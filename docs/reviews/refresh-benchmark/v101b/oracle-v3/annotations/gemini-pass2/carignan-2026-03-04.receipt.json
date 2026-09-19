@@ -1,0 +1,37 @@
+{
+ "documentId": "carignan-2026-03-04",
+ "step": "gemini-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass2",
+ "inputStateSha256": "14b3b9ab727802809e2c4ff1a97fcd2b4c64012d05ad0b23bb36f5a1a2550684",
+ "inputSha256": "eedad87d89297742134dde1b4de3c044ca1bb3b17d7f250b119b736d4437037c",
+ "responseSha256": "a12a84ac779fe6ce5b7b3e9876238181b610245be611f1039e71cc0c1969e6c4",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 139880,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 25882,
+  "outputTokens": 78,
+  "totalTokens": 79077,
+  "thoughtsTokenCount": 53117
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 139673,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:13:18.121Z"
+}

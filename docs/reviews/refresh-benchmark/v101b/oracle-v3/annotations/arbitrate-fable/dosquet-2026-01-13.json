@@ -1,0 +1,19 @@
+{
+ "documentId": "dosquet-2026-01-13",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fe84f010581e156c6284b7feda317b884cef1595b74d882c61dd954e7e00107a",
+ "verificationSha256": "f3de39846b4ec1125f211c55cd1d3de5ec1cd0cd7dd0b460b2a6090d66ae3638",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

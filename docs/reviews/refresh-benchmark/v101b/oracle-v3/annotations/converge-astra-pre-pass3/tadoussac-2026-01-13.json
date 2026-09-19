@@ -1,0 +1,121 @@
+{
+ "documentId": "tadoussac-2026-01-13",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "90ef74b139f7eb9ae84c7d90e681834a75f788f3f33ab63e60c718220263e05d",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-06, page 5, autorise explicitement la vente du lot 4 342 594 par invitation à soumissionner, soit un acte foncier inclus.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 8, Bruno Forest donne effectivement avis de motion du règlement 419 concernant l’agriculture sans élevage à l’intérieur des bâtiments de la zone 31-C.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-15 commence à la page 8 sous le titre cité et adopte le premier projet du règlement 419, étape distincte de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-16, page 10, refuse explicitement l’amendement au zonage visant le 247, rue des Forgerons, conformément à la règle voulant que les refus restent des refus.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-17, page 10, porte le titre PPCMOI cité et refuse le projet d’hébergement touristique et commercial au 176, rue du Bord-de-l’Eau.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution actuelle 2026-01-31, page 14, consent à fermer le chemin sur le lot 4 344 119 et à céder cette portion gratuitement au MELCCFP.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-31, page 14, nomme aussi explicitement le lot 6 683 045 parmi les portions de chemin à fermer et à céder gratuitement au MELCCFP.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-01-31, page 14, prévoit expressément une servitude en faveur de Tadoussac pour le réseau d’aqueduc situé sur les lots visés, ce qui constitue un objet foncier distinct.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 14, la résolution 2026-01-31 accepte explicitement la cession gratuite au MELCCFP du barrage de la rivière du Moulin-à-Baude associé à l’acte no 62 447.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le dispositif de la résolution 2026-01-32, page 15, adopte le règlement 415 citant la Maison du Tourisme au 197, rue des Pionniers, comme immeuble patrimonial.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-06, page 5, autorise explicitement la vente du lot 4 342 594 par invitation à soumissionner, soit un acte foncier inclus."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "À la page 8, Bruno Forest donne effectivement avis de motion du règlement 419 concernant l’agriculture sans élevage à l’intérieur des bâtiments de la zone 31-C."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-15 commence à la page 8 sous le titre cité et adopte le premier projet du règlement 419, étape distincte de l’avis de motion."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-16, page 10, refuse explicitement l’amendement au zonage visant le 247, rue des Forgerons, conformément à la règle voulant que les refus restent des refus."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-17, page 10, porte le titre PPCMOI cité et refuse le projet d’hébergement touristique et commercial au 176, rue du Bord-de-l’Eau."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution actuelle 2026-01-31, page 14, consent à fermer le chemin sur le lot 4 344 119 et à céder cette portion gratuitement au MELCCFP."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-31, page 14, nomme aussi explicitement le lot 6 683 045 parmi les portions de chemin à fermer et à céder gratuitement au MELCCFP."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-31, page 14, prévoit expressément une servitude en faveur de Tadoussac pour le réseau d’aqueduc situé sur les lots visés, ce qui constitue un objet foncier distinct."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "À la page 14, la résolution 2026-01-31 accepte explicitement la cession gratuite au MELCCFP du barrage de la rivière du Moulin-à-Baude associé à l’acte no 62 447."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Le dispositif de la résolution 2026-01-32, page 15, adopte le règlement 415 citant la Maison du Tourisme au 197, rue des Pionniers, comme immeuble patrimonial."
+  }
+ ]
+}

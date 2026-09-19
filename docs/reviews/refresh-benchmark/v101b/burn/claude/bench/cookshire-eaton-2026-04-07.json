@@ -1,0 +1,13 @@
+{
+ "id": "cookshire-eaton-2026-04-07",
+ "rc": 0,
+ "latencyMs": 363277,
+ "inputTokens": 2,
+ "outputTokens": 55519,
+ "cacheRead": 0,
+ "cacheCreate": 13269,
+ "costUsd": 1.530162,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 90062
+}

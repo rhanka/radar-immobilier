@@ -1,0 +1,146 @@
+{
+ "documentId": "blue-sea-2026-02-03",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "a0dc929eb4e206f4b6c8fa689f650dd2ad50b897a25f45bba58e6fd2a2f71f49",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-barrage-lafontaine"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande d’aide financière pour la reconstruction du barrage Lafontaine",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le conseil municipal autorise le dépôt d’une demande d’aide financière dans le\ncadre du programme PAFMAN pour la reconstruction du barrage Lafontaine."
+      },
+      {
+       "page": 4,
+       "excerpt": "Que le conseil municipal autorise le dépôt d’une demande d’aide financière dans le\ncadre du programme PAFMAN pour la reconstruction du barrage Lafontaine.\nQue la Municipalité s’engage à respecter toutes les exigences du programme."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-centre-lac-long"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Plans et devis pour l’agrandissement du centre récréatif du Lac Long",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "Que le conseil municipal autorise la préparation de plans et devis pour\nl’agrandissement du centre récréatif du Lac Long, et ce, à des fins d’estimation des\ncoûts du projet."
+      },
+      {
+       "page": 5,
+       "excerpt": "Que le conseil municipal autorise la préparation de plans et devis pour\nl’agrandissement du centre récréatif du Lac Long, et ce, à des fins d’estimation des\ncoûts du projet.\nQue le conseil autorise le dépôt d’une demande d’aide financière dans le cadre du\nprogramme PAFIR-SPA."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-mont-morissette"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Plans et devis pour la tour d’observation du Mont Morissette",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "Que le conseil municipal autorise la préparation de plans et devis pour le projet relatif à\nla tour d’observation du Mont Morissette, à des fins d’estimation des couts."
+      },
+      {
+       "page": 5,
+       "excerpt": "Que le conseil municipal autorise la préparation de plans et devis pour le projet relatif à\nla tour d’observation du Mont Morissette, à des fins d’estimation des couts.\nQue le conseil autorise le dépôt d’une demande d’aide financière au programme PAFIRSPA."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une simple demande de subvention/aide financière (programme PAFMAN) pour des travaux d'infrastructure, ce qui ne constitue pas un acte d'urbanisme ou foncier.\",\"excerpt\":\"Que le conseil municipal autorise le dépôt d’une demande d’aide financière dans le cadre du programme PAFMAN pour la reconstruction du barrage Lafontaine.\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"La préparation de plans et devis pour estimation des coûts et la demande d'aide financière relèvent d'équipements de loisirs et d'ingénierie préliminaire, exclus des actes d'urbanisme ou fonciers.\",\"excerpt\":\"Que le conseil municipal autorise la préparation de plans et devis pour l’agrandissement du centre récréatif du Lac Long, et ce, à des fins d’estimation des coûts du projet.\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"L'autorisation de plans et devis et la demande d'aide financière pour une infrastructure récréotouristique relèvent des loisirs et études techniques, exclus des actes d'urbanisme.\",\"excerpt\":\"Que le conseil municipal autorise la préparation de plans et devis pour le projet relatif à la tour d’observation du Mont Morissette, à des fins d’estimation des couts.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une simple demande de subvention/aide financière (programme PAFMAN) pour des travaux d'infrastructure, ce qui ne constitue pas un acte d'urbanisme ou foncier.",
+   "excerpt": "Que le conseil municipal autorise le dépôt d’une demande d’aide financière dans le cadre du programme PAFMAN pour la reconstruction du barrage Lafontaine."
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "La préparation de plans et devis pour estimation des coûts et la demande d'aide financière relèvent d'équipements de loisirs et d'ingénierie préliminaire, exclus des actes d'urbanisme ou fonciers.",
+   "excerpt": "Que le conseil municipal autorise la préparation de plans et devis pour l’agrandissement du centre récréatif du Lac Long, et ce, à des fins d’estimation des coûts du projet."
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "L'autorisation de plans et devis et la demande d'aide financière pour une infrastructure récréotouristique relèvent des loisirs et études techniques, exclus des actes d'urbanisme.",
+   "excerpt": "Que le conseil municipal autorise la préparation de plans et devis pour le projet relatif à la tour d’observation du Mont Morissette, à des fins d’estimation des couts."
+  }
+ ],
+ "filter": {
+  "acts": 3,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Il s'agit d'une simple demande de subvention/aide financière (programme PAFMAN) pour des travaux d'infrastructure, ce qui ne constitue pas un acte d'urbanisme ou foncier."
+   },
+   {
+    "act": "A02",
+    "reason": "La préparation de plans et devis pour estimation des coûts et la demande d'aide financière relèvent d'équipements de loisirs et d'ingénierie préliminaire, exclus des actes d'urbanisme ou fonciers."
+   },
+   {
+    "act": "A03",
+    "reason": "L'autorisation de plans et devis et la demande d'aide financière pour une infrastructure récréotouristique relèvent des loisirs et études techniques, exclus des actes d'urbanisme."
+   }
+  ],
+  "kept": [],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1680,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 6329,
+   "outputTokens": 262,
+   "totalTokens": 6591
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1524
+  },
+  "inputSha256": "7f82122a72412b85c612557cd8b8ad68ebe4d4c492ad7ff720245e45404c3c43"
+ }
+}

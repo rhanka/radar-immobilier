@@ -1,0 +1,148 @@
+{
+ "documentId": "dollard-des-ormeaux-2026-02-10",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "a540ae0b36d5e6c693b7d081407ad9e627ac4ddd5c46213d2007c0a860d91c87",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Autorisation prévue de signature du bail de location d’entrepôt avec Timex Reality Corp. (2025-004 GG)\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2025-004 GG\",\n        \"page\": 1,\n        \"citation\": \"Autorisation de signature d’un bail avec Timex Reality Corp. pour la location\\nd'entrepôt (2025-004 GG) (SD2026-500-2811)\",\n        \"anchor\": \"d'entrepôt (2025-004 GG\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte comporte un saut de ligne entre « location » et « d'entrepôt ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Avis de motion prévu du Règlement R-2026-199-1 modifiant le zonage\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"R-2026-199-1\",\n        \"page\": 2,\n        \"citation\": \"Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux\",\n        \"anchor\": \"Règlement R-2026-199-1\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique, notamment le saut de ligne après « modifiant le ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du premier projet du Règlement R-2026-199-1 modifiant le zonage\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"R-2026-199-1\",\n        \"page\": 2,\n        \"citation\": \"Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers\",\n        \"anchor\": \"Règlement R-2026-199-1\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : un saut de ligne sépare « règlement de » et « zonage » dans le document.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Avis de motion prévu du Règlement R-2026-084-1 sur les égouts et la rétention des eaux de ruissellement\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"R-2026-084-1\",\n        \"page\": 2,\n        \"citation\": \"Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\\nRèglement R-2014-084 sur l’utilisation des égouts\",\n        \"anchor\": \"Règlement R-2026-084-1\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique, en conservant le saut de ligne après « modifiant le ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Dépôt prévu du projet de Règlement R-2026-084-1 sur les égouts et la rétention des eaux de ruissellement\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"R-2026-084-1\",\n        \"page\": 2,\n        \"citation\": \"Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\\nRèglement R-2014-084 sur l’utilisation des égouts\",\n        \"anchor\": \"Règlement R-2026-084-1\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique, en conservant le saut de ligne après « modifiant le ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Autorisation prévue de signature du bail de location d’entrepôt avec Timex Reality Corp. (2025-004 GG)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2025-004 GG",
+    "page": 1,
+    "citation": "Autorisation de signature d’un bail avec Timex Reality Corp. pour la location\nd'entrepôt (2025-004 GG) (SD2026-500-2811)",
+    "anchor": "d'entrepôt (2025-004 GG"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte comporte un saut de ligne entre « location » et « d'entrepôt »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Avis de motion prévu du Règlement R-2026-199-1 modifiant le zonage",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "R-2026-199-1",
+    "page": 2,
+    "citation": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux",
+    "anchor": "Règlement R-2026-199-1"
+   },
+   "reason": "La citation doit être recopiée à l’identique, notamment le saut de ligne après « modifiant le »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption prévue du premier projet du Règlement R-2026-199-1 modifiant le zonage",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "R-2026-199-1",
+    "page": 2,
+    "citation": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers",
+    "anchor": "Règlement R-2026-199-1"
+   },
+   "reason": "La citation doit être recopiée à l’identique : un saut de ligne sépare « règlement de » et « zonage » dans le document."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Avis de motion prévu du Règlement R-2026-084-1 sur les égouts et la rétention des eaux de ruissellement",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "R-2026-084-1",
+    "page": 2,
+    "citation": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts",
+    "anchor": "Règlement R-2026-084-1"
+   },
+   "reason": "La citation doit être recopiée à l’identique, en conservant le saut de ligne après « modifiant le »."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Dépôt prévu du projet de Règlement R-2026-084-1 sur les égouts et la rétention des eaux de ruissellement",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "R-2026-084-1",
+    "page": 2,
+    "citation": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts",
+    "anchor": "Règlement R-2026-084-1"
+   },
+   "reason": "La citation doit être recopiée à l’identique, en conservant le saut de ligne après « modifiant le »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "inconnu",
+   "page": 1,
+   "citation": "Autorisation de signature d’un bail avec Timex Reality Corp. pour la location\nd'entrepôt (2025-004 GG) (SD2026-500-2811)"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "avis_motion",
+   "page": 2,
+   "citation": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le\nRèglement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "projet_reglement",
+   "page": 2,
+   "citation": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de\nzonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "avis_motion",
+   "page": 2,
+   "citation": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "projet_reglement",
+   "page": 2,
+   "citation": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le\nRèglement R-2014-084 sur l’utilisation des égouts"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

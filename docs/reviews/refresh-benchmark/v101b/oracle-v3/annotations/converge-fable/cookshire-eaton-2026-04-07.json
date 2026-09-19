@@ -1,0 +1,81 @@
+{
+ "documentId": "cookshire-eaton-2026-04-07",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dcef823e0abf9b897d88bdb82b1720374565a8af97cb1bd96327247ddafd2b5b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 6, résolution 2026-04-0726 : « résolu d’autoriser la dérogation mineure numéro 26-DM-01 pour l’immeuble situé au 978, rue Faulkner (lot 4 487 978) », ADOPTÉE À L’UNANIMITÉ ; objet, étape derogation_mineure et citation exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 6, résolution 2026-04-0727 : « QUE soit autorisée la vente du terrain situé sur la rue Eaton (lot 4 487 586) à madame Stéphanie Beaudoin au montant de 1 300$ » ; acte foncier explicite inclus par la règle « petits PIIA et actes fonciers », immeuble « vacant et non construisible », décision acquise.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 10, point L.1 et résolution 2026-04-0735 : « Avis de motion est donné par la conseillère Jennifer McMullin » pour le règlement 400-2026 ; avis de motion et projet sont des unités distinctes selon les règles.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 10, résolution 2026-04-0736 : « résolu d’adopter le projet de Règlement numéro 400-2026 concernant l’occupation et l’entretien des bâtiments tel que déposé », ADOPTÉE À L’UNANIMITÉ ; étape projet_reglement exacte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Page 10, point N.3 « Règlement numéro 399-2026 amendant le règlement relatif à la démolition d’immeubles numéro 316-2023 – Avis de motion et adoption » suivi de la résolution 2026-04-0739 « Avis de motion est donné par le conseiller Jean-Marc Dickenson » ; citation verbatim sur la page 10, avis de motion attesté et distinct du projet.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Page 11, résolution 2026-04-0740 : « résolu d’adopter le projet de Règlement numéro 399-2026 amendant le règlement relatif à la démolition d’immeubles numéro 316-2023 », ADOPTÉE À L’UNANIMITÉ ; étape projet_reglement, objet et page exacts.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 6, résolution 2026-04-0726 : « résolu d’autoriser la dérogation mineure numéro 26-DM-01 pour l’immeuble situé au 978, rue Faulkner (lot 4 487 978) », ADOPTÉE À L’UNANIMITÉ ; objet, étape derogation_mineure et citation exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 6, résolution 2026-04-0727 : « QUE soit autorisée la vente du terrain situé sur la rue Eaton (lot 4 487 586) à madame Stéphanie Beaudoin au montant de 1 300$ » ; acte foncier explicite inclus par la règle « petits PIIA et actes fonciers », immeuble « vacant et non construisible », décision acquise."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 10, point L.1 et résolution 2026-04-0735 : « Avis de motion est donné par la conseillère Jennifer McMullin » pour le règlement 400-2026 ; avis de motion et projet sont des unités distinctes selon les règles."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 10, résolution 2026-04-0736 : « résolu d’adopter le projet de Règlement numéro 400-2026 concernant l’occupation et l’entretien des bâtiments tel que déposé », ADOPTÉE À L’UNANIMITÉ ; étape projet_reglement exacte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Page 10, point N.3 « Règlement numéro 399-2026 amendant le règlement relatif à la démolition d’immeubles numéro 316-2023 – Avis de motion et adoption » suivi de la résolution 2026-04-0739 « Avis de motion est donné par le conseiller Jean-Marc Dickenson » ; citation verbatim sur la page 10, avis de motion attesté et distinct du projet."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Page 11, résolution 2026-04-0740 : « résolu d’adopter le projet de Règlement numéro 399-2026 amendant le règlement relatif à la démolition d’immeubles numéro 316-2023 », ADOPTÉE À L’UNANIMITÉ ; étape projet_reglement, objet et page exacts."
+  }
+ ]
+}

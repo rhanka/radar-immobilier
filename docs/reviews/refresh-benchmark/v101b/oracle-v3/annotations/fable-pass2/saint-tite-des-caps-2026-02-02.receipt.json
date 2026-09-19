@@ -1,0 +1,75 @@
+{
+ "documentId": "saint-tite-des-caps-2026-02-02",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "4ac2d127487f241a0a235b52fedb80b59899c5b873d682fcae97c996207d0008",
+ "inputSha256": "91de80fe2e017ad4d30cb97f2fd6f76db4b850ed05f7f5f946feb1b850650964",
+ "responseSha256": "98fb9bee52b37b81d3f327f3d500452fec2e5d02687674a2c109c106a132402d",
+ "rc": 0,
+ "latencyMs": 50599,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "093083eb-c20c-4b24-b19d-baa7ddb8a51f",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 3792,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 13689,
+   "webSearchRequests": 0,
+   "costUSD": 0.46407325,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 3583,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 13689,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 3792,
+  "output_tokens_details": {
+   "thinking_tokens": 3583
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 13689,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 3792,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 13689,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 13689
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.46407325,
+ "durationApiMs": 48838,
+ "stderrTail": "",
+ "at": "2026-09-18T17:43:55.564Z"
+}

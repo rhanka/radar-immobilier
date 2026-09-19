@@ -1,0 +1,177 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-2026-12",
+   "label": "Premier projet de règlement 2026-12 — Domaine des Deux Lacs",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+   "status": "candidate",
+   "numero": "2026-12",
+   "title": "zonage et urbanisme - Partie centrale du Domaine des Deux Lacs",
+   "stage": "1er_projet",
+   "meetingDate": "2026-06-01",
+   "municipality": "val-dor",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs.",
+     "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "rawRef": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "docSha": "14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+     "sourceUrl": "https://ville.valdor.qc.ca/uploads/1_La%20ville/D%C3%A9mocratie/Assemblees/569e_-_1er_juin_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-14",
+   "label": "Projet de règlement 2026-14 — Zonage — Règlement Omnibus",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+   "status": "candidate",
+   "numero": "2026-14",
+   "title": "Zonage - Règlement Omnibus",
+   "stage": "projet",
+   "meetingDate": "2026-06-01",
+   "municipality": "val-dor",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu.",
+     "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "rawRef": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "docSha": "14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+     "sourceUrl": "https://ville.valdor.qc.ca/uploads/1_La%20ville/D%C3%A9mocratie/Assemblees/569e_-_1er_juin_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-consultation-2026-14",
+   "label": "Consultation prévue sur le projet 2026-14",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+   "status": "candidate",
+   "meetingDate": "2026-06-01",
+   "municipality": "val-dor",
+   "etape": "consultation_publique",
+   "reglement_number": "2026-14",
+   "description": "À l'ordre du jour : explications du maire et consultation des personnes et organismes désirant s'exprimer, s'il y a lieu. Aucune décision attestée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu.",
+     "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "rawRef": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "docSha": "14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+     "sourceUrl": "https://ville.valdor.qc.ca/uploads/1_La%20ville/D%C3%A9mocratie/Assemblees/569e_-_1er_juin_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-21",
+   "label": "Règlement 2026-21 — Amendement 2024-10 sur le CCSRM",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+   "status": "candidate",
+   "numero": "2026-21",
+   "title": "Amendement 2024-10 sur le CCSRM",
+   "stage": "projet",
+   "meetingDate": "2026-06-01",
+   "municipality": "val-dor",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "5 Avis de motion visant à présenter le règlement 2026-21 et dépôt d'un projet de règlement – Amendement 2024-10 sur\nle CCSRM.",
+     "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "rawRef": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "docSha": "14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+     "sourceUrl": "https://ville.valdor.qc.ca/uploads/1_La%20ville/D%C3%A9mocratie/Assemblees/569e_-_1er_juin_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-credit-taxes",
+   "label": "Entente de crédit de taxes prévue — Accès Patrimmo",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+   "status": "candidate",
+   "category": "incitatif_fiscal_immobilier",
+   "meetingDate": "2026-06-01",
+   "municipality": "val-dor",
+   "description": "Autorisation de signature inscrite à l'ordre du jour pour une entente de crédit de taxes avec Accès Patrimmo concernant les immeubles situés aux 670-690 rue Giguère; autorisation non attestée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "6 Autorisation de signature d'une entente de crédit de taxes avec Accès Patrimmo concernant les immeubles situés aux\n670-690 rue Giguère.",
+     "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "rawRef": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "docSha": "14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+     "sourceUrl": "https://ville.valdor.qc.ca/uploads/1_La%20ville/D%C3%A9mocratie/Assemblees/569e_-_1er_juin_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-cadastre-deux-lacs",
+   "label": "Plan-projet d'opération cadastrale — Domaine des Deux Lacs",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+   "status": "candidate",
+   "kind": "subdivision",
+   "meetingDate": "2026-06-01",
+   "municipality": "val-dor",
+   "etape": "inconnu",
+   "description": "Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des Deux Lacs inscrite à l'ordre du jour; aucune approbation attestée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "14 Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des\nDeux Lacs.",
+     "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "rawRef": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "docSha": "14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+     "sourceUrl": "https://ville.valdor.qc.ca/uploads/1_La%20ville/D%C3%A9mocratie/Assemblees/569e_-_1er_juin_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-cptaq-4721047",
+   "label": "Demande d'appui CPTAQ — Lot 4 721 047",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+   "status": "candidate",
+   "kind": "cptaq",
+   "meetingDate": "2026-06-01",
+   "municipality": "val-dor",
+   "no_lot": "4721047",
+   "etape": "inconnu",
+   "description": "Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047 inscrite à l'ordre du jour. Aucun appui ni autorisation attesté.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047.",
+     "source_file": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "rawRef": "raw/proces-verbaux-val-dor/cas/14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434.pdf",
+     "docSha": "14c439b26687f00e115f4fe089e1e5c21b898c08a71a6dfdc76e506214625434",
+     "sourceUrl": "https://ville.valdor.qc.ca/uploads/1_La%20ville/D%C3%A9mocratie/Assemblees/569e_-_1er_juin_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [],
+ "input_tokens": 6260,
+ "output_tokens": 2270
+}

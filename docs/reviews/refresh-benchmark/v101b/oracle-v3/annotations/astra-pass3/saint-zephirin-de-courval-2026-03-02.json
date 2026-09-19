@@ -1,0 +1,76 @@
+{
+ "documentId": "saint-zephirin-de-courval-2026-03-02",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "97f7e0b7e51578bbfebf6ce80068634ffb184b229280037be9abe204a107acd4",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Recommandation favorable à l’aliénation de quatre lots agricoles – CPTAQ 453592\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"453592\",\n        \"page\": 3,\n        \"citation\": \"DOSSIER CPTAQ – No. 453592 (JOCELYN BOISVERT)\\n45-04-2026\\nLe demandeur désir vendre les lots 5 884 262, 5 885 277, 5 885 261, 5 885 276\",\n        \"anchor\": \"DOSSIER CPTAQ – No. 453592\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les sauts de ligne après le titre du dossier et le numéro de résolution doivent être conservés.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Acquisition du lot 5 885 286 auprès de Ferme Maquille inc.\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5 885 286\",\n        \"page\": 5,\n        \"citation\": \"D’acquérir pour la somme de 15 000 $, plus taxes applicables le cas échéant, le\\nterrain portant le numéro 5 885 286 du Cadastre du Québec\",\n        \"anchor\": \"numéro 5 885 286\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le saut de ligne entre « le » et « terrain » doit être conservé.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Recommandation favorable à l’aliénation de quatre lots agricoles – CPTAQ 453592",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "453592",
+    "page": 3,
+    "citation": "DOSSIER CPTAQ – No. 453592 (JOCELYN BOISVERT)\n45-04-2026\nLe demandeur désir vendre les lots 5 884 262, 5 885 277, 5 885 261, 5 885 276",
+    "anchor": "DOSSIER CPTAQ – No. 453592"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les sauts de ligne après le titre du dossier et le numéro de résolution doivent être conservés."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Acquisition du lot 5 885 286 auprès de Ferme Maquille inc.",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 885 286",
+    "page": 5,
+    "citation": "D’acquérir pour la somme de 15 000 $, plus taxes applicables le cas échéant, le\nterrain portant le numéro 5 885 286 du Cadastre du Québec",
+    "anchor": "numéro 5 885 286"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le saut de ligne entre « le » et « terrain » doit être conservé."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "inconnu",
+   "page": 3,
+   "citation": "DOSSIER CPTAQ – No. 453592 (JOCELYN BOISVERT)\n45-04-2026\nLe demandeur désir vendre les lots 5 884 262, 5 885 277, 5 885 261, 5 885 276"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "adoption",
+   "page": 5,
+   "citation": "D’acquérir pour la somme de 15 000 $, plus taxes applicables le cas échéant, le\nterrain portant le numéro 5 885 286 du Cadastre du Québec"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 2
+}

@@ -1,0 +1,13 @@
+{
+ "id": "mont-saint-hilaire-2026-04-13",
+ "rc": 0,
+ "latencyMs": 540267,
+ "inputTokens": 4,
+ "outputTokens": 78469,
+ "cacheRead": 0,
+ "cacheCreate": 124728,
+ "costUsd": 3.230617,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 26923
+}

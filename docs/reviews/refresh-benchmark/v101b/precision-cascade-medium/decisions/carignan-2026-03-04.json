@@ -1,0 +1,796 @@
+{
+ "documentId": "carignan-2026-03-04",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c3debf461245aba3322319e04a0250123d7974b16be8895973ec0cc9aa2e5be3",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "dm-2026-007"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2026-007 — remise en cour avant",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "D'APPROUVER la demande de de dérogation mineure 2026-007\ndans le but d'autoriser l'implantation d'une remise en cour avant"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "dm-2026-013"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2026-013 — conteneurs semi-enfouis",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 21,
+       "excerpt": "D'APPROUVER la demande de dérogation mineure 2026-013\nconcernant l'installation de conteneurs semi-enfouis en cour avant"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "dm-2025-113"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2025-113 — emprise au sol de 24 %",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "D'APPROUVER la demande de dérogation mineure 2025-113\ndans le but de permettre un coefficient d'emprise au sol de 24 %"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "piia-2025-015"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2025-015 — agrandissement au 2157, rue des Roses",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "D'APPROUVER la demande de PIIA 2025-015 concernant\nl'agrandissement de la résidence unifamiliale isolée située au\n2157, rue des Roses, sur le lot 2 600 450."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "piia-2025-121"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2025-121 — rénovations au 2167, rue des Roses",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "D'APPROUVER la demande de PIIA 2025-121 concernant les\nrénovations de la résidence unifamiliale isolée située au 2167, rue\ndes Roses, sur le lot 2 600 445."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "piia-2025-125"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2025-125 — revêtements au 4400, chemin Bellerive",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "D'APPROUVER la demande de PIIA 2025-125 concernant le\nremplacement de certains revêtements extérieurs de la résidence\nsituée au 4400, chemin Bellerive, sur le lot 5 357 275."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "piia-2025-126"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2025-126 — revêtement au 1463, rue Marie-Gendron",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "D'APPROUVER la demande de PIIA 2025-126 concernant le\nremplacement du revêtement léger extérieur de la résidence\nsituée au 1463, rue Marie-Gendron, sur le lot 2 601 260."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "piia-2025-128"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2025-128 — revêtement d'un bâtiment patrimonial",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 24,
+       "excerpt": "D'APPROUVER la demande de PIIA 2025-128 concernant le\nremplacement du revêtement extérieur sur un bâtiment\npatrimonial située au 3968, chemin Sainte-Thérèse, sur le lot 2\n344 856."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "piia-2026-001"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-001 — remplacement de revêtement refusé",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 24,
+       "excerpt": "DE REFUSER la demande de PIIA 2026-001 consistant au\nremplacement du revêtement en clin par un revêtement\nd'acrylique ainsi que le remplacement de deux fenêtres de la"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "piia-2026-002"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-002 — construction rue Étienne-Provost",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 25,
+       "excerpt": "D'APPROUVER la demande de PIIA 2026-002 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "piia-2026-004"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-004 — construction rue Étienne-Provost",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 25,
+       "excerpt": "D'APPROUVER la demande de PIIA 2026-004 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "piia-2026-005"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-005 — construction rue Liliane Ouest",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 26,
+       "excerpt": "D'APPROUVER la demande de PIIA 2026-005 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "piia-2026-006"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-006 — construction rue Liliane Ouest",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 26,
+       "excerpt": "D'APPROUVER la demande de PIIA 2026-006 concernant la\nconstruction d'une résidence unifamiliale isolée comprenant une\nunité d'habitation accessoire attachée de type studio"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "bylaw-483-41-U"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 483-41-U — sécurité des piscines et usages",
+     "stage": "adoption",
+     "objet": "483-41-U",
+     "citations": [
+      {
+       "page": 33,
+       "excerpt": "D'ADOPTER, pour valoir à toutes fins que de droit, le Règlement\nnuméro 483-41-U modifiant le règlement de zonage numéro 483U."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A15",
+   "nodeIds": [
+    "bylaw-483-U"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 483-U",
+     "stage": null,
+     "objet": "483-U",
+     "citations": [
+      {
+       "page": 33,
+       "excerpt": "Adoption - Règlement numéro 483-41-U modifiant le\nrèglement de zonage numéro 483-U (Sécurité des\npiscines & usages des zones IDI-489 et IDI-490)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A16",
+   "nodeIds": [
+    "bylaw-310-2026-1"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 310 (2026) - 1 — tarifs",
+     "stage": "projet",
+     "objet": "310 (2026) - 1",
+     "citations": [
+      {
+       "page": 32,
+       "excerpt": "La conseillère Diane Morneau donne avis de motion qu'il y aura,\nlors d'une prochaine séance du conseil municipal, l'adoption du\nRèglement numéro 310 (2026) - 1"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A17",
+   "nodeIds": [
+    "bylaw-568-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement d'emprunt 568 (2026) — chemin Brunelle",
+     "stage": "projet",
+     "objet": "568 (2026)",
+     "citations": [
+      {
+       "page": 32,
+       "excerpt": "Le conseiller Daniel St-Jean donne avis de motion qu'il y aura,\nlors d'une prochaine séance du conseil municipal, l'adoption du\nRèglement d'emprunt numéro 568 (2026) autorisant les travaux"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A18",
+   "nodeIds": [
+    "bylaw-569-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement d'emprunt 569 (2026) — pavage 2026",
+     "stage": "projet",
+     "objet": "569 (2026)",
+     "citations": [
+      {
+       "page": 33,
+       "excerpt": "Le conseiller Daniel St-Jean donne avis de motion qu'il y aura,\nlors d'une prochaine séance du conseil municipal, l'adoption du\nRèglement d'emprunt numéro 569 (2026) autorisant les travaux"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A19",
+   "nodeIds": [
+    "signal-offre-gemdev"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acceptation de l'offre d'achat de GemDev — rue Marie-Anne Est",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 34,
+       "excerpt": "D'ACCEPTER l'offre d'achat datée du 2 mars 2026 des lots 2 597\n589 et 6 508 688 du cadastre du Québec circonscription foncière\nde Chambly présentée par l'entreprise GemDev;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A20",
+   "nodeIds": [
+    "signal-vente-26-03-93"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acte de vente définitif — trois lots adjugés pour taxes",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "D'AUTORISER le maire ou en son absence, la mairesse\nsuppléante, et la greffière à signer pour et au nom de la Ville, l'acte\nde vente définitif des lots 2 597 876, 2 598 251 et 2 599 459 du"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A21",
+   "nodeIds": [
+    "signal-vente-6504999"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acte de vente définitif — lot 6 504 999",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "D'AUTORISER le maire ou en son absence, la mairesse\nsuppléante, et la greffière à signer pour et au nom de la Ville, l'acte\nde vente définitif du lot 6 504 999 du cadastre du Québec et à"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A22",
+   "nodeIds": [
+    "signal-redevances"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande de retrait du projet gouvernemental encadrant les redevances",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "DE DEMANDER à la ministre des Affaires municipales et de\nl'Habitation du Québec, Geneviève Guilbault, de retirer le Projet\nde Règlement concernant certaines contributions à des services"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A23",
+   "nodeIds": [
+    "signal-planification-scolaire"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Avis favorable sous réserves — besoins d'espace scolaires 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "QUE le Conseil municipal donne un avis favorable au projet de\nPlanification des besoins d'espace 2026 du Centre de services\nscolaire des Patriotes, sous réserves des clarifications\ndemandées :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A24",
+   "nodeIds": [
+    "signal-camionnage"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Ouverture budgétaire — chemin de camionnage, boulevard de la Mairie",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "D'AUTORISER l'ouverture de l'enveloppe budgétaire du projet cihaut indiqué et financé par le fond de carrière et sablière pour un\nmontant de 211 000 $ et d'un montant de 220 250 $ au surplus"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A25",
+   "nodeIds": [
+    "signal-cours-eau-trente"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Travaux du cours d'eau des Trente et répartition des frais",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "QUE le Conseil de la Ville de Carignan accepte d'assumer tous\nles frais, incluant les frais d'ingénierie, relatifs aux travaux requis\nde la branche principale du cours d'eau des Trente"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"La demande de dérogation mineure 2026-007 pour implanter une remise en cour avant est approuvée par résolution.\",\"excerpt\":\"D'APPROUVER la demande de de dérogation mineure 2026-007 dans le but d'autoriser l'implantation d'une remise en cour avant\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"La dérogation mineure 2026-013 concernant des conteneurs semi-enfouis est formellement approuvée.\",\"excerpt\":\"D'APPROUVER la demande de dérogation mineure 2026-013 concernant l'installation de conteneurs semi-enfouis en cour avant\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La dérogation mineure 2025-113 relative au coefficient d'emprise au sol est approuvée.\",\"excerpt\":\"D'APPROUVER la demande de dérogation mineure 2025-113 dans le but de permettre un coefficient d'emprise au sol de 24 %\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA 2025-015 pour un agrandissement au 2157, rue des Roses est approuvé par résolution.\",\"excerpt\":\"D'APPROUVER la demande de PIIA 2025-015 concernant l'agrandissement de la résidence unifamiliale isolée située au 2157, rue des Roses\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA 2025-121 visant des rénovations au 2167, rue des Roses est approuvé.\",\"excerpt\":\"D'APPROUVER la demande de PIIA 2025-121 concernant les rénovations de la résidence unifamiliale isolée située au 2167, rue des Roses\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA 2025-125 est approuvé pour le remplacement de revêtements extérieurs au 4400, chemin Bellerive.\",\"excerpt\":\"D'APPROUVER la demande de PIIA 2025-125 concernant le remplacement de certains revêtements extérieurs de la résidence située au 4400, chemin Bellerive\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA 2025-126 pour le remplacement du revêtement léger au 1463, rue Marie-Gendron est approuvé.\",\"excerpt\":\"D'APPROUVER la demande de PIIA 2025-126 concernant le remplacement du revêtement léger extérieur de la résidence située au 1463, rue Marie-Gendron\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA 2025-128 concernant le revêtement sur un bâtiment patrimonial est approuvé.\",\"excerpt\":\"D'APPROUVER la demande de PIIA 2025-128 concernant le remplacement du revêtement extérieur sur un bâtiment patrimonial située au 3968, chemin Sainte-Thérèse\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA 2026-001 est formellement refusé par le conseil municipal.\",\"excerpt\":\"DE REFUSER la demande de PIIA 2026-001 consistant au remplacement du revêtement en clin par un revêtement d'acrylique\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA 2026-002 pour la construction au 2014-2016, rue Étienne-Provost est approuvé.\",\"excerpt\":\"D'APPROUVER la demande de PIIA 2026-002 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio au 2014-2016, rue Étienne-Provost\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA 2026-004 pour la construction au 2018-2020, rue Étienne-Provost est approuvé.\",\"excerpt\":\"D'APPROUVER la demande de PIIA 2026-004 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio au 2018-2020, rue Étienne-Provost\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA 2026-005 pour la construction au 2011-2013, rue Liliane Ouest est approuvé.\",\"excerpt\":\"D'APPROUVER la demande de PIIA 2026-005 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio au 2011-2013, rue Liliane Ouest\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA 2026-006 pour la construction au 2015-2017, rue Liliane Ouest est approuvé.\",\"excerpt\":\"D'APPROUVER la demande de PIIA 2026-006 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio au 2015-2017, rue Liliane Ouest\"},{\"act\":\"A14\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement de zonage modificateur 483-41-U est adopté lors de la séance.\",\"excerpt\":\"D'ADOPTER, pour valoir à toutes fins que de droit, le Règlement numéro 483-41-U modifiant le règlement de zonage numéro 483-U.\"},{\"act\":\"A15\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 483-U n'est mentionné qu'en tant que règlement de base faisant l'objet d'une modification par le règlement 483-41-U, sans étape de procédure propre.\",\"excerpt\":\"\"},{\"act\":\"A16\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion et un dépôt de projet de règlement sont effectués pour le règlement 310 (2026) - 1.\",\"excerpt\":\"donne avis de motion qu'il y aura, lors d'une prochaine séance du conseil municipal, l'adoption du Règlement numéro 310 (2026) - 1 établissant les tarifs pour divers services rendus\"},{\"act\":\"A17\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion et le dépôt du projet de règlement d'emprunt 568 (2026) ont eu lieu.\",\"excerpt\":\"donne avis de motion qu'il y aura, lors d'une prochaine séance du conseil municipal, l'adoption du Règlement d'emprunt numéro 568 (2026) autorisant les travaux de réfection du chemin Brunelle\"},{\"act\":\"A18\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion et le dépôt du projet de règlement d'emprunt 569 (2026) ont eu lieu.\",\"excerpt\":\"donne avis de motion qu'il y aura, lors d'une prochaine séance du conseil municipal, l'adoption du Règlement d'emprunt numéro 569 (2026) autorisant les travaux de pavage de chaussée pour l'année 2026\"},{\"act\":\"A19\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise l'acceptation de l'offre d'achat de GemDev et la signature de l'acte de vente des lots municipaux.\",\"excerpt\":\"D'ACCEPTER l'offre d'achat datée du 2 mars 2026 des lots 2 597 589 et 6 508 688 du cadastre du Québec circonscription foncière de Chambly présentée par l'entreprise GemDev;\"},{\"act\":\"A20\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la signature de l'acte de vente définitif pour les lots adjugés pour non-paiement de taxes.\",\"excerpt\":\"D'AUTORISER le maire ou en son absence, la mairesse suppléante, et la greffière à signer pour et au nom de la Ville, l'acte de vente définitif des lots 2 597 876, 2 598 251 et 2 599 459\"},{\"act\":\"A21\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la signature de l'acte de vente définitif pour le lot adjugé pour non-paiement de taxes.\",\"excerpt\":\"D'AUTORISER le maire ou en son absence, la mairesse suppléante, et la greffière à signer pour et au nom de la Ville, l'acte de vente définitif du lot 6 504 999\"},{\"act\":\"A22\",\"verdict\":\"soutenu\",\"reason\":\"La Ville adopte une résolution demandant formellement le retrait d'un projet de règlement sur les redevances de développement.\",\"excerpt\":\"DE DEMANDER à la ministre des Affaires municipales et de l'Habitation du Québec, Geneviève Guilbault, de retirer le Projet de Règlement concernant certaines contributions à des services municipaux\"},{\"act\":\"A23\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil émet formellement un avis favorable sous réserves à l'égard de la planification des besoins d'espace scolaire.\",\"excerpt\":\"QUE le Conseil municipal donne un avis favorable au projet de Planification des besoins d'espace 2026 du Centre de services scolaire des Patriotes, sous réserves des clarifications demandées\"},{\"act\":\"A24\",\"verdict\":\"non_soutenu\",\"reason\":\"L'ouverture d'une enveloppe budgétaire relève de la gestion financière et des comptes internes, sans acte d'urbanisme ou foncier direct.\",\"excerpt\":\"\"},{\"act\":\"A25\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une prise en charge et répartition financière de frais de travaux de cours d'eau sans acte d'aménagement du territoire au sens strict.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "La demande de dérogation mineure 2026-007 pour implanter une remise en cour avant est approuvée par résolution.",
+   "excerpt": "D'APPROUVER la demande de de dérogation mineure 2026-007 dans le but d'autoriser l'implantation d'une remise en cour avant"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "La dérogation mineure 2026-013 concernant des conteneurs semi-enfouis est formellement approuvée.",
+   "excerpt": "D'APPROUVER la demande de dérogation mineure 2026-013 concernant l'installation de conteneurs semi-enfouis en cour avant"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La dérogation mineure 2025-113 relative au coefficient d'emprise au sol est approuvée.",
+   "excerpt": "D'APPROUVER la demande de dérogation mineure 2025-113 dans le but de permettre un coefficient d'emprise au sol de 24 %"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le PIIA 2025-015 pour un agrandissement au 2157, rue des Roses est approuvé par résolution.",
+   "excerpt": "D'APPROUVER la demande de PIIA 2025-015 concernant l'agrandissement de la résidence unifamiliale isolée située au 2157, rue des Roses"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le PIIA 2025-121 visant des rénovations au 2167, rue des Roses est approuvé.",
+   "excerpt": "D'APPROUVER la demande de PIIA 2025-121 concernant les rénovations de la résidence unifamiliale isolée située au 2167, rue des Roses"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le PIIA 2025-125 est approuvé pour le remplacement de revêtements extérieurs au 4400, chemin Bellerive.",
+   "excerpt": "D'APPROUVER la demande de PIIA 2025-125 concernant le remplacement de certains revêtements extérieurs de la résidence située au 4400, chemin Bellerive"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le PIIA 2025-126 pour le remplacement du revêtement léger au 1463, rue Marie-Gendron est approuvé.",
+   "excerpt": "D'APPROUVER la demande de PIIA 2025-126 concernant le remplacement du revêtement léger extérieur de la résidence située au 1463, rue Marie-Gendron"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le PIIA 2025-128 concernant le revêtement sur un bâtiment patrimonial est approuvé.",
+   "excerpt": "D'APPROUVER la demande de PIIA 2025-128 concernant le remplacement du revêtement extérieur sur un bâtiment patrimonial située au 3968, chemin Sainte-Thérèse"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le PIIA 2026-001 est formellement refusé par le conseil municipal.",
+   "excerpt": "DE REFUSER la demande de PIIA 2026-001 consistant au remplacement du revêtement en clin par un revêtement d'acrylique"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Le PIIA 2026-002 pour la construction au 2014-2016, rue Étienne-Provost est approuvé.",
+   "excerpt": "D'APPROUVER la demande de PIIA 2026-002 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio au 2014-2016, rue Étienne-Provost"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Le PIIA 2026-004 pour la construction au 2018-2020, rue Étienne-Provost est approuvé.",
+   "excerpt": "D'APPROUVER la demande de PIIA 2026-004 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio au 2018-2020, rue Étienne-Provost"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "Le PIIA 2026-005 pour la construction au 2011-2013, rue Liliane Ouest est approuvé.",
+   "excerpt": "D'APPROUVER la demande de PIIA 2026-005 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio au 2011-2013, rue Liliane Ouest"
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "Le PIIA 2026-006 pour la construction au 2015-2017, rue Liliane Ouest est approuvé.",
+   "excerpt": "D'APPROUVER la demande de PIIA 2026-006 concernant la construction d'une résidence unifamiliale isolée comprenant une unité d'habitation accessoire attachée de type studio au 2015-2017, rue Liliane Ouest"
+  },
+  {
+   "act": "A14",
+   "verdict": "soutenu",
+   "reason": "Le règlement de zonage modificateur 483-41-U est adopté lors de la séance.",
+   "excerpt": "D'ADOPTER, pour valoir à toutes fins que de droit, le Règlement numéro 483-41-U modifiant le règlement de zonage numéro 483-U."
+  },
+  {
+   "act": "A15",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 483-U n'est mentionné qu'en tant que règlement de base faisant l'objet d'une modification par le règlement 483-41-U, sans étape de procédure propre.",
+   "excerpt": ""
+  },
+  {
+   "act": "A16",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion et un dépôt de projet de règlement sont effectués pour le règlement 310 (2026) - 1.",
+   "excerpt": "donne avis de motion qu'il y aura, lors d'une prochaine séance du conseil municipal, l'adoption du Règlement numéro 310 (2026) - 1 établissant les tarifs pour divers services rendus"
+  },
+  {
+   "act": "A17",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion et le dépôt du projet de règlement d'emprunt 568 (2026) ont eu lieu.",
+   "excerpt": "donne avis de motion qu'il y aura, lors d'une prochaine séance du conseil municipal, l'adoption du Règlement d'emprunt numéro 568 (2026) autorisant les travaux de réfection du chemin Brunelle"
+  },
+  {
+   "act": "A18",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion et le dépôt du projet de règlement d'emprunt 569 (2026) ont eu lieu.",
+   "excerpt": "donne avis de motion qu'il y aura, lors d'une prochaine séance du conseil municipal, l'adoption du Règlement d'emprunt numéro 569 (2026) autorisant les travaux de pavage de chaussée pour l'année 2026"
+  },
+  {
+   "act": "A19",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise l'acceptation de l'offre d'achat de GemDev et la signature de l'acte de vente des lots municipaux.",
+   "excerpt": "D'ACCEPTER l'offre d'achat datée du 2 mars 2026 des lots 2 597 589 et 6 508 688 du cadastre du Québec circonscription foncière de Chambly présentée par l'entreprise GemDev;"
+  },
+  {
+   "act": "A20",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la signature de l'acte de vente définitif pour les lots adjugés pour non-paiement de taxes.",
+   "excerpt": "D'AUTORISER le maire ou en son absence, la mairesse suppléante, et la greffière à signer pour et au nom de la Ville, l'acte de vente définitif des lots 2 597 876, 2 598 251 et 2 599 459"
+  },
+  {
+   "act": "A21",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la signature de l'acte de vente définitif pour le lot adjugé pour non-paiement de taxes.",
+   "excerpt": "D'AUTORISER le maire ou en son absence, la mairesse suppléante, et la greffière à signer pour et au nom de la Ville, l'acte de vente définitif du lot 6 504 999"
+  },
+  {
+   "act": "A22",
+   "verdict": "soutenu",
+   "reason": "La Ville adopte une résolution demandant formellement le retrait d'un projet de règlement sur les redevances de développement.",
+   "excerpt": "DE DEMANDER à la ministre des Affaires municipales et de l'Habitation du Québec, Geneviève Guilbault, de retirer le Projet de Règlement concernant certaines contributions à des services municipaux"
+  },
+  {
+   "act": "A23",
+   "verdict": "soutenu",
+   "reason": "Le conseil émet formellement un avis favorable sous réserves à l'égard de la planification des besoins d'espace scolaire.",
+   "excerpt": "QUE le Conseil municipal donne un avis favorable au projet de Planification des besoins d'espace 2026 du Centre de services scolaire des Patriotes, sous réserves des clarifications demandées"
+  },
+  {
+   "act": "A24",
+   "verdict": "non_soutenu",
+   "reason": "L'ouverture d'une enveloppe budgétaire relève de la gestion financière et des comptes internes, sans acte d'urbanisme ou foncier direct.",
+   "excerpt": ""
+  },
+  {
+   "act": "A25",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une prise en charge et répartition financière de frais de travaux de cours d'eau sans acte d'aménagement du territoire au sens strict.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 25,
+  "removed": [
+   {
+    "act": "A15",
+    "reason": "Le règlement 483-U n'est mentionné qu'en tant que règlement de base faisant l'objet d'une modification par le règlement 483-41-U, sans étape de procédure propre."
+   },
+   {
+    "act": "A24",
+    "reason": "L'ouverture d'une enveloppe budgétaire relève de la gestion financière et des comptes internes, sans acte d'urbanisme ou foncier direct."
+   },
+   {
+    "act": "A25",
+    "reason": "Il s'agit d'une prise en charge et répartition financière de frais de travaux de cours d'eau sans acte d'aménagement du territoire au sens strict."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "La demande de dérogation mineure 2026-007 pour implanter une remise en cour avant est approuvée par résolution."
+   },
+   {
+    "act": "A02",
+    "reason": "La dérogation mineure 2026-013 concernant des conteneurs semi-enfouis est formellement approuvée."
+   },
+   {
+    "act": "A03",
+    "reason": "La dérogation mineure 2025-113 relative au coefficient d'emprise au sol est approuvée."
+   },
+   {
+    "act": "A04",
+    "reason": "Le PIIA 2025-015 pour un agrandissement au 2157, rue des Roses est approuvé par résolution."
+   },
+   {
+    "act": "A05",
+    "reason": "Le PIIA 2025-121 visant des rénovations au 2167, rue des Roses est approuvé."
+   },
+   {
+    "act": "A06",
+    "reason": "Le PIIA 2025-125 est approuvé pour le remplacement de revêtements extérieurs au 4400, chemin Bellerive."
+   },
+   {
+    "act": "A07",
+    "reason": "Le PIIA 2025-126 pour le remplacement du revêtement léger au 1463, rue Marie-Gendron est approuvé."
+   },
+   {
+    "act": "A08",
+    "reason": "Le PIIA 2025-128 concernant le revêtement sur un bâtiment patrimonial est approuvé."
+   },
+   {
+    "act": "A09",
+    "reason": "Le PIIA 2026-001 est formellement refusé par le conseil municipal."
+   },
+   {
+    "act": "A10",
+    "reason": "Le PIIA 2026-002 pour la construction au 2014-2016, rue Étienne-Provost est approuvé."
+   },
+   {
+    "act": "A11",
+    "reason": "Le PIIA 2026-004 pour la construction au 2018-2020, rue Étienne-Provost est approuvé."
+   },
+   {
+    "act": "A12",
+    "reason": "Le PIIA 2026-005 pour la construction au 2011-2013, rue Liliane Ouest est approuvé."
+   },
+   {
+    "act": "A13",
+    "reason": "Le PIIA 2026-006 pour la construction au 2015-2017, rue Liliane Ouest est approuvé."
+   },
+   {
+    "act": "A14",
+    "reason": "Le règlement de zonage modificateur 483-41-U est adopté lors de la séance."
+   },
+   {
+    "act": "A16",
+    "reason": "Un avis de motion et un dépôt de projet de règlement sont effectués pour le règlement 310 (2026) - 1."
+   },
+   {
+    "act": "A17",
+    "reason": "Un avis de motion et le dépôt du projet de règlement d'emprunt 568 (2026) ont eu lieu."
+   },
+   {
+    "act": "A18",
+    "reason": "Un avis de motion et le dépôt du projet de règlement d'emprunt 569 (2026) ont eu lieu."
+   },
+   {
+    "act": "A19",
+    "reason": "Le conseil autorise l'acceptation de l'offre d'achat de GemDev et la signature de l'acte de vente des lots municipaux."
+   },
+   {
+    "act": "A20",
+    "reason": "Le conseil autorise la signature de l'acte de vente définitif pour les lots adjugés pour non-paiement de taxes."
+   },
+   {
+    "act": "A21",
+    "reason": "Le conseil autorise la signature de l'acte de vente définitif pour le lot adjugé pour non-paiement de taxes."
+   },
+   {
+    "act": "A22",
+    "reason": "La Ville adopte une résolution demandant formellement le retrait d'un projet de règlement sur les redevances de développement."
+   },
+   {
+    "act": "A23",
+    "reason": "Le conseil émet formellement un avis favorable sous réserves à l'égard de la planification des besoins d'espace scolaire."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 5855,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 25499,
+   "outputTokens": 2365,
+   "totalTokens": 27864
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 5710
+  },
+  "inputSha256": "4505c09e49a43d6ae9352eff18f2dda701a5629bfd1a7b5185f8190dd504b336"
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "done": 95,
+ "skipped": 0,
+ "notReady": 0,
+ "failed": 0,
+ "noCall": 5,
+ "stopped": null,
+ "at": "2026-09-18T19:42:59.576Z"
+}

@@ -1,0 +1,46 @@
+{
+ "documentId": "saint-barthelemy-2026-09-08",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "31fbd56cea8f01c2feaba83488f3790219842b024c55416317498a995fdec169",
+ "rawText": "{\"operations\":[\n {\"op\":\"correct\",\"id\":\"u07\",\"unit\":{\"label\":\"Vente autorisée du terrain du 180, rang York — matricule 3418-41-5276 — aménagements permanents interdits sauf travaux de correction majeurs de la pente\",\"stage\":\"adoption\",\"procedure\":null,\"objet\":\"3418-41-5276\",\"page\":7,\"citation\":\"à signer pour et au nom de la Municipalité les documents nécessaires à la vente de l'immeuble identifié par le matricule 3418-41-5276\",\"anchor\":\"matricule 3418-41-5276\"},\"reason\":\"Le considérant du point 4.8 (page 7) précise qu'il est interdit d'y implanter des aménagements permanents à moins que des travaux de correction majeurs de la pente soient réalisés ; la règle « les contraintes permanentes et de pente ne doivent pas être contredites » impose de porter cette contrainte dans le libellé, comme le font déjà u04 et u05 pour la contrainte permanente.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Vente autorisée du terrain du 180, rang York — matricule 3418-41-5276 — aménagements permanents interdits sauf travaux de correction majeurs de la pente",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "3418-41-5276",
+    "page": 7,
+    "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à la vente de l'immeuble identifié par le matricule 3418-41-5276",
+    "anchor": "matricule 3418-41-5276"
+   },
+   "reason": "Le considérant du point 4.8 (page 7) précise qu'il est interdit d'y implanter des aménagements permanents à moins que des travaux de correction majeurs de la pente soient réalisés ; la règle « les contraintes permanentes et de pente ne doivent pas être contredites » impose de porter cette contrainte dans le libellé, comme le font déjà u04 et u05 pour la contrainte permanente."
+  }
+ ],
+ "applied": [
+  {
+   "op": "correct",
+   "id": "u07"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 9
+}

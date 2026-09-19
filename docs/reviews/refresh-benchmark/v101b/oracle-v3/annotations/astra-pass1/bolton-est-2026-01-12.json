@@ -1,0 +1,130 @@
+{
+ "documentId": "bolton-est-2026-01-12",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "90261355f07d906c15686f474207c371f0ca01a7f149d4e4fc8d0c59086dd5df",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Examen prévu de la dérogation mineure – lot 6 116 054 – 4 Impasse des Châtelains\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"6 116 054\",\n        \"page\": 1,\n        \"citation\": \"7.3. Dérogation mineure – Lot 6 116 054 – 4 Impasse des Châtelains\",\n        \"anchor\": \"Lot 6 116 054\"\n      },\n      \"reason\": \"Le point 7.3 prévoit l'examen d'une dérogation mineure explicite : dans un ordre du jour, ce point constitue une unité prévue et non une décision acquise.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Examen prévu du PIIA – lot 4 860 343 – 5 rue Castel\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"4 860 343\",\n        \"page\": 1,\n        \"citation\": \"7.4. Demande de PIIA – Lot 4 860 343 – 5 rue Castel\",\n        \"anchor\": \"Lot 4 860 343\"\n      },\n      \"reason\": \"Le point 7.4 nomme une demande de PIIA distincte, à inclure comme point prévu sans présumer son approbation.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Examen prévu du PIIA – lot 4 860 346 – 7 rue Castel\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"4 860 346\",\n        \"page\": 1,\n        \"citation\": \"7.5. Demande de PIIA – Lot 4 860 346 – 7 rue Castel\",\n        \"anchor\": \"Lot 4 860 346\"\n      },\n      \"reason\": \"Le point 7.5 nomme une demande de PIIA distincte, à inclure comme point prévu sans présumer son approbation.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Examen prévu du PIIA – lot 4 860 502 – 19 rue Horse Shoe\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"4 860 502\",\n        \"page\": 1,\n        \"citation\": \"7.6. Demande de PIIA – Lot 4 860 502 – 19 rue Horse Shoe\",\n        \"anchor\": \"Lot 4 860 502\"\n      },\n      \"reason\": \"Le point 7.6 nomme une demande de PIIA distincte, à inclure comme point prévu sans présumer son approbation.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Examen prévu du PIIA – lot 6 465 655 – 74 rue de Lac-Spring\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 465 655\",\n        \"page\": 1,\n        \"citation\": \"7.7. Demande de PIIA – Lot 6 465 655 – 74 rue de Lac-Spring\",\n        \"anchor\": \"Lot 6 465 655\"\n      },\n      \"reason\": \"Le point 7.7 nomme une demande de PIIA distincte, à inclure comme point prévu sans présumer son approbation.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Examen prévu du PIIA – lot 6 668 264-P\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 668 264-P\",\n        \"page\": 1,\n        \"citation\": \"7.8. Demande de PIIA – Lot 6 668 264-P\",\n        \"anchor\": \"Lot 6 668 264-P\"\n      },\n      \"reason\": \"Le point 7.8 identifie explicitement une demande de PIIA par son lot, ce qui constitue une unité prévue même sans adresse.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Examen prévu de la dérogation mineure – lot 6 116 054 – 4 Impasse des Châtelains",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "6 116 054",
+    "page": 1,
+    "citation": "7.3. Dérogation mineure – Lot 6 116 054 – 4 Impasse des Châtelains",
+    "anchor": "Lot 6 116 054"
+   },
+   "reason": "Le point 7.3 prévoit l'examen d'une dérogation mineure explicite : dans un ordre du jour, ce point constitue une unité prévue et non une décision acquise."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Examen prévu du PIIA – lot 4 860 343 – 5 rue Castel",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "4 860 343",
+    "page": 1,
+    "citation": "7.4. Demande de PIIA – Lot 4 860 343 – 5 rue Castel",
+    "anchor": "Lot 4 860 343"
+   },
+   "reason": "Le point 7.4 nomme une demande de PIIA distincte, à inclure comme point prévu sans présumer son approbation."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Examen prévu du PIIA – lot 4 860 346 – 7 rue Castel",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "4 860 346",
+    "page": 1,
+    "citation": "7.5. Demande de PIIA – Lot 4 860 346 – 7 rue Castel",
+    "anchor": "Lot 4 860 346"
+   },
+   "reason": "Le point 7.5 nomme une demande de PIIA distincte, à inclure comme point prévu sans présumer son approbation."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Examen prévu du PIIA – lot 4 860 502 – 19 rue Horse Shoe",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "4 860 502",
+    "page": 1,
+    "citation": "7.6. Demande de PIIA – Lot 4 860 502 – 19 rue Horse Shoe",
+    "anchor": "Lot 4 860 502"
+   },
+   "reason": "Le point 7.6 nomme une demande de PIIA distincte, à inclure comme point prévu sans présumer son approbation."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Examen prévu du PIIA – lot 6 465 655 – 74 rue de Lac-Spring",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 465 655",
+    "page": 1,
+    "citation": "7.7. Demande de PIIA – Lot 6 465 655 – 74 rue de Lac-Spring",
+    "anchor": "Lot 6 465 655"
+   },
+   "reason": "Le point 7.7 nomme une demande de PIIA distincte, à inclure comme point prévu sans présumer son approbation."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Examen prévu du PIIA – lot 6 668 264-P",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 668 264-P",
+    "page": 1,
+    "citation": "7.8. Demande de PIIA – Lot 6 668 264-P",
+    "anchor": "Lot 6 668 264-P"
+   },
+   "reason": "Le point 7.8 identifie explicitement une demande de PIIA par son lot, ce qui constitue une unité prévue même sans adresse."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

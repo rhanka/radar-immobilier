@@ -1,0 +1,35 @@
+{
+ "documentId": "contrecoeur-2026-04-14",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "e529aa5d6ccead8e74ff532fb1e12d176dd3f0a58f87e96c88980aae58a3ac6c",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 5080,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 20770,
+   "outputTokens": 1530,
+   "totalTokens": 22300
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 4920
+  },
+  "inputSha256": "05ba24e6387ca1dae3ed7718fcd16cf50f772987a373999d5db20aab5fb5df64"
+ },
+ "at": "2026-09-19T03:22:51.795Z"
+}

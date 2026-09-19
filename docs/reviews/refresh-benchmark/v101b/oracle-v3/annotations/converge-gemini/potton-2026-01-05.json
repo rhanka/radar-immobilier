@@ -1,0 +1,61 @@
+{
+ "documentId": "potton-2026-01-05",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "6e7a2bf2057ecd980097c4b8b6abf95615089d95eb87795bc1272c6523568da4",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure pour le lot 5 553 677 est bien adoptée à la page 14 et la citation est exacte.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA pour le lot 5 753 149 est adoptée à la page 15 avec une citation fidèle au texte.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement de zonage 2001-291-BR est bien donné à la page 19.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'adoption du premier projet du règlement 2001-291-BR figure bien aux pages 43-45 et la citation correspondante est à la page 45.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La dérogation mineure pour le lot 5 553 677 est bien adoptée à la page 14 et la citation est exacte."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA pour le lot 5 753 149 est adoptée à la page 15 avec une citation fidèle au texte."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement de zonage 2001-291-BR est bien donné à la page 19."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'adoption du premier projet du règlement 2001-291-BR figure bien aux pages 43-45 et la citation correspondante est à la page 45."
+  }
+ ]
+}

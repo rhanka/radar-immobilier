@@ -1,0 +1,239 @@
+{
+ "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+ "nextId": 7,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de la dérogation mineure 2025-0157 — 5580 rue Principale",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2025-0157",
+    "page": 4,
+    "citation": "Que le conseil autorise la demande de dérogation mineure numéro 2025-0157",
+    "anchor": "dérogation mineure numéro 2025-0157",
+    "spanStart": 2142,
+    "spanEnd": 2215
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de la dérogation mineure 2025-0157 — 5580 rue Principale",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2025-0157",
+      "page": 4,
+      "citation": "Que le conseil autorise la demande de dérogation mineure numéro 2025-0157",
+      "anchor": "dérogation mineure numéro 2025-0157",
+      "spanStart": 2142,
+      "spanEnd": 2215
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-049 autorise cette demande concernant un abri d’auto et l’agrandissement du garage détaché, lesquels relèvent d’une seule demande explicitement numérotée."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Refus de la dérogation mineure 2026-0003 — 3791-3791A rang Sainte-Rose",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-0003",
+    "page": 5,
+    "citation": "Que le conseil municipal refuse la demande de dérogation mineure numéro 2026-0003",
+    "anchor": "dérogation mineure numéro 2026-0003",
+    "spanStart": 1588,
+    "spanEnd": 1669
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus de la dérogation mineure 2026-0003 — 3791-3791A rang Sainte-Rose",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-0003",
+      "page": 5,
+      "citation": "Que le conseil municipal refuse la demande de dérogation mineure numéro 2026-0003",
+      "anchor": "dérogation mineure numéro 2026-0003",
+      "spanStart": 1588,
+      "spanEnd": 1669
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-050 refuse la demande d’implantation d’un conteneur; conformément aux règles, ce refus constitue une unité."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de la dérogation mineure 2026-0002 — lot 6 658 131, largeur avant de 30 mètres",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-0002",
+    "page": 6,
+    "citation": "Que le conseil municipal autorise la demande de dérogation mineure numéro 2026-0002",
+    "anchor": "dérogation mineure numéro 2026-0002",
+    "spanStart": 448,
+    "spanEnd": 531
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de la dérogation mineure 2026-0002 — lot 6 658 131, largeur avant de 30 mètres",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-0002",
+      "page": 6,
+      "citation": "Que le conseil municipal autorise la demande de dérogation mineure numéro 2026-0002",
+      "anchor": "dérogation mineure numéro 2026-0002",
+      "spanStart": 448,
+      "spanEnd": 531
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil autorise cette demande portant sur la forme du lot et une largeur sur la ligne avant de 30 mètres sur la rue Maria."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de la dérogation mineure 2026-0005 — 3741 rue Principale, clôture de 1,52 mètre",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-0005",
+    "page": 6,
+    "citation": "Demande de dérogation mineure numéro 2026-0005 - Marianne Isabelle - 3741 rue Principale",
+    "anchor": "dérogation mineure numéro 2026-0005",
+    "spanStart": 726,
+    "spanEnd": 814
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de la dérogation mineure 2026-0005 — 3741 rue Principale, clôture de 1,52 mètre",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-0005",
+      "page": 6,
+      "citation": "Demande de dérogation mineure numéro 2026-0005 - Marianne Isabelle - 3741 rue Principale",
+      "anchor": "dérogation mineure numéro 2026-0005",
+      "spanStart": 726,
+      "spanEnd": 814
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-052 autorise la clôture de 1,52 mètre; le titre et les considérants identifient le dossier comme 2026-0005, malgré la mention discordante 2025-0005 dans le dispositif."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Adoption du second projet de règlement 03-2026 — modification du zonage dans la zone U-41",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "03-2026",
+    "page": 7,
+    "citation": "10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de zonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes",
+    "anchor": "règlement numéro 03-2026",
+    "spanStart": 396,
+    "spanEnd": 541
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du second projet de règlement 03-2026 — modification du zonage dans la zone U-41",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "03-2026",
+      "page": 7,
+      "citation": "10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de zonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes",
+      "anchor": "règlement numéro 03-2026",
+      "spanStart": 396,
+      "spanEnd": 541
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 10.1 identifie expressément l’étape comme l’adoption du second projet, tandis que l’avis de motion et le projet du 9 mars sont seulement rappelés historiquement."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "removed",
+   "current": {
+    "label": "Autorisation d’enchérir et d’acquérir des immeubles — vente pour taxes du 11 juin 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Vente d’immeubles pour taxes",
+    "page": 8,
+    "citation": "et à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente",
+    "anchor": "tout immeuble de son territoire",
+    "spanStart": 2787,
+    "spanEnd": 2873
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation d’enchérir et d’acquérir des immeubles — vente pour taxes du 11 juin 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Vente d’immeubles pour taxes",
+      "page": 8,
+      "citation": "et à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente",
+      "anchor": "tout immeuble de son territoire",
+      "spanStart": 2787,
+      "spanEnd": 2873
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-055 autorise à enchérir et à acquérir des immeubles lors de la vente pour taxes, ce qui constitue une autorisation foncière et non une simple désignation de représentant."
+    },
+    {
+     "step": "gemini-pass2",
+     "op": "remove",
+     "reason": "L'autorisation générale d'enchérir lors d'une vente pour défaut de paiement de taxes ne porte sur aucun bien ou lot explicite et relève du recouvrement fiscal administratif plutôt que d'un acte foncier d'urbanisme."
+    }
+   ]
+  }
+ ]
+}

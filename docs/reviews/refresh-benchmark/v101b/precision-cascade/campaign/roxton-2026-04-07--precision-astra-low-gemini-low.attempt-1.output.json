@@ -1,0 +1,309 @@
+{
+ "nodes": [
+  {
+   "id": "source-pv-2026-04-07",
+   "label": "Procès-verbal du Canton de Roxton du 7 avril 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "status": "candidate",
+   "properties": {
+    "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+    "date": "2026-04-07",
+    "municipality": "canton-de-roxton",
+    "url": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+    "sourceKind": "pv",
+    "format": "pdf"
+   },
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "À une session ordinaire du conseil de la Municipalité du Canton de Roxton,\ntenue le 7 avril 2026 à 19h30, conformément aux dispositions du Code",
+     "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+     "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-384-2026",
+   "label": "Règlement 384-2026 — Usages permis dans la zone 506",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "status": "candidate",
+   "properties": {
+    "numero": "384-2026",
+    "title": "Règlement numéro 384-2026 modifiant le règlement de zonage numéro 181-2003 de la Municipalité du Canton de Roxton modifiant les usages permis dans la zone 506",
+    "date": "2026-04-07",
+    "stage": "adoption",
+    "resolution": "74-04-2026",
+    "municipality": "canton-de-roxton",
+    "zone_cible": "506"
+   },
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Et résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:",
+     "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+     "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 4,
+     "excerpt": "Le présent règlement s'intitule « Règlement numéro 384-2026 modifiant le\nrèglement de zonage numéro 181-2003 de la Municipalité du Canton de\nRoxton modifiant les usages permis dans la zone 506 ».",
+     "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+     "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-506",
+   "label": "Zone 506",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "status": "candidate",
+   "properties": {
+    "code": "506",
+    "municipality": "canton-de-roxton",
+    "bylaw": "181-2003",
+    "description": "Secteur déstructuré pour l’agriculture. Le règlement adopté ajoute l’élevage de classe B à des fins personnelles sur des terrains résidentiels, limité à 25 poules pondeuses ou poulets à griller et à 3 chevaux."
+   },
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "ATTENDU QUE\nla zone visée, soit la zone 506, constitue un secteur\ndéstructuré pour l’agriculture, où les usages agricoles sont actuellement\nlimités à la culture des sols sans bâtiment;",
+     "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+     "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 5,
+     "excerpt": "La grille des usages principaux et des normes, annexée et faisant partie\nintégrante du règlement de zonage numéro 181-2003 de la Municipalité de\nRoxton, est modifiée :",
+     "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+     "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-emprunt-500000",
+   "label": "Règlement d’emprunt de 500 000 $ pour des immobilisations",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "status": "candidate",
+   "properties": {
+    "title": "Règlement décrétant des dépenses en immobilisations et un emprunt au montant de 500 000$",
+    "date": "2026-04-07",
+    "stage": "adoption",
+    "municipality": "canton-de-roxton",
+    "resolution": "81-04-2026",
+    "objet": "Emprunt de 500 000 $ sur 20 ans pour des travaux de voirie, la réfection et la construction de biens immobiliers, ainsi que l’acquisition de matériel roulant et d’équipements."
+   },
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "Il est proposé et résolu à l’unanimité des conseillers de l’adoption du\nrèglement décrétant des dépenses en immobilisation et un emprunt au\nmontant de 500 000$.",
+     "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+     "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-demande-abrogation-245-1",
+   "label": "Demande d’abrogation de l’article 245.1 de la LAU",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "politique_reglementaire",
+    "kind": "protection_milieux_humides_et_hydriques",
+    "date": "2026-04-07",
+    "municipality": "canton-de-roxton",
+    "resolution": "80-04-2026",
+    "description": "Le conseil demande un amendement au projet de loi no 22 pour abroger l’article 245.1 de la Loi sur l’aménagement et l’urbanisme, relatif aux avis individuels aux propriétaires concernés par la protection des milieux humides et hydriques. Il ne s’agit pas d’une abrogation adoptée.",
+    "outcome": "Demande municipale adoptée"
+   },
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "QUE la municipalité du Canton de Roxton demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée\nnationale d’introduire un amendement au projet de loi no 22",
+     "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+     "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-pv-2026-04-07",
+   "target": "bylaw-384-2026",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "evidence_refs": [
+    "ev-adoption"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Et résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:",
+     "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+     "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "bylaw-384-2026",
+   "target": "zone-506",
+   "relation": "applies_to",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "evidence_refs": [
+    "ev-title",
+    "ev-grille"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Le présent règlement s'intitule « Règlement numéro 384-2026 modifiant le\nrèglement de zonage numéro 181-2003 de la Municipalité du Canton de\nRoxton modifiant les usages permis dans la zone 506 ».",
+     "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+     "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-07",
+   "target": "bylaw-emprunt-500000",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "evidence_refs": [
+    "ev-emprunt"
+   ],
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "Il est proposé et résolu à l’unanimité des conseillers de l’adoption du\nrèglement décrétant des dépenses en immobilisation et un emprunt au\nmontant de 500 000$.",
+     "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+     "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-07",
+   "target": "signal-demande-abrogation-245-1",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "evidence_refs": [
+    "ev-abrogation"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "QUE la municipalité du Canton de Roxton demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée\nnationale d’introduire un amendement au projet de loi no 22",
+     "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+     "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+     "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-adoption",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+   "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Et résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:"
+  },
+  {
+   "id": "ev-title",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+   "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Le présent règlement s'intitule « Règlement numéro 384-2026 modifiant le\nrèglement de zonage numéro 181-2003 de la Municipalité du Canton de\nRoxton modifiant les usages permis dans la zone 506 »."
+  },
+  {
+   "id": "ev-grille",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+   "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "La grille des usages principaux et des normes, annexée et faisant partie\nintégrante du règlement de zonage numéro 181-2003 de la Municipalité de\nRoxton, est modifiée :\na)\npar l’ajout des usages agricoles de classe B « élevage » à la liste des\nusages autorisés dans la zone numéro 506;\nb)\npar l’ajout de la note particulière [7] pour les usages agricoles de\nclasse B « élevage », se lisant comme suit :\n[7] Limité à l’élevage à des fins personnelles, sur des terrains utilisés à des\nfins résidentielles, d’un maximum de 25 poules pondeuses ou poulets à\ngriller et d’un maximum de 3 chevaux"
+  },
+  {
+   "id": "ev-motion",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+   "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "ATTENDU QU'\nun avis de motion a été donné par M. Pascal Richard\nlors d'une séance du conseil tenu le 12 janvier 2026 ;"
+  },
+  {
+   "id": "ev-emprunt",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+   "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "Il est proposé et résolu à l’unanimité des conseillers de l’adoption du\nrèglement décrétant des dépenses en immobilisation et un emprunt au\nmontant de 500 000$."
+  },
+  {
+   "id": "ev-abrogation",
+   "source_file": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "rawRef": "raw/proces-verbaux-roxton/cas/0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b.pdf",
+   "docSha": "0140f19b79d362659a713bb36eb8a1fb8ebe68383db9b9b29eb436d382471a9b",
+   "sourceUrl": "https://cantonderoxton.qc.ca/wp-content/uploads/2026/05/01-301-PV-2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "QUE la municipalité du Canton de Roxton demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée\nnationale d’introduire un amendement au projet de loi no 22 abrogeant\nl’article 245.1 de la Loi sur l’aménagement et l’urbanisme afin de respecter\nle consensus établi entre le ministère et ses partenaires municipaux;"
+  }
+ ],
+ "input_tokens": 13900,
+ "output_tokens": 6100
+}

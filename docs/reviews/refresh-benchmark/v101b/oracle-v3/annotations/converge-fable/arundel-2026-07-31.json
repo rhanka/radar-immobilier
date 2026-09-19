@@ -1,0 +1,51 @@
+{
+ "documentId": "arundel-2026-07-31",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "12d93e61bac9f641799398316817d7dcf9cd535d65f53ab01a2d9a52fce57c36",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 3, résolution 2026-08-123 : « ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI) » — adoption d'un règlement PPCMOI (SCAOPI) constatée dans ce document, citation, étape, objet et page exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 6, résolution 2026-08-132 : « AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the construction of a car shelter at 165 Chemin de la Rouge » — petit PIIA inclus par la règle, citation, étape piia, objet et page exacts.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 7, résolution 2026-08-133 : « AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the renovation of the roof and facade of the garage of the building located at 117 Rue du Village » — PIIA accordé, citation, étape piia, objet et page exacts.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 3, résolution 2026-08-123 : « ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI) » — adoption d'un règlement PPCMOI (SCAOPI) constatée dans ce document, citation, étape, objet et page exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 6, résolution 2026-08-132 : « AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the construction of a car shelter at 165 Chemin de la Rouge » — petit PIIA inclus par la règle, citation, étape piia, objet et page exacts."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 7, résolution 2026-08-133 : « AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the renovation of the roof and facade of the garage of the building located at 117 Rue du Village » — PIIA accordé, citation, étape piia, objet et page exacts."
+  }
+ ]
+}

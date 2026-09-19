@@ -1,0 +1,173 @@
+{
+ "documentId": "coteau-du-lac-2026-02-10",
+ "step": "astra-pass1b",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "d4f642924a5be3545e06676c87918e850dadcfcede0a493cd3b483b7d059c203",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Modification prévue de l’autorisation d’achat d’une partie du lot 6 025 922 — 1 rue Dollard\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 025 922\",\n        \"page\": 2,\n        \"citation\": \"a) Modification de la résolution #425-10-2025. Autorisation de signature acte d’achat\\nd’une partie du lot 6 025 922 (1 rue Dollard)\",\n        \"anchor\": \"lot 6 025 922\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique, notamment avec le saut de ligne après « acte d’achat ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Abrogation prévue de l’acceptation du proposant — lot 2 045 370, terrain Juteau\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2 045 370\",\n        \"page\": 2,\n        \"citation\": \"b) Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2\\n045 370 (Terrain Juteau)\",\n        \"anchor\": \"Lot #2\\n045 370\"\n      },\n      \"reason\": \"La citation et son ancre doivent respecter le saut de ligne qui sépare « Lot #2 » de « 045 370 » dans le document.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Approbation de PIIA prévue — 3, rue Principale, enseigne sur vitrage\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"3, rue Principale\",\n        \"page\": 3,\n        \"citation\": \"8.2. Demande d’approbation de PIIA seulement\\na) Pour le 3, rue Principale (enseigne sur vitrage)\",\n        \"anchor\": \"3, rue Principale\"\n      },\n      \"reason\": \"La citation exacte comporte un saut de ligne entre le titre du point 8.2 et le sous-point a).\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Approbation de PIIA prévue — 9, rue Principale, modification d’enseigne sur poteau\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"9, rue Principale\",\n        \"page\": 3,\n        \"citation\": \"8.2. Demande d’approbation de PIIA seulement\\na) Pour le 3, rue Principale (enseigne sur vitrage)\\nb) Pour le 9, rue Principale (modification enseigne sur poteau)\",\n        \"anchor\": \"9, rue Principale\"\n      },\n      \"reason\": \"La citation doit reproduire les sauts de ligne entre le titre du point 8.2 et ses deux sous-points.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Approbation prévue de la demande de PPCMOI — 25, rue des Chutes, agrandissement résidentiel\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"25, rue des Chutes\",\n        \"page\": 3,\n        \"citation\": \"Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes\\n(agrandissement résidentiel)\",\n        \"anchor\": \"25, rue des Chutes\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne après l’adresse pour constituer un extrait recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du premier projet de résolution de PPCMOI — 25, rue des Chutes\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"25, rue des Chutes\",\n        \"page\": 3,\n        \"citation\": \"Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\\ndes Chutes (agrandissement résidentiel)\",\n        \"anchor\": \"25, rue\\ndes Chutes\"\n      },\n      \"reason\": \"La citation et son ancre doivent reproduire le saut de ligne situé entre « rue » et « des Chutes ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Modification prévue de l’autorisation d’achat d’une partie du lot 6 025 922 — 1 rue Dollard",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 025 922",
+    "page": 2,
+    "citation": "a) Modification de la résolution #425-10-2025. Autorisation de signature acte d’achat\nd’une partie du lot 6 025 922 (1 rue Dollard)",
+    "anchor": "lot 6 025 922"
+   },
+   "reason": "La citation doit être recopiée à l’identique, notamment avec le saut de ligne après « acte d’achat »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Abrogation prévue de l’acceptation du proposant — lot 2 045 370, terrain Juteau",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2 045 370",
+    "page": 2,
+    "citation": "b) Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2\n045 370 (Terrain Juteau)",
+    "anchor": "Lot #2\n045 370"
+   },
+   "reason": "La citation et son ancre doivent respecter le saut de ligne qui sépare « Lot #2 » de « 045 370 » dans le document."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Approbation de PIIA prévue — 3, rue Principale, enseigne sur vitrage",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "3, rue Principale",
+    "page": 3,
+    "citation": "8.2. Demande d’approbation de PIIA seulement\na) Pour le 3, rue Principale (enseigne sur vitrage)",
+    "anchor": "3, rue Principale"
+   },
+   "reason": "La citation exacte comporte un saut de ligne entre le titre du point 8.2 et le sous-point a)."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Approbation de PIIA prévue — 9, rue Principale, modification d’enseigne sur poteau",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "9, rue Principale",
+    "page": 3,
+    "citation": "8.2. Demande d’approbation de PIIA seulement\na) Pour le 3, rue Principale (enseigne sur vitrage)\nb) Pour le 9, rue Principale (modification enseigne sur poteau)",
+    "anchor": "9, rue Principale"
+   },
+   "reason": "La citation doit reproduire les sauts de ligne entre le titre du point 8.2 et ses deux sous-points."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Approbation prévue de la demande de PPCMOI — 25, rue des Chutes, agrandissement résidentiel",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "25, rue des Chutes",
+    "page": 3,
+    "citation": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes\n(agrandissement résidentiel)",
+    "anchor": "25, rue des Chutes"
+   },
+   "reason": "La citation doit conserver le saut de ligne après l’adresse pour constituer un extrait recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Adoption prévue du premier projet de résolution de PPCMOI — 25, rue des Chutes",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "25, rue des Chutes",
+    "page": 3,
+    "citation": "Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\ndes Chutes (agrandissement résidentiel)",
+    "anchor": "25, rue\ndes Chutes"
+   },
+   "reason": "La citation et son ancre doivent reproduire le saut de ligne situé entre « rue » et « des Chutes »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass1b",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "a) Modification de la résolution #425-10-2025. Autorisation de signature acte d’achat\nd’une partie du lot 6 025 922 (1 rue Dollard)"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "b) Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2\n045 370 (Terrain Juteau)"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "piia",
+   "page": 3,
+   "citation": "8.2. Demande d’approbation de PIIA seulement\na) Pour le 3, rue Principale (enseigne sur vitrage)"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "piia",
+   "page": 3,
+   "citation": "8.2. Demande d’approbation de PIIA seulement\na) Pour le 3, rue Principale (enseigne sur vitrage)\nb) Pour le 9, rue Principale (modification enseigne sur poteau)"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "adoption",
+   "page": 3,
+   "citation": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes\n(agrandissement résidentiel)"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "projet_reglement",
+   "page": 3,
+   "citation": "Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue\ndes Chutes (agrandissement résidentiel)"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6,
+ "relabeledFrom": "astra-pass2"
+}

@@ -1,0 +1,334 @@
+{
+ "documentId": "orford-2026-03-02",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "5f1bbf77aaa39f7204ab1991b2718224156c3ee2009dc6d1c608098c890f4d79",
+ "verificationSha256": "61f61b5f861fbc0195403557513ec1991f6d4e208e821cc317eb5385d0bd550a",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-61 adoptée à la page 46 impose formellement une contribution pour fins de parcs en argent sur le lot 6 521 680 explicitement identifié, ce qui constitue un acte foncier d'urbanisme expressément inclus dans le périmètre du rappel.\"},{\"item\":\"a02\",\"choice\":\"v1\",\"reason\":\"Le lot 6 449 130 est explicitement désigné dans le tableau de la résolution 2026-03-61 adoptée à la page 46; selon les règles, un nœud groupé couvre plusieurs unités explicitement nommées, chacune constituant un objet foncier distinct inclus.\"},{\"item\":\"a03\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-62 adoptée à la page 47 demande expressément à la MRC la modification du Règlement de contrôle intérimaire numéro 16-21 pour y intégrer le lot 3 787 898, formant un objet réglementaire explicite d'urbanisme avec l'étape inconnu.\"},{\"item\":\"a04\",\"choice\":\"v1\",\"reason\":\"Le schéma d'aménagement fait l'objet d'une demande formelle de modification dans le dispositif de la résolution 2026-03-62 (p. 47) et est explicitement identifié au préambule comme le Règlement numéro 16-23 (p. 46), constituant un objet réglementaire distinct.\"},{\"item\":\"a05\",\"choice\":\"absent\",\"reason\":\"La résolution 2026-03-46 (p. 5) autorise la transmission d'une liste sans désigner aucun lot ni adresse précis; faute d'objet foncier explicite et relevant de la gestion des comptes de taxes, ce point est exclu du rappel.\"},{\"item\":\"a06\",\"choice\":\"absent\",\"reason\":\"L'autorisation générale d'enchérir de la résolution 2026-03-47 (p. 5) ne comporte aucun objet foncier explicite (aucun lot ni immeuble ciblé), ce qui contrevient à la définition stricte d'une unité du corrigé.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Contribution pour parcs exigée en argent — lot 6 521 680",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 521 680",
+      "page": 46,
+      "citation": "6 521 680 0 m2 Chemin des Nénuphars 6 449 130 Montant à payer au fonds de parcs, de terrains de jeux et d'espaces naturels (10 %) Contribution exigée en argent",
+      "anchor": "6 521 680 0 m2",
+      "spanStart": 880,
+      "spanEnd": 1042
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le tableau de la résolution 2026-03-61, adoptée page 46, nomme explicitement le lot 6 521 680 parmi les lots assujettis à une contribution exigée en argent."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 2026-03-61 (p. 46) exige une contribution en argent pour fins de parcs en vertu du Règlement 951 pour le lot explicitement nommé 6 521 680, acte foncier d'urbanisme inclus au rappel."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'imposition d'une contribution financière pour fins de parcs ne correspond pas à un Signal ou DesignationEvent du profil et son étape d'adoption est invalide."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u04",
+   "verificationItem": "i04",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Contribution pour parcs exigée en argent — lot 6 449 130",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 449 130",
+      "page": 46,
+      "citation": "Chemin des Nénuphars 6 449 130 Montant à payer au fonds de parcs, de terrains de jeux et d'espaces naturels (10 %) Contribution exigée en argent",
+      "anchor": "Nénuphars 6 449 130",
+      "spanStart": 897,
+      "spanEnd": 1042
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le lot 6 449 130 est explicitement nommé dans le tableau des contributions exigées en argent de la résolution 2026-03-61, adoptée page 46."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le lot 6 449 130 (chemin des Nénuphars) est nommé explicitement dans le tableau de la résolution 2026-03-61 (p. 46); un nœud groupé peut couvrir plusieurs unités explicitement nommées, chaque lot constitue un objet foncier distinct."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'imposition d'une contribution financière pour fins de parcs ne correspond pas à un Signal ou DesignationEvent du profil et son étape d'adoption est invalide."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u05",
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Demande de modification du RCI 16-21 — intégration du lot 3 787 898 au secteur de consolidation",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "16-21",
+      "page": 47,
+      "citation": "De DEMANDER à la MRC de Memphrémagog de modifier le Règlement de contrôle intérimaire numéro 16-21 et le schéma d'aménagement afin d'agrandir le secteur",
+      "anchor": "intérimaire numéro 16-21",
+      "spanStart": 1428,
+      "spanEnd": 1580
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le dispositif de la résolution 2026-03-62 demande expressément, page 47, la modification du RCI 16-21 pour intégrer le lot 3 787 898 au secteur de consolidation, sans constater l’adoption de cette modification."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 2026-03-62 (p. 47) demande à la MRC de modifier le Règlement de contrôle intérimaire 16-21 pour intégrer le lot 3 787 898; objet réglementaire explicite, étape inconnu adaptée à une demande adressée à la MRC."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Une demande de modification adressée à la MRC visant un règlement supramunicipal ne constitue pas une unité réglementaire municipale du profil."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a04",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Demande de modification du schéma d'aménagement 16-23 — intégration du lot 3 787 898",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "16-23",
+      "page": 46,
+      "citation": "schéma d'aménagement de la MRC de Memphrémagog (Règlement numéro 16-23",
+      "anchor": "Règlement numéro 16-23",
+      "spanStart": 1501,
+      "spanEnd": 1571
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le schéma d’aménagement est identifié comme le Règlement 16-23 dans la citation de la page 46, et sa modification pour intégrer le lot 3 787 898 est expressément demandée dans le dispositif de la page 47."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le schéma d'aménagement (Règlement numéro 16-23) est cité p. 46 dans la même résolution 2026-03-62 et le dispositif demande explicitement sa modification, objet réglementaire distinct du RCI 16-21."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le règlement 16-23 de la MRC n'est cité qu'au préambule historique et ne constitue pas une unité réglementaire adoptée par la municipalité."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a05",
+   "kind": "split",
+   "unitId": "u07",
+   "verificationItem": "i07",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation de transmission à la MRC des immeubles à vendre pour taxes impayées",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "immeubles pour taxes impayées",
+      "page": 5,
+      "citation": "D’AUTORISER la greffière ou le directeur général à transmettre à la MRC de Memphrémagog la liste des immeubles dont les taxes n’auront pas été payées avant le 19 mars 2026",
+      "anchor": "la liste des immeubles",
+      "spanStart": 818,
+      "spanEnd": 989
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-03-46 autorise, page 5, la transmission de la liste des immeubles admissibles à la vente pour taxes, ce qui atteste une étape de procédure foncière et non une vente déjà réalisée."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "La transmission de l'état des taxes échues (p. 5) relève des comptes/taxation sans objet foncier explicite (aucun lot ni adresse), exclu du rappel selon la règle sur les comptes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La transmission d'un état de taxes impayées relève de l'administration fiscale sans objet foncier explicite ni fait d'urbanisme."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a06",
+   "kind": "split",
+   "unitId": "u08",
+   "verificationItem": "i08",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation d'enchérir et d'acquérir des immeubles à la vente pour taxes du 11 juin 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "immeubles vendus pour taxes",
+      "page": 5,
+      "citation": "D’AUTORISER la greffière ou le directeur général à enchérir et à acquérir des immeubles vendus sur le territoire de la Municipalité du Canton d’Orford par la MRC",
+      "anchor": "immeubles vendus",
+      "spanStart": 1635,
+      "spanEnd": 1796
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-03-47, adoptée page 5, autorise expressément la greffière ou le directeur général à enchérir et à acquérir des immeubles lors de la vente pour taxes du 11 juin 2026, sans affirmer qu’une acquisition a déjà eu lieu."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "L'autorisation générale d'enchérir à la vente pour taxes (p. 5) ne vise aucun immeuble explicitement identifié et l'étape « adoption » ne correspond pas à l'adoption d'un règlement; objet non explicite, exclu du rappel."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'autorisation générale d'enchérir à une vente pour taxes ne porte sur aucun objet foncier explicite et ne constitue pas une adoption réglementaire."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-61 adoptée à la page 46 impose formellement une contribution pour fins de parcs en argent sur le lot 6 521 680 explicitement identifié, ce qui constitue un acte foncier d'urbanisme expressément inclus dans le périmètre du rappel."
+  },
+  {
+   "item": "a02",
+   "choice": "v1",
+   "reason": "Le lot 6 449 130 est explicitement désigné dans le tableau de la résolution 2026-03-61 adoptée à la page 46; selon les règles, un nœud groupé couvre plusieurs unités explicitement nommées, chacune constituant un objet foncier distinct inclus."
+  },
+  {
+   "item": "a03",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-62 adoptée à la page 47 demande expressément à la MRC la modification du Règlement de contrôle intérimaire numéro 16-21 pour y intégrer le lot 3 787 898, formant un objet réglementaire explicite d'urbanisme avec l'étape inconnu."
+  },
+  {
+   "item": "a04",
+   "choice": "v1",
+   "reason": "Le schéma d'aménagement fait l'objet d'une demande formelle de modification dans le dispositif de la résolution 2026-03-62 (p. 47) et est explicitement identifié au préambule comme le Règlement numéro 16-23 (p. 46), constituant un objet réglementaire distinct."
+  },
+  {
+   "item": "a05",
+   "choice": "absent",
+   "reason": "La résolution 2026-03-46 (p. 5) autorise la transmission d'une liste sans désigner aucun lot ni adresse précis; faute d'objet foncier explicite et relevant de la gestion des comptes de taxes, ce point est exclu du rappel."
+  },
+  {
+   "item": "a06",
+   "choice": "absent",
+   "reason": "L'autorisation générale d'enchérir de la résolution 2026-03-47 (p. 5) ne comporte aucun objet foncier explicite (aucun lot ni immeuble ciblé), ce qui contrevient à la définition stricte d'une unité du corrigé."
+  }
+ ]
+}

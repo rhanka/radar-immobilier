@@ -1,0 +1,75 @@
+{
+ "documentId": "sainte-thecle-2026-03-09",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "01e174afa3871e892056b2ac16eff8c2088afe711ebcf965b22813672952c4c2",
+ "inputSha256": "5cf87b316b115091acb68a9549469376dcd820fba1eff3e6f0752449d94632d2",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "rc": 0,
+ "latencyMs": 138648,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "69a06a2d-7a40-433a-9fc8-6efaf991929f",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 12402,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 35573,
+   "webSearchRequests": 0,
+   "costUSD": 1.33225325,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 12392,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 35573,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 12402,
+  "output_tokens_details": {
+   "thinking_tokens": 12392
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 35573,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 12402,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 35573,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 35573
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 1.33225325,
+ "durationApiMs": 136750,
+ "stderrTail": "",
+ "at": "2026-09-18T17:55:33.289Z"
+}

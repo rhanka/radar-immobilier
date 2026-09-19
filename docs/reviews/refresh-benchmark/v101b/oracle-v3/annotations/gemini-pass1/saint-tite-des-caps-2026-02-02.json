@@ -1,0 +1,26 @@
+{
+ "documentId": "saint-tite-des-caps-2026-02-02",
+ "step": "gemini-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass1",
+ "inputStateSha256": "b642f13b98bb5054a357a21b193e2d595faef1f826e76d1119a873476103942a",
+ "rawText": "{\"operations\": []}",
+ "parseError": null,
+ "operations": [],
+ "applied": [],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

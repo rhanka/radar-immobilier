@@ -1,0 +1,460 @@
+{
+ "documentId": "sainte-thecle-2026-03-09",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "01e174afa3871e892056b2ac16eff8c2088afe711ebcf965b22813672952c4c2",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Engagement des procédures de modification du règlement 389-2021 — circulation des motoneiges\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"389-2021\",\n        \"page\": 16,\n        \"citation\": \"que le conseil de la municipalité de Sainte-Thècle entame les procédures de modification du\\nrèglement 389-2021 afin de donner accès aux motoneigistes à un poste d’essence dans la\\nmunicipalité\",\n        \"anchor\": \"règlement 389-2021\"\n      },\n      \"reason\": \"La citation doit conserver les retours à la ligne de la page 16 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption du deuxième projet de règlement 434-2026 — production d’énergie commerciale\",\n        \"stage\": \"second_projet\",\n        \"procedure\": null,\n        \"objet\": \"434-2026\",\n        \"page\": 20,\n        \"citation\": \"adopte le 2e projet de règlement 434-2026 remplaçant le règlement 430-2025 modifiant le\\nrèglement de zonage numéro 337-2016\",\n        \"anchor\": \"règlement 434-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 20 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 435-2026 — occupation et entretien des bâtiments\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"435-2026\",\n        \"page\": 20,\n        \"citation\": \"donne avis de motion à l’effet qu’il sera adopté le règlement 435-2026 relatif à\\nl’occupation et à l’entretien des bâtiments sur le territoire de la Municipalité de\\nSainte-Thècle\",\n        \"anchor\": \"règlement 435-2026\"\n      },\n      \"reason\": \"La citation doit conserver les retours à la ligne de la page 20 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet de règlement 435-2026 — occupation et entretien des bâtiments\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"435-2026\",\n        \"page\": 20,\n        \"citation\": \"adopte le 1er projet de règlement 435-2026 relatif à l’occupation et à l’entretien des bâtiments sur\\nle territoire de la Municipalité de Sainte-Thècle\",\n        \"anchor\": \"règlement 435-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 20 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Consultation publique fixée au 23 mars 2026 à 18h00 — règlement 435-2026\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"consultation_publique\",\n        \"objet\": \"435-2026\",\n        \"page\": 21,\n        \"citation\": \"conseil municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h00\\nconcernant le règlement 435-2026\",\n        \"anchor\": \"règlement 435-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 21 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 436-2026 — hébergement touristique\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"436-2026\",\n        \"page\": 21,\n        \"citation\": \"donne avis de motion à l’effet qu’il sera adopté le règlement 436-2026 modifiant le\\nrèglement 398-2023 qui modifiait le règlement de zonage #337-2016\",\n        \"anchor\": \"règlement 436-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 21 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet de règlement 436-2026 — hébergement touristique\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"436-2026\",\n        \"page\": 22,\n        \"citation\": \"adopte le 1er projet de règlement 436-2026 modifiant le règlement 398-2023 qui modifiait le\\nrèglement de zonage #337-2016\",\n        \"anchor\": \"règlement 436-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 22 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Consultation publique fixée au 23 mars 2026 à 18h05 — règlement 436-2026\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"consultation_publique\",\n        \"objet\": \"436-2026\",\n        \"page\": 22,\n        \"citation\": \"municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h05 concernant\\nle règlement 436-2026\",\n        \"anchor\": \"règlement 436-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 22 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 437-2026 — transmission des demandes de dérogation mineure\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"437-2026\",\n        \"page\": 23,\n        \"citation\": \"donne avis de motion à l’effet qu’il sera adopté le règlement 437-2026 modifiant les\\nrèglements 421-2025, 189-2002 et 48-93 concernant la transmission de la demande\\nde dérogation mineure\",\n        \"anchor\": \"règlement 437-2026\"\n      },\n      \"reason\": \"La citation doit conserver les retours à la ligne de la page 23 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u11\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet de règlement 437-2026 — transmission des demandes de dérogation mineure\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"437-2026\",\n        \"page\": 23,\n        \"citation\": \"adopte le 1er projet de règlement 437-2026 modifiant les règlements 421-2025, 189-2002 et 48-93\\nconcernant la transmission de la demande de dérogation mineure\",\n        \"anchor\": \"règlement 437-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 23 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u12\",\n      \"unit\": {\n        \"label\": \"Consultation publique fixée au 23 mars 2026 à 18h10 — règlement 437-2026\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"consultation_publique\",\n        \"objet\": \"437-2026\",\n        \"page\": 23,\n        \"citation\": \"conseil municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h10\\nconcernant le règlement 437-2026\",\n        \"anchor\": \"règlement 437-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 23 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u13\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 438-2026 — dispositions relatives aux autres permis\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"438-2026\",\n        \"page\": 24,\n        \"citation\": \"donne avis de motion à l’effet qu’il sera adopté le règlement 438-2026 modifiant les\\nrèglements 429-2025, 395-2023 et 333-2016 concernant les dispositions relatives aux\\nautres permis\",\n        \"anchor\": \"règlement 438-2026\"\n      },\n      \"reason\": \"La citation doit conserver les retours à la ligne de la page 24 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u14\",\n      \"unit\": {\n        \"label\": \"Dépôt du projet de règlement 438-2026 — dispositions relatives aux autres permis\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"438-2026\",\n        \"page\": 24,\n        \"citation\": \"dépose le projet de règlement 438-2026 modifiant les règlements 429-2025, 395-2023\\net 333-2016 concernant les dispositions relatives aux autres permis\",\n        \"anchor\": \"règlement 438-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 24 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u15\",\n      \"unit\": {\n        \"label\": \"Appui à une demande de suspension des nouvelles activités — projet d’aire protégée PR-1013718\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"PR-1013718\",\n        \"page\": 25,\n        \"citation\": \"ne soit autorisée dans les limites\\ndu projet d’aire protégée de la forêt ancienne des lacs Grandbois (PR-1013718) et ce, jusqu’à ce\\nqu’une décision gouvernementale soit prise pour ce projet\",\n        \"anchor\": \"lacs Grandbois (PR-1013718\"\n      },\n      \"reason\": \"La citation doit conserver les retours à la ligne de la page 25 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u16\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 440-2026 — zone 96-Rc et définition d’un conteneur\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"440-2026\",\n        \"page\": 25,\n        \"citation\": \"donne avis de motion à l’effet qu’il sera adopté le règlement 440-2026 modifiant le\\nrèglement de zonage #337-2016 Annexe D\",\n        \"anchor\": \"règlement 440-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 25 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u17\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet de règlement 440-2026 — zone 96-Rc et définition d’un conteneur\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"440-2026\",\n        \"page\": 26,\n        \"citation\": \"adopte le 1er projet de règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe\\nD pour enlever la note N.B. 22 et ajouter la note N.B. 7 dans la zone 96-Rc\",\n        \"anchor\": \"règlement 440-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 26 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u18\",\n      \"unit\": {\n        \"label\": \"Consultation publique fixée au 23 mars 2026 à 18h15 — règlement 440-2026\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"consultation_publique\",\n        \"objet\": \"440-2026\",\n        \"page\": 26,\n        \"citation\": \"municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h15 concernant\\nle règlement 440-2026\",\n        \"anchor\": \"règlement 440-2026\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 26 pour respecter l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u19\",\n      \"unit\": {\n        \"label\": \"Appui à la demande à la CPTAQ — acquisition d’environ 4,6 acres du lot 4 756 274\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"4 756 274\",\n        \"page\": 26,\n        \"citation\": \"municipal appuie la demande de la Ferme Michel Lebel SENC pour l’acquisition d’une partie du\\nlot 4 756 274 d’environ 4,6 acres\",\n        \"anchor\": \"lot 4 756 274\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne de la page 26 pour respecter l’exigence de reproduction à l’identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Engagement des procédures de modification du règlement 389-2021 — circulation des motoneiges",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "389-2021",
+    "page": 16,
+    "citation": "que le conseil de la municipalité de Sainte-Thècle entame les procédures de modification du\nrèglement 389-2021 afin de donner accès aux motoneigistes à un poste d’essence dans la\nmunicipalité",
+    "anchor": "règlement 389-2021"
+   },
+   "reason": "La citation doit conserver les retours à la ligne de la page 16 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption du deuxième projet de règlement 434-2026 — production d’énergie commerciale",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "434-2026",
+    "page": 20,
+    "citation": "adopte le 2e projet de règlement 434-2026 remplaçant le règlement 430-2025 modifiant le\nrèglement de zonage numéro 337-2016",
+    "anchor": "règlement 434-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 20 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Avis de motion du règlement 435-2026 — occupation et entretien des bâtiments",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "435-2026",
+    "page": 20,
+    "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 435-2026 relatif à\nl’occupation et à l’entretien des bâtiments sur le territoire de la Municipalité de\nSainte-Thècle",
+    "anchor": "règlement 435-2026"
+   },
+   "reason": "La citation doit conserver les retours à la ligne de la page 20 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Adoption du premier projet de règlement 435-2026 — occupation et entretien des bâtiments",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "435-2026",
+    "page": 20,
+    "citation": "adopte le 1er projet de règlement 435-2026 relatif à l’occupation et à l’entretien des bâtiments sur\nle territoire de la Municipalité de Sainte-Thècle",
+    "anchor": "règlement 435-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 20 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Consultation publique fixée au 23 mars 2026 à 18h00 — règlement 435-2026",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "435-2026",
+    "page": 21,
+    "citation": "conseil municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h00\nconcernant le règlement 435-2026",
+    "anchor": "règlement 435-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 21 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Avis de motion du règlement 436-2026 — hébergement touristique",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "436-2026",
+    "page": 21,
+    "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 436-2026 modifiant le\nrèglement 398-2023 qui modifiait le règlement de zonage #337-2016",
+    "anchor": "règlement 436-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 21 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Adoption du premier projet de règlement 436-2026 — hébergement touristique",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "436-2026",
+    "page": 22,
+    "citation": "adopte le 1er projet de règlement 436-2026 modifiant le règlement 398-2023 qui modifiait le\nrèglement de zonage #337-2016",
+    "anchor": "règlement 436-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 22 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Consultation publique fixée au 23 mars 2026 à 18h05 — règlement 436-2026",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "436-2026",
+    "page": 22,
+    "citation": "municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h05 concernant\nle règlement 436-2026",
+    "anchor": "règlement 436-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 22 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Avis de motion du règlement 437-2026 — transmission des demandes de dérogation mineure",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "437-2026",
+    "page": 23,
+    "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 437-2026 modifiant les\nrèglements 421-2025, 189-2002 et 48-93 concernant la transmission de la demande\nde dérogation mineure",
+    "anchor": "règlement 437-2026"
+   },
+   "reason": "La citation doit conserver les retours à la ligne de la page 23 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u11",
+   "unit": {
+    "label": "Adoption du premier projet de règlement 437-2026 — transmission des demandes de dérogation mineure",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "437-2026",
+    "page": 23,
+    "citation": "adopte le 1er projet de règlement 437-2026 modifiant les règlements 421-2025, 189-2002 et 48-93\nconcernant la transmission de la demande de dérogation mineure",
+    "anchor": "règlement 437-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 23 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u12",
+   "unit": {
+    "label": "Consultation publique fixée au 23 mars 2026 à 18h10 — règlement 437-2026",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "437-2026",
+    "page": 23,
+    "citation": "conseil municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h10\nconcernant le règlement 437-2026",
+    "anchor": "règlement 437-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 23 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u13",
+   "unit": {
+    "label": "Avis de motion du règlement 438-2026 — dispositions relatives aux autres permis",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "438-2026",
+    "page": 24,
+    "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 438-2026 modifiant les\nrèglements 429-2025, 395-2023 et 333-2016 concernant les dispositions relatives aux\nautres permis",
+    "anchor": "règlement 438-2026"
+   },
+   "reason": "La citation doit conserver les retours à la ligne de la page 24 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u14",
+   "unit": {
+    "label": "Dépôt du projet de règlement 438-2026 — dispositions relatives aux autres permis",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "438-2026",
+    "page": 24,
+    "citation": "dépose le projet de règlement 438-2026 modifiant les règlements 429-2025, 395-2023\net 333-2016 concernant les dispositions relatives aux autres permis",
+    "anchor": "règlement 438-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 24 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u15",
+   "unit": {
+    "label": "Appui à une demande de suspension des nouvelles activités — projet d’aire protégée PR-1013718",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "PR-1013718",
+    "page": 25,
+    "citation": "ne soit autorisée dans les limites\ndu projet d’aire protégée de la forêt ancienne des lacs Grandbois (PR-1013718) et ce, jusqu’à ce\nqu’une décision gouvernementale soit prise pour ce projet",
+    "anchor": "lacs Grandbois (PR-1013718"
+   },
+   "reason": "La citation doit conserver les retours à la ligne de la page 25 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u16",
+   "unit": {
+    "label": "Avis de motion du règlement 440-2026 — zone 96-Rc et définition d’un conteneur",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "440-2026",
+    "page": 25,
+    "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 440-2026 modifiant le\nrèglement de zonage #337-2016 Annexe D",
+    "anchor": "règlement 440-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 25 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u17",
+   "unit": {
+    "label": "Adoption du premier projet de règlement 440-2026 — zone 96-Rc et définition d’un conteneur",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "440-2026",
+    "page": 26,
+    "citation": "adopte le 1er projet de règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe\nD pour enlever la note N.B. 22 et ajouter la note N.B. 7 dans la zone 96-Rc",
+    "anchor": "règlement 440-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 26 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u18",
+   "unit": {
+    "label": "Consultation publique fixée au 23 mars 2026 à 18h15 — règlement 440-2026",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "440-2026",
+    "page": 26,
+    "citation": "municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h15 concernant\nle règlement 440-2026",
+    "anchor": "règlement 440-2026"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 26 pour respecter l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u19",
+   "unit": {
+    "label": "Appui à la demande à la CPTAQ — acquisition d’environ 4,6 acres du lot 4 756 274",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "4 756 274",
+    "page": 26,
+    "citation": "municipal appuie la demande de la Ferme Michel Lebel SENC pour l’acquisition d’une partie du\nlot 4 756 274 d’environ 4,6 acres",
+    "anchor": "lot 4 756 274"
+   },
+   "reason": "La citation doit conserver le retour à la ligne de la page 26 pour respecter l’exigence de reproduction à l’identique."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "inconnu",
+   "page": 16,
+   "citation": "que le conseil de la municipalité de Sainte-Thècle entame les procédures de modification du\nrèglement 389-2021 afin de donner accès aux motoneigistes à un poste d’essence dans la\nmunicipalité"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "second_projet",
+   "page": 20,
+   "citation": "adopte le 2e projet de règlement 434-2026 remplaçant le règlement 430-2025 modifiant le\nrèglement de zonage numéro 337-2016"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "avis_motion",
+   "page": 20,
+   "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 435-2026 relatif à\nl’occupation et à l’entretien des bâtiments sur le territoire de la Municipalité de\nSainte-Thècle"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "projet_reglement",
+   "page": 20,
+   "citation": "adopte le 1er projet de règlement 435-2026 relatif à l’occupation et à l’entretien des bâtiments sur\nle territoire de la Municipalité de Sainte-Thècle"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "inconnu",
+   "page": 21,
+   "citation": "conseil municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h00\nconcernant le règlement 435-2026"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "avis_motion",
+   "page": 21,
+   "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 436-2026 modifiant le\nrèglement 398-2023 qui modifiait le règlement de zonage #337-2016"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "projet_reglement",
+   "page": 22,
+   "citation": "adopte le 1er projet de règlement 436-2026 modifiant le règlement 398-2023 qui modifiait le\nrèglement de zonage #337-2016"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "inconnu",
+   "page": 22,
+   "citation": "municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h05 concernant\nle règlement 436-2026"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "avis_motion",
+   "page": 23,
+   "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 437-2026 modifiant les\nrèglements 421-2025, 189-2002 et 48-93 concernant la transmission de la demande\nde dérogation mineure"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u11",
+   "stage": "projet_reglement",
+   "page": 23,
+   "citation": "adopte le 1er projet de règlement 437-2026 modifiant les règlements 421-2025, 189-2002 et 48-93\nconcernant la transmission de la demande de dérogation mineure"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 10,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u12",
+   "stage": "inconnu",
+   "page": 23,
+   "citation": "conseil municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h10\nconcernant le règlement 437-2026"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 11,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u13",
+   "stage": "avis_motion",
+   "page": 24,
+   "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 438-2026 modifiant les\nrèglements 429-2025, 395-2023 et 333-2016 concernant les dispositions relatives aux\nautres permis"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 12,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u14",
+   "stage": "projet_reglement",
+   "page": 24,
+   "citation": "dépose le projet de règlement 438-2026 modifiant les règlements 429-2025, 395-2023\net 333-2016 concernant les dispositions relatives aux autres permis"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 13,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u15",
+   "stage": "inconnu",
+   "page": 25,
+   "citation": "ne soit autorisée dans les limites\ndu projet d’aire protégée de la forêt ancienne des lacs Grandbois (PR-1013718) et ce, jusqu’à ce\nqu’une décision gouvernementale soit prise pour ce projet"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 14,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u16",
+   "stage": "avis_motion",
+   "page": 25,
+   "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 440-2026 modifiant le\nrèglement de zonage #337-2016 Annexe D"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 15,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u17",
+   "stage": "projet_reglement",
+   "page": 26,
+   "citation": "adopte le 1er projet de règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe\nD pour enlever la note N.B. 22 et ajouter la note N.B. 7 dans la zone 96-Rc"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 16,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u18",
+   "stage": "inconnu",
+   "page": 26,
+   "citation": "municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h15 concernant\nle règlement 440-2026"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 17,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u19",
+   "stage": "inconnu",
+   "page": 26,
+   "citation": "municipal appuie la demande de la Ferme Michel Lebel SENC pour l’acquisition d’une partie du\nlot 4 756 274 d’environ 4,6 acres"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 21
+}

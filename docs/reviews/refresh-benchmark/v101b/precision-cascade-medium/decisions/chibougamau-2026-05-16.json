@@ -1,0 +1,181 @@
+{
+ "documentId": "chibougamau-2026-05-16",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "f1465dc1b6f3d96d7252567aa436a7168139ff946bc66a821bd780f3534a0686",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "piia-2026-002"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de PIIA 2026-002 — 959, 3e Rue",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 2 – 959, 3 e Rue – Lo t 6 659 70 4"
+      },
+      {
+       "page": 16,
+       "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 2 – 959, 3 e Rue – Lo t 6 659 70 4"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "piia-2026-003"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de PIIA 2026-003 — 418, 3e Rue",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 3 – 418, 3 e Rue – Lo t 3 867 14 4"
+      },
+      {
+       "page": 17,
+       "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 3 – 418, 3 e Rue – Lo t 3 867 14 4"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "derogation-2026-003"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure 2026-003 — 170, rue Joe-Mann",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 3 - 170 , rue J o e - Mann Lo t 3 868 4 4 6"
+      },
+      {
+       "page": 18,
+       "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 3 - 170 , rue J o e - Mann Lo t 3 868 4 4 6"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "derogation-2026-004"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure 2026-004 — 516, 4e Rue",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 4 - 516, 4 e Rue Lo t 3 866 957"
+      },
+      {
+       "page": 19,
+       "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 4 - 516, 4 e Rue Lo t 3 866 957"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"La demande de PIIA 2026-002 pour le 959, 3e Rue est explicitement inscrite à l'ordre du jour.\",\"excerpt\":\"De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\\n20 26- 0 0 2 – 959, 3 e Rue – Lo t 6 659 70 4\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"La demande de PIIA 2026-003 pour le 418, 3e Rue est explicitement inscrite à l'ordre du jour.\",\"excerpt\":\"De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\\n20 26- 0 0 3 – 418, 3 e Rue – Lo t 3 867 14 4\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La demande de dérogation mineure 2026-003 pour le 170, rue Joe-Mann figure à l'ordre du jour.\",\"excerpt\":\"De mande de dé rogat ion mine ure 20 26- 0 0 3 - 170 , rue J o e - Mann Lo t 3 868 4 4 6\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"La demande de dérogation mineure 2026-004 pour le 516, 4e Rue figure à l'ordre du jour.\",\"excerpt\":\"De mande de dé rogat ion mine ure 20 26- 0 0 4 - 516, 4 e Rue Lo t 3 866 957\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "La demande de PIIA 2026-002 pour le 959, 3e Rue est explicitement inscrite à l'ordre du jour.",
+   "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 2 – 959, 3 e Rue – Lo t 6 659 70 4"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "La demande de PIIA 2026-003 pour le 418, 3e Rue est explicitement inscrite à l'ordre du jour.",
+   "excerpt": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 3 – 418, 3 e Rue – Lo t 3 867 14 4"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La demande de dérogation mineure 2026-003 pour le 170, rue Joe-Mann figure à l'ordre du jour.",
+   "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 3 - 170 , rue J o e - Mann Lo t 3 868 4 4 6"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "La demande de dérogation mineure 2026-004 pour le 516, 4e Rue figure à l'ordre du jour.",
+   "excerpt": "De mande de dé rogat ion mine ure 20 26- 0 0 4 - 516, 4 e Rue Lo t 3 866 957"
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "La demande de PIIA 2026-002 pour le 959, 3e Rue est explicitement inscrite à l'ordre du jour."
+   },
+   {
+    "act": "A02",
+    "reason": "La demande de PIIA 2026-003 pour le 418, 3e Rue est explicitement inscrite à l'ordre du jour."
+   },
+   {
+    "act": "A03",
+    "reason": "La demande de dérogation mineure 2026-003 pour le 170, rue Joe-Mann figure à l'ordre du jour."
+   },
+   {
+    "act": "A04",
+    "reason": "La demande de dérogation mineure 2026-004 pour le 516, 4e Rue figure à l'ordre du jour."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1827,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3765,
+   "outputTokens": 399,
+   "totalTokens": 4164
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1696
+  },
+  "inputSha256": "edede157558d07df31cd787da2fd09d63f2097f08dfc5dff0db333369d517e69"
+ }
+}

@@ -1,0 +1,436 @@
+{
+ "documentId": "saint-lin-laurentides-2026-06-09",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "2ac821bad69b8a5b2f465b5c18a52a25c2c78165515c1d3fb996b2e35c5f2045",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "derogation-6663628"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — zone tampon au 1510, route 335",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "derogation-6579952"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — nombre d'enseignes au 70, route 335",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "derogation-3569047"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — remise au 31, rue Cliche",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "piia-6663628"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — agrandissement commercial au 1510, route 335",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial\nexistant / Lot numéro 6 663 628 / 1510, route 335"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "piia-planete-piscine"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — enseignes du commerce Planète Piscine",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot\nnuméro 6 579 952 / 70, route 335"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "piia-allo-mon-coco"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — enseignes du restaurant Allô mon Coco",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot\nnuméro 6 579 952 / 70, route 335"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-acquisition-lacroix"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acquisition envisagée après inondation — 60, rue Lacroix",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme\ngénéral d'assistance financière / Ministère de la Sécurité publique"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-expropriation-puits-7"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Processus d'expropriation — puits numéro 7",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Acceptation de soumissions / Contrat de gré à gré / Processus d'expropriation puits numéro 7 / Services juridiques\n/ Service de l'urbanisme durable / BurELLE inc."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-cession-villemory"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acceptation finale et offre de cession — Seigneurie Villemory, phases 5, 6 et 7",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597 / Seigneurie Villemory phases 5, 6 et 7 /"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "signal-vente-panneton"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acte de vente prévu — rue Panneton",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte de vente / Lot numéro 3 570 038"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "signal-achat-lord"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acte d'achat prévu — 617, rue Lord",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte d'achat / Lot numéro 3 568 198 /\n617, rue Lord"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "signal-servitude-pluviale"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acte de servitude prévu — conduite d'égout pluvial",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte de servitude / Installation,\nutilisation, entretien et réparation d'une conduite d'égout pluvial"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "signal-indemnite-lord"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Indemnité de départ pour locataire — 617, rue Lord",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Autorisation de signature à la mairesse et au directeur général par intérim / Indemnité de départ pour locataire /\nLot numéro 3 568 198 / 617, rue Lord"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Dérogation mineure prévue à l'ordre du jour au point 4.2 pour le 1510, route 335.\",\"excerpt\":\"Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Dérogation mineure prévue à l'ordre du jour au point 4.3 pour le 70, route 335.\",\"excerpt\":\"Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Dérogation mineure prévue à l'ordre du jour au point 4.4 pour le 31, rue Cliche.\",\"excerpt\":\"Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"PIIA prévu à l'ordre du jour au point 4.5 pour le 1510, route 335.\",\"excerpt\":\"Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial existant / Lot numéro 6 663 628 / 1510, route 335\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"PIIA prévu à l'ordre du jour au point 4.6 pour Planète Piscine au 70, route 335.\",\"excerpt\":\"Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot numéro 6 579 952 / 70, route 335\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"PIIA prévu à l'ordre du jour au point 4.7 pour Allô mon Coco au 70, route 335.\",\"excerpt\":\"Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot numéro 6 579 952 / 70, route 335\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Engagement à acquérir un terrain à la suite d'une inondation prévu au point 4.8.\",\"excerpt\":\"Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme général d'assistance financière / Ministère de la Sécurité publique\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit de l'octroi d'un contrat de services juridiques de gré à gré, ce qui relève des exclusions de services professionnels.\",\"excerpt\":\"Acceptation de soumissions / Contrat de gré à gré / Processus d'expropriation puits numéro 7 / Services juridiques / Service de l'urbanisme durable / BurELLE inc.\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Acceptation finale et offre de cession pour un projet de lotissement/développement prévu au point 4.10.\",\"excerpt\":\"Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597 / Seigneurie Villemory phases 5, 6 et 7\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Autorisation de signature pour un acte de vente d'un lot foncier municipal prévu au point 4.11.\",\"excerpt\":\"Autorisation de signature à la mairesse et au directeur général par intérim / Acte de vente / Lot numéro 3 570 038 / Rue Panneton\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Autorisation de signature pour un acte d'achat d'un immeuble/lot au point 4.12.\",\"excerpt\":\"Autorisation de signature à la mairesse et au directeur général par intérim / Acte d'achat / Lot numéro 3 568 198 / 617, rue Lord\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"Autorisation de signature d'un acte de servitude prévu au point 4.13.\",\"excerpt\":\"Autorisation de signature à la mairesse et au directeur général par intérim / Acte de servitude / Installation, utilisation, entretien et réparation d'une conduite d'égout pluvial\"},{\"act\":\"A13\",\"verdict\":\"non_soutenu\",\"reason\":\"Le paiement d'une indemnité de départ à un locataire est une opération financière/administrative et non un acte réglementaire ou foncier d'urbanisme.\",\"excerpt\":\"Autorisation de signature à la mairesse et au directeur général par intérim / Indemnité de départ pour locataire / Lot numéro 3 568 198 / 617, rue Lord\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Dérogation mineure prévue à l'ordre du jour au point 4.2 pour le 1510, route 335.",
+   "excerpt": "Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Dérogation mineure prévue à l'ordre du jour au point 4.3 pour le 70, route 335.",
+   "excerpt": "Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Dérogation mineure prévue à l'ordre du jour au point 4.4 pour le 31, rue Cliche.",
+   "excerpt": "Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "PIIA prévu à l'ordre du jour au point 4.5 pour le 1510, route 335.",
+   "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial existant / Lot numéro 6 663 628 / 1510, route 335"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "PIIA prévu à l'ordre du jour au point 4.6 pour Planète Piscine au 70, route 335.",
+   "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot numéro 6 579 952 / 70, route 335"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "PIIA prévu à l'ordre du jour au point 4.7 pour Allô mon Coco au 70, route 335.",
+   "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot numéro 6 579 952 / 70, route 335"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Engagement à acquérir un terrain à la suite d'une inondation prévu au point 4.8.",
+   "excerpt": "Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme général d'assistance financière / Ministère de la Sécurité publique"
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit de l'octroi d'un contrat de services juridiques de gré à gré, ce qui relève des exclusions de services professionnels.",
+   "excerpt": "Acceptation de soumissions / Contrat de gré à gré / Processus d'expropriation puits numéro 7 / Services juridiques / Service de l'urbanisme durable / BurELLE inc."
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Acceptation finale et offre de cession pour un projet de lotissement/développement prévu au point 4.10.",
+   "excerpt": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597 / Seigneurie Villemory phases 5, 6 et 7"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Autorisation de signature pour un acte de vente d'un lot foncier municipal prévu au point 4.11.",
+   "excerpt": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte de vente / Lot numéro 3 570 038 / Rue Panneton"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Autorisation de signature pour un acte d'achat d'un immeuble/lot au point 4.12.",
+   "excerpt": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte d'achat / Lot numéro 3 568 198 / 617, rue Lord"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "Autorisation de signature d'un acte de servitude prévu au point 4.13.",
+   "excerpt": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte de servitude / Installation, utilisation, entretien et réparation d'une conduite d'égout pluvial"
+  },
+  {
+   "act": "A13",
+   "verdict": "non_soutenu",
+   "reason": "Le paiement d'une indemnité de départ à un locataire est une opération financière/administrative et non un acte réglementaire ou foncier d'urbanisme.",
+   "excerpt": "Autorisation de signature à la mairesse et au directeur général par intérim / Indemnité de départ pour locataire / Lot numéro 3 568 198 / 617, rue Lord"
+  }
+ ],
+ "filter": {
+  "acts": 13,
+  "removed": [
+   {
+    "act": "A08",
+    "reason": "Il s'agit de l'octroi d'un contrat de services juridiques de gré à gré, ce qui relève des exclusions de services professionnels."
+   },
+   {
+    "act": "A13",
+    "reason": "Le paiement d'une indemnité de départ à un locataire est une opération financière/administrative et non un acte réglementaire ou foncier d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Dérogation mineure prévue à l'ordre du jour au point 4.2 pour le 1510, route 335."
+   },
+   {
+    "act": "A02",
+    "reason": "Dérogation mineure prévue à l'ordre du jour au point 4.3 pour le 70, route 335."
+   },
+   {
+    "act": "A03",
+    "reason": "Dérogation mineure prévue à l'ordre du jour au point 4.4 pour le 31, rue Cliche."
+   },
+   {
+    "act": "A04",
+    "reason": "PIIA prévu à l'ordre du jour au point 4.5 pour le 1510, route 335."
+   },
+   {
+    "act": "A05",
+    "reason": "PIIA prévu à l'ordre du jour au point 4.6 pour Planète Piscine au 70, route 335."
+   },
+   {
+    "act": "A06",
+    "reason": "PIIA prévu à l'ordre du jour au point 4.7 pour Allô mon Coco au 70, route 335."
+   },
+   {
+    "act": "A07",
+    "reason": "Engagement à acquérir un terrain à la suite d'une inondation prévu au point 4.8."
+   },
+   {
+    "act": "A09",
+    "reason": "Acceptation finale et offre de cession pour un projet de lotissement/développement prévu au point 4.10."
+   },
+   {
+    "act": "A10",
+    "reason": "Autorisation de signature pour un acte de vente d'un lot foncier municipal prévu au point 4.11."
+   },
+   {
+    "act": "A11",
+    "reason": "Autorisation de signature pour un acte d'achat d'un immeuble/lot au point 4.12."
+   },
+   {
+    "act": "A12",
+    "reason": "Autorisation de signature d'un acte de servitude prévu au point 4.13."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3915,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 4648,
+   "outputTokens": 1210,
+   "totalTokens": 5858
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3302
+  },
+  "inputSha256": "f390d2e6bf137c614b6a854e67a8477b1c231a05715545c09139a7a2b7ccbb4f"
+ }
+}

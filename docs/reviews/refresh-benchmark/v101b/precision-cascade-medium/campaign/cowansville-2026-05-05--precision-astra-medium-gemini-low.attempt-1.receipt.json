@@ -1,0 +1,35 @@
+{
+ "documentId": "cowansville-2026-05-05",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "a56dc72d9cb4e1aa39ef733cc5ad4444d5a14abf6693118a93e1f022dc7b0c02",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 8371,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 39898,
+   "outputTokens": 3048,
+   "totalTokens": 42946
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 8217
+  },
+  "inputSha256": "ea66a45658fc5fd5b3a13b31ed95d74eb728dafe333be505211ddab0522a18b9"
+ },
+ "at": "2026-09-19T03:22:54.367Z"
+}

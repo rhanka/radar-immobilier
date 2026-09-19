@@ -1,0 +1,384 @@
+{
+ "nodes": [
+  {
+   "id": "source-pv-2026-02-03",
+   "label": "Procès-verbal du 3 février 2026 — Lac-Etchemin",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "status": "candidate",
+   "municipality": "lac-etchemin",
+   "date": "2026-02-03",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+   "url": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance ordinaire du Conseil municipal de la Municipalité de LacEtchemin, tenue le 3 février 2026, 19 h, à la salle des délibérations du conseil, à",
+     "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+     "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "derogation-2026-175",
+   "label": "Dérogation mineure 2026-175 — garage attenant",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "status": "candidate",
+   "municipality": "lac-etchemin",
+   "date": "2026-02-03",
+   "meetingDate": "2026-02-03",
+   "decision": "approuvé",
+   "kind": "derogation",
+   "dossier": "2026-175",
+   "resolution": "045-02-2026",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-02-03",
+   "zone_ref": "03-H",
+   "no_lot": "3601426",
+   "reglement_number": "66-2006",
+   "description": "Approbation d'une dérogation mineure au 304, avenue du Ruisseau pour régulariser l'implantation d'un garage attenant trop rapproché de la ligne latérale du lot.",
+   "motif": "Régularisation d'une situation non conforme depuis plusieurs années; absence d'atteinte à l'homogénéité du secteur et à la jouissance du droit de propriété des voisins; respect des autres normes et des objectifs du plan d'urbanisme.",
+   "evidence_refs": [
+    "ev-derogation",
+    "ev-derogation-contexte"
+   ],
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE la demande de dérogation mineure numéro 2026-175 soit et est approuvée par\nle Conseil de la Municipalité de Lac-Etchemin.",
+     "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+     "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-03-H",
+   "label": "Zone 03-H",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "status": "candidate",
+   "code": "03-H",
+   "municipality": "lac-etchemin",
+   "evidence_refs": [
+    "ev-derogation-contexte"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "Demande de dérogation mineure no. 2026-175 - M. Jérémy Blouin, sur le lot\nnuméro 3 601 426, situé au 304, avenue du Ruisseau, zone 03-H, à Lac-Etchemin",
+     "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+     "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "ppcmoi-2026-157",
+   "label": "PPCMOI 2026-157 — vente de trailer et remorque",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "status": "candidate",
+   "municipality": "lac-etchemin",
+   "date": "2026-02-03",
+   "meetingDate": "2026-02-03",
+   "decision": "approuvé",
+   "kind": "ppcmoi",
+   "dossier": "2026-157",
+   "resolution": "046-02-2026",
+   "etape": "ppcmoi",
+   "etape_date": "2026-02-03",
+   "zone_ref": "58-A/ILOT",
+   "no_lot": "4341331",
+   "reglement_number": "121-2012",
+   "description": "Adoption d'un projet de résolution autorisant la demande de PPCMOI pour ajouter l'usage de commerce et services lié à l'automobile, spécifiquement la vente de trailer et remorque, au 1646, route 277. L'intitulé indique un projet de résolution; aucune entrée en vigueur n'est déduite.",
+   "motif": "Aucun changement à la qualité de vie du secteur ni à l'aspect extérieur du bâtiment; terrain déjà aménagé pour l'usage demandé; soutien aux orientations de développement économique et conformité aux critères d'évaluation du PPCMOI.",
+   "evidence_refs": [
+    "ev-ppcmoi",
+    "ev-ppcmoi-zone",
+    "ev-121"
+   ],
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE la demande de PPCMOI numéro 2026-157 soit autorisée par le Conseil\nmunicipal de la Municipalité de Lac-Etchemin de manière à rendre conforme un",
+     "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+     "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 10,
+     "excerpt": "Adoption d’un projet de résolution relatif à une demande d’autorisation d’un projet\nparticulier de construction, de modification ou d’occupation d’un immeuble",
+     "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+     "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-58-A-ILOT",
+   "label": "Zone 58-A/ILOT",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "status": "candidate",
+   "municipality": "lac-etchemin",
+   "code": "58-A/ILOT",
+   "evidence_refs": [
+    "ev-ppcmoi-zone"
+   ],
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "Adoption d’un projet de résolution relatif à une demande d’autorisation d’un projet\nparticulier de construction, de modification ou d’occupation d’un immeuble",
+     "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+     "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-248-2026",
+   "label": "Règlement 248-2026 — réfection des réseaux et de la rue Gagnon",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "status": "candidate",
+   "municipality": "lac-etchemin",
+   "numero": "248-2026",
+   "title": "Travaux de réfection des conduites d'aqueduc et d'égout et de l'infrastructure de la rue Gagnon dans le cadre du Programme FIMEAU et emprunt à long terme",
+   "objet": "Réfection des conduites et de l'infrastructure; emprunt maximal de 2 248 908 $ amorti sur vingt ans.",
+   "date": "2026-02-03",
+   "stage": "adoption",
+   "resolution": "036-02-2026",
+   "evidence_refs": [
+    "ev-248"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "QUE le conseil confirme par la présente résolution, l'adoption du règlement numéro\n248-2026 intitulé : Règlement ayant pour objet des travaux pour la réfection des",
+     "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+     "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-pv-2026-02-03",
+   "target": "derogation-2026-175",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "evidence_refs": [
+    "ev-derogation"
+   ],
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE la demande de dérogation mineure numéro 2026-175 soit et est approuvée par\nle Conseil de la Municipalité de Lac-Etchemin.",
+     "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+     "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "derogation-2026-175",
+   "target": "zone-03-H",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "evidence_refs": [
+    "ev-derogation-contexte"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "Demande de dérogation mineure no. 2026-175 - M. Jérémy Blouin, sur le lot\nnuméro 3 601 426, situé au 304, avenue du Ruisseau, zone 03-H, à Lac-Etchemin",
+     "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+     "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-02-03",
+   "target": "ppcmoi-2026-157",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "evidence_refs": [
+    "ev-ppcmoi",
+    "ev-ppcmoi-zone"
+   ],
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE la demande de PPCMOI numéro 2026-157 soit autorisée par le Conseil\nmunicipal de la Municipalité de Lac-Etchemin de manière à rendre conforme un",
+     "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+     "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "ppcmoi-2026-157",
+   "target": "zone-58-A-ILOT",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "evidence_refs": [
+    "ev-ppcmoi",
+    "ev-ppcmoi-zone"
+   ],
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "QUE la demande de PPCMOI numéro 2026-157 soit autorisée par le Conseil\nmunicipal de la Municipalité de Lac-Etchemin de manière à rendre conforme un",
+     "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+     "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-02-03",
+   "target": "bylaw-248-2026",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "evidence_refs": [
+    "ev-248"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "QUE le conseil confirme par la présente résolution, l'adoption du règlement numéro\n248-2026 intitulé : Règlement ayant pour objet des travaux pour la réfection des",
+     "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+     "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+     "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-derogation",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+   "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "QUE la demande de dérogation mineure numéro 2026-175 soit et est approuvée par\nle Conseil de la Municipalité de Lac-Etchemin."
+  },
+  {
+   "id": "ev-derogation-contexte",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+   "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "Demande de dérogation mineure no. 2026-175 - M. Jérémy Blouin, sur le lot\nnuméro 3 601 426, situé au 304, avenue du Ruisseau, zone 03-H, à Lac-Etchemin"
+  },
+  {
+   "id": "ev-ppcmoi",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+   "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "QUE la demande de PPCMOI numéro 2026-157 soit autorisée par le Conseil\nmunicipal de la Municipalité de Lac-Etchemin de manière à rendre conforme un\nusage « vente de trailer et remorque» sis sur le lot numéro 4 341 331, zone 58A/ILOT, situé au 1646, route 277, et ce, pour les raisons suivantes :"
+  },
+  {
+   "id": "ev-ppcmoi-zone",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+   "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "Adoption d’un projet de résolution relatif à une demande d’autorisation d’un projet\nparticulier de construction, de modification ou d’occupation d’un immeuble\n(PPCMOI) concernant l’ajout de l’usage de commerce et services lié à\nl’automobile pour le lot numéro 4 341 331, zone 58-A/ILOT, situé au 1646, route\n277"
+  },
+  {
+   "id": "ev-66",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+   "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "Considérant que ledit dossier est admissible au processus d'étude dans le cadre d'une\ndemande de dérogation mineure en vertu de l'article 3.1 (Dispositions pouvant faire\nl'objet d'une dérogation mineure) du règlement numéro 66-2006 sur les dérogations\nmineures aux règlements de zonage et de lotissement;"
+  },
+  {
+   "id": "ev-121",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+   "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "Considérant que ledit dossier est admissible au processus d’étude dans le cadre d’une\ndemande de PPCMOI en vertu de l’article 2.1 (Objet d’une demande) du règlement\nnuméro 121-2012 relatif aux projets particuliers de construction, de modification ou\nd’occupation d’un immeuble;"
+  },
+  {
+   "id": "ev-62",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+   "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "Considérant que ledit règlement permet d’autoriser, sous certaines conditions, un\nusage non autorisé dans une zone et de la rendre conforme au sens du règlement de\nzonage numéro 62-2006;"
+  },
+  {
+   "id": "ev-248",
+   "source_file": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "rawRef": "raw/proces-verbaux-lac-etchemin/cas/21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a.pdf",
+   "docSha": "21488e7f1437a4bbc5c73376ef077d9edcb4ad402174de8190b12a2244f5507a",
+   "sourceUrl": "https://lac-etchemin.ca/wp-content/uploads/2026/03/pv-so-2026-02-03.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "QUE le conseil confirme par la présente résolution, l'adoption du règlement numéro\n248-2026 intitulé : Règlement ayant pour objet des travaux pour la réfection des\nconduites d'aqueduc et d'égout ainsi que l’infrastructure de la rue Gagnon dans le\ncadre du « Programme FIMEAU » et décrétant un emprunt à long terme n'excédant\npas un montant de 2 248 908 $ amorti sur une période de vingt (20) ans tel que rédigé\net déposé par le directeur général et greffier-trésorier."
+  }
+ ],
+ "input_tokens": 14500,
+ "output_tokens": 6500
+}

@@ -1,0 +1,35 @@
+{
+ "documentId": "sainte-thecle-2026-03-09",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "63b665ffb06f95c2adc60f448fc96ae096d714a0c68a7899a96d78a1aaa4fb45",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4907,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 23442,
+   "outputTokens": 1870,
+   "totalTokens": 25312
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 4760
+  },
+  "inputSha256": "240d86b480d70d39821532672d018b37af7ec7bf8cd389d291316badb5cdbd5d"
+ },
+ "at": "2026-09-19T03:23:11.390Z"
+}

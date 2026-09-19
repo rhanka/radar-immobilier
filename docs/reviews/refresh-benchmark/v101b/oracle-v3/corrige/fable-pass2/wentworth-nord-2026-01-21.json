@@ -1,0 +1,253 @@
+{
+ "documentId": "wentworth-nord-2026-01-21",
+ "nextId": 7,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Acceptation de la dérogation mineure 2025-0418 — largeur de l’emprise du chemin de l’Adiante",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2025-0418",
+    "page": 9,
+    "citation": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la demande de dérogation mineure 2025-0418 visant à autoriser la création d’une emprise de rue",
+    "anchor": "demande de dérogation mineure 2025-0418",
+    "spanStart": 335,
+    "spanEnd": 497
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation de la dérogation mineure 2025-0418 — largeur de l’emprise du chemin de l’Adiante",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2025-0418",
+      "page": 9,
+      "citation": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la demande de dérogation mineure 2025-0418 visant à autoriser la création d’une emprise de rue",
+      "anchor": "demande de dérogation mineure 2025-0418",
+      "spanStart": 335,
+      "spanEnd": 497
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution accepte une emprise de 11,50 mètres au lieu de 12 mètres pour une voie locale de pente transversale inférieure à 10 %, tout en transmettant la demande à la MRC pour qu’elle statue également."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Contribution pour parcs exigée en argent — lotissement 2025-9029, montant de 12 302.60 $",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2025-9029",
+    "page": 9,
+    "citation": "8.4 CONTRIBUTION POUR FINS DE PARCS, TERRAINS DE JEUX ET ESPACES NATURELS – DEMANDE DE PERMIS DE LOTISSEMENT 2025-9029",
+    "anchor": "PERMIS DE LOTISSEMENT 2025-9029",
+    "spanStart": 1253,
+    "spanEnd": 1371
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Contribution pour parcs exigée en argent — lotissement 2025-9029, montant de 12 302.60 $",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2025-9029",
+      "page": 9,
+      "citation": "8.4 CONTRIBUTION POUR FINS DE PARCS, TERRAINS DE JEUX ET ESPACES NATURELS – DEMANDE DE PERMIS DE LOTISSEMENT 2025-9029",
+      "anchor": "PERMIS DE LOTISSEMENT 2025-9029",
+      "spanStart": 1253,
+      "spanEnd": 1371
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-01-3810 exige une contribution en argent de 12 302.60 $ pour cette opération cadastrale, et les contributions pour parcs sont explicitement incluses."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du certificat de résultat de l’enregistrement référendaire — règlement 2017-498-30-C09",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2017-498-30-C09",
+    "page": 11,
+    "citation": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage",
+    "anchor": "Règlement n° 2017-498-30-C09",
+    "spanStart": 431,
+    "spanEnd": 492
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du certificat de résultat de l’enregistrement référendaire — règlement 2017-498-30-C09",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2017-498-30-C09",
+      "page": 11,
+      "citation": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage",
+      "anchor": "Règlement n° 2017-498-30-C09",
+      "spanStart": 431,
+      "spanEnd": 492
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le dépôt actuel des certificats au point 8.7 vise explicitement ce règlement distinct concernant la zone C-09 ; cette étape constitue une unité sans attester une nouvelle adoption."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du certificat de résultat de l’enregistrement référendaire — règlement 2017-498-30-CONS08",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2017-498-30-CONS08",
+    "page": 11,
+    "citation": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage n°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel",
+    "anchor": "Règlement n° 2017-498-30-CONS08",
+    "spanStart": 675,
+    "spanEnd": 813
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du certificat de résultat de l’enregistrement référendaire — règlement 2017-498-30-CONS08",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2017-498-30-CONS08",
+      "page": 11,
+      "citation": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage n°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel",
+      "anchor": "Règlement n° 2017-498-30-CONS08",
+      "spanStart": 675,
+      "spanEnd": 813
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le règlement concernant la zone CONS-08 est explicitement nommé parmi les objets du dépôt des certificats, et chaque règlement distinct doit avoir sa propre unité."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du certificat de résultat de l’enregistrement référendaire — règlement 2017-498-30-I04",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2017-498-30-I04",
+    "page": 11,
+    "citation": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage n°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel",
+    "anchor": "Règlement n° 2017-498-30-I04",
+    "spanStart": 909,
+    "spanEnd": 1044
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du certificat de résultat de l’enregistrement référendaire — règlement 2017-498-30-I04",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2017-498-30-I04",
+      "page": 11,
+      "citation": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage n°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel",
+      "anchor": "Règlement n° 2017-498-30-I04",
+      "spanStart": 909,
+      "spanEnd": 1044
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le règlement concernant la zone I-04 est explicitement nommé parmi les objets du dépôt des certificats, ce qui atteste une étape actuelle distincte et non une adoption."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Entente de suivi de la servitude de conservation avec Éco-corridors laurentiens — terres des sentiers des Orphelins (lots 5 589 168 et autres)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "servitude de conservation sentiers Orphelins",
+    "page": 7,
+    "citation": "7.2 ENTENTE AVEC ÉCO-CORRIDORS LAURENTIENS POUR LE SUIVI DE LA SERVITUDE DE CONSERVATION DES TERRES DES SENTIERS DES ORPHELINS",
+    "anchor": "SERVITUDE DE CONSERVATION DES TERRES",
+    "spanStart": 246,
+    "spanEnd": 372
+   },
+   "versions": [
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Entente de suivi de la servitude de conservation avec Éco-corridors laurentiens — terres des sentiers des Orphelins (lots 5 589 168 et autres)",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "servitude de conservation sentiers Orphelins",
+      "page": 7,
+      "citation": "7.2 ENTENTE AVEC ÉCO-CORRIDORS LAURENTIENS POUR LE SUIVI DE LA SERVITUDE DE CONSERVATION DES TERRES DES SENTIERS DES ORPHELINS",
+      "anchor": "SUIVI DE LA SERVITUDE DE CONSERVATION",
+      "spanStart": 246,
+      "spanEnd": 372
+     }
+    },
+    {
+     "step": "astra-pass2",
+     "unit": {
+      "label": "Entente de suivi de la servitude de conservation avec Éco-corridors laurentiens — terres des sentiers des Orphelins (lots 5 589 168 et autres)",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "servitude de conservation sentiers Orphelins",
+      "page": 7,
+      "citation": "7.2 ENTENTE AVEC ÉCO-CORRIDORS LAURENTIENS POUR LE SUIVI DE LA SERVITUDE DE CONSERVATION DES TERRES DES SENTIERS DES ORPHELINS",
+      "anchor": "SERVITUDE DE CONSERVATION DES TERRES",
+      "spanStart": 246,
+      "spanEnd": 372
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "fable-pass1",
+     "op": "add",
+     "reason": "Résolution 2026-01-3807 (p. 7) approuve l'engagement et autorise la signature d'une entente fixant les modalités de suivi de la servitude de conservation réelle et perpétuelle sur des lots explicites du cadastre du Québec ; une servitude est un acte foncier inclus (« actes fonciers, même non résidentiels »), l'étape (entente de suivi) n'entrant dans aucune valeur définie, d'où « inconnu » ; les rappels des résolutions antérieures 2025-05-3559 et 2025-09-3705 ne créent pas d'unité supplémentaire."
+    },
+    {
+     "step": "astra-pass2",
+     "op": "correct",
+     "reason": "La citation doit conserver le saut de ligne entre « LA » et « SERVITUDE », et l’ancre doit être une sous-chaîne exacte de cette citation."
+    }
+   ]
+  }
+ ]
+}

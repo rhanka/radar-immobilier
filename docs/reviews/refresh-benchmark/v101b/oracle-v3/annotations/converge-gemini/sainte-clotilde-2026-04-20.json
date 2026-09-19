@@ -1,0 +1,121 @@
+{
+ "documentId": "sainte-clotilde-2026-04-20",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "0a6d0945f3380377a44255675f73219b411ba67d3edba411bfa752f60ddf1ead",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-182 en page 4 adopte l'acquisition du lot 6 592 592, constituant un acte foncier expressément inclus.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-182 en page 4 adopte l'acquisition distincte du lot 6 199 726, constituant un acte foncier expressément inclus.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-186 en page 6 adopte le règlement numéro 533 relatif aux normes d'installation de clapets anti-retour dans les bâtiments.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement de zonage 471-09 est attesté en page 9 à la résolution 2026-04-192.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le dépôt du projet de règlement de zonage 471-09 séance tenante est attesté en page 9 à la résolution 2026-04-192.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement 470-04 modifiant le plan d'urbanisme est attesté en page 9 à la résolution 2026-04-193.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Le dépôt du projet de règlement 470-04 relatif au plan d'urbanisme est attesté en page 9 à la résolution 2026-04-193.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement de lotissement 472-04 est attesté en page 9 à la résolution 2026-04-194.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Le dépôt du projet de règlement de lotissement 472-04 est attesté en page 9 à la résolution 2026-04-194.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-195 en page 10 adopte la correction de la résolution 2025-12-286 d'appui CPTAQ pour y intégrer une partie du lot 6 471 805.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-182 en page 4 adopte l'acquisition du lot 6 592 592, constituant un acte foncier expressément inclus."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-182 en page 4 adopte l'acquisition distincte du lot 6 199 726, constituant un acte foncier expressément inclus."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-186 en page 6 adopte le règlement numéro 533 relatif aux normes d'installation de clapets anti-retour dans les bâtiments."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement de zonage 471-09 est attesté en page 9 à la résolution 2026-04-192."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le dépôt du projet de règlement de zonage 471-09 séance tenante est attesté en page 9 à la résolution 2026-04-192."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement 470-04 modifiant le plan d'urbanisme est attesté en page 9 à la résolution 2026-04-193."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Le dépôt du projet de règlement 470-04 relatif au plan d'urbanisme est attesté en page 9 à la résolution 2026-04-193."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement de lotissement 472-04 est attesté en page 9 à la résolution 2026-04-194."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Le dépôt du projet de règlement de lotissement 472-04 est attesté en page 9 à la résolution 2026-04-194."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-195 en page 10 adopte la correction de la résolution 2025-12-286 d'appui CPTAQ pour y intégrer une partie du lot 6 471 805."
+  }
+ ]
+}

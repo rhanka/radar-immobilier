@@ -1,0 +1,19 @@
+{
+ "documentId": "saint-lin-laurentides-2026-06-09",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "078c235b2de7896a0e3c1790e777f3bb2ca17e540bace0933f6c1edb783788a8",
+ "verificationSha256": "d289cbd1fe5d24fb504ae5552e2b63d01c25ced747fa57d7710dfd6129884535",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

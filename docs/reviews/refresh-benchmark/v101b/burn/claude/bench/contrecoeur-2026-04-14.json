@@ -1,0 +1,13 @@
+{
+ "id": "contrecoeur-2026-04-14",
+ "rc": 0,
+ "latencyMs": 499195,
+ "inputTokens": 6,
+ "outputTokens": 76348,
+ "cacheRead": 30139,
+ "cacheCreate": 94204,
+ "costUsd": 2.8872845,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 24467
+}

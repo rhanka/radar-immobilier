@@ -1,0 +1,147 @@
+{
+ "documentId": "amherst-2026-06-08",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "ac65329353b26a702447a233c6303389227792529b8281546736154005003aa7",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-acquisition-5197804"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande d’acquisition du lot 5 197 804",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Demande d’acquisition du lot 5 197 804 (route 323)"
+      },
+      {
+       "page": 1,
+       "excerpt": "Demande d’acquisition du lot 5 197 804 (route 323)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-fonds-parcs"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Affectation budgétaire au fonds de parcs, terrains de jeux et espaces verts",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "10.4 Affectation budgétaire – Fonds de parcs, terrains de jeux et espaces verts"
+      },
+      {
+       "page": 2,
+       "excerpt": "10.4 Affectation budgétaire – Fonds de parcs, terrains de jeux et espaces verts"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-passerelle"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Passerelle du lac de la Décharge — Autorisation de dépense prévue",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "10.5 Passerelle du lac de la Décharge – Autorisation de dépense"
+      },
+      {
+       "page": 2,
+       "excerpt": "10.5 Passerelle du lac de la Décharge – Autorisation de dépense"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.4 de l'ordre du jour prévoit expressément une demande d'acquisition du lot 5 197 804 (route 323).\",\"excerpt\":\"6.4 Demande d’acquisition du lot 5 197 804 (route 323)\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une simple affectation budgétaire interne au fonds de parcs, sans acte d'urbanisme ou foncier direct (exclusion des simples décisions de gestion budgétaire/financière).\",\"excerpt\":\"10.4 Affectation budgétaire – Fonds de parcs, terrains de jeux et espaces verts\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"L'autorisation de dépense pour une passerelle relève de la dépense/travaux d'infrastructure/loisirs sans acte d'urbanisme ou foncier réglementaire.\",\"excerpt\":\"10.5 Passerelle du lac de la Décharge – Autorisation de dépense\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 6.4 de l'ordre du jour prévoit expressément une demande d'acquisition du lot 5 197 804 (route 323).",
+   "excerpt": "6.4 Demande d’acquisition du lot 5 197 804 (route 323)"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une simple affectation budgétaire interne au fonds de parcs, sans acte d'urbanisme ou foncier direct (exclusion des simples décisions de gestion budgétaire/financière).",
+   "excerpt": "10.4 Affectation budgétaire – Fonds de parcs, terrains de jeux et espaces verts"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "L'autorisation de dépense pour une passerelle relève de la dépense/travaux d'infrastructure/loisirs sans acte d'urbanisme ou foncier réglementaire.",
+   "excerpt": "10.5 Passerelle du lac de la Décharge – Autorisation de dépense"
+  }
+ ],
+ "filter": {
+  "acts": 3,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Il s'agit d'une simple affectation budgétaire interne au fonds de parcs, sans acte d'urbanisme ou foncier direct (exclusion des simples décisions de gestion budgétaire/financière)."
+   },
+   {
+    "act": "A03",
+    "reason": "L'autorisation de dépense pour une passerelle relève de la dépense/travaux d'infrastructure/loisirs sans acte d'urbanisme ou foncier réglementaire."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 6.4 de l'ordre du jour prévoit expressément une demande d'acquisition du lot 5 197 804 (route 323)."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2097,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 1864,
+   "outputTokens": 207,
+   "totalTokens": 2071
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1550
+  },
+  "inputSha256": "3d167df5867cacef181b6ed4d15b7e305540e2a2edd467b4217e88da7628337a"
+ }
+}

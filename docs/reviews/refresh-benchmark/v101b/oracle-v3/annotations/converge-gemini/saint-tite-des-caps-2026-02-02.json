@@ -1,0 +1,101 @@
+{
+ "documentId": "saint-tite-des-caps-2026-02-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "f281c67375de2ce5c722a366d3b436c8b4451be98ed99b320fe007c8bf84b718",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 12945 adopte une demande de permis en zone PIIA pour le lot 6 213 140 à la page 5.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 12946 adopte une demande de permis en zone PIIA pour le lot 6 212 400 à la page 6.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 12947 adopte une demande de permis de construction en zone PIIA pour le lot 6 213 540 à la page 6.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La résolution 12948 adopte une demande de permis de construction en zone PIIA pour le lot 6 425 190 à la page 7.\"},{\"item\":\"i05\",\"choice\":\"v3\",\"reason\":\"L'avis de motion est textuellement consigné au point 5 à la page 2 avec la citation complète.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La résolution 12940 adopte le projet de règlement 591-2026 à la page 2.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Simple mention informative lors d'un suivi de comité concernant un TNO, ne constituant ni un acte foncier ni une étape décisionnelle de la municipalité.\"},{\"item\":\"i08\",\"choice\":\"absent\",\"reason\":\"Simple information rapportée en comité sans acte foncier ni objet réglementaire relevant du conseil.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "absent"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 12945 adopte une demande de permis en zone PIIA pour le lot 6 213 140 à la page 5."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 12946 adopte une demande de permis en zone PIIA pour le lot 6 212 400 à la page 6."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 12947 adopte une demande de permis de construction en zone PIIA pour le lot 6 213 540 à la page 6."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 12948 adopte une demande de permis de construction en zone PIIA pour le lot 6 425 190 à la page 7."
+  },
+  {
+   "item": "i05",
+   "choice": "v3",
+   "reason": "L'avis de motion est textuellement consigné au point 5 à la page 2 avec la citation complète."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 12940 adopte le projet de règlement 591-2026 à la page 2."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Simple mention informative lors d'un suivi de comité concernant un TNO, ne constituant ni un acte foncier ni une étape décisionnelle de la municipalité."
+  },
+  {
+   "item": "i08",
+   "choice": "absent",
+   "reason": "Simple information rapportée en comité sans acte foncier ni objet réglementaire relevant du conseil."
+  }
+ ]
+}

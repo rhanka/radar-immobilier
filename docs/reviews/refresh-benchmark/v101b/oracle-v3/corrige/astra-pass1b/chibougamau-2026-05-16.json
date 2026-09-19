@@ -1,0 +1,158 @@
+{
+ "documentId": "chibougamau-2026-05-16",
+ "nextId": 5,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Demande de PIIA 2026-002 — 959, 3e Rue",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "20 26- 0 0 2",
+    "page": 16,
+    "citation": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA) 20 26- 0 0 2 – 959, 3 e Rue – Lo t 6 659 70 4",
+    "anchor": "20 26- 0 0 2 – 959, 3 e Rue",
+    "spanStart": 0,
+    "spanEnd": 126
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande de PIIA 2026-002 — 959, 3e Rue",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "20 26- 0 0 2",
+      "page": 16,
+      "citation": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA) 20 26- 0 0 2 – 959, 3 e Rue – Lo t 6 659 70 4",
+      "anchor": "20 26- 0 0 2 – 959, 3 e Rue",
+      "spanStart": 0,
+      "spanEnd": 126
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cette demande de PIIA explicitement identifiée constitue une unité incluse, sans que le texte permette de préciser son acceptation ou son refus."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Demande de PIIA 2026-003 — 418, 3e Rue",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "20 26- 0 0 3",
+    "page": 17,
+    "citation": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA) 20 26- 0 0 3 – 418, 3 e Rue – Lo t 3 867 14 4",
+    "anchor": "20 26- 0 0 3 – 418, 3 e Rue",
+    "spanStart": 0,
+    "spanEnd": 126
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande de PIIA 2026-003 — 418, 3e Rue",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "20 26- 0 0 3",
+      "page": 17,
+      "citation": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA) 20 26- 0 0 3 – 418, 3 e Rue – Lo t 3 867 14 4",
+      "anchor": "20 26- 0 0 3 – 418, 3 e Rue",
+      "spanStart": 0,
+      "spanEnd": 126
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cette demande de PIIA porte sur un objet distinct explicitement nommé et doit être ajoutée sans lui attribuer une issue non indiquée."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Demande de dérogation mineure 2026-003 — 170, rue Joe-Mann",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "20 26- 0 0 3",
+    "page": 18,
+    "citation": "De mande de dé rogat ion mine ure 20 26- 0 0 3 - 170 , rue J o e - Mann Lo t 3 868 4 4 6",
+    "anchor": "20 26- 0 0 3 - 170 , rue J o e - Mann",
+    "spanStart": 0,
+    "spanEnd": 88
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande de dérogation mineure 2026-003 — 170, rue Joe-Mann",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "20 26- 0 0 3",
+      "page": 18,
+      "citation": "De mande de dé rogat ion mine ure 20 26- 0 0 3 - 170 , rue J o e - Mann Lo t 3 868 4 4 6",
+      "anchor": "20 26- 0 0 3 - 170 , rue J o e - Mann",
+      "spanStart": 0,
+      "spanEnd": 88
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le document présente une demande de dérogation mineure explicitement identifiée, distincte du dossier de PIIA portant le même numéro, sans préciser son issue."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Demande de dérogation mineure 2026-004 — 516, 4e Rue",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "20 26- 0 0 4",
+    "page": 19,
+    "citation": "De mande de dé rogat ion mine ure 20 26- 0 0 4 - 516, 4 e Rue Lo t 3 866 957",
+    "anchor": "20 26- 0 0 4 - 516, 4 e Rue",
+    "spanStart": 0,
+    "spanEnd": 76
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande de dérogation mineure 2026-004 — 516, 4e Rue",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "20 26- 0 0 4",
+      "page": 19,
+      "citation": "De mande de dé rogat ion mine ure 20 26- 0 0 4 - 516, 4 e Rue Lo t 3 866 957",
+      "anchor": "20 26- 0 0 4 - 516, 4 e Rue",
+      "spanStart": 0,
+      "spanEnd": 76
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cette demande de dérogation mineure explicitement nommée constitue une unité distincte à inclure, sans présumer une acceptation ou un refus."
+    }
+   ]
+  }
+ ]
+}

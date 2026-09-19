@@ -1,0 +1,361 @@
+{
+ "documentId": "brossard-2026-04-28",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "a85426bcda9b72baf3b722b2d01b90372a8acc1f7eadcb04d3da2245506931e6",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Résolution 260428-096 p. 2 : « D'approuver la demande de dérogations mineures ... 5641, rue Aline, lot projeté 6 720 588 » ; étape derogation_mineure, objet et page exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Résolution 260428-097 p. 3 entérine le point favorable CCU-20260311-3.1 PIIA 2025-00304 ; unité explicitement nommée dans un nœud groupé, citation exacte.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-3.2 PIIA 2025-00305 – 3665, rue de Châteauneuf entériné p. 3 ; citation, étape piia et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-5.1 PIIA 2026-00036 – 5892, rue Alexandre entériné p. 3 ; citation exacte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-5.2 PIIA 2025-00320 – 5641, rue Aline entériné p. 3 ; citation exacte.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-5.3 PIIA 2026-00005 – 3280, rue Bahamas entériné p. 3 ; citation exacte.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-5.4 PIIA 2026-00024 – 5890, rue Bretagne entériné p. 3 ; citation exacte.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-5.5 PIIA 2026-00049 – 2010, croissant Tourangeau entériné p. 3 ; citation exacte.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-5.6 PIIA 2026-00027 – 7670, place Trudel entériné p. 3 ; citation exacte.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-6.1 PIIA 2026-00039 – 5770, rue Aline (école Good Shepherd) entériné p. 3 ; petit PIIA non résidentiel inclus, citation exacte.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-6.2 PIIA 2026-00034 – 9550, boulevard Leduc, local 20 entériné p. 3 ; citation exacte.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-6.3 PIIA 2026-00048 – 9750, boulevard Leduc, local 25 entériné p. 3 ; citation exacte.\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-6.4 PIIA 2026-00033 – 9750, boulevard Leduc, local 30 entériné p. 3 ; citation exacte.\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-6.5 PIIA 2026-00038 – 1520, avenue des Lumières, local 25 entériné p. 3 ; citation exacte.\"},{\"item\":\"i15\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-6.6 PIIA 2026-00046 – 1040, rue du Lux, local 15 entériné p. 3 ; citation exacte.\"},{\"item\":\"i16\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-7.1 PIIA Enseignes 2026-00030 – 8240, boulevard Leduc, local 30 entériné p. 3 ; citation exacte.\"},{\"item\":\"i17\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-7.2 PIIA Enseignes 2026-00042 – 9550, boulevard Leduc, local 10 entériné p. 3 ; citation exacte.\"},{\"item\":\"i18\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-7.3 PIIA Enseignes 2026-00041 – 9750, boulevard Leduc, local 25 entériné p. 3 ; citation exacte.\"},{\"item\":\"i19\",\"choice\":\"v1\",\"reason\":\"Point favorable « CCU-20260311.7.4 PIIA – Enseignes 2026-00031 » entériné p. 3 ; citation reproduit fidèlement le texte (point au lieu du tiret).\"},{\"item\":\"i20\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-7.5 PIIA Enseignes 2026-00032 – 9850, boulevard Leduc, local 20 figure p. 4 ; citation et page exactes.\"},{\"item\":\"i21\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-7.6 PIIA Enseignes 2026-00026 (Meubles Toco) figure p. 4 ; citation reproduit le texte tel quel (« venue des Lumières »).\"},{\"item\":\"i22\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-7.7 PIIA Enseignes 2026-00056 – 7185, boulevard du Quartier figure p. 4 ; citation exacte.\"},{\"item\":\"i23\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-7.8 PIIA Enseignes 2026-00044 – 6598, boulevard Taschereau figure p. 4 ; citation exacte.\"},{\"item\":\"i24\",\"choice\":\"v1\",\"reason\":\"Point favorable CCU-20260311-7.9 PIIA Enseignes 2024-00225 – 6633, boulevard Taschereau figure p. 4 ; citation exacte.\"},{\"item\":\"i25\",\"choice\":\"v1\",\"reason\":\"Résolution 260428-101 p. 6 : « D’adopter sans modification la résolution PPCMOI-2026-001 ... lot 6 052 495, à certaines conditions » ; étape adoption, procédure ppcmoi, page exactes ; les rappels du premier et second projet sont historiques et ne créent pas d'unités.\"},{\"item\":\"i26\",\"choice\":\"v1\",\"reason\":\"Résolution 260428-102 p. 7 approuve l'entente MUP-B impliquant renonciation au bénéfice d'accession et propriété superficiaire sur le lot 4 533 221 : acte foncier explicite inclus, citation du titre exacte p. 7.\"},{\"item\":\"i27\",\"choice\":\"v1\",\"reason\":\"Résolution 260428-103 p. 8 approuve l'entente MUP-6 régularisant l'occupation des lots municipaux 4 537 690 et 5 701 948 par LICC : acte foncier explicite, citation et page exactes.\"},{\"item\":\"i28\",\"choice\":\"v1\",\"reason\":\"Résolution 260428-104 (texte résolutif p. 9) autorise la signature de « l'entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage » : entente de développement d'urbanisme, citation et page exactes.\"},{\"item\":\"i29\",\"choice\":\"v1\",\"reason\":\"Résolution 260428-105 p. 9 : « D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies ... société 9520-8732 Québec inc » ; acte de développement explicite, citation et page exactes.\"},{\"item\":\"i30\",\"choice\":\"absent\",\"reason\":\"La demande d'autorisation ministérielle (art. 22 LQE) pour l'égout pluvial est une démarche environnementale d'infrastructure sans « objet réglementaire ou foncier explicite » ; fait complémentaire à signaler hors gold, non une unité.\"},{\"item\":\"i31\",\"choice\":\"absent\",\"reason\":\"La déclaration de conformité pour le réseau d'aqueduc est une démarche d'infrastructure sans objet réglementaire ou foncier explicite ; de plus elle scinde la même résolution 260428-122 en deux unités, fait complémentaire hors gold.\"},{\"item\":\"i32\",\"choice\":\"absent\",\"reason\":\"La modification de date de l'ordonnance de vente pour défaut de taxes (section Administration et finances) est un acte fiscal sans objet foncier explicite (aucun immeuble identifié) ; exclusion « comptes », et doublon des items i33/i34.\"},{\"item\":\"i33\",\"choice\":\"absent\",\"reason\":\"Même fait fiscal que i32 et i34 : modification de date d'une vente pour taxes sans immeuble ni objet foncier explicite, exclu du rappel et « doublon même type/même fait non crédité ».\"},{\"item\":\"i34\",\"choice\":\"absent\",\"reason\":\"Même fait que i32/i33 : acte administratif de recouvrement de taxes sans objet réglementaire ou foncier explicite, hors du profil Signal/DesignationEvent.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v1"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v1"
+  },
+  {
+   "item": "i20",
+   "unitId": "u20",
+   "current": "v1"
+  },
+  {
+   "item": "i21",
+   "unitId": "u21",
+   "current": "v1"
+  },
+  {
+   "item": "i22",
+   "unitId": "u22",
+   "current": "v1"
+  },
+  {
+   "item": "i23",
+   "unitId": "u23",
+   "current": "v1"
+  },
+  {
+   "item": "i24",
+   "unitId": "u24",
+   "current": "v1"
+  },
+  {
+   "item": "i25",
+   "unitId": "u25",
+   "current": "v1"
+  },
+  {
+   "item": "i26",
+   "unitId": "u26",
+   "current": "v1"
+  },
+  {
+   "item": "i27",
+   "unitId": "u27",
+   "current": "v1"
+  },
+  {
+   "item": "i28",
+   "unitId": "u28",
+   "current": "v1"
+  },
+  {
+   "item": "i29",
+   "unitId": "u29",
+   "current": "v1"
+  },
+  {
+   "item": "i30",
+   "unitId": "u30",
+   "current": "v1"
+  },
+  {
+   "item": "i31",
+   "unitId": "u31",
+   "current": "v2"
+  },
+  {
+   "item": "i32",
+   "unitId": "u32",
+   "current": "absent"
+  },
+  {
+   "item": "i33",
+   "unitId": "u33",
+   "current": "absent"
+  },
+  {
+   "item": "i34",
+   "unitId": "u34",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Résolution 260428-096 p. 2 : « D'approuver la demande de dérogations mineures ... 5641, rue Aline, lot projeté 6 720 588 » ; étape derogation_mineure, objet et page exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Résolution 260428-097 p. 3 entérine le point favorable CCU-20260311-3.1 PIIA 2025-00304 ; unité explicitement nommée dans un nœud groupé, citation exacte."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-3.2 PIIA 2025-00305 – 3665, rue de Châteauneuf entériné p. 3 ; citation, étape piia et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-5.1 PIIA 2026-00036 – 5892, rue Alexandre entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-5.2 PIIA 2025-00320 – 5641, rue Aline entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-5.3 PIIA 2026-00005 – 3280, rue Bahamas entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-5.4 PIIA 2026-00024 – 5890, rue Bretagne entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-5.5 PIIA 2026-00049 – 2010, croissant Tourangeau entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-5.6 PIIA 2026-00027 – 7670, place Trudel entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-6.1 PIIA 2026-00039 – 5770, rue Aline (école Good Shepherd) entériné p. 3 ; petit PIIA non résidentiel inclus, citation exacte."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-6.2 PIIA 2026-00034 – 9550, boulevard Leduc, local 20 entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-6.3 PIIA 2026-00048 – 9750, boulevard Leduc, local 25 entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-6.4 PIIA 2026-00033 – 9750, boulevard Leduc, local 30 entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-6.5 PIIA 2026-00038 – 1520, avenue des Lumières, local 25 entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-6.6 PIIA 2026-00046 – 1040, rue du Lux, local 15 entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-7.1 PIIA Enseignes 2026-00030 – 8240, boulevard Leduc, local 30 entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-7.2 PIIA Enseignes 2026-00042 – 9550, boulevard Leduc, local 10 entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-7.3 PIIA Enseignes 2026-00041 – 9750, boulevard Leduc, local 25 entériné p. 3 ; citation exacte."
+  },
+  {
+   "item": "i19",
+   "choice": "v1",
+   "reason": "Point favorable « CCU-20260311.7.4 PIIA – Enseignes 2026-00031 » entériné p. 3 ; citation reproduit fidèlement le texte (point au lieu du tiret)."
+  },
+  {
+   "item": "i20",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-7.5 PIIA Enseignes 2026-00032 – 9850, boulevard Leduc, local 20 figure p. 4 ; citation et page exactes."
+  },
+  {
+   "item": "i21",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-7.6 PIIA Enseignes 2026-00026 (Meubles Toco) figure p. 4 ; citation reproduit le texte tel quel (« venue des Lumières »)."
+  },
+  {
+   "item": "i22",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-7.7 PIIA Enseignes 2026-00056 – 7185, boulevard du Quartier figure p. 4 ; citation exacte."
+  },
+  {
+   "item": "i23",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-7.8 PIIA Enseignes 2026-00044 – 6598, boulevard Taschereau figure p. 4 ; citation exacte."
+  },
+  {
+   "item": "i24",
+   "choice": "v1",
+   "reason": "Point favorable CCU-20260311-7.9 PIIA Enseignes 2024-00225 – 6633, boulevard Taschereau figure p. 4 ; citation exacte."
+  },
+  {
+   "item": "i25",
+   "choice": "v1",
+   "reason": "Résolution 260428-101 p. 6 : « D’adopter sans modification la résolution PPCMOI-2026-001 ... lot 6 052 495, à certaines conditions » ; étape adoption, procédure ppcmoi, page exactes ; les rappels du premier et second projet sont historiques et ne créent pas d'unités."
+  },
+  {
+   "item": "i26",
+   "choice": "v1",
+   "reason": "Résolution 260428-102 p. 7 approuve l'entente MUP-B impliquant renonciation au bénéfice d'accession et propriété superficiaire sur le lot 4 533 221 : acte foncier explicite inclus, citation du titre exacte p. 7."
+  },
+  {
+   "item": "i27",
+   "choice": "v1",
+   "reason": "Résolution 260428-103 p. 8 approuve l'entente MUP-6 régularisant l'occupation des lots municipaux 4 537 690 et 5 701 948 par LICC : acte foncier explicite, citation et page exactes."
+  },
+  {
+   "item": "i28",
+   "choice": "v1",
+   "reason": "Résolution 260428-104 (texte résolutif p. 9) autorise la signature de « l'entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage » : entente de développement d'urbanisme, citation et page exactes."
+  },
+  {
+   "item": "i29",
+   "choice": "v1",
+   "reason": "Résolution 260428-105 p. 9 : « D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies ... société 9520-8732 Québec inc » ; acte de développement explicite, citation et page exactes."
+  },
+  {
+   "item": "i30",
+   "choice": "absent",
+   "reason": "La demande d'autorisation ministérielle (art. 22 LQE) pour l'égout pluvial est une démarche environnementale d'infrastructure sans « objet réglementaire ou foncier explicite » ; fait complémentaire à signaler hors gold, non une unité."
+  },
+  {
+   "item": "i31",
+   "choice": "absent",
+   "reason": "La déclaration de conformité pour le réseau d'aqueduc est une démarche d'infrastructure sans objet réglementaire ou foncier explicite ; de plus elle scinde la même résolution 260428-122 en deux unités, fait complémentaire hors gold."
+  },
+  {
+   "item": "i32",
+   "choice": "absent",
+   "reason": "La modification de date de l'ordonnance de vente pour défaut de taxes (section Administration et finances) est un acte fiscal sans objet foncier explicite (aucun immeuble identifié) ; exclusion « comptes », et doublon des items i33/i34."
+  },
+  {
+   "item": "i33",
+   "choice": "absent",
+   "reason": "Même fait fiscal que i32 et i34 : modification de date d'une vente pour taxes sans immeuble ni objet foncier explicite, exclu du rappel et « doublon même type/même fait non crédité »."
+  },
+  {
+   "item": "i34",
+   "choice": "absent",
+   "reason": "Même fait que i32/i33 : acte administratif de recouvrement de taxes sans objet réglementaire ou foncier explicite, hors du profil Signal/DesignationEvent."
+  }
+ ]
+}

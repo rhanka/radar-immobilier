@@ -1,0 +1,38 @@
+{
+ "documentId": "ogden-2026-03-09",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1b",
+ "inputStateSha256": "af5a4faf465dc6252e49aef5f4261fc3c0b0a03d18233192992631d9539e0d3c",
+ "rawText": "{\"operations\":[\n {\"op\":\"remove\",\"id\":\"u06\",\"reason\":\"Le point 9.4 « Liste des propriétés à vendre pour défaut de paiement de taxes » est un point de la section Finances (perception de taxes) sans objet foncier explicite (aucun lot, matricule ni adresse nommé) et ne constitue pas un acte foncier décidé par la municipalité ; il relève des exclusions du rappel (comptes/finances) et non d'une unité « objet réglementaire ou foncier explicite ».\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u06",
+   "reason": "Le point 9.4 « Liste des propriétés à vendre pour défaut de paiement de taxes » est un point de la section Finances (perception de taxes) sans objet foncier explicite (aucun lot, matricule ni adresse nommé) et ne constitue pas un acte foncier décidé par la municipalité ; il relève des exclusions du rappel (comptes/finances) et non d'une unité « objet réglementaire ou foncier explicite »."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u06"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 8,
+ "inputStateSha256BeforeRelabel": "af5a4faf465dc6252e49aef5f4261fc3c0b0a03d18233192992631d9539e0d3c"
+}

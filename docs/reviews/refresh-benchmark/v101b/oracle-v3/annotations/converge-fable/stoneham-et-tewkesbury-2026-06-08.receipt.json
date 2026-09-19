@@ -1,0 +1,77 @@
+{
+ "documentId": "stoneham-et-tewkesbury-2026-06-08",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fb01cb7d80ff17759f3653fc7e8c1f3a5ef0c6b1da2235b2a3180d8ffe5873d5",
+ "inputSha256": "6fb9a7c052053a7e30f3811d86dd3dfe212288719864d61db2158082f232c035",
+ "responseSha256": "cd82bc4d45d9f695458a133168c1d242cd2c9fdedf752e5faf642e313ec0b383",
+ "rc": 0,
+ "latencyMs": 66831,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "e532ac33-39b6-4591-95ba-34e02e07ddb2",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 5634,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 17667,
+   "webSearchRequests": 0,
+   "costUSD": 0.63534475,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 4000,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 17667,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 5634,
+  "output_tokens_details": {
+   "thinking_tokens": 4000
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 17667,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 5634,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 17667,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 17667
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.63534475,
+ "durationApiMs": 64892,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:32:56.181Z"
+}

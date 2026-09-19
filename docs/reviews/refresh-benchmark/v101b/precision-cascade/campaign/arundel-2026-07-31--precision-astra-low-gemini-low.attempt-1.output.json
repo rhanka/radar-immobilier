@@ -1,0 +1,248 @@
+{
+ "nodes": [
+  {
+   "id": "source-arundel-2026-08-11",
+   "label": "Procès-verbal du 11 août 2026 — Arundel",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "status": "candidate",
+   "date": "2026-08-11",
+   "municipality": "arundel",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+   "url": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Minutes of the August 11, 2026 regular meeting at 7:00 p.m. of the Council of",
+     "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+     "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-source"
+   ]
+  },
+  {
+   "id": "bylaw-312-2026",
+   "label": "Règlement 312-2026 — SCAOPI",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "status": "candidate",
+   "numero": "312-2026",
+   "title": "Specific construction, alteration or occupancy proposals for an immovable (SCAOPI)",
+   "municipality": "arundel",
+   "date": "2026-08-11",
+   "meetingDate": "2026-08-11",
+   "stage": "adoption",
+   "objet": "Adoption en deuxième lecture du mécanisme SCAOPI; ajout de la section 5.2 établissant les frais des demandes.",
+   "resolutionRef": "2026-08-123; le texte de la proposition porte également 2026-08-122.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific\nconstruction, alteration or occupancy proposals for an immovable (SCAOPI),",
+     "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+     "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-312"
+   ]
+  },
+  {
+   "id": "event-132",
+   "label": "PIIA approuvé — abri d’auto, 165 Chemin de la Rouge",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "status": "candidate",
+   "municipality": "arundel",
+   "date": "2026-08-11",
+   "meetingDate": "2026-08-11",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-08-11",
+   "decision": "approuvé",
+   "resolution": "2026-08-132",
+   "reglement_number": "285",
+   "description": "Autorisation du permis pour la construction d’un abri d’auto au 165 Chemin de la Rouge.",
+   "motif": "Appui inconditionnel du comité consultatif d’urbanisme du 28 juillet 2026; conformité à tous les critères du règlement 285.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the construction of a car",
+     "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+     "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-132"
+   ]
+  },
+  {
+   "id": "event-133",
+   "label": "PIIA approuvé — garage, 117 Rue du Village",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "status": "candidate",
+   "municipality": "arundel",
+   "date": "2026-08-11",
+   "meetingDate": "2026-08-11",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-08-11",
+   "decision": "approuvé",
+   "resolution": "2026-08-133",
+   "reglement_number": "168",
+   "description": "Autorisation du permis pour rénover la toiture et la façade du garage au 117 Rue du Village.",
+   "motif": "Conformité des matériaux et de la rénovation; confirmation écrite du propriétaire qu’il repeindra la façade du garage dans son état d’origine.",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the renovation of the",
+     "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+     "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-133"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-arundel-2026-08-11",
+   "target": "bylaw-312-2026",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "evidence_refs": [
+    "ev-312"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific\nconstruction, alteration or occupancy proposals for an immovable (SCAOPI),",
+     "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+     "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-arundel-2026-08-11",
+   "target": "event-132",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "evidence_refs": [
+    "ev-132"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the construction of a car",
+     "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+     "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-arundel-2026-08-11",
+   "target": "event-133",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "evidence_refs": [
+    "ev-133"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the renovation of the",
+     "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+     "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+     "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-source",
+   "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+   "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Minutes of the August 11, 2026 regular meeting at 7:00 p.m. of the Council of\nthe Municipality of the Township of Arundel, held at the Community Hall, 60\nRoute Morrison, Arundel."
+  },
+  {
+   "id": "ev-312",
+   "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+   "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific\nconstruction, alteration or occupancy proposals for an immovable (SCAOPI), which the\nFrench language text can be found in the minutes of this day’s assembly."
+  },
+  {
+   "id": "ev-132",
+   "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+   "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the construction of a car\nshelter at 165 Chemin de la Rouge."
+  },
+  {
+   "id": "ev-133",
+   "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+   "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the renovation of the\nroof and facade of the garage of the building located at 117 Rue du Village."
+  },
+  {
+   "id": "ev-126",
+   "source_file": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "rawRef": "raw/proces-verbaux-arundel/cas/1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c.pdf",
+   "docSha": "1c2366573cdb5256f74abc4e2b8927fb39f540d656d16ced5eda7ecc40914a9c",
+   "sourceUrl": "https://arundel.ca/wp-content/uploads/2026/09/01.01-PV-2026-08-11-ANG.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "THAT the town council authorize the Director general to issue requests for\nproposals, by invitation, for the performance of renovation work on the fields at\nthe garage park (60 Route Morrison) for the purpose of creating a multisport\nfacility, specifically for soccer, softball, and pickleball."
+  }
+ ],
+ "input_tokens": 10400,
+ "output_tokens": 5100
+}

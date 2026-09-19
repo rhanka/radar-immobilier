@@ -1,0 +1,19 @@
+{
+ "documentId": "saint-damien-2026-06-16",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "7cd332a5b358a642a48227ccfa91165d29c84bf486ec3871f5284bae68093fcd",
+ "verificationSha256": "45c256c18d73e9c7a864916e67bc4e857539097d7bb541e5be5bf9008c4d3355",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

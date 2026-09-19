@@ -1,0 +1,216 @@
+{
+ "documentId": "arundel-2026-07-31",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "9e11784810127bf26bbcdb59856ec38fdbc70b002f126fb354d3f33c3980e12f",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-312-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 312-2026 — projets particuliers d'immeubles",
+     "stage": "adoption",
+     "objet": "312-2026",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific\nconstruction, alteration or occupancy proposals for an immovable (SCAOPI),"
+      },
+      {
+       "page": 3,
+       "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific\nconstruction, alteration or occupancy proposals for an immovable (SCAOPI), which the\nFrench language text can be found in the minutes of this day’s assembly."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-285"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 285 — SPAIP",
+     "stage": null,
+     "objet": "285",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the construction of a car"
+      },
+      {
+       "page": 6,
+       "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the construction of a car\nshelter at 165 Chemin de la Rouge."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-132"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — abri d'auto au 165 chemin de la Rouge",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the construction of a car"
+      },
+      {
+       "page": 6,
+       "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the construction of a car\nshelter at 165 Chemin de la Rouge."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-168"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 168 — SPAIP",
+     "stage": null,
+     "objet": "168",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the renovation of the"
+      },
+      {
+       "page": 7,
+       "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the renovation of the\nroof and facade of the garage of the building located at 117 Rue du Village."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-133"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — garage au 117 rue du Village",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the renovation of the"
+      },
+      {
+       "page": 7,
+       "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the renovation of the\nroof and facade of the garage of the building located at 117 Rue du Village."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte en seconde lecture le règlement 312-2026 relatif aux projets particuliers de construction, de modification ou d'occupation d'un immeuble (SCAOPI).\",\"excerpt\":\"ADOPT in second reading and decree bylaw 312-2026 relating to specific\\nconstruction, alteration or occupancy proposals for an immovable (SCAOPI)\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 285 n'est pas adopté ou modifié ici; il s'agit seulement d'une mention de référence pour l'octroi d'une autorisation de PIIA.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise le permis de PIIA (SPAIP) pour la construction d'un abri d'auto au 165 chemin de la Rouge.\",\"excerpt\":\"AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site\\nPlanning and Architectural Integration Plan (SPAIP) for the construction of a car\\nshelter at 165 Chemin de la Rouge.\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 168 n'est pas adopté ou modifié; il s'agit d'une simple mention du règlement applicable pour une demande de PIIA.\",\"excerpt\":\"\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise le permis de PIIA (SPAIP) pour la rénovation du toit et de la façade du garage au 117 rue du Village.\",\"excerpt\":\"AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site\\nPlanning and Architectural Integration Plan (SPAIP) for the renovation of the\\nroof and facade of the garage of the building located at 117 Rue du Village.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte en seconde lecture le règlement 312-2026 relatif aux projets particuliers de construction, de modification ou d'occupation d'un immeuble (SCAOPI).",
+   "excerpt": "ADOPT in second reading and decree bylaw 312-2026 relating to specific\nconstruction, alteration or occupancy proposals for an immovable (SCAOPI)"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 285 n'est pas adopté ou modifié ici; il s'agit seulement d'une mention de référence pour l'octroi d'une autorisation de PIIA.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise le permis de PIIA (SPAIP) pour la construction d'un abri d'auto au 165 chemin de la Rouge.",
+   "excerpt": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the construction of a car\nshelter at 165 Chemin de la Rouge."
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 168 n'est pas adopté ou modifié; il s'agit d'une simple mention du règlement applicable pour une demande de PIIA.",
+   "excerpt": ""
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise le permis de PIIA (SPAIP) pour la rénovation du toit et de la façade du garage au 117 rue du Village.",
+   "excerpt": "AUTHORIZE the permit in accordance with Bylaw 168 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the renovation of the\nroof and facade of the garage of the building located at 117 Rue du Village."
+  }
+ ],
+ "filter": {
+  "acts": 5,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 285 n'est pas adopté ou modifié ici; il s'agit seulement d'une mention de référence pour l'octroi d'une autorisation de PIIA."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement 168 n'est pas adopté ou modifié; il s'agit d'une simple mention du règlement applicable pour une demande de PIIA."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte en seconde lecture le règlement 312-2026 relatif aux projets particuliers de construction, de modification ou d'occupation d'un immeuble (SCAOPI)."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil autorise le permis de PIIA (SPAIP) pour la construction d'un abri d'auto au 165 chemin de la Rouge."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil autorise le permis de PIIA (SPAIP) pour la rénovation du toit et de la façade du garage au 117 rue du Village."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1785,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 5908,
+   "outputTokens": 402,
+   "totalTokens": 6310
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1618
+  },
+  "inputSha256": "ea5dbdd0dd77e601b13e3a14ecd572e7809beae01e48b3c4edb7a0f6c49ba660"
+ }
+}

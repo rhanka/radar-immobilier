@@ -17,7 +17,6 @@ import {
   regressObservedRates,
   renderMarkdown,
   simulatedCost,
-  subscriptionCost,
   validateSeatObservations,
 } from "./cost-calculator.mjs";
 
@@ -66,11 +65,6 @@ test("should price thinking tokens as output in API and simulated modes", () => 
   close(simulated.blendedUsdPerMillion, api / 1.75);
 });
 
-test("should calculate a subscription equivalent only from explicit weekly tokens", () => {
-  const result = subscriptionCost(2_000_000, 20, 1_000_000);
-  close(result.usdPerToken, 20 / (1_000_000 * 52 / 12));
-  close(result.usd, 40 / (52 / 12));
-});
 
 test("should aggregate one synthetic schema-v2 receipt", () => {
   const [arm] = aggregateReceipts([receipt()]);
@@ -92,7 +86,7 @@ test("should project a weekly seat observation and fixed 1000-document cost", ()
     arm: "sol-medium", provider: "chatgpt", status: "scenario",
     method: "account-percent/campaign-token-ratio", sourceStatus: "observed",
     basePlan: "plus", windowMinutes: 10_080, usedPercent: 10,
-    campaignTokens: 10_000,
+    campaignTokens: 10_000, apiEquivalentUsd: 2,
   }] });
   const result = buildSeatComparisons([arm], observations);
   close(result.arms[0].observed.docsPerWeek, 100);
@@ -116,7 +110,7 @@ test("should reject non-allowlisted observation fields and keep five-hour capaci
   const observations = validateSeatObservations({ schemaVersion: 1, observations: [{
     arm: "gemini-low", provider: "gemini", status: "scenario",
     method: "account-percent/campaign-token-ratio", sourceStatus: "observed",
-    basePlan: "ai-pro", windowMinutes: 300, usedPercent: 10, campaignTokens: 10_000,
+    basePlan: "ai-pro", windowMinutes: 300, usedPercent: 10, campaignTokens: 10_000, apiEquivalentUsd: 2,
   }] });
   const result = buildSeatComparisons([{ arm: "gemini-low", documents: 10,
     attemptedDocuments: 10, acceptedDocuments: 8, totalTokens: 10_000, apiUsd: 1 }], observations);
@@ -128,7 +122,7 @@ test("should keep an unknown tier conditional without multiplying capacity", () 
   const observations = validateSeatObservations({ schemaVersion: 1, observations: [{
     arm: "sol-medium", provider: "chatgpt", status: "scenario",
     method: "account-percent/campaign-token-ratio", sourceStatus: "observed",
-    basePlan: null, windowMinutes: 10_080, usedPercent: 10, campaignTokens: 10_000,
+    basePlan: null, windowMinutes: 10_080, usedPercent: 10, campaignTokens: 10_000, apiEquivalentUsd: 2,
   }] });
   const result = buildSeatComparisons([{ arm: "sol-medium", documents: 10,
     attemptedDocuments: 10, acceptedDocuments: 8, totalTokens: 10_000, apiUsd: 2 }], observations);
@@ -166,7 +160,7 @@ test("should recover input and output rates by receipt regression", () => {
 
 test("should parse a seat-observation path and render a report", () => {
   const options = parseArgs(["--campaign", "v101b", "--plan-gemini", "pro",
-    "--plan-chatgpt", "plus", "--gemini-weekly-tokens", "1000000",
+    "--plan-chatgpt", "plus", "--seat-mode", "proportional",
     "--seat-observations", "seat.json"]);
   assert.equal(options.geminiPlan, "ai-pro");
   assert.equal(options.seatObservations, "seat.json");

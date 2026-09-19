@@ -1,0 +1,44 @@
+{
+ "documentId": "sainte-christine-2026-04-07",
+ "nextId": 2,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de signature des documents de modification cadastrale — route 116, pont de la rivière Le Renne",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "route 116",
+    "page": 9,
+    "citation": "Autorisation de signature de documents cadastraux – Projet de modification du cadastre – Dossier du Pont de la Rivière LeRenne sur la route 116",
+    "anchor": "LeRenne sur la route 116",
+    "spanStart": 18,
+    "spanEnd": 161
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de signature des documents de modification cadastrale — route 116, pont de la rivière Le Renne",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "route 116",
+      "page": 9,
+      "citation": "Autorisation de signature de documents cadastraux – Projet de modification du cadastre – Dossier du Pont de la Rivière LeRenne sur la route 116",
+      "anchor": "LeRenne sur la route 116",
+      "spanStart": 18,
+      "spanEnd": 161
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 071-04-2026 autorise la signature des documents d’une opération cadastrale sur une emprise municipale, conditionnellement à l’obtention des permis d’urbanisme requis : cet acte foncier explicite doit être inclus."
+    }
+   ]
+  }
+ ]
+}

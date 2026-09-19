@@ -1,0 +1,121 @@
+{
+ "documentId": "les-coteaux-2026-03-16",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "315677b1715a23a32329865222ea2827b092bfa8fb9eab7f8a457ecb2e58a488",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le dispositif de la résolution 26-03-9287 adopte expressément le règlement de contrôle provisoire 335 à la page 5.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 5, les membres donnent un avis de motion pour le règlement 316-01, étape distincte du dépôt du projet.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 5, les membres déposent explicitement le projet de règlement 316-01 modifiant le règlement de permis et certificats 316.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 6, les membres donnent expressément un avis de motion pour le règlement 317-01 modifiant le règlement de zonage 317.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 6, le dépôt du projet de règlement 317-01 est explicitement constaté et constitue une unité distincte de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v2\",\n      \"reason\": \"L’intitulé de la résolution 26-03-9288, page 6, atteste le traitement du PIIA 2026-01 au 65, route 338, tandis que le libellé proposé préserve la discordance du dispositif visant le PIIA 2026-02.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le dispositif de la résolution 26-03-9289, page 6, accepte explicitement le PIIA 2026-02 au 102, rue Principale pour le remplacement de quatre fenêtres.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 26-03-9290 accepte, page 7, la dérogation mineure DM-294 afin de régulariser le garage privé isolé partiellement en cour avant au 78, rue Sauvé.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 26-03-9293 autorise, page 9, la signature du contrat accordant l’utilisation d’un espace d’amarrage et la circulation dans le parc municipal pour 2026, acte foncier inclus même non résidentiel.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette proposition reproduit le même contrat, le même objet et la même étape que i09, alors que la règle exclut le crédit d’un doublon de même type et de même fait.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v2"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "absent"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le dispositif de la résolution 26-03-9287 adopte expressément le règlement de contrôle provisoire 335 à la page 5."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "À la page 5, les membres donnent un avis de motion pour le règlement 316-01, étape distincte du dépôt du projet."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "À la page 5, les membres déposent explicitement le projet de règlement 316-01 modifiant le règlement de permis et certificats 316."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "À la page 6, les membres donnent expressément un avis de motion pour le règlement 317-01 modifiant le règlement de zonage 317."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "À la page 6, le dépôt du projet de règlement 317-01 est explicitement constaté et constitue une unité distincte de l’avis de motion."
+  },
+  {
+   "item": "i06",
+   "choice": "v2",
+   "reason": "L’intitulé de la résolution 26-03-9288, page 6, atteste le traitement du PIIA 2026-01 au 65, route 338, tandis que le libellé proposé préserve la discordance du dispositif visant le PIIA 2026-02."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Le dispositif de la résolution 26-03-9289, page 6, accepte explicitement le PIIA 2026-02 au 102, rue Principale pour le remplacement de quatre fenêtres."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La résolution 26-03-9290 accepte, page 7, la dérogation mineure DM-294 afin de régulariser le garage privé isolé partiellement en cour avant au 78, rue Sauvé."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La résolution 26-03-9293 autorise, page 9, la signature du contrat accordant l’utilisation d’un espace d’amarrage et la circulation dans le parc municipal pour 2026, acte foncier inclus même non résidentiel."
+  },
+  {
+   "item": "i10",
+   "choice": "absent",
+   "reason": "Cette proposition reproduit le même contrat, le même objet et la même étape que i09, alors que la règle exclut le crédit d’un doublon de même type et de même fait."
+  }
+ ]
+}

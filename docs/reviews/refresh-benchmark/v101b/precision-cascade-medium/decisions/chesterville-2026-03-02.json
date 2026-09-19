@@ -1,0 +1,226 @@
+{
+ "documentId": "chesterville-2026-03-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "28db2b5670392bdbe520f7a29b7a5a997459bb03bdd1d319b9d48b2c713b1c8f",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-267"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 267 N.S. — Occupation et entretien des bâtiments",
+     "stage": "projet",
+     "objet": "267 N.S.",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Adoption du projet de règlement numéro 267 N.S. relatif à\nl'occupation et l'entretien des bâtiments"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-267-motion"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion et dépôt du projet 267 N.S. inscrits à l'ordre du jour",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Avis de motion et dépôt du projet de règlement numéro 267\nN.S. relatif à l'occupation et l'entretien des bâtiments"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-267-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du projet 267 N.S. inscrite à l'ordre du jour",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Adoption du projet de règlement numéro 267 N.S. relatif à\nl'occupation et l'entretien des bâtiments"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-expropriation"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Avis d'expropriation — Lot 6 185 428",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Avis d'expropriation aux propriétaires, lot 6 185 428"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-eaux-usees"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Appel d'offres pour la capacité d'eaux usées",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Autorisation -Appel d’offres pour la capacité d’eaux usées"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-permis"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Dépôt de la liste des permis émis en février 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Dépôt de la liste des permis émis en février 2026"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement 267 N.S. est inscrit à l'ordre du jour pour adoption.\",\"excerpt\":\"Adoption du projet de règlement numéro 267 N.S. relatif à\\nl'occupation et l'entretien des bâtiments\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et le dépôt du projet de règlement 267 N.S. figurent à l'ordre du jour.\",\"excerpt\":\"Avis de motion et dépôt du projet de règlement numéro 267\\nN.S. relatif à l'occupation et l'entretien des bâtiments\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du projet de règlement 267 N.S. est inscrite à l'ordre du jour.\",\"excerpt\":\"Adoption du projet de règlement numéro 267 N.S. relatif à\\nl'occupation et l'entretien des bâtiments\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"L'avis d'expropriation pour le lot 6 185 428 est formellement inscrit sous la rubrique Urbanisme de l'ordre du jour.\",\"excerpt\":\"Avis d'expropriation aux propriétaires, lot 6 185 428\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une autorisation d'appel d'offres relative aux infrastructures d'hygiène du milieu, relevant des contrats de services ou travaux exclus des actes d'urbanisme.\",\"excerpt\":\"Autorisation -Appel d’offres pour la capacité d’eaux usées\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Le simple dépôt d'une liste de permis relève du rapport d'information ou de correspondance, exclu des actes d'urbanisme.\",\"excerpt\":\"Dépôt de la liste des permis émis en février 2026\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement 267 N.S. est inscrit à l'ordre du jour pour adoption.",
+   "excerpt": "Adoption du projet de règlement numéro 267 N.S. relatif à\nl'occupation et l'entretien des bâtiments"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et le dépôt du projet de règlement 267 N.S. figurent à l'ordre du jour.",
+   "excerpt": "Avis de motion et dépôt du projet de règlement numéro 267\nN.S. relatif à l'occupation et l'entretien des bâtiments"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "L'adoption du projet de règlement 267 N.S. est inscrite à l'ordre du jour.",
+   "excerpt": "Adoption du projet de règlement numéro 267 N.S. relatif à\nl'occupation et l'entretien des bâtiments"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "L'avis d'expropriation pour le lot 6 185 428 est formellement inscrit sous la rubrique Urbanisme de l'ordre du jour.",
+   "excerpt": "Avis d'expropriation aux propriétaires, lot 6 185 428"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une autorisation d'appel d'offres relative aux infrastructures d'hygiène du milieu, relevant des contrats de services ou travaux exclus des actes d'urbanisme.",
+   "excerpt": "Autorisation -Appel d’offres pour la capacité d’eaux usées"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Le simple dépôt d'une liste de permis relève du rapport d'information ou de correspondance, exclu des actes d'urbanisme.",
+   "excerpt": "Dépôt de la liste des permis émis en février 2026"
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A05",
+    "reason": "Il s'agit d'une autorisation d'appel d'offres relative aux infrastructures d'hygiène du milieu, relevant des contrats de services ou travaux exclus des actes d'urbanisme."
+   },
+   {
+    "act": "A06",
+    "reason": "Le simple dépôt d'une liste de permis relève du rapport d'information ou de correspondance, exclu des actes d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le projet de règlement 267 N.S. est inscrit à l'ordre du jour pour adoption."
+   },
+   {
+    "act": "A02",
+    "reason": "L'avis de motion et le dépôt du projet de règlement 267 N.S. figurent à l'ordre du jour."
+   },
+   {
+    "act": "A03",
+    "reason": "L'adoption du projet de règlement 267 N.S. est inscrite à l'ordre du jour."
+   },
+   {
+    "act": "A04",
+    "reason": "L'avis d'expropriation pour le lot 6 185 428 est formellement inscrit sous la rubrique Urbanisme de l'ordre du jour."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2486,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2068,
+   "outputTokens": 423,
+   "totalTokens": 2491
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2352
+  },
+  "inputSha256": "e00597f352b3e1b1bab6d14e2370d55858cf3e63c4ef6acdc0ea06b5d93f6b51"
+ }
+}

@@ -1,0 +1,46 @@
+{
+ "documentId": "lac-saint-paul-2026-05-11",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "f360f0fddbb05c3acaf244279ed6841c2fc99050b156808e014a3889fdd013a4",
+ "rawText": "{\"operations\":[\n {\"op\":\"correct\",\"id\":\"u05\",\"unit\":{\"label\":\"Autorisation de location du garage au 366, rue Principale pour l’entreposage du camion de déneigement\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"366, rue Principale\",\"page\":5,\"citation\":\"QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé au 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du camion de déneigement\",\"anchor\":\"366, rue Principale\"},\"reason\":\"Le vocabulaire réserve « adoption » aux actes fonciers décidés de type vente, acquisition, cession ou servitude et classe la convention de prêt à usage d'un immeuble sous « inconnu » ; la location d'un garage (résolution 104-05-2026) est un contrat d'usage d'un immeuble sans transfert et relève donc de l'étape « inconnu ».\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Autorisation de location du garage au 366, rue Principale pour l’entreposage du camion de déneigement",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "366, rue Principale",
+    "page": 5,
+    "citation": "QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé au 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du camion de déneigement",
+    "anchor": "366, rue Principale"
+   },
+   "reason": "Le vocabulaire réserve « adoption » aux actes fonciers décidés de type vente, acquisition, cession ou servitude et classe la convention de prêt à usage d'un immeuble sous « inconnu » ; la location d'un garage (résolution 104-05-2026) est un contrat d'usage d'un immeuble sans transfert et relève donc de l'étape « inconnu »."
+  }
+ ],
+ "applied": [
+  {
+   "op": "correct",
+   "id": "u05"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4
+}

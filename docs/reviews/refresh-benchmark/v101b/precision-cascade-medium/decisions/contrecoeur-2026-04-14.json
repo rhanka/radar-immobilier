@@ -1,0 +1,496 @@
+{
+ "documentId": "contrecoeur-2026-04-14",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "e529aa5d6ccead8e74ff532fb1e12d176dd3f0a58f87e96c88980aae58a3ac6c",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-u102"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "U-102 — Constitution du comité consultatif en urbanisme",
+     "stage": "projet",
+     "objet": "U-102",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "QU’à une séance subséquente de ce conseil tenue à un jour ultérieur, il sera présenté\nen vue de son adoption, le Règlement U-102 constituant le comité consultatif en"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-u100-1"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "U-100-1 — Second projet de modification du zonage",
+     "stage": "2e_projet",
+     "objet": "U-100-1",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\nrelatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de\nl’annexe B."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-u100"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "U-100 — Règlement relatif au zonage",
+     "stage": null,
+     "objet": "U-100",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\nrelatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de\nl’annexe B."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-u100-1"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du second projet U-100-1",
+     "stage": "second_projet",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\nrelatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de\nl’annexe B."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-u101"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "U-101 — Contrôle intérimaire du secteur industriel",
+     "stage": "adoption",
+     "objet": "U-101",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur\nindustriel."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-e109"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "E-109 — Terrains de tennis et de pickleball",
+     "stage": "adoption",
+     "objet": "E-109",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "D’ADOPTER le Règlement E-109 décrétant une dépense et un emprunt n’excédant\npas 831 500 $ pour la démolition et la reconstruction des terrains de tennis et l’ajout\nde terrains de pickleball."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-e110"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "E-110 — Portes et fenêtres du centre multifonctionnel",
+     "stage": "adoption",
+     "objet": "E-110",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "D’ADOPTER le règlement E-110 décrétant une dépense et un emprunt n’excédant\npas 1 561 300 $ pour le remplacement des portes et fenêtres au centre\nmultifonctionnel."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-2026-009"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-009 — Enseignes au 4270, rue des Patriotes",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une\nenseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-2026-012"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-012 — Construction au 5725, rue Moreau",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un\nbâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589 au"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-2026-011"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation 2026-011 — Modification de deux lots, rue Papin",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles\nsitués aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323 au cadastre"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "event-2026-020"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation 2026-020 — 275, rue de l’Église",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé\nau 275, rue de l’Église, lot 6 607 642 au cadastre du Québec, circonscription foncière"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "signal-halte"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Halte routière — Entente avec Picard Construction",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "D’AUTORISER la mairesse, ou, en son absence le maire suppléant, et la directrice\ndes Services juridiques et greffe, ou, en son absence la greffière adjointe, à signer,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "signal-septiques"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Participation au projet régional de conformité des installations septiques",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 12,
+       "excerpt": "DE S’ENGAGER à participer au projet de mise en commun des services visant à\nassurer la conformité des installations septiques sur le territoire de la MRC de\nMarguerite-D’Youville;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "signal-air"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande de surveillance de la qualité de l’air liée au développement portuaire",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 24,
+       "excerpt": "DE DEMANDER l’installation de stations permanentes de mesure de la qualité de l’air\nafin d’assurer un suivi continu des conditions atmosphériques pendant les phases de"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A15",
+   "nodeIds": [
+    "signal-permis-port"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Réitération de la demande de permis municipaux pour le projet portuaire",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 25,
+       "excerpt": "DE RÉITÉRER formellement sa demande auprès de l’Administration portuaire de\nMontréal afin que soient obtenus les permis municipaux requis pour l’ensemble des\ntravaux réalisés sur son territoire;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et le dépôt du projet de règlement U-102 constituant le CCU sont attestés à la page 4.\",\"excerpt\":\"QU’à une séance subséquente de ce conseil tenue à un jour ultérieur, il sera présenté\\nen vue de son adoption, le Règlement U-102 constituant le comité consultatif en\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du second projet de règlement U-100-1 modifiant le zonage est adoptée sous la résolution 2026-04-057.\",\"excerpt\":\"D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\\nrelatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de\\nl’annexe B.\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement U-100 est le règlement de base visé par la modification et ne fait pas l'objet d'un acte procédural autonome dans cette séance.\",\"excerpt\":\"modifiant le Règlement U-100\\nrelatif au zonage\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un doublon de l'acte d'adoption du second projet de règlement U-100-1 déjà représenté par A02, ici catégorisé de façon redondante comme DesignationEvent.\",\"excerpt\":\"D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\\nrelatif au zonage\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement U-101 sur le contrôle intérimaire relatif au secteur industriel est constatée à la page 5.\",\"excerpt\":\"D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur\\nindustriel.\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un règlement d'emprunt et de dépense pour des infrastructures sportives et récréatives (terrains de tennis et pickleball), relevant des exclusions relatives aux loisirs.\",\"excerpt\":\"D’ADOPTER le Règlement E-109 décrétant une dépense et un emprunt n’excédant\\npas 831 500 $ pour la démolition et la reconstruction des terrains de tennis et l’ajout\\nde terrains de pickleball.\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un règlement d'emprunt pour la réfection d'un bâtiment municipal existant (portes et fenêtres), sans acte d'urbanisme ou d'aménagement.\",\"excerpt\":\"D’ADOPTER le règlement E-110 décrétant une dépense et un emprunt n’excédant\\npas 1 561 300 $ pour le remplacement des portes et fenêtres au centre\\nmultifonctionnel.\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"L'approbation du PIIA 2026-009 pour des enseignes est attestée à la page 13.\",\"excerpt\":\"D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une\\nenseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"L'approbation du PIIA 2026-012 pour une construction résidentielle est attestée à la page 14.\",\"excerpt\":\"D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un\\nbâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589 au\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"L'approbation de la dérogation mineure 2026-011 est adoptée sous la résolution 2026-04-073.\",\"excerpt\":\"D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles\\nsitués aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323 au cadastre\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"L'approbation de la dérogation mineure 2026-020 est adoptée sous la résolution 2026-04-074.\",\"excerpt\":\"D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé\\nau 275, rue de l’Église, lot 6 607 642 au cadastre du Québec, circonscription foncière\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"L'autorisation de signature d'un protocole d'entente de développement d'infrastructures pour une halte routière est adoptée sous la résolution 2026-04-075.\",\"excerpt\":\"D’AUTORISER la mairesse, ou, en son absence le maire suppléant, et la directrice\\ndes Services juridiques et greffe, ou, en son absence la greffière adjointe, à signer,\"},{\"act\":\"A13\",\"verdict\":\"non_soutenu\",\"reason\":\"Cette entente intermunicipale de prestation de services de conformité environnementale/septique ne constitue pas un acte réglementaire ou foncier d'urbanisme.\",\"excerpt\":\"DE S’ENGAGER à participer au projet de mise en commun des services visant à\\nassurer la conformité des installations septiques sur le territoire de la MRC de\\nMarguerite-D’Youville;\"},{\"act\":\"A14\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une résolution de représentation politique demandant une surveillance environnementale, sans acte réglementaire ni compétence d'urbanisme directe exercée.\",\"excerpt\":\"DE DEMANDER l’installation de stations permanentes de mesure de la qualité de l’air\\nafin d’assurer un suivi continu des conditions atmosphériques pendant les phases de\"},{\"act\":\"A15\",\"verdict\":\"soutenu\",\"reason\":\"La Ville pose un acte formel d'application de sa réglementation d'urbanisme en exigeant l'obtention de permis municipaux pour les travaux sur son territoire.\",\"excerpt\":\"DE RÉITÉRER formellement sa demande auprès de l’Administration portuaire de\\nMontréal afin que soient obtenus les permis municipaux requis pour l’ensemble des\\ntravaux réalisés sur son territoire;\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et le dépôt du projet de règlement U-102 constituant le CCU sont attestés à la page 4.",
+   "excerpt": "QU’à une séance subséquente de ce conseil tenue à un jour ultérieur, il sera présenté\nen vue de son adoption, le Règlement U-102 constituant le comité consultatif en"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "L'adoption du second projet de règlement U-100-1 modifiant le zonage est adoptée sous la résolution 2026-04-057.",
+   "excerpt": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\nrelatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de\nl’annexe B."
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement U-100 est le règlement de base visé par la modification et ne fait pas l'objet d'un acte procédural autonome dans cette séance.",
+   "excerpt": "modifiant le Règlement U-100\nrelatif au zonage"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un doublon de l'acte d'adoption du second projet de règlement U-100-1 déjà représenté par A02, ici catégorisé de façon redondante comme DesignationEvent.",
+   "excerpt": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\nrelatif au zonage"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement U-101 sur le contrôle intérimaire relatif au secteur industriel est constatée à la page 5.",
+   "excerpt": "D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur\nindustriel."
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un règlement d'emprunt et de dépense pour des infrastructures sportives et récréatives (terrains de tennis et pickleball), relevant des exclusions relatives aux loisirs.",
+   "excerpt": "D’ADOPTER le Règlement E-109 décrétant une dépense et un emprunt n’excédant\npas 831 500 $ pour la démolition et la reconstruction des terrains de tennis et l’ajout\nde terrains de pickleball."
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un règlement d'emprunt pour la réfection d'un bâtiment municipal existant (portes et fenêtres), sans acte d'urbanisme ou d'aménagement.",
+   "excerpt": "D’ADOPTER le règlement E-110 décrétant une dépense et un emprunt n’excédant\npas 1 561 300 $ pour le remplacement des portes et fenêtres au centre\nmultifonctionnel."
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "L'approbation du PIIA 2026-009 pour des enseignes est attestée à la page 13.",
+   "excerpt": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une\nenseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "L'approbation du PIIA 2026-012 pour une construction résidentielle est attestée à la page 14.",
+   "excerpt": "D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un\nbâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589 au"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "L'approbation de la dérogation mineure 2026-011 est adoptée sous la résolution 2026-04-073.",
+   "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles\nsitués aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323 au cadastre"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "L'approbation de la dérogation mineure 2026-020 est adoptée sous la résolution 2026-04-074.",
+   "excerpt": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé\nau 275, rue de l’Église, lot 6 607 642 au cadastre du Québec, circonscription foncière"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "L'autorisation de signature d'un protocole d'entente de développement d'infrastructures pour une halte routière est adoptée sous la résolution 2026-04-075.",
+   "excerpt": "D’AUTORISER la mairesse, ou, en son absence le maire suppléant, et la directrice\ndes Services juridiques et greffe, ou, en son absence la greffière adjointe, à signer,"
+  },
+  {
+   "act": "A13",
+   "verdict": "non_soutenu",
+   "reason": "Cette entente intermunicipale de prestation de services de conformité environnementale/septique ne constitue pas un acte réglementaire ou foncier d'urbanisme.",
+   "excerpt": "DE S’ENGAGER à participer au projet de mise en commun des services visant à\nassurer la conformité des installations septiques sur le territoire de la MRC de\nMarguerite-D’Youville;"
+  },
+  {
+   "act": "A14",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une résolution de représentation politique demandant une surveillance environnementale, sans acte réglementaire ni compétence d'urbanisme directe exercée.",
+   "excerpt": "DE DEMANDER l’installation de stations permanentes de mesure de la qualité de l’air\nafin d’assurer un suivi continu des conditions atmosphériques pendant les phases de"
+  },
+  {
+   "act": "A15",
+   "verdict": "soutenu",
+   "reason": "La Ville pose un acte formel d'application de sa réglementation d'urbanisme en exigeant l'obtention de permis municipaux pour les travaux sur son territoire.",
+   "excerpt": "DE RÉITÉRER formellement sa demande auprès de l’Administration portuaire de\nMontréal afin que soient obtenus les permis municipaux requis pour l’ensemble des\ntravaux réalisés sur son territoire;"
+  }
+ ],
+ "filter": {
+  "acts": 15,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement U-100 est le règlement de base visé par la modification et ne fait pas l'objet d'un acte procédural autonome dans cette séance."
+   },
+   {
+    "act": "A04",
+    "reason": "Il s'agit d'un doublon de l'acte d'adoption du second projet de règlement U-100-1 déjà représenté par A02, ici catégorisé de façon redondante comme DesignationEvent."
+   },
+   {
+    "act": "A06",
+    "reason": "Il s'agit d'un règlement d'emprunt et de dépense pour des infrastructures sportives et récréatives (terrains de tennis et pickleball), relevant des exclusions relatives aux loisirs."
+   },
+   {
+    "act": "A07",
+    "reason": "Il s'agit d'un règlement d'emprunt pour la réfection d'un bâtiment municipal existant (portes et fenêtres), sans acte d'urbanisme ou d'aménagement."
+   },
+   {
+    "act": "A13",
+    "reason": "Cette entente intermunicipale de prestation de services de conformité environnementale/septique ne constitue pas un acte réglementaire ou foncier d'urbanisme."
+   },
+   {
+    "act": "A14",
+    "reason": "Il s'agit d'une résolution de représentation politique demandant une surveillance environnementale, sans acte réglementaire ni compétence d'urbanisme directe exercée."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "L'avis de motion et le dépôt du projet de règlement U-102 constituant le CCU sont attestés à la page 4."
+   },
+   {
+    "act": "A02",
+    "reason": "L'adoption du second projet de règlement U-100-1 modifiant le zonage est adoptée sous la résolution 2026-04-057."
+   },
+   {
+    "act": "A05",
+    "reason": "L'adoption du règlement U-101 sur le contrôle intérimaire relatif au secteur industriel est constatée à la page 5."
+   },
+   {
+    "act": "A08",
+    "reason": "L'approbation du PIIA 2026-009 pour des enseignes est attestée à la page 13."
+   },
+   {
+    "act": "A09",
+    "reason": "L'approbation du PIIA 2026-012 pour une construction résidentielle est attestée à la page 14."
+   },
+   {
+    "act": "A10",
+    "reason": "L'approbation de la dérogation mineure 2026-011 est adoptée sous la résolution 2026-04-073."
+   },
+   {
+    "act": "A11",
+    "reason": "L'approbation de la dérogation mineure 2026-020 est adoptée sous la résolution 2026-04-074."
+   },
+   {
+    "act": "A12",
+    "reason": "L'autorisation de signature d'un protocole d'entente de développement d'infrastructures pour une halte routière est adoptée sous la résolution 2026-04-075."
+   },
+   {
+    "act": "A15",
+    "reason": "La Ville pose un acte formel d'application de sa réglementation d'urbanisme en exigeant l'obtention de permis municipaux pour les travaux sur son territoire."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 5080,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 20770,
+   "outputTokens": 1530,
+   "totalTokens": 22300
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 4920
+  },
+  "inputSha256": "05ba24e6387ca1dae3ed7718fcd16cf50f772987a373999d5db20aab5fb5df64"
+ }
+}

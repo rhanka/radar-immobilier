@@ -1,0 +1,31 @@
+{
+ "documentId": "sainte-christine-2026-04-07",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "aac78225da743b4b7179a06fb7b6d045a339440590cd288b10c510afccb50879",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 071-04-2026, adoptée à l’unanimité à la page 9, autorise la signature des documents de modification cadastrale concernant la route 116 au pont de la rivière Le Renne, sous réserve des permis d’urbanisme requis, ce qui constitue un acte foncier inclus au corrigé.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 071-04-2026, adoptée à l’unanimité à la page 9, autorise la signature des documents de modification cadastrale concernant la route 116 au pont de la rivière Le Renne, sous réserve des permis d’urbanisme requis, ce qui constitue un acte foncier inclus au corrigé."
+  }
+ ]
+}

@@ -1,0 +1,35 @@
+{
+ "documentId": "roxton-2026-04-07",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "ae6e96b796ed2b7c52c364979f3fb87866e86b0c031fd9158eb205b2903e0cda",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2019,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 10457,
+   "outputTokens": 488,
+   "totalTokens": 10945
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1866
+  },
+  "inputSha256": "d59e247586ec5df6f431f0a115f820ef78d5ba0c080978b2b994e0ad265cd3f1"
+ },
+ "at": "2026-09-19T03:22:24.982Z"
+}

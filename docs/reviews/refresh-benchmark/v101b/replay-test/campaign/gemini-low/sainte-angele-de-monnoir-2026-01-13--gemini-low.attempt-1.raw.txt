@@ -1,0 +1,188 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+      "label": "Procès-verbal de la séance ordinaire du 13 janvier 2026 - Sainte-Angèle-de-Monnoir",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+      "status": "validated",
+      "date": "2026-01-13",
+      "municipality": "sainte-angele-de-monnoir",
+      "docSha": "4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+      "url": "https://www.sainte-angele-de-monnoir.ca/wp-content/uploads/2026/02/2026-01_Proces-verbal.pdf",
+      "sourceKind": "pv",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du 13 janvier 2026\n\nMUNICIPALITÉ DE SAINTE-ANGÈLE-DE-MONNOIR"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-382-07",
+      "label": "Règlement numéro 382-07 sur les PIIA",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+      "status": "attached",
+      "numero": "382-07",
+      "title": "Règlement 382-07 sur les PIIA",
+      "municipality": "sainte-angele-de-monnoir",
+      "docSha": "4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Considérant que le comité de consultation en urbanisme (CCU) ainsi que le\nconseil municipal ont étudié la demande en se référant à la grille d’analyse d’une\ndemande de rénovation en zone de PIIA qui reprend"
+        }
+      ]
+    },
+    {
+      "id": "designation-event-26-01-015",
+      "label": "PIIA - Demande de permis 2025-85 au 152, rue Principale",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+      "status": "validated",
+      "date": "2026-01-13",
+      "meetingDate": "2026-01-13",
+      "decision": "approuvé",
+      "kind": "piia",
+      "dossier": "2025-85",
+      "municipality": "sainte-angele-de-monnoir",
+      "resolution": "26-01-015",
+      "resolutionRef": "Résolution numéro 26-01-015",
+      "docSha": "4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+      "description": "Demande de PIIA pour la demande de permis 2025-85 au 152, rue Principale visant à effectuer des travaux de modification aux portes et fenêtres du bâtiment principal",
+      "conditions": [
+        "à la condition que toutes les autres dispositions du règlement d’urbanisme soient respectées"
+      ],
+      "etape": "piia",
+      "etape_date": "2026-01-13",
+      "reglement_number": "382-07",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Pour ces motifs, il est proposé par M. François Charbonneau, appuyé par\nMme Marlene Dagenais et résolu que le conseil municipal accepte la demande de"
+        },
+        {
+          "page": 12,
+          "excerpt": "PIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation à\nla condition que toutes les autres dispositions du règlement d’urbanisme soient\nrespectées."
+        }
+      ]
+    },
+    {
+      "id": "signal-piia-26-01-015",
+      "label": "Signal - Approbation PIIA 152, rue Principale",
+      "node_type": "Signal",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+      "status": "validated",
+      "category": "urbanisme",
+      "kind": "piia",
+      "date": "2026-01-13",
+      "meetingDate": "2026-01-13",
+      "description": "Acceptation d'une demande de PIIA pour la rénovation/modification des portes et fenêtres du bâtiment principal patrimonial au 152, rue Principale",
+      "resolution": "26-01-015",
+      "resolutionRef": "Résolution numéro 26-01-015",
+      "scope": "local",
+      "municipality": "sainte-angele-de-monnoir",
+      "docSha": "4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+      "outcome": "approuvé",
+      "etape": "piia",
+      "etape_date": "2026-01-13",
+      "reglement_number": "382-07",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Pour ces motifs, il est proposé par M. François Charbonneau, appuyé par\nMme Marlene Dagenais et résolu que le conseil municipal accepte la demande de"
+        },
+        {
+          "page": 12,
+          "excerpt": "PIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation à\nla condition que toutes les autres dispositions du règlement d’urbanisme soient\nrespectées."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "source-4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+      "target": "bylaw-382-07",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+      "evidence_refs": [
+        "ev-bylaw-382-07"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Considérant que le comité de consultation en urbanisme (CCU) ainsi que le\nconseil municipal ont étudié la demande en se référant à la grille d’analyse d’une\ndemande de rénovation en zone de PIIA qui reprend"
+        }
+      ]
+    },
+    {
+      "source": "source-4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+      "target": "designation-event-26-01-015",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+      "evidence_refs": [
+        "ev-designation-26-01-015"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Pour ces motifs, il est proposé par M. François Charbonneau, appuyé par\nMme Marlene Dagenais et résolu que le conseil municipal accepte la demande de"
+        }
+      ]
+    },
+    {
+      "source": "designation-event-26-01-015",
+      "target": "signal-piia-26-01-015",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+      "evidence_refs": [
+        "ev-designation-26-01-015"
+      ],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": "Pour ces motifs, il est proposé par M. François Charbonneau, appuyé par\nMme Marlene Dagenais et résolu que le conseil municipal accepte la demande de"
+        },
+        {
+          "page": 12,
+          "excerpt": "PIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation à\nla condition que toutes les autres dispositions du règlement d’urbanisme soient\nrespectées."
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-382-07",
+      "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+      "docSha": "4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+      "sourceUrl": "https://www.sainte-angele-de-monnoir.ca/wp-content/uploads/2026/02/2026-01_Proces-verbal.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "Considérant que le comité de consultation en urbanisme (CCU) ainsi que le\nconseil municipal ont étudié la demande en se référant à la grille d’analyse d’une\ndemande de rénovation en zone de PIIA qui reprend chacun des objectifs et critères\ndu règlement 382-07 sur les PIIA et que ceux-ci sont respectés ;"
+    },
+    {
+      "id": "ev-designation-26-01-015",
+      "source_file": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+      "rawRef": "raw/proces-verbaux-sainte-angele-de-monnoir/cas/4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b.pdf",
+      "docSha": "4030031e91caa199a72fa0354c2b87157ad6033a5c7ea2aa1b47d7f022a8a84b",
+      "sourceUrl": "https://www.sainte-angele-de-monnoir.ca/wp-content/uploads/2026/02/2026-01_Proces-verbal.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": "Pour ces motifs, il est proposé par M. François Charbonneau, appuyé par\nMme Marlene Dagenais et résolu que le conseil municipal accepte la demande de"
+    }
+  ],
+  "input_tokens": 4600,
+  "output_tokens": 1250
+}
+```

@@ -1,0 +1,37 @@
+{
+ "documentId": "mont-saint-hilaire-2026-04-13",
+ "step": "gemini-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass1",
+ "inputStateSha256": "c12709391a007d0b14a62d3db22cbc661686fe00727981aa5acfe9cfc5ae516c",
+ "inputSha256": "b7dfea7911ecae544df587d33fdd5c0199631f260e5dd0f6df63ec52fdc150ec",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 38386,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 24300,
+  "outputTokens": 4,
+  "totalTokens": 39108,
+  "thoughtsTokenCount": 14804
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 32768,
+  "httpStatus": 200,
+  "durationMs": 38205,
+  "requestId": null
+ },
+ "at": "2026-09-18T13:52:51.698Z"
+}

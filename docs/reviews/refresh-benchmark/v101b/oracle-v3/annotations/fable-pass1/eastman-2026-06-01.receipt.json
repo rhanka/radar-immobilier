@@ -1,0 +1,89 @@
+{
+ "documentId": "eastman-2026-06-01",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "a8c95ad8f840bbfc3cfcc53be16b3118dbc6ea6159800d1640eb20d27b3c4dfe",
+ "inputSha256": "293828b83f28b7389ad7bd5ba2abf280a0cee4aa0524d00de31d17d642d94135",
+ "responseSha256": "2f25c1d98488e42071b3c6323942acf344caf169ed36d149f7cd0b757d08dbc1",
+ "rc": 0,
+ "latencyMs": 143335,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "3881f3a6-4784-481c-88dc-e7259bc05407",
+ "modelUsage": {
+  "claude-haiku-4-5-20251001": {
+   "inputTokens": 18765,
+   "outputTokens": 20,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.018865,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  },
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 11960,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 24434,
+   "webSearchRequests": 0,
+   "costUSD": 1.08737325,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 11806,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 24434,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 11960,
+  "output_tokens_details": {
+   "thinking_tokens": 11806
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 24434,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 11960,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 24434,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 24434
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 1.1062382499999999,
+ "durationApiMs": 142448,
+ "stderrTail": "",
+ "at": "2026-09-18T13:22:20.738Z"
+}

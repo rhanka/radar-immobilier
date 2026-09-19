@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-henri-2026-03-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "0571bc8cf9cef927089da7b425b2c7ab8b77d802883bb48b4eddfd2ae2df0b32",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'assemblée de consultation sur le règlement no 741-26 est explicitement prévue au point 7.2 en page 1 et constitue une unité Signal distincte (« rappel par unité gold distincte »).\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement no 741-26 est explicitement prévue au point 7.2 en page 1 avec étape d'adoption conforme.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La demande de dérogation mineure pour le 1096 chemin du Trait-Carré est explicitement attestée au point 7.3 en page 2.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'assemblée de consultation sur le règlement no 741-26 est explicitement prévue au point 7.2 en page 1 et constitue une unité Signal distincte (« rappel par unité gold distincte »)."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'adoption du règlement no 741-26 est explicitement prévue au point 7.2 en page 1 avec étape d'adoption conforme."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La demande de dérogation mineure pour le 1096 chemin du Trait-Carré est explicitement attestée au point 7.3 en page 2."
+  }
+ ]
+}

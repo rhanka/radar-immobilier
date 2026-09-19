@@ -1,0 +1,35 @@
+{
+ "documentId": "frontenac-2026-03-10",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "3a70fa13a7c89ad6ab39050e55bf1a82a06287f3e2ecc7d188a412d9cb445785",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3873,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 23030,
+   "outputTokens": 1340,
+   "totalTokens": 24370
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3725
+  },
+  "inputSha256": "bacbea632689d3feebe55756bffd6ab1d21bf11ac30e8ed06fe8cc18c38b26b1"
+ },
+ "at": "2026-09-19T03:22:51.795Z"
+}

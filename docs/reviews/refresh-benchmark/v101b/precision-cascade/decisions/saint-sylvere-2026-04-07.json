@@ -1,0 +1,323 @@
+{
+ "documentId": "saint-sylvere-2026-04-07",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "911cf93f8fac97501dc20f8064de37f18b1a00c35ffe16941fbf53551bd4ec34",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-247"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage #247",
+     "stage": null,
+     "objet": "247",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "Règlement # 383 modifiant le règlement de zonage # 247"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-383"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Premier projet de règlement #383 modifiant le zonage",
+     "stage": "1er_projet",
+     "objet": "383",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247."
+      },
+      {
+       "page": 6,
+       "excerpt": "Règlement # 383 modifiant le règlement de zonage # 247"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-384"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Premier projet de règlement #384 sur les PPCMOI",
+     "stage": "1er_projet",
+     "objet": "384",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-383-motion"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion du règlement #383",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "Gabrielle Gauthier donne avis de motion qu’il sera présenté pour adoption à un\nséance ultérieure du conseil municipal le règlement suivant:"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-383-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du premier projet de règlement #383",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-384-motion"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion concernant les PPCMOI",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "Yan )agenais avis de motion qu’il sera présenté pour adoption à une séance\n\nultérieur du conseil municipal le règlement suivant:"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-384-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du premier projet de règlement #384",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-cptaq-453952"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui municipal à la demande d’autorisation CPTAQ — échange de parcelles",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais h\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C."
+      },
+      {
+       "page": 8,
+       "excerpt": "Considérant la demande vise les lots 5 652 594 et 5 889 436 du cadastre du Québec de I\ncirconscription foncière de Nicolet;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-permis-mars"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Mars 2026 : trois permis totalisant 118 000 $",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "La directrice générale adjointe et greffière-trésorière adjointe dépose devant le Conseil\nmunicipal la liste des permis de construction, d’environnement et de lotissement pour"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de zonage # 247 n'est cité qu'en tant que règlement antérieur faisant l'objet d'une modification, aucun acte ne porte sur son adoption propre.\",\"excerpt\":\"\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal dépose et adopte le premier projet de règlement # 383 modifiant le zonage.\",\"excerpt\":\"le conseil\\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\\n# 383 n odifiant le règlement de zonage # 247.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le premier projet de règlement # 384 relatif aux PPCMOI.\",\"excerpt\":\"le conseil de I\\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion pour le règlement # 383 modifiant le zonage est donné en séance.\",\"excerpt\":\"Gabrielle Gauthier donne avis de motion qu’il sera présenté pour adoption à un\\nséance ultérieure du conseil municipal le règlement suivant:\\n-\\nRèglement # 383 modifiant le règlement de zonage # 247\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"L'événement d'adoption du premier projet de règlement # 383 est formellement consigné.\",\"excerpt\":\"IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\\n# 383 n odifiant le règlement de zonage # 247.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion est accordé pour le règlement # 384 sur les PPCMOI.\",\"excerpt\":\"Yan )agenais avis de motion qu’il sera présenté pour adoption à une séance\\n\\nultérieur du conseil municipal le règlement suivant:\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"L'événement d'adoption du premier projet de règlement # 384 est acté.\",\"excerpt\":\"IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384.\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution d'appui à une demande conjointe auprès de la CPTAQ pour échange et lotissement.\",\"excerpt\":\"Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais h\\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C.\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Un dépôt d'un rapport/liste des permis de construction, environnement et lotissement a eu lieu en séance.\",\"excerpt\":\"La directrice générale adjointe et greffière-trésorière adjointe dépose devant le Conseil\\nmunicipal la liste des permis de construction, d’environnement et de lotissement pour\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de zonage # 247 n'est cité qu'en tant que règlement antérieur faisant l'objet d'une modification, aucun acte ne porte sur son adoption propre.",
+   "excerpt": ""
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal dépose et adopte le premier projet de règlement # 383 modifiant le zonage.",
+   "excerpt": "le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le premier projet de règlement # 384 relatif aux PPCMOI.",
+   "excerpt": "le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion pour le règlement # 383 modifiant le zonage est donné en séance.",
+   "excerpt": "Gabrielle Gauthier donne avis de motion qu’il sera présenté pour adoption à un\nséance ultérieure du conseil municipal le règlement suivant:\n-\nRèglement # 383 modifiant le règlement de zonage # 247"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "L'événement d'adoption du premier projet de règlement # 383 est formellement consigné.",
+   "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion est accordé pour le règlement # 384 sur les PPCMOI.",
+   "excerpt": "Yan )agenais avis de motion qu’il sera présenté pour adoption à une séance\n\nultérieur du conseil municipal le règlement suivant:"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "L'événement d'adoption du premier projet de règlement # 384 est acté.",
+   "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution d'appui à une demande conjointe auprès de la CPTAQ pour échange et lotissement.",
+   "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais h\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C."
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Un dépôt d'un rapport/liste des permis de construction, environnement et lotissement a eu lieu en séance.",
+   "excerpt": "La directrice générale adjointe et greffière-trésorière adjointe dépose devant le Conseil\nmunicipal la liste des permis de construction, d’environnement et de lotissement pour"
+  }
+ ],
+ "filter": {
+  "acts": 9,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Le règlement de zonage # 247 n'est cité qu'en tant que règlement antérieur faisant l'objet d'une modification, aucun acte ne porte sur son adoption propre."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A02",
+    "reason": "Le conseil municipal dépose et adopte le premier projet de règlement # 383 modifiant le zonage."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil adopte le premier projet de règlement # 384 relatif aux PPCMOI."
+   },
+   {
+    "act": "A04",
+    "reason": "Un avis de motion pour le règlement # 383 modifiant le zonage est donné en séance."
+   },
+   {
+    "act": "A05",
+    "reason": "L'événement d'adoption du premier projet de règlement # 383 est formellement consigné."
+   },
+   {
+    "act": "A06",
+    "reason": "Un avis de motion est accordé pour le règlement # 384 sur les PPCMOI."
+   },
+   {
+    "act": "A07",
+    "reason": "L'événement d'adoption du premier projet de règlement # 384 est acté."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil adopte une résolution d'appui à une demande conjointe auprès de la CPTAQ pour échange et lotissement."
+   },
+   {
+    "act": "A09",
+    "reason": "Un dépôt d'un rapport/liste des permis de construction, environnement et lotissement a eu lieu en séance."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2346,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 8799,
+   "outputTokens": 714,
+   "totalTokens": 9513
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2199
+  },
+  "inputSha256": "d5469614a17081fcc555f6964fa39297fbd87696e4657473522948edf7d00732"
+ }
+}

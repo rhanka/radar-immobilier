@@ -1,0 +1,13 @@
+{
+ "id": "beaupre-2026-03-02",
+ "rc": 0,
+ "latencyMs": 15648,
+ "inputTokens": 2,
+ "outputTokens": 995,
+ "cacheRead": 0,
+ "cacheCreate": 11948,
+ "costUsd": 0.15256599999999998,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 227
+}

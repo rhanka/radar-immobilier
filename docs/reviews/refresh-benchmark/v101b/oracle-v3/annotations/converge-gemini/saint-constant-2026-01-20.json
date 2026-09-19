@@ -1,0 +1,41 @@
+{
+ "documentId": "saint-constant-2026-01-20",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "22aa9a1d4882c0f2c9dfcc8d997f212da35a0d18e6c2e463b7efae5fff67dc9b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'adoption du premier projet de résolution pour le PPCMOI numéro 2025-00114 est explicitement résolue à la page 5, avec citation et métadonnées conformes.\"},{\"item\":\"i02\",\"choice\":\"absent\",\"reason\":\"L'avis annonçant la tenue future d'une assemblée publique de consultation ne constitue pas une unité réglementaire ou foncière distincte du projet de résolution.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'adoption du premier projet de résolution pour le PPCMOI numéro 2025-00114 est explicitement résolue à la page 5, avec citation et métadonnées conformes."
+  },
+  {
+   "item": "i02",
+   "choice": "absent",
+   "reason": "L'avis annonçant la tenue future d'une assemblée publique de consultation ne constitue pas une unité réglementaire ou foncière distincte du projet de résolution."
+  }
+ ]
+}

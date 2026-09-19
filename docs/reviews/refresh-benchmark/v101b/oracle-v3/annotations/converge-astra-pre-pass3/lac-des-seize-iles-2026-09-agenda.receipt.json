@@ -1,0 +1,36 @@
+{
+ "documentId": "lac-des-seize-iles-2026-09-agenda",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "0ded76906f0c25cb52cdce093c80a979c7821bdb5745041887419e5b2c5b5c6e",
+ "inputSha256": "f5b31fe5e7b8193e99702a134e0378765e33b43eb6c2639ea19c6f5d77dd7c90",
+ "responseSha256": "86ca13f343bb763e45ed0d26b5b236235e205366cb049c1307268fd4b7ff36e0",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 12527,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2130,
+  "outputTokens": 367,
+  "totalTokens": 2497
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 12524,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:28:34.926Z"
+}

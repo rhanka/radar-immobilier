@@ -1,0 +1,141 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "da997eb99eac78ef15f719aee853f9267939862b5438972042c00fcc82790f1b",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point relatif au 3, rue Ernest-Piché est marqué « REPORTÉ » à la page 2, et la résolution 089-2026 confirme son report à une séance ultérieure, sans décision sur la dérogation.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 102-2026 autorise expressément, à la page 10, la signature de l’acte de servitude de passage et de droit de premier refus pour le lot 6 164 031.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 111-2026 accorde à la page 20 la dérogation permettant la conversion de l’abri d’auto en garage privé attenant au 2, rue Garbin.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 112-2026 accorde explicitement, à la page 21, la dérogation concernant le lotissement du lot d’angle 6 621 589 avec une largeur de 27,20 mètres.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 113-2026 approuve à la page 22 la subdivision d’une parcelle du lot 6 141 355 dans le cadre du réaménagement du pont de la rivière Ontaritzi.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 115-2026 modifie à la page 23 l’entente de développement avec Groupe Castella 2 inc. pour reporter au 31 octobre 2026 la fin des travaux de prolongement de l’avenue des Catherine.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 116-2026 modifie à la page 24 les conditions d’approbation du PIIA visé par la résolution 344-2024 en exigeant une garantie de 35 000 $ pour chacune des phases 1A et 1B.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 24 atteste un avis de motion actuel visant la modification du zonage 1259-2014 pour les limites, les usages et les normes des zones 115-H et 145-H.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le titre cité figure à la page 24 au début de la résolution 117-2026, dont le dispositif à la page 25 adopte le premier projet APR-423-2026, distinct de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 124-2026 autorise à la page 29 la location d’un bâtiment et d’un emplacement à Yogi Nomade, soit un acte foncier explicite même si sa destination est récréative.\"\n    },\n    {\n      \"item\": \"i11\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 099-2026 engage expressément la Ville, à la page 9, à amorcer les modifications réglementaires nécessaires à l’usage parc solaire, sans constituer un avis de motion ni une adoption de règlement.\"\n    },\n    {\n      \"item\": \"i12\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette proposition reprend exactement l’acte de location retenu sous i10, alors que la règle impose un rappel par unité distincte et ne crédite pas les doublons du même fait.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "absent"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point relatif au 3, rue Ernest-Piché est marqué « REPORTÉ » à la page 2, et la résolution 089-2026 confirme son report à une séance ultérieure, sans décision sur la dérogation."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 102-2026 autorise expressément, à la page 10, la signature de l’acte de servitude de passage et de droit de premier refus pour le lot 6 164 031."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 111-2026 accorde à la page 20 la dérogation permettant la conversion de l’abri d’auto en garage privé attenant au 2, rue Garbin."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 112-2026 accorde explicitement, à la page 21, la dérogation concernant le lotissement du lot d’angle 6 621 589 avec une largeur de 27,20 mètres."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 113-2026 approuve à la page 22 la subdivision d’une parcelle du lot 6 141 355 dans le cadre du réaménagement du pont de la rivière Ontaritzi."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 115-2026 modifie à la page 23 l’entente de développement avec Groupe Castella 2 inc. pour reporter au 31 octobre 2026 la fin des travaux de prolongement de l’avenue des Catherine."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La résolution 116-2026 modifie à la page 24 les conditions d’approbation du PIIA visé par la résolution 344-2024 en exigeant une garantie de 35 000 $ pour chacune des phases 1A et 1B."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La page 24 atteste un avis de motion actuel visant la modification du zonage 1259-2014 pour les limites, les usages et les normes des zones 115-H et 145-H."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Le titre cité figure à la page 24 au début de la résolution 117-2026, dont le dispositif à la page 25 adopte le premier projet APR-423-2026, distinct de l’avis de motion."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La résolution 124-2026 autorise à la page 29 la location d’un bâtiment et d’un emplacement à Yogi Nomade, soit un acte foncier explicite même si sa destination est récréative."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "La résolution 099-2026 engage expressément la Ville, à la page 9, à amorcer les modifications réglementaires nécessaires à l’usage parc solaire, sans constituer un avis de motion ni une adoption de règlement."
+  },
+  {
+   "item": "i12",
+   "choice": "absent",
+   "reason": "Cette proposition reprend exactement l’acte de location retenu sous i10, alors que la règle impose un rappel par unité distincte et ne crédite pas les doublons du même fait."
+  }
+ ]
+}

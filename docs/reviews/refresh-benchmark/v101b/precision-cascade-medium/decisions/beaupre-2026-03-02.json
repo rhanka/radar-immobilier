@@ -1,0 +1,286 @@
+{
+ "documentId": "beaupre-2026-03-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "bff6220aa607f233ebcbd10361ba34d9c4f2529b08c3fcb96ce39596f96efc96",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-1196"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1196 sur les PIIA",
+     "stage": null,
+     "objet": "1196",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "ATTENDU qu’en vertu du Règlement 1196 sur les plans d’implantation et\nd’intégration architecturale, section 5 du chapitre 3, le projet de\nconstruction est assujetti à l’approbation par le conseil muni"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-11983"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — 200, rue de Véga",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés à la recommandation "
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-11984"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — 155, rue de Cassiopée",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés à la recommandation "
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-11985"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — 145, rue de Cassiopée",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés à la recommandation "
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-11986"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA refusé — 150, rue de l’Aurore-Boréale",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement de refuser le projet de construction tel que présenté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-11982"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Horizon Boréal — prolongement de rues et travaux municipaux",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "Il est proposé par Monsieur Christian Blouin et résolu unanimement\nd’autoriser le maire ou la mairesse suppléante et la greffière, Mme\nJohanne Gagnon à signer tous les documents nécessaires aux travau"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-1330"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1330 modifiant le règlement 1328",
+     "stage": "adoption",
+     "objet": "1330",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’adopter le Règlement numéro 1330 modifiant le\nrèglement 1328"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "bylaw-1328"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1328 — taxes et compensations 2026",
+     "stage": null,
+     "objet": "1328",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’adopter le Règlement numéro 1330 modifiant le\nrèglement 1328"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 1196 est uniquement mentionné comme base légale existante pour l'évaluation des PIIA sans faire l'objet d'un acte réglementaire dans cette séance.\",\"excerpt\":\"ATTENDU qu’en vertu du Règlement 1196 sur les plans d’implantation et\\nd’intégration architecturale, section 5 du chapitre 3, le projet de\\nconstruction est assujetti à l’approbation par le conseil muni\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve par résolution le projet de PIIA pour le 200, rue de Véga.\",\"excerpt\":\"EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\\nrésolu unanimement d’approuver le projet de construction de la maison\\nunifamiliale isolée suivant les plans déposés\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve par résolution le PIIA pour le 155, rue de Cassiopée.\",\"excerpt\":\"EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\\nrésolu unanimement d’approuver le projet de construction de la maison\\nunifamiliale isolée suivant les plans déposés\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve par résolution le PIIA pour le 145, rue de Cassiopée.\",\"excerpt\":\"EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\\nrésolu unanimement d’approuver le projet de construction de la maison\\nunifamiliale isolée suivant les plans déposés\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil refuse par résolution le projet de construction sous PIIA pour le 150, rue de l'Aurore-Boréale.\",\"excerpt\":\"EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\\nrésolu unanimement de refuser le projet de construction tel que présenté\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la signature d'un protocole d'entente de travaux municipaux pour le prolongement de rues dans le cadre d'Horizon Boréal.\",\"excerpt\":\"d’autoriser le maire ou la mairesse suppléante et la greffière, Mme\\nJohanne Gagnon à signer tous les documents nécessaires aux travaux\\nmunicipaux de prolongement de la rue Belhumeur\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le Règlement numéro 1330.\",\"excerpt\":\"EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\\nrésolu unanimement d’adopter le Règlement numéro 1330 modifiant le\\nrèglement 1328\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 1328 n'est pas adopté ou modifié directement en tant qu'acte autonome, il s'agit seulement du règlement antérieur visé par la modification.\",\"excerpt\":\"EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\\nrésolu unanimement d’adopter le Règlement numéro 1330 modifiant le\\nrèglement 1328\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 1196 est uniquement mentionné comme base légale existante pour l'évaluation des PIIA sans faire l'objet d'un acte réglementaire dans cette séance.",
+   "excerpt": "ATTENDU qu’en vertu du Règlement 1196 sur les plans d’implantation et\nd’intégration architecturale, section 5 du chapitre 3, le projet de\nconstruction est assujetti à l’approbation par le conseil muni"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve par résolution le projet de PIIA pour le 200, rue de Véga.",
+   "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve par résolution le PIIA pour le 155, rue de Cassiopée.",
+   "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve par résolution le PIIA pour le 145, rue de Cassiopée.",
+   "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil refuse par résolution le projet de construction sous PIIA pour le 150, rue de l'Aurore-Boréale.",
+   "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement de refuser le projet de construction tel que présenté"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la signature d'un protocole d'entente de travaux municipaux pour le prolongement de rues dans le cadre d'Horizon Boréal.",
+   "excerpt": "d’autoriser le maire ou la mairesse suppléante et la greffière, Mme\nJohanne Gagnon à signer tous les documents nécessaires aux travaux\nmunicipaux de prolongement de la rue Belhumeur"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le Règlement numéro 1330.",
+   "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’adopter le Règlement numéro 1330 modifiant le\nrèglement 1328"
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 1328 n'est pas adopté ou modifié directement en tant qu'acte autonome, il s'agit seulement du règlement antérieur visé par la modification.",
+   "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’adopter le Règlement numéro 1330 modifiant le\nrèglement 1328"
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Le règlement 1196 est uniquement mentionné comme base légale existante pour l'évaluation des PIIA sans faire l'objet d'un acte réglementaire dans cette séance."
+   },
+   {
+    "act": "A08",
+    "reason": "Le règlement 1328 n'est pas adopté ou modifié directement en tant qu'acte autonome, il s'agit seulement du règlement antérieur visé par la modification."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A02",
+    "reason": "Le conseil approuve par résolution le projet de PIIA pour le 200, rue de Véga."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil approuve par résolution le PIIA pour le 155, rue de Cassiopée."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil approuve par résolution le PIIA pour le 145, rue de Cassiopée."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil refuse par résolution le projet de construction sous PIIA pour le 150, rue de l'Aurore-Boréale."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil autorise la signature d'un protocole d'entente de travaux municipaux pour le prolongement de rues dans le cadre d'Horizon Boréal."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil adopte le Règlement numéro 1330."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2544,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 8219,
+   "outputTokens": 717,
+   "totalTokens": 8936
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2403
+  },
+  "inputSha256": "9345cf08a78442e25c69fbd14510435071fb8e23ac3755e55a34efafb99bbd7a"
+ }
+}

@@ -1,0 +1,547 @@
+{
+ "documentId": "sainte-martine-2026-03-17",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "0e60f3ff1a3a6941e40955a12fad1123c656013b43f3dfb2ce7b58d196d865d9",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-503"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2026-503 — Conditions d’émission de permis en zone agricole",
+     "stage": "adoption",
+     "objet": "2026-503",
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "Que le Règlement numéro 2026-503 modifiant le Règlement sur les permis et\ncertificats numéro 2019-345 afin de modifier les conditions d’émission de certains"
+      },
+      {
+       "page": 17,
+       "excerpt": "Que le Règlement numéro 2026-503 modifiant le Règlement sur les permis et\ncertificats numéro 2019-345 afin de modifier les conditions d’émission de certains\npermis et certificats concernant des immeubles situés en zone agricole soit\nadopté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2019-345"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2019-345 — Permis et certificats",
+     "stage": null,
+     "objet": "2019-345",
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "Que le Règlement numéro 2026-503 modifiant le Règlement sur les permis et\ncertificats numéro 2019-345 afin de modifier les conditions d’émission de certains"
+      },
+      {
+       "page": 17,
+       "excerpt": "Que le Règlement numéro 2026-503 modifiant le Règlement sur les permis et\ncertificats numéro 2019-345 afin de modifier les conditions d’émission de certains\npermis et certificats concernant des immeubles situés en zone agricole soit\nadopté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-2026-501"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2026-501 — Recherche et développement en agriculture",
+     "stage": "adoption",
+     "objet": "2026-501",
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "Que le Règlement numéro 2026-501 modifiant le Règlement de zonage\nnuméro 2019-342 afin d’ajouter les activités de recherche et développement en"
+      },
+      {
+       "page": 18,
+       "excerpt": "Que le Règlement numéro 2026-501 modifiant le Règlement de zonage\nnuméro 2019-342 afin d’ajouter les activités de recherche et développement en\nagriculture à la liste d’usages commerciaux para-agricoles soit adopté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-2019-342"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2019-342 — Règlement de zonage",
+     "stage": null,
+     "objet": "2019-342",
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "Que le Règlement numéro 2026-501 modifiant le Règlement de zonage\nnuméro 2019-342 afin d’ajouter les activités de recherche et développement en"
+      },
+      {
+       "page": 18,
+       "excerpt": "Que le Règlement numéro 2026-501 modifiant le Règlement de zonage\nnuméro 2019-342 afin d’ajouter les activités de recherche et développement en\nagriculture à la liste d’usages commerciaux para-agricoles soit adopté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-2025-016",
+    "signal-21-logements"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "2025-016 — Modification réglementaire partiellement autorisée, 122, rue Saint-Joseph",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "D’autoriser partiellement les demandes de modifications réglementaires comme\nsuit :"
+      },
+      {
+       "page": 19,
+       "excerpt": "De refuser les modifications suivantes :\n•\n•\n\nLa modification de la grille des usages de la zone MxtV-2 visant à porter\nà 24 le nombre de logements autorisés ;"
+      },
+      {
+       "page": 19,
+       "excerpt": "D’autoriser partiellement les demandes de modifications réglementaires comme\nsuit :\n1. Que soit modifié le Règlement de zonage numéro 2019-342 afin :\n•\nD’intégrer le lot numéro 6 660 191 dans l’affectation « MxtV » –\nMixte villageoise ;\n•\nDe modifier la grille des usages de la zone MxtV-2 afin d’ajuster les\nmarges minimales.\n2. Que soit modifié le Règlement adoptant le plan d’urbanisme numéro 2019341 afin :\n• D’agrandir la zone MxtV-2 à même une partie de la zone P-3 afin\nd’y intégrer le lot numéro 6 660 191.\nDe refuser les modifications suivantes :\n•\n•\n\nLa modification de la grille des usages de la zone MxtV-2 visant à porter\nà 24 le nombre de logements autorisés ;\nLa modification de l’article 6.20 du Règlement de zonage numéro 2019342."
+      }
+     ]
+    },
+    {
+     "type": "Signal",
+     "label": "Maintien à 21 logements autorisés dans la zone du projet au 122, rue Saint-Joseph",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 24,
+       "excerpt": "Réponse : Le conseil a refusé cette modification et maintient le nombre de\nlogements autorisés à 21 pour cette zone."
+      },
+      {
+       "page": 24,
+       "excerpt": "Il désire valider la décision rendue par le conseil au sujet de la demande de\nmodification réglementaire pour venir porter à 24 le nombre de logements\nautorisés pour le projet de construction au 122, rue Saint-Joseph.\nRéponse : Le conseil a refusé cette modification et maintient le nombre de\nlogements autorisés à 21 pour cette zone."
+      },
+      {
+       "page": 19,
+       "excerpt": "D’autoriser partiellement les demandes de modifications réglementaires comme\nsuit :\n1. Que soit modifié le Règlement de zonage numéro 2019-342 afin :\n•\nD’intégrer le lot numéro 6 660 191 dans l’affectation « MxtV » –\nMixte villageoise ;\n•\nDe modifier la grille des usages de la zone MxtV-2 afin d’ajuster les\nmarges minimales.\n2. Que soit modifié le Règlement adoptant le plan d’urbanisme numéro 2019341 afin :\n• D’agrandir la zone MxtV-2 à même une partie de la zone P-3 afin\nd’y intégrer le lot numéro 6 660 191.\nDe refuser les modifications suivantes :\n•\n•\n\nLa modification de la grille des usages de la zone MxtV-2 visant à porter\nà 24 le nombre de logements autorisés ;\nLa modification de l’article 6.20 du Règlement de zonage numéro 2019342."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-2026-003"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "2026-003 — Activités artisanales à domicile",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "D’autoriser la demande de modification du Règlement de zonage numéro 2019342 afin de :"
+      },
+      {
+       "page": 20,
+       "excerpt": "D’autoriser la demande de modification du Règlement de zonage numéro 2019342 afin de :\n•\n•\n•\n\nModifier l’article 6.84 afin d’autoriser certaines activités artisanales\ndans une résidence ;\nLimiter la superficie à un maximum de 25 % de la superficie de\nplancher de la résidence ;\nPrévoir certaines dispositions permettant de réduire l’achalandage."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-2026-004"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "2026-004 — Appui municipal à une demande CPTAQ, rang Touchette",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 21,
+       "excerpt": "D’appuyer la demande d’autorisation à la CPTAQ telle que présentée, afin de\npermettre l’aliénation et l’utilisation à des fins autres que l’agriculture des lots"
+      },
+      {
+       "page": 21,
+       "excerpt": "D’appuyer la demande d’autorisation à la CPTAQ telle que présentée, afin de\npermettre l’aliénation et l’utilisation à des fins autres que l’agriculture des lots\nnuméro 6 060 923 et 6 060 924, soit à des fins résidentielles."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-2026-005"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "2026-005 — Refus de PIIA, panneaux solaires au 182, rue Saint-Joseph",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "De refuser la demande d’approbation d’un PIIA visant l’installation de panneaux\nsolaires sur le toit de la résidence située au 182, rue Saint-Joseph."
+      },
+      {
+       "page": 22,
+       "excerpt": "Attendu que les panneaux solaires ne s’intègrent pas harmonieusement au\nbâtiment ;\nAttendu que les membres conviennent que le projet n’atteint pas les objectifs\ndéfinis pour le secteur « Cordon patrimonial et ancienne école d’agriculture » au\nRèglement numéro 2022-418 relatif aux PIIA ;\nAttendu que les panneaux solaires ne devraient pas être visibles de la rue ;\nAttendu que le comité consultatif d’urbanisme a étudié la demande et transmis\nses recommandations au conseil municipal ;\nEn conséquence,\nIl est proposé par monsieur Dominic Garceau\nAppuyé par madame Stéphanie Julien\nEt résolu à l’unanimité des membres présents\nDe refuser la demande d’approbation d’un PIIA visant l’installation de panneaux\nsolaires sur le toit de la résidence située au 182, rue Saint-Joseph."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "bylaw-2022-418"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2022-418 — PIIA",
+     "stage": null,
+     "objet": "2022-418",
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "Attendu que les membres conviennent que le projet n’atteint pas les objectifs\ndéfinis pour le secteur « Cordon patrimonial et ancienne école d’agriculture » au"
+      },
+      {
+       "page": 22,
+       "excerpt": "Attendu que les panneaux solaires ne s’intègrent pas harmonieusement au\nbâtiment ;\nAttendu que les membres conviennent que le projet n’atteint pas les objectifs\ndéfinis pour le secteur « Cordon patrimonial et ancienne école d’agriculture » au\nRèglement numéro 2022-418 relatif aux PIIA ;\nAttendu que les panneaux solaires ne devraient pas être visibles de la rue ;\nAttendu que le comité consultatif d’urbanisme a étudié la demande et transmis\nses recommandations au conseil municipal ;\nEn conséquence,\nIl est proposé par monsieur Dominic Garceau\nAppuyé par madame Stéphanie Julien\nEt résolu à l’unanimité des membres présents\nDe refuser la demande d’approbation d’un PIIA visant l’installation de panneaux\nsolaires sur le toit de la résidence située au 182, rue Saint-Joseph."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-2026-007"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "2026-007 — Démolition et reconstruction, 5, rue Phénix",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "D’autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le\nprogramme préliminaire de réutilisation du sol dégagé, à savoir le projet de"
+      },
+      {
+       "page": 22,
+       "excerpt": "Attendu que les maisons mobiles ne sont pas autorisées en zone H-31 ;\nAttendu que le programme préliminaire de réutilisation du sol dégagé est\nconforme au règlement de zonage ;\nAttendu que le service d’urbanisme recommande que la demande soit autorisée ;\nAttendu que le comité consultatif d’urbanisme a étudié la demande et transmis\nses recommandations au conseil municipal ;\nEn conséquence,\nIl est proposé par Madame Stéphanie Julien\nAppuyé par monsieur Alexandre Bissonnette\nEt résolu à l’unanimité des membres présents\nD’autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le\nprogramme préliminaire de réutilisation du sol dégagé, à savoir le projet de\nreconstruction de l’immeuble, tel que présenté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "event-parcs-laberge"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Contribution pour fins de parcs — Lotissement au 330, rang Laberge",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "D’exiger du propriétaire du lot projeté numéro 6 717 037 du cadastre du Québec,\nle versement d’une somme équivalente à 10 % de la valeur du lot"
+      },
+      {
+       "page": 23,
+       "excerpt": "D’exiger du propriétaire du lot projeté numéro 6 717 037 du cadastre du Québec,\nle versement d’une somme équivalente à 10 % de la valeur du lot\nnuméro 6 717 037 à titre de contribution pour fins de parcs, terrains de jeux et\nespaces naturels, soit une somme de 7 625,90 $, le tout conformément aux\ndispositions du Règlement de lotissement numéro 2019-343."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "bylaw-2019-343"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "2019-343 — Règlement de lotissement",
+     "stage": null,
+     "objet": "2019-343",
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "Attendu que cette opération cadastrale est assujettie aux dispositions relatives\nà la contribution pour fins de parcs, de terrains de jeux et d’espaces naturels"
+      },
+      {
+       "page": 23,
+       "excerpt": "D’exiger du propriétaire du lot projeté numéro 6 717 037 du cadastre du Québec,\nle versement d’une somme équivalente à 10 % de la valeur du lot\nnuméro 6 717 037 à titre de contribution pour fins de parcs, terrains de jeux et\nespaces naturels, soit une somme de 7 625,90 $, le tout conformément aux\ndispositions du Règlement de lotissement numéro 2019-343."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "signal-taxes-terrains"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Hausse de taxation des terrains vagues desservis",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Réponse : la Municipalité a augmenté cette année la taxation des terrains\nvagues desservis dans l’objectif de favoriser la construction et de réduire le"
+      },
+      {
+       "page": 3,
+       "excerpt": "Réponse : la Municipalité a augmenté cette année la taxation des terrains\nvagues desservis dans l’objectif de favoriser la construction et de réduire le\nnombre de terrains vacants sur le territoire."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "signal-eau"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Étude géotechnique et environnementale — Mise à niveau de l’eau potable",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "D’octroyer à Groupe ABS inc., plus bas fournisseur conforme de la demande de prix\nnuméro 2026-008, un contrat pour la réalisation d’une étude géotechnique et"
+      },
+      {
+       "page": 8,
+       "excerpt": "D’octroyer à Groupe ABS inc., plus bas fournisseur conforme de la demande de prix\nnuméro 2026-008, un contrat pour la réalisation d’une étude géotechnique et\nenvironnementale des sols et de l’eau souterraine dans le cadre du projet de mise à\nniveau du réservoir et des installations de distribution d’eau potable, pour un\nmontant de 45 500 $, plus les taxes applicables."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement numéro 2026-503.\",\"excerpt\":\"Que le Règlement numéro 2026-503 modifiant le Règlement sur les permis et\\ncertificats numéro 2019-345 afin de modifier les conditions d’émission de certains\\npermis et certificats concernant des immeubles situés en zone agricole soit\\nadopté.\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2019-345 est uniquement mentionné comme étant le règlement antérieur modifié, sans étape propre dans la séance.\",\"excerpt\":\"Que le Règlement numéro 2026-503 modifiant le Règlement sur les permis et\\ncertificats numéro 2019-345 afin de modifier les conditions d’émission de certains\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal adopte le règlement numéro 2026-501.\",\"excerpt\":\"Que le Règlement numéro 2026-501 modifiant le Règlement de zonage\\nnuméro 2019-342 afin d’ajouter les activités de recherche et développement en\\nagriculture à la liste d’usages commerciaux para-agricoles soit adopté.\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2019-342 est simplement cité comme le règlement d'origine faisant l'objet d'une modification, sans faire l'objet d'un acte distinct.\",\"excerpt\":\"Que le Règlement numéro 2026-501 modifiant le Règlement de zonage\\nnuméro 2019-342 afin d’ajouter les activités de recherche et développement en\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise partiellement et refuse certaines composantes de la demande de modification réglementaire 2025-016.\",\"excerpt\":\"D’autoriser partiellement les demandes de modifications réglementaires comme\\nsuit :\\n1. Que soit modifié le Règlement de zonage numéro 2019-342 afin :\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution autorisant la demande de modification du règlement de zonage 2026-003.\",\"excerpt\":\"D’autoriser la demande de modification du Règlement de zonage numéro 2019342 afin de :\\n•\\n•\\n•\\n\\nModifier l’article 6.84 afin d’autoriser certaines activités artisanales\\ndans une résidence ;\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution pour appuyer une demande d'autorisation à la CPTAQ pour les lots 6 060 923 et 6 060 924.\",\"excerpt\":\"D’appuyer la demande d’autorisation à la CPTAQ telle que présentée, afin de\\npermettre l’aliénation et l’utilisation à des fins autres que l’agriculture des lots\\nnuméro 6 060 923 et 6 060 924, soit à des fins résidentielles.\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil refuse formellement la demande d'approbation d'un PIIA pour le 182, rue Saint-Joseph.\",\"excerpt\":\"De refuser la demande d’approbation d’un PIIA visant l’installation de panneaux\\nsolaires sur le toit de la résidence située au 182, rue Saint-Joseph.\"},{\"act\":\"A09\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2022-418 relatif aux PIIA est cité en référence réglementaire d'application sans franchir d'étape procédurale dans cette séance.\",\"excerpt\":\"Attendu que les membres conviennent que le projet n’atteint pas les objectifs\\ndéfinis pour le secteur « Cordon patrimonial et ancienne école d’agriculture » au\\nRèglement numéro 2022-418 relatif aux PIIA ;\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la démolition du bâtiment situé au 5, rue Phénix et le programme préliminaire de réutilisation du sol dégagé.\",\"excerpt\":\"D’autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le\\nprogramme préliminaire de réutilisation du sol dégagé, à savoir le projet de\\nreconstruction de l’immeuble, tel que présenté.\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil impose une contribution financière pour fins de parcs lors d'un lotissement au 330, rang Laberge.\",\"excerpt\":\"D’exiger du propriétaire du lot projeté numéro 6 717 037 du cadastre du Québec,\\nle versement d’une somme équivalente à 10 % de la valeur du lot\\nnuméro 6 717 037 à titre de contribution pour fins de parcs, terrains de jeux et\\nespaces naturels\"},{\"act\":\"A12\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de lotissement 2019-343 est simplement la référence normative en vertu de laquelle l'exigence est imposée, sans acte d'adoption ou d'amendement.\",\"excerpt\":\"le tout conformément aux\\ndispositions du Règlement de lotissement numéro 2019-343.\"},{\"act\":\"A13\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple échange oral lors de la période de questions rappelant une mesure fiscale déjà adoptée au budget antérieur, sans décision ni acte au procès-verbal.\",\"excerpt\":\"Réponse : la Municipalité a augmenté cette année la taxation des terrains\\nvagues desservis dans l’objectif de favoriser la construction et de réduire le\"},{\"act\":\"A14\",\"verdict\":\"non_soutenu\",\"reason\":\"L'octroi d'un contrat de services professionnels d'études géotechniques relève des exclusions contractuelles de services réguliers et de gestion d'infrastructures.\",\"excerpt\":\"D’octroyer à Groupe ABS inc., plus bas fournisseur conforme de la demande de prix\\nnuméro 2026-008, un contrat pour la réalisation d’une étude géotechnique et\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement numéro 2026-503.",
+   "excerpt": "Que le Règlement numéro 2026-503 modifiant le Règlement sur les permis et\ncertificats numéro 2019-345 afin de modifier les conditions d’émission de certains\npermis et certificats concernant des immeubles situés en zone agricole soit\nadopté."
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2019-345 est uniquement mentionné comme étant le règlement antérieur modifié, sans étape propre dans la séance.",
+   "excerpt": "Que le Règlement numéro 2026-503 modifiant le Règlement sur les permis et\ncertificats numéro 2019-345 afin de modifier les conditions d’émission de certains"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal adopte le règlement numéro 2026-501.",
+   "excerpt": "Que le Règlement numéro 2026-501 modifiant le Règlement de zonage\nnuméro 2019-342 afin d’ajouter les activités de recherche et développement en\nagriculture à la liste d’usages commerciaux para-agricoles soit adopté."
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2019-342 est simplement cité comme le règlement d'origine faisant l'objet d'une modification, sans faire l'objet d'un acte distinct.",
+   "excerpt": "Que le Règlement numéro 2026-501 modifiant le Règlement de zonage\nnuméro 2019-342 afin d’ajouter les activités de recherche et développement en"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise partiellement et refuse certaines composantes de la demande de modification réglementaire 2025-016.",
+   "excerpt": "D’autoriser partiellement les demandes de modifications réglementaires comme\nsuit :\n1. Que soit modifié le Règlement de zonage numéro 2019-342 afin :"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution autorisant la demande de modification du règlement de zonage 2026-003.",
+   "excerpt": "D’autoriser la demande de modification du Règlement de zonage numéro 2019342 afin de :\n•\n•\n•\n\nModifier l’article 6.84 afin d’autoriser certaines activités artisanales\ndans une résidence ;"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution pour appuyer une demande d'autorisation à la CPTAQ pour les lots 6 060 923 et 6 060 924.",
+   "excerpt": "D’appuyer la demande d’autorisation à la CPTAQ telle que présentée, afin de\npermettre l’aliénation et l’utilisation à des fins autres que l’agriculture des lots\nnuméro 6 060 923 et 6 060 924, soit à des fins résidentielles."
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil refuse formellement la demande d'approbation d'un PIIA pour le 182, rue Saint-Joseph.",
+   "excerpt": "De refuser la demande d’approbation d’un PIIA visant l’installation de panneaux\nsolaires sur le toit de la résidence située au 182, rue Saint-Joseph."
+  },
+  {
+   "act": "A09",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2022-418 relatif aux PIIA est cité en référence réglementaire d'application sans franchir d'étape procédurale dans cette séance.",
+   "excerpt": "Attendu que les membres conviennent que le projet n’atteint pas les objectifs\ndéfinis pour le secteur « Cordon patrimonial et ancienne école d’agriculture » au\nRèglement numéro 2022-418 relatif aux PIIA ;"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la démolition du bâtiment situé au 5, rue Phénix et le programme préliminaire de réutilisation du sol dégagé.",
+   "excerpt": "D’autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le\nprogramme préliminaire de réutilisation du sol dégagé, à savoir le projet de\nreconstruction de l’immeuble, tel que présenté."
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Le conseil impose une contribution financière pour fins de parcs lors d'un lotissement au 330, rang Laberge.",
+   "excerpt": "D’exiger du propriétaire du lot projeté numéro 6 717 037 du cadastre du Québec,\nle versement d’une somme équivalente à 10 % de la valeur du lot\nnuméro 6 717 037 à titre de contribution pour fins de parcs, terrains de jeux et\nespaces naturels"
+  },
+  {
+   "act": "A12",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de lotissement 2019-343 est simplement la référence normative en vertu de laquelle l'exigence est imposée, sans acte d'adoption ou d'amendement.",
+   "excerpt": "le tout conformément aux\ndispositions du Règlement de lotissement numéro 2019-343."
+  },
+  {
+   "act": "A13",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple échange oral lors de la période de questions rappelant une mesure fiscale déjà adoptée au budget antérieur, sans décision ni acte au procès-verbal.",
+   "excerpt": "Réponse : la Municipalité a augmenté cette année la taxation des terrains\nvagues desservis dans l’objectif de favoriser la construction et de réduire le"
+  },
+  {
+   "act": "A14",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de services professionnels d'études géotechniques relève des exclusions contractuelles de services réguliers et de gestion d'infrastructures.",
+   "excerpt": "D’octroyer à Groupe ABS inc., plus bas fournisseur conforme de la demande de prix\nnuméro 2026-008, un contrat pour la réalisation d’une étude géotechnique et"
+  }
+ ],
+ "filter": {
+  "acts": 14,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 2019-345 est uniquement mentionné comme étant le règlement antérieur modifié, sans étape propre dans la séance."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement 2019-342 est simplement cité comme le règlement d'origine faisant l'objet d'une modification, sans faire l'objet d'un acte distinct."
+   },
+   {
+    "act": "A09",
+    "reason": "Le règlement 2022-418 relatif aux PIIA est cité en référence réglementaire d'application sans franchir d'étape procédurale dans cette séance."
+   },
+   {
+    "act": "A12",
+    "reason": "Le règlement de lotissement 2019-343 est simplement la référence normative en vertu de laquelle l'exigence est imposée, sans acte d'adoption ou d'amendement."
+   },
+   {
+    "act": "A13",
+    "reason": "Il s'agit d'un simple échange oral lors de la période de questions rappelant une mesure fiscale déjà adoptée au budget antérieur, sans décision ni acte au procès-verbal."
+   },
+   {
+    "act": "A14",
+    "reason": "L'octroi d'un contrat de services professionnels d'études géotechniques relève des exclusions contractuelles de services réguliers et de gestion d'infrastructures."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le règlement numéro 2026-503."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil municipal adopte le règlement numéro 2026-501."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil autorise partiellement et refuse certaines composantes de la demande de modification réglementaire 2025-016."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil adopte une résolution autorisant la demande de modification du règlement de zonage 2026-003."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil adopte une résolution pour appuyer une demande d'autorisation à la CPTAQ pour les lots 6 060 923 et 6 060 924."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil refuse formellement la demande d'approbation d'un PIIA pour le 182, rue Saint-Joseph."
+   },
+   {
+    "act": "A10",
+    "reason": "Le conseil autorise la démolition du bâtiment situé au 5, rue Phénix et le programme préliminaire de réutilisation du sol dégagé."
+   },
+   {
+    "act": "A11",
+    "reason": "Le conseil impose une contribution financière pour fins de parcs lors d'un lotissement au 330, rang Laberge."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4115,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 21860,
+   "outputTokens": 1437,
+   "totalTokens": 23297
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3983
+  },
+  "inputSha256": "82a008a0730c057d45fe1544ebe977bc450251768fc81caeb5628d15360abdd6"
+ }
+}

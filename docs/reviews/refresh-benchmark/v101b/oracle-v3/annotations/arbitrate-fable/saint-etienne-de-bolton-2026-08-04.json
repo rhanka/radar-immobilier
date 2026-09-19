@@ -1,0 +1,135 @@
+{
+ "documentId": "saint-etienne-de-bolton-2026-08-04",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dbb8601a27768bf3efa9e573dfd219a14a6d99a501dc980f410fefeaa4b1a383",
+ "verificationSha256": "5e708e46ea67d6a9931720f28f4a0e62934a74ec6a3180564d89060e888c2b9d",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"La citation de la page 2 est le point j de l'ordre du jour, soit une table des matières du procès-verbal ; la règle dit qu'« une table des matières ne crée pas d'unité en plus de la résolution qui la traite » et le même fait est constaté par la résolution 2026-08-156 (page 13), donc retenir cette version serait un « doublon même type/même fait non crédité » — la position de l'annotateur A est écartée pour ce motif.\"},{\"item\":\"a02\",\"choice\":\"v1\",\"reason\":\"L'unité repose sur l'étape constatée dans ce document : « QUE le conseil municipal refuse, sur recommandation du CCU, la demande de dérogation mineure visant à réduire à 2,4 mètres la marge latérale … au 135, rue de la Serpentine, lot 6 380 011 » (résolution 2026-08-156, page 13, ADOPTÉE) ; c'est un objet foncier explicite et un refus qui « reste un refus », donc unité de rappel derogation_mineure — les votes « absent » ne sont motivés que par l'absence de proposition automatique et non par le texte.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u15",
+   "verificationItem": "i15",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Refus de dérogation mineure — piscine à 2,4 mètres de la limite latérale au 135, rue de la Serpentine",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "135, rue de la Serpentine",
+      "page": 2,
+      "citation": "j. Refus de la demande de dérogation mineure de réduire la distance entre une piscine creusée et la limite latérale à 2,4 mètres au lieu de 3 mètres au 135, rue de la Serpentine",
+      "anchor": "135, rue de la Serpentine",
+      "spanStart": 1342,
+      "spanEnd": 1519
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "La citation de la page 2 appartient à l’ordre du jour et atteste un point prévu, tandis que le refus acquis est prononcé par la résolution 2026-08-156 à la page 13."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 2, point j de l'ordre du jour cité mot pour mot, et le refus est confirmé par la résolution 2026-08-156 (pages 12-13) ; les refus restent des refus et l'unité n'est pas dupliquée."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La citation et la page 2 renvoient à l'ordre du jour préliminaire et non à la résolution effective (page 13), ce qui contrevient à la règle interdisant d'extraire depuis une table des matières."
+    }
+   ],
+   "human": {
+    "humanId": null,
+    "choice": "absent"
+   }
+  },
+  {
+   "item": "a02",
+   "kind": "human_only",
+   "unitId": null,
+   "humanId": "B156",
+   "verificationItem": null,
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Refus de dérogation piscine 135 rue de la Serpentine",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "QUE le conseil municipal refuse, sur recommandation du CCU, la demande de dérogation mineure visant à réduire",
+      "page": 13,
+      "citation": "QUE le conseil municipal refuse, sur recommandation du CCU, la demande de dérogation mineure visant à réduire à 2,4 mètres la marge latérale de 3 mètres prescrite au tableau 1 « Bâtiment, construction",
+      "anchor": "QUE le conseil municipal refuse, sur recommandation du CCU, la demande de dérogation mineure visant à réduire",
+      "spanStart": 1088,
+      "spanEnd": 1288,
+      "humanId": "B156",
+      "grounded": true
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "unité jamais proposée par les annotateurs automatiques"
+    }
+   ],
+   "human": {
+    "humanId": "B156",
+    "choice": "v1"
+   }
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "La citation de la page 2 est le point j de l'ordre du jour, soit une table des matières du procès-verbal ; la règle dit qu'« une table des matières ne crée pas d'unité en plus de la résolution qui la traite » et le même fait est constaté par la résolution 2026-08-156 (page 13), donc retenir cette version serait un « doublon même type/même fait non crédité » — la position de l'annotateur A est écartée pour ce motif."
+  },
+  {
+   "item": "a02",
+   "choice": "v1",
+   "reason": "L'unité repose sur l'étape constatée dans ce document : « QUE le conseil municipal refuse, sur recommandation du CCU, la demande de dérogation mineure visant à réduire à 2,4 mètres la marge latérale … au 135, rue de la Serpentine, lot 6 380 011 » (résolution 2026-08-156, page 13, ADOPTÉE) ; c'est un objet foncier explicite et un refus qui « reste un refus », donc unité de rappel derogation_mineure — les votes « absent » ne sont motivés que par l'absence de proposition automatique et non par le texte."
+  }
+ ]
+}

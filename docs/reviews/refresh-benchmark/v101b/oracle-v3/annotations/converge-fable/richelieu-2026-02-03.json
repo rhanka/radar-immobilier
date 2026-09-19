@@ -1,0 +1,91 @@
+{
+ "documentId": "richelieu-2026-02-03",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fa4ca07d51ec4c04f34ef69add32b03bdd44df7a665d8a649157a7dbade61b1e",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Résolution 26-02-037 (p. 6) ordonne de « vendre à l'enchère publique » les immeubles pour arrérages de taxes : acte foncier explicite adopté, citation et page exactes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Résolution 26-02-043 (p. 10) : « Approuve la demande numéro PPCMOI-2025-07 » — résolution finale attestée, les premier et second projets cités en considérants sont des rappels historiques qui ne multiplient pas l'unité.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Résolution 26-02-044 (p. 11) : « Approuve la demande numéro PPCMOI-2025-08 » — adoption finale attestée, citation et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Résolution 26-02-045 (p. 12) : « Approuve la demande numéro PPCMOI-2025-09 » — adoption finale attestée, citation et page exactes.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Résolution 26-02-046 (p. 13) : le conseil « appuie la présente demande auprès de la CPTAQ pour la construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot numéro 5 891 123 » — acte foncier explicite, étape inconnu appropriée.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Résolution 26-02-031 (p. 3) : « le conseil municipal adopte le règlement numéro 26-R-285 » — objet réglementaire explicite adopté ; l'avis de motion du 20 janvier 2026 n'est qu'un rappel historique.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Doublon même type/même fait de i01 (résolution 26-02-037, même objet, même étape, même page) : « Doublon même type/même fait non crédité ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "absent"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Résolution 26-02-037 (p. 6) ordonne de « vendre à l'enchère publique » les immeubles pour arrérages de taxes : acte foncier explicite adopté, citation et page exactes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Résolution 26-02-043 (p. 10) : « Approuve la demande numéro PPCMOI-2025-07 » — résolution finale attestée, les premier et second projets cités en considérants sont des rappels historiques qui ne multiplient pas l'unité."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Résolution 26-02-044 (p. 11) : « Approuve la demande numéro PPCMOI-2025-08 » — adoption finale attestée, citation et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Résolution 26-02-045 (p. 12) : « Approuve la demande numéro PPCMOI-2025-09 » — adoption finale attestée, citation et page exactes."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Résolution 26-02-046 (p. 13) : le conseil « appuie la présente demande auprès de la CPTAQ pour la construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot numéro 5 891 123 » — acte foncier explicite, étape inconnu appropriée."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Résolution 26-02-031 (p. 3) : « le conseil municipal adopte le règlement numéro 26-R-285 » — objet réglementaire explicite adopté ; l'avis de motion du 20 janvier 2026 n'est qu'un rappel historique."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Doublon même type/même fait de i01 (résolution 26-02-037, même objet, même étape, même page) : « Doublon même type/même fait non crédité »."
+  }
+ ]
+}

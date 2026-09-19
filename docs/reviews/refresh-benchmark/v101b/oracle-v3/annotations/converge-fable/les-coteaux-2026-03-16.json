@@ -1,0 +1,121 @@
+{
+ "documentId": "les-coteaux-2026-03-16",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "315677b1715a23a32329865222ea2827b092bfa8fb9eab7f8a457ecb2e58a488",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 5 atteste mot pour mot « D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible de créer des besoins excédant la capacité du système d’égout numéro 335 » : objet réglementaire explicite (335) à l’étape adoption constatée dans ce document.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 5 : « donnent avis de motion, qu’il sera adopté, à une séance subséquente, le Règlement numéro 316-01 modifiant le Règlement de permis et certificats numéro 316 » ; avis de motion et projet d’un même règlement sont des unités distinctes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 5 : « déposent le projet de règlement numéro 316-01 – Règlement modifiant le Règlement de permis et certificats numéro 316 afin d’y apporter des correctifs suite à son remplacement » ; étape projet_reglement distincte de l’avis de motion.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 6 : « donnent avis de motion, qu’il sera adopté, à une séance subséquente, le Règlement numéro 317-01 modifiant le Règlement de zonage numéro 317 » ; objet 317-01, étape avis_motion, page exacte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Page 6 : « déposent le projet de règlement numéro 317-01 – Règlement modifiant le Règlement de zonage numéro 317 afin d’y apporter des correctifs suite à son remplacement » ; étape projet_reglement distincte de l’avis de motion 317-01.\"},{\"item\":\"i06\",\"choice\":\"v2\",\"reason\":\"La résolution 26-03-9288 (page 6) porte l’intitulé exact « DEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614 » et son dispositif vise par erreur le PIIA 2026-02 ; v2 cite le titre verbatim sur une seule ligne alors que v1 joint le numéro de résolution à travers un saut de ligne, donc v2 est la citation strictement exacte.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-9289, page 6 : « D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au 102, rue Principale, afin de permettre le remplacement de 4 fenêtres » ; petit PIIA inclus, objet 2026-02, étape piia.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Résolution 26-03-9290, page 7 : « D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au 78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour avant » ; objet DM-294, étape derogation_mineure exacts.\"},{\"item\":\"i09\",\"choice\":\"absent\",\"reason\":\"Le contrat d’autorisation d’utilisation de l’espace d’amarrage (résolution 26-03-9293, section Loisirs, sport, culture et vie communautaire) est une autorisation d’usage temporaire pour une croisière, non un acte foncier ni un objet d’urbanisme ; il relève des exclusions « marchés de services, loisirs » et reste au plus un fait complémentaire hors gold.\"},{\"item\":\"i10\",\"choice\":\"absent\",\"reason\":\"Même fait que i09 (même citation, même objet parc Louis-Stanislas-Pariseau, page 9) : doublon même type/même fait non crédité, et le contrat d’amarrage relève des exclusions loisirs/marchés de services, hors du périmètre urbanisme ou acte foncier.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v2"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "absent"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 5 atteste mot pour mot « D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible de créer des besoins excédant la capacité du système d’égout numéro 335 » : objet réglementaire explicite (335) à l’étape adoption constatée dans ce document."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 5 : « donnent avis de motion, qu’il sera adopté, à une séance subséquente, le Règlement numéro 316-01 modifiant le Règlement de permis et certificats numéro 316 » ; avis de motion et projet d’un même règlement sont des unités distinctes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 5 : « déposent le projet de règlement numéro 316-01 – Règlement modifiant le Règlement de permis et certificats numéro 316 afin d’y apporter des correctifs suite à son remplacement » ; étape projet_reglement distincte de l’avis de motion."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 6 : « donnent avis de motion, qu’il sera adopté, à une séance subséquente, le Règlement numéro 317-01 modifiant le Règlement de zonage numéro 317 » ; objet 317-01, étape avis_motion, page exacte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Page 6 : « déposent le projet de règlement numéro 317-01 – Règlement modifiant le Règlement de zonage numéro 317 afin d’y apporter des correctifs suite à son remplacement » ; étape projet_reglement distincte de l’avis de motion 317-01."
+  },
+  {
+   "item": "i06",
+   "choice": "v2",
+   "reason": "La résolution 26-03-9288 (page 6) porte l’intitulé exact « DEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614 » et son dispositif vise par erreur le PIIA 2026-02 ; v2 cite le titre verbatim sur une seule ligne alors que v1 joint le numéro de résolution à travers un saut de ligne, donc v2 est la citation strictement exacte."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Résolution 26-03-9289, page 6 : « D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au 102, rue Principale, afin de permettre le remplacement de 4 fenêtres » ; petit PIIA inclus, objet 2026-02, étape piia."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Résolution 26-03-9290, page 7 : « D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au 78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour avant » ; objet DM-294, étape derogation_mineure exacts."
+  },
+  {
+   "item": "i09",
+   "choice": "absent",
+   "reason": "Le contrat d’autorisation d’utilisation de l’espace d’amarrage (résolution 26-03-9293, section Loisirs, sport, culture et vie communautaire) est une autorisation d’usage temporaire pour une croisière, non un acte foncier ni un objet d’urbanisme ; il relève des exclusions « marchés de services, loisirs » et reste au plus un fait complémentaire hors gold."
+  },
+  {
+   "item": "i10",
+   "choice": "absent",
+   "reason": "Même fait que i09 (même citation, même objet parc Louis-Stanislas-Pariseau, page 9) : doublon même type/même fait non crédité, et le contrat d’amarrage relève des exclusions loisirs/marchés de services, hors du périmètre urbanisme ou acte foncier."
+  }
+ ]
+}

@@ -1,0 +1,36 @@
+{
+ "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "64645cf466b0c1b2febbbb61b67c06d9e0db8809b661c84d8b327a54f1b29f6b",
+ "inputSha256": "e886e569912cbe078a1bb03d4a50924ee72291f316d10c7071261458a2f5365d",
+ "responseSha256": "566abc9f22b723c80a5c7545e32a87eacaea7b1fff4a10b73a4aecc73c0319e4",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 76018,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 10020,
+  "outputTokens": 2473,
+  "totalTokens": 12493
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 76015,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:19:34.392Z"
+}

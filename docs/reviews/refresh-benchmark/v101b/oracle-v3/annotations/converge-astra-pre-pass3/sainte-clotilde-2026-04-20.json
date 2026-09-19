@@ -1,0 +1,121 @@
+{
+ "documentId": "sainte-clotilde-2026-04-20",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "0a6d0945f3380377a44255675f73219b411ba67d3edba411bfa752f60ddf1ead",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-182, page 4, adopte l’acquisition du lot 6 592 592 destiné au stationnement et à l’espace vert du futur CPE, ce qui constitue un acte foncier explicite.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-182, page 4, adopte également l’acquisition du lot distinct 6 199 726 pour agrandir le terrain du garage municipal.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 6 atteste expressément l’adoption du règlement 533 sur l’installation des clapets anti-retour, dont les exigences applicables aux bâtiments sont décrites page 5.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"Au point 10.2, page 9, Robert Arcoite donne effectivement avis de motion du règlement 471-09 modifiant le zonage, étape distincte du dépôt du projet.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"Au point 10.2, page 9, le texte précise qu’un projet du règlement 471-09 est déposé séance tenante, ce qui constitue une unité distincte de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"Au point 10.3, page 9, Marcel Tremblay donne avis de motion du règlement 470-04 visant à modifier le plan d’urbanisme.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"Au point 10.3, page 9, le dépôt séance tenante du projet de règlement 470-04 est expressément constaté et doit être distingué de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"Au point 10.4, page 9, François Barbeau donne avis de motion du règlement 472-04 modifiant le règlement de lotissement.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"Au point 10.4, page 9, le texte atteste le dépôt séance tenante du projet de règlement 472-04, étape distincte de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-195, page 10, adopte la correction de l’appui 2025-12-286 par l’ajout d’une partie du lot 6 471 805, constituant un acte actuel et non un simple rappel historique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-182, page 4, adopte l’acquisition du lot 6 592 592 destiné au stationnement et à l’espace vert du futur CPE, ce qui constitue un acte foncier explicite."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-182, page 4, adopte également l’acquisition du lot distinct 6 199 726 pour agrandir le terrain du garage municipal."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 6 atteste expressément l’adoption du règlement 533 sur l’installation des clapets anti-retour, dont les exigences applicables aux bâtiments sont décrites page 5."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Au point 10.2, page 9, Robert Arcoite donne effectivement avis de motion du règlement 471-09 modifiant le zonage, étape distincte du dépôt du projet."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Au point 10.2, page 9, le texte précise qu’un projet du règlement 471-09 est déposé séance tenante, ce qui constitue une unité distincte de l’avis de motion."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Au point 10.3, page 9, Marcel Tremblay donne avis de motion du règlement 470-04 visant à modifier le plan d’urbanisme."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Au point 10.3, page 9, le dépôt séance tenante du projet de règlement 470-04 est expressément constaté et doit être distingué de l’avis de motion."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Au point 10.4, page 9, François Barbeau donne avis de motion du règlement 472-04 modifiant le règlement de lotissement."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Au point 10.4, page 9, le texte atteste le dépôt séance tenante du projet de règlement 472-04, étape distincte de l’avis de motion."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-195, page 10, adopte la correction de l’appui 2025-12-286 par l’ajout d’une partie du lot 6 471 805, constituant un acte actuel et non un simple rappel historique."
+  }
+ ]
+}

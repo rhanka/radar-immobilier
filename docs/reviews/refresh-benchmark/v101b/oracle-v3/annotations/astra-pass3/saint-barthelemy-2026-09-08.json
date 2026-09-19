@@ -1,0 +1,244 @@
+{
+ "documentId": "saint-barthelemy-2026-09-08",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "8942644f3bccd5757ec4286a05384d385cab43e5f710cac83f6a72b8a6fb882a",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 738-26 — constructions accessoires en cour avant des propriétés en bordure d’un lac\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"738-26\",\n        \"page\": 3,\n        \"citation\": \"4.1 ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE\\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE LES CONSTRUCTIONS\\nACCESSOIRES EN COUR AVANT\",\n        \"anchor\": \"RÈGLEMENT NUMÉRO 738-26\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les retours à la ligne du titre de la résolution, page 3, doivent être conservés.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Avis de motion — modification du zonage 288-90 pour permettre des immeubles à logements dans les zones R-7 et R-8\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"288-90\",\n        \"page\": 4,\n        \"citation\": \"4.2 AVIS DE MOTION – PROJET DE RÈGLEMENT AMENDANT LE RÈGLEMENT DE\\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À LOGEMENTS\\nDANS LES ZONES R-7 ET R-8\",\n        \"anchor\": \"ZONAGE NUMÉRO 288-90\"\n      },\n      \"reason\": \"La citation courante remplace les retours à la ligne par des espaces, contrairement à l’exigence de recopier l’extrait à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet de règlement 739-26 — immeubles à logements dans les zones R-7 et R-8\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"739-26\",\n        \"page\": 4,\n        \"citation\": \"4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 AMENDANT\\nLE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES\\nIMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8\",\n        \"anchor\": \"RÈGLEMENT NUMÉRO 739-26\"\n      },\n      \"reason\": \"La citation doit conserver les retours à la ligne du titre du point 4.3 pour être identique au texte fourni.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Vente autorisée du matricule 3220-74-4030 près du Camping du Vieux Moulin — sans aménagement permanent\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"3220-74-4030\",\n        \"page\": 6,\n        \"citation\": \"à signer pour et au\\nnom de la Municipalité les documents nécessaires à la vente des immeubles identifiés\\npar les matricules 3220-74-4030 et 3220-73-6695\",\n        \"anchor\": \"matricules 3220-74-4030\"\n      },\n      \"reason\": \"La citation de l’autorisation de vente doit reproduire à l’identique les retours à la ligne présents à la page 6.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Vente autorisée du matricule 3220-73-6695 près du Camping du Vieux Moulin — sans aménagement permanent\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"3220-73-6695\",\n        \"page\": 6,\n        \"citation\": \"à signer pour et au\\nnom de la Municipalité les documents nécessaires à la vente des immeubles identifiés\\npar les matricules 3220-74-4030 et 3220-73-6695\",\n        \"anchor\": \"et 3220-73-6695\"\n      },\n      \"reason\": \"La citation de l’autorisation de vente doit reproduire à l’identique les retours à la ligne présents à la page 6.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Acquisition autorisée d’une portion de la Montée du Lac-Robert — matricule 2723-93-7328\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2723-93-7328\",\n        \"page\": 7,\n        \"citation\": \"à signer pour et au\\nnom de la Municipalité les documents nécessaires à l'achat de l'immeuble identifié\\npar le matricule 2723-93-7328\",\n        \"anchor\": \"matricule 2723-93-7328\"\n      },\n      \"reason\": \"La citation courante supprime des retours à la ligne de l’autorisation d’achat, alors que l’extrait doit être recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Vente autorisée du terrain du 180, rang York — matricule 3418-41-5276 — aménagements permanents interdits sauf travaux de correction majeurs de la pente\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"3418-41-5276\",\n        \"page\": 7,\n        \"citation\": \"à signer pour et au\\nnom de la Municipalité les documents nécessaires à la vente de l'immeuble identifié\\npar le matricule 3418-41-5276\",\n        \"anchor\": \"matricule 3418-41-5276\"\n      },\n      \"reason\": \"La citation courante supprime des retours à la ligne de l’autorisation de vente, alors que l’extrait doit être recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Vente autorisée de l’immeuble 6 621 027 de Chéné Immobilier Inc. à Hulix S.E.N.C., sous conditions\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 621 027\",\n        \"page\": 8,\n        \"citation\": \"le conseil municipal autorise la vente de l'immeuble 6 621 027 de Chéné Immobilier\\nInc. à Hulix S.E.N.C\",\n        \"anchor\": \"l'immeuble 6 621 027\"\n      },\n      \"reason\": \"Le retour à la ligne entre « Immobilier » et « Inc. » doit être rétabli pour respecter l’exigence d’une citation identique au texte.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Autorisation du prolongement du réseau d’aqueduc sur le rang York à Saint-Cuthbert\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"réseau d'aqueduc\",\n        \"page\": 10,\n        \"citation\": \"la Municipalité de Saint-Barthélemy accepte la demande de Saint-Cuthbert pour\\nprolonger le réseau d'aqueduc afin de desservir quelques résidences\\nsupplémentaires sur leur territoire\",\n        \"anchor\": \"prolonger le réseau d'aqueduc\"\n      },\n      \"reason\": \"La citation de la décision doit conserver les retours à la ligne de la page 10 afin d’être recopiée à l’identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Adoption du règlement 738-26 — constructions accessoires en cour avant des propriétés en bordure d’un lac",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "738-26",
+    "page": 3,
+    "citation": "4.1 ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE LES CONSTRUCTIONS\nACCESSOIRES EN COUR AVANT",
+    "anchor": "RÈGLEMENT NUMÉRO 738-26"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les retours à la ligne du titre de la résolution, page 3, doivent être conservés."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Avis de motion — modification du zonage 288-90 pour permettre des immeubles à logements dans les zones R-7 et R-8",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "288-90",
+    "page": 4,
+    "citation": "4.2 AVIS DE MOTION – PROJET DE RÈGLEMENT AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À LOGEMENTS\nDANS LES ZONES R-7 ET R-8",
+    "anchor": "ZONAGE NUMÉRO 288-90"
+   },
+   "reason": "La citation courante remplace les retours à la ligne par des espaces, contrairement à l’exigence de recopier l’extrait à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption du premier projet de règlement 739-26 — immeubles à logements dans les zones R-7 et R-8",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "739-26",
+    "page": 4,
+    "citation": "4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 AMENDANT\nLE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES\nIMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8",
+    "anchor": "RÈGLEMENT NUMÉRO 739-26"
+   },
+   "reason": "La citation doit conserver les retours à la ligne du titre du point 4.3 pour être identique au texte fourni."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Vente autorisée du matricule 3220-74-4030 près du Camping du Vieux Moulin — sans aménagement permanent",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "3220-74-4030",
+    "page": 6,
+    "citation": "à signer pour et au\nnom de la Municipalité les documents nécessaires à la vente des immeubles identifiés\npar les matricules 3220-74-4030 et 3220-73-6695",
+    "anchor": "matricules 3220-74-4030"
+   },
+   "reason": "La citation de l’autorisation de vente doit reproduire à l’identique les retours à la ligne présents à la page 6."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Vente autorisée du matricule 3220-73-6695 près du Camping du Vieux Moulin — sans aménagement permanent",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "3220-73-6695",
+    "page": 6,
+    "citation": "à signer pour et au\nnom de la Municipalité les documents nécessaires à la vente des immeubles identifiés\npar les matricules 3220-74-4030 et 3220-73-6695",
+    "anchor": "et 3220-73-6695"
+   },
+   "reason": "La citation de l’autorisation de vente doit reproduire à l’identique les retours à la ligne présents à la page 6."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Acquisition autorisée d’une portion de la Montée du Lac-Robert — matricule 2723-93-7328",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2723-93-7328",
+    "page": 7,
+    "citation": "à signer pour et au\nnom de la Municipalité les documents nécessaires à l'achat de l'immeuble identifié\npar le matricule 2723-93-7328",
+    "anchor": "matricule 2723-93-7328"
+   },
+   "reason": "La citation courante supprime des retours à la ligne de l’autorisation d’achat, alors que l’extrait doit être recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Vente autorisée du terrain du 180, rang York — matricule 3418-41-5276 — aménagements permanents interdits sauf travaux de correction majeurs de la pente",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "3418-41-5276",
+    "page": 7,
+    "citation": "à signer pour et au\nnom de la Municipalité les documents nécessaires à la vente de l'immeuble identifié\npar le matricule 3418-41-5276",
+    "anchor": "matricule 3418-41-5276"
+   },
+   "reason": "La citation courante supprime des retours à la ligne de l’autorisation de vente, alors que l’extrait doit être recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Vente autorisée de l’immeuble 6 621 027 de Chéné Immobilier Inc. à Hulix S.E.N.C., sous conditions",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 621 027",
+    "page": 8,
+    "citation": "le conseil municipal autorise la vente de l'immeuble 6 621 027 de Chéné Immobilier\nInc. à Hulix S.E.N.C",
+    "anchor": "l'immeuble 6 621 027"
+   },
+   "reason": "Le retour à la ligne entre « Immobilier » et « Inc. » doit être rétabli pour respecter l’exigence d’une citation identique au texte."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Autorisation du prolongement du réseau d’aqueduc sur le rang York à Saint-Cuthbert",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "réseau d'aqueduc",
+    "page": 10,
+    "citation": "la Municipalité de Saint-Barthélemy accepte la demande de Saint-Cuthbert pour\nprolonger le réseau d'aqueduc afin de desservir quelques résidences\nsupplémentaires sur leur territoire",
+    "anchor": "prolonger le réseau d'aqueduc"
+   },
+   "reason": "La citation de la décision doit conserver les retours à la ligne de la page 10 afin d’être recopiée à l’identique."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 3,
+   "citation": "4.1 ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE LES CONSTRUCTIONS\nACCESSOIRES EN COUR AVANT"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "avis_motion",
+   "page": 4,
+   "citation": "4.2 AVIS DE MOTION – PROJET DE RÈGLEMENT AMENDANT LE RÈGLEMENT DE\nZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À LOGEMENTS\nDANS LES ZONES R-7 ET R-8"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "projet_reglement",
+   "page": 4,
+   "citation": "4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 AMENDANT\nLE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES\nIMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "adoption",
+   "page": 6,
+   "citation": "à signer pour et au\nnom de la Municipalité les documents nécessaires à la vente des immeubles identifiés\npar les matricules 3220-74-4030 et 3220-73-6695"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "adoption",
+   "page": 6,
+   "citation": "à signer pour et au\nnom de la Municipalité les documents nécessaires à la vente des immeubles identifiés\npar les matricules 3220-74-4030 et 3220-73-6695"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "adoption",
+   "page": 7,
+   "citation": "à signer pour et au\nnom de la Municipalité les documents nécessaires à l'achat de l'immeuble identifié\npar le matricule 2723-93-7328"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "adoption",
+   "page": 7,
+   "citation": "à signer pour et au\nnom de la Municipalité les documents nécessaires à la vente de l'immeuble identifié\npar le matricule 3418-41-5276"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "adoption",
+   "page": 8,
+   "citation": "le conseil municipal autorise la vente de l'immeuble 6 621 027 de Chéné Immobilier\nInc. à Hulix S.E.N.C"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "adoption",
+   "page": 10,
+   "citation": "la Municipalité de Saint-Barthélemy accepte la demande de Saint-Cuthbert pour\nprolonger le réseau d'aqueduc afin de desservir quelques résidences\nsupplémentaires sur leur territoire"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 9
+}

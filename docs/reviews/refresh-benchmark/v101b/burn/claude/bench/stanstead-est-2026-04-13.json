@@ -1,0 +1,13 @@
+{
+ "id": "stanstead-est-2026-04-13",
+ "rc": 0,
+ "latencyMs": 542924,
+ "inputTokens": 6,
+ "outputTokens": 80108,
+ "cacheRead": 24029,
+ "cacheCreate": 88094,
+ "costUsd": 2.9131375,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 33886
+}

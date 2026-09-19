@@ -1,0 +1,35 @@
+{
+ "documentId": "les-coteaux-2026-03-16",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "33bcf3bc1307cff5a3ee0ad5a6ff46e044f814d84100cb200e359e918a3a17a7",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2727,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 13083,
+   "outputTokens": 845,
+   "totalTokens": 13928
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2554
+  },
+  "inputSha256": "a995975c39b005bdfc3de090fcce4601c5da10a583b44cb9198b546dfed52ff3"
+ },
+ "at": "2026-09-19T03:22:26.292Z"
+}

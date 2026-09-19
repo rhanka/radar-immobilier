@@ -1,0 +1,74 @@
+{
+ "documentId": "stanstead-est-2026-04-13",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dde58b22ba15c59d0eb3228c87709123e0bb175a8e28a5158f89e617de9987e8",
+ "verificationSha256": "a81d7a8571e60589fadbefc1fbec14e4752d0028dc1f15817e2168ecd0e63edf",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"La résolution 2026-04-22 ne constitue pas un acte foncier ou réglementaire d'urbanisme, mais l'acceptation d'une soumission pour la « location de son garage situé au 1420 chemin Ball brook [...] pour une durée de 12 mois » à titre de « solution temporaire » pour les travaux de voirie, ce qui relève de la gestion contractuelle courante exclue du rappel.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Location autorisée du garage au 1420 chemin Ball brook pour douze mois",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "1420 chemin Ball brook",
+      "page": 13,
+      "citation": "location de son garage situé au 1420 chemin Ball brook à BarnstonOuestpour une durée de 12 mois moyennant un montant mensuel de 1 350",
+      "anchor": "1420 chemin Ball brook",
+      "spanStart": 2587,
+      "spanEnd": 2720
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-04-22, page 13, accepte la location du garage au 1420 chemin Ball brook pour douze mois à 1 350 $ par mois, acte foncier non résidentiel inclus par les règles."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "La location temporaire d'un garage privé par acceptation de la soumission des Entreprises Y. Fecteau (12 mois, 1 350 $/mois) est un marché de location/services et non un acte réglementaire ou foncier explicite ; les règles excluent les marchés de services du rappel, à signaler au plus comme fait complémentaire hors gold."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La location temporaire d'un garage pour les travaux de voirie relève d'un marché ou d'un bail d'entretien et ne constitue pas un acte foncier ou d'urbanisme."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "La résolution 2026-04-22 ne constitue pas un acte foncier ou réglementaire d'urbanisme, mais l'acceptation d'une soumission pour la « location de son garage situé au 1420 chemin Ball brook [...] pour une durée de 12 mois » à titre de « solution temporaire » pour les travaux de voirie, ce qui relève de la gestion contractuelle courante exclue du rappel."
+  }
+ ]
+}

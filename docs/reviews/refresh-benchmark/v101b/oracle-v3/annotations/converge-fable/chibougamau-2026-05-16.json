@@ -1,0 +1,61 @@
+{
+ "documentId": "chibougamau-2026-05-16",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "d5bbc9d8affb236747fc5a0ca9e54e5d3b2a830aa9d3167e8fc5684f508255e2",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le texte de la page 16 atteste mot pour mot la demande de PIIA 2026-002 pour le 959, 3e Rue (lot 6 659 704), objet réglementaire explicite avec étape piia, et la règle inclut les petits PIIA.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le texte de la page 17 atteste mot pour mot la demande de PIIA 2026-003 pour le 418, 3e Rue (lot 3 867 144), unité distincte de la précédente par son numéro et son adresse, étape piia conforme.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le texte de la page 18 atteste mot pour mot la demande de dérogation mineure 2026-003 pour le 170, rue Joe-Mann (lot 3 868 446), objet et étape derogation_mineure exacts.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le texte de la page 19 atteste mot pour mot la demande de dérogation mineure 2026-004 pour le 516, 4e Rue (lot 3 866 957), objet, citation, page et étape derogation_mineure exacts.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le texte de la page 16 atteste mot pour mot la demande de PIIA 2026-002 pour le 959, 3e Rue (lot 6 659 704), objet réglementaire explicite avec étape piia, et la règle inclut les petits PIIA."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le texte de la page 17 atteste mot pour mot la demande de PIIA 2026-003 pour le 418, 3e Rue (lot 3 867 144), unité distincte de la précédente par son numéro et son adresse, étape piia conforme."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le texte de la page 18 atteste mot pour mot la demande de dérogation mineure 2026-003 pour le 170, rue Joe-Mann (lot 3 868 446), objet et étape derogation_mineure exacts."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le texte de la page 19 atteste mot pour mot la demande de dérogation mineure 2026-004 pour le 516, 4e Rue (lot 3 866 957), objet, citation, page et étape derogation_mineure exacts."
+  }
+ ]
+}

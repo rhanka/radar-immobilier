@@ -1,0 +1,13 @@
+{
+ "id": "lac-des-seize-iles-2026-09-agenda",
+ "rc": 0,
+ "latencyMs": 91561,
+ "inputTokens": 2,
+ "outputTokens": 14046,
+ "cacheRead": 0,
+ "cacheCreate": 3419,
+ "costUsd": 0.38727599999999995,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 27237
+}

@@ -1,0 +1,19 @@
+{
+ "documentId": "lavenir-2026-05-04",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "d7354ffa0bf6896c5c0bb8a31d61f6c4a251ddc132c709cda391c4038340a4a8",
+ "verificationSha256": "d528040a257d36a9b1896923a33397bef8e0db5542315d82eda80bbbaf7554e0",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

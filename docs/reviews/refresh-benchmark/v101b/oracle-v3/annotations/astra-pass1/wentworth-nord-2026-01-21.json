@@ -1,0 +1,113 @@
+{
+ "documentId": "wentworth-nord-2026-01-21",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "399106cbc59e8249307755d9a5f59932daed03997eac318002c81877d5d8b472",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Acceptation de la dérogation mineure 2025-0418 — largeur de l’emprise du chemin de l’Adiante\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2025-0418\",\n        \"page\": 9,\n        \"citation\": \"ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une\\nemprise de rue\",\n        \"anchor\": \"demande de dérogation mineure 2025-0418\"\n      },\n      \"reason\": \"La résolution accepte une emprise de 11,50 mètres au lieu de 12 mètres pour une voie locale de pente transversale inférieure à 10 %, tout en transmettant la demande à la MRC pour qu’elle statue également.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Contribution pour parcs exigée en argent — lotissement 2025-9029, montant de 12 302.60 $\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2025-9029\",\n        \"page\": 9,\n        \"citation\": \"8.4 CONTRIBUTION POUR FINS DE PARCS, TERRAINS DE JEUX ET ESPACES\\nNATURELS – DEMANDE DE PERMIS DE LOTISSEMENT 2025-9029\",\n        \"anchor\": \"PERMIS DE LOTISSEMENT 2025-9029\"\n      },\n      \"reason\": \"La résolution 2026-01-3810 exige une contribution en argent de 12 302.60 $ pour cette opération cadastrale, et les contributions pour parcs sont explicitement incluses.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt du certificat de résultat de l’enregistrement référendaire — règlement 2017-498-30-C09\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2017-498-30-C09\",\n        \"page\": 11,\n        \"citation\": \"Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage\",\n        \"anchor\": \"Règlement n° 2017-498-30-C09\"\n      },\n      \"reason\": \"Le dépôt actuel des certificats au point 8.7 vise explicitement ce règlement distinct concernant la zone C-09 ; cette étape constitue une unité sans attester une nouvelle adoption.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt du certificat de résultat de l’enregistrement référendaire — règlement 2017-498-30-CONS08\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2017-498-30-CONS08\",\n        \"page\": 11,\n        \"citation\": \"Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\",\n        \"anchor\": \"Règlement n° 2017-498-30-CONS08\"\n      },\n      \"reason\": \"Le règlement concernant la zone CONS-08 est explicitement nommé parmi les objets du dépôt des certificats, et chaque règlement distinct doit avoir sa propre unité.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt du certificat de résultat de l’enregistrement référendaire — règlement 2017-498-30-I04\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2017-498-30-I04\",\n        \"page\": 11,\n        \"citation\": \"Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\",\n        \"anchor\": \"Règlement n° 2017-498-30-I04\"\n      },\n      \"reason\": \"Le règlement concernant la zone I-04 est explicitement nommé parmi les objets du dépôt des certificats, ce qui atteste une étape actuelle distincte et non une adoption.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Acceptation de la dérogation mineure 2025-0418 — largeur de l’emprise du chemin de l’Adiante",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2025-0418",
+    "page": 9,
+    "citation": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une\nemprise de rue",
+    "anchor": "demande de dérogation mineure 2025-0418"
+   },
+   "reason": "La résolution accepte une emprise de 11,50 mètres au lieu de 12 mètres pour une voie locale de pente transversale inférieure à 10 %, tout en transmettant la demande à la MRC pour qu’elle statue également."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Contribution pour parcs exigée en argent — lotissement 2025-9029, montant de 12 302.60 $",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2025-9029",
+    "page": 9,
+    "citation": "8.4 CONTRIBUTION POUR FINS DE PARCS, TERRAINS DE JEUX ET ESPACES\nNATURELS – DEMANDE DE PERMIS DE LOTISSEMENT 2025-9029",
+    "anchor": "PERMIS DE LOTISSEMENT 2025-9029"
+   },
+   "reason": "La résolution 2026-01-3810 exige une contribution en argent de 12 302.60 $ pour cette opération cadastrale, et les contributions pour parcs sont explicitement incluses."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt du certificat de résultat de l’enregistrement référendaire — règlement 2017-498-30-C09",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2017-498-30-C09",
+    "page": 11,
+    "citation": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage",
+    "anchor": "Règlement n° 2017-498-30-C09"
+   },
+   "reason": "Le dépôt actuel des certificats au point 8.7 vise explicitement ce règlement distinct concernant la zone C-09 ; cette étape constitue une unité sans attester une nouvelle adoption."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt du certificat de résultat de l’enregistrement référendaire — règlement 2017-498-30-CONS08",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2017-498-30-CONS08",
+    "page": 11,
+    "citation": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel",
+    "anchor": "Règlement n° 2017-498-30-CONS08"
+   },
+   "reason": "Le règlement concernant la zone CONS-08 est explicitement nommé parmi les objets du dépôt des certificats, et chaque règlement distinct doit avoir sa propre unité."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt du certificat de résultat de l’enregistrement référendaire — règlement 2017-498-30-I04",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2017-498-30-I04",
+    "page": 11,
+    "citation": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel",
+    "anchor": "Règlement n° 2017-498-30-I04"
+   },
+   "reason": "Le règlement concernant la zone I-04 est explicitement nommé parmi les objets du dépôt des certificats, ce qui atteste une étape actuelle distincte et non une adoption."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 5
+}

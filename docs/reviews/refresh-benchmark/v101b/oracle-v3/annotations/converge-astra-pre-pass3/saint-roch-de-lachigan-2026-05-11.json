@@ -1,0 +1,81 @@
+{
+ "documentId": "saint-roch-de-lachigan-2026-05-11",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "29cbae05ed64d89ab15b797a6a429860b02be66efd75d56eef12f530f2d1a9be",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"absent\",\n      \"reason\": \"Le point 8.5, page 2, prévoit l’exercice du droit de préemption sur le lot 6 141 751, mais n’atteste pas l’étape « adoption » proposée.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 10.1, page 2, inscrit la démolition du 16, rue de l’Île-Majeau à l’ordre du jour sans préciser de décision, conformément au caractère prévu et à l’étape « inconnu ».\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 10.2, page 2, prévoit explicitement l’autorisation d’une dérogation mineure au 296 rang de la Rivière Nord, sans attester une décision acquise.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 10.3, page 2, prévoit explicitement l’autorisation d’une dérogation mineure au 28 rue Beaucage, sans attester une décision acquise.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"absent\",\n      \"reason\": \"Le point 10.4, page 2, prévoit une autorisation de modification d’affichage au 1224 rue Principale, mais ne mentionne pas d’adoption justifiant l’étape proposée.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"absent\",\n      \"reason\": \"Le point 10.5, page 2, prévoit une autorisation de travaux au 1484, rue Principale, mais ne mentionne pas d’adoption justifiant l’étape proposée.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "Le point 8.5, page 2, prévoit l’exercice du droit de préemption sur le lot 6 141 751, mais n’atteste pas l’étape « adoption » proposée."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 10.1, page 2, inscrit la démolition du 16, rue de l’Île-Majeau à l’ordre du jour sans préciser de décision, conformément au caractère prévu et à l’étape « inconnu »."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 10.2, page 2, prévoit explicitement l’autorisation d’une dérogation mineure au 296 rang de la Rivière Nord, sans attester une décision acquise."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 10.3, page 2, prévoit explicitement l’autorisation d’une dérogation mineure au 28 rue Beaucage, sans attester une décision acquise."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "Le point 10.4, page 2, prévoit une autorisation de modification d’affichage au 1224 rue Principale, mais ne mentionne pas d’adoption justifiant l’étape proposée."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Le point 10.5, page 2, prévoit une autorisation de travaux au 1484, rue Principale, mais ne mentionne pas d’adoption justifiant l’étape proposée."
+  }
+ ]
+}

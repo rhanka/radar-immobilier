@@ -1,0 +1,268 @@
+{
+ "documentId": "sainte-sophie-2026-06-02",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "b12e935d6f4ef979a86094865d8385d31cb11d7e3c998e244e25419e22ffee56",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Second projet prévu SP-2026-14 — zonage, zone CH-217 et contributions pour parcs\",\n        \"stage\": \"second_projet\",\n        \"procedure\": null,\n        \"objet\": \"SP-2026-14\",\n        \"page\": 1,\n        \"citation\": \"Second projet de règlement SP-2026-14 - Amendement au Règlement 1297-2020 relatif\\nau zonage afin de modifier l'article 1.4.2\",\n        \"anchor\": \"règlement SP-2026-14\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique, y compris le saut de ligne entre « relatif » et « au zonage ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Second projet prévu SP-2026-15 — zonage, zone V-802\",\n        \"stage\": \"second_projet\",\n        \"procedure\": null,\n        \"objet\": \"SP-2026-15\",\n        \"page\": 1,\n        \"citation\": \"Second projet de règlement SP-2026-15 - Amendement au Règlement 1297-2020 relatif\\nau zonage afin de modifier l'annexe 3 - Grille des spécifications, zone V-802\",\n        \"anchor\": \"règlement SP-2026-15\"\n      },\n      \"reason\": \"La citation doit respecter le saut de ligne présent après « relatif » pour être identique au texte fourni.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du règlement 1470-2026 — plan d'urbanisme\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"1470-2026\",\n        \"page\": 1,\n        \"citation\": \"Règlement 1470-2026 - Amendement au Règlement 1296-2020 relatif au plan\\nd'urbanisme afin d’assurer sa conformité au Règlement 399-25\",\n        \"anchor\": \"Règlement 1470-2026\"\n      },\n      \"reason\": \"L'exigence de citation à l'identique impose de rétablir le saut de ligne entre « plan » et « d'urbanisme ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du règlement 1471-2026 — zonage\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"1471-2026\",\n        \"page\": 1,\n        \"citation\": \"Règlement 1471-2026 - Amendement au Règlement 1297-2020 relatif au zonage afin\\nd’assurer sa conformité au Règlement 399-25\",\n        \"anchor\": \"Règlement 1471-2026\"\n      },\n      \"reason\": \"La citation originale comporte un saut de ligne après « afin », qui doit être conservé conformément à la règle de copie à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du règlement 1472-2026 — permis et certificats\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"1472-2026\",\n        \"page\": 1,\n        \"citation\": \"Règlement 1472-2026 - Amendement au Règlement 1299-2020 relatif aux permis et\\ncertificats afin d’assurer sa conformité au Règlement 399-25\",\n        \"anchor\": \"Règlement 1472-2026\"\n      },\n      \"reason\": \"La citation doit reproduire le saut de ligne entre « permis et » et « certificats » présent à la page 1.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du règlement 1473-2026 — réglementation des PIIA\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"1473-2026\",\n        \"page\": 1,\n        \"citation\": \"Règlement 1473-2026 - Amendement au Règlement 1300-2020 relatif aux plans\\nd'implantation et d'intégration architecturale (PIIA) afin d’assurer sa conformité au\\nRèglement 399-25\",\n        \"anchor\": \"Règlement 1473-2026\"\n      },\n      \"reason\": \"Les sauts de ligne après « plans » et avant « Règlement 399-25 » doivent être rétablis pour respecter la citation à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Demande de prolongation de délai prévue — conformité au règlement 399-25, lotissement agricole\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"399-25\",\n        \"page\": 2,\n        \"citation\": \"Demande de prolongation de délai auprès du ministre des Affaires municipales et de\\nl'Habitation – Mise en conformité aux normes de lotissement en zone agricole découlant\\ndu règlement 399-25\",\n        \"anchor\": \"règlement 399-25\"\n      },\n      \"reason\": \"La citation doit conserver les sauts de ligne avant « l'Habitation » et avant « du règlement 399-25 » figurant dans le document.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Demande de modification prévue du règlement 188-07 — réduction de l'aire Conservation\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"188-07\",\n        \"page\": 2,\n        \"citation\": \"Demande de modification au règlement 188-07 relatif au schéma d'aménagement et de\\ndéveloppement révisé afin de réduire la superficie de l'aire d'affectation « Conservation\",\n        \"anchor\": \"règlement 188-07\"\n      },\n      \"reason\": \"Le saut de ligne avant « développement révisé » doit être reproduit conformément à l'exigence de citation à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Autorisation prévue d'une servitude de tolérance — lot 4 037 185, rue Samson\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"4 037 185\",\n        \"page\": 2,\n        \"citation\": \"Servitude de tolérance pour l'empiètement d'un mur de soutènement en roche dans\\nl'emprise de la rue Samson sur une parcelle du lot 4 037 185\",\n        \"anchor\": \"lot 4 037 185\"\n      },\n      \"reason\": \"La citation doit rétablir le saut de ligne après « dans » pour être une reproduction exacte du point 6.3.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Examen prévu d'une demande de PIIA — 799, rue de New Glasgow\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"799, rue de New Glasgow\",\n        \"page\": 3,\n        \"citation\": \"Demande de plan d'implantation et d'intégration architecturale (PIIA) - 799, rue de New\\nGlasgow\",\n        \"anchor\": \"799, rue de New\\nGlasgow\"\n      },\n      \"reason\": \"Le document sépare « New » et « Glasgow » par un saut de ligne, à conserver dans la citation et dans l'ancre qui doit en être une sous-chaîne exacte.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Second projet prévu SP-2026-14 — zonage, zone CH-217 et contributions pour parcs",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "SP-2026-14",
+    "page": 1,
+    "citation": "Second projet de règlement SP-2026-14 - Amendement au Règlement 1297-2020 relatif\nau zonage afin de modifier l'article 1.4.2",
+    "anchor": "règlement SP-2026-14"
+   },
+   "reason": "La citation doit être recopiée à l'identique, y compris le saut de ligne entre « relatif » et « au zonage »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Second projet prévu SP-2026-15 — zonage, zone V-802",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "SP-2026-15",
+    "page": 1,
+    "citation": "Second projet de règlement SP-2026-15 - Amendement au Règlement 1297-2020 relatif\nau zonage afin de modifier l'annexe 3 - Grille des spécifications, zone V-802",
+    "anchor": "règlement SP-2026-15"
+   },
+   "reason": "La citation doit respecter le saut de ligne présent après « relatif » pour être identique au texte fourni."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption prévue du règlement 1470-2026 — plan d'urbanisme",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1470-2026",
+    "page": 1,
+    "citation": "Règlement 1470-2026 - Amendement au Règlement 1296-2020 relatif au plan\nd'urbanisme afin d’assurer sa conformité au Règlement 399-25",
+    "anchor": "Règlement 1470-2026"
+   },
+   "reason": "L'exigence de citation à l'identique impose de rétablir le saut de ligne entre « plan » et « d'urbanisme »."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Adoption prévue du règlement 1471-2026 — zonage",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1471-2026",
+    "page": 1,
+    "citation": "Règlement 1471-2026 - Amendement au Règlement 1297-2020 relatif au zonage afin\nd’assurer sa conformité au Règlement 399-25",
+    "anchor": "Règlement 1471-2026"
+   },
+   "reason": "La citation originale comporte un saut de ligne après « afin », qui doit être conservé conformément à la règle de copie à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Adoption prévue du règlement 1472-2026 — permis et certificats",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1472-2026",
+    "page": 1,
+    "citation": "Règlement 1472-2026 - Amendement au Règlement 1299-2020 relatif aux permis et\ncertificats afin d’assurer sa conformité au Règlement 399-25",
+    "anchor": "Règlement 1472-2026"
+   },
+   "reason": "La citation doit reproduire le saut de ligne entre « permis et » et « certificats » présent à la page 1."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Adoption prévue du règlement 1473-2026 — réglementation des PIIA",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1473-2026",
+    "page": 1,
+    "citation": "Règlement 1473-2026 - Amendement au Règlement 1300-2020 relatif aux plans\nd'implantation et d'intégration architecturale (PIIA) afin d’assurer sa conformité au\nRèglement 399-25",
+    "anchor": "Règlement 1473-2026"
+   },
+   "reason": "Les sauts de ligne après « plans » et avant « Règlement 399-25 » doivent être rétablis pour respecter la citation à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Demande de prolongation de délai prévue — conformité au règlement 399-25, lotissement agricole",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "399-25",
+    "page": 2,
+    "citation": "Demande de prolongation de délai auprès du ministre des Affaires municipales et de\nl'Habitation – Mise en conformité aux normes de lotissement en zone agricole découlant\ndu règlement 399-25",
+    "anchor": "règlement 399-25"
+   },
+   "reason": "La citation doit conserver les sauts de ligne avant « l'Habitation » et avant « du règlement 399-25 » figurant dans le document."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Demande de modification prévue du règlement 188-07 — réduction de l'aire Conservation",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "188-07",
+    "page": 2,
+    "citation": "Demande de modification au règlement 188-07 relatif au schéma d'aménagement et de\ndéveloppement révisé afin de réduire la superficie de l'aire d'affectation « Conservation",
+    "anchor": "règlement 188-07"
+   },
+   "reason": "Le saut de ligne avant « développement révisé » doit être reproduit conformément à l'exigence de citation à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Autorisation prévue d'une servitude de tolérance — lot 4 037 185, rue Samson",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 037 185",
+    "page": 2,
+    "citation": "Servitude de tolérance pour l'empiètement d'un mur de soutènement en roche dans\nl'emprise de la rue Samson sur une parcelle du lot 4 037 185",
+    "anchor": "lot 4 037 185"
+   },
+   "reason": "La citation doit rétablir le saut de ligne après « dans » pour être une reproduction exacte du point 6.3."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Examen prévu d'une demande de PIIA — 799, rue de New Glasgow",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "799, rue de New Glasgow",
+    "page": 3,
+    "citation": "Demande de plan d'implantation et d'intégration architecturale (PIIA) - 799, rue de New\nGlasgow",
+    "anchor": "799, rue de New\nGlasgow"
+   },
+   "reason": "Le document sépare « New » et « Glasgow » par un saut de ligne, à conserver dans la citation et dans l'ancre qui doit en être une sous-chaîne exacte."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "second_projet",
+   "page": 1,
+   "citation": "Second projet de règlement SP-2026-14 - Amendement au Règlement 1297-2020 relatif\nau zonage afin de modifier l'article 1.4.2"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "second_projet",
+   "page": 1,
+   "citation": "Second projet de règlement SP-2026-15 - Amendement au Règlement 1297-2020 relatif\nau zonage afin de modifier l'annexe 3 - Grille des spécifications, zone V-802"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "adoption",
+   "page": 1,
+   "citation": "Règlement 1470-2026 - Amendement au Règlement 1296-2020 relatif au plan\nd'urbanisme afin d’assurer sa conformité au Règlement 399-25"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "adoption",
+   "page": 1,
+   "citation": "Règlement 1471-2026 - Amendement au Règlement 1297-2020 relatif au zonage afin\nd’assurer sa conformité au Règlement 399-25"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "adoption",
+   "page": 1,
+   "citation": "Règlement 1472-2026 - Amendement au Règlement 1299-2020 relatif aux permis et\ncertificats afin d’assurer sa conformité au Règlement 399-25"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "adoption",
+   "page": 1,
+   "citation": "Règlement 1473-2026 - Amendement au Règlement 1300-2020 relatif aux plans\nd'implantation et d'intégration architecturale (PIIA) afin d’assurer sa conformité au\nRèglement 399-25"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "Demande de prolongation de délai auprès du ministre des Affaires municipales et de\nl'Habitation – Mise en conformité aux normes de lotissement en zone agricole découlant\ndu règlement 399-25"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "Demande de modification au règlement 188-07 relatif au schéma d'aménagement et de\ndéveloppement révisé afin de réduire la superficie de l'aire d'affectation « Conservation"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "Servitude de tolérance pour l'empiètement d'un mur de soutènement en roche dans\nl'emprise de la rue Samson sur une parcelle du lot 4 037 185"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "piia",
+   "page": 3,
+   "citation": "Demande de plan d'implantation et d'intégration architecturale (PIIA) - 799, rue de New\nGlasgow"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 12
+}

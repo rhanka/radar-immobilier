@@ -1,0 +1,91 @@
+{
+ "documentId": "sainte-brigide-diberville-2026-06-01",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ab615b0fbb57aa6dba4a51c11a3c25f6858f017c575399590925de3f9be23c82",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 5.1 prévoit explicitement l'adoption du règlement 2026-489 à la page 1.\"},{\"item\":\"i02\",\"choice\":\"absent\",\"reason\":\"Simple correspondance externe d'un tiers sans objet foncier explicite ni compétence directe d'urbanisme municipal.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 11.2 atteste une dérogation mineure prévue pour le lot 4 390 294 à la page 1.\"},{\"item\":\"i04\",\"choice\":\"absent\",\"reason\":\"La vente d'immeubles pour taxes n'a pas d'immeuble explicite désigné et l'étape adoption est erronée.\"},{\"item\":\"i05\",\"choice\":\"absent\",\"reason\":\"L'étape adoption ne s'applique pas à une vente d'immeubles pour taxes et aucun objet foncier explicite n'est nommé.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"Simple correspondance externe sous le point 6.6, dépourvue d'objet foncier explicite.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"L'étape adoption est inexacte pour une procédure de vente pour taxes et aucun lot précis n'est mentionné.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "absent"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 5.1 prévoit explicitement l'adoption du règlement 2026-489 à la page 1."
+  },
+  {
+   "item": "i02",
+   "choice": "absent",
+   "reason": "Simple correspondance externe d'un tiers sans objet foncier explicite ni compétence directe d'urbanisme municipal."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 11.2 atteste une dérogation mineure prévue pour le lot 4 390 294 à la page 1."
+  },
+  {
+   "item": "i04",
+   "choice": "absent",
+   "reason": "La vente d'immeubles pour taxes n'a pas d'immeuble explicite désigné et l'étape adoption est erronée."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "L'étape adoption ne s'applique pas à une vente d'immeubles pour taxes et aucun objet foncier explicite n'est nommé."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Simple correspondance externe sous le point 6.6, dépourvue d'objet foncier explicite."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "L'étape adoption est inexacte pour une procédure de vente pour taxes et aucun lot précis n'est mentionné."
+  }
+ ]
+}

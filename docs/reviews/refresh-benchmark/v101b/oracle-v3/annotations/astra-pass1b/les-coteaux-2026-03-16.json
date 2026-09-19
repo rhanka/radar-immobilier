@@ -1,0 +1,245 @@
+{
+ "documentId": "les-coteaux-2026-03-16",
+ "step": "astra-pass1b",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "b69f45c06615daf99d252af159341cf0c9d0fcacbc773c8f93bdb628b6c90ea9",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 335 – Contrôle provisoire des travaux excédant la capacité du système d’égout\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"335\",\n        \"page\": 5,\n        \"citation\": \"D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible\\nde créer des besoins excédant la capacité du système d’égout numéro 335\",\n        \"anchor\": \"système d’égout numéro 335\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte comporte un saut de ligne après « susceptible ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 316-01 – Correctifs au règlement de permis et certificats\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"316-01\",\n        \"page\": 5,\n        \"citation\": \"donnent avis de motion, qu’il sera adopté, à une séance subséquente, le\\nRèglement numéro 316-01 modifiant le Règlement de permis et certificats numéro 316\",\n        \"anchor\": \"Règlement numéro 316-01\"\n      },\n      \"reason\": \"La règle de citation à l’identique impose de rétablir le saut de ligne précédant « Règlement numéro 316-01 ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Dépôt du projet de règlement 316-01 – Correctifs au règlement de permis et certificats\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"316-01\",\n        \"page\": 5,\n        \"citation\": \"déposent le projet de règlement numéro 316-01 – Règlement modifiant le\\nRèglement de permis et certificats numéro 316 afin d’y apporter des correctifs\\nsuite à son remplacement\",\n        \"anchor\": \"règlement numéro 316-01\"\n      },\n      \"reason\": \"La citation courante remplace deux sauts de ligne par des espaces, contrairement à l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 317-01 – Correctifs au règlement de zonage\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"317-01\",\n        \"page\": 6,\n        \"citation\": \"donnent avis de motion, qu’il sera adopté, à une séance subséquente, le\\nRèglement numéro 317-01 modifiant le Règlement de zonage numéro 317\",\n        \"anchor\": \"Règlement numéro 317-01\"\n      },\n      \"reason\": \"La règle de citation à l’identique impose de rétablir le saut de ligne précédant « Règlement numéro 317-01 ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Dépôt du projet de règlement 317-01 – Correctifs au règlement de zonage\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"317-01\",\n        \"page\": 6,\n        \"citation\": \"déposent le projet de règlement numéro 317-01 – Règlement modifiant le\\nRèglement de zonage numéro 317 afin d’y apporter des correctifs suite à son\\nremplacement\",\n        \"anchor\": \"règlement numéro 317-01\"\n      },\n      \"reason\": \"La citation doit conserver les sauts de ligne après « le » et « son » pour reproduire à l’identique l’extrait de la page 6.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Traitement du PIIA 2026-01 – 65, route 338 (dispositif discordant visant le PIIA 2026-02)\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-01\",\n        \"page\": 6,\n        \"citation\": \"26-03-9288\\n\\nDEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614\",\n        \"anchor\": \"PIIA 2026-01\"\n      },\n      \"reason\": \"La citation doit rétablir les deux sauts de ligne entre le numéro de résolution et son titre, sans modifier le signalement de la discordance du dispositif.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Acceptation du PIIA 2026-02 – 102, rue Principale – Remplacement de quatre fenêtres\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-02\",\n        \"page\": 6,\n        \"citation\": \"D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres\",\n        \"anchor\": \"PIIA numéro 2026-02\"\n      },\n      \"reason\": \"La citation à l’identique exige de conserver le saut de ligne avant l’adresse « 102, rue Principale ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Acceptation de la dérogation mineure DM-294 – 78, rue Sauvé – Garage partiellement en cour avant\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-294\",\n        \"page\": 7,\n        \"citation\": \"D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au\\n78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour\\navant\",\n        \"anchor\": \"dérogation mineure DM-294\"\n      },\n      \"reason\": \"La citation courante omet les sauts de ligne avant « 78, rue Sauvé » et « avant », qui doivent être conservés selon la règle de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Autorisation de signature du contrat d’utilisation de l’espace d’amarrage – Parc Louis-Stanislas-Pariseau – Année 2026\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"parc Louis-Stanislas-Pariseau\",\n        \"page\": 9,\n        \"citation\": \"le contrat d’autorisation\\nd’utilisation de l’espace d’amarrage pour l’année 2026 avec St-Lawrence Cruise Lines afin de\\nleur permettre d’amarrer et de circuler dans le parc Louis-Stanislas-Pariseau\",\n        \"anchor\": \"parc Louis-Stanislas-Pariseau\"\n      },\n      \"reason\": \"La citation doit rétablir les sauts de ligne après « d’autorisation » et « afin de » pour être identique au texte de la page 9.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Adoption du règlement 335 – Contrôle provisoire des travaux excédant la capacité du système d’égout",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "335",
+    "page": 5,
+    "citation": "D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible\nde créer des besoins excédant la capacité du système d’égout numéro 335",
+    "anchor": "système d’égout numéro 335"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte comporte un saut de ligne après « susceptible »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Avis de motion du règlement 316-01 – Correctifs au règlement de permis et certificats",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "316-01",
+    "page": 5,
+    "citation": "donnent avis de motion, qu’il sera adopté, à une séance subséquente, le\nRèglement numéro 316-01 modifiant le Règlement de permis et certificats numéro 316",
+    "anchor": "Règlement numéro 316-01"
+   },
+   "reason": "La règle de citation à l’identique impose de rétablir le saut de ligne précédant « Règlement numéro 316-01 »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Dépôt du projet de règlement 316-01 – Correctifs au règlement de permis et certificats",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "316-01",
+    "page": 5,
+    "citation": "déposent le projet de règlement numéro 316-01 – Règlement modifiant le\nRèglement de permis et certificats numéro 316 afin d’y apporter des correctifs\nsuite à son remplacement",
+    "anchor": "règlement numéro 316-01"
+   },
+   "reason": "La citation courante remplace deux sauts de ligne par des espaces, contrairement à l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Avis de motion du règlement 317-01 – Correctifs au règlement de zonage",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "317-01",
+    "page": 6,
+    "citation": "donnent avis de motion, qu’il sera adopté, à une séance subséquente, le\nRèglement numéro 317-01 modifiant le Règlement de zonage numéro 317",
+    "anchor": "Règlement numéro 317-01"
+   },
+   "reason": "La règle de citation à l’identique impose de rétablir le saut de ligne précédant « Règlement numéro 317-01 »."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Dépôt du projet de règlement 317-01 – Correctifs au règlement de zonage",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "317-01",
+    "page": 6,
+    "citation": "déposent le projet de règlement numéro 317-01 – Règlement modifiant le\nRèglement de zonage numéro 317 afin d’y apporter des correctifs suite à son\nremplacement",
+    "anchor": "règlement numéro 317-01"
+   },
+   "reason": "La citation doit conserver les sauts de ligne après « le » et « son » pour reproduire à l’identique l’extrait de la page 6."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Traitement du PIIA 2026-01 – 65, route 338 (dispositif discordant visant le PIIA 2026-02)",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-01",
+    "page": 6,
+    "citation": "26-03-9288\n\nDEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614",
+    "anchor": "PIIA 2026-01"
+   },
+   "reason": "La citation doit rétablir les deux sauts de ligne entre le numéro de résolution et son titre, sans modifier le signalement de la discordance du dispositif."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Acceptation du PIIA 2026-02 – 102, rue Principale – Remplacement de quatre fenêtres",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-02",
+    "page": 6,
+    "citation": "D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres",
+    "anchor": "PIIA numéro 2026-02"
+   },
+   "reason": "La citation à l’identique exige de conserver le saut de ligne avant l’adresse « 102, rue Principale »."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Acceptation de la dérogation mineure DM-294 – 78, rue Sauvé – Garage partiellement en cour avant",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-294",
+    "page": 7,
+    "citation": "D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au\n78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour\navant",
+    "anchor": "dérogation mineure DM-294"
+   },
+   "reason": "La citation courante omet les sauts de ligne avant « 78, rue Sauvé » et « avant », qui doivent être conservés selon la règle de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Autorisation de signature du contrat d’utilisation de l’espace d’amarrage – Parc Louis-Stanislas-Pariseau – Année 2026",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "parc Louis-Stanislas-Pariseau",
+    "page": 9,
+    "citation": "le contrat d’autorisation\nd’utilisation de l’espace d’amarrage pour l’année 2026 avec St-Lawrence Cruise Lines afin de\nleur permettre d’amarrer et de circuler dans le parc Louis-Stanislas-Pariseau",
+    "anchor": "parc Louis-Stanislas-Pariseau"
+   },
+   "reason": "La citation doit rétablir les sauts de ligne après « d’autorisation » et « afin de » pour être identique au texte de la page 9."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass1b",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 5,
+   "citation": "D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible\nde créer des besoins excédant la capacité du système d’égout numéro 335"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "avis_motion",
+   "page": 5,
+   "citation": "donnent avis de motion, qu’il sera adopté, à une séance subséquente, le\nRèglement numéro 316-01 modifiant le Règlement de permis et certificats numéro 316"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "projet_reglement",
+   "page": 5,
+   "citation": "déposent le projet de règlement numéro 316-01 – Règlement modifiant le\nRèglement de permis et certificats numéro 316 afin d’y apporter des correctifs\nsuite à son remplacement"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "avis_motion",
+   "page": 6,
+   "citation": "donnent avis de motion, qu’il sera adopté, à une séance subséquente, le\nRèglement numéro 317-01 modifiant le Règlement de zonage numéro 317"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "projet_reglement",
+   "page": 6,
+   "citation": "déposent le projet de règlement numéro 317-01 – Règlement modifiant le\nRèglement de zonage numéro 317 afin d’y apporter des correctifs suite à son\nremplacement"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "piia",
+   "page": 6,
+   "citation": "26-03-9288\n\nDEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "piia",
+   "page": 6,
+   "citation": "D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "derogation_mineure",
+   "page": 7,
+   "citation": "D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au\n78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour\navant"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "inconnu",
+   "page": 9,
+   "citation": "le contrat d’autorisation\nd’utilisation de l’espace d’amarrage pour l’année 2026 avec St-Lawrence Cruise Lines afin de\nleur permettre d’amarrer et de circuler dans le parc Louis-Stanislas-Pariseau"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 9,
+ "relabeledFrom": "astra-pass2"
+}

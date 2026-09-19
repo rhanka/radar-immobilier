@@ -1,0 +1,74 @@
+{
+ "documentId": "contrecoeur-2026-04-14",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "f0baf2f9afc3a69c641ca6cc86c1cff2346c391e6151dc571335006642175964",
+ "verificationSha256": "97b885d7aef72193ad516c4d527391b63579f698468965290ed0cc58d45fc799",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"La résolution 2026-04-075 autorise la signature d'un protocole d'entente de génie civil pour des travaux d'infrastructures et ne constitue ni un acte foncier ni un objet réglementaire d'urbanisme; conformément aux règles, ce type de fait relève des éléments complémentaires hors gold sans retoucher le dénominateur.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u09",
+   "verificationItem": "i09",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation du protocole d’entente — Infrastructures de la halte routière, montée de la Pomme d’Or",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "montée de la Pomme d’Or",
+      "page": 16,
+      "citation": "à signer, pour et au nom de la Ville, le protocole d’entente à intervenir avec Picard Construction relativement à la construction d’une halte routière sur la montée de la Pomme d’Or",
+      "anchor": "montée de la Pomme d’Or",
+      "spanStart": 619,
+      "spanEnd": 800
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-04-075, adoptée à la page 16, autorise la signature du protocole avec Picard Construction pour une nouvelle halte routière et ses infrastructures, soit un développement explicite plutôt qu’un simple entretien de voirie."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "L'autorisation de signer un protocole d'entente avec Picard Construction (p.16) n'a pas d'objet réglementaire ou foncier explicite (rue, sans lot ni règlement) et l'étape « adoption » est inexacte pour une signature de protocole ; fait complémentaire à signaler hors gold sans retoucher le dénominateur."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Une autorisation de signature d'un protocole d'entente pour des infrastructures de génie civil n'est ni un objet réglementaire d'urbanisme ni un acte foncier."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "La résolution 2026-04-075 autorise la signature d'un protocole d'entente de génie civil pour des travaux d'infrastructures et ne constitue ni un acte foncier ni un objet réglementaire d'urbanisme; conformément aux règles, ce type de fait relève des éléments complémentaires hors gold sans retoucher le dénominateur."
+  }
+ ]
+}

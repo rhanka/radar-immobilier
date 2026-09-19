@@ -1,0 +1,302 @@
+{
+ "documentId": "cookshire-eaton-2026-04-07",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "30a5c151ce104a982eeb3128899c41aaaa4bf4bd1d00ea9b0e9b684bb92e4fb9",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "dm-26-DM-01"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 26-DM-01 — 978, rue Faulkner",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "PAR CONSÉQUENT, il est proposé par le conseiller Marcel Charpentier,\nappuyé par le conseiller Jean-Marc Dickenson et résolu d’autoriser la"
+      },
+      {
+       "page": 6,
+       "excerpt": "PAR CONSÉQUENT, il est proposé par le conseiller Marcel Charpentier,\nappuyé par le conseiller Jean-Marc Dickenson et résolu d’autoriser la\ndérogation mineure numéro 26-DM-01 pour l’immeuble situé au 978, rue\nFaulkner (lot 4 487 978)."
+      },
+      {
+       "page": 5,
+       "excerpt": "CONSIDÉRANT la demande de dérogation mineure numéro 26-DM-01 pour\nl’immeuble situé au 978, rue Faulkner (lot 4 487 978) en zone Re-303 et Ru012, secteur Sawyerville;\nCONSIDÉRANT QUE la demande vise la construction d’une résidence sans\nservices selon un frontage inférieur à la règlementation municipale, soit un\nfrontage de 15.66 mètres alors que le règlement de lotissement en vigueur\nexige un minimum de 50 mètres;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-aeroport"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Soutien au plan directeur de développement de l’Aéroport de Sherbrooke",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "DE SOUTENIR la Ville de Sherbrooke afin qu’elle réalise un plan directeur\nde développement de l’Aéroport de Sherbrooke à Cookshire-Eaton;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-vente-eaton"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente autorisée du terrain municipal de la rue Eaton",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "QUE soit autorisée la vente du terrain situé sur la rue Eaton (lot 4 487 586) à"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-400-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 400-2026 — Occupation et entretien des bâtiments",
+     "stage": "projet",
+     "objet": "400-2026",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Il est proposé par la conseillère Jennifer McMullin, appuyé par la conseillère\nJosée Pérusse et résolu d’adopter le projet de Règlement numéro 400-2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-motion-400"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Avis de motion — Règlement 400-2026",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Avis de motion est donné par la conseillère Jennifer McMullin qu’elle\nprésentera à une prochaine séance un règlement concernant l’occupation et\nl’entretien des bâtiments."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-399-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 399-2026 — Modification du règlement de démolition",
+     "stage": "projet",
+     "objet": "399-2026",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Il est proposé par le conseiller Jean-Marc Dickenson, appuyé par la\nconseillère Annie Guillemette et résolu d’adopter le projet de Règlement"
+      },
+      {
+       "page": 11,
+       "excerpt": "Il est proposé par le conseiller Jean-Marc Dickenson, appuyé par la\nconseillère Annie Guillemette et résolu d’adopter le projet de Règlement\nnuméro 399-2026 amendant le règlement relatif à la démolition d’immeubles\nnuméro 316-2023."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-316-2023"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 316-2023 — Démolition d’immeubles",
+     "stage": null,
+     "objet": "316-2023",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Il est proposé par le conseiller Jean-Marc Dickenson, appuyé par la\nconseillère Annie Guillemette et résolu d’adopter le projet de Règlement"
+      },
+      {
+       "page": 11,
+       "excerpt": "Il est proposé par le conseiller Jean-Marc Dickenson, appuyé par la\nconseillère Annie Guillemette et résolu d’adopter le projet de Règlement\nnuméro 399-2026 amendant le règlement relatif à la démolition d’immeubles\nnuméro 316-2023."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-caution-pope"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Cautionnement de l’immeuble au 225, rue Pope",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Il est proposé par la conseillère Annie Guillemette, appuyé par le conseiller\nMarcel Charpentier et résolu d’autoriser le paiement au montant de 10 000 $"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\n \"decisions\": [\n  {\n   \"act\": \"A01\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le conseil autorise la dérogation mineure 26-DM-01 pour le 978, rue Faulkner.\",\n   \"excerpt\": \"résolu d’autoriser la\\ndérogation mineure numéro 26-DM-01 pour l’immeuble situé au 978, rue\\nFaulkner (lot 4 487 978).\"\n  },\n  {\n   \"act\": \"A02\",\n   \"verdict\": \"non_soutenu\",\n   \"reason\": \"Il s'agit d'une simple résolution d'appui politique ou de soutien sans objet réglementaire ou foncier opérationnel direct.\",\n   \"excerpt\": \"DE SOUTENIR la Ville de Sherbrooke afin qu’elle réalise un plan directeur\\nde développement de l’Aéroport de Sherbrooke à Cookshire-Eaton;\"\n  },\n  {\n   \"act\": \"A03\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"La vente d'un terrain municipal spécifique est formellement autorisée par le conseil.\",\n   \"excerpt\": \"QUE soit autorisée la vente du terrain situé sur la rue Eaton (lot 4 487 586) à\\nmadame Stéphanie Beaudoin au montant de 1 300$\"\n  },\n  {\n   \"act\": \"A04\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le conseil adopte le projet de règlement numéro 400-2026.\",\n   \"excerpt\": \"résolu d’adopter le projet de Règlement numéro 400-2026\\nconcernant l’occupation et l’entretien des bâtiments\"\n  },\n  {\n   \"act\": \"A05\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Un avis de motion pour le règlement 400-2026 est officiellement donné.\",\n   \"excerpt\": \"Avis de motion est donné par la conseillère Jennifer McMullin qu’elle\\nprésentera à une prochaine séance un règlement concernant l’occupation et\\nl’entretien des bâtiments.\"\n  },\n  {\n   \"act\": \"A06\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le projet de règlement numéro 399-2026 est adopté par résolution.\",\n   \"excerpt\": \"résolu d’adopter le projet de Règlement\\nnuméro 399-2026 amendant le règlement relatif à la démolition d’immeubles\\nnuméro 316-2023.\"\n  },\n  {\n   \"act\": \"A07\",\n   \"verdict\": \"non_soutenu\",\n   \"reason\": \"Le règlement 316-2023 n'est mentionné que comme le règlement antérieur amendé, aucune étape de procédure n'est accomplie pour lui-même.\",\n   \"excerpt\": \"numéro 399-2026 amendant le règlement relatif à la démolition d’immeubles\\nnuméro 316-2023.\"\n  },\n  {\n   \"act\": \"A08\",\n   \"verdict\": \"non_soutenu\",\n   \"reason\": \"Il s'agit d'un simple paiement financier de caution, relevant des exclusions relatives aux opérations financières et administratives courantes.\",\n   \"excerpt\": \"résolu d’autoriser le paiement au montant de 10 000 $\\nà Cookshire-Eaton Innovation à titre de caution de l’immeuble situé au\\n225, rue Pope, secteur Cookshire.\"\n  }\n ]\n}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la dérogation mineure 26-DM-01 pour le 978, rue Faulkner.",
+   "excerpt": "résolu d’autoriser la\ndérogation mineure numéro 26-DM-01 pour l’immeuble situé au 978, rue\nFaulkner (lot 4 487 978)."
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une simple résolution d'appui politique ou de soutien sans objet réglementaire ou foncier opérationnel direct.",
+   "excerpt": "DE SOUTENIR la Ville de Sherbrooke afin qu’elle réalise un plan directeur\nde développement de l’Aéroport de Sherbrooke à Cookshire-Eaton;"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La vente d'un terrain municipal spécifique est formellement autorisée par le conseil.",
+   "excerpt": "QUE soit autorisée la vente du terrain situé sur la rue Eaton (lot 4 487 586) à\nmadame Stéphanie Beaudoin au montant de 1 300$"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le projet de règlement numéro 400-2026.",
+   "excerpt": "résolu d’adopter le projet de Règlement numéro 400-2026\nconcernant l’occupation et l’entretien des bâtiments"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion pour le règlement 400-2026 est officiellement donné.",
+   "excerpt": "Avis de motion est donné par la conseillère Jennifer McMullin qu’elle\nprésentera à une prochaine séance un règlement concernant l’occupation et\nl’entretien des bâtiments."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement numéro 399-2026 est adopté par résolution.",
+   "excerpt": "résolu d’adopter le projet de Règlement\nnuméro 399-2026 amendant le règlement relatif à la démolition d’immeubles\nnuméro 316-2023."
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 316-2023 n'est mentionné que comme le règlement antérieur amendé, aucune étape de procédure n'est accomplie pour lui-même.",
+   "excerpt": "numéro 399-2026 amendant le règlement relatif à la démolition d’immeubles\nnuméro 316-2023."
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple paiement financier de caution, relevant des exclusions relatives aux opérations financières et administratives courantes.",
+   "excerpt": "résolu d’autoriser le paiement au montant de 10 000 $\nà Cookshire-Eaton Innovation à titre de caution de l’immeuble situé au\n225, rue Pope, secteur Cookshire."
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Il s'agit d'une simple résolution d'appui politique ou de soutien sans objet réglementaire ou foncier opérationnel direct."
+   },
+   {
+    "act": "A07",
+    "reason": "Le règlement 316-2023 n'est mentionné que comme le règlement antérieur amendé, aucune étape de procédure n'est accomplie pour lui-même."
+   },
+   {
+    "act": "A08",
+    "reason": "Il s'agit d'un simple paiement financier de caution, relevant des exclusions relatives aux opérations financières et administratives courantes."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil autorise la dérogation mineure 26-DM-01 pour le 978, rue Faulkner."
+   },
+   {
+    "act": "A03",
+    "reason": "La vente d'un terrain municipal spécifique est formellement autorisée par le conseil."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil adopte le projet de règlement numéro 400-2026."
+   },
+   {
+    "act": "A05",
+    "reason": "Un avis de motion pour le règlement 400-2026 est officiellement donné."
+   },
+   {
+    "act": "A06",
+    "reason": "Le projet de règlement numéro 399-2026 est adopté par résolution."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2627,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 9559,
+   "outputTokens": 821,
+   "totalTokens": 10380
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2496
+  },
+  "inputSha256": "760d121d11c1e35f07888aa01b8a40e9941620f1fba0ba0191078ff32910c0b9"
+ }
+}

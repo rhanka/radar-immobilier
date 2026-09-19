@@ -1,0 +1,256 @@
+{
+ "documentId": "sacre-coeur-2026-05-11",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "100e6693da9a26f9ae5671303536fd950010ddf5d50d5f59d71708730cb7a035",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 645 sur l’occupation et l’entretien des bâtiments\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"645\",\n        \"page\": 5,\n        \"citation\": \"PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\\nunanimement que le règlement portant le numéro 645 suivant soit\\nadopté\",\n        \"anchor\": \"règlement portant le numéro 645\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique, en conservant les retours à la ligne présents sur la page 5.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"pratiques agroenvironnementales\",\n        \"page\": 12,\n        \"citation\": \"RÉSOLUTION 2026-05-175\\nRévision nécessaire du projet de règlement sur les pratiques\\nagroenvironnementales\",\n        \"anchor\": \"projet de règlement sur les pratiques\\nagroenvironnementales\"\n      },\n      \"reason\": \"La résolution 2026-05-175 demande effectivement la suspension et la révision d’un projet de règlement touchant l’aménagement du territoire, soit une démarche actuelle sur un objet réglementaire explicite à classer « inconnu ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Modification autorisée de la convention de concession de la halte routière pour l’agrandissement du bâtiment\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"halte routière\",\n        \"page\": 19,\n        \"citation\": \"modification à la convention de la concession de la halte routière en\\najoutant une clause pour l’agrandissement du bâtiment\",\n        \"anchor\": \"concession de la halte routière\"\n      },\n      \"reason\": \"La citation courante remplace un retour à la ligne par un espace, contrairement à l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Projet de résolution du PPCMOI 2026-009 — usage bifamilial isolé sur le lot 4 700 425\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"2026-009\",\n        \"page\": 19,\n        \"citation\": \"d’autoriser par projet de\\nrésolution la demande numéro 2026-009 de M. Mario Bédard aux fins\\nd’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425\",\n        \"anchor\": \"demande numéro 2026-009\"\n      },\n      \"reason\": \"Le dispositif actuel indique expressément « d’autoriser par projet de résolution », plutôt qu’une adoption finale, et la citation doit conserver les retours à la ligne du document.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-010 — reconstruction de la maison au 318, chemin de L’Anse-de-Roche\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-010\",\n        \"page\": 20,\n        \"citation\": \"d’autoriser la demande de PIIA numéro\\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\\nzone 40-REC\",\n        \"anchor\": \"PIIA numéro\\n2026-010\"\n      },\n      \"reason\": \"La citation doit conserver les retours à la ligne de la page 20 et l’ancre doit être une sous-chaîne exacte de cette citation.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-008 — maison au 99, chemin du Fjord\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-008\",\n        \"page\": 20,\n        \"citation\": \"d’autoriser la demande de PIIA\\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC\",\n        \"anchor\": \"numéro 2026-008\"\n      },\n      \"reason\": \"La citation courante remplace les retours à la ligne par des espaces, alors qu’un extrait recopié à l’identique est requis.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-007 — verrière trois saisons au 322 chemin de L’Anse de Roche\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-007\",\n        \"page\": 21,\n        \"citation\": \"d’autoriser la demande de PIIA\\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche\",\n        \"anchor\": \"numéro 2026-007\"\n      },\n      \"reason\": \"La citation doit reproduire exactement les retours à la ligne du dispositif de la résolution sur la page 21.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-006 — agrandissement du patio au 295 chemin de L’Anse de Roche\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-006\",\n        \"page\": 21,\n        \"citation\": \"d’autoriser la demande de PIIA numéro\\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\\ndu patio à la place de la terrasse actuelle\",\n        \"anchor\": \"PIIA numéro\\n2026-006\"\n      },\n      \"reason\": \"La citation et son ancre doivent conserver le retour à la ligne entre « numéro » et « 2026-006 », ainsi que les autres retours présents dans l’extrait.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure 20226-009 accordée — lot 4 700 841, marge arrière réduite à deux mètres\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"20226-009\",\n        \"page\": 22,\n        \"citation\": \"d’autoriser la demande de dérogation\\nmineure numéro 20226-009 soumise par la Société des frais funéraires de\\nSacré-Cœur inc\",\n        \"anchor\": \"mineure numéro 20226-009\"\n      },\n      \"reason\": \"La citation doit conserver les retours à la ligne de la page 22, tout en maintenant le numéro « 20226-009 » tel qu’il est écrit dans le document.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure 2026-011 accordée — lot 4 701 026, marge arrière de 6,25 mètres\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-011\",\n        \"page\": 22,\n        \"citation\": \"d’autoriser la demande de\\ndérogation mineure numéro 2026-011 soumise par monsieur Yannick\\nHovington, aux fins de réduire la marge de recul arrière de huit mètres à\\n6,25 mètres\",\n        \"anchor\": \"dérogation mineure numéro 2026-011\"\n      },\n      \"reason\": \"La citation courante normalise les retours à la ligne en espaces, contrairement à l’exigence d’un extrait recopié à l’identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Adoption du règlement 645 sur l’occupation et l’entretien des bâtiments",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "645",
+    "page": 5,
+    "citation": "PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\nunanimement que le règlement portant le numéro 645 suivant soit\nadopté",
+    "anchor": "règlement portant le numéro 645"
+   },
+   "reason": "La citation doit être recopiée à l’identique, en conservant les retours à la ligne présents sur la page 5."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "pratiques agroenvironnementales",
+    "page": 12,
+    "citation": "RÉSOLUTION 2026-05-175\nRévision nécessaire du projet de règlement sur les pratiques\nagroenvironnementales",
+    "anchor": "projet de règlement sur les pratiques\nagroenvironnementales"
+   },
+   "reason": "La résolution 2026-05-175 demande effectivement la suspension et la révision d’un projet de règlement touchant l’aménagement du territoire, soit une démarche actuelle sur un objet réglementaire explicite à classer « inconnu »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Modification autorisée de la convention de concession de la halte routière pour l’agrandissement du bâtiment",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "halte routière",
+    "page": 19,
+    "citation": "modification à la convention de la concession de la halte routière en\najoutant une clause pour l’agrandissement du bâtiment",
+    "anchor": "concession de la halte routière"
+   },
+   "reason": "La citation courante remplace un retour à la ligne par un espace, contrairement à l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Projet de résolution du PPCMOI 2026-009 — usage bifamilial isolé sur le lot 4 700 425",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "2026-009",
+    "page": 19,
+    "citation": "d’autoriser par projet de\nrésolution la demande numéro 2026-009 de M. Mario Bédard aux fins\nd’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425",
+    "anchor": "demande numéro 2026-009"
+   },
+   "reason": "Le dispositif actuel indique expressément « d’autoriser par projet de résolution », plutôt qu’une adoption finale, et la citation doit conserver les retours à la ligne du document."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Approbation du PIIA 2026-010 — reconstruction de la maison au 318, chemin de L’Anse-de-Roche",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-010",
+    "page": 20,
+    "citation": "d’autoriser la demande de PIIA numéro\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\nzone 40-REC",
+    "anchor": "PIIA numéro\n2026-010"
+   },
+   "reason": "La citation doit conserver les retours à la ligne de la page 20 et l’ancre doit être une sous-chaîne exacte de cette citation."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Approbation du PIIA 2026-008 — maison au 99, chemin du Fjord",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-008",
+    "page": 20,
+    "citation": "d’autoriser la demande de PIIA\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC",
+    "anchor": "numéro 2026-008"
+   },
+   "reason": "La citation courante remplace les retours à la ligne par des espaces, alors qu’un extrait recopié à l’identique est requis."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Approbation du PIIA 2026-007 — verrière trois saisons au 322 chemin de L’Anse de Roche",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-007",
+    "page": 21,
+    "citation": "d’autoriser la demande de PIIA\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche",
+    "anchor": "numéro 2026-007"
+   },
+   "reason": "La citation doit reproduire exactement les retours à la ligne du dispositif de la résolution sur la page 21."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Approbation du PIIA 2026-006 — agrandissement du patio au 295 chemin de L’Anse de Roche",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-006",
+    "page": 21,
+    "citation": "d’autoriser la demande de PIIA numéro\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\ndu patio à la place de la terrasse actuelle",
+    "anchor": "PIIA numéro\n2026-006"
+   },
+   "reason": "La citation et son ancre doivent conserver le retour à la ligne entre « numéro » et « 2026-006 », ainsi que les autres retours présents dans l’extrait."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Dérogation mineure 20226-009 accordée — lot 4 700 841, marge arrière réduite à deux mètres",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "20226-009",
+    "page": 22,
+    "citation": "d’autoriser la demande de dérogation\nmineure numéro 20226-009 soumise par la Société des frais funéraires de\nSacré-Cœur inc",
+    "anchor": "mineure numéro 20226-009"
+   },
+   "reason": "La citation doit conserver les retours à la ligne de la page 22, tout en maintenant le numéro « 20226-009 » tel qu’il est écrit dans le document."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Dérogation mineure 2026-011 accordée — lot 4 701 026, marge arrière de 6,25 mètres",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-011",
+    "page": 22,
+    "citation": "d’autoriser la demande de\ndérogation mineure numéro 2026-011 soumise par monsieur Yannick\nHovington, aux fins de réduire la marge de recul arrière de huit mètres à\n6,25 mètres",
+    "anchor": "dérogation mineure numéro 2026-011"
+   },
+   "reason": "La citation courante normalise les retours à la ligne en espaces, contrairement à l’exigence d’un extrait recopié à l’identique."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u12"
+  },
+  {
+   "op": "correct",
+   "id": "u04"
+  }
+ ],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 5,
+   "citation": "PAR CONSÉQUENT, il est proposé par M. Brisson et résolu\nunanimement que le règlement portant le numéro 645 suivant soit\nadopté"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "inconnu",
+   "page": 19,
+   "citation": "modification à la convention de la concession de la halte routière en\najoutant une clause pour l’agrandissement du bâtiment"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "piia",
+   "page": 20,
+   "citation": "d’autoriser la demande de PIIA numéro\n2026-010 de madame Chantal Gauthier, aux fins de permettre la\nreconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la\nzone 40-REC"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "piia",
+   "page": 20,
+   "citation": "d’autoriser la demande de PIIA\nnuméro 2026-008 de madame Jennifer Hovington, aux fins de permettre la\nconstruction de la maison au 99, chemin du fjord dans la zone 40-REC"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "piia",
+   "page": 21,
+   "citation": "d’autoriser la demande de PIIA\nnuméro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout\nde panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "piia",
+   "page": 21,
+   "citation": "d’autoriser la demande de PIIA numéro\n2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement\ndu patio à la place de la terrasse actuelle"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "derogation_mineure",
+   "page": 22,
+   "citation": "d’autoriser la demande de dérogation\nmineure numéro 20226-009 soumise par la Société des frais funéraires de\nSacré-Cœur inc"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "derogation_mineure",
+   "page": 22,
+   "citation": "d’autoriser la demande de\ndérogation mineure numéro 2026-011 soumise par monsieur Yannick\nHovington, aux fins de réduire la marge de recul arrière de huit mètres à\n6,25 mètres"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 10
+}

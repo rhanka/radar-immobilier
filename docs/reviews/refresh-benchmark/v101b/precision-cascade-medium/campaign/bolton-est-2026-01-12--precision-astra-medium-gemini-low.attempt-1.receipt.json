@@ -1,0 +1,35 @@
+{
+ "documentId": "bolton-est-2026-01-12",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "ae49440bef335c1f9b281303127487d84bcc82b1ea03d0d35725a12c5bd234b3",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1974,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2285,
+   "outputTokens": 581,
+   "totalTokens": 2866
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1805
+  },
+  "inputSha256": "bc5525d59784803cd52916943f5c676d4bd6dd79843edf0d7b7f3a2dc536467a"
+ },
+ "at": "2026-09-19T03:22:20.686Z"
+}

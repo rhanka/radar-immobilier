@@ -1,0 +1,36 @@
+{
+ "documentId": "amherst-2026-06-08",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "5ef95e05368c473bf49852558f3b4bee46398fc74f5e112aacccb67af150b694",
+ "inputSha256": "2a3384707c03d6d28a676fe63f63d54e47669090bc224062429a29861cd3e533",
+ "responseSha256": "742dd50cc01ed508bad72aa2c606f419f1cf559b77f0931462236399512d9954",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 23600,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2353,
+  "outputTokens": 689,
+  "totalTokens": 3042
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 23596,
+  "requestId": null
+ },
+ "at": "2026-09-18T02:17:05.080Z"
+}

@@ -1,0 +1,61 @@
+{
+ "documentId": "daveluyville-2026-05-04",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "06afa8b814e0d9623dfd8f1e5c5588565305993d4ac6e7a338776e5ffb4bff9f",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-86 à la page 6 atteste le report formel de l'adoption de la dérogation mineure 2026-DM-002, dont l'étape est bien inconnue.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-87 à la page 8 refuse formellement la dérogation mineure 2026-DM-003, et la règle prescrit que les refus doivent être conservés.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement R-2026-154 est formellement donné à la page 8 et doit être séparé du projet conformément aux règles.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le dépôt du projet de règlement R-2026-154 est expressément constaté à la page 8, distinctement de l'avis de motion.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-86 à la page 6 atteste le report formel de l'adoption de la dérogation mineure 2026-DM-002, dont l'étape est bien inconnue."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-87 à la page 8 refuse formellement la dérogation mineure 2026-DM-003, et la règle prescrit que les refus doivent être conservés."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement R-2026-154 est formellement donné à la page 8 et doit être séparé du projet conformément aux règles."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le dépôt du projet de règlement R-2026-154 est expressément constaté à la page 8, distinctement de l'avis de motion."
+  }
+ ]
+}

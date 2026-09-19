@@ -1,0 +1,272 @@
+{
+ "documentId": "stanstead-est-2026-04-13",
+ "nextId": 8,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Appui à la demande CPTAQ d’acquisition de 54 acres du lot 6 374 262",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "6 374 262",
+    "page": 2,
+    "citation": "QUE la municipalité de Stanstead-Est appuie la demande déposée par Madame Mélanie Banville auprès de la CPTAQ concernant l’acquisition d’une superficie de 54 acres du lot 6 374 262",
+    "anchor": "lot 6 374 262",
+    "spanStart": 406,
+    "spanEnd": 586
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Appui à la demande CPTAQ d’acquisition de 54 acres du lot 6 374 262",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "6 374 262",
+      "page": 2,
+      "citation": "QUE la municipalité de Stanstead-Est appuie la demande déposée par Madame Mélanie Banville auprès de la CPTAQ concernant l’acquisition d’une superficie de 54 acres du lot 6 374 262",
+      "anchor": "lot 6 374 262",
+      "spanStart": 406,
+      "spanEnd": 586
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution constate un appui municipal à une demande foncière explicite, sans constituer elle-même l’autorisation de la CPTAQ ou la réalisation de l’acquisition."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Appui CPTAQ — lot 5 417 438, nouvelle résidence sous condition de démolition et de remise en culture",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "5 417 438",
+    "page": 2,
+    "citation": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la CPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la construction d’une nouvelle résidence",
+    "anchor": "lot 5 417 438",
+    "spanStart": 2169,
+    "spanEnd": 2340
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Appui CPTAQ — lot 5 417 438, nouvelle résidence sous condition de démolition et de remise en culture",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "5 417 438",
+      "page": 2,
+      "citation": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la CPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la construction d’une nouvelle résidence",
+      "anchor": "lot 5 417 438",
+      "spanStart": 2169,
+      "spanEnd": 2340
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-04 appuie cette demande d’urbanisme à condition de démolir la résidence actuelle et de remettre cette portion en culture, sans accorder l’autorisation relevant de la CPTAQ."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Autorisation d’assujettissement au droit de préemption — lot 5 416 383, pour dix ans",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 416 383",
+    "page": 10,
+    "citation": "RÉSOLUTION AVIS D’ASSUJETTISSEMENT – LOT 5 416 383",
+    "anchor": "LOT 5 416 383",
+    "spanStart": 290,
+    "spanEnd": 340
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation d’assujettissement au droit de préemption — lot 5 416 383, pour dix ans",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 416 383",
+      "page": 10,
+      "citation": "RÉSOLUTION AVIS D’ASSUJETTISSEMENT – LOT 5 416 383",
+      "anchor": "LOT 5 416 383",
+      "spanStart": 290,
+      "spanEnd": 340
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil autorise l’inscription au registre foncier d’un avis d’assujettissement de dix ans sur ce lot, ce qui constitue un acte foncier décidé distinct du règlement de préemption rappelé historiquement."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Autorisation d’assujettissement au droit de préemption — lot 5 416 384, pour dix ans",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 416 384",
+    "page": 10,
+    "citation": "8.2 RÉSOLUTION AVIS D’ASSUJETTISSEMENT – LOT 5 416 384",
+    "anchor": "LOT 5 416 384",
+    "spanStart": 2735,
+    "spanEnd": 2789
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation d’assujettissement au droit de préemption — lot 5 416 384, pour dix ans",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 416 384",
+      "page": 10,
+      "citation": "8.2 RÉSOLUTION AVIS D’ASSUJETTISSEMENT – LOT 5 416 384",
+      "anchor": "LOT 5 416 384",
+      "spanStart": 2735,
+      "spanEnd": 2789
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution poursuivie en page 11 autorise un avis d’assujettissement de dix ans pour ce second lot explicitement nommé, qui forme une unité foncière distincte."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Appui à la demande CPTAQ d’agrandissement du lieu d’enfouissement — lot 2 935 698",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2 935 698",
+    "page": 13,
+    "citation": "des fins autres qu’agricoles, d’une partie du lot 2 935 698 du cadastre du Québec, circonscription foncière de Coaticook, soit pour l’agrandissement de son lieu d’enfouissement technique",
+    "anchor": "lot 2 935 698",
+    "spanStart": 1134,
+    "spanEnd": 1320
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Appui à la demande CPTAQ d’agrandissement du lieu d’enfouissement — lot 2 935 698",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2 935 698",
+      "page": 13,
+      "citation": "des fins autres qu’agricoles, d’une partie du lot 2 935 698 du cadastre du Québec, circonscription foncière de Coaticook, soit pour l’agrandissement de son lieu d’enfouissement technique",
+      "anchor": "lot 2 935 698",
+      "spanStart": 1134,
+      "spanEnd": 1320
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil appuie actuellement la demande d’utilisation non agricole pour agrandir le lieu d’enfouissement, tandis que l’orientation préliminaire défavorable de la CPTAQ est seulement rappelée et ne constitue pas un refus décidé à cette séance."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Location autorisée du garage au 1420 chemin Ball brook pour douze mois",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "1420 chemin Ball brook",
+    "page": 13,
+    "citation": "location de son garage situé au 1420 chemin Ball brook à BarnstonOuestpour une durée de 12 mois moyennant un montant mensuel de 1 350",
+    "anchor": "1420 chemin Ball brook",
+    "spanStart": 2587,
+    "spanEnd": 2720
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Location autorisée du garage au 1420 chemin Ball brook pour douze mois",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "1420 chemin Ball brook",
+      "page": 13,
+      "citation": "location de son garage situé au 1420 chemin Ball brook à BarnstonOuestpour une durée de 12 mois moyennant un montant mensuel de 1 350",
+      "anchor": "1420 chemin Ball brook",
+      "spanStart": 2587,
+      "spanEnd": 2720
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La location approuvée porte sur l’usage d’un immeuble explicitement identifié et relève des conventions foncières à inclure, plutôt que des marchés de services exclus."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 2026-04 modifiant la tarification des permis et certificats",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-04",
+    "page": 18,
+    "citation": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10 sur la tarification des permis et certificats",
+    "anchor": "numéro 2026-04",
+    "spanStart": 1227,
+    "spanEnd": 1339
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 2026-04 modifiant la tarification des permis et certificats",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2026-04",
+      "page": 18,
+      "citation": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10 sur la tarification des permis et certificats",
+      "anchor": "numéro 2026-04",
+      "spanStart": 1227,
+      "spanEnd": 1339
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le règlement sur la tarification des permis et certificats est adopté dans cette séance, tandis que son avis de motion du 2 mars 2026 est un rappel historique ne créant aucune unité supplémentaire."
+    }
+   ]
+  }
+ ]
+}

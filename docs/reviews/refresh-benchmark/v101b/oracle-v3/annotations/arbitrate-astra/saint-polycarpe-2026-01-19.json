@@ -1,0 +1,178 @@
+{
+ "documentId": "saint-polycarpe-2026-01-19",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ab7f365aea8bbf9f79e4bcc5b9eb9134a19b1ef80095576db2136355d052218d",
+ "verificationSha256": "e20df81da49b71101f52b21e6121dc87525ca431af1a2eb84118e692de98c03c",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"Le point 5.2 prévoit une « AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE PAIEMENT DE TAXES MUNICIPALES », ce qui nomme explicitement un objet foncier inclus par les règles. Le classement sous « FINANCES » ne justifie pas son exclusion : l’unité concerne l’autorisation prévue de cet état, sans attester une vente réalisée.\"},{\"item\":\"a02\",\"choice\":\"v1\",\"reason\":\"Le point 8.1 prévoit une « RÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN AUTRE QUE L’AGRICULTURE », sous « URBANISME ET AMÉNAGEMENT ». L’adoption prévue porte sur la résolution d’appui, non sur une autorisation déjà accordée par la CPTAQ, et aucune règle fournie ne réserve l’étape « adoption » aux seuls règlements.\"},{\"item\":\"a03\",\"choice\":\"v1\",\"reason\":\"Le point 10.1 prévoit explicitement un « AVIS DE MOTION » pour le « RÈGLEMENT NO 169-2019-01 REMPLAÇANT LE RÈGLEMENT SUR LES NUISANCES (RMH 450) », soit un objet réglementaire nommé et une étape prévue. Les règles fournies ne justifient pas l’exclusion catégorique des règlements sur les nuisances, et la parenthèse finale manquante dans la citation proposée n’altère ni l’objet ni l’étape.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u02",
+   "verificationItem": "i02",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation prévue de l’état relatif à la vente des immeubles pour défaut de paiement de taxes",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "vente des immeubles",
+      "page": 1,
+      "citation": "AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE PAIEMENT DE TAXES MUNICIPALES",
+      "anchor": "VENTE DES IMMEUBLES",
+      "spanStart": 1633,
+      "spanEnd": 1730
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 5.2, page 1, prévoit l’autorisation de l’état relatif à la vente des immeubles pour défaut de paiement de taxes municipales, un acte foncier inclus."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 5.2 (page 1) atteste un acte foncier prévu (vente des immeubles pour défaut de taxes) avec citation exacte ; unité retenue comme représentation unique de ce fait, les points d'ordre du jour étant « prévus »."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'état de vente pour défaut de paiement de taxes relève des finances municipales et ne comporte aucun objet foncier explicite."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Adoption prévue d’une résolution d’appui à la CPTAQ — fin autre que l’agriculture",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "autorisation non agricole",
+      "page": 2,
+      "citation": "RÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN AUTRE QUE L’AGRICULTURE",
+      "anchor": "RÉSOLUTION D’APPUI POUR LA CPTAQ",
+      "spanStart": 1041,
+      "spanEnd": 1129
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 8.1, page 2, prévoit une résolution d’appui à la CPTAQ pour une fin autre que l’agriculture, et non une autorisation déjà accordée."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "L'étape « adoption » est inexacte pour une résolution d'appui CPTAQ qui n'est pas l'adoption d'un règlement (l'étape attendue serait inconnu, comme pour les autres autorisations par résolution)."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Résolution d'appui CPTAQ pour une fin autre que l'agriculture attestée au point 8.1 en page 2, conforme au domaine de l'urbanisme."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u04",
+   "verificationItem": "i04",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Avis de motion prévu — règlement 169-2019-01 remplaçant le règlement sur les nuisances",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "169-2019-01",
+      "page": 2,
+      "citation": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT LE RÈGLEMENT SUR LES NUISANCES (RMH 450",
+      "anchor": "RÈGLEMENT NO 169-2019-01",
+      "spanStart": 1531,
+      "spanEnd": 1640
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 10.1, page 2, prévoit explicitement un avis de motion pour le règlement no 169-2019-01 remplaçant le règlement sur les nuisances."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 10.1 (page 2) atteste un avis de motion prévu pour le règlement no 169-2019-01, objet réglementaire explicite ; citation, étape avis_motion et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le règlement sur les nuisances ne relève pas de l'urbanisme et constitue un fait hors gold dont la citation est de surcroît tronquée."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "Le point 5.2 prévoit une « AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE PAIEMENT DE TAXES MUNICIPALES », ce qui nomme explicitement un objet foncier inclus par les règles. Le classement sous « FINANCES » ne justifie pas son exclusion : l’unité concerne l’autorisation prévue de cet état, sans attester une vente réalisée."
+  },
+  {
+   "item": "a02",
+   "choice": "v1",
+   "reason": "Le point 8.1 prévoit une « RÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN AUTRE QUE L’AGRICULTURE », sous « URBANISME ET AMÉNAGEMENT ». L’adoption prévue porte sur la résolution d’appui, non sur une autorisation déjà accordée par la CPTAQ, et aucune règle fournie ne réserve l’étape « adoption » aux seuls règlements."
+  },
+  {
+   "item": "a03",
+   "choice": "v1",
+   "reason": "Le point 10.1 prévoit explicitement un « AVIS DE MOTION » pour le « RÈGLEMENT NO 169-2019-01 REMPLAÇANT LE RÈGLEMENT SUR LES NUISANCES (RMH 450) », soit un objet réglementaire nommé et une étape prévue. Les règles fournies ne justifient pas l’exclusion catégorique des règlements sur les nuisances, et la parenthèse finale manquante dans la citation proposée n’altère ni l’objet ni l’étape."
+  }
+ ]
+}

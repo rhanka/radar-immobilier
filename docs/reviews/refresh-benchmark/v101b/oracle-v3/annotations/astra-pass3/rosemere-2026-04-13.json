@@ -1,0 +1,279 @@
+{
+ "documentId": "rosemere-2026-04-13",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "c94d410d546236ae4248fe2e28c16754d353b81e370879395968a90e5cbe37a6",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure accordée — 262, rue Westward, recul arrière du garage de 0,56 mètre\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"262, rue Westward\",\n        \"page\": 2,\n        \"citation\": \"D'ACCORDER la demande de dérogation mineure pour la propriété située\\nau 262, rue Westward, afin de permettre une marge de recul arrière de\\n0,56 mètre pour le garage détaché actuellement présent\",\n        \"anchor\": \"262, rue Westward\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique, en conservant les sauts de ligne présents à la page 2.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — enseignes du Continental, 307, boulevard Labelle\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"307, boulevard Labelle\",\n        \"page\": 2,\n        \"citation\": \"D'APPROUVER, à titre de P.I.I.A., l'ajout d'une enseigne sur bâtiment et\\nd'une enseigne sur pylône pour l'établissement Continental situé au\\n307, boulevard Labelle\",\n        \"anchor\": \"307, boulevard Labelle\"\n      },\n      \"reason\": \"La citation actuelle remplace des sauts de ligne par des espaces et doit être rétablie à l'identique du texte.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — modification des enseignes, 400, chemin de la Grande-Côte\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"400, chemin de la Grande-Côte\",\n        \"page\": 3,\n        \"citation\": \"D'APPROUVER, à titre de P.I.I.A., la modification des enseignes sur le\\npylône d'enseignes existant situé en cour avant au 400, chemin de la\\nGrande-Côte\",\n        \"anchor\": \"400, chemin de la\\nGrande-Côte\"\n      },\n      \"reason\": \"La citation doit conserver les sauts de ligne du document et l'ancre doit être une sous-chaîne exacte de cette citation.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — agrandissement au 266, rue du Bocage\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"266, rue du Bocage\",\n        \"page\": 3,\n        \"citation\": \"D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement au 266, rue du\\nBocage\",\n        \"anchor\": \"266, rue du\\nBocage\"\n      },\n      \"reason\": \"Le texte comporte un saut de ligne dans l'adresse, qui doit être conservé dans la citation et dans son ancre exacte.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — agrandissement et garage annexé au 338, rue Montview\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"338, rue Montview\",\n        \"page\": 3,\n        \"citation\": \"D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement et de\\nconstruction d'un garage annexé au 338, rue Montview\",\n        \"anchor\": \"338, rue Montview\"\n      },\n      \"reason\": \"La règle de transcription à l'identique impose de conserver le saut de ligne avant « construction ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — modification des ouvertures au 355, rue Montcalm\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"355, rue Montcalm\",\n        \"page\": 4,\n        \"citation\": \"D'APPROUVER, à titre de P.I.I.A., le projet de modification des ouvertures\\npour la propriété située au 355, rue Montcalm\",\n        \"anchor\": \"355, rue Montcalm\"\n      },\n      \"reason\": \"La citation doit reproduire le saut de ligne après « ouvertures » plutôt que le remplacer par un espace.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — revêtements et terrasse au toit, 5, chemin de la Grande-Côte\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"5, chemin de la Grande-Côte\",\n        \"page\": 4,\n        \"citation\": \"5.2.6. Revêtements et terrasse sur le toit - 5, chemin de la Grande-Côte\\n2026-04-131\",\n        \"anchor\": \"5, chemin de la Grande-Côte\"\n      },\n      \"reason\": \"Le numéro de résolution figure sur une nouvelle ligne dans le document, ce que la citation exacte doit conserver.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Avis de motion — règlement 1004-01 sur les contributions pour parcs, terrains de jeux et espaces naturels\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"1004-01\",\n        \"page\": 4,\n        \"citation\": \"La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera\\nadopté séance tenante le projet du Règlement 1004-01 modifiant plusieurs\",\n        \"anchor\": \"Règlement 1004-01\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne après « sera » pour être recopiée à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Adoption du projet de règlement 1004-01 — contributions pour parcs et consultation publique fixée\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": \"consultation_publique\",\n        \"objet\": \"1004-01\",\n        \"page\": 5,\n        \"citation\": \"D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\\net d'espaces naturels\",\n        \"anchor\": \"Règlement 1004-01\"\n      },\n      \"reason\": \"La citation doit conserver les deux sauts de ligne du passage adopté à la page 5.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion — règlement 1015 sur la sensibilisation et l'accompagnement des propriétés vulnérables aux inondations pluviales\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"1015\",\n        \"page\": 6,\n        \"citation\": \"6.3. 1015 - Règlement décrétant un programme de sensibilisation et\\nd'accompagnement des propriétés vulnérables aux inondations pluviales\\nafin d'en diminuer les risques - Avis de motion et dépôt\",\n        \"anchor\": \"1015 - Règlement\"\n      },\n      \"reason\": \"La page 6 constate un avis de motion pour un objet réglementaire relatif à la réduction des risques d'inondation des propriétés, distinct du dépôt du projet.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt du projet de règlement 1015 — sensibilisation et accompagnement des propriétés vulnérables aux inondations pluviales\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"1015\",\n        \"page\": 6,\n        \"citation\": \"6.3. 1015 - Règlement décrétant un programme de sensibilisation et\\nd'accompagnement des propriétés vulnérables aux inondations pluviales\\nafin d'en diminuer les risques - Avis de motion et dépôt\",\n        \"anchor\": \"1015 - Règlement\"\n      },\n      \"reason\": \"Le texte précise que la conseillère dépose le projet de règlement 1015, étape distincte de l'avis de motion selon la règle 2.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Dérogation mineure accordée — 262, rue Westward, recul arrière du garage de 0,56 mètre",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "262, rue Westward",
+    "page": 2,
+    "citation": "D'ACCORDER la demande de dérogation mineure pour la propriété située\nau 262, rue Westward, afin de permettre une marge de recul arrière de\n0,56 mètre pour le garage détaché actuellement présent",
+    "anchor": "262, rue Westward"
+   },
+   "reason": "La citation doit être recopiée à l'identique, en conservant les sauts de ligne présents à la page 2."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Approbation PIIA — enseignes du Continental, 307, boulevard Labelle",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "307, boulevard Labelle",
+    "page": 2,
+    "citation": "D'APPROUVER, à titre de P.I.I.A., l'ajout d'une enseigne sur bâtiment et\nd'une enseigne sur pylône pour l'établissement Continental situé au\n307, boulevard Labelle",
+    "anchor": "307, boulevard Labelle"
+   },
+   "reason": "La citation actuelle remplace des sauts de ligne par des espaces et doit être rétablie à l'identique du texte."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Approbation PIIA — modification des enseignes, 400, chemin de la Grande-Côte",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "400, chemin de la Grande-Côte",
+    "page": 3,
+    "citation": "D'APPROUVER, à titre de P.I.I.A., la modification des enseignes sur le\npylône d'enseignes existant situé en cour avant au 400, chemin de la\nGrande-Côte",
+    "anchor": "400, chemin de la\nGrande-Côte"
+   },
+   "reason": "La citation doit conserver les sauts de ligne du document et l'ancre doit être une sous-chaîne exacte de cette citation."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Approbation PIIA — agrandissement au 266, rue du Bocage",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "266, rue du Bocage",
+    "page": 3,
+    "citation": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement au 266, rue du\nBocage",
+    "anchor": "266, rue du\nBocage"
+   },
+   "reason": "Le texte comporte un saut de ligne dans l'adresse, qui doit être conservé dans la citation et dans son ancre exacte."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Approbation PIIA — agrandissement et garage annexé au 338, rue Montview",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "338, rue Montview",
+    "page": 3,
+    "citation": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement et de\nconstruction d'un garage annexé au 338, rue Montview",
+    "anchor": "338, rue Montview"
+   },
+   "reason": "La règle de transcription à l'identique impose de conserver le saut de ligne avant « construction »."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Approbation PIIA — modification des ouvertures au 355, rue Montcalm",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "355, rue Montcalm",
+    "page": 4,
+    "citation": "D'APPROUVER, à titre de P.I.I.A., le projet de modification des ouvertures\npour la propriété située au 355, rue Montcalm",
+    "anchor": "355, rue Montcalm"
+   },
+   "reason": "La citation doit reproduire le saut de ligne après « ouvertures » plutôt que le remplacer par un espace."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Approbation PIIA — revêtements et terrasse au toit, 5, chemin de la Grande-Côte",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "5, chemin de la Grande-Côte",
+    "page": 4,
+    "citation": "5.2.6. Revêtements et terrasse sur le toit - 5, chemin de la Grande-Côte\n2026-04-131",
+    "anchor": "5, chemin de la Grande-Côte"
+   },
+   "reason": "Le numéro de résolution figure sur une nouvelle ligne dans le document, ce que la citation exacte doit conserver."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Avis de motion — règlement 1004-01 sur les contributions pour parcs, terrains de jeux et espaces naturels",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1004-01",
+    "page": 4,
+    "citation": "La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera\nadopté séance tenante le projet du Règlement 1004-01 modifiant plusieurs",
+    "anchor": "Règlement 1004-01"
+   },
+   "reason": "La citation doit conserver le saut de ligne après « sera » pour être recopiée à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Adoption du projet de règlement 1004-01 — contributions pour parcs et consultation publique fixée",
+    "stage": "projet_reglement",
+    "procedure": "consultation_publique",
+    "objet": "1004-01",
+    "page": 5,
+    "citation": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\net d'espaces naturels",
+    "anchor": "Règlement 1004-01"
+   },
+   "reason": "La citation doit conserver les deux sauts de ligne du passage adopté à la page 5."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion — règlement 1015 sur la sensibilisation et l'accompagnement des propriétés vulnérables aux inondations pluviales",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1015",
+    "page": 6,
+    "citation": "6.3. 1015 - Règlement décrétant un programme de sensibilisation et\nd'accompagnement des propriétés vulnérables aux inondations pluviales\nafin d'en diminuer les risques - Avis de motion et dépôt",
+    "anchor": "1015 - Règlement"
+   },
+   "reason": "La page 6 constate un avis de motion pour un objet réglementaire relatif à la réduction des risques d'inondation des propriétés, distinct du dépôt du projet."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt du projet de règlement 1015 — sensibilisation et accompagnement des propriétés vulnérables aux inondations pluviales",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "1015",
+    "page": 6,
+    "citation": "6.3. 1015 - Règlement décrétant un programme de sensibilisation et\nd'accompagnement des propriétés vulnérables aux inondations pluviales\nafin d'en diminuer les risques - Avis de motion et dépôt",
+    "anchor": "1015 - Règlement"
+   },
+   "reason": "Le texte précise que la conseillère dépose le projet de règlement 1015, étape distincte de l'avis de motion selon la règle 2."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u10"
+  },
+  {
+   "op": "add",
+   "id": "u11"
+  }
+ ],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "derogation_mineure",
+   "page": 2,
+   "citation": "D'ACCORDER la demande de dérogation mineure pour la propriété située\nau 262, rue Westward, afin de permettre une marge de recul arrière de\n0,56 mètre pour le garage détaché actuellement présent"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "piia",
+   "page": 2,
+   "citation": "D'APPROUVER, à titre de P.I.I.A., l'ajout d'une enseigne sur bâtiment et\nd'une enseigne sur pylône pour l'établissement Continental situé au\n307, boulevard Labelle"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "piia",
+   "page": 3,
+   "citation": "D'APPROUVER, à titre de P.I.I.A., la modification des enseignes sur le\npylône d'enseignes existant situé en cour avant au 400, chemin de la\nGrande-Côte"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "piia",
+   "page": 3,
+   "citation": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement au 266, rue du\nBocage"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "piia",
+   "page": 3,
+   "citation": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement et de\nconstruction d'un garage annexé au 338, rue Montview"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "piia",
+   "page": 4,
+   "citation": "D'APPROUVER, à titre de P.I.I.A., le projet de modification des ouvertures\npour la propriété située au 355, rue Montcalm"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "piia",
+   "page": 4,
+   "citation": "5.2.6. Revêtements et terrasse sur le toit - 5, chemin de la Grande-Côte\n2026-04-131"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "avis_motion",
+   "page": 4,
+   "citation": "La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera\nadopté séance tenante le projet du Règlement 1004-01 modifiant plusieurs"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "projet_reglement",
+   "page": 5,
+   "citation": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\net d'espaces naturels"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 11
+}

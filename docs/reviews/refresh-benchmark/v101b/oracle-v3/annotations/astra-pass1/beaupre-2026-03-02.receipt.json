@@ -1,0 +1,36 @@
+{
+ "documentId": "beaupre-2026-03-02",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "304306688360f3aca89694cea4bc6dc8b4196e2e45baed6212ef6783213df788",
+ "inputSha256": "42f67871bfba3350755672ccaebb85e8be2ec5c7522fd7aca97bf8215ba9fdb1",
+ "responseSha256": "404dae3c77fffc450d2af4a18224e0aaeb7e15f3b1d35f4fd0f4dbff906b0b9d",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 82809,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 7503,
+  "outputTokens": 2317,
+  "totalTokens": 9820
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 82804,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:13:18.637Z"
+}

@@ -1,0 +1,101 @@
+{
+ "documentId": "valcourt-2026-06-01-agenda",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "160b21de89153b366ad378f120d15d0ad2c2b085c05343a3c47205fcb0259737",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 7.1, page 1, prévoit explicitement le PIIA Boisé du Ruisseau pour le lotissement au 1070, rue Bissonnette, sans attester de décision acquise.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 7.2, page 1, prévoit explicitement le PIIA pour la construction de deux bâtiments principaux unifamiliaux jumelés au 1070, rue Bissonnette, objet distinct du lotissement.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 7.3, page 1, prévoit le PIIA pour la construction d’un bâtiment principal constituant une habitation unifamiliale isolée au 1045, rue Bissonnette.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 7.4, page 1, inscrit à l’ordre du jour le PIIA Boisé du Ruisseau concernant un remblai au 1075, rue Bissonnette.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 7.5, page 1, prévoit l’adoption du second projet de règlement 560-28 modifiant le règlement de zonage 560, ce qui correspond à l’étape second_projet et non à une adoption définitive acquise.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 11.1, page 2, prévoit une révision du projet de règlement sur les pratiques agroenvironnementales, objet réglementaire explicite dont aucune étape plus précise que inconnu n’est attestée.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Le point 13.2, page 3, prévoit une convention de prêt à usage au 4111 rue Carpentier, acte foncier inclus sans décision acquise attestée.\"},{\"item\":\"i08\",\"choice\":\"absent\",\"reason\":\"Cette proposition reproduit exactement l’unité i06 relative au point 11.1, page 2, alors que la règle exclut le double comptage d’un même fait de même type.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 7.1, page 1, prévoit explicitement le PIIA Boisé du Ruisseau pour le lotissement au 1070, rue Bissonnette, sans attester de décision acquise."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 7.2, page 1, prévoit explicitement le PIIA pour la construction de deux bâtiments principaux unifamiliaux jumelés au 1070, rue Bissonnette, objet distinct du lotissement."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 7.3, page 1, prévoit le PIIA pour la construction d’un bâtiment principal constituant une habitation unifamiliale isolée au 1045, rue Bissonnette."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 7.4, page 1, inscrit à l’ordre du jour le PIIA Boisé du Ruisseau concernant un remblai au 1075, rue Bissonnette."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 7.5, page 1, prévoit l’adoption du second projet de règlement 560-28 modifiant le règlement de zonage 560, ce qui correspond à l’étape second_projet et non à une adoption définitive acquise."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 11.1, page 2, prévoit une révision du projet de règlement sur les pratiques agroenvironnementales, objet réglementaire explicite dont aucune étape plus précise que inconnu n’est attestée."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Le point 13.2, page 3, prévoit une convention de prêt à usage au 4111 rue Carpentier, acte foncier inclus sans décision acquise attestée."
+  },
+  {
+   "item": "i08",
+   "choice": "absent",
+   "reason": "Cette proposition reproduit exactement l’unité i06 relative au point 11.1, page 2, alors que la règle exclut le double comptage d’un même fait de même type."
+  }
+ ]
+}

@@ -1,0 +1,397 @@
+{
+ "documentId": "sainte-francoise--becancour-2026-05-04",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "4af969e8c64e2289e0537b2c451b2f38d5c8c54aa3c7f39b4f2eafd81169e21f",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-55-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 55-2026 modifiant le zonage",
+     "stage": null,
+     "objet": "55-2026",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE #2010-03"
+      },
+      {
+       "page": 7,
+       "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier"
+      },
+      {
+       "page": 7,
+       "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\nprojet de règlement #55-2026 modifiant le règlement de zonage #2010-03."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2010-03"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 2010-03",
+     "stage": null,
+     "objet": "2010-03",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE #2010-03"
+      },
+      {
+       "page": 7,
+       "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\nprojet de règlement #55-2026 modifiant le règlement de zonage #2010-03."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-55-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du projet 55-2026 — étape contradictoire",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE #2010-03"
+      },
+      {
+       "page": 7,
+       "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier"
+      },
+      {
+       "page": 7,
+       "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\nprojet de règlement #55-2026 modifiant le règlement de zonage #2010-03."
+      },
+      {
+       "page": 7,
+       "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de zonage afin\nd’agrandir la zone M-03 à même la zone IND-02;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-56-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 56-2026 — entrées privées et fossés",
+     "stage": "adoption",
+     "objet": "56-2026",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Georges Drouin et résolu à l’unanimité des\nconseillers présents que le règlement portant le numéro 56-2026 relatif à"
+      },
+      {
+       "page": 8,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Georges Drouin et résolu à l’unanimité des\nconseillers présents que le règlement portant le numéro 56-2026 relatif à\nl’aménagement des entrées privées et à la fermeture des fossés de chemins soit\nadopté tel que rédigé et qu’il soit consigné dans le livre des règlements de la\nMunicipalité de Sainte-Françoise."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-58-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 58-2026 — plan d’urbanisme",
+     "stage": "projet",
+     "objet": "58-2026",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01."
+      },
+      {
+       "page": 8,
+       "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01. Le règlement vise à :\n-\n\nAgrandir l’affectation mixte à même l’affectation industrielle.\n\nUn projet dudit est déposé séance tenante."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-2010-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Plan d’urbanisme 2010-01",
+     "stage": null,
+     "objet": "2010-01",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01."
+      },
+      {
+       "page": 8,
+       "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01. Le règlement vise à :\n-\n\nAgrandir l’affectation mixte à même l’affectation industrielle.\n\nUn projet dudit est déposé séance tenante."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-58"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Avis de motion — agrandissement de l’affectation mixte",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01."
+      },
+      {
+       "page": 8,
+       "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01. Le règlement vise à :\n-\n\nAgrandir l’affectation mixte à même l’affectation industrielle.\n\nUn projet dudit est déposé séance tenante."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "bylaw-59-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 59-2026 — construction sur pieux",
+     "stage": "projet",
+     "objet": "59-2026",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05."
+      },
+      {
+       "page": 8,
+       "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05. Le règlement vise à :\n-\n\nPermettre les pieux dans l’agrandissement des bâtiments.\n\nUn projet dudit est déposé séance tenante."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "bylaw-2010-05"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de construction 2010-05",
+     "stage": null,
+     "objet": "2010-05",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05."
+      },
+      {
+       "page": 8,
+       "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05. Le règlement vise à :\n-\n\nPermettre les pieux dans l’agrandissement des bâtiments.\n\nUn projet dudit est déposé séance tenante."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "signal-59"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Avis de motion — pieux dans l’agrandissement des bâtiments",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05."
+      },
+      {
+       "page": 8,
+       "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05. Le règlement vise à :\n-\n\nPermettre les pieux dans l’agrandissement des bâtiments.\n\nUn projet dudit est déposé séance tenante."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le texte atteste le dépôt et l'adoption du premier/second projet de règlement modifiant le zonage.\",\"excerpt\":\"ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE\\nRÈGLEMENT DE ZONAGE #2010-03\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement de zonage 2010-03 est expressément cité comme faisant l'objet d'une modification.\",\"excerpt\":\"RÈGLEMENT DE ZONAGE #2010-03\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le document présente une contradiction textuelle entre le titre (second projet) et le dispositif (premier projet).\",\"excerpt\":\"IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\\nprojet de règlement #55-2026\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement numéro 56-2026.\",\"excerpt\":\"que le règlement portant le numéro 56-2026 relatif à\\nl’aménagement des entrées privées et à la fermeture des fossés de chemins soit\\nadopté tel que rédigé\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement modifiant le plan d'urbanisme est déposé en séance.\",\"excerpt\":\"Un projet dudit est déposé séance tenante.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le plan d'urbanisme 2010-01 est mentionné comme étant le règlement modifié.\",\"excerpt\":\"modifiant le plan d’urbanisme\\n#2010-01\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion est donné pour la modification du plan d'urbanisme afin d'agrandir l'affectation mixte.\",\"excerpt\":\"Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\\n#2010-01.\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement modifiant le règlement de construction est déposé en séance.\",\"excerpt\":\"Un projet dudit est déposé séance tenante.\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement de construction 2010-05 est identifié comme étant l'objet de la modification.\",\"excerpt\":\"modifiant le règlement de\\nconstruction #2010-05\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion est formellement donné pour autoriser les pieux dans l'agrandissement des bâtiments.\",\"excerpt\":\"Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\\nconstruction #2010-05.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le texte atteste le dépôt et l'adoption du premier/second projet de règlement modifiant le zonage.",
+   "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE #2010-03"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le règlement de zonage 2010-03 est expressément cité comme faisant l'objet d'une modification.",
+   "excerpt": "RÈGLEMENT DE ZONAGE #2010-03"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le document présente une contradiction textuelle entre le titre (second projet) et le dispositif (premier projet).",
+   "excerpt": "IL EST PROPOSÉ par Chantal Séguin et résolu à l’unanimité des conseillers présents\nque le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\nprojet de règlement #55-2026"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement numéro 56-2026.",
+   "excerpt": "que le règlement portant le numéro 56-2026 relatif à\nl’aménagement des entrées privées et à la fermeture des fossés de chemins soit\nadopté tel que rédigé"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement modifiant le plan d'urbanisme est déposé en séance.",
+   "excerpt": "Un projet dudit est déposé séance tenante."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le plan d'urbanisme 2010-01 est mentionné comme étant le règlement modifié.",
+   "excerpt": "modifiant le plan d’urbanisme\n#2010-01"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion est donné pour la modification du plan d'urbanisme afin d'agrandir l'affectation mixte.",
+   "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01."
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement modifiant le règlement de construction est déposé en séance.",
+   "excerpt": "Un projet dudit est déposé séance tenante."
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le règlement de construction 2010-05 est identifié comme étant l'objet de la modification.",
+   "excerpt": "modifiant le règlement de\nconstruction #2010-05"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion est formellement donné pour autoriser les pieux dans l'agrandissement des bâtiments.",
+   "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05."
+  }
+ ],
+ "filter": {
+  "acts": 10,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le texte atteste le dépôt et l'adoption du premier/second projet de règlement modifiant le zonage."
+   },
+   {
+    "act": "A02",
+    "reason": "Le règlement de zonage 2010-03 est expressément cité comme faisant l'objet d'une modification."
+   },
+   {
+    "act": "A03",
+    "reason": "Le document présente une contradiction textuelle entre le titre (second projet) et le dispositif (premier projet)."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil adopte le règlement numéro 56-2026."
+   },
+   {
+    "act": "A05",
+    "reason": "Le projet de règlement modifiant le plan d'urbanisme est déposé en séance."
+   },
+   {
+    "act": "A06",
+    "reason": "Le plan d'urbanisme 2010-01 est mentionné comme étant le règlement modifié."
+   },
+   {
+    "act": "A07",
+    "reason": "Un avis de motion est donné pour la modification du plan d'urbanisme afin d'agrandir l'affectation mixte."
+   },
+   {
+    "act": "A08",
+    "reason": "Le projet de règlement modifiant le règlement de construction est déposé en séance."
+   },
+   {
+    "act": "A09",
+    "reason": "Le règlement de construction 2010-05 est identifié comme étant l'objet de la modification."
+   },
+   {
+    "act": "A10",
+    "reason": "Un avis de motion est formellement donné pour autoriser les pieux dans l'agrandissement des bâtiments."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2359,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 10728,
+   "outputTokens": 706,
+   "totalTokens": 11434
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2197
+  },
+  "inputSha256": "d102ded6a68972f97b3aedcb7f17e57c687aec7952a36a3eaf37f31f997e2ec3"
+ }
+}

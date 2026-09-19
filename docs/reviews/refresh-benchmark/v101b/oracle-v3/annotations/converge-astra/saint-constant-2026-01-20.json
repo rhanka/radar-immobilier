@@ -1,0 +1,41 @@
+{
+ "documentId": "saint-constant-2026-01-20",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "22aa9a1d4882c0f2c9dfcc8d997f212da35a0d18e6c2e463b7efae5fff67dc9b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La page 5 adopte explicitement le premier projet de résolution accordant conditionnellement la demande de PPCMOI 2025-00114 au 42, montée Saint-Régis, ce qui correspond à l’étape projet_reglement.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L’avis de la page 1 annonce explicitement une consultation publique sur le premier projet de résolution 037-01-26, dont la page 2 fixe la tenue au 3 mars 2026 : il s’agit d’une étape prévue, non d’une consultation déjà réalisée.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 5 adopte explicitement le premier projet de résolution accordant conditionnellement la demande de PPCMOI 2025-00114 au 42, montée Saint-Régis, ce qui correspond à l’étape projet_reglement."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L’avis de la page 1 annonce explicitement une consultation publique sur le premier projet de résolution 037-01-26, dont la page 2 fixe la tenue au 3 mars 2026 : il s’agit d’une étape prévue, non d’une consultation déjà réalisée."
+  }
+ ]
+}

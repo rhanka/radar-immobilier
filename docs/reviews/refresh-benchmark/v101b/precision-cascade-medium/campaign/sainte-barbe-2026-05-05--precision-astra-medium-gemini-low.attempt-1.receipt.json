@@ -1,0 +1,35 @@
+{
+ "documentId": "sainte-barbe-2026-05-05",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c6f840b62592a8d94dcd4c385e168e94534254e01c95b933b2fc0d6b3e0f4224",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3440,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 16083,
+   "outputTokens": 1026,
+   "totalTokens": 17109
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3301
+  },
+  "inputSha256": "e4b2aac31990fb453daa8ab7a46fe4012614514d2107950c6658fda9b4cbabf6"
+ },
+ "at": "2026-09-19T03:22:57.839Z"
+}

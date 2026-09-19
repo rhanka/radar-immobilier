@@ -1,0 +1,26 @@
+{
+ "documentId": "boisbriand-2026-05-05",
+ "step": "gemini-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass2",
+ "inputStateSha256": "b46e8622dc0bbd2c1eb74fabd0f09e5769b8117a82da9ebb9e1ab216106c7b39",
+ "rawText": "{\"operations\":[]}",
+ "parseError": null,
+ "operations": [],
+ "applied": [],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

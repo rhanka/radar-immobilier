@@ -1,0 +1,563 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-596-20",
+   "label": "Adoption du règlement résiduel 596-20",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "numero": "596-20",
+   "title": "Règlement résiduel modifiant le règlement de zonage 596",
+   "objet": "Adoption des dispositions du second projet n'ayant pas fait l'objet d'une demande valide de participation à un référendum; retrait des cinq dispositions ayant fait l'objet de demandes valides.",
+   "date": "2026-04-07",
+   "stage": "adoption",
+   "resolution": "2026-04-098",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "evidence_refs": [
+    "ev-596-20"
+   ],
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "le Conseil adopte le règlement résiduel Règlement 596-20\nmodifiant le règlement de zonage 596.",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-596-21",
+   "label": "Adoption du règlement distinct 596-21",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "numero": "596-21",
+   "title": "Modification des définitions de hauteur d'un bâtiment et de pourcentage d'occupation du terrain",
+   "date": "2026-04-07",
+   "stage": "adoption",
+   "resolution": "2026-04-099",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "evidence_refs": [
+    "ev-596-21"
+   ],
+   "citations": [
+    {
+     "page": 21,
+     "excerpt": "le Conseil adopte le règlement distinct Règlement 596-21\n(concernant les définitions de «Hauteur d'un bâtiment (en\nmètre)» et de «Pourcentage d'occupation du terrain»)",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-596-22",
+   "label": "Adoption du règlement distinct 596-22 — UV-4-I12",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "numero": "596-22",
+   "title": "Modification de la marge latérale minimale et du pourcentage maximal d'occupation du bâtiment principal dans la zone UV-4-I12",
+   "date": "2026-04-07",
+   "stage": "adoption",
+   "resolution": "2026-04-100",
+   "zone_cible": "UV-4-I12",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "evidence_refs": [
+    "ev-596-22"
+   ],
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "le Conseil adopte le règlement distinct Règlement 596-22\n(concernant la marge latérale minimale et le pourcentage\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12)",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-596-23",
+   "label": "Adoption du règlement distinct 596-23 — UV-14-J13",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "numero": "596-23",
+   "title": "Modification du pourcentage maximal d'occupation du bâtiment principal dans la zone UV-14-J13",
+   "date": "2026-04-07",
+   "stage": "adoption",
+   "resolution": "2026-04-101",
+   "zone_cible": "UV-14-J13",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "evidence_refs": [
+    "ev-596-23"
+   ],
+   "citations": [
+    {
+     "page": 24,
+     "excerpt": "le Conseil adopte le règlement distinct Règlement 596-23\n(concernant le pourcentage maximal d'occupation du\nbâtiment principal dans la Zone UV-14-J13) modifiant le\nrèglement de zonage 596;",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-UV-4-I12",
+   "label": "Zone UV-4-I12",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "code": "UV-4-I12",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "le Conseil adopte le règlement distinct Règlement 596-22\n(concernant la marge latérale minimale et le pourcentage\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12)",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-UV-14-J13",
+   "label": "Zone UV-14-J13",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "code": "UV-14-J13",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 24,
+     "excerpt": "le Conseil adopte le règlement distinct Règlement 596-23\n(concernant le pourcentage maximal d'occupation du\nbâtiment principal dans la Zone UV-14-J13) modifiant le\nrèglement de zonage 596;",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-registre-596-21",
+   "label": "Procédure d'enregistrement ordonnée — 596-21",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "category": "procedure_referendaire",
+   "date": "2026-04-07",
+   "description": "Le Conseil ordonne une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-21.",
+   "reglement_number": "596-21",
+   "resolution": "2026-04-099",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 21,
+     "excerpt": "le Conseil ordonne au greffier de tenir une procédure\nd'enregistrement des personnes habiles à voter afin de\ndéterminer si un scrutin référendaire doit être tenu pour le\nrèglement 596-21.",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-registre-596-22",
+   "label": "Procédure d'enregistrement ordonnée — 596-22",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "category": "procedure_referendaire",
+   "date": "2026-04-07",
+   "description": "Le Conseil ordonne une procédure d'enregistrement afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-22.",
+   "reglement_number": "596-22",
+   "zone_ref": "UV-4-I12",
+   "resolution": "2026-04-100",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "le Conseil ordonne au greffier de tenir une procédure\nd'enregistrement des personnes habiles à voter afin de\ndéterminer si un scrutin référendaire doit être tenu pour le\nrèglement 596-22.",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-registre-596-23",
+   "label": "Procédure d'enregistrement ordonnée — 596-23",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "category": "procedure_referendaire",
+   "date": "2026-04-07",
+   "description": "Le Conseil ordonne une procédure d'enregistrement afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-23.",
+   "reglement_number": "596-23",
+   "zone_ref": "UV-14-J13",
+   "resolution": "2026-04-101",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 24,
+     "excerpt": "le Conseil ordonne au greffier de tenir une procédure\nd'enregistrement des personnes habiles à voter afin de\ndéterminer si un scrutin référendaire doit être tenu pour le\nrèglement 596-23.",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-102",
+   "label": "PIIA-2 approuvé — 9, chemin Frank-Santerre",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "kind": "piia",
+   "decision": "approuvé",
+   "date": "2026-04-07",
+   "etape": "piia",
+   "etape_date": "2026-04-07",
+   "resolution": "2026-04-102",
+   "description": "Construction d'un bâtiment accessoire de type abri d'auto résidentiel au 9, chemin Frank-Santerre. PIIA-2 accordé sur recommandation CCU-26-008.",
+   "no_lot": "6129412",
+   "zone_ref": "UC-2-N3",
+   "reglement_number": "601",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "evidence_refs": [
+    "ev-piia-102"
+   ],
+   "citations": [
+    {
+     "page": 25,
+     "excerpt": "le Conseil accorde le PIIA-2 concernant la demande de\nconstruction d’un bâtiment accessoire de type abri d'auto\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\nUC-2-N3.",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-103",
+   "label": "PIIA-3 révisé approuvé — 753, chemin Lakeside",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "kind": "piia",
+   "decision": "approuvé",
+   "date": "2026-04-07",
+   "etape": "piia",
+   "etape_date": "2026-04-07",
+   "resolution": "2026-04-103",
+   "description": "Demande révisée de construction d'un bâtiment principal commercial au 753, chemin Lakeside, dans les zones UC-3-C15 et AFB-4-D15. Révision limitée à l'ajout de quatre fenêtres et à la modification de deux styles de fenêtres. Recommandation CCU-26-009.",
+   "no_lot": "6643103",
+   "reglement_number": "601",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "evidence_refs": [
+    "ev-piia-103"
+   ],
+   "citations": [
+    {
+     "page": 26,
+     "excerpt": "le Conseil accorde le PIIA-3 concernant la demande révisée\nde construction d’un bâtiment principal commercial au 753,\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15.",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-UC-2-N3",
+   "label": "Zone UC-2-N3",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "code": "UC-2-N3",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 25,
+     "excerpt": "le Conseil accorde le PIIA-2 concernant la demande de\nconstruction d’un bâtiment accessoire de type abri d'auto\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\nUC-2-N3.",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-UC-3-C15",
+   "label": "Zone UC-3-C15",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "code": "UC-3-C15",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 26,
+     "excerpt": "le Conseil accorde le PIIA-3 concernant la demande révisée\nde construction d’un bâtiment principal commercial au 753,\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15.",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-AFB-4-D15",
+   "label": "Zone AFB-4-D15",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "code": "AFB-4-D15",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 26,
+     "excerpt": "le Conseil accorde le PIIA-3 concernant la demande révisée\nde construction d’un bâtiment principal commercial au 753,\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15.",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-09",
+   "label": "Projet de règlement 2026-09 — Sentiers",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "numero": "2026-09",
+   "title": "Règlement concernant les sentiers sur le territoire de Lac-Brome",
+   "objet": "Réglementer et encadrer les usages des sentiers publics sur le territoire de la ville.",
+   "stage": "projet",
+   "meetingDate": "2026-04-07",
+   "municipality": "lac-brome",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 17,
+     "excerpt": "Le projet de ce règlement est dûment présenté et déposé par M. Patterson, qui\nen mentionne son objet et sa portée.",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "bylaw-596-22",
+   "target": "zone-UV-4-I12",
+   "relation": "applies_to",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "evidence_refs": [
+    "ev-596-22"
+   ],
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "le Conseil adopte le règlement distinct Règlement 596-22\n(concernant la marge latérale minimale et le pourcentage\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12)",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "bylaw-596-23",
+   "target": "zone-UV-14-J13",
+   "relation": "applies_to",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "evidence_refs": [
+    "ev-596-23"
+   ],
+   "citations": [
+    {
+     "page": 24,
+     "excerpt": "le Conseil adopte le règlement distinct Règlement 596-23\n(concernant le pourcentage maximal d'occupation du\nbâtiment principal dans la Zone UV-14-J13) modifiant le\nrèglement de zonage 596;",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "piia-102",
+   "target": "zone-UC-2-N3",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "evidence_refs": [
+    "ev-piia-102"
+   ],
+   "citations": [
+    {
+     "page": 25,
+     "excerpt": "le Conseil accorde le PIIA-2 concernant la demande de\nconstruction d’un bâtiment accessoire de type abri d'auto\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\nUC-2-N3.",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "piia-103",
+   "target": "zone-UC-3-C15",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "evidence_refs": [
+    "ev-piia-103"
+   ],
+   "citations": [
+    {
+     "page": 26,
+     "excerpt": "le Conseil accorde le PIIA-3 concernant la demande révisée\nde construction d’un bâtiment principal commercial au 753,\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15.",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "piia-103",
+   "target": "zone-AFB-4-D15",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "evidence_refs": [
+    "ev-piia-103"
+   ],
+   "citations": [
+    {
+     "page": 26,
+     "excerpt": "le Conseil accorde le PIIA-3 concernant la demande révisée\nde construction d’un bâtiment principal commercial au 753,\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15.",
+     "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+     "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+     "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-596-20",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+   "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 20,
+   "excerpt": "le Conseil adopte le règlement résiduel Règlement 596-20\nmodifiant le règlement de zonage 596."
+  },
+  {
+   "id": "ev-596-21",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+   "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 21,
+   "excerpt": "le Conseil adopte le règlement distinct Règlement 596-21\n(concernant les définitions de «Hauteur d'un bâtiment (en\nmètre)» et de «Pourcentage d'occupation du terrain»)\nmodifiant le règlement de zonage 596;"
+  },
+  {
+   "id": "ev-596-22",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+   "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 23,
+   "excerpt": "le Conseil adopte le règlement distinct Règlement 596-22\n(concernant la marge latérale minimale et le pourcentage\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12) modifiant le règlement de zonage 596;"
+  },
+  {
+   "id": "ev-596-23",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+   "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 24,
+   "excerpt": "le Conseil adopte le règlement distinct Règlement 596-23\n(concernant le pourcentage maximal d'occupation du\nbâtiment principal dans la Zone UV-14-J13) modifiant le\nrèglement de zonage 596;"
+  },
+  {
+   "id": "ev-piia-102",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+   "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 25,
+   "excerpt": "le Conseil accorde le PIIA-2 concernant la demande de\nconstruction d’un bâtiment accessoire de type abri d'auto\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\nUC-2-N3."
+  },
+  {
+   "id": "ev-piia-103",
+   "source_file": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "rawRef": "raw/proces-verbaux-lac-brome/cas/2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4.pdf",
+   "docSha": "2f4585cc838167ab51bc3f9d91733de464c54237a2d357f131247d6a7ea15fd4",
+   "sourceUrl": "https://www.ville.lac-brome.qc.ca/storage/app/media/vie-municipale/vie-democratique/seances-du-conseil/Proc%C3%A8s-verbaux%202026/FR/proces-verbalconseilfinal2026-04-07.pdf",
+   "modality": "pdf",
+   "page": 26,
+   "excerpt": "le Conseil accorde le PIIA-3 concernant la demande révisée\nde construction d’un bâtiment principal commercial au 753,\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15."
+  }
+ ],
+ "input_tokens": 18000,
+ "output_tokens": 7800
+}

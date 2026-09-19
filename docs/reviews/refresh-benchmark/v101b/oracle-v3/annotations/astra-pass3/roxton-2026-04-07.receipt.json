@@ -1,0 +1,36 @@
+{
+ "documentId": "roxton-2026-04-07",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "1c4598184adea3ab67d4703ab4ce04e2008c33194af15ce551ec2c1796256210",
+ "inputSha256": "f8a05405fb6daae37bb4d694431d94be19df772dbdf11375a6f22d9279072119",
+ "responseSha256": "b6ce389b2518faadb31a4f9a7aaa5469dcd7baf061a07bcfafb6bb311564aa8d",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 44927,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 9597,
+  "outputTokens": 1436,
+  "totalTokens": 11033
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 44924,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:37:33.438Z"
+}

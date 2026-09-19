@@ -1,0 +1,311 @@
+{
+ "documentId": "brownsburg-chatham-2026-03-10",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "74d11969a462e6c5249baa54eed2ad32210241b1b1ec2b5ac6d3225521ce65b0",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le dispositif de la résolution 26-03-066, page 18, engage expressément la Ville à céder une partie des lots 4 235 205 et 5 641 417 pour accueillir des HLM.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le PIIA 2026-006 est identifié page 41 et le conseil l’accepte pages 42-43 avec trois conditions, malgré la recommandation de refus du CCU.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 44 contient la citation et l’acceptation de DM-2026-00030 pour une emprise de rue de 13 mètres sur le lot projeté 6 721 120.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 45 atteste l’acceptation de DM-2026-00031 pour une emprise de rue de 13 mètres sur le lot projeté 6 721 733.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 46 atteste l’acceptation de DM-2026-00032 autorisant une profondeur moyenne de 27,46 mètres pour le lot projeté 6 721 108.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 48 atteste l’acceptation de DM-2026-00033 autorisant une profondeur moyenne de 26,70 mètres pour le lot projeté 6 721 109.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 49 atteste l’acceptation de DM-2026-00034 autorisant une profondeur moyenne de 26,59 mètres pour le lot projeté 6 721 110.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 50 atteste l’acceptation de DM-2026-00035 autorisant une profondeur moyenne de 27,76 mètres pour le lot projeté 6 721 111.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 52 atteste l’acceptation de DM-2026-00036 autorisant une profondeur moyenne de 27,41 mètres pour le lot projeté 6 686 339.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 53 atteste l’acceptation de DM-2026-00037 autorisant une profondeur moyenne de 26,78 mètres pour le lot projeté 6 686 340.\"\n    },\n    {\n      \"item\": \"i11\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 54 atteste l’acceptation de DM-2026-00038 autorisant une profondeur moyenne de 27,31 mètres pour le lot projeté 6 686 341.\"\n    },\n    {\n      \"item\": \"i12\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 55 atteste l’acceptation de DM-2026-00039 autorisant une profondeur moyenne de 27,70 mètres pour le lot projeté 6 686 343.\"\n    },\n    {\n      \"item\": \"i13\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 57 atteste l’acceptation de DM-2026-00040 autorisant une profondeur moyenne de 27,50 mètres pour le lot projeté 6 686 344.\"\n    },\n    {\n      \"item\": \"i14\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 58 accepte DM-2025-00725 pour le lot projeté 6 703 926 afin d’autoriser une enseigne de 10,6 mètres carrés sur une structure hors toit.\"\n    },\n    {\n      \"item\": \"i15\",\n      \"choice\": \"v1\",\n      \"reason\": \"La citation figure page 58 et la résolution accepte page 59 le PIIA 2026-007 pour la construction d’un établissement de restauration sur le lot projeté 6 703 926.\"\n    },\n    {\n      \"item\": \"i16\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le PIIA 2026-008 est identifié page 59 et accepté page 60 pour une remise avec abri à bois attenant au 815, route des Outaouais, conformément à l’inclusion des petits PIIA.\"\n    },\n    {\n      \"item\": \"i17\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le PIIA 2026-009 est identifié page 61 et accepté page 62 pour une habitation bifamiliale sur le lot 4 235 765, rue de l’Église.\"\n    },\n    {\n      \"item\": \"i18\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le PIIA 2026-010 est identifié page 62 et accepté page 63 pour la rénovation de la résidence au 332-332A, rue Saint-Joseph.\"\n    },\n    {\n      \"item\": \"i19\",\n      \"choice\": \"v2\",\n      \"reason\": \"La citation de v2 reproduit exactement le début du titre page 63, qui identifie le 309, route du Canton et le lot 4 423 780, et l’acceptation du PIIA figure page 64.\"\n    },\n    {\n      \"item\": \"i20\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 64 atteste l’avis de motion donné par Martine Renaud pour le règlement 361-2026, étape distincte du projet de règlement.\"\n    },\n    {\n      \"item\": \"i21\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 14.20, page 65, porte explicitement sur l’adoption du projet de règlement 361-2026 et prévoit une consultation publique ultérieure, ce qui justifie l’étape projet_reglement.\"\n    },\n    {\n      \"item\": \"i22\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 67 contient la citation et l’acceptation d’une contrepartie de 810 $ pour la cession aux fins de parcs liée au lotissement 2025-00021.\"\n    },\n    {\n      \"item\": \"i23\",\n      \"choice\": \"v1\",\n      \"reason\": \"La contribution de 16 950 $ liée au lotissement 2026-00001 est explicitement calculée page 68 puis acceptée par le conseil page 69.\"\n    },\n    {\n      \"item\": \"i24\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 70 contient la citation et l’acceptation d’une contrepartie de 21 150 $ pour la cession aux fins de parcs liée au lotissement 2026-00002.\"\n    },\n    {\n      \"item\": \"i25\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 71 contient la citation et l’acceptation d’une contrepartie de 123 000 $ pour la cession aux fins de parcs liée au lotissement 2026-00005.\"\n    },\n    {\n      \"item\": \"i26\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 73 autorise l’acceptation provisoire des travaux du prolongement de la rue de la Septaco, soit une étape de développement explicite et non un simple entretien de voirie.\"\n    },\n    {\n      \"item\": \"i27\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 14.27, cité page 74, concerne l’entente promoteur du Domaine Oria et les prolongements des rues Lacasse et Saint-Denis, dont la signature est autorisée page 75.\"\n    },\n    {\n      \"item\": \"i28\",\n      \"choice\": \"v2\",\n      \"reason\": \"La citation page 75 identifie explicitement le Domaine Oria et les lots des rues concernées, et le dispositif page 76 autorise le dépôt de la demande au MELCCFP.\"\n    },\n    {\n      \"item\": \"i29\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 77 adopte expressément l’engagement de céder gratuitement un terrain pour une école secondaire « si le besoin se présente », condition conservée dans le libellé.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v1"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v2"
+  },
+  {
+   "item": "i20",
+   "unitId": "u20",
+   "current": "v1"
+  },
+  {
+   "item": "i21",
+   "unitId": "u21",
+   "current": "v1"
+  },
+  {
+   "item": "i22",
+   "unitId": "u22",
+   "current": "v1"
+  },
+  {
+   "item": "i23",
+   "unitId": "u23",
+   "current": "v1"
+  },
+  {
+   "item": "i24",
+   "unitId": "u24",
+   "current": "v1"
+  },
+  {
+   "item": "i25",
+   "unitId": "u25",
+   "current": "v1"
+  },
+  {
+   "item": "i26",
+   "unitId": "u26",
+   "current": "v1"
+  },
+  {
+   "item": "i27",
+   "unitId": "u27",
+   "current": "v1"
+  },
+  {
+   "item": "i28",
+   "unitId": "u28",
+   "current": "v2"
+  },
+  {
+   "item": "i29",
+   "unitId": "u29",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le dispositif de la résolution 26-03-066, page 18, engage expressément la Ville à céder une partie des lots 4 235 205 et 5 641 417 pour accueillir des HLM."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le PIIA 2026-006 est identifié page 41 et le conseil l’accepte pages 42-43 avec trois conditions, malgré la recommandation de refus du CCU."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 44 contient la citation et l’acceptation de DM-2026-00030 pour une emprise de rue de 13 mètres sur le lot projeté 6 721 120."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La page 45 atteste l’acceptation de DM-2026-00031 pour une emprise de rue de 13 mètres sur le lot projeté 6 721 733."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La page 46 atteste l’acceptation de DM-2026-00032 autorisant une profondeur moyenne de 27,46 mètres pour le lot projeté 6 721 108."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La page 48 atteste l’acceptation de DM-2026-00033 autorisant une profondeur moyenne de 26,70 mètres pour le lot projeté 6 721 109."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La page 49 atteste l’acceptation de DM-2026-00034 autorisant une profondeur moyenne de 26,59 mètres pour le lot projeté 6 721 110."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La page 50 atteste l’acceptation de DM-2026-00035 autorisant une profondeur moyenne de 27,76 mètres pour le lot projeté 6 721 111."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La page 52 atteste l’acceptation de DM-2026-00036 autorisant une profondeur moyenne de 27,41 mètres pour le lot projeté 6 686 339."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La page 53 atteste l’acceptation de DM-2026-00037 autorisant une profondeur moyenne de 26,78 mètres pour le lot projeté 6 686 340."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "La page 54 atteste l’acceptation de DM-2026-00038 autorisant une profondeur moyenne de 27,31 mètres pour le lot projeté 6 686 341."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "La page 55 atteste l’acceptation de DM-2026-00039 autorisant une profondeur moyenne de 27,70 mètres pour le lot projeté 6 686 343."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "La page 57 atteste l’acceptation de DM-2026-00040 autorisant une profondeur moyenne de 27,50 mètres pour le lot projeté 6 686 344."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "La page 58 accepte DM-2025-00725 pour le lot projeté 6 703 926 afin d’autoriser une enseigne de 10,6 mètres carrés sur une structure hors toit."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "La citation figure page 58 et la résolution accepte page 59 le PIIA 2026-007 pour la construction d’un établissement de restauration sur le lot projeté 6 703 926."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "Le PIIA 2026-008 est identifié page 59 et accepté page 60 pour une remise avec abri à bois attenant au 815, route des Outaouais, conformément à l’inclusion des petits PIIA."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "Le PIIA 2026-009 est identifié page 61 et accepté page 62 pour une habitation bifamiliale sur le lot 4 235 765, rue de l’Église."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "Le PIIA 2026-010 est identifié page 62 et accepté page 63 pour la rénovation de la résidence au 332-332A, rue Saint-Joseph."
+  },
+  {
+   "item": "i19",
+   "choice": "v2",
+   "reason": "La citation de v2 reproduit exactement le début du titre page 63, qui identifie le 309, route du Canton et le lot 4 423 780, et l’acceptation du PIIA figure page 64."
+  },
+  {
+   "item": "i20",
+   "choice": "v1",
+   "reason": "La page 64 atteste l’avis de motion donné par Martine Renaud pour le règlement 361-2026, étape distincte du projet de règlement."
+  },
+  {
+   "item": "i21",
+   "choice": "v1",
+   "reason": "Le point 14.20, page 65, porte explicitement sur l’adoption du projet de règlement 361-2026 et prévoit une consultation publique ultérieure, ce qui justifie l’étape projet_reglement."
+  },
+  {
+   "item": "i22",
+   "choice": "v1",
+   "reason": "La page 67 contient la citation et l’acceptation d’une contrepartie de 810 $ pour la cession aux fins de parcs liée au lotissement 2025-00021."
+  },
+  {
+   "item": "i23",
+   "choice": "v1",
+   "reason": "La contribution de 16 950 $ liée au lotissement 2026-00001 est explicitement calculée page 68 puis acceptée par le conseil page 69."
+  },
+  {
+   "item": "i24",
+   "choice": "v1",
+   "reason": "La page 70 contient la citation et l’acceptation d’une contrepartie de 21 150 $ pour la cession aux fins de parcs liée au lotissement 2026-00002."
+  },
+  {
+   "item": "i25",
+   "choice": "v1",
+   "reason": "La page 71 contient la citation et l’acceptation d’une contrepartie de 123 000 $ pour la cession aux fins de parcs liée au lotissement 2026-00005."
+  },
+  {
+   "item": "i26",
+   "choice": "v1",
+   "reason": "La page 73 autorise l’acceptation provisoire des travaux du prolongement de la rue de la Septaco, soit une étape de développement explicite et non un simple entretien de voirie."
+  },
+  {
+   "item": "i27",
+   "choice": "v1",
+   "reason": "Le point 14.27, cité page 74, concerne l’entente promoteur du Domaine Oria et les prolongements des rues Lacasse et Saint-Denis, dont la signature est autorisée page 75."
+  },
+  {
+   "item": "i28",
+   "choice": "v2",
+   "reason": "La citation page 75 identifie explicitement le Domaine Oria et les lots des rues concernées, et le dispositif page 76 autorise le dépôt de la demande au MELCCFP."
+  },
+  {
+   "item": "i29",
+   "choice": "v1",
+   "reason": "La page 77 adopte expressément l’engagement de céder gratuitement un terrain pour une école secondaire « si le besoin se présente », condition conservée dans le libellé."
+  }
+ ]
+}

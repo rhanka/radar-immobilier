@@ -1,0 +1,26 @@
+{
+ "documentId": "grenville-sur-la-rouge-2026-04-14",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "196330a7c7fa54a291562c8f0834a06cd57a06f85ca3936dca9441b7e2699550",
+ "rawText": "{\"operations\":[]}",
+ "parseError": null,
+ "operations": [],
+ "applied": [],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 8
+}

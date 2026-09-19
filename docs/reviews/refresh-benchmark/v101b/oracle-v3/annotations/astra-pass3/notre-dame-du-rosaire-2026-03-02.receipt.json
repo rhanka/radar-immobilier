@@ -1,0 +1,36 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "284ee220fe486f61e7cd108aa9b318d40b04767e6fdc298ec8d61395c1ba5810",
+ "inputSha256": "25015de56b8dca2d2f2119101799d920c21c2ed4117b9fff4ad9907724cf03d5",
+ "responseSha256": "2b6dc2d4682715d9e6fe9dc8dc627dab20c9a5f1d89091d55fdc826c71d85797",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 93534,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 15321,
+  "outputTokens": 3018,
+  "totalTokens": 18339
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 93529,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:58:18.378Z"
+}

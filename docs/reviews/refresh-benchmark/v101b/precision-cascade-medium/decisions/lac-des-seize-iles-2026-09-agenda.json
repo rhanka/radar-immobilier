@@ -1,0 +1,200 @@
+{
+ "documentId": "lac-des-seize-iles-2026-09-agenda",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "8f13ab958ac418536b4e81f4e57f7f5c7683ef01a4ec0be941b53b30ccbef144",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-08"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-08 — Occupation du domaine public municipal",
+     "stage": "projet",
+     "objet": "2026-08",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l’occupation\ndu domaine public municipal"
+      },
+      {
+       "page": 1,
+       "excerpt": "3.7 Dépôt du projet de règlement numéro 2026-08 régissant l’occupation du\ndomaine public municipal"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2026-102-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-102-01 — Contribution pour fins de parcs",
+     "stage": null,
+     "objet": "2026-102-01",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le\nlotissement numéro 2019-102 concernant les règles de calcul de la"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-2019-102"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement sur le lotissement 2019-102",
+     "stage": null,
+     "objet": "2019-102",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le\nlotissement numéro 2019-102 concernant les règles de calcul de la"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-ddm2026-058"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure DDM2026-058 — 252, chemin du Village",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-barrage"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Projet de reconstruction du barrage — Caractérisation écologique",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "8.4 Octroi de mandat à Terre et Habitats Inc. – Addenda au rapport de\ncaractérisation écologique – Projet de reconstruction du barrage"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et le dépôt du projet de règlement numéro 2026-08 sont prévus aux points 3.6 et 3.7 de l'ordre du jour.\",\"excerpt\":\"3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l’occupation\\ndu domaine public municipal\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement 2026-102-01 est inscrite au point 5.5 de l'ordre du jour.\",\"excerpt\":\"5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le\\nlotissement numéro 2019-102 concernant les règles de calcul de la\\ncontribution pour fins de parcs\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2019-102 n'est mentionné que comme le règlement antérieur faisant l'objet d'une modification, il ne constitue pas un acte distinct adopté ou traité en lui-même.\",\"excerpt\":\"5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le\\nlotissement numéro 2019-102\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le traitement de la dérogation mineure DDM2026-058 est inscrit au point 5.4 de l'ordre du jour.\",\"excerpt\":\"5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058)\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple octroi de contrat/mandat de services professionnels pour un rapport d'expertise, relevant des exclusions.\",\"excerpt\":\"8.4 Octroi de mandat à Terre et Habitats Inc. – Addenda au rapport de\\ncaractérisation écologique – Projet de reconstruction du barrage\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et le dépôt du projet de règlement numéro 2026-08 sont prévus aux points 3.6 et 3.7 de l'ordre du jour.",
+   "excerpt": "3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l’occupation\ndu domaine public municipal"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement 2026-102-01 est inscrite au point 5.5 de l'ordre du jour.",
+   "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le\nlotissement numéro 2019-102 concernant les règles de calcul de la\ncontribution pour fins de parcs"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2019-102 n'est mentionné que comme le règlement antérieur faisant l'objet d'une modification, il ne constitue pas un acte distinct adopté ou traité en lui-même.",
+   "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le\nlotissement numéro 2019-102"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le traitement de la dérogation mineure DDM2026-058 est inscrit au point 5.4 de l'ordre du jour.",
+   "excerpt": "5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058)"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple octroi de contrat/mandat de services professionnels pour un rapport d'expertise, relevant des exclusions.",
+   "excerpt": "8.4 Octroi de mandat à Terre et Habitats Inc. – Addenda au rapport de\ncaractérisation écologique – Projet de reconstruction du barrage"
+  }
+ ],
+ "filter": {
+  "acts": 5,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement 2019-102 n'est mentionné que comme le règlement antérieur faisant l'objet d'une modification, il ne constitue pas un acte distinct adopté ou traité en lui-même."
+   },
+   {
+    "act": "A05",
+    "reason": "Il s'agit d'un simple octroi de contrat/mandat de services professionnels pour un rapport d'expertise, relevant des exclusions."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "L'avis de motion et le dépôt du projet de règlement numéro 2026-08 sont prévus aux points 3.6 et 3.7 de l'ordre du jour."
+   },
+   {
+    "act": "A02",
+    "reason": "L'adoption du règlement 2026-102-01 est inscrite au point 5.5 de l'ordre du jour."
+   },
+   {
+    "act": "A04",
+    "reason": "Le traitement de la dérogation mineure DDM2026-058 est inscrit au point 5.4 de l'ordre du jour."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1724,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2122,
+   "outputTokens": 439,
+   "totalTokens": 2561
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1578
+  },
+  "inputSha256": "6a2546ce4fbd88dce9eca5c5aa43b03b56cd4034771ccb129466b665ab62a826"
+ }
+}

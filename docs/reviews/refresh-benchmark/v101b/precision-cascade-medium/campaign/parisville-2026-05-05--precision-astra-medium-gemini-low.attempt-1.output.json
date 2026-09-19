@@ -1,0 +1,241 @@
+{
+ "nodes": [
+  {
+   "id": "source-pv-2026-05-05",
+   "label": "Procès-verbal du conseil de Parisville du 5 mai 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "status": "candidate",
+   "properties": {
+    "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+    "date": "2026-05-05",
+    "municipality": "parisville",
+    "url": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+    "sourceKind": "pv",
+    "format": "pdf"
+   },
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "PROCÈS-VERBAL de la séance ordinaire du conseil de Parisville tenue à la salle du\nconseil, le mardi 5 mai 2026 à compter de 19 h 30.",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-432-2026",
+   "label": "Règlement 432-2026 modifiant le règlement de zonage",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "status": "candidate",
+   "properties": {
+    "numero": "432-2026",
+    "municipality": "parisville",
+    "date": "2026-05-05",
+    "meetingDate": "2026-05-05",
+    "stage": "adoption",
+    "resolution": "73-05-26",
+    "objet": "Modification du règlement de zonage 308-2011 : terminologie liée à l’occupation et à l’entretien des bâtiments, liste des revêtements extérieurs, conteneurs comme structure de bâtiment principal, agrandissement ou bâtiment accessoire, abrogation de l’annexe 3 sur les éléments susceptibles d’approbation référendaire."
+   },
+   "evidence_refs": [
+    "ev-zonage",
+    "ev-objet-zonage"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011.",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 3,
+     "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de\nzonage afin de permettre les conteneurs comme structure de bâtiment\nprincipal ou pour un agrandissement;",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-433-2026",
+   "label": "Règlement 433-2026 modifiant le règlement de lotissement",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "status": "candidate",
+   "properties": {
+    "numero": "433-2026",
+    "municipality": "parisville",
+    "date": "2026-05-05",
+    "meetingDate": "2026-05-05",
+    "stage": "adoption",
+    "resolution": "74-05-26",
+    "objet": "Modification du règlement de lotissement 311-2011 afin de permettre le remembrement d’un terrain."
+   },
+   "evidence_refs": [
+    "ev-lotissement"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011.",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 4,
+     "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de\nlotissement afin de permettre le remembrement d’un terrain;",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-pv-2026-05-05",
+   "target": "bylaw-432-2026",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "evidence_refs": [
+    "ev-zonage"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011.",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-05-05",
+   "target": "bylaw-433-2026",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "evidence_refs": [
+    "ev-lotissement"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011.",
+     "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+     "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+     "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-zonage",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+  },
+  {
+   "id": "ev-objet-zonage",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de\nzonage afin d’ajouter une terminologie en lien avec le nouveau règlement sur\nl’occupation et l’entretien des bâtiments;\nCONSIDÉRANT QUE le conseil municipal entend modifier le règlement de\nzonage afin d’ajuster la liste des revêtements extérieurs;\nCONSIDÉRANT QUE le conseil municipal entend modifier le règlement de\nzonage afin de permettre les conteneurs comme structure de bâtiment\nprincipal ou pour un agrandissement;\nCONSIDÉRANT QUE le conseil municipal entend modifier le règlement de\nzonage afin de permettre les conteneurs comme bâtiment accessoire;\nCONSIDÉRANT QUE le conseil municipal entend abroger l’annexe 3 sur les\néléments susceptibles d’approbation référendaire afin que la Loi sur\nl’aménagement et l’urbanisme soit la référence;"
+  },
+  {
+   "id": "ev-lotissement",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+  },
+  {
+   "id": "ev-premier-projet",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "CONSIDÉRANT QUE le premier projet de règlement # 431-2026 modifiant\nle règlement de zonage a été adopté le 10 mars 2026;"
+  },
+  {
+   "id": "ev-conduites",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "D’autoriser le directeur général et le maire à signer les documents\nnécessaires auprès du Centre financier aux entreprises de Desjardins afin\nde contracter un prêt temporaire de 6 500 000.00 $ afin de couvrir les\ndépenses liées au projet de réfection des conduites de la route Principale."
+  },
+  {
+   "id": "ev-parc",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "D’autoriser le dépôt de la demande d’aide financière par le directeur général,\nainsi que de l’autoriser à signer et à compléter l’ensemble des documents\nnécessaires liés à cette demande d’aide financière."
+  },
+  {
+   "id": "ev-eau",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "D’autoriser la signature de l’entente modifiée entre la municipalité de\nParisville et la municipalité de Deschaillons-sur-Saint-Laurent concernant la\nfourniture et la distribution d’eau potable."
+  },
+  {
+   "id": "ev-fibre",
+   "source_file": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "rawRef": "raw/proces-verbaux-parisville/cas/1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658.pdf",
+   "docSha": "1bd5c118dd25f889e704e36f9b86e59d0ed026ef926ad46e1308dc5ae0335658",
+   "sourceUrl": "https://www.municipalite.parisville.qc.ca/upload/pv06_05-05-2026.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "De consentir à l’installation d’un réseau de fibre optique sur le territoire de la\nmunicipalité de Parisville tel que présenté aux plans soumis,\nconditionnellement au respect de la réglementation municipale en vigueur.\nD’exiger que tous les travaux soient réalisés conformément aux normes\napplicables et qu’ils n’occasionnent aucun dommage aux infrastructures\nmunicipales.\nDe stipuler que tout bris ou dommage causé aux infrastructures municipales\ndans le cadre des travaux sera à l’entière responsabilité de Sogetel inc.,\nincluant les coûts de réparation et de remise en état des lieux."
+  }
+ ],
+ "input_tokens": 10400,
+ "output_tokens": 6200
+}

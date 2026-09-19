@@ -1,0 +1,35 @@
+{
+ "documentId": "chibougamau-2026-05-16",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "f1465dc1b6f3d96d7252567aa436a7168139ff946bc66a821bd780f3534a0686",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1827,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3765,
+   "outputTokens": 399,
+   "totalTokens": 4164
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1696
+  },
+  "inputSha256": "edede157558d07df31cd787da2fd09d63f2097f08dfc5dff0db333369d517e69"
+ },
+ "at": "2026-09-19T03:22:13.418Z"
+}

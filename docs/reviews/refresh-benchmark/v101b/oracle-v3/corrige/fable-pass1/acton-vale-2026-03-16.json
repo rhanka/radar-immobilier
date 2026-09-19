@@ -1,0 +1,120 @@
+{
+ "documentId": "acton-vale-2026-03-16",
+ "nextId": 4,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue de la résolution finale PPCMOI-001-2026 — 1050, rue Dubois",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-001-2026",
+    "page": 2,
+    "citation": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de modification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue Dubois",
+    "anchor": "PPCMOI-001-2026",
+    "spanStart": 395,
+    "spanEnd": 558
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue de la résolution finale PPCMOI-001-2026 — 1050, rue Dubois",
+      "stage": "adoption",
+      "procedure": "ppcmoi",
+      "objet": "PPCMOI-001-2026",
+      "page": 2,
+      "citation": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de modification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue Dubois",
+      "anchor": "PPCMOI-001-2026",
+      "spanStart": 395,
+      "spanEnd": 558
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 18.1 prévoit l'adoption de la résolution finale d'un PPCMOI explicite ; dans un ordre du jour, cette étape constitue une unité prévue et non une décision acquise."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Résolution prévue sur la demande à la CPTAQ — Ferme Guilmette Inc.",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Ferme Guilmette Inc.",
+    "page": 2,
+    "citation": "18.2 - Résolution relative à une demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Ferme Guilmette Inc",
+    "anchor": "Ferme Guilmette Inc",
+    "spanStart": 560,
+    "spanEnd": 699
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Résolution prévue sur la demande à la CPTAQ — Ferme Guilmette Inc.",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "Ferme Guilmette Inc.",
+      "page": 2,
+      "citation": "18.2 - Résolution relative à une demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Ferme Guilmette Inc",
+      "anchor": "Ferme Guilmette Inc",
+      "spanStart": 560,
+      "spanEnd": 699
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 18.2 prévoit une résolution sur une demande explicite concernant le territoire agricole ; le sens de la résolution n'étant pas précisé, l'étape reste « inconnu »."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Résolution prévue sur la demande à la CPTAQ — Daniel Laroche",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Daniel Laroche",
+    "page": 2,
+    "citation": "18.3 - Résolution relative à une demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Daniel Laroche",
+    "anchor": "Daniel Laroche",
+    "spanStart": 703,
+    "spanEnd": 837
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Résolution prévue sur la demande à la CPTAQ — Daniel Laroche",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "Daniel Laroche",
+      "page": 2,
+      "citation": "18.3 - Résolution relative à une demande présentée à la Commission de protection du territoire agricole du Québec (Réf: Daniel Laroche",
+      "anchor": "Daniel Laroche",
+      "spanStart": 703,
+      "spanEnd": 837
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 18.3 prévoit une résolution sur une demande distincte concernant le territoire agricole ; elle constitue une unité prévue, sans présumer une autorisation ou un refus."
+    }
+   ]
+  }
+ ]
+}

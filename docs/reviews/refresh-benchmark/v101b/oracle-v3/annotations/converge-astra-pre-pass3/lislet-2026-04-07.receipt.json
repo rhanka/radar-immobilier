@@ -1,0 +1,36 @@
+{
+ "documentId": "lislet-2026-04-07",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "efebde05d360c9d992a4b8fc70721d5306bb4bf14ac13bfa9caa7734911b6227",
+ "inputSha256": "100fdcba89baca79a65b5c8904b06b0996268f49d72827ef52999c6836816709",
+ "responseSha256": "08e90e54092b1ef45c82c5ff98071b1b541629ae05e97e38e84131213d0f42fc",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 30362,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2586,
+  "outputTokens": 932,
+  "totalTokens": 3518
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 30360,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:16:19.985Z"
+}

@@ -1,0 +1,111 @@
+{
+ "documentId": "ogden-2026-03-09",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1164b01f7be18a11e9d25f30bcc979b5c5a89e7cd2c523722c986f7ea1695d48",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 6.3, page 1, prévoit la demande de deux dérogations mineures au 905 Descente 2, sans annoncer de décision acquise.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 6.4, page 1, prévoit explicitement une demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 6.5, page 1, prévoit explicitement une demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 6.6, page 1, prévoit le dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme, ce qui atteste l’objet réglementaire et le dépôt prévu sans établir une adoption.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 6.7, page 1, prévoit le dépôt du certificat relatif à la procédure d’enregistrement des personnes habiles à voter sur le règlement de zonage 2025-05.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 9.4, page 1, inscrit une liste de propriétés à vendre pour défaut de paiement de taxes, soit un objet foncier prévu et non une vente déjà réalisée.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Le point 13.1, page 1, prévoit l’adoption du règlement 2026.03 modifiant le règlement relatif au comité consultatif d’urbanisme, et non une simple nomination.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Le point 13.3, page 1, prévoit l’avis de motion du règlement 2026.05 sur l’occupation et l’entretien des bâtiments, étape distincte du projet de règlement.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Le point 13.4, page 2, prévoit l’adoption du projet de règlement 2026.05 sur l’occupation et l’entretien des bâtiments, ce qui correspond à l’étape projet_reglement et non à l’adoption définitive.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 6.3, page 1, prévoit la demande de deux dérogations mineures au 905 Descente 2, sans annoncer de décision acquise."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 6.4, page 1, prévoit explicitement une demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 6.5, page 1, prévoit explicitement une demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 6.6, page 1, prévoit le dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme, ce qui atteste l’objet réglementaire et le dépôt prévu sans établir une adoption."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 6.7, page 1, prévoit le dépôt du certificat relatif à la procédure d’enregistrement des personnes habiles à voter sur le règlement de zonage 2025-05."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 9.4, page 1, inscrit une liste de propriétés à vendre pour défaut de paiement de taxes, soit un objet foncier prévu et non une vente déjà réalisée."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Le point 13.1, page 1, prévoit l’adoption du règlement 2026.03 modifiant le règlement relatif au comité consultatif d’urbanisme, et non une simple nomination."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Le point 13.3, page 1, prévoit l’avis de motion du règlement 2026.05 sur l’occupation et l’entretien des bâtiments, étape distincte du projet de règlement."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Le point 13.4, page 2, prévoit l’adoption du projet de règlement 2026.05 sur l’occupation et l’entretien des bâtiments, ce qui correspond à l’étape projet_reglement et non à l’adoption définitive."
+  }
+ ]
+}

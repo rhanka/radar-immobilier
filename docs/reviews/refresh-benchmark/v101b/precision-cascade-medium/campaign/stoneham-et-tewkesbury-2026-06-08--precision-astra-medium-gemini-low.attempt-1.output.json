@@ -1,0 +1,652 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-26-1105",
+   "label": "Adoption du règlement 26-1105 — modification du zonage",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "numero": "26-1105",
+   "title": "Modification du Règlement de zonage numéro 09-591",
+   "stage": "adoption",
+   "date": "2026-06-08",
+   "meetingDate": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "zones_ciblees": [
+    "RT-503",
+    "F-304",
+    "CS-507"
+   ],
+   "objet": "Créer la zone récréotouristique RT-503 et son cadre normatif; agrandir F-304 pour créer une zone tampon entre LacDelage et RT-503; agrandir la zone de conservation CS-507.",
+   "citations": [
+    {
+     "page": 52,
+     "excerpt": "Adoption du Règlement numéro 26-1105\nmodifiant le Règlement de zonage numéro 09-591",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-26-1106",
+   "label": "Adoption du règlement 26-1106 — PIIA de la zone RT-503",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "numero": "26-1106",
+   "title": "Modification du Règlement relatif aux plans d’implantation et d’intégration architecturale numéro 09-603",
+   "stage": "adoption",
+   "date": "2026-06-08",
+   "meetingDate": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "zone_cible": "RT-503",
+   "objet": "Encadrer le développement de RT-503 pour préserver le milieu naturel, favoriser une intégration harmonieuse des bâtiments et aménagements, la gestion durable des eaux pluviales et la cohabitation des usages.",
+   "citations": [
+    {
+     "page": 54,
+     "excerpt": "Adoption du Règlement numéro 26-1106\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\narchitecturale numéro 09-603",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-RT-503",
+   "label": "Zone récréotouristique RT-503",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "code": "RT-503",
+   "municipality": "stoneham-et-tewkesbury",
+   "designation": "récréotouristique",
+   "secteur": "Chemin de la GrandeLigne, près des activités offertes par Empire 47",
+   "citations": [
+    {
+     "page": 52,
+     "excerpt": "Créer la zone récréotouristique RT-503 (chemin de la GrandeLigne, près des activités offertes par Empire 47)",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-F-304",
+   "label": "Zone F-304 — agrandissement",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "code": "F-304",
+   "municipality": "stoneham-et-tewkesbury",
+   "description": "Agrandissement pour créer une zone tampon entre LacDelage et RT-503.",
+   "citations": [
+    {
+     "page": 52,
+     "excerpt": "Agrandir la zone F-304 pour créer une zone tampon entre LacDelage et la zone RT-503",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-CS-507",
+   "label": "Zone de conservation CS-507",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "code": "CS-507",
+   "municipality": "stoneham-et-tewkesbury",
+   "designation": "conservation",
+   "secteur": "Marais du Nord",
+   "citations": [
+    {
+     "page": 52,
+     "excerpt": "Agrandir la zone de conservation CS-507 (Marais du Nord)",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-15-1-1",
+   "label": "Dérogation mineure — piscine au 2135, route de Tewkesbury",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "meetingDate": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "reglement_number": "09-591",
+   "description": "Construction d’une piscine en cour avant; dérogation à l’article 7.3.2. Le CCU et le Service de l’urbanisme recommandent l’approbation avec un écran opaque d’au moins 4 pieds entre l’enceinte et l’allée d’accès commune. La décision du conseil n’est pas indiquée.",
+   "motif": "Allée privée avec peu de résidences; piscine invisible de la rue grâce à la topographie; marge avant minimale de 7,5 m respectée; emplacement sans arbre et sans remaniement important du sol.",
+   "citations": [
+    {
+     "page": 38,
+     "excerpt": "Construction d’une piscine en cour avant au 2135, route de Tewkesbury",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-15-1-2",
+   "label": "Dérogation mineure — habitation au 53, chemin Plamondon",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "meetingDate": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "reglement_number": "09-591",
+   "description": "Régularisation d’une habitation unifamiliale construite en 1965 avec une marge latérale de 2,55 m plutôt que 5 m; article 3.2.2. Recommandation favorable du CCU et du Service de l’urbanisme, sans décision du conseil indiquée.",
+   "motif": "Implantation antérieure à la réglementation actuelle; correction nécessitant un déplacement ou une démolition partielle; plus de 9 m entre les bâtiments; arbres matures préservant l’intimité.",
+   "citations": [
+    {
+     "page": 40,
+     "excerpt": "Régularisation d’une habitation unifamiliale avec une marge latérale de 2,55 m au 53,\nchemin Plamondon",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-15-2-1",
+   "label": "PIIA — entreposage commercial au 2757, boulevard Talbot",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "kind": "piia",
+   "etape": "piia",
+   "meetingDate": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "reglement_number": "09-603",
+   "zone_ref": "CA-102",
+   "description": "Construction de bâtiments commerciaux d’entreposage intérieur et d’une aire de stationnement de plus de 150 m2. Recommandation favorable du CCU et du Service de l’urbanisme avec exigences paysagères pour tous les bâtiments et priorité à une implantation en biseau des futurs bâtiments. La décision du conseil n’est pas indiquée.",
+   "citations": [
+    {
+     "page": 42,
+     "excerpt": "Construction de bâtiments commerciaux d’entreposage intérieur et aménagement d’une\naire de stationnement de plus de 150 m2 au 2757, boulevard Talbot",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-CA-102",
+   "label": "Zone CA-102",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "code": "CA-102",
+   "municipality": "stoneham-et-tewkesbury",
+   "citations": [
+    {
+     "page": 42,
+     "excerpt": "Construction de bâtiments commerciaux d’entreposage intérieur et aménagement d’une\naire de stationnement de plus de 150 m2 au 2757, boulevard Talbot",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-15-2-2",
+   "label": "PIIA — accès et stationnement au 98, 1re Avenue",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "kind": "piia",
+   "etape": "piia",
+   "meetingDate": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "reglement_number": "09-603",
+   "description": "Agrandissement de l’allée d’accès et du stationnement à plus de 150 m²; articles 5.7, 5.2 et 5.23. Le CCU et le Service de l’urbanisme recommandent le refus; aucune décision du conseil n’est indiquée.",
+   "motif": "Réponse insatisfaisante aux critères de protection patrimoniale, d’harmonisation avec le milieu naturel et de préservation des arbres matures et des écrans végétaux.",
+   "citations": [
+    {
+     "page": 44,
+     "excerpt": "Agrandissement de l’allée d’accès et de l’aire de stationnement portant la superficie à plus de\n150 m² au 98, 1re Avenue",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-15-2-3",
+   "label": "PIIA — piscine au 105, chemin de la Tourterelle",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "kind": "piia",
+   "etape": "piia",
+   "meetingDate": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "reglement_number": "09-603",
+   "description": "Implantation d’une piscine dans les bandes de protection d’un secteur de forte pente, article 5.29. Recommandation favorable du CCU et du Service de l’urbanisme, sans décision du conseil indiquée.",
+   "motif": "Aucun empiètement en zone de forte pente, aucune modification significative du ruissellement et aucun impact additionnel sur les bassins versants protégés; les autres emplacements nécessiteraient du déboisement.",
+   "citations": [
+    {
+     "page": 46,
+     "excerpt": "Implantation d’une piscine à l’intérieur des bandes de protection d’un secteur de forte pente\nau 105, chemin de la Tourterelle",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-15-2-4",
+   "label": "PIIA — stationnement au 144, chemin du Sommet",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "kind": "piia",
+   "etape": "piia",
+   "meetingDate": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "reglement_number": "09-603",
+   "description": "Aménagement d’une aire de stationnement de plus de 150 m2, article 5.23. Le CCU et le Service de l’urbanisme recommandent l’approbation pour conformité aux critères d’analyse; aucune décision du conseil n’est indiquée.",
+   "citations": [
+    {
+     "page": 48,
+     "excerpt": "Aménagement d’une aire de stationnement de plus de 150 m2 au 144, chemin du Sommet",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-15-2-5",
+   "label": "PIIA — enseigne Excavation JDS au 2523, boulevard Talbot",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "kind": "piia",
+   "etape": "piia",
+   "meetingDate": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "reglement_number": "09-603",
+   "description": "Modification d’une enseigne pour Excavation JDS, articles 5.6 et 5.13. Recommandation favorable du CCU et du Service de l’urbanisme en raison des végétaux vivaces atténuant l’impact visuel; aucune décision du conseil n’est indiquée.",
+   "citations": [
+    {
+     "page": 50,
+     "excerpt": "Modification d’une enseigne pour l’entreprise Excavation JDS au 2523, boulevard Talbot",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-16-3",
+   "label": "Refus du PPCMOI — 102, 1re Avenue",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "kind": "ppcmoi",
+   "etape": "ppcmoi",
+   "date": "2026-06-08",
+   "meetingDate": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "decision": "refusé",
+   "description": "Refus d’un projet résidentiel intégré au 102, 1re Avenue comprenant trois bâtiments principaux de 3, 6 et 9 logements, soit 18 logements locatifs, et un bâtiment de remisage isolé. Lots actuels 1827713, 2187411 et 2187412 du cadastre du Québec. Le titre du point mentionne l’adoption du premier projet de résolution, mais le dispositif indique le refus.",
+   "citations": [
+    {
+     "page": 56,
+     "excerpt": "Il est résolu\nde refuser la demande de projet\nparticulier de construction, de\nmodification ou d’occupation d’un\nimmeuble (PPCMOI) visant à autoriser",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-18-logements",
+   "label": "Projet de 18 logements locatifs refusé",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "category": "developpement_residentiel",
+   "date": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "scope": "local",
+   "etape": "ppcmoi",
+   "outcome": "refusé",
+   "nb_unites_min": 18,
+   "nb_unites_max": 18,
+   "description": "Projet intégré de 18 nouveaux logements locatifs au 102, 1re Avenue refusé. La réglementation actuelle ne permet pas sa réalisation sans autorisation particulière.",
+   "citations": [
+    {
+     "page": 56,
+     "excerpt": "Il est résolu\nde refuser la demande de projet\nparticulier de construction, de\nmodification ou d’occupation d’un\nimmeuble (PPCMOI) visant à autoriser",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-acquisition",
+   "label": "Acquisition gratuite et stationnement partagé avec la Résidence",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "category": "acquisition_fonciere",
+   "date": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "scope": "local",
+   "no_lot": "6564346",
+   "description": "Autorisation d’acquérir gratuitement une partie du lot 6564346 et de signer une entente de stationnement commun entre le complexe municipal et la Résidence des Cantons-Unis de Stoneham-et-Tewkesbury; autorisation des conventions d’occupation et servitudes d’utilité publique nécessaires.",
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "d’autoriser l’acquisition à titre\ngratuit, par la Municipalité, d’une\npartie du lot actuel numéro 6 564\n346 du cadastre du Québec;",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-septique-projet",
+   "label": "Projet de règlement — vidange des fosses septiques et de rétention",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "title": "Vidange des fosses septiques et des fosses de rétention",
+   "stage": "projet",
+   "meetingDate": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "objet": "Avis de motion et dépôt d’un projet remplaçant entièrement le règlement 08-573, modernisant la terminologie, les responsabilités, les fréquences de vidange et les processus.",
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "Avis de motion et dépôt d’un projet de règlement\nVidange des fosses septiques et des fosses de rétention",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-26-1125",
+   "label": "Règlement 26-1125 — traitement du manganèse au puits de la Montagne",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "status": "candidate",
+   "numero": "26-1125",
+   "title": "Emprunt pour le traitement du manganèse au puits de la Montagne",
+   "stage": "adoption",
+   "date": "2026-06-08",
+   "municipality": "stoneham-et-tewkesbury",
+   "objet": "Emprunt de 41 800 $ pour le traitement du manganèse au puits de la Montagne.",
+   "citations": [
+    {
+     "page": 35,
+     "excerpt": "Adoption du Règlement numéro 26-1125\n\nEmprunt pour le traitement du manganèse au puits de la Montagne",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "bylaw-26-1105",
+   "target": "zone-RT-503",
+   "relation": "defines",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "evidence_refs": [
+    "ev-52-zones"
+   ],
+   "citations": [
+    {
+     "page": 52,
+     "excerpt": "Créer la zone récréotouristique RT-503 (chemin de la GrandeLigne, près des activités offertes par Empire 47)",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "bylaw-26-1105",
+   "target": "zone-F-304",
+   "relation": "applies_to",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "evidence_refs": [
+    "ev-52-zones"
+   ],
+   "citations": [
+    {
+     "page": 52,
+     "excerpt": "Agrandir la zone F-304 pour créer une zone tampon entre LacDelage et la zone RT-503",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "bylaw-26-1105",
+   "target": "zone-CS-507",
+   "relation": "applies_to",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "evidence_refs": [
+    "ev-52-zones"
+   ],
+   "citations": [
+    {
+     "page": 52,
+     "excerpt": "Agrandir la zone de conservation CS-507 (Marais du Nord)",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "bylaw-26-1106",
+   "target": "zone-RT-503",
+   "relation": "applies_to",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "evidence_refs": [
+    "ev-54-zone"
+   ],
+   "citations": [
+    {
+     "page": 54,
+     "excerpt": "Les modifications au PIIA visent à encadrer le développement\ndans la nouvelle zone RT-503 afin de préserver les\ncaractéristiques du milieu naturel.",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-15-2-1",
+   "target": "zone-CA-102",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "evidence_refs": [
+    "ev-42"
+   ],
+   "citations": [
+    {
+     "page": 42,
+     "excerpt": "Construction de bâtiments commerciaux d’entreposage intérieur et aménagement d’une\naire de stationnement de plus de 150 m2 au 2757, boulevard Talbot",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-16-3",
+   "target": "signal-18-logements",
+   "relation": "raises_signal",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "evidence_refs": [
+    "ev-56"
+   ],
+   "citations": [
+    {
+     "page": 56,
+     "excerpt": "Il est résolu\nde refuser la demande de projet\nparticulier de construction, de\nmodification ou d’occupation d’un\nimmeuble (PPCMOI) visant à autoriser",
+     "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+     "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+     "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-52",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+   "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+   "modality": "pdf",
+   "page": 52,
+   "excerpt": "Adoption du Règlement numéro 26-1105\nmodifiant le Règlement de zonage numéro 09-591"
+  },
+  {
+   "id": "ev-52-zones",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+   "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+   "modality": "pdf",
+   "page": 52,
+   "excerpt": "• Créer la zone récréotouristique RT-503 (chemin de la GrandeLigne, près des activités offertes par Empire 47)\n• Agrandir la zone F-304 pour créer une zone tampon entre LacDelage et la zone RT-503\n• Agrandir la zone de conservation CS-507 (Marais du Nord)\n• Dresser un cadre normatif pour la nouvelle zone récréotouristique"
+  },
+  {
+   "id": "ev-54",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+   "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+   "modality": "pdf",
+   "page": 54,
+   "excerpt": "Adoption du Règlement numéro 26-1106\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\narchitecturale numéro 09-603"
+  },
+  {
+   "id": "ev-54-zone",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+   "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+   "modality": "pdf",
+   "page": 54,
+   "excerpt": "Les modifications au PIIA visent à encadrer le développement\ndans la nouvelle zone RT-503 afin de préserver les\ncaractéristiques du milieu naturel."
+  },
+  {
+   "id": "ev-42",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+   "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+   "modality": "pdf",
+   "page": 42,
+   "excerpt": "Construction de bâtiments commerciaux d’entreposage intérieur et aménagement d’une\naire de stationnement de plus de 150 m2 au 2757, boulevard Talbot\nRèglement relatif aux plans d’implantation et d’intégration architecturale numéro 09-603, zone CA-102"
+  },
+  {
+   "id": "ev-56",
+   "source_file": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "rawRef": "raw/proces-verbaux-stoneham-et-tewkesbury/cas/3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093.pdf",
+   "docSha": "3a8635ff6159c712cc47d8265b8dfbb63d2c3160d3cce461e538b9b7ec1da093",
+   "sourceUrl": "https://www.villestoneham.com/storage/app/media/ma-municipalite/democratie/seances-du-conseil/presentations/presentation_seance_2026-06-08.pdf",
+   "modality": "pdf",
+   "page": 56,
+   "excerpt": "Il est résolu\nde refuser la demande de projet\nparticulier de construction, de\nmodification ou d’occupation d’un\nimmeuble (PPCMOI) visant à autoriser\nun projet résidentiel intégré de trois\nbâtiments principaux comprenant\nrespectivement\n3, 6 et\n9 logements\nAdoption du second\nprojet\n(total de 18 logements) et un bâtiment\nde remisage isolé au 102, 1re Avenue,\nlots actuels numéro 1 827 713, 2 187 411\netAdoption\n2 187 412\ncadastre du Québec.\ndudu\nrèglement"
+  }
+ ],
+ "input_tokens": 11900,
+ "output_tokens": 8120
+}

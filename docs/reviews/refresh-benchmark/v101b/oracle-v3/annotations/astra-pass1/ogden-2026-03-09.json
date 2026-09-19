@@ -1,0 +1,181 @@
+{
+ "documentId": "ogden-2026-03-09",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "30ffc10831cbd2c65c8b302147391f4d752003e9627b85bdbb7cfd7ce3d2572c",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Examen prévu de la demande de deux dérogations mineures au 905 Descente 2\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"905 Descente 2\",\n        \"page\": 1,\n        \"citation\": \"Demande de deux (2) dérogations mineures au 905 Descente 2\",\n        \"anchor\": \"905 Descente 2\"\n      },\n      \"reason\": \"Le point 6.3 prévoit une demande portant sur deux dérogations à une même adresse, sans distinguer deux dossiers ni constater leur acceptation.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"PIIA prévu pour un nouveau bâtiment au 2050 chemin Marlington\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2050 chemin Marlington\",\n        \"page\": 1,\n        \"citation\": \"Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington\",\n        \"anchor\": \"2050 chemin Marlington\"\n      },\n      \"reason\": \"Le point 6.4 nomme une demande de PIIA distincte, à retenir comme point prévu et non comme approbation acquise.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"PIIA prévu pour un nouveau bâtiment au 3695 chemin Stanstead\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"3695 chemin Stanstead\",\n        \"page\": 1,\n        \"citation\": \"Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead\",\n        \"anchor\": \"3695 chemin Stanstead\"\n      },\n      \"reason\": \"Le point 6.5 nomme une autre demande de PIIA, constituant une unité distincte à l'étape prévue.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt prévu des certificats de conformité des règlements d’urbanisme\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"règlements d’urbanisme\",\n        \"page\": 1,\n        \"citation\": \"Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme\",\n        \"anchor\": \"règlements d’urbanisme\"\n      },\n      \"reason\": \"Le point 6.6 prévoit une étape de conformité concernant explicitement les règlements d’urbanisme, regroupés ici puisque le document ne les identifie pas individuellement.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt prévu du certificat d’enregistrement relatif au règlement de zonage 2025-05\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2025-05\",\n        \"page\": 1,\n        \"citation\": \"Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05\",\n        \"anchor\": \"Règlement de zonage no. 2025-05\"\n      },\n      \"reason\": \"Le point 6.7 prévoit le dépôt d’un certificat relatif à une étape procédurale du règlement 2025-05, sans attester une nouvelle adoption.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Point prévu sur la liste des propriétés à vendre pour défaut de paiement de taxes\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"propriétés à vendre\",\n        \"page\": 1,\n        \"citation\": \"Liste des propriétés à vendre pour défaut de paiement de taxes\",\n        \"anchor\": \"propriétés à vendre\"\n      },\n      \"reason\": \"Le point 9.4 porte explicitement sur des propriétés destinées à une vente pour taxes, mais l’ordre du jour ne permet pas de présenter les ventes comme autorisées.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du règlement 2026.03 relatif au comité consultatif d’urbanisme\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026.03\",\n        \"page\": 1,\n        \"citation\": \"Adoption - Règlement no. 2026.03 modifiant le Règlement no. 2020.05 relatif au​\\n​comité consultatif d’urbanisme et ses amendements\",\n        \"anchor\": \"Règlement no. 2026.03\"\n      },\n      \"reason\": \"Le point 13.1 prévoit l’adoption d’un règlement relatif au comité consultatif d’urbanisme, et non une simple nomination.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion prévu du règlement 2026.05 sur l’occupation et l’entretien des bâtiments\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"2026.05\",\n        \"page\": 1,\n        \"citation\": \"Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des​\\n​bâtiments\",\n        \"anchor\": \"Règlement no. 2026.05\"\n      },\n      \"reason\": \"Le point 13.3 prévoit un avis de motion pour un règlement portant sur les bâtiments, étape distincte du projet inscrit au point suivant.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du projet de règlement 2026.05 sur l’occupation et l’entretien des bâtiments\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"2026.05\",\n        \"page\": 2,\n        \"citation\": \"Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des​\\n​bâtiments\",\n        \"anchor\": \"Projet de règlement no. 2026.05\"\n      },\n      \"reason\": \"Le point 13.4 prévoit l’adoption du projet, et non du règlement final, ce qui constitue une unité distincte de l’avis de motion.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Examen prévu de la demande de deux dérogations mineures au 905 Descente 2",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "905 Descente 2",
+    "page": 1,
+    "citation": "Demande de deux (2) dérogations mineures au 905 Descente 2",
+    "anchor": "905 Descente 2"
+   },
+   "reason": "Le point 6.3 prévoit une demande portant sur deux dérogations à une même adresse, sans distinguer deux dossiers ni constater leur acceptation."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "PIIA prévu pour un nouveau bâtiment au 2050 chemin Marlington",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2050 chemin Marlington",
+    "page": 1,
+    "citation": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington",
+    "anchor": "2050 chemin Marlington"
+   },
+   "reason": "Le point 6.4 nomme une demande de PIIA distincte, à retenir comme point prévu et non comme approbation acquise."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "PIIA prévu pour un nouveau bâtiment au 3695 chemin Stanstead",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "3695 chemin Stanstead",
+    "page": 1,
+    "citation": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead",
+    "anchor": "3695 chemin Stanstead"
+   },
+   "reason": "Le point 6.5 nomme une autre demande de PIIA, constituant une unité distincte à l'étape prévue."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt prévu des certificats de conformité des règlements d’urbanisme",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "règlements d’urbanisme",
+    "page": 1,
+    "citation": "Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme",
+    "anchor": "règlements d’urbanisme"
+   },
+   "reason": "Le point 6.6 prévoit une étape de conformité concernant explicitement les règlements d’urbanisme, regroupés ici puisque le document ne les identifie pas individuellement."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt prévu du certificat d’enregistrement relatif au règlement de zonage 2025-05",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2025-05",
+    "page": 1,
+    "citation": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05",
+    "anchor": "Règlement de zonage no. 2025-05"
+   },
+   "reason": "Le point 6.7 prévoit le dépôt d’un certificat relatif à une étape procédurale du règlement 2025-05, sans attester une nouvelle adoption."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Point prévu sur la liste des propriétés à vendre pour défaut de paiement de taxes",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "propriétés à vendre",
+    "page": 1,
+    "citation": "Liste des propriétés à vendre pour défaut de paiement de taxes",
+    "anchor": "propriétés à vendre"
+   },
+   "reason": "Le point 9.4 porte explicitement sur des propriétés destinées à une vente pour taxes, mais l’ordre du jour ne permet pas de présenter les ventes comme autorisées."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption prévue du règlement 2026.03 relatif au comité consultatif d’urbanisme",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026.03",
+    "page": 1,
+    "citation": "Adoption - Règlement no. 2026.03 modifiant le Règlement no. 2020.05 relatif au​\n​comité consultatif d’urbanisme et ses amendements",
+    "anchor": "Règlement no. 2026.03"
+   },
+   "reason": "Le point 13.1 prévoit l’adoption d’un règlement relatif au comité consultatif d’urbanisme, et non une simple nomination."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion prévu du règlement 2026.05 sur l’occupation et l’entretien des bâtiments",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2026.05",
+    "page": 1,
+    "citation": "Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments",
+    "anchor": "Règlement no. 2026.05"
+   },
+   "reason": "Le point 13.3 prévoit un avis de motion pour un règlement portant sur les bâtiments, étape distincte du projet inscrit au point suivant."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption prévue du projet de règlement 2026.05 sur l’occupation et l’entretien des bâtiments",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2026.05",
+    "page": 2,
+    "citation": "Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments",
+    "anchor": "Projet de règlement no. 2026.05"
+   },
+   "reason": "Le point 13.4 prévoit l’adoption du projet, et non du règlement final, ce qui constitue une unité distincte de l’avis de motion."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  },
+  {
+   "op": "add",
+   "id": "u08"
+  },
+  {
+   "op": "add",
+   "id": "u09"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 9
+}

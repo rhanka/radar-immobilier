@@ -1,0 +1,412 @@
+{
+ "documentId": "saint-lin-laurentides-2026-06-09",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "078c235b2de7896a0e3c1790e777f3bb2ca17e540bace0933f6c1edb783788a8",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"PIIA prévu — agrandissement du bâtiment commercial au 1510, route 335\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"1510, route 335\",\n        \"page\": 1,\n        \"citation\": \"Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial\\nexistant / Lot numéro 6 663 628 / 1510, route 335\",\n        \"anchor\": \"1510, route 335\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique, avec le saut de ligne entre « commercial » et « existant ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"PIIA prévu — enseignes de Planète Piscine au 70, route 335\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"70, route 335\",\n        \"page\": 1,\n        \"citation\": \"Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot\\nnuméro 6 579 952 / 70, route 335\",\n        \"anchor\": \"70, route 335\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « Lot » et « numéro » pour être identique au texte du point 4.6.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"PIIA prévu — enseignes d'Allô mon Coco au 70, route 335\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"70, route 335\",\n        \"page\": 1,\n        \"citation\": \"Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot\\nnuméro 6 579 952 / 70, route 335\",\n        \"anchor\": \"70, route 335\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne entre « Lot » et « numéro » pour être identique au texte du point 4.7.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Engagement d'acquisition prévu — terrain du 60, rue Lacroix\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"60, rue Lacroix\",\n        \"page\": 1,\n        \"citation\": \"Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme\\ngénéral d'assistance financière / Ministère de la Sécurité publique\",\n        \"anchor\": \"60, rue Lacroix\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique, avec le saut de ligne entre « Programme » et « général ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Acceptation finale et offre de cession prévues — lot 6 553 599, Seigneurie Villemory\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 553 599\",\n        \"page\": 2,\n        \"citation\": \"Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\\n209, 5 137 708, 6 553 600 et 6 553 597\",\n        \"anchor\": \"Lots numéro 6 553 599\"\n      },\n      \"reason\": \"La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Acceptation finale et offre de cession prévues — lot 5 137 605, Seigneurie Villemory\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5 137 605\",\n        \"page\": 2,\n        \"citation\": \"Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\\n209, 5 137 708, 6 553 600 et 6 553 597\",\n        \"anchor\": \"6 553 599, 5 137 605\"\n      },\n      \"reason\": \"La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Acceptation finale et offre de cession prévues — lot 5 137 606, Seigneurie Villemory\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5 137 606\",\n        \"page\": 2,\n        \"citation\": \"Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\\n209, 5 137 708, 6 553 600 et 6 553 597\",\n        \"anchor\": \"5 137 605, 5 137 606\"\n      },\n      \"reason\": \"La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u11\",\n      \"unit\": {\n        \"label\": \"Acceptation finale et offre de cession prévues — lot 5 429 185, Seigneurie Villemory\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5 429 185\",\n        \"page\": 2,\n        \"citation\": \"Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\\n209, 5 137 708, 6 553 600 et 6 553 597\",\n        \"anchor\": \"5 137 606, 5 429 185\"\n      },\n      \"reason\": \"La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u12\",\n      \"unit\": {\n        \"label\": \"Acceptation finale et offre de cession prévues — lot 5 137 659, Seigneurie Villemory\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5 137 659\",\n        \"page\": 2,\n        \"citation\": \"Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\\n209, 5 137 708, 6 553 600 et 6 553 597\",\n        \"anchor\": \"5 429 185, 5 137 659\"\n      },\n      \"reason\": \"La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u13\",\n      \"unit\": {\n        \"label\": \"Acceptation finale et offre de cession prévues — lot 5 429 209, Seigneurie Villemory\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5 429 209\",\n        \"page\": 2,\n        \"citation\": \"Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\\n209, 5 137 708, 6 553 600 et 6 553 597\",\n        \"anchor\": \"5 137 659, 5 429\\n209\"\n      },\n      \"reason\": \"La citation et son ancre doivent conserver le saut de ligne séparant « 5 429 » de « 209 », conformément à l'exigence de reproduction exacte.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u14\",\n      \"unit\": {\n        \"label\": \"Acceptation finale et offre de cession prévues — lot 5 137 708, Seigneurie Villemory\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5 137 708\",\n        \"page\": 2,\n        \"citation\": \"Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\\n209, 5 137 708, 6 553 600 et 6 553 597\",\n        \"anchor\": \"5 137 708, 6 553 600\"\n      },\n      \"reason\": \"La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u15\",\n      \"unit\": {\n        \"label\": \"Acceptation finale et offre de cession prévues — lot 6 553 600, Seigneurie Villemory\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 553 600\",\n        \"page\": 2,\n        \"citation\": \"Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\\n209, 5 137 708, 6 553 600 et 6 553 597\",\n        \"anchor\": \"5 137 708, 6 553 600\"\n      },\n      \"reason\": \"La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u16\",\n      \"unit\": {\n        \"label\": \"Acceptation finale et offre de cession prévues — lot 6 553 597, Seigneurie Villemory\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 553 597\",\n        \"page\": 2,\n        \"citation\": \"Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\\n209, 5 137 708, 6 553 600 et 6 553 597\",\n        \"anchor\": \"6 553 600 et 6 553 597\"\n      },\n      \"reason\": \"La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u17\",\n      \"unit\": {\n        \"label\": \"Autorisation de signature prévue — acte de vente du lot 3 570 038, rue Panneton\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"3 570 038\",\n        \"page\": 2,\n        \"citation\": \"Autorisation de signature à la mairesse et au directeur général par intérim / Acte de vente / Lot numéro 3 570 038\\n/ Rue Panneton / M. Stéphane Labelle et Mme Méliza Matte\",\n        \"anchor\": \"Lot numéro 3 570 038\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique, avec le saut de ligne après le numéro de lot 3 570 038.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u18\",\n      \"unit\": {\n        \"label\": \"Autorisation de signature prévue — acte d'achat du lot 3 568 198, 617, rue Lord\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"3 568 198\",\n        \"page\": 2,\n        \"citation\": \"Autorisation de signature à la mairesse et au directeur général par intérim / Acte d'achat / Lot numéro 3 568 198 /\\n617, rue Lord\",\n        \"anchor\": \"Lot numéro 3 568 198\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne avant « 617, rue Lord » pour être identique au texte du point 4.12.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u19\",\n      \"unit\": {\n        \"label\": \"Autorisation de signature prévue — servitude pour une conduite d'égout pluvial\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"conduite d'égout pluvial\",\n        \"page\": 2,\n        \"citation\": \"Autorisation de signature à la mairesse et au directeur général par intérim / Acte de servitude / Installation,\\nutilisation, entretien et réparation d'une conduite d'égout pluvial\",\n        \"anchor\": \"conduite d'égout pluvial\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique, avec le saut de ligne après « Installation, ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "PIIA prévu — agrandissement du bâtiment commercial au 1510, route 335",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "1510, route 335",
+    "page": 1,
+    "citation": "Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial\nexistant / Lot numéro 6 663 628 / 1510, route 335",
+    "anchor": "1510, route 335"
+   },
+   "reason": "La citation doit être recopiée à l'identique, avec le saut de ligne entre « commercial » et « existant »."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "PIIA prévu — enseignes de Planète Piscine au 70, route 335",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "70, route 335",
+    "page": 1,
+    "citation": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot\nnuméro 6 579 952 / 70, route 335",
+    "anchor": "70, route 335"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « Lot » et « numéro » pour être identique au texte du point 4.6."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "PIIA prévu — enseignes d'Allô mon Coco au 70, route 335",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "70, route 335",
+    "page": 1,
+    "citation": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot\nnuméro 6 579 952 / 70, route 335",
+    "anchor": "70, route 335"
+   },
+   "reason": "La citation doit conserver le saut de ligne entre « Lot » et « numéro » pour être identique au texte du point 4.7."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Engagement d'acquisition prévu — terrain du 60, rue Lacroix",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "60, rue Lacroix",
+    "page": 1,
+    "citation": "Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme\ngénéral d'assistance financière / Ministère de la Sécurité publique",
+    "anchor": "60, rue Lacroix"
+   },
+   "reason": "La citation doit être recopiée à l'identique, avec le saut de ligne entre « Programme » et « général »."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Acceptation finale et offre de cession prévues — lot 6 553 599, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 553 599",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "Lots numéro 6 553 599"
+   },
+   "reason": "La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Acceptation finale et offre de cession prévues — lot 5 137 605, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 137 605",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "6 553 599, 5 137 605"
+   },
+   "reason": "La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Acceptation finale et offre de cession prévues — lot 5 137 606, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 137 606",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "5 137 605, 5 137 606"
+   },
+   "reason": "La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u11",
+   "unit": {
+    "label": "Acceptation finale et offre de cession prévues — lot 5 429 185, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 429 185",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "5 137 606, 5 429 185"
+   },
+   "reason": "La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u12",
+   "unit": {
+    "label": "Acceptation finale et offre de cession prévues — lot 5 137 659, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 137 659",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "5 429 185, 5 137 659"
+   },
+   "reason": "La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u13",
+   "unit": {
+    "label": "Acceptation finale et offre de cession prévues — lot 5 429 209, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 429 209",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "5 137 659, 5 429\n209"
+   },
+   "reason": "La citation et son ancre doivent conserver le saut de ligne séparant « 5 429 » de « 209 », conformément à l'exigence de reproduction exacte."
+  },
+  {
+   "op": "correct",
+   "id": "u14",
+   "unit": {
+    "label": "Acceptation finale et offre de cession prévues — lot 5 137 708, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 137 708",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "5 137 708, 6 553 600"
+   },
+   "reason": "La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u15",
+   "unit": {
+    "label": "Acceptation finale et offre de cession prévues — lot 6 553 600, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 553 600",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "5 137 708, 6 553 600"
+   },
+   "reason": "La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u16",
+   "unit": {
+    "label": "Acceptation finale et offre de cession prévues — lot 6 553 597, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 553 597",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "6 553 600 et 6 553 597"
+   },
+   "reason": "La citation du point 4.10 doit conserver le saut de ligne entre « 5 429 » et « 209 » pour être recopiée à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u17",
+   "unit": {
+    "label": "Autorisation de signature prévue — acte de vente du lot 3 570 038, rue Panneton",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "3 570 038",
+    "page": 2,
+    "citation": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte de vente / Lot numéro 3 570 038\n/ Rue Panneton / M. Stéphane Labelle et Mme Méliza Matte",
+    "anchor": "Lot numéro 3 570 038"
+   },
+   "reason": "La citation doit être recopiée à l'identique, avec le saut de ligne après le numéro de lot 3 570 038."
+  },
+  {
+   "op": "correct",
+   "id": "u18",
+   "unit": {
+    "label": "Autorisation de signature prévue — acte d'achat du lot 3 568 198, 617, rue Lord",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "3 568 198",
+    "page": 2,
+    "citation": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte d'achat / Lot numéro 3 568 198 /\n617, rue Lord",
+    "anchor": "Lot numéro 3 568 198"
+   },
+   "reason": "La citation doit conserver le saut de ligne avant « 617, rue Lord » pour être identique au texte du point 4.12."
+  },
+  {
+   "op": "correct",
+   "id": "u19",
+   "unit": {
+    "label": "Autorisation de signature prévue — servitude pour une conduite d'égout pluvial",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "conduite d'égout pluvial",
+    "page": 2,
+    "citation": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte de servitude / Installation,\nutilisation, entretien et réparation d'une conduite d'égout pluvial",
+    "anchor": "conduite d'égout pluvial"
+   },
+   "reason": "La citation doit être recopiée à l'identique, avec le saut de ligne après « Installation, »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "piia",
+   "page": 1,
+   "citation": "Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial\nexistant / Lot numéro 6 663 628 / 1510, route 335"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "piia",
+   "page": 1,
+   "citation": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot\nnuméro 6 579 952 / 70, route 335"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "piia",
+   "page": 1,
+   "citation": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot\nnuméro 6 579 952 / 70, route 335"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "adoption",
+   "page": 1,
+   "citation": "Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme\ngénéral d'assistance financière / Ministère de la Sécurité publique"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u11",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u12",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u13",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 10,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u14",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 11,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u15",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 12,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u16",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 13,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u17",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte de vente / Lot numéro 3 570 038\n/ Rue Panneton / M. Stéphane Labelle et Mme Méliza Matte"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 14,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u18",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte d'achat / Lot numéro 3 568 198 /\n617, rue Lord"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 15,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u19",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte de servitude / Installation,\nutilisation, entretien et réparation d'une conduite d'égout pluvial"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 19
+}

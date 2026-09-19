@@ -1,0 +1,71 @@
+{
+ "documentId": "pincourt-2026-01-20",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "4644266b4db74f8b4ea604f712dacd090d8584bccbc2048a38d7b6ed508cb231",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 8.2, page 2, nomme explicitement le règlement 778-03 parmi les règlements de concordance dont l’adoption est prévue à l’ordre du jour, sans attester une décision acquise.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 8.2, page 2, nomme explicitement le règlement 779-03 parmi les règlements de concordance dont l’adoption est prévue à l’ordre du jour, constituant un objet réglementaire distinct.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 8.2, page 2, nomme explicitement le règlement 780-28 parmi les règlements de concordance dont l’adoption est prévue à l’ordre du jour, constituant un objet réglementaire distinct.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 8.2, page 2, nomme explicitement le règlement 784-09 parmi les règlements de concordance dont l’adoption est prévue à l’ordre du jour, constituant un objet réglementaire distinct.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 8.3, page 2, prévoit explicitement l’adoption du règlement 780-32 modifiant le règlement de zonage et de plans d’implantation et d’intégration architecturale no 780, sans attester son adoption effective.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 8.2, page 2, nomme explicitement le règlement 778-03 parmi les règlements de concordance dont l’adoption est prévue à l’ordre du jour, sans attester une décision acquise."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 8.2, page 2, nomme explicitement le règlement 779-03 parmi les règlements de concordance dont l’adoption est prévue à l’ordre du jour, constituant un objet réglementaire distinct."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 8.2, page 2, nomme explicitement le règlement 780-28 parmi les règlements de concordance dont l’adoption est prévue à l’ordre du jour, constituant un objet réglementaire distinct."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 8.2, page 2, nomme explicitement le règlement 784-09 parmi les règlements de concordance dont l’adoption est prévue à l’ordre du jour, constituant un objet réglementaire distinct."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 8.3, page 2, prévoit explicitement l’adoption du règlement 780-32 modifiant le règlement de zonage et de plans d’implantation et d’intégration architecturale no 780, sans attester son adoption effective."
+  }
+ ]
+}

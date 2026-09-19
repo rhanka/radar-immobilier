@@ -1,0 +1,424 @@
+{
+ "documentId": "frontenac-2026-03-10",
+ "nextId": 11,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Vente pour défaut de paiement des taxes demandée — lot 4 972 283",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 972 283",
+    "page": 19,
+    "citation": "de vendre pour défaut de paiement des taxes, les immeubles suivants : Numéro de matricule : 7445-62-1565 Propriétaire : Janine Carrier Racine Numéro de cadastre : 4 972 283",
+    "anchor": "Numéro de cadastre : 4 972 283",
+    "spanStart": 868,
+    "spanEnd": 1040
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Vente pour défaut de paiement des taxes demandée — lot 4 972 283",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "4 972 283",
+      "page": 19,
+      "citation": "de vendre pour défaut de paiement des taxes, les immeubles suivants : Numéro de matricule : 7445-62-1565 Propriétaire : Janine Carrier Racine Numéro de cadastre : 4 972 283",
+      "anchor": "Numéro de cadastre : 4 972 283",
+      "spanStart": 868,
+      "spanEnd": 1040
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-080 demande à la MRC de vendre cet immeuble à défaut de paiement avant le 12 mars 2026, ce qui constitue un acte foncier décidé, sans attester une vente déjà réalisée."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Attestation de conformité municipale — demande CPTAQ 453132, Groupe Exca inc.",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "453132",
+    "page": 23,
+    "citation": "Que le conseil municipal de la Municipalité de Frontenac atteste que la demande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc., est conforme à la réglementation municipale applicable",
+    "anchor": "CPTAQ au dossier 453132",
+    "spanStart": 26,
+    "spanEnd": 220
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Attestation de conformité municipale — demande CPTAQ 453132, Groupe Exca inc.",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "453132",
+      "page": 23,
+      "citation": "Que le conseil municipal de la Municipalité de Frontenac atteste que la demande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc., est conforme à la réglementation municipale applicable",
+      "anchor": "CPTAQ au dossier 453132",
+      "spanStart": 26,
+      "spanEnd": 220
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-087 atteste actuellement la conformité d’une demande identifiée à la CPTAQ, étape réglementaire distincte d’une autorisation finale de cette commission."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Approbation de l’entente de conservation des milieux humides — lac Aux Araignées, durée de 25 ans",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "lac Aux Araignées",
+    "page": 27,
+    "citation": "Que la Municipalité de Frontenac accepte les termes de l’entente relative à la protection et à la conservation des milieux humides riverains du lac Aux Araignées, telle que déposée",
+    "anchor": "lac Aux Araignées",
+    "spanStart": 1746,
+    "spanEnd": 1926
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation de l’entente de conservation des milieux humides — lac Aux Araignées, durée de 25 ans",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "lac Aux Araignées",
+      "page": 27,
+      "citation": "Que la Municipalité de Frontenac accepte les termes de l’entente relative à la protection et à la conservation des milieux humides riverains du lac Aux Araignées, telle que déposée",
+      "anchor": "lac Aux Araignées",
+      "spanStart": 1746,
+      "spanEnd": 1926
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-094 approuve une convention de conservation portant sur les terrains du propriétaire et autorise sa signature pour une collaboration de 25 ans, sans constater une servitude permanente."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Report de l’adoption du premier projet — règlement 503-2026 sur l’occupation et l’entretien des bâtiments",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "503-2026",
+    "page": 37,
+    "citation": "Adoption reportée du 1er projet du règlement no. 503-2026 relatif à l’occupation et à l’entretien des bâtiments",
+    "anchor": "règlement no. 503-2026",
+    "spanStart": 36,
+    "spanEnd": 147
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Report de l’adoption du premier projet — règlement 503-2026 sur l’occupation et l’entretien des bâtiments",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "503-2026",
+      "page": 37,
+      "citation": "Adoption reportée du 1er projet du règlement no. 503-2026 relatif à l’occupation et à l’entretien des bâtiments",
+      "anchor": "règlement no. 503-2026",
+      "spanStart": 36,
+      "spanEnd": 147
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le document constate explicitement le report concernant cet objet réglementaire, et non l’adoption du premier projet; cette étape relève donc de « inconnu »."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Report de l’adoption — règlement 504-2026 modifiant les dispositions sur la démolition d’immeubles",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "504-2026",
+    "page": 37,
+    "citation": "Adoption reportée du règlement no 504-2026 modifiant le règlement relatif à la démolition d’immeubles no 469-2023",
+    "anchor": "règlement no 504-2026",
+    "spanStart": 148,
+    "spanEnd": 261
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Report de l’adoption — règlement 504-2026 modifiant les dispositions sur la démolition d’immeubles",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "504-2026",
+      "page": 37,
+      "citation": "Adoption reportée du règlement no 504-2026 modifiant le règlement relatif à la démolition d’immeubles no 469-2023 afin de modifier certaines dispositions relatives aux bâtiments assujettis",
+      "anchor": "règlement no 504-2026",
+      "spanStart": 148,
+      "spanEnd": 336
+     }
+    },
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Report de l’adoption — règlement 504-2026 modifiant les dispositions sur la démolition d’immeubles",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "504-2026",
+      "page": 37,
+      "citation": "Adoption reportée du règlement no 504-2026 modifiant le règlement relatif à la démolition d’immeubles no 469-2023",
+      "anchor": "règlement no 504-2026",
+      "spanStart": 148,
+      "spanEnd": 261
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’adoption du règlement 504-2026 est expressément reportée, ce qui constitue une étape constatée sans permettre de créditer une adoption acquise."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "correct",
+     "reason": "La citation doit être recopiée à l’identique : le texte de la page 37 porte la coupure « cer-/taines » (« afin de modifier cer- » / « taines dispositions »), donc « certaines dispositions » n’existe pas tel quel dans le texte ; citation raccourcie à un extrait contigu sans coupure de mot."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 506-2026, concordance du règlement de construction",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "506-2026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement no. 506-2026 afin de faire la concordance du règlement de construction no 287-96 envers le schéma d’aménagement de la MRC du Granit",
+    "anchor": "règlement no. 506-2026",
+    "spanStart": 337,
+    "spanEnd": 521
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Report de l’avis de motion et de la présentation — règlement 506-2026, concordance du règlement de construction",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "506-2026",
+      "page": 37,
+      "citation": "Avis de motion et présentation reportée du règlement no. 506-2026 afin de faire la concordance du règlement de construction no 287-96 envers le schéma d’aménagement de la MRC du Granit",
+      "anchor": "règlement no. 506-2026",
+      "spanStart": 337,
+      "spanEnd": 521
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le seul fait procédural constaté est le report concernant le règlement 506-2026, et non un avis de motion donné et un projet présenté qui créeraient deux unités distinctes."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 507-2026, concordance du règlement de lotissement",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "507-2026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement no 507-2026 afin de faire la concordance du règlement de lotissement no 244-90 envers le schéma d’aménagement de la MRC du Granit",
+    "anchor": "règlement no 507-2026",
+    "spanStart": 522,
+    "spanEnd": 704
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Report de l’avis de motion et de la présentation — règlement 507-2026, concordance du règlement de lotissement",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "507-2026",
+      "page": 37,
+      "citation": "Avis de motion et présentation reportée du règlement no 507-2026 afin de faire la concordance du règlement de lotissement no 244-90 envers le schéma d’aménagement de la MRC du Granit",
+      "anchor": "règlement no 507-2026",
+      "spanStart": 522,
+      "spanEnd": 704
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le document atteste le report des démarches relatives au règlement 507-2026, sans constater que l’avis de motion ou la présentation du projet ont eu lieu."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 508-2026, concordance des permis et certificats",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "508-2026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement no 508-2026 afin de faire la concordance du règlement sur les permis et certificats no 242-90 envers le schéma d’aménagement de la MRC du Granit",
+    "anchor": "règlement no 508-2026",
+    "spanStart": 705,
+    "spanEnd": 902
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Report de l’avis de motion et de la présentation — règlement 508-2026, concordance des permis et certificats",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "508-2026",
+      "page": 37,
+      "citation": "Avis de motion et présentation reportée du règlement no 508-2026 afin de faire la concordance du règlement sur les permis et certificats no 242-90 envers le schéma d’aménagement de la MRC du Granit",
+      "anchor": "règlement no 508-2026",
+      "spanStart": 705,
+      "spanEnd": 902
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cet objet réglementaire explicite fait l’objet d’un report constaté, à conserver comme tel plutôt que comme un avis de motion donné ou un projet présenté."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 5092026 remplaçant le plan d’urbanisme",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "5092026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro 241-90",
+    "anchor": "règlement numéro 5092026",
+    "spanStart": 903,
+    "spanEnd": 1036
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Report de l’avis de motion et de la présentation — règlement 5092026 remplaçant le plan d’urbanisme",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "5092026",
+      "page": 37,
+      "citation": "Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro 241-90",
+      "anchor": "règlement numéro 5092026",
+      "spanStart": 903,
+      "spanEnd": 1036
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le texte constate le report concernant le règlement identifié « 5092026 », dont le numéro est conservé tel qu’écrit, sans attester l’accomplissement des étapes reportées."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 510-2026, concordance du règlement de zonage",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "510-2026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement no 510-2026 afin de faire la concordance du règlement de zonage no 243-90",
+    "anchor": "règlement no 510-2026",
+    "spanStart": 1037,
+    "spanEnd": 1163
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Report de l’avis de motion et de la présentation — règlement 510-2026, concordance du règlement de zonage",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "510-2026",
+      "page": 37,
+      "citation": "Avis de motion et présentation reportée du règlement no 510-2026 afin de faire la concordance du règlement de zonage no 243-90 envers le schéma d’aménagement de la MRC du Granit",
+      "anchor": "règlement no 510-2026",
+      "spanStart": 1037,
+      "spanEnd": 1214
+     }
+    },
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Report de l’avis de motion et de la présentation — règlement 510-2026, concordance du règlement de zonage",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "510-2026",
+      "page": 37,
+      "citation": "Avis de motion et présentation reportée du règlement no 510-2026 afin de faire la concordance du règlement de zonage no 243-90",
+      "anchor": "règlement no 510-2026",
+      "spanStart": 1037,
+      "spanEnd": 1163
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le report est une étape constatée pour le règlement 510-2026, tandis que l’avis de motion et la présentation ne sont pas attestés comme ayant été réalisés."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "correct",
+     "reason": "La citation doit être recopiée à l’identique : le texte de la page 37 porte la coupure « en-/vers » (« no 243-90 en- » / « vers le schéma »), donc « envers le schéma » n’existe pas tel quel dans le texte ; citation raccourcie à un extrait contigu sans coupure de mot."
+    }
+   ]
+  }
+ ]
+}

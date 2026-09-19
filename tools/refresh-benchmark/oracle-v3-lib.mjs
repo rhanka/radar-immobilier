@@ -17,12 +17,25 @@ export const FAMILIES = Object.freeze({
   fable: { model: "claude-fable-5-1", effort: "xhigh", transport: "claude-cli" },
   gemini: { model: "gemini-3.8-flash", effort: "high", transport: "cloud-code" },
 });
+// Passes per family: Astra 3 (owner, 2026-09-18: astra-pass3 after gemini-pass2), Fable 2, Gemini 2.
+export const PASS_COUNTS = Object.freeze({ astra: 3, fable: 2, gemini: 2 });
 export const PASS_STEPS = Object.freeze(["astra", "fable", "gemini"].flatMap((family) =>
-  [1, 2].map((pass) => Object.freeze({ id: `${family}-pass${pass}`, kind: "pass", family, pass,
-    ...FAMILIES[family] }))));
+  Array.from({ length: PASS_COUNTS[family] }, (_, index) => index + 1).map((pass) =>
+    Object.freeze({ id: `${family}-pass${pass}`, kind: "pass", family, pass, ...FAMILIES[family] }))));
 export const CONVERGE_STEPS = Object.freeze(["astra", "fable", "gemini"].map((family) =>
   Object.freeze({ id: `converge-${family}`, kind: "converge", family, ...FAMILIES[family] })));
-export const STEPS = Object.freeze([...PASS_STEPS, ...CONVERGE_STEPS]);
+// converge-* = verification of every unit (unanimity); arbitrate-* = re-vote on everything not
+// unanimous and on every difference with the human gold v2 (see oracle-v3-verdict.mjs).
+export const ARBITRATE_STEPS = Object.freeze(["astra", "fable", "gemini"].map((family) =>
+  Object.freeze({ id: `arbitrate-${family}`, kind: "arbitrate", family, ...FAMILIES[family] })));
+export const STEPS = Object.freeze([...PASS_STEPS, ...CONVERGE_STEPS, ...ARBITRATE_STEPS]);
+// Archived pass steps: never run again, only read as links of a document's gold lineage.
+// astra-pass1b = early Astra check: the 52 documents astra-pass2 processed right after astra-pass1,
+// before the owner fixed the order (2026-09-18: astra-pass2 on all 100 documents after gemini-pass1).
+// Relabelled by oracle-v3-relabel-pass1b.mjs; sits between astra-pass1 and fable-pass1.
+export const ARCHIVED_STEPS = Object.freeze([Object.freeze({ id: "astra-pass1b", kind: "pass",
+  family: "astra", pass: 1, archived: true, relabeledFrom: "astra-pass2", ...FAMILIES.astra })]);
+export const LINEAGE_STEPS = Object.freeze([...PASS_STEPS, ...ARCHIVED_STEPS]);
 export const stepById = (id) => STEPS.find((step) => step.id === id)
   ?? (() => { throw new Error(`unknown oracle-v3 step ${id}`); })();
 
@@ -39,7 +52,7 @@ export async function loadPrompts(repositoryRoot) {
     if (!match) throw new Error(`prompt-annotation.md has no PROMPT-${name} block`);
     return { text: match[1], sha256: sha256(match[1]) };
   };
-  return { pass: block("PASS"), converge: block("CONVERGE") };
+  return { pass: block("PASS"), verify: block("VERIFY"), arbitrate: block("ARBITRATE") };
 }
 
 export function documentPages(text) {
@@ -48,8 +61,8 @@ export function documentPages(text) {
   return pages;
 }
 
-const pagesBlock = (pages) => pages.map((page, index) => `=== PAGE ${index + 1} ===\n${page}`).join("\n");
-const identity = (document, pages) =>
+export const pagesBlock = (pages) => pages.map((page, index) => `=== PAGE ${index + 1} ===\n${page}`).join("\n");
+export const identity = (document, pages) =>
   `Document : ${document.id} (ville ${document.city}, date ${document.date}, ${pages.length} pages)`;
 // The current gold is shown without history or authorship: a pass judges units, not annotators.
 export const publicUnit = ({ id, label, stage, procedure, objet, page, citation, anchor }) =>
@@ -58,14 +71,6 @@ export const publicUnit = ({ id, label, stage, procedure, objet, page, citation,
 export function passUserMessage(document, pages, currentUnits) {
   return `${identity(document, pages)}\n\nCORRIGÉ COURANT (${currentUnits.length} unités) :\n`
     + `${JSON.stringify({ units: currentUnits.map(publicUnit) }, null, 1)}\n\nTEXTE DU DOCUMENT :\n${pagesBlock(pages)}`;
-}
-
-export function convergeUserMessage(document, pages, disputes) {
-  return `${identity(document, pages)}\n\nDÉSACCORDS (${disputes.length}) :\n`
-    + `${JSON.stringify({ disputes: disputes.map(({ dispute, options }) => ({ dispute,
-      options: Object.fromEntries(options.map(({ option, unit }) =>
-        [option, unit ? publicUnit({ ...unit, id: undefined }) : "absent"])) })) }, null, 1)}`
-    + `\n\nTEXTE DU DOCUMENT :\n${pagesBlock(pages)}`;
 }
 
 export function parseJsonObject(text) {
@@ -238,55 +243,6 @@ export function applyOperations(state, operations, pages, stepId) {
     return undefined;
   });
   return { state: next, applied, rejects, counters };
-}
-
-// A unit is disputed when a pass removed or corrected it after another pass had set it. Options are
-// its distinct versions (v1 = first) plus "absent"; the option matching the state after the last
-// pass is flagged `current`.
-export function disputesOf(state) {
-  const disputes = [];
-  for (const unit of state.units) {
-    if (!unit.events.some(({ op }) => op === "remove" || op === "correct")) continue;
-    const options = []; const seen = new Set();
-    for (const { unit: version } of unit.versions) {
-      const key = contentKey(version);
-      if (seen.has(key)) continue;
-      seen.add(key); options.push({ option: `v${options.length + 1}`, unit: version });
-    }
-    options.push({ option: "absent", unit: null });
-    const current = unit.status === "active"
-      ? options.find(({ unit: version }) => version && contentKey(version) === contentKey(unit.current)).option
-      : "absent";
-    disputes.push({ dispute: `d${String(disputes.length + 1).padStart(2, "0")}`, unitId: unit.id,
-      options, current, events: unit.events });
-  }
-  return disputes;
-}
-
-// Majority of the three convergence votes. Invalid or missing votes count for nothing; without a
-// 2-of-3 majority the state after the last pass stays and the dispute is `unresolved`.
-export function resolveVotes(dispute, votesByFamily) {
-  const valid = new Set(dispute.options.map(({ option }) => option));
-  const tally = new Map();
-  for (const vote of Object.values(votesByFamily)) {
-    if (vote && valid.has(vote.choice)) tally.set(vote.choice, (tally.get(vote.choice) ?? 0) + 1);
-  }
-  const [winner] = [...tally.entries()].filter(([, count]) => count >= 2).map(([option]) => option);
-  return winner ? { outcome: "resolved", choice: winner, changed: winner !== dispute.current, tally: Object.fromEntries(tally) }
-    : { outcome: "unresolved", choice: dispute.current, changed: false, tally: Object.fromEntries(tally) };
-}
-
-export function applyResolutions(state, disputes, resolutions) {
-  const next = cloneState(state);
-  for (const dispute of disputes) {
-    const resolution = resolutions[dispute.dispute];
-    if (!resolution) continue;
-    const unit = next.units.find(({ id }) => id === dispute.unitId);
-    const option = dispute.options.find(({ option: name }) => name === resolution.choice);
-    if (!option?.unit) { unit.status = "removed"; continue; }
-    unit.status = "active"; unit.current = option.unit;
-  }
-  return next;
 }
 
 // Scorer-compatible unit (same shape as manual-oracle-v2 units, plus provenance).

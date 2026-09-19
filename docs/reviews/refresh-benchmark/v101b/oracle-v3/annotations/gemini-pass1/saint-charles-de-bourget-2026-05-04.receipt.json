@@ -1,0 +1,37 @@
+{
+ "documentId": "saint-charles-de-bourget-2026-05-04",
+ "step": "gemini-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass1",
+ "inputStateSha256": "e7e8a29a1debee533e2558886cbf6e9897fe363620f2e4d3ae773b5e9df81f20",
+ "inputSha256": "51f70d98c0bf8a91d9b60c9575ee6e58c8a5bb89d72858c5d026495ec08d5bd2",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 31743,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 3086,
+  "outputTokens": 4,
+  "totalTokens": 14576,
+  "thoughtsTokenCount": 11486
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 32768,
+  "httpStatus": 200,
+  "durationMs": 31569,
+  "requestId": null
+ },
+ "at": "2026-09-18T13:44:50.963Z"
+}

@@ -1,0 +1,106 @@
+{
+ "documentId": "candiac-2026-06-15",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "988a0cdb5f6d5d85a5d01c17877942be0d3ff141786194b0f73463798111d56c",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-5005-024"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 5005-024 — Études et mesures de mitigation",
+     "stage": null,
+     "objet": "5005-024",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "RÈGLEMENT 5005-024\nMODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET\nCERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE\nD’ÉTUDES ET DE MESURES DE MITIGATION,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-5005"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 5005 relatif aux permis et certificats",
+     "stage": null,
+     "objet": "5005",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le document est le texte d'adoption du règlement 5005-024 décrété par le conseil municipal à la séance du 15 juin 2026.\",\"excerpt\":\"RÈGLEMENT 5005-024\\nMODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET\\nCERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE\\nD’ÉTUDES ET DE MESURES DE MITIGATION\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 5005 est uniquement mentionné comme le règlement de base en cours de modification, il ne fait pas l'objet d'un acte propre dans ce document.\",\"excerpt\":\"Le présent règlement modifie le Règlement 5005 relatif aux permis et\\ncertificats.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le document est le texte d'adoption du règlement 5005-024 décrété par le conseil municipal à la séance du 15 juin 2026.",
+   "excerpt": "RÈGLEMENT 5005-024\nMODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET\nCERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE\nD’ÉTUDES ET DE MESURES DE MITIGATION"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 5005 est uniquement mentionné comme le règlement de base en cours de modification, il ne fait pas l'objet d'un acte propre dans ce document.",
+   "excerpt": "Le présent règlement modifie le Règlement 5005 relatif aux permis et\ncertificats."
+  }
+ ],
+ "filter": {
+  "acts": 2,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 5005 est uniquement mentionné comme le règlement de base en cours de modification, il ne fait pas l'objet d'un acte propre dans ce document."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le document est le texte d'adoption du règlement 5005-024 décrété par le conseil municipal à la séance du 15 juin 2026."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1685,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2713,
+   "outputTokens": 157,
+   "totalTokens": 2870
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1527
+  },
+  "inputSha256": "2223c547073398fd5d719e7110947e9d93001c73522435a1a128065205128e1a"
+ }
+}

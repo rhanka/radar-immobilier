@@ -1,0 +1,37 @@
+{
+ "documentId": "sainte-francoise--becancour-2026-05-04",
+ "step": "gemini-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass2",
+ "inputStateSha256": "3a6ae6809f0da4a89c45b1e2bc32faf27033a275dbb2da9d785a50ccdb404e82",
+ "inputSha256": "74d0da852cb248e9eb3682c68761ac03f39cc99fb19551abf74286066c83c9e6",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 29984,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 10008,
+  "outputTokens": 4,
+  "totalTokens": 20748,
+  "thoughtsTokenCount": 10736
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 29846,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:05:08.106Z"
+}

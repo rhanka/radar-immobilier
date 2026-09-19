@@ -1,0 +1,71 @@
+{
+ "documentId": "waterville-2026-04-07",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b137b8bce7cb9f8629faf0c9f8f7c3c2ba81b57ed8ef781488c2329ec6de5a92",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le texte porte « 6.1 Demande de modification règlementaire 2026-01-0006 » à la page 1 ; un point d'ordre du jour est une unité prévue et l'objet réglementaire est explicite, étape inconnue.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le texte porte « 6.2 Dérogation mineure 2026-02-0007 » à la page 1 ; point d'ordre du jour prévu, étape derogation_mineure et objet exacts.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le texte porte « 6.3 Dérogation mineure 2026-02-0008 » à la page 1 ; point d'ordre du jour prévu, étape derogation_mineure et objet exacts.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le texte porte « 7.3 Avis de motion projet de règlement amendant le règlement de lotissement no 615 de la Ville de Waterville » ; avis de motion prévu sur un règlement d'urbanisme (lotissement), étape avis_motion et objet 615 exacts.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le texte porte « 8.5 Demande d’autorisation à la Commission de protection agricole du Québec – Agrandissement du lieu d’enfouissement technique » ; acte foncier explicite (autorisation d'usage en zone agricole) prévu à l'ordre du jour, non exclu par les règles (ni nomination, compte, marché de services, loisir ni voirie), étape inconnue.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le texte porte « 6.1 Demande de modification règlementaire 2026-01-0006 » à la page 1 ; un point d'ordre du jour est une unité prévue et l'objet réglementaire est explicite, étape inconnue."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le texte porte « 6.2 Dérogation mineure 2026-02-0007 » à la page 1 ; point d'ordre du jour prévu, étape derogation_mineure et objet exacts."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le texte porte « 6.3 Dérogation mineure 2026-02-0008 » à la page 1 ; point d'ordre du jour prévu, étape derogation_mineure et objet exacts."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le texte porte « 7.3 Avis de motion projet de règlement amendant le règlement de lotissement no 615 de la Ville de Waterville » ; avis de motion prévu sur un règlement d'urbanisme (lotissement), étape avis_motion et objet 615 exacts."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le texte porte « 8.5 Demande d’autorisation à la Commission de protection agricole du Québec – Agrandissement du lieu d’enfouissement technique » ; acte foncier explicite (autorisation d'usage en zone agricole) prévu à l'ordre du jour, non exclu par les règles (ni nomination, compte, marché de services, loisir ni voirie), étape inconnue."
+  }
+ ]
+}

@@ -1,0 +1,91 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "284ee220fe486f61e7cd108aa9b318d40b04767e6fdc298ec8d61395c1ba5810",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-16, adoptée à la page 19, fixe le prix du lot 6 714 200 à 19 999 $ plus taxes et autorise sa mise en vente.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-16, adoptée à la page 19, fixe le prix du lot 6 714 201 à 19 999 $ plus taxes et autorise sa mise en vente.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-16, adoptée à la page 19, fixe le prix du lot 6 714 202 à 22 499 $ plus taxes et autorise sa mise en vente.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-17, adoptée à la page 20, autorise la vente du lot 6 714 202 aux acquéreurs nommés, conditionnellement à leur engagement de construire un bâtiment principal dans les deux ans suivant la signature de l’acte de vente.\"},{\"item\":\"i05\",\"choice\":\"absent\",\"reason\":\"La résolution 2026-03-19 autorise la conclusion de l’entente à la page 21 et porte la mention « ADOPTÉ » à la page 22, ce qui ne correspond pas à l’étape « inconnu » proposée.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"À la page 22, Jules Blais donne effectivement avis de motion du règlement 2026-04 modifiant le zonage 90-01, tandis que la présentation et l’adoption du premier projet sont annoncées pour la séance suivante.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"L’engagement de desserte est attesté à la page 19, mais constitue un fait complémentaire de la mise en vente des mêmes lots, sans nouvel objet réglementaire ou foncier justifiant une unité gold distincte.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-16, adoptée à la page 19, fixe le prix du lot 6 714 200 à 19 999 $ plus taxes et autorise sa mise en vente."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-16, adoptée à la page 19, fixe le prix du lot 6 714 201 à 19 999 $ plus taxes et autorise sa mise en vente."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-16, adoptée à la page 19, fixe le prix du lot 6 714 202 à 22 499 $ plus taxes et autorise sa mise en vente."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-17, adoptée à la page 20, autorise la vente du lot 6 714 202 aux acquéreurs nommés, conditionnellement à leur engagement de construire un bâtiment principal dans les deux ans suivant la signature de l’acte de vente."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "La résolution 2026-03-19 autorise la conclusion de l’entente à la page 21 et porte la mention « ADOPTÉ » à la page 22, ce qui ne correspond pas à l’étape « inconnu » proposée."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "À la page 22, Jules Blais donne effectivement avis de motion du règlement 2026-04 modifiant le zonage 90-01, tandis que la présentation et l’adoption du premier projet sont annoncées pour la séance suivante."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "L’engagement de desserte est attesté à la page 19, mais constitue un fait complémentaire de la mise en vente des mêmes lots, sans nouvel objet réglementaire ou foncier justifiant une unité gold distincte."
+  }
+ ]
+}

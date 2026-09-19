@@ -1,0 +1,75 @@
+{
+ "documentId": "lac-des-seize-iles-2026-09-agenda",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "0ded76906f0c25cb52cdce093c80a979c7821bdb5745041887419e5b2c5b5c6e",
+ "inputSha256": "a649684fcf6366d746fa359999f871c6d17c02df677565e45a8c34220cd527f7",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "rc": 0,
+ "latencyMs": 31999,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "4aca4f3f-1440-4a6e-a7c3-e1851250dbf3",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 2597,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 4050,
+   "webSearchRequests": 0,
+   "costUSD": 0.21154324999999996,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 2587,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 4050,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 2597,
+  "output_tokens_details": {
+   "thinking_tokens": 2587
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 4050,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 2597,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 4050,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 4050
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.21154324999999996,
+ "durationApiMs": 30242,
+ "stderrTail": "",
+ "at": "2026-09-18T17:56:36.794Z"
+}

@@ -1,0 +1,71 @@
+{
+ "documentId": "waterville-2026-04-07",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b137b8bce7cb9f8629faf0c9f8f7c3c2ba81b57ed8ef781488c2329ec6de5a92",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 6.1, page 1, inscrit la demande de modification règlementaire 2026-01-0006 à l’ordre du jour, sans préciser d’étape réglementaire : l’examen prévu et l’étape « inconnu » sont conformes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 6.2, page 1, prévoit l’examen de la dérogation mineure 2026-02-0007, sans attester de décision acquise.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 6.3, page 1, prévoit l’examen de la dérogation mineure 2026-02-0008, sans attester de décision acquise.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 7.3, page 1, annonce un avis de motion pour un projet amendant le règlement de lotissement no 615, ce qui atteste l’avis prévu et non une adoption.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 8.5, page 1, prévoit une demande d’autorisation pour l’agrandissement du lieu d’enfouissement technique, objet foncier explicite admissible même non résidentiel, sans attester d’autorisation accordée.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 6.1, page 1, inscrit la demande de modification règlementaire 2026-01-0006 à l’ordre du jour, sans préciser d’étape réglementaire : l’examen prévu et l’étape « inconnu » sont conformes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 6.2, page 1, prévoit l’examen de la dérogation mineure 2026-02-0007, sans attester de décision acquise."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 6.3, page 1, prévoit l’examen de la dérogation mineure 2026-02-0008, sans attester de décision acquise."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 7.3, page 1, annonce un avis de motion pour un projet amendant le règlement de lotissement no 615, ce qui atteste l’avis prévu et non une adoption."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 8.5, page 1, prévoit une demande d’autorisation pour l’agrandissement du lieu d’enfouissement technique, objet foncier explicite admissible même non résidentiel, sans attester d’autorisation accordée."
+  }
+ ]
+}

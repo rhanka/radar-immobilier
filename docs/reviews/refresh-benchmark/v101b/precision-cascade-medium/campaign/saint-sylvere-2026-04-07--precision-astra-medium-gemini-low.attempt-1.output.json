@@ -1,0 +1,530 @@
+{
+ "nodes": [
+  {
+   "id": "source-pv-2026-04-07",
+   "label": "Procès-verbal du 7 avril 2026 — Saint-Sylvère",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "status": "candidate",
+   "municipality": "saint-sylvere",
+   "date": "2026-04-07",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+   "url": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance ordinaire du conseil municipal de la\nMunicipalité de Saint-Sylvère, tenue ce 7 avril 2026,",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-383",
+   "label": "Premier projet de règlement # 383 modifiant le zonage",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "status": "candidate",
+   "municipality": "saint-sylvere",
+   "numero": "383",
+   "title": "Règlement modifiant le règlement de zonage # 247",
+   "stage": "1er_projet",
+   "meetingDate": "2026-04-07",
+   "resolution": "2026-04-117",
+   "zones_ciblees": [
+    "INST-01",
+    "M-01",
+    "M-02",
+    "M-03",
+    "M-04",
+    "R-03"
+   ],
+   "objet": "Permettre les conteneurs sur un terrain municipal; ajuster les revêtements extérieurs; retirer la classe III Forte densité des zones INST-01, M-01, M-02, M-03, M-04 et R-03; ajouter la classe Il De proximité à INST-01; abroger l’annexe 3. Le premier projet prévoit de gérer l’usage résidentiel de forte densité avec le PPCMOI.",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247.",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-383-motion",
+   "label": "Avis de motion — règlement # 383",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "status": "candidate",
+   "municipality": "saint-sylvere",
+   "date": "2026-04-07",
+   "reglement_number": "383",
+   "resolution": "2026-04-116",
+   "kind": "rezonage",
+   "etape": "avis_motion",
+   "etape_date": "2026-04-07",
+   "description": "Avis de motion pour modifier le règlement de zonage # 247. Adoption du règlement annoncée pour une séance ultérieure.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Gabrielle Gauthier donne avis de motion qu’il sera présenté pour adoption à un\nséance ultérieure du conseil municipal le règlement suivant:",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-383-projet",
+   "label": "Adoption du premier projet de règlement # 383",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "status": "candidate",
+   "municipality": "saint-sylvere",
+   "date": "2026-04-07",
+   "reglement_number": "383",
+   "resolution": "2026-04-117",
+   "kind": "rezonage",
+   "decision": "approuvé",
+   "etape": "projet_reglement",
+   "etape_date": "2026-04-07",
+   "description": "Dépôt et adoption unanime du premier projet modifiant le règlement de zonage # 247. Le projet est susceptible d’approbation référendaire; il ne s’agit pas de l’adoption finale du règlement.",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247.",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-384",
+   "label": "Premier projet de règlement # 384 — PPCMOI",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "status": "candidate",
+   "municipality": "saint-sylvere",
+   "numero": "384",
+   "title": "Règlement sur les projets particuliers de construction, de modification ou d’occupation d’un immeuble (PPCMOI)",
+   "stage": "1er_projet",
+   "meetingDate": "2026-04-07",
+   "resolution": "2026-04-119",
+   "objet": "Permettre à des projets complexes de déroger, au cas par cas, à la réglementation d’urbanisme sans modifier le règlement de zonage.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384.",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-384-motion",
+   "label": "Avis de motion — règlement PPCMOI # 384",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "status": "candidate",
+   "municipality": "saint-sylvere",
+   "date": "2026-04-07",
+   "reglement_number": "384",
+   "resolution": "2026-04-118",
+   "etape": "avis_motion",
+   "etape_date": "2026-04-07",
+   "description": "Avis de motion concernant un règlement-cadre sur les PPCMOI, et non une autorisation de projet particulier.",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "Yan )agenais avis de motion qu’il sera présenté pour adoption à une séance\n\nultérieur du conseil municipal le règlement suivant:",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-384-projet",
+   "label": "Adoption du premier projet de règlement PPCMOI # 384",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "status": "candidate",
+   "municipality": "saint-sylvere",
+   "date": "2026-04-07",
+   "reglement_number": "384",
+   "resolution": "2026-04-119",
+   "decision": "approuvé",
+   "etape": "projet_reglement",
+   "etape_date": "2026-04-07",
+   "description": "Dépôt et adoption unanime du premier projet de règlement sur les PPCMOI, sans adoption finale ni autorisation d’un projet immobilier déterminé.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384.",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-cptaq-453952",
+   "label": "Appui municipal à une demande CPTAQ — échange de parcelles",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "status": "candidate",
+   "municipality": "saint-sylvere",
+   "date": "2026-04-07",
+   "resolution": "2026-04-120",
+   "kind": "cptaq",
+   "dossier": "453952",
+   "demandeur_corporate": "Ferme Ramona S.E.N.C.",
+   "decision": "approuvé",
+   "etape": "inconnu",
+   "description": "Appui municipal à une demande conjointe de Ferme Ramona S.E.N.C. et d’un particulier pour échanger deux parcelles entre les lots 5652594 et 5889436, circonscription foncière de Nicolet. La décision est municipale et ne constitue pas une autorisation de la CPTAQ.",
+   "motif": "Conformité à la réglementation d’urbanisme; absence de bâtiment principal résidentiel sur les parcelles; absence d’impact négatif sur les activités agricoles et augmentation de la superficie agricole nette en culture.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais h\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C.",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-permis-mars-2026",
+   "label": "Mars 2026 — trois permis, valeur de 118 000 $",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "status": "candidate",
+   "municipality": "saint-sylvere",
+   "date": "2026-04-07",
+   "category": "permis",
+   "scope": "local",
+   "amount_cad": 118000,
+   "description": "Dépôt de la liste des permis de construction, d’environnement et de lotissement de mars 2026 : trois permis totalisant 118 000 $.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "La directrice générale adjointe et greffière-trésorière adjointe dépose devant le Conseil\nmunicipal la liste des permis de construction, d’environnement et de lotissement pour",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-pv-2026-04-07",
+   "target": "bylaw-383",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "evidence_refs": [
+    "ev-383-projet"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247.",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-07",
+   "target": "event-383-motion",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "evidence_refs": [
+    "ev-383-motion"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Gabrielle Gauthier donne avis de motion qu’il sera présenté pour adoption à un\nséance ultérieure du conseil municipal le règlement suivant:",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-07",
+   "target": "event-383-projet",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "evidence_refs": [
+    "ev-383-projet"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247.",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-383-motion",
+   "target": "event-383-projet",
+   "relation": "lifecycle_predecessor",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "evidence_refs": [
+    "ev-383-motion",
+    "ev-383-projet"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "CONSI’ ÉRANT QU’un avis de motion a été donné le 7 avril 2026 par Gabrielle\nGauthi r;",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-07",
+   "target": "bylaw-384",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "evidence_refs": [
+    "ev-384-projet"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384.",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-07",
+   "target": "event-384-motion",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "evidence_refs": [
+    "ev-384-motion"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "Yan )agenais avis de motion qu’il sera présenté pour adoption à une séance\n\nultérieur du conseil municipal le règlement suivant:",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-07",
+   "target": "event-384-projet",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "evidence_refs": [
+    "ev-384-projet"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384.",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-384-motion",
+   "target": "event-384-projet",
+   "relation": "lifecycle_predecessor",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "evidence_refs": [
+    "ev-384-motion",
+    "ev-384-projet"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "CONSIDÉRANT QU’un avis de motion a été donné le 7 avril 2026 par Yan Dagenais;",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-07",
+   "target": "event-cptaq-453952",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "evidence_refs": [
+    "ev-cptaq"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais h\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C.",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-07",
+   "target": "signal-permis-mars-2026",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "evidence_refs": [
+    "ev-permis"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "La directrice générale adjointe et greffière-trésorière adjointe dépose devant le Conseil\nmunicipal la liste des permis de construction, d’environnement et de lotissement pour",
+     "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+     "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+     "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-383-motion",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+   "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "Gabrielle Gauthier donne avis de motion qu’il sera présenté pour adoption à un\nséance ultérieure du conseil municipal le règlement suivant:\n-\n\nRèglement # 383 modifiant le règlement de zonage # 247\nLe règlement vise à:\n•\n•\n•\n•\n•\n\npermettre les conteneurs sur un terrain municipal;\najuster la liste des revêtements extérieurs;\nretirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;\najouter la classe « Il De proximité» à la zone INST-01;\nabroger l’annexe 3."
+  },
+  {
+   "id": "ev-383-projet",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+   "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "CONSI’ ÉRANT QU’un avis de motion a été donné le 7 avril 2026 par Gabrielle\nGauthi r;\nSUR PI OPOSITION Du conseiller Yan Dagenais appuyé par le conseiller Marc St\nLouis;\nIL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247."
+  },
+  {
+   "id": "ev-384-motion",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+   "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "Yan )agenais avis de motion qu’il sera présenté pour adoption à une séance\n\nultérieur du conseil municipal le règlement suivant:\nRèglLment 4*384 concernant les projets particuliers de construction, de modification ou\nd’occ pation d’un immeuble (PPCMOI)"
+  },
+  {
+   "id": "ev-384-projet",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+   "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "CONSIDÉRANT QU’un avis de motion a été donné le 7 avril 2026 par Yan Dagenais;\nSUR PROPOSITION DE la conseillère Gabrielle Gauthier, appuyée par le conseiller Stéphan\nTrottier;\nIL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+  },
+  {
+   "id": "ev-cptaq",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+   "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais h\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C. et de M Remo Kohler pour h\ndemande de lotissement 453952 du cadastre du Québec de la circonscription foncière d(\nNicolet qui est conforme à la réglementation d’urbanisme.\nAdoptée à l’unanimité des conseillers présents."
+  },
+  {
+   "id": "ev-permis",
+   "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+   "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+   "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "La directrice générale adjointe et greffière-trésorière adjointe dépose devant le Conseil\nmunicipal la liste des permis de construction, d’environnement et de lotissement pour\nle mois de mars 2026 pour 3 permis totalisant une valeur de 118 000 $.\nDéposée."
+  }
+ ],
+ "input_tokens": 12100,
+ "output_tokens": 6900
+}

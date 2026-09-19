@@ -1,0 +1,230 @@
+{
+ "documentId": "stoneham-et-tewkesbury-2026-06-08",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fb01cb7d80ff17759f3653fc7e8c1f3a5ef0c6b1da2235b2a3180d8ffe5873d5",
+ "verificationSha256": "bc645c72aac292ef5f26fbcf912650767d1d7735b5ba5d5d99fd759e709edfd0",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"Le point 9.1 « Avis de motion et dépôt d’un projet de règlement Vidange des fosses septiques et des fosses de rétention » porte sur un service d’hygiène du milieu (« ajuste les fréquences de vidange », « clarifie les responsabilités ») et non sur un objet d’urbanisme, un PIIA ou un acte foncier, seules inclusions prévues ; le document lui-même le range en section 9 avec la gestion contractuelle, hors des sections 15-16 d’urbanisme. L’argument d’A et B par simple non-exclusion ne suffit pas : la règle définit le périmètre positivement, et ce fait « complémentaire valable hors gold reste à signaler séparément, sans retoucher le dénominateur ».\"},{\"item\":\"a02\",\"choice\":\"absent\",\"reason\":\"Même point 9.1 page 20 : le dépôt du projet de règlement sur la vidange des fosses septiques relève de l’hygiène du milieu (remplacement du Règlement 08-573, fréquences de vidange, terminologie) et non des inclusions « urbanisme, petits PIIA et actes fonciers » ; la séparation avis de motion / projet ne vaut que pour un objet réglementaire déjà dans le périmètre. Fait complémentaire à signaler hors gold, sans crédit au rappel.\"},{\"item\":\"a03\",\"choice\":\"v1\",\"reason\":\"Page 23, résolution 9.4 : « signer une entente avec La Résidence des Cantons-Unis de Stoneham-et-Tewkesbury relative au stationnement commun du complexe municipal et de la Résidence », entente d’usage partagé d’un stationnement sur des lots identifiés (« partager un stationnement commun du côté du chemin du Hibou », acquisition d’une partie du lot 6 564 346), soit un acte foncier explicite « même non résidentiel », et non un marché de services exclu. L’étape « inconnu » est le seul libellé applicable à une autorisation de signature ; l’objection de C sur l’étape ne fait pas disparaître le fait.\"},{\"item\":\"a04\",\"choice\":\"v1\",\"reason\":\"La même résolution 9.4 autorise expressément « l’établissement de toutes ententes, conventions d’occupation et servitudes d’utilité publique jugées nécessaires sur les lots concernés par l’entente » : les servitudes sont un acte foncier nommé, de type distinct de l’acquisition de lot et de l’entente de stationnement, donc pas un « doublon même type/même fait ». L’indétermination invoquée par C porte sur le nombre de servitudes, non sur leur nature ni leur assiette (lots du stationnement commun), et la décision est bien constatée dans ce document (« Il est résolu »).\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Avis de motion — règlement sur la vidange des fosses septiques et des fosses de rétention",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "Vidange des fosses septiques",
+      "page": 20,
+      "citation": "Avis de motion et dépôt d’un projet de règlement Vidange des fosses septiques et des fosses de rétention",
+      "anchor": "Vidange des fosses septiques",
+      "spanStart": 5,
+      "spanEnd": 109
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 20 annonce explicitement l’avis de motion concernant la vidange des fosses septiques et des fosses de rétention, unité distincte du dépôt du projet."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 20, point 9.1 « Avis de motion et dépôt d’un projet de règlement Vidange des fosses septiques et des fosses de rétention » : objet réglementaire explicite, étape avis_motion attestée, hors des exclusions (nominations, comptes, marchés, loisirs, voirie)."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La vidange des fosses septiques relève de l'hygiène du milieu et non de l'urbanisme, constituant un fait complémentaire hors gold."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u02",
+   "verificationItem": "i02",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Dépôt du projet de règlement sur la vidange des fosses septiques et des fosses de rétention",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "Vidange des fosses septiques",
+      "page": 20,
+      "citation": "Avis de motion et dépôt d’un projet de règlement Vidange des fosses septiques et des fosses de rétention",
+      "anchor": "Vidange des fosses septiques",
+      "spanStart": 5,
+      "spanEnd": 109
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 20 atteste le dépôt du projet de règlement sur la vidange des fosses septiques et des fosses de rétention, distinct de l’avis de motion."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Même point 9.1 page 20 : « Avis de motion et projet actuels séparés », le dépôt du projet de règlement est une unité distincte à l’étape projet_reglement."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le projet de règlement sur la vidange des fosses septiques relève de l'hygiène du milieu et non de l'urbanisme (hors gold)."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation de signature de l’entente de stationnement commun avec la Résidence des Cantons-Unis",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "stationnement commun",
+      "page": 23,
+      "citation": "signer une entente avec La Résidence des Cantons-Unis de Stoneham-et-Tewkesbury relative au stationnement commun du complexe municipal et de la Résidence",
+      "anchor": "stationnement commun",
+      "spanStart": 83,
+      "spanEnd": 236
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution de la page 23 autorise la signature d’une entente avec la Résidence des Cantons-Unis concernant le stationnement commun, objet foncier explicitement décrit."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 23, résolution 9.4 « signer une entente avec La Résidence des Cantons-Unis ... relative au stationnement commun » : acte foncier explicitement nommé (convention d’occupation de lots), citation et page exactes, étape inconnu acceptable pour une autorisation de signature."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'entente de partage de stationnement est une entente administrative contractuelle hors urbanisme et l'étape indiquée est inexacte."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a04",
+   "kind": "split",
+   "unitId": "u05",
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation des servitudes d’utilité publique nécessaires sur les lots du stationnement commun",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "servitudes d’utilité publique",
+      "page": 23,
+      "citation": "d’autoriser l’établissement de toutes ententes, conventions d’occupation et servitudes d’utilité publique jugées nécessaires sur les lots concernés par l’entente",
+      "anchor": "servitudes d’utilité publique",
+      "spanStart": 373,
+      "spanEnd": 534
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution de la page 23 autorise l’établissement d’ententes, de conventions d’occupation et de servitudes d’utilité publique sur les lots concernés par l’entente."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 23 : « servitudes d’utilité publique jugées nécessaires sur les lots concernés par l’entente » — acte foncier explicitement nommé dans la résolution, un nœud groupé pouvant couvrir plusieurs unités nommées."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'autorisation générale de servitudes jugées nécessaires est une clause accessoire indéterminée sans objet foncier explicite."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "Le point 9.1 « Avis de motion et dépôt d’un projet de règlement Vidange des fosses septiques et des fosses de rétention » porte sur un service d’hygiène du milieu (« ajuste les fréquences de vidange », « clarifie les responsabilités ») et non sur un objet d’urbanisme, un PIIA ou un acte foncier, seules inclusions prévues ; le document lui-même le range en section 9 avec la gestion contractuelle, hors des sections 15-16 d’urbanisme. L’argument d’A et B par simple non-exclusion ne suffit pas : la règle définit le périmètre positivement, et ce fait « complémentaire valable hors gold reste à signaler séparément, sans retoucher le dénominateur »."
+  },
+  {
+   "item": "a02",
+   "choice": "absent",
+   "reason": "Même point 9.1 page 20 : le dépôt du projet de règlement sur la vidange des fosses septiques relève de l’hygiène du milieu (remplacement du Règlement 08-573, fréquences de vidange, terminologie) et non des inclusions « urbanisme, petits PIIA et actes fonciers » ; la séparation avis de motion / projet ne vaut que pour un objet réglementaire déjà dans le périmètre. Fait complémentaire à signaler hors gold, sans crédit au rappel."
+  },
+  {
+   "item": "a03",
+   "choice": "v1",
+   "reason": "Page 23, résolution 9.4 : « signer une entente avec La Résidence des Cantons-Unis de Stoneham-et-Tewkesbury relative au stationnement commun du complexe municipal et de la Résidence », entente d’usage partagé d’un stationnement sur des lots identifiés (« partager un stationnement commun du côté du chemin du Hibou », acquisition d’une partie du lot 6 564 346), soit un acte foncier explicite « même non résidentiel », et non un marché de services exclu. L’étape « inconnu » est le seul libellé applicable à une autorisation de signature ; l’objection de C sur l’étape ne fait pas disparaître le fait."
+  },
+  {
+   "item": "a04",
+   "choice": "v1",
+   "reason": "La même résolution 9.4 autorise expressément « l’établissement de toutes ententes, conventions d’occupation et servitudes d’utilité publique jugées nécessaires sur les lots concernés par l’entente » : les servitudes sont un acte foncier nommé, de type distinct de l’acquisition de lot et de l’entente de stationnement, donc pas un « doublon même type/même fait ». L’indétermination invoquée par C porte sur le nombre de servitudes, non sur leur nature ni leur assiette (lots du stationnement commun), et la décision est bien constatée dans ce document (« Il est résolu »)."
+  }
+ ]
+}

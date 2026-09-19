@@ -1,0 +1,244 @@
+{
+ "documentId": "contrecoeur-2026-04-14",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "f0baf2f9afc3a69c641ca6cc86c1cff2346c391e6151dc571335006642175964",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Avis de motion — Règlement U-102 constituant le comité consultatif en urbanisme (abrogeant le Règlement 147-82)\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"U-102\",\n        \"page\": 4,\n        \"citation\": \"il sera présenté\\nen vue de son adoption, le Règlement U-102 constituant le comité consultatif en\\nurbanisme et abrogeant le Règlement 147-82\",\n        \"anchor\": \"le Règlement U-102 constituant\"\n      },\n      \"reason\": \"L’exigence d’une citation recopiée à l’identique impose de rétablir les retours à la ligne après « présenté » et « en » présents à la page 4.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Présentation et dépôt du projet de règlement U-102 — Comité consultatif en urbanisme\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"U-102\",\n        \"page\": 4,\n        \"citation\": \"AVIS DE MOTION – PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102 – CONSTITUANT LE COMITÉ CONSULTATIF EN URBANISME –\\nABROGEANT LE RÈGLEMENT 147-82\",\n        \"anchor\": \"PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102\"\n      },\n      \"reason\": \"La citation du titre doit conserver le retour à la ligne avant « ABROGEANT », conformément à l’exigence de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption du second projet de règlement U-100-1 — Modification du zonage\",\n        \"stage\": \"second_projet\",\n        \"procedure\": null,\n        \"objet\": \"U-100-1\",\n        \"page\": 5,\n        \"citation\": \"D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\\nrelatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de\\nl’annexe B\",\n        \"anchor\": \"Règlement U-100-1\"\n      },\n      \"reason\": \"La citation doit rétablir les deux retours à la ligne de la décision de la page 5 pour respecter la règle de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement U-101 — Contrôle intérimaire du secteur industriel\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"U-101\",\n        \"page\": 5,\n        \"citation\": \"D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur\\nindustriel\",\n        \"anchor\": \"Règlement U-101\"\n      },\n      \"reason\": \"Le texte de la page 5 comporte un retour à la ligne entre « secteur » et « industriel », à conserver dans une citation recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-009 — Enseignes au 4270, rue des Patriotes, suite 101\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-009\",\n        \"page\": 13,\n        \"citation\": \"D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une\\nenseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau\\nautoroutier\",\n        \"anchor\": \"PIIA 2026-009\"\n      },\n      \"reason\": \"La citation doit conserver les retours à la ligne après « d’une » et « poteau » présents à la page 13, conformément à l’exigence de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-012 — Construction résidentielle au 5725, rue Moreau\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-012\",\n        \"page\": 14,\n        \"citation\": \"D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un\\nbâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589\",\n        \"anchor\": \"PIIA 2026-012\"\n      },\n      \"reason\": \"Le retour à la ligne après « d’un » doit être rétabli pour que la citation reproduise à l’identique le passage de la page 14.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Approbation de la dérogation mineure 2026-011 — 360-366 et 398-400, rue Papin\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-011\",\n        \"page\": 14,\n        \"citation\": \"D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles\\nsitués aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323\",\n        \"anchor\": \"dérogation mineure 2026-011\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « immeubles » de la page 14 pour satisfaire à l’exigence de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Approbation de la dérogation mineure 2026-020 — 275, rue de l’Église\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-020\",\n        \"page\": 15,\n        \"citation\": \"D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé\\nau 275, rue de l’Église, lot 6 607 642 au cadastre du Québec\",\n        \"anchor\": \"dérogation mineure 2026-020\"\n      },\n      \"reason\": \"Le retour à la ligne entre « situé » et « au 275 » doit être rétabli afin de recopier à l’identique le texte de la page 15.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Autorisation du protocole d’entente — Infrastructures de la halte routière, montée de la Pomme d’Or\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"montée de la Pomme d’Or\",\n        \"page\": 16,\n        \"citation\": \"à signer,\\npour et au nom de la Ville, le protocole d’entente à intervenir avec Picard Construction\\nrelativement à la construction d’une halte routière sur la montée de la Pomme d’Or\",\n        \"anchor\": \"montée de la Pomme d’Or\"\n      },\n      \"reason\": \"La citation doit rétablir les retours à la ligne après « à signer, » et « Picard Construction » pour reproduire à l’identique le passage de la page 16.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Avis de motion — Règlement U-102 constituant le comité consultatif en urbanisme (abrogeant le Règlement 147-82)",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "U-102",
+    "page": 4,
+    "citation": "il sera présenté\nen vue de son adoption, le Règlement U-102 constituant le comité consultatif en\nurbanisme et abrogeant le Règlement 147-82",
+    "anchor": "le Règlement U-102 constituant"
+   },
+   "reason": "L’exigence d’une citation recopiée à l’identique impose de rétablir les retours à la ligne après « présenté » et « en » présents à la page 4."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Présentation et dépôt du projet de règlement U-102 — Comité consultatif en urbanisme",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "U-102",
+    "page": 4,
+    "citation": "AVIS DE MOTION – PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102 – CONSTITUANT LE COMITÉ CONSULTATIF EN URBANISME –\nABROGEANT LE RÈGLEMENT 147-82",
+    "anchor": "PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102"
+   },
+   "reason": "La citation du titre doit conserver le retour à la ligne avant « ABROGEANT », conformément à l’exigence de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption du second projet de règlement U-100-1 — Modification du zonage",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "U-100-1",
+    "page": 5,
+    "citation": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\nrelatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de\nl’annexe B",
+    "anchor": "Règlement U-100-1"
+   },
+   "reason": "La citation doit rétablir les deux retours à la ligne de la décision de la page 5 pour respecter la règle de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Adoption du règlement U-101 — Contrôle intérimaire du secteur industriel",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "U-101",
+    "page": 5,
+    "citation": "D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur\nindustriel",
+    "anchor": "Règlement U-101"
+   },
+   "reason": "Le texte de la page 5 comporte un retour à la ligne entre « secteur » et « industriel », à conserver dans une citation recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Approbation du PIIA 2026-009 — Enseignes au 4270, rue des Patriotes, suite 101",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-009",
+    "page": 13,
+    "citation": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une\nenseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau\nautoroutier",
+    "anchor": "PIIA 2026-009"
+   },
+   "reason": "La citation doit conserver les retours à la ligne après « d’une » et « poteau » présents à la page 13, conformément à l’exigence de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Approbation du PIIA 2026-012 — Construction résidentielle au 5725, rue Moreau",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-012",
+    "page": 14,
+    "citation": "D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un\nbâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589",
+    "anchor": "PIIA 2026-012"
+   },
+   "reason": "Le retour à la ligne après « d’un » doit être rétabli pour que la citation reproduise à l’identique le passage de la page 14."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Approbation de la dérogation mineure 2026-011 — 360-366 et 398-400, rue Papin",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-011",
+    "page": 14,
+    "citation": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles\nsitués aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323",
+    "anchor": "dérogation mineure 2026-011"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « immeubles » de la page 14 pour satisfaire à l’exigence de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Approbation de la dérogation mineure 2026-020 — 275, rue de l’Église",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-020",
+    "page": 15,
+    "citation": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé\nau 275, rue de l’Église, lot 6 607 642 au cadastre du Québec",
+    "anchor": "dérogation mineure 2026-020"
+   },
+   "reason": "Le retour à la ligne entre « situé » et « au 275 » doit être rétabli afin de recopier à l’identique le texte de la page 15."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Autorisation du protocole d’entente — Infrastructures de la halte routière, montée de la Pomme d’Or",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "montée de la Pomme d’Or",
+    "page": 16,
+    "citation": "à signer,\npour et au nom de la Ville, le protocole d’entente à intervenir avec Picard Construction\nrelativement à la construction d’une halte routière sur la montée de la Pomme d’Or",
+    "anchor": "montée de la Pomme d’Or"
+   },
+   "reason": "La citation doit rétablir les retours à la ligne après « à signer, » et « Picard Construction » pour reproduire à l’identique le passage de la page 16."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "avis_motion",
+   "page": 4,
+   "citation": "il sera présenté\nen vue de son adoption, le Règlement U-102 constituant le comité consultatif en\nurbanisme et abrogeant le Règlement 147-82"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "projet_reglement",
+   "page": 4,
+   "citation": "AVIS DE MOTION – PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102 – CONSTITUANT LE COMITÉ CONSULTATIF EN URBANISME –\nABROGEANT LE RÈGLEMENT 147-82"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "second_projet",
+   "page": 5,
+   "citation": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\nrelatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de\nl’annexe B"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "adoption",
+   "page": 5,
+   "citation": "D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur\nindustriel"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "piia",
+   "page": 13,
+   "citation": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une\nenseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau\nautoroutier"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "piia",
+   "page": 14,
+   "citation": "D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un\nbâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "derogation_mineure",
+   "page": 14,
+   "citation": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles\nsitués aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "derogation_mineure",
+   "page": 15,
+   "citation": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé\nau 275, rue de l’Église, lot 6 607 642 au cadastre du Québec"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "adoption",
+   "page": 16,
+   "citation": "à signer,\npour et au nom de la Ville, le protocole d’entente à intervenir avec Picard Construction\nrelativement à la construction d’une halte routière sur la montée de la Pomme d’Or"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 9
+}

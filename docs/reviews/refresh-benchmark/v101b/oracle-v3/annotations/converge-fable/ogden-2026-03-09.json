@@ -1,0 +1,111 @@
+{
+ "documentId": "ogden-2026-03-09",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1164b01f7be18a11e9d25f30bcc979b5c5a89e7cd2c523722c986f7ea1695d48",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Point 6.3 de l'ordre du jour page 1 : « Demande de deux (2) dérogations mineures au 905 Descente 2 » ; objet foncier explicite, étape derogation_mineure, unité prévue conforme à la règle sur les ordres du jour.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Point 6.4 page 1 : « Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington » ; petit PIIA inclus, adresse explicite, citation et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Point 6.5 page 1 : « Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead » ; PIIA distinct avec adresse explicite, citation et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point 6.6 page 1 : « Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme » ; étape réglementaire d'urbanisme attestée, objet nommé dans le texte, étape inconnu appropriée pour un dépôt prévu.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Point 6.7 page 1 : dépôt du certificat d'enregistrement des personnes habiles à voter sur le « Règlement de zonage no. 2025-05 » ; objet réglementaire explicite, étape inconnu et page exactes.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"Point 9.4 sous Finances : « Liste des propriétés à vendre pour défaut de paiement de taxes » n'identifie aucun objet foncier explicite (aucune propriété, lot ou adresse) et relève du recouvrement fiscal, hors unité gold.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Point 13.1 page 1 : « Adoption - Règlement no. 2026.03 modifiant le Règlement no. 2020.05 relatif au comité consultatif d’urbanisme » ; règlement d'urbanisme explicite, étape adoption prévue à l'ordre du jour.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Point 13.3 page 1 : « Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments » ; avis de motion prévu, unité distincte du projet selon la règle.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Point 13.4 page 2 : « Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments » ; projet de règlement séparé de l'avis de motion, page 2 exacte.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Point 6.3 de l'ordre du jour page 1 : « Demande de deux (2) dérogations mineures au 905 Descente 2 » ; objet foncier explicite, étape derogation_mineure, unité prévue conforme à la règle sur les ordres du jour."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Point 6.4 page 1 : « Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington » ; petit PIIA inclus, adresse explicite, citation et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Point 6.5 page 1 : « Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead » ; PIIA distinct avec adresse explicite, citation et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point 6.6 page 1 : « Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme » ; étape réglementaire d'urbanisme attestée, objet nommé dans le texte, étape inconnu appropriée pour un dépôt prévu."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Point 6.7 page 1 : dépôt du certificat d'enregistrement des personnes habiles à voter sur le « Règlement de zonage no. 2025-05 » ; objet réglementaire explicite, étape inconnu et page exactes."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Point 9.4 sous Finances : « Liste des propriétés à vendre pour défaut de paiement de taxes » n'identifie aucun objet foncier explicite (aucune propriété, lot ou adresse) et relève du recouvrement fiscal, hors unité gold."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Point 13.1 page 1 : « Adoption - Règlement no. 2026.03 modifiant le Règlement no. 2020.05 relatif au comité consultatif d’urbanisme » ; règlement d'urbanisme explicite, étape adoption prévue à l'ordre du jour."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Point 13.3 page 1 : « Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments » ; avis de motion prévu, unité distincte du projet selon la règle."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Point 13.4 page 2 : « Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des bâtiments » ; projet de règlement séparé de l'avis de motion, page 2 exacte."
+  }
+ ]
+}

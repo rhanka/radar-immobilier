@@ -1,0 +1,13 @@
+{
+ "id": "pierreville-2026-03-10",
+ "rc": 0,
+ "latencyMs": 407770,
+ "inputTokens": 2,
+ "outputTokens": 61742,
+ "cacheRead": 0,
+ "cacheCreate": 32644,
+ "costUsd": 1.893887,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 90665
+}

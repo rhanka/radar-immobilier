@@ -1,0 +1,189 @@
+{
+ "documentId": "gracefield-2026-04-14",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "212e359695ef8333465623448970bc5ed74cbfe7052490567d106a5f56dd20bc",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-263-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 263-2026 relatif à l’occupation et à l’entretien des bâtiments patrimoniaux",
+     "stage": "adoption",
+     "objet": "263-2026",
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "Que le règlement 263-2026 soit adopté et qu’il statue et décrète ce qui\nsuit :"
+      },
+      {
+       "page": 15,
+       "excerpt": "Que le règlement 263-2026 soit adopté et qu’il statue et décrète ce qui\nsuit :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-cptaq-064"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Recommandation favorable à une demande d’aliénation auprès de la CPTAQ",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "Que le conseil de la Ville de Gracefield appuie et recommande ladite\ndemande d’autorisation à la Commission de protection du territoire\nagricole du Québec."
+      },
+      {
+       "page": 22,
+       "excerpt": "Considérant que cette demande vise également l’aliénation des lots\n5 412 018, 5 412 019 et 5 410 311 du cadastre du Québec de la\ncirconscription foncière de Gatineau ;"
+      },
+      {
+       "page": 23,
+       "excerpt": "Que le conseil de la Ville de Gracefield appuie et recommande ladite\ndemande d’autorisation à la Commission de protection du territoire\nagricole du Québec."
+      },
+      {
+       "page": 22,
+       "excerpt": "Considérant que cette demande vise également l’aliénation des lots\n5 412 018, 5 412 019 et 5 410 311 du cadastre du Québec de la\ncirconscription foncière de Gatineau ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-245-1"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande d’abrogation de l’article 245.1 de la Loi sur l’aménagement et l’urbanisme",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 25,
+       "excerpt": "Que la Ville de Gracefield demande aux membres de la Commission\nparlementaire de l’aménagement du territoire de l’Assemblée nationale\nd’introduire un amendement au projet de loi no 22 abrogeant"
+      },
+      {
+       "page": 25,
+       "excerpt": "Que la Ville de Gracefield demande aux membres de la Commission\nparlementaire de l’aménagement du territoire de l’Assemblée nationale\nd’introduire un amendement au projet de loi no 22 abrogeant\nl’article 245.1 de la Loi sur l’aménagement et l’urbanisme afin de\nrespecter le consensus établi entre le ministère et ses partenaires\nmunicipaux ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-frr-067"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Projet d’amélioration des espaces publics et infrastructures municipales",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 26,
+       "excerpt": "Que la Ville de Gracefield confirme son engagement financier pour ce\nprojet (26 962,00 $ après remboursement des taxes)."
+      },
+      {
+       "page": 26,
+       "excerpt": "Que la Ville de Gracefield confirme son engagement financier pour ce\nprojet (26 962,00 $ après remboursement des taxes)."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "```json\n{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement 263-2026 relatif à l'occupation et l'entretien des bâtiments patrimoniaux a été adopté par le conseil municipal.\",\"excerpt\":\"Que le règlement 263-2026 soit adopté et qu’il statue et décrète ce qui suit :\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal a appuyé et recommandé la demande d'autorisation d'aliénation à la CPTAQ pour les lots mentionnés.\",\"excerpt\":\"Que le conseil de la Ville de Gracefield appuie et recommande ladite demande d’autorisation à la Commission de protection du territoire agricole du Québec.\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une prise de position politique et d'une demande de modification législative adressée au gouvernement provincial, sans portée réglementaire locale ni acte d'urbanisme municipal.\",\"excerpt\":\"Que la Ville de Gracefield demande aux membres de la Commission parlementaire de l’aménagement du territoire de l’Assemblée nationale d’introduire un amendement au projet de loi no 22 abrogeant l’article 245.1\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une demande de subvention et d'un engagement financier auprès du FRR, relevant des affaires financières et administratives exclues du champ des actes d'urbanisme.\",\"excerpt\":\"D’autoriser le coordonnateur des ressources humaines, matérielles et des services de proximité, Monsieur Félix-Antoine Parent, à déposer une demande d’aide financière auprès de la MRCVG pour son programme Fonds régions et ruralité\"}]}\n```",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le règlement 263-2026 relatif à l'occupation et l'entretien des bâtiments patrimoniaux a été adopté par le conseil municipal.",
+   "excerpt": "Que le règlement 263-2026 soit adopté et qu’il statue et décrète ce qui suit :"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal a appuyé et recommandé la demande d'autorisation d'aliénation à la CPTAQ pour les lots mentionnés.",
+   "excerpt": "Que le conseil de la Ville de Gracefield appuie et recommande ladite demande d’autorisation à la Commission de protection du territoire agricole du Québec."
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une prise de position politique et d'une demande de modification législative adressée au gouvernement provincial, sans portée réglementaire locale ni acte d'urbanisme municipal.",
+   "excerpt": "Que la Ville de Gracefield demande aux membres de la Commission parlementaire de l’aménagement du territoire de l’Assemblée nationale d’introduire un amendement au projet de loi no 22 abrogeant l’article 245.1"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une demande de subvention et d'un engagement financier auprès du FRR, relevant des affaires financières et administratives exclues du champ des actes d'urbanisme.",
+   "excerpt": "D’autoriser le coordonnateur des ressources humaines, matérielles et des services de proximité, Monsieur Félix-Antoine Parent, à déposer une demande d’aide financière auprès de la MRCVG pour son programme Fonds régions et ruralité"
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Il s'agit d'une prise de position politique et d'une demande de modification législative adressée au gouvernement provincial, sans portée réglementaire locale ni acte d'urbanisme municipal."
+   },
+   {
+    "act": "A04",
+    "reason": "Il s'agit d'une demande de subvention et d'un engagement financier auprès du FRR, relevant des affaires financières et administratives exclues du champ des actes d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le règlement 263-2026 relatif à l'occupation et l'entretien des bâtiments patrimoniaux a été adopté par le conseil municipal."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil municipal a appuyé et recommandé la demande d'autorisation d'aliénation à la CPTAQ pour les lots mentionnés."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1924,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 18951,
+   "outputTokens": 363,
+   "totalTokens": 19314
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1779
+  },
+  "inputSha256": "bad1f4b3f01c834a8c8d2f399817dce2ae33db92addcf5aba71f4c8b7250321e"
+ }
+}

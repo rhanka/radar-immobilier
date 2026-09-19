@@ -1,0 +1,278 @@
+{
+ "nodes": [
+  {
+   "id": "source-pv-2026-02-02",
+   "label": "Procès-verbal du 2 février 2026 — Saint-Just-de-Bretenières",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "status": "candidate",
+   "date": "2026-02-02",
+   "municipality": "saint-just-de-bretenieres",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+   "url": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Assemblée régulière du Conseil municipal, tenue le 02 février 2026, à\nla salle du conseil située au sous-sol du 205, rue principale, à 19h00.",
+     "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+     "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-vente-terrain",
+   "label": "Vente de terrain au rang St-Isidore — informations demandées",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "status": "candidate",
+   "category": "vente_terrain",
+   "date": "2026-02-02",
+   "municipality": "saint-just-de-bretenieres",
+   "description": "Concernant la vente de terrain au rang St-Isidore, les élus demandent davantage d'information, notamment la valeur du terrain. Aucune vente n'est autorisée dans ce passage.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Les élus demandent plus d’information, dont la valeur du terrain.",
+     "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+     "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-terrain"
+   ]
+  },
+  {
+   "id": "constraint-bande-boisee",
+   "label": "Maintien réglementaire d’une bande boisée de 20 mètres",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "status": "candidate",
+   "constraintType": "autre",
+   "municipality": "saint-just-de-bretenieres",
+   "meetingDate": "2026-02-02",
+   "resolution": "40-02-2026",
+   "description": "Un règlement existant, non numéroté dans le passage, exige le maintien d’une bande boisée de 20 mètres. Le conseil demande sa révision en raison des interventions ultérieures d’Hydro-Québec et des pertes de revenus pour les propriétaires.",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "CONSIDÉRANT QU’un règlement existant exige le maintien d’une\nbande boisée de 20 mètres ;",
+     "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+     "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-boisement"
+   ]
+  },
+  {
+   "id": "signal-competence-hydrique",
+   "label": "Acceptation de la compétence de la MRC en matière de milieux hydriques",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "status": "candidate",
+   "category": "encadrement_reglementaire",
+   "date": "2026-02-02",
+   "municipality": "saint-just-de-bretenieres",
+   "resolution": "41-02-2026",
+   "description": "Le conseil accepte l’intention de déclaration de compétence de la MRC de Montmagny concernant certaines autorisations en milieux hydriques et sur les ouvrages de protection contre les inondations. Les activités liées aux bâtiments demeurent sous la responsabilité des municipalités locales.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte",
+     "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+     "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-hydrique",
+    "ev-hydrique-portee"
+   ]
+  },
+  {
+   "id": "signal-marche-jr",
+   "label": "Appui au réaménagement des équipements du Marché JR",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "status": "candidate",
+   "category": "revitalisation_commerciale",
+   "date": "2026-02-02",
+   "municipality": "saint-just-de-bretenieres",
+   "resolution": "43-02-2026",
+   "description": "La municipalité appuie le projet de réaménagement des équipements du Marché JR pour le maintien des services ainsi que le dépôt du projet au volet 5 — Commerces de proximité du Fonds régions et ruralité.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET résolu à l’unanimité\ndes conseillers présents QUE la Municipalité de St-Just-de-Bretenières",
+     "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+     "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-marche"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-pv-2026-02-02",
+   "target": "signal-vente-terrain",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Les élus demandent plus d’information, dont la valeur du terrain.",
+     "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+     "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-terrain"
+   ]
+  },
+  {
+   "source": "source-pv-2026-02-02",
+   "target": "constraint-bande-boisee",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "CONSIDÉRANT QU’un règlement existant exige le maintien d’une\nbande boisée de 20 mètres ;",
+     "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+     "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-boisement"
+   ]
+  },
+  {
+   "source": "source-pv-2026-02-02",
+   "target": "signal-competence-hydrique",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte",
+     "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+     "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-hydrique"
+   ]
+  },
+  {
+   "source": "source-pv-2026-02-02",
+   "target": "signal-marche-jr",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET résolu à l’unanimité\ndes conseillers présents QUE la Municipalité de St-Just-de-Bretenières",
+     "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+     "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+     "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-marche"
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-terrain",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+   "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "AFFAIRES DÉCOULANT DU PROCÈS-VERBAL – VENTE DE\nTERRAIN – RANG ST-ISIDORE\nLes élus demandent plus d’information, dont la valeur du terrain."
+  },
+  {
+   "id": "ev-boisement",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+   "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "CONSIDÉRANT QU’un règlement existant exige le maintien d’une\nbande boisée de 20 mètres ;\nCONSIDÉRANT QU’Hydro-Québec repasse environ un an plus tard et\nenlève approximativement la moitié de cette bande ;\nCONSIDÉRANT QUE cette façon de faire occasionne une perte de\nrevenus importante pour les propriétaires lorsqu’il y a une coupe totale\nà l’arrière ;\nCONSIDÉRANT QUE le peuplement forestier est déjà affaibli par une\npremière intervention ;\nIL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À\nL’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le\nrèglement soit revu en tenant compte des éléments soulevés."
+  },
+  {
+   "id": "ev-hydrique",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+   "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration\nde compétence de la MRC de Montmagny concernant la délivrance de\ncertaines autorisations en vertu du Règlement sur l’encadrement\nd’activités sous la responsabilité des municipalités réalisées dans des\nmilieux hydriques et sur des ouvrages de protection contre les\ninondations, selon les modalités et conditions prévues à la résolution\nadoptée par la MRC le 20 janvier 2026;"
+  },
+  {
+   "id": "ev-hydrique-portee",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+   "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "CONSIDÉRANT que la déclaration de compétence vise à confier à la\nMRC la gestion, la délivrance et le suivi de certaines autorisations\nrelatives aux activités réalisées dans les milieux hydriques, à l’exclusion\ndes activités liées aux bâtiments, lesquelles demeurent sous la\nresponsabilité des municipalités locales;"
+  },
+  {
+   "id": "ev-marche",
+   "source_file": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "rawRef": "raw/proces-verbaux-saint-just-de-bretenieres/cas/2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401.pdf",
+   "docSha": "2b908dc1a6356c47e15ca87808da32dcd57fc66549d208b93a0fa7a3e32cb401",
+   "sourceUrl": "http://www.saintjustdebretenieres.com/wp-content/uploads/2026/04/Proc%C3%A8s-verbal-02-f%C3%A9vrier-2026.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET résolu à l’unanimité\ndes conseillers présents QUE la Municipalité de St-Just-de-Bretenières\nappui le projet de réaménagement des équipements du Marché JR pour"
+  }
+ ],
+ "input_tokens": 11900,
+ "output_tokens": 4200
+}

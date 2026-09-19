@@ -1,0 +1,41 @@
+{
+ "documentId": "bowman-2026-05-12",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "96b3bbd4341598c96b0769d2638ac422258189938435b7069c90508288aac6c7",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"À la page 6, la résolution 2026-05-085 accepte explicitement la dérogation mineure au 2, chemin du Lac-Morin et permet une marge avant réduite à 4,55 mètres pour une remise, conformément à la citation et à l’étape proposées.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"À la page 7, la résolution 2026-05-086 accepte explicitement la dérogation mineure au 115 B, route 307 et autorise le déplacement du bâtiment complémentaire, conformément à la citation et à l’étape proposées.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "À la page 6, la résolution 2026-05-085 accepte explicitement la dérogation mineure au 2, chemin du Lac-Morin et permet une marge avant réduite à 4,55 mètres pour une remise, conformément à la citation et à l’étape proposées."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "À la page 7, la résolution 2026-05-086 accepte explicitement la dérogation mineure au 115 B, route 307 et autorise le déplacement du bâtiment complémentaire, conformément à la citation et à l’étape proposées."
+  }
+ ]
+}

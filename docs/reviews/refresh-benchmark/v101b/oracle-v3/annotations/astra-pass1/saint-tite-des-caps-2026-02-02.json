@@ -1,0 +1,96 @@
+{
+ "documentId": "saint-tite-des-caps-2026-02-02",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "9116c2367d37f2dd4c7af6b2a03d9c9262876888d9d49d7ac2f739eb8c751aa5",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — agrandissement d’une maison unifamiliale, lot 6 213 140, chemin Ceinture du Lac\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 213 140\",\n        \"page\": 5,\n        \"citation\": \"Que le Conseil municipal accepte la demande de permis d’agrandissement en zone\\nPIIA faite par la propriétaire du lot 6 213 140.\",\n        \"anchor\": \"lot 6 213 140\"\n      },\n      \"reason\": \"La résolution 12945 accepte explicitement cette demande d’agrandissement en zone PIIA, ce qui constitue une unité à inclure.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — modification cadastrale, démolition et construction d’une maison, lot 6 212 400, boulevard 138\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 212 400\",\n        \"page\": 6,\n        \"citation\": \"Que le Conseil municipal accepte la demande de permis de construction en zone\\nPIIA faite par le propriétaire du lot 6 212 400.\",\n        \"anchor\": \"lot 6 212 400\"\n      },\n      \"reason\": \"La résolution 12946 accepte une demande de PIIA portant sur ce lot; ses volets cadastral, démolition et construction appartiennent à la même demande.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — construction d’une maison unifamiliale, lot 6 213 540, chemin du Boisé\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 213 540\",\n        \"page\": 6,\n        \"citation\": \"Que le Conseil municipal accepte la demande de permis de construction en zone\\nPIIA faite par le propriétaire du lot 6 213 540.\",\n        \"anchor\": \"lot 6 213 540\"\n      },\n      \"reason\": \"La résolution 12947 accepte explicitement cette demande de construction en zone PIIA, distincte des demandes visant les autres lots.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — construction d’une maison unifamiliale, lot 6 425 190, rue de la Traverse\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 425 190\",\n        \"page\": 7,\n        \"citation\": \"Que le Conseil municipal accepte la demande de permis de construction en zone\\nPIIA faite par le propriétaire du lot 6 425 190.\",\n        \"anchor\": \"lot 6 425 190\"\n      },\n      \"reason\": \"La résolution 12948 accepte explicitement cette demande de construction en zone PIIA et atteste donc une décision actuelle à inclure.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation PIIA — agrandissement d’une maison unifamiliale, lot 6 213 140, chemin Ceinture du Lac",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 213 140",
+    "page": 5,
+    "citation": "Que le Conseil municipal accepte la demande de permis d’agrandissement en zone\nPIIA faite par la propriétaire du lot 6 213 140.",
+    "anchor": "lot 6 213 140"
+   },
+   "reason": "La résolution 12945 accepte explicitement cette demande d’agrandissement en zone PIIA, ce qui constitue une unité à inclure."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation PIIA — modification cadastrale, démolition et construction d’une maison, lot 6 212 400, boulevard 138",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 212 400",
+    "page": 6,
+    "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 212 400.",
+    "anchor": "lot 6 212 400"
+   },
+   "reason": "La résolution 12946 accepte une demande de PIIA portant sur ce lot; ses volets cadastral, démolition et construction appartiennent à la même demande."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation PIIA — construction d’une maison unifamiliale, lot 6 213 540, chemin du Boisé",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 213 540",
+    "page": 6,
+    "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 213 540.",
+    "anchor": "lot 6 213 540"
+   },
+   "reason": "La résolution 12947 accepte explicitement cette demande de construction en zone PIIA, distincte des demandes visant les autres lots."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation PIIA — construction d’une maison unifamiliale, lot 6 425 190, rue de la Traverse",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 425 190",
+    "page": 7,
+    "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 425 190.",
+    "anchor": "lot 6 425 190"
+   },
+   "reason": "La résolution 12948 accepte explicitement cette demande de construction en zone PIIA et atteste donc une décision actuelle à inclure."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4
+}

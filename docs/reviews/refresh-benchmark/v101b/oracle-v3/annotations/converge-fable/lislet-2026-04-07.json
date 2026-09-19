@@ -1,0 +1,81 @@
+{
+ "documentId": "lislet-2026-04-07",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "efebde05d360c9d992a4b8fc70721d5306bb4bf14ac13bfa9caa7734911b6227",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 30 « Demande de dérogation mineure pour le 418, chemin des Pionniers Est » figure en page 1 de l'ordre du jour : unité prévue, étape derogation_mineure, objet et page exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 31 « Demande de PIIA pour le 81, chemin des Pionniers Est » est attesté en page 1 : petit PIIA inclus par les règles, étape piia, citation et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 32 « Demande de PIIA pour le 272, chemin des Pionniers Est » est attesté en page 2 : petit PIIA inclus, étape piia, objet et page exacts.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 33 en page 2 prévoit l'entérinement (ratification par le conseil) d'une décision sur une demande d'entreposage temporaire d'un conteneur au 2, rue Chanoine-Martel : acte d'urbanisme explicite à un objet foncier précis, point prévu et non décision acquise.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 34 en page 2 prévoit une demande d'autorisation à la CPTAQ pour le renouvellement du permis d'exploitation d'une sablière (Michel Gamache & Frères) : acte foncier explicite, non résidentiel mais inclus, étape inconnu adaptée à un point prévu.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 36 en page 2 « Adoption de l'inventaire du patrimoine bâti partiel – Municipalité de L'Islet » est un objet d'urbanisme/patrimoine explicite à l'étape adoption, prévu à l'ordre du jour et non exclu par les règles (ni nomination, compte, marché, loisir ni voirie).\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 30 « Demande de dérogation mineure pour le 418, chemin des Pionniers Est » figure en page 1 de l'ordre du jour : unité prévue, étape derogation_mineure, objet et page exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 31 « Demande de PIIA pour le 81, chemin des Pionniers Est » est attesté en page 1 : petit PIIA inclus par les règles, étape piia, citation et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 32 « Demande de PIIA pour le 272, chemin des Pionniers Est » est attesté en page 2 : petit PIIA inclus, étape piia, objet et page exacts."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 33 en page 2 prévoit l'entérinement (ratification par le conseil) d'une décision sur une demande d'entreposage temporaire d'un conteneur au 2, rue Chanoine-Martel : acte d'urbanisme explicite à un objet foncier précis, point prévu et non décision acquise."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 34 en page 2 prévoit une demande d'autorisation à la CPTAQ pour le renouvellement du permis d'exploitation d'une sablière (Michel Gamache & Frères) : acte foncier explicite, non résidentiel mais inclus, étape inconnu adaptée à un point prévu."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 36 en page 2 « Adoption de l'inventaire du patrimoine bâti partiel – Municipalité de L'Islet » est un objet d'urbanisme/patrimoine explicite à l'étape adoption, prévu à l'ordre du jour et non exclu par les règles (ni nomination, compte, marché, loisir ni voirie)."
+  }
+ ]
+}

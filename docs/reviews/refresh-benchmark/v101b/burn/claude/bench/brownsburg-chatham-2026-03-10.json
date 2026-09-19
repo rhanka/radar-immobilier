@@ -1,0 +1,13 @@
+{
+ "id": "brownsburg-chatham-2026-03-10",
+ "rc": 0,
+ "latencyMs": 669190,
+ "inputTokens": 6,
+ "outputTokens": 101607,
+ "cacheRead": 85380,
+ "cacheCreate": 149445,
+ "costUsd": 4.140948,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 79721
+}

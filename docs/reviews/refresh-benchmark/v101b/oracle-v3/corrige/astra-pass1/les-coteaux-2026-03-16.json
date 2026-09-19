@@ -1,0 +1,348 @@
+{
+ "documentId": "les-coteaux-2026-03-16",
+ "nextId": 10,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 335 – Contrôle provisoire des travaux excédant la capacité du système d’égout",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "335",
+    "page": 5,
+    "citation": "D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible de créer des besoins excédant la capacité du système d’égout numéro 335",
+    "anchor": "système d’égout numéro 335",
+    "spanStart": 1325,
+    "spanEnd": 1487
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 335 – Contrôle provisoire des travaux excédant la capacité du système d’égout",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "335",
+      "page": 5,
+      "citation": "D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible de créer des besoins excédant la capacité du système d’égout numéro 335",
+      "anchor": "système d’égout numéro 335",
+      "spanStart": 1325,
+      "spanEnd": 1487
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le règlement 335 est adopté dans cette séance; les mentions de l’avis de motion et du projet du 16 février sont historiques et ne créent pas d’unités supplémentaires."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 316-01 – Correctifs au règlement de permis et certificats",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "316-01",
+    "page": 5,
+    "citation": "donnent avis de motion, qu’il sera adopté, à une séance subséquente, le Règlement numéro 316-01 modifiant le Règlement de permis et certificats numéro 316",
+    "anchor": "Règlement numéro 316-01",
+    "spanStart": 2943,
+    "spanEnd": 3097
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 316-01 – Correctifs au règlement de permis et certificats",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "316-01",
+      "page": 5,
+      "citation": "donnent avis de motion, qu’il sera adopté, à une séance subséquente, le Règlement numéro 316-01 modifiant le Règlement de permis et certificats numéro 316",
+      "anchor": "Règlement numéro 316-01",
+      "spanStart": 2943,
+      "spanEnd": 3097
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion du règlement de permis et certificats 316-01 est donné dans ce document et constitue une unité distincte du dépôt du projet."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du projet de règlement 316-01 – Correctifs au règlement de permis et certificats",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "316-01",
+    "page": 5,
+    "citation": "déposent le projet de règlement numéro 316-01 – Règlement modifiant le Règlement de permis et certificats numéro 316 afin d’y apporter des correctifs suite à son remplacement",
+    "anchor": "règlement numéro 316-01",
+    "spanStart": 3161,
+    "spanEnd": 3335
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du projet de règlement 316-01 – Correctifs au règlement de permis et certificats",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "316-01",
+      "page": 5,
+      "citation": "déposent le projet de règlement numéro 316-01 – Règlement modifiant le Règlement de permis et certificats numéro 316 afin d’y apporter des correctifs suite à son remplacement",
+      "anchor": "règlement numéro 316-01",
+      "spanStart": 3161,
+      "spanEnd": 3335
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le dépôt actuel du projet 316-01 est explicitement constaté et doit être compté séparément de son avis de motion."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 317-01 – Correctifs au règlement de zonage",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "317-01",
+    "page": 6,
+    "citation": "donnent avis de motion, qu’il sera adopté, à une séance subséquente, le Règlement numéro 317-01 modifiant le Règlement de zonage numéro 317",
+    "anchor": "Règlement numéro 317-01",
+    "spanStart": 292,
+    "spanEnd": 431
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 317-01 – Correctifs au règlement de zonage",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "317-01",
+      "page": 6,
+      "citation": "donnent avis de motion, qu’il sera adopté, à une séance subséquente, le Règlement numéro 317-01 modifiant le Règlement de zonage numéro 317",
+      "anchor": "Règlement numéro 317-01",
+      "spanStart": 292,
+      "spanEnd": 431
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion du règlement de zonage 317-01 est donné pendant cette séance et constitue une étape distincte du projet."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du projet de règlement 317-01 – Correctifs au règlement de zonage",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "317-01",
+    "page": 6,
+    "citation": "déposent le projet de règlement numéro 317-01 – Règlement modifiant le Règlement de zonage numéro 317 afin d’y apporter des correctifs suite à son remplacement",
+    "anchor": "règlement numéro 317-01",
+    "spanStart": 495,
+    "spanEnd": 654
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du projet de règlement 317-01 – Correctifs au règlement de zonage",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "317-01",
+      "page": 6,
+      "citation": "déposent le projet de règlement numéro 317-01 – Règlement modifiant le Règlement de zonage numéro 317 afin d’y apporter des correctifs suite à son remplacement",
+      "anchor": "règlement numéro 317-01",
+      "spanStart": 495,
+      "spanEnd": 654
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le projet de règlement 317-01 est déposé dans ce document; la règle impose une unité distincte de l’avis de motion."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Traitement du PIIA 2026-01 – 65, route 338 (dispositif discordant visant le PIIA 2026-02)",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-01",
+    "page": 6,
+    "citation": "26-03-9288 DEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614",
+    "anchor": "PIIA 2026-01",
+    "spanStart": 711,
+    "spanEnd": 786
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Traitement du PIIA 2026-01 – 65, route 338 (dispositif discordant visant le PIIA 2026-02)",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-01",
+      "page": 6,
+      "citation": "26-03-9288 DEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614",
+      "anchor": "PIIA 2026-01",
+      "spanStart": 711,
+      "spanEnd": 786
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-9288 traite explicitement cette demande dans son intitulé, mais son dispositif vise le PIIA 2026-02 au 102, rue Principale; cette discordance doit être conservée sans affirmer une acceptation non équivoque du PIIA 2026-01."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Acceptation du PIIA 2026-02 – 102, rue Principale – Remplacement de quatre fenêtres",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-02",
+    "page": 6,
+    "citation": "D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au 102, rue Principale, afin de permettre le remplacement de 4 fenêtres",
+    "anchor": "PIIA numéro 2026-02",
+    "spanStart": 1571,
+    "spanEnd": 1710
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-02 – 102, rue Principale – Remplacement de quatre fenêtres",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-02",
+      "page": 6,
+      "citation": "D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au 102, rue Principale, afin de permettre le remplacement de 4 fenêtres",
+      "anchor": "PIIA numéro 2026-02",
+      "spanStart": 1571,
+      "spanEnd": 1710
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-03-9289 accepte explicitement cette demande de PIIA; la répétition du même dispositif sous la résolution précédente ne crée pas une seconde unité pour le même fait."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Acceptation de la dérogation mineure DM-294 – 78, rue Sauvé – Garage partiellement en cour avant",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-294",
+    "page": 7,
+    "citation": "D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au 78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour avant",
+    "anchor": "dérogation mineure DM-294",
+    "spanStart": 1571,
+    "spanEnd": 1747
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation de la dérogation mineure DM-294 – 78, rue Sauvé – Garage partiellement en cour avant",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-294",
+      "page": 7,
+      "citation": "D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au 78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour avant",
+      "anchor": "dérogation mineure DM-294",
+      "spanStart": 1571,
+      "spanEnd": 1747
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte actuellement la demande DM-294 afin de régulariser l’implantation du garage, ce qui constitue une décision explicite de dérogation mineure."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de signature du contrat d’utilisation de l’espace d’amarrage – Parc Louis-Stanislas-Pariseau – Année 2026",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "parc Louis-Stanislas-Pariseau",
+    "page": 9,
+    "citation": "le contrat d’autorisation d’utilisation de l’espace d’amarrage pour l’année 2026 avec St-Lawrence Cruise Lines afin de leur permettre d’amarrer et de circuler dans le parc Louis-Stanislas-Pariseau",
+    "anchor": "parc Louis-Stanislas-Pariseau",
+    "spanStart": 216,
+    "spanEnd": 412
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de signature du contrat d’utilisation de l’espace d’amarrage – Parc Louis-Stanislas-Pariseau – Année 2026",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "parc Louis-Stanislas-Pariseau",
+      "page": 9,
+      "citation": "le contrat d’autorisation d’utilisation de l’espace d’amarrage pour l’année 2026 avec St-Lawrence Cruise Lines afin de leur permettre d’amarrer et de circuler dans le parc Louis-Stanislas-Pariseau",
+      "anchor": "parc Louis-Stanislas-Pariseau",
+      "spanStart": 216,
+      "spanEnd": 412
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution autorise la signature d’un contrat d’utilisation d’un immeuble municipal, objet foncier explicite distinct d’une simple activité de loisirs, dont l’étape relève d’« inconnu »."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "id": "saint-zephirin-de-courval-2026-03-02",
+ "rc": 0,
+ "latencyMs": 227031,
+ "inputTokens": 2,
+ "outputTokens": 24971,
+ "cacheRead": 0,
+ "cacheCreate": 15002,
+ "costUsd": 0.784498,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 52692
+}

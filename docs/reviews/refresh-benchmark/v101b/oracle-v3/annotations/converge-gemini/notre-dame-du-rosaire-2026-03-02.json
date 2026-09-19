@@ -1,0 +1,91 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "284ee220fe486f61e7cd108aa9b318d40b04767e6fdc298ec8d61395c1ba5810",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La mise en vente du lot 6 714 200 est un acte foncier explicite adopté par la résolution 2026-03-16 à la page 19.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La mise en vente du lot 6 714 201 est un acte foncier explicite adopté par la résolution 2026-03-16 à la page 19.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La mise en vente du lot 6 714 202 est un acte foncier explicite adopté par la résolution 2026-03-16 à la page 19.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'aliénation du lot 6 714 202 à Frédéric Beaulieu et Alexia Bélanger est un acte foncier adopté par la résolution 2026-03-17 à la page 20.\"},{\"item\":\"i05\",\"choice\":\"absent\",\"reason\":\"L'entente de collaboration relative à la mise à disposition d'un local municipal, un prêt et un cautionnement ne constitue ni un acte foncier ni un fait d'urbanisme.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement de zonage 2026-04 est explicitement donné à la page 22.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"L'engagement de desserte en eau et électricité est une simple modalité de service accessoire de la résolution de vente 2026-03-16 et non un objet foncier ou réglementaire distinct.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La mise en vente du lot 6 714 200 est un acte foncier explicite adopté par la résolution 2026-03-16 à la page 19."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La mise en vente du lot 6 714 201 est un acte foncier explicite adopté par la résolution 2026-03-16 à la page 19."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La mise en vente du lot 6 714 202 est un acte foncier explicite adopté par la résolution 2026-03-16 à la page 19."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'aliénation du lot 6 714 202 à Frédéric Beaulieu et Alexia Bélanger est un acte foncier adopté par la résolution 2026-03-17 à la page 20."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "L'entente de collaboration relative à la mise à disposition d'un local municipal, un prêt et un cautionnement ne constitue ni un acte foncier ni un fait d'urbanisme."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement de zonage 2026-04 est explicitement donné à la page 22."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "L'engagement de desserte en eau et électricité est une simple modalité de service accessoire de la résolution de vente 2026-03-16 et non un objet foncier ou réglementaire distinct."
+  }
+ ]
+}

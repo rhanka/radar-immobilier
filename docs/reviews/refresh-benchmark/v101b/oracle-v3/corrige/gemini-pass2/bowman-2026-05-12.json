@@ -1,0 +1,82 @@
+{
+ "documentId": "bowman-2026-05-12",
+ "nextId": 3,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure acceptée — 2, chemin du Lac-Morin — marge avant de 4,55 mètres pour une remise",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2, chemin du Lac-Morin",
+    "page": 6,
+    "citation": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de dérogation mineure pour la propriété située au 2, chemin du Lac-Morin, telle que présentée",
+    "anchor": "2, chemin du Lac-Morin",
+    "spanStart": 2058,
+    "spanEnd": 2224
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure acceptée — 2, chemin du Lac-Morin — marge avant de 4,55 mètres pour une remise",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2, chemin du Lac-Morin",
+      "page": 6,
+      "citation": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de dérogation mineure pour la propriété située au 2, chemin du Lac-Morin, telle que présentée",
+      "anchor": "2, chemin du Lac-Morin",
+      "spanStart": 2058,
+      "spanEnd": 2224
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-085 accepte explicitement cette demande de dérogation mineure, ce qui constitue une unité distincte pour l’objet et l’étape constatés."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure acceptée — 115 B, route 307 — déplacement d’un bâtiment complémentaire",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "115 B, route 307",
+    "page": 7,
+    "citation": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de dérogation mineure pour la propriété située au 115 B, route 307",
+    "anchor": "115 B, route 307",
+    "spanStart": 879,
+    "spanEnd": 1018
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure acceptée — 115 B, route 307 — déplacement d’un bâtiment complémentaire",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "115 B, route 307",
+      "page": 7,
+      "citation": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de dérogation mineure pour la propriété située au 115 B, route 307",
+      "anchor": "115 B, route 307",
+      "spanStart": 879,
+      "spanEnd": 1018
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-086 accepte cette demande et autorise le déplacement du bâtiment complémentaire ; la dérogation antérieure mentionnée ne crée pas d’unité supplémentaire."
+    }
+   ]
+  }
+ ]
+}

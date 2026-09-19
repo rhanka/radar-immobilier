@@ -1,0 +1,37 @@
+{
+ "documentId": "les-coteaux-2026-03-16",
+ "step": "gemini-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass1",
+ "inputStateSha256": "b69f45c06615daf99d252af159341cf0c9d0fcacbc773c8f93bdb628b6c90ea9",
+ "rawText": "{\"operations\":[{\"op\":\"remove\",\"id\":\"u09\",\"reason\":\"La résolution 26-03-9293 autorise un contrat d'utilisation de l'espace d'amarrage pour des croisières sous la rubrique Loisirs; il ne s'agit ni d'un acte foncier (vente, acquisition, cession, échange, servitude, lotissement) ni d'un acte réglementaire d'urbanisme, et le domaine des loisirs est explicitement exclu du rappel.\"}]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u09",
+   "reason": "La résolution 26-03-9293 autorise un contrat d'utilisation de l'espace d'amarrage pour des croisières sous la rubrique Loisirs; il ne s'agit ni d'un acte foncier (vente, acquisition, cession, échange, servitude, lotissement) ni d'un acte réglementaire d'urbanisme, et le domaine des loisirs est explicitement exclu du rappel."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u09"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 8
+}

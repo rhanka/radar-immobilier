@@ -1,0 +1,13 @@
+{
+ "id": "sainte-croix-2026-05-05",
+ "rc": 0,
+ "latencyMs": 424132,
+ "inputTokens": 2,
+ "outputTokens": 63518,
+ "cacheRead": 0,
+ "cacheCreate": 32158,
+ "costUsd": 1.9331600000000002,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 92505
+}

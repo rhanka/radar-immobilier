@@ -1,0 +1,172 @@
+{
+ "documentId": "lyster-2026-02-02",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "19f95ade028c85602f448e7baea1a732785be573194dcc73dc29fe03a82fde76",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-372-5"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 372.5 — Taxes 2026",
+     "stage": "adoption",
+     "objet": "372.5",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "QUE le conseil municipal adopte le Règlement numéro 372.5 pour fixer les taux de\ntaxes pour l'exercice financier 2026 et les conditions de perception."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-396"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 396 — Voirie du rang 8 ouest et emprunt",
+     "stage": "adoption",
+     "objet": "396",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "QUE le conseil municipal adopte le Règlement numéro 396 décrétant l'exécution de\ntravaux de voirie sur une partie du rang 8 ouest, ainsi qu'un emprunt pour en\nacquitter les coûts."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-vente-taxes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Autorisation de transmission des immeubles pour vente pour taxes",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "D’AUTORISER la directrice générale et greffière-trésorière à transmettre, avant le\n13 mars 2026, au bureau de la MRC de L’Érable, la liste des immeubles ci-dessous"
+      },
+      {
+       "page": 4,
+       "excerpt": "D’AUTORISER la directrice générale et greffière-trésorière à transmettre, avant le\n13 mars 2026, au bureau de la MRC de L’Érable, la liste des immeubles ci-dessous\npour qu’ils soient procédés à la vente à l’enchère publique, conformément aux\narticles 1022 et suivants du Code municipal du Québec, pour satisfaire aux taxes\nmunicipales impayées, avec intérêts, pénalité et frais encourus, à moins que ces\ntaxes, intérêts et frais ne soient entièrement payés avant la vente;"
+      },
+      {
+       "page": 5,
+       "excerpt": "Jean-François\n1837-35-8331 5 835 056\nLagacé\nAnthony Lalonde2437-98-1768 5 834 167\nLacaille\nCarl Roy, Édith\nFrancoeur, Réal 1636-52-7076 5 834 895\nRoy"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-tecq"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Approbation de la programmation TECQ 2024-2028 version 2",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "QUE la Municipalité approuve le contenu et autorise l’envoi au ministère des Affaires\nmunicipales et de l’Habitation de la programmation de travaux version no 2 ci-jointe"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal adopte le règlement numéro 372.5 fixant les taux de taxes 2026.\",\"excerpt\":\"QUE le conseil municipal adopte le Règlement numéro 372.5 pour fixer les taux de taxes pour l'exercice financier 2026 et les conditions de perception.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement d'emprunt et de travaux de voirie numéro 396.\",\"excerpt\":\"QUE le conseil municipal adopte le Règlement numéro 396 décrétant l'exécution de travaux de voirie sur une partie du rang 8 ouest, ainsi qu'un emprunt pour en acquitter les coûts.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-02-28 autorise la transmission de la liste des immeubles pour la vente à l'enchère publique pour taxes impayées.\",\"excerpt\":\"D’AUTORISER la directrice générale et greffière-trésorière à transmettre, avant le 13 mars 2026, au bureau de la MRC de L’Érable, la liste des immeubles ci-dessous\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-02-31 approuve la programmation de travaux TECQ 2024-2028 version 2.\",\"excerpt\":\"QUE la Municipalité approuve le contenu et autorise l’envoi au ministère des Affaires municipales et de l’Habitation de la programmation de travaux version no 2 ci-jointe\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal adopte le règlement numéro 372.5 fixant les taux de taxes 2026.",
+   "excerpt": "QUE le conseil municipal adopte le Règlement numéro 372.5 pour fixer les taux de taxes pour l'exercice financier 2026 et les conditions de perception."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement d'emprunt et de travaux de voirie numéro 396.",
+   "excerpt": "QUE le conseil municipal adopte le Règlement numéro 396 décrétant l'exécution de travaux de voirie sur une partie du rang 8 ouest, ainsi qu'un emprunt pour en acquitter les coûts."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-02-28 autorise la transmission de la liste des immeubles pour la vente à l'enchère publique pour taxes impayées.",
+   "excerpt": "D’AUTORISER la directrice générale et greffière-trésorière à transmettre, avant le 13 mars 2026, au bureau de la MRC de L’Érable, la liste des immeubles ci-dessous"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-02-31 approuve la programmation de travaux TECQ 2024-2028 version 2.",
+   "excerpt": "QUE la Municipalité approuve le contenu et autorise l’envoi au ministère des Affaires municipales et de l’Habitation de la programmation de travaux version no 2 ci-jointe"
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil municipal adopte le règlement numéro 372.5 fixant les taux de taxes 2026."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil adopte le règlement d'emprunt et de travaux de voirie numéro 396."
+   },
+   {
+    "act": "A03",
+    "reason": "La résolution 2026-02-28 autorise la transmission de la liste des immeubles pour la vente à l'enchère publique pour taxes impayées."
+   },
+   {
+    "act": "A04",
+    "reason": "La résolution 2026-02-31 approuve la programmation de travaux TECQ 2024-2028 version 2."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1601,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 8334,
+   "outputTokens": 357,
+   "totalTokens": 8691
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1458
+  },
+  "inputSha256": "7b430d0a5d84659774b929e5f84ac807604a43a4cb16b1248541ecd09fad9fb2"
+ }
+}

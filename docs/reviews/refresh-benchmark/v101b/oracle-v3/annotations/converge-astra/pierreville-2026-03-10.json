@@ -1,0 +1,91 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4379fc60f9b0423ee4f1fcbe4e45632ff075e83f84ece97381a698efdc225824",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"absent\",\n      \"reason\": \"La citation de la page 7 rappelle l’intérêt exprimé dans la résolution historique 2025-08-304, tandis que la décision actuelle d’acquisition après démolition figure à la page 8 dans la résolution 2026-03-70.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-71, page 8, autorise les enchères et l’acquisition d’immeubles à la vente pour taxes du 16 juin 2026, constituant un acte foncier explicite.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-75, page 12, remplace le nom du maire par Michel Deraspe dans la résolution 2025-08-304 afin de permettre la signature des documents d’acquisition des terrains.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 19, page 15, désigne explicitement le deuxième projet du règlement 268-2025 pour un triplex rue Georges, dont la résolution 2026-03-80 précise la modification des usages de la zone H-06.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-81 autorise, page 17, la publication de l’annonce de vente du 620, rang Haut de la Rivière et conditionne cette vente à la construction d’une résidence dans les huit mois suivant la résolution.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette proposition reprend la même autorisation d’enchérir et d’acquérir de la résolution 2026-03-71 déjà retenue sous i02, sans constituer une unité distincte.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette proposition est un doublon de l’autorisation foncière déjà retenue sous i02, et la règle exclut le crédit supplémentaire pour un même fait de même type.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "La citation de la page 7 rappelle l’intérêt exprimé dans la résolution historique 2025-08-304, tandis que la décision actuelle d’acquisition après démolition figure à la page 8 dans la résolution 2026-03-70."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-71, page 8, autorise les enchères et l’acquisition d’immeubles à la vente pour taxes du 16 juin 2026, constituant un acte foncier explicite."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-75, page 12, remplace le nom du maire par Michel Deraspe dans la résolution 2025-08-304 afin de permettre la signature des documents d’acquisition des terrains."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 19, page 15, désigne explicitement le deuxième projet du règlement 268-2025 pour un triplex rue Georges, dont la résolution 2026-03-80 précise la modification des usages de la zone H-06."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-81 autorise, page 17, la publication de l’annonce de vente du 620, rang Haut de la Rivière et conditionne cette vente à la construction d’une résidence dans les huit mois suivant la résolution."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Cette proposition reprend la même autorisation d’enchérir et d’acquérir de la résolution 2026-03-71 déjà retenue sous i02, sans constituer une unité distincte."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Cette proposition est un doublon de l’autorisation foncière déjà retenue sous i02, et la règle exclut le crédit supplémentaire pour un même fait de même type."
+  }
+ ]
+}

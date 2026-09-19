@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-henri-2026-03-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "0571bc8cf9cef927089da7b425b2c7ab8b77d802883bb48b4eddfd2ae2df0b32",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 7.2, page 1, prévoit explicitement une assemblée de consultation sur le Règlement no 741-26 ; cette étape est attestée comme prévue, non comme réalisée.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 7.2, page 1, prévoit aussi l'adoption du Règlement no 741-26, étape distincte de la consultation et correctement présentée comme prévue.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 7.3, page 2, inscrit une demande de dérogation mineure au 1096 chemin du Trait-Carré, lot 2 360 482, sans attester de décision acquise.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 7.2, page 1, prévoit explicitement une assemblée de consultation sur le Règlement no 741-26 ; cette étape est attestée comme prévue, non comme réalisée."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 7.2, page 1, prévoit aussi l'adoption du Règlement no 741-26, étape distincte de la consultation et correctement présentée comme prévue."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 7.3, page 2, inscrit une demande de dérogation mineure au 1096 chemin du Trait-Carré, lot 2 360 482, sans attester de décision acquise."
+  }
+ ]
+}

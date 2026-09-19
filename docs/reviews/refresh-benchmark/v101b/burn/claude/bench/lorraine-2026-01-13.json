@@ -1,0 +1,13 @@
+{
+ "id": "lorraine-2026-01-13",
+ "rc": 0,
+ "latencyMs": 196911,
+ "inputTokens": 2,
+ "outputTokens": 22039,
+ "cacheRead": 0,
+ "cacheCreate": 13007,
+ "costUsd": 0.690437,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 43881
+}

@@ -1,0 +1,79 @@
+{
+ "documentId": "saint-just-de-bretenieres-2026-02-02",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "eae192c227593289c4c69d09be14fcc7b7b34e73d50b0ce2b4689aa3456a1879",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Demande d’information sur la vente de terrain — rang St-Isidore\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"RANG ST-ISIDORE\",\n        \"page\": 2,\n        \"citation\": \"VENTE DE\\nTERRAIN – RANG ST-ISIDORE\\nLes élus demandent plus d’information, dont la valeur du terrain.\",\n        \"anchor\": \"RANG ST-ISIDORE\"\n      },\n      \"reason\": \"Le document constate une demande actuelle d’information sur une vente de terrain explicitement située, et non un simple rappel historique ou une vente autorisée.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Demande de révision du règlement exigeant une bande boisée de 20 mètres\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"règlement de déboisement\",\n        \"page\": 7,\n        \"citation\": \"IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À\\nL’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le\\nrèglement soit revu en tenant compte des éléments soulevés.\",\n        \"anchor\": \"règlement soit revu\"\n      },\n      \"reason\": \"La résolution 40-02-2026 demande la révision du règlement imposant une bande boisée de 20 mètres, ce qui constitue une démarche réglementaire actuelle sans adoption d’une modification.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Acceptation de la déclaration de compétence de la MRC de Montmagny — autorisations en milieux hydriques\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"déclaration de compétence\",\n        \"page\": 8,\n        \"citation\": \"accepte et se déclare favorable à l’intention de déclaration\\nde compétence de la MRC de Montmagny concernant la délivrance de\\ncertaines autorisations en vertu du Règlement sur l’encadrement\",\n        \"anchor\": \"déclaration\\nde compétence de la MRC\"\n      },\n      \"reason\": \"La résolution 41-02-2026 accepte expressément la déclaration de compétence relative aux autorisations en milieux hydriques ; cette étape réglementaire actuelle ne constitue ni l’adoption du règlement cité ni un simple rappel de la résolution antérieure de la MRC.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Demande d’information sur la vente de terrain — rang St-Isidore",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "RANG ST-ISIDORE",
+    "page": 2,
+    "citation": "VENTE DE\nTERRAIN – RANG ST-ISIDORE\nLes élus demandent plus d’information, dont la valeur du terrain.",
+    "anchor": "RANG ST-ISIDORE"
+   },
+   "reason": "Le document constate une demande actuelle d’information sur une vente de terrain explicitement située, et non un simple rappel historique ou une vente autorisée."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Demande de révision du règlement exigeant une bande boisée de 20 mètres",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "règlement de déboisement",
+    "page": 7,
+    "citation": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À\nL’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le\nrèglement soit revu en tenant compte des éléments soulevés.",
+    "anchor": "règlement soit revu"
+   },
+   "reason": "La résolution 40-02-2026 demande la révision du règlement imposant une bande boisée de 20 mètres, ce qui constitue une démarche réglementaire actuelle sans adoption d’une modification."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Acceptation de la déclaration de compétence de la MRC de Montmagny — autorisations en milieux hydriques",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "déclaration de compétence",
+    "page": 8,
+    "citation": "accepte et se déclare favorable à l’intention de déclaration\nde compétence de la MRC de Montmagny concernant la délivrance de\ncertaines autorisations en vertu du Règlement sur l’encadrement",
+    "anchor": "déclaration\nde compétence de la MRC"
+   },
+   "reason": "La résolution 41-02-2026 accepte expressément la déclaration de compétence relative aux autorisations en milieux hydriques ; cette étape réglementaire actuelle ne constitue ni l’adoption du règlement cité ni un simple rappel de la résolution antérieure de la MRC."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3
+}

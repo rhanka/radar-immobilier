@@ -1,0 +1,76 @@
+{
+ "documentId": "lac-etchemin-2026-02-03",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "d35ebfd9a268081ce8cb8d54fd89837c3d38338f1e6f32a84ad088f635486153",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure 2026-175 accordée — 304, avenue du Ruisseau, lot 3 601 426\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-175\",\n        \"page\": 10,\n        \"citation\": \"QUE la demande de dérogation mineure numéro 2026-175 soit et est approuvée par\\nle Conseil de la Municipalité de Lac-Etchemin\",\n        \"anchor\": \"dérogation mineure numéro 2026-175\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte de la page 10 comporte un saut de ligne entre « par » et « le Conseil ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Projet de résolution PPCMOI 2026-157 — vente de trailers et remorques au 1646, route 277\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"2026-157\",\n        \"page\": 10,\n        \"citation\": \"QUE la demande de PPCMOI numéro 2026-157 soit autorisée par le Conseil\\nmunicipal de la Municipalité de Lac-Etchemin de manière à rendre conforme un\\nusage « vente de trailer et remorque\",\n        \"anchor\": \"PPCMOI numéro 2026-157\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les sauts de ligne après « Conseil » et « un » à la page 10 doivent être conservés.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Dérogation mineure 2026-175 accordée — 304, avenue du Ruisseau, lot 3 601 426",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-175",
+    "page": 10,
+    "citation": "QUE la demande de dérogation mineure numéro 2026-175 soit et est approuvée par\nle Conseil de la Municipalité de Lac-Etchemin",
+    "anchor": "dérogation mineure numéro 2026-175"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte de la page 10 comporte un saut de ligne entre « par » et « le Conseil »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Projet de résolution PPCMOI 2026-157 — vente de trailers et remorques au 1646, route 277",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "2026-157",
+    "page": 10,
+    "citation": "QUE la demande de PPCMOI numéro 2026-157 soit autorisée par le Conseil\nmunicipal de la Municipalité de Lac-Etchemin de manière à rendre conforme un\nusage « vente de trailer et remorque",
+    "anchor": "PPCMOI numéro 2026-157"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les sauts de ligne après « Conseil » et « un » à la page 10 doivent être conservés."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "derogation_mineure",
+   "page": 10,
+   "citation": "QUE la demande de dérogation mineure numéro 2026-175 soit et est approuvée par\nle Conseil de la Municipalité de Lac-Etchemin"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "projet_reglement",
+   "page": 10,
+   "citation": "QUE la demande de PPCMOI numéro 2026-157 soit autorisée par le Conseil\nmunicipal de la Municipalité de Lac-Etchemin de manière à rendre conforme un\nusage « vente de trailer et remorque"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 2
+}

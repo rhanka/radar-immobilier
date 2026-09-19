@@ -1,0 +1,19 @@
+{
+ "documentId": "lac-tremblant-nord-2026-05-09",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1536c2b34552ec1fb18c6d610482fa9d18dc11b241440339c42041c15f77a12b",
+ "verificationSha256": "6d7e77b89413436e654d81853f654d7b746d9535f151d4e31104c46c89d4fc48",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

@@ -1,0 +1,81 @@
+{
+ "documentId": "mcmasterville-2026-02-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "fa603cdfd978c31a80b2c3bb4b0c3925751028f33858efaef911b1fcdb175ffc",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 7.2, page 2, prévoit l’autorisation du versement à des fins de parcs pour le redéveloppement à l’adresse projetée 141, rue de Bretagne, sans attester une décision acquise.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 7.3, page 2, inscrit à l’ordre du jour la demande de dérogation mineure relative au stationnement du lot 5 754 418, au 938, rue Bernard-Pilon.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 7.4, page 2, prévoit l’examen d’une demande d’exemption de fournir et de maintenir des cases de stationnement au 938, rue Bernard-Pilon, sans préciser son issue.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 7.5, page 2, prévoit une modification de la résolution 2025-184 concernant la révision de la décision de démolition CD-2025-03 au 129, rue de Bretagne, et non un simple rappel historique.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 7.6, page 2, prévoit une modification de la résolution 2025-185 concernant la révision de la décision de démolition CD-2025-04 au 143, rue de Bretagne, et non un simple rappel historique.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 7.7, page 2, prévoit l’autorisation du projet de bâtiment résidentiel multifamilial au 141, rue de Bretagne, sur les lots 4 494 279 et 4 494 281, sans établir que cette autorisation est acquise.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 7.2, page 2, prévoit l’autorisation du versement à des fins de parcs pour le redéveloppement à l’adresse projetée 141, rue de Bretagne, sans attester une décision acquise."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 7.3, page 2, inscrit à l’ordre du jour la demande de dérogation mineure relative au stationnement du lot 5 754 418, au 938, rue Bernard-Pilon."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 7.4, page 2, prévoit l’examen d’une demande d’exemption de fournir et de maintenir des cases de stationnement au 938, rue Bernard-Pilon, sans préciser son issue."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 7.5, page 2, prévoit une modification de la résolution 2025-184 concernant la révision de la décision de démolition CD-2025-03 au 129, rue de Bretagne, et non un simple rappel historique."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 7.6, page 2, prévoit une modification de la résolution 2025-185 concernant la révision de la décision de démolition CD-2025-04 au 143, rue de Bretagne, et non un simple rappel historique."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 7.7, page 2, prévoit l’autorisation du projet de bâtiment résidentiel multifamilial au 141, rue de Bretagne, sur les lots 4 494 279 et 4 494 281, sans établir que cette autorisation est acquise."
+  }
+ ]
+}

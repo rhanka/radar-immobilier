@@ -1,0 +1,19 @@
+{
+ "documentId": "blue-sea-2026-02-03",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "0c6fac81c213692ad6aadd2f8d7711f22044fcf29691d3ab6ac033c84ca1f33d",
+ "verificationSha256": "5ae1625b488b3935122d8dd627fe575b388a5aa360378fa4407aad08baaed1e2",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

@@ -1,0 +1,406 @@
+{
+ "nodes": [
+  {
+   "id": "event-503-2026-report",
+   "label": "Report du premier projet sur l’occupation et l’entretien des bâtiments",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "decision": "reporté",
+   "etape": "projet_reglement",
+   "reglement_number": "503-2026",
+   "description": "Adoption du premier projet du règlement relatif à l’occupation et à l’entretien des bâtiments reportée.",
+   "citations": [
+    {
+     "page": 37,
+     "excerpt": "Adoption reportée du 1er projet du règlement no. 503-2026 relatif à\nl’occupation et à l’entretien des bâtiments",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-504-2026-report",
+   "label": "Report de l’adoption du règlement sur la démolition",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "decision": "reporté",
+   "etape": "adoption",
+   "reglement_number": "504-2026",
+   "description": "Adoption reportée du règlement modifiant le règlement relatif à la démolition d’immeubles no 469-2023, concernant les bâtiments assujettis.",
+   "citations": [
+    {
+     "page": 37,
+     "excerpt": "Adoption reportée du règlement no 504-2026 modifiant le règlement\nrelatif à la démolition d’immeubles no 469-2023 afin de modifier certaines dispositions relatives aux bâtiments assujettis",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-506-2026-report",
+   "label": "Report de l’avis de motion et de la présentation — construction",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "decision": "reporté",
+   "etape": "avis_motion",
+   "reglement_number": "506-2026",
+   "description": "Avis de motion et présentation reportés du règlement de concordance du règlement de construction no 287-96 avec le schéma d’aménagement de la MRC du Granit.",
+   "citations": [
+    {
+     "page": 37,
+     "excerpt": "Avis de motion et présentation reportée du règlement no. 506-2026\nafin de faire la concordance du règlement de construction no 287-96\nenvers le schéma d’aménagement de la MRC du Granit",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-507-2026-report",
+   "label": "Report de l’avis de motion et de la présentation — lotissement",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "decision": "reporté",
+   "etape": "avis_motion",
+   "reglement_number": "507-2026",
+   "description": "Avis de motion et présentation reportés du règlement de concordance du règlement de lotissement no 244-90 avec le schéma d’aménagement de la MRC du Granit.",
+   "citations": [
+    {
+     "page": 37,
+     "excerpt": "Avis de motion et présentation reportée du règlement no 507-2026\nafin de faire la concordance du règlement de lotissement no 244-90\nenvers le schéma d’aménagement de la MRC du Granit",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-508-2026-report",
+   "label": "Report de l’avis de motion et de la présentation — permis et certificats",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "decision": "reporté",
+   "etape": "avis_motion",
+   "reglement_number": "508-2026",
+   "description": "Avis de motion et présentation reportés du règlement de concordance du règlement sur les permis et certificats no 242-90 avec le schéma d’aménagement de la MRC du Granit.",
+   "citations": [
+    {
+     "page": 37,
+     "excerpt": "Avis de motion et présentation reportée du règlement no 508-2026\nafin de faire la concordance du règlement sur les permis et certificats\nno 242-90 envers le schéma d’aménagement de la MRC du Granit",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-5092026-report",
+   "label": "Report du projet de remplacement du plan d’urbanisme",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "decision": "reporté",
+   "etape": "avis_motion",
+   "reglement_number": "5092026",
+   "description": "Avis de motion et présentation reportés du règlement visant à remplacer le règlement du plan d’urbanisme numéro 241-90. Le numéro du nouveau règlement est transcrit 5092026 dans le texte fourni.",
+   "citations": [
+    {
+     "page": 37,
+     "excerpt": "Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro\n241-90",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-510-2026-report",
+   "label": "Report de l’avis de motion et de la présentation — zonage",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "decision": "reporté",
+   "etape": "avis_motion",
+   "reglement_number": "510-2026",
+   "description": "Avis de motion et présentation reportés du règlement de concordance du règlement de zonage no 243-90 avec le schéma d’aménagement de la MRC du Granit.",
+   "citations": [
+    {
+     "page": 37,
+     "excerpt": "Avis de motion et présentation reportée du règlement no 510-2026\nafin de faire la concordance du règlement de zonage no 243-90 envers le schéma d’aménagement de la MRC du Granit",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-cptaq-453132",
+   "label": "Attestation de conformité municipale — Groupe Exca inc.",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "kind": "cptaq",
+   "dossier": "453132",
+   "demandeur_corporate": "Groupe Exca inc.",
+   "resolution": "2026-087",
+   "etape": "inconnu",
+   "description": "Le conseil atteste la conformité de la demande à la réglementation municipale applicable et ordonne la transmission de la résolution à la CPTAQ. Cette attestation ne constitue pas une autorisation de la CPTAQ.",
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "Que le conseil municipal de la Municipalité de Frontenac atteste que la\ndemande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc.,\nest conforme à la réglementation municipale applicable,",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-vente-taxes-4972283",
+   "label": "Demande de vente pour défaut de paiement de taxes — lot 4972283",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "category": "vente_pour_taxes",
+   "scope": "local",
+   "resolution": "2026-080",
+   "no_lot": "4972283",
+   "amount_cad": 7047.66,
+   "description": "Demande à la MRC du Granit de vendre l’immeuble pour défaut de paiement des taxes. Le transfert du dossier est prévu si les sommes dues ne sont pas reçues avant le 12 mars 2026. Le montant correspond au total des taxes et intérêts dus, et non à un prix de vente.",
+   "citations": [
+    {
+     "page": 19,
+     "excerpt": "Qu’en vertu de l’article 1023 du Code Municipal du Québec, le conseil\nde la Municipalité de Frontenac demande à la MRC du Granit de vendre\npour défaut de paiement des taxes, les immeubles suivants :",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "constraint-milieux-humides-araignees",
+   "label": "Entente de conservation des milieux humides riverains du lac Aux Araignées",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "meetingDate": "2026-03-10",
+   "constraintType": "milieu_humide",
+   "resolution": "2026-094",
+   "description": "Acceptation des termes d’une entente entre la Municipalité, Les Entreprises Paul Vallée Inc. et Canards Illimités Canada pour la protection et la conservation des milieux humides riverains du lac Aux Araignées. L’entente vise la réfection du barrage et la protection de l’habitat faunique sur les terrains du propriétaire; elle prévoit une collaboration de 25 ans suivant la finalisation du projet.",
+   "evidence_refs": [
+    "ev-conservation"
+   ],
+   "citations": [
+    {
+     "page": 27,
+     "excerpt": "Que la Municipalité de Frontenac accepte les termes de l’entente relative à la protection et à la conservation des milieux humides riverains du\nlac Aux Araignées, telle que déposée;",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-piste-route204",
+   "label": "Octroi du contrat de piste multifonctionnelle — route 204",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "category": "infrastructure",
+   "kind": "octroi_contrat",
+   "scope": "local",
+   "resolution": "2026-089",
+   "amount_cad": 987127.26,
+   "description": "Acceptation de la soumission d’Excavation Bolduc Inc. pour l’ajout d’une piste multifonctionnelle sur la route 204, secteur village, pour 987 127,26 $, taxes incluses.",
+   "citations": [
+    {
+     "page": 24,
+     "excerpt": "Que la municipalité accepte la soumission déposée par Excavation Bolduc Inc. pour l'ajout d'une piste multifonctionnelle sur la route 204 (secteur\nvillage),",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-retrait-surveillance-puits",
+   "label": "Retrait municipal de la gestion de la surveillance des puits — contournement ferroviaire",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "category": "environnement",
+   "kind": "surveillance_eaux_souterraines",
+   "resolution": "2026-095",
+   "description": "La Municipalité retire son intérêt à agir comme responsable de la mise en œuvre et de la gestion du plan de surveillance des puits d’eau potable et des eaux souterraines lié au contournement ferroviaire de Lac-Mégantic, invoquant des risques importants sans garanties suffisantes.",
+   "citations": [
+    {
+     "page": 28,
+     "excerpt": "Que la Municipalité de Frontenac confirme son retrait de l’intérêt d’agir\nà titre de responsable de la mise en œuvre et de la gestion du plan de surveillance des puits d’eau potable",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-site-archeologique-subvention",
+   "label": "Accord de subvention pour l’aménagement du site archéologique",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "category": "amenagement",
+   "kind": "financement",
+   "resolution": "2026-092",
+   "amount_cad": 90050,
+   "description": "Approbation du projet d’accord de subvention avec Patrimoine canadien pour l’aménagement et la mise en valeur du site archéologique Cliche-Rancourt-Mamsalhabika. La Municipalité demande au gouvernement du Québec l’autorisation de conclure l’accord.",
+   "citations": [
+    {
+     "page": 26,
+     "excerpt": "Que la Municipalité de Frontenac approuve le projet d’accord de subvention avec ministère du Patrimoine canadien dans le cadre du programme\nFonds du Canada pour les espaces culturels",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-pavillon-archeologique",
+   "label": "Acquisition des composantes du pavillon d’accueil archéologique",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "category": "construction",
+   "kind": "octroi_contrat",
+   "resolution": "2026-111",
+   "amount_cad": 31151.27,
+   "description": "Acceptation de la soumission de Clyvanor Ltée pour les fermes de toit, murs préfabriqués et autres composantes du pavillon d’accueil du site archéologique Cliche-Rancourt-Mamsalhabika : 31 151,27 $ plus taxes, auxquels s’ajoutent 95 $ plus taxes de transport.",
+   "citations": [
+    {
+     "page": 36,
+     "excerpt": "Que la soumission de Clyvanor Ltée pour la fourniture de fermes de toit,\nmurs préfabriqués et autres composantes du pavillon d’accueil du site archéologique Cliche-Rancourt-Mamsalhabika",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-marais-megantic",
+   "label": "Appui au portrait préliminaire du marais du lac Mégantic",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "status": "candidate",
+   "municipality": "frontenac",
+   "date": "2026-03-10",
+   "category": "environnement",
+   "kind": "etude_milieu_humide",
+   "resolution": "2026-100",
+   "amount_cad": 750,
+   "description": "Appui au portrait préliminaire et ciblé du marais du lac Mégantic présenté par le RAPPEL et l’APLM. Contribution de 750 $ conditionnelle à la subvention principale et à la participation des autres partenaires; le projet comprend aussi le suivi de la qualité de l’eau au lac aux Araignées.",
+   "citations": [
+    {
+     "page": 30,
+     "excerpt": "Que le conseil municipal appuie officiellement le projet de portrait préliminaire et ciblé du marais du lac Mégantic tel que présenté par le RAPPEL\net l’APLM ;",
+     "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+     "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+     "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-conservation",
+   "source_file": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "rawRef": "raw/proces-verbaux-frontenac/cas/068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb.pdf",
+   "docSha": "068fd52b419a0a39340c2de3552161018e156ab3278bc34428baa72800339deb",
+   "sourceUrl": "https://municipalitefrontenac.qc.ca/wp-content/uploads/2026/04/Proces-verbal-du-10-mars-2026.pdf",
+   "modality": "pdf",
+   "page": 27,
+   "excerpt": "Que la Municipalité de Frontenac accepte les termes de l’entente relative à la protection et à la conservation des milieux humides riverains du\nlac Aux Araignées, telle que déposée;"
+  }
+ ],
+ "input_tokens": 23500,
+ "output_tokens": 4800
+}

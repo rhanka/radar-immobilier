@@ -1,0 +1,36 @@
+{
+ "documentId": "cookshire-eaton-2026-04-07",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "dcef823e0abf9b897d88bdb82b1720374565a8af97cb1bd96327247ddafd2b5b",
+ "inputSha256": "f31a5ebc204c0adfdeeb8411976e61d007265d6e2e87f49c97378c183d4567f8",
+ "responseSha256": "68f22ffdf56f433a2a36cbaa79acf77547f9ff5278665a3089ea04089e61cbb4",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 113280,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 9244,
+  "outputTokens": 3700,
+  "totalTokens": 12944
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 113275,
+  "requestId": null
+ },
+ "at": "2026-09-18T14:17:37.550Z"
+}

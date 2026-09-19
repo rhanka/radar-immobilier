@@ -1,0 +1,35 @@
+{
+ "documentId": "stanstead-est-2026-04-13",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "60c96bd6e1b579773431710355f1fa1c2e8bc1c9330ae320b2234fafc969f91b",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3889,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 18043,
+   "outputTokens": 1281,
+   "totalTokens": 19324
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3718
+  },
+  "inputSha256": "82ea8607dfb92c6eadde7657d3a229325edf56644ed9f62913eb3779d4adc3cc"
+ },
+ "at": "2026-09-19T03:23:09.731Z"
+}

@@ -1,0 +1,78 @@
+{
+ "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1e90d3d566980812a2f7b3bc5a30ff52d2c50694c4b8a0a1df6b085c1082b0f7",
+ "verificationSha256": "d3ab3e4c291d964e1d8a6ab921e2dcbdb7cc546e9d21b6845bbe6de5540ccdaf",
+ "inputSha256": "742da4d4297558ca9cba6d25a982210b574677ce98cce1ec148f410434345705",
+ "responseSha256": "298bb8baf19537826ef30c8e1b17382c38e4254d6ea42c90ae55b448ad2cfb30",
+ "rc": 0,
+ "latencyMs": 17376,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "0312c0d9-c8f2-49f3-abce-da104d90d048",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 1108,
+   "cacheReadInputTokens": 1193,
+   "cacheCreationInputTokens": 24470,
+   "webSearchRequests": 0,
+   "costUSD": 0.5451182499999999,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 693,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 24470,
+  "cache_read_input_tokens": 1193,
+  "output_tokens": 1108,
+  "output_tokens_details": {
+   "thinking_tokens": 693
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 24470,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1108,
+    "cache_read_input_tokens": 1193,
+    "cache_creation_input_tokens": 24470,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 24470
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.5451182499999999,
+ "durationApiMs": 15585,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T22:44:56.453Z"
+}

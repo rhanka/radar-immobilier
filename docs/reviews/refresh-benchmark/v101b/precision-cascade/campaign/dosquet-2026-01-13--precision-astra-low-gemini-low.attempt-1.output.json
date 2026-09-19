@@ -1,0 +1,187 @@
+{
+ "nodes": [
+  {
+   "id": "event-cptaq-26-01-08",
+   "label": "Appui municipal à la demande à la CPTAQ",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "status": "candidate",
+   "municipality": "dosquet",
+   "date": "2026-01-13",
+   "meetingDate": "2026-01-13",
+   "kind": "cptaq",
+   "etape": "inconnu",
+   "resolution": "26-01-08",
+   "decision": "Appui municipal favorable; demande recommandée",
+   "no_lot": "6274449",
+   "superficie_m2": 4631.6,
+   "description": "Appui à la demande d'étendre le droit résidentiel à la partie agricole du lot 6 274 449 et d'aliéner les lots 5 376 188 et 4 819 191, totalisant 107,9684 hectares, dont l'usage agricole sera préservé. Aucune décision de la CPTAQ n'est rapportée.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Que la municipalité est favorable et recommande la demande.",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-cptaq",
+    "ev-zones"
+   ]
+  },
+  {
+   "id": "zone-25A",
+   "label": "Zone 25A",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "status": "candidate",
+   "municipality": "dosquet",
+   "code": "25A",
+   "usages_autorises": [
+    "résidentiel"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel\nque montré au règlement de zonage en vigueur, et que l’usage résidentiel est",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zones"
+   ]
+  },
+  {
+   "id": "zone-5H",
+   "label": "Zone 5H",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "status": "candidate",
+   "municipality": "dosquet",
+   "code": "5H",
+   "usages_autorises": [
+    "résidentiel"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel\nque montré au règlement de zonage en vigueur, et que l’usage résidentiel est",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zones"
+   ]
+  },
+  {
+   "id": "bylaw-2025-499",
+   "label": "Règlement 2025-499 — Taxes et compensations 2026",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "status": "needs_review",
+   "municipality": "dosquet",
+   "numero": "2025-499",
+   "title": "Règlement décrétant les taux de taxes et les tarifs de compensation pour l’année financière 2026 et les conditions de leur perception",
+   "stage": "projet",
+   "meetingDate": "2026-01-13",
+   "resolution": "26-01-06",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "SUR LA PROPOSITION de monsieur Michel Moreau, IL EST RÉSOLU À\nL’UNANIMITÉ de procéder au dépôt du projet du règlement 2025-499, tel que\nsuit;",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "event-cptaq-26-01-08",
+   "target": "zone-25A",
+   "relation": "concerns",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "evidence_refs": [
+    "ev-zones",
+    "ev-cptaq"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel\nque montré au règlement de zonage en vigueur, et que l’usage résidentiel est",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-cptaq-26-01-08",
+   "target": "zone-5H",
+   "relation": "concerns",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "evidence_refs": [
+    "ev-zones",
+    "ev-cptaq"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel\nque montré au règlement de zonage en vigueur, et que l’usage résidentiel est",
+     "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+     "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+     "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-cptaq",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+   "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "Que la municipalité est favorable et recommande la demande."
+  },
+  {
+   "id": "ev-zones",
+   "source_file": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "rawRef": "raw/proces-verbaux-dosquet/cas/20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea.pdf",
+   "docSha": "20bd5c3520fc9810a65b6e1bcf8b35b580e491f8e8df7e349aa300b6fc3f88ea",
+   "sourceUrl": "https://www.municipalitedosquet.com/wp-content/uploads/2026/04/PV-13-01-2026.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel\nque montré au règlement de zonage en vigueur, et que l’usage résidentiel est\nautorisé dans ces deux zones, conformément à la réglementation d’urbanisme\nmunicipale;"
+  }
+ ],
+ "input_tokens": 11800,
+ "output_tokens": 3500
+}

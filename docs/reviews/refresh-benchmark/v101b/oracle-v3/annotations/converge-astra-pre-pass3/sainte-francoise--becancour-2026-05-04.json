@@ -1,0 +1,81 @@
+{
+ "documentId": "sainte-francoise--becancour-2026-05-04",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "3a6ae6809f0da4a89c45b1e2bc32faf27033a275dbb2da9d785a50ccdb404e82",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"absent\",\n      \"reason\": \"Malgré le titre annonçant un second projet, la résolution 61-05-2026, page 7, dépose et adopte le « premier projet », ce qui ne permet pas de confirmer l’étape second_projet proposée.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 62-05-2026, page 8, adopte explicitement le règlement 56-2026 relatif à l’aménagement des entrées privées et à la fermeture des fossés de chemins.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"Au point 9.5, page 8, Chantal Séguin donne explicitement avis de motion du règlement 58-2026 modifiant le plan d’urbanisme 2010-01.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"Au point 9.5, page 8, le projet du règlement 58-2026 est déposé séance tenante, ce qui constitue une unité distincte de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"Au point 9.6, page 8, Yvon Paulin donne explicitement avis de motion du règlement 59-2026 modifiant le règlement de construction 2010-05.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"Au point 9.6, page 8, le projet du règlement 59-2026 permettant les pieux dans l’agrandissement des bâtiments est déposé séance tenante, distinctement de l’avis de motion.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "Malgré le titre annonçant un second projet, la résolution 61-05-2026, page 7, dépose et adopte le « premier projet », ce qui ne permet pas de confirmer l’étape second_projet proposée."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 62-05-2026, page 8, adopte explicitement le règlement 56-2026 relatif à l’aménagement des entrées privées et à la fermeture des fossés de chemins."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Au point 9.5, page 8, Chantal Séguin donne explicitement avis de motion du règlement 58-2026 modifiant le plan d’urbanisme 2010-01."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Au point 9.5, page 8, le projet du règlement 58-2026 est déposé séance tenante, ce qui constitue une unité distincte de l’avis de motion."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Au point 9.6, page 8, Yvon Paulin donne explicitement avis de motion du règlement 59-2026 modifiant le règlement de construction 2010-05."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Au point 9.6, page 8, le projet du règlement 59-2026 permettant les pieux dans l’agrandissement des bâtiments est déposé séance tenante, distinctement de l’avis de motion."
+  }
+ ]
+}

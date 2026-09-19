@@ -1,0 +1,101 @@
+{
+ "documentId": "lac-saint-paul-2026-05-11",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "bb96389f138a3f206d64d8dcac29fb7d776e86c78fec7fe79bbdedb91bbe60bc",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v2\",\"reason\":\"La résolution 104-05-2026 (p. 5) autorise la location du garage au 366, rue Principale, acte foncier explicite inclus; ce n'est pas l'adoption d'un règlement, donc l'étape est « inconnu » et non « adoption ».\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 106-05-2026 (p. 6) fixe la consultation publique du 13 juillet 2026 sur le projet de règlement 079-2026 abrogeant la citation patrimoniale; citation, objet et page exacts, étape inconnu avec procédure consultation_publique.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 6.2 (p. 6, en-tête « RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES ») ouvre la résolution 107-05-2026 demandant la suspension et la révision de ce projet de règlement, objet réglementaire explicite en urbanisme/environnement; citation et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 6.3 (p. 8) atteste que le greffier-trésorier dépose l'avis spécial relatif à l'abrogation du règlement 046-2023 (citation patrimoniale de l'église), étape distincte de la consultation sur 079-2026; citation exacte.\"},{\"item\":\"i05\",\"choice\":\"v2\",\"reason\":\"Même acte foncier attesté p. 5 (location du garage au 366, rue Principale); l'étape exacte est « inconnu » car il s'agit d'une résolution de location et non de l'adoption d'un règlement.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La résolution 107-05-2026 (p. 8) demande à la ministre de « suspendre le processus d'adoption de ce règlement afin de le réviser significativement », objet réglementaire explicite; citation, page et étape inconnu exactes.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Seule version proposée avec étape « adoption », inexacte pour une résolution de location de garage (acte foncier par résolution, étape inconnu); doublon du même fait que i01/i05.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Citation exacte de la résolution 107-05-2026 (p. 8) demandant la suspension et la révision du projet de règlement sur les pratiques agroenvironnementales; objet réglementaire explicite, étape inconnu.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "absent"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "absent"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v2",
+   "reason": "La résolution 104-05-2026 (p. 5) autorise la location du garage au 366, rue Principale, acte foncier explicite inclus; ce n'est pas l'adoption d'un règlement, donc l'étape est « inconnu » et non « adoption »."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 106-05-2026 (p. 6) fixe la consultation publique du 13 juillet 2026 sur le projet de règlement 079-2026 abrogeant la citation patrimoniale; citation, objet et page exacts, étape inconnu avec procédure consultation_publique."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 6.2 (p. 6, en-tête « RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES ») ouvre la résolution 107-05-2026 demandant la suspension et la révision de ce projet de règlement, objet réglementaire explicite en urbanisme/environnement; citation et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 6.3 (p. 8) atteste que le greffier-trésorier dépose l'avis spécial relatif à l'abrogation du règlement 046-2023 (citation patrimoniale de l'église), étape distincte de la consultation sur 079-2026; citation exacte."
+  },
+  {
+   "item": "i05",
+   "choice": "v2",
+   "reason": "Même acte foncier attesté p. 5 (location du garage au 366, rue Principale); l'étape exacte est « inconnu » car il s'agit d'une résolution de location et non de l'adoption d'un règlement."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 107-05-2026 (p. 8) demande à la ministre de « suspendre le processus d'adoption de ce règlement afin de le réviser significativement », objet réglementaire explicite; citation, page et étape inconnu exactes."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Seule version proposée avec étape « adoption », inexacte pour une résolution de location de garage (acte foncier par résolution, étape inconnu); doublon du même fait que i01/i05."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Citation exacte de la résolution 107-05-2026 (p. 8) demandant la suspension et la révision du projet de règlement sur les pratiques agroenvironnementales; objet réglementaire explicite, étape inconnu."
+  }
+ ]
+}

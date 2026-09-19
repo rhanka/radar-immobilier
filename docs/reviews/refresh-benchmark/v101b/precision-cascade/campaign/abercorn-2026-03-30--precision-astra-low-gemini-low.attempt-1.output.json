@@ -1,0 +1,55 @@
+{
+ "nodes": [
+  {
+   "id": "source-pv-2026-03-30",
+   "label": "Procès-verbal de la séance extraordinaire du Village d’Abercorn du 30 mars 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "status": "candidate",
+   "date": "2026-03-30",
+   "municipality": "abercorn",
+   "docSha": "0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312",
+   "url": "https://abercorn.ca/docs/pv/2026/PV%202026-03-30%20S%C3%A9anceExtraordinaire.pdf",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance extraordinaire du conseil du Village d’Abercorn,\ntenue le 30 mars 2026, à 19 h, à la salle du Conseil, au 10, rue des Églises",
+     "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+     "rawRef": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+     "docSha": "0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312",
+     "sourceUrl": "https://abercorn.ca/docs/pv/2026/PV%202026-03-30%20S%C3%A9anceExtraordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-rues-principales",
+   "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "rawRef": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "docSha": "0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312",
+   "sourceUrl": "https://abercorn.ca/docs/pv/2026/PV%202026-03-30%20S%C3%A9anceExtraordinaire.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "D’adhérer au réseau Rues Principales au prix de 630 $ et d’autoriser\nmadame la conseillère Annik Alder à participer au colloque qui se tiendra à\nMontréal le 15 avril prochain et de rembourser les frais de participation à\ncette activité conformément à la réglementation."
+  },
+  {
+   "id": "ev-tecq",
+   "source_file": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "rawRef": "raw/proces-verbaux-abercorn/cas/0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312.pdf",
+   "docSha": "0dad38503319a458ebc416ced664282b7d29cb5775264bf8379d5b74ff2cf312",
+   "sourceUrl": "https://abercorn.ca/docs/pv/2026/PV%202026-03-30%20S%C3%A9anceExtraordinaire.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "Que la Municipalité approuve le contenu et autorise l’envoi au ministère\ndes Aﬀaires municipales et de l’Habitation de la programmation de travaux\nci-jointe et de tous les autres documents exigés par le Ministère en vue de"
+  }
+ ],
+ "input_tokens": 7900,
+ "output_tokens": 2200
+}

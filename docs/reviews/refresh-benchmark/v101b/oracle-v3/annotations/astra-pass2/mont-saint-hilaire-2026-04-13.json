@@ -1,0 +1,662 @@
+{
+ "documentId": "mont-saint-hilaire-2026-04-13",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "c12709391a007d0b14a62d3db22cbc661686fe00727981aa5acfe9cfc5ae516c",
+ "rawText": "{\"operations\":[{\"op\":\"correct\",\"id\":\"u01\",\"unit\":{\"label\":\"Autorisation de création et de régularisation de servitudes d’aqueduc et d’égouts — rue Chénier\",\"stage\":\"adoption\",\"procedure\":null,\"objet\":\"rue Chénier\",\"page\":14,\"citation\":\"Que ce conseil autorise la signature d'actes de servitude d'installation, d'entretien et\\nde passage d'égouts et d'aqueduc dans le cadre des travaux à venir sur la rue Chénier\",\"anchor\":\"la rue Chénier\"},\"reason\":\"La citation doit reproduire à l'identique le passage de la page 14, notamment le retour à la ligne après « et ».\"},{\"op\":\"correct\",\"id\":\"u02\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032403 — rénovation extérieure, 498-508, rue de l’Atlantique\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032403\",\"page\":15,\"citation\":\"CCU-26032403 :\\n\\n498-508, rue de l'Atlantique\\nTravaux de rénovation extérieure\",\"anchor\":\"CCU-26032403\"},\"reason\":\"La citation courante fusionne des lignes distinctes; les retours à la ligne de la page 15 doivent être conservés pour une reproduction à l'identique.\"},{\"op\":\"correct\",\"id\":\"u03\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032404 — rénovation extérieure, 455-465, cours de la Raffinerie\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032404\",\"page\":15,\"citation\":\"CCU-26032404:\\n\\n455-465, cours de la Raffinerie\\nTravaux de rénovation extérieure\",\"anchor\":\"CCU-26032404\"},\"reason\":\"La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 15.\"},{\"op\":\"correct\",\"id\":\"u04\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032405 — rénovation extérieure, 485-495, cours de la Raffinerie\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032405\",\"page\":15,\"citation\":\"CCU-26032405:\\n\\n485-495, cours de la Raffinerie\\nTravaux de rénovation extérieure\",\"anchor\":\"CCU-26032405\"},\"reason\":\"La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 15.\"},{\"op\":\"correct\",\"id\":\"u05\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032406 — affichage, 777, boulevard de la Gare\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032406\",\"page\":16,\"citation\":\"CCU-26032406:\\n\\n777, boulevard de la Gare\\nProjet d'affichage\",\"anchor\":\"CCU-26032406\"},\"reason\":\"La citation doit reproduire les retours à la ligne du passage de la page 16, plutôt que les remplacer par des espaces.\"},{\"op\":\"correct\",\"id\":\"u06\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032407 — affichage, 847, chemin Benoît\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032407\",\"page\":16,\"citation\":\"CCU-26032407 :\\n\\n847, chemin Benoît\\nProjet d'affichage\",\"anchor\":\"CCU-26032407\"},\"reason\":\"La citation doit reproduire les retours à la ligne du passage de la page 16, plutôt que les remplacer par des espaces.\"},{\"op\":\"correct\",\"id\":\"u07\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032408 — affichage, 849, chemin Benoît\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032408\",\"page\":16,\"citation\":\"CCU-26032408:\\n\\n849, chemin Benoît\\nProjet d'affichage\",\"anchor\":\"CCU-26032408\"},\"reason\":\"La citation doit reproduire les retours à la ligne du passage de la page 16, plutôt que les remplacer par des espaces.\"},{\"op\":\"correct\",\"id\":\"u08\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032409 — deux bâtiments accessoires, 871, rue des Bernaches\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032409\",\"page\":16,\"citation\":\"CCU-26032409:\\n\\n871, rue des Bernaches\\nConstruction de deux bâtiments accessoires\",\"anchor\":\"CCU-26032409\"},\"reason\":\"La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16.\"},{\"op\":\"correct\",\"id\":\"u09\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032410 — rénovation extérieure, 38, rue Saint-Charles\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032410\",\"page\":16,\"citation\":\"CCU-26032410:\\n\\n38, rue Saint-Charles\\nTravaux de rénovation extérieure\",\"anchor\":\"CCU-26032410\"},\"reason\":\"La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16.\"},{\"op\":\"correct\",\"id\":\"u10\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032411 — habitation unifamiliale isolée, 734, rue Rembrandt\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032411\",\"page\":16,\"citation\":\"CCU-26032411:\\n\\n734, rue Rembrandt (lot 1 815 260)\\nConstruction d'une habitation unifamiliale isolée\",\"anchor\":\"CCU-26032411\"},\"reason\":\"La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16.\"},{\"op\":\"correct\",\"id\":\"u11\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032412 — habitation unifamiliale isolée, 15, rue Campbell\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032412\",\"page\":16,\"citation\":\"CCU-26032412:\\n\\n15, rue Campbell (lot 3 956 018)\\nConstruction d'une habitation unifamiliale isolée\",\"anchor\":\"CCU-26032412\"},\"reason\":\"La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16.\"},{\"op\":\"correct\",\"id\":\"u12\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032413 — agrandissement et rénovation extérieure, 298, rue Fortier\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032413\",\"page\":16,\"citation\":\"CCU-26032413 :\\n\\n298, rue Fortier\\nTravaux d'agrandissement et de rénovation extérieure\",\"anchor\":\"CCU-26032413\"},\"reason\":\"La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16.\"},{\"op\":\"correct\",\"id\":\"u13\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032414 — habitation unifamiliale isolée, 675, rue Cardinal\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032414\",\"page\":16,\"citation\":\"CCU-26032414:\\n\\n675, rue Cardinal (lot 1 816 633)\\nConstruction d'une habitation unifamiliale isolée\",\"anchor\":\"CCU-26032414\"},\"reason\":\"La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16.\"},{\"op\":\"correct\",\"id\":\"u14\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032416 — agrandissement, 1436, chemin des Patriotes Nord\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032416\",\"page\":16,\"citation\":\"CCU-26032416:\\n\\n1436, chemin des Patriotes Nord\\nTravaux d'agrandissement\",\"anchor\":\"CCU-26032416\"},\"reason\":\"La citation doit reproduire les retours à la ligne de la page 16, dont le texte de la résolution indique bien l'adresse 1436, chemin des Patriotes Nord.\"},{\"op\":\"correct\",\"id\":\"u15\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032417 — agrandissement, 236, rue Desnoyers\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032417\",\"page\":16,\"citation\":\"CCU-26032417:\\n\\n236, rue Desnoyers\\nTravaux d'agrandissement\",\"anchor\":\"CCU-26032417\"},\"reason\":\"La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16.\"},{\"op\":\"correct\",\"id\":\"u16\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032420 — affichage, 423, boulevard Sir-Wilfrid-Laurier\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032420\",\"page\":16,\"citation\":\"CCU-26032420:\\n\\n423, boulevard Sir-Wilfrid-Laurier\\nProjet d'affichage\",\"anchor\":\"CCU-26032420\"},\"reason\":\"La citation doit reproduire les retours à la ligne du passage de la page 16, plutôt que les remplacer par des espaces.\"},{\"op\":\"correct\",\"id\":\"u17\",\"unit\":{\"label\":\"Approbation conditionnelle du PIIA CCU-26032421 — rénovation extérieure, 587, rue de l’Atlantique\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032421\",\"page\":16,\"citation\":\"CCU-26032421:\\n\\n587, rue de l'Atlantique\\nTravaux de rénovation extérieure\",\"anchor\":\"CCU-26032421\"},\"reason\":\"La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16.\"},{\"op\":\"correct\",\"id\":\"u18\",\"unit\":{\"label\":\"Refus du PIIA CCU-26032415 — agrandissement et rénovation extérieure, 224, rue Villeneuve\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032415\",\"page\":16,\"citation\":\"PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS\\nCCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS\",\"anchor\":\"CCU-26032415\"},\"reason\":\"Le refus est correctement qualifié, mais sa citation doit conserver le retour à la ligne après « NUMÉROS » dans le titre de la résolution 2026-129.\"},{\"op\":\"correct\",\"id\":\"u19\",\"unit\":{\"label\":\"Refus du PIIA CCU-26032418 — agrandissement et rénovation extérieure, 935, rue des Martinets\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032418\",\"page\":16,\"citation\":\"PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS\\nCCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS\",\"anchor\":\"CCU-26032418\"},\"reason\":\"Le refus est correctement qualifié, mais sa citation doit conserver le retour à la ligne après « NUMÉROS » dans le titre de la résolution 2026-129.\"},{\"op\":\"correct\",\"id\":\"u20\",\"unit\":{\"label\":\"Refus du PIIA CCU-26032419 — agrandissement et rénovation extérieure, 657, rue Doyle\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"CCU-26032419\",\"page\":16,\"citation\":\"PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS\\nCCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS\",\"anchor\":\"CCU-26032419\"},\"reason\":\"Le refus est correctement qualifié, mais sa citation doit conserver le retour à la ligne après « NUMÉROS » dans le titre de la résolution 2026-129.\"},{\"op\":\"correct\",\"id\":\"u21\",\"unit\":{\"label\":\"Dépôt du certificat d’enregistrement — règlement 1371 abrogeant la réserve financière d’acquisition de lots aux fins de conservation\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"1371\",\"page\":17,\"citation\":\"DÉPÔT DU CERTIFICAT ATTESTANT LE RÉSULTAT DE LA PROCÉDURE\\nD'ENREGISTREMENT DES PERSONNES HABILES À VOTER CONCERNANT\\nLE RÈGLEMENT NUMÉRO 1371\",\"anchor\":\"RÈGLEMENT NUMÉRO 1371\"},\"reason\":\"La citation du dépôt doit reproduire à l'identique les trois lignes du titre figurant à la page 17.\"},{\"op\":\"correct\",\"id\":\"u22\",\"unit\":{\"label\":\"Adoption du règlement 1230-7 — plan d’urbanisme durable, concordance des limites d’îlots déstructurés\",\"stage\":\"adoption\",\"procedure\":null,\"objet\":\"1230-7\",\"page\":18,\"citation\":\"Que le Règlement numéro 1230-7, intitulé : « Règlement amendant le Règlement du plan\\nd’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma\",\"anchor\":\"Règlement numéro 1230-7\"},\"reason\":\"La citation doit conserver le retour à la ligne après « plan » dans le dispositif de la résolution à la page 18.\"},{\"op\":\"correct\",\"id\":\"u23\",\"unit\":{\"label\":\"Avis de motion du règlement 1230-8 — plan d’urbanisme durable, concordance à l’orientation gouvernementale en habitation\",\"stage\":\"avis_motion\",\"procedure\":null,\"objet\":\"1230-8\",\"page\":18,\"citation\":\"AVIS DE MOTION - RÈGLEMENT NUMÉRO 1230-8 - RÈGLEMENT AMENDANT\\nLE RÈGLEMENT DU PLAN D’URBANISME DURABLE NUMÉRO 1230 AFIN D’ASSURER\",\"anchor\":\"RÈGLEMENT NUMÉRO 1230-8\"},\"reason\":\"La citation doit conserver le retour à la ligne après « AMENDANT » dans le titre de l'avis de motion à la page 18.\"},{\"op\":\"correct\",\"id\":\"u24\",\"unit\":{\"label\":\"Adoption du projet de règlement 1230-8 — plan d’urbanisme durable, concordance à l’orientation gouvernementale en habitation\",\"stage\":\"projet_reglement\",\"procedure\":null,\"objet\":\"1230-8\",\"page\":18,\"citation\":\"Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement\\ndu Plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma\",\"anchor\":\"Règlement numéro 1230-8\"},\"reason\":\"La citation doit conserver le retour à la ligne entre « Règlement » et « du Plan » dans le dispositif de la page 18.\"},{\"op\":\"correct\",\"id\":\"u25\",\"unit\":{\"label\":\"Adoption du second projet de règlement 1235-34 — modification des limites de quatre zones, secteur de la rue des Vétérans\",\"stage\":\"second_projet\",\"procedure\":null,\"objet\":\"1235-34\",\"page\":18,\"citation\":\"SECOND PROJET DE RÈGLEMENT NUMÉRO 1235-34 - RÈGLEMENT AMENDANT\\nLE RÈGLEMENT DE ZONAGE NUMÉRO 1235 AFIN DE MODIFIER LES LIMITES\\nDE QUATRE ZONES DANS LE SECTEUR DE LA RUE DES VÉTÉRANS - ADOPTION\",\"anchor\":\"RÈGLEMENT NUMÉRO 1235-34\"},\"reason\":\"La citation doit reproduire à l'identique les retours à la ligne du titre de la résolution 2026-134.\"},{\"op\":\"correct\",\"id\":\"u26\",\"unit\":{\"label\":\"Adoption du règlement 1235-35 — zonage, concordance des limites d’îlots déstructurés\",\"stage\":\"adoption\",\"procedure\":null,\"objet\":\"1235-35\",\"page\":19,\"citation\":\"Que le Règlement numéro 1235-35, intitulé : « Règlement amendant le Règlement\\nde zonage numéro 1235 afin d’assurer sa concordance au Schéma d’aménagement révisé\",\"anchor\":\"Règlement numéro 1235-35\"},\"reason\":\"La citation doit conserver le retour à la ligne entre « Règlement » et « de zonage » dans le dispositif de la page 19.\"},{\"op\":\"remove\",\"id\":\"u27\",\"reason\":\"La résolution 2026-124 étend uniquement un mandat de recours confié à des avocats aux propriétaires d'une structure; ce mandat de services juridiques ne constitue pas une décision sur un règlement, une demande d'urbanisme ou un acte foncier et reste hors du rappel.\"}]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Autorisation de création et de régularisation de servitudes d’aqueduc et d’égouts — rue Chénier",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "rue Chénier",
+    "page": 14,
+    "citation": "Que ce conseil autorise la signature d'actes de servitude d'installation, d'entretien et\nde passage d'égouts et d'aqueduc dans le cadre des travaux à venir sur la rue Chénier",
+    "anchor": "la rue Chénier"
+   },
+   "reason": "La citation doit reproduire à l'identique le passage de la page 14, notamment le retour à la ligne après « et »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032403 — rénovation extérieure, 498-508, rue de l’Atlantique",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032403",
+    "page": 15,
+    "citation": "CCU-26032403 :\n\n498-508, rue de l'Atlantique\nTravaux de rénovation extérieure",
+    "anchor": "CCU-26032403"
+   },
+   "reason": "La citation courante fusionne des lignes distinctes; les retours à la ligne de la page 15 doivent être conservés pour une reproduction à l'identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032404 — rénovation extérieure, 455-465, cours de la Raffinerie",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032404",
+    "page": 15,
+    "citation": "CCU-26032404:\n\n455-465, cours de la Raffinerie\nTravaux de rénovation extérieure",
+    "anchor": "CCU-26032404"
+   },
+   "reason": "La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 15."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032405 — rénovation extérieure, 485-495, cours de la Raffinerie",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032405",
+    "page": 15,
+    "citation": "CCU-26032405:\n\n485-495, cours de la Raffinerie\nTravaux de rénovation extérieure",
+    "anchor": "CCU-26032405"
+   },
+   "reason": "La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 15."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032406 — affichage, 777, boulevard de la Gare",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032406",
+    "page": 16,
+    "citation": "CCU-26032406:\n\n777, boulevard de la Gare\nProjet d'affichage",
+    "anchor": "CCU-26032406"
+   },
+   "reason": "La citation doit reproduire les retours à la ligne du passage de la page 16, plutôt que les remplacer par des espaces."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032407 — affichage, 847, chemin Benoît",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032407",
+    "page": 16,
+    "citation": "CCU-26032407 :\n\n847, chemin Benoît\nProjet d'affichage",
+    "anchor": "CCU-26032407"
+   },
+   "reason": "La citation doit reproduire les retours à la ligne du passage de la page 16, plutôt que les remplacer par des espaces."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032408 — affichage, 849, chemin Benoît",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032408",
+    "page": 16,
+    "citation": "CCU-26032408:\n\n849, chemin Benoît\nProjet d'affichage",
+    "anchor": "CCU-26032408"
+   },
+   "reason": "La citation doit reproduire les retours à la ligne du passage de la page 16, plutôt que les remplacer par des espaces."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032409 — deux bâtiments accessoires, 871, rue des Bernaches",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032409",
+    "page": 16,
+    "citation": "CCU-26032409:\n\n871, rue des Bernaches\nConstruction de deux bâtiments accessoires",
+    "anchor": "CCU-26032409"
+   },
+   "reason": "La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032410 — rénovation extérieure, 38, rue Saint-Charles",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032410",
+    "page": 16,
+    "citation": "CCU-26032410:\n\n38, rue Saint-Charles\nTravaux de rénovation extérieure",
+    "anchor": "CCU-26032410"
+   },
+   "reason": "La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032411 — habitation unifamiliale isolée, 734, rue Rembrandt",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032411",
+    "page": 16,
+    "citation": "CCU-26032411:\n\n734, rue Rembrandt (lot 1 815 260)\nConstruction d'une habitation unifamiliale isolée",
+    "anchor": "CCU-26032411"
+   },
+   "reason": "La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16."
+  },
+  {
+   "op": "correct",
+   "id": "u11",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032412 — habitation unifamiliale isolée, 15, rue Campbell",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032412",
+    "page": 16,
+    "citation": "CCU-26032412:\n\n15, rue Campbell (lot 3 956 018)\nConstruction d'une habitation unifamiliale isolée",
+    "anchor": "CCU-26032412"
+   },
+   "reason": "La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16."
+  },
+  {
+   "op": "correct",
+   "id": "u12",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032413 — agrandissement et rénovation extérieure, 298, rue Fortier",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032413",
+    "page": 16,
+    "citation": "CCU-26032413 :\n\n298, rue Fortier\nTravaux d'agrandissement et de rénovation extérieure",
+    "anchor": "CCU-26032413"
+   },
+   "reason": "La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16."
+  },
+  {
+   "op": "correct",
+   "id": "u13",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032414 — habitation unifamiliale isolée, 675, rue Cardinal",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032414",
+    "page": 16,
+    "citation": "CCU-26032414:\n\n675, rue Cardinal (lot 1 816 633)\nConstruction d'une habitation unifamiliale isolée",
+    "anchor": "CCU-26032414"
+   },
+   "reason": "La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16."
+  },
+  {
+   "op": "correct",
+   "id": "u14",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032416 — agrandissement, 1436, chemin des Patriotes Nord",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032416",
+    "page": 16,
+    "citation": "CCU-26032416:\n\n1436, chemin des Patriotes Nord\nTravaux d'agrandissement",
+    "anchor": "CCU-26032416"
+   },
+   "reason": "La citation doit reproduire les retours à la ligne de la page 16, dont le texte de la résolution indique bien l'adresse 1436, chemin des Patriotes Nord."
+  },
+  {
+   "op": "correct",
+   "id": "u15",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032417 — agrandissement, 236, rue Desnoyers",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032417",
+    "page": 16,
+    "citation": "CCU-26032417:\n\n236, rue Desnoyers\nTravaux d'agrandissement",
+    "anchor": "CCU-26032417"
+   },
+   "reason": "La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16."
+  },
+  {
+   "op": "correct",
+   "id": "u16",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032420 — affichage, 423, boulevard Sir-Wilfrid-Laurier",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032420",
+    "page": 16,
+    "citation": "CCU-26032420:\n\n423, boulevard Sir-Wilfrid-Laurier\nProjet d'affichage",
+    "anchor": "CCU-26032420"
+   },
+   "reason": "La citation doit reproduire les retours à la ligne du passage de la page 16, plutôt que les remplacer par des espaces."
+  },
+  {
+   "op": "correct",
+   "id": "u17",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032421 — rénovation extérieure, 587, rue de l’Atlantique",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032421",
+    "page": 16,
+    "citation": "CCU-26032421:\n\n587, rue de l'Atlantique\nTravaux de rénovation extérieure",
+    "anchor": "CCU-26032421"
+   },
+   "reason": "La citation doit conserver les retours à la ligne séparant le numéro de demande, l'adresse et les travaux à la page 16."
+  },
+  {
+   "op": "correct",
+   "id": "u18",
+   "unit": {
+    "label": "Refus du PIIA CCU-26032415 — agrandissement et rénovation extérieure, 224, rue Villeneuve",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032415",
+    "page": 16,
+    "citation": "PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS\nCCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS",
+    "anchor": "CCU-26032415"
+   },
+   "reason": "Le refus est correctement qualifié, mais sa citation doit conserver le retour à la ligne après « NUMÉROS » dans le titre de la résolution 2026-129."
+  },
+  {
+   "op": "correct",
+   "id": "u19",
+   "unit": {
+    "label": "Refus du PIIA CCU-26032418 — agrandissement et rénovation extérieure, 935, rue des Martinets",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032418",
+    "page": 16,
+    "citation": "PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS\nCCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS",
+    "anchor": "CCU-26032418"
+   },
+   "reason": "Le refus est correctement qualifié, mais sa citation doit conserver le retour à la ligne après « NUMÉROS » dans le titre de la résolution 2026-129."
+  },
+  {
+   "op": "correct",
+   "id": "u20",
+   "unit": {
+    "label": "Refus du PIIA CCU-26032419 — agrandissement et rénovation extérieure, 657, rue Doyle",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032419",
+    "page": 16,
+    "citation": "PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS\nCCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS",
+    "anchor": "CCU-26032419"
+   },
+   "reason": "Le refus est correctement qualifié, mais sa citation doit conserver le retour à la ligne après « NUMÉROS » dans le titre de la résolution 2026-129."
+  },
+  {
+   "op": "correct",
+   "id": "u21",
+   "unit": {
+    "label": "Dépôt du certificat d’enregistrement — règlement 1371 abrogeant la réserve financière d’acquisition de lots aux fins de conservation",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "1371",
+    "page": 17,
+    "citation": "DÉPÔT DU CERTIFICAT ATTESTANT LE RÉSULTAT DE LA PROCÉDURE\nD'ENREGISTREMENT DES PERSONNES HABILES À VOTER CONCERNANT\nLE RÈGLEMENT NUMÉRO 1371",
+    "anchor": "RÈGLEMENT NUMÉRO 1371"
+   },
+   "reason": "La citation du dépôt doit reproduire à l'identique les trois lignes du titre figurant à la page 17."
+  },
+  {
+   "op": "correct",
+   "id": "u22",
+   "unit": {
+    "label": "Adoption du règlement 1230-7 — plan d’urbanisme durable, concordance des limites d’îlots déstructurés",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1230-7",
+    "page": 18,
+    "citation": "Que le Règlement numéro 1230-7, intitulé : « Règlement amendant le Règlement du plan\nd’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma",
+    "anchor": "Règlement numéro 1230-7"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « plan » dans le dispositif de la résolution à la page 18."
+  },
+  {
+   "op": "correct",
+   "id": "u23",
+   "unit": {
+    "label": "Avis de motion du règlement 1230-8 — plan d’urbanisme durable, concordance à l’orientation gouvernementale en habitation",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1230-8",
+    "page": 18,
+    "citation": "AVIS DE MOTION - RÈGLEMENT NUMÉRO 1230-8 - RÈGLEMENT AMENDANT\nLE RÈGLEMENT DU PLAN D’URBANISME DURABLE NUMÉRO 1230 AFIN D’ASSURER",
+    "anchor": "RÈGLEMENT NUMÉRO 1230-8"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « AMENDANT » dans le titre de l'avis de motion à la page 18."
+  },
+  {
+   "op": "correct",
+   "id": "u24",
+   "unit": {
+    "label": "Adoption du projet de règlement 1230-8 — plan d’urbanisme durable, concordance à l’orientation gouvernementale en habitation",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "1230-8",
+    "page": 18,
+    "citation": "Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement\ndu Plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma",
+    "anchor": "Règlement numéro 1230-8"
+   },
+   "reason": "La citation doit conserver le retour à la ligne entre « Règlement » et « du Plan » dans le dispositif de la page 18."
+  },
+  {
+   "op": "correct",
+   "id": "u25",
+   "unit": {
+    "label": "Adoption du second projet de règlement 1235-34 — modification des limites de quatre zones, secteur de la rue des Vétérans",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "1235-34",
+    "page": 18,
+    "citation": "SECOND PROJET DE RÈGLEMENT NUMÉRO 1235-34 - RÈGLEMENT AMENDANT\nLE RÈGLEMENT DE ZONAGE NUMÉRO 1235 AFIN DE MODIFIER LES LIMITES\nDE QUATRE ZONES DANS LE SECTEUR DE LA RUE DES VÉTÉRANS - ADOPTION",
+    "anchor": "RÈGLEMENT NUMÉRO 1235-34"
+   },
+   "reason": "La citation doit reproduire à l'identique les retours à la ligne du titre de la résolution 2026-134."
+  },
+  {
+   "op": "correct",
+   "id": "u26",
+   "unit": {
+    "label": "Adoption du règlement 1235-35 — zonage, concordance des limites d’îlots déstructurés",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1235-35",
+    "page": 19,
+    "citation": "Que le Règlement numéro 1235-35, intitulé : « Règlement amendant le Règlement\nde zonage numéro 1235 afin d’assurer sa concordance au Schéma d’aménagement révisé",
+    "anchor": "Règlement numéro 1235-35"
+   },
+   "reason": "La citation doit conserver le retour à la ligne entre « Règlement » et « de zonage » dans le dispositif de la page 19."
+  },
+  {
+   "op": "remove",
+   "id": "u27",
+   "reason": "La résolution 2026-124 étend uniquement un mandat de recours confié à des avocats aux propriétaires d'une structure; ce mandat de services juridiques ne constitue pas une décision sur un règlement, une demande d'urbanisme ou un acte foncier et reste hors du rappel."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u27"
+  }
+ ],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 14,
+   "citation": "Que ce conseil autorise la signature d'actes de servitude d'installation, d'entretien et\nde passage d'égouts et d'aqueduc dans le cadre des travaux à venir sur la rue Chénier"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "piia",
+   "page": 15,
+   "citation": "CCU-26032403 :\n\n498-508, rue de l'Atlantique\nTravaux de rénovation extérieure"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "piia",
+   "page": 15,
+   "citation": "CCU-26032404:\n\n455-465, cours de la Raffinerie\nTravaux de rénovation extérieure"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "piia",
+   "page": 15,
+   "citation": "CCU-26032405:\n\n485-495, cours de la Raffinerie\nTravaux de rénovation extérieure"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "piia",
+   "page": 16,
+   "citation": "CCU-26032406:\n\n777, boulevard de la Gare\nProjet d'affichage"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "piia",
+   "page": 16,
+   "citation": "CCU-26032407 :\n\n847, chemin Benoît\nProjet d'affichage"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "piia",
+   "page": 16,
+   "citation": "CCU-26032408:\n\n849, chemin Benoît\nProjet d'affichage"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "piia",
+   "page": 16,
+   "citation": "CCU-26032409:\n\n871, rue des Bernaches\nConstruction de deux bâtiments accessoires"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "piia",
+   "page": 16,
+   "citation": "CCU-26032410:\n\n38, rue Saint-Charles\nTravaux de rénovation extérieure"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "piia",
+   "page": 16,
+   "citation": "CCU-26032411:\n\n734, rue Rembrandt (lot 1 815 260)\nConstruction d'une habitation unifamiliale isolée"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 10,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u11",
+   "stage": "piia",
+   "page": 16,
+   "citation": "CCU-26032412:\n\n15, rue Campbell (lot 3 956 018)\nConstruction d'une habitation unifamiliale isolée"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 11,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u12",
+   "stage": "piia",
+   "page": 16,
+   "citation": "CCU-26032413 :\n\n298, rue Fortier\nTravaux d'agrandissement et de rénovation extérieure"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 12,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u13",
+   "stage": "piia",
+   "page": 16,
+   "citation": "CCU-26032414:\n\n675, rue Cardinal (lot 1 816 633)\nConstruction d'une habitation unifamiliale isolée"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 13,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u14",
+   "stage": "piia",
+   "page": 16,
+   "citation": "CCU-26032416:\n\n1436, chemin des Patriotes Nord\nTravaux d'agrandissement"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 14,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u15",
+   "stage": "piia",
+   "page": 16,
+   "citation": "CCU-26032417:\n\n236, rue Desnoyers\nTravaux d'agrandissement"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 15,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u16",
+   "stage": "piia",
+   "page": 16,
+   "citation": "CCU-26032420:\n\n423, boulevard Sir-Wilfrid-Laurier\nProjet d'affichage"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 16,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u17",
+   "stage": "piia",
+   "page": 16,
+   "citation": "CCU-26032421:\n\n587, rue de l'Atlantique\nTravaux de rénovation extérieure"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 17,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u18",
+   "stage": "piia",
+   "page": 16,
+   "citation": "PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS\nCCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 18,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u19",
+   "stage": "piia",
+   "page": 16,
+   "citation": "PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS\nCCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 19,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u20",
+   "stage": "piia",
+   "page": 16,
+   "citation": "PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS\nCCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 20,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u21",
+   "stage": "inconnu",
+   "page": 17,
+   "citation": "DÉPÔT DU CERTIFICAT ATTESTANT LE RÉSULTAT DE LA PROCÉDURE\nD'ENREGISTREMENT DES PERSONNES HABILES À VOTER CONCERNANT\nLE RÈGLEMENT NUMÉRO 1371"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 21,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u22",
+   "stage": "adoption",
+   "page": 18,
+   "citation": "Que le Règlement numéro 1230-7, intitulé : « Règlement amendant le Règlement du plan\nd’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 22,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u23",
+   "stage": "avis_motion",
+   "page": 18,
+   "citation": "AVIS DE MOTION - RÈGLEMENT NUMÉRO 1230-8 - RÈGLEMENT AMENDANT\nLE RÈGLEMENT DU PLAN D’URBANISME DURABLE NUMÉRO 1230 AFIN D’ASSURER"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 23,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u24",
+   "stage": "projet_reglement",
+   "page": 18,
+   "citation": "Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement\ndu Plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 24,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u25",
+   "stage": "second_projet",
+   "page": 18,
+   "citation": "SECOND PROJET DE RÈGLEMENT NUMÉRO 1235-34 - RÈGLEMENT AMENDANT\nLE RÈGLEMENT DE ZONAGE NUMÉRO 1235 AFIN DE MODIFIER LES LIMITES\nDE QUATRE ZONES DANS LE SECTEUR DE LA RUE DES VÉTÉRANS - ADOPTION"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 25,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u26",
+   "stage": "adoption",
+   "page": 19,
+   "citation": "Que le Règlement numéro 1235-35, intitulé : « Règlement amendant le Règlement\nde zonage numéro 1235 afin d’assurer sa concordance au Schéma d’aménagement révisé"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 26
+}

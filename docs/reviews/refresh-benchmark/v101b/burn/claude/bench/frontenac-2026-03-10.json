@@ -1,0 +1,13 @@
+{
+ "id": "frontenac-2026-03-10",
+ "rc": 0,
+ "latencyMs": 530970,
+ "inputTokens": 6,
+ "outputTokens": 81417,
+ "cacheRead": 32595,
+ "cacheCreate": 96660,
+ "costUsd": 3.0431745,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 35155
+}

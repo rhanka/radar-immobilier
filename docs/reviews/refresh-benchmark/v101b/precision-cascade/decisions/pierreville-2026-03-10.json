@@ -1,0 +1,303 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "efc36abc09357e05652bf4018c8a8813da2b8ad82a3e531bba1a1ac7af651954",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-268-2025"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Deuxième projet 268-2025 — Triplex rue Georges",
+     "stage": "2e_projet",
+     "objet": "268-2025",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Adoption du deuxième (2ième) projet de règlement 268-2025 modifiant le\nrèglement de zonage 160-2017 pour la construction d’un triplex sur la rue\nGeorges ;"
+      },
+      {
+       "page": 16,
+       "excerpt": "Modifier la grille des usages de la zone H-06 de l’annexe 3 du règlement\nde zonage 160-2017 afin de permettre :"
+      },
+      {
+       "page": 2,
+       "excerpt": "Adoption du deuxième (2ième) projet de règlement 268-2025 modifiant le\nrèglement de zonage 160-2017 pour la construction d’un triplex sur la rue\nGeorges ;"
+      },
+      {
+       "page": 16,
+       "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, QUE le Conseil de\nla municipalité de Pierreville décrète et statue par le présent règlement ce\nqui suit :\nARTICLE 1\nLe préambule fait partie intégrante du présent règlement.\nARTICLE 2\nModifier la grille des usages de la zone H-06 de l’annexe 3 du règlement\nde zonage 160-2017 afin de permettre :\nGroupe habitation II (H2)\nc) Trifamiliale isolée : habitation ne comprenant que 3 logements,\ndégagée de toute autre habitation."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-160-2017"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 160-2017",
+     "stage": null,
+     "objet": "160-2017",
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "Modifier la grille des usages de la zone H-06 de l’annexe 3 du règlement\nde zonage 160-2017 afin de permettre :"
+      },
+      {
+       "page": 16,
+       "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, QUE le Conseil de\nla municipalité de Pierreville décrète et statue par le présent règlement ce\nqui suit :\nARTICLE 1\nLe préambule fait partie intégrante du présent règlement.\nARTICLE 2\nModifier la grille des usages de la zone H-06 de l’annexe 3 du règlement\nde zonage 160-2017 afin de permettre :\nGroupe habitation II (H2)\nc) Trifamiliale isolée : habitation ne comprenant que 3 logements,\ndégagée de toute autre habitation."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-second-projet-268-2025"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du deuxième projet 268-2025",
+     "stage": "second_projet",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Adoption du deuxième (2ième) projet de règlement 268-2025 modifiant le\nrèglement de zonage 160-2017 pour la construction d’un triplex sur la rue\nGeorges ;"
+      },
+      {
+       "page": 16,
+       "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, QUE le Conseil de\nla municipalité de Pierreville décrète et statue par le présent règlement ce\nqui suit :"
+      },
+      {
+       "page": 2,
+       "excerpt": "Adoption du deuxième (2ième) projet de règlement 268-2025 modifiant le\nrèglement de zonage 160-2017 pour la construction d’un triplex sur la rue\nGeorges ;"
+      },
+      {
+       "page": 16,
+       "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, QUE le Conseil de\nla municipalité de Pierreville décrète et statue par le présent règlement ce\nqui suit :\nARTICLE 1\nLe préambule fait partie intégrante du présent règlement.\nARTICLE 2\nModifier la grille des usages de la zone H-06 de l’annexe 3 du règlement\nde zonage 160-2017 afin de permettre :\nGroupe habitation II (H2)\nc) Trifamiliale isolée : habitation ne comprenant que 3 logements,\ndégagée de toute autre habitation."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-vente-620"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Mise en vente du terrain municipal au 620, rang Haut de la Rivière",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, d’autoriser la\nparution de l’annonce de la vente du terrain appartenant à la Municipalité,"
+      },
+      {
+       "page": 17,
+       "excerpt": "QUE cette vente est conditionnelle à la construction d’une résidence dans\nles huit (8) mois suivant cette résolution."
+      },
+      {
+       "page": 17,
+       "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, d’autoriser la\nparution de l’annonce de la vente du terrain appartenant à la Municipalité,\nsoit celui du 620, rang Haut de la Rivière dans le journal Le Courrier Sud\nau coût de ± 726,64 $ taxes incluses.\nQUE cette vente est conditionnelle à la construction d’une résidence dans\nles huit (8) mois suivant cette résolution."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-acquisition-terrain"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acquisition municipale conditionnelle à la démolition",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "QUE la municipalité de Pierreville procèdera à l’acquisition dudit terrain\nlorsque les bâtiments qui y sont érigés dessus seront entièrement démoli."
+      },
+      {
+       "page": 8,
+       "excerpt": "QUE la municipalité de Pierreville procèdera à l’acquisition dudit terrain\nlorsque les bâtiments qui y sont érigés dessus seront entièrement démoli."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-vente-taxes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Autorisation municipale d’enchérir à la vente pour taxes",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, D’AUTORISER la\ndirectrice générale et greffière trésorière ou, en son absence, le maire,"
+      },
+      {
+       "page": 8,
+       "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, D’AUTORISER la\ndirectrice générale et greffière trésorière ou, en son absence, le maire,\nlors de la vente pour défaut de paiement de taxes du 16 juin 2026, à\nenchérir, pour et au nom de la Municipalité, jusqu’à un montant maximal\néquivalent au montant des taxes, en capital, intérêts, pénalité et frais, plus\nun montant suffisant pour satisfaire à toute créance prioritaire ou\nhypothécaire d’un rang antérieur ou légal à celui des taxes municipales,\net à acquérir, au nom de la Municipalité, tout immeuble de son territoire\nmis en vente."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-271-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 271-2026 — Taxation du cours d’eau Victor Jutras",
+     "stage": "adoption",
+     "objet": "271-2026",
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, QUE le Conseil de\nla municipalité de Pierreville décrète et statue par le présent règlement ce\nqui suit :"
+      },
+      {
+       "page": 15,
+       "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, QUE le Conseil de\nla municipalité de Pierreville décrète et statue par le présent règlement ce\nqui suit :"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le deuxième projet de règlement 268-2025 modifiant le règlement de zonage 160-2017.\",\"excerpt\":\"ADOPTION DU DEUXIÈME (2IÈME) PROJET DE\\nRÈGLEMENT 268-2025 MODIFIANT LE RÈGLEMENT DE\\nZONAGE 160-2017 POUR LA CONSTRUCTION D’UN\\nTRIPLEX SUR LA RUE GEORGES\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 160-2017 n'est que la norme d'urbanisme de base modifiée, il ne fait l'objet d'aucune étape propre dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une duplication sous forme de DesignationEvent de l'adoption du deuxième projet de règlement 268-2025 déjà couverte par l'acte de type Bylaw.\",\"excerpt\":\"\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la publication de l'annonce d'appel d'offres pour la vente d'un terrain municipal conditionnelle à la construction d'une résidence.\",\"excerpt\":\"ET RÉSOLU à l’unanimité des conseillers présents, d’autoriser la\\nparution de l’annonce de la vente du terrain appartenant à la Municipalité,\\nsoit celui du 620, rang Haut de la Rivière dans le journal Le Courrier Sud\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-03-70 prévoit explicitement l'engagement de la municipalité à acquérir le terrain après démolition des bâtiments.\",\"excerpt\":\"QUE la municipalité de Pierreville procèdera à l’acquisition dudit terrain\\nlorsque les bâtiments qui y sont érigés dessus seront entièrement démoli.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la directrice générale ou le maire à enchérir et acquérir des immeubles lors de la vente pour taxes.\",\"excerpt\":\"ET RÉSOLU à l’unanimité des conseillers présents, D’AUTORISER la\\ndirectrice générale et greffière trésorière ou, en son absence, le maire,\\nlors de la vente pour défaut de paiement de taxes du 16 juin 2026, à\\nenchérir\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 271-2026 concerne exclusivement la taxation pour des travaux de cours d'eau, relevant de la fiscalité locale et non de l'urbanisme ou de l'aménagement du territoire.\",\"excerpt\":\"Le présent règlement porte le titre de « Règlement no. 271-2026 relatifs\\nà la taxation du cours d’eau Victor Jutras »\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le deuxième projet de règlement 268-2025 modifiant le règlement de zonage 160-2017.",
+   "excerpt": "ADOPTION DU DEUXIÈME (2IÈME) PROJET DE\nRÈGLEMENT 268-2025 MODIFIANT LE RÈGLEMENT DE\nZONAGE 160-2017 POUR LA CONSTRUCTION D’UN\nTRIPLEX SUR LA RUE GEORGES"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 160-2017 n'est que la norme d'urbanisme de base modifiée, il ne fait l'objet d'aucune étape propre dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une duplication sous forme de DesignationEvent de l'adoption du deuxième projet de règlement 268-2025 déjà couverte par l'acte de type Bylaw.",
+   "excerpt": ""
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la publication de l'annonce d'appel d'offres pour la vente d'un terrain municipal conditionnelle à la construction d'une résidence.",
+   "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, d’autoriser la\nparution de l’annonce de la vente du terrain appartenant à la Municipalité,\nsoit celui du 620, rang Haut de la Rivière dans le journal Le Courrier Sud"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-03-70 prévoit explicitement l'engagement de la municipalité à acquérir le terrain après démolition des bâtiments.",
+   "excerpt": "QUE la municipalité de Pierreville procèdera à l’acquisition dudit terrain\nlorsque les bâtiments qui y sont érigés dessus seront entièrement démoli."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la directrice générale ou le maire à enchérir et acquérir des immeubles lors de la vente pour taxes.",
+   "excerpt": "ET RÉSOLU à l’unanimité des conseillers présents, D’AUTORISER la\ndirectrice générale et greffière trésorière ou, en son absence, le maire,\nlors de la vente pour défaut de paiement de taxes du 16 juin 2026, à\nenchérir"
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 271-2026 concerne exclusivement la taxation pour des travaux de cours d'eau, relevant de la fiscalité locale et non de l'urbanisme ou de l'aménagement du territoire.",
+   "excerpt": "Le présent règlement porte le titre de « Règlement no. 271-2026 relatifs\nà la taxation du cours d’eau Victor Jutras »"
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 160-2017 n'est que la norme d'urbanisme de base modifiée, il ne fait l'objet d'aucune étape propre dans cette séance."
+   },
+   {
+    "act": "A03",
+    "reason": "Il s'agit d'une duplication sous forme de DesignationEvent de l'adoption du deuxième projet de règlement 268-2025 déjà couverte par l'acte de type Bylaw."
+   },
+   {
+    "act": "A07",
+    "reason": "Le règlement 271-2026 concerne exclusivement la taxation pour des travaux de cours d'eau, relevant de la fiscalité locale et non de l'urbanisme ou de l'aménagement du territoire."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le deuxième projet de règlement 268-2025 modifiant le règlement de zonage 160-2017."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil autorise la publication de l'annonce d'appel d'offres pour la vente d'un terrain municipal conditionnelle à la construction d'une résidence."
+   },
+   {
+    "act": "A05",
+    "reason": "La résolution 2026-03-70 prévoit explicitement l'engagement de la municipalité à acquérir le terrain après démolition des bâtiments."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil autorise la directrice générale ou le maire à enchérir et acquérir des immeubles lors de la vente pour taxes."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2564,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 23278,
+   "outputTokens": 644,
+   "totalTokens": 23922
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2408
+  },
+  "inputSha256": "f4a8b6373fd79d6956c6c2a17b653f46af9424b4200b6b0cfb49c1c77e12e9cf"
+ }
+}

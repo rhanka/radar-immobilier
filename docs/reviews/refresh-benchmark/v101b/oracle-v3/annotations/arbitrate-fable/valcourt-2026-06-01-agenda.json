@@ -1,0 +1,78 @@
+{
+ "documentId": "valcourt-2026-06-01-agenda",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "160b21de89153b366ad378f120d15d0ad2c2b085c05343a3c47205fcb0259737",
+ "verificationSha256": "4918d6c9bc5934800e44cb3511907389e70fb54c7e823b973fa12fafd444735f",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"Le point 11.1 « RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES » est classé par le document lui-même sous « 11. TRAVAUX PUBLICS, ENVIRONNEMENT ET GESTION DES EAUX » et non sous « 7. URBANISME » : c'est un règlement environnemental sur des pratiques agricoles, sans objet d'urbanisme, de PIIA ni d'acte foncier, donc hors des inclusions du corrigé (« urbanisme, petits PIIA et actes fonciers ») et sans étape procédurale constatée (ni avis de motion, ni projet, ni adoption, seulement une « révision nécessaire »). Les annotateurs A, B et C sont écartés car ils assimilent tout « projet de règlement » à un objet du profil ; conformément à la règle « Un fait complémentaire valable hors gold reste à signaler séparément, sans retoucher le dénominateur », ce point est un signal complémentaire et non une unité gold.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "v3_only",
+   "unitId": "u06",
+   "humanId": null,
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Révision prévue du projet de règlement sur les pratiques agroenvironnementales",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "pratiques agroenvironnementales",
+      "page": 2,
+      "citation": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES",
+      "anchor": "PRATIQUES AGROENVIRONNEMENTALES",
+      "spanStart": 1106,
+      "spanEnd": 1188
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 11.1, page 2, prévoit une révision du projet de règlement sur les pratiques agroenvironnementales, objet réglementaire explicite dont aucune étape plus précise que inconnu n’est attestée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 11.1, page 2, citation exacte ; objet réglementaire explicite (projet de règlement municipal), étape inconnu adaptée à une « révision nécessaire » prévue et non à une adoption acquise."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Projet de règlement sur les pratiques agroenvironnementales prévu au point 11.1 en page 2."
+    }
+   ],
+   "human": {
+    "humanId": null,
+    "choice": "absent"
+   }
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "Le point 11.1 « RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES » est classé par le document lui-même sous « 11. TRAVAUX PUBLICS, ENVIRONNEMENT ET GESTION DES EAUX » et non sous « 7. URBANISME » : c'est un règlement environnemental sur des pratiques agricoles, sans objet d'urbanisme, de PIIA ni d'acte foncier, donc hors des inclusions du corrigé (« urbanisme, petits PIIA et actes fonciers ») et sans étape procédurale constatée (ni avis de motion, ni projet, ni adoption, seulement une « révision nécessaire »). Les annotateurs A, B et C sont écartés car ils assimilent tout « projet de règlement » à un objet du profil ; conformément à la règle « Un fait complémentaire valable hors gold reste à signaler séparément, sans retoucher le dénominateur », ce point est un signal complémentaire et non une unité gold."
+  }
+ ]
+}

@@ -1,0 +1,218 @@
+{
+ "nodes": [
+  {
+   "id": "source-1",
+   "label": "Ordre du jour du 19 janvier 2026 — Saint-Polycarpe",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "status": "candidate",
+   "date": "2026-01-19",
+   "municipality": "saint-polycarpe",
+   "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+   "url": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+   "format": "pdf",
+   "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "SÉANCE ORDINAIRE DU LUNDI 19 JANVIER 2026 À 19 H 30\nORDRE DU JOUR",
+     "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+     "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-acquisition",
+   "label": "Démarches préliminaires pour l’achat des lots liés à l’église",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "status": "candidate",
+   "municipality": "saint-polycarpe",
+   "meetingDate": "2026-01-19",
+   "category": "acquisition_immobiliere",
+   "description": "Les points 3.6 et 3.7 de l’ordre du jour prévoient une autorisation de démarches préliminaires concernant l’achat des lots liés à l’église et un mandat à Dunton Rainville pour l’acquisition de l’église. Aucune décision prise n’est attestée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "AUTORISATION - DÉMARCHES PRÉLIMINAIRES CONCERNANT L'ACHAT DES LOTS\nLIÉS À L’ÉGLISE",
+     "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+     "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 1,
+     "excerpt": "OCTROI DE MANDAT ET AUTORISATION DE PAIEMENT - DUNTON RAINVILLE,\nAVOCATS - ACCOMPAGNEMENT PROFESSIONNEL POUR L'ACQUISITION DE\nL'ÉGLISE",
+     "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+     "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-cptaq",
+   "label": "Appui à une autorisation CPTAQ pour une fin autre que l’agriculture — prévu",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "status": "candidate",
+   "municipality": "saint-polycarpe",
+   "meetingDate": "2026-01-19",
+   "kind": "cptaq",
+   "etape": "inconnu",
+   "description": "Le point 8.1 inscrit à l’ordre du jour une résolution d’appui pour la CPTAQ visant une autorisation à une fin autre que l’agriculture. Le document ne constate ni adoption de l’appui ni autorisation de la CPTAQ.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "RÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN\nAUTRE QUE L’AGRICULTURE.",
+     "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+     "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-169-2019-01",
+   "label": "Règlement no 169-2019-01 — remplacement du règlement sur les nuisances",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "status": "candidate",
+   "numero": "169-2019-01",
+   "municipality": "saint-polycarpe",
+   "meetingDate": "2026-01-19",
+   "objet": "Remplacement du règlement sur les nuisances (RMH 450); avis de motion inscrit à l’ordre du jour.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)",
+     "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+     "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-1",
+   "target": "signal-acquisition",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "evidence_refs": [
+    "ev-acquisition"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "AUTORISATION - DÉMARCHES PRÉLIMINAIRES CONCERNANT L'ACHAT DES LOTS\nLIÉS À L’ÉGLISE",
+     "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+     "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "event-cptaq",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "evidence_refs": [
+    "ev-cptaq"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "RÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN\nAUTRE QUE L’AGRICULTURE.",
+     "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+     "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-1",
+   "target": "bylaw-169-2019-01",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "evidence_refs": [
+    "ev-reglement"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)",
+     "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+     "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+     "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-acquisition",
+   "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+   "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "AUTORISATION - DÉMARCHES PRÉLIMINAIRES CONCERNANT L'ACHAT DES LOTS\nLIÉS À L’ÉGLISE"
+  },
+  {
+   "id": "ev-taxes",
+   "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+   "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE\nPAIEMENT DE TAXES MUNICIPALES"
+  },
+  {
+   "id": "ev-cptaq",
+   "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+   "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "RÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN\nAUTRE QUE L’AGRICULTURE."
+  },
+  {
+   "id": "ev-reglement",
+   "source_file": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "rawRef": "raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf",
+   "docSha": "00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28",
+   "sourceUrl": "https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)"
+  }
+ ],
+ "input_tokens": 7300,
+ "output_tokens": 3700
+}

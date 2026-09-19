@@ -1,0 +1,316 @@
+{
+ "documentId": "val-racine-2026-06-09",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "de547303a3239518bdf67ad16e5db40f9e256e627a1a7f2645c70dda105c4330",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-333"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement no 333 — entretien hivernal des chemins",
+     "stage": "projet",
+     "objet": "333",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Projet de Règlement no 333 annulant le règlement no 315 décrétant l’entretien des chemins l’hiver pour\nla circulation pour les véhicules automobiles avec la fusion du déneigement par tolérance"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-315"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement no 315 — entretien hivernal des chemins",
+     "stage": null,
+     "objet": "315",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Projet de Règlement no 333 annulant le règlement no 315 décrétant l’entretien des chemins l’hiver pour\nla circulation pour les véhicules automobiles avec la fusion du déneigement par tolérance"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-332"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement no 332 — installations septiques",
+     "stage": "projet",
+     "objet": "332",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Projet de Règlement no 332 relatif à l’entretien des installations septiques avec système de traitement\ntertiaire avec désinfestation par rayonnement ultraviolet"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-dm-2026-001"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-2026-001 — 204, chemin de la Forêt-Enchantée",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "DM-2026-001 – Demande du 204, chemin de la Forêt-Enchantée pour le lot 4 768 354"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-piia-2996"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — arbres au 2996, chemin St-Léon",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "PIIA\n\n- Demande du 2996, chemin St-Léon (Arbres)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-piia-2984"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — arbres au 2984, chemin St-Léon",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "PIIA\n\n- Demande du 2984, chemin St-Léon (Arbres)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-batiment-sanitaire"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "FRR volet 4 — bâtiment d’entreposage et bloc sanitaire",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "FRR volet 4 – Bâtiment d’entreposage et bloc sanitaire – Octroi de contrat"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-vente-remises"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente des remises au plus offrant",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Vente des remises au plus offrant"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-milieux-humides"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "GESTIZONE — caractérisation des milieux humides",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "MRC du Granit – Droit de visite pour la caractérisation des milieux humides - GESTIZONE"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement 333 figure à l'ordre du jour pour avis de motion et dépôt.\",\"excerpt\":\"Projet de Règlement no 333 annulant le règlement no 315 décrétant l’entretien des chemins l’hiver\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement no 315 n'est mentionné que comme référence au règlement antérieur abrogé par le projet 333.\",\"excerpt\":\"annulant le règlement no 315 décrétant l’entretien des chemins l’hiver\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement no 332 figure à l'ordre du jour pour avis de motion et dépôt.\",\"excerpt\":\"Projet de Règlement no 332 relatif à l’entretien des installations septiques avec système de traitement\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"La demande de dérogation mineure DM-2026-001 figure à l'ordre du jour sous Aménagement, Urbanisme et Développement.\",\"excerpt\":\"DM-2026-001 – Demande du 204, chemin de la Forêt-Enchantée pour le lot 4 768 354\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"La demande de PIIA pour le 2996, chemin St-Léon est inscrite à l'ordre du jour.\",\"excerpt\":\"6.4.\\n\\nPIIA\\n\\n- Demande du 2996, chemin St-Léon (Arbres)\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"La demande de PIIA pour le 2984, chemin St-Léon est inscrite à l'ordre du jour.\",\"excerpt\":\"6.5.\\n\\nPIIA\\n\\n- Demande du 2984, chemin St-Léon (Arbres)\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple octroi de contrat pour des travaux/services municipaux, exclu du domaine d'urbanisme.\",\"excerpt\":\"FRR volet 4 – Bâtiment d’entreposage et bloc sanitaire – Octroi de contrat\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"La vente de remises au plus offrant est une aliénation de biens meubles/actifs municipaux qui ne constitue pas un acte d'urbanisme ou foncier.\",\"excerpt\":\"Vente des remises au plus offrant\"},{\"act\":\"A09\",\"verdict\":\"non_soutenu\",\"reason\":\"L'autorisation d'un droit de visite pour une caractérisation ne constitue pas un acte réglementaire ou d'urbanisme au sens des compétences municipales.\",\"excerpt\":\"MRC du Granit – Droit de visite pour la caractérisation des milieux humides - GESTIZONE\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement 333 figure à l'ordre du jour pour avis de motion et dépôt.",
+   "excerpt": "Projet de Règlement no 333 annulant le règlement no 315 décrétant l’entretien des chemins l’hiver"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement no 315 n'est mentionné que comme référence au règlement antérieur abrogé par le projet 333.",
+   "excerpt": "annulant le règlement no 315 décrétant l’entretien des chemins l’hiver"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement no 332 figure à l'ordre du jour pour avis de motion et dépôt.",
+   "excerpt": "Projet de Règlement no 332 relatif à l’entretien des installations septiques avec système de traitement"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "La demande de dérogation mineure DM-2026-001 figure à l'ordre du jour sous Aménagement, Urbanisme et Développement.",
+   "excerpt": "DM-2026-001 – Demande du 204, chemin de la Forêt-Enchantée pour le lot 4 768 354"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "La demande de PIIA pour le 2996, chemin St-Léon est inscrite à l'ordre du jour.",
+   "excerpt": "6.4.\n\nPIIA\n\n- Demande du 2996, chemin St-Léon (Arbres)"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "La demande de PIIA pour le 2984, chemin St-Léon est inscrite à l'ordre du jour.",
+   "excerpt": "6.5.\n\nPIIA\n\n- Demande du 2984, chemin St-Léon (Arbres)"
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple octroi de contrat pour des travaux/services municipaux, exclu du domaine d'urbanisme.",
+   "excerpt": "FRR volet 4 – Bâtiment d’entreposage et bloc sanitaire – Octroi de contrat"
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "La vente de remises au plus offrant est une aliénation de biens meubles/actifs municipaux qui ne constitue pas un acte d'urbanisme ou foncier.",
+   "excerpt": "Vente des remises au plus offrant"
+  },
+  {
+   "act": "A09",
+   "verdict": "non_soutenu",
+   "reason": "L'autorisation d'un droit de visite pour une caractérisation ne constitue pas un acte réglementaire ou d'urbanisme au sens des compétences municipales.",
+   "excerpt": "MRC du Granit – Droit de visite pour la caractérisation des milieux humides - GESTIZONE"
+  }
+ ],
+ "filter": {
+  "acts": 9,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement no 315 n'est mentionné que comme référence au règlement antérieur abrogé par le projet 333."
+   },
+   {
+    "act": "A07",
+    "reason": "Il s'agit d'un simple octroi de contrat pour des travaux/services municipaux, exclu du domaine d'urbanisme."
+   },
+   {
+    "act": "A08",
+    "reason": "La vente de remises au plus offrant est une aliénation de biens meubles/actifs municipaux qui ne constitue pas un acte d'urbanisme ou foncier."
+   },
+   {
+    "act": "A09",
+    "reason": "L'autorisation d'un droit de visite pour une caractérisation ne constitue pas un acte réglementaire ou d'urbanisme au sens des compétences municipales."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le projet de règlement 333 figure à l'ordre du jour pour avis de motion et dépôt."
+   },
+   {
+    "act": "A03",
+    "reason": "Le projet de règlement no 332 figure à l'ordre du jour pour avis de motion et dépôt."
+   },
+   {
+    "act": "A04",
+    "reason": "La demande de dérogation mineure DM-2026-001 figure à l'ordre du jour sous Aménagement, Urbanisme et Développement."
+   },
+   {
+    "act": "A05",
+    "reason": "La demande de PIIA pour le 2996, chemin St-Léon est inscrite à l'ordre du jour."
+   },
+   {
+    "act": "A06",
+    "reason": "La demande de PIIA pour le 2984, chemin St-Léon est inscrite à l'ordre du jour."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2766,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2562,
+   "outputTokens": 641,
+   "totalTokens": 3203
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2608
+  },
+  "inputSha256": "d8d40abf852b0c96bf8d810fadcbf8c168b470887a3029866ed51de23a5dbd2c"
+ }
+}

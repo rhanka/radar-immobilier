@@ -1,0 +1,13 @@
+{
+ "id": "lac-tremblant-nord-2026-05-09",
+ "rc": 0,
+ "latencyMs": 74829,
+ "inputTokens": 2,
+ "outputTokens": 8025,
+ "cacheRead": 0,
+ "cacheCreate": 4420,
+ "costUsd": 0.24751599999999996,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 15897
+}

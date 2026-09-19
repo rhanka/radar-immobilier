@@ -1,0 +1,394 @@
+{
+ "documentId": "boisbriand-2026-05-05",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "911e36f339c7a57de48b9736c81f57c963850545152c2e2ced7fd8d631a292ab",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-rv-1446-005"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet RV-1446-005 — dérogations mineures",
+     "stage": "projet",
+     "objet": "RV-1446-005",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\nRèglement RV-1446 sur les dérogations mineures."
+      },
+      {
+       "page": 2,
+       "excerpt": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\nRèglement RV-1446 sur les dérogations mineures.\nAdoptée"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-rv-1446"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "RV-1446 — dérogations mineures",
+     "stage": null,
+     "objet": "RV-1446",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\nRèglement RV-1446 sur les dérogations mineures."
+      },
+      {
+       "page": 2,
+       "excerpt": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\nRèglement RV-1446 sur les dérogations mineures.\nAdoptée"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-rv-1787-1"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "RV-1787-1 — crédit de taxes pour certains terrains vagues",
+     "stage": "adoption",
+     "objet": "RV-1787-1",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "D'adopter le Règlement RV-1787-1 modifiant le Règlement RV-1787 sur le financement des\ndépenses et sur l’imposition des taxes et compensations pour l’exercice financier 2026"
+      },
+      {
+       "page": 2,
+       "excerpt": "D'adopter le Règlement RV-1787-1 modifiant le Règlement RV-1787 sur le financement des\ndépenses et sur l’imposition des taxes et compensations pour l’exercice financier 2026 en\nintroduisant un crédit de taxes relatif à certains terrains vagues.\nAdoptée"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-rv-1787"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "RV-1787 — taxes et compensations 2026",
+     "stage": null,
+     "objet": "RV-1787",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "D'adopter le Règlement RV-1787-1 modifiant le Règlement RV-1787 sur le financement des\ndépenses et sur l’imposition des taxes et compensations pour l’exercice financier 2026"
+      },
+      {
+       "page": 2,
+       "excerpt": "D'adopter le Règlement RV-1787-1 modifiant le Règlement RV-1787 sur le financement des\ndépenses et sur l’imposition des taxes et compensations pour l’exercice financier 2026 en\nintroduisant un crédit de taxes relatif à certains terrains vagues.\nAdoptée"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-259"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui municipal à une opération cadastrale agricole — FAB",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "D'appuyer la demande présentée à la Commission de protection du territoire agricole du\nQuébec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot"
+      },
+      {
+       "page": 15,
+       "excerpt": "D'appuyer la demande présentée à la Commission de protection du territoire agricole du\nQuébec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot\n6 489 086 en deux lots transitoires, soit les lots 6 709 080 et 6 709 081, l’aliénation du lot\ntransitoire 6 709 080 à la Fiducie agroécologique de Boisbriand (FAB) et la fusion du lot\ntransitoire 6 709 080 avec le lot 6 489 085, propriété de la FAB, afin de former le lot\n6 709 255.\nDe considérer cette demande conforme aux objectifs de la Loi sur la protection du territoire\net des activités agricoles et qu’elle répond aux critères de son article 62.\nD'autoriser le dépôt de cette demande et la transmission de tous les documents requis à\nla Commission de protection du territoire agricole du Québec.\nAdoptée"
+      },
+      {
+       "page": 14,
+       "excerpt": "ATTENDU QUE la Ville de Boisbriand est propriétaire du lot 6 489 086 du cadastre du\nQuébec, situé en zone agricole permanente (zone A-521);"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-260"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — 7232, rue Jean-Claude-Langlois",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5249,"
+      },
+      {
+       "page": 15,
+       "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5249, le plan d'implantation et\nd'intégration architecturale du projet de construction d'un bâtiment unifamilial isolé à être\nérigé au 7232, rue Jean-Claude-Langlois dans la zone R-3 483 du Règlement RV-1441 sur\nle zonage et détaillé aux documents suivants:\n- plan d'architecture préparé par Tech Design, daté du 3 décembre 2025;\n- plan d'implantation préparé par PLG arpenteurs-géomètres, daté du 24 février 2026;\n- plan d'aménagement paysager préparé par BMA architecture de paysage, daté du 4 mars\n2026.\n\nCette approbation est conditionnelle au dépôt d'une garantie financière de 9 500 $ pour\nl'aménagement paysager qui vise à assurer l'exécution du contenu des plans, le respect\ndes délais et le paiement des éléments que le requérant doit prendre à sa charge.\nAdoptée"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-261"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — 7225, rue Jean-Claude-Langlois",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5250,"
+      },
+      {
+       "page": 16,
+       "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5250, le plan d'implantation et\nd'intégration architecturale du projet de construction d'un bâtiment unifamilial isolé à être\nérigé au 7225, rue Jean-Claude-Langlois dans la zone R-3 483 du Règlement RV-1441 sur\nle zonage et détaillé aux documents suivants:\n- plan d'architecture préparé par Hugo Conception, daté du 12 mars 2026;\n- plan d'implantation préparé par PLG arpenteurs-géomètres, daté du 9 janvier 2026;\n- plan d'aménagement paysager préparé par BMA architecture de paysage, daté du 13 mars\n2026;\n- perspectives préparées par Hugo Conception, datées du 26 mars 2026.\nCette approbation est conditionnelle au dépôt d'une garantie financière de 9 000 $ pour le\nprojet de construction qui vise à assurer l'exécution du contenu des plans, le respect des\ndélais et le paiement des éléments que le requérant doit prendre à sa charge.\nAdoptée"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-262"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — terrasse du restaurant Escondite",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5251,"
+      },
+      {
+       "page": 16,
+       "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5251, le plan d'implantation et\nd'intégration architecturale du projet d'aménagement d'une terrasse extérieure du\nrestaurant Escondite situé au 2860, promenade Saint-Honoré dans la zone C-3 405 du\nRèglement RV-1441 sur le zonage et détaillé au plan d'architecture préparé par Lemieux\narchitecture, révisé le 8 avril 2026.\nAdoptée"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-263"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA approuvé — espace tampon au 150, rue Chauvin",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5244,"
+      },
+      {
+       "page": 16,
+       "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5244, le plan d'implantation et\nd'intégration architecturale du projet de modification de l'espace tampon entre les zones\nP-2 212 et R-1 210, dans le cadre de travaux d'agrandissement du bâtiment principal situé"
+      },
+      {
+       "page": 17,
+       "excerpt": "au 150, rue Chauvin, dans la zone P-2 212 du Règlement RV-1441 sur le zonage et détaillé\nau plan d'aménagement paysager préparé par CIMA+, daté du 17 mars 2026.\nAdoptée"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "signal-permis"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Permis de construction — mars 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "D'accuser réception des statistiques des permis de construction émis au cours du mois de\nmars 2026 montrant un total mensuel de 8 143 667 $ et un cumulatif annuel de\n11 015 406 $."
+      },
+      {
+       "page": 14,
+       "excerpt": "D'accuser réception des statistiques des permis de construction émis au cours du mois de\nmars 2026 montrant un total mensuel de 8 143 667 $ et un cumulatif annuel de\n11 015 406 $."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le projet de règlement RV-1446-005 modifiant le règlement sur les dérogations mineures.\",\"excerpt\":\"D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\\nRèglement RV-1446 sur les dérogations mineures.\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement RV-1446 est simplement la loi modifiée citée comme référence, non un acte décisionnel autonome à cette séance.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal adopte le règlement RV-1787-1 introduisant un crédit de taxes pour certains terrains vagues.\",\"excerpt\":\"D'adopter le Règlement RV-1787-1 modifiant le Règlement RV-1787 sur le financement des\\ndépenses et sur l’imposition des taxes et compensations pour l’exercice financier 2026\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement RV-1787 est mentionné uniquement en tant que texte modifié par le règlement RV-1787-1, sans faire l'objet d'un acte distinct.\",\"excerpt\":\"\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil appuie formellement une demande d'opération cadastrale en zone agricole auprès de la CPTAQ.\",\"excerpt\":\"D'appuyer la demande présentée à la Commission de protection du territoire agricole du\\nQuébec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve le PIIA pour le 7232, rue Jean-Claude-Langlois.\",\"excerpt\":\"D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5249, le plan d'implantation et\\nd'intégration architecturale\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve le PIIA pour le 7225, rue Jean-Claude-Langlois.\",\"excerpt\":\"D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5250, le plan d'implantation et\\nd'intégration architecturale\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve le PIIA pour une terrasse extérieure au 2860, promenade Saint-Honoré.\",\"excerpt\":\"D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5251, le plan d'implantation et\\nd'intégration architecturale\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve le PIIA pour l'espace tampon au 150, rue Chauvin.\",\"excerpt\":\"D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5244, le plan d'implantation et\\nd'intégration architecturale\"},{\"act\":\"A10\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple accusé de réception de statistiques administratives/dépôt de rapport, relevant des exclusions.\",\"excerpt\":\"D'accuser réception des statistiques des permis de construction émis au cours du mois de\\nmars 2026\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le projet de règlement RV-1446-005 modifiant le règlement sur les dérogations mineures.",
+   "excerpt": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\nRèglement RV-1446 sur les dérogations mineures."
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement RV-1446 est simplement la loi modifiée citée comme référence, non un acte décisionnel autonome à cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal adopte le règlement RV-1787-1 introduisant un crédit de taxes pour certains terrains vagues.",
+   "excerpt": "D'adopter le Règlement RV-1787-1 modifiant le Règlement RV-1787 sur le financement des\ndépenses et sur l’imposition des taxes et compensations pour l’exercice financier 2026"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement RV-1787 est mentionné uniquement en tant que texte modifié par le règlement RV-1787-1, sans faire l'objet d'un acte distinct.",
+   "excerpt": ""
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil appuie formellement une demande d'opération cadastrale en zone agricole auprès de la CPTAQ.",
+   "excerpt": "D'appuyer la demande présentée à la Commission de protection du territoire agricole du\nQuébec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve le PIIA pour le 7232, rue Jean-Claude-Langlois.",
+   "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5249, le plan d'implantation et\nd'intégration architecturale"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve le PIIA pour le 7225, rue Jean-Claude-Langlois.",
+   "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5250, le plan d'implantation et\nd'intégration architecturale"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve le PIIA pour une terrasse extérieure au 2860, promenade Saint-Honoré.",
+   "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5251, le plan d'implantation et\nd'intégration architecturale"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve le PIIA pour l'espace tampon au 150, rue Chauvin.",
+   "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5244, le plan d'implantation et\nd'intégration architecturale"
+  },
+  {
+   "act": "A10",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple accusé de réception de statistiques administratives/dépôt de rapport, relevant des exclusions.",
+   "excerpt": "D'accuser réception des statistiques des permis de construction émis au cours du mois de\nmars 2026"
+  }
+ ],
+ "filter": {
+  "acts": 10,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement RV-1446 est simplement la loi modifiée citée comme référence, non un acte décisionnel autonome à cette séance."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement RV-1787 est mentionné uniquement en tant que texte modifié par le règlement RV-1787-1, sans faire l'objet d'un acte distinct."
+   },
+   {
+    "act": "A10",
+    "reason": "Il s'agit d'un simple accusé de réception de statistiques administratives/dépôt de rapport, relevant des exclusions."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le projet de règlement RV-1446-005 modifiant le règlement sur les dérogations mineures."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil municipal adopte le règlement RV-1787-1 introduisant un crédit de taxes pour certains terrains vagues."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil appuie formellement une demande d'opération cadastrale en zone agricole auprès de la CPTAQ."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil municipal approuve le PIIA pour le 7232, rue Jean-Claude-Langlois."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil municipal approuve le PIIA pour le 7225, rue Jean-Claude-Langlois."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil municipal approuve le PIIA pour une terrasse extérieure au 2860, promenade Saint-Honoré."
+   },
+   {
+    "act": "A09",
+    "reason": "Le conseil municipal approuve le PIIA pour l'espace tampon au 150, rue Chauvin."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2815,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 16986,
+   "outputTokens": 848,
+   "totalTokens": 17834
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2637
+  },
+  "inputSha256": "c182454682b7e65d23b744e9e822997caf7c18e9d9daad826389604c057f3b84"
+ }
+}

@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "ping": "D-p1",
+  "startedAt": "2026-09-14T05:35:15.437Z",
+  "completedAt": "2026-09-14T05:35:16.062Z",
+  "durationMs": 625,
+  "project": "p1 (loadCodeAssist-derived; value redacted)",
+  "request": {
+    "method": "POST",
+    "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels",
+    "envelope": {
+      "project": "[REDACTED_LOAD_CODE_ASSIST_PROJECT]"
+    },
+    "headers": {
+      "Authorization": "Bearer [REDACTED]",
+      "User-Agent": "antigravity/cli/1.1.10 (aidev_client; os_type=linux; arch=amd64; auth_method=consumer)",
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "X-Goog-Api-Client": "gl-node/22.0.0 antigravity/0.1.0",
+      "Client-Metadata": "{\"ideType\":\"ANTIGRAVITY\",\"platform\":\"PLATFORM_UNSPECIFIED\",\"pluginType\":\"ANTIGRAVITY\"}"
+    }
+  },
+  "attempts": [
+    {
+      "networkRequestOrdinal": 1,
+      "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels",
+      "httpStatus": 200,
+      "message": "OK",
+      "durationMs": 623
+    }
+  ],
+  "httpStatus": 200,
+  "message": "OK",
+  "announced": {
+    "modelIds": [
+      "chat_20706",
+      "chat_23310",
+      "claude-opus-4-6-thinking",
+      "claude-sonnet-4-6",
+      "gemini-2.5-flash",
+      "gemini-2.5-flash-lite",
+      "gemini-2.5-flash-thinking",
+      "gemini-2.5-pro",
+      "gemini-3-flash",
+      "gemini-3-flash-agent",
+      "gemini-3.1-flash-image",
+      "gemini-3.1-flash-lite",
+      "gemini-3.1-pro-high",
+      "gemini-3.1-pro-low",
+      "gemini-3.5-flash-extra-low",
+      "gemini-3.5-flash-lite",
+      "gemini-3.5-flash-low",
+      "gemini-3.6-flash-high",
+      "gemini-3.6-flash-low",
+      "gemini-3.6-flash-medium",
+      "gemini-3.6-flash-tiered",
+      "gemini-3.7-flash-tiered",
+      "gemini-3.8-flash-tiered",
+      "gemini-pro-agent",
+      "gpt-oss-120b-medium",
+      "tab_flash_lite_preview",
+      "tab_jump_flash_lite_preview"
+    ]
+  },
+  "responseFieldStructure": {
+    "type": "object",
+    "topLevelFields": [
+      "agentModelSorts",
+      "audioTranscriptionModelIds",
+      "commandModelIds",
+      "commitMessageModelIds",
+      "defaultAgentModelId",
+      "deprecatedModelIds",
+      "experimentIds",
+      "imageGenerationModelIds",
+      "models",
+      "mqueryModelIds",
+      "tabModelIds",
+      "tieredModelIds",
+      "webSearchModelIds"
+    ],
+    "topLevelFieldTypes": {
+      "agentModelSorts": "array",
+      "audioTranscriptionModelIds": "array",
+      "commandModelIds": "array",
+      "commitMessageModelIds": "array",
+      "defaultAgentModelId": "string",
+      "deprecatedModelIds": "object",
+      "experimentIds": "array",
+      "imageGenerationModelIds": "array",
+      "models": "object",
+      "mqueryModelIds": "array",
+      "tabModelIds": "array",
+      "tieredModelIds": "object",
+      "webSearchModelIds": "array"
+    },
+    "models": {
+      "type": "object keyed by wire model id",
+      "count": 27,
+      "entryFields": [
+        "addCursorToFindReplaceTarget",
+        "apiProvider",
+        "displayName",
+        "isInternal",
+        "maxOutputTokens",
+        "maxTokens",
+        "minThinkingBudget",
+        "model",
+        "modelExperiments",
+        "modelProvider",
+        "promptTemplaterType",
+        "quotaInfo",
+        "recommended",
+        "requiresImageOutputOutsideFunctionResponses",
+        "requiresLeadInGeneration",
+        "requiresNoXmlToolExamples",
+        "supportedMimeTypes",
+        "supportsCumulativeContext",
+        "supportsEstimateTokenCounter",
+        "supportsImages",
+        "supportsThinking",
+        "supportsVideo",
+        "tabJumpPrintLineRange",
+        "tagDescription",
+        "tagTitle",
+        "thinkingBudget",
+        "thinkingLevel",
+        "toolFormatterType",
+        "vertexModelId"
+      ]
+    },
+    "tieredModelIds": {
+      "flash": {
+        "type": "array",
+        "length": 1
+      },
+      "flashLite": {
+        "type": "array",
+        "length": 1
+      },
+      "pro": {
+        "type": "array",
+        "length": 1
+      }
+    }
+  },
+  "networkRequestsSoFar": 1
+}

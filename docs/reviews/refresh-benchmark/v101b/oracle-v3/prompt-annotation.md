@@ -1,31 +1,40 @@
 # Consignes d'annotation — corrigé v3 (banc v101b, 100 documents)
 
-Méthode (décision owner relayée par i-cond, 2026-09-17) : consensus **séquentiel**, pas un vote.
+Méthode (décisions owner relayées par i-cond, 2026-09-17 et 2026-09-18) : passes **séquentielles** de
+vérification / complément, puis **unanimité** des trois modèles, avec arbitrage de tout désaccord.
 
 | Ordre | Étape | Modèle | Effort | Transport |
 |---:|---|---|---|---|
-| 1 | `astra-pass1` | `gpt-6-astra` | xhigh | siège Codex (llm-mesh, conteneur) |
-| 2 | `astra-pass2` | `gpt-6-astra` | xhigh | siège Codex |
-| 3 | `fable-pass1` | `claude-fable-5-1` | xhigh | siège Claude (CLI contrainte) |
-| 4 | `fable-pass2` | `claude-fable-5-1` | xhigh | siège Claude |
-| 5 | `gemini-pass1` | `gemini-3.8-flash` | high | Cloud Code (llm-mesh, conteneur) |
+| 1 | `astra-pass1` (+ `astra-pass1b` archivée, 52 documents) | `gpt-6-astra` | xhigh | siège Codex (llm-mesh, conteneur) |
+| 2 | `fable-pass1` | `claude-fable-5-1` | xhigh | siège Claude (CLI contrainte) |
+| 3 | `gemini-pass1` | `gemini-3.8-flash` | high | Cloud Code (llm-mesh, conteneur) |
+| 4 | `astra-pass2` (100 documents) | `gpt-6-astra` | xhigh | siège Codex |
+| 5 | `fable-pass2` | `claude-fable-5-1` | xhigh | siège Claude |
 | 6 | `gemini-pass2` | `gemini-3.8-flash` | high | Cloud Code |
-| 7-9 | `converge-astra`, `converge-fable`, `converge-gemini` | les trois | idem | idem |
+| 7 | `astra-pass3` (100 documents, ajout owner 2026-09-18) | `gpt-6-astra` | xhigh | siège Codex |
+| 8-10 | `converge-astra`, `converge-fable`, `converge-gemini` (vérification) | les trois | idem | idem |
+| 11-13 | `arbitrate-astra`, `arbitrate-fable`, `arbitrate-gemini` | les trois | idem | idem |
 
-Les étapes 1 à 6 emploient la consigne **PASSE**, identique octet pour octet pour tous les modèles.
+Les étapes 1 à 7 emploient la consigne **PASSE**, identique octet pour octet pour tous les modèles.
 Chaque passe reçoit le texte gelé du document et le corrigé courant (vide pour `astra-pass1`) et
-rend des opérations motivées : ajouts, retraits, corrections. Les étapes 7 à 9 emploient la
-consigne **CONVERGENCE** : chaque modèle relit le corrigé final et vote, indépendamment des deux
-autres, sur chaque désaccord ; la majorité (2 sur 3) tranche.
+rend des opérations motivées : ajouts, retraits, corrections. Les étapes 8 à 10 emploient la
+consigne **VÉRIFICATION** : chaque modèle vote seul sur chaque unité jamais proposée. Une unité
+n'entre dans la référence que sur un vote unanime (3 sur 3) pour une version présente. Les étapes 11
+à 13 emploient la consigne **ARBITRAGE** : tout ce qui n'est pas unanime, et sur les 5 documents
+annotés à la main tout écart avec le corrigé humain v2, est rejugé par les trois modèles, qui voient
+les extraits et les positions motivées. Ce qui reste non unanime est publié dans `unresolved.json`
+pour l'owner, et n'entre pas dans la référence.
 
-Les blocs entre `PROMPT-PASS-BEGIN`/`PROMPT-PASS-END` et `PROMPT-CONVERGE-BEGIN`/`PROMPT-CONVERGE-END`
-sont extraits tels quels par `tools/refresh-benchmark/oracle-v3-lib.mjs` (`loadPrompts`) et envoyés
-comme consigne système ; leur SHA-256 est recopié dans chaque reçu.
+Les blocs `PROMPT-PASS`, `PROMPT-VERIFY` et `PROMPT-ARBITRATE` sont extraits tels quels par
+`tools/refresh-benchmark/oracle-v3-lib.mjs` (`loadPrompts`) et envoyés comme consigne système ; leur
+SHA-256 est recopié dans chaque reçu. L'ancien bloc `PROMPT-CONVERGE` (vote 2 sur 3) n'a jamais été
+envoyé ; il est remplacé.
 
 Le message utilisateur contient uniquement : l'identité du document (id, ville, date), le corrigé
 courant (JSON) ou la liste des désaccords, puis le texte gelé du procès-verbal (`runtimeTextRelativePath`
 du manifeste) découpé en pages par des lignes `=== PAGE n ===`. L'annotateur ne voit jamais les
-sorties des bras du banc ni le corrigé humain v2 (sinon le corrigé serait circulaire).
+sorties des bras du banc. Le corrigé humain v2 n'apparaît qu'à l'arbitrage, comme une position parmi
+d'autres, non présumée juste, et seulement sur les écarts.
 
 Origine des règles : les phrases entre guillemets de la section « RÈGLES DU CORRIGÉ » sont recopiées
 mot pour mot de `docs/reviews/refresh-benchmark/manual-oracle-v2.json` → `rules[1]`, `rules[2]`,
@@ -81,8 +90,8 @@ FORMAT DE SORTIE : un seul objet JSON, sans texte autour, sans bloc Markdown :
 - Ne rajoute pas une unité déjà présente dans le corrigé courant.
 <!-- PROMPT-PASS-END -->
 
-<!-- PROMPT-CONVERGE-BEGIN -->
-Tu es arbitre d'un corrigé de référence (gold) pour l'extraction de faits d'urbanisme dans des procès-verbaux et ordres du jour de conseils municipaux du Québec. Tu lis UNIQUEMENT le texte du document fourni. Tu reçois une liste de DÉSACCORDS entre annotateurs successifs. Chaque désaccord propose des versions numérotées d'une unité ("v1", "v2", ...) et la possibilité "absent" (l'unité ne doit pas figurer au corrigé). Pour chaque désaccord, choisis la seule option conforme aux règles et au texte.
+<!-- PROMPT-VERIFY-BEGIN -->
+Tu es vérificateur d'un corrigé de référence (gold) pour l'extraction de faits d'urbanisme dans des procès-verbaux et ordres du jour de conseils municipaux du Québec. Tu lis UNIQUEMENT le texte du document fourni. Tu reçois la liste de TOUTES les unités proposées pour ce document par des annotateurs successifs. Chaque unité à vérifier ("item") propose une ou plusieurs versions numérotées ("v1", "v2", ...) et la possibilité "absent" (l'unité ne doit pas figurer au corrigé). Pour chaque item, choisis la seule option conforme aux règles et au texte. Choisis une version seulement si le texte l'atteste et si sa citation, son étape, son objet et sa page sont exacts ; sinon choisis "absent". Seules les unités confirmées par tous les vérificateurs entreront dans la référence.
 
 RÈGLES DU CORRIGÉ (citées mot pour mot) :
 - « Unité: objet réglementaire ou foncier explicite correspondant à Signal/DesignationEvent du profil. Avis de motion et projet actuels séparés. Mentions historiques du même dossier ne multiplient pas le rappel. »
@@ -93,10 +102,27 @@ RÈGLES DU CORRIGÉ (citées mot pour mot) :
 RAPPELS : une unité = un objet réglementaire ou foncier explicite ET une étape constatée dans CE document ; avis de motion, projet, second projet et adoption d'un même règlement sont des unités distinctes ; un rappel historique ou une table des matières ne crée pas d'unité en plus de la résolution qui la traite ; un point d'ordre du jour est une unité « prévue » ; un refus reste une unité. Étapes : avis_motion, projet_reglement, second_projet, adoption, piia, derogation_mineure, inconnu.
 
 FORMAT DE SORTIE : un seul objet JSON, sans texte autour, sans bloc Markdown :
-{"votes":[{"dispute":"d01","choice":"v1","reason":"..."}]}
-- un vote par désaccord reçu, "choice" parmi les options proposées ("v1", "v2", ... ou "absent").
+{"votes":[{"item":"i01","choice":"v1","reason":"..."}]}
+- un vote par item reçu, "choice" parmi les options proposées ("v1", "v2", ... ou "absent").
 - "reason" : une phrase qui cite la règle ou le fait du texte. Obligatoire.
-<!-- PROMPT-CONVERGE-END -->
+<!-- PROMPT-VERIFY-END -->
+
+<!-- PROMPT-ARBITRATE-BEGIN -->
+Tu es arbitre d'un corrigé de référence (gold) pour l'extraction de faits d'urbanisme dans des procès-verbaux et ordres du jour de conseils municipaux du Québec. Tu lis UNIQUEMENT le texte du document fourni. Tu reçois des POINTS À ARBITRER : des unités sur lesquelles les vérificateurs ne sont pas unanimes, ou sur lesquelles un corrigé humain antérieur diffère. Chaque point propose des versions numérotées ("v1", "v2", ...) avec leur citation recopiée du texte, et la possibilité "absent". Tu reçois aussi les positions motivées des annotateurs (A, B, C) et, le cas échéant, celle de la "reference_humaine". Aucune position n'est présumée juste, la référence humaine non plus : relis le texte et décide sur pièces. Pour chaque point, choisis la seule option conforme aux règles et au texte, et explique pourquoi en citant le texte.
+
+RÈGLES DU CORRIGÉ (citées mot pour mot) :
+- « Unité: objet réglementaire ou foncier explicite correspondant à Signal/DesignationEvent du profil. Avis de motion et projet actuels séparés. Mentions historiques du même dossier ne multiplient pas le rappel. »
+- « Un nœud Signal et son DesignationEvent décrivant le même fait sont deux représentations légitimes: précision par nœud typé; rappel par unité gold distincte. Doublon même type/même fait non crédité. Un nœud groupé peut couvrir plusieurs unités explicitement nommées. »
+- « Les deux ordres du jour (Valcourt, Lac-des-Seize-Îles) attestent des points prévus et non des décisions acquises. Les refus doivent rester des refus. Les matricules de Saint-Barthélemy ne sont pas des lots cadastraux. Les contraintes permanentes et de pente ne doivent pas être contredites. »
+- « Inclusions: urbanisme, petits PIIA et actes fonciers, même non résidentiels. Exclusions du rappel: simples nominations, comptes, marchés de services, loisirs, entretiens de voirie sans développement explicite. Un fait complémentaire valable hors gold reste à signaler séparément, sans retoucher le dénominateur. »
+
+RAPPELS : une unité = un objet réglementaire ou foncier explicite ET une étape constatée dans CE document ; avis de motion, projet, second projet et adoption d'un même règlement sont des unités distinctes ; un rappel historique ou une table des matières ne crée pas d'unité en plus de la résolution qui la traite ; un point d'ordre du jour est une unité « prévue » ; un refus reste une unité. Étapes : avis_motion, projet_reglement, second_projet, adoption, piia, derogation_mineure, inconnu.
+
+FORMAT DE SORTIE : un seul objet JSON, sans texte autour, sans bloc Markdown :
+{"votes":[{"item":"a01","choice":"v1","reason":"..."}]}
+- un vote par point reçu, "choice" parmi les options proposées ("v1", "v2", ... ou "absent").
+- "reason" : une ou deux phrases qui citent la règle ou le fait du texte, et disent pourquoi les positions contraires sont écartées. Obligatoire.
+<!-- PROMPT-ARBITRATE-END -->
 
 ## Règles de traitement (hors consigne, appliquées par l'outillage)
 
@@ -106,12 +132,20 @@ FORMAT DE SORTIE : un seul objet JSON, sans texte autour, sans bloc Markdown :
   comptée). Moins de 20 points de code ou de 12 normalisés : rejet. Plus de 200 : coupé aux 200
   premiers. Opération non ancrée, sans motif, visant un identifiant inconnu ou ajout doublon d'une
   unité présente : rejetée et journalisée dans `grounding-rejects.json` (compteur par étape).
-- **Désaccord** : une unité est en désaccord si une passe l'a retirée ou corrigée après qu'une autre
-  l'a posée. Options : chaque version distincte qu'elle a eue, plus `absent`. Une unité jamais
-  contestée par les passes suivantes est acceptée tacitement (chaque passe a vu le corrigé courant).
-- **Convergence** : 3 votes indépendants ; l'option qui en recueille au moins 2 l'emporte. Sans
-  majorité (3 choix différents) ou vote manquant empêchant la majorité, l'état après `gemini-pass2`
-  est gardé et le désaccord est publié `unresolved` dans `disputed.json`.
+- **Vérification** : items = toutes les unités jamais proposées (actives ou retirées), options =
+  leurs versions distinctes plus `absent`, sans l'état courant ni l'auteur. Un vote compte s'il vise
+  une option proposée et porte un motif. Unanimité 3/3 sur une version : unité retenue ; unanimité
+  sur `absent` : unité écartée ; sinon : arbitrage.
+- **Arbitrage** : points = items non unanimes ; sur les documents du corrigé humain v2, chaque unité
+  humaine sans unité unanime correspondante (même étape, même site verbatim) et, sauf Waterloo
+  (corrigé humain partiel), chaque unité unanime sans unité humaine correspondante. Une unité humaine
+  qui partage le site d'une unité unanime avec une autre étape donne un seul point à trois options
+  (version v3, version humaine, `absent`). Les positions A/B/C sont les votes de vérification,
+  anonymisés par document. Unanimité 3/3 : résolu ; sinon `unresolved`. Une version non ancrée
+  mot à mot dans le texte gelé ne peut pas entrer dans la référence, même unanime.
+- **Écarts avec l'humain** : chaque point qui porte une position humaine reçoit un verdict
+  (`human_right`, `v3_right`, `human_wrong`, `neither`, `unresolved`) avec les motifs des trois
+  arbitres. Cible : 0 écart inexpliqué entre la référence finale et le corrigé humain.
 - **Champ `procedure`** : ce n'est pas une étape ; le scoreur (règle R4 d'oracle v3) l'accepte comme
   alias d'étape, pour ne pas compter en faux positif un bras dont le contrat émet `ppcmoi`,
   `usage_conditionnel` ou `consultation_publique` comme valeur d'étape.

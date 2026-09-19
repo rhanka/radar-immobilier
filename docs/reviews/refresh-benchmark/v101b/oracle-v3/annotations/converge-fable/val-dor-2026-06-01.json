@@ -1,0 +1,61 @@
+{
+ "documentId": "val-dor-2026-06-01",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "35fd5eb75f529c39565ab7bbd7eb6f6a6e1ad33545e6d828d78448e105e36685",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Point 3 de l'ordre du jour, page 1 : « Adoption du premier projet de règlement 2026-12 - zonage et urbanisme » ; étape projet_reglement, objet 2026-12 et citation exacts, et le libellé « prévue » respecte la règle selon laquelle un ordre du jour atteste des points prévus et non des décisions acquises.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Point 4, page 1 : « Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des personnes et organismes » ; objet réglementaire explicite avec procédure de consultation publique, étape inconnu appropriée, citation et page exactes, unité distincte du projet lui-même.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Point 14, page 1 : « Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des Deux Lacs » ; acte foncier explicite inclus par la règle (« petits PIIA et actes fonciers »), approbation prévue rendue par l'étape adoption, citation et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point 15, page 1 : « Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047 » ; objet foncier explicite (lot cadastral), étape inconnu et libellé « prévue » conformes à un point d'ordre du jour, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Point 3 de l'ordre du jour, page 1 : « Adoption du premier projet de règlement 2026-12 - zonage et urbanisme » ; étape projet_reglement, objet 2026-12 et citation exacts, et le libellé « prévue » respecte la règle selon laquelle un ordre du jour atteste des points prévus et non des décisions acquises."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Point 4, page 1 : « Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des personnes et organismes » ; objet réglementaire explicite avec procédure de consultation publique, étape inconnu appropriée, citation et page exactes, unité distincte du projet lui-même."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Point 14, page 1 : « Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des Deux Lacs » ; acte foncier explicite inclus par la règle (« petits PIIA et actes fonciers »), approbation prévue rendue par l'étape adoption, citation et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point 15, page 1 : « Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047 » ; objet foncier explicite (lot cadastral), étape inconnu et libellé « prévue » conformes à un point d'ordre du jour, citation et page exactes."
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "id": "candiac-2026-06-15",
+ "rc": 0,
+ "latencyMs": 110016,
+ "inputTokens": 2,
+ "outputTokens": 12517,
+ "cacheRead": 0,
+ "cacheCreate": 5204,
+ "costUsd": 0.36814900000000006,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 22837
+}

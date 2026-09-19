@@ -1,0 +1,315 @@
+{
+ "documentId": "valcourt-2026-06-01-agenda",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "3171c8cdc4ad61515b5ca653cd73be3a0e63f8074453ea7a68547c47b5a8f510",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "piia-1070-lotissement"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "1070, rue Bissonnette — PIIA, lotissement",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "piia-1070-construction"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "1070, rue Bissonnette — Construction de deux bâtiments principaux unifamiliaux jumelés",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE\nDEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "piia-1045-construction"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "1045, rue Bissonnette — Habitation unifamiliale isolée",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D’UN\nBÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "piia-1075-remblai"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "1075, rue Bissonnette — PIIA, remblai",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-560-28"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Second projet de règlement 560-28",
+     "stage": "2e_projet",
+     "objet": "560-28",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE\nRÈGLEMENT DE ZONAGE 560"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-560"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 560",
+     "stage": null,
+     "objet": "560",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE\nRÈGLEMENT DE ZONAGE 560"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-pratiques-agroenvironnementales"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement sur les pratiques agroenvironnementales",
+     "stage": "projet",
+     "objet": "Révision nécessaire inscrite au point 11.1 de l'ordre du jour.",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES\nAGROENVIRONNEMENTALES"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-garage-municipal"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Agrandissement du garage municipal — Conception et mise en plans",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "OFFRE DE SERVICES - CONCEPTION ET MISE EN PLANS POUR\nL'AGRANDISSEMENT DU GARAGE MUNICIPAL - OCTROI DE CONTRAT"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-4111-carpentier"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "4111 rue Carpentier — Convention de prêt à usage",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "4111 RUE CARPENTIER - CONVENTION DE PRÊT À USAGE"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.1 de l'ordre du jour prévoit expressément une étape PIIA pour le lotissement au 1070 rue Bissonnette.\",\"excerpt\":\"1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.2 prévoit l'examen PIIA de la construction de deux bâtiments jumelés au 1070 rue Bissonnette.\",\"excerpt\":\"1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE\\nDEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.3 prévoit l'examen PIIA de la construction d'un bâtiment unifamilial isolé au 1045 rue Bissonnette.\",\"excerpt\":\"1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D’UN\\nBÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.4 prévoit l'examen PIIA d'un remblai au 1075 rue Bissonnette.\",\"excerpt\":\"1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.5 prévoit l'adoption du second projet de règlement 560-28.\",\"excerpt\":\"ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE\\nRÈGLEMENT DE ZONAGE 560\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de zonage 560 n'est que le règlement cadre modifié, il ne fait pas l'objet d'un acte propre dans cet ordre du jour.\",\"excerpt\":\"ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE\\nRÈGLEMENT DE ZONAGE 560\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le point 11.1 porte sur la révision nécessaire du projet de règlement sur les pratiques agroenvironnementales.\",\"excerpt\":\"RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES\\nAGROENVIRONNEMENTALES\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un octroi de contrat d'offre de services professionnels pour des plans, ce qui relève des exclusions (contrats de services/dépenses).\",\"excerpt\":\"OFFRE DE SERVICES - CONCEPTION ET MISE EN PLANS POUR\\nL'AGRANDISSEMENT DU GARAGE MUNICIPAL - OCTROI DE CONTRAT\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le point 13.2 porte sur une convention foncière de prêt à usage pour un immeuble précis (4111 rue Carpentier).\",\"excerpt\":\"4111 RUE CARPENTIER - CONVENTION DE PRÊT À USAGE\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 7.1 de l'ordre du jour prévoit expressément une étape PIIA pour le lotissement au 1070 rue Bissonnette.",
+   "excerpt": "1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 7.2 prévoit l'examen PIIA de la construction de deux bâtiments jumelés au 1070 rue Bissonnette.",
+   "excerpt": "1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE\nDEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 7.3 prévoit l'examen PIIA de la construction d'un bâtiment unifamilial isolé au 1045 rue Bissonnette.",
+   "excerpt": "1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D’UN\nBÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 7.4 prévoit l'examen PIIA d'un remblai au 1075 rue Bissonnette.",
+   "excerpt": "1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le point 7.5 prévoit l'adoption du second projet de règlement 560-28.",
+   "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE\nRÈGLEMENT DE ZONAGE 560"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de zonage 560 n'est que le règlement cadre modifié, il ne fait pas l'objet d'un acte propre dans cet ordre du jour.",
+   "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE\nRÈGLEMENT DE ZONAGE 560"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le point 11.1 porte sur la révision nécessaire du projet de règlement sur les pratiques agroenvironnementales.",
+   "excerpt": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES\nAGROENVIRONNEMENTALES"
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un octroi de contrat d'offre de services professionnels pour des plans, ce qui relève des exclusions (contrats de services/dépenses).",
+   "excerpt": "OFFRE DE SERVICES - CONCEPTION ET MISE EN PLANS POUR\nL'AGRANDISSEMENT DU GARAGE MUNICIPAL - OCTROI DE CONTRAT"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le point 13.2 porte sur une convention foncière de prêt à usage pour un immeuble précis (4111 rue Carpentier).",
+   "excerpt": "4111 RUE CARPENTIER - CONVENTION DE PRÊT À USAGE"
+  }
+ ],
+ "filter": {
+  "acts": 9,
+  "removed": [
+   {
+    "act": "A06",
+    "reason": "Le règlement de zonage 560 n'est que le règlement cadre modifié, il ne fait pas l'objet d'un acte propre dans cet ordre du jour."
+   },
+   {
+    "act": "A08",
+    "reason": "Il s'agit d'un octroi de contrat d'offre de services professionnels pour des plans, ce qui relève des exclusions (contrats de services/dépenses)."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 7.1 de l'ordre du jour prévoit expressément une étape PIIA pour le lotissement au 1070 rue Bissonnette."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 7.2 prévoit l'examen PIIA de la construction de deux bâtiments jumelés au 1070 rue Bissonnette."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 7.3 prévoit l'examen PIIA de la construction d'un bâtiment unifamilial isolé au 1045 rue Bissonnette."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 7.4 prévoit l'examen PIIA d'un remblai au 1075 rue Bissonnette."
+   },
+   {
+    "act": "A05",
+    "reason": "Le point 7.5 prévoit l'adoption du second projet de règlement 560-28."
+   },
+   {
+    "act": "A07",
+    "reason": "Le point 11.1 porte sur la révision nécessaire du projet de règlement sur les pratiques agroenvironnementales."
+   },
+   {
+    "act": "A09",
+    "reason": "Le point 13.2 porte sur une convention foncière de prêt à usage pour un immeuble précis (4111 rue Carpentier)."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2752,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3022,
+   "outputTokens": 718,
+   "totalTokens": 3740
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2580
+  },
+  "inputSha256": "2b452d32ccb32b1cdd933eb8a1aef5d3ebb3b552491078a62b3b2d77289b5144"
+ }
+}

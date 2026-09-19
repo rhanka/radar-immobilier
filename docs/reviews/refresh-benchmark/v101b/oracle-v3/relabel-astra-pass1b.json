@@ -1,0 +1,1367 @@
+{
+ "relabeledAt": "2026-09-18T13:29:47.838Z",
+ "from": "astra-pass2",
+ "to": "astra-pass1b",
+ "reason": "owner 2026-09-18: astra-pass2 runs on the 100 documents after fable-pass1 and gemini-pass1; the early astra-pass2 outputs are kept as the archived step astra-pass1b",
+ "documents": [
+  "abercorn-2026-03-30",
+  "acton-vale-2026-03-16",
+  "amherst-2026-06-08",
+  "arundel-2026-07-31",
+  "aumond-2026-01-14",
+  "ayers-cliff-2026-03-02",
+  "barnston-ouest-2026-05-04",
+  "beaupre-2026-03-02",
+  "bedford--brome-missisquoi-2026-06-02",
+  "blue-sea-2026-02-03",
+  "bolton-est-2026-01-12",
+  "candiac-2026-06-15",
+  "chesterville-2026-03-02",
+  "chibougamau-2026-05-16",
+  "coteau-du-lac-2026-02-10",
+  "danville-2026-01-15",
+  "daveluyville-2026-05-04",
+  "dollard-des-ormeaux-2026-02-10",
+  "dosquet-2026-01-13",
+  "grenville-sur-la-rouge-2026-04-14",
+  "lac-du-cerf-2026-04-11",
+  "lac-saint-paul-2026-05-11",
+  "lac-tremblant-nord-2026-05-09",
+  "les-coteaux-2026-03-16",
+  "lislet-2026-04-07",
+  "lorraine-2026-01-13",
+  "lyster-2026-02-02",
+  "mcmasterville-2026-02-02",
+  "notre-dame-de-lourdes--joliette-2026-04-13",
+  "ogden-2026-03-09",
+  "parisville-2026-05-05",
+  "pincourt-2026-01-20",
+  "roxton-2026-04-07",
+  "saint-bernard-de-michaudville-2026-04-01",
+  "saint-charles-de-bourget-2026-05-04",
+  "saint-constant-2026-01-20",
+  "saint-damien-2026-06-16",
+  "saint-felix-de-kingsey-2026-04-07",
+  "saint-henri-2026-03-02",
+  "saint-lin-laurentides-2026-06-09",
+  "saint-polycarpe-2026-01-19",
+  "saint-roch-de-lachigan-2026-05-11",
+  "saint-stanislas--des-chenaux-2026-04-07",
+  "saint-sylvere-2026-04-07",
+  "sainte-brigide-diberville-2026-06-01",
+  "sainte-francoise--becancour-2026-05-04",
+  "stratford-2026-04-20",
+  "tadoussac-2026-01-13",
+  "val-dor-2026-06-01",
+  "val-racine-2026-06-09",
+  "waterville-2026-04-07",
+  "wentworth-nord-2026-01-21"
+ ],
+ "files": [
+  {
+   "path": "annotations/astra-pass1b/abercorn-2026-03-30.json",
+   "sha256Before": "7e8021faa224d8f0b42e926d9cd1e0ea86f6aa45723072fde47d5dbddb7f70e1",
+   "sha256After": "bd9e42c850beea7d80fe9f5d1c8d13d2b01671e8842b857e9acd956b20bbca84"
+  },
+  {
+   "path": "annotations/astra-pass1b/abercorn-2026-03-30.receipt.json",
+   "sha256Before": "5e7b469598d7d49e0e2d295259bc81764c1af8e9126f4fb945a2468890f408d3",
+   "sha256After": "3507d0c701587b721e1ca7f0c51342f26c3942f9e1c35565ae51f014357ed51f"
+  },
+  {
+   "path": "annotations/astra-pass1b/acton-vale-2026-03-16.json",
+   "sha256Before": "a8bcafb5442e854a52c5f96dd9b9371c3092e5e934129c4d578da09c43106a64",
+   "sha256After": "72147ae1736a66b161b35c2a90217e223b0303b9d9a6f62ef3d70f2fbd13a879"
+  },
+  {
+   "path": "annotations/astra-pass1b/acton-vale-2026-03-16.receipt.json",
+   "sha256Before": "24aee39e39ee078a0230de6fd416772f789d0e83e9e2ebefe9df60a4840bcc49",
+   "sha256After": "58e0a72b36dd58dc57e988eb4d2a973417e4b8a78530768ef9ec248e4f78b388"
+  },
+  {
+   "path": "annotations/astra-pass1b/amherst-2026-06-08.json",
+   "sha256Before": "443c3d3174d408e9ffb72d5300fe69f158552641366fceab1fe5b6acac6a209e",
+   "sha256After": "bcdcf047617f7df9f5d7408fb6664f272b4aba7d3025a2651da72b3f82064282"
+  },
+  {
+   "path": "annotations/astra-pass1b/amherst-2026-06-08.receipt.json",
+   "sha256Before": "98c60d5b2574c12e190f38fa69032b82a2d2ba0d3f28aa9a6a2c055a021ca68e",
+   "sha256After": "ead2ddfa98d7d6289fb1dae901342a550576dd555dddbe2434e33dc8902dba1b"
+  },
+  {
+   "path": "annotations/astra-pass1b/arundel-2026-07-31.json",
+   "sha256Before": "2becf314b238932fa7538b58635bfa6b38cff2697fd8b8af6ba9aae0e530fc73",
+   "sha256After": "9d7064a9d7c09e7658098b33731f290c2c7c5f0580d94e019ba5e0b14afee63a"
+  },
+  {
+   "path": "annotations/astra-pass1b/arundel-2026-07-31.receipt.json",
+   "sha256Before": "274e451e75c0bce61735b29859d42fe8885521b2b2dd725ae3879b37b06b6886",
+   "sha256After": "e30eeb7e52d52b10bbc09904f5fed449aefc377c41fc065dada82a3658ec16d5"
+  },
+  {
+   "path": "annotations/astra-pass1b/aumond-2026-01-14.json",
+   "sha256Before": "07c0e6fc615efa3fe6155f7a5af07ff2a638ee58d1382c5e60414c3a0ea08964",
+   "sha256After": "48e398302bc20dbd8d48b8fd960d2a9317c67ee1ee2140cc7b1547fae7936c7b"
+  },
+  {
+   "path": "annotations/astra-pass1b/aumond-2026-01-14.receipt.json",
+   "sha256Before": "839d635a32720a10f478fe1ed4562393e758792ec188b109e2520a848bb2cdc7",
+   "sha256After": "084904aec58415516f285f828d5c5a5dd50243796a32294a6cd29dc65d69a09f"
+  },
+  {
+   "path": "annotations/astra-pass1b/ayers-cliff-2026-03-02.json",
+   "sha256Before": "ab71471d067ef60638e3197ca5fb762ff18ecd6b5e8a1f703606bc5948d91217",
+   "sha256After": "4d80d8fd6095363d5d03de5a9c520b7632dea5f9cfb65af5f02abc07ae656e3f"
+  },
+  {
+   "path": "annotations/astra-pass1b/ayers-cliff-2026-03-02.receipt.json",
+   "sha256Before": "067597ca2546c8e89978747c8b3fd1d646c2957ddbd4ff88828da6aa1ecab0fe",
+   "sha256After": "443b7067d08b0cd9e8356633b5660c316188f0128490440cdf3b5773eb7ad28b"
+  },
+  {
+   "path": "annotations/astra-pass1b/barnston-ouest-2026-05-04.json",
+   "sha256Before": "7bdda82ef35ffabaa7bf206d5faa1347eddfe709dc971be1bc111b2bcd7c668b",
+   "sha256After": "3b67d003b2f8b9b8e3447789b9b48192c5a86d83564da69c8e5e8d89432f6a00"
+  },
+  {
+   "path": "annotations/astra-pass1b/barnston-ouest-2026-05-04.receipt.json",
+   "sha256Before": "c895b4eb23feb14eca58fa8f0a83384160f014e9eefa08aa9b7069a0b112e1f8",
+   "sha256After": "b041e42703eba9e8f24d4fa37c28b596cea9f4260bf4d33e14dcbb459c6f4038"
+  },
+  {
+   "path": "annotations/astra-pass1b/beaupre-2026-03-02.json",
+   "sha256Before": "ec51300c8d133cdefa33eea7b2ac1c99beced61c0687e65c50e9f50cf0d29386",
+   "sha256After": "ee0f22261e91d36b64c30ea69a13bb2cc26c54260e1d0c812a9b88112dd91bac"
+  },
+  {
+   "path": "annotations/astra-pass1b/beaupre-2026-03-02.receipt.json",
+   "sha256Before": "42746f4e7752c30002fd42111228c5d2031aa8dff4654056a781dc8faf24c2f2",
+   "sha256After": "986e2768f2471b4cb09400af2c2c57215729853470eb3a47195d947af200bbec"
+  },
+  {
+   "path": "annotations/astra-pass1b/bedford--brome-missisquoi-2026-06-02.json",
+   "sha256Before": "2fd32578ebba490a7447fa20965514c3be76dd3628af8059573ed24098150bf5",
+   "sha256After": "b77adf7b5f30ffab43bfd988379db45a10f4394104a353d0ea63709335360ed5"
+  },
+  {
+   "path": "annotations/astra-pass1b/bedford--brome-missisquoi-2026-06-02.receipt.json",
+   "sha256Before": "157771def3f34ac21c4180306a2474c56b93a5425d2f61a6f618992368036d48",
+   "sha256After": "d7e9956e26ee27983420db0c59f4d5cb50f1bd24fc43d34239571ae7ea805957"
+  },
+  {
+   "path": "annotations/astra-pass1b/blue-sea-2026-02-03.json",
+   "sha256Before": "4e9ce0a440a073595f5fb4d577acff57989b0424177f8cd68b51de6a79b4b586",
+   "sha256After": "e28d4b2bc68b4e1d3c0865fc2ed0be1f0039ac84744fc526874d1ad5bb516a55"
+  },
+  {
+   "path": "annotations/astra-pass1b/blue-sea-2026-02-03.receipt.json",
+   "sha256Before": "bb313d4fc8e51af658c129db6f47578afa27ff7d3800d1b88531484996b5f053",
+   "sha256After": "bff822c13bcc33d9ad393a03ab2ce18155ad73cb69ee78a4f23518cf1387056f"
+  },
+  {
+   "path": "annotations/astra-pass1b/bolton-est-2026-01-12.json",
+   "sha256Before": "e4414b87c4c6c8382054f6bf563932f66eebca725ad11b3cff4cd90cb5be15bd",
+   "sha256After": "df9a5805b7c9ef101ef678ef868c465008be8e0fd71c8bc65201ffc94bd7bc94"
+  },
+  {
+   "path": "annotations/astra-pass1b/bolton-est-2026-01-12.receipt.json",
+   "sha256Before": "aeb369a6712dabf8b0a5d0b4c82d8ffaef12d0639714ddfff174217f95e61142",
+   "sha256After": "12ee94b7a19df62126c86069afc56b50c93b0de0a1d030207c8f22af48116a85"
+  },
+  {
+   "path": "annotations/astra-pass1b/candiac-2026-06-15.json",
+   "sha256Before": "8bdbbd20ce2d2095ea50dcfb3bd8618754d0c2867d95bb1c2c7e0a5678ea3aad",
+   "sha256After": "02a8c9b9a88bf68bb318a6c54cd5c9df7bdcaa2e8dfa393eee078d6b11ebf081"
+  },
+  {
+   "path": "annotations/astra-pass1b/candiac-2026-06-15.receipt.json",
+   "sha256Before": "7fa436c8de4c5dff20d2ca99ead2c68aa8a486084ade0565a2cc1a2c2d2484e6",
+   "sha256After": "7accefd067d7d40f22b237d7e214069e1b3df2e678762c63931a80196df7d2e1"
+  },
+  {
+   "path": "annotations/astra-pass1b/chesterville-2026-03-02.json",
+   "sha256Before": "8593419df60bbd53e2d723137f04b41ca5eb2e8eeaed59b8e07f89f9ab89f7ab",
+   "sha256After": "3ac2d7ae66d4a233f2474d756330a18d4351b88c84ab1229e4c459bde6224b1e"
+  },
+  {
+   "path": "annotations/astra-pass1b/chesterville-2026-03-02.receipt.json",
+   "sha256Before": "606fa63600c1427960db34a92edb34a028e77304a5ba489f09cca23751dbdad0",
+   "sha256After": "d1b73d030c7d08daf5460988ee64d16f179b071fa1d2fbe541453a89ea6f7cda"
+  },
+  {
+   "path": "annotations/astra-pass1b/chibougamau-2026-05-16.json",
+   "sha256Before": "ac1c9e4277073649ea5f8d7397a0ab4339d7cb3272e6a9e72a0bedae3410829c",
+   "sha256After": "27bc4a0412b076f66ba1d3a4392f062150c606291eda738912594b5c2ebbb914"
+  },
+  {
+   "path": "annotations/astra-pass1b/chibougamau-2026-05-16.receipt.json",
+   "sha256Before": "59f4d0d95ff2157b57a1d9d09e4329789bf68b0363872471d4797cdc45152161",
+   "sha256After": "37eee87d00efa1fd11e1e46b16c07f9c6e489404a6f79b5d2c027b11730e2a85"
+  },
+  {
+   "path": "annotations/astra-pass1b/coteau-du-lac-2026-02-10.json",
+   "sha256Before": "a1e9605f8fad9f1fc522df8e262c53472fc60f7173393267a3c774d14fb20951",
+   "sha256After": "849293534f10a646f9fdf2535cca0af93cfa4a1e216f770cbc1d6dbf7bbb97e9"
+  },
+  {
+   "path": "annotations/astra-pass1b/coteau-du-lac-2026-02-10.receipt.json",
+   "sha256Before": "e61b4683369f34c41a2ce52ba3a63e5fbdb7a038b1d3b03b7c45d12d84c37f97",
+   "sha256After": "e8de1f9bae91443fecfbc798cf5d9e7d3515cb0262fa7d7183f508948a20e275"
+  },
+  {
+   "path": "annotations/astra-pass1b/danville-2026-01-15.json",
+   "sha256Before": "ec7e075b7362ddcc6f133dec4c83bec1a6af809d6ed6abbf3e086d8d54456e8b",
+   "sha256After": "0e947b5fa47eaf81497b1c9c310b5732e5baa136be5031d715702636f228cd62"
+  },
+  {
+   "path": "annotations/astra-pass1b/danville-2026-01-15.receipt.json",
+   "sha256Before": "b5d29f01692558eea9152b10f62d6478eb67746f07442171d6eac1beb61b9046",
+   "sha256After": "88ecce23ef37c0165eaeb1bbbde04560dd965c6bfb4f8331e71764c14b986976"
+  },
+  {
+   "path": "annotations/astra-pass1b/daveluyville-2026-05-04.json",
+   "sha256Before": "39df7be084df0bc8e0d4a5734a9e0f47e4f4076bfe263a550674252396c353ab",
+   "sha256After": "bb98ad06551241b5f886460c4af97ab9c7f00386d27e9515435f4dc9f5ff84ad"
+  },
+  {
+   "path": "annotations/astra-pass1b/daveluyville-2026-05-04.receipt.json",
+   "sha256Before": "d515a8b07e2e6e2cb30ea4a0354f9e44a864810f8625692297ce59822bc65b6f",
+   "sha256After": "bca20164e5c068018bc530131ec71ea5ac2ea43fac3584bb45468feedfd058dd"
+  },
+  {
+   "path": "annotations/astra-pass1b/dollard-des-ormeaux-2026-02-10.json",
+   "sha256Before": "9a5a288b021f3e63ffe86abc8449504fe2fe928392297611a02a9ee01d1a44e7",
+   "sha256After": "ce3ee408e1770566f2af76ad8dbbf534b0553704a58290804621633361ad8bd4"
+  },
+  {
+   "path": "annotations/astra-pass1b/dollard-des-ormeaux-2026-02-10.receipt.json",
+   "sha256Before": "a0736473e1a886772bc29da49114692d526e68b82195c211f1e05ae270241faf",
+   "sha256After": "876e93eff005bf94d12d5c6b718add44632b73e842afc86680fc67d8865f7543"
+  },
+  {
+   "path": "annotations/astra-pass1b/dosquet-2026-01-13.json",
+   "sha256Before": "e50bba78d2331a45b1fb9a6c7af1bbc97a02a230e93def686800384e47581275",
+   "sha256After": "3e84e30d7b3baeeb98a9d80d5619d9c2c1cb7b5dcf69d648549d8b064d540d00"
+  },
+  {
+   "path": "annotations/astra-pass1b/dosquet-2026-01-13.receipt.json",
+   "sha256Before": "259519f6638de60c73d29f0145e8d339a162b514bda2aae85682623ab48f3fc1",
+   "sha256After": "83b34ec26267ac11423198a4bb30185c051be13d9152dc2037f6a944d122a786"
+  },
+  {
+   "path": "annotations/astra-pass1b/grenville-sur-la-rouge-2026-04-14.json",
+   "sha256Before": "d315dbe224389cf85222c51d51e20b65d2b4d67d18c4d46df32a039843a0b848",
+   "sha256After": "bb7e4b1199c4dd7e229c3cc5e606efc387266ddb5c7053e8a8def6bd8d9a8fc4"
+  },
+  {
+   "path": "annotations/astra-pass1b/grenville-sur-la-rouge-2026-04-14.receipt.json",
+   "sha256Before": "d61c5702d99f5eb9719d97fed9afdc14bf9ec76d08b4897af07ff84b7a029c19",
+   "sha256After": "738771d26abb0022d7eb12b4bc0a774716beea9872ba993cf1f2b12a1fe41e81"
+  },
+  {
+   "path": "annotations/astra-pass1b/lac-du-cerf-2026-04-11.json",
+   "sha256Before": "f400a0844f751e3347944eff011f6492c29f985fed67157243a6d82e2b785c0b",
+   "sha256After": "b141a0ac3928a22109c864d7ab357f88ece0476a989d55ee6854c78d3dbc9e13"
+  },
+  {
+   "path": "annotations/astra-pass1b/lac-du-cerf-2026-04-11.receipt.json",
+   "sha256Before": "21912861719aefb09c4f7e7ec46a390337f9f3c7c980952fe310bb199b60efab",
+   "sha256After": "e61b33afc082dd3911b8c9f7b363324377b97ce07d468f26f202f51996933fd4"
+  },
+  {
+   "path": "annotations/astra-pass1b/lac-saint-paul-2026-05-11.json",
+   "sha256Before": "6f3ccfee8e4f2621c102b02e9287b2f341914fa6eabcf586b5eaaedcc8032193",
+   "sha256After": "2f35dfee8e52749ff955a5f3fa6bf74bbcb96fa24b48d2ceb1ec28cb3e0fef7c"
+  },
+  {
+   "path": "annotations/astra-pass1b/lac-saint-paul-2026-05-11.receipt.json",
+   "sha256Before": "78db7197a33b4cd3265d85c6345ca27228dd2cbc8fb0a13c62be54c15a5b230f",
+   "sha256After": "6ead6c808a15baf700ebc361e957c7539a295c4c2bffdb07d01f84ef1130c104"
+  },
+  {
+   "path": "annotations/astra-pass1b/lac-tremblant-nord-2026-05-09.json",
+   "sha256Before": "a91bbf38d2e11ace69556140be00c941518aa5ba0c18cf928bfa0b9ea0dd6170",
+   "sha256After": "f53b7e4b248d0170a93c21e5c25bd3e467735dad22f3cf8fe44ec304638ec083"
+  },
+  {
+   "path": "annotations/astra-pass1b/lac-tremblant-nord-2026-05-09.receipt.json",
+   "sha256Before": "0ee841acf41a94c2ab96f8bae1202abaddc481e3b899c145ad231e9272be8f85",
+   "sha256After": "e633a804de113c58756881c95ede79fd96fb48370e48494a7c185c9b9f67cc67"
+  },
+  {
+   "path": "annotations/astra-pass1b/les-coteaux-2026-03-16.json",
+   "sha256Before": "b497da6999236c7864d950d7e73d5176daa2a594d6511a8bfdd0cceb96531fd5",
+   "sha256After": "0c8246311d9c402de5d8aa77fabbf8df73e56b1c44706f4d3b4e045f95a36c61"
+  },
+  {
+   "path": "annotations/astra-pass1b/les-coteaux-2026-03-16.receipt.json",
+   "sha256Before": "0cc0133f00a5cb8d60c3fe233af8600c75eeec9de70fee4ae4db6ffc53c4ec9b",
+   "sha256After": "5cb4bb31ba37660d579b7cb3263e362a3265a6471a81731b84a8d1d6eb6b24f7"
+  },
+  {
+   "path": "annotations/astra-pass1b/lislet-2026-04-07.json",
+   "sha256Before": "4087da1f1adfa8dd35abdf11e082ab04243f1b9e5e6463d635fb603e0eee3dfa",
+   "sha256After": "1abe04f2006dc4a1ea8bdeb47b76fc5720ec33995b352687cbe669de3ae781d2"
+  },
+  {
+   "path": "annotations/astra-pass1b/lislet-2026-04-07.receipt.json",
+   "sha256Before": "7a9f545ee61f2f4a6305b2be7e915d00f56fb0ef532d015c88588833a8e58d13",
+   "sha256After": "83985818df630a1f6bb0239758e669ba23db5c258b447767c440013c13141ba6"
+  },
+  {
+   "path": "annotations/astra-pass1b/lorraine-2026-01-13.json",
+   "sha256Before": "9b70d95f734199b84d3b460312afa52ccb873533844e91566eae7fae1c842460",
+   "sha256After": "ed0b1a6499b5913b589093b76feb7885e4de15468471baeac7324055228e8d3b"
+  },
+  {
+   "path": "annotations/astra-pass1b/lorraine-2026-01-13.receipt.json",
+   "sha256Before": "0b205ae4a1e4c0ab6fd901f8d3e2822d3f2d7fe705290b89c981d813583dfdf7",
+   "sha256After": "231389acc4897d586e4c39f71b64d2d879d6ed4086845a12ab093f74d9bd1b9c"
+  },
+  {
+   "path": "annotations/astra-pass1b/lyster-2026-02-02.json",
+   "sha256Before": "7582e7d4e4f1bf10ac588032dbc64aa17753ba6caedbb8d22ba28f29dc009543",
+   "sha256After": "f8acb306446f6ae2705bb82dd172c4df0d315143d886a8c5b12d722e20102b6d"
+  },
+  {
+   "path": "annotations/astra-pass1b/lyster-2026-02-02.receipt.json",
+   "sha256Before": "be818cf6f396a67738a0db030f093b527b3d0ede6e60140e66e9eb8c014281e6",
+   "sha256After": "4c2c0884b8bf007b97aefa00ae26ef00a17f276a1e0287ffe61ae350989c400b"
+  },
+  {
+   "path": "annotations/astra-pass1b/mcmasterville-2026-02-02.json",
+   "sha256Before": "5235c49b73abbd8967dd9e67095b5eb51c1530932437f4c7f44ef8cebe0be556",
+   "sha256After": "51a734d7084f3355b225dddadcff1db9531c5f02bc64e3af3db77ab4b32735f6"
+  },
+  {
+   "path": "annotations/astra-pass1b/mcmasterville-2026-02-02.receipt.json",
+   "sha256Before": "49ac7806aff3877b268f20cb545c0887e15f5c9fca66ef609c945cc573ad7714",
+   "sha256After": "86d34154ad4c8ed235266a14b936be8496bfccd0908d74de0eca0590e3d3cae4"
+  },
+  {
+   "path": "annotations/astra-pass1b/notre-dame-de-lourdes--joliette-2026-04-13.json",
+   "sha256Before": "4acfb8168cb6b8e223531be2ab676e82cf4383c434f41a4dd65f5a0840fd0f4e",
+   "sha256After": "bb426817ed26da52b3c084839c7447a700be62d46ac497a0cbcfbf3f0ee45af0"
+  },
+  {
+   "path": "annotations/astra-pass1b/notre-dame-de-lourdes--joliette-2026-04-13.receipt.json",
+   "sha256Before": "9e2da648bb2a9fca228d71ff20a7ebf2be93c1665eb5d5738a5625c630a76598",
+   "sha256After": "884462782717ea03e5a5b3bfab3f449b4b44793bbe5f50333b696601d7f770ff"
+  },
+  {
+   "path": "annotations/astra-pass1b/ogden-2026-03-09.json",
+   "sha256Before": "acf9892e17e277c4b8792e875391a966a3709fb920872110c696389babde4130",
+   "sha256After": "f35d8a9f5caf7da79dfdf33ec32bf187b28487d2e0ea85867d8e05c79864f42d"
+  },
+  {
+   "path": "annotations/astra-pass1b/ogden-2026-03-09.receipt.json",
+   "sha256Before": "25fa619da1d5dc451a2b66eb3761478621c34b1e54963e5ca3b93423632005e1",
+   "sha256After": "169a681409517d9c36a67a6ebc6f4813394d90e61b732802b8d3fe8429a6fb9d"
+  },
+  {
+   "path": "annotations/astra-pass1b/parisville-2026-05-05.json",
+   "sha256Before": "358270f8b650714a7e6d0d4a37b9ce9d5ae1c52838855bb9ac1145f1d39b87d4",
+   "sha256After": "cb85c2c49ea160fe99aa6f34910dec00df3730b1acef5bf84737b7d326566c8f"
+  },
+  {
+   "path": "annotations/astra-pass1b/parisville-2026-05-05.receipt.json",
+   "sha256Before": "3e3fff949aa22ccd1eb89ce1f49462b58d1f555caf2dd62685c6457a52b9b729",
+   "sha256After": "071253e8a35473b39e1319cc5e5eb5afead63308ea97c9f5bf9e6c7df52c94eb"
+  },
+  {
+   "path": "annotations/astra-pass1b/pincourt-2026-01-20.json",
+   "sha256Before": "a0ec80e742e0ab35c03629b2687014e290c82b76497f9ee45b7f72d33b256149",
+   "sha256After": "a86f0add696780d633c5bcb1a35c041ce0f92e5d107a87fe75948be78dfa44f2"
+  },
+  {
+   "path": "annotations/astra-pass1b/pincourt-2026-01-20.receipt.json",
+   "sha256Before": "d0ea015cfa8fdc90fc61dab3648795115569a2159c19d7e05bde8075a7ae1db2",
+   "sha256After": "0d0398d762975e02a214f2e359d4627062db91404a89662ffda65249acc66809"
+  },
+  {
+   "path": "annotations/astra-pass1b/roxton-2026-04-07.json",
+   "sha256Before": "0cabd20643f0e6e344612751ab90cccddb3d4caab5d354d87548c631a85b5095",
+   "sha256After": "3430599da538fb10142491fa2725c3213c51ea44d5a94f53f96b5e027a87fcf4"
+  },
+  {
+   "path": "annotations/astra-pass1b/roxton-2026-04-07.receipt.json",
+   "sha256Before": "ae036cef7d04f39a5fa5fe18996b2e307274effdadb102c1cd65853243def0d0",
+   "sha256After": "e074e7bad80f17441cf1c8834beb3173669f874ed8a50090f4bceefa171e11c3"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-bernard-de-michaudville-2026-04-01.json",
+   "sha256Before": "7c914cb2b23caa6d4c809330f3202e5cd538b6ce56e15ee633a6f812a8598db7",
+   "sha256After": "26654fcce046bd188f980eb732846f51da9af189f8dfc8fef5808e3e80d0e333"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-bernard-de-michaudville-2026-04-01.receipt.json",
+   "sha256Before": "92501fe99a38895f5ca62d19eff2e1ab9d28be09d0de970559c745650106a518",
+   "sha256After": "438379cff698499326fa8132582a89f51a4c10a8e7aaa413312a1f6105183b70"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-charles-de-bourget-2026-05-04.json",
+   "sha256Before": "b49e9dc965eafa1b69b26ae381362ac9614882cb84152bb3f47db9b1b1e34f00",
+   "sha256After": "2238f18345f4750953bb2e662ca71a9c6eb99673849f9bc56b44bf75e9b76b29"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-charles-de-bourget-2026-05-04.receipt.json",
+   "sha256Before": "7d261c723aa3a99618ba8d2a336a20be5e63a3063dd47857f3a898073f046477",
+   "sha256After": "1f8cf7f91386f81528e8c56dd9bc6c0e9fb42a72fdc6f2462e1e51c1cf91bc7c"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-constant-2026-01-20.json",
+   "sha256Before": "264d39fae77e83a03ccf76958c547a86838dc9d8816bab9ed406a1c364759ada",
+   "sha256After": "a4392c1616e4893aaf0badc4a741161ae21cefc42f24de0421fde8af3d241261"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-constant-2026-01-20.receipt.json",
+   "sha256Before": "67a844d8ef7c1f4c7062841c699a7c59b10810ed8f1c93b32d97ff40566a5340",
+   "sha256After": "7812f4e490bb9990c7cee7e4972c0964c0edad267eb01a2556b45974d322f60d"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-damien-2026-06-16.json",
+   "sha256Before": "7c0d8ad5cffce8da2b34d04e707e682087bb8075bf5ba6576b8f8c679e6b32dd",
+   "sha256After": "09aeeb68b34dcd946fed800279351c87218c2eec33e8093da20e55a498bfc6f5"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-damien-2026-06-16.receipt.json",
+   "sha256Before": "2672e3e1d0de22cc63bd72a4dd85ee5acd65f59df82ddc09bbafd53f86654ba1",
+   "sha256After": "f2f1df0af1a981bef3a4bcd0f21e544b4ea6b919dcc5a98c503212a77003c2ec"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-felix-de-kingsey-2026-04-07.json",
+   "sha256Before": "9b8187a96a6e8bb13a42480ec4869cf4a1f7669d7cc8a7331bb6511c8cd746e6",
+   "sha256After": "a61399acd4dc8e62c6ad8e49203088274675597fa7e3b4fdd8293776f7950605"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-felix-de-kingsey-2026-04-07.receipt.json",
+   "sha256Before": "7cd409057e770b8255a8e279a6efab0c9198e29a86506c88bd70e342c531b5b5",
+   "sha256After": "c725dded6d1f7afcacc860b93ba1432daa19fadde263340435759a8bd27ab313"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-henri-2026-03-02.json",
+   "sha256Before": "5d6cad34089e75d3e9c0ee952b071bea2ce7fc60a9bf0dd0fce234298d9e8a6e",
+   "sha256After": "3a356002caabaa3294e76f9efe3b4c619b87632dcfbf1fa5fa5e7253dd687940"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-henri-2026-03-02.receipt.json",
+   "sha256Before": "6c9b719437815de03536d44cc56ebab8a477ce250f64935c9c924b69b1dae68a",
+   "sha256After": "3787be8c2c0d3cde4b42caa18153d4b256233ee3d8bc15e49ab8b568aba489a5"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-lin-laurentides-2026-06-09.json",
+   "sha256Before": "e1734b79975b53e97a1c1c4b4c449fda8596345e4b39c0d424e6a04ea891c529",
+   "sha256After": "c06fa8e3cf9ff1b494c11610ca71a3b0ec3c518f7d62ebe58adf6fedd8bec228"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-lin-laurentides-2026-06-09.receipt.json",
+   "sha256Before": "b2ccbd09a20254f3c43e97f5f84ee5347001beb4d0ee656a403e93af5e186601",
+   "sha256After": "0255fc256e190bdea1b9280267b41d583dbded921ef5f736c5b94de978e6f9f9"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-polycarpe-2026-01-19.json",
+   "sha256Before": "d3c1fc010bee93e2f2b38e7041576339ba97790deab0fda8405cb8397b9981ee",
+   "sha256After": "c6de1485ac54ea361bed615ff8e22eb8f46b1025844bbeec8943560ca4639ce3"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-polycarpe-2026-01-19.receipt.json",
+   "sha256Before": "1443675092bf95f31921410ee89f5d51c12359cd18850a10e860cd227e4493af",
+   "sha256After": "6eac68a8519e9c265c91e5d93f7672c1363d93d5ec34d94c438442be96ff4acd"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-roch-de-lachigan-2026-05-11.json",
+   "sha256Before": "73b3f3e2baa11338ac1299b0514008bc193dbf7eb7776823f39e632f211da51b",
+   "sha256After": "de5d6f6f420a986bc51d6e51a67850e3352d810398ae33d1dc3c1f6514111c41"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-roch-de-lachigan-2026-05-11.receipt.json",
+   "sha256Before": "5b0946d62b5e7d6ccf05b6986abb6545d4e9d1ccfa8786cc09336d52d355c919",
+   "sha256After": "f37f0b83aaac5a67d0599c2e3ccd14aed47bc0d03f892217615ec5d4e3489fb9"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-stanislas--des-chenaux-2026-04-07.json",
+   "sha256Before": "dfed2d34433d2db67ecdb8f739a032f5c300ca751e467553911cca1be3b6e41f",
+   "sha256After": "d5441239e79ab6aa21f2485752b7c8ead9070851d91cee97a921dca3726ff88a"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-stanislas--des-chenaux-2026-04-07.receipt.json",
+   "sha256Before": "e42c5765d41c841583466cb2f77e00c5a98bafabbf7296cd882e27debd0a656c",
+   "sha256After": "71b0bf35d72bf029c7bd5dd0dec963ec87f651f3ea404c1f1d416137e6f372bc"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-sylvere-2026-04-07.json",
+   "sha256Before": "80993daf5dd3e5bb3d4b1c006f80d9349ff87f08bc119db7340faeca276a08d0",
+   "sha256After": "43e4a829e877804cf4f2958778070c85328829df4f98cf5a7333980ceaca0c73"
+  },
+  {
+   "path": "annotations/astra-pass1b/saint-sylvere-2026-04-07.receipt.json",
+   "sha256Before": "598c7b0b30da3bdce75ae73748b89ca35cdb332a6f26ef67b18779c851270101",
+   "sha256After": "b68791119396ca4863342160cfc30ea828769c7449849152571466734bdbbd1c"
+  },
+  {
+   "path": "annotations/astra-pass1b/sainte-brigide-diberville-2026-06-01.json",
+   "sha256Before": "728486342431bdd67e09b2c072172ef5dabcb15206d3555561f2e0876def29cb",
+   "sha256After": "dad3d172970d203fdf3b63b600baa5bafdc7fec11e18cc40bcfe1ca494907d62"
+  },
+  {
+   "path": "annotations/astra-pass1b/sainte-brigide-diberville-2026-06-01.receipt.json",
+   "sha256Before": "37ce301f8917656ccc9b70dfebd4cfd8f329db5b572568c70e157460e8ff6b3c",
+   "sha256After": "98cadaa4cae3db500644c1579a7aa19430c7b6ab8cfabe3401cee9ecad1dd78e"
+  },
+  {
+   "path": "annotations/astra-pass1b/sainte-francoise--becancour-2026-05-04.json",
+   "sha256Before": "f12c56ba6162afc3f9f702e8ab3ef3bd6af7980539efe2d62ee35341ca00ef5f",
+   "sha256After": "d3ea34382fd2a9768f20d465d0e82d7f10d85c52092dd7e27b14a876852ceb5a"
+  },
+  {
+   "path": "annotations/astra-pass1b/sainte-francoise--becancour-2026-05-04.receipt.json",
+   "sha256Before": "602289820da7599945fd93af4cc4eaed98bb82730fe9758e192bb8fa7e3b62a8",
+   "sha256After": "81536568ff18bf52208602cca40487ae5495b647b1677838bddb783311521c33"
+  },
+  {
+   "path": "annotations/astra-pass1b/stratford-2026-04-20.json",
+   "sha256Before": "e2d971a79a57c034778570c83d3c01b968123d229cc44373019046329b7f3898",
+   "sha256After": "e8f6fea8d086330bd8e8776f0f2d165a94ac757d36829b86799a6d5d4a2225c7"
+  },
+  {
+   "path": "annotations/astra-pass1b/stratford-2026-04-20.receipt.json",
+   "sha256Before": "342b249393cca6a5f8e7dbe38797a0009eedde23b37812fe83c2e6e8b9dec715",
+   "sha256After": "5111f52f1e22434841f16c74ca57d11c77f8fffd567a6fd4827156552095a95a"
+  },
+  {
+   "path": "annotations/astra-pass1b/tadoussac-2026-01-13.json",
+   "sha256Before": "b677bd557d4e699a0cf76eafa9e71d8e383c276c488a358567f2ad0f96921fc5",
+   "sha256After": "897db0696fce756c96bb6871e21ffcd98aa74950440dcdb9b4b97a2635866d7c"
+  },
+  {
+   "path": "annotations/astra-pass1b/tadoussac-2026-01-13.receipt.json",
+   "sha256Before": "253335c1fbab72c33a4c69ff2f6231c3670867b5912901cf3736e34fed28e61c",
+   "sha256After": "ae4f197b0852d23d5e92464569696283ae840ab15ba0a4a6e165e47558bfd72c"
+  },
+  {
+   "path": "annotations/astra-pass1b/val-dor-2026-06-01.json",
+   "sha256Before": "8ea498189aca77793c79081f80f31793f9659a368dc4cac121244fb4a218f706",
+   "sha256After": "8a043ceab52ce00eaf26bbb98626c98010b04c7a9a2abbaa3b9e3f764d59797d"
+  },
+  {
+   "path": "annotations/astra-pass1b/val-dor-2026-06-01.receipt.json",
+   "sha256Before": "f28e32154e9fa0cdc58cade85a7420aef23f2aaa85f19a3b5c97f783e09e1e15",
+   "sha256After": "e25dbd1492dfa2010fbeded6fe91d76ea2cbd7305952ab542318caceedf30a31"
+  },
+  {
+   "path": "annotations/astra-pass1b/val-racine-2026-06-09.json",
+   "sha256Before": "8387a1db18c1c2b1d170a9b44cdf07aed49f28cf3c8292b115fb62525bd0e1dc",
+   "sha256After": "b615010f2e8480ccc844bb2d8e66248b2114a0a4036869aead0c891ffea59586"
+  },
+  {
+   "path": "annotations/astra-pass1b/val-racine-2026-06-09.receipt.json",
+   "sha256Before": "5930c1bd54ceb05a9a58c9b3c57efccd2700b374ac22d5f43fda752be0ad7118",
+   "sha256After": "28720c4fc6a6f190239bdc75d671ac3262500e0fbab669a0b1f844826058e33a"
+  },
+  {
+   "path": "annotations/astra-pass1b/waterville-2026-04-07.json",
+   "sha256Before": "3ed494319ec0883a930e1b1f49a5bb3b7374f240e822848da1df7af92f2e09c7",
+   "sha256After": "8c6461cb6bbab8d2762b1771658e90124003c53b64a5bfd7663dcdd3d2181dc3"
+  },
+  {
+   "path": "annotations/astra-pass1b/waterville-2026-04-07.receipt.json",
+   "sha256Before": "119c71157449e788c435b41caf03c7141bddcc9894f05bfd60563846ac6b2fee",
+   "sha256After": "272ee9af196cf2dbaf5a7fcc0ebb17685566c789ac22bba4d8c2b38870495aa9"
+  },
+  {
+   "path": "annotations/astra-pass1b/wentworth-nord-2026-01-21.json",
+   "sha256Before": "3d3d6eb4e601ba85c11b076ddfee26059c59a791aa8b92277e8a9c34a7a6ee6b",
+   "sha256After": "a8a467482ed92aed7358297a3927ea10ba73e070e52d2f9ffab0b7ac864d9f35"
+  },
+  {
+   "path": "annotations/astra-pass1b/wentworth-nord-2026-01-21.receipt.json",
+   "sha256Before": "340ba851496a4c2a254bebfa22650006d06ad11465c8e9673e7affa2f806815e",
+   "sha256After": "43b6b2ffbe3d0d29785b5716b1931a7cf9387bfb5e6ea7b4275ee7d63835cfde"
+  },
+  {
+   "path": "corrige/astra-pass1b/abercorn-2026-03-30.json",
+   "sha256Before": "a06e9c53027339dc7680d14abada1039c32fc977c1a898321fe18f13e4e31773",
+   "sha256After": "a06e9c53027339dc7680d14abada1039c32fc977c1a898321fe18f13e4e31773"
+  },
+  {
+   "path": "corrige/astra-pass1b/acton-vale-2026-03-16.json",
+   "sha256Before": "b08d0ba9d74a8bbe5ad19a3042a968272cfc530ddccfb73cdaf02c845c10cbe4",
+   "sha256After": "b08d0ba9d74a8bbe5ad19a3042a968272cfc530ddccfb73cdaf02c845c10cbe4"
+  },
+  {
+   "path": "corrige/astra-pass1b/amherst-2026-06-08.json",
+   "sha256Before": "8d4136b664d1f06f38993893cdf0f7d16719614279270b422a5531b71c8351eb",
+   "sha256After": "8d4136b664d1f06f38993893cdf0f7d16719614279270b422a5531b71c8351eb"
+  },
+  {
+   "path": "corrige/astra-pass1b/arundel-2026-07-31.json",
+   "sha256Before": "3964115f8c585685db36c45578d72d4c9fedc411bd6055710e66d80e7119e4a5",
+   "sha256After": "3964115f8c585685db36c45578d72d4c9fedc411bd6055710e66d80e7119e4a5"
+  },
+  {
+   "path": "corrige/astra-pass1b/aumond-2026-01-14.json",
+   "sha256Before": "216fba18e09e307db07956ec03ce8fc49f14685344f7266000a2544d3797eb43",
+   "sha256After": "216fba18e09e307db07956ec03ce8fc49f14685344f7266000a2544d3797eb43"
+  },
+  {
+   "path": "corrige/astra-pass1b/ayers-cliff-2026-03-02.json",
+   "sha256Before": "6f250d87530382905e56373a4ef2448239ec3b16ea0845913735db75f860c2b5",
+   "sha256After": "6f250d87530382905e56373a4ef2448239ec3b16ea0845913735db75f860c2b5"
+  },
+  {
+   "path": "corrige/astra-pass1b/barnston-ouest-2026-05-04.json",
+   "sha256Before": "680dc026b53c8afa3c3bdf497622834d1035a5ea4dba574500035af32bebfad0",
+   "sha256After": "680dc026b53c8afa3c3bdf497622834d1035a5ea4dba574500035af32bebfad0"
+  },
+  {
+   "path": "corrige/astra-pass1b/beaupre-2026-03-02.json",
+   "sha256Before": "79c17bf935932c082534c0012124c72a7aace45fa262805868cdaf1ca869f31c",
+   "sha256After": "e076b540a604861e72984d1ba2b5d94f229f531890d3db37a8e77f3b52758f8b"
+  },
+  {
+   "path": "corrige/astra-pass1b/bedford--brome-missisquoi-2026-06-02.json",
+   "sha256Before": "88f1c51e2e36e3aaeb717fa5061d312374e45392d45ac8ee350cd2452c5af2f1",
+   "sha256After": "88f1c51e2e36e3aaeb717fa5061d312374e45392d45ac8ee350cd2452c5af2f1"
+  },
+  {
+   "path": "corrige/astra-pass1b/blue-sea-2026-02-03.json",
+   "sha256Before": "9b258636c4a4c94f8d172018b91c3bb3560c663293a01f44ac80b700fd676cef",
+   "sha256After": "9b258636c4a4c94f8d172018b91c3bb3560c663293a01f44ac80b700fd676cef"
+  },
+  {
+   "path": "corrige/astra-pass1b/bolton-est-2026-01-12.json",
+   "sha256Before": "e700a95fd674e3410f822ab92f35d7b2de3d01741294296470101f78ff7af9c3",
+   "sha256After": "e700a95fd674e3410f822ab92f35d7b2de3d01741294296470101f78ff7af9c3"
+  },
+  {
+   "path": "corrige/astra-pass1b/candiac-2026-06-15.json",
+   "sha256Before": "8a95e434479794e0e08ff998ba0f33cdd49ac7847de431ebe21923d106878c11",
+   "sha256After": "8a95e434479794e0e08ff998ba0f33cdd49ac7847de431ebe21923d106878c11"
+  },
+  {
+   "path": "corrige/astra-pass1b/chesterville-2026-03-02.json",
+   "sha256Before": "c14a8cfc1b09cfde654177258c3499249c5f63355cf3d611f71130ccd7edb892",
+   "sha256After": "c14a8cfc1b09cfde654177258c3499249c5f63355cf3d611f71130ccd7edb892"
+  },
+  {
+   "path": "corrige/astra-pass1b/chibougamau-2026-05-16.json",
+   "sha256Before": "00cd4698d0adff6038bba8bc92d6921f658aab468aa5bb8282928bbff8868cd8",
+   "sha256After": "00cd4698d0adff6038bba8bc92d6921f658aab468aa5bb8282928bbff8868cd8"
+  },
+  {
+   "path": "corrige/astra-pass1b/coteau-du-lac-2026-02-10.json",
+   "sha256Before": "97d6e233a99a18f0416dd00687a842082220a531b6f6ba5e224ad6f21941ed05",
+   "sha256After": "97d6e233a99a18f0416dd00687a842082220a531b6f6ba5e224ad6f21941ed05"
+  },
+  {
+   "path": "corrige/astra-pass1b/danville-2026-01-15.json",
+   "sha256Before": "e39d138cb2e48091ada56ff8be6e32d3af7438f85efeb528110204abd99eb833",
+   "sha256After": "e39d138cb2e48091ada56ff8be6e32d3af7438f85efeb528110204abd99eb833"
+  },
+  {
+   "path": "corrige/astra-pass1b/daveluyville-2026-05-04.json",
+   "sha256Before": "ce5c1ab59c3ef4d631e075f70173616176154485d12a00c99c77693905d26f7e",
+   "sha256After": "ce5c1ab59c3ef4d631e075f70173616176154485d12a00c99c77693905d26f7e"
+  },
+  {
+   "path": "corrige/astra-pass1b/dollard-des-ormeaux-2026-02-10.json",
+   "sha256Before": "d42fe8cab961b183f6aaa12efec634dcf032f5267f43178753be2097f8e1f7f1",
+   "sha256After": "d42fe8cab961b183f6aaa12efec634dcf032f5267f43178753be2097f8e1f7f1"
+  },
+  {
+   "path": "corrige/astra-pass1b/dosquet-2026-01-13.json",
+   "sha256Before": "96c03b5364e6644994677d3d074a675acb8de818a565a0a276a94b626feccdbd",
+   "sha256After": "96c03b5364e6644994677d3d074a675acb8de818a565a0a276a94b626feccdbd"
+  },
+  {
+   "path": "corrige/astra-pass1b/grenville-sur-la-rouge-2026-04-14.json",
+   "sha256Before": "a600c29650a3c0f2e22c8d74a4bc5f13e41ab3baa18ed225a29b2f2f8093b4a2",
+   "sha256After": "a600c29650a3c0f2e22c8d74a4bc5f13e41ab3baa18ed225a29b2f2f8093b4a2"
+  },
+  {
+   "path": "corrige/astra-pass1b/lac-du-cerf-2026-04-11.json",
+   "sha256Before": "cf5d42316ae31d8bb8de82cd0521418875143967cf9d65b9c2bc0538a9b37d2b",
+   "sha256After": "cf5d42316ae31d8bb8de82cd0521418875143967cf9d65b9c2bc0538a9b37d2b"
+  },
+  {
+   "path": "corrige/astra-pass1b/lac-saint-paul-2026-05-11.json",
+   "sha256Before": "c66ab75d2efcdd8b4565a04ead9342f2e51da106e37a75cc90a3a89018b43e96",
+   "sha256After": "c66ab75d2efcdd8b4565a04ead9342f2e51da106e37a75cc90a3a89018b43e96"
+  },
+  {
+   "path": "corrige/astra-pass1b/lac-tremblant-nord-2026-05-09.json",
+   "sha256Before": "af74431e35b6367397ed24d7a79c932195b3b11c93efb29df74a550ab0170a05",
+   "sha256After": "af74431e35b6367397ed24d7a79c932195b3b11c93efb29df74a550ab0170a05"
+  },
+  {
+   "path": "corrige/astra-pass1b/les-coteaux-2026-03-16.json",
+   "sha256Before": "238a3c7a4edb240cc89190e903a86dce2fac74b8907f0513afce8118d16e3096",
+   "sha256After": "238a3c7a4edb240cc89190e903a86dce2fac74b8907f0513afce8118d16e3096"
+  },
+  {
+   "path": "corrige/astra-pass1b/lislet-2026-04-07.json",
+   "sha256Before": "a1d74a00c3fcc4059fe922c79f8dfbcafdef393e43f3e3c93b286b395e6f2731",
+   "sha256After": "a1d74a00c3fcc4059fe922c79f8dfbcafdef393e43f3e3c93b286b395e6f2731"
+  },
+  {
+   "path": "corrige/astra-pass1b/lorraine-2026-01-13.json",
+   "sha256Before": "8bc9679ca65dafb376ec673475f36bd09f74d687b85fbec189f07e0ab5320f12",
+   "sha256After": "8bc9679ca65dafb376ec673475f36bd09f74d687b85fbec189f07e0ab5320f12"
+  },
+  {
+   "path": "corrige/astra-pass1b/lyster-2026-02-02.json",
+   "sha256Before": "941c0412d6383231922b9c2894cb47e8d2f69a90173783e4e0e2aa36181c4de8",
+   "sha256After": "941c0412d6383231922b9c2894cb47e8d2f69a90173783e4e0e2aa36181c4de8"
+  },
+  {
+   "path": "corrige/astra-pass1b/mcmasterville-2026-02-02.json",
+   "sha256Before": "a023f85de3f4c39ec4fae849967bf8a689ace059099072ee5f6fd55fa1401120",
+   "sha256After": "a023f85de3f4c39ec4fae849967bf8a689ace059099072ee5f6fd55fa1401120"
+  },
+  {
+   "path": "corrige/astra-pass1b/notre-dame-de-lourdes--joliette-2026-04-13.json",
+   "sha256Before": "9502e17e98a536f307e9c8a0e372c812eb6e07822d5591ed5cdf6d0d2002b2bf",
+   "sha256After": "9502e17e98a536f307e9c8a0e372c812eb6e07822d5591ed5cdf6d0d2002b2bf"
+  },
+  {
+   "path": "corrige/astra-pass1b/ogden-2026-03-09.json",
+   "sha256Before": "28b710cc5bc7ff5a5c7543aebeba596f132cd22edacfaadf8640930963d09a88",
+   "sha256After": "28b710cc5bc7ff5a5c7543aebeba596f132cd22edacfaadf8640930963d09a88"
+  },
+  {
+   "path": "corrige/astra-pass1b/parisville-2026-05-05.json",
+   "sha256Before": "b1192cf88a314c1b56f5fba9d8aa3ef8b133337ff4be55d9f6ccb157a7bcb7dc",
+   "sha256After": "b1192cf88a314c1b56f5fba9d8aa3ef8b133337ff4be55d9f6ccb157a7bcb7dc"
+  },
+  {
+   "path": "corrige/astra-pass1b/pincourt-2026-01-20.json",
+   "sha256Before": "16cdae5d039124fc7e5c04f93b850c110354ebf14979e0d197defcf753ee69e5",
+   "sha256After": "16cdae5d039124fc7e5c04f93b850c110354ebf14979e0d197defcf753ee69e5"
+  },
+  {
+   "path": "corrige/astra-pass1b/roxton-2026-04-07.json",
+   "sha256Before": "d8066287e139fafb6d9a12c718599ef170dffb3755dcb23cf2a6af4bbfbb5178",
+   "sha256After": "d8066287e139fafb6d9a12c718599ef170dffb3755dcb23cf2a6af4bbfbb5178"
+  },
+  {
+   "path": "corrige/astra-pass1b/saint-bernard-de-michaudville-2026-04-01.json",
+   "sha256Before": "2b8da1480e13399e1b015a8798ff693733569096029965cc94ed42a079c9ef77",
+   "sha256After": "2b8da1480e13399e1b015a8798ff693733569096029965cc94ed42a079c9ef77"
+  },
+  {
+   "path": "corrige/astra-pass1b/saint-charles-de-bourget-2026-05-04.json",
+   "sha256Before": "3ba10d7f05a7e62c6f5d41b8127f466a5c4203728f67a43b5bb8dc65daef3e00",
+   "sha256After": "3ba10d7f05a7e62c6f5d41b8127f466a5c4203728f67a43b5bb8dc65daef3e00"
+  },
+  {
+   "path": "corrige/astra-pass1b/saint-constant-2026-01-20.json",
+   "sha256Before": "bb65344ff5f028f030ebf5dad5b4bcbcde3cd75e3c0a91770da2cb46c0b7d2dd",
+   "sha256After": "bb65344ff5f028f030ebf5dad5b4bcbcde3cd75e3c0a91770da2cb46c0b7d2dd"
+  },
+  {
+   "path": "corrige/astra-pass1b/saint-damien-2026-06-16.json",
+   "sha256Before": "d820920c1d81136d28d779073e19857a0522ba57ecb97cb6ff476153c434707a",
+   "sha256After": "d820920c1d81136d28d779073e19857a0522ba57ecb97cb6ff476153c434707a"
+  },
+  {
+   "path": "corrige/astra-pass1b/saint-felix-de-kingsey-2026-04-07.json",
+   "sha256Before": "57b1f96c179a513a1d90486676ae994d4fb7d1d966982b4b3c84f8da5a688725",
+   "sha256After": "57b1f96c179a513a1d90486676ae994d4fb7d1d966982b4b3c84f8da5a688725"
+  },
+  {
+   "path": "corrige/astra-pass1b/saint-henri-2026-03-02.json",
+   "sha256Before": "535c5d37941527cfc4e766c2c7baf171864ebdeb1b4ff86998f15d3afda6c6b5",
+   "sha256After": "535c5d37941527cfc4e766c2c7baf171864ebdeb1b4ff86998f15d3afda6c6b5"
+  },
+  {
+   "path": "corrige/astra-pass1b/saint-lin-laurentides-2026-06-09.json",
+   "sha256Before": "e52428660b25772a9332d0a9d296d1fe17b387640408a61903e683f4ba309c8d",
+   "sha256After": "e52428660b25772a9332d0a9d296d1fe17b387640408a61903e683f4ba309c8d"
+  },
+  {
+   "path": "corrige/astra-pass1b/saint-polycarpe-2026-01-19.json",
+   "sha256Before": "18b67e0766fa528b6406f6de6b3c1cc1a819f3b4bbe718b89636d8e61acacd5b",
+   "sha256After": "18b67e0766fa528b6406f6de6b3c1cc1a819f3b4bbe718b89636d8e61acacd5b"
+  },
+  {
+   "path": "corrige/astra-pass1b/saint-roch-de-lachigan-2026-05-11.json",
+   "sha256Before": "4b55dec1b533eb72fba1cd64d940889608a7dd9486873b5b5bc7135ed0a7934c",
+   "sha256After": "4b55dec1b533eb72fba1cd64d940889608a7dd9486873b5b5bc7135ed0a7934c"
+  },
+  {
+   "path": "corrige/astra-pass1b/saint-stanislas--des-chenaux-2026-04-07.json",
+   "sha256Before": "8c3ce5ed0fa2bb7c57dcb04c75b59a59c365388960a1522b02fd6e699320842f",
+   "sha256After": "8c3ce5ed0fa2bb7c57dcb04c75b59a59c365388960a1522b02fd6e699320842f"
+  },
+  {
+   "path": "corrige/astra-pass1b/saint-sylvere-2026-04-07.json",
+   "sha256Before": "6b031e5fb623195d718dd0ae932c174a7a59b9a36acb546a83ab357c14e8aacd",
+   "sha256After": "6b031e5fb623195d718dd0ae932c174a7a59b9a36acb546a83ab357c14e8aacd"
+  },
+  {
+   "path": "corrige/astra-pass1b/sainte-brigide-diberville-2026-06-01.json",
+   "sha256Before": "a780b20a64c8bc2f6544989b369c81238971ca67e95e608671f63d17a25e6fba",
+   "sha256After": "a780b20a64c8bc2f6544989b369c81238971ca67e95e608671f63d17a25e6fba"
+  },
+  {
+   "path": "corrige/astra-pass1b/sainte-francoise--becancour-2026-05-04.json",
+   "sha256Before": "2b5c472f1bd8a06de283863a04fb8157d824be9298f8e61373caea66bc78eb51",
+   "sha256After": "2b5c472f1bd8a06de283863a04fb8157d824be9298f8e61373caea66bc78eb51"
+  },
+  {
+   "path": "corrige/astra-pass1b/stratford-2026-04-20.json",
+   "sha256Before": "a2898f4b7c85105c8863c64581c5e295f0717cd3de3445755a5ce61d2020a4bf",
+   "sha256After": "a2898f4b7c85105c8863c64581c5e295f0717cd3de3445755a5ce61d2020a4bf"
+  },
+  {
+   "path": "corrige/astra-pass1b/tadoussac-2026-01-13.json",
+   "sha256Before": "381a22c26f49f50dd5c8e544d291cb01141ca934a97fd452dc42f3ec5c4c359e",
+   "sha256After": "381a22c26f49f50dd5c8e544d291cb01141ca934a97fd452dc42f3ec5c4c359e"
+  },
+  {
+   "path": "corrige/astra-pass1b/val-dor-2026-06-01.json",
+   "sha256Before": "9da1e761d8b596bd623b6e3743fb6b97b535929ca8c59241fb8e01513bfd8e97",
+   "sha256After": "9da1e761d8b596bd623b6e3743fb6b97b535929ca8c59241fb8e01513bfd8e97"
+  },
+  {
+   "path": "corrige/astra-pass1b/val-racine-2026-06-09.json",
+   "sha256Before": "8aa29220c85fde9454fd87513aa8e9d158349d534d82da9065043e8a57b79289",
+   "sha256After": "8aa29220c85fde9454fd87513aa8e9d158349d534d82da9065043e8a57b79289"
+  },
+  {
+   "path": "corrige/astra-pass1b/waterville-2026-04-07.json",
+   "sha256Before": "dfcbde4da2228bbe6f21a72214937d2554617aa904e70dbdc636a2483aeaf8ac",
+   "sha256After": "dfcbde4da2228bbe6f21a72214937d2554617aa904e70dbdc636a2483aeaf8ac"
+  },
+  {
+   "path": "corrige/astra-pass1b/wentworth-nord-2026-01-21.json",
+   "sha256Before": "3e65e610048179167aa182f9e9c112be1643f617af8b4f94e89b13b113ef9076",
+   "sha256After": "3e65e610048179167aa182f9e9c112be1643f617af8b4f94e89b13b113ef9076"
+  },
+  {
+   "path": "annotations/fable-pass1/abercorn-2026-03-30.json",
+   "sha256Before": "6b8ea653084863c6e1ab5c2834c94754fceba7edb38def80f4b4ea10bd22802c",
+   "sha256After": "4f2617e9c1147349e37f6a50476cad7f16298fe6015da1af4ad49aa87e7855b3"
+  },
+  {
+   "path": "annotations/fable-pass1/abercorn-2026-03-30.receipt.json",
+   "sha256Before": "7ebce42f195f88b43b9e7d3afd54292fd48d8951bc0ec8c356f699204402f9b7",
+   "sha256After": "a17a0ae3daacdc30cba72107bf095b89618a536c9d8b1718fe4310dba0c2cdd3"
+  },
+  {
+   "path": "annotations/fable-pass1/acton-vale-2026-03-16.json",
+   "sha256Before": "4173dba02ba3d73f6deb72364a5b9b59407723651406a0c299765c5a41def36e",
+   "sha256After": "6d97a32ef9d3a315e984f884157b4c4dbac25e137fc1969473e432542f41c22f"
+  },
+  {
+   "path": "annotations/fable-pass1/acton-vale-2026-03-16.receipt.json",
+   "sha256Before": "0194c8978e5adceb15dbfd0b7c298fcbb43cd860c7294bd5e813e738fd469662",
+   "sha256After": "5048ae161e0ae919b0334f9e60e41fbe4c8012f5029cf928ca94494ab71a1714"
+  },
+  {
+   "path": "annotations/fable-pass1/amherst-2026-06-08.json",
+   "sha256Before": "8c52873bcd51538196a4640e78e464db7c9453424390c0ca1c642fd1725aa099",
+   "sha256After": "038190222685f29fabad153914fdd3e1032f684a6c302a5c7cfc016ac2c0eee8"
+  },
+  {
+   "path": "annotations/fable-pass1/amherst-2026-06-08.receipt.json",
+   "sha256Before": "024751886ff59bc25b6f133942ba73e805e0388e76ff65cda1da3f162b44fc25",
+   "sha256After": "274dd5db40131dc21fa83eedc257d80b7eccf99c71bbbeabf14a6baa8ec9c9ca"
+  },
+  {
+   "path": "annotations/fable-pass1/arundel-2026-07-31.json",
+   "sha256Before": "32c5a372f8311eeb2e17ebbcdf22a25afe3a7e2502fbf61df75b7139174518a7",
+   "sha256After": "f1b8ffcb922df6e977b6b3bd479923af478787aee8fc92a976f8d02873c9e9f0"
+  },
+  {
+   "path": "annotations/fable-pass1/arundel-2026-07-31.receipt.json",
+   "sha256Before": "06d7e62082e1f1a084f053523bce176af5241a893597c5607f8406599ed73d57",
+   "sha256After": "2dea7791ab570dbb56c6b87ddf708d0dd849f63a4bc8fcda3daa3023c172380e"
+  },
+  {
+   "path": "annotations/fable-pass1/aumond-2026-01-14.json",
+   "sha256Before": "688e1108782d5235de8be2eea4ce19e0818c66b505b9657cf8938442dec0fce0",
+   "sha256After": "ccca7965c6077fc129bec432dd5773b72d0adfbf97a9261f5d90c237114aa6e8"
+  },
+  {
+   "path": "annotations/fable-pass1/aumond-2026-01-14.receipt.json",
+   "sha256Before": "89b3694c7c49dfd92d28833cc3538a11be7d40af41d12fa05b4111e2b88c365c",
+   "sha256After": "9312ebff08fbdfd1619544f8249e2fc9c746a1a1076f49256d8b72679097e4f9"
+  },
+  {
+   "path": "annotations/fable-pass1/ayers-cliff-2026-03-02.json",
+   "sha256Before": "84c8fc642c82662238a1c5ecab78275e29a4927dddb46218a88ae4de65f510dd",
+   "sha256After": "f28e190a042c06a2fc1177e58c9066dc85d0bad6929670da4c84c7a2a2c247ba"
+  },
+  {
+   "path": "annotations/fable-pass1/ayers-cliff-2026-03-02.receipt.json",
+   "sha256Before": "a3502a9f39e341978e1fa8b5dad310da7a28cdb0df0c2fe9b36cf336cd5c1181",
+   "sha256After": "22089f741ea84b86627e76f93904963783efbb5ec7076228fb8cfee8fc0ad9a2"
+  },
+  {
+   "path": "annotations/fable-pass1/barnston-ouest-2026-05-04.json",
+   "sha256Before": "50dc3284a36cb01a355e30fe1114e6ff634730d8ab1b88141d8c92511468ff28",
+   "sha256After": "0020098a066fd31857ba4c96e1ac7001be6e4ef6a5d700f11c0a78eefbc11689"
+  },
+  {
+   "path": "annotations/fable-pass1/barnston-ouest-2026-05-04.receipt.json",
+   "sha256Before": "9c8adc761d4520df1637b2afea10a3a958c2d212a1b02536c9dd02e58632f8fe",
+   "sha256After": "83de593d315bb2d61c157a0077b983655ce63fefda8bfcda32c70263749057c7"
+  },
+  {
+   "path": "annotations/fable-pass1/beaupre-2026-03-02.json",
+   "sha256Before": "623a48032f7ae368c316320fed4d26fa26fdd39513bb0720720fc9c8cd5c76fd",
+   "sha256After": "e7ee1853cdcbfc54b868aa6780c0ed0613ac2276d5212a0bccf72a83c174581e"
+  },
+  {
+   "path": "annotations/fable-pass1/beaupre-2026-03-02.receipt.json",
+   "sha256Before": "b256a8edccaaae99d502d58b8cc28f244b476ea5da9f78371f9a28b4f8295800",
+   "sha256After": "106f8724cb0af1665af7d352d738584206937046eef60251fef0469ba4f728f6"
+  },
+  {
+   "path": "annotations/fable-pass1/bedford--brome-missisquoi-2026-06-02.json",
+   "sha256Before": "55aafc4be283a707e80d5b7cb65eb0dce0624f3cf9b8e032eed94e19b0778460",
+   "sha256After": "f2fa3e0225761c9bc6c5783ecb15de57560166da6d37386ea9eaf310f2d33f09"
+  },
+  {
+   "path": "annotations/fable-pass1/bedford--brome-missisquoi-2026-06-02.receipt.json",
+   "sha256Before": "7f64b78cec3102d96117fa9ecba63c6a5b67c3d20d148619d60a9e50a6ca8d73",
+   "sha256After": "e403c99a3236d9ccd925769e323f1a3cfb20de08f14140743f247dbc987b3bd5"
+  },
+  {
+   "path": "annotations/fable-pass1/blue-sea-2026-02-03.json",
+   "sha256Before": "c16bf231b8a581f9121ca9018b1fd3522e0516fb6dd157ecfb11f70a8ded10c1",
+   "sha256After": "287712e5335502729b9555470ad2b80dadd461382bfcb0b477d015a46c69435e"
+  },
+  {
+   "path": "annotations/fable-pass1/blue-sea-2026-02-03.receipt.json",
+   "sha256Before": "a49ea4e722d6b096c035d79ae31b0e6ab78198ff33c94fba8c3b689cacd2dcfa",
+   "sha256After": "6a611480ba1ffcda094bd93676347c6d71f2c5ae191bf8a3a5571caa5e07afa5"
+  },
+  {
+   "path": "annotations/fable-pass1/bolton-est-2026-01-12.json",
+   "sha256Before": "03783b5e2992c910a1ecfaf0334116cb6e388a60d6c15415b110d9f8d478f56e",
+   "sha256After": "397c990b82ff306cc6430b4e4fc4885c7b69073dae064e5361c02a61c7c9582d"
+  },
+  {
+   "path": "annotations/fable-pass1/bolton-est-2026-01-12.receipt.json",
+   "sha256Before": "4f82170308e7d6c1de6ebabcd6afaf5fedf76a4f53d99d8248e434f80928f779",
+   "sha256After": "2f22eae75cfe0982e724c5b6d7f4f4426fa08398b9266fc5821ce4cd78ae9c35"
+  },
+  {
+   "path": "annotations/fable-pass1/candiac-2026-06-15.json",
+   "sha256Before": "2f50d9c215d23d1dcf99a1191d6cff407f634915567988f6b19325f7e19d02cf",
+   "sha256After": "7bf869aefb65ba617a011cdbe0444e44619b0912f8331b1163a0a36dd8bcf153"
+  },
+  {
+   "path": "annotations/fable-pass1/candiac-2026-06-15.receipt.json",
+   "sha256Before": "ea632be94fd6ea4e04c7a2db24bb2742c0af4b2c7da9dca32caa8f42e100b751",
+   "sha256After": "969992a22dab07fc474117e9761d5318167ce77c5edd023dde6b2ef1aa07b736"
+  },
+  {
+   "path": "annotations/fable-pass1/chesterville-2026-03-02.json",
+   "sha256Before": "64bf2698285ab3c02a68d2be561b88446ac39b562401c1d27a008c16dc24e1fd",
+   "sha256After": "8d5abf4a2c620b37987d3b56177becf793e0cefbb17ac149b0b6bd2c3c7c4a32"
+  },
+  {
+   "path": "annotations/fable-pass1/chesterville-2026-03-02.receipt.json",
+   "sha256Before": "b1dc1fde30c2bf0fca147fe5086afb9c9f1bbd5427aa11dc9a6877da0ff643c8",
+   "sha256After": "a261afd303704e3b569bf5775924e667aed996815e0c8902d828893fa670bbf4"
+  },
+  {
+   "path": "annotations/fable-pass1/chibougamau-2026-05-16.json",
+   "sha256Before": "e7a285b84831fbb6b165f312a614b1ccaa956cfab716d81ad409fded073687a4",
+   "sha256After": "de149de8b90a52346587bbbffdf50f3b98741c49e1a41b7c3b87d9dc74c99a46"
+  },
+  {
+   "path": "annotations/fable-pass1/chibougamau-2026-05-16.receipt.json",
+   "sha256Before": "83e6c5eafd1a0ca5032ef00d52a75513b7c3c670a6ac818aa73c86f4fc7036fe",
+   "sha256After": "2c6be72d079dc4a3784fde9051c8a6678af60b3d0e3b857f06e61d6c95fa4dfa"
+  },
+  {
+   "path": "annotations/fable-pass1/coteau-du-lac-2026-02-10.json",
+   "sha256Before": "c2c135bb71c75706e11e2b8a15c570d675dc1a4b433b61164ff992b7f351a4cf",
+   "sha256After": "3a74cfc5e23a7aac7b723f2c30abb2959a8b3dbbf0e2a2c4b3f9c24f7616ec1e"
+  },
+  {
+   "path": "annotations/fable-pass1/coteau-du-lac-2026-02-10.receipt.json",
+   "sha256Before": "c45f25b14cd0310337783e048dae152944d98786bedc4bc4831a2e419d542d12",
+   "sha256After": "b2da3b948ccd2a8a7b7740a1b0087aab634b94043d2eb75086deaecf33fca060"
+  },
+  {
+   "path": "annotations/fable-pass1/danville-2026-01-15.json",
+   "sha256Before": "0292660206c5a83f2bd9df9c10b88c250608ff3833a8acc4b90b40fd66a017bf",
+   "sha256After": "0d5bb34d31a1eab47c084d9795d75c0616d86bbea12f41d971bba6de4bebae34"
+  },
+  {
+   "path": "annotations/fable-pass1/danville-2026-01-15.receipt.json",
+   "sha256Before": "6f13260ca97283118eab71d5a34db651cb506bd11e165afb23780857906f9fbd",
+   "sha256After": "82c3890007f04c4239d4d3238ff78df03323a53df6632e41b169031be8fe5ce9"
+  },
+  {
+   "path": "annotations/fable-pass1/daveluyville-2026-05-04.json",
+   "sha256Before": "2ce83a61c1ec382a89a453f5e2882eaddcf546d329f2d210d4eda7b820121f32",
+   "sha256After": "85f528f1db9d63d7cb0e7095b3d7d3eb636d300c3de2eaa459502167436badd1"
+  },
+  {
+   "path": "annotations/fable-pass1/daveluyville-2026-05-04.receipt.json",
+   "sha256Before": "5875e2c319e321a60c8e4c5ce6dd11f7c369939f0e4de1a4a9adf6c33aa32378",
+   "sha256After": "6a51a038a467eab20677b9b26f972d50a23ed6ba4bbaf161aa7e87ad12f14abe"
+  },
+  {
+   "path": "annotations/fable-pass1/dollard-des-ormeaux-2026-02-10.json",
+   "sha256Before": "76ea000964d19f2f3f234c4b05c4d0d8378b2cd9ecd3cf3bd8fce6c86926b393",
+   "sha256After": "e0916b7f6a6780a56c1ee4dee368752663b0d95c603d158f2bc1a990ec445362"
+  },
+  {
+   "path": "annotations/fable-pass1/dollard-des-ormeaux-2026-02-10.receipt.json",
+   "sha256Before": "e9649b0f63531e8c1abd60a51890619b3d60337930f5d8d68b8b87b3230bfda5",
+   "sha256After": "8516f7ba91f01b8edef67a3d9e5a0e5b041d719107ae5de918094604a48e9575"
+  },
+  {
+   "path": "annotations/fable-pass1/dosquet-2026-01-13.json",
+   "sha256Before": "15cd52e35740723bb1e9e7d05970c98d298427f9399bed56b79c4be9e3a5d59b",
+   "sha256After": "a032f580af5d0485a1cec32e1f826f2419f7737c73138ce54db822f4781a9a12"
+  },
+  {
+   "path": "annotations/fable-pass1/dosquet-2026-01-13.receipt.json",
+   "sha256Before": "ef03103f371928e70565a3b692ec1b7d75e040e406b1afbd5fc3b61415627117",
+   "sha256After": "3c672ee50effdba6dd749171b4a8aafb9682e6e7bb6e5d1eeadd326437f15980"
+  },
+  {
+   "path": "annotations/fable-pass1/grenville-sur-la-rouge-2026-04-14.json",
+   "sha256Before": "b7c440239100cfddef97be043c437807fc2ea75d7861892d6ac65f903fbbfc50",
+   "sha256After": "963a7660f99784ce2c7facd3b2675bbab64a1a32a820c0806b9bba87fc9b1359"
+  },
+  {
+   "path": "annotations/fable-pass1/grenville-sur-la-rouge-2026-04-14.receipt.json",
+   "sha256Before": "f452353f0b76a9cd39c749a797284472259ffb13ba3c3b69739d5cc39c316e3b",
+   "sha256After": "11977f1fecddfc927cafeb7babd3bcb9d4b90a6ad734e4909444c31236ccd0c3"
+  },
+  {
+   "path": "annotations/fable-pass1/lac-du-cerf-2026-04-11.json",
+   "sha256Before": "5da61ba74e5acda682bb21424e5d71f4589df405d4e10685b737e2c5da2b59ca",
+   "sha256After": "41b5e26f1cbb80cee9579a83591e4dfd6fe9805898b9118a1f36c2a276a01669"
+  },
+  {
+   "path": "annotations/fable-pass1/lac-du-cerf-2026-04-11.receipt.json",
+   "sha256Before": "ba405fc5fc24043c036910d16eab5eecdf127eb53b434e7e96b11ef0d8bf96cb",
+   "sha256After": "6f820fc04f147e18c626c83b7cd35f8c45f7db543426ab9f0256fbb5a2c61530"
+  },
+  {
+   "path": "annotations/fable-pass1/lac-saint-paul-2026-05-11.json",
+   "sha256Before": "cc795b47d1b2b430d67cb4fef4bcc4e33bcc3d732536ea2f1de29cd876dd4f1a",
+   "sha256After": "921081be4b14453f0abbc3da4c0265311ebb3e3373e7923875c5facea34763d5"
+  },
+  {
+   "path": "annotations/fable-pass1/lac-saint-paul-2026-05-11.receipt.json",
+   "sha256Before": "f082e55a9cc19c28de32e75d4b2b41d7267cb4a96ae3ff9b07b78112555823f9",
+   "sha256After": "2f8a98e4937fe1a2cca61dfe28e94bb4adef3ea17e60637c50e344a035f951ef"
+  },
+  {
+   "path": "annotations/fable-pass1/lac-tremblant-nord-2026-05-09.json",
+   "sha256Before": "cc1da72aa52a4d5d4da478f0c31d7f6170a0dcacb36273bfb7a0eb2735f7411f",
+   "sha256After": "beab96518fb534a534c89668fc5fd7e94f9f9a90c783f0cddd1e1bcf4cbce278"
+  },
+  {
+   "path": "annotations/fable-pass1/lac-tremblant-nord-2026-05-09.receipt.json",
+   "sha256Before": "89f4e153c3cbc3df362b95c79a01a19e941356ca00ddda1d4af93fdd281fdb43",
+   "sha256After": "d0bdd38851b4bd439dda81e5f22ab694655fa83023ffec5ad82716bb64a803e4"
+  },
+  {
+   "path": "annotations/fable-pass1/les-coteaux-2026-03-16.json",
+   "sha256Before": "5328b800da351d10bea0df4adb5d7c9b26ef8373b2c4bc9accb14105c3b018e6",
+   "sha256After": "ca72c47ce8222fa7e3a4cef8501638ca5f163d365349826eee6765f89961c030"
+  },
+  {
+   "path": "annotations/fable-pass1/les-coteaux-2026-03-16.receipt.json",
+   "sha256Before": "5ceea1984f508c022caec12a58a9e439669a6920e506f06b8803f7a5033a279d",
+   "sha256After": "74bcb6b9570ed50696605a9783d000553a4cadb01f8ad8fc614c7c682efa8a87"
+  },
+  {
+   "path": "annotations/fable-pass1/lislet-2026-04-07.json",
+   "sha256Before": "5c65a48d26b2f7f92ba9d340ddbba9b2a740bda7fb978b8fdf918d47310d608c",
+   "sha256After": "dab4efaa645e12cefac55b728bfc64e480d14c017c204dfceb36c38e456f3dbf"
+  },
+  {
+   "path": "annotations/fable-pass1/lislet-2026-04-07.receipt.json",
+   "sha256Before": "4bd6631a9e1a88e7393aeb767ac215b8f58a73164046b9ad7f48c3fd21207240",
+   "sha256After": "87bef161ec8b40a512bbbc10af118a22d4c91b34b9f35e75597380aa29dcd222"
+  },
+  {
+   "path": "annotations/fable-pass1/lorraine-2026-01-13.json",
+   "sha256Before": "e8dad0e0b27157fc11257e4a9036c77fc2142ef877106b40476057cb2c76263b",
+   "sha256After": "af899ed913f0dcaa3bb9994c911546045e39b98ec425e1619372062d3e6befcb"
+  },
+  {
+   "path": "annotations/fable-pass1/lorraine-2026-01-13.receipt.json",
+   "sha256Before": "64279ba004cb043d8a424f09f24c95a066a3d243a3eada309174b5aa0eaf24d7",
+   "sha256After": "45b8805823f4f21da1858fd813431d9c3cb2fe41e8207a8442aba62a76b9bd97"
+  },
+  {
+   "path": "annotations/fable-pass1/lyster-2026-02-02.json",
+   "sha256Before": "ffea6e0e37595718b058e7e475fd22f7018e332ed0b7d0ed08935d05704f2709",
+   "sha256After": "169e1dad95dc3917a17b9107fc326fe2e86a4487eb081d433c002c49a973c5d3"
+  },
+  {
+   "path": "annotations/fable-pass1/lyster-2026-02-02.receipt.json",
+   "sha256Before": "012bcf31b0cb41ecdd82ecd3f7ba5b2c56122c26a215ac55c2db384e9558c41d",
+   "sha256After": "c838f5798b9d5363491064cc780158eb1e1a5836907a51fa2d32e8371255bb2e"
+  },
+  {
+   "path": "annotations/fable-pass1/mcmasterville-2026-02-02.json",
+   "sha256Before": "65b3d1941b05e90b2474d629b77d1ddacc1534f54c19ff6eb051a3ce19a5edf7",
+   "sha256After": "5f8d0d70527247c6f2de30524f21f5c7b17c6f00f2dd4e3a59ad83f329b9a366"
+  },
+  {
+   "path": "annotations/fable-pass1/mcmasterville-2026-02-02.receipt.json",
+   "sha256Before": "ccdff79e945c870e0a829579fa23801541c3836c44cc0522efffcb195e698a4e",
+   "sha256After": "ef1a652d41ba78256a64286ebf6cee4e29d59f262137c9b8f641533cfcc47ab3"
+  },
+  {
+   "path": "annotations/fable-pass1/notre-dame-de-lourdes--joliette-2026-04-13.json",
+   "sha256Before": "2784d0cc6032a5dee59abca2524cdc1469e6cbcc80e17a15a564480a0af3cf13",
+   "sha256After": "388f7b4f2d0f10286a407bff45266c7fd8e7e78a9bd66636ab7fcc5ea38e35a2"
+  },
+  {
+   "path": "annotations/fable-pass1/notre-dame-de-lourdes--joliette-2026-04-13.receipt.json",
+   "sha256Before": "c8dbebc661d92eb83064ae394034df2f8ce5b8044d4305e3bad30b3b5acb5f83",
+   "sha256After": "2a65d8c748a9a8748f21f5f2bc227cb64639713353e6ecb62d1087be1f270bfc"
+  },
+  {
+   "path": "annotations/fable-pass1/ogden-2026-03-09.json",
+   "sha256Before": "3f471f45799e097a015c2dbbde43c0a61d81b7589eb9b93fd136c5ce7a53479d",
+   "sha256After": "9c199be7aae8a7dc9f01087dc51fe70228f6e71579dfe3a8ca1a1f764047775a"
+  },
+  {
+   "path": "annotations/fable-pass1/ogden-2026-03-09.receipt.json",
+   "sha256Before": "976a35fb8bfcc71dcf1e41f7f9e29683467fa88973034fc068475d450b2bb0b1",
+   "sha256After": "6330ade6b83449f3f46342afdaff712adfc6b963656e954994993d82e8cb1f2e"
+  },
+  {
+   "path": "annotations/fable-pass1/parisville-2026-05-05.json",
+   "sha256Before": "c5f1d2ce79f15167e109fb52b9297bec90e7041633e16494f5240264c8e3c7eb",
+   "sha256After": "c1c9709f1ff9ac5fa69e3a62596997730615d2b566f08fa916fdb77ed79b5af0"
+  },
+  {
+   "path": "annotations/fable-pass1/parisville-2026-05-05.receipt.json",
+   "sha256Before": "c62ef413d8e1b3f094e22c22f0bc41c471735e3302d721e1561763a2c30dbdc5",
+   "sha256After": "e648eeb0537010c982b772fba36c13b93ed5ed8498499f9540d40109121330ae"
+  },
+  {
+   "path": "annotations/fable-pass1/pincourt-2026-01-20.json",
+   "sha256Before": "0880ef566a4c5a75bfa57231750b5d7e90a8fe73637e91a38e864dd4b2c483fd",
+   "sha256After": "d1b2729ae5273fe477fcbbf8e8781758f84bc9d310c882af0e524705c4983242"
+  },
+  {
+   "path": "annotations/fable-pass1/pincourt-2026-01-20.receipt.json",
+   "sha256Before": "9e5ed39d0a67068bf234aeb9c1eb0eef760c11d1fcca28cdec1c51b161576fc5",
+   "sha256After": "40dd11f6bed62338318787e26b476652ae4c1bd61e258a351a7515407f8a31ff"
+  },
+  {
+   "path": "annotations/fable-pass1/roxton-2026-04-07.json",
+   "sha256Before": "59fa53aef0958438082ad516fb352a821d701c5868896e781144806140a8d63e",
+   "sha256After": "1f054154fdea1bfd609543dfb1414a06afab88846788cf673bd458b5679367da"
+  },
+  {
+   "path": "annotations/fable-pass1/roxton-2026-04-07.receipt.json",
+   "sha256Before": "c551ad32fe93008ce9814307f501835705c7d95960e001a8d09b0c877e953165",
+   "sha256After": "ef30f92bf5fb9072acbe0dedafcfebf3f3db066422ca430cbde2196a42ebd2ff"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-bernard-de-michaudville-2026-04-01.json",
+   "sha256Before": "5e607230270cecfa410a086c56ad11b565d31568a162b1d700b5e7e2c446d6d1",
+   "sha256After": "be58bf3f6d36d2f33961cb036ccb050576c6bf5b04df74f977469a3e1ad5f01d"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-bernard-de-michaudville-2026-04-01.receipt.json",
+   "sha256Before": "ee90e1c919e5743d1fc3c024716c0fa2e4807dfa0f9030b4d657eb9a9934d003",
+   "sha256After": "332f1f84dd5e33d5f6cc0f0d69ae06f046b63b9153fba20fd322019339fbfffd"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-charles-de-bourget-2026-05-04.json",
+   "sha256Before": "081307be79eb3ea5fd2e1d415e459c532ba079ec2dfedbb34ffe4e6af51b7c99",
+   "sha256After": "8a4b643722cec198614bad49ecaab5af8ed2cb30672b713ab7cf89013cc0a3de"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-charles-de-bourget-2026-05-04.receipt.json",
+   "sha256Before": "19fdf3a5081b90db4956c0350caadcdad8f2490cb2a088645cc3ff5cf4f00fc7",
+   "sha256After": "0a2c77094558231b06013b855aff6c6bdbefcec8a0bb7e1d94a4187164033039"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-constant-2026-01-20.json",
+   "sha256Before": "70f1dd9dee2fd2e235b5753bfa9553e69b7f16da5b1d87f0d9dcef1ad922d266",
+   "sha256After": "aab7d96f9d80b17d749315d3393fa1689c8df2b2fda18e4b06d9cf1b1fa399e6"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-constant-2026-01-20.receipt.json",
+   "sha256Before": "778bedbe98672feb793fd57e8e82dea74e1b62cf9136ea7c3849dde95edd7ae1",
+   "sha256After": "e02e90702b380e75d932e6c368fbca285023e453f4503ea927536879fd8b4d80"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-damien-2026-06-16.json",
+   "sha256Before": "0305740e9fe0420b7f41dfe94eba8c5e9434d547e2b31b86ac55c35252379495",
+   "sha256After": "4de97d9db4583175f66d3c6249e4986177848fbeab072703a4608852221214e3"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-damien-2026-06-16.receipt.json",
+   "sha256Before": "99a18e0a7b8ba7e20b93488797f0eac7c000ccb381a4fdc632a92801395b14d0",
+   "sha256After": "05562a742b2a5defd5c474f99ff560781ab256b38a6ae9b9f6c716beb2b34389"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-felix-de-kingsey-2026-04-07.json",
+   "sha256Before": "d3e0c247c95ea094af0f7694ca3ac4bbad6aaa992b4fb855ad1071e8dd21369f",
+   "sha256After": "f1a0e8a3746901bfc6c732d97527887da16df27acef9a502ee427b3f0533f611"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-felix-de-kingsey-2026-04-07.receipt.json",
+   "sha256Before": "30483fa87be8411f5fe4cf805946c8358e7cf0f6a79517c4c401babe11d6dc4b",
+   "sha256After": "4db51390ddd2d8ffc6d238f0e10dd3fbba60b18a1699f21e1e7a647526739477"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-henri-2026-03-02.json",
+   "sha256Before": "e4823cc2003a1436d169575aa35bb1a6fb5220485d44091b17f178b88254686e",
+   "sha256After": "c62c3f8ba617b07925eae2c8f30b2fa4e1d65a06544b39087272c1914e3bbe76"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-henri-2026-03-02.receipt.json",
+   "sha256Before": "48b4e714c6271434c6be69148fac9c4dd391fd1180762f22b94de2e6e0727a04",
+   "sha256After": "f3fd61d54eaf80641f780ab361f766c4cf7df1ea58a23efb0b7c1f35356e0566"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-lin-laurentides-2026-06-09.json",
+   "sha256Before": "2b2a4fbee6fe76c2b72350f618f9c212b1ba8723fa9a0143e905890c37da139b",
+   "sha256After": "38c03e8def655b32cf8fac837980c40eb5f8bd34182c1a8528f82c6ac6641da9"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-lin-laurentides-2026-06-09.receipt.json",
+   "sha256Before": "baa452c031edee129ec9deeba3dcdff45c6ba26959899bc5ac17f39e169b05d0",
+   "sha256After": "76934b87bdc338a2f7f752042db9bb5a2eefcff9e3ae193e403c58eda252df37"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-polycarpe-2026-01-19.json",
+   "sha256Before": "5a0d94bd848854ca97c7177fbb797ff05317a7cd4cf18b68e77f31ea84bd2724",
+   "sha256After": "7662e98486f12f1b86321d90fd6b069ef345206c69bb84d5f520f1009f8a96a0"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-polycarpe-2026-01-19.receipt.json",
+   "sha256Before": "794003336f3fae497e9ac395ac122b6608ddc9c917a5e9174718ecff7d85226c",
+   "sha256After": "c16e11d4c6881beb10c70daf789bd2e55172631e28b93bbccb39a9a2f0d061e0"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-roch-de-lachigan-2026-05-11.json",
+   "sha256Before": "9ab6f52079be0112d72c601b0ea94ab3f92f674e4c5d61a517da6531e7bfc1d8",
+   "sha256After": "7c95de604b82771ff99ad5ec7f5656808bc93207a59c2becab4f084fa0a3d2bc"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-roch-de-lachigan-2026-05-11.receipt.json",
+   "sha256Before": "c75cbfb0d8d7d8208ee05c4f1ed244c1501c76c70f9a150a48eb07a9dcf50efd",
+   "sha256After": "7ab96227e0fd95b1c04efefe9b817948b8c4804615cc9929d02b7f08c1186e1c"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-stanislas--des-chenaux-2026-04-07.json",
+   "sha256Before": "003bb2bb530828108d76252b57ac304226d90e71f29cfc2ccea343adfd0c4875",
+   "sha256After": "2812df53e1451ad3fdd9ff4de8054171f699cbcd13d87796a0dd0547a0abcaaa"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-stanislas--des-chenaux-2026-04-07.receipt.json",
+   "sha256Before": "1dd1904bb7d9359db7e99d00504693f2bde8bc74f4529fa0657c024ab820e622",
+   "sha256After": "05a0544ec7896d5b9f572aea64f912ee5ac23784b31d4a686ab0ed7aaa0189ba"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-sylvere-2026-04-07.json",
+   "sha256Before": "c8b86f46b01e24209f698b0f392dd9ca9f214a8c047f543a8b5d0a23441ab2aa",
+   "sha256After": "ac9594c761d4b61cc103e89b8b12c63ebe8beec07e453085988646cf0e565292"
+  },
+  {
+   "path": "annotations/fable-pass1/saint-sylvere-2026-04-07.receipt.json",
+   "sha256Before": "a4040969defd8a7152c7d591541f00c626b8b93ecb39eac0ba753905b864a894",
+   "sha256After": "18de3d7d2f87fda6b52828ecb967e8bf5cb76f51e13343a57fd11e0b867e82fb"
+  },
+  {
+   "path": "annotations/fable-pass1/sainte-brigide-diberville-2026-06-01.json",
+   "sha256Before": "4f6d1f80e77c7797aeffa5404aa4fdbbc7a2dff33b708ee5321bdaad05c5a06f",
+   "sha256After": "5fd9cf3b0ae1f0d6c15dec7dd2c72c8594232507b6a0f82b84a639dd8cb00088"
+  },
+  {
+   "path": "annotations/fable-pass1/sainte-brigide-diberville-2026-06-01.receipt.json",
+   "sha256Before": "2093b42b3a4371b5347167efd7abc7b1bf4c989f5e5f397c99ed12f730d5afd5",
+   "sha256After": "b3bb146a6952858dafed24dd7b94788afed85ed7c18eaacc16bb0df57e1ed25c"
+  },
+  {
+   "path": "annotations/fable-pass1/sainte-francoise--becancour-2026-05-04.json",
+   "sha256Before": "64db24b5020d0c36cf805f78c62ade1d13840b6cd281545e613ef6edfe480460",
+   "sha256After": "d9822b09e89588e3b5c400ed35306d26c38ec971b7a898d7fb24934ace8ae0e0"
+  },
+  {
+   "path": "annotations/fable-pass1/sainte-francoise--becancour-2026-05-04.receipt.json",
+   "sha256Before": "0fe2783e175d654b5ac2383608c8e57ead65aeb85fd2555438982a6491182c54",
+   "sha256After": "122788a226f87ada5efecccbff181f3448782804f1c63b044383ba4fc25a7eae"
+  },
+  {
+   "path": "annotations/fable-pass1/stratford-2026-04-20.json",
+   "sha256Before": "e0f141e0977042c0291b0bd790718ccfac7ad1034a6b277454c93372db5d4a50",
+   "sha256After": "be154c67db59ccd7c5925bcd812bdc0f72e37ad6be45d11ea41d4ac5175a1e7c"
+  },
+  {
+   "path": "annotations/fable-pass1/stratford-2026-04-20.receipt.json",
+   "sha256Before": "20e95b85cbadb5ad98e2ebcc888af05560fb82914e15f78108c853aa7431d5d0",
+   "sha256After": "25825f8024e39033218fde6258633daef5001679e4c61192c583cf481b4a9630"
+  },
+  {
+   "path": "annotations/fable-pass1/tadoussac-2026-01-13.json",
+   "sha256Before": "a65e6b7d497ac99eeed6732d0e3f543ddf8e5aaedb9707558c9f84f5124ef94a",
+   "sha256After": "05795a0221ded093d3f24342cc7ef83177fe69aa80092aa38c3cab0775f80b96"
+  },
+  {
+   "path": "annotations/fable-pass1/tadoussac-2026-01-13.receipt.json",
+   "sha256Before": "0d86fcb934e9025e561672a6b14911033a08bed2a608d46267d26a7326fcf262",
+   "sha256After": "c2eb9928edad638787e782e60e5f8b773820fd489b0c7b1cb3e4da5bba75e69f"
+  },
+  {
+   "path": "annotations/fable-pass1/val-dor-2026-06-01.json",
+   "sha256Before": "c199c0d9112f43a017ad890851662237cb01a95323acd6bff261320e149228c4",
+   "sha256After": "373f7ca212561c24246a472fe79ff779a4c3909e1fa655bd57b2998192aa1ff2"
+  },
+  {
+   "path": "annotations/fable-pass1/val-dor-2026-06-01.receipt.json",
+   "sha256Before": "78805842132041e965238b21b326df74fb9833606c597f138274bac6a4fd83b4",
+   "sha256After": "70de08f232c292c5a8097416f8a1e8eda777d64fcc2d79d3999ee1cd81ae04fb"
+  },
+  {
+   "path": "annotations/fable-pass1/val-racine-2026-06-09.json",
+   "sha256Before": "5728375665f4669cd485834c5cba0e186c5ffd1de1c479e39507a0b1032c37c1",
+   "sha256After": "f69fc9725967ca72c6521cff95628ecaa9e7545db25122f1c0482e28b56dcd55"
+  },
+  {
+   "path": "annotations/fable-pass1/val-racine-2026-06-09.receipt.json",
+   "sha256Before": "92084ec5f939d3a6e00db2a82d5fa35794c44e6e962585cddcbdafd7299de9fc",
+   "sha256After": "83618c8e960a63155385ef64c6ec70ce0e08e044f1f02172c871790c5ef0d325"
+  },
+  {
+   "path": "annotations/fable-pass1/waterville-2026-04-07.json",
+   "sha256Before": "40575f40507fbf26e87a472e1b7dd7ee75683571959b650f25f021a76181c4a6",
+   "sha256After": "219f2e11b8704a000e4829a2246450d15ddb5452c741c717dcc673ac35ace1fc"
+  },
+  {
+   "path": "annotations/fable-pass1/waterville-2026-04-07.receipt.json",
+   "sha256Before": "50a6831919d2b47ee647950bd7e4e15fc4b16201182433a8bfd056e14eed1c82",
+   "sha256After": "1279e3d7a3587ac8ea6312cc742e35e4861d1ba9dde86ee2c594e2288dea17ba"
+  },
+  {
+   "path": "annotations/fable-pass1/wentworth-nord-2026-01-21.json",
+   "sha256Before": "e85c6d1ad48787e126f1e58e4e86d33a7d96083ca3b12865a4624b158c94440c",
+   "sha256After": "17a734bb957151a70f48470a363f16bd69b0fb32464f8194d490539440174155"
+  },
+  {
+   "path": "annotations/fable-pass1/wentworth-nord-2026-01-21.receipt.json",
+   "sha256Before": "dbfe1d3dceeeaba80dc85dc766130eb46cfc7543fab70dcfa65373f5b87c85e1",
+   "sha256After": "d857f095423818bd5af18ab618f94f9113dcd4aac665d61c2f53dcc2b4922a3d"
+  },
+  {
+   "path": "corrige/fable-pass1/beaupre-2026-03-02.json",
+   "sha256Before": "a33426dde6132afb7d2655cc5b9348cc877be3d1618023429ef0214efc60f268",
+   "sha256After": "7997f74c40f1858ce662ee07527b830f4f4821b68f2208a93ac1d44341d8d4ee"
+  }
+ ]
+}

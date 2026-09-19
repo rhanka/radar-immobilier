@@ -1,0 +1,178 @@
+{
+ "documentId": "lac-brome-2026-04-07",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c71cd359cd133021bc4dac4793b39d1015e23185e50f317a26f81884bf00faa1",
+ "verificationSha256": "208abf4bd4e00e61f6f288bbdbe5d23d2729c8e01f4a89b3e38fde91d69c20ae",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"À la page 21, la résolution 2026-04-099 distingue l’adoption du règlement 596-21 de l’ordre au greffier « de tenir une procédure d'enregistrement des personnes habiles à voter ». Cet ordre constitue une étape procédurale actuelle distincte sur un objet réglementaire explicite, classée « inconnu » : sa présence dans la même résolution ne suffit pas à l’exclure comme clause accessoire, et v1 n’affirme pas que le registre a déjà été tenu.\"},{\"item\":\"a02\",\"choice\":\"v1\",\"reason\":\"À la page 23, outre l’adoption du règlement 596-22, le Conseil « ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter » pour ce règlement. L’unité repose sur l’objet réglementaire et l’étape constatée : cet ordre actuel, classé « inconnu », se distingue de l’adoption malgré leur résolution commune, sans attester une tenue déjà réalisée du registre.\"},{\"item\":\"a03\",\"choice\":\"v1\",\"reason\":\"À la page 24, la résolution 2026-04-101 adopte le règlement 596-23 puis ordonne expressément une procédure d’enregistrement « afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-23 ». Contrairement à la position d’exclusion, cet ordre constate une décision procédurale distincte de l’adoption sur un objet réglementaire explicite, recevable au stade « inconnu », sans présumer que l’enregistrement ou le scrutin a eu lieu.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u07",
+   "verificationItem": "i07",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Tenue d'une procédure d'enregistrement ordonnée — règlement 596-21",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "596-21",
+      "page": 21,
+      "citation": "le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-21",
+      "anchor": "règlement 596-21",
+      "spanStart": 1492,
+      "spanEnd": 1678
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 21 ordonne au greffier de tenir une procédure d’enregistrement pour le règlement 596-21, étape procédurale actuelle distincte de son adoption, sans affirmer que le registre a déjà été tenu."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 21 atteste une décision distincte de l'adoption : « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-21 » ; fait différent du même règlement, étape hors liste donc inconnu."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'ordre de tenir un registre est une clause accessoire d'exécution de la résolution d'adoption 2026-04-099 et ne constitue pas une unité d'urbanisme distincte."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u08",
+   "verificationItem": "i08",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Tenue d'une procédure d'enregistrement ordonnée — règlement 596-22",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "596-22",
+      "page": 23,
+      "citation": "le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-22",
+      "anchor": "règlement 596-22",
+      "spanStart": 525,
+      "spanEnd": 711
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 23 ordonne au greffier de tenir une procédure d’enregistrement pour le règlement 596-22, étape procédurale actuelle distincte de son adoption, sans affirmer que le registre a déjà été tenu."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 23 atteste « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-22 » ; décision de registre distincte de l'adoption, non un doublon du même fait."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'ordre de tenir un registre est une clause accessoire d'exécution de la résolution d'adoption 2026-04-100 et ne constitue pas une unité d'urbanisme distincte."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u09",
+   "verificationItem": "i09",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Tenue d'une procédure d'enregistrement ordonnée — règlement 596-23",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "596-23",
+      "page": 24,
+      "citation": "le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-23",
+      "anchor": "règlement 596-23",
+      "spanStart": 2171,
+      "spanEnd": 2357
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 24 ordonne au greffier de tenir une procédure d’enregistrement pour le règlement 596-23, étape procédurale actuelle distincte de son adoption, sans affirmer que le registre a déjà été tenu."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 24 atteste « le Conseil ordonne au greffier de tenir une procédure d'enregistrement … pour le règlement 596-23 » ; décision de registre distincte, citation et page exactes."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'ordre de tenir un registre est une clause accessoire d'exécution de la résolution d'adoption 2026-04-101 et ne constitue pas une unité d'urbanisme distincte."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "À la page 21, la résolution 2026-04-099 distingue l’adoption du règlement 596-21 de l’ordre au greffier « de tenir une procédure d'enregistrement des personnes habiles à voter ». Cet ordre constitue une étape procédurale actuelle distincte sur un objet réglementaire explicite, classée « inconnu » : sa présence dans la même résolution ne suffit pas à l’exclure comme clause accessoire, et v1 n’affirme pas que le registre a déjà été tenu."
+  },
+  {
+   "item": "a02",
+   "choice": "v1",
+   "reason": "À la page 23, outre l’adoption du règlement 596-22, le Conseil « ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter » pour ce règlement. L’unité repose sur l’objet réglementaire et l’étape constatée : cet ordre actuel, classé « inconnu », se distingue de l’adoption malgré leur résolution commune, sans attester une tenue déjà réalisée du registre."
+  },
+  {
+   "item": "a03",
+   "choice": "v1",
+   "reason": "À la page 24, la résolution 2026-04-101 adopte le règlement 596-23 puis ordonne expressément une procédure d’enregistrement « afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-23 ». Contrairement à la position d’exclusion, cet ordre constate une décision procédurale distincte de l’adoption sur un objet réglementaire explicite, recevable au stade « inconnu », sans présumer que l’enregistrement ou le scrutin a eu lieu."
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "id": "barnston-ouest-2026-05-04",
+ "rc": 0,
+ "latencyMs": 226868,
+ "inputTokens": 2,
+ "outputTokens": 24218,
+ "cacheRead": 0,
+ "cacheCreate": 14077,
+ "costUsd": 0.75633,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 52796
+}

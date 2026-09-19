@@ -1,0 +1,44 @@
+{
+ "documentId": "roxton-2026-04-07",
+ "nextId": 2,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 384-2026 modifiant les usages permis dans la zone 506",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "384-2026",
+    "page": 4,
+    "citation": "que le présent règlement soit adopté et qu'il soit statué et décrété par ce règlement ce qui suit: Article 1 Titre du règlement Le présent règlement s'intitule « Règlement numéro 384-2026",
+    "anchor": "Règlement numéro 384-2026",
+    "spanStart": 1676,
+    "spanEnd": 1865
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 384-2026 modifiant les usages permis dans la zone 506",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "384-2026",
+      "page": 4,
+      "citation": "que le présent règlement soit adopté et qu'il soit statué et décrété par ce règlement ce qui suit: Article 1 Titre du règlement Le présent règlement s'intitule « Règlement numéro 384-2026",
+      "anchor": "Règlement numéro 384-2026",
+      "spanStart": 1676,
+      "spanEnd": 1865
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 74-04-2026 adopte le règlement 384-2026 modifiant le zonage; l'avis de motion du 12 janvier 2026 est un rappel historique qui ne crée pas d'unité supplémentaire."
+    }
+   ]
+  }
+ ]
+}

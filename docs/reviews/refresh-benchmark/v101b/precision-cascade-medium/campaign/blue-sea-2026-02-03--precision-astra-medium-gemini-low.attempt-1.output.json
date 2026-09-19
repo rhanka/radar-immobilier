@@ -1,0 +1,78 @@
+{
+ "nodes": [
+  {
+   "id": "source-pv-2026-02-03",
+   "label": "Procès-verbal du conseil de Blue Sea du 3 février 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-blue-sea/cas/198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9.pdf",
+   "status": "candidate",
+   "date": "2026-02-03",
+   "municipality": "blue-sea",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "docSha": "198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9",
+   "url": "https://www.bluesea.ca/fichiersUpload/fichiers/20260506090056-pv-2026-02-03.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance ordinaire du Conseil du 3 février 2026 à 19h, tenue au\ncentre municipal situé au 10, rue Principale à Blue Sea.",
+     "source_file": "raw/proces-verbaux-blue-sea/cas/198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9.pdf",
+     "rawRef": "raw/proces-verbaux-blue-sea/cas/198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9.pdf",
+     "docSha": "198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9",
+     "sourceUrl": "https://www.bluesea.ca/fichiersUpload/fichiers/20260506090056-pv-2026-02-03.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-source"
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-source",
+   "source_file": "raw/proces-verbaux-blue-sea/cas/198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9.pdf",
+   "rawRef": "raw/proces-verbaux-blue-sea/cas/198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9.pdf",
+   "docSha": "198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9",
+   "sourceUrl": "https://www.bluesea.ca/fichiersUpload/fichiers/20260506090056-pv-2026-02-03.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Procès-verbal de la séance ordinaire du Conseil du 3 février 2026 à 19h, tenue au\ncentre municipal situé au 10, rue Principale à Blue Sea."
+  },
+  {
+   "id": "ev-barrage",
+   "source_file": "raw/proces-verbaux-blue-sea/cas/198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9.pdf",
+   "rawRef": "raw/proces-verbaux-blue-sea/cas/198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9.pdf",
+   "docSha": "198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9",
+   "sourceUrl": "https://www.bluesea.ca/fichiersUpload/fichiers/20260506090056-pv-2026-02-03.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Que le conseil municipal autorise le dépôt d’une demande d’aide financière dans le\ncadre du programme PAFMAN pour la reconstruction du barrage Lafontaine."
+  },
+  {
+   "id": "ev-centre",
+   "source_file": "raw/proces-verbaux-blue-sea/cas/198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9.pdf",
+   "rawRef": "raw/proces-verbaux-blue-sea/cas/198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9.pdf",
+   "docSha": "198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9",
+   "sourceUrl": "https://www.bluesea.ca/fichiersUpload/fichiers/20260506090056-pv-2026-02-03.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "Que le conseil municipal autorise la préparation de plans et devis pour\nl’agrandissement du centre récréatif du Lac Long, et ce, à des fins d’estimation des\ncoûts du projet.\nQue le conseil autorise le dépôt d’une demande d’aide financière dans le cadre du\nprogramme PAFIR-SPA."
+  },
+  {
+   "id": "ev-tour",
+   "source_file": "raw/proces-verbaux-blue-sea/cas/198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9.pdf",
+   "rawRef": "raw/proces-verbaux-blue-sea/cas/198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9.pdf",
+   "docSha": "198f3b22e8ca782598755a392d87eb7e3c8ca3cdb79d148ebb5c454595208ac9",
+   "sourceUrl": "https://www.bluesea.ca/fichiersUpload/fichiers/20260506090056-pv-2026-02-03.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "Que le conseil municipal autorise la préparation de plans et devis pour le projet relatif à\nla tour d’observation du Mont Morissette, à des fins d’estimation des couts.\nQue le conseil autorise le dépôt d’une demande d’aide financière au programme PAFIRSPA."
+  }
+ ],
+ "input_tokens": 10800,
+ "output_tokens": 3200
+}

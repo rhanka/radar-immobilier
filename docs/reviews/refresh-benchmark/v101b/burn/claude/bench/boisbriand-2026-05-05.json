@@ -1,0 +1,13 @@
+{
+ "id": "boisbriand-2026-05-05",
+ "rc": 0,
+ "latencyMs": 343565,
+ "inputTokens": 2,
+ "outputTokens": 52936,
+ "cacheRead": 0,
+ "cacheCreate": 21995,
+ "costUsd": 1.558848,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 78527
+}

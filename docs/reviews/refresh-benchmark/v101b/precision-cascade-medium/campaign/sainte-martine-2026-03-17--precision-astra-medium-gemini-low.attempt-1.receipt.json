@@ -1,0 +1,35 @@
+{
+ "documentId": "sainte-martine-2026-03-17",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "0e60f3ff1a3a6941e40955a12fad1123c656013b43f3dfb2ce7b58d196d865d9",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4115,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 21860,
+   "outputTokens": 1437,
+   "totalTokens": 23297
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3983
+  },
+  "inputSha256": "82a008a0730c057d45fe1544ebe977bc450251768fc81caeb5628d15360abdd6"
+ },
+ "at": "2026-09-19T03:22:59.233Z"
+}

@@ -1,0 +1,13 @@
+{
+ "id": "sainte-barbe-2026-05-05",
+ "rc": 0,
+ "latencyMs": 377829,
+ "inputTokens": 2,
+ "outputTokens": 57137,
+ "cacheRead": 0,
+ "cacheCreate": 22784,
+ "costUsd": 1.672681,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 86050
+}

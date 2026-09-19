@@ -1,0 +1,91 @@
+{
+ "documentId": "richelieu-2026-02-03",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fa4ca07d51ec4c04f34ef69add32b03bdd44df7a665d8a649157a7dbade61b1e",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 6, la résolution 26-02-037 ordonne la vente à l'enchère publique des immeubles inscrits au rapport de la trésorière, ce qui atteste l'autorisation de cet acte foncier.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution finale 26-02-043 approuve expressément le PPCMOI-2025-07 à la page 10, pour la fusion des lots 6 465 474 et 6 465 475 décrite à la page 9.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 11, la résolution finale 26-02-044 approuve le PPCMOI-2025-08 concernant la fusion des lots 6 465 476 et 6 465 477 décrite à la page 10.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 12, la résolution finale 26-02-045 approuve le PPCMOI-2025-09 concernant la fusion des lots 6 465 470, 6 465 471 et 6 460 234 décrite à la page 11.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 13, le conseil appuie la demande à la CPTAQ pour une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot 5 891 123, sans prétendre accorder lui-même l'autorisation de la CPTAQ.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 3, la résolution 26-02-031 adopte expressément le règlement 26-R-285 interdisant l'épandage de déjections animales ou de boues à certaines dates en 2026.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette proposition reprend la même autorisation de vente et les mêmes immeubles que l'item i01, alors que la règle précise qu'un doublon de même type et de même fait ne constitue pas une unité distincte.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "absent"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "À la page 6, la résolution 26-02-037 ordonne la vente à l'enchère publique des immeubles inscrits au rapport de la trésorière, ce qui atteste l'autorisation de cet acte foncier."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution finale 26-02-043 approuve expressément le PPCMOI-2025-07 à la page 10, pour la fusion des lots 6 465 474 et 6 465 475 décrite à la page 9."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "À la page 11, la résolution finale 26-02-044 approuve le PPCMOI-2025-08 concernant la fusion des lots 6 465 476 et 6 465 477 décrite à la page 10."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "À la page 12, la résolution finale 26-02-045 approuve le PPCMOI-2025-09 concernant la fusion des lots 6 465 470, 6 465 471 et 6 460 234 décrite à la page 11."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "À la page 13, le conseil appuie la demande à la CPTAQ pour une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot 5 891 123, sans prétendre accorder lui-même l'autorisation de la CPTAQ."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "À la page 3, la résolution 26-02-031 adopte expressément le règlement 26-R-285 interdisant l'épandage de déjections animales ou de boues à certaines dates en 2026."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Cette proposition reprend la même autorisation de vente et les mêmes immeubles que l'item i01, alors que la règle précise qu'un doublon de même type et de même fait ne constitue pas une unité distincte."
+  }
+ ]
+}

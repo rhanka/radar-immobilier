@@ -1,0 +1,237 @@
+{
+ "documentId": "roxton-2026-04-07",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "f6f583a302437e5e0097e6aff4e2e95c82247e5c1f92a03c08353c074cd3cf54",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-384-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 384-2026 — Usages permis dans la zone 506",
+     "stage": "adoption",
+     "objet": "384-2026",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Et résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:"
+      },
+      {
+       "page": 4,
+       "excerpt": "Le présent règlement s'intitule « Règlement numéro 384-2026 modifiant le\nrèglement de zonage numéro 181-2003 de la Municipalité du Canton de\nRoxton modifiant les usages permis dans la zone 506 »."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-181-2003"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 181-2003",
+     "stage": null,
+     "objet": "181-2003",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "ATTENDU QUE\nle conseil de la Municipalité de Roxton a adopté, le 6\noctobre 2003, le règlement de zonage numéro 181-2003 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-adoption-384-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption de la modification des usages agricoles de la zone 506",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Et résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:"
+      },
+      {
+       "page": 4,
+       "excerpt": "ATTENDU QUE\nle conseil a reçu une demande de modification\nrèglementaire des propriétaires du lot 3 841 684;"
+      },
+      {
+       "page": 5,
+       "excerpt": "[7] Limité à l’élevage à des fins personnelles, sur des terrains utilisés à des\nfins résidentielles, d’un maximum de 25 poules pondeuses ou poulets à\ngriller et d’un maximum de 3 chevaux"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-avis-motion-384-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion du 12 janvier 2026 — Modification du zonage",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "ATTENDU QU'\nun avis de motion a été donné par M. Pascal Richard\nlors d'une séance du conseil tenu le 12 janvier 2026 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-emprunt-500000"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement d’emprunt de 500 000 $ pour des immobilisations",
+     "stage": "adoption",
+     "objet": "Emprunt de 500 000 $ sur 20 ans pour des travaux de voirie, la réfection et la construction de biens immobiliers, ainsi que l’acquisition de matériel roulant et d’équipements.",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Il est proposé et résolu à l’unanimité des conseillers de l’adoption du\nrèglement décrétant des dépenses en immobilisation et un emprunt au\nmontant de 500 000$."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-demande-abrogation-245-1"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande d’abrogation de l’article 245.1 de la LAU",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "QUE la municipalité du Canton de Roxton demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée\nnationale d’introduire un amendement au projet de loi no 22"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement numéro 384-2026 modifiant le règlement de zonage 181-2003 pour les usages de la zone 506.\",\"excerpt\":\"Et résolu unanimement que le présent règlement soit adopté et qu'il soit\\nstatué et décrété par ce règlement ce qui suit:\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple rappel historique dans le préambule sans action de procédure dans cette séance.\",\"excerpt\":\"ATTENDU QUE\\nle conseil de la Municipalité de Roxton a adopté, le 6\\noctobre 2003, le règlement de zonage numéro 181-2003 ;\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Cet événement fait doublon avec l'adoption du règlement 384-2026 déjà couverte en A01.\",\"excerpt\":\"\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"La mention de l'avis de motion donné le 12 janvier 2026 est un rappel historique passé dans les considérants.\",\"excerpt\":\"ATTENDU QU'\\nun avis de motion a été donné par M. Pascal Richard\\nlors d'une séance du conseil tenu le 12 janvier 2026 ;\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte un règlement d'emprunt parapluie de 500 000 $ pour des dépenses en immobilisations.\",\"excerpt\":\"Il est proposé et résolu à l’unanimité des conseillers de l’adoption du\\nrèglement décrétant des dépenses en immobilisation et un emprunt au\\nmontant de 500 000$.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution demandant un amendement au projet de loi 22 pour abroger l'article 245.1 de la Loi sur l'aménagement et l'urbanisme.\",\"excerpt\":\"QUE la municipalité du Canton de Roxton demande aux membres de la\\nCommission parlementaire de l’aménagement du territoire de l’Assemblée\\nnationale d’introduire un amendement au projet de loi no 22\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement numéro 384-2026 modifiant le règlement de zonage 181-2003 pour les usages de la zone 506.",
+   "excerpt": "Et résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple rappel historique dans le préambule sans action de procédure dans cette séance.",
+   "excerpt": "ATTENDU QUE\nle conseil de la Municipalité de Roxton a adopté, le 6\noctobre 2003, le règlement de zonage numéro 181-2003 ;"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Cet événement fait doublon avec l'adoption du règlement 384-2026 déjà couverte en A01.",
+   "excerpt": ""
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "La mention de l'avis de motion donné le 12 janvier 2026 est un rappel historique passé dans les considérants.",
+   "excerpt": "ATTENDU QU'\nun avis de motion a été donné par M. Pascal Richard\nlors d'une séance du conseil tenu le 12 janvier 2026 ;"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte un règlement d'emprunt parapluie de 500 000 $ pour des dépenses en immobilisations.",
+   "excerpt": "Il est proposé et résolu à l’unanimité des conseillers de l’adoption du\nrèglement décrétant des dépenses en immobilisation et un emprunt au\nmontant de 500 000$."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution demandant un amendement au projet de loi 22 pour abroger l'article 245.1 de la Loi sur l'aménagement et l'urbanisme.",
+   "excerpt": "QUE la municipalité du Canton de Roxton demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée\nnationale d’introduire un amendement au projet de loi no 22"
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Il s'agit d'un simple rappel historique dans le préambule sans action de procédure dans cette séance."
+   },
+   {
+    "act": "A03",
+    "reason": "Cet événement fait doublon avec l'adoption du règlement 384-2026 déjà couverte en A01."
+   },
+   {
+    "act": "A04",
+    "reason": "La mention de l'avis de motion donné le 12 janvier 2026 est un rappel historique passé dans les considérants."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le règlement numéro 384-2026 modifiant le règlement de zonage 181-2003 pour les usages de la zone 506."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil adopte un règlement d'emprunt parapluie de 500 000 $ pour des dépenses en immobilisations."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil adopte une résolution demandant un amendement au projet de loi 22 pour abroger l'article 245.1 de la Loi sur l'aménagement et l'urbanisme."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2085,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 10142,
+   "outputTokens": 490,
+   "totalTokens": 10632
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1920
+  },
+  "inputSha256": "22caf7ee301169191f94be7bd377b48e365adfd1d469e43bf34f2ac2d692422a"
+ }
+}

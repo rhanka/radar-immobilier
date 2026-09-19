@@ -1,0 +1,36 @@
+{
+ "documentId": "arundel-2026-07-31",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "12d93e61bac9f641799398316817d7dcf9cd535d65f53ab01a2d9a52fce57c36",
+ "inputSha256": "a236c1ec43148c1ec611d6995ddb9d43c7152ce29b924bf1e1f212be454a9a2a",
+ "responseSha256": "3671422da40d9f54c68f3663883275803a28521694e424330687e92c677245f4",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 12778,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 5030,
+  "outputTokens": 368,
+  "totalTokens": 5398
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 12776,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:16:27.112Z"
+}

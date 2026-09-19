@@ -1,0 +1,35 @@
+{
+ "documentId": "dollard-des-ormeaux-2026-02-10",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "5c64cb56786637197851bf90d1a70cea855f4982600ee1ac5dba8f43c12e0436",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2637,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 4630,
+   "outputTokens": 834,
+   "totalTokens": 5464
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2513
+  },
+  "inputSha256": "688d4856f1e73c9de46b60ea7860b5069e17548faffc54a24016bf562cadf4eb"
+ },
+ "at": "2026-09-19T03:22:18.706Z"
+}

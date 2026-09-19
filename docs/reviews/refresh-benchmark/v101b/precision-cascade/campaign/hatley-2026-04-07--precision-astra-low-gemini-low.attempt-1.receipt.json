@@ -1,0 +1,34 @@
+{
+ "documentId": "hatley-2026-04-07",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "a18dbe76a0785c8d691bff744711ccddd6971bfc41af9130e8178473af4b1183",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-low output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2503,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 15545,
+   "outputTokens": 593,
+   "totalTokens": 16138
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2348
+  },
+  "inputSha256": "62ddd583842a1a20b80aa5d4f4e19856b2b212be9022ee2ff7ad72fc46533f68"
+ },
+ "at": "2026-09-19T02:37:16.140Z"
+}

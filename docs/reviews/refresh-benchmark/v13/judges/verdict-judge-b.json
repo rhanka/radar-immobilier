@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "bundleSha256": "dc3d35c8222464b94fc7af9dc68df56ce1473b8426bc71c822ccd5cd9d0df14f",
+  "perDocument": [
+    {
+      "documentId": "lac-des-seize-iles-2026-09-agenda",
+      "systems": [
+        {
+          "system": "system-032f55c8cc8b",
+          "supportedOracleUnitIds": ["L36", "L37", "L54", "L55"],
+          "missedOracleUnitIds": [],
+          "unsupported": [
+            {
+              "summary": "Arête raises_signal entre la dérogation DDM2026-058 (point 5.4) et le signal d'avis de motion du règlement 2026-08 (point 3.6)",
+              "page": 1,
+              "reason": "Aucun lien textuel entre les deux points de l'ordre du jour ; l'extrait cité ne concerne que 3.6. Le marqueur de confiance AMBIGUOUS atténue sans justifier le lien."
+            }
+          ],
+          "citationDefects": [
+            "Neuf extraits normalisent l'apostrophe typographique du PDF en apostrophe droite : citations non littérales (points 3.6, 3.7, 5.5).",
+            "Arêtes mentions et supports dupliquées de la source vers bylaw-2026-08 et vers derog-ddm2026-058 sur les mêmes preuves, sans distinction de portée."
+          ],
+          "usefulness": 4,
+          "notes": "Seul alias à modéliser l'avis de motion (3.6) comme étape distincte, via un nœud Signal en étape avis_motion, tout en portant le dépôt (3.7) sur le règlement en étape 1er_projet. Statut candidate cohérent avec un projet d'ordre du jour. Provenance derived_from complète. Défaut principal : une arête inventée et des extraits retouchés."
+        },
+        {
+          "system": "system-87b5985c3e9f",
+          "supportedOracleUnitIds": ["L37", "L54", "L55"],
+          "missedOracleUnitIds": ["L36"],
+          "unsupported": [],
+          "citationDefects": [
+            "Points 3.6 et 3.7 fusionnés dans un extrait unique et un nœud unique : l'avis de motion n'est plus séparable du dépôt du projet.",
+            "Nœud Source en statut validated alors que la source est un projet d'ordre du jour et que toutes les unités oracle sont au stade prévu."
+          ],
+          "usefulness": 3,
+          "notes": "Citations strictement littérales (14 sur 14 vérifiées contre le texte de page). L36 est comptée manquée sur le fond : aucune entité ne porte l'étape avis_motion, seul stage=projet est émis, même si le texte de l'avis figure dans l'extrait cité. Une lecture indulgente est possible et signalée dans les limites. Graphe plus pauvre (6 arêtes) ; bylaw-2019-102 n'est rattaché à la source par aucune arête."
+        }
+      ],
+      "ranking": ["system-032f55c8cc8b", "system-87b5985c3e9f"],
+      "reason": "Même socle de trois unités (L37, L54, L55) pour les deux alias ; seul system-032f55c8cc8b distingue l'avis de motion (L36) comme étape, c'est-à-dire exactement la granularité que demande l'oracle. Le coût qu'il paie (une arête raises_signal sans appui, des apostrophes normalisées) reste inférieur à la perte d'une étape de cycle de vie chez system-87b5985c3e9f."
+    },
+    {
+      "documentId": "valcourt-2026-06-01-agenda",
+      "systems": [
+        {
+          "system": "system-032f55c8cc8b",
+          "supportedOracleUnitIds": ["V71", "V72", "V73", "V74", "V75"],
+          "missedOracleUnitIds": ["V132"],
+          "unsupported": [
+            {
+              "summary": "Arête raises_signal entre le PIIA lotissement du 1070 Bissonnette (point 7.1) et le signal du second projet de règlement 560-28 (point 7.5)",
+              "page": 1,
+              "reason": "Deux points d'ordre du jour distincts, sans énoncé de lien dans le texte ; la preuve ev-001 ne couvre que le point 7.5."
+            }
+          ],
+          "citationDefects": [
+            "Quatre extraits du point 7.3 (1045 Bissonnette) normalisent l'apostrophe typographique : citations non littérales.",
+            "Le point 13.2 (4111 rue Carpentier, convention de prêt à usage, page 3) n'est ni cité ni modélisé."
+          ],
+          "usefulness": 3,
+          "notes": "Les quatre PIIA et le second projet 560-28 sont couverts, en étape piia et en stade second_projet, avec un statut candidate cohérent pour un ordre du jour prévisionnel. Provenance derived_from complète. Défaut principal : une arête inventée entre deux points sans rapport."
+        },
+        {
+          "system": "system-87b5985c3e9f",
+          "supportedOracleUnitIds": ["V71", "V72", "V73", "V74", "V75"],
+          "missedOracleUnitIds": ["V132"],
+          "unsupported": [],
+          "citationDefects": [
+            "Le point 13.2 (4111 rue Carpentier, page 3) n'est ni cité ni modélisé ; aucune citation ne dépasse la page 1 sur un document de trois pages.",
+            "Statut de la Source à attached, vocabulaire différent de celui employé par le même alias sur les autres documents (validated, candidate)."
+          ],
+          "usefulness": 4,
+          "notes": "Citations strictement littérales (21 sur 21). Même couverture oracle que l'autre alias, sans aucune relation non soutenue. Graphe plus mince : 7 arêtes, aucune arête derived_from, donc pas de chaîne de provenance explicite en dehors des citations."
+        }
+      ],
+      "ranking": ["system-87b5985c3e9f", "system-032f55c8cc8b"],
+      "reason": "Couverture oracle identique (5 sur 6, même unité manquée V132). system-87b5985c3e9f passe devant sur la qualité de l'appui : aucun extrait non littéral et aucune relation inventée, là où system-032f55c8cc8b ajoute une arête raises_signal entre deux points sans rapport et quatre extraits retouchés. Son avantage de provenance derived_from ne compense pas une relation fausse."
+    },
+    {
+      "documentId": "saint-barthelemy-2026-09-08",
+      "systems": [
+        {
+          "system": "system-032f55c8cc8b",
+          "supportedOracleUnitIds": ["S738", "S739M", "S739P"],
+          "missedOracleUnitIds": ["S194", "S195", "S196", "S197", "S203"],
+          "unsupported": [],
+          "citationDefects": [
+            "bylaw-739-26 porte date et dateAdoption au 2026-09-08 alors que son étape est 1er_projet : seul le premier projet a été adopté, le règlement lui-même ne l'est pas. Défaut de date et d'étape.",
+            "Trois extraits (point 4.1 en page 3, ev-2 en page 4) normalisent l'apostrophe typographique.",
+            "de-739-26-premier-projet ne porte que zone_ref R-7 alors que la résolution vise R-7 et R-8 ; les arêtes targets_zone rattrapent partiellement."
+          ],
+          "usefulness": 3,
+          "notes": "Cinq des huit unités oracle sont hors couverture : les quatre transactions immobilières (points 4.6 à 4.9, pages 6 à 8) et le prolongement d'aqueduc vers Saint-Cuthbert (point 6.4, page 10) ne sont pas extraits, alors que ce sont les signaux fonciers du document. En revanche le cycle de vie réglementaire est reconstruit au-delà de l'oracle et correctement appuyé : avis de motion du 7 juillet 2026 (page 3), consultation publique du 22 juillet 2026 (page 4), arêtes lifecycle_predecessor. Résolutions 2026-09-189, 2026-09-190 et 2026-09-191 exactes."
+        },
+        {
+          "system": "system-87b5985c3e9f",
+          "supportedOracleUnitIds": ["S738", "S739M", "S739P"],
+          "missedOracleUnitIds": ["S194", "S195", "S196", "S197", "S203"],
+          "unsupported": [
+            {
+              "summary": "event-avis-motion-739-26 porte decision=approuvé",
+              "page": 4,
+              "reason": "Le texte du point 4.2 indique seulement qu'un avis de motion est donné ; aucune mise aux voix, aucune mention d'adoption pour cette résolution. La décision est ajoutée par le système."
+            },
+            {
+              "summary": "event-avis-motion-739-26 porte reglement_number=288-90",
+              "page": 4,
+              "reason": "L'avis de motion annonce le futur premier projet 739-26 qui amende le règlement 288-90 ; rattacher l'avis au règlement de zonage maître contredit l'usage du même champ ailleurs dans la charge utile (738-26, 739-26) et déplace l'événement sur le mauvais règlement."
+            }
+          ],
+          "citationDefects": [
+            "Aucun élément du cycle de vie antérieur de 738-26 (avis de motion du 7 juillet 2026 en page 3, consultation publique du 22 juillet 2026 en page 4) n'est extrait, alors que les deux attendus sont explicites.",
+            "Statut de la Source à attached, vocabulaire différent de celui employé par le même alias sur waterloo (validated)."
+          ],
+          "usefulness": 2,
+          "notes": "Même angle mort que l'autre alias sur les cinq unités foncières (transactions 4.6 à 4.9 et aqueduc 6.4). Citations littérales (28 sur 28) et double ancrage titre plus clause résolutive sur 739-26. Défaut principal : une décision ajoutée et un numéro de règlement mal attribué sur l'avis de motion, deux erreurs qui portent directement sur des champs de décision."
+        }
+      ],
+      "ranking": ["system-032f55c8cc8b", "system-87b5985c3e9f"],
+      "reason": "Couverture oracle strictement identique (3 sur 8, mêmes cinq unités manquées). system-032f55c8cc8b passe devant sur la fiabilité des champs de décision : il n'ajoute aucune décision et rattache correctement l'avis de motion au projet 739-26, là où system-87b5985c3e9f inscrit decision=approuvé sur un avis de motion qui n'a pas été mis aux voix et le rattache au règlement 288-90. Il reconstruit en plus deux étapes antérieures réellement appuyées. Ses propres défauts (dateAdoption sur un premier projet, apostrophes normalisées) pèsent moins lourd."
+    },
+    {
+      "documentId": "waterloo-2026-08-18",
+      "systems": [
+        {
+          "system": "system-032f55c8cc8b",
+          "supportedOracleUnitIds": ["W001"],
+          "missedOracleUnitIds": [],
+          "unsupported": [
+            {
+              "summary": "signal-tour-telecom-bell affirme no_lot=4161789",
+              "page": 9,
+              "reason": "La résolution 26.08.25.5 vise les lots 4 161 789 ou 6 098 789, en alternative ; retenir un seul lot transforme une option en fait."
+            }
+          ],
+          "citationDefects": [
+            "Deux extraits de la page 14 ne sont pas littéraux : le texte source porte CCU 2026109 et CCU 2026112, les citations réintroduisent un trait d'union (CCU 2026-109, CCU 2026-112). Correction d'un artefact d'extraction, mais traçabilité littérale rompue.",
+            "W001 est ancrée sur le titre du point (page 2) et non sur la clause résolutive de la page 3 visée par l'oracle ; aucune citation ne couvre le dispositif adopté.",
+            "Aucun numéro de résolution (26.08.22.x, 26.08.26.x) n'est porté par les nœuds, alors que le document les numérote systématiquement.",
+            "La mention selon laquelle la réglementation d'urbanisme devra être modifiée provient de la page 10 mais n'est appuyée que par un extrait de la page 9."
+          ],
+          "usefulness": 3,
+          "notes": "Les huit dossiers CCU (2026-105, 106, 107, 108, 109, 110, 111, 112), les deux zones et le signal de tour de télécommunication sont couverts et appuyés, avec conditions et provenance derived_from complète (30 arêtes). Manquent deux règlements pourtant traités en séance : le règlement parapluie 26-972 (emprunt de 1 360 000 $, 415 rue de la Cour, page 3) et la modification du règlement parapluie 26-970 (page 4)."
+        },
+        {
+          "system": "system-87b5985c3e9f",
+          "supportedOracleUnitIds": ["W001"],
+          "missedOracleUnitIds": [],
+          "unsupported": [
+            {
+              "summary": "signal-tour-telecom affirme no_lot=4161789",
+              "page": 9,
+              "reason": "Même défaut que l'autre alias : la résolution vise les lots 4 161 789 ou 6 098 789 en alternative."
+            },
+            {
+              "summary": "bylaw-26-970 porte stage=adoption au 2026-08-18",
+              "page": 4,
+              "reason": "Le point 26.08.22.4 modifie un règlement adopté le 14 juillet 2026 pour fixer la durée de l'emprunt à 10 ans ; l'action du 18 août est une modification, pas une adoption. Défaut d'étape."
+            }
+          ],
+          "citationDefects": [
+            "Huit DesignationEvent (les dossiers CCU) ne sont reliés par aucune arête au nœud Source : la provenance n'existe qu'au niveau des citations et la moitié des nœuds du graphe reste orpheline.",
+            "Hors targets_zone pour trois dossiers, aucune arête ne relie les zones aux événements."
+          ],
+          "usefulness": 4,
+          "notes": "Citations littérales (48 sur 48), y compris CCU 2026109 et CCU 2026112 restitués tels quels. Double ou triple ancrage systématique, titre plus clause résolutive, et numéro de résolution porté par chaque nœud (26.08.22.x, 26.08.26.x). Couvre deux règlements de plus que l'autre alias : 26-972 et 26-970. Défaut principal : un graphe très peu connecté (8 arêtes pour 16 nœuds) et une étape adoption là où il s'agit d'une modification."
+        }
+      ],
+      "ranking": ["system-87b5985c3e9f", "system-032f55c8cc8b"],
+      "reason": "Même unité oracle couverte (W001) par les deux alias. system-87b5985c3e9f l'ancre sur la clause résolutive de la page 3 visée par l'oracle, cite littéralement, porte les numéros de résolution et capte deux règlements adoptés de plus (26-972 et 26-970) que l'autre ignore. system-032f55c8cc8b n'apporte aucun signal appuyé que l'autre n'ait pas, et paie deux extraits retouchés ainsi qu'un ancrage sur le seul titre."
+    }
+  ],
+  "overall": {
+    "ranking": ["system-032f55c8cc8b", "system-87b5985c3e9f"],
+    "winner": "tie",
+    "reason": "Partage de deux documents à deux : system-032f55c8cc8b devant sur lac-des-seize-iles et saint-barthelemy, system-87b5985c3e9f devant sur valcourt et waterloo. Sur les 19 unités oracle des quatre documents comparables, le premier en soutient 13 et le second 12, soit une unité d'écart (l'avis de motion L36), obtenue sur une observation unique par cellule : insuffisant pour départager. Les utilités cumulées sont égales, 13 points chacun. Les profils de défaut sont opposés et de gravité comparable : system-032f55c8cc8b sur-relie (deux arêtes raises_signal sans appui) et retouche ses extraits (citations non littérales sur les quatre documents), mais reconstruit les étapes de cycle de vie et la provenance ; system-87b5985c3e9f cite littéralement partout (111 citations vérifiées sans écart) et ancre sur les clauses résolutives, mais fusionne ou omet des étapes, ajoute une décision sur un avis de motion non mis aux voix et laisse la moitié de ses nœuds sans arête vers la source. Aucun vainqueur global n'est prononcé ; l'ordre du champ ranking ne reflète que l'écart d'une unité oracle, qui n'est pas discriminant.",
+    "confidence": "low",
+    "limitations": [
+      "overall.ranking ne couvre que 4 des 5 documents gelés : saint-etienne-de-bolton-2026-08-04 ne porte aucun alias (comparable=false), les deux systèmes y ayant été refusés ; aucune conclusion n'est tirée pour ce document.",
+      "Une seule observation par document et par système : aucune variance n'est mesurée, donc aucun écart faible n'est distinguable du bruit d'échantillonnage.",
+      "L'écart global se réduit à une unité oracle (13 contre 12) et à un partage de deux documents à deux : le classement d'ensemble n'est pas discriminant.",
+      "Le jugement porte uniquement sur les quatre documents comparables du bundle ; il ne se transporte ni à un usage de production, ni à d'autres municipalités, ni à d'autres formats de source.",
+      "Les deux systèmes manquent ensemble cinq des huit unités de saint-barthelemy (les quatre transactions immobilières 4.6 à 4.9 et le prolongement d'aqueduc 6.4) ainsi que l'unité V132 de valcourt : la couverture foncière hors réglementation n'est démontrée par aucun des deux.",
+      "Le contrat et le plafond de sortie étant communs, les écarts de volume de jetons observés dans les charges utiles ne sont pas interprétés ici et ne participent pas au classement.",
+      "L'unité L36 est comptée manquée pour system-87b5985c3e9f sur une lecture stricte de l'étape (aucune entité en avis_motion) ; une lecture indulgente fondée sur le seul extrait cité égaliserait lac-des-seize-iles à 4 contre 4 et renforcerait l'égalité globale."
+    ]
+  }
+}

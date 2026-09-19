@@ -1,0 +1,147 @@
+{
+ "documentId": "saint-damien-2026-06-16",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "36582d7443011e6e955c73e32ea22f2cbc03270ad76f0c7a2dea4270c97fde67",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-2026-122"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure 2026-122 — 73, rue Messier",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+      },
+      {
+       "page": 1,
+       "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-2026-133"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure 2026-133 — 3173, chemin du Ruisseau",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+      },
+      {
+       "page": 1,
+       "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-2026-135"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande d’approbation au PIIA 2026-135 — 6710, rue Principale",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+      },
+      {
+       "page": 1,
+       "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 12.2 de l'ordre du jour prévoit le traitement de la demande de dérogation mineure 2026-122 au 73, rue Messier.\",\"excerpt\":\"12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 12.3 de l'ordre du jour prévoit le traitement de la demande de dérogation mineure 2026-133 au 3173, chemin du Ruisseau.\",\"excerpt\":\"12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 12.4 de l'ordre du jour prévoit la demande d'approbation au PIIA 2026-135 au 6710, rue Principale.\",\"excerpt\":\"12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 12.2 de l'ordre du jour prévoit le traitement de la demande de dérogation mineure 2026-122 au 73, rue Messier.",
+   "excerpt": "12.2 Demande de dérogation mineure 2026-122 - 73, rue Messier"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 12.3 de l'ordre du jour prévoit le traitement de la demande de dérogation mineure 2026-133 au 3173, chemin du Ruisseau.",
+   "excerpt": "12.3 Demande de dérogation mineure 2026-133 - 3173, chemin du Ruisseau"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 12.4 de l'ordre du jour prévoit la demande d'approbation au PIIA 2026-135 au 6710, rue Principale.",
+   "excerpt": "12.4 Demande d’approbation au PIIA 2026-135 – 6710, rue Principale"
+  }
+ ],
+ "filter": {
+  "acts": 3,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 12.2 de l'ordre du jour prévoit le traitement de la demande de dérogation mineure 2026-122 au 73, rue Messier."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 12.3 de l'ordre du jour prévoit le traitement de la demande de dérogation mineure 2026-133 au 3173, chemin du Ruisseau."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 12.4 de l'ordre du jour prévoit la demande d'approbation au PIIA 2026-135 au 6710, rue Principale."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1710,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2029,
+   "outputTokens": 236,
+   "totalTokens": 2265
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1531
+  },
+  "inputSha256": "13bc232894a646eca7abf3b9c91ca14b9683c8530dc9c78375051300d169938d"
+ }
+}

@@ -1,0 +1,52 @@
+{
+ "documentId": "lavenir-2026-05-04",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "d7354ffa0bf6896c5c0bb8a31d61f6c4a251ddc132c709cda391c4038340a4a8",
+ "rawText": "{\"operations\":[{\"op\":\"correct\",\"id\":\"u01\",\"unit\":{\"label\":\"Adoption du règlement 797-26 — habitation multifamiliale (h3) en zone C3\",\"stage\":\"adoption\",\"procedure\":null,\"objet\":\"797-26\",\"page\":3,\"citation\":\"résolu d'adopter le règlement\\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12\",\"anchor\":\"d'amendement no. 797-26\"},\"reason\":\"La citation doit être recopiée à l’identique : un saut de ligne sépare « règlement » et « d'amendement » dans le texte de la page 3.\"}]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Adoption du règlement 797-26 — habitation multifamiliale (h3) en zone C3",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "797-26",
+    "page": 3,
+    "citation": "résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12",
+    "anchor": "d'amendement no. 797-26"
+   },
+   "reason": "La citation doit être recopiée à l’identique : un saut de ligne sépare « règlement » et « d'amendement » dans le texte de la page 3."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 3,
+   "citation": "résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 1
+}

@@ -1,0 +1,310 @@
+{
+ "documentId": "barnston-ouest-2026-05-04",
+ "nextId": 9,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Dépôt et présentation du projet de règlement 325-2026 modifiant le plan d’urbanisme",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "325-2026",
+    "page": 7,
+    "citation": "6.2.3. Dépôt et présentation du Règlement numéro 325-2026 modifiant le règlement numéro 224 Plan d’urbanisme",
+    "anchor": "Règlement numéro 325-2026",
+    "spanStart": 2491,
+    "spanEnd": 2599
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt et présentation du projet de règlement 325-2026 modifiant le plan d’urbanisme",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "325-2026",
+      "page": 7,
+      "citation": "6.2.3. Dépôt et présentation du Règlement numéro 325-2026 modifiant le règlement numéro 224 Plan d’urbanisme",
+      "anchor": "Règlement numéro 325-2026",
+      "spanStart": 2491,
+      "spanEnd": 2599
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le document constate le dépôt et la présentation du projet modifiant le plan d’urbanisme, étape distincte de l’avis de motion."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 325-2026 modifiant le plan d’urbanisme",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "325-2026",
+    "page": 8,
+    "citation": "6.2.4. Avis de motion - Règlement numéro 325-2026 modifiant le règlement numéro 224 Plan d’urbanisme",
+    "anchor": "Règlement numéro 325-2026",
+    "spanStart": 172,
+    "spanEnd": 272
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 325-2026 modifiant le plan d’urbanisme",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "325-2026",
+      "page": 8,
+      "citation": "6.2.4. Avis de motion - Règlement numéro 325-2026 modifiant le règlement numéro 224 Plan d’urbanisme",
+      "anchor": "Règlement numéro 325-2026",
+      "spanStart": 172,
+      "spanEnd": 272
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion est donné lors de cette séance et constitue une unité distincte du dépôt du projet de règlement."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Dépôt et présentation du projet de règlement 326-2026 modifiant le zonage",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "326-2026",
+    "page": 8,
+    "citation": "6.2.5. Dépôt et présentation du Règlement numéro 326-2026 modifiant le règlement numéro 225 de zonage",
+    "anchor": "Règlement numéro 326-2026",
+    "spanStart": 461,
+    "spanEnd": 562
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt et présentation du projet de règlement 326-2026 modifiant le zonage",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "326-2026",
+      "page": 8,
+      "citation": "6.2.5. Dépôt et présentation du Règlement numéro 326-2026 modifiant le règlement numéro 225 de zonage",
+      "anchor": "Règlement numéro 326-2026",
+      "spanStart": 461,
+      "spanEnd": 562
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le dépôt et la présentation du projet modifiant le règlement de zonage sont expressément constatés dans le procès-verbal."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 326-2026 modifiant le zonage",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "326-2026",
+    "page": 8,
+    "citation": "6.2.6. Avis de motion - Règlement numéro 326-2026 modifiant le règlement numéro 225 de zonage",
+    "anchor": "Règlement numéro 326-2026",
+    "spanStart": 1105,
+    "spanEnd": 1198
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 326-2026 modifiant le zonage",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "326-2026",
+      "page": 8,
+      "citation": "6.2.6. Avis de motion - Règlement numéro 326-2026 modifiant le règlement numéro 225 de zonage",
+      "anchor": "Règlement numéro 326-2026",
+      "spanStart": 1105,
+      "spanEnd": 1198
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion donné pour le règlement 326-2026 doit être compté séparément de son projet actuel."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Dépôt et présentation du projet de règlement 327-2026 modifiant le lotissement",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "327-2026",
+    "page": 8,
+    "citation": "6.2.7. Dépôt et présentation du Règlement numéro 327-2026 modifiant le règlement numéro 226 (2012) de lotissement",
+    "anchor": "Règlement numéro 327-2026",
+    "spanStart": 1380,
+    "spanEnd": 1493
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt et présentation du projet de règlement 327-2026 modifiant le lotissement",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "327-2026",
+      "page": 8,
+      "citation": "6.2.7. Dépôt et présentation du Règlement numéro 327-2026 modifiant le règlement numéro 226 (2012) de lotissement",
+      "anchor": "Règlement numéro 327-2026",
+      "spanStart": 1380,
+      "spanEnd": 1493
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le document constate le dépôt et la présentation d’un projet modifiant le règlement de lotissement, objet réglementaire inclus."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 327-2026 modifiant le lotissement",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "327-2026",
+    "page": 8,
+    "citation": "6.2.8. Avis de motion - Règlement numéro 327-2026 modifiant le règlement numéro 226 (2012) de lotissement",
+    "anchor": "Règlement numéro 327-2026",
+    "spanStart": 2036,
+    "spanEnd": 2141
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 327-2026 modifiant le lotissement",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "327-2026",
+      "page": 8,
+      "citation": "6.2.8. Avis de motion - Règlement numéro 327-2026 modifiant le règlement numéro 226 (2012) de lotissement",
+      "anchor": "Règlement numéro 327-2026",
+      "spanStart": 2036,
+      "spanEnd": 2141
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion est effectivement donné et forme une unité distincte du dépôt du projet de règlement 327-2026."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Dépôt et présentation du projet de règlement 328-2026 modifiant le règlement sur les PIIA",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "328-2026",
+    "page": 8,
+    "citation": "6.2.9. Dépôt et présentation du Règlement numéro 328-2026 modifiant le règlement numéro 221 sur les plans d’implantation et d’intégration architecturale",
+    "anchor": "Règlement numéro 328-2026",
+    "spanStart": 2335,
+    "spanEnd": 2487
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt et présentation du projet de règlement 328-2026 modifiant le règlement sur les PIIA",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "328-2026",
+      "page": 8,
+      "citation": "6.2.9. Dépôt et présentation du Règlement numéro 328-2026 modifiant le règlement numéro 221 sur les plans d’implantation et d’intégration architecturale",
+      "anchor": "Règlement numéro 328-2026",
+      "spanStart": 2335,
+      "spanEnd": 2487
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Il s’agit du dépôt d’un projet modifiant le règlement sur les PIIA, et non d’une décision sur une demande individuelle de PIIA."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 328-2026 modifiant le règlement sur les PIIA",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "328-2026",
+    "page": 9,
+    "citation": "6.2.10. Avis de motion - Règlement numéro 328-2026 modifiant le règlement numéro 221 sur les plans d’implantation et d’intégration architecturale",
+    "anchor": "Règlement numéro 328-2026",
+    "spanStart": 242,
+    "spanEnd": 387
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 328-2026 modifiant le règlement sur les PIIA",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "328-2026",
+      "page": 9,
+      "citation": "6.2.10. Avis de motion - Règlement numéro 328-2026 modifiant le règlement numéro 221 sur les plans d’implantation et d’intégration architecturale",
+      "anchor": "Règlement numéro 328-2026",
+      "spanStart": 242,
+      "spanEnd": 387
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le procès-verbal constate un avis de motion pour le règlement 328-2026, à compter séparément de la présentation de son projet."
+    }
+   ]
+  }
+ ]
+}

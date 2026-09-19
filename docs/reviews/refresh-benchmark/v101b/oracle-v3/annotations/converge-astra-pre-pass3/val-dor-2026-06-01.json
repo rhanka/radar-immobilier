@@ -1,0 +1,61 @@
+{
+ "documentId": "val-dor-2026-06-01",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "35fd5eb75f529c39565ab7bbd7eb6f6a6e1ad33545e6d828d78448e105e36685",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 3, page 1, prévoit l’adoption du premier projet de règlement 2026-12 concernant la partie centrale du Domaine des Deux Lacs, ce qui correspond à une unité prévue à l’étape projet_reglement.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 4, page 1, prévoit les explications et la consultation sur le projet de règlement de zonage omnibus 2026-14, sans annoncer son adoption; la procédure consultation_publique et l’étape inconnu sont conformes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 14, page 1, prévoit explicitement l’approbation de la 21e version du plan-projet d’opération cadastrale du Domaine des Deux Lacs, acte foncier admissible dont l’adoption reste prévue.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 15, page 1, prévoit une demande d’appui auprès de la CPTAQ pour une utilisation non agricole d’une partie du lot 4 721 047, sans attester d’autorisation acquise.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 3, page 1, prévoit l’adoption du premier projet de règlement 2026-12 concernant la partie centrale du Domaine des Deux Lacs, ce qui correspond à une unité prévue à l’étape projet_reglement."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 4, page 1, prévoit les explications et la consultation sur le projet de règlement de zonage omnibus 2026-14, sans annoncer son adoption; la procédure consultation_publique et l’étape inconnu sont conformes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 14, page 1, prévoit explicitement l’approbation de la 21e version du plan-projet d’opération cadastrale du Domaine des Deux Lacs, acte foncier admissible dont l’adoption reste prévue."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 15, page 1, prévoit une demande d’appui auprès de la CPTAQ pour une utilisation non agricole d’une partie du lot 4 721 047, sans attester d’autorisation acquise."
+  }
+ ]
+}

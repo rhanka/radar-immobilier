@@ -1,0 +1,19 @@
+{
+ "documentId": "lislet-2026-04-07",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "efebde05d360c9d992a4b8fc70721d5306bb4bf14ac13bfa9caa7734911b6227",
+ "verificationSha256": "9918b04654b8ee2faa6d80bb3a83cbb5d27fe27d24228fb7f6a2ad1f9d68dbab",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

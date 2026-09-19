@@ -1,0 +1,13 @@
+{
+ "id": "gracefield-2026-04-14",
+ "rc": 0,
+ "latencyMs": 368364,
+ "inputTokens": 2,
+ "outputTokens": 56035,
+ "cacheRead": 0,
+ "cacheCreate": 29075,
+ "costUsd": 1.7132610000000001,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 92550
+}

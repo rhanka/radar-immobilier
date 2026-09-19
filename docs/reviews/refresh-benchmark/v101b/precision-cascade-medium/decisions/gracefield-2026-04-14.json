@@ -1,0 +1,258 @@
+{
+ "documentId": "gracefield-2026-04-14",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "a619f6738b627f03ce2034e9e47deb258ceec9d1ada1dba308f59348b391dbc3",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-259-2025"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 259-2025 — Code d’éthique et de déontologie",
+     "stage": "adoption",
+     "objet": "259-2025",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le règlement 259-2025 soit adopté et qu’il soit statué et décrété,\npar ce règlement comme suit :"
+      },
+      {
+       "page": 4,
+       "excerpt": "Que le règlement 259-2025 soit adopté et qu’il soit statué et décrété,\npar ce règlement comme suit :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-214-2022"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 214-2022 — Ancien code d’éthique et de déontologie",
+     "stage": null,
+     "objet": "214-2022",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "ATTENDU QUE le conseil de la Ville de Gracefield a adopté, le 14 mars\n2022 le Règlement numéro 214-2022 édictant un Code d’éthique et de\ndéontologie des élu(e)s ;"
+      },
+      {
+       "page": 4,
+       "excerpt": "ATTENDU QUE le conseil de la Ville de Gracefield a adopté, le 14 mars\n2022 le Règlement numéro 214-2022 édictant un Code d’éthique et de\ndéontologie des élu(e)s ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-263-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 263-2026 — Occupation et entretien des bâtiments patrimoniaux",
+     "stage": "adoption",
+     "objet": "263-2026",
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "Que le règlement 263-2026 soit adopté et qu’il statue et décrète ce qui\nsuit :"
+      },
+      {
+       "page": 15,
+       "excerpt": "Que le règlement 263-2026 soit adopté et qu’il statue et décrète ce qui\nsuit :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-cptaq-064"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui municipal à une demande d’aliénation auprès de la CPTAQ",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "Que le conseil de la Ville de Gracefield appuie et recommande ladite\ndemande d’autorisation à la Commission de protection du territoire\nagricole du Québec."
+      },
+      {
+       "page": 22,
+       "excerpt": "Considérant que la Ville a reçu une demande d’aliénation d’un droit\nsuperficiaire personnel et temporaire de la résidence construite sur le\nlot 5 412 018"
+      },
+      {
+       "page": 23,
+       "excerpt": "Que le conseil de la Ville de Gracefield appuie et recommande ladite\ndemande d’autorisation à la Commission de protection du territoire\nagricole du Québec."
+      },
+      {
+       "page": 22,
+       "excerpt": "Considérant que la Ville a reçu une demande d’aliénation d’un droit\nsuperficiaire personnel et temporaire de la résidence construite sur le\nlot 5 412 018 du cadastre du Québec de la circonscription foncière de\nGatineau, le tout situé au 40, chemin Éloi-Lachapelle à Gracefield,\nQuébec, J0X 1W0 ;\nConsidérant que cette demande vise également l’aliénation des lots\n5 412 018, 5 412 019 et 5 410 311 du cadastre du Québec de la\ncirconscription foncière de Gatineau ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-abrogation-245-1"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande d’abrogation de l’article 245.1 de la LAU",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 25,
+       "excerpt": "Que la Ville de Gracefield demande aux membres de la Commission\nparlementaire de l’aménagement du territoire de l’Assemblée nationale\nd’introduire un amendement au projet de loi no 22 abrogeant"
+      },
+      {
+       "page": 25,
+       "excerpt": "Que la Ville de Gracefield demande aux membres de la Commission\nparlementaire de l’aménagement du territoire de l’Assemblée nationale\nd’introduire un amendement au projet de loi no 22 abrogeant\nl’article 245.1 de la Loi sur l’aménagement et l’urbanisme afin de\nrespecter le consensus établi entre le ministère et ses partenaires\nmunicipaux ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-frr-067"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Projet FRR d’amélioration des espaces publics et infrastructures",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 26,
+       "excerpt": "Que la Ville de Gracefield confirme son engagement financier pour ce\nprojet (26 962,00 $ après remboursement des taxes)."
+      },
+      {
+       "page": 26,
+       "excerpt": "Que la Ville de Gracefield confirme son engagement financier pour ce\nprojet (26 962,00 $ après remboursement des taxes)."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 259-2025 porte sur le Code d'éthique et de déontologie des élus, ce qui relève de l'administration municipale générale et non de l'urbanisme ou de l'aménagement du territoire.\",\"excerpt\":\"\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 214-2022 est cité à titre de rappel historique et relève de l'éthique et déontologie, hors du champ de l'urbanisme.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement 263-2026 relatif à l'occupation et l'entretien des bâtiments patrimoniaux a été adopté lors de cette séance.\",\"excerpt\":\"Que le règlement 263-2026 soit adopté et qu’il statue et décrète ce qui\\nsuit :\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution appuyant et recommandant une demande d'autorisation d'aliénation à la CPTAQ.\",\"excerpt\":\"Que le conseil de la Ville de Gracefield appuie et recommande ladite\\ndemande d’autorisation à la Commission de protection du territoire\\nagricole du Québec.\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution demandant formellement l'abrogation de l'article 245.1 de la LAU dans le cadre du projet de loi 22.\",\"excerpt\":\"Que la Ville de Gracefield demande aux membres de la Commission\\nparlementaire de l’aménagement du territoire de l’Assemblée nationale\\nd’introduire un amendement au projet de loi no 22 abrogeant\\nl’article 245.1 de la Loi sur l’aménagement et l’urbanisme\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise le dépôt d'un projet auprès du FRR pour l'amélioration des espaces publics et confirme son engagement financier.\",\"excerpt\":\"Que la Ville de Gracefield confirme son engagement financier pour ce\\nprojet (26 962,00 $ après remboursement des taxes).\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 259-2025 porte sur le Code d'éthique et de déontologie des élus, ce qui relève de l'administration municipale générale et non de l'urbanisme ou de l'aménagement du territoire.",
+   "excerpt": ""
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 214-2022 est cité à titre de rappel historique et relève de l'éthique et déontologie, hors du champ de l'urbanisme.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le règlement 263-2026 relatif à l'occupation et l'entretien des bâtiments patrimoniaux a été adopté lors de cette séance.",
+   "excerpt": "Que le règlement 263-2026 soit adopté et qu’il statue et décrète ce qui\nsuit :"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution appuyant et recommandant une demande d'autorisation d'aliénation à la CPTAQ.",
+   "excerpt": "Que le conseil de la Ville de Gracefield appuie et recommande ladite\ndemande d’autorisation à la Commission de protection du territoire\nagricole du Québec."
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution demandant formellement l'abrogation de l'article 245.1 de la LAU dans le cadre du projet de loi 22.",
+   "excerpt": "Que la Ville de Gracefield demande aux membres de la Commission\nparlementaire de l’aménagement du territoire de l’Assemblée nationale\nd’introduire un amendement au projet de loi no 22 abrogeant\nl’article 245.1 de la Loi sur l’aménagement et l’urbanisme"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise le dépôt d'un projet auprès du FRR pour l'amélioration des espaces publics et confirme son engagement financier.",
+   "excerpt": "Que la Ville de Gracefield confirme son engagement financier pour ce\nprojet (26 962,00 $ après remboursement des taxes)."
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Le règlement 259-2025 porte sur le Code d'éthique et de déontologie des élus, ce qui relève de l'administration municipale générale et non de l'urbanisme ou de l'aménagement du territoire."
+   },
+   {
+    "act": "A02",
+    "reason": "Le règlement 214-2022 est cité à titre de rappel historique et relève de l'éthique et déontologie, hors du champ de l'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A03",
+    "reason": "Le règlement 263-2026 relatif à l'occupation et l'entretien des bâtiments patrimoniaux a été adopté lors de cette séance."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil adopte une résolution appuyant et recommandant une demande d'autorisation d'aliénation à la CPTAQ."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil adopte une résolution demandant formellement l'abrogation de l'article 245.1 de la LAU dans le cadre du projet de loi 22."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil autorise le dépôt d'un projet auprès du FRR pour l'amélioration des espaces publics et confirme son engagement financier."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1925,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 19490,
+   "outputTokens": 484,
+   "totalTokens": 19974
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1769
+  },
+  "inputSha256": "1d57bc587d5e642a96eb80d2d93eb98a2781fca8a542be4d03cd36b1d7b27522"
+ }
+}

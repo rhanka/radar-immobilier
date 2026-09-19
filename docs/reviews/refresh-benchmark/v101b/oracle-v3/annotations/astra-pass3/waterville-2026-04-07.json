@@ -1,0 +1,76 @@
+{
+ "documentId": "waterville-2026-04-07",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "b137b8bce7cb9f8629faf0c9f8f7c3c2ba81b57ed8ef781488c2329ec6de5a92",
+ "rawText": "{\"operations\":[{\"op\":\"correct\",\"id\":\"u04\",\"unit\":{\"label\":\"Avis de motion prévu — modification du règlement de lotissement no 615\",\"stage\":\"avis_motion\",\"procedure\":null,\"objet\":\"615\",\"page\":1,\"citation\":\"7.3\\nAvis de motion projet de règlement amendant le règlement de lotissement no 615 de la\\nVille de Waterville\",\"anchor\":\"règlement de lotissement no 615\"},\"reason\":\"La citation doit être recopiée à l’identique : le texte comporte des sauts de ligne après « 7.3 » et « de la », et non des espaces.\"},{\"op\":\"correct\",\"id\":\"u05\",\"unit\":{\"label\":\"Demande d’autorisation prévue — agrandissement du lieu d’enfouissement technique\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"lieu d’enfouissement technique\",\"page\":1,\"citation\":\"8.5\\nDemande d’autorisation à la Commission de protection agricole du Québec –\\nAgrandissement du lieu d’enfouissement technique\",\"anchor\":\"Agrandissement du lieu d’enfouissement technique\"},\"reason\":\"La citation doit être recopiée à l’identique : le texte comporte un saut de ligne après « 8.5 » et un autre avant « Agrandissement ».\"}]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Avis de motion prévu — modification du règlement de lotissement no 615",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "615",
+    "page": 1,
+    "citation": "7.3\nAvis de motion projet de règlement amendant le règlement de lotissement no 615 de la\nVille de Waterville",
+    "anchor": "règlement de lotissement no 615"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte comporte des sauts de ligne après « 7.3 » et « de la », et non des espaces."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Demande d’autorisation prévue — agrandissement du lieu d’enfouissement technique",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "lieu d’enfouissement technique",
+    "page": 1,
+    "citation": "8.5\nDemande d’autorisation à la Commission de protection agricole du Québec –\nAgrandissement du lieu d’enfouissement technique",
+    "anchor": "Agrandissement du lieu d’enfouissement technique"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte comporte un saut de ligne après « 8.5 » et un autre avant « Agrandissement »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "avis_motion",
+   "page": 1,
+   "citation": "7.3\nAvis de motion projet de règlement amendant le règlement de lotissement no 615 de la\nVille de Waterville"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "inconnu",
+   "page": 1,
+   "citation": "8.5\nDemande d’autorisation à la Commission de protection agricole du Québec –\nAgrandissement du lieu d’enfouissement technique"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 5
+}

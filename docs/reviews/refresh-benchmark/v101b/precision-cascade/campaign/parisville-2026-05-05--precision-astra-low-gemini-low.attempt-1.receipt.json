@@ -1,0 +1,34 @@
+{
+ "documentId": "parisville-2026-05-05",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "bf0604fc4a30d1a653a807c5f5985e1a7a195a3130447869f968ce9f42c23879",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-low output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1944,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 7560,
+   "outputTokens": 536,
+   "totalTokens": 8096
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1806
+  },
+  "inputSha256": "dbf6e8808f510343babc610b7a74c3d008ea15e0dc926c748878dffac4b7ddcc"
+ },
+ "at": "2026-09-19T02:36:58.111Z"
+}

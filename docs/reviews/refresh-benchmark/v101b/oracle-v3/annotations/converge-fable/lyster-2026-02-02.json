@@ -1,0 +1,51 @@
+{
+ "documentId": "lyster-2026-02-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "092e8dfeb56a8da806cc0d2322c3112274a690fd04d48f8c24b20e75560b1bfe",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-02-28 (5.7) adoptée autorisant la transmission à la MRC de la liste des immeubles pour vente à l'enchère pour taxes impayées ; le lot cadastral 5 835 056 (et non le matricule 1837-35-8331) est un objet foncier explicite figurant page 5 dans la citation exacte « Jean-François 1837-35-8331 5 835 056 Lagacé », acte foncier inclus par les règles.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Même résolution 2026-02-28 adoptée (« ADOPTÉE » page 5) ; le lot 5 834 167 est nommé explicitement page 5 dans « Anthony Lalonde2437-98-1768 5 834 167 Lacaille », l'objet retenu est le lot cadastral et non le matricule, conforme à l'inclusion des actes fonciers.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Même résolution 2026-02-28 adoptée d'autorisation de vente pour défaut de paiement des taxes ; le lot 5 834 895 est attesté page 5 dans « Carl Roy, Édith Francoeur, Réal 1636-52-7076 5 834 895 Roy », objet foncier explicite distinct des deux autres lots, étape et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Résolution 2026-02-28 (5.7) adoptée autorisant la transmission à la MRC de la liste des immeubles pour vente à l'enchère pour taxes impayées ; le lot cadastral 5 835 056 (et non le matricule 1837-35-8331) est un objet foncier explicite figurant page 5 dans la citation exacte « Jean-François 1837-35-8331 5 835 056 Lagacé », acte foncier inclus par les règles."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Même résolution 2026-02-28 adoptée (« ADOPTÉE » page 5) ; le lot 5 834 167 est nommé explicitement page 5 dans « Anthony Lalonde2437-98-1768 5 834 167 Lacaille », l'objet retenu est le lot cadastral et non le matricule, conforme à l'inclusion des actes fonciers."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Même résolution 2026-02-28 adoptée d'autorisation de vente pour défaut de paiement des taxes ; le lot 5 834 895 est attesté page 5 dans « Carl Roy, Édith Francoeur, Réal 1636-52-7076 5 834 895 Roy », objet foncier explicite distinct des deux autres lots, étape et page exactes."
+  }
+ ]
+}

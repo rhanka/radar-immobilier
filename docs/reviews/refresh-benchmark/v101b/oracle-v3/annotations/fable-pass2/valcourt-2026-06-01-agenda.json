@@ -1,0 +1,37 @@
+{
+ "documentId": "valcourt-2026-06-01-agenda",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "3e8858ec976a79440209f49367d2d07ea73a792e8aa42e7db497fd51a5b3f646",
+ "rawText": "{\"operations\":[\n {\"op\":\"remove\",\"id\":\"u06\",\"reason\":\"Le point 11.1 (Travaux publics, environnement) porte sur un règlement sur les pratiques agroenvironnementales, objet environnemental/agricole qui n'entre pas dans les inclusions du gold (urbanisme, petits PIIA, actes fonciers) ; c'est au plus un fait complémentaire à signaler hors gold, sans retoucher le dénominateur.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u06",
+   "reason": "Le point 11.1 (Travaux publics, environnement) porte sur un règlement sur les pratiques agroenvironnementales, objet environnemental/agricole qui n'entre pas dans les inclusions du gold (urbanisme, petits PIIA, actes fonciers) ; c'est au plus un fait complémentaire à signaler hors gold, sans retoucher le dénominateur."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u06"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

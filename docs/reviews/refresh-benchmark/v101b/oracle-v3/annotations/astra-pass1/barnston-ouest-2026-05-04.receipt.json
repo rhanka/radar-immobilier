@@ -1,0 +1,36 @@
+{
+ "documentId": "barnston-ouest-2026-05-04",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "9798556d1270594f7c233a5a022c558a27ae5f5ab5812470ce0922ccbf0cc402",
+ "inputSha256": "dd2475911fc559ea20608193fb57e59fe7607e1dc08149fe8e1b24d339b17e0d",
+ "responseSha256": "bccf5df07c18290bc6212cbc7583b5251751c6dbd6c024ed9f831973d264155d",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 68216,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 8912,
+  "outputTokens": 2164,
+  "totalTokens": 11076
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 68210,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:16:00.357Z"
+}

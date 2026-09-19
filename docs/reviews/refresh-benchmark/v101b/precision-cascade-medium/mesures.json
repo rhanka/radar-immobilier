@@ -1,0 +1,232 @@
+{
+ "generatedAt": "2026-09-19T03:28:53.720Z",
+ "network": "none",
+ "documentsFiltered": 99,
+ "before": {
+  "tp": 359,
+  "fp": 611,
+  "fn": 315,
+  "precision": 0.37010309278350517,
+  "recall": 0.5326409495548962,
+  "f1": 0.4367396593673966
+ },
+ "after": {
+  "tp": 358,
+  "fp": 383,
+  "fn": 316,
+  "precision": 0.48313090418353577,
+  "recall": 0.5311572700296736,
+  "f1": 0.5060070671378092
+ },
+ "acts": 912,
+ "removedActs": 229,
+ "removed": {
+  "correctAct": 4,
+  "neutral": 0,
+  "falseAct": 225
+ },
+ "supportedUngrounded": 7,
+ "keptNoValidDecision": 0,
+ "unknownIds": 0,
+ "cost": {
+  "apiEquivalentUsd": 1.2222884999999999,
+  "rate": {
+   "model": "gemini-3.8-flash",
+   "input": 0.75,
+   "output": 3.75,
+   "asOf": "2026-09-16"
+  },
+  "calls": 99,
+  "latencyMs": {
+   "p50": 2716,
+   "p95": 6773,
+   "max": 8747
+  }
+ },
+ "sourceArm": "astra-medium",
+ "refusedSourceDocuments": [
+  "waterville-2026-04-07"
+ ],
+ "cumulative": {
+  "sourceArm": "astra-medium",
+  "astraLowApiUsd": 46.43,
+  "geminiPassApiUsd": 1.2222884999999999,
+  "totalApiUsd": 47.6522885,
+  "astraCostSource": "docs/reviews/refresh-benchmark/v101b/costs.md",
+  "tokens": {
+   "source": 2132053,
+   "geminiPass": 1305290,
+   "total": 3437343
+  },
+  "seatUsd": {
+   "source": 2.05383241370878,
+   "geminiPass": 0.046362771220470674,
+   "total": 2.100195184929251,
+   "factors": {
+    "codex": {
+     "plan": "chatgpt/pro-20x",
+     "usdPerMonth": 200,
+     "burnArm": "sol-medium",
+     "burnApiUsd": 125.20533200000007,
+     "burnQuotaPercent": 12,
+     "factor": 0.04423502937128537
+    },
+    "google": {
+     "plan": "gemini/ai-pro",
+     "usdPerMonth": 19.99,
+     "burnArm": "gemini-low",
+     "burnApiUsd": 9.218584499999997,
+     "burnQuotaPercent": 7.580000000000001,
+     "factor": 0.03793111955194758
+    }
+   },
+   "method": "API cost x provider factor (report v10 section 8, cost-calculator api-cost-proportional)"
+  },
+  "docsPerHourPerWorker": 18.50552942649051,
+  "latencyMsPerDocument": {
+   "astraLow": {
+    "p50": 191489,
+    "p95": 323239
+   },
+   "sum": {
+    "p50": 193414,
+    "p95": 326054
+   }
+  }
+ },
+ "removedExamples": [
+  {
+   "verdict": "falseAct",
+   "documentId": "saint-polycarpe-2026-01-19",
+   "act": "A02",
+   "label": "Vente des immeubles pour défaut de paiement de taxes — point à l’ordre du jour",
+   "reason": "La vente pour défaut de paiement de taxes est une procédure fiscale/financière exclue du champ de l'urbanisme et de l'aménagement foncier."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "saint-polycarpe-2026-01-19",
+   "act": "A05",
+   "label": "Règlement sur les nuisances (RMH 450)",
+   "reason": "Le règlement RMH 450 n'est mentionné que comme l'ancien règlement remplacé, et non comme un acte réglementaire autonome en cours."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "saint-lin-laurentides-2026-06-09",
+   "act": "A08",
+   "label": "Processus d'expropriation — puits numéro 7",
+   "reason": "Il s'agit de l'octroi d'un contrat de services juridiques de gré à gré, ce qui relève des exclusions de services professionnels."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "saint-lin-laurentides-2026-06-09",
+   "act": "A13",
+   "label": "Indemnité de départ pour locataire — 617, rue Lord",
+   "reason": "Le paiement d'une indemnité de départ à un locataire est une opération financière/administrative et non un acte réglementaire ou foncier d'urbanisme."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "amherst-2026-06-08",
+   "act": "A03",
+   "label": "Passerelle du lac de la Décharge — Autorisation de dépense prévue",
+   "reason": "Une simple autorisation de dépense pour une passerelle relève de travaux/dépenses d'infrastructure ou de loisirs sans acte d'urbanisme ou foncier explicite."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "saint-henri-2026-03-02",
+   "act": "A05",
+   "label": "Règlement no 739-26",
+   "reason": "Le simple dépôt d'un certificat d'enregistrement sans mention de l'objet d'urbanisme ni étape décisionnelle d'urbanisme relève d'un simple dépôt administratif."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "stratford-2026-04-20",
+   "act": "A02",
+   "label": "Règlement 1212 relatif à la démolition d’immeubles",
+   "reason": "Le règlement 1212 n'est que la mention de la norme modifiée, aucun acte juridique direct ne porte sur le règlement 1212 lui-même."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "stratford-2026-04-20",
+   "act": "A04",
+   "label": "Règlement de zonage 1035",
+   "reason": "Le règlement 1035 n'est cité que comme le règlement de zonage sous-jacent en cours de modification."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "abercorn-2026-03-30",
+   "act": "A01",
+   "label": "Adhésion au réseau Rues Principales",
+   "reason": "Il s'agit d'une adhésion à un organisme et d'une autorisation de participation à un colloque, ce qui relève de la vie associative et des représentations municipales et non d'un acte réglementaire d'urbanisme."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "val-racine-2026-06-09",
+   "act": "A02",
+   "label": "Règlement no 315 — entretien hivernal des chemins",
+   "reason": "Le règlement no 315 n'est mentionné que comme référence au règlement antérieur abrogé par le projet 333."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "val-racine-2026-06-09",
+   "act": "A07",
+   "label": "FRR volet 4 — bâtiment d’entreposage et bloc sanitaire",
+   "reason": "Il s'agit d'un simple octroi de contrat pour des travaux/services municipaux, exclu du domaine d'urbanisme."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "val-racine-2026-06-09",
+   "act": "A08",
+   "label": "Vente des remises au plus offrant",
+   "reason": "La vente de remises au plus offrant est une aliénation de biens meubles/actifs municipaux qui ne constitue pas un acte d'urbanisme ou foncier."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "val-racine-2026-06-09",
+   "act": "A09",
+   "label": "GESTIZONE — caractérisation des milieux humides",
+   "reason": "L'autorisation d'un droit de visite pour une caractérisation ne constitue pas un acte réglementaire ou d'urbanisme au sens des compétences municipales."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "aumond-2026-01-14",
+   "act": "A04",
+   "label": "Règlement 2026-01-0002 — Rémunération des élus",
+   "reason": "Les règlements portant sur la rémunération des élus relèvent de la gouvernance interne et des exclusions du domaine d'urbanisme/aménagement/foncier."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "aumond-2026-01-14",
+   "act": "A05",
+   "label": "Règlement 2019-02 — Rémunération des élus",
+   "reason": "Le règlement 2019-02 sur la rémunération des élus n'est qu'une mention du règlement antérieur modifié, et relève des exclusions hors urbanisme."
+  },
+  {
+   "verdict": "correctAct",
+   "documentId": "sainte-brigide-diberville-2026-06-01",
+   "act": "A05",
+   "label": "Projet éolien — Demande de prolongation à la CPTAQ",
+   "reason": "Il s'agit d'un simple point de correspondance/demande sans décision d'urbanisme ou acte municipal formel caractérisé."
+  },
+  {
+   "verdict": "correctAct",
+   "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+   "act": "A07",
+   "label": "Adoption annoncée du second projet 03-2026",
+   "reason": "Il s'agit d'un doublon de l'acte d'adoption du second projet de règlement 03-2026 (A06)."
+  },
+  {
+   "verdict": "correctAct",
+   "documentId": "contrecoeur-2026-04-14",
+   "act": "A04",
+   "label": "Adoption du second projet U-100-1",
+   "reason": "Il s'agit d'un doublon de l'acte d'adoption du second projet de règlement U-100-1 déjà représenté par A02, ici catégorisé de façon redondante comme DesignationEvent."
+  },
+  {
+   "verdict": "correctAct",
+   "documentId": "berthier-sur-mer-2026-03-24",
+   "act": "A03",
+   "label": "Adoption du deuxième projet 369",
+   "reason": "Il s'agit d'un doublon de l'acte réglementaire A01 portant sur l'adoption du deuxième projet de règlement 369."
+  }
+ ]
+}

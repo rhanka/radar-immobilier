@@ -1,0 +1,91 @@
+{
+ "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "2682ee80973aff453d0d3ecba1df0137b9f1210f5181954b28fcfda77ccb4701",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-04-50 (page 4) autorise la directrice générale « à enchérir au nom de la Municipalité et à acquérir les immeubles identifiés en annexe sur lesquels des taxes demeurent impayées » : acte foncier inclus par la règle « petits PIIA et actes fonciers, même non résidentiels », citation et page exactes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Point 5.5 page 4 : « AVIS DE MOTION est par les présentes donné par Michel Sanscartier » pour le règlement 2009-474-06 modifiant le plan d’urbanisme ; avis de motion et projet sont des unités distinctes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-04-51 page 5 « adopte le projet de règlement 2009-474-06 » sous le titre « Projet de règlement numéro 2009-474-06 modifiant le règlement 2009-474 sur le plan d’urbanisme – Adoption » ; étape projet_reglement et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point 5.7 page 5 : « AVIS DE MOTION est par les présentes donné par Michel Sanscartier » pour le règlement 2009-475-04 relatif aux permis et certificats ; citation et page conformes au texte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-04-52 page 6 « adopte le projet de règlement 2009-475-04 modifiant le règlement sur les permis et certificats 2009-475 » ; étape projet_reglement distincte de l’avis de motion.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Point 5.9 page 6 : « Avis de motion est par les présentes donné par Michel Sanscartier » pour le règlement 2009-476-14 modifiant le règlement de zonage 2009-476 ; citation et page exactes.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-04-53 page 7 « adopte le projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476 » ; étape projet_reglement attestée, unité distincte de l’avis de motion.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Résolution 2026-04-50 (page 4) autorise la directrice générale « à enchérir au nom de la Municipalité et à acquérir les immeubles identifiés en annexe sur lesquels des taxes demeurent impayées » : acte foncier inclus par la règle « petits PIIA et actes fonciers, même non résidentiels », citation et page exactes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Point 5.5 page 4 : « AVIS DE MOTION est par les présentes donné par Michel Sanscartier » pour le règlement 2009-474-06 modifiant le plan d’urbanisme ; avis de motion et projet sont des unités distinctes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Résolution 2026-04-51 page 5 « adopte le projet de règlement 2009-474-06 » sous le titre « Projet de règlement numéro 2009-474-06 modifiant le règlement 2009-474 sur le plan d’urbanisme – Adoption » ; étape projet_reglement et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point 5.7 page 5 : « AVIS DE MOTION est par les présentes donné par Michel Sanscartier » pour le règlement 2009-475-04 relatif aux permis et certificats ; citation et page conformes au texte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Résolution 2026-04-52 page 6 « adopte le projet de règlement 2009-475-04 modifiant le règlement sur les permis et certificats 2009-475 » ; étape projet_reglement distincte de l’avis de motion."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Point 5.9 page 6 : « Avis de motion est par les présentes donné par Michel Sanscartier » pour le règlement 2009-476-14 modifiant le règlement de zonage 2009-476 ; citation et page exactes."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Résolution 2026-04-53 page 7 « adopte le projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476 » ; étape projet_reglement attestée, unité distincte de l’avis de motion."
+  }
+ ]
+}

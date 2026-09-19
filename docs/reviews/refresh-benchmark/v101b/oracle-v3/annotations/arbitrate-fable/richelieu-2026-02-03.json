@@ -1,0 +1,126 @@
+{
+ "documentId": "richelieu-2026-02-03",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fa4ca07d51ec4c04f34ef69add32b03bdd44df7a665d8a649157a7dbade61b1e",
+ "verificationSha256": "bed20261017f60dd0fafb523b6346251391aaea04bc3fa0d425497a32df82d75",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"La résolution 26-02-037 (p. 6-7) « ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère publique » les immeubles en arrérages et autorise arpenteur-géomètre, vérification des titres et publication « au Registre foncier » : c'est un acte foncier explicite adopté, couvert par la règle « Inclusions : ... actes fonciers, même non résidentiels », et non un simple « compte » exclu ; la position A (mesure financière) est écartée car l'objet est bien la vente d'immeubles.\"},{\"item\":\"a02\",\"choice\":\"v1\",\"reason\":\"La résolution 26-02-031 (p. 3) atteste que « le conseil municipal adopte le règlement numéro 26-R-285 » interdisant l'épandage sur le territoire : objet réglementaire explicite avec étape d'adoption constatée dans ce document, et l'avis de motion du 20 janvier 2026 n'est qu'un rappel historique qui ne crée pas d'unité supplémentaire ; la position A est écartée car le fondement à la Loi sur les compétences municipales ne figure pas parmi les exclusions du rappel (nominations, comptes, marchés de services, loisirs, voirie) et l'unité gold vise tout « objet réglementaire explicite ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Vente aux enchères autorisée des immeubles pour défaut de paiement de taxes",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "immeubles à être vendus",
+      "page": 6,
+      "citation": "ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère publique",
+      "anchor": "vendre à l'enchère publique",
+      "spanStart": 1731,
+      "spanEnd": 1822
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "À la page 6, la résolution 26-02-037 ordonne la vente à l'enchère publique des immeubles inscrits au rapport de la trésorière, ce qui atteste l'autorisation de cet acte foncier."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 26-02-037 (p. 6) ordonne de « vendre à l'enchère publique » les immeubles pour arrérages de taxes : acte foncier explicite adopté, citation et page exactes."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La vente pour défaut de paiement de taxes est une mesure financière de recouvrement sans objet foncier explicite ni lien avec l'urbanisme."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Adoption du Règlement 26-R-285 — interdiction d'épandage de déjections animales ou de boues à certaines dates en 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "26-R-285",
+      "page": 3,
+      "citation": "résolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé : « Règlement interdisant l'épandage de déjections animales ou de boues à des dates",
+      "anchor": "règlement numéro 26-R-285",
+      "spanStart": 1203,
+      "spanEnd": 1363
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "À la page 3, la résolution 26-02-031 adopte expressément le règlement 26-R-285 interdisant l'épandage de déjections animales ou de boues à certaines dates en 2026."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 26-02-031 (p. 3) : « le conseil municipal adopte le règlement numéro 26-R-285 » — objet réglementaire explicite adopté ; l'avis de motion du 20 janvier 2026 n'est qu'un rappel historique."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le règlement 26-R-285 sur l'épandage de déjections animales relève de la Loi sur les compétences municipales et non de l'urbanisme, restant hors gold."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "La résolution 26-02-037 (p. 6-7) « ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère publique » les immeubles en arrérages et autorise arpenteur-géomètre, vérification des titres et publication « au Registre foncier » : c'est un acte foncier explicite adopté, couvert par la règle « Inclusions : ... actes fonciers, même non résidentiels », et non un simple « compte » exclu ; la position A (mesure financière) est écartée car l'objet est bien la vente d'immeubles."
+  },
+  {
+   "item": "a02",
+   "choice": "v1",
+   "reason": "La résolution 26-02-031 (p. 3) atteste que « le conseil municipal adopte le règlement numéro 26-R-285 » interdisant l'épandage sur le territoire : objet réglementaire explicite avec étape d'adoption constatée dans ce document, et l'avis de motion du 20 janvier 2026 n'est qu'un rappel historique qui ne crée pas d'unité supplémentaire ; la position A est écartée car le fondement à la Loi sur les compétences municipales ne figure pas parmi les exclusions du rappel (nominations, comptes, marchés de services, loisirs, voirie) et l'unité gold vise tout « objet réglementaire explicite »."
+  }
+ ]
+}

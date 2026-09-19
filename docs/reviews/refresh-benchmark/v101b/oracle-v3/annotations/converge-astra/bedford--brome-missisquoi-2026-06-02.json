@@ -1,0 +1,141 @@
+{
+ "documentId": "bedford--brome-missisquoi-2026-06-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c5de592a09dbe44822aeba1edf7c9686111f53eb53c102fec513198bc10e74d6",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 4, la résolution 26-06-170 constate l’avis de motion donné par Mona Beaulac pour le règlement 765-26 relatif à l’occupation du domaine public.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 4 atteste explicitement le dépôt et la présentation du projet de règlement 765-26, étape distincte de l’avis de motion selon les règles.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 9, la résolution 26-06-177 accorde la demande de PIIA pour le remplacement de la toiture du 152, Rivière.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 9, la résolution 26-06-178 accorde le PIIA révisé pour quatre logements sur le lot 5 603 254, tandis que le refus initial constitue seulement un rappel historique.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 9, la résolution 26-06-179 accorde la dérogation permettant un stationnement à moins de 60 centimètres de la limite droite du 125, rue Alcée-Rocheleau.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 9, la résolution 26-06-179 accorde également la dérogation concernant la limite gauche du 137, rue Alcée-Rocheleau, objet explicitement distinct dans cette résolution groupée.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 10, la résolution 26-06-180 accepte la dérogation mineure pour une construction à 5.68 mètres de la ligne avant au 180, rue du Parc.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 10, la résolution 26-06-181 refuse l’aménagement du développement des Cerfs dans une démarche préliminaire assujettie au PIIA, conformément à la règle voulant qu’un refus reste un refus.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 11, la résolution adoptée 26-06-182 autorise une terrasse saisonnière occupant une portion du parc Dr. Adrien Tougas, ce qui atteste l’autorisation foncière proposée.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v2\",\n      \"reason\": \"À la page 11, la résolution 26-06-183 autorise la signature de l’addenda au bail du local #105 au 52, rue du Pont, acte foncier non résidentiel dont v2 présente l’adresse normalisée.\"\n    },\n    {\n      \"item\": \"i11\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 15, la résolution 26-06-190 constate l’avis de motion du règlement 702-26-9 modifiant les permis et certificats relativement aux amendes pour abattage d’arbre.\"\n    },\n    {\n      \"item\": \"i12\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 15, la résolution 26-06-191 adopte explicitement le premier projet de règlement 702-26-9, unité distincte de l’avis de motion et non adoption définitive du règlement.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v2"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "À la page 4, la résolution 26-06-170 constate l’avis de motion donné par Mona Beaulac pour le règlement 765-26 relatif à l’occupation du domaine public."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 4 atteste explicitement le dépôt et la présentation du projet de règlement 765-26, étape distincte de l’avis de motion selon les règles."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "À la page 9, la résolution 26-06-177 accorde la demande de PIIA pour le remplacement de la toiture du 152, Rivière."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "À la page 9, la résolution 26-06-178 accorde le PIIA révisé pour quatre logements sur le lot 5 603 254, tandis que le refus initial constitue seulement un rappel historique."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "À la page 9, la résolution 26-06-179 accorde la dérogation permettant un stationnement à moins de 60 centimètres de la limite droite du 125, rue Alcée-Rocheleau."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "À la page 9, la résolution 26-06-179 accorde également la dérogation concernant la limite gauche du 137, rue Alcée-Rocheleau, objet explicitement distinct dans cette résolution groupée."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "À la page 10, la résolution 26-06-180 accepte la dérogation mineure pour une construction à 5.68 mètres de la ligne avant au 180, rue du Parc."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "À la page 10, la résolution 26-06-181 refuse l’aménagement du développement des Cerfs dans une démarche préliminaire assujettie au PIIA, conformément à la règle voulant qu’un refus reste un refus."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "À la page 11, la résolution adoptée 26-06-182 autorise une terrasse saisonnière occupant une portion du parc Dr. Adrien Tougas, ce qui atteste l’autorisation foncière proposée."
+  },
+  {
+   "item": "i10",
+   "choice": "v2",
+   "reason": "À la page 11, la résolution 26-06-183 autorise la signature de l’addenda au bail du local #105 au 52, rue du Pont, acte foncier non résidentiel dont v2 présente l’adresse normalisée."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "À la page 15, la résolution 26-06-190 constate l’avis de motion du règlement 702-26-9 modifiant les permis et certificats relativement aux amendes pour abattage d’arbre."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "À la page 15, la résolution 26-06-191 adopte explicitement le premier projet de règlement 702-26-9, unité distincte de l’avis de motion et non adoption définitive du règlement."
+  }
+ ]
+}

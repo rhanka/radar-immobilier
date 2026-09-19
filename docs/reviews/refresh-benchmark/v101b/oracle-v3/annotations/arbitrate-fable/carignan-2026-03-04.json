@@ -1,0 +1,126 @@
+{
+ "documentId": "carignan-2026-03-04",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "cdcb1050f1f0b29e31adcc91aad4b88eea61b70e9633d9c463aef0dd23674c38",
+ "verificationSha256": "6d444e0fc09a49123710034b3c572e54ed970b06ff3cd5ce4a90f07d07316679",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"La résolution 26-03-91 se borne à « DEMANDER à la ministre [...] de retirer le Projet de Règlement » gouvernemental : c'est une prise de position politique sur un texte provincial, sans règlement municipal, lot ni étape réglementaire de Carignan, donc pas un « objet réglementaire ou foncier explicite » du profil ; la position C est écartée et le fait reste à signaler hors gold comme fait complémentaire, sans toucher au dénominateur.\"},{\"item\":\"a02\",\"choice\":\"absent\",\"reason\":\"Le conseil « donne un avis favorable au projet de Planification des besoins d'espace 2026 [...] sous réserves » (p. 6) au titre de l'art. 272.5 de la Loi sur l'instruction publique : avis consultatif sur un document d'un organisme externe, sans règlement municipal ni lot explicite, la cession d'immeuble évoquée n'étant qu'une conséquence future et non identifiée ; ce n'est pas un objet réglementaire ou foncier explicite, la position C est écartée et le fait est à signaler hors gold.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Demande de retrait du projet gouvernemental sur les contributions exigées pour un permis ou certificat",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "contributions aux services municipaux",
+      "page": 11,
+      "citation": "de retirer le Projet de Règlement concernant certaines contributions à des services municipaux exigées pour la délivrance d'un permis ou d'un certificat",
+      "anchor": "Règlement concernant certaines contributions",
+      "spanStart": 1420,
+      "spanEnd": 1572
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 26-03-91 demande expressément, page 11, le retrait du projet réglementaire sur les contributions exigées pour un permis ou certificat, sans en constater le retrait effectif."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "Résolution politique demandant à la ministre de retirer un projet de règlement gouvernemental (p. 11) : ce n'est ni un règlement municipal ni un acte foncier de Carignan, donc pas un « objet réglementaire ou foncier explicite » du profil; fait complémentaire à signaler hors gold."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Il s'agit d'une prise de position politique demandant le retrait d'un projet de règlement provincial, et non d'un acte réglementaire ou foncier municipal."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u20",
+   "verificationItem": "i20",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Avis favorable sous réserves — Planification des besoins d'espace 2026 du Centre de services scolaire des Patriotes",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "Planification des besoins d'espace 2026",
+      "page": 6,
+      "citation": "QUE le Conseil municipal donne un avis favorable au projet de Planification des besoins d'espace 2026 du Centre de services scolaire des Patriotes, sous réserves des clarifications demandées",
+      "anchor": "Planification des besoins d'espace 2026",
+      "spanStart": 1013,
+      "spanEnd": 1203
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 6 constate un avis favorable sous réserves sur la Planification des besoins d'espace 2026, dans le processus d'acquisition et de cession d'immeubles scolaires décrit aux pages 5 et 6."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "Avis favorable sur la Planification des besoins d'espace du CSSP (p. 6) : avis consultatif en vertu de la Loi sur l'instruction publique, sans règlement municipal ni lot explicite ; pas un « objet réglementaire ou foncier explicite » du profil, fait complémentaire à signaler hors gold."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'avis consultatif sur le projet de planification d'un organisme scolaire externe ne constitue pas un objet réglementaire ou foncier municipal."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "La résolution 26-03-91 se borne à « DEMANDER à la ministre [...] de retirer le Projet de Règlement » gouvernemental : c'est une prise de position politique sur un texte provincial, sans règlement municipal, lot ni étape réglementaire de Carignan, donc pas un « objet réglementaire ou foncier explicite » du profil ; la position C est écartée et le fait reste à signaler hors gold comme fait complémentaire, sans toucher au dénominateur."
+  },
+  {
+   "item": "a02",
+   "choice": "absent",
+   "reason": "Le conseil « donne un avis favorable au projet de Planification des besoins d'espace 2026 [...] sous réserves » (p. 6) au titre de l'art. 272.5 de la Loi sur l'instruction publique : avis consultatif sur un document d'un organisme externe, sans règlement municipal ni lot explicite, la cession d'immeuble évoquée n'étant qu'une conséquence future et non identifiée ; ce n'est pas un objet réglementaire ou foncier explicite, la position C est écartée et le fait est à signaler hors gold."
+  }
+ ]
+}

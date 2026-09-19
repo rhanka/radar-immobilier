@@ -1,0 +1,111 @@
+{
+ "documentId": "rosemere-2026-04-13",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "c94d410d546236ae4248fe2e28c16754d353b81e370879395968a90e5cbe37a6",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-125, page 2, accorde la dérogation mineure permettant un recul arrière de 0,56 mètre pour le garage détaché au 262, rue Westward.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-126, page 2, approuve à titre de P.I.I.A. une enseigne sur bâtiment et une enseigne sur pylône pour Continental au 307, boulevard Labelle.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le dispositif de la résolution 2026-04-127, page 3, approuve à titre de P.I.I.A. la modification des enseignes du pylône existant au 400, chemin de la Grande-Côte.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-128, page 3, approuve explicitement à titre de P.I.I.A. le projet d'agrandissement au 266, rue du Bocage.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-129, page 3, approuve à titre de P.I.I.A. l'agrandissement et la construction d'un garage annexé au 338, rue Montview.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le dispositif de la résolution 2026-04-130, page 4, approuve à titre de P.I.I.A. la modification des ouvertures au 355, rue Montcalm.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"L'intitulé cité figure page 4 et la résolution 2026-04-131 qui le suit approuve à titre de P.I.I.A. la substitution du revêtement des façades latérales et l'ajout d'une terrasse au toit au 5, chemin de la Grande-Côte.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 4 constate l'avis de motion donné par Marie-Hélène Fortin pour le règlement 1004-01, étape distincte de l'adoption du projet conformément à la règle.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-04-133, page 5, adopte le projet du règlement 1004-01 sur les contributions pour parcs, terrains de jeux et espaces naturels et fixe la consultation publique au 11 mai 2026 à 18 h 30.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-125, page 2, accorde la dérogation mineure permettant un recul arrière de 0,56 mètre pour le garage détaché au 262, rue Westward."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-126, page 2, approuve à titre de P.I.I.A. une enseigne sur bâtiment et une enseigne sur pylône pour Continental au 307, boulevard Labelle."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le dispositif de la résolution 2026-04-127, page 3, approuve à titre de P.I.I.A. la modification des enseignes du pylône existant au 400, chemin de la Grande-Côte."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-128, page 3, approuve explicitement à titre de P.I.I.A. le projet d'agrandissement au 266, rue du Bocage."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-129, page 3, approuve à titre de P.I.I.A. l'agrandissement et la construction d'un garage annexé au 338, rue Montview."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le dispositif de la résolution 2026-04-130, page 4, approuve à titre de P.I.I.A. la modification des ouvertures au 355, rue Montcalm."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "L'intitulé cité figure page 4 et la résolution 2026-04-131 qui le suit approuve à titre de P.I.I.A. la substitution du revêtement des façades latérales et l'ajout d'une terrasse au toit au 5, chemin de la Grande-Côte."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La page 4 constate l'avis de motion donné par Marie-Hélène Fortin pour le règlement 1004-01, étape distincte de l'adoption du projet conformément à la règle."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-133, page 5, adopte le projet du règlement 1004-01 sur les contributions pour parcs, terrains de jeux et espaces naturels et fixe la consultation publique au 11 mai 2026 à 18 h 30."
+  }
+ ]
+}

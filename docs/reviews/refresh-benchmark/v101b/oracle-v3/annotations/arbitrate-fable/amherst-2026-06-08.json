@@ -1,0 +1,19 @@
+{
+ "documentId": "amherst-2026-06-08",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "186cbcd5e89fc594a82f0f6604ffebe9c9a38c7b37d02acd1cba4947c8c11ed4",
+ "verificationSha256": "66075dcdf0ec53e37674a4e7cec1ebe5778f01dc212407a70ccbf39cff14820c",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

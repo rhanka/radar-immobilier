@@ -1,0 +1,382 @@
+{
+ "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "7312adec7c54a253e8d9d985d7e54e1fdf7e2b158fdbb9fb4817ab9f4f30bb3b",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-437-2025"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 437-2025 modifiant le plan d'urbanisme 392-2021",
+     "stage": "adoption",
+     "objet": "437-2025",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021"
+      },
+      {
+       "page": 3,
+       "excerpt": "2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021\nRésolution 5-01-2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-392-2021"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Plan d'urbanisme 392-2021",
+     "stage": null,
+     "objet": "392-2021",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021"
+      },
+      {
+       "page": 3,
+       "excerpt": "2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021\nRésolution 5-01-2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-438-2025"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 438-2025 — Agrandissement de M-77 et abrogation de Rm-93",
+     "stage": "adoption",
+     "objet": "438-2025",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021"
+      },
+      {
+       "page": 5,
+       "excerpt": "La zone M-77 est agrandie de façon à inclure la totalité de la zone Rm-93. La\nzone Rm-93 est donc abrogée."
+      },
+      {
+       "page": 4,
+       "excerpt": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021\nRésolution 6-01-2026"
+      },
+      {
+       "page": 5,
+       "excerpt": "Le « Plan de zonage » indiqué à l’article 3 du règlement de zonage est modifié\nde façon à agrandir la zone mixte M-77.\n5.1\n\nAgrandissement zone M-77\n\nLa zone M-77 est agrandie de façon à inclure la totalité de la zone Rm-93. La\nzone Rm-93 est donc abrogée."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-394-2021"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 394-2021",
+     "stage": null,
+     "objet": "394-2021",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021"
+      },
+      {
+       "page": 4,
+       "excerpt": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021\nRésolution 6-01-2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-adoption-438-2025"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du rezonage M-77 / Rm-93",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021"
+      },
+      {
+       "page": 5,
+       "excerpt": "La zone M-77 est agrandie de façon à inclure la totalité de la zone Rm-93. La\nzone Rm-93 est donc abrogée."
+      },
+      {
+       "page": 4,
+       "excerpt": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021\nRésolution 6-01-2026"
+      },
+      {
+       "page": 5,
+       "excerpt": "Le « Plan de zonage » indiqué à l’article 3 du règlement de zonage est modifié\nde façon à agrandir la zone mixte M-77.\n5.1\n\nAgrandissement zone M-77\n\nLa zone M-77 est agrandie de façon à inclure la totalité de la zone Rm-93. La\nzone Rm-93 est donc abrogée."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-penalites-construction"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Refus de remboursement des pénalités de construction d'un immeuble multilogement",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "DE CONFIRMER que les pénalités ont été appliquées conformément\naux termes du contrat de vente et qu’aucun remboursement ne sera accordé."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-puits-P-1"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Mandat pour augmenter le prélèvement d'eau au puits P-1",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "D’OCTROYER à Arrakis Consultants inc. le mandat de services\nprofessionnels en hydrogéologie pour l’augmentation du prélèvement d’eau au\npuits P-1,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-HACA"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Questionnaire sur les besoins en habitation et commerces de proximité",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "QUE le conseil municipal accepte le questionnaire soumis visant à\nsonder la population sur ses besoins en habitation, en logement ainsi qu’en\ncommerces de proximité;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-cerisiers"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Changement de zonage envisagé dans le secteur de la rue des Cerisiers",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "La directrice générale informe les membres du conseil que les résultats\ndes premiers tests de pompage du puits démontrent une capacité suffisante"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "signal-trottoir-langevin"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Appel d'offres pour la phase 2 du trottoir de la rue Langevin",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "QUE le conseil municipal de la Municipalité de Saint-Odilon-deCranbourne autorise la publication de l’appel d’offres public\nno2026-01 – Trottoir phase 2 – Rue Langevin,"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 5-01-2026 porte sur l'adoption du règlement 437-2025 modifiant le plan d'urbanisme.\",\"excerpt\":\"2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021\\nRésolution 5-01-2026\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le plan d'urbanisme 392-2021 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification, sans acte autonome.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 6-01-2026 adopte le règlement 438-2025 modifiant le zonage par l'agrandissement de la zone M-77 et l'abrogation de la zone Rm-93.\",\"excerpt\":\"2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021\\nRésolution 6-01-2026\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 394-2021 n'est mentionné que comme le règlement antérieur modifié par le règlement 438-2025, sans acte propre.\",\"excerpt\":\"\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le texte de la résolution 6-01-2026 décrète expressément l'agrandissement de la zone mixte M-77 et l'abrogation de Rm-93.\",\"excerpt\":\"La zone M-77 est agrandie de façon à inclure la totalité de la zone Rm-93. La\\nzone Rm-93 est donc abrogée.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 12-01-2026 refuse formellement la demande de remboursement des pénalités contractuelles liées à la construction d'un multilogement.\",\"excerpt\":\"DE CONFIRMER que les pénalités ont été appliquées conformément\\naux termes du contrat de vente et qu’aucun remboursement ne sera accordé.\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"L'octroi d'un contrat de services professionnels relève des exclusions (contrats de services/dépenses courantes sans acte d'urbanisme).\",\"excerpt\":\"\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 14-01-2026 entérine un questionnaire et une démarche de consultation sur les besoins en habitation et commerces de proximité.\",\"excerpt\":\"QUE le conseil municipal accepte le questionnaire soumis visant à\\nsonder la population sur ses besoins en habitation, en logement ainsi qu’en\\ncommerces de proximité;\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Au point 9.5 du procès-verbal, la directrice générale informe officiellement le conseil de la possibilité d'un changement de zonage pour multilogements rue des Cerisiers.\",\"excerpt\":\"permettant d’envisager un changement de zonage dans le secteur de la rue des\\nCerisiers.\"},{\"act\":\"A10\",\"verdict\":\"non_soutenu\",\"reason\":\"L'autorisation d'un appel d'offres pour des travaux de voirie municipale (trottoir) sans modification du cadre d'urbanisme relève des exclusions.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "La résolution 5-01-2026 porte sur l'adoption du règlement 437-2025 modifiant le plan d'urbanisme.",
+   "excerpt": "2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021\nRésolution 5-01-2026"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le plan d'urbanisme 392-2021 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification, sans acte autonome.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La résolution 6-01-2026 adopte le règlement 438-2025 modifiant le zonage par l'agrandissement de la zone M-77 et l'abrogation de la zone Rm-93.",
+   "excerpt": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021\nRésolution 6-01-2026"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 394-2021 n'est mentionné que comme le règlement antérieur modifié par le règlement 438-2025, sans acte propre.",
+   "excerpt": ""
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le texte de la résolution 6-01-2026 décrète expressément l'agrandissement de la zone mixte M-77 et l'abrogation de Rm-93.",
+   "excerpt": "La zone M-77 est agrandie de façon à inclure la totalité de la zone Rm-93. La\nzone Rm-93 est donc abrogée."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "La résolution 12-01-2026 refuse formellement la demande de remboursement des pénalités contractuelles liées à la construction d'un multilogement.",
+   "excerpt": "DE CONFIRMER que les pénalités ont été appliquées conformément\naux termes du contrat de vente et qu’aucun remboursement ne sera accordé."
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de services professionnels relève des exclusions (contrats de services/dépenses courantes sans acte d'urbanisme).",
+   "excerpt": ""
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "La résolution 14-01-2026 entérine un questionnaire et une démarche de consultation sur les besoins en habitation et commerces de proximité.",
+   "excerpt": "QUE le conseil municipal accepte le questionnaire soumis visant à\nsonder la population sur ses besoins en habitation, en logement ainsi qu’en\ncommerces de proximité;"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Au point 9.5 du procès-verbal, la directrice générale informe officiellement le conseil de la possibilité d'un changement de zonage pour multilogements rue des Cerisiers.",
+   "excerpt": "permettant d’envisager un changement de zonage dans le secteur de la rue des\nCerisiers."
+  },
+  {
+   "act": "A10",
+   "verdict": "non_soutenu",
+   "reason": "L'autorisation d'un appel d'offres pour des travaux de voirie municipale (trottoir) sans modification du cadre d'urbanisme relève des exclusions.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 10,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le plan d'urbanisme 392-2021 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification, sans acte autonome."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement 394-2021 n'est mentionné que comme le règlement antérieur modifié par le règlement 438-2025, sans acte propre."
+   },
+   {
+    "act": "A07",
+    "reason": "L'octroi d'un contrat de services professionnels relève des exclusions (contrats de services/dépenses courantes sans acte d'urbanisme)."
+   },
+   {
+    "act": "A10",
+    "reason": "L'autorisation d'un appel d'offres pour des travaux de voirie municipale (trottoir) sans modification du cadre d'urbanisme relève des exclusions."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "La résolution 5-01-2026 porte sur l'adoption du règlement 437-2025 modifiant le plan d'urbanisme."
+   },
+   {
+    "act": "A03",
+    "reason": "La résolution 6-01-2026 adopte le règlement 438-2025 modifiant le zonage par l'agrandissement de la zone M-77 et l'abrogation de la zone Rm-93."
+   },
+   {
+    "act": "A05",
+    "reason": "Le texte de la résolution 6-01-2026 décrète expressément l'agrandissement de la zone mixte M-77 et l'abrogation de Rm-93."
+   },
+   {
+    "act": "A06",
+    "reason": "La résolution 12-01-2026 refuse formellement la demande de remboursement des pénalités contractuelles liées à la construction d'un multilogement."
+   },
+   {
+    "act": "A08",
+    "reason": "La résolution 14-01-2026 entérine un questionnaire et une démarche de consultation sur les besoins en habitation et commerces de proximité."
+   },
+   {
+    "act": "A09",
+    "reason": "Au point 9.5 du procès-verbal, la directrice générale informe officiellement le conseil de la possibilité d'un changement de zonage pour multilogements rue des Cerisiers."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3940,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 16676,
+   "outputTokens": 778,
+   "totalTokens": 17454
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3795
+  },
+  "inputSha256": "c2b11643859333c6444284b36e673ac7ab32837744b2856946694a29f1736e58"
+ }
+}

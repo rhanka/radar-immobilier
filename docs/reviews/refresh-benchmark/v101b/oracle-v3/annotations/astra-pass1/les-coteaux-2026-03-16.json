@@ -1,0 +1,181 @@
+{
+ "documentId": "les-coteaux-2026-03-16",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "4476f7f29d4e12fd665b2cc2996dea5797a8c17e4f49d85c44d4cd7868830a63",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 335 – Contrôle provisoire des travaux excédant la capacité du système d’égout\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"335\",\n        \"page\": 5,\n        \"citation\": \"D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible\\nde créer des besoins excédant la capacité du système d’égout numéro 335.\",\n        \"anchor\": \"système d’égout numéro 335\"\n      },\n      \"reason\": \"Le règlement 335 est adopté dans cette séance; les mentions de l’avis de motion et du projet du 16 février sont historiques et ne créent pas d’unités supplémentaires.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 316-01 – Correctifs au règlement de permis et certificats\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"316-01\",\n        \"page\": 5,\n        \"citation\": \"donnent avis de motion, qu’il sera adopté, à une séance subséquente, le\\nRèglement numéro 316-01 modifiant le Règlement de permis et certificats numéro 316\",\n        \"anchor\": \"Règlement numéro 316-01\"\n      },\n      \"reason\": \"L’avis de motion du règlement de permis et certificats 316-01 est donné dans ce document et constitue une unité distincte du dépôt du projet.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt du projet de règlement 316-01 – Correctifs au règlement de permis et certificats\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"316-01\",\n        \"page\": 5,\n        \"citation\": \"déposent le projet de règlement numéro 316-01 – Règlement modifiant le\\nRèglement de permis et certificats numéro 316 afin d’y apporter des correctifs\\nsuite à son remplacement.\",\n        \"anchor\": \"règlement numéro 316-01\"\n      },\n      \"reason\": \"Le dépôt actuel du projet 316-01 est explicitement constaté et doit être compté séparément de son avis de motion.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 317-01 – Correctifs au règlement de zonage\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"317-01\",\n        \"page\": 6,\n        \"citation\": \"donnent avis de motion, qu’il sera adopté, à une séance subséquente, le\\nRèglement numéro 317-01 modifiant le Règlement de zonage numéro 317\",\n        \"anchor\": \"Règlement numéro 317-01\"\n      },\n      \"reason\": \"L’avis de motion du règlement de zonage 317-01 est donné pendant cette séance et constitue une étape distincte du projet.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dépôt du projet de règlement 317-01 – Correctifs au règlement de zonage\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"317-01\",\n        \"page\": 6,\n        \"citation\": \"déposent le projet de règlement numéro 317-01 – Règlement modifiant le\\nRèglement de zonage numéro 317 afin d’y apporter des correctifs suite à son\\nremplacement.\",\n        \"anchor\": \"règlement numéro 317-01\"\n      },\n      \"reason\": \"Le projet de règlement 317-01 est déposé dans ce document; la règle impose une unité distincte de l’avis de motion.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Traitement du PIIA 2026-01 – 65, route 338 (dispositif discordant visant le PIIA 2026-02)\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-01\",\n        \"page\": 6,\n        \"citation\": \"26-03-9288\\n\\nDEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614\",\n        \"anchor\": \"PIIA 2026-01\"\n      },\n      \"reason\": \"La résolution 26-03-9288 traite explicitement cette demande dans son intitulé, mais son dispositif vise le PIIA 2026-02 au 102, rue Principale; cette discordance doit être conservée sans affirmer une acceptation non équivoque du PIIA 2026-01.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Acceptation du PIIA 2026-02 – 102, rue Principale – Remplacement de quatre fenêtres\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-02\",\n        \"page\": 6,\n        \"citation\": \"D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres\",\n        \"anchor\": \"PIIA numéro 2026-02\"\n      },\n      \"reason\": \"La résolution 26-03-9289 accepte explicitement cette demande de PIIA; la répétition du même dispositif sous la résolution précédente ne crée pas une seconde unité pour le même fait.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Acceptation de la dérogation mineure DM-294 – 78, rue Sauvé – Garage partiellement en cour avant\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"DM-294\",\n        \"page\": 7,\n        \"citation\": \"D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au\\n78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour\\navant\",\n        \"anchor\": \"dérogation mineure DM-294\"\n      },\n      \"reason\": \"Le conseil accepte actuellement la demande DM-294 afin de régulariser l’implantation du garage, ce qui constitue une décision explicite de dérogation mineure.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation de signature du contrat d’utilisation de l’espace d’amarrage – Parc Louis-Stanislas-Pariseau – Année 2026\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"parc Louis-Stanislas-Pariseau\",\n        \"page\": 9,\n        \"citation\": \"le contrat d’autorisation\\nd’utilisation de l’espace d’amarrage pour l’année 2026 avec St-Lawrence Cruise Lines afin de\\nleur permettre d’amarrer et de circuler dans le parc Louis-Stanislas-Pariseau.\",\n        \"anchor\": \"parc Louis-Stanislas-Pariseau\"\n      },\n      \"reason\": \"La résolution autorise la signature d’un contrat d’utilisation d’un immeuble municipal, objet foncier explicite distinct d’une simple activité de loisirs, dont l’étape relève d’« inconnu ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement 335 – Contrôle provisoire des travaux excédant la capacité du système d’égout",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "335",
+    "page": 5,
+    "citation": "D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible\nde créer des besoins excédant la capacité du système d’égout numéro 335.",
+    "anchor": "système d’égout numéro 335"
+   },
+   "reason": "Le règlement 335 est adopté dans cette séance; les mentions de l’avis de motion et du projet du 16 février sont historiques et ne créent pas d’unités supplémentaires."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion du règlement 316-01 – Correctifs au règlement de permis et certificats",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "316-01",
+    "page": 5,
+    "citation": "donnent avis de motion, qu’il sera adopté, à une séance subséquente, le\nRèglement numéro 316-01 modifiant le Règlement de permis et certificats numéro 316",
+    "anchor": "Règlement numéro 316-01"
+   },
+   "reason": "L’avis de motion du règlement de permis et certificats 316-01 est donné dans ce document et constitue une unité distincte du dépôt du projet."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt du projet de règlement 316-01 – Correctifs au règlement de permis et certificats",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "316-01",
+    "page": 5,
+    "citation": "déposent le projet de règlement numéro 316-01 – Règlement modifiant le\nRèglement de permis et certificats numéro 316 afin d’y apporter des correctifs\nsuite à son remplacement.",
+    "anchor": "règlement numéro 316-01"
+   },
+   "reason": "Le dépôt actuel du projet 316-01 est explicitement constaté et doit être compté séparément de son avis de motion."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion du règlement 317-01 – Correctifs au règlement de zonage",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "317-01",
+    "page": 6,
+    "citation": "donnent avis de motion, qu’il sera adopté, à une séance subséquente, le\nRèglement numéro 317-01 modifiant le Règlement de zonage numéro 317",
+    "anchor": "Règlement numéro 317-01"
+   },
+   "reason": "L’avis de motion du règlement de zonage 317-01 est donné pendant cette séance et constitue une étape distincte du projet."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dépôt du projet de règlement 317-01 – Correctifs au règlement de zonage",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "317-01",
+    "page": 6,
+    "citation": "déposent le projet de règlement numéro 317-01 – Règlement modifiant le\nRèglement de zonage numéro 317 afin d’y apporter des correctifs suite à son\nremplacement.",
+    "anchor": "règlement numéro 317-01"
+   },
+   "reason": "Le projet de règlement 317-01 est déposé dans ce document; la règle impose une unité distincte de l’avis de motion."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Traitement du PIIA 2026-01 – 65, route 338 (dispositif discordant visant le PIIA 2026-02)",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-01",
+    "page": 6,
+    "citation": "26-03-9288\n\nDEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614",
+    "anchor": "PIIA 2026-01"
+   },
+   "reason": "La résolution 26-03-9288 traite explicitement cette demande dans son intitulé, mais son dispositif vise le PIIA 2026-02 au 102, rue Principale; cette discordance doit être conservée sans affirmer une acceptation non équivoque du PIIA 2026-01."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Acceptation du PIIA 2026-02 – 102, rue Principale – Remplacement de quatre fenêtres",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-02",
+    "page": 6,
+    "citation": "D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres",
+    "anchor": "PIIA numéro 2026-02"
+   },
+   "reason": "La résolution 26-03-9289 accepte explicitement cette demande de PIIA; la répétition du même dispositif sous la résolution précédente ne crée pas une seconde unité pour le même fait."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Acceptation de la dérogation mineure DM-294 – 78, rue Sauvé – Garage partiellement en cour avant",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-294",
+    "page": 7,
+    "citation": "D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au\n78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour\navant",
+    "anchor": "dérogation mineure DM-294"
+   },
+   "reason": "Le conseil accepte actuellement la demande DM-294 afin de régulariser l’implantation du garage, ce qui constitue une décision explicite de dérogation mineure."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation de signature du contrat d’utilisation de l’espace d’amarrage – Parc Louis-Stanislas-Pariseau – Année 2026",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "parc Louis-Stanislas-Pariseau",
+    "page": 9,
+    "citation": "le contrat d’autorisation\nd’utilisation de l’espace d’amarrage pour l’année 2026 avec St-Lawrence Cruise Lines afin de\nleur permettre d’amarrer et de circuler dans le parc Louis-Stanislas-Pariseau.",
+    "anchor": "parc Louis-Stanislas-Pariseau"
+   },
+   "reason": "La résolution autorise la signature d’un contrat d’utilisation d’un immeuble municipal, objet foncier explicite distinct d’une simple activité de loisirs, dont l’étape relève d’« inconnu »."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  },
+  {
+   "op": "add",
+   "id": "u08"
+  },
+  {
+   "op": "add",
+   "id": "u09"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 9
+}

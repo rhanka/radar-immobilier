@@ -1,0 +1,101 @@
+{
+ "documentId": "orford-2026-03-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "5f1bbf77aaa39f7204ab1991b2718224156c3ee2009dc6d1c608098c890f4d79",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-59, page 43, approuve le PIIA de l’aire de stationnement du lot 6 474 528, sur une pente d’au plus 18,7 %, conditionnellement à des aménagements de gestion des eaux pluviales.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 45 approuve le PIIA de rénovation au 2197-2199, chemin du Parc, conditionnellement au dépôt d’un plan d’aménagement paysager avant la délivrance du permis ou du certificat.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le tableau de la résolution 2026-03-61, adoptée page 46, désigne expressément le lot 6 521 680 et exige une contribution en argent plutôt qu’une cession de terrain.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le lot 6 449 130 figure également parmi les lots visés par la contribution exigée en argent dans le tableau adopté page 46.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 47 demande expressément à la MRC de modifier le RCI 16-21 pour intégrer le lot 3 787 898 au secteur de consolidation, sans constater l’adoption de cette modification.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le considérant cité page 46 identifie le schéma d’aménagement comme le Règlement 16-23, et le dispositif de la même résolution, page 47, en demande la modification pour intégrer le lot 3 787 898.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"absent\",\n      \"reason\": \"La page 5 autorise la transmission administrative d’une liste fiscale non reproduite, sans identifier d’immeuble constituant un objet foncier explicite à retenir comme unité.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"absent\",\n      \"reason\": \"La résolution 2026-03-47 habilite généralement des représentants à enchérir et à acquérir lors d’une vente fiscale future, sans désigner d’immeuble déterminé répondant à l’exigence d’un objet foncier explicite.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "absent"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-59, page 43, approuve le PIIA de l’aire de stationnement du lot 6 474 528, sur une pente d’au plus 18,7 %, conditionnellement à des aménagements de gestion des eaux pluviales."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 45 approuve le PIIA de rénovation au 2197-2199, chemin du Parc, conditionnellement au dépôt d’un plan d’aménagement paysager avant la délivrance du permis ou du certificat."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le tableau de la résolution 2026-03-61, adoptée page 46, désigne expressément le lot 6 521 680 et exige une contribution en argent plutôt qu’une cession de terrain."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le lot 6 449 130 figure également parmi les lots visés par la contribution exigée en argent dans le tableau adopté page 46."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La page 47 demande expressément à la MRC de modifier le RCI 16-21 pour intégrer le lot 3 787 898 au secteur de consolidation, sans constater l’adoption de cette modification."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le considérant cité page 46 identifie le schéma d’aménagement comme le Règlement 16-23, et le dispositif de la même résolution, page 47, en demande la modification pour intégrer le lot 3 787 898."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "La page 5 autorise la transmission administrative d’une liste fiscale non reproduite, sans identifier d’immeuble constituant un objet foncier explicite à retenir comme unité."
+  },
+  {
+   "item": "i08",
+   "choice": "absent",
+   "reason": "La résolution 2026-03-47 habilite généralement des représentants à enchérir et à acquérir lors d’une vente fiscale future, sans désigner d’immeuble déterminé répondant à l’exigence d’un objet foncier explicite."
+  }
+ ]
+}

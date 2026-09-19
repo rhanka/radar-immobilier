@@ -1,0 +1,360 @@
+{
+ "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "6223668339f89cabceb349b5bbb515724849d9ef8c88d4f7c17b6a3ea341d694",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-509"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "509-07-04-26 — Premier projet modifiant le zonage : éoliennes et captage des eaux souterraines",
+     "stage": "1er_projet",
+     "objet": "509-07-04-26",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Ce règlement modifie le règlement de zonage numéro 310-19-01-09."
+      },
+      {
+       "page": 3,
+       "excerpt": "Ce règlement modifie le règlement de zonage numéro 310-19-01-09."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-310"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "310-19-01-09 — Règlement de zonage",
+     "stage": null,
+     "objet": "310-19-01-09",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Ce règlement modifie le règlement de zonage numéro 310-19-01-09."
+      },
+      {
+       "page": 3,
+       "excerpt": "Ce règlement modifie le règlement de zonage numéro 310-19-01-09."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-510"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "510-07-04-26 — Premier projet modifiant le plan d’urbanisme",
+     "stage": "1er_projet",
+     "objet": "510-07-04-26",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Ce règlement modifie le plan d’urbanisme 309-19-01-09."
+      },
+      {
+       "page": 10,
+       "excerpt": "Ce règlement modifie le plan d’urbanisme 309-19-01-09."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-309"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "309-19-01-09 — Plan d’urbanisme",
+     "stage": null,
+     "objet": "309-19-01-09",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Ce règlement modifie le plan d’urbanisme 309-19-01-09."
+      },
+      {
+       "page": 10,
+       "excerpt": "Ce règlement modifie le plan d’urbanisme 309-19-01-09."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-projet-509"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du premier projet 509-07-04-26",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par M. Yanick Godon, appuyé par Mme Virginie\nLavoie et résolu à l’unanimité des conseillers d’adopter le règlement 509-07-04-26 et\ndécrète ce qui suit :"
+      },
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par M. Yanick Godon, appuyé par Mme Virginie\nLavoie et résolu à l’unanimité des conseillers d’adopter le règlement 509-07-04-26 et\ndécrète ce qui suit :"
+      },
+      {
+       "page": 3,
+       "excerpt": "Avis de motion est donné par M. Benoit Magny pour l’adoption du règlement no 50907-04-26 modifiant le plan d’urbanisme règlement no 309-19-01-09 concordance avec\nle règlement 2024-147A de la MRC des Chenaux.\nAvis de motion est donné par M. Roger Marceau pour l’adoption du règlement no 51007-04-26 modifiant le règlement de zonage no 310-19-01-09 concordance avec le\nrèglement 2024-147A de la MRC des Chenaux."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-projet-510"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du premier projet 510-07-04-26",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par M. Hugo Massicotte, appuyé par M. Yanick\nGodon et résolu à l’unanimité des conseillers d’adopter le règlement 510-07-04-26 et\ndécrète ce qui suit :"
+      },
+      {
+       "page": 10,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par M. Hugo Massicotte, appuyé par M. Yanick\nGodon et résolu à l’unanimité des conseillers d’adopter le règlement 510-07-04-26 et\ndécrète ce qui suit :"
+      },
+      {
+       "page": 3,
+       "excerpt": "Avis de motion est donné par M. Benoit Magny pour l’adoption du règlement no 50907-04-26 modifiant le plan d’urbanisme règlement no 309-19-01-09 concordance avec\nle règlement 2024-147A de la MRC des Chenaux.\nAvis de motion est donné par M. Roger Marceau pour l’adoption du règlement no 51007-04-26 modifiant le règlement de zonage no 310-19-01-09 concordance avec le\nrèglement 2024-147A de la MRC des Chenaux."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-avis-509"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion — 50907-04-26",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Avis de motion est donné par M. Benoit Magny pour l’adoption du règlement no 50907-04-26 modifiant le plan d’urbanisme règlement no 309-19-01-09 concordance avec"
+      },
+      {
+       "page": 3,
+       "excerpt": "Avis de motion est donné par M. Benoit Magny pour l’adoption du règlement no 50907-04-26 modifiant le plan d’urbanisme règlement no 309-19-01-09 concordance avec\nle règlement 2024-147A de la MRC des Chenaux.\nAvis de motion est donné par M. Roger Marceau pour l’adoption du règlement no 51007-04-26 modifiant le règlement de zonage no 310-19-01-09 concordance avec le\nrèglement 2024-147A de la MRC des Chenaux."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-avis-510"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion — 51007-04-26",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Avis de motion est donné par M. Roger Marceau pour l’adoption du règlement no 51007-04-26 modifiant le règlement de zonage no 310-19-01-09 concordance avec le"
+      },
+      {
+       "page": 3,
+       "excerpt": "Avis de motion est donné par M. Benoit Magny pour l’adoption du règlement no 50907-04-26 modifiant le plan d’urbanisme règlement no 309-19-01-09 concordance avec\nle règlement 2024-147A de la MRC des Chenaux.\nAvis de motion est donné par M. Roger Marceau pour l’adoption du règlement no 51007-04-26 modifiant le règlement de zonage no 310-19-01-09 concordance avec le\nrèglement 2024-147A de la MRC des Chenaux."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-245-1"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande d’abrogation de l’article 245.1 de la Loi sur l’aménagement et l’urbanisme",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "QUE la municipalité de Sainte-Geneviève-de-Batiscan demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée nationale"
+      },
+      {
+       "page": 18,
+       "excerpt": "QUE la municipalité de Sainte-Geneviève-de-Batiscan demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée nationale\nd’introduire un amendement au projet de loi no 22 abrogeant l’article 245.1 de la Loi sur\nl’aménagement et l’urbanisme afin de respecter le consensus établi entre le ministère et\nses partenaires municipaux;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le premier projet de règlement 509-07-04-26 modifiant le zonage concernant le captage d'eau et les éoliennes est adopté à la résolution 26-04-04.\",\"excerpt\":\"ADOPTION DU 1ER PROJET DE RÈGLEMENT NUMÉRO 509-07-04-26\\nMODIFIANT LE RÈGLEMENT DE ZONAGE 310-19-01-09 ET SES\\nAMENDEMENTS\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 310-19-01-09 est le règlement de base en vigueur cité comme faisant l'objet d'une modification, et non un acte procéduralement initié ou adopté lors de cette séance.\",\"excerpt\":\"Ce règlement modifie le règlement de zonage numéro 310-19-01-09.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le premier projet de règlement 510-07-04-26 modifiant le plan d'urbanisme est adopté à la résolution 26-04-05.\",\"excerpt\":\"ADOPTION DU 1er PROJET DE RÈGLEMENT NO 510-07-04-26 MODIFIANT\\nLE PLAN D’URBANISME\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le plan d'urbanisme 309-19-01-09 est le règlement antérieur modifié et non un acte d'urbanisme adopté ou franchissant une étape lors de la séance.\",\"excerpt\":\"Ce règlement modifie le plan d’urbanisme 309-19-01-09.\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 26-04-04 consigne l'adoption du premier projet de règlement numéro 509-07-04-26.\",\"excerpt\":\"résolu à l’unanimité des conseillers d’adopter le règlement 509-07-04-26\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 26-04-05 consigne l'adoption du premier projet de règlement numéro 510-07-04-26.\",\"excerpt\":\"résolu à l’unanimité des conseillers d’adopter le règlement 510-07-04-26\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion pour le règlement no 50907-04-26 a été dûment donné en début de séance par Benoit Magny.\",\"excerpt\":\"Avis de motion est donné par M. Benoit Magny pour l’adoption du règlement no 50907-04-26 modifiant le plan d’urbanisme\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion pour le règlement no 51007-04-26 a été donné par Roger Marceau.\",\"excerpt\":\"Avis de motion est donné par M. Roger Marceau pour l’adoption du règlement no 51007-04-26 modifiant le règlement de zonage\"},{\"act\":\"A09\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une prise de position / résolution politique adressée au gouvernement provincial sur un projet de loi, sans effet réglementaire ou foncier local direct.\",\"excerpt\":\"QUE la municipalité de Sainte-Geneviève-de-Batiscan demande aux membres de la\\nCommission parlementaire de l’aménagement du territoire de l’Assemblée nationale\\nd’introduire un amendement au projet de loi no 22\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le premier projet de règlement 509-07-04-26 modifiant le zonage concernant le captage d'eau et les éoliennes est adopté à la résolution 26-04-04.",
+   "excerpt": "ADOPTION DU 1ER PROJET DE RÈGLEMENT NUMÉRO 509-07-04-26\nMODIFIANT LE RÈGLEMENT DE ZONAGE 310-19-01-09 ET SES\nAMENDEMENTS"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 310-19-01-09 est le règlement de base en vigueur cité comme faisant l'objet d'une modification, et non un acte procéduralement initié ou adopté lors de cette séance.",
+   "excerpt": "Ce règlement modifie le règlement de zonage numéro 310-19-01-09."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le premier projet de règlement 510-07-04-26 modifiant le plan d'urbanisme est adopté à la résolution 26-04-05.",
+   "excerpt": "ADOPTION DU 1er PROJET DE RÈGLEMENT NO 510-07-04-26 MODIFIANT\nLE PLAN D’URBANISME"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le plan d'urbanisme 309-19-01-09 est le règlement antérieur modifié et non un acte d'urbanisme adopté ou franchissant une étape lors de la séance.",
+   "excerpt": "Ce règlement modifie le plan d’urbanisme 309-19-01-09."
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "La résolution 26-04-04 consigne l'adoption du premier projet de règlement numéro 509-07-04-26.",
+   "excerpt": "résolu à l’unanimité des conseillers d’adopter le règlement 509-07-04-26"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "La résolution 26-04-05 consigne l'adoption du premier projet de règlement numéro 510-07-04-26.",
+   "excerpt": "résolu à l’unanimité des conseillers d’adopter le règlement 510-07-04-26"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion pour le règlement no 50907-04-26 a été dûment donné en début de séance par Benoit Magny.",
+   "excerpt": "Avis de motion est donné par M. Benoit Magny pour l’adoption du règlement no 50907-04-26 modifiant le plan d’urbanisme"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion pour le règlement no 51007-04-26 a été donné par Roger Marceau.",
+   "excerpt": "Avis de motion est donné par M. Roger Marceau pour l’adoption du règlement no 51007-04-26 modifiant le règlement de zonage"
+  },
+  {
+   "act": "A09",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une prise de position / résolution politique adressée au gouvernement provincial sur un projet de loi, sans effet réglementaire ou foncier local direct.",
+   "excerpt": "QUE la municipalité de Sainte-Geneviève-de-Batiscan demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée nationale\nd’introduire un amendement au projet de loi no 22"
+  }
+ ],
+ "filter": {
+  "acts": 9,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 310-19-01-09 est le règlement de base en vigueur cité comme faisant l'objet d'une modification, et non un acte procéduralement initié ou adopté lors de cette séance."
+   },
+   {
+    "act": "A04",
+    "reason": "Le plan d'urbanisme 309-19-01-09 est le règlement antérieur modifié et non un acte d'urbanisme adopté ou franchissant une étape lors de la séance."
+   },
+   {
+    "act": "A09",
+    "reason": "Il s'agit d'une prise de position / résolution politique adressée au gouvernement provincial sur un projet de loi, sans effet réglementaire ou foncier local direct."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le premier projet de règlement 509-07-04-26 modifiant le zonage concernant le captage d'eau et les éoliennes est adopté à la résolution 26-04-04."
+   },
+   {
+    "act": "A03",
+    "reason": "Le premier projet de règlement 510-07-04-26 modifiant le plan d'urbanisme est adopté à la résolution 26-04-05."
+   },
+   {
+    "act": "A05",
+    "reason": "La résolution 26-04-04 consigne l'adoption du premier projet de règlement numéro 509-07-04-26."
+   },
+   {
+    "act": "A06",
+    "reason": "La résolution 26-04-05 consigne l'adoption du premier projet de règlement numéro 510-07-04-26."
+   },
+   {
+    "act": "A07",
+    "reason": "Un avis de motion pour le règlement no 50907-04-26 a été dûment donné en début de séance par Benoit Magny."
+   },
+   {
+    "act": "A08",
+    "reason": "Un avis de motion pour le règlement no 51007-04-26 a été donné par Roger Marceau."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2946,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 20010,
+   "outputTokens": 822,
+   "totalTokens": 20832
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2791
+  },
+  "inputSha256": "e67b22e4e58d68b049313e0aa9369fd0a3ab3a7787f095ec279fef246dd17b61"
+ }
+}

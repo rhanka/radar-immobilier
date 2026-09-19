@@ -1,0 +1,141 @@
+{
+ "documentId": "bedford--brome-missisquoi-2026-06-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c5de592a09dbe44822aeba1edf7c9686111f53eb53c102fec513198bc10e74d6",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Résolution 26-06-170, page 4 : « La conseillère Mona Beaulac donne un avis de motion ... l’adoption du règlement 765-26 relativement à l’occupation du domaine public » ; citation, étape avis_motion, objet et page exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Même résolution page 4 : « Je dépose et présente le projet de règlement numéro 765-26 » ; avis de motion et projet actuels sont des unités séparées selon la règle, étape projet_reglement exacte.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Résolution 26-06-177, page 9 : « PIIA – 152, Rivière – Remplacement de toiture » et « Que ce conseil accorde ... la demande de PIIA » ; petit PIIA inclus, citation et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Résolution 26-06-178, page 9 : « PIIA – Lot 5 603 254 Rue Leclair – Nouveau 4 Plex », demande accordée sur nouvelle proposition ; objet lot explicite, étape piia exacte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Résolution 26-06-179, page 9, considérant cité mot pour mot pour « le 125, rue Alcée-Rocheleau » et « Que ce conseil accorde ... la demande de dérogation mineure » ; un nœud groupé couvre plusieurs unités explicitement nommées.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Même résolution 26-06-179, page 9 : titre « Dérogation mineure – 125 et 137, rue Alcée-Rocheleau – Réduction de marge de stationnement » et considérant sur la limite gauche du 137 ; seconde adresse explicitement nommée, dérogation accordée.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Résolution 26-06-180, page 10 : « Dérogation mineure – 180, rue du Parc – Implantation dérogatoire », construction à 5.68 mètres de la ligne avant, « Que ce conseil accepte la demande de dérogation mineure » ; citation, objet, étape et page exacts.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Résolution 26-06-181, page 10 : demande assujettie au règlement sur les PIIA # 706-12 et « Que ce conseil refuse l’aménagement du développement des Cerfs tel que présenté » ; le refus reste un refus, étape piia et citation exactes.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Résolution 26-06-182, page 11 : occupation du domaine public au parc Dr. Adrien Tougas pour une terrasse, assujettie au règlement 765-26, « Que le conseil municipal accepte l’installation de la terrasse » ADOPTÉE ; acte foncier explicite sur un objet nommé, citation et page exactes.\"},{\"item\":\"i10\",\"choice\":\"v2\",\"reason\":\"Résolution 26-06-183, page 11 : addenda au bail du local #105 au « 52, rue du Pont » autorisé ; acte foncier non résidentiel inclus, étape inconnu acceptable, v2 retenue car l’objet de v1 contient un saut de ligne parasite.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"Résolution 26-06-190, page 15 : « Le conseiller Pierre Le Blanc donne un avis de motion ... l’adoption du règlement numéro 702-26-9 modifiant le règlement numéro 702-11 » ; la mention à l’ordre du jour page 3 ne crée pas d’unité supplémentaire, étape avis_motion et page exactes.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"Résolution 26-06-191, page 15 : « Que le conseil municipal adopte le premier projet de règlement numéro 702-26-9 » ; premier projet distinct de l’avis de motion selon la règle, étape projet_reglement et citation exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v2"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Résolution 26-06-170, page 4 : « La conseillère Mona Beaulac donne un avis de motion ... l’adoption du règlement 765-26 relativement à l’occupation du domaine public » ; citation, étape avis_motion, objet et page exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Même résolution page 4 : « Je dépose et présente le projet de règlement numéro 765-26 » ; avis de motion et projet actuels sont des unités séparées selon la règle, étape projet_reglement exacte."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Résolution 26-06-177, page 9 : « PIIA – 152, Rivière – Remplacement de toiture » et « Que ce conseil accorde ... la demande de PIIA » ; petit PIIA inclus, citation et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Résolution 26-06-178, page 9 : « PIIA – Lot 5 603 254 Rue Leclair – Nouveau 4 Plex », demande accordée sur nouvelle proposition ; objet lot explicite, étape piia exacte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Résolution 26-06-179, page 9, considérant cité mot pour mot pour « le 125, rue Alcée-Rocheleau » et « Que ce conseil accorde ... la demande de dérogation mineure » ; un nœud groupé couvre plusieurs unités explicitement nommées."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Même résolution 26-06-179, page 9 : titre « Dérogation mineure – 125 et 137, rue Alcée-Rocheleau – Réduction de marge de stationnement » et considérant sur la limite gauche du 137 ; seconde adresse explicitement nommée, dérogation accordée."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Résolution 26-06-180, page 10 : « Dérogation mineure – 180, rue du Parc – Implantation dérogatoire », construction à 5.68 mètres de la ligne avant, « Que ce conseil accepte la demande de dérogation mineure » ; citation, objet, étape et page exacts."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Résolution 26-06-181, page 10 : demande assujettie au règlement sur les PIIA # 706-12 et « Que ce conseil refuse l’aménagement du développement des Cerfs tel que présenté » ; le refus reste un refus, étape piia et citation exactes."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Résolution 26-06-182, page 11 : occupation du domaine public au parc Dr. Adrien Tougas pour une terrasse, assujettie au règlement 765-26, « Que le conseil municipal accepte l’installation de la terrasse » ADOPTÉE ; acte foncier explicite sur un objet nommé, citation et page exactes."
+  },
+  {
+   "item": "i10",
+   "choice": "v2",
+   "reason": "Résolution 26-06-183, page 11 : addenda au bail du local #105 au « 52, rue du Pont » autorisé ; acte foncier non résidentiel inclus, étape inconnu acceptable, v2 retenue car l’objet de v1 contient un saut de ligne parasite."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "Résolution 26-06-190, page 15 : « Le conseiller Pierre Le Blanc donne un avis de motion ... l’adoption du règlement numéro 702-26-9 modifiant le règlement numéro 702-11 » ; la mention à l’ordre du jour page 3 ne crée pas d’unité supplémentaire, étape avis_motion et page exactes."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "Résolution 26-06-191, page 15 : « Que le conseil municipal adopte le premier projet de règlement numéro 702-26-9 » ; premier projet distinct de l’avis de motion selon la règle, étape projet_reglement et citation exactes."
+  }
+ ]
+}

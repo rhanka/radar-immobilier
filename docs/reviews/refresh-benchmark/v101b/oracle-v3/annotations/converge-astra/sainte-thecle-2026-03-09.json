@@ -1,0 +1,231 @@
+{
+ "documentId": "sainte-thecle-2026-03-09",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "01e174afa3871e892056b2ac16eff8c2088afe711ebcf965b22813672952c4c2",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-070, page 16, engage explicitement les procédures de modification du règlement d’urbanisme 389-2021, sans constater un avis de motion ni une adoption.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v2\",\n      \"reason\": \"La résolution 2026-03-072 commence page 17 et demande, dans sa suite page 18, le déplacement du conteneur vers la zone 22-AF(4HA), sans adopter de règlement.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 20 constate expressément l’adoption du deuxième projet de règlement 434-2026, les étapes de février étant seulement rappelées historiquement.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 20, Roxanne Bureau-Grenier donne explicitement avis de motion du règlement 435-2026 relatif à l’occupation et à l’entretien des bâtiments.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-076, page 20, adopte le premier projet de règlement 435-2026, étape distincte de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-077, page 21, fixe une consultation publique sur le règlement 435-2026 au 23 mars 2026 à 18h00, sans la présenter comme déjà tenue.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 21, Danny Dionne donne avis de motion du règlement 436-2026 concernant les modalités applicables à l’hébergement touristique.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-078 adopte expressément, page 22, le premier projet de règlement 436-2026 modifiant les dispositions sur l’hébergement touristique.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-079, page 22, fixe la consultation publique concernant le règlement 436-2026 au 23 mars 2026 à 18h05.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 23 contient l’avis de motion du règlement 437-2026 concernant la transmission des demandes de dérogation mineure.\"\n    },\n    {\n      \"item\": \"i11\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-080, page 23, adopte le premier projet de règlement 437-2026, distinctement de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i12\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-081, page 23, fixe une consultation publique sur le règlement 437-2026 au 23 mars 2026 à 18h10.\"\n    },\n    {\n      \"item\": \"i13\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 24, Jacques Tessier donne explicitement avis de motion du règlement 438-2026 concernant les dispositions relatives aux autres permis.\"\n    },\n    {\n      \"item\": \"i14\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 24, Jacques Tessier dépose le projet de règlement 438-2026, ce qui constitue une unité distincte de son avis de motion.\"\n    },\n    {\n      \"item\": \"i15\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 25 atteste l’appui à une demande de suspension des nouvelles activités dans le périmètre du projet PR-1013718, et non une protection ou une suspension déjà acquise.\"\n    },\n    {\n      \"item\": \"i16\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 25, Frédéric Lapointe donne avis de motion du règlement 440-2026 visant la zone 96-Rc et l’ajout d’une définition de conteneur.\"\n    },\n    {\n      \"item\": \"i17\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-083 adopte expressément, page 26, le premier projet de règlement 440-2026 concernant la zone 96-Rc et la définition d’un conteneur.\"\n    },\n    {\n      \"item\": \"i18\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-084, page 26, fixe la consultation publique concernant le règlement 440-2026 au 23 mars 2026 à 18h15.\"\n    },\n    {\n      \"item\": \"i19\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-085, page 26, appuie la demande à la CPTAQ visant l’acquisition d’environ 4,6 acres du lot 4 756 274, sans constater l’autorisation ni l’acquisition.\"\n    },\n    {\n      \"item\": \"i20\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-086, page 27, accepte la dérogation du 250-252, rue Notre-Dame pour le lotissement arrière et la réduction des marges latérales.\"\n    },\n    {\n      \"item\": \"i21\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-03-087, page 27, refuse le dépassement de superficie mais autorise une marge gauche de 1,25 m à condition de ne prévoir aucune fenêtre ni porte vers cette ligne.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v2"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v1"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v1"
+  },
+  {
+   "item": "i20",
+   "unitId": "u20",
+   "current": "v1"
+  },
+  {
+   "item": "i21",
+   "unitId": "u21",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-070, page 16, engage explicitement les procédures de modification du règlement d’urbanisme 389-2021, sans constater un avis de motion ni une adoption."
+  },
+  {
+   "item": "i02",
+   "choice": "v2",
+   "reason": "La résolution 2026-03-072 commence page 17 et demande, dans sa suite page 18, le déplacement du conteneur vers la zone 22-AF(4HA), sans adopter de règlement."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 20 constate expressément l’adoption du deuxième projet de règlement 434-2026, les étapes de février étant seulement rappelées historiquement."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "À la page 20, Roxanne Bureau-Grenier donne explicitement avis de motion du règlement 435-2026 relatif à l’occupation et à l’entretien des bâtiments."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-076, page 20, adopte le premier projet de règlement 435-2026, étape distincte de l’avis de motion."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-077, page 21, fixe une consultation publique sur le règlement 435-2026 au 23 mars 2026 à 18h00, sans la présenter comme déjà tenue."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "À la page 21, Danny Dionne donne avis de motion du règlement 436-2026 concernant les modalités applicables à l’hébergement touristique."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-078 adopte expressément, page 22, le premier projet de règlement 436-2026 modifiant les dispositions sur l’hébergement touristique."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-079, page 22, fixe la consultation publique concernant le règlement 436-2026 au 23 mars 2026 à 18h05."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La page 23 contient l’avis de motion du règlement 437-2026 concernant la transmission des demandes de dérogation mineure."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-080, page 23, adopte le premier projet de règlement 437-2026, distinctement de l’avis de motion."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-081, page 23, fixe une consultation publique sur le règlement 437-2026 au 23 mars 2026 à 18h10."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "À la page 24, Jacques Tessier donne explicitement avis de motion du règlement 438-2026 concernant les dispositions relatives aux autres permis."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "À la page 24, Jacques Tessier dépose le projet de règlement 438-2026, ce qui constitue une unité distincte de son avis de motion."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "La page 25 atteste l’appui à une demande de suspension des nouvelles activités dans le périmètre du projet PR-1013718, et non une protection ou une suspension déjà acquise."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "À la page 25, Frédéric Lapointe donne avis de motion du règlement 440-2026 visant la zone 96-Rc et l’ajout d’une définition de conteneur."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-083 adopte expressément, page 26, le premier projet de règlement 440-2026 concernant la zone 96-Rc et la définition d’un conteneur."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-084, page 26, fixe la consultation publique concernant le règlement 440-2026 au 23 mars 2026 à 18h15."
+  },
+  {
+   "item": "i19",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-085, page 26, appuie la demande à la CPTAQ visant l’acquisition d’environ 4,6 acres du lot 4 756 274, sans constater l’autorisation ni l’acquisition."
+  },
+  {
+   "item": "i20",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-086, page 27, accepte la dérogation du 250-252, rue Notre-Dame pour le lotissement arrière et la réduction des marges latérales."
+  },
+  {
+   "item": "i21",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-087, page 27, refuse le dépassement de superficie mais autorise une marge gauche de 1,25 m à condition de ne prévoir aucune fenêtre ni porte vers cette ligne."
+  }
+ ]
+}

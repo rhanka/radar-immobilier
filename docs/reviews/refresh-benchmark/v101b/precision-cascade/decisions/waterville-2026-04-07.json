@@ -1,0 +1,224 @@
+{
+ "documentId": "waterville-2026-04-07",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "d40ba9d1cb6a19b9c75b8937163070f7010cefd0d198038cbf0df60e6bbb5f7e",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-1"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de modification règlementaire 2026-01-0006",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "6.1 Demande de modification règlementaire 2026-01-0006"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-2"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2026-02-0007",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "6.2 Dérogation mineure 2026-02-0007"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-3"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2026-02-0008",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "6.3 Dérogation mineure 2026-02-0008"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-4"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion prévu — modification du règlement de lotissement no 615",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Avis de motion projet de règlement amendant le règlement de lotissement no 615 de la\nVille de Waterville"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-615"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de lotissement no 615",
+     "stage": null,
+     "objet": "615",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Avis de motion projet de règlement amendant le règlement de lotissement no 615 de la\nVille de Waterville"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-5"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande d’autorisation agricole — agrandissement du lieu d’enfouissement technique",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Demande d’autorisation à la Commission de protection agricole du Québec –\nAgrandissement du lieu d’enfouissement technique"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.1 de l'ordre du jour prévoit l'examen d'une demande de modification réglementaire.\",\"excerpt\":\"6.1 Demande de modification règlementaire 2026-01-0006\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.2 de l'ordre du jour prévoit le traitement d'une demande de dérogation mineure.\",\"excerpt\":\"6.2 Dérogation mineure 2026-02-0007\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.3 de l'ordre du jour prévoit le traitement d'une demande de dérogation mineure.\",\"excerpt\":\"6.3 Dérogation mineure 2026-02-0008\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.3 de l'ordre du jour prévoit l'avis de motion pour amender le règlement de lotissement.\",\"excerpt\":\"7.3\\nAvis de motion projet de règlement amendant le règlement de lotissement no 615 de la\\nVille de Waterville\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement de lotissement no 615 fait l'objet d'un projet de modification mentionné dans l'ordre du jour.\",\"excerpt\":\"Avis de motion projet de règlement amendant le règlement de lotissement no 615 de la\\nVille de Waterville\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.5 de l'ordre du jour prévoit une demande d'autorisation à la CPTAQ pour l'agrandissement d'un lieu d'enfouissement.\",\"excerpt\":\"8.5\\nDemande d’autorisation à la Commission de protection agricole du Québec –\\nAgrandissement du lieu d’enfouissement technique\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 6.1 de l'ordre du jour prévoit l'examen d'une demande de modification réglementaire.",
+   "excerpt": "6.1 Demande de modification règlementaire 2026-01-0006"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 6.2 de l'ordre du jour prévoit le traitement d'une demande de dérogation mineure.",
+   "excerpt": "6.2 Dérogation mineure 2026-02-0007"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 6.3 de l'ordre du jour prévoit le traitement d'une demande de dérogation mineure.",
+   "excerpt": "6.3 Dérogation mineure 2026-02-0008"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 7.3 de l'ordre du jour prévoit l'avis de motion pour amender le règlement de lotissement.",
+   "excerpt": "7.3\nAvis de motion projet de règlement amendant le règlement de lotissement no 615 de la\nVille de Waterville"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le règlement de lotissement no 615 fait l'objet d'un projet de modification mentionné dans l'ordre du jour.",
+   "excerpt": "Avis de motion projet de règlement amendant le règlement de lotissement no 615 de la\nVille de Waterville"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le point 8.5 de l'ordre du jour prévoit une demande d'autorisation à la CPTAQ pour l'agrandissement d'un lieu d'enfouissement.",
+   "excerpt": "8.5\nDemande d’autorisation à la Commission de protection agricole du Québec –\nAgrandissement du lieu d’enfouissement technique"
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 6.1 de l'ordre du jour prévoit l'examen d'une demande de modification réglementaire."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 6.2 de l'ordre du jour prévoit le traitement d'une demande de dérogation mineure."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 6.3 de l'ordre du jour prévoit le traitement d'une demande de dérogation mineure."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 7.3 de l'ordre du jour prévoit l'avis de motion pour amender le règlement de lotissement."
+   },
+   {
+    "act": "A05",
+    "reason": "Le règlement de lotissement no 615 fait l'objet d'un projet de modification mentionné dans l'ordre du jour."
+   },
+   {
+    "act": "A06",
+    "reason": "Le point 8.5 de l'ordre du jour prévoit une demande d'autorisation à la CPTAQ pour l'agrandissement d'un lieu d'enfouissement."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1839,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2191,
+   "outputTokens": 416,
+   "totalTokens": 2607
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1692
+  },
+  "inputSha256": "e4abd023caefc9e3349a97db5424d984d590112fe0264010f10b0bb635337d55"
+ }
+}

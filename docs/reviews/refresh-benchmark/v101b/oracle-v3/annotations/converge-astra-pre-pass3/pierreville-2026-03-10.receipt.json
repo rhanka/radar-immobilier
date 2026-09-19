@@ -1,0 +1,36 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "ff3ca719885081f1943d80506640ab35d8ec6cbbc709142dfe1e54a9824cc67d",
+ "inputSha256": "13d58136f9190ed45acf118ff2ad251d9a93ea5e07527adc5fd4664980337b6c",
+ "responseSha256": "d9ce19b4e36cf4fa045cd8a5fd9f2af321417285a3b2fdfce6775a3470c472a5",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 87347,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 20005,
+  "outputTokens": 2802,
+  "totalTokens": 22807
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 87344,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:26:59.962Z"
+}

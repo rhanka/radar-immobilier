@@ -1,0 +1,36 @@
+{
+ "documentId": "mont-saint-hilaire-2026-04-13",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "41ff455cfb0630e196e302e18ed12be808e95c461bdb2a2985dba5e784d46c90",
+ "inputSha256": "ff107e38ed9b3c9104b7a103ce937dc46b7718e0d1b9f63ef88aefbba195dc99",
+ "responseSha256": "40c7bdc18317c88d58ee8492c94cca3b1a479c7edd1fe674c9889c437203b153",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 281870,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 18053,
+  "outputTokens": 9280,
+  "totalTokens": 27333
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 281837,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:27:54.626Z"
+}

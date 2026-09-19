@@ -1,0 +1,75 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "284ee220fe486f61e7cd108aa9b318d40b04767e6fdc298ec8d61395c1ba5810",
+ "inputSha256": "25015de56b8dca2d2f2119101799d920c21c2ed4117b9fff4ad9907724cf03d5",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "rc": 0,
+ "latencyMs": 93001,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "d0fb1001-758f-4cb6-9a9a-88af4a0adc70",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 7748,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 25339,
+   "webSearchRequests": 0,
+   "costUSD": 0.8948732500000001,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 7738,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 25339,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 7748,
+  "output_tokens_details": {
+   "thinking_tokens": 7738
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 25339,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 7748,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 25339,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 25339
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.8948732500000001,
+ "durationApiMs": 90920,
+ "stderrTail": "",
+ "at": "2026-09-18T17:52:01.193Z"
+}

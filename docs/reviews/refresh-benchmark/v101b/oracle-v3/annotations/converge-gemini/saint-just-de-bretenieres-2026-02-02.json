@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-just-de-bretenieres-2026-02-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4ed3478f674f30796abf8eaa9483b57afddcd46aeced0b635394e2896f556053",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"La mention sous Affaires découlant du procès-verbal est une simple demande d'information sans acte foncier ni résolution, et le rang St-Isidore ne constitue pas un objet foncier explicite.\"},{\"item\":\"i02\",\"choice\":\"absent\",\"reason\":\"Le texte ne mentionne aucun objet réglementaire explicite ni 'règlement de déboisement', s'agissant seulement d'une demande politique visant un règlement existant non spécifié.\"},{\"item\":\"i03\",\"choice\":\"absent\",\"reason\":\"L'acceptation d'une déclaration de compétence de la MRC ne constitue ni un objet réglementaire d'urbanisme ni un objet foncier explicite correspondant au profil Signal/DesignationEvent.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "La mention sous Affaires découlant du procès-verbal est une simple demande d'information sans acte foncier ni résolution, et le rang St-Isidore ne constitue pas un objet foncier explicite."
+  },
+  {
+   "item": "i02",
+   "choice": "absent",
+   "reason": "Le texte ne mentionne aucun objet réglementaire explicite ni 'règlement de déboisement', s'agissant seulement d'une demande politique visant un règlement existant non spécifié."
+  },
+  {
+   "item": "i03",
+   "choice": "absent",
+   "reason": "L'acceptation d'une déclaration de compétence de la MRC ne constitue ni un objet réglementaire d'urbanisme ni un objet foncier explicite correspondant au profil Signal/DesignationEvent."
+  }
+ ]
+}

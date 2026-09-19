@@ -1,0 +1,165 @@
+{
+ "documentId": "saint-charles-de-bourget-2026-05-04",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "444f4b2ff2dda05da061e3277c898fe9d2cdec9d3467e7639910001df20a638c",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-446"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 446.26 — Droit de préemption",
+     "stage": null,
+     "objet": "446.26",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "ADOPTION DU RÈGLEMENT NO446.26 CONCERNANT L’EXERCICE DU DROIT DE\nPRÉEMPTION PAR LA MUNICIPALITÉ"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-derogation"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure — 237, chemin Maltais-Laberge",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "DEMANDE DE DÉROGATION MINEURE – 237, CHEMIN MALTAIS-LABERGE"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-cptaq"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande d’autorisation CPTAQ — Aliénation du lot 5 682 717",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "DEMANDE D’AUTORISATION À LA CPTAQ POUR ALIÉNER LE LOT 5 682 717 À\nFINS D’AGRICULTURE"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-447"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement omnibus municipal 447.26 — Paix, ordre et sécurité publique",
+     "stage": "projet",
+     "objet": "447.26",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT OMNIBUS MUNICIPAL\nNO447.26 RELATIF À LA PAIX, À L'ORDRE ET À LA SÉCURITÉ PUBLIQUE"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 6.3 de l'ordre du jour prévoit expressément l'adoption du règlement 446.26 sur le droit de préemption.\",\"excerpt\":\"ADOPTION DU RÈGLEMENT NO446.26 CONCERNANT L’EXERCICE DU DROIT DE\\nPRÉEMPTION PAR LA MUNICIPALITÉ\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.1 de l'ordre du jour concerne explicitement une demande de dérogation mineure au 237, chemin Maltais-Laberge.\",\"excerpt\":\"DEMANDE DE DÉROGATION MINEURE – 237, CHEMIN MALTAIS-LABERGE\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.2 de l'ordre du jour prévoit le traitement d'une demande d'autorisation à la CPTAQ pour aliéner le lot 5 682 717.\",\"excerpt\":\"DEMANDE D’AUTORISATION À LA CPTAQ POUR ALIÉNER LE LOT 5 682 717 À\\nFINS D’AGRICULTURE\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 10.2 prévoit l'avis de motion et le dépôt du projet de règlement 447.26, mais ce règlement concerne la paix, l'ordre et la sécurité publique, ce qui n'est pas un acte d'urbanisme ou de planification du territoire.\",\"excerpt\":\"AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT OMNIBUS MUNICIPAL\\nNO447.26 RELATIF À LA PAIX, À L'ORDRE ET À LA SÉCURITÉ PUBLIQUE\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 6.3 de l'ordre du jour prévoit expressément l'adoption du règlement 446.26 sur le droit de préemption.",
+   "excerpt": "ADOPTION DU RÈGLEMENT NO446.26 CONCERNANT L’EXERCICE DU DROIT DE\nPRÉEMPTION PAR LA MUNICIPALITÉ"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 8.1 de l'ordre du jour concerne explicitement une demande de dérogation mineure au 237, chemin Maltais-Laberge.",
+   "excerpt": "DEMANDE DE DÉROGATION MINEURE – 237, CHEMIN MALTAIS-LABERGE"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 8.2 de l'ordre du jour prévoit le traitement d'une demande d'autorisation à la CPTAQ pour aliéner le lot 5 682 717.",
+   "excerpt": "DEMANDE D’AUTORISATION À LA CPTAQ POUR ALIÉNER LE LOT 5 682 717 À\nFINS D’AGRICULTURE"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 10.2 prévoit l'avis de motion et le dépôt du projet de règlement 447.26, mais ce règlement concerne la paix, l'ordre et la sécurité publique, ce qui n'est pas un acte d'urbanisme ou de planification du territoire.",
+   "excerpt": "AVIS DE MOTION ET DÉPÔT DU PROJET DE RÈGLEMENT OMNIBUS MUNICIPAL\nNO447.26 RELATIF À LA PAIX, À L'ORDRE ET À LA SÉCURITÉ PUBLIQUE"
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 6.3 de l'ordre du jour prévoit expressément l'adoption du règlement 446.26 sur le droit de préemption."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 8.1 de l'ordre du jour concerne explicitement une demande de dérogation mineure au 237, chemin Maltais-Laberge."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 8.2 de l'ordre du jour prévoit le traitement d'une demande d'autorisation à la CPTAQ pour aliéner le lot 5 682 717."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 10.2 prévoit l'avis de motion et le dépôt du projet de règlement 447.26, mais ce règlement concerne la paix, l'ordre et la sécurité publique, ce qui n'est pas un acte d'urbanisme ou de planification du territoire."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1788,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2080,
+   "outputTokens": 390,
+   "totalTokens": 2470
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1484
+  },
+  "inputSha256": "6466193b4648bfa62587854e5783da7e3053008d10cb95d3e0f221496a47889e"
+ }
+}

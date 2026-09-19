@@ -1,0 +1,126 @@
+{
+ "documentId": "richelieu-2026-02-03",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fa4ca07d51ec4c04f34ef69add32b03bdd44df7a665d8a649157a7dbade61b1e",
+ "verificationSha256": "bed20261017f60dd0fafb523b6346251391aaea04bc3fa0d425497a32df82d75",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"La résolution 26-02-037 ordonne la vente pour taxes d'immeubles non identifiés dans le texte (« apparaissant au rapport de la trésorière »), ce qui ne constitue pas un objet foncier explicite au sens des règles ; les positions v1 sont écartées car il s'agit d'une mesure financière de recouvrement fiscal sans désignation cadastrale.\"},{\"item\":\"a02\",\"choice\":\"v1\",\"reason\":\"La résolution 26-02-031 atteste formellement que « le conseil municipal adopte le règlement numéro 26-R-285 » encadrant l'épandage sur le territoire, ce qui en fait un objet réglementaire explicite à l'étape d'adoption à la page 3 ; la position absent est écartée car ce règlement d'usage du sol répond aux critères d'inclusion.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Vente aux enchères autorisée des immeubles pour défaut de paiement de taxes",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "immeubles à être vendus",
+      "page": 6,
+      "citation": "ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère publique",
+      "anchor": "vendre à l'enchère publique",
+      "spanStart": 1731,
+      "spanEnd": 1822
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "À la page 6, la résolution 26-02-037 ordonne la vente à l'enchère publique des immeubles inscrits au rapport de la trésorière, ce qui atteste l'autorisation de cet acte foncier."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 26-02-037 (p. 6) ordonne de « vendre à l'enchère publique » les immeubles pour arrérages de taxes : acte foncier explicite adopté, citation et page exactes."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La vente pour défaut de paiement de taxes est une mesure financière de recouvrement sans objet foncier explicite ni lien avec l'urbanisme."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Adoption du Règlement 26-R-285 — interdiction d'épandage de déjections animales ou de boues à certaines dates en 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "26-R-285",
+      "page": 3,
+      "citation": "résolu que le conseil municipal adopte le règlement numéro 26-R-285 intitulé : « Règlement interdisant l'épandage de déjections animales ou de boues à des dates",
+      "anchor": "règlement numéro 26-R-285",
+      "spanStart": 1203,
+      "spanEnd": 1363
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "À la page 3, la résolution 26-02-031 adopte expressément le règlement 26-R-285 interdisant l'épandage de déjections animales ou de boues à certaines dates en 2026."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 26-02-031 (p. 3) : « le conseil municipal adopte le règlement numéro 26-R-285 » — objet réglementaire explicite adopté ; l'avis de motion du 20 janvier 2026 n'est qu'un rappel historique."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le règlement 26-R-285 sur l'épandage de déjections animales relève de la Loi sur les compétences municipales et non de l'urbanisme, restant hors gold."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "La résolution 26-02-037 ordonne la vente pour taxes d'immeubles non identifiés dans le texte (« apparaissant au rapport de la trésorière »), ce qui ne constitue pas un objet foncier explicite au sens des règles ; les positions v1 sont écartées car il s'agit d'une mesure financière de recouvrement fiscal sans désignation cadastrale."
+  },
+  {
+   "item": "a02",
+   "choice": "v1",
+   "reason": "La résolution 26-02-031 atteste formellement que « le conseil municipal adopte le règlement numéro 26-R-285 » encadrant l'épandage sur le territoire, ce qui en fait un objet réglementaire explicite à l'étape d'adoption à la page 3 ; la position absent est écartée car ce règlement d'usage du sol répond aux critères d'inclusion."
+  }
+ ]
+}

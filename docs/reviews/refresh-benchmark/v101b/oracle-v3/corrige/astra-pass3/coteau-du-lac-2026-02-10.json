@@ -1,0 +1,272 @@
+{
+ "documentId": "coteau-du-lac-2026-02-10",
+ "nextId": 7,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Modification prévue de l’autorisation d’achat d’une partie du lot 6 025 922 — 1 rue Dollard",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 025 922",
+    "page": 2,
+    "citation": "a) Modification de la résolution #425-10-2025. Autorisation de signature acte d’achat d’une partie du lot 6 025 922 (1 rue Dollard",
+    "anchor": "lot 6 025 922",
+    "spanStart": 356,
+    "spanEnd": 486
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Modification prévue de l’autorisation d’achat d’une partie du lot 6 025 922 — 1 rue Dollard",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 025 922",
+      "page": 2,
+      "citation": "a) Modification de la résolution #425-10-2025. Autorisation de signature acte d’achat d’une partie du lot 6 025 922 (1 rue Dollard",
+      "anchor": "lot 6 025 922",
+      "spanStart": 356,
+      "spanEnd": 486
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 6 a) prévoit une modification de l’autorisation de signature d’un acte d’achat foncier, ce qui constitue une unité prévue et non une décision acquise."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Abrogation prévue de l’acceptation du proposant — lot 2 045 370, terrain Juteau",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2 045 370",
+    "page": 2,
+    "citation": "b) Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2 045 370 (Terrain Juteau",
+    "anchor": "Lot #2 045 370",
+    "spanStart": 488,
+    "spanEnd": 597
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Abrogation prévue de l’acceptation du proposant — lot 2 045 370, terrain Juteau",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2 045 370",
+      "page": 2,
+      "citation": "b) Abrogation de la résolution #375-09-2025. Acceptation - choix du proposant. Lot #2 045 370 (Terrain Juteau",
+      "anchor": "Lot #2 045 370",
+      "spanStart": 488,
+      "spanEnd": 597
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 6 b) prévoit l’abrogation d’une résolution portant sur un lot explicite, étape foncière à retenir sans la présenter comme une vente autorisée."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Approbation de PIIA prévue — 3, rue Principale, enseigne sur vitrage",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "3, rue Principale",
+    "page": 3,
+    "citation": "8.2. Demande d’approbation de PIIA seulement a) Pour le 3, rue Principale (enseigne sur vitrage",
+    "anchor": "3, rue Principale",
+    "spanStart": 603,
+    "spanEnd": 698
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation de PIIA prévue — 3, rue Principale, enseigne sur vitrage",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "3, rue Principale",
+      "page": 3,
+      "citation": "8.2. Demande d’approbation de PIIA seulement a) Pour le 3, rue Principale (enseigne sur vitrage",
+      "anchor": "3, rue Principale",
+      "spanStart": 603,
+      "spanEnd": 698
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 8.2 a) prévoit l’examen d’une demande de PIIA explicitement identifiée, et les petits PIIA sont inclus."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Approbation de PIIA prévue — 9, rue Principale, modification d’enseigne sur poteau",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "9, rue Principale",
+    "page": 3,
+    "citation": "8.2. Demande d’approbation de PIIA seulement a) Pour le 3, rue Principale (enseigne sur vitrage) b) Pour le 9, rue Principale (modification enseigne sur poteau",
+    "anchor": "9, rue Principale",
+    "spanStart": 603,
+    "spanEnd": 762
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation de PIIA prévue — 9, rue Principale, modification d’enseigne sur poteau",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "9, rue Principale",
+      "page": 3,
+      "citation": "8.2. Demande d’approbation de PIIA seulement a) Pour le 3, rue Principale (enseigne sur vitrage) b) Pour le 9, rue Principale (modification enseigne sur poteau",
+      "anchor": "9, rue Principale",
+      "spanStart": 603,
+      "spanEnd": 762
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 8.2 b) nomme une seconde demande de PIIA, qui constitue une unité distincte et prévue."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Approbation prévue de la demande de PPCMOI — 25, rue des Chutes, agrandissement résidentiel",
+    "stage": "inconnu",
+    "procedure": "ppcmoi",
+    "objet": "25, rue des Chutes",
+    "page": 3,
+    "citation": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes (agrandissement résidentiel",
+    "anchor": "25, rue des Chutes",
+    "spanStart": 798,
+    "spanEnd": 885
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation prévue de la demande de PPCMOI — 25, rue des Chutes, agrandissement résidentiel",
+      "stage": "adoption",
+      "procedure": "ppcmoi",
+      "objet": "25, rue des Chutes",
+      "page": 3,
+      "citation": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes (agrandissement résidentiel",
+      "anchor": "25, rue des Chutes",
+      "spanStart": 798,
+      "spanEnd": 885
+     }
+    },
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Approbation de principe prévue de la demande de PPCMOI — 25, rue des Chutes, agrandissement résidentiel (avant le premier projet de résolution)",
+      "stage": "inconnu",
+      "procedure": "ppcmoi",
+      "objet": "25, rue des Chutes",
+      "page": 3,
+      "citation": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes (agrandissement résidentiel",
+      "anchor": "25, rue des Chutes",
+      "spanStart": 798,
+      "spanEnd": 885
+     }
+    },
+    {
+     "step": "astra-pass3",
+     "unit": {
+      "label": "Approbation prévue de la demande de PPCMOI — 25, rue des Chutes, agrandissement résidentiel",
+      "stage": "inconnu",
+      "procedure": "ppcmoi",
+      "objet": "25, rue des Chutes",
+      "page": 3,
+      "citation": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes (agrandissement résidentiel",
+      "anchor": "25, rue des Chutes",
+      "spanStart": 798,
+      "spanEnd": 885
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 8.3 a) prévoit l’approbation d’une demande de PPCMOI, sans attester une approbation déjà acquise."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "correct",
+     "reason": "Le vocabulaire réserve « adoption » à la résolution finale (PPCMOI accordé) ; or le point 8.3 a) « Approbation. Demande d’un PPCMOI » précède au même ordre du jour le point 8.3 b) « Adoption. Premier projet de résolution », donc il s’agit d’une approbation préalable de la demande dont l’étape n’entre dans aucune valeur définie, d’où « inconnu »."
+    },
+    {
+     "step": "astra-pass3",
+     "op": "correct",
+     "reason": "Le point prévu indique une approbation sans la qualifier « de principe », et la citation doit conserver le retour à la ligne avant la parenthèse."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du premier projet de résolution de PPCMOI — 25, rue des Chutes",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "25, rue des Chutes",
+    "page": 3,
+    "citation": "Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue des Chutes (agrandissement résidentiel",
+    "anchor": "25, rue des Chutes",
+    "spanStart": 892,
+    "spanEnd": 1006
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du premier projet de résolution de PPCMOI — 25, rue des Chutes",
+      "stage": "projet_reglement",
+      "procedure": "ppcmoi",
+      "objet": "25, rue des Chutes",
+      "page": 3,
+      "citation": "Adoption. Premier projet de résolution. Demande d’un PPCMOI pour le 25, rue des Chutes (agrandissement résidentiel",
+      "anchor": "25, rue des Chutes",
+      "spanStart": 892,
+      "spanEnd": 1006
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 8.3 b) prévoit explicitement un premier projet de résolution de PPCMOI, étape distincte de l’approbation de la demande inscrite au point a)."
+    }
+   ]
+  }
+ ]
+}

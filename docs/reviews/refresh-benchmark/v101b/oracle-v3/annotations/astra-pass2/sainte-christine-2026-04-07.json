@@ -1,0 +1,52 @@
+{
+ "documentId": "sainte-christine-2026-04-07",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "aac78225da743b4b7179a06fb7b6d045a339440590cd288b10c510afccb50879",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Autorisation de signature des documents de modification cadastrale — route 116, pont de la rivière Le Renne\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"route 116\",\n        \"page\": 9,\n        \"citation\": \"Autorisation de signature de documents cadastraux – Projet\\nde modification du cadastre – Dossier du Pont de la Rivière\\nLeRenne sur la route 116\",\n        \"anchor\": \"LeRenne sur la route 116\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les deux retours à la ligne du titre de la résolution 071-04-2026, page 9, sont rétablis.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Autorisation de signature des documents de modification cadastrale — route 116, pont de la rivière Le Renne",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "route 116",
+    "page": 9,
+    "citation": "Autorisation de signature de documents cadastraux – Projet\nde modification du cadastre – Dossier du Pont de la Rivière\nLeRenne sur la route 116",
+    "anchor": "LeRenne sur la route 116"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les deux retours à la ligne du titre de la résolution 071-04-2026, page 9, sont rétablis."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 9,
+   "citation": "Autorisation de signature de documents cadastraux – Projet\nde modification du cadastre – Dossier du Pont de la Rivière\nLeRenne sur la route 116"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 1
+}

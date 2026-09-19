@@ -1,0 +1,395 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-1230-7",
+   "label": "Règlement 1230-7 — Concordance du plan d’urbanisme, ilots déstructurés",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "numero": "1230-7",
+   "municipality": "mont-saint-hilaire",
+   "date": "2026-04-13",
+   "meetingDate": "2026-04-13",
+   "stage": "adoption",
+   "resolution": "2026-131",
+   "objet": "Amender le Règlement du plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma d’aménagement révisé pour donner suite à la modification des limites de certains ilots déstructurés.",
+   "citations": [
+    {
+     "page": 18,
+     "excerpt": "Que le Règlement numéro 1230-7, intitulé : « Règlement amendant le Règlement du plan\nd’urbanisme durable numéro 1230",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-1230-8-motion",
+   "label": "Avis de motion — Règlement 1230-8, orientation en habitation",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "municipality": "mont-saint-hilaire",
+   "date": "2026-04-13",
+   "etape": "avis_motion",
+   "etape_date": "2026-04-13",
+   "reglement_number": "1230-8",
+   "resolution": "2026-132",
+   "description": "Avis de motion pour modifier le plan d’urbanisme durable numéro 1230 en concordance au Schéma d’aménagement révisé, en réponse à une nouvelle orientation gouvernementale en matière d’habitation.",
+   "citations": [
+    {
+     "page": 18,
+     "excerpt": "Monsieur Claude Rainville, conseiller municipal, donne un avis de motion à l'effet\nqu'à une prochaine séance, il présentera ou fera présenter un règlement amendant",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1230-8",
+   "label": "Projet de règlement 1230-8 — Concordance en matière d’habitation",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "numero": "1230-8",
+   "municipality": "mont-saint-hilaire",
+   "meetingDate": "2026-04-13",
+   "stage": "projet",
+   "resolution": "2026-133",
+   "objet": "Amender le plan d’urbanisme durable numéro 1230 pour assurer sa concordance au Schéma d’aménagement révisé, en réponse à une nouvelle orientation gouvernementale en matière d’habitation. Projet adopté; assemblée publique de consultation à fixer.",
+   "citations": [
+    {
+     "page": 18,
+     "excerpt": "Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement\ndu Plan d’urbanisme durable numéro 1230",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1235-34",
+   "label": "Second projet de règlement 1235-34 — Rue des Vétérans",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "numero": "1235-34",
+   "municipality": "mont-saint-hilaire",
+   "meetingDate": "2026-04-13",
+   "stage": "2e_projet",
+   "resolution": "2026-134",
+   "objet": "Amender le Règlement de zonage numéro 1235 afin de modifier les limites de quatre zones dans le secteur de la rue des Vétérans. Second projet adopté.",
+   "citations": [
+    {
+     "page": 19,
+     "excerpt": "Que le second projet de Règlement numéro 1235-34, intitulé : « Règlement amendant\nle Règlement de zonage numéro 1235",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1235-35",
+   "label": "Règlement 1235-35 — Concordance du zonage, ilots déstructurés",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "numero": "1235-35",
+   "municipality": "mont-saint-hilaire",
+   "date": "2026-04-13",
+   "stage": "adoption",
+   "resolution": "2026-135",
+   "objet": "Amender le Règlement de zonage numéro 1235 afin d’assurer sa concordance au Schéma d’aménagement révisé pour donner suite à la modification des limites de certains ilots déstructurés.",
+   "citations": [
+    {
+     "page": 19,
+     "excerpt": "Que le Règlement numéro 1235-35, intitulé : « Règlement amendant le Règlement\nde zonage numéro 1235",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-piia-2026-128",
+   "label": "Approbation conditionnelle de seize dossiers PIIA",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "municipality": "mont-saint-hilaire",
+   "date": "2026-04-13",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-04-13",
+   "decision": "approuvé",
+   "resolution": "2026-128",
+   "reglement_number": "1364",
+   "description": "Approbation des dossiers CCU-26032403, CCU-26032404, CCU-26032405, CCU-26032406, CCU-26032407, CCU-26032408, CCU-26032409, CCU-26032410, CCU-26032411, CCU-26032412, CCU-26032413, CCU-26032414, CCU-26032416, CCU-26032417, CCU-26032420 et CCU-26032421 : rénovation extérieure, affichage, bâtiments accessoires, habitations unifamiliales isolées et agrandissements.",
+   "conditions": [
+    "Modifications requises ou compléments d'information exigés aux recommandations du comité consultatif d’urbanisme."
+   ],
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "Que ce conseil approuve les plans d'implantation et d'intégration architecturale et\nles recommandations énumérés ci-dessus, et ce, conditionnellement aux modifications",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-piia-26032411",
+   "label": "PIIA — Habitation unifamiliale isolée, 734, rue Rembrandt",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "municipality": "mont-saint-hilaire",
+   "date": "2026-04-13",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-04-13",
+   "decision": "approuvé",
+   "resolution": "2026-128",
+   "dossier": "CCU-26032411",
+   "no_lot": "1815260",
+   "reglement_number": "1364",
+   "description": "Construction d’une habitation unifamiliale isolée au 734, rue Rembrandt.",
+   "conditions": [
+    "Modifications requises ou compléments d'information exigés aux recommandations."
+   ],
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "Que ce conseil approuve les plans d'implantation et d'intégration architecturale et\nles recommandations énumérés ci-dessus, et ce, conditionnellement aux modifications",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-piia-26032412",
+   "label": "PIIA — Habitation unifamiliale isolée, 15, rue Campbell",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "municipality": "mont-saint-hilaire",
+   "date": "2026-04-13",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-04-13",
+   "decision": "approuvé",
+   "resolution": "2026-128",
+   "dossier": "CCU-26032412",
+   "no_lot": "3956018",
+   "reglement_number": "1364",
+   "description": "Construction d’une habitation unifamiliale isolée au 15, rue Campbell.",
+   "conditions": [
+    "Modifications requises ou compléments d'information exigés aux recommandations."
+   ],
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "Que ce conseil approuve les plans d'implantation et d'intégration architecturale et\nles recommandations énumérés ci-dessus, et ce, conditionnellement aux modifications",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-piia-26032414",
+   "label": "PIIA — Habitation unifamiliale isolée, 675, rue Cardinal",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "municipality": "mont-saint-hilaire",
+   "date": "2026-04-13",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-04-13",
+   "decision": "approuvé",
+   "resolution": "2026-128",
+   "dossier": "CCU-26032414",
+   "no_lot": "1816633",
+   "reglement_number": "1364",
+   "description": "Construction d’une habitation unifamiliale isolée au 675, rue Cardinal.",
+   "conditions": [
+    "Modifications requises ou compléments d'information exigés aux recommandations."
+   ],
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "Que ce conseil approuve les plans d'implantation et d'intégration architecturale et\nles recommandations énumérés ci-dessus, et ce, conditionnellement aux modifications",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-piia-2026-129",
+   "label": "Refus de trois dossiers PIIA — Villeneuve, Martinets et Doyle",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "municipality": "mont-saint-hilaire",
+   "date": "2026-04-13",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-04-13",
+   "decision": "refusé",
+   "resolution": "2026-129",
+   "reglement_number": "1364",
+   "description": "Refus des projets d’agrandissement et de rénovation extérieure CCU-26032415 au 224, rue Villeneuve, CCU-26032418 au 935, rue des Martinets et CCU-26032419 au 657, rue Doyle.",
+   "motif": "Projets non conformes aux objectifs et critères du Règlement numéro 1364; refus selon les motifs formulés aux recommandations.",
+   "citations": [
+    {
+     "page": 17,
+     "excerpt": "Que ce conseil approuve les recommandations et refuse les plans d'implantation et\nd'intégration architecturale énumérés ci-dessus, et ce, selon les motifs formulés auxdites",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-certificat-1371",
+   "label": "Dépôt du certificat d’enregistrement — Règlement 1371",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "municipality": "mont-saint-hilaire",
+   "date": "2026-04-13",
+   "category": "reserve_fonciere",
+   "kind": "depot_certificat_enregistrement",
+   "resolution": "2026-130",
+   "reglement_number": "1371",
+   "description": "Dépôt du certificat attestant le résultat de la procédure d’enregistrement concernant le règlement 1371 abrogeant le règlement 1321 sur la réserve financière d’acquisition de lots pour préserver des milieux naturels et percées visuelles dans les zones A-16, AF-18 et AF-19. Le conseil prend acte; le résultat chiffré n’est pas indiqué.",
+   "citations": [
+    {
+     "page": 17,
+     "excerpt": "Conformément à l’article 557 de la Loi sur les élections et les référendums dans\nles municipalités, la greffière dépose le certificat attestant le résultat de la procédure",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-recours-casavant",
+   "label": "Extension du mandat de recours — 1580, rue Casavant",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "municipality": "mont-saint-hilaire",
+   "date": "2026-04-13",
+   "category": "contentieux_urbanisme",
+   "resolution": "2026-124",
+   "description": "Modification de la résolution 2024-159 pour rendre le mandat de recours applicable aussi aux propriétaires de la structure érigée au 1580, rue Casavant, lots 1 818 249 et 1 818 255. Le mandat concerne des infractions lors de travaux sans permis et un recours en vertu de l’article 227 de la Loi sur l’aménagement et l’urbanisme ou tout recours approprié.",
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "Que ce conseil modifie la résolution 2024-159 en ajoutant, à la fin de ladite résolution,\nle paragraphe suivant :",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-servitudes-chenier",
+   "label": "Servitudes d’aqueduc et d’égouts — Rue Chénier",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "municipality": "mont-saint-hilaire",
+   "date": "2026-04-13",
+   "category": "infrastructures",
+   "kind": "servitudes",
+   "resolution": "2026-125",
+   "description": "Autorisation de signer les actes de servitude d’installation, d’entretien et de passage d’égouts et d’aqueduc pour les travaux de la rue Chénier. Création sur des parties des lots 1815298, 1815299, 1815303, 1815304, 1815308 et 1815315; annulation et remplacement de servitudes sur des parties des lots 1815397, 1815309, 1815314 et 1815403. Frais assumés par la Ville.",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "Que ce conseil autorise la signature d'actes de servitude d'installation, d'entretien et\nde passage d'égouts et d'aqueduc dans le cadre des travaux à venir sur la rue Chénier",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1379",
+   "label": "Règlement 1379 — Réfection d’infrastructures, rue du Parc",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+   "status": "candidate",
+   "municipality": "mont-saint-hilaire",
+   "numero": "1379",
+   "date": "2026-04-13",
+   "stage": "adoption",
+   "resolution": "2026-139",
+   "objet": "Réfection des infrastructures de la rue du Parc : aqueduc, égouts sanitaire et pluvial, voirie, pavage, bordures, aménagement paysager, travaux connexes et honoraires professionnels. Dépense de 2 221 500,00 $ et emprunt de 1 021 500,00 $.",
+   "citations": [
+    {
+     "page": 21,
+     "excerpt": "Que le Règlement numéro 1379, intitulé : « Règlement décrétant des travaux de réfection\nd’infrastructures, soit le remplacement des conduites d’aqueduc, d’égout sanitaire, d’égout",
+     "source_file": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "rawRef": "raw/proces-verbaux-mont-saint-hilaire/cas/0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f.pdf",
+     "docSha": "0001100a6b554267c9bd8d2597740a936b46155d614d43e799741d832eb19b7f",
+     "sourceUrl": "https://www.villemsh.ca/wp-content/uploads/2026/05/Proces_verbal_2026_04_13.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [],
+ "input_tokens": 17900,
+ "output_tokens": 4650
+}

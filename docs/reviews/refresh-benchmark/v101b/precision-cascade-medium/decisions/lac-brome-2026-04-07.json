@@ -1,0 +1,406 @@
+{
+ "documentId": "lac-brome-2026-04-07",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c26636ce20017b761172f86f87ca0022f5937c44d95cd362cf716e965d5cb66c",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-596"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 596",
+     "stage": null,
+     "objet": "596",
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "le Conseil adopte le règlement résiduel Règlement 596-20\nmodifiant le règlement de zonage 596."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-596-20"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement résiduel 596-20",
+     "stage": "adoption",
+     "objet": "596-20",
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "le Conseil adopte le règlement résiduel Règlement 596-20\nmodifiant le règlement de zonage 596."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-596-21"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement distinct 596-21 — définitions",
+     "stage": "adoption",
+     "objet": "596-21",
+     "citations": [
+      {
+       "page": 21,
+       "excerpt": "le Conseil adopte le règlement distinct Règlement 596-21\n(concernant les définitions de «Hauteur d'un bâtiment (en\nmètre)» et de «Pourcentage d'occupation du terrain»)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-596-22"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement distinct 596-22 — UV-4-I12",
+     "stage": "adoption",
+     "objet": "596-22",
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "le Conseil adopte le règlement distinct Règlement 596-22\n(concernant la marge latérale minimale et le pourcentage\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-596-23"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement distinct 596-23 — UV-14-J13",
+     "stage": "adoption",
+     "objet": "596-23",
+     "citations": [
+      {
+       "page": 24,
+       "excerpt": "le Conseil adopte le règlement distinct Règlement 596-23\n(concernant le pourcentage maximal d'occupation du\nbâtiment principal dans la Zone UV-14-J13) modifiant le\nrèglement de zonage 596;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-piia-102"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA accordé — abri d'auto au 9, chemin Frank-Santerre",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 25,
+       "excerpt": "le Conseil accorde le PIIA-2 concernant la demande de\nconstruction d’un bâtiment accessoire de type abri d'auto\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\nUC-2-N3."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-piia-103"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA révisé accordé — bâtiment commercial au 753, chemin Lakeside",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 26,
+       "excerpt": "le Conseil accorde le PIIA-3 concernant la demande révisée\nde construction d’un bâtiment principal commercial au 753,\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "bylaw-601"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 601 sur les PIIA",
+     "stage": null,
+     "objet": "601",
+     "citations": [
+      {
+       "page": 25,
+       "excerpt": "cette demande est assujettie au règlement 601 sur les Plans\nd'implantation et d'intégration architecturale (PIIA),"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-bondville"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Affaissement d'égout et analyse des infrastructures de Bondville",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Une analyse exhaustive est en cours concernant des travaux effectués sur la\nconduite d’égout du secteur de Bondville en 2011 ou 2012."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "signal-fulford"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Contrat de réfection du chemin Fulford et ajout de voies cyclables",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "le Conseil accorde à Eurovia Québec Construction inc. le\ncontrat pour les travaux de voirie - Réfection du chemin\nFulford et ajout de voies cyclables, au montant de 6 551"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "signal-pointe-fisher"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Étude d'avant-projet — chaussée et ruissellement à Pointe-Fisher",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "le Conseil accorde à Tetra Tech le contrat de Services\nprofessionnels en ingénierie - Réalisation d’une étude avantprojet - Réfection de chaussée et gestion des eaux de"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "bylaw-2026-09"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-09 concernant les sentiers",
+     "stage": "projet",
+     "objet": "2026-09",
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "Le maire Lee Patterson donne un avis de motion par lequel, lui-même ou un autre\nmembre du Conseil présentera pour adoption, à une séance ultérieure du\nConseil, le règlement 2026-09"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "```json\n{\n \"decisions\": [\n  {\n   \"act\": \"A01\",\n   \"verdict\": \"non_soutenu\",\n   \"reason\": \"Le règlement 596 est le règlement de base cité comme contexte de modification, non un acte normatif distinct adopté lors de cette séance.\",\n   \"excerpt\": \"modifiant le règlement de zonage 596.\"\n  },\n  {\n   \"act\": \"A02\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le conseil adopte expressément le règlement résiduel 596-20 à la résolution 2026-04-098.\",\n   \"excerpt\": \"le Conseil adopte le règlement résiduel Règlement 596-20\\nmodifiant le règlement de zonage 596.\"\n  },\n  {\n   \"act\": \"A03\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le conseil adopte expressément le règlement distinct 596-21 à la résolution 2026-04-099.\",\n   \"excerpt\": \"le Conseil adopte le règlement distinct Règlement 596-21\\n(concernant les définitions de «Hauteur d'un bâtiment (en\\nmètre)» et de «Pourcentage d'occupation du terrain»)\"\n  },\n  {\n   \"act\": \"A04\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le conseil adopte expressément le règlement distinct 596-22 à la résolution 2026-04-100.\",\n   \"excerpt\": \"le Conseil adopte le règlement distinct Règlement 596-22\\n(concernant la marge latérale minimale et le pourcentage\\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12)\"\n  },\n  {\n   \"act\": \"A05\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le conseil adopte expressément le règlement distinct 596-23 à la résolution 2026-04-101.\",\n   \"excerpt\": \"le Conseil adopte le règlement distinct Règlement 596-23\\n(concernant le pourcentage maximal d'occupation du\\nbâtiment principal dans la Zone UV-14-J13) modifiant le\\nrèglement de zonage 596;\"\n  },\n  {\n   \"act\": \"A06\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le conseil accorde l'approbation PIIA-2 pour l'abri d'auto au 9, chemin Frank-Santerre à la résolution 2026-04-102.\",\n   \"excerpt\": \"le Conseil accorde le PIIA-2 concernant la demande de\\nconstruction d’un bâtiment accessoire de type abri d'auto\\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\\nUC-2-N3.\"\n  },\n  {\n   \"act\": \"A07\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le conseil accorde le PIIA-3 révisé au 753, chemin Lakeside à la résolution 2026-04-103.\",\n   \"excerpt\": \"le Conseil accorde le PIIA-3 concernant la demande révisée\\nde construction d’un bâtiment principal commercial au 753,\\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15.\"\n  },\n  {\n   \"act\": \"A08\",\n   \"verdict\": \"non_soutenu\",\n   \"reason\": \"Le règlement 601 est simplement mentionné comme cadre réglementaire d'assujettissement sans faire l'objet d'un acte lors de cette séance.\",\n   \"excerpt\": \"cette demande est assujettie au règlement 601 sur les Plans\\nd'implantation et d'intégration architecturale (PIIA),\"\n  },\n  {\n   \"act\": \"A09\",\n   \"verdict\": \"non_soutenu\",\n   \"reason\": \"Il s'agit de simples commentaires informatifs du maire en ouverture de séance, sans acte d'urbanisme ou décision formelle.\",\n   \"excerpt\": \"Une analyse exhaustive est en cours concernant des travaux effectués sur la\\nconduite d’égout du secteur de Bondville en 2011 ou 2012.\"\n  },\n  {\n   \"act\": \"A10\",\n   \"verdict\": \"non_soutenu\",\n   \"reason\": \"L'octroi d'un contrat de travaux publics relève des exclusions (contrats de services/travaux de voirie ordinaires sans acte d'urbanisme).\",\n   \"excerpt\": \"le Conseil accorde à Eurovia Québec Construction inc. le\\ncontrat pour les travaux de voirie - Réfection du chemin\\nFulford et ajout de voies cyclables\"\n  },\n  {\n   \"act\": \"A11\",\n   \"verdict\": \"non_soutenu\",\n   \"reason\": \"L'octroi d'un contrat de services professionnels d'ingénierie relève des exclusions et ne constitue pas un acte d'urbanisme.\",\n   \"excerpt\": \"le Conseil accorde à Tetra Tech le contrat de Services\\nprofessionnels en ingénierie - Réalisation d’une étude avantprojet\"\n  },\n  {\n   \"act\": \"A12\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le maire donne formellement l'avis de motion et présente le projet de règlement 2026-09 au point 3.2.1.1.\",\n   \"excerpt\": \"Le maire Lee Patterson donne un avis de motion par lequel, lui-même ou un autre\\nmembre du Conseil présentera pour adoption, à une séance ultérieure du\\nConseil, le règlement 2026-09\"\n  }\n ]\n}\n```",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 596 est le règlement de base cité comme contexte de modification, non un acte normatif distinct adopté lors de cette séance.",
+   "excerpt": "modifiant le règlement de zonage 596."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte expressément le règlement résiduel 596-20 à la résolution 2026-04-098.",
+   "excerpt": "le Conseil adopte le règlement résiduel Règlement 596-20\nmodifiant le règlement de zonage 596."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte expressément le règlement distinct 596-21 à la résolution 2026-04-099.",
+   "excerpt": "le Conseil adopte le règlement distinct Règlement 596-21\n(concernant les définitions de «Hauteur d'un bâtiment (en\nmètre)» et de «Pourcentage d'occupation du terrain»)"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte expressément le règlement distinct 596-22 à la résolution 2026-04-100.",
+   "excerpt": "le Conseil adopte le règlement distinct Règlement 596-22\n(concernant la marge latérale minimale et le pourcentage\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12)"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte expressément le règlement distinct 596-23 à la résolution 2026-04-101.",
+   "excerpt": "le Conseil adopte le règlement distinct Règlement 596-23\n(concernant le pourcentage maximal d'occupation du\nbâtiment principal dans la Zone UV-14-J13) modifiant le\nrèglement de zonage 596;"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil accorde l'approbation PIIA-2 pour l'abri d'auto au 9, chemin Frank-Santerre à la résolution 2026-04-102.",
+   "excerpt": "le Conseil accorde le PIIA-2 concernant la demande de\nconstruction d’un bâtiment accessoire de type abri d'auto\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\nUC-2-N3."
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil accorde le PIIA-3 révisé au 753, chemin Lakeside à la résolution 2026-04-103.",
+   "excerpt": "le Conseil accorde le PIIA-3 concernant la demande révisée\nde construction d’un bâtiment principal commercial au 753,\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15."
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 601 est simplement mentionné comme cadre réglementaire d'assujettissement sans faire l'objet d'un acte lors de cette séance.",
+   "excerpt": "cette demande est assujettie au règlement 601 sur les Plans\nd'implantation et d'intégration architecturale (PIIA),"
+  },
+  {
+   "act": "A09",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit de simples commentaires informatifs du maire en ouverture de séance, sans acte d'urbanisme ou décision formelle.",
+   "excerpt": "Une analyse exhaustive est en cours concernant des travaux effectués sur la\nconduite d’égout du secteur de Bondville en 2011 ou 2012."
+  },
+  {
+   "act": "A10",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de travaux publics relève des exclusions (contrats de services/travaux de voirie ordinaires sans acte d'urbanisme).",
+   "excerpt": "le Conseil accorde à Eurovia Québec Construction inc. le\ncontrat pour les travaux de voirie - Réfection du chemin\nFulford et ajout de voies cyclables"
+  },
+  {
+   "act": "A11",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de services professionnels d'ingénierie relève des exclusions et ne constitue pas un acte d'urbanisme.",
+   "excerpt": "le Conseil accorde à Tetra Tech le contrat de Services\nprofessionnels en ingénierie - Réalisation d’une étude avantprojet"
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "Le maire donne formellement l'avis de motion et présente le projet de règlement 2026-09 au point 3.2.1.1.",
+   "excerpt": "Le maire Lee Patterson donne un avis de motion par lequel, lui-même ou un autre\nmembre du Conseil présentera pour adoption, à une séance ultérieure du\nConseil, le règlement 2026-09"
+  }
+ ],
+ "filter": {
+  "acts": 12,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Le règlement 596 est le règlement de base cité comme contexte de modification, non un acte normatif distinct adopté lors de cette séance."
+   },
+   {
+    "act": "A08",
+    "reason": "Le règlement 601 est simplement mentionné comme cadre réglementaire d'assujettissement sans faire l'objet d'un acte lors de cette séance."
+   },
+   {
+    "act": "A09",
+    "reason": "Il s'agit de simples commentaires informatifs du maire en ouverture de séance, sans acte d'urbanisme ou décision formelle."
+   },
+   {
+    "act": "A10",
+    "reason": "L'octroi d'un contrat de travaux publics relève des exclusions (contrats de services/travaux de voirie ordinaires sans acte d'urbanisme)."
+   },
+   {
+    "act": "A11",
+    "reason": "L'octroi d'un contrat de services professionnels d'ingénierie relève des exclusions et ne constitue pas un acte d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A02",
+    "reason": "Le conseil adopte expressément le règlement résiduel 596-20 à la résolution 2026-04-098."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil adopte expressément le règlement distinct 596-21 à la résolution 2026-04-099."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil adopte expressément le règlement distinct 596-22 à la résolution 2026-04-100."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil adopte expressément le règlement distinct 596-23 à la résolution 2026-04-101."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil accorde l'approbation PIIA-2 pour l'abri d'auto au 9, chemin Frank-Santerre à la résolution 2026-04-102."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil accorde le PIIA-3 révisé au 753, chemin Lakeside à la résolution 2026-04-103."
+   },
+   {
+    "act": "A12",
+    "reason": "Le maire donne formellement l'avis de motion et présente le projet de règlement 2026-09 au point 3.2.1.1."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 8747,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 19643,
+   "outputTokens": 1393,
+   "totalTokens": 21036
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 8603
+  },
+  "inputSha256": "37ef524e6cbc123032db810a8a72661eb5da54d4c9443ebe54edcc9fdd447a7b"
+ }
+}

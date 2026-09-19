@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1e90d3d566980812a2f7b3bc5a30ff52d2c50694c4b8a0a1df6b085c1082b0f7",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 3 atteste « 2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021 Résolution 5-01-2026 », résolution marquée « Adoptée » en page 4 : objet réglementaire explicite, étape adoption exacte.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 4 atteste « 2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021 Résolution 6-01-2026 » avec agrandissement de la zone M-77 et abrogation de Rm-93, « Adoptée » en page 6 : citation, objet, étape et page exacts.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Acte foncier explicite (contrat de vente d'un terrain avec obligation de construction et pénalités) et page 16 atteste « DE REFUSER la demande de remboursement des pénalités formulée par M. Jean-Pierre Labbé » ; les refus restent des refus, étape inconnu appropriée.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 3 atteste « 2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021 Résolution 5-01-2026 », résolution marquée « Adoptée » en page 4 : objet réglementaire explicite, étape adoption exacte."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 4 atteste « 2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021 Résolution 6-01-2026 » avec agrandissement de la zone M-77 et abrogation de Rm-93, « Adoptée » en page 6 : citation, objet, étape et page exacts."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Acte foncier explicite (contrat de vente d'un terrain avec obligation de construction et pénalités) et page 16 atteste « DE REFUSER la demande de remboursement des pénalités formulée par M. Jean-Pierre Labbé » ; les refus restent des refus, étape inconnu appropriée."
+  }
+ ]
+}

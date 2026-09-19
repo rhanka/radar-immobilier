@@ -1,0 +1,100 @@
+{
+ "documentId": "lyster-2026-02-02",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "092e8dfeb56a8da806cc0d2322c3112274a690fd04d48f8c24b20e75560b1bfe",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Autorisation de mise en vente pour taxes impayées — lot 5 835 056\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5 835 056\",\n        \"page\": 5,\n        \"citation\": \"Jean-François\\n1837-35-8331 5 835 056\\nLagacé\",\n        \"anchor\": \"1837-35-8331 5 835 056\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique du document : les retours à la ligne autour du matricule et du lot doivent être rétablis.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Autorisation de mise en vente pour taxes impayées — lot 5 834 167\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5 834 167\",\n        \"page\": 5,\n        \"citation\": \"Anthony Lalonde2437-98-1768 5 834 167\\nLacaille\",\n        \"anchor\": \"2437-98-1768 5 834 167\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique du document : le retour à la ligne avant « Lacaille » doit être rétabli.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Autorisation de mise en vente pour taxes impayées — lot 5 834 895\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5 834 895\",\n        \"page\": 5,\n        \"citation\": \"Carl Roy, Édith\\nFrancoeur, Réal 1636-52-7076 5 834 895\\nRoy\",\n        \"anchor\": \"1636-52-7076 5 834 895\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique du document : les retours à la ligne après « Édith » et avant « Roy » doivent être rétablis.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Autorisation de mise en vente pour taxes impayées — lot 5 835 056",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 835 056",
+    "page": 5,
+    "citation": "Jean-François\n1837-35-8331 5 835 056\nLagacé",
+    "anchor": "1837-35-8331 5 835 056"
+   },
+   "reason": "La citation doit être recopiée à l’identique du document : les retours à la ligne autour du matricule et du lot doivent être rétablis."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Autorisation de mise en vente pour taxes impayées — lot 5 834 167",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 834 167",
+    "page": 5,
+    "citation": "Anthony Lalonde2437-98-1768 5 834 167\nLacaille",
+    "anchor": "2437-98-1768 5 834 167"
+   },
+   "reason": "La citation doit être recopiée à l’identique du document : le retour à la ligne avant « Lacaille » doit être rétabli."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Autorisation de mise en vente pour taxes impayées — lot 5 834 895",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 834 895",
+    "page": 5,
+    "citation": "Carl Roy, Édith\nFrancoeur, Réal 1636-52-7076 5 834 895\nRoy",
+    "anchor": "1636-52-7076 5 834 895"
+   },
+   "reason": "La citation doit être recopiée à l’identique du document : les retours à la ligne après « Édith » et avant « Roy » doivent être rétablis."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 5,
+   "citation": "Jean-François\n1837-35-8331 5 835 056\nLagacé"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "adoption",
+   "page": 5,
+   "citation": "Anthony Lalonde2437-98-1768 5 834 167\nLacaille"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "adoption",
+   "page": 5,
+   "citation": "Carl Roy, Édith\nFrancoeur, Réal 1636-52-7076 5 834 895\nRoy"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3
+}

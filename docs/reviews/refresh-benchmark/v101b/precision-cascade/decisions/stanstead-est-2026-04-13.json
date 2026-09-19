@@ -1,0 +1,457 @@
+{
+ "documentId": "stanstead-est-2026-04-13",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "6615e56ce04cd5f685dfb33985231bbf6bd55454e3bbf8d23ccf67dfd7f54d5c",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "appui-cptaq-6374262"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui municipal à l’acquisition agricole de 54 acres du lot 6 374 262",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée par\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\nd’une superficie de 54 acres du lot 6 374 262."
+      },
+      {
+       "page": 2,
+       "excerpt": "QUE la municipalité de Stanstead-Est :\n1. Reconnaît positivement le projet agricole visant la production\nacéricole, la myciculture et la mise en place d’un verger diversifié ;\n2. Confirme que la Municipalité ne voit pas d’inconvénient à cette\nopération cadastrale, ni à l’usage agricole projeté ;\n3. Reconnaît l’obligation qu’un plan d’arpenteur soit présenté pour toute\ndemande de permis de lotissement ;\nQUE la municipalité de Stanstead-Est appuie la demande déposée par\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\nd’une superficie de 54 acres du lot 6 374 262."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "appui-cptaq-5417438"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui conditionnel au déplacement d’une résidence sur le lot 5 417 438",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\nconstruction d’une nouvelle résidence"
+      },
+      {
+       "page": 2,
+       "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\nconstruction d’une nouvelle résidence dans la portion nord-ouest du\nterrain, conditionnellement à la démolition de la résidence actuelle et à\nla remise en culture de cette dernière portion ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-2021-08"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2021-08 relatif à la prévention contre les incendies",
+     "stage": null,
+     "objet": "2021-08",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "QUE la Municipalité de Stanstead-Est attribue le numéro civique 1770\nChemin Boynton, au lot 5 416 138 pour l’activité agricole projetée"
+      },
+      {
+       "page": 3,
+       "excerpt": "QUE la Municipalité de Stanstead-Est attribue le numéro civique 1770\nChemin Boynton, au lot 5 416 138 pour l’activité agricole projetée\n(culture de l’ail et cabane à sucre) ainsi que pour le bâtiment existant,\nconformément au règlement numéro 2021-08 relatif à la prévention\ncontre les incendies."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-civique-5416138"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Attribution du numéro civique 1770 Chemin Boynton",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "QUE la Municipalité de Stanstead-Est attribue le numéro civique 1770\nChemin Boynton, au lot 5 416 138 pour l’activité agricole projetée"
+      },
+      {
+       "page": 3,
+       "excerpt": "QUE la Municipalité de Stanstead-Est attribue le numéro civique 1770\nChemin Boynton, au lot 5 416 138 pour l’activité agricole projetée\n(culture de l’ail et cabane à sucre) ainsi que pour le bâtiment existant,\nconformément au règlement numéro 2021-08 relatif à la prévention\ncontre les incendies."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-abrogation-245-1"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande d’abrogation de l’article 245.1 de la LAU",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "QUE la municipalité de Stanstead-Est demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de\nl’Assemblée nationale d’introduire un amendement au projet de loi no 22"
+      },
+      {
+       "page": 6,
+       "excerpt": "QUE la municipalité de Stanstead-Est demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de\nl’Assemblée nationale d’introduire un amendement au projet de loi no 22\nabrogeant l’article 245.1 de la Loi sur l’aménagement et l’urbanisme afin\nde respecter le consensus établi entre le ministère et ses partenaires\nmunicipaux;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-2026-02"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-02 sur le droit de préemption",
+     "stage": null,
+     "objet": "2026-02",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "ATTENDU que le conseil municipal a adopté le Règlement 2026-02 sur\nle droit de préemption visant à identifier le territoire assujetti et les fins\nmunicipales pour lesquelles des immeubles peuvent être"
+      },
+      {
+       "page": 10,
+       "excerpt": "ATTENDU que le conseil municipal a adopté le Règlement 2026-02 sur\nle droit de préemption visant à identifier le territoire assujetti et les fins\nmunicipales pour lesquelles des immeubles peuvent être acquis ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "preemption-5416383"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Autorisation d’inscrire un avis de préemption sur le lot 5 416 383",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "QUE le conseil municipal autorise l'inscription, au registre foncier du\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard"
+      },
+      {
+       "page": 10,
+       "excerpt": "QUE le conseil municipal autorise l'inscription, au registre foncier du\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard\nde l’immeuble connu et désigné sous le numéro de lot CINQ MILLIONS\nQUATRE CENT SEIZE MILLE TROIS CENT QUATRE VINGT TROIS\n(5 416 383) du cadastre du Québec, circonscription foncière de\nStanstead, et ce, aux fins d'infrastructures publiques et service d’utilité\npublique, culture, loisirs et activités communautaires ainsi que de\nréserve foncière:"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "preemption-5416384"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Autorisation d’inscrire un avis de préemption sur le lot 5 416 384",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "QUE le conseil municipal autorise l'inscription, au registre foncier du\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard"
+      },
+      {
+       "page": 11,
+       "excerpt": "QUE le conseil municipal autorise l'inscription, au registre foncier du\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard\nde l’immeuble connu et désigné sous le numéro de lot CINQ MILLIONS\nQUATRE CENT SEIZE MILLE TROIS CENT QUATRE VINGT QUATRE\n(5 416 384) du cadastre du Québec, circonscription foncière de\nStanstead, et ce, aux fins d'infrastructures publiques et service d’utilité\npublique, culture, loisirs et activités communautaires ainsi que de\nréserve foncière:"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "appui-let-2935698"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui à l’agrandissement du lieu d’enfouissement sur le lot 2 935 698",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande de la\nRégie intermunicipale de gestion des déchets solides de la région\nde Coaticook à la Commission de protection du territoire agricole"
+      },
+      {
+       "page": 12,
+       "excerpt": "ATTENDU que la Régie est déjà propriétaire du Lot 698;\nATTENDU qu’une partie du Lot 698 d’une superficie\napproximative de 23 hectares est déjà utilisée par la Régie pour\nl’exploitation de son LET, et ce, conformément à la décision de la\nCPTAQ rendue le 5 mars 1982 au dossier numéro 046178;\nATTENDU que la Régie dessert 22 municipalités, dont la\nMunicipalité de Stanstead-Est;\nATTENDU que le LET atteindra sa capacité maximale d’ici l’année\n2028 s’il ne fait pas l’objet d’un agrandissement;\nATTENDU que la Régie a présenté à la Commission de protection\ndu territoire agricole du Québec (la «CPTAQ») une demande\nd’autorisation visant l’agrandissement LET d’une superficie\nd’environ 25,5 hectares (dossier numéro 45064) (la «Demande»);\nATTENDU que le Compte-rendu de la demande et orientation\npréliminaire (l’«Orientation préliminaire») rendu par la CPTAQ\ndans le dossier numéro 45064 en date du 2 décembre 2025;\nATTENDU que l’Orientation préliminaire indique que la CPTAQ\nconsidère essentiellement que la Demande doit être refusée;\nATTENDU qu’une rencontre avec la CPTAQ a été demandée par\nla Régie et que cette rencontre est prévue le 15 avril prochain;"
+      },
+      {
+       "page": 13,
+       "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande de la\nRégie intermunicipale de gestion des déchets solides de la région\nde Coaticook à la Commission de protection du territoire agricole\ndu Québec visant l’obtention d’une autorisation pour l’utilisation, à\ndes fins autres qu’agricoles, d’une partie du lot 2 935 698 du\ncadastre du Québec, circonscription foncière de Coaticook, soit\npour l’agrandissement de son lieu d’enfouissement technique."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "bylaw-2026-04"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-04 modifiant la tarification des permis et certificats",
+     "stage": "adoption",
+     "objet": "2026-04",
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats ;"
+      },
+      {
+       "page": 18,
+       "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "bylaw-2016-10"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2016-10 sur la tarification des permis et certificats",
+     "stage": null,
+     "objet": "2016-10",
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats ;"
+      },
+      {
+       "page": 18,
+       "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "bylaw-2026-03"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement 2026-03 sur l’éthique et la déontologie des élus",
+     "stage": "adoption",
+     "objet": "2026-03",
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "D’adopter le règlement portant le numéro 2026-03- Code d’éthique et de\ndéontologie des élus municipaux ;"
+      },
+      {
+       "page": 18,
+       "excerpt": "D’adopter le règlement portant le numéro 2026-03- Code d’éthique et de\ndéontologie des élus municipaux ;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution d'appui à la demande déposée à la CPTAQ pour l'acquisition d'une superficie du lot 6 374 262.\",\"excerpt\":\"QUE la municipalité de Stanstead-Est appuie la demande déposée par\\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\\nd’une superficie de 54 acres du lot 6 374 262.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution appuyant sous conditions la demande à la CPTAQ pour déplacer une résidence sur le lot 5 417 438.\",\"excerpt\":\"QUE la municipalité de Stanstead-Est appuie la demande déposée à la\\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\\nconstruction d’une nouvelle résidence dans la portion nord-ouest du\\nterrain\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2021-08 n'est mentionné qu'en référence réglementaire pour une attribution d'adresse civique et ne fait l'objet d'aucun acte procédural dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil résout d'attribuer le numéro civique 1770 Chemin Boynton au lot 5 416 138.\",\"excerpt\":\"QUE la Municipalité de Stanstead-Est attribue le numéro civique 1770\\nChemin Boynton, au lot 5 416 138 pour l’activité agricole projetée\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution demandant formellement l'abrogation de l'article 245.1 de la LAU dans le projet de loi no 22.\",\"excerpt\":\"QUE la municipalité de Stanstead-Est demande aux membres de la\\nCommission parlementaire de l’aménagement du territoire de\\nl’Assemblée nationale d’introduire un amendement au projet de loi no 22\\nabrogeant l’article 245.1\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2026-02 n'est mentionné qu'à titre de rappel historique dans les préambules des avis d'assujettissement.\",\"excerpt\":\"ATTENDU que le conseil municipal a adopté le Règlement 2026-02 sur\\nle droit de préemption\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise formellement l'inscription d'un avis d'assujettissement au droit de préemption sur le lot 5 416 383.\",\"excerpt\":\"QUE le conseil municipal autorise l'inscription, au registre foncier du\\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard\\nde l’immeuble connu et désigné sous le numéro de lot CINQ MILLIONS\\nQUATRE CENT SEIZE MILLE TROIS CENT QUATRE VINGT TROIS\\n(5 416 383)\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise l'inscription d'un avis d'assujettissement au droit de préemption sur le lot 5 416 384.\",\"excerpt\":\"QUE le conseil municipal autorise l'inscription, au registre foncier du\\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard\\nde l’immeuble connu et désigné sous le numéro de lot CINQ MILLIONS\\nQUATRE CENT SEIZE MILLE TROIS CENT QUATRE VINGT QUATRE\\n(5 416 384)\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil appuie la demande d'autorisation à la CPTAQ pour l'agrandissement du lieu d'enfouissement sur le lot 2 935 698.\",\"excerpt\":\"QUE la municipalité de Stanstead-Est appuie la demande de la\\nRégie intermunicipale de gestion des déchets solides de la région\\nde Coaticook à la Commission de protection du territoire agricole\\ndu Québec visant l’obtention d’une autorisation pour l’utilisation, à\\ndes fins autres qu’agricoles, d’une partie du lot 2 935 698\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement 2026-04 modifiant le règlement de tarification des permis et certificats.\",\"excerpt\":\"D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\\nsur la tarification des permis et certificats ;\"},{\"act\":\"A11\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2016-10 est le règlement antérieur modifié par le nouveau règlement et ne franchit aucune étape procédurale propre.\",\"excerpt\":\"\"},{\"act\":\"A12\",\"verdict\":\"non_soutenu\",\"reason\":\"Le code d'éthique et de déontologie des élus municipaux ne relève pas de l'urbanisme, de l'aménagement du territoire ou du droit foncier.\",\"excerpt\":\"D’adopter le règlement portant le numéro 2026-03- Code d’éthique et de\\ndéontologie des élus municipaux ;\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution d'appui à la demande déposée à la CPTAQ pour l'acquisition d'une superficie du lot 6 374 262.",
+   "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée par\nMadame Mélanie Banville auprès de la CPTAQ concernant l’acquisition\nd’une superficie de 54 acres du lot 6 374 262."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution appuyant sous conditions la demande à la CPTAQ pour déplacer une résidence sur le lot 5 417 438.",
+   "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande déposée à la\nCPTAQ par le propriétaire du lot 5 417 438, visant à autoriser la\nconstruction d’une nouvelle résidence dans la portion nord-ouest du\nterrain"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2021-08 n'est mentionné qu'en référence réglementaire pour une attribution d'adresse civique et ne fait l'objet d'aucun acte procédural dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil résout d'attribuer le numéro civique 1770 Chemin Boynton au lot 5 416 138.",
+   "excerpt": "QUE la Municipalité de Stanstead-Est attribue le numéro civique 1770\nChemin Boynton, au lot 5 416 138 pour l’activité agricole projetée"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution demandant formellement l'abrogation de l'article 245.1 de la LAU dans le projet de loi no 22.",
+   "excerpt": "QUE la municipalité de Stanstead-Est demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de\nl’Assemblée nationale d’introduire un amendement au projet de loi no 22\nabrogeant l’article 245.1"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2026-02 n'est mentionné qu'à titre de rappel historique dans les préambules des avis d'assujettissement.",
+   "excerpt": "ATTENDU que le conseil municipal a adopté le Règlement 2026-02 sur\nle droit de préemption"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise formellement l'inscription d'un avis d'assujettissement au droit de préemption sur le lot 5 416 383.",
+   "excerpt": "QUE le conseil municipal autorise l'inscription, au registre foncier du\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard\nde l’immeuble connu et désigné sous le numéro de lot CINQ MILLIONS\nQUATRE CENT SEIZE MILLE TROIS CENT QUATRE VINGT TROIS\n(5 416 383)"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise l'inscription d'un avis d'assujettissement au droit de préemption sur le lot 5 416 384.",
+   "excerpt": "QUE le conseil municipal autorise l'inscription, au registre foncier du\nQuébec, d'un avis d'assujettissement, d'une période de 10 ans, à l'égard\nde l’immeuble connu et désigné sous le numéro de lot CINQ MILLIONS\nQUATRE CENT SEIZE MILLE TROIS CENT QUATRE VINGT QUATRE\n(5 416 384)"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le conseil appuie la demande d'autorisation à la CPTAQ pour l'agrandissement du lieu d'enfouissement sur le lot 2 935 698.",
+   "excerpt": "QUE la municipalité de Stanstead-Est appuie la demande de la\nRégie intermunicipale de gestion des déchets solides de la région\nde Coaticook à la Commission de protection du territoire agricole\ndu Québec visant l’obtention d’une autorisation pour l’utilisation, à\ndes fins autres qu’agricoles, d’une partie du lot 2 935 698"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement 2026-04 modifiant le règlement de tarification des permis et certificats.",
+   "excerpt": "D’adopter le règlement portant le numéro 2026-04 modifiant 2016-10\nsur la tarification des permis et certificats ;"
+  },
+  {
+   "act": "A11",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2016-10 est le règlement antérieur modifié par le nouveau règlement et ne franchit aucune étape procédurale propre.",
+   "excerpt": ""
+  },
+  {
+   "act": "A12",
+   "verdict": "non_soutenu",
+   "reason": "Le code d'éthique et de déontologie des élus municipaux ne relève pas de l'urbanisme, de l'aménagement du territoire ou du droit foncier.",
+   "excerpt": "D’adopter le règlement portant le numéro 2026-03- Code d’éthique et de\ndéontologie des élus municipaux ;"
+  }
+ ],
+ "filter": {
+  "acts": 12,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement 2021-08 n'est mentionné qu'en référence réglementaire pour une attribution d'adresse civique et ne fait l'objet d'aucun acte procédural dans cette séance."
+   },
+   {
+    "act": "A06",
+    "reason": "Le règlement 2026-02 n'est mentionné qu'à titre de rappel historique dans les préambules des avis d'assujettissement."
+   },
+   {
+    "act": "A11",
+    "reason": "Le règlement 2016-10 est le règlement antérieur modifié par le nouveau règlement et ne franchit aucune étape procédurale propre."
+   },
+   {
+    "act": "A12",
+    "reason": "Le code d'éthique et de déontologie des élus municipaux ne relève pas de l'urbanisme, de l'aménagement du territoire ou du droit foncier."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte une résolution d'appui à la demande déposée à la CPTAQ pour l'acquisition d'une superficie du lot 6 374 262."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil adopte une résolution appuyant sous conditions la demande à la CPTAQ pour déplacer une résidence sur le lot 5 417 438."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil résout d'attribuer le numéro civique 1770 Chemin Boynton au lot 5 416 138."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil adopte une résolution demandant formellement l'abrogation de l'article 245.1 de la LAU dans le projet de loi no 22."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil autorise formellement l'inscription d'un avis d'assujettissement au droit de préemption sur le lot 5 416 383."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil autorise l'inscription d'un avis d'assujettissement au droit de préemption sur le lot 5 416 384."
+   },
+   {
+    "act": "A09",
+    "reason": "Le conseil appuie la demande d'autorisation à la CPTAQ pour l'agrandissement du lieu d'enfouissement sur le lot 2 935 698."
+   },
+   {
+    "act": "A10",
+    "reason": "Le conseil adopte le règlement 2026-04 modifiant le règlement de tarification des permis et certificats."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3752,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 18752,
+   "outputTokens": 1256,
+   "totalTokens": 20008
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3553
+  },
+  "inputSha256": "457b56c23fb732ae73c1c667faa29abd0b855146882122077f73d9601b5ede86"
+ }
+}

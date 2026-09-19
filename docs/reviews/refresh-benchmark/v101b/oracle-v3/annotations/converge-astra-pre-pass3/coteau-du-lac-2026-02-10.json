@@ -1,0 +1,81 @@
+{
+ "documentId": "coteau-du-lac-2026-02-10",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "e5209264e4489dd355cc973787422272e64d0d124c89c8a8d8275c6e15831c01",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"Le point 6 a), page 2, prévoit une modification de résolution concernant l’achat d’une partie du lot 6 025 922, mais n’atteste pas l’étape « adoption » proposée.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 6 b), page 2, prévoit explicitement l’abrogation de la résolution concernant le choix du proposant pour le lot 2 045 370, sans constater de décision acquise.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 8.2 a), page 3, prévoit une demande d’approbation de PIIA pour une enseigne sur vitrage au 3, rue Principale.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 8.2 b), page 3, prévoit une demande d’approbation de PIIA pour la modification d’une enseigne sur poteau au 9, rue Principale.\"},{\"item\":\"i05\",\"choice\":\"v2\",\"reason\":\"Le point 8.3 a), page 3, prévoit l’approbation de la demande de PPCMOI au 25, rue des Chutes, distinctement et avant l’adoption prévue du premier projet de résolution au point suivant.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 8.3 b), page 3, prévoit explicitement l’adoption du premier projet de résolution de PPCMOI au 25, rue des Chutes, ce qui correspond à l’étape « projet_reglement » et non à une adoption finale acquise.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v2"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "Le point 6 a), page 2, prévoit une modification de résolution concernant l’achat d’une partie du lot 6 025 922, mais n’atteste pas l’étape « adoption » proposée."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 6 b), page 2, prévoit explicitement l’abrogation de la résolution concernant le choix du proposant pour le lot 2 045 370, sans constater de décision acquise."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 8.2 a), page 3, prévoit une demande d’approbation de PIIA pour une enseigne sur vitrage au 3, rue Principale."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 8.2 b), page 3, prévoit une demande d’approbation de PIIA pour la modification d’une enseigne sur poteau au 9, rue Principale."
+  },
+  {
+   "item": "i05",
+   "choice": "v2",
+   "reason": "Le point 8.3 a), page 3, prévoit l’approbation de la demande de PPCMOI au 25, rue des Chutes, distinctement et avant l’adoption prévue du premier projet de résolution au point suivant."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 8.3 b), page 3, prévoit explicitement l’adoption du premier projet de résolution de PPCMOI au 25, rue des Chutes, ce qui correspond à l’étape « projet_reglement » et non à une adoption finale acquise."
+  }
+ ]
+}

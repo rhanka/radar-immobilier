@@ -1,0 +1,81 @@
+{
+ "documentId": "val-racine-2026-06-09",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "76a286c0a70e28c654c1f4ea52589753cf8d14c57882e2bc1d85989f44c23d37",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 6.2, page 1, prévoit la « Vente des remises au plus offrant » par résolution (« R »), soit un acte foncier prévu et non une vente déjà décidée.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 6.3, page 1, inscrit expressément la demande DM-2026-001 au 204, chemin de la Forêt-Enchantée, pour le lot 4 768 354, comme dérogation mineure prévue.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 6.4, page 1, prévoit explicitement un PIIA pour les arbres au 2996, chemin St-Léon, et les petits PIIA sont inclus dans le corrigé.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 6.5, page 1, prévoit explicitement un PIIA pour les arbres au 2984, chemin St-Léon, distinct de la demande du 2996.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le projet de règlement no 332 sur les installations septiques, au point 9.1 de la page 1, est associé à « A et D », dont la légende définit « A » comme avis de motion, ce qui atteste un avis prévu.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 9.1, page 1, prévoit le projet de règlement no 332 avec le code « D : Dépôt », unité distincte de l’avis de motion conformément aux règles.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 6.2, page 1, prévoit la « Vente des remises au plus offrant » par résolution (« R »), soit un acte foncier prévu et non une vente déjà décidée."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 6.3, page 1, inscrit expressément la demande DM-2026-001 au 204, chemin de la Forêt-Enchantée, pour le lot 4 768 354, comme dérogation mineure prévue."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 6.4, page 1, prévoit explicitement un PIIA pour les arbres au 2996, chemin St-Léon, et les petits PIIA sont inclus dans le corrigé."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 6.5, page 1, prévoit explicitement un PIIA pour les arbres au 2984, chemin St-Léon, distinct de la demande du 2996."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le projet de règlement no 332 sur les installations septiques, au point 9.1 de la page 1, est associé à « A et D », dont la légende définit « A » comme avis de motion, ce qui atteste un avis prévu."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 9.1, page 1, prévoit le projet de règlement no 332 avec le code « D : Dépôt », unité distincte de l’avis de motion conformément aux règles."
+  }
+ ]
+}

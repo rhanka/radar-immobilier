@@ -1,0 +1,38 @@
+{
+ "documentId": "saint-roch-de-lachigan-2026-05-11",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "29cbae05ed64d89ab15b797a6a429860b02be66efd75d56eef12f530f2d1a9be",
+ "verificationSha256": "c55b279a67e3051fede1b13126ccdaf6682d433edc74c6b2f8fa72aff630d49d",
+ "inputSha256": "baf009fdbf5679da20d453dfbc779bc76f8eab44e5b097acd32a476bdccd66bf",
+ "responseSha256": "114e4012cb8e3ef221eb9654120405ef125e6b61e4133fef497861ff2dfd31ae",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 5818,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 3001,
+  "outputTokens": 242,
+  "totalTokens": 4744,
+  "thoughtsTokenCount": 1501
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 5339,
+  "requestId": null
+ },
+ "at": "2026-09-18T22:46:38.017Z"
+}

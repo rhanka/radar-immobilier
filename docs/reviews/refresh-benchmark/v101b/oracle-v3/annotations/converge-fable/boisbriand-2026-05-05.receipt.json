@@ -1,0 +1,77 @@
+{
+ "documentId": "boisbriand-2026-05-05",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b46e8622dc0bbd2c1eb74fabd0f09e5769b8117a82da9ebb9e1ab216106c7b39",
+ "inputSha256": "d1d3ee0437a330e50431f6fc64386b8370596b42f1ee439e62a28fedd7f2d7b9",
+ "responseSha256": "9932e533aace3e705be653fe9ff64d2e949bd9bf84db4d297d6ed5f3bd247053",
+ "rc": 0,
+ "latencyMs": 24883,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "ffb7a110-b7cd-4d96-89d4-a4f684ea17ea",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 1977,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 23737,
+   "webSearchRequests": 0,
+   "costUSD": 0.57389475,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 1291,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 23737,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 1977,
+  "output_tokens_details": {
+   "thinking_tokens": 1291
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 23737,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1977,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 23737,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 23737
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.57389475,
+ "durationApiMs": 22968,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:40:38.326Z"
+}

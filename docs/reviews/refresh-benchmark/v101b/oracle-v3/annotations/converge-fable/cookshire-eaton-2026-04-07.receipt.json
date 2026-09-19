@@ -1,0 +1,77 @@
+{
+ "documentId": "cookshire-eaton-2026-04-07",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dcef823e0abf9b897d88bdb82b1720374565a8af97cb1bd96327247ddafd2b5b",
+ "inputSha256": "831d90362da0163efb70c591632ef2458a99dab0631bc605e4de634fa8cf5b6f",
+ "responseSha256": "2f4cd530cb04d15a6329cac87b3bb4ffc1610277323643208e2ebe4c3fca7f51",
+ "rc": 0,
+ "latencyMs": 37467,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "9915e90d-4027-4d2e-b6bc-7a169c09432f",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 3212,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 14596,
+   "webSearchRequests": 0,
+   "costUSD": 0.45282475,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 2379,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 14596,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 3212,
+  "output_tokens_details": {
+   "thinking_tokens": 2379
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 14596,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 3212,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 14596,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 14596
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.45282475,
+ "durationApiMs": 35597,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:33:02.606Z"
+}

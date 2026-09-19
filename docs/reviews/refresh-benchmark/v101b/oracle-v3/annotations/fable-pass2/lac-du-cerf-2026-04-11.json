@@ -1,0 +1,45 @@
+{
+ "documentId": "lac-du-cerf-2026-04-11",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "9acbb9d6f7717313e1554a95b12fe986ee970ec7051cc29a242dd3acea59259f",
+ "rawText": "{\"operations\":[\n {\"op\":\"add\",\"unit\":{\"label\":\"Contrat d'évaluation des terrains du projet de lotissement chemin Dicaire / St-Louis (prévu, ordre du jour)\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"projet de lotissement chemin Dicaire / St-Louis\",\"page\":1,\"citation\":\"8.1 Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis\",\"anchor\":\"projet de lotissement chemin Dicaire / St- Louis\"},\"reason\":\"Point 8.1 sous la rubrique Urbanisme porte sur un objet foncier explicite (projet de lotissement chemin Dicaire / St-Louis) dont l'étape (évaluation des terrains préalable au lotissement) n'entre dans aucune valeur d'étape définie, d'où « inconnu » ; le document n'étant qu'un ordre du jour, l'unité atteste un point prévu et non une décision acquise (règle 5).\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Contrat d'évaluation des terrains du projet de lotissement chemin Dicaire / St-Louis (prévu, ordre du jour)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "projet de lotissement chemin Dicaire / St-Louis",
+    "page": 1,
+    "citation": "8.1 Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis",
+    "anchor": "projet de lotissement chemin Dicaire / St- Louis"
+   },
+   "reason": "Point 8.1 sous la rubrique Urbanisme porte sur un objet foncier explicite (projet de lotissement chemin Dicaire / St-Louis) dont l'étape (évaluation des terrains préalable au lotissement) n'entre dans aucune valeur d'étape définie, d'où « inconnu » ; le document n'étant qu'un ordre du jour, l'unité atteste un point prévu et non une décision acquise (règle 5)."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u02"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 1
+}

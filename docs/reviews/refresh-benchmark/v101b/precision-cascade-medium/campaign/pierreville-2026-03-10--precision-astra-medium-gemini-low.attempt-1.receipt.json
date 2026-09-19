@@ -1,0 +1,35 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "1985738d32d60a47b12c85bc62b0f30e47ee8324a360fe34830fad935688e8b4",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2754,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 23079,
+   "outputTokens": 668,
+   "totalTokens": 23747
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2570
+  },
+  "inputSha256": "9521283d8e43b2c2733b2b6a9ce3db6cb4c32def6beef46266e62e682bea2d74"
+ },
+ "at": "2026-09-19T03:23:05.797Z"
+}

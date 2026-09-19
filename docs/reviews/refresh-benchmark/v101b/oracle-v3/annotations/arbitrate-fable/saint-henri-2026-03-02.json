@@ -1,0 +1,19 @@
+{
+ "documentId": "saint-henri-2026-03-02",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "0571bc8cf9cef927089da7b425b2c7ab8b77d802883bb48b4eddfd2ae2df0b32",
+ "verificationSha256": "0e35f308ac7ab305b61922f6a8c5eb84008c5c36f6571073656ee01393a30292",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

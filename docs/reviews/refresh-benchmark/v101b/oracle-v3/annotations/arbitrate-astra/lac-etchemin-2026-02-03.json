@@ -1,0 +1,19 @@
+{
+ "documentId": "lac-etchemin-2026-02-03",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "d35ebfd9a268081ce8cb8d54fd89837c3d38338f1e6f32a84ad088f635486153",
+ "verificationSha256": "e093849ed2978db8753fe9211ac0ffb100eed14ea94827520cb87b6318b71d96",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

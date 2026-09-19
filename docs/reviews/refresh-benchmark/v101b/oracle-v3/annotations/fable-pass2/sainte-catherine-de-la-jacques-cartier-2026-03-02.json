@@ -1,0 +1,54 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "989616eafaf923bd0e695e7ec7d6c8d7b007f17bb14b464a269d45c7fe15b9b5",
+ "rawText": "{\"operations\":[\n {\"op\":\"remove\",\"id\":\"u10\",\"reason\":\"Exclusion du rappel « loisirs » et « contrats et marchés de services » (règle 7) : la résolution 124-2026, classée sous Sports, loisirs, culture et vie communautaire, autorise un contrat de location saisonnier pour un service de formation et de location de planches à pagaie à l’été 2026 ; ce n’est ni un objet réglementaire d’urbanisme ni un acte foncier au sens de la règle 1 (vente, acquisition, cession, échange, servitude, lotissement, prolongement de rue permettant un développement).\"},\n {\"op\":\"add\",\"unit\":{\"label\":\"Engagement à amorcer les modifications réglementaires (LAU) pour autoriser l’usage parc solaire — projet Innergex, résolution 099-2026\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"modifications réglementaires parc solaire\",\"page\":9,\"citation\":\"s’engage à amorcer, suivant la procédure prescrite par la Loi sur l’aménagement et l’urbanisme, les modifications réglementaires nécessaires pour autoriser l’usage prévu dans la zone concernée\",\"anchor\":\"les modifications réglementaires nécessaires\"},\"reason\":\"Résolution 099-2026 (p. 8-9) : le conseil décide explicitement que la Ville « s’engage à amorcer, suivant la procédure prescrite par la Loi sur l’aménagement et l’urbanisme, les modifications réglementaires nécessaires pour autoriser l’usage prévu » pour le parc solaire d’Innergex, après le considérant « la réglementation municipale devra être amendée afin de permettre cet usage » ; objet réglementaire d’urbanisme explicite (inclusion « urbanisme ») dont l’étape, antérieure à tout avis de motion, n’entre dans aucune valeur du vocabulaire, d’où « inconnu » par analogie avec l’avis de non-modification d’un règlement ; aucune unité du corrigé courant ne couvre ce fait.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u10",
+   "reason": "Exclusion du rappel « loisirs » et « contrats et marchés de services » (règle 7) : la résolution 124-2026, classée sous Sports, loisirs, culture et vie communautaire, autorise un contrat de location saisonnier pour un service de formation et de location de planches à pagaie à l’été 2026 ; ce n’est ni un objet réglementaire d’urbanisme ni un acte foncier au sens de la règle 1 (vente, acquisition, cession, échange, servitude, lotissement, prolongement de rue permettant un développement)."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Engagement à amorcer les modifications réglementaires (LAU) pour autoriser l’usage parc solaire — projet Innergex, résolution 099-2026",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "modifications réglementaires parc solaire",
+    "page": 9,
+    "citation": "s’engage à amorcer, suivant la procédure prescrite par la Loi sur l’aménagement et l’urbanisme, les modifications réglementaires nécessaires pour autoriser l’usage prévu dans la zone concernée",
+    "anchor": "les modifications réglementaires nécessaires"
+   },
+   "reason": "Résolution 099-2026 (p. 8-9) : le conseil décide explicitement que la Ville « s’engage à amorcer, suivant la procédure prescrite par la Loi sur l’aménagement et l’urbanisme, les modifications réglementaires nécessaires pour autoriser l’usage prévu » pour le parc solaire d’Innergex, après le considérant « la réglementation municipale devra être amendée afin de permettre cet usage » ; objet réglementaire d’urbanisme explicite (inclusion « urbanisme ») dont l’étape, antérieure à tout avis de motion, n’entre dans aucune valeur du vocabulaire, d’où « inconnu » par analogie avec l’avis de non-modification d’un règlement ; aucune unité du corrigé courant ne couvre ce fait."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u10"
+  },
+  {
+   "op": "add",
+   "id": "u11"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 10
+}

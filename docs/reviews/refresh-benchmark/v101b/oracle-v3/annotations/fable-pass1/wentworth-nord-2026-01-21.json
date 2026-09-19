@@ -1,0 +1,46 @@
+{
+ "documentId": "wentworth-nord-2026-01-21",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1b",
+ "inputStateSha256": "d82efe4a4819cd6784d5286402d11772f6bb83776fe209af55c22ee9e0f274db",
+ "rawText": "{\"operations\":[\n {\"op\":\"add\",\"unit\":{\"label\":\"Entente de suivi de la servitude de conservation avec Éco-corridors laurentiens — terres des sentiers des Orphelins (lots 5 589 168 et autres)\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"servitude de conservation sentiers Orphelins\",\"page\":7,\"citation\":\"7.2 ENTENTE AVEC ÉCO-CORRIDORS LAURENTIENS POUR LE SUIVI DE LA SERVITUDE DE CONSERVATION DES TERRES DES SENTIERS DES ORPHELINS\",\"anchor\":\"SUIVI DE LA SERVITUDE DE CONSERVATION\"},\"reason\":\"Résolution 2026-01-3807 (p. 7) approuve l'engagement et autorise la signature d'une entente fixant les modalités de suivi de la servitude de conservation réelle et perpétuelle sur des lots explicites du cadastre du Québec ; une servitude est un acte foncier inclus (« actes fonciers, même non résidentiels »), l'étape (entente de suivi) n'entrant dans aucune valeur définie, d'où « inconnu » ; les rappels des résolutions antérieures 2025-05-3559 et 2025-09-3705 ne créent pas d'unité supplémentaire.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Entente de suivi de la servitude de conservation avec Éco-corridors laurentiens — terres des sentiers des Orphelins (lots 5 589 168 et autres)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "servitude de conservation sentiers Orphelins",
+    "page": 7,
+    "citation": "7.2 ENTENTE AVEC ÉCO-CORRIDORS LAURENTIENS POUR LE SUIVI DE LA SERVITUDE DE CONSERVATION DES TERRES DES SENTIERS DES ORPHELINS",
+    "anchor": "SUIVI DE LA SERVITUDE DE CONSERVATION"
+   },
+   "reason": "Résolution 2026-01-3807 (p. 7) approuve l'engagement et autorise la signature d'une entente fixant les modalités de suivi de la servitude de conservation réelle et perpétuelle sur des lots explicites du cadastre du Québec ; une servitude est un acte foncier inclus (« actes fonciers, même non résidentiels »), l'étape (entente de suivi) n'entrant dans aucune valeur définie, d'où « inconnu » ; les rappels des résolutions antérieures 2025-05-3559 et 2025-09-3705 ne créent pas d'unité supplémentaire."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u06"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6,
+ "inputStateSha256BeforeRelabel": "d82efe4a4819cd6784d5286402d11772f6bb83776fe209af55c22ee9e0f274db"
+}

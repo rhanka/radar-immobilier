@@ -1,0 +1,37 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "e73cf4f8475d950d448269717211f21d5d32900aeb2677faf9086dfc89da3396",
+ "rawText": "{\"operations\":[\n {\"op\":\"remove\",\"id\":\"u02\",\"reason\":\"Règle 1 : l’unité exige un objet foncier explicite ; la résolution 2026-03-71 autorise seulement à enchérir et acquérir « tout immeuble de son territoire mis en vente » sans lot, matricule ni adresse identifiés, et relève du recouvrement de taxes (comptes), catégorie exclue par la règle 7.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u02",
+   "reason": "Règle 1 : l’unité exige un objet foncier explicite ; la résolution 2026-03-71 autorise seulement à enchérir et acquérir « tout immeuble de son territoire mis en vente » sans lot, matricule ni adresse identifiés, et relève du recouvrement de taxes (comptes), catégorie exclue par la règle 7."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u02"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4
+}

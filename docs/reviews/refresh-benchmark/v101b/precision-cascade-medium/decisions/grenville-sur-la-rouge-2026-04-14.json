@@ -1,0 +1,317 @@
+{
+ "documentId": "grenville-sur-la-rouge-2026-04-14",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "bc63c6cad459639d53e0cfa16f4633627f41e218173d6038dc0181fbddbaac65",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-don"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acceptation du don du lot 6 209 933",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Acceptation du don gratuit du lot 6 209 933 au bénéﬁce de la Municipalité."
+      },
+      {
+       "page": 1,
+       "excerpt": "Acceptation du don gratuit du lot 6 209 933 au bénéﬁce de la Municipalité."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-vente"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Autorisation de vente du lot municipal 6 095 015",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Autorisation de la vente du lot municipal 6 095 015 pour un montant de 13000$,\ncorrespondant à sa valeur marchande."
+      },
+      {
+       "page": 1,
+       "excerpt": "Autorisation de la vente du lot municipal 6 095 015 pour un montant de 13000$,\ncorrespondant à sa valeur marchande."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-piia-refus"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA refusé — 47, rue Donald Campbell",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\nd’accorder la demande de dérogation mineure"
+      },
+      {
+       "page": 2,
+       "excerpt": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\nd’accorder la demande de dérogation mineure concernant la construction d’un abri d’auto\nempiétant sur la marge latérale droite du terrain."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-derogation-refus"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure refusée — abri d’auto au 47, rue Donald Campbell",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\nd’accorder la demande de dérogation mineure"
+      },
+      {
+       "page": 2,
+       "excerpt": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\nd’accorder la demande de dérogation mineure concernant la construction d’un abri d’auto\nempiétant sur la marge latérale droite du terrain."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-piia-accord"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA accordé — résidence unifamiliale au 1417, route 148",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Demande de PIIA accordée pour la construction d’une résidence unifamiliale au 1417,\nroute 148."
+      },
+      {
+       "page": 2,
+       "excerpt": "Demande de PIIA accordée pour la construction d’une résidence unifamiliale au 1417,\nroute 148."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-renofacade"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de développement économique RénoFaçade",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Adoption du règlement de développement économique RénoFaçade."
+      },
+      {
+       "page": 3,
+       "excerpt": "Adoption du règlement de développement économique RénoFaçade."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-plan"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement relatif à des modifications au plan d’urbanisme",
+     "stage": "projet",
+     "objet": "Modifications au plan d’urbanisme",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\npublication des avis publics et à des modiﬁcations au plan d’urbanisme."
+      },
+      {
+       "page": 3,
+       "excerpt": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\npublication des avis publics et à des modiﬁcations au plan d’urbanisme."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-plan"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Avis de motion et adoption de projet — modifications au plan d’urbanisme",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\npublication des avis publics et à des modiﬁcations au plan d’urbanisme."
+      },
+      {
+       "page": 3,
+       "excerpt": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\npublication des avis publics et à des modiﬁcations au plan d’urbanisme."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le document atteste l'acceptation du don gratuit du lot.\",\"excerpt\":\"Acceptation du don gratuit du lot 6 209 933 au bénéﬁce de la Municipalité.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le document atteste l'autorisation de vente de ce lot municipal.\",\"excerpt\":\"Autorisation de la vente du lot municipal 6 095 015 pour un montant de 13000$,\\ncorrespondant à sa valeur marchande.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le document atteste le refus de la demande de PIIA au 47, rue Donald Campbell.\",\"excerpt\":\"Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\\nd’accorder la demande de dérogation mineure\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le texte mentionne expressément le refus d'accorder la demande de dérogation mineure.\",\"excerpt\":\"compte tenu du refus\\nd’accorder la demande de dérogation mineure concernant la construction d’un abri d’auto\\nempiétant sur la marge latérale droite du terrain.\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le document atteste l'octroi du PIIA pour une résidence unifamiliale à cette adresse.\",\"excerpt\":\"Demande de PIIA accordée pour la construction d’une résidence unifamiliale au 1417,\\nroute 148.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le document atteste l'adoption du règlement de développement économique RénoFaçade.\",\"excerpt\":\"Adoption du règlement de développement économique RénoFaçade.\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le texte confirme l'adoption d'un projet de règlement concernant des modifications au plan d'urbanisme.\",\"excerpt\":\"Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\\npublication des avis publics et à des modiﬁcations au plan d’urbanisme.\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le texte confirme l'avis de motion et l'adoption de projet pour les modifications au plan d'urbanisme.\",\"excerpt\":\"Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\\npublication des avis publics et à des modiﬁcations au plan d’urbanisme.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le document atteste l'acceptation du don gratuit du lot.",
+   "excerpt": "Acceptation du don gratuit du lot 6 209 933 au bénéﬁce de la Municipalité."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le document atteste l'autorisation de vente de ce lot municipal.",
+   "excerpt": "Autorisation de la vente du lot municipal 6 095 015 pour un montant de 13000$,\ncorrespondant à sa valeur marchande."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le document atteste le refus de la demande de PIIA au 47, rue Donald Campbell.",
+   "excerpt": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus\nd’accorder la demande de dérogation mineure"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le texte mentionne expressément le refus d'accorder la demande de dérogation mineure.",
+   "excerpt": "compte tenu du refus\nd’accorder la demande de dérogation mineure concernant la construction d’un abri d’auto\nempiétant sur la marge latérale droite du terrain."
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le document atteste l'octroi du PIIA pour une résidence unifamiliale à cette adresse.",
+   "excerpt": "Demande de PIIA accordée pour la construction d’une résidence unifamiliale au 1417,\nroute 148."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le document atteste l'adoption du règlement de développement économique RénoFaçade.",
+   "excerpt": "Adoption du règlement de développement économique RénoFaçade."
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le texte confirme l'adoption d'un projet de règlement concernant des modifications au plan d'urbanisme.",
+   "excerpt": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\npublication des avis publics et à des modiﬁcations au plan d’urbanisme."
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le texte confirme l'avis de motion et l'adoption de projet pour les modifications au plan d'urbanisme.",
+   "excerpt": "Avis de motion et adoption de projets de règlements liés au traitement des élus, à la\npublication des avis publics et à des modiﬁcations au plan d’urbanisme."
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le document atteste l'acceptation du don gratuit du lot."
+   },
+   {
+    "act": "A02",
+    "reason": "Le document atteste l'autorisation de vente de ce lot municipal."
+   },
+   {
+    "act": "A03",
+    "reason": "Le document atteste le refus de la demande de PIIA au 47, rue Donald Campbell."
+   },
+   {
+    "act": "A04",
+    "reason": "Le texte mentionne expressément le refus d'accorder la demande de dérogation mineure."
+   },
+   {
+    "act": "A05",
+    "reason": "Le document atteste l'octroi du PIIA pour une résidence unifamiliale à cette adresse."
+   },
+   {
+    "act": "A06",
+    "reason": "Le document atteste l'adoption du règlement de développement économique RénoFaçade."
+   },
+   {
+    "act": "A07",
+    "reason": "Le texte confirme l'adoption d'un projet de règlement concernant des modifications au plan d'urbanisme."
+   },
+   {
+    "act": "A08",
+    "reason": "Le texte confirme l'avis de motion et l'adoption de projet pour les modifications au plan d'urbanisme."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2302,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3912,
+   "outputTokens": 551,
+   "totalTokens": 4463
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1926
+  },
+  "inputSha256": "63e01d65fb0b9afe10fbf5f3c6434e9b6903ccb2aaa0e4f2b39b6fe6c890eccd"
+ }
+}

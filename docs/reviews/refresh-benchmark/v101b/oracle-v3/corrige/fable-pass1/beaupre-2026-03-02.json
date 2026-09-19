@@ -1,0 +1,239 @@
+{
+ "documentId": "beaupre-2026-03-02",
+ "nextId": 7,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation du protocole d’entente Horizon Boréal — prolongement de la rue Belhumeur et d’une autre rue",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "rue Belhumeur",
+    "page": 5,
+    "citation": "signer tous les documents nécessaires aux travaux municipaux de prolongement de la rue Belhumeur et autre rue ainsi que tous les documents nécessaires à cet effet",
+    "anchor": "rue Belhumeur",
+    "spanStart": 819,
+    "spanEnd": 981
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation du protocole d’entente Horizon Boréal — prolongement de la rue Belhumeur et d’une autre rue",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "rue Belhumeur",
+      "page": 5,
+      "citation": "signer tous les documents nécessaires aux travaux municipaux de prolongement de la rue Belhumeur et autre rue ainsi que tous les documents nécessaires à cet effet",
+      "anchor": "rue Belhumeur",
+      "spanStart": 819,
+      "spanEnd": 981
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 11982-020326 autorise la signature des documents relatifs au prolongement de rues pour Horizon Boréal, ce qui constitue une intervention foncière liée au développement et non un simple entretien de voirie."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Approbation PIIA — 200, rue de Véga, FYRA QUARTIER",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "200, rue de Véga",
+    "page": 5,
+    "citation": "11983-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (200, rue de Véga",
+    "anchor": "200, rue de Véga",
+    "spanStart": 983,
+    "spanEnd": 1052
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation PIIA — 200, rue de Véga, FYRA QUARTIER",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "200, rue de Véga",
+      "page": 5,
+      "citation": "11983-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (200, rue de Véga",
+      "anchor": "200, rue de Véga",
+      "spanStart": 983,
+      "spanEnd": 1052
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 11983-020326 approuve la construction d’une résidence unifamiliale isolée assujettie au règlement sur les PIIA, suivant la recommandation 26-07 du CCU."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Approbation PIIA — 155, rue de Cassiopée, FYRA QUARTIER",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "155, rue de Cassiopée",
+    "page": 5,
+    "citation": "11984-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (155, rue de Cassiopée",
+    "anchor": "155, rue de Cassiopée",
+    "spanStart": 2161,
+    "spanEnd": 2235
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation PIIA — 155, rue de Cassiopée, FYRA QUARTIER",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "155, rue de Cassiopée",
+      "page": 5,
+      "citation": "11984-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (155, rue de Cassiopée",
+      "anchor": "155, rue de Cassiopée",
+      "spanStart": 2161,
+      "spanEnd": 2235
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 11984-020326, dont la décision se poursuit page 6, approuve cette demande de PIIA suivant la recommandation 26-08 du CCU et constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Approbation PIIA — 145, rue de Cassiopée, FYRA QUARTIER",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "145, rue de Cassiopée",
+    "page": 6,
+    "citation": "11985-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (145, rue de Cassiopée",
+    "anchor": "145, rue de Cassiopée",
+    "spanStart": 887,
+    "spanEnd": 961
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation PIIA — 145, rue de Cassiopée, FYRA QUARTIER",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "145, rue de Cassiopée",
+      "page": 6,
+      "citation": "11985-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (145, rue de Cassiopée",
+      "anchor": "145, rue de Cassiopée",
+      "spanStart": 887,
+      "spanEnd": 961
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 11985-020326 approuve cette demande de construction assujettie au PIIA suivant la recommandation 26-09 du CCU."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Refus PIIA — 150, rue de l’Aurore-Boréale, FYRA QUARTIER",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "150, rue de l’Aurore-Boréale",
+    "page": 6,
+    "citation": "11986-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (150, rue de l’Aurore-Boréale",
+    "anchor": "150, rue de l’Aurore-Boréale",
+    "spanStart": 2075,
+    "spanEnd": 2156
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus PIIA — 150, rue de l’Aurore-Boréale, FYRA QUARTIER",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "150, rue de l’Aurore-Boréale",
+      "page": 6,
+      "citation": "11986-020326 PROJET DE CONSTRUCTION – FYRA QUARTIER (150, rue de l’Aurore-Boréale",
+      "anchor": "150, rue de l’Aurore-Boréale",
+      "spanStart": 2075,
+      "spanEnd": 2156
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 11986-020326 se conclut page 7 par le refus du projet pour intégration architecturale insuffisante suivant la recommandation 26-10 du CCU; conformément aux règles, ce refus demeure une unité."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "removed",
+   "current": {
+    "label": "Prêt de la salle du centre communautaire à l’Association Bénévole Côte-de-Beaupré — 4 mars",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "salle au centre communautaire",
+    "page": 5,
+    "citation": "prêter la salle au centre communautaire à l’Association Bénévole Côte-deBeaupré pour le 4 mars prochain de 16 h à 18 h",
+    "anchor": "salle au centre communautaire",
+    "spanStart": 153,
+    "spanEnd": 271
+   },
+   "versions": [
+    {
+     "step": "astra-pass1b",
+     "unit": {
+      "label": "Prêt de la salle du centre communautaire à l’Association Bénévole Côte-de-Beaupré — 4 mars",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "salle au centre communautaire",
+      "page": 5,
+      "citation": "prêter la salle au centre communautaire à l’Association Bénévole Côte-deBeaupré pour le 4 mars prochain de 16 h à 18 h",
+      "anchor": "salle au centre communautaire",
+      "spanStart": 153,
+      "spanEnd": 271
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1b",
+     "op": "add",
+     "reason": "La résolution 11980-020326 autorise explicitement une mise à disposition immobilière par prêt, relevant de l’étape « inconnu » comme le prêt à usage d’un immeuble."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "remove",
+     "reason": "Le prêt de la salle du centre communautaire pour le 4 mars de 16 h à 18 h (rés. 11980-020326) n'est ni un objet réglementaire d'urbanisme ni un acte foncier (aucune vente, acquisition, cession, servitude ou convention de prêt à usage d'un immeuble) ; il s'agit d'un prêt ponctuel d'une salle à un organisme, relevant des exclusions du rappel (loisirs/communautaire)."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,101 @@
+{
+ "documentId": "orford-2026-03-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "5f1bbf77aaa39f7204ab1991b2718224156c3ee2009dc6d1c608098c890f4d79",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-03-59 (p. 43) approuve conditionnellement le PIIA pour l'aire de stationnement en pente sur le lot 6 474 528, citation exacte, étape piia et objet conformes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-03-60 (p. 45) approuve conditionnellement le PIIA des travaux de rénovation au 2197-2199, chemin du Parc, citation exacte et étape piia conforme.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-03-61 (p. 46) exige une contribution en argent pour fins de parcs en vertu du Règlement 951 pour le lot explicitement nommé 6 521 680, acte foncier d'urbanisme inclus au rappel.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le lot 6 449 130 (chemin des Nénuphars) est nommé explicitement dans le tableau de la résolution 2026-03-61 (p. 46); un nœud groupé peut couvrir plusieurs unités explicitement nommées, chaque lot constitue un objet foncier distinct.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-03-62 (p. 47) demande à la MRC de modifier le Règlement de contrôle intérimaire 16-21 pour intégrer le lot 3 787 898; objet réglementaire explicite, étape inconnu adaptée à une demande adressée à la MRC.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le schéma d'aménagement (Règlement numéro 16-23) est cité p. 46 dans la même résolution 2026-03-62 et le dispositif demande explicitement sa modification, objet réglementaire distinct du RCI 16-21.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"La transmission de l'état des taxes échues (p. 5) relève des comptes/taxation sans objet foncier explicite (aucun lot ni adresse), exclu du rappel selon la règle sur les comptes.\"},{\"item\":\"i08\",\"choice\":\"absent\",\"reason\":\"L'autorisation générale d'enchérir à la vente pour taxes (p. 5) ne vise aucun immeuble explicitement identifié et l'étape « adoption » ne correspond pas à l'adoption d'un règlement; objet non explicite, exclu du rappel.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "absent"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Résolution 2026-03-59 (p. 43) approuve conditionnellement le PIIA pour l'aire de stationnement en pente sur le lot 6 474 528, citation exacte, étape piia et objet conformes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Résolution 2026-03-60 (p. 45) approuve conditionnellement le PIIA des travaux de rénovation au 2197-2199, chemin du Parc, citation exacte et étape piia conforme."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Résolution 2026-03-61 (p. 46) exige une contribution en argent pour fins de parcs en vertu du Règlement 951 pour le lot explicitement nommé 6 521 680, acte foncier d'urbanisme inclus au rappel."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le lot 6 449 130 (chemin des Nénuphars) est nommé explicitement dans le tableau de la résolution 2026-03-61 (p. 46); un nœud groupé peut couvrir plusieurs unités explicitement nommées, chaque lot constitue un objet foncier distinct."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Résolution 2026-03-62 (p. 47) demande à la MRC de modifier le Règlement de contrôle intérimaire 16-21 pour intégrer le lot 3 787 898; objet réglementaire explicite, étape inconnu adaptée à une demande adressée à la MRC."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le schéma d'aménagement (Règlement numéro 16-23) est cité p. 46 dans la même résolution 2026-03-62 et le dispositif demande explicitement sa modification, objet réglementaire distinct du RCI 16-21."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "La transmission de l'état des taxes échues (p. 5) relève des comptes/taxation sans objet foncier explicite (aucun lot ni adresse), exclu du rappel selon la règle sur les comptes."
+  },
+  {
+   "item": "i08",
+   "choice": "absent",
+   "reason": "L'autorisation générale d'enchérir à la vente pour taxes (p. 5) ne vise aucun immeuble explicitement identifié et l'étape « adoption » ne correspond pas à l'adoption d'un règlement; objet non explicite, exclu du rappel."
+  }
+ ]
+}

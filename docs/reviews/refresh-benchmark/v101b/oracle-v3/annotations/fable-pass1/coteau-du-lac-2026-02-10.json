@@ -1,0 +1,47 @@
+{
+ "documentId": "coteau-du-lac-2026-02-10",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1b",
+ "inputStateSha256": "d4f642924a5be3545e06676c87918e850dadcfcede0a493cd3b483b7d059c203",
+ "rawText": "{\"operations\":[\n {\"op\":\"correct\",\"id\":\"u05\",\"unit\":{\"label\":\"Approbation de principe prévue de la demande de PPCMOI — 25, rue des Chutes, agrandissement résidentiel (avant le premier projet de résolution)\",\"stage\":\"inconnu\",\"procedure\":\"ppcmoi\",\"objet\":\"25, rue des Chutes\",\"page\":3,\"citation\":\"Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes (agrandissement résidentiel\",\"anchor\":\"25, rue des Chutes\"},\"reason\":\"Le vocabulaire réserve « adoption » à la résolution finale (PPCMOI accordé) ; or le point 8.3 a) « Approbation. Demande d’un PPCMOI » précède au même ordre du jour le point 8.3 b) « Adoption. Premier projet de résolution », donc il s’agit d’une approbation préalable de la demande dont l’étape n’entre dans aucune valeur définie, d’où « inconnu ».\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Approbation de principe prévue de la demande de PPCMOI — 25, rue des Chutes, agrandissement résidentiel (avant le premier projet de résolution)",
+    "stage": "inconnu",
+    "procedure": "ppcmoi",
+    "objet": "25, rue des Chutes",
+    "page": 3,
+    "citation": "Approbation. Demande d’un PPCMOI pour le 25, rue des Chutes (agrandissement résidentiel",
+    "anchor": "25, rue des Chutes"
+   },
+   "reason": "Le vocabulaire réserve « adoption » à la résolution finale (PPCMOI accordé) ; or le point 8.3 a) « Approbation. Demande d’un PPCMOI » précède au même ordre du jour le point 8.3 b) « Adoption. Premier projet de résolution », donc il s’agit d’une approbation préalable de la demande dont l’étape n’entre dans aucune valeur définie, d’où « inconnu »."
+  }
+ ],
+ "applied": [
+  {
+   "op": "correct",
+   "id": "u05"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6,
+ "inputStateSha256BeforeRelabel": "d4f642924a5be3545e06676c87918e850dadcfcede0a493cd3b483b7d059c203"
+}

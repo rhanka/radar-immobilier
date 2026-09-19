@@ -1,0 +1,365 @@
+{
+ "nodes": [
+  {
+   "id": "source-020326",
+   "label": "Procès-verbal de Beaupré du 2 mars 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "status": "candidate",
+   "date": "2026-03-02",
+   "municipality": "beaupre",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+   "url": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "À une séance ordinaire du conseil municipal tenue à l’Hôtel de Ville de\nBeaupré au 10995 rue des Montagnards, le lundi 2 mars 2026 à 19 h 30, à\nlaquelle sont présents :",
+     "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-horizon-boreal",
+   "label": "Horizon Boréal — prolongement de rues",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "status": "candidate",
+   "municipality": "beaupre",
+   "date": "2026-03-02",
+   "resolution": "11982-020326",
+   "category": "infrastructures_municipales",
+   "kind": "prolongement_de_rues",
+   "description": "Autorisation de signer les documents nécessaires aux travaux municipaux de prolongement de la rue Belhumeur et autre rue, dans le cadre du protocole d’entente Horizon Boréal.",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "Il est proposé par Monsieur Christian Blouin et résolu unanimement\nd’autoriser le maire ou la mairesse suppléante et la greffière, Mme\nJohanne Gagnon à signer tous les documents nécessaires",
+     "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-horizon"
+   ]
+  },
+  {
+   "id": "event-11983",
+   "label": "PIIA approuvé — 200, rue de Véga",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "status": "candidate",
+   "municipality": "beaupre",
+   "date": "2026-03-02",
+   "meetingDate": "2026-03-02",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-02",
+   "resolution": "11983-020326",
+   "no_lot": "6485061",
+   "reglement_number": "1196",
+   "description": "Approbation du projet de construction d’une maison unifamiliale isolée au 200, rue de Véga, FYRA Quartier, suivant les plans déposés à la recommandation 26-07 du CCU du 17 février.",
+   "motif": "Le style et le traitement architectural s’inscrivent dans la continuité du cadre bâti et répondent aux objectifs et critères du PIIA.",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés",
+     "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-11983"
+   ]
+  },
+  {
+   "id": "event-11984",
+   "label": "PIIA approuvé — 155, rue de Cassiopée",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "status": "candidate",
+   "municipality": "beaupre",
+   "date": "2026-03-02",
+   "meetingDate": "2026-03-02",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-02",
+   "resolution": "11984-020326",
+   "no_lot": "6485080",
+   "reglement_number": "1196",
+   "description": "Approbation du projet de construction d’une maison unifamiliale isolée au 155, rue de Cassiopée, FYRA Quartier, suivant les plans déposés à la recommandation 26-08 du CCU du 17 février.",
+   "motif": "Le style et le traitement architectural s’inscrivent dans la continuité du cadre bâti et répondent aux objectifs et critères du PIIA.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés",
+     "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-11984"
+   ]
+  },
+  {
+   "id": "event-11985",
+   "label": "PIIA approuvé — 145, rue de Cassiopée",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "status": "candidate",
+   "municipality": "beaupre",
+   "date": "2026-03-02",
+   "meetingDate": "2026-03-02",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-02",
+   "resolution": "11985-020326",
+   "no_lot": "6485075",
+   "reglement_number": "1196",
+   "description": "Approbation du projet de construction d’une maison unifamiliale isolée au 145, rue de Cassiopée, FYRA Quartier, suivant les plans déposés à la recommandation 26-09 du CCU du 17 février.",
+   "motif": "Le style et le traitement architectural s’inscrivent dans la continuité du cadre bâti et répondent aux objectifs et critères du PIIA.",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés",
+     "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-11985"
+   ]
+  },
+  {
+   "id": "event-11986",
+   "label": "PIIA refusé — 150, rue de l’Aurore-Boréale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "status": "candidate",
+   "municipality": "beaupre",
+   "date": "2026-03-02",
+   "meetingDate": "2026-03-02",
+   "decision": "refusé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-02",
+   "resolution": "11986-020326",
+   "no_lot": "6485034",
+   "reglement_number": "1196",
+   "description": "Refus du projet de construction d’une résidence unifamiliale isolée au 150, rue de l’Aurore-Boréale, FYRA Quartier, tel que présenté, suivant la recommandation 26-10 du CCU du 17 février.",
+   "motif": "Contraste architectural trop marqué avec le secteur et ressemblance insuffisante d’une majorité des éléments architecturaux avec le cadre bâti existant, au regard du paragraphe 3 b) de l’article 47 du règlement sur les PIIA.",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement de refuser le projet de construction tel que présenté",
+     "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-11986"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-020326",
+   "target": "signal-horizon-boreal",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "evidence_refs": [
+    "ev-horizon"
+   ],
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "Il est proposé par Monsieur Christian Blouin et résolu unanimement\nd’autoriser le maire ou la mairesse suppléante et la greffière, Mme\nJohanne Gagnon à signer tous les documents nécessaires",
+     "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-020326",
+   "target": "event-11983",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "evidence_refs": [
+    "ev-11983"
+   ],
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés",
+     "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-020326",
+   "target": "event-11984",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "evidence_refs": [
+    "ev-11984"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés",
+     "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-020326",
+   "target": "event-11985",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "evidence_refs": [
+    "ev-11985"
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés",
+     "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-020326",
+   "target": "event-11986",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "evidence_refs": [
+    "ev-11986"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement de refuser le projet de construction tel que présenté",
+     "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+     "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+     "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-horizon",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "Il est proposé par Monsieur Christian Blouin et résolu unanimement\nd’autoriser le maire ou la mairesse suppléante et la greffière, Mme\nJohanne Gagnon à signer tous les documents nécessaires aux travaux\nmunicipaux de prolongement de la rue Belhumeur et autre rue ainsi que\ntous les documents nécessaires à cet effet."
+  },
+  {
+   "id": "ev-1196",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "ATTENDU qu’en vertu du Règlement 1196 sur les plans d’implantation et\nd’intégration architecturale, section 5 du chapitre 3, le projet de\nconstruction est assujetti à l’approbation par le conseil municipal suivant\nles objectifs et les critères énoncés;"
+  },
+  {
+   "id": "ev-11983",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés à la recommandation 26-07\ndu CCU du 17 février."
+  },
+  {
+   "id": "ev-11984",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés à la recommandation 26-08\ndu CCU du 17 février."
+  },
+  {
+   "id": "ev-11985",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement d’approuver le projet de construction de la maison\nunifamiliale isolée suivant les plans déposés à la recommandation 26-09\ndu CCU du 17 février."
+  },
+  {
+   "id": "ev-11986",
+   "source_file": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "rawRef": "raw/proces-verbaux-beaupre/cas/0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d.pdf",
+   "docSha": "0b2043cb52daba43131e4d47946175cea6e7d21a41282912f4f809f892642d3d",
+   "sourceUrl": "https://vplus-documents.s3.ca-central-1.amazonaws.com/beaupre/_publication/fichiers/Procs-verbal%202%20mars%20rgulire%20-%20Contribuables.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "EN CONSÉQUENCE, il est proposé par Monsieur Christian Blouin et\nrésolu unanimement de refuser le projet de construction tel que présenté\npuisque ce projet ne satisfait pas adéquatement aux objectifs et critères\nd’intégration architecturale prévus au règlement sur les PIIA no 1196 et de\nses amendements suivant la recommandation 26-10 du CCU du 17 février."
+  }
+ ],
+ "input_tokens": 11400,
+ "output_tokens": 5400
+}

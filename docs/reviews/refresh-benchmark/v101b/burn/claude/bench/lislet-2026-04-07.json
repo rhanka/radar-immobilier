@@ -1,0 +1,13 @@
+{
+ "id": "lislet-2026-04-07",
+ "rc": 0,
+ "latencyMs": 155294,
+ "inputTokens": 2,
+ "outputTokens": 17838,
+ "cacheRead": 0,
+ "cacheCreate": 3912,
+ "costUsd": 0.48735300000000004,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 30500
+}

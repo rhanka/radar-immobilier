@@ -1,0 +1,13 @@
+{
+ "id": "sacre-coeur-2026-05-11",
+ "rc": 0,
+ "latencyMs": 452340,
+ "inputTokens": 6,
+ "outputTokens": 68355,
+ "cacheRead": 31372,
+ "cacheCreate": 95437,
+ "costUsd": 2.702082,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 8013
+}

@@ -1,0 +1,81 @@
+{
+ "documentId": "lislet-2026-04-07",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "efebde05d360c9d992a4b8fc70721d5306bb4bf14ac13bfa9caa7734911b6227",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 30, page 1, prévoit une demande de dérogation mineure pour le 418, chemin des Pionniers Est, sans attester de décision acquise.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 31, page 1, prévoit une demande de PIIA pour le 81, chemin des Pionniers Est, conformément à l’objet et à l’étape proposés.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 32, page 2, prévoit une demande de PIIA pour le 272, chemin des Pionniers Est, conformément à la citation proposée.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 33, page 2, prévoit l’entérinement de la décision concernant l’entreposage temporaire d’un conteneur au 2, rue Chanoine-Martel, ce qui correspond à une adoption prévue et non acquise.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 34, page 2, prévoit une demande d’autorisation à la CPTAQ pour renouveler le permis d’exploitation de la sablière Michel Gamache & Frères, sans préciser d’étape correspondant aux autres catégories.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 36, page 2, prévoit explicitement l’adoption de l’inventaire du patrimoine bâti partiel de L’Islet, un objet relevant de l’urbanisme.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 30, page 1, prévoit une demande de dérogation mineure pour le 418, chemin des Pionniers Est, sans attester de décision acquise."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 31, page 1, prévoit une demande de PIIA pour le 81, chemin des Pionniers Est, conformément à l’objet et à l’étape proposés."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 32, page 2, prévoit une demande de PIIA pour le 272, chemin des Pionniers Est, conformément à la citation proposée."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 33, page 2, prévoit l’entérinement de la décision concernant l’entreposage temporaire d’un conteneur au 2, rue Chanoine-Martel, ce qui correspond à une adoption prévue et non acquise."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 34, page 2, prévoit une demande d’autorisation à la CPTAQ pour renouveler le permis d’exploitation de la sablière Michel Gamache & Frères, sans préciser d’étape correspondant aux autres catégories."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 36, page 2, prévoit explicitement l’adoption de l’inventaire du patrimoine bâti partiel de L’Islet, un objet relevant de l’urbanisme."
+  }
+ ]
+}

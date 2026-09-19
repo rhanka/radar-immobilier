@@ -117,12 +117,6 @@ export function simulatedCost(usage, rate) {
     blendedUsdPerMillion };
 }
 
-export function subscriptionCost(totalTokens, monthlyUsd, weeklyReserveTokens) {
-  if (!(weeklyReserveTokens > 0)) return null;
-  const usdPerToken = monthlyUsd / (weeklyReserveTokens * WEEKS_PER_MONTH);
-  return { usd: totalTokens * usdPerToken, usdPerToken, weeklyReserveTokens };
-}
-
 async function receiptPaths(root) {
   const found = [];
   async function visit(directory) {
@@ -238,35 +232,10 @@ export function regressObservedRates(entries) {
   });
 }
 
-function rangedSubscription(totalTokens, plan, reserveRange, basis) {
-  const [reserveMin, reserveMax] = reserveRange;
-  const low = subscriptionCost(totalTokens, plan.monthlyUsd, reserveMax);
-  const high = subscriptionCost(totalTokens, plan.monthlyUsd, reserveMin);
-  return { basis, weeklyReserveTokens: { min: reserveMin, max: reserveMax },
-    usd: { min: low.usd, max: high.usd },
-    usdPerToken: { min: low.usdPerToken, max: high.usdPerToken } };
-}
-
-export function subscriptionForArm(arm, options = {}) {
-  const isGemini = arm.modelId === "gemini-3.8-flash" && arm.transports.includes("cloud-code");
-  const isChatgpt = arm.transports.includes("codex")
-    && Object.hasOwn(CHATGPT_PLUS_FIVE_HOUR_MESSAGES, arm.modelId);
-  const provider = isGemini ? "gemini" : isChatgpt ? "chatgpt" : null;
-  if (!provider) return null;
-  const planName = options[`${provider}Plan`] ?? null;
-  if (!planName) return { provider, plan: null, status: "N-A", reason: "plan-source-gap" };
-  const plan = SUBSCRIPTION_PLANS[provider][planName];
-  if (!plan) throw new Error(`Unknown ${provider} plan: ${planName}`);
-  const override = options[`${provider}WeeklyTokens`] ?? null;
-  if (override) return { provider, plan: planName, status: "estimated",
-    ...rangedSubscription(arm.totalTokens, plan, [override, override], "weekly-token-override") };
-  if (provider === "gemini") return { provider, plan: planName, status: "N-A",
-    reason: "weekly-token-reserve-source-gap" };
-  return { provider, plan: planName, status: "N-A", reason: "weekly-token-reserve-source-gap" };
-}
-
 const SEAT_ARMS = Object.freeze({
   "gemini-low": { provider: "gemini" },
+  "gemini-medium": { provider: "gemini" },
+  "gemini-high": { provider: "gemini" },
   "sol-medium": { provider: "chatgpt" },
   "luna-high": { provider: "chatgpt" },
   "luna-low": { provider: "chatgpt" },
@@ -280,10 +249,16 @@ const SEAT_ARMS = Object.freeze({
   "astra-high": { provider: "chatgpt" },
   "astra-xhigh": { provider: "chatgpt" },
   "sonnet46-cloud-off": { provider: "claude" },
+  "opus5-off": { provider: "claude" },
+  "opus5-low": { provider: "claude" },
+  "opus5-high": { provider: "claude" },
+  "sonnet5-off": { provider: "claude" },
+  "sonnet5-low": { provider: "claude" },
+  "sonnet5-high": { provider: "claude" },
 });
 const OBSERVATION_FIELDS = new Set(["arm", "provider", "status", "reason", "method",
   "sourceStatus", "basePlan", "windowMinutes", "usedPercent", "campaignTokens",
-  "quotaDeltaPercent", "documents", "tokens", "t0Utc", "t1Utc"]);
+  "quotaDeltaPercent", "documents", "tokens", "t0Utc", "t1Utc", "apiEquivalentUsd"]);
 const N_A_REASONS = new Set(["weekly-window-source-gap", "transport-mismatch",
   "plan-source-gap", "missing-observation", "no-quota-delta"]);
 
@@ -295,6 +270,10 @@ export function validateSeatObservations(value) {
   for (const observation of value.observations) {
     for (const key of Object.keys(observation)) {
       if (!OBSERVATION_FIELDS.has(key)) throw new Error(`Unknown observation field: ${key}`);
+    }
+    if (observation.apiEquivalentUsd !== undefined
+      && (!Number.isFinite(observation.apiEquivalentUsd) || observation.apiEquivalentUsd <= 0)) {
+      throw new Error("API equivalent must be a positive finite USD amount");
     }
     const config = SEAT_ARMS[observation.arm];
     if (!config || observation.provider !== config.provider) {
@@ -331,18 +310,16 @@ function observedCapacity(arm, observation) {
   if (!observation) return { status: "N-A", reason: "missing-observation" };
   if (observation.status === "N-A") return { status: "N-A", reason: observation.reason };
   if (observation.windowMinutes !== 10_080) return { status: "N-A", reason: "non-weekly-window" };
-  const tokensPerDocument = arm.documents ? arm.totalTokens / arm.documents : 0;
-  if (!(tokensPerDocument > 0)) return { status: "N-A", reason: "missing-usage" };
-  const documentDelta = ["controlled-burn", "passive-window-delta"].includes(observation.method);
-  const quotaFraction = (documentDelta ? observation.quotaDeltaPercent : observation.usedPercent) / 100;
-  const docsPerWeek = documentDelta
-    ? observation.tokens / quotaFraction / tokensPerDocument
-    : observation.campaignTokens / quotaFraction / tokensPerDocument;
-  const tokensPerWeek = documentDelta
-    ? observation.tokens / quotaFraction : observation.campaignTokens / quotaFraction;
-  return { status: observation.status, method: observation.method,
+  const apiPerDocument = arm.documents ? arm.apiUsd / arm.documents : 0;
+  if (!(apiPerDocument > 0)) return { status: "N-A", reason: "missing-usage" };
+  if (!(observation.apiEquivalentUsd > 0)) return { status: "N-A", reason: "api-equivalent-source-gap" };
+  const quotaFraction = (observation.quotaDeltaPercent ?? observation.usedPercent) / 100;
+  const apiEquivalentPerWeek = observation.apiEquivalentUsd / quotaFraction;
+  const docsPerWeek = apiEquivalentPerWeek / apiPerDocument;
+  return { status: observation.status, method: "api-cost-proportional",
+    apiEquivalentPerWeek, apiEquivalentPerMonth: apiEquivalentPerWeek * WEEKS_PER_MONTH,
     docsPerTenPercent: docsPerWeek / 10, docsPerWeek,
-    docsPerMonth: docsPerWeek * WEEKS_PER_MONTH, tokensPerWeek };
+    docsPerMonth: docsPerWeek * WEEKS_PER_MONTH, tokensPerWeek: null };
 }
 
 export function buildSeatComparisons(arms, observations = []) {
@@ -357,7 +334,8 @@ export function buildSeatComparisons(arms, observations = []) {
     return { arm: arm.arm, provider: SEAT_ARMS[arm.arm].provider,
       status: observed.status, reason: observed.reason ?? null, observed,
       acceptedRate, apiUsdPerDocument,
-      apiUsdPerAccepted: acceptedRate > 0 ? apiUsdPerDocument / acceptedRate : null };
+      apiUsdPerAccepted: acceptedRate > 0 && apiUsdPerDocument !== null
+        ? apiUsdPerDocument / acceptedRate : null };
   });
   const rows = [];
   for (const arm of selected) {
@@ -377,6 +355,9 @@ export function buildSeatComparisons(arms, observations = []) {
         docsPerMonth,
         acceptedDocsPerMonth: docsPerMonth === null || arm.acceptedRate === null
           ? null : docsPerMonth * arm.acceptedRate,
+        seatMode: "proportional",
+        discountFactor: scale === null ? null
+          : details.monthlyUsd / (arm.observed.apiEquivalentPerMonth * scale),
         seatUsdPerDocument: docsPerMonth ? details.monthlyUsd / docsPerMonth : null,
         breakEvenDocuments,
         breakEvenReachable: docsPerMonth === null || breakEvenDocuments === null
@@ -400,10 +381,19 @@ function scaleRange(range, factor) {
 export function buildReport(entries, options = {}) {
   const cycleDocuments = options.cycleDocuments ?? null;
   const aggregateArms = aggregateReceipts(entries);
+  const observations = Array.isArray(options.seatObservations) ? options.seatObservations : [];
+  const seatComparison = buildSeatComparisons(aggregateArms, observations);
   const arms = aggregateArms.map((arm) => {
     const factor1000 = arm.documents ? 1000 / arm.documents : null;
     const factorCycle = arm.documents && cycleDocuments ? cycleDocuments / arm.documents : null;
-    const subscription = subscriptionForArm(arm, options);
+    const provider = SEAT_ARMS[arm.arm]?.provider;
+    const seat = seatComparison.rows.find(row => row.arm === arm.arm
+      && row.plan === options[`${provider}Plan`]);
+    const subscription = seat?.discountFactor != null
+      ? { provider, plan: seat.plan, status: "estimated", basis: "api-cost-proportional",
+        discountFactor: seat.discountFactor,
+        usd: { min: arm.apiUsd * seat.discountFactor, max: arm.apiUsd * seat.discountFactor } }
+      : { provider: provider ?? null, status: "N-A", reason: "api-equivalent-source-gap" };
     return { ...arm, subscription,
       per1000Documents: factor1000 === null ? null : {
         apiUsd: arm.apiUsd === null ? null : arm.apiUsd * factor1000,
@@ -422,12 +412,14 @@ export function buildReport(entries, options = {}) {
     generatedAt: new Date().toISOString(),
     selections: { geminiPlan: options.geminiPlan ?? null,
       chatgptPlan: options.chatgptPlan ?? null,
-      geminiWeeklyTokens: options.geminiWeeklyTokens ?? null,
-      chatgptWeeklyTokens: options.chatgptWeeklyTokens ?? null },
+      seatMode: "proportional" },
     cycle: { benchmarkDocuments: cycleDocuments, refreshDocuments: null,
       refreshStatus: "source-gap" },
-    burn: { status: "N-A", quotaBurnPercent: 0, requests: 0,
-      reason: "No measurable pre/post Cloud Code quota observable; 429 exhaustion needs owner GO." },
+    burn: { status: observations.some(value => value.apiEquivalentUsd > 0) ? "calibrated" : "N-A",
+      requestsSentByCalculator: 0,
+      observations: observations.filter(value => value.apiEquivalentUsd > 0)
+        .map(({ provider, quotaDeltaPercent, apiEquivalentUsd }) =>
+          ({ provider, quotaDeltaPercent, apiEquivalentUsd })) },
     verifiedDiscrepancies: [
       { modelId: "gpt-5.6-sol", supplied: { input: 5, output: 30 },
         verified: { input: 4, output: 20 }, note: "Official promotional standard rate." },
@@ -436,8 +428,7 @@ export function buildReport(entries, options = {}) {
     ],
     rateCards: RATE_CARDS, subscriptionPlans: SUBSCRIPTION_PLANS,
     chatgptPlusFiveHourMessages: CHATGPT_PLUS_FIVE_HOUR_MESSAGES,
-    seatComparison: buildSeatComparisons(aggregateArms,
-      Array.isArray(options.seatObservations) ? options.seatObservations : []),
+    seatComparison,
     regressions: regressObservedRates(entries), arms,
   };
 }
@@ -459,7 +450,7 @@ export function renderMarkdown(report) {
     `Generated: ${report.generatedAt}. Every schema-v2 attempt receipt present under \`campaign/\` and `
       + "`codex-replay/campaign/` is counted; retries are not discarded.", "",
     `Selected Gemini plan: **${planGemini}**. Selected ChatGPT plan: **${planChatgpt}**.`,
-    "The owner must provide both actual tiers; Gemini also needs a measured or estimated weekly token reserve.", "",
+    "Seat mode: API cost × monthly subscription / monthly API-equivalent quota. Missing calibration stays N-A.", "",
     "## Per-arm costs", "",
     "Output is billable output: visible output plus separately reported thinking tokens. Token columns are total / per document.", "",
     "| Arm | Receipts (usage) | Docs usage / attempted / accepted | Input total / doc | Visible output total / doc | Thinking | Billable output | API USD | Subscription USD | Simulated USD | API / 1,000 docs | Subscription / 1,000 docs | Simulated / 1,000 docs | API / benchmark cycle |",
@@ -479,7 +470,7 @@ export function renderMarkdown(report) {
     + `${count(report.cycle.benchmarkDocuments)} documents. Production refresh cycle = **source-gap**: `
     + "the CronJobs define schedules but no stable document count per run.", "",
   "## Siège vs token", "",
-  "Une capacité n'est publiée que pour une fenêtre attestée de 7 jours. `scenario` est le ratio indirect quota compte/tokens campagne; il suppose un quota linéaire en tokens et une pondération Sol/Luna identique, toutes deux non vérifiées.", "",
+  "Quota proportionnel au coût API : équivalent API observé / fraction consommée × 52/12. Facteur = prix mensuel / équivalent mensuel. Un étalonnage absent reste N-A.", "",
   "| Arm | Statut | Rendement accepté | Docs / 10% | Docs / semaine | Docs / mois | Tokens / semaine | API / doc | API / résultat accepté |",
   "|---|---|---:|---:|---:|---:|---:|---:|---:|" );
   for (const arm of report.seatComparison.arms) {
@@ -489,17 +480,17 @@ export function renderMarkdown(report) {
       + `${capacity ? count(capacity.docsPerTenPercent, 1) : "N-A"} | `
       + `${capacity ? count(capacity.docsPerWeek, 1) : "N-A"} | `
       + `${capacity ? count(capacity.docsPerMonth, 1) : "N-A"} | `
-      + `${capacity ? count(capacity.tokensPerWeek, 0) : "N-A"} | `
+      + `${capacity?.tokensPerWeek != null ? count(capacity.tokensPerWeek, 0) : "N-A"} | `
       + `${money(arm.apiUsdPerDocument)} | ${money(arm.apiUsdPerAccepted)} |`);
   }
   lines.push("", "Quand le palier observé 1x/5x/20x est source-gap, chaque ligne est conditionnelle: elle suppose que ce palier est celui du siège observé, sans extrapolation de multiplicateur. Avec `basePlan` renseigné, les autres lignes sont mises à l'échelle. Les seuils économiques ne dépendent que du prix mensuel et du coût API mesuré.", "",
-    "| Arm | Palier | Base capacité | USD/mois | Docs/semaine | Docs/mois | Siège/doc | Seuil strict siège < API | Atteignable/siège | Sièges pour 1 000 docs/mois | Siège / 1 000 | API / 1 000 |",
-    "|---|---|---|---:|---:|---:|---:|---:|---|---:|---:|---:|" );
+    "| Arm | Palier | Base capacité | USD/mois | Docs/semaine | Docs/mois | Siège/doc | Facteur | Seuil strict siège < API | Atteignable/siège | Sièges pour 1 000 docs/mois | Siège / 1 000 | API / 1 000 |",
+    "|---|---|---|---:|---:|---:|---:|---:|---:|---|---:|---:|---:|" );
   for (const row of report.seatComparison.rows) {
     lines.push(`| ${row.arm} | ${row.provider}/${row.plan} | ${row.capacityBasis} | ${money(row.monthlyUsd)} | `
       + `${row.docsPerWeek === null ? "N-A" : count(row.docsPerWeek, 1)} | `
       + `${row.docsPerMonth === null ? "N-A" : count(row.docsPerMonth, 1)} | `
-      + `${money(row.seatUsdPerDocument)} | ${count(row.breakEvenDocuments)} | `
+      + `${money(row.seatUsdPerDocument)} | ${row.discountFactor === null ? "N-A" : count(row.discountFactor, 6)} | ${row.breakEvenDocuments === null ? "N-A" : count(row.breakEvenDocuments)} | `
       + `${row.breakEvenReachable === null ? "N-A" : row.breakEvenReachable ? "oui" : "non"} | `
       + `${row.seatsFor1000Documents ?? "N-A"} | ${money(row.seatUsdFor1000Documents)} | `
       + `${money(row.apiUsdFor1000Documents)} |`);
@@ -507,7 +498,7 @@ export function renderMarkdown(report) {
   lines.push("", "Cycle de production: **N-A (source-gap)**. Le manifeste de 100 documents est un cycle benchmark, pas un volume de refresh. Pour un cycle de `N` documents, le coût API est `N × API/doc`; le coût siège requiert d'abord une capacité mensuelle attestée.", "",
   "## Modes", "",
   "- `api`: measured input × input rate + (visible output + thinking) × output rate.",
-  "- `subscription`: monthly plan price ÷ monthly token reserve, uniquement avec un override hebdomadaire explicite; les limites 5 h ne sont jamais extrapolées en semaine.",
+  "- `subscription`: API cost × calibrated provider discount factor; weekly windows only. Fixed subscription charges at low utilization remain separate.",
   "- `simulated`: measured input/output token shares × the same model's API rates, producing a blended USD/M token rate. It is algebraically equal to API cost and is kept explicit for scenario work.", "",
   "## Hard-coded rate cards", "",
   "| Model | Input USD/M | Output USD/M | As of | Valid until | Source |", "|---|---:|---:|---|---|---|" );
@@ -542,7 +533,7 @@ export function renderMarkdown(report) {
       + `${count(value.outputUsdPerMillion, 6)} | ${card ? `${card.input} / ${card.output}` : "N-A"} |`);
   }
   lines.push("", "## Observables de quota", "",
-    "- Codex/ChatGPT: `wham/usage` expose le pourcentage, la durée et le reset de la fenêtre. La capacité Sol/Luna ci-dessus est un scénario par ratio avec les reçus de campagne, pas une mesure marginale par bras.",
+    "- Codex/ChatGPT: `wham/usage` expose le pourcentage, la durée et le reset de la fenêtre. La capacité par bras est proportionnelle au coût API, étalonnée sur la cohorte observée ; ce n’est pas une mesure marginale par bras.",
     "- Google Cloud Code: `agy /usage` expose directement les pourcentages hebdomadaire et 5 h pour Gemini Flash/Pro. Une observation `controlled-burn` avec fenêtre 10 080 min est donc une capacité hebdomadaire mesurée; les reçus restent la source des documents et tokens.",
     "- Claude Code OAuth: `/usage` expose les fenêtres 5 h et 7 j, mais `sonnet46-cloud-off` utilise Google Cloud Code. Une projection Claude Pro/Max pour ce bras serait un changement de transport; elle reste N-A.", "",
     "Burn réel: voir `burn/seat-observations.json` pour les pourcentages et les bornes UTC allowlistés; aucun identifiant de session ni secret n'est conservé. Les capacités Codex sans delta de compteur sont N-A, non extrapolées.", "");
@@ -557,9 +548,9 @@ const GEMINI_PLAN_ALIASES = Object.freeze({
 
 export function parseArgs(argv) {
   const options = { format: "md", campaign: null, geminiPlan: null, chatgptPlan: null,
-    geminiWeeklyTokens: null, chatgptWeeklyTokens: null, seatObservations: null };
+    seatObservations: null, seatMode: "proportional" };
   const valued = new Set(["--campaign", "--plan-gemini", "--plan-chatgpt", "--format",
-    "--gemini-weekly-tokens", "--chatgpt-weekly-tokens", "--seat-observations"]);
+    "--seat-observations", "--seat-mode"]);
   for (let index = 0; index < argv.length; index += 1) {
     const flag = argv[index];
     if (flag === "--help") return { ...options, help: true };
@@ -568,16 +559,12 @@ export function parseArgs(argv) {
     if (!value) throw new Error(`Missing value for ${flag}`);
     if (flag === "--campaign") options.campaign = value;
     else if (flag === "--format") options.format = value;
+    else if (flag === "--seat-mode") options.seatMode = value;
     else if (flag === "--seat-observations") options.seatObservations = value;
     else if (flag === "--plan-gemini") options.geminiPlan = GEMINI_PLAN_ALIASES[value] ?? value;
     else if (flag === "--plan-chatgpt") options.chatgptPlan = value;
-    else {
-      const number = Number(value);
-      if (!(number > 0)) throw new Error(`${flag} must be a positive number`);
-      options[flag === "--gemini-weekly-tokens" ? "geminiWeeklyTokens"
-        : "chatgptWeeklyTokens"] = number;
-    }
   }
+  if (options.seatMode !== "proportional") throw new Error("--seat-mode must be proportional");
   if (!options.campaign || !/^[A-Za-z0-9._-]+$/u.test(options.campaign)) {
     throw new Error("--campaign is required and must be a safe campaign name");
   }
@@ -596,8 +583,7 @@ export const HELP = `Usage: node cost-calculator.mjs --campaign <name> [options]
 Options:
   --plan-gemini pro|ultra-5x|ultra-20x
   --plan-chatgpt plus|pro-5x|pro-20x
-  --gemini-weekly-tokens <tokens>    Measured/estimated weekly reserve override
-  --chatgpt-weekly-tokens <tokens>   Override published-message estimate
+  --seat-mode proportional          API-cost-based quota allocation (default)
   --seat-observations <json>         Allowlisted quota observations (schema v1)
   --format md|json                   Default: md
 `;

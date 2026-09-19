@@ -1,0 +1,100 @@
+{
+ "documentId": "hatley-2026-04-07",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "7698c4adcecc5ce44ef0cfa7e380f71b90c092e21d3515c64adfddca992c1a16",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA-1 2025-03-0004 – agrandissement au 141 rue Main\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"141 rue Main\",\n        \"page\": 11,\n        \"citation\": \"D’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la\\ndemande d’agrandissement du bâtiment principal situé au 141 rue Main, le tout\",\n        \"anchor\": \"situé au 141 rue Main\"\n      },\n      \"reason\": \"La règle de transcription à l’identique impose de rétablir le saut de ligne entre « la » et « demande » dans la citation de la page 11.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Maintien à la liste patrimoniale révisée – grange de la Rubicon Farm, 38, rue Main\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"38, rue Main\",\n        \"page\": 11,\n        \"citation\": \"d’inventaire, les bâtiments suivants :\\n• la grange de la Rubicon Farm, située au 38, rue Main\",\n        \"anchor\": \"la grange de la Rubicon Farm, située au 38, rue Main\"\n      },\n      \"reason\": \"La règle de transcription à l’identique impose de rétablir le saut de ligne avant la puce désignant la grange dans la citation de la page 11.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Appui à la demande CPTAQ – agrandissement du LET sur le lot 2 935 698\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2 935 698\",\n        \"page\": 13,\n        \"citation\": \"d’une partie du lot 2 935 698 du cadastre du Québec, circonscription foncière de\\nCoaticook, soit pour l’agrandissement de son lieu d’enfouissement technique\",\n        \"anchor\": \"lot 2 935 698\"\n      },\n      \"reason\": \"La règle de transcription à l’identique impose de rétablir le saut de ligne entre « de » et « Coaticook » dans la citation de la page 13.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Approbation du PIIA-1 2025-03-0004 – agrandissement au 141 rue Main",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "141 rue Main",
+    "page": 11,
+    "citation": "D’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la\ndemande d’agrandissement du bâtiment principal situé au 141 rue Main, le tout",
+    "anchor": "situé au 141 rue Main"
+   },
+   "reason": "La règle de transcription à l’identique impose de rétablir le saut de ligne entre « la » et « demande » dans la citation de la page 11."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Maintien à la liste patrimoniale révisée – grange de la Rubicon Farm, 38, rue Main",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "38, rue Main",
+    "page": 11,
+    "citation": "d’inventaire, les bâtiments suivants :\n• la grange de la Rubicon Farm, située au 38, rue Main",
+    "anchor": "la grange de la Rubicon Farm, située au 38, rue Main"
+   },
+   "reason": "La règle de transcription à l’identique impose de rétablir le saut de ligne avant la puce désignant la grange dans la citation de la page 11."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Appui à la demande CPTAQ – agrandissement du LET sur le lot 2 935 698",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2 935 698",
+    "page": 13,
+    "citation": "d’une partie du lot 2 935 698 du cadastre du Québec, circonscription foncière de\nCoaticook, soit pour l’agrandissement de son lieu d’enfouissement technique",
+    "anchor": "lot 2 935 698"
+   },
+   "reason": "La règle de transcription à l’identique impose de rétablir le saut de ligne entre « de » et « Coaticook » dans la citation de la page 13."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "piia",
+   "page": 11,
+   "citation": "D’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la\ndemande d’agrandissement du bâtiment principal situé au 141 rue Main, le tout"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "inconnu",
+   "page": 11,
+   "citation": "d’inventaire, les bâtiments suivants :\n• la grange de la Rubicon Farm, située au 38, rue Main"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "inconnu",
+   "page": 13,
+   "citation": "d’une partie du lot 2 935 698 du cadastre du Québec, circonscription foncière de\nCoaticook, soit pour l’agrandissement de son lieu d’enfouissement technique"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

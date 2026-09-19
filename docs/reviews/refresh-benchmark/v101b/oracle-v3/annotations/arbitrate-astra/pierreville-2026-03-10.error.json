@@ -1,0 +1,25 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4379fc60f9b0423ee4f1fcbe4e45632ff075e83f84ece97381a698efdc225824",
+ "verificationSha256": "7164aa8baea9c7115d02be3454a81de94b10c8b4aab46fe0c70478931b1d17e6",
+ "error": "MESH_FAILED ENOTFOUND",
+ "receipt": {
+  "transport": "codex",
+  "latencyMs": 3314336,
+  "code": "ENOTFOUND",
+  "httpStatus": null,
+  "responseError": null
+ },
+ "at": "2026-09-18T20:57:12.456Z"
+}

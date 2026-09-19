@@ -1,0 +1,406 @@
+{
+  "nodes": [
+    {
+      "id": "source-doc",
+      "label": "Procès-verbal de la séance ordinaire du 21 janvier 2026",
+      "node_type": "Source",
+      "file_type": "document",
+      "status": "validated",
+      "municipality": "wentworth-nord",
+      "date": "2026-01-21",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "url": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire tenue par le Conseil municipal le\n21 janvier 2026 à 19 h au Centre communautaire de Laurel situé au 3470, route\nPrincipale à Wentworth-Nord."
+        }
+      ]
+    },
+    {
+      "id": "event-dm-2025-0418",
+      "label": "Dérogation mineure 2025-0418",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "status": "validated",
+      "kind": "derogation",
+      "dossier": "2025-0418",
+      "resolution": "2026-01-3809",
+      "date": "2026-01-21",
+      "meetingDate": "2026-01-21",
+      "decision": "approuvé",
+      "etape": "derogation_mineure",
+      "etape_date": "2026-01-21",
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "description": "Dérogation mineure accordée pour autoriser la création d'une emprise de rue d'une largeur de 11,50 mètres dans sa section la plus étroite au lieu de 12 mètres.",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Il est proposé par madame Suzie Cormier,\nET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une emprise de rue"
+        }
+      ]
+    },
+    {
+      "id": "constraint-rive-milieu-humide",
+      "label": "Contrainte environnementale - Rive de cours d'eau et milieux humides",
+      "node_type": "Constraint",
+      "file_type": "document",
+      "status": "candidate",
+      "constraintType": "milieu_humide",
+      "municipality": "wentworth-nord",
+      "resolution": "2026-01-3809",
+      "meetingDate": "2026-01-21",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "description": "Emprise de rue située dans un lieu soumis à des contraintes de protection de l'environnement (dans la rive d'un cours d'eau et de milieux humides).",
+      "evidence_refs": ["ev-3"],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "ATTENDU QUE la MRC des Pays-d’en-Haut devra également statuer sur la\nprésente demande de dérogation mineure puisque cette emprise de rue sera\nsituée dans un lieu où l’occupation du sol est soumisse à des"
+        }
+      ]
+    },
+    {
+      "id": "event-lotissement-2025-9029",
+      "label": "Permis de lotissement 2025-9029",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "status": "validated",
+      "kind": "subdivision",
+      "dossier": "2025-9029",
+      "resolution": "2026-01-3810",
+      "date": "2026-01-21",
+      "meetingDate": "2026-01-21",
+      "decision": "approuvé",
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "description": "Demande de contribution pour fins de parcs, terrains de jeux et espaces naturels acquittée en argent pour la création du lot 6 717 658.",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Il est proposé par madame Céline Bouchard,\nET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit acquittée"
+        }
+      ]
+    },
+    {
+      "id": "signal-contribution-parcs-2025-9029",
+      "label": "Contribution parcs - Lotissement 2025-9029",
+      "node_type": "Signal",
+      "file_type": "document",
+      "status": "candidate",
+      "category": "lotissement",
+      "kind": "contribution_parcs",
+      "date": "2026-01-21",
+      "meetingDate": "2026-01-21",
+      "resolution": "2026-01-3810",
+      "amount_cad": 12302.6,
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "description": "Contribution exigée pour fins de parcs, terrains de jeux ou espaces naturels d'un montant de 12 302.60 $ acquittée en argent.",
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Il est proposé par madame Céline Bouchard,\nET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit acquittée"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2017-498",
+      "label": "Règlement de zonage 2017-498",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "status": "candidate",
+      "numero": "2017-498",
+      "title": "Règlement de zonage",
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "citations": [
+        {
+          "page": 10,
+          "excerpt": "Conformément à l’article 557 de la Loi sur les élections et les référendums dans\nles municipalités, monsieur Ron Kelley, directeur général et greffier-trésorier,\ndépose les certificats attestant le"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2017-498-30-c09",
+      "label": "Règlement 2017-498-30-C09",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "status": "candidate",
+      "numero": "2017-498-30-C09",
+      "title": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017-498 afin d’autoriser l’usage complémentaire à un usage résidentiel « hébergement touristique de type résidence principale » avec restriction dans la zone commerciale C-09",
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "zone_cible": "C-09",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": " Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » avec restriction"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2017-498-30-cons08",
+      "label": "Règlement 2017-498-30-CONS08",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "status": "candidate",
+      "numero": "2017-498-30-CONS08",
+      "title": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage n°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel « hébergement touristique de type résidence principale » dans la zone conservation CONS-08",
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "zone_cible": "CONS-08",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": " Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale »"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-2017-498-30-i04",
+      "label": "Règlement 2017-498-30-I04",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "status": "candidate",
+      "numero": "2017-498-30-I04",
+      "title": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage n°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel « hébergement touristique de type résidence principale » dans la zone industrielle I-04",
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "zone_cible": "I-04",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": " Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale »"
+        }
+      ]
+    },
+    {
+      "id": "zone-c-09",
+      "label": "Zone C-09",
+      "node_type": "Zone",
+      "file_type": "document",
+      "status": "candidate",
+      "code": "C-09",
+      "usage": "commerciale",
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": " Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » avec restriction"
+        }
+      ]
+    },
+    {
+      "id": "zone-cons-08",
+      "label": "Zone CONS-08",
+      "node_type": "Zone",
+      "file_type": "document",
+      "status": "candidate",
+      "code": "CONS-08",
+      "usage": "conservation",
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": " Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale »"
+        }
+      ]
+    },
+    {
+      "id": "zone-i-04",
+      "label": "Zone I-04",
+      "node_type": "Zone",
+      "file_type": "document",
+      "status": "candidate",
+      "code": "I-04",
+      "usage": "industrielle",
+      "municipality": "wentworth-nord",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": " Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale »"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "event-lotissement-2025-9029",
+      "target": "signal-contribution-parcs-2025-9029",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "evidence_refs": ["ev-4"],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Il est proposé par madame Céline Bouchard,\nET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit acquittée"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2017-498-30-c09",
+      "target": "bylaw-2017-498",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "evidence_refs": ["ev-5"],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": " Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » avec restriction"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2017-498-30-cons08",
+      "target": "bylaw-2017-498",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "evidence_refs": ["ev-5"],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": " Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale »"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2017-498-30-i04",
+      "target": "bylaw-2017-498",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "evidence_refs": ["ev-5"],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": " Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale »"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2017-498-30-c09",
+      "target": "zone-c-09",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "evidence_refs": ["ev-5"],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": " Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » avec restriction"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2017-498-30-cons08",
+      "target": "zone-cons-08",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "evidence_refs": ["ev-5"],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": " Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale »"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-2017-498-30-i04",
+      "target": "zone-i-04",
+      "relation": "applies_to",
+      "confidence": "EXTRACTED",
+      "evidence_refs": ["ev-5"],
+      "citations": [
+        {
+          "page": 11,
+          "excerpt": " Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale »"
+        }
+      ]
+    },
+    {
+      "source": "source-doc",
+      "target": "event-dm-2025-0418",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "evidence_refs": ["ev-2"],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Il est proposé par madame Suzie Cormier,\nET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une emprise de rue"
+        }
+      ]
+    },
+    {
+      "source": "source-doc",
+      "target": "event-lotissement-2025-9029",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "evidence_refs": ["ev-4"],
+      "citations": [
+        {
+          "page": 9,
+          "excerpt": "Il est proposé par madame Céline Bouchard,\nET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit acquittée"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-1",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+      "modality": "pdf",
+      "page": 1,
+      "excerpt": "Procès-verbal de la séance ordinaire tenue par le Conseil municipal le\n21 janvier 2026 à 19 h au Centre communautaire de Laurel situé au 3470, route\nPrincipale à Wentworth-Nord."
+    },
+    {
+      "id": "ev-2",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+      "modality": "pdf",
+      "page": 9,
+      "excerpt": "Il est proposé par madame Suzie Cormier,\nET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une emprise de rue"
+    },
+    {
+      "id": "ev-3",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "ATTENDU QUE la MRC des Pays-d’en-Haut devra également statuer sur la\nprésente demande de dérogation mineure puisque cette emprise de rue sera\nsituée dans un lieu où l’occupation du sol est soumisse à des"
+    },
+    {
+      "id": "ev-4",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+      "modality": "pdf",
+      "page": 9,
+      "excerpt": "Il est proposé par madame Céline Bouchard,\nET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit acquittée"
+    },
+    {
+      "id": "ev-5",
+      "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+      "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+      "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+      "modality": "pdf",
+      "page": 11,
+      "excerpt": " Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel\n« hébergement touristique de type résidence principale » avec restriction"
+    }
+  ],
+  "input_tokens": 4200,
+  "output_tokens": 2250
+}

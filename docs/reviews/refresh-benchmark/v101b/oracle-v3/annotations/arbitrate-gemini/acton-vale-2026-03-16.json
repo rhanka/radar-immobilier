@@ -1,0 +1,19 @@
+{
+ "documentId": "acton-vale-2026-03-16",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "651db8ff1fc50b87182675ec2f9ff7652f82181a774981355061c593e80a89d8",
+ "verificationSha256": "40b3383a5254fa32dc563d21c8a6383780b2d1b224ca61b56f895b9c26050493",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

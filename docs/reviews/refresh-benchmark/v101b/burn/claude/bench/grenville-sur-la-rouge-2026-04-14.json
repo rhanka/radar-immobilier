@@ -1,0 +1,13 @@
+{
+ "id": "grenville-sur-la-rouge-2026-04-14",
+ "rc": 0,
+ "latencyMs": 164639,
+ "inputTokens": 2,
+ "outputTokens": 18022,
+ "cacheRead": 0,
+ "cacheCreate": 5046,
+ "costUsd": 0.504156,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 32092
+}

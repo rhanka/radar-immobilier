@@ -1,0 +1,386 @@
+{
+ "documentId": "contrecoeur-2026-04-14",
+ "nextId": 10,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion — Règlement U-102 constituant le comité consultatif en urbanisme (abrogeant le Règlement 147-82)",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "U-102",
+    "page": 4,
+    "citation": "il sera présenté en vue de son adoption, le Règlement U-102 constituant le comité consultatif en urbanisme et abrogeant le Règlement 147-82",
+    "anchor": "le Règlement U-102 constituant",
+    "spanStart": 1431,
+    "spanEnd": 1570
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion — Règlement U102 constituant le comité consultatif en urbanisme",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "U102",
+      "page": 4,
+      "citation": "AVIS DE MOTION – PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102 – CONSTITUANT LE COMITÉ CONSULTATIF EN URBANISME – ABROGEANT LE RÈGLEMENT 147-82",
+      "anchor": "RÈGLEMENT U102",
+      "spanStart": 1147,
+      "spanEnd": 1293
+     }
+    },
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Avis de motion — Règlement U-102 constituant le comité consultatif en urbanisme (abrogeant le Règlement 147-82)",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "U-102",
+      "page": 4,
+      "citation": "il sera présenté en vue de son adoption, le Règlement U-102 constituant le comité consultatif en urbanisme et abrogeant le Règlement 147-82",
+      "anchor": "le Règlement U-102 constituant",
+      "spanStart": 1431,
+      "spanEnd": 1570
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le texte constate un avis de motion actuel pour ce règlement, écrit U102 dans l’intitulé et U-102 dans le corps du texte, à compter séparément du dépôt de son projet."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "correct",
+     "reason": "Le numéro du règlement est écrit « U-102 » dans le corps de l'avis de motion (page 4) et à l'ordre du jour (point 5.1) ; « U102 » n'apparaît que dans l'en-tête où le tiret de fin de ligne a été perdu, l'objet doit porter l'identifiant tel qu'écrit dans le texte de la résolution."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Présentation et dépôt du projet de règlement U-102 — Comité consultatif en urbanisme",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "U-102",
+    "page": 4,
+    "citation": "AVIS DE MOTION – PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102 – CONSTITUANT LE COMITÉ CONSULTATIF EN URBANISME – ABROGEANT LE RÈGLEMENT 147-82",
+    "anchor": "PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102",
+    "spanStart": 1147,
+    "spanEnd": 1293
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Présentation et dépôt du projet de règlement U102 — Comité consultatif en urbanisme",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "U102",
+      "page": 4,
+      "citation": "AVIS DE MOTION – PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102 – CONSTITUANT LE COMITÉ CONSULTATIF EN URBANISME – ABROGEANT LE RÈGLEMENT 147-82",
+      "anchor": "PROJET DE RÈGLEMENT U102",
+      "spanStart": 1147,
+      "spanEnd": 1293
+     }
+    },
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Présentation et dépôt du projet de règlement U-102 — Comité consultatif en urbanisme",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "U-102",
+      "page": 4,
+      "citation": "AVIS DE MOTION – PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102 – CONSTITUANT LE COMITÉ CONSULTATIF EN URBANISME – ABROGEANT LE RÈGLEMENT 147-82",
+      "anchor": "PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102",
+      "spanStart": 1147,
+      "spanEnd": 1293
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le membre du conseil présente et dépose effectivement le projet de règlement, ce qui constitue une unité distincte de l’avis de motion."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "correct",
+     "reason": "Même objet que u01 : le corps de l'avis (« le Règlement U-102 ») et l'ordre du jour écrivent « U-102 » ; l'objet est aligné sur cet identifiant, la citation de l'en-tête (« PRÉSENTATION ET DÉPÔT ») restant celle qui atteste le dépôt du projet constaté par « Ledit membre du conseil présente et dépose le projet de règlement visé »."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption du second projet de règlement U-100-1 — Modification du zonage",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "U-100-1",
+    "page": 5,
+    "citation": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100 relatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de l’annexe B",
+    "anchor": "Règlement U-100-1",
+    "spanStart": 741,
+    "spanEnd": 913
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du second projet de règlement U-100-1 — Modification du zonage",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "U-100-1",
+      "page": 5,
+      "citation": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100 relatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de l’annexe B",
+      "anchor": "Règlement U-100-1",
+      "spanStart": 741,
+      "spanEnd": 913
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-057 adopte le second projet, tandis que l’avis de motion, le premier projet et la consultation antérieurs ne sont que des rappels historiques."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement U-101 — Contrôle intérimaire du secteur industriel",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "U-101",
+    "page": 5,
+    "citation": "D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur industriel",
+    "anchor": "Règlement U-101",
+    "spanStart": 1344,
+    "spanEnd": 1430
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement U-101 — Contrôle intérimaire du secteur industriel",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "U-101",
+      "page": 5,
+      "citation": "D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur industriel",
+      "anchor": "Règlement U-101",
+      "spanStart": 1344,
+      "spanEnd": 1430
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-058 adopte ce règlement de contrôle intérimaire, objet réglementaire d’urbanisme explicite."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-009 — Enseignes au 4270, rue des Patriotes, suite 101",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-009",
+    "page": 13,
+    "citation": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une enseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau autoroutier",
+    "anchor": "PIIA 2026-009",
+    "spanStart": 1208,
+    "spanEnd": 1378
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-009 — Enseignes au 4270, rue des Patriotes, suite 101",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-009",
+      "page": 13,
+      "citation": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une enseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau autoroutier",
+      "anchor": "PIIA 2026-009",
+      "spanStart": 1208,
+      "spanEnd": 1378
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-071 approuve une demande de PIIA portant sur des enseignes commerciales, les petits PIIA non résidentiels étant inclus."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-012 — Construction résidentielle au 5725, rue Moreau",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-012",
+    "page": 14,
+    "citation": "D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un bâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589",
+    "anchor": "PIIA 2026-012",
+    "spanStart": 0,
+    "spanEnd": 158
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-012 — Construction résidentielle au 5725, rue Moreau",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-012",
+      "page": 14,
+      "citation": "D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un bâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589",
+      "anchor": "PIIA 2026-012",
+      "spanStart": 0,
+      "spanEnd": 158
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-072 approuve explicitement le PIIA pour la construction d’un bâtiment résidentiel unifamilial isolé."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Approbation de la dérogation mineure 2026-011 — 360-366 et 398-400, rue Papin",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-011",
+    "page": 14,
+    "citation": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles situés aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323",
+    "anchor": "dérogation mineure 2026-011",
+    "spanStart": 1876,
+    "spanEnd": 2018
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation de la dérogation mineure 2026-011 — 360-366 et 398-400, rue Papin",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-011",
+      "page": 14,
+      "citation": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles situés aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323",
+      "anchor": "dérogation mineure 2026-011",
+      "spanStart": 1876,
+      "spanEnd": 2018
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-073 approuve une seule demande identifiée, couvrant les dérogations de profondeur et de superficie des deux lots."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Approbation de la dérogation mineure 2026-020 — 275, rue de l’Église",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-020",
+    "page": 15,
+    "citation": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé au 275, rue de l’Église, lot 6 607 642 au cadastre du Québec",
+    "anchor": "dérogation mineure 2026-020",
+    "spanStart": 1520,
+    "spanEnd": 1656
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation de la dérogation mineure 2026-020 — 275, rue de l’Église",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-020",
+      "page": 15,
+      "citation": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé au 275, rue de l’Église, lot 6 607 642 au cadastre du Québec",
+      "anchor": "dérogation mineure 2026-020",
+      "spanStart": 1520,
+      "spanEnd": 1656
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-074 approuve cette demande concernant la plantation d’arbres et la localisation ainsi que l’implantation d’un équipement accessoire."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Autorisation du protocole d’entente — Infrastructures de la halte routière, montée de la Pomme d’Or",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "montée de la Pomme d’Or",
+    "page": 16,
+    "citation": "à signer, pour et au nom de la Ville, le protocole d’entente à intervenir avec Picard Construction relativement à la construction d’une halte routière sur la montée de la Pomme d’Or",
+    "anchor": "montée de la Pomme d’Or",
+    "spanStart": 619,
+    "spanEnd": 800
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation du protocole d’entente — Infrastructures de la halte routière, montée de la Pomme d’Or",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "montée de la Pomme d’Or",
+      "page": 16,
+      "citation": "à signer, pour et au nom de la Ville, le protocole d’entente à intervenir avec Picard Construction relativement à la construction d’une halte routière sur la montée de la Pomme d’Or",
+      "anchor": "montée de la Pomme d’Or",
+      "spanStart": 619,
+      "spanEnd": 800
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le protocole autorisé encadre la réalisation d’un réseau d’égout, d’une conduite de refoulement et d’un poste de pompage pour un développement explicite de halte routière, et non un simple entretien de voirie."
+    }
+   ]
+  }
+ ]
+}

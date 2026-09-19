@@ -1,0 +1,257 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "030c4546161047e033a92d6ae702a18c50a359a4f007374c11b7a2f383b02380",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-04"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-04 modifiant le zonage",
+     "stage": "projet",
+     "objet": "2026-04",
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04"
+      },
+      {
+       "page": 22,
+       "excerpt": "20-AVIS DE MOTION ET PRÉSENTATION DU PROJET DE RÈGLEMENT 2026-04\nMODIFIANT LE RÈGLEMENT DE ZONAGE NUMÉRO 90-01\nJe, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage\nnuméro 90-01 de la Municipalité de Notre-Dame-du-Rosaire.\nLe projet de règlement vise à modifier la grille des usages afin de permettre certains usages qui ne\nsont pas autorisés présentement dans certaines zones du territoire municipal."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-90-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 90-01",
+     "stage": null,
+     "objet": "90-01",
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "20-AVIS DE MOTION ET PRÉSENTATION DU PROJET DE RÈGLEMENT 2026-04\nMODIFIANT LE RÈGLEMENT DE ZONAGE NUMÉRO 90-01"
+      },
+      {
+       "page": 22,
+       "excerpt": "20-AVIS DE MOTION ET PRÉSENTATION DU PROJET DE RÈGLEMENT 2026-04\nMODIFIANT LE RÈGLEMENT DE ZONAGE NUMÉRO 90-01\nJe, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage\nnuméro 90-01 de la Municipalité de Notre-Dame-du-Rosaire.\nLe projet de règlement vise à modifier la grille des usages afin de permettre certains usages qui ne\nsont pas autorisés présentement dans certaines zones du territoire municipal."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-avis-motion-2026-04"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion — modification de la grille des usages",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04"
+      },
+      {
+       "page": 22,
+       "excerpt": "20-AVIS DE MOTION ET PRÉSENTATION DU PROJET DE RÈGLEMENT 2026-04\nMODIFIANT LE RÈGLEMENT DE ZONAGE NUMÉRO 90-01\nJe, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage\nnuméro 90-01 de la Municipalité de Notre-Dame-du-Rosaire.\nLe projet de règlement vise à modifier la grille des usages afin de permettre certains usages qui ne\nsont pas autorisés présentement dans certaines zones du territoire municipal."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-terrains-morin"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Mise en vente de trois terrains municipaux — rue Morin",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du\ncadastre du Québec ;"
+      },
+      {
+       "page": 19,
+       "excerpt": "QUE le conseil municipal autorise la mise en vente desdits terrains ;"
+      },
+      {
+       "page": 19,
+       "excerpt": "QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du\ncadastre du Québec ;\n-\n\n6 714 200 :19 999 $ plus taxes\n6 714 201 :19 999 $plus taxes\n6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains ;\nQUE la municipalité s’engage à procéder à l’installation de la ligne électrique et du réseau\nd’aqueduc desservant lesdits lots ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-vente-6714202"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente conditionnelle du lot 6714202 — rue Morin",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6\n714 202 du cadastre du Québec,"
+      },
+      {
+       "page": 20,
+       "excerpt": "QUE cette vente soit conditionnelle à l’engagement de l’acheteur de construire un bâtiment principal\nsur ledit lot dans un délai maximal de deux (2) ans suivant la signature de l’acte de vente ;"
+      },
+      {
+       "page": 20,
+       "excerpt": "QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6\n714 202 du cadastre du Québec, d’une superficie de 2 491,6 mètres carrés, au prix de 22 499 $, plus\nles taxes applicables ;\nQUE cette vente soit conditionnelle à l’engagement de l’acheteur de construire un bâtiment principal\nsur ledit lot dans un délai maximal de deux (2) ans suivant la signature de l’acte de vente ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-cour-accommodation"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Réaménagement de la cour de l’Accommodation NDR",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "Le Comité d’action et de développement (CAD) réitère sa demande auprès du conseil municipal afin\nde procéder au déplacement du cabanon situé dans la cour arrière du dépanneur."
+      },
+      {
+       "page": 23,
+       "excerpt": "Le Comité d’action et de développement (CAD) réitère sa demande auprès du conseil municipal afin\nde procéder au déplacement du cabanon situé dans la cour arrière du dépanneur. Depuis la fin du\nservice de recyclage au printemps 2025, le cabanon est inutilisé. Son déplacement permettrait de\nréaménager l’espace pour offrir un lieu accueillant et sécuritaire à la clientèle durant la saison\nestivale (aire de repas ou de rencontre). Cette demande s’inscrit notamment dans un contexte\nd’augmentation de l’achalandage liée au projet de parc éolien et vise à améliorer l’accessibilité, la\nconvivialité et l’attrait du site. Acceptée"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le texte atteste explicitement l'avis de motion et la présentation du projet de règlement 2026-04 modifiant le règlement de zonage 90-01.\",\"excerpt\":\"sera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage\\nnuméro 90-01 de la Municipalité de Notre-Dame-du-Rosaire.\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 90-01 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification future (simple référence réglementaire d'arrière-plan sans acte propre).\",\"excerpt\":\"sera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage\\nnuméro 90-01\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le document enregistre formellement le dépôt de l'avis de motion relatif au projet modifiant la grille des usages du zonage.\",\"excerpt\":\"Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\\nsera présenté et adopté le premier projet de règlement 2026-04\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution autorisant la fixation du prix et la mise en vente de trois lots municipaux sur la rue Morin.\",\"excerpt\":\"QUE le conseil municipal autorise la mise en vente desdits terrains ;\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la résolution autorisant la vente conditionnelle du lot 6 714 202 avec obligation de construire un bâtiment principal en deux ans.\",\"excerpt\":\"QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6\\n714 202 du cadastre du Québec, d’une superficie de 2 491,6 mètres carrés, au prix de 22 499 $\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple traitement de correspondance concernant le déplacement d'un cabanon dans une cour, sans acte de planification territoriale, de zonage ou foncier d'urbanisme.\",\"excerpt\":\"Le Comité d’action et de développement (CAD) réitère sa demande auprès du conseil municipal afin\\nde procéder au déplacement du cabanon situé dans la cour arrière du dépanneur.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le texte atteste explicitement l'avis de motion et la présentation du projet de règlement 2026-04 modifiant le règlement de zonage 90-01.",
+   "excerpt": "sera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage\nnuméro 90-01 de la Municipalité de Notre-Dame-du-Rosaire."
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 90-01 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification future (simple référence réglementaire d'arrière-plan sans acte propre).",
+   "excerpt": "sera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage\nnuméro 90-01"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le document enregistre formellement le dépôt de l'avis de motion relatif au projet modifiant la grille des usages du zonage.",
+   "excerpt": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution autorisant la fixation du prix et la mise en vente de trois lots municipaux sur la rue Morin.",
+   "excerpt": "QUE le conseil municipal autorise la mise en vente desdits terrains ;"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la résolution autorisant la vente conditionnelle du lot 6 714 202 avec obligation de construire un bâtiment principal en deux ans.",
+   "excerpt": "QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6\n714 202 du cadastre du Québec, d’une superficie de 2 491,6 mètres carrés, au prix de 22 499 $"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple traitement de correspondance concernant le déplacement d'un cabanon dans une cour, sans acte de planification territoriale, de zonage ou foncier d'urbanisme.",
+   "excerpt": "Le Comité d’action et de développement (CAD) réitère sa demande auprès du conseil municipal afin\nde procéder au déplacement du cabanon situé dans la cour arrière du dépanneur."
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 90-01 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification future (simple référence réglementaire d'arrière-plan sans acte propre)."
+   },
+   {
+    "act": "A06",
+    "reason": "Il s'agit d'un simple traitement de correspondance concernant le déplacement d'un cabanon dans une cour, sans acte de planification territoriale, de zonage ou foncier d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le texte atteste explicitement l'avis de motion et la présentation du projet de règlement 2026-04 modifiant le règlement de zonage 90-01."
+   },
+   {
+    "act": "A03",
+    "reason": "Le document enregistre formellement le dépôt de l'avis de motion relatif au projet modifiant la grille des usages du zonage."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil adopte une résolution autorisant la fixation du prix et la mise en vente de trois lots municipaux sur la rue Morin."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil adopte la résolution autorisant la vente conditionnelle du lot 6 714 202 avec obligation de construire un bâtiment principal en deux ans."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2385,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 16465,
+   "outputTokens": 558,
+   "totalTokens": 17023
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2232
+  },
+  "inputSha256": "18a943d640cde5cc1b8deb1ef39d44392579829197a831085e1e8a3eb5ba7599"
+ }
+}

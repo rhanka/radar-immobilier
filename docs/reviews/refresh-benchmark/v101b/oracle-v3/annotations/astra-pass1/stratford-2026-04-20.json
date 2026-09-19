@@ -1,0 +1,181 @@
+{
+ "documentId": "stratford-2026-04-20",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "4f62ba03ce24eaa83e94bc29d1ee39b19582407fa3031f7dab688e40bc4b7011",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Consultation publique prévue — Règlement 1257\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"consultation_publique\",\n        \"objet\": \"1257\",\n        \"page\": 1,\n        \"citation\": \"Consultation publique (Règlement 1257 et dérogations)\",\n        \"anchor\": \"Règlement 1257\"\n      },\n      \"reason\": \"L’ordre du jour prévoit explicitement une consultation publique sur le règlement 1257, étape distincte de son deuxième projet.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du projet de règlement no 1256 — démolition d’immeubles\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"1256\",\n        \"page\": 1,\n        \"citation\": \"Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\\nassujettis\",\n        \"anchor\": \"Règlement no 1256\"\n      },\n      \"reason\": \"Le projet de règlement modifiant les dispositions relatives à la démolition est un objet réglementaire explicite dont l’adoption est prévue, et non acquise.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption prévue du deuxième projet de règlement no 1257 — zone RU-13\",\n        \"stage\": \"second_projet\",\n        \"procedure\": null,\n        \"objet\": \"1257\",\n        \"page\": 1,\n        \"citation\": \"Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés\",\n        \"anchor\": \"Règlement no 1257\"\n      },\n      \"reason\": \"L’ordre du jour prévoit l’adoption du deuxième projet du règlement de zonage 1257, qui constitue une étape réglementaire distincte.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Examen prévu du bail du bureau de poste\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"Bail bureau de poste\",\n        \"page\": 1,\n        \"citation\": \"Bail bureau de poste\",\n        \"anchor\": \"Bail bureau de poste\"\n      },\n      \"reason\": \"Le bail du bureau de poste est un objet foncier explicite prévu à l’ordre du jour, sans précision permettant de qualifier davantage son étape.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Achat prévu d’un terrain sur la rue des Érables\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"rue des Érables\",\n        \"page\": 1,\n        \"citation\": \"Achat d’un terrain sur la rue des Érables\",\n        \"anchor\": \"rue des Érables\"\n      },\n      \"reason\": \"L’achat de terrain est un acte foncier explicitement inscrit à l’ordre du jour et doit être qualifié de prévu.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Vente prévue d’une lisière de terrain sur le chemin des Hauts-Cantons\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"chemin des Hauts-Cantons\",\n        \"page\": 1,\n        \"citation\": \"Vente d’une lisière de terrain sur le chemin des Hauts-Cantons\",\n        \"anchor\": \"chemin des Hauts-Cantons\"\n      },\n      \"reason\": \"La vente d’une lisière de terrain constitue un acte foncier explicite, ici prévu et non encore décidé.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Décision prévue sur une servitude d’écoulement des eaux — 467 rang Beau-Lac\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"467 rang Beau-Lac\",\n        \"page\": 1,\n        \"citation\": \"Servitude d’écoulement des eaux au 467 rang Beau-Lac\",\n        \"anchor\": \"467 rang Beau-Lac\"\n      },\n      \"reason\": \"La servitude identifiée par son adresse est un acte foncier soumis à une décision prévue à l’ordre du jour.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Décision prévue sur une dérogation mineure — lot 6 674 217, chemin Thompson\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"6 674 217\",\n        \"page\": 2,\n        \"citation\": \"Demande de dérogation mineure – lot 6 674 217 chemin Thompson\",\n        \"anchor\": \"lot 6 674 217\"\n      },\n      \"reason\": \"La demande de dérogation mineure explicitement identifiée par son lot constitue une unité prévue, sans présumer de son acceptation.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Décision prévue sur une dérogation mineure — 405 rang Elgin\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"405 rang Elgin\",\n        \"page\": 2,\n        \"citation\": \"Demande de dérogation mineure – 405 rang Elgin\",\n        \"anchor\": \"405 rang Elgin\"\n      },\n      \"reason\": \"Cette demande de dérogation mineure possède une adresse distincte et forme une unité propre, dont seule la décision prévue est attestée.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Consultation publique prévue — Règlement 1257",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "1257",
+    "page": 1,
+    "citation": "Consultation publique (Règlement 1257 et dérogations)",
+    "anchor": "Règlement 1257"
+   },
+   "reason": "L’ordre du jour prévoit explicitement une consultation publique sur le règlement 1257, étape distincte de son deuxième projet."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption prévue du projet de règlement no 1256 — démolition d’immeubles",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "1256",
+    "page": 1,
+    "citation": "Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition\nd’immeubles no 1212 afin de modifier certaines dispositions relatives aux bâtiments\nassujettis",
+    "anchor": "Règlement no 1256"
+   },
+   "reason": "Le projet de règlement modifiant les dispositions relatives à la démolition est un objet réglementaire explicite dont l’adoption est prévue, et non acquise."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption prévue du deuxième projet de règlement no 1257 — zone RU-13",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "1257",
+    "page": 1,
+    "citation": "Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage\nno 1035 afin de créer la zone RU-13 et déterminer les usages qui y sont autorisés",
+    "anchor": "Règlement no 1257"
+   },
+   "reason": "L’ordre du jour prévoit l’adoption du deuxième projet du règlement de zonage 1257, qui constitue une étape réglementaire distincte."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Examen prévu du bail du bureau de poste",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Bail bureau de poste",
+    "page": 1,
+    "citation": "Bail bureau de poste",
+    "anchor": "Bail bureau de poste"
+   },
+   "reason": "Le bail du bureau de poste est un objet foncier explicite prévu à l’ordre du jour, sans précision permettant de qualifier davantage son étape."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Achat prévu d’un terrain sur la rue des Érables",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "rue des Érables",
+    "page": 1,
+    "citation": "Achat d’un terrain sur la rue des Érables",
+    "anchor": "rue des Érables"
+   },
+   "reason": "L’achat de terrain est un acte foncier explicitement inscrit à l’ordre du jour et doit être qualifié de prévu."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Vente prévue d’une lisière de terrain sur le chemin des Hauts-Cantons",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "chemin des Hauts-Cantons",
+    "page": 1,
+    "citation": "Vente d’une lisière de terrain sur le chemin des Hauts-Cantons",
+    "anchor": "chemin des Hauts-Cantons"
+   },
+   "reason": "La vente d’une lisière de terrain constitue un acte foncier explicite, ici prévu et non encore décidé."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Décision prévue sur une servitude d’écoulement des eaux — 467 rang Beau-Lac",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "467 rang Beau-Lac",
+    "page": 1,
+    "citation": "Servitude d’écoulement des eaux au 467 rang Beau-Lac",
+    "anchor": "467 rang Beau-Lac"
+   },
+   "reason": "La servitude identifiée par son adresse est un acte foncier soumis à une décision prévue à l’ordre du jour."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Décision prévue sur une dérogation mineure — lot 6 674 217, chemin Thompson",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "6 674 217",
+    "page": 2,
+    "citation": "Demande de dérogation mineure – lot 6 674 217 chemin Thompson",
+    "anchor": "lot 6 674 217"
+   },
+   "reason": "La demande de dérogation mineure explicitement identifiée par son lot constitue une unité prévue, sans présumer de son acceptation."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Décision prévue sur une dérogation mineure — 405 rang Elgin",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "405 rang Elgin",
+    "page": 2,
+    "citation": "Demande de dérogation mineure – 405 rang Elgin",
+    "anchor": "405 rang Elgin"
+   },
+   "reason": "Cette demande de dérogation mineure possède une adresse distincte et forme une unité propre, dont seule la décision prévue est attestée."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  },
+  {
+   "op": "add",
+   "id": "u08"
+  },
+  {
+   "op": "add",
+   "id": "u09"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 9
+}

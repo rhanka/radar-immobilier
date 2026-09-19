@@ -1,0 +1,25 @@
+{
+ "documentId": "sacre-coeur-2026-05-11",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c60bf030522dd5b0690362be3828e93dc6e6ecd023d549331d71c76ebdac0f58",
+ "verificationSha256": "f1f0480c33327d11c40c49980ed64a2f9da40c001723e5d10bd2ee1611166d59",
+ "error": "MESH_FAILED ETIMEDOUT",
+ "receipt": {
+  "transport": "codex",
+  "latencyMs": 3455118,
+  "code": "ETIMEDOUT",
+  "httpStatus": 200,
+  "responseError": null
+ },
+ "at": "2026-09-18T20:57:07.373Z"
+}

@@ -1,0 +1,111 @@
+{
+ "documentId": "stratford-2026-04-20",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b060a30ca906a62ca089de5bcbd2b50be6f30be819ba2a6c011fb5dbd200edc6",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"La citation est tronquée (parenthèse manquante) et la mention générale de consultation publique en tête de séance ne constitue pas une unité réglementaire distincte du second projet du règlement 1257.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le texte atteste en page 1 l'adoption prévue du premier projet du règlement no 1256 sur la démolition d'immeubles, avec une étape et une citation exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le texte atteste en page 1 l'adoption prévue du deuxième projet du règlement no 1257 modifiant le zonage, avec une étape et une citation exactes.\"},{\"item\":\"i04\",\"choice\":\"absent\",\"reason\":\"Un bail pour un bureau de poste est un contrat de louage/services et non un acte foncier ou une unité d'urbanisme.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le texte atteste en page 1 l'achat prévu d'un terrain sur la rue des Érables, acte foncier au stade d'adoption prévu.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le texte atteste en page 1 la vente prévue d'une lisière de terrain sur le chemin des Hauts-Cantons, acte foncier au stade d'adoption prévu.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Le texte atteste en page 1 l'octroi prévu d'une servitude d'écoulement des eaux au 467 rang Beau-Lac, acte foncier au stade d'adoption prévu.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Le texte atteste en page 2 une demande de dérogation mineure pour le lot 6 674 217 sur le chemin Thompson, avec une étape et une citation exactes.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Le texte atteste en page 2 une demande de dérogation mineure pour le 405 rang Elgin, avec une étape et une citation exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "La citation est tronquée (parenthèse manquante) et la mention générale de consultation publique en tête de séance ne constitue pas une unité réglementaire distincte du second projet du règlement 1257."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le texte atteste en page 1 l'adoption prévue du premier projet du règlement no 1256 sur la démolition d'immeubles, avec une étape et une citation exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le texte atteste en page 1 l'adoption prévue du deuxième projet du règlement no 1257 modifiant le zonage, avec une étape et une citation exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "absent",
+   "reason": "Un bail pour un bureau de poste est un contrat de louage/services et non un acte foncier ou une unité d'urbanisme."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le texte atteste en page 1 l'achat prévu d'un terrain sur la rue des Érables, acte foncier au stade d'adoption prévu."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le texte atteste en page 1 la vente prévue d'une lisière de terrain sur le chemin des Hauts-Cantons, acte foncier au stade d'adoption prévu."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Le texte atteste en page 1 l'octroi prévu d'une servitude d'écoulement des eaux au 467 rang Beau-Lac, acte foncier au stade d'adoption prévu."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Le texte atteste en page 2 une demande de dérogation mineure pour le lot 6 674 217 sur le chemin Thompson, avec une étape et une citation exactes."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Le texte atteste en page 2 une demande de dérogation mineure pour le 405 rang Elgin, avec une étape et une citation exactes."
+  }
+ ]
+}

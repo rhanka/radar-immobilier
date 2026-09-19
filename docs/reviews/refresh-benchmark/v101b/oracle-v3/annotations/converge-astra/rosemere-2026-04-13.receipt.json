@@ -1,0 +1,36 @@
+{
+ "documentId": "rosemere-2026-04-13",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "6bbeb215bfddb233381f5e7b8c9c44befae20c69c1d1080a965da0ab91962dd8",
+ "inputSha256": "22cb8fe7b61c3bd596e5f13c94196e1ac80e1f3fc9437d9927d9d9acda5702a1",
+ "responseSha256": "763ad904e1eb91a07ba5dd1c5629f736c08de80007af26e81edcde896f202f4e",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 40448,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 15129,
+  "outputTokens": 1280,
+  "totalTokens": 16409
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 40444,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:18:19.799Z"
+}

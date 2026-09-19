@@ -1,0 +1,120 @@
+{
+ "documentId": "chesterville-2026-03-02",
+ "nextId": 4,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion prévu — règlement 267 N.S. relatif à l'occupation et l'entretien des bâtiments",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "267 N.S.",
+    "page": 1,
+    "citation": "Avis de motion et dépôt du projet de règlement numéro 267 N.S. relatif à l'occupation et l'entretien des bâtiments",
+    "anchor": "règlement numéro 267 N.S",
+    "spanStart": 546,
+    "spanEnd": 660
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion prévu — règlement 267 N.S. relatif à l'occupation et l'entretien des bâtiments",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "267 N.S.",
+      "page": 1,
+      "citation": "Avis de motion et dépôt du projet de règlement numéro 267 N.S. relatif à l'occupation et l'entretien des bâtiments",
+      "anchor": "règlement numéro 267 N.S",
+      "spanStart": 546,
+      "spanEnd": 660
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L'ordre du jour prévoit un avis de motion pour un règlement concernant les bâtiments, qui constitue une unité distincte du projet de règlement."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Dépôt et adoption du projet prévus — règlement 267 N.S. relatif à l'occupation et l'entretien des bâtiments",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "267 N.S.",
+    "page": 1,
+    "citation": "Adoption du projet de règlement numéro 267 N.S. relatif à l'occupation et l'entretien des bâtiments",
+    "anchor": "règlement numéro 267 N.S",
+    "spanStart": 661,
+    "spanEnd": 760
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt et adoption du projet prévus — règlement 267 N.S. relatif à l'occupation et l'entretien des bâtiments",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "267 N.S.",
+      "page": 1,
+      "citation": "Adoption du projet de règlement numéro 267 N.S. relatif à l'occupation et l'entretien des bâtiments",
+      "anchor": "règlement numéro 267 N.S",
+      "spanStart": 661,
+      "spanEnd": 760
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le dépôt et l'adoption du projet sont prévus pour le même règlement et relèvent d'une seule unité au stade projet_reglement, sans attester l'adoption du règlement final."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Avis d'expropriation prévu — lot 6 185 428",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "6 185 428",
+    "page": 1,
+    "citation": "Avis d'expropriation aux propriétaires, lot 6 185 428",
+    "anchor": "lot 6 185 428",
+    "spanStart": 1609,
+    "spanEnd": 1662
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis d'expropriation prévu — lot 6 185 428",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "6 185 428",
+      "page": 1,
+      "citation": "Avis d'expropriation aux propriétaires, lot 6 185 428",
+      "anchor": "lot 6 185 428",
+      "spanStart": 1609,
+      "spanEnd": 1662
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L'avis d'expropriation prévu porte sur un objet foncier explicite, mais cette étape ne correspond à aucune des étapes nommées du vocabulaire."
+    }
+   ]
+  }
+ ]
+}

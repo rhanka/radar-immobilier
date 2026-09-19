@@ -1,0 +1,307 @@
+{
+ "documentId": "brossard-2026-04-28",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "58c27853aba010d37fed3e983e0936f4f74146b58c32e30c6e2d0bdd8d6c113a",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-reg362"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "REG-362 — Règlement de zonage",
+     "stage": null,
+     "objet": "REG-362",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Considérant qu’une demande de dérogation mineure a été déposée pour le lot projeté\n6 720 588 afin de permettre une largeur de lot de 10,74 mètres"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-260428-096"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogations mineures approuvées — 5641, rue Aline",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue\nAline, lot projeté 6 720 588, ayant pour effet de permettre :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-260428-097"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Approbation des PIIA — recommandations du CCU du 11 mars 2026",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D’entériner les recommandations du comité consultatif d’urbanisme émanant du procèsverbal de la réunion tenue le 11 mars 2026"
+      },
+      {
+       "page": 4,
+       "excerpt": "CCU-20260311-7.5 PIIA – Enseignes 2026-00032 – 9850, boulevard Leduc, local 20 –\nEnseigne sur bâtiment – La Voûte;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-260428-101",
+    "signal-chateauneuf"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du PPCMOI-2026-001 — 3605-3665, rue de Châteauneuf",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif"
+      },
+      {
+       "page": 7,
+       "excerpt": "et de l'obtention du permis de construction dans les 24 mois suivant l’adoption de la présente\nrésolution, à défaut de quoi celle-ci deviendra nulle et sans effet."
+      }
+     ]
+    },
+    {
+     "type": "Signal",
+     "label": "Densification résidentielle conditionnelle — 210 logements, rue de Châteauneuf",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-pandora"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Pandora Matte Self-Storage — entente de travaux municipaux",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "D'autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l'entente relative\naux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-plana-accord"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Plan A — site chemin des Prairies — accord de développement",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies à\nintervenir entre la Ville de Brossard et le promoteur immobilier, société 9520-8732 Québec\ninc."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-plana-reseaux"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Plan A — démarches environnementales pour les prolongements de réseaux",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "D’autoriser le directeur de la Direction des affaires stratégiques et développement, ou toute\npersonne qu’il désigne, à présenter, pour et au nom de la Ville de Brossard, une demande"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "bylaw-reg516"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "REG-516 — Emprunt de 6 500 000 $ pour planage et pavage",
+     "stage": "adoption",
+     "objet": "REG-516",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’adopter le règlement REG-516 décrétant des dépenses en immobilisations et un emprunt\nde 6 500 000 $ pour la réalisation de travaux de planage et de pavage, tel que soumis."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement REG-362 n'est pas l'objet d'un acte réglementaire dans cette séance, il est seulement mentionné comme référence dans une dérogation mineure.\",\"excerpt\":\"Considérant qu’une demande de dérogation mineure a été déposée pour le lot projeté 6 720 588 afin de permettre une largeur de lot de 10,74 mètres, alors que la grille des usages et normes de la zone Ha-219 du règlement de zonage REG-362\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve la demande de dérogations mineures pour l'immeuble situé au 5641, rue Aline.\",\"excerpt\":\"D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue Aline, lot projeté 6 720 588\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil entérine les recommandations du CCU concernant les PIIA de la réunion du 11 mars 2026.\",\"excerpt\":\"D’entériner les recommandations du comité consultatif d’urbanisme émanant du procèsverbal de la réunion tenue le 11 mars 2026, en ce qui concerne les plans d’implantation et d’intégration architecturale\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la résolution PPCMOI-2026-001 pour l'immeuble aux 3605-3665, rue de Châteauneuf.\",\"excerpt\":\"D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif aux projets particuliers de construction, de modification ou d'occupation d'un immeuble (REG367), pour l'immeuble situé aux 3605-3665, rue de Châteauneuf\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la signature de l'entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage.\",\"excerpt\":\"D'autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l'entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve l'accord de développement du projet Plan A - Site chemin des Prairies.\",\"excerpt\":\"D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies à intervenir entre la Ville de Brossard et le promoteur immobilier, société 9520-8732 Québec inc.\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise les démarches de demande d'autorisation et déclaration de conformité au MELCCFP pour les prolongements de réseaux du projet Plan A.\",\"excerpt\":\"D’autoriser le directeur de la Direction des affaires stratégiques et développement, ou toute personne qu’il désigne, à présenter, pour et au nom de la Ville de Brossard, une demande d’autorisation ministérielle pour le prolongement du réseau d’égout pluvial ainsi qu'une déclaration de conformité pour le prolongement du réseau d’aqueduc\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement décrétant des dépenses et emprunts pour des travaux d'entretien de voirie (planage et pavage) relève des exclusions.\",\"excerpt\":\"D’adopter le règlement REG-516 décrétant des dépenses en immobilisations et un emprunt de 6 500 000 $ pour la réalisation de travaux de planage et de pavage, tel que soumis.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement REG-362 n'est pas l'objet d'un acte réglementaire dans cette séance, il est seulement mentionné comme référence dans une dérogation mineure.",
+   "excerpt": "Considérant qu’une demande de dérogation mineure a été déposée pour le lot projeté 6 720 588 afin de permettre une largeur de lot de 10,74 mètres, alors que la grille des usages et normes de la zone Ha-219 du règlement de zonage REG-362"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve la demande de dérogations mineures pour l'immeuble situé au 5641, rue Aline.",
+   "excerpt": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue Aline, lot projeté 6 720 588"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil entérine les recommandations du CCU concernant les PIIA de la réunion du 11 mars 2026.",
+   "excerpt": "D’entériner les recommandations du comité consultatif d’urbanisme émanant du procèsverbal de la réunion tenue le 11 mars 2026, en ce qui concerne les plans d’implantation et d’intégration architecturale"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la résolution PPCMOI-2026-001 pour l'immeuble aux 3605-3665, rue de Châteauneuf.",
+   "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif aux projets particuliers de construction, de modification ou d'occupation d'un immeuble (REG367), pour l'immeuble situé aux 3605-3665, rue de Châteauneuf"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la signature de l'entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage.",
+   "excerpt": "D'autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l'entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve l'accord de développement du projet Plan A - Site chemin des Prairies.",
+   "excerpt": "D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies à intervenir entre la Ville de Brossard et le promoteur immobilier, société 9520-8732 Québec inc."
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise les démarches de demande d'autorisation et déclaration de conformité au MELCCFP pour les prolongements de réseaux du projet Plan A.",
+   "excerpt": "D’autoriser le directeur de la Direction des affaires stratégiques et développement, ou toute personne qu’il désigne, à présenter, pour et au nom de la Ville de Brossard, une demande d’autorisation ministérielle pour le prolongement du réseau d’égout pluvial ainsi qu'une déclaration de conformité pour le prolongement du réseau d’aqueduc"
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement décrétant des dépenses et emprunts pour des travaux d'entretien de voirie (planage et pavage) relève des exclusions.",
+   "excerpt": "D’adopter le règlement REG-516 décrétant des dépenses en immobilisations et un emprunt de 6 500 000 $ pour la réalisation de travaux de planage et de pavage, tel que soumis."
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Le règlement REG-362 n'est pas l'objet d'un acte réglementaire dans cette séance, il est seulement mentionné comme référence dans une dérogation mineure."
+   },
+   {
+    "act": "A08",
+    "reason": "Le règlement décrétant des dépenses et emprunts pour des travaux d'entretien de voirie (planage et pavage) relève des exclusions."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A02",
+    "reason": "Le conseil approuve la demande de dérogations mineures pour l'immeuble situé au 5641, rue Aline."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil entérine les recommandations du CCU concernant les PIIA de la réunion du 11 mars 2026."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil adopte la résolution PPCMOI-2026-001 pour l'immeuble aux 3605-3665, rue de Châteauneuf."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil autorise la signature de l'entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil approuve l'accord de développement du projet Plan A - Site chemin des Prairies."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil autorise les démarches de demande d'autorisation et déclaration de conformité au MELCCFP pour les prolongements de réseaux du projet Plan A."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3166,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 20507,
+   "outputTokens": 844,
+   "totalTokens": 21351
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2977
+  },
+  "inputSha256": "98af04a5f032724bbe5ea188157c795a28d75a659bff3f917cba67054f9b412e"
+ }
+}

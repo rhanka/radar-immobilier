@@ -1,0 +1,81 @@
+{
+ "documentId": "bolton-est-2026-01-12",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "f971f04a3adffc7cd458fc798258875999b81d9567226b126177a8929ad29eff",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 7.3 de l'ordre du jour prévoit explicitement l'examen d'une dérogation mineure pour le lot 6 116 054 à la page 1.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 7.4 de l'ordre du jour prévoit explicitement l'examen d'une demande de PIIA pour le lot 4 860 343 à la page 1.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 7.5 de l'ordre du jour prévoit explicitement l'examen d'une demande de PIIA pour le lot 4 860 346 à la page 1.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 7.6 de l'ordre du jour prévoit explicitement l'examen d'une demande de PIIA pour le lot 4 860 502 à la page 1.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 7.7 de l'ordre du jour prévoit explicitement l'examen d'une demande de PIIA pour le lot 6 465 655 à la page 1.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 7.8 de l'ordre du jour prévoit explicitement l'examen d'une demande de PIIA pour le lot 6 668 264-P à la page 1.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 7.3 de l'ordre du jour prévoit explicitement l'examen d'une dérogation mineure pour le lot 6 116 054 à la page 1."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 7.4 de l'ordre du jour prévoit explicitement l'examen d'une demande de PIIA pour le lot 4 860 343 à la page 1."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 7.5 de l'ordre du jour prévoit explicitement l'examen d'une demande de PIIA pour le lot 4 860 346 à la page 1."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 7.6 de l'ordre du jour prévoit explicitement l'examen d'une demande de PIIA pour le lot 4 860 502 à la page 1."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 7.7 de l'ordre du jour prévoit explicitement l'examen d'une demande de PIIA pour le lot 6 465 655 à la page 1."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 7.8 de l'ordre du jour prévoit explicitement l'examen d'une demande de PIIA pour le lot 6 668 264-P à la page 1."
+  }
+ ]
+}

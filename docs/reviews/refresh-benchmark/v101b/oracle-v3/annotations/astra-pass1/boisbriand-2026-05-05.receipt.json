@@ -1,0 +1,36 @@
+{
+ "documentId": "boisbriand-2026-05-05",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "168a0130572bb2367c8a4959c378f78d9efb78f7160b43c37dbf96a1ee2a3074",
+ "inputSha256": "1c21db9050879364442886db1e0a00278529d2085326f522b88b6b48fd75b505",
+ "responseSha256": "11ac73baf1f564e09d72599953c34f452f295aa5bc1a5cce7e90addcc8bb9ec1",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 149720,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 13617,
+  "outputTokens": 4901,
+  "totalTokens": 18518
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 149713,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:49:31.730Z"
+}

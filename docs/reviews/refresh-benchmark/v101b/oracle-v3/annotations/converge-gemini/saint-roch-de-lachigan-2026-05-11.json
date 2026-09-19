@@ -1,0 +1,81 @@
+{
+ "documentId": "saint-roch-de-lachigan-2026-05-11",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "29cbae05ed64d89ab15b797a6a429860b02be66efd75d56eef12f530f2d1a9be",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Acte foncier prévu à l'ordre du jour concernant l'exercice du droit de préemption sur le lot 6 141 751, textuellement attesté en page 2.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Dossier de démolition sous la rubrique Urbanisme prévu à l'ordre du jour pour le 16, rue de l'Île-Majeau, textuellement attesté en page 2.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Autorisation de dérogation mineure prévue à l'ordre du jour pour le 296 rang de la Rivière Nord, textuellement attestée en page 2.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Autorisation de dérogation mineure prévue à l'ordre du jour pour le 28 rue Beaucage, textuellement attestée en page 2.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Autorisation de modification d'affichage sur un immeuble cité prévue à l'ordre du jour pour le 1224 rue Principale, textuellement attestée en page 2.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Autorisation de travaux sur un immeuble cité prévue à l'ordre du jour pour le 1484, rue Principale, textuellement attestée en page 2.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Acte foncier prévu à l'ordre du jour concernant l'exercice du droit de préemption sur le lot 6 141 751, textuellement attesté en page 2."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Dossier de démolition sous la rubrique Urbanisme prévu à l'ordre du jour pour le 16, rue de l'Île-Majeau, textuellement attesté en page 2."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Autorisation de dérogation mineure prévue à l'ordre du jour pour le 296 rang de la Rivière Nord, textuellement attestée en page 2."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Autorisation de dérogation mineure prévue à l'ordre du jour pour le 28 rue Beaucage, textuellement attestée en page 2."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Autorisation de modification d'affichage sur un immeuble cité prévue à l'ordre du jour pour le 1224 rue Principale, textuellement attestée en page 2."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Autorisation de travaux sur un immeuble cité prévue à l'ordre du jour pour le 1484, rue Principale, textuellement attestée en page 2."
+  }
+ ]
+}

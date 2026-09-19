@@ -1,0 +1,322 @@
+{
+  "nodes": [
+    {
+      "id": "source-1",
+      "label": "Procès-verbal de la séance ordinaire du 7 avril 2026 - Saint-Sylvère",
+      "node_type": "Source",
+      "file_type": "document",
+      "status": "validated",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "date": "2026-04-07",
+      "municipality": "saint-sylvere",
+      "url": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil municipal de la\nMunicipalité de Saint-Sylvère, tenue ce 7 avril 2026, au 837, 8 Rang, Saint\nSylvère, à 20 h 00."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-247",
+      "label": "Règlement de zonage # 247",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "status": "validated",
+      "numero": "247",
+      "title": "Règlement de zonage de la municipalité de Saint-Sylvère",
+      "municipality": "saint-sylvere",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSI )ÉRANT QUE le règlement de zonage de la municipalité de Saint-Sylvère est\nen vigu ur depuis le 19 décembre 2013;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-383",
+      "label": "Règlement # 383 modifiant le règlement de zonage # 247",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "status": "candidate",
+      "numero": "383",
+      "title": "Règlement # 383 modifiant le règlement de zonage # 247",
+      "stage": "1er_projet",
+      "municipality": "saint-sylvere",
+      "meetingDate": "2026-04-07",
+      "resolution": "2026-04-117",
+      "resolutionRef": "2026-04-117",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-384",
+      "label": "Règlement # 384 sur les PPCMOI",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "status": "candidate",
+      "numero": "384",
+      "title": "Règlement # 384 concernant les projets particuliers de construction, de modification ou d’occupation d’un immeuble (PPCMOI)",
+      "stage": "1er_projet",
+      "municipality": "saint-sylvere",
+      "meetingDate": "2026-04-07",
+      "resolution": "2026-04-119",
+      "resolutionRef": "2026-04-119",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+        }
+      ]
+    },
+    {
+      "id": "event-cptaq-453952",
+      "label": "Demande d’autorisation CPTAQ - Ferme Ramona S.E.N.C. et Remo Kohler",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "status": "candidate",
+      "kind": "cptaq",
+      "decision": "approuvé",
+      "date": "2026-04-07",
+      "meetingDate": "2026-04-07",
+      "resolution": "2026-04-120",
+      "resolutionRef": "2026-04-120",
+      "dossier": "453952",
+      "demandeur": "Ferme Ramona S.E.N.C. et M Remo Kohler",
+      "demandeur_corporate": "Ferme Ramona S.E.N.C.",
+      "municipality": "saint-sylvere",
+      "no_lot": "5652594",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais h\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C. et de M Remo Kohler pour h\ndemande de lotissement 453952"
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-453952",
+      "label": "Autorisation CPTAQ - Dossier 453952",
+      "node_type": "Constraint",
+      "file_type": "document",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "organisme": "Commission de protection du territoire agricole du Québec",
+      "dossier": "453952",
+      "loi": "Loi sur la protection du territoire et des activités agricoles",
+      "municipality": "saint-sylvere",
+      "resolution": "2026-04-120",
+      "resolutionRef": "2026-04-120",
+      "meetingDate": "2026-04-07",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "evidence_refs": [
+        "ev-cptaq-1"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Considérant l’objet de la demande d’autorisation auprès de la Commission de protection d\nterritoire agricole du Québec (CPTAQ), rempli conjointement pour l’entreprise Ferme Ramon\nS.E.N.C. et M Remo Kohler;"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-383",
+      "target": "bylaw-247",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-383"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247."
+        }
+      ]
+    },
+    {
+      "source": "source-1",
+      "target": "bylaw-383",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-383"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247."
+        }
+      ]
+    },
+    {
+      "source": "source-1",
+      "target": "bylaw-384",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-384"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+        }
+      ]
+    },
+    {
+      "source": "source-1",
+      "target": "event-cptaq-453952",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-cptaq-res"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais h\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C. et de M Remo Kohler pour h\ndemande de lotissement 453952"
+        }
+      ]
+    },
+    {
+      "source": "source-1",
+      "target": "constraint-cptaq-453952",
+      "relation": "mentions",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-cptaq-1"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Considérant l’objet de la demande d’autorisation auprès de la Commission de protection d\nterritoire agricole du Québec (CPTAQ), rempli conjointement pour l’entreprise Ferme Ramon\nS.E.N.C. et M Remo Kohler;"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-383",
+      "target": "source-1",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-383"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-384",
+      "target": "source-1",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-384"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+        }
+      ]
+    },
+    {
+      "source": "event-cptaq-453952",
+      "target": "source-1",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-cptaq-res"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais h\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C. et de M Remo Kohler pour h\ndemande de lotissement 453952"
+        }
+      ]
+    },
+    {
+      "source": "constraint-cptaq-453952",
+      "target": "source-1",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-cptaq-1"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Considérant l’objet de la demande d’autorisation auprès de la Commission de protection d\nterritoire agricole du Québec (CPTAQ), rempli conjointement pour l’entreprise Ferme Ramon\nS.E.N.C. et M Remo Kohler;"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-bylaw-383",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+      "modality": "pdf",
+      "page": 7,
+      "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247."
+    },
+    {
+      "id": "ev-bylaw-384",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+    },
+    {
+      "id": "ev-cptaq-1",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "Considérant l’objet de la demande d’autorisation auprès de la Commission de protection d\nterritoire agricole du Québec (CPTAQ), rempli conjointement pour l’entreprise Ferme Ramon\nS.E.N.C. et M Remo Kohler;"
+    },
+    {
+      "id": "ev-cptaq-res",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais h\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C. et de M Remo Kohler pour h\ndemande de lotissement 453952"
+    }
+  ],
+  "input_tokens": 2845,
+  "output_tokens": 1780
+}

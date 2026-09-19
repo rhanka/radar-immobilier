@@ -1,0 +1,234 @@
+{
+ "documentId": "sainte-francoise--becancour-2026-05-04",
+ "nextId": 7,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption du second projet du règlement #55-2026 modifiant le zonage",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "55-2026",
+    "page": 7,
+    "citation": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE #2010-03",
+    "anchor": "RÈGLEMENT #55-2026",
+    "spanStart": 501,
+    "spanEnd": 590
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du second projet du règlement #55-2026 modifiant le zonage",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "55-2026",
+      "page": 7,
+      "citation": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE #2010-03",
+      "anchor": "RÈGLEMENT #55-2026",
+      "spanStart": 501,
+      "spanEnd": 590
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’ordre du jour et l’intitulé du point 9.2 identifient un second projet, malgré la mention contradictoire « premier projet » dans le dispositif de la même résolution, qui ne justifie pas une unité supplémentaire."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement #56-2026 sur les entrées privées et la fermeture des fossés",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "56-2026",
+    "page": 8,
+    "citation": "le règlement portant le numéro 56-2026 relatif à l’aménagement des entrées privées et à la fermeture des fossés de chemins soit adopté tel que rédigé",
+    "anchor": "numéro 56-2026",
+    "spanStart": 115,
+    "spanEnd": 264
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement #56-2026 sur les entrées privées et la fermeture des fossés",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "56-2026",
+      "page": 8,
+      "citation": "le règlement portant le numéro 56-2026 relatif à l’aménagement des entrées privées et à la fermeture des fossés de chemins soit adopté tel que rédigé",
+      "anchor": "numéro 56-2026",
+      "spanStart": 115,
+      "spanEnd": 264
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 62-05-2026 adopte un règlement encadrant l’aménagement des accès privés, tandis que l’avis de motion et le dépôt du projet du 13 avril sont seulement des rappels historiques."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement #58-2026 modifiant le plan d’urbanisme",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "58-2026",
+    "page": 8,
+    "citation": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance ultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme #2010-01",
+    "anchor": "règlement #58-2026",
+    "spanStart": 1820,
+    "spanEnd": 1995
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement #58-2026 modifiant le plan d’urbanisme",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "58-2026",
+      "page": 8,
+      "citation": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance ultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme #2010-01",
+      "anchor": "règlement #58-2026",
+      "spanStart": 1820,
+      "spanEnd": 1995
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 9.5 constate un avis de motion donné à cette séance pour modifier le plan d’urbanisme, étape distincte du dépôt du projet."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du projet de règlement #58-2026 modifiant le plan d’urbanisme",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "58-2026",
+    "page": 8,
+    "citation": "règlement #58-2026 modifiant le plan d’urbanisme #2010-01. Le règlement vise à : - Agrandir l’affectation mixte à même l’affectation industrielle. Un projet dudit est déposé séance tenante",
+    "anchor": "règlement #58-2026",
+    "spanStart": 1938,
+    "spanEnd": 2128
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du projet de règlement #58-2026 modifiant le plan d’urbanisme",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "58-2026",
+      "page": 8,
+      "citation": "règlement #58-2026 modifiant le plan d’urbanisme #2010-01. Le règlement vise à : - Agrandir l’affectation mixte à même l’affectation industrielle. Un projet dudit est déposé séance tenante",
+      "anchor": "règlement #58-2026",
+      "spanStart": 1938,
+      "spanEnd": 2128
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le projet du règlement #58-2026 est explicitement déposé séance tenante et doit former une unité distincte de l’avis de motion."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement #59-2026 modifiant le règlement de construction",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "59-2026",
+    "page": 8,
+    "citation": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance ultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de construction #2010-05",
+    "anchor": "règlement #59-2026",
+    "spanStart": 2382,
+    "spanEnd": 2563
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement #59-2026 modifiant le règlement de construction",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "59-2026",
+      "page": 8,
+      "citation": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance ultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de construction #2010-05",
+      "anchor": "règlement #59-2026",
+      "spanStart": 2382,
+      "spanEnd": 2563
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 9.6 constate un avis de motion donné à cette séance pour modifier le règlement de construction, étape distincte du dépôt du projet."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du projet de règlement #59-2026 permettant les pieux pour l’agrandissement des bâtiments",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "59-2026",
+    "page": 8,
+    "citation": "règlement #59-2026 modifiant le règlement de construction #2010-05. Le règlement vise à : - Permettre les pieux dans l’agrandissement des bâtiments. Un projet dudit est déposé séance tenante",
+    "anchor": "règlement #59-2026",
+    "spanStart": 2497,
+    "spanEnd": 2689
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du projet de règlement #59-2026 permettant les pieux pour l’agrandissement des bâtiments",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "59-2026",
+      "page": 8,
+      "citation": "règlement #59-2026 modifiant le règlement de construction #2010-05. Le règlement vise à : - Permettre les pieux dans l’agrandissement des bâtiments. Un projet dudit est déposé séance tenante",
+      "anchor": "règlement #59-2026",
+      "spanStart": 2497,
+      "spanEnd": 2689
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le projet du règlement #59-2026 est explicitement déposé séance tenante et doit former une unité distincte de l’avis de motion."
+    }
+   ]
+  }
+ ]
+}

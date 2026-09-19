@@ -1,0 +1,90 @@
+{
+ "documentId": "roxton-2026-04-07",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1b",
+ "inputStateSha256": "1c4598184adea3ab67d4703ab4ce04e2008c33194af15ce551ec2c1796256210",
+ "inputSha256": "f8a05405fb6daae37bb4d694431d94be19df772dbdf11375a6f22d9279072119",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "rc": 0,
+ "latencyMs": 26539,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "56b061aa-4617-4895-bd10-1263c252d3c8",
+ "modelUsage": {
+  "claude-haiku-4-5-20251001": {
+   "inputTokens": 11152,
+   "outputTokens": 20,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 0,
+   "webSearchRequests": 0,
+   "costUSD": 0.011252,
+   "contextWindow": 200000,
+   "maxOutputTokens": 32000,
+   "thinkingTokens": 0,
+   "canonicalModel": "claude-haiku-4-5",
+   "provider": "firstParty",
+   "costBasis": "list"
+  },
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 1884,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 15378,
+   "webSearchRequests": 0,
+   "costUSD": 0.40245325,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 1874,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 15378,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 1884,
+  "output_tokens_details": {
+   "thinking_tokens": 1874
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 15378,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1884,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 15378,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 15378
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.41370524999999997,
+ "durationApiMs": 25746,
+ "stderrTail": "",
+ "at": "2026-09-18T13:15:48.307Z",
+ "inputStateSha256BeforeRelabel": "1c4598184adea3ab67d4703ab4ce04e2008c33194af15ce551ec2c1796256210"
+}

@@ -1,0 +1,181 @@
+{
+ "documentId": "acton-vale-2026-03-16",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "72b79b4f6b809d3fba15db4b5c6f2a2a063d2d0768f3092288b382c512385e34",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-ppcmoi"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PPCMOI-001-2026 — 1050, rue Dubois — adoption finale prévue",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+      },
+      {
+       "page": 2,
+       "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-cptaq-1"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande à la CPTAQ — Ferme Guilmette Inc.",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+      },
+      {
+       "page": 2,
+       "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-cptaq-2"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande à la CPTAQ — particulier anonymisé",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec"
+      },
+      {
+       "page": 2,
+       "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-prhlm"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Entente PRHLM — rénovation des habitations à loyer modique",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5.2 - Désignation des signataires – Entente relative au Programme de rénovation\ndes habitations à loyer modique (PRHLM) – Volet 1 – Soutien à des travaux\nde rénovation."
+      },
+      {
+       "page": 1,
+       "excerpt": "5.2 - Désignation des signataires – Entente relative au Programme de rénovation\ndes habitations à loyer modique (PRHLM) – Volet 1 – Soutien à des travaux\nde rénovation."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 18.1 de l'ordre du jour prévoit explicitement l'adoption de la résolution finale du PPCMOI-001-2026 pour le 1050, rue Dubois.\",\"excerpt\":\"18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\\nDubois.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 18.2 prévoit une résolution relative à une demande à la CPTAQ pour Ferme Guilmette Inc.\",\"excerpt\":\"18.2 - Résolution relative à une demande présentée à la Commission de protection\\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.).\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 18.3 porte sur une résolution relative à une demande à la CPTAQ.\",\"excerpt\":\"18.3 - Résolution relative à une demande présentée à la Commission de protection\\ndu territoire agricole du Québec (Réf: Daniel Laroche).\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 5.2 concerne la désignation de signataires pour l'entente relative au PRHLM.\",\"excerpt\":\"5.2 - Désignation des signataires – Entente relative au Programme de rénovation\\ndes habitations à loyer modique (PRHLM) – Volet 1 – Soutien à des travaux\\nde rénovation.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 18.1 de l'ordre du jour prévoit explicitement l'adoption de la résolution finale du PPCMOI-001-2026 pour le 1050, rue Dubois.",
+   "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 18.2 prévoit une résolution relative à une demande à la CPTAQ pour Ferme Guilmette Inc.",
+   "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 18.3 porte sur une résolution relative à une demande à la CPTAQ.",
+   "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 5.2 concerne la désignation de signataires pour l'entente relative au PRHLM.",
+   "excerpt": "5.2 - Désignation des signataires – Entente relative au Programme de rénovation\ndes habitations à loyer modique (PRHLM) – Volet 1 – Soutien à des travaux\nde rénovation."
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 18.1 de l'ordre du jour prévoit explicitement l'adoption de la résolution finale du PPCMOI-001-2026 pour le 1050, rue Dubois."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 18.2 prévoit une résolution relative à une demande à la CPTAQ pour Ferme Guilmette Inc."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 18.3 porte sur une résolution relative à une demande à la CPTAQ."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 5.2 concerne la désignation de signataires pour l'entente relative au PRHLM."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1585,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2347,
+   "outputTokens": 317,
+   "totalTokens": 2664
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1460
+  },
+  "inputSha256": "79c4f3f5eb926e6e7eeb8150c021c5f0968b41e12d1ac1a2a82a72150e2370de"
+ }
+}

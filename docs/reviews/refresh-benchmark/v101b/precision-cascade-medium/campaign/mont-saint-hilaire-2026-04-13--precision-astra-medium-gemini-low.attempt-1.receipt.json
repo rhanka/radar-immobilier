@@ -1,0 +1,35 @@
+{
+ "documentId": "mont-saint-hilaire-2026-04-13",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "d111b59967ed832c1f6c25cabdc16376c8387ba1d54bf385d4bf1c35d97dea1e",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3414,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 21427,
+   "outputTokens": 1118,
+   "totalTokens": 22545
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3283
+  },
+  "inputSha256": "f6cabe3fae0409bdc67947a603d4e505a0b996d9408390c70374ad9026e8e4cb"
+ },
+ "at": "2026-09-19T03:22:47.786Z"
+}

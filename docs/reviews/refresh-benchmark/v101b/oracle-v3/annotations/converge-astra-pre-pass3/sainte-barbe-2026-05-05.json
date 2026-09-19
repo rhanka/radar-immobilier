@@ -1,0 +1,91 @@
+{
+ "documentId": "sainte-barbe-2026-05-05",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "4d1e737f5b87940afc4fdaaca53ee2d9a01a0336db2efe620f0fe663b9779ab9",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 3 atteste l’annonce d’une mise en délibéré de la demande au 813, 45e Avenue, identifiée 2026-0059 à l’ordre du jour, sans décision d’acceptation ou de refus.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-05-13, page 14, fixe effectivement au 14 juin 2026 le scrutin référendaire concernant le PPCMOI 2025-001 pour l’île Raymond.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 15 atteste expressément l’adoption d’un second projet du règlement 2003-05-63 « AVEC CHANGEMENT », distinct des étapes antérieures rappelées.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v2\",\n      \"reason\": \"La citation exacte de la page 18 confirme l’acceptation du PIIA 2026-0055, dont l’objet décrit page 17 est un garage incorporé au 31 Rue des Moissons.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v2\",\n      \"reason\": \"La citation exacte de la page 19 confirme l’acceptation du PIIA 2026-0056 pour le bâtiment commercial au 424 Chemin de l’Église, les PIIA non résidentiels étant inclus.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v2\",\n      \"reason\": \"La page 20 accepte explicitement la dérogation mineure 2026-0057 concernant l’allée d’accès existante au 424 Chemin de l’Église décrite page 19.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution adoptée page 20 autorise la signature de l’acte de cession de servitude sur les lots 5 988 194 et 6 520 252 au 163 avenue des Cèdres, conformément à l’inclusion des actes fonciers.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v2"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v2"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v2"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 3 atteste l’annonce d’une mise en délibéré de la demande au 813, 45e Avenue, identifiée 2026-0059 à l’ordre du jour, sans décision d’acceptation ou de refus."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-13, page 14, fixe effectivement au 14 juin 2026 le scrutin référendaire concernant le PPCMOI 2025-001 pour l’île Raymond."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 15 atteste expressément l’adoption d’un second projet du règlement 2003-05-63 « AVEC CHANGEMENT », distinct des étapes antérieures rappelées."
+  },
+  {
+   "item": "i04",
+   "choice": "v2",
+   "reason": "La citation exacte de la page 18 confirme l’acceptation du PIIA 2026-0055, dont l’objet décrit page 17 est un garage incorporé au 31 Rue des Moissons."
+  },
+  {
+   "item": "i05",
+   "choice": "v2",
+   "reason": "La citation exacte de la page 19 confirme l’acceptation du PIIA 2026-0056 pour le bâtiment commercial au 424 Chemin de l’Église, les PIIA non résidentiels étant inclus."
+  },
+  {
+   "item": "i06",
+   "choice": "v2",
+   "reason": "La page 20 accepte explicitement la dérogation mineure 2026-0057 concernant l’allée d’accès existante au 424 Chemin de l’Église décrite page 19."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La résolution adoptée page 20 autorise la signature de l’acte de cession de servitude sur les lots 5 988 194 et 6 520 252 au 163 avenue des Cèdres, conformément à l’inclusion des actes fonciers."
+  }
+ ]
+}

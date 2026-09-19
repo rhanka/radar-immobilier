@@ -1,0 +1,228 @@
+{
+ "documentId": "roxton-2026-04-07",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "ae6e96b796ed2b7c52c364979f3fb87866e86b0c031fd9158eb205b2903e0cda",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-384-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 384-2026 — Usages permis dans la zone 506",
+     "stage": "adoption",
+     "objet": "384-2026",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Et résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:"
+      },
+      {
+       "page": 4,
+       "excerpt": "Le présent règlement s'intitule « Règlement numéro 384-2026 modifiant le\nrèglement de zonage numéro 181-2003 de la Municipalité du Canton de\nRoxton modifiant les usages permis dans la zone 506 »."
+      },
+      {
+       "page": 4,
+       "excerpt": "Et résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:"
+      },
+      {
+       "page": 4,
+       "excerpt": "Le présent règlement s'intitule « Règlement numéro 384-2026 modifiant le\nrèglement de zonage numéro 181-2003 de la Municipalité du Canton de\nRoxton modifiant les usages permis dans la zone 506 »."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-181-2003"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 181-2003",
+     "stage": null,
+     "objet": "181-2003",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "ATTENDU QUE\nle conseil de la Municipalité de Roxton a adopté, le 6\noctobre 2003, le règlement de zonage numéro 181-2003 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-adoption-384-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption de la modification des usages de la zone 506",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Et résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:"
+      },
+      {
+       "page": 4,
+       "excerpt": "ATTENDU QUE\nle conseil a reçu une demande de modification\nrèglementaire des propriétaires du lot 3 841 684;"
+      },
+      {
+       "page": 4,
+       "excerpt": "Et résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:"
+      },
+      {
+       "page": 5,
+       "excerpt": "La grille des usages principaux et des normes, annexée et faisant partie\nintégrante du règlement de zonage numéro 181-2003 de la Municipalité de\nRoxton, est modifiée :\na)\npar l’ajout des usages agricoles de classe B « élevage » à la liste des\nusages autorisés dans la zone numéro 506;\nb)\npar l’ajout de la note particulière [7] pour les usages agricoles de\nclasse B « élevage », se lisant comme suit :\n[7] Limité à l’élevage à des fins personnelles, sur des terrains utilisés à des\nfins résidentielles, d’un maximum de 25 poules pondeuses ou poulets à\ngriller et d’un maximum de 3 chevaux"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-emprunt-500000"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement d’emprunt de 500 000 $ pour des immobilisations",
+     "stage": "adoption",
+     "objet": "Travaux de voirie, réfection et construction de biens immobiliers, acquisition de matériel roulant et d’équipements; emprunt sur 20 ans.",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Il est proposé et résolu à l’unanimité des conseillers de l’adoption du\nrèglement décrétant des dépenses en immobilisation et un emprunt au\nmontant de 500 000$."
+      },
+      {
+       "page": 10,
+       "excerpt": "Il est proposé et résolu à l’unanimité des conseillers de l’adoption du\nrèglement décrétant des dépenses en immobilisation et un emprunt au\nmontant de 500 000$."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-demande-abrogation-245-1"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande d’abrogation de l’article 245.1 de la LAU",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "QUE la municipalité du Canton de Roxton demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée\nnationale d’introduire un amendement au projet de loi no 22"
+      },
+      {
+       "page": 9,
+       "excerpt": "QUE la municipalité du Canton de Roxton demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée\nnationale d’introduire un amendement au projet de loi no 22 abrogeant\nl’article 245.1 de la Loi sur l’aménagement et l’urbanisme afin de respecter\nle consensus établi entre le ministère et ses partenaires municipaux;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement 384-2026 modifiant les usages permis dans la zone 506.\",\"excerpt\":\"Et résolu unanimement que le présent règlement soit adopté et qu'il soit\\nstatué et décrété par ce règlement ce qui suit:\\nArticle 1\\n\\nTitre du règlement\\n\\nLe présent règlement s'intitule « Règlement numéro 384-2026\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de zonage 181-2003 n'est mentionné que comme rappel historique dans le préambule.\",\"excerpt\":\"le conseil de la Municipalité de Roxton a adopté, le 6\\noctobre 2003, le règlement de zonage numéro 181-2003 ;\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la modification de la grille des usages pour autoriser l'élevage dans la zone 506.\",\"excerpt\":\"La grille des usages principaux et des normes, annexée et faisant partie\\nintégrante du règlement de zonage numéro 181-2003 de la Municipalité de\\nRoxton, est modifiée :\\na)\\npar l’ajout des usages agricoles\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal adopte le règlement décrétant des dépenses en immobilisation et un emprunt de 500 000 $.\",\"excerpt\":\"Il est proposé et résolu à l’unanimité des conseillers de l’adoption du\\nrèglement décrétant des dépenses en immobilisation et un emprunt au\\nmontant de 500 000$.\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution demandant formellement l'abrogation de l'article 245.1 de la LAU dans le projet de loi 22.\",\"excerpt\":\"QUE la municipalité du Canton de Roxton demande aux membres de la\\nCommission parlementaire de l’aménagement du territoire de l’Assemblée\\nnationale d’introduire un amendement au projet de loi no 22 abrogeant\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement 384-2026 modifiant les usages permis dans la zone 506.",
+   "excerpt": "Et résolu unanimement que le présent règlement soit adopté et qu'il soit\nstatué et décrété par ce règlement ce qui suit:\nArticle 1\n\nTitre du règlement\n\nLe présent règlement s'intitule « Règlement numéro 384-2026"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de zonage 181-2003 n'est mentionné que comme rappel historique dans le préambule.",
+   "excerpt": "le conseil de la Municipalité de Roxton a adopté, le 6\noctobre 2003, le règlement de zonage numéro 181-2003 ;"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la modification de la grille des usages pour autoriser l'élevage dans la zone 506.",
+   "excerpt": "La grille des usages principaux et des normes, annexée et faisant partie\nintégrante du règlement de zonage numéro 181-2003 de la Municipalité de\nRoxton, est modifiée :\na)\npar l’ajout des usages agricoles"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal adopte le règlement décrétant des dépenses en immobilisation et un emprunt de 500 000 $.",
+   "excerpt": "Il est proposé et résolu à l’unanimité des conseillers de l’adoption du\nrèglement décrétant des dépenses en immobilisation et un emprunt au\nmontant de 500 000$."
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution demandant formellement l'abrogation de l'article 245.1 de la LAU dans le projet de loi 22.",
+   "excerpt": "QUE la municipalité du Canton de Roxton demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée\nnationale d’introduire un amendement au projet de loi no 22 abrogeant"
+  }
+ ],
+ "filter": {
+  "acts": 5,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement de zonage 181-2003 n'est mentionné que comme rappel historique dans le préambule."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le règlement 384-2026 modifiant les usages permis dans la zone 506."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil adopte la modification de la grille des usages pour autoriser l'élevage dans la zone 506."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil municipal adopte le règlement décrétant des dépenses en immobilisation et un emprunt de 500 000 $."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil adopte une résolution demandant formellement l'abrogation de l'article 245.1 de la LAU dans le projet de loi 22."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2019,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 10457,
+   "outputTokens": 488,
+   "totalTokens": 10945
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1866
+  },
+  "inputSha256": "d59e247586ec5df6f431f0a115f820ef78d5ba0c080978b2b994e0ad265cd3f1"
+ }
+}

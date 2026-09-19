@@ -1,0 +1,159 @@
+{
+ "nodes": [
+  {
+   "id": "signal-col230051",
+   "label": "Renouvellement du permis COL230051 — construction neuve",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "permis_construction",
+    "kind": "renouvellement_permis",
+    "meetingDate": "2026-05-09",
+    "municipality": "lac-tremblant-nord",
+    "docSha": "162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd",
+    "description": "Demande de renouvellement du permis COL230051 pour une construction neuve, inscrite au volet CCU du projet d’ordre du jour. Aucune décision n’est attestée.",
+    "no_lot": "5011332",
+    "etape": "inconnu",
+    "scope": "local"
+   },
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "9.2.1 Demande de renouvellement du permis COL230051 pour une construction neuve, matricule 1624-72-9382,\nlot 5 011 332 du cadastre du Québec;",
+     "source_file": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+     "rawRef": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+     "docSha": "162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd",
+     "sourceUrl": "https://lac-tremblant-nord.qc.ca/wp-content/uploads/2026/05/ODJ-AGENDA-Conseil-municipal-Council-meeting-samedi-9-mai-11-h-Saturday-May-9-11-AM-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-dpcol250057",
+   "label": "Demande DPCOL250057 — garage détaché",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "permis_construction",
+    "kind": "garage_detache",
+    "meetingDate": "2026-05-09",
+    "municipality": "lac-tremblant-nord",
+    "docSha": "162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd",
+    "description": "Demande DPCOL250057 de permis pour la construction d’un garage détaché, inscrite au volet CCU du projet d’ordre du jour. Aucune décision n’est attestée.",
+    "no_lot": "6219794",
+    "etape": "inconnu",
+    "scope": "local"
+   },
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "9.2.2 Demande DPCOL250057, demande de permis pour la construction d’un garage détaché, matricule 1427-691052-0-010-0001, lot 6 219 794 du cadastre du Québec;",
+     "source_file": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+     "rawRef": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+     "docSha": "162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd",
+     "sourceUrl": "https://lac-tremblant-nord.qc.ca/wp-content/uploads/2026/05/ODJ-AGENDA-Conseil-municipal-Council-meeting-samedi-9-mai-11-h-Saturday-May-9-11-AM-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-dpcol260003",
+   "label": "Demande DPCOL260003 — construction neuve",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "permis_construction",
+    "kind": "construction_neuve",
+    "meetingDate": "2026-05-09",
+    "municipality": "lac-tremblant-nord",
+    "docSha": "162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd",
+    "description": "Demande DPCOL260003 de permis pour une construction neuve, inscrite au volet CCU du projet d’ordre du jour. Aucune décision n’est attestée.",
+    "no_lot": "6219789",
+    "etape": "inconnu",
+    "scope": "local"
+   },
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "9.2.3 Demande DPCOL260003, demande de permis pour une construction neuve, matricule 1427-69-1052-0-0050001, lot 6 219 789 du cadastre du Québec;",
+     "source_file": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+     "rawRef": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+     "docSha": "162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd",
+     "sourceUrl": "https://lac-tremblant-nord.qc.ca/wp-content/uploads/2026/05/ODJ-AGENDA-Conseil-municipal-Council-meeting-samedi-9-mai-11-h-Saturday-May-9-11-AM-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-dpcol260002",
+   "label": "Demande DPCOL260002 — garage détaché",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "permis_construction",
+    "kind": "garage_detache",
+    "meetingDate": "2026-05-09",
+    "municipality": "lac-tremblant-nord",
+    "docSha": "162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd",
+    "description": "Demande DPCOL260002 de permis pour la construction d’un garage détaché, inscrite au volet CCU du projet d’ordre du jour. Aucune décision n’est attestée.",
+    "no_lot": "5011370",
+    "etape": "inconnu",
+    "scope": "local"
+   },
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "9.2.4 Demande DPCOL260002, demande de permis pour la construction d’un garage détaché, matricule 1720-695649, lot 5 011 370 du cadastre du Québec;",
+     "source_file": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+     "rawRef": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+     "docSha": "162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd",
+     "sourceUrl": "https://lac-tremblant-nord.qc.ca/wp-content/uploads/2026/05/ODJ-AGENDA-Conseil-municipal-Council-meeting-samedi-9-mai-11-h-Saturday-May-9-11-AM-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-dpcol240004",
+   "label": "Demande DPCOL240004 — construction neuve",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+   "status": "candidate",
+   "properties": {
+    "category": "permis_construction",
+    "kind": "construction_neuve",
+    "meetingDate": "2026-05-09",
+    "municipality": "lac-tremblant-nord",
+    "docSha": "162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd",
+    "description": "Demande DPCOL240004 de permis pour une construction neuve, inscrite au volet CCU du projet d’ordre du jour. Aucune décision n’est attestée.",
+    "no_lot": "5011310",
+    "etape": "inconnu",
+    "scope": "local"
+   },
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "9.2.5 Demande DPCOL240004, demande de permis pour une construction neuve, matricule 1621-54-9153, lot\n5 011 310 du cadastre du Québec;",
+     "source_file": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+     "rawRef": "raw/proces-verbaux-lac-tremblant-nord/cas/162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd.pdf",
+     "docSha": "162921c80796fd06d9fede6b8e987f158f23d9ccd0b48e88e2ac54749e2e1ccd",
+     "sourceUrl": "https://lac-tremblant-nord.qc.ca/wp-content/uploads/2026/05/ODJ-AGENDA-Conseil-municipal-Council-meeting-samedi-9-mai-11-h-Saturday-May-9-11-AM-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [],
+ "input_tokens": 6900,
+ "output_tokens": 2100
+}

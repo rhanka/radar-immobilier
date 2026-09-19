@@ -1,0 +1,44 @@
+{
+ "documentId": "candiac-2026-06-15",
+ "nextId": 2,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 5005-024 — permis et certificats, études et mesures de mitigation",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5005-024",
+    "page": 1,
+    "citation": "RÈGLEMENT 5005-024 MODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET CERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE D’ÉTUDES ET DE MESURES DE MITIGATION, NOTAMMENT EN BORDURE D’AUTOROUTE",
+    "anchor": "RÈGLEMENT 5005-024",
+    "spanStart": 0,
+    "spanEnd": 186
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 5005-024 — permis et certificats, études et mesures de mitigation",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5005-024",
+      "page": 1,
+      "citation": "RÈGLEMENT 5005-024 MODIFIANT LE RÈGLEMENT RELATIF AUX PERMIS ET CERTIFICATS AFIN DE REVOIR LES EXIGENCES EN MATIÈRE D’ÉTUDES ET DE MESURES DE MITIGATION, NOTAMMENT EN BORDURE D’AUTOROUTE",
+      "anchor": "RÈGLEMENT 5005-024",
+      "spanStart": 0,
+      "spanEnd": 186
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil décrète ce règlement modifiant les permis et certificats à la séance du 15 juin 2026, ce qui atteste une adoption réglementaire à inclure."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,71 @@
+{
+ "documentId": "saint-sylvere-2026-04-07",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "8b7b8350fdc54fe2c7ab617f2069ef5c4429b9fb958955266415f48aae00735a",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement de zonage numéro 383 est bien donné à la page 6 par Gabrielle Gauthier.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le premier projet de règlement numéro 383 modifiant le zonage est déposé et adopté à la page 7 par la résolution 2026-04-117.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement numéro 384 sur les PPCMOI est bien consigné à la page 7 par Yan Dagenais.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le premier projet de règlement numéro 384 sur les PPCMOI est déposé et adopté à la page 8 par la résolution 2026-04-119.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La résolution d'autorisation/recommandation pour la demande CPTAQ et le lotissement 453952 est adoptée à la page 8.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement de zonage numéro 383 est bien donné à la page 6 par Gabrielle Gauthier."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le premier projet de règlement numéro 383 modifiant le zonage est déposé et adopté à la page 7 par la résolution 2026-04-117."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement numéro 384 sur les PPCMOI est bien consigné à la page 7 par Yan Dagenais."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le premier projet de règlement numéro 384 sur les PPCMOI est déposé et adopté à la page 8 par la résolution 2026-04-119."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution d'autorisation/recommandation pour la demande CPTAQ et le lotissement 453952 est adoptée à la page 8."
+  }
+ ]
+}

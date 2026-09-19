@@ -1,0 +1,1270 @@
+{
+ "documentId": "brossard-2026-04-28",
+ "nextId": 34,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Approbation des dérogations mineures — 5641, rue Aline, lot projeté 6 720 588",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "6 720 588",
+    "page": 2,
+    "citation": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue Aline, lot projeté 6 720 588, ayant pour effet de permettre",
+    "anchor": "lot projeté 6 720 588",
+    "spanStart": 2158,
+    "spanEnd": 2307
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation des dérogations mineures — 5641, rue Aline, lot projeté 6 720 588",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "6 720 588",
+      "page": 2,
+      "citation": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue Aline, lot projeté 6 720 588, ayant pour effet de permettre",
+      "anchor": "lot projeté 6 720 588",
+      "spanStart": 2158,
+      "spanEnd": 2307
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution approuve une demande portant sur la largeur et la superficie du même lot projeté, ce qui constitue une unité de dérogation mineure."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2025-00304 — construction multifamiliale au 3605, rue de Châteauneuf",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-00304",
+    "page": 3,
+    "citation": "CCU-20260311-3.1 PIIA – Construction multifamiliale 2025-00304 – 3605, rue de Châteauneuf – Habitation multifamiliale isolée de quatre étages",
+    "anchor": "multifamiliale 2025-00304",
+    "spanStart": 565,
+    "spanEnd": 706
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2025-00304 — construction multifamiliale au 3605, rue de Châteauneuf",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2025-00304",
+      "page": 3,
+      "citation": "CCU-20260311-3.1 PIIA – Construction multifamiliale 2025-00304 – 3605, rue de Châteauneuf – Habitation multifamiliale isolée de quatre étages",
+      "anchor": "multifamiliale 2025-00304",
+      "spanStart": 565,
+      "spanEnd": 706
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 260428-097 entérine cette recommandation favorable; chaque demande de PIIA explicitement nommée constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2025-00305 — construction multifamiliale au 3665, rue de Châteauneuf",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-00305",
+    "page": 3,
+    "citation": "CCU-20260311-3.2 PIIA – Construction multifamiliale 2025-00305 – 3665, rue de Châteauneuf – Habitation multifamiliale isolée de quatre étages",
+    "anchor": "multifamiliale 2025-00305",
+    "spanStart": 708,
+    "spanEnd": 849
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2025-00305 — construction multifamiliale au 3665, rue de Châteauneuf",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2025-00305",
+      "page": 3,
+      "citation": "CCU-20260311-3.2 PIIA – Construction multifamiliale 2025-00305 – 3665, rue de Châteauneuf – Habitation multifamiliale isolée de quatre étages",
+      "anchor": "multifamiliale 2025-00305",
+      "spanStart": 708,
+      "spanEnd": 849
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 260428-097 entérine cette demande de PIIA, distincte de celle visant le 3605, rue de Châteauneuf."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00036 — construction au 5892, rue Alexandre",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00036",
+    "page": 3,
+    "citation": "CCU-20260311-5.1 PIIA – Construction unifamiliale 2026-00036 – 5892, rue Alexandre – Construction – Habitation unifamiliale isolée de deux étages",
+    "anchor": "unifamiliale 2026-00036",
+    "spanStart": 851,
+    "spanEnd": 996
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00036 — construction au 5892, rue Alexandre",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00036",
+      "page": 3,
+      "citation": "CCU-20260311-5.1 PIIA – Construction unifamiliale 2026-00036 – 5892, rue Alexandre – Construction – Habitation unifamiliale isolée de deux étages",
+      "anchor": "unifamiliale 2026-00036",
+      "spanStart": 851,
+      "spanEnd": 996
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cette demande de construction unifamiliale figure parmi les recommandations favorables entérinées par le conseil."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2025-00320 — construction au 5641, rue Aline",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-00320",
+    "page": 3,
+    "citation": "CCU-20260311-5.2 PIIA – Construction unifamiliale 2025-00320 – 5641, rue Aline – Habitation unifamiliale isolée d'un étage",
+    "anchor": "unifamiliale 2025-00320",
+    "spanStart": 998,
+    "spanEnd": 1120
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2025-00320 — construction au 5641, rue Aline",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2025-00320",
+      "page": 3,
+      "citation": "CCU-20260311-5.2 PIIA – Construction unifamiliale 2025-00320 – 5641, rue Aline – Habitation unifamiliale isolée d'un étage",
+      "anchor": "unifamiliale 2025-00320",
+      "spanStart": 998,
+      "spanEnd": 1120
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil entérine ce PIIA, qui constitue un objet procédural distinct de la demande de dérogations mineures à la même adresse."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00005 — agrandissement au 3280, rue Bahamas",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00005",
+    "page": 3,
+    "citation": "CCU-20260311-5.3 PIIA – Agrandissement unifamilial 2026-00005 – 3280, rue Bahamas – PIIA – Agrandissement – Habitation unifamiliale isolée d'un étage",
+    "anchor": "unifamilial 2026-00005",
+    "spanStart": 1122,
+    "spanEnd": 1271
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00005 — agrandissement au 3280, rue Bahamas",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00005",
+      "page": 3,
+      "citation": "CCU-20260311-5.3 PIIA – Agrandissement unifamilial 2026-00005 – 3280, rue Bahamas – PIIA – Agrandissement – Habitation unifamiliale isolée d'un étage",
+      "anchor": "unifamilial 2026-00005",
+      "spanStart": 1122,
+      "spanEnd": 1271
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution entérine cette demande d'agrandissement, et les petits PIIA sont expressément inclus dans le corrigé."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00024 — transformation au 5890, rue Bretagne",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00024",
+    "page": 3,
+    "citation": "CCU-20260311-5.4 PIIA – Transformation bâtiment principal résidentiel 2026-00024 – 5890, rue Bretagne",
+    "anchor": "résidentiel 2026-00024",
+    "spanStart": 1273,
+    "spanEnd": 1374
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00024 — transformation au 5890, rue Bretagne",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00024",
+      "page": 3,
+      "citation": "CCU-20260311-5.4 PIIA – Transformation bâtiment principal résidentiel 2026-00024 – 5890, rue Bretagne",
+      "anchor": "résidentiel 2026-00024",
+      "spanStart": 1273,
+      "spanEnd": 1374
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le remplacement du revêtement, des portes et des fenêtres fait l'objet d'un PIIA favorable entériné par le conseil."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00049 — agrandissement au 2010, croissant Tourangeau",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00049",
+    "page": 3,
+    "citation": "CCU-20260311-5.5 PIIA – Agrandissement unifamilial 2026-00049 – 2010, croissant Tourangeau – Agrandissement – Habitation unifamiliale isolée de deux étages",
+    "anchor": "unifamilial 2026-00049",
+    "spanStart": 1487,
+    "spanEnd": 1642
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00049 — agrandissement au 2010, croissant Tourangeau",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00049",
+      "page": 3,
+      "citation": "CCU-20260311-5.5 PIIA – Agrandissement unifamilial 2026-00049 – 2010, croissant Tourangeau – Agrandissement – Habitation unifamiliale isolée de deux étages",
+      "anchor": "unifamilial 2026-00049",
+      "spanStart": 1487,
+      "spanEnd": 1642
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cette demande d'agrandissement est explicitement nommée parmi les PIIA dont les recommandations favorables sont entérinées."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00027 — agrandissement au 7670, place Trudel",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00027",
+    "page": 3,
+    "citation": "CCU-20260311-5.6 PIIA – Agrandissement unifamilial 2026-00027 – 7670, place Trudel – PIIA – Agrandissement du rez-de-chaussée et modification des parements extérieurs",
+    "anchor": "unifamilial 2026-00027",
+    "spanStart": 1644,
+    "spanEnd": 1810
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00027 — agrandissement au 7670, place Trudel",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00027",
+      "page": 3,
+      "citation": "CCU-20260311-5.6 PIIA – Agrandissement unifamilial 2026-00027 – 7670, place Trudel – PIIA – Agrandissement du rez-de-chaussée et modification des parements extérieurs",
+      "anchor": "unifamilial 2026-00027",
+      "spanStart": 1644,
+      "spanEnd": 1810
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil entérine le PIIA relatif à l'agrandissement et aux parements extérieurs, ce qui forme une seule unité pour cette demande."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00039 — transformation de l'école Good Shepherd, 5770, rue Aline",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00039",
+    "page": 3,
+    "citation": "CCU-20260311-6.1 PIIA – Transformation bâtiment principal non résidentiel 2026-00039 – 5770, rue Aline – Modification architecturale – École primaire Good Shepherd",
+    "anchor": "non résidentiel 2026-00039",
+    "spanStart": 1860,
+    "spanEnd": 2023
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00039 — transformation de l'école Good Shepherd, 5770, rue Aline",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00039",
+      "page": 3,
+      "citation": "CCU-20260311-6.1 PIIA – Transformation bâtiment principal non résidentiel 2026-00039 – 5770, rue Aline – Modification architecturale – École primaire Good Shepherd",
+      "anchor": "non résidentiel 2026-00039",
+      "spanStart": 1860,
+      "spanEnd": 2023
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Ce PIIA scolaire est entériné par le conseil et demeure inclus malgré son caractère non résidentiel."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00034 — transformation au 9550, boulevard Leduc, local 20",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00034",
+    "page": 3,
+    "citation": "CCU-20260311-6.2 PIIA – Transformation bâtiment principal non résidentiel 2026-00034 – 9550, boulevard Leduc, local 20 – Modification architecturale commerciale – Local vacant",
+    "anchor": "non résidentiel 2026-00034",
+    "spanStart": 2025,
+    "spanEnd": 2200
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00034 — transformation au 9550, boulevard Leduc, local 20",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00034",
+      "page": 3,
+      "citation": "CCU-20260311-6.2 PIIA – Transformation bâtiment principal non résidentiel 2026-00034 – 9550, boulevard Leduc, local 20 – Modification architecturale commerciale – Local vacant",
+      "anchor": "non résidentiel 2026-00034",
+      "spanStart": 2025,
+      "spanEnd": 2200
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution entérine cette modification architecturale commerciale, les PIIA non résidentiels étant inclus."
+    }
+   ]
+  },
+  {
+   "id": "u12",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00048 — transformation au 9750, boulevard Leduc, local 25",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00048",
+    "page": 3,
+    "citation": "CCU-20260311-6.3 PIIA – Transformation bâtiment principal non résidentiel 2026-00048 – 9750, boulevard Leduc, local 25 – Modification architecturale commerciale – Consignaction",
+    "anchor": "non résidentiel 2026-00048",
+    "spanStart": 2202,
+    "spanEnd": 2378
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00048 — transformation au 9750, boulevard Leduc, local 25",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00048",
+      "page": 3,
+      "citation": "CCU-20260311-6.3 PIIA – Transformation bâtiment principal non résidentiel 2026-00048 – 9750, boulevard Leduc, local 25 – Modification architecturale commerciale – Consignaction",
+      "anchor": "non résidentiel 2026-00048",
+      "spanStart": 2202,
+      "spanEnd": 2378
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le PIIA de transformation de Consignaction est une demande explicitement approuvée, distincte du PIIA d'enseigne au même local."
+    }
+   ]
+  },
+  {
+   "id": "u13",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00033 — transformation au 9750, boulevard Leduc, local 30",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00033",
+    "page": 3,
+    "citation": "CCU-20260311-6.4 PIIA – Transformation bâtiment principal non résidentiel 2026-00033 – 9750, boulevard Leduc, local 30 – Modification architecturale de la façade avant – Activate",
+    "anchor": "non résidentiel 2026-00033",
+    "spanStart": 2380,
+    "spanEnd": 2558
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00033 — transformation au 9750, boulevard Leduc, local 30",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00033",
+      "page": 3,
+      "citation": "CCU-20260311-6.4 PIIA – Transformation bâtiment principal non résidentiel 2026-00033 – 9750, boulevard Leduc, local 30 – Modification architecturale de la façade avant – Activate",
+      "anchor": "non résidentiel 2026-00033",
+      "spanStart": 2380,
+      "spanEnd": 2558
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil entérine la modification de façade d'Activate, qui constitue une demande distincte de celle portant sur son enseigne."
+    }
+   ]
+  },
+  {
+   "id": "u14",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00038 — transformation au 1520, avenue des Lumières, local 25",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00038",
+    "page": 3,
+    "citation": "CCU-20260311-6.5 PIIA – Transformation bâtiment principal non résidentiel 2026-00038 – 1520, avenue des Lumières, local 25",
+    "anchor": "non résidentiel 2026-00038",
+    "spanStart": 2560,
+    "spanEnd": 2682
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00038 — transformation au 1520, avenue des Lumières, local 25",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00038",
+      "page": 3,
+      "citation": "CCU-20260311-6.5 PIIA – Transformation bâtiment principal non résidentiel 2026-00038 – 1520, avenue des Lumières, local 25",
+      "anchor": "non résidentiel 2026-00038",
+      "spanStart": 2560,
+      "spanEnd": 2682
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cette transformation commerciale de Meubles TOCO est explicitement comprise dans les recommandations favorables entérinées."
+    }
+   ]
+  },
+  {
+   "id": "u15",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00046 — transformation au 1040, rue du Lux, local 15",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00046",
+    "page": 3,
+    "citation": "CCU-20260311-6.6 PIIA – Transformation bâtiment principal non résidentiel 2026-00046 – 1040, rue du Lux, local 15 – Modification architecturale commerciale – UNIQLO",
+    "anchor": "non résidentiel 2026-00046",
+    "spanStart": 2765,
+    "spanEnd": 2929
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00046 — transformation au 1040, rue du Lux, local 15",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00046",
+      "page": 3,
+      "citation": "CCU-20260311-6.6 PIIA – Transformation bâtiment principal non résidentiel 2026-00046 – 1040, rue du Lux, local 15 – Modification architecturale commerciale – UNIQLO",
+      "anchor": "non résidentiel 2026-00046",
+      "spanStart": 2765,
+      "spanEnd": 2929
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil entérine ce PIIA commercial d'UNIQLO, lequel relève des inclusions non résidentielles."
+    }
+   ]
+  },
+  {
+   "id": "u16",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00030 — enseigne au 8240, boulevard Leduc, local 30",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00030",
+    "page": 3,
+    "citation": "CCU-20260311-7.1 PIIA – Enseignes 2026-00030 – 8240, boulevard Leduc, local 30 – Enseigne sur bâtiment – King",
+    "anchor": "Enseignes 2026-00030",
+    "spanStart": 2931,
+    "spanEnd": 3040
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00030 — enseigne au 8240, boulevard Leduc, local 30",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00030",
+      "page": 3,
+      "citation": "CCU-20260311-7.1 PIIA – Enseignes 2026-00030 – 8240, boulevard Leduc, local 30 – Enseigne sur bâtiment – King",
+      "anchor": "Enseignes 2026-00030",
+      "spanStart": 2931,
+      "spanEnd": 3040
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L'enseigne King fait l'objet d'un PIIA favorable entériné, et les petits PIIA d'enseignes doivent être inclus."
+    }
+   ]
+  },
+  {
+   "id": "u17",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00042 — enseigne au 9550, boulevard Leduc, local 10",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00042",
+    "page": 3,
+    "citation": "CCU-20260311-7.2 PIIA – Enseignes 2026-00042 – 9550, boulevard Leduc, local 10 – Enseigne sur bâtiment – Le Tee Off Lounge",
+    "anchor": "Enseignes 2026-00042",
+    "spanStart": 3042,
+    "spanEnd": 3164
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00042 — enseigne au 9550, boulevard Leduc, local 10",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00042",
+      "page": 3,
+      "citation": "CCU-20260311-7.2 PIIA – Enseignes 2026-00042 – 9550, boulevard Leduc, local 10 – Enseigne sur bâtiment – Le Tee Off Lounge",
+      "anchor": "Enseignes 2026-00042",
+      "spanStart": 3042,
+      "spanEnd": 3164
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution entérine cette demande d'enseigne du Tee Off Lounge, explicitement identifiée par son numéro de dossier."
+    }
+   ]
+  },
+  {
+   "id": "u18",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00041 — enseigne au 9750, boulevard Leduc, local 25",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00041",
+    "page": 3,
+    "citation": "CCU-20260311-7.3 PIIA – Enseignes 2026-00041 – 9750, boulevard Leduc, local 25 – Enseigne sur bâtiment – Consignaction",
+    "anchor": "Enseignes 2026-00041",
+    "spanStart": 3166,
+    "spanEnd": 3284
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00041 — enseigne au 9750, boulevard Leduc, local 25",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00041",
+      "page": 3,
+      "citation": "CCU-20260311-7.3 PIIA – Enseignes 2026-00041 – 9750, boulevard Leduc, local 25 – Enseigne sur bâtiment – Consignaction",
+      "anchor": "Enseignes 2026-00041",
+      "spanStart": 3166,
+      "spanEnd": 3284
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La demande d'enseigne de Consignaction est entérinée et possède un numéro distinct de sa demande de transformation architecturale."
+    }
+   ]
+  },
+  {
+   "id": "u19",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00031 — enseigne au 9750, boulevard Leduc, local 30",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00031",
+    "page": 3,
+    "citation": "CCU-20260311.7.4 PIIA – Enseignes 2026-00031 – 9750, boulevard Leduc, local 30 – Enseigne sur bâtiment – Activate",
+    "anchor": "Enseignes 2026-00031",
+    "spanStart": 3286,
+    "spanEnd": 3399
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00031 — enseigne au 9750, boulevard Leduc, local 30",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00031",
+      "page": 3,
+      "citation": "CCU-20260311.7.4 PIIA – Enseignes 2026-00031 – 9750, boulevard Leduc, local 30 – Enseigne sur bâtiment – Activate",
+      "anchor": "Enseignes 2026-00031",
+      "spanStart": 3286,
+      "spanEnd": 3399
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Ce PIIA d'enseigne d'Activate est une demande favorable entérinée distincte du PIIA de modification de façade."
+    }
+   ]
+  },
+  {
+   "id": "u20",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00032 — enseigne au 9850, boulevard Leduc, local 20",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00032",
+    "page": 4,
+    "citation": "CCU-20260311-7.5 PIIA – Enseignes 2026-00032 – 9850, boulevard Leduc, local 20 – Enseigne sur bâtiment – La Voûte",
+    "anchor": "Enseignes 2026-00032",
+    "spanStart": 0,
+    "spanEnd": 113
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00032 — enseigne au 9850, boulevard Leduc, local 20",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00032",
+      "page": 4,
+      "citation": "CCU-20260311-7.5 PIIA – Enseignes 2026-00032 – 9850, boulevard Leduc, local 20 – Enseigne sur bâtiment – La Voûte",
+      "anchor": "Enseignes 2026-00032",
+      "spanStart": 0,
+      "spanEnd": 113
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cette demande d'enseigne poursuit la liste des PIIA favorables entérinés par la résolution 260428-097."
+    }
+   ]
+  },
+  {
+   "id": "u21",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00026 — enseigne Meubles Toco",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00026",
+    "page": 4,
+    "citation": "CCU-20260311-7.6 PIIA – Enseignes 2026-00026 – 1520, venue des Lumières, local 25 – Enseigne sur bâtiment – Meubles Toco",
+    "anchor": "Enseignes 2026-00026",
+    "spanStart": 115,
+    "spanEnd": 235
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00026 — enseigne Meubles Toco",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00026",
+      "page": 4,
+      "citation": "CCU-20260311-7.6 PIIA – Enseignes 2026-00026 – 1520, venue des Lumières, local 25 – Enseigne sur bâtiment – Meubles Toco",
+      "anchor": "Enseignes 2026-00026",
+      "spanStart": 115,
+      "spanEnd": 235
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le PIIA d'enseigne de Meubles Toco est explicitement entériné et reste distinct de la demande de transformation du bâtiment."
+    }
+   ]
+  },
+  {
+   "id": "u22",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00056 — enseigne au 7185, boulevard du Quartier",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00056",
+    "page": 4,
+    "citation": "CCU-20260311-7.7 PIIA – Enseignes 2026-00056 – 7185, boulevard du Quartier – Enseigne sur bâtiment – Coyote country",
+    "anchor": "Enseignes 2026-00056",
+    "spanStart": 237,
+    "spanEnd": 352
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00056 — enseigne au 7185, boulevard du Quartier",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00056",
+      "page": 4,
+      "citation": "CCU-20260311-7.7 PIIA – Enseignes 2026-00056 – 7185, boulevard du Quartier – Enseigne sur bâtiment – Coyote country",
+      "anchor": "Enseignes 2026-00056",
+      "spanStart": 237,
+      "spanEnd": 352
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cette enseigne de Coyote country fait l'objet d'une demande de PIIA favorable entérinée par le conseil."
+    }
+   ]
+  },
+  {
+   "id": "u23",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-00044 — enseigne au 6598, boulevard Taschereau",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-00044",
+    "page": 4,
+    "citation": "CCU-20260311-7.8 PIIA – Enseignes 2026-00044 – 6598, boulevard Taschereau – Enseigne sur marquise – Esso",
+    "anchor": "Enseignes 2026-00044",
+    "spanStart": 354,
+    "spanEnd": 458
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-00044 — enseigne au 6598, boulevard Taschereau",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-00044",
+      "page": 4,
+      "citation": "CCU-20260311-7.8 PIIA – Enseignes 2026-00044 – 6598, boulevard Taschereau – Enseigne sur marquise – Esso",
+      "anchor": "Enseignes 2026-00044",
+      "spanStart": 354,
+      "spanEnd": 458
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil entérine le PIIA de l'enseigne sur marquise d'Esso, inclus même s'il s'agit d'un petit projet commercial."
+    }
+   ]
+  },
+  {
+   "id": "u24",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2024-00225 — enseigne au 6633, boulevard Taschereau",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2024-00225",
+    "page": 4,
+    "citation": "CCU-20260311-7.9 PIIA – Enseignes 2024-00225 – 6633, boulevard Taschereau – Enseigne détachée – Jurassique",
+    "anchor": "Enseignes 2024-00225",
+    "spanStart": 460,
+    "spanEnd": 566
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2024-00225 — enseigne au 6633, boulevard Taschereau",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2024-00225",
+      "page": 4,
+      "citation": "CCU-20260311-7.9 PIIA – Enseignes 2024-00225 – 6633, boulevard Taschereau – Enseigne détachée – Jurassique",
+      "anchor": "Enseignes 2024-00225",
+      "spanStart": 460,
+      "spanEnd": 566
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Malgré le millésime du dossier, le document constate bien l'entérinement actuel de ce PIIA d'enseigne."
+    }
+   ]
+  },
+  {
+   "id": "u25",
+   "status": "active",
+   "current": {
+    "label": "Adoption conditionnelle du PPCMOI-2026-001 — 3605-3665, rue de Châteauneuf",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-2026-001",
+    "page": 6,
+    "citation": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif aux projets particuliers de construction, de modification ou d'occupation d'un immeuble",
+    "anchor": "résolution PPCMOI-2026-001",
+    "spanStart": 2614,
+    "spanEnd": 2789
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption conditionnelle du PPCMOI-2026-001 — 3605-3665, rue de Châteauneuf",
+      "stage": "adoption",
+      "procedure": "ppcmoi",
+      "objet": "PPCMOI-2026-001",
+      "page": 6,
+      "citation": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif aux projets particuliers de construction, de modification ou d'occupation d'un immeuble",
+      "anchor": "résolution PPCMOI-2026-001",
+      "spanStart": 2614,
+      "spanEnd": 2789
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil adopte la résolution finale sous conditions; les premier et second projets rappelés dans les considérants sont historiques et ne créent pas d'unités supplémentaires."
+    }
+   ]
+  },
+  {
+   "id": "u26",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle de l'entente MUP-B — propriété superficiaire au profit de LICC",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "MUP-B",
+    "page": 7,
+    "citation": "ENTENTE RELATIVE À LA PISTE MULTIFONCTIONNELLE MUP-B – DEMANDE DE DÉCRET (M-30) ET AUTORISATION DE SIGNATURE",
+    "anchor": "MULTIFONCTIONNELLE MUP-B",
+    "spanStart": 246,
+    "spanEnd": 354
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle de l'entente MUP-B — propriété superficiaire au profit de LICC",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "MUP-B",
+      "page": 7,
+      "citation": "ENTENTE RELATIVE À LA PISTE MULTIFONCTIONNELLE MUP-B – DEMANDE DE DÉCRET (M-30) ET AUTORISATION DE SIGNATURE",
+      "anchor": "MULTIFONCTIONNELLE MUP-B",
+      "spanStart": 246,
+      "spanEnd": 354
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L'entente approuvée prévoit une renonciation à l'accession et une propriété superficiaire sur le terrain municipal, ce qui constitue un acte foncier autorisé sous réserve du décret requis."
+    }
+   ]
+  },
+  {
+   "id": "u27",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle de l'entente MUP-6 — régularisation de l'occupation des terrains municipaux",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "MUP-6",
+    "page": 8,
+    "citation": "ENTENTE RELATIVE À LA PISTE MULTIFONCTIONNELLE MUP-6 – DEMANDE DE DÉCRET (M-30) ET AUTORISATION DE SIGNATURE",
+    "anchor": "MULTIFONCTIONNELLE MUP-6",
+    "spanStart": 320,
+    "spanEnd": 428
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle de l'entente MUP-6 — régularisation de l'occupation des terrains municipaux",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "MUP-6",
+      "page": 8,
+      "citation": "ENTENTE RELATIVE À LA PISTE MULTIFONCTIONNELLE MUP-6 – DEMANDE DE DÉCRET (M-30) ET AUTORISATION DE SIGNATURE",
+      "anchor": "MULTIFONCTIONNELLE MUP-6",
+      "spanStart": 320,
+      "spanEnd": 428
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L'entente actuelle régularise la présence de l'ouvrage sur les lots municipaux 4 537 690 et 5 701 948 et ses modalités d'accès, sans constituer une nouvelle renonciation à l'accession, celle-ci étant historique."
+    }
+   ]
+  },
+  {
+   "id": "u28",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de l'entente de travaux municipaux — Pandora Matte Self-Storage, 3505, boulevard Matte",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Pandora Matte Self-Storage",
+    "page": 9,
+    "citation": "D'autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l'entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage",
+    "anchor": "projet Pandora Matte Self-Storage",
+    "spanStart": 10,
+    "spanEnd": 180
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de l'entente de travaux municipaux — Pandora Matte Self-Storage, 3505, boulevard Matte",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Pandora Matte Self-Storage",
+      "page": 9,
+      "citation": "D'autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l'entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage",
+      "anchor": "projet Pandora Matte Self-Storage",
+      "spanStart": 10,
+      "spanEnd": 180
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution autorise une entente de travaux municipaux explicitement liée à un projet de développement identifié, et non un simple marché d'entretien."
+    }
+   ]
+  },
+  {
+   "id": "u29",
+   "status": "active",
+   "current": {
+    "label": "Approbation de l'accord de développement — Plan A, site chemin des Prairies",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Plan A - Site chemin des Prairies",
+    "page": 9,
+    "citation": "D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies à intervenir entre la Ville de Brossard et le promoteur immobilier, société 9520-8732 Québec inc",
+    "anchor": "Plan A - Site chemin des Prairies",
+    "spanStart": 497,
+    "spanEnd": 675
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation de l'accord de développement — Plan A, site chemin des Prairies",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Plan A - Site chemin des Prairies",
+      "page": 9,
+      "citation": "D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies à intervenir entre la Ville de Brossard et le promoteur immobilier, société 9520-8732 Québec inc",
+      "anchor": "Plan A - Site chemin des Prairies",
+      "spanStart": 497,
+      "spanEnd": 675
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil approuve et autorise la signature d'un accord portant explicitement sur le développement d'un site immobilier."
+    }
+   ]
+  },
+  {
+   "id": "u30",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de demander l'autorisation ministérielle — prolongement de l'égout pluvial du projet Plan A",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "réseau d’égout pluvial",
+    "page": 15,
+    "citation": "une demande d’autorisation ministérielle pour le prolongement du réseau d’égout pluvial",
+    "anchor": "réseau d’égout pluvial",
+    "spanStart": 181,
+    "spanEnd": 268
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de demander l'autorisation ministérielle — prolongement de l'égout pluvial du projet Plan A",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "réseau d’égout pluvial",
+      "page": 15,
+      "citation": "une demande d’autorisation ministérielle pour le prolongement du réseau d’égout pluvial",
+      "anchor": "réseau d’égout pluvial",
+      "spanStart": 181,
+      "spanEnd": 268
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution autorise le dépôt d'une demande visant un prolongement de réseau explicitement lié au développement Plan A, sans constater la délivrance de l'autorisation ministérielle."
+    }
+   ]
+  },
+  {
+   "id": "u31",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de déposer la déclaration de conformité — prolongement de l'aqueduc du projet Plan A",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "réseau d’aqueduc",
+    "page": 15,
+    "citation": "une déclaration de conformité pour le prolongement du réseau d’aqueduc auprès du ministère de",
+    "anchor": "réseau d’aqueduc",
+    "spanStart": 278,
+    "spanEnd": 371
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de déposer la déclaration de conformité — prolongement de l'aqueduc du projet Plan A",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "réseau d’aqueduc",
+      "page": 15,
+      "citation": "une déclaration de conformité pour le prolongement du réseau d’aqueduc auprès du ministère de",
+      "anchor": "réseau d’aqueduc",
+      "spanStart": 278,
+      "spanEnd": 371
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La déclaration de conformité du prolongement d'aqueduc est un objet explicitement nommé distinct de la demande d'autorisation concernant l'égout pluvial."
+    }
+   ]
+  },
+  {
+   "id": "u32",
+   "status": "removed",
+   "current": {
+    "label": "Modification de la date de l'ordonnance de vente d'immeubles pour défaut de taxes",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "vente aux enchères",
+    "page": 15,
+    "citation": "de procéder à la vente aux enchères des immeubles pour défaut de paiement de taxes le jeudi 11 juin 2026, à 10 h, par celle du 28 avril 2026",
+    "anchor": "vente aux enchères des immeubles",
+    "spanStart": 2884,
+    "spanEnd": 3024
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Modification de la date de l'ordonnance de vente d'immeubles pour défaut de taxes",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "vente aux enchères",
+      "page": 15,
+      "citation": "de procéder à la vente aux enchères des immeubles pour défaut de paiement de taxes le jeudi 11 juin 2026, à 10 h, par celle du 28 avril 2026",
+      "anchor": "vente aux enchères des immeubles",
+      "spanStart": 2884,
+      "spanEnd": 3024
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution modifie la date de l'ordonnance relative à une vente foncière, sans modifier la date des enchères fixée au 11 juin 2026."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "remove",
+     "reason": "La modification de la date de l'ordonnance de vente pour non-paiement de taxes (résolution 260428-124, p. 15) ne vise aucun objet foncier explicite (aucun lot ni adresse identifié) et relève du recouvrement fiscal, assimilable aux « comptes » exclus du rappel, non d'un acte d'urbanisme ou d'un acte foncier décidé par la Ville."
+    }
+   ]
+  },
+  {
+   "id": "u33",
+   "status": "removed",
+   "current": {
+    "label": "Modification de la date de l'ordonnance de vente pour non-paiement de taxes foncières",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "vente aux enchères",
+    "page": 15,
+    "citation": "De modifier la date du 17 mars 2026 ordonnant à la greffière ou son représentant de procéder à la vente aux enchères des immeubles pour défaut de paiement de taxes le jeudi",
+    "anchor": "vente aux enchères des immeubles",
+    "spanStart": 2803,
+    "spanEnd": 2975
+   },
+   "versions": [
+    {
+     "step": "astra-pass2",
+     "unit": {
+      "label": "Modification de la date de l'ordonnance de vente pour non-paiement de taxes foncières",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "vente aux enchères",
+      "page": 15,
+      "citation": "De modifier la date du 17 mars 2026 ordonnant à la greffière ou son représentant de procéder à la vente aux enchères des immeubles pour défaut de paiement de taxes le jeudi",
+      "anchor": "vente aux enchères des immeubles",
+      "spanStart": 2803,
+      "spanEnd": 2975
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass2",
+     "op": "add",
+     "reason": "La résolution 260428-124 constate une modification actuelle de l'ordonnance de vente d'immeubles, soit une étape explicite d'un acte foncier qui n'est pas encore une vente décidée à un acquéreur."
+    },
+    {
+     "step": "fable-pass2",
+     "op": "remove",
+     "reason": "La modification de la date de l'ordonnance de vente pour défaut de paiement de taxes (point 9.5, section « Administration et finances ») est une procédure de recouvrement fiscal sans objet foncier explicite (aucun lot, adresse ou immeuble nommé) ; elle relève des exclusions (comptes, rapports financiers) et ne constitue ni un acte foncier décidé par la Ville ni un objet réglementaire d'urbanisme."
+    }
+   ]
+  }
+ ]
+}

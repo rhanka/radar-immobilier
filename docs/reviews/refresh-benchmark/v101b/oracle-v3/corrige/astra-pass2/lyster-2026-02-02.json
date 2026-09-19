@@ -1,0 +1,120 @@
+{
+ "documentId": "lyster-2026-02-02",
+ "nextId": 4,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de mise en vente pour taxes impayées — lot 5 835 056",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 835 056",
+    "page": 5,
+    "citation": "Jean-François 1837-35-8331 5 835 056 Lagacé",
+    "anchor": "1837-35-8331 5 835 056",
+    "spanStart": 0,
+    "spanEnd": 43
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de mise en vente pour taxes impayées — lot 5 835 056",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 835 056",
+      "page": 5,
+      "citation": "Jean-François 1837-35-8331 5 835 056 Lagacé",
+      "anchor": "1837-35-8331 5 835 056",
+      "spanStart": 0,
+      "spanEnd": 43
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-02-28 autorise la transmission de la liste comprenant ce lot pour sa vente aux enchères, sauf paiement préalable des sommes dues, ce qui constitue un acte foncier à inclure."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de mise en vente pour taxes impayées — lot 5 834 167",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 834 167",
+    "page": 5,
+    "citation": "Anthony Lalonde2437-98-1768 5 834 167 Lacaille",
+    "anchor": "2437-98-1768 5 834 167",
+    "spanStart": 44,
+    "spanEnd": 90
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de mise en vente pour taxes impayées — lot 5 834 167",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 834 167",
+      "page": 5,
+      "citation": "Anthony Lalonde2437-98-1768 5 834 167 Lacaille",
+      "anchor": "2437-98-1768 5 834 167",
+      "spanStart": 44,
+      "spanEnd": 90
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-02-28 vise également la vente aux enchères de ce lot, sauf paiement préalable des sommes dues, et chaque objet foncier explicitement nommé donne une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de mise en vente pour taxes impayées — lot 5 834 895",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 834 895",
+    "page": 5,
+    "citation": "Carl Roy, Édith Francoeur, Réal 1636-52-7076 5 834 895 Roy",
+    "anchor": "1636-52-7076 5 834 895",
+    "spanStart": 91,
+    "spanEnd": 149
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de mise en vente pour taxes impayées — lot 5 834 895",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 834 895",
+      "page": 5,
+      "citation": "Carl Roy, Édith Francoeur, Réal 1636-52-7076 5 834 895 Roy",
+      "anchor": "1636-52-7076 5 834 895",
+      "spanStart": 91,
+      "spanEnd": 149
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-02-28 vise également la vente aux enchères de ce lot, sauf paiement préalable des sommes dues, et chaque objet foncier explicitement nommé donne une unité distincte."
+    }
+   ]
+  }
+ ]
+}

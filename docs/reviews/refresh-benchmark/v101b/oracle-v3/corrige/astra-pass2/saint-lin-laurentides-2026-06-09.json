@@ -1,0 +1,728 @@
+{
+ "documentId": "saint-lin-laurentides-2026-06-09",
+ "nextId": 20,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure prévue — zone tampon au 1510, route 335",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "1510, route 335",
+    "page": 1,
+    "citation": "Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335",
+    "anchor": "1510, route 335",
+    "spanStart": 2600,
+    "spanEnd": 2685
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure prévue — zone tampon au 1510, route 335",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "1510, route 335",
+      "page": 1,
+      "citation": "Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335",
+      "anchor": "1510, route 335",
+      "spanStart": 2600,
+      "spanEnd": 2685
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 4.2 prévoit l'examen d'une dérogation mineure explicite, sans attester une décision acquise."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure prévue — nombre d'enseignes attachées au 70, route 335",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "70, route 335",
+    "page": 1,
+    "citation": "Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335",
+    "anchor": "70, route 335",
+    "spanStart": 2696,
+    "spanEnd": 2796
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure prévue — nombre d'enseignes attachées au 70, route 335",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "70, route 335",
+      "page": 1,
+      "citation": "Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335",
+      "anchor": "70, route 335",
+      "spanStart": 2696,
+      "spanEnd": 2796
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 4.3 constitue une demande de dérogation mineure explicitement prévue à l'ordre du jour."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure prévue — superficie et largeur d'une remise au 31, rue Cliche",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "31, rue Cliche",
+    "page": 1,
+    "citation": "Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche",
+    "anchor": "31, rue Cliche",
+    "spanStart": 2807,
+    "spanEnd": 2914
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure prévue — superficie et largeur d'une remise au 31, rue Cliche",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "31, rue Cliche",
+      "page": 1,
+      "citation": "Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche",
+      "anchor": "31, rue Cliche",
+      "spanStart": 2807,
+      "spanEnd": 2914
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 4.4 prévoit une demande de dérogation mineure portant sur la superficie et la largeur d'une même remise."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "PIIA prévu — agrandissement du bâtiment commercial au 1510, route 335",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "1510, route 335",
+    "page": 1,
+    "citation": "Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial existant / Lot numéro 6 663 628 / 1510, route 335",
+    "anchor": "1510, route 335",
+    "spanStart": 2924,
+    "spanEnd": 3087
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA prévu — agrandissement du bâtiment commercial au 1510, route 335",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "1510, route 335",
+      "page": 1,
+      "citation": "Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial existant / Lot numéro 6 663 628 / 1510, route 335",
+      "anchor": "1510, route 335",
+      "spanStart": 2924,
+      "spanEnd": 3087
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 4.5 prévoit une demande de PIIA distincte de la dérogation mineure visant la même propriété."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "PIIA prévu — enseignes de Planète Piscine au 70, route 335",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "70, route 335",
+    "page": 1,
+    "citation": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot numéro 6 579 952 / 70, route 335",
+    "anchor": "70, route 335",
+    "spanStart": 3096,
+    "spanEnd": 3246
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA prévu — enseignes de Planète Piscine au 70, route 335",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "70, route 335",
+      "page": 1,
+      "citation": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot numéro 6 579 952 / 70, route 335",
+      "anchor": "70, route 335",
+      "spanStart": 3096,
+      "spanEnd": 3246
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 4.6 prévoit une demande de PIIA pour les enseignes de Planète Piscine, les petits PIIA commerciaux étant inclus."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "PIIA prévu — enseignes d'Allô mon Coco au 70, route 335",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "70, route 335",
+    "page": 1,
+    "citation": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot numéro 6 579 952 / 70, route 335",
+    "anchor": "70, route 335",
+    "spanStart": 3255,
+    "spanEnd": 3405
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA prévu — enseignes d'Allô mon Coco au 70, route 335",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "70, route 335",
+      "page": 1,
+      "citation": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot numéro 6 579 952 / 70, route 335",
+      "anchor": "70, route 335",
+      "spanStart": 3255,
+      "spanEnd": 3405
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 4.7 prévoit une demande de PIIA pour Allô mon Coco, distincte de celle de Planète Piscine malgré l'adresse commune."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Engagement d'acquisition prévu — terrain du 60, rue Lacroix",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "60, rue Lacroix",
+    "page": 1,
+    "citation": "Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme général d'assistance financière / Ministère de la Sécurité publique",
+    "anchor": "60, rue Lacroix",
+    "spanStart": 3414,
+    "spanEnd": 3594
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Engagement d'acquisition prévu — terrain du 60, rue Lacroix",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "60, rue Lacroix",
+      "page": 1,
+      "citation": "Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme général d'assistance financière / Ministère de la Sécurité publique",
+      "anchor": "60, rue Lacroix",
+      "spanStart": 3414,
+      "spanEnd": 3594
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 4.8 prévoit un engagement d'acquisition d'un terrain explicitement identifié, qui constitue un objet foncier admissible."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Acceptation finale et offre de cession prévues — lot 6 553 599, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 553 599",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "Lots numéro 6 553 599",
+    "spanStart": 180,
+    "spanEnd": 332
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation finale et offre de cession prévues — lot 6 553 599, Seigneurie Villemory",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 553 599",
+      "page": 2,
+      "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+      "anchor": "Lots numéro 6 553 599",
+      "spanStart": 180,
+      "spanEnd": 332
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le lot 6 553 599 est un objet foncier explicitement nommé dans l'offre de cession prévue au point 4.10 et constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Acceptation finale et offre de cession prévues — lot 5 137 605, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 137 605",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "6 553 599, 5 137 605",
+    "spanStart": 180,
+    "spanEnd": 332
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation finale et offre de cession prévues — lot 5 137 605, Seigneurie Villemory",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 137 605",
+      "page": 2,
+      "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+      "anchor": "6 553 599, 5 137 605",
+      "spanStart": 180,
+      "spanEnd": 332
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le lot 5 137 605 est un objet foncier explicitement nommé dans l'offre de cession prévue au point 4.10 et constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Acceptation finale et offre de cession prévues — lot 5 137 606, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 137 606",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "5 137 605, 5 137 606",
+    "spanStart": 180,
+    "spanEnd": 332
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation finale et offre de cession prévues — lot 5 137 606, Seigneurie Villemory",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 137 606",
+      "page": 2,
+      "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+      "anchor": "5 137 605, 5 137 606",
+      "spanStart": 180,
+      "spanEnd": 332
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le lot 5 137 606 est un objet foncier explicitement nommé dans l'offre de cession prévue au point 4.10 et constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "active",
+   "current": {
+    "label": "Acceptation finale et offre de cession prévues — lot 5 429 185, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 429 185",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "5 137 606, 5 429 185",
+    "spanStart": 180,
+    "spanEnd": 332
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation finale et offre de cession prévues — lot 5 429 185, Seigneurie Villemory",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 429 185",
+      "page": 2,
+      "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+      "anchor": "5 137 606, 5 429 185",
+      "spanStart": 180,
+      "spanEnd": 332
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le lot 5 429 185 est un objet foncier explicitement nommé dans l'offre de cession prévue au point 4.10 et constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u12",
+   "status": "active",
+   "current": {
+    "label": "Acceptation finale et offre de cession prévues — lot 5 137 659, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 137 659",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "5 429 185, 5 137 659",
+    "spanStart": 180,
+    "spanEnd": 332
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation finale et offre de cession prévues — lot 5 137 659, Seigneurie Villemory",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 137 659",
+      "page": 2,
+      "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+      "anchor": "5 429 185, 5 137 659",
+      "spanStart": 180,
+      "spanEnd": 332
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le lot 5 137 659 est un objet foncier explicitement nommé dans l'offre de cession prévue au point 4.10 et constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u13",
+   "status": "active",
+   "current": {
+    "label": "Acceptation finale et offre de cession prévues — lot 5 429 209, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 429 209",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "5 137 659, 5 429 209",
+    "spanStart": 180,
+    "spanEnd": 332
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation finale et offre de cession prévues — lot 5 429 209, Seigneurie Villemory",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 429 209",
+      "page": 2,
+      "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+      "anchor": "5 137 659, 5 429 209",
+      "spanStart": 180,
+      "spanEnd": 332
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le lot 5 429 209 est un objet foncier explicitement nommé dans l'offre de cession prévue au point 4.10 et constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u14",
+   "status": "active",
+   "current": {
+    "label": "Acceptation finale et offre de cession prévues — lot 5 137 708, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 137 708",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "5 137 708, 6 553 600",
+    "spanStart": 180,
+    "spanEnd": 332
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation finale et offre de cession prévues — lot 5 137 708, Seigneurie Villemory",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 137 708",
+      "page": 2,
+      "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+      "anchor": "5 137 708, 6 553 600",
+      "spanStart": 180,
+      "spanEnd": 332
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le lot 5 137 708 est un objet foncier explicitement nommé dans l'offre de cession prévue au point 4.10 et constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u15",
+   "status": "active",
+   "current": {
+    "label": "Acceptation finale et offre de cession prévues — lot 6 553 600, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 553 600",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "5 137 708, 6 553 600",
+    "spanStart": 180,
+    "spanEnd": 332
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation finale et offre de cession prévues — lot 6 553 600, Seigneurie Villemory",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 553 600",
+      "page": 2,
+      "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+      "anchor": "5 137 708, 6 553 600",
+      "spanStart": 180,
+      "spanEnd": 332
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le lot 6 553 600 est un objet foncier explicitement nommé dans l'offre de cession prévue au point 4.10 et constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u16",
+   "status": "active",
+   "current": {
+    "label": "Acceptation finale et offre de cession prévues — lot 6 553 597, Seigneurie Villemory",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 553 597",
+    "page": 2,
+    "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+    "anchor": "6 553 600 et 6 553 597",
+    "spanStart": 180,
+    "spanEnd": 332
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acceptation finale et offre de cession prévues — lot 6 553 597, Seigneurie Villemory",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 553 597",
+      "page": 2,
+      "citation": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597",
+      "anchor": "6 553 600 et 6 553 597",
+      "spanStart": 180,
+      "spanEnd": 332
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le lot 6 553 597 est un objet foncier explicitement nommé dans l'offre de cession prévue au point 4.10 et constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u17",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de signature prévue — acte de vente du lot 3 570 038, rue Panneton",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "3 570 038",
+    "page": 2,
+    "citation": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte de vente / Lot numéro 3 570 038 / Rue Panneton / M. Stéphane Labelle et Mme Méliza Matte",
+    "anchor": "Lot numéro 3 570 038",
+    "spanStart": 431,
+    "spanEnd": 602
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de signature prévue — acte de vente du lot 3 570 038, rue Panneton",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "3 570 038",
+      "page": 2,
+      "citation": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte de vente / Lot numéro 3 570 038 / Rue Panneton / M. Stéphane Labelle et Mme Méliza Matte",
+      "anchor": "Lot numéro 3 570 038",
+      "spanStart": 431,
+      "spanEnd": 602
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 4.11 prévoit l'autorisation de signer un acte de vente foncière explicitement identifié par son lot."
+    }
+   ]
+  },
+  {
+   "id": "u18",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de signature prévue — acte d'achat du lot 3 568 198, 617, rue Lord",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "3 568 198",
+    "page": 2,
+    "citation": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte d'achat / Lot numéro 3 568 198 / 617, rue Lord",
+    "anchor": "Lot numéro 3 568 198",
+    "spanStart": 612,
+    "spanEnd": 741
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de signature prévue — acte d'achat du lot 3 568 198, 617, rue Lord",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "3 568 198",
+      "page": 2,
+      "citation": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte d'achat / Lot numéro 3 568 198 / 617, rue Lord",
+      "anchor": "Lot numéro 3 568 198",
+      "spanStart": 612,
+      "spanEnd": 741
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 4.12 prévoit l'autorisation de signer un acte d'achat immobilier, qui relève des actes fonciers inclus."
+    }
+   ]
+  },
+  {
+   "id": "u19",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de signature prévue — servitude pour une conduite d'égout pluvial",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "conduite d'égout pluvial",
+    "page": 2,
+    "citation": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte de servitude / Installation, utilisation, entretien et réparation d'une conduite d'égout pluvial",
+    "anchor": "conduite d'égout pluvial",
+    "spanStart": 751,
+    "spanEnd": 930
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de signature prévue — servitude pour une conduite d'égout pluvial",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "conduite d'égout pluvial",
+      "page": 2,
+      "citation": "Autorisation de signature à la mairesse et au directeur général par intérim / Acte de servitude / Installation, utilisation, entretien et réparation d'une conduite d'égout pluvial",
+      "anchor": "conduite d'égout pluvial",
+      "spanStart": 751,
+      "spanEnd": 930
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 4.13 prévoit l'autorisation de signer une servitude explicite, admissible comme acte foncier même sans numéro de lot."
+    }
+   ]
+  }
+ ]
+}

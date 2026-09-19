@@ -1,0 +1,91 @@
+{
+ "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "01d555b9144977e58926b82bb8440d1531b599d66161fc3fb838739681afff4f",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-04-049 page 4 : « Que le conseil autorise la demande de dérogation mineure numéro 2025-0157 » ; citation, objet, étape derogation_mineure et page exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-04-050 page 5 : « Que le conseil municipal refuse la demande de dérogation mineure numéro 2026-0003 » ; un refus reste une unité et la citation est exacte.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Résolution 04-2026-051 page 6 : « Que le conseil municipal autorise la demande de dérogation mineure numéro 2026-0002 » pour le lot 6 658 131 avec largeur avant de 30 mètres ; citation et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point 8.4 page 6 intitulé « Demande de dérogation mineure numéro 2026-0005 - Marianne Isabelle - 3741 rue Principale », autorisé par la résolution 2026-04-052 pour une clôture de 1,52 mètre ; l'objet 2026-0005 est attesté par le titre et la recommandation du CCU malgré la coquille « 2025-0005 » dans le dispositif.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Titre page 7 « 10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de zonage 02-2023 » après avis de motion du 9 mars et consultation publique du 8 avril ; l'étape second_projet est celle constatée dans ce document, distincte de l'avis de motion et du projet antérieurs.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-04-055 page 8 autorisant à enchérir et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » lors de la vente pour taxes du 11 juin 2026 : acte foncier inclus au rappel, citation exacte.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Même type et même fait que i06 (résolution 2026-04-055, vente pour taxes du 11 juin 2026) : « Doublon même type/même fait non crédité ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Résolution 2026-04-049 page 4 : « Que le conseil autorise la demande de dérogation mineure numéro 2025-0157 » ; citation, objet, étape derogation_mineure et page exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Résolution 2026-04-050 page 5 : « Que le conseil municipal refuse la demande de dérogation mineure numéro 2026-0003 » ; un refus reste une unité et la citation est exacte."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Résolution 04-2026-051 page 6 : « Que le conseil municipal autorise la demande de dérogation mineure numéro 2026-0002 » pour le lot 6 658 131 avec largeur avant de 30 mètres ; citation et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point 8.4 page 6 intitulé « Demande de dérogation mineure numéro 2026-0005 - Marianne Isabelle - 3741 rue Principale », autorisé par la résolution 2026-04-052 pour une clôture de 1,52 mètre ; l'objet 2026-0005 est attesté par le titre et la recommandation du CCU malgré la coquille « 2025-0005 » dans le dispositif."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Titre page 7 « 10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de zonage 02-2023 » après avis de motion du 9 mars et consultation publique du 8 avril ; l'étape second_projet est celle constatée dans ce document, distincte de l'avis de motion et du projet antérieurs."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Résolution 2026-04-055 page 8 autorisant à enchérir et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » lors de la vente pour taxes du 11 juin 2026 : acte foncier inclus au rappel, citation exacte."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Même type et même fait que i06 (résolution 2026-04-055, vente pour taxes du 11 juin 2026) : « Doublon même type/même fait non crédité »."
+  }
+ ]
+}

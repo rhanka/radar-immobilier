@@ -1,0 +1,77 @@
+{
+ "documentId": "saint-roch-de-lachigan-2026-05-11",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "29cbae05ed64d89ab15b797a6a429860b02be66efd75d56eef12f530f2d1a9be",
+ "inputSha256": "083205a96a0c1761ea36ab82c7bcdb40bff766bd1c892f1e7dbe192493e77faa",
+ "responseSha256": "032f191d852c829faec8235f5c078e6e8f4c299579e529f768463e20fa7c3036",
+ "rc": 0,
+ "latencyMs": 25089,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "3ffa67d4-cb4f-4443-8410-5fb64002037b",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 2012,
+   "cacheReadInputTokens": 1139,
+   "cacheCreationInputTokens": 5014,
+   "webSearchRequests": 0,
+   "costUSD": 0.20118475000000002,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 1437,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 5014,
+  "cache_read_input_tokens": 1139,
+  "output_tokens": 2012,
+  "output_tokens_details": {
+   "thinking_tokens": 1437
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 5014,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 2012,
+    "cache_read_input_tokens": 1139,
+    "cache_creation_input_tokens": 5014,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 5014
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.20118475000000002,
+ "durationApiMs": 23258,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:24:24.786Z"
+}

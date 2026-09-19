@@ -1,0 +1,13 @@
+{
+ "id": "blue-sea-2026-02-03",
+ "rc": 0,
+ "latencyMs": 170907,
+ "inputTokens": 2,
+ "outputTokens": 18942,
+ "cacheRead": 0,
+ "cacheCreate": 10269,
+ "costUsd": 0.583145,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 32398
+}

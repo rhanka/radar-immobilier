@@ -1,0 +1,78 @@
+{
+ "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "2682ee80973aff453d0d3ecba1df0137b9f1210f5181954b28fcfda77ccb4701",
+ "verificationSha256": "7f8b45f6bfcf671d839a31dba237c63c09baef3eb01e08a4e8f7a323f154267b",
+ "inputSha256": "41be4ae05dcebdd55d574df82c9aa2824c839a1ff27bcf933b9a210027d3ed5d",
+ "responseSha256": "b75e2633c57cda7e0c4bdf018977d16e9e34fc3819edaa3e23f1846f57f9ef63",
+ "rc": 0,
+ "latencyMs": 20733,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "73b46c65-7cf9-4db6-bdaf-6315dfc6bdbc",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 1139,
+   "cacheReadInputTokens": 1193,
+   "cacheCreationInputTokens": 15716,
+   "webSearchRequests": 0,
+   "costUSD": 0.37158825000000006,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 851,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 15716,
+  "cache_read_input_tokens": 1193,
+  "output_tokens": 1139,
+  "output_tokens_details": {
+   "thinking_tokens": 851
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 15716,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1139,
+    "cache_read_input_tokens": 1193,
+    "cache_creation_input_tokens": 15716,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 15716
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.37158825000000006,
+ "durationApiMs": 18532,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T21:14:55.573Z"
+}

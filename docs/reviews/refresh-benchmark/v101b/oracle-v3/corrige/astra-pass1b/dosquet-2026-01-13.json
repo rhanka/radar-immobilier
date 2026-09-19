@@ -1,0 +1,82 @@
+{
+ "documentId": "dosquet-2026-01-13",
+ "nextId": 3,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de signature d’un bail pour le service de garde — 368 route 116",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "368 route 116",
+    "page": 3,
+    "citation": "à signer pour et au nom de la municipalité un bail liant la municipalité et les responsables de garde qui utiliseront les locaux dédiés à ce service au 368 route 116",
+    "anchor": "au 368 route 116",
+    "spanStart": 1445,
+    "spanEnd": 1610
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de signature d’un bail pour le service de garde — 368 route 116",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "368 route 116",
+      "page": 3,
+      "citation": "à signer pour et au nom de la municipalité un bail liant la municipalité et les responsables de garde qui utiliseront les locaux dédiés à ce service au 368 route 116",
+      "anchor": "au 368 route 116",
+      "spanStart": 1445,
+      "spanEnd": 1610
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-01-04 autorise une convention de location immobilière explicite, incluse au titre des actes fonciers même non résidentiels."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Appui à la demande CPTAQ — droit résidentiel au lot 6 274 449 et aliénation des lots 5 376 188 et 4 819 191",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "6 274 449",
+    "page": 8,
+    "citation": "ATTENDU QUE le propriétaire du lot 6 274 449 souhaite étendre son droit résidentiel à la partie du lot située en zone agricole",
+    "anchor": "lot 6 274 449",
+    "spanStart": 1497,
+    "spanEnd": 1623
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Appui à la demande CPTAQ — droit résidentiel au lot 6 274 449 et aliénation des lots 5 376 188 et 4 819 191",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "6 274 449",
+      "page": 8,
+      "citation": "ATTENDU QUE le propriétaire du lot 6 274 449 souhaite étendre son droit résidentiel à la partie du lot située en zone agricole",
+      "anchor": "lot 6 274 449",
+      "spanStart": 1497,
+      "spanEnd": 1623
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 26-01-08 appuie une même demande foncière portant sur l’extension du droit résidentiel et l’aliénation de deux lots dont l’usage agricole sera préservé, sans constater une autorisation de la CPTAQ."
+    }
+   ]
+  }
+ ]
+}

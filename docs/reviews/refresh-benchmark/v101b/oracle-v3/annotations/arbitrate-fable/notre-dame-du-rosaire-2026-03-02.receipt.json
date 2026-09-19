@@ -1,0 +1,78 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "284ee220fe486f61e7cd108aa9b318d40b04767e6fdc298ec8d61395c1ba5810",
+ "verificationSha256": "a0ae581513b3081f3f146efa86d33ea1ca76c6c1d8436405105e9e98db696d6c",
+ "inputSha256": "fda1bb1a70d7b9045041c3baf528de82876583e42916d887874d0160a0a71a26",
+ "responseSha256": "fefa1cfe15fa5dbef9cdb0e6eae3e888cec9b113f2e5fef70c7e008a0d7f75a5",
+ "rc": 0,
+ "latencyMs": 12088,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "825cd925-3979-4482-aec8-daac58d0633e",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 688,
+   "cacheReadInputTokens": 1193,
+   "cacheCreationInputTokens": 24555,
+   "webSearchRequests": 0,
+   "costUSD": 0.5258182499999999,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 412,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 24555,
+  "cache_read_input_tokens": 1193,
+  "output_tokens": 688,
+  "output_tokens_details": {
+   "thinking_tokens": 412
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 24555,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 688,
+    "cache_read_input_tokens": 1193,
+    "cache_creation_input_tokens": 24555,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 24555
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.5258182499999999,
+ "durationApiMs": 10157,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T22:44:01.467Z"
+}

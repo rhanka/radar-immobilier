@@ -1,0 +1,35 @@
+{
+ "documentId": "ayers-cliff-2026-03-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "ab13f81ec72e2b4d845b9aac3cd8be6a49eb841a261bc5a61fac13a7adb3fc25",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2190,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3516,
+   "outputTokens": 276,
+   "totalTokens": 3792
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1713
+  },
+  "inputSha256": "24a3350d682068d66b480cf85167d8b4e2fd03601dfc389ad98f0d73d22cf8ec"
+ },
+ "at": "2026-09-19T03:22:07.090Z"
+}

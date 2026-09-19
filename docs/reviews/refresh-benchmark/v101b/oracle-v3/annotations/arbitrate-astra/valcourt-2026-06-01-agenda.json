@@ -1,0 +1,78 @@
+{
+ "documentId": "valcourt-2026-06-01-agenda",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "160b21de89153b366ad378f120d15d0ad2c2b085c05343a3c47205fcb0259737",
+ "verificationSha256": "4918d6c9bc5934800e44cb3511907389e70fb54c7e823b973fa12fafd444735f",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"Le point 11.1, page 2, prévoit la « RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES » : il s’agit d’un objet réglementaire explicite, et non d’un simple rappel historique. L’option « absent » est donc écartée : conformément à la règle sur les ordres du jour, cette révision constitue une unité prévue, à l’étape « inconnu », sans attester une adoption ni le dépôt d’un nouveau projet.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "v3_only",
+   "unitId": "u06",
+   "humanId": null,
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Révision prévue du projet de règlement sur les pratiques agroenvironnementales",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "pratiques agroenvironnementales",
+      "page": 2,
+      "citation": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES",
+      "anchor": "PRATIQUES AGROENVIRONNEMENTALES",
+      "spanStart": 1106,
+      "spanEnd": 1188
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 11.1, page 2, prévoit une révision du projet de règlement sur les pratiques agroenvironnementales, objet réglementaire explicite dont aucune étape plus précise que inconnu n’est attestée."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Point 11.1, page 2, citation exacte ; objet réglementaire explicite (projet de règlement municipal), étape inconnu adaptée à une « révision nécessaire » prévue et non à une adoption acquise."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "Projet de règlement sur les pratiques agroenvironnementales prévu au point 11.1 en page 2."
+    }
+   ],
+   "human": {
+    "humanId": null,
+    "choice": "absent"
+   }
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "Le point 11.1, page 2, prévoit la « RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES » : il s’agit d’un objet réglementaire explicite, et non d’un simple rappel historique. L’option « absent » est donc écartée : conformément à la règle sur les ordres du jour, cette révision constitue une unité prévue, à l’étape « inconnu », sans attester une adoption ni le dépôt d’un nouveau projet."
+  }
+ ]
+}

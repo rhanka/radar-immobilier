@@ -1,0 +1,364 @@
+{
+ "documentId": "parisville-2026-05-05",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "7a581331801910ff25ac004ac098d8cf7c0865e87d2e76e23961e92e7bf38d0f",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-432-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 432-2026 modifiant le règlement de zonage",
+     "stage": "adoption",
+     "objet": "432-2026",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+      },
+      {
+       "page": 3,
+       "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de\nzonage afin de permettre les conteneurs comme structure de bâtiment\nprincipal ou pour un agrandissement;"
+      },
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+      },
+      {
+       "page": 3,
+       "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de\nzonage afin d’ajouter une terminologie en lien avec le nouveau règlement sur\nl’occupation et l’entretien des bâtiments;\nCONSIDÉRANT QUE le conseil municipal entend modifier le règlement de\nzonage afin d’ajuster la liste des revêtements extérieurs;\nCONSIDÉRANT QUE le conseil municipal entend modifier le règlement de\nzonage afin de permettre les conteneurs comme structure de bâtiment\nprincipal ou pour un agrandissement;\nCONSIDÉRANT QUE le conseil municipal entend modifier le règlement de\nzonage afin de permettre les conteneurs comme bâtiment accessoire;\nCONSIDÉRANT QUE le conseil municipal entend abroger l’annexe 3 sur les\néléments susceptibles d’approbation référendaire afin que la Loi sur\nl’aménagement et l’urbanisme soit la référence;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-308-2011"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 308-2011",
+     "stage": null,
+     "objet": "308-2011",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+      },
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-433-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 433-2026 modifiant le règlement de lotissement",
+     "stage": "adoption",
+     "objet": "433-2026",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+      },
+      {
+       "page": 4,
+       "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de\nlotissement afin de permettre le remembrement d’un terrain;"
+      },
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-311-2011"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de lotissement 311-2011",
+     "stage": null,
+     "objet": "311-2011",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+      },
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-431-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Premier projet de règlement 431-2026 — zonage",
+     "stage": "1er_projet",
+     "objet": "431-2026",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "CONSIDÉRANT QUE le premier projet de règlement # 431-2026 modifiant\nle règlement de zonage a été adopté le 10 mars 2026;"
+      },
+      {
+       "page": 3,
+       "excerpt": "CONSIDÉRANT QUE le premier projet de règlement # 431-2026 modifiant\nle règlement de zonage a été adopté le 10 mars 2026;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-conduites"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Prêt temporaire de 6,5 M$ pour les conduites de la route Principale",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D’autoriser le directeur général et le maire à signer les documents\nnécessaires auprès du Centre financier aux entreprises de Desjardins afin\nde contracter un prêt temporaire de 6 500 000.00 $"
+      },
+      {
+       "page": 3,
+       "excerpt": "D’autoriser le directeur général et le maire à signer les documents\nnécessaires auprès du Centre financier aux entreprises de Desjardins afin\nde contracter un prêt temporaire de 6 500 000.00 $ afin de couvrir les\ndépenses liées au projet de réfection des conduites de la route Principale."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-parc"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande d’aide pour la réhabilitation du parc municipal",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’autoriser le dépôt de la demande d’aide financière par le directeur général,\nainsi que de l’autoriser à signer et à compléter l’ensemble des documents"
+      },
+      {
+       "page": 5,
+       "excerpt": "D’autoriser le dépôt de la demande d’aide financière par le directeur général,\nainsi que de l’autoriser à signer et à compléter l’ensemble des documents\nnécessaires liés à cette demande d’aide financière."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-eau"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Signature de l’entente modifiée de fourniture d’eau potable",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "D’autoriser la signature de l’entente modifiée entre la municipalité de\nParisville et la municipalité de Deschaillons-sur-Saint-Laurent concernant la\nfourniture et la distribution d’eau potable."
+      },
+      {
+       "page": 6,
+       "excerpt": "D’autoriser la signature de l’entente modifiée entre la municipalité de\nParisville et la municipalité de Deschaillons-sur-Saint-Laurent concernant la\nfourniture et la distribution d’eau potable."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-fibre"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Consentement conditionnel au réseau de fibre optique de Sogetel",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "De consentir à l’installation d’un réseau de fibre optique sur le territoire de la\nmunicipalité de Parisville tel que présenté aux plans soumis,"
+      },
+      {
+       "page": 7,
+       "excerpt": "De consentir à l’installation d’un réseau de fibre optique sur le territoire de la\nmunicipalité de Parisville tel que présenté aux plans soumis,\nconditionnellement au respect de la réglementation municipale en vigueur.\nD’exiger que tous les travaux soient réalisés conformément aux normes\napplicables et qu’ils n’occasionnent aucun dommage aux infrastructures\nmunicipales.\nDe stipuler que tout bris ou dommage causé aux infrastructures municipales\ndans le cadre des travaux sera à l’entière responsabilité de Sogetel inc.,\nincluant les coûts de réparation et de remise en état des lieux."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement 432-2026 modifiant le règlement de zonage est formellement adopté par le conseil.\",\"excerpt\":\"Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011.\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 308-2011 n'est mentionné qu'à titre de référence historique pour le règlement modifié sans faire l'objet d'une étape procédurale propre.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte formellement le règlement 433-2026 modifiant le règlement de lotissement.\",\"excerpt\":\"Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011.\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 311-2011 n'est cité qu'en tant que règlement d'origine faisant l'objet d'une modification.\",\"excerpt\":\"\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"L'adoption du premier projet de règlement 431-2026 est un rappel historique d'une séance passée (10 mars 2026).\",\"excerpt\":\"CONSIDÉRANT QUE le premier projet de règlement # 431-2026 modifiant\\nle règlement de zonage a été adopté le 10 mars 2026;\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"L'autorisation d'un prêt bancaire temporaire auprès d'une institution financière relève de la gestion financière exclue.\",\"excerpt\":\"\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une demande d'aide financière pour des infrastructures récréatives et de loisirs, relevant des exclusions.\",\"excerpt\":\"\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"L'entente de fourniture et distribution d'eau potable avec une autre municipalité relève d'un contrat de services/gestion d'exploitation sans acte d'urbanisme.\",\"excerpt\":\"\"},{\"act\":\"A09\",\"verdict\":\"non_soutenu\",\"reason\":\"Le consentement municipal accordé à une entreprise de télécommunications pour installer un réseau de fibre optique constitue une simple autorisation de travaux/services d'utilité publique exclue de l'urbanisme réglementaire ou foncier.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le règlement 432-2026 modifiant le règlement de zonage est formellement adopté par le conseil.",
+   "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 308-2011 n'est mentionné qu'à titre de référence historique pour le règlement modifié sans faire l'objet d'une étape procédurale propre.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte formellement le règlement 433-2026 modifiant le règlement de lotissement.",
+   "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 311-2011 n'est cité qu'en tant que règlement d'origine faisant l'objet d'une modification.",
+   "excerpt": ""
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "L'adoption du premier projet de règlement 431-2026 est un rappel historique d'une séance passée (10 mars 2026).",
+   "excerpt": "CONSIDÉRANT QUE le premier projet de règlement # 431-2026 modifiant\nle règlement de zonage a été adopté le 10 mars 2026;"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "L'autorisation d'un prêt bancaire temporaire auprès d'une institution financière relève de la gestion financière exclue.",
+   "excerpt": ""
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une demande d'aide financière pour des infrastructures récréatives et de loisirs, relevant des exclusions.",
+   "excerpt": ""
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "L'entente de fourniture et distribution d'eau potable avec une autre municipalité relève d'un contrat de services/gestion d'exploitation sans acte d'urbanisme.",
+   "excerpt": ""
+  },
+  {
+   "act": "A09",
+   "verdict": "non_soutenu",
+   "reason": "Le consentement municipal accordé à une entreprise de télécommunications pour installer un réseau de fibre optique constitue une simple autorisation de travaux/services d'utilité publique exclue de l'urbanisme réglementaire ou foncier.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 9,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 308-2011 n'est mentionné qu'à titre de référence historique pour le règlement modifié sans faire l'objet d'une étape procédurale propre."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement 311-2011 n'est cité qu'en tant que règlement d'origine faisant l'objet d'une modification."
+   },
+   {
+    "act": "A05",
+    "reason": "L'adoption du premier projet de règlement 431-2026 est un rappel historique d'une séance passée (10 mars 2026)."
+   },
+   {
+    "act": "A06",
+    "reason": "L'autorisation d'un prêt bancaire temporaire auprès d'une institution financière relève de la gestion financière exclue."
+   },
+   {
+    "act": "A07",
+    "reason": "Il s'agit d'une demande d'aide financière pour des infrastructures récréatives et de loisirs, relevant des exclusions."
+   },
+   {
+    "act": "A08",
+    "reason": "L'entente de fourniture et distribution d'eau potable avec une autre municipalité relève d'un contrat de services/gestion d'exploitation sans acte d'urbanisme."
+   },
+   {
+    "act": "A09",
+    "reason": "Le consentement municipal accordé à une entreprise de télécommunications pour installer un réseau de fibre optique constitue une simple autorisation de travaux/services d'utilité publique exclue de l'urbanisme réglementaire ou foncier."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le règlement 432-2026 modifiant le règlement de zonage est formellement adopté par le conseil."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil adopte formellement le règlement 433-2026 modifiant le règlement de lotissement."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2436,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 8374,
+   "outputTokens": 588,
+   "totalTokens": 8962
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2280
+  },
+  "inputSha256": "36c0ca2bf1e80351e2204fffc273f19c58e1a0162baad27479afe511cda0e9bf"
+ }
+}

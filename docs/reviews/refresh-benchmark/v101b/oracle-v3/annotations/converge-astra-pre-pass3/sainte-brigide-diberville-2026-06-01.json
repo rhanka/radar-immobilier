@@ -1,0 +1,71 @@
+{
+ "documentId": "sainte-brigide-diberville-2026-06-01",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "a9ee6cecabd3783bd7e3b6b406ff6c65f5f35376b6b2f88a93d5924b5f19e786",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 5.1, page 1, prévoit explicitement l’adoption du règlement 2026-489 sur la gestion quantitative des eaux pluviales, sans attester une décision acquise.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 6.6, page 1, prévoit une demande de prolongation à la CPTAQ pour le projet éolien, conformément à l’objet cité et à l’étape « inconnu ».\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 11.2, page 1, inscrit explicitement une dérogation mineure concernant le lot 4 390 294, Rang de la Rivière Ouest, comme point prévu.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"absent\",\n      \"reason\": \"Le point 14.1, page 1, mentionne une vente d’immeubles pour défaut de paiement des taxes, mais ne précise aucune adoption, de sorte que l’étape proposée n’est pas attestée.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"absent\",\n      \"reason\": \"Cette proposition identique à i04 attribue une étape « adoption » au point 14.1, alors que le texte annonce seulement une vente d’immeubles pour défaut de paiement des taxes.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "absent"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 5.1, page 1, prévoit explicitement l’adoption du règlement 2026-489 sur la gestion quantitative des eaux pluviales, sans attester une décision acquise."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 6.6, page 1, prévoit une demande de prolongation à la CPTAQ pour le projet éolien, conformément à l’objet cité et à l’étape « inconnu »."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 11.2, page 1, inscrit explicitement une dérogation mineure concernant le lot 4 390 294, Rang de la Rivière Ouest, comme point prévu."
+  },
+  {
+   "item": "i04",
+   "choice": "absent",
+   "reason": "Le point 14.1, page 1, mentionne une vente d’immeubles pour défaut de paiement des taxes, mais ne précise aucune adoption, de sorte que l’étape proposée n’est pas attestée."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "Cette proposition identique à i04 attribue une étape « adoption » au point 14.1, alors que le texte annonce seulement une vente d’immeubles pour défaut de paiement des taxes."
+  }
+ ]
+}

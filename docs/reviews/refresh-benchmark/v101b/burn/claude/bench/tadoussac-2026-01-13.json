@@ -1,0 +1,13 @@
+{
+ "id": "tadoussac-2026-01-13",
+ "rc": 0,
+ "latencyMs": 302719,
+ "inputTokens": 2,
+ "outputTokens": 32021,
+ "cacheRead": 0,
+ "cacheCreate": 19960,
+ "costUsd": 1.013632,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 55399
+}

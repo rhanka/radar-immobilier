@@ -1,0 +1,125 @@
+{
+ "documentId": "lorraine-2026-01-13",
+ "step": "astra-pass1b",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "ef0331425b92a0039b4068244592edd94d52873d828fbc33e45411b8aab44774",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure accordée — 4, rue de Souilly, lot 2 323 270\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2 323 270\",\n        \"page\": 3,\n        \"citation\": \"D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de\\nSouilly, lot 2 323 270, cadastre du Québec\",\n        \"anchor\": \"lot 2 323 270\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : le texte de la page 3 comporte un saut de ligne entre « rue de » et « Souilly ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure accordée — 12, place de Liverdun, lot 5 061 778\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"5 061 778\",\n        \"page\": 3,\n        \"citation\": \"D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place\\nde Liverdun, lot numéro 5 061 778, cadastre du Québec\",\n        \"anchor\": \"lot numéro 5 061 778\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : le texte de la page 3 comporte un saut de ligne entre « place » et « de Liverdun ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure accordée — 9, place de Charmois, lot 2 323 185\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2 323 185\",\n        \"page\": 4,\n        \"citation\": \"D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place\\nde Charmois, lot numéro 2 323 185, cadastre du Québec\",\n        \"anchor\": \"lot numéro 2 323 185\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : le texte de la page 4 comporte un saut de ligne entre « place » et « de Charmois ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"PIIA approuvé — agrandissement 2025-0069 au 9, place de Charmois\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-0069\",\n        \"page\": 5,\n        \"citation\": \"D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro\\n2025-0069 situé au 9, place de Charmois, tel que presentée au plan de construction\",\n        \"anchor\": \"2025-0069 situé au 9, place de Charmois\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : le texte de la page 5 comporte un saut de ligne entre « numéro » et « 2025-0069 ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Dérogation mineure accordée — 4, rue de Souilly, lot 2 323 270",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2 323 270",
+    "page": 3,
+    "citation": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de\nSouilly, lot 2 323 270, cadastre du Québec",
+    "anchor": "lot 2 323 270"
+   },
+   "reason": "La citation doit être recopiée à l'identique : le texte de la page 3 comporte un saut de ligne entre « rue de » et « Souilly »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Dérogation mineure accordée — 12, place de Liverdun, lot 5 061 778",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "5 061 778",
+    "page": 3,
+    "citation": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place\nde Liverdun, lot numéro 5 061 778, cadastre du Québec",
+    "anchor": "lot numéro 5 061 778"
+   },
+   "reason": "La citation doit être recopiée à l'identique : le texte de la page 3 comporte un saut de ligne entre « place » et « de Liverdun »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Dérogation mineure accordée — 9, place de Charmois, lot 2 323 185",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2 323 185",
+    "page": 4,
+    "citation": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place\nde Charmois, lot numéro 2 323 185, cadastre du Québec",
+    "anchor": "lot numéro 2 323 185"
+   },
+   "reason": "La citation doit être recopiée à l'identique : le texte de la page 4 comporte un saut de ligne entre « place » et « de Charmois »."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "PIIA approuvé — agrandissement 2025-0069 au 9, place de Charmois",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-0069",
+    "page": 5,
+    "citation": "D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro\n2025-0069 situé au 9, place de Charmois, tel que presentée au plan de construction",
+    "anchor": "2025-0069 situé au 9, place de Charmois"
+   },
+   "reason": "La citation doit être recopiée à l'identique : le texte de la page 5 comporte un saut de ligne entre « numéro » et « 2025-0069 »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass1b",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "derogation_mineure",
+   "page": 3,
+   "citation": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de\nSouilly, lot 2 323 270, cadastre du Québec"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "derogation_mineure",
+   "page": 3,
+   "citation": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place\nde Liverdun, lot numéro 5 061 778, cadastre du Québec"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "derogation_mineure",
+   "page": 4,
+   "citation": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place\nde Charmois, lot numéro 2 323 185, cadastre du Québec"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "piia",
+   "page": 5,
+   "citation": "D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro\n2025-0069 situé au 9, place de Charmois, tel que presentée au plan de construction"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4,
+ "relabeledFrom": "astra-pass2"
+}

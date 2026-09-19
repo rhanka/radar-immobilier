@@ -1,0 +1,13 @@
+{
+ "id": "saint-damien-2026-06-16",
+ "rc": 0,
+ "latencyMs": 35832,
+ "inputTokens": 2,
+ "outputTokens": 2626,
+ "cacheRead": 0,
+ "cacheCreate": 3531,
+ "costUsd": 0.102927,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 26
+}

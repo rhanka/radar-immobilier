@@ -1,0 +1,586 @@
+{
+ "rule": {
+  "decides": "character intervals",
+  "minOverlapChars": 12,
+  "diagnosticOnly": "ROUGE-L >= 0.5"
+ },
+ "sameUnitVersions": {
+  "pairs": 15,
+  "joinedByIntervals": 12,
+  "joinedByRougeL": 13,
+  "overlapChars": {
+   "n": 15,
+   "min": 0,
+   "p25": 40,
+   "median": 78,
+   "p75": 91,
+   "max": 104,
+   "bins": [
+    {
+     "from": 0,
+     "to": 0.1,
+     "count": 3
+    },
+    {
+     "from": 0.1,
+     "to": 0.2,
+     "count": 0
+    },
+    {
+     "from": 0.2,
+     "to": 0.3,
+     "count": 0
+    },
+    {
+     "from": 0.3,
+     "to": 0.4,
+     "count": 0
+    },
+    {
+     "from": 0.4,
+     "to": 0.5,
+     "count": 0
+    },
+    {
+     "from": 0.5,
+     "to": 0.6,
+     "count": 0
+    },
+    {
+     "from": 0.6,
+     "to": 0.7,
+     "count": 0
+    },
+    {
+     "from": 0.7,
+     "to": 0.8,
+     "count": 0
+    },
+    {
+     "from": 0.8,
+     "to": 0.9,
+     "count": 0
+    },
+    {
+     "from": 0.9,
+     "to": 1,
+     "count": 0
+    }
+   ]
+  },
+  "rougeL": {
+   "n": 15,
+   "min": 0.28571428571428564,
+   "p25": 0.5777777777777778,
+   "median": 0.7441860465116279,
+   "p75": 0.851063829787234,
+   "max": 0.9375,
+   "bins": [
+    {
+     "from": 0,
+     "to": 0.1,
+     "count": 0
+    },
+    {
+     "from": 0.1,
+     "to": 0.2,
+     "count": 0
+    },
+    {
+     "from": 0.2,
+     "to": 0.3,
+     "count": 1
+    },
+    {
+     "from": 0.3,
+     "to": 0.4,
+     "count": 1
+    },
+    {
+     "from": 0.4,
+     "to": 0.5,
+     "count": 0
+    },
+    {
+     "from": 0.5,
+     "to": 0.6,
+     "count": 2
+    },
+    {
+     "from": 0.6,
+     "to": 0.7,
+     "count": 0
+    },
+    {
+     "from": 0.7,
+     "to": 0.8,
+     "count": 5
+    },
+    {
+     "from": 0.8,
+     "to": 0.9,
+     "count": 4
+    },
+    {
+     "from": 0.9,
+     "to": 1,
+     "count": 2
+    }
+   ]
+  }
+ },
+ "distinctUnits": {
+  "pairs": 8,
+  "joinedByIntervals": 0,
+  "joinedByRougeL": 7,
+  "overlapChars": {
+   "n": 8,
+   "min": 0,
+   "p25": 0,
+   "median": 0,
+   "p75": 0,
+   "max": 0,
+   "bins": [
+    {
+     "from": 0,
+     "to": 0.1,
+     "count": 8
+    },
+    {
+     "from": 0.1,
+     "to": 0.2,
+     "count": 0
+    },
+    {
+     "from": 0.2,
+     "to": 0.3,
+     "count": 0
+    },
+    {
+     "from": 0.3,
+     "to": 0.4,
+     "count": 0
+    },
+    {
+     "from": 0.4,
+     "to": 0.5,
+     "count": 0
+    },
+    {
+     "from": 0.5,
+     "to": 0.6,
+     "count": 0
+    },
+    {
+     "from": 0.6,
+     "to": 0.7,
+     "count": 0
+    },
+    {
+     "from": 0.7,
+     "to": 0.8,
+     "count": 0
+    },
+    {
+     "from": 0.8,
+     "to": 0.9,
+     "count": 0
+    },
+    {
+     "from": 0.9,
+     "to": 1,
+     "count": 0
+    }
+   ]
+  },
+  "rougeL": {
+   "n": 8,
+   "min": 0.3333333333333333,
+   "p25": 0.5,
+   "median": 0.6363636363636364,
+   "p75": 0.8571428571428572,
+   "max": 0.9411764705882353,
+   "bins": [
+    {
+     "from": 0,
+     "to": 0.1,
+     "count": 0
+    },
+    {
+     "from": 0.1,
+     "to": 0.2,
+     "count": 0
+    },
+    {
+     "from": 0.2,
+     "to": 0.3,
+     "count": 0
+    },
+    {
+     "from": 0.3,
+     "to": 0.4,
+     "count": 1
+    },
+    {
+     "from": 0.4,
+     "to": 0.5,
+     "count": 0
+    },
+    {
+     "from": 0.5,
+     "to": 0.6,
+     "count": 2
+    },
+    {
+     "from": 0.6,
+     "to": 0.7,
+     "count": 3
+    },
+    {
+     "from": 0.7,
+     "to": 0.8,
+     "count": 0
+    },
+    {
+     "from": 0.8,
+     "to": 0.9,
+     "count": 1
+    },
+    {
+     "from": 0.9,
+     "to": 1,
+     "count": 1
+    }
+   ]
+  }
+ },
+ "pairs": {
+  "sameUnitVersions": [
+   {
+    "documentId": "saint-damien-2026-06-16",
+    "unitId": "u04",
+    "page": [
+     2,
+     2
+    ],
+    "overlapChars": 64,
+    "rougeL": 0.7368421052631579,
+    "citations": [
+     "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du règlement 804 portant sur les camions de cuisine cantines temporaires",
+     "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du"
+    ]
+   },
+   {
+    "documentId": "saint-damien-2026-06-16",
+    "unitId": "u05",
+    "page": [
+     2,
+     2
+    ],
+    "overlapChars": 64,
+    "rougeL": 0.7368421052631579,
+    "citations": [
+     "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du règlement 804 portant sur les camions de cuisine cantines temporaires",
+     "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du"
+    ]
+   },
+   {
+    "documentId": "les-coteaux-2026-03-16",
+    "unitId": "u06",
+    "page": [
+     6,
+     6
+    ],
+    "overlapChars": 45,
+    "rougeL": 0.9032258064516129,
+    "citations": [
+     "26-03-9288 DEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614",
+     "DEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614"
+    ]
+   },
+   {
+    "documentId": "saint-tite-des-caps-2026-02-02",
+    "unitId": "u05",
+    "page": [
+     2,
+     1
+    ],
+    "overlapChars": 0,
+    "rougeL": 0.3243243243243243,
+    "citations": [
+     "donne avis que je présenterai, lors d’une prochaine assemblée, un règlement concernant l’épandage en 2026",
+     "5. Avis de motion – Règlement sur l’épandage en 2026 6. Adoption projet de règlement # 591-2026 – Épandage en 2026"
+    ]
+   },
+   {
+    "documentId": "saint-tite-des-caps-2026-02-02",
+    "unitId": "u05",
+    "page": [
+     2,
+     2
+    ],
+    "overlapChars": 87,
+    "rougeL": 0.8717948717948718,
+    "citations": [
+     "donne avis que je présenterai, lors d’une prochaine assemblée, un règlement concernant l’épandage en 2026",
+     "Je soussignée, Magaly Leclerc, Conseillère, donne avis que je présenterai, lors d’une prochaine assemblée, un règlement concernant l’épandage en 2026"
+    ]
+   },
+   {
+    "documentId": "saint-tite-des-caps-2026-02-02",
+    "unitId": "u05",
+    "page": [
+     1,
+     2
+    ],
+    "overlapChars": 0,
+    "rougeL": 0.28571428571428564,
+    "citations": [
+     "5. Avis de motion – Règlement sur l’épandage en 2026 6. Adoption projet de règlement # 591-2026 – Épandage en 2026",
+     "Je soussignée, Magaly Leclerc, Conseillère, donne avis que je présenterai, lors d’une prochaine assemblée, un règlement concernant l’épandage en 2026"
+    ]
+   },
+   {
+    "documentId": "brossard-2026-04-28",
+    "unitId": "u31",
+    "page": [
+     15,
+     15
+    ],
+    "overlapChars": 79,
+    "rougeL": 0.9375,
+    "citations": [
+     "une déclaration de conformité pour le prolongement du réseau d’aqueduc auprès du ministère de",
+     "ainsi qu'une déclaration de conformité pour le prolongement du réseau d’aqueduc auprès du ministère de"
+    ]
+   },
+   {
+    "documentId": "contrecoeur-2026-04-14",
+    "unitId": "u01",
+    "page": [
+     4,
+     4
+    ],
+    "overlapChars": 0,
+    "rougeL": 0.5777777777777778,
+    "citations": [
+     "AVIS DE MOTION – PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102 – CONSTITUANT LE COMITÉ CONSULTATIF EN URBANISME – ABROGEANT LE RÈGLEMENT 147-82",
+     "il sera présenté en vue de son adoption, le Règlement U-102 constituant le comité consultatif en urbanisme et abrogeant le Règlement 147-82"
+    ]
+   },
+   {
+    "documentId": "frontenac-2026-03-10",
+    "unitId": "u05",
+    "page": [
+     37,
+     37
+    ],
+    "overlapChars": 95,
+    "rougeL": 0.8085106382978724,
+    "citations": [
+     "Adoption reportée du règlement no 504-2026 modifiant le règlement relatif à la démolition d’immeubles no 469-2023 afin de modifier certaines dispositions relatives aux bâtiments assujettis",
+     "Adoption reportée du règlement no 504-2026 modifiant le règlement relatif à la démolition d’immeubles no 469-2023"
+    ]
+   },
+   {
+    "documentId": "frontenac-2026-03-10",
+    "unitId": "u10",
+    "page": [
+     37,
+     37
+    ],
+    "overlapChars": 104,
+    "rougeL": 0.8214285714285715,
+    "citations": [
+     "Avis de motion et présentation reportée du règlement no 510-2026 afin de faire la concordance du règlement de zonage no 243-90 envers le schéma d’aménagement de la MRC du Granit",
+     "Avis de motion et présentation reportée du règlement no 510-2026 afin de faire la concordance du règlement de zonage no 243-90"
+    ]
+   },
+   {
+    "documentId": "sainte-barbe-2026-05-05",
+    "unitId": "u04",
+    "page": [
+     18,
+     18
+    ],
+    "overlapChars": 78,
+    "rougeL": 0.7441860465116279,
+    "citations": [
+     "Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d’urbanisme",
+     "accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d’urbanisme"
+    ]
+   },
+   {
+    "documentId": "sainte-barbe-2026-05-05",
+    "unitId": "u05",
+    "page": [
+     19,
+     19
+    ],
+    "overlapChars": 78,
+    "rougeL": 0.7441860465116279,
+    "citations": [
+     "Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 tel que recommandé par le Comité consultatif d’urbanisme",
+     "accepte la demande de PIIA 2026-0056 tel que recommandé par le Comité consultatif d’urbanisme"
+    ]
+   },
+   {
+    "documentId": "sainte-barbe-2026-05-05",
+    "unitId": "u06",
+    "page": [
+     20,
+     20
+    ],
+    "overlapChars": 91,
+    "rougeL": 0.7555555555555554,
+    "citations": [
+     "Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057 tel que recommandé par le Comité consultatif d’urbanisme",
+     "accepte la demande de dérogation mineure 2026-0057 tel que recommandé par le Comité consultatif d’urbanisme"
+    ]
+   },
+   {
+    "documentId": "gracefield-2026-04-14",
+    "unitId": "u03",
+    "page": [
+     22,
+     22
+    ],
+    "overlapChars": 40,
+    "rougeL": 0.5454545454545454,
+    "citations": [
+     "2026-04-064 Demande d’autorisation (aliénation temporaire) Commission de protection du territoire agricole du Québec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311",
+     "Québec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311 du cadastre du Québec dans la circonscription foncière de Gatineau"
+    ]
+   },
+   {
+    "documentId": "brownsburg-chatham-2026-03-10",
+    "unitId": "u19",
+    "page": [
+     63,
+     63
+    ],
+    "overlapChars": 103,
+    "rougeL": 0.851063829787234,
+    "citations": [
+     "DEMANDE DE PIIA 2026-011 RELATIVE À UNE DEMANDE DE CERTIFICAT D’AUTORISATION VISANT LA CONSTRUCTION D’UN BÂTIMENT AGRICOLE PROPRIÉTÉ SITUÉE AU 309, ROUTE DU CANTON",
+     "DEMANDE DE PIIA 2026-011 RELATIVE À UNE DEMANDE DE CERTIFICAT D’AUTORISATION VISANT LA CONSTRUCTION D’UN BÂTIMENT AGRICOLE"
+    ]
+   }
+  ],
+  "distinctUnits": [
+   {
+    "documentId": "saint-lin-laurentides-2026-06-09",
+    "unitIds": [
+     "u05",
+     "u06"
+    ],
+    "page": 1,
+    "overlapChars": 0,
+    "rougeL": 0.8571428571428572,
+    "citations": [
+     "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot numéro 6 579 952 / 70, route 335",
+     "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot numéro 6 579 952 / 70, route 335"
+    ]
+   },
+   {
+    "documentId": "mcmasterville-2026-02-02",
+    "unitIds": [
+     "u01",
+     "u06"
+    ],
+    "page": 2,
+    "overlapChars": 0,
+    "rougeL": 0.3333333333333333,
+    "citations": [
+     "Autorisation – Versement à des fins de parcs, de terrains de jeu ou pour le maintien d'un espace naturel – Projet de redéveloppement – Adresse projetée 141, rue de Bretagne",
+     "Autorisation d'un projet de construction d'un bâtiment résidentiel multifamilial – 141, rue de Bretagne – Lots 4 494 279 et 4 494 281 – Zone R-8"
+    ]
+   },
+   {
+    "documentId": "eastman-2026-06-01",
+    "unitIds": [
+     "u13",
+     "u14"
+    ],
+    "page": 13,
+    "overlapChars": 0,
+    "rougeL": 0.6153846153846153,
+    "citations": [
+     "Le changement de couleur du revêtement extérieur du bâtiment principal sis sur le lot 2 239 886, 42 chemin de Petite-Rivière",
+     "La construction d’un bâtiment accessoire sur le lot 2 239 886, 42 chemin de Petite-Rivière"
+    ]
+   },
+   {
+    "documentId": "eastman-2026-06-01",
+    "unitIds": [
+     "u16",
+     "u17"
+    ],
+    "page": 13,
+    "overlapChars": 0,
+    "rougeL": 0.9411764705882353,
+    "citations": [
+     "La rénovation du bâtiment principal sis sur le lot 2 240 000, 50 chemin de la Feuillade",
+     "La rénovation du bâtiment accessoire sis sur le lot 2 240 000, 50 chemin de la Feuillade"
+    ]
+   },
+   {
+    "documentId": "hatley-2026-04-07",
+    "unitIds": [
+     "u03",
+     "u04"
+    ],
+    "page": 11,
+    "overlapChars": 0,
+    "rougeL": 0.5,
+    "citations": [
+     "l’église Saint-James, située au 100, rue Main",
+     "le St. James Hall (centre communautaire), situé au 100, rue Main"
+    ]
+   },
+   {
+    "documentId": "hatley-2026-04-07",
+    "unitIds": [
+     "u03",
+     "u05"
+    ],
+    "page": 11,
+    "overlapChars": 0,
+    "rougeL": 0.5,
+    "citations": [
+     "l’église Saint-James, située au 100, rue Main",
+     "le gazebo, situé au 100, rue Main"
+    ]
+   },
+   {
+    "documentId": "hatley-2026-04-07",
+    "unitIds": [
+     "u04",
+     "u05"
+    ],
+    "page": 11,
+    "overlapChars": 0,
+    "rougeL": 0.6666666666666665,
+    "citations": [
+     "le St. James Hall (centre communautaire), situé au 100, rue Main",
+     "le gazebo, situé au 100, rue Main"
+    ]
+   },
+   {
+    "documentId": "valcourt-2026-06-01-agenda",
+    "unitIds": [
+     "u01",
+     "u02"
+    ],
+    "page": 1,
+    "overlapChars": 0,
+    "rougeL": 0.6363636363636364,
+    "citations": [
+     "1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT",
+     "1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE DEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS"
+    ]
+   }
+  ]
+ },
+ "note": "sameUnitVersions should be joined, distinctUnits never; ROUGE-L never decides"
+}

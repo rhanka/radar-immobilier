@@ -35,6 +35,10 @@ export const oracleV2Rules = Object.freeze({
   R2: "Bylaw admitted as an eligible candidate node type",
   R3: "unit alternate citation sites, each with page and verbatim provenance",
 });
+export const oracleV3Rules = Object.freeze({ R4: "unit stage_aliases accepted as candidate stage (option useStageAliases)",
+  R5: "stage-tolerant: any stage accepted on the same anchored site (option stageTolerant)",
+  R6: "neutral units: a candidate group matching only a neutral unit is neither credited nor counted as a false detection (option neutralUnits)",
+  R7: "unit variants: a unit is matched if any of its variants matches (unresolved item with several versions)" });
 
 const metric = (numerator, denominator) => denominator ? numerator / denominator : null;
 
@@ -42,6 +46,18 @@ export function scoreValidV2(output, document, gold, options = {}) {
   const eligibleTypes = new Set(options.eligibleNodeTypes ?? ORACLE_V2_ELIGIBLE_NODE_TYPES);
   const stripNumbering = options.stripNumbering ?? true;
   const useAlternateSites = options.useAlternateSites ?? true;
+  // R4 (oracle v3 only, off by default so every v2 figure is unchanged): a unit may declare
+  // stage_aliases, the procedure values (ppcmoi, usage_conditionnel, consultation_publique) that
+  // contract v9 lets a model emit as a stage for the same fact.
+  const useStageAliases = options.useStageAliases ?? false;
+  // R5-R7 (oracle v3 bounds, off by default): stageTolerant ignores the stage; neutralUnits are
+  // unresolved items, excluded from the expected units AND from the false detections; a unit with
+  // variants matches when any variant does.
+  const stageTolerant = options.stageTolerant ?? false;
+  const neutralUnits = options.neutralUnits ?? [];
+  // softMatcher(unit, group): optional second-chance matcher, tried only for a group that matched no
+  // unit exactly, one unit at most; its matches are reported apart (softMatchedIds).
+  const softMatcher = options.softMatcher ?? null;
   const key = (value) => stripNumbering ? stripItemNumber(normalized(value)) : normalized(value);
   const eligible = output.nodes.filter(({ node_type: type }) => eligibleTypes.has(type));
   const byId = new Map(eligible.map((node, index) => [node.id, index]));
@@ -58,7 +74,7 @@ export function scoreValidV2(output, document, gold, options = {}) {
   });
   const evidence = new Map((output.evidence ?? []).map((item) => [item.id, item]));
   const matches = [];
-  let unmatchedGroups = 0;
+  let unmatchedGroups = 0; let neutralizedGroups = 0; const softMatches = []; const exactMatches = [];
   for (const nodes of groups.values()) {
     const stages = new Set(nodes.flatMap((node) => {
       const properties = node.properties ?? node;
@@ -71,24 +87,43 @@ export function scoreValidV2(output, document, gold, options = {}) {
     ]).filter((record) => record.source_file === document.originalKey
       && record.rawRef === document.originalKey && record.docSha === document.sha256
       && record.sourceUrl === document.sourceUrl && record.modality === "pdf");
-    const groupMatches = gold.filter((unit) => {
-      if (!stages.has(unit.stage)) return false;
+    const variantMatches = (unit, tolerant = false) => {
+      const unitStages = [unit.stage, ...(useStageAliases ? (unit.stage_aliases ?? []) : [])];
+      if (!tolerant && !unitStages.some((stage) => stages.has(stage))) return false;
       const sites = [{ page: unit.page, anchor: unit.anchor },
         ...(useAlternateSites ? (unit.alternate_sites ?? []) : [])];
       return sites.some((site) => records.some((record) => record.page === site.page
         && typeof record.excerpt === "string" && key(record.excerpt).includes(key(site.anchor))));
-    });
-    if (groupMatches.length === 0) unmatchedGroups += 1;
+    };
+    const unitMatches = (unit, tolerant = false) => (unit.variants ?? [unit]).some((variant) => variantMatches(variant, tolerant));
+    let groupMatches = gold.filter((unit) => unitMatches(unit));
+    // R5: only for a group that matched no unit with its own stage, and one unit at most, so a single
+    // detection never collects the avis, the projet and the adoption of the same bylaw.
+    if (groupMatches.length === 0 && stageTolerant) groupMatches = gold.filter((unit) => unitMatches(unit, true)).slice(0, 1);
+    exactMatches.push(...groupMatches.map(({ id }) => id));
+    if (groupMatches.length === 0 && softMatcher) {
+      const texts = [...records.map(({ excerpt }) => excerpt), ...nodes.flatMap((node) =>
+        [node.label, node.numero, node.title, node.properties?.numero, node.properties?.adresse, node.properties?.lot])]
+        .filter((value) => typeof value === "string");
+      groupMatches = gold.filter((unit) => softMatcher(unit, { stages, records, texts })).slice(0, 1);
+      softMatches.push(...groupMatches.map(({ id }) => id));
+    }
+    if (groupMatches.length === 0) {
+      if (neutralUnits.some((unit) => unitMatches(unit))) neutralizedGroups += 1; else unmatchedGroups += 1;
+    }
     matches.push(...groupMatches.map(({ id }) => id));
   }
+  const exactIds = new Set(exactMatches);
   const matchedIds = [...new Set(matches)];
   const duplicates = matches.length - matchedIds.length;
   const tp = matchedIds.length;
   const fn = gold.length - tp;
-  const partialOracle = document.id === "waterloo-2026-08-18";
+  // The Waterloo human gold is partial by construction; oracle v3 is complete there and passes false.
+  const partialOracle = options.partialOracle ?? document.id === "waterloo-2026-08-18";
   const fp = partialOracle ? null : unmatchedGroups + duplicates;
   return { oracleUnits: gold.length, candidateGroups: groups.size, matchedIds,
     tp, fp, fn, precision: partialOracle ? null : metric(tp, tp + fp), recall: metric(tp, gold.length),
     f1: partialOracle || !(2 * tp + fp + fn) ? null : 2 * tp / (2 * tp + fp + fn),
-    partialOracle, unmatchedGroups, duplicateMatches: duplicates };
+    partialOracle, unmatchedGroups, neutralizedGroups, duplicateMatches: duplicates,
+    softMatchedIds: [...new Set(softMatches)].filter((id) => !exactIds.has(id)) };
 }

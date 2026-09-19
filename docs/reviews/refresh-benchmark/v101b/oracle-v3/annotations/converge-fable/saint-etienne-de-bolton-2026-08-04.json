@@ -1,0 +1,191 @@
+{
+ "documentId": "saint-etienne-de-bolton-2026-08-04",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dbb8601a27768bf3efa9e573dfd219a14a6d99a501dc980f410fefeaa4b1a383",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 10, résolution 2026-08-150 adopte les règlements listés dont « 2026-04 modifiant le Règlement de plan d’urbanisme 2014-04 » ; un nœud groupé couvre des unités explicitement nommées.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 10, « 2026-05 modifiant le Règlement de zonage 2014-05 » figure dans la liste adoptée par la résolution 2026-08-150.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 10, « 2026-06 modifiant le règlement de lotissement 2014-06 » est adopté par la résolution 2026-08-150.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 10, « 2026-07 modifiant le règlement de construction 2014-08 » est adopté par la résolution 2026-08-150.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Page 10, « 2026-08 modifiant le règlement de PIIA 2014-09 » est adopté par la résolution 2026-08-150.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Page 10, « 2026-09 modifiant le règlement de permis et certificats 2014-10 » est adopté par la résolution 2026-08-150 (saut de ligne normalisé).\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Page 10, « 2026-10 modifiant le règlement de dérogation mineure 2008-06 » est adopté par la résolution 2026-08-150.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Page 10, résolution 2026-08-151 : « QUE le conseil municipal adopte le Règlement 2025-11 créant le Règlement sur l’occupation et l’entretien des bâtiments » ; l'avis de motion et le projet sont des rappels historiques.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Page 11, résolution 2026-08-152 : « QUE le conseil adopte le Règlement 2026-14 modifiant le règlement 2008-04 sur les usages conditionnels ».\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Page 11, résolution 2026-08-153 en vertu de l'art. 59.1 LAU vise le « Règlement 2010-11 sur les ententes relatives à des travaux municipaux » comme n'ayant pas à être modifié ; objet réglementaire explicite, étape hors liste donc inconnu.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"Page 11, résolution 2026-08-153 vise le « Règlement 2014-11 sur les conditions d’émission de permis de construire » comme n'ayant pas à être modifié pour la concordance au schéma.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"Page 11, résolution 2026-08-153 vise le « Règlement 2023-02 relatif à la démolition d’immeubles » comme n'ayant pas à être modifié pour la concordance au schéma.\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"Page 12, résolution 2026-08-154 autorise sur recommandation du CCU l'ajout d'une toiture au 12, rue Principale après étude des critères du PIIA ; citation exacte.\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"Page 12, résolution 2026-08-155 autorise l'ajout d'un garage attaché au 24, Allée des Sommets, lot 5 662 886, critères du PIIA étudiés ; citation exacte.\"},{\"item\":\"i15\",\"choice\":\"v1\",\"reason\":\"Page 2, point j de l'ordre du jour cité mot pour mot, et le refus est confirmé par la résolution 2026-08-156 (pages 12-13) ; les refus restent des refus et l'unité n'est pas dupliquée.\"},{\"item\":\"i16\",\"choice\":\"v1\",\"reason\":\"Page 14, résolution 2026-08-157 : « refuse, sur recommandation du CCU, la demande de dérogation mineure visant à permettre l’abattage d’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la période de gel ».\"},{\"item\":\"i17\",\"choice\":\"v1\",\"reason\":\"Page 14, résolution 2026-08-158 autorise sur recommandation du CCU le remplacement du revêtement de toiture au 572, 1er Rang, lot 5 191 952, par de la tôle, critères du PIIA étudiés.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 10, résolution 2026-08-150 adopte les règlements listés dont « 2026-04 modifiant le Règlement de plan d’urbanisme 2014-04 » ; un nœud groupé couvre des unités explicitement nommées."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 10, « 2026-05 modifiant le Règlement de zonage 2014-05 » figure dans la liste adoptée par la résolution 2026-08-150."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 10, « 2026-06 modifiant le règlement de lotissement 2014-06 » est adopté par la résolution 2026-08-150."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 10, « 2026-07 modifiant le règlement de construction 2014-08 » est adopté par la résolution 2026-08-150."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Page 10, « 2026-08 modifiant le règlement de PIIA 2014-09 » est adopté par la résolution 2026-08-150."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Page 10, « 2026-09 modifiant le règlement de permis et certificats 2014-10 » est adopté par la résolution 2026-08-150 (saut de ligne normalisé)."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Page 10, « 2026-10 modifiant le règlement de dérogation mineure 2008-06 » est adopté par la résolution 2026-08-150."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Page 10, résolution 2026-08-151 : « QUE le conseil municipal adopte le Règlement 2025-11 créant le Règlement sur l’occupation et l’entretien des bâtiments » ; l'avis de motion et le projet sont des rappels historiques."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Page 11, résolution 2026-08-152 : « QUE le conseil adopte le Règlement 2026-14 modifiant le règlement 2008-04 sur les usages conditionnels »."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Page 11, résolution 2026-08-153 en vertu de l'art. 59.1 LAU vise le « Règlement 2010-11 sur les ententes relatives à des travaux municipaux » comme n'ayant pas à être modifié ; objet réglementaire explicite, étape hors liste donc inconnu."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "Page 11, résolution 2026-08-153 vise le « Règlement 2014-11 sur les conditions d’émission de permis de construire » comme n'ayant pas à être modifié pour la concordance au schéma."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "Page 11, résolution 2026-08-153 vise le « Règlement 2023-02 relatif à la démolition d’immeubles » comme n'ayant pas à être modifié pour la concordance au schéma."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "Page 12, résolution 2026-08-154 autorise sur recommandation du CCU l'ajout d'une toiture au 12, rue Principale après étude des critères du PIIA ; citation exacte."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "Page 12, résolution 2026-08-155 autorise l'ajout d'un garage attaché au 24, Allée des Sommets, lot 5 662 886, critères du PIIA étudiés ; citation exacte."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "Page 2, point j de l'ordre du jour cité mot pour mot, et le refus est confirmé par la résolution 2026-08-156 (pages 12-13) ; les refus restent des refus et l'unité n'est pas dupliquée."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "Page 14, résolution 2026-08-157 : « refuse, sur recommandation du CCU, la demande de dérogation mineure visant à permettre l’abattage d’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la période de gel »."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "Page 14, résolution 2026-08-158 autorise sur recommandation du CCU le remplacement du revêtement de toiture au 572, 1er Rang, lot 5 191 952, par de la tôle, critères du PIIA étudiés."
+  }
+ ]
+}

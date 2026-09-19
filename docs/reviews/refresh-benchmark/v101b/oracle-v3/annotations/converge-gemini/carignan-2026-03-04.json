@@ -1,0 +1,221 @@
+{
+ "documentId": "carignan-2026-03-04",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "cdcb1050f1f0b29e31adcc91aad4b88eea61b70e9633d9c463aef0dd23674c38",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"Il s'agit d'une prise de position politique demandant le retrait d'un projet de règlement provincial, et non d'un acte réglementaire ou foncier municipal.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'autorisation de signature de l'acte de vente définitif des lots 2 597 876, 2 598 251 et 2 599 459 est un acte foncier dûment attesté à la page 14.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'autorisation de signature de l'acte de vente définitif du lot 6 504 999 est un acte foncier dûment attesté à la page 14.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure 2026-007 est adoptée à la page 20 avec une citation textuelle exacte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'approbation conditionnelle de la dérogation mineure 2026-013 est attestée textuellement à la page 21.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'approbation de la dérogation mineure 2025-113 est attestée textuellement à la page 22.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"L'approbation conditionnelle du PIIA 2025-015 est conforme au texte de la résolution à la page 22.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA 2025-121 est attestée textuellement à la page 22.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA 2025-125 est conforme au texte de la résolution à la page 23.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA 2025-126 est attestée textuellement à la page 23.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA 2025-128 sur bâtiment patrimonial est attestée textuellement à la page 24.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"Le refus du PIIA 2026-001 est attesté à la page 24, conformément à la règle selon laquelle les refus doivent rester des refus.\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA 2026-002 est attestée textuellement à la page 25.\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA 2026-004 est attestée textuellement à la page 25.\"},{\"item\":\"i15\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA 2026-005 est attestée textuellement à la page 26.\"},{\"item\":\"i16\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA 2026-006 est attestée textuellement à la page 26.\"},{\"item\":\"i17\",\"choice\":\"absent\",\"reason\":\"Ce protocole d'entente relève des loisirs et de la vie communautaire, expressément exclus du rappel.\"},{\"item\":\"i18\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement modifiant le zonage numéro 483-41-U est attestée à la page 33, avec l'ancre nominale complète.\"},{\"item\":\"i19\",\"choice\":\"v1\",\"reason\":\"L'autorisation de vente des lots 2 597 589 et 6 508 688 constitue un acte foncier attesté à la page 34.\"},{\"item\":\"i20\",\"choice\":\"absent\",\"reason\":\"L'avis consultatif sur le projet de planification d'un organisme scolaire externe ne constitue pas un objet réglementaire ou foncier municipal.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "absent"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  },
+  {
+   "item": "i18",
+   "unitId": "u18",
+   "current": "v2"
+  },
+  {
+   "item": "i19",
+   "unitId": "u19",
+   "current": "v1"
+  },
+  {
+   "item": "i20",
+   "unitId": "u20",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "Il s'agit d'une prise de position politique demandant le retrait d'un projet de règlement provincial, et non d'un acte réglementaire ou foncier municipal."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'autorisation de signature de l'acte de vente définitif des lots 2 597 876, 2 598 251 et 2 599 459 est un acte foncier dûment attesté à la page 14."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'autorisation de signature de l'acte de vente définitif du lot 6 504 999 est un acte foncier dûment attesté à la page 14."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La dérogation mineure 2026-007 est adoptée à la page 20 avec une citation textuelle exacte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'approbation conditionnelle de la dérogation mineure 2026-013 est attestée textuellement à la page 21."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'approbation de la dérogation mineure 2025-113 est attestée textuellement à la page 22."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "L'approbation conditionnelle du PIIA 2025-015 est conforme au texte de la résolution à la page 22."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA 2025-121 est attestée textuellement à la page 22."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA 2025-125 est conforme au texte de la résolution à la page 23."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA 2025-126 est attestée textuellement à la page 23."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA 2025-128 sur bâtiment patrimonial est attestée textuellement à la page 24."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "Le refus du PIIA 2026-001 est attesté à la page 24, conformément à la règle selon laquelle les refus doivent rester des refus."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA 2026-002 est attestée textuellement à la page 25."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA 2026-004 est attestée textuellement à la page 25."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA 2026-005 est attestée textuellement à la page 26."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA 2026-006 est attestée textuellement à la page 26."
+  },
+  {
+   "item": "i17",
+   "choice": "absent",
+   "reason": "Ce protocole d'entente relève des loisirs et de la vie communautaire, expressément exclus du rappel."
+  },
+  {
+   "item": "i18",
+   "choice": "v1",
+   "reason": "L'adoption du règlement modifiant le zonage numéro 483-41-U est attestée à la page 33, avec l'ancre nominale complète."
+  },
+  {
+   "item": "i19",
+   "choice": "v1",
+   "reason": "L'autorisation de vente des lots 2 597 589 et 6 508 688 constitue un acte foncier attesté à la page 34."
+  },
+  {
+   "item": "i20",
+   "choice": "absent",
+   "reason": "L'avis consultatif sur le projet de planification d'un organisme scolaire externe ne constitue pas un objet réglementaire ou foncier municipal."
+  }
+ ]
+}

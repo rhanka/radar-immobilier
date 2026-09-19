@@ -1,0 +1,111 @@
+{
+ "documentId": "stratford-2026-04-20",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b060a30ca906a62ca089de5bcbd2b50be6f30be819ba2a6c011fb5dbd200edc6",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le texte atteste « Consultation publique (Règlement 1257 et dérogations) » en page 1 : étape procédurale distincte du deuxième projet (pas un doublon même type/même fait), point prévu d'un ordre du jour, étape inconnu avec procédure consultation_publique cohérente.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 2.2 « Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition d'immeubles no 1212 » est attesté page 1 ; objet réglementaire d'urbanisme, étape projet_reglement exacte, point prévu.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 2.3 « Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage no 1035 afin de créer la zone RU-13 » est attesté page 1 ; étape second_projet distincte de la consultation, citation et objet exacts.\"},{\"item\":\"i04\",\"choice\":\"absent\",\"reason\":\"« Bail bureau de poste » n'est pas un objet réglementaire ou foncier explicite (aucun lot ni adresse, un bail est un contrat et non un acte foncier de type vente/achat/servitude), donc hors du périmètre du rappel ; fait complémentaire éventuel à signaler séparément.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 4.2 « Achat d'un terrain sur la rue des Érables » est attesté page 1 comme point prévu (Décision) ; acte foncier explicite inclus par la règle « actes fonciers, même non résidentiels », label « prévu » conforme à un ordre du jour.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 4.3 « Vente d'une lisière de terrain sur le chemin des Hauts-Cantons » est attesté page 1 ; acte foncier explicite, point prévu et non décision acquise, citation exacte.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Le point 4.4 « Servitude d'écoulement des eaux au 467 rang Beau-Lac » est attesté page 1 ; servitude = acte foncier explicite avec adresse identifiée, point prévu, citation exacte.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Le point 10.4 « Demande de dérogation mineure – lot 6 674 217 chemin Thompson » est attesté page 2 ; objet cadastral explicite, étape derogation_mineure exacte, point prévu.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Le point 10.5 « Demande de dérogation mineure – 405 rang Elgin » est attesté page 2 ; adresse explicite, étape derogation_mineure exacte, point prévu de l'ordre du jour.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le texte atteste « Consultation publique (Règlement 1257 et dérogations) » en page 1 : étape procédurale distincte du deuxième projet (pas un doublon même type/même fait), point prévu d'un ordre du jour, étape inconnu avec procédure consultation_publique cohérente."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 2.2 « Adoption du projet du Règlement no 1256 modifiant le règlement relatif à la démolition d'immeubles no 1212 » est attesté page 1 ; objet réglementaire d'urbanisme, étape projet_reglement exacte, point prévu."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 2.3 « Adoption du deuxième projet du Règlement no 1257 modifiant le règlement de zonage no 1035 afin de créer la zone RU-13 » est attesté page 1 ; étape second_projet distincte de la consultation, citation et objet exacts."
+  },
+  {
+   "item": "i04",
+   "choice": "absent",
+   "reason": "« Bail bureau de poste » n'est pas un objet réglementaire ou foncier explicite (aucun lot ni adresse, un bail est un contrat et non un acte foncier de type vente/achat/servitude), donc hors du périmètre du rappel ; fait complémentaire éventuel à signaler séparément."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 4.2 « Achat d'un terrain sur la rue des Érables » est attesté page 1 comme point prévu (Décision) ; acte foncier explicite inclus par la règle « actes fonciers, même non résidentiels », label « prévu » conforme à un ordre du jour."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 4.3 « Vente d'une lisière de terrain sur le chemin des Hauts-Cantons » est attesté page 1 ; acte foncier explicite, point prévu et non décision acquise, citation exacte."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Le point 4.4 « Servitude d'écoulement des eaux au 467 rang Beau-Lac » est attesté page 1 ; servitude = acte foncier explicite avec adresse identifiée, point prévu, citation exacte."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Le point 10.4 « Demande de dérogation mineure – lot 6 674 217 chemin Thompson » est attesté page 2 ; objet cadastral explicite, étape derogation_mineure exacte, point prévu."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Le point 10.5 « Demande de dérogation mineure – 405 rang Elgin » est attesté page 2 ; adresse explicite, étape derogation_mineure exacte, point prévu de l'ordre du jour."
+  }
+ ]
+}
