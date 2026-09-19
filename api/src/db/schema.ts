@@ -3,6 +3,7 @@ import {
   customType,
   date,
   index,
+  integer,
   jsonb,
   numeric,
   pgEnum,
@@ -719,7 +720,42 @@ export const accountInvitations = pgTable(
   }),
 );
 
+export const refreshOutcomeStatus = pgEnum("refresh_outcome_status", ["submitted", "accepted", "refused"]);
+export const refreshOutcomeReason = pgEnum("refresh_outcome_reason",
+  ["quota", "timeout", "empty-output", "transport", "quality", "forced", "circuit-open"]);
+export const refreshOutcomeTransition = pgEnum("refresh_outcome_transition",
+  ["primary", "same-model-retry", "fallback", "verification"]);
+
+/** One immutable result per actual document submission; no document text or upstream errors. */
+export const refreshDocumentOutcomes = pgTable("refresh_document_outcomes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  cycleId: uuid("cycle_id").notNull(),
+  documentSha: text("document_sha").notNull(),
+  citySlug: text("city_slug").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  pageCount: integer("page_count").notNull(),
+  provider: text("provider"),
+  model: text("model"),
+  effort: text("effort"),
+  transition: refreshOutcomeTransition("transition"),
+  status: refreshOutcomeStatus("status").notNull(),
+  failureReason: refreshOutcomeReason("failure_reason"),
+  fallbackReason: refreshOutcomeReason("fallback_reason"),
+  attempts: integer("attempts").notNull(),
+  latencyMs: integer("latency_ms").notNull(),
+  unknownIds: integer("unknown_ids").notNull().default(0),
+  keptNoValidDecision: integer("kept_no_valid_decision").notNull().default(0),
+  supportedUngrounded: integer("supported_ungrounded").notNull().default(0),
+  actsJudged: integer("acts_judged").notNull().default(0),
+  actsRemoved: integer("acts_removed").notNull().default(0),
+  skippedFallback: integer("skipped_fallback").notNull().default(0),
+}, (t) => ({
+  byCreatedAt: index("refresh_document_outcomes_created_at_idx").on(t.createdAt),
+  byStatus: index("refresh_document_outcomes_status_idx").on(t.status),
+}));
+
 export const schema = {
+  refreshDocumentOutcomes,
   sources,
   ingestions,
   documents,
