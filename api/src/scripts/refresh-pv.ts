@@ -92,6 +92,7 @@ async function main(): Promise<void> {
     maximumAttempts,
   };
   const documentModels = createRefreshModelPolicy({ primary, fallback, primaryQualityAttempts, timeoutMs,
+    citySlug: city,
     ...(verification ? { verification } : {}),
     forceFallback: process.env.REFRESH_FORCE_FALLBACK === "1",
     createClient: (model, signal) => createRefreshMesh({ ...common,

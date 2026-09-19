@@ -19,12 +19,21 @@ Acts are connected groups of `Signal`, `DesignationEvent`, and `Bylaw` linked by
 Only explicit `non_soutenu` with a non-empty reason removes a group's nodes and every edge
 whose source or target is a removed node, exactly as `precision-cascade.mjs` does.
 Other nodes, surviving edges, evidence, and metadata remain unchanged. No new or modified
-graph content is accepted. Durable policy contract `v101b-removal-only-v2` isolates earlier
-outputs that retained incident edges, without deleting them.
+graph content is accepted. Durable policy contract `v101b-removal-only-v3` isolates earlier
+outputs produced before the edge rule and the verifier envelope were aligned on the benchmark,
+without deleting them.
 
 Missing or invalid decisions keep acts (`kept_no_valid_decision`). Unknown IDs are ignored
-and counted (`unknown_ids`). A supported excerpt absent verbatim from the source keeps the
-act (`supported_ungrounded`). Invalid JSON or verifier failure keeps the accepted extraction.
+and counted (`unknown_ids`); a primitive or null decision entry names no act and is skipped
+without being counted, as in `precision-cascade.mjs`. Grounding is the benchmark predicate:
+at least 20 Unicode code points and a normalized match inside one physical page of the chunk.
+A supported act whose excerpt fails it is kept and counted (`supported_ungrounded`); an
+unsupported act whose contradicting excerpt fails it is removed and counted
+(`contradicting_excerpt_ungrounded`). Grounding feeds counters only and never removes an act.
+A chunk with no act triggers no verifier call and records `verification.status=skipped-no-acts`.
+The verifier answer is parsed like the benchmark: a code fence and prose around a single JSON
+object are tolerated, and a scalar, null, or array answer is a parse failure rather than an
+empty decision list. Invalid JSON or verifier failure keeps the accepted extraction.
 Verification failure triggers neither an extraction fallback nor a verification retry.
 
 Each `documentModels[docSha][]` receipt carries model, invocation ordinal, latency, status,
@@ -52,14 +61,21 @@ preserve the one-row, append-only contract. A process kill before that INSERT or
 PostgreSQL server can leave no outcome; there is no transactional outbox or crash reconciliation.
 An INSERT failure fails the cycle. An accepted extraction does not assert publication success.
 
-The edge rule now matches the benchmark. Other observed differences remain for conductor
-decision: whole-document versus per-chunk verification and different message framing;
-normalized page-level grounding with a 20-code-point floor versus literal chunk substring;
-the benchmark's additional `contradictingExcerptUngrounded` counter; tolerant versus strict
-verification JSON parsing; skipping primitive decisions versus counting them as unknown;
-no verifier call for zero acts versus an unconditional call; and no benchmark output on
-verifier failure versus keeping the accepted primary output. The frozen instruction matches,
-but these differences prevent claiming full benchmark/runtime equivalence.
+The edge rule, page-level grounding, the contradicting-excerpt counter, JSON parsing
+tolerance, primitive-decision handling, the zero-act skip, and the message body now match
+`precision-cascade.mjs`. Replaying the 100 archived astra-medium outputs and the archived
+verifier answers through this code reproduces the benchmark act by act: 912 acts, 229
+removals, zero difference in either direction, and identical counters (see
+`.remote/CONVERGENCE_BANC_RUNTIME_STATUS.md`).
+
+Three differences remain for conductor decision. The verifier instruction travels as the head
+of the single `prompt` string instead of a separate system message, because the text/JSON port
+exposes no system field, and the mesh client prepends its own generic system message and a
+`Schema:` line. The identity line carries the document SHA-256 and the city but no meeting
+date, which the corpus does not hold. Verification is scoped to the accepted chunk rather than
+the whole document; on this benchmark corpus the two scopes coincide, because every one of the
+100 documents is single-chunk by construction. `contradicting_excerpt_ungrounded` lives in the
+S3 receipt only; `refresh_document_outcomes` does not project it.
 
 ## Validation préproduction (lane k8s)
 
