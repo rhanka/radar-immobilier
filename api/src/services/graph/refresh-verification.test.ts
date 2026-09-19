@@ -28,7 +28,7 @@ function fixture(): RefreshProfileChunk {
   } };
 }
 function setup(answer: string | ((request: TextJsonGenerationInput, signal: AbortSignal) => Promise<string>),
-  options: { enabled?: boolean; forceFallback?: boolean; failPrimary?: boolean;
+  options: { enabled?: boolean; forceFallback?: boolean; failPrimary?: boolean; citySlug?: string;
     invalidResult?: "identity" | "status" | "missing-text" } = {}) {
   const receipts: RefreshModelReceipt[] = [];
   const calls: RefreshModel[] = [];
@@ -36,6 +36,7 @@ function setup(answer: string | ((request: TextJsonGenerationInput, signal: Abor
   const record = async (receipt: RefreshModelReceipt) => { receipts.push(receipt); };
   const policy = createRefreshModelPolicy({ primary, fallback: gemini,
     ...(options.enabled !== false ? { verification: gemini } : {}),
+    ...(options.citySlug ? { citySlug: options.citySlug } : {}),
     forceFallback: options.forceFallback ?? false, primaryQualityAttempts: 2, timeoutMs: 50,
     createClient(model, signal) {
       return { mode: "mesh", provider: model.provider, model: model.model, async generateJson(request) {
@@ -89,15 +90,68 @@ describe("refresh precision verification", () => {
       expect(run.receipts.at(-1)?.verification).toMatchObject({ kept_no_valid_decision: 2, removed: 0 });
     });
 
-  it("should keep a supported act with a non-verbatim excerpt and count it (invariant 3)", async () => {
+  it.each([["sous le plancher de 20 points de code", "règlement"],
+    ["absent de la page", "Le conseil refuse la dérogation mineure demandée."],
+    ["non textuel", 7], ["vide", ""]] as const)(
+    "should keep a supported act with an ungrounded excerpt and count it (invariant 3): %s", async (_label, bad) => {
+      const input = fixture();
+      const run = setup(answer([{ act: "A01", verdict: "soutenu", reason: "Adoption", excerpt: bad },
+        { act: "A02", verdict: "soutenu", reason: "Adoption", excerpt }]));
+      expect(await run.run(input)).toBe(input);
+      expect(run.receipts.at(-1)?.verification).toMatchObject({ supported_ungrounded: 1, kept_no_valid_decision: 0 });
+    });
+
+  it("should ground a supported excerpt through the benchmark normalization, not raw equality", async () => {
     const input = fixture();
-    const run = setup(answer([{ act: "A01", verdict: "soutenu", reason: "Adoption", excerpt: excerpt.toUpperCase() },
+    const run = setup(answer([{ act: "A01", verdict: "soutenu", reason: "Adoption",
+      excerpt: "  LE CONSEIL   ADOPTE le REGLEMENT de zonage  " },
       { act: "A02", verdict: "soutenu", reason: "Adoption", excerpt }]));
     expect(await run.run(input)).toBe(input);
-    expect(run.receipts.at(-1)?.verification).toMatchObject({ supported_ungrounded: 1, kept_no_valid_decision: 0 });
+    expect(run.receipts.at(-1)?.verification).toMatchObject({ supported_ungrounded: 0, kept_no_valid_decision: 0 });
   });
 
-  it.each(["not JSON", "```json\n{}\n```", '{"decisions":', "transport"])(
+  it("should count an ungrounded contradicting excerpt without changing the removal", async () => {
+    const input = fixture();
+    const run = setup(answer([{ act: "A01", verdict: "non_soutenu", reason: "Rappel historique",
+      excerpt: "Le conseil refuse la dérogation mineure demandée." },
+      { act: "A02", verdict: "non_soutenu", reason: "Rappel historique", excerpt: "" }]));
+    const output = await run.run(input);
+    expect(output.extraction.nodes.map(({ id }) => id)).toEqual(["source", "zone", "constraint"]);
+    expect(run.receipts.at(-1)?.verification)
+      .toMatchObject({ removed: 2, contradicting_excerpt_ungrounded: 1, supported_ungrounded: 0 });
+  });
+
+  it.each([[[null], 0], [[3, "A01", true], 0], [[[]], 1], [[{ act: "A99", verdict: "soutenu", reason: "x" }], 1]] as const)(
+    "should skip primitive decisions without counting them as unknown identifiers: %j", async (decisions, unknown) => {
+      const input = fixture();
+      const run = setup(answer([...decisions]));
+      expect(await run.run(input)).toBe(input);
+      expect(run.receipts.at(-1)?.verification).toMatchObject({ unknown_ids: unknown, removed: 0 });
+    });
+
+  it.each(["```json\n{\"decisions\":[DECISION]}\n```", "```\n{\"decisions\":[DECISION]}\n```",
+    "Voici ma réponse :\n{\"decisions\":[DECISION]}\nFin."])(
+    "should tolerate code fences and surrounding prose like the benchmark parser: %s", async (shape) => {
+      const input = fixture();
+      const run = setup(shape.replace("DECISION", JSON.stringify(remove())));
+      const output = await run.run(input);
+      expect(output.extraction.nodes.map(({ id }) => id)).toEqual(["other", "source", "zone", "constraint"]);
+      expect(run.receipts.at(-1)?.verification).toMatchObject({ removed: 1, acts: 2 });
+    });
+
+  it("should not call the verifier when the chunk holds no act to judge", async () => {
+    const input = fixture();
+    const empty: RefreshProfileChunk = { ...input, extraction: { ...input.extraction,
+      nodes: input.extraction.nodes.filter((item) =>
+        !["Signal", "Bylaw", "DesignationEvent"].includes(item.node_type ?? "")) } };
+    const run = setup(answer([remove()]));
+    expect(await run.run(empty)).toBe(empty);
+    expect(run.calls).toEqual([primary]);
+    expect(run.receipts.at(-1)).toMatchObject({ transition: "verification", status: "completed",
+      modelUsed: null, latencyMs: 0, verification: { status: "skipped-no-acts", acts: 0, removed: 0 } });
+  });
+
+  it.each(["not JSON", "```json\n[1,2]\n```", '{"decisions":', '"just a string"', "null", "transport"])(
     "should preserve the whole accepted output when verification fails (invariant 4): %s", async (failure) => {
       const input = fixture();
       const run = setup(failure === "transport" ? async () => { throw new Error("network failed"); } : failure);
@@ -118,10 +172,38 @@ describe("refresh precision verification", () => {
     expect(output.extraction.edges.every(({ source, target }) => remaining.has(source) && remaining.has(target))).toBe(true);
     expect(output.extraction.evidence).toBe(input.extraction.evidence);
     const prompt = run.requests[1]!.prompt;
-    expect(prompt).toContain('"act":"A01"');
-    expect(prompt).toContain('"act":"A02"');
-    expect(prompt).not.toContain('"act":"A03"');
-    expect(prompt).toContain(input.chunk.text);
+    expect(prompt).toContain('"act": "A01"');
+    expect(prompt).toContain('"act": "A02"');
+    expect(prompt).not.toContain('"act": "A03"');
+    expect(prompt).toContain(`=== PAGE 1 ===\n${excerpt}`);
+    expect(prompt).not.toContain("[PDF PAGE 1]");
+  });
+
+  it("should frame the verifier message like the benchmark: instruction, identity, pretty acts, page blocks", async () => {
+    const input = fixture();
+    const run = setup(answer([]), { citySlug: "sutton" });
+    await run.run(input);
+    const prompt = run.requests[1]!.prompt;
+    expect(prompt.startsWith(REFRESH_VERIFICATION_PROMPT)).toBe(true);
+    expect(prompt).toContain(`Document : ${input.chunk.docSha} (ville sutton, 1 pages)`);
+    expect(prompt).toContain("ACTES À VÉRIFIER (2) :");
+    expect(prompt).toContain("TEXTE DU DOCUMENT :\n=== PAGE 1 ===");
+  });
+
+  it("should rebuild one grounding surface per physical page of a multi-page chunk", async () => {
+    const input = fixture();
+    const split: RefreshProfileChunk = { ...input, chunk: { ...input.chunk, pages: [4, 5],
+      text: `[PDF PAGE 4]\nLe conseil adopte le règlement\n\n[PDF PAGE 5]\nde zonage numéro 1234-26.` } };
+    const run = setup(answer([{ act: "A01", verdict: "soutenu", reason: "Adoption",
+      excerpt: "Le conseil adopte le règlement de zonage numéro" },
+      { act: "A02", verdict: "soutenu", reason: "Adoption", excerpt: "de zonage numéro 1234-26." }]));
+    expect(await run.run(split)).toBe(split);
+    // The first excerpt only exists across the page break: the benchmark refuses it, and so does this.
+    expect(run.receipts.at(-1)?.verification).toMatchObject({ supported_ungrounded: 1 });
+    // One blank-line separator, exactly like the benchmark's pagesBlock: the chunk's own
+    // part separator must not survive into the page block.
+    expect(run.requests[1]!.prompt).toContain(
+      "=== PAGE 4 ===\nLe conseil adopte le règlement\n=== PAGE 5 ===\nde zonage numéro 1234-26.");
   });
 
   it("should use only the first valid decision for a duplicate act", async () => {
