@@ -19,9 +19,9 @@
 #   kubectl logs -l job-name=radar-scrape -n radar-immobilier
 #   kubectl delete job radar-scrape -n radar-immobilier
 #
-# Cibler des villes / limiter : surcharger args + LIVE_SCRAPE_LIMIT via un patch,
-#   command: ["node", "dist/scripts/worker-live.js", "carignan", "delson"]
-#   env: LIVE_SCRAPE_LIMIT=2
+# Chunking : SCRAPE_CHUNK_SIZE=25 par défaut (plancher mesuré ~439 MiB cgroup,
+# 768 MiB de limite, heap 512 MiB). La boucle relance jusqu'au JSON terminal
+# `newDocuments: 0`, au plus 100 fois; le Job garde backoffLimit=1 et 2 h.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -62,7 +62,7 @@ spec:
           image: ghcr.io/rhanka/radar-api:latest
           imagePullPolicy: Always
           workingDir: /workspace/api
-          command: ["node", "dist/scripts/worker-live.js"]
+          command: ["sh", "/opt/scrape/run-chunks.sh", "node", "dist/scripts/worker-live.js"]
           envFrom:
             - configMapRef:
                 name: radar-api
@@ -95,9 +95,22 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY } }
             - name: SCRAPE_S3_SECRET_KEY
               valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY } }
+            - name: SCRAPE_CHUNK_SIZE
+              value: "25"
+            - name: SCRAPE_CHUNK_MAX_ITERATIONS
+              value: "100"
+          volumeMounts:
+            - name: scrape-chunk-loop
+              mountPath: /opt/scrape
+              readOnly: true
           resources:
             # 256Mi structurally too low (node heap ~240-280Mi + poppler/pdftotext
             # in the same cgroup); 512Mi floor / 768Mi comfort from extraction runs.
             # NODE_OPTIONS max-old-space-size=512 pairs with the 768Mi limit.
             requests: { cpu: 50m, memory: 256Mi }
             limits: { cpu: 150m, memory: 768Mi }
+      volumes:
+        - name: scrape-chunk-loop
+          configMap:
+            name: radar-scrape-chunk-loop
+            defaultMode: 0555

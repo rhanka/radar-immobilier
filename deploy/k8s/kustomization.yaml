@@ -43,6 +43,7 @@ resources:
   - 10-rbac.yaml
   - 20-postgres-postgis.yaml
   - 30-api.yaml
+  - 33-scrape-chunk-loop-configmap.yaml
   # 31/32/33 = Jobs one-shot (projection, projection-only, scrape) appliqués À LA
   # MAIN par le conducteur (kubectl apply -f), pas dans le bundle permanent.
   # 34-refresh-cronjob.yaml = OVERLAY-MANAGED-ONLY (§6 image-pin). Retiré d'ici
