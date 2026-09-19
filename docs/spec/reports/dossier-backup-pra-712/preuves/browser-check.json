@@ -1,0 +1,312 @@
+{
+  "status": "pass",
+  "checkedAt": "2026-09-19T02:47:41.942Z",
+  "url": "file:///home/antoinefa/src/radar-immobilier/.lanes/conductor/tmp/dossier-backup-pra/docs/spec/reports/dossier-backup-pra-712/focus/../decision-focus.html",
+  "chromiumCdpPort": "9242",
+  "offline": {
+    "url": "file:///home/antoinefa/src/radar-immobilier/.lanes/conductor/tmp/dossier-backup-pra/docs/spec/reports/dossier-backup-pra-712/decision-focus.html",
+    "title": "Dossier de décision v2 · Sauvegardes et PRA immo + geo (PR #712, geo#390)",
+    "external": 0,
+    "blockedExternal": true
+  },
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "scenes": [
+    {
+      "sceneId": "architecture-sauvegardes",
+      "sceneHash": "3d26491a0c263576306e172fb053781fc01d2214659dddcdbfb0004e58eb34c0",
+      "initialScale": 0.263158,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 22,
+      "edges": 10,
+      "groups": 6,
+      "edgeLabels": 10,
+      "panel": {
+        "left": 40,
+        "top": 3337.953125,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.99938606274557,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "sequence-bout-en-bout",
+      "sceneHash": "a7faf374fae94c0a17c44858e2304d165dbe36c204284e7713d509070926a250",
+      "initialScale": 0.177231,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 13,
+      "edges": 12,
+      "groups": 2,
+      "edgeLabels": 12,
+      "panel": {
+        "left": 40,
+        "top": 4707.046875,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 70.00045138830114,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "mise-en-service",
+      "sceneHash": "219d8fb9a9429bd568533343a920574f46db41dfe14a11b1c97df87f07b01a2a",
+      "initialScale": 0.163734,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 14,
+      "edges": 13,
+      "groups": 3,
+      "edgeLabels": 13,
+      "panel": {
+        "left": 40,
+        "top": 5990.734375,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 70.0002796074731,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "scenesAt1920": [
+    {
+      "sceneId": "architecture-sauvegardes",
+      "sceneHash": "3d26491a0c263576306e172fb053781fc01d2214659dddcdbfb0004e58eb34c0",
+      "initialScale": 0.288781,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 22,
+      "edges": 10,
+      "groups": 6,
+      "edgeLabels": 10,
+      "panel": {
+        "left": 52.5,
+        "top": 3295.765625,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99975624911265,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "sequence-bout-en-bout",
+      "sceneHash": "a7faf374fae94c0a17c44858e2304d165dbe36c204284e7713d509070926a250",
+      "initialScale": 0.237067,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 13,
+      "edges": 12,
+      "groups": 2,
+      "edgeLabels": 12,
+      "panel": {
+        "left": 52.5,
+        "top": 4722.53125,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 70.00015422855142,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "mise-en-service",
+      "sceneHash": "219d8fb9a9429bd568533343a920574f46db41dfe14a11b1c97df87f07b01a2a",
+      "initialScale": 0.219013,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 14,
+      "edges": 13,
+      "groups": 3,
+      "edgeLabels": 13,
+      "panel": {
+        "left": 52.5,
+        "top": 6086.21875,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.9984311718939,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "choices": {
+    "blocks": 5,
+    "single": 5,
+    "radio": 16,
+    "selected": {
+      "D1": [
+        "A"
+      ],
+      "D2": [
+        "CONDUCTEUR"
+      ],
+      "D3": [
+        "MESURER"
+      ],
+      "D4": [
+        "AUTRE_REGION"
+      ],
+      "D5": [
+        "BUCKET"
+      ]
+    },
+    "answered": [
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5"
+    ],
+    "selections": {
+      "D1": "A",
+      "D2": "CONDUCTEUR",
+      "D3": "MESURER",
+      "D4": "AUTRE_REGION",
+      "D5": "BUCKET"
+    },
+    "optionKeys": {
+      "D1": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "D2": [
+        "CONDUCTEUR",
+        "FABLE",
+        "GEMINI",
+        "AUTRE"
+      ],
+      "D3": [
+        "CONFIRME",
+        "ACTIVER",
+        "MESURER"
+      ],
+      "D4": [
+        "VALIDE",
+        "AUTRE_REGION",
+        "AUTRE_NOM"
+      ],
+      "D5": [
+        "BUCKET",
+        "OBJETS"
+      ]
+    },
+    "schema": "immo-712-decision-owner-response/v2",
+    "status": "draft-not-ratified",
+    "persisted": {
+      "D1": "A",
+      "D2": "CONDUCTEUR",
+      "D3": "MESURER",
+      "D4": "AUTRE_REGION",
+      "D5": "BUCKET"
+    },
+    "options": 16
+  },
+  "oneToOne": [
+    {
+      "sceneId": "architecture-sauvegardes",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 3295.765625,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "sequence-bout-en-bout",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 4722.53125,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "mise-en-service",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 6086.21875,
+        "width": 1800,
+        "height": 900
+      }
+    }
+  ],
+  "overview": [
+    {
+      "sceneId": "architecture-sauvegardes",
+      "clip": {
+        "x": 52.5,
+        "y": 3295.765625,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "sequence-bout-en-bout",
+      "clip": {
+        "x": 52.5,
+        "y": 4722.53125,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "mise-en-service",
+      "clip": {
+        "x": 52.5,
+        "y": 6086.21875,
+        "width": 1800,
+        "height": 900
+      }
+    }
+  ],
+  "captures": [
+    ".generated/dossier-preview-1440x1000.png",
+    ".generated/dossier-preview-1920x1080.png",
+    ".generated/scene-1a1-architecture-sauvegardes.png",
+    ".generated/scene-1a1-sequence-bout-en-bout.png",
+    ".generated/scene-1a1-mise-en-service.png",
+    ".generated/scene-vue-ensemble-architecture-sauvegardes.png",
+    ".generated/scene-vue-ensemble-sequence-bout-en-bout.png",
+    ".generated/scene-vue-ensemble-mise-en-service.png"
+  ],
+  "consoleErrors": [],
+  "runtimeErrors": [],
+  "externalRequests": []
+}
