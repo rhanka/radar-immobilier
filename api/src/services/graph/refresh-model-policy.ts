@@ -4,6 +4,8 @@ import { dirname } from "node:path";
 import type { TextJsonGenerationClient } from "@sentropic/graphify";
 
 import type { RefreshProvider } from "./refresh-mesh.js";
+import type { RefreshProfileChunk } from "./refresh-profile.js";
+import { verifyRefreshProfile, type RefreshVerificationSummary } from "./refresh-verification.js";
 
 export interface RefreshModel {
   readonly provider: RefreshProvider;
@@ -11,22 +13,24 @@ export interface RefreshModel {
   readonly effort: string;
 }
 export type RefreshFallbackReason = "quota" | "timeout" | "empty-output" | "transport" | "quality" | "forced" | "circuit-open";
-export type RefreshModelTransition = "primary" | "same-model-retry" | "fallback";
+export type RefreshModelTransition = "primary" | "same-model-retry" | "fallback" | "verification";
 export interface RefreshModelReceipt {
   readonly modelUsed: RefreshModel | null;
   readonly status: "completed" | "failed" | "quality-refused";
   /** One-based model invocation number for this document. */
   readonly attempt: number;
-  /** Distinguishes a Gemini retry from a switch to Astra. */
+  /** Distinguishes extraction retries, fallback, and verification. */
   readonly transition: RefreshModelTransition;
   readonly fallbackReason?: RefreshFallbackReason;
   readonly failureReason?: RefreshFallbackReason;
   readonly terminalFailure?: true;
   readonly latencyMs: number;
+  readonly verification?: RefreshVerificationSummary;
 }
 export interface RefreshModelPolicyOptions {
   readonly primary: RefreshModel;
   readonly fallback: RefreshModel;
+  readonly verification?: RefreshModel;
   readonly forceFallback: boolean;
   readonly primaryQualityAttempts: number;
   readonly timeoutMs: number;
@@ -37,6 +41,8 @@ export interface RefreshDocumentModels {
   readonly policy: string;
   readonly maximumAttempts: number;
   forDocument(docSha: string, record: (receipt: RefreshModelReceipt) => Promise<void>): TextJsonGenerationClient;
+  verify(input: RefreshProfileChunk, maxOutputTokens: number,
+    record: (receipt: RefreshModelReceipt) => Promise<void>): Promise<RefreshProfileChunk>;
   completeDocument(docSha: string): void;
   restoreDocument(docSha: string, receipts: readonly RefreshModelReceipt[]): void;
 }
@@ -64,21 +70,67 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
     reason?: RefreshFallbackReason; counted: boolean; terminal?: boolean; attempts: number; primaryQualityCalls: number;
   }>();
   return {
-    policy: JSON.stringify({ version: 2, primary: options.primary, fallback: options.fallback,
+    policy: JSON.stringify({ version: 3, primary: options.primary, fallback: options.fallback,
+      verification: options.verification ?? null, verificationContract: "v101b-removal-only-v2",
       primaryQualityAttempts: options.primaryQualityAttempts, forceFallback: options.forceFallback, quotaThreshold: 3 }),
-    maximumAttempts: options.primaryQualityAttempts + 1,
+    maximumAttempts: options.primaryQualityAttempts + 1 + (options.verification ? 1 : 0),
+    async verify(input, maxOutputTokens, record) {
+      const selected = documents.get(input.chunk.docSha);
+      if (!options.verification || selected?.reason) return input;
+      if (!selected) throw new Error("Refresh verification requires an accepted primary extraction");
+      options.signal?.throwIfAborted();
+      const model = options.verification;
+      const attempt = ++selected.attempts;
+      const startedAt = Date.now();
+      const controller = new AbortController();
+      const abort = () => controller.abort(options.signal?.reason);
+      options.signal?.addEventListener("abort", abort, { once: true });
+      const timeout = setTimeout(() => controller.abort(new DOMException("Refresh verification timeout", "TimeoutError")),
+        options.timeoutMs);
+      let rejectDeadline: () => void = () => {};
+      const deadline = new Promise<never>((_resolve, reject) => {
+        rejectDeadline = () => reject(controller.signal.reason);
+        controller.signal.addEventListener("abort", rejectDeadline, { once: true });
+      });
+      let output = input;
+      let summary: RefreshVerificationSummary = { status: "failed" };
+      let modelUsed: RefreshModel | null = model;
+      let failureReason: RefreshFallbackReason | undefined;
+      try {
+        const verified = await Promise.race([deadline, verifyRefreshProfile(input, {
+          client: options.createClient(model, controller.signal), model, signal: controller.signal, maxOutputTokens,
+        })]);
+        output = verified.output;
+        summary = verified.summary;
+      } catch (error) {
+        failureReason = error instanceof SyntaxError ? "quality" : refreshFallbackReason(error);
+        if (error && typeof error === "object" && "code" in error && error.code === "REFRESH_MODEL_MISMATCH") modelUsed = null;
+      } finally {
+        clearTimeout(timeout);
+        options.signal?.removeEventListener("abort", abort);
+        controller.signal.removeEventListener("abort", rejectDeadline);
+      }
+      // A failed verifier keeps the accepted extraction. Storage failures and cycle cancellation
+      // still stop the run; neither may masquerade as a completed durable chunk.
+      await record({ modelUsed, status: summary.status === "completed" ? "completed" : "failed",
+        attempt, transition: "verification", latencyMs: Date.now() - startedAt, verification: summary,
+        ...(failureReason ? { failureReason } : {}) });
+      options.signal?.throwIfAborted();
+      return output;
+    },
     completeDocument(docSha) {
       const document = documents.get(docSha);
       if (document && !document.reason) consecutiveQuotaDocuments = 0;
     },
     restoreDocument(docSha, receipts) {
-      const primaryQualityCalls = receipts.filter((receipt) => receipt.modelUsed?.provider === options.primary.provider
+      const extractionReceipts = receipts.filter((receipt) => receipt.transition !== "verification");
+      const primaryQualityCalls = extractionReceipts.filter((receipt) => receipt.modelUsed?.provider === options.primary.provider
         && receipt.modelUsed.model === options.primary.model && receipt.status === "quality-refused").length;
-      const reason = receipts.find((receipt) => receipt.fallbackReason)?.fallbackReason
-        ?? receipts.find((receipt) => receipt.status === "failed")?.failureReason
+      const reason = extractionReceipts.find((receipt) => receipt.fallbackReason)?.fallbackReason
+        ?? extractionReceipts.find((receipt) => receipt.status === "failed")?.failureReason
         ?? (primaryQualityCalls >= options.primaryQualityAttempts ? "quality" : undefined);
       documents.set(docSha, { ...(reason ? { reason } : {}), counted: reason !== undefined,
-        terminal: receipts.some((receipt) => receipt.terminalFailure), attempts: receipts.length, primaryQualityCalls });
+        terminal: extractionReceipts.some((receipt) => receipt.terminalFailure), attempts: receipts.length, primaryQualityCalls });
     },
     forDocument(docSha, record) {
       let document = documents.get(docSha);
@@ -156,6 +208,8 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
               ? { ...model, model: result.model } : null : model;
             await record({ modelUsed, status: qualityRefused ? "quality-refused" : failed ? "failed" : "completed",
               attempt: attemptNumber, transition,
+              ...(!failed && (transition === "fallback" || !options.verification)
+                ? { verification: { status: transition === "fallback" ? "skipped-fallback" as const : "disabled" as const } } : {}),
               ...(terminalFailure ? { terminalFailure: true as const } : {}),
               ...(fallbackReason ? { fallbackReason } : {}),
               ...(failed && !qualityRefused ? { failureReason: reason } : {}), latencyMs: Date.now() - startedAt });

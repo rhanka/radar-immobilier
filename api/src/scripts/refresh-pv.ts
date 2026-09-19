@@ -75,6 +75,9 @@ async function main(): Promise<void> {
   const timeoutMs = positive("REFRESH_TIMEOUT_MS", 900_000, 3_600_000);
   const primary = selectedModel("REFRESH");
   const fallback = selectedModel("REFRESH_FALLBACK");
+  const verifyEnabled = process.env.REFRESH_VERIFY_ENABLED ?? "0";
+  if (verifyEnabled !== "0" && verifyEnabled !== "1") throw new Error("REFRESH_VERIFY_ENABLED must be 0 or 1");
+  const verification = verifyEnabled === "1" ? selectedModel("REFRESH_VERIFY") : undefined;
   // The explicit policy owns bounded quality retries; Graphify gets one route attempt.
   const maximumAttempts = positive("REFRESH_MAXIMUM_ATTEMPTS", 1, 1);
   const primaryQualityAttempts = positive("REFRESH_PRIMARY_QUALITY_ATTEMPTS", 2, 10);
@@ -89,6 +92,7 @@ async function main(): Promise<void> {
     maximumAttempts,
   };
   const documentModels = createRefreshModelPolicy({ primary, fallback, primaryQualityAttempts, timeoutMs,
+    ...(verification ? { verification } : {}),
     forceFallback: process.env.REFRESH_FORCE_FALLBACK === "1",
     createClient: (model, signal) => createRefreshMesh({ ...common,
       provider: model.provider, model: model.model,
