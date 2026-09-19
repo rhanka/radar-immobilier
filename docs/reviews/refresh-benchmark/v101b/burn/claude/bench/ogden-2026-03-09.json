@@ -1,0 +1,13 @@
+{
+ "id": "ogden-2026-03-09",
+ "rc": 0,
+ "latencyMs": 23485,
+ "inputTokens": 2,
+ "outputTokens": 1579,
+ "cacheRead": 0,
+ "cacheCreate": 4247,
+ "costUsd": 0.084588,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 49
+}

@@ -1,0 +1,35 @@
+{
+ "documentId": "lavenir-2026-05-04",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "54c0b470e21f8a1c0c8c5570d5eace4a64323e005e82d29fb1b448f73bca3d04",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2716,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 11378,
+   "outputTokens": 516,
+   "totalTokens": 11894
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2515
+  },
+  "inputSha256": "c4e5bd4925f9d37e864febc23f8ca5374e01687620287f94af700338645fe04f"
+ },
+ "at": "2026-09-19T03:22:43.177Z"
+}

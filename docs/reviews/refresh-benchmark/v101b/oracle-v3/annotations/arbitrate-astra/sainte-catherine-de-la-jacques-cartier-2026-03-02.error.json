@@ -1,0 +1,25 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "da997eb99eac78ef15f719aee853f9267939862b5438972042c00fcc82790f1b",
+ "verificationSha256": "a2efd33835e39d6a6b9d59e5c00c8605134221e422f7955815a09effbaf7d3f4",
+ "error": "MESH_FAILED ETIMEDOUT",
+ "receipt": {
+  "transport": "codex",
+  "latencyMs": 170546,
+  "code": "ETIMEDOUT",
+  "httpStatus": 200,
+  "responseError": null
+ },
+ "at": "2026-09-18T20:01:58.114Z"
+}

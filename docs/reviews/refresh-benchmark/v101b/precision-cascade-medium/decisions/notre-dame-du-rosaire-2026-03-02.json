@@ -1,0 +1,284 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "1698f06b24e7e8b0fde74e799e66c2be3e435ae9c4f72f1f3690c77726729eef",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-04"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-04 modifiant le zonage",
+     "stage": "projet",
+     "objet": "2026-04",
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04"
+      },
+      {
+       "page": 22,
+       "excerpt": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage\nnuméro 90-01 de la Municipalité de Notre-Dame-du-Rosaire.\nLe projet de règlement vise à modifier la grille des usages afin de permettre certains usages qui ne\nsont pas autorisés présentement dans certaines zones du territoire municipal."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-90-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 90-01",
+     "stage": null,
+     "objet": "90-01",
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "20-AVIS DE MOTION ET PRÉSENTATION DU PROJET DE RÈGLEMENT 2026-04\nMODIFIANT LE RÈGLEMENT DE ZONAGE NUMÉRO 90-01"
+      },
+      {
+       "page": 22,
+       "excerpt": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage\nnuméro 90-01 de la Municipalité de Notre-Dame-du-Rosaire.\nLe projet de règlement vise à modifier la grille des usages afin de permettre certains usages qui ne\nsont pas autorisés présentement dans certaines zones du territoire municipal."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-avis-2026-04"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion — modification des usages autorisés",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 22,
+       "excerpt": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04"
+      },
+      {
+       "page": 22,
+       "excerpt": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage\nnuméro 90-01 de la Municipalité de Notre-Dame-du-Rosaire.\nLe projet de règlement vise à modifier la grille des usages afin de permettre certains usages qui ne\nsont pas autorisés présentement dans certaines zones du territoire municipal."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-vente-6714200"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Mise en vente du lot 6 714 200 — rue Morin",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du\ncadastre du Québec ;"
+      },
+      {
+       "page": 19,
+       "excerpt": "QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du\ncadastre du Québec ;\n-\n\n6 714 200 :19 999 $ plus taxes\n6 714 201 :19 999 $plus taxes\n6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains ;\nQUE la municipalité s’engage à procéder à l’installation de la ligne électrique et du réseau\nd’aqueduc desservant lesdits lots ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-vente-6714201"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Mise en vente du lot 6 714 201 — rue Morin",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du\ncadastre du Québec ;"
+      },
+      {
+       "page": 19,
+       "excerpt": "QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du\ncadastre du Québec ;\n-\n\n6 714 200 :19 999 $ plus taxes\n6 714 201 :19 999 $plus taxes\n6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains ;\nQUE la municipalité s’engage à procéder à l’installation de la ligne électrique et du réseau\nd’aqueduc desservant lesdits lots ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-vente-6714202"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente conditionnelle du lot 6 714 202 — rue Morin",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "QUE cette vente soit conditionnelle à l’engagement de l’acheteur de construire un bâtiment principal\nsur ledit lot dans un délai maximal de deux (2) ans suivant la signature de l’acte de vente ;"
+      },
+      {
+       "page": 20,
+       "excerpt": "QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6\n714 202 du cadastre du Québec, d’une superficie de 2 491,6 mètres carrés, au prix de 22 499 $, plus\nles taxes applicables ;\nQUE cette vente soit conditionnelle à l’engagement de l’acheteur de construire un bâtiment principal\nsur ledit lot dans un délai maximal de deux (2) ans suivant la signature de l’acte de vente ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-cour-ndr"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Réaménagement de la cour de l’Accommodation NDR",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "Le Comité d’action et de développement (CAD) réitère sa demande auprès du conseil municipal afin\nde procéder au déplacement du cabanon situé dans la cour arrière du dépanneur."
+      },
+      {
+       "page": 23,
+       "excerpt": "Le Comité d’action et de développement (CAD) réitère sa demande auprès du conseil municipal afin\nde procéder au déplacement du cabanon situé dans la cour arrière du dépanneur. Depuis la fin du\nservice de recyclage au printemps 2025, le cabanon est inutilisé. Son déplacement permettrait de\nréaménager l’espace pour offrir un lieu accueillant et sécuritaire à la clientèle durant la saison\nestivale (aire de repas ou de rencontre). Cette demande s’inscrit notamment dans un contexte\nd’augmentation de l’achalandage liée au projet de parc éolien et vise à améliorer l’accessibilité, la\nconvivialité et l’attrait du site. Acceptée"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Le premier projet de règlement n'est pas adopté lors de cette séance mais seulement annoncé pour la prochaine séance du conseil.\",\"excerpt\":\"sera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de zonage numéro 90-01 n'est mentionné que comme règlement d'origine faisant l'objet d'un avis de motion de modification.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion est formellement donné lors de la séance pour modifier le règlement de zonage numéro 90-01.\",\"excerpt\":\"Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026 sera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal autorise expressément la mise en vente du lot 6 714 200 en en fixant le prix.\",\"excerpt\":\"QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du cadastre du Québec ;\\n-\\n\\n6 714 200 :19 999 $ plus taxes\\n6 714 201 :19 999 $plus taxes\\n6 714 202 22 499 $ plus taxes\\n\\nQUE le conseil municipal autorise la mise en vente desdits terrains\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal autorise la mise en vente du lot 6 714 201 et en fixe le prix.\",\"excerpt\":\"QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du cadastre du Québec ;\\n-\\n\\n6 714 200 :19 999 $ plus taxes\\n6 714 201 :19 999 $plus taxes\\n6 714 202 22 499 $ plus taxes\\n\\nQUE le conseil municipal autorise la mise en vente desdits terrains\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la vente conditionnelle du lot 6 714 202 à Frédéric Beaulieu et Alexia Bélanger avec obligation de construire.\",\"excerpt\":\"QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6 714 202 du cadastre du Québec, d’une superficie de 2 491,6 mètres carrés, au prix de 22 499 $, plus les taxes applicables\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"Ce point relève d'une simple mention sous la correspondance relative au déplacement d'un cabanon sans acte d'urbanisme ou d'aménagement formel.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Le premier projet de règlement n'est pas adopté lors de cette séance mais seulement annoncé pour la prochaine séance du conseil.",
+   "excerpt": "sera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de zonage numéro 90-01 n'est mentionné que comme règlement d'origine faisant l'objet d'un avis de motion de modification.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion est formellement donné lors de la séance pour modifier le règlement de zonage numéro 90-01.",
+   "excerpt": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026 sera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal autorise expressément la mise en vente du lot 6 714 200 en en fixant le prix.",
+   "excerpt": "QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du cadastre du Québec ;\n-\n\n6 714 200 :19 999 $ plus taxes\n6 714 201 :19 999 $plus taxes\n6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal autorise la mise en vente du lot 6 714 201 et en fixe le prix.",
+   "excerpt": "QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du cadastre du Québec ;\n-\n\n6 714 200 :19 999 $ plus taxes\n6 714 201 :19 999 $plus taxes\n6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la vente conditionnelle du lot 6 714 202 à Frédéric Beaulieu et Alexia Bélanger avec obligation de construire.",
+   "excerpt": "QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6 714 202 du cadastre du Québec, d’une superficie de 2 491,6 mètres carrés, au prix de 22 499 $, plus les taxes applicables"
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "Ce point relève d'une simple mention sous la correspondance relative au déplacement d'un cabanon sans acte d'urbanisme ou d'aménagement formel.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Le premier projet de règlement n'est pas adopté lors de cette séance mais seulement annoncé pour la prochaine séance du conseil."
+   },
+   {
+    "act": "A02",
+    "reason": "Le règlement de zonage numéro 90-01 n'est mentionné que comme règlement d'origine faisant l'objet d'un avis de motion de modification."
+   },
+   {
+    "act": "A07",
+    "reason": "Ce point relève d'une simple mention sous la correspondance relative au déplacement d'un cabanon sans acte d'urbanisme ou d'aménagement formel."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A03",
+    "reason": "Un avis de motion est formellement donné lors de la séance pour modifier le règlement de zonage numéro 90-01."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil municipal autorise expressément la mise en vente du lot 6 714 200 en en fixant le prix."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil municipal autorise la mise en vente du lot 6 714 201 et en fixe le prix."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil adopte la vente conditionnelle du lot 6 714 202 à Frédéric Beaulieu et Alexia Bélanger avec obligation de construire."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2597,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 16572,
+   "outputTokens": 732,
+   "totalTokens": 17304
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2446
+  },
+  "inputSha256": "1ac23460d68f211063eca9d20fa83f4c86507699f1bfba95562d2c0d3cb9a4ad"
+ }
+}

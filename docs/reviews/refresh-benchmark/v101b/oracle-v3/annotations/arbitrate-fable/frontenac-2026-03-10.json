@@ -1,0 +1,19 @@
+{
+ "documentId": "frontenac-2026-03-10",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4123b4b6aa6edb3493ae47527db68392cd5733de0363aa4ec717521c25f429d1",
+ "verificationSha256": "4eb7bb2eb412d893ced1855d065a3324bfb6a609effd420ffde59de4884f6fa6",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

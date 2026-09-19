@@ -1,0 +1,234 @@
+{
+ "documentId": "hatley-2026-04-07",
+ "nextId": 7,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA-1 2025-03-0004 – agrandissement au 141 rue Main",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "141 rue Main",
+    "page": 11,
+    "citation": "D’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la demande d’agrandissement du bâtiment principal situé au 141 rue Main, le tout",
+    "anchor": "situé au 141 rue Main",
+    "spanStart": 488,
+    "spanEnd": 651
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA-1 2025-03-0004 – agrandissement au 141 rue Main",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "141 rue Main",
+      "page": 11,
+      "citation": "D’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la demande d’agrandissement du bâtiment principal situé au 141 rue Main, le tout",
+      "anchor": "situé au 141 rue Main",
+      "spanStart": 488,
+      "spanEnd": 651
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-054 autorise explicitement l’agrandissement soumis au PIIA; cette décision constitue une unité, sans compter séparément sa mention à l’ordre du jour."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Maintien à la liste patrimoniale révisée – grange de la Rubicon Farm, 38, rue Main",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "38, rue Main",
+    "page": 11,
+    "citation": "d’inventaire, les bâtiments suivants : • la grange de la Rubicon Farm, située au 38, rue Main",
+    "anchor": "la grange de la Rubicon Farm, située au 38, rue Main",
+    "spanStart": 1625,
+    "spanEnd": 1718
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Maintien à la liste patrimoniale révisée – grange de la Rubicon Farm, 38, rue Main",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "38, rue Main",
+      "page": 11,
+      "citation": "d’inventaire, les bâtiments suivants : • la grange de la Rubicon Farm, située au 38, rue Main",
+      "anchor": "la grange de la Rubicon Farm, située au 38, rue Main",
+      "spanStart": 1625,
+      "spanEnd": 1718
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-055 retient expressément ce bâtiment dans la liste patrimoniale révisée transmise à la MRC, sans constater une désignation patrimoniale définitive."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Maintien à la liste patrimoniale révisée – église Saint-James, 100, rue Main",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "100, rue Main",
+    "page": 11,
+    "citation": "l’église Saint-James, située au 100, rue Main",
+    "anchor": "l’église Saint-James, située au 100, rue Main",
+    "spanStart": 1722,
+    "spanEnd": 1767
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Maintien à la liste patrimoniale révisée – église Saint-James, 100, rue Main",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "100, rue Main",
+      "page": 11,
+      "citation": "l’église Saint-James, située au 100, rue Main",
+      "anchor": "l’église Saint-James, située au 100, rue Main",
+      "spanStart": 1722,
+      "spanEnd": 1767
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-055 retient explicitement l’église Saint-James comme objet distinct dans la liste patrimoniale révisée transmise à la MRC."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Maintien à la liste patrimoniale révisée – St. James Hall, 100, rue Main",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "100, rue Main",
+    "page": 11,
+    "citation": "le St. James Hall (centre communautaire), situé au 100, rue Main",
+    "anchor": "situé au 100, rue Main",
+    "spanStart": 1771,
+    "spanEnd": 1835
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Maintien à la liste patrimoniale révisée – St. James Hall, 100, rue Main",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "100, rue Main",
+      "page": 11,
+      "citation": "le St. James Hall (centre communautaire), situé au 100, rue Main",
+      "anchor": "situé au 100, rue Main",
+      "spanStart": 1771,
+      "spanEnd": 1835
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-055 retient séparément le St. James Hall dans la liste patrimoniale révisée, même s’il partage l’adresse d’autres biens nommés."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Maintien à la liste patrimoniale révisée – gazebo, 100, rue Main",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "100, rue Main",
+    "page": 11,
+    "citation": "le gazebo, situé au 100, rue Main",
+    "anchor": "le gazebo, situé au 100, rue Main",
+    "spanStart": 1839,
+    "spanEnd": 1872
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Maintien à la liste patrimoniale révisée – gazebo, 100, rue Main",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "100, rue Main",
+      "page": 11,
+      "citation": "le gazebo, situé au 100, rue Main",
+      "anchor": "le gazebo, situé au 100, rue Main",
+      "spanStart": 1839,
+      "spanEnd": 1872
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-055 nomme et retient le gazebo comme bien distinct dans la liste patrimoniale révisée transmise à la MRC."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Appui à la demande CPTAQ – agrandissement du LET sur le lot 2 935 698",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2 935 698",
+    "page": 13,
+    "citation": "d’une partie du lot 2 935 698 du cadastre du Québec, circonscription foncière de Coaticook, soit pour l’agrandissement de son lieu d’enfouissement technique",
+    "anchor": "lot 2 935 698",
+    "spanStart": 1336,
+    "spanEnd": 1492
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Appui à la demande CPTAQ – agrandissement du LET sur le lot 2 935 698",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2 935 698",
+      "page": 13,
+      "citation": "d’une partie du lot 2 935 698 du cadastre du Québec, circonscription foncière de Coaticook, soit pour l’agrandissement de son lieu d’enfouissement technique",
+      "anchor": "lot 2 935 698",
+      "spanStart": 1336,
+      "spanEnd": 1492
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-058 appuie une demande d’utilisation non agricole pour agrandir le LET; cet appui actuel ne constitue ni une autorisation acquise ni un refus définitif de la CPTAQ."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,113 @@
+{
+ "documentId": "richelieu-2026-02-03",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "e3a8c7525588661accb571a6cbc49439c21bcfd82e46815f6b83e6948d58c875",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Vente aux enchères autorisée des immeubles pour défaut de paiement de taxes\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"immeubles à être vendus\",\n        \"page\": 6,\n        \"citation\": \"ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère\\npublique,\",\n        \"anchor\": \"vendre à l'enchère\\npublique\"\n      },\n      \"reason\": \"La résolution 26-02-037 ordonne la vente des immeubles figurant au rapport de la trésorière : il s'agit d'un acte foncier décidé, et non d'un simple dépôt de liste.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption finale du PPCMOI-2025-07 — fusion des lots 6 465 474 et 6 465 475\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"PPCMOI-2025-07\",\n        \"page\": 10,\n        \"citation\": \"Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\\nl'aspect suivant :\",\n        \"anchor\": \"demande numéro PPCMOI-2025-07\"\n      },\n      \"reason\": \"La résolution finale approuve ce PPCMOI permettant deux bâtiments principaux sur le lot résultant de la fusion; les projets antérieurs rappelés dans les considérants ne créent pas d'unités supplémentaires.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption finale du PPCMOI-2025-08 — fusion des lots 6 465 476 et 6 465 477\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"PPCMOI-2025-08\",\n        \"page\": 11,\n        \"citation\": \"Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\\nl'aspect suivant :\",\n        \"anchor\": \"demande numéro PPCMOI-2025-08\"\n      },\n      \"reason\": \"La résolution finale approuve une demande distincte permettant deux bâtiments principaux sur le lot fusionné, ce qui constitue une unité propre au PPCMOI-2025-08.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption finale du PPCMOI-2025-09 — fusion des lots 6 465 470, 6 465 471 et 6 460 234\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"PPCMOI-2025-09\",\n        \"page\": 12,\n        \"citation\": \"Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\\nl'aspect suivant :\",\n        \"anchor\": \"demande numéro PPCMOI-2025-09\"\n      },\n      \"reason\": \"La résolution finale approuve ce troisième PPCMOI permettant trois bâtiments principaux sur le lot fusionné; les étapes antérieures sont uniquement historiques.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Appui à la demande à la CPTAQ — habitation unifamiliale au 2860, chemin des Patriotes\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2860, chemin des Patriotes\",\n        \"page\": 13,\n        \"citation\": \"appuie la présente demande auprès de la CPTAQ pour\\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\\nnuméro 5 891 123 du cadastre du Québec.\",\n        \"anchor\": \"2860, chemin des Patriotes\"\n      },\n      \"reason\": \"Le conseil appuie une demande explicite d'utilisation non agricole du lot 5 891 123 pour une habitation; cet appui constitue une étape d'urbanisme sans valoir autorisation finale de la CPTAQ.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Vente aux enchères autorisée des immeubles pour défaut de paiement de taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "immeubles à être vendus",
+    "page": 6,
+    "citation": "ORDONNE à la directrice des affaires juridiques et greffière de vendre à l'enchère\npublique,",
+    "anchor": "vendre à l'enchère\npublique"
+   },
+   "reason": "La résolution 26-02-037 ordonne la vente des immeubles figurant au rapport de la trésorière : il s'agit d'un acte foncier décidé, et non d'un simple dépôt de liste."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption finale du PPCMOI-2025-07 — fusion des lots 6 465 474 et 6 465 475",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-2025-07",
+    "page": 10,
+    "citation": "Approuve la demande numéro PPCMOI-2025-07 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :",
+    "anchor": "demande numéro PPCMOI-2025-07"
+   },
+   "reason": "La résolution finale approuve ce PPCMOI permettant deux bâtiments principaux sur le lot résultant de la fusion; les projets antérieurs rappelés dans les considérants ne créent pas d'unités supplémentaires."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption finale du PPCMOI-2025-08 — fusion des lots 6 465 476 et 6 465 477",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-2025-08",
+    "page": 11,
+    "citation": "Approuve la demande numéro PPCMOI-2025-08 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :",
+    "anchor": "demande numéro PPCMOI-2025-08"
+   },
+   "reason": "La résolution finale approuve une demande distincte permettant deux bâtiments principaux sur le lot fusionné, ce qui constitue une unité propre au PPCMOI-2025-08."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption finale du PPCMOI-2025-09 — fusion des lots 6 465 470, 6 465 471 et 6 460 234",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-2025-09",
+    "page": 12,
+    "citation": "Approuve la demande numéro PPCMOI-2025-09 décrite ci-dessus, laquelle pourra\nêtre réalisée en contravention au Règlement d'urbanisme numéro 14-R-186 sur\nl'aspect suivant :",
+    "anchor": "demande numéro PPCMOI-2025-09"
+   },
+   "reason": "La résolution finale approuve ce troisième PPCMOI permettant trois bâtiments principaux sur le lot fusionné; les étapes antérieures sont uniquement historiques."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Appui à la demande à la CPTAQ — habitation unifamiliale au 2860, chemin des Patriotes",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2860, chemin des Patriotes",
+    "page": 13,
+    "citation": "appuie la présente demande auprès de la CPTAQ pour\nla construction d'une habitation unifamiliale au 2860, chemin des Patriotes, sur le lot\nnuméro 5 891 123 du cadastre du Québec.",
+    "anchor": "2860, chemin des Patriotes"
+   },
+   "reason": "Le conseil appuie une demande explicite d'utilisation non agricole du lot 5 891 123 pour une habitation; cet appui constitue une étape d'urbanisme sans valoir autorisation finale de la CPTAQ."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 5
+}

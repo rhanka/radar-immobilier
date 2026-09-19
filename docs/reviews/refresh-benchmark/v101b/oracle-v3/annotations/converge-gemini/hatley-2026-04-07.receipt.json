@@ -1,0 +1,37 @@
+{
+ "documentId": "hatley-2026-04-07",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "7698c4adcecc5ce44ef0cfa7e380f71b90c092e21d3515c64adfddca992c1a16",
+ "inputSha256": "470fa3c8db48a893899875b81f85a4213965c0d7b56ec1cfb01b5b1f12330753",
+ "responseSha256": "621b7145ae088147083a4c59157b6abdaa1c0f4f4ce60584e5dcfcf6ed899897",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 17478,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 14861,
+  "outputTokens": 284,
+  "totalTokens": 21989,
+  "thoughtsTokenCount": 6844
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 17252,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:48:42.717Z"
+}

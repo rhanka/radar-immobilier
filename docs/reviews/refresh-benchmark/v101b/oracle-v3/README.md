@@ -1,98 +1,80 @@
 # Oracle v3 — corrigé des 100 documents du banc v101b
 
-Statut au 2026-09-17 : **outillage prêt et testé, aucune annotation produite.** Seul appel modèle
-effectué : un ping Fable 5.1 sur un document (`ping/`), autorisé par i-cond. Tout le reste attend le
-GO du conducteur (et la reprise du siège Codex le 2026-09-22 à 09:12 pour Astra).
+Statut au 2026-09-18 : **chaîne terminée, référence finale** (`consensus.json`, `final: true`, 674
+unités). Chiffres et verdicts : `rapport-reference.md` ; notation des bras : `tableau-f1-100.md` ;
+journal de la chaîne (incidents, relances, heures) : `ORACLE_V3_STATUS.md` du conducteur.
 
-## Méthode (décision owner relayée par i-cond, 2026-09-17)
+## Méthode (décisions owner relayées par i-cond, 2026-09-17 et 2026-09-18)
 
-Consensus séquentiel, pas un vote :
+1. **Sept passes séquentielles de vérification / complément** (on ne refait pas l'annotation, on la
+   vérifie et la complète) : astra-pass1 → fable-pass1 → gemini-pass1 → astra-pass2 → fable-pass2 →
+   gemini-pass2 → astra-pass3. Modèles : `gpt-6-astra` xhigh (siège Codex, llm-mesh en conteneur),
+   `claude-fable-5-1` xhigh (siège Claude, CLI contrainte), `gemini-3.8-flash` high (Cloud Code,
+   llm-mesh en conteneur). Chaque passe lit le corrigé courant du document (tête de sa lignée,
+   `inputStateStep`), rend des opérations motivées (`add` / `remove` / `correct`), toutes ancrées mot à
+   mot dans le texte gelé. `astra-pass1b` = 52 sorties précoces d'une première astra-pass2, archivées
+   et gardées dans la lignée (`relabel-astra-pass1b.json`).
+2. **Vérification** (`converge-*`) : chaque modèle vote seul, motif obligatoire, sur **chaque** unité
+   jamais proposée (versions + « absent »). Entrée dans la référence : **unanimité 3/3**.
+3. **Arbitrage** (`arbitrate-*`) : tout ce qui n'est pas unanime et, sur les 5 documents annotés à la
+   main, chaque écart avec le corrigé humain v2 ; les trois modèles voient extraits et positions
+   motivées (anonymisées ; l'humain non présumé juste). Unanimité 3/3 ; sinon `unresolved.json`,
+   exclu de la référence et remis à l'owner.
+4. **Fusion souple par intervalles de caractères** : un item non unanime dont les trois votes portent
+   sur des versions présentes de même objet exact, même étape, même page, dont les extraits se
+   recouvrent d'au moins 12 caractères normalisés, est fusionné au lieu d'être arbitré. ROUGE-L est
+   publié en diagnostic seulement. Motifs et comparaison : `rapport-reference.md`, `soft-diagnostics.json`,
+   avis contradicteurs verbatim dans `avis/`.
+5. **Notation** des 26 bras et des cascades sur 100 documents : **stricte** (non résolus neutralisés,
+   ni attendus ni fausses détections), **large** (non résolus attendus), et deux colonnes séparées,
+   jamais mélangées à la stricte : tolérante à l'étape, et souple par intervalles (+ diagnostic ROUGE-L).
 
-1. `astra-pass1`, `astra-pass2` — `gpt-6-astra` xhigh, siège Codex (llm-mesh en conteneur).
-2. `fable-pass1`, `fable-pass2` — `claude-fable-5-1` xhigh, siège Claude (CLI contrainte).
-3. `gemini-pass1`, `gemini-pass2` — `gemini-3.8-flash` high, Cloud Code (llm-mesh en conteneur).
-4. `converge-astra`, `converge-fable`, `converge-gemini` — chaque modèle vote seul sur chaque
-   désaccord ; 2 votes sur 3 tranchent.
+Consignes (blocs PASS, VERIFY, ARBITRATE) et règles de traitement : `prompt-annotation.md`.
 
-Chaque passe reçoit le texte gelé et le corrigé courant (vide au départ), et rend des opérations
-motivées (`add` / `remove` / `correct`). Consignes, règles d'ancrage, de désaccord et de convergence :
-`prompt-annotation.md`.
-
-## Commandes
+## Commandes (depuis la racine du worktree)
 
 ```sh
-cd /home/antoinefa/src/radar-immobilier/tmp/t1-model-benchmark-real
 # chaîne complète, reprise possible à chaque étape (les documents déjà faits sont sautés)
-ORACLE_V3_GO=1 ORACLE_V3_ASTRA_GO=1 tools/refresh-benchmark/run-oracle-v3.sh
-# reprendre à partir d'une étape
-ORACLE_V3_GO=1 ORACLE_V3_ASTRA_GO=1 tools/refresh-benchmark/run-oracle-v3.sh fable-pass1
-# hors ligne : livrables à partir de ce qui existe (intérimaire tant que la chaîne n'est pas finie)
+ORACLE_V3_GO=1 ORACLE_V3_ASTRA_GO=1 MESH_CONCURRENCY=4 tools/refresh-benchmark/run-oracle-v3.sh [étape]
+# hors ligne : référence, rapport, calibration, notation
 node tools/refresh-benchmark/oracle-v3-build.mjs && node tools/refresh-benchmark/score-oracle-v3.mjs
 # tests
 node --test tools/refresh-benchmark/oracle-v3-lib.test.mjs tools/refresh-benchmark/score-oracle-v2.test.mjs
 ```
 
-Garde-fous : sans `ORACLE_V3_GO=1`, aucun appel modèle possible ; sans `ORACLE_V3_ASTRA_GO=1`, aucune
-étape Astra. Les étapes llm-mesh refusent de démarrer si une clé `OPENAI_API_KEY`,
-`ANTHROPIC_API_KEY` ou `MISTRAL_API_KEY` est présente. Le siège Claude : forme contrainte
-(`env -i`, répertoire vide, `--disallowed-tools '*'`, `--strict-mcp-config`), 4 appels au plus en
-parallèle, lecture du compteur hebdo au départ puis toutes les 25 annotations, arrêt au-delà de
-40 %, et arrêt si le siège signale une limite d'usage.
+Garde-fous : sans `ORACLE_V3_GO=1`, aucun appel modèle ; sans `ORACLE_V3_ASTRA_GO=1`, aucune étape
+Astra ; les étapes llm-mesh refusent de démarrer si une clé API est présente (sièges seulement).
+Siège Claude : forme contrainte, 4 appels au plus en parallèle, arrêt au-delà de 60 % du compteur
+hebdo (40 % jusqu'au 2026-09-18 13:40Z), arrêt immédiat sur message de limite et après 3 échecs vides
+consécutifs. Siège Codex : arrêt au-delà de 70 % du compteur hebdo. Plafond de sortie Gemini 65 536
+(32 768 ailleurs). Délais réseau llm-mesh : en-têtes 120 s, inactivité 600 s, échéance totale 30 min
+(xhigh) ou 15 min (high), chien de garde +60 s (en vigueur à partir de 2026-09-18 21:13:30Z).
 
 ## Fichiers
 
 | Chemin | Contenu |
 |---|---|
-| `prompt-annotation.md` | consignes PASSE et CONVERGENCE, règles de traitement |
-| `annotations/<étape>/<doc>.json` | réponse brute, opérations, appliquées, rejetées ; votes pour la convergence |
-| `annotations/<étape>/<doc>.receipt.json` | reçu d'usage (jetons, coût équivalent API, latence, modèle servi) |
-| `corrige/<passe>/<doc>.json` | corrigé après la passe (unités, versions, historique motivé) |
-| `consensus-interim.json` puis `consensus.json` | corrigé v3, au format des unités de `manual-oracle-v2.json` |
-| `disputed.json` | désaccords, options, votes, résolution (`resolved` / `unresolved` / `pending`) |
-| `grounding-rejects.json` | opérations rejetées, comptées par étape et par code |
-| `volumes.json` | opérations et jetons par étape |
-| `calibration.md` / `.json` | v3 contre le corrigé humain v2 (5 documents) |
-| `scores-100.json`, `tableau-f1-100.md` | 27 bras + cascades C2/C3, P/R/F1 nets sur 100, écart avec le F1 sur 4 documents |
-
-## Outillage (`tools/refresh-benchmark/`)
-
-- `oracle-v3-lib.mjs` : fonctions pures (ancrage v9, clé d'objet, doublons, opérations, désaccords,
-  votes, calibration).
-- `oracle-v3-step.mjs` : lance une étape (transports `claude-cli`, llm-mesh, `fake:` pour les tests).
-- `run-oracle-v3-mesh.sh` : étapes Astra et Gemini en conteneur `node:22-bookworm-slim`.
-- `run-oracle-v3.sh` : la chaîne complète en une commande.
-- `oracle-v3-build.mjs` : consensus, désaccords, rejets, volumes, calibration.
-- `score-oracle-v3.mjs` : re-notation hors ligne à partir des sorties archivées. Étend
-  `score-oracle-v2.mjs`, où deux options s'ajoutent, désactivées par défaut (les chiffres v2 ne
-  bougent pas) : `useStageAliases` (R4) et `partialOracle`.
-
-## Vérifications faites
-
-- `node --test` : 12 tests oracle-v3 + 8 tests v2 existants, 20/20 verts.
-- Non-régression du scoreur : avec le corrigé humain v2 en entrée, `score-oracle-v3.mjs` retrouve le
-  F1 micro sur sorties acceptées publié dans `oracle-v2-comparison.json` pour les 27 bras (les 4 bras
-  sans sortie acceptée sur ces documents sont N-A des deux côtés). L'ordre de lecture des tentatives
-  est [4, 3, 2, 1], comme la comparaison publiée ; les bras Anthropic ont des tentatives 3.
-- Essai à blanc de toute la chaîne (9 étapes factices → build → re-notation) sur un document.
-- Conteneur : llm-mesh 0.19.3 installé, `v101-provider.mjs` importable, écriture sous l'uid hôte,
-  transport factice, aucun appel modèle.
-
-## Ping Fable 5.1 (`ping/`)
-
-1 appel, `lac-des-seize-iles-2026-09-agenda`, consigne PASSE, corrigé vide. Modèle servi
-`claude-fable-5-1` (modelUsage), 1 615 jetons de réflexion sur 2 563 en sortie, 32,6 s, coût
-équivalent API 0,2525 USD (dont 0,0020 d'un appel annexe `claude-haiku-4-5` de la CLI). JSON strict,
-4 ajouts motivés et ancrés, identiques aux unités humaines L36, L37, L54, L55. Le JSON ne porte aucun
-champ d'effort : l'effort xhigh demandé n'est pas vérifié dans le reçu.
+| `consensus.json` | référence finale (unités au format `manual-oracle-v2.json`, provenance, lignées) |
+| `rapport-reference.md` | unanimes, fusionnées, arbitrées, non résolues ; écarts humains par verdict ; appariement souple ; annexes |
+| `unresolved.json` | points non résolus après arbitrage, avec extraits et positions (owner) |
+| `disputed.json` | tous les points arbitrés ou fusionnés : options, extraits, positions, votes, résolution |
+| `human-diffs.json`, `calibration.md` / `.json` | écarts avec le corrigé humain v2 et leur verdict ; rappel / précision |
+| `soft-diagnostics.json` | paires même objet / même étape : recouvrement d'intervalles et ROUGE-L, liste nominative |
+| `scores-100.json`, `tableau-f1-100.md` | notation stricte / large / tolérante / souple / diagnostic ROUGE-L |
+| `annotations/<étape>/<doc>.json` (+ `.receipt.json`) | réponses brutes, opérations ou votes ; reçus d'usage |
+| `corrige/<passe>/<doc>.json` | corrigé après chaque passe (unités, versions, historique motivé) |
+| `grounding-rejects.json`, `volumes.json` | opérations rejetées par code ; volumes et jetons par étape |
+| `quota-log.jsonl`, `run-resume.out`, `run.log` | journal des compteurs de quota et sortie de la chaîne |
+| `relabel-astra-pass1b.json`, `archive-converge-astra-pre-pass3.json` | journaux de renommage et d'archivage (sha256) |
+| `archive/` | sauvegardes avant renommage/archivage, build « exact » d'origine, calibration ROUGE-L abandonnée |
+| `avis/` | avis contradicteurs Fable et Astra sur l'appariement souple, verbatim |
+| `ping/` | ping Fable 5.1 du 2026-09-17 (1 appel, avant la chaîne) |
 
 ## Limites connues
 
-- Chaque passe voit le corrigé courant : les passes suivantes peuvent être ancrées par les
-  précédentes (biais d'ordre). La convergence ne porte que sur les unités contestées ; une unité
-  jamais contestée est acceptée tacitement.
-- Détection de doublon à l'ajout : même objet, même étape, extraits qui se chevauchent sur la même
-  page. Une citation très longue qui couvre deux points d'ordre du jour sur la même adresse peut
-  être rejetée à tort ; le rejet est journalisé (`duplicate_add`).
-- Le scoreur crédite une unité si l'extrait d'un bras contient l'ancre v3 sur la même page. Aucun
-  site alternatif n'est ajouté automatiquement : un bras qui cite une autre page pour le même acte
-  n'est pas crédité.
+- Biais d'ordre : chaque passe voit le corrigé courant.
+- Deux passages éloignés qui prouvent le même acte ne sont pas rapprochés par les intervalles ; ils
+  restent en arbitrage (voir `rapport-reference.md`).
+- La calibration contre l'humain porte sur 5 documents (36 unités), dont Waterloo partiel.
+- Le scoreur crédite une unité si l'extrait d'un bras contient l'ancre v3 sur la même page ; les
+  colonnes tolérante et souple mesurent ce que cette règle laisse passer, sans entrer dans la stricte.

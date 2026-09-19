@@ -1,0 +1,81 @@
+{
+ "documentId": "val-racine-2026-06-09",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "76a286c0a70e28c654c1f4ea52589753cf8d14c57882e2bc1d85989f44c23d37",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"« Vente des remises au plus offrant » (6.2) vise la cession de remises sans lot ni immeuble identifié : ce n'est pas un objet réglementaire ou foncier explicite au sens de la règle, et l'étape « adoption » n'est pas attestée pour un simple point d'ordre du jour de type R.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 6.3 « DM-2026-001 – Demande du 204, chemin de la Forêt-Enchantée pour le lot 4 768 354 » (type R) atteste une dérogation mineure prévue, avec citation, objet et page exacts.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 6.4 « PIIA - Demande du 2996, chemin St-Léon (Arbres) » (type R) atteste un petit PIIA prévu, inclus par la règle « petits PIIA », citation et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 6.5 « PIIA - Demande du 2984, chemin St-Léon (Arbres) » (type R) atteste un second PIIA distinct prévu, citation et page exactes.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 9.1 « Projet de Règlement no 332 … » porte le type « A et D » où A = Avis de motion selon la légende, ce qui atteste un avis de motion prévu, unité distincte du projet selon la règle « Avis de motion et projet actuels séparés ».\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le même point 9.1 porte le type « D » = Dépôt selon la légende et s'intitule « Projet de Règlement no 332 », ce qui atteste le dépôt du projet de règlement prévu, étape distincte de l'avis de motion.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "« Vente des remises au plus offrant » (6.2) vise la cession de remises sans lot ni immeuble identifié : ce n'est pas un objet réglementaire ou foncier explicite au sens de la règle, et l'étape « adoption » n'est pas attestée pour un simple point d'ordre du jour de type R."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 6.3 « DM-2026-001 – Demande du 204, chemin de la Forêt-Enchantée pour le lot 4 768 354 » (type R) atteste une dérogation mineure prévue, avec citation, objet et page exacts."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 6.4 « PIIA - Demande du 2996, chemin St-Léon (Arbres) » (type R) atteste un petit PIIA prévu, inclus par la règle « petits PIIA », citation et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 6.5 « PIIA - Demande du 2984, chemin St-Léon (Arbres) » (type R) atteste un second PIIA distinct prévu, citation et page exactes."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 9.1 « Projet de Règlement no 332 … » porte le type « A et D » où A = Avis de motion selon la légende, ce qui atteste un avis de motion prévu, unité distincte du projet selon la règle « Avis de motion et projet actuels séparés »."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le même point 9.1 porte le type « D » = Dépôt selon la légende et s'intitule « Projet de Règlement no 332 », ce qui atteste le dépôt du projet de règlement prévu, étape distincte de l'avis de motion."
+  }
+ ]
+}

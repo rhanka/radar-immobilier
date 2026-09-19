@@ -1,0 +1,36 @@
+{
+ "documentId": "waterloo-2026-08-18",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "ca0efc16bda0209a8288b47b15c20e7d8961732e2dd24f83f06a00996ff03123",
+ "inputSha256": "e812071a45a9c618b6862c06fdce79cea355f7d1cb136a1c9087a3ec08ebf2e0",
+ "responseSha256": "f1dba632086ccd1760e3af850a75319bc60007259203db66f2b0ab6fe6c79b08",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 318103,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 13472,
+  "outputTokens": 10528,
+  "totalTokens": 24000
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 318082,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:54:49.837Z"
+}

@@ -1,0 +1,125 @@
+{
+ "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+ "nextId": 4,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 437-2025 modifiant le plan d'urbanisme 392-2021",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "437-2025",
+    "page": 3,
+    "citation": "2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021 Résolution 5-01-2026",
+    "anchor": "règlement 437-2025",
+    "spanStart": 1823,
+    "spanEnd": 1914
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 437-2025 modifiant le plan d'urbanisme 392-2021",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "437-2025",
+      "page": 3,
+      "citation": "2.4 Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021 Résolution 5-01-2026",
+      "anchor": "règlement 437-2025",
+      "spanStart": 1823,
+      "spanEnd": 1914
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 5-01-2026 constate l'adoption de ce règlement d'urbanisme, tandis que l'avis de motion et le premier projet du 10 novembre 2025 sont uniquement rappelés historiquement."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 438-2025 — agrandissement de la zone M-77 et abrogation de la zone Rm-93",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "438-2025",
+    "page": 4,
+    "citation": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021 Résolution 6-01-2026",
+    "anchor": "règlement 438-2025",
+    "spanStart": 928,
+    "spanEnd": 1022
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 438-2025 — agrandissement de la zone M-77 et abrogation de la zone Rm-93",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "438-2025",
+      "page": 4,
+      "citation": "2.5 Adoption règlement 438-2025 modifiant le règlement de zonage 394-2021 Résolution 6-01-2026",
+      "anchor": "règlement 438-2025",
+      "spanStart": 928,
+      "spanEnd": 1022
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 6-01-2026 adopte le règlement modifiant le zonage; les modifications des deux zones relèvent du même objet réglementaire et de la même étape."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "removed",
+   "current": {
+    "label": "Refus de remboursement des pénalités de construction — terrain de Jean-Pierre Labbé",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Terrain de Jean-Pierre Labbé",
+    "page": 16,
+    "citation": "DE REFUSER la demande de remboursement des pénalités formulée par M. Jean-Pierre Labbé; DE CONFIRMER que les pénalités ont été appliquées conformément aux termes du contrat de vente",
+    "anchor": "M. Jean-Pierre Labbé",
+    "spanStart": 111,
+    "spanEnd": 292
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus de remboursement des pénalités de construction — terrain de Jean-Pierre Labbé",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "Terrain de Jean-Pierre Labbé",
+      "page": 16,
+      "citation": "DE REFUSER la demande de remboursement des pénalités formulée par M. Jean-Pierre Labbé; DE CONFIRMER que les pénalités ont été appliquées conformément aux termes du contrat de vente",
+      "anchor": "M. Jean-Pierre Labbé",
+      "spanStart": 111,
+      "spanEnd": 292
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 12-01-2026 statue sur les obligations de construction du contrat de vente d'un terrain destiné à un immeuble multi-logement; ce refus contractuel foncier doit être conservé, sans être assimilé à une nouvelle vente."
+    },
+    {
+     "step": "astra-pass3",
+     "op": "remove",
+     "reason": "La résolution refuse un remboursement de pénalités contractuelles sans décider d'un acte foncier ni constater une étape réglementaire, tandis que l'acquisition du terrain est seulement rappelée comme fait antérieur."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,147 @@
+{
+ "documentId": "bowman-2026-05-12",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "60da7ee2e8d32e2a836fd01d70cb42079ac719a042ad2d0cf13f359064df0e2c",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2022-02-05Z"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 2022-02-05Z",
+     "stage": null,
+     "objet": "2022-02-05Z",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "CONSIDÉRANT QUE le règlement de zonage no 2022-02-05Z prescrit une marge avant\nminimale de 6 mètres;"
+      },
+      {
+       "page": 6,
+       "excerpt": "CONSIDÉRANT QUE le règlement de zonage no 2022-02-05Z prescrit une marge avant\nminimale de 6 mètres;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "derogation-085"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure acceptée — 2, chemin du Lac-Morin",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de dérogation\nmineure pour la propriété située au 2, chemin du Lac-Morin, telle que présentée;"
+      },
+      {
+       "page": 6,
+       "excerpt": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de dérogation\nmineure pour la propriété située au 2, chemin du Lac-Morin, telle que présentée;\n\nQUE cette dérogation permette une marge avant réduite à 4,55 mètres pour l’implantation\nd’une remise.\nQUE la présente résolution est conditionnelle au respect de toute autre réglementation\nmunicipale applicable."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "derogation-086"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure acceptée — 115 B, route 307",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de\ndérogation mineure pour la propriété située au 115 B, route 307;"
+      },
+      {
+       "page": 7,
+       "excerpt": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de\ndérogation mineure pour la propriété située au 115 B, route 307;\n\nQUE le déplacement du bâtiment complémentaire soit autorisé conformément à la\ndemande présentée.\n\nQUE la présente résolution est conditionnelle au respect de toute autre réglementation\nmunicipale applicable."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de zonage 2022-02-05Z n'est que mentionné comme norme de référence dans les considérants d'une dérogation mineure, sans faire l'objet d'un acte réglementaire dans cette séance.\",\"excerpt\":\"CONSIDÉRANT QUE le règlement de zonage no 2022-02-05Z prescrit une marge avant\\nminimale de 6 mètres;\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la résolution 2026-05-085 acceptant la dérogation mineure pour le 2, chemin du Lac-Morin.\",\"excerpt\":\"QUE le conseil municipal de la Municipalité de Bowman accepte la demande de dérogation\\nmineure pour la propriété située au 2, chemin du Lac-Morin, telle que présentée;\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la résolution 2026-05-086 acceptant la dérogation mineure pour le 115 B, route 307.\",\"excerpt\":\"QUE le conseil municipal de la Municipalité de Bowman accepte la demande de\\ndérogation mineure pour la propriété située au 115 B, route 307;\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de zonage 2022-02-05Z n'est que mentionné comme norme de référence dans les considérants d'une dérogation mineure, sans faire l'objet d'un acte réglementaire dans cette séance.",
+   "excerpt": "CONSIDÉRANT QUE le règlement de zonage no 2022-02-05Z prescrit une marge avant\nminimale de 6 mètres;"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la résolution 2026-05-085 acceptant la dérogation mineure pour le 2, chemin du Lac-Morin.",
+   "excerpt": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de dérogation\nmineure pour la propriété située au 2, chemin du Lac-Morin, telle que présentée;"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la résolution 2026-05-086 acceptant la dérogation mineure pour le 115 B, route 307.",
+   "excerpt": "QUE le conseil municipal de la Municipalité de Bowman accepte la demande de\ndérogation mineure pour la propriété située au 115 B, route 307;"
+  }
+ ],
+ "filter": {
+  "acts": 3,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Le règlement de zonage 2022-02-05Z n'est que mentionné comme norme de référence dans les considérants d'une dérogation mineure, sans faire l'objet d'un acte réglementaire dans cette séance."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A02",
+    "reason": "Le conseil adopte la résolution 2026-05-085 acceptant la dérogation mineure pour le 2, chemin du Lac-Morin."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil adopte la résolution 2026-05-086 acceptant la dérogation mineure pour le 115 B, route 307."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1342,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 6736,
+   "outputTokens": 281,
+   "totalTokens": 7017
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1182
+  },
+  "inputSha256": "96bc7a18768f7d96adb426a50631b02630df04c45ea27cd5e7475919cc920cc5"
+ }
+}

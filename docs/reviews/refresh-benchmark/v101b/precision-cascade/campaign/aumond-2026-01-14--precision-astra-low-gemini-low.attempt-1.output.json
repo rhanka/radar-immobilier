@@ -1,0 +1,164 @@
+{
+ "nodes": [
+  {
+   "id": "source-aumond-2026-01-14",
+   "label": "Procès-verbal d’Aumond du 14 janvier 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "status": "candidate",
+   "date": "2026-01-14",
+   "municipality": "aumond",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "url": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Séance ordinaire du conseil de la Municipalité d'Aumond tenue au Centre culturel et",
+     "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+     "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-01-0001",
+   "label": "Projet de règlement 2026-01-0001 — Tarification 2026",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "status": "candidate",
+   "numero": "2026-01-0001",
+   "title": "Règlement établissant la tarification applicable pour l’année 2026",
+   "stage": "projet",
+   "municipality": "aumond",
+   "meetingDate": "2026-01-14",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Le projet de règlement 2026-01-0001 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie.",
+     "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+     "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-tarification"
+   ]
+  },
+  {
+   "id": "bylaw-2026-01-0002",
+   "label": "Projet de règlement 2026-01-0002 — Rémunération des élus",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "status": "candidate",
+   "numero": "2026-01-0002",
+   "title": "Règlement 2026-01-0002 modifiant le règlement 2019-02 concernant la rémunération des élus",
+   "stage": "projet",
+   "municipality": "aumond",
+   "meetingDate": "2026-01-14",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "Le projet de règlement 2026-01-0002 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie.",
+     "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+     "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-remuneration"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-aumond-2026-01-14",
+   "target": "bylaw-2026-01-0001",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "evidence_refs": [
+    "ev-tarification"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Le projet de règlement 2026-01-0001 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie.",
+     "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+     "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-aumond-2026-01-14",
+   "target": "bylaw-2026-01-0002",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "evidence_refs": [
+    "ev-remuneration"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "Le projet de règlement 2026-01-0002 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie.",
+     "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+     "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-tarification",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "Le projet de règlement 2026-01-0001 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie."
+  },
+  {
+   "id": "ev-remuneration",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "Le projet de règlement 2026-01-0002 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie."
+  },
+  {
+   "id": "ev-reglement-anterieur",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "Avis de motion – Règlement 2026-01-0002 modifiant le\nrèglement 2019-02 concernant la rémunération des élus"
+  }
+ ],
+ "input_tokens": 10300,
+ "output_tokens": 2900
+}

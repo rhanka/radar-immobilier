@@ -1,0 +1,26 @@
+{
+ "documentId": "saint-bernard-de-michaudville-2026-04-01",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "9a3c8090c94dd30d437fde15205f3848efdde8df7fdc136768e77e37e7304bf6",
+ "rawText": "{\"operations\":[]}",
+ "parseError": null,
+ "operations": [],
+ "applied": [],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 0
+}

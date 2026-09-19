@@ -1,0 +1,181 @@
+{
+ "documentId": "contrecoeur-2026-04-14",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "efa9887d2f594d5c2b8f2f96950d0a098bcc1880a84f874b2726bae5748b6765",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion — Règlement U102 constituant le comité consultatif en urbanisme\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"U102\",\n        \"page\": 4,\n        \"citation\": \"AVIS DE MOTION – PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102 – CONSTITUANT LE COMITÉ CONSULTATIF EN URBANISME –\\nABROGEANT LE RÈGLEMENT 147-82\",\n        \"anchor\": \"RÈGLEMENT U102\"\n      },\n      \"reason\": \"Le texte constate un avis de motion actuel pour ce règlement, écrit U102 dans l’intitulé et U-102 dans le corps du texte, à compter séparément du dépôt de son projet.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Présentation et dépôt du projet de règlement U102 — Comité consultatif en urbanisme\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"U102\",\n        \"page\": 4,\n        \"citation\": \"AVIS DE MOTION – PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102 – CONSTITUANT LE COMITÉ CONSULTATIF EN URBANISME –\\nABROGEANT LE RÈGLEMENT 147-82\",\n        \"anchor\": \"PROJET DE RÈGLEMENT U102\"\n      },\n      \"reason\": \"Le membre du conseil présente et dépose effectivement le projet de règlement, ce qui constitue une unité distincte de l’avis de motion.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du second projet de règlement U-100-1 — Modification du zonage\",\n        \"stage\": \"second_projet\",\n        \"procedure\": null,\n        \"objet\": \"U-100-1\",\n        \"page\": 5,\n        \"citation\": \"D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\\nrelatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de\\nl’annexe B.\",\n        \"anchor\": \"Règlement U-100-1\"\n      },\n      \"reason\": \"La résolution 2026-04-057 adopte le second projet, tandis que l’avis de motion, le premier projet et la consultation antérieurs ne sont que des rappels historiques.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement U-101 — Contrôle intérimaire du secteur industriel\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"U-101\",\n        \"page\": 5,\n        \"citation\": \"D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur\\nindustriel.\",\n        \"anchor\": \"Règlement U-101\"\n      },\n      \"reason\": \"La résolution 2026-04-058 adopte ce règlement de contrôle intérimaire, objet réglementaire d’urbanisme explicite.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-009 — Enseignes au 4270, rue des Patriotes, suite 101\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-009\",\n        \"page\": 13,\n        \"citation\": \"D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une\\nenseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau\\nautoroutier\",\n        \"anchor\": \"PIIA 2026-009\"\n      },\n      \"reason\": \"La résolution 2026-04-071 approuve une demande de PIIA portant sur des enseignes commerciales, les petits PIIA non résidentiels étant inclus.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-012 — Construction résidentielle au 5725, rue Moreau\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-012\",\n        \"page\": 14,\n        \"citation\": \"D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un\\nbâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589\",\n        \"anchor\": \"PIIA 2026-012\"\n      },\n      \"reason\": \"La résolution 2026-04-072 approuve explicitement le PIIA pour la construction d’un bâtiment résidentiel unifamilial isolé.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation de la dérogation mineure 2026-011 — 360-366 et 398-400, rue Papin\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-011\",\n        \"page\": 14,\n        \"citation\": \"D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles\\nsitués aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323\",\n        \"anchor\": \"dérogation mineure 2026-011\"\n      },\n      \"reason\": \"La résolution 2026-04-073 approuve une seule demande identifiée, couvrant les dérogations de profondeur et de superficie des deux lots.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation de la dérogation mineure 2026-020 — 275, rue de l’Église\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-020\",\n        \"page\": 15,\n        \"citation\": \"D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé\\nau 275, rue de l’Église, lot 6 607 642 au cadastre du Québec\",\n        \"anchor\": \"dérogation mineure 2026-020\"\n      },\n      \"reason\": \"La résolution 2026-04-074 approuve cette demande concernant la plantation d’arbres et la localisation ainsi que l’implantation d’un équipement accessoire.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation du protocole d’entente — Infrastructures de la halte routière, montée de la Pomme d’Or\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"montée de la Pomme d’Or\",\n        \"page\": 16,\n        \"citation\": \"à signer,\\npour et au nom de la Ville, le protocole d’entente à intervenir avec Picard Construction\\nrelativement à la construction d’une halte routière sur la montée de la Pomme d’Or,\",\n        \"anchor\": \"montée de la Pomme d’Or\"\n      },\n      \"reason\": \"Le protocole autorisé encadre la réalisation d’un réseau d’égout, d’une conduite de refoulement et d’un poste de pompage pour un développement explicite de halte routière, et non un simple entretien de voirie.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion — Règlement U102 constituant le comité consultatif en urbanisme",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "U102",
+    "page": 4,
+    "citation": "AVIS DE MOTION – PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102 – CONSTITUANT LE COMITÉ CONSULTATIF EN URBANISME –\nABROGEANT LE RÈGLEMENT 147-82",
+    "anchor": "RÈGLEMENT U102"
+   },
+   "reason": "Le texte constate un avis de motion actuel pour ce règlement, écrit U102 dans l’intitulé et U-102 dans le corps du texte, à compter séparément du dépôt de son projet."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Présentation et dépôt du projet de règlement U102 — Comité consultatif en urbanisme",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "U102",
+    "page": 4,
+    "citation": "AVIS DE MOTION – PRÉSENTATION ET DÉPÔT – PROJET DE RÈGLEMENT U102 – CONSTITUANT LE COMITÉ CONSULTATIF EN URBANISME –\nABROGEANT LE RÈGLEMENT 147-82",
+    "anchor": "PROJET DE RÈGLEMENT U102"
+   },
+   "reason": "Le membre du conseil présente et dépose effectivement le projet de règlement, ce qui constitue une unité distincte de l’avis de motion."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du second projet de règlement U-100-1 — Modification du zonage",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "U-100-1",
+    "page": 5,
+    "citation": "D’ADOPTER le second projet de Règlement U-100-1 modifiant le Règlement U-100\nrelatif au zonage afin de corriger diverses dispositions de l’annexe A et du plan de\nl’annexe B.",
+    "anchor": "Règlement U-100-1"
+   },
+   "reason": "La résolution 2026-04-057 adopte le second projet, tandis que l’avis de motion, le premier projet et la consultation antérieurs ne sont que des rappels historiques."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du règlement U-101 — Contrôle intérimaire du secteur industriel",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "U-101",
+    "page": 5,
+    "citation": "D’ADOPTER le Règlement U-101 sur le contrôle intérimaire relatif au secteur\nindustriel.",
+    "anchor": "Règlement U-101"
+   },
+   "reason": "La résolution 2026-04-058 adopte ce règlement de contrôle intérimaire, objet réglementaire d’urbanisme explicite."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-009 — Enseignes au 4270, rue des Patriotes, suite 101",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-009",
+    "page": 13,
+    "citation": "D’APPROUVER la demande de PIIA 2026-009 afin d’autoriser l’installation d’une\nenseigne commerciale sur bâtiment ainsi que l'ajout d'une enseigne sur le poteau\nautoroutier",
+    "anchor": "PIIA 2026-009"
+   },
+   "reason": "La résolution 2026-04-071 approuve une demande de PIIA portant sur des enseignes commerciales, les petits PIIA non résidentiels étant inclus."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-012 — Construction résidentielle au 5725, rue Moreau",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-012",
+    "page": 14,
+    "citation": "D’APPROUVER la demande de PIIA 2026-012 afin d’autoriser la construction d’un\nbâtiment résidentiel unifamilial isolé au 5725, rue Moreau, sur le lot 6 382 589",
+    "anchor": "PIIA 2026-012"
+   },
+   "reason": "La résolution 2026-04-072 approuve explicitement le PIIA pour la construction d’un bâtiment résidentiel unifamilial isolé."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation de la dérogation mineure 2026-011 — 360-366 et 398-400, rue Papin",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-011",
+    "page": 14,
+    "citation": "D’APPROUVER la demande de dérogation mineure 2026-011 pour les immeubles\nsitués aux 360-366 et 398-400, rue Papin, lots 4 813 320 et 4 813 323",
+    "anchor": "dérogation mineure 2026-011"
+   },
+   "reason": "La résolution 2026-04-073 approuve une seule demande identifiée, couvrant les dérogations de profondeur et de superficie des deux lots."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation de la dérogation mineure 2026-020 — 275, rue de l’Église",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-020",
+    "page": 15,
+    "citation": "D’APPROUVER la demande de dérogation mineure 2026-020 pour l’immeuble situé\nau 275, rue de l’Église, lot 6 607 642 au cadastre du Québec",
+    "anchor": "dérogation mineure 2026-020"
+   },
+   "reason": "La résolution 2026-04-074 approuve cette demande concernant la plantation d’arbres et la localisation ainsi que l’implantation d’un équipement accessoire."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation du protocole d’entente — Infrastructures de la halte routière, montée de la Pomme d’Or",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "montée de la Pomme d’Or",
+    "page": 16,
+    "citation": "à signer,\npour et au nom de la Ville, le protocole d’entente à intervenir avec Picard Construction\nrelativement à la construction d’une halte routière sur la montée de la Pomme d’Or,",
+    "anchor": "montée de la Pomme d’Or"
+   },
+   "reason": "Le protocole autorisé encadre la réalisation d’un réseau d’égout, d’une conduite de refoulement et d’un poste de pompage pour un développement explicite de halte routière, et non un simple entretien de voirie."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  },
+  {
+   "op": "add",
+   "id": "u08"
+  },
+  {
+   "op": "add",
+   "id": "u09"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 9
+}

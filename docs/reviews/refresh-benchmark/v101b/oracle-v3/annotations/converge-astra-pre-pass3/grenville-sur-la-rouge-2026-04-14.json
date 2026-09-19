@@ -1,0 +1,101 @@
+{
+ "documentId": "grenville-sur-la-rouge-2026-04-14",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "196330a7c7fa54a291562c8f0834a06cd57a06f85ca3936dca9441b7e2699550",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La page 1 présente l’acceptation du don du lot 6 209 933 parmi les résolutions adoptées, ce qui atteste cet acte foncier.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La page 1 atteste l’autorisation de vendre le lot municipal 6 095 015 pour 13000$, parmi les résolutions adoptées.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La page 2 indique explicitement le refus de la demande de PIIA du 47, rue Donald Campbell, et la version conserve ce refus.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La page 2 atteste expressément le refus d’accorder la dérogation mineure concernant l’abri d’auto au 47, rue Donald Campbell, distinct du refus de PIIA.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La page 2 indique que la demande de PIIA pour construire une résidence unifamiliale au 1417, route 148 est accordée.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La page 3 atteste explicitement l’adoption du règlement de développement économique RénoFaçade, conformément à l’objet et à l’étape proposés.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"La page 3 mentionne un avis de motion portant notamment sur des modifications au plan d’urbanisme, à compter séparément du projet de règlement.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"La page 3 atteste l’adoption de projets de règlements portant notamment sur des modifications au plan d’urbanisme, étape distincte de l’avis de motion.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 1 présente l’acceptation du don du lot 6 209 933 parmi les résolutions adoptées, ce qui atteste cet acte foncier."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 1 atteste l’autorisation de vendre le lot municipal 6 095 015 pour 13000$, parmi les résolutions adoptées."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 2 indique explicitement le refus de la demande de PIIA du 47, rue Donald Campbell, et la version conserve ce refus."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La page 2 atteste expressément le refus d’accorder la dérogation mineure concernant l’abri d’auto au 47, rue Donald Campbell, distinct du refus de PIIA."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La page 2 indique que la demande de PIIA pour construire une résidence unifamiliale au 1417, route 148 est accordée."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La page 3 atteste explicitement l’adoption du règlement de développement économique RénoFaçade, conformément à l’objet et à l’étape proposés."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La page 3 mentionne un avis de motion portant notamment sur des modifications au plan d’urbanisme, à compter séparément du projet de règlement."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La page 3 atteste l’adoption de projets de règlements portant notamment sur des modifications au plan d’urbanisme, étape distincte de l’avis de motion."
+  }
+ ]
+}

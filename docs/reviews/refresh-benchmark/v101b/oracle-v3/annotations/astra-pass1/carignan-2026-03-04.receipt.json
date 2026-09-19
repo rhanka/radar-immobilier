@@ -1,0 +1,36 @@
+{
+ "documentId": "carignan-2026-03-04",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "d62ddf235904f705837de57c7e6342e1782f31f7e70a1be92da5f826fedc61cd",
+ "inputSha256": "2cc2aa1f1edd723898f3724efb7836e04a34ab1eae300d58984f6da4b274dbcd",
+ "responseSha256": "30f2e428fd32a7dd33f3060c8c5cfd6c18f8c6cac123a2f1798840e04e64ba3e",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 378087,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 20413,
+  "outputTokens": 12545,
+  "totalTokens": 32958
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 378074,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:48:38.918Z"
+}

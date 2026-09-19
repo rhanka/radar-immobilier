@@ -1,0 +1,121 @@
+{
+ "documentId": "sainte-clotilde-2026-04-20",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "0a6d0945f3380377a44255675f73219b411ba67d3edba411bfa752f60ddf1ead",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Acte foncier explicite attesté p.4 (résolution 2026-04-182 adoptée) : « achète ... les lots 6 592 592 et 6 199 726 du cadastre du Québec », citation, objet, étape et page exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le lot 6 199 726 est un objet foncier explicite distinct nommé dans la même résolution adoptée p.4 (« Un nœud groupé peut couvrir plusieurs unités explicitement nommées »), citation et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Objet réglementaire explicite (Règlement 533 imposant des clapets anti-retour dans les bâtiments raccordés à l'égout) adopté p.6 par la résolution 2026-04-186 ; citation, étape adoption et page exactes, hors exclusions.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"P.9, résolution 2026-04-192 : « Avis de motion est par la présente donné ... le Règlement numéro 471-09 modifiant le règlement de zonage numéro 471 » ; avis de motion et projet sont des unités distinctes.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"P.9, point 10.2 : « Un projet de règlement est déposé séance tenante » pour le règlement 471-09 de zonage ; étape projet_reglement distincte de l'avis de motion.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"P.9, résolution 2026-04-193 : avis de motion donné pour le Règlement 470-04 modifiant le plan d'urbanisme numéro 470 ; citation d'en-tête, objet et page exacts.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"P.9, point 10.3 : « Un projet de règlement est déposé séance tenante » pour le règlement 470-04 du plan d'urbanisme ; unité projet séparée de l'avis de motion.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"P.9, résolution 2026-04-194 : avis de motion donné pour le Règlement 472-04 modifiant le règlement de lotissement numéro 472 ; citation, objet et page exacts.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"P.9, point 10.4 : « Un projet de règlement est déposé séance tenante » pour le règlement 472-04 de lotissement ; étape projet_reglement distincte.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Acte foncier explicite adopté p.10 (résolution 2026-04-195) : « DE CORRIGER la résolution numéro 2025-12-286 afin d'y ajouter la partie du lot 6 471 805 du cadastre du Québec, en plus du lot 6 199 292 » (appui CPTAQ carrière) ; citation, étape et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Acte foncier explicite attesté p.4 (résolution 2026-04-182 adoptée) : « achète ... les lots 6 592 592 et 6 199 726 du cadastre du Québec », citation, objet, étape et page exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le lot 6 199 726 est un objet foncier explicite distinct nommé dans la même résolution adoptée p.4 (« Un nœud groupé peut couvrir plusieurs unités explicitement nommées »), citation et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Objet réglementaire explicite (Règlement 533 imposant des clapets anti-retour dans les bâtiments raccordés à l'égout) adopté p.6 par la résolution 2026-04-186 ; citation, étape adoption et page exactes, hors exclusions."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "P.9, résolution 2026-04-192 : « Avis de motion est par la présente donné ... le Règlement numéro 471-09 modifiant le règlement de zonage numéro 471 » ; avis de motion et projet sont des unités distinctes."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "P.9, point 10.2 : « Un projet de règlement est déposé séance tenante » pour le règlement 471-09 de zonage ; étape projet_reglement distincte de l'avis de motion."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "P.9, résolution 2026-04-193 : avis de motion donné pour le Règlement 470-04 modifiant le plan d'urbanisme numéro 470 ; citation d'en-tête, objet et page exacts."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "P.9, point 10.3 : « Un projet de règlement est déposé séance tenante » pour le règlement 470-04 du plan d'urbanisme ; unité projet séparée de l'avis de motion."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "P.9, résolution 2026-04-194 : avis de motion donné pour le Règlement 472-04 modifiant le règlement de lotissement numéro 472 ; citation, objet et page exacts."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "P.9, point 10.4 : « Un projet de règlement est déposé séance tenante » pour le règlement 472-04 de lotissement ; étape projet_reglement distincte."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Acte foncier explicite adopté p.10 (résolution 2026-04-195) : « DE CORRIGER la résolution numéro 2025-12-286 afin d'y ajouter la partie du lot 6 471 805 du cadastre du Québec, en plus du lot 6 199 292 » (appui CPTAQ carrière) ; citation, étape et page exactes."
+  }
+ ]
+}

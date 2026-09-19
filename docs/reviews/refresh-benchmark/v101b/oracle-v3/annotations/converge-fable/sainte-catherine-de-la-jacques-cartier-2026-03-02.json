@@ -1,0 +1,141 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "da997eb99eac78ef15f719aee853f9267939862b5438972042c00fcc82790f1b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 5.1 de l'ordre du jour (page 2) porte « Demande de dérogation mineure : 3, rue Ernest-Piché - REPORTÉ » et la résolution 089-2026 confirme le report; un point d'ordre du jour reporté est une unité prévue avec objet foncier explicite, étape inconnue.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Résolution 102-2026 page 10 : « ET RÉSOLU d’autoriser la signature du projet d’acte de servitude exclusive et personnelle de passage, droit de premier refus pour le lot 6 164 031 » — acte foncier explicite adopté (ADOPTÉE), citation et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Résolution 111-2026 page 20 : « ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri d’auto en garage privé attenant pour la propriété sise au 2, rue Garbin » — dérogation mineure accordée, citation exacte.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Résolution 112-2026 page 21 : « ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot d’angle 6 621 589 d’une largeur de 27,20 mètres » — dérogation mineure accordée, lot explicite, page exacte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Résolution 113-2026 page 22 : « ET RÉSOLU d’approuver la subdivision d’une parcelle du lot 6 141 355, tel que présenté, dans le cadre du réaménagement du pont de la rivière Ontaritzi » — acte foncier explicite adopté, citation et page exactes.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Résolution 115-2026 page 23 amende l'article 6.7 de l'entente de travaux municipaux avec Groupe Castella 2 inc. (prolongement de l'avenue des Catherine jusqu'au lot 6 621 589) — développement explicite, citation exacte, étape inconnue acceptable.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Résolution 116-2026 page 24 : « ET RÉSOLU d’amender la résolution numéro 344-2024 en remplaçant les deux derniers alinéas » — amendement d'une approbation PIIA (art. 145.20 LAU) pour « Le Ste-4 », garantie 35 000 $ phases 1A et 1B, citation exacte.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Page 24 : avis de motion donné par David Milot d'un règlement modifiant le Règlement de zonage 1259-2014 pour déplacer les limites des zones 115-H et 145-H — avis de motion distinct du projet selon les règles, citation exacte.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Résolution 117-2026 titrée page 24 « ADOPTION DE L'AVANT-PROJET DE RÈGLEMENT NUMÉRO APR-423-2026 » et adoptée comme premier projet de règlement — étape projet_reglement distincte de l'avis de motion, citation exacte.\"},{\"item\":\"i10\",\"choice\":\"absent\",\"reason\":\"Contrat de location d'un bâtiment au parc du Grand-Héron pour location de planches à pagaie (résolution 124-2026) relève des loisirs et d'un marché de services, exclus du rappel; de plus doublon de i12.\"},{\"item\":\"i11\",\"choice\":\"absent\",\"reason\":\"L'engagement à amorcer « les modifications réglementaires nécessaires pour autoriser l’usage prévu dans la zone concernée » n'identifie ni règlement ni zone : pas d'objet réglementaire explicite, fait complémentaire à signaler hors gold.\"},{\"item\":\"i12\",\"choice\":\"absent\",\"reason\":\"Même fait que i10 (doublon même type/même fait non crédité) et contrat de location loisirs (Yogi Nomade, planches à pagaie) exclu du rappel.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "absent"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 5.1 de l'ordre du jour (page 2) porte « Demande de dérogation mineure : 3, rue Ernest-Piché - REPORTÉ » et la résolution 089-2026 confirme le report; un point d'ordre du jour reporté est une unité prévue avec objet foncier explicite, étape inconnue."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Résolution 102-2026 page 10 : « ET RÉSOLU d’autoriser la signature du projet d’acte de servitude exclusive et personnelle de passage, droit de premier refus pour le lot 6 164 031 » — acte foncier explicite adopté (ADOPTÉE), citation et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Résolution 111-2026 page 20 : « ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri d’auto en garage privé attenant pour la propriété sise au 2, rue Garbin » — dérogation mineure accordée, citation exacte."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Résolution 112-2026 page 21 : « ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot d’angle 6 621 589 d’une largeur de 27,20 mètres » — dérogation mineure accordée, lot explicite, page exacte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Résolution 113-2026 page 22 : « ET RÉSOLU d’approuver la subdivision d’une parcelle du lot 6 141 355, tel que présenté, dans le cadre du réaménagement du pont de la rivière Ontaritzi » — acte foncier explicite adopté, citation et page exactes."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Résolution 115-2026 page 23 amende l'article 6.7 de l'entente de travaux municipaux avec Groupe Castella 2 inc. (prolongement de l'avenue des Catherine jusqu'au lot 6 621 589) — développement explicite, citation exacte, étape inconnue acceptable."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Résolution 116-2026 page 24 : « ET RÉSOLU d’amender la résolution numéro 344-2024 en remplaçant les deux derniers alinéas » — amendement d'une approbation PIIA (art. 145.20 LAU) pour « Le Ste-4 », garantie 35 000 $ phases 1A et 1B, citation exacte."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Page 24 : avis de motion donné par David Milot d'un règlement modifiant le Règlement de zonage 1259-2014 pour déplacer les limites des zones 115-H et 145-H — avis de motion distinct du projet selon les règles, citation exacte."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Résolution 117-2026 titrée page 24 « ADOPTION DE L'AVANT-PROJET DE RÈGLEMENT NUMÉRO APR-423-2026 » et adoptée comme premier projet de règlement — étape projet_reglement distincte de l'avis de motion, citation exacte."
+  },
+  {
+   "item": "i10",
+   "choice": "absent",
+   "reason": "Contrat de location d'un bâtiment au parc du Grand-Héron pour location de planches à pagaie (résolution 124-2026) relève des loisirs et d'un marché de services, exclus du rappel; de plus doublon de i12."
+  },
+  {
+   "item": "i11",
+   "choice": "absent",
+   "reason": "L'engagement à amorcer « les modifications réglementaires nécessaires pour autoriser l’usage prévu dans la zone concernée » n'identifie ni règlement ni zone : pas d'objet réglementaire explicite, fait complémentaire à signaler hors gold."
+  },
+  {
+   "item": "i12",
+   "choice": "absent",
+   "reason": "Même fait que i10 (doublon même type/même fait non crédité) et contrat de location loisirs (Yogi Nomade, planches à pagaie) exclu du rappel."
+  }
+ ]
+}

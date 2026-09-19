@@ -1,0 +1,101 @@
+{
+ "documentId": "barnston-ouest-2026-05-04",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "9bfdc8d37ca0e47bfd310015dc8f0b0963ec76d2c52dd6c9c4d139f5b4cc9863",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 6.2.3, page 7, atteste la présentation et le dépôt du projet de règlement 325-2026 modifiant le règlement 224 Plan d’urbanisme.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 6.2.4, page 8, constate l’avis de motion donné par Cynthia Ferland pour le règlement 325-2026, étape distincte du dépôt du projet.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 6.2.5, page 8, atteste la présentation et le dépôt du projet de règlement 326-2026 modifiant le règlement 225 de zonage.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 6.2.6, page 8, constate l’avis de motion donné par Cynthia Ferland pour le règlement 326-2026, étape distincte du dépôt du projet.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 6.2.7, page 8, atteste la présentation et le dépôt du projet de règlement 327-2026 modifiant le règlement 226 (2012) de lotissement.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 6.2.8, page 8, constate l’avis de motion donné par Cynthia Ferland pour le règlement 327-2026, étape distincte du dépôt du projet.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 6.2.9, page 8, atteste la présentation et le dépôt du projet de règlement 328-2026 modifiant le règlement 221 sur les plans d’implantation et d’intégration architecturale.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 6.2.10, page 9, constate l’avis de motion donné par Virginie Ashby pour le règlement 328-2026, étape distincte du dépôt du projet.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 6.2.3, page 7, atteste la présentation et le dépôt du projet de règlement 325-2026 modifiant le règlement 224 Plan d’urbanisme."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 6.2.4, page 8, constate l’avis de motion donné par Cynthia Ferland pour le règlement 325-2026, étape distincte du dépôt du projet."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 6.2.5, page 8, atteste la présentation et le dépôt du projet de règlement 326-2026 modifiant le règlement 225 de zonage."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 6.2.6, page 8, constate l’avis de motion donné par Cynthia Ferland pour le règlement 326-2026, étape distincte du dépôt du projet."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 6.2.7, page 8, atteste la présentation et le dépôt du projet de règlement 327-2026 modifiant le règlement 226 (2012) de lotissement."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 6.2.8, page 8, constate l’avis de motion donné par Cynthia Ferland pour le règlement 327-2026, étape distincte du dépôt du projet."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Le point 6.2.9, page 8, atteste la présentation et le dépôt du projet de règlement 328-2026 modifiant le règlement 221 sur les plans d’implantation et d’intégration architecturale."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Le point 6.2.10, page 9, constate l’avis de motion donné par Virginie Ashby pour le règlement 328-2026, étape distincte du dépôt du projet."
+  }
+ ]
+}

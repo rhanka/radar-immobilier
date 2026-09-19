@@ -1,0 +1,71 @@
+{
+ "documentId": "saint-sylvere-2026-04-07",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "8b7b8350fdc54fe2c7ab617f2069ef5c4429b9fb958955266415f48aae00735a",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 6, résolution 2026-04-116 : « Gabrielle Gauthier donne avis de motion ... Règlement # 383 modifiant le règlement de zonage # 247 » — avis de motion distinct du projet, citation et page exactes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 7, résolution 2026-04-117 : le conseil « dépose et adopte le premier projet de règlement # 383 n odifiant le règlement de zonage # 247 » — étape projet_reglement distincte de l'avis de motion, citation conforme au texte OCR.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 7, résolution 2026-04-118 : « Yan )agenais avis de motion ... RèglLment 4*384 concernant les projets particuliers ... (PPCMOI) » — avis de motion du règlement 384, citation et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 8, résolution 2026-04-119 : « dépose et adopte le premier projet de règlement # 384 » sur les PPCMOI — étape projet_reglement distincte de l'avis de motion, citation exacte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Page 8, résolution 2026-04-120 : acte foncier explicite (échange de parcelles entre les lots 5 652 594 et 5 889 436, « demande de lotissement 453952 ») adopté à l'unanimité ; les actes fonciers sont inclus au rappel et la citation correspond au texte.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 6, résolution 2026-04-116 : « Gabrielle Gauthier donne avis de motion ... Règlement # 383 modifiant le règlement de zonage # 247 » — avis de motion distinct du projet, citation et page exactes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 7, résolution 2026-04-117 : le conseil « dépose et adopte le premier projet de règlement # 383 n odifiant le règlement de zonage # 247 » — étape projet_reglement distincte de l'avis de motion, citation conforme au texte OCR."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 7, résolution 2026-04-118 : « Yan )agenais avis de motion ... RèglLment 4*384 concernant les projets particuliers ... (PPCMOI) » — avis de motion du règlement 384, citation et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 8, résolution 2026-04-119 : « dépose et adopte le premier projet de règlement # 384 » sur les PPCMOI — étape projet_reglement distincte de l'avis de motion, citation exacte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Page 8, résolution 2026-04-120 : acte foncier explicite (échange de parcelles entre les lots 5 652 594 et 5 889 436, « demande de lotissement 453952 ») adopté à l'unanimité ; les actes fonciers sont inclus au rappel et la citation correspond au texte."
+  }
+ ]
+}

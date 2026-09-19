@@ -1,0 +1,50 @@
+{
+ "documentId": "cowansville-2026-05-05",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "6b2f0f42478cda0df13e9a0ef53603935fecd69407b87058a8c18a85e4cf5120",
+ "error": "CLAUDE_CLI_FAILED rc=1",
+ "receipt": {
+  "transport": "claude-cli",
+  "rc": 1,
+  "latencyMs": 2014,
+  "isError": true,
+  "numTurns": 1,
+  "sessionId": "c7051d30-9f1e-4f3e-9655-6202ff9f4456",
+  "modelUsage": {},
+  "usage": {
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "input_tokens": 0,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "output_tokens": 0,
+   "server_tool_use": {
+    "web_search_requests": 0,
+    "web_fetch_requests": 0
+   },
+   "service_tier": "standard",
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "inference_geo": "",
+   "iterations": [],
+   "speed": "standard"
+  },
+  "totalCostUsd": 0,
+  "durationApiMs": 0,
+  "stderrTail": ""
+ },
+ "at": "2026-09-18T14:53:22.390Z"
+}

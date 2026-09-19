@@ -1,0 +1,35 @@
+{
+ "documentId": "la-peche-2026-06-01",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "748a46ddf1a040c8770f0326b735d7f0551503d4d45ca64fa946571fcf19e29e",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3228,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 24359,
+   "outputTokens": 1102,
+   "totalTokens": 25461
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3099
+  },
+  "inputSha256": "79112e75e9b5a9e25d8f2698f933a11030070caf0ef6881790762efee0a908b0"
+ },
+ "at": "2026-09-19T03:22:55.050Z"
+}

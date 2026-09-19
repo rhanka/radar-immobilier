@@ -1,0 +1,370 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-509",
+   "label": "509-07-04-26 — Premier projet modifiant le zonage : éoliennes et captage des eaux souterraines",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "status": "needs_review",
+   "numero": "509-07-04-26",
+   "title": "Règlement modifiant le règlement de zonage 310-1901-09 et ses amendements afin d’identifier les aires de protection des lieux de captage des eaux souterraines ainsi que la création de dispositions relatives aux éoliennes de la MRC des Chenaux",
+   "stage": "1er_projet",
+   "municipality": "sainte-genevieve-de-batiscan",
+   "meetingDate": "2026-04-07",
+   "resolution": "26-04-04",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Ce règlement modifie le règlement de zonage numéro 310-19-01-09.",
+     "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+     "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zonage"
+   ]
+  },
+  {
+   "id": "bylaw-510",
+   "label": "510-07-04-26 — Premier projet modifiant le plan d’urbanisme",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "status": "needs_review",
+   "numero": "510-07-04-26",
+   "title": "Règlement modifiant le plan d’urbanisme",
+   "objet": "Encadrer l’implantation d’éoliennes et identifier les aires de protection des lieux de captage des eaux souterraines.",
+   "stage": "1er_projet",
+   "municipality": "sainte-genevieve-de-batiscan",
+   "meetingDate": "2026-04-07",
+   "resolution": "26-04-05",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "Ce règlement modifie le plan d’urbanisme 309-19-01-09.",
+     "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+     "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-plan"
+   ]
+  },
+  {
+   "id": "event-projet-509",
+   "label": "Adoption du premier projet 509-07-04-26",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "status": "needs_review",
+   "date": "2026-04-07",
+   "meetingDate": "2026-04-07",
+   "decision": "approuvé",
+   "etape": "projet_reglement",
+   "etape_date": "2026-04-07",
+   "reglement_number": "509-07-04-26",
+   "resolution": "26-04-04",
+   "municipality": "sainte-genevieve-de-batiscan",
+   "description": "Adoption unanime du premier projet concernant le zonage, les éoliennes et les aires de protection des captages. Incohérence documentaire : l’avis de motion attribue au numéro 50907-04-26 une modification du plan d’urbanisme, alors que la résolution 26-04-04 et le texte du projet 509-07-04-26 concernent le zonage.",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par M. Yanick Godon, appuyé par Mme Virginie\nLavoie et résolu à l’unanimité des conseillers d’adopter le règlement 509-07-04-26 et\ndécrète ce qui suit :",
+     "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+     "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-adoption-509",
+    "ev-avis"
+   ]
+  },
+  {
+   "id": "event-projet-510",
+   "label": "Adoption du premier projet 510-07-04-26",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "status": "needs_review",
+   "date": "2026-04-07",
+   "meetingDate": "2026-04-07",
+   "decision": "approuvé",
+   "etape": "projet_reglement",
+   "etape_date": "2026-04-07",
+   "reglement_number": "510-07-04-26",
+   "resolution": "26-04-05",
+   "municipality": "sainte-genevieve-de-batiscan",
+   "description": "Adoption unanime du premier projet modifiant le plan d’urbanisme. Incohérence documentaire : l’avis de motion attribue au numéro 51007-04-26 une modification du zonage, alors que la résolution 26-04-05 et le texte du projet 510-07-04-26 concernent le plan d’urbanisme.",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par M. Hugo Massicotte, appuyé par M. Yanick\nGodon et résolu à l’unanimité des conseillers d’adopter le règlement 510-07-04-26 et\ndécrète ce qui suit :",
+     "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+     "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-adoption-510",
+    "ev-avis"
+   ]
+  },
+  {
+   "id": "event-avis-509",
+   "label": "Avis de motion — 50907-04-26",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "status": "needs_review",
+   "date": "2026-04-07",
+   "etape": "avis_motion",
+   "etape_date": "2026-04-07",
+   "reglement_number": "50907-04-26",
+   "municipality": "sainte-genevieve-de-batiscan",
+   "description": "Avis de motion pour modifier le plan d’urbanisme 309-19-01-09 en concordance avec le règlement 2024-147A de la MRC des Chenaux. Numéro et objet reproduits selon l’avis; divergence avec le premier projet adopté.",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Avis de motion est donné par M. Benoit Magny pour l’adoption du règlement no 50907-04-26 modifiant le plan d’urbanisme règlement no 309-19-01-09 concordance avec",
+     "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+     "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-avis"
+   ]
+  },
+  {
+   "id": "event-avis-510",
+   "label": "Avis de motion — 51007-04-26",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "status": "needs_review",
+   "date": "2026-04-07",
+   "etape": "avis_motion",
+   "etape_date": "2026-04-07",
+   "reglement_number": "51007-04-26",
+   "municipality": "sainte-genevieve-de-batiscan",
+   "description": "Avis de motion pour modifier le zonage 310-19-01-09 en concordance avec le règlement 2024-147A de la MRC des Chenaux. Numéro et objet reproduits selon l’avis; divergence avec le premier projet adopté.",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Avis de motion est donné par M. Roger Marceau pour l’adoption du règlement no 51007-04-26 modifiant le règlement de zonage no 310-19-01-09 concordance avec le",
+     "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+     "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-avis"
+   ]
+  },
+  {
+   "id": "constraint-habitations",
+   "label": "Projet 509 — Distances entre éoliennes et habitations",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "status": "candidate",
+   "constraintType": "autre",
+   "municipality": "sainte-genevieve-de-batiscan",
+   "meetingDate": "2026-04-07",
+   "resolution": "26-04-04",
+   "loi": "Premier projet 509-07-04-26, article 17.9.6",
+   "description": "Normes du premier projet : distance éolienne-habitation d’au moins quatre fois la hauteur de l’éolienne; nouvelle habitation interdite à moins de 600 m; agrandissement ou déplacement d’une habitation existante interdit à moins de 550 m; éolienne jumelée à un groupe électrogène diesel à au moins 1 500 m de toute habitation. Entrée en vigueur non établie.",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "La distance entre toute éolienne et toute habitation doit correspondre à au moins quatre\n(4) fois la hauteur de l’éolienne.",
+     "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+     "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-habitations"
+   ]
+  },
+  {
+   "id": "constraint-humides",
+   "label": "Projet 509 — Protection des milieux humides contre l’implantation d’éoliennes",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "status": "candidate",
+   "constraintType": "milieu_humide",
+   "municipality": "sainte-genevieve-de-batiscan",
+   "meetingDate": "2026-04-07",
+   "resolution": "26-04-04",
+   "loi": "Premier projet 509-07-04-26, article 17.9.9",
+   "description": "Le premier projet interdit l’implantation d’une éolienne dans un milieu humide et impose un recul de 100 m des milieux classés utilisation durable ou options de restauration, et de 140 m des milieux classés options de protection ou milieu sensible au plan régional. Entrée en vigueur non établie.",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "L’implantation d’une éolienne est interdite dans un milieu humide.",
+     "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+     "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-humides"
+   ]
+  },
+  {
+   "id": "constraint-captage",
+   "label": "Projet 509 — Protection des captages et des puits privés",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "status": "candidate",
+   "constraintType": "autre",
+   "municipality": "sainte-genevieve-de-batiscan",
+   "meetingDate": "2026-04-07",
+   "resolution": "26-04-04",
+   "loi": "Premier projet 509-07-04-26, article 17.9.11",
+   "description": "Le premier projet exige que toute éolienne soit implantée hors des aires de protection des ouvrages de captage des eaux souterraines et à au moins 100 m d’un puits privé. Entrée en vigueur non établie.",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "Toute éolienne doit être implantée à l’extérieur des aires de protection des ouvrages de\ncaptage des eaux souterraines.",
+     "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+     "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+     "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-captage"
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-zonage",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "Ce règlement modifie le règlement de zonage numéro 310-19-01-09."
+  },
+  {
+   "id": "ev-plan",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "Ce règlement modifie le plan d’urbanisme 309-19-01-09."
+  },
+  {
+   "id": "ev-adoption-509",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "EN CONSÉQUENCE, il est proposé par M. Yanick Godon, appuyé par Mme Virginie\nLavoie et résolu à l’unanimité des conseillers d’adopter le règlement 509-07-04-26 et\ndécrète ce qui suit :"
+  },
+  {
+   "id": "ev-adoption-510",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "EN CONSÉQUENCE, il est proposé par M. Hugo Massicotte, appuyé par M. Yanick\nGodon et résolu à l’unanimité des conseillers d’adopter le règlement 510-07-04-26 et\ndécrète ce qui suit :"
+  },
+  {
+   "id": "ev-avis",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "Avis de motion est donné par M. Benoit Magny pour l’adoption du règlement no 50907-04-26 modifiant le plan d’urbanisme règlement no 309-19-01-09 concordance avec\nle règlement 2024-147A de la MRC des Chenaux.\nAvis de motion est donné par M. Roger Marceau pour l’adoption du règlement no 51007-04-26 modifiant le règlement de zonage no 310-19-01-09 concordance avec le\nrèglement 2024-147A de la MRC des Chenaux."
+  },
+  {
+   "id": "ev-habitations",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "La distance entre toute éolienne et toute habitation doit correspondre à au moins quatre\n(4) fois la hauteur de l’éolienne. Toute nouvelle habitation ne peut s’implanter à moins\nde 600 mètres d’une\néolienne. L’agrandissement ou le déplacement d’une habitation existante n’est pas\npermis à moins de 550 mètres d’une éolienne. Toutefois, lorsque jumelée à un groupe\nélectrogène diesel, toute éolienne doit être située à au moins 1500 mètres de toute\nhabitation."
+  },
+  {
+   "id": "ev-humides",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "L’implantation d’une éolienne est interdite dans un milieu humide. Toute éolienne doit\naussi se situer à au moins 100 mètres d’un milieu humide classé utilisation durable ou\noptions de restauration et à au moins 140 mètres d’un milieu humide classé options de\nprotection ou milieu sensible comme\nindiqué dans le Plan régional des milieux humides et hydriques de la MRC des Chenaux."
+  },
+  {
+   "id": "ev-captage",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+   "modality": "pdf",
+   "page": 6,
+   "excerpt": "Toute éolienne doit être implantée à l’extérieur des aires de protection des ouvrages de\ncaptage des eaux souterraines.\nToute éolienne doit être implantée à au moins 100 mètres d’un puits privé."
+  },
+  {
+   "id": "ev-demande",
+   "source_file": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-genevieve-de-batiscan/cas/2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4.pdf",
+   "docSha": "2468693f7188b8ebae48472c0336489c31da03c711b3072bdfd598c0bb87ebf4",
+   "sourceUrl": "https://www.stegenevieve.ca/upload/seances-du-conseil/2026-04.pdf",
+   "modality": "pdf",
+   "page": 18,
+   "excerpt": "QUE la municipalité de Sainte-Geneviève-de-Batiscan demande aux membres de la\nCommission parlementaire de l’aménagement du territoire de l’Assemblée nationale\nd’introduire un amendement au projet de loi no 22 abrogeant l’article 245.1 de la Loi sur\nl’aménagement et l’urbanisme afin de respecter le consensus établi entre le ministère et\nses partenaires municipaux;"
+  }
+ ],
+ "input_tokens": 18100,
+ "output_tokens": 6500
+}

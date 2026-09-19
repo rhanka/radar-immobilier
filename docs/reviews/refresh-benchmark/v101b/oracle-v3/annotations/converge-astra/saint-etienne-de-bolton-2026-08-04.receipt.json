@@ -1,0 +1,36 @@
+{
+ "documentId": "saint-etienne-de-bolton-2026-08-04",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dbb8601a27768bf3efa9e573dfd219a14a6d99a501dc980f410fefeaa4b1a383",
+ "inputSha256": "46cf3a024de78ad30372c0e9425b4c65f19e257ba2c0214083ff67d19ef79014",
+ "responseSha256": "1d6c502e8b8a16ff1c0989de7723aaff940208289ff6fc1ad48afc9277a3eed6",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 66606,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 15067,
+  "outputTokens": 2106,
+  "totalTokens": 17173
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 66603,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:22:52.649Z"
+}

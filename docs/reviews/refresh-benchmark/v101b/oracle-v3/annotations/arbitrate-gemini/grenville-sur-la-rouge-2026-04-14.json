@@ -1,0 +1,74 @@
+{
+ "documentId": "grenville-sur-la-rouge-2026-04-14",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "196330a7c7fa54a291562c8f0834a06cd57a06f85ca3936dca9441b7e2699550",
+ "verificationSha256": "258c8c90f8c5bd2c0eb09041b7f30f7573be546eb1870430f122727e26383545",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"La seule décision adoptée lors de la séance est le « Refus de la demande de PIIA du 47, rue Donald Campbell », la mention « compte tenu du refus d’accorder la demande de dérogation mineure » n'étant qu'un motif justificatif ou rappel historique au sein du même dossier qui, selon les règles, « ne crée pas d'unité en plus de la résolution qui la traite » et ne doit pas multiplier le rappel. Les positions B et C sont rejetées car elles créent une unité distincte à partir d'un simple considérant causal.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u04",
+   "verificationItem": "i04",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Refus de dérogation mineure — 47, rue Donald Campbell — abri d’auto",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "47, rue Donald Campbell",
+      "page": 2,
+      "citation": "Refus de la demande de PIIA du 47, rue Donald Campbell, compte tenu du refus d’accorder la demande de dérogation mineure concernant la construction d’un abri d’auto",
+      "anchor": "47, rue Donald Campbell",
+      "spanStart": 1206,
+      "spanEnd": 1370
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 2 atteste expressément le refus de la dérogation mineure concernant l’abri d’auto au 47, rue Donald Campbell, procédure distincte du PIIA."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le texte page 2 atteste le « refus d'accorder la demande de dérogation mineure concernant la construction d'un abri d'auto », objet distinct de type derogation_mineure sur la même adresse, donc pas un doublon même type/même fait; les refus doivent rester des refus."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La dérogation mineure n'est mentionnée que comme motif justificatif du refus de PIIA pour le même dossier, or les mentions historiques du même dossier ne multiplient pas le rappel."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "La seule décision adoptée lors de la séance est le « Refus de la demande de PIIA du 47, rue Donald Campbell », la mention « compte tenu du refus d’accorder la demande de dérogation mineure » n'étant qu'un motif justificatif ou rappel historique au sein du même dossier qui, selon les règles, « ne crée pas d'unité en plus de la résolution qui la traite » et ne doit pas multiplier le rappel. Les positions B et C sont rejetées car elles créent une unité distincte à partir d'un simple considérant causal."
+  }
+ ]
+}

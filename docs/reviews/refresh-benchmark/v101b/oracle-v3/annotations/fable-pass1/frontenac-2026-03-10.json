@@ -1,0 +1,64 @@
+{
+ "documentId": "frontenac-2026-03-10",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "22976802881d0444051f1facfc9e0e7101dac01c24d8e0d2389843fb3c4e92e0",
+ "rawText": "{\"operations\":[\n {\"op\":\"correct\",\"id\":\"u05\",\"unit\":{\"label\":\"Report de l’adoption — règlement 504-2026 modifiant les dispositions sur la démolition d’immeubles\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"504-2026\",\"page\":37,\"citation\":\"Adoption reportée du règlement no 504-2026 modifiant le règlement relatif à la démolition d’immeubles no 469-2023\",\"anchor\":\"règlement no 504-2026\"},\"reason\":\"La citation doit être recopiée à l’identique : le texte de la page 37 porte la coupure « cer-/taines » (« afin de modifier cer- » / « taines dispositions »), donc « certaines dispositions » n’existe pas tel quel dans le texte ; citation raccourcie à un extrait contigu sans coupure de mot.\"},\n {\"op\":\"correct\",\"id\":\"u10\",\"unit\":{\"label\":\"Report de l’avis de motion et de la présentation — règlement 510-2026, concordance du règlement de zonage\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"510-2026\",\"page\":37,\"citation\":\"Avis de motion et présentation reportée du règlement no 510-2026 afin de faire la concordance du règlement de zonage no 243-90\",\"anchor\":\"règlement no 510-2026\"},\"reason\":\"La citation doit être recopiée à l’identique : le texte de la page 37 porte la coupure « en-/vers » (« no 243-90 en- » / « vers le schéma »), donc « envers le schéma » n’existe pas tel quel dans le texte ; citation raccourcie à un extrait contigu sans coupure de mot.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Report de l’adoption — règlement 504-2026 modifiant les dispositions sur la démolition d’immeubles",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "504-2026",
+    "page": 37,
+    "citation": "Adoption reportée du règlement no 504-2026 modifiant le règlement relatif à la démolition d’immeubles no 469-2023",
+    "anchor": "règlement no 504-2026"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte de la page 37 porte la coupure « cer-/taines » (« afin de modifier cer- » / « taines dispositions »), donc « certaines dispositions » n’existe pas tel quel dans le texte ; citation raccourcie à un extrait contigu sans coupure de mot."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 510-2026, concordance du règlement de zonage",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "510-2026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement no 510-2026 afin de faire la concordance du règlement de zonage no 243-90",
+    "anchor": "règlement no 510-2026"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte de la page 37 porte la coupure « en-/vers » (« no 243-90 en- » / « vers le schéma »), donc « envers le schéma » n’existe pas tel quel dans le texte ; citation raccourcie à un extrait contigu sans coupure de mot."
+  }
+ ],
+ "applied": [
+  {
+   "op": "correct",
+   "id": "u05"
+  },
+  {
+   "op": "correct",
+   "id": "u10"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 10
+}

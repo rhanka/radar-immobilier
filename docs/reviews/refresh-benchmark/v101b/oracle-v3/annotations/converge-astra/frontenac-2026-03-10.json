@@ -1,0 +1,121 @@
+{
+ "documentId": "frontenac-2026-03-10",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4123b4b6aa6edb3493ae47527db68392cd5733de0363aa4ec717521c25f429d1",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-080, page 19, adopte la demande de vente pour défaut de paiement des taxes du lot cadastral 4 972 283, sans attester une vente réalisée.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-087, page 23, atteste la conformité municipale de la demande CPTAQ 453132 de Groupe Exca inc., sans constituer une autorisation de la CPTAQ.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-094, page 27, accepte l’entente de conservation des milieux humides riverains du lac Aux Araignées et précise une durée de 25 ans suivant la finalisation du projet.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La page 37 constate explicitement le report de l’adoption du premier projet du règlement 503-2026, correctement présenté comme un report et non comme une adoption acquise.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La citation complète figure à la page 37 et atteste le report de l’adoption du règlement 504-2026 modifiant les dispositions relatives aux bâtiments assujettis au règlement de démolition.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La page 37 mentionne expressément le report de l’avis de motion et de la présentation du règlement 506-2026 sur la concordance du règlement de construction, sans constater leur réalisation.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"La page 37 atteste le report de l’avis de motion et de la présentation du règlement 507-2026 concernant la concordance du règlement de lotissement 244-90.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"La page 37 atteste le report de l’avis de motion et de la présentation du règlement 508-2026 concernant la concordance du règlement sur les permis et certificats 242-90.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"La page 37 emploie bien le numéro 5092026 et constate le report de l’avis de motion et de la présentation du règlement visant à remplacer le plan d’urbanisme 241-90.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"La citation complète de la page 37 atteste le report de l’avis de motion et de la présentation du règlement 510-2026 visant la concordance du règlement de zonage 243-90 avec le schéma de la MRC du Granit.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v2"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v2"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-080, page 19, adopte la demande de vente pour défaut de paiement des taxes du lot cadastral 4 972 283, sans attester une vente réalisée."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-087, page 23, atteste la conformité municipale de la demande CPTAQ 453132 de Groupe Exca inc., sans constituer une autorisation de la CPTAQ."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-094, page 27, accepte l’entente de conservation des milieux humides riverains du lac Aux Araignées et précise une durée de 25 ans suivant la finalisation du projet."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La page 37 constate explicitement le report de l’adoption du premier projet du règlement 503-2026, correctement présenté comme un report et non comme une adoption acquise."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La citation complète figure à la page 37 et atteste le report de l’adoption du règlement 504-2026 modifiant les dispositions relatives aux bâtiments assujettis au règlement de démolition."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La page 37 mentionne expressément le report de l’avis de motion et de la présentation du règlement 506-2026 sur la concordance du règlement de construction, sans constater leur réalisation."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La page 37 atteste le report de l’avis de motion et de la présentation du règlement 507-2026 concernant la concordance du règlement de lotissement 244-90."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La page 37 atteste le report de l’avis de motion et de la présentation du règlement 508-2026 concernant la concordance du règlement sur les permis et certificats 242-90."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La page 37 emploie bien le numéro 5092026 et constate le report de l’avis de motion et de la présentation du règlement visant à remplacer le plan d’urbanisme 241-90."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La citation complète de la page 37 atteste le report de l’avis de motion et de la présentation du règlement 510-2026 visant la concordance du règlement de zonage 243-90 avec le schéma de la MRC du Granit."
+  }
+ ]
+}

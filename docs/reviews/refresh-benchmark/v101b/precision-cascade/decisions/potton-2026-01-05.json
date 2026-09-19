@@ -1,0 +1,253 @@
+{
+ "documentId": "potton-2026-01-05",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "7392feab072c2d6850e6475095ade7eaee8076d8488f0a857c1544f9e8f3e606",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-2026-01-17"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure acceptée — lot 5553677, chemin de la Mine",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment\nprincipal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant"
+      },
+      {
+       "page": 14,
+       "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment\nprincipal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant alors que les\narticles 22 et 113 du règlement de zonage numéro 2001\n-291 et ses amendements stipule nt\nqu’un bâtiment principal n’est pas autorisé en cour avant minimale et doit être implanté à\nune distance d’au moins 15 m de la ligne de lot avant en zone municipale RU\n-6, ce qui\nconstitue un empi étement de 9 mètres aux dispositions minimales ap plicables.\nLE TOUT pour le lot 5 553 677, ch. de la Mine.\nAdoptée ."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2001-291"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 2001-291",
+     "stage": null,
+     "objet": "2001-291",
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment\nprincipal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant"
+      },
+      {
+       "page": 14,
+       "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment\nprincipal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant alors que les\narticles 22 et 113 du règlement de zonage numéro 2001\n-291 et ses amendements stipule nt\nqu’un bâtiment principal n’est pas autorisé en cour avant minimale et doit être implanté à\nune distance d’au moins 15 m de la ligne de lot avant en zone municipale RU\n-6, ce qui\nconstitue un empi étement de 9 mètres aux dispositions minimales ap plicables.\nLE TOUT pour le lot 5 553 677, ch. de la Mine.\nAdoptée ."
+      },
+      {
+       "page": 44,
+       "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001\nBR qui décrète ce qui suit :\nArticle 1 .\n\n-291-\n\nLe préambule fait partie intégrante du présent règlement.\n\nArticle 2.\nL’article 20 « Extension de l’usage dérogatoire d’une construction ou d’un\nterrain » du règlement de zonage 2001 -291 et ses amendements se lisant comme suit\n:"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-2026-01-18"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — construction résidentielle acceptée, chemin du Mont-Bear",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "D’ACCEPTER le projet consiste à construire une habitation unifamiliale sur le lot 5\nle tout conformément aux plans mentionnés précédemment.\n\n753 149,"
+      },
+      {
+       "page": 15,
+       "excerpt": "D’ACCEPTER le projet consiste à construire une habitation unifamiliale sur le lot 5\nle tout conformément aux plans mentionnés précédemment.\n\n753 149,\n\nLE TOUT pour le lot 5 753 149, chemin du Mont -Bear."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-2001-291-br"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Premier projet 2001-291-BR — extension des cimetières dérogatoires",
+     "stage": "1er_projet",
+     "objet": "2001-291-BR",
+     "citations": [
+      {
+       "page": 44,
+       "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001\nBR qui décrète ce qui suit :"
+      },
+      {
+       "page": 44,
+       "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001\nBR qui décrète ce qui suit :\nArticle 1 .\n\n-291-\n\nLe préambule fait partie intégrante du présent règlement.\n\nArticle 2.\nL’article 20 « Extension de l’usage dérogatoire d’une construction ou d’un\nterrain » du règlement de zonage 2001 -291 et ses amendements se lisant comme suit\n:"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-zonage-avis"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion — règlement 2001-291-BR",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "Le Conseiller Cynthia Sherrer donne avis de motion qu’un projet de règlement portant le\nnuméro 2001 -291-BR sera présenté pour adoption."
+      },
+      {
+       "page": 19,
+       "excerpt": "Le Conseiller Cynthia Sherrer donne avis de motion qu’un projet de règlement portant le\nnuméro 2001 -291-BR sera présenté pour adoption.\nLe règlement a pour objet de prévoir spécifiquement les conditions où un cimetière\ndérogatoire protégé par droits acquis pourra être étendu ou modifié."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-zonage-premier-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du premier projet 2001-291-BR",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 44,
+       "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001\nBR qui décrète ce qui suit :"
+      },
+      {
+       "page": 44,
+       "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001\nBR qui décrète ce qui suit :\nArticle 1 .\n\n-291-\n\nLe préambule fait partie intégrante du présent règlement.\n\nArticle 2.\nL’article 20 « Extension de l’usage dérogatoire d’une construction ou d’un\nterrain » du règlement de zonage 2001 -291 et ses amendements se lisant comme suit\n:"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"La dérogation mineure pour le lot 5 553 677 est adoptée à la résolution 2026 01 17.\",\"excerpt\":\"D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment\\nprincipal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2001-291 est simplement mentionné comme règlement cadre antérieur sans faire l'objet d'un acte procédural propre sans son amendement.\",\"excerpt\":\"articles 22 et 113 du règlement de zonage numéro 2001\\n-291 et ses amendements stipule nt\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le projet assujetti au PIIA sur le lot 5 753 149 est approuvé par la résolution 2026 01 18.\",\"excerpt\":\"D’ACCEPTER le projet consiste à construire une habitation unifamiliale sur le lot 5\\n\\n753 149,\\n\\nLE TOUT pour le lot 5 753 149, chemin du Mont -Bear.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du premier projet de règlement 2001-291-BR est adoptée à la résolution 2026 01 26.\",\"excerpt\":\"QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001\\n\\n-291-\\n\\nBR qui décrète ce qui suit :\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion pour le règlement 2001-291-BR est donné au point 6.3 par la conseillère Cynthia Sherrer.\",\"excerpt\":\"Le Conseiller Cynthia Sherrer donne avis de motion qu’un projet de règlement portant le\\nnuméro 2001 -291-BR sera présenté pour adoption.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du premier projet de règlement 2001-291-BR est consignée sous le point 7.4.\",\"excerpt\":\"QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001\\n\\n-291-\\n\\nBR qui décrète ce qui suit :\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "La dérogation mineure pour le lot 5 553 677 est adoptée à la résolution 2026 01 17.",
+   "excerpt": "D’ACCEPTER la présente demande qui consiste à permettre l’implantation d’un bâtiment\nprincipal (habitation) en cour avant minimale, soit à 6 m de la ligne de lot avant"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2001-291 est simplement mentionné comme règlement cadre antérieur sans faire l'objet d'un acte procédural propre sans son amendement.",
+   "excerpt": "articles 22 et 113 du règlement de zonage numéro 2001\n-291 et ses amendements stipule nt"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le projet assujetti au PIIA sur le lot 5 753 149 est approuvé par la résolution 2026 01 18.",
+   "excerpt": "D’ACCEPTER le projet consiste à construire une habitation unifamiliale sur le lot 5\n\n753 149,\n\nLE TOUT pour le lot 5 753 149, chemin du Mont -Bear."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "L'adoption du premier projet de règlement 2001-291-BR est adoptée à la résolution 2026 01 26.",
+   "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001\n\n-291-\n\nBR qui décrète ce qui suit :"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion pour le règlement 2001-291-BR est donné au point 6.3 par la conseillère Cynthia Sherrer.",
+   "excerpt": "Le Conseiller Cynthia Sherrer donne avis de motion qu’un projet de règlement portant le\nnuméro 2001 -291-BR sera présenté pour adoption."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "L'adoption du premier projet de règlement 2001-291-BR est consignée sous le point 7.4.",
+   "excerpt": "QUE la municipalité du Canton de Potton adopte le premier projet de règlement 2001\n\n-291-\n\nBR qui décrète ce qui suit :"
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 2001-291 est simplement mentionné comme règlement cadre antérieur sans faire l'objet d'un acte procédural propre sans son amendement."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "La dérogation mineure pour le lot 5 553 677 est adoptée à la résolution 2026 01 17."
+   },
+   {
+    "act": "A03",
+    "reason": "Le projet assujetti au PIIA sur le lot 5 753 149 est approuvé par la résolution 2026 01 18."
+   },
+   {
+    "act": "A04",
+    "reason": "L'adoption du premier projet de règlement 2001-291-BR est adoptée à la résolution 2026 01 26."
+   },
+   {
+    "act": "A05",
+    "reason": "Un avis de motion pour le règlement 2001-291-BR est donné au point 6.3 par la conseillère Cynthia Sherrer."
+   },
+   {
+    "act": "A06",
+    "reason": "L'adoption du premier projet de règlement 2001-291-BR est consignée sous le point 7.4."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 3,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2243,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 40135,
+   "outputTokens": 538,
+   "totalTokens": 40673
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2076
+  },
+  "inputSha256": "8ec9ee93f55da22925afebb347b3e2b3e74e199097a777750ef54005db54447e"
+ }
+}

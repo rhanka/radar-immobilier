@@ -1,0 +1,13 @@
+{
+ "id": "saint-stanislas--des-chenaux-2026-04-07",
+ "rc": 0,
+ "latencyMs": 314224,
+ "inputTokens": 2,
+ "outputTokens": 34495,
+ "cacheRead": 0,
+ "cacheCreate": 15035,
+ "costUsd": 1.0235759999999998,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 64755
+}

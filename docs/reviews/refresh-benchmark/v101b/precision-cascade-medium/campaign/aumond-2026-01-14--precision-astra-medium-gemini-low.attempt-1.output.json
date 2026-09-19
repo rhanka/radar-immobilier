@@ -1,0 +1,242 @@
+{
+ "nodes": [
+  {
+   "id": "source-2026-01-14",
+   "label": "Procès-verbal du conseil d’Aumond du 14 janvier 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "status": "candidate",
+   "municipality": "aumont",
+   "date": "2026-01-14",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "url": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Séance ordinaire du conseil de la Municipalité d'Aumond tenue au Centre culturel et\ncommunautaire situé au 664, route Principale à Aumond, le mercredi 14 janvier 2026 à",
+     "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+     "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-01-0001",
+   "label": "Règlement 2026-01-0001 — Tarification applicable pour 2026",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "status": "candidate",
+   "numero": "2026-01-0001",
+   "title": "Règlement établissant la tarification applicable pour l’année 2026",
+   "stage": "projet",
+   "municipality": "aumont",
+   "meetingDate": "2026-01-14",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "evidence_refs": [
+    "ev-tarification"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Le projet de règlement 2026-01-0001 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie.",
+     "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+     "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-taxe-fonciere",
+   "label": "Adoption du taux de taxe foncière 2026",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "status": "candidate",
+   "category": "fiscalite",
+   "kind": "taxe_fonciere",
+   "date": "2026-01-14",
+   "meetingDate": "2026-01-14",
+   "municipality": "aumont",
+   "scope": "local",
+   "resolution": "2026-01-A5381",
+   "description": "Adoption du taux de taxe foncière pour 2026 à 0.7929 $ par 100 $ d’évaluation.",
+   "outcome": "adopté à l’unanimité",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "evidence_refs": [
+    "ev-foncier"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Il est résolu par tous les conseillers présents que le conseil\nmunicipal adopte le taux de la taxe foncière pour l’année 2026 à\n0.7929$ /100 $ d’évaluation.",
+     "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+     "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-taxe-jeness",
+   "label": "Taxe de secteur du chemin Jeness pour 2026",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "status": "candidate",
+   "category": "fiscalite",
+   "kind": "taxe_de_secteur",
+   "date": "2026-01-14",
+   "meetingDate": "2026-01-14",
+   "municipality": "aumont",
+   "scope": "local",
+   "resolution": "2026-01-A5384",
+   "description": "Adoption pour 2026 d’une taxe de secteur de 495.00 $ par propriété pour le règlement d’emprunt du chemin Jeness.",
+   "amount_cad": 495,
+   "outcome": "adopté à l’unanimité",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "evidence_refs": [
+    "ev-jeness"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Il est résolu par tous les conseillers présents que le conseil\nmunicipal adopte le taux de taxe de secteur pour le règlement\nd’emprunt du chemin Jeness à 495.00 $ par propriété.",
+     "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+     "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-2026-01-14",
+   "target": "bylaw-2026-01-0001",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "evidence_refs": [
+    "ev-tarification"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Le projet de règlement 2026-01-0001 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie.",
+     "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+     "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-01-14",
+   "target": "signal-taxe-fonciere",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "evidence_refs": [
+    "ev-foncier"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Il est résolu par tous les conseillers présents que le conseil\nmunicipal adopte le taux de la taxe foncière pour l’année 2026 à\n0.7929$ /100 $ d’évaluation.",
+     "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+     "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-01-14",
+   "target": "signal-taxe-jeness",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "evidence_refs": [
+    "ev-jeness"
+   ],
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Il est résolu par tous les conseillers présents que le conseil\nmunicipal adopte le taux de taxe de secteur pour le règlement\nd’emprunt du chemin Jeness à 495.00 $ par propriété.",
+     "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+     "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+     "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-tarification",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "Le projet de règlement 2026-01-0001 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie."
+  },
+  {
+   "id": "ev-foncier",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "Il est résolu par tous les conseillers présents que le conseil\nmunicipal adopte le taux de la taxe foncière pour l’année 2026 à\n0.7929$ /100 $ d’évaluation."
+  },
+  {
+   "id": "ev-jeness",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Il est résolu par tous les conseillers présents que le conseil\nmunicipal adopte le taux de taxe de secteur pour le règlement\nd’emprunt du chemin Jeness à 495.00 $ par propriété."
+  },
+  {
+   "id": "ev-remuneration",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "Le projet de règlement 2026-01-0002 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie."
+  },
+  {
+   "id": "ev-modification",
+   "source_file": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "rawRef": "raw/proces-verbaux-aumond/cas/11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e.pdf",
+   "docSha": "11de2c5281a1b226395e963c7ac55fe8d4f9a3f06fbfaf1f62507a29eac4914e",
+   "sourceUrl": "https://www.aumond.ca/images/2026-01-14_-_ordinaire.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "Avis de motion – Règlement 2026-01-0002 modifiant le\nrèglement 2019-02 concernant la rémunération des élus"
+  }
+ ],
+ "input_tokens": 9400,
+ "output_tokens": 4700
+}

@@ -1,0 +1,368 @@
+Schema: {"contract_version":"immo-pv-extraction-v9","type":"Graphify Extraction","required":["nodes","edges","input_tokens","output_tokens"],"ontology":{"profile_id":"radar-immobilier-zonage","profile_version":"2","allowed_node_types":["Source","Bylaw","Zone","DesignationEvent","Signal","Constraint"],"node_properties":{"Source":{"docSha":{"type":"string","description":"SHA-256 hex du fichier source"},"sha256":{"type":"string","description":"Alias legacy de docSha"},"date":{"type":"string","format":"date","description":"Date du document"},"municipality":{"type":"string","description":"Slug de la municipalité"},"citySlug":{"type":"string","description":"Alias legacy municipality"},"url":{"type":"string","description":"URL d'accès au document"},"sourceUrl":{"type":"string","description":"Alias legacy de url"},"pdfPath":{"type":"string","description":"Chemin SCW vers le PDF"},"sourceKind":{"type":"string","description":"Type de source : pv/reglement/avis/media"},"sourceType":{"type":"string","description":"Alias legacy de sourceKind"},"format":{"type":"string","description":"Format : pdf/video/html"},"fetchedAt":{"type":"string","format":"datetime","description":"Horodatage de récupération"},"slug":{"type":"string","description":"Slug du document"},"rawRef":{"type":"string","description":"Référence brute dans le document"},"status":{"type":"string","enum":["candidate","attached","needs_review","validated","rejected","superseded"],"description":"Exact node status accepted by the product validator."}},"Bylaw":{"numero":{"type":"string","description":"Numéro officiel du règlement"},"bylawNumber":{"type":"string","description":"Alias legacy de numero"},"number":{"type":"string","description":"Alias legacy de numero"},"title":{"type":"string","description":"Titre ou objet officiel"},"titre":{"type":"string","description":"Alias FR de title"},"objet":{"type":"string","description":"Objet du règlement"},"date":{"type":"string","format":"date","description":"Date d'adoption"},"dateAdoption":{"type":"string","format":"date","description":"Alias legacy de date"},"date_adoption":{"type":"string","format":"date","description":"Alias legacy de date"},"status":{"type":"string","enum":["candidate","attached","needs_review","validated","rejected","superseded"],"description":"Exact node status accepted by the product validator."},"statut":{"type":"string","description":"Alias FR de status"},"stage":{"type":"string","description":"Étape : projet/1er_projet/2e_projet/adoption"},"stade":{"type":"string","description":"Alias FR de stage"},"municipality":{"type":"string","description":"Slug de la municipalité"},"citySlug":{"type":"string","description":"Alias legacy municipality"},"zone_cible":{"type":"string","description":"Zone ciblée par le règlement"},"zone_visee":{"type":"string","description":"Alias de zone_cible"},"zones_ciblees":{"type":"array","description":"Zones ciblées (pluriel)"},"docSha":{"type":"string","description":"SHA-256 du document source"},"meetingDate":{"type":"string","format":"date","description":"Date de séance"},"resolution":{"type":"string","description":"Numéro de résolution d'adoption"},"resolutionRef":{"type":"string","description":"Référence complète de résolution"}},"Zone":{"code":{"type":"string","description":"Code officiel de zone"},"zoneCode":{"type":"string","description":"Alias legacy de code"},"code_zone":{"type":"string","description":"Alias legacy de code"},"municipality":{"type":"string","description":"Slug de la municipalité"},"citySlug":{"type":"string","description":"Alias legacy municipality"},"usage":{"type":"string","description":"Usage principal de la zone"},"usages_autorises":{"type":"array","description":"Liste des usages autorisés"},"designation":{"type":"string","description":"Désignation réglementaire"},"status":{"type":"string","enum":["candidate","attached","needs_review","validated","rejected","superseded"],"description":"Exact node status accepted by the product validator."},"statut":{"type":"string","description":"Alias FR de status"},"description":{"type":"string","description":"Description textuelle"},"bylaw":{"type":"string","description":"Règlement constitutif"},"regl_zonage":{"type":"string","description":"Alias legacy de bylaw"},"secteur":{"type":"string","description":"Secteur géographique"},"superficie_m2":{"type":"number","description":"Superficie en m²"},"docSha":{"type":"string","description":"SHA-256 du document source"},"meetingDate":{"type":"string","format":"date","description":"Date de séance"}},"DesignationEvent":{"date":{"type":"string","format":"date","description":"Date de décision"},"meetingDate":{"type":"string","format":"date","description":"Date de séance"},"decision":{"type":"string","description":"Décision : approuvé/refusé/reporté"},"status":{"type":"string","enum":["candidate","attached","needs_review","validated","rejected","superseded"],"description":"Exact node status accepted by the product validator."},"statut":{"type":"string","description":"Alias FR de status"},"kind":{"type":"string","description":"Sous-type : rezonage/derogation/subdivision/piia/cptaq"},"eventType":{"type":"string","description":"Alias legacy de kind"},"type_evenement":{"type":"string","description":"Alias FR de kind"},"dossier":{"type":"string","description":"Numéro de dossier"},"numeroDossier":{"type":"string","description":"Alias legacy de dossier"},"demandeur":{"type":"string","description":"Demandeur (anonymisé si PII)"},"demandeur_corporate":{"type":"string","description":"Demandeur (entité morale seulement)"},"municipality":{"type":"string","description":"Slug de la municipalité"},"citySlug":{"type":"string","description":"Alias legacy municipality"},"resolution":{"type":"string","description":"Numéro de résolution"},"resolutionRef":{"type":"string","description":"Référence complète de résolution"},"docSha":{"type":"string","description":"SHA-256 du document source"},"description":{"type":"string","description":"Description textuelle"},"motif":{"type":"string","description":"Motif de la décision"},"conditions":{"type":"array","description":"Conditions imposées"},"superficie_m2":{"type":"number","description":"Superficie visée (m²)"},"etape":{"type":"string","description":"Étape réglementaire (enum ordonné v2.1) : avis_motion/projet_reglement/consultation_publique/second_projet/adoption/entree_vigueur/derogation_mineure/piia/ppcmoi/usage_conditionnel/inconnu"},"etape_date":{"type":"string","format":"date","description":"Date de cette étape (ISO-8601 YYYY-MM-DD)"},"zone_ref":{"type":"string","description":"Code de zone officiel (v2.2) — extrait si mentionné explicitement dans le PV. Ex: H-431, C-512, H34-327. ANTI-INVENTION: omis si absent du texte."},"no_lot":{"type":"string","description":"Numéro de lot cadastral (v2.2) — chiffres uniquement, espaces supprimés. Ex: 6057912. ANTI-INVENTION: omis si absent du texte."},"reglement_number":{"type":"string","description":"Numéro de règlement impliqué (v2.2) — tel que dans le PV. Ex: Z-2026-042. ANTI-INVENTION: omis si absent du texte."}},"Signal":{"category":{"type":"string","description":"Catégorie principale du signal"},"categorie":{"type":"string","description":"Alias FR de category"},"signalType":{"type":"string","description":"Alias legacy de category"},"signal_type":{"type":"string","description":"Alias legacy de category"},"type_signal":{"type":"string","description":"Alias legacy de category"},"kind":{"type":"string","description":"Sous-type du signal"},"date":{"type":"string","format":"date","description":"Date du signal"},"meetingDate":{"type":"string","format":"date","description":"Date de séance source"},"description":{"type":"string","description":"Description textuelle"},"status":{"type":"string","enum":["candidate","attached","needs_review","validated","rejected","superseded"],"description":"Exact node status accepted by the product validator."},"resolution":{"type":"string","description":"Numéro de résolution source"},"resolutionRef":{"type":"string","description":"Référence complète de résolution"},"scope":{"type":"string","description":"Portée : local/regional"},"portee":{"type":"string","description":"Alias FR de scope"},"municipality":{"type":"string","description":"Slug de la municipalité"},"citySlug":{"type":"string","description":"Alias legacy municipality"},"docSha":{"type":"string","description":"SHA-256 du document source"},"intensite":{"type":"string","description":"Intensité estimée du signal"},"outcome":{"type":"string","description":"Issue finale si connue"},"nb_unites_min":{"type":"integer","description":"Nb d'unités minimum estimé"},"nb_unites_max":{"type":"integer","description":"Nb d'unités maximum estimé"},"amount_cad":{"type":"number","description":"Montant ($CAD) si applicable"},"etape":{"type":"string","description":"Étape réglementaire (enum ordonné v2.1) : avis_motion/projet_reglement/consultation_publique/second_projet/adoption/entree_vigueur/derogation_mineure/piia/ppcmoi/usage_conditionnel/inconnu"},"etape_date":{"type":"string","format":"date","description":"Date de cette étape (ISO-8601 YYYY-MM-DD)"},"zone_ref":{"type":"string","description":"Code de zone officiel (v2.2) — extrait si mentionné explicitement dans le PV. Ex: H-431, C-512. ANTI-INVENTION: omis si absent du texte."},"no_lot":{"type":"string","description":"Numéro de lot cadastral (v2.2) — chiffres uniquement, espaces supprimés. Ex: 6057912. ANTI-INVENTION: omis si absent du texte."},"reglement_number":{"type":"string","description":"Numéro de règlement impliqué (v2.2) — tel que dans le PV. Ex: Z-2026-042. ANTI-INVENTION: omis si absent du texte."}},"Constraint":{"constraintType":{"type":"string","description":"Type : cptaq/milieu_humide/inondable/riveraine/autre"},"constraint_type":{"type":"string","description":"Alias legacy de constraintType"},"type_contrainte":{"type":"string","description":"Alias FR legacy de constraintType"},"status":{"type":"string","enum":["candidate","attached","needs_review","validated","rejected","superseded"],"description":"Exact node status accepted by the product validator."},"statut":{"type":"string","description":"Alias FR de status"},"municipality":{"type":"string","description":"Slug de la municipalité"},"citySlug":{"type":"string","description":"Alias legacy municipality"},"loi":{"type":"string","description":"Loi ou règlement fondement"},"loi_reference":{"type":"string","description":"Alias legacy de loi"},"organisme":{"type":"string","description":"Organisme émetteur"},"resolution":{"type":"string","description":"Numéro de résolution"},"resolutionRef":{"type":"string","description":"Référence complète de résolution"},"description":{"type":"string","description":"Description textuelle"},"docSha":{"type":"string","description":"SHA-256 du document source"},"superficie_concernee_m2":{"type":"number","description":"Superficie concernée (m²)"},"meetingDate":{"type":"string","format":"date","description":"Date de séance"},"dossier":{"type":"string","description":"Numéro de dossier (CPTAQ etc.)"}}},"relation_signatures":{"governed_by":{"source_node_types":["Zone"],"target_node_types":["Bylaw"],"requires_evidence_refs":true},"amends":{"source_node_types":["Bylaw"],"target_node_types":["Bylaw"],"requires_evidence_refs":true},"defines":{"source_node_types":["Bylaw"],"target_node_types":["Zone"],"requires_evidence_refs":true},"rezones":{"source_node_types":["DesignationEvent"],"target_node_types":["Zone"],"requires_evidence_refs":true},"splits":{"source_node_types":["DesignationEvent"],"target_node_types":["Zone"],"requires_evidence_refs":true},"merges":{"source_node_types":["DesignationEvent"],"target_node_types":["Zone"],"requires_evidence_refs":true},"supersedes":{"source_node_types":["DesignationEvent"],"target_node_types":["DesignationEvent"],"requires_evidence_refs":false},"lifecycle_predecessor":{"source_node_types":["DesignationEvent","Bylaw"],"target_node_types":["DesignationEvent","Bylaw"],"requires_evidence_refs":false},"replaces":{"source_node_types":["Bylaw"],"target_node_types":["Bylaw"],"requires_evidence_refs":true},"targets_zone":{"source_node_types":["DesignationEvent"],"target_node_types":["Zone"],"requires_evidence_refs":true},"raises_signal":{"source_node_types":["DesignationEvent"],"target_node_types":["Signal"],"requires_evidence_refs":true},"concerns":{"source_node_types":["Signal","DesignationEvent"],"target_node_types":["Zone"],"requires_evidence_refs":true},"constrains":{"source_node_types":["Constraint"],"target_node_types":["Zone"],"requires_evidence_refs":true},"applies_to":{"source_node_types":["Constraint","Bylaw"],"target_node_types":["Zone"],"requires_evidence_refs":true},"mentions":{"source_node_types":["Source"],"target_node_types":["Zone","Bylaw","DesignationEvent","Constraint","Signal"],"requires_evidence_refs":true},"supports":{"source_node_types":["Source"],"target_node_types":["Bylaw","DesignationEvent","Signal"],"requires_evidence_refs":true},"references":{"source_node_types":["Source"],"target_node_types":["Bylaw","DesignationEvent"],"requires_evidence_refs":true},"flags":{"source_node_types":["Source"],"target_node_types":["Bylaw","DesignationEvent"],"requires_evidence_refs":true},"derived_from":{"source_node_types":["Zone","Bylaw","DesignationEvent","Constraint"],"target_node_types":["Source"],"requires_evidence_refs":true}}},"graph_contract":{"node_file_type":["code","concept","document","image","paper","rationale"],"edge_confidence":["AMBIGUOUS","EXTRACTED","INFERRED"],"entity_source_file":{"const":"raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf"},"evidence_refs":{"type":"array","items":{"type":"string","references":"evidence[].id"},"minItems":1,"required_for_node_types":["Constraint"],"required_for_relation_types":["governed_by","amends","defines","rezones","splits","merges","supersedes","lifecycle_predecessor","replaces","targets_zone","raises_signal","concerns","constrains","applies_to","mentions","supports","references","flags","derived_from"],"required_for":["every edge"]},"entity_citations":{"node_field":"nodes[].citations","edge_field":"edges[].citations","required_for":["every node","every edge"],"type":"array","minItems":1,"items":{"type":"object","required":["page","excerpt"],"properties":{"page":{"enum":[1,2]},"excerpt":{"type":"string","minLength":20,"maxLength":200,"description":"Exact beginning of the decision sentence, 20 to 200 characters, copied verbatim and never completed or corrected. A field label such as \"Zone : RUR-12\" is a property, never an excerpt."}},"description":"The profile injects the constant PDF identity and bounds the excerpt before validation; an entity citation excerpt under 20 code points, or under 12 once normalized to letters and digits, is refused as entity_citation_excerpt_too_short."},"description":"Emit only page and excerpt; the profile injects the constant PDF identity."}},"evidence":{"pdf_identity":{"source_file":"raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf","rawRef":"raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf","docSha":"00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28","sourceUrl":"https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf","modality":"pdf"},"allowedPages":[1,2],"evidence_item":{"type":"object","required":["id","source_file","rawRef","docSha","sourceUrl","modality","page","excerpt"],"properties":{"id":{"type":"string","minLength":1},"source_file":{"const":"raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf"},"rawRef":{"const":"raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf"},"docSha":{"const":"00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28"},"sourceUrl":{"const":"https://stpolycarpe.ca/wp-content/uploads/2026/01/ordre-du-jour-conseil-19-01-2026.pdf"},"modality":{"const":"pdf"},"page":{"enum":[1,2]},"excerpt":{"type":"string","minLength":12,"description":"Verbatim text from the cited page, at least 12 characters once normalized to letters and digits only, case and accents folded; a shorter excerpt is refused as excerpt_below_anchor_floor. Unlike an entity citation, an evidence item repeats the full PDF identity above and is never truncated."}}}},"constraints":["Omit facts absent from the chunk, including in-force status and residential unit counts.","An empty nodes/edges/evidence extraction is valid; the enclosing chunk retains the verified PDF identity."]}
+
+Contract immo-pv-extraction-v9. Emit only these node types: Source, Bylaw, Zone, DesignationEvent, Signal, Constraint.
+Every node file_type must be "document" for this PDF. Edge confidence, when present, must be
+"AMBIGUOUS", "EXTRACTED", or "INFERRED"; never emit a numeric confidence.
+Node status is type-specific: use only ontology.node_properties.<node_type>.status.enum. These enums
+are generated from, and exactly align with, the allowed_statuses list below.
+Every entity must use the exact PDF identity in the schema. Evidence refs are
+non-empty arrays of string IDs from evidence[].id, never embedded objects. Evidence refs do not replace citations.
+Every edge must carry at least one evidence_refs ID that exists in evidence[]. Minimal example:
+{"edges":[{"evidence_refs":["ev-1"]}],"evidence":[{"id":"ev-1"}]}.
+Every node and every edge must include a non-empty citations array. Each citation must contain only page
+and excerpt. The excerpt is the exact beginning of the cited passage, between 20 and 200 characters;
+never complete or correct it.
+The excerpt carries the act, never a bare field label. A line that is only a label and a code, such as
+"Zone : RUR-12" or "Lot : 5 662 886", is a property: put the zone code in the node property (Zone.code,
+or zone_ref on Signal and DesignationEvent) and cite the sentence that states the act instead.
+Contrastive example, both lines taken from the same real PV page:
+excerpt "Zone : RUR-12" is refused; excerpt
+"QUE le conseil municipal autorise, sur recommandation du CCU," is correct.
+On an agenda, which lists planned items rather than decisions taken, the listed item is the act itself:
+cite that agenda line. Never return an empty extraction merely because the document carries no
+decision sentence.
+Any entity citation excerpt under 20 characters is refused as entity_citation_excerpt_too_short, before
+the page anchor is even checked: keep copying the page verbatim from that point
+until you pass 20 characters, without inventing the continuation.
+Do not repeat the document identity inside citations; the profile
+injects it before validation. Follow the relation source/target signatures exactly. Copy every excerpt
+exactly as it appears in the PDF text, including mistakes, spacing, and typography; correct nothing.
+Contrastive example: if the PDF text says "YvesMalouin", keep "YvesMalouin"; never "Yves-Malouin".
+If no supported fact is grounded in the PDF, return empty nodes, edges, and evidence.
+
+# Graphify Ontology Dataprep Extraction Prompt
+
+Profile: radar-immobilier-zonage 2
+Profile hash: 90ea7ddd55893c9f52a6f68d58a809cf9a620099c32d08c0f886e640b39aa64a
+
+## Allowed node types
+- Municipality (registry=municipalities)
+- Source (source_backed=true)
+- Bylaw (status_policy=hardenable)
+- Zone (status_policy=hardenable)
+- DesignationEvent (status_policy=hardenable)
+- Signal
+- Lot (registry=cadastre, status_policy=hardenable)
+- Adresse (registry=adresses_qc, status_policy=hardenable)
+- Constraint (source_backed=true)
+
+## Allowed relation types
+- located_in: Zone | Lot | Adresse | Municipality | Source -> Municipality
+- located_at: Lot -> Adresse
+- governed_by: Zone -> Bylaw
+- amends: Bylaw -> Bylaw
+- defines: Bylaw -> Zone
+- rezones: DesignationEvent -> Zone
+- splits: DesignationEvent -> Zone
+- merges: DesignationEvent -> Zone
+- subdivides: DesignationEvent -> Lot
+- supersedes: DesignationEvent -> DesignationEvent
+- lifecycle_predecessor: DesignationEvent | Bylaw -> DesignationEvent | Bylaw
+- replaces: Bylaw -> Bylaw
+- targets_zone: DesignationEvent -> Zone
+- targets_lot: DesignationEvent -> Lot
+- raises_signal: DesignationEvent -> Signal
+- concerns: Signal | DesignationEvent -> Zone | Lot
+- assigned_zone: Lot -> Zone
+- issued_for: Bylaw | DesignationEvent -> Lot
+- subject_of: Lot -> DesignationEvent
+- constrains: Constraint -> Lot | Zone
+- applies_to: Constraint | Bylaw -> Zone | Lot
+- mentions: Source -> Zone | Bylaw | DesignationEvent | Constraint | Lot | Adresse | Signal
+- supports: Source -> Bylaw | DesignationEvent | Signal
+- references: Source -> Bylaw | DesignationEvent
+- flags: Source -> Bylaw | DesignationEvent
+- derived_from: Zone | Bylaw | DesignationEvent | Constraint | Lot | Adresse -> Source
+- has_source: Municipality -> Source
+
+## Relation metadata
+- Profile edges may include generic metadata: review_status, assertion_basis, derivation_method, evidence_refs, confidence_handle, provenance_handle.
+- located_at: requires_evidence=true
+- governed_by: requires_evidence=true
+- amends: requires_evidence=true
+- defines: requires_evidence=true
+- rezones: requires_evidence=true
+- splits: requires_evidence=true
+- merges: requires_evidence=true
+- subdivides: requires_evidence=true
+- replaces: requires_evidence=true
+- targets_zone: requires_evidence=true
+- targets_lot: requires_evidence=true
+- raises_signal: requires_evidence=true
+- concerns: requires_evidence=true
+- issued_for: requires_evidence=true
+- subject_of: requires_evidence=true
+- constrains: requires_evidence=true
+- applies_to: requires_evidence=true
+- mentions: requires_evidence=true
+- supports: requires_evidence=true
+- references: requires_evidence=true
+- flags: requires_evidence=true
+- derived_from: requires_evidence=true
+
+## Registry matching rules
+- municipalities: 0 records, node_type=Municipality
+- cadastre: 0 records, node_type=Lot
+- adresses_qc: 0 records, node_type=Adresse
+- Link registry-backed nodes with registry_id and registry_record_id when a match is available.
+- Do not invent registry matches; use needs_review when evidence is insufficient.
+
+## Citation policy
+- minimum_granularity: page
+- require_source_file: true
+- allow_bbox: when_available
+
+## Status and hardening rules
+- allowed_statuses: candidate, attached, needs_review, validated, rejected, superseded
+- default_status: candidate
+- promotion_requires: source_citation, allowed_relation_type, registry_match_for_registered_types
+- Status transitions:
+  - candidate -> needs_review | validated | rejected
+  - attached -> needs_review | validated | rejected
+  - needs_review -> validated | rejected
+  - validated -> superseded
+
+## Inferred relation policy
+- allow_inferred_relations: false
+- allowed_relation_types: located_in, located_at, assigned_zone, has_source
+- require_evidence_refs: true
+
+## Evidence requirements
+- require_evidence_refs: true
+- min_refs: 1
+- node_types: Constraint
+- relation_types: governed_by, amends, rezones, splits, merges, subdivides, constrains, mentions, derived_from, targets_zone, targets_lot, raises_signal, supports, references, concerns, applies_to, flags, issued_for, subject_of, defines
+
+## Configured input hints
+- No project config was provided.
+
+## JSON Extraction output schema
+- Return one JSON object with keys: nodes, edges, hyperedges, input_tokens, output_tokens.
+- nodes require: id, label, file_type, source_file.
+- profile nodes should include: node_type, status, review_status, citations, evidence_refs, and registry identifiers when matched.
+- edges require: source, target, relation, confidence, source_file.
+- profile edges should include citations, status, review_status, assertion_basis, derivation_method, and evidence_refs.
+- Optional profile v2 records: canonical_entities, mentions, occurrences, evidence, mappings.
+
+## Generic product boundary
+- Do not invent customer, partner, project, proprietary ontology, or private domain content.
+- Use only the configured generic profile, registries, and evidence in the current chunk.
+- Keep examples synthetic and product-generic.
+
+# Current Chunk
+File: raw/proces-verbaux-saint-polycarpe/cas/00304b724971143cb1fd634e244f5a2ac57aeb4c856c8e1f3395c7a6f69e2a28.pdf
+Chunk type: document
+
+## Document guidance
+- extract procedures, processes, components, tools, and cited evidence.
+- prefer explicit source text over inference; use AMBIGUOUS for weak evidence.
+
+## Chunk content
+[PDF PAGE 1]
+Municipalité de SAINT-POLYCARPE
+
+SÉANCE ORDINAIRE DU LUNDI 19 JANVIER 2026 À 19 H 30
+ORDRE DU JOUR
+1.
+
+OUVERTURE DE LA SÉANCE
+
+2.
+
+ADOPTION DE L'ORDRE DU JOUR
+
+3.
+
+GREFFE
+
+3.1
+
+ADOPTION DU PROCÈS-VERBAL DE LA SÉANCE EXTRAORDINAIRE DU 15
+DÉCEMBRE 2025
+
+3.2
+
+ADOPTION DU PROCÈS-VERBAL DE LA SÉANCE ORDINAIRE DU 15 DÉCEMBRE
+2025
+
+3.3
+
+DÉPÔT DE LA CORRESPONDANCE
+
+3.4
+
+APPROBATION DU COMPTE DE DÉPENSES DU DIRECTEUR GÉNÉRAL ET
+GREFFIER-TRÉSORIER - NOVEMBRE - DÉCEMBRE 2025
+
+3.5
+
+ORDRE DE CHANGEMENT ET AUTORISATION DE PAIEMENT - SUPER-MICRO FACTURE POUR CONFIGURATION DE NOUVEAU POSTE DE TRAVAIL - OCTOBRE
+2025
+
+3.6
+
+AUTORISATION - DÉMARCHES PRÉLIMINAIRES CONCERNANT L'ACHAT DES LOTS
+LIÉS À L’ÉGLISE
+
+3.7
+
+OCTROI DE MANDAT ET AUTORISATION DE PAIEMENT - DUNTON RAINVILLE,
+AVOCATS - ACCOMPAGNEMENT PROFESSIONNEL POUR L'ACQUISITION DE
+L'ÉGLISE
+
+3.8
+
+OCTROI DE CONTRAT ET AUTORISATION DE PAIEMENT - FÉDÉRATION
+QUÉBÉCOISE DES MUNICIPALITÉS (FQM) - RÉDACTION D'UN CONTRAT DE
+TRAVAIL
+
+4.
+
+RESSOURCES HUMAINES
+
+4.1
+
+APPROBATION ET AUTORISATION DE SIGNATURE – ENTENTE INTERMUNICIPALE
+ENTRE LA MUNICIPALITÉ DE SAINT-POLYCARPE ET LA MUNICIPALITÉ DE SAINTTÉLESPHORE
+
+4.2
+
+MODIFICATION DE LA POLITIQUE DE TRAVAIL DES EMPLOYÉS-CADRES DE LA
+MUNICIPALITÉ DE SAINT-POLYCARPE
+
+4.3
+
+EMBAUCHE - CHAUFFEUR MANOEUVRE
+
+4.4
+
+NOMINATION - CHEF AUX OPÉRATIONS - SERVICE DE SÉCURITÉ INCENDIE
+
+4.5
+
+AUTORISATION DE SIGNATURE – LETTRE D’ENTENTE #17 CONVENTION
+COLLECTIVE - SYNDICAT DES TRAVAILLEURS ET TRAVAILLEUSES DE LA
+MUNICIPALITÉ DE SAINT-POLYCARPE (CSN)
+
+5.
+
+FINANCES
+
+5.1
+
+APPROBATION DES LISTES DE DÉBOURSÉS ET DES TRANSFERTS BUDGÉTAIRES
+DÉCEMBRE 2025
+
+5.2
+
+AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE
+PAIEMENT DE TAXES MUNICIPALES
+
+
+
+[PDF PAGE 2]
+5.3
+
+OCTROI DE CONTRAT ET AUTORISATION DE PAIEMENT - BCGO S.E.N.C.R.L. BANQUE DE 25 HEURES POUR CONSULTATION RELATIVES À DES QUESTIONS
+LIÉES AU TRAITEMENT DES TAXES À LA CONSOMMATION - 2026
+
+6.
+
+SÉCURITÉ INCENDIE ET SÉCURITÉ CIVILE
+
+7.
+
+SERVICES URBAINS
+
+7.1
+
+APPROBATION ET AUTORISATION DE PAIEMENT - TRANSPORT ADAPTÉ PRÉVISIONS BUDGÉTAIRES, QUOTES-PARTS ET GRILLES TARIFAIRES POUR
+L'ANNÉE 2026
+
+7.2
+
+ORDRE DE CHANGEMENT ET AUTORISATION DE PAIEMENT - CHEMTRADE
+CHEMICAL CANADA LTD - EAUX USÉES - ALUN
+
+7.3
+
+ORDRE DE CHANGEMENT ET AUTORISATION DE PAIEMENT - ENTREPRISE S.
+BESNER INC. - BRIS D’AQUEDUC ET URGENCES
+
+7.4
+
+RATIFICATION - OCTROI DE CONTRAT ET AUTORISATION DE SIGNATURE - H2LAB
+INC. - ANALYSES EN LABORATOIRE, CONTRÔLE DE LA QUALITÉ DE L’EAU
+POTABLE ET SUIVI ENVIRONNEMENTAL DES ÉTANGS D’ÉPURATION - 2025
+
+7.5
+
+PLAN DE GESTION DES ACTIFS EN EAU
+
+7.6
+
+RENOUVELLEMENT DE CONTRAT - MINISTÈRE DES TRANSPORTS ET DE LA
+MOBILITÉ DURABLE - DÉNEIGEMENT D'UNE PORTION DE LA ROUTE 340 PAR LA
+MUNICIPALITÉ
+
+8.
+
+URBANISME ET AMÉNAGEMENT
+
+8.1
+
+RÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN
+AUTRE QUE L’AGRICULTURE.
+
+9.
+
+SPORTS, LOISIRS, CULTURE ET VIE COMMUNAUTAIRE
+
+9.1
+
+DEMANDE D'AIDE FINANCIÈRE - ÉCOLE SECONDAIRE SOULANGES - SOIRÉE
+MÉRITAS - COLLATION DES GRADES - ALBUM DE FINISSANTS
+
+9.2
+
+DEMANDE D'AIDE FINANCIÈRE - MAISON DE LA FAMILLE - INVITATION AU
+SOUPER-BÉNÉFICE HOMARDS 2026
+
+9.3
+
+MODIFICATION - POLITIQUE DE RECONNAISSANCE DES ORGANISMES DE LA
+MUNICIPALITÉ DE SAINT-POLYCARPE
+
+10.
+
+RÈGLEMENTS
+
+10.1
+
+AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT
+LE RÈGLEMENT SUR LES NUISANCES (RMH 450)
+
+11.
+
+AFFAIRES DIVERSES
+
+11.1
+
+DISPOSITION DE BIENS
+
+12.
+
+PAROLE AUX CONSEILLERS
+
+13.
+
+PAROLE AU MAIRE
+
+14.
+
+PÉRIODE DE QUESTIONS
+
+15.
+
+LEVÉE DE LA SÉANCE ORDINAIRE
+

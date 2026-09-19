@@ -1,0 +1,36 @@
+{
+ "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "d8f4904bce673345abd5a940a1efb1891c102e435becd1f16b8d7479b9c36063",
+ "inputSha256": "1bcd52ed25e004c46b974581ba29f8b677f188cd0e445c5f201f15f630d14819",
+ "responseSha256": "8295405a9dd7b5b82432c5337086104df767406b0e039f03b2dda2f2b22d06f1",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 87250,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 9554,
+  "outputTokens": 2804,
+  "totalTokens": 12358
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 87244,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:13:41.732Z"
+}

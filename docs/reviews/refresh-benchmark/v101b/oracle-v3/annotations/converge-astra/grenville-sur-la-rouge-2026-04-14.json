@@ -1,0 +1,101 @@
+{
+ "documentId": "grenville-sur-la-rouge-2026-04-14",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "196330a7c7fa54a291562c8f0834a06cd57a06f85ca3936dca9441b7e2699550",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 1 atteste l’acceptation du don gratuit du lot 6 209 933 parmi les résolutions adoptées, ce qui constitue un acte foncier inclus.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 1 atteste l’autorisation de vendre le lot municipal 6 095 015 pour 13000$, conformément à l’objet foncier et à l’étape proposés.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 2 énonce explicitement le refus de la demande de PIIA du 47, rue Donald Campbell, et la version conserve bien ce refus.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 2 atteste expressément le refus de la dérogation mineure concernant l’abri d’auto au 47, rue Donald Campbell, procédure distincte du PIIA.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 2 indique que la demande de PIIA pour construire une résidence unifamiliale au 1417, route 148 est accordée.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 3 atteste explicitement l’adoption du règlement de développement économique RénoFaçade.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 3 atteste un avis de motion visant notamment des modifications au plan d’urbanisme, étape à distinguer de l’adoption du projet.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 3 atteste l’adoption de projets de règlements visant notamment des modifications au plan d’urbanisme, unité distincte de l’avis de motion.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 1 atteste l’acceptation du don gratuit du lot 6 209 933 parmi les résolutions adoptées, ce qui constitue un acte foncier inclus."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 1 atteste l’autorisation de vendre le lot municipal 6 095 015 pour 13000$, conformément à l’objet foncier et à l’étape proposés."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 2 énonce explicitement le refus de la demande de PIIA du 47, rue Donald Campbell, et la version conserve bien ce refus."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La page 2 atteste expressément le refus de la dérogation mineure concernant l’abri d’auto au 47, rue Donald Campbell, procédure distincte du PIIA."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La page 2 indique que la demande de PIIA pour construire une résidence unifamiliale au 1417, route 148 est accordée."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La page 3 atteste explicitement l’adoption du règlement de développement économique RénoFaçade."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La page 3 atteste un avis de motion visant notamment des modifications au plan d’urbanisme, étape à distinguer de l’adoption du projet."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "La page 3 atteste l’adoption de projets de règlements visant notamment des modifications au plan d’urbanisme, unité distincte de l’avis de motion."
+  }
+ ]
+}

@@ -1,0 +1,52 @@
+{
+ "documentId": "ayers-cliff-2026-03-02",
+ "step": "gemini-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass1",
+ "inputStateSha256": "e43e04d14aef91ebfa21d77900784f41178e841a79d4d579077be5e017cb1d1b",
+ "rawText": "{\"operations\":[{\"op\":\"correct\",\"id\":\"u03\",\"unit\":{\"label\":\"Examen prévu du PIIA-9 — lot 6 108 937, Ripple Cove\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"6 108 937\",\"page\":2,\"citation\":\"Matricule 1805-72-3947 lot 6 108 937, 329 chemin 694 -716 Ripple Cove, Rec-5- Projet plan globale, future construction et Agrandissements (PIIA-9)\",\"anchor\":\"lot 6 108 937\"},\"reason\":\"Rétablir la parenthèse fermante manquante à la fin de la citation conforme au texte original (« (PIIA-9) » au lieu de « (PIIA-9 »).\"}]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Examen prévu du PIIA-9 — lot 6 108 937, Ripple Cove",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 108 937",
+    "page": 2,
+    "citation": "Matricule 1805-72-3947 lot 6 108 937, 329 chemin 694 -716 Ripple Cove, Rec-5- Projet plan globale, future construction et Agrandissements (PIIA-9)",
+    "anchor": "lot 6 108 937"
+   },
+   "reason": "Rétablir la parenthèse fermante manquante à la fin de la citation conforme au texte original (« (PIIA-9) » au lieu de « (PIIA-9 »)."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "gemini-pass1",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "piia",
+   "page": 2,
+   "citation": "Matricule 1805-72-3947 lot 6 108 937, 329 chemin 694 -716 Ripple Cove, Rec-5- Projet plan globale, future construction et Agrandissements (PIIA-9)"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3
+}

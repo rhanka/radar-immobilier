@@ -1,0 +1,51 @@
+{
+ "documentId": "gracefield-2026-04-14",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "638f58c73d3253faa109d65d15cdb3049a3d7c044a5978af7e7b940173cebbd3",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"Le prêt d'un local à un organisme communautaire est une entente administrative qui ne constitue ni un dossier d'urbanisme ni un acte foncier.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement d'urbanisme 263-2026 est attestée à la résolution 2026-04-063 en page 15.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La recommandation à la CPTAQ pour aliénation en zone agricole est attestée à la résolution 2026-04-064 en page 22, avec la citation complète du titre.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v2"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "Le prêt d'un local à un organisme communautaire est une entente administrative qui ne constitue ni un dossier d'urbanisme ni un acte foncier."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'adoption du règlement d'urbanisme 263-2026 est attestée à la résolution 2026-04-063 en page 15."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La recommandation à la CPTAQ pour aliénation en zone agricole est attestée à la résolution 2026-04-064 en page 22, avec la citation complète du titre."
+  }
+ ]
+}

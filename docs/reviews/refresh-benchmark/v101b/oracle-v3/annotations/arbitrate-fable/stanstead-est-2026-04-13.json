@@ -1,0 +1,74 @@
+{
+ "documentId": "stanstead-est-2026-04-13",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dde58b22ba15c59d0eb3228c87709123e0bb175a8e28a5158f89e617de9987e8",
+ "verificationSha256": "a81d7a8571e60589fadbefc1fbec14e4752d0028dc1f15817e2168ecd0e63edf",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"La résolution 2026-04-22 (p. 13) « accepte la soumission de M. Yannick Fecteau [...] pour une location de son garage situé au 1420 chemin Ball brook à Barnston-Ouest pour une durée de 12 mois moyennant un montant mensuel de 1 350 $ » : il s'agit d'un bail temporaire retenu par soumission « pour augmenter l'efficacité de nos travaux en voirie », soit un marché de services/entretien de voirie sans développement explicite, exclu du rappel, et non un objet réglementaire ou foncier explicite (aucun lot, permis, zonage, acquisition ou servitude ; l'immeuble est d'ailleurs hors du territoire). La position B est écartée car un bail commercial d'un an n'est pas un acte foncier au sens du gold ; le fait reste au plus à signaler séparément hors gold sans retoucher le dénominateur.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Location autorisée du garage au 1420 chemin Ball brook pour douze mois",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "1420 chemin Ball brook",
+      "page": 13,
+      "citation": "location de son garage situé au 1420 chemin Ball brook à BarnstonOuestpour une durée de 12 mois moyennant un montant mensuel de 1 350",
+      "anchor": "1420 chemin Ball brook",
+      "spanStart": 2587,
+      "spanEnd": 2720
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-04-22, page 13, accepte la location du garage au 1420 chemin Ball brook pour douze mois à 1 350 $ par mois, acte foncier non résidentiel inclus par les règles."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "La location temporaire d'un garage privé par acceptation de la soumission des Entreprises Y. Fecteau (12 mois, 1 350 $/mois) est un marché de location/services et non un acte réglementaire ou foncier explicite ; les règles excluent les marchés de services du rappel, à signaler au plus comme fait complémentaire hors gold."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La location temporaire d'un garage pour les travaux de voirie relève d'un marché ou d'un bail d'entretien et ne constitue pas un acte foncier ou d'urbanisme."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "La résolution 2026-04-22 (p. 13) « accepte la soumission de M. Yannick Fecteau [...] pour une location de son garage situé au 1420 chemin Ball brook à Barnston-Ouest pour une durée de 12 mois moyennant un montant mensuel de 1 350 $ » : il s'agit d'un bail temporaire retenu par soumission « pour augmenter l'efficacité de nos travaux en voirie », soit un marché de services/entretien de voirie sans développement explicite, exclu du rappel, et non un objet réglementaire ou foncier explicite (aucun lot, permis, zonage, acquisition ou servitude ; l'immeuble est d'ailleurs hors du territoire). La position B est écartée car un bail commercial d'un an n'est pas un acte foncier au sens du gold ; le fait reste au plus à signaler séparément hors gold sans retoucher le dénominateur."
+  }
+ ]
+}

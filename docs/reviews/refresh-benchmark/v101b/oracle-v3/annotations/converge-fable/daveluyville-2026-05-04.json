@@ -1,0 +1,61 @@
+{
+ "documentId": "daveluyville-2026-05-04",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "06afa8b814e0d9623dfd8f1e5c5588565305993d4ac6e7a338776e5ffb4bff9f",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-86 (page 6) atteste le report de l'adoption de la dérogation mineure 2026-DM-002 jusqu'à l'adoption définitive du règlement R-2026-154 : objet foncier explicite, étape constatée (report, sans décision au fond, d'où « inconnu »), citation et page exactes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-87 (page 8) refuse à l'unanimité la demande de dérogation mineure 2026-DM-003 sur le lot 4 441 171 ; « les refus doivent rester des refus », citation et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-05-88 (page 8) contient un avis de motion donné par M. Bilodeau pour le règlement R-2026-154 modifiant le Règlement de zonage R-2025-137 ; « Avis de motion et projet actuels séparés », citation conforme à l'intitulé de la page 8.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le texte de la page 8 précise « Le projet de règlement est également déposé » conformément à l'article 356 LCV pour le règlement R-2026-154 ; le dépôt du projet est une unité distincte de l'avis de motion, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-86 (page 6) atteste le report de l'adoption de la dérogation mineure 2026-DM-002 jusqu'à l'adoption définitive du règlement R-2026-154 : objet foncier explicite, étape constatée (report, sans décision au fond, d'où « inconnu »), citation et page exactes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-87 (page 8) refuse à l'unanimité la demande de dérogation mineure 2026-DM-003 sur le lot 4 441 171 ; « les refus doivent rester des refus », citation et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-88 (page 8) contient un avis de motion donné par M. Bilodeau pour le règlement R-2026-154 modifiant le Règlement de zonage R-2025-137 ; « Avis de motion et projet actuels séparés », citation conforme à l'intitulé de la page 8."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le texte de la page 8 précise « Le projet de règlement est également déposé » conformément à l'article 356 LCV pour le règlement R-2026-154 ; le dépôt du projet est une unité distincte de l'avis de motion, citation et page exactes."
+  }
+ ]
+}

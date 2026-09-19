@@ -1,0 +1,131 @@
+{
+ "documentId": "rosemere-2026-04-13",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "6bbeb215bfddb233381f5e7b8c9c44befae20c69c1d1080a965da0ab91962dd8",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 2, résolution 2026-04-125 : « D'ACCORDER la demande de dérogation mineure pour la propriété située au 262, rue Westward » — étape derogation_mineure, objet et citation exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 2, résolution 2026-04-126 : « D'APPROUVER, à titre de P.I.I.A., l'ajout d'une enseigne sur bâtiment et d'une enseigne sur pylône pour l'établissement Continental situé au 307, boulevard Labelle » — petit PIIA inclus, citation exacte.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le dispositif de la résolution 2026-04-127 figure en page 3 : « D'APPROUVER, à titre de P.I.I.A., la modification des enseignes sur le pylône ... au 400, chemin de la Grande-Côte » — étape piia, page et citation exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 3, résolution 2026-04-128 : « D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement au 266, rue du Bocage » — citation, objet et étape exacts.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Page 3, résolution 2026-04-129 : « D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement et de construction d'un garage annexé au 338, rue Montview » — citation exacte, étape piia.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le dispositif de la résolution 2026-04-130 est en page 4 : « D'APPROUVER, à titre de P.I.I.A., le projet de modification des ouvertures pour la propriété située au 355, rue Montcalm » — exact.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Page 4, point 5.2.6 et résolution 2026-04-131 : le Conseil approuve « à titre de P.I.I.A. » la substitution de revêtement et « l'ajout d'une terrasse au toit » au 5, chemin de la Grande-Côte ; la citation reprend l'intitulé du point (seul le saut de ligne diffère), objet et page exacts.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Page 4, 2026-04-132 : « La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera adopté séance tenante le projet du Règlement 1004-01 » — avis de motion distinct de l'adoption du projet selon les règles.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Page 5, 2026-04-133 : « D'ADOPTER le projet du Règlement 1004-01 ... » et « DE FIXER la date de la séance de consultation publique ... au lundi 11 mai 2026 » — étape projet_reglement avec consultation publique attestée, unité distincte de l'avis de motion.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Page 6, 2026-04-137 : « donne avis de motion qu'il sera adopté à une séance subséquente le Règlement 1015 décrétant un programme ... des propriétés vulnérables aux inondations pluviales » — règlement explicite visant les propriétés et une contrainte territoriale (inondations), citation du point 6.3 exacte, étape avis_motion.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"Même résolution 2026-04-137 page 6 : « ... et dépose le projet de règlement » — dépôt du projet du Règlement 1015 attesté, étape projet_reglement distincte de l'avis de motion selon la règle « Avis de motion et projet actuels séparés ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 2, résolution 2026-04-125 : « D'ACCORDER la demande de dérogation mineure pour la propriété située au 262, rue Westward » — étape derogation_mineure, objet et citation exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 2, résolution 2026-04-126 : « D'APPROUVER, à titre de P.I.I.A., l'ajout d'une enseigne sur bâtiment et d'une enseigne sur pylône pour l'établissement Continental situé au 307, boulevard Labelle » — petit PIIA inclus, citation exacte."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le dispositif de la résolution 2026-04-127 figure en page 3 : « D'APPROUVER, à titre de P.I.I.A., la modification des enseignes sur le pylône ... au 400, chemin de la Grande-Côte » — étape piia, page et citation exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 3, résolution 2026-04-128 : « D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement au 266, rue du Bocage » — citation, objet et étape exacts."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Page 3, résolution 2026-04-129 : « D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement et de construction d'un garage annexé au 338, rue Montview » — citation exacte, étape piia."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le dispositif de la résolution 2026-04-130 est en page 4 : « D'APPROUVER, à titre de P.I.I.A., le projet de modification des ouvertures pour la propriété située au 355, rue Montcalm » — exact."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Page 4, point 5.2.6 et résolution 2026-04-131 : le Conseil approuve « à titre de P.I.I.A. » la substitution de revêtement et « l'ajout d'une terrasse au toit » au 5, chemin de la Grande-Côte ; la citation reprend l'intitulé du point (seul le saut de ligne diffère), objet et page exacts."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Page 4, 2026-04-132 : « La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera adopté séance tenante le projet du Règlement 1004-01 » — avis de motion distinct de l'adoption du projet selon les règles."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Page 5, 2026-04-133 : « D'ADOPTER le projet du Règlement 1004-01 ... » et « DE FIXER la date de la séance de consultation publique ... au lundi 11 mai 2026 » — étape projet_reglement avec consultation publique attestée, unité distincte de l'avis de motion."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Page 6, 2026-04-137 : « donne avis de motion qu'il sera adopté à une séance subséquente le Règlement 1015 décrétant un programme ... des propriétés vulnérables aux inondations pluviales » — règlement explicite visant les propriétés et une contrainte territoriale (inondations), citation du point 6.3 exacte, étape avis_motion."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "Même résolution 2026-04-137 page 6 : « ... et dépose le projet de règlement » — dépôt du projet du Règlement 1015 attesté, étape projet_reglement distincte de l'avis de motion selon la règle « Avis de motion et projet actuels séparés »."
+  }
+ ]
+}

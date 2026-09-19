@@ -1,0 +1,254 @@
+{
+ "documentId": "saint-roch-de-lachigan-2026-05-11",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "dcf0d93c323a3865cd78951a73f530c53f28a7d1202ced1780cb46af24f910a0",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-583-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 583-2026 — Droits sur les mutations immobilières",
+     "stage": "Adoption inscrite au projet d’ordre du jour",
+     "objet": "583-2026",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "7.4 Adoption du règlement 583-2026 relatif aux droits sur les mutations immobilières"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-preemption-6141751"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente du lot 6 141 751 — Droit de préemption à l’ordre du jour",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "8.5 Vente du lot lot 6 141 751-exercise du droit de préemption"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-demolition-16-ile-majeau"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Démolition — 16, rue de l’Île-Majeau",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "10.1 Démolition de l'immeuble situé au 16, rue de l'Île-Majeau"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-derogation-296-riviere-nord"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure — 296 rang de la Rivière Nord",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "10.2 Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-derogation-28-beaucage"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure — 28 rue Beaucage",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "10.3 Demande de dérogation mineure - 28 rue Beaucage - Autorisation"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-affichage-1224-principale"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Modification d’affichage sur un immeuble cité — 1224 rue Principale",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-travaux-1484-principale"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Travaux sur un immeuble cité — 1484, rue Principale",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\n \"decisions\": [\n  {\n   \"act\": \"A01\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le point 7.4 du projet d'ordre du jour prévoit expressément l'adoption du règlement 583-2026.\",\n   \"excerpt\": \"7.4 Adoption du règlement 583-2026 relatif aux droits sur les mutations immobilières\"\n  },\n  {\n   \"act\": \"A02\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le point 8.5 mentionne la vente du lot 6 141 751 et l'exercice du droit de préemption.\",\n   \"excerpt\": \"8.5 Vente du lot lot 6 141 751-exercise du droit de préemption\"\n  },\n  {\n   \"act\": \"A03\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le point 10.1 concerne la démolition de l'immeuble situé au 16, rue de l'Île-Majeau.\",\n   \"excerpt\": \"10.1 Démolition de l'immeuble situé au 16, rue de l'Île-Majeau\"\n  },\n  {\n   \"act\": \"A04\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le point 10.2 vise une demande de dérogation mineure au 296 rang de la Rivière Nord.\",\n   \"excerpt\": \"10.2 Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation\"\n  },\n  {\n   \"act\": \"A05\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le point 10.3 vise une demande de dérogation mineure au 28 rue Beaucage.\",\n   \"excerpt\": \"10.3 Demande de dérogation mineure - 28 rue Beaucage - Autorisation\"\n  },\n  {\n   \"act\": \"A06\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le point 10.4 concerne une demande de modification d'affichage à un immeuble cité au 1224 rue Principale.\",\n   \"excerpt\": \"10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation\"\n  },\n  {\n   \"act\": \"A07\",\n   \"verdict\": \"soutenu\",\n   \"reason\": \"Le point 10.5 concerne des travaux sur un immeuble cité situé au 1484, rue Principale.\",\n   \"excerpt\": \"10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation\"\n  }\n ]\n}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 7.4 du projet d'ordre du jour prévoit expressément l'adoption du règlement 583-2026.",
+   "excerpt": "7.4 Adoption du règlement 583-2026 relatif aux droits sur les mutations immobilières"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 8.5 mentionne la vente du lot 6 141 751 et l'exercice du droit de préemption.",
+   "excerpt": "8.5 Vente du lot lot 6 141 751-exercise du droit de préemption"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 10.1 concerne la démolition de l'immeuble situé au 16, rue de l'Île-Majeau.",
+   "excerpt": "10.1 Démolition de l'immeuble situé au 16, rue de l'Île-Majeau"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 10.2 vise une demande de dérogation mineure au 296 rang de la Rivière Nord.",
+   "excerpt": "10.2 Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le point 10.3 vise une demande de dérogation mineure au 28 rue Beaucage.",
+   "excerpt": "10.3 Demande de dérogation mineure - 28 rue Beaucage - Autorisation"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le point 10.4 concerne une demande de modification d'affichage à un immeuble cité au 1224 rue Principale.",
+   "excerpt": "10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le point 10.5 concerne des travaux sur un immeuble cité situé au 1484, rue Principale.",
+   "excerpt": "10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation"
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 7.4 du projet d'ordre du jour prévoit expressément l'adoption du règlement 583-2026."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 8.5 mentionne la vente du lot 6 141 751 et l'exercice du droit de préemption."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 10.1 concerne la démolition de l'immeuble situé au 16, rue de l'Île-Majeau."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 10.2 vise une demande de dérogation mineure au 296 rang de la Rivière Nord."
+   },
+   {
+    "act": "A05",
+    "reason": "Le point 10.3 vise une demande de dérogation mineure au 28 rue Beaucage."
+   },
+   {
+    "act": "A06",
+    "reason": "Le point 10.4 concerne une demande de modification d'affichage à un immeuble cité au 1224 rue Principale."
+   },
+   {
+    "act": "A07",
+    "reason": "Le point 10.5 concerne des travaux sur un immeuble cité situé au 1484, rue Principale."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 7261,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2555,
+   "outputTokens": 622,
+   "totalTokens": 3177
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 7112
+  },
+  "inputSha256": "e3a78188c5e4a17a9093ea00de47a4980fa4055e5cf9cc1301ff9b6b1b82a6e6"
+ }
+}

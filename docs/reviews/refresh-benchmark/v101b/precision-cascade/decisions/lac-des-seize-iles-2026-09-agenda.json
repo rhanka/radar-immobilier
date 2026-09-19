@@ -1,0 +1,225 @@
+{
+ "documentId": "lac-des-seize-iles-2026-09-agenda",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "d6926fe404876cc005350390b2e871f880e7a3ba99bfa84d0fdd39d642c750f7",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-08"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-08 — Occupation du domaine public municipal",
+     "stage": "projet",
+     "objet": "2026-08",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "3.7 Dépôt du projet de règlement numéro 2026-08 régissant l’occupation du\ndomaine public municipal"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-2026-08-motion"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion prévu — Règlement 2026-08",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l’occupation\ndu domaine public municipal"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-ddm2026-058"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure prévue — 252, chemin du Village",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-2026-102-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-102-01 — Modification des règles de contribution pour fins de parcs",
+     "stage": null,
+     "objet": "2026-102-01",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le\nlotissement numéro 2019-102 concernant les règles de calcul de la"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-2019-102"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement sur le lotissement 2019-102",
+     "stage": null,
+     "objet": "2019-102",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le\nlotissement numéro 2019-102 concernant les règles de calcul de la"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-barrage"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Mandat prévu — Caractérisation écologique du projet de reconstruction du barrage",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "8.4 Octroi de mandat à Terre et Habitats Inc. – Addenda au rapport de\ncaractérisation écologique – Projet de reconstruction du barrage"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt du projet de règlement numéro 2026-08 est inscrit à l'ordre du jour au point 3.7.\",\"excerpt\":\"3.7 Dépôt du projet de règlement numéro 2026-08 régissant l’occupation du\\ndomaine public municipal\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion pour ce projet de règlement figure au point 3.6 de l'ordre du jour.\",\"excerpt\":\"3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l’occupation\\ndu domaine public municipal\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La dérogation mineure pour le 252, chemin du Village est inscrite au point 5.4.\",\"excerpt\":\"5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058)\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"L'adoption du règlement numéro 2026-102-01 est prévue au point 5.5.\",\"excerpt\":\"5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le\\nlotissement numéro 2019-102\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2019-102 n'est mentionné que comme référence historique au règlement modifié et ne fait l'objet d'aucun acte propre.\",\"excerpt\":\"\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"L'octroi d'un mandat de services professionnels relève des contrats de services exclus.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le dépôt du projet de règlement numéro 2026-08 est inscrit à l'ordre du jour au point 3.7.",
+   "excerpt": "3.7 Dépôt du projet de règlement numéro 2026-08 régissant l’occupation du\ndomaine public municipal"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion pour ce projet de règlement figure au point 3.6 de l'ordre du jour.",
+   "excerpt": "3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l’occupation\ndu domaine public municipal"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La dérogation mineure pour le 252, chemin du Village est inscrite au point 5.4.",
+   "excerpt": "5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058)"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "L'adoption du règlement numéro 2026-102-01 est prévue au point 5.5.",
+   "excerpt": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le\nlotissement numéro 2019-102"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2019-102 n'est mentionné que comme référence historique au règlement modifié et ne fait l'objet d'aucun acte propre.",
+   "excerpt": ""
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un mandat de services professionnels relève des contrats de services exclus.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A05",
+    "reason": "Le règlement 2019-102 n'est mentionné que comme référence historique au règlement modifié et ne fait l'objet d'aucun acte propre."
+   },
+   {
+    "act": "A06",
+    "reason": "L'octroi d'un mandat de services professionnels relève des contrats de services exclus."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le dépôt du projet de règlement numéro 2026-08 est inscrit à l'ordre du jour au point 3.7."
+   },
+   {
+    "act": "A02",
+    "reason": "L'avis de motion pour ce projet de règlement figure au point 3.6 de l'ordre du jour."
+   },
+   {
+    "act": "A03",
+    "reason": "La dérogation mineure pour le 252, chemin du Village est inscrite au point 5.4."
+   },
+   {
+    "act": "A04",
+    "reason": "L'adoption du règlement numéro 2026-102-01 est prévue au point 5.5."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2415,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2209,
+   "outputTokens": 363,
+   "totalTokens": 2572
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1995
+  },
+  "inputSha256": "361069ebd3d2259180882598aaca4c3fd4c5cdfc6d53c090464cc13b7d0b81cc"
+ }
+}

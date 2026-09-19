@@ -1,0 +1,126 @@
+{
+ "documentId": "eastman-2026-06-01",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "2b37e965112a20a9a323d6b23fe9c9468c0440785feb1a3723a57f1f51c14e16",
+ "verificationSha256": "d1d5fb8ac9b56521059ff33dba4c54c3d1d4a4e0a38e43ae9e061dbee6d5f8f9",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"Le renouvellement du bail de la friperie La Corde-à-linge ne comporte aucun objet foncier explicite (ni lot cadastral ni adresse) et relève de la simple gestion locative municipale, hors du champ des actes fonciers d'urbanisme.\"},{\"item\":\"a02\",\"choice\":\"absent\",\"reason\":\"La consultation publique n'est mentionnée que dans un attendu de la résolution d'adoption 2026-06-144 ; or la règle prévoit qu'« un rappel historique ou une table des matières ne crée pas d'unité en plus de la résolution qui la traite » et que les « mentions historiques du même dossier ne multiplient pas le rappel ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Renouvellement du bail de La Corde-à-linge — juillet 2026 à juin 2027",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "La Corde-à-linge",
+      "page": 4,
+      "citation": "DE renouveler le bail de location de La Corde-à-linge pour une période de douze (12) mois, soit du 1er juillet 2026 au 30 juin 2027",
+      "anchor": "La Corde-à-linge",
+      "spanStart": 1711,
+      "spanEnd": 1842
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-06-122, page 4, renouvelle explicitement ce bail du 1er juillet 2026 au 30 juin 2027, acte foncier inclus même non résidentiel."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "Le renouvellement du bail de la friperie ne désigne aucun objet foncier explicite (ni lot ni adresse) et relève de la gestion locative, hors « objet réglementaire ou foncier explicite » du profil."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le renouvellement d'un bail de location d'une friperie ne constitue ni un acte d'urbanisme ni un acte foncier."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u30",
+   "verificationItem": "i30",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Consultation publique tenue — règlement 2026-03 sur l’occupation et l’entretien des bâtiments",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "2026-03",
+      "page": 14,
+      "citation": "ATTENDU QU’une séance de consultation publique a été tenue le 1er juin 2026; En conséquence, il est proposé par la conseillère Agnès Mager Grandmaison D'adopter le règlement no 2026-03",
+      "anchor": "règlement no 2026-03",
+      "spanStart": 2168,
+      "spanEnd": 2352
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "L’attendu de la page 14 atteste une consultation publique tenue le jour même, le 1er juin 2026, étape actuelle distincte de l’adoption du règlement 2026-03."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "La consultation publique n'est qu'un ATTENDU rappelant une étape du même dossier 2026-03 ; « Mentions historiques du même dossier ne multiplient pas le rappel », l'unité est la résolution d'adoption (i31)."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La mention de la consultation publique dans un attendu est un rappel historique qui ne crée pas d'unité en sus de l'adoption."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "Le renouvellement du bail de la friperie La Corde-à-linge ne comporte aucun objet foncier explicite (ni lot cadastral ni adresse) et relève de la simple gestion locative municipale, hors du champ des actes fonciers d'urbanisme."
+  },
+  {
+   "item": "a02",
+   "choice": "absent",
+   "reason": "La consultation publique n'est mentionnée que dans un attendu de la résolution d'adoption 2026-06-144 ; or la règle prévoit qu'« un rappel historique ou une table des matières ne crée pas d'unité en plus de la résolution qui la traite » et que les « mentions historiques du même dossier ne multiplient pas le rappel »."
+  }
+ ]
+}

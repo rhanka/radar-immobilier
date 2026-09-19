@@ -1,0 +1,36 @@
+{
+ "documentId": "blue-sea-2026-02-03",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "0c6fac81c213692ad6aadd2f8d7711f22044fcf29691d3ab6ac033c84ca1f33d",
+ "inputSha256": "e946e0cce4d99d2fd27f49acdb5884e8cfdd575ad2bf8580beb12a875ed3a221",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 4733,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 6434,
+  "outputTokens": 90,
+  "totalTokens": 6524
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 4730,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:13:23.380Z"
+}

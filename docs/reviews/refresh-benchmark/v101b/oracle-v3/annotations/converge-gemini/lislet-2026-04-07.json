@@ -1,0 +1,81 @@
+{
+ "documentId": "lislet-2026-04-07",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "efebde05d360c9d992a4b8fc70721d5306bb4bf14ac13bfa9caa7734911b6227",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 30 prévoit l'examen d'une dérogation mineure au 418, chemin des Pionniers Est en page 1.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 31 prévoit l'examen d'un PIIA au 81, chemin des Pionniers Est en page 1.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 32 prévoit l'examen d'un PIIA au 272, chemin des Pionniers Est en page 2.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 33 prévoit l'entérinement d'une décision relative à une autorisation d'usage foncier temporaire au 2, rue Chanoine-Martel en page 2.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 34 concerne une demande d'autorisation foncière à la CPTAQ pour une sablière en page 2.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 36 prévoit l'adoption de l'inventaire partiel du patrimoine bâti en page 2.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 30 prévoit l'examen d'une dérogation mineure au 418, chemin des Pionniers Est en page 1."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 31 prévoit l'examen d'un PIIA au 81, chemin des Pionniers Est en page 1."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 32 prévoit l'examen d'un PIIA au 272, chemin des Pionniers Est en page 2."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 33 prévoit l'entérinement d'une décision relative à une autorisation d'usage foncier temporaire au 2, rue Chanoine-Martel en page 2."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 34 concerne une demande d'autorisation foncière à la CPTAQ pour une sablière en page 2."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 36 prévoit l'adoption de l'inventaire partiel du patrimoine bâti en page 2."
+  }
+ ]
+}

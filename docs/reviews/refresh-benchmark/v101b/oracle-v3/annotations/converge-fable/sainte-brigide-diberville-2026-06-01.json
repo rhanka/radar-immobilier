@@ -1,0 +1,91 @@
+{
+ "documentId": "sainte-brigide-diberville-2026-06-01",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ab615b0fbb57aa6dba4a51c11a3c25f6858f017c575399590925de3f9be23c82",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le texte de la page 1 porte « 5.1 Règlement 2026-489 sur la gestion quantitative des eaux pluviales : - Adoption », point prévu à l'ordre du jour d'un règlement d'urbanisme, citation, étape et objet exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point « 6.6 … projet éolien : demande de prolongation à la CPTAQ » est un acte foncier explicite (autorisation en zone agricole) prévu à l'ordre du jour, étape inconnu justifiée, citation et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le texte atteste « 11.2 Dérogation mineure : Lot 4 390 294 Rang de la Rivière Ouest », objet foncier explicite avec étape derogation_mineure, citation et page exactes.\"},{\"item\":\"i04\",\"choice\":\"absent\",\"reason\":\"Le point « 14.1 Vente d'immeubles pour défaut de paiement des taxes » ne mentionne aucune adoption ni aucun immeuble identifié : l'étape « adoption » n'est pas attestée et l'objet foncier n'est pas explicite.\"},{\"item\":\"i05\",\"choice\":\"absent\",\"reason\":\"Doublon strict de i04 (même type/même fait non crédité) et, comme lui, étape « adoption » non attestée par le texte et objet foncier non explicite.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"Doublon de i02 sur le même fait (demande de prolongation à la CPTAQ du projet éolien) : « Doublon même type/même fait non crédité ».\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Doublon strict de i04 et i05 ; le texte « 14.1 Vente d'immeubles pour défaut de paiement des taxes » n'atteste ni une adoption ni un objet foncier explicite.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "absent"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le texte de la page 1 porte « 5.1 Règlement 2026-489 sur la gestion quantitative des eaux pluviales : - Adoption », point prévu à l'ordre du jour d'un règlement d'urbanisme, citation, étape et objet exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point « 6.6 … projet éolien : demande de prolongation à la CPTAQ » est un acte foncier explicite (autorisation en zone agricole) prévu à l'ordre du jour, étape inconnu justifiée, citation et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le texte atteste « 11.2 Dérogation mineure : Lot 4 390 294 Rang de la Rivière Ouest », objet foncier explicite avec étape derogation_mineure, citation et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "absent",
+   "reason": "Le point « 14.1 Vente d'immeubles pour défaut de paiement des taxes » ne mentionne aucune adoption ni aucun immeuble identifié : l'étape « adoption » n'est pas attestée et l'objet foncier n'est pas explicite."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "Doublon strict de i04 (même type/même fait non crédité) et, comme lui, étape « adoption » non attestée par le texte et objet foncier non explicite."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Doublon de i02 sur le même fait (demande de prolongation à la CPTAQ du projet éolien) : « Doublon même type/même fait non crédité »."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Doublon strict de i04 et i05 ; le texte « 14.1 Vente d'immeubles pour défaut de paiement des taxes » n'atteste ni une adoption ni un objet foncier explicite."
+  }
+ ]
+}

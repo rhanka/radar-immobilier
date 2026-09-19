@@ -1,0 +1,178 @@
+{
+ "documentId": "saint-just-de-bretenieres-2026-02-02",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4ed3478f674f30796abf8eaa9483b57afddcd46aeced0b635394e2896f556053",
+ "verificationSha256": "18ad209e3e7fa2ee9f96582565de5ce9500b9120b5002001791d17e5f5387e64",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"Le texte p. 2 sous « Affaires découlant du procès-verbal » indique seulement que « les élus demandent plus d’information, dont la valeur du terrain », ce qui ne constitue ni un objet foncier explicite (aucun lot ni terrain délimité) ni un acte foncier constaté.\"},{\"item\":\"a02\",\"choice\":\"absent\",\"reason\":\"La résolution 40-02-2026 évoque seulement « un règlement existant » sans numéro ni intitulé officiel (« règlement de déboisement » n'apparaît pas dans le texte), et un simple vœu de révision ne constitue pas un objet réglementaire explicite ni une étape de modification au sens du profil.\"},{\"item\":\"a03\",\"choice\":\"absent\",\"reason\":\"La résolution 41-02-2026 porte sur l'acceptation de l'intention de déclaration de compétence de la MRC en vertu du Code municipal, ce qui constitue une compétence administrative intermunicipale et non un objet réglementaire ou foncier d'urbanisme correspondant à Signal/DesignationEvent.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Demande d’information sur la vente de terrain — rang St-Isidore",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "RANG ST-ISIDORE",
+      "page": 2,
+      "citation": "VENTE DE TERRAIN – RANG ST-ISIDORE Les élus demandent plus d’information, dont la valeur du terrain",
+      "anchor": "RANG ST-ISIDORE",
+      "spanStart": 142,
+      "spanEnd": 241
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 2 atteste une demande actuelle d’information, notamment sur la valeur du terrain du rang St-Isidore, constituant un suivi foncier explicite sans attester une vente conclue."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Acte foncier explicite (vente de terrain – rang St-Isidore) attesté p.2 sous « Affaires découlant du procès-verbal », les élus demandant plus d'information ; étape inconnu et citation exactes, les actes fonciers étant inclus au rappel."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La mention sous Affaires découlant du procès-verbal est une simple demande d'information sans acte foncier ni résolution, et le rang St-Isidore ne constitue pas un objet foncier explicite."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u02",
+   "verificationItem": "i02",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Demande de révision du règlement exigeant une bande boisée de 20 mètres",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "règlement de déboisement",
+      "page": 7,
+      "citation": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le règlement soit revu en tenant compte des éléments soulevés",
+      "anchor": "règlement soit revu",
+      "spanStart": 877,
+      "spanEnd": 1047
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 40-02-2026, page 7, demande expressément la révision du règlement exigeant une bande boisée de 20 mètres, sans adopter de modification réglementaire, ce qui justifie l’étape « inconnu »."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 40-02-2026 p.7 demandant que le règlement existant exigeant une bande boisée de 20 mètres soit revu : objet réglementaire explicite, citation mot pour mot, étape inconnu appropriée."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le texte ne mentionne aucun objet réglementaire explicite ni 'règlement de déboisement', s'agissant seulement d'une demande politique visant un règlement existant non spécifié."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Acceptation de la déclaration de compétence de la MRC de Montmagny — autorisations en milieux hydriques",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "déclaration de compétence",
+      "page": 8,
+      "citation": "accepte et se déclare favorable à l’intention de déclaration de compétence de la MRC de Montmagny concernant la délivrance de certaines autorisations en vertu du Règlement sur l’encadrement",
+      "anchor": "déclaration de compétence de la MRC",
+      "spanStart": 162,
+      "spanEnd": 351
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 8 atteste l’acceptation de l’intention de déclaration de compétence de la MRC concernant certaines autorisations en milieux hydriques, conformément à l’objet et à la citation proposés, sans constituer une adoption de règlement."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 41-02-2026 (citation p.8) acceptant la déclaration de compétence de la MRC pour la délivrance d'autorisations en vertu du Règlement sur l'encadrement d'activités en milieux hydriques : objet réglementaire explicite, hors exclusions, citation et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'acceptation d'une déclaration de compétence de la MRC ne constitue ni un objet réglementaire d'urbanisme ni un objet foncier explicite correspondant au profil Signal/DesignationEvent."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "Le texte p. 2 sous « Affaires découlant du procès-verbal » indique seulement que « les élus demandent plus d’information, dont la valeur du terrain », ce qui ne constitue ni un objet foncier explicite (aucun lot ni terrain délimité) ni un acte foncier constaté."
+  },
+  {
+   "item": "a02",
+   "choice": "absent",
+   "reason": "La résolution 40-02-2026 évoque seulement « un règlement existant » sans numéro ni intitulé officiel (« règlement de déboisement » n'apparaît pas dans le texte), et un simple vœu de révision ne constitue pas un objet réglementaire explicite ni une étape de modification au sens du profil."
+  },
+  {
+   "item": "a03",
+   "choice": "absent",
+   "reason": "La résolution 41-02-2026 porte sur l'acceptation de l'intention de déclaration de compétence de la MRC en vertu du Code municipal, ce qui constitue une compétence administrative intermunicipale et non un objet réglementaire ou foncier d'urbanisme correspondant à Signal/DesignationEvent."
+  }
+ ]
+}

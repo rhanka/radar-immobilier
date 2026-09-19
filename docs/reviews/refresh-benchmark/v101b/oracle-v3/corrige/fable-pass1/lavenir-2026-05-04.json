@@ -1,0 +1,44 @@
+{
+ "documentId": "lavenir-2026-05-04",
+ "nextId": 2,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 797-26 — habitation multifamiliale (h3) en zone C3",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "797-26",
+    "page": 3,
+    "citation": "résolu d'adopter le règlement d'amendement no. 797-26, modifiant le règlement de zonage no. 654-12",
+    "anchor": "d'amendement no. 797-26",
+    "spanStart": 607,
+    "spanEnd": 705
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 797-26 — habitation multifamiliale (h3) en zone C3",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "797-26",
+      "page": 3,
+      "citation": "résolu d'adopter le règlement d'amendement no. 797-26, modifiant le règlement de zonage no. 654-12",
+      "anchor": "d'amendement no. 797-26",
+      "spanStart": 607,
+      "spanEnd": 705
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution R 2026-05-107 adopte le règlement 797-26 modifiant le zonage pour permettre l’habitation multifamiliale en zone C3 ; les étapes antérieures rappelées dans les considérants ne créent pas d’unités supplémentaires."
+    }
+   ]
+  }
+ ]
+}

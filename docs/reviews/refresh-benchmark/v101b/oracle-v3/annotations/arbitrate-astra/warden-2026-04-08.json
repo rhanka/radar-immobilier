@@ -1,0 +1,88 @@
+{
+ "documentId": "warden-2026-04-08",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c8a31d25a47bb2fca7dc9c87cb1fdeca738889ce0bacd1e88c4a63c8e391eaa4",
+ "verificationSha256": "89efb7e32ffe8da6f9fe1d7b3541f50396f20d9bdbba5dc56546c1faa5fe5a32",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v2\",\"reason\":\"La résolution 2026-04-051 (p. 6) « accepte le bail commercial » pour « la location d'un espace de bureau situé au 1-5383, rue Foster, à Waterloo » : cet acte immobilier relève des « actes fonciers, même non résidentiels », et la destination administrative temporaire des locaux ne justifie pas son exclusion. Le conseil accepte un bail et autorise sa signature, sans adopter de règlement : l'étape « inconnu » de v2 convient donc, contrairement à l'étape « adoption » de v1.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u03",
+   "verificationItem": "i03",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Acceptation du bail commercial au 1-5383, rue Foster, à Waterloo",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1-5383, rue Foster",
+      "page": 6,
+      "citation": "accepte le bail commercial à intervenir entre Groupe RSE inc. et la Municipalité de Warden pour la location d'un espace de bureau situé au 1-5383, rue Foster, à Waterloo",
+      "anchor": "1-5383, rue Foster",
+      "spanStart": 630,
+      "spanEnd": 799
+     }
+    },
+    {
+     "option": "v2",
+     "unit": {
+      "label": "Acceptation du bail commercial pour la location d'un espace de bureau au 1-5383, rue Foster, à Waterloo (relocalisation temporaire des bureaux municipaux)",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "1-5383, rue Foster",
+      "page": 6,
+      "citation": "accepte le bail commercial à intervenir entre Groupe RSE inc. et la Municipalité de Warden pour la location d'un espace de bureau situé au 1-5383, rue Foster, à Waterloo",
+      "anchor": "1-5383, rue Foster",
+      "spanStart": 630,
+      "spanEnd": 799
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v2",
+     "reason": "La page 6 accepte le bail commercial au 1-5383, rue Foster, acte foncier inclus mais ne constituant pas une adoption de règlement, ce qui justifie l’étape « inconnu »."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v2",
+     "reason": "La résolution 2026-04-051 (page 6) accepte un bail commercial pour l'espace de bureau au 1-5383, rue Foster, à Waterloo (relocalisation temporaire des bureaux municipaux) — acte foncier non résidentiel inclus par la règle « petits PIIA et actes fonciers, même non résidentiels » ; l'étape « adoption » de v1 est réservée aux règlements, donc « inconnu » est l'étape exacte."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "La signature d'un bail commercial pour relocaliser temporairement des bureaux administratifs est un contrat de louage opérationnel et non un acte foncier ou d'urbanisme."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v2",
+   "reason": "La résolution 2026-04-051 (p. 6) « accepte le bail commercial » pour « la location d'un espace de bureau situé au 1-5383, rue Foster, à Waterloo » : cet acte immobilier relève des « actes fonciers, même non résidentiels », et la destination administrative temporaire des locaux ne justifie pas son exclusion. Le conseil accepte un bail et autorise sa signature, sans adopter de règlement : l'étape « inconnu » de v2 convient donc, contrairement à l'étape « adoption » de v1."
+  }
+ ]
+}

@@ -1,0 +1,516 @@
+{
+ "nodes": [
+  {
+   "id": "source-2026-03-09",
+   "label": "Ordre du jour du conseil d’Ogden du 9 mars 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "status": "candidate",
+   "municipality": "ogden",
+   "date": "2026-03-09",
+   "format": "pdf",
+   "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+   "url": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Séance ordinaire du conseil",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "derogations-905-descente-2",
+   "label": "Demande de deux dérogations mineures au 905 Descente 2",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "status": "candidate",
+   "municipality": "ogden",
+   "meetingDate": "2026-03-09",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "description": "Demande de deux dérogations mineures au 905 Descente 2 inscrite au point 6.3 de l’ordre du jour; aucune décision n’est documentée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Demande de deux (2) dérogations mineures au 905 Descente 2",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-derogations"
+   ]
+  },
+  {
+   "id": "piia-2050-marlington",
+   "label": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "status": "candidate",
+   "municipality": "ogden",
+   "meetingDate": "2026-03-09",
+   "kind": "piia",
+   "etape": "piia",
+   "description": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington inscrite au point 6.4 de l’ordre du jour; aucune décision n’est documentée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-marlington"
+   ]
+  },
+  {
+   "id": "piia-3695-stanstead",
+   "label": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "status": "candidate",
+   "municipality": "ogden",
+   "meetingDate": "2026-03-09",
+   "kind": "piia",
+   "etape": "piia",
+   "description": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead inscrite au point 6.5 de l’ordre du jour; aucune décision n’est documentée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-stanstead"
+   ]
+  },
+  {
+   "id": "bylaw-2025-05",
+   "label": "Règlement de zonage no. 2025-05",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "status": "candidate",
+   "municipality": "ogden",
+   "numero": "2025-05",
+   "title": "Règlement de zonage",
+   "meetingDate": "2026-03-09",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-enregistrement"
+   ]
+  },
+  {
+   "id": "signal-enregistrement-2025-05",
+   "label": "Dépôt prévu du certificat de procédure d’enregistrement — zonage 2025-05",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "status": "candidate",
+   "municipality": "ogden",
+   "meetingDate": "2026-03-09",
+   "category": "procedure_reglementaire",
+   "reglement_number": "2025-05",
+   "description": "Le point 6.7 prévoit le dépôt du certificat relatif au déroulement de la procédure d’enregistrement des personnes habiles à voter sur le règlement de zonage no. 2025-05. Le résultat de la procédure et l’entrée en vigueur ne sont pas indiqués.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-enregistrement"
+   ]
+  },
+  {
+   "id": "bylaw-2026-05",
+   "label": "Projet de règlement no. 2026.05 sur l’occupation et l’entretien des bâtiments",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "status": "candidate",
+   "municipality": "ogden",
+   "numero": "2026.05",
+   "title": "Sur l'occupation et l'entretien des bâtiments",
+   "stage": "projet",
+   "meetingDate": "2026-03-09",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 2,
+     "excerpt": "Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-motion-2026-05",
+    "ev-projet-2026-05"
+   ]
+  },
+  {
+   "id": "signal-conformite-urbanisme",
+   "label": "Dépôt prévu des certificats de conformité de la MRC",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "status": "candidate",
+   "municipality": "ogden",
+   "meetingDate": "2026-03-09",
+   "category": "conformite_reglementaire",
+   "description": "Le point 6.6 prévoit le dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme, sans identifier les règlements concernés.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-conformite"
+   ]
+  },
+  {
+   "id": "signal-vente-taxes",
+   "label": "Liste prévue des propriétés à vendre pour défaut de paiement de taxes",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "status": "candidate",
+   "municipality": "ogden",
+   "meetingDate": "2026-03-09",
+   "category": "vente_pour_taxes",
+   "description": "Le point 9.4 porte sur la liste des propriétés à vendre pour défaut de paiement de taxes; aucune propriété n’est identifiée dans cet ordre du jour.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Liste des propriétés à vendre pour défaut de paiement de taxes",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-taxes"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-2026-03-09",
+   "target": "derogations-905-descente-2",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "evidence_refs": [
+    "ev-derogations"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Demande de deux (2) dérogations mineures au 905 Descente 2",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-03-09",
+   "target": "piia-2050-marlington",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "evidence_refs": [
+    "ev-marlington"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-03-09",
+   "target": "piia-3695-stanstead",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "evidence_refs": [
+    "ev-stanstead"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-03-09",
+   "target": "bylaw-2025-05",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "evidence_refs": [
+    "ev-enregistrement"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-03-09",
+   "target": "signal-enregistrement-2025-05",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "evidence_refs": [
+    "ev-enregistrement"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-03-09",
+   "target": "bylaw-2026-05",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "evidence_refs": [
+    "ev-motion-2026-05",
+    "ev-projet-2026-05"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 2,
+     "excerpt": "Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-03-09",
+   "target": "signal-conformite-urbanisme",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "evidence_refs": [
+    "ev-conformite"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-2026-03-09",
+   "target": "signal-vente-taxes",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "evidence_refs": [
+    "ev-taxes"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Liste des propriétés à vendre pour défaut de paiement de taxes",
+     "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+     "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+     "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-derogations",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+   "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Demande de deux (2) dérogations mineures au 905 Descente 2"
+  },
+  {
+   "id": "ev-marlington",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+   "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Demande de PIIA pour un nouveau bâtiment au 2050 chemin Marlington"
+  },
+  {
+   "id": "ev-stanstead",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+   "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Demande de PIIA pour un nouveau bâtiment au 3695 chemin Stanstead"
+  },
+  {
+   "id": "ev-enregistrement",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+   "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Dépôt du certificat relatif au déroulement de la procédure d’enregistrement des​\n​personnes habiles à voter sur le Règlement de zonage no. 2025-05"
+  },
+  {
+   "id": "ev-motion-2026-05",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+   "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Avis de motion – Règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments"
+  },
+  {
+   "id": "ev-projet-2026-05",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+   "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Adoption – Projet de règlement no. 2026.05 sur l'occupation et l'entretien des​\n​bâtiments"
+  },
+  {
+   "id": "ev-conformite",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+   "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Dépôt des certificats de conformité de la MRC pour les règlements d’urbanisme"
+  },
+  {
+   "id": "ev-taxes",
+   "source_file": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "rawRef": "raw/proces-verbaux-ogden/cas/168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b.pdf",
+   "docSha": "168ae998c170acd21605b82f5841e6dc288c107219b740e365874edc2227b47b",
+   "sourceUrl": "https://www.munogden.ca/uploads/1/3/4/8/134872540/03-09_ordre_du_jour.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Liste des propriétés à vendre pour défaut de paiement de taxes"
+  }
+ ],
+ "input_tokens": 7800,
+ "output_tokens": 6200
+}

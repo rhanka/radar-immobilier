@@ -1,0 +1,51 @@
+{
+ "documentId": "lyster-2026-02-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "092e8dfeb56a8da806cc0d2322c3112274a690fd04d48f8c24b20e75560b1bfe",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'autorisation de mise en vente pour taxes impayées du lot 5 835 056 constitue un acte foncier explicite adopté par la résolution 2026-02-28 à la page 5.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'autorisation de mise en vente pour taxes impayées du lot 5 834 167 est un acte foncier explicite adopté par la résolution 2026-02-28 à la page 5.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'autorisation de mise en vente pour taxes impayées du lot 5 834 895 est un acte foncier explicite adopté par la résolution 2026-02-28 à la page 5.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'autorisation de mise en vente pour taxes impayées du lot 5 835 056 constitue un acte foncier explicite adopté par la résolution 2026-02-28 à la page 5."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'autorisation de mise en vente pour taxes impayées du lot 5 834 167 est un acte foncier explicite adopté par la résolution 2026-02-28 à la page 5."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'autorisation de mise en vente pour taxes impayées du lot 5 834 895 est un acte foncier explicite adopté par la résolution 2026-02-28 à la page 5."
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "id": "val-dor-2026-06-01",
+ "rc": 0,
+ "latencyMs": 95921,
+ "inputTokens": 2,
+ "outputTokens": 10163,
+ "cacheRead": 0,
+ "cacheCreate": 3492,
+ "costUsd": 0.29096500000000003,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 16939
+}

@@ -1,0 +1,81 @@
+{
+ "documentId": "hatley-2026-04-07",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "7698c4adcecc5ce44ef0cfa7e380f71b90c092e21d3515c64adfddca992c1a16",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-054, page 11, autorise l’agrandissement du bâtiment principal au 141 rue Main dans le cadre du PIIA-1 2025-03-0004.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-055, page 11, retient explicitement la grange de la Rubicon Farm au 38, rue Main dans la liste patrimoniale révisée.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-055, page 11, retient explicitement l’église Saint-James au 100, rue Main, objet patrimonial distinct des autres biens à cette adresse.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-055, page 11, retient explicitement le St. James Hall au 100, rue Main, objet patrimonial distinct malgré son adresse commune avec d’autres biens.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-055, page 11, retient explicitement le gazebo au 100, rue Main comme bien distinct dans la liste patrimoniale révisée.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-058, page 13, appuie la demande d’utilisation non agricole d’une partie du lot 2 935 698 pour agrandir le LET, sans constituer une autorisation de la CPTAQ.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-054, page 11, autorise l’agrandissement du bâtiment principal au 141 rue Main dans le cadre du PIIA-1 2025-03-0004."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-055, page 11, retient explicitement la grange de la Rubicon Farm au 38, rue Main dans la liste patrimoniale révisée."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-055, page 11, retient explicitement l’église Saint-James au 100, rue Main, objet patrimonial distinct des autres biens à cette adresse."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-055, page 11, retient explicitement le St. James Hall au 100, rue Main, objet patrimonial distinct malgré son adresse commune avec d’autres biens."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-055, page 11, retient explicitement le gazebo au 100, rue Main comme bien distinct dans la liste patrimoniale révisée."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 2026-058, page 13, appuie la demande d’utilisation non agricole d’une partie du lot 2 935 698 pour agrandir le LET, sans constituer une autorisation de la CPTAQ."
+  }
+ ]
+}

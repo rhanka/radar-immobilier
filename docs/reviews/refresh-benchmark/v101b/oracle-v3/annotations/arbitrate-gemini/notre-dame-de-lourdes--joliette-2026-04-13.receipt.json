@@ -1,0 +1,38 @@
+{
+ "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "01d555b9144977e58926b82bb8440d1531b599d66161fc3fb838739681afff4f",
+ "verificationSha256": "9a6cb5ff340d25d6865af71fa65c0bd60c185c2cac1125e2c2ce6cad5906fd8a",
+ "inputSha256": "1676254e6d71428d2470b4e3279b91fc09785880fa3c4f2559fe072706f86350",
+ "responseSha256": "507345746cb0b5435fbae3aec7cb0c392bbd4a44c6f9f177d7617d8d515a8d99",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 5677,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 10532,
+  "outputTokens": 54,
+  "totalTokens": 12201,
+  "thoughtsTokenCount": 1615
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 5522,
+  "requestId": null
+ },
+ "at": "2026-09-18T22:47:06.372Z"
+}

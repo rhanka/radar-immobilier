@@ -1,0 +1,101 @@
+{
+ "documentId": "grenville-sur-la-rouge-2026-04-14",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "196330a7c7fa54a291562c8f0834a06cd57a06f85ca3936dca9441b7e2699550",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'acte foncier d'acceptation du don du lot 6 209 933 est explicitement attesté à la page 1 et relève des inclusions foncières.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'acte foncier d'autorisation de vente du lot municipal 6 095 015 est expressément attesté à la page 1.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le refus de PIIA au 47, rue Donald Campbell est explicitement attesté à la page 2, conformément à la règle stipulant que les refus restent des refus.\"},{\"item\":\"i04\",\"choice\":\"absent\",\"reason\":\"La dérogation mineure n'est mentionnée que comme motif justificatif du refus de PIIA pour le même dossier, or les mentions historiques du même dossier ne multiplient pas le rappel.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'approbation du PIIA pour une résidence unifamiliale au 1417, route 148 est expressément attestée à la page 2.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'adoption de ce règlement relatif à la rénovation des façades est explicitement attestée comme résolution adoptée à la page 3.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"L'avis de motion visant des modifications au plan d'urbanisme est explicitement attesté à la page 3 et doit être séparé du projet de règlement.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"L'adoption du projet de règlement visant des modifications au plan d'urbanisme est explicitement attestée à la page 3 et forme une unité distincte de l'avis de motion.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'acte foncier d'acceptation du don du lot 6 209 933 est explicitement attesté à la page 1 et relève des inclusions foncières."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'acte foncier d'autorisation de vente du lot municipal 6 095 015 est expressément attesté à la page 1."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le refus de PIIA au 47, rue Donald Campbell est explicitement attesté à la page 2, conformément à la règle stipulant que les refus restent des refus."
+  },
+  {
+   "item": "i04",
+   "choice": "absent",
+   "reason": "La dérogation mineure n'est mentionnée que comme motif justificatif du refus de PIIA pour le même dossier, or les mentions historiques du même dossier ne multiplient pas le rappel."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'approbation du PIIA pour une résidence unifamiliale au 1417, route 148 est expressément attestée à la page 2."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'adoption de ce règlement relatif à la rénovation des façades est explicitement attestée comme résolution adoptée à la page 3."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "L'avis de motion visant des modifications au plan d'urbanisme est explicitement attesté à la page 3 et doit être séparé du projet de règlement."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "L'adoption du projet de règlement visant des modifications au plan d'urbanisme est explicitement attestée à la page 3 et forme une unité distincte de l'avis de motion."
+  }
+ ]
+}

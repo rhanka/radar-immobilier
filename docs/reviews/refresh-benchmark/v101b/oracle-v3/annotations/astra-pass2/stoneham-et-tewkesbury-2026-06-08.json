@@ -1,0 +1,340 @@
+{
+ "documentId": "stoneham-et-tewkesbury-2026-06-08",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "fb01cb7d80ff17759f3653fc7e8c1f3a5ef0c6b1da2235b2a3180d8ffe5873d5",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Avis de motion — règlement sur la vidange des fosses septiques et des fosses de rétention\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"Vidange des fosses septiques\",\n        \"page\": 20,\n        \"citation\": \"Avis de motion et dépôt d’un projet de règlement\\nVidange des fosses septiques et des fosses de rétention\",\n        \"anchor\": \"Vidange des fosses septiques\"\n      },\n      \"reason\": \"La règle exige une citation recopiée à l’identique, y compris le retour à la ligne après « règlement » à la page 20.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Dépôt du projet de règlement sur la vidange des fosses septiques et des fosses de rétention\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"Vidange des fosses septiques\",\n        \"page\": 20,\n        \"citation\": \"Avis de motion et dépôt d’un projet de règlement\\nVidange des fosses septiques et des fosses de rétention\",\n        \"anchor\": \"Vidange des fosses septiques\"\n      },\n      \"reason\": \"La règle exige une citation recopiée à l’identique, y compris le retour à la ligne après « règlement » à la page 20.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Autorisation de signature de l’entente de stationnement commun avec la Résidence des Cantons-Unis\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"stationnement commun\",\n        \"page\": 23,\n        \"citation\": \"signer une entente avec La\\nRésidence des Cantons-Unis de\\nStoneham-et-Tewkesbury relative au\\nstationnement commun du\\ncomplexe municipal et de la\\nRésidence\",\n        \"anchor\": \"stationnement commun\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de l’autorisation de signature figurant à la page 23.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Acquisition à titre gratuit d’une partie du lot 6 564 346\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 564 346\",\n        \"page\": 23,\n        \"citation\": \"d’autoriser l’acquisition à titre\\ngratuit, par la Municipalité, d’une\\npartie du lot actuel numéro 6 564\\n346 du cadastre du Québec\",\n        \"anchor\": \"lot actuel numéro 6 564\\n346\"\n      },\n      \"reason\": \"La citation doit être identique au texte de la page 23 et l’ancre doit en être une sous-chaîne exacte, notamment avec le retour à la ligne dans le numéro du lot.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Autorisation des servitudes d’utilité publique nécessaires sur les lots du stationnement commun\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"servitudes d’utilité publique\",\n        \"page\": 23,\n        \"citation\": \"d’autoriser l’établissement de toutes\\nententes, conventions d’occupation\\net servitudes d’utilité publique\\njugées nécessaires sur les lots\\nconcernés par l’entente\",\n        \"anchor\": \"servitudes d’utilité publique\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les retours à la ligne de l’autorisation des servitudes figurant à la page 23.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure — piscine en cour avant au 2135, route de Tewkesbury, approbation recommandée sous condition\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2135, route de Tewkesbury\",\n        \"page\": 38,\n        \"citation\": \"Construction d’une piscine en cour avant au 2135, route de Tewkesbury\\nDérogation mineure au Règlement de zonage numéro 09-591, article 7.3.2\",\n        \"anchor\": \"2135, route de Tewkesbury\"\n      },\n      \"reason\": \"La règle de citation à l’identique impose de conserver le retour à la ligne entre l’adresse et « Dérogation mineure » à la page 38.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure — marge latérale de 2,55 m au 53, chemin Plamondon, approbation recommandée\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"53, chemin Plamondon\",\n        \"page\": 40,\n        \"citation\": \"Régularisation d’une habitation unifamiliale avec une marge latérale de 2,55 m au 53,\\nchemin Plamondon\\nDérogation mineure au Règlement de zonage numéro 09-591, article 3.2.2\",\n        \"anchor\": \"53,\\nchemin Plamondon\"\n      },\n      \"reason\": \"La citation et son ancre doivent respecter les retours à la ligne du texte de la page 40, notamment celui qui coupe l’adresse après « 53, ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"PIIA — bâtiments d’entreposage et stationnement au 2757, boulevard Talbot, approbation recommandée avec exigences\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2757, boulevard Talbot\",\n        \"page\": 42,\n        \"citation\": \"Construction de bâtiments commerciaux d’entreposage intérieur et aménagement d’une\\naire de stationnement de plus de 150 m2 au 2757, boulevard Talbot\",\n        \"anchor\": \"2757, boulevard Talbot\"\n      },\n      \"reason\": \"La règle de citation à l’identique impose de conserver le retour à la ligne avant « aire de stationnement » à la page 42.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"PIIA — refus recommandé de l’agrandissement de l’accès et du stationnement au 98, 1re Avenue\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"98, 1re Avenue\",\n        \"page\": 44,\n        \"citation\": \"Agrandissement de l’allée d’accès et de l’aire de stationnement portant la superficie à plus de\\n150 m² au 98, 1re Avenue\",\n        \"anchor\": \"98, 1re Avenue\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique le retour à la ligne avant « 150 m² » à la page 44, sans modifier le refus recommandé.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"PIIA — piscine en bande de protection au 105, chemin de la Tourterelle, approbation recommandée\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"105, chemin de la Tourterelle\",\n        \"page\": 46,\n        \"citation\": \"Implantation d’une piscine à l’intérieur des bandes de protection d’un secteur de forte pente\\nau 105, chemin de la Tourterelle\",\n        \"anchor\": \"105, chemin de la Tourterelle\"\n      },\n      \"reason\": \"La règle de citation à l’identique impose de conserver le retour à la ligne après « forte pente » à la page 46.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u13\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 26-1105 modifiant le zonage\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"26-1105\",\n        \"page\": 52,\n        \"citation\": \"Adoption du Règlement numéro 26-1105\\nmodifiant le Règlement de zonage numéro 09-591\",\n        \"anchor\": \"Règlement numéro 26-1105\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique le retour à la ligne après le numéro 26-1105 dans le titre de la page 52.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u14\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 26-1106 modifiant le règlement relatif aux PIIA\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"26-1106\",\n        \"page\": 54,\n        \"citation\": \"Adoption du Règlement numéro 26-1106\\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\\narchitecturale numéro 09-603\",\n        \"anchor\": \"Règlement numéro 26-1106\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique les deux retours à la ligne du titre d’adoption figurant à la page 54.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u15\",\n      \"unit\": {\n        \"label\": \"Refus au stade du premier projet de résolution PPCMOI — 102, 1re Avenue, 18 logements\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"102, 1re Avenue\",\n        \"page\": 56,\n        \"citation\": \"total de 18 logements) et un bâtiment\\nde remisage isolé au 102, 1re Avenue\",\n        \"anchor\": \"102, 1re Avenue\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique le retour à la ligne après « bâtiment » à la page 56, tout en conservant le refus au stade du premier projet.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Avis de motion — règlement sur la vidange des fosses septiques et des fosses de rétention",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "Vidange des fosses septiques",
+    "page": 20,
+    "citation": "Avis de motion et dépôt d’un projet de règlement\nVidange des fosses septiques et des fosses de rétention",
+    "anchor": "Vidange des fosses septiques"
+   },
+   "reason": "La règle exige une citation recopiée à l’identique, y compris le retour à la ligne après « règlement » à la page 20."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Dépôt du projet de règlement sur la vidange des fosses septiques et des fosses de rétention",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "Vidange des fosses septiques",
+    "page": 20,
+    "citation": "Avis de motion et dépôt d’un projet de règlement\nVidange des fosses septiques et des fosses de rétention",
+    "anchor": "Vidange des fosses septiques"
+   },
+   "reason": "La règle exige une citation recopiée à l’identique, y compris le retour à la ligne après « règlement » à la page 20."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Autorisation de signature de l’entente de stationnement commun avec la Résidence des Cantons-Unis",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "stationnement commun",
+    "page": 23,
+    "citation": "signer une entente avec La\nRésidence des Cantons-Unis de\nStoneham-et-Tewkesbury relative au\nstationnement commun du\ncomplexe municipal et de la\nRésidence",
+    "anchor": "stationnement commun"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de l’autorisation de signature figurant à la page 23."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Acquisition à titre gratuit d’une partie du lot 6 564 346",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 564 346",
+    "page": 23,
+    "citation": "d’autoriser l’acquisition à titre\ngratuit, par la Municipalité, d’une\npartie du lot actuel numéro 6 564\n346 du cadastre du Québec",
+    "anchor": "lot actuel numéro 6 564\n346"
+   },
+   "reason": "La citation doit être identique au texte de la page 23 et l’ancre doit en être une sous-chaîne exacte, notamment avec le retour à la ligne dans le numéro du lot."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Autorisation des servitudes d’utilité publique nécessaires sur les lots du stationnement commun",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "servitudes d’utilité publique",
+    "page": 23,
+    "citation": "d’autoriser l’établissement de toutes\nententes, conventions d’occupation\net servitudes d’utilité publique\njugées nécessaires sur les lots\nconcernés par l’entente",
+    "anchor": "servitudes d’utilité publique"
+   },
+   "reason": "La citation doit reproduire à l’identique les retours à la ligne de l’autorisation des servitudes figurant à la page 23."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Dérogation mineure — piscine en cour avant au 2135, route de Tewkesbury, approbation recommandée sous condition",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2135, route de Tewkesbury",
+    "page": 38,
+    "citation": "Construction d’une piscine en cour avant au 2135, route de Tewkesbury\nDérogation mineure au Règlement de zonage numéro 09-591, article 7.3.2",
+    "anchor": "2135, route de Tewkesbury"
+   },
+   "reason": "La règle de citation à l’identique impose de conserver le retour à la ligne entre l’adresse et « Dérogation mineure » à la page 38."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Dérogation mineure — marge latérale de 2,55 m au 53, chemin Plamondon, approbation recommandée",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "53, chemin Plamondon",
+    "page": 40,
+    "citation": "Régularisation d’une habitation unifamiliale avec une marge latérale de 2,55 m au 53,\nchemin Plamondon\nDérogation mineure au Règlement de zonage numéro 09-591, article 3.2.2",
+    "anchor": "53,\nchemin Plamondon"
+   },
+   "reason": "La citation et son ancre doivent respecter les retours à la ligne du texte de la page 40, notamment celui qui coupe l’adresse après « 53, »."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "PIIA — bâtiments d’entreposage et stationnement au 2757, boulevard Talbot, approbation recommandée avec exigences",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2757, boulevard Talbot",
+    "page": 42,
+    "citation": "Construction de bâtiments commerciaux d’entreposage intérieur et aménagement d’une\naire de stationnement de plus de 150 m2 au 2757, boulevard Talbot",
+    "anchor": "2757, boulevard Talbot"
+   },
+   "reason": "La règle de citation à l’identique impose de conserver le retour à la ligne avant « aire de stationnement » à la page 42."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "PIIA — refus recommandé de l’agrandissement de l’accès et du stationnement au 98, 1re Avenue",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "98, 1re Avenue",
+    "page": 44,
+    "citation": "Agrandissement de l’allée d’accès et de l’aire de stationnement portant la superficie à plus de\n150 m² au 98, 1re Avenue",
+    "anchor": "98, 1re Avenue"
+   },
+   "reason": "La citation doit reproduire à l’identique le retour à la ligne avant « 150 m² » à la page 44, sans modifier le refus recommandé."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "PIIA — piscine en bande de protection au 105, chemin de la Tourterelle, approbation recommandée",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "105, chemin de la Tourterelle",
+    "page": 46,
+    "citation": "Implantation d’une piscine à l’intérieur des bandes de protection d’un secteur de forte pente\nau 105, chemin de la Tourterelle",
+    "anchor": "105, chemin de la Tourterelle"
+   },
+   "reason": "La règle de citation à l’identique impose de conserver le retour à la ligne après « forte pente » à la page 46."
+  },
+  {
+   "op": "correct",
+   "id": "u13",
+   "unit": {
+    "label": "Adoption du règlement 26-1105 modifiant le zonage",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "26-1105",
+    "page": 52,
+    "citation": "Adoption du Règlement numéro 26-1105\nmodifiant le Règlement de zonage numéro 09-591",
+    "anchor": "Règlement numéro 26-1105"
+   },
+   "reason": "La citation doit reproduire à l’identique le retour à la ligne après le numéro 26-1105 dans le titre de la page 52."
+  },
+  {
+   "op": "correct",
+   "id": "u14",
+   "unit": {
+    "label": "Adoption du règlement 26-1106 modifiant le règlement relatif aux PIIA",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "26-1106",
+    "page": 54,
+    "citation": "Adoption du Règlement numéro 26-1106\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\narchitecturale numéro 09-603",
+    "anchor": "Règlement numéro 26-1106"
+   },
+   "reason": "La citation doit reproduire à l’identique les deux retours à la ligne du titre d’adoption figurant à la page 54."
+  },
+  {
+   "op": "correct",
+   "id": "u15",
+   "unit": {
+    "label": "Refus au stade du premier projet de résolution PPCMOI — 102, 1re Avenue, 18 logements",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "102, 1re Avenue",
+    "page": 56,
+    "citation": "total de 18 logements) et un bâtiment\nde remisage isolé au 102, 1re Avenue",
+    "anchor": "102, 1re Avenue"
+   },
+   "reason": "La citation doit reproduire à l’identique le retour à la ligne après « bâtiment » à la page 56, tout en conservant le refus au stade du premier projet."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "avis_motion",
+   "page": 20,
+   "citation": "Avis de motion et dépôt d’un projet de règlement\nVidange des fosses septiques et des fosses de rétention"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "projet_reglement",
+   "page": 20,
+   "citation": "Avis de motion et dépôt d’un projet de règlement\nVidange des fosses septiques et des fosses de rétention"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "inconnu",
+   "page": 23,
+   "citation": "signer une entente avec La\nRésidence des Cantons-Unis de\nStoneham-et-Tewkesbury relative au\nstationnement commun du\ncomplexe municipal et de la\nRésidence"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "adoption",
+   "page": 23,
+   "citation": "d’autoriser l’acquisition à titre\ngratuit, par la Municipalité, d’une\npartie du lot actuel numéro 6 564\n346 du cadastre du Québec"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "adoption",
+   "page": 23,
+   "citation": "d’autoriser l’établissement de toutes\nententes, conventions d’occupation\net servitudes d’utilité publique\njugées nécessaires sur les lots\nconcernés par l’entente"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "derogation_mineure",
+   "page": 38,
+   "citation": "Construction d’une piscine en cour avant au 2135, route de Tewkesbury\nDérogation mineure au Règlement de zonage numéro 09-591, article 7.3.2"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "derogation_mineure",
+   "page": 40,
+   "citation": "Régularisation d’une habitation unifamiliale avec une marge latérale de 2,55 m au 53,\nchemin Plamondon\nDérogation mineure au Règlement de zonage numéro 09-591, article 3.2.2"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "piia",
+   "page": 42,
+   "citation": "Construction de bâtiments commerciaux d’entreposage intérieur et aménagement d’une\naire de stationnement de plus de 150 m2 au 2757, boulevard Talbot"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "piia",
+   "page": 44,
+   "citation": "Agrandissement de l’allée d’accès et de l’aire de stationnement portant la superficie à plus de\n150 m² au 98, 1re Avenue"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "piia",
+   "page": 46,
+   "citation": "Implantation d’une piscine à l’intérieur des bandes de protection d’un secteur de forte pente\nau 105, chemin de la Tourterelle"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 10,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u13",
+   "stage": "adoption",
+   "page": 52,
+   "citation": "Adoption du Règlement numéro 26-1105\nmodifiant le Règlement de zonage numéro 09-591"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 11,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u14",
+   "stage": "adoption",
+   "page": 54,
+   "citation": "Adoption du Règlement numéro 26-1106\nmodifiant le Règlement relatif aux plans d’implantation et d’intégration\narchitecturale numéro 09-603"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 12,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u15",
+   "stage": "projet_reglement",
+   "page": 56,
+   "citation": "total de 18 logements) et un bâtiment\nde remisage isolé au 102, 1re Avenue"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 15
+}

@@ -1,0 +1,35 @@
+{
+ "documentId": "saint-just-de-bretenieres-2026-02-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "ca81244e69dbf3748fd787c068b35785a0535720ce45346c9ab02dc26e258bc4",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1561,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 9229,
+   "outputTokens": 330,
+   "totalTokens": 9559
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1423
+  },
+  "inputSha256": "3ca99c0cc0116a3c93b9f601f2505dc4b744190b5597ad9008a3bcffa152a75c"
+ },
+ "at": "2026-09-19T03:22:37.538Z"
+}

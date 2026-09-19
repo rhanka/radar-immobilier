@@ -1,0 +1,91 @@
+{
+ "documentId": "sainte-croix-2026-05-05",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "99b86b2c262f1b2a6ed341d6b6085222101383467151687495d2b29b3300191c",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 117-2026, page 8, autorise la transmission d'une lettre d'intention visant une partie du lot 6 191 770, sans constater une vente conclue.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 118-2026, page 9, adopte explicitement le règlement 760-2026 modifiant les grandes affectations du plan d'urbanisme.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 119-2026, page 9, adopte explicitement le règlement 761-2026 concernant les usages permis dans la zone 14-I et la création de la zone 21-H.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 120-2026, page 10, approuve le plan d'aménagement de Giroux Arpentage pour le développement du lot 3 592 103 et le prolongement de la rue Thibodeau.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 121-2026, page 14, recommande à la CPTAQ d'approuver la demande relative au projet éolien Lotbinière Ndakina, sans présenter cette recommandation comme une autorisation de la Commission.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La page 14 confirme expressément l'engagement municipal à octroyer les droits fonciers nécessaires au projet éolien sur les terres municipales, objet foncier distinct de la recommandation à la CPTAQ.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 126-2026, page 17, approuve les plans et devis préliminaires d'Apex Expert Conseil inc. pour le lot 3 592 103, tout en précisant que cette approbation ne certifie pas la conformité du projet.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 117-2026, page 8, autorise la transmission d'une lettre d'intention visant une partie du lot 6 191 770, sans constater une vente conclue."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 118-2026, page 9, adopte explicitement le règlement 760-2026 modifiant les grandes affectations du plan d'urbanisme."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 119-2026, page 9, adopte explicitement le règlement 761-2026 concernant les usages permis dans la zone 14-I et la création de la zone 21-H."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 120-2026, page 10, approuve le plan d'aménagement de Giroux Arpentage pour le développement du lot 3 592 103 et le prolongement de la rue Thibodeau."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 121-2026, page 14, recommande à la CPTAQ d'approuver la demande relative au projet éolien Lotbinière Ndakina, sans présenter cette recommandation comme une autorisation de la Commission."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La page 14 confirme expressément l'engagement municipal à octroyer les droits fonciers nécessaires au projet éolien sur les terres municipales, objet foncier distinct de la recommandation à la CPTAQ."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La résolution 126-2026, page 17, approuve les plans et devis préliminaires d'Apex Expert Conseil inc. pour le lot 3 592 103, tout en précisant que cette approbation ne certifie pas la conformité du projet."
+  }
+ ]
+}

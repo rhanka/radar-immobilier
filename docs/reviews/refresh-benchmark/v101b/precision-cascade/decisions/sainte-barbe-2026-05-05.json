@@ -1,0 +1,383 @@
+{
+ "documentId": "sainte-barbe-2026-05-05",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "2c312a6cfdf6ee179b39a46a0d102686c1513f28e961cece040a2d13b6146af3",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2003-05-63"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Second projet de règlement 2003-05-63",
+     "stage": "2e_projet",
+     "objet": "2003-05-63",
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "Il est proposé par : Denis Larocque. Qu’un second projet de\nrèglement portant le numéro 2003-05-63 AVEC CHANGEMENT\nsoit adopté"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2003-05"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 2003-05",
+     "stage": null,
+     "objet": "2003-05",
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "Le règlement numéro 2003-05 est modifié à l’article 6.2, dans la\nrangé #20 (garage détaché), dans la colonne « cour avant »,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-ppcmoi-2025-001"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Scrutin référendaire — PPCMOI 2025-001, Île Raymond",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "QUE le conseil municipal autorise la tenue d'un scrutin\nréférendaire conformément à la Loi sur les élections et les\nréférendums dans les municipalités ;"
+      },
+      {
+       "page": 14,
+       "excerpt": "QUE la date du scrutin référendaire est fixée au dimanche 14\njuin 2026, de 10 h 00 à 20 h 00 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-piia-2026-0055"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-0055 — 31 Rue des Moissons",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 18,
+       "excerpt": "Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que\nrecommandé par le Comité consultatif d’urbanisme."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-piia-2026-0056"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-0056 — 424 Chemin de l’Église",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 tel que\nrecommandé par le Comité consultatif d’urbanisme."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-derogation-2026-0057"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2026-0057 — allée d’accès",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057\ntel que recommandé par le Comité consultatif d’urbanisme."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-derogation-2026-0059"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2026-0059 — 813, 45e avenue",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "6.8 Demande de dérogation mineure #2026-0059 – 813, 45e avenue ®"
+      },
+      {
+       "page": 3,
+       "excerpt": "Le maire explique que la demande sera prise en\ndélibéré et revenir à un moment ultérieurement."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-servitude"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Cession de servitude — 163 avenue des Cèdres",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "Il est proposé par : Johanne Béliveau. Que le maire et la\ndirectrice générale soient autorisés à signer les documents\nnécessaires pour l’acte de cession de la servitude"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-branchement"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Branchement aqueduc et égout — lot 2 844 573",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "Il est proposé par :\nFrançois Gagnon. QUE le conseil octroi\nle contrat à l'entreprise F. Duval Excavation, plus bas\nsoumissionnaire jugé conforme,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "bylaw-2023-10-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2023-10-01 — abrogation de l’emprunt du Centre Barberivain",
+     "stage": "adoption",
+     "objet": "2023-10-01",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Il est proposé par : François Gagnon. Que le règlement 202310-01 soit adopté et de décrèter ce qui suit :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "bylaw-2026-05"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement d’emprunt 2026-05 — réfection routière",
+     "stage": "adoption",
+     "objet": "2026-05",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Il est proposé par : Élodie Tricoire. Que le conseil décrète ce\nqui suit :"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le second projet de règlement numéro 2003-05-63.\",\"excerpt\":\"Qu’un second projet de règlement portant le numéro 2003-05-63 AVEC CHANGEMENT soit adopté\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2003-05 est le règlement d'origine faisant l'objet de modifications par le second projet 2003-05-63, il ne constitue pas un acte autonome adopté ou franchissant une étape ici.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal fixe la date et les modalités d'un scrutin référendaire pour la demande de PPCMOI 2025-001 concernant l’Île Raymond.\",\"excerpt\":\"QUE la date du scrutin référendaire est fixée au dimanche 14 juin 2026, de 10 h 00 à 20 h 00 ;\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil accepte la demande de PIIA 2026-0055 pour le 31, rue des Moissons.\",\"excerpt\":\"Que le conseil de Sainte-Barbe accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d’urbanisme.\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil accepte la demande de PIIA 2026-0056 pour le 424, chemin de l’Église.\",\"excerpt\":\"Que le conseil de Sainte-Barbe accepte la demande de PIIA 2026-0056 tel que recommandé par le Comité consultatif d’urbanisme.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil accepte la demande de dérogation mineure 2026-0057.\",\"excerpt\":\"Que le conseil de Sainte-Barbe accepte la demande de dérogation mineure 2026-0057 tel que recommandé par le Comité consultatif d’urbanisme.\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"La demande de dérogation mineure 2026-0059 figure à l'ordre du jour et fait l'objet d'un traitement formel (prise en délibéré).\",\"excerpt\":\"Le maire explique que la demande sera prise en délibéré et revenir à un moment ultérieurement.\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la signature des documents pour l’acte de cession de servitude sur l'avenue des Cèdres.\",\"excerpt\":\"Que le maire et la directrice générale soient autorisés à signer les documents nécessaires pour l’acte de cession de la servitude sur les lots 5 988 194 et 6 520 252 située au 163 avenue des Cèdres.\"},{\"act\":\"A09\",\"verdict\":\"non_soutenu\",\"reason\":\"L'octroi d'un contrat de branchement de service relève des contrats d'exécution de travaux/services exclus du périmètre d'urbanisme.\",\"excerpt\":\"\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement 2023-10-01 abrogeant le règlement d'emprunt 2023-10.\",\"excerpt\":\"Que le règlement 2023-10-01 soit adopté et de décrèter ce qui suit :\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement d'emprunt 2026-05 pour des travaux de réfection de chemins.\",\"excerpt\":\"RÈGLEMENT NUMÉRO 2026-05 RÈGLEMENT D’EMPRUNT À L’ENSEMBLE RELATIF À DES TRAVAUX DE RÉFECTION DES CHEMINS INCLUANT LE PAVAGE, LES TROTTOIRS ET LE STATIONNEMENT DE L’HÔTEL DE VILLE\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le second projet de règlement numéro 2003-05-63.",
+   "excerpt": "Qu’un second projet de règlement portant le numéro 2003-05-63 AVEC CHANGEMENT soit adopté"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2003-05 est le règlement d'origine faisant l'objet de modifications par le second projet 2003-05-63, il ne constitue pas un acte autonome adopté ou franchissant une étape ici.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal fixe la date et les modalités d'un scrutin référendaire pour la demande de PPCMOI 2025-001 concernant l’Île Raymond.",
+   "excerpt": "QUE la date du scrutin référendaire est fixée au dimanche 14 juin 2026, de 10 h 00 à 20 h 00 ;"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil accepte la demande de PIIA 2026-0055 pour le 31, rue des Moissons.",
+   "excerpt": "Que le conseil de Sainte-Barbe accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d’urbanisme."
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil accepte la demande de PIIA 2026-0056 pour le 424, chemin de l’Église.",
+   "excerpt": "Que le conseil de Sainte-Barbe accepte la demande de PIIA 2026-0056 tel que recommandé par le Comité consultatif d’urbanisme."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil accepte la demande de dérogation mineure 2026-0057.",
+   "excerpt": "Que le conseil de Sainte-Barbe accepte la demande de dérogation mineure 2026-0057 tel que recommandé par le Comité consultatif d’urbanisme."
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "La demande de dérogation mineure 2026-0059 figure à l'ordre du jour et fait l'objet d'un traitement formel (prise en délibéré).",
+   "excerpt": "Le maire explique que la demande sera prise en délibéré et revenir à un moment ultérieurement."
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la signature des documents pour l’acte de cession de servitude sur l'avenue des Cèdres.",
+   "excerpt": "Que le maire et la directrice générale soient autorisés à signer les documents nécessaires pour l’acte de cession de la servitude sur les lots 5 988 194 et 6 520 252 située au 163 avenue des Cèdres."
+  },
+  {
+   "act": "A09",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de branchement de service relève des contrats d'exécution de travaux/services exclus du périmètre d'urbanisme.",
+   "excerpt": ""
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement 2023-10-01 abrogeant le règlement d'emprunt 2023-10.",
+   "excerpt": "Que le règlement 2023-10-01 soit adopté et de décrèter ce qui suit :"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement d'emprunt 2026-05 pour des travaux de réfection de chemins.",
+   "excerpt": "RÈGLEMENT NUMÉRO 2026-05 RÈGLEMENT D’EMPRUNT À L’ENSEMBLE RELATIF À DES TRAVAUX DE RÉFECTION DES CHEMINS INCLUANT LE PAVAGE, LES TROTTOIRS ET LE STATIONNEMENT DE L’HÔTEL DE VILLE"
+  }
+ ],
+ "filter": {
+  "acts": 11,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 2003-05 est le règlement d'origine faisant l'objet de modifications par le second projet 2003-05-63, il ne constitue pas un acte autonome adopté ou franchissant une étape ici."
+   },
+   {
+    "act": "A09",
+    "reason": "L'octroi d'un contrat de branchement de service relève des contrats d'exécution de travaux/services exclus du périmètre d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le second projet de règlement numéro 2003-05-63."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil municipal fixe la date et les modalités d'un scrutin référendaire pour la demande de PPCMOI 2025-001 concernant l’Île Raymond."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil accepte la demande de PIIA 2026-0055 pour le 31, rue des Moissons."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil accepte la demande de PIIA 2026-0056 pour le 424, chemin de l’Église."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil accepte la demande de dérogation mineure 2026-0057."
+   },
+   {
+    "act": "A07",
+    "reason": "La demande de dérogation mineure 2026-0059 figure à l'ordre du jour et fait l'objet d'un traitement formel (prise en délibéré)."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil autorise la signature des documents pour l’acte de cession de servitude sur l'avenue des Cèdres."
+   },
+   {
+    "act": "A10",
+    "reason": "Le conseil adopte le règlement 2023-10-01 abrogeant le règlement d'emprunt 2023-10."
+   },
+   {
+    "act": "A11",
+    "reason": "Le conseil adopte le règlement d'emprunt 2026-05 pour des travaux de réfection de chemins."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4373,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 15928,
+   "outputTokens": 908,
+   "totalTokens": 16836
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2948
+  },
+  "inputSha256": "abc8c8f33fc3cf1ec7b4ae112933a737b2a6ba8d96d248a720763f8cbd9e3cea"
+ }
+}

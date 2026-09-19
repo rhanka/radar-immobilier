@@ -1,0 +1,51 @@
+{
+ "documentId": "acton-vale-2026-03-16",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "651db8ff1fc50b87182675ec2f9ff7652f82181a774981355061c593e80a89d8",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 18.1 prévoit l'adoption de la résolution finale du PPCMOI-001-2026 à la page 2, ce qui correspond exactement aux faits énoncés.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 18.2 en aménagement et urbanisme prévoit une résolution sur une demande CPTAQ concernant Ferme Guilmette Inc. à la page 2.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 18.3 en aménagement et urbanisme prévoit une résolution sur une demande CPTAQ concernant Daniel Laroche à la page 2.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 18.1 prévoit l'adoption de la résolution finale du PPCMOI-001-2026 à la page 2, ce qui correspond exactement aux faits énoncés."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 18.2 en aménagement et urbanisme prévoit une résolution sur une demande CPTAQ concernant Ferme Guilmette Inc. à la page 2."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 18.3 en aménagement et urbanisme prévoit une résolution sur une demande CPTAQ concernant Daniel Laroche à la page 2."
+  }
+ ]
+}

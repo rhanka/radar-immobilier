@@ -1,0 +1,198 @@
+{
+ "documentId": "frontenac-2026-03-10",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "8092c1d12e3394bbbeaa7b48276f87c27be8914f2f71912a3ac903977d3b4a6d",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Vente pour défaut de paiement des taxes demandée — lot 4 972 283\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"4 972 283\",\n        \"page\": 19,\n        \"citation\": \"de vendre\\npour défaut de paiement des taxes, les immeubles suivants :\\nNuméro de matricule : 7445-62-1565\\nPropriétaire : Janine Carrier Racine\\nNuméro de cadastre : 4 972 283\",\n        \"anchor\": \"Numéro de cadastre : 4 972 283\"\n      },\n      \"reason\": \"La résolution 2026-080 demande à la MRC de vendre cet immeuble à défaut de paiement avant le 12 mars 2026, ce qui constitue un acte foncier décidé, sans attester une vente déjà réalisée.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Attestation de conformité municipale — demande CPTAQ 453132, Groupe Exca inc.\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"453132\",\n        \"page\": 23,\n        \"citation\": \"Que le conseil municipal de la Municipalité de Frontenac atteste que la\\ndemande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc.,\\nest conforme à la réglementation municipale applicable,\",\n        \"anchor\": \"CPTAQ au dossier 453132\"\n      },\n      \"reason\": \"La résolution 2026-087 atteste actuellement la conformité d’une demande identifiée à la CPTAQ, étape réglementaire distincte d’une autorisation finale de cette commission.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation de l’entente de conservation des milieux humides — lac Aux Araignées, durée de 25 ans\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"lac Aux Araignées\",\n        \"page\": 27,\n        \"citation\": \"Que la Municipalité de Frontenac accepte les termes de l’entente relative à la protection et à la conservation des milieux humides riverains du\\nlac Aux Araignées, telle que déposée;\",\n        \"anchor\": \"lac Aux Araignées\"\n      },\n      \"reason\": \"La résolution 2026-094 approuve une convention de conservation portant sur les terrains du propriétaire et autorise sa signature pour une collaboration de 25 ans, sans constater une servitude permanente.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Report de l’adoption du premier projet — règlement 503-2026 sur l’occupation et l’entretien des bâtiments\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"503-2026\",\n        \"page\": 37,\n        \"citation\": \"Adoption reportée du 1er projet du règlement no. 503-2026 relatif à\\nl’occupation et à l’entretien des bâtiments\",\n        \"anchor\": \"règlement no. 503-2026\"\n      },\n      \"reason\": \"Le document constate explicitement le report concernant cet objet réglementaire, et non l’adoption du premier projet; cette étape relève donc de « inconnu ».\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Report de l’adoption — règlement 504-2026 modifiant les dispositions sur la démolition d’immeubles\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"504-2026\",\n        \"page\": 37,\n        \"citation\": \"Adoption reportée du règlement no 504-2026 modifiant le règlement\\nrelatif à la démolition d’immeubles no 469-2023 afin de modifier certaines dispositions relatives aux bâtiments assujettis\",\n        \"anchor\": \"règlement no 504-2026\"\n      },\n      \"reason\": \"L’adoption du règlement 504-2026 est expressément reportée, ce qui constitue une étape constatée sans permettre de créditer une adoption acquise.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Report de l’avis de motion et de la présentation — règlement 506-2026, concordance du règlement de construction\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"506-2026\",\n        \"page\": 37,\n        \"citation\": \"Avis de motion et présentation reportée du règlement no. 506-2026\\nafin de faire la concordance du règlement de construction no 287-96\\nenvers le schéma d’aménagement de la MRC du Granit\",\n        \"anchor\": \"règlement no. 506-2026\"\n      },\n      \"reason\": \"Le seul fait procédural constaté est le report concernant le règlement 506-2026, et non un avis de motion donné et un projet présenté qui créeraient deux unités distinctes.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Report de l’avis de motion et de la présentation — règlement 507-2026, concordance du règlement de lotissement\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"507-2026\",\n        \"page\": 37,\n        \"citation\": \"Avis de motion et présentation reportée du règlement no 507-2026\\nafin de faire la concordance du règlement de lotissement no 244-90\\nenvers le schéma d’aménagement de la MRC du Granit\",\n        \"anchor\": \"règlement no 507-2026\"\n      },\n      \"reason\": \"Le document atteste le report des démarches relatives au règlement 507-2026, sans constater que l’avis de motion ou la présentation du projet ont eu lieu.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Report de l’avis de motion et de la présentation — règlement 508-2026, concordance des permis et certificats\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"508-2026\",\n        \"page\": 37,\n        \"citation\": \"Avis de motion et présentation reportée du règlement no 508-2026\\nafin de faire la concordance du règlement sur les permis et certificats\\nno 242-90 envers le schéma d’aménagement de la MRC du Granit\",\n        \"anchor\": \"règlement no 508-2026\"\n      },\n      \"reason\": \"Cet objet réglementaire explicite fait l’objet d’un report constaté, à conserver comme tel plutôt que comme un avis de motion donné ou un projet présenté.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Report de l’avis de motion et de la présentation — règlement 5092026 remplaçant le plan d’urbanisme\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"5092026\",\n        \"page\": 37,\n        \"citation\": \"Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro\\n241-90\",\n        \"anchor\": \"règlement numéro 5092026\"\n      },\n      \"reason\": \"Le texte constate le report concernant le règlement identifié « 5092026 », dont le numéro est conservé tel qu’écrit, sans attester l’accomplissement des étapes reportées.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Report de l’avis de motion et de la présentation — règlement 510-2026, concordance du règlement de zonage\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"510-2026\",\n        \"page\": 37,\n        \"citation\": \"Avis de motion et présentation reportée du règlement no 510-2026\\nafin de faire la concordance du règlement de zonage no 243-90 envers le schéma d’aménagement de la MRC du Granit\",\n        \"anchor\": \"règlement no 510-2026\"\n      },\n      \"reason\": \"Le report est une étape constatée pour le règlement 510-2026, tandis que l’avis de motion et la présentation ne sont pas attestés comme ayant été réalisés.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Vente pour défaut de paiement des taxes demandée — lot 4 972 283",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 972 283",
+    "page": 19,
+    "citation": "de vendre\npour défaut de paiement des taxes, les immeubles suivants :\nNuméro de matricule : 7445-62-1565\nPropriétaire : Janine Carrier Racine\nNuméro de cadastre : 4 972 283",
+    "anchor": "Numéro de cadastre : 4 972 283"
+   },
+   "reason": "La résolution 2026-080 demande à la MRC de vendre cet immeuble à défaut de paiement avant le 12 mars 2026, ce qui constitue un acte foncier décidé, sans attester une vente déjà réalisée."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Attestation de conformité municipale — demande CPTAQ 453132, Groupe Exca inc.",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "453132",
+    "page": 23,
+    "citation": "Que le conseil municipal de la Municipalité de Frontenac atteste que la\ndemande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc.,\nest conforme à la réglementation municipale applicable,",
+    "anchor": "CPTAQ au dossier 453132"
+   },
+   "reason": "La résolution 2026-087 atteste actuellement la conformité d’une demande identifiée à la CPTAQ, étape réglementaire distincte d’une autorisation finale de cette commission."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation de l’entente de conservation des milieux humides — lac Aux Araignées, durée de 25 ans",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "lac Aux Araignées",
+    "page": 27,
+    "citation": "Que la Municipalité de Frontenac accepte les termes de l’entente relative à la protection et à la conservation des milieux humides riverains du\nlac Aux Araignées, telle que déposée;",
+    "anchor": "lac Aux Araignées"
+   },
+   "reason": "La résolution 2026-094 approuve une convention de conservation portant sur les terrains du propriétaire et autorise sa signature pour une collaboration de 25 ans, sans constater une servitude permanente."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Report de l’adoption du premier projet — règlement 503-2026 sur l’occupation et l’entretien des bâtiments",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "503-2026",
+    "page": 37,
+    "citation": "Adoption reportée du 1er projet du règlement no. 503-2026 relatif à\nl’occupation et à l’entretien des bâtiments",
+    "anchor": "règlement no. 503-2026"
+   },
+   "reason": "Le document constate explicitement le report concernant cet objet réglementaire, et non l’adoption du premier projet; cette étape relève donc de « inconnu »."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Report de l’adoption — règlement 504-2026 modifiant les dispositions sur la démolition d’immeubles",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "504-2026",
+    "page": 37,
+    "citation": "Adoption reportée du règlement no 504-2026 modifiant le règlement\nrelatif à la démolition d’immeubles no 469-2023 afin de modifier certaines dispositions relatives aux bâtiments assujettis",
+    "anchor": "règlement no 504-2026"
+   },
+   "reason": "L’adoption du règlement 504-2026 est expressément reportée, ce qui constitue une étape constatée sans permettre de créditer une adoption acquise."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 506-2026, concordance du règlement de construction",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "506-2026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement no. 506-2026\nafin de faire la concordance du règlement de construction no 287-96\nenvers le schéma d’aménagement de la MRC du Granit",
+    "anchor": "règlement no. 506-2026"
+   },
+   "reason": "Le seul fait procédural constaté est le report concernant le règlement 506-2026, et non un avis de motion donné et un projet présenté qui créeraient deux unités distinctes."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 507-2026, concordance du règlement de lotissement",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "507-2026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement no 507-2026\nafin de faire la concordance du règlement de lotissement no 244-90\nenvers le schéma d’aménagement de la MRC du Granit",
+    "anchor": "règlement no 507-2026"
+   },
+   "reason": "Le document atteste le report des démarches relatives au règlement 507-2026, sans constater que l’avis de motion ou la présentation du projet ont eu lieu."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 508-2026, concordance des permis et certificats",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "508-2026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement no 508-2026\nafin de faire la concordance du règlement sur les permis et certificats\nno 242-90 envers le schéma d’aménagement de la MRC du Granit",
+    "anchor": "règlement no 508-2026"
+   },
+   "reason": "Cet objet réglementaire explicite fait l’objet d’un report constaté, à conserver comme tel plutôt que comme un avis de motion donné ou un projet présenté."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 5092026 remplaçant le plan d’urbanisme",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "5092026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro\n241-90",
+    "anchor": "règlement numéro 5092026"
+   },
+   "reason": "Le texte constate le report concernant le règlement identifié « 5092026 », dont le numéro est conservé tel qu’écrit, sans attester l’accomplissement des étapes reportées."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Report de l’avis de motion et de la présentation — règlement 510-2026, concordance du règlement de zonage",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "510-2026",
+    "page": 37,
+    "citation": "Avis de motion et présentation reportée du règlement no 510-2026\nafin de faire la concordance du règlement de zonage no 243-90 envers le schéma d’aménagement de la MRC du Granit",
+    "anchor": "règlement no 510-2026"
+   },
+   "reason": "Le report est une étape constatée pour le règlement 510-2026, tandis que l’avis de motion et la présentation ne sont pas attestés comme ayant été réalisés."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  },
+  {
+   "op": "add",
+   "id": "u08"
+  },
+  {
+   "op": "add",
+   "id": "u09"
+  },
+  {
+   "op": "add",
+   "id": "u10"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 10
+}

@@ -1,0 +1,101 @@
+{
+ "documentId": "saint-tite-des-caps-2026-02-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "f281c67375de2ce5c722a366d3b436c8b4451be98ed99b320fe007c8bf84b718",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 5, Rés. # 12945 : « Que le Conseil municipal accepte la demande de permis d’agrandissement en zone PIIA faite par la propriétaire du lot 6 213 140 » — PIIA accepté, objet et page exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 6, Rés. # 12946 : « Que le Conseil municipal accepte la demande de permis de construction en zone PIIA faite par le propriétaire du lot 6 212 400 » ; les considérants (p. 5) attestent modification du cadastre, démolition et construction — libellé, étape et page exacts.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 6, Rés. # 12947 : « Que le Conseil municipal accepte la demande de permis de construction en zone PIIA faite par le propriétaire du lot 6 213 540 » — PIIA accepté, objet et page exacts.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 7, Rés. # 12948 : « Que le Conseil municipal accepte la demande de permis de construction en zone PIIA faite par le propriétaire du lot 6 425 190 » — PIIA accepté, objet et page exacts.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'avis de motion est donné en page 2 (Avis # 12939) par « donne avis que je présenterai, lors d’une prochaine assemblée, un règlement concernant l’épandage en 2026 », citation exacte ; v2 cite l'ordre du jour de la page 1 qui n'est qu'une table des matières ne créant pas l'unité, et v3 ne diffère de v1 que par l'ajout du signataire.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Page 2, Rés. # 12940 : « Que le projet de règlement # 591-2026 pourvoyant à interdire l’épandage à certains jours de l’année 2026 dans la municipalité de Saint-Tite-des-Caps soit et est adopté » — projet de règlement distinct de l'avis de motion, objet réglementaire explicite.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Simple information rapportée au « Suivi des comités » sur un bail minier provincial (BEX) d'une carrière située sur un TNO hors territoire municipal, sans décision ni étape réglementaire ou foncière constatée dans ce document ; fait complémentaire à signaler hors gold, et doublon même type/même fait avec i08.\"},{\"item\":\"i08\",\"choice\":\"absent\",\"reason\":\"Même fait que i07 (doublon même type/même fait non crédité) : mention informative du renouvellement automatique d'une demande de BEX sur le TNO Saut-au-Cochon, sans acte d'urbanisme ni acte foncier de la municipalité ni étape constatée.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "absent"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 5, Rés. # 12945 : « Que le Conseil municipal accepte la demande de permis d’agrandissement en zone PIIA faite par la propriétaire du lot 6 213 140 » — PIIA accepté, objet et page exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 6, Rés. # 12946 : « Que le Conseil municipal accepte la demande de permis de construction en zone PIIA faite par le propriétaire du lot 6 212 400 » ; les considérants (p. 5) attestent modification du cadastre, démolition et construction — libellé, étape et page exacts."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 6, Rés. # 12947 : « Que le Conseil municipal accepte la demande de permis de construction en zone PIIA faite par le propriétaire du lot 6 213 540 » — PIIA accepté, objet et page exacts."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 7, Rés. # 12948 : « Que le Conseil municipal accepte la demande de permis de construction en zone PIIA faite par le propriétaire du lot 6 425 190 » — PIIA accepté, objet et page exacts."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'avis de motion est donné en page 2 (Avis # 12939) par « donne avis que je présenterai, lors d’une prochaine assemblée, un règlement concernant l’épandage en 2026 », citation exacte ; v2 cite l'ordre du jour de la page 1 qui n'est qu'une table des matières ne créant pas l'unité, et v3 ne diffère de v1 que par l'ajout du signataire."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Page 2, Rés. # 12940 : « Que le projet de règlement # 591-2026 pourvoyant à interdire l’épandage à certains jours de l’année 2026 dans la municipalité de Saint-Tite-des-Caps soit et est adopté » — projet de règlement distinct de l'avis de motion, objet réglementaire explicite."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Simple information rapportée au « Suivi des comités » sur un bail minier provincial (BEX) d'une carrière située sur un TNO hors territoire municipal, sans décision ni étape réglementaire ou foncière constatée dans ce document ; fait complémentaire à signaler hors gold, et doublon même type/même fait avec i08."
+  },
+  {
+   "item": "i08",
+   "choice": "absent",
+   "reason": "Même fait que i07 (doublon même type/même fait non crédité) : mention informative du renouvellement automatique d'une demande de BEX sur le TNO Saut-au-Cochon, sans acte d'urbanisme ni acte foncier de la municipalité ni étape constatée."
+  }
+ ]
+}

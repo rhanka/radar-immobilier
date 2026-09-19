@@ -1,0 +1,35 @@
+{
+ "documentId": "saint-constant-2026-01-20",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c9abe0b998cac2c8ce004058fae5d3cd8ca1ca0e3a951038694e7d56f1c1a0ed",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1750,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 4809,
+   "outputTokens": 465,
+   "totalTokens": 5274
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1607
+  },
+  "inputSha256": "0713ce68165254251c93f7eb278f8c7a742bca5997ccfcba7b54994d486b54a4"
+ },
+ "at": "2026-09-19T03:22:23.546Z"
+}

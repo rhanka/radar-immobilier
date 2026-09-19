@@ -1,0 +1,211 @@
+{
+ "documentId": "sainte-brigide-diberville-2026-06-01",
+ "nextId": 6,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du règlement 2026-489 sur la gestion quantitative des eaux pluviales",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-489",
+    "page": 1,
+    "citation": "5.1 Règlement 2026-489 sur la gestion quantitative des eaux pluviales : - Adoption",
+    "anchor": "Règlement 2026-489",
+    "spanStart": 342,
+    "spanEnd": 424
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du règlement 2026-489 sur la gestion quantitative des eaux pluviales",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2026-489",
+      "page": 1,
+      "citation": "5.1 Règlement 2026-489 sur la gestion quantitative des eaux pluviales : - Adoption",
+      "anchor": "Règlement 2026-489",
+      "spanStart": 342,
+      "spanEnd": 424
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 5.1 prévoit explicitement l’adoption d’un règlement de gestion des eaux pluviales ; l’ordre du jour atteste une étape prévue, non une décision acquise."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "removed",
+   "current": {
+    "label": "Demande de prolongation prévue à la CPTAQ pour le projet éolien",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "projet éolien",
+    "page": 1,
+    "citation": "6.6 Coopérative Régionale d’Électricité de Saint0Jean-Baptiste de Rouville – projet éolien : demande de prolongation à la CPTAQ",
+    "anchor": "projet éolien",
+    "spanStart": 1000,
+    "spanEnd": 1127
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande de prolongation prévue à la CPTAQ pour le projet éolien",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "projet éolien",
+      "page": 1,
+      "citation": "6.6 Coopérative Régionale d’Électricité de Saint0Jean-Baptiste de Rouville – projet éolien : demande de prolongation à la CPTAQ",
+      "anchor": "projet éolien",
+      "spanStart": 1000,
+      "spanEnd": 1127
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 6.6 prévoit une démarche foncière auprès de la CPTAQ pour un projet éolien explicite, et non un simple dépôt de correspondance ; cette demande de prolongation relève de l’étape « inconnu »."
+    },
+    {
+     "step": "gemini-pass2",
+     "op": "remove",
+     "reason": "La demande de prolongation à la CPTAQ pour un projet éolien relève de la correspondance et concerne une procédure devant un organisme provincial, et non un objet réglementaire ou foncier municipal (règlement d'urbanisme, PIIA, dérogation mineure ou acte foncier)."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure prévue — lot 4 390 294, Rang de la Rivière Ouest",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "4 390 294",
+    "page": 1,
+    "citation": "11.2 Dérogation mineure : Lot 4 390 294 Rang de la Rivière Ouest",
+    "anchor": "Lot 4 390 294",
+    "spanStart": 1574,
+    "spanEnd": 1638
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure prévue — lot 4 390 294, Rang de la Rivière Ouest",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "4 390 294",
+      "page": 1,
+      "citation": "11.2 Dérogation mineure : Lot 4 390 294 Rang de la Rivière Ouest",
+      "anchor": "Lot 4 390 294",
+      "spanStart": 1574,
+      "spanEnd": 1638
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 11.2 porte explicitement sur une dérogation mineure pour le lot désigné ; son examen est prévu sans qu’une acceptation ou un refus soit attesté."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "removed",
+   "current": {
+    "label": "Vente prévue d’immeubles pour défaut de paiement des taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Vente d’immeubles",
+    "page": 1,
+    "citation": "14.1 Vente d’immeubles pour défaut de paiement des taxes",
+    "anchor": "Vente d’immeubles",
+    "spanStart": 1922,
+    "spanEnd": 1978
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Vente prévue d’immeubles pour défaut de paiement des taxes",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Vente d’immeubles",
+      "page": 1,
+      "citation": "14.1 Vente d’immeubles pour défaut de paiement des taxes",
+      "anchor": "Vente d’immeubles",
+      "spanStart": 1922,
+      "spanEnd": 1978
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 14.1 prévoit un acte foncier explicite de vente d’immeubles, inclus même sans identifiant cadastral ; le libellé conserve son caractère prévu."
+    },
+    {
+     "step": "gemini-pass1",
+     "op": "remove",
+     "reason": "La vente d’immeubles pour défaut de paiement des taxes est une procédure fiscale de recouvrement de la MRC qui ne constitue ni un acte foncier municipal ni un objet foncier explicite d'aménagement."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "removed",
+   "current": {
+    "label": "Vente prévue d’immeubles pour défaut de paiement des taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Vente d’immeubles",
+    "page": 1,
+    "citation": "14.1 Vente d’immeubles pour défaut de paiement des taxes",
+    "anchor": "Vente d’immeubles",
+    "spanStart": 1922,
+    "spanEnd": 1978
+   },
+   "versions": [
+    {
+     "step": "astra-pass2",
+     "unit": {
+      "label": "Vente prévue d’immeubles pour défaut de paiement des taxes",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Vente d’immeubles",
+      "page": 1,
+      "citation": "14.1 Vente d’immeubles pour défaut de paiement des taxes",
+      "anchor": "Vente d’immeubles",
+      "spanStart": 1922,
+      "spanEnd": 1978
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass2",
+     "op": "add",
+     "reason": "Le point 14.1 porte explicitement sur une vente d’immeubles, acte foncier inclus au rappel, dont l’étape reste prévue puisque le document est un ordre du jour."
+    },
+    {
+     "step": "gemini-pass2",
+     "op": "remove",
+     "reason": "La vente d’immeubles pour défaut de paiement des taxes est une procédure de recouvrement fiscal de la MRC, sans objet foncier explicite ni transaction foncière municipale (acte foncier) au sens des règles."
+    }
+   ]
+  }
+ ]
+}

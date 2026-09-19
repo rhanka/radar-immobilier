@@ -1,0 +1,81 @@
+{
+ "documentId": "dollard-des-ormeaux-2026-02-10",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "a540ae0b36d5e6c693b7d081407ad9e627ac4ddd5c46213d2007c0a860d91c87",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"Le bail de location d'entrepôt (2025-004 GG) est un contrat de location identifié par un numéro de contrat, sans objet réglementaire ni objet foncier explicite (aucun lot ni adresse) ; il relève des marchés exclus du rappel et reste au mieux un fait complémentaire hors gold.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 50.1, page 2, atteste « Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199 » ; étape avis_motion, objet et page exacts, unité prévue d'ordre du jour.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 50.2, page 2, atteste « Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199 » ; le projet est une unité distincte de l'avis de motion, étape projet_reglement et citation exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 50.3, page 2, atteste « Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l'utilisation des égouts » ; objet réglementaire explicite lié à la rétention des eaux de ruissellement, étape avis_motion exacte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le même point 50.3 atteste le dépôt du projet de Règlement R-2026-084-1 ; la règle « Avis de motion et projet actuels séparés » en fait une unité distincte à l'étape projet_reglement, citation et page exactes.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 50.4, page 2, atteste « Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux » ; règlement d'urbanisme, étape adoption, objet et citation exacts, unité prévue d'ordre du jour.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "Le bail de location d'entrepôt (2025-004 GG) est un contrat de location identifié par un numéro de contrat, sans objet réglementaire ni objet foncier explicite (aucun lot ni adresse) ; il relève des marchés exclus du rappel et reste au mieux un fait complémentaire hors gold."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 50.1, page 2, atteste « Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199 » ; étape avis_motion, objet et page exacts, unité prévue d'ordre du jour."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 50.2, page 2, atteste « Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199 » ; le projet est une unité distincte de l'avis de motion, étape projet_reglement et citation exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 50.3, page 2, atteste « Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l'utilisation des égouts » ; objet réglementaire explicite lié à la rétention des eaux de ruissellement, étape avis_motion exacte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le même point 50.3 atteste le dépôt du projet de Règlement R-2026-084-1 ; la règle « Avis de motion et projet actuels séparés » en fait une unité distincte à l'étape projet_reglement, citation et page exactes."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 50.4, page 2, atteste « Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux » ; règlement d'urbanisme, étape adoption, objet et citation exacts, unité prévue d'ordre du jour."
+  }
+ ]
+}

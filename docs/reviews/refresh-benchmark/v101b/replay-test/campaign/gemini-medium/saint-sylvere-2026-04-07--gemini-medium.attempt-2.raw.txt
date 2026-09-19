@@ -1,0 +1,646 @@
+```json
+{
+  "nodes": [
+    {
+      "id": "source-1b11e516",
+      "label": "Procès-verbal du conseil municipal - 7 avril 2026",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "Source",
+      "status": "candidate",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "date": "2026-04-07",
+      "municipality": "saint-sylvere",
+      "url": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "Procès-verbal de la séance ordinaire du conseil municipal de la\nMunicipalité de Saint-Sylvère, tenue ce 7 avril 2026, au 837, 8 Rang, Saint\nSylvère, à 20 h 00."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-247",
+      "label": "Règlement de zonage # 247",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "247",
+      "title": "Règlement de zonage # 247",
+      "municipality": "saint-sylvere",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "meetingDate": "2026-04-07",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT QUE le règlement de zonage de la municipalité de Saint-Sylvère est\nen vigueur depuis le 19 décembre 2013;"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-383",
+      "label": "Règlement # 383 modifiant le règlement de zonage # 247",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "383",
+      "title": "Règlement # 383 modifiant le règlement de zonage # 247",
+      "stage": "1er_projet",
+      "municipality": "saint-sylvere",
+      "resolution": "2026-04-117",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "meetingDate": "2026-04-07",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la municipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 modifiant le règlement de zonage # 247."
+        }
+      ]
+    },
+    {
+      "id": "bylaw-384",
+      "label": "Règlement # 384 sur les PPCMOI",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "Bylaw",
+      "status": "candidate",
+      "numero": "384",
+      "title": "Règlement # 384 sur les projets particuliers de construction, de modification ou d’occupation d’un immeuble (PPCMOI)",
+      "stage": "1er_projet",
+      "municipality": "saint-sylvere",
+      "resolution": "2026-04-119",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "meetingDate": "2026-04-07",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de la\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+        }
+      ]
+    },
+    {
+      "id": "zone-inst-01",
+      "label": "Zone INST-01",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "INST-01",
+      "municipality": "saint-sylvere",
+      "bylaw": "247",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "meetingDate": "2026-04-07",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "retirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;"
+        }
+      ]
+    },
+    {
+      "id": "zone-m-01",
+      "label": "Zone M-01",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "M-01",
+      "municipality": "saint-sylvere",
+      "bylaw": "247",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "meetingDate": "2026-04-07",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "retirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;"
+        }
+      ]
+    },
+    {
+      "id": "zone-m-02",
+      "label": "Zone M-02",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "M-02",
+      "municipality": "saint-sylvere",
+      "bylaw": "247",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "meetingDate": "2026-04-07",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "retirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;"
+        }
+      ]
+    },
+    {
+      "id": "zone-m-03",
+      "label": "Zone M-03",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "M-03",
+      "municipality": "saint-sylvere",
+      "bylaw": "247",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "meetingDate": "2026-04-07",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "retirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;"
+        }
+      ]
+    },
+    {
+      "id": "zone-m-04",
+      "label": "Zone M-04",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "M-04",
+      "municipality": "saint-sylvere",
+      "bylaw": "247",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "meetingDate": "2026-04-07",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "retirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;"
+        }
+      ]
+    },
+    {
+      "id": "zone-r-03",
+      "label": "Zone R-03",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "Zone",
+      "status": "candidate",
+      "code": "R-03",
+      "municipality": "saint-sylvere",
+      "bylaw": "247",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "meetingDate": "2026-04-07",
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "retirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-04-117",
+      "label": "Adoption du premier projet de règlement # 383",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-04-07",
+      "meetingDate": "2026-04-07",
+      "decision": "approuvé",
+      "kind": "rezonage",
+      "resolution": "2026-04-117",
+      "municipality": "saint-sylvere",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "etape": "projet_reglement",
+      "etape_date": "2026-04-07",
+      "reglement_number": "383",
+      "description": "Dépôt et adoption du premier projet de règlement # 383 modifiant le règlement de zonage # 247.",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la municipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 modifiant le règlement de zonage # 247."
+        }
+      ]
+    },
+    {
+      "id": "event-2026-04-120",
+      "label": "Demande d'autorisation CPTAQ - Ferme Ramona S.E.N.C. et Remo Kohler",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "DesignationEvent",
+      "status": "candidate",
+      "date": "2026-04-07",
+      "meetingDate": "2026-04-07",
+      "decision": "approuvé",
+      "kind": "cptaq",
+      "dossier": "453952",
+      "demandeur_corporate": "Ferme Ramona S.E.N.C.",
+      "municipality": "saint-sylvere",
+      "resolution": "2026-04-120",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "description": "Demande d'autorisation conjointe de Ferme Ramona S.E.N.C. et de M Remo Kohler auprès de la CPTAQ pour échange de parcelles et lotissement.",
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais la\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C. et de M Remo Kohler pour la\ndemande de lotissement 453952"
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-453952",
+      "label": "Contrainte agricole CPTAQ - Dossier 453952",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "Constraint",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "municipality": "saint-sylvere",
+      "loi": "Loi sur la protection du territoire et des activités agricoles",
+      "organisme": "Commission de protection du territoire agricole du Québec",
+      "resolution": "2026-04-120",
+      "dossier": "453952",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "meetingDate": "2026-04-07",
+      "description": "Demande d'autorisation auprès de la CPTAQ visant les lots 5 652 594 et 5 889 436.",
+      "evidence_refs": [
+        "ev-cptaq-120"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Considérant l’objet de la demande d’autorisation auprès de la Commission de protection du\nterritoire agricole du Québec (CPTAQ), rempli conjointement pour l’entreprise Ferme Ramona\nS.E.N.C. et M Remo Kohler;"
+        }
+      ]
+    },
+    {
+      "id": "signal-383-adoption",
+      "label": "Signal de rezonage - Règlement 383",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "node_type": "Signal",
+      "status": "candidate",
+      "category": "rezonage",
+      "kind": "modification_zonage",
+      "date": "2026-04-07",
+      "meetingDate": "2026-04-07",
+      "resolution": "2026-04-117",
+      "municipality": "saint-sylvere",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "etape": "projet_reglement",
+      "etape_date": "2026-04-07",
+      "reglement_number": "383",
+      "description": "Adoption du premier projet de règlement # 383 modifiant les usages et densités dans diverses zones.",
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la municipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 modifiant le règlement de zonage # 247."
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "bylaw-383",
+      "target": "bylaw-247",
+      "relation": "amends",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-383"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la municipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 modifiant le règlement de zonage # 247."
+        }
+      ]
+    },
+    {
+      "source": "zone-inst-01",
+      "target": "bylaw-247",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-motion-383"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "retirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;"
+        }
+      ]
+    },
+    {
+      "source": "zone-m-01",
+      "target": "bylaw-247",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-motion-383"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "retirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;"
+        }
+      ]
+    },
+    {
+      "source": "zone-m-02",
+      "target": "bylaw-247",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-motion-383"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "retirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;"
+        }
+      ]
+    },
+    {
+      "source": "zone-m-03",
+      "target": "bylaw-247",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-motion-383"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "retirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;"
+        }
+      ]
+    },
+    {
+      "source": "zone-m-04",
+      "target": "bylaw-247",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-motion-383"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "retirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;"
+        }
+      ]
+    },
+    {
+      "source": "zone-r-03",
+      "target": "bylaw-247",
+      "relation": "governed_by",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-motion-383"
+      ],
+      "citations": [
+        {
+          "page": 6,
+          "excerpt": "retirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-04-117",
+      "target": "zone-inst-01",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-383-inst"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de zonage\nafin de permettre la classe d’usage contenant garderie dans la zone INST-01"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-04-117",
+      "target": "signal-383-adoption",
+      "relation": "raises_signal",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-383"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la municipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 modifiant le règlement de zonage # 247."
+        }
+      ]
+    },
+    {
+      "source": "signal-383-adoption",
+      "target": "zone-inst-01",
+      "relation": "concerns",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-383-inst"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de zonage\nafin de permettre la classe d’usage contenant garderie dans la zone INST-01"
+        }
+      ]
+    },
+    {
+      "source": "source-1b11e516",
+      "target": "bylaw-383",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-383"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la municipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 modifiant le règlement de zonage # 247."
+        }
+      ]
+    },
+    {
+      "source": "source-1b11e516",
+      "target": "bylaw-384",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-384"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de la\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+        }
+      ]
+    },
+    {
+      "source": "source-1b11e516",
+      "target": "event-2026-04-120",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-cptaq-120"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais la\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C. et de M Remo Kohler pour la\ndemande de lotissement 453952"
+        }
+      ]
+    },
+    {
+      "source": "bylaw-383",
+      "target": "source-1b11e516",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-383"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la municipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 modifiant le règlement de zonage # 247."
+        }
+      ]
+    },
+    {
+      "source": "bylaw-384",
+      "target": "source-1b11e516",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-384"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de la\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-04-117",
+      "target": "source-1b11e516",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-bylaw-383"
+      ],
+      "citations": [
+        {
+          "page": 7,
+          "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la municipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 modifiant le règlement de zonage # 247."
+        }
+      ]
+    },
+    {
+      "source": "event-2026-04-120",
+      "target": "source-1b11e516",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-cptaq-120"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais la\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C. et de M Remo Kohler pour la\ndemande de lotissement 453952"
+        }
+      ]
+    },
+    {
+      "source": "constraint-cptaq-453952",
+      "target": "source-1b11e516",
+      "relation": "derived_from",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "evidence_refs": [
+        "ev-cptaq-120"
+      ],
+      "citations": [
+        {
+          "page": 8,
+          "excerpt": "Considérant l’objet de la demande d’autorisation auprès de la Commission de protection du\nterritoire agricole du Québec (CPTAQ), rempli conjointement pour l’entreprise Ferme Ramona\nS.E.N.C. et M Remo Kohler;"
+        }
+      ]
+    }
+  ],
+  "hyperedges": [],
+  "evidence": [
+    {
+      "id": "ev-bylaw-383",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+      "modality": "pdf",
+      "page": 7,
+      "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil\nde la municipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 modifiant le règlement de zonage # 247."
+    },
+    {
+      "id": "ev-bylaw-383-inst",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+      "modality": "pdf",
+      "page": 7,
+      "excerpt": "CONSIDÉRANT QUE le conseil municipal entend modifier le règlement de zonage\nafin de permettre la classe d’usage contenant garderie dans la zone INST-01"
+    },
+    {
+      "id": "ev-motion-383",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+      "modality": "pdf",
+      "page": 6,
+      "excerpt": "retirer la classe « III Forte densité» des zones INST-01, M-01, M-02, M-03,\nM-04 et R-03;"
+    },
+    {
+      "id": "ev-bylaw-384",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de la\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+    },
+    {
+      "id": "ev-cptaq-120",
+      "source_file": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "rawRef": "raw/proces-verbaux-saint-sylvere/cas/1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c.pdf",
+      "docSha": "1b11e51673a27cb168bf886cb111a82ad94334dd520fd6d8430c4c4ccf7c2f4c",
+      "sourceUrl": "https://www.saint-sylvere.ca/upload/seances-du-conseil/pv_de_la_seance_ordinaire_du_7_avril_2026.pdf",
+      "modality": "pdf",
+      "page": 8,
+      "excerpt": "Il est proposé par le conseiller Stéphane Trottier Et appuyé par le conseiller Van Dagenais la\ndemande d’autorisation conjointe de Ferme Ramona S.E.N.C. et de M Remo Kohler pour la\ndemande de lotissement 453952"
+    }
+  ],
+  "input_tokens": 3150,
+  "output_tokens": 3200
+}
+```

@@ -1,0 +1,126 @@
+{
+ "documentId": "sainte-croix-2026-05-05",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "99b86b2c262f1b2a6ed341d6b6085222101383467151687495d2b29b3300191c",
+ "verificationSha256": "69abcb3b20db74c97fece2cfe4610f31e5e3e0b22f55e76bb34f5781a8ac2400",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"La résolution 121-2026 (p. 14) « confirme son engagement à l'octroi des droits fonciers sur les terres du domaine municipal » nécessaires au projet éolien : l'objet foncier et l'engagement actuel sont donc explicites. Cet engagement constitue une unité distincte de la recommandation à la CPTAQ, malgré leur présence dans la même résolution, sans attester un octroi déjà réalisé.\"},{\"item\":\"a02\",\"choice\":\"v1\",\"reason\":\"La résolution 126-2026 (p. 17) décide « D'APPROUVER au promoteur les plans et devis préliminaires » d'Apex concernant le développement du lot 3 592 103 : cette approbation est distincte de celle du plan d'aménagement de Giroux Arpentage par la résolution 120-2026 (p. 10), et non un doublon. L'adoption porte uniquement sur les documents préliminaires, puisque « la présente résolution ne certifie pas la conformité du projet aux exigences municipales et gouvernementales ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Engagement à octroyer des droits fonciers municipaux — projet éolien Lotbinière Ndakina",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "droits fonciers municipaux",
+      "page": 14,
+      "citation": "QUE Ia Municipalité confirme son engagement à l'octroi des droits fonciers sur les terres du domaine municipal qui pourront être requises pour la réalisation du Projet",
+      "anchor": "l'octroi des droits fonciers",
+      "spanStart": 1506,
+      "spanEnd": 1673
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 14 confirme expressément l'engagement municipal à octroyer les droits fonciers nécessaires au projet éolien sur les terres municipales, objet foncier distinct de la recommandation à la CPTAQ."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Fait distinct dans la même résolution 121-2026 (p. 14) : « confirme son engagement à l'octroi des droits fonciers sur les terres du domaine municipal », acte foncier propre, non un doublon de la recommandation CPTAQ."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'engagement relatif aux droits fonciers est une clause accessoire de la résolution 121-2026 et ne porte sur aucun objet foncier explicite."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u07",
+   "verificationItem": "i07",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Approbation des plans et devis préliminaires — développement du lot 3 592 103, rue Thibodeau",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "3 592 103",
+      "page": 17,
+      "citation": "D'APPROUVER au promoteur les plans et devis préliminaires de l'entreprise « Apex Expert Conseil inc. », concernant le développement du lot 3 592 103",
+      "anchor": "lot 3 592 103",
+      "spanStart": 1264,
+      "spanEnd": 1412
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 126-2026, page 17, approuve les plans et devis préliminaires d'Apex Expert Conseil inc. pour le lot 3 592 103, tout en précisant que cette approbation ne certifie pas la conformité du projet."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 126-2026 (p. 17) : « D'APPROUVER au promoteur les plans et devis préliminaires … développement du lot 3 592 103 », étape distincte du plan de lotissement (6.4) avec développement explicite, citation et page exactes."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Cette approbation préliminaire de plans et devis en travaux publics fait doublon avec le développement du lot 3 592 103 déjà consigné en urbanisme."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "La résolution 121-2026 (p. 14) « confirme son engagement à l'octroi des droits fonciers sur les terres du domaine municipal » nécessaires au projet éolien : l'objet foncier et l'engagement actuel sont donc explicites. Cet engagement constitue une unité distincte de la recommandation à la CPTAQ, malgré leur présence dans la même résolution, sans attester un octroi déjà réalisé."
+  },
+  {
+   "item": "a02",
+   "choice": "v1",
+   "reason": "La résolution 126-2026 (p. 17) décide « D'APPROUVER au promoteur les plans et devis préliminaires » d'Apex concernant le développement du lot 3 592 103 : cette approbation est distincte de celle du plan d'aménagement de Giroux Arpentage par la résolution 120-2026 (p. 10), et non un doublon. L'adoption porte uniquement sur les documents préliminaires, puisque « la présente résolution ne certifie pas la conformité du projet aux exigences municipales et gouvernementales »."
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "id": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "rc": 0,
+ "latencyMs": 558634,
+ "inputTokens": 6,
+ "outputTokens": 85664,
+ "cacheRead": 44623,
+ "cacheCreate": 108688,
+ "costUsd": 3.2826265,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 42834
+}

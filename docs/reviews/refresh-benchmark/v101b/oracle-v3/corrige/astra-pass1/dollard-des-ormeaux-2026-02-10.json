@@ -1,0 +1,234 @@
+{
+ "documentId": "dollard-des-ormeaux-2026-02-10",
+ "nextId": 7,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation prévue de signature du bail de location d’entrepôt avec Timex Reality Corp. (2025-004 GG)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2025-004 GG",
+    "page": 1,
+    "citation": "Autorisation de signature d’un bail avec Timex Reality Corp. pour la location d'entrepôt (2025-004 GG) (SD2026-500-2811",
+    "anchor": "d'entrepôt (2025-004 GG",
+    "spanStart": 602,
+    "spanEnd": 721
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation prévue de signature du bail de location d’entrepôt avec Timex Reality Corp. (2025-004 GG)",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2025-004 GG",
+      "page": 1,
+      "citation": "Autorisation de signature d’un bail avec Timex Reality Corp. pour la location d'entrepôt (2025-004 GG) (SD2026-500-2811",
+      "anchor": "d'entrepôt (2025-004 GG",
+      "spanStart": 602,
+      "spanEnd": 721
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La signature prévue d’un bail de location d’entrepôt porte sur un objet foncier explicite, à inclure même s’il est non résidentiel."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion prévu du Règlement R-2026-199-1 modifiant le zonage",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "R-2026-199-1",
+    "page": 2,
+    "citation": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux",
+    "anchor": "Règlement R-2026-199-1",
+    "spanStart": 1109,
+    "spanEnd": 1255
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion prévu du Règlement R-2026-199-1 modifiant le zonage",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "R-2026-199-1",
+      "page": 2,
+      "citation": "Avis de motion et dépôt du premier projet de Règlement R-2026-199-1 modifiant le Règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux",
+      "anchor": "Règlement R-2026-199-1",
+      "spanStart": 1109,
+      "spanEnd": 1255
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 50.1 prévoit un avis de motion pour ce règlement de zonage, unité distincte du premier projet."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du premier projet du Règlement R-2026-199-1 modifiant le zonage",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "R-2026-199-1",
+    "page": 2,
+    "citation": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers",
+    "anchor": "Règlement R-2026-199-1",
+    "spanStart": 1355,
+    "spanEnd": 1509
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du premier projet du Règlement R-2026-199-1 modifiant le zonage",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "R-2026-199-1",
+      "page": 2,
+      "citation": "Adoption du premier projet du Règlement R-2026-199-1 modifiant le règlement de zonage R-2025-199 de la Ville de Dollard-des-Ormeaux afin d'apporter divers",
+      "anchor": "Règlement R-2026-199-1",
+      "spanStart": 1355,
+      "spanEnd": 1509
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 50.2 prévoit l’adoption du premier projet, distincte de l’avis de motion mais sans multiplier les unités pour le dépôt du même premier projet annoncé au point 50.1."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion prévu du Règlement R-2026-084-1 sur les égouts et la rétention des eaux de ruissellement",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "R-2026-084-1",
+    "page": 2,
+    "citation": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l’utilisation des égouts",
+    "anchor": "Règlement R-2026-084-1",
+    "spanStart": 1586,
+    "spanEnd": 1708
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion prévu du Règlement R-2026-084-1 sur les égouts et la rétention des eaux de ruissellement",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "R-2026-084-1",
+      "page": 2,
+      "citation": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l’utilisation des égouts",
+      "anchor": "Règlement R-2026-084-1",
+      "spanStart": 1586,
+      "spanEnd": 1708
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 50.3 prévoit un avis de motion pour un règlement précisant les dispositions relatives à la rétention des eaux de ruissellement."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Dépôt prévu du projet de Règlement R-2026-084-1 sur les égouts et la rétention des eaux de ruissellement",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "R-2026-084-1",
+    "page": 2,
+    "citation": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l’utilisation des égouts",
+    "anchor": "Règlement R-2026-084-1",
+    "spanStart": 1586,
+    "spanEnd": 1708
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt prévu du projet de Règlement R-2026-084-1 sur les égouts et la rétention des eaux de ruissellement",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "R-2026-084-1",
+      "page": 2,
+      "citation": "Avis de motion et dépôt du projet de Règlement R-2026-084-1 modifiant le Règlement R-2014-084 sur l’utilisation des égouts",
+      "anchor": "Règlement R-2026-084-1",
+      "spanStart": 1586,
+      "spanEnd": 1708
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le dépôt prévu du projet au point 50.3 constitue une unité distincte de l’avis de motion du même règlement."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du règlement R-2026-216 sur les ententes pour travaux municipaux",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "R-2026-216",
+    "page": 2,
+    "citation": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux",
+    "anchor": "règlement R-2026-216",
+    "spanStart": 1812,
+    "spanEnd": 1885
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du règlement R-2026-216 sur les ententes pour travaux municipaux",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "R-2026-216",
+      "page": 2,
+      "citation": "Adoption du règlement R-2026-216 sur les ententes pour travaux municipaux",
+      "anchor": "règlement R-2026-216",
+      "spanStart": 1812,
+      "spanEnd": 1885
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 50.4 prévoit l’adoption d’un règlement sur les ententes pour travaux municipaux, sans attester une décision déjà acquise."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,51 @@
+{
+ "documentId": "gracefield-2026-04-14",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "638f58c73d3253faa109d65d15cdb3049a3d7c044a5978af7e7b940173cebbd3",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-062, page 14, accepte le prêt d’un local au 30, rue Principale et autorise la signature des documents correspondants, ce qui constitue un acte foncier non résidentiel inclus.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-04-063, page 15, adopte explicitement le règlement 263-2026 relatif à l’occupation et l’entretien des bâtiments patrimoniaux.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L’intitulé cité figure à la page 22 avec les quatre lots, et la résolution poursuivie page 23 confirme l’appui municipal à la demande sans constituer une autorisation accordée par la CPTAQ.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v2"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-062, page 14, accepte le prêt d’un local au 30, rue Principale et autorise la signature des documents correspondants, ce qui constitue un acte foncier non résidentiel inclus."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-04-063, page 15, adopte explicitement le règlement 263-2026 relatif à l’occupation et l’entretien des bâtiments patrimoniaux."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L’intitulé cité figure à la page 22 avec les quatre lots, et la résolution poursuivie page 23 confirme l’appui municipal à la demande sans constituer une autorisation accordée par la CPTAQ."
+  }
+ ]
+}

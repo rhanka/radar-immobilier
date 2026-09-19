@@ -1,0 +1,36 @@
+{
+ "documentId": "hatley-2026-04-07",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "7698c4adcecc5ce44ef0cfa7e380f71b90c092e21d3515c64adfddca992c1a16",
+ "inputSha256": "470fa3c8db48a893899875b81f85a4213965c0d7b56ec1cfb01b5b1f12330753",
+ "responseSha256": "a5e13d2bc8590827a34c1573e71a3268fbbbd2c1766710d2bad89ca0f0b42e3d",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 21617,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 13586,
+  "outputTokens": 588,
+  "totalTokens": 14174
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 21615,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:16:28.364Z"
+}

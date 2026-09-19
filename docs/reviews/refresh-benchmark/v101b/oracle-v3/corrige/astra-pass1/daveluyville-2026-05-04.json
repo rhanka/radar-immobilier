@@ -1,0 +1,158 @@
+{
+ "documentId": "daveluyville-2026-05-04",
+ "nextId": 5,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Report de l’adoption de la dérogation mineure 2026-DM-002 — 1200, route Principale",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2026-DM-002",
+    "page": 6,
+    "citation": "Sur proposition de monsieur Alain Raymond, il est résolu de reporter l’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à l’adoption définitive du règlement numéro R-2026-154",
+    "anchor": "dérogation mineure 2026-DM-002",
+    "spanStart": 2282,
+    "spanEnd": 2470
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Report de l’adoption de la dérogation mineure 2026-DM-002 — 1200, route Principale",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "2026-DM-002",
+      "page": 6,
+      "citation": "Sur proposition de monsieur Alain Raymond, il est résolu de reporter l’adoption de la demande de dérogation mineure 2026-DM-002 jusqu’à l’adoption définitive du règlement numéro R-2026-154",
+      "anchor": "dérogation mineure 2026-DM-002",
+      "spanStart": 2282,
+      "spanEnd": 2470
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution constate une étape actuelle sur une demande explicite, soit un report, qui n’est ni une acceptation ni un refus et relève donc de l’étape « inconnu »."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Refus de la dérogation mineure 2026-DM-003 — 425, 2e Rue, lot 4 441 171",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-DM-003",
+    "page": 8,
+    "citation": "l’unanimité de refuser la demande de dérogation mineure 2026-DM-003, telle que présentée, et de maintenir le dossier ouvert, sans frais, jusqu’à",
+    "anchor": "dérogation mineure 2026-DM-003",
+    "spanStart": 1041,
+    "spanEnd": 1185
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus de la dérogation mineure 2026-DM-003 — 425, 2e Rue, lot 4 441 171",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-DM-003",
+      "page": 8,
+      "citation": "l’unanimité de refuser la demande de dérogation mineure 2026-DM-003, telle que présentée, et de maintenir le dossier ouvert, sans frais, jusqu’à",
+      "anchor": "dérogation mineure 2026-DM-003",
+      "spanStart": 1041,
+      "spanEnd": 1185
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution refuse explicitement la demande tout en maintenant le dossier ouvert; un refus constitue une unité et doit rester qualifié comme tel."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement R-2026-154 — assouplissement des normes de droits acquis",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "R-2026-154",
+    "page": 8,
+    "citation": "Avis de motion et dépôt du projet de règlement numéro R-2026-154 modifiant le Règlement de zonage R-2025137",
+    "anchor": "règlement numéro R-2026-154",
+    "spanStart": 1358,
+    "spanEnd": 1465
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement R-2026-154 — assouplissement des normes de droits acquis",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "R-2026-154",
+      "page": 8,
+      "citation": "Avis de motion et dépôt du projet de règlement numéro R-2026-154 modifiant le Règlement de zonage R-2025137",
+      "anchor": "règlement numéro R-2026-154",
+      "spanStart": 1358,
+      "spanEnd": 1465
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 2026-05-88 constate un avis de motion donné à cette séance pour le règlement R-2026-154, à compter séparément du dépôt du projet."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du projet de règlement R-2026-154 — assouplissement des normes de droits acquis",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "R-2026-154",
+    "page": 8,
+    "citation": "Avis de motion et dépôt du projet de règlement numéro R-2026-154 modifiant le Règlement de zonage R-2025137",
+    "anchor": "règlement numéro R-2026-154",
+    "spanStart": 1358,
+    "spanEnd": 1465
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du projet de règlement R-2026-154 — assouplissement des normes de droits acquis",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "R-2026-154",
+      "page": 8,
+      "citation": "Avis de motion et dépôt du projet de règlement numéro R-2026-154 modifiant le Règlement de zonage R-2025137",
+      "anchor": "règlement numéro R-2026-154",
+      "spanStart": 1358,
+      "spanEnd": 1465
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le texte confirme que le projet de règlement est également déposé; le projet actuel constitue une unité distincte de l’avis de motion."
+    }
+   ]
+  }
+ ]
+}

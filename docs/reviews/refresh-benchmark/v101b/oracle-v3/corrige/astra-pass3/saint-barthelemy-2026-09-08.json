@@ -1,0 +1,386 @@
+{
+ "documentId": "saint-barthelemy-2026-09-08",
+ "nextId": 10,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 738-26 — constructions accessoires en cour avant des propriétés en bordure d’un lac",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "738-26",
+    "page": 3,
+    "citation": "4.1 ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE LES CONSTRUCTIONS ACCESSOIRES EN COUR AVANT",
+    "anchor": "RÈGLEMENT NUMÉRO 738-26",
+    "spanStart": 1560,
+    "spanEnd": 1707
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 738-26 — constructions accessoires en cour avant des propriétés en bordure d’un lac",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "738-26",
+      "page": 3,
+      "citation": "4.1 ADOPTION DU RÈGLEMENT NUMÉRO 738-26 AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE LES CONSTRUCTIONS ACCESSOIRES EN COUR AVANT",
+      "anchor": "RÈGLEMENT NUMÉRO 738-26",
+      "spanStart": 1560,
+      "spanEnd": 1707
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le règlement d’urbanisme 738-26 est adopté dans cette séance; l’avis de motion et la consultation antérieurs ne constituent pas des unités supplémentaires."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion — modification du zonage 288-90 pour permettre des immeubles à logements dans les zones R-7 et R-8",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "288-90",
+    "page": 4,
+    "citation": "4.2 AVIS DE MOTION – PROJET DE RÈGLEMENT AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8",
+    "anchor": "ZONAGE NUMÉRO 288-90",
+    "spanStart": 1679,
+    "spanEnd": 1835
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion — modification du zonage 288-90 pour permettre des immeubles à logements dans les zones R-7 et R-8",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "288-90",
+      "page": 4,
+      "citation": "4.2 AVIS DE MOTION – PROJET DE RÈGLEMENT AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8",
+      "anchor": "ZONAGE NUMÉRO 288-90",
+      "spanStart": 1679,
+      "spanEnd": 1835
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Un avis de motion est effectivement donné au point 4.2 et constitue une unité distincte du premier projet adopté au point suivant."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet de règlement 739-26 — immeubles à logements dans les zones R-7 et R-8",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "739-26",
+    "page": 4,
+    "citation": "4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8",
+    "anchor": "RÈGLEMENT NUMÉRO 739-26",
+    "spanStart": 2148,
+    "spanEnd": 2321
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet de règlement 739-26 — immeubles à logements dans les zones R-7 et R-8",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "739-26",
+      "page": 4,
+      "citation": "4.3 ADOPTION DU PREMIER PROJET DE RÈGLEMENT NUMÉRO 739-26 AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 288-90 AFIN DE PERMETTRE DES IMMEUBLES À LOGEMENTS DANS LES ZONES R-7 ET R-8",
+      "anchor": "RÈGLEMENT NUMÉRO 739-26",
+      "spanStart": 2148,
+      "spanEnd": 2321
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’adoption du premier projet 739-26 est constatée dans le document et doit être distinguée de l’avis de motion du même dossier."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Vente autorisée du matricule 3220-74-4030 près du Camping du Vieux Moulin — sans aménagement permanent",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "3220-74-4030",
+    "page": 6,
+    "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à la vente des immeubles identifiés par les matricules 3220-74-4030 et 3220-73-6695",
+    "anchor": "matricules 3220-74-4030",
+    "spanStart": 1886,
+    "spanEnd": 2038
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Vente autorisée du matricule 3220-74-4030 près du Camping du Vieux Moulin — sans aménagement permanent",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "3220-74-4030",
+      "page": 6,
+      "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à la vente des immeubles identifiés par les matricules 3220-74-4030 et 3220-73-6695",
+      "anchor": "matricules 3220-74-4030",
+      "spanStart": 1886,
+      "spanEnd": 2038
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La vente autorisée porte sur deux immeubles explicitement identifiés, justifiant une unité par objet foncier; cet identifiant est un matricule et les aménagements permanents y sont interdits."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Vente autorisée du matricule 3220-73-6695 près du Camping du Vieux Moulin — sans aménagement permanent",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "3220-73-6695",
+    "page": 6,
+    "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à la vente des immeubles identifiés par les matricules 3220-74-4030 et 3220-73-6695",
+    "anchor": "et 3220-73-6695",
+    "spanStart": 1886,
+    "spanEnd": 2038
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Vente autorisée du matricule 3220-73-6695 près du Camping du Vieux Moulin — sans aménagement permanent",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "3220-73-6695",
+      "page": 6,
+      "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à la vente des immeubles identifiés par les matricules 3220-74-4030 et 3220-73-6695",
+      "anchor": "3220-73-6695",
+      "spanStart": 1886,
+      "spanEnd": 2038
+     }
+    },
+    {
+     "step": "astra-pass2",
+     "unit": {
+      "label": "Vente autorisée du matricule 3220-73-6695 près du Camping du Vieux Moulin — sans aménagement permanent",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "3220-73-6695",
+      "page": 6,
+      "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à la vente des immeubles identifiés par les matricules 3220-74-4030 et 3220-73-6695",
+      "anchor": "et 3220-73-6695",
+      "spanStart": 1886,
+      "spanEnd": 2038
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le matricule 3220-73-6695 désigne le second objet foncier explicitement visé par la vente autorisée et demeure soumis à l’interdiction d’aménagements permanents."
+    },
+    {
+     "step": "astra-pass2",
+     "op": "correct",
+     "reason": "La citation est rétablie à l'identique avec ses retours à la ligne et l'ancre initiale de 11 caractères est étendue pour respecter le minimum de 12 caractères."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Acquisition autorisée d’une portion de la Montée du Lac-Robert — matricule 2723-93-7328",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2723-93-7328",
+    "page": 7,
+    "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à l'achat de l'immeuble identifié par le matricule 2723-93-7328",
+    "anchor": "matricule 2723-93-7328",
+    "spanStart": 897,
+    "spanEnd": 1029
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acquisition autorisée d’une portion de la Montée du Lac-Robert — matricule 2723-93-7328",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2723-93-7328",
+      "page": 7,
+      "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à l'achat de l'immeuble identifié par le matricule 2723-93-7328",
+      "anchor": "matricule 2723-93-7328",
+      "spanStart": 897,
+      "spanEnd": 1029
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil autorise l’achat de cet immeuble par la Municipalité, acte foncier qui facilitera explicitement le développement de terrains dans le secteur."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Vente autorisée du terrain du 180, rang York — matricule 3418-41-5276 — aménagements permanents interdits sauf travaux de correction majeurs de la pente",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "3418-41-5276",
+    "page": 7,
+    "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à la vente de l'immeuble identifié par le matricule 3418-41-5276",
+    "anchor": "matricule 3418-41-5276",
+    "spanStart": 2205,
+    "spanEnd": 2338
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Vente autorisée du terrain du 180, rang York — matricule 3418-41-5276",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "3418-41-5276",
+      "page": 7,
+      "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à la vente de l'immeuble identifié par le matricule 3418-41-5276",
+      "anchor": "matricule 3418-41-5276",
+      "spanStart": 2205,
+      "spanEnd": 2338
+     }
+    },
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Vente autorisée du terrain du 180, rang York — matricule 3418-41-5276 — aménagements permanents interdits sauf travaux de correction majeurs de la pente",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "3418-41-5276",
+      "page": 7,
+      "citation": "à signer pour et au nom de la Municipalité les documents nécessaires à la vente de l'immeuble identifié par le matricule 3418-41-5276",
+      "anchor": "matricule 3418-41-5276",
+      "spanStart": 2205,
+      "spanEnd": 2338
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La vente est autorisée, sans lever l’interdiction d’aménagements permanents en l’absence de travaux majeurs préalables de correction de la pente."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "correct",
+     "reason": "Le considérant du point 4.8 (page 7) précise qu'il est interdit d'y implanter des aménagements permanents à moins que des travaux de correction majeurs de la pente soient réalisés ; la règle « les contraintes permanentes et de pente ne doivent pas être contredites » impose de porter cette contrainte dans le libellé, comme le font déjà u04 et u05 pour la contrainte permanente."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Vente autorisée de l’immeuble 6 621 027 de Chéné Immobilier Inc. à Hulix S.E.N.C., sous conditions",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 621 027",
+    "page": 8,
+    "citation": "le conseil municipal autorise la vente de l'immeuble 6 621 027 de Chéné Immobilier Inc. à Hulix S.E.N.C",
+    "anchor": "l'immeuble 6 621 027",
+    "spanStart": 558,
+    "spanEnd": 661
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Vente autorisée de l’immeuble 6 621 027 de Chéné Immobilier Inc. à Hulix S.E.N.C., sous conditions",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 621 027",
+      "page": 8,
+      "citation": "le conseil municipal autorise la vente de l'immeuble 6 621 027 de Chéné Immobilier Inc. à Hulix S.E.N.C",
+      "anchor": "l'immeuble 6 621 027",
+      "spanStart": 558,
+      "spanEnd": 661
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil autorise cet acte foncier à condition que les responsabilités et les clauses de préemption soient transférées au nouveau propriétaire."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Autorisation du prolongement du réseau d’aqueduc sur le rang York à Saint-Cuthbert",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "réseau d'aqueduc",
+    "page": 10,
+    "citation": "la Municipalité de Saint-Barthélemy accepte la demande de Saint-Cuthbert pour prolonger le réseau d'aqueduc afin de desservir quelques résidences supplémentaires sur leur territoire",
+    "anchor": "prolonger le réseau d'aqueduc",
+    "spanStart": 2300,
+    "spanEnd": 2481
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation du prolongement du réseau d’aqueduc sur le rang York à Saint-Cuthbert",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "réseau d'aqueduc",
+      "page": 10,
+      "citation": "la Municipalité de Saint-Barthélemy accepte la demande de Saint-Cuthbert pour prolonger le réseau d'aqueduc afin de desservir quelques résidences supplémentaires sur leur territoire",
+      "anchor": "prolonger le réseau d'aqueduc",
+      "spanStart": 2300,
+      "spanEnd": 2481
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Ce prolongement de réseau est accepté afin de desservir des résidences supplémentaires, ce qui constitue un développement explicite inclus dans le corrigé."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,76 @@
+{
+ "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "9d523d36752582a0448cd5695ff41c885691c4b98d0a03b9df489ebd43629e93",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet de règlement 509-07-04-26 modifiant le zonage — captages souterrains et éoliennes\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"509-07-04-26\",\n        \"page\": 3,\n        \"citation\": \"ADOPTION DU 1ER PROJET DE RÈGLEMENT NUMÉRO 509-07-04-26\\nMODIFIANT LE RÈGLEMENT DE ZONAGE 310-19-01-09\",\n        \"anchor\": \"RÈGLEMENT NUMÉRO 509-07-04-26\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : la page 3 comporte un saut de ligne après « 509-07-04-26 ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet de règlement 510-07-04-26 modifiant le plan d’urbanisme — captages souterrains et éoliennes\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"510-07-04-26\",\n        \"page\": 10,\n        \"citation\": \"ADOPTION DU 1er PROJET DE RÈGLEMENT NO 510-07-04-26 MODIFIANT\\nLE PLAN D’URBANISME\",\n        \"anchor\": \"RÈGLEMENT NO 510-07-04-26\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : la page 10 comporte un saut de ligne entre « MODIFIANT » et « LE PLAN D’URBANISME ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption du premier projet de règlement 509-07-04-26 modifiant le zonage — captages souterrains et éoliennes",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "509-07-04-26",
+    "page": 3,
+    "citation": "ADOPTION DU 1ER PROJET DE RÈGLEMENT NUMÉRO 509-07-04-26\nMODIFIANT LE RÈGLEMENT DE ZONAGE 310-19-01-09",
+    "anchor": "RÈGLEMENT NUMÉRO 509-07-04-26"
+   },
+   "reason": "La citation doit être recopiée à l’identique : la page 3 comporte un saut de ligne après « 509-07-04-26 »."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Adoption du premier projet de règlement 510-07-04-26 modifiant le plan d’urbanisme — captages souterrains et éoliennes",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "510-07-04-26",
+    "page": 10,
+    "citation": "ADOPTION DU 1er PROJET DE RÈGLEMENT NO 510-07-04-26 MODIFIANT\nLE PLAN D’URBANISME",
+    "anchor": "RÈGLEMENT NO 510-07-04-26"
+   },
+   "reason": "La citation doit être recopiée à l’identique : la page 10 comporte un saut de ligne entre « MODIFIANT » et « LE PLAN D’URBANISME »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "projet_reglement",
+   "page": 3,
+   "citation": "ADOPTION DU 1ER PROJET DE RÈGLEMENT NUMÉRO 509-07-04-26\nMODIFIANT LE RÈGLEMENT DE ZONAGE 310-19-01-09"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "projet_reglement",
+   "page": 10,
+   "citation": "ADOPTION DU 1er PROJET DE RÈGLEMENT NO 510-07-04-26 MODIFIANT\nLE PLAN D’URBANISME"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4
+}

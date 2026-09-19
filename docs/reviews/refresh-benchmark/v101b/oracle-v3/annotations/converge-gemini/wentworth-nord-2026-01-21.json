@@ -1,0 +1,81 @@
+{
+ "documentId": "wentworth-nord-2026-01-21",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "557b52ba9da86b3f1031f029f78af38c91c213d7117f49d8249dcc742b14e92d",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure 2025-0418 est formellement accordée par la résolution 2026-01-3809 à la page 9 avec citation et métadonnées exactes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'exigence de contribution pour parcs en argent pour le lotissement 2025-9029 est adoptée par la résolution 2026-01-3810 à la page 9.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le dépôt du certificat d'enregistrement pour le règlement de zonage 2017-498-30-C09 est attesté à la page 11 avec citation exacte.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le dépôt du certificat d'enregistrement pour le règlement 2017-498-30-CONS08 est attesté textuellement à la page 11 avec citation exacte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le dépôt du certificat d'enregistrement pour le règlement 2017-498-30-I04 est attesté à la page 11 avec citation exacte.\"},{\"item\":\"i06\",\"choice\":\"v2\",\"reason\":\"La résolution 2026-01-3807 à la page 7 approuve l'entente relative à la servitude de conservation, et l'ancre de la v2 cible précisément l'acte foncier en cause.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v2"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La dérogation mineure 2025-0418 est formellement accordée par la résolution 2026-01-3809 à la page 9 avec citation et métadonnées exactes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'exigence de contribution pour parcs en argent pour le lotissement 2025-9029 est adoptée par la résolution 2026-01-3810 à la page 9."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le dépôt du certificat d'enregistrement pour le règlement de zonage 2017-498-30-C09 est attesté à la page 11 avec citation exacte."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le dépôt du certificat d'enregistrement pour le règlement 2017-498-30-CONS08 est attesté textuellement à la page 11 avec citation exacte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le dépôt du certificat d'enregistrement pour le règlement 2017-498-30-I04 est attesté à la page 11 avec citation exacte."
+  },
+  {
+   "item": "i06",
+   "choice": "v2",
+   "reason": "La résolution 2026-01-3807 à la page 7 approuve l'entente relative à la servitude de conservation, et l'ancre de la v2 cible précisément l'acte foncier en cause."
+  }
+ ]
+}

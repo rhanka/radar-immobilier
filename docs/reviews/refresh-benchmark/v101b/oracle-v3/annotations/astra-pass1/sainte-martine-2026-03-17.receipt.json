@@ -1,0 +1,36 @@
+{
+ "documentId": "sainte-martine-2026-03-17",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "c5633536d8951ec5023a6d3f249b97ae0228b3b90414316f2f64a110dad08e14",
+ "inputSha256": "392b652e4437eb30294def46685ca0e77386cfe3ed687cd13c97424817b1bb1a",
+ "responseSha256": "5143a6404b2c6858f12a34ca50d709b4d7e55c17d65e0e9b7a126ec79a2d1c24",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 234008,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 16949,
+  "outputTokens": 7719,
+  "totalTokens": 24668
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 234000,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:36:59.983Z"
+}

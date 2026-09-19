@@ -1,0 +1,35 @@
+{
+ "documentId": "orford-2026-03-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "8a3a6d3ffc6fb2e09b7e53425495da08b52b1133649c642dd28c316329125f21",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2049,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 32102,
+   "outputTokens": 466,
+   "totalTokens": 32568
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1880
+  },
+  "inputSha256": "8eebad8a771b1a6c7817515f3d3c708c7264e09cc135d31a8d108f45b409615a"
+ },
+ "at": "2026-09-19T03:22:59.939Z"
+}

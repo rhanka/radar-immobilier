@@ -1,0 +1,74 @@
+{
+ "documentId": "sainte-brigide-diberville-2026-06-01",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ab615b0fbb57aa6dba4a51c11a3c25f6858f017c575399590925de3f9be23c82",
+ "verificationSha256": "b9f62e088698d96862ab95a68ea61818509fb04b78902188265b5e6b67bc6c3c",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"Le point 6.6 mentionne explicitement « projet éolien : demande de prolongation à la CPTAQ » : il atteste une démarche foncière prévue à l’ordre du jour, correctement classée à l’étape « inconnu », sans établir de décision acquise. Son classement sous « Correspondance et demandes » ne justifie pas l’exclusion : les règles incluent les actes fonciers même non résidentiels et n’exigent pas une compétence municipale directe.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u02",
+   "verificationItem": "i02",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Demande de prolongation prévue à la CPTAQ pour le projet éolien",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "projet éolien",
+      "page": 1,
+      "citation": "6.6 Coopérative Régionale d’Électricité de Saint0Jean-Baptiste de Rouville – projet éolien : demande de prolongation à la CPTAQ",
+      "anchor": "projet éolien",
+      "spanStart": 1000,
+      "spanEnd": 1127
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 6.6, page 1, prévoit une demande de prolongation à la CPTAQ pour le projet éolien, correctement décrite avec l’étape inconnu."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le point « 6.6 … projet éolien : demande de prolongation à la CPTAQ » est un acte foncier explicite (autorisation en zone agricole) prévu à l'ordre du jour, étape inconnu justifiée, citation et page exactes."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Simple correspondance externe d'un tiers sans objet foncier explicite ni compétence directe d'urbanisme municipal."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "Le point 6.6 mentionne explicitement « projet éolien : demande de prolongation à la CPTAQ » : il atteste une démarche foncière prévue à l’ordre du jour, correctement classée à l’étape « inconnu », sans établir de décision acquise. Son classement sous « Correspondance et demandes » ne justifie pas l’exclusion : les règles incluent les actes fonciers même non résidentiels et n’exigent pas une compétence municipale directe."
+  }
+ ]
+}

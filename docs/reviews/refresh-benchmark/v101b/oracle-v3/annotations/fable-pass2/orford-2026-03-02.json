@@ -1,0 +1,46 @@
+{
+ "documentId": "orford-2026-03-02",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "14c620b4e7114d1d6fcd72972e12c02e700ca2055c7cc38525f97408ad0c145f",
+ "rawText": "{\"operations\":[\n {\"op\":\"remove\",\"id\":\"u07\",\"reason\":\"La résolution 2026-03-46 (transmission de l'état des taxes échues à la MRC) est une mesure de perception fiscale sans objet foncier explicite (aucun immeuble ou lot identifié) : elle relève des « comptes » exclus par la règle 7 et non d'un acte foncier ou d'un règlement d'urbanisme.\"},\n {\"op\":\"remove\",\"id\":\"u08\",\"reason\":\"La résolution 2026-03-47 autorise de façon générique la greffière ou le directeur général à enchérir à la vente pour défaut de paiement de taxes ; aucun immeuble n'est nommé, donc pas d'« objet réglementaire ou foncier explicite » au sens de la règle 1, et la matière (perception de taxes) relève des exclusions de la règle 7.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u07",
+   "reason": "La résolution 2026-03-46 (transmission de l'état des taxes échues à la MRC) est une mesure de perception fiscale sans objet foncier explicite (aucun immeuble ou lot identifié) : elle relève des « comptes » exclus par la règle 7 et non d'un acte foncier ou d'un règlement d'urbanisme."
+  },
+  {
+   "op": "remove",
+   "id": "u08",
+   "reason": "La résolution 2026-03-47 autorise de façon générique la greffière ou le directeur général à enchérir à la vente pour défaut de paiement de taxes ; aucun immeuble n'est nommé, donc pas d'« objet réglementaire ou foncier explicite » au sens de la règle 1, et la matière (perception de taxes) relève des exclusions de la règle 7."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u07"
+  },
+  {
+   "op": "remove",
+   "id": "u08"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

@@ -1,0 +1,77 @@
+{
+ "documentId": "chibougamau-2026-05-16",
+ "step": "astra-pass1b",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "d5bbc9d8affb236747fc5a0ca9e54e5d3b2a830aa9d3167e8fc5684f508255e2",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Demande de PIIA 2026-002 — 959, 3e Rue\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"20 26- 0 0 2\",\n        \"page\": 16,\n        \"citation\": \"De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\\n20 26- 0 0 2 – 959, 3 e Rue – Lo t 6 659 70 4\",\n        \"anchor\": \"20 26- 0 0 2 – 959, 3 e Rue\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : la page 16 comporte un saut de ligne entre « (PIIA) » et le numéro de demande, et non une espace.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Demande de PIIA 2026-003 — 418, 3e Rue\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"20 26- 0 0 3\",\n        \"page\": 17,\n        \"citation\": \"De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\\n20 26- 0 0 3 – 418, 3 e Rue – Lo t 3 867 14 4\",\n        \"anchor\": \"20 26- 0 0 3 – 418, 3 e Rue\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : la page 17 comporte un saut de ligne entre « (PIIA) » et le numéro de demande, et non une espace.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Demande de PIIA 2026-002 — 959, 3e Rue",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "20 26- 0 0 2",
+    "page": 16,
+    "citation": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 2 – 959, 3 e Rue – Lo t 6 659 70 4",
+    "anchor": "20 26- 0 0 2 – 959, 3 e Rue"
+   },
+   "reason": "La citation doit être recopiée à l’identique : la page 16 comporte un saut de ligne entre « (PIIA) » et le numéro de demande, et non une espace."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Demande de PIIA 2026-003 — 418, 3e Rue",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "20 26- 0 0 3",
+    "page": 17,
+    "citation": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 3 – 418, 3 e Rue – Lo t 3 867 14 4",
+    "anchor": "20 26- 0 0 3 – 418, 3 e Rue"
+   },
+   "reason": "La citation doit être recopiée à l’identique : la page 17 comporte un saut de ligne entre « (PIIA) » et le numéro de demande, et non une espace."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass1b",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "piia",
+   "page": 16,
+   "citation": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 2 – 959, 3 e Rue – Lo t 6 659 70 4"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "piia",
+   "page": 17,
+   "citation": "De mande de plan d’implant at ion e t d’int é grat ion archit e c t urale (PIIA)\n20 26- 0 0 3 – 418, 3 e Rue – Lo t 3 867 14 4"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4,
+ "relabeledFrom": "astra-pass2"
+}

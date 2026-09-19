@@ -1,0 +1,13 @@
+{
+ "id": "danville-2026-01-15",
+ "rc": 0,
+ "latencyMs": 150457,
+ "inputTokens": 2,
+ "outputTokens": 15276,
+ "cacheRead": 0,
+ "cacheCreate": 5617,
+ "costUsd": 0.44169600000000003,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 27014
+}

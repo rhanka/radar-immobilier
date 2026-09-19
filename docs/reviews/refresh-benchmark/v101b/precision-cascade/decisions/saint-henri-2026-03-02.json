@@ -1,0 +1,195 @@
+{
+ "documentId": "saint-henri-2026-03-02",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "0f52a14caa68caa039aa6fa97f5490e5ff858f26ac359b0a74bdfbf9e5d9a98a",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-739-26"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement no 739-26 — dépôt du certificat d'enregistrement prévu",
+     "stage": null,
+     "objet": "739-26",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5.5 Dépôt du certificat relatif à la procédure d'enregistrement sur le Règlement no 739-26"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-741-26"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement no 741-26 sur l'occupation et l'entretien des bâtiments",
+     "stage": null,
+     "objet": "741-26",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-741-26"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Consultation et adoption prévues du règlement no 741-26",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-derogation-2360482"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure — 1096 chemin du Trait-Carré",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "7.3 Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-demolition"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Constitution prévue du Comité de démolition",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Constitution du Comité de démolition et désignation du responsable du traitement des\ndemandes de démolition"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Le dépôt d'un certificat d'enregistrement administratif sous le point 5.5 relève de la simple formalité administrative générale sans lien direct avec un objet d'urbanisme explicité.\",\"excerpt\":\"5.5 Dépôt du certificat relatif à la procédure d'enregistrement sur le Règlement no 739-26\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.2 prévoit l'assemblée de consultation et l'adoption du Règlement no 741-26 sur l'occupation et l'entretien des bâtiments.\",\"excerpt\":\"7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\\nadoption du Règlement no 741-26\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.2 annonce la tenue d'une assemblée de consultation et l'adoption pour le règlement 741-26.\",\"excerpt\":\"7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\\nadoption du Règlement no 741-26\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.3 prévoit le traitement d'une demande de dérogation mineure pour le 1096 chemin du Trait-Carré.\",\"excerpt\":\"7.3 Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482)\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"La constitution d'un comité et la désignation d'un responsable relèvent de nominations et de gouvernance interne, exclues du périmètre d'extraction des actes fonciers ou réglementaires d'urbanisme.\",\"excerpt\":\"7.1 Constitution du Comité de démolition et désignation du responsable du traitement des\\ndemandes de démolition\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Le dépôt d'un certificat d'enregistrement administratif sous le point 5.5 relève de la simple formalité administrative générale sans lien direct avec un objet d'urbanisme explicité.",
+   "excerpt": "5.5 Dépôt du certificat relatif à la procédure d'enregistrement sur le Règlement no 739-26"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 7.2 prévoit l'assemblée de consultation et l'adoption du Règlement no 741-26 sur l'occupation et l'entretien des bâtiments.",
+   "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 7.2 annonce la tenue d'une assemblée de consultation et l'adoption pour le règlement 741-26.",
+   "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 7.3 prévoit le traitement d'une demande de dérogation mineure pour le 1096 chemin du Trait-Carré.",
+   "excerpt": "7.3 Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482)"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "La constitution d'un comité et la désignation d'un responsable relèvent de nominations et de gouvernance interne, exclues du périmètre d'extraction des actes fonciers ou réglementaires d'urbanisme.",
+   "excerpt": "7.1 Constitution du Comité de démolition et désignation du responsable du traitement des\ndemandes de démolition"
+  }
+ ],
+ "filter": {
+  "acts": 5,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Le dépôt d'un certificat d'enregistrement administratif sous le point 5.5 relève de la simple formalité administrative générale sans lien direct avec un objet d'urbanisme explicité."
+   },
+   {
+    "act": "A05",
+    "reason": "La constitution d'un comité et la désignation d'un responsable relèvent de nominations et de gouvernance interne, exclues du périmètre d'extraction des actes fonciers ou réglementaires d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A02",
+    "reason": "Le point 7.2 prévoit l'assemblée de consultation et l'adoption du Règlement no 741-26 sur l'occupation et l'entretien des bâtiments."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 7.2 annonce la tenue d'une assemblée de consultation et l'adoption pour le règlement 741-26."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 7.3 prévoit le traitement d'une demande de dérogation mineure pour le 1096 chemin du Trait-Carré."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1949,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 1940,
+   "outputTokens": 417,
+   "totalTokens": 2357
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1661
+  },
+  "inputSha256": "50ad8788743292f6312413eb79b0724a8414a52248efcaf01cf3537fa36561c8"
+ }
+}

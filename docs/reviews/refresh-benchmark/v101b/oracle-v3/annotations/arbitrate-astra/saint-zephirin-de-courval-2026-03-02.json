@@ -1,0 +1,19 @@
+{
+ "documentId": "saint-zephirin-de-courval-2026-03-02",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "97f7e0b7e51578bbfebf6ce80068634ffb184b229280037be9abe204a107acd4",
+ "verificationSha256": "d57570b361281268bf4b160356c00e5a72083a367791f4b3ad7aa2ebdd173774",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

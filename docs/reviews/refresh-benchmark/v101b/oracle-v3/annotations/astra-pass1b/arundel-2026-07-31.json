@@ -1,0 +1,101 @@
+{
+ "documentId": "arundel-2026-07-31",
+ "step": "astra-pass1b",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "12d93e61bac9f641799398316817d7dcf9cd535d65f53ab01a2d9a52fce57c36",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Adoption en deuxième lecture du règlement 312-2026 sur les PPCMOI\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"312-2026\",\n        \"page\": 3,\n        \"citation\": \"ADOPT in second reading and decree bylaw 312-2026 relating to specific\\nconstruction, alteration or occupancy proposals for an immovable (SCAOPI)\",\n        \"anchor\": \"bylaw 312-2026\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte de la page 3 comporte un saut de ligne après « specific ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"PIIA accordé — construction d’un abri d’auto au 165 Chemin de la Rouge\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"165 Chemin de la Rouge\",\n        \"page\": 6,\n        \"citation\": \"AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site\\nPlanning and Architectural Integration Plan (SPAIP) for the construction of a car\\nshelter at 165 Chemin de la Rouge.\",\n        \"anchor\": \"165 Chemin de la Rouge\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte de la page 6 comporte des sauts de ligne après « Site » et « car ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"PIIA accordé — rénovation du toit et de la façade du garage au 117 Rue du Village\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"117 Rue du Village\",\n        \"page\": 7,\n        \"citation\": \"Planning and Architectural Integration Plan (SPAIP) for the renovation of the\\nroof and facade of the garage of the building located at 117 Rue du Village.\",\n        \"anchor\": \"117 Rue du Village\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte de la page 7 comporte un saut de ligne entre « renovation of the » et « roof ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Adoption en deuxième lecture du règlement 312-2026 sur les PPCMOI",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "312-2026",
+    "page": 3,
+    "citation": "ADOPT in second reading and decree bylaw 312-2026 relating to specific\nconstruction, alteration or occupancy proposals for an immovable (SCAOPI)",
+    "anchor": "bylaw 312-2026"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte de la page 3 comporte un saut de ligne après « specific »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "PIIA accordé — construction d’un abri d’auto au 165 Chemin de la Rouge",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "165 Chemin de la Rouge",
+    "page": 6,
+    "citation": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the construction of a car\nshelter at 165 Chemin de la Rouge.",
+    "anchor": "165 Chemin de la Rouge"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte de la page 6 comporte des sauts de ligne après « Site » et « car »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "PIIA accordé — rénovation du toit et de la façade du garage au 117 Rue du Village",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "117 Rue du Village",
+    "page": 7,
+    "citation": "Planning and Architectural Integration Plan (SPAIP) for the renovation of the\nroof and facade of the garage of the building located at 117 Rue du Village.",
+    "anchor": "117 Rue du Village"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte de la page 7 comporte un saut de ligne entre « renovation of the » et « roof »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass1b",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 3,
+   "citation": "ADOPT in second reading and decree bylaw 312-2026 relating to specific\nconstruction, alteration or occupancy proposals for an immovable (SCAOPI)"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "piia",
+   "page": 6,
+   "citation": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site\nPlanning and Architectural Integration Plan (SPAIP) for the construction of a car\nshelter at 165 Chemin de la Rouge."
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "piia",
+   "page": 7,
+   "citation": "Planning and Architectural Integration Plan (SPAIP) for the renovation of the\nroof and facade of the garage of the building located at 117 Rue du Village."
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3,
+ "relabeledFrom": "astra-pass2"
+}

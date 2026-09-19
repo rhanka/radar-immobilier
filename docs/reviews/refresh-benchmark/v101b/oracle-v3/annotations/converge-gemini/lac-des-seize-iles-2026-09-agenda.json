@@ -1,0 +1,61 @@
+{
+ "documentId": "lac-des-seize-iles-2026-09-agenda",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "0ded76906f0c25cb52cdce093c80a979c7821bdb5745041887419e5b2c5b5c6e",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 3.6 prévoit l'avis de motion du règlement 2026-08 régissant l'occupation du domaine public à la page 1.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 3.7 prévoit le dépôt du projet de règlement 2026-08 à la page 1, distinct de l'avis de motion selon les règles.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 5.4 prévoit la dérogation mineure DDM2026-058 au 252, chemin du Village à la page 1, avec une ancre précise en v1.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 5.5 prévoit l'adoption du règlement 2026-102-01 modifiant le règlement de lotissement à la page 1.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v2"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 3.6 prévoit l'avis de motion du règlement 2026-08 régissant l'occupation du domaine public à la page 1."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 3.7 prévoit le dépôt du projet de règlement 2026-08 à la page 1, distinct de l'avis de motion selon les règles."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 5.4 prévoit la dérogation mineure DDM2026-058 au 252, chemin du Village à la page 1, avec une ancre précise en v1."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 5.5 prévoit l'adoption du règlement 2026-102-01 modifiant le règlement de lotissement à la page 1."
+  }
+ ]
+}

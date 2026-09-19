@@ -1,0 +1,386 @@
+{
+ "nodes": [
+  {
+   "id": "source-hatley-2026-04-07",
+   "label": "Procès-verbal du conseil municipal de Hatley du 7 avril 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+   "url": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+   "date": "2026-04-07",
+   "municipality": "hatley",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "status": "candidate",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Le conseil de la municipalité de Hatley siège en assemblée ordinaire, ce mardi 7 avril 2026 à",
+     "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+     "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2025-03-0004",
+   "label": "Autorisation d’agrandissement du bâtiment principal au 141 rue Main",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "status": "candidate",
+   "municipality": "hatley",
+   "date": "2026-04-07",
+   "meetingDate": "2026-04-07",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-04-07",
+   "decision": "approuvé",
+   "dossier": "2025-03-0004",
+   "no_lot": "4666122",
+   "reglement_number": "2006",
+   "resolution": "2026-054",
+   "description": "Autorisation de l’agrandissement du bâtiment principal situé au 141 rue Main, sur recommandation du comité consultatif en urbanisme. Le projet respecte les critères du PIIA-1.",
+   "conditions": [
+    "Conformité aux documents soumis."
+   ],
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "D’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la\ndemande d’agrandissement du bâtiment principal situé au 141 rue Main, le tout",
+     "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+     "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 10,
+     "excerpt": "141 rue Main (lot 4 666 122) – PIIA-1 2025-03-0004",
+     "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+     "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-piia",
+    "ev-piia-reglement"
+   ]
+  },
+  {
+   "id": "signal-permis-mars-2026",
+   "label": "Dépôt du rapport cumulatif des permis — mars 2026",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "status": "candidate",
+   "municipality": "hatley",
+   "date": "2026-04-07",
+   "category": "permis_construction",
+   "scope": "local",
+   "description": "Dépôt du rapport cumulatif pour la période se terminant en mars 2026 : cinq permis de construction d’une valeur totale de 111 000 $ et deux certificats d’autorisation d’une valeur totale de 25 000 $.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "La directrice générale dépose le rapport cumulatif d’émission des permis pour la période\nse terminant en mars 2026.",
+     "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+     "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-permis"
+   ]
+  },
+  {
+   "id": "signal-patrimoine-2026-055",
+   "label": "Révision de la liste préliminaire du patrimoine immobilier",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "status": "candidate",
+   "municipality": "hatley",
+   "date": "2026-04-07",
+   "category": "patrimoine_immobilier",
+   "scope": "local",
+   "resolution": "2026-055",
+   "description": "Le conseil retient dans la liste préliminaire de la phase 1 de l’inventaire patrimonial la grange de la Rubicon Farm au 38 rue Main, l’église Saint-James, le St. James Hall et le gazebo au 100 rue Main. Il demande le retrait de tous les autres bâtiments de Hatley de cette liste et sa transmission à la MRC de Memphrémagog.",
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "DE retenir, parmi les bâtiments situés sur le territoire de la municipalité de Hatley\napparaissant à l’Annexe 2 – Liste des bâtiments et autres biens du corpus de la phase 1",
+     "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+     "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-patrimoine"
+   ]
+  },
+  {
+   "id": "event-cptaq-45064",
+   "label": "Appui municipal à l’agrandissement du LET de la RIGDSC",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "status": "candidate",
+   "municipality": "hatley",
+   "date": "2026-04-07",
+   "kind": "cptaq",
+   "etape": "inconnu",
+   "etape_date": "2026-04-07",
+   "dossier": "45064",
+   "no_lot": "2935698",
+   "resolution": "2026-058",
+   "superficie_m2": 255000,
+   "demandeur_corporate": "Régie intermunicipale de gestion des déchets solides de la région de Coaticook",
+   "description": "Appui de Hatley à la demande d’autorisation à la CPTAQ pour l’utilisation à des fins autres qu’agricoles d’une partie du lot 2 935 698 afin d’agrandir le lieu d’enfouissement technique d’environ 25,5 hectares. Cet appui municipal ne constitue pas une autorisation de la CPTAQ.",
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "D’appuyer la demande de la Régie intermunicipale de gestion des déchets solides de la\nrégion de Coaticook à la Commission de protection du territoire agricole du Québec",
+     "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+     "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-cptaq-appui",
+    "ev-cptaq-demande"
+   ]
+  },
+  {
+   "id": "constraint-cptaq-45064",
+   "label": "Zone agricole permanente et orientation préliminaire défavorable — LET",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "status": "candidate",
+   "constraintType": "cptaq",
+   "organisme": "Commission de protection du territoire agricole du Québec",
+   "dossier": "45064",
+   "meetingDate": "2026-04-07",
+   "superficie_concernee_m2": 255000,
+   "description": "Le lot 2 935 698 est situé dans la zone agricole permanente. L’orientation préliminaire du 2 décembre 2025 indique que la CPTAQ considère que la demande d’agrandissement doit être refusée. Une rencontre demandée par la Régie est prévue le 15 avril 2026; aucune décision finale sur cette demande n’est rapportée.",
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "ATTENDU QUE l’Orientation préliminaire indique que la CPTAQ considère\nessentiellement que la Demande doit être refusée;",
+     "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+     "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-cptaq-orientation",
+    "ev-cptaq-demande"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-hatley-2026-04-07",
+   "target": "piia-2025-03-0004",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "evidence_refs": [
+    "ev-piia"
+   ],
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "D’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la",
+     "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+     "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-hatley-2026-04-07",
+   "target": "signal-permis-mars-2026",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "evidence_refs": [
+    "ev-permis"
+   ],
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "La directrice générale dépose le rapport cumulatif d’émission des permis pour la période\nse terminant en mars 2026.",
+     "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+     "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-hatley-2026-04-07",
+   "target": "signal-patrimoine-2026-055",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "evidence_refs": [
+    "ev-patrimoine"
+   ],
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "DE retenir, parmi les bâtiments situés sur le territoire de la municipalité de Hatley",
+     "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+     "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-hatley-2026-04-07",
+   "target": "event-cptaq-45064",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "evidence_refs": [
+    "ev-cptaq-appui"
+   ],
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "D’appuyer la demande de la Régie intermunicipale de gestion des déchets solides de la\nrégion de Coaticook à la Commission de protection du territoire agricole du Québec",
+     "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+     "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-hatley-2026-04-07",
+   "target": "constraint-cptaq-45064",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "evidence_refs": [
+    "ev-cptaq-orientation"
+   ],
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "ATTENDU QUE l’Orientation préliminaire indique que la CPTAQ considère\nessentiellement que la Demande doit être refusée;",
+     "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+     "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+     "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-piia",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+   "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 11,
+   "excerpt": "D’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la\ndemande d’agrandissement du bâtiment principal situé au 141 rue Main, le tout\nconformément aux documents soumis."
+  },
+  {
+   "id": "ev-piia-reglement",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+   "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "141 rue Main (lot 4 666 122) – PIIA-1 2025-03-0004\n\nCONSIDÉRANT QUE le propriétaire du 141 rue Main a soumis une demande de\nconstruction visant l’agrandissement du bâtiment principal;\nCONSIDÉRANT QUE l’immeuble est assujetti au règlement sur les PIIA 2006;"
+  },
+  {
+   "id": "ev-permis",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+   "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "La directrice générale dépose le rapport cumulatif d’émission des permis pour la période\nse terminant en mars 2026. Pour la période visée, cinq (5) permis de construction ont été\ndélivrés pour une valeur totale de 111 000 $, ainsi que deux (2) certificats d’autorisation\npour une valeur totale de 25 000 $."
+  },
+  {
+   "id": "ev-patrimoine",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+   "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 11,
+   "excerpt": "DE retenir, parmi les bâtiments situés sur le territoire de la municipalité de Hatley\napparaissant à l’Annexe 2 – Liste des bâtiments et autres biens du corpus de la phase 1\nd’inventaire, les bâtiments suivants :\n• la grange de la Rubicon Farm, située au 38, rue Main;\n• l’église Saint-James, située au 100, rue Main;\n• le St. James Hall (centre communautaire), situé au 100, rue Main;\n• le gazebo, situé au 100, rue Main;\nDE demander le retrait de tous les autres bâtiments situés sur le territoire de la\nmunicipalité de Hatley de ladite liste;"
+  },
+  {
+   "id": "ev-cptaq-appui",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+   "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 13,
+   "excerpt": "D’appuyer la demande de la Régie intermunicipale de gestion des déchets solides de la\nrégion de Coaticook à la Commission de protection du territoire agricole du Québec\nvisant l’obtention d’une autorisation pour l’utilisation, à des fins autres qu’agricoles,\nd’une partie du lot 2 935 698 du cadastre du Québec, circonscription foncière de\nCoaticook, soit pour l’agrandissement de son lieu d’enfouissement technique."
+  },
+  {
+   "id": "ev-cptaq-demande",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+   "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 12,
+   "excerpt": "ATTENDU QUE la Régie a présenté à la Commission de protection du territoire agricole\ndu Québec (la « CPTAQ ») une demande d’autorisation visant l’agrandissement LET\nd’une superficie d’environ 25,5 hectares (dossier numéro 45064) (la « Demande »);"
+  },
+  {
+   "id": "ev-cptaq-orientation",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+   "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 13,
+   "excerpt": "ATTENDU QUE l’Orientation préliminaire indique que la CPTAQ considère\nessentiellement que la Demande doit être refusée;\nATTENDU QU’une rencontre avec la CPTAQ a été demandée par la Régie et que cette\nrencontre est prévue le 15 avril prochain;"
+  },
+  {
+   "id": "ev-pompage",
+   "source_file": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "rawRef": "raw/proces-verbaux-hatley/cas/06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd.pdf",
+   "docSha": "06a0d00fde4836c479311157da5c890859ab833cdc17749372d63c92d47f27cd",
+   "sourceUrl": "https://www.municipalitehatley.com/wp-content/uploads/2026/05/04-PV-7-avril-2026.pdf",
+   "modality": "pdf",
+   "page": 14,
+   "excerpt": "D’octroyer le contrat à l’entreprise Electro-Concept P.B.L. inc. pour le remplacement\ndes composantes électroniques des stations de pompage des rues des Cèdres et des\nOrmes, selon les soumissions reçues, soit :\n• un montant de 34 880 $, taxes en sus, pour la station de pompage de la rue des Ormes;\n• un montant de 34 880 $, taxes en sus, pour la station de pompage de la rue des Cèdres;"
+  }
+ ],
+ "input_tokens": 15400,
+ "output_tokens": 6200
+}

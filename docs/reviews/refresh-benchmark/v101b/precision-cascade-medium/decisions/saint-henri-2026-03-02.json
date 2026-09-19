@@ -1,0 +1,216 @@
+{
+ "documentId": "saint-henri-2026-03-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "6b199084dcd96ccd00c9b04dc2d0a00c0a27739915b0c0b478579e0e587b19fe",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-741-26"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement no 741-26 sur l'occupation et l'entretien des bâtiments",
+     "stage": null,
+     "objet": "741-26",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26"
+      },
+      {
+       "page": 1,
+       "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-741-26"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Consultation et adoption prévues du règlement no 741-26",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26"
+      },
+      {
+       "page": 1,
+       "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-derogation-trait-carre"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande de dérogation mineure au 1096 chemin du Trait-Carré",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "7.3 Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482)"
+      },
+      {
+       "page": 2,
+       "excerpt": "7.3 Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-comite-demolition"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Constitution prévue du Comité de démolition",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Constitution du Comité de démolition et désignation du responsable du traitement des\ndemandes de démolition"
+      },
+      {
+       "page": 1,
+       "excerpt": "Constitution du Comité de démolition et désignation du responsable du traitement des\ndemandes de démolition"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-739-26"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement no 739-26",
+     "stage": null,
+     "objet": "739-26",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5.5 Dépôt du certificat relatif à la procédure d'enregistrement sur le Règlement no 739-26"
+      },
+      {
+       "page": 1,
+       "excerpt": "5.5 Dépôt du certificat relatif à la procédure d'enregistrement sur le Règlement no 739-26"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.2 prévoit l'assemblée de consultation et l'adoption du Règlement no 741-26 sur l'occupation et l'entretien des bâtiments.\",\"excerpt\":\"7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\\nadoption du Règlement no 741-26\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le texte inscrit formellement à l'ordre du jour la tenue de l'assemblée de consultation et l'adoption du Règlement no 741-26.\",\"excerpt\":\"7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\\nadoption du Règlement no 741-26\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.3 porte explicitement sur une demande de dérogation mineure au 1096 chemin du Trait-Carré.\",\"excerpt\":\"7.3 Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482)\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.1 inscrit à l'ordre du jour la constitution du Comité de démolition et la désignation de son responsable.\",\"excerpt\":\"Constitution du Comité de démolition et désignation du responsable du traitement des\\ndemandes de démolition\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le simple dépôt d'un certificat d'enregistrement sans mention de l'objet d'urbanisme ni étape décisionnelle d'urbanisme relève d'un simple dépôt administratif.\",\"excerpt\":\"5.5 Dépôt du certificat relatif à la procédure d'enregistrement sur le Règlement no 739-26\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 7.2 prévoit l'assemblée de consultation et l'adoption du Règlement no 741-26 sur l'occupation et l'entretien des bâtiments.",
+   "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le texte inscrit formellement à l'ordre du jour la tenue de l'assemblée de consultation et l'adoption du Règlement no 741-26.",
+   "excerpt": "7.2 Règlement sur l'occupation et l'entretien des bâtiments - assemblée de consultation et\nadoption du Règlement no 741-26"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 7.3 porte explicitement sur une demande de dérogation mineure au 1096 chemin du Trait-Carré.",
+   "excerpt": "7.3 Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482)"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 7.1 inscrit à l'ordre du jour la constitution du Comité de démolition et la désignation de son responsable.",
+   "excerpt": "Constitution du Comité de démolition et désignation du responsable du traitement des\ndemandes de démolition"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le simple dépôt d'un certificat d'enregistrement sans mention de l'objet d'urbanisme ni étape décisionnelle d'urbanisme relève d'un simple dépôt administratif.",
+   "excerpt": "5.5 Dépôt du certificat relatif à la procédure d'enregistrement sur le Règlement no 739-26"
+  }
+ ],
+ "filter": {
+  "acts": 5,
+  "removed": [
+   {
+    "act": "A05",
+    "reason": "Le simple dépôt d'un certificat d'enregistrement sans mention de l'objet d'urbanisme ni étape décisionnelle d'urbanisme relève d'un simple dépôt administratif."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 7.2 prévoit l'assemblée de consultation et l'adoption du Règlement no 741-26 sur l'occupation et l'entretien des bâtiments."
+   },
+   {
+    "act": "A02",
+    "reason": "Le texte inscrit formellement à l'ordre du jour la tenue de l'assemblée de consultation et l'adoption du Règlement no 741-26."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 7.3 porte explicitement sur une demande de dérogation mineure au 1096 chemin du Trait-Carré."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 7.1 inscrit à l'ordre du jour la constitution du Comité de démolition et la désignation de son responsable."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1922,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2187,
+   "outputTokens": 392,
+   "totalTokens": 2579
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1759
+  },
+  "inputSha256": "6741fe19877aafef6b5bb21cc3304152f8d195a58428948440513574bce0d764"
+ }
+}

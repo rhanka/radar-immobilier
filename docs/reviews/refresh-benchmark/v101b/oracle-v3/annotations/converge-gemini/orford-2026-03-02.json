@@ -1,0 +1,101 @@
+{
+ "documentId": "orford-2026-03-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "5f1bbf77aaa39f7204ab1991b2718224156c3ee2009dc6d1c608098c890f4d79",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-59 atteste l'approbation conditionnelle du PIIA pour le lot 6 474 528 à la page 43 conformément à la règle d'inclusion des PIIA.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-60 atteste l'approbation conditionnelle du PIIA pour le 2197-2199, chemin du Parc à la page 45 conformément à la règle d'inclusion des PIIA.\"},{\"item\":\"i03\",\"choice\":\"absent\",\"reason\":\"L'imposition d'une contribution financière pour fins de parcs ne correspond pas à un Signal ou DesignationEvent du profil et son étape d'adoption est invalide.\"},{\"item\":\"i04\",\"choice\":\"absent\",\"reason\":\"L'imposition d'une contribution financière pour fins de parcs ne correspond pas à un Signal ou DesignationEvent du profil et son étape d'adoption est invalide.\"},{\"item\":\"i05\",\"choice\":\"absent\",\"reason\":\"Une demande de modification adressée à la MRC visant un règlement supramunicipal ne constitue pas une unité réglementaire municipale du profil.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"Le règlement 16-23 de la MRC n'est cité qu'au préambule historique et ne constitue pas une unité réglementaire adoptée par la municipalité.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"La transmission d'un état de taxes impayées relève de l'administration fiscale sans objet foncier explicite ni fait d'urbanisme.\"},{\"item\":\"i08\",\"choice\":\"absent\",\"reason\":\"L'autorisation générale d'enchérir à une vente pour taxes ne porte sur aucun objet foncier explicite et ne constitue pas une adoption réglementaire.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "absent"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-59 atteste l'approbation conditionnelle du PIIA pour le lot 6 474 528 à la page 43 conformément à la règle d'inclusion des PIIA."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-60 atteste l'approbation conditionnelle du PIIA pour le 2197-2199, chemin du Parc à la page 45 conformément à la règle d'inclusion des PIIA."
+  },
+  {
+   "item": "i03",
+   "choice": "absent",
+   "reason": "L'imposition d'une contribution financière pour fins de parcs ne correspond pas à un Signal ou DesignationEvent du profil et son étape d'adoption est invalide."
+  },
+  {
+   "item": "i04",
+   "choice": "absent",
+   "reason": "L'imposition d'une contribution financière pour fins de parcs ne correspond pas à un Signal ou DesignationEvent du profil et son étape d'adoption est invalide."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "Une demande de modification adressée à la MRC visant un règlement supramunicipal ne constitue pas une unité réglementaire municipale du profil."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Le règlement 16-23 de la MRC n'est cité qu'au préambule historique et ne constitue pas une unité réglementaire adoptée par la municipalité."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "La transmission d'un état de taxes impayées relève de l'administration fiscale sans objet foncier explicite ni fait d'urbanisme."
+  },
+  {
+   "item": "i08",
+   "choice": "absent",
+   "reason": "L'autorisation générale d'enchérir à une vente pour taxes ne porte sur aucun objet foncier explicite et ne constitue pas une adoption réglementaire."
+  }
+ ]
+}

@@ -1,0 +1,534 @@
+{
+ "documentId": "sacre-coeur-2026-05-11",
+ "nextId": 13,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 645 sur l’occupation et l’entretien des bâtiments",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "645",
+    "page": 5,
+    "citation": "PAR CONSÉQUENT, il est proposé par M. Brisson et résolu unanimement que le règlement portant le numéro 645 suivant soit adopté",
+    "anchor": "règlement portant le numéro 645",
+    "spanStart": 1664,
+    "spanEnd": 1790
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 645 sur l’occupation et l’entretien des bâtiments",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "645",
+      "page": 5,
+      "citation": "PAR CONSÉQUENT, il est proposé par M. Brisson et résolu unanimement que le règlement portant le numéro 645 suivant soit adopté",
+      "anchor": "règlement portant le numéro 645",
+      "spanStart": 1664,
+      "spanEnd": 1790
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le règlement 645 est adopté à cette séance; l’avis de motion et le dépôt du projet du 20 avril 2026 sont seulement des rappels historiques."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "removed",
+   "current": {
+    "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "règlement sur les pratiques agroenvironnementales",
+    "page": 12,
+    "citation": "RÉSOLUTION 2026-05-175 Révision nécessaire du projet de règlement sur les pratiques agroenvironnementales",
+    "anchor": "règlement sur les pratiques agroenvironnementales",
+    "spanStart": 874,
+    "spanEnd": 979
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "règlement sur les pratiques agroenvironnementales",
+      "page": 12,
+      "citation": "RÉSOLUTION 2026-05-175 Révision nécessaire du projet de règlement sur les pratiques agroenvironnementales",
+      "anchor": "règlement sur les pratiques agroenvironnementales",
+      "spanStart": 874,
+      "spanEnd": 979
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution demande la suspension et la révision d’un projet réglementaire explicitement nommé touchant l’aménagement du territoire, sans constituer son adoption ni son dépôt par la municipalité."
+    },
+    {
+     "step": "gemini-pass1",
+     "op": "remove",
+     "reason": "Cette résolution constitue une demande d'intervention politique adressée au gouvernement provincial au sujet d'un projet de règlement québécois, et non un acte réglementaire ou foncier municipal relevant d'une procédure d'urbanisme."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Modification autorisée de la convention de concession de la halte routière pour l’agrandissement du bâtiment",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "halte routière",
+    "page": 19,
+    "citation": "modification à la convention de la concession de la halte routière en ajoutant une clause pour l’agrandissement du bâtiment",
+    "anchor": "concession de la halte routière",
+    "spanStart": 141,
+    "spanEnd": 264
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Modification autorisée de la convention de concession de la halte routière pour l’agrandissement du bâtiment",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "halte routière",
+      "page": 19,
+      "citation": "modification à la convention de la concession de la halte routière en ajoutant une clause pour l’agrandissement du bâtiment",
+      "anchor": "concession de la halte routière",
+      "spanStart": 141,
+      "spanEnd": 264
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution autorise la modification d’une convention de concession pour permettre l’agrandissement d’un bâtiment devant demeurer déplaçable, ce qui constitue un acte foncier conventionnel même non résidentiel."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Projet de résolution du PPCMOI 2026-009 — usage bifamilial isolé sur le lot 4 700 425",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "2026-009",
+    "page": 19,
+    "citation": "d’autoriser par projet de résolution la demande numéro 2026-009 de M. Mario Bédard aux fins d’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425",
+    "anchor": "demande numéro 2026-009",
+    "spanStart": 1972,
+    "spanEnd": 2143
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du PPCMOI 2026-009 — usage bifamilial isolé sur le lot 4 700 425",
+      "stage": "adoption",
+      "procedure": "ppcmoi",
+      "objet": "2026-009",
+      "page": 19,
+      "citation": "d’autoriser par projet de résolution la demande numéro 2026-009 de M. Mario Bédard aux fins d’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425",
+      "anchor": "demande numéro 2026-009",
+      "spanStart": 1972,
+      "spanEnd": 2143
+     }
+    },
+    {
+     "step": "astra-pass2",
+     "unit": {
+      "label": "Projet de résolution du PPCMOI 2026-009 — usage bifamilial isolé sur le lot 4 700 425",
+      "stage": "projet_reglement",
+      "procedure": "ppcmoi",
+      "objet": "2026-009",
+      "page": 19,
+      "citation": "d’autoriser par projet de résolution la demande numéro 2026-009 de M. Mario Bédard aux fins d’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425",
+      "anchor": "demande numéro 2026-009",
+      "spanStart": 1972,
+      "spanEnd": 2143
+     }
+    },
+    {
+     "step": "fable-pass2",
+     "unit": {
+      "label": "Second projet de résolution du PPCMOI 2026-009 — usage bifamilial isolé sur le lot 4 700 425",
+      "stage": "second_projet",
+      "procedure": "ppcmoi",
+      "objet": "2026-009",
+      "page": 19,
+      "citation": "d’autoriser par projet de résolution la demande numéro 2026-009 de M. Mario Bédard aux fins d’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425",
+      "anchor": "demande numéro 2026-009",
+      "spanStart": 1972,
+      "spanEnd": 2143
+     }
+    },
+    {
+     "step": "astra-pass3",
+     "unit": {
+      "label": "Projet de résolution du PPCMOI 2026-009 — usage bifamilial isolé sur le lot 4 700 425",
+      "stage": "projet_reglement",
+      "procedure": "ppcmoi",
+      "objet": "2026-009",
+      "page": 19,
+      "citation": "d’autoriser par projet de résolution la demande numéro 2026-009 de M. Mario Bédard aux fins d’intégrer la classe d’usage l’usage (Hc) bifamilial isolé sur le lot 4 700 425",
+      "anchor": "demande numéro 2026-009",
+      "spanStart": 1972,
+      "spanEnd": 2143
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution actuelle autorise le PPCMOI après le processus de consultation et d’approbation; le projet de résolution 2026-03-93 est seulement rappelé et ne crée pas d’unité supplémentaire."
+    },
+    {
+     "step": "astra-pass2",
+     "op": "correct",
+     "reason": "Le dispositif actuel indique expressément « d’autoriser par projet de résolution », plutôt qu’une adoption finale, et la citation doit conserver les retours à la ligne du document."
+    },
+    {
+     "step": "fable-pass2",
+     "op": "correct",
+     "reason": "Les considérants de la résolution 2026-05-186 rappellent que le premier projet de résolution (#2026-03-93) a déjà été adopté et que la consultation a eu lieu ; le texte constate ici un nouveau « projet de résolution » postérieur à la consultation, donc l’étape est « second_projet » et non « projet_reglement » (premier projet)."
+    },
+    {
+     "step": "astra-pass3",
+     "op": "correct",
+     "reason": "Le dispositif constate un « projet de résolution » sans le qualifier de second, tandis que la résolution antérieure est un rappel historique; la citation est également rétablie à l’identique."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-010 — reconstruction de la maison au 318, chemin de L’Anse-de-Roche",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-010",
+    "page": 20,
+    "citation": "d’autoriser la demande de PIIA numéro 2026-010 de madame Chantal Gauthier, aux fins de permettre la reconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la zone 40-REC",
+    "anchor": "PIIA numéro 2026-010",
+    "spanStart": 722,
+    "spanEnd": 903
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-010 — reconstruction de la maison au 318, chemin de L’Anse-de-Roche",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-010",
+      "page": 20,
+      "citation": "d’autoriser la demande de PIIA numéro 2026-010 de madame Chantal Gauthier, aux fins de permettre la reconstruction de la maison au 318, chemin de L’Anse-de-Roche dans la zone 40-REC",
+      "anchor": "PIIA numéro 2026-010",
+      "spanStart": 722,
+      "spanEnd": 903
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-187 autorise explicitement cette demande de PIIA, qui constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-008 — maison au 99, chemin du Fjord",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-008",
+    "page": 20,
+    "citation": "d’autoriser la demande de PIIA numéro 2026-008 de madame Jennifer Hovington, aux fins de permettre la construction de la maison au 99, chemin du fjord dans la zone 40-REC",
+    "anchor": "numéro 2026-008",
+    "spanStart": 1617,
+    "spanEnd": 1787
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-008 — maison au 99, chemin du Fjord",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-008",
+      "page": 20,
+      "citation": "d’autoriser la demande de PIIA numéro 2026-008 de madame Jennifer Hovington, aux fins de permettre la construction de la maison au 99, chemin du fjord dans la zone 40-REC",
+      "anchor": "numéro 2026-008",
+      "spanStart": 1617,
+      "spanEnd": 1787
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-188 autorise la demande de PIIA de Jennifer Hovington, distincte des autres demandes traitées."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-007 — verrière trois saisons au 322 chemin de L’Anse de Roche",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-007",
+    "page": 21,
+    "citation": "d’autoriser la demande de PIIA numéro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout de panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche",
+    "anchor": "numéro 2026-007",
+    "spanStart": 451,
+    "spanEnd": 623
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-007 — verrière trois saisons au 322 chemin de L’Anse de Roche",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-007",
+      "page": 21,
+      "citation": "d’autoriser la demande de PIIA numéro 2026-007 de monsieur Ken Gauthier, aux fins de permettre l’ajout de panneaux de verre au patio actuel au 322 chemin de L’Anse de Roche",
+      "anchor": "numéro 2026-007",
+      "spanStart": 451,
+      "spanEnd": 623
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-189 autorise l’ajout de panneaux de verre au patio dans le cadre d’un PIIA, et les petits PIIA sont inclus."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA 2026-006 — agrandissement du patio au 295 chemin de L’Anse de Roche",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-006",
+    "page": 21,
+    "citation": "d’autoriser la demande de PIIA numéro 2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement du patio à la place de la terrasse actuelle",
+    "anchor": "PIIA numéro 2026-006",
+    "spanStart": 1418,
+    "spanEnd": 1570
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA 2026-006 — agrandissement du patio au 295 chemin de L’Anse de Roche",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-006",
+      "page": 21,
+      "citation": "d’autoriser la demande de PIIA numéro 2026-006 de madame Émilie Dufour aux fins d’autoriser l’agrandissement du patio à la place de la terrasse actuelle",
+      "anchor": "PIIA numéro 2026-006",
+      "spanStart": 1418,
+      "spanEnd": 1570
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-190 autorise cette demande de PIIA pour l’agrandissement d’un patio, laquelle doit être comptée séparément."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure 20226-009 accordée — lot 4 700 841, marge arrière réduite à deux mètres",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "20226-009",
+    "page": 22,
+    "citation": "d’autoriser la demande de dérogation mineure numéro 20226-009 soumise par la Société des frais funéraires de Sacré-Cœur inc",
+    "anchor": "mineure numéro 20226-009",
+    "spanStart": 308,
+    "spanEnd": 431
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure 20226-009 accordée — lot 4 700 841, marge arrière réduite à deux mètres",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "20226-009",
+      "page": 22,
+      "citation": "d’autoriser la demande de dérogation mineure numéro 20226-009 soumise par la Société des frais funéraires de Sacré-Cœur inc",
+      "anchor": "mineure numéro 20226-009",
+      "spanStart": 308,
+      "spanEnd": 431
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-191 accorde la dérogation réduisant la marge arrière de huit à deux mètres, et le numéro « 20226-009 » est conservé tel qu’écrit."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure 2026-011 accordée — lot 4 701 026, marge arrière de 6,25 mètres",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-011",
+    "page": 22,
+    "citation": "d’autoriser la demande de dérogation mineure numéro 2026-011 soumise par monsieur Yannick Hovington, aux fins de réduire la marge de recul arrière de huit mètres à 6,25 mètres",
+    "anchor": "dérogation mineure numéro 2026-011",
+    "spanStart": 1243,
+    "spanEnd": 1418
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure 2026-011 accordée — lot 4 701 026, marge arrière de 6,25 mètres",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-011",
+      "page": 22,
+      "citation": "d’autoriser la demande de dérogation mineure numéro 2026-011 soumise par monsieur Yannick Hovington, aux fins de réduire la marge de recul arrière de huit mètres à 6,25 mètres",
+      "anchor": "dérogation mineure numéro 2026-011",
+      "spanStart": 1243,
+      "spanEnd": 1418
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-192 accorde la dérogation de Yannick Hovington; la mention d’un éventuel refus dans les considérants ne constitue pas la décision."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "removed",
+   "current": {
+    "label": "Mandat d'estimation (Stantec) pour le développement du secteur de la rue Dufour — plans et devis du réseau routier et extension des réseaux d'aqueduc et d'égout",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "secteur de la rue Dufour",
+    "page": 16,
+    "citation": "développement du secteur de la rue Dufour",
+    "anchor": "secteur de la rue Dufour",
+    "spanStart": 1325,
+    "spanEnd": 1366
+   },
+   "versions": [
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Mandat d'estimation (Stantec) pour le développement du secteur de la rue Dufour — plans et devis du réseau routier et extension des réseaux d'aqueduc et d'égout",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "secteur de la rue Dufour",
+      "page": 16,
+      "citation": "développement du secteur de la rue Dufour",
+      "anchor": "secteur de la rue Dufour",
+      "spanStart": 1325,
+      "spanEnd": 1366
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "fable-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-05-180 (p. 16) constate que la municipalité « désire procéder au développement du secteur de la rue Dufour » et mandate l'estimation des plans et devis de construction du réseau routier ainsi que de l'extension des réseaux d'aqueduc et d'égout : prolongement de réseau ou de rue qui permet explicitement un développement (règle 1), ce qui le distingue d'un simple entretien de voirie ou d'un marché de services exclu ; l'étape (mandat d'estimation) n'entre dans aucune valeur, d'où « inconnu »."
+    },
+    {
+     "step": "gemini-pass1",
+     "op": "remove",
+     "reason": "L'octroi d'un mandat professionnel d'ingénierie pour la préparation d'une estimation de coûts constitue un marché de services, explicitement exclu du corrigé selon la règle 7."
+    }
+   ]
+  },
+  {
+   "id": "u12",
+   "status": "removed",
+   "current": {
+    "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "pratiques agroenvironnementales",
+    "page": 12,
+    "citation": "RÉSOLUTION 2026-05-175 Révision nécessaire du projet de règlement sur les pratiques agroenvironnementales",
+    "anchor": "projet de règlement sur les pratiques agroenvironnementales",
+    "spanStart": 874,
+    "spanEnd": 979
+   },
+   "versions": [
+    {
+     "step": "astra-pass2",
+     "unit": {
+      "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "pratiques agroenvironnementales",
+      "page": 12,
+      "citation": "RÉSOLUTION 2026-05-175 Révision nécessaire du projet de règlement sur les pratiques agroenvironnementales",
+      "anchor": "projet de règlement sur les pratiques agroenvironnementales",
+      "spanStart": 874,
+      "spanEnd": 979
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass2",
+     "op": "add",
+     "reason": "La résolution 2026-05-175 demande effectivement la suspension et la révision d’un projet de règlement touchant l’aménagement du territoire, soit une démarche actuelle sur un objet réglementaire explicite à classer « inconnu »."
+    },
+    {
+     "step": "gemini-pass2",
+     "op": "remove",
+     "reason": "La résolution 2026-05-175 est une demande politique adressée au gouvernement provincial concernant un projet de règlement québécois et non un objet réglementaire ou foncier de compétence municipale."
+    }
+   ]
+  }
+ ]
+}

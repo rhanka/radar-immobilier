@@ -1,0 +1,13 @@
+{
+ "id": "berthier-sur-mer-2026-03-24",
+ "rc": 0,
+ "latencyMs": 506669,
+ "inputTokens": 6,
+ "outputTokens": 72236,
+ "cacheRead": 37311,
+ "cacheCreate": 101376,
+ "costUsd": 2.8663885000000002,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 16512
+}

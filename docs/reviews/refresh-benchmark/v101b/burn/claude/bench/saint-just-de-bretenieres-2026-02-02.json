@@ -1,0 +1,13 @@
+{
+ "id": "saint-just-de-bretenieres-2026-02-02",
+ "rc": 0,
+ "latencyMs": 219724,
+ "inputTokens": 2,
+ "outputTokens": 24384,
+ "cacheRead": 0,
+ "cacheCreate": 14831,
+ "costUsd": 0.768125,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 47275
+}

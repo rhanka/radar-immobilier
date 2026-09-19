@@ -1,0 +1,131 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "3f3b91ed4395d5c4eae4da5d67f0ed20d1595a981d9594c5b87473b837b9ff4f",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 5.1 est marqué « REPORTÉ » page 2 et son report est expressément décidé par la résolution 089-2026 page 3, sans octroi de dérogation.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 102-2026 autorise explicitement, page 10, la signature de l’acte de servitude et du droit de premier refus concernant le lot 6 164 031.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 111-2026 accorde, page 20, la dérogation pour convertir l’abri d’auto en garage privé attenant au 2, rue Garbin, conformément à la citation.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 112-2026 accorde expressément, page 21, la dérogation concernant le lotissement du lot d’angle 6 621 589 avec une largeur de 27,20 mètres.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 113-2026 approuve, page 22, la subdivision d’une parcelle du lot 6 141 355 dans le cadre du réaménagement du pont de la rivière Ontaritzi.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 115-2026 reporte au 31 octobre 2026 l’échéance de l’entente avec Groupe Castella 2 inc., page 23, pour un prolongement de rue explicitement lié au développement plutôt qu’à un simple entretien.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 116-2026 modifie, page 24, les conditions de l’approbation du PIIA par la résolution 344-2024 en exigeant une garantie de 35 000 $ pour chacune des phases 1A et 1B.\"\n    },\n    {\n      \"item\": \"i08\",\n      \"choice\": \"v1\",\n      \"reason\": \"L’avis de motion est effectivement donné page 24 pour modifier les limites, les usages et les normes des zones 115-H et 145-H du Règlement de zonage 1259-2014.\"\n    },\n    {\n      \"item\": \"i09\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 117-2026 commence sous l’intitulé cité page 24 et adopte le premier projet APR-423-2026 page 25, constituant une unité distincte de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i10\",\n      \"choice\": \"absent\",\n      \"reason\": \"La résolution 124-2026 concerne une location saisonnière destinée à la formation et à la location de planches à pagaie, relevant des loisirs expressément exclus du rappel.\"\n    },\n    {\n      \"item\": \"i11\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 099-2026 engage expressément la Ville, page 9, à amorcer les modifications réglementaires permettant l’usage de parc solaire, sans constituer encore un avis de motion ni un projet de règlement.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "absent"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 5.1 est marqué « REPORTÉ » page 2 et son report est expressément décidé par la résolution 089-2026 page 3, sans octroi de dérogation."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 102-2026 autorise explicitement, page 10, la signature de l’acte de servitude et du droit de premier refus concernant le lot 6 164 031."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 111-2026 accorde, page 20, la dérogation pour convertir l’abri d’auto en garage privé attenant au 2, rue Garbin, conformément à la citation."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 112-2026 accorde expressément, page 21, la dérogation concernant le lotissement du lot d’angle 6 621 589 avec une largeur de 27,20 mètres."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 113-2026 approuve, page 22, la subdivision d’une parcelle du lot 6 141 355 dans le cadre du réaménagement du pont de la rivière Ontaritzi."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 115-2026 reporte au 31 octobre 2026 l’échéance de l’entente avec Groupe Castella 2 inc., page 23, pour un prolongement de rue explicitement lié au développement plutôt qu’à un simple entretien."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La résolution 116-2026 modifie, page 24, les conditions de l’approbation du PIIA par la résolution 344-2024 en exigeant une garantie de 35 000 $ pour chacune des phases 1A et 1B."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "L’avis de motion est effectivement donné page 24 pour modifier les limites, les usages et les normes des zones 115-H et 145-H du Règlement de zonage 1259-2014."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "La résolution 117-2026 commence sous l’intitulé cité page 24 et adopte le premier projet APR-423-2026 page 25, constituant une unité distincte de l’avis de motion."
+  },
+  {
+   "item": "i10",
+   "choice": "absent",
+   "reason": "La résolution 124-2026 concerne une location saisonnière destinée à la formation et à la location de planches à pagaie, relevant des loisirs expressément exclus du rappel."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "La résolution 099-2026 engage expressément la Ville, page 9, à amorcer les modifications réglementaires permettant l’usage de parc solaire, sans constituer encore un avis de motion ni un projet de règlement."
+  }
+ ]
+}

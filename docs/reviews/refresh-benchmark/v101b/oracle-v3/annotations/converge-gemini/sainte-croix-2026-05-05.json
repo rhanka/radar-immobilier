@@ -1,0 +1,91 @@
+{
+ "documentId": "sainte-croix-2026-05-05",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "99b86b2c262f1b2a6ed341d6b6085222101383467151687495d2b29b3300191c",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'acte foncier visant une partie du lot 6 191 770 est explicitement autorisé par la résolution 117-2026 à la page 8 avec les attributs exacts.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement 760-2026 modifiant le plan d'urbanisme est dûment constatée à la page 9 avec une citation textuelle conforme.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement de zonage 761-2026 est expressément adoptée à la page 9 avec des métadonnées exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'approbation du plan d'aménagement et de lotissement pour le lot 3 592 103 est adoptée par la résolution 120-2026 à la page 10.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La recommandation favorable à la CPTAQ pour le Projet éolien Lotbinière Ndakina est formellement adoptée à la page 14.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"L'engagement relatif aux droits fonciers est une clause accessoire de la résolution 121-2026 et ne porte sur aucun objet foncier explicite.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Cette approbation préliminaire de plans et devis en travaux publics fait doublon avec le développement du lot 3 592 103 déjà consigné en urbanisme.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'acte foncier visant une partie du lot 6 191 770 est explicitement autorisé par la résolution 117-2026 à la page 8 avec les attributs exacts."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'adoption du règlement 760-2026 modifiant le plan d'urbanisme est dûment constatée à la page 9 avec une citation textuelle conforme."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'adoption du règlement de zonage 761-2026 est expressément adoptée à la page 9 avec des métadonnées exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'approbation du plan d'aménagement et de lotissement pour le lot 3 592 103 est adoptée par la résolution 120-2026 à la page 10."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La recommandation favorable à la CPTAQ pour le Projet éolien Lotbinière Ndakina est formellement adoptée à la page 14."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "L'engagement relatif aux droits fonciers est une clause accessoire de la résolution 121-2026 et ne porte sur aucun objet foncier explicite."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Cette approbation préliminaire de plans et devis en travaux publics fait doublon avec le développement du lot 3 592 103 déjà consigné en urbanisme."
+  }
+ ]
+}

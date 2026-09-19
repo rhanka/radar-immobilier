@@ -1,0 +1,147 @@
+{
+ "documentId": "aumond-2026-01-14",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "6e81d4355e45718af7a845ce1722868f52f84178feddfe8c51ac25baa8cba5f3",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-01-0001"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-01-0001 — Tarification 2026",
+     "stage": "projet",
+     "objet": "2026-01-0001",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Le projet de règlement 2026-01-0001 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie."
+      },
+      {
+       "page": 3,
+       "excerpt": "Le projet de règlement 2026-01-0001 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2026-01-0002"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-01-0002 — Rémunération des élus",
+     "stage": "projet",
+     "objet": "2026-01-0002",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "Le projet de règlement 2026-01-0002 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie."
+      },
+      {
+       "page": 7,
+       "excerpt": "Le projet de règlement 2026-01-0002 est déposé et disponible au\nbureau municipal pour consultation, et les membres du conseil en\nont déjà reçu copie."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-2019-02"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2019-02 — Rémunération des élus",
+     "stage": null,
+     "objet": "2019-02",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "Avis de motion – Règlement 2026-01-0002 modifiant le\nrèglement 2019-02 concernant la rémunération des élus"
+      },
+      {
+       "page": 7,
+       "excerpt": "Avis de motion – Règlement 2026-01-0002 modifiant le\nrèglement 2019-02 concernant la rémunération des élus"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt du projet de règlement 2026-01-0001 concernant la tarification pour 2026 est expressément consigné.\",\"excerpt\":\"Le projet de règlement 2026-01-0001 est déposé et disponible au bureau municipal pour consultation, et les membres du conseil en ont déjà reçu copie.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le dépôt du projet de règlement 2026-01-0002 modifiant la rémunération des élus est expressément consigné.\",\"excerpt\":\"Le projet de règlement 2026-01-0002 est déposé et disponible au bureau municipal pour consultation, et les membres du conseil en ont déjà reçu copie.\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2019-02 n'est mentionné qu'à titre de référence historique comme règlement faisant l'objet d'une modification, sans étape procédurale propre dans cette séance.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le dépôt du projet de règlement 2026-01-0001 concernant la tarification pour 2026 est expressément consigné.",
+   "excerpt": "Le projet de règlement 2026-01-0001 est déposé et disponible au bureau municipal pour consultation, et les membres du conseil en ont déjà reçu copie."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le dépôt du projet de règlement 2026-01-0002 modifiant la rémunération des élus est expressément consigné.",
+   "excerpt": "Le projet de règlement 2026-01-0002 est déposé et disponible au bureau municipal pour consultation, et les membres du conseil en ont déjà reçu copie."
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2019-02 n'est mentionné qu'à titre de référence historique comme règlement faisant l'objet d'une modification, sans étape procédurale propre dans cette séance.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 3,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement 2019-02 n'est mentionné qu'à titre de référence historique comme règlement faisant l'objet d'une modification, sans étape procédurale propre dans cette séance."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le dépôt du projet de règlement 2026-01-0001 concernant la tarification pour 2026 est expressément consigné."
+   },
+   {
+    "act": "A02",
+    "reason": "Le dépôt du projet de règlement 2026-01-0002 modifiant la rémunération des élus est expressément consigné."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1622,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 4877,
+   "outputTokens": 225,
+   "totalTokens": 5102
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1444
+  },
+  "inputSha256": "899912ef46d9252a4dac3f93abe0f37f6626b4bba67cb1463955f079c48d4dce"
+ }
+}

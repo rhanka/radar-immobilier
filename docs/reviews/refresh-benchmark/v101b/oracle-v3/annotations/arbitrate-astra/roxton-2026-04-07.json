@@ -1,0 +1,19 @@
+{
+ "documentId": "roxton-2026-04-07",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1c4598184adea3ab67d4703ab4ce04e2008c33194af15ce551ec2c1796256210",
+ "verificationSha256": "fbc53b739820f532cb55878531e5d7eeff27a46c5784daebe8e91a953a71f401",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

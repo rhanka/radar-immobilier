@@ -1,0 +1,37 @@
+{
+ "documentId": "eastman-2026-06-01",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "a8c95ad8f840bbfc3cfcc53be16b3118dbc6ea6159800d1640eb20d27b3c4dfe",
+ "rawText": "{\"operations\":[\n {\"op\":\"remove\",\"id\":\"u30\",\"reason\":\"Règle 4 : la consultation publique n'est constatée que dans un « considérant » de la résolution 2026-06-144 (au même titre que l'avis de motion du 7 avril et le projet du 4 mai, non retenus) ; ce rappel du même dossier ne crée pas d'unité en plus de l'adoption du règlement 2026-03 (u31).\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u30",
+   "reason": "Règle 4 : la consultation publique n'est constatée que dans un « considérant » de la résolution 2026-06-144 (au même titre que l'avis de motion du 7 avril et le projet du 4 mai, non retenus) ; ce rappel du même dossier ne crée pas d'unité en plus de l'adoption du règlement 2026-03 (u31)."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u30"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 30
+}

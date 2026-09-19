@@ -1,0 +1,36 @@
+{
+ "documentId": "wentworth-nord-2026-01-21",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "7b7d61f006b38ca9b40d4855db28daddce4ae82513abb12f2adcf83f99af20f7",
+ "inputSha256": "e5746d970a98a1f4d0bb428d4651c8311075f89b0c6fa515b28fe9552890216b",
+ "responseSha256": "5cedc0276e63c645513358ea9d71991549156e0153c3a5a5e39b190998f23c4f",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 141324,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 11120,
+  "outputTokens": 4625,
+  "totalTokens": 15745
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 141320,
+  "requestId": null
+ },
+ "at": "2026-09-18T14:14:04.913Z"
+}

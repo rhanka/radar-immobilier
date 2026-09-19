@@ -1,0 +1,45 @@
+{
+ "documentId": "sacre-coeur-2026-05-11",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "e9acdb5493c5f045611206884d3a3bca7e5d6de539f44c5453232ee4c745c006",
+ "rawText": "{\"operations\":[\n {\"op\":\"add\",\"unit\":{\"label\":\"Mandat d'estimation (Stantec) pour le développement du secteur de la rue Dufour — plans et devis du réseau routier et extension des réseaux d'aqueduc et d'égout\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"secteur de la rue Dufour\",\"page\":16,\"citation\":\"développement du secteur de la rue Dufour;\",\"anchor\":\"secteur de la rue Dufour\"},\"reason\":\"La résolution 2026-05-180 (p. 16) constate que la municipalité « désire procéder au développement du secteur de la rue Dufour » et mandate l'estimation des plans et devis de construction du réseau routier ainsi que de l'extension des réseaux d'aqueduc et d'égout : prolongement de réseau ou de rue qui permet explicitement un développement (règle 1), ce qui le distingue d'un simple entretien de voirie ou d'un marché de services exclu ; l'étape (mandat d'estimation) n'entre dans aucune valeur, d'où « inconnu ».\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Mandat d'estimation (Stantec) pour le développement du secteur de la rue Dufour — plans et devis du réseau routier et extension des réseaux d'aqueduc et d'égout",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "secteur de la rue Dufour",
+    "page": 16,
+    "citation": "développement du secteur de la rue Dufour;",
+    "anchor": "secteur de la rue Dufour"
+   },
+   "reason": "La résolution 2026-05-180 (p. 16) constate que la municipalité « désire procéder au développement du secteur de la rue Dufour » et mandate l'estimation des plans et devis de construction du réseau routier ainsi que de l'extension des réseaux d'aqueduc et d'égout : prolongement de réseau ou de rue qui permet explicitement un développement (règle 1), ce qui le distingue d'un simple entretien de voirie ou d'un marché de services exclu ; l'étape (mandat d'estimation) n'entre dans aucune valeur, d'où « inconnu »."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u11"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 11
+}

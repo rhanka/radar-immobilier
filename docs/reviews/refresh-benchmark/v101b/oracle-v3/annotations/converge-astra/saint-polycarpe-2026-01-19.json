@@ -1,0 +1,91 @@
+{
+ "documentId": "saint-polycarpe-2026-01-19",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ab7f365aea8bbf9f79e4bcc5b9eb9134a19b1ef80095576db2136355d052218d",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 3.6, page 1, prévoit l’autorisation de démarches préliminaires concernant l’achat des lots liés à l’église, un objet foncier explicite.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 5.2, page 1, prévoit l’autorisation de l’état relatif à la vente des immeubles pour défaut de paiement de taxes municipales, un acte foncier inclus.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 8.1, page 2, prévoit une résolution d’appui à la CPTAQ pour une fin autre que l’agriculture, et non une autorisation déjà accordée.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 10.1, page 2, prévoit explicitement un avis de motion pour le règlement no 169-2019-01 remplaçant le règlement sur les nuisances.\"},{\"item\":\"i05\",\"choice\":\"absent\",\"reason\":\"Cette proposition reprend le même objet foncier et la même étape que l’item i02 au point 5.2, alors qu’un doublon du même fait ne constitue pas une unité distincte.\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"Cette proposition est un doublon de l’item i02 portant sur l’autorisation prévue au point 5.2, sans objet ni étape supplémentaires.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"Cette proposition reprend exactement l’avis de motion prévu au point 10.1 déjà couvert par l’item i04, et ne constitue donc pas une unité distincte.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "absent"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 3.6, page 1, prévoit l’autorisation de démarches préliminaires concernant l’achat des lots liés à l’église, un objet foncier explicite."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 5.2, page 1, prévoit l’autorisation de l’état relatif à la vente des immeubles pour défaut de paiement de taxes municipales, un acte foncier inclus."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 8.1, page 2, prévoit une résolution d’appui à la CPTAQ pour une fin autre que l’agriculture, et non une autorisation déjà accordée."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 10.1, page 2, prévoit explicitement un avis de motion pour le règlement no 169-2019-01 remplaçant le règlement sur les nuisances."
+  },
+  {
+   "item": "i05",
+   "choice": "absent",
+   "reason": "Cette proposition reprend le même objet foncier et la même étape que l’item i02 au point 5.2, alors qu’un doublon du même fait ne constitue pas une unité distincte."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "Cette proposition est un doublon de l’item i02 portant sur l’autorisation prévue au point 5.2, sans objet ni étape supplémentaires."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "Cette proposition reprend exactement l’avis de motion prévu au point 10.1 déjà couvert par l’item i04, et ne constitue donc pas une unité distincte."
+  }
+ ]
+}

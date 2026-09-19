@@ -1,0 +1,147 @@
+{
+ "documentId": "blue-sea-2026-02-03",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "7903950ee276c7d8c45abdb7160c4e8b0ea03e32e9f6f377f62da56104c93172",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-barrage-lafontaine"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande d’aide financière pour reconstruire le barrage Lafontaine",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le conseil municipal autorise le dépôt d’une demande d’aide financière dans le\ncadre du programme PAFMAN pour la reconstruction du barrage Lafontaine."
+      },
+      {
+       "page": 4,
+       "excerpt": "Que le conseil municipal autorise le dépôt d’une demande d’aide financière dans le\ncadre du programme PAFMAN pour la reconstruction du barrage Lafontaine."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-centre-lac-long"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Préparation de l’agrandissement du centre récréatif du Lac Long",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "Que le conseil municipal autorise la préparation de plans et devis pour\nl’agrandissement du centre récréatif du Lac Long, et ce, à des fins d’estimation des\ncoûts du projet."
+      },
+      {
+       "page": 5,
+       "excerpt": "Que le conseil municipal autorise la préparation de plans et devis pour\nl’agrandissement du centre récréatif du Lac Long, et ce, à des fins d’estimation des\ncoûts du projet.\nQue le conseil autorise le dépôt d’une demande d’aide financière dans le cadre du\nprogramme PAFIR-SPA."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-tour-mont-morissette"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Plans et devis pour la tour d’observation du Mont Morissette",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "Que le conseil municipal autorise la préparation de plans et devis pour le projet relatif à\nla tour d’observation du Mont Morissette, à des fins d’estimation des couts."
+      },
+      {
+       "page": 5,
+       "excerpt": "Que le conseil municipal autorise la préparation de plans et devis pour le projet relatif à\nla tour d’observation du Mont Morissette, à des fins d’estimation des couts.\nQue le conseil autorise le dépôt d’une demande d’aide financière au programme PAFIRSPA."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une simple demande de subvention pour des travaux sur un barrage, ce qui ne constitue pas un acte d'urbanisme ou d'aménagement du territoire.\",\"excerpt\":\"\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"La préparation de plans et devis pour l'agrandissement d'un centre récréatif et la demande de subvention relèvent d'équipements de loisirs et ne constituent pas un acte d'urbanisme réglementaire ou foncier.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"La commande de plans et devis et la demande d'aide financière pour une tour d'observation de plein air relèvent du domaine des loisirs/tourisme, exclu des actes d'urbanisme.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une simple demande de subvention pour des travaux sur un barrage, ce qui ne constitue pas un acte d'urbanisme ou d'aménagement du territoire.",
+   "excerpt": ""
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "La préparation de plans et devis pour l'agrandissement d'un centre récréatif et la demande de subvention relèvent d'équipements de loisirs et ne constituent pas un acte d'urbanisme réglementaire ou foncier.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "La commande de plans et devis et la demande d'aide financière pour une tour d'observation de plein air relèvent du domaine des loisirs/tourisme, exclu des actes d'urbanisme.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 3,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Il s'agit d'une simple demande de subvention pour des travaux sur un barrage, ce qui ne constitue pas un acte d'urbanisme ou d'aménagement du territoire."
+   },
+   {
+    "act": "A02",
+    "reason": "La préparation de plans et devis pour l'agrandissement d'un centre récréatif et la demande de subvention relèvent d'équipements de loisirs et ne constituent pas un acte d'urbanisme réglementaire ou foncier."
+   },
+   {
+    "act": "A03",
+    "reason": "La commande de plans et devis et la demande d'aide financière pour une tour d'observation de plein air relèvent du domaine des loisirs/tourisme, exclu des actes d'urbanisme."
+   }
+  ],
+  "kept": [],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1931,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 6311,
+   "outputTokens": 155,
+   "totalTokens": 6466
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1766
+  },
+  "inputSha256": "6d2e8433df403848b00314589e14a25680c4550b7b3cf0dc54ee02d4ee2f2a4a"
+ }
+}

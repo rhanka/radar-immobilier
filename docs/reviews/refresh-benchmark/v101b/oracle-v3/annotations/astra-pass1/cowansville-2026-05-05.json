@@ -1,0 +1,606 @@
+{
+ "documentId": "cowansville-2026-05-05",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "d90ddb2c09a65aba234d596f233f6a8ebb68fdf245213bb02933cf5ebb30667d",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation de mainlevée et de renonciation au droit de préemption — acte 28 261 535\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"28 261 535\",\n        \"page\": 8,\n        \"citation\": \"une mainlevée totale de l'hypothèque et afin\\nde renoncer au droit de préemption prévus à l’acte de vente publié au registre\\nfoncier sous le numéro 28 261 535\",\n        \"anchor\": \"numéro 28 261 535\"\n      },\n      \"reason\": \"La résolution 250-05-2026 autorise un acte notarié de mainlevée et de renonciation au droit de préemption, ce qui constitue un acte foncier décidé.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 1571-08-2026 — modification du règlement sur les PIIA\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"1571-08-2026\",\n        \"page\": 10,\n        \"citation\": \"Monsieur le conseiller Alain Daigle, donne avis de motion qu’à une prochaine\\nséance de ce conseil, il sera adopté le Règlement numéro 1571-08-2026\",\n        \"anchor\": \"Règlement numéro 1571-08-2026\"\n      },\n      \"reason\": \"L’avis de motion est donné dans cette séance et forme une unité distincte du projet de règlement.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du projet de règlement 1571-08-2026 — modification du règlement sur les PIIA\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"1571-08-2026\",\n        \"page\": 11,\n        \"citation\": \"D’adopter le projet de règlement numéro 1571-08-2026 modifiant le règlement\\nnuméro 1571 relatif aux plans d’implantation et d’intégration architecturale\",\n        \"anchor\": \"règlement numéro 1571-08-2026\"\n      },\n      \"reason\": \"La résolution 256-05-2026 adopte le projet de règlement sur les PIIA, étape distincte de l’avis de motion.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement de zonage 1841-53-2026 — zones Rc-23, Cbb-1 et Ib-1\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"1841-53-2026\",\n        \"page\": 11,\n        \"citation\": \"Avis de motion – Règlement numéro 1841-53-2026 modifiant le règlement\\nde zonage numéro 1841 afin de permettre les habitations de 26\",\n        \"anchor\": \"Règlement numéro 1841-53-2026\"\n      },\n      \"reason\": \"Le document constate un avis de motion actuel pour cette modification du zonage, à compter séparément du premier projet.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet de règlement de zonage 1841-53-2026\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"1841-53-2026\",\n        \"page\": 12,\n        \"citation\": \"D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26\",\n        \"anchor\": \"règlement numéro 1841-53-2026\"\n      },\n      \"reason\": \"La résolution 258-05-2026 adopte explicitement le premier projet, et non le règlement définitif.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement de lotissement 1842-06-2026 — contributions pour parcs et projets intégrés\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"1842-06-2026\",\n        \"page\": 12,\n        \"citation\": \"Avis de motion – Règlement numéro 1842-06-2026 modifiant le règlement\\nde lotissement numéro 1842 afin de préciser les dispositions relatives\",\n        \"anchor\": \"Règlement numéro 1842-06-2026\"\n      },\n      \"reason\": \"L’avis de motion actuel concerne un règlement de lotissement et constitue une unité distincte du projet adopté.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du projet de règlement de lotissement 1842-06-2026\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"1842-06-2026\",\n        \"page\": 13,\n        \"citation\": \"D’adopter le projet de règlement numéro 1842-06-2026 modifiant le règlement\\nde lotissement numéro 1842 afin de préciser les dispositions relatives aux\",\n        \"anchor\": \"règlement numéro 1842-06-2026\"\n      },\n      \"reason\": \"La résolution 260-05-2026 adopte le projet de règlement de lotissement, étape explicitement constatée dans ce document.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation sous conditions de la dérogation mineure 2026-006 — 518 rue Principale\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-006\",\n        \"page\": 14,\n        \"citation\": \"D'approuver la demande de dérogation mineure 2026-006 relative à la\\npropriété sise au 518 rue Principale, lot 3 355 762 du cadastre du Québec, afin\\nde permettre :\",\n        \"anchor\": \"dérogation mineure 2026-006\"\n      },\n      \"reason\": \"La résolution 262-05-2026 approuve sous conditions une demande explicite de dérogation mineure.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation de la dérogation mineure 2026-034 — 111 rue du Muscadet\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-034\",\n        \"page\": 15,\n        \"citation\": \"D'approuver la demande de dérogation mineure 2026-034 relative à la\\npropriété sise au 111 rue du Muscadet, lot 4 445 225 du cadastre du Québec,\",\n        \"anchor\": \"dérogation mineure 2026-034\"\n      },\n      \"reason\": \"La résolution 263-05-2026 accorde la dérogation concernant la superficie des bâtiments accessoires.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation sous conditions du PIIA 2026-003 — 518 rue Principale\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-003\",\n        \"page\": 16,\n        \"citation\": \"D’approuver la demande de PIIA 2026-003 relative à la propriété sise au 518\\nrue Principale, lot 3 355 762 du cadastre du Québec, de manière à permettre\",\n        \"anchor\": \"PIIA 2026-003\"\n      },\n      \"reason\": \"La demande de PIIA est approuvée sous conditions et constitue un objet distinct de la dérogation mineure visant la même propriété.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2025-087 — 1529 rue du Sud\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-087\",\n        \"page\": 16,\n        \"citation\": \"D’approuver la demande de PIIA 2025-087 relative à la propriété sise au 1529\\nrue du Sud, lot 3 798 733 du cadastre du Québec, de manière à permettre\",\n        \"anchor\": \"PIIA 2025-087\"\n      },\n      \"reason\": \"La résolution 265-05-2026 approuve actuellement ce PIIA d’affichage et de peinture, inclus même pour des travaux non résidentiels.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Refus du PIIA 2026-029 — garage au 295 rue d’Ontario\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-029\",\n        \"page\": 17,\n        \"citation\": \"De refuser la demande de PIIA 2026-029 relative à la propriété sise au 295 rue\\nd’Ontario, lots 6 407 699 et 6 407 703 du cadastre du Québec,\",\n        \"anchor\": \"PIIA 2026-029\"\n      },\n      \"reason\": \"La résolution refuse explicitement la demande pour insuffisance de données; un refus demeure une unité et doit être libellé comme tel.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-043 — 1600 rue du Sud\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-043\",\n        \"page\": 17,\n        \"citation\": \"D’approuver les demandes de PIIA 2026-043 et 2026-047 relatives à la\\npropriété sise au 1600 rue du Sud, lot 3 798 742 du cadastre du Québec,\",\n        \"anchor\": \"PIIA 2026-043\"\n      },\n      \"reason\": \"La résolution 267-05-2026 nomme deux demandes de PIIA; la règle impose une unité par demande explicitement nommée.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-047 — 1600 rue du Sud\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-047\",\n        \"page\": 17,\n        \"citation\": \"D’approuver les demandes de PIIA 2026-043 et 2026-047 relatives à la\\npropriété sise au 1600 rue du Sud, lot 3 798 742 du cadastre du Québec,\",\n        \"anchor\": \"PIIA 2026-043 et 2026-047\"\n      },\n      \"reason\": \"La demande 2026-047 est approuvée avec la demande 2026-043, mais constitue un second objet explicitement nommé.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation sous conditions du PIIA 2026-040 — 101 rue Albert, local 1002\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-040\",\n        \"page\": 18,\n        \"citation\": \"D’approuver la demande de PIIA 2026-040 relative à la propriété sise au 101\\nrue Albert, lot 3 357 701 du cadastre du Québec, de manière à permettre\",\n        \"anchor\": \"PIIA 2026-040\"\n      },\n      \"reason\": \"La résolution approuve sous conditions une nouvelle enseigne, et les petits PIIA non résidentiels sont inclus.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-013 — réfection et agrandissement au 454 rue Principale\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-013\",\n        \"page\": 18,\n        \"citation\": \"D’approuver la demande de PIIA 2026-013 relative à la propriété sise au 454\\nrue Principale, lot 3 356 478 du cadastre du Québec, de manière à permettre\",\n        \"anchor\": \"PIIA 2026-013\"\n      },\n      \"reason\": \"La résolution 269-05-2026 approuve une demande explicite de PIIA pour la réfection et l’agrandissement d’une résidence.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-042 — retrait d’une marquise au 419 rue de la Rivière\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-042\",\n        \"page\": 18,\n        \"citation\": \"D’approuver la demande de PIIA 2026-042 relative à la propriété sise au 419\\nrue de la Rivière, lots 3 799 479 et 5 759 231 du cadastre du Québec,\",\n        \"anchor\": \"PIIA 2026-042\"\n      },\n      \"reason\": \"Le retrait de la marquise fait l’objet d’une approbation explicite de PIIA, incluse même pour de petits travaux commerciaux.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-039 — projet Le Nordik, 141 à 153 rue du Nord\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-039\",\n        \"page\": 19,\n        \"citation\": \"D’approuver la demande de PIIA 2026-039 relative aux propriétés sises aux\\n141 à 153 rue du Nord, lots 6 677 103 à 6 677 110, 6 692 067 et 6 388 104 du\\ncadastre du Québec,\",\n        \"anchor\": \"PIIA 2026-039\"\n      },\n      \"reason\": \"La décision actuelle porte sur le PIIA 2026-039; le PPCMOI 2025-115 n’est qu’un rappel historique et ne crée pas d’autre unité.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA 2026-041 — enseigne au 111 rue William\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-041\",\n        \"page\": 19,\n        \"citation\": \"D’approuver la demande de PIIA 2026-041 relative à la propriété sise au 111\\nrue William, lot 3 356 907 du cadastre du Québec, de manière à permettre\",\n        \"anchor\": \"PIIA 2026-041\"\n      },\n      \"reason\": \"La résolution 272-05-2026 approuve une demande de PIIA pour une enseigne, objet inclus dans le rappel.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation sous conditions du PIIA 2026-044 — bâtiment accessoire au 191 rue Pauline-Julien\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-044\",\n        \"page\": 20,\n        \"citation\": \"D’approuver la demande de PIIA 2026-044 relative à la propriété sise au 191\\nrue Pauline-Julien, lot 6 592 066 du cadastre du Québec,\",\n        \"anchor\": \"PIIA 2026-044\"\n      },\n      \"reason\": \"Le conseil approuve le bâtiment accessoire sous conditions, notamment avec un toit à deux pentes uniquement.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation conditionnelle du PIIA 2026-045 — bâtiment accessoire sans appentis au 192 rue Albert-Millaire\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-045\",\n        \"page\": 20,\n        \"citation\": \"D’approuver la demande de PIIA 2026-045 relative à la propriété sise au 192\\nrue Albert-Millaire, lot 6 592 073 du cadastre du Québec,\",\n        \"anchor\": \"PIIA 2026-045\"\n      },\n      \"reason\": \"La décision approuve un bâtiment accessoire de 10 x 12 pieds sans appentis, avec un seul matériau de revêtement extérieur.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation sous conditions du PIIA 2026-046 — véranda au 82 rue Pine\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-046\",\n        \"page\": 21,\n        \"citation\": \"D’approuver la demande de PIIA 2026-046 relative à la propriété sise au 82\\nrue Pine, lot 5 236 370 du cadastre du Québec, de manière à permettre\",\n        \"anchor\": \"PIIA 2026-046\"\n      },\n      \"reason\": \"La résolution 275-05-2026 approuve sous conditions l’agrandissement résidentiel par transformation d’une terrasse en véranda.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation sous conditions du PIIA 2026-051 — enclos à bacs du Quartier des Comédiens\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-051\",\n        \"page\": 21,\n        \"citation\": \"D’approuver la demande de PIIA 2026-051 relative aux propriétés situées sur\\nles rues Pauline-Julien et Albert-Millaire, afin de permettre l’installation\",\n        \"anchor\": \"PIIA 2026-051\"\n      },\n      \"reason\": \"Cette demande unique de PIIA est approuvée sous conditions pour les enclos à bacs des maisons de ville concernées.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Refus du PIIA 2026-035 — immeuble de 9 logements, rue Bernard, lot 3 356 557\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2026-035\",\n        \"page\": 22,\n        \"citation\": \"De refuser la demande de PIIA 2026-035 relative à la future propriété sise à\\nl’angle des rues Bernard et du Nord, lot 3 356 557 du cadastre du Québec,\",\n        \"anchor\": \"PIIA 2026-035\"\n      },\n      \"reason\": \"La résolution 277-05-2026 refuse le projet multifamilial; le refus doit être conservé comme unité sans être présenté comme une autorisation.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Refus de la modification du PIIA 2025-120 — 403 et 407 rue Paul-Hébert\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-120\",\n        \"page\": 22,\n        \"citation\": \"De refuser la demande de PIIA 2025-120 relative aux futures propriétés sises\\nsur la rue Paul-Hébert, lots 6 691 576 et 6 691 577 du cadastre du Québec,\",\n        \"anchor\": \"PIIA 2025-120\"\n      },\n      \"reason\": \"La décision actuelle refuse la modification d’implantation demandée pour ce PIIA, malgré la formule générale de validité figurant au préambule.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation de la modification du PIIA 2025-117 — 1447 rue du Sud\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2025-117\",\n        \"page\": 23,\n        \"citation\": \"D’approuver la demande de PIIA 2025-117 relative à la future propriété sise\\nau 1447 rue du Sud, lot 3 798 608 du cadastre du Québec,\",\n        \"anchor\": \"PIIA 2025-117\"\n      },\n      \"reason\": \"La résolution 279-05-2026 approuve actuellement une modification de la demande initiale, ce qui constitue une décision de PIIA à ajouter.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du rendu architectural CDEMO 2025-116 — 1037-1041 rue Principale\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"CDEMO 2025-116\",\n        \"page\": 23,\n        \"citation\": \"Demande d’approbation du rendu architectural – CDEMO 2025-116 –\\nGestion Lussard Inc. – 1037-1041 rue Principale\",\n        \"anchor\": \"CDEMO 2025-116\"\n      },\n      \"reason\": \"La résolution 280-05-2026 approuve le rendu architectural du projet de remplacement en application du règlement de démolition, distinctement de l’autorisation historique de démolir.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Contribution pour parcs de 14 500 $ exigée — lot projeté 6 725 842, boulevard Pierre-Laporte\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 725 842\",\n        \"page\": 25,\n        \"citation\": \"contribution pour fins de parcs, terrains de jeux et espaces\\nnaturels de 14 500 $ en argent, préalablement à l'autorisation de délivrance du\\npermis de lotissement sur le lot projeté numéro 6 725 842\",\n        \"anchor\": \"lot projeté numéro 6 725 842\"\n      },\n      \"reason\": \"La résolution 282-05-2026 impose une contribution pour parcs préalable au permis de lotissement, objet expressément inclus.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation de rétrocession à la Ville — lot 4 621 525, rue des Pivoines\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"4 621 525\",\n        \"page\": 25,\n        \"citation\": \"signer, pour et au nom de la Ville, l’acte\\nde rétrocession (acte de vente) à intervenir entre les propriétaires du lot\\nnuméro 4 621 525 du cadastre du Québec et la Ville.\",\n        \"anchor\": \"numéro 4 621 525\"\n      },\n      \"reason\": \"La résolution 283-05-2026 autorise la signature de l’acte de rétrocession, tandis que les ventes et décisions antérieures ne créent pas d’unités supplémentaires.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation de l’avenant 1 au protocole d’infrastructures — Village Scolaire inc., rue du Nord\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"avenant 1\",\n        \"page\": 27,\n        \"citation\": \"D’autoriser la mairesse et la greffière à signer, pour et au nom de la Ville,\\nl’avenant 1 du protocole d’entente à être entériné avec Village Scolaire inc.\",\n        \"anchor\": \"l’avenant 1 du protocole d’entente\"\n      },\n      \"reason\": \"Le conseil entérine et autorise un avenant concernant des infrastructures à céder à la Ville pour un développement domiciliaire explicitement identifié.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation d’acquisition de servitudes de passage — arrière-lots de la rue Jules-Monast\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"rue Jules-Monast\",\n        \"page\": 31,\n        \"citation\": \"L’acquisition de servitudes de passage (en arrière-lot de propriétés\\nsituées sur la rue Jules-Monast);\",\n        \"anchor\": \"rue Jules-Monast\"\n      },\n      \"reason\": \"La résolution 291-05-2026 autorise une dépense incluant explicitement l’acquisition de servitudes, acte foncier distinct des travaux de drainage associés.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation de signature d’un bail — cantine du Centre de la nature, saison 2026\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"Centre de la nature\",\n        \"page\": 34,\n        \"citation\": \"Autorisation de signature - Bail de la cantine du Centre de la nature\",\n        \"anchor\": \"cantine du Centre de la nature\"\n      },\n      \"reason\": \"La résolution 298-05-2026 autorise un bail immobilier commercial explicite, inclus comme acte foncier non résidentiel plutôt que comme simple activité de loisirs.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation de signature d’un bail — cantine du parc Pierre-Lussier, un an à compter du 1er mai 2026\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"parc Pierre-Lussier\",\n        \"page\": 34,\n        \"citation\": \"Autorisation de signature - Bail de la cantine du parc Pierre-Lussier\",\n        \"anchor\": \"cantine du parc Pierre-Lussier\"\n      },\n      \"reason\": \"La résolution 299-05-2026 autorise un nouveau bail portant sur la cantine, convention d’usage immobilier distincte des activités récréatives du parc.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du second projet de PPCMOI 2026-032 — quatre logements touristiques et stationnement au 245, rue Principale\",\n        \"stage\": \"second_projet\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"2026-032\",\n        \"page\": 42,\n        \"citation\": \"D’adopter le second projet de PPCMOI numéro 2026-032, afin d’autoriser, sur\\nl’immeuble situé au 245, rue Principale (lot 3 357 427 du cadastre du Québec)\",\n        \"anchor\": \"PPCMOI numéro 2026-032\"\n      },\n      \"reason\": \"La résolution 315-05-2026 adopte seulement le second projet de PPCMOI; les rappels antérieurs et le PIIA restant à faire approuver ne constituent pas des décisions actuelles supplémentaires.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation de mainlevée et de renonciation au droit de préemption — acte 28 261 535",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "28 261 535",
+    "page": 8,
+    "citation": "une mainlevée totale de l'hypothèque et afin\nde renoncer au droit de préemption prévus à l’acte de vente publié au registre\nfoncier sous le numéro 28 261 535",
+    "anchor": "numéro 28 261 535"
+   },
+   "reason": "La résolution 250-05-2026 autorise un acte notarié de mainlevée et de renonciation au droit de préemption, ce qui constitue un acte foncier décidé."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion du règlement 1571-08-2026 — modification du règlement sur les PIIA",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1571-08-2026",
+    "page": 10,
+    "citation": "Monsieur le conseiller Alain Daigle, donne avis de motion qu’à une prochaine\nséance de ce conseil, il sera adopté le Règlement numéro 1571-08-2026",
+    "anchor": "Règlement numéro 1571-08-2026"
+   },
+   "reason": "L’avis de motion est donné dans cette séance et forme une unité distincte du projet de règlement."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du projet de règlement 1571-08-2026 — modification du règlement sur les PIIA",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "1571-08-2026",
+    "page": 11,
+    "citation": "D’adopter le projet de règlement numéro 1571-08-2026 modifiant le règlement\nnuméro 1571 relatif aux plans d’implantation et d’intégration architecturale",
+    "anchor": "règlement numéro 1571-08-2026"
+   },
+   "reason": "La résolution 256-05-2026 adopte le projet de règlement sur les PIIA, étape distincte de l’avis de motion."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion du règlement de zonage 1841-53-2026 — zones Rc-23, Cbb-1 et Ib-1",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1841-53-2026",
+    "page": 11,
+    "citation": "Avis de motion – Règlement numéro 1841-53-2026 modifiant le règlement\nde zonage numéro 1841 afin de permettre les habitations de 26",
+    "anchor": "Règlement numéro 1841-53-2026"
+   },
+   "reason": "Le document constate un avis de motion actuel pour cette modification du zonage, à compter séparément du premier projet."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du premier projet de règlement de zonage 1841-53-2026",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "1841-53-2026",
+    "page": 12,
+    "citation": "D’adopter le premier projet de règlement numéro 1841-53-2026 modifiant le\nrèglement de zonage numéro 1841 afin de permettre les habitations de 26",
+    "anchor": "règlement numéro 1841-53-2026"
+   },
+   "reason": "La résolution 258-05-2026 adopte explicitement le premier projet, et non le règlement définitif."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion du règlement de lotissement 1842-06-2026 — contributions pour parcs et projets intégrés",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1842-06-2026",
+    "page": 12,
+    "citation": "Avis de motion – Règlement numéro 1842-06-2026 modifiant le règlement\nde lotissement numéro 1842 afin de préciser les dispositions relatives",
+    "anchor": "Règlement numéro 1842-06-2026"
+   },
+   "reason": "L’avis de motion actuel concerne un règlement de lotissement et constitue une unité distincte du projet adopté."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du projet de règlement de lotissement 1842-06-2026",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "1842-06-2026",
+    "page": 13,
+    "citation": "D’adopter le projet de règlement numéro 1842-06-2026 modifiant le règlement\nde lotissement numéro 1842 afin de préciser les dispositions relatives aux",
+    "anchor": "règlement numéro 1842-06-2026"
+   },
+   "reason": "La résolution 260-05-2026 adopte le projet de règlement de lotissement, étape explicitement constatée dans ce document."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation sous conditions de la dérogation mineure 2026-006 — 518 rue Principale",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-006",
+    "page": 14,
+    "citation": "D'approuver la demande de dérogation mineure 2026-006 relative à la\npropriété sise au 518 rue Principale, lot 3 355 762 du cadastre du Québec, afin\nde permettre :",
+    "anchor": "dérogation mineure 2026-006"
+   },
+   "reason": "La résolution 262-05-2026 approuve sous conditions une demande explicite de dérogation mineure."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation de la dérogation mineure 2026-034 — 111 rue du Muscadet",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-034",
+    "page": 15,
+    "citation": "D'approuver la demande de dérogation mineure 2026-034 relative à la\npropriété sise au 111 rue du Muscadet, lot 4 445 225 du cadastre du Québec,",
+    "anchor": "dérogation mineure 2026-034"
+   },
+   "reason": "La résolution 263-05-2026 accorde la dérogation concernant la superficie des bâtiments accessoires."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation sous conditions du PIIA 2026-003 — 518 rue Principale",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-003",
+    "page": 16,
+    "citation": "D’approuver la demande de PIIA 2026-003 relative à la propriété sise au 518\nrue Principale, lot 3 355 762 du cadastre du Québec, de manière à permettre",
+    "anchor": "PIIA 2026-003"
+   },
+   "reason": "La demande de PIIA est approuvée sous conditions et constitue un objet distinct de la dérogation mineure visant la même propriété."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2025-087 — 1529 rue du Sud",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-087",
+    "page": 16,
+    "citation": "D’approuver la demande de PIIA 2025-087 relative à la propriété sise au 1529\nrue du Sud, lot 3 798 733 du cadastre du Québec, de manière à permettre",
+    "anchor": "PIIA 2025-087"
+   },
+   "reason": "La résolution 265-05-2026 approuve actuellement ce PIIA d’affichage et de peinture, inclus même pour des travaux non résidentiels."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Refus du PIIA 2026-029 — garage au 295 rue d’Ontario",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-029",
+    "page": 17,
+    "citation": "De refuser la demande de PIIA 2026-029 relative à la propriété sise au 295 rue\nd’Ontario, lots 6 407 699 et 6 407 703 du cadastre du Québec,",
+    "anchor": "PIIA 2026-029"
+   },
+   "reason": "La résolution refuse explicitement la demande pour insuffisance de données; un refus demeure une unité et doit être libellé comme tel."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-043 — 1600 rue du Sud",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-043",
+    "page": 17,
+    "citation": "D’approuver les demandes de PIIA 2026-043 et 2026-047 relatives à la\npropriété sise au 1600 rue du Sud, lot 3 798 742 du cadastre du Québec,",
+    "anchor": "PIIA 2026-043"
+   },
+   "reason": "La résolution 267-05-2026 nomme deux demandes de PIIA; la règle impose une unité par demande explicitement nommée."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-047 — 1600 rue du Sud",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-047",
+    "page": 17,
+    "citation": "D’approuver les demandes de PIIA 2026-043 et 2026-047 relatives à la\npropriété sise au 1600 rue du Sud, lot 3 798 742 du cadastre du Québec,",
+    "anchor": "PIIA 2026-043 et 2026-047"
+   },
+   "reason": "La demande 2026-047 est approuvée avec la demande 2026-043, mais constitue un second objet explicitement nommé."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation sous conditions du PIIA 2026-040 — 101 rue Albert, local 1002",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-040",
+    "page": 18,
+    "citation": "D’approuver la demande de PIIA 2026-040 relative à la propriété sise au 101\nrue Albert, lot 3 357 701 du cadastre du Québec, de manière à permettre",
+    "anchor": "PIIA 2026-040"
+   },
+   "reason": "La résolution approuve sous conditions une nouvelle enseigne, et les petits PIIA non résidentiels sont inclus."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-013 — réfection et agrandissement au 454 rue Principale",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-013",
+    "page": 18,
+    "citation": "D’approuver la demande de PIIA 2026-013 relative à la propriété sise au 454\nrue Principale, lot 3 356 478 du cadastre du Québec, de manière à permettre",
+    "anchor": "PIIA 2026-013"
+   },
+   "reason": "La résolution 269-05-2026 approuve une demande explicite de PIIA pour la réfection et l’agrandissement d’une résidence."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-042 — retrait d’une marquise au 419 rue de la Rivière",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-042",
+    "page": 18,
+    "citation": "D’approuver la demande de PIIA 2026-042 relative à la propriété sise au 419\nrue de la Rivière, lots 3 799 479 et 5 759 231 du cadastre du Québec,",
+    "anchor": "PIIA 2026-042"
+   },
+   "reason": "Le retrait de la marquise fait l’objet d’une approbation explicite de PIIA, incluse même pour de petits travaux commerciaux."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-039 — projet Le Nordik, 141 à 153 rue du Nord",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-039",
+    "page": 19,
+    "citation": "D’approuver la demande de PIIA 2026-039 relative aux propriétés sises aux\n141 à 153 rue du Nord, lots 6 677 103 à 6 677 110, 6 692 067 et 6 388 104 du\ncadastre du Québec,",
+    "anchor": "PIIA 2026-039"
+   },
+   "reason": "La décision actuelle porte sur le PIIA 2026-039; le PPCMOI 2025-115 n’est qu’un rappel historique et ne crée pas d’autre unité."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA 2026-041 — enseigne au 111 rue William",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-041",
+    "page": 19,
+    "citation": "D’approuver la demande de PIIA 2026-041 relative à la propriété sise au 111\nrue William, lot 3 356 907 du cadastre du Québec, de manière à permettre",
+    "anchor": "PIIA 2026-041"
+   },
+   "reason": "La résolution 272-05-2026 approuve une demande de PIIA pour une enseigne, objet inclus dans le rappel."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation sous conditions du PIIA 2026-044 — bâtiment accessoire au 191 rue Pauline-Julien",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-044",
+    "page": 20,
+    "citation": "D’approuver la demande de PIIA 2026-044 relative à la propriété sise au 191\nrue Pauline-Julien, lot 6 592 066 du cadastre du Québec,",
+    "anchor": "PIIA 2026-044"
+   },
+   "reason": "Le conseil approuve le bâtiment accessoire sous conditions, notamment avec un toit à deux pentes uniquement."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation conditionnelle du PIIA 2026-045 — bâtiment accessoire sans appentis au 192 rue Albert-Millaire",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-045",
+    "page": 20,
+    "citation": "D’approuver la demande de PIIA 2026-045 relative à la propriété sise au 192\nrue Albert-Millaire, lot 6 592 073 du cadastre du Québec,",
+    "anchor": "PIIA 2026-045"
+   },
+   "reason": "La décision approuve un bâtiment accessoire de 10 x 12 pieds sans appentis, avec un seul matériau de revêtement extérieur."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation sous conditions du PIIA 2026-046 — véranda au 82 rue Pine",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-046",
+    "page": 21,
+    "citation": "D’approuver la demande de PIIA 2026-046 relative à la propriété sise au 82\nrue Pine, lot 5 236 370 du cadastre du Québec, de manière à permettre",
+    "anchor": "PIIA 2026-046"
+   },
+   "reason": "La résolution 275-05-2026 approuve sous conditions l’agrandissement résidentiel par transformation d’une terrasse en véranda."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation sous conditions du PIIA 2026-051 — enclos à bacs du Quartier des Comédiens",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-051",
+    "page": 21,
+    "citation": "D’approuver la demande de PIIA 2026-051 relative aux propriétés situées sur\nles rues Pauline-Julien et Albert-Millaire, afin de permettre l’installation",
+    "anchor": "PIIA 2026-051"
+   },
+   "reason": "Cette demande unique de PIIA est approuvée sous conditions pour les enclos à bacs des maisons de ville concernées."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Refus du PIIA 2026-035 — immeuble de 9 logements, rue Bernard, lot 3 356 557",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-035",
+    "page": 22,
+    "citation": "De refuser la demande de PIIA 2026-035 relative à la future propriété sise à\nl’angle des rues Bernard et du Nord, lot 3 356 557 du cadastre du Québec,",
+    "anchor": "PIIA 2026-035"
+   },
+   "reason": "La résolution 277-05-2026 refuse le projet multifamilial; le refus doit être conservé comme unité sans être présenté comme une autorisation."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Refus de la modification du PIIA 2025-120 — 403 et 407 rue Paul-Hébert",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-120",
+    "page": 22,
+    "citation": "De refuser la demande de PIIA 2025-120 relative aux futures propriétés sises\nsur la rue Paul-Hébert, lots 6 691 576 et 6 691 577 du cadastre du Québec,",
+    "anchor": "PIIA 2025-120"
+   },
+   "reason": "La décision actuelle refuse la modification d’implantation demandée pour ce PIIA, malgré la formule générale de validité figurant au préambule."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation de la modification du PIIA 2025-117 — 1447 rue du Sud",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2025-117",
+    "page": 23,
+    "citation": "D’approuver la demande de PIIA 2025-117 relative à la future propriété sise\nau 1447 rue du Sud, lot 3 798 608 du cadastre du Québec,",
+    "anchor": "PIIA 2025-117"
+   },
+   "reason": "La résolution 279-05-2026 approuve actuellement une modification de la demande initiale, ce qui constitue une décision de PIIA à ajouter."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du rendu architectural CDEMO 2025-116 — 1037-1041 rue Principale",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "CDEMO 2025-116",
+    "page": 23,
+    "citation": "Demande d’approbation du rendu architectural – CDEMO 2025-116 –\nGestion Lussard Inc. – 1037-1041 rue Principale",
+    "anchor": "CDEMO 2025-116"
+   },
+   "reason": "La résolution 280-05-2026 approuve le rendu architectural du projet de remplacement en application du règlement de démolition, distinctement de l’autorisation historique de démolir."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Contribution pour parcs de 14 500 $ exigée — lot projeté 6 725 842, boulevard Pierre-Laporte",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 725 842",
+    "page": 25,
+    "citation": "contribution pour fins de parcs, terrains de jeux et espaces\nnaturels de 14 500 $ en argent, préalablement à l'autorisation de délivrance du\npermis de lotissement sur le lot projeté numéro 6 725 842",
+    "anchor": "lot projeté numéro 6 725 842"
+   },
+   "reason": "La résolution 282-05-2026 impose une contribution pour parcs préalable au permis de lotissement, objet expressément inclus."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation de rétrocession à la Ville — lot 4 621 525, rue des Pivoines",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 621 525",
+    "page": 25,
+    "citation": "signer, pour et au nom de la Ville, l’acte\nde rétrocession (acte de vente) à intervenir entre les propriétaires du lot\nnuméro 4 621 525 du cadastre du Québec et la Ville.",
+    "anchor": "numéro 4 621 525"
+   },
+   "reason": "La résolution 283-05-2026 autorise la signature de l’acte de rétrocession, tandis que les ventes et décisions antérieures ne créent pas d’unités supplémentaires."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation de l’avenant 1 au protocole d’infrastructures — Village Scolaire inc., rue du Nord",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "avenant 1",
+    "page": 27,
+    "citation": "D’autoriser la mairesse et la greffière à signer, pour et au nom de la Ville,\nl’avenant 1 du protocole d’entente à être entériné avec Village Scolaire inc.",
+    "anchor": "l’avenant 1 du protocole d’entente"
+   },
+   "reason": "Le conseil entérine et autorise un avenant concernant des infrastructures à céder à la Ville pour un développement domiciliaire explicitement identifié."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation d’acquisition de servitudes de passage — arrière-lots de la rue Jules-Monast",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "rue Jules-Monast",
+    "page": 31,
+    "citation": "L’acquisition de servitudes de passage (en arrière-lot de propriétés\nsituées sur la rue Jules-Monast);",
+    "anchor": "rue Jules-Monast"
+   },
+   "reason": "La résolution 291-05-2026 autorise une dépense incluant explicitement l’acquisition de servitudes, acte foncier distinct des travaux de drainage associés."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation de signature d’un bail — cantine du Centre de la nature, saison 2026",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Centre de la nature",
+    "page": 34,
+    "citation": "Autorisation de signature - Bail de la cantine du Centre de la nature",
+    "anchor": "cantine du Centre de la nature"
+   },
+   "reason": "La résolution 298-05-2026 autorise un bail immobilier commercial explicite, inclus comme acte foncier non résidentiel plutôt que comme simple activité de loisirs."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation de signature d’un bail — cantine du parc Pierre-Lussier, un an à compter du 1er mai 2026",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "parc Pierre-Lussier",
+    "page": 34,
+    "citation": "Autorisation de signature - Bail de la cantine du parc Pierre-Lussier",
+    "anchor": "cantine du parc Pierre-Lussier"
+   },
+   "reason": "La résolution 299-05-2026 autorise un nouveau bail portant sur la cantine, convention d’usage immobilier distincte des activités récréatives du parc."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du second projet de PPCMOI 2026-032 — quatre logements touristiques et stationnement au 245, rue Principale",
+    "stage": "second_projet",
+    "procedure": "ppcmoi",
+    "objet": "2026-032",
+    "page": 42,
+    "citation": "D’adopter le second projet de PPCMOI numéro 2026-032, afin d’autoriser, sur\nl’immeuble situé au 245, rue Principale (lot 3 357 427 du cadastre du Québec)",
+    "anchor": "PPCMOI numéro 2026-032"
+   },
+   "reason": "La résolution 315-05-2026 adopte seulement le second projet de PPCMOI; les rappels antérieurs et le PIIA restant à faire approuver ne constituent pas des décisions actuelles supplémentaires."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u07"
+  },
+  {
+   "op": "add",
+   "id": "u08"
+  },
+  {
+   "op": "add",
+   "id": "u09"
+  },
+  {
+   "op": "add",
+   "id": "u10"
+  },
+  {
+   "op": "add",
+   "id": "u11"
+  },
+  {
+   "op": "add",
+   "id": "u12"
+  },
+  {
+   "op": "add",
+   "id": "u13"
+  },
+  {
+   "op": "add",
+   "id": "u14"
+  },
+  {
+   "op": "add",
+   "id": "u15"
+  },
+  {
+   "op": "add",
+   "id": "u16"
+  },
+  {
+   "op": "add",
+   "id": "u17"
+  },
+  {
+   "op": "add",
+   "id": "u18"
+  },
+  {
+   "op": "add",
+   "id": "u19"
+  },
+  {
+   "op": "add",
+   "id": "u20"
+  },
+  {
+   "op": "add",
+   "id": "u21"
+  },
+  {
+   "op": "add",
+   "id": "u22"
+  },
+  {
+   "op": "add",
+   "id": "u23"
+  },
+  {
+   "op": "add",
+   "id": "u24"
+  },
+  {
+   "op": "add",
+   "id": "u25"
+  },
+  {
+   "op": "add",
+   "id": "u26"
+  },
+  {
+   "op": "add",
+   "id": "u27"
+  },
+  {
+   "op": "add",
+   "id": "u28"
+  },
+  {
+   "op": "add",
+   "id": "u29"
+  },
+  {
+   "op": "add",
+   "id": "u30"
+  },
+  {
+   "op": "add",
+   "id": "u31"
+  },
+  {
+   "op": "add",
+   "id": "u32"
+  },
+  {
+   "op": "add",
+   "id": "u33"
+  },
+  {
+   "op": "add",
+   "id": "u34"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 34
+}

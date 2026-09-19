@@ -1,0 +1,355 @@
+{
+ "documentId": "les-coteaux-2026-03-16",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "54c8ebded1803738d48305ccf42ae36f1a8377413c6b9c7d9147cbe3f2dad923",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-335"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 335 — Contrôle provisoire de la capacité du système d’égout",
+     "stage": "adoption",
+     "objet": "335",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible\nde créer des besoins excédant la capacité du système d’égout numéro 335."
+      },
+      {
+       "page": 5,
+       "excerpt": "D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible\nde créer des besoins excédant la capacité du système d’égout numéro 335."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-316-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet 316-01 — Correctifs au règlement de permis et certificats",
+     "stage": "projet",
+     "objet": "316-01",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "déposent le projet de règlement numéro 316-01 – Règlement modifiant le\nRèglement de permis et certificats numéro 316 afin d’y apporter des correctifs\nsuite à son remplacement."
+      },
+      {
+       "page": 5,
+       "excerpt": "déposent le projet de règlement numéro 316-01 – Règlement modifiant le\nRèglement de permis et certificats numéro 316 afin d’y apporter des correctifs\nsuite à son remplacement."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-316"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 316 — Permis et certificats",
+     "stage": null,
+     "objet": "316",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "déposent le projet de règlement numéro 316-01 – Règlement modifiant le\nRèglement de permis et certificats numéro 316 afin d’y apporter des correctifs\nsuite à son remplacement."
+      },
+      {
+       "page": 5,
+       "excerpt": "déposent le projet de règlement numéro 316-01 – Règlement modifiant le\nRèglement de permis et certificats numéro 316 afin d’y apporter des correctifs\nsuite à son remplacement."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-317-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet 317-01 — Correctifs au règlement de zonage",
+     "stage": "projet",
+     "objet": "317-01",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "déposent le projet de règlement numéro 317-01 – Règlement modifiant le\nRèglement de zonage numéro 317 afin d’y apporter des correctifs suite à son\nremplacement."
+      },
+      {
+       "page": 6,
+       "excerpt": "déposent le projet de règlement numéro 317-01 – Règlement modifiant le\nRèglement de zonage numéro 317 afin d’y apporter des correctifs suite à son\nremplacement."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-317"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 317 — Zonage",
+     "stage": null,
+     "objet": "317",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "déposent le projet de règlement numéro 317-01 – Règlement modifiant le\nRèglement de zonage numéro 317 afin d’y apporter des correctifs suite à son\nremplacement."
+      },
+      {
+       "page": 6,
+       "excerpt": "déposent le projet de règlement numéro 317-01 – Règlement modifiant le\nRèglement de zonage numéro 317 afin d’y apporter des correctifs suite à son\nremplacement."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-9288"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Résolution 26-03-9288, identification contradictoire",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "DEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614"
+      },
+      {
+       "page": 6,
+       "excerpt": "D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres à l’étage du bâtiment"
+      },
+      {
+       "page": 6,
+       "excerpt": "D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres à l’étage du bâtiment\nprincipal par des fenêtres à guillotine, tel que présenté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-9289"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2026-02 — 102, rue Principale",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres à l’étage du bâtiment"
+      },
+      {
+       "page": 6,
+       "excerpt": "D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres à l’étage du bâtiment\nprincipal par des fenêtres à guillotine, tel que présenté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-dm294"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-294 — Régularisation du garage au 78, rue Sauvé",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au\n78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour"
+      },
+      {
+       "page": 7,
+       "excerpt": "D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au\n78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour\navant plutôt qu’entièrement en cour latérale ou arrière tel que prévu au point 9 du tableau de\nl’article 6.1 du règlement de zonage 317 telle que présentée."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-dm293"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "DM-293 — Dérogation antérieure au 56, rue Lippé",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "CONSIDÉRANT QUE par la résolution numéro 25-10-9187, le conseil a approuvé la demande\nde dérogation mineure DM-293 ;"
+      },
+      {
+       "page": 7,
+       "excerpt": "CONSIDÉRANT QUE par la résolution numéro 25-10-9187, le conseil a approuvé la demande\nde dérogation mineure DM-293 ;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement de contrôle provisoire numéro 335 à la résolution 26-03-9287.\",\"excerpt\":\"D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible\\nde créer des besoins excédant la capacité du système d’égout numéro 335.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement numéro 316-01 fait l'objet d'un avis de motion et d'un dépôt de projet.\",\"excerpt\":\"déposent le projet de règlement numéro 316-01 – Règlement modifiant le\\nRèglement de permis et certificats numéro 316 afin d’y apporter des correctifs\\nsuite à son remplacement.\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 316 est seulement le règlement d'origine cité dans l'intitulé de la modification et ne fait l'objet d'aucune étape décisionnelle propre dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement numéro 317-01 fait l'objet d'un avis de motion et d'un dépôt de projet.\",\"excerpt\":\"déposent le projet de règlement numéro 317-01 – Règlement modifiant le\\nRèglement de zonage numéro 317 afin d’y apporter des correctifs suite à son\\nremplacement.\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 317 n'est que le règlement modifié mentionné au titre du projet 317-01, sans étape procédurale propre le concernant directement.\",\"excerpt\":\"\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 26-03-9288 porte sur une demande de PIIA (avec divergence de numéro dans le texte de la résolution), formellement adoptée par le conseil.\",\"excerpt\":\"DEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 26-03-9289 adopte formellement la demande de PIIA numéro 2026-02 pour le 102, rue Principale.\",\"excerpt\":\"D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres à l’étage du bâtiment\\nprincipal par des fenêtres à guillotine, tel que présenté.\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 26-03-9290 accepte la demande de dérogation mineure DM-294 pour le 78, rue Sauvé.\",\"excerpt\":\"D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au\\n78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour\\navant\"},{\"act\":\"A09\",\"verdict\":\"non_soutenu\",\"reason\":\"La dérogation DM-293 n'est qu'un rappel historique d'une résolution passée (25-10-9187) dans le cadre d'une demande de remboursement de frais.\",\"excerpt\":\"CONSIDÉRANT QUE par la résolution numéro 25-10-9187, le conseil a approuvé la demande\\nde dérogation mineure DM-293 ;\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement de contrôle provisoire numéro 335 à la résolution 26-03-9287.",
+   "excerpt": "D’ADOPTER le Règlement de contrôle provisoire prohibant l’exécution de travaux susceptible\nde créer des besoins excédant la capacité du système d’égout numéro 335."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement numéro 316-01 fait l'objet d'un avis de motion et d'un dépôt de projet.",
+   "excerpt": "déposent le projet de règlement numéro 316-01 – Règlement modifiant le\nRèglement de permis et certificats numéro 316 afin d’y apporter des correctifs\nsuite à son remplacement."
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 316 est seulement le règlement d'origine cité dans l'intitulé de la modification et ne fait l'objet d'aucune étape décisionnelle propre dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement numéro 317-01 fait l'objet d'un avis de motion et d'un dépôt de projet.",
+   "excerpt": "déposent le projet de règlement numéro 317-01 – Règlement modifiant le\nRèglement de zonage numéro 317 afin d’y apporter des correctifs suite à son\nremplacement."
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 317 n'est que le règlement modifié mentionné au titre du projet 317-01, sans étape procédurale propre le concernant directement.",
+   "excerpt": ""
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "La résolution 26-03-9288 porte sur une demande de PIIA (avec divergence de numéro dans le texte de la résolution), formellement adoptée par le conseil.",
+   "excerpt": "DEMANDE D’ÉTUDE DE PIIA 2026-01 – 65, ROUTE 338 – LOT 2 085 614"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "La résolution 26-03-9289 adopte formellement la demande de PIIA numéro 2026-02 pour le 102, rue Principale.",
+   "excerpt": "D’ACCEPTER la demande de PIIA numéro 2026-02 pour la propriété sise au\n102, rue Principale, afin de permettre le remplacement de 4 fenêtres à l’étage du bâtiment\nprincipal par des fenêtres à guillotine, tel que présenté."
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "La résolution 26-03-9290 accepte la demande de dérogation mineure DM-294 pour le 78, rue Sauvé.",
+   "excerpt": "D’ACCEPTER la demande de dérogation mineure DM-294 pour la propriété sise au\n78, rue Sauvé, afin de régulariser l’implantation du garage privé isolé partiellement en cour\navant"
+  },
+  {
+   "act": "A09",
+   "verdict": "non_soutenu",
+   "reason": "La dérogation DM-293 n'est qu'un rappel historique d'une résolution passée (25-10-9187) dans le cadre d'une demande de remboursement de frais.",
+   "excerpt": "CONSIDÉRANT QUE par la résolution numéro 25-10-9187, le conseil a approuvé la demande\nde dérogation mineure DM-293 ;"
+  }
+ ],
+ "filter": {
+  "acts": 9,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement 316 est seulement le règlement d'origine cité dans l'intitulé de la modification et ne fait l'objet d'aucune étape décisionnelle propre dans cette séance."
+   },
+   {
+    "act": "A05",
+    "reason": "Le règlement 317 n'est que le règlement modifié mentionné au titre du projet 317-01, sans étape procédurale propre le concernant directement."
+   },
+   {
+    "act": "A09",
+    "reason": "La dérogation DM-293 n'est qu'un rappel historique d'une résolution passée (25-10-9187) dans le cadre d'une demande de remboursement de frais."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le règlement de contrôle provisoire numéro 335 à la résolution 26-03-9287."
+   },
+   {
+    "act": "A02",
+    "reason": "Le projet de règlement numéro 316-01 fait l'objet d'un avis de motion et d'un dépôt de projet."
+   },
+   {
+    "act": "A04",
+    "reason": "Le projet de règlement numéro 317-01 fait l'objet d'un avis de motion et d'un dépôt de projet."
+   },
+   {
+    "act": "A06",
+    "reason": "La résolution 26-03-9288 porte sur une demande de PIIA (avec divergence de numéro dans le texte de la résolution), formellement adoptée par le conseil."
+   },
+   {
+    "act": "A07",
+    "reason": "La résolution 26-03-9289 adopte formellement la demande de PIIA numéro 2026-02 pour le 102, rue Principale."
+   },
+   {
+    "act": "A08",
+    "reason": "La résolution 26-03-9290 accepte la demande de dérogation mineure DM-294 pour le 78, rue Sauvé."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2754,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 12846,
+   "outputTokens": 809,
+   "totalTokens": 13655
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2615
+  },
+  "inputSha256": "29ee550aa81605ddbebcc08ccceb706fff92df9a462bff4a914495fa6e184ad5"
+ }
+}

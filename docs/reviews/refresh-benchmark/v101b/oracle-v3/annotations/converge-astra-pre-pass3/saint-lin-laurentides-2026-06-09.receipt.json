@@ -1,0 +1,36 @@
+{
+ "documentId": "saint-lin-laurentides-2026-06-09",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "078c235b2de7896a0e3c1790e777f3bb2ca17e540bace0933f6c1edb783788a8",
+ "inputSha256": "05429292a491add499d5478566d92e46c14a0f4342fa38199e17dcbb75fd2334",
+ "responseSha256": "bd8b2eaf110c5db94fa27d7eb6f1c1a6b1046f116983235b587089a28423bb86",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 66265,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 5806,
+  "outputTokens": 2144,
+  "totalTokens": 7950
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 66246,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:15:04.178Z"
+}

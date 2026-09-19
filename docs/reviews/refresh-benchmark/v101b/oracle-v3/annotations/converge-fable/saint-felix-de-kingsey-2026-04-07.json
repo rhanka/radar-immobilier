@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-felix-de-kingsey-2026-04-07",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "3af0de69954f704c23483e712159a82d4849c7f5137fb1ff3937ee8794f66a3a",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 8, résolution 70-04-2026 : « il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation et à l’entretien des bâtiments » — objet 638, étape adoption, citation et page exactes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 8, résolution 71-04-2026 : demande de dérogation mineure pour le 1130 rue Provencher (lot 5 740 483), « résolu à l’unanimité des conseillers présents d’accepter la dérogation mineure telle que demandée » — objet, étape, citation et page exacts.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 8, résolution 72-04-2026 : « DÉPÔT DU PREMIER PROJET DE RÉSOLUTION RELATIF À UN PROJET PARTICULIER ... (PPCMOI) LOT 5 739 222 », premier projet soumis à consultation publique le 4 mai 2026 — étape projet_reglement (procédure PPCMOI), objet et page exacts.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 8, résolution 70-04-2026 : « il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation et à l’entretien des bâtiments » — objet 638, étape adoption, citation et page exactes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 8, résolution 71-04-2026 : demande de dérogation mineure pour le 1130 rue Provencher (lot 5 740 483), « résolu à l’unanimité des conseillers présents d’accepter la dérogation mineure telle que demandée » — objet, étape, citation et page exacts."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 8, résolution 72-04-2026 : « DÉPÔT DU PREMIER PROJET DE RÉSOLUTION RELATIF À UN PROJET PARTICULIER ... (PPCMOI) LOT 5 739 222 », premier projet soumis à consultation publique le 4 mai 2026 — étape projet_reglement (procédure PPCMOI), objet et page exacts."
+  }
+ ]
+}

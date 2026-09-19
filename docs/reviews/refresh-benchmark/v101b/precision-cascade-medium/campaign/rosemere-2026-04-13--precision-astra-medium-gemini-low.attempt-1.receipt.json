@@ -1,0 +1,35 @@
+{
+ "documentId": "rosemere-2026-04-13",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "3c64c761364aa52b94162d01ac08219c04c74520d76ce4faeb03cf3007492d58",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4659,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 17476,
+   "outputTokens": 1719,
+   "totalTokens": 19195
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 4515
+  },
+  "inputSha256": "660c60b05d6da8018e73e2d0f72da88e1e86ec08cad8a8f08dccab6d474a64a5"
+ },
+ "at": "2026-09-19T03:23:00.647Z"
+}

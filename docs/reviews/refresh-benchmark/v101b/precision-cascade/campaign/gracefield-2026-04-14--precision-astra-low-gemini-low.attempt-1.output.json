@@ -1,0 +1,277 @@
+{
+ "nodes": [
+  {
+   "id": "source-pv-2026-04-14",
+   "label": "Procès-verbal du conseil de Gracefield du 14 avril 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "status": "candidate",
+   "date": "2026-04-14",
+   "municipality": "gracefield",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+   "url": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Séance ordinaire du conseil municipal de la Ville de Gracefield, tenue le\n14 avril 2026, à la salle du conseil, située au 3, rue de la Polyvalente,\nGracefield, à 19 h 00.",
+     "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+     "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-source"
+   ]
+  },
+  {
+   "id": "bylaw-263-2026",
+   "label": "Règlement 263-2026 relatif à l’occupation et à l’entretien des bâtiments patrimoniaux",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "status": "candidate",
+   "numero": "263-2026",
+   "title": "Règlement relatif à l’occupation et à l’entretien des bâtiments patrimoniaux",
+   "objet": "Établir des normes minimales d’occupation, de salubrité et d’entretien des bâtiments patrimoniaux identifiés par le schéma d’aménagement et de développement révisé de la MRCVG sur le territoire de Gracefield.",
+   "date": "2026-04-14",
+   "meetingDate": "2026-04-14",
+   "stage": "adoption",
+   "municipality": "gracefield",
+   "resolution": "2026-04-063",
+   "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "Que le règlement 263-2026 soit adopté et qu’il statue et décrète ce qui\nsuit :",
+     "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+     "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-263"
+   ]
+  },
+  {
+   "id": "constraint-patrimoine",
+   "label": "Obligations d’entretien des bâtiments patrimoniaux",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "status": "candidate",
+   "constraintType": "autre",
+   "municipality": "gracefield",
+   "loi": "Règlement 263-2026",
+   "organisme": "Ville de Gracefield",
+   "meetingDate": "2026-04-14",
+   "resolution": "2026-04-063",
+   "description": "Normes d’occupation, de salubrité et d’entretien applicables aux bâtiments patrimoniaux identifiés au schéma révisé de la MRCVG et à leurs accessoires, de nature résidentielle, commerciale, industrielle ou agricole, sauf les bâtiments appartenant à un organisme public. Les propriétaires, locataires ou occupants doivent maintenir les bâtiments en bon état de salubrité et effectuer les réparations et travaux d’entretien nécessaires.",
+   "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "Le propriétaire, le locataire ou l’occupant doit, en tout temps, maintenir\nle bâtiment dans un bon état de salubrité.",
+     "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+     "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-patrimoine"
+   ]
+  },
+  {
+   "id": "event-cptaq-064",
+   "label": "Recommandation favorable à une demande d’aliénation auprès de la CPTAQ",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "status": "candidate",
+   "kind": "cptaq",
+   "date": "2026-04-14",
+   "meetingDate": "2026-04-14",
+   "etape": "inconnu",
+   "etape_date": "2026-04-14",
+   "decision": "approuvé",
+   "municipality": "gracefield",
+   "resolution": "2026-04-064",
+   "no_lot": "5412018",
+   "description": "Appui et recommandation municipale à la CPTAQ, sans décision de la CPTAQ rapportée. Demande d’aliénation d’un droit superficiaire personnel et temporaire de la résidence construite sur le lot 5412018, au 40, chemin Éloi-Lachapelle; elle vise également l’aliénation des lots 5412018, 5412019 et 5410311. Le lot 5410305 est aussi mentionné dans le titre de la résolution.",
+   "motif": "La demande ne contrevient pas à la règlementation municipale, est sans impact négatif sur le développement des activités agricoles et vise un emplacement approprié compte tenu de l’occupation historique de la situation existante.",
+   "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "Que le conseil de la Ville de Gracefield appuie et recommande ladite\ndemande d’autorisation à la Commission de protection du territoire\nagricole du Québec.",
+     "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+     "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 22,
+     "excerpt": "Considérant que cette demande vise également l’aliénation des lots\n5 412 018, 5 412 019 et 5 410 311 du cadastre du Québec de la\ncirconscription foncière de Gatineau ;",
+     "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+     "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-cptaq-decision",
+    "ev-cptaq-lots"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-pv-2026-04-14",
+   "target": "bylaw-263-2026",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "evidence_refs": [
+    "ev-263"
+   ],
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "Que le règlement 263-2026 soit adopté et qu’il statue et décrète ce qui\nsuit :",
+     "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+     "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-14",
+   "target": "constraint-patrimoine",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "evidence_refs": [
+    "ev-patrimoine"
+   ],
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "Le propriétaire, le locataire ou l’occupant doit, en tout temps, maintenir\nle bâtiment dans un bon état de salubrité.",
+     "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+     "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-pv-2026-04-14",
+   "target": "event-cptaq-064",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "evidence_refs": [
+    "ev-cptaq-decision"
+   ],
+   "citations": [
+    {
+     "page": 23,
+     "excerpt": "Que le conseil de la Ville de Gracefield appuie et recommande ladite\ndemande d’autorisation à la Commission de protection du territoire\nagricole du Québec.",
+     "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+     "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+     "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-source",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+   "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Séance ordinaire du conseil municipal de la Ville de Gracefield, tenue le\n14 avril 2026, à la salle du conseil, située au 3, rue de la Polyvalente,\nGracefield, à 19 h 00."
+  },
+  {
+   "id": "ev-263",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+   "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+   "modality": "pdf",
+   "page": 15,
+   "excerpt": "Que le règlement 263-2026 soit adopté et qu’il statue et décrète ce qui\nsuit :"
+  },
+  {
+   "id": "ev-patrimoine",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+   "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+   "modality": "pdf",
+   "page": 16,
+   "excerpt": "Le propriétaire, le locataire ou l’occupant doit, en tout temps, maintenir\nle bâtiment dans un bon état de salubrité. Il doit faire les réparations\nnécessaires et effectuer les travaux d’entretien afin de conserver le\nbâtiment ou le logement en bon état."
+  },
+  {
+   "id": "ev-cptaq-decision",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+   "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+   "modality": "pdf",
+   "page": 23,
+   "excerpt": "Que le conseil de la Ville de Gracefield appuie et recommande ladite\ndemande d’autorisation à la Commission de protection du territoire\nagricole du Québec."
+  },
+  {
+   "id": "ev-cptaq-lots",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+   "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+   "modality": "pdf",
+   "page": 22,
+   "excerpt": "Considérant que cette demande vise également l’aliénation des lots\n5 412 018, 5 412 019 et 5 410 311 du cadastre du Québec de la\ncirconscription foncière de Gatineau ;"
+  },
+  {
+   "id": "ev-245",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+   "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+   "modality": "pdf",
+   "page": 25,
+   "excerpt": "Que la Ville de Gracefield demande aux membres de la Commission\nparlementaire de l’aménagement du territoire de l’Assemblée nationale\nd’introduire un amendement au projet de loi no 22 abrogeant\nl’article 245.1 de la Loi sur l’aménagement et l’urbanisme afin de\nrespecter le consensus établi entre le ministère et ses partenaires\nmunicipaux ;"
+  },
+  {
+   "id": "ev-frr",
+   "source_file": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "rawRef": "raw/proces-verbaux-gracefield/cas/125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813.pdf",
+   "docSha": "125cbdbfb646d860319e810d085561f77a092072817614982f92d745d59d4813",
+   "sourceUrl": "https://www.gracefield.ca/fichiersUpload/fichiers/20260515140232-pv-2026-04-14-seance-ordinaire-054-a-073.pdf",
+   "modality": "pdf",
+   "page": 26,
+   "excerpt": "Que la Ville de Gracefield confirme son engagement financier pour ce\nprojet (26 962,00 $ après remboursement des taxes)."
+  }
+ ],
+ "input_tokens": 19100,
+ "output_tokens": 5300
+}

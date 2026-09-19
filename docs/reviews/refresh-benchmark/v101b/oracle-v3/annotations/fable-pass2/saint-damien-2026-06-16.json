@@ -1,0 +1,64 @@
+{
+ "documentId": "saint-damien-2026-06-16",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "a0ad84ca7a51bd3ae0f08ed6fb540a32694a750e1e5b0985fc2000c85f3f49ae",
+ "rawText": "{\"operations\":[\n {\"op\":\"correct\",\"id\":\"u04\",\"unit\":{\"label\":\"Avis de motion prévu – règlement 804-1 modifiant le règlement 804 sur les camions de cuisine cantines temporaires\",\"stage\":\"avis_motion\",\"procedure\":null,\"objet\":\"804-1\",\"page\":2,\"citation\":\"14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\",\"anchor\":\"règlement 804-1\"},\"reason\":\"La citation courante fusionne deux lignes du texte (saut de ligne après « modification du ») et n'est donc pas recopiée à l'identique d'un seul tenant ; la citation corrigée reprend la première ligne du point 14.2 telle qu'elle figure en page 2.\"},\n {\"op\":\"correct\",\"id\":\"u05\",\"unit\":{\"label\":\"Présentation prévue du projet de règlement 804-1 modifiant le règlement 804 sur les camions de cuisine cantines temporaires\",\"stage\":\"projet_reglement\",\"procedure\":null,\"objet\":\"804-1\",\"page\":2,\"citation\":\"14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\",\"anchor\":\"règlement 804-1\"},\"reason\":\"Même motif : la citation courante traverse un saut de ligne du texte source ; elle est remplacée par un extrait d'un seul tenant recopié à l'identique de la page 2, qui atteste la présentation prévue du projet de règlement 804-1 (unité distincte de l'avis de motion selon la règle 2).\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Avis de motion prévu – règlement 804-1 modifiant le règlement 804 sur les camions de cuisine cantines temporaires",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "804-1",
+    "page": 2,
+    "citation": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du",
+    "anchor": "règlement 804-1"
+   },
+   "reason": "La citation courante fusionne deux lignes du texte (saut de ligne après « modification du ») et n'est donc pas recopiée à l'identique d'un seul tenant ; la citation corrigée reprend la première ligne du point 14.2 telle qu'elle figure en page 2."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Présentation prévue du projet de règlement 804-1 modifiant le règlement 804 sur les camions de cuisine cantines temporaires",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "804-1",
+    "page": 2,
+    "citation": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du",
+    "anchor": "règlement 804-1"
+   },
+   "reason": "Même motif : la citation courante traverse un saut de ligne du texte source ; elle est remplacée par un extrait d'un seul tenant recopié à l'identique de la page 2, qui atteste la présentation prévue du projet de règlement 804-1 (unité distincte de l'avis de motion selon la règle 2)."
+  }
+ ],
+ "applied": [
+  {
+   "op": "correct",
+   "id": "u04"
+  },
+  {
+   "op": "correct",
+   "id": "u05"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 5
+}

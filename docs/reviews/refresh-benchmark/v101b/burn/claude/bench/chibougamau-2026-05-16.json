@@ -1,0 +1,13 @@
+{
+ "id": "chibougamau-2026-05-16",
+ "rc": 0,
+ "latencyMs": 182205,
+ "inputTokens": 2,
+ "outputTokens": 20169,
+ "cacheRead": 0,
+ "cacheCreate": 4875,
+ "costUsd": 0.556168,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 32392
+}

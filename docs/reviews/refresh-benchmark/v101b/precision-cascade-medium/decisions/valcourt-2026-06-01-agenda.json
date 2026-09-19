@@ -1,0 +1,284 @@
+{
+ "documentId": "valcourt-2026-06-01-agenda",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "ae5fe92725161d452f91bcd662e70b64cd1f1e48967996cc7d55c5421d3809d9",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "piia-7-1"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "1070, rue Bissonnette — PIIA Boisé du Ruisseau — lotissement",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT"
+      },
+      {
+       "page": 1,
+       "excerpt": "1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "piia-7-2"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "1070, rue Bissonnette — PIIA — deux bâtiments principaux unifamiliaux jumelés",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE\nDEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS"
+      },
+      {
+       "page": 1,
+       "excerpt": "1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE\nDEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "piia-7-3"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "1045, rue Bissonnette — PIIA — habitation unifamiliale isolée",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D’UN\nBÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE"
+      },
+      {
+       "page": 1,
+       "excerpt": "1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D’UN\nBÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "piia-7-4"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "1075, rue Bissonnette — PIIA Boisé du Ruisseau — remblai",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI"
+      },
+      {
+       "page": 1,
+       "excerpt": "1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-560-28"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Second projet de règlement 560-28 amendant le règlement de zonage 560",
+     "stage": "2e_projet",
+     "objet": "560-28",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE\nRÈGLEMENT DE ZONAGE 560"
+      },
+      {
+       "page": 1,
+       "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE\nRÈGLEMENT DE ZONAGE 560"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-560"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 560",
+     "stage": null,
+     "objet": "560",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE\nRÈGLEMENT DE ZONAGE 560"
+      },
+      {
+       "page": 1,
+       "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE\nRÈGLEMENT DE ZONAGE 560"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-agroenvironnement"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement sur les pratiques agroenvironnementales — révision nécessaire",
+     "stage": "projet",
+     "objet": "Révision nécessaire inscrite au point 11.1 de l'ordre du jour; aucune décision n'est fournie.",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES\nAGROENVIRONNEMENTALES"
+      },
+      {
+       "page": 2,
+       "excerpt": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES\nAGROENVIRONNEMENTALES"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.1 de l'ordre du jour prévoit l'examen d'un PIIA pour un lotissement au 1070, rue Bissonnette.\",\"excerpt\":\"1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.2 de l'ordre du jour prévoit un PIIA pour la construction de deux bâtiments unifamiliaux jumelés au 1070, rue Bissonnette.\",\"excerpt\":\"1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE\\nDEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.3 de l'ordre du jour prévoit un PIIA pour la construction d'une habitation unifamiliale isolée au 1045, rue Bissonnette.\",\"excerpt\":\"1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D’UN\\nBÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.4 de l'ordre du jour concerne un PIIA pour du remblai au 1075, rue Bissonnette.\",\"excerpt\":\"1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le point 7.5 prévoit l'adoption du second projet de règlement 560-28 modifiant le règlement de zonage 560.\",\"excerpt\":\"ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE\\nRÈGLEMENT DE ZONAGE 560\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de zonage 560 n'est mentionné que comme le règlement d'origine amendé par le second projet 560-28, il ne fait l'objet d'aucune étape propre dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le point 11.1 porte sur la révision nécessaire du projet de règlement sur les pratiques agroenvironnementales.\",\"excerpt\":\"RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES\\nAGROENVIRONNEMENTALES\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 7.1 de l'ordre du jour prévoit l'examen d'un PIIA pour un lotissement au 1070, rue Bissonnette.",
+   "excerpt": "1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 7.2 de l'ordre du jour prévoit un PIIA pour la construction de deux bâtiments unifamiliaux jumelés au 1070, rue Bissonnette.",
+   "excerpt": "1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE\nDEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 7.3 de l'ordre du jour prévoit un PIIA pour la construction d'une habitation unifamiliale isolée au 1045, rue Bissonnette.",
+   "excerpt": "1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D’UN\nBÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 7.4 de l'ordre du jour concerne un PIIA pour du remblai au 1075, rue Bissonnette.",
+   "excerpt": "1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le point 7.5 prévoit l'adoption du second projet de règlement 560-28 modifiant le règlement de zonage 560.",
+   "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE\nRÈGLEMENT DE ZONAGE 560"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de zonage 560 n'est mentionné que comme le règlement d'origine amendé par le second projet 560-28, il ne fait l'objet d'aucune étape propre dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le point 11.1 porte sur la révision nécessaire du projet de règlement sur les pratiques agroenvironnementales.",
+   "excerpt": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES\nAGROENVIRONNEMENTALES"
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [
+   {
+    "act": "A06",
+    "reason": "Le règlement de zonage 560 n'est mentionné que comme le règlement d'origine amendé par le second projet 560-28, il ne fait l'objet d'aucune étape propre dans cette séance."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 7.1 de l'ordre du jour prévoit l'examen d'un PIIA pour un lotissement au 1070, rue Bissonnette."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 7.2 de l'ordre du jour prévoit un PIIA pour la construction de deux bâtiments unifamiliaux jumelés au 1070, rue Bissonnette."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 7.3 de l'ordre du jour prévoit un PIIA pour la construction d'une habitation unifamiliale isolée au 1045, rue Bissonnette."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 7.4 de l'ordre du jour concerne un PIIA pour du remblai au 1075, rue Bissonnette."
+   },
+   {
+    "act": "A05",
+    "reason": "Le point 7.5 prévoit l'adoption du second projet de règlement 560-28 modifiant le règlement de zonage 560."
+   },
+   {
+    "act": "A07",
+    "reason": "Le point 11.1 porte sur la révision nécessaire du projet de règlement sur les pratiques agroenvironnementales."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2128,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3198,
+   "outputTokens": 566,
+   "totalTokens": 3764
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1971
+  },
+  "inputSha256": "b0806f8c36634aee26e4d24946b62f27fef2cc8d13d17fb05f11ee03527bade5"
+ }
+}

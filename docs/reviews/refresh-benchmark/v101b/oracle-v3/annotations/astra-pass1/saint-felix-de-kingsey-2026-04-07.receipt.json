@@ -1,0 +1,36 @@
+{
+ "documentId": "saint-felix-de-kingsey-2026-04-07",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "62bca73cb476f394533ad300438e440ff38eccf1a88ece4a3b617e01bc66b867",
+ "inputSha256": "547000a702afef398340a463b798c06385c4c72f46b1fc01cffc6b1e0114f3bc",
+ "responseSha256": "088338eb1dfac4b13900e3602ca09f26026b664a20c38c9868595771d67604ff",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 46432,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 7991,
+  "outputTokens": 1498,
+  "totalTokens": 9489
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 46429,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:11:55.822Z"
+}

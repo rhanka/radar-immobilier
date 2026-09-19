@@ -1,0 +1,200 @@
+{
+ "documentId": "saint-polycarpe-2026-01-19",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "2d73f32db74026c4e2ed8fca3091d9b07f5337281170ae1ea849c7ca7602e51c",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-acquisition"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Démarches préliminaires pour l’achat des lots liés à l’église",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "AUTORISATION - DÉMARCHES PRÉLIMINAIRES CONCERNANT L'ACHAT DES LOTS\nLIÉS À L’ÉGLISE"
+      },
+      {
+       "page": 1,
+       "excerpt": "OCTROI DE MANDAT ET AUTORISATION DE PAIEMENT - DUNTON RAINVILLE,\nAVOCATS - ACCOMPAGNEMENT PROFESSIONNEL POUR L'ACQUISITION DE\nL'ÉGLISE"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-vente-taxes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente des immeubles pour défaut de paiement de taxes — point à l’ordre du jour",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE\nPAIEMENT DE TAXES MUNICIPALES"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-cptaq"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui à une autorisation CPTAQ pour une fin autre que l’agriculture — prévu",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "RÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN\nAUTRE QUE L’AGRICULTURE."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-169-2019-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement no 169-2019-01 — remplacement du règlement sur les nuisances",
+     "stage": null,
+     "objet": "169-2019-01",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-rmh-450"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement sur les nuisances (RMH 450)",
+     "stage": null,
+     "objet": "RMH 450",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 3.6 de l'ordre du jour prévoit expressément l'autorisation de démarches préliminaires concernant l'achat de lots liés à l'église.\",\"excerpt\":\"AUTORISATION - DÉMARCHES PRÉLIMINAIRES CONCERNANT L'ACHAT DES LOTS\\nLIÉS À L’ÉGLISE\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"La vente pour défaut de paiement de taxes est une procédure fiscale/financière exclue du champ de l'urbanisme et de l'aménagement foncier.\",\"excerpt\":\"AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE\\nPAIEMENT DE TAXES MUNICIPALES\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 8.1 de l'ordre du jour prévoit expressément une résolution d'appui pour une demande d'autorisation à la CPTAQ.\",\"excerpt\":\"RÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN\\nAUTRE QUE L’AGRICULTURE.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 10.1 prévoit un avis de motion pour le règlement no 169-2019-01.\",\"excerpt\":\"AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement RMH 450 n'est mentionné que comme l'ancien règlement remplacé, et non comme un acte réglementaire autonome en cours.\",\"excerpt\":\"AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 3.6 de l'ordre du jour prévoit expressément l'autorisation de démarches préliminaires concernant l'achat de lots liés à l'église.",
+   "excerpt": "AUTORISATION - DÉMARCHES PRÉLIMINAIRES CONCERNANT L'ACHAT DES LOTS\nLIÉS À L’ÉGLISE"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "La vente pour défaut de paiement de taxes est une procédure fiscale/financière exclue du champ de l'urbanisme et de l'aménagement foncier.",
+   "excerpt": "AUTORISATION - ÉTAT RELATIF À LA VENTE DES IMMEUBLES POUR DÉFAUT DE\nPAIEMENT DE TAXES MUNICIPALES"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 8.1 de l'ordre du jour prévoit expressément une résolution d'appui pour une demande d'autorisation à la CPTAQ.",
+   "excerpt": "RÉSOLUTION D’APPUI POUR LA CPTAQ VISANT L’AUTORISATION À UNE FIN\nAUTRE QUE L’AGRICULTURE."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 10.1 prévoit un avis de motion pour le règlement no 169-2019-01.",
+   "excerpt": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement RMH 450 n'est mentionné que comme l'ancien règlement remplacé, et non comme un acte réglementaire autonome en cours.",
+   "excerpt": "AVIS DE MOTION - AVIS DE MOTION - RÈGLEMENT NO 169-2019-01 REMPLAÇANT\nLE RÈGLEMENT SUR LES NUISANCES (RMH 450)"
+  }
+ ],
+ "filter": {
+  "acts": 5,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "La vente pour défaut de paiement de taxes est une procédure fiscale/financière exclue du champ de l'urbanisme et de l'aménagement foncier."
+   },
+   {
+    "act": "A05",
+    "reason": "Le règlement RMH 450 n'est mentionné que comme l'ancien règlement remplacé, et non comme un acte réglementaire autonome en cours."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 3.6 de l'ordre du jour prévoit expressément l'autorisation de démarches préliminaires concernant l'achat de lots liés à l'église."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 8.1 de l'ordre du jour prévoit expressément une résolution d'appui pour une demande d'autorisation à la CPTAQ."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 10.1 prévoit un avis de motion pour le règlement no 169-2019-01."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2451,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2784,
+   "outputTokens": 446,
+   "totalTokens": 3230
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1854
+  },
+  "inputSha256": "bce95900a5d8ee582ed43a5f4a41f2a2b9b6918214f57de30d887e8c71591104"
+ }
+}

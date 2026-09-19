@@ -1,0 +1,126 @@
+{
+ "documentId": "rosemere-2026-04-13",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "6bbeb215bfddb233381f5e7b8c9c44befae20c69c1d1080a965da0ab91962dd8",
+ "verificationSha256": "ca73889b24126533510d6c04a5ac3230bc5bf82673b483eda13eeee4124119a7",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"Le règlement 1015 porte sur un programme municipal de sensibilisation et d'accompagnement et figure sous la section 6 « AUTRE RÈGLEMENTATION »; il ne constitue ni un acte d'urbanisme ni un acte foncier au sens des règles d'inclusion (« Inclusions: urbanisme, petits PIIA et actes fonciers »). Les positions de A et C étendent indûment le champ du gold aux simples programmes citoyens.\"},{\"item\":\"a02\",\"choice\":\"absent\",\"reason\":\"Puisque le règlement 1015 relève d'un programme de sensibilisation étranger à la réglementation d'urbanisme et aux actes fonciers, son dépôt de projet ne constitue pas une unité admissible au gold (« Inclusions: urbanisme, petits PIIA et actes fonciers »). L'argument de B est retenu et les positions de A et C sont écartées.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u10",
+   "verificationItem": "i10",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Avis de motion — règlement 1015 sur la sensibilisation et l'accompagnement des propriétés vulnérables aux inondations pluviales",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "1015",
+      "page": 6,
+      "citation": "6.3. 1015 - Règlement décrétant un programme de sensibilisation et d'accompagnement des propriétés vulnérables aux inondations pluviales afin d'en diminuer les risques - Avis de motion et dépôt",
+      "anchor": "1015 - Règlement",
+      "spanStart": 595,
+      "spanEnd": 788
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 6.3, page 6, atteste que Stéphanie Nantel donne avis de motion pour le règlement 1015 concernant les propriétés vulnérables aux inondations pluviales."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 6, 2026-04-137 : « donne avis de motion qu'il sera adopté à une séance subséquente le Règlement 1015 décrétant un programme ... des propriétés vulnérables aux inondations pluviales » — règlement explicite visant les propriétés et une contrainte territoriale (inondations), citation du point 6.3 exacte, étape avis_motion."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le règlement 1015 décrétant un programme d'accompagnement et de sensibilisation relève d'une autre réglementation municipale et non de l'urbanisme ou du foncier."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u11",
+   "verificationItem": "i11",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Dépôt du projet de règlement 1015 — sensibilisation et accompagnement des propriétés vulnérables aux inondations pluviales",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "1015",
+      "page": 6,
+      "citation": "6.3. 1015 - Règlement décrétant un programme de sensibilisation et d'accompagnement des propriétés vulnérables aux inondations pluviales afin d'en diminuer les risques - Avis de motion et dépôt",
+      "anchor": "1015 - Règlement",
+      "spanStart": 595,
+      "spanEnd": 788
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "Le point 6.3, page 6, précise que Stéphanie Nantel « dépose le projet de règlement », ce qui constitue une unité distincte de l'avis de motion pour le règlement 1015."
+    },
+    {
+     "position": "C",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Même résolution 2026-04-137 page 6 : « ... et dépose le projet de règlement » — dépôt du projet du Règlement 1015 attesté, étape projet_reglement distincte de l'avis de motion selon la règle « Avis de motion et projet actuels séparés »."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Le règlement 1015 est hors du champ de l'urbanisme et du foncier, et il s'agit d'un simple dépôt sans adoption de projet de règlement."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "Le règlement 1015 porte sur un programme municipal de sensibilisation et d'accompagnement et figure sous la section 6 « AUTRE RÈGLEMENTATION »; il ne constitue ni un acte d'urbanisme ni un acte foncier au sens des règles d'inclusion (« Inclusions: urbanisme, petits PIIA et actes fonciers »). Les positions de A et C étendent indûment le champ du gold aux simples programmes citoyens."
+  },
+  {
+   "item": "a02",
+   "choice": "absent",
+   "reason": "Puisque le règlement 1015 relève d'un programme de sensibilisation étranger à la réglementation d'urbanisme et aux actes fonciers, son dépôt de projet ne constitue pas une unité admissible au gold (« Inclusions: urbanisme, petits PIIA et actes fonciers »). L'argument de B est retenu et les positions de A et C sont écartées."
+  }
+ ]
+}

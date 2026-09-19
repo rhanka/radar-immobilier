@@ -1,0 +1,82 @@
+{
+ "documentId": "saint-constant-2026-01-20",
+ "nextId": 3,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet de résolution – PPCMOI 2025-00114, 42, montée Saint-Régis",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "2025-00114",
+    "page": 5,
+    "citation": "D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la demande d’autorisation de PPCMOI numéro 2025-00114",
+    "anchor": "PPCMOI numéro 2025-00114",
+    "spanStart": 1150,
+    "spanEnd": 1292
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet de résolution – PPCMOI 2025-00114, 42, montée Saint-Régis",
+      "stage": "projet_reglement",
+      "procedure": "ppcmoi",
+      "objet": "2025-00114",
+      "page": 5,
+      "citation": "D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la demande d’autorisation de PPCMOI numéro 2025-00114",
+      "anchor": "PPCMOI numéro 2025-00114",
+      "spanStart": 1150,
+      "spanEnd": 1292
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution adopte expressément le premier projet de résolution du PPCMOI 2025-00114, ce qui constitue une unité au stade projet_reglement et non une autorisation finale."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Consultation publique prévue le 3 mars 2026 – premier projet de résolution 037-01-26",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "037-01-26",
+    "page": 1,
+    "citation": "CONSULTATION PUBLIQUE SUR LE PREMIER PROJET DE RÉSOLUTION NUMÉRO 037-01-26 VISANT UNE DEMANDE D’AUTORISATION D’UN PROJET PARTICULIER",
+    "anchor": "037-01-26 VISANT UNE DEMANDE",
+    "spanStart": 55,
+    "spanEnd": 187
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Consultation publique prévue le 3 mars 2026 – premier projet de résolution 037-01-26",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "037-01-26",
+      "page": 1,
+      "citation": "CONSULTATION PUBLIQUE SUR LE PREMIER PROJET DE RÉSOLUTION NUMÉRO 037-01-26 VISANT UNE DEMANDE D’AUTORISATION D’UN PROJET PARTICULIER",
+      "anchor": "037-01-26 VISANT UNE DEMANDE",
+      "spanStart": 55,
+      "spanEnd": 187
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis porte sur un projet de résolution explicite et annonce à la page 2 une consultation le 3 mars 2026, étape prévue distincte de l’adoption du premier projet et non simple avis public générique."
+    }
+   ]
+  }
+ ]
+}

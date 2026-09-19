@@ -1,0 +1,462 @@
+{
+ "documentId": "sainte-sophie-2026-06-02",
+ "nextId": 13,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Second projet prévu SP-2026-14 — zonage, zone CH-217 et contributions pour parcs",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "SP-2026-14",
+    "page": 1,
+    "citation": "Second projet de règlement SP-2026-14 - Amendement au Règlement 1297-2020 relatif au zonage afin de modifier l'article 1.4.2",
+    "anchor": "règlement SP-2026-14",
+    "spanStart": 1375,
+    "spanEnd": 1499
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Second projet prévu SP-2026-14 — zonage, zone CH-217 et contributions pour parcs",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "SP-2026-14",
+      "page": 1,
+      "citation": "Second projet de règlement SP-2026-14 - Amendement au Règlement 1297-2020 relatif au zonage afin de modifier l'article 1.4.2",
+      "anchor": "règlement SP-2026-14",
+      "spanStart": 1375,
+      "spanEnd": 1499
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 1.10 prévoit le second projet de ce règlement de zonage, sans que les étapes historiques du 5 mai rappelées dans l'annexe créent d'autres unités."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Second projet prévu SP-2026-15 — zonage, zone V-802",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "SP-2026-15",
+    "page": 1,
+    "citation": "Second projet de règlement SP-2026-15 - Amendement au Règlement 1297-2020 relatif au zonage afin de modifier l'annexe 3 - Grille des spécifications, zone V-802",
+    "anchor": "règlement SP-2026-15",
+    "spanStart": 1594,
+    "spanEnd": 1753
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Second projet prévu SP-2026-15 — zonage, zone V-802",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "SP-2026-15",
+      "page": 1,
+      "citation": "Second projet de règlement SP-2026-15 - Amendement au Règlement 1297-2020 relatif au zonage afin de modifier l'annexe 3 - Grille des spécifications, zone V-802",
+      "anchor": "règlement SP-2026-15",
+      "spanStart": 1594,
+      "spanEnd": 1753
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 1.11 prévoit un second projet de règlement distinct concernant la zone V-802, et non une adoption finale acquise."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du règlement 1470-2026 — plan d'urbanisme",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1470-2026",
+    "page": 1,
+    "citation": "Règlement 1470-2026 - Amendement au Règlement 1296-2020 relatif au plan d'urbanisme afin d’assurer sa conformité au Règlement 399-25",
+    "anchor": "Règlement 1470-2026",
+    "spanStart": 1761,
+    "spanEnd": 1893
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du règlement 1470-2026 — plan d'urbanisme",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1470-2026",
+      "page": 1,
+      "citation": "Règlement 1470-2026 - Amendement au Règlement 1296-2020 relatif au plan d'urbanisme afin d’assurer sa conformité au Règlement 399-25",
+      "anchor": "Règlement 1470-2026",
+      "spanStart": 1761,
+      "spanEnd": 1893
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 1.12 et l'échéancier annexé prévoient l'adoption de ce règlement le 2 juin, avec un numéro de résolution provisoire qui ne permet pas de constater une décision acquise."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du règlement 1471-2026 — zonage",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1471-2026",
+    "page": 1,
+    "citation": "Règlement 1471-2026 - Amendement au Règlement 1297-2020 relatif au zonage afin d’assurer sa conformité au Règlement 399-25",
+    "anchor": "Règlement 1471-2026",
+    "spanStart": 2061,
+    "spanEnd": 2183
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du règlement 1471-2026 — zonage",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1471-2026",
+      "page": 1,
+      "citation": "Règlement 1471-2026 - Amendement au Règlement 1297-2020 relatif au zonage afin d’assurer sa conformité au Règlement 399-25",
+      "anchor": "Règlement 1471-2026",
+      "spanStart": 2061,
+      "spanEnd": 2183
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 1.13 prévoit l'adoption de ce règlement de zonage, dont les modifications et annexes constituent un seul objet réglementaire à cette étape."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du règlement 1472-2026 — permis et certificats",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1472-2026",
+    "page": 1,
+    "citation": "Règlement 1472-2026 - Amendement au Règlement 1299-2020 relatif aux permis et certificats afin d’assurer sa conformité au Règlement 399-25",
+    "anchor": "Règlement 1472-2026",
+    "spanStart": 2351,
+    "spanEnd": 2489
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du règlement 1472-2026 — permis et certificats",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1472-2026",
+      "page": 1,
+      "citation": "Règlement 1472-2026 - Amendement au Règlement 1299-2020 relatif aux permis et certificats afin d’assurer sa conformité au Règlement 399-25",
+      "anchor": "Règlement 1472-2026",
+      "spanStart": 2351,
+      "spanEnd": 2489
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 1.14 prévoit l'adoption d'un règlement sur les permis et certificats, distinct des autres règlements de concordance nommés."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du règlement 1473-2026 — réglementation des PIIA",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1473-2026",
+    "page": 1,
+    "citation": "Règlement 1473-2026 - Amendement au Règlement 1300-2020 relatif aux plans d'implantation et d'intégration architecturale (PIIA) afin d’assurer sa conformité au Règlement 399-25",
+    "anchor": "Règlement 1473-2026",
+    "spanStart": 2657,
+    "spanEnd": 2833
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du règlement 1473-2026 — réglementation des PIIA",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1473-2026",
+      "page": 1,
+      "citation": "Règlement 1473-2026 - Amendement au Règlement 1300-2020 relatif aux plans d'implantation et d'intégration architecturale (PIIA) afin d’assurer sa conformité au Règlement 399-25",
+      "anchor": "Règlement 1473-2026",
+      "spanStart": 2657,
+      "spanEnd": 2833
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 1.15 prévoit l'adoption d'une modification du règlement sur les PIIA, à distinguer d'une décision sur une demande individuelle de PIIA."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Demande de prolongation de délai prévue — conformité au règlement 399-25, lotissement agricole",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "399-25",
+    "page": 2,
+    "citation": "Demande de prolongation de délai auprès du ministre des Affaires municipales et de l'Habitation – Mise en conformité aux normes de lotissement en zone agricole découlant du règlement 399-25",
+    "anchor": "règlement 399-25",
+    "spanStart": 100,
+    "spanEnd": 289
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande de prolongation de délai prévue — conformité au règlement 399-25, lotissement agricole",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "399-25",
+      "page": 2,
+      "citation": "Demande de prolongation de délai auprès du ministre des Affaires municipales et de l'Habitation – Mise en conformité aux normes de lotissement en zone agricole découlant du règlement 399-25",
+      "anchor": "règlement 399-25",
+      "spanStart": 100,
+      "spanEnd": 289
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 1.16 prévoit une demande de prolongation du délai de conformité des normes de lotissement, étape réglementaire explicite qui relève du stade « inconnu »."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Demande de modification prévue du règlement 188-07 — réduction de l'aire Conservation",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "188-07",
+    "page": 2,
+    "citation": "Demande de modification au règlement 188-07 relatif au schéma d'aménagement et de développement révisé afin de réduire la superficie de l'aire d'affectation « Conservation",
+    "anchor": "règlement 188-07",
+    "spanStart": 799,
+    "spanEnd": 970
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Demande de modification prévue du règlement 188-07 — réduction de l'aire Conservation",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "188-07",
+      "page": 2,
+      "citation": "Demande de modification au règlement 188-07 relatif au schéma d'aménagement et de développement révisé afin de réduire la superficie de l'aire d'affectation « Conservation",
+      "anchor": "règlement 188-07",
+      "spanStart": 799,
+      "spanEnd": 970
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 1.20 prévoit une demande de modification du schéma auprès de la MRC, et non l'adoption de cette modification."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Autorisation prévue d'une servitude de tolérance — lot 4 037 185, rue Samson",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 037 185",
+    "page": 2,
+    "citation": "Servitude de tolérance pour l'empiètement d'un mur de soutènement en roche dans l'emprise de la rue Samson sur une parcelle du lot 4 037 185",
+    "anchor": "lot 4 037 185",
+    "spanStart": 2084,
+    "spanEnd": 2224
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation prévue d'une servitude de tolérance — lot 4 037 185, rue Samson",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "4 037 185",
+      "page": 2,
+      "citation": "Servitude de tolérance pour l'empiètement d'un mur de soutènement en roche dans l'emprise de la rue Samson sur une parcelle du lot 4 037 185",
+      "anchor": "lot 4 037 185",
+      "spanStart": 2084,
+      "spanEnd": 2224
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 6.3 prévoit une servitude sur une parcelle identifiée, acte foncier inclus dans le rappel sans présumer son autorisation acquise."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu d'une demande de PIIA — 799, rue de New Glasgow",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "799, rue de New Glasgow",
+    "page": 3,
+    "citation": "Demande de plan d'implantation et d'intégration architecturale (PIIA) - 799, rue de New Glasgow",
+    "anchor": "799, rue de New Glasgow",
+    "spanStart": 139,
+    "spanEnd": 234
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu d'une demande de PIIA — 799, rue de New Glasgow",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "799, rue de New Glasgow",
+      "page": 3,
+      "citation": "Demande de plan d'implantation et d'intégration architecturale (PIIA) - 799, rue de New Glasgow",
+      "anchor": "799, rue de New Glasgow",
+      "spanStart": 139,
+      "spanEnd": 234
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 9.1 prévoit l'examen d'une demande individuelle de PIIA à une adresse explicite, sans en indiquer l'issue."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu d'une dérogation mineure — 537, chemin de l'Achigan Ouest",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "537, chemin de l'Achigan Ouest",
+    "page": 3,
+    "citation": "Dérogation mineure - 537, chemin de l'Achigan Ouest",
+    "anchor": "537, chemin de l'Achigan Ouest",
+    "spanStart": 241,
+    "spanEnd": 292
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu d'une dérogation mineure — 537, chemin de l'Achigan Ouest",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "537, chemin de l'Achigan Ouest",
+      "page": 3,
+      "citation": "Dérogation mineure - 537, chemin de l'Achigan Ouest",
+      "anchor": "537, chemin de l'Achigan Ouest",
+      "spanStart": 241,
+      "spanEnd": 292
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 9.2 prévoit une dérogation mineure à cette adresse, ce qui constitue une unité sans permettre de conclure à son acceptation ou à son refus."
+    }
+   ]
+  },
+  {
+   "id": "u12",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu d'une dérogation mineure — 318-318 A, chemin Abercrombie",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "318-318 A, chemin Abercrombie",
+    "page": 3,
+    "citation": "Dérogation mineure - 318-318 A, chemin Abercrombie",
+    "anchor": "318-318 A, chemin Abercrombie",
+    "spanStart": 299,
+    "spanEnd": 349
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu d'une dérogation mineure — 318-318 A, chemin Abercrombie",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "318-318 A, chemin Abercrombie",
+      "page": 3,
+      "citation": "Dérogation mineure - 318-318 A, chemin Abercrombie",
+      "anchor": "318-318 A, chemin Abercrombie",
+      "spanStart": 299,
+      "spanEnd": 349
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 9.3 prévoit une autre demande de dérogation mineure explicitement localisée, à compter séparément et sans présumer de la décision."
+    }
+   ]
+  }
+ ]
+}

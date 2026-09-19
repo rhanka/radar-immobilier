@@ -1,0 +1,18 @@
+{
+ "documentId": "danville-2026-01-15",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "cc49f785f83e85ce0abbb8d9586db34c331016ecb4b0085ce9f026530da16db7",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

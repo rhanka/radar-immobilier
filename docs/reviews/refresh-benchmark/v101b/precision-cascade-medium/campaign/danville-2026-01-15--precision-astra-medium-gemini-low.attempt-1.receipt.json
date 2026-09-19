@@ -1,0 +1,35 @@
+{
+ "documentId": "danville-2026-01-15",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c618be9ce9bf308f6416f8c761cbb0674e7fffebe121d9ea369edb0663cdc96f",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1810,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3944,
+   "outputTokens": 258,
+   "totalTokens": 4202
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1648
+  },
+  "inputSha256": "7dcbab36545fdd5220f05e7aab971ef0208ca4a3ee07d847d434e98d1b53deee"
+ },
+ "at": "2026-09-19T03:22:21.360Z"
+}

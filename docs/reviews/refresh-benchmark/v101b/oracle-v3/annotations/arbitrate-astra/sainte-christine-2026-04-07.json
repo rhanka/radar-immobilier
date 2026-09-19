@@ -1,0 +1,19 @@
+{
+ "documentId": "sainte-christine-2026-04-07",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "aac78225da743b4b7179a06fb7b6d045a339440590cd288b10c510afccb50879",
+ "verificationSha256": "be75a6e0e6f596918e37ea6a4d0b5377dc8b6193230f787dff80a2e7adba4503",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

@@ -1,0 +1,283 @@
+{
+ "documentId": "sainte-francoise--becancour-2026-05-04",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "cefc2a5e86a0789f268341ca43398b5f87669c78af818f4691a8aa17883de7d4",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-55-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 55-2026 modifiant le zonage",
+     "stage": null,
+     "objet": "55-2026",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE #2010-03"
+      },
+      {
+       "page": 7,
+       "excerpt": "que le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\nprojet de règlement #55-2026 modifiant le règlement de zonage #2010-03."
+      },
+      {
+       "page": 7,
+       "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE #2010-03"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2010-03"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 2010-03",
+     "stage": null,
+     "objet": "2010-03",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE #2010-03"
+      },
+      {
+       "page": 7,
+       "excerpt": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE #2010-03"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-56-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement 56-2026 — entrées privées et fossés",
+     "stage": "adoption",
+     "objet": "56-2026",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par Georges Drouin et résolu à l’unanimité des\nconseillers présents que le règlement portant le numéro 56-2026 relatif à"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-58-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 58-2026 — plan d’urbanisme",
+     "stage": "projet",
+     "objet": "58-2026",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01."
+      },
+      {
+       "page": 8,
+       "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01. Le règlement vise à :\n-\n\nAgrandir l’affectation mixte à même l’affectation industrielle."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-2010-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Plan d’urbanisme 2010-01",
+     "stage": null,
+     "objet": "2010-01",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01."
+      },
+      {
+       "page": 8,
+       "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01. Le règlement vise à :\n-\n\nAgrandir l’affectation mixte à même l’affectation industrielle."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-59-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 59-2026 — construction",
+     "stage": "projet",
+     "objet": "59-2026",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05."
+      },
+      {
+       "page": 8,
+       "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05. Le règlement vise à :\n-\n\nPermettre les pieux dans l’agrandissement des bâtiments."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "bylaw-2010-05"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de construction 2010-05",
+     "stage": null,
+     "objet": "2010-05",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05."
+      },
+      {
+       "page": 8,
+       "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05. Le règlement vise à :\n-\n\nPermettre les pieux dans l’agrandissement des bâtiments."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le texte atteste l'adoption du projet de règlement 55-2026 modifiant le zonage.\",\"excerpt\":\"que le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\\nprojet de règlement #55-2026 modifiant le règlement de zonage #2010-03.\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2010-03 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal adopte le règlement 56-2026 régissant les entrées privées et fossés.\",\"excerpt\":\"que le règlement portant le numéro 56-2026 relatif à\\nl’aménagement des entrées privées et à la fermeture des fossés de chemins soit\\nadopté tel que rédigé\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion est donné et un projet de règlement est déposé pour le règlement 58-2026 modifiant le plan d'urbanisme.\",\"excerpt\":\"Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\\n#2010-01.\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le plan d'urbanisme 2010-01 est uniquement cité comme le règlement antérieur visé par la modification.\",\"excerpt\":\"\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion et le dépôt de projet sont effectués pour le règlement 59-2026 modifiant le règlement de construction.\",\"excerpt\":\"Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\\nconstruction #2010-05.\"},{\"act\":\"A07\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 2010-05 est simplement cité en tant que règlement antérieur modifié.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le texte atteste l'adoption du projet de règlement 55-2026 modifiant le zonage.",
+   "excerpt": "que le conseil de la municipalité de Sainte-Françoise dépose et adopte le premier\nprojet de règlement #55-2026 modifiant le règlement de zonage #2010-03."
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2010-03 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal adopte le règlement 56-2026 régissant les entrées privées et fossés.",
+   "excerpt": "que le règlement portant le numéro 56-2026 relatif à\nl’aménagement des entrées privées et à la fermeture des fossés de chemins soit\nadopté tel que rédigé"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion est donné et un projet de règlement est déposé pour le règlement 58-2026 modifiant le plan d'urbanisme.",
+   "excerpt": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01."
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le plan d'urbanisme 2010-01 est uniquement cité comme le règlement antérieur visé par la modification.",
+   "excerpt": ""
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion et le dépôt de projet sont effectués pour le règlement 59-2026 modifiant le règlement de construction.",
+   "excerpt": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05."
+  },
+  {
+   "act": "A07",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2010-05 est simplement cité en tant que règlement antérieur modifié.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 2010-03 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification."
+   },
+   {
+    "act": "A05",
+    "reason": "Le plan d'urbanisme 2010-01 est uniquement cité comme le règlement antérieur visé par la modification."
+   },
+   {
+    "act": "A07",
+    "reason": "Le règlement 2010-05 est simplement cité en tant que règlement antérieur modifié."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le texte atteste l'adoption du projet de règlement 55-2026 modifiant le zonage."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil municipal adopte le règlement 56-2026 régissant les entrées privées et fossés."
+   },
+   {
+    "act": "A04",
+    "reason": "Un avis de motion est donné et un projet de règlement est déposé pour le règlement 58-2026 modifiant le plan d'urbanisme."
+   },
+   {
+    "act": "A06",
+    "reason": "Un avis de motion et le dépôt de projet sont effectués pour le règlement 59-2026 modifiant le règlement de construction."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3182,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 9579,
+   "outputTokens": 496,
+   "totalTokens": 10075
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3042
+  },
+  "inputSha256": "35738c46feee4698ba5fc783a1f4b006171a14a6ae5a895b82dd6940dc08e634"
+ }
+}

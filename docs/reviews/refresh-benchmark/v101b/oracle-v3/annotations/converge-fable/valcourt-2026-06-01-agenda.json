@@ -1,0 +1,101 @@
+{
+ "documentId": "valcourt-2026-06-01-agenda",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "160b21de89153b366ad378f120d15d0ad2c2b085c05343a3c47205fcb0259737",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Point 7.1 de l'ordre du jour, page 1, citation exacte « 1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT » ; un point d'ordre du jour est une unité prévue, étape piia correcte.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Point 7.2, page 1, citation conforme au texte (saut de ligne joint) ; PIIA prévu distinct du 7.1 par son objet (construction de deux bâtiments jumelés), étape piia correcte.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Point 7.3, page 1, citation conforme « 1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D'UN BÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE » ; PIIA prévu, étape et objet exacts.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point 7.4, page 1, citation exacte « 1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI » ; petit PIIA inclus par la règle d'inclusion, étape piia correcte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Point 7.5, page 1, « ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560 » ; l'ordre du jour de Valcourt atteste un point prévu, étape second_projet et objet 560-28 exacts.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Point 11.1, page 2, citation exacte ; objet réglementaire explicite (projet de règlement municipal), étape inconnu adaptée à une « révision nécessaire » prévue et non à une adoption acquise.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Point 13.2, page 3, citation exacte « 4111 RUE CARPENTIER - CONVENTION DE PRÊT À USAGE » ; acte foncier (prêt à usage d'un immeuble) inclus par la règle « petits PIIA et actes fonciers, même non résidentiels », étape inconnu.\"},{\"item\":\"i08\",\"choice\":\"absent\",\"reason\":\"Strictement identique à i06 (même objet, même étape, même citation, même page) : « Doublon même type/même fait non crédité ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "absent"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Point 7.1 de l'ordre du jour, page 1, citation exacte « 1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT » ; un point d'ordre du jour est une unité prévue, étape piia correcte."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Point 7.2, page 1, citation conforme au texte (saut de ligne joint) ; PIIA prévu distinct du 7.1 par son objet (construction de deux bâtiments jumelés), étape piia correcte."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Point 7.3, page 1, citation conforme « 1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D'UN BÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE » ; PIIA prévu, étape et objet exacts."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point 7.4, page 1, citation exacte « 1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI » ; petit PIIA inclus par la règle d'inclusion, étape piia correcte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Point 7.5, page 1, « ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560 » ; l'ordre du jour de Valcourt atteste un point prévu, étape second_projet et objet 560-28 exacts."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Point 11.1, page 2, citation exacte ; objet réglementaire explicite (projet de règlement municipal), étape inconnu adaptée à une « révision nécessaire » prévue et non à une adoption acquise."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Point 13.2, page 3, citation exacte « 4111 RUE CARPENTIER - CONVENTION DE PRÊT À USAGE » ; acte foncier (prêt à usage d'un immeuble) inclus par la règle « petits PIIA et actes fonciers, même non résidentiels », étape inconnu."
+  },
+  {
+   "item": "i08",
+   "choice": "absent",
+   "reason": "Strictement identique à i06 (même objet, même étape, même citation, même page) : « Doublon même type/même fait non crédité »."
+  }
+ ]
+}

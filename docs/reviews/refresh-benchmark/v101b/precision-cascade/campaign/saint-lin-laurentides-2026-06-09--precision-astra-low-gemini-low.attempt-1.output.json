@@ -1,0 +1,503 @@
+{
+ "nodes": [
+  {
+   "id": "source-odj-2026-06-09",
+   "label": "Ordre du jour du 9 juin 2026 — Saint-Lin-Laurentides",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "status": "candidate",
+   "date": "2026-06-09",
+   "municipality": "saint-lin-laurentides",
+   "format": "pdf",
+   "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+   "url": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Ordre du jour\nSéance ordinaire du 9 juin 2026",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "derogation-6663628",
+   "label": "Dérogation mineure prévue — zone tampon au 1510, route 335",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "status": "candidate",
+   "municipality": "saint-lin-laurentides",
+   "meetingDate": "2026-06-09",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "no_lot": "6663628",
+   "description": "Demande de dérogation mineure pour une zone tampon dérogatoire inscrite à l'ordre du jour; aucune décision constatée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-1"
+   ]
+  },
+  {
+   "id": "derogation-6579952",
+   "label": "Dérogation mineure prévue — nombre d'enseignes au 70, route 335",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "status": "candidate",
+   "municipality": "saint-lin-laurentides",
+   "meetingDate": "2026-06-09",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "no_lot": "6579952",
+   "description": "Dérogation concernant le nombre d'enseignes attachées inscrite à l'ordre du jour; aucune décision constatée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-2"
+   ]
+  },
+  {
+   "id": "derogation-3569047",
+   "label": "Dérogation mineure prévue — remise au 31, rue Cliche",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "status": "candidate",
+   "municipality": "saint-lin-laurentides",
+   "meetingDate": "2026-06-09",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "no_lot": "3569047",
+   "description": "Dérogation concernant la superficie et la largeur d'une remise inscrite à l'ordre du jour; aucune décision constatée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-3"
+   ]
+  },
+  {
+   "id": "piia-6663628",
+   "label": "PIIA prévu — agrandissement commercial au 1510, route 335",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "status": "candidate",
+   "municipality": "saint-lin-laurentides",
+   "meetingDate": "2026-06-09",
+   "kind": "piia",
+   "etape": "piia",
+   "no_lot": "6663628",
+   "description": "Autorisation d'agrandissement du bâtiment commercial existant inscrite à l'ordre du jour au titre du PIIA; aucune décision constatée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial\nexistant / Lot numéro 6 663 628 / 1510, route 335",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-4"
+   ]
+  },
+  {
+   "id": "piia-planete-piscine",
+   "label": "PIIA prévu — enseignes Planète Piscine",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "status": "candidate",
+   "municipality": "saint-lin-laurentides",
+   "meetingDate": "2026-06-09",
+   "kind": "piia",
+   "etape": "piia",
+   "no_lot": "6579952",
+   "description": "Ajout d'enseignes pour le commerce Planète Piscine au 70, route 335 inscrit à l'ordre du jour; aucune décision constatée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot\nnuméro 6 579 952 / 70, route 335",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-5"
+   ]
+  },
+  {
+   "id": "piia-allo-mon-coco",
+   "label": "PIIA prévu — enseignes Allô mon Coco",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "status": "candidate",
+   "municipality": "saint-lin-laurentides",
+   "meetingDate": "2026-06-09",
+   "kind": "piia",
+   "etape": "piia",
+   "no_lot": "6579952",
+   "description": "Ajout d'enseignes pour le restaurant Allô mon Coco au 70, route 335 inscrit à l'ordre du jour; aucune décision constatée.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot\nnuméro 6 579 952 / 70, route 335",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-6"
+   ]
+  },
+  {
+   "id": "signal-acquisition-lacroix",
+   "label": "Acquisition envisagée après inondation — 60, rue Lacroix",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "status": "candidate",
+   "municipality": "saint-lin-laurentides",
+   "meetingDate": "2026-06-09",
+   "category": "acquisition_fonciere",
+   "description": "Engagement à acquérir le terrain du 60, rue Lacroix après l'inondation du bâtiment principal, inscrit à l'ordre du jour dans le cadre du Programme général d'assistance financière du ministère de la Sécurité publique.",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme\ngénéral d'assistance financière / Ministère de la Sécurité publique",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-7"
+   ]
+  },
+  {
+   "id": "signal-cession-villemory",
+   "label": "Offre de cession prévue — Seigneurie Villemory, phases 5, 6 et 7",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "status": "candidate",
+   "municipality": "saint-lin-laurentides",
+   "meetingDate": "2026-06-09",
+   "category": "cession_fonciere",
+   "description": "Acceptation finale et offre de cession inscrites à l'ordre du jour pour les phases 5, 6 et 7 de Seigneurie Villemory, avec 9223-9169 Québec inc. et 9207-4327 Québec inc. Lots mentionnés : 6553599, 5137605, 5137606, 5429185, 5137659, 5429209, 5137708, 6553600 et 6553597. Aucune acceptation effective constatée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-8"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-odj-2026-06-09",
+   "target": "derogation-6663628",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "evidence_refs": [
+    "ev-1"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-odj-2026-06-09",
+   "target": "derogation-6579952",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "evidence_refs": [
+    "ev-2"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-odj-2026-06-09",
+   "target": "derogation-3569047",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "evidence_refs": [
+    "ev-3"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-odj-2026-06-09",
+   "target": "piia-6663628",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "evidence_refs": [
+    "ev-4"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial\nexistant / Lot numéro 6 663 628 / 1510, route 335",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-odj-2026-06-09",
+   "target": "piia-planete-piscine",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "evidence_refs": [
+    "ev-5"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot\nnuméro 6 579 952 / 70, route 335",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-odj-2026-06-09",
+   "target": "piia-allo-mon-coco",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "evidence_refs": [
+    "ev-6"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot\nnuméro 6 579 952 / 70, route 335",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-odj-2026-06-09",
+   "target": "signal-acquisition-lacroix",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "evidence_refs": [
+    "ev-7"
+   ],
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme\ngénéral d'assistance financière / Ministère de la Sécurité publique",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source-odj-2026-06-09",
+   "target": "signal-cession-villemory",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "evidence_refs": [
+    "ev-8"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429",
+     "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+     "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+     "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-1",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+   "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335"
+  },
+  {
+   "id": "ev-2",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+   "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335"
+  },
+  {
+   "id": "ev-3",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+   "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche"
+  },
+  {
+   "id": "ev-4",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+   "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial\nexistant / Lot numéro 6 663 628 / 1510, route 335"
+  },
+  {
+   "id": "ev-5",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+   "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot\nnuméro 6 579 952 / 70, route 335"
+  },
+  {
+   "id": "ev-6",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+   "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot\nnuméro 6 579 952 / 70, route 335"
+  },
+  {
+   "id": "ev-7",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+   "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme\ngénéral d'assistance financière / Ministère de la Sécurité publique"
+  },
+  {
+   "id": "ev-8",
+   "source_file": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "rawRef": "raw/proces-verbaux-saint-lin-laurentides/cas/012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207.pdf",
+   "docSha": "012cd7ca6d1cd0321dbb15a5d09cc42c3d8b253587f43b0f9d54327923c4f207",
+   "sourceUrl": "https://www.saint-lin-laurentides.com/storage/app/media/decouvrir/votre-conseil/seance-du-conseil-proces-verbaux/ordres-du-jour/2026/ODJ-9-06-26.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597 / Seigneurie Villemory phases 5, 6 et 7 / 9223-9169 Québec inc. et 9207-4327\nQuébec inc."
+  }
+ ],
+ "input_tokens": 9100,
+ "output_tokens": 6400
+}

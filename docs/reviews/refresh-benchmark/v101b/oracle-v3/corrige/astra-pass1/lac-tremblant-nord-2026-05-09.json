@@ -1,0 +1,196 @@
+{
+ "documentId": "lac-tremblant-nord-2026-05-09",
+ "nextId": 6,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu du renouvellement du permis COL230051 — construction neuve, lot 5 011 332",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "COL230051",
+    "page": 1,
+    "citation": "9.2.1 Demande de renouvellement du permis COL230051 pour une construction neuve, matricule 1624-72-9382, lot 5 011 332 du cadastre du Québec",
+    "anchor": "permis COL230051",
+    "spanStart": 1511,
+    "spanEnd": 1651
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu du renouvellement du permis COL230051 — construction neuve, lot 5 011 332",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "COL230051",
+      "page": 1,
+      "citation": "9.2.1 Demande de renouvellement du permis COL230051 pour une construction neuve, matricule 1624-72-9382, lot 5 011 332 du cadastre du Québec",
+      "anchor": "permis COL230051",
+      "spanStart": 1511,
+      "spanEnd": 1651
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 9.2.1 prévoit l'examen d'une demande explicite de renouvellement de permis; l'ordre du jour ne constate ni décision acquise ni procédure de PIIA."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu de la demande de permis DPCOL250057 — garage détaché, lot 6 219 794",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "DPCOL250057",
+    "page": 1,
+    "citation": "9.2.2 Demande DPCOL250057, demande de permis pour la construction d’un garage détaché, matricule 1427-691052-0-010-0001, lot 6 219 794 du cadastre du Québec",
+    "anchor": "Demande DPCOL250057",
+    "spanStart": 1653,
+    "spanEnd": 1809
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu de la demande de permis DPCOL250057 — garage détaché, lot 6 219 794",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "DPCOL250057",
+      "page": 1,
+      "citation": "9.2.2 Demande DPCOL250057, demande de permis pour la construction d’un garage détaché, matricule 1427-691052-0-010-0001, lot 6 219 794 du cadastre du Québec",
+      "anchor": "Demande DPCOL250057",
+      "spanStart": 1653,
+      "spanEnd": 1809
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 9.2.2 porte sur une demande de permis explicitement identifiée, à retenir comme point prévu sans présumer une approbation ou une procédure de PIIA."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu de la demande de permis DPCOL260003 — construction neuve, lot 6 219 789",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "DPCOL260003",
+    "page": 1,
+    "citation": "9.2.3 Demande DPCOL260003, demande de permis pour une construction neuve, matricule 1427-69-1052-0-0050001, lot 6 219 789 du cadastre du Québec",
+    "anchor": "Demande DPCOL260003",
+    "spanStart": 1811,
+    "spanEnd": 1954
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu de la demande de permis DPCOL260003 — construction neuve, lot 6 219 789",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "DPCOL260003",
+      "page": 1,
+      "citation": "9.2.3 Demande DPCOL260003, demande de permis pour une construction neuve, matricule 1427-69-1052-0-0050001, lot 6 219 789 du cadastre du Québec",
+      "anchor": "Demande DPCOL260003",
+      "spanStart": 1811,
+      "spanEnd": 1954
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 9.2.3 prévoit une demande de permis distincte pour une construction neuve, sans décision ni procédure particulière explicitement constatée."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu de la demande de permis DPCOL260002 — garage détaché, lot 5 011 370",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "DPCOL260002",
+    "page": 1,
+    "citation": "9.2.4 Demande DPCOL260002, demande de permis pour la construction d’un garage détaché, matricule 1720-695649, lot 5 011 370 du cadastre du Québec",
+    "anchor": "Demande DPCOL260002",
+    "spanStart": 1956,
+    "spanEnd": 2101
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu de la demande de permis DPCOL260002 — garage détaché, lot 5 011 370",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "DPCOL260002",
+      "page": 1,
+      "citation": "9.2.4 Demande DPCOL260002, demande de permis pour la construction d’un garage détaché, matricule 1720-695649, lot 5 011 370 du cadastre du Québec",
+      "anchor": "Demande DPCOL260002",
+      "spanStart": 1956,
+      "spanEnd": 2101
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 9.2.4 nomme une demande de permis distincte relevant de l'urbanisme, à retenir avec une étape prévue et non comme une décision acquise."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu de la demande de permis DPCOL240004 — construction neuve, lot 5 011 310",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "DPCOL240004",
+    "page": 1,
+    "citation": "9.2.5 Demande DPCOL240004, demande de permis pour une construction neuve, matricule 1621-54-9153, lot 5 011 310 du cadastre du Québec",
+    "anchor": "Demande DPCOL240004",
+    "spanStart": 2103,
+    "spanEnd": 2236
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu de la demande de permis DPCOL240004 — construction neuve, lot 5 011 310",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "DPCOL240004",
+      "page": 1,
+      "citation": "9.2.5 Demande DPCOL240004, demande de permis pour une construction neuve, matricule 1621-54-9153, lot 5 011 310 du cadastre du Québec",
+      "anchor": "Demande DPCOL240004",
+      "spanStart": 2103,
+      "spanEnd": 2236
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 9.2.5 prévoit l'examen d'une demande de permis explicitement identifiée; aucune adoption ni procédure de PIIA n'est indiquée."
+    }
+   ]
+  }
+ ]
+}

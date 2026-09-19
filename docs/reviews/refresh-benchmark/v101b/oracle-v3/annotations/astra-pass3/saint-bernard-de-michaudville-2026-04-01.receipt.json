@@ -1,0 +1,36 @@
+{
+ "documentId": "saint-bernard-de-michaudville-2026-04-01",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "9a3c8090c94dd30d437fde15205f3848efdde8df7fdc136768e77e37e7304bf6",
+ "inputSha256": "33d9bcf73b22f52ca2865101f075265f95a6d9ebf871df15ff6dcbddab26761b",
+ "responseSha256": "9389e6512af6fefa0599e7a946ef8eb432546cec8eb92d674ad516e2b98d7f1e",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 6839,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 9412,
+  "outputTokens": 161,
+  "totalTokens": 9573
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 6838,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:38:18.233Z"
+}

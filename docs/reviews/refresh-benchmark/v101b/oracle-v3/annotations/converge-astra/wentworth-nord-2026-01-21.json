@@ -1,0 +1,81 @@
+{
+ "documentId": "wentworth-nord-2026-01-21",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "557b52ba9da86b3f1031f029f78af38c91c213d7117f49d8249dcc742b14e92d",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution figurant à la page 9 accepte explicitement la dérogation mineure 2025-0418 pour une emprise de rue de 11,50 mètres au lieu de 12 mètres, avec transmission à la MRC pour qu’elle statue également.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"À la page 9, le Conseil adopte unanimement la résolution exigeant une contribution en argent de 12 302.60 $ pour le lotissement 2025-9029, ce qui constitue une décision foncière actuelle.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le dépôt des certificats annoncé au point 8.7 vise explicitement le règlement 2017-498-30-C09 énuméré à la page 11, sans constituer une nouvelle adoption du règlement.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le règlement 2017-498-30-CONS08 est explicitement énuméré à la page 11 parmi les règlements faisant actuellement l’objet du dépôt des certificats de résultat de l’enregistrement.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le règlement 2017-498-30-I04 est explicitement énuméré à la page 11 parmi les règlements visés par le dépôt actuel des certificats, correctement décrit à l’étape inconnu.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-01-3807, page 7, autorise la signature de l’entente relative au suivi de la servitude de conservation des lots énumérés, un engagement foncier actuel distinct des approbations historiques rappelées.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v2"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution figurant à la page 9 accepte explicitement la dérogation mineure 2025-0418 pour une emprise de rue de 11,50 mètres au lieu de 12 mètres, avec transmission à la MRC pour qu’elle statue également."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "À la page 9, le Conseil adopte unanimement la résolution exigeant une contribution en argent de 12 302.60 $ pour le lotissement 2025-9029, ce qui constitue une décision foncière actuelle."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le dépôt des certificats annoncé au point 8.7 vise explicitement le règlement 2017-498-30-C09 énuméré à la page 11, sans constituer une nouvelle adoption du règlement."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le règlement 2017-498-30-CONS08 est explicitement énuméré à la page 11 parmi les règlements faisant actuellement l’objet du dépôt des certificats de résultat de l’enregistrement."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le règlement 2017-498-30-I04 est explicitement énuméré à la page 11 parmi les règlements visés par le dépôt actuel des certificats, correctement décrit à l’étape inconnu."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 2026-01-3807, page 7, autorise la signature de l’entente relative au suivi de la servitude de conservation des lots énumérés, un engagement foncier actuel distinct des approbations historiques rappelées."
+  }
+ ]
+}

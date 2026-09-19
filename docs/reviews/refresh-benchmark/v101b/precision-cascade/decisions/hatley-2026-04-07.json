@@ -1,0 +1,261 @@
+{
+ "documentId": "hatley-2026-04-07",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "a18dbe76a0785c8d691bff744711ccddd6971bfc41af9130e8178473af4b1183",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "piia-2025-03-0004"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Autorisation d’agrandissement du bâtiment principal au 141 rue Main",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "D’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la\ndemande d’agrandissement du bâtiment principal situé au 141 rue Main, le tout"
+      },
+      {
+       "page": 10,
+       "excerpt": "141 rue Main (lot 4 666 122) – PIIA-1 2025-03-0004"
+      },
+      {
+       "page": 11,
+       "excerpt": "D’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la\ndemande d’agrandissement du bâtiment principal situé au 141 rue Main, le tout\nconformément aux documents soumis."
+      },
+      {
+       "page": 10,
+       "excerpt": "141 rue Main (lot 4 666 122) – PIIA-1 2025-03-0004\n\nCONSIDÉRANT QUE le propriétaire du 141 rue Main a soumis une demande de\nconstruction visant l’agrandissement du bâtiment principal;\nCONSIDÉRANT QUE l’immeuble est assujetti au règlement sur les PIIA 2006;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-piia-2006"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement sur les PIIA 2006",
+     "stage": null,
+     "objet": "2006",
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "CONSIDÉRANT QUE l’immeuble est assujetti au règlement sur les PIIA 2006;"
+      },
+      {
+       "page": 10,
+       "excerpt": "141 rue Main (lot 4 666 122) – PIIA-1 2025-03-0004\n\nCONSIDÉRANT QUE le propriétaire du 141 rue Main a soumis une demande de\nconstruction visant l’agrandissement du bâtiment principal;\nCONSIDÉRANT QUE l’immeuble est assujetti au règlement sur les PIIA 2006;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-permis-mars-2026"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Dépôt du rapport cumulatif des permis — mars 2026",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "La directrice générale dépose le rapport cumulatif d’émission des permis pour la période\nse terminant en mars 2026."
+      },
+      {
+       "page": 10,
+       "excerpt": "La directrice générale dépose le rapport cumulatif d’émission des permis pour la période\nse terminant en mars 2026. Pour la période visée, cinq (5) permis de construction ont été\ndélivrés pour une valeur totale de 111 000 $, ainsi que deux (2) certificats d’autorisation\npour une valeur totale de 25 000 $."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-patrimoine-2026-055"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Révision de la liste préliminaire du patrimoine immobilier",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "DE retenir, parmi les bâtiments situés sur le territoire de la municipalité de Hatley\napparaissant à l’Annexe 2 – Liste des bâtiments et autres biens du corpus de la phase 1"
+      },
+      {
+       "page": 11,
+       "excerpt": "DE retenir, parmi les bâtiments situés sur le territoire de la municipalité de Hatley\napparaissant à l’Annexe 2 – Liste des bâtiments et autres biens du corpus de la phase 1\nd’inventaire, les bâtiments suivants :\n• la grange de la Rubicon Farm, située au 38, rue Main;\n• l’église Saint-James, située au 100, rue Main;\n• le St. James Hall (centre communautaire), situé au 100, rue Main;\n• le gazebo, situé au 100, rue Main;\nDE demander le retrait de tous les autres bâtiments situés sur le territoire de la\nmunicipalité de Hatley de ladite liste;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-cptaq-45064"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui municipal à l’agrandissement du LET de la RIGDSC",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "D’appuyer la demande de la Régie intermunicipale de gestion des déchets solides de la\nrégion de Coaticook à la Commission de protection du territoire agricole du Québec"
+      },
+      {
+       "page": 13,
+       "excerpt": "D’appuyer la demande de la Régie intermunicipale de gestion des déchets solides de la\nrégion de Coaticook à la Commission de protection du territoire agricole du Québec\nvisant l’obtention d’une autorisation pour l’utilisation, à des fins autres qu’agricoles,\nd’une partie du lot 2 935 698 du cadastre du Québec, circonscription foncière de\nCoaticook, soit pour l’agrandissement de son lieu d’enfouissement technique."
+      },
+      {
+       "page": 12,
+       "excerpt": "ATTENDU QUE la Régie a présenté à la Commission de protection du territoire agricole\ndu Québec (la « CPTAQ ») une demande d’autorisation visant l’agrandissement LET\nd’une superficie d’environ 25,5 hectares (dossier numéro 45064) (la « Demande »);"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-pompage-2026-060"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Remplacement des composantes électroniques des stations de pompage",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 14,
+       "excerpt": "D’octroyer le contrat à l’entreprise Electro-Concept P.B.L. inc. pour le remplacement\ndes composantes électroniques des stations de pompage des rues des Cèdres et des"
+      },
+      {
+       "page": 14,
+       "excerpt": "D’octroyer le contrat à l’entreprise Electro-Concept P.B.L. inc. pour le remplacement\ndes composantes électroniques des stations de pompage des rues des Cèdres et des\nOrmes, selon les soumissions reçues, soit :\n• un montant de 34 880 $, taxes en sus, pour la station de pompage de la rue des Ormes;\n• un montant de 34 880 $, taxes en sus, pour la station de pompage de la rue des Cèdres;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la résolution 2026-054 autorisant la demande de PIIA pour l'agrandissement du bâtiment principal au 141 rue Main.\",\"excerpt\":\"D’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la\\ndemande d’agrandissement du bâtiment principal situé au 141 rue Main, le tout\\nconformément aux documents soumis.\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement sur les PIIA 2006 n'est mentionné que comme un rappel réglementaire d'assujettissement dans les considérants et ne fait l'objet d'aucune démarche procédurale dans cette séance.\",\"excerpt\":\"CONSIDÉRANT QUE l’immeuble est assujetti au règlement sur les PIIA 2006;\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La directrice générale procède formellement au dépôt du rapport cumulatif d'émission des permis pour la période terminant en mars 2026.\",\"excerpt\":\"La directrice générale dépose le rapport cumulatif d’émission des permis pour la période\\nse terminant en mars 2026.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution retenant certains bâtiments et demandant le retrait des autres dans le cadre de l'inventaire du patrimoine immobilier de la MRC.\",\"excerpt\":\"DE retenir, parmi les bâtiments situés sur le territoire de la municipalité de Hatley\\napparaissant à l’Annexe 2 – Liste des bâtiments et autres biens du corpus de la phase 1\\nd’inventaire, les bâtiments suivants\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal adopte une résolution d'appui à la demande d'autorisation à la CPTAQ pour l'agrandissement du lieu d'enfouissement technique.\",\"excerpt\":\"D’appuyer la demande de la Régie intermunicipale de gestion des déchets solides de la\\nrégion de Coaticook à la Commission de protection du territoire agricole du Québec\\nvisant l’obtention d’une autorisation\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"L'octroi d'un contrat de remplacement de composantes électroniques dans des stations de pompage relève des exclusions (contrats de services/entretien d'infrastructures sans développement ou acte d'urbanisme explicite).\",\"excerpt\":\"D’octroyer le contrat à l’entreprise Electro-Concept P.B.L. inc. pour le remplacement\\ndes composantes électroniques des stations de pompage des rues des Cèdres et des\\nOrmes\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la résolution 2026-054 autorisant la demande de PIIA pour l'agrandissement du bâtiment principal au 141 rue Main.",
+   "excerpt": "D’accepter la recommandation du comité consultatif en urbanisme visant à autoriser la\ndemande d’agrandissement du bâtiment principal situé au 141 rue Main, le tout\nconformément aux documents soumis."
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement sur les PIIA 2006 n'est mentionné que comme un rappel réglementaire d'assujettissement dans les considérants et ne fait l'objet d'aucune démarche procédurale dans cette séance.",
+   "excerpt": "CONSIDÉRANT QUE l’immeuble est assujetti au règlement sur les PIIA 2006;"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La directrice générale procède formellement au dépôt du rapport cumulatif d'émission des permis pour la période terminant en mars 2026.",
+   "excerpt": "La directrice générale dépose le rapport cumulatif d’émission des permis pour la période\nse terminant en mars 2026."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution retenant certains bâtiments et demandant le retrait des autres dans le cadre de l'inventaire du patrimoine immobilier de la MRC.",
+   "excerpt": "DE retenir, parmi les bâtiments situés sur le territoire de la municipalité de Hatley\napparaissant à l’Annexe 2 – Liste des bâtiments et autres biens du corpus de la phase 1\nd’inventaire, les bâtiments suivants"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal adopte une résolution d'appui à la demande d'autorisation à la CPTAQ pour l'agrandissement du lieu d'enfouissement technique.",
+   "excerpt": "D’appuyer la demande de la Régie intermunicipale de gestion des déchets solides de la\nrégion de Coaticook à la Commission de protection du territoire agricole du Québec\nvisant l’obtention d’une autorisation"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de remplacement de composantes électroniques dans des stations de pompage relève des exclusions (contrats de services/entretien d'infrastructures sans développement ou acte d'urbanisme explicite).",
+   "excerpt": "D’octroyer le contrat à l’entreprise Electro-Concept P.B.L. inc. pour le remplacement\ndes composantes électroniques des stations de pompage des rues des Cèdres et des\nOrmes"
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement sur les PIIA 2006 n'est mentionné que comme un rappel réglementaire d'assujettissement dans les considérants et ne fait l'objet d'aucune démarche procédurale dans cette séance."
+   },
+   {
+    "act": "A06",
+    "reason": "L'octroi d'un contrat de remplacement de composantes électroniques dans des stations de pompage relève des exclusions (contrats de services/entretien d'infrastructures sans développement ou acte d'urbanisme explicite)."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte la résolution 2026-054 autorisant la demande de PIIA pour l'agrandissement du bâtiment principal au 141 rue Main."
+   },
+   {
+    "act": "A03",
+    "reason": "La directrice générale procède formellement au dépôt du rapport cumulatif d'émission des permis pour la période terminant en mars 2026."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil adopte une résolution retenant certains bâtiments et demandant le retrait des autres dans le cadre de l'inventaire du patrimoine immobilier de la MRC."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil municipal adopte une résolution d'appui à la demande d'autorisation à la CPTAQ pour l'agrandissement du lieu d'enfouissement technique."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2503,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 15545,
+   "outputTokens": 593,
+   "totalTokens": 16138
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2348
+  },
+  "inputSha256": "62ddd583842a1a20b80aa5d4f4e19856b2b212be9022ee2ff7ad72fc46533f68"
+ }
+}

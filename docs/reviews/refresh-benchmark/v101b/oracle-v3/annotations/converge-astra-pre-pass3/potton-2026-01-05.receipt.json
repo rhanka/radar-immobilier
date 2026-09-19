@@ -1,0 +1,36 @@
+{
+ "documentId": "potton-2026-01-05",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "6e7a2bf2057ecd980097c4b8b6abf95615089d95eb87795bc1272c6523568da4",
+ "inputSha256": "80b5af97c322903763815c9e2fcd7f61f793822392b993bdaec9fb80fa377b43",
+ "responseSha256": "78ee9d89c646fc1e6d42fbc88ab5cf62b094f0974dcc6c3f74fa4aadd319de7f",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 20902,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 36346,
+  "outputTokens": 631,
+  "totalTokens": 36977
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 20899,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:25:04.509Z"
+}

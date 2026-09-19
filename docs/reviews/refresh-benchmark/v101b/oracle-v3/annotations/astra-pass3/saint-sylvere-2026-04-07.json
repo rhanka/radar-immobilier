@@ -1,0 +1,148 @@
+{
+ "documentId": "saint-sylvere-2026-04-07",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "8b7b8350fdc54fe2c7ab617f2069ef5c4429b9fb958955266415f48aae00735a",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Avis de motion — règlement 383 modifiant le zonage 247\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"383\",\n        \"page\": 6,\n        \"citation\": \"Gabrielle Gauthier donne avis de motion qu’il sera présenté pour adoption à un\\nséance ultérieure du conseil municipal le règlement suivant:\\n-\\n\\nRèglement # 383 modifiant le règlement de zonage # 247\",\n        \"anchor\": \"Règlement # 383\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les sauts de ligne de la page 6, notamment autour du tiret, doivent être rétablis.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Dépôt et adoption du premier projet — règlement 383 modifiant le zonage 247\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"383\",\n        \"page\": 7,\n        \"citation\": \"de la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\\n# 383 n odifiant le règlement de zonage # 247.\",\n        \"anchor\": \"règlement\\n# 383\"\n      },\n      \"reason\": \"La citation et son ancre doivent reproduire exactement le texte de la page 7, où un saut de ligne sépare « règlement » de « # 383 ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Avis de motion — règlement 384 sur les PPCMOI\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"384\",\n        \"page\": 7,\n        \"citation\": \"Yan )agenais avis de motion qu’il sera présenté pour adoption à une séance\\n\\nultérieur du conseil municipal le règlement suivant:\\nRèglLment 4*384\",\n        \"anchor\": \"RèglLment 4*384\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique, en conservant les sauts de ligne présents dans l’avis de motion à la page 7.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Dépôt et adoption du premier projet — règlement 384 sur les PPCMOI\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"384\",\n        \"page\": 8,\n        \"citation\": \"IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384.\",\n        \"anchor\": \"règlement # 384\"\n      },\n      \"reason\": \"La citation doit reproduire à l’identique la résolution de la page 8, notamment le saut de ligne avant « municipalité ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Appui municipal à la demande CPTAQ — lotissement 453952 et échange de parcelles\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"453952\",\n        \"page\": 8,\n        \"citation\": \"demande de lotissement 453952 du cadastre du Québec de la circonscription foncière d(\\nNicolet qui est conforme à la réglementation d’urbanisme.\\nAdoptée à l’unanimité des conseillers présents.\",\n        \"anchor\": \"demande de lotissement 453952\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les sauts de ligne avant « Nicolet » et « Adoptée » sont présents à la page 8.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Avis de motion — règlement 383 modifiant le zonage 247",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "383",
+    "page": 6,
+    "citation": "Gabrielle Gauthier donne avis de motion qu’il sera présenté pour adoption à un\nséance ultérieure du conseil municipal le règlement suivant:\n-\n\nRèglement # 383 modifiant le règlement de zonage # 247",
+    "anchor": "Règlement # 383"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les sauts de ligne de la page 6, notamment autour du tiret, doivent être rétablis."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Dépôt et adoption du premier projet — règlement 383 modifiant le zonage 247",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "383",
+    "page": 7,
+    "citation": "de la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247.",
+    "anchor": "règlement\n# 383"
+   },
+   "reason": "La citation et son ancre doivent reproduire exactement le texte de la page 7, où un saut de ligne sépare « règlement » de « # 383 »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Avis de motion — règlement 384 sur les PPCMOI",
+    "stage": "avis_motion",
+    "procedure": "ppcmoi",
+    "objet": "384",
+    "page": 7,
+    "citation": "Yan )agenais avis de motion qu’il sera présenté pour adoption à une séance\n\nultérieur du conseil municipal le règlement suivant:\nRèglLment 4*384",
+    "anchor": "RèglLment 4*384"
+   },
+   "reason": "La citation doit être recopiée à l’identique, en conservant les sauts de ligne présents dans l’avis de motion à la page 7."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Dépôt et adoption du premier projet — règlement 384 sur les PPCMOI",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "384",
+    "page": 8,
+    "citation": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384.",
+    "anchor": "règlement # 384"
+   },
+   "reason": "La citation doit reproduire à l’identique la résolution de la page 8, notamment le saut de ligne avant « municipalité »."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Appui municipal à la demande CPTAQ — lotissement 453952 et échange de parcelles",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "453952",
+    "page": 8,
+    "citation": "demande de lotissement 453952 du cadastre du Québec de la circonscription foncière d(\nNicolet qui est conforme à la réglementation d’urbanisme.\nAdoptée à l’unanimité des conseillers présents.",
+    "anchor": "demande de lotissement 453952"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les sauts de ligne avant « Nicolet » et « Adoptée » sont présents à la page 8."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "avis_motion",
+   "page": 6,
+   "citation": "Gabrielle Gauthier donne avis de motion qu’il sera présenté pour adoption à un\nséance ultérieure du conseil municipal le règlement suivant:\n-\n\nRèglement # 383 modifiant le règlement de zonage # 247"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "projet_reglement",
+   "page": 7,
+   "citation": "de la m inicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement\n# 383 n odifiant le règlement de zonage # 247."
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "avis_motion",
+   "page": 7,
+   "citation": "Yan )agenais avis de motion qu’il sera présenté pour adoption à une séance\n\nultérieur du conseil municipal le règlement suivant:\nRèglLment 4*384"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "projet_reglement",
+   "page": 8,
+   "citation": "IL EST RÉSOLU À L’UNANIMITÉ DES CONSEILLERS PRÉSENTS que le conseil de I\nmunicipalité de Saint-Sylvère dépose et adopte le premier projet de règlement # 384."
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "adoption",
+   "page": 8,
+   "citation": "demande de lotissement 453952 du cadastre du Québec de la circonscription foncière d(\nNicolet qui est conforme à la réglementation d’urbanisme.\nAdoptée à l’unanimité des conseillers présents."
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 5
+}

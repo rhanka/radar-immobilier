@@ -1,0 +1,823 @@
+{
+ "documentId": "sainte-thecle-2026-03-09",
+ "nextId": 22,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Engagement des procédures de modification du règlement 389-2021 — circulation des motoneiges",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "389-2021",
+    "page": 16,
+    "citation": "que le conseil de la municipalité de Sainte-Thècle entame les procédures de modification du règlement 389-2021 afin de donner accès aux motoneigistes à un poste d’essence dans la municipalité",
+    "anchor": "règlement 389-2021",
+    "spanStart": 1642,
+    "spanEnd": 1833
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Engagement des procédures de modification du règlement 389-2021 — circulation des motoneiges",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "389-2021",
+      "page": 16,
+      "citation": "que le conseil de la municipalité de Sainte-Thècle entame les procédures de modification du règlement 389-2021 afin de donner accès aux motoneigistes à un poste d’essence dans la municipalité",
+      "anchor": "règlement 389-2021",
+      "spanStart": 1642,
+      "spanEnd": 1833
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution engage la modification d’un règlement explicitement qualifié d’urbanisme, sans constater encore un avis de motion, un projet ou son adoption."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Décision sur la demande d’autorisation du propriétaire du lot 4 757 089 (conteneur) — déplacement demandé vers la zone 22-AF(4HA)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "4 757 089",
+    "page": 17,
+    "citation": "que le conseil de la municipalité de Sainte-Thècle demande au propriétaire du lot 4 757 089 de",
+    "anchor": "lot 4 757 089",
+    "spanStart": 2078,
+    "spanEnd": 2172
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Décision sur le lot 4 757 089 — déplacement du conteneur demandé vers la zone 22-AF(4HA)",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "4 757 089",
+      "page": 17,
+      "citation": "que le conseil de la municipalité de Sainte-Thècle demande au propriétaire du lot 4 757 089 de",
+      "anchor": "lot 4 757 089",
+      "spanStart": 2078,
+      "spanEnd": 2172
+     }
+    },
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Décision sur la demande d’autorisation du propriétaire du lot 4 757 089 (conteneur) — déplacement demandé vers la zone 22-AF(4HA)",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "4 757 089",
+      "page": 17,
+      "citation": "que le conseil de la municipalité de Sainte-Thècle demande au propriétaire du lot 4 757 089 de",
+      "anchor": "lot 4 757 089",
+      "spanStart": 2078,
+      "spanEnd": 2172
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution statue sur la demande d’autorisation en demandant le déplacement du conteneur dans la zone 22-AF(4HA), sans accorder une installation ailleurs sur le lot."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "correct",
+     "reason": "La résolution 2026-03-072 tranche une demande d’autorisation d’installation d’un conteneur (règlement de zonage #337-2016) : ce n’est ni l’adoption d’un règlement, ni un PPCMOI/usage conditionnel, ni un acte foncier (vente, acquisition, cession, servitude), donc l’étape n’entre dans aucune valeur définie et relève de « inconnu », comme les exemples du vocabulaire (avis de non-modification, convention de prêt à usage)."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption du deuxième projet de règlement 434-2026 — production d’énergie commerciale",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "434-2026",
+    "page": 20,
+    "citation": "adopte le 2e projet de règlement 434-2026 remplaçant le règlement 430-2025 modifiant le règlement de zonage numéro 337-2016",
+    "anchor": "règlement 434-2026",
+    "spanStart": 694,
+    "spanEnd": 817
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du deuxième projet de règlement 434-2026 — production d’énergie commerciale",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "434-2026",
+      "page": 20,
+      "citation": "adopte le 2e projet de règlement 434-2026 remplaçant le règlement 430-2025 modifiant le règlement de zonage numéro 337-2016",
+      "anchor": "règlement 434-2026",
+      "spanStart": 694,
+      "spanEnd": 817
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le deuxième projet est adopté dans cette séance, tandis que l’avis de motion et le premier projet du 23 février sont des rappels historiques."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 435-2026 — occupation et entretien des bâtiments",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "435-2026",
+    "page": 20,
+    "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 435-2026 relatif à l’occupation et à l’entretien des bâtiments sur le territoire de la Municipalité de Sainte-Thècle",
+    "anchor": "règlement 435-2026",
+    "spanStart": 1174,
+    "spanEnd": 1352
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 435-2026 — occupation et entretien des bâtiments",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "435-2026",
+      "page": 20,
+      "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 435-2026 relatif à l’occupation et à l’entretien des bâtiments sur le territoire de la Municipalité de Sainte-Thècle",
+      "anchor": "règlement 435-2026",
+      "spanStart": 1174,
+      "spanEnd": 1352
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion est donné dans la séance et constitue une unité distincte du premier projet."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet de règlement 435-2026 — occupation et entretien des bâtiments",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "435-2026",
+    "page": 20,
+    "citation": "adopte le 1er projet de règlement 435-2026 relatif à l’occupation et à l’entretien des bâtiments sur le territoire de la Municipalité de Sainte-Thècle",
+    "anchor": "règlement 435-2026",
+    "spanStart": 2090,
+    "spanEnd": 2240
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet de règlement 435-2026 — occupation et entretien des bâtiments",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "435-2026",
+      "page": 20,
+      "citation": "adopte le 1er projet de règlement 435-2026 relatif à l’occupation et à l’entretien des bâtiments sur le territoire de la Municipalité de Sainte-Thècle",
+      "anchor": "règlement 435-2026",
+      "spanStart": 2090,
+      "spanEnd": 2240
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le premier projet est déposé puis adopté dans la séance, ce qui forme une seule unité à l’étape du premier projet."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Consultation publique fixée au 23 mars 2026 à 18h00 — règlement 435-2026",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "435-2026",
+    "page": 21,
+    "citation": "conseil municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h00 concernant le règlement 435-2026",
+    "anchor": "règlement 435-2026",
+    "spanStart": 800,
+    "spanEnd": 926
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Consultation publique fixée au 23 mars 2026 à 18h00 — règlement 435-2026",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "435-2026",
+      "page": 21,
+      "citation": "conseil municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h00 concernant le règlement 435-2026",
+      "anchor": "règlement 435-2026",
+      "spanStart": 800,
+      "spanEnd": 926
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution fixe une consultation propre au règlement 435-2026, sans attester qu’elle a déjà eu lieu."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 436-2026 — hébergement touristique",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "436-2026",
+    "page": 21,
+    "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 436-2026 modifiant le règlement 398-2023 qui modifiait le règlement de zonage #337-2016",
+    "anchor": "règlement 436-2026",
+    "spanStart": 1403,
+    "spanEnd": 1552
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 436-2026 — hébergement touristique",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "436-2026",
+      "page": 21,
+      "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 436-2026 modifiant le règlement 398-2023 qui modifiait le règlement de zonage #337-2016",
+      "anchor": "règlement 436-2026",
+      "spanStart": 1403,
+      "spanEnd": 1552
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion actuel concernant les modalités d’hébergement touristique doit être distingué du premier projet."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet de règlement 436-2026 — hébergement touristique",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "436-2026",
+    "page": 22,
+    "citation": "adopte le 1er projet de règlement 436-2026 modifiant le règlement 398-2023 qui modifiait le règlement de zonage #337-2016",
+    "anchor": "règlement 436-2026",
+    "spanStart": 393,
+    "spanEnd": 514
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet de règlement 436-2026 — hébergement touristique",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "436-2026",
+      "page": 22,
+      "citation": "adopte le 1er projet de règlement 436-2026 modifiant le règlement 398-2023 qui modifiait le règlement de zonage #337-2016",
+      "anchor": "règlement 436-2026",
+      "spanStart": 393,
+      "spanEnd": 514
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution adopte le premier projet de modification du zonage, dont le dépôt dans la même séance ne crée pas une seconde unité de même étape."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Consultation publique fixée au 23 mars 2026 à 18h05 — règlement 436-2026",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "436-2026",
+    "page": 22,
+    "citation": "municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h05 concernant le règlement 436-2026",
+    "anchor": "règlement 436-2026",
+    "spanStart": 1863,
+    "spanEnd": 1981
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Consultation publique fixée au 23 mars 2026 à 18h05 — règlement 436-2026",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "436-2026",
+      "page": 22,
+      "citation": "municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h05 concernant le règlement 436-2026",
+      "anchor": "règlement 436-2026",
+      "spanStart": 1863,
+      "spanEnd": 1981
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La fixation de cette assemblée constitue une étape explicite de consultation sur le règlement 436-2026."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 437-2026 — transmission des demandes de dérogation mineure",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "437-2026",
+    "page": 23,
+    "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 437-2026 modifiant les règlements 421-2025, 189-2002 et 48-93 concernant la transmission de la demande de dérogation mineure",
+    "anchor": "règlement 437-2026",
+    "spanStart": 5,
+    "spanEnd": 191
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 437-2026 — transmission des demandes de dérogation mineure",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "437-2026",
+      "page": 23,
+      "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 437-2026 modifiant les règlements 421-2025, 189-2002 et 48-93 concernant la transmission de la demande de dérogation mineure",
+      "anchor": "règlement 437-2026",
+      "spanStart": 5,
+      "spanEnd": 191
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le texte constate un avis de motion actuel pour ce règlement relatif aux dérogations mineures."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet de règlement 437-2026 — transmission des demandes de dérogation mineure",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "437-2026",
+    "page": 23,
+    "citation": "adopte le 1er projet de règlement 437-2026 modifiant les règlements 421-2025, 189-2002 et 48-93 concernant la transmission de la demande de dérogation mineure",
+    "anchor": "règlement 437-2026",
+    "spanStart": 949,
+    "spanEnd": 1107
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet de règlement 437-2026 — transmission des demandes de dérogation mineure",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "437-2026",
+      "page": 23,
+      "citation": "adopte le 1er projet de règlement 437-2026 modifiant les règlements 421-2025, 189-2002 et 48-93 concernant la transmission de la demande de dérogation mineure",
+      "anchor": "règlement 437-2026",
+      "spanStart": 949,
+      "spanEnd": 1107
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le premier projet est adopté et constitue une unité distincte de l’avis de motion, sans multiplier les unités pour les règlements qu’il modifie."
+    }
+   ]
+  },
+  {
+   "id": "u12",
+   "status": "active",
+   "current": {
+    "label": "Consultation publique fixée au 23 mars 2026 à 18h10 — règlement 437-2026",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "437-2026",
+    "page": 23,
+    "citation": "conseil municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h10 concernant le règlement 437-2026",
+    "anchor": "règlement 437-2026",
+    "spanStart": 1945,
+    "spanEnd": 2071
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Consultation publique fixée au 23 mars 2026 à 18h10 — règlement 437-2026",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "437-2026",
+      "page": 23,
+      "citation": "conseil municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h10 concernant le règlement 437-2026",
+      "anchor": "règlement 437-2026",
+      "spanStart": 1945,
+      "spanEnd": 2071
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Une résolution distincte fixe la consultation publique concernant cet objet réglementaire."
+    }
+   ]
+  },
+  {
+   "id": "u13",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 438-2026 — dispositions relatives aux autres permis",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "438-2026",
+    "page": 24,
+    "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 438-2026 modifiant les règlements 429-2025, 395-2023 et 333-2016 concernant les dispositions relatives aux autres permis",
+    "anchor": "règlement 438-2026",
+    "spanStart": 94,
+    "spanEnd": 276
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 438-2026 — dispositions relatives aux autres permis",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "438-2026",
+      "page": 24,
+      "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 438-2026 modifiant les règlements 429-2025, 395-2023 et 333-2016 concernant les dispositions relatives aux autres permis",
+      "anchor": "règlement 438-2026",
+      "spanStart": 94,
+      "spanEnd": 276
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion est donné pour un règlement relatif aux permis et doit être séparé du dépôt du projet."
+    }
+   ]
+  },
+  {
+   "id": "u14",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du projet de règlement 438-2026 — dispositions relatives aux autres permis",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "438-2026",
+    "page": 24,
+    "citation": "dépose le projet de règlement 438-2026 modifiant les règlements 429-2025, 395-2023 et 333-2016 concernant les dispositions relatives aux autres permis",
+    "anchor": "règlement 438-2026",
+    "spanStart": 278,
+    "spanEnd": 428
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du projet de règlement 438-2026 — dispositions relatives aux autres permis",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "438-2026",
+      "page": 24,
+      "citation": "dépose le projet de règlement 438-2026 modifiant les règlements 429-2025, 395-2023 et 333-2016 concernant les dispositions relatives aux autres permis",
+      "anchor": "règlement 438-2026",
+      "spanStart": 278,
+      "spanEnd": 428
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le dépôt du projet est expressément constaté, sans adoption finale du règlement dans ce document."
+    }
+   ]
+  },
+  {
+   "id": "u15",
+   "status": "active",
+   "current": {
+    "label": "Appui à une demande de suspension des nouvelles activités — projet d’aire protégée PR-1013718",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "PR-1013718",
+    "page": 25,
+    "citation": "ne soit autorisée dans les limites du projet d’aire protégée de la forêt ancienne des lacs Grandbois (PR-1013718) et ce, jusqu’à ce qu’une décision gouvernementale soit prise pour ce projet",
+    "anchor": "lacs Grandbois (PR-1013718",
+    "spanStart": 848,
+    "spanEnd": 1037
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Appui à une demande de suspension des nouvelles activités — projet d’aire protégée PR-1013718",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "PR-1013718",
+      "page": 25,
+      "citation": "ne soit autorisée dans les limites du projet d’aire protégée de la forêt ancienne des lacs Grandbois (PR-1013718) et ce, jusqu’à ce qu’une décision gouvernementale soit prise pour ce projet",
+      "anchor": "lacs Grandbois (PR-1013718",
+      "spanStart": 848,
+      "spanEnd": 1037
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution appuie une demande de protection transitoire d’un territoire explicitement identifié, sans établir elle-même l’aire protégée ni la suspension demandée."
+    }
+   ]
+  },
+  {
+   "id": "u16",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 440-2026 — zone 96-Rc et définition d’un conteneur",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "440-2026",
+    "page": 25,
+    "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe D",
+    "anchor": "règlement 440-2026",
+    "spanStart": 1683,
+    "spanEnd": 1805
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 440-2026 — zone 96-Rc et définition d’un conteneur",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "440-2026",
+      "page": 25,
+      "citation": "donne avis de motion à l’effet qu’il sera adopté le règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe D",
+      "anchor": "règlement 440-2026",
+      "spanStart": 1683,
+      "spanEnd": 1805
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion concernant les annexes du règlement de zonage est une étape actuelle distincte du premier projet."
+    }
+   ]
+  },
+  {
+   "id": "u17",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet de règlement 440-2026 — zone 96-Rc et définition d’un conteneur",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "440-2026",
+    "page": 26,
+    "citation": "adopte le 1er projet de règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe D pour enlever la note N.B. 22 et ajouter la note N.B. 7 dans la zone 96-Rc",
+    "anchor": "règlement 440-2026",
+    "spanStart": 188,
+    "spanEnd": 356
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet de règlement 440-2026 — zone 96-Rc et définition d’un conteneur",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "440-2026",
+      "page": 26,
+      "citation": "adopte le 1er projet de règlement 440-2026 modifiant le règlement de zonage #337-2016 Annexe D pour enlever la note N.B. 22 et ajouter la note N.B. 7 dans la zone 96-Rc",
+      "anchor": "règlement 440-2026",
+      "spanStart": 188,
+      "spanEnd": 356
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le premier projet est adopté dans la séance; son dépôt et cette adoption relèvent d’une seule unité de premier projet."
+    }
+   ]
+  },
+  {
+   "id": "u18",
+   "status": "active",
+   "current": {
+    "label": "Consultation publique fixée au 23 mars 2026 à 18h15 — règlement 440-2026",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "440-2026",
+    "page": 26,
+    "citation": "municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h15 concernant le règlement 440-2026",
+    "anchor": "règlement 440-2026",
+    "spanStart": 1427,
+    "spanEnd": 1545
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Consultation publique fixée au 23 mars 2026 à 18h15 — règlement 440-2026",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "440-2026",
+      "page": 26,
+      "citation": "municipal tienne une assemblée publique de consultation le lundi 23 mars 2026 à 18h15 concernant le règlement 440-2026",
+      "anchor": "règlement 440-2026",
+      "spanStart": 1427,
+      "spanEnd": 1545
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution fixe une consultation publique propre au règlement 440-2026, distincte de son premier projet."
+    }
+   ]
+  },
+  {
+   "id": "u19",
+   "status": "active",
+   "current": {
+    "label": "Appui à la demande à la CPTAQ — acquisition d’environ 4,6 acres du lot 4 756 274",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "4 756 274",
+    "page": 26,
+    "citation": "municipal appuie la demande de la Ferme Michel Lebel SENC pour l’acquisition d’une partie du lot 4 756 274 d’environ 4,6 acres",
+    "anchor": "lot 4 756 274",
+    "spanStart": 2211,
+    "spanEnd": 2337
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Appui à la demande à la CPTAQ — acquisition d’environ 4,6 acres du lot 4 756 274",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "4 756 274",
+      "page": 26,
+      "citation": "municipal appuie la demande de la Ferme Michel Lebel SENC pour l’acquisition d’une partie du lot 4 756 274 d’environ 4,6 acres",
+      "anchor": "lot 4 756 274",
+      "spanStart": 2211,
+      "spanEnd": 2337
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’appui municipal concerne une acquisition foncière explicite, mais ne constitue ni l’autorisation de la CPTAQ ni la réalisation de l’acquisition."
+    }
+   ]
+  },
+  {
+   "id": "u20",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure acceptée — 250-252, rue Notre-Dame, lotissement et marges latérales",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "250-252, rue Notre-Dame",
+    "page": 27,
+    "citation": "Rés. 2026-03-086 : Demande de dérogation mineure pour le 250-252, rue Notre-Dame",
+    "anchor": "250-252, rue Notre-Dame",
+    "spanStart": 20,
+    "spanEnd": 100
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure acceptée — 250-252, rue Notre-Dame, lotissement et marges latérales",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "250-252, rue Notre-Dame",
+      "page": 27,
+      "citation": "Rés. 2026-03-086 : Demande de dérogation mineure pour le 250-252, rue Notre-Dame",
+      "anchor": "250-252, rue Notre-Dame",
+      "spanStart": 20,
+      "spanEnd": 100
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accepte cette demande pour une largeur de terrain de 13,72 mètres, une marge latérale de 4 mètres et une somme des marges latérales de 6 mètres."
+    }
+   ]
+  },
+  {
+   "id": "u21",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure — 500, rue Bédard : refus de superficie, marge gauche de 1,25 m autorisée sous condition",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "500, rue Bédard",
+    "page": 27,
+    "citation": "Rés. 2026-03-087 : Demande de dérogation mineure pour le 500, rue Bédard",
+    "anchor": "500, rue Bédard",
+    "spanStart": 1346,
+    "spanEnd": 1418
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure — 500, rue Bédard : refus de superficie, marge gauche de 1,25 m autorisée sous condition",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "500, rue Bédard",
+      "page": 27,
+      "citation": "Rés. 2026-03-087 : Demande de dérogation mineure pour le 500, rue Bédard",
+      "anchor": "500, rue Bédard",
+      "spanStart": 1346,
+      "spanEnd": 1418
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cette demande unique reçoit une décision mixte : refus du dépassement de superficie et autorisation de la marge gauche à 1,25 mètres, sans fenêtres ni portes vers la ligne latérale gauche."
+    }
+   ]
+  }
+ ]
+}

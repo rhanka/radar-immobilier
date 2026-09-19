@@ -1,0 +1,51 @@
+{
+ "documentId": "arundel-2026-07-31",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "12d93e61bac9f641799398316817d7dcf9cd535d65f53ab01a2d9a52fce57c36",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La page 3 décide expressément « ADOPT in second reading and decree bylaw 312-2026 » : il s’agit de l’adoption actuelle du règlement sur les PPCMOI, distincte des étapes historiques rappelées.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La page 6 autorise explicitement le permis selon le règlement de PIIA 285 pour construire un abri d’auto au 165 Chemin de la Rouge, conformément à la citation proposée.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La page 7 autorise explicitement le permis selon le règlement de PIIA 168 pour rénover le toit et la façade du garage au 117 Rue du Village, après confirmation écrite concernant la peinture de la façade.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La page 3 décide expressément « ADOPT in second reading and decree bylaw 312-2026 » : il s’agit de l’adoption actuelle du règlement sur les PPCMOI, distincte des étapes historiques rappelées."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La page 6 autorise explicitement le permis selon le règlement de PIIA 285 pour construire un abri d’auto au 165 Chemin de la Rouge, conformément à la citation proposée."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La page 7 autorise explicitement le permis selon le règlement de PIIA 168 pour rénover le toit et la façade du garage au 117 Rue du Village, après confirmation écrite concernant la peinture de la façade."
+  }
+ ]
+}

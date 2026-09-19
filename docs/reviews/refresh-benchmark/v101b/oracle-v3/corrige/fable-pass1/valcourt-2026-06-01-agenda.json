@@ -1,0 +1,272 @@
+{
+ "documentId": "valcourt-2026-06-01-agenda",
+ "nextId": 8,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "PIIA prévu — 1070, rue Bissonnette — lotissement",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "1070, RUE BISSONNETTE",
+    "page": 1,
+    "citation": "1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT",
+    "anchor": "1070, RUE BISSONNETTE",
+    "spanStart": 399,
+    "spanEnd": 459
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA prévu — 1070, rue Bissonnette — lotissement",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "1070, RUE BISSONNETTE",
+      "page": 1,
+      "citation": "1070, RUE BISSONNETTE - PIIA BOISÉ DU RUISSEAU - LOTISSEMENT",
+      "anchor": "1070, RUE BISSONNETTE",
+      "spanStart": 399,
+      "spanEnd": 459
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 7.1 prévoit l'examen d'un PIIA de lotissement, qui constitue une unité sans attester une décision acquise."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "PIIA prévu — 1070, rue Bissonnette — construction de deux bâtiments principaux unifamiliaux jumelés",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "1070,RUE BISSONNETTE",
+    "page": 1,
+    "citation": "1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE DEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS",
+    "anchor": "1070,RUE BISSONNETTE",
+    "spanStart": 466,
+    "spanEnd": 576
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA prévu — 1070, rue Bissonnette — construction de deux bâtiments principaux unifamiliaux jumelés",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "1070,RUE BISSONNETTE",
+      "page": 1,
+      "citation": "1070,RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION DE DEUX BÂTIMENTS PRINCIPAUX UNIFAMILIAUX JUMELÉS",
+      "anchor": "1070,RUE BISSONNETTE",
+      "spanStart": 466,
+      "spanEnd": 576
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 7.2 prévoit un PIIA de construction distinct du PIIA de lotissement à la même adresse."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "PIIA prévu — 1045, rue Bissonnette — construction d'une habitation unifamiliale isolée",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "1045, RUE BISSONNETTE",
+    "page": 1,
+    "citation": "1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D’UN BÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE",
+    "anchor": "1045, RUE BISSONNETTE",
+    "spanStart": 583,
+    "spanEnd": 701
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA prévu — 1045, rue Bissonnette — construction d'une habitation unifamiliale isolée",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "1045, RUE BISSONNETTE",
+      "page": 1,
+      "citation": "1045, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – CONSTRUCTION D’UN BÂTIMENT PRINCIPAL - HABITATION UNIFAMILIALE ISOLÉE",
+      "anchor": "1045, RUE BISSONNETTE",
+      "spanStart": 583,
+      "spanEnd": 701
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 7.3 nomme explicitement un PIIA de construction prévu à l'ordre du jour, à inclure sans présumer son approbation."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "PIIA prévu — 1075, rue Bissonnette — remblai",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "1075, RUE BISSONNETTE",
+    "page": 1,
+    "citation": "1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI",
+    "anchor": "1075, RUE BISSONNETTE",
+    "spanStart": 708,
+    "spanEnd": 764
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA prévu — 1075, rue Bissonnette — remblai",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "1075, RUE BISSONNETTE",
+      "page": 1,
+      "citation": "1075, RUE BISSONNETTE – PIIA BOISÉ DU RUISSEAU – REMBLAI",
+      "anchor": "1075, RUE BISSONNETTE",
+      "spanStart": 708,
+      "spanEnd": 764
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 7.4 prévoit un PIIA de remblai, inclus au même titre que les autres demandes de PIIA."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du second projet de règlement 560-28 modifiant le zonage",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "560-28",
+    "page": 1,
+    "citation": "ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560",
+    "anchor": "RÈGLEMENT 560-28",
+    "spanStart": 771,
+    "spanEnd": 852
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du second projet de règlement 560-28 modifiant le zonage",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "560-28",
+      "page": 1,
+      "citation": "ADOPTION DU SECOND PROJET DE RÈGLEMENT 560-28 AMENDANT LE RÈGLEMENT DE ZONAGE 560",
+      "anchor": "RÈGLEMENT 560-28",
+      "spanStart": 771,
+      "spanEnd": 852
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 7.5 prévoit l'adoption du second projet du règlement 560-28, étape distincte de l'adoption finale du règlement."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Révision prévue du projet de règlement sur les pratiques agroenvironnementales",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "pratiques agroenvironnementales",
+    "page": 2,
+    "citation": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES",
+    "anchor": "PRATIQUES AGROENVIRONNEMENTALES",
+    "spanStart": 1106,
+    "spanEnd": 1188
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Révision prévue du projet de règlement sur les pratiques agroenvironnementales",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "pratiques agroenvironnementales",
+      "page": 2,
+      "citation": "RÉVISION NÉCESSAIRE DU PROJET DE RÈGLEMENT SUR LES PRATIQUES AGROENVIRONNEMENTALES",
+      "anchor": "PRATIQUES AGROENVIRONNEMENTALES",
+      "spanStart": 1106,
+      "spanEnd": 1188
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 11.1 porte sur la révision d'un objet réglementaire explicite, sans annoncer un avis de motion, un dépôt de projet ou une adoption ; l'étape prévue relève donc d'« inconnu »."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Convention de prêt à usage prévue — 4111 rue Carpentier",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "4111 RUE CARPENTIER",
+    "page": 3,
+    "citation": "4111 RUE CARPENTIER - CONVENTION DE PRÊT À USAGE",
+    "anchor": "4111 RUE CARPENTIER",
+    "spanStart": 523,
+    "spanEnd": 571
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Convention de prêt à usage prévue — 4111 rue Carpentier",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "4111 RUE CARPENTIER",
+      "page": 3,
+      "citation": "4111 RUE CARPENTIER - CONVENTION DE PRÊT À USAGE",
+      "anchor": "4111 RUE CARPENTIER",
+      "spanStart": 523,
+      "spanEnd": 571
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 13.2 prévoit une convention de prêt à usage d'un immeuble explicite, acte foncier inclus et classé « inconnu » selon le vocabulaire d'étape."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,41 @@
+{
+ "documentId": "lac-du-cerf-2026-04-11",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c9c511e751188af60815f0564299776b5cd821cae8d27ff23b4a952704f10066",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"Le point 8.1 prévoit un contrat de services d’évaluation des terrains, et non un acte foncier sur le lotissement ; les marchés de services sont exclus du rappel.\"},{\"item\":\"i02\",\"choice\":\"absent\",\"reason\":\"Le contrat d’évaluation prévu au point 8.1 relève des marchés de services exclus du rappel, malgré sa référence explicite à un projet de lotissement.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "absent"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "Le point 8.1 prévoit un contrat de services d’évaluation des terrains, et non un acte foncier sur le lotissement ; les marchés de services sont exclus du rappel."
+  },
+  {
+   "item": "i02",
+   "choice": "absent",
+   "reason": "Le contrat d’évaluation prévu au point 8.1 relève des marchés de services exclus du rappel, malgré sa référence explicite à un projet de lotissement."
+  }
+ ]
+}

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "campaign": "v101b",
+  "arms": {
+    "gemini-low": {
+      "state": "running",
+      "total": 100,
+      "processed": 15,
+      "accepted": 13,
+      "errors": 0,
+      "lastReceipt": "/results/replay-test/campaign/gemini-low/saint-etienne-de-bolton-2026-08-04--gemini-low.attempt-1.receipt.json",
+      "requests": 40,
+      "rateLimitConsecutive": 0,
+      "resumeAt": null,
+      "etaSeconds": 851
+    },
+    "gemini-medium": {
+      "state": "running",
+      "total": 100,
+      "processed": 13,
+      "accepted": 11,
+      "errors": 0,
+      "lastReceipt": "/results/replay-test/campaign/gemini-medium/val-dor-2026-06-01--gemini-medium.attempt-1.receipt.json",
+      "requests": 36,
+      "rateLimitConsecutive": 0,
+      "resumeAt": null,
+      "etaSeconds": 1861
+    }
+  },
+  "updatedAt": "2026-09-17T16:39:59.543Z"
+}

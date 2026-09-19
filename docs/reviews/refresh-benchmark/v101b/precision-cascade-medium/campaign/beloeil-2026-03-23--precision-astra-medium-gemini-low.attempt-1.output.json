@@ -1,0 +1,996 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-126",
+   "label": "1667-126-2026 — Service de génie dans I-906",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "numero": "1667-126-2026",
+   "municipality": "beloeil",
+   "stage": "2e_projet",
+   "meetingDate": "2026-03-23",
+   "resolution": "2026-03-116",
+   "zone_cible": "I-906",
+   "objet": "Permettre spécifiquement l’usage Service de génie (6592), jusqu’à concurrence de 20 % de la superficie de plancher brute du bâtiment principal.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "D'adopter le second projet du Règlement 1667-126-2026 modifiant le Règlement de zonage 166700-2011",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "consultation-126",
+   "label": "Consultation publique — 1667-126-2026",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "etape": "consultation_publique",
+   "etape_date": "2026-03-23",
+   "reglement_number": "1667-126-2026",
+   "zone_ref": "I-906",
+   "resolution": "2026-03-115",
+   "description": "Consultation tenue sur l’ajout de l’usage Service de génie (6592); aucune intervention.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Le conseil tient une assemblée publique de consultation sur le projet de Règlement 1667-1262026",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "second-126",
+   "label": "Second projet adopté — 1667-126-2026",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "etape": "second_projet",
+   "etape_date": "2026-03-23",
+   "reglement_number": "1667-126-2026",
+   "zone_ref": "I-906",
+   "resolution": "2026-03-116",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "D'adopter le second projet du Règlement 1667-126-2026 modifiant le Règlement de zonage 166700-2011",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-127",
+   "label": "1667-127-2026 — Actualisation environnementale du zonage",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "numero": "1667-127-2026",
+   "municipality": "beloeil",
+   "stage": "2e_projet",
+   "meetingDate": "2026-03-23",
+   "resolution": "2026-03-118",
+   "objet": "Actualiser certaines dispositions d’un point de vue environnemental et en faciliter l’application sur l’ensemble du territoire : définitions, recharge et vélos, piscines, capteurs énergétiques, documents pour logements bigénérationnels, stationnement, arbres, revêtements, climatisation dans H-744, enseignes de barbier et droits acquis résidentiels en zone agricole.",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "D'adopter le second projet du Règlement 1667-127-2026 modifiant le Règlement de zonage 166700-2011",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "consultation-127",
+   "label": "Consultation publique — 1667-127-2026",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "etape": "consultation_publique",
+   "etape_date": "2026-03-23",
+   "reglement_number": "1667-127-2026",
+   "resolution": "2026-03-117",
+   "description": "Consultation tenue sur l’actualisation environnementale des dispositions de zonage; aucune intervention.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Le conseil tient une assemblée publique de consultation sur le projet de Règlement 1667-1272026",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "second-127",
+   "label": "Second projet adopté — 1667-127-2026",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "etape": "second_projet",
+   "etape_date": "2026-03-23",
+   "reglement_number": "1667-127-2026",
+   "resolution": "2026-03-118",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "D'adopter le second projet du Règlement 1667-127-2026 modifiant le Règlement de zonage 166700-2011",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-128",
+   "label": "1667-128-2026 — Usages C-5 dans C-523",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "numero": "1667-128-2026",
+   "municipality": "beloeil",
+   "stage": "2e_projet",
+   "meetingDate": "2026-03-23",
+   "resolution": "2026-03-120",
+   "zone_cible": "C-523",
+   "objet": "Permettre le groupe d’usage Commerce de divertissement et d’activités récréotouristiques (C-5) dans C-523.",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D'adopter le second projet du Règlement 1667-128-2026 modifiant le Règlement de zonage 1667-00-2011",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "consultation-128",
+   "label": "Consultation publique — 1667-128-2026",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "etape": "consultation_publique",
+   "etape_date": "2026-03-23",
+   "reglement_number": "1667-128-2026",
+   "zone_ref": "C-523",
+   "resolution": "2026-03-119",
+   "description": "Consultation tenue sur l’ajout du groupe d’usage C-5 dans C-523; aucune intervention.",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Le conseil tient une assemblée publique de consultation sur le projet de Règlement 1667-1282026",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "second-128",
+   "label": "Second projet adopté — 1667-128-2026",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "etape": "second_projet",
+   "etape_date": "2026-03-23",
+   "reglement_number": "1667-128-2026",
+   "zone_ref": "C-523",
+   "resolution": "2026-03-120",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D'adopter le second projet du Règlement 1667-128-2026 modifiant le Règlement de zonage 1667-00-2011",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-9017",
+   "label": "DM-2026-9017 — 636, rue Salomon",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-23",
+   "dossier": "DM-2026-9017",
+   "resolution": "2026-03-121",
+   "reglement_number": "1667-00-2011",
+   "description": "Agrandissement d’un garage intégré comprenant un deuxième étage : marge avant de 5,8 m au lieu de 7,5 m et marge latérale droite de 1,4 m au lieu de 1,5 m.",
+   "conditions": [
+    "Conditions de la recommandation CCU 2026/02/26."
+   ],
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D’autoriser la dérogation mineure numéro DM-2026-9017 telle que demandée pour le\n636, rue Salomon,",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-9021",
+   "label": "DM-2026-9021 — 1500, rue Louis-Marchand",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-23",
+   "dossier": "DM-2026-9021",
+   "resolution": "2026-03-122",
+   "demandeur_corporate": "Transdev Québec inc.",
+   "reglement_number": "1667-00-2011",
+   "description": "Enseigne supplémentaire à plat sur le bâtiment pour un usage complémentaire, malgré la limite d’une enseigne par façade donnant sur rue.",
+   "conditions": [
+    "Conditions de la recommandation CCU 2026/02/27."
+   ],
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "D’autoriser la dérogation mineure numéro DM-2026-9021 telle que demandée pour le\n1500, rue Louis-Marchand,",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-9022",
+   "label": "DM-2026-9022 — 850, rue Laurier",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-23",
+   "dossier": "DM-2026-9022",
+   "resolution": "2026-03-123",
+   "demandeur_corporate": "Centre de services scolaire des Patriotes",
+   "reglement_number": "1667-00-2011",
+   "description": "Marge latérale droite de 3,9 m au lieu de 5 m; empiètements de 3,9 m, 2,76 m et 2,4 m pour escalier, avant-toit et galerie; absence de distance entre l’escalier et la limite de lot.",
+   "conditions": [
+    "Conditions de la recommandation CCU 2026/02/28."
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "D’autoriser la dérogation mineure numéro DM-2026-9022 telle que demandée pour le\n850, rue Laurier,",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "uc-9008",
+   "label": "UC-2026-9008 — 209, rue Gagnon",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "etape": "usage_conditionnel",
+   "etape_date": "2026-03-23",
+   "dossier": "UC-2026-9008",
+   "resolution": "2026-03-124",
+   "reglement_number": "1646-00-2011",
+   "description": "Logement bigénérationnel de plus de 45 m² par agrandissement sur deux étages d’une résidence unifamiliale isolée.",
+   "conditions": [
+    "Conditions de la recommandation CCU 2026/02/40."
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9008 pour le 209, rue Gagnon, aux\nconditions prévues à la recommandation 2026/02/40",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "uc-9020",
+   "label": "UC-2026-9020 — 850, rue Le Moyne",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "etape": "usage_conditionnel",
+   "etape_date": "2026-03-23",
+   "dossier": "UC-2026-9020",
+   "resolution": "2026-03-125",
+   "reglement_number": "1646-00-2011",
+   "description": "Logement bigénérationnel de plus de 45 m² au rez-de-chaussée et au sous-sol d’une résidence unifamiliale isolée.",
+   "conditions": [
+    "Conditions de la recommandation CCU 2026/02/41."
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9020 pour le 850, rue Le Moyne,\naux conditions prévues à la recommandation 2026/02/41",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-9002",
+   "label": "PIIA-2026-9002 — 1005, rue Richelieu",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-23",
+   "dossier": "PIIA-2026-9002",
+   "resolution": "2026-03-133",
+   "reglement_number": "1813-00-2025",
+   "description": "Modification d’une construction neuve : remplacement de la terrasse sur toit par un deuxième étage complet.",
+   "conditions": [
+    "Recommandation CCU 2026/02/30.",
+    "Respect de l’autorisation; toute modification doit être réévaluée avant les travaux."
+   ],
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/30 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9002",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-9003",
+   "label": "PIIA-2026-9003 — Enseignes, 201-217, rue Saint-Jean-Baptiste",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-23",
+   "dossier": "PIIA-2026-9003",
+   "resolution": "2026-03-134",
+   "reglement_number": "1813-00-2025",
+   "description": "Projet global d’affichage pour l’ensemble des établissements commerciaux du bâtiment.",
+   "conditions": [
+    "Recommandation CCU 2026/02/31.",
+    "Respect de l’autorisation; toute modification doit être réévaluée avant les travaux."
+   ],
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/31 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9003",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-9004",
+   "label": "PIIA-2026-9004 — Enseignes, 229-245, rue Saint-Jean-Baptiste",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-23",
+   "dossier": "PIIA-2026-9004",
+   "resolution": "2026-03-135",
+   "reglement_number": "1813-00-2025",
+   "description": "Projet global d’affichage pour l’ensemble des établissements commerciaux du bâtiment.",
+   "conditions": [
+    "Recommandation CCU 2026/02/32.",
+    "Respect de l’autorisation; toute modification doit être réévaluée avant les travaux."
+   ],
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/32 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9004",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-9009",
+   "label": "PIIA-2026-9009 — Poulet Rouge, 481, rue de l’Industrie",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-23",
+   "dossier": "PIIA-2026-9009",
+   "resolution": "2026-03-136",
+   "reglement_number": "1813-00-2025",
+   "description": "Deux enseignes à plat sur le bâtiment et deux enseignes détachées sur poteaux communs.",
+   "conditions": [
+    "Recommandation CCU 2026/02/33.",
+    "Respect de l’autorisation; toute modification doit être réévaluée avant les travaux."
+   ],
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/33 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9009",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-9024",
+   "label": "PIIA-2026-9024 — Lotissement, rue Serge-Pepin",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-23",
+   "dossier": "PIIA-2026-9024",
+   "resolution": "2026-03-137",
+   "reglement_number": "1813-00-2025",
+   "no_lot": "6580334",
+   "demandeur_corporate": "9174-8319 Québec inc.",
+   "description": "Subdivision du lot 6 580 334 en quatre terrains distincts destinés à la construction résidentielle sur la rue Serge-Pepin.",
+   "conditions": [
+    "Recommandation CCU 2026/02/34.",
+    "Respect de l’autorisation; toute modification doit être réévaluée avant les travaux."
+   ],
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/34 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9024",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-9025",
+   "label": "PIIA-2026-9025 — Lotissement, rues Laurier et Hubert",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-23",
+   "dossier": "PIIA-2026-9025",
+   "resolution": "2026-03-138",
+   "reglement_number": "1813-00-2025",
+   "demandeur_corporate": "Centre de services scolaire des Patriotes",
+   "description": "Division des lots 4 554 591 et 4 554 592 en trois lots projetés 6 718 445 à 6 718 447, aux 850 et 866, rue Laurier et au 225, rue Hubert.",
+   "conditions": [
+    "Recommandation CCU 2026/02/35.",
+    "Respect de l’autorisation; toute modification doit être réévaluée avant les travaux."
+   ],
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/35 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9025",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-9026",
+   "label": "PIIA-2026-9026 — 1182, rue Omer-Adam",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-23",
+   "dossier": "PIIA-2026-9026",
+   "resolution": "2026-03-139",
+   "reglement_number": "1813-00-2025",
+   "description": "Agrandissement d’un bâtiment principal jumelé par un garage intégré avec une pièce habitable au-dessus.",
+   "conditions": [
+    "Recommandation CCU 2026/02/36.",
+    "Respect de l’autorisation; toute modification doit être réévaluée avant les travaux."
+   ],
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/36 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9026",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-9028",
+   "label": "PIIA-2026-9028 — Projet intégré mixte, rue Serge-Pepin",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-23",
+   "dossier": "PIIA-2026-9028",
+   "resolution": "2026-03-140",
+   "reglement_number": "1813-00-2025",
+   "no_lot": "4553167",
+   "demandeur_corporate": "9478-2968 Québec inc.",
+   "description": "Projet intégré mixte de trois bâtiments principaux comprenant un local commercial et 218 logements.",
+   "conditions": [
+    "Recommandation CCU 2026/02/37.",
+    "Respect de l’autorisation; toute modification doit être réévaluée avant les travaux."
+   ],
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/37 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9028",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-9030",
+   "label": "PIIA-2026-9030 — Liquidation Marie",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-23",
+   "dossier": "PIIA-2026-9030",
+   "resolution": "2026-03-141",
+   "reglement_number": "1813-00-2025",
+   "description": "Trois enseignes, une principale au mur et les autres détachées sur socle, au 888, boulevard Yvon-L’Heureux Nord; lots 5 104 830 et 6 265 985.",
+   "conditions": [
+    "Recommandation CCU 2026/02/38.",
+    "Respect de l’autorisation; toute modification doit être réévaluée avant les travaux."
+   ],
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/38 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9030",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-9033",
+   "label": "PIIA-2026-9033 — Pitou Minou et Compagnons",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-23",
+   "dossier": "PIIA-2026-9033",
+   "resolution": "2026-03-142",
+   "reglement_number": "1813-00-2025",
+   "description": "Enseigne murale de type channel et affichage sur l’enseigne détachée commune au 650, rue Serge-Pepin.",
+   "conditions": [
+    "Fond de l’enseigne murale de la même couleur que le revêtement extérieur.",
+    "Respect de l’autorisation; toute modification doit être réévaluée avant les travaux."
+   ],
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "D’approuver le plan d’implantation et d’intégration architecturale PIIA-2026-9033 et d’autoriser\nla délivrance du certificat d’autorisation",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-129",
+   "label": "1667-129-2026 — Dimensions minimales des terrains dans C-733",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "numero": "1667-129-2026",
+   "municipality": "beloeil",
+   "stage": "projet",
+   "meetingDate": "2026-03-23",
+   "resolution": "2026-03-143",
+   "zone_cible": "C-733",
+   "objet": "Réduire la largeur minimale des terrains de 125 m à 50 m et leur superficie minimale de 12 000 m² à 7 500 m².",
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "D’adopter le projet de Règlement 1667-129-2026 modifiant le Règlement de zonage 1667-002011",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "motion-129",
+   "label": "Avis de motion — 1667-129-2026",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "etape": "avis_motion",
+   "etape_date": "2026-03-23",
+   "reglement_number": "1667-129-2026",
+   "zone_ref": "C-733",
+   "resolution": "2026-03-143",
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "Madame la conseillère Alexandra Picard-Dubé donne un avis de motion qu'un règlement ayant\npour objet de modifier les normes relatives aux dimensions minimales de terrain",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "projet-129",
+   "label": "Projet adopté — 1667-129-2026",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "etape": "projet_reglement",
+   "etape_date": "2026-03-23",
+   "reglement_number": "1667-129-2026",
+   "zone_ref": "C-733",
+   "resolution": "2026-03-143",
+   "description": "Adoption du projet; consultation publique fixée au 27 avril 2026 à 19 h 30 à la salle du conseil.",
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "D’adopter le projet de Règlement 1667-129-2026 modifiant le Règlement de zonage 1667-002011",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "ppcmoi-9027",
+   "label": "PPCMOI-2026-9027 — Premier projet, rue Serge-Pepin",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "etape": "ppcmoi",
+   "etape_date": "2026-03-23",
+   "dossier": "PPCMOI-2026-9027",
+   "resolution": "2026-03-144",
+   "reglement_number": "1643-00-2010",
+   "no_lot": "4553167",
+   "zone_ref": "C-512",
+   "demandeur_corporate": "9478-2968 Québec inc.",
+   "description": "Adoption unanime du premier projet de résolution : projet intégré mixte de trois bâtiments avec un local commercial et 218 logements. Autorisations proposées pour l’usage H-4, la mixité commerciale-résidentielle, les logements au rez-de-chaussée côté rue, une marge arrière de 6 m plutôt que 15 m et diverses dérogations accessoires. Consultation fixée au 27 avril 2026 à 19 h 30.",
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "1. D'accorder, conformément au Règlement 1643‐00‐2010 relatif aux projets particuliers de\nconstruction, de modification ou d'occupation d'un immeuble (PPCMOI),",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-c512",
+   "label": "C-512",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "code": "C-512",
+   "citations": [
+    {
+     "page": 17,
+     "excerpt": "a) Autoriser la classe d’usage « Habitation multifamiliale de 9 logements et plus (H-4) » dans\nla zone C-512 (art. 25);",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-218",
+   "label": "Projet mixte de 218 logements — rue Serge-Pepin",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "category": "developpement_residentiel_mixte",
+   "scope": "local",
+   "nb_unites_min": 218,
+   "nb_unites_max": 218,
+   "no_lot": "4553167",
+   "etape": "piia",
+   "etape_date": "2026-03-23",
+   "resolution": "2026-03-140",
+   "description": "PIIA approuvé pour trois bâtiments principaux comprenant un local commercial et 218 logements; premier projet de PPCMOI adopté séparément à la même séance.",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/37 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9028",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "ppcmoi-9133",
+   "label": "PPCMOI 2025-9133 — Premier projet, 409-415, boulevard Sir-Wilfrid-Laurier",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "status": "candidate",
+   "municipality": "beloeil",
+   "date": "2026-03-23",
+   "decision": "approuvé",
+   "etape": "ppcmoi",
+   "etape_date": "2026-03-23",
+   "dossier": "PPCMOI 2025-9133",
+   "resolution": "2026-03-145",
+   "reglement_number": "1643-00-2010",
+   "no_lot": "4554011",
+   "description": "Premier projet adopté à la majorité pour réaménager le stationnement : absence d’aire de chargement, de zone tampon et d’enclos pour conteneurs; distances réduites, allée d’accès de 4,95 m non perpendiculaire, adaptations des bordures et des manœuvres, minimum de 17 % d’espace libre. Consultation fixée au 27 avril 2026 à 19 h 30.",
+   "citations": [
+    {
+     "page": 18,
+     "excerpt": "1. D'accorder, conformément au Règlement 1643‐00‐2010 relatif aux projets particuliers de\nconstruction, de modification ou d'occupation d'un immeuble (PPCMOI),",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "ppcmoi-9027",
+   "target": "zone-c512",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "evidence_refs": [
+    "ev-c512"
+   ],
+   "citations": [
+    {
+     "page": 17,
+     "excerpt": "a) Autoriser la classe d’usage « Habitation multifamiliale de 9 logements et plus (H-4) » dans\nla zone C-512 (art. 25);",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "piia-9028",
+   "target": "signal-218",
+   "relation": "raises_signal",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "evidence_refs": [
+    "ev-218"
+   ],
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/37 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9028",
+     "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+     "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+     "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-c512",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+   "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+   "modality": "pdf",
+   "page": 17,
+   "excerpt": "a) Autoriser la classe d’usage « Habitation multifamiliale de 9 logements et plus (H-4) » dans\nla zone C-512 (art. 25);"
+  },
+  {
+   "id": "ev-218",
+   "source_file": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "rawRef": "raw/proces-verbaux-beloeil/cas/0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c.pdf",
+   "docSha": "0719bfd6088d323d55fff0aaf5af06d71c5f5e3d614a5ca2266ad161bcf51f7c",
+   "sourceUrl": "https://beloeil.ca/wp-content/uploads/2026/03/conseil_20260323_pv.pdf",
+   "modality": "pdf",
+   "page": 14,
+   "excerpt": "D’approuver, aux conditions prévues à la recommandation 2026/02/37 du comité consultatif\nd’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9028 et d’autoriser la\ndélivrance du permis vise à permettre la réalisation d’un projet intégré mixte, incluant la construction de\ntrois bâtiments principaux comprenant un local commercial et 218 logements sur la rue Serge-Pepin, ledit"
+  }
+ ],
+ "input_tokens": 22800,
+ "output_tokens": 10500
+}

@@ -1,0 +1,38 @@
+{
+ "documentId": "lac-brome-2026-04-07",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c71cd359cd133021bc4dac4793b39d1015e23185e50f317a26f81884bf00faa1",
+ "verificationSha256": "208abf4bd4e00e61f6f288bbdbe5d23d2729c8e01f4a89b3e38fde91d69c20ae",
+ "inputSha256": "c675d96c61b0e44a4b112e3cd8df4a231655c905f1517000f63a551acbb7e399",
+ "responseSha256": "56c8a18334c26a01b8fbc563ec4d518bcbcd81781833ef7769cf8a32d6c3841a",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 20779,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 19268,
+  "outputTokens": 227,
+  "totalTokens": 26972,
+  "thoughtsTokenCount": 7477
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 20647,
+  "requestId": null
+ },
+ "at": "2026-09-18T22:48:47.313Z"
+}

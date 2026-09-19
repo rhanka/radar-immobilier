@@ -1,0 +1,179 @@
+{
+ "nodes": [
+  {
+   "id": "dm-2025-0418",
+   "label": "Dérogation mineure 2025-0418 — chemin de l’Adiante",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "municipality": "wentworth-nord",
+   "date": "2026-01-21",
+   "meetingDate": "2026-01-21",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-01-21",
+   "decision": "approuvé",
+   "dossier": "2025-0418",
+   "resolution": "2026-01-3809",
+   "no_lot": "6704332",
+   "reglement_number": "2017-497",
+   "description": "Acceptation d’une emprise de rue constituée du lot projeté 6 704 332 à Wentworth-Nord et du lot 6 433 244 à Harrington, d’une largeur minimale de 11,50 mètres plutôt que 12 mètres. L’opération permettra d’agrandir les lots 5 940 268 et 5 949 269 vers l’ouest pour leur donner front sur le chemin de la Médéole et les rendre constructibles.",
+   "conditions": [
+    "Transmettre la résolution à la MRC des Pays-d’en-Haut afin qu’elle statue également sur la demande.",
+    "La résolution est nulle et caduque si le plan de l’opération cadastrale n’est pas enregistré au ministère des Ressources naturelles et des Forêts du Québec dans les six mois suivant la délivrance du permis de lotissement."
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 8,
+     "excerpt": "ATTENDU QUE cette opération cadastrale permettra d’identifier une voie\nverbalisée existante depuis 1896 et de pouvoir agrandir les lots 5 940 268 et",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "contribution-2025-9029",
+   "label": "Lotissement 2025-9029 — contribution pour fins de parcs en argent",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "municipality": "wentworth-nord",
+   "date": "2026-01-21",
+   "kind": "subdivision",
+   "etape": "inconnu",
+   "decision": "approuvé",
+   "dossier": "2025-9029",
+   "resolution": "2026-01-3810",
+   "no_lot": "6717658",
+   "description": "Décision de percevoir en argent la contribution pour fins de parcs de 12 302,60 $, plutôt qu’en terrain (866,01 m²), pour la demande visant la création du lot 6 717 658 à partir des lots 5 940 257, 5 940 255 et 5 940 256. Cette décision porte sur le mode de contribution, et non sur la délivrance du permis.",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 9,
+     "excerpt": "ATTENDU QUE la demande de permis de lotissement 2025-9029 vise la création\ndu lot 6 717 658 fait à partir des lots 5 940 257 du cadastre du Québec, 5 940 255",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "servitude-orphelins",
+   "label": "Servitude de conservation — terres des sentiers des Orphelins",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "municipality": "wentworth-nord",
+   "constraintType": "autre",
+   "meetingDate": "2026-01-21",
+   "resolution": "2026-01-3807",
+   "organisme": "Éco-corridors laurentiens",
+   "description": "Approbation de l’engagement municipal et autorisation de signer l’entente de suivi de la conservation des terres des sentiers des Orphelins. Le projet de servitude réelle et perpétuelle, approuvé par la résolution 2025-09-3705, concerne les lots 5 589 168, 6 312 664, 6 312 665, 6 579 582, 6 669 890 et 6 671 588. Le texte ne confirme pas l’inscription de la servitude.",
+   "evidence_refs": [
+    "ev-conservation"
+   ],
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’approuver\nl’engagement de la Municipalité de Wentworth-Nord et d’autoriser monsieur Ron",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "depot-certificats",
+   "label": "Dépôt des certificats de procédure d’enregistrement — hébergement touristique",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "municipality": "wentworth-nord",
+   "date": "2026-01-21",
+   "kind": "rezonage",
+   "etape": "inconnu",
+   "reglement_number": "2017-498-30",
+   "description": "Dépôt des certificats attestant le résultat de la procédure d’enregistrement des personnes habiles à voter pour les règlements distincts 2017-498-30-C09, 2017-498-30-CONS08 et 2017-498-30-I04. Aucun résultat chiffré, décision d’adoption ou statut d’entrée en vigueur n’est donné.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "Conformément à l’article 557 de la Loi sur les élections et les référendums dans\nles municipalités, monsieur Ron Kelley, directeur général et greffier-trésorier,",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "retrait-rue-bernard",
+   "label": "Demande de désofficialisation de la rue Bernard",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "status": "candidate",
+   "municipality": "wentworth-nord",
+   "date": "2026-01-21",
+   "category": "lotissement",
+   "kind": "retrait_odonyme",
+   "resolution": "2026-01-3811",
+   "description": "Demande à la Commission de toponymie de désofficialiser la rue Bernard, intégrée à une propriété résidentielle à la suite d’un permis de lotissement récemment délivré et ne constituant pas une voie de circulation.",
+   "citations": [
+    {
+     "page": 10,
+     "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander à la\nCommission de toponymie de désofficialiser la dénomination de la rue nommée",
+     "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+     "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+     "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-conservation",
+   "source_file": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "rawRef": "raw/proces-verbaux-wentworth-nord/cas/2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1.pdf",
+   "docSha": "2a6fdd9146bb4b45547cabe319653b6029b3c76194e20f0ce6a4de23c93daea1",
+   "sourceUrl": "https://wentworth-nord.ca/wp-content/uploads/2026/02/3.1-Proces-verbal-21-01-2026.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’approuver\nl’engagement de la Municipalité de Wentworth-Nord et d’autoriser monsieur Ron\nKelley, directeur général et greffier-trésorier, à signer l’entente avec Éco-corridors\nlaurentiens visant à assurer le suivi de la conservation des terres comprenant le\nréseau de sentiers des Orphelins."
+  }
+ ],
+ "input_tokens": 12400,
+ "output_tokens": 3400
+}

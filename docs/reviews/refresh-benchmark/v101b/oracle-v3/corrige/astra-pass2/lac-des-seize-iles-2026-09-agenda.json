@@ -1,0 +1,177 @@
+{
+ "documentId": "lac-des-seize-iles-2026-09-agenda",
+ "nextId": 5,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion prévu – règlement 2026-08 sur l’occupation du domaine public municipal",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2026-08",
+    "page": 1,
+    "citation": "3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l’occupation du domaine public municipal",
+    "anchor": "règlement numéro 2026-08",
+    "spanStart": 883,
+    "spanEnd": 989
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion prévu – règlement 2026-08 sur l’occupation du domaine public municipal",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "2026-08",
+      "page": 1,
+      "citation": "3.6 Avis de motion – Projet de règlement numéro 2026-08 régissant l’occupation du domaine public municipal",
+      "anchor": "règlement numéro 2026-08",
+      "spanStart": 883,
+      "spanEnd": 989
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 3.6 prévoit un avis de motion sur l’occupation du domaine public, unité distincte du dépôt du projet et non décision acquise."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Dépôt prévu du projet de règlement 2026-08 sur l’occupation du domaine public municipal",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2026-08",
+    "page": 1,
+    "citation": "3.7 Dépôt du projet de règlement numéro 2026-08 régissant l’occupation du domaine public municipal",
+    "anchor": "règlement numéro 2026-08",
+    "spanStart": 990,
+    "spanEnd": 1088
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt prévu du projet de règlement 2026-08 sur l’occupation du domaine public municipal",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "2026-08",
+      "page": 1,
+      "citation": "3.7 Dépôt du projet de règlement numéro 2026-08 régissant l’occupation du domaine public municipal",
+      "anchor": "règlement numéro 2026-08",
+      "spanStart": 990,
+      "spanEnd": 1088
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 3.7 prévoit le dépôt du projet de règlement, étape comptée séparément de l’avis de motion selon les règles du corrigé."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Examen prévu de la dérogation mineure DDM2026-058 – 252, chemin du Village",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DDM2026-058",
+    "page": 1,
+    "citation": "5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058",
+    "anchor": "chemin du Village (DDM2026-058",
+    "spanStart": 1338,
+    "spanEnd": 1398
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Examen prévu de la dérogation mineure DDM2026-058 – 252, chemin du Village",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DDM2026-058",
+      "page": 1,
+      "citation": "5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058",
+      "anchor": "DDM2026-058",
+      "spanStart": 1338,
+      "spanEnd": 1398
+     }
+    },
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Examen prévu de la dérogation mineure DDM2026-058 – 252, chemin du Village",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DDM2026-058",
+      "page": 1,
+      "citation": "5.4 Dérogation mineure – 252, chemin du Village (DDM2026-058",
+      "anchor": "chemin du Village (DDM2026-058",
+      "spanStart": 1338,
+      "spanEnd": 1398
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 5.4 nomme explicitement une demande de dérogation mineure à traiter, sans attester son acceptation ou son refus."
+    },
+    {
+     "step": "fable-pass1",
+     "op": "correct",
+     "reason": "L'ancre « DDM2026-058 » ne compte que 11 caractères alors que la règle exige une sous-chaîne de 12 à 60 caractères ; la citation est en outre complétée jusqu'à la parenthèse fermante telle qu'écrite au point 5.4 de la page 1."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Adoption prévue du règlement 2026-102-01 – lotissement et calcul de la contribution pour parcs",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-102-01",
+    "page": 1,
+    "citation": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le lotissement numéro 2019-102 concernant les règles de calcul de la contribution pour fins de parcs",
+    "anchor": "règlement numéro 2026-102-01",
+    "spanStart": 1400,
+    "spanEnd": 1572
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption prévue du règlement 2026-102-01 – lotissement et calcul de la contribution pour parcs",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2026-102-01",
+      "page": 1,
+      "citation": "5.5 Adoption du règlement numéro 2026-102-01 modifiant le règlement sur le lotissement numéro 2019-102 concernant les règles de calcul de la contribution pour fins de parcs",
+      "anchor": "règlement numéro 2026-102-01",
+      "spanStart": 1400,
+      "spanEnd": 1572
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 5.5 prévoit l’adoption d’un règlement modifiant le lotissement et les contributions pour parcs, objet inclus dont l’adoption reste prévue dans cet ordre du jour."
+    }
+   ]
+  }
+ ]
+}

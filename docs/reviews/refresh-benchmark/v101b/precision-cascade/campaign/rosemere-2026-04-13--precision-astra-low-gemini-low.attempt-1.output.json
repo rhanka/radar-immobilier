@@ -1,0 +1,498 @@
+{
+ "nodes": [
+  {
+   "id": "event-125",
+   "label": "Dérogation mineure — 262, rue Westward",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "date": "2026-04-13",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-04-13",
+   "decision": "approuvé",
+   "resolution": "2026-04-125",
+   "description": "Dérogation accordée pour une marge de recul arrière de 0,56 mètre pour le garage détaché existant au 262, rue Westward, plutôt que le minimum réglementaire de 7,00 mètres.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "D'ACCORDER la demande de dérogation mineure pour la propriété située\nau 262, rue Westward, afin de permettre une marge de recul arrière de",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-126",
+   "label": "PIIA — Affichage Continental, 307, boulevard Labelle",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "date": "2026-04-13",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-04-13",
+   "decision": "approuvé",
+   "resolution": "2026-04-126",
+   "description": "Approbation de l'ajout d'une enseigne sur bâtiment et d'une enseigne sur pylône pour Continental au 307, boulevard Labelle, selon les plans reçus le 6 février 2026.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "D'APPROUVER, à titre de P.I.I.A., l'ajout d'une enseigne sur bâtiment et\nd'une enseigne sur pylône pour l'établissement Continental situé au",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-127",
+   "label": "PIIA — Affichage, 400, chemin de la Grande-Côte",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "date": "2026-04-13",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-04-13",
+   "decision": "approuvé",
+   "resolution": "2026-04-127",
+   "description": "Approbation de la modification des enseignes sur le pylône existant en cour avant au 400, chemin de la Grande-Côte, selon les plans de Zone Enseignes + Éclairage du 23 février 2026, projet Z-14550.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "D'APPROUVER, à titre de P.I.I.A., la modification des enseignes sur le\npylône d'enseignes existant situé en cour avant au 400, chemin de la\nGrande-Côte,",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-128",
+   "label": "PIIA — Agrandissement, 266, rue du Bocage",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "date": "2026-04-13",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-04-13",
+   "decision": "approuvé",
+   "resolution": "2026-04-128",
+   "description": "Approbation du projet d'agrandissement au 266, rue du Bocage, selon les plans du projet 25-27 datés du 12 février 2026.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement au 266, rue du\nBocage, tel qu'illustré dans les plans soumis réalisés par Jean-Benoit",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-129",
+   "label": "PIIA — Agrandissement et garage annexé, 338, rue Montview",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "date": "2026-04-13",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-04-13",
+   "decision": "approuvé",
+   "resolution": "2026-04-129",
+   "description": "Approbation de l'agrandissement et de la construction d'un garage annexé au 338, rue Montview, selon les plans de Dessina Plan Plus inc., projet 25-6085 du 3 février 2026, et le plan d'implantation, minute 2826 du 6 janvier 2026.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement et de\nconstruction d'un garage annexé au 338, rue Montview, selon les plans",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-130",
+   "label": "PIIA — Ouvertures, 355, rue Montcalm",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "date": "2026-04-13",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-04-13",
+   "decision": "approuvé",
+   "resolution": "2026-04-130",
+   "description": "Approbation de la modification des ouvertures au 355, rue Montcalm, selon les plans du projet 002-26 datés du 9 février 2026.",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "D'APPROUVER, à titre de P.I.I.A., le projet de modification des ouvertures\npour la propriété située au 355, rue Montcalm, tel qu'illustré dans les plans",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-131",
+   "label": "PIIA — Revêtements et terrasse au toit, 5, chemin de la Grande-Côte",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "date": "2026-04-13",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-04-13",
+   "decision": "approuvé",
+   "resolution": "2026-04-131",
+   "description": "Approbation du remplacement du revêtement des façades latérales par du fibrociment à clin et de l'ajout d'une terrasse au toit au 5, chemin de la Grande-Côte, selon les plans du Groupe Falardeau inc., projet 24-024.",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "D'APPROUVER, à titre de P.I.I.A., pour les façades latérales, la substitution\ndu revêtement prévu de panneaux de fibrociment HardiePanel fini lisse,",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1004-01",
+   "label": "Règlement 1004-01 — Contribution pour fins de parcs",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "numero": "1004-01",
+   "title": "Règlement modifiant plusieurs dispositions du Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux et d'espaces naturels",
+   "stage": "projet",
+   "meetingDate": "2026-04-13",
+   "resolution": "2026-04-133",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\net d'espaces naturels.",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-132",
+   "label": "Avis de motion — Règlement 1004-01",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "date": "2026-04-13",
+   "resolution": "2026-04-132",
+   "reglement_number": "1004-01",
+   "etape": "avis_motion",
+   "etape_date": "2026-04-13",
+   "description": "Avis de motion annonçant l'adoption séance tenante du projet modifiant les dispositions relatives à la contribution pour fins de parcs, de terrains de jeux et d'espaces naturels.",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera\nadopté séance tenante le projet du Règlement 1004-01 modifiant plusieurs",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-133",
+   "label": "Adoption du projet — Règlement 1004-01",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "date": "2026-04-13",
+   "resolution": "2026-04-133",
+   "reglement_number": "1004-01",
+   "etape": "projet_reglement",
+   "etape_date": "2026-04-13",
+   "decision": "approuvé",
+   "description": "Adoption du projet de règlement 1004-01. Consultation publique fixée au 11 mai 2026 à 18 h 30, dans la salle du Conseil, au 100, rue Charbonneau.",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\net d'espaces naturels.",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 5,
+     "excerpt": "DE FIXER la date de la séance de consultation publique sur ledit projet de\nrèglement au lundi 11 mai 2026, à 18 h 30, dans la salle du Conseil de l'hôtel",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-990-01",
+   "label": "Règlement 990-01 — Augmentation de l'emprunt pour la rue Northcote",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "numero": "990-01",
+   "title": "Règlement modifiant le Règlement 990 décrétant une dépense et un emprunt de 1 155 000 $ pour des travaux de réfection de la rue Northcote pour augmenter la dépense et l'emprunt de 800 000 $",
+   "stage": "adoption",
+   "date": "2026-04-13",
+   "resolution": "2026-04-135",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D'ADOPTER le Règlement 990-01 modifiant le Règlement 990 décrétant une\ndépense et un emprunt de 1 155 000 $ pour des travaux de réfection de la rue",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-991-01",
+   "label": "Règlement 991-01 — Réfection pluviale, secteur Bordeaux",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "numero": "991-01",
+   "title": "Règlement modifiant le Règlement 991 décrétant une dépense et un emprunt de 5 685 000 $ pour des travaux de réfection pluviale - Secteur Bordeaux pour augmenter la dépense et l'emprunt de 900 000 $",
+   "stage": "projet",
+   "meetingDate": "2026-04-13",
+   "resolution": "2026-04-136",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\nséance subséquente le Règlement 991-01 modifiant le Règlement 991 décrétant",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1015",
+   "label": "Règlement 1015 — Accompagnement des propriétés vulnérables aux inondations pluviales",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "numero": "1015",
+   "title": "Règlement décrétant un programme de sensibilisation et d'accompagnement des propriétés vulnérables aux inondations pluviales afin d'en diminuer les risques",
+   "stage": "projet",
+   "meetingDate": "2026-04-13",
+   "resolution": "2026-04-137",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\nséance subséquente le Règlement 1015 décrétant un programme de",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1016-01",
+   "label": "Règlement 1016-01 — Taxation et tarification 2026",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "numero": "1016-01",
+   "title": "Règlement modifiant le Règlement 1016 concernant l'imposition des taux de taxation et la tarification de différents services municipaux pour l'année 2026",
+   "stage": "projet",
+   "meetingDate": "2026-04-13",
+   "resolution": "2026-04-138",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\nséance subséquente le Règlement 1016-01 modifiant le Règlement 1016",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1022",
+   "label": "Règlement 1022 — Immobilisations et emprunt de 5 000 000 $",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "numero": "1022",
+   "title": "Règlement décrétant des dépenses en immobilisations et un emprunt de 5 000 000 $",
+   "stage": "projet",
+   "meetingDate": "2026-04-13",
+   "resolution": "2026-04-140",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\nséance subséquente le Règlement 1022 décrétant des dépenses en",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-150",
+   "label": "Calendrier de vente d'immeubles pour défaut de paiement de taxes",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "category": "vente_pour_taxes",
+   "date": "2026-04-13",
+   "resolution": "2026-04-150",
+   "scope": "local",
+   "description": "Adoption du calendrier de vente aux enchères pour défaut de paiement de taxes. Démarches à compter du 5 mai 2026, en vue d'une vente le 26 novembre 2026, devant encore être ordonnée officiellement par résolution à la séance du 1er octobre 2026.",
+   "citations": [
+    {
+     "page": 11,
+     "excerpt": "D'ADOPTER le calendrier de vente aux enchères pour défaut de paiement de\ntaxes proposé par le Service des finances et trésorerie et les Services juridiques",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-159",
+   "label": "Étude de connectivité écologique des habitats",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "category": "environnement",
+   "date": "2026-04-13",
+   "resolution": "2026-04-159",
+   "scope": "local",
+   "description": "Autorisation à Nature-Action Québec de déposer une demande de 32 021,16 $ au Fonds des municipalités pour la biodiversité pour une étude de connectivité des habitats de milieux ouverts, humides et hydriques. Dépense complémentaire autorisée de 3 200 $.",
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "D'AUTORISER Nature-Action Québec à déposer une demande d'aide financière\nau Fonds des municipalités pour la biodiversité de la Ville de Rosemère",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-161",
+   "label": "Adoption du Plan de lutte et d'adaptation aux changements climatiques",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "status": "candidate",
+   "municipality": "rosemere",
+   "category": "planification_climatique",
+   "date": "2026-04-13",
+   "resolution": "2026-04-161",
+   "scope": "local",
+   "etape": "adoption",
+   "etape_date": "2026-04-13",
+   "description": "Adoption du Plan de lutte et d'adaptation aux changements climatiques 2026-2030 de la Ville de Rosemère.",
+   "citations": [
+    {
+     "page": 17,
+     "excerpt": "D'ADOPTER le Plan de lutte et d'adaptation aux changements climatiques 20262030 de la Ville de Rosemère.",
+     "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+     "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+     "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-133",
+   "source_file": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "rawRef": "raw/proces-verbaux-rosemere/cas/0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62.pdf",
+   "docSha": "0d58956df50ea28121334922f0a58d4059c1f9b7ab6b39a9cc38e148eb5a3e62",
+   "sourceUrl": "https://www.ville.rosemere.qc.ca/images/clients/PV%202026-04-13%20FINAL.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\net d'espaces naturels."
+  }
+ ],
+ "input_tokens": 16700,
+ "output_tokens": 6500
+}

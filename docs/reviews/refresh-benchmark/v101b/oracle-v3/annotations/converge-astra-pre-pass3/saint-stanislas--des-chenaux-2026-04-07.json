@@ -1,0 +1,91 @@
+{
+ "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "2682ee80973aff453d0d3ecba1df0137b9f1210f5181954b28fcfda77ccb4701",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 4, la résolution 2026-04-50 autorise expressément l’enchère et l’acquisition des immeubles identifiés en annexe lors de la vente du 11 juin 2026 : il s’agit d’un acte foncier, et non d’une simple nomination.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 5.5, à la page 4, atteste l’avis de motion donné par Michel Sanscartier pour le règlement 2009-474-06 modifiant le plan d’urbanisme.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 5, l’intitulé cité du point 5.6 et la résolution 2026-04-51 attestent l’adoption du projet 2009-474-06 sur le plan d’urbanisme, unité distincte de l’avis de motion.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 5.7, à la page 5, contient bien l’avis de motion donné par Michel Sanscartier pour le règlement 2009-475-04 relatif aux permis et certificats.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 6, la résolution 2026-04-52 adopte explicitement le projet de règlement 2009-475-04 modifiant le règlement sur les permis et certificats 2009-475.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"Le point 5.9, à la page 6, atteste l’avis de motion donné par Michel Sanscartier pour le règlement 2009-476-14 modifiant le règlement de zonage 2009-476.\"\n    },\n    {\n      \"item\": \"i07\",\n      \"choice\": \"v1\",\n      \"reason\": \"À la page 7, la résolution 2026-04-53 adopte explicitement le projet de règlement 2009-476-14 modifiant le zonage, ce qui confirme l’étape projet_reglement plutôt qu’une adoption définitive.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "À la page 4, la résolution 2026-04-50 autorise expressément l’enchère et l’acquisition des immeubles identifiés en annexe lors de la vente du 11 juin 2026 : il s’agit d’un acte foncier, et non d’une simple nomination."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 5.5, à la page 4, atteste l’avis de motion donné par Michel Sanscartier pour le règlement 2009-474-06 modifiant le plan d’urbanisme."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "À la page 5, l’intitulé cité du point 5.6 et la résolution 2026-04-51 attestent l’adoption du projet 2009-474-06 sur le plan d’urbanisme, unité distincte de l’avis de motion."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 5.7, à la page 5, contient bien l’avis de motion donné par Michel Sanscartier pour le règlement 2009-475-04 relatif aux permis et certificats."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "À la page 6, la résolution 2026-04-52 adopte explicitement le projet de règlement 2009-475-04 modifiant le règlement sur les permis et certificats 2009-475."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 5.9, à la page 6, atteste l’avis de motion donné par Michel Sanscartier pour le règlement 2009-476-14 modifiant le règlement de zonage 2009-476."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "À la page 7, la résolution 2026-04-53 adopte explicitement le projet de règlement 2009-476-14 modifiant le zonage, ce qui confirme l’étape projet_reglement plutôt qu’une adoption définitive."
+  }
+ ]
+}

@@ -1,0 +1,120 @@
+{
+ "documentId": "arundel-2026-07-31",
+ "nextId": 4,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption en deuxième lecture du règlement 312-2026 sur les PPCMOI",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "312-2026",
+    "page": 3,
+    "citation": "ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI",
+    "anchor": "bylaw 312-2026",
+    "spanStart": 483,
+    "spanEnd": 626
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption en deuxième lecture du règlement 312-2026 sur les PPCMOI",
+      "stage": "adoption",
+      "procedure": "ppcmoi",
+      "objet": "312-2026",
+      "page": 3,
+      "citation": "ADOPT in second reading and decree bylaw 312-2026 relating to specific construction, alteration or occupancy proposals for an immovable (SCAOPI",
+      "anchor": "bylaw 312-2026",
+      "spanStart": 483,
+      "spanEnd": 626
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil adopte et décrète le règlement 312-2026 en deuxième lecture; les étapes antérieures rappelées dans les considérants ne créent pas d’unités supplémentaires."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "PIIA accordé — construction d’un abri d’auto au 165 Chemin de la Rouge",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "165 Chemin de la Rouge",
+    "page": 6,
+    "citation": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the construction of a car shelter at 165 Chemin de la Rouge",
+    "anchor": "165 Chemin de la Rouge",
+    "spanStart": 1574,
+    "spanEnd": 1758
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accordé — construction d’un abri d’auto au 165 Chemin de la Rouge",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "165 Chemin de la Rouge",
+      "page": 6,
+      "citation": "AUTHORIZE the permit in accordance with Bylaw 285 regarding the Site Planning and Architectural Integration Plan (SPAIP) for the construction of a car shelter at 165 Chemin de la Rouge",
+      "anchor": "165 Chemin de la Rouge",
+      "spanStart": 1574,
+      "spanEnd": 1758
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-08-132 autorise le permis soumis au PIIA pour cet abri d’auto, ce qui constitue une décision sur une demande de PIIA incluse au corrigé."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "PIIA accordé — rénovation du toit et de la façade du garage au 117 Rue du Village",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "117 Rue du Village",
+    "page": 7,
+    "citation": "Planning and Architectural Integration Plan (SPAIP) for the renovation of the roof and facade of the garage of the building located at 117 Rue du Village",
+    "anchor": "117 Rue du Village",
+    "spanStart": 521,
+    "spanEnd": 674
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "PIIA accordé — rénovation du toit et de la façade du garage au 117 Rue du Village",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "117 Rue du Village",
+      "page": 7,
+      "citation": "Planning and Architectural Integration Plan (SPAIP) for the renovation of the roof and facade of the garage of the building located at 117 Rue du Village",
+      "anchor": "117 Rue du Village",
+      "spanStart": 521,
+      "spanEnd": 674
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-08-133 autorise le permis soumis au PIIA après confirmation écrite du propriétaire qu’il repeindra la façade du garage conformément à son état d’origine."
+    }
+   ]
+  }
+ ]
+}

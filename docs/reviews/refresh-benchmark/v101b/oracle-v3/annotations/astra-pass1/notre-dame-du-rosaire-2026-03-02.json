@@ -1,0 +1,130 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "a4efff175185b8c38738bdc5e4fed5514496cbe2bf968e916aff9672c04bdeaa",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Fixation du prix et mise en vente du lot 6 714 200, rue Morin — 19 999 $ plus taxes\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 714 200\",\n        \"page\": 19,\n        \"citation\": \"6 714 200 :19 999 $ plus taxes\\n6 714 201 :19 999 $plus taxes\\n6 714 202 22 499 $ plus taxes\\n\\nQUE le conseil municipal autorise la mise en vente desdits terrains ;\",\n        \"anchor\": \"6 714 200 :19 999 $\"\n      },\n      \"reason\": \"La résolution 2026-03-16 fixe le prix et autorise la mise en vente de ce lot ; chaque objet foncier explicitement nommé constitue une unité.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Fixation du prix et mise en vente du lot 6 714 201, rue Morin — 19 999 $ plus taxes\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 714 201\",\n        \"page\": 19,\n        \"citation\": \"6 714 201 :19 999 $plus taxes\\n6 714 202 22 499 $ plus taxes\\n\\nQUE le conseil municipal autorise la mise en vente desdits terrains ;\",\n        \"anchor\": \"6 714 201 :19 999 $\"\n      },\n      \"reason\": \"La résolution 2026-03-16 fixe le prix et autorise la mise en vente de ce deuxième lot explicitement nommé, qui doit être distingué des autres lots.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Fixation du prix et mise en vente du lot 6 714 202, rue Morin — 22 499 $ plus taxes\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 714 202\",\n        \"page\": 19,\n        \"citation\": \"6 714 202 22 499 $ plus taxes\\n\\nQUE le conseil municipal autorise la mise en vente desdits terrains ;\",\n        \"anchor\": \"6 714 202 22 499 $\"\n      },\n      \"reason\": \"La résolution 2026-03-16 fixe le prix et autorise la mise en vente de ce troisième lot explicitement nommé.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Vente du lot 6 714 202 à Frédéric Beaulieu et Alexia Bélanger, conditionnelle à une construction dans les deux ans\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 714 202\",\n        \"page\": 20,\n        \"citation\": \"QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6\\n714 202 du cadastre du Québec,\",\n        \"anchor\": \"lot numéro 6\\n714 202\"\n      },\n      \"reason\": \"La résolution 2026-03-17 décide une vente à des acquéreurs nommés, conditionnelle à la construction d’un bâtiment principal dans les deux ans, acte distinct de la fixation du prix et de la mise en vente.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Conclusion autorisée de l’entente avec le CAD encadrant la mise à disposition d’un local municipal\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"Entente de collaboration\",\n        \"page\": 21,\n        \"citation\": \"QUE le conseil municipal autorise la conclusion de l’Entente de collaboration entre la Municipalité\\nde Notre-Dame-du-Rosaire et le Comité d’action et de développement (CAD), telle que présentée ;\",\n        \"anchor\": \"l’Entente de collaboration\"\n      },\n      \"reason\": \"L’entente autorisée encadre explicitement la mise à disposition d’un local municipal ; cet objet foncier d’usage relève de l’étape « inconnu », sans être assimilé à une vente ou à une cession.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement 2026-04 modifiant le règlement de zonage 90-01\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"2026-04\",\n        \"page\": 22,\n        \"citation\": \"Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\\nsera présenté et adopté le premier projet de règlement 2026-04\",\n        \"anchor\": \"règlement 2026-04\"\n      },\n      \"reason\": \"L’avis de motion est donné dans cette séance, tandis que le corps du texte reporte expressément la présentation et l’adoption du premier projet au 7 avril 2026, ce qui ne crée pas d’unité de projet actuel.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Fixation du prix et mise en vente du lot 6 714 200, rue Morin — 19 999 $ plus taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 714 200",
+    "page": 19,
+    "citation": "6 714 200 :19 999 $ plus taxes\n6 714 201 :19 999 $plus taxes\n6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains ;",
+    "anchor": "6 714 200 :19 999 $"
+   },
+   "reason": "La résolution 2026-03-16 fixe le prix et autorise la mise en vente de ce lot ; chaque objet foncier explicitement nommé constitue une unité."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Fixation du prix et mise en vente du lot 6 714 201, rue Morin — 19 999 $ plus taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 714 201",
+    "page": 19,
+    "citation": "6 714 201 :19 999 $plus taxes\n6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains ;",
+    "anchor": "6 714 201 :19 999 $"
+   },
+   "reason": "La résolution 2026-03-16 fixe le prix et autorise la mise en vente de ce deuxième lot explicitement nommé, qui doit être distingué des autres lots."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Fixation du prix et mise en vente du lot 6 714 202, rue Morin — 22 499 $ plus taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 714 202",
+    "page": 19,
+    "citation": "6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains ;",
+    "anchor": "6 714 202 22 499 $"
+   },
+   "reason": "La résolution 2026-03-16 fixe le prix et autorise la mise en vente de ce troisième lot explicitement nommé."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Vente du lot 6 714 202 à Frédéric Beaulieu et Alexia Bélanger, conditionnelle à une construction dans les deux ans",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 714 202",
+    "page": 20,
+    "citation": "QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6\n714 202 du cadastre du Québec,",
+    "anchor": "lot numéro 6\n714 202"
+   },
+   "reason": "La résolution 2026-03-17 décide une vente à des acquéreurs nommés, conditionnelle à la construction d’un bâtiment principal dans les deux ans, acte distinct de la fixation du prix et de la mise en vente."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Conclusion autorisée de l’entente avec le CAD encadrant la mise à disposition d’un local municipal",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Entente de collaboration",
+    "page": 21,
+    "citation": "QUE le conseil municipal autorise la conclusion de l’Entente de collaboration entre la Municipalité\nde Notre-Dame-du-Rosaire et le Comité d’action et de développement (CAD), telle que présentée ;",
+    "anchor": "l’Entente de collaboration"
+   },
+   "reason": "L’entente autorisée encadre explicitement la mise à disposition d’un local municipal ; cet objet foncier d’usage relève de l’étape « inconnu », sans être assimilé à une vente ou à une cession."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion du règlement 2026-04 modifiant le règlement de zonage 90-01",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2026-04",
+    "page": 22,
+    "citation": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04",
+    "anchor": "règlement 2026-04"
+   },
+   "reason": "L’avis de motion est donné dans cette séance, tandis que le corps du texte reporte expressément la présentation et l’adoption du premier projet au 7 avril 2026, ce qui ne crée pas d’unité de projet actuel."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

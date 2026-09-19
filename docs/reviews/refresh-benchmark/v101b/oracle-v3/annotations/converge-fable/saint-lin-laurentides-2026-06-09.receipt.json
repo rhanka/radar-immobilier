@@ -1,0 +1,77 @@
+{
+ "documentId": "saint-lin-laurentides-2026-06-09",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "078c235b2de7896a0e3c1790e777f3bb2ca17e540bace0933f6c1edb783788a8",
+ "inputSha256": "05429292a491add499d5478566d92e46c14a0f4342fa38199e17dcbb75fd2334",
+ "responseSha256": "b6c441d42eb0bc37e523c9378ba884e6c23bf2171e255198aa58749759974a5f",
+ "rc": 0,
+ "latencyMs": 52342,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "73cb615b-81ad-4229-b089-2663858d0526",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 4601,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 10365,
+   "webSearchRequests": 0,
+   "costUSD": 0.43737,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 2813,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 10365,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 4601,
+  "output_tokens_details": {
+   "thinking_tokens": 2813
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 10365,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 4601,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 10365,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 10365
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.43737,
+ "durationApiMs": 50366,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:24:42.771Z"
+}

@@ -1,0 +1,278 @@
+{
+ "nodes": [
+  {
+   "id": "source",
+   "label": "Procès-verbal du 2 mars 2026 — Notre-Dame-du-Rosaire",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "status": "candidate",
+   "date": "2026-03-02",
+   "municipality": "notre-dame-du-rosaire",
+   "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+   "url": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance régulière du conseil, tenue le 2 mars 2026 au lieu ordinaire des séances, à",
+     "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+     "sourceUrl": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-avis-2026-04",
+   "label": "Avis de motion — modification des usages autorisés",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "status": "candidate",
+   "date": "2026-03-02",
+   "meetingDate": "2026-03-02",
+   "municipality": "notre-dame-du-rosaire",
+   "kind": "rezonage",
+   "etape": "avis_motion",
+   "etape_date": "2026-03-02",
+   "reglement_number": "2026-04",
+   "description": "Avis de motion visant à modifier la grille des usages du règlement 90-01. La présentation et l’adoption du premier projet sont annoncées pour le 7 avril 2026; aucune zone précise n’est identifiée.",
+   "citations": [
+    {
+     "page": 22,
+     "excerpt": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04",
+     "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+     "sourceUrl": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zonage"
+   ]
+  },
+  {
+   "id": "signal-vente-6714200",
+   "label": "Mise en vente du lot 6 714 200 — rue Morin",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "status": "candidate",
+   "category": "vente_terrain",
+   "date": "2026-03-02",
+   "municipality": "notre-dame-du-rosaire",
+   "resolution": "2026-03-16",
+   "no_lot": "6714200",
+   "amount_cad": 19999,
+   "description": "Mise en vente autorisée au prix de 19 999 $ plus taxes. La municipalité s’engage à installer la ligne électrique et le réseau d’aqueduc desservant les lots. Frais de notaire et autres frais afférents à la charge des acquéreurs.",
+   "citations": [
+    {
+     "page": 19,
+     "excerpt": "QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du\ncadastre du Québec ;",
+     "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+     "sourceUrl": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-prix"
+   ]
+  },
+  {
+   "id": "signal-vente-6714201",
+   "label": "Mise en vente du lot 6 714 201 — rue Morin",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "status": "candidate",
+   "category": "vente_terrain",
+   "date": "2026-03-02",
+   "municipality": "notre-dame-du-rosaire",
+   "resolution": "2026-03-16",
+   "no_lot": "6714201",
+   "amount_cad": 19999,
+   "description": "Mise en vente autorisée au prix de 19 999 $ plus taxes. La municipalité s’engage à installer la ligne électrique et le réseau d’aqueduc desservant les lots. Frais de notaire et autres frais afférents à la charge des acquéreurs.",
+   "citations": [
+    {
+     "page": 19,
+     "excerpt": "QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du\ncadastre du Québec ;",
+     "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+     "sourceUrl": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-prix"
+   ]
+  },
+  {
+   "id": "signal-vente-6714202",
+   "label": "Vente conditionnelle du lot 6 714 202 — rue Morin",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "status": "candidate",
+   "category": "vente_terrain",
+   "date": "2026-03-02",
+   "municipality": "notre-dame-du-rosaire",
+   "resolution": "2026-03-17",
+   "no_lot": "6714202",
+   "amount_cad": 22499,
+   "outcome": "Vente autorisée sous condition",
+   "description": "Vente à des particuliers d’un terrain de 2 491,6 m² pour 22 499 $ plus taxes, conditionnelle à la construction d’un bâtiment principal dans les deux ans suivant l’acte de vente. Installation de l’aqueduc et démarches de raccordement électrique à la charge de la municipalité; frais de transaction à la charge de l’acheteur.",
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "QUE cette vente soit conditionnelle à l’engagement de l’acheteur de construire un bâtiment principal\nsur ledit lot dans un délai maximal de deux (2) ans suivant la signature de l’acte de vente ;",
+     "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+     "sourceUrl": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-vente"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source",
+   "target": "event-avis-2026-04",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "evidence_refs": [
+    "ev-zonage"
+   ],
+   "citations": [
+    {
+     "page": 22,
+     "excerpt": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04",
+     "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+     "sourceUrl": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "signal-vente-6714200",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "evidence_refs": [
+    "ev-prix"
+   ],
+   "citations": [
+    {
+     "page": 19,
+     "excerpt": "QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du\ncadastre du Québec ;",
+     "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+     "sourceUrl": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "signal-vente-6714201",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "evidence_refs": [
+    "ev-prix"
+   ],
+   "citations": [
+    {
+     "page": 19,
+     "excerpt": "QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du\ncadastre du Québec ;",
+     "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+     "sourceUrl": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "signal-vente-6714202",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "evidence_refs": [
+    "ev-vente"
+   ],
+   "citations": [
+    {
+     "page": 20,
+     "excerpt": "QUE cette vente soit conditionnelle à l’engagement de l’acheteur de construire un bâtiment principal\nsur ledit lot dans un délai maximal de deux (2) ans suivant la signature de l’acte de vente ;",
+     "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "rawRef": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+     "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+     "sourceUrl": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-zonage",
+   "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "rawRef": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+   "sourceUrl": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+   "modality": "pdf",
+   "page": 22,
+   "excerpt": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026\nsera présenté et adopté le premier projet de règlement 2026-04 modifiant le règlement de zonage\nnuméro 90-01 de la Municipalité de Notre-Dame-du-Rosaire.\nLe projet de règlement vise à modifier la grille des usages afin de permettre certains usages qui ne\nsont pas autorisés présentement dans certaines zones du territoire municipal."
+  },
+  {
+   "id": "ev-prix",
+   "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "rawRef": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+   "sourceUrl": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+   "modality": "pdf",
+   "page": 19,
+   "excerpt": "QUE le conseil municipal établisse le prix de vente des lots 6 714 200, 6 714 201 et 6 714 202 du\ncadastre du Québec ;\n-\n\n6 714 200 :19 999 $ plus taxes\n6 714 201 :19 999 $plus taxes\n6 714 202 22 499 $ plus taxes\n\nQUE le conseil municipal autorise la mise en vente desdits terrains ;\nQUE la municipalité s’engage à procéder à l’installation de la ligne électrique et du réseau\nd’aqueduc desservant lesdits lots ;"
+  },
+  {
+   "id": "ev-vente",
+   "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "rawRef": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+   "sourceUrl": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+   "modality": "pdf",
+   "page": 20,
+   "excerpt": "QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6\n714 202 du cadastre du Québec, d’une superficie de 2 491,6 mètres carrés, au prix de 22 499 $, plus\nles taxes applicables ;\nQUE cette vente soit conditionnelle à l’engagement de l’acheteur de construire un bâtiment principal\nsur ledit lot dans un délai maximal de deux (2) ans suivant la signature de l’acte de vente ;"
+  },
+  {
+   "id": "ev-cour",
+   "source_file": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "rawRef": "raw/proces-verbaux-notre-dame-du-rosaire/cas/199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b.pdf",
+   "docSha": "199e87784484740c173e9217d9b810d39b580299d1c6169aef844f80fb84ca2b",
+   "sourceUrl": "https://www.notredamedurosaire.com/wp-content/uploads/2026/04/6212-mars-2026.pdf",
+   "modality": "pdf",
+   "page": 23,
+   "excerpt": "Le Comité d’action et de développement (CAD) réitère sa demande auprès du conseil municipal afin\nde procéder au déplacement du cabanon situé dans la cour arrière du dépanneur. Depuis la fin du\nservice de recyclage au printemps 2025, le cabanon est inutilisé. Son déplacement permettrait de\nréaménager l’espace pour offrir un lieu accueillant et sécuritaire à la clientèle durant la saison\nestivale (aire de repas ou de rencontre). Cette demande s’inscrit notamment dans un contexte\nd’augmentation de l’achalandage liée au projet de parc éolien et vise à améliorer l’accessibilité, la\nconvivialité et l’attrait du site. Acceptée"
+  }
+ ],
+ "input_tokens": 15700,
+ "output_tokens": 5300
+}

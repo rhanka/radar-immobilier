@@ -1,0 +1,121 @@
+{
+ "documentId": "sainte-martine-2026-03-17",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ae0f045bd02b646fb63cf0b1fe203cda1fe541e8f3489f5a36c452e1d48bf09c",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"Il n'y a aucun objet réglementaire ou foncier explicite désigné, l'autorisation générale d'enchérir pour vente de taxes ne constituant pas un acte d'urbanisme ou un acte foncier ciblé.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement 2026-503 est expressément attestée à la page 17 par la résolution 2026-03-057.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement de zonage 2026-501 est explicitement attestée à la page 17 par la résolution 2026-03-058.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'autorisation partielle et le refus de modification du règlement de zonage 2019-342 sont dûment constatés à la page 19 par la résolution 2026-03-059.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La modification du plan d'urbanisme 2019-341 constitue un objet réglementaire distinct visé par la résolution 2026-03-059 débutant à la page 18.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La demande de modification réglementaire 2026-003 au 1394, boulevard Saint-Jean-Baptiste Ouest est adoptée à la page 19 par la résolution 2026-03-060.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"L'appui à la demande d'autorisation CPTAQ 2026-004 sur les lots 6 060 923 et 6 060 924 est attesté à la page 20 par la résolution 2026-03-061.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Le refus de la demande de PIIA au 182, rue Saint-Joseph est conforme au texte de la page 22 (résolution 2026-03-062).\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"L'autorisation de démolition et du programme de réutilisation au 5, rue Phénix est attestée à la page 22 par la résolution 2026-03-063.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"La contribution monétaire pour fins de parcs exigée pour le lot 6 717 037 est adoptée à la page 23 par la résolution 2026-03-064.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "Il n'y a aucun objet réglementaire ou foncier explicite désigné, l'autorisation générale d'enchérir pour vente de taxes ne constituant pas un acte d'urbanisme ou un acte foncier ciblé."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'adoption du règlement 2026-503 est expressément attestée à la page 17 par la résolution 2026-03-057."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'adoption du règlement de zonage 2026-501 est explicitement attestée à la page 17 par la résolution 2026-03-058."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'autorisation partielle et le refus de modification du règlement de zonage 2019-342 sont dûment constatés à la page 19 par la résolution 2026-03-059."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La modification du plan d'urbanisme 2019-341 constitue un objet réglementaire distinct visé par la résolution 2026-03-059 débutant à la page 18."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La demande de modification réglementaire 2026-003 au 1394, boulevard Saint-Jean-Baptiste Ouest est adoptée à la page 19 par la résolution 2026-03-060."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "L'appui à la demande d'autorisation CPTAQ 2026-004 sur les lots 6 060 923 et 6 060 924 est attesté à la page 20 par la résolution 2026-03-061."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Le refus de la demande de PIIA au 182, rue Saint-Joseph est conforme au texte de la page 22 (résolution 2026-03-062)."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "L'autorisation de démolition et du programme de réutilisation au 5, rue Phénix est attestée à la page 22 par la résolution 2026-03-063."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "La contribution monétaire pour fins de parcs exigée pour le lot 6 717 037 est adoptée à la page 23 par la résolution 2026-03-064."
+  }
+ ]
+}

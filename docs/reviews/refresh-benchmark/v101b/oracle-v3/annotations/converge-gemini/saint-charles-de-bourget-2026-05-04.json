@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-charles-de-bourget-2026-05-04",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "e7e8a29a1debee533e2558886cbf6e9897fe363620f2e4d3ae773b5e9df81f20",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'adoption prévue du règlement 446.26 relatif au droit de préemption figure au point 6.3 de l'ordre du jour à la page 1.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La demande de dérogation mineure pour le 237, chemin Maltais-Laberge est explicitement inscrite au point 8.1 à la page 1.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La demande d'autorisation à la CPTAQ visant à aliéner le lot 5 682 717 est bien inscrite au point 8.2 à la page 1.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'adoption prévue du règlement 446.26 relatif au droit de préemption figure au point 6.3 de l'ordre du jour à la page 1."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La demande de dérogation mineure pour le 237, chemin Maltais-Laberge est explicitement inscrite au point 8.1 à la page 1."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La demande d'autorisation à la CPTAQ visant à aliéner le lot 5 682 717 est bien inscrite au point 8.2 à la page 1."
+  }
+ ]
+}

@@ -1,0 +1,101 @@
+{
+ "documentId": "barnston-ouest-2026-05-04",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "9bfdc8d37ca0e47bfd310015dc8f0b0963ec76d2c52dd6c9c4d139f5b4cc9863",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 7 atteste « 6.2.3. Dépôt et présentation du Règlement numéro 325-2026 modifiant le règlement numéro 224 Plan d’urbanisme » avec « Le projet de règlement numéro 325-2026 est présenté... Le règlement est déposé », étape projet_reglement distincte de l’avis de motion.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 8 atteste « 6.2.4. Avis de motion - Règlement numéro 325-2026 modifiant le règlement numéro 224 Plan d’urbanisme », avis donné par la conseillère Cynthia Ferland; avis de motion et projet sont des unités séparées.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 8 atteste « 6.2.5. Dépôt et présentation du Règlement numéro 326-2026 modifiant le règlement numéro 225 de zonage » avec présentation et dépôt du projet de règlement, étape projet_reglement.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 8 atteste « 6.2.6. Avis de motion - Règlement numéro 326-2026 modifiant le règlement numéro 225 de zonage », avis donné par la conseillère Cynthia Ferland, étape avis_motion distincte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Page 8 atteste « 6.2.7. Dépôt et présentation du Règlement numéro 327-2026 modifiant le règlement numéro 226 (2012) de lotissement » avec présentation et dépôt du projet, étape projet_reglement.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Page 8 atteste « 6.2.8. Avis de motion - Règlement numéro 327-2026 modifiant le règlement numéro 226 (2012) de lotissement », avis donné par la conseillère Cynthia Ferland, étape avis_motion.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Page 8 atteste « 6.2.9. Dépôt et présentation du Règlement numéro 328-2026 modifiant le règlement numéro 221 sur les plans d’implantation et d’intégration architecturale » avec présentation et dépôt du projet (PIIA inclus au périmètre urbanisme), étape projet_reglement.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Page 9 atteste « 6.2.10. Avis de motion - Règlement numéro 328-2026 modifiant le règlement numéro 221 sur les plans d’implantation et d’intégration architecturale », avis donné par la conseillère Virginie Ashby, étape avis_motion distincte du projet.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 7 atteste « 6.2.3. Dépôt et présentation du Règlement numéro 325-2026 modifiant le règlement numéro 224 Plan d’urbanisme » avec « Le projet de règlement numéro 325-2026 est présenté... Le règlement est déposé », étape projet_reglement distincte de l’avis de motion."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 8 atteste « 6.2.4. Avis de motion - Règlement numéro 325-2026 modifiant le règlement numéro 224 Plan d’urbanisme », avis donné par la conseillère Cynthia Ferland; avis de motion et projet sont des unités séparées."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 8 atteste « 6.2.5. Dépôt et présentation du Règlement numéro 326-2026 modifiant le règlement numéro 225 de zonage » avec présentation et dépôt du projet de règlement, étape projet_reglement."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 8 atteste « 6.2.6. Avis de motion - Règlement numéro 326-2026 modifiant le règlement numéro 225 de zonage », avis donné par la conseillère Cynthia Ferland, étape avis_motion distincte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Page 8 atteste « 6.2.7. Dépôt et présentation du Règlement numéro 327-2026 modifiant le règlement numéro 226 (2012) de lotissement » avec présentation et dépôt du projet, étape projet_reglement."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Page 8 atteste « 6.2.8. Avis de motion - Règlement numéro 327-2026 modifiant le règlement numéro 226 (2012) de lotissement », avis donné par la conseillère Cynthia Ferland, étape avis_motion."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Page 8 atteste « 6.2.9. Dépôt et présentation du Règlement numéro 328-2026 modifiant le règlement numéro 221 sur les plans d’implantation et d’intégration architecturale » avec présentation et dépôt du projet (PIIA inclus au périmètre urbanisme), étape projet_reglement."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Page 9 atteste « 6.2.10. Avis de motion - Règlement numéro 328-2026 modifiant le règlement numéro 221 sur les plans d’implantation et d’intégration architecturale », avis donné par la conseillère Virginie Ashby, étape avis_motion distincte du projet."
+  }
+ ]
+}

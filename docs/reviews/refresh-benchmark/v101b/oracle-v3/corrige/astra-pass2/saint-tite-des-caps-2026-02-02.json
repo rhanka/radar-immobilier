@@ -1,0 +1,291 @@
+{
+ "documentId": "saint-tite-des-caps-2026-02-02",
+ "nextId": 8,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Approbation PIIA — agrandissement d’une maison unifamiliale, lot 6 213 140, chemin Ceinture du Lac",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 213 140",
+    "page": 5,
+    "citation": "Que le Conseil municipal accepte la demande de permis d’agrandissement en zone PIIA faite par la propriétaire du lot 6 213 140",
+    "anchor": "lot 6 213 140",
+    "spanStart": 265,
+    "spanEnd": 391
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation PIIA — agrandissement d’une maison unifamiliale, lot 6 213 140, chemin Ceinture du Lac",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "6 213 140",
+      "page": 5,
+      "citation": "Que le Conseil municipal accepte la demande de permis d’agrandissement en zone PIIA faite par la propriétaire du lot 6 213 140",
+      "anchor": "lot 6 213 140",
+      "spanStart": 265,
+      "spanEnd": 391
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 12945 accepte explicitement cette demande d’agrandissement en zone PIIA, ce qui constitue une unité à inclure."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Approbation PIIA — modification cadastrale, démolition et construction d’une maison, lot 6 212 400, boulevard 138",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 212 400",
+    "page": 6,
+    "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone PIIA faite par le propriétaire du lot 6 212 400",
+    "anchor": "lot 6 212 400",
+    "spanStart": 0,
+    "spanEnd": 125
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation PIIA — modification cadastrale, démolition et construction d’une maison, lot 6 212 400, boulevard 138",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "6 212 400",
+      "page": 6,
+      "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone PIIA faite par le propriétaire du lot 6 212 400",
+      "anchor": "lot 6 212 400",
+      "spanStart": 0,
+      "spanEnd": 125
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 12946 accepte une demande de PIIA portant sur ce lot; ses volets cadastral, démolition et construction appartiennent à la même demande."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Approbation PIIA — construction d’une maison unifamiliale, lot 6 213 540, chemin du Boisé",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 213 540",
+    "page": 6,
+    "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone PIIA faite par le propriétaire du lot 6 213 540",
+    "anchor": "lot 6 213 540",
+    "spanStart": 1944,
+    "spanEnd": 2069
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation PIIA — construction d’une maison unifamiliale, lot 6 213 540, chemin du Boisé",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "6 213 540",
+      "page": 6,
+      "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone PIIA faite par le propriétaire du lot 6 213 540",
+      "anchor": "lot 6 213 540",
+      "spanStart": 1944,
+      "spanEnd": 2069
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 12947 accepte explicitement cette demande de construction en zone PIIA, distincte des demandes visant les autres lots."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Approbation PIIA — construction d’une maison unifamiliale, lot 6 425 190, rue de la Traverse",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 425 190",
+    "page": 7,
+    "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone PIIA faite par le propriétaire du lot 6 425 190",
+    "anchor": "lot 6 425 190",
+    "spanStart": 1122,
+    "spanEnd": 1247
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation PIIA — construction d’une maison unifamiliale, lot 6 425 190, rue de la Traverse",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "6 425 190",
+      "page": 7,
+      "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone PIIA faite par le propriétaire du lot 6 425 190",
+      "anchor": "lot 6 425 190",
+      "spanStart": 1122,
+      "spanEnd": 1247
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 12948 accepte explicitement cette demande de construction en zone PIIA et atteste donc une décision actuelle à inclure."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion — Règlement # 591-2026 sur l’épandage en 2026",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "591-2026",
+    "page": 1,
+    "citation": "5. Avis de motion – Règlement sur l’épandage en 2026 6. Adoption projet de règlement # 591-2026 – Épandage en 2026",
+    "anchor": "règlement # 591-2026",
+    "spanStart": 890,
+    "spanEnd": 1004
+   },
+   "versions": [
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Avis de motion — Règlement # 591-2026 sur l’épandage en 2026",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "591-2026",
+      "page": 2,
+      "citation": "donne avis que je présenterai, lors d’une prochaine assemblée, un règlement concernant l’épandage en 2026",
+      "anchor": "un règlement concernant l’épandage en 2026",
+      "spanStart": 1573,
+      "spanEnd": 1678
+     }
+    },
+    {
+     "step": "astra-pass2",
+     "unit": {
+      "label": "Avis de motion — Règlement # 591-2026 sur l’épandage en 2026",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "591-2026",
+      "page": 1,
+      "citation": "5. Avis de motion – Règlement sur l’épandage en 2026 6. Adoption projet de règlement # 591-2026 – Épandage en 2026",
+      "anchor": "règlement # 591-2026",
+      "spanStart": 890,
+      "spanEnd": 1004
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "fable-pass1",
+     "op": "add",
+     "reason": "Point 5 (Avis # 12939) : avis de motion effectivement donné en séance pour le règlement sur l’épandage en 2026 (identifié # 591-2026 au point 6) ; la règle « Avis de motion et projet actuels séparés » et l’application 2 exigent une unité distincte pour l’avis de motion ; le considérant du point 6 rappelant cet avis ne crée pas d’unité supplémentaire."
+    },
+    {
+     "step": "astra-pass2",
+     "op": "correct",
+     "reason": "La citation initiale ne respecte pas les sauts de ligne et son ancre ne contient pas le numéro du règlement ; cet extrait exact des points contigus fournit les deux éléments sans ajouter d’unité."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Dépôt et adoption du projet de règlement # 591-2026 — épandage en 2026",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "591-2026",
+    "page": 2,
+    "citation": "Que le projet de règlement # 591-2026 pourvoyant à interdire l’épandage à certains jours de l’année 2026 dans la municipalité de Saint-Tite-des-Caps soit et est adopté",
+    "anchor": "projet de règlement # 591-2026",
+    "spanStart": 2413,
+    "spanEnd": 2580
+   },
+   "versions": [
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Dépôt et adoption du projet de règlement # 591-2026 — épandage en 2026",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "591-2026",
+      "page": 2,
+      "citation": "Que le projet de règlement # 591-2026 pourvoyant à interdire l’épandage à certains jours de l’année 2026 dans la municipalité de Saint-Tite-des-Caps soit et est adopté",
+      "anchor": "projet de règlement # 591-2026",
+      "spanStart": 2413,
+      "spanEnd": 2580
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "fable-pass1",
+     "op": "add",
+     "reason": "Point 6 (Rés. # 12940) : objet réglementaire explicite (règlement numéroté # 591-2026) dont le projet est déposé et adopté à cette séance ; étape « projet_reglement » distincte de l’avis de motion selon l’application 2, absente du corrigé courant."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Renouvellement automatique de la demande de bail exclusif (BEX) — carrière du TNO Saut-au-Cochon, information rapportée",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "bail exclusif (BEX)",
+    "page": 2,
+    "citation": "et que celui-ci a été informé du renouvellement de la demande de bail exclusif (BEX) de la carrière située sur le territoire non organisé (TNO) Saut-au-Cochon, et ce, de façon automatique",
+    "anchor": "bail exclusif (BEX",
+    "spanStart": 338,
+    "spanEnd": 525
+   },
+   "versions": [
+    {
+     "step": "astra-pass2",
+     "unit": {
+      "label": "Renouvellement automatique de la demande de bail exclusif (BEX) — carrière du TNO Saut-au-Cochon, information rapportée",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "bail exclusif (BEX)",
+      "page": 2,
+      "citation": "et que celui-ci a été informé du renouvellement de la demande de bail exclusif (BEX) de la carrière située sur le territoire non organisé (TNO) Saut-au-Cochon, et ce, de façon automatique",
+      "anchor": "bail exclusif (BEX",
+      "spanStart": 338,
+      "spanEnd": 525
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass2",
+     "op": "add",
+     "reason": "Le suivi des comités constate le renouvellement automatique d’une demande portant sur un objet foncier explicite, à retenir comme étape « inconnu » sans le transformer en décision d’octroi du bail."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "id": "lac-brome-2026-04-07",
+ "rc": 0,
+ "latencyMs": 610198,
+ "inputTokens": 6,
+ "outputTokens": 93621,
+ "cacheRead": 27581,
+ "cacheCreate": 91646,
+ "costUsd": 3.2912825000000003,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 61386
+}

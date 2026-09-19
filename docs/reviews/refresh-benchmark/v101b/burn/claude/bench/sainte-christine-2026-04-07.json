@@ -1,0 +1,13 @@
+{
+ "id": "sainte-christine-2026-04-07",
+ "rc": 0,
+ "latencyMs": 346012,
+ "inputTokens": 2,
+ "outputTokens": 51915,
+ "cacheRead": 0,
+ "cacheCreate": 19457,
+ "costUsd": 1.507065,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 83303
+}

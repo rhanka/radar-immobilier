@@ -1,0 +1,18 @@
+{
+ "documentId": "blue-sea-2026-02-03",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "0c6fac81c213692ad6aadd2f8d7711f22044fcf29691d3ab6ac033c84ca1f33d",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

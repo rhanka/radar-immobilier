@@ -1,0 +1,82 @@
+{
+ "documentId": "lac-etchemin-2026-02-03",
+ "nextId": 3,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure 2026-175 accordée — 304, avenue du Ruisseau, lot 3 601 426",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-175",
+    "page": 10,
+    "citation": "QUE la demande de dérogation mineure numéro 2026-175 soit et est approuvée par le Conseil de la Municipalité de Lac-Etchemin",
+    "anchor": "dérogation mineure numéro 2026-175",
+    "spanStart": 201,
+    "spanEnd": 325
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure 2026-175 accordée — 304, avenue du Ruisseau, lot 3 601 426",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-175",
+      "page": 10,
+      "citation": "QUE la demande de dérogation mineure numéro 2026-175 soit et est approuvée par le Conseil de la Municipalité de Lac-Etchemin",
+      "anchor": "dérogation mineure numéro 2026-175",
+      "spanStart": 201,
+      "spanEnd": 325
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 045-02-2026 approuve explicitement cette demande de dérogation mineure visant à régulariser l’implantation du garage attenant, ce qui constitue une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Projet de résolution PPCMOI 2026-157 — vente de trailers et remorques au 1646, route 277",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "2026-157",
+    "page": 10,
+    "citation": "QUE la demande de PPCMOI numéro 2026-157 soit autorisée par le Conseil municipal de la Municipalité de Lac-Etchemin de manière à rendre conforme un usage « vente de trailer et remorque",
+    "anchor": "PPCMOI numéro 2026-157",
+    "spanStart": 1911,
+    "spanEnd": 2095
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Projet de résolution PPCMOI 2026-157 — vente de trailers et remorques au 1646, route 277",
+      "stage": "projet_reglement",
+      "procedure": "ppcmoi",
+      "objet": "2026-157",
+      "page": 10,
+      "citation": "QUE la demande de PPCMOI numéro 2026-157 soit autorisée par le Conseil municipal de la Municipalité de Lac-Etchemin de manière à rendre conforme un usage « vente de trailer et remorque",
+      "anchor": "PPCMOI numéro 2026-157",
+      "spanStart": 1911,
+      "spanEnd": 2095
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 6.2 est explicitement intitulé « Adoption d’un projet de résolution » concernant ce PPCMOI : l’unité relève donc du stade projet_reglement, sans ajouter une adoption finale."
+    }
+   ]
+  }
+ ]
+}

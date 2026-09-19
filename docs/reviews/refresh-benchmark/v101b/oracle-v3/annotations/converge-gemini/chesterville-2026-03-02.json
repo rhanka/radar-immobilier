@@ -1,0 +1,51 @@
+{
+ "documentId": "chesterville-2026-03-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "d9a409dbefad179459f5751fa87c97623f8a3da0e1c2fe816646735999b3793a",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 5.2 de l'ordre du jour prévoit bien l'avis de motion pour le règlement 267 N.S. relatif à l'occupation et l'entretien des bâtiments.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 5.3 de l'ordre du jour prévoit l'adoption du projet de règlement numéro 267 N.S., distinct de l'avis de motion.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 11.3 mentionne explicitement un acte foncier visant le lot 6 185 428 sous la rubrique Urbanisme.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 5.2 de l'ordre du jour prévoit bien l'avis de motion pour le règlement 267 N.S. relatif à l'occupation et l'entretien des bâtiments."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 5.3 de l'ordre du jour prévoit l'adoption du projet de règlement numéro 267 N.S., distinct de l'avis de motion."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 11.3 mentionne explicitement un acte foncier visant le lot 6 185 428 sous la rubrique Urbanisme."
+  }
+ ]
+}

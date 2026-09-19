@@ -1,0 +1,316 @@
+{
+ "documentId": "saint-etienne-de-bolton-2026-08-04",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "dbb8601a27768bf3efa9e573dfd219a14a6d99a501dc980f410fefeaa4b1a383",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-04 modifiant le plan d’urbanisme\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-04\",\n        \"page\": 10,\n        \"citation\": \"2026-04 modifiant le Règlement de plan d’urbanisme\\n2014-04\",\n        \"anchor\": \"2026-04 modifiant le Règlement\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique et conserver le saut de ligne avant « 2014-04 ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-09 modifiant les permis et certificats\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-09\",\n        \"page\": 10,\n        \"citation\": \"2026-09 modifiant le règlement de permis et certificats\\n2014-10\",\n        \"anchor\": \"2026-09 modifiant le règlement\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique et conserver le saut de ligne avant « 2014-10 ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-10 modifiant les dérogations mineures\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-10\",\n        \"page\": 10,\n        \"citation\": \"2026-10 modifiant le règlement de dérogation mineure\\n2008-06\",\n        \"anchor\": \"2026-10 modifiant le règlement\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique et conserver le saut de ligne avant « 2008-06 ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2025-11 sur l’occupation et l’entretien des bâtiments\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2025-11\",\n        \"page\": 10,\n        \"citation\": \"QUE le conseil municipal adopte le Règlement 2025-11 créant le\\nRèglement sur l’occupation et l’entretien des bâtiments\",\n        \"anchor\": \"Règlement 2025-11\"\n      },\n      \"reason\": \"L’extrait de la résolution d’adoption doit conserver le saut de ligne après « créant le » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-14 modifiant le règlement sur les usages conditionnels\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-14\",\n        \"page\": 11,\n        \"citation\": \"QUE le conseil adopte le Règlement 2026-14 modifiant le\\nrèglement 2008-04 sur les usages conditionnels\",\n        \"anchor\": \"Règlement 2026-14\"\n      },\n      \"reason\": \"L’extrait de la résolution d’adoption doit conserver le saut de ligne après « modifiant le » pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Avis de non-modification du règlement 2010-11 — concordance au schéma\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2010-11\",\n        \"page\": 11,\n        \"citation\": \"Règlement 2010-11 sur les ententes relatives à des\\ntravaux municipaux\",\n        \"anchor\": \"Règlement 2010-11\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique et conserver le saut de ligne avant « travaux municipaux ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u11\",\n      \"unit\": {\n        \"label\": \"Avis de non-modification du règlement 2014-11 — concordance au schéma\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"2014-11\",\n        \"page\": 11,\n        \"citation\": \"Règlement 2014-11 sur les conditions d’émission de\\npermis de construire\",\n        \"anchor\": \"Règlement 2014-11\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique et conserver le saut de ligne avant « permis de construire ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u13\",\n      \"unit\": {\n        \"label\": \"PIIA accordé — toiture de la chambre froide au 12, rue Principale\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"12, rue Principale\",\n        \"page\": 12,\n        \"citation\": \"QUE le conseil municipal autorise, sur recommandation du CCU,\\nl’ajout d’une toiture pour protéger la chambre froide qui sera\\ninstallée à l’arrière de la Coopérative située au 12, rue Principale\",\n        \"anchor\": \"12, rue Principale\"\n      },\n      \"reason\": \"La citation de l’autorisation doit conserver les sauts de ligne du document pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u14\",\n      \"unit\": {\n        \"label\": \"PIIA accordé — remplacement de l’abri automobile par un garage au 24, Allée des Sommets\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"24, Allée des Sommets\",\n        \"page\": 12,\n        \"citation\": \"QUE le conseil municipal autorise, sur recommandation du CCU,\\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\\nSommets, lot 5 662 886\",\n        \"anchor\": \"24, Allée des\\nSommets\"\n      },\n      \"reason\": \"La citation doit conserver les sauts de ligne du document et l’ancre doit rester une sous-chaîne exacte de cette citation.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u15\",\n      \"unit\": {\n        \"label\": \"Refus de dérogation mineure — piscine à 2,4 mètres de la limite latérale au 135, rue de la Serpentine\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"135, rue de la Serpentine\",\n        \"page\": 2,\n        \"citation\": \"j. Refus de la demande de dérogation mineure de\\nréduire la distance entre une piscine creusée et la\\nlimite latérale à 2,4 mètres au lieu de 3 mètres au\\n135, rue de la Serpentine\",\n        \"anchor\": \"135, rue de la Serpentine\"\n      },\n      \"reason\": \"Le refus est confirmé par la résolution 2026-08-156, mais la citation retenue à la page 2 doit conserver les sauts de ligne du texte.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u16\",\n      \"unit\": {\n        \"label\": \"Refus de dérogation mineure — abattage hors période de gel sur le lot 5 191 546, chemin de la Tour\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"5 191 546\",\n        \"page\": 14,\n        \"citation\": \"refuse, sur recommandation du CCU, la\\ndemande de dérogation mineure visant à permettre l’abattage\\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\\npériode de gel\",\n        \"anchor\": \"lot 5 191 546\"\n      },\n      \"reason\": \"La citation du refus doit conserver les sauts de ligne du document pour respecter l’exigence de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u17\",\n      \"unit\": {\n        \"label\": \"PIIA accordé — remplacement du revêtement de toiture au 572, 1er Rang\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"572, 1er Rang\",\n        \"page\": 14,\n        \"citation\": \"QUE le conseil municipal autorise, sur recommandation du CCU,\\nle remplacement du revêtement de la toiture de la résidence\\nsituée au 572, 1er Rang, lot 5 191 952, par un revêtement en tôle\",\n        \"anchor\": \"572, 1er Rang\"\n      },\n      \"reason\": \"La citation de l’autorisation doit conserver les sauts de ligne du document pour respecter l’exigence de copie à l’identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Adoption du règlement 2026-04 modifiant le plan d’urbanisme",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-04",
+    "page": 10,
+    "citation": "2026-04 modifiant le Règlement de plan d’urbanisme\n2014-04",
+    "anchor": "2026-04 modifiant le Règlement"
+   },
+   "reason": "La citation doit être recopiée à l’identique et conserver le saut de ligne avant « 2014-04 »."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Adoption du règlement 2026-09 modifiant les permis et certificats",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-09",
+    "page": 10,
+    "citation": "2026-09 modifiant le règlement de permis et certificats\n2014-10",
+    "anchor": "2026-09 modifiant le règlement"
+   },
+   "reason": "La citation doit être recopiée à l’identique et conserver le saut de ligne avant « 2014-10 »."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Adoption du règlement 2026-10 modifiant les dérogations mineures",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-10",
+    "page": 10,
+    "citation": "2026-10 modifiant le règlement de dérogation mineure\n2008-06",
+    "anchor": "2026-10 modifiant le règlement"
+   },
+   "reason": "La citation doit être recopiée à l’identique et conserver le saut de ligne avant « 2008-06 »."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Adoption du règlement 2025-11 sur l’occupation et l’entretien des bâtiments",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2025-11",
+    "page": 10,
+    "citation": "QUE le conseil municipal adopte le Règlement 2025-11 créant le\nRèglement sur l’occupation et l’entretien des bâtiments",
+    "anchor": "Règlement 2025-11"
+   },
+   "reason": "L’extrait de la résolution d’adoption doit conserver le saut de ligne après « créant le » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Adoption du règlement 2026-14 modifiant le règlement sur les usages conditionnels",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-14",
+    "page": 11,
+    "citation": "QUE le conseil adopte le Règlement 2026-14 modifiant le\nrèglement 2008-04 sur les usages conditionnels",
+    "anchor": "Règlement 2026-14"
+   },
+   "reason": "L’extrait de la résolution d’adoption doit conserver le saut de ligne après « modifiant le » pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Avis de non-modification du règlement 2010-11 — concordance au schéma",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2010-11",
+    "page": 11,
+    "citation": "Règlement 2010-11 sur les ententes relatives à des\ntravaux municipaux",
+    "anchor": "Règlement 2010-11"
+   },
+   "reason": "La citation doit être recopiée à l’identique et conserver le saut de ligne avant « travaux municipaux »."
+  },
+  {
+   "op": "correct",
+   "id": "u11",
+   "unit": {
+    "label": "Avis de non-modification du règlement 2014-11 — concordance au schéma",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "2014-11",
+    "page": 11,
+    "citation": "Règlement 2014-11 sur les conditions d’émission de\npermis de construire",
+    "anchor": "Règlement 2014-11"
+   },
+   "reason": "La citation doit être recopiée à l’identique et conserver le saut de ligne avant « permis de construire »."
+  },
+  {
+   "op": "correct",
+   "id": "u13",
+   "unit": {
+    "label": "PIIA accordé — toiture de la chambre froide au 12, rue Principale",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "12, rue Principale",
+    "page": 12,
+    "citation": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’une toiture pour protéger la chambre froide qui sera\ninstallée à l’arrière de la Coopérative située au 12, rue Principale",
+    "anchor": "12, rue Principale"
+   },
+   "reason": "La citation de l’autorisation doit conserver les sauts de ligne du document pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u14",
+   "unit": {
+    "label": "PIIA accordé — remplacement de l’abri automobile par un garage au 24, Allée des Sommets",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "24, Allée des Sommets",
+    "page": 12,
+    "citation": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\nSommets, lot 5 662 886",
+    "anchor": "24, Allée des\nSommets"
+   },
+   "reason": "La citation doit conserver les sauts de ligne du document et l’ancre doit rester une sous-chaîne exacte de cette citation."
+  },
+  {
+   "op": "correct",
+   "id": "u15",
+   "unit": {
+    "label": "Refus de dérogation mineure — piscine à 2,4 mètres de la limite latérale au 135, rue de la Serpentine",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "135, rue de la Serpentine",
+    "page": 2,
+    "citation": "j. Refus de la demande de dérogation mineure de\nréduire la distance entre une piscine creusée et la\nlimite latérale à 2,4 mètres au lieu de 3 mètres au\n135, rue de la Serpentine",
+    "anchor": "135, rue de la Serpentine"
+   },
+   "reason": "Le refus est confirmé par la résolution 2026-08-156, mais la citation retenue à la page 2 doit conserver les sauts de ligne du texte."
+  },
+  {
+   "op": "correct",
+   "id": "u16",
+   "unit": {
+    "label": "Refus de dérogation mineure — abattage hors période de gel sur le lot 5 191 546, chemin de la Tour",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "5 191 546",
+    "page": 14,
+    "citation": "refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à permettre l’abattage\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\npériode de gel",
+    "anchor": "lot 5 191 546"
+   },
+   "reason": "La citation du refus doit conserver les sauts de ligne du document pour respecter l’exigence de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u17",
+   "unit": {
+    "label": "PIIA accordé — remplacement du revêtement de toiture au 572, 1er Rang",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "572, 1er Rang",
+    "page": 14,
+    "citation": "QUE le conseil municipal autorise, sur recommandation du CCU,\nle remplacement du revêtement de la toiture de la résidence\nsituée au 572, 1er Rang, lot 5 191 952, par un revêtement en tôle",
+    "anchor": "572, 1er Rang"
+   },
+   "reason": "La citation de l’autorisation doit conserver les sauts de ligne du document pour respecter l’exigence de copie à l’identique."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 10,
+   "citation": "2026-04 modifiant le Règlement de plan d’urbanisme\n2014-04"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "adoption",
+   "page": 10,
+   "citation": "2026-09 modifiant le règlement de permis et certificats\n2014-10"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "adoption",
+   "page": 10,
+   "citation": "2026-10 modifiant le règlement de dérogation mineure\n2008-06"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "adoption",
+   "page": 10,
+   "citation": "QUE le conseil municipal adopte le Règlement 2025-11 créant le\nRèglement sur l’occupation et l’entretien des bâtiments"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "adoption",
+   "page": 11,
+   "citation": "QUE le conseil adopte le Règlement 2026-14 modifiant le\nrèglement 2008-04 sur les usages conditionnels"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "inconnu",
+   "page": 11,
+   "citation": "Règlement 2010-11 sur les ententes relatives à des\ntravaux municipaux"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u11",
+   "stage": "inconnu",
+   "page": 11,
+   "citation": "Règlement 2014-11 sur les conditions d’émission de\npermis de construire"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u13",
+   "stage": "piia",
+   "page": 12,
+   "citation": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’une toiture pour protéger la chambre froide qui sera\ninstallée à l’arrière de la Coopérative située au 12, rue Principale"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u14",
+   "stage": "piia",
+   "page": 12,
+   "citation": "QUE le conseil municipal autorise, sur recommandation du CCU,\nl’ajout d’un garage attaché à la résidence située au 24, Allée des\nSommets, lot 5 662 886"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u15",
+   "stage": "derogation_mineure",
+   "page": 2,
+   "citation": "j. Refus de la demande de dérogation mineure de\nréduire la distance entre une piscine creusée et la\nlimite latérale à 2,4 mètres au lieu de 3 mètres au\n135, rue de la Serpentine"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 10,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u16",
+   "stage": "derogation_mineure",
+   "page": 14,
+   "citation": "refuse, sur recommandation du CCU, la\ndemande de dérogation mineure visant à permettre l’abattage\nd’arbre sur le lot 5 191 546 du chemin de la Tour en dehors de la\npériode de gel"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 11,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u17",
+   "stage": "piia",
+   "page": 14,
+   "citation": "QUE le conseil municipal autorise, sur recommandation du CCU,\nle remplacement du revêtement de la toiture de la résidence\nsituée au 572, 1er Rang, lot 5 191 952, par un revêtement en tôle"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 17
+}

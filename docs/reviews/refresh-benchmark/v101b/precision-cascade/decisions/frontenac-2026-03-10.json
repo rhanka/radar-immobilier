@@ -1,0 +1,435 @@
+{
+ "documentId": "frontenac-2026-03-10",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "bc2731803c2f86150b04a507ed271783f2d18f4c2666b2d06746f2afd81ffefa",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-cptaq-453132"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Attestation de conformité municipale — dossier CPTAQ 453132",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "Que le conseil municipal de la Municipalité de Frontenac atteste que la\ndemande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc.,\nest conforme à la réglementation municipale applicable,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-vente-taxes-4972283"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande de vente pour défaut de paiement de taxes — lot 4972283",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 19,
+       "excerpt": "Qu’en vertu de l’article 1023 du Code Municipal du Québec, le conseil\nde la Municipalité de Frontenac demande à la MRC du Granit de vendre\npour défaut de paiement des taxes, les immeubles suivants :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-piste-route-204"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Octroi du contrat de piste multifonctionnelle — route 204",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 24,
+       "excerpt": "Que la municipalité accepte la soumission déposée par Excavation Bolduc Inc. pour l'ajout d'une piste multifonctionnelle sur la route 204 (secteur\nvillage),"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-retrait-surveillance-puits"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Retrait de la gestion du plan de surveillance des puits — contournement ferroviaire",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 28,
+       "excerpt": "Que la Municipalité de Frontenac confirme son retrait de l’intérêt d’agir\nà titre de responsable de la mise en œuvre et de la gestion du plan de surveillance des puits d’eau potable"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-report-503-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report du premier projet — occupation et entretien des bâtiments",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Adoption reportée du 1er projet du règlement no. 503-2026 relatif à\nl’occupation et à l’entretien des bâtiments"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-report-504-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report de l'adoption — modification du règlement de démolition",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Adoption reportée du règlement no 504-2026 modifiant le règlement\nrelatif à la démolition d’immeubles no 469-2023 afin de modifier certaines dispositions relatives aux bâtiments assujettis"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-report-506-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report de l'avis de motion et de la présentation — concordance construction",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Avis de motion et présentation reportée du règlement no. 506-2026\nafin de faire la concordance du règlement de construction no 287-96\nenvers le schéma d’aménagement de la MRC du Granit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "event-report-507-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report de l'avis de motion et de la présentation — concordance lotissement",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Avis de motion et présentation reportée du règlement no 507-2026\nafin de faire la concordance du règlement de lotissement no 244-90\nenvers le schéma d’aménagement de la MRC du Granit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "event-report-508-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report de l'avis de motion et de la présentation — permis et certificats",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Avis de motion et présentation reportée du règlement no 508-2026\nafin de faire la concordance du règlement sur les permis et certificats\nno 242-90 envers le schéma d’aménagement de la MRC du Granit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-report-5092026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report de l'avis de motion et de la présentation — remplacement du plan d'urbanisme",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro\n241-90"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "event-report-510-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Report de l'avis de motion et de la présentation — concordance zonage",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Avis de motion et présentation reportée du règlement no 510-2026\nafin de faire la concordance du règlement de zonage no 243-90 envers le schéma d’aménagement de la MRC du Granit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "signal-soleil-levant"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Mention du développement Soleil-Levant 2.0",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Développement Soleil-Levant 2.0"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "signal-eolien-haute-chaudiere"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Suivi des travaux du projet éolien de la Haute-Chaudière",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 37,
+       "excerpt": "Suivi des travaux pour le projet éolien de la Haute-Chaudière"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-087 atteste la conformité de la demande CPTAQ au dossier 453132.\",\"excerpt\":\"Que le conseil municipal de la Municipalité de Frontenac atteste que la\\ndemande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc.,\\nest conforme à la réglementation municipale applicable,\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 2026-080 demande la vente pour défaut de paiement de taxes pour l'immeuble mentionné.\",\"excerpt\":\"Qu’en vertu de l’article 1023 du Code Municipal du Québec, le conseil\\nde la Municipalité de Frontenac demande à la MRC du Granit de vendre\\npour défaut de paiement des taxes, les immeubles suivants :\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"L'octroi d'un contrat de construction/travaux publics d'infrastructure relève des exclusions (contrat de travaux/services).\",\"excerpt\":\"\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le retrait de la gestion d'un plan de surveillance de puits d'eau potable ne constitue pas un acte d'urbanisme ou d'aménagement du territoire.\",\"excerpt\":\"\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le report de l'adoption du premier projet du règlement no 503-2026 est expressément consigné dans la section Autres sujets.\",\"excerpt\":\"Adoption reportée du 1er projet du règlement no. 503-2026 relatif à\\nl’occupation et à l’entretien des bâtiments\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le report de l'adoption du règlement modifiant le règlement sur la démolition d'immeubles no 504-2026 est acté au procès-verbal.\",\"excerpt\":\"Adoption reportée du règlement no 504-2026 modifiant le règlement\\nrelatif à la démolition d’immeubles no 469-2023 afin de modifier certaines dispositions relatives aux bâtiments assujettis\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le procès-verbal consigne le report de l'avis de motion et de présentation du règlement de concordance de construction no 506-2026.\",\"excerpt\":\"Avis de motion et présentation reportée du règlement no. 506-2026\\nafin de faire la concordance du règlement de construction no 287-96\\nenvers le schéma d’aménagement de la MRC du Granit\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le procès-verbal mentionne le report de l'avis de motion et présentation du règlement de lotissement no 507-2026.\",\"excerpt\":\"Avis de motion et présentation reportée du règlement no 507-2026\\nafin de faire la concordance du règlement de lotissement no 244-90\\nenvers le schéma d’aménagement de la MRC du Granit\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le procès-verbal mentionne le report de l'avis de motion et de présentation pour le règlement sur les permis et certificats no 508-2026.\",\"excerpt\":\"Avis de motion et présentation reportée du règlement no 508-2026\\nafin de faire la concordance du règlement sur les permis et certificats\\nno 242-90 envers le schéma d’aménagement de la MRC du Granit\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Le document acte le report de l'avis de motion et de présentation du règlement no 509-2026 remplaçant le plan d'urbanisme.\",\"excerpt\":\"Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro\\n241-90\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Le document acte le report de l'avis de motion et présentation du règlement de concordance de zonage no 510-2026.\",\"excerpt\":\"Avis de motion et présentation reportée du règlement no 510-2026\\nafin de faire la concordance du règlement de zonage no 243-90 envers le schéma d’aménagement de la MRC du Granit\"},{\"act\":\"A12\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une simple mention d'un sujet sans décision, acte administratif ou contenu explicite.\",\"excerpt\":\"\"},{\"act\":\"A13\",\"verdict\":\"non_soutenu\",\"reason\":\"Simple mention sous 'Autres sujets' sans aucune décision ni fait d'urbanisme caractérisé.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-087 atteste la conformité de la demande CPTAQ au dossier 453132.",
+   "excerpt": "Que le conseil municipal de la Municipalité de Frontenac atteste que la\ndemande déposée à la CPTAQ au dossier 453132, par Groupe Exca inc.,\nest conforme à la réglementation municipale applicable,"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "La résolution 2026-080 demande la vente pour défaut de paiement de taxes pour l'immeuble mentionné.",
+   "excerpt": "Qu’en vertu de l’article 1023 du Code Municipal du Québec, le conseil\nde la Municipalité de Frontenac demande à la MRC du Granit de vendre\npour défaut de paiement des taxes, les immeubles suivants :"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de construction/travaux publics d'infrastructure relève des exclusions (contrat de travaux/services).",
+   "excerpt": ""
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le retrait de la gestion d'un plan de surveillance de puits d'eau potable ne constitue pas un acte d'urbanisme ou d'aménagement du territoire.",
+   "excerpt": ""
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le report de l'adoption du premier projet du règlement no 503-2026 est expressément consigné dans la section Autres sujets.",
+   "excerpt": "Adoption reportée du 1er projet du règlement no. 503-2026 relatif à\nl’occupation et à l’entretien des bâtiments"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le report de l'adoption du règlement modifiant le règlement sur la démolition d'immeubles no 504-2026 est acté au procès-verbal.",
+   "excerpt": "Adoption reportée du règlement no 504-2026 modifiant le règlement\nrelatif à la démolition d’immeubles no 469-2023 afin de modifier certaines dispositions relatives aux bâtiments assujettis"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le procès-verbal consigne le report de l'avis de motion et de présentation du règlement de concordance de construction no 506-2026.",
+   "excerpt": "Avis de motion et présentation reportée du règlement no. 506-2026\nafin de faire la concordance du règlement de construction no 287-96\nenvers le schéma d’aménagement de la MRC du Granit"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le procès-verbal mentionne le report de l'avis de motion et présentation du règlement de lotissement no 507-2026.",
+   "excerpt": "Avis de motion et présentation reportée du règlement no 507-2026\nafin de faire la concordance du règlement de lotissement no 244-90\nenvers le schéma d’aménagement de la MRC du Granit"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le procès-verbal mentionne le report de l'avis de motion et de présentation pour le règlement sur les permis et certificats no 508-2026.",
+   "excerpt": "Avis de motion et présentation reportée du règlement no 508-2026\nafin de faire la concordance du règlement sur les permis et certificats\nno 242-90 envers le schéma d’aménagement de la MRC du Granit"
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Le document acte le report de l'avis de motion et de présentation du règlement no 509-2026 remplaçant le plan d'urbanisme.",
+   "excerpt": "Avis de motion et présentation reportée du règlement numéro 5092026 visant à remplacer le règlement du plan d’urbanisme numéro\n241-90"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Le document acte le report de l'avis de motion et présentation du règlement de concordance de zonage no 510-2026.",
+   "excerpt": "Avis de motion et présentation reportée du règlement no 510-2026\nafin de faire la concordance du règlement de zonage no 243-90 envers le schéma d’aménagement de la MRC du Granit"
+  },
+  {
+   "act": "A12",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une simple mention d'un sujet sans décision, acte administratif ou contenu explicite.",
+   "excerpt": ""
+  },
+  {
+   "act": "A13",
+   "verdict": "non_soutenu",
+   "reason": "Simple mention sous 'Autres sujets' sans aucune décision ni fait d'urbanisme caractérisé.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 13,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "L'octroi d'un contrat de construction/travaux publics d'infrastructure relève des exclusions (contrat de travaux/services)."
+   },
+   {
+    "act": "A04",
+    "reason": "Le retrait de la gestion d'un plan de surveillance de puits d'eau potable ne constitue pas un acte d'urbanisme ou d'aménagement du territoire."
+   },
+   {
+    "act": "A12",
+    "reason": "Il s'agit d'une simple mention d'un sujet sans décision, acte administratif ou contenu explicite."
+   },
+   {
+    "act": "A13",
+    "reason": "Simple mention sous 'Autres sujets' sans aucune décision ni fait d'urbanisme caractérisé."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "La résolution 2026-087 atteste la conformité de la demande CPTAQ au dossier 453132."
+   },
+   {
+    "act": "A02",
+    "reason": "La résolution 2026-080 demande la vente pour défaut de paiement de taxes pour l'immeuble mentionné."
+   },
+   {
+    "act": "A05",
+    "reason": "Le report de l'adoption du premier projet du règlement no 503-2026 est expressément consigné dans la section Autres sujets."
+   },
+   {
+    "act": "A06",
+    "reason": "Le report de l'adoption du règlement modifiant le règlement sur la démolition d'immeubles no 504-2026 est acté au procès-verbal."
+   },
+   {
+    "act": "A07",
+    "reason": "Le procès-verbal consigne le report de l'avis de motion et de présentation du règlement de concordance de construction no 506-2026."
+   },
+   {
+    "act": "A08",
+    "reason": "Le procès-verbal mentionne le report de l'avis de motion et présentation du règlement de lotissement no 507-2026."
+   },
+   {
+    "act": "A09",
+    "reason": "Le procès-verbal mentionne le report de l'avis de motion et de présentation pour le règlement sur les permis et certificats no 508-2026."
+   },
+   {
+    "act": "A10",
+    "reason": "Le document acte le report de l'avis de motion et de présentation du règlement no 509-2026 remplaçant le plan d'urbanisme."
+   },
+   {
+    "act": "A11",
+    "reason": "Le document acte le report de l'avis de motion et présentation du règlement de concordance de zonage no 510-2026."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4246,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 22843,
+   "outputTokens": 1097,
+   "totalTokens": 23940
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 4097
+  },
+  "inputSha256": "c6247caaa3afd89cd074cfd25ffb707f3172bcce8a8dddb9b9bc03186171c871"
+ }
+}

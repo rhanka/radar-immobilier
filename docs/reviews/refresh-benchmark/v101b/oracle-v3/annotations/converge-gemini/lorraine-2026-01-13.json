@@ -1,0 +1,61 @@
+{
+ "documentId": "lorraine-2026-01-13",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ef0331425b92a0039b4068244592edd94d52873d828fbc33e45411b8aab44774",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure pour le lot 2 323 270 (4, rue de Souilly) est accordée à la résolution 2026-01-4 en page 3.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure pour le lot 5 061 778 (12, place de Liverdun) est accordée à la résolution 2026-01-5 en page 3.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure pour le lot 2 323 185 (9, place de Charmois) est accordée en page 4.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La demande PIIA no 2025-0069 (agrandissement au 9, place de Charmois) est approuvée par la résolution 2026-01-7 en page 5.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La dérogation mineure pour le lot 2 323 270 (4, rue de Souilly) est accordée à la résolution 2026-01-4 en page 3."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La dérogation mineure pour le lot 5 061 778 (12, place de Liverdun) est accordée à la résolution 2026-01-5 en page 3."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La dérogation mineure pour le lot 2 323 185 (9, place de Charmois) est accordée en page 4."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La demande PIIA no 2025-0069 (agrandissement au 9, place de Charmois) est approuvée par la résolution 2026-01-7 en page 5."
+  }
+ ]
+}

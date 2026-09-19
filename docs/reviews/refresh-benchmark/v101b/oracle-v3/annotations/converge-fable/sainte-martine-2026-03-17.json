@@ -1,0 +1,121 @@
+{
+ "documentId": "sainte-martine-2026-03-17",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ae0f045bd02b646fb63cf0b1fe203cda1fe541e8f3489f5a36c452e1d48bf09c",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"La résolution 2026-03-053 est une mesure de recouvrement de taxes visant « tout immeuble de son territoire mis en vente » sans objet foncier explicite (aucun lot ni adresse), donc hors du corrigé au titre des exclusions (comptes) ; fait complémentaire à signaler séparément.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 17 atteste « 2026-03-057 : Adoption du Règlement numéro 2026-503 modifiant le Règlement sur les permis et certificats numéro 2019-345 » avec « soit adopté. Adoptée » : objet réglementaire explicite, étape adoption exacte.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 17 atteste « 2026-03-058 : Adoption du Règlement numéro 2026-501 modifiant le Règlement de zonage numéro 2019-342 » et la résolution adopte le règlement (rappels d'avis de motion et projets antérieurs ne créent pas d'unités supplémentaires).\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 19 atteste « D'autoriser partiellement les demandes de modifications réglementaires comme suit : 1. Que soit modifié le Règlement de zonage numéro 2019-342 » avec refus de deux modifications ; objet réglementaire explicite, étape inconnu (résolution d'autorisation de modification), le refus est conservé.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-03-059 nomme explicitement deux objets réglementaires distincts ; page 18 atteste la citation et la page 19 autorise « Que soit modifié le Règlement adoptant le plan d'urbanisme numéro 2019-341 », ce qui constitue une unité distincte selon la règle du nœud groupé couvrant plusieurs unités explicitement nommées.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Page 19 atteste « 2026-03-060 : Demande 2026-003 – Modification réglementaire – 1394, boulevard Saint-Jean-Baptiste Ouest » et page 20 le conseil autorise la modification du Règlement de zonage 2019-342 (article 6.84) ; dossier d'urbanisme explicite, étape inconnu.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Page 20 atteste « 2026-03-061 : Demande 2026-004 – Autorisation à la CPTAQ – Lots numéro 6 060 923 et 6 060 924 (rang Touchette) » et page 21 le conseil appuie la demande ; acte foncier explicite (lots nommés), étape inconnu.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Page 22 atteste « De refuser la demande d'approbation d'un PIIA visant l'installation de panneaux solaires sur le toit de la résidence située au 182, rue Saint-Joseph » ; un refus reste une unité, étape piia exacte.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Page 22 atteste « D'autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le programme préliminaire de réutilisation du sol dégagé » suivi de « Adoptée » ; acte foncier/urbanisme explicite sur un immeuble nommé.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Page 23 atteste la citation « le conseil opte pour une compensation monétaire de 10 % ... pour le lot projeté numéro 6 717 037, soit une somme de 7 625,90 $ » et la résolution 2026-03-064 exige cette contribution pour fins de parcs (Règlement de lotissement 2019-343) ; acte foncier explicite adopté.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "La résolution 2026-03-053 est une mesure de recouvrement de taxes visant « tout immeuble de son territoire mis en vente » sans objet foncier explicite (aucun lot ni adresse), donc hors du corrigé au titre des exclusions (comptes) ; fait complémentaire à signaler séparément."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 17 atteste « 2026-03-057 : Adoption du Règlement numéro 2026-503 modifiant le Règlement sur les permis et certificats numéro 2019-345 » avec « soit adopté. Adoptée » : objet réglementaire explicite, étape adoption exacte."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 17 atteste « 2026-03-058 : Adoption du Règlement numéro 2026-501 modifiant le Règlement de zonage numéro 2019-342 » et la résolution adopte le règlement (rappels d'avis de motion et projets antérieurs ne créent pas d'unités supplémentaires)."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 19 atteste « D'autoriser partiellement les demandes de modifications réglementaires comme suit : 1. Que soit modifié le Règlement de zonage numéro 2019-342 » avec refus de deux modifications ; objet réglementaire explicite, étape inconnu (résolution d'autorisation de modification), le refus est conservé."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-03-059 nomme explicitement deux objets réglementaires distincts ; page 18 atteste la citation et la page 19 autorise « Que soit modifié le Règlement adoptant le plan d'urbanisme numéro 2019-341 », ce qui constitue une unité distincte selon la règle du nœud groupé couvrant plusieurs unités explicitement nommées."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Page 19 atteste « 2026-03-060 : Demande 2026-003 – Modification réglementaire – 1394, boulevard Saint-Jean-Baptiste Ouest » et page 20 le conseil autorise la modification du Règlement de zonage 2019-342 (article 6.84) ; dossier d'urbanisme explicite, étape inconnu."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Page 20 atteste « 2026-03-061 : Demande 2026-004 – Autorisation à la CPTAQ – Lots numéro 6 060 923 et 6 060 924 (rang Touchette) » et page 21 le conseil appuie la demande ; acte foncier explicite (lots nommés), étape inconnu."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Page 22 atteste « De refuser la demande d'approbation d'un PIIA visant l'installation de panneaux solaires sur le toit de la résidence située au 182, rue Saint-Joseph » ; un refus reste une unité, étape piia exacte."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Page 22 atteste « D'autoriser la démolition du bâtiment situé au 5, rue Phénix, ainsi que le programme préliminaire de réutilisation du sol dégagé » suivi de « Adoptée » ; acte foncier/urbanisme explicite sur un immeuble nommé."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Page 23 atteste la citation « le conseil opte pour une compensation monétaire de 10 % ... pour le lot projeté numéro 6 717 037, soit une somme de 7 625,90 $ » et la résolution 2026-03-064 exige cette contribution pour fins de parcs (Règlement de lotissement 2019-343) ; acte foncier explicite adopté."
+  }
+ ]
+}

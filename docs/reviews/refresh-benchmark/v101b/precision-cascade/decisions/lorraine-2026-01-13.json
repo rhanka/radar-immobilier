@@ -1,0 +1,164 @@
+{
+ "documentId": "lorraine-2026-01-13",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c130a018429407c342030291b01f103e3ebd9b25ebba5406447570111e00cde8",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-souilly"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 4, rue de Souilly",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de\nSouilly, lot 2 323 270, cadastre du Québec, circonscription foncière de Terrebonne,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-liverdun"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 12, place de Liverdun",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place\nde Liverdun, lot numéro 5 061 778, cadastre du Québec, circonscription foncière de"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-charmois-derogation"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 9, place de Charmois",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place\nde Charmois, lot numéro 2 323 185, cadastre du Québec, circonscription foncière de"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-charmois-piia"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Agrandissement au 9, place de Charmois",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro\n2025-0069 situé au 9, place de Charmois, tel que presentée au plan de construction"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal a accordé la demande de dérogation mineure pour le 4, rue de Souilly par la résolution 2026-01-4.\",\"excerpt\":\"D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de\\nSouilly, lot 2 323 270, cadastre du Québec, circonscription foncière de Terrebonne,\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil a adopté la résolution 2026-01-5 accordant la dérogation mineure pour le 12, place de Liverdun.\",\"excerpt\":\"D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place\\nde Liverdun, lot numéro 5 061 778, cadastre du Québec, circonscription foncière de\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil a adopté la résolution accordant la dérogation mineure pour le 9, place de Charmois.\",\"excerpt\":\"D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place\\nde Charmois, lot numéro 2 323 185, cadastre du Québec, circonscription foncière de\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil a approuvé la demande de PIIA pour l'agrandissement au 9, place de Charmois par la résolution 2026-01-7.\",\"excerpt\":\"D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro\\n2025-0069 situé au 9, place de Charmois, tel que presentée au plan de construction\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal a accordé la demande de dérogation mineure pour le 4, rue de Souilly par la résolution 2026-01-4.",
+   "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 4, rue de\nSouilly, lot 2 323 270, cadastre du Québec, circonscription foncière de Terrebonne,"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil a adopté la résolution 2026-01-5 accordant la dérogation mineure pour le 12, place de Liverdun.",
+   "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situéau 12, place\nde Liverdun, lot numéro 5 061 778, cadastre du Québec, circonscription foncière de"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil a adopté la résolution accordant la dérogation mineure pour le 9, place de Charmois.",
+   "excerpt": "D'ACCORDER la demande de dérogation mineure pour l'immeuble situé au 9, place\nde Charmois, lot numéro 2 323 185, cadastre du Québec, circonscription foncière de"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le conseil a approuvé la demande de PIIA pour l'agrandissement au 9, place de Charmois par la résolution 2026-01-7.",
+   "excerpt": "D'APPROUVER la demande d'agrandissement d'un bâtiment résidentiel numéro\n2025-0069 situé au 9, place de Charmois, tel que presentée au plan de construction"
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil municipal a accordé la demande de dérogation mineure pour le 4, rue de Souilly par la résolution 2026-01-4."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil a adopté la résolution 2026-01-5 accordant la dérogation mineure pour le 12, place de Liverdun."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil a adopté la résolution accordant la dérogation mineure pour le 9, place de Charmois."
+   },
+   {
+    "act": "A04",
+    "reason": "Le conseil a approuvé la demande de PIIA pour l'agrandissement au 9, place de Charmois par la résolution 2026-01-7."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1854,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 8271,
+   "outputTokens": 372,
+   "totalTokens": 8643
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1701
+  },
+  "inputSha256": "92d301a123c46bc024423892b374e82beff1c40cc639053b446712a59c88a2c6"
+ }
+}

@@ -1,0 +1,13 @@
+{
+ "id": "sainte-angele-de-monnoir-2026-01-13",
+ "rc": 0,
+ "latencyMs": 445735,
+ "inputTokens": 6,
+ "outputTokens": 66722,
+ "cacheRead": 14655,
+ "cacheCreate": 78720,
+ "costUsd": 2.4732395,
+ "isError": false,
+ "numTurns": 2,
+ "resultLen": 4930
+}

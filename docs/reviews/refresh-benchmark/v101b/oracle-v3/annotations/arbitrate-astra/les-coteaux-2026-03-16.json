@@ -1,0 +1,74 @@
+{
+ "documentId": "les-coteaux-2026-03-16",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "315677b1715a23a32329865222ea2827b092bfa8fb9eab7f8a457ecb2e58a488",
+ "verificationSha256": "71fe1cc125a6e760f181f82dc79984c83ed157023ffda3e8b56bdede6a5afc7b",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"La résolution 26-03-9293 autorise un « contrat d’autorisation d’utilisation de l’espace d’amarrage pour l’année 2026 » afin de permettre à St-Lawrence Cruise Lines « d’amarrer et de circuler dans le parc Louis-Stanislas-Pariseau » (p. 8-9). Cette autorisation d’usage liée aux croisières relève des « loisirs » exclus du rappel : aucun bail, cession, servitude ou changement réglementaire n’est explicité, et la propriété municipale du parc ne suffit pas à qualifier ce contrat d’acte foncier comme le propose v1.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u09",
+   "verificationItem": "i09",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation de signature du contrat d’utilisation de l’espace d’amarrage – Parc Louis-Stanislas-Pariseau – Année 2026",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "parc Louis-Stanislas-Pariseau",
+      "page": 9,
+      "citation": "le contrat d’autorisation d’utilisation de l’espace d’amarrage pour l’année 2026 avec St-Lawrence Cruise Lines afin de leur permettre d’amarrer et de circuler dans le parc Louis-Stanislas-Pariseau",
+      "anchor": "parc Louis-Stanislas-Pariseau",
+      "spanStart": 216,
+      "spanEnd": 412
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution autorise à la page 9 la signature du contrat d’utilisation de l’espace d’amarrage du parc municipal pour 2026, acte foncier explicite inclus même s’il est non résidentiel."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "Le contrat d’autorisation d’utilisation de l’espace d’amarrage (résolution 26-03-9293, section Loisirs, sport, culture et vie communautaire) est une autorisation d’usage temporaire pour une croisière, non un acte foncier ni un objet d’urbanisme ; il relève des exclusions « marchés de services, loisirs » et reste au plus un fait complémentaire hors gold."
+    },
+    {
+     "position": "A",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'autorisation d'amarrage dans un parc relève des loisirs et de la gestion contractuelle courante, exclus du périmètre urbanisme et foncier."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "La résolution 26-03-9293 autorise un « contrat d’autorisation d’utilisation de l’espace d’amarrage pour l’année 2026 » afin de permettre à St-Lawrence Cruise Lines « d’amarrer et de circuler dans le parc Louis-Stanislas-Pariseau » (p. 8-9). Cette autorisation d’usage liée aux croisières relève des « loisirs » exclus du rappel : aucun bail, cession, servitude ou changement réglementaire n’est explicité, et la propriété municipale du parc ne suffit pas à qualifier ce contrat d’acte foncier comme le propose v1."
+  }
+ ]
+}

@@ -1,0 +1,181 @@
+{
+ "documentId": "saint-constant-2026-01-20",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "da2d9cc42d6b979e9cb4e73271806e76b0aa93ca779519ddec9651e2ae040fa8",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "ppcmoi-premier-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du premier projet de résolution 037-01-26 — 42, montée Saint-Régis",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la\ndemande d’autorisation de PPCMOI numéro 2025-00114"
+      },
+      {
+       "page": 5,
+       "excerpt": "D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la\ndemande d’autorisation de PPCMOI numéro 2025-00114, concernant le lot 2 869 628 du\ncadastre du Québec, soit le 42, montée Saint-Régis, selon la condition suivante :\n•\n\nQu’une servitude soit publiée pour les parties de la construction qui empiètent sur\nla propriété voisine dans les douze (12) mois suivant l’entrée en vigueur de la\nprésente résolution."
+      },
+      {
+       "page": 1,
+       "excerpt": "AVIS est donné par la soussignée, que lors d'une séance ordinaire tenue le mardi,\n20 janvier 2026, le Conseil municipal de la Ville de Saint-Constant a adopté le projet de\nrésolution numéro 037-01-26 intitulé « Adoption du premier projet de résolution –\nDemande de PPCMOI numéro 2025-00114 – Projet de construction, de modification\nou d’occupation d’un immeuble (PPCMOI) – 42, montée Saint-Régis » visant à\nrégulariser des éléments dérogatoires de l’habitation unifamiliale jumelée existante au 42,\nmontée Saint-Régis (lot 2 869 625 du cadastre du Québec)."
+      },
+      {
+       "page": 6,
+       "excerpt": "Que la présente autorisation ne dispense pas la requérante à obtenir, le cas échéant, tous\npermis, certificats d’autorisation, approbations ou avis requis en vertu d’une loi ou d’un\nrèglement."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "consultation"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Consultation publique prévue le 3 mars 2026 — PPCMOI 2025-00114",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Ce projet de résolution conformément à la Loi, fera l'objet d'une assemblée publique de\nconsultation"
+      },
+      {
+       "page": 2,
+       "excerpt": "Ce projet de résolution conformément à la Loi, fera l'objet d'une assemblée publique de\nconsultation qui sera tenue par le Conseil municipal le 3 mars 2026 à 18h00, au Pavillon\nde la biodiversité situé au 66, rue du Maçon à Saint-Constant."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-1528-17"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 1528-17",
+     "stage": null,
+     "objet": "1528-17",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Ce projet de résolution concerne une propriété située dans la zone H-532 du règlement\nde zonage numéro 1528-17, laquelle est illustrée au plan suivant :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-1536-17"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1536-17 relatif aux PPCMOI",
+     "stage": null,
+     "objet": "1536-17",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "CONSIDÉRANT que la Ville de Saint-Constant a adopté le règlement numéro 1536-17 relatif\naux projets particuliers de construction, de modification ou d’occupation d’un immeuble;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal a formellement adopté le premier projet de résolution numéro 037-01-26 pour le PPCMOI numéro 2025-00114.\",\"excerpt\":\"D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la\\ndemande d’autorisation de PPCMOI numéro 2025-00114\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"L'avis public annonce la tenue de l'assemblée publique de consultation fixée au 3 mars 2026.\",\"excerpt\":\"Ce projet de résolution conformément à la Loi, fera l'objet d'une assemblée publique de\\nconsultation qui sera tenue par le Conseil municipal le 3 mars 2026 à 18h00\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 1528-17 est uniquement cité comme cadre normatif en vigueur et ne fait l'objet d'aucun acte ou étape procédurale dans ce document.\",\"excerpt\":\"Ce projet de résolution concerne une propriété située dans la zone H-532 du règlement\\nde zonage numéro 1528-17\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 1536-17 est simplement mentionné dans les considérants comme le règlement autorisant les PPCMOI, sans faire l'objet d'un acte procédural.\",\"excerpt\":\"CONSIDÉRANT que la Ville de Saint-Constant a adopté le règlement numéro 1536-17 relatif\\naux projets particuliers de construction, de modification ou d’occupation d’un immeuble;\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal a formellement adopté le premier projet de résolution numéro 037-01-26 pour le PPCMOI numéro 2025-00114.",
+   "excerpt": "D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la\ndemande d’autorisation de PPCMOI numéro 2025-00114"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "L'avis public annonce la tenue de l'assemblée publique de consultation fixée au 3 mars 2026.",
+   "excerpt": "Ce projet de résolution conformément à la Loi, fera l'objet d'une assemblée publique de\nconsultation qui sera tenue par le Conseil municipal le 3 mars 2026 à 18h00"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 1528-17 est uniquement cité comme cadre normatif en vigueur et ne fait l'objet d'aucun acte ou étape procédurale dans ce document.",
+   "excerpt": "Ce projet de résolution concerne une propriété située dans la zone H-532 du règlement\nde zonage numéro 1528-17"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 1536-17 est simplement mentionné dans les considérants comme le règlement autorisant les PPCMOI, sans faire l'objet d'un acte procédural.",
+   "excerpt": "CONSIDÉRANT que la Ville de Saint-Constant a adopté le règlement numéro 1536-17 relatif\naux projets particuliers de construction, de modification ou d’occupation d’un immeuble;"
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement 1528-17 est uniquement cité comme cadre normatif en vigueur et ne fait l'objet d'aucun acte ou étape procédurale dans ce document."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement 1536-17 est simplement mentionné dans les considérants comme le règlement autorisant les PPCMOI, sans faire l'objet d'un acte procédural."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil municipal a formellement adopté le premier projet de résolution numéro 037-01-26 pour le PPCMOI numéro 2025-00114."
+   },
+   {
+    "act": "A02",
+    "reason": "L'avis public annonce la tenue de l'assemblée publique de consultation fixée au 3 mars 2026."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1792,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 4967,
+   "outputTokens": 348,
+   "totalTokens": 5315
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1649
+  },
+  "inputSha256": "00639864512ad55c5da6631c6f9244ca46ef21554ff1cc5c6e3fbf9ad0e27e8b"
+ }
+}

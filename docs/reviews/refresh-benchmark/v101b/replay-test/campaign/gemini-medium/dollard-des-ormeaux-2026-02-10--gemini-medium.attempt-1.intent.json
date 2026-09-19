@@ -1,0 +1,1 @@
+{"schemaVersion":2,"state":"in-flight","startedAt":"2026-09-17T12:30:48.974Z","campaign":"v101b","arm":"gemini-medium","documentId":"dollard-des-ormeaux-2026-02-10","attempt":1,"requested":{"providerId":"gemini","transportProviderId":"cloud-code","modelId":"gemini-3.8-flash","effort":"medium","maxOutputTokens":32768}}

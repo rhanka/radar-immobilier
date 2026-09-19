@@ -1,0 +1,13 @@
+{
+ "id": "valcourt-2026-06-01-agenda",
+ "rc": 0,
+ "latencyMs": 147455,
+ "inputTokens": 2,
+ "outputTokens": 22250,
+ "cacheRead": 0,
+ "cacheCreate": 4365,
+ "costUsd": 0.6021479999999999,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 35766
+}

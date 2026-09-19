@@ -1,0 +1,568 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-sp-2026-14",
+   "label": "SP-2026-14 — Second projet de modification du zonage",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "numero": "SP-2026-14",
+   "municipality": "sainte-sophie",
+   "meetingDate": "2026-06-02",
+   "stage": "2e_projet",
+   "objet": "Second projet inscrit à l'ordre du jour : modification de la contribution pour parcs, agrandissement de CH-217 au détriment de CH-220, de CH-219 au détriment de CH-217 et CH-220, et de U-711 et U-705 au détriment de U-701. Retrait de la classe A2 dans CH-217 et remplacement des nombres 67 et 62 par 89 dans la section Bâtiment principal. Adoption finale non établie.",
+   "zones_ciblees": [
+    "CH-217",
+    "CH-220",
+    "CH-219",
+    "U-711",
+    "U-701",
+    "U-705"
+   ],
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "SECOND PROJET DE RÈGLEMENT SP-2026-14 - AMENDEMENT AU\nRÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 13,
+     "excerpt": "3. L’annexe 2 - « Plan de zonage » est modifié par l’agrandissement de la zone\n« CH-219 » au détriment des zones « CH-217 » et « CH-220 ».",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 14,
+     "excerpt": "5. L’annexe 2 - « Plan de zonage » est modifié par l’agrandissement de la zone\n« U-705 » au détriment de la zone « U-701 ».",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-sp-2026-15",
+   "label": "SP-2026-15 — Modification des usages de V-802",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "numero": "SP-2026-15",
+   "municipality": "sainte-sophie",
+   "meetingDate": "2026-06-02",
+   "stage": "2e_projet",
+   "zone_cible": "V-802",
+   "objet": "Second projet inscrit à l'ordre du jour : insertion des classes C2, C3 et C6 dans V-802, avec interdiction spécifique de C2-03, C2-09, C2-10, C2-12, C2-13, C2-14, C3-08, C3-12, C3-14, C6-01, C6-05 et C6-09. Adoption finale non établie.",
+   "citations": [
+    {
+     "page": 15,
+     "excerpt": "SECOND PROJET DE RÈGLEMENT SP-2026-15 - AMENDEMENT AU\nRÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER\nL’ANNEXE 3 - GRILLE DES SPÉCIFICATIONS, ZONE V-802",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1470-2026",
+   "label": "1470-2026 — Conformité du plan d'urbanisme",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "numero": "1470-2026",
+   "municipality": "sainte-sophie",
+   "meetingDate": "2026-06-02",
+   "objet": "Règlement inscrit à l'ordre du jour, modifiant le plan d'urbanisme 1296-2020 pour conformité au règlement 399-25 : contraintes sonores, récréation intensive dans l'affectation Services industriels, agrandissement du périmètre d'urbanisation et remplacement de parties des affectations Rurale par Conservation et Périurbaine et Industrielle par Urbaine. Adoption et entrée en vigueur non établies.",
+   "citations": [
+    {
+     "page": 16,
+     "excerpt": "RÈGLEMENT 1470-2026 - AMENDEMENT AU RÈGLEMENT 1296-2020\nRELATIF AU PLAN D’URBANISME AFIN D’ASSURER SA CONFORMITÉ AU",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 17,
+     "excerpt": "5. Le plan 2 « Affectation du sol » de ce règlement est modifié par :",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1471-2026",
+   "label": "1471-2026 — Conformité du zonage et nouvelles zones",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "numero": "1471-2026",
+   "municipality": "sainte-sophie",
+   "meetingDate": "2026-06-02",
+   "objet": "Règlement inscrit à l'ordre du jour pour conformité au règlement 399-25 : protection des milieux humides et hydriques, contraintes relatives au bruit, remplacement de PERIU-500 par U-720 et IND-407 par U-721, agrandissement de CONS-300 et création de CONS-301, CONS-302, CONS-303, RU-630 et RU-631. Pour les classes C2, C3, C4 et C10 dans U-720 et U-721, réduction proposée de la largeur minimale des lots adjacents à une nouvelle rue de 50 à 20 mètres et de leur superficie minimale de 40 000 à 800 m². Ajout de C7 et de l'usage spécifiquement autorisé C7-14 dans IND-400. Adoption et entrée en vigueur non établies.",
+   "zones_ciblees": [
+    "PERIU-500",
+    "U-720",
+    "IND-407",
+    "U-721",
+    "CONS-300",
+    "RU-624",
+    "CONS-301",
+    "RU-630",
+    "RU-620",
+    "CONS-302",
+    "RU-631",
+    "RU-619",
+    "CONS-303",
+    "RU-607",
+    "RU-608",
+    "IND-400"
+   ],
+   "citations": [
+    {
+     "page": 22,
+     "excerpt": "RÈGLEMENT 1471-2026\n\nAMENDEMENT AU RÈGLEMENT 1297-2020\nRELATIF AU ZONAGE AFIN D’ASSURER SA",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 26,
+     "excerpt": "7. L’annexe 2 « Plan de zonage » de ce règlement est modifiée par :",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 27,
+     "excerpt": "6° À la grille correspondant à la zone IND-407 :\na) Le remplacement du nom de la grille par « U-721 »;",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1472-2026",
+   "label": "1472-2026 — Études acoustiques pour permis et certificats",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "numero": "1472-2026",
+   "municipality": "sainte-sophie",
+   "meetingDate": "2026-06-02",
+   "objet": "Règlement inscrit à l'ordre du jour modifiant 1299-2020. Exigences d'étude acoustique pour les opérations cadastrales de nouvelles rues ou prolongements destinés à des usages sensibles en zone sonore élevée; mesures de mitigation, plans et devis et engagement écrit si nécessaires. Adoption et entrée en vigueur non établies.",
+   "citations": [
+    {
+     "page": 41,
+     "excerpt": "RÈGLEMENT 1472-2026 - AMENDEMENT AU RÈGLEMENT 1299-2020\nRELATIF AUX PERMIS ET CERTIFICATS AFIN D’ASSURER SA",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-1473-2026",
+   "label": "1473-2026 — Suppression de dispositions PIIA relatives au bruit",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "numero": "1473-2026",
+   "municipality": "sainte-sophie",
+   "meetingDate": "2026-06-02",
+   "objet": "Règlement inscrit à l'ordre du jour modifiant 1300-2020 : suppression de la colonne Intervention dans une zone de niveau sonore élevé au tableau 1 de l'article 2.2.1, de l'article 2.2.2 et de la section 3.6. Adoption et entrée en vigueur non établies.",
+   "citations": [
+    {
+     "page": 42,
+     "excerpt": "RÈGLEMENT 1473-2026 - AMENDEMENT AU RÈGLEMENT 1300-2020\nRELATIF\nAU\nPLAN\nD’IMPLANTATION\nET\nD’INTÉGRATION",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-u-720",
+   "label": "U-720",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "code": "U-720",
+   "municipality": "sainte-sophie",
+   "designation": "Urbaine",
+   "description": "Zone prévue en remplacement de PERIU-500 dans le règlement 1471-2026 joint à l'ordre du jour.",
+   "citations": [
+    {
+     "page": 26,
+     "excerpt": "1° Le remplacement de la zone PERIU-500 par la zone U-720, le tout tel\nque montré à l’annexe A du présent règlement;",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-u-721",
+   "label": "U-721",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "code": "U-721",
+   "municipality": "sainte-sophie",
+   "designation": "Urbaine",
+   "description": "Zone prévue en remplacement de IND-407 dans le règlement 1471-2026 joint à l'ordre du jour.",
+   "citations": [
+    {
+     "page": 26,
+     "excerpt": "2° Le remplacement de la zone IND-407 par la zone U-721, le tout tel que\nmontré à l’annexe A du présent règlement;",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "constraint-wetland-u720",
+   "label": "Protection des milieux humides et hydriques — U-720",
+   "node_type": "Constraint",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "constraintType": "milieu_humide",
+   "municipality": "sainte-sophie",
+   "meetingDate": "2026-06-02",
+   "loi": "Règlement 1471-2026, ajout de l'article 11.2.2 au règlement de zonage 1297-2020",
+   "description": "Disposition proposée concernant le lot 4 545 697, zone U-720. Le document signale la présence possible d'un milieu humide et de deux cours d'eau d'intérêt selon le plan régional de 2023. Avant autorisation dans le milieu humide, rapport d'un biologiste ou professionnel en environnement produit dans les cinq années précédant la demande, confirmant sa présence et ses limites. Dans la portion humide, seuls les travaux de restauration écologique et d'utilisation durable sont prévus. Entrée en vigueur non établie.",
+   "evidence_refs": [
+    "ev-wetland"
+   ],
+   "citations": [
+    {
+     "page": 22,
+     "excerpt": "1. La section 11.2 « Protection des milieux humides » du Règlement de\nzonage nº 1297-2020 est modifiée par l’ajout de l’article 11.2.2 qui se lit\ncomme suit :",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-piia-new-glasgow",
+   "label": "Demande de PIIA — 799, rue de New Glasgow",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "municipality": "sainte-sophie",
+   "meetingDate": "2026-06-02",
+   "kind": "piia",
+   "etape": "piia",
+   "description": "Demande inscrite à l'ordre du jour; aucune décision fournie.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Demande de plan d'implantation et d'intégration architecturale (PIIA) - 799, rue de New\nGlasgow",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-derogation-achigan",
+   "label": "Dérogation mineure — 537, chemin de l'Achigan Ouest",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "municipality": "sainte-sophie",
+   "meetingDate": "2026-06-02",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "description": "Dérogation mineure inscrite à l'ordre du jour; objet détaillé et décision absents.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Dérogation mineure - 537, chemin de l'Achigan Ouest",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-derogation-abercrombie",
+   "label": "Dérogation mineure — 318-318 A, chemin Abercrombie",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "municipality": "sainte-sophie",
+   "meetingDate": "2026-06-02",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "description": "Dérogation mineure inscrite à l'ordre du jour; objet détaillé et décision absents.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "Dérogation mineure - 318-318 A, chemin Abercrombie",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-conservation",
+   "label": "Demande de réduction d'une aire d'affectation Conservation",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "municipality": "sainte-sophie",
+   "meetingDate": "2026-06-02",
+   "category": "modification_affectation",
+   "reglement_number": "188-07",
+   "etape": "inconnu",
+   "description": "Demande inscrite à l'ordre du jour auprès de la MRC de la Rivière-du-Nord pour réduire la superficie de l'aire d'affectation Conservation du schéma révisé. Superficie, périmètre et issue non fournis.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande de modification au règlement 188-07 relatif au schéma d'aménagement et de\ndéveloppement révisé afin de réduire la superficie de l'aire d'affectation « Conservation",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-agricultural-deadline",
+   "label": "Prolongation du délai de conformité du lotissement agricole",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "municipality": "sainte-sophie",
+   "meetingDate": "2026-06-02",
+   "category": "conformite_lotissement",
+   "reglement_number": "399-25",
+   "etape": "inconnu",
+   "description": "Demande de prolongation de délai inscrite à l'ordre du jour auprès du ministre des Affaires municipales et de l'Habitation pour la conformité aux normes de lotissement en zone agricole découlant du règlement 399-25. Issue non fournie.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Demande de prolongation de délai auprès du ministre des Affaires municipales et de\nl'Habitation – Mise en conformité aux normes de lotissement en zone agricole découlant",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-servitude-samson",
+   "label": "Servitude de tolérance — Rue Samson",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "status": "candidate",
+   "municipality": "sainte-sophie",
+   "meetingDate": "2026-06-02",
+   "category": "servitude",
+   "no_lot": "4037185",
+   "description": "Servitude de tolérance inscrite à l'ordre du jour pour l'empiètement d'un mur de soutènement en roche dans l'emprise de la rue Samson sur une parcelle du lot 4 037 185. Aucune décision fournie.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Servitude de tolérance pour l'empiètement d'un mur de soutènement en roche dans\nl'emprise de la rue Samson sur une parcelle du lot 4 037 185",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "bylaw-1471-2026",
+   "target": "zone-u-720",
+   "relation": "defines",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "assertion_basis": "Remplacement prévu dans le texte joint à l'ordre du jour.",
+   "evidence_refs": [
+    "ev-u720"
+   ],
+   "citations": [
+    {
+     "page": 26,
+     "excerpt": "1° Le remplacement de la zone PERIU-500 par la zone U-720, le tout tel\nque montré à l’annexe A du présent règlement;",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "bylaw-1471-2026",
+   "target": "zone-u-721",
+   "relation": "defines",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "assertion_basis": "Remplacement prévu dans le texte joint à l'ordre du jour.",
+   "evidence_refs": [
+    "ev-u721"
+   ],
+   "citations": [
+    {
+     "page": 26,
+     "excerpt": "2° Le remplacement de la zone IND-407 par la zone U-721, le tout tel que\nmontré à l’annexe A du présent règlement;",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "constraint-wetland-u720",
+   "target": "zone-u-720",
+   "relation": "constrains",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "assertion_basis": "Disposition proposée concernant le lot 4 545 697 dans U-720; ne constitue pas une confirmation de milieu humide sur toute la zone.",
+   "evidence_refs": [
+    "ev-wetland"
+   ],
+   "citations": [
+    {
+     "page": 22,
+     "excerpt": "1. La section 11.2 « Protection des milieux humides » du Règlement de\nzonage nº 1297-2020 est modifiée par l’ajout de l’article 11.2.2 qui se lit\ncomme suit :",
+     "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+     "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+     "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-sp14",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+   "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+   "modality": "pdf",
+   "page": 12,
+   "excerpt": "SECOND PROJET DE RÈGLEMENT SP-2026-14 - AMENDEMENT AU\nRÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER\nL’ARTICLE 1.4.2 AINSI QUE LES ANNEXES 2 – PLAN DE ZONAGE ET 3 –\nGRILLE DES SPÉCIFICATION, ZONE CH-217"
+  },
+  {
+   "id": "ev-sp15",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+   "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+   "modality": "pdf",
+   "page": 15,
+   "excerpt": "SECOND PROJET DE RÈGLEMENT SP-2026-15 - AMENDEMENT AU\nRÈGLEMENT 1297-2020 RELATIF AU ZONAGE AFIN DE MODIFIER\nL’ANNEXE 3 - GRILLE DES SPÉCIFICATIONS, ZONE V-802"
+  },
+  {
+   "id": "ev-1471",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+   "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+   "modality": "pdf",
+   "page": 22,
+   "excerpt": "RÈGLEMENT 1471-2026\n\nAMENDEMENT AU RÈGLEMENT 1297-2020\nRELATIF AU ZONAGE AFIN D’ASSURER SA"
+  },
+  {
+   "id": "ev-u720",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+   "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+   "modality": "pdf",
+   "page": 26,
+   "excerpt": "1° Le remplacement de la zone PERIU-500 par la zone U-720, le tout tel\nque montré à l’annexe A du présent règlement;"
+  },
+  {
+   "id": "ev-u721",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+   "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+   "modality": "pdf",
+   "page": 26,
+   "excerpt": "2° Le remplacement de la zone IND-407 par la zone U-721, le tout tel que\nmontré à l’annexe A du présent règlement;"
+  },
+  {
+   "id": "ev-wetland",
+   "source_file": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "rawRef": "raw/proces-verbaux-sainte-sophie/cas/09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda.pdf",
+   "docSha": "09120950bb18b421bb74d457ec58d821d75f15ff028b6d7c7762dc5ddfc7ddda",
+   "sourceUrl": "https://www.stesophie.ca/storage/app/media/municipalite/vie-democratique/seances-du-conseil-et-proces-verbaux/ordre du jour 2026/agenda-so-2026-06-02-web-1.pdf",
+   "modality": "pdf",
+   "page": 22,
+   "excerpt": "1. La section 11.2 « Protection des milieux humides » du Règlement de\nzonage nº 1297-2020 est modifiée par l’ajout de l’article 11.2.2 qui se lit\ncomme suit :\n« 11.2.2 Dispositions relatives à la protection des milieux humides et\nhydriques sur le lot 4 545 697 (zone U-720)"
+  }
+ ],
+ "input_tokens": 21500,
+ "output_tokens": 8500
+}

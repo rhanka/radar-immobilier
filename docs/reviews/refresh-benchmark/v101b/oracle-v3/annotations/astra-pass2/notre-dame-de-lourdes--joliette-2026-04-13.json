@@ -1,0 +1,100 @@
+{
+ "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "e896da47182098f2426a6bae2497828c8ac6dac7f4fa07bf42244fd6018bdd6b",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Autorisation de la dérogation mineure 2026-0005 — 3741 rue Principale, clôture de 1,52 mètre\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"2026-0005\",\n        \"page\": 6,\n        \"citation\": \"Demande de dérogation mineure numéro 2026-0005 - Marianne Isabelle - 3741 rue\\nPrincipale\",\n        \"anchor\": \"dérogation mineure numéro 2026-0005\"\n      },\n      \"reason\": \"La règle impose une citation recopiée à l’identique : le titre de la demande comporte un saut de ligne entre « rue » et « Principale ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Adoption du second projet de règlement 03-2026 — modification du zonage dans la zone U-41\",\n        \"stage\": \"second_projet\",\n        \"procedure\": null,\n        \"objet\": \"03-2026\",\n        \"page\": 7,\n        \"citation\": \"10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de\\nzonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes\",\n        \"anchor\": \"règlement numéro 03-2026\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne avant « zonage » pour reproduire à l’identique le titre du point 10.1, qui précise l’étape du second projet.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Autorisation d’enchérir et d’acquérir des immeubles — vente pour taxes du 11 juin 2026\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"Vente d’immeubles pour taxes\",\n        \"page\": 8,\n        \"citation\": \"et à acquérir, au nom de la Municipalité,\\ntout immeuble de son territoire mis en vente\",\n        \"anchor\": \"tout immeuble de son territoire\"\n      },\n      \"reason\": \"La règle de transcription à l’identique exige de rétablir le saut de ligne après « Municipalité, » dans l’extrait autorisant l’acquisition.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Autorisation de la dérogation mineure 2026-0005 — 3741 rue Principale, clôture de 1,52 mètre",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-0005",
+    "page": 6,
+    "citation": "Demande de dérogation mineure numéro 2026-0005 - Marianne Isabelle - 3741 rue\nPrincipale",
+    "anchor": "dérogation mineure numéro 2026-0005"
+   },
+   "reason": "La règle impose une citation recopiée à l’identique : le titre de la demande comporte un saut de ligne entre « rue » et « Principale »."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Adoption du second projet de règlement 03-2026 — modification du zonage dans la zone U-41",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "03-2026",
+    "page": 7,
+    "citation": "10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de\nzonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes",
+    "anchor": "règlement numéro 03-2026"
+   },
+   "reason": "La citation doit conserver le saut de ligne avant « zonage » pour reproduire à l’identique le titre du point 10.1, qui précise l’étape du second projet."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Autorisation d’enchérir et d’acquérir des immeubles — vente pour taxes du 11 juin 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Vente d’immeubles pour taxes",
+    "page": 8,
+    "citation": "et à acquérir, au nom de la Municipalité,\ntout immeuble de son territoire mis en vente",
+    "anchor": "tout immeuble de son territoire"
+   },
+   "reason": "La règle de transcription à l’identique exige de rétablir le saut de ligne après « Municipalité, » dans l’extrait autorisant l’acquisition."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "derogation_mineure",
+   "page": 6,
+   "citation": "Demande de dérogation mineure numéro 2026-0005 - Marianne Isabelle - 3741 rue\nPrincipale"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "second_projet",
+   "page": 7,
+   "citation": "10.1 – Adoption du second projet de règlement numéro 03-2026 modifiant le règlement de\nzonage 02-2023 de la municipalité de Notre-Dame-de-Lourdes"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "adoption",
+   "page": 8,
+   "citation": "et à acquérir, au nom de la Municipalité,\ntout immeuble de son territoire mis en vente"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

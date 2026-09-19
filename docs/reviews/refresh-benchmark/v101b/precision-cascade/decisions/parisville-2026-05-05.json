@@ -1,0 +1,283 @@
+{
+ "documentId": "parisville-2026-05-05",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "bf0604fc4a30d1a653a807c5f5985e1a7a195a3130447869f968ce9f42c23879",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-432-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 432-2026 modifiant le règlement de zonage 308-2011",
+     "stage": "adoption",
+     "objet": "432-2026",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+      },
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-308-2011"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 308-2011",
+     "stage": null,
+     "objet": "308-2011",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+      },
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-433-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 433-2026 modifiant le règlement de lotissement 311-2011",
+     "stage": "adoption",
+     "objet": "433-2026",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+      },
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-311-2011"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de lotissement 311-2011",
+     "stage": null,
+     "objet": "311-2011",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+      },
+      {
+       "page": 4,
+       "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-431-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Premier projet de règlement 431-2026 modifiant le zonage",
+     "stage": "1er_projet",
+     "objet": "431-2026",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "CONSIDÉRANT QUE le premier projet de règlement # 431-2026 modifiant\nle règlement de zonage a été adopté le 10 mars 2026;"
+      },
+      {
+       "page": 3,
+       "excerpt": "CONSIDÉRANT QUE le premier projet de règlement # 431-2026 modifiant\nle règlement de zonage a été adopté le 10 mars 2026;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-conduites"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Prêt temporaire pour la réfection des conduites de la route Principale",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D’autoriser le directeur général et le maire à signer les documents\nnécessaires auprès du Centre financier aux entreprises de Desjardins afin\nde contracter un prêt temporaire de 6 500 000.00 $"
+      },
+      {
+       "page": 3,
+       "excerpt": "D’autoriser le directeur général et le maire à signer les documents\nnécessaires auprès du Centre financier aux entreprises de Desjardins afin\nde contracter un prêt temporaire de 6 500 000.00 $ afin de couvrir les\ndépenses liées au projet de réfection des conduites de la route Principale."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-eau"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Signature de l’entente modifiée de fourniture d’eau potable",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "D’autoriser la signature de l’entente modifiée entre la municipalité de\nParisville et la municipalité de Deschaillons-sur-Saint-Laurent concernant la"
+      },
+      {
+       "page": 6,
+       "excerpt": "D’autoriser la signature de l’entente modifiée entre la municipalité de\nParisville et la municipalité de Deschaillons-sur-Saint-Laurent concernant la\nfourniture et la distribution d’eau potable."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal adopte le règlement numéro 432-2026 modifiant le règlement de zonage à la résolution 73-05-26.\",\"excerpt\":\"Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011.\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 308-2011 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification, sans étape procédurale propre.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement 433-2026 modifiant le règlement de lotissement lors de la résolution 74-05-26.\",\"excerpt\":\"Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011.\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 311-2011 est uniquement cité à titre de règlement antérieur modifié, sans étape procédurale propre dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"L'adoption du premier projet de règlement 431-2026 le 10 mars 2026 n'est qu'un rappel historique dans les considérants.\",\"excerpt\":\"\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la conclusion d'un emprunt temporaire de 6 500 000 $ pour la réfection des conduites de la route Principale.\",\"excerpt\":\"D’autoriser le directeur général et le maire à signer les documents nécessaires auprès du Centre financier aux entreprises de Desjardins afin de contracter un prêt temporaire de 6 500 000.00 $\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la signature de l'entente modifiée relative à la fourniture et distribution d'eau potable.\",\"excerpt\":\"D’autoriser la signature de l’entente modifiée entre la municipalité de Parisville et la municipalité de Deschaillons-sur-Saint-Laurent concernant la fourniture et la distribution d’eau potable.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal adopte le règlement numéro 432-2026 modifiant le règlement de zonage à la résolution 73-05-26.",
+   "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4322026 modifiant le règlement de zonage # 308-2011."
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 308-2011 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification, sans étape procédurale propre.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement 433-2026 modifiant le règlement de lotissement lors de la résolution 74-05-26.",
+   "excerpt": "Que le conseil de la municipalité de Parisville adopte le règlement # 4332026 modifiant le règlement de lotissement # 311-2011."
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 311-2011 est uniquement cité à titre de règlement antérieur modifié, sans étape procédurale propre dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "L'adoption du premier projet de règlement 431-2026 le 10 mars 2026 n'est qu'un rappel historique dans les considérants.",
+   "excerpt": ""
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la conclusion d'un emprunt temporaire de 6 500 000 $ pour la réfection des conduites de la route Principale.",
+   "excerpt": "D’autoriser le directeur général et le maire à signer les documents nécessaires auprès du Centre financier aux entreprises de Desjardins afin de contracter un prêt temporaire de 6 500 000.00 $"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la signature de l'entente modifiée relative à la fourniture et distribution d'eau potable.",
+   "excerpt": "D’autoriser la signature de l’entente modifiée entre la municipalité de Parisville et la municipalité de Deschaillons-sur-Saint-Laurent concernant la fourniture et la distribution d’eau potable."
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement 308-2011 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification, sans étape procédurale propre."
+   },
+   {
+    "act": "A04",
+    "reason": "Le règlement 311-2011 est uniquement cité à titre de règlement antérieur modifié, sans étape procédurale propre dans cette séance."
+   },
+   {
+    "act": "A05",
+    "reason": "L'adoption du premier projet de règlement 431-2026 le 10 mars 2026 n'est qu'un rappel historique dans les considérants."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil municipal adopte le règlement numéro 432-2026 modifiant le règlement de zonage à la résolution 73-05-26."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil adopte le règlement 433-2026 modifiant le règlement de lotissement lors de la résolution 74-05-26."
+   },
+   {
+    "act": "A06",
+    "reason": "Le conseil autorise la conclusion d'un emprunt temporaire de 6 500 000 $ pour la réfection des conduites de la route Principale."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil autorise la signature de l'entente modifiée relative à la fourniture et distribution d'eau potable."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1944,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 7560,
+   "outputTokens": 536,
+   "totalTokens": 8096
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1806
+  },
+  "inputSha256": "dbf6e8808f510343babc610b7a74c3d008ea15e0dc926c748878dffac4b7ddcc"
+ }
+}

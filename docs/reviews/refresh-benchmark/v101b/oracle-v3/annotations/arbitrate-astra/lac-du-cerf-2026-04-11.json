@@ -1,0 +1,74 @@
+{
+ "documentId": "lac-du-cerf-2026-04-11",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c9c511e751188af60815f0564299776b5cd821cae8d27ff23b4a952704f10066",
+ "verificationSha256": "1e9fcbba9039effe149eebbc88ba780654ed1174663bcf10d1758c3f82d7b9f8",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"Le point 8.1 prévoit un « Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis » : il s’agit d’un marché de services, expressément exclu du rappel. Contrairement à v1, la mention du lotissement et le classement sous « Urbanisme » ne suffisent pas à constituer une unité, car aucune étape réglementaire ni aucun acte foncier distinct n’est inscrit à ce point.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Point prévu – octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St-Louis",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "lotissement chemin Dicaire / St- Louis",
+      "page": 1,
+      "citation": "Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis",
+      "anchor": "lotissement chemin Dicaire / St- Louis",
+      "spanStart": 1382,
+      "spanEnd": 1482
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "Le point 8.1 prévoit un contrat de services d’évaluation des terrains, et non un acte foncier sur le lotissement ; les marchés de services sont exclus du rappel."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Le point 8.1 sous « 8. Urbanisme » — « Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis » — est un objet foncier explicite (projet de lotissement) inscrit à un ordre du jour, donc une unité « prévue » (stage inconnu) ; citation, page et objet sont exacts."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "L'octroi de contrat pour l'évaluation de terrains est un marché de services, expressément exclu du rappel selon les règles."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "Le point 8.1 prévoit un « Octroi de contrat pour l’évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis » : il s’agit d’un marché de services, expressément exclu du rappel. Contrairement à v1, la mention du lotissement et le classement sous « Urbanisme » ne suffisent pas à constituer une unité, car aucune étape réglementaire ni aucun acte foncier distinct n’est inscrit à ce point."
+  }
+ ]
+}

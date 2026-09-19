@@ -1,0 +1,272 @@
+{
+ "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+ "nextId": 8,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation d’enchérir et d’acquérir des immeubles pour taxes impayées — vente du 11 juin 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "immeubles identifiés en annexe",
+    "page": 4,
+    "citation": "la directrice générale à enchérir au nom de la Municipalité et à acquérir les immeubles identifiés en annexe sur lesquels des taxes demeurent impayées au moment de la vente",
+    "anchor": "immeubles identifiés en annexe",
+    "spanStart": 1515,
+    "spanEnd": 1687
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation d’enchérir et d’acquérir des immeubles pour taxes impayées — vente du 11 juin 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "immeubles identifiés en annexe",
+      "page": 4,
+      "citation": "la directrice générale à enchérir au nom de la Municipalité et à acquérir les immeubles identifiés en annexe sur lesquels des taxes demeurent impayées au moment de la vente",
+      "anchor": "immeubles identifiés en annexe",
+      "spanStart": 1515,
+      "spanEnd": 1687
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-50 autorise expressément l’acquisition des immeubles visés, au-delà d’une simple nomination, ce qui constitue un acte foncier à inclure."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion — Règlement 2009-474-06 modifiant le plan d’urbanisme",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2009-474-06",
+    "page": 4,
+    "citation": "Règlement numéro 2009-474-06 modifiant le plan d’urbanisme – Avis de motion AVIS DE MOTION est par les présentes donné par Michel Sanscartier",
+    "anchor": "Règlement numéro 2009-474-06",
+    "spanStart": 2027,
+    "spanEnd": 2168
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion — Règlement 2009-474-06 modifiant le plan d’urbanisme",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "2009-474-06",
+      "page": 4,
+      "citation": "Règlement numéro 2009-474-06 modifiant le plan d’urbanisme – Avis de motion AVIS DE MOTION est par les présentes donné par Michel Sanscartier",
+      "anchor": "Règlement numéro 2009-474-06",
+      "spanStart": 2027,
+      "spanEnd": 2168
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 5.5 constate un avis de motion donné à cette séance, qui constitue une unité distincte de l’adoption du projet du même règlement."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption du projet de règlement 2009-474-06 modifiant le plan d’urbanisme",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2009-474-06",
+    "page": 5,
+    "citation": "Projet de règlement numéro 2009-474-06 modifiant le règlement 2009-474 sur le plan d’urbanisme – Adoption",
+    "anchor": "Projet de règlement numéro 2009-474-06",
+    "spanStart": 681,
+    "spanEnd": 786
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du projet de règlement 2009-474-06 modifiant le plan d’urbanisme",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "2009-474-06",
+      "page": 5,
+      "citation": "Projet de règlement numéro 2009-474-06 modifiant le règlement 2009-474 sur le plan d’urbanisme – Adoption",
+      "anchor": "Projet de règlement numéro 2009-474-06",
+      "spanStart": 681,
+      "spanEnd": 786
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-51 adopte le projet du règlement 2009-474-06, étape à classer comme projet_reglement et à distinguer de l’avis de motion."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion — Règlement 2009-475-04 relatif aux permis et certificats",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2009-475-04",
+    "page": 5,
+    "citation": "Règlement numéro 2009-475-04 modifiant le règlement 2009-475 relatif aux permis et certificats – Avis de motion AVIS DE MOTION est par les présentes donné par Michel Sanscartier",
+    "anchor": "Règlement numéro 2009-475-04",
+    "spanStart": 2403,
+    "spanEnd": 2580
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion — Règlement 2009-475-04 relatif aux permis et certificats",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "2009-475-04",
+      "page": 5,
+      "citation": "Règlement numéro 2009-475-04 modifiant le règlement 2009-475 relatif aux permis et certificats – Avis de motion AVIS DE MOTION est par les présentes donné par Michel Sanscartier",
+      "anchor": "Règlement numéro 2009-475-04",
+      "spanStart": 2403,
+      "spanEnd": 2580
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 5.7 constate l’avis de motion du règlement 2009-475-04, unité distincte du projet adopté à la même séance."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Adoption du projet de règlement 2009-475-04 relatif aux permis et certificats",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2009-475-04",
+    "page": 6,
+    "citation": "adopte le projet de règlement 2009-475-04 modifiant le règlement sur les permis et certificats 2009-475",
+    "anchor": "projet de règlement 2009-475-04",
+    "spanStart": 2194,
+    "spanEnd": 2297
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du projet de règlement 2009-475-04 relatif aux permis et certificats",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "2009-475-04",
+      "page": 6,
+      "citation": "adopte le projet de règlement 2009-475-04 modifiant le règlement sur les permis et certificats 2009-475",
+      "anchor": "projet de règlement 2009-475-04",
+      "spanStart": 2194,
+      "spanEnd": 2297
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-52 adopte explicitement le projet, et non le règlement définitif, ce qui justifie une unité à l’étape projet_reglement."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion — Règlement 2009-476-14 modifiant le zonage",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2009-476-14",
+    "page": 6,
+    "citation": "Règlement numéro 2009-476-14 modifiant le règlement de zonage 2009-476 – Avis de motion Avis de motion est par les présentes donné par Michel Sanscartier à",
+    "anchor": "Règlement numéro 2009-476-14",
+    "spanStart": 2382,
+    "spanEnd": 2537
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion — Règlement 2009-476-14 modifiant le zonage",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "2009-476-14",
+      "page": 6,
+      "citation": "Règlement numéro 2009-476-14 modifiant le règlement de zonage 2009-476 – Avis de motion Avis de motion est par les présentes donné par Michel Sanscartier à",
+      "anchor": "Règlement numéro 2009-476-14",
+      "spanStart": 2382,
+      "spanEnd": 2537
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 5.9 constate un avis de motion actuel pour le règlement de zonage 2009-476-14, à compter séparément de son projet."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Adoption du projet de règlement 2009-476-14 modifiant le zonage",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2009-476-14",
+    "page": 7,
+    "citation": "adopte le projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476",
+    "anchor": "projet de règlement 2009-476-14",
+    "spanStart": 2586,
+    "spanEnd": 2669
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du projet de règlement 2009-476-14 modifiant le zonage",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "2009-476-14",
+      "page": 7,
+      "citation": "adopte le projet de règlement 2009-476-14 modifiant le règlement de zonage 2009-476",
+      "anchor": "projet de règlement 2009-476-14",
+      "spanStart": 2586,
+      "spanEnd": 2669
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-53 adopte le projet du règlement 2009-476-14, étape distincte de l’avis de motion et non une adoption définitive."
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,341 @@
+{
+ "nodes": [
+  {
+   "id": "source",
+   "label": "Ordre du jour du 2 mars 2026 — Ayer’s Cliff",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "status": "candidate",
+   "date": "2026-03-02",
+   "municipality": "ayers-cliff",
+   "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+   "url": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+   "format": "pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "ORDRE DU JOUR / AGENDA\n2 MARS / MARCH 2ND 2026",
+     "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+     "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "ppcmoi-main-strathcona",
+   "label": "Demande de PPCMOI — 881-883 Main, 828 Strathcona",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "status": "candidate",
+   "municipality": "ayers-cliff",
+   "meetingDate": "2026-03-02",
+   "etape": "ppcmoi",
+   "description": "Demande de PPCMOI inscrite à l’ordre du jour, sous les conclusions du CCU du 18 février 2026; aucune décision indiquée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Matricule 1904-14-2760, 1904-14-5192, 1904-155636, 1904-15-7333- 881-883 Main, 828,\nStrathcona – Demande de PPCMOI",
+     "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+     "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "ppcmoi-tyler",
+   "label": "Projet PPCMOI — 329 rue Tyler",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "status": "candidate",
+   "municipality": "ayers-cliff",
+   "meetingDate": "2026-03-02",
+   "etape": "ppcmoi",
+   "zone_ref": "Res-10",
+   "no_lot": "4665202",
+   "description": "Projet PPCMOI inscrit à l’ordre du jour : construction d’un bâtiment de deux étages et quatre logements au total au 329 rue Tyler. Aucune décision indiquée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total",
+     "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+     "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-res-10",
+   "label": "Res-10",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "status": "candidate",
+   "municipality": "ayers-cliff",
+   "code": "Res-10",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total",
+     "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+     "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-ripple-cove",
+   "label": "Projet de plan global et agrandissements — Ripple Cove",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "status": "candidate",
+   "municipality": "ayers-cliff",
+   "meetingDate": "2026-03-02",
+   "kind": "piia",
+   "etape": "piia",
+   "zone_ref": "Rec-5",
+   "no_lot": "6108937",
+   "description": "Projet de plan global, future construction et agrandissements (PIIA-9) inscrit à l’ordre du jour sous les conclusions du CCU; aucune décision indiquée.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)",
+     "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+     "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-rec-5",
+   "label": "Rec-5",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "status": "candidate",
+   "municipality": "ayers-cliff",
+   "code": "Rec-5",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)",
+     "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+     "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-amendements",
+   "label": "Amendements aux règlements d’urbanisme — point à l’ordre du jour",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "status": "candidate",
+   "municipality": "ayers-cliff",
+   "meetingDate": "2026-03-02",
+   "category": "modification_reglementaire",
+   "etape": "inconnu",
+   "description": "Amendements aux règlements d’urbanisme inscrits au point 16.2; aucun numéro de règlement, zone ou détail de modification indiqué.",
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Amendements aux règlements d’urbanisme",
+     "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+     "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source",
+   "target": "ppcmoi-main-strathcona",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "evidence_refs": [
+    "ev-main"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Matricule 1904-14-2760, 1904-14-5192, 1904-155636, 1904-15-7333- 881-883 Main, 828,\nStrathcona – Demande de PPCMOI",
+     "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+     "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "ppcmoi-tyler",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "evidence_refs": [
+    "ev-tyler"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total",
+     "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+     "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "ppcmoi-tyler",
+   "target": "zone-res-10",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "evidence_refs": [
+    "ev-tyler"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total",
+     "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+     "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "piia-ripple-cove",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "evidence_refs": [
+    "ev-ripple"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)",
+     "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+     "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "piia-ripple-cove",
+   "target": "zone-rec-5",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "evidence_refs": [
+    "ev-ripple"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)",
+     "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+     "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "signal-amendements",
+   "relation": "mentions",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "evidence_refs": [
+    "ev-amendements"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Amendements aux règlements d’urbanisme",
+     "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+     "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+     "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-main",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+   "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Matricule 1904-14-2760, 1904-14-5192, 1904-155636, 1904-15-7333- 881-883 Main, 828,\nStrathcona – Demande de PPCMOI"
+  },
+  {
+   "id": "ev-tyler",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+   "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Matricule 1904-97-9556 lot 4 665 202, 329 rue\nTyler, Res-10 Projet PPCMOI construction 1\nbâtiment 2 étages 4 logement au total"
+  },
+  {
+   "id": "ev-ripple",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+   "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Matricule 1805-72-3947 lot 6 108 937, 329\nchemin 694 -716 Ripple Cove, Rec-5- Projet plan\nglobale, future construction et Agrandissements\n(PIIA-9)"
+  },
+  {
+   "id": "ev-amendements",
+   "source_file": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "rawRef": "raw/proces-verbaux-ayers-cliff/cas/0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69.pdf",
+   "docSha": "0172ac1c99953336a4fb55d00f5f784955fdfd10b4d554f8853a7bf77786ed69",
+   "sourceUrl": "https://ayerscliff.ca/wp-content/uploads/2026/03/ODJ-Seance.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Amendements aux règlements d’urbanisme"
+  }
+ ],
+ "input_tokens": 7990,
+ "output_tokens": 3890
+}

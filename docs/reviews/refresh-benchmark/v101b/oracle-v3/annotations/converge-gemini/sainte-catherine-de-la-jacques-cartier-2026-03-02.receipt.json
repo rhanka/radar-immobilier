@@ -1,0 +1,37 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "da997eb99eac78ef15f719aee853f9267939862b5438972042c00fcc82790f1b",
+ "inputSha256": "5087f1c5bf55f375f9cf2511382f611c95a33c15b6dad12a4a328b0639175273",
+ "responseSha256": "68afb484e564e490d0eeb5247d53f1f33d2888366bfc21c3969bf59204a02d38",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 44747,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 30421,
+  "outputTokens": 626,
+  "totalTokens": 48552,
+  "thoughtsTokenCount": 17505
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 44563,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:50:24.434Z"
+}

@@ -1,0 +1,82 @@
+{
+ "documentId": "sainte-barbe-2026-05-05",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "2fe9d04b8c5daa01a33411b0f02bea728b154973da8ad8e95c70254f8fa97e82",
+ "rawText": "{\"operations\":[\n {\"op\":\"correct\",\"id\":\"u04\",\"unit\":{\"label\":\"Acceptation du PIIA 2026-0055 — garage incorporé au 31 Rue des Moissons\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"2026-0055\",\"page\":18,\"citation\":\"accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d’urbanisme\",\"anchor\":\"demande de PIIA 2026-0055\"},\"reason\":\"La citation doit être recopiée à l'identique : le texte de la page 18 lit « Sainte-\\\\nBarbe » (trait d'union suivi d'un saut de ligne) et non « SainteBarbe » ; l'extrait est remplacé par un passage d'un seul tenant sans mot coupé, attestant la même résolution 2026-05-18.\"},\n {\"op\":\"correct\",\"id\":\"u05\",\"unit\":{\"label\":\"Acceptation du PIIA 2026-0056 — bâtiment commercial au 424 Chemin de l’Église\",\"stage\":\"piia\",\"procedure\":null,\"objet\":\"2026-0056\",\"page\":19,\"citation\":\"accepte la demande de PIIA 2026-0056 tel que recommandé par le Comité consultatif d’urbanisme\",\"anchor\":\"demande de PIIA 2026-0056\"},\"reason\":\"La citation doit être recopiée à l'identique : le texte de la page 19 lit « Sainte-\\\\nBarbe » et non « SainteBarbe » ; l'extrait est remplacé par un passage d'un seul tenant sans mot coupé, attestant la même résolution 2026-05-19.\"},\n {\"op\":\"correct\",\"id\":\"u06\",\"unit\":{\"label\":\"Acceptation de la dérogation mineure 2026-0057 — allée d’accès au 424 Chemin de l’Église\",\"stage\":\"derogation_mineure\",\"procedure\":null,\"objet\":\"2026-0057\",\"page\":20,\"citation\":\"accepte la demande de dérogation mineure 2026-0057 tel que recommandé par le Comité consultatif d’urbanisme\",\"anchor\":\"demande de dérogation mineure 2026-0057\"},\"reason\":\"La citation doit être recopiée à l'identique : le texte de la page 20 lit « Sainte-\\\\nBarbe » et non « SainteBarbe » ; l'extrait est remplacé par un passage d'un seul tenant sans mot coupé, attestant la même résolution 2026-05-20.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Acceptation du PIIA 2026-0055 — garage incorporé au 31 Rue des Moissons",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-0055",
+    "page": 18,
+    "citation": "accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d’urbanisme",
+    "anchor": "demande de PIIA 2026-0055"
+   },
+   "reason": "La citation doit être recopiée à l'identique : le texte de la page 18 lit « Sainte-\\nBarbe » (trait d'union suivi d'un saut de ligne) et non « SainteBarbe » ; l'extrait est remplacé par un passage d'un seul tenant sans mot coupé, attestant la même résolution 2026-05-18."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Acceptation du PIIA 2026-0056 — bâtiment commercial au 424 Chemin de l’Église",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2026-0056",
+    "page": 19,
+    "citation": "accepte la demande de PIIA 2026-0056 tel que recommandé par le Comité consultatif d’urbanisme",
+    "anchor": "demande de PIIA 2026-0056"
+   },
+   "reason": "La citation doit être recopiée à l'identique : le texte de la page 19 lit « Sainte-\\nBarbe » et non « SainteBarbe » ; l'extrait est remplacé par un passage d'un seul tenant sans mot coupé, attestant la même résolution 2026-05-19."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Acceptation de la dérogation mineure 2026-0057 — allée d’accès au 424 Chemin de l’Église",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2026-0057",
+    "page": 20,
+    "citation": "accepte la demande de dérogation mineure 2026-0057 tel que recommandé par le Comité consultatif d’urbanisme",
+    "anchor": "demande de dérogation mineure 2026-0057"
+   },
+   "reason": "La citation doit être recopiée à l'identique : le texte de la page 20 lit « Sainte-\\nBarbe » et non « SainteBarbe » ; l'extrait est remplacé par un passage d'un seul tenant sans mot coupé, attestant la même résolution 2026-05-20."
+  }
+ ],
+ "applied": [
+  {
+   "op": "correct",
+   "id": "u04"
+  },
+  {
+   "op": "correct",
+   "id": "u05"
+  },
+  {
+   "op": "correct",
+   "id": "u06"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 7
+}

@@ -1,0 +1,111 @@
+{
+ "documentId": "saint-barthelemy-2026-09-08",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "8942644f3bccd5757ec4286a05384d385cab43e5f710cac83f6a72b8a6fb882a",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement de zonage 738-26 à la page 3 est un fait réglementaire attesté par le texte.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'avis de motion modifiant le zonage 288-90 à la page 4 est explicitement donné dans la résolution 2026-09-190.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'adoption du premier projet de règlement 739-26 est attestée à la page 4 par la résolution 2026-09-191.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La vente autorisée du matricule 3220-74-4030 est un acte foncier explicite respectant l'interdiction d'aménagements permanents.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"La vente du matricule 3220-73-6695 est un acte foncier distinct, et v1 utilise l'ancre exacte du matricule.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'acquisition du matricule 2723-93-7328 à la page 7 est un acte foncier explicitement autorisé par le conseil.\"},{\"item\":\"i07\",\"choice\":\"v2\",\"reason\":\"La version v2 formule fidèlement la contrainte permanente et de pente mentionnée dans les considérants et exigée par les règles.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"L'autorisation de vente de l'immeuble 6 621 027 grevé d'une clause résolutoire est un acte foncier explicite à la page 8.\"},{\"item\":\"i09\",\"choice\":\"absent\",\"reason\":\"Le prolongement du réseau d'aqueduc n'est ni un objet réglementaire d'urbanisme ni un acte foncier selon les règles du corrigé.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v2"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v2"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'adoption du règlement de zonage 738-26 à la page 3 est un fait réglementaire attesté par le texte."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'avis de motion modifiant le zonage 288-90 à la page 4 est explicitement donné dans la résolution 2026-09-190."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'adoption du premier projet de règlement 739-26 est attestée à la page 4 par la résolution 2026-09-191."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La vente autorisée du matricule 3220-74-4030 est un acte foncier explicite respectant l'interdiction d'aménagements permanents."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La vente du matricule 3220-73-6695 est un acte foncier distinct, et v1 utilise l'ancre exacte du matricule."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'acquisition du matricule 2723-93-7328 à la page 7 est un acte foncier explicitement autorisé par le conseil."
+  },
+  {
+   "item": "i07",
+   "choice": "v2",
+   "reason": "La version v2 formule fidèlement la contrainte permanente et de pente mentionnée dans les considérants et exigée par les règles."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "L'autorisation de vente de l'immeuble 6 621 027 grevé d'une clause résolutoire est un acte foncier explicite à la page 8."
+  },
+  {
+   "item": "i09",
+   "choice": "absent",
+   "reason": "Le prolongement du réseau d'aqueduc n'est ni un objet réglementaire d'urbanisme ni un acte foncier selon les règles du corrigé."
+  }
+ ]
+}

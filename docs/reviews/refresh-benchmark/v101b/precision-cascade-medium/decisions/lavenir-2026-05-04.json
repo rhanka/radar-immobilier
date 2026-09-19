@@ -1,0 +1,313 @@
+{
+ "documentId": "lavenir-2026-05-04",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "54c0b470e21f8a1c0c8c5570d5eace4a64323e005e82d29fb1b448f73bca3d04",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-797-26"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 797-26 — Amendement au règlement de zonage",
+     "stage": "adoption",
+     "objet": "797-26",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26"
+      },
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12 et\nqu'il soit statué et décrété ce qui suit:"
+      },
+      {
+       "page": 3,
+       "excerpt": "L’annexe B de ce règlement de zonage no 654-12 de la\nmunicipalité de l’Avenir, concernant la grille des usages et normes, est\nmodifiée comme suit :\na) En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation. Le tout, comme il est montré dans la\ngrille jointe en annexe I du présent règlement pour en faire partie\nintégrante;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-654-12"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 654-12",
+     "stage": null,
+     "objet": "654-12",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "ATTENDU QUE la municipalité de L’Avenir a le pouvoir, en vertu de la Loi\nsur l’aménagement et l’urbanisme, de modifier son règlement de zonage\n654-12;"
+      },
+      {
+       "page": 2,
+       "excerpt": "ATTENDU QUE la municipalité de L’Avenir a le pouvoir, en vertu de la Loi\nsur l’aménagement et l’urbanisme, de modifier son règlement de zonage\n654-12;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-797-26-motion"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion et présentation du règlement 797-26",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "ATTENDU QU'un avis de motion et présentation du présent règlement a\nété donné, à la séance ordinaire de ce conseil tenue le 9 mars 2026;"
+      },
+      {
+       "page": 3,
+       "excerpt": "ATTENDU QU'un avis de motion et présentation du présent règlement a\nété donné, à la séance ordinaire de ce conseil tenue le 9 mars 2026;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-797-26-premier-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du premier projet du règlement 797-26",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "ATTENDU QUE le premier projet de règlement a été adopté le 9 mars 2026;"
+      },
+      {
+       "page": 3,
+       "excerpt": "ATTENDU QUE le premier projet de règlement a été adopté le 9 mars 2026;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-797-26-consultation"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Consultation publique sur le règlement 797-26",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "ATTENDU la tenue d’une consultation publique le 13 avril 2026;"
+      },
+      {
+       "page": 3,
+       "excerpt": "ATTENDU la tenue d’une consultation publique le 13 avril 2026;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-797-26-second-projet"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption sans changement du deuxième projet du règlement 797-26",
+     "stage": "second_projet",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "ATTENDU QUE le deuxième projet de règlement a été adopté sans\nchangement le 13 avril 2026;"
+      },
+      {
+       "page": 3,
+       "excerpt": "ATTENDU QUE le deuxième projet de règlement a été adopté sans\nchangement le 13 avril 2026;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-797-26-adoption",
+    "signal-multifamilial-c3"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du règlement 797-26 — Habitation multifamiliale en C3",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26"
+      },
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12 et\nqu'il soit statué et décrété ce qui suit:"
+      },
+      {
+       "page": 3,
+       "excerpt": "L’annexe B de ce règlement de zonage no 654-12 de la\nmunicipalité de l’Avenir, concernant la grille des usages et normes, est\nmodifiée comme suit :\na) En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation. Le tout, comme il est montré dans la\ngrille jointe en annexe I du présent règlement pour en faire partie\nintégrante;"
+      }
+     ]
+    },
+    {
+     "type": "Signal",
+     "label": "Ouverture réglementaire à l’habitation multifamiliale en C3",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "a) En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation."
+      },
+      {
+       "page": 3,
+       "excerpt": "L’annexe B de ce règlement de zonage no 654-12 de la\nmunicipalité de l’Avenir, concernant la grille des usages et normes, est\nmodifiée comme suit :\na) En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation. Le tout, comme il est montré dans la\ngrille jointe en annexe I du présent règlement pour en faire partie\nintégrante;"
+      },
+      {
+       "page": 3,
+       "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12 et\nqu'il soit statué et décrété ce qui suit:"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement d'amendement numéro 797-26 modifiant le règlement de zonage 654-12.\",\"excerpt\":\"résolu d'adopter le règlement d'amendement no. 797-26, modifiant le règlement de zonage no. 654-12\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de zonage 654-12 est seulement mentionné comme règlement de base faisant l'objet de la modification, sans étape propre dans cette séance.\",\"excerpt\":\"modifier son règlement de zonage 654-12\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"L'avis de motion est un simple rappel historique d'une étape passée tenue le 9 mars 2026.\",\"excerpt\":\"ATTENDU QU'un avis de motion et présentation du présent règlement a été donné, à la séance ordinaire de ce conseil tenue le 9 mars 2026;\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"L'adoption du premier projet de règlement est un rappel historique d'une étape antérieure survenue le 9 mars 2026.\",\"excerpt\":\"ATTENDU QUE le premier projet de règlement a été adopté le 9 mars 2026;\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"La consultation publique est mentionnée au préambule comme un événement passé tenu le 13 avril 2026.\",\"excerpt\":\"ATTENDU la tenue d’une consultation publique le 13 avril 2026;\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"L'adoption du second projet est un rappel historique d'une étape s'étant déroulée le 13 avril 2026.\",\"excerpt\":\"ATTENDU QUE le deuxième projet de règlement a été adopté sans changement le 13 avril 2026;\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement 797-26 modifiant la grille des usages et normes pour autoriser l'usage habitation multifamiliale (h3) dans la zone C3.\",\"excerpt\":\"résolu d'adopter le règlement d'amendement no. 797-26, modifiant le règlement de zonage no. 654-12\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement d'amendement numéro 797-26 modifiant le règlement de zonage 654-12.",
+   "excerpt": "résolu d'adopter le règlement d'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de zonage 654-12 est seulement mentionné comme règlement de base faisant l'objet de la modification, sans étape propre dans cette séance.",
+   "excerpt": "modifier son règlement de zonage 654-12"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "L'avis de motion est un simple rappel historique d'une étape passée tenue le 9 mars 2026.",
+   "excerpt": "ATTENDU QU'un avis de motion et présentation du présent règlement a été donné, à la séance ordinaire de ce conseil tenue le 9 mars 2026;"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "L'adoption du premier projet de règlement est un rappel historique d'une étape antérieure survenue le 9 mars 2026.",
+   "excerpt": "ATTENDU QUE le premier projet de règlement a été adopté le 9 mars 2026;"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "La consultation publique est mentionnée au préambule comme un événement passé tenu le 13 avril 2026.",
+   "excerpt": "ATTENDU la tenue d’une consultation publique le 13 avril 2026;"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "L'adoption du second projet est un rappel historique d'une étape s'étant déroulée le 13 avril 2026.",
+   "excerpt": "ATTENDU QUE le deuxième projet de règlement a été adopté sans changement le 13 avril 2026;"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement 797-26 modifiant la grille des usages et normes pour autoriser l'usage habitation multifamiliale (h3) dans la zone C3.",
+   "excerpt": "résolu d'adopter le règlement d'amendement no. 797-26, modifiant le règlement de zonage no. 654-12"
+  }
+ ],
+ "filter": {
+  "acts": 7,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement de zonage 654-12 est seulement mentionné comme règlement de base faisant l'objet de la modification, sans étape propre dans cette séance."
+   },
+   {
+    "act": "A03",
+    "reason": "L'avis de motion est un simple rappel historique d'une étape passée tenue le 9 mars 2026."
+   },
+   {
+    "act": "A04",
+    "reason": "L'adoption du premier projet de règlement est un rappel historique d'une étape antérieure survenue le 9 mars 2026."
+   },
+   {
+    "act": "A05",
+    "reason": "La consultation publique est mentionnée au préambule comme un événement passé tenu le 13 avril 2026."
+   },
+   {
+    "act": "A06",
+    "reason": "L'adoption du second projet est un rappel historique d'une étape s'étant déroulée le 13 avril 2026."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le règlement d'amendement numéro 797-26 modifiant le règlement de zonage 654-12."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil adopte le règlement 797-26 modifiant la grille des usages et normes pour autoriser l'usage habitation multifamiliale (h3) dans la zone C3."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2716,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 11378,
+   "outputTokens": 516,
+   "totalTokens": 11894
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2515
+  },
+  "inputSha256": "c4e5bd4925f9d37e864febc23f8ca5374e01687620287f94af700338645fe04f"
+ }
+}

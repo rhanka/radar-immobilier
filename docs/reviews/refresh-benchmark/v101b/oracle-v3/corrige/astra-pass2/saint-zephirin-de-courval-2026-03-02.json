@@ -1,0 +1,82 @@
+{
+ "documentId": "saint-zephirin-de-courval-2026-03-02",
+ "nextId": 3,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Recommandation favorable à l’aliénation de quatre lots agricoles – CPTAQ 453592",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "453592",
+    "page": 3,
+    "citation": "DOSSIER CPTAQ – No. 453592 (JOCELYN BOISVERT) 45-04-2026 Le demandeur désir vendre les lots 5 884 262, 5 885 277, 5 885 261, 5 885 276",
+    "anchor": "DOSSIER CPTAQ – No. 453592",
+    "spanStart": 1906,
+    "spanEnd": 2040
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Recommandation favorable à l’aliénation de quatre lots agricoles – CPTAQ 453592",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "453592",
+      "page": 3,
+      "citation": "DOSSIER CPTAQ – No. 453592 (JOCELYN BOISVERT) 45-04-2026 Le demandeur désir vendre les lots 5 884 262, 5 885 277, 5 885 261, 5 885 276",
+      "anchor": "DOSSIER CPTAQ – No. 453592",
+      "spanStart": 1906,
+      "spanEnd": 2040
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 45-04-2026 recommande, à la page 4, d’autoriser cette demande d’aliénation : elle constitue une démarche foncière explicite unique portant sur quatre lots, sans valoir autorisation de la CPTAQ."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Acquisition du lot 5 885 286 auprès de Ferme Maquille inc.",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 885 286",
+    "page": 5,
+    "citation": "D’acquérir pour la somme de 15 000 $, plus taxes applicables le cas échéant, le terrain portant le numéro 5 885 286 du Cadastre du Québec",
+    "anchor": "numéro 5 885 286",
+    "spanStart": 521,
+    "spanEnd": 658
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acquisition du lot 5 885 286 auprès de Ferme Maquille inc.",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "5 885 286",
+      "page": 5,
+      "citation": "D’acquérir pour la somme de 15 000 $, plus taxes applicables le cas échéant, le terrain portant le numéro 5 885 286 du Cadastre du Québec",
+      "anchor": "numéro 5 885 286",
+      "spanStart": 521,
+      "spanEnd": 658
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 46-04-2026 décide l’acquisition du lot 5 885 286 pour 15 000 $ et autorise la signature de l’acte de vente, ce qui constitue un acte foncier inclus au stade adoption."
+    }
+   ]
+  }
+ ]
+}

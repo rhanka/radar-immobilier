@@ -1,0 +1,96 @@
+{
+ "documentId": "potton-2026-01-05",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "5b8184926731a6d785ecf06d7e4a3c403d96d470633c66dfb88329e70bc477e0",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure accordée — lot 5 553 677, ch. de la Mine, recul avant de 6 m\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"5 553 677\",\n        \"page\": 14,\n        \"citation\": \"constitue un empi étement de 9 mètres aux dispositions minimales ap plicables.\\nLE TOUT pour le lot 5 553 677, ch. de la Mine.\\nAdoptée .\",\n        \"anchor\": \"lot 5 553 677\"\n      },\n      \"reason\": \"La résolution 2026 01 17 accepte la dérogation au recul avant pour ce lot, sans lever l’interdiction de construire dans les pentes de 30 % et plus.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Approbation du PIIA — lot 5 753 149, chemin du Mont -Bear, habitation unifamiliale\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"5 753 149\",\n        \"page\": 15,\n        \"citation\": \"D’ACCEPTER le projet consiste à construire une habitation unifamiliale sur le lot 5\\nle tout conformément aux plans mentionnés précédemment.\\n\\n753 149,\\n\\nLE TOUT pour le lot 5 753 149\",\n        \"anchor\": \"lot 5 753 149\"\n      },\n      \"reason\": \"La résolution 2026 01 18 accepte le projet d’habitation soumis au PIIA-5 sur le lot 5 753 149, ce qui constitue une unité distincte de la dérogation précédente.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Avis de motion — règlement 2001 -291-BR modifiant le zonage pour les cimetières dérogatoires\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"2001 -291-BR\",\n        \"page\": 19,\n        \"citation\": \"Le Conseiller Cynthia Sherrer donne avis de motion qu’un projet de règlement portant le\\nnuméro 2001 -291-BR sera présenté pour adoption.\",\n        \"anchor\": \"numéro 2001 -291-BR\"\n      },\n      \"reason\": \"Le point 6.3 constate un avis de motion actuel pour ce règlement de zonage, à compter séparément du premier projet.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Adoption du premier projet — règlement 2001 -291-BR sur l’agrandissement des cimetières dérogatoires\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"2001 -291-BR\",\n        \"page\": 45,\n        \"citation\": \"Adoptée .\\nFirst project by -law number 2001 -291-BR amending zoning by -law 2001 -291 and its amendments.\",\n        \"anchor\": \"by -law number 2001 -291-BR\"\n      },\n      \"reason\": \"La résolution 2026 01 26 adopte le premier projet modifiant le zonage; cette étape est distincte de l’avis de motion et ne constitue pas l’adoption finale du règlement.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Dérogation mineure accordée — lot 5 553 677, ch. de la Mine, recul avant de 6 m",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "5 553 677",
+    "page": 14,
+    "citation": "constitue un empi étement de 9 mètres aux dispositions minimales ap plicables.\nLE TOUT pour le lot 5 553 677, ch. de la Mine.\nAdoptée .",
+    "anchor": "lot 5 553 677"
+   },
+   "reason": "La résolution 2026 01 17 accepte la dérogation au recul avant pour ce lot, sans lever l’interdiction de construire dans les pentes de 30 % et plus."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Approbation du PIIA — lot 5 753 149, chemin du Mont -Bear, habitation unifamiliale",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "5 753 149",
+    "page": 15,
+    "citation": "D’ACCEPTER le projet consiste à construire une habitation unifamiliale sur le lot 5\nle tout conformément aux plans mentionnés précédemment.\n\n753 149,\n\nLE TOUT pour le lot 5 753 149",
+    "anchor": "lot 5 753 149"
+   },
+   "reason": "La résolution 2026 01 18 accepte le projet d’habitation soumis au PIIA-5 sur le lot 5 753 149, ce qui constitue une unité distincte de la dérogation précédente."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Avis de motion — règlement 2001 -291-BR modifiant le zonage pour les cimetières dérogatoires",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2001 -291-BR",
+    "page": 19,
+    "citation": "Le Conseiller Cynthia Sherrer donne avis de motion qu’un projet de règlement portant le\nnuméro 2001 -291-BR sera présenté pour adoption.",
+    "anchor": "numéro 2001 -291-BR"
+   },
+   "reason": "Le point 6.3 constate un avis de motion actuel pour ce règlement de zonage, à compter séparément du premier projet."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Adoption du premier projet — règlement 2001 -291-BR sur l’agrandissement des cimetières dérogatoires",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2001 -291-BR",
+    "page": 45,
+    "citation": "Adoptée .\nFirst project by -law number 2001 -291-BR amending zoning by -law 2001 -291 and its amendments.",
+    "anchor": "by -law number 2001 -291-BR"
+   },
+   "reason": "La résolution 2026 01 26 adopte le premier projet modifiant le zonage; cette étape est distincte de l’avis de motion et ne constitue pas l’adoption finale du règlement."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4
+}

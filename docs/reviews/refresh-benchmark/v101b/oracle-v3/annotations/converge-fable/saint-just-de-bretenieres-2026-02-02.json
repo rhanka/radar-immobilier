@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-just-de-bretenieres-2026-02-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4ed3478f674f30796abf8eaa9483b57afddcd46aeced0b635394e2896f556053",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Acte foncier explicite (vente de terrain – rang St-Isidore) attesté p.2 sous « Affaires découlant du procès-verbal », les élus demandant plus d'information ; étape inconnu et citation exactes, les actes fonciers étant inclus au rappel.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Résolution 40-02-2026 p.7 demandant que le règlement existant exigeant une bande boisée de 20 mètres soit revu : objet réglementaire explicite, citation mot pour mot, étape inconnu appropriée.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Résolution 41-02-2026 (citation p.8) acceptant la déclaration de compétence de la MRC pour la délivrance d'autorisations en vertu du Règlement sur l'encadrement d'activités en milieux hydriques : objet réglementaire explicite, hors exclusions, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Acte foncier explicite (vente de terrain – rang St-Isidore) attesté p.2 sous « Affaires découlant du procès-verbal », les élus demandant plus d'information ; étape inconnu et citation exactes, les actes fonciers étant inclus au rappel."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Résolution 40-02-2026 p.7 demandant que le règlement existant exigeant une bande boisée de 20 mètres soit revu : objet réglementaire explicite, citation mot pour mot, étape inconnu appropriée."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Résolution 41-02-2026 (citation p.8) acceptant la déclaration de compétence de la MRC pour la délivrance d'autorisations en vertu du Règlement sur l'encadrement d'activités en milieux hydriques : objet réglementaire explicite, hors exclusions, citation et page exactes."
+  }
+ ]
+}

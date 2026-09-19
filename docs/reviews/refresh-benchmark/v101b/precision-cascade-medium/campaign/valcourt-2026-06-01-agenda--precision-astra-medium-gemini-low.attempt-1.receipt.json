@@ -1,0 +1,35 @@
+{
+ "documentId": "valcourt-2026-06-01-agenda",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "ae5fe92725161d452f91bcd662e70b64cd1f1e48967996cc7d55c5421d3809d9",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2128,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3198,
+   "outputTokens": 566,
+   "totalTokens": 3764
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1971
+  },
+  "inputSha256": "b0806f8c36634aee26e4d24946b62f27fef2cc8d13d17fb05f11ee03527bade5"
+ },
+ "at": "2026-09-19T03:23:18.564Z"
+}

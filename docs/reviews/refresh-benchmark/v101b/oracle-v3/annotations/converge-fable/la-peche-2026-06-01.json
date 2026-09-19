@@ -1,0 +1,101 @@
+{
+ "documentId": "la-peche-2026-06-01",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1bf30d4e86757ad7bd1cc2edc48b5f7efb22e8cdb823706f4efae97ba9488853",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Point 6a page 7 intitulé « Demande de dérogation mineure au règlement de zonage numéro 113-2025 – 30, chemin Albert-Labelle », résolution qui « accorde » la dérogation (p. 8) : objet foncier explicite, étape derogation_mineure, citation et page exactes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 8, point 6b : le conseil « accorde la demande d’une dérogation mineure au Règlement de zonage 113-2025 pour la propriété sise au 14, chemin Guertin » — citation, objet, étape et page exacts.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 9, point 6c : le conseil accorde l’usage conditionnel « conformément au Règlement relatif aux usages conditionnels 145.31-2025 pour la propriété sise au 75, chemin du Lac-Chip, connue comme étant le lot 3 390 978 » sous conditions — décision adoptée, objet et citation exacts.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 10, point 6d : usage conditionnel accordé sous conditions « pour la propriété sise au 5, chemin Vaillant, connue comme étant le lot 3 390 175 du cadastre du Québec » — citation, objet et page exacts.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Page 11, point 6e : acte foncier explicite, le conseil « autorise une servitude de tolérance d’empiètement au bénéfice du propriétaire du lot 3 391 753 … connu comme étant le 741, chemin Riverside » (inclusion des actes fonciers).\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Page 14, point 9a « Adoption du règlement numéro 26-866 relatif au bon fonctionnement des installations septiques », avis de motion et projet déposés le 4 mai 2026 : objet réglementaire explicite à l’étape adoption dans ce document.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Page 14, point 9b « Adoption du règlement numéro 26-867 relatif à la création d’un programme d’aide financière pour la mise aux normes des installations septiques », avis de motion et projet antérieurs (4 mai 2026) : adoption d’un objet réglementaire explicite, citation et page exactes.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Page 15, point 9c « Adoption du règlement numéro 26-868 autorisant une dépense de 5 737 912 $ et un emprunt de 5 737 912 $ » finançant la mise aux normes des installations septiques : règlement explicite adopté dans ce document, hors exclusions (nominations, comptes, marchés, loisirs, voirie).\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Point 6a page 7 intitulé « Demande de dérogation mineure au règlement de zonage numéro 113-2025 – 30, chemin Albert-Labelle », résolution qui « accorde » la dérogation (p. 8) : objet foncier explicite, étape derogation_mineure, citation et page exactes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 8, point 6b : le conseil « accorde la demande d’une dérogation mineure au Règlement de zonage 113-2025 pour la propriété sise au 14, chemin Guertin » — citation, objet, étape et page exacts."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 9, point 6c : le conseil accorde l’usage conditionnel « conformément au Règlement relatif aux usages conditionnels 145.31-2025 pour la propriété sise au 75, chemin du Lac-Chip, connue comme étant le lot 3 390 978 » sous conditions — décision adoptée, objet et citation exacts."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 10, point 6d : usage conditionnel accordé sous conditions « pour la propriété sise au 5, chemin Vaillant, connue comme étant le lot 3 390 175 du cadastre du Québec » — citation, objet et page exacts."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Page 11, point 6e : acte foncier explicite, le conseil « autorise une servitude de tolérance d’empiètement au bénéfice du propriétaire du lot 3 391 753 … connu comme étant le 741, chemin Riverside » (inclusion des actes fonciers)."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Page 14, point 9a « Adoption du règlement numéro 26-866 relatif au bon fonctionnement des installations septiques », avis de motion et projet déposés le 4 mai 2026 : objet réglementaire explicite à l’étape adoption dans ce document."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Page 14, point 9b « Adoption du règlement numéro 26-867 relatif à la création d’un programme d’aide financière pour la mise aux normes des installations septiques », avis de motion et projet antérieurs (4 mai 2026) : adoption d’un objet réglementaire explicite, citation et page exactes."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Page 15, point 9c « Adoption du règlement numéro 26-868 autorisant une dépense de 5 737 912 $ et un emprunt de 5 737 912 $ » finançant la mise aux normes des installations septiques : règlement explicite adopté dans ce document, hors exclusions (nominations, comptes, marchés, loisirs, voirie)."
+  }
+ ]
+}

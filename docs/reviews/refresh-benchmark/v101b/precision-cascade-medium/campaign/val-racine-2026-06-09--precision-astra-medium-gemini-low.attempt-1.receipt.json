@@ -1,0 +1,35 @@
+{
+ "documentId": "val-racine-2026-06-09",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "de547303a3239518bdf67ad16e5db40f9e256e627a1a7f2645c70dda105c4330",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2766,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2562,
+   "outputTokens": 641,
+   "totalTokens": 3203
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2608
+  },
+  "inputSha256": "d8d40abf852b0c96bf8d810fadcbf8c168b470887a3029866ed51de23a5dbd2c"
+ },
+ "at": "2026-09-19T03:22:14.370Z"
+}

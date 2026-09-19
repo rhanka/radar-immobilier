@@ -1,0 +1,36 @@
+{
+ "documentId": "sacre-coeur-2026-05-11",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "4b8d087132de1e1589ceed15de53c3e53182edad6a147c8183ca51ff0503841d",
+ "inputSha256": "de70a8ade7df74fde37670a2fdb55808bc5d31d943ccfe491195129239092e92",
+ "responseSha256": "f694c6aeae734f10402560fb919a425ec849b52daf051bcdc0aa3342d9754788",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 191145,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 20096,
+  "outputTokens": 6286,
+  "totalTokens": 26382
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 191136,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:59:00.675Z"
+}

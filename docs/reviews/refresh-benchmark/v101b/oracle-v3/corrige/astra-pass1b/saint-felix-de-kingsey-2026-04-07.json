@@ -1,0 +1,120 @@
+{
+ "documentId": "saint-felix-de-kingsey-2026-04-07",
+ "nextId": 4,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 638 relatif à l’occupation et à l’entretien des bâtiments",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "638",
+    "page": 8,
+    "citation": "il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation et à l’entretien des bâtiments",
+    "anchor": "règlement 638",
+    "spanStart": 723,
+    "spanEnd": 829
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 638 relatif à l’occupation et à l’entretien des bâtiments",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "638",
+      "page": 8,
+      "citation": "il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation et à l’entretien des bâtiments",
+      "anchor": "règlement 638",
+      "spanStart": 723,
+      "spanEnd": 829
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 70-04-2026 adopte le règlement 638; l’avis de motion et le dépôt du projet du 9 mars sont des rappels historiques qui ne créent pas d’unités supplémentaires."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure acceptée — 1130 rue Provencher, lot 5 740 483",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "5 740 483",
+    "page": 8,
+    "citation": "dérogation mineure formulée concernant l'immeuble situé au numéro, 1130 rue Provencher (lot 5 740 483 cadastre du Québec), et ayant pour objet",
+    "anchor": "lot 5 740 483",
+    "spanStart": 979,
+    "spanEnd": 1121
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure acceptée — 1130 rue Provencher, lot 5 740 483",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "5 740 483",
+      "page": 8,
+      "citation": "dérogation mineure formulée concernant l'immeuble situé au numéro, 1130 rue Provencher (lot 5 740 483 cadastre du Québec), et ayant pour objet",
+      "anchor": "lot 5 740 483",
+      "spanStart": 979,
+      "spanEnd": 1121
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 71-04-2026 accepte la dérogation mineure permettant une marge avant de 9,66 mètres pour le bâtiment existant plutôt que les 10 mètres exigés."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du premier projet de résolution PPCMOI — lot 5 739 222, route 255",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "5 739 222",
+    "page": 8,
+    "citation": "DÉPÔT DU PREMIER PROJET DE RÉSOLUTION RELATIF À UN PROJET PARTICULIER DE CONSTRUCTION, DE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI) LOT 5 739 222",
+    "anchor": "LOT 5 739 222",
+    "spanStart": 1780,
+    "spanEnd": 1935
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du premier projet de résolution PPCMOI — lot 5 739 222, route 255",
+      "stage": "projet_reglement",
+      "procedure": "ppcmoi",
+      "objet": "5 739 222",
+      "page": 8,
+      "citation": "DÉPÔT DU PREMIER PROJET DE RÉSOLUTION RELATIF À UN PROJET PARTICULIER DE CONSTRUCTION, DE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI) LOT 5 739 222",
+      "anchor": "LOT 5 739 222",
+      "spanStart": 1780,
+      "spanEnd": 1935
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 9.4 constate le dépôt du premier projet de résolution PPCMOI visant l’agrandissement d’un bâtiment industriel sur ce lot, et non une autorisation finale."
+    }
+   ]
+  }
+ ]
+}

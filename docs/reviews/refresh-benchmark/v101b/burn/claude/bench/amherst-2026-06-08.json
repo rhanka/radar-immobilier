@@ -1,0 +1,13 @@
+{
+ "id": "amherst-2026-06-08",
+ "rc": 0,
+ "latencyMs": 281593,
+ "inputTokens": 2,
+ "outputTokens": 10338,
+ "cacheRead": 0,
+ "cacheCreate": 3408,
+ "costUsd": 0.294457,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 18318
+}

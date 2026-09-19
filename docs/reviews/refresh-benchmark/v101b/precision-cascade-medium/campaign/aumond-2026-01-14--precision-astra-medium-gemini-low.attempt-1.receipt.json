@@ -1,0 +1,35 @@
+{
+ "documentId": "aumond-2026-01-14",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "1b2590f6dceeb4ea7335d3952637e87fdb9bfabe576f89c4010a3d320541094d",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1718,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 5333,
+   "outputTokens": 376,
+   "totalTokens": 5709
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1572
+  },
+  "inputSha256": "d406e07cd1966ec3e8d03dd1d74d021895c5c6c4a0b4f2cac1cc08c9fa9c0711"
+ },
+ "at": "2026-09-19T03:22:13.891Z"
+}

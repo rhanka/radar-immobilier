@@ -1,0 +1,74 @@
+{
+ "documentId": "sainte-martine-2026-03-17",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ae0f045bd02b646fb63cf0b1fe203cda1fe541e8f3489f5a36c452e1d48bf09c",
+ "verificationSha256": "8bfce2da0ed7c8920b5dc0c0a743fad8074bc2882b71d4c19f64b9e49782da3b",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"absent\",\"reason\":\"La règle exige un « objet réglementaire ou foncier explicite » ; or la résolution 2026-03-053 autorise seulement la greffière adjointe à enchérir et acquérir « tout immeuble de son territoire mis en vente » lors de la vente pour taxes du 9 avril 2026, sans lot ni adresse désigné, et relève du recouvrement de taxes (exclusion « comptes »). La position de C (acte foncier inclus) est écartée faute d'objet foncier explicite ; il s'agit au plus d'un fait complémentaire à signaler hors gold sans retoucher le dénominateur.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation d’enchérir et d’acquérir à la vente d’immeubles pour taxes du 9 avril 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Vente d’immeubles",
+      "page": 14,
+      "citation": "2026-03-053 : Autorisation d’enchérir – Vente d’immeubles pour défaut de paiement des taxes municipales",
+      "anchor": "Vente d’immeubles pour défaut",
+      "spanStart": 1655,
+      "spanEnd": 1758
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "C",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-03-053, citée page 14 et adoptée page 15, autorise à enchérir et à acquérir lors de la vente pour taxes du 9 avril 2026, ce qui constitue un acte foncier inclus."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "absent",
+     "reason": "La résolution 2026-03-053 est une mesure de recouvrement de taxes visant « tout immeuble de son territoire mis en vente » sans objet foncier explicite (aucun lot ni adresse), donc hors du corrigé au titre des exclusions (comptes) ; fait complémentaire à signaler séparément."
+    },
+    {
+     "position": "B",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Il n'y a aucun objet réglementaire ou foncier explicite désigné, l'autorisation générale d'enchérir pour vente de taxes ne constituant pas un acte d'urbanisme ou un acte foncier ciblé."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "absent",
+   "reason": "La règle exige un « objet réglementaire ou foncier explicite » ; or la résolution 2026-03-053 autorise seulement la greffière adjointe à enchérir et acquérir « tout immeuble de son territoire mis en vente » lors de la vente pour taxes du 9 avril 2026, sans lot ni adresse désigné, et relève du recouvrement de taxes (exclusion « comptes »). La position de C (acte foncier inclus) est écartée faute d'objet foncier explicite ; il s'agit au plus d'un fait complémentaire à signaler hors gold sans retoucher le dénominateur."
+  }
+ ]
+}

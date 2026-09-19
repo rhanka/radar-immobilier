@@ -1,0 +1,172 @@
+{
+ "documentId": "sainte-francoise--becancour-2026-05-04",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "3a6ae6809f0da4a89c45b1e2bc32faf27033a275dbb2da9d785a50ccdb404e82",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Adoption du second projet du règlement #55-2026 modifiant le zonage\",\n        \"stage\": \"second_projet\",\n        \"procedure\": null,\n        \"objet\": \"55-2026\",\n        \"page\": 7,\n        \"citation\": \"ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE\\nRÈGLEMENT DE ZONAGE #2010-03\",\n        \"anchor\": \"RÈGLEMENT #55-2026\"\n      },\n      \"reason\": \"La citation du titre doit conserver son saut de ligne pour respecter l’exigence d’un extrait recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement #56-2026 sur les entrées privées et la fermeture des fossés\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"56-2026\",\n        \"page\": 8,\n        \"citation\": \"le règlement portant le numéro 56-2026 relatif à\\nl’aménagement des entrées privées et à la fermeture des fossés de chemins soit\\nadopté tel que rédigé\",\n        \"anchor\": \"numéro 56-2026\"\n      },\n      \"reason\": \"La citation actuelle remplace les sauts de ligne par des espaces, contrairement à la règle de reproduction à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement #58-2026 modifiant le plan d’urbanisme\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"58-2026\",\n        \"page\": 8,\n        \"citation\": \"Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\\n#2010-01\",\n        \"anchor\": \"règlement #58-2026\"\n      },\n      \"reason\": \"Les sauts de ligne de l’avis de motion doivent être rétablis afin que la citation soit identique au texte fourni.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Dépôt du projet de règlement #58-2026 modifiant le plan d’urbanisme\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"58-2026\",\n        \"page\": 8,\n        \"citation\": \"règlement #58-2026 modifiant le plan d’urbanisme\\n#2010-01. Le règlement vise à :\\n-\\n\\nAgrandir l’affectation mixte à même l’affectation industrielle.\\n\\nUn projet dudit est déposé séance tenante\",\n        \"anchor\": \"règlement #58-2026\"\n      },\n      \"reason\": \"La citation doit reproduire les sauts de ligne et la disposition du tiret pour constituer un extrait continu recopié à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Avis de motion du règlement #59-2026 modifiant le règlement de construction\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"59-2026\",\n        \"page\": 8,\n        \"citation\": \"Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\\nconstruction #2010-05\",\n        \"anchor\": \"règlement #59-2026\"\n      },\n      \"reason\": \"Les sauts de ligne de l’avis de motion doivent être rétablis pour respecter la règle de citation à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Dépôt du projet de règlement #59-2026 permettant les pieux pour l’agrandissement des bâtiments\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"59-2026\",\n        \"page\": 8,\n        \"citation\": \"règlement #59-2026 modifiant le règlement de\\nconstruction #2010-05. Le règlement vise à :\\n-\\n\\nPermettre les pieux dans l’agrandissement des bâtiments.\\n\\nUn projet dudit est déposé séance tenante\",\n        \"anchor\": \"règlement #59-2026\"\n      },\n      \"reason\": \"La citation actuelle aplatit les sauts de ligne et la liste, alors que l’extrait doit être recopié à l’identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Adoption du second projet du règlement #55-2026 modifiant le zonage",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "55-2026",
+    "page": 7,
+    "citation": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE #2010-03",
+    "anchor": "RÈGLEMENT #55-2026"
+   },
+   "reason": "La citation du titre doit conserver son saut de ligne pour respecter l’exigence d’un extrait recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Adoption du règlement #56-2026 sur les entrées privées et la fermeture des fossés",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "56-2026",
+    "page": 8,
+    "citation": "le règlement portant le numéro 56-2026 relatif à\nl’aménagement des entrées privées et à la fermeture des fossés de chemins soit\nadopté tel que rédigé",
+    "anchor": "numéro 56-2026"
+   },
+   "reason": "La citation actuelle remplace les sauts de ligne par des espaces, contrairement à la règle de reproduction à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Avis de motion du règlement #58-2026 modifiant le plan d’urbanisme",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "58-2026",
+    "page": 8,
+    "citation": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01",
+    "anchor": "règlement #58-2026"
+   },
+   "reason": "Les sauts de ligne de l’avis de motion doivent être rétablis afin que la citation soit identique au texte fourni."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Dépôt du projet de règlement #58-2026 modifiant le plan d’urbanisme",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "58-2026",
+    "page": 8,
+    "citation": "règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01. Le règlement vise à :\n-\n\nAgrandir l’affectation mixte à même l’affectation industrielle.\n\nUn projet dudit est déposé séance tenante",
+    "anchor": "règlement #58-2026"
+   },
+   "reason": "La citation doit reproduire les sauts de ligne et la disposition du tiret pour constituer un extrait continu recopié à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Avis de motion du règlement #59-2026 modifiant le règlement de construction",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "59-2026",
+    "page": 8,
+    "citation": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05",
+    "anchor": "règlement #59-2026"
+   },
+   "reason": "Les sauts de ligne de l’avis de motion doivent être rétablis pour respecter la règle de citation à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Dépôt du projet de règlement #59-2026 permettant les pieux pour l’agrandissement des bâtiments",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "59-2026",
+    "page": 8,
+    "citation": "règlement #59-2026 modifiant le règlement de\nconstruction #2010-05. Le règlement vise à :\n-\n\nPermettre les pieux dans l’agrandissement des bâtiments.\n\nUn projet dudit est déposé séance tenante",
+    "anchor": "règlement #59-2026"
+   },
+   "reason": "La citation actuelle aplatit les sauts de ligne et la liste, alors que l’extrait doit être recopié à l’identique."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "second_projet",
+   "page": 7,
+   "citation": "ADOPTION DU SECOND PROJET DE RÈGLEMENT #55-2026 MODIFIANT LE\nRÈGLEMENT DE ZONAGE #2010-03"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "adoption",
+   "page": 8,
+   "citation": "le règlement portant le numéro 56-2026 relatif à\nl’aménagement des entrées privées et à la fermeture des fossés de chemins soit\nadopté tel que rédigé"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "avis_motion",
+   "page": 8,
+   "citation": "Chantal Séguin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "projet_reglement",
+   "page": 8,
+   "citation": "règlement #58-2026 modifiant le plan d’urbanisme\n#2010-01. Le règlement vise à :\n-\n\nAgrandir l’affectation mixte à même l’affectation industrielle.\n\nUn projet dudit est déposé séance tenante"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "avis_motion",
+   "page": 8,
+   "citation": "Yvon Paulin donne avis de motion qu’il sera présenté pour adoption à une séance\nultérieure du conseil municipal le règlement #59-2026 modifiant le règlement de\nconstruction #2010-05"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "projet_reglement",
+   "page": 8,
+   "citation": "règlement #59-2026 modifiant le règlement de\nconstruction #2010-05. Le règlement vise à :\n-\n\nPermettre les pieux dans l’agrandissement des bâtiments.\n\nUn projet dudit est déposé séance tenante"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

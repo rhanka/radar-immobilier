@@ -1,0 +1,257 @@
+{
+ "nodes": [
+  {
+   "id": "source",
+   "label": "Avis de consultation publique — PPCMOI 2025-00114",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "status": "candidate",
+   "properties": {
+    "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+    "municipality": "saint-constant",
+    "date": "2026-02-13",
+    "sourceKind": "avis",
+    "format": "pdf",
+    "url": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf"
+   },
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Ce projet de résolution conformément à la Loi, fera l'objet d'une assemblée publique de\nconsultation",
+     "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "rawRef": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+     "sourceUrl": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "ppcmoi-premier-projet",
+   "label": "Adoption du premier projet — PPCMOI 2025-00114 — 42, montée Saint-Régis",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "status": "needs_review",
+   "properties": {
+    "municipality": "saint-constant",
+    "date": "2026-01-20",
+    "meetingDate": "2026-01-20",
+    "kind": "ppcmoi",
+    "etape": "projet_reglement",
+    "etape_date": "2026-01-20",
+    "decision": "approuvé",
+    "dossier": "2025-00114",
+    "resolution": "037-01-26",
+    "zone_ref": "H-532",
+    "reglement_number": "1528-17",
+    "superficie_m2": 29.04,
+    "description": "Adoption du premier projet accordant conditionnellement la régularisation de l’agrandissement sans permis d’une habitation unifamiliale jumelée existante au 42, montée Saint-Régis, sous réserve de la suite des procédures. Implantation de l’agrandissement et du mur latéral droit à 0,06 m de la ligne latérale droite plutôt que 1,50 m; agrandissement de 29,04 m² représentant 33 % plutôt que le maximum de 25 %. Discordance cadastrale à vérifier : lot 2 869 625 dans l’avis, lot 2 869 628 dans le dispositif de la résolution.",
+    "conditions": [
+     "Publication d’une servitude pour les parties de la construction qui empiètent sur la propriété voisine dans les douze mois suivant l’entrée en vigueur de la résolution.",
+     "Obtention, le cas échéant, des permis, certificats d’autorisation, approbations ou avis requis par une loi ou un règlement."
+    ]
+   },
+   "evidence_refs": [
+    "ev-decision",
+    "ev-avis"
+   ],
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la\ndemande d’autorisation de PPCMOI numéro 2025-00114,",
+     "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "rawRef": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+     "sourceUrl": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 1,
+     "excerpt": "AVIS est donné par la soussignée, que lors d'une séance ordinaire tenue le mardi,\n20 janvier 2026,",
+     "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "rawRef": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+     "sourceUrl": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "consultation",
+   "label": "Consultation publique annoncée — 3 mars 2026",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "status": "candidate",
+   "properties": {
+    "municipality": "saint-constant",
+    "date": "2026-03-03",
+    "kind": "ppcmoi",
+    "etape": "consultation_publique",
+    "etape_date": "2026-03-03",
+    "dossier": "2025-00114",
+    "resolution": "037-01-26",
+    "zone_ref": "H-532",
+    "description": "Consultation publique annoncée pour le 3 mars 2026 à 18h00 au Pavillon de la biodiversité, 66, rue du Maçon. Le projet contient des dispositions susceptibles d’approbation référendaire."
+   },
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Ce projet de résolution conformément à la Loi, fera l'objet d'une assemblée publique de\nconsultation qui sera tenue par le Conseil municipal le 3 mars 2026 à 18h00,",
+     "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "rawRef": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+     "sourceUrl": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-h532",
+   "label": "Zone H-532",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "status": "candidate",
+   "properties": {
+    "code": "H-532",
+    "municipality": "saint-constant",
+    "bylaw": "1528-17",
+    "description": "Zone de la propriété visée par le PPCMOI; l’usage habitation unifamiliale jumelée n’y est pas autorisé par le règlement 1528-17."
+   },
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Ce projet de résolution concerne une propriété située dans la zone H-532 du règlement\nde zonage numéro 1528-17,",
+     "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "rawRef": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+     "sourceUrl": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source",
+   "target": "ppcmoi-premier-projet",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "evidence_refs": [
+    "ev-decision"
+   ],
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la\ndemande d’autorisation de PPCMOI numéro 2025-00114,",
+     "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "rawRef": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+     "sourceUrl": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "consultation",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "evidence_refs": [
+    "ev-consultation"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Ce projet de résolution conformément à la Loi, fera l'objet d'une assemblée publique de\nconsultation qui sera tenue par le Conseil municipal le 3 mars 2026 à 18h00,",
+     "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "rawRef": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+     "sourceUrl": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "ppcmoi-premier-projet",
+   "target": "zone-h532",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "evidence_refs": [
+    "ev-zone"
+   ],
+   "citations": [
+    {
+     "page": 2,
+     "excerpt": "Ce projet de résolution concerne une propriété située dans la zone H-532 du règlement\nde zonage numéro 1528-17,",
+     "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "rawRef": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+     "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+     "sourceUrl": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-decision",
+   "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "rawRef": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+   "sourceUrl": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf",
+   "modality": "pdf",
+   "page": 5,
+   "excerpt": "D’adopter le premier projet de résolution ayant pour effet d’accorder conditionnellement la\ndemande d’autorisation de PPCMOI numéro 2025-00114, concernant le lot 2 869 628 du\ncadastre du Québec, soit le 42, montée Saint-Régis, selon la condition suivante :"
+  },
+  {
+   "id": "ev-avis",
+   "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "rawRef": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+   "sourceUrl": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf",
+   "modality": "pdf",
+   "page": 1,
+   "excerpt": "AVIS est donné par la soussignée, que lors d'une séance ordinaire tenue le mardi,\n20 janvier 2026, le Conseil municipal de la Ville de Saint-Constant a adopté le projet de\nrésolution numéro 037-01-26 intitulé « Adoption du premier projet de résolution –\nDemande de PPCMOI numéro 2025-00114 – Projet de construction, de modification\nou d’occupation d’un immeuble (PPCMOI) – 42, montée Saint-Régis » visant à\nrégulariser des éléments dérogatoires de l’habitation unifamiliale jumelée existante au 42,\nmontée Saint-Régis (lot 2 869 625 du cadastre du Québec)."
+  },
+  {
+   "id": "ev-consultation",
+   "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "rawRef": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+   "sourceUrl": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Ce projet de résolution conformément à la Loi, fera l'objet d'une assemblée publique de\nconsultation qui sera tenue par le Conseil municipal le 3 mars 2026 à 18h00, au Pavillon\nde la biodiversité situé au 66, rue du Maçon à Saint-Constant."
+  },
+  {
+   "id": "ev-zone",
+   "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "rawRef": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+   "sourceUrl": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf",
+   "modality": "pdf",
+   "page": 2,
+   "excerpt": "Ce projet de résolution concerne une propriété située dans la zone H-532 du règlement\nde zonage numéro 1528-17, laquelle est illustrée au plan suivant :"
+  },
+  {
+   "id": "ev-1536",
+   "source_file": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "rawRef": "raw/proces-verbaux-saint-constant/cas/2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6.pdf",
+   "docSha": "2f5790724c14bc4fb93009dabc9aa409ce9b2605fcea0ba41f31f966dae2eff6",
+   "sourceUrl": "https://saint-constant.ca/uploads/Greffe/AvisPublics2025/Avis_publics_2026/PPCMOI/CP_PPCMOI_42_Saint-Regis.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "CONSIDÉRANT que la Ville de Saint-Constant a adopté le règlement numéro 1536-17 relatif\naux projets particuliers de construction, de modification ou d’occupation d’un immeuble;"
+  }
+ ],
+ "input_tokens": 10000,
+ "output_tokens": 4600
+}

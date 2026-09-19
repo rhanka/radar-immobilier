@@ -1,0 +1,37 @@
+{
+ "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+ "step": "gemini-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass2",
+ "inputStateSha256": "9d523d36752582a0448cd5695ff41c885691c4b98d0a03b9df489ebd43629e93",
+ "inputSha256": "f36bf70d03053ec6ba4e1cd192f71cc9db90af92747905b02d2ddf58fb7b4c8a",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 19043,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 19302,
+  "outputTokens": 4,
+  "totalTokens": 25567,
+  "thoughtsTokenCount": 6261
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 18845,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:10:48.034Z"
+}

@@ -1,0 +1,606 @@
+{
+ "nodes": [
+  {
+   "id": "bylaw-2026-07",
+   "label": "Projet de règlement 2026-07 — stationnement et voies publiques",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "numero": "2026-07",
+   "title": "Amendant le règlement uniformisé RU-2023-02 relatif au stationnement et à la gestion des voies publiques",
+   "stage": "projet",
+   "meetingDate": "2026-06-01",
+   "municipality": "eastman",
+   "citations": [
+    {
+     "page": 4,
+     "excerpt": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté\npour adoption, lors d’une prochaine séance du conseil municipal, le règlement no",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-04",
+   "label": "2026-04 — gestion contractuelle",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "numero": "2026-04",
+   "title": "Règlement sur la gestion contractuelle",
+   "stage": "adoption",
+   "date": "2026-06-01",
+   "resolution": "2026-06-124",
+   "municipality": "eastman",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D’adopter le Règlement no 2026-04 sur la gestion contractuelle dont copie est jointe\naux présentes pour en faire partie intégrante.",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-05",
+   "label": "2026-05 — annexion d’une partie du Canton d’Orford",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "numero": "2026-05",
+   "title": "Règlement décrétant l’annexion d’une partie du territoire du Canton d’Orford",
+   "stage": "adoption",
+   "date": "2026-06-01",
+   "resolution": "2026-06-125",
+   "municipality": "eastman",
+   "citations": [
+    {
+     "page": 5,
+     "excerpt": "D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du\nCanton d’Orford dont copie est jointe aux présentes pour en faire partie intégrante;",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-06",
+   "label": "2026-06 — réserve financière pour les infrastructures municipales",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "numero": "2026-06",
+   "title": "Règlement décrétant la création d’une réserve financière à des fins d’infrastructures municipales",
+   "stage": "adoption",
+   "date": "2026-06-01",
+   "resolution": "2026-06-126",
+   "municipality": "eastman",
+   "citations": [
+    {
+     "page": 6,
+     "excerpt": "D’adopter le Règlement no 2026-06 décrétant la création d’une réserve financière à\ndes fins d’infrastructures municipales dont copie est jointe aux présentes pour en\nfaire partie intégrante;",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-multiplexes",
+   "label": "Modification conditionnelle de l’acte de vente pour permettre un projet de multiplexes",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "category": "developpement_residentiel",
+   "date": "2026-06-01",
+   "municipality": "eastman",
+   "resolution": "2026-06-127",
+   "scope": "local",
+   "description": "Autorisation conditionnelle de modifier l’acte de vente 19 377 959 lors de la vente des lots 4 380 408 et 4 380 601 pour favoriser un projet de multiplexes. Conditions : suppression des clauses « Conditions essentielles » et « Droit de premier refus », versement de 250 000 $, servitude publique perpétuelle de passage piétonnier de trois mètres sur le lot 4 380 408, don des lots 5 235 794 et 4 380 417 libres de biens meubles et de contamination, frais de modification à la charge du propriétaire.",
+   "amount_cad": 250000,
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots\n4 380 408 et 4 380 601 par le propriétaire, sous réserve des cinq conditions\nsuivantes :",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 6,
+     "excerpt": "ATTENDU QUE le propriétaire souhaite désormais vendre ces lots afin qu’un projet\nde construction de multiplexes voie le jour;",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-financement-logements",
+   "label": "Affectation de 250 000 $ à la création de logements",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "category": "financement_logement",
+   "date": "2026-06-01",
+   "municipality": "eastman",
+   "resolution": "2026-06-127",
+   "scope": "local",
+   "no_lot": "4380350",
+   "amount_cad": 250000,
+   "description": "Affectation de la somme à recevoir à la création de logements au 450 rue Principale, sur le lot municipal 4 380 350, et/ou à tout autre projet de logements futur.",
+   "citations": [
+    {
+     "page": 7,
+     "excerpt": "D'utiliser la somme de 250 000$ reçue afin d’aider la création de logements pour le\nprojet sur le lot municipal situé au 450 rue Principale (lot 4 380 350) et/ou tout autre",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-140",
+   "label": "Dérogation refusée — garage attenant, 70 chemin de la Traverse",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "date": "2026-06-01",
+   "municipality": "eastman",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-06-01",
+   "decision": "refusé",
+   "resolution": "2026-06-140",
+   "zone_ref": "V-10",
+   "no_lot": "4380003",
+   "description": "Refus de réduire la marge latérale droite pour construire un garage attenant au bâtiment principal; secteur PIIA-4, Corridor visuel d'intérêt supérieur.",
+   "motif": "Le plan ne démontre pas clairement l’implantation souhaitée ni l’ampleur de la dérogation; recommandation défavorable du CCU.",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à la réduction de\nla marge latérale droite dans le but de permettre la construction d’un garage",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-V-10",
+   "label": "Zone V-10",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "code": "V-10",
+   "municipality": "eastman",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à la réduction de\nla marge latérale droite dans le but de permettre la construction d’un garage",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-141",
+   "label": "Dérogation refusée — coupe d’arbres, 152 chemin Bellevue",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "date": "2026-06-01",
+   "municipality": "eastman",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-06-01",
+   "decision": "refusé",
+   "resolution": "2026-06-141",
+   "zone_ref": "V-2",
+   "description": "Refus de coupe d’arbres sur les lots 4 380 313 et 4 380 322, au 152 chemin Bellevue, où le déboisement excède déjà la superficie maximale prescrite.",
+   "motif": "Préjudice d’un refus non démontré; demande visant essentiellement un usage, exclu des dérogations mineures par l’article 145.1 de la Loi sur l’aménagement et l’urbanisme; recommandation défavorable du CCU.",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à autoriser la\ncoupe d’arbres sur une propriété où le déboisement excède déjà la superficie de",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-V-2",
+   "label": "Zone V-2",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "code": "V-2",
+   "municipality": "eastman",
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à autoriser la\ncoupe d’arbres sur une propriété où le déboisement excède déjà la superficie de",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-142",
+   "label": "Dérogation acceptée — bâtiment accessoire, 6 chemin de la Mésange",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "date": "2026-06-01",
+   "municipality": "eastman",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-06-01",
+   "decision": "approuvé",
+   "resolution": "2026-06-142",
+   "zone_ref": "R-10",
+   "no_lot": "2235834",
+   "description": "Construction d’un bâtiment accessoire en cour avant au 6 chemin de la Mésange, secteur PIIA-1, Pourtour des lacs Stukely, Parker et d’Argent.",
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "D’ACCEPTER la présente demande de dérogation mineure visant à autoriser la\nconstruction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-R-10",
+   "label": "Zone R-10",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "code": "R-10",
+   "municipality": "eastman",
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "D’ACCEPTER la présente demande de dérogation mineure visant à autoriser la\nconstruction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-143-approvals",
+   "label": "Approbations PIIA — résolution 2026-06-143",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "date": "2026-06-01",
+   "municipality": "eastman",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-06-01",
+   "decision": "approuvé",
+   "resolution": "2026-06-143",
+   "reglement_number": "2002-14",
+   "description": "Approbations : construction de bâtiments principaux sur les lots 6 627 628 (chemin Gilbert), 2 236 143 (88 chemin de l’Escalade), 6 597 767 (rue de la Butte), 6 720 154 (chemin des Étangs) et 6 291 859 (chemin des Diligences); changement de couleur du revêtement principal et construction accessoire sur le lot 2 239 886 (42 chemin de Petite-Rivière); rénovation des bâtiments principal et accessoire sur le lot 2 240 000 (50 chemin de la Feuillade); rénovation du bâtiment principal sur les lots 2 239 703 (103 chemin du Lac-d’Argent), 2 237 223 (151 rue Martin) et 4 380 241 (14 rue Martin); agrandissement du bâtiment principal sur les lots 2 239 988 (9 rue des Jacinthes) et 4 380 205 (21 rue Lapointe); enseigne sur le lot 2 235 611 (1167 chemin des Diligences).",
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "D’accepter la demande d’approbation au règlement PIIA suivante :",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 14,
+     "excerpt": "La rénovation du bâtiment principal pour la propriété sise sur le lot 4 380\n241, 14 rue Martin.",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-143-refusal-corniche",
+   "label": "PIIA refusé — bâtiment principal, chemin de la Corniche",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "date": "2026-06-01",
+   "municipality": "eastman",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-06-01",
+   "decision": "refusé",
+   "resolution": "2026-06-143",
+   "no_lot": "6627707",
+   "reglement_number": "2002-14",
+   "description": "Refus de construction d’un bâtiment principal sur le chemin de la Corniche.",
+   "motif": "L’étude d’impact visuel mentionne une visibilité partielle possible depuis certains points stratégiques.",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "ET DE REFUSER, les demandes d’approbation au règlement PIIA suivantes :",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 14,
+     "excerpt": "La construction d’un bâtiment principal sur le lot 6 627 707, chemin de la\nCorniche puisque l’étude d’impact visuel mentionne la possibilité que le",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-143-refusal-cedre",
+   "label": "PIIA refusé — bâtiment accessoire, 93 chemin du Cèdre",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "date": "2026-06-01",
+   "municipality": "eastman",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-06-01",
+   "decision": "refusé",
+   "resolution": "2026-06-143",
+   "no_lot": "2238228",
+   "reglement_number": "2002-14",
+   "description": "Refus de construction d’un bâtiment accessoire au 93 chemin du Cèdre.",
+   "motif": "Emplacement et orientation visés non clairement démontrés.",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "ET DE REFUSER, les demandes d’approbation au règlement PIIA suivantes :",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 14,
+     "excerpt": "La construction d’un bâtiment accessoire sur le lot 2 238 228, 93 chemin\ndu Cèdre puisque l’emplacement et l’orientation visés n’ont pas été\nclairement démontrés;",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "event-143-refusal-murale",
+   "label": "PIIA refusé — murale, 412 rue Principale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "date": "2026-06-01",
+   "municipality": "eastman",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-06-01",
+   "decision": "refusé",
+   "resolution": "2026-06-143",
+   "no_lot": "4380220",
+   "reglement_number": "2002-14",
+   "description": "Refus d’installation d’une murale sur le bâtiment principal au 412 rue Principale.",
+   "motif": "La Municipalité souhaite se doter d’une politique encadrant l’art urbain.",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "ET DE REFUSER, les demandes d’approbation au règlement PIIA suivantes :",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 14,
+     "excerpt": "L’installation d’une murale sur le bâtiment principal sis sur le lot\n4 380 220, 412 rue Principale puisque la Municipalité souhaite se doter",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-2026-03",
+   "label": "2026-03 — occupation et entretien des bâtiments",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "status": "candidate",
+   "numero": "2026-03",
+   "title": "Règlement sur l’occupation et l’entretien des bâtiments",
+   "stage": "adoption",
+   "date": "2026-06-01",
+   "resolution": "2026-06-144",
+   "municipality": "eastman",
+   "objet": "Normes visant à empêcher le dépérissement des bâtiments, les protéger contre les intempéries, préserver leur structure et obliger leur entretien, en assujettissant minimalement les immeubles d’intérêt patrimonial identifiés dans un inventaire de la MRC.",
+   "citations": [
+    {
+     "page": 14,
+     "excerpt": "D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments dont\ncopie est jointe aux présentes pour en faire partie intégrante;",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "event-140",
+   "target": "zone-V-10",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "evidence_refs": [
+    "ev-140"
+   ],
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à la réduction de\nla marge latérale droite dans le but de permettre la construction d’un garage",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-141",
+   "target": "zone-V-2",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "evidence_refs": [
+    "ev-141"
+   ],
+   "citations": [
+    {
+     "page": 12,
+     "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à autoriser la\ncoupe d’arbres sur une propriété où le déboisement excède déjà la superficie de",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "event-142",
+   "target": "zone-R-10",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "evidence_refs": [
+    "ev-142"
+   ],
+   "citations": [
+    {
+     "page": 13,
+     "excerpt": "D’ACCEPTER la présente demande de dérogation mineure visant à autoriser la\nconstruction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot",
+     "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+     "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+     "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-amendment",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+   "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+   "modality": "pdf",
+   "page": 4,
+   "excerpt": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté\npour adoption, lors d’une prochaine séance du conseil municipal, le règlement no\n2026-07 amendant le règlement uniformisé RU-2023-02 relatif au stationnement et\nà la gestion des voies publiques."
+  },
+  {
+   "id": "ev-140",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+   "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+   "modality": "pdf",
+   "page": 12,
+   "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à la réduction de\nla marge latérale droite dans le but de permettre la construction d’un garage\nattenant au bâtiment principal pour la propriété sise sur le lot 4 380 003, 70 chemin\nde la Traverse, zone V-10, PIIA-4 - Corridor visuel d'intérêt supérieur."
+  },
+  {
+   "id": "ev-141",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+   "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+   "modality": "pdf",
+   "page": 12,
+   "excerpt": "DE REFUSER la présente demande de dérogation mineure visant à autoriser la\ncoupe d’arbres sur une propriété où le déboisement excède déjà la superficie de\ndéboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et\n4 380 322, 152 chemin Bellevue, zone V-2."
+  },
+  {
+   "id": "ev-142",
+   "source_file": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "rawRef": "raw/proces-verbaux-eastman/cas/30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8.pdf",
+   "docSha": "30b17c1c20824a9d4dddd4ee650321613e800a8711616dadd94f3407325e37e8",
+   "sourceUrl": "https://eastman.quebec/storage/app/media/municipalite/vie-democratique/seances-du-conseil/proces-verbaux/2026/2026-06-01_PV.pdf",
+   "modality": "pdf",
+   "page": 13,
+   "excerpt": "D’ACCEPTER la présente demande de dérogation mineure visant à autoriser la\nconstruction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot\n2 235 834, 6 chemin de la Mésange, zone R-10, PIIA-1- Pourtour des lacs Stukely,\nParker et d’Argent."
+  }
+ ],
+ "input_tokens": 13750,
+ "output_tokens": 7550
+}

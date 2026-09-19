@@ -1,0 +1,100 @@
+{
+ "documentId": "acton-vale-2026-03-16",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "651db8ff1fc50b87182675ec2f9ff7652f82181a774981355061c593e80a89d8",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Adoption prévue de la résolution finale PPCMOI-001-2026 — 1050, rue Dubois\",\n        \"stage\": \"adoption\",\n        \"procedure\": \"ppcmoi\",\n        \"objet\": \"PPCMOI-001-2026\",\n        \"page\": 2,\n        \"citation\": \"18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\\nDubois.\",\n        \"anchor\": \"PPCMOI-001-2026\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : les retours à la ligne du point 18.1 sont absents de la citation courante.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Résolution prévue sur la demande à la CPTAQ — Ferme Guilmette Inc.\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"Ferme Guilmette Inc.\",\n        \"page\": 2,\n        \"citation\": \"18.2 - Résolution relative à une demande présentée à la Commission de protection\\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.).\",\n        \"anchor\": \"Ferme Guilmette Inc\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : le retour à la ligne après « protection » au point 18.2 manque dans la citation courante.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Résolution prévue sur la demande à la CPTAQ — Daniel Laroche\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"Daniel Laroche\",\n        \"page\": 2,\n        \"citation\": \"18.3 - Résolution relative à une demande présentée à la Commission de protection\\ndu territoire agricole du Québec (Réf: Daniel Laroche).\",\n        \"anchor\": \"Daniel Laroche\"\n      },\n      \"reason\": \"La citation doit être recopiée à l'identique : le retour à la ligne après « protection » au point 18.3 manque dans la citation courante.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Adoption prévue de la résolution finale PPCMOI-001-2026 — 1050, rue Dubois",
+    "stage": "adoption",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-001-2026",
+    "page": 2,
+    "citation": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois.",
+    "anchor": "PPCMOI-001-2026"
+   },
+   "reason": "La citation doit être recopiée à l'identique : les retours à la ligne du point 18.1 sont absents de la citation courante."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Résolution prévue sur la demande à la CPTAQ — Ferme Guilmette Inc.",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Ferme Guilmette Inc.",
+    "page": 2,
+    "citation": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.).",
+    "anchor": "Ferme Guilmette Inc"
+   },
+   "reason": "La citation doit être recopiée à l'identique : le retour à la ligne après « protection » au point 18.2 manque dans la citation courante."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Résolution prévue sur la demande à la CPTAQ — Daniel Laroche",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Daniel Laroche",
+    "page": 2,
+    "citation": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche).",
+    "anchor": "Daniel Laroche"
+   },
+   "reason": "La citation doit être recopiée à l'identique : le retour à la ligne après « protection » au point 18.3 manque dans la citation courante."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 2,
+   "citation": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "inconnu",
+   "page": 2,
+   "citation": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3
+}

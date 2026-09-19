@@ -1,0 +1,37 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "284ee220fe486f61e7cd108aa9b318d40b04767e6fdc298ec8d61395c1ba5810",
+ "inputSha256": "42154fd05eb54446fe4322cd42b5fde208d29b12fdee0332dfb0d183c41882d9",
+ "responseSha256": "57b5e35825e5b53244f6816af335b38e7290a38f773db02a2aeea44beb9501aa",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 10718,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 15893,
+  "outputTokens": 381,
+  "totalTokens": 20048,
+  "thoughtsTokenCount": 3774
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 10571,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:50:25.528Z"
+}

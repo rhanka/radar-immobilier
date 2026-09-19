@@ -1,0 +1,81 @@
+{
+ "documentId": "mcmasterville-2026-02-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "fa603cdfd978c31a80b2c3bb4b0c3925751028f33858efaef911b1fcdb175ffc",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Point 7.2 du projet d'ordre du jour, page 2, citation exacte ; acte foncier (contribution pour fins de parcs) prévu et non acquis, libellé « prévue » conforme.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Point 7.3, page 2, citation exacte « Demande de dérogation mineure – Stationnement – Lot 5 754 418 – 938, rue Bernard-Pilon – Zone MXT-4 », étape derogation_mineure attestée.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Point 7.4, page 2, citation exacte ; demande d'exemption de cases de stationnement distincte de la dérogation mineure (fait différent), étape inconnu appropriée pour un point prévu.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Point 7.5, page 2, citation exacte ; modification de la résolution 2025-184 sur la révision de démolition CD-2025-03 (129, rue de Bretagne), objet d'urbanisme prévu à l'ordre du jour.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Point 7.6, page 2, citation exacte ; modification de la résolution 2025-185 sur la révision de démolition CD-2025-04 (143, rue de Bretagne), fait distinct de 2025-184.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Point 7.7, page 2, citation exacte ; autorisation prévue d'un projet résidentiel multifamilial au 141, rue de Bretagne, fait distinct du versement pour fins de parcs (i01).\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Point 7.2 du projet d'ordre du jour, page 2, citation exacte ; acte foncier (contribution pour fins de parcs) prévu et non acquis, libellé « prévue » conforme."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Point 7.3, page 2, citation exacte « Demande de dérogation mineure – Stationnement – Lot 5 754 418 – 938, rue Bernard-Pilon – Zone MXT-4 », étape derogation_mineure attestée."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Point 7.4, page 2, citation exacte ; demande d'exemption de cases de stationnement distincte de la dérogation mineure (fait différent), étape inconnu appropriée pour un point prévu."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Point 7.5, page 2, citation exacte ; modification de la résolution 2025-184 sur la révision de démolition CD-2025-03 (129, rue de Bretagne), objet d'urbanisme prévu à l'ordre du jour."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Point 7.6, page 2, citation exacte ; modification de la résolution 2025-185 sur la révision de démolition CD-2025-04 (143, rue de Bretagne), fait distinct de 2025-184."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Point 7.7, page 2, citation exacte ; autorisation prévue d'un projet résidentiel multifamilial au 141, rue de Bretagne, fait distinct du versement pour fins de parcs (i01)."
+  }
+ ]
+}

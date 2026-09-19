@@ -1,0 +1,36 @@
+{
+ "documentId": "la-peche-2026-06-01",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "6403c834cf5039832425639cf950740d1a33dad5f8eb24368507cbabe019e1f0",
+ "inputSha256": "ce1893d76ab94f943b117451e15e08151db393c7fe0f27ca865eb02c496591aa",
+ "responseSha256": "ebf383e8eb6f1ce0f1d783787974f07e419d0d1263f6f912d99c4364d0589e70",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 191697,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 21520,
+  "outputTokens": 6297,
+  "totalTokens": 27817
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 191693,
+  "requestId": null
+ },
+ "at": "2026-09-18T12:33:05.966Z"
+}

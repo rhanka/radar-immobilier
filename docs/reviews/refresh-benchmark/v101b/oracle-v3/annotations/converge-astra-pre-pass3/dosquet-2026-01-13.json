@@ -1,0 +1,51 @@
+{
+ "documentId": "dosquet-2026-01-13",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "fe84f010581e156c6284b7feda317b884cef1595b74d882c61dd954e7e00107a",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 26-01-04, page 3, autorise expressément la signature d’un bail pour les locaux du 368 route 116, ce qui constitue un acte foncier inclus même non résidentiel.\"},{\"item\":\"i02\",\"choice\":\"v2\",\"reason\":\"La résolution 26-01-08, page 8, appuie la demande d’extension du droit résidentiel à la partie agricole du lot 6 274 449, objet distinct de l’aliénation traitée dans i03.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 26-01-08, page 8, recommande également la demande d’aliénation des lots 5 376 188 et 4 819 191, dont l’usage agricole sera préservé.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v2"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 26-01-04, page 3, autorise expressément la signature d’un bail pour les locaux du 368 route 116, ce qui constitue un acte foncier inclus même non résidentiel."
+  },
+  {
+   "item": "i02",
+   "choice": "v2",
+   "reason": "La résolution 26-01-08, page 8, appuie la demande d’extension du droit résidentiel à la partie agricole du lot 6 274 449, objet distinct de l’aliénation traitée dans i03."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 26-01-08, page 8, recommande également la demande d’aliénation des lots 5 376 188 et 4 819 191, dont l’usage agricole sera préservé."
+  }
+ ]
+}

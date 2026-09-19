@@ -1,0 +1,13 @@
+{
+ "id": "stratford-2026-04-20",
+ "rc": 0,
+ "latencyMs": 115194,
+ "inputTokens": 2,
+ "outputTokens": 13044,
+ "cacheRead": 0,
+ "cacheCreate": 3639,
+ "costUsd": 0.364602,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 23323
+}

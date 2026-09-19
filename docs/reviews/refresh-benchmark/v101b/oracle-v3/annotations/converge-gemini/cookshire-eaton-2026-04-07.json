@@ -1,0 +1,81 @@
+{
+ "documentId": "cookshire-eaton-2026-04-07",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dcef823e0abf9b897d88bdb82b1720374565a8af97cb1bd96327247ddafd2b5b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure 26-DM-01 est adoptée par la résolution 2026-04-0726 à la page 6 et la citation est exacte.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'acte foncier autorisant la vente du lot 4 487 586 est adopté à la page 6 par la résolution 2026-04-0727 et la citation est exacte.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement 400-2026 est donné à la page 10 sous la résolution 2026-04-0735.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le projet de règlement 400-2026 est adopté à la page 10 par la résolution 2026-04-0736 avec citation exacte.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le règlement 399-2026 est initié sous cette rubrique à la page 10 conformément au texte.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le projet de règlement 399-2026 est adopté par la résolution 2026-04-0740 à la page 11 et la citation est textuellement exacte.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La dérogation mineure 26-DM-01 est adoptée par la résolution 2026-04-0726 à la page 6 et la citation est exacte."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'acte foncier autorisant la vente du lot 4 487 586 est adopté à la page 6 par la résolution 2026-04-0727 et la citation est exacte."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement 400-2026 est donné à la page 10 sous la résolution 2026-04-0735."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le projet de règlement 400-2026 est adopté à la page 10 par la résolution 2026-04-0736 avec citation exacte."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le règlement 399-2026 est initié sous cette rubrique à la page 10 conformément au texte."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le projet de règlement 399-2026 est adopté par la résolution 2026-04-0740 à la page 11 et la citation est textuellement exacte."
+  }
+ ]
+}

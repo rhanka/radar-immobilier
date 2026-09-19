@@ -1,0 +1,75 @@
+{
+ "documentId": "sacre-coeur-2026-05-11",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "bc86dde64d498788a532412cc82d571d0cd67f8ef56fb3eb914be2d30a596b56",
+ "inputSha256": "16f72b2c1d1e1eefe9b823cf4f28c5d692728dfa0ec94561d007b2deea829e44",
+ "responseSha256": "58205a4619715825002554f247e177fb2311bfa7906185723ef30c7bdef9640f",
+ "rc": 0,
+ "latencyMs": 116004,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "2be656ca-1b85-4d80-96c9-f47234adcf2e",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 9104,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 33603,
+   "webSearchRequests": 0,
+   "costUSD": 1.12795325,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 8759,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 33603,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 9104,
+  "output_tokens_details": {
+   "thinking_tokens": 8759
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 33603,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 9104,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 33603,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 33603
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 1.12795325,
+ "durationApiMs": 114019,
+ "stderrTail": "",
+ "at": "2026-09-18T17:51:43.352Z"
+}

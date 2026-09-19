@@ -1,0 +1,297 @@
+{
+ "documentId": "wentworth-nord-2026-01-21",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "25168b5f16850e77728f530f6c4f5486380f9fef67b81d1ac048789c19684b2c",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "dm-2025-0418"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure 2025-0418 — chemin de l’Adiante",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la\ndemande de dérogation mineure 2025-0418 visant à autoriser la création d’une"
+      },
+      {
+       "page": 8,
+       "excerpt": "ATTENDU QUE cette opération cadastrale permettra d’identifier une voie\nverbalisée existante depuis 1896 et de pouvoir agrandir les lots 5 940 268 et"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "contribution-2025-9029"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Lotissement 2025-9029 — contribution pour fins de parcs en argent",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que\nla contribution pour fins de parcs, terrains de jeux ou espaces naturels soit"
+      },
+      {
+       "page": 9,
+       "excerpt": "ATTENDU QUE la demande de permis de lotissement 2025-9029 vise la création\ndu lot 6 717 658 fait à partir des lots 5 940 257 du cadastre du Québec, 5 940 255"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-2026-580"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-580 — taxes, compensations et tarifs 2026",
+     "stage": "projet",
+     "objet": "2026-580",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "Donne avis de motion qu’à une prochaine séance du Conseil municipal, le\nrèglement 2026-580 décrétant l’imposition de taxes, compensations et"
+      },
+      {
+       "page": 4,
+       "excerpt": "Dépose le projet de règlement 2026-580 ;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-c09"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2017-498-30-C09 — hébergement touristique en C-09",
+     "stage": null,
+     "objet": "2017-498-30-C09",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Règlement n° 2017-498-30-C09 modifiant le Règlement de zonage n° 2017498 afin d’autoriser l’usage complémentaire à un usage résidentiel"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-cons08"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2017-498-30-CONS08 — hébergement touristique en CONS-08",
+     "stage": null,
+     "objet": "2017-498-30-CONS08",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Règlement n° 2017-498-30-CONS08 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-i04"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2017-498-30-I04 — hébergement touristique en I-04",
+     "stage": null,
+     "objet": "2017-498-30-I04",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Règlement n° 2017-498-30-I04 modifiant le Règlement de zonage\nn°2017-498 afin d’interdire l’usage complémentaire à un usage résidentiel"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "depot-certificats"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dépôt des certificats de procédure d’enregistrement — hébergement touristique",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "Conformément à l’article 557 de la Loi sur les élections et les référendums dans\nles municipalités, monsieur Ron Kelley, directeur général et greffier-trésorier,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "retrait-rue-bernard"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande de désofficialisation de la rue Bernard",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 10,
+       "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander à la\nCommission de toponymie de désofficialiser la dénomination de la rue nommée"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la résolution acceptant la demande de dérogation mineure 2025-0418.\",\"excerpt\":\"ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la demande de dérogation mineure 2025-0418 visant à autoriser la création d’une emprise de rue\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution fixant la contribution pour fins de parcs en argent pour le permis de lotissement 2025-9029.\",\"excerpt\":\"ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que la contribution pour fins de parcs, terrains de jeux ou espaces naturels soit acquittée en argent pour un montant de 12 302.60 $.\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un règlement fiscal (taxes, compensations et tarifs) qui relève des exclusions financières et non de l'urbanisme.\",\"excerpt\":\"règlement 2026-580 décrétant l’imposition de taxes, compensations et tarifs pour les services municipaux pour l’exercice financier 2026\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Aucun acte d'adoption ou d'étape procédurale n'est posé sur ce règlement, il s'agit seulement d'une mention dans le cadre du dépôt d'un certificat d'enregistrement.\",\"excerpt\":\"dépose les certificats attestant le résultat de la procédure d’enregistrement des personnes habiles à voter\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Aucune étape procédurale n'est franchie sur ce règlement lui-même, mentionné seulement dans le dépôt d'un certificat d'enregistrement.\",\"excerpt\":\"dépose les certificats attestant le résultat de la procédure d’enregistrement des personnes habiles à voter\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"Aucune étape procédurale n'est franchie sur ce règlement lui-même, mentionné seulement dans le dépôt d'un certificat d'enregistrement.\",\"excerpt\":\"dépose les certificats attestant le résultat de la procédure d’enregistrement des personnes habiles à voter\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le greffier effectue formellement le dépôt des certificats d'enregistrement référendaire pour ces règlements d'urbanisme.\",\"excerpt\":\"dépose les certificats attestant le résultat de la procédure d’enregistrement des personnes habiles à voter ayant le droit d’être inscrites sur la liste référendaire\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution demandant formellement à la Commission de toponymie la désofficialisation du nom de la rue.\",\"excerpt\":\"ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander à la Commission de toponymie de désofficialiser la dénomination de la rue nommée « rue Bernard »\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la résolution acceptant la demande de dérogation mineure 2025-0418.",
+   "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal d’accepter la demande de dérogation mineure 2025-0418 visant à autoriser la création d’une emprise de rue"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution fixant la contribution pour fins de parcs en argent pour le permis de lotissement 2025-9029.",
+   "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander que la contribution pour fins de parcs, terrains de jeux ou espaces naturels soit acquittée en argent pour un montant de 12 302.60 $."
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un règlement fiscal (taxes, compensations et tarifs) qui relève des exclusions financières et non de l'urbanisme.",
+   "excerpt": "règlement 2026-580 décrétant l’imposition de taxes, compensations et tarifs pour les services municipaux pour l’exercice financier 2026"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Aucun acte d'adoption ou d'étape procédurale n'est posé sur ce règlement, il s'agit seulement d'une mention dans le cadre du dépôt d'un certificat d'enregistrement.",
+   "excerpt": "dépose les certificats attestant le résultat de la procédure d’enregistrement des personnes habiles à voter"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Aucune étape procédurale n'est franchie sur ce règlement lui-même, mentionné seulement dans le dépôt d'un certificat d'enregistrement.",
+   "excerpt": "dépose les certificats attestant le résultat de la procédure d’enregistrement des personnes habiles à voter"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "Aucune étape procédurale n'est franchie sur ce règlement lui-même, mentionné seulement dans le dépôt d'un certificat d'enregistrement.",
+   "excerpt": "dépose les certificats attestant le résultat de la procédure d’enregistrement des personnes habiles à voter"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le greffier effectue formellement le dépôt des certificats d'enregistrement référendaire pour ces règlements d'urbanisme.",
+   "excerpt": "dépose les certificats attestant le résultat de la procédure d’enregistrement des personnes habiles à voter ayant le droit d’être inscrites sur la liste référendaire"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution demandant formellement à la Commission de toponymie la désofficialisation du nom de la rue.",
+   "excerpt": "ET RÉSOLU À L’UNANIMITÉ des membres du Conseil municipal de demander à la Commission de toponymie de désofficialiser la dénomination de la rue nommée « rue Bernard »"
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Il s'agit d'un règlement fiscal (taxes, compensations et tarifs) qui relève des exclusions financières et non de l'urbanisme."
+   },
+   {
+    "act": "A04",
+    "reason": "Aucun acte d'adoption ou d'étape procédurale n'est posé sur ce règlement, il s'agit seulement d'une mention dans le cadre du dépôt d'un certificat d'enregistrement."
+   },
+   {
+    "act": "A05",
+    "reason": "Aucune étape procédurale n'est franchie sur ce règlement lui-même, mentionné seulement dans le dépôt d'un certificat d'enregistrement."
+   },
+   {
+    "act": "A06",
+    "reason": "Aucune étape procédurale n'est franchie sur ce règlement lui-même, mentionné seulement dans le dépôt d'un certificat d'enregistrement."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte la résolution acceptant la demande de dérogation mineure 2025-0418."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil adopte une résolution fixant la contribution pour fins de parcs en argent pour le permis de lotissement 2025-9029."
+   },
+   {
+    "act": "A07",
+    "reason": "Le greffier effectue formellement le dépôt des certificats d'enregistrement référendaire pour ces règlements d'urbanisme."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil adopte une résolution demandant formellement à la Commission de toponymie la désofficialisation du nom de la rue."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3332,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 11461,
+   "outputTokens": 659,
+   "totalTokens": 12120
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3166
+  },
+  "inputSha256": "5f969978577874a3968c6de6bf89e30ef1b316c2e76c9619a7f78d6e59aa51f5"
+ }
+}

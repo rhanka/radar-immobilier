@@ -1,0 +1,131 @@
+{
+ "documentId": "rosemere-2026-04-13",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "6bbeb215bfddb233381f5e7b8c9c44befae20c69c1d1080a965da0ab91962dd8",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure pour le 262, rue Westward est adoptée par la résolution 2026-04-125 à la page 2.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'approbation PIIA pour le 307, boulevard Labelle est adoptée par la résolution 2026-04-126 à la page 2.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L'approbation PIIA pour le 400, chemin de la Grande-Côte est accordée par la résolution 2026-04-127 à la page 3.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'approbation PIIA pour l'agrandissement au 266, rue du Bocage est adoptée par la résolution 2026-04-128 à la page 3.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'approbation PIIA pour le 338, rue Montview est adoptée par la résolution 2026-04-129 à la page 3.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'approbation PIIA pour le 355, rue Montcalm est adoptée par la résolution 2026-04-130 à la page 4.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"L'approbation PIIA pour le 5, chemin de la Grande-Côte est adoptée par la résolution 2026-04-131 à la page 4.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"L'avis de motion pour le projet de règlement d'urbanisme 1004-01 est dûment consigné à la page 4 (point 5.3.1).\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"L'adoption du projet de règlement 1004-01 et la fixation de la consultation publique sont votées à la page 5 (résolution 2026-04-133).\"},{\"item\":\"i10\",\"choice\":\"absent\",\"reason\":\"Le règlement 1015 décrétant un programme d'accompagnement et de sensibilisation relève d'une autre réglementation municipale et non de l'urbanisme ou du foncier.\"},{\"item\":\"i11\",\"choice\":\"absent\",\"reason\":\"Le règlement 1015 est hors du champ de l'urbanisme et du foncier, et il s'agit d'un simple dépôt sans adoption de projet de règlement.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La dérogation mineure pour le 262, rue Westward est adoptée par la résolution 2026-04-125 à la page 2."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'approbation PIIA pour le 307, boulevard Labelle est adoptée par la résolution 2026-04-126 à la page 2."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L'approbation PIIA pour le 400, chemin de la Grande-Côte est accordée par la résolution 2026-04-127 à la page 3."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'approbation PIIA pour l'agrandissement au 266, rue du Bocage est adoptée par la résolution 2026-04-128 à la page 3."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'approbation PIIA pour le 338, rue Montview est adoptée par la résolution 2026-04-129 à la page 3."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'approbation PIIA pour le 355, rue Montcalm est adoptée par la résolution 2026-04-130 à la page 4."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "L'approbation PIIA pour le 5, chemin de la Grande-Côte est adoptée par la résolution 2026-04-131 à la page 4."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "L'avis de motion pour le projet de règlement d'urbanisme 1004-01 est dûment consigné à la page 4 (point 5.3.1)."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "L'adoption du projet de règlement 1004-01 et la fixation de la consultation publique sont votées à la page 5 (résolution 2026-04-133)."
+  },
+  {
+   "item": "i10",
+   "choice": "absent",
+   "reason": "Le règlement 1015 décrétant un programme d'accompagnement et de sensibilisation relève d'une autre réglementation municipale et non de l'urbanisme ou du foncier."
+  },
+  {
+   "item": "i11",
+   "choice": "absent",
+   "reason": "Le règlement 1015 est hors du champ de l'urbanisme et du foncier, et il s'agit d'un simple dépôt sans adoption de projet de règlement."
+  }
+ ]
+}

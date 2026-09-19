@@ -1,0 +1,19 @@
+{
+ "documentId": "parisville-2026-05-05",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "2aa5234b8f9ef2dd8ca8992165af580158825b1851a5554d291351cb6b12579a",
+ "verificationSha256": "df7a6e10889501f39d7c93ebc425bfc053371b447fa6112d6bb061b2fc785fc6",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

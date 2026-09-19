@@ -1,0 +1,130 @@
+{
+ "documentId": "saint-roch-de-lachigan-2026-05-11",
+ "step": "astra-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": null,
+ "inputStateSha256": "75b96f76fef9964a0ee779a66dc88e9208063894623dec692645a623e0fa24e4",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Exercice du droit de préemption prévu — vente du lot 6 141 751\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"6 141 751\",\n        \"page\": 2,\n        \"citation\": \"8.5 Vente du lot lot 6 141 751-exercise du droit de préemption\",\n        \"anchor\": \"lot 6 141 751\"\n      },\n      \"reason\": \"Le point 8.5 prévoit un acte foncier concernant un lot explicitement identifié, à inclure comme point prévu et non comme décision acquise.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Examen prévu de la démolition — 16, rue de l'Île-Majeau\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"16, rue de l'Île-Majeau\",\n        \"page\": 2,\n        \"citation\": \"10.1 Démolition de l'immeuble situé au 16, rue de l'Île-Majeau\",\n        \"anchor\": \"16, rue de l'Île-Majeau\"\n      },\n      \"reason\": \"Le point 10.1 prévoit le traitement d'une démolition à une adresse explicite, sans préciser une étape d'adoption ou une procédure particulière.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation prévue de dérogation mineure — 296 rang de la Rivière Nord\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"296 rang de la Rivière Nord\",\n        \"page\": 2,\n        \"citation\": \"10.2 Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation\",\n        \"anchor\": \"296 rang de la Rivière Nord\"\n      },\n      \"reason\": \"Le point 10.2 nomme une demande de dérogation mineure distincte dont l'autorisation est prévue à l'ordre du jour.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation prévue de dérogation mineure — 28 rue Beaucage\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"28 rue Beaucage\",\n        \"page\": 2,\n        \"citation\": \"10.3 Demande de dérogation mineure - 28 rue Beaucage - Autorisation\",\n        \"anchor\": \"28 rue Beaucage\"\n      },\n      \"reason\": \"Le point 10.3 nomme une autre demande de dérogation mineure, à compter séparément et à présenter comme prévue.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation prévue de modification d'affichage — immeuble cité au 1224 rue Principale\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"1224 rue Principale\",\n        \"page\": 2,\n        \"citation\": \"10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation\",\n        \"anchor\": \"1224 rue Principale\"\n      },\n      \"reason\": \"Le point 10.4 prévoit une autorisation d'urbanisme sur un immeuble cité explicitement identifié, sans qualifier la demande de PIIA.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Autorisation prévue de travaux — immeuble cité au 1484, rue Principale\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"1484, rue Principale\",\n        \"page\": 2,\n        \"citation\": \"10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation\",\n        \"anchor\": \"1484, rue Principale\"\n      },\n      \"reason\": \"Le point 10.5 prévoit une autorisation de travaux sur un immeuble cité distinct, à inclure sans présumer que l'autorisation est déjà accordée.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "add",
+   "unit": {
+    "label": "Exercice du droit de préemption prévu — vente du lot 6 141 751",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 141 751",
+    "page": 2,
+    "citation": "8.5 Vente du lot lot 6 141 751-exercise du droit de préemption",
+    "anchor": "lot 6 141 751"
+   },
+   "reason": "Le point 8.5 prévoit un acte foncier concernant un lot explicitement identifié, à inclure comme point prévu et non comme décision acquise."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Examen prévu de la démolition — 16, rue de l'Île-Majeau",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "16, rue de l'Île-Majeau",
+    "page": 2,
+    "citation": "10.1 Démolition de l'immeuble situé au 16, rue de l'Île-Majeau",
+    "anchor": "16, rue de l'Île-Majeau"
+   },
+   "reason": "Le point 10.1 prévoit le traitement d'une démolition à une adresse explicite, sans préciser une étape d'adoption ou une procédure particulière."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation prévue de dérogation mineure — 296 rang de la Rivière Nord",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "296 rang de la Rivière Nord",
+    "page": 2,
+    "citation": "10.2 Demande de dérogation mineure - 296 rang de la Rivière Nord - Autorisation",
+    "anchor": "296 rang de la Rivière Nord"
+   },
+   "reason": "Le point 10.2 nomme une demande de dérogation mineure distincte dont l'autorisation est prévue à l'ordre du jour."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation prévue de dérogation mineure — 28 rue Beaucage",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "28 rue Beaucage",
+    "page": 2,
+    "citation": "10.3 Demande de dérogation mineure - 28 rue Beaucage - Autorisation",
+    "anchor": "28 rue Beaucage"
+   },
+   "reason": "Le point 10.3 nomme une autre demande de dérogation mineure, à compter séparément et à présenter comme prévue."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation prévue de modification d'affichage — immeuble cité au 1224 rue Principale",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1224 rue Principale",
+    "page": 2,
+    "citation": "10.4 Demande de modification d'affichage à un immeuble cité - 1224 rue Principale Autorisation",
+    "anchor": "1224 rue Principale"
+   },
+   "reason": "Le point 10.4 prévoit une autorisation d'urbanisme sur un immeuble cité explicitement identifié, sans qualifier la demande de PIIA."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Autorisation prévue de travaux — immeuble cité au 1484, rue Principale",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1484, rue Principale",
+    "page": 2,
+    "citation": "10.5 Demande de travaux sur un immeuble cité - 1484, rue Principale - Autorisation",
+    "anchor": "1484, rue Principale"
+   },
+   "reason": "Le point 10.5 prévoit une autorisation de travaux sur un immeuble cité distinct, à inclure sans présumer que l'autorisation est déjà accordée."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u01"
+  },
+  {
+   "op": "add",
+   "id": "u02"
+  },
+  {
+   "op": "add",
+   "id": "u03"
+  },
+  {
+   "op": "add",
+   "id": "u04"
+  },
+  {
+   "op": "add",
+   "id": "u05"
+  },
+  {
+   "op": "add",
+   "id": "u06"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

@@ -1,0 +1,225 @@
+{
+ "documentId": "sainte-brigide-diberville-2026-06-01",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "9ed929965fb4cead26d9ff9c095a5c4b0c9b5106b76a90f0fb9c3ac04fb3784a",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-489"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-489 — Gestion quantitative des eaux pluviales",
+     "stage": null,
+     "objet": "2026-489",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5.1 Règlement 2026-489 sur la gestion quantitative des eaux pluviales : - Adoption"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-402-6"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-402-6 — Réserve financière pour l’égout et l’aqueduc",
+     "stage": null,
+     "objet": "2026-402-6",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5.2 Règlement 2026-402-6 Règlement modifiant le règlement 2012-402 concernant la\nréserve financière pour l’égout et l’aqueduc : avis de motion"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-402"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2012-402 — Réserve financière pour l’égout et l’aqueduc",
+     "stage": null,
+     "objet": "2012-402",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5.2 Règlement 2026-402-6 Règlement modifiant le règlement 2012-402 concernant la\nréserve financière pour l’égout et l’aqueduc : avis de motion"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-derogation"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — Lot 4 390 294",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "11.2 Dérogation mineure : Lot 4 390 294 Rang de la Rivière Ouest"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-cptaq"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Projet éolien — Demande de prolongation à la CPTAQ",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "6.6 Coopérative Régionale d’Électricité de Saint0Jean-Baptiste de Rouville – projet\néolien : demande de prolongation à la CPTAQ"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-vente"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente d’immeubles pour défaut de paiement des taxes",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "14.1 Vente d’immeubles pour défaut de paiement des taxes"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\n  \"decisions\": [\n    {\n      \"act\": \"A01\",\n      \"verdict\": \"soutenu\",\n      \"reason\": \"Le point 5.1 prévoit explicitement l'adoption du règlement 2026-489 sur la gestion quantitative des eaux pluviales.\",\n      \"excerpt\": \"5.1 Règlement 2026-489 sur la gestion quantitative des eaux pluviales : - Adoption\"\n    },\n    {\n      \"act\": \"A02\",\n      \"verdict\": \"soutenu\",\n      \"reason\": \"Le point 5.2 prévoit explicitement l'avis de motion pour le règlement modificateur 2026-402-6.\",\n      \"excerpt\": \"5.2 Règlement 2026-402-6 Règlement modifiant le règlement 2012-402 concernant la\\nréserve financière pour l’égout et l’aqueduc : avis de motion\"\n    },\n    {\n      \"act\": \"A03\",\n      \"verdict\": \"non_soutenu\",\n      \"reason\": \"Le règlement 2012-402 n'est mentionné que comme référence historique faisant l'objet de la modification par le règlement 2026-402-6.\",\n      \"excerpt\": \"Règlement modifiant le règlement 2012-402 concernant la\\nréserve financière pour l’égout et l’aqueduc\"\n    },\n    {\n      \"act\": \"A04\",\n      \"verdict\": \"soutenu\",\n      \"reason\": \"Le point 11.2 concerne explicitement une dérogation mineure pour le lot 4 390 294 Rang de la Rivière Ouest.\",\n      \"excerpt\": \"11.2 Dérogation mineure : Lot 4 390 294 Rang de la Rivière Ouest\"\n    },\n    {\n      \"act\": \"A05\",\n      \"verdict\": \"soutenu\",\n      \"reason\": \"Le point 6.6 porte sur une demande de prolongation à la CPTAQ pour un projet éolien.\",\n      \"excerpt\": \"6.6 Coopérative Régionale d’Électricité de Saint0Jean-Baptiste de Rouville – projet\\néolien : demande de prolongation à la CPTAQ\"\n    },\n    {\n      \"act\": \"A06\",\n      \"verdict\": \"soutenu\",\n      \"reason\": \"Le point 14.1 porte sur la vente d'immeubles pour défaut de paiement des taxes sous la rubrique MRC.\",\n      \"excerpt\": \"14.1 Vente d’immeubles pour défaut de paiement des taxes\"\n    }\n  ]\n}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 5.1 prévoit explicitement l'adoption du règlement 2026-489 sur la gestion quantitative des eaux pluviales.",
+   "excerpt": "5.1 Règlement 2026-489 sur la gestion quantitative des eaux pluviales : - Adoption"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 5.2 prévoit explicitement l'avis de motion pour le règlement modificateur 2026-402-6.",
+   "excerpt": "5.2 Règlement 2026-402-6 Règlement modifiant le règlement 2012-402 concernant la\nréserve financière pour l’égout et l’aqueduc : avis de motion"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 2012-402 n'est mentionné que comme référence historique faisant l'objet de la modification par le règlement 2026-402-6.",
+   "excerpt": "Règlement modifiant le règlement 2012-402 concernant la\nréserve financière pour l’égout et l’aqueduc"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 11.2 concerne explicitement une dérogation mineure pour le lot 4 390 294 Rang de la Rivière Ouest.",
+   "excerpt": "11.2 Dérogation mineure : Lot 4 390 294 Rang de la Rivière Ouest"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le point 6.6 porte sur une demande de prolongation à la CPTAQ pour un projet éolien.",
+   "excerpt": "6.6 Coopérative Régionale d’Électricité de Saint0Jean-Baptiste de Rouville – projet\néolien : demande de prolongation à la CPTAQ"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le point 14.1 porte sur la vente d'immeubles pour défaut de paiement des taxes sous la rubrique MRC.",
+   "excerpt": "14.1 Vente d’immeubles pour défaut de paiement des taxes"
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement 2012-402 n'est mentionné que comme référence historique faisant l'objet de la modification par le règlement 2026-402-6."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 5.1 prévoit explicitement l'adoption du règlement 2026-489 sur la gestion quantitative des eaux pluviales."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 5.2 prévoit explicitement l'avis de motion pour le règlement modificateur 2026-402-6."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 11.2 concerne explicitement une dérogation mineure pour le lot 4 390 294 Rang de la Rivière Ouest."
+   },
+   {
+    "act": "A05",
+    "reason": "Le point 6.6 porte sur une demande de prolongation à la CPTAQ pour un projet éolien."
+   },
+   {
+    "act": "A06",
+    "reason": "Le point 14.1 porte sur la vente d'immeubles pour défaut de paiement des taxes sous la rubrique MRC."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1959,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2190,
+   "outputTokens": 580,
+   "totalTokens": 2770
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1828
+  },
+  "inputSha256": "3bd60db635df2cf1d80b734084ad73d1c7f878fd618184f1450a7a8c5dbaade3"
+ }
+}

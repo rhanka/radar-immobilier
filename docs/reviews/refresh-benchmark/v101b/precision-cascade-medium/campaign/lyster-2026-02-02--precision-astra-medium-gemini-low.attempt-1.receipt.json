@@ -1,0 +1,35 @@
+{
+ "documentId": "lyster-2026-02-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "21de882d74a4c64b761c3db4102baaa146cf429e20d1a3e20081ed588adfc052",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2726,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 8666,
+   "outputTokens": 397,
+   "totalTokens": 9063
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1711
+  },
+  "inputSha256": "ff51010c703a394bbf598ff5b0c9c22566252e3a39ded957eb524877b00fa31d"
+ },
+ "at": "2026-09-19T03:22:24.890Z"
+}

@@ -1,0 +1,91 @@
+{
+ "documentId": "sainte-barbe-2026-05-05",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4d1e737f5b87940afc4fdaaca53ee2d9a01a0336db2efe620f0fe663b9779ab9",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 3 atteste mot pour mot « dérogation mineure 813, 45e Avenue – lotissement 2 terrains. Le maire explique que la demande sera prise en délibéré » ; objet foncier explicite (point 6.8 de l'ordre du jour, aucune résolution prise), étape inconnu conforme.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-05-13 page 14 fixe le scrutin référendaire au 14 juin 2026 pour la demande de PPCMOI 2025-001 (île Raymond) ; citation exacte, objet réglementaire explicite, étape inconnu acceptable.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-05-16 page 15 : « Qu'un second projet de règlement portant le numéro 2003-05-63 AVEC CHANGEMENT soit adopté » ; étape second_projet distincte de l'avis de motion et du projet historiques, citation et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-05-18 page 18 : « Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d'urbanisme » ; citation exacte, étape piia, page 18 ; v2 est un doublon de même fait avec citation tronquée.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-05-19 page 19 : « Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 » ; citation exacte, étape piia, page 19 ; v2 doublon même type/même fait.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-05-20 page 20 : « Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057 » ; citation exacte, étape derogation_mineure, page 20 ; v2 doublon même fait.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-05-21 page 20 autorise la signature de « l'acte de cession de la servitude sur les lots 5 988 194 et 6 520 252 située au 163 avenue des Cèdres » ; acte foncier inclus par la règle, résolution adoptée, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v2"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v2"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v2"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 3 atteste mot pour mot « dérogation mineure 813, 45e Avenue – lotissement 2 terrains. Le maire explique que la demande sera prise en délibéré » ; objet foncier explicite (point 6.8 de l'ordre du jour, aucune résolution prise), étape inconnu conforme."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Résolution 2026-05-13 page 14 fixe le scrutin référendaire au 14 juin 2026 pour la demande de PPCMOI 2025-001 (île Raymond) ; citation exacte, objet réglementaire explicite, étape inconnu acceptable."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Résolution 2026-05-16 page 15 : « Qu'un second projet de règlement portant le numéro 2003-05-63 AVEC CHANGEMENT soit adopté » ; étape second_projet distincte de l'avis de motion et du projet historiques, citation et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Résolution 2026-05-18 page 18 : « Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d'urbanisme » ; citation exacte, étape piia, page 18 ; v2 est un doublon de même fait avec citation tronquée."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Résolution 2026-05-19 page 19 : « Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 » ; citation exacte, étape piia, page 19 ; v2 doublon même type/même fait."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Résolution 2026-05-20 page 20 : « Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057 » ; citation exacte, étape derogation_mineure, page 20 ; v2 doublon même fait."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Résolution 2026-05-21 page 20 autorise la signature de « l'acte de cession de la servitude sur les lots 5 988 194 et 6 520 252 située au 163 avenue des Cèdres » ; acte foncier inclus par la règle, résolution adoptée, citation et page exactes."
+  }
+ ]
+}

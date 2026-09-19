@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-charles-de-bourget-2026-05-04",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "e7e8a29a1debee533e2558886cbf6e9897fe363620f2e4d3ae773b5e9df81f20",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 6.3, page 1, du projet d’ordre du jour prévoit l’adoption du règlement no446.26 sur l’exercice du droit de préemption, sans attester une adoption acquise.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 8.1, page 1, inscrit la demande de dérogation mineure au 237, chemin Maltais-Laberge, comme point prévu et non comme dérogation accordée.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 8.2, page 1, prévoit une demande d’autorisation à la CPTAQ pour aliéner le lot 5 682 717 à fins d’agriculture, objet foncier explicite sans décision attestée, compatible avec l’étape « inconnu ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 6.3, page 1, du projet d’ordre du jour prévoit l’adoption du règlement no446.26 sur l’exercice du droit de préemption, sans attester une adoption acquise."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 8.1, page 1, inscrit la demande de dérogation mineure au 237, chemin Maltais-Laberge, comme point prévu et non comme dérogation accordée."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 8.2, page 1, prévoit une demande d’autorisation à la CPTAQ pour aliéner le lot 5 682 717 à fins d’agriculture, objet foncier explicite sans décision attestée, compatible avec l’étape « inconnu »."
+  }
+ ]
+}

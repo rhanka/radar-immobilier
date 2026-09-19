@@ -1,0 +1,37 @@
+{
+ "documentId": "brownsburg-chatham-2026-03-10",
+ "step": "gemini-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass2",
+ "inputStateSha256": "74d11969a462e6c5249baa54eed2ad32210241b1b1ec2b5ac6d3225521ce65b0",
+ "inputSha256": "7fddd9529bdd438e892d4bf33f9ff09794cfcf2ae8a3b6a8920676ee4550f324",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 59207,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 61478,
+  "outputTokens": 4,
+  "totalTokens": 87318,
+  "thoughtsTokenCount": 25836
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 59030,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:11:32.111Z"
+}

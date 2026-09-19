@@ -1,0 +1,46 @@
+{
+ "documentId": "warden-2026-04-08",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "8acbc0b7e00c9c48465ca4e1971d9a84bd476bb1723f0d2e2d7209cd4bcc84e1",
+ "rawText": "{\"operations\":[\n {\"op\":\"correct\",\"id\":\"u03\",\"unit\":{\"label\":\"Acceptation du bail commercial pour la location d'un espace de bureau au 1-5383, rue Foster, à Waterloo (relocalisation temporaire des bureaux municipaux)\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"1-5383, rue Foster\",\"page\":6,\"citation\":\"accepte le bail commercial à intervenir entre Groupe RSE inc. et la Municipalité de Warden pour la location d'un espace de bureau situé au 1-5383, rue Foster, à Waterloo\",\"anchor\":\"1-5383, rue Foster\"},\"reason\":\"Un bail (location d'un immeuble) n'est pas un acte foncier décidé au sens de « adoption » (vente, acquisition, cession, servitude autorisée) ; il relève de l'étape « inconnu », comme l'exemple « convention de prêt à usage d'un immeuble » du vocabulaire d'étape.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Acceptation du bail commercial pour la location d'un espace de bureau au 1-5383, rue Foster, à Waterloo (relocalisation temporaire des bureaux municipaux)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "1-5383, rue Foster",
+    "page": 6,
+    "citation": "accepte le bail commercial à intervenir entre Groupe RSE inc. et la Municipalité de Warden pour la location d'un espace de bureau situé au 1-5383, rue Foster, à Waterloo",
+    "anchor": "1-5383, rue Foster"
+   },
+   "reason": "Un bail (location d'un immeuble) n'est pas un acte foncier décidé au sens de « adoption » (vente, acquisition, cession, servitude autorisée) ; il relève de l'étape « inconnu », comme l'exemple « convention de prêt à usage d'un immeuble » du vocabulaire d'étape."
+  }
+ ],
+ "applied": [
+  {
+   "op": "correct",
+   "id": "u03"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 6
+}

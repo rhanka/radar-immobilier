@@ -1,0 +1,101 @@
+{
+ "documentId": "barnston-ouest-2026-05-04",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "9bfdc8d37ca0e47bfd310015dc8f0b0963ec76d2c52dd6c9c4d139f5b4cc9863",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le dépôt et la présentation du projet de règlement 325-2026 sont bien attestés à la page 7 sous le point 6.2.3.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'avis de motion du règlement 325-2026 est bien consigné à la page 8 sous la résolution 26 05 056 (point 6.2.4).\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le dépôt et la présentation du projet de règlement 326-2026 modifiant le zonage sont attestés à la page 8 sous le point 6.2.5.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'avis de motion du règlement 326-2026 est consigné à la page 8 sous la résolution 26 05 057 (point 6.2.6).\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le dépôt et la présentation du projet de règlement 327-2026 modifiant le lotissement figurent à la page 8 sous le point 6.2.7.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'avis de motion du règlement 327-2026 est consigné à la page 8 sous la résolution 26 05 058 (point 6.2.8).\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Le dépôt et la présentation du projet de règlement 328-2026 modifiant les PIIA figurent bien au bas de la page 8 sous le point 6.2.9.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"L'avis de motion du règlement 328-2026 est attesté à la page 9 sous la résolution 26 05 059 (point 6.2.10).\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le dépôt et la présentation du projet de règlement 325-2026 sont bien attestés à la page 7 sous le point 6.2.3."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'avis de motion du règlement 325-2026 est bien consigné à la page 8 sous la résolution 26 05 056 (point 6.2.4)."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le dépôt et la présentation du projet de règlement 326-2026 modifiant le zonage sont attestés à la page 8 sous le point 6.2.5."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'avis de motion du règlement 326-2026 est consigné à la page 8 sous la résolution 26 05 057 (point 6.2.6)."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le dépôt et la présentation du projet de règlement 327-2026 modifiant le lotissement figurent à la page 8 sous le point 6.2.7."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'avis de motion du règlement 327-2026 est consigné à la page 8 sous la résolution 26 05 058 (point 6.2.8)."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Le dépôt et la présentation du projet de règlement 328-2026 modifiant les PIIA figurent bien au bas de la page 8 sous le point 6.2.9."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "L'avis de motion du règlement 328-2026 est attesté à la page 9 sous la résolution 26 05 059 (point 6.2.10)."
+  }
+ ]
+}

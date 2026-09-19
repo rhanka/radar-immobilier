@@ -1,0 +1,13 @@
+{
+ "id": "notre-dame-de-lourdes--joliette-2026-04-13",
+ "rc": 0,
+ "latencyMs": 223654,
+ "inputTokens": 2,
+ "outputTokens": 24613,
+ "cacheRead": 0,
+ "cacheCreate": 16249,
+ "costUsd": 0.7895409999999999,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 47952
+}

@@ -1,0 +1,191 @@
+{
+ "documentId": "waterloo-2026-08-18",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b77427cfb49b8a86baf404098dbeb0941f95bb02f69826c603ec1e14494bfea4",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Page 2, point 26.08.21.2 : le certificat de résultat du processus d'approbation par les personnes habiles à voter relié au Règlement 26-956-2 est déposé (aucune signature reçue) — objet réglementaire explicite et étape constatée dans ce document, distincte de l'adoption.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Page 2, point 26.08.21.3 : le procès-verbal de l'assemblée publique de consultation sur le projet de règlement de lotissement 26-957-1 tenue le 3 août 2026 est déposé — citation exacte, objet explicite, étape de consultation constatée séparément de l'adoption.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Page 3, résolution 26.08.22.1 : « Que le conseil municipal adopte le Règlement 26-956-2 modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés tel que soumis » — adoption attestée, citation et page exactes.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Page 3, résolution 26.08.22.2 : « Que le conseil municipal adopte le Règlement 26-957-1 sur le lotissement en lien avec certains sites patrimoniaux tel que soumis » — adoption attestée, citation et page exactes.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Page 3, titre 26.08.22.3 « Adoption - Règlement parapluie 26-972 ... pour le réaménagement et la mise à niveau des locaux du 415, rue de la Cour », adopté à l'unanimité page 4 — objet réglementaire explicite avec étape d'adoption, ne relève pas des exclusions (nominations, comptes, services, loisirs, voirie).\"},{\"item\":\"i06\",\"choice\":\"absent\",\"reason\":\"La vente pour taxes vise des immeubles seulement énumérés dans une liste annexée non reproduite : aucun objet foncier explicite, et le recouvrement de taxes relève de l'exclusion « comptes »; l'étape « adoption » ne correspond pas à une résolution administrative.\"},{\"item\":\"i07\",\"choice\":\"absent\",\"reason\":\"L'entente de prêt temporaire à titre gratuit d'un espace de rangement à un organisme communautaire (page 8) est une entente d'utilisation de locaux, non un acte foncier ni un objet d'urbanisme; elle relève du soutien aux organismes exclu du rappel.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Page 9, résolution 26.08.25.3 adoptée : le conseil autorise la signature d'une servitude réelle et perpétuelle en faveur d'Hydro-Québec pour le prolongement du réseau sur la rue Nadeau — acte foncier explicite inclus par la règle « actes fonciers, même non résidentiels », citation exacte.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Page 9, résolution 26.08.25.5 : accord de principe à l'implantation d'une tour de télécommunications au fonds des lots 4 161 789 ou 6 098 789, conditionnel au processus d'information de Bell, avec modification réglementaire d'urbanisme annoncée — objet foncier explicite, étape inconnue justifiée.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Page 11, point 26.08.26.2 « Dérogation mineure, implantation latérale et arrière, 80, rue Yves-Malouin (CCU 2026-107) », dérogation accordée par le conseil — citation, objet, étape et page exacts.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"Page 11, titre 26.08.26.3 « Dérogation mineure, implantation latérale et arrière, 82, rue Yves-Malouin (CCU 2026-108) », accordée page 12 — citation du titre exacte en page 11, unité distincte du 80.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"Page 12, résolution 26.08.26.4 : « le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 153, rue du Manège, telle que demandée » avec condition de l'aval du service des incendies — citation et page exactes.\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"Page 13, résolution 26.08.26.5 : « le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 155, rue du Manège, telle que demandée » — citation et page exactes, unité distincte du 153.\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"Page 13, résolution 26.08.26.6 (CCU 2026-105) : « le conseil approuve l'ajout de lettrage en façade, tel que présenté, pour le 4906, rue Foster » — petit PIIA inclus par la règle, citation exacte.\"},{\"item\":\"i15\",\"choice\":\"v1\",\"reason\":\"Page 13, point 26.08.26.7 « PIIA - Rénovations extérieures, 5, rue Nord (CCU 2026-106) », projet approuvé tel que présenté — citation du titre, objet, étape piia et page exacts.\"},{\"item\":\"i16\",\"choice\":\"v1\",\"reason\":\"Page 14, résolution 26.08.26.8 : « le conseil municipal approuve la demande PIIA pour une construction neuve au 80-82, rue Yves-Malouin, tel que demandé » avec condition des plans d'aménagement — citation et page exactes.\"},{\"item\":\"i17\",\"choice\":\"v1\",\"reason\":\"Page 14, résolution 26.08.26.9 : « le conseil approuve le projet de construction résidentielle neuve au 153 et 155, rue du Manège, tel que présenté » — PIIA groupé sur deux adresses explicitement nommées, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "absent"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Page 2, point 26.08.21.2 : le certificat de résultat du processus d'approbation par les personnes habiles à voter relié au Règlement 26-956-2 est déposé (aucune signature reçue) — objet réglementaire explicite et étape constatée dans ce document, distincte de l'adoption."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Page 2, point 26.08.21.3 : le procès-verbal de l'assemblée publique de consultation sur le projet de règlement de lotissement 26-957-1 tenue le 3 août 2026 est déposé — citation exacte, objet explicite, étape de consultation constatée séparément de l'adoption."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Page 3, résolution 26.08.22.1 : « Que le conseil municipal adopte le Règlement 26-956-2 modifiant le règlement de zonage afin de modifier l'encadrement des projets intégrés tel que soumis » — adoption attestée, citation et page exactes."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Page 3, résolution 26.08.22.2 : « Que le conseil municipal adopte le Règlement 26-957-1 sur le lotissement en lien avec certains sites patrimoniaux tel que soumis » — adoption attestée, citation et page exactes."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Page 3, titre 26.08.22.3 « Adoption - Règlement parapluie 26-972 ... pour le réaménagement et la mise à niveau des locaux du 415, rue de la Cour », adopté à l'unanimité page 4 — objet réglementaire explicite avec étape d'adoption, ne relève pas des exclusions (nominations, comptes, services, loisirs, voirie)."
+  },
+  {
+   "item": "i06",
+   "choice": "absent",
+   "reason": "La vente pour taxes vise des immeubles seulement énumérés dans une liste annexée non reproduite : aucun objet foncier explicite, et le recouvrement de taxes relève de l'exclusion « comptes »; l'étape « adoption » ne correspond pas à une résolution administrative."
+  },
+  {
+   "item": "i07",
+   "choice": "absent",
+   "reason": "L'entente de prêt temporaire à titre gratuit d'un espace de rangement à un organisme communautaire (page 8) est une entente d'utilisation de locaux, non un acte foncier ni un objet d'urbanisme; elle relève du soutien aux organismes exclu du rappel."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Page 9, résolution 26.08.25.3 adoptée : le conseil autorise la signature d'une servitude réelle et perpétuelle en faveur d'Hydro-Québec pour le prolongement du réseau sur la rue Nadeau — acte foncier explicite inclus par la règle « actes fonciers, même non résidentiels », citation exacte."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Page 9, résolution 26.08.25.5 : accord de principe à l'implantation d'une tour de télécommunications au fonds des lots 4 161 789 ou 6 098 789, conditionnel au processus d'information de Bell, avec modification réglementaire d'urbanisme annoncée — objet foncier explicite, étape inconnue justifiée."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Page 11, point 26.08.26.2 « Dérogation mineure, implantation latérale et arrière, 80, rue Yves-Malouin (CCU 2026-107) », dérogation accordée par le conseil — citation, objet, étape et page exacts."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "Page 11, titre 26.08.26.3 « Dérogation mineure, implantation latérale et arrière, 82, rue Yves-Malouin (CCU 2026-108) », accordée page 12 — citation du titre exacte en page 11, unité distincte du 80."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "Page 12, résolution 26.08.26.4 : « le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 153, rue du Manège, telle que demandée » avec condition de l'aval du service des incendies — citation et page exactes."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "Page 13, résolution 26.08.26.5 : « le Conseil, sur recommandation du CCU approuve la dérogation mineure pour le 155, rue du Manège, telle que demandée » — citation et page exactes, unité distincte du 153."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "Page 13, résolution 26.08.26.6 (CCU 2026-105) : « le conseil approuve l'ajout de lettrage en façade, tel que présenté, pour le 4906, rue Foster » — petit PIIA inclus par la règle, citation exacte."
+  },
+  {
+   "item": "i15",
+   "choice": "v1",
+   "reason": "Page 13, point 26.08.26.7 « PIIA - Rénovations extérieures, 5, rue Nord (CCU 2026-106) », projet approuvé tel que présenté — citation du titre, objet, étape piia et page exacts."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "Page 14, résolution 26.08.26.8 : « le conseil municipal approuve la demande PIIA pour une construction neuve au 80-82, rue Yves-Malouin, tel que demandé » avec condition des plans d'aménagement — citation et page exactes."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "Page 14, résolution 26.08.26.9 : « le conseil approuve le projet de construction résidentielle neuve au 153 et 155, rue du Manège, tel que présenté » — PIIA groupé sur deux adresses explicitement nommées, citation et page exactes."
+  }
+ ]
+}

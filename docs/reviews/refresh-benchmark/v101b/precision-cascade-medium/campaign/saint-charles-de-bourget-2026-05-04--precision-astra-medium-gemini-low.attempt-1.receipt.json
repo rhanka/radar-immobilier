@@ -1,0 +1,35 @@
+{
+ "documentId": "saint-charles-de-bourget-2026-05-04",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "444f4b2ff2dda05da061e3277c898fe9d2cdec9d3467e7639910001df20a638c",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1788,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2080,
+   "outputTokens": 390,
+   "totalTokens": 2470
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1484
+  },
+  "inputSha256": "6466193b4648bfa62587854e5783da7e3053008d10cb95d3e0f221496a47889e"
+ },
+ "at": "2026-09-19T03:22:08.884Z"
+}

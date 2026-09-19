@@ -1,0 +1,75 @@
+{
+ "documentId": "lavenir-2026-05-04",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "d7354ffa0bf6896c5c0bb8a31d61f6c4a251ddc132c709cda391c4038340a4a8",
+ "inputSha256": "e1daed8f0162f24547ba2be90d7a112eccd6bc1ac9bfd3d692adc0118ad1a840",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "rc": 0,
+ "latencyMs": 19925,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "0710e30e-7a46-4cec-979d-8393848a1eab",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 1266,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 18139,
+   "webSearchRequests": 0,
+   "costUSD": 0.4261,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 1256,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 18139,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 1266,
+  "output_tokens_details": {
+   "thinking_tokens": 1256
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 18139,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 1266,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 18139,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 18139
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.4261,
+ "durationApiMs": 17891,
+ "stderrTail": "",
+ "at": "2026-09-18T17:42:24.113Z"
+}

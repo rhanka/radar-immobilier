@@ -1,0 +1,53 @@
+{
+ "documentId": "rosemere-2026-04-13",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "6bbeb215bfddb233381f5e7b8c9c44befae20c69c1d1080a965da0ab91962dd8",
+ "verificationSha256": "ca73889b24126533510d6c04a5ac3230bc5bf82673b483eda13eeee4124119a7",
+ "error": "CLAUDE_CLI_FAILED rc=1",
+ "receipt": {
+  "transport": "claude-cli",
+  "rc": 1,
+  "latencyMs": 1775,
+  "isError": true,
+  "numTurns": 1,
+  "sessionId": "779abf54-c13a-4751-ae6a-631dc5e73a80",
+  "modelUsage": {},
+  "usage": {
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "input_tokens": 0,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "output_tokens": 0,
+   "server_tool_use": {
+    "web_search_requests": 0,
+    "web_fetch_requests": 0
+   },
+   "service_tier": "standard",
+   "cache_creation": {
+    "ephemeral_1h_input_tokens": 0,
+    "ephemeral_5m_input_tokens": 0
+   },
+   "inference_geo": "",
+   "iterations": [],
+   "speed": "standard"
+  },
+  "totalCostUsd": 0,
+  "durationApiMs": 0,
+  "stderrTail": "",
+  "errorText": "You've hit your session limit · resets 6:40pm (America/Toronto)",
+  "apiErrorStatus": 429
+ },
+ "at": "2026-09-18T21:17:03.587Z"
+}

@@ -1,0 +1,38 @@
+{
+ "documentId": "sainte-croix-2026-05-05",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "99b86b2c262f1b2a6ed341d6b6085222101383467151687495d2b29b3300191c",
+ "verificationSha256": "69abcb3b20db74c97fece2cfe4610f31e5e3e0b22f55e76bb34f5781a8ac2400",
+ "inputSha256": "396c7c62209185caa51dee0211facdd03b4fe5d6a78b060695dd48d8b8448492",
+ "responseSha256": "ecf16c9eea53a8edf9f56ecf621db95a36ab92fc884b35898b1feb3779496ecb",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 11094,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 20837,
+  "outputTokens": 170,
+  "totalTokens": 24799,
+  "thoughtsTokenCount": 3792
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 10955,
+  "requestId": null
+ },
+ "at": "2026-09-18T22:48:21.002Z"
+}

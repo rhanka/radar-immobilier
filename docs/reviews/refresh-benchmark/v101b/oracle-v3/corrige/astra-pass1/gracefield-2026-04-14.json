@@ -1,0 +1,120 @@
+{
+ "documentId": "gracefield-2026-04-14",
+ "nextId": 4,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Signature autorisée de l’entente de prêt d’un local au 30, rue Principale",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "30, rue Principale",
+    "page": 14,
+    "citation": "Considérant la demande formulée pour le prêt de locaux situés à l’étage de la Clinique Santé, sise au 30, rue Principale, propriété de la Ville de Gracefield",
+    "anchor": "30, rue Principale",
+    "spanStart": 1332,
+    "spanEnd": 1489
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Signature autorisée de l’entente de prêt d’un local au 30, rue Principale",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "30, rue Principale",
+      "page": 14,
+      "citation": "Considérant la demande formulée pour le prêt de locaux situés à l’étage de la Clinique Santé, sise au 30, rue Principale, propriété de la Ville de Gracefield",
+      "anchor": "30, rue Principale",
+      "spanStart": 1332,
+      "spanEnd": 1489
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-062 accepte le prêt d’un local au Repère Familial et autorise la signature des documents, ce qui constitue une convention de prêt immobilier à classer au stade « inconnu »."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 263-2026 relatif à l’occupation et à l’entretien des bâtiments patrimoniaux",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "263-2026",
+    "page": 15,
+    "citation": "2026-04-063 Adoption du règlement numéro 263-2026 relatif à l’occupation et l’entretien des bâtiments patrimoniaux",
+    "anchor": "règlement numéro 263-2026",
+    "spanStart": 237,
+    "spanEnd": 351
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 263-2026 relatif à l’occupation et à l’entretien des bâtiments patrimoniaux",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "263-2026",
+      "page": 15,
+      "citation": "2026-04-063 Adoption du règlement numéro 263-2026 relatif à l’occupation et l’entretien des bâtiments patrimoniaux",
+      "anchor": "règlement numéro 263-2026",
+      "spanStart": 237,
+      "spanEnd": 351
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil adopte ce règlement d’urbanisme dans la présente séance ; l’avis de motion, le projet et la consultation antérieurs ne sont que des rappels historiques."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Appui à la demande d’aliénation à la CPTAQ — lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "5 410 305",
+    "page": 22,
+    "citation": "2026-04-064 Demande d’autorisation (aliénation temporaire) Commission de protection du territoire agricole du Québec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311",
+    "anchor": "Lots 5 410 305",
+    "spanStart": 996,
+    "spanEnd": 1164
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Appui à la demande d’aliénation à la CPTAQ — lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "5 410 305",
+      "page": 22,
+      "citation": "2026-04-064 Demande d’autorisation (aliénation temporaire) Commission de protection du territoire agricole du Québec – Lots 5 410 305, 5 412 018, 5 412 019 et 5 410 311",
+      "anchor": "Lots 5 410 305",
+      "spanStart": 996,
+      "spanEnd": 1164
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-04-064 appuie et recommande cette demande foncière unique portant sur plusieurs lots, sans constituer elle-même une autorisation d’aliénation de la CPTAQ."
+    }
+   ]
+  }
+ ]
+}

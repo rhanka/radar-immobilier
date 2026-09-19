@@ -1,0 +1,13 @@
+{
+ "id": "la-peche-2026-06-01",
+ "rc": 0,
+ "latencyMs": 246209,
+ "inputTokens": 2,
+ "outputTokens": 37181,
+ "cacheRead": 0,
+ "cacheCreate": 35365,
+ "costUsd": 1.309069,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 54061
+}

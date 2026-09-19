@@ -1,0 +1,233 @@
+{
+ "documentId": "sainte-angele-de-monnoir-2026-01-13",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "152253add0597c8018e89c1c34f82eb53701e17b818707bb1e7399da1b8b88fa",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-597-25"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 597-25 — Taxes et tarifs 2026",
+     "stage": "adoption",
+     "objet": "597-25",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "Sur proposition de M. Patrick Robert, appuyée par M. François\nCharbonneau, il est résolu d’adopter le Règlement numéro 597-25 pour fixer des"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-599-26"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 599-26 — Projet d’interdiction temporaire d’épandage",
+     "stage": "projet",
+     "objet": "599-26",
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Avis de motion et dépôt du projet de Règlement numéro 599-26 sont donnés\npar Mme Johanne Lacourse, conseillère au poste # 3,"
+      },
+      {
+       "page": 9,
+       "excerpt": "L’objet de ce règlement est d’interdire l’épandage de déjections animales, de\nboues ou de résidus provenant d’une fabrique de pâtes et papiers, les 22, 23 et 24\njuin 2026"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "piia-2025-85"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA 2025-85 — 152, rue Principale",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Pour ces motifs, il est proposé par M. François Charbonneau, appuyé par\nMme Marlene Dagenais et résolu que le conseil municipal accepte la demande de"
+      },
+      {
+       "page": 12,
+       "excerpt": "PIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation à\nla condition que toutes les autres dispositions du règlement d’urbanisme soient\nrespectées."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-382-07"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 382-07 sur les PIIA",
+     "stage": null,
+     "objet": "382-07",
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Considérant que le comité de consultation en urbanisme (CCU) ainsi que le\nconseil municipal ont étudié la demande en se référant à la grille d’analyse d’une"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-pga-eau"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Approbation du Plan de gestion des actifs municipaux en eau",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Que le conseil municipal approuve le document « Plan de gestion des actifs\nmunicipaux en eau » et autorise le dépôt des documents auprès du\nMinistère."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-budget-habitation"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Budget initial 2026 de l’Office d’habitation Haute-Yamaska-Rouville",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "Sur proposition de M. Patrick Robert, appuyée par Mme Johanne Lacourse,\nil est résolu d’approuver le budget initial 2026 de l’Office d’habitation de la HauteYamaska-Rouville"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement numéro 597-25 est expressément adopté par la résolution 26-01-006.\",\"excerpt\":\"il est résolu d’adopter le Règlement numéro 597-25 pour fixer des taxes et des tarifs pour l’exercice financier 2026\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et le dépôt du projet de règlement 599-26 sont formellement donnés lors de la séance.\",\"excerpt\":\"Avis de motion et dépôt du projet de Règlement numéro 599-26 sont donnés par Mme Johanne Lacourse, conseillère au poste # 3\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La demande de PIIA au 152, rue Principale est approuvée par la résolution 26-01-015.\",\"excerpt\":\"résolu que le conseil municipal accepte la demande de PIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 382-07 n'est cité qu'en référence historique et réglementaire pour analyser la demande, sans faire l'objet d'un acte de procédure dans ce document.\",\"excerpt\":\"qui reprend chacun des objectifs et critères du règlement 382-07 sur les PIIA et que ceux-ci sont respectés\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal approuve le Plan de gestion des actifs municipaux en eau par la résolution 26-01-013.\",\"excerpt\":\"Que le conseil municipal approuve le document « Plan de gestion des actifs municipaux en eau » et autorise le dépôt des documents auprès du Ministère.\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"L'approbation d'un budget financier d'un organisme relève des exclusions (gestion financière/administrative courante) et ne constitue pas un acte d'urbanisme ou foncier.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le règlement numéro 597-25 est expressément adopté par la résolution 26-01-006.",
+   "excerpt": "il est résolu d’adopter le Règlement numéro 597-25 pour fixer des taxes et des tarifs pour l’exercice financier 2026"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et le dépôt du projet de règlement 599-26 sont formellement donnés lors de la séance.",
+   "excerpt": "Avis de motion et dépôt du projet de Règlement numéro 599-26 sont donnés par Mme Johanne Lacourse, conseillère au poste # 3"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La demande de PIIA au 152, rue Principale est approuvée par la résolution 26-01-015.",
+   "excerpt": "résolu que le conseil municipal accepte la demande de PIIA pour le 152, rue Principale et autorise l’émission du certificat d’autorisation"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 382-07 n'est cité qu'en référence historique et réglementaire pour analyser la demande, sans faire l'objet d'un acte de procédure dans ce document.",
+   "excerpt": "qui reprend chacun des objectifs et critères du règlement 382-07 sur les PIIA et que ceux-ci sont respectés"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal approuve le Plan de gestion des actifs municipaux en eau par la résolution 26-01-013.",
+   "excerpt": "Que le conseil municipal approuve le document « Plan de gestion des actifs municipaux en eau » et autorise le dépôt des documents auprès du Ministère."
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "L'approbation d'un budget financier d'un organisme relève des exclusions (gestion financière/administrative courante) et ne constitue pas un acte d'urbanisme ou foncier.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A04",
+    "reason": "Le règlement 382-07 n'est cité qu'en référence historique et réglementaire pour analyser la demande, sans faire l'objet d'un acte de procédure dans ce document."
+   },
+   {
+    "act": "A06",
+    "reason": "L'approbation d'un budget financier d'un organisme relève des exclusions (gestion financière/administrative courante) et ne constitue pas un acte d'urbanisme ou foncier."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le règlement numéro 597-25 est expressément adopté par la résolution 26-01-006."
+   },
+   {
+    "act": "A02",
+    "reason": "L'avis de motion et le dépôt du projet de règlement 599-26 sont formellement donnés lors de la séance."
+   },
+   {
+    "act": "A03",
+    "reason": "La demande de PIIA au 152, rue Principale est approuvée par la résolution 26-01-015."
+   },
+   {
+    "act": "A05",
+    "reason": "Le conseil municipal approuve le Plan de gestion des actifs municipaux en eau par la résolution 26-01-013."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 1,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2894,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 9838,
+   "outputTokens": 460,
+   "totalTokens": 10298
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2734
+  },
+  "inputSha256": "6088d9a257b4ac7c54e73b497af9715257a9c97973c88729ea879e56d15b7b22"
+ }
+}

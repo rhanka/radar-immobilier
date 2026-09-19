@@ -1,0 +1,36 @@
+{
+ "documentId": "gracefield-2026-04-14",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "638f58c73d3253faa109d65d15cdb3049a3d7c044a5978af7e7b940173cebbd3",
+ "inputSha256": "0cc804487d8f2fdd758208f142b3e568b11140fe886e9519af17e4df41e21eb5",
+ "responseSha256": "03b78a382d61076b47705ad56fa2c3303153461309f01e3a7355f537c9287908",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 24911,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 17538,
+  "outputTokens": 700,
+  "totalTokens": 18238
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 24910,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:18:39.960Z"
+}

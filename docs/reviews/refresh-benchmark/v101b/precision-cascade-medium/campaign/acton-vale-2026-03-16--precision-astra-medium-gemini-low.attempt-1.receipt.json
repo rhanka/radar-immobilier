@@ -1,0 +1,35 @@
+{
+ "documentId": "acton-vale-2026-03-16",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "72b79b4f6b809d3fba15db4b5c6f2a2a063d2d0768f3092288b382c512385e34",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1585,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2347,
+   "outputTokens": 317,
+   "totalTokens": 2664
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1460
+  },
+  "inputSha256": "79c4f3f5eb926e6e7eeb8150c021c5f0968b41e12d1ac1a2a82a72150e2370de"
+ },
+ "at": "2026-09-19T03:22:22.949Z"
+}

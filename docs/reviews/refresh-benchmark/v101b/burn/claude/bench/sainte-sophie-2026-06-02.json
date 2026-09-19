@@ -1,0 +1,13 @@
+{
+ "id": "sainte-sophie-2026-06-02",
+ "rc": 0,
+ "latencyMs": 428084,
+ "inputTokens": 2,
+ "outputTokens": 63842,
+ "cacheRead": 0,
+ "cacheCreate": 30673,
+ "costUsd": 1.926026,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 78794
+}

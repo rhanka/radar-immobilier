@@ -1,0 +1,489 @@
+{
+ "documentId": "lac-brome-2026-04-07",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "04bdcbaf64f5fde2029884067fe07fcd8dafdcc08277a9917e76e14cb770091d",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-596"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement de zonage 596",
+     "stage": null,
+     "objet": "596",
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "le Conseil adopte le règlement résiduel Règlement 596-20\nmodifiant le règlement de zonage 596."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-596-20"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement résiduel 596-20",
+     "stage": "adoption",
+     "objet": "596-20",
+     "citations": [
+      {
+       "page": 20,
+       "excerpt": "le Conseil adopte le règlement résiduel Règlement 596-20\nmodifiant le règlement de zonage 596."
+      },
+      {
+       "page": 20,
+       "excerpt": "le Conseil adopte le règlement résiduel Règlement 596-20\nmodifiant le règlement de zonage 596."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-596-21"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement distinct 596-21",
+     "stage": "adoption",
+     "objet": "596-21",
+     "citations": [
+      {
+       "page": 21,
+       "excerpt": "le Conseil adopte le règlement distinct Règlement 596-21\n(concernant les définitions de «Hauteur d'un bâtiment (en\nmètre)» et de «Pourcentage d'occupation du terrain»)"
+      },
+      {
+       "page": 21,
+       "excerpt": "le Conseil adopte le règlement distinct Règlement 596-21\n(concernant les définitions de «Hauteur d'un bâtiment (en\nmètre)» et de «Pourcentage d'occupation du terrain»)\nmodifiant le règlement de zonage 596;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-596-22"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement distinct 596-22 — UV-4-I12",
+     "stage": "adoption",
+     "objet": "596-22",
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "le Conseil adopte le règlement distinct Règlement 596-22\n(concernant la marge latérale minimale et le pourcentage\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12)"
+      },
+      {
+       "page": 23,
+       "excerpt": "le Conseil adopte le règlement distinct Règlement 596-22\n(concernant la marge latérale minimale et le pourcentage\nmaximal d'occupation du bâtiment principal dans la Zone UV4-I12) modifiant le règlement de zonage 596;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-596-23"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Adoption du règlement distinct 596-23 — UV-14-J13",
+     "stage": "adoption",
+     "objet": "596-23",
+     "citations": [
+      {
+       "page": 24,
+       "excerpt": "le Conseil adopte le règlement distinct Règlement 596-23\n(concernant le pourcentage maximal d'occupation du\nbâtiment principal dans la Zone UV-14-J13) modifiant le\nrèglement de zonage 596;"
+      },
+      {
+       "page": 24,
+       "excerpt": "le Conseil adopte le règlement distinct Règlement 596-23\n(concernant le pourcentage maximal d'occupation du\nbâtiment principal dans la Zone UV-14-J13) modifiant le\nrèglement de zonage 596;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-registre-596-21"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Procédure d'enregistrement ordonnée — 596-21",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 21,
+       "excerpt": "le Conseil ordonne au greffier de tenir une procédure\nd'enregistrement des personnes habiles à voter afin de\ndéterminer si un scrutin référendaire doit être tenu pour le\nrèglement 596-21."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-registre-596-22"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Procédure d'enregistrement ordonnée — 596-22",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 23,
+       "excerpt": "le Conseil ordonne au greffier de tenir une procédure\nd'enregistrement des personnes habiles à voter afin de\ndéterminer si un scrutin référendaire doit être tenu pour le\nrèglement 596-22."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-registre-596-23"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Procédure d'enregistrement ordonnée — 596-23",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 24,
+       "excerpt": "le Conseil ordonne au greffier de tenir une procédure\nd'enregistrement des personnes habiles à voter afin de\ndéterminer si un scrutin référendaire doit être tenu pour le\nrèglement 596-23."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "piia-102"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA-2 approuvé — 9, chemin Frank-Santerre",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 25,
+       "excerpt": "le Conseil accorde le PIIA-2 concernant la demande de\nconstruction d’un bâtiment accessoire de type abri d'auto\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\nUC-2-N3."
+      },
+      {
+       "page": 25,
+       "excerpt": "le Conseil accorde le PIIA-2 concernant la demande de\nconstruction d’un bâtiment accessoire de type abri d'auto\nrésidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone\nUC-2-N3."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "piia-103"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA-3 révisé approuvé — 753, chemin Lakeside",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 26,
+       "excerpt": "le Conseil accorde le PIIA-3 concernant la demande révisée\nde construction d’un bâtiment principal commercial au 753,\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15."
+      },
+      {
+       "page": 26,
+       "excerpt": "le Conseil accorde le PIIA-3 concernant la demande révisée\nde construction d’un bâtiment principal commercial au 753,\nchemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4D15."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "bylaw-2026-09"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-09 — Sentiers",
+     "stage": "projet",
+     "objet": "2026-09",
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "Le projet de ce règlement est dûment présenté et déposé par M. Patterson, qui\nen mentionne son objet et sa portée."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "signal-bondville"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Affaissement d'égout et réparation permanente à l'étude — Bondville",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "La Ville examine actuellement différentes options en vue d’une réparation\npermanente de la section de route touchée."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "signal-fulford"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Contrat de réfection du chemin Fulford et ajout de voies cyclables",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "le Conseil accorde à Eurovia Québec Construction inc. le\ncontrat pour les travaux de voirie - Réfection du chemin\nFulford et ajout de voies cyclables, au montant de 6 551\n019,43$, taxes incluses;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "signal-pointe-fisher"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Étude avant-projet — Chaussée et ruissellement à Pointe-Fisher",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "le Conseil accorde à Tetra Tech le contrat de Services\nprofessionnels en ingénierie - Réalisation d’une étude avantprojet - Réfection de chaussée et gestion des eaux de"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 596 est simplement le règlement de base modifié par le 596-20 ; il n'y a aucun acte d'urbanisme autonome sans étape sur le règlement 596.\",\"excerpt\":\"\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le Conseil adopte formellement le règlement résiduel 596-20 à la résolution 2026-04-098.\",\"excerpt\":\"le Conseil adopte le règlement résiduel Règlement 596-20 modifiant le règlement de zonage 596.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le Conseil adopte le règlement distinct 596-21 à la résolution 2026-04-099.\",\"excerpt\":\"le Conseil adopte le règlement distinct Règlement 596-21 (concernant les définitions de «Hauteur d'un bâtiment (en mètre)» et de «Pourcentage d'occupation du terrain») modifiant le règlement de zonage 596;\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le Conseil adopte le règlement distinct 596-22 à la résolution 2026-04-100.\",\"excerpt\":\"le Conseil adopte le règlement distinct Règlement 596-22 (concernant la marge latérale minimale et le pourcentage maximal d'occupation du bâtiment principal dans la Zone UV-4-I12) modifiant le règlement de zonage 596;\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le Conseil adopte le règlement distinct 596-23 à la résolution 2026-04-101.\",\"excerpt\":\"le Conseil adopte le règlement distinct Règlement 596-23 (concernant le pourcentage maximal d'occupation du bâtiment principal dans la Zone UV-14-J13) modifiant le règlement de zonage 596;\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le Conseil ordonne la tenue d'une procédure d'enregistrement pour le règlement 596-21.\",\"excerpt\":\"le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-21.\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le Conseil ordonne la tenue d'une procédure d'enregistrement pour le règlement 596-22.\",\"excerpt\":\"le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-22.\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le Conseil ordonne la tenue d'une procédure d'enregistrement pour le règlement 596-23.\",\"excerpt\":\"le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-23.\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le Conseil accorde l'approbation PIIA-2 pour le bâtiment accessoire au 9, chemin Frank-Santerre.\",\"excerpt\":\"le Conseil accorde le PIIA-2 concernant la demande de construction d’un bâtiment accessoire de type abri d'auto résidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone UC-2-N3.\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Le Conseil accorde l'approbation PIIA-3 révisé au 753, chemin Lakeside.\",\"excerpt\":\"le Conseil accorde le PIIA-3 concernant la demande révisée de construction d’un bâtiment principal commercial au 753, chemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4-D15.\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement 2026-09 concernant les sentiers est présenté et déposé lors de la séance.\",\"excerpt\":\"Le projet de ce règlement est dûment présenté et déposé par M. Patterson, qui en mentionne son objet et sa portée.\"},{\"act\":\"A12\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un simple commentaire d'ouverture du maire concernant un incident technique sur le réseau d'égout, ne constituant pas un acte d'urbanisme ou de planification du territoire.\",\"excerpt\":\"\"},{\"act\":\"A13\",\"verdict\":\"non_soutenu\",\"reason\":\"L'octroi d'un contrat de travaux de voirie et de réfection constitue un contrat de services/travaux exclu du champ de l'urbanisme et de l'aménagement réglementaire.\",\"excerpt\":\"\"},{\"act\":\"A14\",\"verdict\":\"non_soutenu\",\"reason\":\"L'octroi d'un contrat de services professionnels d'ingénierie pour une étude d'avant-projet de voirie/drainage relève des contrats de services techniques et non des actes d'urbanisme.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 596 est simplement le règlement de base modifié par le 596-20 ; il n'y a aucun acte d'urbanisme autonome sans étape sur le règlement 596.",
+   "excerpt": ""
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le Conseil adopte formellement le règlement résiduel 596-20 à la résolution 2026-04-098.",
+   "excerpt": "le Conseil adopte le règlement résiduel Règlement 596-20 modifiant le règlement de zonage 596."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le Conseil adopte le règlement distinct 596-21 à la résolution 2026-04-099.",
+   "excerpt": "le Conseil adopte le règlement distinct Règlement 596-21 (concernant les définitions de «Hauteur d'un bâtiment (en mètre)» et de «Pourcentage d'occupation du terrain») modifiant le règlement de zonage 596;"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le Conseil adopte le règlement distinct 596-22 à la résolution 2026-04-100.",
+   "excerpt": "le Conseil adopte le règlement distinct Règlement 596-22 (concernant la marge latérale minimale et le pourcentage maximal d'occupation du bâtiment principal dans la Zone UV-4-I12) modifiant le règlement de zonage 596;"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le Conseil adopte le règlement distinct 596-23 à la résolution 2026-04-101.",
+   "excerpt": "le Conseil adopte le règlement distinct Règlement 596-23 (concernant le pourcentage maximal d'occupation du bâtiment principal dans la Zone UV-14-J13) modifiant le règlement de zonage 596;"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le Conseil ordonne la tenue d'une procédure d'enregistrement pour le règlement 596-21.",
+   "excerpt": "le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-21."
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le Conseil ordonne la tenue d'une procédure d'enregistrement pour le règlement 596-22.",
+   "excerpt": "le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-22."
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le Conseil ordonne la tenue d'une procédure d'enregistrement pour le règlement 596-23.",
+   "excerpt": "le Conseil ordonne au greffier de tenir une procédure d'enregistrement des personnes habiles à voter afin de déterminer si un scrutin référendaire doit être tenu pour le règlement 596-23."
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le Conseil accorde l'approbation PIIA-2 pour le bâtiment accessoire au 9, chemin Frank-Santerre.",
+   "excerpt": "le Conseil accorde le PIIA-2 concernant la demande de construction d’un bâtiment accessoire de type abri d'auto résidentiel au 9, chemin Frank-Santerre, lot #6 129 412, zone UC-2-N3."
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Le Conseil accorde l'approbation PIIA-3 révisé au 753, chemin Lakeside.",
+   "excerpt": "le Conseil accorde le PIIA-3 concernant la demande révisée de construction d’un bâtiment principal commercial au 753, chemin Lakeside, lot #6 643 103, zones UC-3-C15 & AFB-4-D15."
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement 2026-09 concernant les sentiers est présenté et déposé lors de la séance.",
+   "excerpt": "Le projet de ce règlement est dûment présenté et déposé par M. Patterson, qui en mentionne son objet et sa portée."
+  },
+  {
+   "act": "A12",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un simple commentaire d'ouverture du maire concernant un incident technique sur le réseau d'égout, ne constituant pas un acte d'urbanisme ou de planification du territoire.",
+   "excerpt": ""
+  },
+  {
+   "act": "A13",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de travaux de voirie et de réfection constitue un contrat de services/travaux exclu du champ de l'urbanisme et de l'aménagement réglementaire.",
+   "excerpt": ""
+  },
+  {
+   "act": "A14",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de services professionnels d'ingénierie pour une étude d'avant-projet de voirie/drainage relève des contrats de services techniques et non des actes d'urbanisme.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 14,
+  "removed": [
+   {
+    "act": "A01",
+    "reason": "Le règlement 596 est simplement le règlement de base modifié par le 596-20 ; il n'y a aucun acte d'urbanisme autonome sans étape sur le règlement 596."
+   },
+   {
+    "act": "A12",
+    "reason": "Il s'agit d'un simple commentaire d'ouverture du maire concernant un incident technique sur le réseau d'égout, ne constituant pas un acte d'urbanisme ou de planification du territoire."
+   },
+   {
+    "act": "A13",
+    "reason": "L'octroi d'un contrat de travaux de voirie et de réfection constitue un contrat de services/travaux exclu du champ de l'urbanisme et de l'aménagement réglementaire."
+   },
+   {
+    "act": "A14",
+    "reason": "L'octroi d'un contrat de services professionnels d'ingénierie pour une étude d'avant-projet de voirie/drainage relève des contrats de services techniques et non des actes d'urbanisme."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A02",
+    "reason": "Le Conseil adopte formellement le règlement résiduel 596-20 à la résolution 2026-04-098."
+   },
+   {
+    "act": "A03",
+    "reason": "Le Conseil adopte le règlement distinct 596-21 à la résolution 2026-04-099."
+   },
+   {
+    "act": "A04",
+    "reason": "Le Conseil adopte le règlement distinct 596-22 à la résolution 2026-04-100."
+   },
+   {
+    "act": "A05",
+    "reason": "Le Conseil adopte le règlement distinct 596-23 à la résolution 2026-04-101."
+   },
+   {
+    "act": "A06",
+    "reason": "Le Conseil ordonne la tenue d'une procédure d'enregistrement pour le règlement 596-21."
+   },
+   {
+    "act": "A07",
+    "reason": "Le Conseil ordonne la tenue d'une procédure d'enregistrement pour le règlement 596-22."
+   },
+   {
+    "act": "A08",
+    "reason": "Le Conseil ordonne la tenue d'une procédure d'enregistrement pour le règlement 596-23."
+   },
+   {
+    "act": "A09",
+    "reason": "Le Conseil accorde l'approbation PIIA-2 pour le bâtiment accessoire au 9, chemin Frank-Santerre."
+   },
+   {
+    "act": "A10",
+    "reason": "Le Conseil accorde l'approbation PIIA-3 révisé au 753, chemin Lakeside."
+   },
+   {
+    "act": "A11",
+    "reason": "Le projet de règlement 2026-09 concernant les sentiers est présenté et déposé lors de la séance."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4509,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 20418,
+   "outputTokens": 1163,
+   "totalTokens": 21581
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 4365
+  },
+  "inputSha256": "6dcdf02afebe5c7cc4e9d054e19d4e6e5c7c544e2159660cbe93138bbb114312"
+ }
+}

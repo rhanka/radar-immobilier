@@ -1,0 +1,416 @@
+{
+ "documentId": "brossard-2026-04-28",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "a81fdeb604c94ce4472934afc5ebc4fc204c65f631965870ae6a787177a4eaf3",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-096"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogations mineures approuvées — 5641, rue Aline",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue\nAline, lot projeté 6 720 588, ayant pour effet de permettre :"
+      },
+      {
+       "page": 2,
+       "excerpt": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue\nAline, lot projeté 6 720 588, ayant pour effet de permettre :"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-362"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "REG-362 — Règlement de zonage",
+     "stage": null,
+     "objet": "REG-362",
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Une largeur de lot de 10,74 mètres, alors que la grille des usages et normes de la\nzone Ha-219 du règlement de zonage REG-362 prescrit une largeur de lot minimale\nde 12 mètres;"
+      },
+      {
+       "page": 2,
+       "excerpt": "Une largeur de lot de 10,74 mètres, alors que la grille des usages et normes de la\nzone Ha-219 du règlement de zonage REG-362 prescrit une largeur de lot minimale\nde 12 mètres;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-097"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Approbation des recommandations PIIA du CCU du 11 mars 2026",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D’entériner les recommandations du comité consultatif d’urbanisme émanant du procèsverbal de la réunion tenue le 11 mars 2026,"
+      },
+      {
+       "page": 3,
+       "excerpt": "D’entériner les recommandations du comité consultatif d’urbanisme émanant du procèsverbal de la réunion tenue le 11 mars 2026, en ce qui concerne les plans d’implantation et\nd’intégration architecturale précisés ci-dessous, selon les recommandations et conditions\nconsignées audit procès-verbal."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-434-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "REG-434-01 — Commerces de prêts sur gages et articles d'occasion",
+     "stage": "projet",
+     "objet": "REG-434-01",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "La conseillère Sophie Allard dépose le projet de règlement REG-434-01."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-512"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "REG-512 — Code d’éthique et de déontologie",
+     "stage": "adoption",
+     "objet": "REG-512",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’adopter le règlement REG-512 modifiant le règlement relatif au Code d’éthique et de\ndéontologie des élues et élus de la Ville de Brossard, tel que soumis."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "bylaw-516"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "REG-516 — Emprunt de 6 500 000 $ pour planage et pavage",
+     "stage": "adoption",
+     "objet": "REG-516",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D’adopter le règlement REG-516 décrétant des dépenses en immobilisations et un emprunt\nde 6 500 000 $ pour la réalisation de travaux de planage et de pavage, tel que soumis."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-101",
+    "signal-housing"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PPCMOI-2026-001 — 3605-3665, rue de Châteauneuf",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif\naux projets particuliers de construction, de modification ou d'occupation d'un immeuble (REG367),"
+      },
+      {
+       "page": 7,
+       "excerpt": "et de l'obtention du permis de construction dans les 24 mois suivant l’adoption de la présente\nrésolution, à défaut de quoi celle-ci deviendra nulle et sans effet."
+      },
+      {
+       "page": 6,
+       "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif\naux projets particuliers de construction, de modification ou d'occupation d'un immeuble (REG367), pour l'immeuble situé aux 3605-3665, rue de Châteauneuf, lot 6 052 495, à certaines\nconditions et visant à :"
+      }
+     ]
+    },
+    {
+     "type": "Signal",
+     "label": "20 logements supplémentaires autorisés — Châteauneuf",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif"
+      },
+      {
+       "page": 6,
+       "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif\naux projets particuliers de construction, de modification ou d'occupation d'un immeuble (REG367), pour l'immeuble situé aux 3605-3665, rue de Châteauneuf, lot 6 052 495, à certaines\nconditions et visant à :"
+      },
+      {
+       "page": 6,
+       "excerpt": "permettre un maximum de 210 logements dans l’ensemble de la zone Hc-316;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-pandora"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Pandora Matte Self-Storage — Entente de travaux municipaux",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "D'autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l'entente relative\naux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "signal-plana"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Plan A — Accord de développement du site chemin des Prairies",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies à\nintervenir entre la Ville de Brossard et le promoteur immobilier, société 9520-8732 Québec\ninc.,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "signal-plana-eau"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Plan A — Démarches environnementales pour prolongements des réseaux",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "D’autoriser le directeur de la Direction des affaires stratégiques et développement, ou toute\npersonne qu’il désigne, à présenter, pour et au nom de la Ville de Brossard, une demande"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "signal-taxes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente pour non-paiement de taxes — Modification de la date de l'ordonnance",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 15,
+       "excerpt": "De modifier la date du 17 mars 2026 ordonnant à la greffière ou son représentant de procéder\nà la vente aux enchères des immeubles pour défaut de paiement de taxes le jeudi"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil a résolu d'approuver la demande de dérogations mineures pour l'immeuble situé au 5641, rue Aline.\",\"excerpt\":\"D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue\\nAline, lot projeté 6 720 588, ayant pour effet de permettre :\"},{\"act\":\"A02\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement de zonage REG-362 n'est que mentionné comme norme de référence dans la dérogation mineure, il ne fait l'objet d'aucun acte ou étape réglementaire dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte la résolution d'entériner les recommandations du CCU relatives aux plans d'implantation et d'intégration architecturale de la réunion du 11 mars 2026.\",\"excerpt\":\"D’entériner les recommandations du comité consultatif d’urbanisme émanant du procèsverbal de la réunion tenue le 11 mars 2026, en ce qui concerne les plans d’implantation et\\nd’intégration architecturale\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement REG-434-01 a été déposé et l'avis de motion a été donné par la conseillère Sophie Allard.\",\"excerpt\":\"La conseillère Sophie Allard dépose le projet de règlement REG-434-01.\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement REG-512 porte sur le Code d'éthique et de déontologie des élues et élus, ce qui constitue une exclusion car il ne s'agit pas d'un acte d'urbanisme ou foncier.\",\"excerpt\":\"D’adopter le règlement REG-512 modifiant le règlement relatif au Code d’éthique et de\\ndéontologie des élues et élus de la Ville de Brossard, tel que soumis.\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"L'adoption du règlement d'emprunt REG-516 porte sur des travaux de planage et de pavage (simple entretien de voirie sans développement explicite), relevant des exclusions.\",\"excerpt\":\"D’adopter le règlement REG-516 décrétant des dépenses en immobilisations et un emprunt\\nde 6 500 000 $ pour la réalisation de travaux de planage et de pavage, tel que soumis.\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil a formellement adopté la résolution PPCMOI-2026-001 visant notamment à autoriser un maximum de 210 logements dans la zone Hc-316.\",\"excerpt\":\"D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif\\naux projets particuliers de construction, de modification ou d'occupation d'un immeuble (REG367)\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la signature d'une entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage.\",\"excerpt\":\"D'autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l'entente relative\\naux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage\"},{\"act\":\"A09\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil approuve l'Accord de développement du projet Plan A - Site chemin des Prairies avec le promoteur immobilier.\",\"excerpt\":\"D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies à\\nintervenir entre la Ville de Brossard et le promoteur immobilier, société 9520-8732 Québec\\ninc.\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise le dépôt de démarches d'autorisation ministérielle et déclaration de conformité pour le prolongement de réseaux liés au projet de développement Plan A.\",\"excerpt\":\"D’autoriser le directeur de la Direction des affaires stratégiques et développement, ou toute\\npersonne qu’il désigne, à présenter, pour et au nom de la Ville de Brossard, une demande\"},{\"act\":\"A11\",\"verdict\":\"non_soutenu\",\"reason\":\"La vente pour non-paiement de taxes est une matière fiscale/comptable exclue du domaine de l'urbanisme et de l'aménagement foncier.\",\"excerpt\":\"De modifier la date du 17 mars 2026 ordonnant à la greffière ou son représentant de procéder\\nà la vente aux enchères des immeubles pour défaut de paiement de taxes\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil a résolu d'approuver la demande de dérogations mineures pour l'immeuble situé au 5641, rue Aline.",
+   "excerpt": "D'approuver la demande de dérogations mineures à l'égard de l'immeuble situé au 5641, rue\nAline, lot projeté 6 720 588, ayant pour effet de permettre :"
+  },
+  {
+   "act": "A02",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement de zonage REG-362 n'est que mentionné comme norme de référence dans la dérogation mineure, il ne fait l'objet d'aucun acte ou étape réglementaire dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte la résolution d'entériner les recommandations du CCU relatives aux plans d'implantation et d'intégration architecturale de la réunion du 11 mars 2026.",
+   "excerpt": "D’entériner les recommandations du comité consultatif d’urbanisme émanant du procèsverbal de la réunion tenue le 11 mars 2026, en ce qui concerne les plans d’implantation et\nd’intégration architecturale"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement REG-434-01 a été déposé et l'avis de motion a été donné par la conseillère Sophie Allard.",
+   "excerpt": "La conseillère Sophie Allard dépose le projet de règlement REG-434-01."
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement REG-512 porte sur le Code d'éthique et de déontologie des élues et élus, ce qui constitue une exclusion car il ne s'agit pas d'un acte d'urbanisme ou foncier.",
+   "excerpt": "D’adopter le règlement REG-512 modifiant le règlement relatif au Code d’éthique et de\ndéontologie des élues et élus de la Ville de Brossard, tel que soumis."
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "L'adoption du règlement d'emprunt REG-516 porte sur des travaux de planage et de pavage (simple entretien de voirie sans développement explicite), relevant des exclusions.",
+   "excerpt": "D’adopter le règlement REG-516 décrétant des dépenses en immobilisations et un emprunt\nde 6 500 000 $ pour la réalisation de travaux de planage et de pavage, tel que soumis."
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le conseil a formellement adopté la résolution PPCMOI-2026-001 visant notamment à autoriser un maximum de 210 logements dans la zone Hc-316.",
+   "excerpt": "D’adopter sans modification la résolution PPCMOI-2026-001 en vertu du Règlement relatif\naux projets particuliers de construction, de modification ou d'occupation d'un immeuble (REG367)"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la signature d'une entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage.",
+   "excerpt": "D'autoriser la mairesse et la greffière à signer, pour et au nom de la Ville, l'entente relative\naux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage"
+  },
+  {
+   "act": "A09",
+   "verdict": "soutenu",
+   "reason": "Le conseil approuve l'Accord de développement du projet Plan A - Site chemin des Prairies avec le promoteur immobilier.",
+   "excerpt": "D'approuver l'Accord de développement du projet Plan A - Site chemin des Prairies à\nintervenir entre la Ville de Brossard et le promoteur immobilier, société 9520-8732 Québec\ninc."
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise le dépôt de démarches d'autorisation ministérielle et déclaration de conformité pour le prolongement de réseaux liés au projet de développement Plan A.",
+   "excerpt": "D’autoriser le directeur de la Direction des affaires stratégiques et développement, ou toute\npersonne qu’il désigne, à présenter, pour et au nom de la Ville de Brossard, une demande"
+  },
+  {
+   "act": "A11",
+   "verdict": "non_soutenu",
+   "reason": "La vente pour non-paiement de taxes est une matière fiscale/comptable exclue du domaine de l'urbanisme et de l'aménagement foncier.",
+   "excerpt": "De modifier la date du 17 mars 2026 ordonnant à la greffière ou son représentant de procéder\nà la vente aux enchères des immeubles pour défaut de paiement de taxes"
+  }
+ ],
+ "filter": {
+  "acts": 11,
+  "removed": [
+   {
+    "act": "A02",
+    "reason": "Le règlement de zonage REG-362 n'est que mentionné comme norme de référence dans la dérogation mineure, il ne fait l'objet d'aucun acte ou étape réglementaire dans cette séance."
+   },
+   {
+    "act": "A05",
+    "reason": "Le règlement REG-512 porte sur le Code d'éthique et de déontologie des élues et élus, ce qui constitue une exclusion car il ne s'agit pas d'un acte d'urbanisme ou foncier."
+   },
+   {
+    "act": "A06",
+    "reason": "L'adoption du règlement d'emprunt REG-516 porte sur des travaux de planage et de pavage (simple entretien de voirie sans développement explicite), relevant des exclusions."
+   },
+   {
+    "act": "A11",
+    "reason": "La vente pour non-paiement de taxes est une matière fiscale/comptable exclue du domaine de l'urbanisme et de l'aménagement foncier."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil a résolu d'approuver la demande de dérogations mineures pour l'immeuble situé au 5641, rue Aline."
+   },
+   {
+    "act": "A03",
+    "reason": "Le conseil adopte la résolution d'entériner les recommandations du CCU relatives aux plans d'implantation et d'intégration architecturale de la réunion du 11 mars 2026."
+   },
+   {
+    "act": "A04",
+    "reason": "Le projet de règlement REG-434-01 a été déposé et l'avis de motion a été donné par la conseillère Sophie Allard."
+   },
+   {
+    "act": "A07",
+    "reason": "Le conseil a formellement adopté la résolution PPCMOI-2026-001 visant notamment à autoriser un maximum de 210 logements dans la zone Hc-316."
+   },
+   {
+    "act": "A08",
+    "reason": "Le conseil autorise la signature d'une entente relative aux travaux municipaux dans le cadre du projet Pandora Matte Self-Storage."
+   },
+   {
+    "act": "A09",
+    "reason": "Le conseil approuve l'Accord de développement du projet Plan A - Site chemin des Prairies avec le promoteur immobilier."
+   },
+   {
+    "act": "A10",
+    "reason": "Le conseil autorise le dépôt de démarches d'autorisation ministérielle et déclaration de conformité pour le prolongement de réseaux liés au projet de développement Plan A."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 3869,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 21423,
+   "outputTokens": 1046,
+   "totalTokens": 22469
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3423
+  },
+  "inputSha256": "7819b99739084fd62d5164ca34dfdc7a0e894a476c1de6ad63d42d4df79c5ab6"
+ }
+}

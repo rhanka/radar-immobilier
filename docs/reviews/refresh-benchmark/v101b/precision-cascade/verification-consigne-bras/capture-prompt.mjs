@@ -1,0 +1,27 @@
+import { createHash } from "node:crypto";
+import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+const sha256 = (v) => createHash("sha256").update(v).digest("hex");
+const repositoryRoot = "<racine du worktree t1>";
+const t1Root = "<racine T1 gelée, module refresh-profile sha 65e06be3…>";
+const manifest = JSON.parse(await readFile(resolve(repositoryRoot, "docs/reviews/refresh-benchmark/v101b/manifest.json"), "utf8"));
+const id = process.argv[2] ?? "saint-polycarpe-2026-01-19";
+const document = manifest.documents.find((d) => d.id === id);
+const expected = manifest.promptFreeze.documents.find((d) => d.id === id);
+const { extractRefreshProfile, loadRefreshProfileContext } = await import(pathToFileURL(resolve(t1Root, "api/src/services/graph/refresh-profile.ts")));
+const { materializeRefreshCorpus } = await import(pathToFileURL(resolve(t1Root, "api/src/services/graph/refresh-corpus.ts")));
+const context = loadRefreshProfileContext({ root: t1Root, profilePath: resolve(t1Root, "radar/ontology/ontology-profile.yaml"), unregisteredOnly: true });
+const sourceRunRoot = resolve(repositoryRoot, manifest.corpus.sourceRunRelativePath);
+const pdfPath = resolve(sourceRunRoot, "workers", document.city, "corpus", `${document.sha256}.pdf`);
+const [pdf, parsedText] = await Promise.all([readFile(pdfPath), readFile(resolve(repositoryRoot, document.runtimeTextRelativePath), "utf8")]);
+const manifestKey = "refresh-benchmark-input.tsv";
+const tsv = `source_id\tcity_slug\tsha\trepresentation_key\tsidecar_key\n${document.sourceId}\t${document.city}\t${document.sha256}\t${document.originalKey}\t${document.originalKey}.meta.json\n`;
+const reader = { async get(key) { if (key === manifestKey) return Buffer.from(tsv); if (key === document.originalKey) return pdf;
+  if (key === `${document.originalKey}.meta.json`) return readFile(`${pdfPath}.meta.json`); throw new Error(`unexpected key ${key}`); } };
+const corpus = await materializeRefreshCorpus({ citySlug: document.city, manifestKey, reader, extractPdf: async () => parsedText });
+let captured = null;
+const textClient = { mode: "benchmark", provider: "none", model: "none", async generateJson(input) { captured = input; throw new Error("CAPTURED_NO_CALL"); } };
+try { await extractRefreshProfile(corpus.chunks, { textClient, context, maxOutputTokens: 32768, outputDir: await mkdtemp("/tmp/capture-") }); } catch (e) { if (!captured) throw e; }
+console.log(JSON.stringify({ promptSha: sha256(captured.prompt) === expected.promptSha256, schemaSha: sha256(captured.schema) === expected.schemaSha256, bytes: captured.prompt.length }));
+await writeFile(process.argv[3], `Schema: ${captured.schema}\n\n${captured.prompt}`);

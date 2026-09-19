@@ -1,0 +1,13 @@
+{
+ "id": "saint-henri-2026-03-02",
+ "rc": 0,
+ "latencyMs": 88676,
+ "inputTokens": 2,
+ "outputTokens": 9357,
+ "cacheRead": 0,
+ "cacheCreate": 3344,
+ "costUsd": 0.269168,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 17552
+}

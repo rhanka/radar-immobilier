@@ -1,0 +1,37 @@
+{
+ "documentId": "lac-saint-paul-2026-05-11",
+ "step": "gemini-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass1",
+ "inputStateSha256": "4e917415d909058ad97ab774aa08d6740bf8fb8e55944bce93e601dfcdf353d0",
+ "rawText": "{\"operations\":[\n {\"op\":\"remove\",\"id\":\"u01\",\"reason\":\"La location temporaire d’un garage pour l’entreposage d’un camion de déneigement relève de l’entretien de voirie sans développement explicite et ne constitue pas un acte foncier admissible (vente, acquisition, cession, échange, servitude, lotissement).\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u01",
+   "reason": "La location temporaire d’un garage pour l’entreposage d’un camion de déneigement relève de l’entretien de voirie sans développement explicite et ne constitue pas un acte foncier admissible (vente, acquisition, cession, échange, servitude, lotissement)."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u01"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 2
+}

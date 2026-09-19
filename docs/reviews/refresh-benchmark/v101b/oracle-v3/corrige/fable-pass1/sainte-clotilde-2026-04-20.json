@@ -1,0 +1,386 @@
+{
+ "documentId": "sainte-clotilde-2026-04-20",
+ "nextId": 11,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Acquisition du lot 6 592 592 pour le stationnement et l’espace vert du futur CPE",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 592 592",
+    "page": 4,
+    "citation": "QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B. Clermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec",
+    "anchor": "lots 6 592 592",
+    "spanStart": 955,
+    "spanEnd": 1114
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acquisition du lot 6 592 592 pour le stationnement et l’espace vert du futur CPE",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 592 592",
+      "page": 4,
+      "citation": "QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B. Clermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec",
+      "anchor": "lots 6 592 592",
+      "spanStart": 955,
+      "spanEnd": 1114
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution décide explicitement l’acquisition de ce lot, ce qui constitue un acte foncier inclus même pour un usage non résidentiel."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Acquisition du lot 6 199 726 pour agrandir le terrain du garage municipal",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 199 726",
+    "page": 4,
+    "citation": "QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B. Clermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec",
+    "anchor": "6 199 726 du cadastre du Québec",
+    "spanStart": 955,
+    "spanEnd": 1114
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Acquisition du lot 6 199 726 pour agrandir le terrain du garage municipal",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 199 726",
+      "page": 4,
+      "citation": "QUE la municipalité de Sainte-Clotilde achète de Gestions C. Clermont et Les Immeubles J.B. Clermont Inc. les lots 6 592 592 et 6 199 726 du cadastre du Québec",
+      "anchor": "6 199 726 du cadastre du Québec",
+      "spanStart": 955,
+      "spanEnd": 1114
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Ce second lot explicitement nommé et acquis constitue un objet foncier distinct, malgré son traitement dans la même résolution."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 533 relatif à l’installation des clapets anti-retour",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "533",
+    "page": 6,
+    "citation": "QUE le conseil municipal adopte le Règlement numéro 533 relatif à l’installation des clapets anti-retour afin de prévenir les refoulements d’égout",
+    "anchor": "Règlement numéro 533",
+    "spanStart": 281,
+    "spanEnd": 427
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 533 relatif à l’installation des clapets anti-retour",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "533",
+      "page": 6,
+      "citation": "QUE le conseil municipal adopte le Règlement numéro 533 relatif à l’installation des clapets anti-retour afin de prévenir les refoulements d’égout",
+      "anchor": "Règlement numéro 533",
+      "spanStart": 281,
+      "spanEnd": 427
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le règlement adopté impose des exigences de construction aux bâtiments raccordés à l’égout; l’avis de motion et le projet du 16 mars ne sont que des rappels historiques."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 471-09 modifiant le zonage",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "471-09",
+    "page": 9,
+    "citation": "10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU ZONAGE",
+    "anchor": "RÈGLEMENT 471-09",
+    "spanStart": 132,
+    "spanEnd": 199
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 471-09 modifiant le zonage",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "471-09",
+      "page": 9,
+      "citation": "10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU ZONAGE",
+      "anchor": "RÈGLEMENT 471-09",
+      "spanStart": 132,
+      "spanEnd": 199
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Robert Arcoite donne un avis de motion pour ce règlement de zonage, étape actuelle distincte du dépôt du projet."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du projet de règlement 471-09 modifiant le zonage",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "471-09",
+    "page": 9,
+    "citation": "10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU ZONAGE",
+    "anchor": "RÈGLEMENT 471-09",
+    "spanStart": 132,
+    "spanEnd": 199
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du projet de règlement 471-09 modifiant le zonage",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "471-09",
+      "page": 9,
+      "citation": "10.2 AVIS DE MOTION ET PROJET DE RÈGLEMENT 471-09 RELATIF AU ZONAGE",
+      "anchor": "RÈGLEMENT 471-09",
+      "spanStart": 132,
+      "spanEnd": 199
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le texte confirme qu’un projet de règlement est déposé séance tenante, ce qui forme une unité distincte de l’avis de motion."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 470-04 modifiant le plan d’urbanisme",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "470-04",
+    "page": 9,
+    "citation": "10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN D’URBANISME",
+    "anchor": "RÈGLEMENT 470-04",
+    "spanStart": 761,
+    "spanEnd": 838
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 470-04 modifiant le plan d’urbanisme",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "470-04",
+      "page": 9,
+      "citation": "10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN D’URBANISME",
+      "anchor": "RÈGLEMENT 470-04",
+      "spanStart": 761,
+      "spanEnd": 838
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Marcel Tremblay donne un avis de motion pour ce règlement modifiant le plan d’urbanisme, indépendamment du projet également déposé."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du projet de règlement 470-04 modifiant le plan d’urbanisme",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "470-04",
+    "page": 9,
+    "citation": "10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN D’URBANISME",
+    "anchor": "RÈGLEMENT 470-04",
+    "spanStart": 761,
+    "spanEnd": 838
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du projet de règlement 470-04 modifiant le plan d’urbanisme",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "470-04",
+      "page": 9,
+      "citation": "10.3 AVIS DE MOTION ET PROJET DE RÈGLEMENT 470-04 RELATIF AU PLAN D’URBANISME",
+      "anchor": "RÈGLEMENT 470-04",
+      "spanStart": 761,
+      "spanEnd": 838
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le projet modifiant le plan d’urbanisme est déposé séance tenante et doit être compté séparément de l’avis de motion."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 472-04 modifiant le lotissement",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "472-04",
+    "page": 9,
+    "citation": "10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU LOTISSEMENT",
+    "anchor": "RÈGLEMENT 472-04",
+    "spanStart": 1414,
+    "spanEnd": 1486
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 472-04 modifiant le lotissement",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "472-04",
+      "page": 9,
+      "citation": "10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU LOTISSEMENT",
+      "anchor": "RÈGLEMENT 472-04",
+      "spanStart": 1414,
+      "spanEnd": 1486
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "François Barbeau donne un avis de motion pour ce règlement de lotissement, ce qui constitue une étape actuelle distincte."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du projet de règlement 472-04 modifiant le lotissement",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "472-04",
+    "page": 9,
+    "citation": "10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU LOTISSEMENT",
+    "anchor": "RÈGLEMENT 472-04",
+    "spanStart": 1414,
+    "spanEnd": 1486
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du projet de règlement 472-04 modifiant le lotissement",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "472-04",
+      "page": 9,
+      "citation": "10.4 AVIS DE MOTION ET PROJET DE RÈGLEMENT 472-04 RELATIF AU LOTISSEMENT",
+      "anchor": "RÈGLEMENT 472-04",
+      "spanStart": 1414,
+      "spanEnd": 1486
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le dépôt séance tenante du projet de règlement de lotissement est expressément constaté et forme une unité séparée de l’avis de motion."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Adoption de la correction de l’appui CPTAQ 2025-12-286 — ajout d’une partie du lot 6 471 805",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2025-12-286",
+    "page": 10,
+    "citation": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805 du cadastre du Québec, en plus du lot 6 199 292",
+    "anchor": "résolution numéro 2025-12-286",
+    "spanStart": 281,
+    "spanEnd": 417
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption de la correction de l’appui CPTAQ 2025-12-286 — ajout d’une partie du lot 6 471 805",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "2025-12-286",
+      "page": 10,
+      "citation": "DE CORRIGER la résolution numéro 2025-12-286 afin d’y ajouter la partie du lot 6 471 805 du cadastre du Québec, en plus du lot 6 199 292",
+      "anchor": "résolution numéro 2025-12-286",
+      "spanStart": 281,
+      "spanEnd": 417
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil adopte une correction étendant l’appui à la demande de renouvellement d’exploitation de la carrière à une partie du lot 6 471 805, sans créer d’unité pour l’appui historique de décembre 2025."
+    }
+   ]
+  }
+ ]
+}

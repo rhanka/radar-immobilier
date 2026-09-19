@@ -1,0 +1,1480 @@
+{
+ "generatedAt": "2026-09-19T03:28:53.874Z",
+ "network": "none",
+ "rule": {
+  "A": [
+   "/exclusion/u",
+   "/fiscal/u",
+   "/taxe/u",
+   "/recouvrement/u",
+   "/nomination/u",
+   "/embauche/u",
+   "/ressources humaines/u",
+   "/\\bcomptes?\\b/u",
+   "/dépenses?/u",
+   "/financi/u",
+   "/budg/u",
+   "/contrat/u",
+   "/services? professionnels?/u",
+   "/loisir/u",
+   "/\\bsport/u",
+   "/culture/u",
+   "/voirie/u",
+   "/entretien/u",
+   "/correspondance/u",
+   "/avis public/u",
+   "/administrati/u",
+   "/(pas|aucun) (un |d'|de )?(acte|objet)s? d'(urbanisme|aménagement)/u",
+   "/hors (du )?(périmètre|champ)/u",
+   "/politique/u",
+   "/subvention/u",
+   "/aide financière/u"
+  ],
+  "B": [
+   "/mentionn/u",
+   "/\\bcité/u",
+   "/citée?s?\\b/u",
+   "/rappel/u",
+   "/historique/u",
+   "/antérieur/u",
+   "/(à titre de |en |comme )?référence/u",
+   "/considérant/u",
+   "/aucun(e)? (acte|étape|démarche|action)/u",
+   "/sans (faire l'objet|acte|étape|action|démarche)/u",
+   "/n'est pas attest/u",
+   "/non attest/u",
+   "/absent/u",
+   "/ne figure pas/u",
+   "/étape (fausse|erronée|incorrecte)/u",
+   "/objet (faux|erroné|incorrect)/u",
+   "/doublon/u",
+   "/duplica/u",
+   "/déjà (validé|couvert|extrait|représenté)/u",
+   "/modifié par/u",
+   "/règlement (d'origine|de base)/u",
+   "/texte antérieur/u"
+  ],
+  "decision": "A if only A patterns match; B if only B patterns match; otherwise C (both or none)"
+ },
+ "counts": {
+  "A": 80,
+  "B": 120,
+  "C": 29
+ },
+ "totals": {
+  "none": {
+   "tp": 359,
+   "fp": 611,
+   "fn": 315,
+   "precision": 0.37010309278350517,
+   "recall": 0.5326409495548962,
+   "f1": 0.4367396593673966
+  },
+  "full": {
+   "tp": 358,
+   "fp": 383,
+   "fn": 316,
+   "precision": 0.48313090418353577,
+   "recall": 0.5311572700296736,
+   "f1": 0.5060070671378092
+  },
+  "bOnly": {
+   "tp": 359,
+   "fp": 491,
+   "fn": 315,
+   "precision": 0.4223529411764706,
+   "recall": 0.5326409495548962,
+   "f1": 0.47112860892388453
+  },
+  "abOnly": {
+   "tp": 358,
+   "fp": 412,
+   "fn": 316,
+   "precision": 0.4649350649350649,
+   "recall": 0.5311572700296736,
+   "f1": 0.49584487534626037
+  }
+ },
+ "listed": {
+  "A": [
+   {
+    "documentId": "saint-polycarpe-2026-01-19",
+    "act": "A02",
+    "label": "Vente des immeubles pour défaut de paiement de taxes — point à l’ordre du jour",
+    "reason": "La vente pour défaut de paiement de taxes est une procédure fiscale/financière exclue du champ de l'urbanisme et de l'aménagement foncier."
+   },
+   {
+    "documentId": "saint-lin-laurentides-2026-06-09",
+    "act": "A08",
+    "label": "Processus d'expropriation — puits numéro 7",
+    "reason": "Il s'agit de l'octroi d'un contrat de services juridiques de gré à gré, ce qui relève des exclusions de services professionnels."
+   },
+   {
+    "documentId": "saint-lin-laurentides-2026-06-09",
+    "act": "A13",
+    "label": "Indemnité de départ pour locataire — 617, rue Lord",
+    "reason": "Le paiement d'une indemnité de départ à un locataire est une opération financière/administrative et non un acte réglementaire ou foncier d'urbanisme."
+   },
+   {
+    "documentId": "saint-henri-2026-03-02",
+    "act": "A05",
+    "label": "Règlement no 739-26",
+    "reason": "Le simple dépôt d'un certificat d'enregistrement sans mention de l'objet d'urbanisme ni étape décisionnelle d'urbanisme relève d'un simple dépôt administratif."
+   },
+   {
+    "documentId": "val-racine-2026-06-09",
+    "act": "A07",
+    "label": "FRR volet 4 — bâtiment d’entreposage et bloc sanitaire",
+    "reason": "Il s'agit d'un simple octroi de contrat pour des travaux/services municipaux, exclu du domaine d'urbanisme."
+   },
+   {
+    "documentId": "val-racine-2026-06-09",
+    "act": "A08",
+    "label": "Vente des remises au plus offrant",
+    "reason": "La vente de remises au plus offrant est une aliénation de biens meubles/actifs municipaux qui ne constitue pas un acte d'urbanisme ou foncier."
+   },
+   {
+    "documentId": "aumond-2026-01-14",
+    "act": "A04",
+    "label": "Règlement 2026-01-0002 — Rémunération des élus",
+    "reason": "Les règlements portant sur la rémunération des élus relèvent de la gouvernance interne et des exclusions du domaine d'urbanisme/aménagement/foncier."
+   },
+   {
+    "documentId": "chesterville-2026-03-02",
+    "act": "A05",
+    "label": "Appel d'offres pour la capacité d'eaux usées",
+    "reason": "Il s'agit d'une autorisation d'appel d'offres relative aux infrastructures d'hygiène du milieu, relevant des contrats de services ou travaux exclus des actes d'urbanisme."
+   },
+   {
+    "documentId": "chesterville-2026-03-02",
+    "act": "A06",
+    "label": "Dépôt de la liste des permis émis en février 2026",
+    "reason": "Le simple dépôt d'une liste de permis relève du rapport d'information ou de correspondance, exclu des actes d'urbanisme."
+   },
+   {
+    "documentId": "lac-du-cerf-2026-04-11",
+    "act": "A01",
+    "label": "Évaluation des terrains du projet de lotissement chemin Dicaire / St- Louis",
+    "reason": "Il s'agit d'un simple octroi de contrat de services professionnels pour de l'évaluation, ce qui relève des exclusions."
+   },
+   {
+    "documentId": "lac-du-cerf-2026-04-11",
+    "act": "A02",
+    "label": "Renforcement prévu de l’application du règlement sur les nuisances",
+    "reason": "Le point concerne une mesure générale d'application policière/administrative d'un règlement sur les nuisances, exclue du champ de l'urbanisme et de l'aménagement du territoire."
+   },
+   {
+    "documentId": "sainte-brigide-diberville-2026-06-01",
+    "act": "A05",
+    "label": "Projet éolien — Demande de prolongation à la CPTAQ",
+    "reason": "Il s'agit d'un simple point de correspondance/demande sans décision d'urbanisme ou acte municipal formel caractérisé."
+   },
+   {
+    "documentId": "sainte-brigide-diberville-2026-06-01",
+    "act": "A06",
+    "label": "Vente d’immeubles pour défaut de paiement des taxes",
+    "reason": "La vente d'immeubles pour défaut de paiement de taxes relève de l'administration fiscale et des exclusions, non de la planification d'urbanisme ou de développement foncier."
+   },
+   {
+    "documentId": "daveluyville-2026-05-04",
+    "act": "A07",
+    "label": "Litige de zonage 5803-23 — Mandat de remise en conformité",
+    "reason": "L'octroi d'un mandat à une firme d'avocats pour un litige judiciaire relève des exclusions de services professionnels et contentieux."
+   },
+   {
+    "documentId": "daveluyville-2026-05-04",
+    "act": "A08",
+    "label": "Avril 2026 — 11 permis délivrés, 236 000 $",
+    "reason": "Le simple dépôt statistique ou récapitulatif des permis délivrés relève des exclusions."
+   },
+   {
+    "documentId": "daveluyville-2026-05-04",
+    "act": "A09",
+    "label": "Mise à jour du plan d’intervention des infrastructures",
+    "reason": "L'octroi d'un contrat de services professionnels pour la mise à jour d'un plan d'intervention d'infrastructures relève des exclusions."
+   },
+   {
+    "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+    "act": "A14",
+    "label": "Opposition aux éoliennes et appui à la résiliation de l’entente TES Mauricie H2",
+    "reason": "Il s'agit d'une résolution politique d'appui à une autre municipalité et non d'un acte réglementaire d'urbanisme ou foncier direct."
+   },
+   {
+    "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+    "act": "A15",
+    "label": "Autorisation d’enchérir à la vente pour taxes du 11 juin 2026",
+    "reason": "Une autorisation d'enchérir à une vente pour non-paiement de taxes est un acte d'administration fiscale et générale exclu du champ de l'urbanisme."
+   },
+   {
+    "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+    "act": "A17",
+    "label": "Élargissement de l’autorité d’application des règlements d’urbanisme",
+    "reason": "La désignation d'un fonctionnaire pour l'application des règlements est une nomination/gestion administrative interne exclue."
+   },
+   {
+    "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+    "act": "A18",
+    "label": "Adoption du plan d’intervention pour les infrastructures",
+    "reason": "L'adoption d'un plan d'intervention pour le renouvellement de conduites d'aqueduc et d'égouts relève de la voirie/infrastructure technique d'hygiène du milieu sans développement foncier/urbanistique explicite."
+   },
+   {
+    "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+    "act": "A19",
+    "label": "Projet de préau au-dessus de la patinoire — Demande de financement",
+    "reason": "Une demande de subvention pour des infrastructures récréatives et sportives (loisirs) relève des exclusions."
+   },
+   {
+    "documentId": "saint-bernard-de-michaudville-2026-04-01",
+    "act": "A04",
+    "label": "Parcours nourricier — Mandat de planification de la phase 1",
+    "reason": "Il s'agit de l'octroi d'un contrat de services d'accompagnement et de planification, ce qui relève des contrats de services exclus."
+   },
+   {
+    "documentId": "blue-sea-2026-02-03",
+    "act": "A01",
+    "label": "Demande d’aide financière pour reconstruire le barrage Lafontaine",
+    "reason": "Il s'agit d'une simple demande de subvention pour des travaux sur un barrage, ce qui ne constitue pas un acte d'urbanisme ou d'aménagement du territoire."
+   },
+   {
+    "documentId": "blue-sea-2026-02-03",
+    "act": "A02",
+    "label": "Préparation de l’agrandissement du centre récréatif du Lac Long",
+    "reason": "La préparation de plans et devis pour l'agrandissement d'un centre récréatif et la demande de subvention relèvent d'équipements de loisirs et ne constituent pas un acte d'urbanisme réglementaire ou foncier."
+   },
+   {
+    "documentId": "blue-sea-2026-02-03",
+    "act": "A03",
+    "label": "Plans et devis pour la tour d’observation du Mont Morissette",
+    "reason": "La commande de plans et devis et la demande d'aide financière pour une tour d'observation de plein air relèvent du domaine des loisirs/tourisme, exclu des actes d'urbanisme."
+   },
+   {
+    "documentId": "parisville-2026-05-05",
+    "act": "A06",
+    "label": "Prêt temporaire de 6,5 M$ pour les conduites de la route Principale",
+    "reason": "L'autorisation d'un prêt bancaire temporaire auprès d'une institution financière relève de la gestion financière exclue."
+   },
+   {
+    "documentId": "parisville-2026-05-05",
+    "act": "A07",
+    "label": "Demande d’aide pour la réhabilitation du parc municipal",
+    "reason": "Il s'agit d'une demande d'aide financière pour des infrastructures récréatives et de loisirs, relevant des exclusions."
+   },
+   {
+    "documentId": "lac-saint-paul-2026-05-11",
+    "act": "A05",
+    "label": "Contrat d’ingénierie — Restauration de l’église Saint-Paul et halte routière",
+    "reason": "L'octroi d'un contrat de services professionnels d'ingénierie relève des exclusions (contrats de services/dépenses courantes hors acte d'urbanisme/réglementation)."
+   },
+   {
+    "documentId": "lac-saint-paul-2026-05-11",
+    "act": "A07",
+    "label": "Contrat d’arpentage pour la construction d’un terrain de pickleball",
+    "reason": "L'octroi d'un contrat d'arpentage relève des contrats de services professionnels exclus."
+   },
+   {
+    "documentId": "dosquet-2026-01-13",
+    "act": "A04",
+    "label": "Financement de 85 000 $ pour les fosses septiques",
+    "reason": "Cet emprunt par billet auprès d'une institution financière relève de la simple gestion financière et de trésorerie exclue du champ de l'urbanisme et de l'aménagement."
+   },
+   {
+    "documentId": "bedford--brome-missisquoi-2026-06-02",
+    "act": "A15",
+    "label": "Engagement municipal — Rénovation de logements sociaux",
+    "reason": "Cet engagement financier et administratif dans le cadre d'un programme d'aide financière relève des exclusions financières/administratives générales."
+   },
+   {
+    "documentId": "wentworth-nord-2026-01-21",
+    "act": "A10",
+    "label": "Projet de règlement 2026-580 — taxes, compensations et tarifs",
+    "reason": "Le règlement de taxation 2026-580 relève des finances et de la fiscalité municipale, hors du champ de l'urbanisme et de l'aménagement du territoire."
+   },
+   {
+    "documentId": "saint-just-de-bretenieres-2026-02-02",
+    "act": "A04",
+    "label": "Appui au réaménagement des équipements du Marché JR",
+    "reason": "L'appui financier ou moral à une demande de subvention commerciale d'un commerce privé pour ses équipements ne constitue pas un acte d'urbanisme ou foncier."
+   },
+   {
+    "documentId": "saint-zephirin-de-courval-2026-03-02",
+    "act": "A03",
+    "label": "Engagement municipal pour la rénovation des logements sociaux — E.I. 2317",
+    "reason": "Il s'agit d'une simple entente d'aide financière et d'engagement de contribution pour un programme de rénovation de logements sociaux, ce qui ne constitue pas un acte d'urbanisme ou d'aménagement foncier."
+   },
+   {
+    "documentId": "saint-zephirin-de-courval-2026-03-02",
+    "act": "A04",
+    "label": "Demande d’abrogation de l’article 245.1 de la Loi sur l’aménagement et l’urbanisme",
+    "reason": "Il s'agit d'une prise de position politique/lobbying adressée à l'Assemblée nationale concernant un projet de loi provincial, et non d'un acte réglementaire ou d'urbanisme municipal."
+   },
+   {
+    "documentId": "warden-2026-04-08",
+    "act": "A08",
+    "label": "Mise à jour du plan d'intervention des infrastructures municipales",
+    "reason": "Il s'agit d'un contrat de services professionnels d'ingénierie, relevant des exclusions."
+   },
+   {
+    "documentId": "richelieu-2026-02-03",
+    "act": "A06",
+    "label": "Vente d'immeubles pour défaut de paiement de taxes — 15 avril 2026",
+    "reason": "La vente d'immeubles pour taxes est une mesure de perception/recouvrement fiscal, exclue des actes d'urbanisme et d'aménagement foncier."
+   },
+   {
+    "documentId": "richelieu-2026-02-03",
+    "act": "A07",
+    "label": "Réfection du rang de la Savane — Plans et devis",
+    "reason": "L'octroi d'un contrat de services professionnels pour des plans et devis d'ingénierie routière relève des contrats et de l'entretien de voirie, exclus des actes d'urbanisme."
+   },
+   {
+    "documentId": "saint-tite-des-caps-2026-02-02",
+    "act": "A07",
+    "label": "Arrérages de taxes — processus préalable à une vente d’immeubles",
+    "reason": "Il s'agit d'une instruction administrative relative à la perception des taxes et arrérages, ce qui relève des exclusions financières et n'est pas un acte d'urbanisme."
+   },
+   {
+    "documentId": "saint-tite-des-caps-2026-02-02",
+    "act": "A08",
+    "label": "Réfection de l’avenue de la Montagne — aide financière refusée",
+    "reason": "Il s'agit d'un simple dépôt de correspondance passive (lettre d'information), explicitement exclu."
+   },
+   {
+    "documentId": "cookshire-eaton-2026-04-07",
+    "act": "A02",
+    "label": "Soutien au plan directeur de développement de l’Aéroport de Sherbrooke",
+    "reason": "Il s'agit d'une simple résolution d'appui politique ou de soutien sans objet réglementaire ou foncier opérationnel direct."
+   },
+   {
+    "documentId": "cookshire-eaton-2026-04-07",
+    "act": "A08",
+    "label": "Cautionnement de l’immeuble au 225, rue Pope",
+    "reason": "Il s'agit d'un simple paiement financier de caution, relevant des exclusions relatives aux opérations financières et administratives courantes."
+   },
+   {
+    "documentId": "sainte-angele-de-monnoir-2026-01-13",
+    "act": "A06",
+    "label": "Office d’habitation Haute-Yamaska-Rouville — Budget initial 2026 approuvé",
+    "reason": "L'approbation budgétaire d'un organisme d'habitation tiers relève des affaires financières/administratives courantes et des exclusions, sans portée réglementaire d'urbanisme ou foncière directe."
+   },
+   {
+    "documentId": "brossard-2026-04-28",
+    "act": "A08",
+    "label": "REG-516 — Emprunt de 6 500 000 $ pour planage et pavage",
+    "reason": "Le règlement décrétant des dépenses et emprunts pour des travaux d'entretien de voirie (planage et pavage) relève des exclusions."
+   },
+   {
+    "documentId": "contrecoeur-2026-04-14",
+    "act": "A06",
+    "label": "E-109 — Terrains de tennis et de pickleball",
+    "reason": "Il s'agit d'un règlement d'emprunt et de dépense pour des infrastructures sportives et récréatives (terrains de tennis et pickleball), relevant des exclusions relatives aux loisirs."
+   },
+   {
+    "documentId": "hatley-2026-04-07",
+    "act": "A03",
+    "label": "Rapport cumulatif des permis — mars 2026",
+    "reason": "Le simple dépôt d'un rapport mensuel des permis constitue une formalité administrative d'information exclue des actes d'urbanisme opérationnels ou réglementaires."
+   },
+   {
+    "documentId": "hatley-2026-04-07",
+    "act": "A06",
+    "label": "Remplacement des composantes électroniques des stations de pompage",
+    "reason": "Il s'agit d'un simple octroi de contrat d'équipement/service pour des travaux d'infrastructure, ce qui relève des exclusions contractuelles."
+   },
+   {
+    "documentId": "beloeil-2026-03-23",
+    "act": "A30",
+    "label": "Réhabilitation de conduites d’eau potable",
+    "reason": "Il s'agit d'un simple octroi de contrat pour des travaux d'entretien/réhabilitation d'infrastructures existantes, ce qui relève des exclusions."
+   },
+   {
+    "documentId": "la-peche-2026-06-01",
+    "act": "A13",
+    "label": "Étude de mobilité active — Sentier multifonctionnel Wakefield",
+    "reason": "Il s'agit d'un simple contrat de services professionnels / étude spécialisée, relevant des exclusions."
+   },
+   {
+    "documentId": "sainte-barbe-2026-05-05",
+    "act": "A08",
+    "label": "Branchement aqueduc et égout — lot 2844573",
+    "reason": "Il s'agit d'un simple octroi de contrat de travaux publics / voirie, ce qui relève des exclusions."
+   },
+   {
+    "documentId": "sainte-barbe-2026-05-05",
+    "act": "A10",
+    "label": "Règlement 2023-10-01 — abrogation de l’emprunt du Centre Barberivain",
+    "reason": "Il s'agit de l'abrogation d'un règlement d'emprunt financier sans composante d'urbanisme ou d'aménagement du territoire."
+   },
+   {
+    "documentId": "sainte-barbe-2026-05-05",
+    "act": "A11",
+    "label": "Règlement d’emprunt 2026-05 — réfection des chemins",
+    "reason": "Il s'agit d'un règlement d'emprunt financier pour travaux de voirie et pavage sans développement urbain explicite, relevant des exclusions."
+   },
+   {
+    "documentId": "sainte-martine-2026-03-17",
+    "act": "A14",
+    "label": "Étude géotechnique et environnementale — Mise à niveau de l’eau potable",
+    "reason": "L'octroi d'un contrat de services professionnels d'études géotechniques relève des exclusions contractuelles de services réguliers et de gestion d'infrastructures."
+   },
+   {
+    "documentId": "rosemere-2026-04-13",
+    "act": "A17",
+    "label": "Adjudication — Réfection de la rue Northcote",
+    "reason": "L'adjudication d'un contrat de travaux de voirie relève des exclusions (contrats de services/entretien/travaux)."
+   },
+   {
+    "documentId": "rosemere-2026-04-13",
+    "act": "A18",
+    "label": "Adjudication — Réfection pluviale, Beaujolais, Bordeaux et Champagne",
+    "reason": "L'adjudication de contrat de travaux de réfection pluviale relève des exclusions."
+   },
+   {
+    "documentId": "rosemere-2026-04-13",
+    "act": "A19",
+    "label": "Étude de connectivité écologique — Demande d'aide financière",
+    "reason": "Une autorisation de demande d'aide financière à un fonds externe relève des exclusions et ne constitue pas un acte d'urbanisme ou d'aménagement foncier."
+   },
+   {
+    "documentId": "gracefield-2026-04-14",
+    "act": "A01",
+    "label": "Règlement 259-2025 — Code d’éthique et de déontologie",
+    "reason": "Le règlement 259-2025 porte sur le Code d'éthique et de déontologie des élus, ce qui relève de l'administration municipale générale et non de l'urbanisme ou de l'aménagement du territoire."
+   },
+   {
+    "documentId": "sacre-coeur-2026-05-11",
+    "act": "A02",
+    "label": "Règlement 626 — promenade sur la rue Principale Nord",
+    "reason": "Il s'agit d'une modification financière (terme d'emprunt) d'un règlement d'emprunt déjà en vigueur, ne constituant pas un acte réglementaire d'urbanisme."
+   },
+   {
+    "documentId": "sacre-coeur-2026-05-11",
+    "act": "A03",
+    "label": "Projet de règlement 646 — délégation de pouvoirs",
+    "reason": "Le règlement 646 concerne la délégation de pouvoirs administratifs internes, ce qui relève des exclusions de gouvernance/gestion interne."
+   },
+   {
+    "documentId": "sacre-coeur-2026-05-11",
+    "act": "A05",
+    "label": "Développement du secteur de la rue Dufour — estimation d’ingénierie",
+    "reason": "Il s'agit d'un simple octroi de mandat d'ingénierie/service professionnel (devis de coûts), relevant des contrats de services exclus."
+   },
+   {
+    "documentId": "sacre-coeur-2026-05-11",
+    "act": "A06",
+    "label": "Dépôt du rapport des permis d’avril 2026",
+    "reason": "Le simple dépôt d'un rapport statistique mensuel de permis sans décision foncière ou réglementaire relève des dépôts et correspondances exclus."
+   },
+   {
+    "documentId": "potton-2026-01-05",
+    "act": "A07",
+    "label": "Règlement 2025-501 — taxes et tarifs 2026",
+    "reason": "Il s'agit d'un règlement purement fiscal de taxation et tarification annuelle, ce qui relève des exclusions réglementaires et foncières d'urbanisme."
+   },
+   {
+    "documentId": "pierreville-2026-03-10",
+    "act": "A08",
+    "label": "Règlement 271-2026 — Taxation du cours d’eau Victor Jutras",
+    "reason": "Ce règlement porte exclusivement sur la taxation d'un cours d'eau pour des travaux d'entretien, ce qui relève de la fiscalité locale et des exclusions d'urbanisme."
+   },
+   {
+    "documentId": "sainte-croix-2026-05-05",
+    "act": "A09",
+    "label": "Évaluation de la capacité des puits pour planifier le développement",
+    "reason": "Il s'agit d'un simple octroi de contrat/mandat de services professionnels, ce qui est exclu."
+   },
+   {
+    "documentId": "sainte-croix-2026-05-05",
+    "act": "A10",
+    "label": "Études géotechniques et environnementales — Lot 3 590 823",
+    "reason": "Il s'agit d'un simple octroi de contrat d'études géotechniques/environnementales (contrat de services), expressément exclu."
+   },
+   {
+    "documentId": "sainte-croix-2026-05-05",
+    "act": "A11",
+    "label": "Fermeture de SouthShore — Possibilité de requalification évoquée",
+    "reason": "Il s'agit d'un simple propos discursif lors du mot du maire, ne constituant pas un acte d'urbanisme ou d'aménagement au sens requis."
+   },
+   {
+    "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+    "act": "A09",
+    "label": "Demande d’abrogation de l’article 245.1 de la Loi sur l’aménagement et l’urbanisme",
+    "reason": "Il s'agit d'une prise de position / résolution politique adressée au gouvernement provincial sur un projet de loi, sans effet réglementaire ou foncier local direct."
+   },
+   {
+    "documentId": "stanstead-est-2026-04-13",
+    "act": "A09",
+    "label": "Location temporaire d’un garage municipal",
+    "reason": "Il s'agit d'un contrat de location de services/bâtiment, relevant des exclusions."
+   },
+   {
+    "documentId": "brownsburg-chatham-2026-03-10",
+    "act": "A30",
+    "label": "Intention de taxation immobilière par sous-catégories et secteurs",
+    "reason": "Cette décision relève exclusivement de la fiscalité municipale et des taux de taxation, un domaine hors champ d'urbanisme/aménagement/foncier."
+   },
+   {
+    "documentId": "sainte-thecle-2026-03-09",
+    "act": "A16",
+    "label": "Nouvel écocentre — Engagement financier municipal",
+    "reason": "Il s'agit d'un engagement financier/subvention pour la gestion résiduelle (écocentre), ce qui ne relève pas de la planification d'aménagement ou de l'urbanisme."
+   },
+   {
+    "documentId": "sainte-thecle-2026-03-09",
+    "act": "A17",
+    "label": "Parc Saint-Jean-Optimiste — Projet de scène extérieure",
+    "reason": "L'aménagement d'une scène extérieure relève des parcs, loisirs et culture, exclus des actes d'urbanisme."
+   },
+   {
+    "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+    "act": "A10",
+    "label": "Appel d'offres pour la phase 2 du trottoir de la rue Langevin",
+    "reason": "L'autorisation d'un appel d'offres pour des travaux de voirie municipale (trottoir) sans modification du cadre d'urbanisme relève des exclusions."
+   },
+   {
+    "documentId": "lac-brome-2026-04-07",
+    "act": "A11",
+    "label": "Étude d'avant-projet — chaussée et ruissellement à Pointe-Fisher",
+    "reason": "L'octroi d'un contrat de services professionnels d'ingénierie relève des exclusions et ne constitue pas un acte d'urbanisme."
+   },
+   {
+    "documentId": "boisbriand-2026-05-05",
+    "act": "A10",
+    "label": "Permis de construction — mars 2026",
+    "reason": "Il s'agit d'un simple accusé de réception de statistiques administratives/dépôt de rapport, relevant des exclusions."
+   },
+   {
+    "documentId": "lac-des-seize-iles-2026-09-agenda",
+    "act": "A05",
+    "label": "Projet de reconstruction du barrage — Caractérisation écologique",
+    "reason": "Il s'agit d'un simple octroi de contrat/mandat de services professionnels pour un rapport d'expertise, relevant des exclusions."
+   },
+   {
+    "documentId": "saint-etienne-de-bolton-2026-08-04",
+    "act": "A16",
+    "label": "Plans et devis — Réfection du chemin du Lac-Trousers",
+    "reason": "L'octroi d'un contrat de services professionnels d'ingénierie pour la voirie relève des contrats de services exclus."
+   },
+   {
+    "documentId": "waterloo-2026-08-18",
+    "act": "A13",
+    "label": "Contrat de réaménagement pour le CLSC — 415, rue de la Cour",
+    "reason": "L'octroi d'un contrat de rénovation/construction de bâtiment municipal relève des contrats de travaux et services exclus."
+   },
+   {
+    "documentId": "waterloo-2026-08-18",
+    "act": "A14",
+    "label": "Opération façade — 5700 à 5702, rue Foster",
+    "reason": "L'approbation d'une subvention financière dans le cadre d'un programme d'aide relève des exclusions financières/subventions ordinaires."
+   },
+   {
+    "documentId": "waterloo-2026-08-18",
+    "act": "A15",
+    "label": "Réfection des infrastructures — Secteur Beauregard",
+    "reason": "L'autorisation de lancer un appel d'offres de services professionnels d'ingénierie pour la réfection d'infrastructures relève des exclusions contractuelles de voirie/ingénierie."
+   },
+   {
+    "documentId": "waterloo-2026-08-18",
+    "act": "A16",
+    "label": "Vente pour défaut de paiement des taxes foncières — 2026",
+    "reason": "Une procédure administrative et fiscale de vente pour défaut de paiement de taxes foncières relève des exclusions de gestion financière et fiscale courante."
+   }
+  ],
+  "B": [
+   {
+    "documentId": "saint-polycarpe-2026-01-19",
+    "act": "A05",
+    "label": "Règlement sur les nuisances (RMH 450)",
+    "reason": "Le règlement RMH 450 n'est mentionné que comme l'ancien règlement remplacé, et non comme un acte réglementaire autonome en cours."
+   },
+   {
+    "documentId": "stratford-2026-04-20",
+    "act": "A02",
+    "label": "Règlement 1212 relatif à la démolition d’immeubles",
+    "reason": "Le règlement 1212 n'est que la mention de la norme modifiée, aucun acte juridique direct ne porte sur le règlement 1212 lui-même."
+   },
+   {
+    "documentId": "stratford-2026-04-20",
+    "act": "A04",
+    "label": "Règlement de zonage 1035",
+    "reason": "Le règlement 1035 n'est cité que comme le règlement de zonage sous-jacent en cours de modification."
+   },
+   {
+    "documentId": "val-racine-2026-06-09",
+    "act": "A02",
+    "label": "Règlement no 315 — entretien hivernal des chemins",
+    "reason": "Le règlement no 315 n'est mentionné que comme référence au règlement antérieur abrogé par le projet 333."
+   },
+   {
+    "documentId": "candiac-2026-06-15",
+    "act": "A02",
+    "label": "Règlement 5005 relatif aux permis et certificats",
+    "reason": "Le règlement 5005 est uniquement mentionné comme le règlement de base en cours de modification, il ne fait pas l'objet d'un acte propre dans ce document."
+   },
+   {
+    "documentId": "dollard-des-ormeaux-2026-02-10",
+    "act": "A02",
+    "label": "R-2025-199 — Règlement de zonage",
+    "reason": "Le règlement de zonage R-2025-199 n'est cité qu'à titre de référence comme règlement modifié, sans acte propre sur celui-ci."
+   },
+   {
+    "documentId": "dollard-des-ormeaux-2026-02-10",
+    "act": "A04",
+    "label": "R-2014-084 — Utilisation des égouts",
+    "reason": "Le règlement R-2014-084 n'est mentionné que comme le règlement antérieur modifié."
+   },
+   {
+    "documentId": "pincourt-2026-01-20",
+    "act": "A02",
+    "label": "Règlement 931 — nuisances",
+    "reason": "Le règlement 931 n'est que le règlement d'origine faisant l'objet de la modification, il ne fait pas l'objet d'un acte propre dans cette séance."
+   },
+   {
+    "documentId": "pincourt-2026-01-20",
+    "act": "A08",
+    "label": "Règlement 780 — zonage et PIIA",
+    "reason": "Le règlement 780 est le règlement de base modifié, non un règlement adopté ou initié de façon distincte lors de cette séance."
+   },
+   {
+    "documentId": "arundel-2026-07-31",
+    "act": "A02",
+    "label": "Règlement 285 — SPAIP",
+    "reason": "Le règlement 285 n'est pas adopté ou modifié ici; il s'agit seulement d'une mention de référence pour l'octroi d'une autorisation de PIIA."
+   },
+   {
+    "documentId": "saint-constant-2026-01-20",
+    "act": "A03",
+    "label": "Règlement de zonage 1528-17",
+    "reason": "Le règlement de zonage 1528-17 est simplement mentionné comme norme de référence faisant l'objet de dérogations, sans faire l'objet d'un acte réglementaire dans cette séance."
+   },
+   {
+    "documentId": "saint-constant-2026-01-20",
+    "act": "A04",
+    "label": "Règlement 1536-17 relatif aux PPCMOI",
+    "reason": "Le règlement 1536-17 est cité dans les considérants comme base habilitante du PPCMOI et ne fait l'objet d'aucun acte ou processus d'adoption dans la séance."
+   },
+   {
+    "documentId": "sainte-brigide-diberville-2026-06-01",
+    "act": "A03",
+    "label": "Règlement 2012-402 — Réserve financière pour l’égout et l’aqueduc",
+    "reason": "Le règlement 2012-402 n'est mentionné qu'en référence historique comme objet de modification par le règlement 2026-402-6, sans faire l'objet d'une étape propre."
+   },
+   {
+    "documentId": "roxton-2026-04-07",
+    "act": "A02",
+    "label": "Règlement de zonage 181-2003",
+    "reason": "Le règlement de zonage 181-2003 n'est mentionné que comme rappel historique dans le préambule."
+   },
+   {
+    "documentId": "les-coteaux-2026-03-16",
+    "act": "A02",
+    "label": "Règlement 304 — Contrôle provisoire du système d’égout",
+    "reason": "Il s'agit d'un simple rappel historique dans les considérants d'un règlement antérieur adopté en 2024."
+   },
+   {
+    "documentId": "les-coteaux-2026-03-16",
+    "act": "A04",
+    "label": "Règlement de permis et certificats 316",
+    "reason": "Le règlement 316 n'est que la loi existante visée par la modification, sans étape procédurale propre."
+   },
+   {
+    "documentId": "les-coteaux-2026-03-16",
+    "act": "A10",
+    "label": "Dérogation mineure DM-293 — Approbation antérieure citée",
+    "reason": "Il s'agit d'un rappel historique d'une résolution passée (25-10-9187) dans le cadre d'une demande de remboursement de frais."
+   },
+   {
+    "documentId": "saint-felix-de-kingsey-2026-04-07",
+    "act": "A02",
+    "label": "Règlement de zonage 547",
+    "reason": "Le règlement de zonage 547 n'est cité qu'en référence contextuelle dans une résolution de PPCMOI, sans faire l'objet d'un acte réglementaire direct dans cette séance."
+   },
+   {
+    "documentId": "saint-felix-de-kingsey-2026-04-07",
+    "act": "A03",
+    "label": "Règlement 631 — PPCMOI",
+    "reason": "Le règlement 631 n'est mentionné qu'à titre de référence habilitante générale au PPCMOI, sans faire l'objet d'un acte réglementaire dans cette séance."
+   },
+   {
+    "documentId": "daveluyville-2026-05-04",
+    "act": "A02",
+    "label": "R-2025-137 — Règlement de zonage",
+    "reason": "Le règlement R-2025-137 n'est cité qu'à titre de règlement antérieur modifié, sans faire l'objet d'une étape procédurale propre."
+   },
+   {
+    "documentId": "lorraine-2026-01-13",
+    "act": "A05",
+    "label": "Règlement URB-03 de zonage",
+    "reason": "Le règlement URB-03 est seulement mentionné comme référence réglementaire en vigueur, aucun acte législatif ne le vise dans cette séance."
+   },
+   {
+    "documentId": "beaupre-2026-03-02",
+    "act": "A01",
+    "label": "Règlement 1196 sur les PIIA",
+    "reason": "Le règlement 1196 est uniquement mentionné comme base légale existante pour l'évaluation des PIIA sans faire l'objet d'un acte réglementaire dans cette séance."
+   },
+   {
+    "documentId": "beaupre-2026-03-02",
+    "act": "A08",
+    "label": "Règlement 1328 — taxes et compensations 2026",
+    "reason": "Le règlement 1328 n'est pas adopté ou modifié directement en tant qu'acte autonome, il s'agit seulement du règlement antérieur visé par la modification."
+   },
+   {
+    "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+    "act": "A02",
+    "label": "Règlement 2009-474 — Plan d’urbanisme",
+    "reason": "Il s'agit d'un simple rappel historique de l'adoption en 2009 du plan d'urbanisme numéro 2009-474, sans décision prise dans ce document."
+   },
+   {
+    "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+    "act": "A04",
+    "label": "Règlement 2009-475 — Permis et certificats",
+    "reason": "Il s'agit d'un rappel historique concernant un règlement adopté le 4 mai 2009."
+   },
+   {
+    "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+    "act": "A06",
+    "label": "Règlement 2009-476 — Zonage",
+    "reason": "Il s'agit d'un rappel historique d'un règlement adopté en mai 2009."
+   },
+   {
+    "documentId": "saint-bernard-de-michaudville-2026-04-01",
+    "act": "A02",
+    "label": "Règlement 2025-11 — Tarification et frais administratifs",
+    "reason": "Le règlement 2025-11 n'est mentionné que dans un préambule comme le règlement remplacé/modifié (rappel historique sans acte propre)."
+   },
+   {
+    "documentId": "saint-bernard-de-michaudville-2026-04-01",
+    "act": "A06",
+    "label": "Dépôt du rapport des permis émis en mars 2026",
+    "reason": "Il s'agit d'un simple dépôt d'information/rapport de permis sans acte décisionnel ni réglementaire."
+   },
+   {
+    "documentId": "tadoussac-2026-01-13",
+    "act": "A02",
+    "label": "Règlement de zonage 253",
+    "reason": "Le règlement 253 n'est mentionné qu'à titre de rappel historique dans les considérants du projet modificateur."
+   },
+   {
+    "documentId": "saint-sylvere-2026-04-07",
+    "act": "A01",
+    "label": "Règlement de zonage # 247",
+    "reason": "Le règlement 247 n'est cité qu'en tant que règlement de zonage antérieur modifié, sans faire l'objet d'une étape procédurale propre dans cette séance."
+   },
+   {
+    "documentId": "parisville-2026-05-05",
+    "act": "A02",
+    "label": "Règlement de zonage 308-2011",
+    "reason": "Le règlement 308-2011 n'est mentionné qu'à titre de référence historique pour le règlement modifié sans faire l'objet d'une étape procédurale propre."
+   },
+   {
+    "documentId": "parisville-2026-05-05",
+    "act": "A04",
+    "label": "Règlement de lotissement 311-2011",
+    "reason": "Le règlement 311-2011 n'est cité qu'en tant que règlement d'origine faisant l'objet d'une modification."
+   },
+   {
+    "documentId": "parisville-2026-05-05",
+    "act": "A05",
+    "label": "Premier projet de règlement 431-2026 — zonage",
+    "reason": "L'adoption du premier projet de règlement 431-2026 est un rappel historique d'une séance passée (10 mars 2026)."
+   },
+   {
+    "documentId": "lac-saint-paul-2026-05-11",
+    "act": "A03",
+    "label": "Règlement 046-2023 — Citation patrimoniale de l’église Saint-Paul",
+    "reason": "Le règlement 046-2023 n'est mentionné que comme référence historique au règlement visé par l'abrogation, aucun acte de procédure ne le vise directement."
+   },
+   {
+    "documentId": "dosquet-2026-01-13",
+    "act": "A03",
+    "label": "Règlement d’emprunt 2022-459",
+    "reason": "Le règlement 2022-459 est un règlement d'emprunt antérieur cité comme base juridique pour une résolution de concordance d'emprunt par billet, et non un acte réglementaire adopté à cette séance."
+   },
+   {
+    "documentId": "barnston-ouest-2026-05-04",
+    "act": "A02",
+    "label": "Règlement 224 — Plan d’urbanisme",
+    "reason": "Le règlement 224 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification par le projet de règlement 325-2026."
+   },
+   {
+    "documentId": "barnston-ouest-2026-05-04",
+    "act": "A04",
+    "label": "Règlement 225 — Zonage",
+    "reason": "Le règlement 225 est uniquement cité en tant que règlement antérieur modifié par le projet de règlement 326-2026."
+   },
+   {
+    "documentId": "barnston-ouest-2026-05-04",
+    "act": "A06",
+    "label": "Règlement 226 (2012) — Lotissement",
+    "reason": "Le règlement 226 (2012) est simplement le règlement antérieur visé par la modification du projet de règlement 327-2026."
+   },
+   {
+    "documentId": "barnston-ouest-2026-05-04",
+    "act": "A08",
+    "label": "Règlement 221 — PIIA",
+    "reason": "Le règlement 221 est uniquement mentionné comme le règlement faisant l'objet d'une modification par le projet de règlement 328-2026."
+   },
+   {
+    "documentId": "bedford--brome-missisquoi-2026-06-02",
+    "act": "A03",
+    "label": "706-12 — Règlement sur les PIIA",
+    "reason": "Le règlement 706-12 n'est mentionné que comme référence légale antérieure (rappel historique/cadre) sans faire l'objet d'un acte réglementaire dans cette séance."
+   },
+   {
+    "documentId": "bedford--brome-missisquoi-2026-06-02",
+    "act": "A07",
+    "label": "699-11 — Règlement de zonage",
+    "reason": "Le règlement de zonage 699-11 est cité en référence normative sans faire l'objet d'un acte procédural dans la séance."
+   },
+   {
+    "documentId": "bedford--brome-missisquoi-2026-06-02",
+    "act": "A12",
+    "label": "702-11 — Émission des permis et certificats",
+    "reason": "Le règlement 702-11 est le règlement d'origine faisant l'objet d'une modification, et non un acte adopté en tant que tel."
+   },
+   {
+    "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+    "act": "A05",
+    "label": "Règlement de zonage 02-2023",
+    "reason": "Le règlement 02-2023 n'est mentionné que comme rappel historique et règlement modifié, sans acte propre à cette séance."
+   },
+   {
+    "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+    "act": "A07",
+    "label": "Adoption annoncée du second projet 03-2026",
+    "reason": "Il s'agit d'un doublon de l'acte d'adoption du second projet de règlement 03-2026 (A06)."
+   },
+   {
+    "documentId": "wentworth-nord-2026-01-21",
+    "act": "A02",
+    "label": "Règlement de lotissement 2017-497",
+    "reason": "Le règlement de lotissement no 2017-497 n'est cité que comme rappel historique ou cadre normatif dans les attendus de la dérogation mineure."
+   },
+   {
+    "documentId": "wentworth-nord-2026-01-21",
+    "act": "A04",
+    "label": "Règlement de zonage 2017-498",
+    "reason": "Le règlement no 2017-498 n'est mentionné que comme règlement de base modifié, aucun acte direct ne porte sur son adoption globale."
+   },
+   {
+    "documentId": "wentworth-nord-2026-01-21",
+    "act": "A05",
+    "label": "Projet de règlement 2017-498-30 — hébergement touristique",
+    "reason": "Le projet de règlement 2017-498-30 n'est mentionné qu'en référence historique lors du dépôt des certificats d'enregistrement."
+   },
+   {
+    "documentId": "wentworth-nord-2026-01-21",
+    "act": "A06",
+    "label": "Règlement 2017-498-30-C09",
+    "reason": "Le règlement distinct 2017-498-30-C09 n'est l'objet d'aucune démarche procédurale adoptée dans la séance autre qu'un dépôt de certificat de consultation."
+   },
+   {
+    "documentId": "wentworth-nord-2026-01-21",
+    "act": "A07",
+    "label": "Règlement 2017-498-30-CONS08",
+    "reason": "Le règlement distinct 2017-498-30-CONS08 n'est l'objet d'aucune démarche procédurale adoptée dans la séance autre qu'un dépôt de certificat d'enregistrement."
+   },
+   {
+    "documentId": "wentworth-nord-2026-01-21",
+    "act": "A08",
+    "label": "Règlement 2017-498-30-I04",
+    "reason": "Le règlement distinct 2017-498-30-I04 n'est mentionné que dans le cadre du dépôt des certificats d'enregistrement, sans action réglementaire propre."
+   },
+   {
+    "documentId": "sainte-clotilde-2026-04-20",
+    "act": "A02",
+    "label": "Règlement de zonage 471",
+    "reason": "Le règlement 471 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification, il ne fait l'objet d'aucun acte autonome dans la séance."
+   },
+   {
+    "documentId": "sainte-clotilde-2026-04-20",
+    "act": "A04",
+    "label": "Règlement du plan d’urbanisme 470",
+    "reason": "Le règlement 470 est uniquement le règlement antérieur modifié, sans étape de procédure propre lors de cette séance."
+   },
+   {
+    "documentId": "sainte-clotilde-2026-04-20",
+    "act": "A06",
+    "label": "Règlement de lotissement 472",
+    "reason": "Le règlement 472 est simplement mentionné comme le règlement d'origine visé par une modification."
+   },
+   {
+    "documentId": "eastman-2026-06-01",
+    "act": "A02",
+    "label": "RU-2023-02 — stationnement et gestion des voies publiques",
+    "reason": "Le règlement RU-2023-02 n'est mentionné que comme le règlement existant amendé par le projet 2026-07, sans acte propre ni étape de procédure."
+   },
+   {
+    "documentId": "warden-2026-04-08",
+    "act": "A03",
+    "label": "Règlement administratif 2017-131",
+    "reason": "Le règlement 2017-131 n'est que la cible modifiée mentionnée dans le titre et ne subit pas d'étape de procédure autonome dans ce document."
+   },
+   {
+    "documentId": "bowman-2026-05-12",
+    "act": "A01",
+    "label": "Règlement de zonage no 2022-02-05Z",
+    "reason": "Le règlement de zonage no 2022-02-05Z n'est mentionné qu'incidemment dans les considérants d'une dérogation mineure sans faire l'objet d'un acte ou d'une étape de procédure dans cette séance."
+   },
+   {
+    "documentId": "lavenir-2026-05-04",
+    "act": "A02",
+    "label": "Règlement de zonage 654-12",
+    "reason": "Le règlement de zonage 654-12 est seulement mentionné comme règlement de base faisant l'objet de la modification, sans étape propre dans cette séance."
+   },
+   {
+    "documentId": "lavenir-2026-05-04",
+    "act": "A03",
+    "label": "Avis de motion et présentation du règlement 797-26",
+    "reason": "L'avis de motion est un simple rappel historique d'une étape passée tenue le 9 mars 2026."
+   },
+   {
+    "documentId": "lavenir-2026-05-04",
+    "act": "A04",
+    "label": "Adoption du premier projet du règlement 797-26",
+    "reason": "L'adoption du premier projet de règlement est un rappel historique d'une étape antérieure survenue le 9 mars 2026."
+   },
+   {
+    "documentId": "lavenir-2026-05-04",
+    "act": "A05",
+    "label": "Consultation publique sur le règlement 797-26",
+    "reason": "La consultation publique est mentionnée au préambule comme un événement passé tenu le 13 avril 2026."
+   },
+   {
+    "documentId": "lavenir-2026-05-04",
+    "act": "A06",
+    "label": "Adoption sans changement du deuxième projet du règlement 797-26",
+    "reason": "L'adoption du second projet est un rappel historique d'une étape s'étant déroulée le 13 avril 2026."
+   },
+   {
+    "documentId": "stoneham-et-tewkesbury-2026-06-08",
+    "act": "A01",
+    "label": "Règlement de zonage numéro 09-591",
+    "reason": "Le règlement 09-591 n'est que le règlement d'origine cité comme référence modifiée par le règlement 26-1105 sans étape propre dans cette séance."
+   },
+   {
+    "documentId": "stoneham-et-tewkesbury-2026-06-08",
+    "act": "A02",
+    "label": "Règlement relatif aux plans d’implantation et d’intégration architecturale numéro 09-603",
+    "reason": "Le règlement 09-603 est seulement le règlement d'origine cité comme objet de la modification par le règlement 26-1106."
+   },
+   {
+    "documentId": "saint-tite-des-caps-2026-02-02",
+    "act": "A05",
+    "label": "Règlement 500-2017 — interventions assujetties au PIIA",
+    "reason": "Le règlement 500-2017 n'est cité qu'en référence légale existante dans les considérants, il ne fait l'objet d'aucune démarche ou adoption dans cette séance."
+   },
+   {
+    "documentId": "cookshire-eaton-2026-04-07",
+    "act": "A07",
+    "label": "Règlement 316-2023 — Démolition d’immeubles",
+    "reason": "Le règlement 316-2023 n'est mentionné que comme le règlement antérieur amendé, aucune étape de procédure n'est accomplie pour lui-même."
+   },
+   {
+    "documentId": "sainte-angele-de-monnoir-2026-01-13",
+    "act": "A03",
+    "label": "Règlement 382-07 sur les PIIA",
+    "reason": "Le règlement 382-07 n'est qu'une mention contextuelle de conformité réglementaire dans un considérant, il ne fait l'objet d'aucune démarche procédurale propre dans cette séance."
+   },
+   {
+    "documentId": "mont-saint-hilaire-2026-04-13",
+    "act": "A03",
+    "label": "Règlement du Plan d’urbanisme durable numéro 1230",
+    "reason": "Le règlement 1230 est simplement le règlement d'urbanisme antérieur mentionné comme faisant l'objet de modifications, aucun acte autonome de procédure n'est posé sur lui dans cette séance."
+   },
+   {
+    "documentId": "mont-saint-hilaire-2026-04-13",
+    "act": "A07",
+    "label": "Règlement de zonage numéro 1235",
+    "reason": "Le règlement de zonage 1235 est le règlement d'origine faisant l'objet d'amendements, aucun acte autonome de procédure n'est posé directement sur le règlement 1235 lui-même."
+   },
+   {
+    "documentId": "brossard-2026-04-28",
+    "act": "A01",
+    "label": "REG-362 — Règlement de zonage",
+    "reason": "Le règlement REG-362 n'est pas l'objet d'un acte réglementaire dans cette séance, il est seulement mentionné comme référence dans une dérogation mineure."
+   },
+   {
+    "documentId": "contrecoeur-2026-04-14",
+    "act": "A03",
+    "label": "U-100 — Règlement relatif au zonage",
+    "reason": "Le règlement U-100 est le règlement de base visé par la modification et ne fait pas l'objet d'un acte procédural autonome dans cette séance."
+   },
+   {
+    "documentId": "contrecoeur-2026-04-14",
+    "act": "A04",
+    "label": "Adoption du second projet U-100-1",
+    "reason": "Il s'agit d'un doublon de l'acte d'adoption du second projet de règlement U-100-1 déjà représenté par A02, ici catégorisé de façon redondante comme DesignationEvent."
+   },
+   {
+    "documentId": "contrecoeur-2026-04-14",
+    "act": "A07",
+    "label": "E-110 — Portes et fenêtres du centre multifonctionnel",
+    "reason": "Il s'agit d'un règlement d'emprunt pour la réfection d'un bâtiment municipal existant (portes et fenêtres), sans acte d'urbanisme ou d'aménagement."
+   },
+   {
+    "documentId": "hatley-2026-04-07",
+    "act": "A02",
+    "label": "Règlement sur les PIIA 2006",
+    "reason": "Il s'agit d'une simple mention d'un règlement existant dans les considérants, sans aucune démarche d'adoption ou de modification de règlement."
+   },
+   {
+    "documentId": "la-peche-2026-06-01",
+    "act": "A01",
+    "label": "Règlement de zonage 113-2025",
+    "reason": "Le règlement de zonage 113-2025 n'est mentionné que comme cadre réglementaire existant d'une demande de dérogation mineure, sans faire l'objet d'un acte ou d'une étape d'adoption."
+   },
+   {
+    "documentId": "la-peche-2026-06-01",
+    "act": "A02",
+    "label": "Projet de règlement 113-001-2026",
+    "reason": "Le texte ne fait que mentionner dans un considérant d'une dérogation mineure que le projet 113-001-2026 est adopté conformément à la loi (rappel historique), sans acte d'adoption dans la séance."
+   },
+   {
+    "documentId": "la-peche-2026-06-01",
+    "act": "A03",
+    "label": "Projet de règlement 113-002-2026",
+    "reason": "Il ne s'agit que d'un rappel historique dans les considérants d'une dérogation mineure et non d'une démarche d'adoption de ce projet de règlement lors de cette séance."
+   },
+   {
+    "documentId": "la-peche-2026-06-01",
+    "act": "A06",
+    "label": "Règlement relatif aux usages conditionnels 145.31-2025",
+    "reason": "Le règlement 145.31-2025 est simplement le règlement en vertu duquel sont examinées des demandes d'usage conditionnel, sans acte propre."
+   },
+   {
+    "documentId": "sainte-sophie-2026-06-02",
+    "act": "A03",
+    "label": "1297-2020 — Règlement de zonage",
+    "reason": "Le règlement 1297-2020 n'est que le règlement de base cité comme objet de modification, il ne fait pas l'objet d'un acte propre dans cette séance."
+   },
+   {
+    "documentId": "sainte-barbe-2026-05-05",
+    "act": "A02",
+    "label": "Règlement de zonage 2003-05",
+    "reason": "Le règlement 2003-05 n'est que le règlement d'origine modifié par le second projet de règlement 2003-05-63, il ne constitue pas un acte distinct adopté ici."
+   },
+   {
+    "documentId": "sainte-martine-2026-03-17",
+    "act": "A02",
+    "label": "2019-345 — Permis et certificats",
+    "reason": "Le règlement 2019-345 est uniquement mentionné comme étant le règlement antérieur modifié, sans étape propre dans la séance."
+   },
+   {
+    "documentId": "sainte-martine-2026-03-17",
+    "act": "A04",
+    "label": "2019-342 — Règlement de zonage",
+    "reason": "Le règlement 2019-342 est simplement cité comme le règlement d'origine faisant l'objet d'une modification, sans faire l'objet d'un acte distinct."
+   },
+   {
+    "documentId": "sainte-martine-2026-03-17",
+    "act": "A09",
+    "label": "2022-418 — PIIA",
+    "reason": "Le règlement 2022-418 relatif aux PIIA est cité en référence réglementaire d'application sans franchir d'étape procédurale dans cette séance."
+   },
+   {
+    "documentId": "sainte-martine-2026-03-17",
+    "act": "A12",
+    "label": "2019-343 — Règlement de lotissement",
+    "reason": "Le règlement de lotissement 2019-343 est simplement la référence normative en vertu de laquelle l'exigence est imposée, sans acte d'adoption ou d'amendement."
+   },
+   {
+    "documentId": "rosemere-2026-04-13",
+    "act": "A09",
+    "label": "Règlement 1004 — Contribution pour fins de parcs",
+    "reason": "Le règlement 1004 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification par le 1004-01, sans étape propre."
+   },
+   {
+    "documentId": "rosemere-2026-04-13",
+    "act": "A13",
+    "label": "Règlement 990 — Réfection de la rue Northcote",
+    "reason": "Le règlement 990 est le règlement antérieur modifié par le 990-01 et ne fait l'objet d'aucune démarche procédurale directe."
+   },
+   {
+    "documentId": "orford-2026-03-02",
+    "act": "A03",
+    "label": "Règlement 955 — plans d’implantation et d’intégration architecturale",
+    "reason": "Le règlement 955 n'est mentionné qu'à titre de cadre juridique existant dans les considérants d'une résolution de PIIA, sans étape d'adoption ni modification."
+   },
+   {
+    "documentId": "orford-2026-03-02",
+    "act": "A04",
+    "label": "Règlement 951 — zonage et lotissement",
+    "reason": "Le règlement 951 n'est cité qu'en référence dans les considérants, il ne franchit aucune étape procédurale dans cette séance."
+   },
+   {
+    "documentId": "berthier-sur-mer-2026-03-24",
+    "act": "A02",
+    "label": "265 — Règlement de zonage",
+    "reason": "Le règlement 265 est uniquement mentionné comme règlement d'origine faisant l'objet de modifications, sans acte décisionnel autonome."
+   },
+   {
+    "documentId": "berthier-sur-mer-2026-03-24",
+    "act": "A03",
+    "label": "Adoption du deuxième projet 369",
+    "reason": "Il s'agit d'un doublon de l'acte réglementaire A01 portant sur l'adoption du deuxième projet de règlement 369."
+   },
+   {
+    "documentId": "berthier-sur-mer-2026-03-24",
+    "act": "A05",
+    "label": "360 — Modification du règlement de démolition",
+    "reason": "Le règlement 360 est cité comme historique ou règlement modifié, aucun acte n'est posé à son sujet durant cette séance."
+   },
+   {
+    "documentId": "berthier-sur-mer-2026-03-24",
+    "act": "A06",
+    "label": "354 — Démolition d'immeubles",
+    "reason": "Le règlement 354 n'est qu'un simple rappel historique dans les considérants."
+   },
+   {
+    "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+    "act": "A07",
+    "label": "Règlement de zonage 1259-2014",
+    "reason": "Le règlement 1259-2014 est le règlement de zonage d'origine qui est simplement mentionné comme objet de modification, non un acte adopté ici."
+   },
+   {
+    "documentId": "potton-2026-01-05",
+    "act": "A02",
+    "label": "Règlement de zonage 2001-291",
+    "reason": "Le règlement de zonage 2001-291 n'est qu'une référence réglementaire citée dans la résolution de dérogation mineure, sans faire l'objet d'un acte propre dans cette section."
+   },
+   {
+    "documentId": "notre-dame-du-rosaire-2026-03-02",
+    "act": "A02",
+    "label": "Règlement de zonage 90-01",
+    "reason": "Le règlement de zonage numéro 90-01 n'est mentionné que comme règlement d'origine faisant l'objet d'un avis de motion de modification."
+   },
+   {
+    "documentId": "pierreville-2026-03-10",
+    "act": "A02",
+    "label": "Règlement de zonage 160-2017",
+    "reason": "Le règlement 160-2017 est seulement mentionné comme règlement antérieur en cours de modification."
+   },
+   {
+    "documentId": "pierreville-2026-03-10",
+    "act": "A04",
+    "label": "Avis de motion du projet 268-2025",
+    "reason": "L'avis de motion est un rappel historique tenu lors de la séance du 9 décembre 2025 et n'est pas posé dans la présente séance."
+   },
+   {
+    "documentId": "sainte-croix-2026-05-05",
+    "act": "A02",
+    "label": "387-2007 — Plan d'urbanisme",
+    "reason": "Le règlement 387-2007 n'est cité qu'à titre de règlement modifié (rappel de contexte réglementaire), sans étape procédurale propre."
+   },
+   {
+    "documentId": "sainte-croix-2026-05-05",
+    "act": "A04",
+    "label": "389-2007 — Règlement de zonage",
+    "reason": "Le règlement de zonage 389-2007 n'est qu'un rappel historique/réglementaire du règlement en vigueur faisant l'objet d'une modification."
+   },
+   {
+    "documentId": "lac-etchemin-2026-02-03",
+    "act": "A03",
+    "label": "Règlement 66-2006 — dérogations mineures",
+    "reason": "Le règlement 66-2006 n'est mentionné qu'à titre de référence habilitante pour la demande de dérogation mineure, sans faire l'objet d'un acte réglementaire dans cette séance."
+   },
+   {
+    "documentId": "lac-etchemin-2026-02-03",
+    "act": "A04",
+    "label": "Règlement 121-2012 — PPCMOI",
+    "reason": "Le règlement 121-2012 est seulement cité comme cadre normatif habilitant la demande de PPCMOI, aucun acte procédural ne porte sur ce règlement."
+   },
+   {
+    "documentId": "lac-etchemin-2026-02-03",
+    "act": "A05",
+    "label": "Règlement de zonage 62-2006",
+    "reason": "Le règlement 62-2006 est une simple mention de référence contextuelle dans les considérants du PPCMOI."
+   },
+   {
+    "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+    "act": "A02",
+    "label": "310-19-01-09 — Règlement de zonage",
+    "reason": "Le règlement 310-19-01-09 est le règlement de base en vigueur cité comme faisant l'objet d'une modification, et non un acte procéduralement initié ou adopté lors de cette séance."
+   },
+   {
+    "documentId": "sainte-genevieve-de-batiscan-2026-04-07",
+    "act": "A04",
+    "label": "309-19-01-09 — Plan d’urbanisme",
+    "reason": "Le plan d'urbanisme 309-19-01-09 est le règlement antérieur modifié et non un acte d'urbanisme adopté ou franchissant une étape lors de la séance."
+   },
+   {
+    "documentId": "stanstead-est-2026-04-13",
+    "act": "A05",
+    "label": "Règlement 2026-02 sur le droit de préemption",
+    "reason": "Le règlement 2026-02 n'est pas adopté lors de cette séance, il s'agit d'un simple rappel historique dans les attendus."
+   },
+   {
+    "documentId": "stanstead-est-2026-04-13",
+    "act": "A11",
+    "label": "Règlement 2016-10 sur la tarification des permis et certificats",
+    "reason": "Le règlement 2016-10 est le règlement antérieur qui fait l'objet d'une modification, il ne fait l'objet d'aucun acte ou étape autonome lors de cette séance."
+   },
+   {
+    "documentId": "brownsburg-chatham-2026-03-10",
+    "act": "A02",
+    "label": "Règlement de zonage 197-2013",
+    "reason": "Le règlement de zonage 197-2013 est uniquement mentionné comme contexte réglementaire existant et ne fait l'objet d'aucun acte ou modification lors de cette séance."
+   },
+   {
+    "documentId": "brownsburg-chatham-2026-03-10",
+    "act": "A03",
+    "label": "Règlement de lotissement 198-2013",
+    "reason": "Le règlement de lotissement 198-2013 est seulement cité comme référence pour les dérogations demandées et ne fait l'objet d'aucune démarche procédurale propre."
+   },
+   {
+    "documentId": "brownsburg-chatham-2026-03-10",
+    "act": "A04",
+    "label": "Règlement sur les PIIA 201-2013",
+    "reason": "Le règlement 201-2013 est seulement mentionné comme cadre réglementaire d'application du PIIA et ne fait l'objet d'aucune modification ou adoption."
+   },
+   {
+    "documentId": "sainte-thecle-2026-03-09",
+    "act": "A07",
+    "label": "337-2016 — Règlement de zonage",
+    "reason": "Le règlement 337-2016 est simplement le règlement d'origine faisant l'objet d'une modification par le règlement 440-2026, aucun acte autonome sans étape n'est posé dessus."
+   },
+   {
+    "documentId": "carignan-2026-03-04",
+    "act": "A15",
+    "label": "Règlement de zonage 483-U",
+    "reason": "Le règlement 483-U n'est mentionné qu'en tant que règlement de base faisant l'objet d'une modification par le règlement 483-41-U, sans étape de procédure propre."
+   },
+   {
+    "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+    "act": "A02",
+    "label": "Plan d'urbanisme 392-2021",
+    "reason": "Le plan d'urbanisme 392-2021 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification, sans acte autonome."
+   },
+   {
+    "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+    "act": "A04",
+    "label": "Règlement de zonage 394-2021",
+    "reason": "Le règlement 394-2021 n'est mentionné que comme le règlement antérieur modifié par le règlement 438-2025, sans acte propre."
+   },
+   {
+    "documentId": "lac-brome-2026-04-07",
+    "act": "A01",
+    "label": "Règlement de zonage 596",
+    "reason": "Le règlement 596 est le règlement de base cité comme contexte de modification, non un acte normatif distinct adopté lors de cette séance."
+   },
+   {
+    "documentId": "lac-brome-2026-04-07",
+    "act": "A08",
+    "label": "Règlement 601 sur les PIIA",
+    "reason": "Le règlement 601 est simplement mentionné comme cadre réglementaire d'assujettissement sans faire l'objet d'un acte lors de cette séance."
+   },
+   {
+    "documentId": "lac-brome-2026-04-07",
+    "act": "A09",
+    "label": "Affaissement d'égout et analyse des infrastructures de Bondville",
+    "reason": "Il s'agit de simples commentaires informatifs du maire en ouverture de séance, sans acte d'urbanisme ou décision formelle."
+   },
+   {
+    "documentId": "boisbriand-2026-05-05",
+    "act": "A02",
+    "label": "RV-1446 — dérogations mineures",
+    "reason": "Le règlement RV-1446 est simplement la loi modifiée citée comme référence, non un acte décisionnel autonome à cette séance."
+   },
+   {
+    "documentId": "boisbriand-2026-05-05",
+    "act": "A04",
+    "label": "RV-1787 — taxes et compensations 2026",
+    "reason": "Le règlement RV-1787 est mentionné uniquement en tant que texte modifié par le règlement RV-1787-1, sans faire l'objet d'un acte distinct."
+   },
+   {
+    "documentId": "lac-des-seize-iles-2026-09-agenda",
+    "act": "A03",
+    "label": "Règlement sur le lotissement 2019-102",
+    "reason": "Le règlement 2019-102 n'est mentionné que comme le règlement antérieur faisant l'objet d'une modification, il ne constitue pas un acte distinct adopté ou traité en lui-même."
+   },
+   {
+    "documentId": "valcourt-2026-06-01-agenda",
+    "act": "A06",
+    "label": "Règlement de zonage 560",
+    "reason": "Le règlement de zonage 560 n'est mentionné que comme le règlement d'origine amendé par le second projet 560-28, il ne fait l'objet d'aucune étape propre dans cette séance."
+   },
+   {
+    "documentId": "saint-barthelemy-2026-09-08",
+    "act": "A01",
+    "label": "Règlement de zonage 288-90",
+    "reason": "Le règlement 288-90 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification, il ne fait pas l'objet d'une étape procédurale propre."
+   }
+  ],
+  "C": [
+   {
+    "documentId": "amherst-2026-06-08",
+    "act": "A03",
+    "label": "Passerelle du lac de la Décharge — Autorisation de dépense prévue",
+    "reason": "Une simple autorisation de dépense pour une passerelle relève de travaux/dépenses d'infrastructure ou de loisirs sans acte d'urbanisme ou foncier explicite."
+   },
+   {
+    "documentId": "abercorn-2026-03-30",
+    "act": "A01",
+    "label": "Adhésion au réseau Rues Principales",
+    "reason": "Il s'agit d'une adhésion à un organisme et d'une autorisation de participation à un colloque, ce qui relève de la vie associative et des représentations municipales et non d'un acte réglementaire d'urbanisme."
+   },
+   {
+    "documentId": "val-racine-2026-06-09",
+    "act": "A09",
+    "label": "GESTIZONE — caractérisation des milieux humides",
+    "reason": "L'autorisation d'un droit de visite pour une caractérisation ne constitue pas un acte réglementaire ou d'urbanisme au sens des compétences municipales."
+   },
+   {
+    "documentId": "aumond-2026-01-14",
+    "act": "A05",
+    "label": "Règlement 2019-02 — Rémunération des élus",
+    "reason": "Le règlement 2019-02 sur la rémunération des élus n'est qu'une mention du règlement antérieur modifié, et relève des exclusions hors urbanisme."
+   },
+   {
+    "documentId": "arundel-2026-07-31",
+    "act": "A04",
+    "label": "Règlement 168 — SPAIP",
+    "reason": "Le règlement 168 n'est pas adopté ou modifié; il s'agit d'une simple mention du règlement applicable pour une demande de PIIA."
+   },
+   {
+    "documentId": "lac-du-cerf-2026-04-11",
+    "act": "A03",
+    "label": "Projet de règlement 427-2026 — Gestion contractuelle",
+    "reason": "Le règlement porte sur la gestion contractuelle (marchés publics), ce qui est exclu du domaine de l'urbanisme et de l'aménagement."
+   },
+   {
+    "documentId": "les-coteaux-2026-03-16",
+    "act": "A06",
+    "label": "Règlement de zonage 317",
+    "reason": "Le règlement 317 est uniquement la réglementation d'origine faisant l'objet du projet modificatif."
+   },
+   {
+    "documentId": "saint-felix-de-kingsey-2026-04-07",
+    "act": "A06",
+    "label": "Rapport mensuel — 10 demandes de permis",
+    "reason": "Le dépôt d'un rapport mensuel d'activités/permis constitue une simple communication interne exclue des actes d'urbanisme opérationnels ou réglementaires."
+   },
+   {
+    "documentId": "daveluyville-2026-05-04",
+    "act": "A01",
+    "label": "R-2026-154 — Assouplissement des normes de droits acquis",
+    "reason": "Il n'y a pas eu d'adoption d'un premier projet de règlement pour R-2026-154 dans cette séance, seulement un avis de motion et un dépôt de projet de règlement."
+   },
+   {
+    "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+    "act": "A16",
+    "label": "Règlement 2026-02 — Occupation et entretien des bâtiments",
+    "reason": "Le texte fait uniquement référence à l'adoption passée du règlement 2026-02 pour justifier la nomination d'officiers d'application."
+   },
+   {
+    "documentId": "saint-bernard-de-michaudville-2026-04-01",
+    "act": "A05",
+    "label": "Station d’épuration — Remplacement d’un surpresseur",
+    "reason": "Il s'agit d'un simple contrat de services/achat d'équipement pour la réparation ou l'entretien d'une station d'épuration, sans acte réglementaire ou d'urbanisme."
+   },
+   {
+    "documentId": "parisville-2026-05-05",
+    "act": "A08",
+    "label": "Signature de l’entente modifiée de fourniture d’eau potable",
+    "reason": "L'entente de fourniture et distribution d'eau potable avec une autre municipalité relève d'un contrat de services/gestion d'exploitation sans acte d'urbanisme."
+   },
+   {
+    "documentId": "parisville-2026-05-05",
+    "act": "A09",
+    "label": "Consentement conditionnel au réseau de fibre optique de Sogetel",
+    "reason": "Le consentement municipal accordé à une entreprise de télécommunications pour installer un réseau de fibre optique constitue une simple autorisation de travaux/services d'utilité publique exclue de l'urbanisme réglementaire ou foncier."
+   },
+   {
+    "documentId": "dosquet-2026-01-13",
+    "act": "A05",
+    "label": "Projet potentiel d’éoliennes à l’ordre du jour",
+    "reason": "Le point apparaît à l'ordre du jour mais ne fait l'objet d'aucune délibération, décision ou résolution dans le procès-verbal."
+   },
+   {
+    "documentId": "dosquet-2026-01-13",
+    "act": "A06",
+    "label": "Bail pour un service de garde communautaire au 368 route 116",
+    "reason": "L'autorisation de bail pour un service de garde éducatif en milieu communautaire relève de la gestion de baux municipaux/services sociaux, exclue de la planification urbaine."
+   },
+   {
+    "documentId": "dosquet-2026-01-13",
+    "act": "A07",
+    "label": "Intérêt pour la rénovation énergétique des actifs municipaux",
+    "reason": "L'avis d'intérêt à un programme d'efficacité énergétique des bâtiments municipaux (Éco Énergie 360) relève de la gestion des actifs internes sans impact direct sur l'aménagement du territoire."
+   },
+   {
+    "documentId": "barnston-ouest-2026-05-04",
+    "act": "A14",
+    "label": "Intention de relancer un projet de carrière — chemin Stage",
+    "reason": "Il s'agit d'une simple intervention citoyenne lors de la période de questions, ne constituant pas un acte municipal ou une procédure initiée."
+   },
+   {
+    "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+    "act": "A08",
+    "label": "Vente pour taxes du 11 juin 2026 — autorisation d’enchérir",
+    "reason": "L'autorisation d'enchérir lors d'une vente pour taxes relève de l'administration/finances et des exclusions, sans acte d'urbanisme ou foncier réglementaire."
+   },
+   {
+    "documentId": "warden-2026-04-08",
+    "act": "A02",
+    "label": "Règlement de zonage 2017-127",
+    "reason": "Le règlement 2017-127 n'est que la cible modifiée par le règlement 2026-184 et ne subit pas d'étape de procédure autonome dans ce document."
+   },
+   {
+    "documentId": "contrecoeur-2026-04-14",
+    "act": "A13",
+    "label": "Participation au projet régional de conformité des installations septiques",
+    "reason": "Cette entente intermunicipale de prestation de services de conformité environnementale/septique ne constitue pas un acte réglementaire ou foncier d'urbanisme."
+   },
+   {
+    "documentId": "contrecoeur-2026-04-14",
+    "act": "A14",
+    "label": "Demande de surveillance de la qualité de l’air liée au développement portuaire",
+    "reason": "Il s'agit d'une résolution de représentation politique demandant une surveillance environnementale, sans acte réglementaire ni compétence d'urbanisme directe exercée."
+   },
+   {
+    "documentId": "sainte-martine-2026-03-17",
+    "act": "A13",
+    "label": "Hausse de taxation des terrains vagues desservis",
+    "reason": "Il s'agit d'un simple échange oral lors de la période de questions rappelant une mesure fiscale déjà adoptée au budget antérieur, sans décision ni acte au procès-verbal."
+   },
+   {
+    "documentId": "gracefield-2026-04-14",
+    "act": "A02",
+    "label": "Règlement 214-2022 — Ancien code d’éthique et de déontologie",
+    "reason": "Le règlement 214-2022 est cité à titre de rappel historique et relève de l'éthique et déontologie, hors du champ de l'urbanisme."
+   },
+   {
+    "documentId": "notre-dame-du-rosaire-2026-03-02",
+    "act": "A01",
+    "label": "Projet de règlement 2026-04 modifiant le zonage",
+    "reason": "Le premier projet de règlement n'est pas adopté lors de cette séance mais seulement annoncé pour la prochaine séance du conseil."
+   },
+   {
+    "documentId": "notre-dame-du-rosaire-2026-03-02",
+    "act": "A07",
+    "label": "Réaménagement de la cour de l’Accommodation NDR",
+    "reason": "Ce point relève d'une simple mention sous la correspondance relative au déplacement d'un cabanon sans acte d'urbanisme ou d'aménagement formel."
+   },
+   {
+    "documentId": "carignan-2026-03-04",
+    "act": "A24",
+    "label": "Ouverture budgétaire — chemin de camionnage, boulevard de la Mairie",
+    "reason": "L'ouverture d'une enveloppe budgétaire relève de la gestion financière et des comptes internes, sans acte d'urbanisme ou foncier direct."
+   },
+   {
+    "documentId": "carignan-2026-03-04",
+    "act": "A25",
+    "label": "Travaux du cours d'eau des Trente et répartition des frais",
+    "reason": "Il s'agit d'une prise en charge et répartition financière de frais de travaux de cours d'eau sans acte d'aménagement du territoire au sens strict."
+   },
+   {
+    "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+    "act": "A07",
+    "label": "Mandat pour augmenter le prélèvement d'eau au puits P-1",
+    "reason": "L'octroi d'un contrat de services professionnels relève des exclusions (contrats de services/dépenses courantes sans acte d'urbanisme)."
+   },
+   {
+    "documentId": "lac-brome-2026-04-07",
+    "act": "A10",
+    "label": "Contrat de réfection du chemin Fulford et ajout de voies cyclables",
+    "reason": "L'octroi d'un contrat de travaux publics relève des exclusions (contrats de services/travaux de voirie ordinaires sans acte d'urbanisme)."
+   }
+  ]
+ }
+}

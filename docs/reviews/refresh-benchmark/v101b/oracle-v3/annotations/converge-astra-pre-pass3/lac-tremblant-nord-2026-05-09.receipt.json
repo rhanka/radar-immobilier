@@ -1,0 +1,36 @@
+{
+ "documentId": "lac-tremblant-nord-2026-05-09",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "1536c2b34552ec1fb18c6d610482fa9d18dc11b241440339c42041c15f77a12b",
+ "inputSha256": "608aa6b00e3a0a7184ca217d3ff68f5c37ab31df3bd182c0b55d2b469d0db581",
+ "responseSha256": "6453657656afb8b08ac3229383fa0dc3437dc353c89c9f3838081728d17d1c77",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 15148,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2927,
+  "outputTokens": 420,
+  "totalTokens": 3347
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 15145,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:15:49.621Z"
+}

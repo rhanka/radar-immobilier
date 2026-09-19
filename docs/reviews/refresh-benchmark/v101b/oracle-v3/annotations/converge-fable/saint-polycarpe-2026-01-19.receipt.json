@@ -1,0 +1,77 @@
+{
+ "documentId": "saint-polycarpe-2026-01-19",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "ab7f365aea8bbf9f79e4bcc5b9eb9134a19b1ef80095576db2136355d052218d",
+ "inputSha256": "0541789ff4d52ab7ecbd4eeba73da143373c36d749663ff6c6df1940e5132457",
+ "responseSha256": "204b0eaf0306639fb0a6b6c114547fd6bc73a329be555ca21804da4ee5234a20",
+ "rc": 0,
+ "latencyMs": 65870,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "59050a45-94f4-4a26-af71-30613190a078",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 5228,
+   "cacheReadInputTokens": 0,
+   "cacheCreationInputTokens": 7684,
+   "webSearchRequests": 0,
+   "costUSD": 0.4151,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 4606,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 7684,
+  "cache_read_input_tokens": 0,
+  "output_tokens": 5228,
+  "output_tokens_details": {
+   "thinking_tokens": 4606
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 7684,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 5228,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 7684,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 7684
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 0.4151,
+ "durationApiMs": 63931,
+ "stderrTail": "",
+ "errorText": null,
+ "apiErrorStatus": null,
+ "at": "2026-09-18T19:24:56.291Z"
+}

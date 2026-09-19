@@ -1,0 +1,46 @@
+{
+ "documentId": "sainte-thecle-2026-03-09",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "85f618c8cf61a275be400ff62b04b112aa0d2b2304e3e8c3f97db7856362cdc4",
+ "rawText": "{\"operations\":[\n {\"op\":\"correct\",\"id\":\"u02\",\"unit\":{\"label\":\"Décision sur la demande d’autorisation du propriétaire du lot 4 757 089 (conteneur) — déplacement demandé vers la zone 22-AF(4HA)\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"4 757 089\",\"page\":17,\"citation\":\"que le conseil de la municipalité de Sainte-Thècle demande au propriétaire du lot 4 757 089 de\",\"anchor\":\"lot 4 757 089\"},\"reason\":\"La résolution 2026-03-072 tranche une demande d’autorisation d’installation d’un conteneur (règlement de zonage #337-2016) : ce n’est ni l’adoption d’un règlement, ni un PPCMOI/usage conditionnel, ni un acte foncier (vente, acquisition, cession, servitude), donc l’étape n’entre dans aucune valeur définie et relève de « inconnu », comme les exemples du vocabulaire (avis de non-modification, convention de prêt à usage).\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Décision sur la demande d’autorisation du propriétaire du lot 4 757 089 (conteneur) — déplacement demandé vers la zone 22-AF(4HA)",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "4 757 089",
+    "page": 17,
+    "citation": "que le conseil de la municipalité de Sainte-Thècle demande au propriétaire du lot 4 757 089 de",
+    "anchor": "lot 4 757 089"
+   },
+   "reason": "La résolution 2026-03-072 tranche une demande d’autorisation d’installation d’un conteneur (règlement de zonage #337-2016) : ce n’est ni l’adoption d’un règlement, ni un PPCMOI/usage conditionnel, ni un acte foncier (vente, acquisition, cession, servitude), donc l’étape n’entre dans aucune valeur définie et relève de « inconnu », comme les exemples du vocabulaire (avis de non-modification, convention de prêt à usage)."
+  }
+ ],
+ "applied": [
+  {
+   "op": "correct",
+   "id": "u02"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 21
+}

@@ -1,0 +1,293 @@
+{
+ "documentId": "lac-saint-paul-2026-05-11",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "d694195f99b5b4aa9522600d00a4b85b3e916853324a0ce31166592d18c65fa1",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-078-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 078-2026 — Publication des avis publics",
+     "stage": "adoption",
+     "objet": "078-2026",
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "QUE le règlement numéro 078-2026 sur les modalités de publication des avis\npublics de la municipalité de Lac-Saint-Paul soit adopté."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-079-2026"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 079-2026 — Abrogation de la citation patrimoniale de l’église Saint-Paul",
+     "stage": "projet",
+     "objet": "079-2026",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Assemblée publique de consultation sur le règlement no. 079-2026, abrogeant\nle règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à\ntitre d’immeuble patrimonial;"
+      },
+      {
+       "page": 6,
+       "excerpt": "ATTENDU QUE, conformément aux dispositions de la Loi sur le patrimoine\nculturel, une séance de consultation publique doit être tenue pour présenter et\nexpliquer le projet de règlement numéro 079-2026;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-046-2023"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 046-2023 — Citation patrimoniale de l’église Saint-Paul",
+     "stage": null,
+     "objet": "046-2023",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Assemblée publique de consultation sur le règlement no. 079-2026, abrogeant\nle règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à\ntitre d’immeuble patrimonial;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-consultation-079-2026"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Convocation d’une consultation publique sur le projet de règlement 079-2026",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "QU’une séance de consultation publique soit tenue le 13 juillet 2026 à 18 h 30\nà la salle communautaire située au 386, rue Principale à Lac-Saint-Paul pour"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-avis-special-046-2023"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dépôt de l’avis spécial relatif à l’abrogation du règlement 046-2023",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "CONFORMÉMENT aux dispositions de la Loi sur le patrimoine culturel\n(chapitre P-9.002), le greffier-trésorier présente et dépose l’avis spécial relatif"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-eglise-travaux"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Contrat d’ingénierie pour la restauration de l’église Saint-Paul et le projet de halte routière",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "QUE la municipalité de Lac Saint Paul octroie de gré à gré le contrat relatif à\nla préparation des études, plans, devis et documents requis pour le projet de"
+      },
+      {
+       "page": 5,
+       "excerpt": "ATTENDU QUE la municipalité de Lac Saint Paul souhaite procéder à la\nrestauration et la réfection de la devanture de l’église Saint-Paul ainsi qu’à la\ndémolition de la partie arrière;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-revision-agroenvironnement"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande de suspension et de révision du projet de règlement sur les pratiques agroenvironnementales",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "DE DEMANDER à la ministre de l’Environnement, de la Lutte contre les\nChangements climatiques, de la Faune et des Parcs, Mme Pascale Déry, de\nsuspendre le processus d’adoption de ce règlement"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-pickleball-arpentage"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Contrat d’arpentage pour la construction d’un terrain de pickleball",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "D’OCTROYER de gré à gré un contrat de services professionnels à la firme\nBoréal, Arpenteurs-Géomètres, pour la préparation du certificat d’implantation"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte le règlement numéro 078-2026 sur les modalités de publication des avis publics.\",\"excerpt\":\"QUE le règlement numéro 078-2026 sur les modalités de publication des avis publics de la municipalité de Lac-Saint-Paul soit adopté.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement 079-2026 abrogeant la citation patrimoniale est mentionné dans la résolution de consultation publique.\",\"excerpt\":\"une séance de consultation publique doit être tenue pour présenter et expliquer le projet de règlement numéro 079-2026\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 046-2023 n'est mentionné que comme référence historique abrogée par le projet de règlement 079-2026.\",\"excerpt\":\"abrogeant le règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à titre d’immeuble patrimonial\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"La résolution fixe la tenue d'une séance de consultation publique sur le projet de règlement numéro 079-2026 le 13 juillet 2026.\",\"excerpt\":\"QU’une séance de consultation publique soit tenue le 13 juillet 2026 à 18 h 30 à la salle communautaire située au 386, rue Principale à Lac-Saint-Paul\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le greffier-trésorier présente et dépose l'avis spécial relatif à l'abrogation du règlement numéro 046-2023.\",\"excerpt\":\"le greffier-trésorier présente et dépose l’avis spécial relatif à l’abrogation du règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à titre d’immeuble patrimonial.\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"L'octroi d'un contrat de services professionnels d'ingénierie relève des exclusions (contrats de services).\",\"excerpt\":\"QUE la municipalité de Lac Saint Paul octroie de gré à gré le contrat relatif à la préparation des études, plans, devis et documents requis pour le projet de halte routière\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"La résolution demande formellement au gouvernement de suspendre et réviser le projet de règlement sur les pratiques agroenvironnementales en matière d'aménagement.\",\"excerpt\":\"DE DEMANDER à la ministre de l’Environnement, de la Lutte contre les Changements climatiques, de la Faune et des Parcs, Mme Pascale Déry, de suspendre le processus d’adoption de ce règlement\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"L'octroi d'un contrat de services professionnels en arpentage relève des exclusions (contrats de services/loisirs).\",\"excerpt\":\"D’OCTROYER de gré à gré un contrat de services professionnels à la firme Boréal, Arpenteurs-Géomètres, pour la préparation du certificat d’implantation\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte le règlement numéro 078-2026 sur les modalités de publication des avis publics.",
+   "excerpt": "QUE le règlement numéro 078-2026 sur les modalités de publication des avis publics de la municipalité de Lac-Saint-Paul soit adopté."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement 079-2026 abrogeant la citation patrimoniale est mentionné dans la résolution de consultation publique.",
+   "excerpt": "une séance de consultation publique doit être tenue pour présenter et expliquer le projet de règlement numéro 079-2026"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 046-2023 n'est mentionné que comme référence historique abrogée par le projet de règlement 079-2026.",
+   "excerpt": "abrogeant le règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à titre d’immeuble patrimonial"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "La résolution fixe la tenue d'une séance de consultation publique sur le projet de règlement numéro 079-2026 le 13 juillet 2026.",
+   "excerpt": "QU’une séance de consultation publique soit tenue le 13 juillet 2026 à 18 h 30 à la salle communautaire située au 386, rue Principale à Lac-Saint-Paul"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le greffier-trésorier présente et dépose l'avis spécial relatif à l'abrogation du règlement numéro 046-2023.",
+   "excerpt": "le greffier-trésorier présente et dépose l’avis spécial relatif à l’abrogation du règlement numéro 046-2023 établissant la citation de l’église Saint-Paul à titre d’immeuble patrimonial."
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de services professionnels d'ingénierie relève des exclusions (contrats de services).",
+   "excerpt": "QUE la municipalité de Lac Saint Paul octroie de gré à gré le contrat relatif à la préparation des études, plans, devis et documents requis pour le projet de halte routière"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "La résolution demande formellement au gouvernement de suspendre et réviser le projet de règlement sur les pratiques agroenvironnementales en matière d'aménagement.",
+   "excerpt": "DE DEMANDER à la ministre de l’Environnement, de la Lutte contre les Changements climatiques, de la Faune et des Parcs, Mme Pascale Déry, de suspendre le processus d’adoption de ce règlement"
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "L'octroi d'un contrat de services professionnels en arpentage relève des exclusions (contrats de services/loisirs).",
+   "excerpt": "D’OCTROYER de gré à gré un contrat de services professionnels à la firme Boréal, Arpenteurs-Géomètres, pour la préparation du certificat d’implantation"
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Le règlement 046-2023 n'est mentionné que comme référence historique abrogée par le projet de règlement 079-2026."
+   },
+   {
+    "act": "A06",
+    "reason": "L'octroi d'un contrat de services professionnels d'ingénierie relève des exclusions (contrats de services)."
+   },
+   {
+    "act": "A08",
+    "reason": "L'octroi d'un contrat de services professionnels en arpentage relève des exclusions (contrats de services/loisirs)."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte le règlement numéro 078-2026 sur les modalités de publication des avis publics."
+   },
+   {
+    "act": "A02",
+    "reason": "Le projet de règlement 079-2026 abrogeant la citation patrimoniale est mentionné dans la résolution de consultation publique."
+   },
+   {
+    "act": "A04",
+    "reason": "La résolution fixe la tenue d'une séance de consultation publique sur le projet de règlement numéro 079-2026 le 13 juillet 2026."
+   },
+   {
+    "act": "A05",
+    "reason": "Le greffier-trésorier présente et dépose l'avis spécial relatif à l'abrogation du règlement numéro 046-2023."
+   },
+   {
+    "act": "A07",
+    "reason": "La résolution demande formellement au gouvernement de suspendre et réviser le projet de règlement sur les pratiques agroenvironnementales en matière d'aménagement."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2456,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 9866,
+   "outputTokens": 698,
+   "totalTokens": 10564
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2294
+  },
+  "inputSha256": "0693195848b8f78c6593f2de1508e8e50831267fca7e884b19ba52472bc38551"
+ }
+}

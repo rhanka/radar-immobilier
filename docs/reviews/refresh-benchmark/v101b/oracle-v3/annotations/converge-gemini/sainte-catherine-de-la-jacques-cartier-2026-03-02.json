@@ -1,0 +1,141 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "da997eb99eac78ef15f719aee853f9267939862b5438972042c00fcc82790f1b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"absent\",\"reason\":\"L'examen du point 5.1 a été reporté lors de l'adoption de l'ordre du jour et aucune décision d'urbanisme n'a été prise dans cette séance.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'autorisation de signature de l'acte de servitude sur le lot 6 164 031 est un acte foncier dûment adopté par la résolution 102-2026 à la page 10.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure pour le 2, rue Garbin a été accordée par la résolution 111-2026 à la page 20.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La dérogation mineure autorisant la largeur de 27,20 mètres pour le lot 6 621 589 a été accordée par la résolution 112-2026 à la page 21.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'approbation de la subdivision d'une parcelle du lot 6 141 355 dans le site patrimonial a été adoptée par la résolution 113-2026 à la page 22.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"La modification de l'entente de travaux municipaux avec Groupe Castella 2 inc. a été adoptée par la résolution 115-2026 à la page 23.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"La modification des exigences de garantie financière du PIIA Le Ste-4 a été adoptée par la résolution 116-2026 à la page 24.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"L'avis de motion modifiant le règlement de zonage 1259-2014 pour les zones 115-H et 145-H a été donné à la page 24.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"L'avant-projet de règlement APR-423-2026 modifiant le zonage a été adopté par la résolution 117-2026 à la page 24.\"},{\"item\":\"i10\",\"choice\":\"absent\",\"reason\":\"Ce bail saisonnier pour la location de planches à pagaie relève des loisirs et est expressément exclu du périmètre.\"},{\"item\":\"i11\",\"choice\":\"absent\",\"reason\":\"Cette résolution d'appui à un tiers contenant un engagement futur ne constitue pas un objet réglementaire ou foncier explicite adopté lors de cette séance.\"},{\"item\":\"i12\",\"choice\":\"absent\",\"reason\":\"Ce contrat relève des loisirs et constitue de plus un doublon de la proposition i10.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "absent"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "absent",
+   "reason": "L'examen du point 5.1 a été reporté lors de l'adoption de l'ordre du jour et aucune décision d'urbanisme n'a été prise dans cette séance."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'autorisation de signature de l'acte de servitude sur le lot 6 164 031 est un acte foncier dûment adopté par la résolution 102-2026 à la page 10."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La dérogation mineure pour le 2, rue Garbin a été accordée par la résolution 111-2026 à la page 20."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La dérogation mineure autorisant la largeur de 27,20 mètres pour le lot 6 621 589 a été accordée par la résolution 112-2026 à la page 21."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'approbation de la subdivision d'une parcelle du lot 6 141 355 dans le site patrimonial a été adoptée par la résolution 113-2026 à la page 22."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La modification de l'entente de travaux municipaux avec Groupe Castella 2 inc. a été adoptée par la résolution 115-2026 à la page 23."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "La modification des exigences de garantie financière du PIIA Le Ste-4 a été adoptée par la résolution 116-2026 à la page 24."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "L'avis de motion modifiant le règlement de zonage 1259-2014 pour les zones 115-H et 145-H a été donné à la page 24."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "L'avant-projet de règlement APR-423-2026 modifiant le zonage a été adopté par la résolution 117-2026 à la page 24."
+  },
+  {
+   "item": "i10",
+   "choice": "absent",
+   "reason": "Ce bail saisonnier pour la location de planches à pagaie relève des loisirs et est expressément exclu du périmètre."
+  },
+  {
+   "item": "i11",
+   "choice": "absent",
+   "reason": "Cette résolution d'appui à un tiers contenant un engagement futur ne constitue pas un objet réglementaire ou foncier explicite adopté lors de cette séance."
+  },
+  {
+   "item": "i12",
+   "choice": "absent",
+   "reason": "Ce contrat relève des loisirs et constitue de plus un doublon de la proposition i10."
+  }
+ ]
+}

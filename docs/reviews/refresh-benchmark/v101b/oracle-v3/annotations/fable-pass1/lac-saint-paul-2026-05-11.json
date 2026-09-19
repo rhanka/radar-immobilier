@@ -1,0 +1,56 @@
+{
+ "documentId": "lac-saint-paul-2026-05-11",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1b",
+ "inputStateSha256": "0264906bcb79ef6b3633818a8b7e410484a90675ec2524a70f836e9143602dca",
+ "rawText": "{\"operations\":[\n {\"op\":\"correct\",\"id\":\"u01\",\"unit\":{\"label\":\"Contrat de location du garage au 366, rue Principale pour l’entreposage du camion de déneigement\",\"stage\":\"inconnu\",\"procedure\":null,\"objet\":\"366, rue Principale\",\"page\":5,\"citation\":\"QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé au 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du camion de déneigement\",\"anchor\":\"366, rue Principale\"},\"reason\":\"La résolution 104-05-2026 autorise une location (bail de six mois) et non une vente, acquisition, cession ou servitude ; le vocabulaire réserve « adoption » aux actes fonciers de ce type et classe les conventions d'usage d'un immeuble (prêt à usage) sous « inconnu ».\"},\n {\"op\":\"remove\",\"id\":\"u03\",\"reason\":\"Le point 6.2 vise le projet de règlement provincial sur les pratiques agroenvironnementales du ministère de l'Environnement (visant à remplacer le REA) : ce n'est ni un règlement d'urbanisme municipal ni un acte foncier, et la résolution 107-05-2026 est une demande de suspension adressée à la ministre, non une étape de procédure réglementaire constatée pour un objet du profil Signal/DesignationEvent.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Contrat de location du garage au 366, rue Principale pour l’entreposage du camion de déneigement",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "366, rue Principale",
+    "page": 5,
+    "citation": "QUE le conseil municipal de Lac-Saint-Paul autorise la location du garage situé au 366, rue Principale, appartenant à M. Gérald Dufour, pour l’entreposage du camion de déneigement",
+    "anchor": "366, rue Principale"
+   },
+   "reason": "La résolution 104-05-2026 autorise une location (bail de six mois) et non une vente, acquisition, cession ou servitude ; le vocabulaire réserve « adoption » aux actes fonciers de ce type et classe les conventions d'usage d'un immeuble (prêt à usage) sous « inconnu »."
+  },
+  {
+   "op": "remove",
+   "id": "u03",
+   "reason": "Le point 6.2 vise le projet de règlement provincial sur les pratiques agroenvironnementales du ministère de l'Environnement (visant à remplacer le REA) : ce n'est ni un règlement d'urbanisme municipal ni un acte foncier, et la résolution 107-05-2026 est une demande de suspension adressée à la ministre, non une étape de procédure réglementaire constatée pour un objet du profil Signal/DesignationEvent."
+  }
+ ],
+ "applied": [
+  {
+   "op": "correct",
+   "id": "u01"
+  },
+  {
+   "op": "remove",
+   "id": "u03"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3,
+ "inputStateSha256BeforeRelabel": "0264906bcb79ef6b3633818a8b7e410484a90675ec2524a70f836e9143602dca"
+}

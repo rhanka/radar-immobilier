@@ -1,0 +1,36 @@
+{
+ "documentId": "coteau-du-lac-2026-02-10",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "e5209264e4489dd355cc973787422272e64d0d124c89c8a8d8275c6e15831c01",
+ "inputSha256": "c8c87d4889d2745d89d440d0e6cbcffcaae1c9817e2cdc3f24757548ab9ad07a",
+ "responseSha256": "ea43c9726e1a46bd450419565eacd3ad059a5adf298e6839d3434000790aa170",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 79148,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 3588,
+  "outputTokens": 2533,
+  "totalTokens": 6121
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 79144,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:33:52.715Z"
+}

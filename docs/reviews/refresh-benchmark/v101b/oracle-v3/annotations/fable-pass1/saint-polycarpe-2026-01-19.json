@@ -1,0 +1,38 @@
+{
+ "documentId": "saint-polycarpe-2026-01-19",
+ "step": "fable-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1b",
+ "inputStateSha256": "ce46509a5ea7aa75603535c5ed301fd43bc54441ce91fe7122a079a18c877d0a",
+ "rawText": "{\"operations\":[\n {\"op\":\"remove\",\"id\":\"u02\",\"reason\":\"Le point 5.2 (section FINANCES) porte sur l'état des immeubles à vendre pour défaut de paiement de taxes, une procédure de recouvrement fiscal sans objet foncier explicite (aucun lot, adresse ni immeuble nommé) ; il relève des comptes et rapports financiers exclus du rappel, non d'un acte foncier ou d'urbanisme.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u02",
+   "reason": "Le point 5.2 (section FINANCES) porte sur l'état des immeubles à vendre pour défaut de paiement de taxes, une procédure de recouvrement fiscal sans objet foncier explicite (aucun lot, adresse ni immeuble nommé) ; il relève des comptes et rapports financiers exclus du rappel, non d'un acte foncier ou d'urbanisme."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u02"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3,
+ "inputStateSha256BeforeRelabel": "ce46509a5ea7aa75603535c5ed301fd43bc54441ce91fe7122a079a18c877d0a"
+}

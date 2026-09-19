@@ -1,0 +1,285 @@
+{
+ "documentId": "val-dor-2026-06-01",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "fcc6e16378b912dc83d40ee246bf199f170b78b9d5403f14a42cfcb0d9d3b3a2",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "bylaw-2026-12"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Premier projet de règlement 2026-12 — Domaine des Deux Lacs",
+     "stage": "1er_projet",
+     "objet": "2026-12",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2026-14"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Projet de règlement 2026-14 — Zonage — Règlement Omnibus",
+     "stage": "projet",
+     "objet": "2026-14",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-consultation-2026-14"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Consultation prévue sur le projet 2026-14",
+     "stage": "consultation_publique",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus et consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "bylaw-2026-21"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2026-21 — Amendement 2024-10 sur le CCSRM",
+     "stage": "projet",
+     "objet": "2026-21",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5 Avis de motion visant à présenter le règlement 2026-21 et dépôt d'un projet de règlement – Amendement 2024-10 sur\nle CCSRM."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-credit-taxes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Entente de crédit de taxes prévue — Accès Patrimmo",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "6 Autorisation de signature d'une entente de crédit de taxes avec Accès Patrimmo concernant les immeubles situés aux\n670-690 rue Giguère."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-cadastre-deux-lacs"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Plan-projet d'opération cadastrale — Domaine des Deux Lacs",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "14 Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des\nDeux Lacs."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-cptaq-4721047"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande d'appui CPTAQ — Lot 4 721 047",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-caracterisation-pfas"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Caractérisation environnementale d'un panache de contamination en PFAS",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "12 Ratification de l'ouverture des soumissions relatives au projet de caractérisation environnementale de panache de\ncontamination en PFAS et octroi du contrat, s'il y a lieu."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"L'ordre du jour prévoit l'adoption du premier projet de règlement 2026-12 concernant le zonage et l'urbanisme.\",\"excerpt\":\"3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 4 concerne le projet de règlement de zonage 2026-14.\",\"excerpt\":\"4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Une consultation publique est explicitement prévue au point 4 sur le projet de règlement 2026-14.\",\"excerpt\":\"consultation des\\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu.\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"L'avis de motion et le dépôt d'un projet de règlement 2026-21 figurent à l'ordre du jour.\",\"excerpt\":\"5 Avis de motion visant à présenter le règlement 2026-21 et dépôt d'un projet de règlement – Amendement 2024-10 sur\\nle CCSRM.\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"L'autorisation de signature d'une entente de crédit de taxes est inscrite à l'ordre du jour.\",\"excerpt\":\"6 Autorisation de signature d'une entente de crédit de taxes avec Accès Patrimmo concernant les immeubles situés aux\\n670-690 rue Giguère.\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"L'approbation du plan-projet d'opération cadastrale est prévue à la section Aménagements et urbanisme.\",\"excerpt\":\"14 Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des\\nDeux Lacs.\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le point 15 porte sur une demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole.\",\"excerpt\":\"15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047.\"},{\"act\":\"A08\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un octroi de contrat d'étude/services professionnels environnementaux, ce qui relève des exclusions de contrats de services.\",\"excerpt\":\"12 Ratification de l'ouverture des soumissions relatives au projet de caractérisation environnementale de panache de\\ncontamination en PFAS et octroi du contrat, s'il y a lieu.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "L'ordre du jour prévoit l'adoption du premier projet de règlement 2026-12 concernant le zonage et l'urbanisme.",
+   "excerpt": "3 Adoption du premier projet de règlement 2026-12 - zonage et urbanisme - Partie centrale du Domaine des Deux Lacs."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 4 concerne le projet de règlement de zonage 2026-14.",
+   "excerpt": "4 Explications du maire sur le projet de règlement 2026-14 - Zonage - Règlement Omnibus"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Une consultation publique est explicitement prévue au point 4 sur le projet de règlement 2026-14.",
+   "excerpt": "consultation des\npersonnes et organismes désirant s'exprimer sur le sujet, s'il y a lieu."
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "L'avis de motion et le dépôt d'un projet de règlement 2026-21 figurent à l'ordre du jour.",
+   "excerpt": "5 Avis de motion visant à présenter le règlement 2026-21 et dépôt d'un projet de règlement – Amendement 2024-10 sur\nle CCSRM."
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "L'autorisation de signature d'une entente de crédit de taxes est inscrite à l'ordre du jour.",
+   "excerpt": "6 Autorisation de signature d'une entente de crédit de taxes avec Accès Patrimmo concernant les immeubles situés aux\n670-690 rue Giguère."
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "L'approbation du plan-projet d'opération cadastrale est prévue à la section Aménagements et urbanisme.",
+   "excerpt": "14 Approbation de la 21e version du plan-projet d'opération cadastrale concernant la partie centrale du Domaine des\nDeux Lacs."
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le point 15 porte sur une demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole.",
+   "excerpt": "15 Demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole sur une partie du lot 4 721 047."
+  },
+  {
+   "act": "A08",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un octroi de contrat d'étude/services professionnels environnementaux, ce qui relève des exclusions de contrats de services.",
+   "excerpt": "12 Ratification de l'ouverture des soumissions relatives au projet de caractérisation environnementale de panache de\ncontamination en PFAS et octroi du contrat, s'il y a lieu."
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [
+   {
+    "act": "A08",
+    "reason": "Il s'agit d'un octroi de contrat d'étude/services professionnels environnementaux, ce qui relève des exclusions de contrats de services."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "L'ordre du jour prévoit l'adoption du premier projet de règlement 2026-12 concernant le zonage et l'urbanisme."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 4 concerne le projet de règlement de zonage 2026-14."
+   },
+   {
+    "act": "A03",
+    "reason": "Une consultation publique est explicitement prévue au point 4 sur le projet de règlement 2026-14."
+   },
+   {
+    "act": "A04",
+    "reason": "L'avis de motion et le dépôt d'un projet de règlement 2026-21 figurent à l'ordre du jour."
+   },
+   {
+    "act": "A05",
+    "reason": "L'autorisation de signature d'une entente de crédit de taxes est inscrite à l'ordre du jour."
+   },
+   {
+    "act": "A06",
+    "reason": "L'approbation du plan-projet d'opération cadastrale est prévue à la section Aménagements et urbanisme."
+   },
+   {
+    "act": "A07",
+    "reason": "Le point 15 porte sur une demande d'appui auprès de la CPTAQ pour une utilisation à une fin autre qu'agricole."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2111,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2569,
+   "outputTokens": 632,
+   "totalTokens": 3201
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1958
+  },
+  "inputSha256": "be362f21415a4fe795e7e21c416003e9945127df74586f6e720fd559427b0f95"
+ }
+}

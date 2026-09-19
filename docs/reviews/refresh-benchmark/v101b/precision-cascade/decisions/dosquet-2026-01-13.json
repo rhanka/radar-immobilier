@@ -1,0 +1,233 @@
+{
+ "documentId": "dosquet-2026-01-13",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "b3c3517bda90e04c403c5661a3911429e3f2315a837e492155ab90495f0adaa5",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-cptaq-26-01-08"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Appui municipal à la demande à la CPTAQ",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "Que la municipalité est favorable et recommande la demande."
+      },
+      {
+       "page": 8,
+       "excerpt": "Que la municipalité est favorable et recommande la demande."
+      },
+      {
+       "page": 8,
+       "excerpt": "ATTENDU QUE le lot 6 274 449 se trouve à l’intérieur des zones 25A et 5H, tel\nque montré au règlement de zonage en vigueur, et que l’usage résidentiel est\nautorisé dans ces deux zones, conformément à la réglementation d’urbanisme\nmunicipale;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "bylaw-2025-499"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 2025-499 — Taxes et compensations 2026",
+     "stage": "projet",
+     "objet": "2025-499",
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "SUR LA PROPOSITION de monsieur Michel Moreau, IL EST RÉSOLU À\nL’UNANIMITÉ de procéder au dépôt du projet du règlement 2025-499, tel que\nsuit;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "bylaw-2022-459"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement d’emprunt 2022-459 — Fosses septiques",
+     "stage": null,
+     "objet": "2022-459",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "QU’UN emprunt par billet au montant de 85 000 $ prévu au règlement d’emprunt\nnuméro 2022-459 soit réalisé au taux annuel de 5,01%."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-eoliennes"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Projet potentiel d’éoliennes",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5. Projet potentiel d’éoliennes."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "signal-garde"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Bail pour un service de garde communautaire au 368 route 116",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "IL EST PROPOSÉ par madame Mélanie St-Jean, ET RÉSOLU À\nL’UNANIMITÉ QUE le conseil de la municipalité de Dosquet autorise madame"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "signal-eco"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Intérêt au programme Éco Énergie 360",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 9,
+       "excerpt": "QUE la Municipalité de Dosquet déclare son intérêt au programme Éco\nÉnergie 360 ;"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil adopte une résolution d'appui recommandant favorablement une demande d'exclusion ou d'autorisation à la CPTAQ pour le lot 6 274 449.\",\"excerpt\":\"Que la municipalité est favorable et recommande la demande.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil municipal procède au dépôt du projet de règlement 2025-499 concernant les taxes et compensations 2026.\",\"excerpt\":\"SUR LA PROPOSITION de monsieur Michel Moreau, IL EST RÉSOLU À\\nL’UNANIMITÉ de procéder au dépôt du projet du règlement 2025-499, tel que\\nsuit;\"},{\"act\":\"A03\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une simple résolution de concordance financière pour émettre un billet de gré à gré dans le cadre d'un règlement antérieur, ce qui relève de la gestion financière ordinaire et non d'une étape réglementaire.\",\"excerpt\":\"QU’UN emprunt par billet au montant de 85 000 $ prévu au règlement d’emprunt\\nnuméro 2022-459 soit réalisé au taux annuel de 5,01%.\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit uniquement d'une mention à l'ordre du jour sans résolution ni acte d'urbanisme adopté dans le document.\",\"excerpt\":\"5. Projet potentiel d’éoliennes.\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"L'autorisation de signer un bail pour un local de garderie relève des affaires contractuelles et administratives ordinaires, exclues du domaine de l'urbanisme et de l'aménagement foncier.\",\"excerpt\":\"autorise madame\\nJolyane Houle, directrice générale à signer pour et au nom de la municipalité un\\nbail liant la municipalité et les responsables de garde\"},{\"act\":\"A06\",\"verdict\":\"non_soutenu\",\"reason\":\"La manifestation d'intérêt à un programme d'efficacité énergétique des bâtiments municipaux ne constitue pas un acte d'urbanisme ou d'aménagement du territoire.\",\"excerpt\":\"QUE la Municipalité de Dosquet déclare son intérêt au programme Éco\\nÉnergie 360 ;\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le conseil adopte une résolution d'appui recommandant favorablement une demande d'exclusion ou d'autorisation à la CPTAQ pour le lot 6 274 449.",
+   "excerpt": "Que la municipalité est favorable et recommande la demande."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le conseil municipal procède au dépôt du projet de règlement 2025-499 concernant les taxes et compensations 2026.",
+   "excerpt": "SUR LA PROPOSITION de monsieur Michel Moreau, IL EST RÉSOLU À\nL’UNANIMITÉ de procéder au dépôt du projet du règlement 2025-499, tel que\nsuit;"
+  },
+  {
+   "act": "A03",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une simple résolution de concordance financière pour émettre un billet de gré à gré dans le cadre d'un règlement antérieur, ce qui relève de la gestion financière ordinaire et non d'une étape réglementaire.",
+   "excerpt": "QU’UN emprunt par billet au montant de 85 000 $ prévu au règlement d’emprunt\nnuméro 2022-459 soit réalisé au taux annuel de 5,01%."
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit uniquement d'une mention à l'ordre du jour sans résolution ni acte d'urbanisme adopté dans le document.",
+   "excerpt": "5. Projet potentiel d’éoliennes."
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "L'autorisation de signer un bail pour un local de garderie relève des affaires contractuelles et administratives ordinaires, exclues du domaine de l'urbanisme et de l'aménagement foncier.",
+   "excerpt": "autorise madame\nJolyane Houle, directrice générale à signer pour et au nom de la municipalité un\nbail liant la municipalité et les responsables de garde"
+  },
+  {
+   "act": "A06",
+   "verdict": "non_soutenu",
+   "reason": "La manifestation d'intérêt à un programme d'efficacité énergétique des bâtiments municipaux ne constitue pas un acte d'urbanisme ou d'aménagement du territoire.",
+   "excerpt": "QUE la Municipalité de Dosquet déclare son intérêt au programme Éco\nÉnergie 360 ;"
+  }
+ ],
+ "filter": {
+  "acts": 6,
+  "removed": [
+   {
+    "act": "A03",
+    "reason": "Il s'agit d'une simple résolution de concordance financière pour émettre un billet de gré à gré dans le cadre d'un règlement antérieur, ce qui relève de la gestion financière ordinaire et non d'une étape réglementaire."
+   },
+   {
+    "act": "A04",
+    "reason": "Il s'agit uniquement d'une mention à l'ordre du jour sans résolution ni acte d'urbanisme adopté dans le document."
+   },
+   {
+    "act": "A05",
+    "reason": "L'autorisation de signer un bail pour un local de garderie relève des affaires contractuelles et administratives ordinaires, exclues du domaine de l'urbanisme et de l'aménagement foncier."
+   },
+   {
+    "act": "A06",
+    "reason": "La manifestation d'intérêt à un programme d'efficacité énergétique des bâtiments municipaux ne constitue pas un acte d'urbanisme ou d'aménagement du territoire."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le conseil adopte une résolution d'appui recommandant favorablement une demande d'exclusion ou d'autorisation à la CPTAQ pour le lot 6 274 449."
+   },
+   {
+    "act": "A02",
+    "reason": "Le conseil municipal procède au dépôt du projet de règlement 2025-499 concernant les taxes et compensations 2026."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2488,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 8767,
+   "outputTokens": 484,
+   "totalTokens": 9251
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 2311
+  },
+  "inputSha256": "142454ff90106ae43e13aed09c14c8693a2a2926be7ac11dc9155d5d556180f4"
+ }
+}

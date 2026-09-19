@@ -1,0 +1,19 @@
+{
+ "documentId": "la-peche-2026-06-01",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1bf30d4e86757ad7bd1cc2edc48b5f7efb22e8cdb823706f4efae97ba9488853",
+ "verificationSha256": "12054a2855b25aa5b120b5c770d21b71be71650594efc93f7170b0d3c6d5a04b",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

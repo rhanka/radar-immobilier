@@ -1,0 +1,37 @@
+{
+ "documentId": "ayers-cliff-2026-03-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "e43e04d14aef91ebfa21d77900784f41178e841a79d4d579077be5e017cb1d1b",
+ "inputSha256": "7353acb620625af5a9965f9c13558f92cea7cd88d1353cf3c7d1d77128238ef4",
+ "responseSha256": "93ad27d5d4f7b9a9906ede7df530f1ade0258463f7f47dc8d79a89f7300c5862",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 10749,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 3691,
+  "outputTokens": 149,
+  "totalTokens": 7318,
+  "thoughtsTokenCount": 3478
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 10272,
+  "requestId": null
+ },
+ "at": "2026-09-18T19:43:11.470Z"
+}

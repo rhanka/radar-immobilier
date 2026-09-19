@@ -1,0 +1,81 @@
+{
+ "documentId": "warden-2026-04-08",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c8a31d25a47bb2fca7dc9c87cb1fdeca738889ce0bacd1e88c4a63c8e391eaa4",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"L'avis de motion du règlement de zonage 2026-184 est textuellement attesté à la page 4 avec les métadonnées exactes.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'adoption du projet de règlement 2026-184 est une unité distincte de l'avis de motion selon les règles et est attestée à la page 4.\"},{\"item\":\"i03\",\"choice\":\"absent\",\"reason\":\"La signature d'un bail commercial pour relocaliser temporairement des bureaux administratifs est un contrat de louage opérationnel et non un acte foncier ou d'urbanisme.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement 2026-180 relatif aux immeubles patrimoniaux et au CCU est textuellement attestée à la page 12.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement 2026-181 sur la démolition d'immeubles est textuellement attestée à la page 12.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'adoption du règlement 2026-182 sur l'occupation et l'entretien des bâtiments est textuellement attestée à la page 13.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v2"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "L'avis de motion du règlement de zonage 2026-184 est textuellement attesté à la page 4 avec les métadonnées exactes."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'adoption du projet de règlement 2026-184 est une unité distincte de l'avis de motion selon les règles et est attestée à la page 4."
+  },
+  {
+   "item": "i03",
+   "choice": "absent",
+   "reason": "La signature d'un bail commercial pour relocaliser temporairement des bureaux administratifs est un contrat de louage opérationnel et non un acte foncier ou d'urbanisme."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L'adoption du règlement 2026-180 relatif aux immeubles patrimoniaux et au CCU est textuellement attestée à la page 12."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "L'adoption du règlement 2026-181 sur la démolition d'immeubles est textuellement attestée à la page 12."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'adoption du règlement 2026-182 sur l'occupation et l'entretien des bâtiments est textuellement attestée à la page 13."
+  }
+ ]
+}

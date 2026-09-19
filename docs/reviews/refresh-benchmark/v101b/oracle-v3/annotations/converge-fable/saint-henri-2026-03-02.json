@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-henri-2026-03-02",
+ "step": "converge-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "0571bc8cf9cef927089da7b425b2c7ab8b77d802883bb48b4eddfd2ae2df0b32",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 7.2 (page 1) prévoit explicitement une « assemblée de consultation » sur le Règlement no 741-26 ; c'est une étape distincte de l'adoption pour le même règlement, attestée dans un ordre du jour donc « prévue », et la citation correspond au texte.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 7.2 (page 1) prévoit l'« adoption du Règlement no 741-26 » sur l'occupation et l'entretien des bâtiments ; étape adoption distincte de la consultation, objet réglementaire explicite, citation et page exactes.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 7.3 (page 2) prévoit une « Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482) » ; objet foncier explicite, étape derogation_mineure, unité prévue d'ordre du jour, citation et page exactes.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 7.2 (page 1) prévoit explicitement une « assemblée de consultation » sur le Règlement no 741-26 ; c'est une étape distincte de l'adoption pour le même règlement, attestée dans un ordre du jour donc « prévue », et la citation correspond au texte."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 7.2 (page 1) prévoit l'« adoption du Règlement no 741-26 » sur l'occupation et l'entretien des bâtiments ; étape adoption distincte de la consultation, objet réglementaire explicite, citation et page exactes."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 7.3 (page 2) prévoit une « Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482) » ; objet foncier explicite, étape derogation_mineure, unité prévue d'ordre du jour, citation et page exactes."
+  }
+ ]
+}

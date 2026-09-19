@@ -1,0 +1,37 @@
+{
+ "documentId": "lac-saint-paul-2026-05-11",
+ "step": "gemini-pass1",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass1",
+ "inputStateSha256": "4e917415d909058ad97ab774aa08d6740bf8fb8e55944bce93e601dfcdf353d0",
+ "inputSha256": "f2ca0e879b1a749e791a7237c2d7b0e65708bf5d40232c999b21e32fba2c031d",
+ "responseSha256": "c699e9370e1e63a2632f9001ddabc312b6b5d0e71e9252f5750a99c555217e10",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 62037,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 10149,
+  "outputTokens": 49,
+  "totalTokens": 32405,
+  "thoughtsTokenCount": 22207
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 32768,
+  "httpStatus": 200,
+  "durationMs": 61855,
+  "requestId": null
+ },
+ "at": "2026-09-18T13:50:33.655Z"
+}

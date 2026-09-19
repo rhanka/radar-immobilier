@@ -1,0 +1,13 @@
+{
+ "id": "coteau-du-lac-2026-02-10",
+ "rc": 0,
+ "latencyMs": 155297,
+ "inputTokens": 2,
+ "outputTokens": 18094,
+ "cacheRead": 0,
+ "cacheCreate": 4124,
+ "costUsd": 0.49607,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 32499
+}

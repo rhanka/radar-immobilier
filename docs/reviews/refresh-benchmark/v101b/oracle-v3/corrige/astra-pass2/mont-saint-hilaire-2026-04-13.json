@@ -1,0 +1,1037 @@
+{
+ "documentId": "mont-saint-hilaire-2026-04-13",
+ "nextId": 28,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de création et de régularisation de servitudes d’aqueduc et d’égouts — rue Chénier",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "rue Chénier",
+    "page": 14,
+    "citation": "Que ce conseil autorise la signature d'actes de servitude d'installation, d'entretien et de passage d'égouts et d'aqueduc dans le cadre des travaux à venir sur la rue Chénier",
+    "anchor": "la rue Chénier",
+    "spanStart": 1014,
+    "spanEnd": 1188
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de création et de régularisation de servitudes d’aqueduc et d’égouts — rue Chénier",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "rue Chénier",
+      "page": 14,
+      "citation": "Que ce conseil autorise la signature d'actes de servitude d'installation, d'entretien et de passage d'égouts et d'aqueduc dans le cadre des travaux à venir sur la rue Chénier",
+      "anchor": "la rue Chénier",
+      "spanStart": 1014,
+      "spanEnd": 1188
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-125 autorise la signature des actes de servitude, ce qui constitue un acte foncier décidé même si les travaux concernent des infrastructures existantes."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032403 — rénovation extérieure, 498-508, rue de l’Atlantique",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032403",
+    "page": 15,
+    "citation": "CCU-26032403 : 498-508, rue de l'Atlantique Travaux de rénovation extérieure",
+    "anchor": "CCU-26032403",
+    "spanStart": 2320,
+    "spanEnd": 2397
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032403 — rénovation extérieure, 498-508, rue de l’Atlantique",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032403",
+      "page": 15,
+      "citation": "CCU-26032403 : 498-508, rue de l'Atlantique Travaux de rénovation extérieure",
+      "anchor": "CCU-26032403",
+      "spanStart": 2320,
+      "spanEnd": 2397
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce PIIA, qui constitue une unité distincte parmi les demandes explicitement nommées."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032404 — rénovation extérieure, 455-465, cours de la Raffinerie",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032404",
+    "page": 15,
+    "citation": "CCU-26032404: 455-465, cours de la Raffinerie Travaux de rénovation extérieure",
+    "anchor": "CCU-26032404",
+    "spanStart": 2401,
+    "spanEnd": 2480
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032404 — rénovation extérieure, 455-465, cours de la Raffinerie",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032404",
+      "page": 15,
+      "citation": "CCU-26032404: 455-465, cours de la Raffinerie Travaux de rénovation extérieure",
+      "anchor": "CCU-26032404",
+      "spanStart": 2401,
+      "spanEnd": 2480
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce PIIA et la règle impose une unité par demande explicitement nommée."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032405 — rénovation extérieure, 485-495, cours de la Raffinerie",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032405",
+    "page": 15,
+    "citation": "CCU-26032405: 485-495, cours de la Raffinerie Travaux de rénovation extérieure",
+    "anchor": "CCU-26032405",
+    "spanStart": 2484,
+    "spanEnd": 2563
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032405 — rénovation extérieure, 485-495, cours de la Raffinerie",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032405",
+      "page": 15,
+      "citation": "CCU-26032405: 485-495, cours de la Raffinerie Travaux de rénovation extérieure",
+      "anchor": "CCU-26032405",
+      "spanStart": 2484,
+      "spanEnd": 2563
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce PIIA et la règle impose une unité par demande explicitement nommée."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032406 — affichage, 777, boulevard de la Gare",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032406",
+    "page": 16,
+    "citation": "CCU-26032406: 777, boulevard de la Gare Projet d'affichage",
+    "anchor": "CCU-26032406",
+    "spanStart": 2,
+    "spanEnd": 61
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032406 — affichage, 777, boulevard de la Gare",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032406",
+      "page": 16,
+      "citation": "CCU-26032406: 777, boulevard de la Gare Projet d'affichage",
+      "anchor": "CCU-26032406",
+      "spanStart": 2,
+      "spanEnd": 61
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce projet d’affichage, les petits PIIA même non résidentiels étant inclus."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032407 — affichage, 847, chemin Benoît",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032407",
+    "page": 16,
+    "citation": "CCU-26032407 : 847, chemin Benoît Projet d'affichage",
+    "anchor": "CCU-26032407",
+    "spanStart": 65,
+    "spanEnd": 118
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032407 — affichage, 847, chemin Benoît",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032407",
+      "page": 16,
+      "citation": "CCU-26032407 : 847, chemin Benoît Projet d'affichage",
+      "anchor": "CCU-26032407",
+      "spanStart": 65,
+      "spanEnd": 118
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce projet d’affichage, qui doit être distingué des autres demandes nommées."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032408 — affichage, 849, chemin Benoît",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032408",
+    "page": 16,
+    "citation": "CCU-26032408: 849, chemin Benoît Projet d'affichage",
+    "anchor": "CCU-26032408",
+    "spanStart": 122,
+    "spanEnd": 174
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032408 — affichage, 849, chemin Benoît",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032408",
+      "page": 16,
+      "citation": "CCU-26032408: 849, chemin Benoît Projet d'affichage",
+      "anchor": "CCU-26032408",
+      "spanStart": 122,
+      "spanEnd": 174
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce projet d’affichage, qui doit être distingué des autres demandes nommées."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032409 — deux bâtiments accessoires, 871, rue des Bernaches",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032409",
+    "page": 16,
+    "citation": "CCU-26032409: 871, rue des Bernaches Construction de deux bâtiments accessoires",
+    "anchor": "CCU-26032409",
+    "spanStart": 178,
+    "spanEnd": 258
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032409 — deux bâtiments accessoires, 871, rue des Bernaches",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032409",
+      "page": 16,
+      "citation": "CCU-26032409: 871, rue des Bernaches Construction de deux bâtiments accessoires",
+      "anchor": "CCU-26032409",
+      "spanStart": 178,
+      "spanEnd": 258
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement cette demande de PIIA portant sur deux bâtiments accessoires."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032410 — rénovation extérieure, 38, rue Saint-Charles",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032410",
+    "page": 16,
+    "citation": "CCU-26032410: 38, rue Saint-Charles Travaux de rénovation extérieure",
+    "anchor": "CCU-26032410",
+    "spanStart": 262,
+    "spanEnd": 331
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032410 — rénovation extérieure, 38, rue Saint-Charles",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032410",
+      "page": 16,
+      "citation": "CCU-26032410: 38, rue Saint-Charles Travaux de rénovation extérieure",
+      "anchor": "CCU-26032410",
+      "spanStart": 262,
+      "spanEnd": 331
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce PIIA et les petits projets de rénovation sont inclus dans le rappel."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032411 — habitation unifamiliale isolée, 734, rue Rembrandt",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032411",
+    "page": 16,
+    "citation": "CCU-26032411: 734, rue Rembrandt (lot 1 815 260) Construction d'une habitation unifamiliale isolée",
+    "anchor": "CCU-26032411",
+    "spanStart": 335,
+    "spanEnd": 434
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032411 — habitation unifamiliale isolée, 734, rue Rembrandt",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032411",
+      "page": 16,
+      "citation": "CCU-26032411: 734, rue Rembrandt (lot 1 815 260) Construction d'une habitation unifamiliale isolée",
+      "anchor": "CCU-26032411",
+      "spanStart": 335,
+      "spanEnd": 434
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce PIIA de construction et chaque demande nommée forme une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032412 — habitation unifamiliale isolée, 15, rue Campbell",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032412",
+    "page": 16,
+    "citation": "CCU-26032412: 15, rue Campbell (lot 3 956 018) Construction d'une habitation unifamiliale isolée",
+    "anchor": "CCU-26032412",
+    "spanStart": 438,
+    "spanEnd": 535
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032412 — habitation unifamiliale isolée, 15, rue Campbell",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032412",
+      "page": 16,
+      "citation": "CCU-26032412: 15, rue Campbell (lot 3 956 018) Construction d'une habitation unifamiliale isolée",
+      "anchor": "CCU-26032412",
+      "spanStart": 438,
+      "spanEnd": 535
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce PIIA de construction et chaque demande nommée forme une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u12",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032413 — agrandissement et rénovation extérieure, 298, rue Fortier",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032413",
+    "page": 16,
+    "citation": "CCU-26032413 : 298, rue Fortier Travaux d'agrandissement et de rénovation extérieure",
+    "anchor": "CCU-26032413",
+    "spanStart": 539,
+    "spanEnd": 624
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032413 — agrandissement et rénovation extérieure, 298, rue Fortier",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032413",
+      "page": 16,
+      "citation": "CCU-26032413 : 298, rue Fortier Travaux d'agrandissement et de rénovation extérieure",
+      "anchor": "CCU-26032413",
+      "spanStart": 539,
+      "spanEnd": 624
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce PIIA, explicitement nommé parmi les projets soumis au conseil."
+    }
+   ]
+  },
+  {
+   "id": "u13",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032414 — habitation unifamiliale isolée, 675, rue Cardinal",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032414",
+    "page": 16,
+    "citation": "CCU-26032414: 675, rue Cardinal (lot 1 816 633) Construction d'une habitation unifamiliale isolée",
+    "anchor": "CCU-26032414",
+    "spanStart": 628,
+    "spanEnd": 726
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032414 — habitation unifamiliale isolée, 675, rue Cardinal",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032414",
+      "page": 16,
+      "citation": "CCU-26032414: 675, rue Cardinal (lot 1 816 633) Construction d'une habitation unifamiliale isolée",
+      "anchor": "CCU-26032414",
+      "spanStart": 628,
+      "spanEnd": 726
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce PIIA de construction et chaque demande nommée forme une unité distincte."
+    }
+   ]
+  },
+  {
+   "id": "u14",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032416 — agrandissement, 1436, chemin des Patriotes Nord",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032416",
+    "page": 16,
+    "citation": "CCU-26032416: 1436, chemin des Patriotes Nord Travaux d'agrandissement",
+    "anchor": "CCU-26032416",
+    "spanStart": 730,
+    "spanEnd": 801
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032416 — agrandissement, 1436, chemin des Patriotes Nord",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032416",
+      "page": 16,
+      "citation": "CCU-26032416: 1436, chemin des Patriotes Nord Travaux d'agrandissement",
+      "anchor": "CCU-26032416",
+      "spanStart": 730,
+      "spanEnd": 801
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce PIIA au 1436, chemin des Patriotes Nord, adresse inscrite dans son corps plutôt que le 1736 annoncé à l’ordre du jour."
+    }
+   ]
+  },
+  {
+   "id": "u15",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032417 — agrandissement, 236, rue Desnoyers",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032417",
+    "page": 16,
+    "citation": "CCU-26032417: 236, rue Desnoyers Travaux d'agrandissement",
+    "anchor": "CCU-26032417",
+    "spanStart": 805,
+    "spanEnd": 863
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032417 — agrandissement, 236, rue Desnoyers",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032417",
+      "page": 16,
+      "citation": "CCU-26032417: 236, rue Desnoyers Travaux d'agrandissement",
+      "anchor": "CCU-26032417",
+      "spanStart": 805,
+      "spanEnd": 863
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce PIIA et la règle impose une unité par demande explicitement nommée."
+    }
+   ]
+  },
+  {
+   "id": "u16",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032420 — affichage, 423, boulevard Sir-Wilfrid-Laurier",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032420",
+    "page": 16,
+    "citation": "CCU-26032420: 423, boulevard Sir-Wilfrid-Laurier Projet d'affichage",
+    "anchor": "CCU-26032420",
+    "spanStart": 867,
+    "spanEnd": 935
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032420 — affichage, 423, boulevard Sir-Wilfrid-Laurier",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032420",
+      "page": 16,
+      "citation": "CCU-26032420: 423, boulevard Sir-Wilfrid-Laurier Projet d'affichage",
+      "anchor": "CCU-26032420",
+      "spanStart": 867,
+      "spanEnd": 935
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce projet d’affichage, les petits PIIA même non résidentiels étant inclus."
+    }
+   ]
+  },
+  {
+   "id": "u17",
+   "status": "active",
+   "current": {
+    "label": "Approbation conditionnelle du PIIA CCU-26032421 — rénovation extérieure, 587, rue de l’Atlantique",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032421",
+    "page": 16,
+    "citation": "CCU-26032421: 587, rue de l'Atlantique Travaux de rénovation extérieure",
+    "anchor": "CCU-26032421",
+    "spanStart": 939,
+    "spanEnd": 1011
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation conditionnelle du PIIA CCU-26032421 — rénovation extérieure, 587, rue de l’Atlantique",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032421",
+      "page": 16,
+      "citation": "CCU-26032421: 587, rue de l'Atlantique Travaux de rénovation extérieure",
+      "anchor": "CCU-26032421",
+      "spanStart": 939,
+      "spanEnd": 1011
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-128 approuve conditionnellement ce PIIA et les petits projets de rénovation sont inclus dans le rappel."
+    }
+   ]
+  },
+  {
+   "id": "u18",
+   "status": "active",
+   "current": {
+    "label": "Refus du PIIA CCU-26032415 — agrandissement et rénovation extérieure, 224, rue Villeneuve",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032415",
+    "page": 16,
+    "citation": "PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS CCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS",
+    "anchor": "CCU-26032415",
+    "spanStart": 1538,
+    "spanEnd": 1649
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus du PIIA CCU-26032415 — agrandissement et rénovation extérieure, 224, rue Villeneuve",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032415",
+      "page": 16,
+      "citation": "PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS CCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS",
+      "anchor": "CCU-26032415",
+      "spanStart": 1538,
+      "spanEnd": 1649
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-129 refuse explicitement ce PIIA et les refus restent des unités distinctes pour chaque demande nommée."
+    }
+   ]
+  },
+  {
+   "id": "u19",
+   "status": "active",
+   "current": {
+    "label": "Refus du PIIA CCU-26032418 — agrandissement et rénovation extérieure, 935, rue des Martinets",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032418",
+    "page": 16,
+    "citation": "PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS CCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS",
+    "anchor": "CCU-26032418",
+    "spanStart": 1538,
+    "spanEnd": 1649
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus du PIIA CCU-26032418 — agrandissement et rénovation extérieure, 935, rue des Martinets",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032418",
+      "page": 16,
+      "citation": "PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS CCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS",
+      "anchor": "CCU-26032418",
+      "spanStart": 1538,
+      "spanEnd": 1649
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-129 refuse explicitement ce PIIA et les refus restent des unités distinctes pour chaque demande nommée."
+    }
+   ]
+  },
+  {
+   "id": "u20",
+   "status": "active",
+   "current": {
+    "label": "Refus du PIIA CCU-26032419 — agrandissement et rénovation extérieure, 657, rue Doyle",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "CCU-26032419",
+    "page": 16,
+    "citation": "PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS CCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS",
+    "anchor": "CCU-26032419",
+    "spanStart": 1538,
+    "spanEnd": 1649
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Refus du PIIA CCU-26032419 — agrandissement et rénovation extérieure, 657, rue Doyle",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "CCU-26032419",
+      "page": 16,
+      "citation": "PLANS D'IMPLANTATION ET D'INTÉGRATION ARCHITECTURALE NUMÉROS CCU-26032415, CCU-26032418 ET CCU-26032419 - REFUS",
+      "anchor": "CCU-26032419",
+      "spanStart": 1538,
+      "spanEnd": 1649
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-129 refuse explicitement ce PIIA et les refus restent des unités distinctes pour chaque demande nommée."
+    }
+   ]
+  },
+  {
+   "id": "u21",
+   "status": "active",
+   "current": {
+    "label": "Dépôt du certificat d’enregistrement — règlement 1371 abrogeant la réserve financière d’acquisition de lots aux fins de conservation",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "1371",
+    "page": 17,
+    "citation": "DÉPÔT DU CERTIFICAT ATTESTANT LE RÉSULTAT DE LA PROCÉDURE D'ENREGISTREMENT DES PERSONNES HABILES À VOTER CONCERNANT LE RÈGLEMENT NUMÉRO 1371",
+    "anchor": "RÈGLEMENT NUMÉRO 1371",
+    "spanStart": 751,
+    "spanEnd": 891
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dépôt du certificat d’enregistrement — règlement 1371 abrogeant la réserve financière d’acquisition de lots aux fins de conservation",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "1371",
+      "page": 17,
+      "citation": "DÉPÔT DU CERTIFICAT ATTESTANT LE RÉSULTAT DE LA PROCÉDURE D'ENREGISTREMENT DES PERSONNES HABILES À VOTER CONCERNANT LE RÈGLEMENT NUMÉRO 1371",
+      "anchor": "RÈGLEMENT NUMÉRO 1371",
+      "spanStart": 751,
+      "spanEnd": 891
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 2026-130 constate le dépôt du certificat d’enregistrement concernant ce règlement lié à l’acquisition de lots et à la réserve foncière, étape actuelle relevant du stade « inconnu »."
+    }
+   ]
+  },
+  {
+   "id": "u22",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 1230-7 — plan d’urbanisme durable, concordance des limites d’îlots déstructurés",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1230-7",
+    "page": 18,
+    "citation": "Que le Règlement numéro 1230-7, intitulé : « Règlement amendant le Règlement du plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma",
+    "anchor": "Règlement numéro 1230-7",
+    "spanStart": 124,
+    "spanEnd": 280
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 1230-7 — plan d’urbanisme durable, concordance des limites d’îlots déstructurés",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1230-7",
+      "page": 18,
+      "citation": "Que le Règlement numéro 1230-7, intitulé : « Règlement amendant le Règlement du plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma",
+      "anchor": "Règlement numéro 1230-7",
+      "spanStart": 124,
+      "spanEnd": 280
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-131 adopte ce règlement d’urbanisme, sans que les étapes antérieures rappelées dans ses considérants créent d’unités supplémentaires."
+    }
+   ]
+  },
+  {
+   "id": "u23",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 1230-8 — plan d’urbanisme durable, concordance à l’orientation gouvernementale en habitation",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1230-8",
+    "page": 18,
+    "citation": "AVIS DE MOTION - RÈGLEMENT NUMÉRO 1230-8 - RÈGLEMENT AMENDANT LE RÈGLEMENT DU PLAN D’URBANISME DURABLE NUMÉRO 1230 AFIN D’ASSURER",
+    "anchor": "RÈGLEMENT NUMÉRO 1230-8",
+    "spanStart": 429,
+    "spanEnd": 558
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 1230-8 — plan d’urbanisme durable, concordance à l’orientation gouvernementale en habitation",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "1230-8",
+      "page": 18,
+      "citation": "AVIS DE MOTION - RÈGLEMENT NUMÉRO 1230-8 - RÈGLEMENT AMENDANT LE RÈGLEMENT DU PLAN D’URBANISME DURABLE NUMÉRO 1230 AFIN D’ASSURER",
+      "anchor": "RÈGLEMENT NUMÉRO 1230-8",
+      "spanStart": 429,
+      "spanEnd": 558
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 2026-132 constate un avis de motion donné à cette séance, lequel doit être distingué du projet du même règlement."
+    }
+   ]
+  },
+  {
+   "id": "u24",
+   "status": "active",
+   "current": {
+    "label": "Adoption du projet de règlement 1230-8 — plan d’urbanisme durable, concordance à l’orientation gouvernementale en habitation",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "1230-8",
+    "page": 18,
+    "citation": "Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement du Plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma",
+    "anchor": "Règlement numéro 1230-8",
+    "spanStart": 1479,
+    "spanEnd": 1644
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du projet de règlement 1230-8 — plan d’urbanisme durable, concordance à l’orientation gouvernementale en habitation",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "1230-8",
+      "page": 18,
+      "citation": "Que le projet de Règlement numéro 1230-8, intitulé: « Règlement amendant le Règlement du Plan d’urbanisme durable numéro 1230 afin d’assurer sa concordance au Schéma",
+      "anchor": "Règlement numéro 1230-8",
+      "spanStart": 1479,
+      "spanEnd": 1644
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-133 adopte le projet de règlement, étape distincte de l’avis de motion également constaté dans ce document."
+    }
+   ]
+  },
+  {
+   "id": "u25",
+   "status": "active",
+   "current": {
+    "label": "Adoption du second projet de règlement 1235-34 — modification des limites de quatre zones, secteur de la rue des Vétérans",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "1235-34",
+    "page": 18,
+    "citation": "SECOND PROJET DE RÈGLEMENT NUMÉRO 1235-34 - RÈGLEMENT AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 1235 AFIN DE MODIFIER LES LIMITES DE QUATRE ZONES DANS LE SECTEUR DE LA RUE DES VÉTÉRANS - ADOPTION",
+    "anchor": "RÈGLEMENT NUMÉRO 1235-34",
+    "spanStart": 2105,
+    "spanEnd": 2297
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du second projet de règlement 1235-34 — modification des limites de quatre zones, secteur de la rue des Vétérans",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "1235-34",
+      "page": 18,
+      "citation": "SECOND PROJET DE RÈGLEMENT NUMÉRO 1235-34 - RÈGLEMENT AMENDANT LE RÈGLEMENT DE ZONAGE NUMÉRO 1235 AFIN DE MODIFIER LES LIMITES DE QUATRE ZONES DANS LE SECTEUR DE LA RUE DES VÉTÉRANS - ADOPTION",
+      "anchor": "RÈGLEMENT NUMÉRO 1235-34",
+      "spanStart": 2105,
+      "spanEnd": 2297
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-134 adopte le second projet, tandis que l’avis de motion, le premier projet et la consultation sont uniquement rappelés comme étapes antérieures."
+    }
+   ]
+  },
+  {
+   "id": "u26",
+   "status": "active",
+   "current": {
+    "label": "Adoption du règlement 1235-35 — zonage, concordance des limites d’îlots déstructurés",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "1235-35",
+    "page": 19,
+    "citation": "Que le Règlement numéro 1235-35, intitulé : « Règlement amendant le Règlement de zonage numéro 1235 afin d’assurer sa concordance au Schéma d’aménagement révisé",
+    "anchor": "Règlement numéro 1235-35",
+    "spanStart": 1093,
+    "spanEnd": 1253
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du règlement 1235-35 — zonage, concordance des limites d’îlots déstructurés",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "1235-35",
+      "page": 19,
+      "citation": "Que le Règlement numéro 1235-35, intitulé : « Règlement amendant le Règlement de zonage numéro 1235 afin d’assurer sa concordance au Schéma d’aménagement révisé",
+      "anchor": "Règlement numéro 1235-35",
+      "spanStart": 1093,
+      "spanEnd": 1253
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-135 adopte ce règlement de zonage, sans ajouter les étapes historiques mentionnées dans les considérants."
+    }
+   ]
+  },
+  {
+   "id": "u27",
+   "status": "removed",
+   "current": {
+    "label": "Modification du mandat de recours en vertu de l'article 227 LAU — 1580, rue Casavant (lots 1 818 249 et 1 818 255), travaux sans permis",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "1580, rue Casavant",
+    "page": 13,
+    "citation": "MODIFICATION À LA RÉSOLUTION 2024-159 - MANDAT - RECOURS EN VERTU DE L'ARTICLE 227 DE LA LOI SUR L'AMÉNAGEMENT ET L'URBANISME OU TOUT RECOURS APPROPRIÉ - 1580, RUE CASAVANT",
+    "anchor": "1580, RUE CASAVANT",
+    "spanStart": 1333,
+    "spanEnd": 1505
+   },
+   "versions": [
+    {
+     "step": "fable-pass1",
+     "unit": {
+      "label": "Modification du mandat de recours en vertu de l'article 227 LAU — 1580, rue Casavant (lots 1 818 249 et 1 818 255), travaux sans permis",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "1580, rue Casavant",
+      "page": 13,
+      "citation": "MODIFICATION À LA RÉSOLUTION 2024-159 - MANDAT - RECOURS EN VERTU DE L'ARTICLE 227 DE LA LOI SUR L'AMÉNAGEMENT ET L'URBANISME OU TOUT RECOURS APPROPRIÉ - 1580, RUE CASAVANT",
+      "anchor": "1580, RUE CASAVANT",
+      "spanStart": 1333,
+      "spanEnd": 1505
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "fable-pass1",
+     "op": "add",
+     "reason": "Résolution 2026-124 : objet foncier explicite (1580, rue Casavant, lots 1 818 249 et 1 818 255) et étape constatée dans ce document (modification du mandat de recours en vertu de l'article 227 LAU pour travaux sans permis) ; fait d'urbanisme inclus, aucune valeur d'étape ne s'applique, d'où « inconnu »."
+    },
+    {
+     "step": "astra-pass2",
+     "op": "remove",
+     "reason": "La résolution 2026-124 étend uniquement un mandat de recours confié à des avocats aux propriétaires d'une structure; ce mandat de services juridiques ne constitue pas une décision sur un règlement, une demande d'urbanisme ou un acte foncier et reste hors du rappel."
+    }
+   ]
+  }
+ ]
+}

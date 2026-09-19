@@ -1,0 +1,197 @@
+{
+ "documentId": "saint-stanislas--des-chenaux-2026-04-07",
+ "step": "astra-pass1b",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "2682ee80973aff453d0d3ecba1df0137b9f1210f5181954b28fcfda77ccb4701",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Autorisation d’enchérir et d’acquérir des immeubles pour taxes impayées — vente du 11 juin 2026\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"immeubles identifiés en annexe\",\n        \"page\": 4,\n        \"citation\": \"la directrice générale à enchérir au nom de la Municipalité et à\\nacquérir les immeubles identifiés en annexe sur lesquels des taxes\\ndemeurent impayées au moment de la vente\",\n        \"anchor\": \"immeubles identifiés en annexe\"\n      },\n      \"reason\": \"L’autorisation d’acquérir est correctement décrite, mais la citation doit conserver les retours à la ligne de la page 4 pour être recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Avis de motion — Règlement 2009-474-06 modifiant le plan d’urbanisme\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"2009-474-06\",\n        \"page\": 4,\n        \"citation\": \"Règlement numéro 2009-474-06 modifiant le plan d’urbanisme –\\nAvis de motion\\nAVIS DE MOTION est par les présentes donné par Michel Sanscartier\",\n        \"anchor\": \"Règlement numéro 2009-474-06\"\n      },\n      \"reason\": \"La citation de l’avis de motion doit rétablir les retours à la ligne présents à la page 4, conformément à la règle de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Adoption du projet de règlement 2009-474-06 modifiant le plan d’urbanisme\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"2009-474-06\",\n        \"page\": 5,\n        \"citation\": \"Projet de règlement numéro 2009-474-06 modifiant le règlement\\n2009-474 sur le plan d’urbanisme – Adoption\",\n        \"anchor\": \"Projet de règlement numéro 2009-474-06\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne entre « règlement » et « 2009-474 » à la page 5 pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Avis de motion — Règlement 2009-475-04 relatif aux permis et certificats\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"2009-475-04\",\n        \"page\": 5,\n        \"citation\": \"Règlement numéro 2009-475-04 modifiant le règlement 2009-475\\nrelatif aux permis et certificats – Avis de motion\\nAVIS DE MOTION est par les présentes donné par Michel Sanscartier\",\n        \"anchor\": \"Règlement numéro 2009-475-04\"\n      },\n      \"reason\": \"La citation de l’avis de motion doit rétablir les retours à la ligne présents à la page 5, conformément à la règle de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Adoption du projet de règlement 2009-475-04 relatif aux permis et certificats\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"2009-475-04\",\n        \"page\": 6,\n        \"citation\": \"adopte le projet de règlement 2009-475-04 modifiant le\\nrèglement sur les permis et certificats 2009-475\",\n        \"anchor\": \"projet de règlement 2009-475-04\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « modifiant le » à la page 6 pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Avis de motion — Règlement 2009-476-14 modifiant le zonage\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"2009-476-14\",\n        \"page\": 6,\n        \"citation\": \"Règlement numéro 2009-476-14 modifiant le règlement de zonage\\n2009-476 – Avis de motion\\nAvis de motion est par les présentes donné par Michel Sanscartier à\",\n        \"anchor\": \"Règlement numéro 2009-476-14\"\n      },\n      \"reason\": \"La citation de l’avis de motion doit rétablir les retours à la ligne présents à la page 6, conformément à la règle de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Adoption du projet de règlement 2009-476-14 modifiant le zonage\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"2009-476-14\",\n        \"page\": 7,\n        \"citation\": \"adopte le projet de règlement 2009-476-14 modifiant le\\nrèglement de zonage 2009-476\",\n        \"anchor\": \"projet de règlement 2009-476-14\"\n      },\n      \"reason\": \"La citation doit conserver le retour à la ligne après « modifiant le » à la page 7 pour respecter la copie à l’identique.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Autorisation d’enchérir et d’acquérir des immeubles pour taxes impayées — vente du 11 juin 2026",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "immeubles identifiés en annexe",
+    "page": 4,
+    "citation": "la directrice générale à enchérir au nom de la Municipalité et à\nacquérir les immeubles identifiés en annexe sur lesquels des taxes\ndemeurent impayées au moment de la vente",
+    "anchor": "immeubles identifiés en annexe"
+   },
+   "reason": "L’autorisation d’acquérir est correctement décrite, mais la citation doit conserver les retours à la ligne de la page 4 pour être recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Avis de motion — Règlement 2009-474-06 modifiant le plan d’urbanisme",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2009-474-06",
+    "page": 4,
+    "citation": "Règlement numéro 2009-474-06 modifiant le plan d’urbanisme –\nAvis de motion\nAVIS DE MOTION est par les présentes donné par Michel Sanscartier",
+    "anchor": "Règlement numéro 2009-474-06"
+   },
+   "reason": "La citation de l’avis de motion doit rétablir les retours à la ligne présents à la page 4, conformément à la règle de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Adoption du projet de règlement 2009-474-06 modifiant le plan d’urbanisme",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2009-474-06",
+    "page": 5,
+    "citation": "Projet de règlement numéro 2009-474-06 modifiant le règlement\n2009-474 sur le plan d’urbanisme – Adoption",
+    "anchor": "Projet de règlement numéro 2009-474-06"
+   },
+   "reason": "La citation doit conserver le retour à la ligne entre « règlement » et « 2009-474 » à la page 5 pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Avis de motion — Règlement 2009-475-04 relatif aux permis et certificats",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2009-475-04",
+    "page": 5,
+    "citation": "Règlement numéro 2009-475-04 modifiant le règlement 2009-475\nrelatif aux permis et certificats – Avis de motion\nAVIS DE MOTION est par les présentes donné par Michel Sanscartier",
+    "anchor": "Règlement numéro 2009-475-04"
+   },
+   "reason": "La citation de l’avis de motion doit rétablir les retours à la ligne présents à la page 5, conformément à la règle de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Adoption du projet de règlement 2009-475-04 relatif aux permis et certificats",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2009-475-04",
+    "page": 6,
+    "citation": "adopte le projet de règlement 2009-475-04 modifiant le\nrèglement sur les permis et certificats 2009-475",
+    "anchor": "projet de règlement 2009-475-04"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « modifiant le » à la page 6 pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Avis de motion — Règlement 2009-476-14 modifiant le zonage",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2009-476-14",
+    "page": 6,
+    "citation": "Règlement numéro 2009-476-14 modifiant le règlement de zonage\n2009-476 – Avis de motion\nAvis de motion est par les présentes donné par Michel Sanscartier à",
+    "anchor": "Règlement numéro 2009-476-14"
+   },
+   "reason": "La citation de l’avis de motion doit rétablir les retours à la ligne présents à la page 6, conformément à la règle de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Adoption du projet de règlement 2009-476-14 modifiant le zonage",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2009-476-14",
+    "page": 7,
+    "citation": "adopte le projet de règlement 2009-476-14 modifiant le\nrèglement de zonage 2009-476",
+    "anchor": "projet de règlement 2009-476-14"
+   },
+   "reason": "La citation doit conserver le retour à la ligne après « modifiant le » à la page 7 pour respecter la copie à l’identique."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass1b",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "adoption",
+   "page": 4,
+   "citation": "la directrice générale à enchérir au nom de la Municipalité et à\nacquérir les immeubles identifiés en annexe sur lesquels des taxes\ndemeurent impayées au moment de la vente"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "avis_motion",
+   "page": 4,
+   "citation": "Règlement numéro 2009-474-06 modifiant le plan d’urbanisme –\nAvis de motion\nAVIS DE MOTION est par les présentes donné par Michel Sanscartier"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "projet_reglement",
+   "page": 5,
+   "citation": "Projet de règlement numéro 2009-474-06 modifiant le règlement\n2009-474 sur le plan d’urbanisme – Adoption"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "avis_motion",
+   "page": 5,
+   "citation": "Règlement numéro 2009-475-04 modifiant le règlement 2009-475\nrelatif aux permis et certificats – Avis de motion\nAVIS DE MOTION est par les présentes donné par Michel Sanscartier"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "projet_reglement",
+   "page": 6,
+   "citation": "adopte le projet de règlement 2009-475-04 modifiant le\nrèglement sur les permis et certificats 2009-475"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "avis_motion",
+   "page": 6,
+   "citation": "Règlement numéro 2009-476-14 modifiant le règlement de zonage\n2009-476 – Avis de motion\nAvis de motion est par les présentes donné par Michel Sanscartier à"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "projet_reglement",
+   "page": 7,
+   "citation": "adopte le projet de règlement 2009-476-14 modifiant le\nrèglement de zonage 2009-476"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 7,
+ "relabeledFrom": "astra-pass2"
+}

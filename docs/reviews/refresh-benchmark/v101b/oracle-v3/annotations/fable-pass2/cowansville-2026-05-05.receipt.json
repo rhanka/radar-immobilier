@@ -1,0 +1,75 @@
+{
+ "documentId": "cowansville-2026-05-05",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "6b2f0f42478cda0df13e9a0ef53603935fecd69407b87058a8c18a85e4cf5120",
+ "inputSha256": "ccd85bb6a0ca4d78a729c6c216db4be91c0185e8b382ce10fc6d58b27dd69cec",
+ "responseSha256": "ba008b3ff2e64fd0f721e62a4159d1068da4c3f8ca432bf40a0414c167013059",
+ "rc": 0,
+ "latencyMs": 216255,
+ "isError": false,
+ "numTurns": 1,
+ "sessionId": "6791e767-b23e-4ac0-809f-d1beb8a3e26e",
+ "modelUsage": {
+  "claude-fable-5-1": {
+   "inputTokens": 2,
+   "outputTokens": 18898,
+   "cacheReadInputTokens": 2693,
+   "cacheCreationInputTokens": 56950,
+   "webSearchRequests": 0,
+   "costUSD": 2.08459325,
+   "contextWindow": 1000000,
+   "maxOutputTokens": 64000,
+   "thinkingTokens": 18888,
+   "canonicalModel": "claude-fable-5-1",
+   "provider": "firstParty",
+   "costBasis": "list"
+  }
+ },
+ "usage": {
+  "input_tokens": 2,
+  "cache_creation_input_tokens": 56950,
+  "cache_read_input_tokens": 2693,
+  "output_tokens": 18898,
+  "output_tokens_details": {
+   "thinking_tokens": 18888
+  },
+  "server_tool_use": {
+   "web_search_requests": 0,
+   "web_fetch_requests": 0
+  },
+  "service_tier": "standard",
+  "cache_creation": {
+   "ephemeral_1h_input_tokens": 56950,
+   "ephemeral_5m_input_tokens": 0
+  },
+  "inference_geo": "not_available",
+  "iterations": [
+   {
+    "input_tokens": 2,
+    "output_tokens": 18898,
+    "cache_read_input_tokens": 2693,
+    "cache_creation_input_tokens": 56950,
+    "cache_creation": {
+     "ephemeral_5m_input_tokens": 0,
+     "ephemeral_1h_input_tokens": 56950
+    },
+    "type": "message"
+   }
+  ],
+  "speed": "standard"
+ },
+ "totalCostUsd": 2.08459325,
+ "durationApiMs": 214472,
+ "stderrTail": "",
+ "at": "2026-09-18T17:47:46.653Z"
+}

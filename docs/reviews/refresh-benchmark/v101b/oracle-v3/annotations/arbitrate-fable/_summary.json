@@ -1,0 +1,15 @@
+{
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "done": 21,
+ "skipped": 73,
+ "notReady": 0,
+ "failed": 0,
+ "noCall": 6,
+ "stopped": null,
+ "at": "2026-09-18T22:46:30.698Z"
+}

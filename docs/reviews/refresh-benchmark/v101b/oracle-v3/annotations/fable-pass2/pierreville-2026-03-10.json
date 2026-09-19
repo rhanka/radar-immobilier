@@ -1,0 +1,37 @@
+{
+ "documentId": "pierreville-2026-03-10",
+ "step": "fable-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass2",
+ "inputStateSha256": "cc33975cf6846d1cd404c522fbe8f4f0779dbcee3a8593a4791a901060b55ce5",
+ "rawText": "{\"operations\":[\n {\"op\":\"remove\",\"id\":\"u06\",\"reason\":\"La résolution 2026-03-71 autorise à enchérir sur « tout immeuble de son territoire mis en vente » sans nommer aucun lot, matricule ni adresse : il n’y a pas d’objet foncier explicite au sens de la règle « Unité: objet réglementaire ou foncier explicite », et il s’agit d’une autorisation administrative générique de vente pour taxes, non d’un acte foncier décidé sur un immeuble identifié.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u06",
+   "reason": "La résolution 2026-03-71 autorise à enchérir sur « tout immeuble de son territoire mis en vente » sans nommer aucun lot, matricule ni adresse : il n’y a pas d’objet foncier explicite au sens de la règle « Unité: objet réglementaire ou foncier explicite », et il s’agit d’une autorisation administrative générique de vente pour taxes, non d’un acte foncier décidé sur un immeuble identifié."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u06"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 4
+}

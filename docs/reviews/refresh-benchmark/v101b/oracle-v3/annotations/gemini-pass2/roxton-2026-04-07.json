@@ -1,0 +1,26 @@
+{
+ "documentId": "roxton-2026-04-07",
+ "step": "gemini-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass2",
+ "inputStateSha256": "1c4598184adea3ab67d4703ab4ce04e2008c33194af15ce551ec2c1796256210",
+ "rawText": "{\"operations\":[]}",
+ "parseError": null,
+ "operations": [],
+ "applied": [],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 1
+}

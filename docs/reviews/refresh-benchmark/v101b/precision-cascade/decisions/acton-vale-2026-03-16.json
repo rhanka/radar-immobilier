@@ -1,0 +1,215 @@
+{
+ "documentId": "acton-vale-2026-03-16",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "fe12c7e23915109379c4c65fddffdc03409ac9f51d098519346b6cd42bd2786e",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-ppcmoi"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PPCMOI-001-2026 — 1050, rue Dubois — adoption finale prévue",
+     "stage": "ppcmoi",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+      },
+      {
+       "page": 2,
+       "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-cptaq-ferme"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande CPTAQ — Ferme Guilmette Inc.",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+      },
+      {
+       "page": 2,
+       "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-cptaq-particulier"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Demande CPTAQ — particulier — point 18.3",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+      },
+      {
+       "page": 2,
+       "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-prhlm"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Entente PRHLM — soutien à la rénovation des HLM",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "5.2 - Désignation des signataires – Entente relative au Programme de rénovation\ndes habitations à loyer modique (PRHLM) – Volet 1 – Soutien à des travaux\nde rénovation."
+      },
+      {
+       "page": 1,
+       "excerpt": "5.2 - Désignation des signataires – Entente relative au Programme de rénovation\ndes habitations à loyer modique (PRHLM) – Volet 1 – Soutien à des travaux\nde rénovation."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "bylaw-005-206"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 005-206 — tarification du camp de jour et de la piscine municipale",
+     "stage": null,
+     "objet": "005-206",
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "10.2 - Adoption du règlement 005-206 établissant la tarification pour le camp de jour\net de la piscine municipale."
+      },
+      {
+       "page": 1,
+       "excerpt": "10.2 - Adoption du règlement 005-206 établissant la tarification pour le camp de jour\net de la piscine municipale."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 18.1 de l'ordre du jour prévoit l'adoption de la résolution finale pour le PPCMOI-001-2026 au 1050, rue Dubois.\",\"excerpt\":\"18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\\nDubois.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 18.2 prévoit une résolution relative à une demande à la CPTAQ pour Ferme Guilmette Inc.\",\"excerpt\":\"18.2 - Résolution relative à une demande présentée à la Commission de protection\\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.).\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 18.3 prévoit une résolution relative à une demande à la CPTAQ pour Daniel Laroche.\",\"excerpt\":\"18.3 - Résolution relative à une demande présentée à la Commission de protection\\ndu territoire agricole du Québec (Réf: Daniel Laroche).\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"L'acte concerne uniquement la désignation de signataires pour une entente de subvention de rénovation de HLM, ce qui relève des exclusions administratives.\",\"excerpt\":\"5.2 - Désignation des signataires – Entente relative au Programme de rénovation\\ndes habitations à loyer modique (PRHLM)\"},{\"act\":\"A05\",\"verdict\":\"non_soutenu\",\"reason\":\"La tarification pour le camp de jour et la piscine municipale relève des loisirs et de la tarification de services, exclus du champ de l'urbanisme et de l'aménagement.\",\"excerpt\":\"10.2 - Adoption du règlement 005-206 établissant la tarification pour le camp de jour\\net de la piscine municipale.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 18.1 de l'ordre du jour prévoit l'adoption de la résolution finale pour le PPCMOI-001-2026 au 1050, rue Dubois.",
+   "excerpt": "18.1 - Adoption de la résolution finale d'un projet particulier de construction, de\nmodification et d'occupation d'un immeuble (PPCMOI-001-2026) - 1050, rue\nDubois."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 18.2 prévoit une résolution relative à une demande à la CPTAQ pour Ferme Guilmette Inc.",
+   "excerpt": "18.2 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Ferme Guilmette Inc.)."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 18.3 prévoit une résolution relative à une demande à la CPTAQ pour Daniel Laroche.",
+   "excerpt": "18.3 - Résolution relative à une demande présentée à la Commission de protection\ndu territoire agricole du Québec (Réf: Daniel Laroche)."
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "L'acte concerne uniquement la désignation de signataires pour une entente de subvention de rénovation de HLM, ce qui relève des exclusions administratives.",
+   "excerpt": "5.2 - Désignation des signataires – Entente relative au Programme de rénovation\ndes habitations à loyer modique (PRHLM)"
+  },
+  {
+   "act": "A05",
+   "verdict": "non_soutenu",
+   "reason": "La tarification pour le camp de jour et la piscine municipale relève des loisirs et de la tarification de services, exclus du champ de l'urbanisme et de l'aménagement.",
+   "excerpt": "10.2 - Adoption du règlement 005-206 établissant la tarification pour le camp de jour\net de la piscine municipale."
+  }
+ ],
+ "filter": {
+  "acts": 5,
+  "removed": [
+   {
+    "act": "A04",
+    "reason": "L'acte concerne uniquement la désignation de signataires pour une entente de subvention de rénovation de HLM, ce qui relève des exclusions administratives."
+   },
+   {
+    "act": "A05",
+    "reason": "La tarification pour le camp de jour et la piscine municipale relève des loisirs et de la tarification de services, exclus du champ de l'urbanisme et de l'aménagement."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 18.1 de l'ordre du jour prévoit l'adoption de la résolution finale pour le PPCMOI-001-2026 au 1050, rue Dubois."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 18.2 prévoit une résolution relative à une demande à la CPTAQ pour Ferme Guilmette Inc."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 18.3 prévoit une résolution relative à une demande à la CPTAQ pour Daniel Laroche."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 2023,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 2573,
+   "outputTokens": 418,
+   "totalTokens": 2991
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1859
+  },
+  "inputSha256": "1402d3e48607ead6e1cf8907d445acedf6290b90858834f0eec5663c301691a8"
+ }
+}

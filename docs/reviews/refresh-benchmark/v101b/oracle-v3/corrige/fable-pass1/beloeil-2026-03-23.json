@@ -1,0 +1,956 @@
+{
+ "documentId": "beloeil-2026-03-23",
+ "nextId": 26,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Consultation publique tenue sur le règlement 1667-126-2026 — service de génie en zone I-906",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "1667-126-2026",
+    "page": 2,
+    "citation": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-126-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE 1667-00-2011",
+    "anchor": "RÈGLEMENT 1667-126-2026",
+    "spanStart": 738,
+    "spanEnd": 849
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Consultation publique tenue sur le règlement 1667-126-2026 — service de génie en zone I-906",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "1667-126-2026",
+      "page": 2,
+      "citation": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-126-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE 1667-00-2011",
+      "anchor": "RÈGLEMENT 1667-126-2026",
+      "spanStart": 738,
+      "spanEnd": 849
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil tient cette assemblée publique de consultation pendant la séance, ce qui constitue une étape distincte de l’adoption du second projet."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Adoption du second projet du règlement 1667-126-2026 — service de génie en zone I-906",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "1667-126-2026",
+    "page": 3,
+    "citation": "D'adopter le second projet du Règlement 1667-126-2026 modifiant le Règlement de zonage 166700-2011 visant à permettre spécifiquement l’usage « Service de génie (6592) » dans la zone I-906",
+    "anchor": "Règlement 1667-126-2026",
+    "spanStart": 343,
+    "spanEnd": 530
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du second projet du règlement 1667-126-2026 — service de génie en zone I-906",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "1667-126-2026",
+      "page": 3,
+      "citation": "D'adopter le second projet du Règlement 1667-126-2026 modifiant le Règlement de zonage 166700-2011 visant à permettre spécifiquement l’usage « Service de génie (6592) » dans la zone I-906",
+      "anchor": "Règlement 1667-126-2026",
+      "spanStart": 343,
+      "spanEnd": 530
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-116 adopte explicitement le second projet de ce règlement de zonage."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Consultation publique tenue sur le règlement 1667-127-2026 — dispositions environnementales",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "1667-127-2026",
+    "page": 3,
+    "citation": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-127-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE 1667-00-2011",
+    "anchor": "RÈGLEMENT 1667-127-2026",
+    "spanStart": 586,
+    "spanEnd": 697
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Consultation publique tenue sur le règlement 1667-127-2026 — dispositions environnementales",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "1667-127-2026",
+      "page": 3,
+      "citation": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-127-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE 1667-00-2011",
+      "anchor": "RÈGLEMENT 1667-127-2026",
+      "spanStart": 586,
+      "spanEnd": 697
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le document constate la tenue de la consultation sur ce règlement, indépendamment de l’adoption de son second projet."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Adoption du second projet du règlement 1667-127-2026 — dispositions environnementales",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "1667-127-2026",
+    "page": 4,
+    "citation": "D'adopter le second projet du Règlement 1667-127-2026 modifiant le Règlement de zonage 166700-2011",
+    "anchor": "Règlement 1667-127-2026",
+    "spanStart": 574,
+    "spanEnd": 672
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du second projet du règlement 1667-127-2026 — dispositions environnementales",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "1667-127-2026",
+      "page": 4,
+      "citation": "D'adopter le second projet du Règlement 1667-127-2026 modifiant le Règlement de zonage 166700-2011",
+      "anchor": "Règlement 1667-127-2026",
+      "spanStart": 574,
+      "spanEnd": 672
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-118 adopte le second projet du règlement visant l’actualisation de dispositions environnementales."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Consultation publique tenue sur le règlement 1667-128-2026 — usages C-5 en zone C-523",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "1667-128-2026",
+    "page": 4,
+    "citation": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-128-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE 1667-00-2011",
+    "anchor": "RÈGLEMENT 1667-128-2026",
+    "spanStart": 836,
+    "spanEnd": 947
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Consultation publique tenue sur le règlement 1667-128-2026 — usages C-5 en zone C-523",
+      "stage": "inconnu",
+      "procedure": "consultation_publique",
+      "objet": "1667-128-2026",
+      "page": 4,
+      "citation": "ASSEMBLÉE PUBLIQUE DE CONSULTATION SUR LE RÈGLEMENT 1667-128-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE 1667-00-2011",
+      "anchor": "RÈGLEMENT 1667-128-2026",
+      "spanStart": 836,
+      "spanEnd": 947
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La consultation publique sur cet objet réglementaire est effectivement tenue lors de la séance."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Adoption du second projet du règlement 1667-128-2026 — usages C-5 en zone C-523",
+    "stage": "second_projet",
+    "procedure": null,
+    "objet": "1667-128-2026",
+    "page": 5,
+    "citation": "D'adopter le second projet du Règlement 1667-128-2026 modifiant le Règlement de zonage 1667-00-2011",
+    "anchor": "Règlement 1667-128-2026",
+    "spanStart": 387,
+    "spanEnd": 486
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du second projet du règlement 1667-128-2026 — usages C-5 en zone C-523",
+      "stage": "second_projet",
+      "procedure": null,
+      "objet": "1667-128-2026",
+      "page": 5,
+      "citation": "D'adopter le second projet du Règlement 1667-128-2026 modifiant le Règlement de zonage 1667-00-2011",
+      "anchor": "Règlement 1667-128-2026",
+      "spanStart": 387,
+      "spanEnd": 486
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-120 adopte explicitement le second projet de ce règlement de zonage."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de la dérogation mineure DM-2026-9017 — marges, 636, rue Salomon",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-9017",
+    "page": 5,
+    "citation": "D’autoriser la dérogation mineure numéro DM-2026-9017 telle que demandée pour le 636, rue Salomon",
+    "anchor": "dérogation mineure numéro DM-2026-9017",
+    "spanStart": 1692,
+    "spanEnd": 1789
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de la dérogation mineure DM-2026-9017 — marges, 636, rue Salomon",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-9017",
+      "page": 5,
+      "citation": "D’autoriser la dérogation mineure numéro DM-2026-9017 telle que demandée pour le 636, rue Salomon",
+      "anchor": "dérogation mineure numéro DM-2026-9017",
+      "spanStart": 1692,
+      "spanEnd": 1789
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil autorise cette demande portant sur les marges d’un agrandissement, aux conditions de la recommandation du comité consultatif d’urbanisme."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de la dérogation mineure DM-2026-9021 — enseigne, 1500, rue Louis-Marchand",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-9021",
+    "page": 6,
+    "citation": "D’autoriser la dérogation mineure numéro DM-2026-9021 telle que demandée pour le 1500, rue Louis-Marchand",
+    "anchor": "dérogation mineure numéro DM-2026-9021",
+    "spanStart": 791,
+    "spanEnd": 896
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de la dérogation mineure DM-2026-9021 — enseigne, 1500, rue Louis-Marchand",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-9021",
+      "page": 6,
+      "citation": "D’autoriser la dérogation mineure numéro DM-2026-9021 telle que demandée pour le 1500, rue Louis-Marchand",
+      "anchor": "dérogation mineure numéro DM-2026-9021",
+      "spanStart": 791,
+      "spanEnd": 896
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution autorise explicitement cette demande d’enseigne supplémentaire, qui demeure incluse même pour un usage non résidentiel."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de la dérogation mineure DM-2026-9022 — marge et empiètements, 850, rue Laurier",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "DM-2026-9022",
+    "page": 7,
+    "citation": "D’autoriser la dérogation mineure numéro DM-2026-9022 telle que demandée pour le 850, rue Laurier",
+    "anchor": "dérogation mineure numéro DM-2026-9022",
+    "spanStart": 154,
+    "spanEnd": 251
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de la dérogation mineure DM-2026-9022 — marge et empiètements, 850, rue Laurier",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "DM-2026-9022",
+      "page": 7,
+      "citation": "D’autoriser la dérogation mineure numéro DM-2026-9022 telle que demandée pour le 850, rue Laurier",
+      "anchor": "dérogation mineure numéro DM-2026-9022",
+      "spanStart": 154,
+      "spanEnd": 251
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La décision autorise une seule demande nommée regroupant les dérogations relatives à la marge, à la galerie, à l’escalier et à l’avant-toit."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de l’usage conditionnel UC-2026-9008 — logement bigénérationnel, 209, rue Gagnon",
+    "stage": "adoption",
+    "procedure": "usage_conditionnel",
+    "objet": "UC-2026-9008",
+    "page": 7,
+    "citation": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9008 pour le 209, rue Gagnon, aux conditions prévues à la recommandation 2026/02/40 du comité consultatif d'urbanisme",
+    "anchor": "usage conditionnel numéro UC-2026-9008",
+    "spanStart": 1335,
+    "spanEnd": 1511
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de l’usage conditionnel UC-2026-9008 — logement bigénérationnel, 209, rue Gagnon",
+      "stage": "adoption",
+      "procedure": "usage_conditionnel",
+      "objet": "UC-2026-9008",
+      "page": 7,
+      "citation": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9008 pour le 209, rue Gagnon, aux conditions prévues à la recommandation 2026/02/40 du comité consultatif d'urbanisme",
+      "anchor": "usage conditionnel numéro UC-2026-9008",
+      "spanStart": 1335,
+      "spanEnd": 1511
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil accorde l’usage conditionnel pour un logement bigénérationnel de plus de 45 mètres carrés, ce qui relève du stade adoption."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de l’usage conditionnel UC-2026-9020 — logement bigénérationnel, 850, rue Le Moyne",
+    "stage": "adoption",
+    "procedure": "usage_conditionnel",
+    "objet": "UC-2026-9020",
+    "page": 8,
+    "citation": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9020 pour le 850, rue Le Moyne, aux conditions prévues à la recommandation 2026/02/41 du comité consultatif d'urbanisme",
+    "anchor": "usage conditionnel numéro UC-2026-9020",
+    "spanStart": 601,
+    "spanEnd": 779
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de l’usage conditionnel UC-2026-9020 — logement bigénérationnel, 850, rue Le Moyne",
+      "stage": "adoption",
+      "procedure": "usage_conditionnel",
+      "objet": "UC-2026-9020",
+      "page": 8,
+      "citation": "D’autoriser la demande d’usage conditionnel numéro UC-2026-9020 pour le 850, rue Le Moyne, aux conditions prévues à la recommandation 2026/02/41 du comité consultatif d'urbanisme",
+      "anchor": "usage conditionnel numéro UC-2026-9020",
+      "spanStart": 601,
+      "spanEnd": 779
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution accorde cette demande distincte d’usage conditionnel pour l’aménagement d’un logement bigénérationnel."
+    }
+   ]
+  },
+  {
+   "id": "u12",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA-2026-9002 — modification du projet, 1005, rue Richelieu",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9002",
+    "page": 11,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/30 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9002",
+    "anchor": "architecturale PIIA-2026-9002",
+    "spanStart": 1002,
+    "spanEnd": 1173
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA-2026-9002 — modification du projet, 1005, rue Richelieu",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "PIIA-2026-9002",
+      "page": 11,
+      "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/30 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9002",
+      "anchor": "architecturale PIIA-2026-9002",
+      "spanStart": 1002,
+      "spanEnd": 1173
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil approuve actuellement la modification du projet remplaçant la terrasse sur toit par un deuxième étage complet."
+    }
+   ]
+  },
+  {
+   "id": "u13",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA-2026-9003 — enseignes, 201-217, rue Saint-Jean-Baptiste",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9003",
+    "page": 11,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/31 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9003",
+    "anchor": "architecturale PIIA-2026-9003",
+    "spanStart": 2395,
+    "spanEnd": 2566
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA-2026-9003 — enseignes, 201-217, rue Saint-Jean-Baptiste",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "PIIA-2026-9003",
+      "page": 11,
+      "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/31 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9003",
+      "anchor": "architecturale PIIA-2026-9003",
+      "spanStart": 2395,
+      "spanEnd": 2566
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’approbation du projet global d’affichage constitue une unité de PIIA, les petits projets non résidentiels étant inclus."
+    }
+   ]
+  },
+  {
+   "id": "u14",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA-2026-9004 — enseignes, 229-245, rue Saint-Jean-Baptiste",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9004",
+    "page": 12,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/32 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9004",
+    "anchor": "architecturale PIIA-2026-9004",
+    "spanStart": 1250,
+    "spanEnd": 1421
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA-2026-9004 — enseignes, 229-245, rue Saint-Jean-Baptiste",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "PIIA-2026-9004",
+      "page": 12,
+      "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/32 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9004",
+      "anchor": "architecturale PIIA-2026-9004",
+      "spanStart": 1250,
+      "spanEnd": 1421
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Cette résolution approuve une demande de PIIA explicitement distincte pour l’affichage des établissements du 229-245, rue Saint-Jean-Baptiste."
+    }
+   ]
+  },
+  {
+   "id": "u15",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA-2026-9009 — enseignes Poulet Rouge, 481, rue de l’Industrie",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9009",
+    "page": 12,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/33 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9009",
+    "anchor": "architecturale PIIA-2026-9009",
+    "spanStart": 2645,
+    "spanEnd": 2816
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA-2026-9009 — enseignes Poulet Rouge, 481, rue de l’Industrie",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "PIIA-2026-9009",
+      "page": 12,
+      "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/33 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9009",
+      "anchor": "architecturale PIIA-2026-9009",
+      "spanStart": 2645,
+      "spanEnd": 2816
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil approuve cette demande de PIIA pour deux enseignes à plat et deux enseignes détachées."
+    }
+   ]
+  },
+  {
+   "id": "u16",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA-2026-9024 — lotissement du lot 6 580 334, rue Serge-Pepin",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9024",
+    "page": 13,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/34 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9024",
+    "anchor": "architecturale PIIA-2026-9024",
+    "spanStart": 1078,
+    "spanEnd": 1249
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA-2026-9024 — lotissement du lot 6 580 334, rue Serge-Pepin",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "PIIA-2026-9024",
+      "page": 13,
+      "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/34 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9024",
+      "anchor": "architecturale PIIA-2026-9024",
+      "spanStart": 1078,
+      "spanEnd": 1249
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La décision approuve le PIIA permettant la subdivision du lot 6 580 334 en quatre terrains destinés à la construction résidentielle."
+    }
+   ]
+  },
+  {
+   "id": "u17",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA-2026-9025 — lotissement, 850 et 866, rue Laurier et 225, rue Hubert",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9025",
+    "page": 13,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/35 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9025",
+    "anchor": "architecturale PIIA-2026-9025",
+    "spanStart": 2518,
+    "spanEnd": 2689
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA-2026-9025 — lotissement, 850 et 866, rue Laurier et 225, rue Hubert",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "PIIA-2026-9025",
+      "page": 13,
+      "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/35 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9025",
+      "anchor": "architecturale PIIA-2026-9025",
+      "spanStart": 2518,
+      "spanEnd": 2689
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil approuve cette demande de PIIA pour diviser les lots 4 554 591 et 4 554 592 en trois lots projetés."
+    }
+   ]
+  },
+  {
+   "id": "u18",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA-2026-9026 — agrandissement, 1182, rue Omer-Adam",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9026",
+    "page": 14,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/36 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9026",
+    "anchor": "architecturale PIIA-2026-9026",
+    "spanStart": 1037,
+    "spanEnd": 1208
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA-2026-9026 — agrandissement, 1182, rue Omer-Adam",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "PIIA-2026-9026",
+      "page": 14,
+      "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/36 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9026",
+      "anchor": "architecturale PIIA-2026-9026",
+      "spanStart": 1037,
+      "spanEnd": 1208
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution approuve le PIIA pour un garage intégré avec une pièce habitable au-dessus dans un bâtiment principal jumelé."
+    }
+   ]
+  },
+  {
+   "id": "u19",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA-2026-9028 — projet intégré mixte de 218 logements, rue Serge-Pepin",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9028",
+    "page": 14,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/37 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9028",
+    "anchor": "architecturale PIIA-2026-9028",
+    "spanStart": 2534,
+    "spanEnd": 2705
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA-2026-9028 — projet intégré mixte de 218 logements, rue Serge-Pepin",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "PIIA-2026-9028",
+      "page": 14,
+      "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/37 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9028",
+      "anchor": "architecturale PIIA-2026-9028",
+      "spanStart": 2534,
+      "spanEnd": 2705
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil approuve le PIIA du projet de trois bâtiments comprenant un local commercial et 218 logements sur le lot 4 553 167."
+    }
+   ]
+  },
+  {
+   "id": "u20",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA-2026-9030 — enseignes, 888, boulevard Yvon-L’Heureux Nord",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9030",
+    "page": 15,
+    "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/38 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9030",
+    "anchor": "architecturale PIIA-2026-9030",
+    "spanStart": 1103,
+    "spanEnd": 1274
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA-2026-9030 — enseignes, 888, boulevard Yvon-L’Heureux Nord",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "PIIA-2026-9030",
+      "page": 15,
+      "citation": "D’approuver, aux conditions prévues à la recommandation 2026/02/38 du comité consultatif d’urbanisme, le plan d’implantation et d’intégration architecturale PIIA-2026-9030",
+      "anchor": "architecturale PIIA-2026-9030",
+      "spanStart": 1103,
+      "spanEnd": 1274
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’approbation de ce PIIA pour trois nouvelles enseignes est une décision d’urbanisme incluse malgré son caractère non résidentiel."
+    }
+   ]
+  },
+  {
+   "id": "u21",
+   "status": "active",
+   "current": {
+    "label": "Approbation du PIIA-2026-9033 — enseignes Pitou Minou et Compagnons, 650, rue Serge-Pepin",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "PIIA-2026-9033",
+    "page": 15,
+    "citation": "D’approuver le plan d’implantation et d’intégration architecturale PIIA-2026-9033 et d’autoriser",
+    "anchor": "architecturale PIIA-2026-9033",
+    "spanStart": 2567,
+    "spanEnd": 2663
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation du PIIA-2026-9033 — enseignes Pitou Minou et Compagnons, 650, rue Serge-Pepin",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "PIIA-2026-9033",
+      "page": 15,
+      "citation": "D’approuver le plan d’implantation et d’intégration architecturale PIIA-2026-9033 et d’autoriser",
+      "anchor": "architecturale PIIA-2026-9033",
+      "spanStart": 2567,
+      "spanEnd": 2663
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil approuve cette demande de PIIA d’affichage, avec une exigence sur la couleur du fond de l’enseigne murale."
+    }
+   ]
+  },
+  {
+   "id": "u22",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 1667-129-2026 — dimensions minimales des terrains en zone C-733",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1667-129-2026",
+    "page": 16,
+    "citation": "AVIS DE MOTION ET ADOPTION DU PROJET DE RÈGLEMENT 1667-129-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE 1667-00-2011",
+    "anchor": "RÈGLEMENT 1667-129-2026",
+    "spanStart": 472,
+    "spanEnd": 581
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 1667-129-2026 — dimensions minimales des terrains en zone C-733",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "1667-129-2026",
+      "page": 16,
+      "citation": "AVIS DE MOTION ET ADOPTION DU PROJET DE RÈGLEMENT 1667-129-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE 1667-00-2011",
+      "anchor": "RÈGLEMENT 1667-129-2026",
+      "spanStart": 472,
+      "spanEnd": 581
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion est donné pendant cette séance et doit être compté séparément de l’adoption du projet du même règlement."
+    }
+   ]
+  },
+  {
+   "id": "u23",
+   "status": "active",
+   "current": {
+    "label": "Adoption du projet du règlement 1667-129-2026 — dimensions minimales des terrains en zone C-733",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "1667-129-2026",
+    "page": 16,
+    "citation": "D’adopter le projet de Règlement 1667-129-2026 modifiant le Règlement de zonage 1667-002011 visant à réduire les normes relatives aux dimensions minimales de terrain pour la zone C-733",
+    "anchor": "Règlement 1667-129-2026",
+    "spanStart": 1184,
+    "spanEnd": 1368
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du projet du règlement 1667-129-2026 — dimensions minimales des terrains en zone C-733",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "1667-129-2026",
+      "page": 16,
+      "citation": "D’adopter le projet de Règlement 1667-129-2026 modifiant le Règlement de zonage 1667-002011 visant à réduire les normes relatives aux dimensions minimales de terrain pour la zone C-733",
+      "anchor": "Règlement 1667-129-2026",
+      "spanStart": 1184,
+      "spanEnd": 1368
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le conseil adopte le projet de règlement lors de la séance, étape distincte de l’avis de motion également donné."
+    }
+   ]
+  },
+  {
+   "id": "u24",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet PPCMOI-2026-9027 — projet intégré mixte, lot 4 553 167, rue Serge-Pepin",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI-2026-9027",
+    "page": 16,
+    "citation": "ADOPTION DU PREMIER PROJET DE RÉSOLUTION D’UN PROJET PARTICULIER DE CONSTRUCTION, DE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI-2026-9027",
+    "anchor": "PPCMOI-2026-9027",
+    "spanStart": 1551,
+    "spanEnd": 1696
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet PPCMOI-2026-9027 — projet intégré mixte, lot 4 553 167, rue Serge-Pepin",
+      "stage": "projet_reglement",
+      "procedure": "ppcmoi",
+      "objet": "PPCMOI-2026-9027",
+      "page": 16,
+      "citation": "ADOPTION DU PREMIER PROJET DE RÉSOLUTION D’UN PROJET PARTICULIER DE CONSTRUCTION, DE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI-2026-9027",
+      "anchor": "PPCMOI-2026-9027",
+      "spanStart": 1551,
+      "spanEnd": 1696
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 36 adopte le premier projet de résolution du PPCMOI, objet procédural distinct du PIIA-2026-9028 concernant le même développement."
+    }
+   ]
+  },
+  {
+   "id": "u25",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet PPCMOI 2025-9133 — stationnement, 409-415, boulevard Sir-Wilfrid-Laurier",
+    "stage": "projet_reglement",
+    "procedure": "ppcmoi",
+    "objet": "PPCMOI 2025-9133",
+    "page": 18,
+    "citation": "ADOPTION DU PREMIER PROJET DE RÉSOLUTION D’UN PROJET PARTICULIER DE CONSTRUCTION, DE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI 2025-9133",
+    "anchor": "PPCMOI 2025-9133",
+    "spanStart": 49,
+    "spanEnd": 194
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet PPCMOI 2025-9133 — stationnement, 409-415, boulevard Sir-Wilfrid-Laurier",
+      "stage": "projet_reglement",
+      "procedure": "ppcmoi",
+      "objet": "PPCMOI 2025-9133",
+      "page": 18,
+      "citation": "ADOPTION DU PREMIER PROJET DE RÉSOLUTION D’UN PROJET PARTICULIER DE CONSTRUCTION, DE MODIFICATION OU D’OCCUPATION D’UN IMMEUBLE (PPCMOI 2025-9133",
+      "anchor": "PPCMOI 2025-9133",
+      "spanStart": 49,
+      "spanEnd": 194
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le point 37 adopte à la majorité le premier projet de résolution du PPCMOI, et non son autorisation finale."
+    }
+   ]
+  }
+ ]
+}

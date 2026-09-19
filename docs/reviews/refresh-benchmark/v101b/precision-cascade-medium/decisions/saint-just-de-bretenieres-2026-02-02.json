@@ -1,0 +1,182 @@
+{
+ "documentId": "saint-just-de-bretenieres-2026-02-02",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "ca81244e69dbf3748fd787c068b35785a0535720ce45346c9ab02dc26e258bc4",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "signal-vente-terrain"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Vente de terrain au rang St-Isidore — information complémentaire demandée",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Les élus demandent plus d’information, dont la valeur du terrain."
+      },
+      {
+       "page": 2,
+       "excerpt": "AFFAIRES DÉCOULANT DU PROCÈS-VERBAL – VENTE DE\nTERRAIN – RANG ST-ISIDORE\nLes élus demandent plus d’information, dont la valeur du terrain."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "signal-revision-deboisement"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Demande de révision du règlement sur la bande boisée",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À\nL’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le\nrèglement soit revu en tenant compte des éléments soulevés."
+      },
+      {
+       "page": 7,
+       "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À\nL’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le\nrèglement soit revu en tenant compte des éléments soulevés."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "signal-competence-hydrique"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acceptation de l’intention de compétence de la MRC en milieux hydriques",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable"
+      },
+      {
+       "page": 8,
+       "excerpt": "IL EST PROPOSÉ PAR : Benoit Vachon et résolu à l’unanimité des\nconseillers présents QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration\nde compétence de la MRC de Montmagny concernant la délivrance de\ncertaines autorisations en vertu du Règlement sur l’encadrement\nd’activités sous la responsabilité des municipalités réalisées dans des\nmilieux hydriques et sur des ouvrages de protection contre les\ninondations, selon les modalités et conditions prévues à la résolution\nadoptée par la MRC le 20 janvier 2026;"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "signal-marche-jr"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Appui au réaménagement des équipements du Marché JR",
+     "stage": "inconnu",
+     "objet": null,
+     "citations": [
+      {
+       "page": 8,
+       "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET résolu à l’unanimité\ndes conseillers présents QUE la Municipalité de St-Just-de-Bretenières\nappui le projet de réaménagement"
+      },
+      {
+       "page": 8,
+       "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET résolu à l’unanimité\ndes conseillers présents QUE la Municipalité de St-Just-de-Bretenières\nappui le projet de réaménagement des équipements du Marché JR pour"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le procès-verbal mentionne la demande d'information supplémentaire concernant la vente d'un terrain au rang St-Isidore.\",\"excerpt\":\"AFFAIRES DÉCOULANT DU PROCÈS-VERBAL – VENTE DE\\nTERRAIN – RANG ST-ISIDORE\\nLes élus demandent plus d’information, dont la valeur du terrain.\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 40-02-2026 demande formellement la révision du règlement concernant le maintien de la bande boisée de 20 mètres.\",\"excerpt\":\"IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À\\nL’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le\\nrèglement soit revu en tenant compte des éléments soulevés.\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"La résolution 41-02-2026 accepte officiellement l'intention de déclaration de compétence de la MRC de Montmagny en milieux hydriques.\",\"excerpt\":\"QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration\\nde compétence de la MRC de Montmagny\"},{\"act\":\"A04\",\"verdict\":\"non_soutenu\",\"reason\":\"L'appui financier ou moral à une demande de subvention commerciale d'un commerce privé pour ses équipements ne constitue pas un acte d'urbanisme ou foncier.\",\"excerpt\":\"\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le procès-verbal mentionne la demande d'information supplémentaire concernant la vente d'un terrain au rang St-Isidore.",
+   "excerpt": "AFFAIRES DÉCOULANT DU PROCÈS-VERBAL – VENTE DE\nTERRAIN – RANG ST-ISIDORE\nLes élus demandent plus d’information, dont la valeur du terrain."
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "La résolution 40-02-2026 demande formellement la révision du règlement concernant le maintien de la bande boisée de 20 mètres.",
+   "excerpt": "IL EST PROPOSÉ PAR : Jessie Gonthier-Lajoie ET RÉSOLU À\nL’UNANIMITÉ DES CONSEILLERS PRÉSENTS de demander que le\nrèglement soit revu en tenant compte des éléments soulevés."
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "La résolution 41-02-2026 accepte officiellement l'intention de déclaration de compétence de la MRC de Montmagny en milieux hydriques.",
+   "excerpt": "QUE le conseil de la municipalité de Saint-Just-deBretenières accepte et se déclare favorable à l’intention de déclaration\nde compétence de la MRC de Montmagny"
+  },
+  {
+   "act": "A04",
+   "verdict": "non_soutenu",
+   "reason": "L'appui financier ou moral à une demande de subvention commerciale d'un commerce privé pour ses équipements ne constitue pas un acte d'urbanisme ou foncier.",
+   "excerpt": ""
+  }
+ ],
+ "filter": {
+  "acts": 4,
+  "removed": [
+   {
+    "act": "A04",
+    "reason": "L'appui financier ou moral à une demande de subvention commerciale d'un commerce privé pour ses équipements ne constitue pas un acte d'urbanisme ou foncier."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le procès-verbal mentionne la demande d'information supplémentaire concernant la vente d'un terrain au rang St-Isidore."
+   },
+   {
+    "act": "A02",
+    "reason": "La résolution 40-02-2026 demande formellement la révision du règlement concernant le maintien de la bande boisée de 20 mètres."
+   },
+   {
+    "act": "A03",
+    "reason": "La résolution 41-02-2026 accepte officiellement l'intention de déclaration de compétence de la MRC de Montmagny en milieux hydriques."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 1561,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 9229,
+   "outputTokens": 330,
+   "totalTokens": 9559
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 1423
+  },
+  "inputSha256": "3ca99c0cc0116a3c93b9f601f2505dc4b744190b5597ad9008a3bcffa152a75c"
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "step": "gemini-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "done": 100,
+ "skipped": 0,
+ "notReady": 0,
+ "failed": 0,
+ "noCall": 0,
+ "stopped": null,
+ "at": "2026-09-18T18:13:55.948Z"
+}

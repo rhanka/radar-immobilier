@@ -1,0 +1,13 @@
+{
+ "id": "lyster-2026-02-02",
+ "rc": 0,
+ "latencyMs": 302807,
+ "inputTokens": 2,
+ "outputTokens": 33429,
+ "cacheRead": 0,
+ "cacheCreate": 13115,
+ "costUsd": 0.975813,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 66415
+}

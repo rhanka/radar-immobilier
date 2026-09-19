@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-odilon-de-cranbourne-2026-01-12",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "1e90d3d566980812a2f7b3bc5a30ff52d2c50694c4b8a0a1df6b085c1082b0f7",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 5-01-2026, intitulée à la page 3 « Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021 » et déclarée « Adoptée » à la page 4, atteste cette adoption.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 6-01-2026 commence à la page 4 et adopte le règlement 438-2025, dont la page 5 précise l’agrandissement de la zone M-77 pour inclure toute la zone Rm-93, ainsi abrogée.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 12-01-2026 refuse explicitement à la page 16 le remboursement des pénalités liées au contrat de vente du terrain destiné à un immeuble multilogement, ce qui constitue une décision foncière dont le refus est correctement conservé.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "absent"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 5-01-2026, intitulée à la page 3 « Adoption règlement 437-2025 modifiant le plan d'urbanisme 392-2021 » et déclarée « Adoptée » à la page 4, atteste cette adoption."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 6-01-2026 commence à la page 4 et adopte le règlement 438-2025, dont la page 5 précise l’agrandissement de la zone M-77 pour inclure toute la zone Rm-93, ainsi abrogée."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 12-01-2026 refuse explicitement à la page 16 le remboursement des pénalités liées au contrat de vente du terrain destiné à un immeuble multilogement, ce qui constitue une décision foncière dont le refus est correctement conservé."
+  }
+ ]
+}

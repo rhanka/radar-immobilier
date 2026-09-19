@@ -1,0 +1,37 @@
+{
+ "documentId": "sacre-coeur-2026-05-11",
+ "step": "gemini-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass2",
+ "inputStateSha256": "a7450cbe0ded036e2f281c15017c48b7a6ee8429d9fa88a505613d1d6cecb5df",
+ "rawText": "{\"operations\":[\n {\"op\":\"remove\",\"id\":\"u12\",\"reason\":\"La résolution 2026-05-175 est une demande politique adressée au gouvernement provincial concernant un projet de règlement québécois et non un objet réglementaire ou foncier de compétence municipale.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "remove",
+   "id": "u12",
+   "reason": "La résolution 2026-05-175 est une demande politique adressée au gouvernement provincial concernant un projet de règlement québécois et non un objet réglementaire ou foncier de compétence municipale."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u12"
+  }
+ ],
+ "rejects": [],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 9
+}

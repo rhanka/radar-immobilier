@@ -1,0 +1,74 @@
+{
+ "documentId": "coteau-du-lac-2026-02-10",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "157c64fb15e859bcb2fca8cebab1e81f23e96302883248d5c021b7c8c5853839",
+ "verificationSha256": "81f9998909bf84455d2847e1d932fc6692771f25484be55c57a24902b3a62f43",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"Le point 6a inscrit explicitement la « Modification de la résolution #425-10-2025 » concernant l’« Autorisation de signature acte d’achat d’une partie du lot 6 025 922 (1 rue Dollard) ». Les actes fonciers étant inclus et un point d’ordre du jour constituant une unité « prévue », v1 est retenue comme étape décisionnelle prévue, conformément à son libellé, et non comme adoption acquise : l’absence de décision constatée ne justifie donc pas « absent ».\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Modification prévue de l’autorisation d’achat d’une partie du lot 6 025 922 — 1 rue Dollard",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 025 922",
+      "page": 2,
+      "citation": "a) Modification de la résolution #425-10-2025. Autorisation de signature acte d’achat d’une partie du lot 6 025 922 (1 rue Dollard",
+      "anchor": "lot 6 025 922",
+      "spanStart": 356,
+      "spanEnd": 486
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "A",
+     "family": "astra",
+     "choice": "absent",
+     "reason": "Le point 6a, page 2, prévoit une modification de la résolution d’autorisation d’achat, sans attester l’étape « adoption » proposée."
+    },
+    {
+     "position": "B",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Acte foncier explicite attesté page 2 (« Autorisation de signature acte d’achat d’une partie du lot 6 025 922 (1 rue Dollard) »), point d’ordre du jour donc « prévu » comme le dit le label, et la résolution d’autorisation constitue l’étape décisionnelle du dossier ; citation, objet et page exacts."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "La modification de l'autorisation d'achat d'une partie du lot 6 025 922 est un acte foncier explicite prévu à l'ordre du jour à la page 2."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "Le point 6a inscrit explicitement la « Modification de la résolution #425-10-2025 » concernant l’« Autorisation de signature acte d’achat d’une partie du lot 6 025 922 (1 rue Dollard) ». Les actes fonciers étant inclus et un point d’ordre du jour constituant une unité « prévue », v1 est retenue comme étape décisionnelle prévue, conformément à son libellé, et non comme adoption acquise : l’absence de décision constatée ne justifie donc pas « absent »."
+  }
+ ]
+}

@@ -1,0 +1,272 @@
+{
+ "documentId": "notre-dame-du-rosaire-2026-03-02",
+ "nextId": 8,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Fixation du prix et mise en vente du lot 6 714 200, rue Morin — 19 999 $ plus taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 714 200",
+    "page": 19,
+    "citation": "6 714 200 :19 999 $ plus taxes 6 714 201 :19 999 $plus taxes 6 714 202 22 499 $ plus taxes QUE le conseil municipal autorise la mise en vente desdits terrains",
+    "anchor": "6 714 200 :19 999",
+    "spanStart": 610,
+    "spanEnd": 769
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Fixation du prix et mise en vente du lot 6 714 200, rue Morin — 19 999 $ plus taxes",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 714 200",
+      "page": 19,
+      "citation": "6 714 200 :19 999 $ plus taxes 6 714 201 :19 999 $plus taxes 6 714 202 22 499 $ plus taxes QUE le conseil municipal autorise la mise en vente desdits terrains",
+      "anchor": "6 714 200 :19 999",
+      "spanStart": 610,
+      "spanEnd": 769
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-16 fixe le prix et autorise la mise en vente de ce lot ; chaque objet foncier explicitement nommé constitue une unité."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Fixation du prix et mise en vente du lot 6 714 201, rue Morin — 19 999 $ plus taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 714 201",
+    "page": 19,
+    "citation": "6 714 201 :19 999 $plus taxes 6 714 202 22 499 $ plus taxes QUE le conseil municipal autorise la mise en vente desdits terrains",
+    "anchor": "6 714 201 :19 999",
+    "spanStart": 641,
+    "spanEnd": 769
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Fixation du prix et mise en vente du lot 6 714 201, rue Morin — 19 999 $ plus taxes",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 714 201",
+      "page": 19,
+      "citation": "6 714 201 :19 999 $plus taxes 6 714 202 22 499 $ plus taxes QUE le conseil municipal autorise la mise en vente desdits terrains",
+      "anchor": "6 714 201 :19 999",
+      "spanStart": 641,
+      "spanEnd": 769
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-16 fixe le prix et autorise la mise en vente de ce deuxième lot explicitement nommé, qui doit être distingué des autres lots."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Fixation du prix et mise en vente du lot 6 714 202, rue Morin — 22 499 $ plus taxes",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 714 202",
+    "page": 19,
+    "citation": "6 714 202 22 499 $ plus taxes QUE le conseil municipal autorise la mise en vente desdits terrains",
+    "anchor": "6 714 202 22 499",
+    "spanStart": 671,
+    "spanEnd": 769
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Fixation du prix et mise en vente du lot 6 714 202, rue Morin — 22 499 $ plus taxes",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 714 202",
+      "page": 19,
+      "citation": "6 714 202 22 499 $ plus taxes QUE le conseil municipal autorise la mise en vente desdits terrains",
+      "anchor": "6 714 202 22 499",
+      "spanStart": 671,
+      "spanEnd": 769
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-16 fixe le prix et autorise la mise en vente de ce troisième lot explicitement nommé."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Vente du lot 6 714 202 à Frédéric Beaulieu et Alexia Bélanger, conditionnelle à une construction dans les deux ans",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 714 202",
+    "page": 20,
+    "citation": "QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6 714 202 du cadastre du Québec",
+    "anchor": "lot numéro 6 714 202",
+    "spanStart": 367,
+    "spanEnd": 491
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Vente du lot 6 714 202 à Frédéric Beaulieu et Alexia Bélanger, conditionnelle à une construction dans les deux ans",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 714 202",
+      "page": 20,
+      "citation": "QUE la Municipalité vende à Monsieur Frédéric Beaulieu et Mme Alexia Bélanger, le lot numéro 6 714 202 du cadastre du Québec",
+      "anchor": "lot numéro 6 714 202",
+      "spanStart": 367,
+      "spanEnd": 491
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 2026-03-17 décide une vente à des acquéreurs nommés, conditionnelle à la construction d’un bâtiment principal dans les deux ans, acte distinct de la fixation du prix et de la mise en vente."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Conclusion autorisée de l’entente avec le CAD encadrant la mise à disposition d’un local municipal",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "Entente de collaboration",
+    "page": 21,
+    "citation": "QUE le conseil municipal autorise la conclusion de l’Entente de collaboration entre la Municipalité de Notre-Dame-du-Rosaire et le Comité d’action et de développement (CAD), telle que présentée",
+    "anchor": "l’Entente de collaboration",
+    "spanStart": 1836,
+    "spanEnd": 2029
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Conclusion autorisée de l’entente avec le CAD encadrant la mise à disposition d’un local municipal",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "Entente de collaboration",
+      "page": 21,
+      "citation": "QUE le conseil municipal autorise la conclusion de l’Entente de collaboration entre la Municipalité de Notre-Dame-du-Rosaire et le Comité d’action et de développement (CAD), telle que présentée",
+      "anchor": "l’Entente de collaboration",
+      "spanStart": 1836,
+      "spanEnd": 2029
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’entente autorisée encadre explicitement la mise à disposition d’un local municipal ; cet objet foncier d’usage relève de l’étape « inconnu », sans être assimilé à une vente ou à une cession."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion du règlement 2026-04 modifiant le règlement de zonage 90-01",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2026-04",
+    "page": 22,
+    "citation": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026 sera présenté et adopté le premier projet de règlement 2026-04",
+    "anchor": "règlement 2026-04",
+    "spanStart": 439,
+    "spanEnd": 599
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion du règlement 2026-04 modifiant le règlement de zonage 90-01",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "2026-04",
+      "page": 22,
+      "citation": "Je, Jules Blais, donne avis de motion qu’au cours de la prochaine séance du conseil du 07-04-2026 sera présenté et adopté le premier projet de règlement 2026-04",
+      "anchor": "règlement 2026-04",
+      "spanStart": 439,
+      "spanEnd": 599
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "L’avis de motion est donné dans cette séance, tandis que le corps du texte reporte expressément la présentation et l’adoption du premier projet au 7 avril 2026, ce qui ne crée pas d’unité de projet actuel."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Engagement d’installation des réseaux électrique et d’aqueduc desservant les terrains de la rue Morin",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "Desserte des terrains",
+    "page": 19,
+    "citation": "QUE la municipalité s’engage à procéder à l’installation de la ligne électrique et du réseau d’aqueduc desservant lesdits lots",
+    "anchor": "la ligne électrique et du réseau d’aqueduc",
+    "spanStart": 772,
+    "spanEnd": 898
+   },
+   "versions": [
+    {
+     "step": "astra-pass2",
+     "unit": {
+      "label": "Engagement d’installation des réseaux électrique et d’aqueduc desservant les terrains de la rue Morin",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Desserte des terrains",
+      "page": 19,
+      "citation": "QUE la municipalité s’engage à procéder à l’installation de la ligne électrique et du réseau d’aqueduc desservant lesdits lots",
+      "anchor": "la ligne électrique et du réseau d’aqueduc",
+      "spanStart": 772,
+      "spanEnd": 898
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass2",
+     "op": "add",
+     "reason": "La résolution 2026-03-16 décide également l’installation des réseaux desservant les trois lots mis en vente, objet de desserte permettant leur développement inclus par la règle 1 et distinct des décisions de prix et de vente."
+    }
+   ]
+  }
+ ]
+}

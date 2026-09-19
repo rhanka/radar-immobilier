@@ -1,0 +1,38 @@
+{
+ "documentId": "dollard-des-ormeaux-2026-02-10",
+ "step": "arbitrate-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "a540ae0b36d5e6c693b7d081407ad9e627ac4ddd5c46213d2007c0a860d91c87",
+ "verificationSha256": "bd8936e0ba1b2c9f163d79bce96e2b261be40e4ee318da150c5cd2c9adf0d377",
+ "inputSha256": "1c49aa961612c9317fe0a697e6fcfe03edf9ee623ceea10edd85413d46e19660",
+ "responseSha256": "e62863f72ef1d866f3b2c634bafd6fe237cf584c4c320f102be604ef0c0b1c7c",
+ "accountPseudonym": "acct-59dca62565",
+ "latencyMs": 5017,
+ "modelId": "gemini-3.8-flash",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 2893,
+  "outputTokens": 52,
+  "totalTokens": 4323,
+  "thoughtsTokenCount": 1378
+ },
+ "wire": {
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+  "model": "gemini-3.8-flash-tiered",
+  "effort": "HIGH",
+  "maxOutputTokens": 65536,
+  "httpStatus": 200,
+  "durationMs": 4873,
+  "requestId": null
+ },
+ "at": "2026-09-18T22:46:49.893Z"
+}

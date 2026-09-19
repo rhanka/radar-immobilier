@@ -1,0 +1,679 @@
+{
+ "documentId": "rosemere-2026-04-13",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "c79840643e19dc67e761ec8f7bdb4d269044a950a4282aad3ecddc861f737eab",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "event-125"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure — 262, rue Westward",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "D'ACCORDER la demande de dérogation mineure pour la propriété située\nau 262, rue Westward, afin de permettre une marge de recul arrière de"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "event-126"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Affichage Continental, 307, boulevard Labelle",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "D'APPROUVER, à titre de P.I.I.A., l'ajout d'une enseigne sur bâtiment et\nd'une enseigne sur pylône pour l'établissement Continental situé au"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "event-127"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Affichage, 400, chemin de la Grande-Côte",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D'APPROUVER, à titre de P.I.I.A., la modification des enseignes sur le\npylône d'enseignes existant situé en cour avant au 400, chemin de la\nGrande-Côte,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "event-128"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Agrandissement, 266, rue du Bocage",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement au 266, rue du\nBocage, tel qu'illustré dans les plans soumis réalisés par Jean-Benoit"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "event-129"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Agrandissement et garage annexé, 338, rue Montview",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 3,
+       "excerpt": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement et de\nconstruction d'un garage annexé au 338, rue Montview, selon les plans"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "event-130"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Ouvertures, 355, rue Montcalm",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "D'APPROUVER, à titre de P.I.I.A., le projet de modification des ouvertures\npour la propriété située au 355, rue Montcalm, tel qu'illustré dans les plans"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "event-131"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA — Revêtements et terrasse au toit, 5, chemin de la Grande-Côte",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "D'APPROUVER, à titre de P.I.I.A., pour les façades latérales, la substitution\ndu revêtement prévu de panneaux de fibrociment HardiePanel fini lisse,"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "bylaw-1004-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1004-01 — Contribution pour fins de parcs",
+     "stage": "projet",
+     "objet": "1004-01",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\net d'espaces naturels."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A09",
+   "nodeIds": [
+    "bylaw-1004"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1004 — Contribution pour fins de parcs",
+     "stage": null,
+     "objet": "1004",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\net d'espaces naturels."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A10",
+   "nodeIds": [
+    "event-132"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Avis de motion — Règlement 1004-01",
+     "stage": "avis_motion",
+     "objet": null,
+     "citations": [
+      {
+       "page": 4,
+       "excerpt": "La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera\nadopté séance tenante le projet du Règlement 1004-01 modifiant plusieurs"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A11",
+   "nodeIds": [
+    "event-133"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Adoption du projet — Règlement 1004-01",
+     "stage": "projet_reglement",
+     "objet": null,
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\net d'espaces naturels."
+      },
+      {
+       "page": 5,
+       "excerpt": "DE FIXER la date de la séance de consultation publique sur ledit projet de\nrèglement au lundi 11 mai 2026, à 18 h 30, dans la salle du Conseil de l'hôtel"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A12",
+   "nodeIds": [
+    "bylaw-990-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 990-01 — Augmentation de l'emprunt pour la rue Northcote",
+     "stage": "adoption",
+     "objet": "990-01",
+     "citations": [
+      {
+       "page": 5,
+       "excerpt": "D'ADOPTER le Règlement 990-01 modifiant le Règlement 990 décrétant une\ndépense et un emprunt de 1 155 000 $ pour des travaux de réfection de la rue"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A13",
+   "nodeIds": [
+    "bylaw-991-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 991-01 — Réfection pluviale, secteur Bordeaux",
+     "stage": "projet",
+     "objet": "991-01",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\nséance subséquente le Règlement 991-01 modifiant le Règlement 991 décrétant"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A14",
+   "nodeIds": [
+    "bylaw-1015"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1015 — Accompagnement des propriétés vulnérables aux inondations pluviales",
+     "stage": "projet",
+     "objet": "1015",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\nséance subséquente le Règlement 1015 décrétant un programme de"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A15",
+   "nodeIds": [
+    "bylaw-1016-01"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1016-01 — Taxation et tarification 2026",
+     "stage": "projet",
+     "objet": "1016-01",
+     "citations": [
+      {
+       "page": 6,
+       "excerpt": "La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\nséance subséquente le Règlement 1016-01 modifiant le Règlement 1016"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A16",
+   "nodeIds": [
+    "bylaw-1022"
+   ],
+   "view": [
+    {
+     "type": "Bylaw",
+     "label": "Règlement 1022 — Immobilisations et emprunt de 5 000 000 $",
+     "stage": "projet",
+     "objet": "1022",
+     "citations": [
+      {
+       "page": 7,
+       "excerpt": "La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\nséance subséquente le Règlement 1022 décrétant des dépenses en"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A17",
+   "nodeIds": [
+    "signal-150"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Calendrier de vente d'immeubles pour défaut de paiement de taxes",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 11,
+       "excerpt": "D'ADOPTER le calendrier de vente aux enchères pour défaut de paiement de\ntaxes proposé par le Service des finances et trésorerie et les Services juridiques"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A18",
+   "nodeIds": [
+    "signal-153"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Réfection de rues et trottoirs — Rue Northcote",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "D'ADJUGER le contrat ST-294 24724 - Travaux de réfection de rues et trottoirs\n2026 - Rue Northcote au plus bas soumissionnaire conforme, soit à l'entreprise"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A19",
+   "nodeIds": [
+    "signal-154"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Réfection pluviale — Rues du Beaujolais, du Bordeaux et du Champagne",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 13,
+       "excerpt": "D'ADJUGER le contrat ST-295 24725 - Travaux de réfection pluviale - Rues du\nBeaujolais, du Bordeaux et du Champagne au plus bas soumissionnaire"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A20",
+   "nodeIds": [
+    "signal-159"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Étude de connectivité écologique des habitats",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 16,
+       "excerpt": "D'AUTORISER Nature-Action Québec à déposer une demande d'aide financière\nau Fonds des municipalités pour la biodiversité de la Ville de Rosemère"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A21",
+   "nodeIds": [
+    "signal-161"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Adoption du Plan de lutte et d'adaptation aux changements climatiques",
+     "stage": "adoption",
+     "objet": null,
+     "citations": [
+      {
+       "page": 17,
+       "excerpt": "D'ADOPTER le Plan de lutte et d'adaptation aux changements climatiques 20262030 de la Ville de Rosemère."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"La dérogation mineure pour le 262, rue Westward a été accordée par le conseil.\",\"excerpt\":\"D'ACCORDER la demande de dérogation mineure pour la propriété située\\nau 262, rue Westward, afin de permettre une marge de recul arrière de\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA concernant l'affichage Continental au 307, boulevard Labelle a été approuvé.\",\"excerpt\":\"D'APPROUVER, à titre de P.I.I.A., l'ajout d'une enseigne sur bâtiment et\\nd'une enseigne sur pylône pour l'établissement Continental situé au\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA pour la modification d'enseignes au 400, chemin de la Grande-Côte a été approuvé.\",\"excerpt\":\"D'APPROUVER, à titre de P.I.I.A., la modification des enseignes sur le\\npylône d'enseignes existant situé en cour avant au 400, chemin de la\\nGrande-Côte,\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA pour le projet d'agrandissement au 266, rue du Bocage a été approuvé.\",\"excerpt\":\"D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement au 266, rue du\\nBocage, tel qu'illustré dans les plans soumis réalisés par Jean-Benoit\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA d'agrandissement et garage au 338, rue Montview a été approuvé.\",\"excerpt\":\"D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement et de\\nconstruction d'un garage annexé au 338, rue Montview, selon les plans\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA pour la modification des ouvertures au 355, rue Montcalm a été approuvé.\",\"excerpt\":\"D'APPROUVER, à titre de P.I.I.A., le projet de modification des ouvertures\\npour la propriété située au 355, rue Montcalm, tel qu'illustré dans les plans\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le PIIA pour les revêtements et la terrasse au toit au 5, chemin de la Grande-Côte a été approuvé.\",\"excerpt\":\"D'APPROUVER, à titre de P.I.I.A., pour les façades latérales, la substitution\\ndu revêtement prévu de panneaux de fibrociment HardiePanel fini lisse,\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le projet de règlement 1004-01 a été adopté par le conseil.\",\"excerpt\":\"D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\\net d'espaces naturels.\"},{\"act\":\"A09\",\"verdict\":\"non_soutenu\",\"reason\":\"Le règlement 1004 n'est mentionné qu'à titre de règlement antérieur modifié, sans étape procédurale propre dans cette séance.\",\"excerpt\":\"\"},{\"act\":\"A10\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion pour le projet de règlement 1004-01 a été donné lors de la séance.\",\"excerpt\":\"La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera\\nadopté séance tenante le projet du Règlement 1004-01 modifiant plusieurs\"},{\"act\":\"A11\",\"verdict\":\"soutenu\",\"reason\":\"L'événement d'adoption du projet de règlement 1004-01 est attesté par la résolution 2026-04-133.\",\"excerpt\":\"D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\\net d'espaces naturels.\"},{\"act\":\"A12\",\"verdict\":\"soutenu\",\"reason\":\"Le règlement 990-01 a été formellement adopté lors de la séance.\",\"excerpt\":\"D'ADOPTER le Règlement 990-01 modifiant le Règlement 990 décrétant une\\ndépense et un emprunt de 1 155 000 $ pour des travaux de réfection de la rue\"},{\"act\":\"A13\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion a été donné et le projet du règlement 991-01 a été déposé.\",\"excerpt\":\"La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\\nséance subséquente le Règlement 991-01 modifiant le Règlement 991 décrétant\"},{\"act\":\"A14\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion a été donné et le projet du règlement 1015 a été déposé.\",\"excerpt\":\"La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\\nséance subséquente le Règlement 1015 décrétant un programme de\"},{\"act\":\"A15\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion a été donné et le projet du règlement 1016-01 a été déposé.\",\"excerpt\":\"La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\\nséance subséquente le Règlement 1016-01 modifiant le Règlement 1016\"},{\"act\":\"A16\",\"verdict\":\"soutenu\",\"reason\":\"Un avis de motion a été donné et le projet du règlement 1022 a été déposé.\",\"excerpt\":\"La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\\nséance subséquente le Règlement 1022 décrétant des dépenses en\"},{\"act\":\"A17\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil a formellement adopté le calendrier de vente aux enchères pour taxes impayées.\",\"excerpt\":\"D'ADOPTER le calendrier de vente aux enchères pour défaut de paiement de\\ntaxes proposé par le Service des finances et trésorerie et les Services juridiques\"},{\"act\":\"A18\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'un octroi de contrat d'exécution de travaux de réfection de voirie, relevant des exclusions de simple entretien/travaux sans acte de planification ou de zonage.\",\"excerpt\":\"D'ADJUGER le contrat ST-294 24724 - Travaux de réfection de rues et trottoirs\\n2026 - Rue Northcote au plus bas soumissionnaire conforme, soit à l'entreprise\"},{\"act\":\"A19\",\"verdict\":\"non_soutenu\",\"reason\":\"Il s'agit d'une simple adjudication de contrat pour des travaux d'infrastructure pluviale, relevant des exclusions de contrats/travaux.\",\"excerpt\":\"D'ADJUGER le contrat ST-295 24725 - Travaux de réfection pluviale - Rues du\\nBeaujolais, du Bordeaux et du Champagne au plus bas soumissionnaire\"},{\"act\":\"A20\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil autorise la demande de subvention pour une étude de connectivité écologique des habitats.\",\"excerpt\":\"D'AUTORISER Nature-Action Québec à déposer une demande d'aide financière\\nau Fonds des municipalités pour la biodiversité de la Ville de Rosemère\"},{\"act\":\"A21\",\"verdict\":\"soutenu\",\"reason\":\"Le conseil a adopté le Plan de lutte et d'adaptation aux changements climatiques 2026-2030.\",\"excerpt\":\"D'ADOPTER le Plan de lutte et d'adaptation aux changements climatiques 20262030 de la Ville de Rosemère.\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "La dérogation mineure pour le 262, rue Westward a été accordée par le conseil.",
+   "excerpt": "D'ACCORDER la demande de dérogation mineure pour la propriété située\nau 262, rue Westward, afin de permettre une marge de recul arrière de"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le PIIA concernant l'affichage Continental au 307, boulevard Labelle a été approuvé.",
+   "excerpt": "D'APPROUVER, à titre de P.I.I.A., l'ajout d'une enseigne sur bâtiment et\nd'une enseigne sur pylône pour l'établissement Continental situé au"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le PIIA pour la modification d'enseignes au 400, chemin de la Grande-Côte a été approuvé.",
+   "excerpt": "D'APPROUVER, à titre de P.I.I.A., la modification des enseignes sur le\npylône d'enseignes existant situé en cour avant au 400, chemin de la\nGrande-Côte,"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le PIIA pour le projet d'agrandissement au 266, rue du Bocage a été approuvé.",
+   "excerpt": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement au 266, rue du\nBocage, tel qu'illustré dans les plans soumis réalisés par Jean-Benoit"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le PIIA d'agrandissement et garage au 338, rue Montview a été approuvé.",
+   "excerpt": "D'APPROUVER, à titre de P.I.I.A., le projet d'agrandissement et de\nconstruction d'un garage annexé au 338, rue Montview, selon les plans"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le PIIA pour la modification des ouvertures au 355, rue Montcalm a été approuvé.",
+   "excerpt": "D'APPROUVER, à titre de P.I.I.A., le projet de modification des ouvertures\npour la propriété située au 355, rue Montcalm, tel qu'illustré dans les plans"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le PIIA pour les revêtements et la terrasse au toit au 5, chemin de la Grande-Côte a été approuvé.",
+   "excerpt": "D'APPROUVER, à titre de P.I.I.A., pour les façades latérales, la substitution\ndu revêtement prévu de panneaux de fibrociment HardiePanel fini lisse,"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le projet de règlement 1004-01 a été adopté par le conseil.",
+   "excerpt": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\net d'espaces naturels."
+  },
+  {
+   "act": "A09",
+   "verdict": "non_soutenu",
+   "reason": "Le règlement 1004 n'est mentionné qu'à titre de règlement antérieur modifié, sans étape procédurale propre dans cette séance.",
+   "excerpt": ""
+  },
+  {
+   "act": "A10",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion pour le projet de règlement 1004-01 a été donné lors de la séance.",
+   "excerpt": "La conseillère MARIE-HÉLÈNE FORTIN donne avis de motion qu'il sera\nadopté séance tenante le projet du Règlement 1004-01 modifiant plusieurs"
+  },
+  {
+   "act": "A11",
+   "verdict": "soutenu",
+   "reason": "L'événement d'adoption du projet de règlement 1004-01 est attesté par la résolution 2026-04-133.",
+   "excerpt": "D'ADOPTER le projet du Règlement 1004-01 modifiant plusieurs dispositions\ndu Règlement 1004 sur la contribution pour fins de parcs, de terrains de jeux\net d'espaces naturels."
+  },
+  {
+   "act": "A12",
+   "verdict": "soutenu",
+   "reason": "Le règlement 990-01 a été formellement adopté lors de la séance.",
+   "excerpt": "D'ADOPTER le Règlement 990-01 modifiant le Règlement 990 décrétant une\ndépense et un emprunt de 1 155 000 $ pour des travaux de réfection de la rue"
+  },
+  {
+   "act": "A13",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion a été donné et le projet du règlement 991-01 a été déposé.",
+   "excerpt": "La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\nséance subséquente le Règlement 991-01 modifiant le Règlement 991 décrétant"
+  },
+  {
+   "act": "A14",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion a été donné et le projet du règlement 1015 a été déposé.",
+   "excerpt": "La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\nséance subséquente le Règlement 1015 décrétant un programme de"
+  },
+  {
+   "act": "A15",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion a été donné et le projet du règlement 1016-01 a été déposé.",
+   "excerpt": "La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\nséance subséquente le Règlement 1016-01 modifiant le Règlement 1016"
+  },
+  {
+   "act": "A16",
+   "verdict": "soutenu",
+   "reason": "Un avis de motion a été donné et le projet du règlement 1022 a été déposé.",
+   "excerpt": "La conseillère STÉPHANIE NANTEL donne avis de motion qu'il sera adopté à une\nséance subséquente le Règlement 1022 décrétant des dépenses en"
+  },
+  {
+   "act": "A17",
+   "verdict": "soutenu",
+   "reason": "Le conseil a formellement adopté le calendrier de vente aux enchères pour taxes impayées.",
+   "excerpt": "D'ADOPTER le calendrier de vente aux enchères pour défaut de paiement de\ntaxes proposé par le Service des finances et trésorerie et les Services juridiques"
+  },
+  {
+   "act": "A18",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'un octroi de contrat d'exécution de travaux de réfection de voirie, relevant des exclusions de simple entretien/travaux sans acte de planification ou de zonage.",
+   "excerpt": "D'ADJUGER le contrat ST-294 24724 - Travaux de réfection de rues et trottoirs\n2026 - Rue Northcote au plus bas soumissionnaire conforme, soit à l'entreprise"
+  },
+  {
+   "act": "A19",
+   "verdict": "non_soutenu",
+   "reason": "Il s'agit d'une simple adjudication de contrat pour des travaux d'infrastructure pluviale, relevant des exclusions de contrats/travaux.",
+   "excerpt": "D'ADJUGER le contrat ST-295 24725 - Travaux de réfection pluviale - Rues du\nBeaujolais, du Bordeaux et du Champagne au plus bas soumissionnaire"
+  },
+  {
+   "act": "A20",
+   "verdict": "soutenu",
+   "reason": "Le conseil autorise la demande de subvention pour une étude de connectivité écologique des habitats.",
+   "excerpt": "D'AUTORISER Nature-Action Québec à déposer une demande d'aide financière\nau Fonds des municipalités pour la biodiversité de la Ville de Rosemère"
+  },
+  {
+   "act": "A21",
+   "verdict": "soutenu",
+   "reason": "Le conseil a adopté le Plan de lutte et d'adaptation aux changements climatiques 2026-2030.",
+   "excerpt": "D'ADOPTER le Plan de lutte et d'adaptation aux changements climatiques 20262030 de la Ville de Rosemère."
+  }
+ ],
+ "filter": {
+  "acts": 21,
+  "removed": [
+   {
+    "act": "A09",
+    "reason": "Le règlement 1004 n'est mentionné qu'à titre de règlement antérieur modifié, sans étape procédurale propre dans cette séance."
+   },
+   {
+    "act": "A18",
+    "reason": "Il s'agit d'un octroi de contrat d'exécution de travaux de réfection de voirie, relevant des exclusions de simple entretien/travaux sans acte de planification ou de zonage."
+   },
+   {
+    "act": "A19",
+    "reason": "Il s'agit d'une simple adjudication de contrat pour des travaux d'infrastructure pluviale, relevant des exclusions de contrats/travaux."
+   }
+  ],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "La dérogation mineure pour le 262, rue Westward a été accordée par le conseil."
+   },
+   {
+    "act": "A02",
+    "reason": "Le PIIA concernant l'affichage Continental au 307, boulevard Labelle a été approuvé."
+   },
+   {
+    "act": "A03",
+    "reason": "Le PIIA pour la modification d'enseignes au 400, chemin de la Grande-Côte a été approuvé."
+   },
+   {
+    "act": "A04",
+    "reason": "Le PIIA pour le projet d'agrandissement au 266, rue du Bocage a été approuvé."
+   },
+   {
+    "act": "A05",
+    "reason": "Le PIIA d'agrandissement et garage au 338, rue Montview a été approuvé."
+   },
+   {
+    "act": "A06",
+    "reason": "Le PIIA pour la modification des ouvertures au 355, rue Montcalm a été approuvé."
+   },
+   {
+    "act": "A07",
+    "reason": "Le PIIA pour les revêtements et la terrasse au toit au 5, chemin de la Grande-Côte a été approuvé."
+   },
+   {
+    "act": "A08",
+    "reason": "Le projet de règlement 1004-01 a été adopté par le conseil."
+   },
+   {
+    "act": "A10",
+    "reason": "Un avis de motion pour le projet de règlement 1004-01 a été donné lors de la séance."
+   },
+   {
+    "act": "A11",
+    "reason": "L'événement d'adoption du projet de règlement 1004-01 est attesté par la résolution 2026-04-133."
+   },
+   {
+    "act": "A12",
+    "reason": "Le règlement 990-01 a été formellement adopté lors de la séance."
+   },
+   {
+    "act": "A13",
+    "reason": "Un avis de motion a été donné et le projet du règlement 991-01 a été déposé."
+   },
+   {
+    "act": "A14",
+    "reason": "Un avis de motion a été donné et le projet du règlement 1015 a été déposé."
+   },
+   {
+    "act": "A15",
+    "reason": "Un avis de motion a été donné et le projet du règlement 1016-01 a été déposé."
+   },
+   {
+    "act": "A16",
+    "reason": "Un avis de motion a été donné et le projet du règlement 1022 a été déposé."
+   },
+   {
+    "act": "A17",
+    "reason": "Le conseil a formellement adopté le calendrier de vente aux enchères pour taxes impayées."
+   },
+   {
+    "act": "A20",
+    "reason": "Le conseil autorise la demande de subvention pour une étude de connectivité écologique des habitats."
+   },
+   {
+    "act": "A21",
+    "reason": "Le conseil a adopté le Plan de lutte et d'adaptation aux changements climatiques 2026-2030."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4549,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 17626,
+   "outputTokens": 1814,
+   "totalTokens": 19440
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 4409
+  },
+  "inputSha256": "86074a4aa14799e464d20599d79ab20202f77f273e86ab504efd21f34b16c376"
+ }
+}

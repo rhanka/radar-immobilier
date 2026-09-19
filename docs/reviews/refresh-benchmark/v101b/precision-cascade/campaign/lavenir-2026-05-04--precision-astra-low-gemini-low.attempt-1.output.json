@@ -1,0 +1,165 @@
+{
+ "nodes": [
+  {
+   "id": "source-pv-2026-05-04",
+   "label": "Procès-verbal de L’Avenir du 4 mai 2026",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+   "status": "candidate",
+   "date": "2026-05-04",
+   "municipality": "lavenir",
+   "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+   "url": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance ordinaire du conseil municipal de la\nmunicipalité de L’Avenir, tenue le 4 mai 2026,",
+     "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+     "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+     "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+     "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-797-26",
+   "label": "Règlement 797-26 — Habitation multifamiliale en zone C3",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+   "status": "candidate",
+   "numero": "797-26",
+   "objet": "Modification de l’annexe B du règlement de zonage 654-12 : ajout de la colonne 5 autorisant l’habitation multifamiliale (h3) en zone C3 et définissant les normes d’implantation.",
+   "date": "2026-05-04",
+   "stage": "adoption",
+   "municipality": "lavenir",
+   "zone_cible": "C3",
+   "resolution": "2026-05-107",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26,",
+     "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+     "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+     "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+     "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-adoption",
+    "ev-zone"
+   ]
+  },
+  {
+   "id": "zone-c3",
+   "label": "Zone C3",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+   "status": "candidate",
+   "code": "C3",
+   "municipality": "lavenir",
+   "bylaw": "654-12",
+   "secteur": "Périmètre urbain",
+   "description": "Zone visée par l’ajout de l’usage habitation multifamiliale (h3) et de normes d’implantation au règlement 797-26 adopté.",
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "a) En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation.",
+     "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+     "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+     "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+     "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-zone"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source-pv-2026-05-04",
+   "target": "bylaw-797-26",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+   "evidence_refs": [
+    "ev-adoption"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26,",
+     "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+     "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+     "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+     "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "bylaw-797-26",
+   "target": "zone-c3",
+   "relation": "applies_to",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+   "evidence_refs": [
+    "ev-zone"
+   ],
+   "citations": [
+    {
+     "page": 3,
+     "excerpt": "a) En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation.",
+     "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+     "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+     "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+     "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-adoption",
+   "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+   "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+   "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+   "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "EN CONSÉQUENCE, il est proposé par le conseiller Michel Lalonde, appuyé\npar le conseiller Christian Bazinet et résolu d'adopter le règlement\nd'amendement no. 797-26, modifiant le règlement de zonage no. 654-12 et\nqu'il soit statué et décrété ce qui suit:"
+  },
+  {
+   "id": "ev-zone",
+   "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+   "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+   "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+   "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+   "modality": "pdf",
+   "page": 3,
+   "excerpt": "a) En ajoutant dans la grille représentant la zone C3, la nouvelle colonne\n5 permettant l’usage habitation multifamiliale (h3) dans la zone C3 et\ndéfinissant les normes d’implantation. Le tout, comme il est montré dans la\ngrille jointe en annexe I du présent règlement pour en faire partie\nintégrante;"
+  },
+  {
+   "id": "ev-riveraines",
+   "source_file": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+   "rawRef": "raw/proces-verbaux-lavenir/cas/36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799.pdf",
+   "docSha": "36d45e7b131c5ec5d317c06e122896156c792c862981a9f97009e08ec081f799",
+   "sourceUrl": "https://www.municipalitelavenir.qc.ca/images/pdf/proces_verbaux/2026-05-04_pv_seance_ordinaire.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "Que le conseil de la municipalité de L’Avenir désigne deux employés d’Exp\ncomme inspecteur adjoints, l’autorisant ainsi à circuler sur les terrains\nprivés de la municipalité afin de réaliser des travaux de caractérisation des\nbandes riveraines."
+  }
+ ],
+ "input_tokens": 12400,
+ "output_tokens": 4080
+}

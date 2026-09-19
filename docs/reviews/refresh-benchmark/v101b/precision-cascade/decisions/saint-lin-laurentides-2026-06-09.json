@@ -1,0 +1,316 @@
+{
+ "documentId": "saint-lin-laurentides-2026-06-09",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "e4796abfa660c33cc59c0db94738b64cbd1518a2c060e315f7373a5aa2c61d43",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "acts": [
+  {
+   "act": "A01",
+   "nodeIds": [
+    "derogation-6663628"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure prévue — zone tampon au 1510, route 335",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335"
+      },
+      {
+       "page": 1,
+       "excerpt": "Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A02",
+   "nodeIds": [
+    "derogation-6579952"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure prévue — nombre d'enseignes au 70, route 335",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335"
+      },
+      {
+       "page": 1,
+       "excerpt": "Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A03",
+   "nodeIds": [
+    "derogation-3569047"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "Dérogation mineure prévue — remise au 31, rue Cliche",
+     "stage": "derogation_mineure",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche"
+      },
+      {
+       "page": 1,
+       "excerpt": "Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A04",
+   "nodeIds": [
+    "piia-6663628"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA prévu — agrandissement commercial au 1510, route 335",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial\nexistant / Lot numéro 6 663 628 / 1510, route 335"
+      },
+      {
+       "page": 1,
+       "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial\nexistant / Lot numéro 6 663 628 / 1510, route 335"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A05",
+   "nodeIds": [
+    "piia-planete-piscine"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA prévu — enseignes Planète Piscine",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot\nnuméro 6 579 952 / 70, route 335"
+      },
+      {
+       "page": 1,
+       "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot\nnuméro 6 579 952 / 70, route 335"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A06",
+   "nodeIds": [
+    "piia-allo-mon-coco"
+   ],
+   "view": [
+    {
+     "type": "DesignationEvent",
+     "label": "PIIA prévu — enseignes Allô mon Coco",
+     "stage": "piia",
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot\nnuméro 6 579 952 / 70, route 335"
+      },
+      {
+       "page": 1,
+       "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot\nnuméro 6 579 952 / 70, route 335"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A07",
+   "nodeIds": [
+    "signal-acquisition-lacroix"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Acquisition envisagée après inondation — 60, rue Lacroix",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 1,
+       "excerpt": "Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme\ngénéral d'assistance financière / Ministère de la Sécurité publique"
+      },
+      {
+       "page": 1,
+       "excerpt": "Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme\ngénéral d'assistance financière / Ministère de la Sécurité publique"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "act": "A08",
+   "nodeIds": [
+    "signal-cession-villemory"
+   ],
+   "view": [
+    {
+     "type": "Signal",
+     "label": "Offre de cession prévue — Seigneurie Villemory, phases 5, 6 et 7",
+     "stage": null,
+     "objet": null,
+     "citations": [
+      {
+       "page": 2,
+       "excerpt": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429"
+      },
+      {
+       "page": 2,
+       "excerpt": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429\n209, 5 137 708, 6 553 600 et 6 553 597 / Seigneurie Villemory phases 5, 6 et 7 / 9223-9169 Québec inc. et 9207-4327\nQuébec inc."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "rawText": "{\"decisions\":[{\"act\":\"A01\",\"verdict\":\"soutenu\",\"reason\":\"Le point 4.2 de l'ordre du jour prévoit l'examen d'une dérogation mineure pour une zone tampon dérogatoire au 1510, route 335.\",\"excerpt\":\"Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335\"},{\"act\":\"A02\",\"verdict\":\"soutenu\",\"reason\":\"Le point 4.3 de l'ordre du jour prévoit l'examen d'une dérogation mineure relative au nombre d'enseignes attachées au 70, route 335.\",\"excerpt\":\"Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335\"},{\"act\":\"A03\",\"verdict\":\"soutenu\",\"reason\":\"Le point 4.4 de l'ordre du jour porte sur une dérogation mineure pour la superficie et largeur d'une remise au 31, rue Cliche.\",\"excerpt\":\"Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche\"},{\"act\":\"A04\",\"verdict\":\"soutenu\",\"reason\":\"Le point 4.5 de l'ordre du jour prévoit l'évaluation d'un PIIA pour l'agrandissement d'un bâtiment commercial au 1510, route 335.\",\"excerpt\":\"Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial existant / Lot numéro 6 663 628 / 1510, route 335\"},{\"act\":\"A05\",\"verdict\":\"soutenu\",\"reason\":\"Le point 4.6 de l'ordre du jour prévoit l'évaluation d'un PIIA pour l'ajout d'enseignes pour Planète Piscine au 70, route 335.\",\"excerpt\":\"Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot numéro 6 579 952 / 70, route 335\"},{\"act\":\"A06\",\"verdict\":\"soutenu\",\"reason\":\"Le point 4.7 de l'ordre du jour prévoit l'évaluation d'un PIIA pour des enseignes pour le restaurant Allô mon Coco au 70, route 335.\",\"excerpt\":\"Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot numéro 6 579 952 / 70, route 335\"},{\"act\":\"A07\",\"verdict\":\"soutenu\",\"reason\":\"Le point 4.8 de l'ordre du jour traite d'un engagement à acquérir un terrain suite à une inondation au 60, rue Lacroix.\",\"excerpt\":\"Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme général d'assistance financière / Ministère de la Sécurité publique\"},{\"act\":\"A08\",\"verdict\":\"soutenu\",\"reason\":\"Le point 4.10 de l'ordre du jour porte sur une acceptation finale et offre de cession pour le projet Seigneurie Villemory phases 5, 6 et 7.\",\"excerpt\":\"Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597 / Seigneurie Villemory phases 5, 6 et 7\"}]}",
+ "decisions": [
+  {
+   "act": "A01",
+   "verdict": "soutenu",
+   "reason": "Le point 4.2 de l'ordre du jour prévoit l'examen d'une dérogation mineure pour une zone tampon dérogatoire au 1510, route 335.",
+   "excerpt": "Dérogation mineure / Zone tampon dérogatoire / Lot numéro 6 663 628 / 1510, route 335"
+  },
+  {
+   "act": "A02",
+   "verdict": "soutenu",
+   "reason": "Le point 4.3 de l'ordre du jour prévoit l'examen d'une dérogation mineure relative au nombre d'enseignes attachées au 70, route 335.",
+   "excerpt": "Dérogation mineure / Nombre d'enseignes attachées dérogatoire / Lot numéro 6 579 952 / 70, route 335"
+  },
+  {
+   "act": "A03",
+   "verdict": "soutenu",
+   "reason": "Le point 4.4 de l'ordre du jour porte sur une dérogation mineure pour la superficie et largeur d'une remise au 31, rue Cliche.",
+   "excerpt": "Dérogation mineure / Superficie et largeur d'une remise dérogatoire / Lot numéro 3 569 047 / 31, rue Cliche"
+  },
+  {
+   "act": "A04",
+   "verdict": "soutenu",
+   "reason": "Le point 4.5 de l'ordre du jour prévoit l'évaluation d'un PIIA pour l'agrandissement d'un bâtiment commercial au 1510, route 335.",
+   "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Autorisation d’agrandissement du bâtiment commercial existant / Lot numéro 6 663 628 / 1510, route 335"
+  },
+  {
+   "act": "A05",
+   "verdict": "soutenu",
+   "reason": "Le point 4.6 de l'ordre du jour prévoit l'évaluation d'un PIIA pour l'ajout d'enseignes pour Planète Piscine au 70, route 335.",
+   "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le commerce Planète Piscine / Lot numéro 6 579 952 / 70, route 335"
+  },
+  {
+   "act": "A06",
+   "verdict": "soutenu",
+   "reason": "Le point 4.7 de l'ordre du jour prévoit l'évaluation d'un PIIA pour des enseignes pour le restaurant Allô mon Coco au 70, route 335.",
+   "excerpt": "Plan d'implantation et d'intégration architecturale (PIIA) / Ajout d'enseignes pour le restaurant Allô mon Coco / Lot numéro 6 579 952 / 70, route 335"
+  },
+  {
+   "act": "A07",
+   "verdict": "soutenu",
+   "reason": "Le point 4.8 de l'ordre du jour traite d'un engagement à acquérir un terrain suite à une inondation au 60, rue Lacroix.",
+   "excerpt": "Engagement à acquérir le terrain suite à l'inondation du bâtiment principal situé au 60, rue Lacroix / Programme général d'assistance financière / Ministère de la Sécurité publique"
+  },
+  {
+   "act": "A08",
+   "verdict": "soutenu",
+   "reason": "Le point 4.10 de l'ordre du jour porte sur une acceptation finale et offre de cession pour le projet Seigneurie Villemory phases 5, 6 et 7.",
+   "excerpt": "Acceptation finale et offre de cession / Lots numéro 6 553 599, 5 137 605, 5 137 606, 5 429 185, 5 137 659, 5 429 209, 5 137 708, 6 553 600 et 6 553 597 / Seigneurie Villemory phases 5, 6 et 7"
+  }
+ ],
+ "filter": {
+  "acts": 8,
+  "removed": [],
+  "kept": [
+   {
+    "act": "A01",
+    "reason": "Le point 4.2 de l'ordre du jour prévoit l'examen d'une dérogation mineure pour une zone tampon dérogatoire au 1510, route 335."
+   },
+   {
+    "act": "A02",
+    "reason": "Le point 4.3 de l'ordre du jour prévoit l'examen d'une dérogation mineure relative au nombre d'enseignes attachées au 70, route 335."
+   },
+   {
+    "act": "A03",
+    "reason": "Le point 4.4 de l'ordre du jour porte sur une dérogation mineure pour la superficie et largeur d'une remise au 31, rue Cliche."
+   },
+   {
+    "act": "A04",
+    "reason": "Le point 4.5 de l'ordre du jour prévoit l'évaluation d'un PIIA pour l'agrandissement d'un bâtiment commercial au 1510, route 335."
+   },
+   {
+    "act": "A05",
+    "reason": "Le point 4.6 de l'ordre du jour prévoit l'évaluation d'un PIIA pour l'ajout d'enseignes pour Planète Piscine au 70, route 335."
+   },
+   {
+    "act": "A06",
+    "reason": "Le point 4.7 de l'ordre du jour prévoit l'évaluation d'un PIIA pour des enseignes pour le restaurant Allô mon Coco au 70, route 335."
+   },
+   {
+    "act": "A07",
+    "reason": "Le point 4.8 de l'ordre du jour traite d'un engagement à acquérir un terrain suite à une inondation au 60, rue Lacroix."
+   },
+   {
+    "act": "A08",
+    "reason": "Le point 4.10 de l'ordre du jour porte sur une acceptation finale et offre de cession pour le projet Seigneurie Villemory phases 5, 6 et 7."
+   }
+  ],
+  "unknownIds": [],
+  "keptNoValidDecision": 0,
+  "supportedUngrounded": 0,
+  "contradictingExcerptUngrounded": 0
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 4383,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 4507,
+   "outputTokens": 869,
+   "totalTokens": 5376
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 3813
+  },
+  "inputSha256": "54ed84677bb00af2f824afa0d4b0b12a60e14b57770d1c6d2662d70e8318b062"
+ }
+}

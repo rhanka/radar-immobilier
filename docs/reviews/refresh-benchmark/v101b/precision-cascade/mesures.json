@@ -1,0 +1,209 @@
+{
+ "generatedAt": "2026-09-19T03:28:53.402Z",
+ "network": "none",
+ "documentsFiltered": 100,
+ "before": {
+  "tp": 330,
+  "fp": 558,
+  "fn": 344,
+  "precision": 0.3716216216216216,
+  "recall": 0.4896142433234421,
+  "f1": 0.4225352112676056
+ },
+ "after": {
+  "tp": 330,
+  "fp": 360,
+  "fn": 344,
+  "precision": 0.4782608695652174,
+  "recall": 0.4896142433234421,
+  "f1": 0.4838709677419355
+ },
+ "acts": 888,
+ "removedActs": 198,
+ "removed": {
+  "correctAct": 1,
+  "neutral": 0,
+  "falseAct": 197
+ },
+ "supportedUngrounded": 11,
+ "keptNoValidDecision": 0,
+ "unknownIds": 0,
+ "cost": {
+  "apiEquivalentUsd": 1.1945715,
+  "rate": {
+   "model": "gemini-3.8-flash",
+   "input": 0.75,
+   "output": 3.75,
+   "asOf": "2026-09-16"
+  },
+  "calls": 100,
+  "latencyMs": {
+   "p50": 2531,
+   "p95": 5669,
+   "max": 9051
+  }
+ },
+ "sourceArm": "astra-low",
+ "refusedSourceDocuments": [],
+ "cumulative": {
+  "sourceArm": "astra-low",
+  "astraLowApiUsd": 40.72,
+  "geminiPassApiUsd": 1.1945715,
+  "totalApiUsd": 41.9145715,
+  "astraCostSource": "docs/reviews/refresh-benchmark/v101b/costs.md",
+  "tokens": {
+   "source": 2023478,
+   "geminiPass": 1282754,
+   "total": 3306232
+  },
+  "seatUsd": {
+   "source": 1.8012503959987403,
+   "geminiPass": 0.045311434379849344,
+   "total": 1.8465618303785896,
+   "factors": {
+    "codex": {
+     "plan": "chatgpt/pro-20x",
+     "usdPerMonth": 200,
+     "burnArm": "sol-medium",
+     "burnApiUsd": 125.20533200000007,
+     "burnQuotaPercent": 12,
+     "factor": 0.04423502937128537
+    },
+    "google": {
+     "plan": "gemini/ai-pro",
+     "usdPerMonth": 19.99,
+     "burnArm": "gemini-low",
+     "burnApiUsd": 9.218584499999997,
+     "burnQuotaPercent": 7.580000000000001,
+     "factor": 0.03793111955194758
+    }
+   },
+   "method": "API cost x provider factor (report v10 section 8, cost-calculator api-cost-proportional)"
+  },
+  "docsPerHourPerWorker": 22.629049224782204,
+  "latencyMsPerDocument": {
+   "astraLow": {
+    "p50": 150560,
+    "p95": 323224
+   },
+   "sum": {
+    "p50": 153914,
+    "p95": 328794
+   }
+  }
+ },
+ "removedExamples": [
+  {
+   "verdict": "falseAct",
+   "documentId": "saint-polycarpe-2026-01-19",
+   "act": "A02",
+   "label": "Vente des immeubles pour défaut de paiement de taxes",
+   "reason": "La vente d'immeubles pour non-paiement de taxes relève de la fiscalité/recouvrement municipal et des exclusions, et ne constitue pas un acte d'urbanisme ou d'aménagement foncier."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "saint-polycarpe-2026-01-19",
+   "act": "A05",
+   "label": "Règlement sur les nuisances (RMH 450)",
+   "reason": "Le règlement RMH 450 n'est mentionné que comme texte antérieur en cours de remplacement, il ne fait l'objet d'aucune démarche ou étape propre dans cette séance."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "amherst-2026-06-08",
+   "act": "A02",
+   "label": "Affectation budgétaire au fonds de parcs, terrains de jeux et espaces verts",
+   "reason": "Il s'agit d'une simple affectation budgétaire interne au fonds de parcs, sans acte d'urbanisme ou foncier direct (exclusion des simples décisions de gestion budgétaire/financière)."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "amherst-2026-06-08",
+   "act": "A03",
+   "label": "Passerelle du lac de la Décharge — Autorisation de dépense prévue",
+   "reason": "L'autorisation de dépense pour une passerelle relève de la dépense/travaux d'infrastructure/loisirs sans acte d'urbanisme ou foncier réglementaire."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "saint-charles-de-bourget-2026-05-04",
+   "act": "A04",
+   "label": "Projet de règlement omnibus municipal 447.26",
+   "reason": "Le règlement no 447.26 est relatif à la paix, à l'ordre et à la sécurité publique, ce qui ne relève pas de l'urbanisme ou de l'aménagement du territoire."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "saint-henri-2026-03-02",
+   "act": "A01",
+   "label": "Règlement no 739-26 — dépôt du certificat d'enregistrement prévu",
+   "reason": "Le dépôt d'un certificat d'enregistrement administratif sous le point 5.5 relève de la simple formalité administrative générale sans lien direct avec un objet d'urbanisme explicité."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "saint-henri-2026-03-02",
+   "act": "A05",
+   "label": "Constitution prévue du Comité de démolition",
+   "reason": "La constitution d'un comité et la désignation d'un responsable relèvent de nominations et de gouvernance interne, exclues du périmètre d'extraction des actes fonciers ou réglementaires d'urbanisme."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "stratford-2026-04-20",
+   "act": "A02",
+   "label": "Règlement 1212 relatif à la démolition d’immeubles",
+   "reason": "Le règlement no 1212 n'est mentionné que comme le règlement d'origine faisant l'objet d'une modification, sans acte procédural propre."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "stratford-2026-04-20",
+   "act": "A04",
+   "label": "Règlement de zonage 1035",
+   "reason": "Le règlement 1035 est uniquement cité en tant que règlement de zonage modifié, sans acte autonome le concernant."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "abercorn-2026-03-30",
+   "act": "A01",
+   "label": "Adhésion au réseau Rues Principales",
+   "reason": "Il s'agit d'une adhésion à un organisme et d'une autorisation de participation à un colloque, ce qui ne constitue pas un acte d'urbanisme ou d'aménagement foncier/réglementaire."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "abercorn-2026-03-30",
+   "act": "A02",
+   "label": "Approbation de la programmation de travaux TECQ 2024-2028",
+   "reason": "L'approbation d'une programmation de travaux dans le cadre d'un programme de subvention d'infrastructures d'eau (TECQ) relève de la voirie et des travaux publics sans volet de planification urbaine ou d'aménagement du territoire réglementé."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "grenville-sur-la-rouge-2026-04-14",
+   "act": "A07",
+   "label": "Mandat de plan directeur du réseau d’aqueduc",
+   "reason": "Il s'agit d'un simple contrat de services professionnels / étude technique d'aqueduc, exclu des actes d'urbanisme."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "saint-damien-2026-06-16",
+   "act": "A04",
+   "label": "Règlement 834 — gestion contractuelle",
+   "reason": "Un règlement portant sur la gestion contractuelle relève de l'administration et des contrats municipaux et est exclu du champ de l'urbanisme et du foncier."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "saint-damien-2026-06-16",
+   "act": "A05",
+   "label": "Projet de règlement 804-1 — modification du règlement 804",
+   "reason": "La réglementation des camions de cuisine/cantines temporaires relève du commerce/activités mobiles et ne constitue pas un acte d'urbanisme ou d'aménagement foncier soutenu."
+  },
+  {
+   "verdict": "falseAct",
+   "documentId": "saint-damien-2026-06-16",
+   "act": "A06",
+   "label": "Règlement 804 — camions de cuisine cantines temporaires",
+   "reason": "Le règlement antérieur 804 n'est mentionné que comme objet de modification pour les cantines temporaires (hors urbanisme/foncier) et ne fait l'objet d'aucune étape propre."
+  },
+  {
+   "verdict": "correctAct",
+   "documentId": "lavenir-2026-05-04",
+   "act": "A03",
+   "label": "Adoption de l’amendement de zonage 797-26",
+   "reason": "Il s'agit d'une duplication sous un type d'événement de l'adoption du règlement 797-26 déjà validée en A01, sans qualification d'acte distinct d'urbanisme."
+  }
+ ]
+}

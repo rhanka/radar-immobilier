@@ -1,0 +1,36 @@
+{
+ "documentId": "berthier-sur-mer-2026-03-24",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "c45f9d1b48e4e12cc888b85c591319f6edbda635bff8a8a1342f47fc48ea7f1b",
+ "inputSha256": "268beafc5ba6186fd24cd0f5816dc903178a8c7fe3dffa47427c4aaa597f6443",
+ "responseSha256": "1da0c8d2c645538e66beb64588a2b48259d3c93a11d4b1a4a905f0b0512a8d2f",
+ "accountPseudonym": "acct-c015cb459d",
+ "latencyMs": 21188,
+ "modelId": "gpt-6-astra",
+ "finishReason": "stop",
+ "usage": {
+  "inputTokens": 23013,
+  "outputTokens": 630,
+  "totalTokens": 23643
+ },
+ "wire": {
+  "endpoint": "https://chatgpt.com/backend-api/codex/responses",
+  "model": "gpt-6-astra",
+  "effort": "xhigh",
+  "maxOutputTokens": null,
+  "httpStatus": 200,
+  "durationMs": 21185,
+  "requestId": null
+ },
+ "at": "2026-09-18T18:24:34.255Z"
+}

@@ -1,0 +1,77 @@
+{
+ "documentId": "saint-damien-2026-06-16",
+ "step": "astra-pass1b",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "astra-pass1",
+ "inputStateSha256": "a0ad84ca7a51bd3ae0f08ed6fb540a32694a750e1e5b0985fc2000c85f3f49ae",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Avis de motion prévu – règlement 804-1 sur les camions de cuisine cantines temporaires\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"804-1\",\n        \"page\": 2,\n        \"citation\": \"14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\\nrèglement 804 portant sur les camions de cuisine cantines temporaires\",\n        \"anchor\": \"règlement 804-1\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte de la page 2 comporte un saut de ligne après « modification du ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Présentation prévue du projet de règlement 804-1 sur les camions de cuisine cantines temporaires\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"804-1\",\n        \"page\": 2,\n        \"citation\": \"14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\\nrèglement 804 portant sur les camions de cuisine cantines temporaires\",\n        \"anchor\": \"règlement 804-1\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : le texte de la page 2 comporte un saut de ligne après « modification du ».\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Avis de motion prévu – règlement 804-1 sur les camions de cuisine cantines temporaires",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "804-1",
+    "page": 2,
+    "citation": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires",
+    "anchor": "règlement 804-1"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte de la page 2 comporte un saut de ligne après « modification du »."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Présentation prévue du projet de règlement 804-1 sur les camions de cuisine cantines temporaires",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "804-1",
+    "page": 2,
+    "citation": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires",
+    "anchor": "règlement 804-1"
+   },
+   "reason": "La citation doit être recopiée à l’identique : le texte de la page 2 comporte un saut de ligne après « modification du »."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "astra-pass1b",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "avis_motion",
+   "page": 2,
+   "citation": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+  },
+  {
+   "step": "astra-pass1b",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "projet_reglement",
+   "page": 2,
+   "citation": "14.2 Avis de motion et présentation – projet de règlement 804-1 – modification du\nrèglement 804 portant sur les camions de cuisine cantines temporaires"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 5,
+ "relabeledFrom": "astra-pass2"
+}

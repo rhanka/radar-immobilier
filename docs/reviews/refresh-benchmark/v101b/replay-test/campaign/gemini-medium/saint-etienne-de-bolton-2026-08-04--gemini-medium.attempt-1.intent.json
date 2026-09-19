@@ -1,0 +1,1 @@
+{"schemaVersion":2,"state":"in-flight","startedAt":"2026-09-17T12:35:39.103Z","campaign":"v101b","arm":"gemini-medium","documentId":"saint-etienne-de-bolton-2026-08-04","attempt":1,"requested":{"providerId":"gemini","transportProviderId":"cloud-code","modelId":"gemini-3.8-flash","effort":"medium","maxOutputTokens":32768}}

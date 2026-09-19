@@ -1,0 +1,339 @@
+{
+ "nodes": [
+  {
+   "id": "source",
+   "label": "Procès-verbal du 7 avril 2026 — Saint-Félix-de-Kingsey",
+   "node_type": "Source",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "status": "candidate",
+   "date": "2026-04-07",
+   "municipality": "saint-felix-de-kingsey",
+   "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+   "url": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+   "sourceKind": "pv",
+   "format": "pdf",
+   "citations": [
+    {
+     "page": 1,
+     "excerpt": "Procès-verbal de la séance ordinaire de la Municipalité de Saint-Félix-de-Kingsey,\ntenue publiquement le 07 avril 2026, à 20 h,",
+     "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+     "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-638",
+   "label": "Règlement 638 — Occupation et entretien des bâtiments",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "status": "candidate",
+   "numero": "638",
+   "title": "Règlement relatif à l’occupation et à l’entretien des bâtiments",
+   "objet": "Normes visant à empêcher le dépérissement des bâtiments, à les protéger contre les intempéries et à préserver l’intégrité de leur structure.",
+   "date": "2026-04-07",
+   "stage": "adoption",
+   "municipality": "saint-felix-de-kingsey",
+   "resolution": "70-04-2026",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "EN CONSÉQUENCE, sur proposition de M. Jacob Morin, appuyée par M. Simon\nLauzière, il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation\net à l’entretien des bâtiments.",
+     "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+     "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-638"
+   ]
+  },
+  {
+   "id": "zone-i-1",
+   "label": "Zone I-1 — Industriel",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "status": "candidate",
+   "code": "I-1",
+   "usage": "Industriel",
+   "bylaw": "547",
+   "municipality": "saint-felix-de-kingsey",
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "une demande de PPCMOI a été déposée au Service de l’urbanisme et de\nl’environnement concernant le lot 5 739 222, situé en zone I-1 (Industriel),\nvisant l’agrandissement d’un bâtiment industriel;",
+     "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+     "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-projet"
+   ]
+  },
+  {
+   "id": "derogation-1130-provencher",
+   "label": "Dérogation mineure acceptée — 1130, rue Provencher",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "status": "candidate",
+   "date": "2026-04-07",
+   "meetingDate": "2026-04-07",
+   "decision": "approuvé",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-04-07",
+   "no_lot": "5740483",
+   "reglement_number": "547",
+   "resolution": "71-04-2026",
+   "municipality": "saint-felix-de-kingsey",
+   "description": "Acceptation de la dérogation mineure pour rendre conforme la marge avant du bâtiment principal existant au 1130, rue Provencher à 9,66 mètres, plutôt que le minimum de 10 mètres exigé par le règlement 547.",
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Il est résolu à l’unanimité des conseillers présents d’accepter la dérogation mineure\ntelle que demandée.",
+     "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+     "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-derogation"
+   ]
+  },
+  {
+   "id": "ppcmoi-5739222",
+   "label": "Premier projet de résolution PPCMOI — Lot 5 739 222",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "status": "candidate",
+   "date": "2026-04-07",
+   "meetingDate": "2026-04-07",
+   "kind": "ppcmoi",
+   "etape": "ppcmoi",
+   "etape_date": "2026-04-07",
+   "no_lot": "5739222",
+   "zone_ref": "I-1",
+   "reglement_number": "631",
+   "resolution": "72-04-2026",
+   "municipality": "saint-felix-de-kingsey",
+   "description": "Dépôt du premier projet de résolution pour un agrandissement industriel sur la route 255, avec une marge avant de 3 m plutôt que 10 m selon le règlement de zonage 547. Le texte résout que le CCU recommande d’accepter la demande. Le projet de résolution est soumis à consultation publique, prévue le 4 mai 2026 à 19h45; aucune autorisation finale n’est constatée.",
+   "conditions": [
+    "Respect des plans et des croquis déposés.",
+    "Aire d’attente des camions déplacée à l’intérieur de leur clôture.",
+    "Avis professionnel du MTQ exigé avant l’émission du permis concernant la distance de l’agrandissement projeté et la route 255, le voyagement et l’accessibilité des portes de garage latéral, le triangle de visibilité et l’efficacité du voyagement et du chargement des camions.",
+    "Ajout d’arbustes en façade de l’agrandissement.",
+    "Stationnement sans empiètement dans l’emprise de la rue de l’église."
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "il est proposé par monsieur Douglas Beard, appuyé par monsieur Jean-François De\nPlaen et résolu à l’unanimité que le CCU recommande d’accepter la demande de\nPPCMOI,",
+     "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+     "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 10,
+     "excerpt": "2. Le projet de résolution est soumis à la consultation publique, conformément à la\nLoi sur l’aménagement et l’urbanisme (A-19.1);",
+     "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+     "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+     "modality": "pdf"
+    }
+   ],
+   "evidence_refs": [
+    "ev-ppcmoi",
+    "ev-consultation"
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "source",
+   "target": "bylaw-638",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "evidence_refs": [
+    "ev-638"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "EN CONSÉQUENCE, sur proposition de M. Jacob Morin, appuyée par M. Simon\nLauzière, il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation\net à l’entretien des bâtiments.",
+     "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+     "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "derogation-1130-provencher",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "evidence_refs": [
+    "ev-derogation"
+   ],
+   "citations": [
+    {
+     "page": 8,
+     "excerpt": "Il est résolu à l’unanimité des conseillers présents d’accepter la dérogation mineure\ntelle que demandée.",
+     "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+     "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "source",
+   "target": "ppcmoi-5739222",
+   "relation": "supports",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "evidence_refs": [
+    "ev-ppcmoi",
+    "ev-consultation"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "il est proposé par monsieur Douglas Beard, appuyé par monsieur Jean-François De\nPlaen et résolu à l’unanimité que le CCU recommande d’accepter la demande de\nPPCMOI,",
+     "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+     "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "source": "ppcmoi-5739222",
+   "target": "zone-i-1",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "evidence_refs": [
+    "ev-projet"
+   ],
+   "citations": [
+    {
+     "page": 9,
+     "excerpt": "une demande de PPCMOI a été déposée au Service de l’urbanisme et de\nl’environnement concernant le lot 5 739 222, situé en zone I-1 (Industriel),\nvisant l’agrandissement d’un bâtiment industriel;",
+     "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+     "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+     "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-638",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+   "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "EN CONSÉQUENCE, sur proposition de M. Jacob Morin, appuyée par M. Simon\nLauzière, il est unanimement résolu d’adopter le règlement 638 relatif à l’occupation\net à l’entretien des bâtiments."
+  },
+  {
+   "id": "ev-631",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+   "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "le Règlement no 631 sur les Projets particuliers de construction, de\nmodification ou d’occupation d’un immeuble (PPCMOI) de la Municipalité"
+  },
+  {
+   "id": "ev-zonage",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+   "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "le projet d’agrandissement, tel que soumis, ne respecte pas le Règlement de\nzonage 547, pour la zone I-1, dont la marge avant qui serait de 3 m malgré le\nrèglement de zonage numéro 547 qui mentionne que la marge avant doit être\nde 10m."
+  },
+  {
+   "id": "ev-projet",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+   "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "une demande de PPCMOI a été déposée au Service de l’urbanisme et de\nl’environnement concernant le lot 5 739 222, situé en zone I-1 (Industriel),\nvisant l’agrandissement d’un bâtiment industriel;"
+  },
+  {
+   "id": "ev-derogation",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+   "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+   "modality": "pdf",
+   "page": 8,
+   "excerpt": "Les membres du conseil municipal prennent en considération une demande de\ndérogation mineure formulée concernant l'immeuble situé au numéro, 1130 rue\nProvencher (lot 5 740 483 cadastre du Québec), et ayant pour objet :\na) -De rendre conforme la marge avant du bâtiment principal existant à 9,66\nmètres alors que le règlement 547 exige une distance minimale de 10 mètres\nAprès avoir pris connaissance de l’avis donné par le Comité consultatif d’urbanisme\nde la Municipalité de Saint-Félix-de-Kingsey, informant le conseil municipal que la\ndemande devrait être acceptée.\nLa parole est donnée à toute personne désirant se faire entendre tel qu’annoncé à\nl’avis publié.\nSur proposition du conseiller M. Jean-François De Plaen, appuyée par Mme Mélise\nBeaulac\nIl est résolu à l’unanimité des conseillers présents d’accepter la dérogation mineure\ntelle que demandée."
+  },
+  {
+   "id": "ev-ppcmoi",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+   "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+   "modality": "pdf",
+   "page": 9,
+   "excerpt": "il est proposé par monsieur Douglas Beard, appuyé par monsieur Jean-François De\nPlaen et résolu à l’unanimité que le CCU recommande d’accepter la demande de\nPPCMOI, pour l’immeuble situé sur le lot 5 739 222 sur la route 255 pour autoriser\nl’agrandissement en cours avant avec une marge avant de 3 m malgré le règlement\nde zonage numéro 547 qui mentionne que la marge avant doit être de 10m."
+  },
+  {
+   "id": "ev-consultation",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+   "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+   "modality": "pdf",
+   "page": 10,
+   "excerpt": "2. Le projet de résolution est soumis à la consultation publique, conformément à la\nLoi sur l’aménagement et l’urbanisme (A-19.1);\n3. Le greffier est mandaté pour publier un avis public annonçant la tenue de cette\nconsultation et informer les citoyens de leurs droits quant à une éventuelle demande\nd’approbation référendaire.\nUne séance de consultation publique sera tenue le : 04 mai 2026 à 19h45."
+  },
+  {
+   "id": "ev-permis",
+   "source_file": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "rawRef": "raw/proces-verbaux-saint-felix-de-kingsey/cas/029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823.pdf",
+   "docSha": "029d9ab17af8d79de7bf9da2435ff7558605be43bedd62d9adeec01425722823",
+   "sourceUrl": "https://www.saintfelixdekingsey.ca/fichiersUpload/fichiers/20260508082510-2026-04-07-pv-final.pdf",
+   "modality": "pdf",
+   "page": 7,
+   "excerpt": "10 demandes de permis (valeur approx. 865 300 $)"
+  }
+ ],
+ "input_tokens": 11600,
+ "output_tokens": 6500
+}

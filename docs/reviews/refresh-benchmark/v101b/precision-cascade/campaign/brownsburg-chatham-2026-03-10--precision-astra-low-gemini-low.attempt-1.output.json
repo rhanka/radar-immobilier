@@ -1,0 +1,999 @@
+{
+ "nodes": [
+  {
+   "id": "piia-2026-006",
+   "label": "PIIA 2026-006 — Développement résidentiel, rue Lacasse",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-10",
+   "dossier": "2026-006",
+   "resolution": "26-03-086",
+   "decision": "approuvé",
+   "zone_ref": "R-615",
+   "no_lot": "4234857",
+   "reglement_number": "201-2013",
+   "description": "Autorisation du développement résidentiel comprenant des habitations unifamiliales (H1) et multifamiliales (H4), avec prolongement des rues Lacasse et Saint-Denis. Le conseil accepte après réception d’un plan de drainage pluvial, malgré la recommandation de refus du CCU.",
+   "conditions": [
+    "Identifier et délimiter les zones boisées à conserver pendant la construction des infrastructures et les protéger par servitude de non-déboisement dans les actes notariés en faveur de la Ville.",
+    "Prévoir un lien piéton et cyclable entre le prolongement de la rue Lacasse et la rue Saint-Georges dans l’opération cadastrale de la phase 2.",
+    "Prolonger la piste multifonctionnelle sur la rue Lacasse jusqu’à l’extrémité sud de la rue."
+   ],
+   "citations": [
+    {
+     "page": 42,
+     "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle projet de développement d’envergure projeté sur le lot",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 43,
+     "excerpt": "QUE l’acceptation du projet est assortie des conditions suivantes:",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2026-00030",
+   "label": "DM-2026-00030 — Emprise de rue de 13 mètres",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-10",
+   "dossier": "DM-2026-00030",
+   "resolution": "26-03-087",
+   "decision": "approuvé",
+   "zone_ref": "R-615",
+   "no_lot": "6721120",
+   "reglement_number": "198-2013",
+   "description": "Autorisation d’une emprise de rue de 13 mètres au prolongement de la rue Lacasse, au lieu du minimum de 15 mètres prévu à l’article 3.2.1.",
+   "citations": [
+    {
+     "page": 44,
+     "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00030, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2026-00031",
+   "label": "DM-2026-00031 — Emprise de rue de 13 mètres",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-10",
+   "dossier": "DM-2026-00031",
+   "resolution": "26-03-088",
+   "decision": "approuvé",
+   "zone_ref": "R-615",
+   "no_lot": "6721733",
+   "reglement_number": "198-2013",
+   "description": "Autorisation d’une emprise de rue de 13 mètres au prolongement de la rue Lacasse, au lieu du minimum de 15 mètres prévu à l’article 3.2.1.",
+   "citations": [
+    {
+     "page": 45,
+     "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00031, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2026-00032",
+   "label": "DM-2026-00032 — Profondeur moyenne de 27,46 mètres",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-10",
+   "dossier": "DM-2026-00032",
+   "resolution": "26-03-089",
+   "decision": "approuvé",
+   "zone_ref": "R-615",
+   "no_lot": "6721108",
+   "reglement_number": "198-2013",
+   "description": "Création d’un lot sur le prolongement de la rue Lacasse avec une profondeur moyenne de 27,46 mètres au lieu du minimum de 28 mètres prévu à l’article 4.1.3.",
+   "citations": [
+    {
+     "page": 46,
+     "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00032, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2026-00033",
+   "label": "DM-2026-00033 — Profondeur moyenne de 26,70 mètres",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-10",
+   "dossier": "DM-2026-00033",
+   "resolution": "26-03-090",
+   "decision": "approuvé",
+   "zone_ref": "R-615",
+   "no_lot": "6721109",
+   "reglement_number": "198-2013",
+   "description": "Création d’un lot sur le prolongement de la rue Lacasse avec une profondeur moyenne de 26,70 mètres au lieu du minimum de 28 mètres.",
+   "citations": [
+    {
+     "page": 48,
+     "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00033, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2026-00034",
+   "label": "DM-2026-00034 — Profondeur moyenne de 26,59 mètres",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-10",
+   "dossier": "DM-2026-00034",
+   "resolution": "26-03-091",
+   "decision": "approuvé",
+   "zone_ref": "R-615",
+   "no_lot": "6721110",
+   "reglement_number": "198-2013",
+   "description": "Création d’un lot sur le prolongement de la rue Lacasse avec une profondeur moyenne de 26,59 mètres au lieu du minimum de 28 mètres.",
+   "citations": [
+    {
+     "page": 49,
+     "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00034, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2026-00035",
+   "label": "DM-2026-00035 — Profondeur moyenne de 27,76 mètres",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-10",
+   "dossier": "DM-2026-00035",
+   "resolution": "26-03-092",
+   "decision": "approuvé",
+   "zone_ref": "R-615",
+   "no_lot": "6721111",
+   "reglement_number": "198-2013",
+   "description": "Création d’un lot sur le prolongement de la rue Lacasse avec une profondeur moyenne de 27,76 mètres au lieu du minimum de 28 mètres.",
+   "citations": [
+    {
+     "page": 50,
+     "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00035, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2026-00036",
+   "label": "DM-2026-00036 — Profondeur moyenne de 27,41 mètres",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-10",
+   "dossier": "DM-2026-00036",
+   "resolution": "26-03-093",
+   "decision": "approuvé",
+   "zone_ref": "R-615",
+   "no_lot": "6686339",
+   "reglement_number": "198-2013",
+   "description": "Création d’un lot sur le prolongement de la rue Lacasse avec une profondeur moyenne de 27,41 mètres au lieu du minimum de 28 mètres.",
+   "citations": [
+    {
+     "page": 52,
+     "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00036, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2026-00037",
+   "label": "DM-2026-00037 — Profondeur moyenne de 26,78 mètres",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-10",
+   "dossier": "DM-2026-00037",
+   "resolution": "26-03-094",
+   "decision": "approuvé",
+   "zone_ref": "R-615",
+   "no_lot": "6686340",
+   "reglement_number": "198-2013",
+   "description": "Création d’un lot sur le prolongement de la rue Lacasse avec une profondeur moyenne de 26,78 mètres au lieu du minimum de 28 mètres.",
+   "citations": [
+    {
+     "page": 53,
+     "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00037, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2026-00038",
+   "label": "DM-2026-00038 — Profondeur moyenne de 27,31 mètres",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-10",
+   "dossier": "DM-2026-00038",
+   "resolution": "26-03-095",
+   "decision": "approuvé",
+   "zone_ref": "R-615",
+   "no_lot": "6686341",
+   "reglement_number": "198-2013",
+   "description": "Création d’un lot sur le prolongement de la rue Lacasse avec une profondeur moyenne de 27,31 mètres au lieu du minimum de 28 mètres.",
+   "citations": [
+    {
+     "page": 54,
+     "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00038, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2026-00039",
+   "label": "DM-2026-00039 — Profondeur moyenne de 27,70 mètres",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-10",
+   "dossier": "DM-2026-00039",
+   "resolution": "26-03-096",
+   "decision": "approuvé",
+   "zone_ref": "R-615",
+   "no_lot": "6686343",
+   "reglement_number": "198-2013",
+   "description": "Création d’un lot sur le prolongement de la rue Lacasse avec une profondeur moyenne de 27,70 mètres au lieu du minimum de 28 mètres.",
+   "citations": [
+    {
+     "page": 55,
+     "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00039, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2026-00040",
+   "label": "DM-2026-00040 — Profondeur moyenne de 27,50 mètres",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-10",
+   "dossier": "DM-2026-00040",
+   "resolution": "26-03-097",
+   "decision": "approuvé",
+   "zone_ref": "R-615",
+   "no_lot": "6686344",
+   "reglement_number": "198-2013",
+   "description": "Création d’un lot sur le prolongement de la rue Lacasse avec une profondeur moyenne de 27,50 mètres au lieu du minimum de 28 mètres.",
+   "citations": [
+    {
+     "page": 57,
+     "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2026-00040, visant des dispositions du\nRèglement de lotissement numéro 198-2013 pour le lot projeté",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "dm-2025-00725",
+   "label": "DM-2025-00725 — Enseigne sur la route du Canton",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "derogation",
+   "etape": "derogation_mineure",
+   "etape_date": "2026-03-10",
+   "dossier": "DM-2025-00725",
+   "resolution": "26-03-098",
+   "decision": "approuvé",
+   "zone_ref": "Pl-530",
+   "no_lot": "6703926",
+   "reglement_number": "197-2013",
+   "description": "Autorisation d’une enseigne de 10,6 m² au lieu de 7,5 m² et de son installation sur une structure hors toit, emplacement normalement interdit.",
+   "citations": [
+    {
+     "page": 58,
+     "excerpt": "QUE le conseil municipal accepte la demande de dérogation\nmineure numéro DM-2025-00725, visant des dispositions du\nRèglement de zonage numéro 197-2013 pour le lot projeté",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2026-007",
+   "label": "PIIA 2026-007 — Construction d’un établissement de restauration",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-10",
+   "dossier": "2026-007",
+   "resolution": "26-03-099",
+   "decision": "approuvé",
+   "zone_ref": "Pl-530",
+   "no_lot": "6703926",
+   "reglement_number": "201-2013",
+   "description": "Autorisation de délivrer le permis de construction d’un établissement de restauration (C302) sur la route du Canton.",
+   "citations": [
+    {
+     "page": 59,
+     "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle Service du développement et de l’aménagement du territoire à",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2026-008",
+   "label": "PIIA 2026-008 — Remise et abri à bois, 815 route des Outaouais",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-10",
+   "dossier": "2026-008",
+   "resolution": "26-03-100",
+   "decision": "approuvé",
+   "zone_ref": "V-425",
+   "no_lot": "6501338",
+   "reglement_number": "201-2013",
+   "description": "Autorisation d’une remise de 14,86 m² et d’un abri à bois attenant de 18,58 m² en cour avant.",
+   "citations": [
+    {
+     "page": 60,
+     "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle Service du développement et de l’aménagement du territoire à",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2026-009",
+   "label": "PIIA 2026-009 — Habitation bifamiliale, rue de l’Église",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-10",
+   "dossier": "2026-009",
+   "resolution": "26-03-101",
+   "decision": "approuvé",
+   "zone_ref": "R-604",
+   "no_lot": "4235765",
+   "reglement_number": "201-2013",
+   "description": "Autorisation de délivrer le permis de construction d’une habitation bifamiliale sur la rue de l’Église.",
+   "citations": [
+    {
+     "page": 62,
+     "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle Service du développement et de l’aménagement du territoire à",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2026-010",
+   "label": "PIIA 2026-010 — Rénovation, 332-332A rue Saint-Joseph",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-10",
+   "dossier": "2026-010",
+   "resolution": "26-03-102",
+   "decision": "approuvé",
+   "zone_ref": "R-614",
+   "no_lot": "4235532",
+   "reglement_number": "201-2013",
+   "description": "Autorisation de rénovation de la résidence, comprenant le remplacement d’une fenêtre et de deux portes.",
+   "citations": [
+    {
+     "page": 63,
+     "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle Service du développement et de l’aménagement du territoire à",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "piia-2026-011",
+   "label": "PIIA 2026-011 — Bâtiment agricole, 309 route du Canton",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "piia",
+   "etape": "piia",
+   "etape_date": "2026-03-10",
+   "dossier": "2026-011",
+   "resolution": "26-03-103",
+   "decision": "approuvé",
+   "zone_ref": "A-131",
+   "no_lot": "4423780",
+   "reglement_number": "201-2013",
+   "description": "Autorisation de délivrer le certificat d’autorisation pour la construction d’un bâtiment agricole.",
+   "citations": [
+    {
+     "page": 64,
+     "excerpt": "QU’en tenant compte des considérants énumérés précédemment, le\nconseil municipal accepte la demande et en conséquence, autorise\nle Service du développement et de l’aménagement du territoire à",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "bylaw-361-2026",
+   "label": "Projet de règlement 361-2026 — Occupation et entretien des bâtiments",
+   "node_type": "Bylaw",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "numero": "361-2026",
+   "title": "Règlement numéro 361-2026 concernant l’occupation et l’entretien des bâtiments",
+   "stage": "projet",
+   "meetingDate": "2026-03-10",
+   "resolution": "26-03-104",
+   "citations": [
+    {
+     "page": 65,
+     "excerpt": "CONSIDÉRANT QUE le projet de règlement a été adopté par le\nconseil municipal à la séance ordinaire du 10 mars 2026;",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 66,
+     "excerpt": "EN CONSÉQUENCE, il est proposé par madame la conseillère\nMartine Renaud et résolu que soit adopté le Règlement numéro\n361-2026 intitulé « Règlement numéro 361-2026 concernant",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "motion-361-2026",
+   "label": "Avis de motion et dépôt du règlement 361-2026",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "etape": "avis_motion",
+   "etape_date": "2026-03-10",
+   "reglement_number": "361-2026",
+   "description": "Avis de motion et dépôt du projet concernant l’occupation et l’entretien des bâtiments, destiné à abroger et remplacer le règlement 129-2007.",
+   "citations": [
+    {
+     "page": 64,
+     "excerpt": "Madame la conseillère Martine Renaud donne avis de motion qu’à\nune séance subséquente, il sera proposé pour adoption le\nRèglement numéro 361-2026 concernant l’occupation et l’entretien",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "consultation-361-2026",
+   "label": "Consultation publique annoncée — Règlement 361-2026",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "category": "consultation_publique",
+   "meetingDate": "2026-03-10",
+   "date": "2026-04-07",
+   "etape": "consultation_publique",
+   "etape_date": "2026-04-07",
+   "reglement_number": "361-2026",
+   "description": "Consultation publique prévue le 7 avril 2026 à 18 h 30 au centre communautaire Louis-Renaud, 270 route du Canton. La tenue effective n’est pas constatée dans cette séance.",
+   "citations": [
+    {
+     "page": 65,
+     "excerpt": "CONSIDÉRANT QU’une consultation publique se tiendra le\n7 avril 2026 à 18 h 30, à la salle du centre communautaire LouisRenaud située au 270, route du Canton, Brownsburg-Chatham,",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "cession-2025-00021",
+   "label": "Lotissement 2025-00021 — Contribution pour fins de parcs",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "subdivision",
+   "etape": "inconnu",
+   "dossier": "2025-00021",
+   "resolution": "26-03-105",
+   "decision": "approuvé",
+   "reglement_number": "198-2013",
+   "no_lot": "6715763",
+   "superficie_m2": 5000,
+   "description": "Acceptation d’une contribution en argent de 810 $ pour la création des lots 6 715 763 et 6 715 764 à partir du lot 4 459 333, route des Outaouais. Le lot résidentiel 6 715 763 est assujetti; le lot agricole 6 715 764 est exempté de contribution.",
+   "citations": [
+    {
+     "page": 67,
+     "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\naccepte la contrepartie en argent pour cette cession. Sur la base de\nla valeur établie par l’évaluateur agréé, la contribution de 10 % en",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "cession-2026-00001",
+   "label": "Lotissement 2026-00001 — Contribution pour fins de parcs",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "subdivision",
+   "etape": "inconnu",
+   "dossier": "2026-00001",
+   "resolution": "26-03-106",
+   "decision": "approuvé",
+   "reglement_number": "198-2013",
+   "no_lot": "6717609",
+   "description": "Acceptation d’une contribution en argent de 16 950 $ pour la création du lot 6 717 609 à partir des lots 4 424 299 et 4 424 300, destiné à une habitation unifamiliale sur la route des Outaouais.",
+   "citations": [
+    {
+     "page": 69,
+     "excerpt": "QUE le conseil municipal accepte la contrepartie en argent pour\ncette cession. Sur la base de l’évaluation foncière, la contribution\nde 10 % en argent représente un montant de 16 950 $.",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "cession-2026-00002",
+   "label": "Lotissement 2026-00002 — Trois lots, rue Principale",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "subdivision",
+   "etape": "inconnu",
+   "dossier": "2026-00002",
+   "resolution": "26-03-107",
+   "decision": "approuvé",
+   "reglement_number": "198-2013",
+   "no_lot": "4235652",
+   "description": "Acceptation d’une contribution en argent de 21 150 $ pour la création des lots 6 718 011 à 6 718 013 à partir du lot 4 235 652, destinés à des habitations unifamiliales sur la rue Principale.",
+   "citations": [
+    {
+     "page": 70,
+     "excerpt": "QUE le conseil municipal accepte la contrepartie en argent pour\ncette cession. Sur la base de l’évaluation foncière, la contribution\nde 10 % en argent représente un montant de 21 150 $.",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "cession-2026-00005",
+   "label": "Lotissement 2026-00005 — Lots commerciaux ou industriels",
+   "node_type": "DesignationEvent",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "kind": "subdivision",
+   "etape": "inconnu",
+   "dossier": "2026-00005",
+   "resolution": "26-03-108",
+   "decision": "approuvé",
+   "reglement_number": "198-2013",
+   "no_lot": "4422680",
+   "description": "Acceptation d’une contribution en argent de 123 000 $ pour la création des lots 6 703 926, 6 703 927 et 6 721 476 à partir du lot 4 422 680, destinés à des constructions commerciales ou industrielles sur la route du Canton.",
+   "citations": [
+    {
+     "page": 71,
+     "excerpt": "QUE le conseil municipal accepte la contrepartie en argent pour\ncette cession. Sur la base de l’évaluation foncière, la contribution\nde 10 % en argent représente un montant de 123 000 $.",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-hlm",
+   "label": "Accueil potentiel de logements sociaux et cession de terrain",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "needs_review",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "category": "logement_social",
+   "resolution": "26-03-066",
+   "scope": "local",
+   "nb_unites_max": 48,
+   "description": "Volonté d’accueillir des HLM et engagement de céder une partie de terrains municipaux. Aire constructible envisagée d’environ 8 563 m², pour un maximum potentiel de 48 logements répartis dans deux bâtiments. Une opération cadastrale reste nécessaire. Divergence cadastrale à vérifier : les considérants et la mise à disposition des études citent 4 236 205 et 5 641 417, tandis que la décision de cession cite 4 235 205 et 5 641 417.",
+   "citations": [
+    {
+     "page": 18,
+     "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\nconfirme sa volonté d’accueillir des unités d’Habitation à loyer\nmodique (HLM) sur son territoire, s’engage à céder une partie des",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 18,
+     "excerpt": "CONSIDÉRANT QUE l’aire de construction possible sur le lot à\ncréer est d’environ 8 563 mètres carrés et qu’en fonction de cette\nsuperficie, la Ville pourrait accueillir jusqu’à un maximum de",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-septaco",
+   "label": "Acceptation provisoire du prolongement de la rue de la Septaco",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "category": "infrastructure_developpement",
+   "resolution": "26-03-110",
+   "description": "Acceptation provisoire des travaux du prolongement de la rue de la Septaco selon le protocole autorisé par la résolution 25-05-162. Reprise municipale de la rue et services subordonnés à la correction des déficiences et à l’acceptation finale; entretien et réparation demeurent à la charge du promoteur dans l’intervalle.",
+   "citations": [
+    {
+     "page": 73,
+     "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\nautorise l’acceptation provisoire selon le protocole d’entente de la\nrésolution numéro 25-05-162",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 74,
+     "excerpt": "QUE tel que prévu à l’article 9.1 du protocole d’entente, la Ville\ns’engage à reprendre la rue de la Septaco suite à l’acceptation finale.",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-oria-entente",
+   "label": "Domaine Oria — Signature de l’entente promoteur",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "category": "entente_promoteur",
+   "resolution": "26-03-111",
+   "description": "Autorisation de signature pour l’entente avec Gestion Or Concept inc. concernant le Domaine Oria : prolongement des rues publiques Lacasse et Saint-Denis pour accueillir des lots destinés aux habitations unifamiliales (H1) et multifamiliales (H4).",
+   "citations": [
+    {
+     "page": 74,
+     "excerpt": "CONSIDÉRANT QUE le projet de développement vise à encadrer\nla construction d’une nouvelle rue publique, soit le prolongement\ndes rues Lacasse et Saint-Denis et verra à accueillir de nouveaux",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    },
+    {
+     "page": 75,
+     "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\nautorise, monsieur Kévin Maurice, maire, ainsi que\nMe Pierre-Alain Bouchard, greffier et directeur du Service",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-oria-environnement",
+   "label": "Domaine Oria — Dépôt d’une demande au MELCCFP",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "needs_review",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "category": "autorisation_environnementale",
+   "resolution": "26-03-112",
+   "description": "Autorisation de dépôt par BHP Conseils pour Gestion Or Concept inc. au MELCCFP pour le Domaine Oria, concernant les lots projetés 6 721 120, 6 721 121, 6 721 733 et 6 721 734 et les lots 4 236 617 et 4 236 618. Le titre et les considérants parlent d’une déclaration de conformité, alors que le dispositif parle d’une demande de certificat d’autorisation. Aucune autorisation ministérielle accordée n’est constatée.",
+   "citations": [
+    {
+     "page": 76,
+     "excerpt": "D’AUTORISER le dépôt d’une demande de certificat\nd’autorisation au ministère de l’Environnement, de la Lutte contre\nles changements climatiques, de la Faune et des Parcs",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "signal-ecole",
+   "label": "Planification scolaire — Engagement conditionnel de cession d’un terrain",
+   "node_type": "Signal",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "date": "2026-03-10",
+   "category": "equipement_collectif",
+   "resolution": "26-03-113",
+   "description": "Avis favorable au projet de planification des besoins d’espace 2027-2037 du CSSRDN, appui aux demandes de financement et engagement de céder gratuitement un terrain pour une école secondaire si le besoin se présente.",
+   "citations": [
+    {
+     "page": 77,
+     "excerpt": "QUE le conseil municipal de la Ville de Brownsburg-Chatham\ns’engage à céder, si le besoin se présente, un terrain à titre gratuit\npour l’établissement d’une école secondaire sur son territoire.",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  },
+  {
+   "id": "zone-r615",
+   "label": "Zone résidentielle R-615",
+   "node_type": "Zone",
+   "file_type": "document",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "status": "candidate",
+   "municipality": "brownsburg-chatham",
+   "code": "R-615",
+   "usage": "résidentielle",
+   "bylaw": "197-2013",
+   "citations": [
+    {
+     "page": 41,
+     "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone résidentielle R-615 selon le plan de zonage en vigueur\n(Règlement de zonage numéro 197-2013);",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "edges": [
+  {
+   "source": "piia-2026-006",
+   "target": "zone-r615",
+   "relation": "targets_zone",
+   "confidence": "EXTRACTED",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "evidence_refs": [
+    "ev-r615"
+   ],
+   "citations": [
+    {
+     "page": 41,
+     "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone résidentielle R-615 selon le plan de zonage en vigueur\n(Règlement de zonage numéro 197-2013);",
+     "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+     "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+     "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+     "modality": "pdf"
+    }
+   ]
+  }
+ ],
+ "hyperedges": [],
+ "evidence": [
+  {
+   "id": "ev-r615",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+   "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+   "modality": "pdf",
+   "page": 41,
+   "excerpt": "CONSIDÉRANT QUE l’immeuble visé par la demande est situé\ndans la zone résidentielle R-615 selon le plan de zonage en vigueur\n(Règlement de zonage numéro 197-2013);"
+  },
+  {
+   "id": "ev-amend-320",
+   "source_file": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "rawRef": "raw/proces-verbaux-brownsburg-chatham/cas/2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044.pdf",
+   "docSha": "2701e522ae6dd839579b65d2812447e4b2bc491729b947e1df1bfabd67c33044",
+   "sourceUrl": "https://brownsburgchatham.ca/wp-content/uploads/2026/04/Proces-verbal_10-03-2026.pdf",
+   "modality": "pdf",
+   "page": 20,
+   "excerpt": "Le titre du règlement numéro 320-2023 est remplacé par le suivant :"
+  }
+ ],
+ "input_tokens": 36300,
+ "output_tokens": 10900
+}

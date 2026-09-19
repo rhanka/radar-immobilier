@@ -1,0 +1,191 @@
+{
+ "documentId": "saint-etienne-de-bolton-2026-08-04",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "dbb8601a27768bf3efa9e573dfd219a14a6d99a501dc980f410fefeaa4b1a383",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Adoption du règlement 2026-04 modifiant le plan d'urbanisme attestée par la résolution 2026-08-150 à la page 10.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Adoption du règlement 2026-05 modifiant le zonage attestée par la résolution 2026-08-150 à la page 10.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Adoption du règlement 2026-06 modifiant le lotissement attestée par la résolution 2026-08-150 à la page 10.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Adoption du règlement 2026-07 modifiant la construction attestée par la résolution 2026-08-150 à la page 10.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Adoption du règlement 2026-08 modifiant le PIIA attestée par la résolution 2026-08-150 à la page 10.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Adoption du règlement 2026-09 modifiant les permis et certificats attestée par la résolution 2026-08-150 à la page 10.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Adoption du règlement 2026-10 modifiant les dérogations mineures attestée par la résolution 2026-08-150 à la page 10.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Adoption du règlement 2025-11 attestée par la résolution 2026-08-151 à la page 10.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Adoption du règlement 2026-14 attestée par la résolution 2026-08-152 à la page 11.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Résolution de non-modification du règlement 2010-11 pour concordance au schéma attestée par la résolution 2026-08-153 à la page 11.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"Résolution de non-modification du règlement 2014-11 pour concordance au schéma attestée par la résolution 2026-08-153 à la page 11.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"Résolution de non-modification du règlement 2023-02 pour concordance au schéma attestée par la résolution 2026-08-153 à la page 11.\"},{\"item\":\"i13\",\"choice\":\"v1\",\"reason\":\"Approbation du PIIA pour la toiture au 12, rue Principale attestée par la résolution 2026-08-154 à la page 12.\"},{\"item\":\"i14\",\"choice\":\"v1\",\"reason\":\"Approbation du PIIA pour le garage au 24, Allée des Sommets attestée par la résolution 2026-08-155 à la page 12.\"},{\"item\":\"i15\",\"choice\":\"absent\",\"reason\":\"La citation et la page 2 renvoient à l'ordre du jour préliminaire et non à la résolution effective (page 13), ce qui contrevient à la règle interdisant d'extraire depuis une table des matières.\"},{\"item\":\"i16\",\"choice\":\"v1\",\"reason\":\"Refus de dérogation mineure sur le lot 5 191 546 attesté par la résolution 2026-08-157 à la page 14.\"},{\"item\":\"i17\",\"choice\":\"v1\",\"reason\":\"Approbation du PIIA pour le revêtement de toiture au 572, 1er Rang attestée par la résolution 2026-08-158 à la page 14.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  },
+  {
+   "item": "i13",
+   "unitId": "u13",
+   "current": "v1"
+  },
+  {
+   "item": "i14",
+   "unitId": "u14",
+   "current": "v1"
+  },
+  {
+   "item": "i15",
+   "unitId": "u15",
+   "current": "v1"
+  },
+  {
+   "item": "i16",
+   "unitId": "u16",
+   "current": "v1"
+  },
+  {
+   "item": "i17",
+   "unitId": "u17",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Adoption du règlement 2026-04 modifiant le plan d'urbanisme attestée par la résolution 2026-08-150 à la page 10."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Adoption du règlement 2026-05 modifiant le zonage attestée par la résolution 2026-08-150 à la page 10."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Adoption du règlement 2026-06 modifiant le lotissement attestée par la résolution 2026-08-150 à la page 10."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Adoption du règlement 2026-07 modifiant la construction attestée par la résolution 2026-08-150 à la page 10."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Adoption du règlement 2026-08 modifiant le PIIA attestée par la résolution 2026-08-150 à la page 10."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Adoption du règlement 2026-09 modifiant les permis et certificats attestée par la résolution 2026-08-150 à la page 10."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Adoption du règlement 2026-10 modifiant les dérogations mineures attestée par la résolution 2026-08-150 à la page 10."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Adoption du règlement 2025-11 attestée par la résolution 2026-08-151 à la page 10."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Adoption du règlement 2026-14 attestée par la résolution 2026-08-152 à la page 11."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Résolution de non-modification du règlement 2010-11 pour concordance au schéma attestée par la résolution 2026-08-153 à la page 11."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "Résolution de non-modification du règlement 2014-11 pour concordance au schéma attestée par la résolution 2026-08-153 à la page 11."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "Résolution de non-modification du règlement 2023-02 pour concordance au schéma attestée par la résolution 2026-08-153 à la page 11."
+  },
+  {
+   "item": "i13",
+   "choice": "v1",
+   "reason": "Approbation du PIIA pour la toiture au 12, rue Principale attestée par la résolution 2026-08-154 à la page 12."
+  },
+  {
+   "item": "i14",
+   "choice": "v1",
+   "reason": "Approbation du PIIA pour le garage au 24, Allée des Sommets attestée par la résolution 2026-08-155 à la page 12."
+  },
+  {
+   "item": "i15",
+   "choice": "absent",
+   "reason": "La citation et la page 2 renvoient à l'ordre du jour préliminaire et non à la résolution effective (page 13), ce qui contrevient à la règle interdisant d'extraire depuis une table des matières."
+  },
+  {
+   "item": "i16",
+   "choice": "v1",
+   "reason": "Refus de dérogation mineure sur le lot 5 191 546 attesté par la résolution 2026-08-157 à la page 14."
+  },
+  {
+   "item": "i17",
+   "choice": "v1",
+   "reason": "Approbation du PIIA pour le revêtement de toiture au 572, 1er Rang attestée par la résolution 2026-08-158 à la page 14."
+  }
+ ]
+}

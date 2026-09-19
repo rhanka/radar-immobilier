@@ -1,0 +1,51 @@
+{
+ "documentId": "saint-felix-de-kingsey-2026-04-07",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "3af0de69954f704c23483e712159a82d4849c7f5137fb1ff3937ee8794f66a3a",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 70-04-2026 énonce explicitement, page 8, l’adoption unanime du règlement 638 relatif à l’occupation et à l’entretien des bâtiments.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 71-04-2026, page 8, identifie le 1130 rue Provencher et le lot 5 740 483, puis accepte à l’unanimité la dérogation mineure demandée.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"L’intitulé de la résolution 72-04-2026, page 8, atteste le dépôt du premier projet de résolution PPCMOI visant le lot 5 739 222, dont la localisation sur la route 255 est précisée page 9.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 70-04-2026 énonce explicitement, page 8, l’adoption unanime du règlement 638 relatif à l’occupation et à l’entretien des bâtiments."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 71-04-2026, page 8, identifie le 1130 rue Provencher et le lot 5 740 483, puis accepte à l’unanimité la dérogation mineure demandée."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "L’intitulé de la résolution 72-04-2026, page 8, atteste le dépôt du premier projet de résolution PPCMOI visant le lot 5 739 222, dont la localisation sur la route 255 est précisée page 9."
+  }
+ ]
+}

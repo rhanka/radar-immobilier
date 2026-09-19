@@ -1,0 +1,19 @@
+{
+ "documentId": "bolton-est-2026-01-12",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "f971f04a3adffc7cd458fc798258875999b81d9567226b126177a8929ad29eff",
+ "verificationSha256": "6f3417f9987f7c2088ab121fc84f02d89b0e4dfadd19ed0e2113476130a06a6f",
+ "items": [],
+ "votes": [],
+ "noCall": true
+}

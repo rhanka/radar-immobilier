@@ -1,0 +1,81 @@
+{
+ "documentId": "boisbriand-2026-05-05",
+ "step": "converge-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b46e8622dc0bbd2c1eb74fabd0f09e5769b8117a82da9ebb9e1ab216106c7b39",
+ "rawText": "{\n  \"votes\": [\n    {\n      \"item\": \"i01\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-05-232, page 2, adopte explicitement le projet de règlement RV-1446-005 sur les dérogations mineures, ce qui atteste l’étape projet_reglement.\"\n    },\n    {\n      \"item\": \"i02\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-05-259, page 15, appuie la demande à la CPTAQ visant la subdivision du lot 6 489 086, l’aliénation et la fusion décrites, sans autoriser elle-même une sortie de la zone agricole permanente.\"\n    },\n    {\n      \"item\": \"i03\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-05-260, page 15, porte l’intitulé cité et approuve le PIIA de construction unifamiliale au 7232, rue Jean-Claude-Langlois, sous condition d’une garantie financière de 9 500 $.\"\n    },\n    {\n      \"item\": \"i04\",\n      \"choice\": \"v1\",\n      \"reason\": \"L’intitulé cité de la résolution 2026-05-261 figure page 15 et son dispositif page 16 approuve le PIIA de construction unifamiliale au 7225, rue Jean-Claude-Langlois, sous condition d’une garantie financière de 9 000 $.\"\n    },\n    {\n      \"item\": \"i05\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-05-262, page 16, porte l’intitulé cité et approuve le PIIA d’aménagement d’une terrasse extérieure du restaurant Escondite au 2860, promenade Saint-Honoré.\"\n    },\n    {\n      \"item\": \"i06\",\n      \"choice\": \"v1\",\n      \"reason\": \"La résolution 2026-05-263, dont l’intitulé cité figure page 16 et le dispositif se poursuit page 17, approuve le PIIA de modification de l’espace tampon entre les zones P-2 212 et R-1 210 au 150, rue Chauvin.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-232, page 2, adopte explicitement le projet de règlement RV-1446-005 sur les dérogations mineures, ce qui atteste l’étape projet_reglement."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-259, page 15, appuie la demande à la CPTAQ visant la subdivision du lot 6 489 086, l’aliénation et la fusion décrites, sans autoriser elle-même une sortie de la zone agricole permanente."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-260, page 15, porte l’intitulé cité et approuve le PIIA de construction unifamiliale au 7232, rue Jean-Claude-Langlois, sous condition d’une garantie financière de 9 500 $."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "L’intitulé cité de la résolution 2026-05-261 figure page 15 et son dispositif page 16 approuve le PIIA de construction unifamiliale au 7225, rue Jean-Claude-Langlois, sous condition d’une garantie financière de 9 000 $."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-262, page 16, porte l’intitulé cité et approuve le PIIA d’aménagement d’une terrasse extérieure du restaurant Escondite au 2860, promenade Saint-Honoré."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "La résolution 2026-05-263, dont l’intitulé cité figure page 16 et le dispositif se poursuit page 17, approuve le PIIA de modification de l’espace tampon entre les zones P-2 212 et R-1 210 au 150, rue Chauvin."
+  }
+ ]
+}

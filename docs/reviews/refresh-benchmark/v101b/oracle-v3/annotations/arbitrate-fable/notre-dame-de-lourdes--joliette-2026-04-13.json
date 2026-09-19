@@ -1,0 +1,74 @@
+{
+ "documentId": "notre-dame-de-lourdes--joliette-2026-04-13",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "01d555b9144977e58926b82bb8440d1531b599d66161fc3fb838739681afff4f",
+ "verificationSha256": "9a6cb5ff340d25d6865af71fa65c0bd60c185c2cac1125e2c2ce6cad5906fd8a",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"Page 8, résolution 2026-04-055 adoptée à l’unanimité : le conseil autorise le DG « lors de la vente pour défaut de paiement de taxes du 11 juin 2026, à enchérir, pour et au nom de la Municipalité […] et à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » (art. 1038 CM, liste transmise à la MRC par 2026-02-026) : c’est un acte foncier explicite et daté, inclus au rappel selon la règle « Inclusions : urbanisme, petits PIIA et actes fonciers, même non résidentiels ». L’objection de C est écartée : l’absence d’un lot nommé ne retire pas la nature foncière de l’objet (vente d’immeubles pour taxes du 11 juin 2026), et une réserve sur l’étiquette d’étape (résolution adoptée dans ce document) ne justifie pas de rendre l’unité absente.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Autorisation d’enchérir et d’acquérir des immeubles — vente pour taxes du 11 juin 2026",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "Vente d’immeubles pour taxes",
+      "page": 8,
+      "citation": "et à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente",
+      "anchor": "tout immeuble de son territoire",
+      "spanStart": 2787,
+      "spanEnd": 2873
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La résolution 2026-04-055, adoptée page 8, autorise expressément à enchérir et à acquérir des immeubles lors de la vente pour taxes du 11 juin 2026, ce qui constitue un acte foncier inclus."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 2026-04-055 page 8 autorisant à enchérir et « à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » lors de la vente pour taxes du 11 juin 2026 : acte foncier inclus au rappel, citation exacte."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Cette résolution d'autorisation générale d'enchérir ne comporte aucun objet foncier explicite et le statut adoption est erroné pour une résolution administrative."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "Page 8, résolution 2026-04-055 adoptée à l’unanimité : le conseil autorise le DG « lors de la vente pour défaut de paiement de taxes du 11 juin 2026, à enchérir, pour et au nom de la Municipalité […] et à acquérir, au nom de la Municipalité, tout immeuble de son territoire mis en vente » (art. 1038 CM, liste transmise à la MRC par 2026-02-026) : c’est un acte foncier explicite et daté, inclus au rappel selon la règle « Inclusions : urbanisme, petits PIIA et actes fonciers, même non résidentiels ». L’objection de C est écartée : l’absence d’un lot nommé ne retire pas la nature foncière de l’objet (vente d’immeubles pour taxes du 11 juin 2026), et une réserve sur l’étiquette d’étape (résolution adoptée dans ce document) ne justifie pas de rendre l’unité absente."
+  }
+ ]
+}

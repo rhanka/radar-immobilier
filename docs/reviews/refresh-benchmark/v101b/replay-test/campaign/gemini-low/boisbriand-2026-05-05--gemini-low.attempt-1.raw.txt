@@ -1,0 +1,472 @@
+{
+  "nodes": [
+    {
+      "id": "source-34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "label": "Procès-verbal de la séance ordinaire du 5 mai 2026 - Ville de Boisbriand",
+      "node_type": "Source",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "status": "validated",
+      "date": "2026-05-05",
+      "municipality": "boisbriand",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "url": "https://www.ville.boisbriand.qc.ca/storage/app/media/ville/vie-democratique/seances-du-conseil/PV/2026/2026-05-05_Seance-ordinaire.pdf",
+      "sourceKind": "pv",
+      "format": "pdf",
+      "citations": [
+        {
+          "page": 1,
+          "excerpt": "PROCÈS-VERBAL de la séance ordinaire du conseil municipal du 5 mai 2026 tenue à 19 h 30"
+        }
+      ]
+    },
+    {
+      "id": "bylaw-rv-1446-005",
+      "label": "Règlement RV-1446-005",
+      "node_type": "Bylaw",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "status": "candidate",
+      "numero": "RV-1446-005",
+      "title": "Projet de règlement RV-1446-005 modifiant diverses dispositions du Règlement RV-1446 sur les dérogations mineures",
+      "stage": "1er_projet",
+      "municipality": "boisbriand",
+      "date": "2026-05-05",
+      "resolution": "2026-05-232",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\nRèglement RV-1446 sur les dérogations mineures."
+        }
+      ]
+    },
+    {
+      "id": "zone-a-521",
+      "label": "Zone A-521",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "status": "candidate",
+      "code": "A-521",
+      "municipality": "boisbriand",
+      "usage": "agricole",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "ATTENDU QUE la Ville de Boisbriand est propriétaire du lot 6 489 086 du cadastre du\nQuébec, situé en zone agricole permanente (zone A-521);"
+        }
+      ]
+    },
+    {
+      "id": "zone-r-3-483",
+      "label": "Zone R-3 483",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "status": "candidate",
+      "code": "R-3 483",
+      "municipality": "boisbriand",
+      "bylaw": "RV-1441",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5249, le plan d'implantation et\nd'intégration architecturale du projet"
+        }
+      ]
+    },
+    {
+      "id": "zone-c-3-405",
+      "label": "Zone C-3 405",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "status": "candidate",
+      "code": "C-3 405",
+      "municipality": "boisbriand",
+      "bylaw": "RV-1441",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5251, le plan d'implantation et\nd'intégration architecturale du projet"
+        }
+      ]
+    },
+    {
+      "id": "zone-p-2-212",
+      "label": "Zone P-2 212",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "status": "candidate",
+      "code": "P-2 212",
+      "municipality": "boisbriand",
+      "bylaw": "RV-1441",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5244, le plan d'implantation et\nd'intégration architecturale du projet"
+        }
+      ]
+    },
+    {
+      "id": "zone-r-1-210",
+      "label": "Zone R-1 210",
+      "node_type": "Zone",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "status": "candidate",
+      "code": "R-1 210",
+      "municipality": "boisbriand",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5244, le plan d'implantation et\nd'intégration architecturale du projet"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-05-259",
+      "label": "Résolution 2026-05-259 - Appui CPTAQ lot 6 489 086",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "status": "candidate",
+      "kind": "cptaq",
+      "decision": "approuvé",
+      "date": "2026-05-05",
+      "resolution": "2026-05-259",
+      "municipality": "boisbriand",
+      "zone_ref": "A-521",
+      "no_lot": "6489086",
+      "demandeur_corporate": "Fiducie agroécologique de Boisbriand (FAB)",
+      "description": "Appui à une demande d'autorisation auprès de la CPTAQ relative à une opération cadastrale en zone agricole (A 521) - Lots 6 489 085 et 6 489 086",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "D'appuyer la demande présentée à la Commission de protection du territoire agricole du\nQuébec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot\n6 489 086"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-05-260",
+      "label": "Résolution 2026-05-260 - PIIA 7232, rue Jean-Claude-Langlois",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "status": "candidate",
+      "kind": "piia",
+      "etape": "piia",
+      "decision": "approuvé",
+      "date": "2026-05-05",
+      "resolution": "2026-05-260",
+      "municipality": "boisbriand",
+      "zone_ref": "R-3 483",
+      "reglement_number": "RV-1441",
+      "description": "Approbation PIIA pour la construction d'un bâtiment unifamilial isolé au 7232, rue Jean-Claude-Langlois",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5249, le plan d'implantation et\nd'intégration architecturale du projet"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-05-261",
+      "label": "Résolution 2026-05-261 - PIIA 7225, rue Jean-Claude-Langlois",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "status": "candidate",
+      "kind": "piia",
+      "etape": "piia",
+      "decision": "approuvé",
+      "date": "2026-05-05",
+      "resolution": "2026-05-261",
+      "municipality": "boisbriand",
+      "zone_ref": "R-3 483",
+      "reglement_number": "RV-1441",
+      "description": "Approbation PIIA pour la construction d'un bâtiment unifamilial isolé au 7225, rue Jean-Claude-Langlois",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5250, le plan d'implantation et\nd'intégration architecturale du projet"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-05-262",
+      "label": "Résolution 2026-05-262 - PIIA 2860, promenade Saint-Honoré",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "status": "candidate",
+      "kind": "piia",
+      "etape": "piia",
+      "decision": "approuvé",
+      "date": "2026-05-05",
+      "resolution": "2026-05-262",
+      "municipality": "boisbriand",
+      "zone_ref": "C-3 405",
+      "reglement_number": "RV-1441",
+      "description": "Approbation PIIA pour l'aménagement d'une terrasse extérieure du restaurant Escondite au 2860, promenade Saint-Honoré",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5251, le plan d'implantation et\nd'intégration architecturale du projet"
+        }
+      ]
+    },
+    {
+      "id": "event-2026-05-263",
+      "label": "Résolution 2026-05-263 - PIIA 150, rue Chauvin",
+      "node_type": "DesignationEvent",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "status": "candidate",
+      "kind": "piia",
+      "etape": "piia",
+      "decision": "approuvé",
+      "date": "2026-05-05",
+      "resolution": "2026-05-263",
+      "municipality": "boisbriand",
+      "zone_ref": "P-2 212",
+      "reglement_number": "RV-1441",
+      "description": "Approbation PIIA pour la modification d'un espace tampon entre les zones P-2 212 et R-1 210 au 150, rue Chauvin",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5244, le plan d'implantation et\nd'intégration architecturale du projet"
+        }
+      ]
+    },
+    {
+      "id": "constraint-cptaq-zone-a-521",
+      "label": "Zone agricole permanente CPTAQ (Zone A-521)",
+      "node_type": "Constraint",
+      "file_type": "document",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "status": "candidate",
+      "constraintType": "cptaq",
+      "loi": "Loi sur la protection du territoire et des activités agricoles (RLRQ, c. P-41.1)",
+      "organisme": "Commission de protection du territoire agricole du Québec",
+      "municipality": "boisbriand",
+      "resolution": "2026-05-259",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "evidence_refs": [
+        "ev-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "ATTENDU QUE la Ville de Boisbriand est propriétaire du lot 6 489 086 du cadastre du\nQuébec, situé en zone agricole permanente (zone A-521);"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "event-2026-05-259",
+      "target": "zone-a-521",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "evidence_refs": [
+        "ev-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "ATTENDU QUE la Ville de Boisbriand est propriétaire du lot 6 489 086 du cadastre du\nQuébec, situé en zone agricole permanente (zone A-521);"
+        }
+      ]
+    },
+    {
+      "source": "constraint-cptaq-zone-a-521",
+      "target": "zone-a-521",
+      "relation": "constrains",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "evidence_refs": [
+        "ev-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 14,
+          "excerpt": "ATTENDU QUE la Ville de Boisbriand est propriétaire du lot 6 489 086 du cadastre du\nQuébec, situé en zone agricole permanente (zone A-521);"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-05-260",
+      "target": "zone-r-3-483",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "evidence_refs": [
+        "ev-piia-5249"
+      ],
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5249, le plan d'implantation et\nd'intégration architecturale du projet"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-05-261",
+      "target": "zone-r-3-483",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "evidence_refs": [
+        "ev-piia-5250"
+      ],
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5250, le plan d'implantation et\nd'intégration architecturale du projet"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-05-262",
+      "target": "zone-c-3-405",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "evidence_refs": [
+        "ev-piia-5251"
+      ],
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5251, le plan d'implantation et\nd'intégration architecturale du projet"
+        }
+      ]
+    },
+    {
+      "source": "event-2026-05-263",
+      "target": "zone-p-2-212",
+      "relation": "targets_zone",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "evidence_refs": [
+        "ev-piia-5244"
+      ],
+      "citations": [
+        {
+          "page": 16,
+          "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5244, le plan d'implantation et\nd'intégration architecturale du projet"
+        }
+      ]
+    },
+    {
+      "source": "source-34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "target": "bylaw-rv-1446-005",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "evidence_refs": [
+        "ev-bylaw-1446-005"
+      ],
+      "citations": [
+        {
+          "page": 2,
+          "excerpt": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\nRèglement RV-1446 sur les dérogations mineures."
+        }
+      ]
+    },
+    {
+      "source": "source-34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "target": "event-2026-05-259",
+      "relation": "supports",
+      "confidence": "EXTRACTED",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "evidence_refs": [
+        "ev-cptaq"
+      ],
+      "citations": [
+        {
+          "page": 15,
+          "excerpt": "D'appuyer la demande présentée à la Commission de protection du territoire agricole du\nQuébec visant la réalisation d’une opération cadastrale consistant en la subdivision du lot\n6 489 086"
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-bylaw-1446-005",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "rawRef": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "sourceUrl": "https://www.ville.boisbriand.qc.ca/storage/app/media/ville/vie-democratique/seances-du-conseil/PV/2026/2026-05-05_Seance-ordinaire.pdf",
+      "modality": "pdf",
+      "page": 2,
+      "excerpt": "D'adopter le Projet de règlement RV-1446-005 modifiant diverses dispositions du\nRèglement RV-1446 sur les dérogations mineures."
+    },
+    {
+      "id": "ev-cptaq",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "rawRef": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "sourceUrl": "https://www.ville.boisbriand.qc.ca/storage/app/media/ville/vie-democratique/seances-du-conseil/PV/2026/2026-05-05_Seance-ordinaire.pdf",
+      "modality": "pdf",
+      "page": 14,
+      "excerpt": "ATTENDU QUE la Ville de Boisbriand est propriétaire du lot 6 489 086 du cadastre du\nQuébec, situé en zone agricole permanente (zone A-521);"
+    },
+    {
+      "id": "ev-piia-5249",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "rawRef": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "sourceUrl": "https://www.ville.boisbriand.qc.ca/storage/app/media/ville/vie-democratique/seances-du-conseil/PV/2026/2026-05-05_Seance-ordinaire.pdf",
+      "modality": "pdf",
+      "page": 15,
+      "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5249, le plan d'implantation et\nd'intégration architecturale du projet"
+    },
+    {
+      "id": "ev-piia-5250",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "rawRef": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "sourceUrl": "https://www.ville.boisbriand.qc.ca/storage/app/media/ville/vie-democratique/seances-du-conseil/PV/2026/2026-05-05_Seance-ordinaire.pdf",
+      "modality": "pdf",
+      "page": 16,
+      "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5250, le plan d'implantation et\nd'intégration architecturale du projet"
+    },
+    {
+      "id": "ev-piia-5251",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "rawRef": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "sourceUrl": "https://www.ville.boisbriand.qc.ca/storage/app/media/ville/vie-democratique/seances-du-conseil/PV/2026/2026-05-05_Seance-ordinaire.pdf",
+      "modality": "pdf",
+      "page": 16,
+      "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5251, le plan d'implantation et\nd'intégration architecturale du projet"
+    },
+    {
+      "id": "ev-piia-5244",
+      "source_file": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "rawRef": "raw/proces-verbaux-boisbriand/cas/34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5.pdf",
+      "docSha": "34494f18c34824857a8769cc8bf0f01d3f26ce52865a1dddc84211ac0b2a47b5",
+      "sourceUrl": "https://www.ville.boisbriand.qc.ca/storage/app/media/ville/vie-democratique/seances-du-conseil/PV/2026/2026-05-05_Seance-ordinaire.pdf",
+      "modality": "pdf",
+      "page": 16,
+      "excerpt": "D'approuver, conformément à la recommandation du Comité consultatif d'urbanisme et de\ntoponymie du 1er avril 2026 portant le numéro R-26-CU-5244, le plan d'implantation et\nd'intégration architecturale du projet"
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 4912,
+  "output_tokens": 2048
+}

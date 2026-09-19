@@ -1,0 +1,52 @@
+{
+ "documentId": "saint-henri-2026-03-02",
+ "step": "gemini-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "fable-pass2",
+ "inputStateSha256": "0571bc8cf9cef927089da7b425b2c7ab8b77d802883bb48b4eddfd2ae2df0b32",
+ "rawText": "{\"operations\":[\n {\"op\":\"correct\",\"id\":\"u03\",\"unit\":{\"label\":\"Dérogation mineure prévue — 1096 chemin du Trait-Carré, lot 2 360 482\",\"stage\":\"derogation_mineure\",\"procedure\":null,\"objet\":\"1096 chemin du Trait-Carré\",\"page\":2,\"citation\":\"7.3 Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482)\",\"anchor\":\"1096 chemin du Trait-Carré\"},\"reason\":\"La citation était tronquée et omettait la parenthèse fermante finale du point d'ordre du jour.\"}\n]}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Dérogation mineure prévue — 1096 chemin du Trait-Carré, lot 2 360 482",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "1096 chemin du Trait-Carré",
+    "page": 2,
+    "citation": "7.3 Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482)",
+    "anchor": "1096 chemin du Trait-Carré"
+   },
+   "reason": "La citation était tronquée et omettait la parenthèse fermante finale du point d'ordre du jour."
+  }
+ ],
+ "applied": [],
+ "rejects": [
+  {
+   "step": "gemini-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "derogation_mineure",
+   "page": 2,
+   "citation": "7.3 Demande dérogation mineure 1096 chemin du Trait-Carré (lot 2 360 482)"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 3
+}

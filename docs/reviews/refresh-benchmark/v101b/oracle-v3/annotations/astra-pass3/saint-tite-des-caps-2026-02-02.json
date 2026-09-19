@@ -1,0 +1,160 @@
+{
+ "documentId": "saint-tite-des-caps-2026-02-02",
+ "step": "astra-pass3",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass2",
+ "inputStateSha256": "23b20cf2e1e78a31dc7a9cd791230f0f01b983dcd20fdfd683f4aba63d1ccf7a",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — agrandissement d’une maison unifamiliale, lot 6 213 140, chemin Ceinture du Lac\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 213 140\",\n        \"page\": 5,\n        \"citation\": \"Que le Conseil municipal accepte la demande de permis d’agrandissement en zone\\nPIIA faite par la propriétaire du lot 6 213 140\",\n        \"anchor\": \"lot 6 213 140\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique, notamment avec le saut de ligne entre « zone » et « PIIA ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — modification cadastrale, démolition et construction d’une maison, lot 6 212 400, boulevard 138\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 212 400\",\n        \"page\": 6,\n        \"citation\": \"Que le Conseil municipal accepte la demande de permis de construction en zone\\nPIIA faite par le propriétaire du lot 6 212 400\",\n        \"anchor\": \"lot 6 212 400\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique, notamment avec le saut de ligne entre « zone » et « PIIA ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — construction d’une maison unifamiliale, lot 6 213 540, chemin du Boisé\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 213 540\",\n        \"page\": 6,\n        \"citation\": \"Que le Conseil municipal accepte la demande de permis de construction en zone\\nPIIA faite par le propriétaire du lot 6 213 540\",\n        \"anchor\": \"lot 6 213 540\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique, notamment avec le saut de ligne entre « zone » et « PIIA ».\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Approbation PIIA — construction d’une maison unifamiliale, lot 6 425 190, rue de la Traverse\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 425 190\",\n        \"page\": 7,\n        \"citation\": \"Que le Conseil municipal accepte la demande de permis de construction en zone\\nPIIA faite par le propriétaire du lot 6 425 190\",\n        \"anchor\": \"lot 6 425 190\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique, notamment avec le saut de ligne entre « zone » et « PIIA ».\"\n    },\n    {\n      \"op\": \"remove\",\n      \"id\": \"u05\",\n      \"reason\": \"L’avis de motion concerne uniquement une interdiction d’épandage à certaines dates pour préserver la qualité de l’air, sans objet explicite d’urbanisme ni acte foncier relevant du périmètre d’inclusion.\"\n    },\n    {\n      \"op\": \"remove\",\n      \"id\": \"u06\",\n      \"reason\": \"Le projet de règlement # 591-2026 fixe uniquement des jours d’interdiction d’épandage pour la qualité de l’air et ne constitue pas un règlement d’urbanisme ou un acte foncier dans le périmètre du corrigé.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Renouvellement automatique de la demande de bail exclusif (BEX) — carrière du TNO Saut-au-Cochon\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"bail exclusif (BEX)\",\n        \"page\": 2,\n        \"citation\": \"renouvellement de la demande de bail exclusif (BEX) de la carrière située sur le\\nterritoire non organisé (TNO) Saut-au-Cochon, et ce, de façon automatique.\",\n        \"anchor\": \"bail exclusif (BEX)\"\n      },\n      \"reason\": \"Le suivi des comités constate le renouvellement automatique d’une demande de bail visant une carrière explicitement localisée, soit une étape foncière distincte à classer « inconnu », sans la présenter comme une autorisation du conseil.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Approbation PIIA — agrandissement d’une maison unifamiliale, lot 6 213 140, chemin Ceinture du Lac",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 213 140",
+    "page": 5,
+    "citation": "Que le Conseil municipal accepte la demande de permis d’agrandissement en zone\nPIIA faite par la propriétaire du lot 6 213 140",
+    "anchor": "lot 6 213 140"
+   },
+   "reason": "La citation doit être recopiée à l’identique, notamment avec le saut de ligne entre « zone » et « PIIA »."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Approbation PIIA — modification cadastrale, démolition et construction d’une maison, lot 6 212 400, boulevard 138",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 212 400",
+    "page": 6,
+    "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 212 400",
+    "anchor": "lot 6 212 400"
+   },
+   "reason": "La citation doit être recopiée à l’identique, notamment avec le saut de ligne entre « zone » et « PIIA »."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Approbation PIIA — construction d’une maison unifamiliale, lot 6 213 540, chemin du Boisé",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 213 540",
+    "page": 6,
+    "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 213 540",
+    "anchor": "lot 6 213 540"
+   },
+   "reason": "La citation doit être recopiée à l’identique, notamment avec le saut de ligne entre « zone » et « PIIA »."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Approbation PIIA — construction d’une maison unifamiliale, lot 6 425 190, rue de la Traverse",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 425 190",
+    "page": 7,
+    "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 425 190",
+    "anchor": "lot 6 425 190"
+   },
+   "reason": "La citation doit être recopiée à l’identique, notamment avec le saut de ligne entre « zone » et « PIIA »."
+  },
+  {
+   "op": "remove",
+   "id": "u05",
+   "reason": "L’avis de motion concerne uniquement une interdiction d’épandage à certaines dates pour préserver la qualité de l’air, sans objet explicite d’urbanisme ni acte foncier relevant du périmètre d’inclusion."
+  },
+  {
+   "op": "remove",
+   "id": "u06",
+   "reason": "Le projet de règlement # 591-2026 fixe uniquement des jours d’interdiction d’épandage pour la qualité de l’air et ne constitue pas un règlement d’urbanisme ou un acte foncier dans le périmètre du corrigé."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Renouvellement automatique de la demande de bail exclusif (BEX) — carrière du TNO Saut-au-Cochon",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "bail exclusif (BEX)",
+    "page": 2,
+    "citation": "renouvellement de la demande de bail exclusif (BEX) de la carrière située sur le\nterritoire non organisé (TNO) Saut-au-Cochon, et ce, de façon automatique.",
+    "anchor": "bail exclusif (BEX)"
+   },
+   "reason": "Le suivi des comités constate le renouvellement automatique d’une demande de bail visant une carrière explicitement localisée, soit une étape foncière distincte à classer « inconnu », sans la présenter comme une autorisation du conseil."
+  }
+ ],
+ "applied": [
+  {
+   "op": "remove",
+   "id": "u05"
+  },
+  {
+   "op": "remove",
+   "id": "u06"
+  },
+  {
+   "op": "add",
+   "id": "u08"
+  }
+ ],
+ "rejects": [
+  {
+   "step": "astra-pass3",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "piia",
+   "page": 5,
+   "citation": "Que le Conseil municipal accepte la demande de permis d’agrandissement en zone\nPIIA faite par la propriétaire du lot 6 213 140"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "piia",
+   "page": 6,
+   "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 212 400"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "piia",
+   "page": 6,
+   "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 213 540"
+  },
+  {
+   "step": "astra-pass3",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "piia",
+   "page": 7,
+   "citation": "Que le Conseil municipal accepte la demande de permis de construction en zone\nPIIA faite par le propriétaire du lot 6 425 190"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 5
+}

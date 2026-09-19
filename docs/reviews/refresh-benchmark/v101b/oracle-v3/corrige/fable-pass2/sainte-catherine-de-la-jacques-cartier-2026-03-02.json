@@ -1,0 +1,429 @@
+{
+ "documentId": "sainte-catherine-de-la-jacques-cartier-2026-03-02",
+ "nextId": 12,
+ "units": [
+  {
+   "id": "u01",
+   "status": "active",
+   "current": {
+    "label": "Report de l’examen de la dérogation mineure — 3, rue Ernest-Piché",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "3, rue Ernest-Piché",
+    "page": 2,
+    "citation": "Demande de dérogation mineure : 3, rue Ernest-Piché - REPORTÉ",
+    "anchor": "3, rue Ernest-Piché",
+    "spanStart": 1146,
+    "spanEnd": 1207
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Report de l’examen de la dérogation mineure — 3, rue Ernest-Piché",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "3, rue Ernest-Piché",
+      "page": 2,
+      "citation": "Demande de dérogation mineure : 3, rue Ernest-Piché - REPORTÉ",
+      "anchor": "3, rue Ernest-Piché",
+      "spanStart": 1146,
+      "spanEnd": 1207
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Le report du point 5.1 est confirmé lors de l’adoption de l’ordre du jour, sans constituer une acceptation ni un refus de cette demande identifiée."
+    }
+   ]
+  },
+  {
+   "id": "u02",
+   "status": "active",
+   "current": {
+    "label": "Autorisation de servitude de passage et droit de premier refus — lot 6 164 031, Sablière Martel",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 164 031",
+    "page": 10,
+    "citation": "ET RÉSOLU d’autoriser la signature du projet d’acte de servitude exclusive et personnelle de passage, droit de premier refus pour le lot 6 164 031",
+    "anchor": "lot 6 164 031",
+    "spanStart": 2690,
+    "spanEnd": 2836
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de servitude de passage et droit de premier refus — lot 6 164 031, Sablière Martel",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 164 031",
+      "page": 10,
+      "citation": "ET RÉSOLU d’autoriser la signature du projet d’acte de servitude exclusive et personnelle de passage, droit de premier refus pour le lot 6 164 031",
+      "anchor": "lot 6 164 031",
+      "spanStart": 2690,
+      "spanEnd": 2836
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 102-2026 autorise expressément la signature d’un acte de servitude, acte foncier inclus dans le corrigé."
+    }
+   ]
+  },
+  {
+   "id": "u03",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure accordée — 2, rue du Garbin, conversion de l’abri d’auto en garage",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "2, rue Garbin",
+    "page": 20,
+    "citation": "ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri d’auto en garage privé attenant pour la propriété sise au 2, rue Garbin",
+    "anchor": "2, rue Garbin",
+    "spanStart": 1933,
+    "spanEnd": 2082
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure accordée — 2, rue du Garbin, conversion de l’abri d’auto en garage",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2, rue Garbin",
+      "page": 20,
+      "citation": "ET RÉSOLU d’accorder la dérogation mineure concernant la conversion de l’abri d’auto en garage privé attenant pour la propriété sise au 2, rue Garbin",
+      "anchor": "2, rue Garbin",
+      "spanStart": 1933,
+      "spanEnd": 2082
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 111-2026 accorde la dérogation actuelle, distincte de la dérogation de 2019 seulement rappelée dans les considérants."
+    }
+   ]
+  },
+  {
+   "id": "u04",
+   "status": "active",
+   "current": {
+    "label": "Dérogation mineure accordée — lot 6 621 589, largeur de 27,20 mètres",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "6 621 589",
+    "page": 21,
+    "citation": "ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot d’angle 6 621 589 d’une largeur de 27,20 mètres",
+    "anchor": "d’angle 6 621 589",
+    "spanStart": 1407,
+    "spanEnd": 1530
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Dérogation mineure accordée — lot 6 621 589, largeur de 27,20 mètres",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "6 621 589",
+      "page": 21,
+      "citation": "ET RÉSOLU d’accorder la dérogation mineure concernant le lotissement du lot d’angle 6 621 589 d’une largeur de 27,20 mètres",
+      "anchor": "d’angle 6 621 589",
+      "spanStart": 1407,
+      "spanEnd": 1530
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 112-2026 accorde explicitement la dérogation permettant un lot d’angle de 27,20 mètres de largeur."
+    }
+   ]
+  },
+  {
+   "id": "u05",
+   "status": "active",
+   "current": {
+    "label": "Approbation de subdivision — parcelle du lot 6 141 355, site patrimonial du manoir Juchereau-Duchesnay",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "6 141 355",
+    "page": 22,
+    "citation": "ET RÉSOLU d’approuver la subdivision d’une parcelle du lot 6 141 355, tel que présenté, dans le cadre du réaménagement du pont de la rivière Ontaritzi",
+    "anchor": "lot 6 141 355",
+    "spanStart": 475,
+    "spanEnd": 625
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Approbation de subdivision — parcelle du lot 6 141 355, site patrimonial du manoir Juchereau-Duchesnay",
+      "stage": "adoption",
+      "procedure": null,
+      "objet": "6 141 355",
+      "page": 22,
+      "citation": "ET RÉSOLU d’approuver la subdivision d’une parcelle du lot 6 141 355, tel que présenté, dans le cadre du réaménagement du pont de la rivière Ontaritzi",
+      "anchor": "lot 6 141 355",
+      "spanStart": 475,
+      "spanEnd": 625
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 113-2026 approuve une subdivision foncière précise, incluse même si elle concerne un projet non résidentiel."
+    }
+   ]
+  },
+  {
+   "id": "u06",
+   "status": "active",
+   "current": {
+    "label": "Addenda à l’entente Groupe Castella — prolongement de l’avenue des Catherine, échéance reportée au 31 octobre 2026",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "entente Groupe Castella",
+    "page": 23,
+    "citation": "ET RÉSOLU d’amender l’article 6.7 de l’entente conclue avec Groupe Castella 2 inc. afin de repousser la date de fin des travaux au 31 octobre 2026",
+    "anchor": "l’entente conclue avec Groupe Castella 2 inc",
+    "spanStart": 1717,
+    "spanEnd": 1863
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Addenda à l’entente Groupe Castella — prolongement de l’avenue des Catherine, échéance reportée au 31 octobre 2026",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "entente Groupe Castella",
+      "page": 23,
+      "citation": "ET RÉSOLU d’amender l’article 6.7 de l’entente conclue avec Groupe Castella 2 inc. afin de repousser la date de fin des travaux au 31 octobre 2026",
+      "anchor": "l’entente conclue avec Groupe Castella 2 inc",
+      "spanStart": 1717,
+      "spanEnd": 1863
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 115-2026 modifie actuellement l’entente de prolongement de l’avenue des Catherine liée au projet de lotissement, et non à un simple entretien de voirie."
+    }
+   ]
+  },
+  {
+   "id": "u07",
+   "status": "active",
+   "current": {
+    "label": "Modification du PIIA « Le Ste-4 » — résolution 344-2024, garantie de 35 000 $ pour chacune des phases 1A et 1B",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "344-2024",
+    "page": 24,
+    "citation": "ET RÉSOLU d’amender la résolution numéro 344-2024 en remplaçant les deux derniers alinéas par les alinéas suivants",
+    "anchor": "résolution numéro 344-2024",
+    "spanStart": 646,
+    "spanEnd": 760
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Modification du PIIA « Le Ste-4 » — résolution 344-2024, garantie de 35 000 $ pour chacune des phases 1A et 1B",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "344-2024",
+      "page": 24,
+      "citation": "ET RÉSOLU d’amender la résolution numéro 344-2024 en remplaçant les deux derniers alinéas par les alinéas suivants",
+      "anchor": "résolution numéro 344-2024",
+      "spanStart": 646,
+      "spanEnd": 760
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 116-2026 modifie une condition financière de l’approbation PIIA du projet « Le Ste-4 », sans créer une nouvelle unité pour l’approbation historique de 2024."
+    }
+   ]
+  },
+  {
+   "id": "u08",
+   "status": "active",
+   "current": {
+    "label": "Avis de motion — modification du zonage 1259-2014, zones 115-H et 145-H",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "1259-2014",
+    "page": 24,
+    "citation": "AVIS DE MOTION CONCERNANT UN RÈGLEMENT MODIFIANT LE RÈGLEMENT DE ZONAGE NUMÉRO 1259-2014 VISANT À DÉPLACER LES LIMITES DES ZONES 115-H ET 145-H ET D'EN PRÉCISER LES USAGES ET LES NORMES",
+    "anchor": "ZONAGE NUMÉRO 1259-2014",
+    "spanStart": 1209,
+    "spanEnd": 1394
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Avis de motion — modification du zonage 1259-2014, zones 115-H et 145-H",
+      "stage": "avis_motion",
+      "procedure": null,
+      "objet": "1259-2014",
+      "page": 24,
+      "citation": "AVIS DE MOTION CONCERNANT UN RÈGLEMENT MODIFIANT LE RÈGLEMENT DE ZONAGE NUMÉRO 1259-2014 VISANT À DÉPLACER LES LIMITES DES ZONES 115-H ET 145-H ET D'EN PRÉCISER LES USAGES ET LES NORMES",
+      "anchor": "ZONAGE NUMÉRO 1259-2014",
+      "spanStart": 1209,
+      "spanEnd": 1394
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "Un avis de motion est effectivement donné pendant la séance pour cette modification de zonage et doit être distingué du premier projet."
+    }
+   ]
+  },
+  {
+   "id": "u09",
+   "status": "active",
+   "current": {
+    "label": "Adoption du premier projet APR-423-2026 — modification du zonage, zones 115-H et 145-H",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "APR-423-2026",
+    "page": 24,
+    "citation": "ADOPTION DE L'AVANT-PROJET DE RÈGLEMENT NUMÉRO APR-423-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE NUMÉRO 1259-2014 VISANT À DÉPLACER LES LIMITES DES ZONES 115-H ET 145-H",
+    "anchor": "RÈGLEMENT NUMÉRO APR-423-2026",
+    "spanStart": 1903,
+    "spanEnd": 2067
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Adoption du premier projet APR-423-2026 — modification du zonage, zones 115-H et 145-H",
+      "stage": "projet_reglement",
+      "procedure": null,
+      "objet": "APR-423-2026",
+      "page": 24,
+      "citation": "ADOPTION DE L'AVANT-PROJET DE RÈGLEMENT NUMÉRO APR-423-2026 MODIFIANT LE RÈGLEMENT DE ZONAGE NUMÉRO 1259-2014 VISANT À DÉPLACER LES LIMITES DES ZONES 115-H ET 145-H",
+      "anchor": "RÈGLEMENT NUMÉRO APR-423-2026",
+      "spanStart": 1903,
+      "spanEnd": 2067
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 117-2026 adopte le premier projet de règlement, étape distincte de l’avis de motion et non adoption finale du règlement."
+    }
+   ]
+  },
+  {
+   "id": "u10",
+   "status": "removed",
+   "current": {
+    "label": "Autorisation de location à Yogi Nomade — bâtiment et emplacement au parc du Grand-Héron, été 2026",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "parc du Grand-Héron",
+    "page": 29,
+    "citation": "ET RÉSOLU d’autoriser le directeur du Service sports, loisirs, culture et vie communautaire à signer un contrat de location d’un bâtiment et d’un emplacement dans le parc du Grand-Héron",
+    "anchor": "parc du Grand-Héron",
+    "spanStart": 560,
+    "spanEnd": 745
+   },
+   "versions": [
+    {
+     "step": "astra-pass1",
+     "unit": {
+      "label": "Autorisation de location à Yogi Nomade — bâtiment et emplacement au parc du Grand-Héron, été 2026",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "parc du Grand-Héron",
+      "page": 29,
+      "citation": "ET RÉSOLU d’autoriser le directeur du Service sports, loisirs, culture et vie communautaire à signer un contrat de location d’un bâtiment et d’un emplacement dans le parc du Grand-Héron",
+      "anchor": "parc du Grand-Héron",
+      "spanStart": 560,
+      "spanEnd": 745
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "astra-pass1",
+     "op": "add",
+     "reason": "La résolution 124-2026 autorise une location immobilière explicite, acte foncier à inclure malgré sa finalité récréative."
+    },
+    {
+     "step": "fable-pass2",
+     "op": "remove",
+     "reason": "Exclusion du rappel « loisirs » et « contrats et marchés de services » (règle 7) : la résolution 124-2026, classée sous Sports, loisirs, culture et vie communautaire, autorise un contrat de location saisonnier pour un service de formation et de location de planches à pagaie à l’été 2026 ; ce n’est ni un objet réglementaire d’urbanisme ni un acte foncier au sens de la règle 1 (vente, acquisition, cession, échange, servitude, lotissement, prolongement de rue permettant un développement)."
+    }
+   ]
+  },
+  {
+   "id": "u11",
+   "status": "active",
+   "current": {
+    "label": "Engagement à amorcer les modifications réglementaires (LAU) pour autoriser l’usage parc solaire — projet Innergex, résolution 099-2026",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "modifications réglementaires parc solaire",
+    "page": 9,
+    "citation": "s’engage à amorcer, suivant la procédure prescrite par la Loi sur l’aménagement et l’urbanisme, les modifications réglementaires nécessaires pour autoriser l’usage prévu dans la zone concernée",
+    "anchor": "les modifications réglementaires nécessaires",
+    "spanStart": 606,
+    "spanEnd": 798
+   },
+   "versions": [
+    {
+     "step": "fable-pass2",
+     "unit": {
+      "label": "Engagement à amorcer les modifications réglementaires (LAU) pour autoriser l’usage parc solaire — projet Innergex, résolution 099-2026",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "modifications réglementaires parc solaire",
+      "page": 9,
+      "citation": "s’engage à amorcer, suivant la procédure prescrite par la Loi sur l’aménagement et l’urbanisme, les modifications réglementaires nécessaires pour autoriser l’usage prévu dans la zone concernée",
+      "anchor": "les modifications réglementaires nécessaires",
+      "spanStart": 606,
+      "spanEnd": 798
+     }
+    }
+   ],
+   "events": [
+    {
+     "step": "fable-pass2",
+     "op": "add",
+     "reason": "Résolution 099-2026 (p. 8-9) : le conseil décide explicitement que la Ville « s’engage à amorcer, suivant la procédure prescrite par la Loi sur l’aménagement et l’urbanisme, les modifications réglementaires nécessaires pour autoriser l’usage prévu » pour le parc solaire d’Innergex, après le considérant « la réglementation municipale devra être amendée afin de permettre cet usage » ; objet réglementaire d’urbanisme explicite (inclusion « urbanisme ») dont l’étape, antérieure à tout avis de motion, n’entre dans aucune valeur du vocabulaire, d’où « inconnu » par analogie avec l’avis de non-modification d’un règlement ; aucune unité du corrigé courant ne couvre ce fait."
+    }
+   ]
+  }
+ ]
+}

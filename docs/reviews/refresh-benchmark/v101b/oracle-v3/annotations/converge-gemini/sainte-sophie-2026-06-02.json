@@ -1,0 +1,141 @@
+{
+ "documentId": "sainte-sophie-2026-06-02",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "b12e935d6f4ef979a86094865d8385d31cb11d7e3c998e244e25419e22ffee56",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"Le point 1.10 de l'ordre du jour à la page 1 prévoit l'adoption du second projet de règlement SP-2026-14 modifiant le règlement de zonage 1297-2020.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"Le point 1.11 de l'ordre du jour à la page 1 atteste du second projet de règlement SP-2026-15 modifiant la grille de la zone V-802.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"Le point 1.12 à la page 1 prévoit l'adoption du règlement 1470-2026 modifiant le plan d'urbanisme.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"Le point 1.13 à la page 1 prévoit l'adoption du règlement de zonage 1471-2026.\"},{\"item\":\"i05\",\"choice\":\"v1\",\"reason\":\"Le point 1.14 à la page 1 prévoit l'adoption du règlement 1472-2026 relatif aux permis et certificats.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"Le point 1.15 à la page 1 prévoit l'adoption du règlement 1473-2026 relatif aux PIIA.\"},{\"item\":\"i07\",\"choice\":\"v1\",\"reason\":\"Le point 1.16 à la page 2 concerne une demande de prolongation de délai d'urbanisme relative aux normes de lotissement découlant du règlement 399-25.\"},{\"item\":\"i08\",\"choice\":\"v1\",\"reason\":\"Le point 1.20 à la page 2 concerne une demande de modification d'urbanisme au schéma d'aménagement révisé 188-07 pour l'aire Conservation.\"},{\"item\":\"i09\",\"choice\":\"v1\",\"reason\":\"Le point 6.3 à la page 2 concerne un acte foncier explicite (servitude de tolérance) sur une parcelle du lot 4 037 185.\"},{\"item\":\"i10\",\"choice\":\"v1\",\"reason\":\"Le point 9.1 à la page 3 prévoit l'examen d'une demande de PIIA au 799, rue de New Glasgow.\"},{\"item\":\"i11\",\"choice\":\"v1\",\"reason\":\"Le point 9.2 à la page 3 prévoit l'examen d'une dérogation mineure au 537, chemin de l'Achigan Ouest.\"},{\"item\":\"i12\",\"choice\":\"v1\",\"reason\":\"Le point 9.3 à la page 3 prévoit l'examen d'une dérogation mineure au 318-318 A, chemin Abercrombie.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v1"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  },
+  {
+   "item": "i07",
+   "unitId": "u07",
+   "current": "v1"
+  },
+  {
+   "item": "i08",
+   "unitId": "u08",
+   "current": "v1"
+  },
+  {
+   "item": "i09",
+   "unitId": "u09",
+   "current": "v1"
+  },
+  {
+   "item": "i10",
+   "unitId": "u10",
+   "current": "v1"
+  },
+  {
+   "item": "i11",
+   "unitId": "u11",
+   "current": "v1"
+  },
+  {
+   "item": "i12",
+   "unitId": "u12",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "Le point 1.10 de l'ordre du jour à la page 1 prévoit l'adoption du second projet de règlement SP-2026-14 modifiant le règlement de zonage 1297-2020."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "Le point 1.11 de l'ordre du jour à la page 1 atteste du second projet de règlement SP-2026-15 modifiant la grille de la zone V-802."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "Le point 1.12 à la page 1 prévoit l'adoption du règlement 1470-2026 modifiant le plan d'urbanisme."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "Le point 1.13 à la page 1 prévoit l'adoption du règlement de zonage 1471-2026."
+  },
+  {
+   "item": "i05",
+   "choice": "v1",
+   "reason": "Le point 1.14 à la page 1 prévoit l'adoption du règlement 1472-2026 relatif aux permis et certificats."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "Le point 1.15 à la page 1 prévoit l'adoption du règlement 1473-2026 relatif aux PIIA."
+  },
+  {
+   "item": "i07",
+   "choice": "v1",
+   "reason": "Le point 1.16 à la page 2 concerne une demande de prolongation de délai d'urbanisme relative aux normes de lotissement découlant du règlement 399-25."
+  },
+  {
+   "item": "i08",
+   "choice": "v1",
+   "reason": "Le point 1.20 à la page 2 concerne une demande de modification d'urbanisme au schéma d'aménagement révisé 188-07 pour l'aire Conservation."
+  },
+  {
+   "item": "i09",
+   "choice": "v1",
+   "reason": "Le point 6.3 à la page 2 concerne un acte foncier explicite (servitude de tolérance) sur une parcelle du lot 4 037 185."
+  },
+  {
+   "item": "i10",
+   "choice": "v1",
+   "reason": "Le point 9.1 à la page 3 prévoit l'examen d'une demande de PIIA au 799, rue de New Glasgow."
+  },
+  {
+   "item": "i11",
+   "choice": "v1",
+   "reason": "Le point 9.2 à la page 3 prévoit l'examen d'une dérogation mineure au 537, chemin de l'Achigan Ouest."
+  },
+  {
+   "item": "i12",
+   "choice": "v1",
+   "reason": "Le point 9.3 à la page 3 prévoit l'examen d'une dérogation mineure au 318-318 A, chemin Abercrombie."
+  }
+ ]
+}

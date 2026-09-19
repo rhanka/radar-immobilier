@@ -1,0 +1,272 @@
+{
+ "documentId": "sainte-barbe-2026-05-05",
+ "step": "arbitrate-fable",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "claude-fable-5-1",
+ "effort": "xhigh",
+ "transport": "claude-cli",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "4d1e737f5b87940afc4fdaaca53ee2d9a01a0336db2efe620f0fe663b9779ab9",
+ "verificationSha256": "df85cc5789fc553f36f54bcd70842cdfc833c33740ec837e7675d28d35691319",
+ "rawText": "{\"votes\":[{\"item\":\"a01\",\"choice\":\"v1\",\"reason\":\"La page 3 atteste mot pour mot « dérogation mineure 813, 45e Avenue – lotissement 2 terrains. Le maire explique que la demande sera prise en délibéré », et le point 6.8 « Demande de dérogation mineure #2026-0059 – 813, 45e avenue » figure à l'ordre du jour sans résolution subséquente : objet foncier explicite et étape constatée dans ce document (report, étape inconnu). La position « absent » de C est écartée car les règles n'exigent pas une décision acquise (un point d'ordre du jour est une unité prévue, un refus reste une unité) et la mise en délibéré est bien un fait d'urbanisme attesté, non un simple échange sans objet.\"},{\"item\":\"a02\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-05-18 page 18 : « Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d'urbanisme » ; citation exacte et complète de la décision, étape piia, PIIA inclus par les règles. v2 décrit le même fait avec une citation tronquée : doublon même type/même fait non crédité en plus, v1 étant la version qui recopie l'énoncé décisionnel intégral.\"},{\"item\":\"a03\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-05-19 page 19 : « Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 tel que recommandé par le Comité consultatif d'urbanisme » ; citation exacte et intégrale, étape piia, inclusion explicite des PIIA même non résidentiels (bâtiment commercial au 424 Chemin de l'Église). v2 est un doublon du même fait avec citation tronquée, non crédité séparément.\"},{\"item\":\"a04\",\"choice\":\"v1\",\"reason\":\"Résolution 2026-05-20 page 20 : « Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057 tel que recommandé par le Comité consultatif d'urbanisme » ; citation exacte et complète, étape derogation_mineure, objet explicite (allée d'accès au 424 Chemin de l'Église, page 19). v2 vise le même fait avec une citation tronquée : doublon même type/même fait, la version intégrale v1 prime.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "a01",
+   "kind": "split",
+   "unitId": "u01",
+   "verificationItem": "i01",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Mise en délibéré annoncée de la dérogation mineure 2026-0059 — 813, 45e Avenue",
+      "stage": "inconnu",
+      "procedure": null,
+      "objet": "813, 45e Avenue",
+      "page": 3,
+      "citation": "dérogation mineure 813, 45e Avenue – lotissement 2 terrains. Le maire explique que la demande sera prise en délibéré et revenir à un moment ultérieurement",
+      "anchor": "dérogation mineure 813, 45e Avenue",
+      "spanStart": 668,
+      "spanEnd": 822
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v1",
+     "reason": "La page 3 annonce explicitement la mise en délibéré de la demande concernant le lotissement de deux terrains au 813, 45e Avenue, sans constater son acceptation ni son refus."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Page 3 atteste mot pour mot « dérogation mineure 813, 45e Avenue – lotissement 2 terrains. Le maire explique que la demande sera prise en délibéré » ; objet foncier explicite (point 6.8 de l'ordre du jour, aucune résolution prise), étape inconnu conforme."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "absent",
+     "reason": "Un simple échange en période de questions sans décision formelle du conseil ne constitue pas une étape procédurale d'urbanisme au sens des règles."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a02",
+   "kind": "split",
+   "unitId": "u04",
+   "verificationItem": "i04",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-0055 — garage incorporé au 31 Rue des Moissons",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-0055",
+      "page": 18,
+      "citation": "Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d’urbanisme",
+      "anchor": "demande de PIIA 2026-0055",
+      "spanStart": 214,
+      "spanEnd": 375
+     }
+    },
+    {
+     "option": "v2",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-0055 — garage incorporé au 31 Rue des Moissons",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-0055",
+      "page": 18,
+      "citation": "accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d’urbanisme",
+      "anchor": "demande de PIIA 2026-0055",
+      "spanStart": 282,
+      "spanEnd": 375
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v2",
+     "reason": "La citation reproduit exactement l’acceptation du PIIA 2026-0055 à la page 18, dont l’objet est le garage incorporé au 31 Rue des Moissons décrit à la page 17."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 2026-05-18 page 18 : « Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d'urbanisme » ; citation exacte, étape piia, page 18 ; v2 est un doublon de même fait avec citation tronquée."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "La résolution 2026-05-18 approuve le PIIA 2026-0055 à la page 18, et la version v1 fournit la citation intégrale de la décision."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a03",
+   "kind": "split",
+   "unitId": "u05",
+   "verificationItem": "i05",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-0056 — bâtiment commercial au 424 Chemin de l’Église",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-0056",
+      "page": 19,
+      "citation": "Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 tel que recommandé par le Comité consultatif d’urbanisme",
+      "anchor": "demande de PIIA 2026-0056",
+      "spanStart": 519,
+      "spanEnd": 679
+     }
+    },
+    {
+     "option": "v2",
+     "unit": {
+      "label": "Acceptation du PIIA 2026-0056 — bâtiment commercial au 424 Chemin de l’Église",
+      "stage": "piia",
+      "procedure": null,
+      "objet": "2026-0056",
+      "page": 19,
+      "citation": "accepte la demande de PIIA 2026-0056 tel que recommandé par le Comité consultatif d’urbanisme",
+      "anchor": "demande de PIIA 2026-0056",
+      "spanStart": 586,
+      "spanEnd": 679
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v2",
+     "reason": "La page 19 accepte explicitement le PIIA 2026-0056 pour le bâtiment commercial au 424 Chemin de l’Église, conformément à l’inclusion des PIIA même non résidentiels."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 2026-05-19 page 19 : « Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 » ; citation exacte, étape piia, page 19 ; v2 doublon même type/même fait."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "La résolution 2026-05-19 approuve le PIIA 2026-0056 à la page 19, et la version v1 fournit la citation intégrale de la décision."
+    }
+   ],
+   "human": null
+  },
+  {
+   "item": "a04",
+   "kind": "split",
+   "unitId": "u06",
+   "verificationItem": "i06",
+   "options": [
+    {
+     "option": "v1",
+     "unit": {
+      "label": "Acceptation de la dérogation mineure 2026-0057 — allée d’accès au 424 Chemin de l’Église",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-0057",
+      "page": 20,
+      "citation": "Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057 tel que recommandé par le Comité consultatif d’urbanisme",
+      "anchor": "demande de dérogation mineure 2026-0057",
+      "spanStart": 214,
+      "spanEnd": 389
+     }
+    },
+    {
+     "option": "v2",
+     "unit": {
+      "label": "Acceptation de la dérogation mineure 2026-0057 — allée d’accès au 424 Chemin de l’Église",
+      "stage": "derogation_mineure",
+      "procedure": null,
+      "objet": "2026-0057",
+      "page": 20,
+      "citation": "accepte la demande de dérogation mineure 2026-0057 tel que recommandé par le Comité consultatif d’urbanisme",
+      "anchor": "demande de dérogation mineure 2026-0057",
+      "spanStart": 282,
+      "spanEnd": 389
+     }
+    },
+    {
+     "option": "absent",
+     "unit": null
+    }
+   ],
+   "positions": [
+    {
+     "position": "B",
+     "family": "astra",
+     "choice": "v2",
+     "reason": "La page 20 accepte explicitement la dérogation mineure 2026-0057 concernant l’allée d’accès existante au 424 Chemin de l’Église décrite à la page 19."
+    },
+    {
+     "position": "A",
+     "family": "fable",
+     "choice": "v1",
+     "reason": "Résolution 2026-05-20 page 20 : « Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057 » ; citation exacte, étape derogation_mineure, page 20 ; v2 doublon même fait."
+    },
+    {
+     "position": "C",
+     "family": "gemini",
+     "choice": "v1",
+     "reason": "La résolution 2026-05-20 approuve la dérogation mineure 2026-0057 à la page 20, et la version v1 fournit la citation intégrale de la décision."
+    }
+   ],
+   "human": null
+  }
+ ],
+ "votes": [
+  {
+   "item": "a01",
+   "choice": "v1",
+   "reason": "La page 3 atteste mot pour mot « dérogation mineure 813, 45e Avenue – lotissement 2 terrains. Le maire explique que la demande sera prise en délibéré », et le point 6.8 « Demande de dérogation mineure #2026-0059 – 813, 45e avenue » figure à l'ordre du jour sans résolution subséquente : objet foncier explicite et étape constatée dans ce document (report, étape inconnu). La position « absent » de C est écartée car les règles n'exigent pas une décision acquise (un point d'ordre du jour est une unité prévue, un refus reste une unité) et la mise en délibéré est bien un fait d'urbanisme attesté, non un simple échange sans objet."
+  },
+  {
+   "item": "a02",
+   "choice": "v1",
+   "reason": "Résolution 2026-05-18 page 18 : « Il est proposé par : Élodie Tricoire. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0055 tel que recommandé par le Comité consultatif d'urbanisme » ; citation exacte et complète de la décision, étape piia, PIIA inclus par les règles. v2 décrit le même fait avec une citation tronquée : doublon même type/même fait non crédité en plus, v1 étant la version qui recopie l'énoncé décisionnel intégral."
+  },
+  {
+   "item": "a03",
+   "choice": "v1",
+   "reason": "Résolution 2026-05-19 page 19 : « Il est proposé par : Denis Larocque. Que le conseil de SainteBarbe accepte la demande de PIIA 2026-0056 tel que recommandé par le Comité consultatif d'urbanisme » ; citation exacte et intégrale, étape piia, inclusion explicite des PIIA même non résidentiels (bâtiment commercial au 424 Chemin de l'Église). v2 est un doublon du même fait avec citation tronquée, non crédité séparément."
+  },
+  {
+   "item": "a04",
+   "choice": "v1",
+   "reason": "Résolution 2026-05-20 page 20 : « Il est proposé par : François Gagnon. Que le conseil de SainteBarbe accepte la demande de dérogation mineure 2026-0057 tel que recommandé par le Comité consultatif d'urbanisme » ; citation exacte et complète, étape derogation_mineure, objet explicite (allée d'accès au 424 Chemin de l'Église, page 19). v2 vise le même fait avec une citation tronquée : doublon même type/même fait, la version intégrale v1 prime."
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "id": "lac-saint-paul-2026-05-11",
+ "rc": 0,
+ "latencyMs": 216040,
+ "inputTokens": 2,
+ "outputTokens": 23264,
+ "cacheRead": 0,
+ "cacheCreate": 14553,
+ "costUsd": 0.7371889999999999,
+ "isError": false,
+ "numTurns": 1,
+ "resultLen": 41331
+}

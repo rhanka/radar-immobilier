@@ -1,0 +1,766 @@
+{
+ "documentId": "eastman-2026-06-01",
+ "step": "astra-pass2",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "9cfe6bc0cfc7e5742be391c29845a988c04f59b8e44f8e8bf8e505269e64a654",
+ "inputStateStep": "gemini-pass1",
+ "inputStateSha256": "fb6e68bb4384943808a376c62660b68c7f5a7fd3fcec0d9dcf29a67b3b56a024",
+ "rawText": "{\n  \"operations\": [\n    {\n      \"op\": \"correct\",\n      \"id\": \"u01\",\n      \"unit\": {\n        \"label\": \"Avis de motion — règlement 2026-07 sur le stationnement et la gestion des voies publiques\",\n        \"stage\": \"avis_motion\",\n        \"procedure\": null,\n        \"objet\": \"2026-07\",\n        \"page\": 4,\n        \"citation\": \"Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté\\npour adoption, lors d’une prochaine séance du conseil municipal, le règlement no\\n2026-07\",\n        \"anchor\": \"règlement no\\n2026-07\"\n      },\n      \"reason\": \"La citation doit être recopiée à l’identique : les sauts de ligne omis sont rétablis dans la citation et son ancre.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u02\",\n      \"unit\": {\n        \"label\": \"Présentation du projet de règlement 2026-07 — stationnement et gestion des voies publiques\",\n        \"stage\": \"projet_reglement\",\n        \"procedure\": null,\n        \"objet\": \"2026-07\",\n        \"page\": 4,\n        \"citation\": \"Avis de motion et présentation du projet de règlement no 2026-07\\namendant le règlement uniformisé RU-2023-02 relatif au stationnement\\net à la gestion des voies publiques\",\n        \"anchor\": \"règlement no 2026-07\"\n      },\n      \"reason\": \"La citation actuelle remplace les sauts de ligne du document par des espaces, contrairement à l’exigence de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u03\",\n      \"unit\": {\n        \"label\": \"Renouvellement du bail de La Corde-à-linge — juillet 2026 à juin 2027\",\n        \"stage\": \"inconnu\",\n        \"procedure\": null,\n        \"objet\": \"La Corde-à-linge\",\n        \"page\": 4,\n        \"citation\": \"DE renouveler le bail de location de La Corde-à-linge pour une période de douze\\n(12) mois, soit du 1er juillet 2026 au 30 juin 2027\",\n        \"anchor\": \"La Corde-à-linge\"\n      },\n      \"reason\": \"Le saut de ligne après « douze » est rétabli pour respecter la copie à l’identique de la citation.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u04\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-05 — annexion d’une partie du territoire du Canton d’Orford\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-05\",\n        \"page\": 5,\n        \"citation\": \"D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du\\nCanton d’Orford dont copie est jointe aux présentes pour en faire partie intégrante\",\n        \"anchor\": \"Règlement no 2026-05\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne précédant « Canton d’Orford » pour être identique au document.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u05\",\n      \"unit\": {\n        \"label\": \"Autorisation de modifier l’acte de vente 19 377 959 — lots 4 380 408 et 4 380 601\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"19 377 959\",\n        \"page\": 7,\n        \"citation\": \"D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots\\n4 380 408 et 4 380 601 par le propriétaire, sous réserve des cinq conditions\\nsuivantes\",\n        \"anchor\": \"acte de vente 19 377 959\"\n      },\n      \"reason\": \"Les sauts de ligne de la résolution sont rétablis conformément à l’exigence de citation recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u06\",\n      \"unit\": {\n        \"label\": \"Autorisation conditionnelle de servitude publique et perpétuelle — passage piétonnier de 3 m, lot 4 380 408\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"4 380 408\",\n        \"page\": 7,\n        \"citation\": \"3- Établissement d’une servitude publique et perpétuelle de passage\\npiétonnier, d'une largeur de trois (3) mètres en bordure du chemin\\nGeorge-Bonnallie, grevant le lot 4 380 408\",\n        \"anchor\": \"lot 4 380 408\"\n      },\n      \"reason\": \"La citation actuelle supprime deux sauts de ligne, qui doivent être conservés pour une copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u07\",\n      \"unit\": {\n        \"label\": \"Cession par don à la Municipalité — lots 5 235 794 et 4 380 417, sous conditions\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"5 235 794 et 4 380 417\",\n        \"page\": 7,\n        \"citation\": \"4- Le don des lots 5 235 794 et 4 380 417 par le propriétaire au bénéfice de\\nla Municipalité. Il est entendu que ces lots\",\n        \"anchor\": \"lots 5 235 794 et 4 380 417\"\n      },\n      \"reason\": \"Le saut de ligne avant « la Municipalité » est rétabli pour rendre la citation identique au texte fourni.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u08\",\n      \"unit\": {\n        \"label\": \"Servitude de circulation et de stationnement autorisée — en faveur du lot 4 380 420\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"4 380 420\",\n        \"page\": 7,\n        \"citation\": \"Consentir à une servitude de circulation et de stationnement en faveur du\\nfond dominant situé sur le lot 4 380 420 pour le nombre de cases requises\",\n        \"anchor\": \"lot 4 380 420\"\n      },\n      \"reason\": \"La citation doit reproduire le saut de ligne avant « fond dominant », conformément à la règle de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u09\",\n      \"unit\": {\n        \"label\": \"Refus de dérogation mineure — 70 chemin de la Traverse, réduction de la marge latérale droite\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"4 380 003\",\n        \"page\": 12,\n        \"citation\": \"attenant au bâtiment principal pour la propriété sise sur le lot 4 380 003, 70 chemin\\nde la Traverse, zone V-10, PIIA-4 - Corridor visuel d'intérêt supérieur\",\n        \"anchor\": \"lot 4 380 003\"\n      },\n      \"reason\": \"Le saut de ligne dans l’adresse est rétabli pour respecter la citation à l’identique, sans modifier le refus.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u10\",\n      \"unit\": {\n        \"label\": \"Refus de dérogation mineure — 152 chemin Bellevue, coupe d’arbres au-delà du déboisement maximal\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"152 chemin Bellevue\",\n        \"page\": 12,\n        \"citation\": \"déboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et\\n4 380 322, 152 chemin Bellevue, zone V-2\",\n        \"anchor\": \"152 chemin Bellevue\"\n      },\n      \"reason\": \"La citation de la résolution doit conserver le saut de ligne avant le second lot, sans changer la qualification de refus.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u11\",\n      \"unit\": {\n        \"label\": \"Dérogation mineure acceptée — 6 chemin de la Mésange, bâtiment accessoire en cour avant\",\n        \"stage\": \"derogation_mineure\",\n        \"procedure\": null,\n        \"objet\": \"6 chemin de la Mésange\",\n        \"page\": 13,\n        \"citation\": \"construction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot\\n2 235 834, 6 chemin de la Mésange, zone R-10, PIIA-1- Pourtour des lacs Stukely,\\nParker et d’Argent\",\n        \"anchor\": \"6 chemin de la Mésange\"\n      },\n      \"reason\": \"Les deux sauts de ligne omis sont rétablis afin que la citation soit recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u12\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — construction d’un bâtiment principal, lot 6 627 628, chemin Gilbert\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 627 628\",\n        \"page\": 13,\n        \"citation\": \"La construction d’un bâtiment principal sur le lot 6 627 628, chemin\\nGilbert\",\n        \"anchor\": \"lot 6 627 628\"\n      },\n      \"reason\": \"Le saut de ligne avant « Gilbert » doit être conservé pour respecter la citation à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u13\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — changement de couleur du bâtiment principal, 42 chemin de Petite-Rivière\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2 239 886\",\n        \"page\": 13,\n        \"citation\": \"Le changement de couleur du revêtement extérieur du bâtiment principal\\nsis sur le lot 2 239 886, 42 chemin de Petite-Rivière\",\n        \"anchor\": \"lot 2 239 886\"\n      },\n      \"reason\": \"La citation est corrigée uniquement pour rétablir le saut de ligne présent dans le document.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u14\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — construction d’un bâtiment accessoire, 42 chemin de Petite-Rivière\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2 239 886\",\n        \"page\": 13,\n        \"citation\": \"La construction d’un bâtiment accessoire sur le lot 2 239 886, 42 chemin\\nde Petite-Rivière\",\n        \"anchor\": \"lot 2 239 886\"\n      },\n      \"reason\": \"Le saut de ligne dans l’adresse est rétabli conformément à l’exigence de citation recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u15\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — construction d’un bâtiment principal, 88 chemin de l’Escalade\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2 236 143\",\n        \"page\": 13,\n        \"citation\": \"La construction d’un bâtiment principal sur le lot 2 236 143, 88 chemin\\nde l’Escalade\",\n        \"anchor\": \"lot 2 236 143\"\n      },\n      \"reason\": \"La citation doit conserver le saut de ligne avant « de l’Escalade » pour être identique au texte fourni.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u16\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — rénovation du bâtiment principal, 50 chemin de la Feuillade\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2 240 000\",\n        \"page\": 13,\n        \"citation\": \"La rénovation du bâtiment principal sis sur le lot 2 240 000, 50 chemin\\nde la Feuillade\",\n        \"anchor\": \"lot 2 240 000\"\n      },\n      \"reason\": \"Le saut de ligne dans l’adresse est rétabli pour satisfaire la règle de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u17\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — rénovation du bâtiment accessoire, 50 chemin de la Feuillade\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2 240 000\",\n        \"page\": 13,\n        \"citation\": \"La rénovation du bâtiment accessoire sis sur le lot 2 240 000, 50 chemin\\nde la Feuillade\",\n        \"anchor\": \"lot 2 240 000\"\n      },\n      \"reason\": \"Le saut de ligne dans l’adresse est rétabli pour satisfaire la règle de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u18\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — rénovation du bâtiment principal, 103 chemin du Lac-d’Argent\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2 239 703\",\n        \"page\": 13,\n        \"citation\": \"La rénovation du bâtiment principal sis sur le lot 2 239 703, 103 chemin\\ndu Lac-d’Argent\",\n        \"anchor\": \"lot 2 239 703\"\n      },\n      \"reason\": \"La citation doit reproduire le saut de ligne avant « du Lac-d’Argent », conformément à l’exigence de copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u19\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — agrandissement du bâtiment principal, 9 rue des Jacinthes\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2 239 988\",\n        \"page\": 13,\n        \"citation\": \"L’agrandissement du bâtiment principal sis sur le lot 2 239 988, 9 rue\\ndes Jacinthes\",\n        \"anchor\": \"lot 2 239 988\"\n      },\n      \"reason\": \"Le saut de ligne avant « des Jacinthes » est rétabli afin de reproduire exactement l’extrait.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u20\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — construction d’un bâtiment principal, lot 6 597 767, rue de la Butte\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 597 767\",\n        \"page\": 13,\n        \"citation\": \"La construction d’un bâtiment principal sur le lot 6 597 767, rue de la\\nButte\",\n        \"anchor\": \"lot 6 597 767\"\n      },\n      \"reason\": \"Le saut de ligne avant « Butte » est rétabli conformément à la règle de citation à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u21\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — construction d’un bâtiment principal, lot 6 720 154, chemin des Étangs\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 720 154\",\n        \"page\": 13,\n        \"citation\": \"La construction d’un bâtiment principal sur le lot 6 720 154, chemin des\\nÉtangs\",\n        \"anchor\": \"lot 6 720 154\"\n      },\n      \"reason\": \"Le saut de ligne avant « Étangs » est rétabli conformément à la règle de citation à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u22\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — agrandissement du bâtiment principal, 21 rue Lapointe\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"4 380 205\",\n        \"page\": 13,\n        \"citation\": \"L’agrandissement du bâtiment principal sis sur le lot 4 380 205, 21 rue\\nLapointe\",\n        \"anchor\": \"lot 4 380 205\"\n      },\n      \"reason\": \"Le saut de ligne avant « Lapointe » est rétabli pour rendre la citation identique au document.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u23\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — installation d’une enseigne, 1167 chemin des Diligences\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2 235 611\",\n        \"page\": 13,\n        \"citation\": \"L’installation d’une enseigne sur le lot 2 235 611, 1167 chemin des\\nDiligences\",\n        \"anchor\": \"lot 2 235 611\"\n      },\n      \"reason\": \"Le saut de ligne avant « Diligences » est rétabli pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u24\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — rénovation du bâtiment principal, 151 rue Martin\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2 237 223\",\n        \"page\": 13,\n        \"citation\": \"La rénovation du bâtiment principal sis sur le lot 2 237 223, 151 rue\\nMartin\",\n        \"anchor\": \"lot 2 237 223\"\n      },\n      \"reason\": \"Le saut de ligne avant « Martin » est rétabli pour respecter la copie à l’identique.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u25\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — construction d’un bâtiment principal, lot 6 291 859, chemin des Diligences\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 291 859\",\n        \"page\": 13,\n        \"citation\": \"La construction d’un bâtiment principal pour la propriété sise sur le lot 6\\n291 859, chemin des Diligences\",\n        \"anchor\": \"lot 6\\n291 859\"\n      },\n      \"reason\": \"Le numéro de lot est coupé par un saut de ligne dans le document, lequel doit être reproduit dans la citation et son ancre.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u26\",\n      \"unit\": {\n        \"label\": \"PIIA accepté — rénovation du bâtiment principal, 14 rue Martin\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"14 rue Martin\",\n        \"page\": 14,\n        \"citation\": \"La rénovation du bâtiment principal pour la propriété sise sur le lot 4 380\\n241, 14 rue Martin\",\n        \"anchor\": \"14 rue Martin\"\n      },\n      \"reason\": \"Le saut de ligne à l’intérieur du numéro de lot est rétabli pour rendre la citation identique au texte fourni.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u27\",\n      \"unit\": {\n        \"label\": \"Refus de PIIA — construction d’un bâtiment principal, lot 6 627 707, chemin de la Corniche\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"6 627 707\",\n        \"page\": 14,\n        \"citation\": \"La construction d’un bâtiment principal sur le lot 6 627 707, chemin de la\\nCorniche puisque l’étude d’impact visuel mentionne la possibilité que le\\nbâtiment soit partiellement visible\",\n        \"anchor\": \"lot 6 627 707\"\n      },\n      \"reason\": \"Les sauts de ligne sont rétablis pour respecter la citation à l’identique, sans modifier le refus ni son motif.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u28\",\n      \"unit\": {\n        \"label\": \"Refus de PIIA — construction d’un bâtiment accessoire, 93 chemin du Cèdre\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"2 238 228\",\n        \"page\": 14,\n        \"citation\": \"La construction d’un bâtiment accessoire sur le lot 2 238 228, 93 chemin\\ndu Cèdre puisque l’emplacement et l’orientation visés n’ont pas été\\nclairement démontrés\",\n        \"anchor\": \"lot 2 238 228\"\n      },\n      \"reason\": \"Les sauts de ligne sont rétablis pour respecter la citation à l’identique, sans modifier le refus ni son motif.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u29\",\n      \"unit\": {\n        \"label\": \"Refus de PIIA — installation d’une murale, 412 rue Principale\",\n        \"stage\": \"piia\",\n        \"procedure\": null,\n        \"objet\": \"412 rue Principale\",\n        \"page\": 14,\n        \"citation\": \"L’installation d’une murale sur le bâtiment principal sis sur le lot\\n4 380 220, 412 rue Principale\",\n        \"anchor\": \"412 rue Principale\"\n      },\n      \"reason\": \"Le saut de ligne avant le numéro de lot est rétabli pour respecter la citation à l’identique, sans changer le refus.\"\n    },\n    {\n      \"op\": \"correct\",\n      \"id\": \"u31\",\n      \"unit\": {\n        \"label\": \"Adoption du règlement 2026-03 — occupation et entretien des bâtiments\",\n        \"stage\": \"adoption\",\n        \"procedure\": null,\n        \"objet\": \"2026-03\",\n        \"page\": 14,\n        \"citation\": \"D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments dont\\ncopie est jointe aux présentes pour en faire partie intégrante\",\n        \"anchor\": \"règlement no 2026-03\"\n      },\n      \"reason\": \"Le saut de ligne avant « copie » est rétabli conformément à l’exigence de citation recopiée à l’identique.\"\n    },\n    {\n      \"op\": \"add\",\n      \"unit\": {\n        \"label\": \"Consultation publique tenue le 1er juin 2026 — règlement 2026-03 sur l’occupation et l’entretien des bâtiments\",\n        \"stage\": \"inconnu\",\n        \"procedure\": \"consultation_publique\",\n        \"objet\": \"2026-03\",\n        \"page\": 14,\n        \"citation\": \"ATTENDU QU’une séance de consultation publique a été tenue le 1er juin 2026;\\nEn conséquence, il est proposé par la conseillère Agnès Mager Grandmaison\\nD'adopter le règlement no 2026-03\",\n        \"anchor\": \"règlement no 2026-03\"\n      },\n      \"reason\": \"Le document constate une consultation publique tenue le jour même sur le règlement 2026-03, étape distincte de son adoption et non rappel d’une procédure à une date antérieure.\"\n    }\n  ]\n}",
+ "parseError": null,
+ "operations": [
+  {
+   "op": "correct",
+   "id": "u01",
+   "unit": {
+    "label": "Avis de motion — règlement 2026-07 sur le stationnement et la gestion des voies publiques",
+    "stage": "avis_motion",
+    "procedure": null,
+    "objet": "2026-07",
+    "page": 4,
+    "citation": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté\npour adoption, lors d’une prochaine séance du conseil municipal, le règlement no\n2026-07",
+    "anchor": "règlement no\n2026-07"
+   },
+   "reason": "La citation doit être recopiée à l’identique : les sauts de ligne omis sont rétablis dans la citation et son ancre."
+  },
+  {
+   "op": "correct",
+   "id": "u02",
+   "unit": {
+    "label": "Présentation du projet de règlement 2026-07 — stationnement et gestion des voies publiques",
+    "stage": "projet_reglement",
+    "procedure": null,
+    "objet": "2026-07",
+    "page": 4,
+    "citation": "Avis de motion et présentation du projet de règlement no 2026-07\namendant le règlement uniformisé RU-2023-02 relatif au stationnement\net à la gestion des voies publiques",
+    "anchor": "règlement no 2026-07"
+   },
+   "reason": "La citation actuelle remplace les sauts de ligne du document par des espaces, contrairement à l’exigence de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u03",
+   "unit": {
+    "label": "Renouvellement du bail de La Corde-à-linge — juillet 2026 à juin 2027",
+    "stage": "inconnu",
+    "procedure": null,
+    "objet": "La Corde-à-linge",
+    "page": 4,
+    "citation": "DE renouveler le bail de location de La Corde-à-linge pour une période de douze\n(12) mois, soit du 1er juillet 2026 au 30 juin 2027",
+    "anchor": "La Corde-à-linge"
+   },
+   "reason": "Le saut de ligne après « douze » est rétabli pour respecter la copie à l’identique de la citation."
+  },
+  {
+   "op": "correct",
+   "id": "u04",
+   "unit": {
+    "label": "Adoption du règlement 2026-05 — annexion d’une partie du territoire du Canton d’Orford",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-05",
+    "page": 5,
+    "citation": "D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du\nCanton d’Orford dont copie est jointe aux présentes pour en faire partie intégrante",
+    "anchor": "Règlement no 2026-05"
+   },
+   "reason": "La citation doit conserver le saut de ligne précédant « Canton d’Orford » pour être identique au document."
+  },
+  {
+   "op": "correct",
+   "id": "u05",
+   "unit": {
+    "label": "Autorisation de modifier l’acte de vente 19 377 959 — lots 4 380 408 et 4 380 601",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "19 377 959",
+    "page": 7,
+    "citation": "D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots\n4 380 408 et 4 380 601 par le propriétaire, sous réserve des cinq conditions\nsuivantes",
+    "anchor": "acte de vente 19 377 959"
+   },
+   "reason": "Les sauts de ligne de la résolution sont rétablis conformément à l’exigence de citation recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u06",
+   "unit": {
+    "label": "Autorisation conditionnelle de servitude publique et perpétuelle — passage piétonnier de 3 m, lot 4 380 408",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 380 408",
+    "page": 7,
+    "citation": "3- Établissement d’une servitude publique et perpétuelle de passage\npiétonnier, d'une largeur de trois (3) mètres en bordure du chemin\nGeorge-Bonnallie, grevant le lot 4 380 408",
+    "anchor": "lot 4 380 408"
+   },
+   "reason": "La citation actuelle supprime deux sauts de ligne, qui doivent être conservés pour une copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u07",
+   "unit": {
+    "label": "Cession par don à la Municipalité — lots 5 235 794 et 4 380 417, sous conditions",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "5 235 794 et 4 380 417",
+    "page": 7,
+    "citation": "4- Le don des lots 5 235 794 et 4 380 417 par le propriétaire au bénéfice de\nla Municipalité. Il est entendu que ces lots",
+    "anchor": "lots 5 235 794 et 4 380 417"
+   },
+   "reason": "Le saut de ligne avant « la Municipalité » est rétabli pour rendre la citation identique au texte fourni."
+  },
+  {
+   "op": "correct",
+   "id": "u08",
+   "unit": {
+    "label": "Servitude de circulation et de stationnement autorisée — en faveur du lot 4 380 420",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "4 380 420",
+    "page": 7,
+    "citation": "Consentir à une servitude de circulation et de stationnement en faveur du\nfond dominant situé sur le lot 4 380 420 pour le nombre de cases requises",
+    "anchor": "lot 4 380 420"
+   },
+   "reason": "La citation doit reproduire le saut de ligne avant « fond dominant », conformément à la règle de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u09",
+   "unit": {
+    "label": "Refus de dérogation mineure — 70 chemin de la Traverse, réduction de la marge latérale droite",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "4 380 003",
+    "page": 12,
+    "citation": "attenant au bâtiment principal pour la propriété sise sur le lot 4 380 003, 70 chemin\nde la Traverse, zone V-10, PIIA-4 - Corridor visuel d'intérêt supérieur",
+    "anchor": "lot 4 380 003"
+   },
+   "reason": "Le saut de ligne dans l’adresse est rétabli pour respecter la citation à l’identique, sans modifier le refus."
+  },
+  {
+   "op": "correct",
+   "id": "u10",
+   "unit": {
+    "label": "Refus de dérogation mineure — 152 chemin Bellevue, coupe d’arbres au-delà du déboisement maximal",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "152 chemin Bellevue",
+    "page": 12,
+    "citation": "déboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et\n4 380 322, 152 chemin Bellevue, zone V-2",
+    "anchor": "152 chemin Bellevue"
+   },
+   "reason": "La citation de la résolution doit conserver le saut de ligne avant le second lot, sans changer la qualification de refus."
+  },
+  {
+   "op": "correct",
+   "id": "u11",
+   "unit": {
+    "label": "Dérogation mineure acceptée — 6 chemin de la Mésange, bâtiment accessoire en cour avant",
+    "stage": "derogation_mineure",
+    "procedure": null,
+    "objet": "6 chemin de la Mésange",
+    "page": 13,
+    "citation": "construction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot\n2 235 834, 6 chemin de la Mésange, zone R-10, PIIA-1- Pourtour des lacs Stukely,\nParker et d’Argent",
+    "anchor": "6 chemin de la Mésange"
+   },
+   "reason": "Les deux sauts de ligne omis sont rétablis afin que la citation soit recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u12",
+   "unit": {
+    "label": "PIIA accepté — construction d’un bâtiment principal, lot 6 627 628, chemin Gilbert",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 627 628",
+    "page": 13,
+    "citation": "La construction d’un bâtiment principal sur le lot 6 627 628, chemin\nGilbert",
+    "anchor": "lot 6 627 628"
+   },
+   "reason": "Le saut de ligne avant « Gilbert » doit être conservé pour respecter la citation à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u13",
+   "unit": {
+    "label": "PIIA accepté — changement de couleur du bâtiment principal, 42 chemin de Petite-Rivière",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 239 886",
+    "page": 13,
+    "citation": "Le changement de couleur du revêtement extérieur du bâtiment principal\nsis sur le lot 2 239 886, 42 chemin de Petite-Rivière",
+    "anchor": "lot 2 239 886"
+   },
+   "reason": "La citation est corrigée uniquement pour rétablir le saut de ligne présent dans le document."
+  },
+  {
+   "op": "correct",
+   "id": "u14",
+   "unit": {
+    "label": "PIIA accepté — construction d’un bâtiment accessoire, 42 chemin de Petite-Rivière",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 239 886",
+    "page": 13,
+    "citation": "La construction d’un bâtiment accessoire sur le lot 2 239 886, 42 chemin\nde Petite-Rivière",
+    "anchor": "lot 2 239 886"
+   },
+   "reason": "Le saut de ligne dans l’adresse est rétabli conformément à l’exigence de citation recopiée à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u15",
+   "unit": {
+    "label": "PIIA accepté — construction d’un bâtiment principal, 88 chemin de l’Escalade",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 236 143",
+    "page": 13,
+    "citation": "La construction d’un bâtiment principal sur le lot 2 236 143, 88 chemin\nde l’Escalade",
+    "anchor": "lot 2 236 143"
+   },
+   "reason": "La citation doit conserver le saut de ligne avant « de l’Escalade » pour être identique au texte fourni."
+  },
+  {
+   "op": "correct",
+   "id": "u16",
+   "unit": {
+    "label": "PIIA accepté — rénovation du bâtiment principal, 50 chemin de la Feuillade",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 240 000",
+    "page": 13,
+    "citation": "La rénovation du bâtiment principal sis sur le lot 2 240 000, 50 chemin\nde la Feuillade",
+    "anchor": "lot 2 240 000"
+   },
+   "reason": "Le saut de ligne dans l’adresse est rétabli pour satisfaire la règle de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u17",
+   "unit": {
+    "label": "PIIA accepté — rénovation du bâtiment accessoire, 50 chemin de la Feuillade",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 240 000",
+    "page": 13,
+    "citation": "La rénovation du bâtiment accessoire sis sur le lot 2 240 000, 50 chemin\nde la Feuillade",
+    "anchor": "lot 2 240 000"
+   },
+   "reason": "Le saut de ligne dans l’adresse est rétabli pour satisfaire la règle de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u18",
+   "unit": {
+    "label": "PIIA accepté — rénovation du bâtiment principal, 103 chemin du Lac-d’Argent",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 239 703",
+    "page": 13,
+    "citation": "La rénovation du bâtiment principal sis sur le lot 2 239 703, 103 chemin\ndu Lac-d’Argent",
+    "anchor": "lot 2 239 703"
+   },
+   "reason": "La citation doit reproduire le saut de ligne avant « du Lac-d’Argent », conformément à l’exigence de copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u19",
+   "unit": {
+    "label": "PIIA accepté — agrandissement du bâtiment principal, 9 rue des Jacinthes",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 239 988",
+    "page": 13,
+    "citation": "L’agrandissement du bâtiment principal sis sur le lot 2 239 988, 9 rue\ndes Jacinthes",
+    "anchor": "lot 2 239 988"
+   },
+   "reason": "Le saut de ligne avant « des Jacinthes » est rétabli afin de reproduire exactement l’extrait."
+  },
+  {
+   "op": "correct",
+   "id": "u20",
+   "unit": {
+    "label": "PIIA accepté — construction d’un bâtiment principal, lot 6 597 767, rue de la Butte",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 597 767",
+    "page": 13,
+    "citation": "La construction d’un bâtiment principal sur le lot 6 597 767, rue de la\nButte",
+    "anchor": "lot 6 597 767"
+   },
+   "reason": "Le saut de ligne avant « Butte » est rétabli conformément à la règle de citation à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u21",
+   "unit": {
+    "label": "PIIA accepté — construction d’un bâtiment principal, lot 6 720 154, chemin des Étangs",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 720 154",
+    "page": 13,
+    "citation": "La construction d’un bâtiment principal sur le lot 6 720 154, chemin des\nÉtangs",
+    "anchor": "lot 6 720 154"
+   },
+   "reason": "Le saut de ligne avant « Étangs » est rétabli conformément à la règle de citation à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u22",
+   "unit": {
+    "label": "PIIA accepté — agrandissement du bâtiment principal, 21 rue Lapointe",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "4 380 205",
+    "page": 13,
+    "citation": "L’agrandissement du bâtiment principal sis sur le lot 4 380 205, 21 rue\nLapointe",
+    "anchor": "lot 4 380 205"
+   },
+   "reason": "Le saut de ligne avant « Lapointe » est rétabli pour rendre la citation identique au document."
+  },
+  {
+   "op": "correct",
+   "id": "u23",
+   "unit": {
+    "label": "PIIA accepté — installation d’une enseigne, 1167 chemin des Diligences",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 235 611",
+    "page": 13,
+    "citation": "L’installation d’une enseigne sur le lot 2 235 611, 1167 chemin des\nDiligences",
+    "anchor": "lot 2 235 611"
+   },
+   "reason": "Le saut de ligne avant « Diligences » est rétabli pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u24",
+   "unit": {
+    "label": "PIIA accepté — rénovation du bâtiment principal, 151 rue Martin",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 237 223",
+    "page": 13,
+    "citation": "La rénovation du bâtiment principal sis sur le lot 2 237 223, 151 rue\nMartin",
+    "anchor": "lot 2 237 223"
+   },
+   "reason": "Le saut de ligne avant « Martin » est rétabli pour respecter la copie à l’identique."
+  },
+  {
+   "op": "correct",
+   "id": "u25",
+   "unit": {
+    "label": "PIIA accepté — construction d’un bâtiment principal, lot 6 291 859, chemin des Diligences",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 291 859",
+    "page": 13,
+    "citation": "La construction d’un bâtiment principal pour la propriété sise sur le lot 6\n291 859, chemin des Diligences",
+    "anchor": "lot 6\n291 859"
+   },
+   "reason": "Le numéro de lot est coupé par un saut de ligne dans le document, lequel doit être reproduit dans la citation et son ancre."
+  },
+  {
+   "op": "correct",
+   "id": "u26",
+   "unit": {
+    "label": "PIIA accepté — rénovation du bâtiment principal, 14 rue Martin",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "14 rue Martin",
+    "page": 14,
+    "citation": "La rénovation du bâtiment principal pour la propriété sise sur le lot 4 380\n241, 14 rue Martin",
+    "anchor": "14 rue Martin"
+   },
+   "reason": "Le saut de ligne à l’intérieur du numéro de lot est rétabli pour rendre la citation identique au texte fourni."
+  },
+  {
+   "op": "correct",
+   "id": "u27",
+   "unit": {
+    "label": "Refus de PIIA — construction d’un bâtiment principal, lot 6 627 707, chemin de la Corniche",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "6 627 707",
+    "page": 14,
+    "citation": "La construction d’un bâtiment principal sur le lot 6 627 707, chemin de la\nCorniche puisque l’étude d’impact visuel mentionne la possibilité que le\nbâtiment soit partiellement visible",
+    "anchor": "lot 6 627 707"
+   },
+   "reason": "Les sauts de ligne sont rétablis pour respecter la citation à l’identique, sans modifier le refus ni son motif."
+  },
+  {
+   "op": "correct",
+   "id": "u28",
+   "unit": {
+    "label": "Refus de PIIA — construction d’un bâtiment accessoire, 93 chemin du Cèdre",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "2 238 228",
+    "page": 14,
+    "citation": "La construction d’un bâtiment accessoire sur le lot 2 238 228, 93 chemin\ndu Cèdre puisque l’emplacement et l’orientation visés n’ont pas été\nclairement démontrés",
+    "anchor": "lot 2 238 228"
+   },
+   "reason": "Les sauts de ligne sont rétablis pour respecter la citation à l’identique, sans modifier le refus ni son motif."
+  },
+  {
+   "op": "correct",
+   "id": "u29",
+   "unit": {
+    "label": "Refus de PIIA — installation d’une murale, 412 rue Principale",
+    "stage": "piia",
+    "procedure": null,
+    "objet": "412 rue Principale",
+    "page": 14,
+    "citation": "L’installation d’une murale sur le bâtiment principal sis sur le lot\n4 380 220, 412 rue Principale",
+    "anchor": "412 rue Principale"
+   },
+   "reason": "Le saut de ligne avant le numéro de lot est rétabli pour respecter la citation à l’identique, sans changer le refus."
+  },
+  {
+   "op": "correct",
+   "id": "u31",
+   "unit": {
+    "label": "Adoption du règlement 2026-03 — occupation et entretien des bâtiments",
+    "stage": "adoption",
+    "procedure": null,
+    "objet": "2026-03",
+    "page": 14,
+    "citation": "D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments dont\ncopie est jointe aux présentes pour en faire partie intégrante",
+    "anchor": "règlement no 2026-03"
+   },
+   "reason": "Le saut de ligne avant « copie » est rétabli conformément à l’exigence de citation recopiée à l’identique."
+  },
+  {
+   "op": "add",
+   "unit": {
+    "label": "Consultation publique tenue le 1er juin 2026 — règlement 2026-03 sur l’occupation et l’entretien des bâtiments",
+    "stage": "inconnu",
+    "procedure": "consultation_publique",
+    "objet": "2026-03",
+    "page": 14,
+    "citation": "ATTENDU QU’une séance de consultation publique a été tenue le 1er juin 2026;\nEn conséquence, il est proposé par la conseillère Agnès Mager Grandmaison\nD'adopter le règlement no 2026-03",
+    "anchor": "règlement no 2026-03"
+   },
+   "reason": "Le document constate une consultation publique tenue le jour même sur le règlement 2026-03, étape distincte de son adoption et non rappel d’une procédure à une date antérieure."
+  }
+ ],
+ "applied": [
+  {
+   "op": "add",
+   "id": "u32"
+  }
+ ],
+ "rejects": [
+  {
+   "step": "astra-pass2",
+   "index": 0,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u01",
+   "stage": "avis_motion",
+   "page": 4,
+   "citation": "Avis de motion est donné par le conseiller Serge Meunier à l’effet qu’il sera présenté\npour adoption, lors d’une prochaine séance du conseil municipal, le règlement no\n2026-07"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 1,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u02",
+   "stage": "projet_reglement",
+   "page": 4,
+   "citation": "Avis de motion et présentation du projet de règlement no 2026-07\namendant le règlement uniformisé RU-2023-02 relatif au stationnement\net à la gestion des voies publiques"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 2,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u03",
+   "stage": "inconnu",
+   "page": 4,
+   "citation": "DE renouveler le bail de location de La Corde-à-linge pour une période de douze\n(12) mois, soit du 1er juillet 2026 au 30 juin 2027"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 3,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u04",
+   "stage": "adoption",
+   "page": 5,
+   "citation": "D’adopter le Règlement no 2026-05 décrétant l’annexion d’une partie du territoire du\nCanton d’Orford dont copie est jointe aux présentes pour en faire partie intégrante"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 4,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u05",
+   "stage": "adoption",
+   "page": 7,
+   "citation": "D’autoriser la modification de l’acte de vente 19 377 959, lors de la vente des lots\n4 380 408 et 4 380 601 par le propriétaire, sous réserve des cinq conditions\nsuivantes"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 5,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u06",
+   "stage": "adoption",
+   "page": 7,
+   "citation": "3- Établissement d’une servitude publique et perpétuelle de passage\npiétonnier, d'une largeur de trois (3) mètres en bordure du chemin\nGeorge-Bonnallie, grevant le lot 4 380 408"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 6,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u07",
+   "stage": "adoption",
+   "page": 7,
+   "citation": "4- Le don des lots 5 235 794 et 4 380 417 par le propriétaire au bénéfice de\nla Municipalité. Il est entendu que ces lots"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 7,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u08",
+   "stage": "adoption",
+   "page": 7,
+   "citation": "Consentir à une servitude de circulation et de stationnement en faveur du\nfond dominant situé sur le lot 4 380 420 pour le nombre de cases requises"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 8,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u09",
+   "stage": "derogation_mineure",
+   "page": 12,
+   "citation": "attenant au bâtiment principal pour la propriété sise sur le lot 4 380 003, 70 chemin\nde la Traverse, zone V-10, PIIA-4 - Corridor visuel d'intérêt supérieur"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 9,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u10",
+   "stage": "derogation_mineure",
+   "page": 12,
+   "citation": "déboisement maximale prescrite pour la propriété sise sur les lots 4 380 313 et\n4 380 322, 152 chemin Bellevue, zone V-2"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 10,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u11",
+   "stage": "derogation_mineure",
+   "page": 13,
+   "citation": "construction d’un bâtiment accessoire en cour avant pour la propriété sise sur le lot\n2 235 834, 6 chemin de la Mésange, zone R-10, PIIA-1- Pourtour des lacs Stukely,\nParker et d’Argent"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 11,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u12",
+   "stage": "piia",
+   "page": 13,
+   "citation": "La construction d’un bâtiment principal sur le lot 6 627 628, chemin\nGilbert"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 12,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u13",
+   "stage": "piia",
+   "page": 13,
+   "citation": "Le changement de couleur du revêtement extérieur du bâtiment principal\nsis sur le lot 2 239 886, 42 chemin de Petite-Rivière"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 13,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u14",
+   "stage": "piia",
+   "page": 13,
+   "citation": "La construction d’un bâtiment accessoire sur le lot 2 239 886, 42 chemin\nde Petite-Rivière"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 14,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u15",
+   "stage": "piia",
+   "page": 13,
+   "citation": "La construction d’un bâtiment principal sur le lot 2 236 143, 88 chemin\nde l’Escalade"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 15,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u16",
+   "stage": "piia",
+   "page": 13,
+   "citation": "La rénovation du bâtiment principal sis sur le lot 2 240 000, 50 chemin\nde la Feuillade"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 16,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u17",
+   "stage": "piia",
+   "page": 13,
+   "citation": "La rénovation du bâtiment accessoire sis sur le lot 2 240 000, 50 chemin\nde la Feuillade"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 17,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u18",
+   "stage": "piia",
+   "page": 13,
+   "citation": "La rénovation du bâtiment principal sis sur le lot 2 239 703, 103 chemin\ndu Lac-d’Argent"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 18,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u19",
+   "stage": "piia",
+   "page": 13,
+   "citation": "L’agrandissement du bâtiment principal sis sur le lot 2 239 988, 9 rue\ndes Jacinthes"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 19,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u20",
+   "stage": "piia",
+   "page": 13,
+   "citation": "La construction d’un bâtiment principal sur le lot 6 597 767, rue de la\nButte"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 20,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u21",
+   "stage": "piia",
+   "page": 13,
+   "citation": "La construction d’un bâtiment principal sur le lot 6 720 154, chemin des\nÉtangs"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 21,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u22",
+   "stage": "piia",
+   "page": 13,
+   "citation": "L’agrandissement du bâtiment principal sis sur le lot 4 380 205, 21 rue\nLapointe"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 22,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u23",
+   "stage": "piia",
+   "page": 13,
+   "citation": "L’installation d’une enseigne sur le lot 2 235 611, 1167 chemin des\nDiligences"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 23,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u24",
+   "stage": "piia",
+   "page": 13,
+   "citation": "La rénovation du bâtiment principal sis sur le lot 2 237 223, 151 rue\nMartin"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 24,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u25",
+   "stage": "piia",
+   "page": 13,
+   "citation": "La construction d’un bâtiment principal pour la propriété sise sur le lot 6\n291 859, chemin des Diligences"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 25,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u26",
+   "stage": "piia",
+   "page": 14,
+   "citation": "La rénovation du bâtiment principal pour la propriété sise sur le lot 4 380\n241, 14 rue Martin"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 26,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u27",
+   "stage": "piia",
+   "page": 14,
+   "citation": "La construction d’un bâtiment principal sur le lot 6 627 707, chemin de la\nCorniche puisque l’étude d’impact visuel mentionne la possibilité que le\nbâtiment soit partiellement visible"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 27,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u28",
+   "stage": "piia",
+   "page": 14,
+   "citation": "La construction d’un bâtiment accessoire sur le lot 2 238 228, 93 chemin\ndu Cèdre puisque l’emplacement et l’orientation visés n’ont pas été\nclairement démontrés"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 28,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u29",
+   "stage": "piia",
+   "page": 14,
+   "citation": "L’installation d’une murale sur le bâtiment principal sis sur le lot\n4 380 220, 412 rue Principale"
+  },
+  {
+   "step": "astra-pass2",
+   "index": 29,
+   "code": "no_change",
+   "op": "correct",
+   "id": "u31",
+   "stage": "adoption",
+   "page": 14,
+   "citation": "D'adopter le règlement no 2026-03 sur l’occupation et l’entretien des bâtiments dont\ncopie est jointe aux présentes pour en faire partie intégrante"
+  }
+ ],
+ "counters": {
+  "pageCorrected": 0,
+  "clipped": 0,
+  "anchorReplaced": 0
+ },
+ "activeAfter": 31
+}

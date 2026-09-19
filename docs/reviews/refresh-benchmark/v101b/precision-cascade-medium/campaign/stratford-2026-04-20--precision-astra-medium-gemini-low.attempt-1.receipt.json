@@ -1,0 +1,35 @@
+{
+ "documentId": "stratford-2026-04-20",
+ "sourceArm": "astra-medium",
+ "promptSha256": "cf015e57c6e1cd1404efc7e22ddb014da0e4851aba9befea9ef39cae46094b68",
+ "sourceOutputSha256": "76e401151fec9d83e5e228e004b7f06ac8f86d6902b312337c46366413c7e8bc",
+ "model": "gemini-3.8-flash",
+ "effort": "low",
+ "transport": "cloud-code",
+ "validation": {
+  "accepted": true,
+  "note": "filtered astra-medium output"
+ },
+ "receipt": {
+  "transport": "cloud-code",
+  "accountPseudonym": "acct-59dca62565",
+  "latencyMs": 6948,
+  "modelId": "gemini-3.8-flash",
+  "finishReason": "stop",
+  "usage": {
+   "inputTokens": 3374,
+   "outputTokens": 630,
+   "totalTokens": 4004
+  },
+  "wire": {
+   "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent",
+   "model": "gemini-3.8-flash-tiered",
+   "effort": "LOW",
+   "maxOutputTokens": 32768,
+   "httpStatus": 200,
+   "durationMs": 6791
+  },
+  "inputSha256": "3bb0a5d191a127cefeef3ac77ea6feff651804be16ec50f12d092592a5d19891"
+ },
+ "at": "2026-09-19T03:22:15.735Z"
+}

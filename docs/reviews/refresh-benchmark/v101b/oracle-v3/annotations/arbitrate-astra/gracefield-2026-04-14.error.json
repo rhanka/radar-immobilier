@@ -1,0 +1,25 @@
+{
+ "documentId": "gracefield-2026-04-14",
+ "step": "arbitrate-astra",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gpt-6-astra",
+ "effort": "xhigh",
+ "transport": "codex",
+ "promptSha256": "1adec305b278a43be3bb1be723dbf8017874ab3796c9b5398550d015cd483464",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "638f58c73d3253faa109d65d15cdb3049a3d7c044a5978af7e7b940173cebbd3",
+ "verificationSha256": "2af9e9662f35369cf3b44e56cc843ac7fa1c8af4d0ea96e28680fb301a3dbd2d",
+ "error": "MESH_FAILED ETIMEDOUT",
+ "receipt": {
+  "transport": "codex",
+  "latencyMs": 3480573,
+  "code": "ETIMEDOUT",
+  "httpStatus": 200,
+  "responseError": null
+ },
+ "at": "2026-09-18T20:57:07.372Z"
+}

@@ -1,0 +1,81 @@
+{
+ "documentId": "coteau-du-lac-2026-02-10",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "157c64fb15e859bcb2fca8cebab1e81f23e96302883248d5c021b7c8c5853839",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La modification de l'autorisation d'achat d'une partie du lot 6 025 922 est un acte foncier explicite prévu à l'ordre du jour à la page 2.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"L'abrogation de la résolution de choix du proposant visant le lot 2 045 370 constitue un acte foncier prévu à la page 2, correctement qualifié au stade inconnu.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La demande d'approbation de PIIA pour le 3, rue Principale est explicitement inscrite à l'ordre du jour à la page 3.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La demande d'approbation de PIIA pour le 9, rue Principale est explicitement inscrite à l'ordre du jour à la page 3.\"},{\"item\":\"i05\",\"choice\":\"v3\",\"reason\":\"Le point 8.3 a) vise l'approbation de la demande de PPCMOI distincte du premier projet de résolution qui suit au point b), ce qui correspond au stade inconnu avec un libellé fidèle et neutre.\"},{\"item\":\"i06\",\"choice\":\"v1\",\"reason\":\"L'adoption du premier projet de résolution pour le PPCMOI du 25, rue des Chutes est inscrite à la page 3 au stade projet_reglement.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v1"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  },
+  {
+   "item": "i05",
+   "unitId": "u05",
+   "current": "v3"
+  },
+  {
+   "item": "i06",
+   "unitId": "u06",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La modification de l'autorisation d'achat d'une partie du lot 6 025 922 est un acte foncier explicite prévu à l'ordre du jour à la page 2."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "L'abrogation de la résolution de choix du proposant visant le lot 2 045 370 constitue un acte foncier prévu à la page 2, correctement qualifié au stade inconnu."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La demande d'approbation de PIIA pour le 3, rue Principale est explicitement inscrite à l'ordre du jour à la page 3."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La demande d'approbation de PIIA pour le 9, rue Principale est explicitement inscrite à l'ordre du jour à la page 3."
+  },
+  {
+   "item": "i05",
+   "choice": "v3",
+   "reason": "Le point 8.3 a) vise l'approbation de la demande de PPCMOI distincte du premier projet de résolution qui suit au point b), ce qui correspond au stade inconnu avec un libellé fidèle et neutre."
+  },
+  {
+   "item": "i06",
+   "choice": "v1",
+   "reason": "L'adoption du premier projet de résolution pour le PPCMOI du 25, rue des Chutes est inscrite à la page 3 au stade projet_reglement."
+  }
+ ]
+}

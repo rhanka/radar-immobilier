@@ -1,0 +1,61 @@
+{
+ "documentId": "berthier-sur-mer-2026-03-24",
+ "step": "converge-gemini",
+ "chain": [
+  "astra",
+  "fable",
+  "gemini"
+ ],
+ "model": "gemini-3.8-flash",
+ "effort": "high",
+ "transport": "cloud-code",
+ "promptSha256": "651bd5dea16722f2ebec18cf317d4965e496d49106ec08a61435adc8b57b2ef8",
+ "inputStateStep": "astra-pass3",
+ "inputStateSha256": "c45f9d1b48e4e12cc888b85c591319f6edbda635bff8a8a1342f47fc48ea7f1b",
+ "rawText": "{\"votes\":[{\"item\":\"i01\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-063 adoptée en page 4 autorise la conclusion d'un bail de terrain municipal pour cinq ans, constituant un acte foncier dûment adopté par le conseil.\"},{\"item\":\"i02\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-067 adoptée en page 6 porte sur l'adoption du deuxième projet de règlement numéro 369 modifiant le zonage.\"},{\"item\":\"i03\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-068 adoptée en page 7 porte sur le premier projet du règlement numéro 372 relatif à la démolition d'immeubles.\"},{\"item\":\"i04\",\"choice\":\"v1\",\"reason\":\"La résolution 2026-069 adoptée en page 7 porte sur le premier projet du règlement d'urbanisme numéro 373 relatif à l'entretien et la salubrité des bâtiments.\"}]}",
+ "parseError": null,
+ "items": [
+  {
+   "item": "i01",
+   "unitId": "u01",
+   "current": "v2"
+  },
+  {
+   "item": "i02",
+   "unitId": "u02",
+   "current": "v1"
+  },
+  {
+   "item": "i03",
+   "unitId": "u03",
+   "current": "v1"
+  },
+  {
+   "item": "i04",
+   "unitId": "u04",
+   "current": "v1"
+  }
+ ],
+ "votes": [
+  {
+   "item": "i01",
+   "choice": "v1",
+   "reason": "La résolution 2026-063 adoptée en page 4 autorise la conclusion d'un bail de terrain municipal pour cinq ans, constituant un acte foncier dûment adopté par le conseil."
+  },
+  {
+   "item": "i02",
+   "choice": "v1",
+   "reason": "La résolution 2026-067 adoptée en page 6 porte sur l'adoption du deuxième projet de règlement numéro 369 modifiant le zonage."
+  },
+  {
+   "item": "i03",
+   "choice": "v1",
+   "reason": "La résolution 2026-068 adoptée en page 7 porte sur le premier projet du règlement numéro 372 relatif à la démolition d'immeubles."
+  },
+  {
+   "item": "i04",
+   "choice": "v1",
+   "reason": "La résolution 2026-069 adoptée en page 7 porte sur le premier projet du règlement d'urbanisme numéro 373 relatif à l'entretien et la salubrité des bâtiments."
+  }
+ ]
+}
