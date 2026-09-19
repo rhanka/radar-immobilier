@@ -489,7 +489,7 @@ object-storage-docs-preprod-fence: ## Record zero live MinIO DOCS writers after 
 	@set -euo pipefail; namespace="$(OBJECT_STORAGE_INVENTORY_NAMESPACE)"; \
 	  api="$$(mktemp)"; cron="$$(mktemp)"; pods="$$(mktemp)"; trap 'rm -f "$$api" "$$cron" "$$pods"' EXIT; \
 	  $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json >"$$api"; \
-	  $(KUBECTL) -n "$$namespace" get cronjobs/radar-refresh-scrape cronjobs/radar-refresh-projection -o json >"$$cron"; \
+	  $(KUBECTL) -n "$$namespace" get cronjobs -o json >"$$cron"; \
 	  $(KUBECTL) -n "$$namespace" get pods -o json >"$$pods"; \
 	  jq -e -f deploy/ci/raw-api-ovh-binding.jq "$$api" >/dev/null; \
 	  jq -e -f deploy/ci/docs-zero-writer-bindings.jq "$$cron" >/dev/null; \
@@ -556,7 +556,7 @@ object-storage-minio-preprod-remove: ## Irreversibly remove exact preprod MinIO 
 	  jq -e -f deploy/ci/minio-removal-pods.jq "$$work/pods.json" >/dev/null; \
 	  $(KUBECTL) -n "$$namespace" get deployment/radar-api -o json | \
 	    jq -e -f deploy/ci/raw-api-ovh-binding.jq >/dev/null; \
-	  $(KUBECTL) -n "$$namespace" get cronjobs/radar-refresh-scrape cronjobs/radar-refresh-projection -o json | \
+	  $(KUBECTL) -n "$$namespace" get cronjobs -o json | \
 	    jq -e -f deploy/ci/docs-zero-writer-bindings.jq >/dev/null; \
 	  observed="$$(date -u +%Y-%m-%dT%H:%M:%SZ)"; \
 	  jq --arg observedAt "$$observed" -f deploy/ci/minio-removal-receipt.jq \

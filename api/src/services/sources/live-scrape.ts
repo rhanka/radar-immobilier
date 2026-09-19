@@ -31,7 +31,8 @@ import type { Database } from "../../db/client.js";
 import type { ObjectStore } from "../../storage/object-store.js";
 import {
   exploitScrapedCity,
-  exploitScrapedCityFromStore,
+  reexploitScrapedCityChunk,
+  type ReexploitProgress,
   type ExploitScrapeResult,
 } from "./exploit-scrape.js";
 import { runRecueilWithManifest } from "./recueil.js";
@@ -65,6 +66,8 @@ export interface LiveScrapeCityRecap {
   readonly signals?: number;
   /** EXPLOITATION error detail (non-fatal), when `exploit: true` and it threw. */
   readonly exploitError?: string;
+  /** Durable parse progress for the process-restarting replay loop. */
+  readonly reexploitProgress?: ReexploitProgress;
 }
 
 export interface RunLiveScrapeOptions {
@@ -72,7 +75,7 @@ export interface RunLiveScrapeOptions {
   readonly store: ObjectStore;
   /** Injected fetch for the PV adapter (tests). Defaults to globalThis.fetch. */
   readonly fetch?: PvFetchLike;
-  /** Per-city cap on the number of docs collected (RECUEIL `limit`). */
+  /** Per-city collection cap; in replay mode, process-wide parse cap (default 25). */
   readonly limit?: number;
   /** Optional representation filter applied before the collection limit. */
   readonly acceptRef?: (ref: RawDocumentRef) => boolean;
@@ -97,7 +100,8 @@ export interface RunLiveScrapeOptions {
    * When true, run in REEXPLOIT mode: do NO network scrape at all. For each
    * requested city, reconstruct the stored `RawDocumentRecord`s from the object
    * store (the `*.meta.json` sidecars under `raw/proces-verbaux-<city>/cas/`) and
-   * replay PARSE + EXPLOITATION on them via `exploitScrapedCityFromStore`. Used
+   * parse one bounded tranche via `reexploitScrapedCityChunk`. Once every PV is
+   * parsed, replay whole-city EXPLOITATION from cached texts. Used
    * to re-project already-collected raw into the per-city project-state AND feed
    * PG (via `db`) without re-hitting the network (~2h45 of HEAD-skips avoided).
    *
@@ -196,6 +200,10 @@ export async function runLiveScrape(
     exploit, reexploit, db } =
     options;
   const { configs, unknown } = resolveConfigs(citySlugs);
+  let parseBudget = limit ?? 25;
+  if (reexploit && (!Number.isSafeInteger(parseBudget) || parseBudget <= 0)) {
+    throw new Error("reexploit limit must be a positive integer");
+  }
 
   // Resolve the PDF→text extractor once (used when `exploit` OR `reexploit`).
   // Defaults to real poppler; tests inject a mock. A scrape source URL is not
@@ -245,20 +253,25 @@ export async function runLiveScrape(
     // a reload/exploit failure becomes a per-city `status: "error"` recap entry.
     if (reexploit) {
       try {
-        const result = await exploitScrapedCityFromStore(store, config.citySlug, {
+        const { result, progress } = await reexploitScrapedCityChunk(store, config.citySlug, parseBudget, {
           ...(pdfToText !== undefined ? { pdfToText } : {}),
           ...(now !== undefined ? { now } : {}),
           ...(db !== undefined ? { db } : {}),
         });
+        parseBudget -= progress.newDocuments;
+        if (result?.exploitation.graphFeed?.ok === false) {
+          throw new Error(result.exploitation.graphFeed.error ?? "reexploit PG feed failed");
+        }
         pushRecap({
           city: config.citySlug,
           sourceId: config.sourceId,
           // No scrape ran: nothing new was written to raw CAS this run, so the
           // aggregate scrape status is `seen` (the raw was already collected).
           status: "seen",
-          casKeys: result.parsed.map((p) => p.rawRef),
-          count: result.parsed.length,
-          signals: result.designationEventCount,
+          casKeys: result?.parsed.map((p) => p.rawRef) ?? [],
+          count: progress.newDocuments + progress.skippedExisting,
+          ...(result ? { signals: result.designationEventCount } : {}),
+          reexploitProgress: progress,
         });
       } catch (e) {
         pushRecap({
@@ -269,6 +282,9 @@ export async function runLiveScrape(
           count: 0,
           error: e instanceof Error ? e.message : String(e),
         });
+        // A failed tranche may have consumed its budget before throwing.
+        // Stop this process; a retry resumes from durable parsed pairs.
+        break;
       }
       continue;
     }

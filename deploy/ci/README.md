@@ -238,6 +238,33 @@ store holds up to **N+1** objects per env at the peak (default `14` → up to `1
 The current backup is categorically the rollback point of the release being cut,
 so it is never counted against the retention budget — a deliberate one-object
 safety bias.
-# Déploiement du rafraîchissement Gemini low puis Astra low
+# PV refresh precision cascade
 
-Le CronJob PV utilise Gemini 3.8 Flash low avec deux essais maximum sur refus de qualité du contrat v9, puis Astra low comme repli. Les incidents transport, quota/429, délai et flux vide basculent immédiatement vers Astra. `REFRESH_FORCE_FALLBACK=1` est réservé aux recettes. Les deux comptes doivent être enrôlés sous le même owner scope du Secret runtime dans le PVC keyring inscriptible. L’owner enrôle les comptes localement (`make enroll-cloud-code` et `make enroll-codex`); pour un PVC déjà initialisé, la lane k8s rend puis applique le Job éphémère `make import-keyring-account`, sans remplacer l’autre compte. Pour un PVC neuf, le Secret bootstrap contient les deux comptes avant le premier bootstrap. La validation préproduction (purge `refresh/018/*`, cycle complet, mesures par document et liens B′) et la promotion par variable GitHub puis tag `v*` sont documentées dans [`production-acceptance.md`](../../docs/reviews/refresh-cascade/production-acceptance.md). Une fusion déploie la préproduction; la production reste protégée par `REFRESH_CRONJOB_PROD_ENABLED=true`.
+The prepared CronJob uses `openai / gpt-6-astra / medium`, with two quality attempts
+under contract v9 and `gemini / gemini-3.8-flash / low` fallback. Transport, quota,
+timeout, or empty output switches immediately to fallback; persistent quality
+refusal also falls back. After three consecutive quota-failed documents, the
+circuit routes subsequent documents directly to Gemini.
+
+With `REFRESH_VERIFY_ENABLED=1`, every accepted primary chunk receives one
+`REFRESH_VERIFY_PROVIDER=gemini`, `REFRESH_VERIFY_MODEL=gemini-3.8-flash`,
+`REFRESH_VERIFY_REASONING_EFFORT=low` verification pass. The frozen v101b instruction
+judges existing acts; code only removes eligible node groups explicitly marked
+unsupported with a non-empty reason, plus edges incident to the removed nodes.
+Other nodes and surviving edges remain unchanged.
+Invalid JSON or a failed verifier preserves the accepted extraction. Fallback
+outputs skip verification, recorded as `skipped-fallback`.
+
+Before releasing this image, apply migration `0012_refresh_document_outcomes` through
+the existing DB migrator. The dedicated append-only table in `radar` stores one final
+metadata result per document submission, including refusals and parsed page counts,
+with indexes on `created_at` and `status`. No S3 credentials are needed to query it.
+
+Set `REFRESH_VERIFY_ENABLED=0` on the runtime workload to disable verification
+without rebuilding the image. This changes the durable policy identity; no purge
+is required. `REFRESH_FORCE_FALLBACK=1` remains an acceptance-test override.
+Both transports use the existing runtime owner scope and writable keyring PVC.
+Account enrollment/import procedures remain in the [Astra acceptance guide](../../docs/reviews/refresh-astra/production-acceptance.md).
+The [cascade acceptance guide](../../docs/reviews/refresh-cascade/production-acceptance.md)
+defines release checks. These prepared changes are not evidence of deployment;
+production remains gated by `REFRESH_CRONJOB_PROD_ENABLED=true`.

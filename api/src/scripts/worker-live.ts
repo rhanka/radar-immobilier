@@ -10,7 +10,8 @@
  *   tsx src/scripts/worker-live.ts                 # all config-only cities
  *   tsx src/scripts/worker-live.ts carignan delson # a subset
  *   tsx src/scripts/worker-live.ts --chunk 2/5     # shard 2 of 5 (batch launch)
- *   tsx src/scripts/worker-live.ts --reexploit     # replay exploitation, NO scrape
+ *   tsx src/scripts/worker-live.ts --reexploit     # one replay tranche, NO scrape
+ *   sh /opt/scrape/run-chunks.sh node dist/scripts/worker-live.js --reexploit saint-henri
  *   LIVE_SCRAPE_LIMIT=2 tsx src/scripts/worker-live.ts carignan
  *
  * PG FEED (opt-in on explicit credentials): the worker feeds Postgres directly
@@ -44,7 +45,8 @@
  * of per-city errors is logged as NORMAL tolerated data-quality.
  *
  * Env:
- *   LIVE_SCRAPE_LIMIT    optional per-city cap on the number of docs collected.
+ *   LIVE_SCRAPE_LIMIT    optional per-city cap on newly written raw documents;
+ *                        existing CAS documents are skipped before it is consumed.
  *   LIVE_SCRAPE_EXPLOIT  when "1"/"true", also run EXPLOITATION after each
  *                        city's RECUEIL: PARSE the raw PV (pdftotext via poppler)
  *                        + project the real DesignationEvents into the per-city
@@ -67,6 +69,7 @@ import { loadConfig } from "../config.js";
 import { createDb, type DbHandle } from "../db/client.js";
 import { createLogger } from "../logger.js";
 import { citiesChunk, configOnlyCitySlugs, runLiveScrape } from "../services/sources/live-scrape.js";
+import { recueilMetrics, recueilMetricsJson, resetRecueilMetrics } from "../services/sources/recueil.js";
 import { getScrapeObjectStore } from "../storage/s3-object-store.js";
 import { assessJobHealth } from "./job-health.js";
 import { decidePgFeed } from "./pg-feed-decision.js";
@@ -136,8 +139,16 @@ async function main(): Promise<number> {
   const store = getScrapeObjectStore(config);
 
   const { slugs, label, reexploit } = resolveTargets();
-  const limitEnv = process.env.LIVE_SCRAPE_LIMIT;
-  const limit = limitEnv ? Number.parseInt(limitEnv, 10) : undefined;
+  const limitEnv = reexploit
+    ? (process.env.LIVE_SCRAPE_LIMIT ?? process.env.SCRAPE_CHUNK_SIZE ?? "25")
+    : process.env.LIVE_SCRAPE_LIMIT;
+  const limit = limitEnv
+    ? (reexploit ? Number(limitEnv) : Number.parseInt(limitEnv, 10))
+    : undefined;
+  if (reexploit && (limit === undefined || !Number.isSafeInteger(limit) || limit <= 0)) {
+    logger.error("reexploit chunk size must be a positive integer");
+    return 2;
+  }
   const exploitEnv = (process.env.LIVE_SCRAPE_EXPLOIT ?? "").toLowerCase();
   // `--reexploit` implies exploitation; a plain exploit run is opt-in via env.
   const exploit = reexploit || exploitEnv === "1" || exploitEnv === "true";
@@ -198,6 +209,7 @@ async function main(): Promise<number> {
       );
     }
 
+    resetRecueilMetrics();
     const recap = await runLiveScrape(slugs, {
       store,
       ...(limit !== undefined && Number.isFinite(limit) ? { limit } : {}),
@@ -229,8 +241,16 @@ async function main(): Promise<number> {
       (r) => r.signals !== undefined && r.exploitError === undefined,
     ).length;
 
+    const collection = recueilMetrics();
+    // Machine-readable terminal line consumed by the in-container chunk loop.
+    const replay = recap.reduce((total, city) => ({
+      newDocuments: total.newDocuments + (city.reexploitProgress?.newDocuments ?? 0),
+      skippedExisting: total.skippedExisting + (city.reexploitProgress?.skippedExisting ?? 0),
+      remaining: total.remaining + (city.reexploitProgress?.remaining ?? 0),
+    }), { newDocuments: 0, skippedExisting: 0, remaining: 0 });
+    console.log(reexploit ? JSON.stringify(replay) : recueilMetricsJson());
     logger.info(
-      { cities: recap.length, new: newCount, seen: seenCount, errors: errors.length },
+      { cities: recap.length, new: newCount, seen: seenCount, errors: errors.length, ...collection },
       "worker-live: done",
     );
     logger.info(
@@ -247,6 +267,9 @@ async function main(): Promise<number> {
       const n = Number.parseFloat(raw ?? "");
       return Number.isFinite(n) && n > 0 && n <= 1 ? n : fallback;
     };
+    // A parse-only tranche intentionally has no PG upsert yet. Replays fail
+    // on ANY city error; otherwise the loop may stop on an incomplete restore.
+    if (reexploit) return errors.length > 0 || !pdftotextAvailable ? 1 : 0;
     const maxErrorRate = parseRate(process.env.LIVE_SCRAPE_MAX_ERROR_RATE, 0.9);
     const elevatedWarnRate = parseRate(process.env.LIVE_SCRAPE_WARN_ERROR_RATE, 0.5);
     const errorRate = recap.length > 0 ? errors.length / recap.length : 0;
