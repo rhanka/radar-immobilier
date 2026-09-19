@@ -1,16 +1,49 @@
-# Rafraîchissement Astra low : préproduction puis production
+# Astra medium refresh with Gemini low verification: preproduction and production
 
-Refs #703 et #697. Décision owner : 2026-09-17 04:40Z. La lane code prépare la livraison ; i-cond fusionne et la lane k8s exécute le déploiement autorisé.
+Refs #703 and #697 established Astra extraction with Gemini fallback. The prepared v101b
+precision-cascade change uses Astra medium and Gemini low verification. This is not a
+deployment receipt: i-cond reviews and commits; the release lane deploys only when authorized.
 
 ## Contrat d’exécution
 
-Primaire : `openai / gpt-6-astra / low`, transporté par `CodexRuntimeClient`. Repli : `gemini / gemini-3.8-flash / low`, via Cloud Code. `@sentropic/llm-mesh-refresh` reste exactement en 0.19.2. Son `dist/codex.js:53` retire `max_output_tokens`; le test unitaire à la frontière HTTP vérifie son omission même lorsque l’extraction demande 32768 jetons. La limite Gemini reste 32768. `REFRESH_MAXIMUM_ATTEMPTS` doit valoir 1 : Graphify peut réessayer les refus de validation avec des budgets de route supérieurs.
+Primary: `openai / gpt-6-astra / medium` through `CodexRuntimeClient`. Fallback and verification:
+`gemini / gemini-3.8-flash / low` through Cloud Code. `@sentropic/llm-mesh-refresh` stays pinned
+to 0.19.2; Codex omits `max_output_tokens`, with a boundary test for that behavior. Gemini
+retains the 32768-token cap. `REFRESH_MAXIMUM_ATTEMPTS=1` prevents hidden Graphify route retries.
 
-`REFRESH_TIMEOUT_MS=900000` est une échéance distincte par tentative modèle. L’échéance Job est 2100 secondes, laissant la place aux deux fenêtres modèle plus acquisition/publication. Un gros document multi-fragments peut atteindre l’échéance ; les fragments terminés reprennent durablement au cycle suivant.
+`REFRESH_TIMEOUT_MS=900000` is a separate deadline per extraction or verification attempt.
+The Job deadline remains 2100 seconds: it does not cover four worst-case attempt windows.
+A slow or multichunk document may reach that deadline; completed chunks resume durably.
+A verifier timeout preserves the primary extraction. Cycle cancellation and storage errors
+still stop durable completion rather than falsely recording success.
 
-Les erreurs de transport, quota/429, 5xx, compte actif absent, délai et texte vide déclenchent le repli. Les refus JSON, profil et provenance s’arrêtent sans repli. Le repli reste attaché aux fragments restants du document. Après trois documents distincts repliés consécutivement pour quota/429, les suivants ignorent Astra. Un document primaire entièrement réussi remet ce compteur à zéro ; les fragments intermédiaires réussis ne le font pas. Le circuit se réinitialise au cycle suivant ; les documents partiels restaurent le repli depuis les reçus durables. L’acquisition courante sélectionne un PDF par cycle ville ; utiliser deux cycles distincts pour l’acceptation à deux documents.
+Transport, quota/429, 5xx, missing active account, timeout, and empty output trigger fallback.
+JSON, profile, and provenance refusals receive one same-primary retry, then Gemini fallback.
+Fallback sticks to the document's remaining chunks. Three consecutive distinct quota-failed
+documents cause subsequent documents to bypass Astra. A wholly successful primary document
+resets that counter; intermediate chunks do not. The circuit resets each cycle; partial
+documents restore extraction affinity from durable receipts. Acquisition selects one PDF
+per city cycle; use distinct cycles for acceptance with two documents.
 
-`state.json` contient les deux modèles et le mode forcé dans `identity.modelPolicy`. `documentModels[docSha][]` conserve `modelUsed`, statut, latence, `failureReason` et/ou `fallbackReason` pour chaque tentative. Un document mixte conserve donc les deux modèles. Les fragments terminés reprennent sans génération dupliquée. Le fournisseur/modèle/statut retournés sont contrôlés avant enregistrement ; une identité retournée différente arrête avec `modelUsed: null`. Les refus d’intégrité/statut portent `terminalFailure: true` entre redémarrages. L’échéance est appliquée même pour un client non coopératif. Les réponses tardives ne peuvent ni valider ni écraser le fichier choisi. Les journaux n’émettent que les métadonnées sûres de `refresh-pv: model receipt` ; aucun message fournisseur, prompt, identifiant ou matière de compte.
+With `REFRESH_VERIFY_ENABLED=1`, each accepted primary chunk is verified by
+`REFRESH_VERIFY_PROVIDER=gemini`, `REFRESH_VERIFY_MODEL=gemini-3.8-flash`,
+`REFRESH_VERIFY_REASONING_EFFORT=low`. Fallback output is never verified (`skipped-fallback`).
+The frozen filter only removes eligible act groups on explicit `non_soutenu` with a non-empty
+reason, together with all edges incident to removed nodes. Other nodes and surviving edges
+remain unchanged. Missing/invalid decisions keep the act;
+ungrounded supported excerpts also keep it. Invalid JSON or a failed verification preserves
+the accepted primary output. See the [cascade contract](../refresh-cascade/production-acceptance.md)
+for grouping, counters, and the frozen instruction hash. `REFRESH_VERIFY_ENABLED=0` disables
+verification without rebuilding the image and records `disabled` on primary receipts.
+
+`identity.modelPolicy` includes primary, fallback, verification model or disabled state, and
+forced mode. `documentModels[docSha][]` persists safe per-call receipts and verification
+counters under `transition=verification`. The budget reserves four calls per chunk when
+enabled, three otherwise. Completed chunks resume without duplicate calls. Verification
+failures never restore extraction fallback affinity or affect the quota circuit. Extraction
+identity/status integrity failures remain terminal; verifier integrity failures preserve
+the accepted extraction. Deadlines apply to non-cooperative clients and reject late responses.
+Logs contain only safe receipt metadata, never supplier messages, prompts, or account material.
 
 ## Prérequis keyring et principal
 
@@ -33,17 +66,17 @@ Employer les clés Secret existantes `REFRESH_PRINCIPAL_REF` et `REFRESH_OWNER_S
 ## Acceptation préproduction (lane k8s)
 
 1. Vérifier cluster/namespace OVH préprod, noms des clés runtime, deux transports enrôlés, PVC inscriptible et limite workload 1536Mi. Le kubeconfig cert-ro de la lane code est en lecture seule.
-2. Fusionner la PR verte via i-cond, attendre CD préprod et consigner SHA de livraison et digest API immuable. Le rendu doit montrer uniquement PV actif, six variables modèle et images init/runtime correspondantes.
+2. After i-cond merges and preproduction CD completes, record the release SHA and immutable API digest. Check PV alone is active, Astra medium, Gemini low fallback, all four verification variables, and matching init/runtime images.
 3. Après l’import Codex si le PVC existe déjà, créer via la cible k8s un Job unique depuis `radar-refresh-pv`. Respecter le `flock`, éviter 05:17 UTC et choisir des PDF publics aux identités d’entrée inutilisées, ou consigner les skips durables.
-4. Conserver, par document, modèle réellement employé, acceptations JSON/profil/provenance, six étapes durables terminées, projection PG, durée et issue Job. L’acceptation primaire exige un appel réel `gpt-6-astra / low`.
-5. Créer un second Job unique avec `REFRESH_FORCE_FALLBACK=1` sur ce seul Job. Conserver son reçu : Gemini low, raison `forced`, zéro appel Astra. L’identité de politique modifiée évite la réutilisation de l’extraction primaire.
-6. Collecter les preuves e2e demandées : modèle par document, acceptés/refusés, durée, liens vers les nouveaux signaux filtre B′ sur immo-preprod puis immo-prod, et logs du Job. Un refus qualité est une acceptation échouée, jamais un motif de relance silencieuse avec un autre modèle.
+4. Retain actual models, JSON/profile/provenance acceptance, verification receipts/counters, six durable stages, PostgreSQL projection, duration, and Job result. Primary acceptance requires a real `gpt-6-astra / medium` call followed by Gemini low verification.
+5. Exercise a separate authorized Job with `REFRESH_FORCE_FALLBACK=1`: Gemini low, reason `forced`, `skipped-fallback`, zero Astra and verification calls. Also test verification disabled. Policy identities separate those results without a state purge.
+6. Collect model, accepted/refused counts, duration, safe Job logs, and B′ links on `https://preprod.immo.sent-tech.ca`, then `https://immo.sent-tech.ca`. Extraction quality retries and Gemini fallback must carry their explicit transitions; verifier failure is recorded while the primary output is retained.
 
 ## Promotion production (lane k8s et i-cond)
 
 1. Avec GO owner, vérifier/créer les Secrets runtime et bootstrap production, PVC `radar-refresh-keyring` inscriptible, deux enrôlements, identifiants S3 dédiés et marge 768Mi. Vérifier le contexte OVH production réel ; un inventaire Scaleway historique ne prouve rien.
 2. Mettre `REFRESH_CRONJOB_PROD_ENABLED=true`, créer le tag `v*` sur le commit fusionné accepté et approuver la porte `production` si nécessaire. `promote-prod` déploie le digest API exact de la release.
-3. Vérifier PV actif, scrape/projection historiques suspendus, six valeurs modèle Astra/Gemini low et images identiques. Exécuter l’acceptation unique autorisée puis inspecter le Job planifié suivant ; conserver clés d’état, reçus sûrs, comptes acceptés/refusés et durées.
+3. Verify PV active, historical scrape/projection suspended, Astra medium, Gemini low fallback and verification, and matching images. Run the authorized acceptance and inspect the next scheduled Job; retain state keys, safe receipts/counters, and durations.
 
 ## Retour arrière et suivi quota
 
