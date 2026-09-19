@@ -5,7 +5,8 @@ import type { TextJsonGenerationClient } from "@sentropic/graphify";
 
 import type { RefreshProvider } from "./refresh-mesh.js";
 import type { RefreshProfileChunk } from "./refresh-profile.js";
-import { verifyRefreshProfile, type RefreshVerificationSummary } from "./refresh-verification.js";
+import { refreshVerificationActs, verifyRefreshProfile,
+  type RefreshVerificationSummary } from "./refresh-verification.js";
 
 export interface RefreshModel {
   readonly provider: RefreshProvider;
@@ -34,6 +35,8 @@ export interface RefreshModelPolicyOptions {
   readonly forceFallback: boolean;
   readonly primaryQualityAttempts: number;
   readonly timeoutMs: number;
+  /** Document identity shown to the verifier, as the benchmark's identity line does. */
+  readonly citySlug?: string;
   readonly signal?: AbortSignal;
   readonly createClient: (model: RefreshModel, signal: AbortSignal) => TextJsonGenerationClient;
 }
@@ -71,7 +74,7 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
   }>();
   return {
     policy: JSON.stringify({ version: 3, primary: options.primary, fallback: options.fallback,
-      verification: options.verification ?? null, verificationContract: "v101b-removal-only-v2",
+      verification: options.verification ?? null, verificationContract: "v101b-removal-only-v3",
       primaryQualityAttempts: options.primaryQualityAttempts, forceFallback: options.forceFallback, quotaThreshold: 3 }),
     maximumAttempts: options.primaryQualityAttempts + 1 + (options.verification ? 1 : 0),
     async verify(input, maxOutputTokens, record) {
@@ -79,6 +82,16 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
       if (!options.verification || selected?.reason) return input;
       if (!selected) throw new Error("Refresh verification requires an accepted primary extraction");
       options.signal?.throwIfAborted();
+      // No act to judge: the benchmark makes no call in this case, so neither does the runtime.
+      // The receipt still names the skip, with no model and no attempt consumed.
+      if (refreshVerificationActs(input.extraction).length === 0) {
+        await record({ modelUsed: null, status: "completed", attempt: selected.attempts,
+          transition: "verification", latencyMs: 0,
+          verification: { status: "skipped-no-acts", acts: 0, removed: 0, unknown_ids: 0,
+            kept_no_valid_decision: 0, supported_ungrounded: 0, contradicting_excerpt_ungrounded: 0 } });
+        options.signal?.throwIfAborted();
+        return input;
+      }
       const model = options.verification;
       const attempt = ++selected.attempts;
       const startedAt = Date.now();
@@ -99,6 +112,7 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
       try {
         const verified = await Promise.race([deadline, verifyRefreshProfile(input, {
           client: options.createClient(model, controller.signal), model, signal: controller.signal, maxOutputTokens,
+          ...(options.citySlug ? { citySlug: options.citySlug } : {}),
         })]);
         output = verified.output;
         summary = verified.summary;
