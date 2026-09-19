@@ -1,0 +1,30 @@
+{
+  "output": "docs/spec/reports/dossier-backup-pra-712/decision-focus.html",
+  "bytes": 699949,
+  "htmlSha256": "9a48f25046c6d2ee19b0e3d07f978d1b7a2a43bcb768f6fc23705c183f3d865e",
+  "dossierHash": "f79aaad53bdfe739440d32ae2492e9523e96a44549a95960d7b53166dca75e72",
+  "artifactInputHash": "7b9aa79ab663b426dc72bb6bab502fff2f09bf9621d8deaac5ae93ab410cc258",
+  "graphs": [
+    {
+      "id": "architecture-sauvegardes",
+      "nodes": 22,
+      "edges": 10,
+      "subflows": 6,
+      "sceneHash": "3d26491a0c263576306e172fb053781fc01d2214659dddcdbfb0004e58eb34c0"
+    },
+    {
+      "id": "sequence-bout-en-bout",
+      "nodes": 13,
+      "edges": 12,
+      "subflows": 2,
+      "sceneHash": "a7faf374fae94c0a17c44858e2304d165dbe36c204284e7713d509070926a250"
+    },
+    {
+      "id": "mise-en-service",
+      "nodes": 14,
+      "edges": 13,
+      "subflows": 3,
+      "sceneHash": "219d8fb9a9429bd568533343a920574f46db41dfe14a11b1c97df87f07b01a2a"
+    }
+  ]
+}
