@@ -15,8 +15,10 @@
  *     failure, across two sub-axes:
  *       EXPLOITATION: exploitation was asked for but structurally cannot produce
  *         signal — `pdftotext` (poppler) is missing (every PV extracts to empty),
- *         or a PG feed was expected yet nothing was upserted despite cities being
- *         fetched (a broken exploitation / PG-write path).
+ *         or a PG feed was expected yet nothing was upserted although cities DID
+ *         collect documents (a broken exploitation / PG-write path). A night on
+ *         which nothing new was published anywhere collects nothing, projects
+ *         nothing and upserts nothing: that is an up-to-date parc, not a fault.
  *       RECUEIL: the per-city fetch-error RATE reached `maxErrorRate` (the whole
  *         run erroring points at infra / network / a source-provider outage, not
  *         at individual unreachable cities).
@@ -50,6 +52,18 @@ export function assessJobHealth(input: {
   readonly upserted: number; // cities whose graph was upserted to PG.
   readonly pdftotextAvailable: boolean; // poppler present (exploitation can extract).
   readonly index404Cities?: readonly string[];
+  /**
+   * Cities that actually COLLECTED a document this run, i.e. the ones
+   * exploitation had anything to do for. Defaults to "every city that was
+   * fetched", which is what it meant before the collection became differential.
+   *
+   * Once the run downloads only what is new (owner, 2026-09-20), a quiet night
+   * legitimately collects nothing anywhere, re-projects nothing, and upserts
+   * nothing. Without this, "0 upserted while cities were fetched" — a rule
+   * written to catch a broken exploitation path — fails the Job on the most
+   * normal night there is.
+   */
+  readonly citiesWithNewDocuments?: number;
 }): JobHealth {
   const {
     errorCount,
@@ -89,11 +103,12 @@ export function assessJobHealth(input: {
         "for every city (misconfigured image)" + indexSuffix,
     };
   }
-  if (feedExpected && fetched > 0 && upserted === 0) {
+  const exploitable = input.citiesWithNewDocuments ?? fetched;
+  if (feedExpected && exploitable > 0 && upserted === 0) {
     return {
       code: 1,
       warn,
-      reason: `systemic: exploitation produced nothing — ${fetched} cities fetched, 0 upserted (broken exploitation/PG-write path)` + indexSuffix,
+      reason: `systemic: exploitation produced nothing — ${exploitable} cities collected a document, 0 upserted (broken exploitation/PG-write path)` + indexSuffix,
     };
   }
 

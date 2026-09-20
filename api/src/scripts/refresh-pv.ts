@@ -118,7 +118,14 @@ async function main(): Promise<void> {
       maxOutputTokens: positive("REFRESH_MAX_OUTPUT_TOKENS", 32_768, 65_536),
       acquisitionLimit: positive("REFRESH_ACQUISITION_LIMIT", 1, 100),
       ...(acquire ? { acquire } : {}) });
-    logger.info({ ...result, modelCalls }, "refresh-pv: completed");
+    logger.info(
+      { ...result, modelCalls },
+      "upToDate" in result && result.upToDate
+        // Nothing new in the city's index: the check ran, the differential was
+        // empty, no document was downloaded and no model was called. Exit 0.
+        ? "refresh-pv: up to date — nothing new published for this city"
+        : "refresh-pv: completed",
+    );
   } finally {
     await pool.end();
   }

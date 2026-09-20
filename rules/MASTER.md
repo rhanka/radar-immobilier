@@ -112,20 +112,38 @@ Canonical hostnames — never guess or derive them, copy them from here:
   - **DOCUMENTED EXCEPTION — procès-verbaux (PV) sources, owner decision of 2026-09-20 (issue #723).**
     `robots.txt` is NOT fetched and NOT evaluated at run time by the PV adapter, and that is deliberate,
     not an omission. Reason, in the owner's terms: radar-immobilier is a specialised alerting tool over a
-    bounded list of municipal council documents, not a search engine reindexing sites every night. The
-    decision is bound to the three measures that make it defensible, and it does not stand without them:
-    (1) the collection window is enforced — an undatable document no longer escapes it; (2) a document
-    already collected is not downloaded again — the nightly run READS every city's index, which is the
-    daily check for a new document, and downloads only what is new; (3) every request is spaced per the
-    rate limit below, which is what actually protects a small municipal server.
+    bounded list of municipal council documents, not a search engine reindexing sites every night.
+    The decision is UNCONDITIONAL — it was taken as recorded here, and the measures listed below
+    accompany it; they are not conditions attached to it, and an agent does not add any.
+    Accompanying measures, stated as they actually stand on 2026-09-20:
+    (1) the collection window now bounds a run in practice — an undatable document is still KEPT by
+    `filterPvByWindow` (a new PV may legitimately carry no date), but far fewer documents are undatable:
+    on the measured drummondville index, 240 of 496 links before the fix, 56 after, and a FIRST run goes
+    from 255 documents to 73;
+    (2) a document an earlier run already collected is NOT downloaded again, and is not probed either
+    — no GET and no HEAD. The run READS every city's index, which is the daily check for a new
+    document, and downloads only the differential. A published procès-verbal does not change, so
+    whether a stored document has been updated is a question the cycle does not ask (owner decision of
+    the same day). The memory is a cumulative per-source state
+    (`runs/{source}/collected-urls.jsonl`) that never shrinks, so a night with nothing new erases
+    nothing. In force on BOTH callers: the `radar-refresh-pv` CronJob (the scheduled cycle) and the
+    on-demand `worker-live` mass scrape. Measured on drummondville: one night went from 1 index
+    request + 255 document downloads to 1 index request and nothing else;
+    (3) requests are spaced on the live-scrape path — `runLiveScrape` gives the adapter
+    `PV_MIN_REQUEST_INTERVAL_MS` and the adapter then spaces its index page, sitemap, session pages and
+    documents alike. The adapter's own default is `0`, and the pipeline executor path
+    (`adapter-registry.ts`) does not set it yet.
     Scope and limits of record: 15 of the 553 PV hosts `Disallow` a directory that can hold PV
     (inventory of 2026-09-20); for `www.saint-henri.ca` all 397 PV are under a disallowed
     `/wp-content/uploads/`. That is a fact on file, not a run-time gate. Reopening this decision is the
     owner's, not an agent's. Code anchor: `PV_ROBOTS_TXT_CONSULTED` in `proces-verbaux-generic.ts`.
 - Rate-limit aggressively : at most 1 req / 2 s by default per source, more conservative for small municipal sites.
-  - This is HELD IN CODE, not left to each caller's goodwill: the PV adapter itself spaces every request
-    it makes — index page, sitemap, session pages, documents (`minRequestIntervalMs`). Until 2026-09-20
-    the rule was documented as "the caller's responsibility" and no caller assumed it.
+  - Held in code on the live-scrape path rather than in each caller's goodwill: the PV adapter spaces
+    every request it makes — index page, sitemap, session pages, documents (`minRequestIntervalMs`) —
+    when the caller sets that interval, which `runLiveScrape` does on the real network. Before
+    2026-09-20 the adapter documented the limit as "the caller's responsibility"; the refresh path
+    (`refresh-run.ts`) did pace its DOCUMENT fetches, no caller paced the INDEX fetch, and the pipeline
+    executor path still paces nothing.
 - Identify the user-agent truthfully (`radar-immobilier/0.x (+contact)`); anti-detect via Obscura is for reliability, not deception.
 - Cache raw payloads in S3 to avoid re-fetching during dev / tests.
 
