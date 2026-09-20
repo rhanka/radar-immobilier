@@ -317,6 +317,81 @@ describe("refresh 0.18 real storage integration", () => {
     } finally { await clean(city); }
   }, 60_000);
 
+  it("advances to the next pending document instead of re-selecting the first row of the index",
+    async () => {
+      // The bug this branch fixes: a city whose index page lists several minutes
+      // stayed pinned on ONE of them, reported itself up to date, and never
+      // extracted a newly published procès-verbal. Here the city offers two PDFs;
+      // three consecutive cycles must take the newest, then the older, then stop.
+      const city = `refresh-advance-${randomUUID()}`;
+      const sourceId = `proces-verbaux-${city}`;
+      const documents = [
+        { label: "older", publishedAt: "2026-04-14" },
+        { label: "newer", publishedAt: "2026-09-15" },
+      ].map(({ label, publishedAt }) => {
+        const bytes = new TextEncoder().encode(`%PDF refresh ${city} ${label}`);
+        const sha = createHash("sha256").update(bytes).digest("hex");
+        return { label, publishedAt, bytes, sha, key: `raw/${sourceId}/cas/${sha}.pdf`,
+          url: `https://example.test/${city}-${label}.pdf` };
+      });
+      for (const document of documents) {
+        await store.put(document.key, document.bytes, "application/pdf");
+        await store.put(`${document.key}.meta.json`, JSON.stringify({ sourceUrl: document.url }),
+          "application/json");
+      }
+      await store.putCanonicalGraph(canonicalGraphKey(city), JSON.stringify({ nodes: [], edges: [] }),
+        "application/json", { ifMatch: null });
+
+      const extracted: string[] = [];
+      const textClient = { mode: "mesh", provider: "test", model: "test",
+        async generateJson(input: Parameters<TextJsonGenerationClient["generateJson"]>[0]) {
+          // The prompt carries the document text, which is how the test knows
+          // WHICH document the cycle actually paid a model call for.
+          const document = documents.find(({ label }) => JSON.stringify(input).includes(label))!;
+          extracted.push(document.label);
+          const extraction: Extraction = { nodes: [], edges: [], input_tokens: 1, output_tokens: 1 };
+          const body = JSON.stringify(extraction);
+          await input.validateResponse?.(body);
+          if (input.outputPath) {
+            await mkdir(dirname(input.outputPath), { recursive: true });
+            await writeFile(input.outputPath, body);
+          }
+          return { status: "completed", provider: "test", mode: "mesh",
+            outputPath: input.outputPath!, audit: {} } as const;
+        } } satisfies TextJsonGenerationClient;
+
+      // The index page lists its minutes OLDEST first — the order that made the
+      // previous positional selection pick the wrong document every time.
+      const configured: RunPvRefreshOptions = { citySlug: city, store, db, profileContext: context,
+        textClient, extractPdf: async (bytes) => `${new TextDecoder().decode(bytes)}\f`,
+        profileHash: "sha256:profile", registryHash: "sha256:registry", packageVersion: "0.18.0",
+        modelPolicy: "test", budgetLimit: 100, maximumAttempts: 2, maxOutputTokens: 512,
+        acquire: async () => [{ city, sourceId, status: "seen", count: documents.length,
+          casKeys: documents.map(({ key }) => key),
+          documents: documents.map(({ key, sha, publishedAt }) => ({
+            casKey: key, sha256: sha, status: "seen" as const, publishedAt })) }] };
+
+      try {
+        const first = await runPvRefresh(configured);
+        expect(first).toMatchObject({ status: "published", candidates: 2,
+          documentSha: documents.find(({ label }) => label === "newer")!.sha });
+
+        const second = await runPvRefresh(configured);
+        expect(second).toMatchObject({ status: "published", candidates: 2,
+          documentSha: documents.find(({ label }) => label === "older")!.sha });
+
+        // Both documents are projected: the city settles instead of oscillating.
+        const third = await runPvRefresh(configured);
+        expect(third).toMatchObject({ status: "up-to-date", candidates: 2 });
+        expect(extracted).toEqual(["newer", "older"]);
+
+        const outcomes = await db.select().from(refreshDocumentOutcomes)
+          .where(eq(refreshDocumentOutcomes.citySlug, city));
+        expect(outcomes).toHaveLength(2);
+        expect(outcomes.map(({ status }) => status)).toEqual(["accepted", "accepted"]);
+      } finally { await clean(city); }
+    }, 120_000);
+
   it("treats a skipped selected city as failure before model execution", async () => {
     const city = `refresh-018-${randomUUID()}`;
     const fx = await fixture(city);
