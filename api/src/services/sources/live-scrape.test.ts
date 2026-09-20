@@ -15,7 +15,7 @@
  * No real network: the adapter's `fetch` is injected (PvFetchLike). Storage is
  * an in-memory MemoryStore (patron recueil.test.ts).
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   ALL_PV_CITIES,
@@ -28,7 +28,10 @@ import {
 
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
 import { projectStateKey } from "../exploitation/project-state.js";
+import { collectedUrlsKey } from "./known-urls.js";
 import { citiesChunk, configOnlyCitySlugs, runLiveScrape } from "./live-scrape.js";
+import { recueilMetrics, recueilMetricsJson, resetRecueilMetrics } from "./recueil.js";
+import { assessJobHealth } from "../../scripts/job-health.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // In-memory object store (patron recueil.test.ts)
@@ -37,11 +40,16 @@ import { citiesChunk, configOnlyCitySlugs, runLiveScrape } from "./live-scrape.j
 class MemoryStore implements ObjectStore {
   readonly objects = new Map<string, Uint8Array>();
   putCount = 0;
+  /** When set, every `put` under this prefix throws (storage-failure double). */
+  failPutPrefix: string | undefined;
   async put(
     key: string,
     body: Uint8Array | Buffer | string,
     _contentType?: string,
   ): Promise<ObjectInfo> {
+    if (this.failPutPrefix !== undefined && key.startsWith(this.failPutPrefix)) {
+      throw new Error(`storage unavailable for ${key}`);
+    }
     this.putCount += 1;
     const bytes =
       typeof body === "string" ? new TextEncoder().encode(body) : new Uint8Array(body);
@@ -148,6 +156,341 @@ function fakeFetchForSlugs(slugs: readonly string[], pdfBody: string): PvFetchLi
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("runLiveScrape — config-only PV cities → object store", () => {
+  // An INDEX 404 is the only 404 that still costs the city. The DOCUMENT 404 of
+  // the same shape is now a hole in an otherwise successful run (issue #723) —
+  // see "a dead document link" below for the measured drummondville shape.
+  it("should preserve index 404 diagnostics through RECUEIL, metrics and onCity", async () => {
+    resetRecueilMetrics();
+    const city = "drummondville";
+    const config = ALL_PV_CITIES.find((c) => c.config.citySlug === city)!.config;
+    const onCity = vi.fn();
+    const onRequest = vi.fn();
+    const recap = await runLiveScrape([city], {
+      store: new MemoryStore(), onCity, onRequest,
+      now: () => new Date("2026-06-10T00:00:00Z"),
+      fetch: async () => ({
+        ok: false, status: 404,
+        headers: new Headers({ server: "cloudflare", "cf-ray": "ray", authorization: "SECRET" }),
+        arrayBuffer: async () => { throw new Error("Must not read error bodies"); },
+      }),
+    });
+    expect(recap[0]).toMatchObject({ city, status: "error", error: "[http] HTTP 404", fetchFailure: {
+      url: config.pvIndexUrl,
+      phase: "index", httpStatus: 404, durationMs: 0, headers: { server: "cloudflare", "cf-ray": "ray" },
+    } });
+    expect(onCity).toHaveBeenCalledExactlyOnceWith(recap[0]);
+    expect(onRequest).toHaveBeenLastCalledWith({ city, ...recap[0]!.fetchFailure });
+    expect(recueilMetrics()).toMatchObject({ index404: 1, document404: 0 });
+    expect(JSON.parse(recueilMetricsJson())).toEqual(recueilMetrics());
+    expect(JSON.stringify([recap, onRequest.mock.calls, onCity.mock.calls])).not.toContain("SECRET");
+    const health = assessJobHealth({
+      cityCount: 528, errorCount: 1, maxErrorRate: 0.9, elevatedWarnRate: 0.5,
+      exploitRequested: false, feedExpected: false, upserted: 0, pdftotextAvailable: true,
+      index404Cities: recap.filter((r) => r.fetchFailure?.phase === "index" && r.fetchFailure.httpStatus === 404).map((r) => r.city),
+    });
+    expect(health.warn).toBe("elevated");
+    expect(health.reason).toContain(city);
+    resetRecueilMetrics();
+    expect(recueilMetrics()).toMatchObject({ index404: 0, document404: 0 });
+  });
+
+  // THE defect of issue #723, at the orchestration layer: the city's index
+  // answers, two documents are collected, the third is a dead link. Before, the
+  // city came back `error, docs=0` and its two CAS objects were orphaned.
+  it("should keep a city whose index answers when ONE document 404s, and name the dead URL", async () => {
+    resetRecueilMetrics();
+    const city = "drummondville";
+    const config = ALL_PV_CITIES.find((c) => c.config.citySlug === city)!.config;
+    const base = new URL(config.pvIndexUrl).origin;
+    const dead = `${base}/wp-content/uploads/2015/10/Proces_verbal_2016_01_18.pdf`;
+    const alive = [`${base}/pv/2026-06-05.pdf`, `${base}/pv/2026-06-12.pdf`];
+    const onCity = vi.fn();
+    const store = new MemoryStore();
+    const recap = await runLiveScrape([city], {
+      store, onCity, onRequest: () => {},
+      now: () => new Date("2026-06-20T00:00:00Z"),
+      // The dead link is listed LAST, exactly like the measured rank 253/255.
+      fetch: async (url) => {
+        if (url === config.pvIndexUrl) {
+          return htmlResponse(
+            [...alive, dead]
+              .map((u) => `<a href="${u}">Procès-verbal du 2026-06-05</a>`)
+              .join(""),
+          ) as Awaited<ReturnType<PvFetchLike>>;
+        }
+        if (url === dead) {
+          return {
+            ok: false, status: 404,
+            headers: new Headers({ server: "cloudflare", "content-type": "text/html" }),
+            arrayBuffer: async () => { throw new Error("Must not read error bodies"); },
+          } as Awaited<ReturnType<PvFetchLike>>;
+        }
+        return pdfResponse(`PV bytes ${url}`) as Awaited<ReturnType<PvFetchLike>>;
+      },
+    });
+
+    const entry = recap[0]!;
+    expect(entry.status).toBe("new");
+    expect(entry.count).toBe(2);
+    expect(entry.casKeys).toHaveLength(2);
+    expect(entry.failedDocs).toBe(1);
+    expect(entry.documentFailures).toEqual([
+      { url: dead, phase: "document", error: "http", detail: "HTTP 404", httpStatus: 404 },
+    ]);
+    // The run is COMMITTED: a manifest references the two collected documents.
+    const manifests = [...store.objects.keys()].filter((k) => k.endsWith("manifest.jsonl"));
+    expect(manifests).toHaveLength(1);
+    // The 404 is counted on the document axis, so job-health does not read it
+    // as a lost index and the city is not in the error set.
+    expect(recueilMetrics()).toMatchObject({ index404: 0, document404: 1 });
+    expect(recap.filter((r) => r.status === "error")).toHaveLength(0);
+    resetRecueilMetrics();
+  });
+
+  // The owner's requirement of 2026-09-20, in one test: CHECK every 24 h,
+  // do not re-download.
+  it("should re-read the index but skip a document the previous run already collected", async () => {
+    const slugs = configOnlySlugs(1);
+    const store = new MemoryStore();
+    const fetched: string[] = [];
+    const base = fakeFetchForSlugs(slugs, "PV bytes — identical");
+    const fetch: PvFetchLike = async (url, init) => {
+      fetched.push(url);
+      return base(url, init);
+    };
+
+    const first = await runLiveScrape(slugs, { store, fetch, skipAlreadyCollectedUrls: true });
+    expect(first[0]!.count).toBe(1);
+    const afterFirst = [...fetched];
+    expect(afterFirst.filter((u) => u.endsWith(".pdf"))).toHaveLength(1);
+
+    fetched.length = 0;
+    const second = await runLiveScrape(slugs, { store, fetch, skipAlreadyCollectedUrls: true });
+    // The INDEX was read again — that is the daily check, and it is not skipped.
+    expect(fetched).toContain(
+      ALL_PV_CITIES.find((c) => c.config.citySlug === slugs[0])!.config.pvIndexUrl,
+    );
+    // The document was NOT downloaded again.
+    expect(fetched.filter((u) => u.endsWith(".pdf"))).toHaveLength(0);
+    expect(second[0]!.status).toBe("seen");
+    expect(second[0]!.count).toBe(0);
+  });
+
+  it("should still download a document that is NEW in the index on the next run", async () => {
+    const slug = configOnlySlugs(1)[0]!;
+    const config = ALL_PV_CITIES.find((c) => c.config.citySlug === slug)!.config;
+    const origin = new URL(config.pvIndexUrl).origin;
+    const store = new MemoryStore();
+    let listed = [`${origin}/pv/${slug}-2026-06-05.pdf`];
+    const fetch: PvFetchLike = async (url) => {
+      if (url === config.pvIndexUrl) {
+        return htmlResponse(
+          listed.map((u) => `<a href="${u}">Procès-verbal du 2026-06-05</a>`).join(""),
+        ) as Awaited<ReturnType<PvFetchLike>>;
+      }
+      return pdfResponse(`bytes for ${url}`) as Awaited<ReturnType<PvFetchLike>>;
+    };
+    await runLiveScrape([slug], { store, fetch, skipAlreadyCollectedUrls: true,
+      now: () => new Date("2026-06-20T00:00:00Z") });
+
+    // A new PV appears in the index the next night.
+    listed = [...listed, `${origin}/pv/${slug}-2026-06-12.pdf`];
+    const second = await runLiveScrape([slug], { store, fetch, skipAlreadyCollectedUrls: true,
+      now: () => new Date("2026-06-21T00:00:00Z") });
+    expect(second[0]!.count).toBe(1);
+    expect(second[0]!.status).toBe("new");
+    expect(second[0]!.casKeys).toHaveLength(1);
+  });
+
+  it("is OFF by default, so an explicit caller still gets the whole window", async () => {
+    const slugs = configOnlySlugs(1);
+    const store = new MemoryStore();
+    const fetch = fakeFetchForSlugs(slugs, "PV bytes — identical");
+    await runLiveScrape(slugs, { store, fetch });
+    // No `skipAlreadyCollectedUrls`: a backfill or a repair run re-collects.
+    const second = await runLiveScrape(slugs, { store, fetch });
+    expect(second[0]!.count).toBe(1);
+    expect(second[0]!.status).toBe("seen");
+    expect(second[0]!.skippedKnown).toBeUndefined();
+  });
+
+  // THREE passes, not two. Two passes cannot show the defect both contradictory
+  // reviews of PR #735 found: the guard read only the LAST run's manifest, and a
+  // manifest lists only what THAT run collected. A quiet night writes an empty
+  // one, so the night after has nothing to skip and the whole back catalogue
+  // comes down again — the steady state oscillates between 0 and N downloads
+  // instead of settling on 0.
+  it("keeps its memory across THREE runs: a quiet night must not re-arm the download", async () => {
+    const slug = configOnlySlugs(1)[0]!;
+    const config = ALL_PV_CITIES.find((c) => c.config.citySlug === slug)!.config;
+    const origin = new URL(config.pvIndexUrl).origin;
+    const store = new MemoryStore();
+    const listed = [
+      `${origin}/pv/${slug}-2026-06-05.pdf`,
+      `${origin}/pv/${slug}-2026-06-12.pdf`,
+    ];
+    // EVERY request the adapter makes goes through this double, whatever its
+    // method — so `requests` also proves that a known URL costs no HEAD either.
+    const requests: string[] = [];
+    const downloads: string[] = [];
+    const fetch: PvFetchLike = async (url) => {
+      requests.push(url);
+      if (url === config.pvIndexUrl) {
+        return htmlResponse(
+          listed.map((u) => `<a href="${u}">Procès-verbal du 2026-06-12</a>`).join(""),
+        ) as Awaited<ReturnType<PvFetchLike>>;
+      }
+      downloads.push(url);
+      return pdfResponse(`bytes for ${url}`) as Awaited<ReturnType<PvFetchLike>>;
+    };
+    const night = (day: number) => {
+      requests.length = 0;
+      downloads.length = 0;
+      return runLiveScrape([slug], {
+        store, fetch, skipAlreadyCollectedUrls: true,
+        now: () => new Date(`2026-06-${day}T00:00:00Z`),
+      });
+    };
+
+    await night(20);
+    expect(downloads).toHaveLength(2);
+
+    const second = await night(21);
+    expect(downloads).toEqual([]);
+    expect(second[0]!.count).toBe(0);
+    expect(second[0]!.skippedKnown).toBe(2);
+    // ONE request for the whole city: the index page. A URL already collected is
+    // skipped outright — no GET, and no HEAD to ask whether it changed (owner,
+    // 2026-09-20: a published procès-verbal does not change).
+    expect(requests).toEqual([config.pvIndexUrl]);
+
+    // THE assertion: the third night is still quiet. A guard that remembers only
+    // the previous run re-downloads both documents here.
+    const third = await night(22);
+    expect(downloads).toEqual([]);
+    expect(third[0]!.count).toBe(0);
+    expect(requests).toEqual([config.pvIndexUrl]);
+
+    // And a fourth, because an oscillation of period 2 would pass at three.
+    await night(23);
+    expect(downloads).toEqual([]);
+    expect(requests).toEqual([config.pvIndexUrl]);
+  });
+
+  // A PARTIAL night is the same defect with one document in it: the manifest of
+  // a night that collected only the new PV listed only that PV, so the night
+  // after forgot every other one.
+  it("keeps its memory when a run collects only SOME documents", async () => {
+    const slug = configOnlySlugs(1)[0]!;
+    const config = ALL_PV_CITIES.find((c) => c.config.citySlug === slug)!.config;
+    const origin = new URL(config.pvIndexUrl).origin;
+    const store = new MemoryStore();
+    let listed = [
+      `${origin}/pv/${slug}-2026-06-05.pdf`,
+      `${origin}/pv/${slug}-2026-06-12.pdf`,
+    ];
+    const downloads: string[] = [];
+    const fetch: PvFetchLike = async (url) => {
+      if (url === config.pvIndexUrl) {
+        return htmlResponse(
+          listed.map((u) => `<a href="${u}">Procès-verbal du 2026-06-12</a>`).join(""),
+        ) as Awaited<ReturnType<PvFetchLike>>;
+      }
+      downloads.push(url);
+      return pdfResponse(`bytes for ${url}`) as Awaited<ReturnType<PvFetchLike>>;
+    };
+    const night = (day: number) =>
+      runLiveScrape([slug], {
+        store, fetch, skipAlreadyCollectedUrls: true,
+        now: () => new Date(`2026-06-${day}T00:00:00Z`),
+      });
+
+    await night(20);
+    expect(downloads).toHaveLength(2);
+
+    // A new PV appears: only it is downloaded.
+    const fresh = `${origin}/pv/${slug}-2026-06-19.pdf`;
+    listed = [...listed, fresh];
+    downloads.length = 0;
+    const second = await night(21);
+    expect(downloads).toEqual([fresh]);
+    expect(second[0]!.count).toBe(1);
+
+    // The night after must remember ALL THREE, not just the one the partial
+    // manifest recorded.
+    downloads.length = 0;
+    const third = await night(22);
+    expect(downloads).toEqual([]);
+    expect(third[0]!.count).toBe(0);
+  });
+
+  // #723 IN ITS EXACT SHAPE, UNDER THE GUARD. The dead link carries no date, so
+  // `filterPvByWindow` keeps it for ever and every run retries it. On a quiet
+  // night the guard skips every healthy document, so the run collects NOTHING
+  // and the only thing it attempted failed — which the "zero harvest + one
+  // failure ⇒ the source failed" rule would read as a lost city, every night,
+  // for as long as the dead link stays in the index. That is the symptom this
+  // whole branch exists to remove.
+  it("does not lose a city to a dead undated link on a night where everything else was skipped", async () => {
+    const slug = configOnlySlugs(1)[0]!;
+    const config = ALL_PV_CITIES.find((c) => c.config.citySlug === slug)!.config;
+    const origin = new URL(config.pvIndexUrl).origin;
+    const store = new MemoryStore();
+    const alive = [`${origin}/pv/${slug}-2026-06-05.pdf`, `${origin}/pv/${slug}-2026-06-12.pdf`];
+    // No date anywhere: neither the label nor the file name. Kept by the window
+    // whatever the window, exactly like drummondville's "Ordre du jour" links.
+    const dead = `${origin}/wp-content/uploads/ordrejour.pdf`;
+    let listed = [...alive];
+    const fetch: PvFetchLike = async (url) => {
+      if (url === config.pvIndexUrl) {
+        return htmlResponse(
+          listed
+            .map((u) => `<a href="${u}">${u === dead ? "Ordre du jour" : "Procès-verbal du 2026-06-12"}</a>`)
+            .join(""),
+        ) as Awaited<ReturnType<PvFetchLike>>;
+      }
+      if (url === dead) {
+        return {
+          ok: false, status: 404,
+          headers: new Headers({ "content-type": "text/html" }),
+          arrayBuffer: async () => { throw new Error("Must not read error bodies"); },
+        } as Awaited<ReturnType<PvFetchLike>>;
+      }
+      return pdfResponse(`bytes for ${url}`) as Awaited<ReturnType<PvFetchLike>>;
+    };
+    const night = (day: number) =>
+      runLiveScrape([slug], {
+        store, fetch, skipAlreadyCollectedUrls: true,
+        now: () => new Date(`2026-06-${day}T00:00:00Z`),
+      });
+
+    const first = await night(20);
+    expect(first[0]!.count).toBe(2);
+
+    // The dead link appears; both healthy documents are already known.
+    listed = [...alive, dead];
+    const second = await night(21);
+    expect(second[0]!.status).not.toBe("error");
+    expect(second[0]!.count).toBe(0);
+    expect(second[0]!.failedDocs).toBe(1);
+    expect(second[0]!.skippedKnown).toBe(2);
+    expect(second[0]!.documentFailures?.[0]?.url).toBe(dead);
+  });
+
+  // A run that fails to persist its guard state must not fail the city: the
+  // consequence is a re-download on the next run, never a lost document.
+  it("still reports the city when the guard state cannot be written", async () => {
+    const slug = configOnlySlugs(1)[0]!;
+    const sourceId = ALL_PV_CITIES.find((c) => c.config.citySlug === slug)!.config.sourceId;
+    const store = new MemoryStore();
+    const fetch = fakeFetchForSlugs([slug], "PV bytes — unwritable guard");
+    store.failPutPrefix = collectedUrlsKey(sourceId);
+    const recap = await runLiveScrape([slug], { store, fetch, skipAlreadyCollectedUrls: true });
+    expect(recap[0]!.status).toBe("new");
+    expect(recap[0]!.count).toBe(1);
+    expect(store.objects.has(collectedUrlsKey(sourceId))).toBe(false);
+  });
+
   it("scrapes a subset of cities and writes CAS + meta + run manifest, reporting new", async () => {
     const slugs = configOnlySlugs(2);
     expect(slugs.length).toBe(2);
@@ -271,6 +614,101 @@ describe("runLiveScrape — exploit: true (PARSE + signaux réels)", () => {
     expect(entry.exploitError).toBeUndefined();
     // The Signaux view reads exactly this key.
     expect(store.objects.has(projectStateKey(entry.city))).toBe(true);
+  });
+
+  // The guard removes already-collected documents from `outcome.records`;
+  // EXPLOITATION used to rebuild the whole project-state from THAT array and PUT
+  // it over the city's key. A night with nothing new therefore rewrote the city
+  // from zero documents and erased its signals. Both deployed Jobs set
+  // LIVE_SCRAPE_EXPLOIT=1, and this is the key the Signaux view reads.
+  it("does not rewrite a city's project-state from a quiet night's zero documents", async () => {
+    const slug = configOnlySlugs(1)[0]!;
+    const config = ALL_PV_CITIES.find((c) => c.config.citySlug === slug)!.config;
+    const origin = new URL(config.pvIndexUrl).origin;
+    const store = new MemoryStore();
+    const listed = [`${origin}/pv/${slug}-2026-06-05.pdf`];
+    const fetch: PvFetchLike = async (url) => {
+      if (url === config.pvIndexUrl) {
+        return htmlResponse(
+          listed.map((u) => `<a href="${u}">Procès-verbal du 2026-06-05</a>`).join(""),
+        ) as Awaited<ReturnType<PvFetchLike>>;
+      }
+      return pdfResponse(`PV bytes — ${url}`) as Awaited<ReturnType<PvFetchLike>>;
+    };
+    const night = (day: number) =>
+      runLiveScrape([slug], {
+        store, fetch, exploit: true, pdfToText, skipAlreadyCollectedUrls: true,
+        now: () => new Date(`2026-06-${day}T00:00:00Z`),
+      });
+
+    const first = await night(20);
+    expect(first[0]!.signals).toBe(1);
+    const stateAfterFirst = JSON.parse(
+      new TextDecoder().decode(store.objects.get(projectStateKey(slug))!),
+    ) as { rawRefs: string[]; canonicals: { type: string }[] };
+    expect(stateAfterFirst.rawRefs.length).toBeGreaterThan(0);
+
+    // Quiet night: the guard skips the one known document, so the run collects
+    // nothing. The city's signals must survive it BYTE FOR BYTE — exploitation
+    // is not re-run, so the state is not even rewritten with the same content.
+    const bytesAfterFirst = store.objects.get(projectStateKey(slug))!;
+    const second = await night(21);
+    expect(second[0]!.count).toBe(0);
+    const stateAfterSecond = JSON.parse(
+      new TextDecoder().decode(store.objects.get(projectStateKey(slug))!),
+    ) as { rawRefs: string[]; canonicals: { type: string }[] };
+    expect(stateAfterSecond.rawRefs).toEqual(stateAfterFirst.rawRefs);
+    expect(
+      stateAfterSecond.canonicals.filter((c) => c.type === "DesignationEvent"),
+    ).toHaveLength(1);
+    expect(store.objects.get(projectStateKey(slug))).toEqual(bytesAfterFirst);
+    // `undefined`, not `0`: the recap says "not re-derived", which is not the
+    // same claim as "this city has no signals".
+    expect(second[0]!.signals).toBeUndefined();
+  });
+
+  // A night that DOES bring a new document must re-derive the state from the
+  // whole stored corpus, not from the one document it just downloaded — that is
+  // the other half of the same defect.
+  it("re-derives a city's state from its whole corpus when something new arrives", async () => {
+    const slug = configOnlySlugs(1)[0]!;
+    const config = ALL_PV_CITIES.find((c) => c.config.citySlug === slug)!.config;
+    const origin = new URL(config.pvIndexUrl).origin;
+    const store = new MemoryStore();
+    let listed = [`${origin}/pv/${slug}-2026-06-05.pdf`];
+    const fetch: PvFetchLike = async (url) => {
+      if (url === config.pvIndexUrl) {
+        return htmlResponse(
+          listed.map((u) => `<a href="${u}">Procès-verbal du 2026-06-05</a>`).join(""),
+        ) as Awaited<ReturnType<PvFetchLike>>;
+      }
+      return pdfResponse(`PV bytes — ${url}`) as Awaited<ReturnType<PvFetchLike>>;
+    };
+    // Each PV must extract to DIFFERENT text, otherwise the two documents share
+    // one content-addressed text key and the corpus is genuinely of size one.
+    const perDocText: PdfToText = async (bytes) =>
+      `${PV_SAINT_DAMASE_2025_05_POSITIVE}\n${new TextDecoder().decode(bytes)}`;
+    const night = (day: number) =>
+      runLiveScrape([slug], {
+        store, fetch, exploit: true, pdfToText: perDocText, skipAlreadyCollectedUrls: true,
+        now: () => new Date(`2026-06-${day}T00:00:00Z`),
+      });
+
+    await night(20);
+    const firstRefs = (JSON.parse(
+      new TextDecoder().decode(store.objects.get(projectStateKey(slug))!),
+    ) as { rawRefs: string[] }).rawRefs;
+    expect(firstRefs).toHaveLength(1);
+
+    listed = [...listed, `${origin}/pv/${slug}-2026-06-12.pdf`];
+    const second = await night(21);
+    expect(second[0]!.count).toBe(1);
+    const secondRefs = (JSON.parse(
+      new TextDecoder().decode(store.objects.get(projectStateKey(slug))!),
+    ) as { rawRefs: string[] }).rawRefs;
+    // TWO, not one: the older PV is still in the city's state.
+    expect(secondRefs).toHaveLength(2);
+    expect(secondRefs).toEqual(expect.arrayContaining(firstRefs));
   });
 
   it("sans exploit: pas de signaux, pas de project-state (RECUEIL seul)", async () => {

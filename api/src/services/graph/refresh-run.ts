@@ -127,7 +127,28 @@ export function orderRefreshPdfCandidates(
   });
 }
 
-/** RECUEIL for one city, validated, with its exact-PDF candidates in selection order. */
+/**
+ * RECUEIL for one city, validated, with its exact-PDF candidates in selection
+ * order.
+ *
+ * ONLY THE DIFFERENTIAL IS DOWNLOADED (owner, 2026-09-20: « on ne telechaege que
+ * le differentiel sinon c pas un job d update »). `radar-refresh-pv` is the only
+ * SCHEDULED cycle, so this is where that rule has to hold. The city's index is
+ * read on every run — that IS the daily check — and `skipAlreadyCollectedUrls`
+ * keeps the run from fetching a document an earlier run already stored: no GET,
+ * and no HEAD either, because a published procès-verbal does not change. Before,
+ * this re-downloaded the city's whole look-back window every night.
+ *
+ * NOTHING NEW IS A SUCCESS, NOT A FAILURE. This function used to demand
+ * `count >= 1` and throw `REFRESH_NO_ACQUISITION` otherwise, which encoded the
+ * idea that a run must always come back with a document. For an update job that
+ * idea is false, and it is what made the normal night fail the Job. A city with
+ * nothing new now returns an EMPTY candidate list; what it still owes is the
+ * coverage ledger's business, not this function's — a document queued by an
+ * earlier run is rebuilt from the ledger even when it has dropped out of the
+ * source's window. An index that could NOT be read is a different thing, and
+ * still throws.
+ */
 export async function acquireRefreshPdfCandidates(
   options: AcquireRefreshPdfOptions & { readonly onSkippedKey?: (key: string) => void },
 ): Promise<{ recap: LiveScrapeCityRecap; candidates: RefreshPdfCandidate[] }> {
@@ -135,6 +156,7 @@ export async function acquireRefreshPdfCandidates(
   const recaps = await acquire([options.citySlug], {
     store: options.store,
     exploit: false,
+    skipAlreadyCollectedUrls: true,
     acceptRef: (ref) => ref.contentType?.toLowerCase().startsWith("application/pdf") === true
       || /\.pdf(?:[?#]|$)/i.test(ref.url),
     beforeFetch: async () => {
@@ -146,15 +168,22 @@ export async function acquireRefreshPdfCandidates(
   });
   if (options.signal?.aborted) throw new Error("Refresh aborted after acquisition");
   const recap = recaps[0];
+  // A genuine failure: no recap, the wrong city, an index that did not answer,
+  // or a recap whose own invariant (`casKeys.length === count`) is broken.
   if (recaps.length !== 1 || !recap || recap.city !== options.citySlug
-    || recap.status === "error" || recap.count < 1 || recap.casKeys.length !== recap.count) {
+    || recap.status === "error" || recap.casKeys.length !== recap.count) {
     throw coded(`Selected city acquisition failed: ${options.citySlug}`, "REFRESH_NO_ACQUISITION");
   }
   if (!recap.sourceId || /[\t\n]/.test(recap.sourceId)) {
     throw new Error(`Invalid selected source id: ${options.citySlug}`);
   }
   const candidates = orderRefreshPdfCandidates(recap, options.onSkippedKey);
-  if (candidates.length === 0) {
+  // NOTHING DOWNLOADED ⇒ NO CANDIDATES, AND THAT IS NOT A FAULT. Under the
+  // already-collected-URL guard the normal night collects nothing, so an empty
+  // candidate list is the expected shape of an up-to-date city — the caller's
+  // coverage ledger decides what is still owed. Only a city that DID collect
+  // documents and produced no exact PDF is an anomaly worth a reason code.
+  if (recap.count > 0 && candidates.length === 0) {
     throw coded(`Selected city acquisition produced no exact PDF: ${options.citySlug}`, "REFRESH_NO_PDF");
   }
   return { recap, candidates };

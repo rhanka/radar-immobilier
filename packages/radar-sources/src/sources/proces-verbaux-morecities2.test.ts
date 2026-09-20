@@ -400,12 +400,37 @@ describe("ProcesVerbauxGenericAdapter.list() – Saint-Rémi (mocked fetch)", ()
     windowDays: 183,
   });
 
-  it("yields au moins 5 refs PV dans la fenêtre 6 mois", async () => {
-    const refs: unknown[] = [];
+  // ASSERTION CORRIGÉE (issue #723). Elle exigeait « au moins 5 refs dans la
+  // fenêtre de 6 mois » et ne passait QUE parce que les dates étaient illisibles :
+  // les noms de fichiers de Saint-Rémi sont compacts (`20251215_pv.pdf`), aucune
+  // règle ne les datait, et `filterPvByWindow` retient d'office ce qu'il ne sait
+  // pas dater. Les 10 PV de l'index étaient donc « dans la fenêtre » quelle que
+  // soit la fenêtre. Les séances réelles vont du 2025-12-15 au 2025-05-20 ; au
+  // 2026-06-10, la fenêtre de 183 jours commence le 2025-12-09 et n'en contient
+  // qu'une. Le test dit maintenant ce que la fenêtre veut dire.
+  it("ne retient que les PV réellement dans la fenêtre de 183 jours", async () => {
+    const refs: { url: string; publishedAt?: string }[] = [];
     for await (const ref of adapter.list({})) {
-      refs.push(ref);
+      refs.push(ref as { url: string; publishedAt?: string });
     }
-    expect(refs.length).toBeGreaterThanOrEqual(5);
+    expect(refs).toHaveLength(1);
+    expect(refs[0]!.url).toContain("20251215_pv.pdf");
+    expect(refs[0]!.publishedAt).toBe("2025-12-15");
+  });
+
+  it("date les noms de fichiers compacts, au lieu de les laisser hors fenêtre", async () => {
+    const wide = new ProcesVerbauxGenericAdapter(SAINT_REMI_PV_CONFIG, {
+      fetchImpl: mockFetch as unknown as typeof mockFetch,
+      now: () => new Date("2026-06-10T00:00:00Z"),
+      windowDays: 3650,
+    });
+    const dated: (string | undefined)[] = [];
+    for await (const ref of wide.list({})) {
+      dated.push((ref as { publishedAt?: string }).publishedAt);
+    }
+    expect(dated.length).toBeGreaterThanOrEqual(5);
+    // Plus aucun ref non daté : c'est ce qui rendait la fenêtre inopérante.
+    expect(dated.filter((d) => d === undefined)).toEqual([]);
   });
 
   it("tous les refs ont city 'saint-remi'", async () => {
