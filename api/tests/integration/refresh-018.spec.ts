@@ -392,6 +392,149 @@ describe("refresh 0.18 real storage integration", () => {
       } finally { await clean(city); }
     }, 120_000);
 
+  it("primes a city's existing corpus and only pays for what appears afterwards",
+    async () => {
+      // Owner decision of 2026-09-20: new documents only. A city's first visit
+      // adopts what the source already offers — the 4 166 minutes already in the
+      // graph are not re-extracted — and the sweep pays from there on.
+      const city = `refresh-prime-${randomUUID()}`;
+      const sourceId = `proces-verbaux-${city}`;
+      const make = (label: string, publishedAt: string) => {
+        const bytes = new TextEncoder().encode(`%PDF refresh ${city} ${label}`);
+        const sha = createHash("sha256").update(bytes).digest("hex");
+        return { label, publishedAt, bytes, sha, key: `raw/${sourceId}/cas/${sha}.pdf`,
+          url: `https://example.test/${city}-${label}.pdf` };
+      };
+      const existing = [make("backlog-1", "2026-03-10"), make("backlog-2", "2026-05-22")];
+      const fresh = make("fresh", "2026-09-19");
+      for (const document of [...existing, fresh]) {
+        await store.put(document.key, document.bytes, "application/pdf");
+        await store.put(`${document.key}.meta.json`, JSON.stringify({ sourceUrl: document.url }),
+          "application/json");
+      }
+      await store.putCanonicalGraph(canonicalGraphKey(city), JSON.stringify({ nodes: [], edges: [] }),
+        "application/json", { ifMatch: null });
+
+      const extracted: string[] = [];
+      const textClient = { mode: "mesh", provider: "test", model: "test",
+        async generateJson(input: Parameters<TextJsonGenerationClient["generateJson"]>[0]) {
+          const document = [...existing, fresh].find(({ label }) => JSON.stringify(input).includes(label))!;
+          extracted.push(document.label);
+          const extraction: Extraction = { nodes: [], edges: [], input_tokens: 1, output_tokens: 1 };
+          const body = JSON.stringify(extraction);
+          await input.validateResponse?.(body);
+          if (input.outputPath) {
+            await mkdir(dirname(input.outputPath), { recursive: true });
+            await writeFile(input.outputPath, body);
+          }
+          return { status: "completed", provider: "test", mode: "mesh",
+            outputPath: input.outputPath!, audit: {} } as const;
+        } } satisfies TextJsonGenerationClient;
+
+      const configured = (documents: typeof existing): RunPvRefreshOptions => ({
+        citySlug: city, store, db, profileContext: context, textClient, primeCoverage: true,
+        extractPdf: async (bytes) => `${new TextDecoder().decode(bytes)}\f`,
+        profileHash: "sha256:profile", registryHash: "sha256:registry", packageVersion: "0.18.0",
+        modelPolicy: "test", budgetLimit: 100, maximumAttempts: 2, maxOutputTokens: 512,
+        acquire: async () => [{ city, sourceId, status: "seen", count: documents.length,
+          casKeys: documents.map(({ key }) => key),
+          documents: documents.map(({ key, sha, publishedAt }) => ({
+            casKey: key, sha256: sha, status: "seen" as const, publishedAt })) }] });
+
+      try {
+        // Priming pass: two documents in the window, not one model call.
+        const primed = await runPvRefresh(configured(existing));
+        expect(primed).toMatchObject({ status: "up-to-date", candidates: 2, submissions: 0 });
+        expect(primed.coverage).toEqual({ pending: 0, covered: 2, abandoned: 0 });
+        expect(extracted).toEqual([]);
+
+        // A procès-verbal published afterwards IS the one the next pass pays for.
+        const next = await runPvRefresh(configured([...existing, fresh]));
+        expect(next).toMatchObject({ status: "published", documentSha: fresh.sha });
+        expect(extracted).toEqual(["fresh"]);
+
+        const settled = await runPvRefresh(configured([...existing, fresh]));
+        expect(settled).toMatchObject({ status: "up-to-date" });
+        expect(settled.coverage).toEqual({ pending: 0, covered: 3, abandoned: 0 });
+
+        const outcomes = await db.select().from(refreshDocumentOutcomes)
+          .where(eq(refreshDocumentOutcomes.citySlug, city));
+        expect(outcomes).toHaveLength(1);
+      } finally { await clean(city); }
+    }, 120_000);
+
+  it("keeps a failing document in the queue, then sets it aside so the city advances",
+    async () => {
+      // ~15 % of documents are refused on quality under the Gemini fallback.
+      // Without a failure counter the refused one stays the city's first pending
+      // document for ever, hiding the ones behind it and paying on every pass.
+      const city = `refresh-abandon-${randomUUID()}`;
+      const sourceId = `proces-verbaux-${city}`;
+      const make = (label: string, publishedAt: string) => {
+        const bytes = new TextEncoder().encode(`%PDF refresh ${city} ${label}`);
+        const sha = createHash("sha256").update(bytes).digest("hex");
+        return { label, publishedAt, bytes, sha, key: `raw/${sourceId}/cas/${sha}.pdf`,
+          url: `https://example.test/${city}-${label}.pdf` };
+      };
+      const broken = make("broken", "2026-09-19");
+      const good = make("good", "2026-09-01");
+      for (const document of [broken, good]) {
+        await store.put(document.key, document.bytes, "application/pdf");
+        await store.put(`${document.key}.meta.json`, JSON.stringify({ sourceUrl: document.url }),
+          "application/json");
+      }
+      await store.putCanonicalGraph(canonicalGraphKey(city), JSON.stringify({ nodes: [], edges: [] }),
+        "application/json", { ifMatch: null });
+
+      const attempted: string[] = [];
+      const options: RunPvRefreshOptions = { citySlug: city, store, db, profileContext: context,
+        maxDocumentFailures: 2,
+        // The broken document fails in the EXTRACTION stage, before any model
+        // call: that is still a failure the ledger has to count.
+        extractPdf: async (bytes) => {
+          const text = new TextDecoder().decode(bytes);
+          attempted.push(text.includes("broken") ? "broken" : "good");
+          if (text.includes("broken")) throw new Error("poppler refused this document");
+          return `${text}\f`;
+        },
+        textClient: { mode: "mesh", provider: "test", model: "test",
+          async generateJson(input: Parameters<TextJsonGenerationClient["generateJson"]>[0]) {
+            const extraction: Extraction = { nodes: [], edges: [], input_tokens: 1, output_tokens: 1 };
+            const body = JSON.stringify(extraction);
+            await input.validateResponse?.(body);
+            if (input.outputPath) {
+              await mkdir(dirname(input.outputPath), { recursive: true });
+              await writeFile(input.outputPath, body);
+            }
+            return { status: "completed", provider: "test", mode: "mesh",
+              outputPath: input.outputPath!, audit: {} } as const;
+          } } satisfies TextJsonGenerationClient,
+        profileHash: "sha256:profile", registryHash: "sha256:registry", packageVersion: "0.18.0",
+        modelPolicy: "test", budgetLimit: 100, maximumAttempts: 2, maxOutputTokens: 512,
+        acquire: async () => [{ city, sourceId, status: "seen", count: 2,
+          casKeys: [broken.key, good.key],
+          documents: [broken, good].map(({ key, sha, publishedAt }) => ({
+            casKey: key, sha256: sha, status: "seen" as const, publishedAt })) }] };
+
+      try {
+        // Pass 1 and 2 both retry the newest document: it is still owed.
+        await expect(runPvRefresh(options)).rejects.toThrow("poppler refused");
+        await expect(runPvRefresh(options)).rejects.toThrow("poppler refused");
+        expect(attempted).toEqual(["broken", "broken"]);
+
+        // Two failures is the configured ceiling: the document is set aside and
+        // the older one finally gets its turn.
+        const advanced = await runPvRefresh(options);
+        expect(advanced).toMatchObject({ status: "published", documentSha: good.sha });
+        expect(advanced.coverage).toEqual({ pending: 0, covered: 1, abandoned: 1 });
+        expect(attempted).toEqual(["broken", "broken", "good"]);
+
+        // And the city settles instead of paying for the refused document again.
+        expect(await runPvRefresh(options)).toMatchObject({ status: "up-to-date" });
+        expect(attempted).toHaveLength(3);
+      } finally { await clean(city); }
+    }, 120_000);
+
   it("treats a skipped selected city as failure before model execution", async () => {
     const city = `refresh-018-${randomUUID()}`;
     const fx = await fixture(city);

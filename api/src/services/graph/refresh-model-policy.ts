@@ -54,7 +54,18 @@ export interface RefreshDocumentModels {
     citySlug?: string): Promise<RefreshProfileChunk>;
   completeDocument(docSha: string): void;
   restoreDocument(docSha: string, receipts: readonly RefreshModelReceipt[]): void;
+  /**
+   * The FALLBACK has refused N documents in a row on quota. The primary has a
+   * circuit that spares the cities behind it a call known to be refused; the
+   * fallback had none, so every remaining city of a 528-city sweep paid a 429,
+   * failed, and the sweep carried on to the next one. A caller that sees this
+   * must stop extracting and say so.
+   */
+  fallbackQuotaExhausted(): boolean;
 }
+
+/** Consecutive documents refused on quota before a seat is declared exhausted. */
+export const REFRESH_QUOTA_THRESHOLD = 3;
 
 /** Inspect only for classification; never emit upstream messages or response bodies. */
 export function refreshFallbackReason(error: unknown): RefreshFallbackReason {
@@ -71,6 +82,7 @@ export function refreshFallbackReason(error: unknown): RefreshFallbackReason {
 /** One instance per cycle. A fallback sticks to its document after any model switch. */
 export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): RefreshDocumentModels {
   let consecutiveQuotaDocuments = 0;
+  let consecutiveFallbackQuota = 0;
   if (!Number.isInteger(options.primaryQualityAttempts) || options.primaryQualityAttempts < 1) {
     throw new Error("Refresh primary quality attempts must be positive");
   }
@@ -81,7 +93,8 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
   return {
     policy: JSON.stringify({ version: 3, primary: options.primary, fallback: options.fallback,
       verification: options.verification ?? null, verificationContract: "v101b-removal-only-v3",
-      primaryQualityAttempts: options.primaryQualityAttempts, forceFallback: options.forceFallback, quotaThreshold: 3 }),
+      primaryQualityAttempts: options.primaryQualityAttempts, forceFallback: options.forceFallback,
+      quotaThreshold: REFRESH_QUOTA_THRESHOLD }),
     maximumAttempts: options.primaryQualityAttempts + 1 + (options.verification ? 1 : 0),
     async verify(input, maxOutputTokens, record, citySlug) {
       const identity = citySlug ?? options.citySlug;
@@ -139,9 +152,16 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
       options.signal?.throwIfAborted();
       return output;
     },
+    fallbackQuotaExhausted() {
+      return consecutiveFallbackQuota >= REFRESH_QUOTA_THRESHOLD;
+    },
     completeDocument(docSha) {
       const document = documents.get(docSha);
       if (document && !document.reason) consecutiveQuotaDocuments = 0;
+      // One policy instance now spans a whole 528-city sweep. A finished
+      // document's entry has no further use, and an unbounded map is the kind
+      // of slow growth that only shows up in a four-hour process.
+      documents.delete(docSha);
     },
     restoreDocument(docSha, receipts) {
       const extractionReceipts = receipts.filter((receipt) => receipt.transition !== "verification");
@@ -258,11 +278,15 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
             if (!selected.counted) {
               selected.counted = true;
               consecutiveQuotaDocuments = primary.reason === "quota" ? consecutiveQuotaDocuments + 1 : 0;
-              if (consecutiveQuotaDocuments >= 3) circuitOpen = true;
+              if (consecutiveQuotaDocuments >= REFRESH_QUOTA_THRESHOLD) circuitOpen = true;
             }
           }
           const fallback = await attempt(options.fallback, "fallback", selected.reason);
-          if (fallback.failed) throw fallback.failure;
+          if (fallback.failed) {
+            consecutiveFallbackQuota = fallback.reason === "quota" ? consecutiveFallbackQuota + 1 : 0;
+            throw fallback.failure;
+          }
+          consecutiveFallbackQuota = 0;
           return finish(fallback);
         },
       };

@@ -1,31 +1,61 @@
 # refresh-cronjob.yaml — RAFRAÎCHISSEMENT PÉRIODIQUE des procès-verbaux → signaux.
 #
-# Un seul CronJob : radar-refresh-pv, lancé avec `--all`. Il balaie la liste
-# déterministe des ~528 villes config-only. Pour CHAQUE ville il rescrape la
-# source (fenêtre REFRESH_WINDOW_DAYS), puis traite AU PLUS UN document : le plus
-# récemment publié dont les signaux ne sont pas déjà projetés en PostgreSQL. Une
-# ville dont tous les documents sont déjà projetés ne coûte aucun appel modèle.
-# Le document retenu est extrait par le modèle (principal puis repli), publié
-# dans le graphe canonique et projeté en PostgreSQL.
+# Un seul CronJob : radar-refresh-pv, lancé avec `--all`, QUATRE fois par jour.
+# Chaque passage balaie la liste déterministe des ~528 villes config-only.
+#
+# Pour chaque ville, dans cet ordre :
+#   1. lecture du graphe canonique. Pas de graphe ⇒ `no-baseline`, et la ville
+#      est passée SANS être rescrapée : un rafraîchissement n'a rien sur quoi
+#      construire, et l'acquisition est le coût dominant du balayage ;
+#   2. rescrape de la source sur REFRESH_WINDOW_DAYS ;
+#   3. au plus UN document extrait : le plus récemment publié que le registre de
+#      couverture de la ville (`refresh/018/<ville>/coverage.json`) doit encore.
+#
+# Ce que le balayage traite : ce qui APPARAÎT. La première visite d'une ville
+# AMORCE son registre — tout ce que la source offre alors est réputé couvert,
+# sans un seul appel modèle — et les passages suivants ne paient que les
+# documents publiés depuis (décision owner du 2026-09-20 : nouveaux documents
+# seulement ; les procès-verbaux déjà projetés ne sont pas ré-extraits).
 #
 # Ce que le balayage garantit, et ce qu'il ne garantit pas :
 #   - il REPREND au curseur durable `refresh/018/sweep/cursor.json`, écrit AVANT
-#     chaque ville : une exécution coupée par activeDeadlineSeconds continue là
-#     où elle s'est arrêtée au lieu de repartir du premier slug, et aucune ville
-#     ne peut bloquer la rotation ;
-#   - il s'arrête sur REFRESH_SWEEP_DEADLINE_MS (horloge) ou sur
-#     REFRESH_SWEEP_MAX_DOCUMENTS (documents extraits), ce second plafond étant
-#     ce qui borne la dépense modèle quotidienne ;
+#     chaque ville : un passage coupé par activeDeadlineSeconds continue là où il
+#     s'est arrêté, et aucune ville ne peut bloquer la rotation ;
+#   - il n'y a PAS de plafond quotidien de documents. Ce qu'un passage ne traite
+#     pas reste `pending` dans le registre de sa ville et revient au passage
+#     suivant : une file de reprise, pas un abandon. REFRESH_SWEEP_MAX_SUBMISSIONS
+#     existe comme levier (0 = pas de plafond) et, s'il est armé, il coupe
+#     l'EXTRACTION sans couper la VISITE — les villes restantes sont quand même
+#     rescrapées et leur registre tenu à jour ;
+#   - un document qui échoue REFRESH_MAX_DOCUMENT_FAILURES fois est mis à
+#     l'écart (`abandoned`) et cesse de bloquer les documents derrière lui ;
+#   - le balayage s'arrête sur REFRESH_SWEEP_DEADLINE_MS, sur SIGTERM, ou quand
+#     le siège de repli est à sec (sortie en 1, raison `fallback-quota-exhausted`) ;
 #   - une ville en erreur — source injoignable, aucun PV dans la fenêtre, pas
 #     encore de graphe canonique — est comptée et le balayage continue. Seul un
-#     TAUX systémique d'échecs inattendus fait sortir le Job en 1 ;
-#   - il NE rattrape PAS un arriéré : un document par ville et par passage. Une
-#     ville qui publie deux PV le même jour voit le second au passage suivant.
+#     TAUX systémique d'échecs inattendus, mesuré sur les villes ayant TENTÉ une
+#     extraction, fait sortir le Job en 1 ;
+#   - il NE rattrape PAS un arriéré en un passage : un document par ville et par
+#     passage. Une ville qui publie quatre PV le même jour les voit en un jour,
+#     pas en un passage.
 #
-# Avancement mesurable : toutes les lignes `refresh_document_outcomes` d'une
-# exécution portent le même `cycle_id`, donc l'état d'un passage se lit d'un seul
-# GROUP BY. Une ville sans document neuf n'écrit aucune ligne — c'est voulu, le
-# journal est par document soumis, pas par ville visitée.
+# Pourquoi quatre passages et pas un : ce n'est pas une question de quota. Au
+# volume attendu (quelques documents par jour), aucune fenêtre de session de
+# siège n'est approchée — 17 documents valent 4,3 min de Gemini low (p50 15,3 s)
+# ou 42 min d'Astra low (p50 147,8 s). Quatre passages servent à VIDER la file
+# par ville : une ville qui publie plusieurs documents, ou un document refusé en
+# qualité (~15 % sous repli Gemini), est traité ou tranché dans la journée au
+# lieu de la semaine. Le nombre de passages est borné par la DURÉE d'un passage,
+# pas par les sièges : passages/jour ≤ 24 h / (durée mesurée × 1,25). Seule
+# durée disponible : 2 h 41 pour une acquisition 528 villes, mesurée sur
+# `worker-live` — un PROXY de ce chemin de code, pas une mesure. À revoir sur le
+# premier balayage réel en préproduction.
+#
+# Avancement mesurable : toutes les lignes `refresh_document_outcomes` d'un
+# passage portent le même `cycle_id`, donc l'état d'un passage se lit d'un seul
+# GROUP BY. Le rapport complet du passage (villes visitées, issues, curseur) est
+# persisté dans `refresh/018/sweep/reports/<cycle_id>.json` et
+# `refresh/018/sweep/latest.json` : les logs du pod, eux, expirent en 24 h.
 #
 # Base dormante (suspend: true) ; l'overlay préprod l'active,
 # l'overlay prod (refresh-cronjobs-prod) l'active derrière la promotion gardée.
@@ -48,7 +78,9 @@ metadata:
 spec:
   # Production-dormant base. Only the preprod overlay activates this workload.
   suspend: true
-  schedule: "17 5 * * *"
+  # Quatre passages par jour, créneaux de 6 h. Voir l'en-tête : le nombre est
+  # borné par la durée d'un passage, pas par une fenêtre de session de siège.
+  schedule: "17 5,11,17,23 * * *"
   timeZone: "Etc/UTC"
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 600
@@ -59,12 +91,11 @@ spec:
       # A later cycle resumes durable, hash-checked state; do not duplicate a
       # provider call automatically inside the same scheduled execution.
       backoffLimit: 0
-      # Le balayage complet, pas un document isolé. Mesure du 2026-09-05 sur la
-      # même liste de 528 villes : 2 h 41 pour l'acquisition seule (fenêtre 183 j).
-      # S'y ajoute l'extraction d'au plus REFRESH_SWEEP_MAX_DOCUMENTS documents.
-      # 4 h 30 ici, contre 4 h 15 pour REFRESH_SWEEP_DEADLINE_MS : le balayage
-      # s'arrête de lui-même, curseur à jour, avant le SIGKILL du contrôleur.
-      activeDeadlineSeconds: 16200
+      # Le balayage complet, pas un document isolé. Le créneau vaut 6 h ; 5 h 30
+      # ici, contre 5 h 15 pour REFRESH_SWEEP_DEADLINE_MS : le balayage s'arrête
+      # de lui-même, curseur à jour, avant le SIGKILL du contrôleur, et le
+      # passage suivant ne trouve jamais le précédent encore en vol.
+      activeDeadlineSeconds: 19800
       ttlSecondsAfterFinished: 86400
       template:
         metadata:
@@ -74,6 +105,10 @@ spec:
             app.kubernetes.io/component: graph-projection
         spec:
           restartPolicy: Never
+          # Le SIGTERM d'activeDeadlineSeconds arme le signal d'arrêt du
+          # balayage : il faut lui laisser le temps de finir sa ville proprement
+          # (écriture du registre, fermeture du pool) avant le SIGKILL.
+          terminationGracePeriodSeconds: 60
           serviceAccountName: radar-app
           securityContext:
             runAsNonRoot: true
@@ -143,26 +178,39 @@ spec:
                 # Gemini output ceiling. Pinned mesh 0.19.2 omits this on Codex.
                 - { name: REFRESH_MAX_OUTPUT_TOKENS, value: "32768" }
                 # Plafond d'ÉCRITURES CAS nouvelles par ville et par passage. Un
-                # document déjà collecté ne le consomme pas : la fenêtre entière
-                # est parcourue de toute façon, c'est le coût dominant du balayage.
-                - { name: REFRESH_ACQUISITION_LIMIT, value: "1" }
+                # document déjà collecté ne le consomme pas, mais RECUEIL CESSE
+                # de lister dès qu'il a écrit ce nombre : à 1, la liste des
+                # candidats était tronquée au premier document inédit, et une
+                # page d'index du plus ancien au plus récent ne révélait sa
+                # fenêtre qu'à un document par passage.
+                - { name: REFRESH_ACQUISITION_LIMIT, value: "5" }
                 # Fenêtre de la source, en jours. Valeur par défaut de l'adaptateur,
                 # et celle du balayage 528 villes mesuré à 2 h 41. La réduire
                 # accélère le passage mais rétrécit l'ensemble des documents
                 # candidats : à ne faire que sur mesure.
                 - { name: REFRESH_WINDOW_DAYS, value: "183" }
-                # 4 h 15 : le balayage s'arrête avant activeDeadlineSeconds.
-                - { name: REFRESH_SWEEP_DEADLINE_MS, value: "15300000" }
-                # Plafond de documents EXTRAITS par passage — la borne de la
-                # dépense modèle quotidienne. 17/jour tient sous le plafond mesuré
-                # de 532 documents/mois du siège Gemini dédié. Le delta réel
-                # attendu est bien inférieur ; c'est un plafond, pas une cible.
-                - { name: REFRESH_SWEEP_MAX_DOCUMENTS, value: "17" }
-                # On ne démarre pas une ville s'il reste moins que cela.
-                - { name: REFRESH_SWEEP_CITY_RESERVE_MS, value: "120000" }
+                # 5 h 15 : le balayage s'arrête avant activeDeadlineSeconds. Un
+                # SIGTERM et cette échéance arment tous deux le signal d'arrêt,
+                # si bien qu'une ville n'est plus tuée en plein document.
+                - { name: REFRESH_SWEEP_DEADLINE_MS, value: "18900000" }
+                # Plafond de SOUMISSIONS modèle par passage — appels réellement
+                # envoyés, refus compris. 0 = pas de plafond : c'est le régime
+                # décidé par l'owner le 2026-09-20. Une valeur non nulle ne
+                # termine pas le passage, elle coupe l'extraction et laisse la
+                # visite se poursuivre, les documents non traités restant en file.
+                - { name: REFRESH_SWEEP_MAX_SUBMISSIONS, value: "0" }
+                # Échecs après lesquels un document est mis à l'écart, au lieu
+                # d'être repayé à chaque rotation en bloquant sa ville.
+                - { name: REFRESH_MAX_DOCUMENT_FAILURES, value: "3" }
+                # On ne démarre pas une ville s'il reste moins que cela : une
+                # ville peut devoir un document, donc la réserve doit couvrir un
+                # appel modèle entier (REFRESH_TIMEOUT_MS).
+                - { name: REFRESH_SWEEP_CITY_RESERVE_MS, value: "900000" }
                 # Taux d'échecs INATTENDUS à partir duquel le passage est
-                # systémique et sort en 1. Les sources cassées (93/528 au dernier
-                # balayage complet) ne sont pas comptées ici.
+                # systémique et sort en 1. Mesuré sur les villes ayant TENTÉ une
+                # extraction, et seulement à partir de cinq tentatives. Les
+                # sources cassées (93/528 au dernier balayage complet) comptent
+                # en `no-input`, pas ici.
                 - { name: REFRESH_SWEEP_MAX_FAILURE_RATE, value: "0.9" }
                 - { name: SENTROPIC_LLM_MESH_KEYRING_DIR, value: "/keyring/runtime" }
                 - name: REFRESH_PRINCIPAL_REF
