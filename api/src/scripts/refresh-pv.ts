@@ -5,10 +5,19 @@
  *   node dist/scripts/refresh-pv.js --all          # toutes les villes configurées
  *   node dist/scripts/refresh-pv.js waterloo       # une seule ville (diagnostic)
  *
- * `--all` est le mode du CronJob quotidien. Il balaie la liste déterministe des
- * villes config-only, reprend au curseur durable de la veille, et traite au plus
- * un document par ville et par passage. Le mode mono-ville reste disponible pour
- * un diagnostic ciblé et pour le rejeu d'un PDF figé (REFRESH_SAVED_PDF_PATH).
+ * `--all` est le mode du CronJob, joué QUATRE fois par jour. Il balaie la liste
+ * déterministe des villes config-only, reprend au curseur durable du passage
+ * précédent, et traite au plus un document par ville et par passage. Le mode
+ * mono-ville reste disponible pour un diagnostic ciblé et pour le rejeu d'un PDF
+ * figé (REFRESH_SAVED_PDF_PATH).
+ *
+ * Ce que `--all` traite : ce qui APPARAÎT. La première visite d'une ville amorce
+ * son registre de couverture — tout ce que la source offre alors est réputé
+ * couvert, sans un seul appel modèle — et les passages suivants ne paient que
+ * les documents publiés depuis. Les procès-verbaux déjà projetés par le
+ * traitement en masse ne sont pas ré-extraits (décision owner, 2026-09-20).
+ * Il n'y a PAS de plafond quotidien de documents : ce qu'un passage ne peut pas
+ * traiter reste `pending` dans le registre de sa ville et revient au suivant.
  *
  * Le balayage partage UNE instance de politique de modèle entre toutes les
  * villes : c'est ce qui fait que le circuit de quota, une fois ouvert, épargne
@@ -34,7 +43,7 @@ import { createRefreshModelPolicy, type RefreshModel } from "../services/graph/r
 import { loadRefreshProfileContext } from "../services/graph/refresh-profile.js";
 import { runPvRefresh, type RefreshAcquire } from "../services/graph/refresh-run.js";
 import { assessRefreshSweepHealth, parseRefreshTarget,
-  runRefreshSweep } from "../services/graph/refresh-sweep.js";
+  runRefreshSweep, writeRefreshSweepReport } from "../services/graph/refresh-sweep.js";
 import { canonicalHash } from "../services/graph/replay/canonical-json.js";
 import { configOnlyCitySlugs } from "../services/sources/live-scrape.js";
 import { canonicalGraphKey } from "../storage/object-store.js";
@@ -52,6 +61,15 @@ function positive(name: string, fallback: number, maximum: number): number {
   const value = Number(process.env[name] ?? fallback);
   if (!Number.isInteger(value) || value < 1 || value > maximum) {
     throw new Error(`${name} must be an integer from 1 to ${maximum}`);
+  }
+  return value;
+}
+
+/** Same, but 0 is a legal value and means "no ceiling". */
+function optionalCeiling(name: string, fallback: number, maximum: number): number {
+  const value = Number(process.env[name] ?? fallback);
+  if (!Number.isInteger(value) || value < 0 || value > maximum) {
+    throw new Error(`${name} must be an integer from 0 to ${maximum}`);
   }
   return value;
 }
@@ -139,6 +157,10 @@ async function main(): Promise<void> {
       reasoning: { effort: model.effort as "low" }, signal }).textClient,
   });
   let modelCalls = 0;
+  // Calls actually SENT to a seat, refusals included. `modelCalls` counts every
+  // receipt, including the verification skipped for want of an act, which costs
+  // nothing; a budget must be spent against what was paid.
+  let submissions = 0;
   // One cycle id for the whole run: it is the key that makes the progress of a
   // sweep readable as one GROUP BY over refresh_document_outcomes.
   const cycleId = randomUUID();
@@ -149,52 +171,90 @@ async function main(): Promise<void> {
   const runOptions = {
     budgetLimit: positive("REFRESH_BUDGET_LIMIT", 20_000, 1_000_000),
     maxOutputTokens: positive("REFRESH_MAX_OUTPUT_TOKENS", 32_768, 65_536),
-    acquisitionLimit: positive("REFRESH_ACQUISITION_LIMIT", 1, 100),
+    // NEW CAS writes per city and per pass. RECUEIL stops listing as soon as it
+    // has written this many, so a value of 1 truncates the candidate list at the
+    // first unseen document: on an index page ordered oldest-first, a city would
+    // reveal its window one document per pass. Five bounds the per-pass writes
+    // while letting a city that published several documents at once be seen in
+    // one visit. Documents already collected do not consume it.
+    acquisitionLimit: positive("REFRESH_ACQUISITION_LIMIT", 5, 100),
     // The adapter's own six-month default. The one measured whole-list sweep
     // (528 cities, 2026-09-05) ran at this window, so it is the window whose
     // cost is known; narrowing it would be a behaviour change with no measure.
     acquisitionWindowDays: positive("REFRESH_WINDOW_DAYS", 183, 3_650),
   };
   const sweepOptions = {
-    // 4 h 15, i.e. the measured 2 h 41 of a 528-city acquisition sweep plus the
-    // extraction headroom of the document cap below, and fifteen minutes under
-    // the Job's own activeDeadlineSeconds so the sweep stops itself first.
-    deadlineMs: positive("REFRESH_SWEEP_DEADLINE_MS", 15_300_000, 86_400_000),
-    // 17/day keeps a month of sweeps under the measured 532 documents/month
-    // ceiling of the dedicated Gemini seat. The expected daily delta is far
-    // lower; this is the ceiling, not the target. Raise it deliberately, and
-    // watch the seat, to drain a backlog.
-    maxDocuments: positive("REFRESH_SWEEP_MAX_DOCUMENTS", 17, 10_000),
-    cityReserveMs: positive("REFRESH_SWEEP_CITY_RESERVE_MS", 120_000, 3_600_000),
+    // The sweep must stop itself, cursor up to date, before the Job's own
+    // activeDeadlineSeconds SIGKILLs the pod. The value belongs to the manifest,
+    // which knows the schedule; this default is the Job deadline minus a slot's
+    // margin. The only duration figure available for a 528-city acquisition is
+    // 2 h 41, measured on `worker-live` — a PROXY for this code path, not a
+    // measurement of it (see the status report).
+    deadlineMs: positive("REFRESH_SWEEP_DEADLINE_MS", 18_000_000, 86_400_000),
+    // NO daily ceiling by default (owner decision, 2026-09-20): the volume is
+    // what the municipalities publish. A non-zero value does not END the run —
+    // it switches extraction off and keeps visiting, so the documents passed
+    // over stay pending and the next pass picks them up.
+    maxSubmissions: optionalCeiling("REFRESH_SWEEP_MAX_SUBMISSIONS", 0, 100_000),
+    // A city may turn out to owe a document, so the reserve has to cover one
+    // model call; 120 s used to guarantee a SIGKILL mid-document instead.
+    cityReserveMs: positive("REFRESH_SWEEP_CITY_RESERVE_MS", timeoutMs, 3_600_000),
     maxFailureRate: rate("REFRESH_SWEEP_MAX_FAILURE_RATE", 0.9),
+    maxDocumentFailures: positive("REFRESH_MAX_DOCUMENT_FAILURES", 3, 100),
   };
-  const refreshCity = (citySlug: string) => runPvRefresh({ cycleId, citySlug, store, db, profileContext,
-    documentModels,
-    onModelReceipt(docSha, chunkId, receipt) {
-      modelCalls += 1;
-      logger.info({ citySlug, docSha, chunkId, modelCalls, ...receipt }, "refresh-pv: model receipt");
-    },
-    extractPdf: async (bytes, url) => pdfToTextViaPoppler(url)(bytes, 30_000),
-    profileHash: profileContext.profile.profile_hash,
-    registryHash: canonicalHash(profileContext.registryExtraction), packageVersion: "0.18.0",
-    modelPolicy: documentModels.policy,
-    maximumAttempts,
-    ...runOptions,
-    ...(acquire ? { acquire } : {}) });
+  // The Job is SIGTERMed before it is SIGKILLed, and the sweep's own deadline is
+  // a second, independent guard. Without either, the `aborted` branch of the
+  // sweep was dead code and the pod died in the middle of a document.
+  const controller = new AbortController();
+  const stop = (reason: string) => () => {
+    if (!controller.signal.aborted) {
+      logger.warn({ reason }, "refresh-pv: stopping");
+      controller.abort(new Error(`Refresh stopped: ${reason}`));
+    }
+  };
+  process.once("SIGTERM", stop("sigterm"));
+  process.once("SIGINT", stop("sigint"));
+  const hardStop = setTimeout(stop("deadline"), sweepOptions.deadlineMs);
+  hardStop.unref();
+  const refreshCity = (citySlug: string, mode: { extract: boolean } = { extract: true }) =>
+    runPvRefresh({ cycleId, citySlug, store, db, profileContext,
+      documentModels,
+      onModelReceipt(docSha, chunkId, receipt) {
+        modelCalls += 1;
+        if (receipt.modelUsed) submissions += 1;
+        logger.info({ citySlug, docSha, chunkId, modelCalls, submissions, ...receipt },
+          "refresh-pv: model receipt");
+      },
+      onNote: (note, detail) => logger.info({ citySlug, ...detail }, `refresh-pv: ${note}`),
+      extractPdf: async (bytes, url) => pdfToTextViaPoppler(url)(bytes, 30_000),
+      profileHash: profileContext.profile.profile_hash,
+      registryHash: canonicalHash(profileContext.registryExtraction), packageVersion: "0.18.0",
+      modelPolicy: documentModels.policy,
+      maximumAttempts,
+      // The whole-list sweep takes a city's existing corpus as covered on its
+      // first visit; a targeted single-city run does not, because the operator
+      // asked for that city on purpose.
+      primeCoverage: target.all,
+      maxDocumentFailures: sweepOptions.maxDocumentFailures,
+      extract: mode.extract,
+      signal: controller.signal,
+      ...runOptions,
+      ...(acquire ? { acquire } : {}) });
 
   logger.info({ mode: target.all ? "all" : "city", city, cities: cities.length, cycleId,
     modelPolicy: documentModels.policy, maximumAttempts, primaryQualityAttempts, timeoutMs },
   "refresh-pv: starting");
+  const startedAt = new Date().toISOString();
   try {
     if (!target.all) {
-      logger.info({ ...await refreshCity(city!), modelCalls }, "refresh-pv: completed");
+      logger.info({ ...await refreshCity(city!), modelCalls, submissions }, "refresh-pv: completed");
       return;
     }
     const report = await runRefreshSweep({
       cities, store,
-      async refreshCity(citySlug) {
+      async refreshCity(citySlug, mode) {
         try {
-          return await refreshCity(citySlug);
+          return await refreshCity(citySlug, mode);
         } catch (error) {
           // The sweep keeps only a reason code; the redacted diagnostic is
           // logged here, where the error is still in hand.
@@ -203,17 +263,34 @@ async function main(): Promise<void> {
         }
       },
       deadlineMs: sweepOptions.deadlineMs,
-      maxDocuments: sweepOptions.maxDocuments,
+      maxSubmissions: sweepOptions.maxSubmissions,
+      submissions: () => submissions,
+      // The primary's quota circuit already spares the following cities a call
+      // known to be refused. Nothing covered the FALLBACK: once it too is out of
+      // quota, every remaining city would pay a 429 and fail.
+      haltExtraction: () => documentModels.fallbackQuotaExhausted() ? "fallback-quota-exhausted" : null,
       cityReserveMs: sweepOptions.cityReserveMs,
       onCity: (entry) => logger.info(entry, "refresh-pv: city"),
+      onNote: (note, detail) => logger.warn({ ...detail }, `refresh-pv: ${note}`),
+      signal: controller.signal,
     });
     // The per-city entries are already streamed above; the summary stays small
     // enough to read in one log line even with 528 cities.
     const { entries: _entries, ...summary } = report;
     const health = assessRefreshSweepHealth(report, sweepOptions.maxFailureRate);
     logger.info({ cycleId, ...summary, modelCalls, ...health }, "refresh-pv: sweep completed");
+    // The pod's logs are collected for a day; the rotation they describe takes
+    // longer than that to come round. Persist the report or the question "which
+    // cities were visited, and when" has no answer.
+    try {
+      await writeRefreshSweepReport(store, cycleId,
+        { ...report, startedAt, finishedAt: new Date().toISOString() });
+    } catch (error) {
+      logger.warn(refreshErrorDiagnostic(error), "refresh-pv: sweep report not persisted");
+    }
     if (health.exitCode === 1) process.exitCode = 1;
   } finally {
+    clearTimeout(hardStop);
     await pool.end();
   }
 }

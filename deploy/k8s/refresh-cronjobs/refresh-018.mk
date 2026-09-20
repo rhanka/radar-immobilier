@@ -131,6 +131,14 @@ render-prod:
 # depuis #734 le balayage toutes-villes : une commande sans `--all`, ou avec un
 # slug en dur, est refusée ici — c'est cette garde qui manquait quand le job
 # quotidien a silencieusement cessé de rafraîchir autre chose qu'une ville.
+#
+# La garde est STRUCTURELLE, pas numérique. Elle exige `--all`, l'absence de
+# slug positionnel, et la PRÉSENCE des variables de balayage — pas leurs
+# valeurs. Épingler ici les réglages (échéances, plafonds, réserve) transformait
+# chaque ajustement d'exploitation en double modification, et gelait en CI des
+# valeurs dont la conception dit elles-mêmes qu'elles doivent bouger à la
+# première mesure réelle. Ce qui doit rester figé — modèles, efforts, activation,
+# enveloppe mémoire prod — l'est par les autres blocs.
 .PHONY: verify-renders
 verify-renders:
 	@set -euo pipefail; tmp="$$(mktemp -d)"; trap 'rm -rf "$$tmp"' EXIT; \
@@ -161,12 +169,16 @@ verify-renders:
 	    }' "$$render" || { echo "refresh activation/model contract failed: $$render" >&2; exit 1; }; \
 	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ { \
 	      if ($$0 !~ /- dist\/scripts\/refresh-pv\.js\n[ ]+- --all\n[ ]+env:/) exit 1; \
-	      if ($$0 !~ /activeDeadlineSeconds: 16200\n/) exit 1; \
-	      if ($$0 !~ /name: REFRESH_WINDOW_DAYS\n[ ]+value: "183"/) exit 1; \
-	      if ($$0 !~ /name: REFRESH_SWEEP_DEADLINE_MS\n[ ]+value: "15300000"/) exit 1; \
-	      if ($$0 !~ /name: REFRESH_SWEEP_MAX_DOCUMENTS\n[ ]+value: "17"/) exit 1; \
-	      if ($$0 !~ /name: REFRESH_SWEEP_CITY_RESERVE_MS\n[ ]+value: "120000"/) exit 1; \
-	      if ($$0 !~ /name: REFRESH_SWEEP_MAX_FAILURE_RATE\n[ ]+value: "0.9"/) exit 1; \
+	      if ($$0 ~ /refresh-pv\.js\n[ ]+- [a-z]/) exit 1; \
+	      if ($$0 !~ /activeDeadlineSeconds: [0-9]+\n/) exit 1; \
+	      if ($$0 !~ /terminationGracePeriodSeconds: [0-9]+\n/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_WINDOW_DAYS\n/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_ACQUISITION_LIMIT\n/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_SWEEP_DEADLINE_MS\n/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_SWEEP_MAX_SUBMISSIONS\n/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_MAX_DOCUMENT_FAILURES\n/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_SWEEP_CITY_RESERVE_MS\n/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_SWEEP_MAX_FAILURE_RATE\n/) exit 1; \
 	    }' "$$render" || { echo "refresh whole-list sweep contract failed: $$render" >&2; exit 1; }; \
 	    awk 'function flush(){if(active && literal && reference){print "mixed value/valueFrom: " name > "/dev/stderr"; bad=1} literal=0; reference=0} \
 	      /^[[:space:]]*- name:/ {flush(); active=1; name=$$0; next} \
@@ -233,7 +245,7 @@ observe-scheduled-preprod: guard-preprod
 	    -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.metadata.ownerReferences[0].name}{"\t"}{.metadata.creationTimestamp}{"\n"}{end}' \
 	    | awk '$$2 == "radar-refresh-pv" { print }' | sort -k3 | tail -1 | cut -f1)"; \
 	  test -n "$$job" || { echo "Scheduled Job owner reference not found" >&2; exit 1; }; \
-	  $(K) wait --for=condition=complete "job/$$job" --timeout=2100s; \
+	  $(K) wait --for=condition=complete "job/$$job" --timeout=19800s; \
 	  $(K) get "job/$$job" -o custom-columns=NAME:.metadata.name,OWNER:.metadata.ownerReferences[0].name,IMAGE:.spec.template.spec.containers[0].image,START:.status.startTime,END:.status.completionTime; \
 	  $(K) logs "job/$$job" --all-containers=true
 
