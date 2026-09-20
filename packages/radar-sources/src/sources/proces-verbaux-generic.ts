@@ -11,6 +11,7 @@ import type {
 import {
   extractIsoFromLabel,
   filterPvByWindow,
+  isRealIsoDate,
   parsePvIndex,
   PV_NON_DISPONIBLE,
 } from "./proces-verbaux-parser.js";
@@ -22,9 +23,70 @@ import type { PvIndexItemT } from "./proces-verbaux-parser.js";
 
 export const PV_ADAPTER_VERSION = "0.1.0";
 
-/** Honest, identifiable user-agent (rules/MASTER.md Scraping Policy). */
+/** Identifiable user-agent, never disguised (rules/MASTER.md Scraping Policy). */
 export const PV_USER_AGENT =
   "radar-immobilier/0.1 (+https://github.com/rhanka/radar-immobilier)";
+
+/**
+ * `robots.txt` IS NOT READ BY THIS ADAPTER, AND WILL NOT BE — owner decision of
+ * 2026-09-20, recorded as the documented exception that rules/MASTER.md
+ * §Scraping Policy provides for.
+ *
+ * Reason, in the owner's terms: radar-immobilier is a specialised alerting tool
+ * for a bounded list of Québec municipal council documents, not a search engine
+ * building a general index. The decision is UNCONDITIONAL; the measures below
+ * accompany it and are not conditions on it. Stated as they actually stand:
+ *   - the collection window now bounds a run in practice, because far fewer
+ *     documents are undatable (see `extractIsoFromLabel`): on the measured
+ *     drummondville index of 2026-09-20, 240 of 496 links were undatable before
+ *     the fix and 56 after, so a FIRST run drops from 255 documents to 73. An
+ *     undated document is still KEPT by `filterPvByWindow` — a new PV may
+ *     legitimately carry no date — and the already-collected-URL guard
+ *     (`skipAlreadyCollectedUrls` in live-scrape.ts) then downloads it once and
+ *     never again, with no GET and no HEAD on the nights after. The steady state
+ *     for a city is ONE request: its index page, plus whatever is new;
+ *   - every request of a live scrape is spaced by at least
+ *     `PV_MIN_REQUEST_INTERVAL_MS`, which is what actually protects a small
+ *     municipal server. This adapter's own default is `0`; `runLiveScrape` sets
+ *     the interval on the real network, and the pipeline executor path does not
+ *     set it yet.
+ *
+ * What this constant does NOT say: it is not a claim that no site restricts
+ * anything. 15 hosts of the 553 in the parc do `Disallow` a directory that can
+ * hold procès-verbaux (inventory of 2026-09-20, INVESTIGATION_404_STATUS §3.6);
+ * for `www.saint-henri.ca` the 397 PV are all under a disallowed
+ * `/wp-content/uploads/`. That list is a fact of record, not a gate applied at
+ * run time. The `robots.txt: …` notes on the per-city configs below are dated
+ * MANUAL verifications and are kept as such.
+ */
+export const PV_ROBOTS_TXT_CONSULTED = false;
+
+/**
+ * Minimum spacing between two requests to the same source, in milliseconds.
+ * rules/MASTER.md §Scraping Policy: "at most 1 req / 2 s by default per source,
+ * more conservative for small municipal sites".
+ */
+export const PV_MIN_REQUEST_INTERVAL_MS = 2_000;
+
+/**
+ * Jitter added to the spacing, in milliseconds, so a long run does not hammer a
+ * source on a perfectly regular beat. Matches the ±300 ms the refresh pipeline
+ * already uses (`refreshSourceDelayMs`).
+ */
+export const PV_REQUEST_JITTER_MS = 300;
+
+export type PvFetchPhase = "index" | "document";
+export type PvDiagnosticHeaders = Partial<Record<
+  "server" | "cf-ray" | "cf-mitigated" | "location" | "content-type", string
+>>;
+export interface PvFetchDiagnostic {
+  readonly url: string;
+  readonly phase: PvFetchPhase;
+  readonly httpStatus: number | null;
+  /** Time to response headers (or transport failure), excluding body download. */
+  readonly durationMs: number;
+  readonly headers: PvDiagnosticHeaders;
+}
 
 /** Hard cap per fetch so a slow/hanging source never blocks the request. */
 const FETCH_TIMEOUT_MS = 15_000;
@@ -74,11 +136,17 @@ function parseSitemapSessionPages(
         .replace(/[-_]+/g, " ")
         .trim() || pageUrl.href;
     const slugDate = extractIsoFromLabel(pageTitle);
+    // `<lastmod>` is a date the site hands us ready-made, so nothing in the
+    // extractor checks it: "2026-02-99" would sail into the window and into
+    // `publishedAt`. Refusing an impossible day costs nothing — the item simply
+    // stays undated, and an undated item is kept by the window and collected.
     const lastmod = block.match(/<lastmod>\s*(\d{4}-\d{2}-\d{2})[^<]*<\/lastmod>/i);
+    const lastmodIso =
+      lastmod?.[1] !== undefined && isRealIsoDate(lastmod[1]) ? lastmod[1] : undefined;
     const dateIso =
       slugDate !== PV_NON_DISPONIBLE
         ? slugDate
-        : lastmod?.[1] ?? PV_NON_DISPONIBLE;
+        : lastmodIso ?? PV_NON_DISPONIBLE;
 
     items.push({
       title: pageTitle,
@@ -152,6 +220,10 @@ export class PvSourceFetchError extends Error {
     readonly kind: PvSourceErrorKind,
     readonly detail: string,
     readonly url: string,
+    readonly phase: PvFetchPhase,
+    readonly httpStatus: number | null = null,
+    readonly headers: PvDiagnosticHeaders = {},
+    readonly durationMs: number = 0,
   ) {
     super(`[${kind}] ${detail}`);
     this.name = "PvSourceFetchError";
@@ -206,6 +278,8 @@ export interface PvCityConfig {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface PvAdapterOptions {
+  /** Structured request telemetry; defaults to one JSON console line per fetch. */
+  readonly onRequest?: (diagnostic: PvFetchDiagnostic) => void;
   /** Inject a mock fetch in tests; defaults to globalThis.fetch. */
   readonly fetchImpl?: PvFetchLike;
   /** Per-fetch timeout in ms; defaults to FETCH_TIMEOUT_MS. */
@@ -217,6 +291,25 @@ export interface PvAdapterOptions {
    * is excluded from the list.  Defaults to DEFAULT_WINDOW_DAYS (6 months).
    */
   readonly windowDays?: number;
+  /**
+   * Minimum delay between two requests THIS adapter makes, in ms — index page,
+   * sitemap, session pages and documents alike. Defaults to `0`, i.e. the
+   * adapter stays the pure fetch abstraction it has always been; the
+   * orchestrator that owns a whole run (`runLiveScrape`) sets
+   * `PV_MIN_REQUEST_INTERVAL_MS` on the production path.
+   *
+   * It is a MINIMUM INTERVAL, not a fixed sleep: it waits only for the time
+   * still missing since the previous request returned. A caller that already
+   * paces itself — `acquireRefreshPdfCandidates` sleeps ~2 s in `beforeFetch` —
+   * therefore pays nothing extra instead of being throttled twice.
+   */
+  readonly minRequestIntervalMs?: number;
+  /** Jitter added on top of the interval, in ms. Defaults to PV_REQUEST_JITTER_MS. */
+  readonly requestJitterMs?: number;
+  /** Injected sleep (tests); defaults to a real timer. */
+  readonly sleep?: (ms: number) => Promise<void>;
+  /** Injected randomness for the pacing jitter (tests); defaults to Math.random. */
+  readonly random?: () => number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -232,10 +325,23 @@ export interface PvAdapterOptions {
  * `hash()`: sha256 of the raw bytes (idempotent storage key primitive).
  *
  * The adapter NEVER throws on a fetch failure: it raises a typed
- * `PvSourceFetchError` that the RECUEIL job converts into a typed outcome.
+ * `PvSourceFetchError` that the RECUEIL job converts into a typed outcome. The
+ * error carries the PHASE (`index` vs `document`), which is what lets RECUEIL
+ * lose a city only on an index failure and merely COUNT a failed document.
  *
- * Rate-limiting (1 req / 2 s per the Scraping Policy) is the caller's
- * responsibility; the adapter itself is a pure fetch abstraction.
+ * Rate-limiting (1 req / 2 s per the Scraping Policy) used to be described as
+ * "the caller's responsibility". No caller paced the INDEX fetch, and the live
+ * worker paced nothing at all, so a run of one city fired an index page plus
+ * 255 documents at full speed from a single IP. (The refresh path did already
+ * pace its document fetches, via `refreshSourceDelayMs`.)
+ * The adapter now HOLDS the spacing itself (`minRequestIntervalMs`), because it
+ * is the only layer that sees every request it makes: the index, the sitemap,
+ * the session pages and the documents. It still defaults to `0` so that it
+ * remains a pure fetch abstraction for a caller that paces itself; the
+ * production orchestrator (`runLiveScrape`) turns it on.
+ *
+ * `robots.txt` is NOT consulted — see `PV_ROBOTS_TXT_CONSULTED` for the owner
+ * decision of 2026-09-20 and its reason.
  */
 export class ProcesVerbauxGenericAdapter implements SourceAdapter {
   readonly kind: SourceKind = "pv";
@@ -247,6 +353,13 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
   private readonly timeoutMs: number;
   private readonly now: () => Date;
   private readonly windowDays: number;
+  private readonly onRequest: (diagnostic: PvFetchDiagnostic) => void;
+  private readonly minRequestIntervalMs: number;
+  private readonly requestJitterMs: number;
+  private readonly sleep: (ms: number) => Promise<void>;
+  private readonly random: () => number;
+  /** Wall-clock ms of the last request this adapter issued; -Infinity before the first. */
+  private lastRequestAt = Number.NEGATIVE_INFINITY;
 
   constructor(config: PvCityConfig, options: PvAdapterOptions = {}) {
     this.config = config;
@@ -256,9 +369,32 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
     this.timeoutMs = options.timeoutMs ?? FETCH_TIMEOUT_MS;
     this.now = options.now ?? (() => new Date());
     this.windowDays = options.windowDays ?? DEFAULT_WINDOW_DAYS;
+    this.onRequest = options.onRequest ?? ((diagnostic) =>
+      console.info(JSON.stringify({ event: "pv-fetch", city: this.city, ...diagnostic })));
+    this.minRequestIntervalMs = Math.max(0, options.minRequestIntervalMs ?? 0);
+    this.requestJitterMs = Math.max(0, options.requestJitterMs ?? PV_REQUEST_JITTER_MS);
+    this.sleep = options.sleep
+      ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+    this.random = options.random ?? Math.random;
   }
 
   // ── helpers ────────────────────────────────────────────────────────────────
+
+  /**
+   * Hold the Scraping-Policy spacing before issuing a request: wait only for
+   * the time STILL MISSING since the previous one, so a caller that already
+   * paced itself is not throttled twice. No-op when `minRequestIntervalMs` is 0
+   * and before the very first request of the adapter.
+   */
+  private async paceRequest(): Promise<void> {
+    if (this.minRequestIntervalMs <= 0) return;
+    const target = this.minRequestIntervalMs
+      + Math.floor(this.random() * (this.requestJitterMs + 1));
+    const elapsed = this.now().getTime() - this.lastRequestAt;
+    if (Number.isFinite(elapsed) && elapsed < target) {
+      await this.sleep(target - elapsed);
+    }
+  }
 
   private isoWindow(): { since: string; until: string } {
     const now = this.now();
@@ -270,39 +406,54 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
   }
 
   /**
-   * Perform one fetch with timeout + error wrapping.
+   * Perform one fetch with Scraping-Policy spacing, timeout + error wrapping.
    * Returns `{ ok, status, headers, arrayBuffer }` or throws `PvSourceFetchError`.
    */
   private async fetchWithTimeout(
     url: string,
+    phase: PvFetchPhase,
     accept = "*/*",
   ): Promise<Awaited<ReturnType<PvFetchLike>>> {
+    await this.paceRequest();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+    const started = this.now().getTime();
+    this.lastRequestAt = started;
+    let httpStatus: number | null = null;
+    const headers: PvDiagnosticHeaders = {};
     try {
       let res: Awaited<ReturnType<PvFetchLike>>;
       try {
         res = await this.fetchImpl(url, {
           signal: controller.signal,
-          headers: {
-            "user-agent": PV_USER_AGENT,
-            accept,
-          },
+          headers: { "user-agent": PV_USER_AGENT, accept },
         });
       } catch (e) {
         const isAbort = e instanceof Error && e.name === "AbortError";
         throw new PvSourceFetchError(
           isAbort ? "timeout" : "network",
-          e instanceof Error ? e.message : String(e),
+          isAbort ? "Request timed out" : "Network request failed",
           url,
+          phase,
+          null,
+          headers,
+          Math.max(0, this.now().getTime() - started),
         );
       }
+      httpStatus = res.status;
+      for (const name of ["server", "cf-ray", "cf-mitigated", "location", "content-type"] as const) {
+        const value = res.headers.get(name);
+        if (value !== null) headers[name] = value;
+      }
       if (!res.ok) {
-        throw new PvSourceFetchError("http", `HTTP ${res.status}`, url);
+        throw new PvSourceFetchError("http", `HTTP ${res.status}`, url, phase,
+          httpStatus, headers, Math.max(0, this.now().getTime() - started));
       }
       return res;
     } finally {
       clearTimeout(timer);
+      this.onRequest({ url, phase, httpStatus, headers,
+        durationMs: Math.max(0, this.now().getTime() - started) });
     }
   }
 
@@ -351,11 +502,13 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
           "parse",
           "sitemap-driven discovery requires sitemapUrl",
           this.config.pvIndexUrl,
+          "index",
         );
       }
 
       const sitemapRes = await this.fetchWithTimeout(
         sitemapUrl,
+        "index",
         "application/xml,text/xml",
       );
       const sitemapXml = new TextDecoder("utf-8").decode(
@@ -374,7 +527,18 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
       for (const session of sessions) {
         if (opts.signal?.aborted) break;
 
-        const pageRes = await this.fetchWithTimeout(session.url, "text/html");
+        // One dead session page must not cost the whole city. Before, a single
+        // 404 here threw out of the generator and every session that followed
+        // was lost (the same defect as issue #723, one layer up). The failure
+        // is already journalled by `onRequest` with its URL, phase and status;
+        // here we simply move on to the next session.
+        let pageRes: Awaited<ReturnType<PvFetchLike>>;
+        try {
+          pageRes = await this.fetchWithTimeout(session.url, "document", "text/html");
+        } catch (e) {
+          if (e instanceof PvSourceFetchError) continue;
+          throw e;
+        }
         const pageHtml = new TextDecoder("utf-8").decode(
           new Uint8Array(await pageRes.arrayBuffer()),
         );
@@ -396,6 +560,7 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
     //    failure; the RECUEIL job catches it — no wrapper needed here.
     const indexRes = await this.fetchWithTimeout(
       this.config.pvIndexUrl,
+      "index",
       "text/html",
     );
     const indexHtml = new TextDecoder("utf-8").decode(
@@ -436,7 +601,7 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
     const isPdf = ref.url.toLowerCase().endsWith(".pdf");
     const accept = isPdf ? "application/pdf" : "text/html,*/*";
 
-    const res = await this.fetchWithTimeout(ref.url, accept);
+    const res = await this.fetchWithTimeout(ref.url, "document", accept);
     const arrayBuffer = await res.arrayBuffer();
     const body = new Uint8Array(arrayBuffer);
     const contentType =

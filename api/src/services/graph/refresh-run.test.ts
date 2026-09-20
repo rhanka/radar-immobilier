@@ -59,6 +59,46 @@ describe("acquireRefreshPdfCandidates", () => {
     expect(manifest).not.toContain(laterPdfKey);
   });
 
+  // THE DAILY CYCLE IS AN UPDATE JOB (owner, 2026-09-20): it reads the index —
+  // that is the check — and downloads only the differential. A night on which
+  // the municipality published nothing collects nothing, and that is the normal
+  // result, not a failed Job. This function used to demand `count >= 1` and
+  // throw REFRESH_NO_ACQUISITION otherwise, which failed the CronJob on the most
+  // ordinary night there is.
+  it("returns no candidate instead of failing when the city has nothing new", async () => {
+    const store = new MemoryStore();
+    const { recap, candidates } = await acquireRefreshPdfCandidates({
+      citySlug: "city", store, acquire: async () => [{
+        city: "city", sourceId: "proces-verbaux-city", status: "seen", casKeys: [], count: 0,
+        skippedKnown: 12,
+      }] });
+    expect(candidates).toEqual([]);
+    expect(recap.skippedKnown).toBe(12);
+    // Nothing is published for a run with no input: no manifest, no bytes.
+    expect(store.objects.size).toBe(0);
+  });
+
+  // The distinction that matters: "nothing new" is not "could not look".
+  it("still fails when the index itself could not be read", async () => {
+    const store = new MemoryStore();
+    await expect(acquireRefreshPdfCandidates({ citySlug: "city", store, acquire: async () => [{
+      city: "city", sourceId: "proces-verbaux-city", status: "error", casKeys: [], count: 0,
+      error: "[http] HTTP 404",
+    }] })).rejects.toMatchObject({ code: "REFRESH_NO_ACQUISITION" });
+  });
+
+  it("asks the scrape to skip documents an earlier run already collected", async () => {
+    const store = new MemoryStore();
+    let sawGuard: boolean | undefined;
+    await acquireRefreshPdfCandidates({ citySlug: "city", store, acquire: async (_cities, options) => {
+      sawGuard = options.skipAlreadyCollectedUrls;
+      return [{ city: "city", sourceId: "proces-verbaux-city", status: "seen", casKeys: [], count: 0 }];
+    } });
+    // No GET and no HEAD on a document already in storage: the skip is decided
+    // on the URL, before any request.
+    expect(sawGuard).toBe(true);
+  });
+
   it("fails before manifest publication when acquisition has no exact PDF", async () => {
     const store = new MemoryStore();
     const sourceId = "proces-verbaux-city";

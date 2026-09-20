@@ -247,6 +247,8 @@ async function main(): Promise<void> {
   const startedAt = new Date().toISOString();
   try {
     if (!target.all) {
+      // `status` carries the outcome: `up-to-date` when the index answered and
+      // the city owed nothing — no document downloaded, no model called, exit 0.
       logger.info({ ...await refreshCity(city!), modelCalls, submissions }, "refresh-pv: completed");
       return;
     }

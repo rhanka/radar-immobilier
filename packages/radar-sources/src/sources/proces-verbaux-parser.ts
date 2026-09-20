@@ -170,46 +170,224 @@ const FRENCH_MONTHS_PV: Record<string, string> = {
 };
 
 /**
+ * Word characters that municipalities use to glue date parts inside a label or
+ * a file name: whitespace, underscore, dot and hyphen. `\b` CANNOT be used to
+ * delimit a date in a file name, because `_` is itself a word character: in
+ * `Proces_verbal_2016_01_18.pdf` there is NO word boundary before `2016`, so a
+ * `\b`-anchored rule never fires. That single detail made 240 of the 255
+ * documents of one real index undatable — and therefore unbounded by the
+ * collection window (issue #723). Every rule below delimits with explicit
+ * digit lookarounds instead.
+ */
+const DATE_GLUE = "[\\s_.-]+";
+
+/**
+ * Take the FIRST match whose captured word is a real French month name.
+ * A single `.match()` cannot do this: it stops on the first *structural* match,
+ * so `ordre-du-jour-24-aout-2026` would be decided by whatever token happens to
+ * come first and the real date would be lost.
+ */
+function firstFrenchMonthMatch(
+  lower: string,
+  re: RegExp,
+  monthGroup: number,
+): RegExpMatchArray | null {
+  for (const m of lower.matchAll(re)) {
+    const word = m[monthGroup];
+    if (word && FRENCH_MONTHS_PV[word]) return m;
+  }
+  return null;
+}
+
+/** Two-digit zero-padded string for a day/month number. */
+function pad2(n: string): string {
+  return n.padStart(2, "0");
+}
+
+/**
+ * `YYYY-MM-DD` when those three numbers are a date that EXISTS, `null`
+ * otherwise. A structural match is not a date: `2026-02-31`, `pv-31-02-2026`
+ * and `20260231.pdf` all fit the shapes below and none of them is a day. The
+ * check is a `Date.UTC` round trip, so it is the real calendar (leap years
+ * included), not a table of month lengths.
+ *
+ * A REFUSAL here is not a loss: the caller falls through to the less specific
+ * rules and, failing those, the document stays undated — and an undated
+ * document is KEPT by `filterPvByWindow`, i.e. collected. A fabricated date is
+ * the opposite: it moves a document in or out of the window silently, and a
+ * document wrongly put outside the window is a document never collected.
+ */
+
+/**
+ * `true` when `iso` is a `YYYY-MM-DD` string that names a day that exists. Used
+ * on dates the sources hand over ready-made — a sitemap `<lastmod>`, say —
+ * where nothing else checks them.
+ */
+export function isRealIsoDate(iso: string): boolean {
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m?.[1] !== undefined && m[2] !== undefined && m[3] !== undefined
+    && isoDateIfReal(m[1], m[2], m[3]) !== null;
+}
+
+function isoDateIfReal(year: string, month: string, day: string): string | null {
+  const y = Number(year);
+  const m = Number(month);
+  const d = Number(day);
+  const utc = new Date(Date.UTC(y, m - 1, d));
+  if (
+    utc.getUTCFullYear() !== y
+    || utc.getUTCMonth() !== m - 1
+    || utc.getUTCDate() !== d
+  ) {
+    return null;
+  }
+  return `${year}-${pad2(month)}-${pad2(day)}`;
+}
+
+/**
  * Extract an ISO date from a human label, most specific first:
- *   - "séance du 10 mars 2025" / "10 mars 2025"  → "2025-03-10"
- *   - "2025-03-10" / "2025/03/10"                → "2025-03-10"
- *   - "Mars 2025" (month + year, no day)         → "2025-03"  (YYYY-MM)
+ *   - "séance du 10 mars 2025" / "10-mars-2025"   → "2025-03-10"
+ *   - "2025-03-10" / "2025/03/10" / "2025_03_10"  → "2025-03-10"
+ *   - "PV20250310.pdf" (compact year-first)       → "2025-03-10"
+ *   - "Mars 2025" (month + year, no day)          → "2025-03"  (YYYY-MM)
  *   - "pv-2025-03" (filename year-month)          → "2025-03"
  * Returns NON_DISPONIBLE when nothing parses.
  *
  * The month-only form (YYYY-MM) is intentional: many flat-list municipalities
  * label PVs by month ("Mars 2025") with no day. A YYYY-MM string still sorts
  * and window-filters correctly (lexicographic ≥/≤ against YYYY-MM-DD bounds).
+ *
+ * ANTI-INVENTION, and it is the point of this function. A rule fires only on a
+ * date that is verbatim in the label or the file name, and an ambiguous form
+ * that could be read two ways is REJECTED rather than resolved by preference.
+ * Two consequences that are deliberate, not oversights:
+ *
+ *   - THERE IS NO DAY-FIRST RULE. `10-03-2025` could be 10 March or 3 October
+ *     and nothing in the string says which. See point 4 below for what was
+ *     measured, and for the real names such a rule reads as dates.
+ *   - EVERY NUMERIC DATE IS CHECKED AGAINST THE CALENDAR (`isoDateIfReal`) and
+ *     every year is bounded to `20xx` by the patterns themselves, so
+ *     `pv-2026-02-31.pdf` and `reglement-1234-10-25.pdf` cannot reach
+ *     `publishedAt`.
+ *
+ * A date that is missing costs one download: `filterPvByWindow` keeps an
+ * undated item, so it is collected. A date that is WRONG costs a document —
+ * placed outside the window it is never fetched, and nothing says so.
  */
 export function extractIsoFromLabel(label: string): string {
   const lower = label.toLowerCase();
 
-  // 1. Full French date: "10 mars 2025" or ordinal "1er octobre 2025"
-  //    ("1er"/"1ᵉʳ"/"2e" — the ordinal suffix is consumed, not the day digit).
-  const full = lower.match(
-    /(\d{1,2})(?:er|re|e|ère|ème|ᵉʳ|ᵉ)?\s+([a-zàâçéèêëîïôûù]+)\s+(\d{4})/i,
+  // 1. Full French date: "10 mars 2025", "10-mars-2025", ordinal "1er octobre
+  //    2025" ("1er"/"1ᵉʳ"/"2e" — the ordinal suffix is consumed, not the day
+  //    digit). The glue is not only whitespace: `Ordre-du-jour-24-aout-2026`
+  //    and `PV_6_juillet_2026` are both real file names in the parc.
+  const full = firstFrenchMonthMatch(
+    lower,
+    new RegExp(
+      `(?<![0-9])(\\d{1,2})(?:er|re|e|ère|ème|ᵉʳ|ᵉ)?${DATE_GLUE}`
+        + `([a-zàâçéèêëîïôûù]+)${DATE_GLUE}(20\\d{2})(?![0-9])`,
+      "gi",
+    ),
+    2,
   );
   if (full?.[1] && full[2] && full[3]) {
     const month = FRENCH_MONTHS_PV[full[2]];
-    if (month) return `${full[3]}-${month}-${full[1].padStart(2, "0")}`;
+    // The digit lookbehind stops `reglement-1234-mai-2020` being read as "day
+    // 34 of May" (a guard built for this rule, not a shape observed in the
+    // parc); the calendar check stops "31 février".
+    const iso = month ? isoDateIfReal(full[3], month, full[1]) : null;
+    if (iso) return iso;
   }
 
-  // 2. ISO-ish numeric date: "2025-03-10" or "2025/03/10".
-  const iso = lower.match(/\b(\d{4})[-/](\d{2})[-/](\d{2})\b/);
-  if (iso?.[1] && iso[2] && iso[3]) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+  // 2. Year-first numeric date: "2025-03-10", "2025/03/10", "2025_03_10",
+  //    "2025.03.10". Three guards, each with its own refusal test:
+  //      - the SAME separator on both sides (back reference `\2`), so a version
+  //        string like "v1.2-2025" is not a date;
+  //      - the year is `20xx`, so a bylaw number like `1234-10-25` is not;
+  //      - the triple must be a REAL calendar date, so "2025-99-99" and
+  //        "2026-02-31" are not.
+  //    `/` stays a separator because municipal LABELS use it (les-coteaux
+  //    writes its sessions "2026/03/10"). It cannot pick up a WordPress upload
+  //    path any more: `parsePvIndex` hands this function the LAST path segment
+  //    of a URL, never the directories — see the `dateSource` note there.
+  const ymd = lower.match(
+    /(?<![0-9])(20\d{2})([-/_.])(0[1-9]|1[0-2])\2(0[1-9]|[12]\d|3[01])(?![0-9])/,
+  );
+  if (ymd?.[1] && ymd[3] && ymd[4]) {
+    const iso = isoDateIfReal(ymd[1], ymd[3], ymd[4]);
+    if (iso) return iso;
+  }
 
-  // 3. Month + year only: "mars 2025".
-  const monthYear = lower.match(/\b([a-zàâçéèêëîïôûù]+)\s+(\d{4})\b/i);
+  // 3. Compact year-first date: "PV20250310.pdf". Measured on this repository's
+  //    own PV index fixtures — every `*_HTML` export of every
+  //    `proces-verbaux-*.fixture.ts` run through `parsePvIndex`, 427 document
+  //    anchors: 81 file names carry a compact date, 187 a `YYYY-MM-DD` one, 16 a
+  //    `YYYY_MM_DD` one, and ZERO a day-first `JJ-MM-AAAA` one (which is the
+  //    measurement behind point 4 below). No rule read the compact form before.
+  const compact = lower.match(
+    /(?<![0-9])(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(?![0-9])/,
+  );
+  if (compact?.[1] && compact[2] && compact[3]) {
+    const iso = isoDateIfReal(compact[1], compact[2], compact[3]);
+    if (iso) return iso;
+  }
+
+  // 4. DELIBERATELY ABSENT — day-first numeric date, year last ("10-03-2025").
+  //
+  //    Such a rule was written on this branch and is NOT kept. Its reading
+  //    order rested on a single index (drummondville, 2026-09-20: 48 names of
+  //    this shape, 29 with a first component > 12 — and therefore 19 where both
+  //    components are ≤ 12 and either reading is possible). Applying one city's
+  //    convention to 553 turns a guess into `publishedAt`, and on real strings
+  //    it fires on things that are not dates: `annexe-v1-2-2026.pdf` →
+  //    "2026-02-01", `note-v2.5.2024.pdf` → "2024-05-02", and Lavaltrie's bylaw
+  //    number `RRU3-2-2026` → "2026-02-03" (this repository's own fixture).
+  //
+  //    Without the rule those names stay undated, `filterPvByWindow` keeps
+  //    undated items, and the document IS collected — once. With the rule, a PV
+  //    of 10 March read as 3 October falls outside the 183-day window and is
+  //    never fetched at all. The refusal tests in
+  //    proces-verbaux-date-window.test.ts pin the three shapes above.
+
+  // 5. Month + year only: "mars 2025", "mars-2025".
+  const monthYear = firstFrenchMonthMatch(
+    lower,
+    new RegExp(`([a-zàâçéèêëîïôûù]+)${DATE_GLUE}(20\\d{2})(?![0-9])`, "gi"),
+    1,
+  );
   if (monthYear?.[1] && monthYear[2]) {
     const month = FRENCH_MONTHS_PV[monthYear[1]];
     if (month) return `${monthYear[2]}-${month}`;
   }
 
-  // 4. Filename year-month: "pv-2025-03" / "2025_03".
-  const fileYm = lower.match(/\b(20\d{2})[-_](0[1-9]|1[0-2])\b/);
+  // 6. Filename year-month: "pv-2025-03" / "2025_03".
+  //
+  //    Separators are `-` and `_`, exactly as on `origin/main`: this rule is
+  //    kept UNWIDENED on purpose. `YYYY-MM` is also how Québec municipalities
+  //    number year-prefixed bylaws ("règlement 2025-11", documented on
+  //    `REGLEMENT_NUMBER_RE` below), so every separator added here adds a way to
+  //    read a bylaw number as a date. The collision that already exists is
+  //    unchanged by this branch and is written down as a known limitation.
+  //
+  //    `/` is deliberately NOT a separator. Accepting it would make every
+  //    WordPress upload path `/wp-content/uploads/2015/10/…` yield a date, and
+  //    that date is the UPLOAD month, not the session month — it would land in
+  //    `publishedAt`, the valid-time axis.
+  const fileYm = lower.match(/(?<![0-9])(20\d{2})[-_](0[1-9]|1[0-2])(?![0-9])/);
   if (fileYm?.[1] && fileYm[2]) return `${fileYm[1]}-${fileYm[2]}`;
 
   return PV_NON_DISPONIBLE;
+}
+
+/**
+ * The last path segment of a URL, without query string or fragment. Empty when
+ * the URL has no segment (a bare origin). Never throws on a malformed URL: the
+ * string is cut mechanically, because this feeds the date extractor and a
+ * failure there must yield "no date", not an exception.
+ */
+function fileNameOf(url: string): string {
+  const withoutQuery = url.split(/[?#]/, 1)[0] ?? "";
+  return withoutQuery.split("/").pop() ?? "";
 }
 
 /** Decode minimal HTML entities in a fragment. */
@@ -395,9 +573,21 @@ export function parsePvIndex(html: string, baseUrl: string): PvIndexItemT[] {
     const title = inner || url.split("/").pop() || url;
     // For month-only labels with no month name in the visible text, fall back to
     // the filename (e.g. "pv-2025-03.pdf") to recover a YYYY-MM date.
+    //
+    // THE FILE NAME, NOT THE PATH. Handing the whole URL to the date extractor
+    // let a WordPress upload directory become a session date: in
+    // `…/uploads/2015/10/18-01-2016-pv.pdf` the rule for "2015/10/18" fires on
+    // three PATH segments and yields 2015-10-18, and in
+    // `…/uploads/2026/03/10-proces-verbal.pdf` it fabricates 2026-03-10 out of
+    // an upload month and a leading number in the file name. The upload month
+    // is not the session month, and this value goes to `publishedAt`, the
+    // valid-time axis. Only the last segment is a name a municipality chose;
+    // the query string is dropped with it (`pv.pdf?ver=20240115` is a cache
+    // buster, not a date).
+    const fileName = fileNameOf(url);
     const dateSource = SESSION_MONTH_LABEL_RE.test(title) || /\d{4}/.test(title)
       ? title
-      : `${title} ${url}`;
+      : `${title} ${fileName}`;
     const dateIso = extractIsoFromLabel(dateSource);
     const parsed = PvIndexItem.safeParse({
       title,
@@ -464,6 +654,29 @@ export function detectIndexRenderMode(html: string): IndexRenderMode {
  *   - Month-only dates ("YYYY-MM") are expanded to their whole-month span
  *     [YYYY-MM-01, YYYY-MM-31] and kept when that span OVERLAPS the window, so a
  *     PV labelled only by month near a window boundary is not silently dropped.
+ *
+ * WHAT AN UNDATED DOCUMENT BECOMES (issue #723). Keeping an undated item is
+ * correct and stays: a brand-new PV whose label carries no date must be
+ * collected the day it appears, and dropping it here would make the daily check
+ * blind. What was WRONG was the consequence: an undated item was kept by EVERY
+ * run, so the same decade-old documents were re-downloaded every night — 240 of
+ * drummondville's 255 fetches were undated items, and one of them was a dead
+ * 2016 link that aborted the whole city.
+ *
+ * This branch fixes the CAUSE: most of those 240 were undatable only because
+ * `\b` cannot delimit a date in `Proces_verbal_2016_01_18.pdf`. With the
+ * separator rules corrected, 56 of the same 496 links stay undated and a first
+ * run drops from 255 documents to 73 — and the dead 2016 link is dated
+ * 2016-01-18 and falls outside the window, which is what closes #723.
+ *
+ * The two halves of the answer are therefore split:
+ *   - this window filter keeps undated items, so the daily CHECK stays complete
+ *     and a brand-new PV with no readable date is collected the day it appears;
+ *   - the collection layer skips an item whose URL an earlier run already
+ *     collected (`loadCollectedUrls` + `alreadyCollected` in live-scrape), so
+ *     those 56 are downloaded ONCE and never requested again.
+ * Reading the index every 24 h is the check; re-downloading its whole back
+ * catalogue is what is avoided.
  */
 export function filterPvByWindow(
   items: PvIndexItemT[],
