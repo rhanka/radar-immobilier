@@ -268,3 +268,72 @@ Account enrollment/import procedures remain in the [Astra acceptance guide](../.
 The [cascade acceptance guide](../../docs/reviews/refresh-cascade/production-acceptance.md)
 defines release checks. These prepared changes are not evidence of deployment;
 production remains gated by `REFRESH_CRONJOB_PROD_ENABLED=true`.
+
+# Armer le rafraîchissement de production
+
+Le CronJob `radar-refresh-pv` **n'existe pas** dans `radar-immobilier` : rien
+n'y rafraîchit les procès-verbaux aujourd'hui. Le chemin CD est prêt et vérifié
+en CI ; il ne s'exécute que lorsque la variable GitHub
+`REFRESH_CRONJOB_PROD_ENABLED` vaut `'true'`. **Définir cette variable est le
+seul geste d'armement, et c'est un acte owner** — une fusion ne peut pas armer
+la production par effet de bord. Tant qu'elle n'est pas définie, chaque
+promotion émet un `::warning::` « Refresh CronJob DISARMED (prod) » : désarmé
+n'est pas une faute, mais ce n'est jamais invisible.
+
+## Ce que fait l'étape, une fois armée
+
+`promote-prod` → « Deploy refresh CronJobs (prod) », **après** la promotion des
+images, de sorte que le CronJob porte exactement l'empreinte que les
+Deployments viennent de recevoir. Le rendu passe par
+`make -f deploy/k8s/refresh-cronjobs/refresh-018.mk render-prod`, la **même**
+cible que la CI exécute sur chaque PR dans `verify-renders` : ce qui est
+appliqué est ce qui a été vérifié. La cible refuse un `IMAGE_REF` qui n'est pas
+une empreinte `@sha256:`, et refuse un rendu portant encore le placeholder
+fail-loud ou `:latest`. Après l'apply, l'étape RELIT le CronJob dans le cluster
+et rougit si `suspend` n'est pas `false` ou si l'image n'est pas l'empreinte
+promue.
+
+Le régime appliqué est celui de la base `deploy/k8s/34-refresh-cronjob.yaml`,
+inchangé entre les deux environnements depuis #736 : `--all` sur les ~528
+villes, **quatre passages par jour** (`17 5,11,17,23` UTC), échéance de Job
+`19800 s` (5 h 30) et arrêt propre du balayage à `18900000 ms` (5 h 15).
+`verify-renders` refuse toute divergence entre le rendu préprod et le rendu
+prod en dehors de trois différences voulues : namespace, enveloppe mémoire,
+liaison S3.
+
+## À vérifier AVANT de définir la variable
+
+1. **Secrets du namespace `radar-immobilier`.** Le pod monte
+   `radar-refresh-keyring-bootstrap` (volume) et lit `radar-refresh-runtime`
+   (`REFRESH_PRINCIPAL_REF`, `REFRESH_OWNER_SCOPE_REF`). Sans eux, le pod ne
+   démarre pas. `refresh-018.mk` n'a **que** `seed-preprod` : le semis prod est
+   un acte owner, hors CI, avec un `REFRESH_PRINCIPAL_REF` distinct de celui de
+   la préproduction. Enrôlement des comptes : voir le guide Astra cité plus
+   haut.
+2. **PVC `radar-refresh-keyring`.** Il est dans le rendu, donc l'apply le crée.
+   Cela suppose que le Role `radar-ci-deployer-refresh-cronjobs`
+   (`deploy/k8s/10-rbac.yaml`, verbes `batch/cronjobs` **et**
+   `persistentvolumeclaims`) soit **réellement appliqué sur le cluster** : c'est
+   un acte cluster-admin (poc-k8s), la CI ne se l'accorde jamais. C'est la même
+   omission qui avait cassé six déploiements préprod d'affilée en septembre.
+3. **Marge de quota mémoire.** `radar-immobilier` plafonne `limits.memory` à
+   3 072 Mi et en consomme 2 304 Mi : la marge est de **768 Mi**, soit
+   exactement ce pod — et exactement ce que consommerait aussi un surge HPA de
+   `radar-api` à deux pods. Les deux sont **mutuellement exclusifs**, et le
+   perdant échoue en `FailedCreate`, sans alerte. Relire le quota réel sur le
+   cluster OVH de production avant d'armer, et non un inventaire historique.
+4. **Occupation du créneau.** Quatre passages de 5 h 30 au pire occupent le pod
+   presque en continu, là où le régime précédent était nocturne. Décider si le
+   surge `radar-api` doit rester possible, et sinon quand.
+5. **Pic RSS du balayage.** Aucun pic de `refresh-pv --all` n'a jamais été
+   mesuré ; les chiffres disponibles (OOM à 512 Mi, pic 815 Mi, plateau
+   305-426 Mi à 3 Gi) viennent de `worker-live`, un proxy de ce chemin de code.
+   La consigne « validate peak RSS » de l'overlay prod n'est pas encore levée.
+   Une mesure sur un balayage réel en préproduction est la pièce manquante.
+
+## Désarmer
+
+Remettre `REFRESH_CRONJOB_PROD_ENABLED` à autre chose que `'true'` empêche les
+promotions suivantes de redéployer le CronJob, mais **ne suspend pas** celui qui
+tourne déjà : suspendre est un acte explicite
+(`kubectl -n radar-immobilier patch cronjob radar-refresh-pv --type=merge -p '{"spec":{"suspend":true}}'`).

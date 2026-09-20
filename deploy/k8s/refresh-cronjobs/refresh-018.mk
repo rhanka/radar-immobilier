@@ -8,6 +8,8 @@ EXPECTED_SERVER := https://hlhedx.c1.bhs5.k8s.ovh.net
 K := kubectl --kubeconfig "$(KUBECONFIG)" -n $(NAMESPACE)
 PLACEHOLDER := ghcr.io/rhanka/radar-api:PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNEDITED
 API_IMAGE := ghcr.io/rhanka/radar-api
+CONTRACT_AWK := $(OVERLAY)/refresh-contract.awk
+WINDOW_AWK := $(OVERLAY)/refresh-window.awk
 
 .PHONY: guard-preprod
 guard-preprod:
@@ -139,6 +141,22 @@ render-prod:
 # valeurs dont la conception dit elles-mêmes qu'elles doivent bouger à la
 # première mesure réelle. Ce qui doit rester figé — modèles, efforts, activation,
 # enveloppe mémoire prod — l'est par les autres blocs.
+#
+# Depuis l'armement du CD de production (2026-09-20), trois blocs s'ajoutent, et
+# ils ne figent toujours aucune valeur d'exploitation :
+#   - PARITÉ DES DEUX OVERLAYS (refresh-contract.awk) : tout ce qui n'est pas une
+#     divergence VOULUE — namespace, enveloppe mémoire, liaison S3 — doit
+#     coïncider entre le rendu préprod et le rendu prod. C'est la garde qui
+#     manquait : #736 a porté `--all`, l'échéance à 19 800 s et quatre passages
+#     dans la BASE, donc les deux overlays en héritent ; rien n'empêchait
+#     jusqu'ici un patch prod de s'en écarter en silence ;
+#   - COHÉRENCE TEMPORELLE (refresh-window.awk) : le balayage doit s'arrêter
+#     avant l'échéance du Job, et un passage doit tenir dans son créneau — en
+#     `concurrencyPolicy: Forbid`, un passage encore en vol fait SAUTER le
+#     suivant ;
+#   - l'enveloppe mémoire de production reste épinglée en toutes lettres, avec
+#     le message d'erreur qui manquait.
+
 .PHONY: verify-renders
 verify-renders:
 	@set -euo pipefail; tmp="$$(mktemp -d)"; trap 'rm -rf "$$tmp"' EXIT; \
@@ -185,10 +203,18 @@ verify-renders:
 	      active && /^[[:space:]]+value:[[:space:]]/ {literal=1} \
 	      active && /^[[:space:]]+valueFrom:[[:space:]]*$$/ {reference=1} \
 	      END {flush(); exit bad}' "$$render"; \
+	    awk -f "$(WINDOW_AWK)" "$$render" \
+	      || { echo "refresh temporal contract failed: $$render" >&2; exit 1; }; \
 	  done; \
 	  awk 'BEGIN{RS="\n---\n"} /name: radar-refresh-pv\n/ { \
 	    if ($$0 !~ /memory: 768Mi/ || $$0 !~ /--max-old-space-size=512/) exit 1; \
-	  }' "$$tmp/prod.yaml"
+	  }' "$$tmp/prod.yaml" \
+	    || { echo "prod memory envelope contract failed: the prod render must keep memory: 768Mi and --max-old-space-size=512 (quota radar-immobilier)" >&2; exit 1; }; \
+	  awk -f "$(CONTRACT_AWK)" "$$tmp/preprod.yaml" | sort > "$$tmp/preprod.contract"; \
+	  awk -f "$(CONTRACT_AWK)" "$$tmp/prod.yaml" | sort > "$$tmp/prod.contract"; \
+	  test -s "$$tmp/prod.contract" || { echo "empty refresh contract projection" >&2; exit 1; }; \
+	  diff -u "$$tmp/preprod.contract" "$$tmp/prod.contract" \
+	    || { echo "refresh overlay parity failed: preprod and prod diverge outside the three intended differences (namespace, memory envelope, S3 binding) — see the diff above (< preprod, > prod)" >&2; exit 1; }
 
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
