@@ -127,6 +127,10 @@ render-prod:
 	  | sed "s#$(PLACEHOLDER)#$(IMAGE_REF)#g" > "$(RENDER_OUT)"
 	@! grep -q 'PINNED-BY-CI\|radar-api:latest' "$(RENDER_OUT)"
 
+# Contrat de rendu des DEUX overlays. Au-delà du contrat de modèle, il épingle
+# depuis #734 le balayage toutes-villes : une commande sans `--all`, ou avec un
+# slug en dur, est refusée ici — c'est cette garde qui manquait quand le job
+# quotidien a silencieusement cessé de rafraîchir autre chose qu'une ville.
 .PHONY: verify-renders
 verify-renders:
 	@set -euo pipefail; tmp="$$(mktemp -d)"; trap 'rm -rf "$$tmp"' EXIT; \
@@ -155,6 +159,15 @@ verify-renders:
 	        || $$0 !~ /name: REFRESH_VERIFY_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_MAX_OUTPUT_TOKENS\n[ ]+value: "32768"/)) exit 1; \
 	    }' "$$render" || { echo "refresh activation/model contract failed: $$render" >&2; exit 1; }; \
+	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ { \
+	      if ($$0 !~ /- dist\/scripts\/refresh-pv\.js\n[ ]+- --all\n[ ]+env:/) exit 1; \
+	      if ($$0 !~ /activeDeadlineSeconds: 16200\n/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_WINDOW_DAYS\n[ ]+value: "183"/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_SWEEP_DEADLINE_MS\n[ ]+value: "15300000"/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_SWEEP_MAX_DOCUMENTS\n[ ]+value: "17"/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_SWEEP_CITY_RESERVE_MS\n[ ]+value: "120000"/) exit 1; \
+	      if ($$0 !~ /name: REFRESH_SWEEP_MAX_FAILURE_RATE\n[ ]+value: "0.9"/) exit 1; \
+	    }' "$$render" || { echo "refresh whole-list sweep contract failed: $$render" >&2; exit 1; }; \
 	    awk 'function flush(){if(active && literal && reference){print "mixed value/valueFrom: " name > "/dev/stderr"; bad=1} literal=0; reference=0} \
 	      /^[[:space:]]*- name:/ {flush(); active=1; name=$$0; next} \
 	      active && /^[[:space:]]+value:[[:space:]]/ {literal=1} \

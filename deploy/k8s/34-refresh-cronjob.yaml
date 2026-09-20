@@ -1,9 +1,33 @@
 # refresh-cronjob.yaml — RAFRAÎCHISSEMENT PÉRIODIQUE des procès-verbaux → signaux.
 #
-# Un seul CronJob : radar-refresh-pv. À chaque exécution, pour chaque ville, il
-# acquiert au plus REFRESH_ACQUISITION_LIMIT procès-verbaux nouveaux, les extrait
-# par le modèle (principal puis repli), publie le graphe canonique et le projette
-# en PostgreSQL. Base dormante (suspend: true) ; l'overlay préprod l'active,
+# Un seul CronJob : radar-refresh-pv, lancé avec `--all`. Il balaie la liste
+# déterministe des ~528 villes config-only. Pour CHAQUE ville il rescrape la
+# source (fenêtre REFRESH_WINDOW_DAYS), puis traite AU PLUS UN document : le plus
+# récemment publié dont les signaux ne sont pas déjà projetés en PostgreSQL. Une
+# ville dont tous les documents sont déjà projetés ne coûte aucun appel modèle.
+# Le document retenu est extrait par le modèle (principal puis repli), publié
+# dans le graphe canonique et projeté en PostgreSQL.
+#
+# Ce que le balayage garantit, et ce qu'il ne garantit pas :
+#   - il REPREND au curseur durable `refresh/018/sweep/cursor.json`, écrit AVANT
+#     chaque ville : une exécution coupée par activeDeadlineSeconds continue là
+#     où elle s'est arrêtée au lieu de repartir du premier slug, et aucune ville
+#     ne peut bloquer la rotation ;
+#   - il s'arrête sur REFRESH_SWEEP_DEADLINE_MS (horloge) ou sur
+#     REFRESH_SWEEP_MAX_DOCUMENTS (documents extraits), ce second plafond étant
+#     ce qui borne la dépense modèle quotidienne ;
+#   - une ville en erreur — source injoignable, aucun PV dans la fenêtre, pas
+#     encore de graphe canonique — est comptée et le balayage continue. Seul un
+#     TAUX systémique d'échecs inattendus fait sortir le Job en 1 ;
+#   - il NE rattrape PAS un arriéré : un document par ville et par passage. Une
+#     ville qui publie deux PV le même jour voit le second au passage suivant.
+#
+# Avancement mesurable : toutes les lignes `refresh_document_outcomes` d'une
+# exécution portent le même `cycle_id`, donc l'état d'un passage se lit d'un seul
+# GROUP BY. Une ville sans document neuf n'écrit aucune ligne — c'est voulu, le
+# journal est par document soumis, pas par ville visitée.
+#
+# Base dormante (suspend: true) ; l'overlay préprod l'active,
 # l'overlay prod (refresh-cronjobs-prod) l'active derrière la promotion gardée.
 #
 # Retirés le 2026-09-18 (décision owner) : radar-refresh-scrape (scrape
@@ -35,8 +59,12 @@ spec:
       # A later cycle resumes durable, hash-checked state; do not duplicate a
       # provider call automatically inside the same scheduled execution.
       backoffLimit: 0
-      # Two independent 900s model windows plus acquisition/publication headroom.
-      activeDeadlineSeconds: 2100
+      # Le balayage complet, pas un document isolé. Mesure du 2026-09-05 sur la
+      # même liste de 528 villes : 2 h 41 pour l'acquisition seule (fenêtre 183 j).
+      # S'y ajoute l'extraction d'au plus REFRESH_SWEEP_MAX_DOCUMENTS documents.
+      # 4 h 30 ici, contre 4 h 15 pour REFRESH_SWEEP_DEADLINE_MS : le balayage
+      # s'arrête de lui-même, curseur à jour, avant le SIGKILL du contrôleur.
+      activeDeadlineSeconds: 16200
       ttlSecondsAfterFinished: 86400
       template:
         metadata:
@@ -88,7 +116,11 @@ spec:
                 allowPrivilegeEscalation: false
                 readOnlyRootFilesystem: true
                 capabilities: { drop: ["ALL"] }
-              command: ["/usr/bin/flock", "-n", "/keyring/runtime/.refresh.lock", "node", "dist/scripts/refresh-pv.js", "waterloo"]
+              # `--all` : toutes les villes configurées. Un slug en dur ici est
+              # exactement le bug #734 — le job tournait, et ne rafraîchissait
+              # qu'une seule ville. `verify-renders` refuse désormais un rendu
+              # sans `--all`.
+              command: ["/usr/bin/flock", "-n", "/keyring/runtime/.refresh.lock", "node", "dist/scripts/refresh-pv.js", "--all"]
               envFrom:
                 - configMapRef: { name: radar-api }
               env:
@@ -110,7 +142,28 @@ spec:
                 - { name: REFRESH_BUDGET_LIMIT, value: "20000" }
                 # Gemini output ceiling. Pinned mesh 0.19.2 omits this on Codex.
                 - { name: REFRESH_MAX_OUTPUT_TOKENS, value: "32768" }
+                # Plafond d'ÉCRITURES CAS nouvelles par ville et par passage. Un
+                # document déjà collecté ne le consomme pas : la fenêtre entière
+                # est parcourue de toute façon, c'est le coût dominant du balayage.
                 - { name: REFRESH_ACQUISITION_LIMIT, value: "1" }
+                # Fenêtre de la source, en jours. Valeur par défaut de l'adaptateur,
+                # et celle du balayage 528 villes mesuré à 2 h 41. La réduire
+                # accélère le passage mais rétrécit l'ensemble des documents
+                # candidats : à ne faire que sur mesure.
+                - { name: REFRESH_WINDOW_DAYS, value: "183" }
+                # 4 h 15 : le balayage s'arrête avant activeDeadlineSeconds.
+                - { name: REFRESH_SWEEP_DEADLINE_MS, value: "15300000" }
+                # Plafond de documents EXTRAITS par passage — la borne de la
+                # dépense modèle quotidienne. 17/jour tient sous le plafond mesuré
+                # de 532 documents/mois du siège Gemini dédié. Le delta réel
+                # attendu est bien inférieur ; c'est un plafond, pas une cible.
+                - { name: REFRESH_SWEEP_MAX_DOCUMENTS, value: "17" }
+                # On ne démarre pas une ville s'il reste moins que cela.
+                - { name: REFRESH_SWEEP_CITY_RESERVE_MS, value: "120000" }
+                # Taux d'échecs INATTENDUS à partir duquel le passage est
+                # systémique et sort en 1. Les sources cassées (93/528 au dernier
+                # balayage complet) ne sont pas comptées ici.
+                - { name: REFRESH_SWEEP_MAX_FAILURE_RATE, value: "0.9" }
                 - { name: SENTROPIC_LLM_MESH_KEYRING_DIR, value: "/keyring/runtime" }
                 - name: REFRESH_PRINCIPAL_REF
                   valueFrom: { secretKeyRef: { name: radar-refresh-runtime, key: REFRESH_PRINCIPAL_REF } }

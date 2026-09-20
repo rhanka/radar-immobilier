@@ -35,7 +35,12 @@ export interface RefreshModelPolicyOptions {
   readonly forceFallback: boolean;
   readonly primaryQualityAttempts: number;
   readonly timeoutMs: number;
-  /** Document identity shown to the verifier, as the benchmark's identity line does. */
+  /**
+   * Default document identity shown to the verifier, as the benchmark's
+   * identity line does. A whole-list sweep shares ONE policy instance across
+   * every city — that is what carries the quota circuit from one city to the
+   * next — so the city is normally passed per call to `verify` instead.
+   */
   readonly citySlug?: string;
   readonly signal?: AbortSignal;
   readonly createClient: (model: RefreshModel, signal: AbortSignal) => TextJsonGenerationClient;
@@ -45,7 +50,8 @@ export interface RefreshDocumentModels {
   readonly maximumAttempts: number;
   forDocument(docSha: string, record: (receipt: RefreshModelReceipt) => Promise<void>): TextJsonGenerationClient;
   verify(input: RefreshProfileChunk, maxOutputTokens: number,
-    record: (receipt: RefreshModelReceipt) => Promise<void>): Promise<RefreshProfileChunk>;
+    record: (receipt: RefreshModelReceipt) => Promise<void>,
+    citySlug?: string): Promise<RefreshProfileChunk>;
   completeDocument(docSha: string): void;
   restoreDocument(docSha: string, receipts: readonly RefreshModelReceipt[]): void;
 }
@@ -77,7 +83,8 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
       verification: options.verification ?? null, verificationContract: "v101b-removal-only-v3",
       primaryQualityAttempts: options.primaryQualityAttempts, forceFallback: options.forceFallback, quotaThreshold: 3 }),
     maximumAttempts: options.primaryQualityAttempts + 1 + (options.verification ? 1 : 0),
-    async verify(input, maxOutputTokens, record) {
+    async verify(input, maxOutputTokens, record, citySlug) {
+      const identity = citySlug ?? options.citySlug;
       const selected = documents.get(input.chunk.docSha);
       if (!options.verification || selected?.reason) return input;
       if (!selected) throw new Error("Refresh verification requires an accepted primary extraction");
@@ -112,7 +119,7 @@ export function createRefreshModelPolicy(options: RefreshModelPolicyOptions): Re
       try {
         const verified = await Promise.race([deadline, verifyRefreshProfile(input, {
           client: options.createClient(model, controller.signal), model, signal: controller.signal, maxOutputTokens,
-          ...(options.citySlug ? { citySlug: options.citySlug } : {}),
+          ...(identity ? { citySlug: identity } : {}),
         })]);
         output = verified.output;
         summary = verified.summary;
