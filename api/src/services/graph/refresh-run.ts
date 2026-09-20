@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import { mergeExtractions, type TextJsonGenerationClient } from "@sentropic/graphify";
 
@@ -15,6 +15,7 @@ import { enrichGraphify34Snapshot, type Graphify34Snapshot } from "./graphify-34
 import { applyGraphify34Snapshots, applyPlanKey, buildGraphify34Manifest,
   type Graphify34SnapshotStore } from "./graphify-34-snapshot.js";
 import { materializeRefreshCorpus } from "./refresh-corpus.js";
+import { appendRefreshDocumentOutcome } from "./refresh-document-outcomes.js";
 import type { RefreshDocumentModels, RefreshModelReceipt } from "./refresh-model-policy.js";
 import { extractRefreshProfile, type RefreshProfileChunk,
   type RefreshProfileContext } from "./refresh-profile.js";
@@ -98,6 +99,7 @@ export async function acquireRefreshPdfManifest(
 }
 
 export interface RunPvRefreshOptions {
+  readonly cycleId?: string;
   readonly citySlug: string;
   readonly store: Graphify34SnapshotStore & ObjectStore;
   readonly db: Database;
@@ -168,6 +170,7 @@ async function publishSnapshot(options: RunPvRefreshOptions, initial: RefreshSta
 /** One selected city: RECUEIL -> exact PDF -> profiled v2.3 -> 3.4 -> guarded S3 -> atomic PG. */
 export async function runPvRefresh(options: RunPvRefreshOptions) {
   const now = options.now ?? (() => new Date());
+  const cycleId = options.cycleId ?? randomUUID();
   requireRunning(options.signal, "before acquisition");
   const selected = await acquireRefreshPdfManifest({ citySlug: options.citySlug,
     store: options.store, ...(options.signal ? { signal: options.signal } : {}),
@@ -187,13 +190,13 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   };
   const prior = await findPublishedRefreshState(options.store, { ...scope, publishedHash: baselineHash });
   if (prior?.state.receipts.projected?.status === "completed") {
-    return { citySlug: options.citySlug, inputHash: corpus.inputHash,
+    return { cycleId, citySlug: options.citySlug, inputHash: corpus.inputHash,
       candidateHash: baselineHash, stateKey: prior.key };
   }
   if (prior) {
     const resumed = baselineJson as Graphify34Snapshot;
     if (canonicalHash(resumed) !== baselineHash) throw new Error("Published refresh state no longer matches canonical bytes");
-    return { ...await publishSnapshot(options, prior, resumed, read.anchor, now), inputHash: corpus.inputHash };
+    return { ...await publishSnapshot(options, prior, resumed, read.anchor, now), cycleId, inputHash: corpus.inputHash };
   }
   let handle = await openRefreshState(options.store, { ...scope, baselineHash }, options.budgetLimit, now);
   handle = await completeStage(options.store, handle, "corpus", `sha256:${corpus.inputHash}`, now);
@@ -201,27 +204,52 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
     options.documentModels?.restoreDocument(docSha, receipts);
   }
   const profiled: RefreshProfileChunk[] = [];
-  for (const chunk of corpus.chunks) {
-    const reserved = await reserveRefreshChunk(options.store, handle, chunk.id,
-      options.maximumAttempts * (options.documentModels?.maximumAttempts ?? 1));
-    handle = reserved;
-    if (!reserved.shouldCall) {
-      profiled.push(await readCompletedRefreshChunk(options.store, handle, chunk.id));
-      const document = corpus.documents.find((item) => item.sha256 === chunk.docSha);
-      if (document?.chunks.at(-1)?.id === chunk.id) options.documentModels?.completeDocument(chunk.docSha);
-      continue;
+  for (const document of corpus.documents) {
+    const receipts: RefreshModelReceipt[] = [];
+    let submittedAt: Date | undefined;
+    let attempts = 0;
+    let accepted = false;
+    let failure: unknown;
+    try {
+      for (const chunk of document.chunks) {
+        const reserved = await reserveRefreshChunk(options.store, handle, chunk.id,
+          options.maximumAttempts * (options.documentModels?.maximumAttempts ?? 1));
+        handle = reserved;
+        if (!reserved.shouldCall) {
+          profiled.push(await readCompletedRefreshChunk(options.store, handle, chunk.id));
+          continue;
+        }
+        const record = async (receipt: RefreshModelReceipt) => {
+          receipts.push(receipt);
+          handle = await recordRefreshModel(options.store, handle, chunk.docSha, chunk.id, receipt);
+          options.onModelReceipt?.(chunk.docSha, chunk.id, receipt);
+        };
+        const client = options.documentModels?.forDocument(chunk.docSha, record) ?? options.textClient;
+        if (!client) throw new Error("Refresh requires a text client or document model policy");
+        const textClient: TextJsonGenerationClient = { ...client, generateJson(input) {
+          submittedAt ??= now();
+          attempts++;
+          return client.generateJson(input);
+        } };
+        const extracted = (await extractRefreshProfile([chunk], { textClient,
+          context: options.profileContext, maxOutputTokens: options.maxOutputTokens }))[0]!;
+        const result = await options.documentModels?.verify(extracted, options.maxOutputTokens, record) ?? extracted;
+        handle = await completeRefreshChunk(options.store, handle, chunk.id, result);
+        profiled.push(result);
+      }
+      options.documentModels?.completeDocument(document.sha256);
+      accepted = true;
+    } catch (error) {
+      failure = error;
+      throw error;
+    } finally {
+      // Cache-only resumes are not submissions. One INSERT covers all new chunks/retries,
+      // including a refused document; receipts from earlier cycles are never counted again.
+      if (submittedAt) await appendRefreshDocumentOutcome(options.db, {
+        cycleId, document, createdAt: submittedAt, latencyMs: Math.max(0, now().getTime() - submittedAt.getTime()),
+        receipts, attempts, accepted, error: failure,
+      });
     }
-    const textClient = options.documentModels?.forDocument(chunk.docSha, async (receipt) => {
-      handle = await recordRefreshModel(options.store, handle, chunk.docSha, chunk.id, receipt);
-      options.onModelReceipt?.(chunk.docSha, chunk.id, receipt);
-    }) ?? options.textClient;
-    if (!textClient) throw new Error("Refresh requires a text client or document model policy");
-    const result = (await extractRefreshProfile([chunk], { textClient,
-      context: options.profileContext, maxOutputTokens: options.maxOutputTokens }))[0]!;
-    handle = await completeRefreshChunk(options.store, handle, chunk.id, result);
-    profiled.push(result);
-    const document = corpus.documents.find((item) => item.sha256 === chunk.docSha);
-    if (document?.chunks.at(-1)?.id === chunk.id) options.documentModels?.completeDocument(chunk.docSha);
   }
   const extraction = profiled.map((item) => item.extraction).reduce(mergeExtractions);
   handle = await completeStage(options.store, handle, "profile", canonicalHash(extraction), now);
@@ -234,5 +262,5 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   const snapshotHash = canonicalHash(snapshot);
   handle = await completeStage(options.store, handle, "enriched", snapshotHash, now);
   return { ...await publishSnapshot(options, handle, snapshot, read.anchor, now),
-    inputHash: corpus.inputHash };
+    cycleId, inputHash: corpus.inputHash };
 }
