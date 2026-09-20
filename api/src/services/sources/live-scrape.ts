@@ -12,6 +12,15 @@
  * reported `seen`, writing no new CAS object. Never throws on a source failure:
  * an adapter fetch error becomes a per-city `status: "error"` recap entry.
  *
+ * A CITY IS LOST ONLY WHEN ITS INDEX IS (issue #723). A document that fails is
+ * counted in `failedDocs`, journalled with its URL, and the city keeps the
+ * documents it did collect. Requests are spaced by `minRequestIntervalMs`
+ * (default: the Scraping Policy's 1 req / 2 s). With
+ * `skipAlreadyCollectedUrls` — which `worker-live` sets for the 24 h cycle —
+ * a document the previous run already collected is not downloaded again; the
+ * index itself is read on every run, and that is the daily check for a new
+ * document.
+ *
  * The `fetch` is injectable so the worker is unit-testable without real network
  * (the adapter accepts a `PvFetchLike`). In production, omit it and the adapter
  * falls back to `globalThis.fetch`.
@@ -21,6 +30,7 @@ import {
   ALL_PV_CITIES,
   pdfToTextViaPoppler,
   ProcesVerbauxGenericAdapter,
+  PV_MIN_REQUEST_INTERVAL_MS,
   type PdfToText,
   type PvCityConfig,
   type PvFetchLike,
@@ -36,7 +46,15 @@ import {
   type ReexploitProgress,
   type ExploitScrapeResult,
 } from "./exploit-scrape.js";
-import { runRecueilWithManifest } from "./recueil.js";
+import { knownSourceUrlsFromLastRun } from "./known-urls.js";
+import { runRecueilWithManifest, type RecueilFetchFailure } from "./recueil.js";
+
+/**
+ * Cap on the failed documents echoed back in a per-city recap. The full number
+ * is always in `failedDocs`; this only bounds the detail carried in memory and
+ * printed in a log line when a source breaks wholesale.
+ */
+export const MAX_REPORTED_DOCUMENT_FAILURES = 20;
 
 /** Per-city outcome of a live scrape run. */
 export interface LiveScrapeCityRecap {
@@ -50,6 +68,13 @@ export interface LiveScrapeCityRecap {
    *   - `new`   at least one doc had its bytes PUT this run,
    *   - `seen`  every collected doc was HEAD-skipped (byte-identical),
    *   - `error` the source failed (no manifest written, no docs committed).
+   *
+   * `error` now means what it says: NOTHING could be collected — the index page
+   * or the sitemap was unreachable. A city whose index answered and whose
+   * documents partly failed is `new`/`seen` with `failedDocs > 0`, not `error`
+   * (issue #723: one dead document link used to report the whole city as
+   * `docs=0`, which is how the investigation was sent after a phantom index
+   * failure).
    */
   readonly status: "new" | "seen" | "error";
   /** CAS object keys collected this run (empty on error). */
@@ -58,6 +83,24 @@ export interface LiveScrapeCityRecap {
   readonly count: number;
   /** Error detail when `status === "error"` (omitted otherwise). */
   readonly error?: string;
+  /**
+   * Number of documents that failed this run without costing the city. `0` (or
+   * absent) on a clean run. `count` is unaffected: it reports what WAS
+   * collected.
+   */
+  readonly failedDocs?: number;
+  /**
+   * The failed documents, with the exact URL, phase, kind and HTTP status of
+   * each — capped at `MAX_REPORTED_DOCUMENT_FAILURES` so a systematically
+   * broken source cannot flood the recap. `failedDocs` always carries the full
+   * count.
+   */
+  readonly documentFailures?: readonly RecueilFetchFailure[];
+  /**
+   * Set when enumeration stopped early but what had been collected was kept and
+   * committed. The list is incomplete; the next run re-reads the index.
+   */
+  readonly listingTruncatedBy?: RecueilFetchFailure;
   /**
    * EXPLOITATION recap, present only when `exploit: true` was requested AND the
    * RECUEIL succeeded. `signals` is the number of canonical DesignationEvents
@@ -74,10 +117,35 @@ export interface LiveScrapeCityRecap {
 
 export interface RunLiveScrapeOptions {
   readonly onRequest?: (diagnostic: PvFetchDiagnostic & { city: string }) => void;
-  /** Negotiation experiment, disabled by default. */
-  readonly negotiateHeaders?: boolean;
   /** Scraping object store (use `getScrapeObjectStore(config)` in production). */
   readonly store: ObjectStore;
+  /**
+   * Minimum spacing between two requests to the SAME city, in ms
+   * (rules/MASTER.md §Scraping Policy: 1 req / 2 s per source). It covers the
+   * index page as well as every document, because the adapter holds it.
+   *
+   * Default: `PV_MIN_REQUEST_INTERVAL_MS` on the real network, and `0` when a
+   * `fetch` double is injected — a test double is not a municipal server, and
+   * pacing it would only add 2 s per fetch to the suite. Pass an explicit value
+   * to override either way; `0` disables the spacing.
+   */
+  readonly minRequestIntervalMs?: number;
+  /**
+   * Skip a listed document whose URL the PREVIOUS run already collected
+   * (`knownSourceUrlsFromLastRun`). The index of every city is still read on
+   * every run — that IS the daily check for a new document — but a document
+   * already in storage is not downloaded a second time.
+   *
+   * DEFAULT `false`, and `worker-live` turns it ON. That asymmetry is
+   * deliberate: the 24 h cycle is the only caller whose job is "tell me what is
+   * NEW", and it is the one that was re-downloading the whole back catalogue
+   * every night. The other caller, `acquireRefreshPdfManifest`, asks for a
+   * document to work on right now and requires the run to return at least one —
+   * gating it by default would make its second run on a city return nothing.
+   *
+   * Composes with `acceptRef`: both must accept.
+   */
+  readonly skipAlreadyCollectedUrls?: boolean;
   /** Injected fetch for the PV adapter (tests). Defaults to globalThis.fetch. */
   readonly fetch?: PvFetchLike;
   /** Per-city collection cap; in replay mode, process-wide parse cap (default 25). */
@@ -179,6 +247,20 @@ export function configOnlyCitySlugs(): string[] {
 }
 
 /**
+ * Compose the caller's `acceptRef` with the already-collected-URL gate. Both
+ * must accept. Returns `undefined` when neither applies, so RECUEIL keeps its
+ * "no filter at all" fast path.
+ */
+function buildAcceptRef(
+  callerAcceptRef: ((ref: RawDocumentRef) => boolean) | undefined,
+  alreadyCollected: ReadonlySet<string> | undefined,
+): ((ref: RawDocumentRef) => boolean) | undefined {
+  if (!alreadyCollected || alreadyCollected.size === 0) return callerAcceptRef;
+  if (!callerAcceptRef) return (ref) => !alreadyCollected.has(ref.url);
+  return (ref) => callerAcceptRef(ref) && !alreadyCollected.has(ref.url);
+}
+
+/**
  * The k-th (1-based) of `n` equal, contiguous shards of `all` (deterministic).
  * Shard size = ceil(len/n); the trailing shard may be shorter or empty. Callers
  * validate `1 <= k <= n` and `n >= 1`.
@@ -204,6 +286,12 @@ export async function runLiveScrape(
   const { store, fetch, limit, acceptRef, beforeFetch, windowDays, now, signal, onRequest,
     exploit, reexploit, db } =
     options;
+  // Spacing is ON by default on the real network and OFF behind an injected
+  // fetch: pacing a test double would add 2 s per fetch to the suite and
+  // protect nobody. See `RunLiveScrapeOptions.minRequestIntervalMs`.
+  const minRequestIntervalMs =
+    options.minRequestIntervalMs ?? (fetch !== undefined ? 0 : PV_MIN_REQUEST_INTERVAL_MS);
+  const skipAlreadyCollectedUrls = options.skipAlreadyCollectedUrls ?? false;
   const { configs, unknown } = resolveConfigs(citySlugs);
   let parseBudget = limit ?? 25;
   if (reexploit && (!Number.isSafeInteger(parseBudget) || parseBudget <= 0)) {
@@ -297,19 +385,33 @@ export async function runLiveScrape(
     const adapter = new ProcesVerbauxGenericAdapter(config, {
       ...(onRequest ? { onRequest: (diagnostic: PvFetchDiagnostic) =>
         onRequest({ city: config.citySlug, ...diagnostic }) } : {}),
-      ...(options.negotiateHeaders !== undefined ? { negotiateHeaders: options.negotiateHeaders } : {}),
       ...(fetch !== undefined ? { fetchImpl: fetch } : {}),
       ...(windowDays !== undefined ? { windowDays } : {}),
       ...(now !== undefined ? { now } : {}),
+      minRequestIntervalMs,
     });
+
+    // THE DAILY CHECK IS THE INDEX, NOT THE BACK CATALOGUE (issue #723). The
+    // index page above is always fetched, so a document appearing today is
+    // discovered today. What is skipped is a document whose URL the previous
+    // run already collected and stored — re-downloading it would buy nothing
+    // and is what made one city pull 255 files a night.
+    const alreadyCollected = skipAlreadyCollectedUrls
+      ? await knownSourceUrlsFromLastRun(store, config.sourceId)
+      : undefined;
+    const effectiveAcceptRef = buildAcceptRef(acceptRef, alreadyCollected);
 
     const outcome = await runRecueilWithManifest(config.sourceId, adapter, store, {
       ...(limit !== undefined ? { limit } : {}),
-      ...(acceptRef !== undefined ? { acceptRef } : {}),
+      ...(effectiveAcceptRef !== undefined ? { acceptRef: effectiveAcceptRef } : {}),
       ...(beforeFetch !== undefined ? { beforeFetch } : {}),
       ...(signal !== undefined ? { signal } : {}),
     });
 
+    // `ok: false` now means the source could collect NOTHING (index / sitemap
+    // unreachable), so `count: 0` is a fact here rather than an erasure. A run
+    // that collected documents and then hit a failure comes back `ok: true`,
+    // with its harvest and its holes both reported below.
     if (!outcome.ok) {
       pushRecap({
         city: config.citySlug,
@@ -351,12 +453,26 @@ export async function runLiveScrape(
       }
     }
 
+    // A document that failed is reported ALONGSIDE what was collected, never
+    // instead of it: `count` stays the number of documents actually in the CAS.
     pushRecap({
       city: config.citySlug,
       sourceId: config.sourceId,
       status: anyNew ? "new" : "seen",
       casKeys: outcome.manifestEntries.map((e) => e.casKey),
       count: outcome.count,
+      ...(outcome.documentFailures.length > 0
+        ? {
+            failedDocs: outcome.documentFailures.length,
+            documentFailures: outcome.documentFailures.slice(
+              0,
+              MAX_REPORTED_DOCUMENT_FAILURES,
+            ),
+          }
+        : {}),
+      ...(outcome.listingTruncatedBy !== undefined
+        ? { listingTruncatedBy: outcome.listingTruncatedBy }
+        : {}),
       ...(signals !== undefined ? { signals } : {}),
       ...(exploitError !== undefined ? { exploitError } : {}),
     });

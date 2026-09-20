@@ -1,4 +1,8 @@
-// Standalone Node probe. Keep these headers aligned with pvRequestHeaders.
+// Standalone Node probe (issue #723). Keep the baseline variant aligned with
+// the adapter's own headers: `PV_USER_AGENT` + a plain `accept`. The second,
+// "negotiated" variant is kept HERE only — it is what proved header negotiation
+// changes nothing (see probe-pv-index.md) — and has no counterpart in the
+// adapter, which always sends the plain identifiable headers.
 import { pathToFileURL, URL } from "node:url";
 import { setTimeout as sleep } from "node:timers/promises";
 import { performance } from "node:perf_hooks";

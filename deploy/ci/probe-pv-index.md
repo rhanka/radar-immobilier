@@ -13,8 +13,10 @@ More cities can be supplied as `CITY=PV_INDEX_URL` arguments (quote each whole
 argument); copy the exact public `pvIndexUrl` from
 `packages/radar-sources/src/sources/proces-verbaux-generic.ts`.
 Only Drummondville and Saint-Henri have built-in shortcuts. Do not pass private
-or signed URLs. Check the target's robots policy before running; increase the
-2000 ms interval if a source requires a longer crawl delay.
+or signed URLs. Increase the 2000 ms interval if a source is known to need a longer crawl
+delay. `robots.txt` is not consulted by the scrape either — owner decision of
+2026-09-20, recorded in rules/MASTER.md §Scraping Policy and in
+`PV_ROBOTS_TXT_CONSULTED`.
 
 Each city receives two GET variants: the adapter's exact index headers
 (`User-Agent: radar-immobilier/0.1 (+https://github.com/rhanka/radar-immobilier)`,
@@ -33,32 +35,45 @@ seconds **after the previous response**; timeout is 15 seconds per request.
 HTTP failures remain data (exit 0); inspect every JSON line, not just the exit
 code. Invalid arguments or excessive redirects exit 1.
 
-Interpretation: a repeatable baseline 404 / negotiation 200 on Drummondville
-would support enabling the negotiation option. Both 200 would leave the
-original incident unexplained; both 404 would show that this change is
-insufficient. Cloudflare response headers alone do not establish the cause.
-Saint-Henri's known failure is on a document: a successful index probe does not
-resolve it. Use the instrumented worker's document URL/status before deciding
-on that case. No municipality was fetched while implementing this patch.
+## Outcome (2026-09-20) — what this probe established, and what it did not
 
-The candidate remedy is already available through
-`new ProcesVerbauxGenericAdapter(config, { negotiateHeaders: true })` or
-`runLiveScrape(slugs, { store, negotiateHeaders: true })`. It is **false by
-default**, and `worker-live` does not activate it. The conductor can wire it
-after measurements. It changes negotiation headers only; no agent spoofing,
-proxy, additional retries or pacing change. If insufficient, evaluate Obscura
-with the same identifiable agent or contact the city about allowlisting;
-neither alternative is implemented here.
+The probe did its job and the lead it was built to test is CLOSED. Both header
+variants answered `200` on both cities' index pages, from the workstation, from
+a preproduction pod (egress `148.113.137.230`, the exact IP named in the issue)
+and from a residential IP. No `cf-mitigated` on any measurement. Header
+negotiation is therefore NOT a remedy, and the `negotiateHeaders` option it was
+written against has been removed rather than left dormant.
 
-The observation gap is reproduced locally: PV adapters throw
-`PvSourceFetchError`, while RECUEIL previously recognized only
+The index page was never what failed. **Drummondville's 404 is on a DOCUMENT**:
+`…/wp-content/uploads/2015/10/Proces_verbal_2016_01_18.pdf`, one dead link out
+of 491, reproducible in HEAD and in GET with the adapter's exact headers, whose
+body is a WordPress "Page non trouvée". It was downloaded at all because its
+date was unparseable (`\b` cannot match after the underscore in
+`Proces_verbal_2016_01_18.pdf`) and an undated item escaped the 183-day window;
+it cost the WHOLE city because RECUEIL wrapped listing and every document in a
+single `try` and `live-scrape` then forced `count: 0`. All three are fixed on
+the branch that carries this file.
+
+For **saint-henri** the mechanism is consistent but NOT measured: its 397 PDFs
+all live under a `/wp-content/uploads/` directory its `robots.txt` disallows,
+and the investigation chose not to probe them. Read the instrumented worker's
+per-document URL and status instead of re-probing that host.
+
+Keep this probe. Its value is unchanged: it is the only tool that answers
+"does this index answer, from THIS network path, with THESE headers", and it
+answers it without downloading a single document body.
+
+## Visibility, which was the real gap
+
+PV adapters throw `PvSourceFetchError`, while RECUEIL previously recognized only
 `SourceFetchError` and reduced PV failures to generic network errors.
 RECUEIL now preserves PV diagnostics and increments separate `index404` and
 `document404` counters. `worker-live` emits request telemetry and includes
 failure diagnostics in `onCity`; `job-health` names lost indexes at the
 elevated warning tier regardless of error-rate thresholds. Systemic failures
-retain exit 1 and include the index warning. These changes establish visibility,
-not the remote cause of Drummondville's 404.
+retain exit 1 and include the index warning. Without this, `docs=0` and
+`[http] HTTP 404` were indistinguishable between an index failure and the
+253ʳᵈ document — which is how the issue came to state the opposite of the facts.
 
 Local verification uses the worktree's ignored `tmp/404-checks.mk`, Docker
 Compose test volumes, and no exposed host ports:
