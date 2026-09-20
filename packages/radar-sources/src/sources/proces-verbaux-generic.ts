@@ -11,6 +11,7 @@ import type {
 import {
   extractIsoFromLabel,
   filterPvByWindow,
+  isRealIsoDate,
   parsePvIndex,
   PV_NON_DISPONIBLE,
 } from "./proces-verbaux-parser.js";
@@ -33,15 +34,22 @@ export const PV_USER_AGENT =
  *
  * Reason, in the owner's terms: radar-immobilier is a specialised alerting tool
  * for a bounded list of Québec municipal council documents, not a search engine
- * building a general index. What the decision buys is spelled out in the two
- * measures that accompany it, and they are the substance of it:
- *   - the collection window is actually enforced now (see
- *     `extractIsoFromLabel`), and an already-collected document is not fetched
- *     again — the nightly run CHECKS every city's index for a new document, it
- *     does not re-download the back catalogue;
- *   - every request is spaced by at least `PV_MIN_REQUEST_INTERVAL_MS`
- *     (see `minRequestIntervalMs` below), which is what actually protects a
- *     small municipal server.
+ * building a general index. The decision is UNCONDITIONAL; the measures below
+ * accompany it and are not conditions on it. Stated as they actually stand:
+ *   - the collection window now bounds a run in practice, because far fewer
+ *     documents are undatable (see `extractIsoFromLabel`): on the measured
+ *     drummondville index of 2026-09-20, 240 of 496 links were undatable before
+ *     the fix and 56 after, so a FIRST run drops from 255 documents to 73. An
+ *     undated document is still KEPT by `filterPvByWindow` — a new PV may
+ *     legitimately carry no date — and the already-collected-URL guard
+ *     (`skipAlreadyCollectedUrls` in live-scrape.ts) then downloads it once and
+ *     never again, with no GET and no HEAD on the nights after. The steady state
+ *     for a city is ONE request: its index page, plus whatever is new;
+ *   - every request of a live scrape is spaced by at least
+ *     `PV_MIN_REQUEST_INTERVAL_MS`, which is what actually protects a small
+ *     municipal server. This adapter's own default is `0`; `runLiveScrape` sets
+ *     the interval on the real network, and the pipeline executor path does not
+ *     set it yet.
  *
  * What this constant does NOT say: it is not a claim that no site restricts
  * anything. 15 hosts of the 553 in the parc do `Disallow` a directory that can
@@ -128,11 +136,17 @@ function parseSitemapSessionPages(
         .replace(/[-_]+/g, " ")
         .trim() || pageUrl.href;
     const slugDate = extractIsoFromLabel(pageTitle);
+    // `<lastmod>` is a date the site hands us ready-made, so nothing in the
+    // extractor checks it: "2026-02-99" would sail into the window and into
+    // `publishedAt`. Refusing an impossible day costs nothing — the item simply
+    // stays undated, and an undated item is kept by the window and collected.
     const lastmod = block.match(/<lastmod>\s*(\d{4}-\d{2}-\d{2})[^<]*<\/lastmod>/i);
+    const lastmodIso =
+      lastmod?.[1] !== undefined && isRealIsoDate(lastmod[1]) ? lastmod[1] : undefined;
     const dateIso =
       slugDate !== PV_NON_DISPONIBLE
         ? slugDate
-        : lastmod?.[1] ?? PV_NON_DISPONIBLE;
+        : lastmodIso ?? PV_NON_DISPONIBLE;
 
     items.push({
       title: pageTitle,
@@ -316,8 +330,10 @@ export interface PvAdapterOptions {
  * lose a city only on an index failure and merely COUNT a failed document.
  *
  * Rate-limiting (1 req / 2 s per the Scraping Policy) used to be described as
- * "the caller's responsibility" — and no caller assumed it, so a run of one
- * city fired an index page plus 255 documents at full speed from a single IP.
+ * "the caller's responsibility". No caller paced the INDEX fetch, and the live
+ * worker paced nothing at all, so a run of one city fired an index page plus
+ * 255 documents at full speed from a single IP. (The refresh path did already
+ * pace its document fetches, via `refreshSourceDelayMs`.)
  * The adapter now HOLDS the spacing itself (`minRequestIntervalMs`), because it
  * is the only layer that sees every request it makes: the index, the sitemap,
  * the session pages and the documents. It still defaults to `0` so that it

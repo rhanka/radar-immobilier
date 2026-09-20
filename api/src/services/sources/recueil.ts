@@ -37,16 +37,35 @@ import {
  *     truncated success (`listingTruncatedBy`), never a discard.
  *   - DOCUMENT failure: counted in `documentFailures` with its URL, phase and
  *     status, and the run CONTINUES to the next reference.
- *   - ZERO documents collected AND at least one failure: the source failed —
- *     `ok: false`. "Nothing collected, everything tried failed" is not a
- *     success with holes. Single-reference sources (the avis-publics adapters,
- *     whose one document IS the index page) are entirely this case.
+ *   - ZERO documents collected AND at least one failure AND nothing skipped as
+ *     already-collected: the source failed — `ok: false`. "Nothing collected,
+ *     everything tried failed, nothing already in hand" is not a success with
+ *     holes. Single-reference sources (the avis-publics adapters, whose one
+ *     document IS the index page) are entirely this case.
+ *
+ * ZERO DOCUMENTS IS NOT A FAILURE (owner, 2026-09-20: « on ne télécharge que le
+ * différentiel sinon c pas un job d'update »). A run that skipped everything
+ * because it already held it returns `ok: true`, `count: 0`,
+ * `skippedKnown: N` — the normal outcome of an update run on a quiet night, and
+ * distinguishable from an empty run only by that counter. Every layer above
+ * this one has to make the same distinction; the callers do.
  */
 
 export interface RecueilOptions {
   readonly limit?: number;
   /** Skip listed representations before they count toward `limit` or get fetched. */
   readonly acceptRef?: (ref: RawDocumentRef) => boolean;
+  /**
+   * URLs an earlier run already collected: listed, counted, and NOT downloaded.
+   *
+   * Kept apart from `acceptRef` on purpose, even though both end in `continue`.
+   * "I already have this one" and "the caller does not want this kind of
+   * document" are different facts, and only the first one makes a run that
+   * collected nothing a NORMAL run — see the zero-harvest rule at the end of
+   * `runRecueil`. Composing them into a single predicate is what made that rule
+   * unable to tell an up-to-date city from a broken one.
+   */
+  readonly alreadyCollected?: ReadonlySet<string>;
   /** Optional source-specific pacing hook, invoked immediately before each fetch. */
   readonly beforeFetch?: (ref: RawDocumentRef) => Promise<void>;
   /**
@@ -111,6 +130,13 @@ export interface RecueilSuccess {
    * collected and are never zeroed because of these.
    */
   readonly documentFailures: readonly RecueilFetchFailure[];
+  /**
+   * References skipped because `alreadyCollected` already holds their URL. This
+   * is the DIFFERENTIAL made visible: `count` is what was new, this is what was
+   * already in hand, and `count === 0 && skippedKnown > 0` is an up-to-date
+   * source — the expected outcome of an update job on a quiet night.
+   */
+  readonly skippedKnown: number;
   /**
    * Set when ENUMERATION stopped early (the index page, the sitemap or the
    * generator itself failed) after at least one document had been collected.
@@ -180,6 +206,7 @@ export async function runRecueil(
   let skippedExisting = 0;
 
   const documentFailures: RecueilFetchFailure[] = [];
+  let skippedKnown = 0;
   let listingTruncatedBy: RecueilFetchFailure | undefined;
   // Kept so a run that collected NOTHING can still report the typed error that
   // caused it, exactly as before (see the zero-harvest rule below).
@@ -220,6 +247,10 @@ export async function runRecueil(
     }
     if (options.signal?.aborted) break;
     if (options.acceptRef && !options.acceptRef(ref)) continue;
+    if (options.alreadyCollected?.has(ref.url)) {
+      skippedKnown += 1;
+      continue;
+    }
 
     try {
       await options.beforeFetch?.(ref);
@@ -306,14 +337,24 @@ export async function runRecueil(
     }
   }
 
-  // ZERO HARVEST + AT LEAST ONE FAILURE ⇒ the source FAILED. "Collected nothing
-  // and everything we tried failed" is not a success with holes; it is what
+  // ZERO HARVEST + AT LEAST ONE FAILURE + NOTHING ALREADY IN HAND ⇒ the source
+  // FAILED. "Collected nothing, everything we tried failed, and we had nothing
+  // to begin with" is not a success with holes; it is what
   // `POST /api/sources/collect/:source` answers 502 to, and what makes a
   // pipeline run PARTIAL. Sources whose `list()` yields a single reference (the
   // avis-publics adapters, whose document IS the index page) live entirely in
-  // this case. The #723 fix is unaffected: a run that collected 252 of 255
-  // documents has a harvest and stays a success.
-  if (records.length === 0 && documentFailures.length > 0) {
+  // this case.
+  //
+  // THE `skippedKnown` CLAUSE IS NOT A DETAIL. Once an update run skips the
+  // documents it already holds, the FIRST dead link left in an index makes every
+  // later night "zero collected, one failure" — which without this clause would
+  // report the city as lost every single night, for as long as that link stays
+  // up. That is issue #723 coming back through the other door: a city whose
+  // index answered, whose documents are all in storage, reported as an error
+  // because the only thing it still tried was a link that has been dead since
+  // 2016. A run that skipped documents HAS a harvest; it is simply already on
+  // disk.
+  if (records.length === 0 && documentFailures.length > 0 && skippedKnown === 0) {
     return failureOutcome(firstDocumentError, source, fetchedAt);
   }
 
@@ -328,6 +369,7 @@ export async function runRecueil(
     fetchedAt,
     manifestEntries,
     documentFailures,
+    skippedKnown,
     ...(listingTruncatedBy !== undefined ? { listingTruncatedBy } : {}),
   };
 }

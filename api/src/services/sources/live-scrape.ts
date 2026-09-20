@@ -17,9 +17,8 @@
  * documents it did collect. Requests are spaced by `minRequestIntervalMs`
  * (default: the Scraping Policy's 1 req / 2 s). With
  * `skipAlreadyCollectedUrls` — which `worker-live` sets for the 24 h cycle —
- * a document the previous run already collected is not downloaded again; the
- * index itself is read on every run, and that is the daily check for a new
- * document.
+ * a document already collected is not downloaded again; the index itself is
+ * read on every run, and that is the daily check for a new document.
  *
  * The `fetch` is injectable so the worker is unit-testable without real network
  * (the adapter accepts a `PvFetchLike`). In production, omit it and the adapter
@@ -35,6 +34,7 @@ import {
   type PvCityConfig,
   type PvFetchLike,
   type PvFetchDiagnostic,
+  type RawDocumentRecord,
   type RawDocumentRef,
 } from "@radar/sources";
 
@@ -42,11 +42,12 @@ import type { Database } from "../../db/client.js";
 import type { ObjectStore } from "../../storage/object-store.js";
 import {
   exploitScrapedCity,
+  loadScrapedPvRecords,
   reexploitScrapedCityChunk,
   type ReexploitProgress,
   type ExploitScrapeResult,
 } from "./exploit-scrape.js";
-import { knownSourceUrlsFromLastRun } from "./known-urls.js";
+import { loadCollectedUrls, saveCollectedUrls } from "./known-urls.js";
 import { runRecueilWithManifest, type RecueilFetchFailure } from "./recueil.js";
 
 /**
@@ -90,6 +91,14 @@ export interface LiveScrapeCityRecap {
    */
   readonly failedDocs?: number;
   /**
+   * Documents the run did NOT download because an earlier run already collected
+   * them (`skipAlreadyCollectedUrls`). This is the differential made legible:
+   * `count` is what was new tonight, `skippedKnown` is what was already in
+   * storage, and `count: 0` with a non-zero `skippedKnown` is an up-to-date
+   * city — the expected result of an update cycle, not a degradation.
+   */
+  readonly skippedKnown?: number;
+  /**
    * The failed documents, with the exact URL, phase, kind and HTTP status of
    * each — capped at `MAX_REPORTED_DOCUMENT_FAILURES` so a systematically
    * broken source cannot flood the recap. `failedDocs` always carries the full
@@ -131,17 +140,31 @@ export interface RunLiveScrapeOptions {
    */
   readonly minRequestIntervalMs?: number;
   /**
-   * Skip a listed document whose URL the PREVIOUS run already collected
-   * (`knownSourceUrlsFromLastRun`). The index of every city is still read on
-   * every run — that IS the daily check for a new document — but a document
-   * already in storage is not downloaded a second time.
+   * Skip a listed document whose URL an EARLIER run already collected. The index
+   * of every city is still read on every run — that IS the daily check for a new
+   * document — but a document already in storage is not downloaded a second
+   * time. This is the owner's « on ne rescrape pas tout chaque nuit ».
    *
-   * DEFAULT `false`, and `worker-live` turns it ON. That asymmetry is
-   * deliberate: the 24 h cycle is the only caller whose job is "tell me what is
-   * NEW", and it is the one that was re-downloading the whole back catalogue
-   * every night. The other caller, `acquireRefreshPdfManifest`, asks for a
-   * document to work on right now and requires the run to return at least one —
-   * gating it by default would make its second run on a city return nothing.
+   * The memory is CUMULATIVE (`runs/{source}/collected-urls.jsonl`, see
+   * known-urls.ts): a run adds the URLs it collected and never removes any, so a
+   * night with nothing new erases nothing. The first version of this guard read
+   * the previous run's MANIFEST instead, which a quiet night leaves empty — the
+   * regime then oscillated between 0 and N downloads. `live-scrape.test.ts`
+   * plays four consecutive nights precisely to hold that down.
+   *
+   * A known URL costs NO request: it is skipped before `beforeFetch`, so there is
+   * no GET and no HEAD. Nothing asks whether a stored document has been updated
+   * — a published procès-verbal does not change (owner, 2026-09-20). The CAS
+   * dedup by sha256 stays behind this, for the case of two URLs carrying the
+   * same file; it cannot decide whether to download, because it only knows once
+   * the bytes are already in hand.
+   *
+   * DEFAULT `false`, and BOTH callers turn it on: `worker-live` for the
+   * on-demand mass scrape, and `acquireRefreshPdfManifest` for the daily
+   * `radar-refresh-pv` cycle. The default stays off so an explicit caller — a
+   * backfill, a repair — gets the whole window without having to think about it.
+   *
+   * It also changes how EXPLOITATION is fed: see `exploitationRecords` below.
    *
    * Composes with `acceptRef`: both must accept.
    */
@@ -247,17 +270,38 @@ export function configOnlyCitySlugs(): string[] {
 }
 
 /**
- * Compose the caller's `acceptRef` with the already-collected-URL gate. Both
- * must accept. Returns `undefined` when neither applies, so RECUEIL keeps its
- * "no filter at all" fast path.
+ * The records EXPLOITATION must be fed for one city.
+ *
+ * WITHOUT the guard, `outcome.records` is everything the window retained, so it
+ * is the whole picture and is used as is — that is what happened before the
+ * guard existed.
+ *
+ * WITH the guard, `outcome.records` holds ONLY what this run downloaded, and on
+ * a quiet night that is nothing. `runExploitation` assembles the city's
+ * project-state from exactly the records it receives and PUTs it over
+ * `ontology/{city}/project-state.json` — the key the Signaux view reads — so
+ * feeding it this run's records would erase every signal of every past PV, every
+ * night, silently. The corpus already on the store is therefore reloaded from
+ * the per-document `*.meta.json` sidecars and merged with this run's records.
+ *
+ * Cost: a LIST plus one GET per sidecar. No network, and no poppler either —
+ * `parseRawDoc` HEAD-skips a document whose `parsed/…` pair exists and reads the
+ * cached text. A store that cannot LIST returns nothing, and the union then
+ * degrades to this run's records: the same behaviour as before the guard.
  */
-function buildAcceptRef(
-  callerAcceptRef: ((ref: RawDocumentRef) => boolean) | undefined,
-  alreadyCollected: ReadonlySet<string> | undefined,
-): ((ref: RawDocumentRef) => boolean) | undefined {
-  if (!alreadyCollected || alreadyCollected.size === 0) return callerAcceptRef;
-  if (!callerAcceptRef) return (ref) => !alreadyCollected.has(ref.url);
-  return (ref) => callerAcceptRef(ref) && !alreadyCollected.has(ref.url);
+async function exploitationRecords(
+  store: ObjectStore,
+  citySlug: string,
+  runRecords: readonly RawDocumentRecord[],
+  guardActive: boolean,
+): Promise<RawDocumentRecord[]> {
+  if (!guardActive) return [...runRecords];
+  const byKey = new Map<string, RawDocumentRecord>();
+  for (const record of await loadScrapedPvRecords(store, citySlug)) {
+    byKey.set(record.storageKey, record);
+  }
+  for (const record of runRecords) byKey.set(record.storageKey, record);
+  return [...byKey.values()];
 }
 
 /**
@@ -393,17 +437,16 @@ export async function runLiveScrape(
 
     // THE DAILY CHECK IS THE INDEX, NOT THE BACK CATALOGUE (issue #723). The
     // index page above is always fetched, so a document appearing today is
-    // discovered today. What is skipped is a document whose URL the previous
-    // run already collected and stored — re-downloading it would buy nothing
-    // and is what made one city pull 255 files a night.
-    const alreadyCollected = skipAlreadyCollectedUrls
-      ? await knownSourceUrlsFromLastRun(store, config.sourceId)
+    // discovered today. What is skipped is a document whose URL an earlier run
+    // already collected and stored — re-downloading it buys nothing, and is
+    // what made one city pull 255 files a night.
+    const guardState = skipAlreadyCollectedUrls
+      ? await loadCollectedUrls(store, config.sourceId)
       : undefined;
-    const effectiveAcceptRef = buildAcceptRef(acceptRef, alreadyCollected);
-
     const outcome = await runRecueilWithManifest(config.sourceId, adapter, store, {
       ...(limit !== undefined ? { limit } : {}),
-      ...(effectiveAcceptRef !== undefined ? { acceptRef: effectiveAcceptRef } : {}),
+      ...(acceptRef !== undefined ? { acceptRef } : {}),
+      ...(guardState !== undefined ? { alreadyCollected: guardState.urls } : {}),
       ...(beforeFetch !== undefined ? { beforeFetch } : {}),
       ...(signal !== undefined ? { signal } : {}),
     });
@@ -425,6 +468,21 @@ export async function runLiveScrape(
       continue;
     }
 
+    // PERSIST THE GUARD STATE, MONOTONICALLY. The set read above plus the URLs
+    // this run actually collected — nothing is ever removed, so a night that
+    // collected nothing writes back exactly what it read. Written even when
+    // nothing was added the first time a source is seen, so the one-off
+    // bootstrap from past manifests is not redone every night. A failure to
+    // write costs re-downloads next run and must never cost the city, so it is
+    // swallowed by `saveCollectedUrls`.
+    if (guardState) {
+      const before = guardState.urls.size;
+      for (const entry of outcome.manifestEntries) guardState.urls.add(entry.sourceUrl);
+      if (guardState.urls.size !== before || !guardState.fromState) {
+        await saveCollectedUrls(store, config.sourceId, guardState.urls);
+      }
+    }
+
     // Aggregate status: `new` if any doc's bytes were PUT this run, else `seen`.
     const anyNew = outcome.manifestEntries.some((e) => e.status === "new");
 
@@ -436,17 +494,35 @@ export async function runLiveScrape(
     let exploitError: string | undefined;
     if (exploit) {
       try {
-        const result: ExploitScrapeResult = await exploitScrapedCity(
+        const records = await exploitationRecords(
           store,
           config.citySlug,
-          {
-            records: outcome.records,
-            ...(pdfToText !== undefined ? { pdfToText } : {}),
-            ...(now !== undefined ? { now } : {}),
-            ...(db !== undefined ? { db } : {}),
-          },
+          outcome.records,
+          guardState !== undefined,
         );
-        signals = result.designationEventCount;
+        // NOTHING NEW ⇒ NOTHING TO RE-PROJECT. The city's project-state already
+        // describes every document in storage, so re-deriving it would spend a
+        // full corpus read and a PG upsert to write the same thing. Leaving it
+        // untouched is both cheaper and safer: `runExploitation` PUTs the state
+        // it assembles over `ontology/{city}/project-state.json` — the key the
+        // Signaux view reads — so a run with nothing to assemble must not reach
+        // it at all. `signals` stays undefined, which is how the recap says
+        // "not re-derived" rather than "zero signals".
+        if (records.length === 0 || outcome.records.length === 0) {
+          // Nothing collected this run: leave the projected state as it stands.
+        } else {
+          const result: ExploitScrapeResult = await exploitScrapedCity(
+            store,
+            config.citySlug,
+            {
+              records,
+              ...(pdfToText !== undefined ? { pdfToText } : {}),
+              ...(now !== undefined ? { now } : {}),
+              ...(db !== undefined ? { db } : {}),
+            },
+          );
+          signals = result.designationEventCount;
+        }
       } catch (e) {
         signals = 0;
         exploitError = e instanceof Error ? e.message : String(e);
@@ -461,6 +537,7 @@ export async function runLiveScrape(
       status: anyNew ? "new" : "seen",
       casKeys: outcome.manifestEntries.map((e) => e.casKey),
       count: outcome.count,
+      ...(outcome.skippedKnown > 0 ? { skippedKnown: outcome.skippedKnown } : {}),
       ...(outcome.documentFailures.length > 0
         ? {
             failedDocs: outcome.documentFailures.length,

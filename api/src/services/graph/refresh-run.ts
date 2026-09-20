@@ -51,14 +51,33 @@ export function refreshSourceDelayMs(random = Math.random): number {
   return 1_700 + Math.floor(random() * 601);
 }
 
-/** Convert one successful existing RECUEIL result into C04's immutable PDF selection. */
+/**
+ * Convert one existing RECUEIL result into C04's immutable PDF selection, or
+ * report that the city has nothing new.
+ *
+ * THE DAILY CYCLE ONLY DOWNLOADS THE DIFFERENTIAL (owner, 2026-09-20: « on ne
+ * telechaege que le differentiel sinon c pas un job d update »). The city's
+ * index is read on every run — that is the check — and
+ * `skipAlreadyCollectedUrls` keeps the run from fetching a document an earlier
+ * run already stored. `radar-refresh-pv` is the only SCHEDULED cycle, so this is
+ * where that rule has to hold; before, it re-downloaded the city's whole window
+ * every night.
+ *
+ * `null` MEANS "UP TO DATE", AND THAT IS A SUCCESS. This function used to demand
+ * `count >= 1` and throw otherwise, which encoded the idea that a run must
+ * always come back with a document. For an update job that idea is simply false:
+ * a night on which the municipality published nothing collects nothing, and
+ * failing the Job for it would make the normal case an error. An index that
+ * could NOT be read is a different thing, and still throws.
+ */
 export async function acquireRefreshPdfManifest(
   options: AcquireRefreshPdfOptions,
-): Promise<RefreshPdfSelection> {
+): Promise<RefreshPdfSelection | null> {
   const acquire = options.acquire ?? runLiveScrape;
   const recaps = await acquire([options.citySlug], {
     store: options.store,
     exploit: false,
+    skipAlreadyCollectedUrls: true,
     acceptRef: (ref) => ref.contentType?.toLowerCase().startsWith("application/pdf") === true
       || /\.pdf(?:[?#]|$)/i.test(ref.url),
     beforeFetch: async () => {
@@ -69,10 +88,14 @@ export async function acquireRefreshPdfManifest(
   });
   if (options.signal?.aborted) throw new Error("Refresh aborted after acquisition");
   const recap = recaps[0];
+  // A genuine failure: no recap, the wrong city, an index that did not answer,
+  // or a recap whose own invariant (`casKeys.length === count`) is broken.
   if (recaps.length !== 1 || !recap || recap.city !== options.citySlug
-    || recap.status === "error" || recap.count < 1 || recap.casKeys.length !== recap.count) {
+    || recap.status === "error" || recap.casKeys.length !== recap.count) {
     throw new Error(`Selected city acquisition failed: ${options.citySlug}`);
   }
+  // The index answered and there was nothing to download. Up to date.
+  if (recap.count === 0) return null;
   if (!recap.sourceId || /[\t\n]/.test(recap.sourceId)) {
     throw new Error(`Invalid selected source id: ${options.citySlug}`);
   }
@@ -176,6 +199,14 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
     store: options.store, ...(options.signal ? { signal: options.signal } : {}),
     ...(options.acquire ? { acquire: options.acquire } : {}),
     ...(options.acquisitionLimit ? { limit: options.acquisitionLimit } : {}) });
+  // UP TO DATE: the index answered and published nothing this city does not
+  // already have. There is no corpus to materialise, no model to call, no
+  // snapshot to publish and no projection to make — the graph on file already
+  // describes every document in storage. Returning here is the cheap, expected
+  // path of an update cycle, and it costs exactly one index request.
+  if (!selected) {
+    return { cycleId, citySlug: options.citySlug, upToDate: true as const };
+  }
   const corpus = await materializeRefreshCorpus({ citySlug: options.citySlug,
     manifestKey: selected.manifestKey, reader: options.store, extractPdf: options.extractPdf });
   const read = await readCanonicalCityGraph(options.store, options.citySlug, now);

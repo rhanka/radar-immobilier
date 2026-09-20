@@ -49,7 +49,7 @@
  *                        existing CAS documents are skipped before it is consumed.
  *   LIVE_SCRAPE_RECOLLECT_ALL
  *                        when "1"/"true", re-download every document the index
- *                        lists, even one already collected by the previous run.
+ *                        lists, even one an earlier run already collected.
  *                        OFF by default: the nightly run reads each index (the
  *                        check for a new document) and downloads only what is
  *                        new. Turn it on for a backfill or a repair run.
@@ -224,10 +224,12 @@ async function main(): Promise<number> {
       // THE 24 h CYCLE CHECKS, IT DOES NOT RE-DOWNLOAD (owner, 2026-09-20).
       // Every city's index page is read on every run — that is the check for a
       // new document, and it is one request. What is not done again is
-      // downloading a document the previous run already stored: drummondville
-      // was pulling 255 files a night, 240 of them a decade old and kept only
-      // because their date was unparseable. Set LIVE_SCRAPE_RECOLLECT_ALL=1 to
-      // force a full re-collection (a backfill or a repair run).
+      // downloading a document an earlier run already stored: drummondville was
+      // pulling 255 files a night, 240 of them a decade old and kept only
+      // because their date was unparseable. The memory is cumulative
+      // (`runs/{source}/collected-urls.jsonl`), so a night with nothing new
+      // forgets nothing. Set LIVE_SCRAPE_RECOLLECT_ALL=1 to force a full
+      // re-collection (a backfill or a repair run).
       skipAlreadyCollectedUrls: !recollectAll,
       ...(limit !== undefined && Number.isFinite(limit) ? { limit } : {}),
       ...(exploit ? { exploit: true } : {}),
@@ -250,6 +252,7 @@ async function main(): Promise<number> {
             // reported side by side so a line can never again mean "404
             // somewhere, nothing collected" (issue #723).
             ...(r.failedDocs ? { failedDocs: r.failedDocs } : {}),
+            ...(r.skippedKnown ? { skippedKnown: r.skippedKnown } : {}),
             ...(r.documentFailures
               ? {
                   failedUrls: r.documentFailures.map(
@@ -268,6 +271,12 @@ async function main(): Promise<number> {
     const errors = recap.filter((r) => r.status === "error");
     const newCount = recap.filter((r) => r.status === "new").length;
     const seenCount = recap.filter((r) => r.status === "seen").length;
+    // Cities that collected at least one document — the ones exploitation had
+    // anything to do for. On a quiet night this is 0 everywhere, and that is the
+    // expected result of an update cycle: « on ne télécharge que le différentiel »
+    // (owner, 2026-09-20). It must not read as a broken exploitation path.
+    const citiesWithNewDocuments = recap.filter((r) => r.count > 0).length;
+    const skippedKnown = recap.reduce((total, r) => total + (r.skippedKnown ?? 0), 0);
     // Cities whose exploitation ran to completion (signals projected, no
     // exploit error) — i.e. those whose graph was fed to PG when a db was used.
     const upserted = recap.filter(
@@ -290,7 +299,10 @@ async function main(): Promise<number> {
     logger.info(
       {
         cities: recap.length, new: newCount, seen: seenCount, errors: errors.length,
-        partialCities: partial.length, failedDocs, ...collection,
+        partialCities: partial.length, failedDocs,
+        // The differential, in one line: how many documents were downloaded and
+        // how many were already in storage and therefore not fetched again.
+        citiesWithNewDocuments, skippedKnown, ...collection,
       },
       "worker-live: done",
     );
@@ -323,6 +335,7 @@ async function main(): Promise<number> {
       feedExpected: pgFeed.feed,
       upserted,
       pdftotextAvailable,
+      citiesWithNewDocuments,
       index404Cities: recap.filter((r) => r.fetchFailure?.phase === "index" &&
         r.fetchFailure.httpStatus === 404).map((r) => r.city),
     });
