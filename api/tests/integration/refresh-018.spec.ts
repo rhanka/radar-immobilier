@@ -9,7 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { loadConfig } from "../../src/config.js";
 import { createDb, type Database } from "../../src/db/client.js";
-import { graphEdges, graphNodes } from "../../src/db/schema.js";
+import { graphEdges, graphNodes, refreshDocumentOutcomes } from "../../src/db/schema.js";
 import { subgraphForCity, upsertGraphAtomic } from "../../src/services/graph/graph-store.js";
 import type { RefreshProfileContext } from "../../src/services/graph/refresh-profile.js";
 import { createRefreshModelPolicy } from "../../src/services/graph/refresh-model-policy.js";
@@ -41,7 +41,7 @@ async function clean(city: string) {
   await db.delete(graphNodes).where(eq(graphNodes.citySlug, city));
 }
 
-async function fixture(city: string, afterGeneration?: () => Promise<void>) {
+async function fixture(city: string, afterGeneration?: () => Promise<void>, withEvent = false) {
   const sourceId = `proces-verbaux-${city}`;
   const bytes = new TextEncoder().encode(`%PDF refresh ${city}`);
   const sha = createHash("sha256").update(bytes).digest("hex");
@@ -57,6 +57,14 @@ async function fixture(city: string, afterGeneration?: () => Promise<void>) {
     reglement_number: "26-956-2", citations: [{ source_file: key, rawRef: key, sourceUrl: url,
       docSha: sha, modality: "pdf", page: 3, excerpt: "adopte le règlement 26-956-2" }] }],
     edges: [], input_tokens: 10, output_tokens: 10 };
+  if (withEvent) {
+    const signal = extraction.nodes[0]!;
+    extraction.nodes.push({ ...signal, id: `${city}:event`, node_type: "DesignationEvent" });
+    extraction.evidence = [{ id: "ev-1", source_file: key, rawRef: key, sourceUrl: url,
+      docSha: sha, modality: "pdf", page: 3, excerpt: "adopte le règlement 26-956-2" }];
+    extraction.edges.push({ source: `${city}:event`, target: signal.id, relation: "raises_signal",
+      confidence: "EXTRACTED", source_file: key, citations: signal.citations!, evidence_refs: ["ev-1"] });
+  }
   let calls = 0;
   const textClient = { mode: "mesh", provider: "test", model: "test",
     async generateJson(input) {
@@ -85,6 +93,104 @@ function options(city: string, fx: Awaited<ReturnType<typeof fixture>>, targetDb
 }
 
 describe("refresh 0.18 real storage integration", () => {
+  it.each(["accepted", "quality", "quota"] as const)(
+    "should append one metadata outcome per submitted document, including refusal (%s)", async (outcome) => {
+      const city = `refresh-outcome-${randomUUID()}`;
+      const fx = await fixture(city);
+      const cycleId = randomUUID();
+      const sensitive = "private-document-content-and-upstream-secret";
+      const policy = () => createRefreshModelPolicy({
+        primary: { provider: "openai", model: "gpt-6-astra", effort: "medium" },
+        fallback: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
+        timeoutMs: 1000, forceFallback: false, primaryQualityAttempts: 2,
+        createClient(model) {
+          return { ...fx.textClient, async generateJson(input) {
+            if (outcome === "quota") throw Object.assign(new Error(sensitive), { status: 429 });
+            if (outcome === "quality") await input.validateResponse?.(JSON.stringify({ text: sensitive }));
+            return { ...await fx.textClient.generateJson(input), provider: model.provider, model: model.model };
+          } };
+        },
+      });
+      const configured = { ...options(city, fx, db), cycleId, maximumAttempts: 1 };
+      const run = () => runPvRefresh({ ...configured, documentModels: policy() });
+      try {
+        if (outcome === "accepted") await run();
+        else await expect(run()).rejects.toThrow();
+        const rows = await db.select().from(refreshDocumentOutcomes).where(eq(refreshDocumentOutcomes.cycleId, cycleId));
+        expect(rows).toHaveLength(1);
+        expect(rows[0]).toMatchObject({ cycleId, documentSha: fx.sha, citySlug: city, pageCount: 3,
+          status: outcome === "accepted" ? "accepted" : "refused",
+          failureReason: outcome === "accepted" ? null : outcome,
+          provider: outcome === "accepted" ? "openai" : "gemini",
+          model: outcome === "accepted" ? "gpt-6-astra" : "gemini-3.8-flash",
+          transition: outcome === "accepted" ? "primary" : "fallback",
+          attempts: outcome === "accepted" ? 1 : outcome === "quality" ? 3 : 2,
+          unknownIds: 0, keptNoValidDecision: 0, supportedUngrounded: 0,
+          actsJudged: 0, actsRemoved: 0, skippedFallback: 0 });
+        expect(rows[0]!.createdAt).toBeInstanceOf(Date);
+        expect(rows[0]!.latencyMs).toBeGreaterThanOrEqual(0);
+        expect(JSON.stringify(rows)).not.toContain(sensitive);
+        expect(JSON.stringify(rows)).not.toContain("adopte le règlement");
+        // Cached success is not resubmitted; an explicit retry of a refusal appends a new row.
+        if (outcome === "accepted") await run();
+        else await expect(run()).rejects.toThrow();
+        const repeated = await db.select().from(refreshDocumentOutcomes).where(eq(refreshDocumentOutcomes.cycleId, cycleId));
+        expect(repeated).toHaveLength(outcome === "accepted" ? 1 : 2);
+        expect(repeated.find(({ id }) => id === rows[0]!.id)).toEqual(rows[0]);
+        if (outcome !== "accepted") expect(repeated.find(({ id }) => id !== rows[0]!.id)?.attempts).toBe(1);
+      } finally { await clean(city); }
+    }, 60_000);
+
+  it.each([false, true])("persists verification and resumes the filtered chunk without another call (failure=%s)", async (fail) => {
+    const city = `refresh-verify-${randomUUID()}`;
+    const fx = await fixture(city, undefined, true);
+    let verifyCalls = 0;
+    const documentModels = createRefreshModelPolicy({
+      primary: { provider: "openai", model: "gpt-6-astra", effort: "medium" },
+      fallback: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
+      verification: { provider: "gemini", model: "gemini-3.8-flash", effort: "low" },
+      timeoutMs: 1000, forceFallback: false, primaryQualityAttempts: 2,
+      createClient(model) {
+        return { ...fx.textClient, async generateJson(input) {
+          if (model.provider === "openai") {
+            return { ...await fx.textClient.generateJson(input), provider: model.provider, model: model.model };
+          }
+          verifyCalls++;
+          await input.validateResponse?.(fail ? "not JSON" : JSON.stringify({ decisions: [
+            { act: "A01", verdict: "non_soutenu", reason: "Historical reference only", excerpt: "" },
+          ] }));
+          return { status: "completed", mode: "mesh", provider: model.provider, model: model.model, audit: {} };
+        } };
+      },
+    });
+    const configured = { ...options(city, fx, db), maximumAttempts: 1, budgetLimit: 4, documentModels };
+    try {
+      await expect(runPvRefresh({ ...configured, budgetLimit: 3, profileHash: "sha256:budget-test" }))
+        .rejects.toThrow("Refresh call budget exhausted");
+      expect(fx.calls()).toBe(0);
+      const result = await runPvRefresh(configured);
+      const state = JSON.parse(new TextDecoder().decode(await store.get(result.stateKey)));
+      expect(state.reservedCalls).toBe(4);
+      expect(state.documentModels[fx.sha]).toMatchObject([
+        { transition: "primary", attempt: 1 },
+        { transition: "verification", attempt: 2, status: fail ? "failed" : "completed" },
+      ]);
+      const completed = Object.values(state.completedChunks)[0] as { key: string };
+      const output = JSON.parse(new TextDecoder().decode(await store.get(completed.key)));
+      expect(output.extraction.nodes).toHaveLength(fail ? 2 : 0);
+      expect(output.extraction.edges).toHaveLength(fail ? 1 : 0);
+      const outcomes = await db.select().from(refreshDocumentOutcomes).where(eq(refreshDocumentOutcomes.citySlug, city));
+      expect(outcomes).toHaveLength(1);
+      expect(outcomes[0]).toMatchObject({ status: "accepted", pageCount: 3, attempts: 2,
+        model: "gpt-6-astra", transition: "primary", failureReason: fail ? "quality" : null,
+        actsJudged: fail ? 0 : 1, actsRemoved: fail ? 0 : 1 });
+      expect((await subgraphForCity(db, city)).nodes).toHaveLength(fail ? 2 : 0);
+      await runPvRefresh(configured);
+      expect(fx.calls()).toBe(1);
+      expect(verifyCalls).toBe(1);
+    } finally { await clean(city); }
+  }, 60_000);
+
   it("restores Astra for an incomplete multichunk document after a process restart", async () => {
     const city = `refresh-resume-${randomUUID()}`;
     const fx = await fixture(city);
@@ -116,6 +222,12 @@ describe("refresh 0.18 real storage integration", () => {
       expect(state.reservedCalls).toBe(9);
       expect(primaryCalls).toBe(1);
       expect(fallbackCalls).toBe(3);
+      const outcomes = await db.select().from(refreshDocumentOutcomes).where(eq(refreshDocumentOutcomes.citySlug, city));
+      expect(outcomes).toHaveLength(2);
+      expect(outcomes.find(({ status }) => status === "refused")).toMatchObject({
+        pageCount: 2, attempts: 3, failureReason: "transport", skippedFallback: 1 });
+      expect(outcomes.find(({ status }) => status === "accepted")).toMatchObject({
+        pageCount: 2, attempts: 1, failureReason: null, skippedFallback: 1 });
       expect(state.documentModels[fx.sha].at(-1)).toMatchObject({
         modelUsed: { model: "gpt-6-astra" }, status: "completed", fallbackReason: "quota",
       });
@@ -159,7 +271,8 @@ describe("refresh 0.18 real storage integration", () => {
   it("resumes PG after S3 publication without a second model call", async () => {
     const city = `refresh-018-${randomUUID()}`;
     const fx = await fixture(city);
-    const failingDb = { select() { throw new Error("injected PG failure"); } } as unknown as Database;
+    const failingDb = { insert: db.insert.bind(db),
+      select() { throw new Error("injected PG failure"); } } as unknown as Database;
     try {
       await expect(runPvRefresh(options(city, fx, failingDb))).rejects.toThrow("injected PG failure");
       expect(await store.head(canonicalGraphKey(city))).not.toBeNull();
