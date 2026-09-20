@@ -6,6 +6,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  PvSourceFetchError,
   rawMetaKey,
   RawDocumentRecordSchema,
   type RawDocument,
@@ -401,5 +402,175 @@ describe("runRecueilWithManifest — run manifest (commit record)", () => {
     const expectedRunId = `${out.fetchedAt.replace(/[:.]/g, "")}-r`;
     const key = manifestKey("avis-publics-testville", expectedRunId);
     expect(store.objects.has(key)).toBe(true);
+  });
+});
+
+/**
+ * Issue #723 — one dead document link used to cost the WHOLE city.
+ * `drummondvilleShapedAdapter` reproduces the exact shape that was measured on
+ * the real index: many documents that succeed, one 404 near the end, more
+ * documents after it.
+ */
+function drummondvilleShapedAdapter(
+  count: number,
+  deadIndex: number,
+  options: { listFailsAt?: number } = {},
+): SourceAdapter {
+  const refs = Array.from({ length: count }, (_, i): RawDocumentRef => ({
+    sourceKind: "pv",
+    city: "drummondville",
+    url: `https://www.drummondville.ca/uploads/pv-${i}.pdf`,
+    discoveredAt: "2026-09-20T00:00:00.000Z",
+    contentType: "application/pdf",
+  }));
+  return {
+    kind: "pv", city: "drummondville", version: "1.0.0",
+    async *list() {
+      for (const [i, ref] of refs.entries()) {
+        if (options.listFailsAt !== undefined && i === options.listFailsAt) {
+          throw new PvSourceFetchError(
+            "http", "HTTP 500", "https://www.drummondville.ca/seances/", "index", 500,
+          );
+        }
+        yield ref;
+      }
+    },
+    async fetch(ref) {
+      if (ref.url === refs[deadIndex]?.url) {
+        throw new PvSourceFetchError("http", "HTTP 404", ref.url, "document", 404);
+      }
+      return {
+        ref, sourceKind: "pv", city: "drummondville", url: ref.url,
+        fetchedAt: "2026-09-20T09:30:00.000Z", contentType: "application/pdf",
+        body: new TextEncoder().encode(ref.url),
+        provenance: { adapterVersion: "1.0.0", fetchedViaObscura: false },
+      };
+    },
+    hash() { return "unused"; },
+  };
+}
+
+describe("runRecueil — a failed document must not cost the city (#723)", () => {
+  it("keeps collecting after a 404 document and reports it as a hole, not a failure", async () => {
+    const store = new MemoryStore();
+    resetRecueilMetrics();
+    // 255 documents, the dead link at rank 253 — the measured drummondville run.
+    const out = await runRecueil(
+      "proces-verbaux-drummondville",
+      drummondvilleShapedAdapter(255, 252),
+      store,
+    );
+
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    // The two documents AFTER the dead link were collected too: the loop went on.
+    expect(out.count).toBe(254);
+    expect(out.newDocuments).toBe(254);
+    expect(out.documentFailures).toHaveLength(1);
+    expect(out.documentFailures[0]).toEqual({
+      url: "https://www.drummondville.ca/uploads/pv-252.pdf",
+      phase: "document",
+      error: "http",
+      detail: "HTTP 404",
+      httpStatus: 404,
+    });
+    expect(out.listingTruncatedBy).toBeUndefined();
+    // The 404 is counted as a DOCUMENT 404, never as a lost index.
+    expect(JSON.parse(recueilMetricsJson())).toMatchObject({
+      document404: 1, index404: 0,
+    });
+  });
+
+  it("commits the run manifest of a run that has holes, so the failed doc is retried and nothing is orphaned", async () => {
+    const store = new MemoryStore();
+    const out = await runRecueilWithManifest(
+      "proces-verbaux-drummondville",
+      drummondvilleShapedAdapter(5, 3),
+      store,
+      { runId: "run-1" },
+    );
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    const body = new TextDecoder().decode(
+      store.objects.get(manifestKey("proces-verbaux-drummondville", "run-1"))!,
+    );
+    const urls = body.trim().split("\n").map((l) => JSON.parse(l).sourceUrl as string);
+    expect(urls).toHaveLength(4);
+    expect(urls).not.toContain("https://www.drummondville.ca/uploads/pv-3.pdf");
+  });
+
+  it("still loses the city when the INDEX fails and nothing was collected", async () => {
+    const store = new MemoryStore();
+    resetRecueilMetrics();
+    const out = await runRecueil(
+      "proces-verbaux-drummondville",
+      drummondvilleShapedAdapter(5, -1, { listFailsAt: 0 }),
+      store,
+    );
+    expect(out.ok).toBe(false);
+    if (out.ok) return;
+    expect(out.error).toBe("http");
+    expect(out.fetchFailure).toMatchObject({ phase: "index", httpStatus: 500 });
+  });
+
+  it("keeps the harvest when enumeration breaks PART WAY, and says the list is truncated", async () => {
+    const store = new MemoryStore();
+    const out = await runRecueilWithManifest(
+      "proces-verbaux-drummondville",
+      drummondvilleShapedAdapter(10, -1, { listFailsAt: 4 }),
+      store,
+      { runId: "run-2" },
+    );
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.count).toBe(4);
+    expect(out.listingTruncatedBy).toMatchObject({ phase: "index", httpStatus: 500 });
+    // Committed: the 4 documents are referenced by a manifest, not orphaned.
+    expect(store.objects.has(manifestKey("proces-verbaux-drummondville", "run-2"))).toBe(true);
+  });
+
+  it("fails the source when it collected NOTHING and every attempt failed", async () => {
+    // A single-reference source (the avis-publics adapters, whose one document
+    // IS the index page) lives entirely in this case, and so does a city whose
+    // every listed document 404s. `POST /api/sources/collect/:source` answers
+    // 502 on it and a pipeline run is PARTIAL — neither may be softened into a
+    // "success with holes" by the #723 fix.
+    const store = new MemoryStore();
+    const out = await runRecueil(
+      "proces-verbaux-drummondville",
+      drummondvilleShapedAdapter(1, 0),
+      store,
+    );
+    expect(out.ok).toBe(false);
+    if (out.ok) return;
+    expect(out.error).toBe("http");
+    expect(out.fetchFailure).toMatchObject({ phase: "document", httpStatus: 404 });
+  });
+
+  it("does not lose the city on a STORAGE failure of one document either", async () => {
+    const store = new MemoryStore();
+    let puts = 0;
+    const failingStore: ObjectStore = {
+      ...store,
+      head: (key) => store.head(key),
+      get: (key) => store.get(key),
+      put: async (key, body) => {
+        puts += 1;
+        if (puts === 3) throw new Error("S3 unavailable");
+        return store.put(key, body);
+      },
+    };
+    const out = await runRecueil(
+      "proces-verbaux-drummondville",
+      drummondvilleShapedAdapter(4, -1),
+      failingStore,
+    );
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.documentFailures).toHaveLength(1);
+    expect(out.documentFailures[0]).toMatchObject({
+      error: "storage", detail: "S3 unavailable", phase: "document",
+    });
+    expect(out.count).toBe(3);
   });
 });

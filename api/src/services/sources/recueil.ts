@@ -23,6 +23,24 @@ import {
  * per fetched artifact. Idempotent: a byte-identical re-collection reuses the
  * same sha256-derived storage key (the `put` is skipped when the object already
  * exists). Never crashes — adapter failures become typed outcomes.
+ *
+ * TWO PHASES, TWO CONSEQUENCES (issue #723). Listing and fetching used to sit
+ * inside ONE `try`, so the first error of either kind aborted the source and
+ * the caller then reported `docs=0`. On drummondville that meant: 252 documents
+ * downloaded and written to the CAS, the 253ʳᵈ a dead 2016 link returning 404,
+ * and the whole city reported as collecting nothing — deterministically, every
+ * night, with no way to tell from the log which of the 255 URLs had failed.
+ *
+ *   - LISTING failure (the index page, the sitemap): nothing can be enumerated,
+ *     so the source fails — `ok: false`. If it happens AFTER some documents
+ *     were already collected, what was collected is KEPT and the outcome is a
+ *     truncated success (`listingTruncatedBy`), never a discard.
+ *   - DOCUMENT failure: counted in `documentFailures` with its URL, phase and
+ *     status, and the run CONTINUES to the next reference.
+ *   - ZERO documents collected AND at least one failure: the source failed —
+ *     `ok: false`. "Nothing collected, everything tried failed" is not a
+ *     success with holes. Single-reference sources (the avis-publics adapters,
+ *     whose one document IS the index page) are entirely this case.
  */
 
 export interface RecueilOptions {
@@ -50,6 +68,24 @@ export interface RecueilOptions {
   readonly runId?: string;
 }
 
+/**
+ * One reference that could not be collected, kept as data instead of aborting
+ * the source. Carries what the log needs to be actionable at a glance: the
+ * exact URL, the phase, the typed kind and the HTTP status when there was one.
+ */
+export interface RecueilFetchFailure {
+  /** Exact URL that failed. */
+  readonly url: string;
+  /** `document` for a PV, `index` for the index page / sitemap / session page. */
+  readonly phase: "index" | "document";
+  /** Typed failure kind (`http`, `timeout`, `network`, `parse`, `storage`). */
+  readonly error: SourceErrorKind | "storage";
+  /** Verbatim detail (`HTTP 404`, the timeout message…). */
+  readonly detail: string;
+  /** HTTP status when the failure was an HTTP response; `null` otherwise. */
+  readonly httpStatus: number | null;
+}
+
 export interface RecueilSuccess {
   readonly ok: true;
   readonly source: string;
@@ -68,6 +104,20 @@ export interface RecueilSuccess {
    * `runRecueilWithManifest` writes it, `runRecueil` only computes it.
    */
   readonly manifestEntries: readonly RunManifestEntry[];
+  /**
+   * References that failed during this run WITHOUT costing the source. Empty on
+   * a clean run. A non-empty array is a successful run with holes, not a
+   * failure: `count`, `records` and `manifestEntries` describe what WAS
+   * collected and are never zeroed because of these.
+   */
+  readonly documentFailures: readonly RecueilFetchFailure[];
+  /**
+   * Set when ENUMERATION stopped early (the index page, the sitemap or the
+   * generator itself failed) after at least one document had been collected.
+   * The harvest is kept and committed; this says the list may be incomplete, so
+   * the next run will pick up what is missing. Absent on a complete run.
+   */
+  readonly listingTruncatedBy?: RecueilFetchFailure;
 }
 
 export interface RecueilFailure {
@@ -129,19 +179,49 @@ export async function runRecueil(
   let newDocuments = 0;
   let skippedExisting = 0;
 
-  try {
-    const listOpts = {
-      ...(adapter.city !== undefined ? { city: adapter.city } : {}),
-      ...(options.signal !== undefined ? { signal: options.signal } : {}),
-    };
-    for await (const ref of adapter.list(listOpts)) {
-      if (newDocuments >= limit) {
-        metrics = { ...metrics, remaining: null };
-        break;
-      }
-      if (options.signal?.aborted) break;
-      if (options.acceptRef && !options.acceptRef(ref)) continue;
+  const documentFailures: RecueilFetchFailure[] = [];
+  let listingTruncatedBy: RecueilFetchFailure | undefined;
+  // Kept so a run that collected NOTHING can still report the typed error that
+  // caused it, exactly as before (see the zero-harvest rule below).
+  let firstDocumentError: unknown;
 
+  const listOpts = {
+    ...(adapter.city !== undefined ? { city: adapter.city } : {}),
+    ...(options.signal !== undefined ? { signal: options.signal } : {}),
+  };
+  // The iterator is driven BY HAND rather than with `for await`, because the
+  // two phases must be caught separately: an error out of `iterator.next()` is
+  // the LISTING failing, an error inside the body is ONE DOCUMENT failing. A
+  // `for await` puts both under the same `catch` — which is exactly the defect
+  // of issue #723.
+  const iterator = adapter.list(listOpts)[Symbol.asyncIterator]();
+
+  for (;;) {
+    let step: IteratorResult<RawDocumentRef>;
+    try {
+      step = await iterator.next();
+    } catch (e) {
+      const failure = toFetchFailure(e, "index");
+      countHttp404(failure);
+      // Nothing collected yet ⇒ the source genuinely failed (index / sitemap
+      // unreachable): the city is lost, and THAT is the only case where it is.
+      if (records.length === 0) return failureOutcome(e, source, fetchedAt);
+      // Something WAS collected: keep it, commit it, and record that the list
+      // is incomplete. The next run re-reads the index and picks up the rest.
+      listingTruncatedBy = failure;
+      break;
+    }
+    if (step.done) break;
+    const ref = step.value;
+
+    if (newDocuments >= limit) {
+      metrics = { ...metrics, remaining: null };
+      break;
+    }
+    if (options.signal?.aborted) break;
+    if (options.acceptRef && !options.acceptRef(ref)) continue;
+
+    try {
       await options.beforeFetch?.(ref);
       if (options.signal?.aborted) break;
       const raw = await adapter.fetch(ref);
@@ -215,29 +295,26 @@ export async function runRecueil(
           ? { publishedAt: record.publishedAt }
           : {}),
       });
+    } catch (e) {
+      // ONE document failed — counted, journalled with its URL and its phase,
+      // and the run goes on. Nothing already written to the CAS is discarded.
+      const failure = toFetchFailure(e, "document", ref.url);
+      countHttp404(failure);
+      documentFailures.push(failure);
+      if (firstDocumentError === undefined) firstDocumentError = e;
+      continue;
     }
-  } catch (e) {
-    if (e instanceof PvSourceFetchError) {
-      const { url, phase, httpStatus, headers, durationMs } = e;
-      if (httpStatus === 404) {
-        const counter = phase === "index" ? "index404" : "document404";
-        metrics = { ...metrics, [counter]: metrics[counter] + 1 };
-      }
-      return { ok: false, source, error: e.kind, detail: e.detail, fetchedAt,
-        fetchFailure: { url, phase, httpStatus, headers, durationMs } };
-    }
-    if (e instanceof SourceFetchError) {
-      return { ok: false, source, error: e.kind, detail: e.detail, fetchedAt };
-    }
-    // Storage / unexpected failure — surface as a typed network-class error
-    // rather than crashing the request.
-    return {
-      ok: false,
-      source,
-      error: "network",
-      detail: e instanceof Error ? e.message : String(e),
-      fetchedAt,
-    };
+  }
+
+  // ZERO HARVEST + AT LEAST ONE FAILURE ⇒ the source FAILED. "Collected nothing
+  // and everything we tried failed" is not a success with holes; it is what
+  // `POST /api/sources/collect/:source` answers 502 to, and what makes a
+  // pipeline run PARTIAL. Sources whose `list()` yields a single reference (the
+  // avis-publics adapters, whose document IS the index page) live entirely in
+  // this case. The #723 fix is unaffected: a run that collected 252 of 255
+  // documents has a harvest and stays a success.
+  if (records.length === 0 && documentFailures.length > 0) {
+    return failureOutcome(firstDocumentError, source, fetchedAt);
   }
 
   return {
@@ -250,6 +327,82 @@ export async function runRecueil(
     records,
     fetchedAt,
     manifestEntries,
+    documentFailures,
+    ...(listingTruncatedBy !== undefined ? { listingTruncatedBy } : {}),
+  };
+}
+
+/**
+ * Normalise anything thrown during collection into a `RecueilFetchFailure`.
+ * The PHASE carried by a `PvSourceFetchError` wins over the caller's guess: the
+ * adapter is the only layer that knows whether the URL it was on was an index
+ * page or a document.
+ */
+function toFetchFailure(
+  e: unknown,
+  fallbackPhase: "index" | "document",
+  fallbackUrl = "",
+): RecueilFetchFailure {
+  if (e instanceof PvSourceFetchError) {
+    return {
+      url: e.url,
+      phase: e.phase,
+      error: e.kind,
+      detail: e.detail,
+      httpStatus: e.httpStatus,
+    };
+  }
+  if (e instanceof SourceFetchError) {
+    return {
+      url: fallbackUrl,
+      phase: fallbackPhase,
+      error: e.kind,
+      detail: e.detail,
+      httpStatus: null,
+    };
+  }
+  // Storage / unexpected failure — typed as `storage` so it is never confused
+  // with a source being unreachable.
+  return {
+    url: fallbackUrl,
+    phase: fallbackPhase,
+    error: "storage",
+    detail: e instanceof Error ? e.message : String(e),
+    httpStatus: null,
+  };
+}
+
+/** Keep the index404 / document404 split of the per-run counters. */
+function countHttp404(failure: RecueilFetchFailure): void {
+  if (failure.httpStatus !== 404) return;
+  const counter = failure.phase === "index" ? "index404" : "document404";
+  metrics = { ...metrics, [counter]: metrics[counter] + 1 };
+}
+
+/** Build the `ok: false` outcome for a source that could collect nothing. */
+function failureOutcome(
+  e: unknown,
+  source: string,
+  fetchedAt: string,
+): RecueilFailure {
+  if (e instanceof PvSourceFetchError) {
+    const { url, phase, httpStatus, headers, durationMs } = e;
+    return {
+      ok: false, source, error: e.kind, detail: e.detail, fetchedAt,
+      fetchFailure: { url, phase, httpStatus, headers, durationMs },
+    };
+  }
+  if (e instanceof SourceFetchError) {
+    return { ok: false, source, error: e.kind, detail: e.detail, fetchedAt };
+  }
+  // Storage / unexpected failure — surface as a typed network-class error
+  // rather than crashing the request.
+  return {
+    ok: false,
+    source,
+    error: "network",
+    detail: e instanceof Error ? e.message : String(e),
+    fetchedAt,
   };
 }
 
@@ -267,8 +420,15 @@ function defaultRunId(fetchedAt: string): string {
  * `runs/{source}/{runId}/manifest.jsonl` (SPEC_PERSISTENCE_S3_FIRST §1.1, §5) —
  * one JSONL line per doc seen, with the `new`/`seen` dedup status. The manifest
  * is written LAST (after every CAS object + sidecar), so its presence attests
- * that everything it references already exists. On failure, no manifest is
- * written (a partial run is not committed).
+ * that everything it references already exists. On failure (`ok: false`, i.e.
+ * nothing at all could be collected) no manifest is written.
+ *
+ * A run WITH HOLES is not a failure and IS committed: documents that failed are
+ * listed in `documentFailures` and simply absent from the manifest, so the next
+ * run retries exactly them. Before issue #723's fix, one failed document made
+ * the whole run `ok: false` — the CAS objects and sidecars of the documents
+ * already collected stayed on S3 with no manifest referencing them, so the run
+ * never terminated and the bytes were orphaned.
  *
  * `runId` is taken from `options.runId`, else derived from `fetchedAt`.
  */

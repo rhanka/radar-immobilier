@@ -4,7 +4,6 @@ import {
   ProcesVerbauxGenericAdapter,
   PvSourceFetchError,
   PV_USER_AGENT,
-  pvRequestHeaders,
   type PvFetchLike,
 } from "./proces-verbaux-generic.js";
 
@@ -25,13 +24,6 @@ const response = (status: number) => ({
 afterEach(() => vi.restoreAllMocks());
 
 describe("PV request diagnostics", () => {
-  it("should preserve document preferences without duplicate wildcard ranges", () => {
-    expect(pvRequestHeaders("text/html,*/*", true).accept)
-      .toBe("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-    expect(pvRequestHeaders("application/pdf", true).accept)
-      .toBe("application/pdf,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-  });
-
   it.each(["index", "document"] as const)("should log and propagate an HTTP error during %s", async (phase) => {
     const log = vi.spyOn(console, "info").mockImplementation(() => {});
     const res = response(404);
@@ -78,17 +70,19 @@ describe("PV request diagnostics", () => {
     expect(JSON.stringify([error, onRequest.mock.calls])).not.toContain("AUTH_SECRET");
   });
 
-  it.each([false, true])("should send the selected negotiation variant (%s) with the same identifiable agent", async (negotiateHeaders) => {
+  // The header-negotiation experiment of PR #730 is gone: the cause of the 404
+  // was a dead document link, not a header, and both variants answered
+  // identically from the workstation, from a preproduction pod and from a
+  // residential IP (INVESTIGATION_404_STATUS §5). What must NOT regress is the
+  // identifiable agent — a scrape that hides who it is would be a different
+  // decision from the one the owner took.
+  it("should always send the identifiable agent and the plain accept header", async () => {
     const fetchImpl = vi.fn<PvFetchLike>(async () => response(200));
     const adapter = new ProcesVerbauxGenericAdapter(DRUMMONDVILLE_PV_CONFIG, {
-      fetchImpl, onRequest: () => {}, ...(negotiateHeaders ? { negotiateHeaders } : {}),
+      fetchImpl, onRequest: () => {},
     });
     await adapter.list({})[Symbol.asyncIterator]().next();
     const sent = fetchImpl.mock.calls[0]![1]!.headers;
-    expect(sent).toEqual(pvRequestHeaders("text/html", negotiateHeaders));
-    expect(sent?.["user-agent"]).toBe(PV_USER_AGENT);
-    expect(sent?.accept).toBe(negotiateHeaders
-      ? "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8" : "text/html");
-    expect(sent?.["accept-language"]).toBe(negotiateHeaders ? "fr-CA,fr;q=0.9" : undefined);
+    expect(sent).toEqual({ "user-agent": PV_USER_AGENT, accept: "text/html" });
   });
 });

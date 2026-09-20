@@ -170,43 +170,149 @@ const FRENCH_MONTHS_PV: Record<string, string> = {
 };
 
 /**
+ * Word characters that municipalities use to glue date parts inside a label or
+ * a file name: whitespace, underscore, dot and hyphen. `\b` CANNOT be used to
+ * delimit a date in a file name, because `_` is itself a word character: in
+ * `Proces_verbal_2016_01_18.pdf` there is NO word boundary before `2016`, so a
+ * `\b`-anchored rule never fires. That single detail made 240 of the 255
+ * documents of one real index undatable — and therefore unbounded by the
+ * collection window (issue #723). Every rule below delimits with explicit
+ * digit lookarounds instead.
+ */
+const DATE_GLUE = "[\\s_.-]+";
+
+/**
+ * Take the FIRST match whose captured word is a real French month name.
+ * A single `.match()` cannot do this: it stops on the first *structural* match,
+ * so `ordre-du-jour-24-aout-2026` would be decided by whatever token happens to
+ * come first and the real date would be lost.
+ */
+function firstFrenchMonthMatch(
+  lower: string,
+  re: RegExp,
+  monthGroup: number,
+): RegExpMatchArray | null {
+  for (const m of lower.matchAll(re)) {
+    const word = m[monthGroup];
+    if (word && FRENCH_MONTHS_PV[word]) return m;
+  }
+  return null;
+}
+
+/** Two-digit zero-padded string for a day/month number. */
+function pad2(n: string): string {
+  return n.padStart(2, "0");
+}
+
+/**
  * Extract an ISO date from a human label, most specific first:
- *   - "séance du 10 mars 2025" / "10 mars 2025"  → "2025-03-10"
- *   - "2025-03-10" / "2025/03/10"                → "2025-03-10"
- *   - "Mars 2025" (month + year, no day)         → "2025-03"  (YYYY-MM)
+ *   - "séance du 10 mars 2025" / "10-mars-2025"   → "2025-03-10"
+ *   - "2025-03-10" / "2025/03/10" / "2025_03_10"  → "2025-03-10"
+ *   - "PV20250310.pdf" (compact year-first)       → "2025-03-10"
+ *   - "ODJ_10-03-2025.pdf" (day-first, year last) → "2025-03-10"
+ *   - "Mars 2025" (month + year, no day)          → "2025-03"  (YYYY-MM)
  *   - "pv-2025-03" (filename year-month)          → "2025-03"
  * Returns NON_DISPONIBLE when nothing parses.
  *
  * The month-only form (YYYY-MM) is intentional: many flat-list municipalities
  * label PVs by month ("Mars 2025") with no day. A YYYY-MM string still sorts
  * and window-filters correctly (lexicographic ≥/≤ against YYYY-MM-DD bounds).
+ *
+ * ANTI-INVENTION: a rule fires only on a date that is verbatim in the label or
+ * the URL. Nothing is guessed from a neighbouring element, and an ambiguous
+ * form that could be read two ways is rejected rather than resolved by
+ * preference — see the day-first rule below for the one documented exception,
+ * which rests on a measured corpus convention, not on a guess.
  */
 export function extractIsoFromLabel(label: string): string {
   const lower = label.toLowerCase();
 
-  // 1. Full French date: "10 mars 2025" or ordinal "1er octobre 2025"
-  //    ("1er"/"1ᵉʳ"/"2e" — the ordinal suffix is consumed, not the day digit).
-  const full = lower.match(
-    /(\d{1,2})(?:er|re|e|ère|ème|ᵉʳ|ᵉ)?\s+([a-zàâçéèêëîïôûù]+)\s+(\d{4})/i,
+  // 1. Full French date: "10 mars 2025", "10-mars-2025", ordinal "1er octobre
+  //    2025" ("1er"/"1ᵉʳ"/"2e" — the ordinal suffix is consumed, not the day
+  //    digit). The glue is not only whitespace: `Ordre-du-jour-24-aout-2026`
+  //    and `PV_6_juillet_2026` are both real file names in the parc.
+  const full = firstFrenchMonthMatch(
+    lower,
+    new RegExp(
+      `(?<![0-9])(\\d{1,2})(?:er|re|e|ère|ème|ᵉʳ|ᵉ)?${DATE_GLUE}`
+        + `([a-zàâçéèêëîïôûù]+)${DATE_GLUE}(\\d{4})(?![0-9])`,
+      "gi",
+    ),
+    2,
   );
   if (full?.[1] && full[2] && full[3]) {
     const month = FRENCH_MONTHS_PV[full[2]];
-    if (month) return `${full[3]}-${month}-${full[1].padStart(2, "0")}`;
+    const day = Number(full[1]);
+    // The digit lookbehind and the day range together stop `reglement-1234-mai-2020`
+    // from being read as "day 34 of May" — a real shape in the parc, and one the
+    // whitespace-only rule was already exposed to.
+    if (month && day >= 1 && day <= 31) {
+      return `${full[3]}-${month}-${pad2(full[1])}`;
+    }
   }
 
-  // 2. ISO-ish numeric date: "2025-03-10" or "2025/03/10".
-  const iso = lower.match(/\b(\d{4})[-/](\d{2})[-/](\d{2})\b/);
-  if (iso?.[1] && iso[2] && iso[3]) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+  // 2. Year-first numeric date: "2025-03-10", "2025/03/10", "2025_03_10",
+  //    "2025.03.10". The SAME separator is required on both sides (back
+  //    reference `\2`), so a version string like "v1.2-2025" is not read as a
+  //    date, and month/day are range-checked so "2025-99-99" stays undated.
+  const ymd = lower.match(
+    /(?<![0-9])(\d{4})([-/_.])(0[1-9]|1[0-2])\2(0[1-9]|[12]\d|3[01])(?![0-9])/,
+  );
+  if (ymd?.[1] && ymd[3] && ymd[4]) return `${ymd[1]}-${ymd[3]}-${ymd[4]}`;
 
-  // 3. Month + year only: "mars 2025".
-  const monthYear = lower.match(/\b([a-zàâçéèêëîïôûù]+)\s+(\d{4})\b/i);
+  // 3. Compact year-first date: "PV20250310.pdf". 81 of the 438 document file
+  //    names surveyed in the repository's own PV index fixtures use this form.
+  const compact = lower.match(
+    /(?<![0-9])(20\d{2})(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])(?![0-9])/,
+  );
+  if (compact?.[1] && compact[2] && compact[3]) {
+    return `${compact[1]}-${compact[2]}-${compact[3]}`;
+  }
+
+  // 4. Day-first numeric date, year LAST: "ODJ_10-03-2025.pdf". Same-separator
+  //    back reference as rule 2.
+  //
+  //    Reading order is DAY-month-year, and that is a MEASURED convention, not
+  //    an assumption: on the drummondville index (2026-09-20) 48 file names use
+  //    this form; 29 of them have a first component > 12 (so it can only be a
+  //    day) and NONE has a second component > 12. The same page also writes the
+  //    form out in French as "24-aout-2026" — day first. French Québec writes
+  //    JJ-MM-AAAA. The US reading is still accepted, but only when the numbers
+  //    make it the ONLY possible one (second component > 12).
+  const dmy = lower.match(
+    /(?<![0-9])(\d{1,2})([-_./])(\d{1,2})\2(20\d{2})(?![0-9])/,
+  );
+  if (dmy?.[1] && dmy[3] && dmy[4]) {
+    const first = Number(dmy[1]);
+    const second = Number(dmy[3]);
+    if (first >= 1 && first <= 31 && second >= 1 && second <= 12) {
+      return `${dmy[4]}-${pad2(dmy[3])}-${pad2(dmy[1])}`;
+    }
+    if (second > 12 && second <= 31 && first >= 1 && first <= 12) {
+      return `${dmy[4]}-${pad2(dmy[1])}-${pad2(dmy[3])}`;
+    }
+  }
+
+  // 5. Month + year only: "mars 2025", "mars-2025".
+  const monthYear = firstFrenchMonthMatch(
+    lower,
+    new RegExp(`([a-zàâçéèêëîïôûù]+)${DATE_GLUE}(\\d{4})(?![0-9])`, "gi"),
+    1,
+  );
   if (monthYear?.[1] && monthYear[2]) {
     const month = FRENCH_MONTHS_PV[monthYear[1]];
     if (month) return `${monthYear[2]}-${month}`;
   }
 
-  // 4. Filename year-month: "pv-2025-03" / "2025_03".
-  const fileYm = lower.match(/\b(20\d{2})[-_](0[1-9]|1[0-2])\b/);
+  // 6. Filename year-month: "pv-2025-03" / "2025_03" / "2025.03".
+  //
+  //    `/` is deliberately NOT a separator here. Accepting it would make every
+  //    WordPress upload path `/wp-content/uploads/2015/10/…` yield a date, and
+  //    that date is the UPLOAD month, not the session month — it would land in
+  //    `publishedAt`, the valid-time axis. Bounding the fetch window with an
+  //    upload-path hint is a separate, deliberate decision; it is not smuggled
+  //    in through the date extractor.
+  const fileYm = lower.match(/(?<![0-9])(20\d{2})[-_.](0[1-9]|1[0-2])(?![0-9])/);
   if (fileYm?.[1] && fileYm[2]) return `${fileYm[1]}-${fileYm[2]}`;
 
   return PV_NON_DISPONIBLE;
@@ -464,6 +570,22 @@ export function detectIndexRenderMode(html: string): IndexRenderMode {
  *   - Month-only dates ("YYYY-MM") are expanded to their whole-month span
  *     [YYYY-MM-01, YYYY-MM-31] and kept when that span OVERLAPS the window, so a
  *     PV labelled only by month near a window boundary is not silently dropped.
+ *
+ * WHAT AN UNDATED DOCUMENT BECOMES (issue #723). Keeping an undated item is
+ * correct and stays: a brand-new PV whose label carries no date must be
+ * collected the day it appears, and dropping it here would make the daily check
+ * blind. What was WRONG was the consequence: an undated item was kept by EVERY
+ * run, so the same decade-old documents were re-downloaded every night — 240 of
+ * drummondville's 255 fetches were undated items, and one of them was a dead
+ * 2016 link that aborted the whole city.
+ *
+ * The two halves of the answer are therefore split:
+ *   - this window filter keeps undated items (the daily CHECK stays complete);
+ *   - the collection layer skips an item whose URL was already collected by the
+ *     previous run (`knownSourceUrlsFromLastRun` + `acceptRef` in live-scrape),
+ *     so an undated document is downloaded ONCE and never again.
+ * Reading the index every 24 h is the check; re-downloading its whole back
+ * catalogue is what is avoided.
  */
 export function filterPvByWindow(
   items: PvIndexItemT[],

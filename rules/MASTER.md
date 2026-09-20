@@ -109,8 +109,24 @@ Canonical hostnames — never guess or derive them, copy them from here:
 
 ## Scraping Policy
 - Respect `robots.txt` (with documented exceptions if explicitly required for the radar use case).
+  - **DOCUMENTED EXCEPTION — procès-verbaux (PV) sources, owner decision of 2026-09-20 (issue #723).**
+    `robots.txt` is NOT fetched and NOT evaluated at run time by the PV adapter, and that is deliberate,
+    not an omission. Reason, in the owner's terms: radar-immobilier is a specialised alerting tool over a
+    bounded list of municipal council documents, not a search engine reindexing sites every night. The
+    decision is bound to the three measures that make it defensible, and it does not stand without them:
+    (1) the collection window is enforced — an undatable document no longer escapes it; (2) a document
+    already collected is not downloaded again — the nightly run READS every city's index, which is the
+    daily check for a new document, and downloads only what is new; (3) every request is spaced per the
+    rate limit below, which is what actually protects a small municipal server.
+    Scope and limits of record: 15 of the 553 PV hosts `Disallow` a directory that can hold PV
+    (inventory of 2026-09-20); for `www.saint-henri.ca` all 397 PV are under a disallowed
+    `/wp-content/uploads/`. That is a fact on file, not a run-time gate. Reopening this decision is the
+    owner's, not an agent's. Code anchor: `PV_ROBOTS_TXT_CONSULTED` in `proces-verbaux-generic.ts`.
 - Rate-limit aggressively : at most 1 req / 2 s by default per source, more conservative for small municipal sites.
-- Identify the user-agent honestly (`radar-immobilier/0.x (+contact)`); anti-detect via Obscura is for reliability, not deception.
+  - This is HELD IN CODE, not left to each caller's goodwill: the PV adapter itself spaces every request
+    it makes — index page, sitemap, session pages, documents (`minRequestIntervalMs`). Until 2026-09-20
+    the rule was documented as "the caller's responsibility" and no caller assumed it.
+- Identify the user-agent truthfully (`radar-immobilier/0.x (+contact)`); anti-detect via Obscura is for reliability, not deception.
 - Cache raw payloads in S3 to avoid re-fetching during dev / tests.
 
 ## Language Policy
