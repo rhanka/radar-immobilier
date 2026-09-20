@@ -90,7 +90,7 @@ describe("PV adapter request spacing", () => {
     for await (const ref of adapter.list({})) refs.push(ref);
     expect(clock.slept).toEqual([]); // one request so far
     // The caller sleeps 2 s of its own before asking for a document
-    // (`acquireRefreshPdfManifest` does exactly this in `beforeFetch`).
+    // (`acquireRefreshPdfCandidates` does exactly this in `beforeFetch`).
     clock.tick(PV_MIN_REQUEST_INTERVAL_MS + 50);
     await adapter.fetch(refs[0]!);
     expect(clock.slept).toEqual([]); // nothing added on top
