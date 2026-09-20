@@ -47,6 +47,12 @@
  * Env:
  *   LIVE_SCRAPE_LIMIT    optional per-city cap on newly written raw documents;
  *                        existing CAS documents are skipped before it is consumed.
+ *   LIVE_SCRAPE_RECOLLECT_ALL
+ *                        when "1"/"true", re-download every document the index
+ *                        lists, even one already collected by the previous run.
+ *                        OFF by default: the nightly run reads each index (the
+ *                        check for a new document) and downloads only what is
+ *                        new. Turn it on for a backfill or a repair run.
  *   LIVE_SCRAPE_EXPLOIT  when "1"/"true", also run EXPLOITATION after each
  *                        city's RECUEIL: PARSE the raw PV (pdftotext via poppler)
  *                        + project the real DesignationEvents into the per-city
@@ -149,6 +155,8 @@ async function main(): Promise<number> {
     logger.error("reexploit chunk size must be a positive integer");
     return 2;
   }
+  const recollectAllEnv = (process.env.LIVE_SCRAPE_RECOLLECT_ALL ?? "").toLowerCase();
+  const recollectAll = recollectAllEnv === "1" || recollectAllEnv === "true";
   const exploitEnv = (process.env.LIVE_SCRAPE_EXPLOIT ?? "").toLowerCase();
   // `--reexploit` implies exploitation; a plain exploit run is opt-in via env.
   const exploit = reexploit || exploitEnv === "1" || exploitEnv === "true";
@@ -213,6 +221,14 @@ async function main(): Promise<number> {
     const recap = await runLiveScrape(slugs, {
       store,
       onRequest: (diagnostic) => logger.info(diagnostic, "worker-live: PV request"),
+      // THE 24 h CYCLE CHECKS, IT DOES NOT RE-DOWNLOAD (owner, 2026-09-20).
+      // Every city's index page is read on every run — that is the check for a
+      // new document, and it is one request. What is not done again is
+      // downloading a document the previous run already stored: drummondville
+      // was pulling 255 files a night, 240 of them a decade old and kept only
+      // because their date was unparseable. Set LIVE_SCRAPE_RECOLLECT_ALL=1 to
+      // force a full re-collection (a backfill or a repair run).
+      skipAlreadyCollectedUrls: !recollectAll,
       ...(limit !== undefined && Number.isFinite(limit) ? { limit } : {}),
       ...(exploit ? { exploit: true } : {}),
       ...(reexploit ? { reexploit: true } : {}),
@@ -229,6 +245,21 @@ async function main(): Promise<number> {
             signals: r.signals,
             error: r.error ?? r.exploitError,
             ...r.fetchFailure,
+            // Documents that failed WITHOUT costing the city: the count plus
+            // the exact URLs. `docs` above is what was collected; the two are
+            // reported side by side so a line can never again mean "404
+            // somewhere, nothing collected" (issue #723).
+            ...(r.failedDocs ? { failedDocs: r.failedDocs } : {}),
+            ...(r.documentFailures
+              ? {
+                  failedUrls: r.documentFailures.map(
+                    (f) => `${f.url} [${f.error} ${f.httpStatus ?? "-"}]`,
+                  ),
+                }
+              : {}),
+            ...(r.listingTruncatedBy
+              ? { listingTruncatedBy: r.listingTruncatedBy.url }
+              : {}),
           },
           `worker-live: ${r.city} → ${r.status}`,
         ),
@@ -251,8 +282,16 @@ async function main(): Promise<number> {
       remaining: total.remaining + (city.reexploitProgress?.remaining ?? 0),
     }), { newDocuments: 0, skippedExisting: 0, remaining: 0 });
     console.log(reexploit ? JSON.stringify(replay) : recueilMetricsJson());
+    // Cities that collected documents but lost some of them — a degradation the
+    // old recap could not express at all, because any failed document turned
+    // the whole city into `errors`.
+    const partial = recap.filter((r) => (r.failedDocs ?? 0) > 0);
+    const failedDocs = partial.reduce((total, r) => total + (r.failedDocs ?? 0), 0);
     logger.info(
-      { cities: recap.length, new: newCount, seen: seenCount, errors: errors.length, ...collection },
+      {
+        cities: recap.length, new: newCount, seen: seenCount, errors: errors.length,
+        partialCities: partial.length, failedDocs, ...collection,
+      },
       "worker-live: done",
     );
     logger.info(
