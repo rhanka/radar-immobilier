@@ -61,6 +61,22 @@ interface ManifestEntry {
   readonly sidecarKey: string;
 }
 
+/**
+ * Identity of a refresh input set, derived from the manifest rows alone.
+ *
+ * Exported because the run identity must be known BEFORE the PDF text is
+ * extracted: that is what lets a cycle ask "is this document already
+ * published?" without paying for poppler, and what lets it compare several
+ * candidate documents of the same city. Callers must therefore keep using this
+ * one formula — a second copy of it would silently split the identity space.
+ */
+export function refreshCorpusInputHash(
+  entries: readonly Pick<ManifestEntry, "sourceId" | "citySlug" | "sha256" | "representationKey">[],
+): string {
+  return createHash("sha256").update(entries.map((entry) =>
+    `${entry.sourceId}\t${entry.citySlug}\t${entry.sha256}\t${entry.representationKey}`).join("\n")).digest("hex");
+}
+
 export interface MaterializeRefreshCorpusOptions {
   readonly citySlug: string;
   readonly manifestKey: string;
@@ -163,7 +179,6 @@ export async function materializeRefreshCorpus(options: MaterializeRefreshCorpus
       pages: pageTexts.map((page, index) => ({ page: index + 1, text: page })) };
     documents.push({ ...base, chunks: chunkDocument(base) });
   }
-  const inputHash = createHash("sha256").update(selected.map((entry) =>
-    `${entry.sourceId}\t${entry.citySlug}\t${entry.sha256}\t${entry.representationKey}`).join("\n")).digest("hex");
+  const inputHash = refreshCorpusInputHash(selected);
   return { inputHash, documents, chunks: documents.flatMap((document) => document.chunks) };
 }
