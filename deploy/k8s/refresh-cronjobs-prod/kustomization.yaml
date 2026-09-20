@@ -1,9 +1,57 @@
-# Activate only the causal PV-to-Signal refresh at 05:17 UTC.
-# Storage comes from the base (legacy scrape/projection CronJobs removed 2026-09-18).
+# refresh-cronjobs-prod — jumeau PRODUCTION de l'overlay refresh.
 #
-# Applied only by the gated promote-prod "Deploy refresh CronJobs (prod)" step.
-# The fail-loud image placeholder must be replaced by `kustomize edit set image`
-# before rendering or applying this overlay.
+# Déploie le CronJob `radar-refresh-pv` dans `radar-immobilier`, épinglé à
+# l'EMPREINTE de l'image promue, et le sort de sa dormance. Appliqué par la
+# seule étape « Deploy refresh CronJobs (prod) » de `promote-prod`, elle-même
+# gardée par la variable GitHub `REFRESH_CRONJOB_PROD_ENABLED`. Le mode d'emploi
+# de l'armement — ce qui doit exister dans le namespace AVANT de définir la
+# variable — est dans `deploy/ci/README.md`, section « Armer le rafraîchissement
+# de production ».
+#
+# CE QUI VIENT DE LA BASE, ET N'EST PAS À RECOPIER ICI
+# ----------------------------------------------------
+# Tout le régime d'exécution est porté par ../34-refresh-cronjob.yaml et hérité
+# tel quel, y compris ce que #736 y a introduit le 2026-09-20 :
+#   - `--all` : le balayage couvre les ~528 villes configurées, et non plus un
+#     slug en dur (c'était le bug #734 : le job tournait sans rien rafraîchir
+#     d'autre qu'une ville) ;
+#   - quatre passages par jour, `schedule: "17 5,11,17,23 * * *"` ;
+#   - `activeDeadlineSeconds: 19800` (5 h 30) et
+#     `REFRESH_SWEEP_DEADLINE_MS: 18900000` (5 h 15), pour que le balayage
+#     s'arrête de lui-même, curseur écrit, avant le SIGTERM du contrôleur ;
+#   - les variables de balayage (fenêtre, plafonds, réserve, taux d'échec).
+# Ne PAS dupliquer ces valeurs ici : un réglage se change dans la base, une
+# seule fois, et les deux overlays suivent. `verify-renders` refuse désormais
+# tout écart entre le rendu préprod et le rendu prod (refresh-contract.awk).
+#
+# LES TROIS SEULES DIVERGENCES VOULUES AVEC LA PRÉPRODUCTION
+# ----------------------------------------------------------
+#   1. le namespace ;
+#   2. l'enveloppe mémoire (voir le bloc dédié plus bas) ;
+#   3. la liaison de stockage : la préproduction pointe explicitement son propre
+#      seau, la production hérite du ConfigMap `radar-api`
+#      (`SCRAPE_S3_BUCKET: radar-immobilier-docs`) et du Secret
+#      `radar-scrape-s3-credentials`. Garde dédiée :
+#      deploy/ci/check-object-storage-bindings.sh.
+# Toute autre divergence fait rougir la CI.
+#
+# Le placeholder `newTag` est FAIL-LOUD : rendre ou appliquer cet overlay sans
+# l'étape de substitution produit un tag impossible à tirer (et non `:latest`),
+# donc un apply non épinglé échoue visiblement au lieu de faire tourner du code
+# périmé en silence. L'étape CD rend par `refresh-018.mk render-prod`, qui
+# exige une empreinte `@sha256:` et refuse un rendu portant encore le
+# placeholder.
+#
+# NB rendu : `kubectl apply -k` ne peut PAS être utilisé — la base vit un
+# répertoire au-dessus et le load-restrictor par défaut l'interdit. Il faut
+# `kubectl kustomize --load-restrictor LoadRestrictionsNone`, qui n'émet que le
+# CronJob et son PVC keyring, jamais le bundle complet.
+#
+# RBAC : l'apply a besoin de `batch/cronjobs` ET de `persistentvolumeclaims` sur
+# `radar-ci-deployer` (deploy/k8s/10-rbac.yaml). Depuis que le PVC keyring est
+# dans `resources`, le rendu émet bien un PVC : le grant PVC n'est plus une
+# précaution, il est portant. L'apply du Role sur le cluster est un acte
+# cluster-admin (poc-k8s, GO owner), il ne se fait pas depuis la CI.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -25,8 +73,36 @@ patches:
       - op: replace
         path: /spec/suspend
         value: false
-  # Fit the pilot into the production 768Mi release headroom. The heap leaves
-  # 256Mi for native PDF extraction and runtime overhead; validate peak RSS.
+
+  # ENVELOPPE MÉMOIRE DE PRODUCTION — divergence voulue n°2, et POINT OUVERT.
+  #
+  # Ce que le quota impose (mesure poc-k8s reportée dans 55-radar-api-hpa.yaml) :
+  # le namespace `radar-immobilier` plafonne `limits.memory` à 3 072 Mi et en
+  # consomme déjà 2 304 Mi. La marge est de 768 Mi — exactement ce pod, et
+  # exactement ce que consommerait aussi un surge HPA de `radar-api` à deux
+  # pods. Le balayage et un surge sont donc MUTUELLEMENT EXCLUSIFS, sans alerte :
+  # le second des deux échoue en `FailedCreate`. Le conteneur d'initialisation
+  # étant séquentiel et plus petit, la limite effective du pod reste 768 Mi.
+  #
+  # Ce que le profil d'exécution est devenu (#736) : un seul processus pour ~528
+  # villes pendant des heures, quatre fois par jour, là où c'était un processus
+  # par ville. Les seules mesures disponibles portent sur `worker-live`, un
+  # PROXY de ce chemin de code, et non sur `refresh-pv --all` :
+  #   - 2026-09-04, `radar-refresh-all` r1 : OOMKilled (137) à 512 Mi de cgroup ;
+  #   - 2026-09-05, r3 à 3 Gi : plateau 305-426 Mi sur les 528 villes, puis
+  #     815 Mi de pic AU DUMP FINAL ; le verdict d'alors était « limites CronJob
+  #     refresh ≈ 1 Gi/512 Mi suffisent », soit AU-DESSUS des 768 Mi d'ici ;
+  #   - 2026-09-18, `worker-live --reexploit` sous exactement 768 Mi / heap 512 :
+  #     OOMKilled (137) après ~13 documents, cause racine jamais établie.
+  # Aucun pic RSS de `refresh-pv` lui-même n'a jamais été mesuré. C'est ce que
+  # dit déjà, depuis 2026-09-14, la consigne « validate peak RSS » de ce fichier.
+  #
+  # L'enveloppe n'est donc PAS relevée ici de la seule initiative d'une lane :
+  # la relever consommerait un quota qui n'existe pas (2 304 + 1 024 = 3 328 Mi
+  # > 3 072 Mi : l'admission REFUSE), et supposerait un acte owner côté poc-k8s.
+  # Les valeurs ci-dessous sont celles que `verify-renders` épingle en toutes
+  # lettres ; les changer suppose de changer la garde, et donc de passer par une
+  # revue. Le point d'entrée pour la mesure en cours en préproduction est ici.
   - target:
       kind: CronJob
       name: radar-refresh-pv
