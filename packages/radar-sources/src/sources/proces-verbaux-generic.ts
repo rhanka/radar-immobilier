@@ -300,7 +300,7 @@ export interface PvAdapterOptions {
    *
    * It is a MINIMUM INTERVAL, not a fixed sleep: it waits only for the time
    * still missing since the previous request returned. A caller that already
-   * paces itself — `acquireRefreshPdfManifest` sleeps ~2 s in `beforeFetch` —
+   * paces itself — `acquireRefreshPdfCandidates` sleeps ~2 s in `beforeFetch` —
    * therefore pays nothing extra instead of being throttled twice.
    */
   readonly minRequestIntervalMs?: number;

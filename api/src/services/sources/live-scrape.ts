@@ -57,6 +57,25 @@ import { runRecueilWithManifest, type RecueilFetchFailure } from "./recueil.js";
  */
 export const MAX_REPORTED_DOCUMENT_FAILURES = 20;
 
+/**
+ * One collected representation, with the metadata a consumer needs to CHOOSE
+ * between the documents of a city. `casKeys` alone cannot express that choice:
+ * it loses both the publication date and the new/seen decision, so a consumer
+ * can only take a positional guess (which is how the refresh stayed pinned to
+ * the first document of every index page). Additive and optional: existing
+ * consumers that only read `casKeys` are unaffected.
+ */
+export interface LiveScrapeDocument {
+  /** CAS object key, the same value that appears in `casKeys`. */
+  readonly casKey: string;
+  /** SHA-256 of the exact bytes, as recorded in the run manifest. */
+  readonly sha256: string;
+  /** `new` when the bytes were PUT this run, `seen` when HEAD-skipped. */
+  readonly status: "new" | "seen";
+  /** Publication date parsed from the source index, when the source exposes one. */
+  readonly publishedAt?: string;
+}
+
 /** Per-city outcome of a live scrape run. */
 export interface LiveScrapeCityRecap {
   readonly fetchFailure?: PvFetchDiagnostic;
@@ -80,6 +99,13 @@ export interface LiveScrapeCityRecap {
   readonly status: "new" | "seen" | "error";
   /** CAS object keys collected this run (empty on error). */
   readonly casKeys: readonly string[];
+  /**
+   * The same documents as `casKeys`, in the same order, with the sha, the
+   * new/seen decision and the source publication date. Present on a successful
+   * RECUEIL; omitted on error and on the `reexploit` replay path, which has no
+   * run manifest to report.
+   */
+  readonly documents?: readonly LiveScrapeDocument[];
   /** Number of docs seen this run (0 on error). */
   readonly count: number;
   /** Error detail when `status === "error"` (omitted otherwise). */
@@ -160,7 +186,7 @@ export interface RunLiveScrapeOptions {
    * the bytes are already in hand.
    *
    * DEFAULT `false`, and BOTH callers turn it on: `worker-live` for the
-   * on-demand mass scrape, and `acquireRefreshPdfManifest` for the daily
+   * on-demand mass scrape, and `acquireRefreshPdfCandidates` for the daily
    * `radar-refresh-pv` cycle. The default stays off so an explicit caller — a
    * backfill, a repair — gets the whole window without having to think about it.
    *
@@ -536,6 +562,12 @@ export async function runLiveScrape(
       sourceId: config.sourceId,
       status: anyNew ? "new" : "seen",
       casKeys: outcome.manifestEntries.map((e) => e.casKey),
+      documents: outcome.manifestEntries.map((e) => ({
+        casKey: e.casKey,
+        sha256: e.sha256,
+        status: e.status,
+        ...(e.publishedAt !== undefined ? { publishedAt: e.publishedAt } : {}),
+      })),
       count: outcome.count,
       ...(outcome.skippedKnown > 0 ? { skippedKnown: outcome.skippedKnown } : {}),
       ...(outcome.documentFailures.length > 0

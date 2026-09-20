@@ -139,6 +139,30 @@ describe("runRecueil — raw bytes + sidecar meta.json", () => {
     expect(final.ok && { new: final.newDocuments, seen: final.skippedExisting }).toEqual({ new: 0, seen: 60 });
   });
 
+  it("stops LISTING once the new-write cap is reached, truncating the rest of the window",
+    async () => {
+      // This is why REFRESH_ACQUISITION_LIMIT is not just a write cap: the loop
+      // breaks, so the documents after the cap are never listed at all. On an
+      // index page ordered oldest-first, a cap of 1 hands the refresh the OLDEST
+      // unseen document and hides the newest until a later pass.
+      const store = new MemoryStore();
+      const adapter = manyDocumentsAdapter(6);
+
+      const capped = await runRecueil("proces-verbaux-testville", adapter, store, { limit: 1 });
+      expect(capped.ok && capped.count).toBe(1);
+
+      // Already-collected documents do not consume the cap, so a second pass
+      // reaches exactly one more — convergence at one document per pass.
+      const next = await runRecueil("proces-verbaux-testville", adapter, store, { limit: 1 });
+      expect(next.ok && { new: next.newDocuments, seen: next.skippedExisting })
+        .toEqual({ new: 1, seen: 1 });
+
+      // A cap of five sees the whole window in one pass instead of four more.
+      const wide = await runRecueil("proces-verbaux-testville", adapter, store, { limit: 5 });
+      expect(wide.ok && { new: wide.newDocuments, seen: wide.skippedExisting })
+        .toEqual({ new: 4, seen: 2 });
+    });
+
   it("filters index representations before the limit and paces the selected fetch", async () => {
     const store = new MemoryStore();
     const indexRef: RawDocumentRef = {

@@ -191,6 +191,44 @@ describe("refresh model policy", () => {
     expect(run.calls).toEqual([primary.model]);
   });
 
+  it("should declare the FALLBACK seat exhausted after three consecutive quota refusals",
+    async () => {
+      // The primary's circuit spares the cities behind it a call known to be
+      // refused. Nothing covered the fallback: every remaining city of a
+      // 528-city sweep paid its own 429, failed, and the sweep carried on.
+      const run = fixture(async () => { throw Object.assign(new Error("limited"), { status: 429 }); });
+      expect(run.policy.fallbackQuotaExhausted()).toBe(false);
+      for (const id of ["a", "b"]) {
+        await expect(run.document(id).generateJson(input)).rejects.toThrow("limited");
+      }
+      expect(run.policy.fallbackQuotaExhausted()).toBe(false);
+      await expect(run.document("c").generateJson(input)).rejects.toThrow("limited");
+      expect(run.policy.fallbackQuotaExhausted()).toBe(true);
+    });
+
+  it("should not confuse a transport failure of the fallback with a dry seat", async () => {
+    const run = fixture(async () => { throw new Error("network"); });
+    for (const id of ["a", "b", "c", "d"]) {
+      await expect(run.document(id).generateJson(input)).rejects.toThrow("network");
+    }
+    expect(run.policy.fallbackQuotaExhausted()).toBe(false);
+  });
+
+  it("should forget a finished document, since one policy now spans 528 cities", async () => {
+    // The attempt counter lives in the per-document entry. A finished document
+    // whose entry is released starts from one again — which is the observable
+    // proof that the map does not grow for four hours across 528 cities.
+    const run = fixture(async () => "{}");
+    await run.document("one").generateJson(input);
+    expect(run.receipts.at(-1)).toMatchObject({ attempt: 1 });
+    await run.document("one").generateJson(input);
+    expect(run.receipts.at(-1)).toMatchObject({ attempt: 2 });
+
+    run.policy.completeDocument("one");
+    await run.document("one").generateJson(input);
+    expect(run.receipts.at(-1)).toMatchObject({ attempt: 1 });
+  });
+
   it("should stop after both transports fail", async () => {
     const run = fixture(async () => { throw new Error("network"); });
     await expect(run.document("one").generateJson(input)).rejects.toThrow("network");
