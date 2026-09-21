@@ -1,30 +1,30 @@
 {
   "output": "docs/spec/reports/dossier-backup-pra-712/decision-focus.html",
-  "bytes": 699949,
-  "htmlSha256": "9a48f25046c6d2ee19b0e3d07f978d1b7a2a43bcb768f6fc23705c183f3d865e",
-  "dossierHash": "f79aaad53bdfe739440d32ae2492e9523e96a44549a95960d7b53166dca75e72",
-  "artifactInputHash": "7b9aa79ab663b426dc72bb6bab502fff2f09bf9621d8deaac5ae93ab410cc258",
+  "bytes": 773710,
+  "htmlSha256": "6afbc987fa326a0d99f692f87b89055f9e3b3443e58abf3a9d9680a29390ac0d",
+  "dossierHash": "9f5e99a37c8539b373e43c9d2e484e5640bd6a9b722f215f4294271f79dc1261",
+  "artifactInputHash": "193dab9e5d52762270a5007fbd2b41f773888fa0d0fda74d04f1fbc0b191331a",
   "graphs": [
     {
       "id": "architecture-sauvegardes",
-      "nodes": 22,
-      "edges": 10,
-      "subflows": 6,
-      "sceneHash": "3d26491a0c263576306e172fb053781fc01d2214659dddcdbfb0004e58eb34c0"
+      "nodes": 48,
+      "edges": 26,
+      "subflows": 21,
+      "sceneHash": "6e95df06a398b97a4af884f0320e1730d85e237a9caddd1e6d61d0cf7bbf95de"
     },
     {
       "id": "sequence-bout-en-bout",
-      "nodes": 13,
-      "edges": 12,
-      "subflows": 2,
-      "sceneHash": "a7faf374fae94c0a17c44858e2304d165dbe36c204284e7713d509070926a250"
+      "nodes": 20,
+      "edges": 19,
+      "subflows": 4,
+      "sceneHash": "a2b557989230e4b4ec28b237b4d5c1274413cf5564b9fa1bdca1e042e916d3f9"
     },
     {
       "id": "mise-en-service",
-      "nodes": 14,
-      "edges": 13,
+      "nodes": 17,
+      "edges": 16,
       "subflows": 3,
-      "sceneHash": "219d8fb9a9429bd568533343a920574f46db41dfe14a11b1c97df87f07b01a2a"
+      "sceneHash": "95f735afc6f02f8036e4371879432a145c091c9afe29f3f34f86158a028ff9a7"
     }
   ]
 }
