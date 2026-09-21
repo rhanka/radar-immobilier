@@ -152,6 +152,14 @@ jobs:
       - name: S0 preflight (binaires + secrets + EXPECTED_DATABASE)
         run: node "$CLI" preflight
 
+      # ── S0.b (advisory) — prédiction précoce de la mémoire de collecte ─────
+      # Lit `runs/` de PROD_DOCS (read-only) : prédit si la copie S3 amènera bien
+      # la mémoire de collecte → delta. ADVISORY : ne bloque JAMAIS (WARN seul),
+      # joué aussi en DRY (0 écriture). Le vrai gate est plus bas (PREPROD_DOCS).
+      - name: S0.b precheck-runs (advisory, cible PROD_DOCS)
+        continue-on-error: true
+        run: node "$CLI" precheck-runs --prod
+
       # ══════════════ DRY_RUN : rien de destructif ══════════════
       - name: S3 copy-docs (plan --dry)
         if: ${{ inputs.DRY_RUN }}
@@ -204,6 +212,16 @@ jobs:
       - name: UN-QUIESCE consommateurs préprod (reprise — après S5, avant S7)
         if: ${{ always() && !inputs.DRY_RUN }}
         run: node "$CLI" unquiesce
+
+      # Pré-check runs/ (mémoire de collecte) — APRÈS S3/S3b (copie docs) et
+      # AVANT S6 (refresh). Gate fail-closed sur PREPROD_DOCS = bucket réellement
+      # LU par le delta : `runs/` VIDE → exit 1 (rescrape complet imminent) ;
+      # source sans collected-urls.jsonl → WARN (refetch borné self-heal). Non
+      # joué en DRY (la copie S3 réelle n'a pas eu lieu → faux négatif) ; S6
+      # re-vérifie en interne (ASSERT_RUNS_MEMORY, défense en profondeur).
+      - name: precheck-runs (gate mémoire de collecte — PREPROD_DOCS, avant S6)
+        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_REFRESH }}
+        run: node "$CLI" precheck-runs
 
       - name: S6 refresh différentiel (worker-live delta, Job in-cluster)
         if: ${{ !inputs.DRY_RUN && !inputs.SKIP_REFRESH }}
