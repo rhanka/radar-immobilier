@@ -1,730 +1,1485 @@
-# Dossier de décision — Sauvegardes et PRA d'ensemble immo + geo (PR #712 et rhanka/geo#390, carte #698) — v2
+# Dossier de décision — Sauvegardes et PRA immo + geo (spec PRA v3, 2026-09-20)
 
-*2026-09-18 · conducteur i-cond · livraison reprise par Astra (PR #712, branche `feat/backup-pra-698`, HEAD `5ee7900c`) · revues contradictoires Fable 5.1 et Gemini 3.8 high · agrément de la lane k8s · co-validation de sécurité i-infra. Remplace le dossier v1 du même jour, qui décrivait la première version de la PR, rejetée.*
+*2026-09-20 · conducteur i-cond · base : `SPEC_PRA_V3_2026-09-19.md` réconciliée (31 constats absorbés, 0 écarté), exigence RPO-1 et complément débits intégrés · revues contradictoires Fable 5.1 et Gemini 3.8 high (annexe A, verbatim) · inventaire k8s et faits de rendu (annexe B, verbatim) · demande de l'owner, sections 1 à 5 (annexe C, verbatim). Remplace le dossier v3 du 2026-09-19, périmé : il présentait la conception d'avant la spécification PRA v3. Français, factuel. Le verbatim de l'owner fait foi ; ses quatre passages inachevés (Q1–Q4) ne sont jamais complétés ; les ajouts du conducteur sont marqués `[ajout conducteur]` et ne sont pas ses exigences.*
 
 ## 1. Décision demandée et état réel
 
-Que faire de la PR immo **#712** et de la PR geo conjointe **rhanka/geo#390**, qui forment ensemble le plan de sauvegarde et de reprise d'ensemble (PRA) ?
+Tu as **24 questions** à trancher, en 7 lots (section 12) : lot 0 (mesures conservatoires, avant toute réponse), lot 1 (quatre passages de ton texte, Q1–Q4), lots 2 à 6 (rétention, alertes, verrou, région, périmètre, hors GitHub, chronomètre, risque, coût, méthodes de copie). Deux actions **ne peuvent pas attendre tes réponses** : **A1, l'export des clés de scellement** (rotation vers le 22/09, l'outil refuse toute situation autre que 2 clés), et **Q0, le GO pour activer la sauvegarde planifiée de la prod avec le code actuel** (le RPO prod est non borné et vieillit : 8 jours).
 
-**Recommandation : corriger avant fusion.** Les deux revues contradictoires de la livraison actuelle concluent, chacune de son côté, **« non fusionnable en l'état »**. Rien n'est fusionné tant que les défauts bloquants de la section 4 ne sont pas corrigés et que la preuve de sauvegarde et de restauration en préproduction n'est pas faite.
+**Recommandation : A1 aujourd'hui, Q0 dès que possible, puis les lots dans l'ordre.** Les recommandations de la spec sur chaque question sont relayées comme telles en section 12 ; là où c'est le sens de ton texte qui manque (Q1–Q4, Q5, Q5b, Q7, Q18, Q21–Q23), il n'y en a pas.
 
-**État réel au 2026-09-18 :**
+**État réel au 2026-09-20 :**
 
 | Élément | État |
 |---|---|
-| Provisionnement (bucket, identités, secrets) | **gelé**, en attente de la décision D2 sur le verrou d'objet. Seul le bucket de préproduction a été recréé, pour pouvoir porter un verrou. |
-| Preuve de sauvegarde et de restauration en préproduction | **pas faite** |
-| Mesures geo : volumes, débit de copie, délai de reprise | **pas faites** |
-| Coordinateur de cycle joint (gel, inventaire, marqueur commun) | **n'existe pas** : aucun code (réserve R4 de la lane k8s) |
-| Fusion #712 et geo#390 | **aucune** |
-| Activation d'une sauvegarde planifiée, en préproduction ou en production | **aucune** : aujourd'hui, aucune sauvegarde planifiée de la base radar n'existe |
-| Revues contradictoires de la livraison actuelle | Fable 5.1 : non fusionnable, 5 bloquants. Gemini 3.8 high : non fusionnable, 5 bloquants. |
-| Agrément de la lane k8s, clés comprises | agréé **sous réserves R1 à R7** ; il autorise le provisionnement de la préproduction et la preuve PostgreSQL, pas la production, ni la fusion, ni l'activation |
-| Co-validation de sécurité i-infra | validée, **auto-invalidée**, puis reconduite après re-mesure |
+| Spécification PRA v3 | **corrigée et réconciliée** : 31 constats des deux revues absorbés (marqués F1–F30 + F19bis), 5 volets RPO-1 intégrés, **0 écarté, 0 divergence** sur ce périmètre ; DEB-1 couverte partiellement, **3 divergences ouvertes** (DV-1 à DV-3), postérieures aux revues |
+| Double challenge | **fait** : Fable 5.1 + Gemini 3.8 high, les deux avis verbatim en annexe A. Astra xhigh, d'abord demandée, était injoignable ; **c'est toi qui as décidé** de la remplacer par Gemini 3.8 high |
+| Sauvegarde planifiée de la prod | **aucune** : dernier point vieux de **8 jours et vieillissant, RPO non borné** ; code N2 prêt hors ligne (gouvernance 35 j, 7/4/2), **non provisionné, non activé** |
+| Clés de scellement | **2 dans le cluster, aucun export trouvé**, rotation 30 jours active, prochaine **vers le 22/09** ; l'outil `poc-k8s` refuse toute situation autre que 2 clés |
+| RTO-1 < 2 h | **non acquis** : borne haute ≥ 135 min > 120 sur estimation partielle, création MKS jamais mesurée, IdP sentropic hors budget |
+| RPO-1 ≤ 24 h | **tient partout sauf geo `normalized/`** (aucune chaîne N2, Q14 bloquant) et sous réserve des versionnements inconnus |
+| Tes quatre passages inachevés | **ouverts** (Q1–Q4), jamais complétés |
+| Dossier précédent (v3 du 19/09) | **périmé** : conception d'avant la spec ; remplacé par celui-ci |
+| Schémas | **Graphviz supprimé** (ARCH-7), suppression tenue par un test ; **archify produit** (ARCH-8) : deux rendus hors ligne, contrôles verts, limites dites ; BPMN : contenu P1–P9 livré, **rendu bpmn-js non produit** (paquet non installé, aucune installation réseau ; autorisation D7 non prononcée) ; plancher **12 px** : **aucune scène ne le tient** (3,38 à 7,21 px mesurés), page sortie par dérogation motivée ; **options de vue non tranchées** (section 13) |
 
-**Tes quatre exigences, et où elles en sont :**
+**Tes exigences, et où elles en sont :**
 
 | # | Ton exigence | État |
 |---|---|---|
-| 1 | Un plan d'ensemble, double PR immo + geo conjointe, immo présente et orchestre | Plan écrit dans #712, volet geo dans geo#390. L'orchestration (coordinateur de cycle) n'est pas livrée, et les deux plans se contredisent sur le gel et sur la copie de `exports/immo/` (constat Fable I13). |
-| 2 | Un schéma qui incorpore les deux, bout en bout, avec la séquence de consistance | Scènes 1 et 2 de ce dossier. Seul le chemin PostgreSQL de la séquence est livré. |
-| 3 | Activer en même temps la sauvegarde préprod et prod lors de la fusion | Livré dans le workflow `deploy-backup-pra`, mais l'activation simultanée déclenche une alerte d'astreinte immédiate (Gemini 2, Fable I10) et active une image qui n'est pas l'image prouvée (Fable I7). |
-| 4 | Démontrer que sauvegarde et restauration préprod fonctionnent AVANT la fusion | **Pas faite.** Bloquée par le gel du provisionnement (D2) et par les défauts B1 à B5. |
+| ARCH-1 à ARCH-6 | Symétrie préprod/prod, zones k8s/OVH/dehors, clés, alertes + admin + canal, chaque écart expliqué, GitHub Actions dedans | Contenu de scène défini (section 4), rendu section 13 |
+| ARCH-7, ARCH-8 | Graphviz supprimé, archify produit | **Faits tous les deux** (section 13) : Graphviz retiré de toute la chaîne et contrôlé par un test ; deux rendus archify livrés, exécutés hors ligne, contrôles `archify check` verts, limites évaluées sans détour |
+| PROC-1, PROC-2 | Déclencheur et exécutant réels à chaque étape, plus de « Coordinateur immo » ; BPMN (bpmn-js + autolayout) ? | Acteurs réels (section 5) ; réponse BPMN : oui, avec un couloir par acteur, autolayout écarté sur fait mesuré ; contenu P1–P9 écrit, **rendu bpmn-js non produit** (section 13) |
+| PROC-3 à PROC-6 | Triggers a, b.i, b.ii, b.iii, full automatiques, démontrés sur préprod | Processus P-a, P-bi, P-bii, P-biii + exercices E1–E4 (section 5) ; Q1, Q2, Q12 ouverts |
+| PROC-7, PROC-8 | Régimes migration/iso, un seul workflow paramétré | Régimes + refus (proposition), `pra.yml` par dépôt même interface (section 5) |
+| PROC-9 | Qui est alerté, par quel canal | Chaîne + canal Q6 (section 9) ; accusé `[ajout conducteur]` retenu |
+| OPS-1 à OPS-3 | k8s facilitateur, aucune IA nécessaire, scripts si GitHub défaille | Inventaire résorbé, garde transférée, script+coffre, miroir requis (section 10) |
+| RTO-1, RTO-2, RTO-3 | < 2 h démontré, < 5 min par composant, deux niveaux | N1/N2 définis ; < 2 h **non acquis**, < 5 min **partiel** (section 8) |
+| RTO-4 | « les délai de retour a l'objectif RTO RPO doivent, » | **Inachevé (Q3)**, jamais complété |
+| RPO-1 | RPO objectif 24 h, jamais 8 j | Intégré : cadences, seuils, faisabilité par composant (section 6) |
+| RET-1 à RET-3 | 28 sauvegardes 10/5/13, gestion et externalisation au clair, autre centre ou région | Paliers + Q5/Q5b, verrou Q7, réplique Q8/Q13 (section 7) |
+| RET-4 | `[ajout conducteur]` verrou 13 mois | Retenu comme conséquence technique, pas comme demande (section 7) |
+| DEB-1 | Méthodes de copie au clair (chemins, sync diff, rclone ou autre, persistance, etc.) | Chemins établis ; outil, persistance et « etc » ouverts : Q21–Q23, DV-1 à DV-3 (section 6) |
 
-**Cinq décisions t'attendent** (section 12) : **D1** le sort des deux PR, **D2** le mode et la durée du verrou d'objet, **D3** le versionnement du bucket `sentropic-geo`, **D4** le nom et la région du bucket de reprise geo, **D5** la détection d'exposition au niveau des objets.
+## 2. La demande de l'owner, ce qui fait foi
 
-## 2. Ce qui a été livré
+Le texte intégral est en **annexe C** (`.remote/PRA_V3_DEMANDE_OWNER.md`, sections 1 à 5, verbatim). Règle de lecture, posée par l'owner : **« 0 interprétation »** au niveau du conducteur. Le texte verbatim de la section 1 fait foi ; la grille n'est qu'une aide de navigation ; en cas d'écart, le verbatim l'emporte et l'écart est signalé.
 
-**PR immo #712**, entièrement reprise depuis la version rejetée (branche `feat/backup-pra-698`, HEAD `5ee7900c`, trois commits de reprise) :
+**La grille** : ARCH-1 à ARCH-8 (schéma), PROC-1 à PROC-9 (processus), OPS-1 à OPS-3 (principes), RTO-1 à RTO-4 (objectifs), RET-1 à RET-4 (rétention), RPO-1 (complément du 19/09 : « non jamais le RPO (Objective) ne sera 8j. il faut que ce soit 24h. »), DEB-1 (complément du 20/09 : « débits: il faut être au clair sur les méthodes de copie (par ou tu fais les copies de bucket, comment avec les sync diff pour accélérer avec un rclone ou autre depuis le cluster, peut être avec une persistance limitée de donnée pour pas réindexer les buckets a chaque fois etc) »).
 
-| Élément | Ce qu'il fait | État |
+**Ce que le conducteur a ajouté** (marqué `[ajout conducteur]` dans la demande, **ce ne sont pas des exigences**) :
+- PROC-9 : « avec quel accusé de réception » — **retenu** par la spec (motif section 9) ;
+- RTO-4 : « déclarer le RPO par composant et par niveau » — **absorbé** par ton exigence RPO-1 ;
+- RET-2 : « exemples de normes à examiner — loi 25 au Québec, résidence des données » — **retenus** comme pistes, vérifiées sur les faits (section 7) ;
+- RET-4 : la rétention 13 mois contre le verrou d'objet — **retenu** comme conséquence technique (section 7) ;
+- ARCH-8 : « déterminer ce qu'est l'outil » — consigne du conducteur ; fait établi : archify existe (section 13).
+
+**Les quatre passages inachevés, à ne trancher par personne d'autre que toi :**
+- en (a), « la preprod recupere le dernier snapshot **de preprod** » alors que la phrase précédente dit que la préprod est écrasée par la donnée **de prod** (Q1) ;
+- en (b.i), la phrase se termine sur « **la démonstration** », sans suite (Q2) ;
+- « les délai de retour a l'objectif RTO RPO **doivent,** » : la phrase s'interrompt sur « doivent » (Q3) ;
+- « **j'imagine que** », en fin de message, est inachevé (Q4).
+
+À distinguer : « Par ailleurs j'imagine que github action doit être la dedans » (ARCH-6) est une **phrase complète**, distincte du « j'imagine que » final. Le « etc » de DEB-1 est un ouvert **distinct** (Q23, DV-3), postérieur aux quatre passages.
+
+**Double challenge** : tu as demandé « avec double challenge », puis « astra xhigh + fable5.1 ». Astra étant injoignable (compte épuisé jusqu'au 2026-09-24, passerelle sans ce modèle), **tu as décidé** de la remplacer par Gemini 3.8 high. Les deux contradicteurs sont donc Fable 5.1 et Gemini 3.8 high, chacun contre le verbatim.
+
+## 3. Couverture contre le verbatim, fragment par fragment
+
+Les fragments V1 à V44 découpent ton texte dans l'ordre, sans en retirer un mot (V42 = RPO-1, V43 = DEB-1, V44 = actualisation du dossier, hors spec). Statuts : **couvert** · **partiel** · **ambigu/inachevé** (ouvert) · **hors spec**.
+
+| # | Fragment (coquilles d'origine) | Statut | Section spec |
+|---|---|---|---|
+| V1 | symétrie préprod/prod pour voir commun et différence | couvert (contenu ; rendu §13) | §12.1 |
+| V2 | zone k8s - et ovh (vs géré en dehors) | couvert (6 zones) | §12.1 |
+| V3 | eventuellement des clé etc. | couvert | §9.4, §12.1 |
+| V4 | alertes : on ne sait pas comment et qui reçoit | couvert | §11 |
+| V5 | symboliser l'admin cluster | couvert | §2.1, §12.1 |
+| V6 | mails de notif ? (via TEM scw ?? ou gh ou autre ??) | couvert (options + Q6) | §11.3 |
+| V7 | 5 vs 3 geo, 3 vs 2 immo, sans raison lisible | couvert (8 cartes expliquées) | §12.2 |
+| V8 | github action doit être la dedans | couvert | §2, §12.1 |
+| V9 | consommateurs : trigger par gh action ? un admin ? | couvert (CronJob / workflow / jamais l'admin en routine) | §2.2 |
+| V10 | « Coordinateur immo » pas clair, plusieurs fois, plusieurs icônes | couvert ; **la suppression du rôle est une décision spec (F13), pas ta demande** | §2.3 |
+| V11 | bpmn (bpmn js et autolayout) favorable ici ? | couvert pour la réponse et le contenu (oui, un couloir par acteur ; autolayout écarté sur fait) ; **rendu bpmn-js non produit** (section 13) | §12.3 |
+| V12 | processus très mauvais : il doit y avoir des triggers | couvert (4 déclencheurs) | §7 |
+| V13 | (a) go to preprod, écrase + test migration, full auto | **partiel (F14)** : Q12 recommande un déclenchement restreint, **plus faible que ton texte**, soumis à validation | §7.3 |
+| V14 | dernier snapshot de preprod (geo ou immo) | **ambigu : Q1**, non tranché | §7.3 |
+| V15 | (b) restauration owner, full auto selon types | couvert | §7.4–7.6 |
+| V16 | (b.i) crash complet k8s, nouveau provisionnement + tenant | couvert | §7.4 |
+| V17 | démontré sur preprod (sauvegarde prod sur preprod) | couvert (E1) | §7.4, §10.1 |
+| V18 | a priori trigger par github action | couvert | §8 |
+| V19 | la démonstration | **inachevé : Q2** | — |
+| V20 | (b.ii) complète immo+geo depuis github action, démontré | couvert (E2, preuve d'intégralité) | §7.5 |
+| V21 | (b.iii) immo ou geo ou sous-composant, guardrails | couvert (G1–G10, E3) | §7.1, §7.6 |
+| V22 | restauration + migration (préprod en avance), ou iso | couvert (+ refus, proposition) | §7.2 |
+| V23 | même job github action avec paramètre (scope, target, tenant tiers) | couvert (un `pra.yml` par dépôt, même interface, motif donné) | §8.1 |
+| V24 | k8s enabler, pas bloquant | couvert | §9 |
+| V25 | immo/geo se reprovisionnent sur leur propre k8s | couvert | §9.2 |
+| V26 | repo k8s trigger pour jobs infra via github action | couvert (optionnel, jamais critique) | §9.3 |
+| V27 | aucune IA nécessaire, en aucune situation | couvert (transfert de garde + E7) | §9.5 |
+| V28 | IA : aide au monitoring sur doc claire | couvert | §9.6 |
+| V29 | github action défaillant : scripts font la même chose, secrets au clair | **partiel (F3)** : conditionné au miroir d'images, **requis** (D-v3-14) | §8.3, §8.4 |
+| V30 | les délai de retour a l'objectif RTO RPO doivent, | **inachevé : Q3** | — |
+| V31 | retour en opération < 2 h démontré, k8s compris | **partiel, non acquis (F4, F5)** : ≥ 135 min, IdP hors budget, T2 non mesuré | §10.1 |
+| V32 | upgrade d'un composant < 5 min | **partiel** : N1 base oui, dump et bucket geo entier non | §3.2, §10.2 |
+| V33 | deux niveaux de backup (snapshot et sync aux bons endroits) | couvert (N1/N2) | §3 |
+| V34 | supprimer la visualisation graphviz | **fait** : retiré de toute la chaîne, suppression tenue par un test (section 13) | §12.4 |
+| V35 | représentation archifify, je me fous de graphviz | **fait** : deux rendus archify livrés hors ligne, contrôles verts, limites dites (section 13) | §12.4 |
+| V36 | daily 10 j, weekly 5 sem, monthly 13 mois = 28 sauvegardes | couvert (prod) ; **préprod réduite = proposition à valider (F12) : Q5b** ; décompte : Q5 | §4 |
+| V37 | gestion et externalisation au clair (compliances normes) | couvert | §5, §6 |
+| V38 | sauvegarde hors ovh : une autre carte | couvert (option à part) | §5.3 |
+| V39 | au moins un autre datacenter ou region | couvert (réplique autre région) | §5.1 |
+| V40 | j'imagine que | **inachevé : Q4** | — |
+| V41 | reprend, trace bien, double challenge | hors spec (organisation conducteur) | — |
+| V42 | RPO objectif 24 h, jamais 8 j | couvert (cadences, paliers, surveillance) | §3.5 |
+| V43 | débits : méthodes de copie au clair (chemins, sync diff, rclone ou autre, persistance, etc.) | **partiel** : chemins établis ; outil, persistance, « etc » : Q21–Q23, DV-1 à DV-3 | §3.6 |
+| V44 | actualisation du dossier de PRA | hors spec (ce dossier) | — |
+
+**Réconciliation des deux revues** (2026-09-20) : 31 constats (F1–F30 + F19bis), appariés un par un — Fable et Gemini disent la même chose, preuves et corrections convergentes, vérifiées sur pièces. 5 volets RPO-1 (Gemini seule) examinés et retenus. Deux nuances réconciliées (gravité V32, remèdes F27/F30 combinés). **0 écarté, 0 divergence** sur ce périmètre. Chaque correction est marquée `(F#)` dans la spec, à l'endroit corrigé.
+
+**Rien perdu** : chaque phrase a sa section. **Ajouté au nom de l'owner** : aucun — les deux cas relevés par les revues (V10, V36) sont corrigés : suppressions et restrictions sont marquées **proposition spec**, soumises à validation. **Quatre passages ouverts** : Q1 (deux lectures, pas de recommandation, `source_env` obligatoire, auto non armé), Q2 (rien d'ajouté), Q3 (rien d'ajouté, **sans mention de RPO** F19bis), Q4 (rien d'ajouté).
+
+## 4. Architecture cible : zones, symétrie, clés (ARCH-1 à ARCH-6)
+
+**Six zones** (Z1 cluster MKS `poc-ca` bhs5 ; Z2 OVH bhs hors cluster : stockage objet, API, IAM ; Z3 OVH autre région : réplique ; Z4 GitHub : dépôts, Actions, environnements, secrets, GHCR, tickets ; Z5 poste de l'owner : coffre, clé `age`, `pra.sh` ; Z6 autres fournisseurs : Cloudflare, Let's Encrypt, TEM Scaleway, option hors OVH). **Acteurs** : owner ; administrateur du cluster (rôle humain, tenu par l'owner) ; GitHub Actions ; CronJobs. Chaque élément porte zone, environnement et rangée. La scène 1 dessine ce contenu dans la mise en page **imposée par l'owner** : les six zones y restent la **taxonomie**, elles ne sont plus six boîtes à plat mais réparties sur **cinq colonnes** entre l'utilisateur au nord et l'administration au sud — GitHub seul, hors GitHub, le cluster (chaque tenant, et dans chaque tenant sa préproduction à l'ouest et sa production à l'est), les buckets OVH, la réplication en autre région (annexe D).
+
+**Grille immo** (mêmes rangées, deux colonnes ; case « absent » motivée) :
+
+| Rangée | Préprod | Prod |
 |---|---|---|
-| Provisionnement en une commande | Commande idempotente et gardée (`PRA_PROVISION_GO`, `BACKUP_ENV`, et `PRA_PRODUCTION_GO` pour la prod), jouée par toi avec tes identifiants d'administration, dans ton environnement. Préflight en lecture seule avant toute écriture OVH. Crée le bucket **privé, versionné, avec verrou d'objet**, les **trois identités** et leurs politiques, le cycle de vie ; écrit les secrets dans le cluster par un tube anonyme, sans jamais afficher de valeur ; **se vérifie elle-même** par une sonde. | livré ; 44 tests hors ligne verts ; exécution **gelée** en attente de D2 |
-| Trois identités par environnement | Écrivain : dépôt seul, ni lecture ni suppression. Lecteur : lecture seule. Purgeur : seul à supprimer. Trois au lieu de cinq, sur l'avis de sécurité d'i-infra. | livré ; défauts B1, B3, B5 ouverts |
-| Dump cohérent | Comptes exacts par table relevés **dans la même transaction** que `pg_dump --snapshot`, inscrits au manifeste. | livré |
-| Restauration de vérification | Sur **instance PostgreSQL éphémère**, par socket, sans identifiants vivants, sans PVC source ; valide schéma, cycle, empreintes et tailles avant de démarrer ; compare comptes et extensions au manifeste. Jamais la base de préproduction. | livré ; jamais exécuté en cluster |
-| Surveillance | Contrôle horaire de fraîcheur sur les **reçus vérifiés** (échec au-delà de 86 400 s), contrôle continu de l'ACL du bucket, règle d'alerte Prometheus vers l'astreinte immo. | livré ; livraison de l'alerte non prouvée (R3) |
-| Planification | Sauvegarde à 02:15 et 14:15 UTC, avant le rafraîchissement de 05:17 ; overlays préprod et prod actifs, appliqués ensemble par le workflow `deploy-backup-pra` sous approbation production. | livré ; non activé |
-| Plan d'ensemble | Plan immo + geo réécrit, séquence de consistance, identifiant de cycle commun, ordre de reprise. | document ; coordinateur non livré |
+| R1 base PostgreSQL | 950 MiB | 1 002 MiB |
+| R2 objets | bucket RAW dédié (nom inconnu) + `radar-immobilier-graph-preprod` | `radar-immobilier-docs` (59 017 objets, 12,53 Go) |
+| R3 CronJob N2 | oui (2×/jour, code prêt, non actif) | oui (idem) |
+| R4 fraîcheur + état | oui | oui |
+| R5 bucket N2 bhs | `radar-immobilier-backups-preprod`, quotidien seul (Q5b) | `radar-immobilier-backups`, 10/5/13 (Q5, Q7) |
+| R6 réplique | **absent** : §4.4, Q5b | bucket de réplique (Z3, Q8) |
+| R7 avant publication | `sentropic-pgbackup-preprod` (armé) | `sentropic-pgbackup` (armé) |
+| R8 clone N1 | oui (proposition) | oui (proposition) |
+| R9 keyring | PVC (à confirmer en préprod) | PVC 1 Gi |
 
-**PR geo conjointe rhanka/geo#390**, document `docs/ops/pra/GEO_PRA_PLAN.md`. Sa contrainte change la conception d'ensemble : **les données irremplaçables de geo sont immuables et adressées par contenu** (`raw/<source>/cas/<sha256>`, grilles en ajout seul), donc une copie est cohérente **sans geler les écritures**. Le gel ne concerne que la base PostgreSQL immo. Irremplaçables aujourd'hui : `sources/qc-zonage-grilles/` (44 objets) ; `raw/` et `capture/_runs/` sont vides (0 objet). Bucket `sentropic-geo` entier : ~48,9 GB, 45 378 objets (relevé du 2026-07-29). Cible proposée : `sentropic-geo-pra`, privée, versionnée, verrou en conformité 1 an roulant. C'est un plan : aucun job de copie n'existe.
+**Grille geo** :
 
-## 3. Contraintes de la plateforme OVH, mesurées en direct
+| Rangée | Préprod | Prod |
+|---|---|---|
+| G1 `geo-api` | `geo-api-preprod` (1 pod 14/09, manifestes brouillon) | `geo-api` |
+| G2 bucket | `sentropic-geo-preprod`, `normalized/` seul | `sentropic-geo` (45 378 objets, 48,94 Go) |
+| G3 irremplaçables | **absent** : rien d'irremplaçable, tout vient de la prod | `sources/qc-zonage-grilles/` (44 objets), `raw/`, `capture/_runs/` |
+| G4 PostGIS | **absent** : n'existe qu'en prod, hors chemin servi | 139 MiB |
+| G5 copie + `sentropic-geo-pra` | **absent** : rien à protéger | prévu (plan geo), non livré |
+| G6 alimentation | Job `preprod-sync` (lit la prod) | source du `preprod-sync` |
+| G7 réplique | **absent** | Z3 (Q8, Q14) |
 
-| Fait mesuré sur OVH BHS | Ce qu'il coûte |
+**Commun** : plateforme (sealed-secrets, cert-manager, Traefik, KEDA) en Z1 ; IdP sentropic, dépendance hors périmètre (Q15, F5).
+
+**Les 8 écarts de la scène v2, expliqués un par un (ARCH-5)** : `QUOTA` (contrainte, pas composant — le « 3 contre 2 » d'immo ; attribut de R3 en v3) ; `GEO_SRC` (équivalent préprod `GEO_PPB`, même rangée G2) ; `GEO_IRR` (rien d'irremplaçable en préprod) ; `GEO_PG` (qu'en prod) ; `GEO_COPY`/`GEO_DST` (rien à protéger en préprod) ; `GEO_SYNC` (mécanisme d'alimentation, source côté prod) ; `GEO_PPX` (une case vide, pas un composant — le « 5 contre 3 » de geo ; l'état connu est un attribut de G1).
+
+**GitHub Actions (ARCH-6)** : `pra.yml` immo + geo (nouveaux, même interface), `pra-watch.yml` (nouveau, veilleur hors cluster), `deploy-preprod`/`promote-prod` (existants, N1 + migration), `rollback.yml` (existant, image seule), `cd-preprod/cd-prod/geo-jobs.yml` (geo, existants). Environnements : `preprod` (sans approbation), `production` (approbation, existe), `dr` (approbation, jetons OVH/tofu/Cloudflare — **proposition** F29), `watch` (identité `watcher` seule).
+
+**Les clés (ARCH-3)** : où, qui, ce qu'elles ouvrent —
+
+| Clé | Où (cible v3) | Qui | Ce qu'elle ouvre |
+|---|---|---|---|
+| Clé `age` du coffre | gestionnaire de l'owner + copie hors ligne | owner | tous les secrets ci-dessous |
+| Jeton API OVH | coffre, env `dr` (selon Q19) | owner | **projet OVH entier** — risque exposé (F16, Q19) |
+| Admin S3 | coffre | owner | buckets, contournement de gouvernance |
+| Backend tofu | coffre, env `dr` | owner | état d'infrastructure |
+| Kubeconfig admin | produit par le run, jamais stocké | le run | cluster entier |
+| Clés sealed-secrets (2) | selon Q10 | owner | SealedSecrets committés, dont jeton Cloudflare |
+| Jeton Cloudflare | coffre, env `dr` | owner | zone `sent-tech.ca` |
+| Identités données S3 | Secrets du cluster, coffre | cluster, owner | lecture/écriture des données |
+| Identités PRA (7/env : writer, verifier, reader, retainer + watcher, replica-writer, data-reader) | Secrets, env `watch` | CronJobs, GitHub | §4, moindres privilèges (F22 : comptées et justifiées) |
+| Juste-à-temps de restauration | créées puis supprimées par le run | le run | lecture du bucket source (G9) |
+| `radar-pra-admin` | `.env` local, créée par l'agent k8s | aujourd'hui l'agent | objectstore_operator, **refusée** sur les buckets de données — à renouveler (§9.5) |
+| Clé TEM, mots de passe PostgreSQL | Secret, coffre | cluster, owner | courriels ; base (exclus des dumps) |
+
+**Flux** (scène 1) : CronJob → bucket N2 (dépôt writer) ; bucket N2 → CronJob (téléchargement reader, vérification) ; CronJob → état ; état → `pra-watch.yml` (lecture watcher) → ticket + courriel → owner, admin ; bucket N2 → réplique ; `deploy-preprod`/`promote-prod` → dump + clone + migration ; owner → `pra.yml` (déclenche, approbation) → Jobs (exécute) ; `pra.yml` → tofu → Z1 neuf ; `pra.yml` → Cloudflare ; `pra.yml` immo → `pra.yml` geo (déclenche) ; coffre (Z5) → secrets GitHub (synchronise) ; `preprod-sync` : `sentropic-geo` → `sentropic-geo-preprod` ; nginx immo → `geo-api` ; clés vers ce qu'elles ouvrent.
+
+## 5. Processus : déclencheurs, garde-fous, régimes (PROC-1 à PROC-8)
+
+**Qui déclenche quoi** (réponse à « est-ce que la sauvegarde est trigger par gh action ? un admin ? ») : la routine par l'horloge du cluster (CronJob 02:15/14:15 UTC), la sauvegarde de publication par le workflow GitHub, **jamais l'administrateur pour la routine**. Le « Coordinateur immo » est clarifié (ses 5 tâches v2 attribuées à des exécutants réels) puis **supprimé — décision spec (F13), pas ta demande** : tu as demandé la clarté, pas la suppression.
+
+| Déclencheur | Processus | Déclencheur réel | Exécutant | Approbation | Preuve |
+|---|---|---|---|---|---|
+| (a) passage en préprod | P-a : écrase préprod, test de migration | Q12 (auto restreinte proposée, sous réserve Q1) | `pra.yml operation=go-to-preprod` (env `preprod`) | aucune | E4 (iso + migration) |
+| (b.i) crash complet k8s | P-bi : cluster neuf + tenant depuis backup (9 étapes) | owner (`operation=rebuild`) | GitHub env `dr` | owner + `confirm` | E1 : cluster neuf, tenant préprod, sauvegarde prod, destruction vérifiée |
+| (b.ii) complète immo+geo | P-bii : geo puis immo, même T0 | owner (`operation=restore scope=all`) | `pra.yml` immo → `pra.yml` geo | prod : owner | E2 : préprod récupère intégralement la prod |
+| (b.iii) partielle | P-biii : périmètre + garde-fous | owner (`operation=restore scope=…`) | GitHub + Jobs cible | prod : owner | E3 : un reçu par périmètre + un refus |
+
+**Garde-fous G1–G10** (tous proposition spec) : G1 point source vérifié ; G2 même T0 sauf `allow_mixed_points` motivé ; G3 fermeture base → objets → exports geo ; G4 régime calculé, refus si donnée en avance ; G5 point de sécurité avant écrasement ; G6 approbation owner + `confirm=<cible>/<périmètre>` pour prod/`dr` ; G7 écrivains arrêtés puis rétablis ; G8 identité du cluster attendue ; G9 identifiants juste-à-temps supprimés en fin ; G10 reçu JSON final.
+
+**Régimes** (manifeste portant image + migration) : **iso** (migrations égales → restaurer, vérifier) ; **migration** (cible en avance → restaurer, Job de migration, vérifier) ; **refus** (donnée en avance → arrêt, ou `on_schema_ahead=deploy-source-image`). Le refus est une **proposition spec**. Pour geo : compatibilité `normalized/`/image `geo-api`, à définir (inconnu).
+
+**Un workflow par dépôt, même interface** (motif : autonomie, pas de secrets croisés) : `operation`, `scope` (`all` → tiers inclus : `target=third-party` + kubeconfig + namespaces + `expected_server`), `source_env` (Q1 : explicite, obligatoire), `source_point`, `target`, `cluster`, `region`, `regime`, `dns`, `confirm`, `dry_run` (défaut `true`). Le workflow n'est qu'une **enveloppe de `pra.sh`** (parité GitHub/hors GitHub par construction, D-v3-4).
+
+**Contenu BPMN P1–P9** (un couloir par acteur ; rendu section 13) :
+
+| Processus | Couloirs | Éléments et passerelles |
+|---|---|---|
+| P1 N2 base | CronJob, stockage OVH, GitHub (veilleur), owner | minuterie 02:15/14:15 → purge → dump → envoi → téléchargement → restauration éphémère → reçu → promotion → réplication ; « contrôles verts ? » → E1a |
+| P2 N2 objets | CronJob, stockage OVH | minuterie → T0 → versions ≤ T0 strict (F6) → copie adressée par contenu → manifeste → fermeture ; sinon reprise bornée (F7) |
+| P3 N1 publication | GitHub, cluster, owner | push/tag → dump → clone → migration → bascule ; « migration OK ? » → arrêt, retour arrière |
+| P4 passage (a) | GitHub, cluster préprod, stockage OVH | §7.3 ; régime iso/migration/refus |
+| P5 crash (b.i) | owner, GitHub `dr`, OVH MKS, cluster neuf, Cloudflare | 9 étapes §7.4 |
+| P6 complète (b.ii) | owner, GitHub immo, GitHub geo (message « déclenche »), cluster | geo puis immo |
+| P7 partielle (b.iii) | owner, GitHub, cluster | §7.6 ; passerelles G3, G4 |
+| P8 alerte + accusé | CronJob, stockage OVH, GitHub (veilleur), owner, admin | état → lecture → condition → ticket + courriel → « accusé dans N h ? » → relance |
+| P9 garde + E7 | owner, coffre, OVH, cluster d'exercice | §9.5 |
+
+## 6. Deux niveaux, RPO 24 h, débits (RTO-3, RPO-1, DEB-1)
+
+**N1 rapide** (revenir vite, surtout autour d'une publication) : clone `radar_pre_<sha>` par `CREATE DATABASE … TEMPLATE` + bascule par renommage — exige l'absence de **toute** connexion (coupure complète, F20), PVC doublée, durées à mesurer (E5) ; versionnement des buckets sources pour les objets (état **inconnu**). **N2 complet externalisé** (reconstruire un environnement) : dump cohérent 2×/jour + objets à chaque point base (même T0, F8) + réplique autre région.
+
+| Composant | N1 | N2 |
+|---|---|---|
+| Base immo | clone + dump avant publication (repli) | dump 2×/jour, restauration vérifiée |
+| Objets immo | versionnement source (prérequis inconnu) | copies 2×/jour à T0, adressées par contenu |
+| Keyring | — | réamorçage (hypothèse, lane immo) |
+| Irremplaçables geo | versionnement (non confirmé) | copie quotidienne vers `sentropic-geo-pra` |
+| `normalized/` etc. geo | versionnement | selon Q14 |
+| PostGIS geo | — | reconstruction ou dump 139 MiB (Q14) |
+| Secrets | au changement (coffre) | copie chiffrée dans la réplique |
+
+**RPO-1 (V42) : objectif ≤ 24 h pour chaque composant couvert.** Ce qu'il change : base 2×/jour maintenue, objets N2 alignés 2×/jour même T0, réplication immédiate après chaque point vérifié, `backoffLimit: 2` (aujourd'hui 0), fraîcheur **14 h** (alerter à 24 h = alerter après violation), E7a à 2 h (26 h violerait 24 h). Option : base 4×/jour. Faisabilité : base immo oui (≤ 12 h), objets immo oui sous versionnement, irremplaçables et PostGIS geo oui, **`normalized/` non en l'état** (Q14 bloquant). Coût estimé < 5 $ CAD/mois (**estimé**, non mesuré). Exercices E1–E4 gagnent une assertion RPO (source ≤ 24 h, réplique ≤ 14 h).
+
+**Cohérence sans gel** (D-v3-2, mérites techniques seuls F13) : T0 = instantané PostgreSQL ; objets ≤ **T0 strict** (F6) ; solide seulement si clés immuables — **invariant à vérifier par la lane immo**, repli si faux ; **contrôle de fermeture** + reprise bornée, point hors fenêtre de refresh, « incomplet » = état intermédiaire (F7) ; prérequis : versionnement actif + **lecture d'une version non courante sur OVH à mesurer par la sonde** (F9), repli miroir à chaque écriture.
+
+**Débits (DEB-1, V43)** — « peut être », « ou autre », « etc » : questions ouvertes, non tranchées. Le verbatim ne chiffre aucun débit cible : seules bornes = RTO-1/RTO-2.
+
+| Flux | Chemin des octets | Outillage | Statut |
+|---|---|---|---|
+| Dump N2 | CronJob → S3 bhs ; S3 → CronJob (vérification) | `backup.py` boto3 mono-filin | fait |
+| Dump N1 | Job cluster : `pg_dump` → gzip → `emptyDir`, puis `s5cmd cp` → S3 | conteneurs dump + upload | fait |
+| Rétention N1 | aucun octet (appels API depuis le runner) | `run-db-backup.sh` | fait |
+| Objets N2 (2×/jour, T0) | CronJob : versions ≤ T0 → stockage adressé par contenu | **aucun outil livré** | proposition |
+| Réplique bhs → région | CronJob : lecture bhs, écriture réplique ; réplication native OVH : inconnu | aucun outil livré | proposition |
+| Miroir P-a (prod → préprod) | copie côté serveur en bhs, orchestrée depuis le cluster | aucun outil livré | proposition |
+| `preprod-sync` geo | Job prod → préprod | méthode interne inconnue | fait d'existence |
+| Migration (une fois) | machine d'exécution (`get-object` puis `put`) | scripts + reprise sur point de contrôle | fait, hors sauvegarde |
+| Runners GitHub | **aucune donnée** (orchestration seule) | — | décidé (D-v3-5) |
+
+**Sync diff** : aucune copie différentielle dans le chemin de sauvegarde ; seule mesure : 59 017 objets (39 582 copiés), 12,53 Go, 38 min 31 s (≈ 17/s, F18) sur chemin inter-fournisseurs ; copie intra-bhs à mesurer (E3). Tout outil (rclone ou autre) doit satisfaire : T0 strict, lecture versions non courantes sur OVH, aucune donnée par les runners, contrôle de fermeture (D-v3-16) — que rclone les satisfasse est **non démontré** : Q21. **Persistance limitée** : CronJobs éphémères seuls (8 Gi plafonnés), aucun cache d'inventaire ; volume d'un inventaire inconnu ; contenu/support/durée : Q22 (« peut être »). **« etc »** : non complété (Q23, DV-3). **Divergences** : DV-1 (DEB-1 non soumis au double challenge), DV-2 (outil/chemins/persistance sans réponse), DV-3 (« etc » ouvert) — toutes ouvertes.
+
+## 7. Rétention, verrou, externalisation, conformité (RET-1 à RET-4)
+
+**Paliers** (prod) : quotidien = dernier point vérifié de chacun des **10 derniers jours représentés** (sémantique du code, **proposition** F26 ; alternative : fenêtre calendaire) ; hebdomadaire = 5 semaines ISO ; mensuel = 13 mois. **Q5** (reposée sans orientation, F11) : seule la construction **disjointe** (28 points distincts, ≈ 14,5 mois) reproduit ton décompte 10 + 5 + 13 ; la **superposée** (≈ 26–27 points, horizon 13 mois) est une économie d'≈ 1,5 mois, à valider. Pas de recommandation : c'est ton décompte. **Q5b** : préprod au quotidien seul (10 points, sans réplique, motif §4.4) — proposition à valider, le verbatim ne distinguant pas les environnements.
+
+**Rotation** : purge en tête de cycle ; **plafond par jeu** (3/exécution, F21), blocs en lot, report signalé (E11a) ; quarantaine, jamais bloquante ; jamais de suppression du dernier point vérifié. `keep_sets()` : 7/4/2 → 10/5/13 selon Q5.
+
+**Verrou (RET-4, ajout conducteur retenu comme conséquence)** : défaut court (14 j proposés) + **promotion** (hebdo 42 j, mensuel 400 j) par l'identité `retainer` (sans contournement) ; **hypothèse** : OVH accepte `PutObjectRetention` sur version existante — repli : un bucket par palier. **Q7** (reposée sans orientation, F10), L1 et L2 à égalité : **L1** gouvernance partout (contournement gardé, mais un admin compromis efface 13 mois) ; **L2** conformité sur le mensuel (≈ 6,5 GiB irréversibles 13 mois, intouchable même par toi). L'argument loi 25 contre L2 est une **hypothèse, juriste**. Volume estimé (base prod, L1) : ≈ 50 dumps ≈ 25 GiB (**estimé**) ; prix OVH **inconnu**.
+
+**Externalisation** : réplique de chaque point vérifié de prod dans un bucket verrouillé d'une autre région OVH (mêmes paliers, revérification, E7a) ; réplication native : inconnu (i-infra). Autre centre dans bhs : **hypothèse non sélectionnable** ; autre région canadienne : **inconnu** ; régions européennes : existence publique, verrou par région inconnu. Perte régionale : **analyse de la spec, pas ta demande** (Q13) — backend neuf, coffre + export répliqués, miroir GHCR. **Hors OVH** : option à part, non conçue (V38) ; fait utile : régions tierces à Montréal/Québec, **à confirmer**.
+
+**Conformité** (RET-2 ; « loi 25, résidence » = ajout conducteur retenu comme piste ; pas un avis juridique) : applicabilité fondée sur **`account_users`** (table peuplée, F23), pas sur `prospect_contacts` (alimentation inconnue) ; toute la donnée à Beauharnois (bhs, Québec) ; geo : publiques, aucun RP identifié. Normes : **Loi 25 applicable** d'après la classification du dépôt (art. 3.3, 10, 17, 23, 3.5–3.8 — à vérifier sur le texte officiel, RLRQ c. P-39.1) ; résidence (art. 17 → Q8) ; LPRPDE, contrats clients, OACIQ : **inconnus**. Conséquences : aucune donnée par les runners (D-v3-5) ; rétention 13 mois au calendrier de conservation ; ACL publique = incident potentiel ; P-a/E2 et **E1 copient des RP** (Q9 ; E1 : destruction vérifiée, F30) ; **aucun RP dans alertes, tickets, reçus** (F23).
+
+## 8. Objectifs de reprise : < 2 h non acquis, < 5 min partiel (RTO-1, RTO-2)
+
+**RTO-1** : perte du cluster, bhs disponible, buckets intacts (P-bi). Départ du chronomètre : déclenchement du workflow — **décision spec, ton texte ne le fixe pas (F15)** : Q18 (depuis l'incident ou le déclenchement ?). Détection (2–3 h possibles) et attentes humaines (approbation `dr`, « GO owner ») : **hors chronomètre technique**, sur le chemin critique mais non bornées.
+
+**Mesuré** (aucune mesure de bout en bout) : dump prod + envoi 6 min 54 s (11/09) ; préprod 2 min 10 s (19/09) ; migrations 20 s / 10 s ; copie objets 59 017 traités (39 582 copiés), 12,53 Go, 38 min 31 s (13/09, ≈ 17/s F18, chemin inter-fournisseurs). **Écart ×3 inexpliqué** (F4) : 6 min 54 s contre 2 min 10 s pour des bases égales — à expliquer ou mesurer avant E1.
+
+**Estimé** : T1 déclenchement 2–5 ; **T2 cluster MKS 10–30, jamais mesuré** (exercice `tofu apply` avant E1, F4) ; T3 plateforme 5–15 ; T4 tenants 3–10 ; T5 secrets 2–10 ; T6 DNS/certificats 5–20 (TTL réel non mesuré, E1 en `drill` ne le mesure pas) ; T7 base 10–40 ; T8 apps 3–10 **+ tirage des images non chiffré** (F4) ; T9 contrôle 5–15 ; T-pvc (PVC + StatefulSet) **à mesurer** ; T-idp (IdP, F5/Q15) **non chiffré** ; T-rescell (si Q10 = 3) **non estimé**. Chemin critique : **40 min en bas, ≥ 135 min en haut** (hors non chiffrés) — le haut dépasse 2 h : **non acquis sur estimation**. Leviers : `pg_restore -j`, `pg_amcheck` hors chemin critique, cluster tiède, nœud plus grand. Perte régionale : **N-A tant que non mesuré**.
+
+**RTO-2** : N1 base par renommage — oui en principe, coupure complète exigée, création à mesurer (E5) ; base depuis dump — **non attendu** (10–40 min) ; préfixe objets — jusqu'à ≈ 5 000 (F18), intra-bhs à mesurer (E3), prérequis versionnement ; bucket geo entier — **non** (sauf pointeur de publication, lane geo, Q14) ; PostGIS geo — hors chemin servi, N-A.
+
+## 9. Alertes de bout en bout (ARCH-4, PROC-9)
+
+Fait : aucune pile Prometheus observée sur le cluster ; la règle `alerts.yaml` du code ne serait évaluée par personne. Une alerte évaluée dans le cluster meurt avec lui. **Proposition** : le CronJob de fraîcheur écrit un **état** horodaté (`status/<env>/freshness.json`) ; hors cluster, `pra-watch.yml` (horaire) le lit avec l'identité `watcher` (aucun accès aux données), recalcule l'âge, et **alerte aussi quand l'état ne se met plus à jour**. Limite déclarée : workflow planifié GitHub retardable ; sans GitHub, pas d'alerte.
+
+| Id | Événement | Détecté par | Destinataire |
+|---|---|---|---|
+| E1a | échec d'une sauvegarde N2 | reçu absent, état | owner |
+| E2a | aucun point vérifié depuis **14 h** (10 h d'intervention avant 24 h) | watcher | owner |
+| E3a | état non mis à jour depuis 2 h | watcher | owner, admin |
+| E4a | cluster injoignable, service public en échec | watcher | admin |
+| E5a | reçus en quarantaine | état | owner |
+| E6a | ACL publique sur un bucket de sauvegarde | état | owner (incident potentiel, §7) |
+| E7a | réplique en retard > 2 h ou empreinte divergente (RPO réplique ≤ 14 h) | watcher | owner |
+| E8a | exécution PRA démarrée, réussie, échouée | `pra.yml` | owner |
+| E9a | échec de sauvegarde/migration avant publication | workflow existant | owner |
+| E10a | clés non exportées après rotation, ou compte ≠ 2 (outil bloqué, F1) | watcher | admin |
+| E11a | purge reportée plusieurs cycles | état | owner |
+| E12a | relecture de configuration divergente | état | owner |
+
+Destinataires : tu es aujourd'hui le seul humain ; l'administrateur du cluster est un rôle que tu tiens. « L'astreinte immo » de la v2 n'était assignée à personne : remplacée par ces rôles nommés. Un second humain : Q6.
+
+**Canal (Q6, ta question V6)** : **courriel TEM** (déjà utilisé par l'API, indépendant de GitHub ; seule dépendance Scaleway conservée ; pas d'acquittement natif) ; **notification GitHub** (ticket `pra-alert` assigné + courriels d'échec ; acquittement et historique natifs ; même domaine de panne que l'exécutant) ; **autre** (poussée mobile, veilleur indépendant TEM). Recommandation spec : **ticket comme support de l'accusé ET courriel TEM comme second canal**. Dis aussi si un second humain reçoit.
+
+**Accusé de réception** (`[ajout conducteur]`, **retenu** : sans accusé, une alerte non vue ne se distingue pas d'une traitée) : le ticket porte l'accusé (`pra-ack` ou `/ack`) ; sans lui, relance par le second canal toutes les N heures (N proposé : 4) ; fermeture auto quand la condition disparaît. En courriel seul, l'accusé n'est pas mesurable.
+
+## 10. k8s facilitateur, garde, secrets (OPS-1 à OPS-3)
+
+Point de départ (inventaire k8s, annexe B) : `poc-k8s` sans workflow ni cible tofu, `tofu apply` manuel, machine opérateur préconfigurée exigée ; immo/geo ne déploient que sur cluster+namespace déjà provisionnés.
+
+| Élément d'inventaire | Résorbé par |
 |---|---|
-| **Pas de blocage d'accès public**, **pas de politique de bucket** : l'API répond « non implémenté ». | L'absence d'accès public repose sur l'ACL privée. Un droit public posé à la main n'est pas empêché, seulement **détecté**, avec au plus une heure de retard (R6). |
-| L'IAM **refuse les formules « tout sauf »** (`NotAction`, `NotResource`). | Chaque interdit est énuméré verbe par verbe. Un verbe oublié reste hérité du rôle de base (Gemini 6), et rien ne confine une identité hors de son bucket (Fable B5). |
-| **`GetObjectVersion` et `DeleteObjectVersion` n'existent pas** dans l'énumération. | Ces deux verbes ne peuvent être ni accordés ni interdits. La purge passe par la suppression de l'objet courant et l'expiration des versions non courantes ; seul le verrou d'objet protège une version (Fable B3). |
-| **Aucun rôle en lecture seule.** | La séparation des droits passe par la politique, pas par le rôle : chaque identité porte le rôle large `objectstore_operator`, restreint par des interdits. |
-| Un **interdit explicite contient bien le rôle de base**. | C'est ce qui sauve le modèle à trois identités. |
-| Le **verrou d'objet existe**, en gouvernance et en conformité, **activable seulement à la création du bucket**. | Le bucket de préproduction a été recréé pour le porter ; celui de production devra être créé avec. |
-| Le **verrou prime sur le cycle de vie** : une version verrouillée n'expire pas tant que le verrou court. | Le stockage facturé suit la durée du verrou, pas seulement la rétention voulue (D2). |
+| Fait structurel (pas de `.github/`, pas de tofu) | `pra.yml` + `pra.sh` dans immo et geo |
+| A.1 IaC cluster, A.2 enveloppe tenant, A.3 plateforme, A.4 kubeconfig tenant, A.5 quotas | module de cluster vendu (`infra/cluster/`, backend paramétrable), plateforme minimale (`deploy/platform/`), enveloppe (`deploy/tenant/`), étape kubeconfigs + DNS de `pra.sh` ; contrôle de dérive en CI |
+| B.1 auth OVH, B.2 creds tofu, B.3 `bhs.tfvars`, B.6 identités S3 | coffre + env GitHub `dr` (+ `preprod`/`production`, Secrets) ; projet en variable non secrète |
+| B.4 kubeconfig admin, D garde de l'agent | produit par le run, jamais conservé ; garde révoquée (§9.5, E7) |
+| B.5 clés sealed-secrets + complément | Q10 (4 options, contrainte d'outil F1 dite) |
+| B.7 DNS Cloudflare | étape `dns` par jeton |
+| C libre-service | conservé, étendu en amont |
+| E quotas | gabarit `r2-15` vérifié au plan |
 
-**L'épisode de la mesure faussée.** Une première mesure avait conclu que l'IAM d'OVH ne pouvait pas exprimer le modèle de moindre privilège, et la lane k8s avait alerté en conséquence (réserve R7). La mesure était faussée par la **propagation lente des identifiants S3** : les refus observés venaient de clés pas encore actives, pas de la politique. Re-mesurée proprement, la conclusion s'est inversée : un interdit explicite contient le rôle de base, le modèle est exprimable. La leçon : **une mesure non gatée peut conduire à une décision d'architecture erronée**. Ici, elle aurait fait abandonner les trois identités au profit d'une architecture découplée plus lourde. Toute mesure de droits doit attendre la propagation effective de la clé, vérifiée par un appel témoin qui réussit, avant d'interpréter un refus.
+`poc-k8s` appelable (`repository_dispatch`) quand il expose des workflows, **jamais sur le chemin critique** ; échec → bascule sur la copie vendue. Cluster commun ou par tenant : les deux possibles (Q16) ; couplage nginx immo → geo configurable.
 
-## 4. Ce que les revues contradictoires ont trouvé
+**Transfert de la garde (OPS-2)** — le problème réel est la **reproductibilité documentée** (F17), les fichiers étant sur ton poste : inventaire nominatif (diff vide avec le coffre) → renouvellement par toi (anciennes supprimées côté OVH, liste API) → kubeconfig réinitialisé (**hypothèse** API MKS, i-infra) + agents en lecture → clés selon Q10 → **E7** : toi seul, poste neuf, runbook + coffre, `tofu plan` + clés + E2 par `pra.sh`, **refus mesuré** des anciens identifiants. **Aucune IA nécessaire** ; aide au suivi sur runbook, reçus, états, tickets (V28).
 
-Deux revues indépendantes de la livraison actuelle (HEAD `5ee7900c`), par les deux familles de modèles qui ne l'ont pas livrée : **Fable 5.1** et **Gemini 3.8 high**. **Verdict des deux : non fusionnable en l'état.** Aucun commit n'a été poussé sur la branche depuis `5ee7900c` : aucun défaut n'est donc corrigé à ce jour. Chaque objection a été re-vérifiée dans le code de HEAD ; celles qui ne tiennent pas sont marquées **contesté**, avec la preuve, et restent listées. Les numéros de ligne cités par la revue Gemini ne correspondent pas à ceux de HEAD : les constats ont été relocalisés dans le code de HEAD.
+**Secrets (OPS-3)** : coffre chiffré unique (`sops` + `age`, **tranché par la spec**, réversible — Q11 retirée F28), clé privée chez toi, deux copies chiffrées (dépôt privé + réplique) ; hors GitHub : `sops exec-env`, `set +x`, `umask 077`, kubeconfig en tmpfs + `trap`, tube vers kubectl, `::add-mask::` ; synchro coffre → GitHub par toi. **Miroir d'images requis, tranché (D-v3-14, F3)** : sans lui, « faire la même chose » sans GitHub est faux pour toute reconstruction ; Q17 = support et coût. Sans GitHub et avant le miroir : restauration de données sur cluster vivant possible, reconstruction impossible, pas d'alerte ticket. **Jeton OVH dans GitHub (F16, D-v3-15)** : compromission GitHub = projet OVH entier — Q19 (GitHub `dr`, script depuis coffre seul, ou portée réduite) : dis ce que tu acceptes.
 
-**Défauts bloquants**
+## 11. Mesures conservatoires et exercices
 
-| # | Défaut | Relevé par | État |
+**A1 — export des clés de scellement, action immédiate, pas une question (F1).** Aujourd'hui : 2 clés dans le cluster (`keyxfs6p` 24/07, `key948dh` 23/08 active), **aucun export trouvé** dans la visibilité k8s, rotation 30 jours active, prochaine **vers le 22/09** ; l'outil refuse toute situation autre que 2 clés (export, restauration, contrôle). **Tu exportes avant la rotation, pendant que le compte vaut 2, et déposes hors cluster et hors région.** Sans cela, les SealedSecrets committés deviennent indéchiffrables en cas de perte du cluster. À confirmer par toi (pas par la lane) : export sur ta machine, chemin, date face à la clé active et à la rotation.
+
+**Q0 — GO pour activer la prod avec le code actuel ?** Gouvernance 35 j, 7/4/2, puis migration à chaud vers la v3 **sans recréer le bucket** (seule l'activation du verrou est figée ; les versions gardent leur échéance 35 j, la promotion ne vaut que pour les nouveaux points). Sans GO, le RPO prod reste non borné et vieillit. RPO et rétention sont indépendants : le RPO tient dès l'activation intérimaire.
+
+**Exercices** (E1–E4 avec assertion RPO : source ≤ 24 h, réplique ≤ 14 h) :
+
+| Id | Démontre | Cible | Preuve |
 |---|---|---|---|
-| B1 | **Des reçus forgés permettent au purgeur de détruire de vraies sauvegardes.** L'écrivain signe les reçus `verified/` ; des jeux forgés, datés juste après chaque jeu réel, évincent les réels de la rétention, et le purgeur les supprime. Rejoué hors ligne : 4 jeux réels (16 objets) supprimés en une exécution. | Fable | **ouvert** |
-| B2 | **L'écrasement n'est pas empêché ; rien n'est immuable par défaut.** L'écrivain peut déposer une nouvelle version courante de n'importe quel jeu passé ; la rétention par défaut du verrou est optionnelle (`None` si non fournie) ; la restauration ne lit que la version courante. | Fable (B2), Gemini (7) | **ouvert** : la rétention par défaut attend D2 |
-| B3 | **La lecture et la suppression de version par l'écrivain ne sont ni testées ni interdites.** La sonde n'essaie `delete_object` et `get_object` que sans identifiant de version ; ces verbes de version n'existent pas dans l'IAM OVH. Si OVH suit la sémantique AWS, seul le verrou empêche l'écrivain de détruire une version. | Fable | **ouvert** ; à mesurer par la sonde |
-| B4 | **Le provisionnement ne peut plus se terminer une fois la rétention par défaut posée.** L'objet sonde hérite de la rétention ; son nettoyage final, sans contournement de gouvernance, est refusé, et la commande échoue après avoir créé utilisateurs et clés, avant d'écrire les secrets. En conformité, l'objet sonde est indestructible jusqu'à échéance. | Fable | **ouvert** ; bloque tout choix de D2 exercé de bout en bout |
-| B5 | **Aucun confinement hors du bucket.** Le rôle de base porte sur tout le projet OVH ; les interdits ne visent que le bucket de l'environnement. L'écrivain de préproduction a donc plein accès au bucket de production, et réciproquement ; les autres buckets du même projet (`radar-immobilier-docs`, `radar-immobilier-raw`, `sentropic-geo`, hypothèse de même projet) sont exposés. | Fable (B5), Gemini (1) | **ouvert** |
-| G2 | **L'activation simultanée en production déclenche une alerte d'astreinte immédiate.** Le contrôle de fraîcheur est actif dès l'application (`suspend: false`, `45 * * * *`) ; sans reçu, l'âge vaut l'infini et le contrôle échoue avant la première sauvegarde de 02:15 ou 14:15. | Gemini (2), Fable (I10) | **ouvert** ; confirmé à HEAD (`43-backup-freshness-cronjob.yaml:7`, `backup.py:288`) |
-| G3 | **Pas de `pg_dumpall --globals-only`** : rôles, mots de passe et droits ne sont pas sauvegardés ; la restauration de vérification tourne avec `--no-owner --no-privileges`. Après perte totale du cluster, les données restaurées ne sont pas utilisables telles quelles par l'application. | Gemini (3) | **ouvert**. Le plan prévoit de reconstruire les rôles depuis l'infrastructure versionnée et les mots de passe depuis le coffre, mais aucune procédure exécutable ne le fait. |
-| G4 | **Les règles de cycle de vie ne portent pas sur les vrais préfixes de sauvegarde.** Elles expirent `daily/`, `weekly/`, `monthly/`, alors que la sauvegarde écrit sous `postgres/<env>/sets/<cycle>/`. Aucune règle S3 ne borne `sets/` ; la rétention y dépend entièrement du purgeur. | Gemini (4), Fable (I3) | **ouvert** ; confirmé (`backup-provision.py:98`, `backup.py:127`). Le plan présente ces préfixes comme « réservés », mais aucun filet S3 ne couvre `sets/` quand le purgeur ne tourne pas. |
-| G5 | **La purge et le contrôle de fraîcheur se bloquent sur un rapport invalide.** Un seul reçu incohérent fait échouer `verified_sets()`, donc la purge et la fraîcheur, en continu. | Gemini (5), Fable (I4) | **ouvert** |
-| G13 | **Deux gabarits bloquants restent dans le code**, `PIN-BEFORE-APPLY` et `SELECT-A-COMPLETE-SET` : un déploiement direct échouerait au tirage de l'image. | Gemini (13, classé mineur par Gemini) | **contesté** : ce sont des sentinelles volontaires, fail-close. Le rendu (`deploy/ci/backup-pra.sh:5` et `:11`) refuse une image `PIN-BEFORE*` et substitue le digest ; `backup-pra-render.py:34` remplace `BACKUP_OBJECT` ; un test vérifie qu'aucun `PIN-BEFORE-APPLY` ne subsiste après rendu (`backup-pra.test.py:287`). Ce qui reste vrai : un `kubectl apply` direct des fichiers bruts échouerait, sans rien activer. |
+| E1 | reconstruction < 2 h (RTO-1) | cluster neuf, tenant préprod, sauvegarde prod | reçu chronométré par étape ; **destruction vérifiée** (cluster, PVC, kubeconfigs, F30) ; noms d'exercice distincts (limites Let's Encrypt, à vérifier) |
+| E2 | préprod récupère intégralement la prod | préprod | comptes, séquences, rôles, `pg_amcheck`, inventaire objets, `set_hash` ; tout écart = échec |
+| E3 | partielles + refus | préprod | un reçu par périmètre + un refus (G3/G4) ; mesure copie intra-bhs + outil Q21 |
+| E4 | passage iso + migration | préprod | deux reçus |
+| E5 | retour N1 < 5 min (RTO-2) | préprod | reçu chronométré (création du clone incluse) |
+| E6 | même opération sans GitHub (OPS-3) | préprod | E2 ou E4 rejoué par `pra.sh` |
+| E7 | aucune IA nécessaire (OPS-2) | garde | reçu + refus des anciens identifiants |
+| E8 | alertes reçues et acquittées | chaque événement provoqué | tickets, courriels |
+| E9 | restauration depuis la réplique | préprod | reçu (au moins la base) |
 
-**Autres objections de Gemini, re-vérifiées**
-
-| # | Objection | État |
-|---|---|---|
-| 6 | Les verbes de verrou (`PutObjectRetention`, `BypassGovernanceRetention`) et `ListBucketVersions` ne sont pas interdits : un écrivain compromis pourrait verrouiller ou contourner une rétention en gouvernance. | **ouvert** ; confirmé : ces verbes sont reconnus (`backup-provision.py:29-35`) mais absents des interdits (`:37-39`). |
-| 8 | Restauration sous-dimensionnée (512 Mi, 6 GiB de disque) pour une base de 1 GiB. | **ouvert**, à mesurer : c'est la réserve R2 de la lane k8s. |
-| 9 | Identifiant de cycle tiré au hasard dans le pod, sans synchronisation avec geo. | **ouvert** : le coordinateur de cycle n'existe pas (R4). |
-| 10 | Plantage `UnboundLocalError` dans la sonde si le premier dépôt échoue. | **contesté** : à HEAD, le dépôt a lieu **avant** le bloc `try` (`backup-provision.py:284-285`) ; un échec lève directement, le `finally` n'est pas atteint. |
-| 11 | Le comptage de lignes ne lit pas les colonnes TOAST, ni les contraintes, ni les séquences. | **ouvert** ; le plan le reconnaît : l'égalité des comptes est nécessaire, pas suffisante. |
-| 12 | Relire un secret S3 existant provoquerait une rotation silencieuse. | **contesté, non mesuré** : la route `POST …/s3Credentials/{access}/secret` est la route de lecture du secret de l'API OVH v1 ; l'agrément k8s note « récupère le secret S3 existant sans rotation ». À confirmer par une mesure. |
-
-**Défauts importants relevés par Fable** (le détail est en annexe A) : le reçu quotidien prouve que le dump local se restaure, pas l'objet S3 (I1) ; l'horizon réel de rétention est de 20 jours au plus, pas un mois (I2) ; la purge des orphelins ne tourne qu'après un pipeline réussi (I3) ; égalité stricte des versions d'extensions contre des images flottantes (I5, I6) ; **l'image activée n'est pas l'image prouvée** (I7) ; le RBAC de l'activation n'est pas livré (I8) ; le job d'activation demande une approbation production à chaque push sur `main` (I9) ; aucune commande de restauration réelle, durée non mesurée (I11) ; le runbook contredit le code sur des garanties de sécurité (I12) ; **les plans immo et geo se contredisent** sur le gel, sur `exports/immo/` et sur le versionnement (I13) ; quotas partagés non mesurés (I14).
-
-**Ce que ça change** : la reprise a réglé les défauts de la première version (empreinte, admission, comptes estimés, isolation de la restauration), mais la nouvelle version porte l'invariant central, « l'écrivain ne peut ni lire, ni détruire, ni exposer », et les revues montrent trois chemins détournés (B1, B2, B3) et un confinement absent (B5). La recommandation ne peut pas être « fusionner ».
-
-## 5. Agrément de la lane k8s, clés comprises
-
-Exigé par toi : « k8s doit agréer notre plan de sauvegarde et pra incluant les clés et ceci doit être inclus au dossier de décision ». Le texte intégral de la lane est en annexe B.
-
-**Verdict : AGRÉÉ SOUS RÉSERVES.** Portée : il autorise le provisionnement de la préproduction et la preuve PostgreSQL depuis la branche. Il n'autorise **ni** le provisionnement de la production (feu vert owner séparé), **ni** l'activation, **ni** la fusion, qui dépendent de R2, R3 et R4, ni aucune allégation de reprise de service complète.
-
-**Le modèle de clés**
-
-| Clé | Porteur | Où elle vit | Ce qu'elle peut | Ce qu'elle ne peut pas |
-|---|---|---|---|---|
-| Écrivain S3 (`radar-pra-<env>-writer`) | CronJob de sauvegarde | secret du namespace | déposer sous `postgres/<env>/` | lire, supprimer, poser une ACL publique, suspendre le versionnement (sonde) — mais : reçus forgés (B1), écrasement (B2), versions (B3), autres buckets (B5) |
-| Lecteur S3 (`radar-pra-<env>-reader`) | restauration, fraîcheur | secret du namespace | lire les objets et la configuration du bucket | écrire, supprimer |
-| Purgeur S3 (`radar-pra-<env>-retainer`) | conteneur de rétention | secret du namespace | lire et supprimer l'objet courant | détruire une version (verbe absent d'OVH) |
-| Administration S3 | toi | ton environnement, jamais le cluster | créer et configurer le bucket, contourner la gouvernance | — (R1 : à réduire et rendre éphémère) |
-| Jeton d'API OVH | toi | ton environnement, jamais le cluster | créer utilisateurs, politiques et clés S3 | — (R1) |
-
-**Les réserves, une par une**
-
-| Réserve | Objet | État |
-|---|---|---|
-| R1 | Réduire au moindre privilège et rendre éphémères les deux jetons larges de provisionnement ; jamais d'administration au runtime. | **ouverte** |
-| R2 | Mesurer en préproduction le pic réel de la restauration et le non-chevauchement avec le rafraîchissement de 05:17, avant activation. | **ouverte** : rien n'est mesuré |
-| R3 | Prouver la livraison de l'alerte, y compris le cas du contrôleur arrêté, avant activation. | **ouverte** |
-| R4 | Le coordinateur de gel et l'export geo sont des points d'étape non remplis ; aucun marqueur « PostgreSQL seul » ne doit être présenté comme cycle complet ; le dossier de fusion doit porter la preuve geo appariée. | **ouverte** |
-| R5 | Cibles en bhs, résidence québécoise préservée ; la protection immuable hors région est une décision owner avec mesure de coût séparée. | **transformée** en décision D4 |
-| R6 | Pas de blocage d'accès public ni de politique de bucket sur OVH BHS : la garantie repose sur l'ACL privée, vérifiée à la création et en continu ; un droit public posé à la main est détecté, pas empêché, avec au plus une heure de retard. | **transformée** : résidu accepté et documenté. Le rectificatif 2 ajoute la preuve que l'écrivain se voit refuser la pose d'une ACL publique ; l'extension au niveau des objets est la décision D5. |
-| R7 | La lane avait conclu que l'IAM d'OVH ne pouvait pas exprimer le modèle. | **levée** (caduque) après re-mesure ; l'épisode est conservé (section 3) |
-
-Deux rectificatifs de la lane elle-même figurent dans son texte : les manifestes `41`, `42`, `43` et les overlays existent bien ; et elle a refusé d'élargir seule les droits du lecteur, ce qui a conduit à la solution sans élargissement (D5).
-
-## 6. Co-validation de sécurité i-infra : validée, invalidée, reconduite
-
-Texte intégral en annexe B.
-
-| Étape | Contenu |
-|---|---|
-| **1. Co-validée sous réserves** | P1 actions par identité au moindre privilège ; P2 « l'écrivain ne peut pas supprimer », en politique et à l'exécution ; P3 cycle de vie, sous réserve (expiration par âge : il faudrait ignorer les alertes 7 jours pour vider le palier quotidien, environ un mois pour tout perdre) ; P4 identité d'administration confinée. |
-| **2. Auto-invalidée** | i-infra avait validé la **logique** de la politique sans marquer comme non vérifiée l'hypothèse porteuse : qu'OVH BHS sache exprimer ces formules et que l'interdit écrase le rôle de base. Elle n'avait aucun accès OVH. Elle a daté et invalidé son propre verdict. |
-| **3. Reconduite** | Après re-mesure : le verrou d'objet est disponible, un interdit explicite contient le rôle de base. La branche haute de son arbre de décision est atteignable (« verrou disponible → l'utiliser ») ; P1 et P2 sont reconduits, avec le mode et la durée du verrou à trancher (D2). |
-
-La reconduction porte sur les invariants **dans le bucket**. Les chemins détournés relevés ensuite par Fable (B1 reçus forgés, B2 écrasement, B3 versions, B5 autres buckets) sont postérieurs et ne sont couverts par aucune des deux validations.
-
-## 7. La séquence de bout en bout (ton exigence 2)
-
-Un **cycle** est une unité de reprise : un identifiant commun, un environnement, un instant de référence T0. La scène 2 la dessine.
-
-**Sauvegarde, dans l'ordre**
-
-| # | Étape | Qui | Preuve qu'elle a réussi | Existe ? |
-|---|---|---|---|---|
-| 1 | Allouer l'identifiant de cycle commun et T0 | coordinateur immo | identifiant et T0 inscrits dans chaque manifeste | non |
-| 2 | Geler les écritures **côté immo seulement** (API, annotations, rafraîchissements, dépôts d'objets) et drainer | coordinateur immo | inventaire complet des écrivains et accusés de gel | non |
-| 3 | Instantané PostgreSQL, comptes exacts et `pg_dump --snapshot` **dans la même transaction** | CronJob de sauvegarde immo | manifeste : comptes, extensions, taille et SHA-256 du dump | **oui** |
-| 4 | Copier les objets immo (documents, graphe, trousseau), versions exactes | coordinateur immo | inventaire : clé, version, taille, SHA-256 | non |
-| 5 | Copier geo **sans gel**, puisque ses irremplaçables sont immuables | job de copie geo | inventaire réconcilié avec le bucket cible ; SHA-256 = nom de l'objet | non |
-| 6 | Vérifier les octets et la fermeture des références PostgreSQL → documents → graphe → geo, puis publier le **marqueur commun en dernier** (`cycles/<env>/<cycle>/complete.json`) | coordinateur immo | marqueur portant les empreintes de tous les manifestes ; aucun marqueur si un composant manque | non |
-| 7 | Dégeler et restaurer l'état exact des planificateurs | coordinateur immo | durée du gel et arriéré mesurés | non |
-
-**Restauration, dans l'ordre inverse de la dépendance** (immo dépend de geo, geo ne dépend pas d'immo) :
-
-| # | Étape | Qui | Preuve |
-|---|---|---|---|
-| 1 | Choisir un cycle **complet** ; à défaut, reprise PostgreSQL seule, sur accord explicite du propriétaire | astreinte immo | marqueur et reçus concordants |
-| 2 | Provisionner un environnement vide (namespaces, PostgreSQL 16 + PostGIS 3.4, buckets, secrets du coffre) | lane k8s | environnement prêt, aucun secret tiré de Git |
-| 3 | Restaurer les irremplaçables geo, puis re-dériver `normalized/` et `exports/immo/` | lane geo | SHA-256 = nom, invariants géométriques |
-| 4 | Restaurer les objets immo du même cycle | lane immo | empreintes et fermeture des références |
-| 5 | Restaurer PostgreSQL sur une instance neuve, puis rôles et droits | lane immo | comptes exacts, extensions, index ; rôles applicatifs (non sauvegardés aujourd'hui, G3) |
-| 6 | Rouvrir l'API en lecture, puis en écriture | toi, feu vert | annotation existante lue, écriture contrôlée, durée mesurée = RTO réel |
-
-**Ce qui est livré de cette séquence : l'étape 3 seule**, qui garantit son propre instantané cohérent sans gel. Ses manifestes portent `scope: postgres-only` et ne doivent jamais être présentés comme un cycle complet (R4). Point ouvert entre les deux plans (Fable I13) : le plan immo gèle encore geo et exige de copier `exports/immo/` tant que sa reproduction n'est pas démontrée ; le plan geo exclut `exports/immo/` et `normalized/`, réécrits en place, de sa copie. Tant que ce n'est pas tranché, un cycle ne peut pas épingler la version geo consommée par immo à T0.
-
-## 8. Mise en service : la preuve avant la fusion, puis l'activation simultanée (tes exigences 3 et 4)
-
-La scène 3 la dessine. Chaque étape a un acteur, un garde-fou et une preuve de sortie.
-
-| # | Étape | Acteur | Garde-fou | Preuve de sortie |
-|---|---|---|---|---|
-| 1 | Corriger B1 à B5, G2 à G5 et les verbes de verrou non interdits | lane de reprise immo | revue contradictoire sur les corrections | tests hors ligne verts, revue sans bloquant |
-| 2 | Trancher le verrou d'objet | toi | D2 | mode et durée écrits dans la commande |
-| 3 | Provisionner la préproduction | toi, commande unique | `PRA_PROVISION_GO`, `BACKUP_ENV`, préflight lecture seule | sonde auto-vérifiée ; secrets écrits sans valeur affichée |
-| 4 | Sauvegarde de preuve en préproduction | lane k8s | `PRA_CLUSTER_GO`, image de la branche épinglée par digest | Job unique, objet S3 et reçu vérifié |
-| 5 | Restauration de preuve **depuis l'objet S3** | lane k8s | instance éphémère, identité lecteur | comptes exacts, durée et pic mémoire mesurés (R2) |
-| 6 | Preuve d'alerte | lane k8s | contrôleur volontairement arrêté | alerte reçue par l'astreinte (R3) |
-| 7 | Preuve geo appariée | lane geo | même identifiant de cycle | inventaire geo réconcilié (R4) |
-| 8 | Provisionner la production | toi | **feu vert direct dans la session qui l'exécute**, `PRA_PRODUCTION_GO` | sonde de production auto-vérifiée |
-| 9 | Contrôles de production | lane k8s | `kubectl describe quota`, `auth can-i` | marge et droits relevés dans les deux namespaces |
-| 10 | Fusionner #712 et geo#390 | toi | D1 | deux PR fusionnées |
-| 11 | Activer préproduction **et** production ensemble | workflow `deploy-backup-pra` | approbation production, image prouvée promue (pas reconstruite), fraîcheur appliquée suspendue | dry-run et application dans les deux namespaces |
-| 12 | Premiers Jobs manuels, préproduction puis production | lane k8s | observés jusqu'au reçu | deux reçus vérifiés |
-| 13 | Réactiver le contrôle de fraîcheur | lane k8s | après les deux reçus | une exécution de :45 réussie par namespace |
-| 14 | Compte rendu sur #698 | conducteur | — | commentaire sur la carte |
-
-L'**acte de production** (étapes 8, 10 et 11) est soumis à ton feu vert direct, dans la session de la lane qui l'exécute. Les deux revues jugent que la preuve préproduction seule ne suffit pas à activer la production le même jour ; Fable admet l'activation simultanée si les étapes 4 à 9 sont réunies et si le premier Job de production est observé jusqu'au reçu (étape 12). C'est ce que ce chemin retient, pour satisfaire ton exigence 3.
-
-## 9. Options pour D1
-
-| Option | Meilleur argument pour | Meilleur argument contre | Coût | Réversibilité |
-|---|---|---|---|---|
-| **A — corriger avant fusion, prouver en préproduction, puis fusionner les deux PR et activer préprod et prod ensemble** | Satisfait tes exigences 3 et 4 telles quelles ; les deux revues n'ont plus de bloquant à opposer. | Une passe de corrections substantielle (sécurité des reçus, confinement, rétention, sonde), puis D2, puis la preuve : plusieurs jours sans sauvegarde planifiée. | une lane de reprise + la lane k8s + la lane geo | élevée : rien n'est actif avant l'étape 11 |
-| **B — corriger avant fusion, prouver, puis fusionner et activer la préproduction seule ; la production après un premier cycle préproduction vérifié (≤ 12 h)** | Position par défaut des deux revues : risque de fausse confiance réduit. | Déroge à ton exigence 3 (activation simultanée). | identique à A, plus un second acte | élevée |
-| **C — fusionner en l'état** | Le code entre dans `main` aujourd'hui. | Deux revues : non fusionnable. Les reçus forgés, l'écrasement et l'absence de confinement resteraient ; l'activation déclencherait l'astreinte ; la preuve avant fusion (exigence 4) serait sautée. | nul maintenant | moyenne : un workflow actif sur chaque push de `main` (I9) |
-| **D — reporter** | Livrer d'un coup coordinateur de cycle et copie geo. | Aucune sauvegarde planifiée d'ici là, annotations de Steve comprises. | plusieurs jours de plus | totale |
-
-## 10. Recommandation
-
-**A — corriger avant fusion.** Les deux contradicteurs l'établissent indépendamment : l'invariant « l'écrivain ne peut ni lire, ni détruire, ni exposer » tombe par trois chemins détournés et par l'absence de confinement, et l'activation telle que livrée réveillerait l'astreinte. A est le seul chemin qui satisfait tes exigences 3 et 4 sans exception.
-
-- **Argument le plus fort contre A** : chaque jour sans sauvegarde est un risque réel. Mais C n'apporte pas de sauvegarde plus tôt : sans provisionnement (gelé en attente de D2), le CronJob n'a ni bucket ni identité.
-- **Ce qui ferait changer d'avis** : une mesure qui montrerait qu'OVH refuse déjà `DeleteObject?versionId=` à l'écrivain réduirait B3 ; elle ne changerait ni B1, ni B2, ni B5.
-- **Pré-mortem** : « Le jour du sinistre, un écrivain compromis avait remplacé les dumps par des versions courantes vides, et le purgeur avait supprimé les derniers vrais jeux sur la foi de reçus forgés. » C'est exactement ce que A corrige avant toute activation.
-- **Intérêt du présentateur** : B me ferait deux actes de production à piloter au lieu d'un ; C m'en ferait zéro aujourd'hui. Je recommande A parce que tes exigences 3 et 4 le demandent et que les revues l'imposent.
-
-**Ce que la preuve préproduction ne couvrira pas encore** : la reprise de service complète (coordinateur de cycle, R4) et le délai de reprise geo. Le dossier de fusion le dira ; aucun test PostgreSQL ne sera présenté comme un résultat complet.
-
-## 11. Tes critères
-
-| Critère | Source | Couvert par | Écart |
-|---|---|---|---|
-| Plan d'ensemble, immo orchestre les deux PR | ta demande, point 1 | #712 + geo#390, section 7 | coordinateur non livré (R4) ; contradiction immo/geo (I13) |
-| Schéma incorporant immo et geo, bout en bout | ta demande, point 2 | scènes 1 et 2 | — |
-| Activation simultanée préprod et prod à la fusion | ta demande, point 3 | workflow `deploy-backup-pra`, section 8 | alerte immédiate (G2), image non prouvée (I7), RBAC non livré (I8) |
-| Preuve sauvegarde et restauration préprod **avant** la fusion | ta demande, point 4 | section 8, étapes 3 à 7 | **pas faite** ; gelée par D2 |
-| Agrément k8s, clés comprises, dans le dossier | ta demande | section 5, annexe B | R1 à R4 ouvertes |
-| Challenge par Fable 5.1 (livraison Astra) et Gemini 3.8 high | ta demande | section 4, annexe A | — |
-| Format h2a Focus avec SvelteFlow | ta demande | cette page | — |
-| Aucun secret dans Git, aucune valeur affichée | règles du dépôt | provisionnement par tube anonyme | — |
+**Lots de réponse** : 0 (A1 + Q0, immédiat) → 1 (Q1–Q4, ton texte) → 2 (Q5, Q5b, Q6, Q7) → 3 (Q8, Q9, Q10, Q12) → 4 (Q13–Q16) → 5 (Q17–Q20) → 6 (Q21–Q23). La spec devient EVOL après tes réponses ; RPO-1 et les débits suivent le même circuit (DV-1 : DEB-1 à faire relire contre le verbatim).
 
 ## 12. Ce que j'attends de toi
 
-- **D1 — PR #712 et geo#390** : A (corriger avant fusion, prouver, fusionner et activer ensemble — recommandé), B (activer la préproduction d'abord), C (fusionner en l'état) ou D (reporter) ?
-- **D2 — mode et durée du verrou d'objet**, pour immo préproduction, immo production et geo. Recommandation du conducteur : **conformité 7 jours en production, gouvernance 1 jour en préproduction, conformité 1 an pour geo**, dont les irremplaçables n'expirent pas. À savoir avant de trancher :
-  - la **conformité est irréversible** : personne, ni un administrateur ni toi, ne peut supprimer une version verrouillée ni raccourcir son verrou avant échéance, et le stockage est facturé quoi qu'il arrive ; la gouvernance peut être contournée par une identité qui détient le droit de contournement, que n'a aucune identité runtime ;
-  - le **verrou prime sur l'expiration** : une version verrouillée n'expire pas tant que le verrou court ;
-  - avec 7 jours en production, seuls les jeux des 7 derniers jours sont indestructibles ; les plus anciens restent récupérables 35 jours comme versions non courantes, sans verrou ;
-  - les revues proposent d'autres valeurs : **Fable, gouvernance 35 jours** dans les deux environnements ; **Gemini, gouvernance 14 jours**, jamais conformité ; le plan geo, conformité 1 an roulant ;
-  - **préalable technique** : tant que B4 n'est pas corrigé, aucune rétention par défaut ne permet au provisionnement d'aller au bout.
-- **D3 — versionnement du bucket `sentropic-geo`** : non confirmé actif à ce jour. Confirmé actif, à activer, ou à mesurer d'abord par la lane k8s ?
-- **D4 — bucket de reprise geo** : `sentropic-geo-pra` en bhs, proposé. Une cible dans la même région **ne couvre pas une panne régionale** ; une autre région ajoute sortie réseau, stockage et latence, à chiffrer par i-infra et k8s. Validé, autre région, ou autre nom ?
-- **D5 — détection d'exposition** : (a) s'en tenir au niveau du bucket, avec la preuve que l'écrivain se voit refuser la pose d'une ACL publique — solution retenue par le conducteur, résidu au niveau des objets documenté ; (b) étendre la détection au niveau des objets, ce qui demande d'élargir les droits du lecteur à la lecture des ACL d'objets.
+Par lots de quatre au plus. Pour les passages de ton texte, **aucune recommandation** : c'est le sens de ta demande. Les questions à options figurent aussi dans le panneau de choix (brouillon local, export JSON) ; les ouvertes se répondent en texte. ~~Q11 (outil du coffre)~~ : **retirée** — tranchée `sops` + `age` (F28), numérotation conservée. Les options de vue (scission, ouverture, compact) sont en **section 13**, présentées sans recommandation.
 
-## Annexe A — Revues contradictoires de la livraison actuelle (verbatim)
+**Lot 0 — mesures conservatoires (avant toute réponse)** : **A1** (action, pas une question) ; **Q0** — GO activation intérimaire de la prod (35 j, 7/4/2, puis migration à chaud) ?
 
-Revues de la PR #712 à HEAD `5ee7900c`, 2026-09-18. Contenu intégral, sans modification.
+**Lot 1 — passages de ton texte** : **Q1** — (a) « dernier snapshot de preprod » : lecture A (**de prod** — chaque passage teste aussi la restauration) ou B (**de préprod** — remise à son état, écrasement à préciser) ? En attendant : auto non armée, `source_env` obligatoire. **Q2** — (b.i) « la démonstration » : fréquence, cible, critère, autre ? (E1 prévu §7.4.) **Q3** — « les délai de retour a l'objectif RTO RPO doivent, » : que devaient-ils être ou faire ? **Q4** — « j'imagine que » : une exigence manque-t-elle ? Pas de recommandation (×4).
 
-### Revue A1 — Fable 5.1
+**Lot 2 — rétention, alertes, verrou** : **Q5** — « 28 sauvegardes » : **disjointe** (28 points, ≈ 14,5 mois — seule conforme à ton décompte) ou **superposée** (≈ 26–27 points, économie ≈ 1,5 mois) ? Pas de recommandation. **Q5b** — préprod au quotidien seul (10 points, sans réplique) : valides-tu, ou trois paliers comme la prod ? Pas de recommandation. **Q6** — canal + destinataires : recommandation **ticket GitHub (accusé, historique) ET courriel TEM (hors panne GitHub)**, émis par le veilleur ; second humain ? **Q7** — verrou : **L1** (contournement gardé, 13 mois effaçables par un admin compromis) ou **L2** (mensuel intouchable, ≈ 6,5 GiB irréversibles) ? « Loi 25 » contre L2 = hypothèse, juriste. Pas de recommandation.
 
-# Revue contradictoire PR #712 (reprise Astra, carte #698) — rendu Fable
+**Lot 3 — région, données, garde, déclencheur** : **Q8** — réplique où ? Recommandation : relever d'abord les régions (i-infra), préférer le Canada ; hors Québec → évaluation art. 17 (juriste). **Q9** — RP en préprod (P-a, E2) : recommandation copie intégrale tant que `prospect_contacts` est vide en prod (accès limités comme en prod), masquage dès qu'elle se remplit. **Q10** — garde des clés : (1) réexporter après chaque rotation (**inapplicable** avec l'outil actuel dès la 3ᵉ clé, sauf correction du Makefile) ; (2) figer la rotation (`--key-renew-period=0`, compromis = tout le passé et futur) ; (3) coffre en clair + rescellement (**circularité** : il faut les clés actuelles pour peupler le coffre ; allonge RTO-1) ; (4, proposition) `kubeseal --re-encrypt` puis export de la clé active. Pas de recommandation (lane k8s). **Q12** — qui déclenche (a) ? Recommandation : auto par `deploy-preprod` quand la publication apporte une migration nouvelle, et à la demande — **plus faible que ton texte** (« doit écraser » à chaque passage), motif : 1 GiB + 12,5 Go par fusion. À valider comme tel.
 
-Date : 2026-09-18. Worktree `tmp/backup-pra-698`, branche `feat/backup-pra-698`, HEAD `5ee7900c`.
-Périmètre : ce qui est livré à HEAD, lu dans les fichiers réels. Aucun fichier modifié, aucun commit, aucune action cluster ni OVH.
+**Lot 4 — périmètre** : **Q13** — perte régionale : recommandation s'engager et démontrer pour le cluster en bhs, cible déclarée non démontrée pour la région (tant que réplique non choisie/chiffrée). **Q14** — contrat geo : recommandation versionnement de `sentropic-geo` + réplique `normalized/` et `exports/immo/` (sans eux : ni restauration jointe épinglée ni geo rapide après perte régionale ; **bloquant pour le RPO geo**). À accorder avec la lane geo. **Q15** — IdP sentropic : recommandation le confier à la lane sentropic, sinon RTO-1 « complet » reste conditionné. **Q16** — reprise : recommandation capacité pour chacun (OPS-1), cluster commun par défaut pour `scope=all`.
 
-Méthode. Lecture intégrale des fichiers listés dans le brief plus le contexte cluster existant (`20-postgres-postgis.yaml`, `70-networkpolicy.yaml`, `10-rbac.yaml`, `11-ci-deployer-preprod-rbac.yaml`, overlay `deploy/overlays/preprod`, workflows). Le volet geo a été lu depuis la branche locale `docs/geo-pra-plan` du dépôt `~/src/geo` (`docs/ops/pra/GEO_PRA_PLAN.md`). Trois exécutions hors réseau dans l'image `radar-backup:test` déjà construite (conteneurs `--rm --network none --read-only`, dépôt monté en lecture seule) : (a) scénario « writer compromis forge des reçus » contre `retain()` ; (b) calcul de l'horizon réel de `keep_sets()` ; (c) impression de la politique writer produite par `policy()` ; plus une vérification d'ordre de tri des noms de tables (résultat : pas de défaut, le type `name` trie en C quelle que soit la locale) et un relevé des versions embarquées (Debian 11, PostgreSQL 16.4, PostGIS 3.4.3, boto3 1.40.0, `_ssl` lié à libssl 1.1). Tout constat non étayé par une ligne ou une exécution est marqué « hypothèse ».
+**Lot 5 — hors GitHub, chronomètre, risque, coût** : **Q17** — miroir requis (D-v3-14) : quel support, quel budget (empreintes API, UI, sauvegarde, `geo-api` vers OVH à chaque promotion) ? Coût inconnu (i-infra). **Q18** — « moins de 2 h » depuis l'incident ou le déclenchement ? Depuis l'incident : détection au budget, veilleur plus fréquent. Pas de recommandation. **Q19** — jeton OVH dans GitHub `dr`, ou b.i par script depuis le coffre (GitHub pour b.ii/b.iii), ou portée réduite (MKS + S3 DR) ? Dis ce que tu acceptes. **Q20** — plafond mensuel (stockage verrouillé, réplique, un r2-15 par E1) ? Sans plafond, la spec chiffre (i-infra) et avance.
 
-## Tableau des constats
+**Lot 6 — méthodes de copie (DEB-1)** : **Q21** — outil (`rclone` ou autre ?) et chemins proposés (depuis le cluster, côté serveur en bhs pour P-a) : tranches-tu, valides-tu ? **Q22** — persistance limitée (inventaire entre cycles pour ne pas réindexer) : faut-il, et quoi ? **Q23** — « etc » : que couvre la fin ouverte ? Un débit ou une durée cible au-delà de RTO-1/RTO-2 ? Pas de recommandation (×3) : ce sont tes questions.
 
-| # | Constat | Gravité | Preuve (fichier:ligne) | Correction proposée |
+## 13. Rendu des schémas : Graphviz supprimé, archify produit, plancher 12 px, options non tranchées
+
+**ARCH-7 — Graphviz supprimé : fait, et contrôlé.** Aucun rendu `dot` dans ce dossier. Retirés de la chaîne : `gv-layout.mjs`, `GraphvizView.svelte`, la bascule entre rendus, le bloc de source `dot` sous chaque scène, la dépendance `@hpcc-js/wasm-graphviz` de `package.json`, le moteur Graphviz du balayage de lisibilité et du contrôle Chromium, et les preuves `*-graphviz-*` du dossier `preuves/`. Un test de la chaîne (`mapping.test.mjs`) balaie désormais tous les fichiers et **échoue si le mot réapparaît** ailleurs que dans une phrase qui constate la suppression : l'exigence est tenue par un contrôle, pas par une intention. Effet de bord utile : la scène d'architecture v3 (47 cartes) **faisait planter Graphviz** (`trapezoid segment construction failed`, puis `points` indéfini) — le rendu que tu voulais supprimer était aussi celui qui bloquait la construction de la page.
+
+**ARCH-8 — archify produit.** Fait établi (S16) : MIT, `github.com/tt-a1i/archify`, binaire `bin/archify.mjs`, cinq types, entrée JSON validée par schéma, sortie page HTML autonome. Exécuté hors ligne (conteneur sans réseau), à partir du clone local — **aucune installation réseau n'a été faite par cette lane**. Deux rendus livrés dans `archify/` :
+
+| Fichier | Type archify | Contenu | Contrôle `archify check` |
+|---|---|---|---|
+| `pra-v3-architecture.architecture.json` → `.html` | `architecture` | les six zones en colonnes, 24 cartes, paires préprod / prod par rangée, cases « absent » motivées, 14 liaisons | **vert** (`ok: true`, 0 constat de composition) |
+| `pra-v3-pbi.workflow.json` → `.html` | `workflow` | P-bi, perte totale du cluster : **5 couloirs** (owner et admin, GitHub `dr`, OVH, cluster neuf, preuves), 12 étapes, 11 liaisons | **vert** (`ok: true`) |
+
+**Limites d'archify, constatées en le faisant tourner, sans le forcer :**
+- **pas de conteneurs imbriqués** : les six zones sont rendues par **colonnes et position**, pas par cadres. La symétrie (ARCH-1) et les zones (ARCH-2) y survivent, la hiérarchie non. **Le rendu ELK de la page reste la référence pour les conteneurs** ;
+- **validation de placement stricte** : archify refuse qu'une liaison traverse une carte tierce (`clean-flow/edge-through-node`). J'ai dû restreindre le schéma à des liaisons **entre voisines d'une même rangée** ; c'est pourquoi la vue archify est une **vue réduite (24 cartes)**, pas les 47 de la page ;
+- **type `workflow` limité à 6 colonnes** : P-bi tient en 6 (colonnes 0 à 5). Un processus à 7 acteurs exigerait une scission ;
+- **archify applique son propre plancher de lisibilité** (6 px projetés à 1440) et **avait d'abord refusé** la vue d'architecture à 5,75 px : il a fallu resserrer la grille pour passer. Sa porte est deux fois plus basse que la nôtre (12 px) — **passer chez archify ne veut donc pas dire tenir notre plancher** ;
+- archify refuse aussi un libellé plus large que sa carte : même règle que la nôtre, appliquée par l'outil.
+
+**Convertisseur** : le codec h2a (`archify-codec`, r4) a été lu comme point de départ ; les deux documents ont été écrits sur les schémas d'archify, sans réécrire de convertisseur.
+
+**PROC-2 — BPMN : réponse oui, rendu non produit.** Oui, le BPMN sert mieux ces processus : un **couloir par acteur** et des passerelles explicites. Le contenu des neuf processus P1 à P9 est écrit (section 5). **Le rendu bpmn-js n'est pas produit dans ce dossier** : le paquet n'est pas installé et cette lane ne fait aucune installation réseau ; l'autorisation D7 du Design System n'est pas prononcée. Décisions déjà prises et tenues quand il le sera : **bpmn-js et elkjs 0.12.0 adoptés**, `bpmn-auto-layout` **écarté sur fait mesuré** (il perd pools, couloirs, second processus et flux de messages : 29 éléments de dessin tombent à 19), placement par **ELK en couloirs partitionnés** puis émission des coordonnées BPMN DI, **attribution bpmn.io visible et dessinée dans les exports**, formes BPMN standard au style du Design System. En attendant, le couloir par acteur est porté par le rendu `workflow` d'archify (P-bi) et par la scène 2. Transparence : « un couloir par acteur », « bpmn-js choisi » et « formes standard » viennent de S16 et **sont absents de ton verbatim** — marqués ajout h-cond, à confirmer (F27).
+
+**Portes de lisibilité, ratifiées et appliquées.** À 1440 × 900, scène ajustée à la vue : **aucun texte sous 12 px** (plancher, plus 11). En impression A4 paysage, plancher intérimaire de **8 pt pour le texte de lecture** (repère, titre, détail, dépôt, en-tête de conteneur) et **7 pt pour l'annotation secondaire** (étiquette de liaison) ; le contrôle est fait **rôle par rôle**, pas sur le seul minimum. Le **taux de remplissage n'est plus un critère contractuel** : il reste publié comme indicateur. La règle ratifiée est **qu'un libellé ne s'affiche que s'il tient sans troncature** à la taille minimale — appliquée par le contrôle Chromium du gabarit, qui a **refusé une carte** de la scène 1 (`Irremplaçables · absents`, 392 px de texte pour 358 px de place) jusqu'à ce que le libellé soit raccourci. Le build **refuse la page** sous les portes, sauf dérogation explicite et motivée, inscrite au manifeste et affichée dans la page.
+
+**Mesures de ce dossier** (Chromium, sur le DOM réellement rendu ; le modèle du build donne la même valeur à **±0,000 px**) :
+
+| Scène | Cartes · liens · conteneurs | 1440 × 900 (porte 12 px) | 1920 × 1080 (sans porte) | A4 paysage (8 pt / 7 pt) | Rapport l/h |
+|---|---|---|---|---|---|
+| architecture, plan de l'owner tenu (cinq colonnes) | 48 · 26 · 20 | **3,35 px** | 4,18 px | **2,22 pt** | 1,664 |
+| *(pour mémoire : la même scène, quatre faces et tenants en grille)* | *48 · 26 · 16* | *2,45 px* | *3,06 px* | *1,55 pt* | *1,748* |
+| *(pour mémoire : la même scène, faces non tenues et tenants sur une colonne)* | *48 · 26 · 16* | *2,79 px* | *3,48 px* | *2,07 pt* | *1,340* |
+| *(pour mémoire : la même scène en six zones à plat)* | *47 · 24 · 6* | *3,38 px* | *4,22 px* | *2,51 pt* | *1,423* |
+| déclencheurs et reprise | 20 · 19 · 4 | **5,97 px** | 7,45 px | **4,00 pt** | 1,651 |
+| conservatoire, lots, preuves | 17 · 16 · 3 | **7,21 px** | 9,00 px | **4,68 pt** | 1,707 |
+
+**Ce que le plan de l'owner a rendu, mesuré.** La scène 1 est posée comme l'owner l'a écrite le
+2026-09-20, bloc par bloc : **utilisateur au nord, administration et coffre au sud**, et entre les
+deux **cinq colonnes** — GitHub à 100 % verticale, hors GitHub verticale et nettement séparée, le
+cluster (immo au nord avec préproduction à l'ouest et production à l'est, geo au centre de même,
+plateforme partagée au sud sur toute la largeur), les buckets OVH (immo au nord, geo au centre, clés tout au sud), la
+réplication en autre région verticale à l'est de l'est. **Le plan est contrôlé sur le rendu, pas sur
+l'intention** : un test et une porte de build échouent si un bloc lâche — le nord au-dessus de tout,
+le sud en dessous de tout, les cinq colonnes qui se suivent d'ouest en est sans se chevaucher, l'ordre
+imposé dans chacun des dix conteneurs nommés, si l'administration au sud n'est pas sur une seule
+rangée horizontale, et aucune des trois colonnes verticales avec deux cartes côte à côte.
+
+**Le gain est dans l'emprise et dans le texte.** Le cadre passe de **10 455 × 5 992 à 7 289 × 4 391**
+— **30 % de largeur et 27 % de hauteur en moins** — et le plus petit texte de **2,45 px à 3,35 px**
+à 1440 × 900 (**+31 %**), de **1,55 pt à 2,22 pt** en A4 paysage. La part de la surface occupée par
+les **cartes elles-mêmes** passe de **7 % à 14 %** : ce sont les vides qui ont reculé, pas les cartes
+qui ont grossi. Le rapport largeur / hauteur est de **1,664**, dans la porte 4:3 – 16:9, sans que le
+cadre ait eu besoin d'être rallongé pour la tenir.
+
+**Ce que le plan coûte, dit franchement.** L'ordre des colonnes place GitHub à deux colonnes du
+cluster et à trois des buckets. Deux colonnes non voisines **ne se voient pas** : leurs cinq liaisons
+montent par le couloir qui les borde, **survolent toute la bande** et redescendent par le couloir
+d'arrivée — c'est ce qui garantit qu'aucun tracé ne traverse une colonne non concernée, et c'est ce
+qui fait passer le nombre de coudes de **133 à 374** et la longueur de trait de **123 000 à
+186 000 px**. Le balayage a mesuré **232 placements** sur ce plan (découpage par ports, contraintes
+de ports, espacements, placement des nœuds, compaction, marge des couloirs, rapport visé) et retenu
+le meilleur ; le sens et le rapport d'aspect de chaque conteneur de feuilles ne sont plus des
+réglages de scène, le cadre les balaie lui-même conteneur par conteneur et retient le mélange qui
+tient le rapport à la hauteur la plus faible.
+
+**Une dérogation de grille, déclarée.** La porte « un conteneur de quatre cartes ou plus occupe au
+moins deux colonnes », ajoutée à la version précédente, n'est pas opposable aux conteneurs que le
+plan **verticalise lui-même** — l'owner écrit « la zone de réplication ovh autre région,
+verticalisée ». La liste des conteneurs exemptés est publiée au manifeste ; un seul y est
+effectivement concerné, `EXT_REGION` (5 cartes sur 1 colonne). Partout ailleurs la porte s'applique,
+et elle est verte.
+
+**La porte de 12 px reste hors d'atteinte par construction** et le choix de vue (A / B / C)
+**reste entier**.
+
+Contrôles géométriques, aux deux définitions : **0 extrémité hors bord, 0 croisement, 0 étiquette détachée ou posée sur une carte, 0 px d'écart au milieu** pour les cartes à liaison unique, tracés orthogonaux, rapports tous dans 4:3 – 16:9. Page autonome : **0 erreur de console, 0 erreur d'exécution, 0 requête externe**. Impression : chaque schéma tient entier sur sa page.
+
+**Aucune scène ne tient le plancher de 12 px**, et l'écart reste grand : le plus petit texte de la scène d'architecture est à 3,35 px, soit **3,6 fois sous la porte** (4,9 fois avant le plan). La page sort par **dérogation motivée** (« décision owner attendue : aucun placement natif ne tient 12 px ni 8 pt, options de vue A/B/C en section 13 »), inscrite au manifeste et affichée sous chaque scène. Ce n'est pas un défaut de réglage : le balayage a essayé **232 placements sur le plan imposé** pour la scène 1 et **672 par scène** pour les deux autres (mode, sens, stratégie de couches, écarts, placement des nœuds, compaction, étiquettes, rapport d'aspect, repliement) et a retenu le meilleur de chacun. **La mesure est établie : au-delà d'une dizaine de cartes par vue, aucun placement ne tient le plancher.** La scène 3 (17 cartes) monte à 7,21 px, la scène 1 (48 cartes, vingt conteneurs, cinq colonnes) tombe à 3,35 px — c'est le nombre de cartes et de conteneurs, et la mise en page demandée, qui décident, pas le moteur.
+
+**Options de vue — présentées, non tranchées.** Tu n'as pas choisi entre scinder par domaine, ouvrir à taille lisible, ou garder la vue compacte. **Ce dossier ne choisit pas à ta place** ; les trois sont dans le panneau de choix (question « Vue des schémas »), avec la possibilité d'une combinaison.
+
+| Option | Contenu | Meilleur argument pour | Meilleur argument contre | Coût | Réversibilité |
+|---|---|---|---|---|---|
+| **A — scinder par domaine** | architecture → immo / geo / transverse (+ clés, alertes) ; processus → un BPMN par déclencheur ; ≤ 10 cartes par vue | seule voie **mesurée** vers 12 px partout : la scène 3, à 17 cartes, est déjà à 7,21 px, et la remise en page hiérarchique de la scène 1 vient de montrer qu'ajouter des conteneurs éloigne de la porte au lieu d'en rapprocher | perd la vue d'ensemble symétrique que tu demandais en ARCH-1 ; références croisées à tenir cohérentes ; plus de vues à maintenir | moyen (nouvelles scènes, métadonnées, balayage) | élevée : les scènes compactes restent |
+| **B — ouvrir à taille lisible** | cadrage d'ouverture au zoom plancher (12 px), centré, minicarte pour naviguer, au lieu d'« ajuster à la vue » | la porte tient **par construction**, sans toucher au contenu ni scinder ; la vue d'ensemble reste accessible par zoom arrière | la vue d'ensemble n'est plus immédiate ; **l'impression garde le problème** (la page entière doit tenir sur une feuille) | faible (cadrage + contrôle) | totale |
+| **C — garder la vue compacte** | scènes actuelles, dérogation affichée, détail accessible au clic et à l'échelle 1:1 | aucun travail de restructuration ; symétrie, faces et hiérarchie visibles ensemble | illisible à distance de lecture (**3,21 à 7,21 px mesurés**) ; la dérogation devient permanente | nul | totale |
+
+**Ce que ce dossier n'a pas pu faire** : le rendu bpmn-js des processus P1 à P9 (paquet non installé, aucune installation réseau dans cette lane ; autorisation D7 non prononcée) ; des **variantes scindées mesurées** pour l'option A (elles attendent ton choix — les chiffrer d'avance supposerait un découpage que tu n'as pas validé) ; la mesure d'une copie intra-bhs et celle de la création du cluster MKS (actes cluster et OVH, hors du périmètre de cette lane) ; la relecture du complément « débits » par le double challenge (DV-1, à organiser).
+
+**Une dérogation de forme, déclarée** : la revue Gemini porte dans sa source une **espace en fin de ligne** (ligne 197). La chaîne du dépôt refuse toute fin de ligne blanche (`git diff --check`), donc l'annexe reproduit ce texte **sans cette seule espace**. C'est la seule différence entre l'annexe A et la source ; les cinq autres textes verbatim sont repris **octet pour octet**, et les six empreintes sont contrôlées par un test.
+
+**Ce qu'il me faut** : tes réponses aux lots 0 à 6 (section 12), **et** ton choix de vue — A, B, C, ou une combinaison (par exemple A pour l'architecture, C pour le reste).
+
+## Annexe A — Revues contradictoires de la spec PRA v3 (verbatim)
+
+Avis des deux contradicteurs sur `SPEC_PRA_V3_2026-09-19.md`, 2026-09-19. Contenu intégral, sans modification.
+
+### Revue A1 — Fable 5.1 (PRA v3)
+
+# Revue contradictoire — SPEC PRA v3 (sauvegarde et reprise immo + geo) — Fable 5.1
+
+*2026-09-19 · contradicteur : Fable 5.1 (`claude-fable-5-1`) · lecture seule : aucun fichier modifié hors ce rendu,
+aucun commit, aucune action cluster, OVH ou réseau, aucun `.env` ni valeur secrète lus.*
+
+## Périmètre et méthode
+
+| Élément | Chemin (relatif à `.lanes/conductor/`) |
+|---|---|
+| SPEC | `tmp/backup-pra-698/docs/spec/SPEC_PRA_V3_2026-09-19.md` (1 152 lignes, lues en entier) |
+| OWNER | `.remote/PRA_V3_DEMANDE_OWNER.md` (verbatim lignes 20–47, passages ouverts lignes 49–58) |
+| INV | `.remote/PRA_V3_INVENTAIRE_K8S.md` (inventaire k8s + complément B.5) |
+| FAITS | `.remote/PRA_V3_RENDU_FAITS.md` (archify, bpmn-js) |
+| E2E | `.remote/BACKUP_E2E_STATUS.md` (état du code, 19/09) |
+| CODE | worktree `tmp/backup-pra-698`, HEAD `5ee7900c`, diff non commité (17 fichiers modifiés, 2 nouveaux) |
+| K8S-MK | `/home/antoinefa/src/poc-k8s/Makefile` (cibles d'export / restauration des clés de scellement, sans valeur) |
+
+Vérifié dans le code ou les sources locales : `keep_sets` 7/4/2 (`backup.py:304-317`), RPO 86 400 s
+(`backup.py:424-429`), `--no-role-passwords` (`backup.py:107`), plancher de verrou 35 j = `NONCURRENT_DAYS`
+(`backup-provision.py:48,149`), région `bhs` codée (`backup-provision.py:173,299`), `OVH_ENDPOINT` par défaut
+`ovh-eu` (`backup-provision.py:238`), horaires 02:15/14:15 et 45 * (`41-db-backup-cronjob.yaml:8`,
+`43-backup-freshness-cronjob.yaml:8`), règle Prometheus `for: 2h` (`backup-common/alerts.yaml:31`),
+commentaires « Loi 25 » du schéma (`api/src/db/schema.ts:372-584`), 12 migrations drizzle (`api/drizzle/`),
+purge par le runner (`run-db-backup.sh:147`), 14 conservés (`run-db-backup.sh:47`), nœud unique r2-15
+1840m / 12 785,78 MiB et aucun namespace Prometheus (`.remote/K8S_RESERVATIONS_R2-15.md:32-61`), reçu de
+copie d'objets : `parityJob.createdAt 22:00:00Z`, `completedAt 22:38:31Z`, `processed 59017`,
+`copied 39582` (`origin/main:docs/architecture/evidence/scw-final-sweep-prod-live-receipt-2026-09-13.json`).
+
+Non vérifiable ici (réseau interdit) : durées 6 min 54 s / 2 min 10 s (S13, `gh api`), variables GitHub (S12),
+plan geo (S7, branche distante), régions OVH, articles de loi sur le texte officiel.
+
+---
+
+## 1. Couverture contre le verbatim (OWNER lignes 20–47)
+
+Statuts : **oui** · **partiel** · **déformé** · **non** · **ouvert** (passage inachevé). Gravité seulement
+quand le statut n'est pas « oui » ou « ouvert ».
+
+| # | Fragment verbatim (OWNER:ligne) | Statut | Où dans SPEC | Gravité / commentaire |
 |---|---|---|---|---|
-| B1 | **Un writer compromis fait supprimer les vraies sauvegardes par le retainer.** Le writer signe légitimement les reçus `verified/` (étape `report`), et `verified_sets()` accepte tout reçu cohérent avec un manifeste que ce même writer a pu déposer. `keep_sets()` retient le point le plus récent par jour/semaine/mois : des jeux forgés datés après chaque jeu réel évincent les réels, puis `retain()` les supprime. Rejoué hors ligne : 40 jeux forgés une heure après chaque réel, une exécution de `retain()` a supprimé 4 jeux réels (16 objets) ; positionnés sur chaque jour conservé, ils évincent tout. L'invariant « l'écrivain ne peut pas supprimer » ne tient pas par chemin détourné. | bloquant | `deploy/k8s/db-backup/backup.py:213-228`, `:199-210`, `:244-254` ; `deploy/k8s/41-db-backup-cronjob.yaml:84-96` (report = `radar-pra-writer`) ; `deploy/ci/backup-provision.py:63` (PutObject sur tout `postgres/<env>/*`, donc `verified/` inclus) | Identité « verifier » distincte (PutObject uniquement sous `verified/` et `exercises/`), Deny explicite PutObject du writer sur `arn/postgres/<env>/verified/*` (exprimable sans NotResource) ; garde dans `retain()` : jamais plus de N suppressions par exécution et jamais un jeu plus récent que le plus ancien point conservé ; rétention Object Lock obligatoire (B2). |
-| B2 | **L'écrasement n'est pas empêché et rien n'est immuable par défaut.** PutObject sur une clé existante crée une nouvelle version courante : le writer peut remplacer `backup.dump`/`manifest.json` de tous les jeux. La rétention Object Lock par défaut est optionnelle (`None` si non fournie), `upload()` ne pose aucune rétention par objet, et `download()` ne sait lire que la version courante (aucun VersionId). Les versions écrasées expirent à 35 j. La restauration après un tel incident dépend d'un admin manipulant des versions non courantes à la main. | bloquant | `deploy/ci/backup-provision.py:120-131`, `:172-175`, `:336` ; `deploy/k8s/db-backup/backup.py:134-136`, `:140-149` ; `deploy/ci/backup-provision.py:90` | Rendre `OBJECT_LOCK_MODE`/`OBJECT_LOCK_DAYS` obligatoires au provisionnement (refus sinon) ; ajouter un paramètre `BACKUP_OBJECT_VERSION` à `download` ; NoncurrentDays ≥ rétention. |
-| B3 | **La suppression et la lecture de version par le writer ne sont ni testées ni interdites.** La sonde n'appelle que `delete_object` sans VersionId et `get_object` sans VersionId. `DeleteObjectVersion` et `GetObjectVersion` sont absents de l'énumération OVH (fait du brief), donc non refusables par politique. Hypothèse à mesurer : OVH applique la sémantique AWS (un `DeleteObject?versionId=` relève de `DeleteObjectVersion`, hérité du rôle de base). Si oui, sans rétention par défaut (B2), un writer supprime définitivement toute version, et lit toute version. Le runbook affirme le contraire. | bloquant | `deploy/ci/backup-provision.py:294-297`, `:302-303` ; `deploy/ci/README.md:341` (« including version deletion ») | Ajouter à `probe()` : `expect_denied(writer.delete_object, Key, VersionId=version)` sur une version NON verrouillée et `expect_denied(writer.get_object, Key, VersionId=version)` ; si l'un des deux réussit, la rétention Object Lock devient l'unique barrière et doit être documentée comme telle. |
-| B4 | **Le provisionnement ne peut pas aboutir dès que la rétention par défaut est configurée.** L'objet sonde écrit par le writer hérite de la rétention par défaut ; le nettoyage final supprime sa version sans `BypassGovernanceRetention` → AccessDenied dans les deux modes, dans un `finally`, donc échec de la commande après création des utilisateurs/clés et avant émission des Secrets. En COMPLIANCE, la sonde est indestructible jusqu'à échéance. Le test ne couvre pas le cas. Le paramétrage « mode et durée au choix de l'owner » n'est donc pas exerçable de bout en bout. | bloquant | `deploy/ci/backup-provision.py:284-285`, `:312-318` (ligne 318 sans bypass), `:364-366` ; `deploy/ci/backup-provision.test.py:276-298` (aucun `lock_config`) | `BypassGovernanceRetention=True` ligne 318 (GOVERNANCE) ; en COMPLIANCE, ne pas supprimer les objets sonde (préfixe `exercises/_provision/`, expiration 90 j) ; test avec rétention par défaut posée. |
-| B5 | **Aucun confinement hors du bucket.** Toutes les ressources de la politique sont `arn:aws:s3:::<ce bucket>[...]` (politique writer imprimée depuis `policy()`). Le rôle de base `objectstore_operator` est à l'échelle du projet : chaque identité runtime hérite lecture/écriture/suppression sur tous les autres buckets du projet. Le même `OVH_PROJECT_ID` sert aux deux environnements, donc le writer préprod a plein accès au bucket prod et réciproquement (fait). Hypothèse : `radar-immobilier-docs`, `radar-immobilier-raw`, `sentropic-geo` sont dans le même projet (même endpoint bhs), auquel cas ils sont exposés à un writer compromis. Le runbook annonce « Deny other buckets/envs » ; la sonde ne teste qu'un autre préfixe du même bucket. | bloquant | `deploy/ci/backup-provision.py:59-61`, `:72-78`, `:239-241`, `:302-303` ; `deploy/ci/README.md:279`, `:313-314` ; `deploy/ci/object-storage-prod.mk:285` ; `docs/architecture/storage-audit.md:44` | Sans NotResource : au provisionnement, `list_buckets` (admin) et Deny `s3:*` explicite sur chaque autre bucket (`arn` et `arn/*`), à relancer à chaque nouveau bucket ; sonde `expect_denied(writer.list_objects_v2 / put_object, Bucket=<autre>)` ; décision owner : projet Public Cloud dédié aux buckets PRA. |
-| I1 | **Le reçu quotidien prouve que le dump local se restaure, pas l'objet S3.** Dans le CronJob, `restore-and-verify` lit `/work` (emptyDir rempli par `dump`), sans étape `download` ; celle-ci n'existe que dans le Job manuel. `verified_sets()` ne vérifie que `ContentLength`. Un objet corrompu à l'envoi porte un reçu « vérifié ». | important | `deploy/k8s/41-db-backup-cronjob.yaml:69-82` vs `deploy/k8s/42-db-restore-verify-job.yaml:24-39` ; `deploy/k8s/db-backup/backup.py:224-226` ; `deploy/ci/README.md:257` | Init container `download` (identité reader) vers un second emptyDir vierge avant `restore` ; à défaut, relecture SHA-256 de l'objet et renommer le reçu « local-verified ». |
-| I2 | **L'horizon de rétention réel est ≤ 20 jours, pas un mois.** Le palier mensuel (`limit=1`) retient toujours le point le plus récent, déjà retenu par le palier quotidien. Calcul exécuté sur des points toutes les 12 h : 9 points conservés, âge maximal 17,5 à 20 j selon la date. Le plan et le runbook annoncent 12 points et 1 mois ; le chiffrage de stockage repose sur 12. Une corruption découverte après trois semaines est irrécupérable. | important | `deploy/k8s/db-backup/backup.py:199-210` ; `docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md:139-141`, `:166` ; `deploy/ci/README.md:260-261` ; `deploy/ci/backup-pra.test.py:251-257` (ne fixe pas l'horizon) | Palier mensuel = dernier point de chacun des 2 derniers mois représentés (ou N mois hors mois courant) ; aligner NoncurrentDays et rétention Object Lock sur l'âge maximal (≥ 62 j) ; corriger le chiffrage. |
-| I3 | **La purge des orphelins ne s'exécute qu'après un pipeline entièrement réussi.** `retain` est le conteneur principal, après quatre init containers ; si `restore` échoue plusieurs jours (mémoire, extension, I5), chaque exécution laisse un dump ≈ 500 MiB sous `sets/`, préfixe sans aucune règle de cycle de vie. Croissance ≈ 1 GiB/jour/env jusqu'à correction. | important | `deploy/k8s/41-db-backup-cronjob.yaml:33-116` ; `deploy/k8s/db-backup/backup.py:255-267` ; `deploy/ci/backup-provision.py:85-99` ; `PLAN...md:152-153` | Exécuter `retain` en premier init container (purge des orphelins des cycles précédents) ou CronJob quotidien séparé avec l'identité retainer ; conserver la garde « au moins un point vérifié ». |
-| I4 | **Un seul reçu incohérent bloque définitivement la fraîcheur et la purge.** `verified_sets()` lève à la première incohérence ; rejoué : `retain()` lève `verification report does not match manifest`. Un writer compromis ou bogué maintient la page en alarme et arrête la purge ; seul le retainer peut effacer le reçu et aucune procédure n'existe. | important | `deploy/k8s/db-backup/backup.py:221-223`, `:246`, `:287` ; `deploy/ci/README.md:486-494` | Mettre en quarantaine (ignorer, journaliser, compter) les reçus incohérents et paginer sur ce compteur ; documenter le nettoyage avec l'identité retainer. |
-| I5 | **Égalité stricte des versions d'extensions contre des images flottantes.** `extensions()` compare `extversion` à l'identique ; l'image de restauration installe sa version par défaut (3.4.3 mesurée) alors que la source tourne `postgis/postgis:16-3.4` en `IfNotPresent` (version figée au premier pull du nœud) et que l'image de sauvegarde est reconstruite à chaque push sur main. Au premier écart mineur, toutes les vérifications échouent, aucun reçu, page permanente. Le plan exige un pin par digest, non réalisé. | important | `deploy/k8s/db-backup/backup.py:51-53`, `:175` ; `deploy/k8s/db-backup/Dockerfile:1`, `:3` ; `deploy/k8s/20-postgres-postgis.yaml:50-51` ; `PLAN...md:115-116` | Comparer nom + version majeure.mineure, ou restaurer avec `CREATE EXTENSION ... VERSION` de la source ; pinner les bases par digest ; consigner la version source dans le manifeste. |
-| I6 | **Compatibilité Python/libssl non garantie entre les deux bases.** Python de `python:3.11-slim-bullseye` copié dans `postgis/postgis:16-3.4`. Mesuré : l'image locale est bullseye, `_ssl` lié à `libssl.so.1.1`, base PostGIS en cache datée 2024-10-14. Un pull frais du tag peut être bookworm (libssl3) : `import ssl`/boto3 échoue à l'exécution alors que `docker build` réussit. | important | `deploy/k8s/db-backup/Dockerfile:1-5` | Pin des deux bases par digest ; `RUN python3 -c "import ssl, boto3, psycopg2"` dans le Dockerfile. |
-| I7 | **L'image activée n'est pas l'image prouvée.** La preuve préprod utilise `pra-712-v2` construite depuis la branche ; `deploy-backup-pra` active `radar-backup:<sha7>` reconstruite sur main (digest différent, jamais exécuté en cluster), simultanément en préprod et prod. | important | `deploy/ci/README.md:433`, `:186` ; `.github/workflows/build-push-images.yml` job `deploy-backup-pra` (`radar-backup:${GITHUB_SHA::7}`) | Promouvoir le digest prouvé (retag) au lieu de reconstruire ; sinon, après activation, `kubectl create job --from=cronjob/radar-db-backup` en préprod et attendre le reçu avant d'appliquer prod. |
-| I8 | **Le RBAC de `PRA_KUBE_CONFIG` n'est pas livré.** Aucun Role du dépôt n'accorde `networkpolicies` ; le runbook décrit les droits sans manifeste ; `activate` n'a aucun préflight `auth can-i` (contrairement au provisionnement). L'activation échouera en Forbidden ou sera préparée hors dépôt. | important | `deploy/k8s/10-rbac.yaml`, `deploy/k8s/11-ci-deployer-preprod-rbac.yaml` (aucune règle networkpolicies) ; `deploy/ci/README.md:471-473` ; `deploy/ci/backup-pra.sh:35-42` vs `deploy/ci/backup-provision.sh:28-30` | Livrer Role + RoleBinding (cronjobs, configmaps, networkpolicies ; get/create/patch) pour les deux namespaces ou ticket opérateur ; préflight `kubectl auth can-i` par kind et namespace dans `activate`. |
-| I9 | **`deploy-backup-pra` s'exécute à chaque push sur main avec approbation `production`.** Chaque fusion sans rapport attend une approbation owner et re-pinne l'image de sauvegarde sur un digest non éprouvé (I7). | important | `.github/workflows/build-push-images.yml` job `deploy-backup-pra` (`if: main && BACKUP_PRA_ENABLED`, `environment: production`, `needs: build-push`) | Déclencher seulement si le digest de `radar-backup` change (comparer au CronJob en place) ou par `workflow_dispatch` ; sinon documenter la charge d'approbation. |
-| I10 | **La fraîcheur pagine dès l'activation, jusqu'au premier point vérifié.** Sans reçu, `freshness()` lève ; la règle `unless last_successful_time` s'arme après 10 min. Fusion l'après-midi UTC : première sauvegarde prod à 02:15, jusqu'à 12 h d'échecs horaires en prod, sans consigne de premier lancement manuel. | important | `deploy/k8s/db-backup/backup.py:288-293` ; `deploy/k8s/backup-common/alerts.yaml:15-21` ; `deploy/k8s/41-db-backup-cronjob.yaml:8` | Runbook : `kubectl -n <ns> create job --from=cronjob/radar-db-backup radar-pra-first` immédiatement après activation et attente du reçu ; ou fraîcheur suspendue 24 h. |
-| I11 | **Aucun chemin exécutable de restauration réelle, et durée non mesurée à 1 GiB.** `restore` ne vise que le serveur éphémère, arrêté en `finally` ; la reprise réelle est de la prose. Le budget `activeDeadlineSeconds: 3600` couvre dump + upload + restore + report + retain avec 500m CPU, `maintenance_work_mem=32MB`, `--single-transaction` ; le plan reconnaît que c'est une proposition à mesurer. | important | `deploy/k8s/db-backup/backup.py:152-187`, `:163-165`, `:171-172` ; `deploy/k8s/41-db-backup-cronjob.yaml:17`, `:75` ; `PLAN...md:83-106`, `:125-126` | Action `restore-into` (PGHOST cible, GO explicite, identité reader, `pg_restore -j` sans single-transaction) ; exercice chronométré taille réelle en préprod (950 MiB) avec durée, pic mémoire et disque avant activation prod ; budget de temps séparé pour la vérification. |
-| I12 | **Le runbook contredit le code sur des affirmations de sécurité.** Reader « GetObjectVersion, GetBucketPublicAccessBlock » (non octroyables) ; retainer « DeleteObjectVersion sous `_provision/` » (non implémenté, c'est l'admin) ; « exact version removed by retainer » et « writer deletion (including version deletion) » (faux) ; « Deny other buckets » (absent). | important | `deploy/ci/README.md:275`, `:276`, `:279`, `:339-341` vs `deploy/ci/backup-provision.py:62-68`, `:294-297`, `:313-318` | Régénérer la matrice depuis `policy()` et le paragraphe sonde depuis `probe()` ; test qui compare la matrice du README à la politique. |
-| I13 | **Le plan d'ensemble et le plan geo se contredisent sur ce qui est copié et gelé.** Le plan immo exige de copier les artefacts publiés référencés par immo tant que la reproduction n'est pas démontrée, avec versions exactes, et suspend l'export geo. Le plan geo exclut par principe `normalized/`, `exports/immo/`, `pmtiles/` et PostGIS, affirme « aucun gel », admet que `normalized/` « peut se re-stamper » (mutation en place de ce qu'immo consomme), compte 0 objet dans `raw/` et n'a pas confirmé le versioning de `sentropic-geo`. Aujourd'hui, un sinistre du bucket geo perd le contrat sans copie ni reproduction démontrée, et un cycle ne peut pas épingler la version geo référencée à T0. | important | `PLAN...md:24-27`, `:44`, `:55-57` ; geo `docs/ops/pra/GEO_PRA_PLAN.md:16-18`, `:83-87`, `:14`, `:105-106` | Inscrire la contradiction comme décision owner ouverte dans le plan immo ; minimum : geo copie `exports/immo/` (et ses entrées) avec version-id par cycle jusqu'à démonstration de reproduction ; inventaire des writers immo incluant `35b-populate-geo-cronjob.yaml`. |
-| I14 | **Le CronJob prod partage la fenêtre de fraîcheur et le quota avec le reste sans mesure.** Le pod de sauvegarde vaut 512 MiB de limite (max des init), la fraîcheur 128 MiB à :45, soit 640 MiB en chevauchement à 02:45 et 14:45 ; la marge « ~768 MiB » est rapportée, non mesurée ; la sauvegarde de 14:15 UTC tombe en heures ouvrées (10:15 EDT) sur une source limitée à 600m CPU. | important | `deploy/k8s/41-db-backup-cronjob.yaml:8`, `:73-75` ; `deploy/k8s/43-backup-freshness-cronjob.yaml:8`, `:39` ; `deploy/k8s/20-postgres-postgis.yaml:83-84` ; `PLAN...md:127-131` | `kubectl describe quota` des deux namespaces dans le dossier de fusion ; décaler la fraîcheur hors des fenêtres de sauvegarde (par ex. `:05`) ; envisager 02:15/20:15 UTC. |
-| M1 | `verify_bucket()` compare les règles de cycle de vie par égalité de dictionnaires ; une normalisation côté serveur (forme de `Filter`, booléens) produit un faux « lifecycle readback failed ». Hypothèse : non mesuré sur OVH. | mineur | `deploy/ci/backup-provision.py:192-194` | Comparer champ par champ sur ID/Status/Filter.Prefix/valeurs numériques. |
-| M2 | Le moindre privilège est obtenu par exclusion : `ListAllMyBuckets`, `ListBucketVersions`, `GetBucketObjectLockConfiguration` restent hérités ; `verify_bucket(reader)` dépend de ce dernier sans l'avoir accordé. | mineur | `deploy/ci/backup-provision.py:67-68` vs `:183` ; `:29-35` | Ajouter `GetBucketObjectLockConfiguration` aux `bucket_reads`, refuser `ListAllMyBuckets`/`ListBucketVersions` aux runtimes, documenter le reste. |
-| M3 | boto3 1.40 calcule par défaut des sommes de contrôle (`when_supported`, mesuré) : classe d'incompatibilité connue avec des S3 non AWS. Hypothèse : la validation live du 18/09 n'indique pas le client utilisé. | mineur | `deploy/k8s/db-backup/Dockerfile:2`, `:9` | `ENV AWS_REQUEST_CHECKSUM_CALCULATION=when_required AWS_RESPONSE_CHECKSUM_VALIDATION=when_required` sauf preuve live avec ce boto3. |
-| M4 | `kubectl wait --for=condition=complete` sur un Job échoué attend les 3700 s complètes. | mineur | `deploy/ci/backup-pra.sh:55`, `:61` | Boucle surveillant `complete` et `failed`. |
-| M5 | Conflit d'apply côté serveur silencieux : si un Secret `radar-pra-*` existe déjà sous un autre field manager, l'apply échoue et stderr est jeté ; le runbook ne le dit pas. | mineur | `deploy/ci/backup-provision.sh:40`, `:43` | Consigne « supprimer tout Secret préexistant de même nom avant provisionnement ». |
-| M6 | `JOB_UID` lit le label `batch.kubernetes.io/controller-uid` (Kubernetes ≥ 1.27, hypothèse sur la version MKS) ; sinon `jobUid` vide, accepté par la preuve (`!= "local-test"`). | mineur | `deploy/k8s/41-db-backup-cronjob.yaml:78-79` ; `deploy/ci/backup-pra.sh:63` | Vérifier la version serveur ; exiger un UID non vide dans la preuve. |
-| M7 | `db-restore-verify/kustomization.yaml` n'est utilisé par aucun script (le rendu lit `42-…yaml` directement) ; `gettext-base` installé sans usage dans l'image. | mineur | `deploy/k8s/db-restore-verify/kustomization.yaml:1-7` vs `deploy/ci/backup-pra-render.py:26` ; `deploy/k8s/db-backup/Dockerfile:6` | Supprimer les deux. |
-| M8 | `radar-pra-postgres-ingress` duplique `allow-backup-to-postgres` en prod (même sélecteur `component: db-backup`). Sans effet, mais à connaître pour éviter une suppression « inutile » de l'un ou l'autre. | mineur | `deploy/k8s/backup-common/network.yaml:29-41` vs `deploy/k8s/70-networkpolicy.yaml:206-229` | Note dans le runbook. |
+| C1 | « symétrie entre preprod et prod pour mieux comprendre visuellement les elements commun et différence » (21) | oui | §12.1 (903-927) | Contenu défini, rendu différé à la phase de rendu ; conforme à une spec. |
+| C2 | « représenter la zone k8s - et ovh (vs ce qui est géré en dehors) » (21) | oui | §12.1 (895-898) | Six zones : élaboration, pas déformation. |
+| C3 | « eventuellement des clé etc. » (21) | oui | §9.4 (731-748) | Écart grille (« éventuellement » rendu ferme) relevé par la spec (103). |
+| C4 | « Pour les alertes, on ne sais pas cocmment et uqi les recoit. » (21) | oui | §11 (831-883) | — |
+| C5 | « il faut symboliser l'admin cluster » (21) | oui | §2.1 (231), §12.1 (900) | — |
+| C6 | « peut être les mails pour les notifs des alertes ? (via TEM scw ?? ou via gh ou autre ??) » (21) | oui | §11.3 (867-875), Q6 (1069) | Question de l'owner, réponse par options + recommandation. |
+| C7 | « moins de composants (5 vs 3 pour geo, 3 vs 2 pour immo). C'est difficile de comprendre pourquoi. » (22) | oui | §12.2 (941-953) | Explication carte par carte ; le lien avec les chiffres 5/3 et 3/2 est plausible, non vérifié contre la scène v2. |
+| C8 | « j'imagine que github action doit être la dedans » (22) | oui | §2 (232-234), §12.1 (895) | Phrase complète, distincte du « j'imagine que » final. |
+| C9 | « il manque encore une fois les consommateurs: est-ce que la sauvegarde est trigger par gh action ? un admin ? » (24) | oui | §2.2 (239-256) | Le mot « consommateurs » n'est pas repris tel quel ; la glose de l'owner (déclencheur) est traitée. Hypothèse : lecture suffisante. |
+| C10 | « "Coordinateur immo" n,est pas un rôle clair, il arrive plusieurs fois. il a plusieurs icones, on ne comprends pas si c un job ou uoi. » (24) | **déformé (élargi)** | §0.1 V10 (64), §2.3 (258-268), D-v3-2 (1029) | **important** — « n'est pas un rôle clair » devient « le rôle disparaît », source « owner » ; D-v3-2 justifie la suppression du gel par « un rôle que l'owner juge obscur ». L'écart grille/verbatim n'est pas relevé en §0.2 (109). Voir F13. |
+| C11 | « peut être qu'un bpmn (avec bpmn js et autolayout) serait favorable iic pour la repreésnetation non ? » (24) | oui | §12.3 (955-977) | Réponse « oui » ; limite du placement automatique signalée (fait FAITS:45-51). |
+| C12 | « le processus est tres mauvais: il doit y avoir des triggers » (26) | oui | §7 (480-616) | — |
+| C13 | « go to preprod: restoration de prod a prerod (go to preprod doit écraser la preprod avec la donnée de prod, et faire un test de migration de donnée) - doit être full automatique. » (27) | **partiel** | §7.3 (516-540), Q12 (1100-1102) | **important** — la recommandation Q12 (« quand la publication apporte une migration nouvelle, et à la demande ») est plus faible que « doit écraser la preprod avec la donnée de prod » à chaque passage, sans le dire. Voir F14. |
+| C14 | « la preprod recupere le dernier snapshot de preprod (que ce soit un go to preprod geo ou immo) » (27) | ouvert | Q1 (1051-1056), §7.3 (522-524) | Non tranché ; `scope` couvre « geo ou immo ». Voir §2 ci-dessous. |
+| C15 | « demande de restauration owner: selon devrait être full automatique, selon les différents types de reprise » (28) | oui | §7.4-7.6 | — |
+| C16 | « b.i crash complet k8s (nouveau provisionnement de k8s + tenant de preprod ou prod sur base du backup) » (29) | oui | §7.4 (542-564) | — |
+| C17 | « doit être démontré sur preprod (on récupere la sauvegarde de prod sur preprod) » (29) | oui | E1 (566-568, 607) | Cluster neuf + tenant préprod + sauvegarde prod : conforme au b.i. |
+| C18 | « a priori doit pouvoir être trigger par un github action. » (29) | oui | §8 (544-545) | La grille PROC-4 perd « a priori » ; sans conséquence ici. |
+| C19 | « la démonstration » (29) | ouvert | Q2 (1057-1058) | Voir §2. |
+| C20 | « b.ii demande de restauration complete (immo + geo) a parir d'un github action: doit être full automatisé également - comme sur i, doit être démontré que prperod récup total la prod » (30) | oui | §7.5 (572-585), E2 | Preuve d'intégralité définie (583-585). |
+| C21 | « b.iii demande de restauration immo ou geo ou d'un sous composant (bucket s3, db) - idem - doit être automatisé avec les guardrails de cohérence. » (31) | oui | §7.1 (482-498), §7.6 (587-601) | « idem » : les deux lectures couvertes (75). |
+| C22 | « restauration + migration (quand preprod est en avance sur prod), ou iso (aligné, pas besoin de remigration) » (33) | oui | §7.2 (500-514) | Le troisième régime « refus » est marqué proposition (115). |
+| C23 | « ce pourrait être le meme job github action avec un paramètre (e.g scope target de restauration preprod / prod - tenant tiers k8s etc). » (35) | oui | §8.1 (621-649) | Écart (un workflow par dépôt) dit et motivé (623-625) ; `target=third-party` présent (635). |
+| C24 | « k8s doit être un enabler, mais pas un blocant. » (37) | oui | §9 (697-729) | — |
+| C25 | « s'il y a crash, immo/geo doivent pouvoir se reprovisionner sur leur propre k8s. » (37) | oui | §9.2 (706-723), Q16 | — |
+| C26 | « k8s (le repo) peut être trigger pour déclencher des jobs spécifiques d'infra via github action. » (37) | oui | §9.3 (725-729) | Fait : `poc-k8s` n'a aucun workflow (INV:13). |
+| C27 | « en aucune situation, il doit y avoir besoin d'une ia pour le processus. » (37) | oui | §9.5 (750-769) | Plan déclaratif sur l'essentiel : voir F17. |
+| C28 | « au mieux elle doit pouvoir aider a gérer / monitor une situation (aide au monitoring) sur la base d'une documentation claire. » (37) | oui | §9.6 (771-775) | — |
+| C29 | « en cas de github action defaillant, des scripts doivent permettre de pouvoir faire la meme chose sans avec une clareté sur la gestion des secrets. » (37) | **partiel** | §8.2-8.4 (651-693) | **important** — §8.3 (662-663) déclare qu'une reconstruction complète est impossible sans GitHub tant que Q17 n'est pas retenu ; la ligne V29 (83) affiche « couvert » sans condition. Voir F3. |
+| C30 | « ah oui les délai de retour a l'objectif RTO RPO doivent, » (39) | ouvert | Q3 (1059-1060), §3.3 (294-307) | Voir §2 : ouvert, mais le voisin (RPO) est rempli par une proposition marquée. |
+| C31 | « le retour en opération doit être démontré comme étant moins de 2h (provisionnement d'infra k8s comprise / redéploiement complet). » (39) | **partiel** | §10.1 (781-817), E1 | **important** — estimation haute 135 min > 120 (809-810) ; dit une fois, absent de la ligne V31 (85), de RTO-1 (121), de §14 ; IdP hors budget (F5). |
+| C32 | « pour un upgrade ou on ne restore que des elements de composant, la restauration doit prendre moins de 5 min. » (39) | partiel | §3.2 (285-286), §10.2 (821-827) | mineur — la spec dit composant par composant ce qui ne tient pas 5 min ; transparent, mais la ligne V32 (86) devrait porter « partiel ». |
+| C33 | « Il faut donc peut être deux niveau de backup (snapshot et sync dispo aux bons endroit) » (39) | oui | §3 (272-324) | « snapshot » lu comme clone `TEMPLATE`, l'instantané de volume MKS en case vide (1134) : acceptable. |
+| C34 | « stp supprimer la visauliation grafphviz. » (41) | oui (différé) | §12.4 (981-982) | Action de la phase de rendu, dit (107). |
+| C35 | « j,avais demandé une représentation archifify ... je me fous ed graphviz » (41) | oui (différé) | §12.4 (983-987) | Faits archify transmis (FAITS:8-35). |
+| C36 | « daily sur une semaine (10j donc), weekly sur un mois (5 semaines du coup), et monthly sur 13 mois. ca veut dire 28 sauvegardes » (43) | **déformé (rétréci) pour la préprod** | §4.1 (330-345), §4.4 (398-403), D-v3-9 (1036), Q5 | **important** — le verbatim ne distingue pas les environnements ; la spec réduit la préprod au quotidien seul, marqué « proposition » mais non soumis à l'owner. Voir F12. « 10 jours représentés » (334) est une sémantique de code, non marquée (F26). |
+| C37 | « la gestion et l'externalisation doivent être au clair (compliances normes). » (43) | oui | §4.2, §5, §6 | — |
+| C38 | « La sauvegarde sur une plateforme hors ovh pourrait être une autre carte, » (43) | oui | §5.3 (433-438) | — |
+| C39 | « mais au moins faut prévoir un autre datacenter ou region. » (43) | oui | §5.1 (409-421) | — |
+| C40 | « j'imagine que » (45) | ouvert | Q4 (1061) | — |
+| C41 | « reprend - trace bien ma demande stp, avec double challenge merci » (47) + « astra xhigh + fable5.1 … 0 interprétation » (OWNER:117-118) | hors spec | V41 (95) | Organisation du conducteur. |
 
-## Réponses aux huit questions
+**Rien perdu** : chaque phrase du verbatim a une ligne V1–V41 dans la spec et une section ; je n'ai trouvé
+aucune demande absente. **Ajouté au nom de l'owner** : un cas (C10, « le rôle disparaît »). **Déformé** :
+C13 (recommandation plus faible), C29 et C31 (couverture affichée pleine alors qu'elle est conditionnelle
+ou non acquise), C36 (rétention préprod rétrécie sans question). Un point annexe : FAITS:41-52 attribue à
+l'owner « a choisi bpmn-js », « veut un couloir par acteur », « veut les formes BPMN standard », absents
+du verbatim S1 ; la spec ne les présente pas comme exigences (F27, hypothèse : autre message de l'owner).
 
-**1. Les invariants tiennent-ils ?** Non. Dans le bucket, les Deny énumérés couvrent bien lecture, suppression courante, ACL et versioning (politique writer imprimée : Allow PutObject/Abort/ListParts sous le préfixe, ListBucket conditionné, Deny des sept verbes sensibles). Mais trois chemins détournés subsistent : destruction par écrasement (B2), destruction par reçus forgés via le retainer (B1, reproduit), et suppression/lecture de version non testées et vraisemblablement non refusables (B3). Hors du bucket, aucun confinement (B5). Les préfixes sont bien ancrés (`postgres/<env>/*`, condition `s3:prefix` en StringLike/StringNotLike, clé absente couverte par le NotLike) ; l'objet sonde et la clé de verrou vivent sous `exercises/_provision/`, dans le périmètre.
+## 2. Les quatre passages inachevés : restent-ils ouverts ?
 
-**2. La restauration prouve-t-elle la restaurabilité ?** Elle prouve qu'un dump pris dans la même transaction que les comptes se restaure dans une instance éphémère de même version majeure avec les mêmes comptes par table, les mêmes extensions et des index valides. Elle ne prouve toujours pas : l'objet S3 lui-même (I1), les rôles et privilèges (`--no-owner --no-privileges`, admis par le plan), l'égalité sémantique (comptes seulement), le démarrage de l'API sur la base restaurée, la compatibilité de version d'extension dans le temps (I5), ni la durée (I11). Jour de sinistre réel, instance perdue, base d'un gigaoctet : il n'existe aucune commande de restauration vers une instance cible ; l'opérateur doit télécharger avec l'identité reader (aucun outil de sélection de version), recréer la StatefulSet, jouer `pg_restore` à la main (le `--single-transaction` du vérificateur n'est pas adapté à une restauration réelle), puis reconstituer les rôles ; la durée n'a jamais été mesurée et le budget d'une heure du vérificateur ne renseigne pas le RTO de 4 h annoncé.
+| Passage | Verdict | Preuve | Réserve |
+|---|---|---|---|
+| (a) « le dernier snapshot de preprod » | **ouvert** | Q1 (1051-1056) : deux lectures, « pas de recommandation » ; §7.3 (522-524) : déclenchement automatique non armé, `source_env` obligatoire | §4.4 (401), D-v3-9 (1036) et Q9 (1083) raisonnent sur « écrasée par la donnée de prod » : cela vient de la première phrase de (a), non ambiguë, pas de Q1. Acceptable. |
+| (b.i) « la démonstration » | **ouvert** | Q2 (1057-1058) ; E1 dérive de la phrase précédente (566-568) | Aucune. |
+| « les délai de retour a l'objectif RTO RPO doivent, » | **ouvert, avec une réserve** | Q3 (1059-1060) « pas de recommandation » | §3.3 (294-307) remplit le voisin de la phrase avec des valeurs concrètes (≤ 12 h, alerte 24 h, ≈ 0) sous l'étiquette « ajout conducteur retenu comme proposition ». L'étiquetage est correct ; le risque est l'acceptation par défaut : Q3 dit « la spec propose des RPO … que devaient-ils être ou faire ? », ce qui suggère que le manque est une valeur de RPO. Hypothèse de lecture alternative : « doivent [être démontrés] », qui rejoint la suite de la phrase. À laisser à l'owner, sans exemple de valeur dans la question. |
+| « j'imagine que » | **ouvert** | Q4 (1061) | Aucune. |
 
-**3. Verrou d'objet : valeurs recommandées.** Mode GOVERNANCE, durée 35 jours, posés dès le provisionnement des deux environnements (jamais laissés vides). Raisons : COMPLIANCE rend indestructible une sonde ou un envoi erroné pour toute la durée et engage le coût quoi qu'il arrive ; le bypass GOVERNANCE n'est détenu par aucune identité runtime, ce qui couvre la menace retenue (writer/retainer compromis) ; la menace « administrateur compromis » est déclarée hors périmètre par le plan (`PLAN...md:32-33`). Interactions à intégrer : le verrou repousse `NoncurrentVersionExpiration`, les expirations `daily/weekly/monthly` (7/28/31 j) et `exercises/` (90 j) jusqu'à l'échéance, d'où une durée alignée sur NoncurrentDays (35) et supérieure à l'âge maximal d'un point conservé (≤ 20 j aujourd'hui, ≥ 62 j si I2 est corrigé, auquel cas monter les deux valeurs ensemble) ; sous verrou, toute suppression du retainer n'est qu'un marqueur, donc le stockage vaut jeux courants + 2 jeux/jour × durée (≈ 35 GiB/env à 35 j, ≈ 90 GiB/env à 90 j). Le plan geo propose COMPLIANCE 1 an roulant pour ses irremplaçables ; deux doctrines par bucket sont acceptables si la décision owner les formule ensemble. Préalables techniques : B4 (nettoyage de la sonde) et B3 (mesurer ce que le verrou est seul à empêcher).
-
-**4. La purge suffit-elle à borner le stockage ?** En régime sain, oui : ≤ 9 jeux courants (I2), orphelins < 48 h, versions non courantes ≤ 35 j (≈ 70 jeux, ≈ 35 GiB/env à 0,5 GiB le jeu, ce qui domine la facture comme le plan l'admet). En cas d'échec répété de la sauvegarde, non : `retain` ne s'exécute pas, chaque tentative dépose un dump orphelin sous `sets/` sans règle de cycle de vie, croissance ≈ 1 GiB/jour/env jusqu'à intervention (I3) ; la fraîcheur alerte au bout de 24 h, mais l'alerte ne stoppe pas la croissance. Le dernier bon point n'est jamais supprimé (garde « au moins un point vérifié ») ; un reçu incohérent bloque en revanche toute purge (I4).
-
-**5. Séquence de consistance et « geo immuable ».** Le plan immo, tel qu'écrit, gèle aussi geo (`PLAN...md:44`) ; c'est le plan geo qui retire le gel. L'absence de gel est correcte pour `raw/cas` (adressé par contenu) et les grilles (append-only). Elle est incorrecte pour ce qu'immo consomme réellement : `normalized/` et `exports/immo/` sont réécrits en place et exclus de la copie (I13). Ce qui peut encore produire un état incohérent : (a) geo re-publie `exports/immo/` ou `normalized/` entre T0 immo et la copie ou la restauration, sans version épinglée ; (b) le versioning de `sentropic-geo` n'est pas confirmé, donc « copier une version exacte » est impossible ; (c) `raw/` est vide, donc la « re-dérivation » n'a pas d'entrée aujourd'hui ; (d) `35b-populate-geo-cronjob` (immo) lit geo et écrit PG : il doit figurer dans l'inventaire des writers gelés ; (e) les objets immo (`radar-immobilier-docs`, `raw`, graph) écrits par l'API pendant la fenêtre ; (f) le marqueur `complete.json` n'existe dans aucun code, le cycle joint reste un plan.
-
-**6. Activation simultanée à la fusion : risques et ordre sûr.** Ce qui peut mal tourner : image non éprouvée (I7), Forbidden RBAC (I8), Secrets prod absents si le provisionnement prod n'a pas eu lieu (pods en CreateContainerConfigError), refus de quota (I14), page immédiate de fraîcheur (I10), échec au premier cycle sur version d'extension (I5), et un writer prod en cluster avec les trous B1 à B5. Ordre qui rend l'opération sûre : 1) corriger B1 à B5 et relancer les tests ; 2) provisionner préprod puis prod avec rétention GOVERNANCE 35 j, conserver les résumés ; 3) preuve préprod complète chronométrée, y compris un `download` depuis S3 ; 4) `kubectl describe quota` et `auth can-i` des deux namespaces avec `PRA_KUBE_CONFIG` ; 5) installer la règle d'alerte et prouver la remontée avec un checker volontairement arrêté ; 6) fusion, activation appariée ; 7) aussitôt, Job manuel `--from=cronjob` en préprod puis en prod, attendre les deux reçus ; 8) vérifier une exécution de fraîcheur réussie à :45 dans chaque namespace, puis seulement déclarer l'activation terminée.
-
-**7. La preuve préprod suffit-elle pour activer prod le même jour ?** Non, en l'état. Elle n'exerce ni le bucket et les identités prod (seule la sonde de provisionnement les touche), ni le quota prod, ni les versions d'extensions prod, ni le RBAC d'activation, ni la remontée d'alerte, ni l'image qui sera activée (I7). Elle devient suffisante pour une activation prod le même jour si les conditions de la question 6 sont réunies et si le premier Job prod manuel est observé jusqu'au reçu par un humain. Sinon, activer préprod à la fusion et prod après le premier cycle préprod vérifié (≤ 12 h) ; le risque sur la source prod est faible (session en lecture seule, pas de PVC monté), le risque principal est une fausse confiance.
-
-**8. Autres défauts.** Voir I8 à I14 et M1 à M8. À souligner : le runbook affirme des garanties que le code n'implémente pas (I12), et le pipeline CD active à chaque push sur main (I9).
-
-## Synthèse
-
-1. **Fusionnable en l'état : non.** Cinq constats bloquants portent sur l'invariant central « l'écrivain ne peut ni lire, ni détruire, ni exposer » : destruction par reçus forgés (B1, reproduite), écrasement sans immuabilité par défaut (B2), suppression/lecture de version non testées (B3), provisionnement impossible avec rétention (B4), aucun confinement hors du bucket (B5).
-2. Conditions de sécurité : identité « verifier » séparée et Deny du writer sur `verified/`, garde de suppression dans `retain()`, rétention GOVERNANCE 35 j obligatoire avec sonde corrigée, sondes de version, Deny explicites sur les autres buckets du projet (ou projet dédié), le tout couvert par les tests hors ligne et par la sonde live.
-3. Conditions de preuve : vérification quotidienne depuis l'objet S3 (I1), comparaison d'extensions tolérante et images pinnées (I5, I6), horizon de rétention réel corrigé et chiffré (I2), purge indépendante du succès du pipeline (I3), exercice de restauration taille réelle chronométré en préprod (I11).
-4. Conditions d'activation : RBAC livré et préflight (I8), image promue plutôt que reconstruite ou re-preuve post-fusion (I7, I9), premier Job manuel et fraîcheur observés dans chaque namespace (I10), quotas mesurés (I14).
-5. Conditions documentaires : runbook réaligné sur `policy()`/`probe()` (I12) et contradiction immo/geo sur `exports/immo/`, le gel et le versioning inscrite comme décision owner ouverte (I13) ; tant qu'elle n'est pas tranchée, le plan d'ensemble ne décrit pas une reprise de service, seulement une reprise PostgreSQL.
-
-### Revue A2 — Gemini 3.8 high
-
-# Revue contradictoire — PR #712 (Sauvegardes et PRA, carte #698)
-
-## 1. Tableau des constats
-
-| # | Constat | Gravité | Preuve (fichier:ligne) | Correction proposée |
-|---|---|---|---|---|
-| **1** | **Fuite de privilèges inter-environnements et inter-buckets** : L'utilisateur OVH est créé avec le rôle projet global `objectstore_operator`. La politique générée n'applique des `Deny` que sur `arn` (le bucket de l'environnement courant). Aucune règle ne refuse les actions sur les autres buckets du projet OVH. L'écrivain ou le lecteur de préproduction a donc un accès opérateur complet sur le bucket de production (`radar-immobilier-backups`) et les buckets geo (`rhanka/geo`). De plus, `probe()` ne teste `postgres/other/` que sur le même bucket, masquant la faille. | **Bloquant** | `deploy/ci/backup-provision.py:147`<br>`deploy/ci/backup-provision.py:74`<br>`deploy/ci/backup-provision.py:223-225` | Créer les identités dans des projets Cloud OVH séparés par environnement, ou injecter un `Deny` explicite sur les ressources des autres buckets connus (`radar-immobilier-backups`, `rhanka-geo-*`). |
-| **2** | **Alerte d'astreinte immédiate au déploiement simultané en production** : Le CronJob de fraîcheur est actif dès l'application (`suspend: false`) et s'exécute à `45 * * * *`. Lors du déploiement initial, aucune sauvegarde n'existe encore. `verified_sets` retourne une liste vide, ce qui fixe `age = float("inf")`. La condition `age > 86400` lève immédiatement une exception et déclenche une alerte d'astreinte non justifiée avant même le premier cycle planifié à 02:15 / 14:15. | **Bloquant** | `deploy/k8s/43-backup-freshness-cronjob.yaml:6-8`<br>`deploy/k8s/db-backup/backup.py:242-247` | Déployer le CronJob de fraîcheur suspendu (`suspend: true`), exécuter un Job manuel initial de sauvegarde/vérification validé, puis activer le CronJob de fraîcheur. |
-| **3** | **PRA incomplet : absence totale de sauvegarde des rôles et globaux PostgreSQL** : Seule la base applicative est exportée via `pg_dump` dans `dump()`. Aucun `pg_dumpall --globals-only` n'est exécuté. La restauration s'effectue avec `--no-owner --no-privileges` dans une base vierge en mode trust sous l'utilisateur `postgres`. En cas de sinistre réel avec perte totale du cluster, les rôles applicatifs (`radar`), les mots de passe et les permissions n'existent pas : la restauration des données est inutilisable par l'application. | **Bloquant** | `deploy/k8s/db-backup/backup.py:59-62`<br>`deploy/k8s/db-backup/backup.py:164-165` | Sauvegarder les objets globaux (`pg_dumpall --globals-only`) chiffrés avec le jeu de sauvegarde, et inclure la création/vérification des rôles sans `--no-owner` dans le test de restauration. |
-| **4** | **Règles de cycle de vie S3 inopérantes sur les sauvegardes réelles** : Les règles de cycle de vie appliquent l'expiration sur les préfixes `postgres/{env}/daily/`, `weekly/`, et `monthly/`. Or, `backup.py` écrit exclusivement dans `postgres/{env}/sets/{cycleId}/`. Aucun objet n'est jamais écrit sous ces préfixes de rétention. Les sauvegardes courantes ne sont donc jamais purgées par S3 ; leur expiration dépend à 100 % du script `retain()`. | **Bloquant** | `deploy/ci/backup-provision.py:90-92`<br>`deploy/k8s/db-backup/backup.py:133` | Aligner les filtres de cycle de vie S3 sur l'arborescence réelle (`postgres/{env}/sets/`) ou faire écrire `backup.py` dans les sous-dossiers de palier correspondants. |
-| **5** | **Blocage définitif de la purge et de la fraîcheur sur rapport invalide** : Dans `verified_sets()`, la lecture des manifestes et le `head_object` lèvent directement une exception `ValueError` non interceptée dès qu'un fichier est altéré, manquant ou incomplet. Si un seul rapport ancien est corrompu ou désynchronisé, `verified_sets()` plante systématiquement, paralysant à la fois `retain()` (rétention bloquée, accumulation de stockage) et `freshness()` (alerte continue d'astreinte). | **Bloquant** | `deploy/k8s/db-backup/backup.py:197-205`<br>`deploy/k8s/db-backup/backup.py:217`<br>`deploy/k8s/db-backup/backup.py:241` | Intercepter les exceptions (`ClientError`, `ValueError`) au sein de la boucle dans `verified_sets` pour ignorer/archiver le rapport invalide avec un log d'avertissement au lieu de faire échouer l'ensemble du processus. |
-| **6** | **Omission de verbes critiques dans `DANGER_ACTIONS`** : `OVH_POLICY_ACTIONS` contient `s3:PutObjectRetention`, `s3:BypassGovernanceRetention`, `s3:GetObjectRetention` et `s3:ListBucketVersions`. Aucun d'eux ne figure dans `DANGER_ACTIONS`. Par conséquent, ils ne sont jamais ajoutés au bloc `Deny`. Les comptes `writer`, `reader` et `retainer` héritent de ces actions via `objectstore_operator`. Un attaquant disposant des identifiants `writer` peut verrouiller arbitrairement un objet ou contourner une rétention gouvernance. | **Important** | `deploy/ci/backup-provision.py:24-25`<br>`deploy/ci/backup-provision.py:28-30`<br>`deploy/ci/backup-provision.py:66` | Ajouter l'ensemble des verbes d'Object Lock et `s3:ListBucketVersions` dans `DANGER_ACTIONS` pour tout rôle ne nécessitant pas explicitement ce privilège. |
-| **7** | **Possibilité d'écrasement des sauvegardes antérieures par l'écrivain** : L'autorisation accordée à l'écrivain porte sur `arn + '/' + prefix + '*'`. Rien ne restreint `PutObject` au `cycleId` courant. Un processus écrivain compromis peut exécuter un `PutObject` sur les clés existantes d'un jeu antérieur (`postgres/{env}/sets/{cycle_passe}/backup.dump`). Dans S3, cela crée une nouvelle version courante non intègre qui sera téléchargée par défaut lors d'un `download()`. | **Important** | `deploy/ci/backup-provision.py:57-59`<br>`deploy/k8s/db-backup/backup.py:149-151` | Restreindre le préfixe accessible ou associer un verrouillage systématique dès l'écriture pour empêcher la substitution de la version courante. |
-| **8** | **Sous-dimensionnement critique pour une base de 1 Go+ (risque d'expulsion Kubelet)** : Le conteneur `restore-and-verify` est bridé à 512 MiB de mémoire et le volume `/scratch` à 6 GiB. Lors d'un dump de 1 Go compressé, la restauration décompressée (données, index, WALs) dans `/scratch/pgdata` et le dump sur `/work` (2 GiB max) risquent de saturer l'espace éphémère ou la mémoire, provoquant l'expulsion immédiate du pod (`Evicted`). | **Important** | `deploy/k8s/41-db-backup-cronjob.yaml:28-29`<br>`deploy/k8s/41-db-backup-cronjob.yaml:67` | Rehausser les limites du conteneur de restauration (mémoire ≥ 2 GiB, volume `/scratch` ≥ 15 GiB, `/work` ≥ 5 GiB) pour absorber l'expansion d'une base de 1 Go+. |
-| **9** | **Désynchronisation du cycle Immo/Geo et consistance référentielle rompue** : `dump()` génère localement un `CYCLE_ID` aléatoire (`uuid.uuid4().hex[:12]`) dans le pod. Le CronJob K8s ne lui transmet aucun identifiant commun. Même si les données geo sont immuables, l'application immo peut acter en base une dépendance vers une nouvelle ressource geo dont l'export côté geo n'a pas encore eu lieu, créant un lien orphelin lors d'une restauration PRA. | **Important** | `deploy/k8s/db-backup/backup.py:53`<br>`deploy/k8s/41-db-backup-cronjob.yaml:32-47`<br>`docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md` | Orchestrer l'exécution via un déclencheur commun transmettant le même `CYCLE_ID` et figer le référentiel de publication geo avant de prendre le snapshot PostgreSQL immo. |
-| **10** | **Crash `UnboundLocalError` dans `probe()` en cas d'échec initial** : Si `writer.put_object` échoue à la ligne 210, la variable `version` n'est pas initialisée. Le bloc `finally` tente alors d'exécuter `admin.delete_object(..., VersionId=version)`, levant une exception Python interne qui masque l'erreur de droit d'origine. | **Important** | `deploy/ci/backup-provision.py:210`<br>`deploy/ci/backup-provision.py:234` | Initialiser `version = None` avant l'appel et n'exécuter la suppression dans `finally` que si `version is not None`. |
-| **11** | **Limites de la validation par simple comptage de lignes** : `table_counts()` exécute `SELECT count(*) FROM ONLY {schema}.{table}`. Cela valide le nombre d'enregistrements mais ne lit pas les colonnes déportées en TOAST (champs texte longs, géométries volumineuses, JSONB). Une corruption de bloc TOAST ne sera pas détectée. De plus, les contraintes d'intégrité référentielle, les déclencheurs et les séquences (`last_value`) ne sont pas validés. | **Important** | `deploy/k8s/db-backup/backup.py:37-43`<br>`deploy/k8s/db-backup/backup.py:167` | Compléter la validation post-restauration par un parcours des colonnes TOAST, un contrôle de validité des clés étrangères (`pg_constraint`) et une vérification des valeurs de séquences. |
-| **12** | **Absence d'idempotence sur les identifiants S3 dans `identity()`** : La méthode `identity()` appelle `POST .../s3Credentials/{access}/secret` lorsqu'un accès existe déjà. Dans l'API OVH Cloud v1, cette action génère un nouveau secret (rotation) au lieu d'une simple lecture. Un ré-approvisionnement invalide ainsi silencieusement les secrets en cours d'utilisation dans le cluster. | **Mineur** | `deploy/ci/backup-provision.py:158-160` | Ne pas tenter de relire un secret existant (impossible sans réinitialisation sur OVH S3) ; conserver le secret existant ou prévoir une procédure de rotation déclarée. |
-| **13** | **Présence de placeholders bloquants dans les fichiers K8s** : Les fichiers contiennent des valeurs sentinelles `ghcr.io/rhanka/radar-backup:PIN-BEFORE-APPLY` et `SELECT-A-COMPLETE-SET`. Un déploiement direct sans étape de templating ou de kustomize échouera immédiatement au tirage de l'image (`ErrImagePull`). | **Mineur** | `deploy/k8s/41-db-backup-cronjob.yaml:32`<br>`deploy/k8s/42-db-restore-verify-job.yaml:33` | Valider les manifests par un overlay Kustomize substituant l'empreinte de build exacte (`sha256`) avant tout commit ou application. |
+Aucun des quatre n'a été comblé à la place de l'owner. La seule pression vient de §3.3 sur Q3 (F19 bis dans
+les constats, mineur).
 
 ---
 
-## 2. Réponses aux questions d'arbitrage
-
-### 1. Invariants de politique IAM
-Les invariants **ne tiennent pas**. La politique repose sur l'hypothèse que lister des `Deny` sur le bucket cible suffit. Comme les identités reçoivent le rôle OVH global `objectstore_operator` au niveau du projet Cloud, et qu'aucun `Deny` n'est posé sur les autres buckets, un compte écrivain ou lecteur préproduction a le contrôle total sur le bucket de production et les buckets geo. De plus, l'écrivain conserve `s3:PutObject` sur tout le préfixe sans verrou par cycle, lui permettant d'écraser la version courante de n'importe quel backup existant.
-
-### 2. Validité de la preuve de restaurabilité
-La procédure **ne prouve pas la restaurabilité en conditions réelles de sinistre**. Relever les comptes dans la transaction prouve la cohérence de lecture du dump, mais :
-1. Elle ignore les corruptions physiques sous-jacentes (tables TOAST non lues par un `count(*)`).
-2. Elle ignore totalement les rôles, droits et utilisateurs applicatifs car exécutée avec `--no-owner --no-privileges`.
-3. Sur une base d'un gigaoctet ou plus, les plafonds mémoire (512 MiB) et stockage temporaire (6 GiB) provoqueront un échec d'allocation lors de la reconstruction des index et des tables dans `/scratch`.
-
-### 3. Recommandations sur le verrou d'objet (Object Lock)
-- **Mode recommandé** : `GOVERNANCE` exclusivement. Le mode `COMPLIANCE` est irréversible et interdirait toute correction d'erreur ou purge prématurée en cas de bug de rétention, même par l'administrateur OVH.
-- **Durée recommandée** : **14 jours**.
-- **Interaction avec le cycle de vie** : Dans S3, le verrou prime sur l'expiration. Si une durée de verrou supérieure à la règle d'expiration non courante (35 jours) est choisie, le cycle de vie S3 échouera à purger les versions non courantes, générant une fuite de stockage et une surfacturation incontrôlable.
-
-### 4. Bilan de la purge et gestion des pannes prolongées
-La purge par suppression de l'objet courant s'appuie sur la pose d'un marqueur de suppression (*delete marker*). La version sous-jacente passe en version non courante et n'est supprimée qu'après 35 jours.
-- En cas de panne de sauvegarde pendant plusieurs jours, `keep_sets()` préserve les derniers points connus sans les éliminer (l'âge calendaire ne les périme pas dans l'algorithme tant que le quota de 7 jours / 4 semaines n'est pas rempli par de nouveaux succès).
-- En revanche, le filtre de cycle de vie étant déconnecté du préfixe réel (`sets/`), aucune version courante n'est jamais purgée par S3 si le conteneur `retain` cesse de tourner.
-
-### 5. Séquence de consistance d'ensemble (Immo + Geo)
-Ne pas geler Geo repose sur l'hypothèse de son immuabilité, mais **la consistance d'ensemble n'est pas garantie** :
-- Le `CYCLE_ID` est généré à la volée par le pod Immo sans synchronisation avec Geo.
-- Si une transaction Immo référence une ressource Geo en cours de synchronisation ou publiée postérieurement au dernier snapshot Geo, la restauration produira des clés étrangères ou des identifiants orphelins.
-- Le périmètre est explicitement restreint à `"scope": "postgres-only"`, excluant tout objet non-base côté immo.
-
-### 6. Activation simultanée préproduction et production
-L'activation simultanée échouera immédiatement car la surveillance horaire (`freshness`) se déclenchera avant la première sauvegarde planifiée et alertera l'astreinte pour dépassement de RPO.
-**Ordre d'opérations requis** :
-1. Provisionner et valider la préproduction de bout en bout (sauvegarde, restauration, fraîcheur).
-2. Provisionner l'infrastructure de stockage production.
-3. Déployer les CronJobs de production avec `radar-backup-freshness` **suspendu**.
-4. Déclencher un Job de sauvegarde initial en production et attendre le reçu `verified.json`.
-5. Réactiver le CronJob de surveillance de fraîcheur.
-
-### 7. Suffisance de la preuve préproduction avant fusion
-La preuve en préproduction **ne suffit pas** pour autoriser une mise en production le jour même. La volumétrie, les extensions installées, la concurrence I/O et les ressources allouées au conteneur de restauration en préproduction ne reproduisent pas les contraintes d'une base de production (taille réelle, intégrité TOAST, reconstruction d'index lourds).
-
----
-
-## 3. Synthèse
-
-**Fusionnable en l'état : NON.**
-
-1. **Isolation OVH défaillante** : Les identités préproduction disposent des droits opérateur sur le stockage de production via le rôle de projet OpenStack non restreint hors bucket.
-2. **PRA incomplet** : Les rôles, utilisateurs et privilèges du cluster PostgreSQL ne sont pas sauvegardés, rendant une restauration après sinistre inutilisable par l'application.
-3. **Faux positif d'astreinte garanti** : Le contrôle horaire de fraîcheur entrera immédiatement en alerte critique dès le déploiement en production en l'absence de sauvegarde initiale préalable.
-4. **Purge S3 désynchronisée** : Les règles d'expiration S3 ciblent des répertoires inexistants (`daily/`, `weekly/`, `monthly/`) au lieu de `sets/`.
-5. **Résilience insuffisante du monitoring** : Une seule anomalie de manifeste fait crasher l'ensemble du cycle de rétention et de surveillance de fraîcheur sans tolérance aux pannes.
-
-## Annexe B — Agréments (verbatim)
-
-Textes intégraux, sans modification.
-
-### Agrément B1 — lane k8s, clés comprises
-
-# Agrément formel de la lane k8s — plan de sauvegarde et de reprise, clés comprises (2026-09-18)
-
-*Exigé par l'owner : « k8s doit agréer notre plan de sauvegarde et pra incluant les clés et ceci doit être inclus au dossier de décision ». Texte de la lane, cité tel quel, réserves comprises. Deux rectificatifs de la lane elle-même sont inclus à la fin.*
-
-**1. Exploitabilité** — Une commande owner/env, fail-close, idempotente. Gardes `PRA_PROVISION_GO` + `BACKUP_ENV` (+ `PRA_PRODUCTION_GO` pour prod). Préflight lecture seule AVANT toute écriture OVH : identité cluster == `PRA_EXPECTED_SERVER`, namespace existe, `kubectl auth can-i get/create/patch secrets`. Payload secret uniquement via pipe anonyme vers `kubectl apply --server-side` (pas de tee, pas de fichier temporaire, pas d'annotation last-applied) ; conteneur `--read-only --cap-drop ALL --no-new-privileges --log-driver=none --memory 256m`. Idempotence : réutilise les utilisateurs par description exacte, refuse doublons et rôles inattendus, récupère le secret S3 existant sans rotation, préserve les règles de cycle de vie non gérées, STOPPE sur règle active non gérée (revue owner). 44 tests hors ligne verts, image 238,9 MiB. → **opérable**.
-
-**2. Modèle de clés** — 3 identités runtime au moindre privilège par environnement (writer/reader/retainer) : rôle de base `objectstore_operator` plus politique IAM restrictive. Isolation prouvée à l'exécution par la sonde. Le seul secret large au repos est l'administration S3, pour créer et configurer le bucket, dans l'environnement du propriétaire. **Réserve R1** : le jeton d'administration S3 et le jeton d'API OVH sont les deux identifiants larges ; à porter au moindre privilège et idéalement à rendre éphémères après provisionnement, jamais exposés au runtime. → **isolation runtime forte, réserve sur les deux jetons de provisionnement**.
-
-**3. Séquence de consistance** — Le chemin PostgreSQL garantit son propre instantané cohérent SANS gel (lecture répétable et `pg_dump --snapshot` de la même transaction, exporteur maintenu ouvert). Manifestes `scope: postgres-only`, interdits d'être relabellisés « cycle joint complet ». Le cycle joint (gel, inventaire, référence) est identifié comme un point d'étape d'implémentation, non caché dans le CronJob. **Réserve R4** : le coordinateur de gel et l'export geo restent des points d'étape NON LIVRÉS ; aujourd'hui seule la récupération PostgreSQL est démontrable — le plan le dit explicitement, aucune fausse déclaration.
-
-**4. Restauration et quotas** — La restauration valide schéma, base, environnement, cycle, horodatage, empreinte du manifeste, empreinte et taille du dump, et structure AVANT de démarrer PostgreSQL. Instance éphémère par socket uniquement, sans identifiants vivants, sans identité S3, sans PVC source ; `--single-transaction --exit-on-error` ; comparaison des comptes et des extensions au manifeste. Budget mémoire : restauration 512 Mi, dump 256 Mi, S3 128 Mi, fraîcheur 128 Mi, chevauchement maximal 640 Mi contre environ 768 Mi de marge en production ; sauvegarde à 02:15 et 14:15 UTC, avant le rafraîchissement de 05:17. **Réserve R2** : ces chiffres sont des propositions à mesurer en préproduction ; le pic réel de la restauration doit être mesuré avant activation.
-
-**5. Surveillance** — Le contrôle horaire de fraîcheur lit les reçus vérifiés et échoue si aucun point, point pendant, corrompu, ou âge supérieur à 86 400 s. Règle Prometheus installée par l'opérateur, routée vers l'astreinte immo. **Réserve R3** : la livraison de l'alerte, y compris le cas « contrôleur arrêté », doit être PROUVÉE avant activation — un job en échec n'est pas une alerte reçue.
-
-**6. Verdict — AGRÉÉ SOUS RÉSERVES.** Le livré PostgreSQL est cohérent, fail-close, au moindre privilège, sans fuite de secret, avec 44 tests verts et un provisionnement idempotent et gardé. Le plan est exact sur ce qui n'est pas livré et ne présente jamais un test PostgreSQL comme un résultat complet.
-
-Réserves, aucune ne bloquant le provisionnement ni la preuve en préproduction :
-- **R1 — modèle de clés** : réduire et rendre éphémères les deux jetons larges de provisionnement ; jamais d'administration au runtime.
-- **R2 — quotas** : mesurer le pic réel de la restauration et le non-chevauchement avec le rafraîchissement de 05:17, en préproduction, avant activation.
-- **R3 — surveillance** : prouver la livraison de l'alerte, y compris le cas du contrôleur arrêté, avant activation.
-- **R4 — consistance jointe** : le coordinateur de gel et l'export geo sont des points d'étape non remplis ; ne relabelliser aucun marqueur « PostgreSQL seul » en cycle complet ; le dossier de fusion doit porter la preuve geo appariée.
-- **R5 — résidence** : cibles en bhs, résidence québécoise préservée ; la protection immuable hors région est une décision owner avec mesure de coût séparée.
-- **R6 — accès public** : OVH BHS ne supporte ni le blocage d'accès public ni les politiques de bucket ; la garantie repose sur une ACL privée et l'absence de mécanisme de politique, vérifiée à la création et en continu par le contrôle de fraîcheur. Un droit public posé à la main ne serait pas empêché, seulement détecté, avec au plus une heure de retard.
-- **R7 — devenue caduque** : la lane avait conclu que l'IAM d'OVH ne pouvait pas exprimer le modèle de moindre privilège. Cette conclusion reposait sur une mesure faussée par la propagation lente des identifiants S3. Re-mesuré proprement, un interdit explicite contient bien le rôle de base, et le modèle est exprimable. La réserve est levée, l'épisode conservé.
-
-**Portée du verdict** : il autorise le provisionnement de la préproduction et la preuve PostgreSQL depuis la branche. Il n'autorise pas le provisionnement de la production, qui demande un feu vert owner séparé, ni l'activation ou la fusion, qui dépendent des réserves R2, R3 et R4, ni aucune allégation de reprise de service complète.
-
-**Rectificatif 1** : la lane avait écrit que les manifestes `41`, `42`, `43` et les overlays n'existaient plus, après n'avoir regardé qu'un répertoire. C'est faux : ils existent, et le provisionneur Python s'ajoute à eux sans les remplacer.
-
-**Rectificatif 2** : sur l'ACL au niveau des objets, la lane a refusé d'élargir unilatéralement les droits du lecteur. Le conducteur a retenu une solution sans élargissement : prouver par la sonde que l'écrivain se voit refuser la pose d'une ACL publique. Le contrôle continu reste au niveau du bucket ; le résidu au niveau des objets est documenté.
-
-### Agrément B2 — co-validation de sécurité i-infra
-
-# Co-validation de sécurité — lane i-infra (2026-09-18)
-
-*Texte de la lane, cité tel quel. La séquence importe : co-validée, puis invalidée par elle-même, puis reconduite après re-mesure.*
-
-## Premier verdict — co-validé sous réserves
-
-**P1 — actions S3 par identité au moindre privilège : co-validé.** Écrivain limité au dépôt d'objets, sans lecture ni suppression. Lecteur limité à la lecture des objets et de la configuration du bucket, sans dépôt ni suppression. Purgeur limité à la lecture et à la suppression, avec la suppression de version restreinte au seul préfixe de la sonde.
-
-**P2 — invariant « l'écrivain ne peut pas supprimer » : co-validé, en politique et à l'exécution.** La sonde de provisionnement vérifie les refus au moment de la création. Protection supplémentaire relevée : aucune identité ne peut détruire définitivement une version d'une vraie sauvegarde ; une suppression ne pose qu'un marqueur, et la version reste récupérable 35 jours.
-
-**P3 — cycle de vie : co-validé sous réserve.** L'expiration se fait par âge et non par nombre de jeux conservés, ce que le code dit explicitement. Le filet est ailleurs : contrôle de fraîcheur horaire, alerte critique après 90 minutes, versions récupérables 35 jours. **Réserve non bloquante** : il faudrait ignorer les alertes sept jours pour vider le palier quotidien, et environ un mois pour tout perdre. À documenter comme risque d'exploitation.
-
-**P4 — identité d'administration confinée : co-validé.** Identifiants transitoires, jamais sur disque ; la sortie standard ne contient qu'une liste de secrets destinée au cluster.
-
-**Réserves mineures** : le chiffrement au repos est imposé par la sonde mais pas par la politique ; la sortie réseau vers le port 443 reste large, limite des politiques réseau standard, atténuée par le cantonnement des identités.
-
-## Auto-invalidation
-
-> « j'ai validé la LOGIQUE de la policy (sémantique IAM type-AWS : Deny/NotAction/NotResource clampant le rôle large) sans marquer en source-gap l'hypothèse porteuse — « OVH BHS supporte ces constructs + ces verbes + Deny-écrase-le-rôle-de-base », que je NE POUVAIS PAS vérifier (0 accès OVH). Leçon gravée : une co-val de policy IAM cloud depuis le fichier DOIT marquer la capacité-plateforme comme non-vérifiée quand je ne peux pas la tester. Mon verdict précédent = daté/invalidé, à raison. »
-
-## Arbre de décision proposé par la lane, conditionné aux mesures
-
-- **Verrou d'objet disponible** → l'utiliser : reprise possible même après compromission, car les versions deviennent indestructibles pendant la fenêtre, y compris pour un administrateur.
-- **Sinon**, si le rôle large ne peut ni suspendre le versionnement ni détruire une version → « sauvegarde récupérable », avec le résidu écrit.
-- **Sinon** → ce n'est plus une sauvegarde protégée mais un stockage de commodité, à nommer ainsi : cela couvre la panne matérielle et l'effacement accidentel, pas un attaquant.
-- **À défaut de verrou**, architecture découplée : l'application pousse vers un premier bucket ; un processus séparé, dont elle ne voit jamais les identifiants, réplique vers un second bucket immuable.
-
-## État après re-mesure
-
-Le verrou d'objet **est disponible** sur OVH BHS, en gouvernance comme en conformité, activable à la création du bucket seulement. Un interdit explicite **contient** bien le rôle de base. La branche haute de l'arbre est donc atteignable, et les invariants co-validés en P1 et P2 sont réalisables — la co-validation est reconduite sous cette condition, avec le mode et la durée du verrou à trancher par l'owner.
-
-## Annexe C — Revues de la première version (historique, 2026-09-17)
-
-Revues de la première version de la PR #712, livrée par Claude Opus 5 et rejetée. Elles ne portent pas sur la livraison actuelle. Contenu intégral, sans modification.
-
-### Revue C1 — Astra high (2026-09-17, première version)
-
-# Revue contradictoire — PR #712, sauvegardes PostgreSQL et restauration de vérification
-
-Branche examinée : `feat/backup-pra-698`, commit `fe17d4414dec1800aa35ee32b5e3df7ee76dee1c`. Brief lu intégralement ; diff confronté aux fichiers complets du worktree. Revue statique individuelle : aucune exécution des scripts de sauvegarde/restauration, aucun test connecté, aucune action cluster, aucun commit. Seul ce rendu est écrit. Les quotas, volumes et observations d'exploitation sont ceux fournis par le brief, sans nouvelle mesure. Les références désignent les lignes des fichiers de la branche ; les compléments hors diff sont explicitement signalés. « À vérifier » ne signifie pas que la configuration externe est absente, mais que les pièces examinées ne la démontrent pas.
-
-| # | Constat | Gravité | Preuve (fichier:ligne) | Correction proposée |
-|---|---|---|---|---|
-| 1 | **Q1/Q2 — Ne tient pas : le contrôle SHA-256 empêche toute restauration normale d'un dump produit par ce code.** Le fichier de contrôle contient `<hash>  /work/radar-<date>.dump`. Le téléchargement crée `/work/restore.dump`, puis `sha256sum -c` ouvre le chemin enregistré dans le fichier de contrôle, pas le fichier voisin portant le même radical. Dans le nouvel `emptyDir`, le chemin d'origine n'existe pas : arrêt avant `pg_restore`. Le dump peut être valide ; c'est sa chaîne de vérification qui est cassée. | bloquant | `deploy/k8s/db-backup/dump.sh:6,10` ; `deploy/k8s/42-db-restore-verify-job.yaml:25,32` ; `deploy/k8s/db-backup/restore-verify.sh:9`. | Définir un format de contrôle indépendant du chemin de création ; valider un hash de 64 chiffres hexadécimaux puis le comparer au SHA-256 du fichier effectivement téléchargé, ou conserver un nom relatif cohérent. Exiger un test de bout en bout avec un vrai jeu produit par `dump.sh`, puis un cas de corruption qui échoue avant toute commande SQL. |
-| 2 | **Q5 — Ne tient pas dans les conditions du brief : pods refusés à l'admission.** Aucun des quatre conteneurs, init inclus, ne déclare de `resources`. Avec un ResourceQuota sur `limits.memory` et sans LimitRange qui injecte une valeur, l'API refuse la création des pods pour limite mémoire manquante. Créer le CronJob/Job ne prouve donc pas qu'il puisse démarrer. Ce n'est pas seulement un risque d'OOM ou de pod Pending. | bloquant | `deploy/k8s/41-db-backup-cronjob.yaml:42-70` ; `deploy/k8s/42-db-restore-verify-job.yaml:28-64` ; contexte ResourceQuota du brief. | Déclarer requests/limits pour chaque conteneur et dimensionner CPU, mémoire et stockage temporaire. Vérifier le quota réel avant activation : en production, la marge annoncée est seulement d'environ 0,7 Gi. Pour les init conteneurs classiques séquentiels, tenir compte du maximum des ressources init et de la somme des conteneurs applicatifs, pas d'une addition systématique de tous les conteneurs. Admission à démontrer ultérieurement par la lane k8s autorisée. |
-| 3 | **Q2 — Ne tient pas : `n_live_tup` n'est pas un décompte de données.** C'est une estimation issue des statistiques PostgreSQL, pas `COUNT(*)`. Ces statistiques ne sont pas sauvegardées/restaurées comme les lignes par ce dump PG16 ; après chargement elles peuvent être en retard ou différentes, selon les mises à jour des compteurs et l'autovacuum/analyze. Une valeur nulle immédiatement après restore n'est pas une certitude universelle. Faux négatif : mêmes données, statistiques différentes. Faux positif : mêmes estimations, données différentes ; même des comptes exacts égaux ne démontreraient pas l'égalité du contenu. | bloquant | `deploy/k8s/db-backup/restore-verify.sh:10-11,17-20`. | Comparer des comptes exacts à une référence cohérente avec le snapshot du dump, et ajouter quelques invariants métier, contraintes et lectures d'annotations. `ANALYZE` est utile après restauration pour le planificateur, mais ne transforme pas une estimation en preuve d'intégrité. |
-| 4 | **Q2/Q3 — Ne tient pas : la référence est la source vivante au moment du test, pas l'état sauvegardé.** Une insertion ou suppression après le dump fait échouer une restauration pourtant fidèle, même en remplaçant `n_live_tup` par `COUNT(*)`. En cas de perte de l'instance source, le script échoue sur sa lecture de source avant de pouvoir restaurer. | important | `deploy/k8s/db-backup/restore-verify.sh:11-18` ; `deploy/k8s/db-backup/dump.sh:7-11`. | Produire une référence de validation lors de la sauvegarde, dans le même snapshot cohérent que `pg_dump` si des comptes source sont utilisés. La restauration et son verdict doivent fonctionner depuis le jeu S3 et les prérequis documentés, sans accès à l'ancienne instance. |
-| 5 | **Q3 — Ne tient pas : seule la base logique est distincte, pas l'instance ni le stockage.** La garde protège le nom `POSTGRES_DB`, mais le restore écrit sur `radar-postgres`, donc dans le même PGDATA/PVC de 5 Gi. Avec environ 950 MiB en préprod, la copie restaurée ajoute un volume du même ordre, auquel s'ajoutent WAL, index et temporaires. Saturation et dégradation sont des risques, pas des faits mesurés ici : la taille de la base ne donne pas l'espace libre du PVC. CPU, mémoire, I/O et checkpoints sont partagés. Le plan exige pourtant une PVC dédiée. Le test ne prouve ni reconstruction d'instance, ni récupération après perte du volume, ni redémarrage applicatif ou RTO complet. | bloquant | `deploy/k8s/42-db-restore-verify-job.yaml:56` ; `deploy/k8s/db-backup/restore-verify.sh:7,12-16` ; `docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md:7-8,15-17,64-65`. Complément hors diff : `deploy/k8s/20-postgres-postgis.yaml:79-93`. | Diriger le rehearsal vers une instance PostgreSQL/PostGIS jetable et une PVC dédiée, avec quotas dimensionnés et aucune dépendance à la source. Mesurer l'espace de pointe et la durée. Inclure provisionnement, extensions, rôles, configuration et contrôle applicatif dans un exercice PRA distinct avant d'annoncer le RTO de 4 h comme démontré. |
-| 6 | **Q3/Q8 — Ne tient pas : la base « jetable » n'est jamais nettoyée en fin d'exécution.** Le seul DROP précède le CREATE. Une fois les autres blocages corrigés, réussite, erreur de restore, échec de comparaison ou arrêt du Job laissent la base entière ou partielle sur la PVC source. Le TTL supprime des objets Kubernetes, pas une base PostgreSQL. | important | `deploy/k8s/db-backup/restore-verify.sh:12-20` ; `deploy/k8s/42-db-restore-verify-job.yaml:13-14` ; `deploy/ci/README.md:269`. | Définir une destruction contrôlée de l'environnement de rehearsal et une durée explicite de conservation pour diagnostic. Prévoir la reprise après arrêt forcé, qu'un simple trap ne couvre pas. Vérifier que les ressources et volumes temporaires ont effectivement disparu. |
-| 7 | **Q4 — Ne tient pas : rétention déclarée, non livrée ni attribuée.** Le script ne supprime rien. Le plan délègue à un lifecycle S3 sans configuration, responsable de création, échéance ni preuve d'installation. Le README attribue au CronJob la conservation des « newest 7/4/1 » et lui prête validation numérique/`awk`, qui appartiennent au script de sauvegarde avant release, indépendant de ce CronJob. L'existence effective d'un lifecycle externe reste **à vérifier**. | bloquant | `docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md:21-26` ; `deploy/k8s/db-backup/upload.sh:10-18` ; `deploy/ci/README.md:244-249` ; `deploy/ci/run-db-backup.sh:47-51,133-139`. | Confier explicitement à la lane infrastructure/owner la politique de chaque bucket et préfixe, la versionner ou joindre un reçu vérifiable de son installation, puis en faire un prérequis d'activation. Corriger le README pour distinguer sauvegardes quotidiennes et sauvegardes avant release. |
-| 8 | **Q4 — Ne tient pas : expiration par âge ≠ conservation des N derniers jeux complets.** Un lifecycle S3 standard expire les objets selon leur âge, indépendamment du succès du prochain backup ; il ne classe pas les jeux complets pour garder exactement 7 quotidiens, 4 hebdomadaires et 1 mensuel. Une interruption assez longue peut faire expirer tous les anciens points valides. Les trois objets sont traités séparément ; les versions non courantes peuvent continuer à coûter si le bucket est versionné. | important | `deploy/ci/README.md:247-248` ; `docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md:21-26,33-34` ; `deploy/k8s/db-backup/upload.sh:12-14`. | Choisir et écrire le contrat : fenêtres temporelles approximatives avec délais d'expiration et comportement en cas d'échec, ou sélection des N derniers jeux complets avec conservation du dernier valide. Préciser le traitement des versions non courantes et des uploads multipart abandonnés. |
-| 9 | **Q7 — Ne tient pas : fusionner n'installe pas ces nouveaux objets en préprod.** L'ajout au kustomization et `suspend:false` ne suffisent pas. Nuance au brief : le checkout contient bien une réconciliation CD, mais elle est ciblée sur nginx, deux Deployments et le CronJob consistency-snapshot ; elle exclut le nouveau CronJob, sa ConfigMap et la NetworkPolicy. Les étapes refresh déploient leur propre sous-ensemble. En production, aucune activation automatique de ce CronJob n'est apportée ; même appliqué explicitement, il demeure suspendu. | bloquant | Diff : `deploy/k8s/kustomization.yaml:55,80-84` ; `deploy/overlays/preprod/kustomization.yaml:50-69` ; `deploy/k8s/41-db-backup-cronjob.yaml:11`. Compléments hors diff : `deploy/ci/reconcile-preprod.sh:53-60,68-81` ; `.github/workflows/build-push-images.yml:782-806,1397-1415`. | Livrer un chemin de mise en service borné avec responsable : buckets, IAM/lifecycle, secrets, admission, ConfigMap, réseau, CronJob, puis preuve d'un premier jeu complet. Soit étendre la réconciliation et ses droits, soit fournir une procédure d'application explicite à la lane k8s. Conserver l'activation production derrière le GO prévu ; qualifier la préprod de « configurée dans Git », pas déjà active. |
-| 10 | **Q6/Q7 — Tient pour l'ouverture ingress ciblée ; à vérifier pour le trajet réseau complet.** La nouvelle règle autorise les pods `db-restore-verify` du même namespace vers les pods PostgreSQL sur TCP/5432, sans ouvrir ce port à tous les namespaces. Elle ne donne aucune autorisation egress DNS/Postgres/S3. **Hypothèse conditionnelle :** si la baseline isole leur egress sans autorisation adaptée, téléchargement ou connexion restent bloqués. De plus, le renderer de rehearsal ne contient que le Job et la ConfigMap : sa commande d'application n'installe pas la nouvelle règle ingress. | important | `deploy/k8s/70-networkpolicy.yaml:227-233` ; `deploy/k8s/db-restore-verify/kustomization.yaml:5-12` ; `deploy/ci/README.md:262`. Complément hors diff : `deploy/k8s/70-networkpolicy.yaml:215-222`. | Faire de l'installation de la règle un prérequis explicite et vérifier les politiques effectives et le CNI. Autoriser uniquement les flux nécessaires de l'environnement de rehearsal. Ne pas attribuer un blocage egress certain sans lecture des politiques opérateur. |
-| 11 | **Q1 — Tient pour le choix du dump logique ; restaurabilité complète à vérifier.** `pg_dump -Fc` convient à `pg_restore` et fournit un snapshot cohérent de la base. Clients et serveur déclaré sont PG16/PostGIS 3.4. Cependant, un dump de base n'emporte ni les rôles globaux, ni les binaires des extensions, ni la configuration de l'instance. Pour une archive custom, `--no-owner` de `pg_dump` ne suffit pas : c'est son emploi dans `pg_restore`, présent ici, qui supprime les restaurations de propriétaires. `--no-privileges` omet les GRANT/REVOKE ; les objets restaurés appartiennent au rôle de restore, sans reconstitution des droits applicatifs d'origine. Une réussite sous ce rôle ne prouve pas l'accès de l'application sous ses rôles attendus. | important | `deploy/k8s/db-backup/dump.sh:7-8` ; `deploy/k8s/db-backup/restore-verify.sh:15-16` ; `deploy/k8s/41-db-backup-cronjob.yaml:44` ; `deploy/k8s/42-db-restore-verify-job.yaml:52`. Compléments hors diff : `deploy/k8s/20-postgres-postgis.yaml:50` ; `api/drizzle/0001_wp5v1_ontology_bitemporal.sql:5-6` ; `api/drizzle/0003_graph_indexes.sql:37`. | Documenter et tester la création des rôles, propriétaires et droits attendus, ainsi que les extensions serveur nécessaires, dont PostGIS, btree_gist et pg_trgm. Relever les versions réelles et les extensions dans le manifeste ; tester sur une instance fraîche compatible avec le rôle applicatif final. L'image PostGIS du client seule n'installe aucune extension sur un serveur distant. |
-| 12 | **Q6 — À vérifier : l'isolation IAM au préfixe et le blocage public sont des promesses documentaires.** Les secrets contiennent des références/placeholders, pas une politique IAM ou de bucket. Le code demande bien HTTPS vers OVH et `--sse AES256` pour chacun des trois objets : ces dispositions tiennent au niveau de la requête. Elles ne démontrent ni la politique effective du bucket, ni les refus hors préfixe, ni une protection contre effacement par une identité compromise. SHA-256 détecte une corruption mais n'authentifie pas un couple dump/hash réécrit ensemble. Aucun secret réel n'est ajouté par les blocs de la PR. | important | `deploy/ci/README.md:251-254` ; `deploy/k8s/secrets.example.yaml:101-124` ; `deploy/k8s/41-db-backup-cronjob.yaml:51,58-61` ; `deploy/k8s/db-backup/upload.sh:12-14`. | Avant activation, faire fournir par l'owner une politique et des preuves de refus hors `postgres/<env>/`, de bucket privé et de chiffrement observé sur les objets. Séparer les droits d'écriture de sauvegarde et de lecture de restauration ; préciser les garanties attendues contre suppression/altération. Ne pas présenter le chiffrement SSE comme chiffrement côté client ou comme immutabilité. |
-| 13 | **Q6/Q8 — À vérifier : réutilisation d'un secret ayant déjà un autre contrat.** Le nouveau CronJob et le restore utilisent `radar-backup-s3-credentials`, également secret par défaut du backup avant release. Ce dernier écrit par défaut sous `db-backups/`, tandis que le nouveau README demande une identité restreinte à `postgres/`. **Hypothèse conditionnelle :** remplacer le secret existant par cette identité stricte fait échouer le backup avant release lorsqu'il est activé ; élargir ses permissions contredit l'isolation annoncée. Le bucket peut aussi différer selon les variables CD. | important | Diff : `deploy/k8s/41-db-backup-cronjob.yaml:58-61` ; `deploy/k8s/42-db-restore-verify-job.yaml:45-48` ; `deploy/ci/README.md:253-254`. Compléments hors diff : `deploy/ci/run-db-backup.sh:45,51,63` ; `.github/workflows/build-push-images.yml:688-716`. | Inventorier les consommateurs avant de provisionner le secret. Utiliser un secret propre au dispositif quotidien, ou un contrat IAM commun explicitement documenté et validé pour les deux chemins. Exiger un contrôle de non-régression du backup avant release si son secret change. |
-| 14 | **Q4/Q8 — Ne tient pas : les erreurs weekly/monthly peuvent produire un Job vert.** Les appels `upload weekly` et `upload monthly` sont dans une liste AND/OR terminée par `\|\| :`. Une erreur est neutralisée ; `set -e` ne rend pas cette construction sûre et peut aussi laisser la fonction poursuivre ses commandes. Un dump weekly peut échouer tandis que hash/manifeste sont envoyés. Le succès quotidien ne garantit donc pas les classes de rétention annoncées. | important | `deploy/k8s/db-backup/upload.sh:10-18`. | Employer des blocs `if` et faire remonter chaque erreur d'envoi ; ne publier un marqueur de complétude qu'après tous les envois réussis. Tester les échecs séparément sur dump, hash et manifeste, le dimanche et le premier du mois. |
-| 15 | **Q1/Q2/Q8 — Ne tient pas pour la validation d'un jeu complet : le manifeste n'est jamais téléchargé ni vérifié.** Trois objets sont créés, mais le restore accepte uniquement dump + hash. Il ne contrôle ni schéma du manifeste, ni identité de base/environnement, ni version déclarée, ni fraîcheur. Les uploads ne sont pas atomiques. Le SHA-256, après correction du chemin, prouvera la cohérence des deux fichiers téléchargés, pas que le bon jeu complet a été choisi. | important | `deploy/k8s/db-backup/upload.sh:8-14` ; `deploy/k8s/42-db-restore-verify-job.yaml:32,37` ; `deploy/k8s/db-backup/restore-verify.sh:9,20`. | Télécharger et valider le manifeste comme marqueur final de complétude ; rattacher dump, hash, base, environnement, versions et instant du snapshot à un même jeu. Rejeter un jeu incomplet ou incompatible. Ajouter une validation de fraîcheur pour le suivi du RPO. |
-| 16 | **Q7/Q8 — Ne tient pas pour un rehearsal répétable : nom de Job fixe et procédure limitée à apply/wait.** Pendant les sept jours de TTL, réappliquer le même Job terminé ne lance pas une nouvelle restauration. Changer `BACKUP_OBJECT` ou le hash de ConfigMap change le pod template d'un Job existant, normalement immuable : l'apply est rejeté. Le wait peut sinon constater une ancienne réussite. | important | `deploy/k8s/42-db-restore-verify-job.yaml:6,14,37` ; `deploy/k8s/db-restore-verify/kustomization.yaml:7-12` ; `deploy/ci/README.md:258-264`. | Créer un nom unique par exercice, ou documenter une suppression/recréation explicitement contrôlée du Job. Associer le rapport à l'UID du Job et à la clé S3 testée ; ne pas accepter le statut d'un exercice précédent. |
-| 17 | **Q8 — À vérifier : RPO 24 h et RTO 4 h restent des objectifs.** La cadence quotidienne n'est pas une garantie de fraîcheur disponible : transfert en cours, échec ou exécution manquée allongent l'âge du dernier snapshot récupérable. `backoffLimit:0`, délai de démarrage de 30 minutes et deadline d'une heure n'apportent ni reprise ni alerte de fraîcheur. Le diff n'apporte pas de surveillance de la dernière sauvegarde complète. Le test actuel ne mesure pas la remise en service nécessaire au RTO. | important | `deploy/k8s/41-db-backup-cronjob.yaml:12-22` ; `docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md:64-74`. | Définir une alerte sur l'âge du dernier jeu complet et validé, un destinataire et une procédure de rattrapage. Adapter la fréquence à un RPO strict si requis. Mesurer le RTO de bout en bout avant toute déclaration de garantie ; conserver la formulation « cible à mesurer » jusque-là. |
-| 18 | **Q8 — Ne tient pas comme validation du nouveau dispositif : le test ajouté porte sur l'ancien runner.** Le cas `BACKUP_RETAIN_COUNT=not-a-number` vérifie un code de sortie du backup avant release. Il n'exécute ni le nouveau dump, ni upload, ni restore, et ne peut détecter le chemin SHA cassé, les erreurs masquées ou la comparaison de statistiques. L'absence d'exécution de tests dans cette revue ne vaut pas résultat de CI. | important | `deploy/ci/db-backup.test.sh:106-108` ; `deploy/k8s/db-backup/dump.sh:6-10` ; `deploy/k8s/db-backup/upload.sh:17-18` ; `deploy/k8s/db-backup/restore-verify.sh:9-18`. Complément hors diff : `deploy/ci/db-backup.test.sh:14`. | Ajouter des tests ciblés de la nouvelle chaîne, dont archive réelle PG16/PostGIS sur environnement isolé, corruption, jeu incomplet et erreurs S3. Tester qu'aucune étape SQL ne commence si les contrôles du jeu échouent. |
-| 19 | **Q8 — Ne tient pas : exemple de secret dupliqué à l'identique.** Deux documents définissent le même Secret dans le même namespace. Ce n'est pas une fuite de secret, mais une ambiguïté inutile pour le provisioning et un risque d'échec des outils exigeant des identifiants uniques. Le fichier est hors kustomization principal : ne pas en déduire que son doublon casse le rendu normal de la base. | mineur | `deploy/k8s/secrets.example.yaml:100-124`. Complément hors diff : `deploy/k8s/kustomization.yaml:3-5`. | Conserver un seul exemple et clarifier le nom de secret par usage et environnement selon le contrat retenu au constat 13. |
-| 20 | **Q8 — Ne tient pas : estimation mensuelle des écritures sous-évaluée.** Le plan annonce environ 29,3 GiB/mois pour « 30 dumps quotidiens par environnement, jeux weekly/monthly inclus », alors que le script envoie réellement une copie supplémentaire chaque dimanche et chaque premier du mois. Avec 30 jours, 4 dimanches et un premier du mois, cela fait 35 copies par environnement ; avec les tailles exactes et le ratio 50 % du plan, environ 33,4 GiB, pas 29,3. Un mois à 5 dimanches augmente encore ce total. Ce calcul demeure une hypothèse de compression, pas une mesure de coût OVH. | mineur | `docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md:28-35` ; `deploy/k8s/db-backup/upload.sh:16-18`. | Compter séparément daily, weekly et monthly, puis remplacer l'hypothèse de taille par la mesure du premier dump. Séparer volume écrit, stockage retenu et tarification réelle des requêtes/transferts. |
-| 21 | **Q8/Geo — Tient comme contrat de travail à déléguer ; ne prouve pas une reprise Geo opérationnelle.** Le plan distingue correctement les données irremplaçables des dérivés et laisse le RTO Geo non mesuré. Il ne livre pas la synchro ni sa validation. Source et cible sont annoncées dans bhs : ce choix ne couvre pas une indisponibilité régionale. Un bucket privé/versionné n'est pas en soi une preuve de conservation historique des écrasements ni de re-dérivation complète. | important | `docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md:10,45-60,66-68,78-79`. | Faire accepter à geo-cond le périmètre, la conservation des versions, l'inventaire et un test de re-dérivation. Définir les sinistres couverts ; si la perte régionale est dans le contrat, prévoir une cible hors bhs. Ne pas compter ce contrat comme sauvegarde Geo déjà déployée. |
-
-**Fusionnable en l'état : non** — blocages démontrés sur le contrôle SHA, l'admission sous quota, la preuve de restauration, l'isolation, la rétention et le chemin de mise en service.  
-**Avant fusion :** corriger ces blocages et les erreurs weekly/monthly, puis apporter des tests ciblés de la nouvelle chaîne ; la validation du runner avant release ne suffit pas.  
-**Avant activation préprod :** la lane k8s/infra doit fournir les preuves IAM/lifecycle, de déploiement des objets et d'admission, puis un premier jeu complet et une restauration sur instance/PVC dédiées.  
-**Production :** conserver la suspension jusqu'au GO owner, avec capacité vérifiée, surveillance de fraîcheur et reprise applicative mesurée ; 24 h/4 h sont des cibles, pas des résultats acquis.  
-**Portée du verdict :** revue statique individuelle, sans preuve d'exécution ni consensus multi-agent ; les configurations externes signalées « à vérifier » et la livraison Geo restent à établir par leurs responsables.
-
-### Revue C2 — Gemini 3.8 high (2026-09-17, première version)
-
-# Revue contradictoire de la PR #712
-
----
-
-## I. Réponses aux questions d'arbitrage
-
-### 1. La sauvegarde est-elle correcte et restaurable ?
-**Verdict : Ne tient pas**
-* **Format** : L'usage de `pg_dump --format=custom` ([`deploy/k8s/db-backup/dump.sh:8`](file:///deploy/k8s/db-backup/dump.sh#L8)) est standard et adapté à PostgreSQL.
-* **Perte de droits et d'appartenance** : L'emploi systématique de `--no-owner --no-privileges` ([`deploy/k8s/db-backup/dump.sh:8`](file:///deploy/k8s/db-backup/dump.sh#L8) et [`deploy/k8s/db-backup/restore-verify.sh:16`](file:///deploy/k8s/db-backup/restore-verify.sh#L16)) écarte tous les `GRANT`/`REVOKE` et assigne tous les objets à l'utilisateur de restauration. Si l'application ou des composants d'analyse utilisent des rôles distincts, ces habilitations sont perdues à la restauration.
-* **Absence des rôles globaux** : `pg_dump` n'exporte pas le cluster global (`pg_dumpall --globals-only` absent). En cas de sinistre réel sur une instance vierge, la restauration échoue si les rôles applicatifs requis n'ont pas été réinjectés en amont.
-* **PostGIS et extensions** : La base de vérification est créée vierge (`CREATE DATABASE` à [`deploy/k8s/db-backup/restore-verify.sh:14`](file:///deploy/k8s/db-backup/restore-verify.sh#L14)) sans exécuter `CREATE EXTENSION postgis`. Si le dump contient l'instruction et que `POSTGRES_USER` ne dispose pas des privilèges nécessaires sur l'instance cible, `--exit-on-error` ([`deploy/k8s/db-backup/restore-verify.sh:16`](file:///deploy/k8s/db-backup/restore-verify.sh#L16)) interrompt immédiatement la restauration.
-
----
-
-### 2. La vérification de restauration prouve-t-elle quelque chose ?
-**Verdict : Ne tient pas**
-* **Compteurs statistiques non déterministes** : La requête s'appuie sur `pg_stat_user_tables.n_live_tup` ([`deploy/k8s/db-backup/restore-verify.sh:10`](file:///deploy/k8s/db-backup/restore-verify.sh#L10)), qui est une estimation asynchrone du collecteur statistique et non un compte réel (`COUNT(*)`).
-* **Base restaurée non analysée** : Juste après un `pg_restore`, aucun `ANALYZE` n'a tourné sur `radar_restore_verify`. Les valeurs de `n_live_tup` sont à 0 ou non initialisées, rendant toute comparaison caduque.
-* **Faux négatif garanti par dérive temporelle** : Le script extrait l'état de `POSTGRES_DB` en direct lors du test ([`deploy/k8s/db-backup/restore-verify.sh:11`](file:///deploy/k8s/db-backup/restore-verify.sh#L11)) et le compare par `cmp` strict ([`deploy/k8s/db-backup/restore-verify.sh:18`](file:///deploy/k8s/db-backup/restore-verify.sh#L18)) à un dump pris la nuit ou plusieurs jours plus tôt. La moindre écriture en préproduction entre le dump et le test fait échouer le `cmp` et crashe le Job sous `set -eu`.
-* **Bug fatal sur le contrôle SHA-256** : [`deploy/k8s/db-backup/dump.sh:10`](file:///deploy/k8s/db-backup/dump.sh#L10) stocke dans le fichier `.sha256` la chaîne brute issue de `sha256sum /work/radar-${now}.dump`. Or [`deploy/k8s/42-db-restore-verify-job.yaml:32`](file:///deploy/k8s/42-db-restore-verify-job.yaml#L32) télécharge le dump sous le nom `/work/restore.dump`. L'appel `sha256sum -c /work/restore.dump.sha256` ([`deploy/k8s/db-backup/restore-verify.sh:9`](file:///deploy/k8s/db-backup/restore-verify.sh#L9)) échoue systématiquement (`No such file or directory` sur l'ancien chemin) et stoppe le script avant toute restauration.
-
----
-
-### 3. Le test est-il vraiment isolé ?
-**Verdict : Ne tient pas**
-* **Même serveur et même stockage** : Le Job pointe sur `PGHOST=radar-postgres` ([`deploy/k8s/42-db-restore-verify-job.yaml:56`](file:///deploy/k8s/42-db-restore-verify-job.yaml#L56)). La restauration s'exécute directement sur l'instance PostgreSQL active.
-* **Risque de saturation de la PVC de 5 GiB** : La base active occupe ~950 MiB en préproduction et 1 002 MiB en production. Restaurer une copie complète de 1 Go tout en générant les journaux de transactions (WAL) associés sur un disque de 5 GiB partagé menace directement la base active d'un arrêt brutal par saturation de volume (`disk full`).
-* **Contradiction avec le plan PRA** : [`docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md:15`](file:///docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md#L15) indique formellement : *« Les PVC ne sont pas une capacité de sauvegarde : une restauration isolée exige une PVC dédiée »*. Le fichier YAML livre l'exact inverse.
-* **Validité nulle en cas de sinistre** : Le test ne valide ni le provisionnement d'un nouveau pod, ni le montage d'un volume vierge, ni la reconfiguration réseau ou des secrets dans un cluster de secours.
-
----
-
-### 4. La rétention est-elle garantie ?
-**Verdict : Ne tient pas**
-* **Aucun lifecycle S3 déployé** : Aucun manifeste Terraform, script d'automatisation ou appel API ne configure de cycle de vie sur les buckets OVH S3.
-* **Code d'upload sans purge** : [`deploy/k8s/db-backup/upload.sh:16-18`](file:///deploy/k8s/db-backup/upload.sh#L16-L18) empile les objets dans `daily/`, `weekly/` et `monthly/` sans jamais appeler de suppression. Sans règle S3 externe (dont l'existence relève de l'hypothèse), le stockage s'accumulera indéfiniment, reproduisant l'anomalie documentée à [`docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md:24-26`](file:///docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md#L24-L26) (67 dumps non purgés).
-* **Documentation contradictoire** : [`deploy/ci/README.md:246-248`](file:///deploy/ci/README.md#L246-L248) prétend que le CronJob applique une rétention et filtre les valeurs non numériques via `awk`. C'est une confusion complète avec la modification apportée au script de release CI [`deploy/ci/run-db-backup.sh:48-50`](file:///deploy/ci/run-db-backup.sh#L48-L50).
-
----
-
-### 5. Les pods seront-ils admis ?
-**Verdict : Ne tient pas**
-* **Absence totale de ressources** : Aucun conteneur ni initConteneur de [`deploy/k8s/41-db-backup-cronjob.yaml:42-70`](file:///deploy/k8s/41-db-backup-cronjob.yaml#L42-L70) et [`deploy/k8s/42-db-restore-verify-job.yaml:28-64`](file:///deploy/k8s/42-db-restore-verify-job.yaml#L28-L64) ne déclare de section `resources.limits.memory` ou `resources.requests`.
-* **Rejet strict par l'admission** : Dans un namespace contraint par un `ResourceQuota` sur `limits.memory` (3 Gi en prod, 6 Gi en préprod) et sans `LimitRange` fournissant des valeurs par défaut, l'Admission Controller Kubernetes rejette immédiatement la création des pods (`failed quota: must specify limits.memory`). Aucun pod ne démarrera.
-* **Budget mémoire en production** : Avec 2,3 Gi déjà alloués sur un quota de 3 Gi en production, la marge résiduelle n'est que de ~700 MiB. Sans limites ajustées au millimètre, le pod dépassera le quota global ou subira un `OOMKilled`.
-
----
-
-### 6. Sécurité
-**Verdict : À vérifier**
-* **Restriction de préfixe S3 non garantie** : La politique IAM limitant la clé au préfixe `postgres/` n'est définie nulle part dans le code. Sa présence repose sur une hypothèse opérationnelle hors-bande ([`deploy/ci/README.md:251`](file:///deploy/ci/README.md#L251)).
-* **Doublon dans les exemples de secrets** : [`deploy/k8s/secrets.example.yaml:105-123`](file:///deploy/k8s/secrets.example.yaml#L105-L123) déclare deux fois exactement le même secret `radar-backup-s3-credentials` dans le namespace `radar-immobilier`. Aucun exemple n'est fourni pour `radar-immobilier-preprod`.
-* **Fuite de privilèges entre conteneurs** : Via l'ancre YAML `&backup-env` ([`deploy/k8s/41-db-backup-cronjob.yaml:47-61`](file:///deploy/k8s/41-db-backup-cronjob.yaml#L47-L61)), l'initConteneur `dump` reçoit les identifiants S3 sans en avoir l'usage, et le conteneur `upload-and-retain` reçoit le mot de passe superutilisateur de PostgreSQL.
-* **NetworkPolicy incomplète (Egress non géré)** : [`deploy/k8s/70-networkpolicy.yaml:227-233`](file:///deploy/k8s/70-networkpolicy.yaml#L227-L233) autorise le port 5432 vers la base de données. En revanche, aucune egress policy n'est ajoutée pour joindre l'endpoint OVH S3 (`s3.bhs.io.cloud.ovh.net:443`) ni le serveur DNS du cluster (port 53). Si le namespace bloque l'egress par défaut, les uploads et downloads échouent par timeout.
-
----
-
-### 7. Chemin de mise en service
-**Verdict : Ne tient pas**
-* **Déploiement fantôme en préproduction** : Le CD actuel se limitant à un `kubectl set image` sur les Deployments existants, les nouveaux objets de [`deploy/k8s/kustomization.yaml:55, 81`](file:///deploy/k8s/kustomization.yaml#L55) (`radar-db-backup` et `radar-db-backup-scripts`) ne seront jamais créés ni appliqués sur le cluster lors de la fusion.
-* **Blocage en production** : Le CronJob y est expressément suspendu (`suspend: true` à [`deploy/k8s/41-db-backup-cronjob.yaml:11`](file:///deploy/k8s/41-db-backup-cronjob.yaml#L11)). De plus, le secret `radar-backup-s3-credentials` n'y existe pas encore ; un déblocage manuel provoquerait immédiatement une erreur `CreateContainerConfigError`.
-
----
-
-### 8. Autres défauts constatés dans le diff
-* **Incompatibilité `kubectl apply -k`** : La commande documentée ([`deploy/ci/README.md:261`](file:///deploy/ci/README.md#L261)) requiert impérativement `--load-restrictor LoadRestrictionsNone` car [`deploy/k8s/db-restore-verify/kustomization.yaml:6-11`](file:///deploy/k8s/db-restore-verify/kustomization.yaml#L6-L11) référence des fichiers situés dans le répertoire parent (`..`).
-* **Variable placeholder non injectée** : Dans [`deploy/k8s/42-db-restore-verify-job.yaml:37`](file:///deploy/k8s/42-db-restore-verify-job.yaml#L37), `BACKUP_OBJECT` vaut en dur `REPLACE_WITH_POSTGRES_PREPROD_BACKUP_STEM`. L'instruction du README commande d'appliquer le dossier directement, ce qui déclenche un échec de téléchargement S3 404 immédiat.
-* **Uploads redondants le dimanche et le 1er du mois** : [`deploy/k8s/db-backup/upload.sh:16-18`](file:///deploy/k8s/db-backup/upload.sh#L16-L18) ré-uploade trois fois le fichier complet de 500 MiB à travers la connexion Internet au lieu de réaliser une copie côté bucket (`aws s3 cp s3://... s3://...`).
-* **Violation de la convention CronJob du dépôt** : [`deploy/k8s/kustomization.yaml:55`](file:///deploy/k8s/kustomization.yaml#L55) insère le CronJob sous le commentaire explicite : *« créés + pinnés UNIQUEMENT par la CI via kustomize build … refresh-cronjobs [...] Ne PAS re-lister »*.
-* **Modification hors périmètre** : Modification inutile de [`deploy/ci/run-db-backup.sh:48-50`](file:///deploy/ci/run-db-backup.sh#L48-L50) et [`deploy/ci/db-backup.test.sh:106-109`](file:///deploy/ci/db-backup.test.sh#L106-L109), qui appartiennent au mécanisme de release CI et n'ont aucun lien avec le CronJob planifié #698.
-
----
-
-## II. Tableau des constats
+## 3. Constats de fond
+
+Gravité : **bloquant** (la spec ne peut pas être mise en œuvre telle quelle ou expose à une perte
+immédiate), **important** (une conclusion ou une couverture est fausse ou fragile), **mineur**.
+« hypothèse » = critique que je n'ai pas pu établir.
 
 | # | Constat | Gravité | Preuve | Correction proposée |
 |---|---|---|---|---|
-| 1 | Échec d'admission Kubernetes : absence de `limits.memory` sous quota strict | **Bloquant** | [`deploy/k8s/41-db-backup-cronjob.yaml:42-70`](file:///deploy/k8s/41-db-backup-cronjob.yaml#L42-L70), [`deploy/k8s/42-db-restore-verify-job.yaml:28-64`](file:///deploy/k8s/42-db-restore-verify-job.yaml#L28-L64) | Déclarer `resources.requests` et `resources.limits` pour la mémoire et le CPU sur tous les conteneurs et initConteneurs. |
-| 2 | Échec systématique de vérification du hash SHA-256 (incohérence de nommage de fichier) | **Bloquant** | [`deploy/k8s/db-backup/dump.sh:10`](file:///deploy/k8s/db-backup/dump.sh#L10), [`deploy/k8s/42-db-restore-verify-job.yaml:32`](file:///deploy/k8s/42-db-restore-verify-job.yaml#L32), [`deploy/k8s/db-backup/restore-verify.sh:9`](file:///deploy/k8s/db-backup/restore-verify.sh#L9) | Générer le checksum avec un nom relatif (`(cd /work && sha256sum "$(basename "$dump")" > restore.dump.sha256)`) ou faire `echo "$hash  /work/restore.dump" \| sha256sum -c`. |
-| 3 | Faux négatif garanti lors de la vérification : comparaison stricte `cmp` avec une base source active | **Bloquant** | [`deploy/k8s/db-backup/restore-verify.sh:10-18`](file:///deploy/k8s/db-backup/restore-verify.sh#L10-L18) | Enregistrer le compte réel (`COUNT(*)`) de chaque table dans le fichier manifest lors du dump, puis comparer l'état restauré à ce manifeste. |
-| 4 | Métrique de décompte invalide : usage de `n_live_tup` non initialisé après restauration | **Bloquant** | [`deploy/k8s/db-backup/restore-verify.sh:10, 17`](file:///deploy/k8s/db-backup/restore-verify.sh#L10) | Remplacer l'interrogation de `pg_stat_user_tables` par une boucle calculant le `COUNT(*)` exact des tables applicatives. |
-| 5 | Risque de panne d'exploitation : restauration non isolée menaçant la PVC partagée de 5 GiB de saturation | **Bloquant** | [`deploy/k8s/42-db-restore-verify-job.yaml:56`](file:///deploy/k8s/42-db-restore-verify-job.yaml#L56), [`deploy/k8s/db-backup/restore-verify.sh:12-16`](file:///deploy/k8s/db-backup/restore-verify.sh#L12-L16) | Exécuter la restauration dans un conteneur PostgreSQL éphémère dédié avec sa propre PVC ou volume temporaire isolé. |
-| 6 | Absence totale de mécanisme de rétention (dumps accumulés indéfiniment) | **Bloquant** | [`deploy/k8s/db-backup/upload.sh:16-18`](file:///deploy/k8s/db-backup/upload.sh#L16-L18), [`docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md:21-26`](file:///docs/spec/reports/PLAN_BACKUP_PRA_2026-09-17.md#L21-L26) | Fournir le manifest ou le script Terraform/API appliquant réellement les règles de cycle de vie sur les préfixes S3 OVH. |
-| 7 | Déploiement inopérant : objets Kustomize non pris en compte par le CD préprod | **Important** | [`deploy/k8s/kustomization.yaml:55`](file:///deploy/k8s/kustomization.yaml#L55) et Contexte d'exploitation | Adapter le pipeline de déploiement pour appliquer les manifests durables ou exécuter une étape d'apply dédiée aux CronJobs. |
-| 8 | Bloquage réseau potentiel : absence de règles Egress vers S3 et le DNS | **Important** | [`deploy/k8s/70-networkpolicy.yaml:227-233`](file:///deploy/k8s/70-networkpolicy.yaml#L227-L233) | Ajouter les règles Egress autorisant le port 443 vers le CIDR/domaine S3 OVH et le port 53 UDP/TCP vers CoreDNS. |
-| 9 | Fuite des identifiants entre conteneurs (`&backup-env`) | **Important** | [`deploy/k8s/41-db-backup-cronjob.yaml:47-69`](file:///deploy/k8s/41-db-backup-cronjob.yaml#L47-L69) | Séparer les blocs d'environnement : variables DB pour `dump`, variables S3 pour `upload-and-retain`. |
-| 10 | Placeholder `BACKUP_OBJECT` non substitué dans la commande de vérification | **Important** | [`deploy/k8s/42-db-restore-verify-job.yaml:37`](file:///deploy/k8s/42-db-restore-verify-job.yaml#L37), [`deploy/ci/README.md:261`](file:///deploy/ci/README.md#L261) | Documenter la commande exacte de patch kustomize ou injecter dynamiquement le nom du dernier dump valide. |
-| 11 | Duplication du manifest secret dans les exemples | **Mineur** | [`deploy/k8s/secrets.example.yaml:105-123`](file:///deploy/k8s/secrets.example.yaml#L105-L123) | Supprimer le bloc dupliqué et ajouter un exemple explicite pour le namespace préproduction. |
-| 12 | Surconsommation de bande passante par uploads S3 redondants | **Mineur** | [`deploy/k8s/db-backup/upload.sh:16-18`](file:///deploy/k8s/db-backup/upload.sh#L16-L18) | Uploader une seule fois vers `daily/`, puis copier d'objet à objet (`aws s3 cp s3://... s3://...`) vers `weekly/` et `monthly/`. |
-| 13 | Modification parasite du script de release CI | **Mineur** | [`deploy/ci/run-db-backup.sh:48-50`](file:///deploy/ci/run-db-backup.sh#L48-L50), [`deploy/ci/db-backup.test.sh:106-109`](file:///deploy/ci/db-backup.test.sh#L106-L109) | Revert des modifications sur `deploy/ci/run-db-backup.sh`, qui ne concernent pas le CronJob planifié. |
+| F1 | **Clés de scellement : l'outil impose exactement deux clés, la rotation en crée une troisième vers le 22/09, et la spec ne prévoit aucune action avant.** `export-sealed-secrets-keys` refuse si le compte ≠ 2 ; `restore-sealed-secrets-keys` et `check-sealed-secrets-runtime` aussi. Option (1) de Q10 (« réexporter après chaque rotation ») est donc inapplicable avec l'outil actuel dès la prochaine rotation, et la restauration aussi. L'option (3) (coffre en clair + rescellement) exige d'abord de déchiffrer les SealedSecrets existants, donc les clés actuelles, pour peupler le coffre : dépendance circulaire non dite. L'option standard `kubeseal --re-encrypt` (rescellement de tous les SealedSecrets avec la clé active, puis export de la seule clé active) n'est pas nommée. | **bloquant** | K8S-MK:183-185, :207-209, :216-218 ; INV:63 (rotation ~09-22) ; SPEC:1088-1096 (Q10) ; SPEC:174 | (a) Mesure conservatoire hors spec, **aujourd'hui** : l'owner exporte pendant que le compte vaut 2 et dépose l'export dans un coffre ; (b) Q10 : ajouter la contrainte outil, l'option (4) re-encrypt + export de la clé active, et la circularité de (3) ; (c) événement E10a déjà prévu : le lier au compte de clés. |
+| F2 | **Séquencement : la prod n'a aucune sauvegarde planifiée, le dernier point a 8 jours et vieillit sans borne, et la spec fait dépendre l'activation de décisions nouvelles.** Le code N2 est prêt hors ligne avec gouvernance 35 j et 7/4/2 (E2E:5, :92) ; la v3 remplace le plancher 35 j par 14 j + promotion (D-v3-7), et 7/4/2 par 10/5/13 selon Q5 : nouveau code, nouveaux tests, nouvelles questions avant la première sauvegarde de prod. La rétention par défaut d'un bucket verrouillé est modifiable après création (seule l'activation du verrou est figée à la création, SPEC:210) : rien n'empêche une activation intérimaire. | **bloquant** | SPEC:188, :358, :372-380, :1034 ; E2E:92-94 ; `backup-provision.py:48,149` | Ajouter un chapitre « mesure conservatoire » : provisionner et activer la prod avec le code actuel (35 j gouvernance, 7/4/2), puis migrer vers la v3 sans recréer le bucket. Une seule question à l'owner, en tête de lot 1 : « GO activation intérimaire ? ». |
+| F3 | **V29 surcouverte.** « des scripts doivent permettre de pouvoir faire la meme chose » n'est tenu que si le miroir d'images (Q17) est retenu ; la spec l'écrit (§8.3) mais la matrice affiche « couvert ». | important | SPEC:83 (V29), :662-663, :1121-1123 | V29 = « partiel, conditionné à Q17 » ; ou mieux : Q17 n'est pas une question, c'est une conséquence de V29 — la trancher (miroir requis), ne demander que le coût. |
+| F4 | **RTO-1 : « non acquis » dit trop bas et découpage incomplet.** La borne haute 135 min > 120 figure une fois (810) ; absente de V31 (85), RTO-1 (121), §14, et du lot 1 des questions. Manquent au découpage : tirage des images sur nœud neuf (API, UI, refresh, nginx, geo-api, postgres, backup), provisionnement PVC + démarrage StatefulSet PostgreSQL, TTL DNS réel pour `dns=switch` (E1 en `drill` ne le mesure pas), attente humaine (approbation `dr` en T1, « GO owner » en T9 : sur le chemin critique, non borné), rescellement si Q10 = 3, reconstruction IdP (F5). Estimations non ancrées : T7 (10–40) alors que la seule mesure disponible montre un écart ×3 inexpliqué entre prod (6 min 54 s) et préprod (2 min 10 s) pour des bases de taille égale (1 002 vs 950 MiB). **Mesure manquante qui changerait la conclusion : durée de création d'un cluster MKS** (jamais mesurée, T2 = 10–30 min à elle seule). | important | SPEC:182, :187, :797-812 | Mettre « non acquis sur estimation, borne haute 135 min » dans V31, RTO-1 et la synthèse ; ajouter les étapes ; expliquer ou mesurer l'écart ×3 ; sortir « GO owner » du chronomètre ou le compter ; mesurer T2 par un `tofu apply` d'exercice avant E1. |
+| F5 | **L'IdP sentropic vit dans le même cluster** (namespace `sentropic`, S9) ; une perte du cluster emporte la connexion immo. « Retour en opération complet » n'est pas atteignable par immo + geo seuls ; l'IdP est hors budget T1–T9 et renvoyé à une autre lane (Q15). | important | SPEC:176, :564, :1113-1115 ; K8S-RESERVATIONS (namespace `sentropic` listé) | Soit une étape T-IdP (module vendu ou mode dégradé sans connexion documenté), soit redéfinir « opération » avec l'owner par une question explicite ; dans les deux cas, le dire dans V31. |
+| F6 | **Cohérence sans gel : la fenêtre ≤ T0 + ε capture des écritures postérieures à T0.** Si une clé est réécrite entre T0 et T0 + ε, la copie porte un contenu que la base à T0 ne référence pas ; le contrôle de fermeture, par clé, ne le voit pas. Le mécanisme n'est solide que si les clés sont write-once, propriété non établie (les sorties du refresh et du scrape peuvent réécrire des clés). | important | SPEC:315-319, :323-324 | Déclarer l'invariant « clé immuable » à vérifier par la lane immo ; sinon sélectionner ≤ T0 − skew puis compléter par les seules références manquantes ; comparer l'empreinte quand la base en stocke une. |
+| F7 | **Aucune conduite à tenir quand la fermeture échoue.** Le point est « incomplet » et une alerte part ; si l'application écrit la ligne avant l'objet (ordre inconnu), tout point pris pendant une fenêtre du refresh sera incomplet. Les horaires de sauvegarde (02:15, 14:15) et du refresh ne sont pas coordonnés. Résultat possible : aucun point N2 complet pendant des jours, alerte E2a permanente. | important | SPEC:318-319, :243, :323 ; `41-db-backup-cronjob.yaml:8` ; `34-refresh-cronjob.yaml` | Reprise bornée (re-sélection des objets manquants à T1 > T0 si la base n'a pas bougé, sinon nouveau point) ; placer le point hors fenêtre de refresh ; définir « incomplet » comme état intermédiaire, pas comme échec. |
+| F8 | **Cadence base 2×/jour, objets 1×/jour** : sous G2 (« même T0 »), le point de 14:15 n'a pas de compagnon objets et ne sert pas à une restauration jointe. | important | SPEC:243-244, :320, :490 | Copier les objets à chaque point base (coût faible en adressage par contenu) ou désigner le point joint quotidien et le dire dans §3.4. |
+| F9 | **Prérequis non nommé : lire une version non courante par une identité de données sur OVH.** `GetObjectVersion` est absent de l'énumération IAM (§1.4) ; E2E C3 dit « non refusable par politique, donc mesuré ». N1 objets, la sélection à T0 et `versions@<instant>` en dépendent tous. La spec ne liste que le versionnement comme prérequis. | important | SPEC:209, :286, :315, :595 ; E2E:17 | Ajouter à §16 « `GetObject` avec `versionId` sur une version non courante, par `data-reader`, sur OVH : à mesurer par la sonde » ; prévoir le repli (miroir à chaque écriture) si refusé. |
+| F10 | **Q7 / L1 : la conformité est écartée pour le mensuel sur une hypothèse juridique.** « une destruction de renseignements personnels que la loi 25 pourrait exiger » n'est pas établi ; la pratique courante inscrit les sauvegardes au calendrier de conservation. En L1, l'admin S3 du coffre (contournement gouvernance) reste le point de destruction unique : une compromission du coffre ou du poste de l'owner efface 13 mois. Le coût réel de l'irréversibilité en L2 est petit (≈ 13 × 0,5 GiB). | important | SPEC:386-389, :737, :1073-1076 | Présenter L2 à égalité, marquer l'argument loi 25 « hypothèse, juriste », chiffrer l'irréversibilité, et dire ce que L1 ne protège pas. |
+| F11 | **Q5 : le verbatim fait lui-même l'arithmétique 10 + 5 + 13 = 28.** Seule la construction disjointe la reproduit ; la superposée (26–27) contredit le décompte écrit. Confirmer est légitime, mais Q5 ne présente la disjointe que par son surcoût (« ≈ 1,5 mois … en plus ») : formulation orientée vers la construction qui contredit le texte. | important | OWNER:43 ; SPEC:338-345, :1065-1068 | Dire que la disjointe est la lecture conforme au décompte ; proposer la superposée comme économie à valider, avec son coût et son gain. |
+| F12 | **Rétention préprod rétrécie sans question.** V36 ne distingue pas les environnements ; D-v3-9 réduit la préprod au quotidien seul, marqué proposition mais absent des questions et de la matrice comme écart. | important | SPEC:400-403, :1036 ; OWNER:43 | Ligne V36 : « prod complet ; préprod rétrécie, proposition à valider » ; ou question dans le lot 2. |
+| F13 | **PROC-1 : « n'est pas un rôle clair » devient « le rôle disparaît », source « owner ».** D-v3-2 (suppression du gel) est motivée par « un rôle que l'owner juge obscur ». L'owner a demandé la clarté, pas la suppression ; §2.3 répond bien à la clarté, mais la décision de conception ne doit pas s'abriter derrière le verbatim. L'écart grille/verbatim n'est pas relevé en §0.2, alors que celui d'ARCH-3 l'est. | important | SPEC:64, :109, :1029 ; OWNER:24 | Relever l'écart en §0.2 ; motiver D-v3-2 par ses seuls mérites techniques (coordinateur jamais livré, S17 R4). |
+| F14 | **Q12 rétrécit « doit écraser la preprod avec la donnée de prod » sans le dire**, et §4.4 justifie D-v3-9 par « écrasée à chaque passage » : incohérent avec la recommandation Q12 (« quand la publication apporte une migration nouvelle »). | important | SPEC:401, :1100-1102 ; OWNER:27 | Dans Q12, dire que la recommandation est plus faible que le verbatim et pourquoi (1 GiB + 12,5 Go par fusion) ; aligner §4.4. |
+| F15 | **Départ du chronomètre RTO décidé par la spec** (déclenchement du workflow) alors que le verbatim ne le fixe pas ; avec un veilleur horaire et un seuil de 2 h (E3a), la détection seule peut prendre 2–3 h avant tout déclenchement. | important | SPEC:783-784, :852 ; OWNER:39 | Question à l'owner : « moins de 2 h depuis l'incident ou depuis le déclenchement ? » ; si incident, la détection entre au budget et le veilleur doit être plus fréquent. |
+| F16 | **Jeton API OVH racine dans l'environnement GitHub `dr`.** Une compromission GitHub = projet OVH entier (clusters, utilisateurs S3, clés). D-v3-5 (« aucune donnée par un runner ») ne couvre pas ce risque ; il n'est pas exposé à l'owner comme décision. | important | SPEC:644-646, :675, :736 | Décision explicite (D-v3-14) avec alternatives : b.i par script depuis le coffre seulement (GitHub pour b.ii et b.iii), ou jeton OVH à portée réduite (MKS + S3 du projet DR) ; dire ce que l'owner accepte. |
+| F17 | **Transfert de garde (§9.5) : déclaratif sur l'essentiel.** Pas de lot ni d'ordre daté ; l'étape 3 (réinitialisation du kubeconfig par l'API OVH) est une hypothèse ; la seule vérification est E7, exercice humain coûteux, en fin de chaîne. Le cadre « l'agent détient » masque que les fichiers sont sur le poste de l'owner (INV : `~/.ovh.conf`, `/home/antoinefa/src/sentropic/.env`) : le problème réel est la reproductibilité documentée, pas la personne. | important | SPEC:750-769 ; INV:23-28, :35 | Check-list vérifiable avant E7 : inventaire nominatif ↔ coffre (diff vide), anciens identifiants supprimés côté OVH (liste API), `tofu plan` depuis un runner sans `.env`, refus mesuré des anciennes clés ; E7 comme preuve finale. |
+| F18 | **Débit objets surestimé.** 38 min 31 s couvre 39 582 copies + 19 435 comparaisons, sur un chemin Scaleway → OVH ; ≈ 17 copies/s, pas 25. Le seuil « ≈ 7 500 objets en 5 min » tombe à ≈ 5 000 ; une copie intra-région côté serveur peut être plus rapide, non mesurée. | mineur | reçu S10 (`copySummary.copied = 39582`, `parityJob` 22:00:00 → 22:38:31) ; SPEC:793, :825 | Reprendre le seuil ; noter « chemin inter-fournisseurs » ; mesurer une copie intra-bhs en E3. |
+| F19 | **« RPO effectif ≈ 8 jours »** est l'âge du dernier point, croissant jusqu'au prochain tag ; le RPO effectif de la prod est « indéfini ». Le terme minore l'urgence (F2). | mineur | SPEC:188 | Reformuler : « dernier point : 8 j, aucun mécanisme planifié : RPO non borné ». |
+| F19 bis | **§3.3 remplit le voisin de Q3** avec des valeurs (≤ 12 h, alerte 24 h reprise du code 86 400 s) ; étiquetage correct, mais Q3 mentionne « la spec propose des RPO », ce qui oriente la réponse. | mineur | SPEC:296-301, :1059-1060 ; `backup.py:424` | Retirer la mention des RPO de Q3 ; laisser §3.3 comme proposition indépendante. |
+| F20 | **N1 base : `CREATE DATABASE … TEMPLATE`** exige l'absence de toute connexion à la base modèle : coupure complète (lecture comprise), pas seulement d'écriture ; occupation PVC doublée (5 GiB pour 1 GiB + clones). Le renommage exige la même absence de connexions. | mineur | SPEC:285, :823 | Le dire ; mesurer en E5 ; purge des clones ; envisager l'instantané de volume MKS (case vide 1134) comme alternative sans coupure. |
+| F21 | **Plafond « 3 suppressions par exécution » étendu aux blocs d'objets** : des milliers de blocs orphelins → E11 permanent. | mineur | SPEC:351, :1000 | Plafond par jeu, non par bloc ; suppression de blocs en lot. |
+| F22 | **Identités : de 4 à 7 par environnement** (+ JIT + `GEO_DISPATCH_TOKEN`), alors que le brief v3 demandait le minimum ; non compté, non justifié. | mineur | SPEC:743-745 ; `.remote/BACKUP_PRA_V3_BRIEF.md:10-19` | Table de comptage, justification par identité, ou fusion (`watcher` = `reader` restreint par préfixe). |
+| F23 | **Loi 25 : l'applicabilité tient plus sûrement à `account_users`** (courriels d'utilisateurs réels) qu'à `prospect_contacts` (vide ou inconnue) ; la spec fonde sur la classification du dépôt. Articles cités (3.3, 3.5-3.8, 10, 17, 23) : cohérents avec ma connaissance du texte — **hypothèse**, à confirmer sur le texte officiel, comme la spec le dit. Manque : aucun renseignement personnel dans une alerte (courriel TEM hors Québec). | mineur | SPEC:217-220, :449-450, :460 ; `schema.ts:372-584` | Fonder l'applicabilité sur les comptes ; ajouter la règle « aucun RP dans alertes, tickets, reçus ». |
+| F24 | **§13 : « commentaire PREPARED BUT DISARMED périmé »** — c'est un avertissement conditionnel (`if: vars.BACKUP_BEFORE_RELEASE_ENABLED != 'true'`), pas un texte périmé. | mineur | SPEC:1016 ; `build-push-images.yml:725-728` | Reformuler. |
+| F25 | **§13 ne consolide pas le « à construire »** : `restore-into`, `pra.sh`, `pra.yml` ×2, CronJobs objets et réplication, veilleur, `infra/cluster`, `deploy/platform`, `deploy/tenant`, étape DNS, coffre, miroir d'images. L'ampleur n'est pas visible. Le tri de l'existant est juste (vérifié : `keep_sets`, `freshness`, `OVH_ENDPOINT`, `bhs` codé, purge par le runner). | mineur | SPEC:991-1020 | Table « nouveau » avec taille et lot ; base du plan harness. |
+| F26 | **« 10 derniers jours représentés »** (les trous ne vieillissent pas) est une sémantique de code, pas le verbatim « sur une semaine (10j donc) » ; non marquée proposition. | mineur | SPEC:334 ; `backup.py:304-307` | Marquer « proposition spec » et dire l'alternative calendaire. |
+| F27 | **FAITS attribue à l'owner** « a choisi bpmn-js », « veut un couloir par acteur », « veut les formes BPMN standard » ; absents du verbatim S1. La spec ne les érige pas en exigence mais §12.3 s'y adosse. **hypothèse** : autre message de l'owner. | mineur | FAITS:40-52 ; SPEC:957-959 | Sourcer (message, date) ou marquer « ajout h-cond ». |
+| F28 | **Questions : une de trop, plusieurs manquantes.** Q11 (sops + age) est tranchable par la spec (réversible, technique) ; Q17 découle de V29 (F3). Manquent : GO activation intérimaire (F2), départ du chronomètre (F15), jeton OVH dans GitHub (F16), plafond de coût mensuel (stockage verrouillé + réplique + un cluster r2-15 par exercice E1), préprod à rétention réduite (F12). L'export des clés (F1) est une action, pas une question. | mineur | SPEC:1044-1123 | Retirer Q11 et Q17 (décider) ; ajouter les cinq ; mettre F1 en action immédiate. |
+| F29 | **§2.1 : « approuve toute cible prod (environnement GitHub production et dr) », statut « fait »** ; `dr` n'existe pas et l'approbation est D-v3-12. | mineur | SPEC:230, :644-646, :1039 | Statut « proposition ». |
+| F30 | **E1 met des renseignements personnels de prod dans un cluster d'exercice** ; Q9 couvre la préprod, pas le cluster d'exercice ni sa destruction vérifiée. | mineur | SPEC:566-568, :1083-1087 | Ajouter à E1 la destruction vérifiée (cluster, PVC, kubeconfigs) et l'inscrire au registre. |
+
+**Réponses aux points du brief non déjà couverts.** *Niveau rapide (5 min)* : tient pour la base par renommage
+(hors coupure, F20) et pour un préfixe d'objets ≤ ≈ 5 000 (F18) ; ne tient pas pour un bucket geo entier ni
+pour une base depuis un dump ; dit par la spec. Il ne protège pas contre la perte de l'instance ou du bucket
+(dit) ni contre une réécriture de clé si le versionnement n'est pas actif (dit, état inconnu). *Mesures* :
+utilisées correctement pour la copie d'objets (reçu vérifié), avec le biais F18 ; l'absence de Prometheus est
+mesurée (S9) et la conclusion D-v3-6 est juste ; le RPO 8 jours est juste en valeur, faux en nom (F19) et sous-
+exploité (F2). *Indépendance k8s* : le découpage §9.2 est réel (copie épinglée, contrôle de dérive) ; le
+transfert de garde est déclaratif (F17).
 
 ---
 
-## III. Synthèse
+## 4. Synthèse
 
-1. **Fusionnable en l'état : NON.**
-2. Les pods ne peuvent pas démarrer car ils violent le `ResourceQuota` mémoire obligatoire du cluster.
-3. Le script de test échoue systématiquement sur le contrôle SHA-256 puis sur la comparaison `cmp` des tables.
-4. L'exercice de restauration menace directement la stabilité du PostgreSQL de préproduction en ciblant sa PVC partagée de 5 GiB.
-5. **Conditions de fusion** : déclarer les quotas de ressources (`limits.memory`), isoler la vérification sur un PostgreSQL éphémère dédié, baser la validation sur le manifeste du dump (et non sur `n_live_tup`), corriger la vérification SHA-256 et livrer le provisionnement effectif du lifecycle S3.
+1. **Non, la spec n'est pas prête à être mise en œuvre telle quelle** : deux points bloquants sont
+   indépendants de toute réponse de l'owner — l'export des clés de scellement doit être fait avant la
+   rotation du ~22/09 avec un outil qui refuse déjà toute autre situation que deux clés (F1), et la prod n'a
+   aucune sauvegarde planifiée pendant que la spec allonge le chemin vers l'activation (F2).
+2. **La couverture du verbatim est presque complète** (rien perdu, quatre passages bien laissés ouverts), mais
+   quatre lignes affichent plus que ce qu'elles tiennent : V10 (rôle « disparaît » au nom de l'owner), V29
+   (scripts « faire la même chose » conditionné à Q17), V31 (2 h non acquis sur estimation, IdP hors budget)
+   et V36 (préprod rétrécie sans question) ; à corriger avant présentation.
+3. **Le fond est solide sur la structure** (deux niveaux, un script enveloppé par le workflow, alerte hors
+   cluster, coffre) et **fragile sur trois hypothèses non nommées** : lecture de versions non courantes sur
+   OVH (F9), immuabilité des clés d'objets (F6) et conduite à tenir quand la fermeture échoue (F7).
+4. **Trois questions sont orientées ou décidées seules** — Q5, Q7, Q12 — et cinq manquent (activation
+   intérimaire, départ du chronomètre, jeton OVH dans GitHub, plafond de coût, rétention préprod).
+5. **Conditions pour passer à EVOL** : (a) mesure conservatoire F1 + F2 lancée ; (b) matrice corrigée
+   (F3, F12, F13) ; (c) F5, F6, F7, F9 inscrits comme prérequis avec vérificateur ; (d) Q5, Q7, Q12 reposées sans
+   orientation et questions manquantes ajoutées ; (e) budget RTO-1 complété (F4) avec T2 mesuré avant E1.
+
+### Revue A2 — Gemini 3.8 high (PRA v3)
+
+# Revue contradictoire — SPEC PRA v3 (sauvegarde et reprise immo + geo) — Gemini 3.8
+
+*2026-09-19 · contradicteur : Gemini 3.8 (`gemini-3.8-flash-high`) · lecture seule stricte : aucun fichier modifié hors ce rendu, aucun commit, aucune action cluster, OVH ou réseau, aucun fichier `.env` ni aucune valeur secrète lus.*
+
+---
+
+## 0. Périmètre, mandat et méthode
+
+Le présent avis contradictoire porte sur la spécification PRA v3 :
+`/home/antoinefa/src/radar-immobilier/.lanes/conductor/tmp/backup-pra-698/docs/spec/SPEC_PRA_V3_2026-09-19.md` (1 153 lignes).
+
+Il s'appuie exclusivement sur les pièces suivantes :
+- **DEMANDE_OWNER** : `.remote/PRA_V3_DEMANDE_OWNER.md` (texte verbatim de l'owner lignes 20–47, passages inachevés lignes 49–58, complément RPO-1 lignes 129–138) ;
+- **INVENTAIRE_K8S** : `.remote/PRA_V3_INVENTAIRE_K8S.md` (inventaire verbatim k8s, faits A.1 à E et complément B.5 sur les clés de scellement) ;
+- **RENDU_FAITS** : `.remote/PRA_V3_RENDU_FAITS.md` (faits établis sur archify et bpmn-js) ;
+- **BACKUP_E2E** : `.remote/BACKUP_E2E_STATUS.md` (état de convergence du 19/09, worktree `tmp/backup-pra-698`, branche `feat/backup-pra-698`, base `5ee7900c`) ;
+- **K8S_RES** : `.remote/K8S_RESERVATIONS_R2-15.md` (relevé du cluster OVH MKS `poc-ca`, nœud unique r2-15, 2026-09-14) ;
+- **K8S_MAKEFILE** : `/home/antoinefa/src/poc-k8s/Makefile` (cibles de gestion et de contrôle des clés de scellement).
+
+Chaque constat cite sa preuve sous la forme `fichier:ligne` ou est formellement marqué « hypothèse ».
+
+---
+
+## 1. Première tâche : vérification impérative de couverture contre le texte verbatim de l'owner
+
+L'owner a édicté la règle absolue : **« 0 interprétation »**. Le verbatim de la section 1 de `PRA_V3_DEMANDE_OWNER.md` fait seul foi. La grille n'est qu'un repère d'indexation.
+
+### 1.1 Tableau de couverture, fragment par fragment
+
+Statuts appliqués :
+- **oui** : l'exigence est prise en charge intégralement et sans distorsion ;
+- **partiel** : l'exigence n'est prise en charge que sous conditions, avec des exclusions ou sur un sous-ensemble du périmètre ;
+- **déformé** : l'exigence est reformulée, affaiblie, élargie, ou une décision technique est imputée indûment à l'owner ;
+- **non** : demande absente de la spécification ;
+- **ouvert** : passage inachevé ou ambigu maintenu ouvert sans extrapolation.
+
+La gravité (**bloquant**, **important**, **mineur**) qualifie tout écart par rapport au statut « oui » ou « ouvert ».
+
+| # | Fragment verbatim (DEMANDE_OWNER:ligne) | Statut | Où dans SPEC | Gravité | Commentaire contradictoire |
+|---|---|---|---|---|---|
+| V1 | « pour le diagramme du backup global, on s'attend d'avoir une symétrie entre preprod et prod pour mieux comprendre visuellement les elements commun et différence. » (21) | oui | §12.1 (SPEC:903-928) | — | La spécification formalise les deux grilles à rangées identiques ; le rendu visuel est correctement délégué à la phase de rendu graphique. |
+| V2 | « D'autre part, il faut représenter la zone k8s - et ovh (vs ce qui est géré en dehors). » (21) | oui | §12.1 (SPEC:895-898) | — | Découpage en 6 zones nettes (Z1 à Z6). |
+| V3 | « eventuellement des clé etc. » (21) | oui | §9.4 (SPEC:731-749), §12.1 (SPEC:929-930) | — | Tableau complet des clés (qui, où, ce qu'elles ouvrent). L'écart avec la grille ARCH-3 (qui durcissait le « éventuellement ») est signalé en SPEC:103. |
+| V4 | « Pour les alertes, on ne sais pas cocmment et uqi les recoit. » (21) | oui | §11 (SPEC:831-884) | — | Architecture d'alerte hors cluster documentée (destinataires, déclencheurs, matrice d'événements). |
+| V5 | « il faut symboliser l'admin cluster, » (21) | oui | §2.1 (SPEC:231), §12.1 (SPEC:900) | — | Rôle humain identifié, tenu aujourd'hui par l'owner. |
+| V6 | « et peut être les mails pour les notifs des alertes ? (via TEM scw ?? ou via gh ou autre ??). » (21) | oui | §11.3 (SPEC:867-875), Q6 (SPEC:1069-1072) | — | Trois options analysées techniquement, recommandation motivée et choix soumis à l'owner. |
+| V7 | « certains composants ne sont pas les memes en preprod qui smeble avoir moins de composants (5 vs 3 pour geo, 3 vs 2 pour immo). C'est difficile de comprendre pourquoi. » (21-22) | oui | §12.2 (SPEC:941-954) | — | Justification élément par élément des écarts de la version antérieure. |
+| V8 | « Par ailleurs j'imagine que github action doit être la dedans » (22) | oui | §2.1 (SPEC:232-234), §12.1 (SPEC:896) | — | GitHub Actions positionné comme déclencheur et orchestrateur. Phrase complète, bien distinguée du « j'imagine que » final. |
+| V9 | « processus: il manque encore une fois les consommateurs: est-ce que la sauvegarde est trigger par gh action ? un admin ? » (24) | oui | §2.2 (SPEC:239-256) | — | Réponse nette : CronJob pour la routine planifiée, GHA pour les livraisons et la demande, jamais l'administrateur pour l'exploitation courante. |
+| V10 | « "Coordinateur immo" n,est pas un rôle clair, il arrive plusieurs fois. il a plusieurs icones, on ne comprends pas si c un job ou uoi. » (24) | **déformé** | §0.1 (SPEC:64), §2.3 (SPEC:258-269), D-v3-2 (SPEC:1029) | **important** | L'owner critique un manque de clarté (« n,est pas un rôle clair »). La spécification transforme cette remarque en mandat de suppression : « Le rôle disparaît », attribué à la source `owner` (SPEC:64). En D-v3-2 (SPEC:1029), la spec justifie la suppression du gel par « un rôle que l'owner juge obscur ». C'est une déformation : la décision architecturale de supprimer le rôle et le gel appartient à la spec et ne doit pas être imputée à l'owner. L'écart n'est pas relevé dans la grille §0.2 (SPEC:109). |
+| V11 | « In fine, peut être qu'un bpmn (avec bpmn js et autolayout) serait favorable iic pour la repreésnetation non ? » (24) | oui | §12.3 (SPEC:955-978) | — | Prise en compte avec intégration du fait RENDU_FAITS:45-51 démontrant les pertes de couloirs par `bpmn-auto-layout`. |
+| V12 | « Selon moi le processus est tres mauvais: il doit y avoir des triggers » (26) | oui | §7 (SPEC:480-616) | — | Processus entièrement réarticulés autour de déclencheurs explicites. |
+| V13 | « a. go to preprod: restoration de prod a prerod (go to preprod doit écraser la preprod avec la donnée de prod, et faire un test de migration de donnée) - doit être full automatique. » (27) | **partiel** | §7.3 (SPEC:516-540), Q12 (SPEC:1100-1102) | **important** | L'exigence verbatim est « doit être full automatique ». La spécification conditionne et restreint cette automatisation : en §7.3 (SPEC:523-524), le déclenchement automatique est désarmé dans l'attente de Q1 ; en Q12 (SPEC:1100-1102), la spec recommande de ne déclencher l'écrasement que lorsqu'une migration nouvelle apparaît, pour économiser les copies. C'est un recul par rapport au verbatim, qui n'est pas assumé comme tel dans la matrice §0.1. |
+| V14 | « la preprod recupere le dernier snapshot de preprod (que ce soit un go to preprod geo ou immo) » (27) | **ouvert** | §7.3 (SPEC:522-524), Q1 (SPEC:1051-1056) | — | Ambiguïté (« snapshot de preprod » vs « donnée de prod ») maintenue strictement ouverte sous Q1 sans choix imposé. |
+| V15 | « b. demande de restauration owner: selon devrait être full automatique, selon les différents types de reprise: » (28) | oui | §7.4 à §7.6 (SPEC:542-602) | — | Trois processus automatisés selon la typologie demandée. |
+| V16 | « b.i crash complet k8s (nouveau provisionnement de k8s + tenant de preprod ou prod sur base du backup) » (29) | oui | §7.4 (SPEC:542-571) | — | Processus P-bi documenté de bout en bout. |
+| V17 | « - doit être démontré sur preprod (on récupere la sauvegarde de prod sur preprod) » (29) | oui | §7.4 (SPEC:566-571), E1 (SPEC:607) | — | Exercice E1 formalisé sur préprod avec la sauvegarde de prod. |
+| V18 | « - a priori doit pouvoir être trigger par un github action. » (29) | oui | §8.1 (SPEC:621-649) | — | Déclenchement via `pra.yml operation=rebuild`. |
+| V19 | « la démonstration » (29) | **ouvert** | Q2 (SPEC:1057-1058) | — | Fragment textuel inachevé laissé ouvert sans spéculation. |
+| V20 | « b.ii demande de restauration complete (immo + geo) a parir d'un github action: doit être full automatisé également - comme sur i, doit être démontré que prperod récup total la prod » (30) | oui | §7.5 (SPEC:572-586), E2 (SPEC:608) | — | Processus P-bii et exercice E2 avec contrôles stricts d'égalité des données. |
+| V21 | « b.iii demande de restauration immo ou geo ou d'un sous composant (bucket s3, db) - idem - doit être automatisé avec les guardrails de cohérence. » (31) | oui | §7.1 (SPEC:482-499), §7.6 (SPEC:587-602), E3 (SPEC:609) | — | Restauration modulaire avec garde-fous G1 à G10. |
+| V22 | « on doit pouvoir gérer les situations : restauration + migration (quand preprod est en avance sur prod), ou iso (aligné, pas besoin de remigration) » (33) | oui | §7.2 (SPEC:500-514) | — | Calcul de régime automatisé via les migrations Drizzle. Le cas « refus » est correctement étiqueté comme proposition spec en SPEC:115. |
+| V23 | « ce pourrait être le meme job github action avec un paramètre (e.g scope target de restauration preprod / prod - tenant tiers k8s etc). » (35) | oui | §8.1 (SPEC:621-649) | — | Interface commune paramétrée. La décision d'un fichier par dépôt est techniquement motivée sans trahir l'intention. |
+| V24 | « note pour k8s et les agents ia : k8s doit être un enabler, mais pas un blocant. » (37) | oui | §9 (SPEC:697-729) | — | Découplage structurel vis-à-vis du dépôt `poc-k8s`. |
+| V25 | « s'il y a crash, immo/geo doivent pouvoir se reprovisionner sur leur propre k8s. » (37) | oui | §9.2 (SPEC:706-724) | — | Module IaC, plateforme minimale et manifestes tenant embarqués dans chaque dépôt. |
+| V26 | « et le cas échéant, k8s (le repo) peut être trigger pour déclencher des jobs spécifiques d'infra via github action. » (37) | oui | §9.3 (SPEC:725-729) | — | Déclenchement optionnel hors chemin critique. |
+| V27 | « en aucune situation, il doit y avoir besoin d'une ia pour le processus. » (37) | oui | §9.5 (SPEC:750-770), E7 (SPEC:613) | — | Processus exécutables sans IA, garde retirée aux agents. |
+| V28 | « au mieux elle doit pouvoir aider a gérer / monitor une situation (aide au monitoring) sur la base d'une documentation claire. » (37) | oui | §9.6 (SPEC:771-776) | — | Rôle de l'IA circonscrit à la lecture d'états et de runbooks. |
+| V29 | « en cas de github action defaillant, des scripts doivent permettre de pouvoir faire la meme chose sans avec une clareté sur la gestion des secrets. » (37) | **partiel** | §8.2 à §8.4 (SPEC:651-694) | **important** | La matrice §0.1 affiche « couvert » (SPEC:83). Or, le texte du §8.3 (SPEC:661-663) admet que si GitHub est en panne, les images sur GHCR sont inaccessibles, rendant toute reconstruction de cluster impossible sans le miroir d'images OVH de Q17. L'exigence « faire la même chose » sans GitHub n'est donc pas tenue de manière autonome sans décision préalable sur Q17. |
+| V30 | « ah oui les délai de retour a l'objectif RTO RPO doivent, » (39) | **ouvert** | Q3 (SPEC:1059-1060) | — | Fragment inachevé maintenu ouvert. |
+| V31 | « et le retour en opération doit être démontré comme étant moins de 2h (provisionnement d'infra k8s comprise / redéploiement complet). » (39) | **partiel** | §10.1 (SPEC:781-817), E1 (SPEC:607) | **important** | La matrice §0.1 affiche « couvert » (SPEC:85). Or, le calcul du §10.1 (SPEC:809-810) chiffre la fourchette haute du chemin critique à 135 minutes (> 120 minutes). De plus, l'IdP sentropic indispensable au service n'est pas budgété. L'exigence de moins de 2 h n'est donc pas acquise sur les estimations de la spec. |
+| V32 | « pour un upgrade ou on ne restore que des elements de composant, la restauration doit prendre moins de 5 min. » (39) | **partiel** | §3.2 (SPEC:283-293), §10.2 (SPEC:821-828) | **important** | La matrice §0.1 affiche « couvert » (SPEC:86). Or, le §10.2 admet formellement que la restauration d'une base depuis un dump (10 à 40 min, SPEC:824) et la restauration d'un bucket geo complet (45 378 objets, SPEC:826) ne tiennent pas les 5 minutes. La couverture devait être déclarée partielle. |
+| V33 | « Il faut donc peut être deux niveau de backup (snapshot et sync dispo aux bons endroit) » (39) | oui | §3 (SPEC:272-325) | — | Articulation N1 (rapide, local) et N2 (complet, externalisé, immuable). |
+| V34 | « au fait stp supprimer la visauliation grafphviz. » (41) | oui | §12.4 (SPEC:981-982) | — | Graphviz banni de la spécification ; action différée à la phase de rendu. |
+| V35 | « j,avais demandé une représentation archifify ... je me fous ed graphviz » (41) | oui | §12.4 (SPEC:983-988) | — | Contraintes d'archify documentées d'après RENDU_FAITS:8-35. |
+| V36 | « comme demandé initialement j'avais demandé des sauvegarde daily sur une semaine (10j donc), weekly sur un mois (5 semaines du coup), et monthly sur 13 mois. ca veut dire 28 sauvegardes, » (43) | **déformé** | §4.1 à §4.4 (SPEC:330-404), D-v3-9 (SPEC:1036) | **important** | Double déformation : 1) L'owner demande ces 28 sauvegardes sans restreindre à la prod ; la spec décide unilatéralement au §4.4 (SPEC:400-403) et en D-v3-9 de priver la préprod des paliers hebdomadaire et mensuel (10 sauvegardes seulement), sans soumettre cet arbitrage à l'owner ; 2) La sémantique de code des « 10 jours représentés » (SPEC:334) n'est pas une couverture calendaire continue. |
+| V37 | « pour lesquelles la gestion et l'externalisation doivent être au clair (compliances normes). » (43) | oui | §5 (SPEC:408-438), §6 (SPEC:442-476) | — | Chapitre dédié à la conformité (Loi 25, résidence) et à l'externalisation. |
+| V38 | « La sauvegarde sur une plateforme hors ovh pourrait être une autre carte, » (43) | oui | §5.3 (SPEC:433-438) | — | Option documentée à part, sans complexification prématurée. |
+| V39 | « mais au moins faut prévoir un autre datacenter ou region. » (43) | oui | §5.1 (SPEC:409-422) | — | Réplication dans une seconde région OVH. |
+| V40 | « j'imagine que » (45) | **ouvert** | Q4 (SPEC:1061) | — | Fragment inachevé maintenu ouvert sous Q4. |
+| V41 | « reprend - trace bien ma demande stp, avec double challenge merci » (47) + « astra xhigh + fable5.1 … (0 interprétation a ton niveau) » (DEMANDE_OWNER:117-118) | hors spec | SPEC:95 | — | Organisation du double challenge par le conducteur. |
+
+---
+
+### 1.2 Synthèse des quatre critères de couverture
+
+#### 1. Rien n'a été perdu
+L'analyse intégrale phrase par phrase confirme que l'ensemble des éléments du texte de l'owner est indexé dans le tableau de correspondance V1 à V41. Aucun sujet soulevé par l'owner n'a été purement omis.
+
+#### 2. Rien n'a été ajouté en son nom
+Deux dérives significatives sont identifiées où la spécification attribue à l'owner des décisions qui lui sont propres :
+- **V10 / Coordinateur immo** : En SPEC:64, la spec classe sous la source `owner` l'affirmation « Le rôle disparaît », alors que l'owner demandait uniquement d'éclaircir ce rôle. De plus, la décision D-v3-2 (SPEC:1029) justifie la suppression du gel par le fait que l'owner jugerait le rôle « obscur ».
+- **V36 / Découpage de la rétention préprod** : La spec restreint la préprod à 10 sauvegardes (quotidien seul) au lieu des 28 demandées (SPEC:400-403, D-v3-9), tout en cochant l'exigence comme couverte sans signaler la divergence.
+
+#### 3. Rien n'a été déformé
+Quatre déformations importantes affectent la rigueur de la couverture :
+- **V13 (Passage en préprod automatique)** : La recommandation Q12 (SPEC:1100-1102) propose de n'exécuter l'écrasement que lorsqu'une migration apparaît, ce qui affaiblit la consigne de passage systématique et entièrement automatique formulée par l'owner.
+- **V29 (Autonomie hors GitHub)** : Présenté comme « couvert » en §0.1 (SPEC:83), alors que la dépendance non résolue envers le registre d'images GHCR (Q17, SPEC:661-663) rend la reconstruction de cluster impossible sans GitHub.
+- **V31 (RTO < 2 h)** : Présenté comme « couvert » en §0.1 (SPEC:85), alors que l'estimation haute est de 135 minutes (SPEC:810) et qu'une dépendance structurelle (l'IdP sentropic) est ignorée.
+- **V32 (RTO composant < 5 min)** : Présenté comme « couvert » en §0.1 (SPEC:86), alors que le corps du texte admet l'échec de cet objectif pour la base via dump et pour le volume complet de geo.
+
+#### 4. Statut des quatre passages inachevés ou ambigus
+Les quatre passages ont été scrupuleusement identifiés et préservés comme questions ouvertes à l'owner :
+1. **(a) « la preprod recupere le dernier snapshot de preprod »** : maintenu ouvert sous **Q1** (SPEC:1051-1056). Aucune interprétation n'est arrêtée, bien que le paragraphe §4.4 (SPEC:401) anticipe déjà la lecture A (écrasement par la prod).
+2. **(b.i) « la démonstration »** : maintenu ouvert sous **Q2** (SPEC:1057-1058).
+3. **« les délai de retour a l'objectif RTO RPO doivent, »** : maintenu ouvert sous **Q3** (SPEC:1059-1060). *Réserve contradictoire* : en proposant des valeurs détaillées de RPO en §3.3 (SPEC:298-307) sous étiquette d'ajout conducteur, la spec oriente la réponse vers une définition de seuils temporels, alors que la phrase inachevée pouvait signifier « doivent [être démontrés] ».
+4. **« j'imagine que »** : maintenu ouvert sous **Q4** (SPEC:1061).
+
+---
+
+## 2. Traitement de l'exigence RPO-1 (complément du 2026-09-19)
+
+Postérieurement à la rédaction de la spécification, l'owner a formulé l'exigence formelle suivante (DEMANDE_OWNER:131) :
+> « non jamais le RPO (Objective) ne sera 8j. il faut que ce soit 24h. »
+
+Le RPO objectif est donc de **24 heures au maximum**, pour l'ensemble des composants du périmètre. L'échéance de 8 jours relevée en SPEC:188 est le reflet d'une défaillance du dispositif existant (dépendance exclusive aux tags de version), et en aucun cas une cible acceptable.
+
+### 2.1 Ce que RPO-1 casse ou rend insuffisant dans la conception actuelle
+
+1. **La planification et la surveillance de la réplication N2 (SPEC:301, :856)** :
+   La spec propose une sauvegarde de base 2×/jour (SPEC:243), mais pour la réplication vers la seconde région, elle tolère un seuil d'alerte à **26 heures** (SPEC:301, événement E7a en SPEC:856 : « réplique en retard > 26 h »). Avec un RPO objectif fixé à 24 h, tolérer 26 h viole formellement l'engagement en cas de sinistre majeur sur la région principale.
+2. **La sauvegarde des objets immo (SPEC:244, :303)** :
+   La sauvegarde N2 des objets n'est prévue qu'une seule fois par jour (« horaire quotidien », SPEC:244). Si le traitement s'exécute à 01:00 UTC et qu'un incident survient à 23:30 UTC, le décalage cumulé avec le temps de copie et de réplication dépasse 24 heures. Une fréquence quotidienne simple ne permet pas d'absorber les aléas d'exécution sans enfreindre le plafond de 24 h.
+3. **L'absence de retry sur les CronJobs (`41-db-backup-cronjob.yaml:16`)** :
+   Le manifeste en worktree configure `backoffLimit: 0`. En cas d'erreur transitoire réseau ou d'I/O lors du dump de 02:15, le pod échoue sans aucune nouvelle tentative. Le prochain cycle n'intervenant qu'à 14:15, le moindre incident isolé consomme 12 heures de marge, et un second échec propulse le RPO au-delà de 24 heures.
+4. **Le calibrage des alertes de fraîcheur (`backup.py:428-429`)** :
+   Le contrôle de fraîcheur existant déclenche une erreur quand `age > 86400`. Si l'alerte n'est émise qu'au bout de 24 heures, l'équipe d'astreinte est avertie alors que le RPO est **déjà consommé et violé**. L'alerte doit impérativement précéder l'échéance contractuelle.
+5. **Le statut de geo `normalized/` (SPEC:197, :289, Q14)** :
+   La spec traite la sauvegarde de `normalized/` (45 378 objets, 48,94 Go) comme une question ouverte (Q14). Sans sauvegarde planifiée N2 de ce volume, son RPO est indéfini en cas de destruction du bucket en production.
+
+### 2.2 Ce qu'il faut changer pour tenir RPO-1 et à quel coût
+
+1. **Augmentation des cadences d'exécution** :
+   - Base PostgreSQL immo : maintenir 2×/jour (02:15 et 14:15 UTC) ou passer à 4×/jour (toutes les 6 heures). Coût de stockage négligeable (un dump compressé pèse ~0,5 GiB, soit ~2 GiB bruts par jour, purgés selon la politique de rétention).
+   - Objets immo : caler la copie N2 sur la même fréquence que la base (2×/jour à T0), en exploitant l'adressage par contenu pour ne transférer que les deltas.
+   - Réplication inter-régions : déclenchement immédiat après chaque sauvegarde réussie, alerte si le décalage de réplication excède 2 heures (visant un RPO inter-régions ≤ 14 h).
+2. **Résilience opérationnelle des Jobs** :
+   - Positionner `backoffLimit: 2` sur les CronJobs pour relancer immédiatement après un échec réseau transitoire.
+   - Abaisser le seuil d'alerte de fraîcheur à 14 heures sans point vérifié, afin de disposer d'une fenêtre d'intervention humaine de 10 heures avant rupture de l'objectif de 24 h.
+3. **Coût financier estimé** :
+   L'impact financier chez OVHcloud est dérisoire : le surcoût de bande passante interne et de stockage d'objets pour doubler la fréquence des deltas représente moins de 5 $ CAD par mois.
+
+### 2.3 Faisabilité composant par composant
+
+| Composant | Volume / Objets | RPO 24 h tenable ? | Justification technique factuelle |
+|---|---|---|---|
+| **Base immo (PostgreSQL 16)** | 1 002 MiB (SPEC:182) | **OUI** | Durée de dump mesurée à 6 min 54 s en prod (SPEC:187). Avec 2 sauvegardes par jour et vérification sur instance éphémère (~15 min), le cycle est parfaitement maîtrisé et garantit un RPO effectif ≤ 12 h. |
+| **Objets immo (`radar-immobilier-docs`)** | 59 017 objets, 12,53 Go (SPEC:183) | **OUI, sous conditions** | La copie intégrale initiale requiert 38 min 31 s (mesure S10, SPEC:183). En régime nominal, la sauvegarde N2 par sélection de version ou adressage par contenu ne traite que les créations quotidiennes. La condition absolue est l'activation préalable du versionnement sur le bucket source, dont l'état actuel demeure inconnu (SPEC:184). |
+| **Geo — Sources irremplaçables** | 44 objets (SPEC:198) | **OUI** | Volume minuscule (`sources/qc-zonage-grilles/`). Sauvegarde et réplication quasi instantanées. |
+| **Geo — Base PostGIS** | 139 MiB (SPEC:199) | **OUI** | Taille réduite, dump exécutable en moins d'une minute avec l'image existante. |
+| **Geo — Données normalisées (`normalized/`)** | 45 378 objets, 48,94 Go (SPEC:197) | **NON dans l'état actuel du code** | Aucune chaîne de sauvegarde N2 n'est livrée côté geo (SPEC:202). Une synchronisation complète de 48 Go d'objets à travers l'API S3 OVH prend 30 à 50 minutes. Sans un mécanisme incrémental stabilisé et testé, la promesse d'un RPO de 24 h sur ce bucket ne peut pas être tenue immédiatement. |
+
+---
+
+## 3. Deuxième tâche : discussion de fond et tableau des constats
+
+### 3.1 Tableau des constats de fond
+
+| # | Constat | Gravité | Preuve (fichier:ligne) | Correction proposée |
+|---|---|---|---|---|
+| **F1** | **Clés de scellement : l'outillage exige strictement deux clés, la rotation automatique en crée une troisième vers le 22/09, et aucun export hors-cluster n'existe.** `export-sealed-secrets-keys`, `restore-sealed-secrets-keys` et `check-sealed-secrets-runtime` refusent de s'exécuter si le nombre de clés est différent de 2. Dès la prochaine rotation (cycle de 30 jours actif, dernière clé le 23/08), l'outillage Makefile sera paralysé. La spec ne prévoit aucune mesure conservatoire immédiate. L'option (3) de Q10 (coffre en clair) souffre d'une circularité : elle exige les clés actuelles pour déchiffrer les secrets avant de peupler le coffre. | **bloquant** | `poc-k8s/Makefile:183-186`, `:207-209`, `:216-218` ; INVENTAIRE_K8S:54-56, :63 ; SPEC:174, :1088-1096 (Q10) | 1) Action d'urgence immédiate hors spec : exécuter manuellement l'export pendant que le cluster compte exactement 2 clés et consigner le fichier hors-cluster ; 2) Intégrer l'option standard `kubeseal --re-encrypt` pour re-sceller avec la clé active avant export ; 3) Corriger le Makefile pour lever le contrôle figé à 2 clés. |
+| **F2** | **Séquencement critique : la base de production n'a aucune sauvegarde planifiée (RPO constaté de 8 jours), et la spec retarde l'activation en attendant la résolution de 17 questions et la refonte des paliers.** Le code N2 est opérationnel et validé hors ligne en gouvernance 35 j avec la rétention 7/4/2 (BACKUP_E2E:5, :92). La spec v3 remplace ce socle par un palier 14 j avec promotion et une rétention 10/5/13 conditionnée par Q5 et Q7, suspendant le déploiement. Or, la rétention par défaut d'un bucket verrouillé est modifiable à chaud sans recréer le bucket. | **bloquant** | SPEC:188, :358, :372-380, :1034 ; BACKUP_E2E:92-94 ; `backup-provision.py:48,149` | Établir un palier conservatoire immédiat : provisionner et armer la production avec le code prêt (gouvernance 35 j, 7/4/2), refermant l'écart critique actuel, puis migrer à froid vers la configuration v3 définitive. |
+| **F3** | **Surcouverture de l'autonomie hors GitHub (V29) : la reconstruction complète est impossible sans miroir d'images.** La spec affirme en §0.1 que V29 est couverte (SPEC:83). Or, le §8.3 (SPEC:661-663) concède qu'en cas d'indisponibilité de GitHub, le tirage des images sur GHCR échoue, interdisant le reprovisionnement du cluster. | **important** | SPEC:83 (V29), :661-663, :1121-1123 (Q17) | Rendre V29 « partielle » dans la matrice ; requalifier Q17 non comme une question ouverte optionnelle, mais comme un prérequis architectural impératif d'OPS-3 (miroir de registre chez OVH). |
+| **F4** | **Budget RTO-1 : dépassement des 2 h en borne haute et omissions majeures sur le chemin critique.** La fourchette haute s'élève à 135 minutes (SPEC:810). Le découpage en 9 étapes omet le tirage des images sur nœud vierge, l'attente des approbations humaines (« GO owner »), le provisionnement des volumes PVC, et le temps de création réel d'un MKS OVH (T2 = 10–30 min, purement estimé et jamais mesuré). | **important** | SPEC:85, :121, :797-812 | Inscrire « non acquis sur estimation haute (135 min) » dans la synthèse ; chronométrer la création d'un cluster MKS par un test réel ; exclure le temps de décision humaine du budget RTO technique. |
+| **F5** | **Point de blocage fonctionnel : l'IdP sentropic hébergé sur le même cluster est exclu du budget.** L'application immo exige `https://auth.sent-tech.ca` pour fonctionner (SPEC:176). Le namespace `sentropic` est colocalisé sur le même cluster (K8S_RES:63-65). Lors d'un crash complet, immo ne peut pas rouvrir sans la restauration préalable de cet IdP, pourtant renvoyée à une autre lane sous Q15 sans calendrier. | **important** | SPEC:176, :564, :1113-1115 (Q15) ; K8S_RES:63-65 | Intégrer l'IdP sentropic comme dépendance critique dans l'étape T3/T8 ou concevoir un mode dégradé temporaire sans authentification pour immo. |
+| **F6** | **Cohérence immo + geo sans gel : risque d'incohérence temporelle avec la fenêtre T0 + ε.** La règle sélectionne les objets ≤ T0 + 60 s (SPEC:315). Si un objet est mis à jour entre T0 et T0 + 60 s, le système capture une version postérieure à l'état de la base de données. De plus, si l'application écrit la ligne en base avant de déposer l'objet dans S3, le contrôle de fermeture échoue systématiquement pendant les traitements actifs. | **important** | SPEC:315-324 | Restreindre la sélection à ≤ T0 strict ; valider l'invariant d'immuabilité des clés d'objets avec l'équipe applicative ; consigner la conduite opérationnelle en cas d'échec de fermeture. |
+| **F7** | **Absence de remédiation en cas d'échec du contrôle de fermeture.** Lorsqu'une incohérence référence-objet est constatée, la spec se borne à marquer le point « incomplet » et à lever une alerte (SPEC:318-319). Si une tâche d'importation s'exécute aux heures de sauvegarde (02:15, 14:15), les sauvegardes peuvent échouer en boucle, provoquant une alerte de fraîcheur permanente sans stratégie de reprise. | **important** | SPEC:243, :318-319, :851 ; `41-db-backup-cronjob.yaml:8` | Définir une procédure de relance automatique (re-capture des deltas à T0 + Δt sans réexécuter le dump) et coordonner les plages horaires avec les CronJobs applicatifs. |
+| **F8** | **Désynchronisation des cadences base (2×/j) et objets (1×/j) brisant le garde-fou G2.** G2 impose que tous les composants restaurés partagent le même T0 (SPEC:490). Or, le point de base de 14:15 ne disposera d'aucun point objets correspondant, interdisant toute restauration complète cohérente à cette échéance. | **important** | SPEC:243-244, :320, :490 | Aligner la sauvegarde N2 des objets sur la cadence biquotidienne de la base de données. |
+| **F9** | **Dépendance non prouvée envers l'API S3 OVH pour la lecture des versions non courantes.** `GetObjectVersion` est absent de l'énumération IAM OVH (SPEC:209). Or, la sélection de version au temps T0 et le niveau N1 objets reposent entièrement sur la capacité d'une identité applicative à lire une version spécifique via `versionId`. | **important** | SPEC:209, :286, :315, :595 ; BACKUP_E2E:17 | Inscrire le test d'extraction d'une version non courante via boto3 comme mesure bloquante dans la sonde de provisionnement. |
+| **F10** | **Recommandation L1 (Gouvernance) vulnérable à la suppression globale.** La recommandation de rejeter L2 (Conformité sur mensuel) repose sur la crainte d'une demande de purge Loi 25 (SPEC:387). En mode Gouvernance sur l'ensemble des 13 mois, le vol d'identifiants administrateur permet l'effacement total de l'historique de sauvegarde. | **important** | SPEC:386-389, :737, :1073-1076 | Réévaluer L2 : l'irréversibilité ne porte que sur 13 dumps mensuels (~6,5 GiB), offrant une protection inviolable contre les rançongiciels, tandis que les obligations de purge ne s'étendent généralement pas aux archives chiffrées hors ligne. |
+| **F11** | **Biais dans la formulation de Q5 sur le décompte des 28 sauvegardes.** L'addition arithmétique 10 + 5 + 13 = 28 correspond rigoureusement à des paliers disjoints. La spec oriente la décision en insistant sur le surcoût de stockage de cette lecture conforme, au profit de la formule superposée (26–27 points) issue de son code préexistant. | **important** | DEMANDE_OWNER:43 ; SPEC:338-345, :1065-1068 | Reformuler Q5 de façon neutre en précisant que le modèle disjoint est le seul conforme au chiffre 28, et chiffrer le surcoût réel (négligeable, ~1,5 mois de stockage). |
+| **F12** | **Rétention préprod réduite à 10 jours sans validation de l'owner.** L'owner n'a pas dissocié la préprod de la prod dans sa demande de rétention 10/5/13 (DEMANDE_OWNER:43). La spec a restreint la préprod au quotidien seul en D-v3-9 sans poser la question dans le questionnaire. | **important** | DEMANDE_OWNER:43 ; SPEC:400-403, :1036 | Ajouter une question formelle dans le lot 2 ou rétablir la parité des paliers de rétention. |
+| **F13** | **Déformation du mandat sur le « Coordinateur immo » pour justifier la suppression du gel.** L'owner a dénoncé l'ambiguïté du rôle (DEMANDE_OWNER:24). La spec a conclu à sa radiation unilatérale (SPEC:64) et motivé l'abandon du gel par la suppression d'un rôle « obscur » (SPEC:1029). | **important** | DEMANDE_OWNER:24 ; SPEC:64, :109, :1029 | Dissocier le choix architectural légitime (abandon du gel grâce aux versions T0) du retour de l'owner, sans lui imputer cette décision. |
+| **F14** | **Affaiblissement implicite de l'automatisation de « go to preprod » (Q12).** L'owner a exigé un mécanisme « full automatique » (DEMANDE_OWNER:27). Q12 préconise de ne déclencher l'écrasement qu'en présence d'une migration nouvelle pour limiter les transferts, sans expliciter qu'il s'agit d'une dérogation au mandat. | **important** | DEMANDE_OWNER:27 ; SPEC:401, :1100-1102 | Présenter explicitement la proposition de Q12 comme une optimisation de ressources soumise à arbitrage. |
+| **F15** | **Point de départ du chronomètre RTO-1 biaisé.** La spec fixe l'origine du chronomètre RTO au clic de déclenchement du workflow (SPEC:783). En exploitation réelle avec un veilleur horaire et un seuil d'inactivité de 2 h (E3a, SPEC:852), la détection d'un sinistre peut prendre 2 à 3 heures avant tout déclenchement. | **important** | DEMANDE_OWNER:39 ; SPEC:783-784, :852 | Clarifier si l'objectif de 2 h s'entend depuis la panne ou depuis le déclenchement ; si depuis la panne, resserrer la fréquence du veilleur hors cluster. |
+| **F16** | **Risque de sécurité : exposition des clés API racine OVH dans l'environnement GitHub `dr`.** Les identifiants API OVH conférant les pleins pouvoirs sur le projet cloud sont injectés dans GitHub Actions (SPEC:644-646, :675). Une compromission d'un runner GitHub expose l'ensemble du tenant infrastructure. | **important** | SPEC:644-646, :675, :736 | Restreindre les droits du token API OVH dédié au PRA ou réserver le provisionnement d'infrastructure à une exécution locale sécurisée via le script et le coffre. |
+| **F17** | **Transfert de garde (OPS-2) déclaratif et dépendant d'une hypothèse non vérifiée.** Le plan repose sur l'hypothèse que l'API OVH permet de réinitialiser le kubeconfig admin du cluster MKS (SPEC:761, :1144). Si cette API est indisponible, l'ancien certificat détenu par l'agent demeure actif. | **important** | SPEC:750-770, :1144 ; INVENTAIRE_K8S:34-36 | Vérifier la commande d'invalidation de kubeconfig via l'API OVH et ajouter une étape de contrôle de révocation effective avant l'exercice E7. |
+| **F18** | **Surestimation du débit de transfert d'objets.** La spec retient un débit de ~25 objets/s sur la base de 59 017 objets traités en 38 min 31 s (SPEC:793). Or, seuls 39 582 objets ont été effectivement copiés (S10), soit un débit réel de ~17 objets/s. La volumétrie restaurable en 5 minutes tombe de 7 500 à ~5 000 objets. | mineur | SPEC:793, :825 ; S10 (evidence JSON) | Réajuster les seuils du palier N1 pour les objets à 5 000 éléments au maximum. |
+| **F19** | **Sémantique inappropriée du « RPO constaté ≈ 8 jours ».** Parler d'un RPO de 8 jours masque la gravité de la situation : sans mécanisme de sauvegarde récurrent en service, le RPO réel de la base est indéfini et croît chaque jour. | mineur | SPEC:188 | Reformuler : « RPO non borné / aucun point depuis 8 jours ». |
+| **F20** | **Contrainte non mentionnée du clone PostgreSQL N1 (`CREATE DATABASE ... TEMPLATE`).** Cette commande requiert la déconnexion stricte de tous les utilisateurs de la base modèle. Elle provoque donc une interruption de service (lecture comprise) lors de la livraison. | mineur | SPEC:285, :823 | Documenter l'indisponibilité brève induite par le clonage N1. |
+| **F21** | **Plafond d'effacement inadapté aux blocs d'objets.** La règle limitant la purge à 3 suppressions par cycle (SPEC:351) paralyse le nettoyage des objets adressés par contenu, où des centaines de blocs orphelins peuvent être déréférencés simultanément. | mineur | SPEC:351, :1000 | Appliquer le plafond aux jeux de sauvegarde et non aux blocs de données élémentaires. |
+| **F22** | **Inflation non motivée des identités IAM S3.** Le nombre de rôles IAM passe de 4 à 7 (création de `watcher`, `replica-writer`, `data-reader`), augmentant la complexité de gestion. | mineur | SPEC:743-745 | Rationaliser les rôles (ex. fusionner `watcher` et `reader`). |
+| **F23** | **Argumentaire Loi 25 appuyé sur une table non exploitée.** La spec motive l'application de la Loi 25 sur la table `prospect_contacts` dont l'alimentation en production est inconnue ou nulle (SPEC:220), alors que `account_users` et les journaux IP suffisent amplement. | mineur | SPEC:217-220, :449-450 | Asseoir la démonstration juridique sur les tables applicatives effectivement peuplées. |
+| **F24** | **Interprétation inexacte du flag `PREPARED BUT DISARMED`.** Le commentaire en workflow est une garde conditionnelle standard et non une trace obsolète. | mineur | SPEC:1016 ; `build-push-images.yml:725-728` | Rectifier la mention dans le bilan du code. |
+| **F25** | **Absence de chiffrage de la dette d'implémentation de la spec.** La spec introduit dix nouveaux modules sans ordonnancement ni estimation de charge. | mineur | §13 (SPEC:991-1021) | Consolider une feuille de route par lots prioritaires. |
+| **F26** | **Non-explicitation du choix technique des « jours représentés ».** L'algorithme de `backup.py` ne couvre pas des jours calendaires continus mais des points distincts, sémantique non explicitée à l'owner. | mineur | SPEC:334 ; `backup.py:304-307` | Expliciter le comportement en cas de trou de sauvegarde. |
+| **F27** | **Attribution non sourcée de préférences à l'owner dans FAITS.** RENDU_FAITS:41-52 prête à l'owner des choix (bpmn-js, formes BPMN) absents du verbatim S1. | mineur | RENDU_FAITS:40-52 ; SPEC:957-959 | Qualifier ces éléments d'ajouts techniques de l'équipe de conception. |
+| **F28** | **Pertinence discutable de certaines questions à l'owner.** Q11 (`sops` + `age`) et Q17 (miroir d'images) sont des arbitrages techniques qui incombent à la spec, tandis que le plan de sauvegarde d'urgence en prod n'est pas posé. | mineur | §15 (SPEC:1044-1124) | Remplacer les questions techniques par des arbitrages de cadrage. |
+| **F29** | **Qualification erronée de l'environnement GitHub `dr`.** Noté « fait » en SPEC:230 alors que cet environnement n'est pas encore créé. | mineur | SPEC:230, :644-646 | Corriger en « proposition ». |
+| **F30** | **Manque d'encadrement des données nominatives dans l'exercice E1.** E1 déploie une copie de la base prod sur un cluster éphémère sans protocole attesté de purge post-test. | mineur | SPEC:566-568, :1083-1087 | Rendre obligatoire l'anonymisation préalable ou l'audit de destruction du cluster d'exercice. |
+
+---
+
+### 3.2 Analyse approfondie des points sensibles
+
+#### 1. Le budget RTO-1 et la borne haute de 135 minutes
+L'owner a fixé un plafond strict de **2 heures** pour le retour en opération complet, provisionnement du cluster inclus. La décomposition proposée (SPEC:799-808) s'établit entre 40 et 135 minutes. La borne haute excède l'exigence de 15 minutes.
+L'estimation pèche par optimisme sur plusieurs points non mesurés :
+- La création d'un cluster managé MKS et de son pool de nœuds est créditée de 10 à 30 minutes sans aucune mesure réelle dans l'historique du projet.
+- Le temps de téléchargement et d'extraction de plusieurs gigaoctets d'images conteneurs (`api`, `ui`, `geo-api`, `postgres`, `traefik`, etc.) sur un nœud vierge n'est pas pris en compte.
+- La validation humaine (« GO owner » à l'étape T9, approbation d'environnement à l'étape T1) est positionnée sur le chemin critique sans borne maximale.
+- L'IdP sentropic est exclu de la chaîne alors que l'application immo refuse les connexions en son absence.
+
+L'objectif de 2 heures ne peut donc être tenu que sous réserve d'optimisations strictes : automatisation intégrale sans validation humaine bloquante en cours de route, parallélisation de `pg_restore`, et pré-chauffage ou mise en miroir des images sur le réseau interne d'OVH.
+
+#### 2. La cohérence immo + geo sans gel des écritures
+La suppression du gel applicatif au profit d'une sélection temporelle par version à T0 (SPEC:310-325) constitue un progrès d'exploitabilité indiscutable. Cependant, l'injection d'une marge d'horloge de 60 secondes (T0 + ε) introduit un risque réel de désynchronisation : un document S3 réécrit dans cette fenêtre peut écraser un état antérieur attendu par la base de données.
+Le contrôle de fermeture (vérifiant que chaque clé référencée par la base existe dans l'inventaire S3) constitue un filet de sécurité utile, mais son articulation opérationnelle est inachevée. Si un lot d'écriture asynchrone est en cours au moment du dump, le contrôle échouera systématiquement, disqualifiant la sauvegarde. Il manque une politique d'itération bornée permettant de réconcilier les objets manquants avant de déclarer le point invalide.
+
+#### 3. Les deux niveaux de sauvegarde (N1 / N2)
+Le découpage en deux niveaux répond adéquatement à la dualité RTO-1 (reprise lourde) et RTO-2 (retour arrière rapide) :
+- **N1 (rapide, local)** : le clone `TEMPLATE` de PostgreSQL permet une bascule instantanée en cas d'échec de migration. Toutefois, la promesse des 5 minutes ne vaut que pour la base : elle ne protège pas contre une corruption de données étendue sur les objets S3 (dont la restauration sélective par script dépasse rapidement 5 minutes pour quelques milliers d'objets), ni contre une avarie matérielle affectant le volume de stockage local.
+- **N2 (complet, externalisé)** : assure la protection patrimoniale pérenne avec immuabilité et réplication géographique, mais s'inscrit structurellement dans un RTO de 30 à 90 minutes.
+
+#### 4. La rétention 10 / 5 / 13 et le verrou d'objet (Options L1 à L4)
+Le décompte initial de 28 sauvegardes (10 jours + 5 semaines + 13 mois) découle arithmétiquement d'une construction à **paliers disjoints**. La volonté de la spec de pousser le modèle superposé (26–27 points) provient uniquement de l'héritage de l'algorithme préexistant dans `backup.py`.
+Concernant le verrou d'objet, le rejet de l'option L2 (Conformité sur la tranche mensuelle 13 mois) au motif de la Loi 25 repose sur une interprétation fragile : le droit à l'effacement ou à la destruction n'impose pas la destruction immédiate de sauvegardes chiffrées immuables, pourvu que les données soient purgées de la base active et que les archives soient détruites à leur terme de conservation. Choisir le mode Gouvernance intégrale (L1) laisse la porte ouverte à une destruction totale de l'historique de sauvegarde en cas de compromission du poste de travail de l'owner.
+
+#### 5. Les clés de scellement et le blocage immédiat de l'outillage Makefile
+C'est le risque opérationnel le plus aigu documenté dans les pièces :
+- Les clés privées du contrôleur Sealed-Secrets ne font l'objet d'aucun export hors-cluster vérifié (INVENTAIRE_K8S:53-56).
+- Le contrôleur effectue une rotation automatique tous les 30 jours, dont l'échéance suivante intervient aux alentours du **22 septembre 2026** (INVENTAIRE_K8S:63).
+- L'outillage de maintenance du dépôt k8s (`poc-k8s/Makefile:183-186, :207-209, :216-218`) impose de façon rigide la présence de **strictement deux clés** :
+  ```makefile
+  count=$$(KUBECONFIG=$(KUBECONFIG) kubectl -n $(SEALED_SECRETS_NAMESPACE) get secret -l sealedsecrets.bitnami.com/sealed-secrets-key -o name | wc -l); \
+  if [ "$$count" -ne 2 ]; then \
+      echo "expected exactly TWO live key secrets before export ... got $$count" >&2; \
+      exit 2; \
+  fi
+  ```
+Dès que la troisième clé sera générée, l'ensemble des cibles d'export, de test et de restauration échoueront immédiatement. Une action de sauvegarde manuelle doit être exécutée avant cette date, indépendamment des cycles de validation de la spec v3.
+
+---
+
+## 4. Synthèse
+
+1. **Non, la spécification PRA v3 n'est pas prête à être mise en œuvre en l'état**, car elle est bloquée par deux urgences opérationnelles immédiates : la paralysie programmée de l'outillage des clés de scellement lors de la rotation du 22 septembre (constat F1), et l'absence totale de sauvegarde planifiée active sur la base de production (RPO constaté de 8 jours, constat F2).
+2. **La couverture formelle du verbatim de l'owner est rigoureusement exhaustive sur le repérage**, mais elle est faussée par quatre glissements substantiels : la suppression du coordinateur et du gel imputée indûment à l'owner (V10), l'amputation unilatérale de la rétention préprod à 10 jours (V36), et l'affichage d'une couverture complète pour V29, V31 et V32 alors que leurs exigences ne sont pas tenues.
+3. **L'exigence RPO-1 (24 h max) disqualifie définitivement le statu quo et impose une refonte des seuils** : elle requiert le passage à une cadence biquotidienne sur les objets immo, un abaissement des alertes de fraîcheur à 14 h, l'activation de retries sur les CronJobs, et demeure techniquement irréalisable sur les 48 Go de geo sans un nouveau composant de réplication incrémentale.
+4. **L'architecture technique est conceptuellement solide sur le découplage et la parité script/workflow, mais vulnérable sur ses fondations** : elle repose sur des capacités non démontrées de l'API S3 OVH (lecture de versions non courantes), exclut l'IdP sentropic du chemin critique, et expose des identifiants cloud racine dans GitHub Actions.
+5. **Le passage à l'échelon EVOL est conditionné à six actions préalables** : (a) exécution d'une sauvegarde conservatoire d'urgence de la production avec le code validé en gouvernance 35 j ; (b) export immédiat hors-cluster des clés de scellement avant la rotation du 22 septembre ; (c) correction des distorsions dans la matrice de couverture ; (d) recalibrage de la chaîne N2 et de la surveillance pour garantir RPO-1 ; (e) mesure empirique du temps de création d'un cluster MKS OVH pour consolider RTO-1 ; (f) réintégration de l'IdP sentropic dans le périmètre fonctionnel de reprise.
+
+## Annexe B — Faits : inventaire k8s, rendu, divergences (verbatim)
+
+Textes intégraux, sans modification. Aucune valeur secrète : noms et chemins seulement.
+
+### Faits B1 — inventaire k8s et clés de scellement
+
+# PRA v3 — inventaire de la lane k8s, reproduit verbatim
+
+Source : lane k8s, session du 2026-09-19, en lecture seule. Texte reproduit **tel quel**, sans
+résumé ni reformulation par le conducteur. Aucune valeur secrète : noms et chemins seulement.
+Il répond à la question : que ne peut-on faire aujourd'hui **que** via le dépôt `poc-k8s` ou une
+machine opérateur pour provisionner un cluster OVH et y remettre immo + geo ?
+
+---
+
+k8s → i-cond. INVENTAIRE (lecture seule, pas une solution) : ce qui aujourd'hui ne peut être fait QUE via le dépôt poc-k8s ou une machine opérateur pour provisionner un cluster OVH et y remettre immo+geo. Aucune valeur secrète (noms/chemins seulement). Chaque item étiqueté REPO-BOUND / OPERATOR-BOUND / SELF-SERVICE. C'est ce que la spéc doit résorber pour tenir OPS-1/2/3.
+
+════ FAIT STRUCTUREL EN TÊTE ════
+poc-k8s n'a **aucun .github/** et **aucune cible tofu dans le Makefile**. Tout le provisionnement (cluster + plateforme + tenants + kubeconfig) est un `tofu apply` manuel + un Makefile local pilotant kubectl/ovhcloud/kubeseal. Donc aujourd'hui : ni déclencheur GitHub Actions, ni workflow, ni script-équivalent, ni gestionnaire de secrets partagé. OPS-1 (passage obligé) + OPS-3 (workflow↔script + secrets explicites) non tenus par construction.
+
+════ A. REPO-BOUND — seulement via les manifestes/IaC de poc-k8s ════
+1. IaC cluster+nodepool OVH MKS : infra/ovh/{main.tf,variables.tf,versions.tf} (projet poc-ca, BHS5, k8s 1.31, pool r2-15). immo/geo ne peuvent pas provisionner un cluster sans ce .tf (ou une copie dans leurs dépôts).
+2. Enveloppe de namespace tenant : tenants/<immo|geo>/00-namespace.yaml (Namespace + ResourceQuota + LimitRange + NetworkPolicy default-deny + SA + RoleBinding edit) + 30-netpol.yaml + 10-ci-deployer-rbac.yaml. Restaurer le namespace/quota/netpol d'immo ou geo dépend de ces manifestes — définis ici seulement.
+3. Couche plateforme + ordre de bootstrap : platform/ + Makefile (cert-manager, Traefik, KEDA, sealed-secrets, storage-classes, issuers ; cible `bootstrap-platform-ovh`). Un tenant ne peut pas monter ingress/TLS/stockage/déchiffrement-secrets depuis son dépôt.
+4. Recette de fabrication du kubeconfig tenant : `make tenant-kubeconfig TENANT=…` (Makefile) — la façon dont un tenant OBTIENT un kubeconfig est une cible opérateur de poc-k8s.
+5. Quotas capacitaires k8s : contracts/README.md + tenants/*/00-namespace.yaml.
+
+════ B. OPERATOR-BOUND — seulement via les creds/état locaux d'une machine (aujourd'hui la mienne, ou un humain au même poste) ════
+1. **Auth API OVH** : ~/.ovh.conf (endpoint ovh-ca) ou env OVH_APPLICATION_KEY/OVH_APPLICATION_SECRET/OVH_CONSUMER_KEY — **ni dans le dépôt, ni dans .env, ni dans un gestionnaire partagé**. Requis pour tofu apply, kubeconfig, mint de clés S3, création d'utilisateurs. Sur ma machine aujourd'hui.
+2. **Creds du backend d'état tofu** : env AWS_ACCESS_KEY_ID/SECRET ← .env OVH_S3_ACCESS_KEY/SECRET_KEY → accès au bucket **sentropic-tofu-state** (clé ovh/mks-bhs.tfstate, lock S3 natif, ACTIF depuis 2026-07-24). Sans ces clés : pas de `tofu init/apply` → impossible de provisionner/modifier le cluster de façon reproductible. .env local seulement.
+3. **infra/ovh/bhs.tfvars** (project id 32-hex) : gitignored, local uniquement (id présent aussi dans docs/runbooks/ovh-operations.md).
+4. **Kubeconfig admin** : obtenu via sortie tofu / `ovhcloud cloud managed-kubernetes` ; le contexte admin vit sur la machine opérateur (j'en détiens une copie de travail). Per-tenant : clusters/poc-ca/*.kubeconfig gitignored.
+5. **Les DEUX clés privées du contrôleur Sealed-Secrets** (Makefile export/restore-sealed-secrets-keys, fichier hors-git SEALED_SECRETS_KEYS) : **requises pour déchiffrer les SealedSecrets committés** (dont cloudflare-api-token pour cert-manager DNS-01). Leur perte = pas de reprise TLS/plateforme sans re-sceller depuis le clair. **Point unique critique.**
+6. **Toutes les identités/clés S3** dans .env local : OVH_S3_*, OVH_S3_PGBACKUP_ACCESS_KEY/SECRET_KEY/BUCKET(_PREPROD), S3_*, SCW_POCS_*. Requises pour restaurer la donnée tenant (backups, docs, graph). Aucun gestionnaire partagé.
+7. **DNS Cloudflare** : création manuelle d'enregistrements A (zone sent-tech.ca sur Cloudflare, pas d'external-dns) + token cloudflare (scellé) pour cert-manager DNS-01 — étape opérateur-interactive.
+
+════ C. SELF-SERVICE — ce qu'immo/geo font déjà depuis leur propre dépôt ════
+Leurs workloads applicatifs + secrets applicatifs, depuis rhanka/radar-immobilier et rhanka/geo (deploy/k8s/) + leurs GitHub Secrets — **mais seulement contre un cluster+namespace DÉJÀ provisionnés, avec un KUBE_CONFIG_DATA que l'opérateur a fabriqué**. Ils ne peuvent PAS recréer le cluster, leur enveloppe de namespace, la plateforme, ni obtenir un kubeconfig sans l'opérateur. (Réserves docs/migrations/ovh-tenant-readiness.md : build d'image + StatefulSet PostGIS de geo hors-GitOps.)
+
+════ D. CUSTODY QUE JE DÉTIENS EN SESSION (angle OPS-2 « aucune IA nécessaire ») ════
+Aujourd'hui je détiens/opère : un kubeconfig admin de travail ; le mapping ~/.ovh.conf → env API OVH ; et j'ai CRÉÉ l'identité **radar-pra-admin** (objectstore_operator) dont j'ai écrit les clés dans /home/antoinefa/src/sentropic/.env pour le provisionnement backup. Rien de tout ça n'est dans un gestionnaire partagé. Fait connexe mesuré : radar-pra-admin est **AccessDenied** sur les buckets de DONNÉE (radar-immobilier-graph/docs/raw) — ceux-ci sont privés à des identités propriétaires distinctes ; restaurer la donnée tenant exige les clés de CHAQUE identité propriétaire, qui vivent en .env. → si la reprise dépendait de « l'IA qui a monté ça », c'est exactement la violation OPS-2 à supprimer.
+
+════ E. QUOTAS ════
+**Pas de dépendance de quota OVH au niveau projet** documentée (aucun quota vCPU/instance à relever). La capacité est en ResourceQuota k8s (REPO-BOUND, manifestes tenant). Seul implicite : la disponibilité du flavor r2-15 dans le projet OVH lors d'un provisionnement neuf. Un blocage de moins.
+
+════ CE QUE LA SPÉC DOIT RÉSORBER (inventaire des manques, pas la solution) ════
+• Aucun GitHub Actions ni script-équivalent dans poc-k8s pour provisionner/restaurer (OPS-1, OPS-3).
+• Aucun gestionnaire de secrets partagé : OVH API, creds état tofu, 2 clés sealed-secrets, identités S3, kubeconfig = tous locaux machine-opérateur (OPS-3 « où sont les secrets, qui les charge, comment »).
+• La reprise exige aujourd'hui une machine opérateur pré-configurée (ovhcloud authentifié, .env local, bhs.tfvars local, kubeconfig admin, export sealed-secrets) → OPS-1 + OPS-2 non tenus.
+• immo/geo ne peuvent pas, depuis leurs dépôts, provisionner cluster+namespace+plateforme → OPS-1 non tenu pour la couche cluster/namespace/plateforme.
+
+---
+
+## Complément B.5 — clés privées sealed-secrets, reproduit verbatim (lane k8s, 2026-09-19)
+
+k8s → i-cond. B.5, lecture seule, aucune valeur de clé lue. Réponse aux 3 questions — et c'est plus grave que « une seule copie sur une seule machine ».
+
+════ 1. Où est physiquement SEALED_SECRETS_KEYS aujourd'hui ? ════
+Le Makefile ne fixe **aucun chemin par défaut** (`SEALED_SECRETS_KEYS ?=` vide ; le `/secure/sealed-secrets-keys.yaml` du commentaire n'est qu'un exemple). Sur CETTE machine (session conductor poc-k8s), j'ai cherché un fichier d'export (roots : $HOME, /secure, /opt, /etc, /var/lib, le dépôt poc-k8s, le scratchpad ; motifs *sealed-secrets-key*.yaml/.json) → **AUCUN fichier trouvé**. Le nom de variable SEALED_SECRETS_KEYS **n'est présent dans aucun des deux .env** (poc-k8s ni sentropic). Donc : **aucun export présent ici.**
+Les clés privées autoritatives vivent **dans le cluster** : 2 Secrets dans le namespace `sealed-secrets` —
+ • `sealed-secrets-key948dh` créé **2026-08-23T12:20:26Z** (clé de scellement ACTIVE) ;
+ • `sealed-secrets-keyxfs6p` créé **2026-07-24T12:20:26Z**.
+Un éventuel export vit sur la machine de l'owner/opérateur, **hors de ma visibilité lecture seule** (je ne vois que cette machine + le cluster).
+
+════ 2. Copie ailleurs ? ════
+Dans ma visibilité (cette machine + le cluster) : la **seule** copie des clés privées est la paire in-cluster. **Aucun export hors-cluster trouvé ici.** Savoir si l'owner en détient un — et où — est précisément la question à lui poser ; je ne peux pas l'inspecter d'ici.
+
+════ 3. L'export est-il postérieur à la dernière rotation ? → LA ROTATION EST ACTIVE ════
+Le contrôleur tourne avec command=["controller"], **args=[] et env=[]** → aucun override de `--key-renew-period` → **rotation par défaut de 30 jours ACTIVE**. Preuve empirique : les deux clés sont exactement à 30 jours d'écart (07-24 → 08-23). Donc la prochaine rotation crée une nouvelle clé active **vers 2026-09-22 (≈ 3 jours)**. Conséquence : tout export STATIQUE ne déchiffre que les secrets scellés par les clés qu'il a capturées ; un export antérieur au 08-23 ne déchiffre déjà plus ce qui a été scellé depuis, et un export d'avant le ~09-22 ne couvrira pas la clé suivante. Je ne peux pas dater un export que je ne trouve pas.
+
+════ BILAN (risque présent AUJOURD'HUI, indépendant du PRA v3) ════
+Ce n'est pas « une copie sur une machine » : **de la visibilité de cette machine, il n'y a AUCUNE copie d'export, et les clés tournent tous les 30 jours (prochaine ~09-22)**. Si le cluster était perdu sans export hors-cluster à jour, les SealedSecrets committés (dont cloudflare-api-token pour cert-manager DNS-01) deviendraient **indéchiffrables** → à re-sceller depuis le clair (donc il faudrait re-obtenir les valeurs en clair).
+À confirmer par l'owner, pas par moi : (a) existe-t-il un export sur sa machine, à quel chemin ; (b) sa date par rapport à la clé active 08-23 et à la rotation imminente ~09-22. Le correctif structurel (ré-export après chaque rotation, ou figer la rotation via `--key-renew-period=0` — décision owner) relève de la spéc, pas de cet inventaire. Je reste en lecture seule.
+
+### Faits B2 — rendu archify et bpmn-js
+
+# PRA v3 — faits établis pour la phase de rendu des schémas
+
+À lire par la lane de rendu, **après** la validation de la spécification PRA v3. Source : h-cond,
+qui a lu le code d'archify et piloté les essais du Design System, le 2026-09-19.
+
+## Archify — exigence ARCH-8
+
+- **Ce que c'est** : projet open source sous licence MIT, https://github.com/tt-a1i/archify — paquet
+  npm `archify`, binaire `bin/archify.mjs`. Code lu au commit `72c750bb` du 16/09, clone local dans
+  `/tmp/archify-cap/archify`.
+- **Cinq types de diagrammes**, vérifiés dans le code (`TYPES` dans `bin/archify.mjs`) : architecture,
+  workflow, sequence, dataflow, lifecycle. Un schéma JSON par type dans `schemas/`, des exemples dans
+  `examples/`, un moteur de rendu par type dans `renderers/`.
+- **Entrée** : un document JSON validé par le schéma du type. **Sortie** : une page HTML autonome
+  contenant du SVG. Les essais de h-cond tournaient hors ligne ; **vérifie l'absence de requête
+  externe** dans notre cas.
+- **Un codec h2a vers archify et des rendus existent déjà** :
+  `/home/antoinefa/src/h2a/tmp/dossier-diagrammes/docs/decisions/2026-09-18-dossier-diagrammes/r4/`
+  (lab, `archify-codec`). **Pars de là**, ne réécris pas un convertisseur.
+
+**Pourquoi archify a refusé nos deux schémas hier** — ce sont ses propres validations qui ont
+échoué, pas le format de nos données :
+- **architecture** : archify place les composants lui-même, **sans groupes imbriqués**. Sa
+  validation de placement rejette la scène convertie parce que des liens traversent des composants
+  (`clean-flow/edge-through-node`, code 1). h-cond n'a obtenu un rendu qu'en réinjectant notre routage.
+- **séquence** : notre schéma passait par le type `workflow`, **limité à 6 colonnes**, et il en
+  comptait 7.
+
+**Pistes** : pour l'architecture, aplatir les conteneurs et accepter le placement d'archify ; pour
+les processus, tenir en 6 colonnes ou scinder.
+
+**Conséquence pour ARCH-1 et ARCH-2** : la symétrie préprod/prod et les zones — k8s, OVH, hors
+plateforme — reposent sur des **conteneurs**, qu'archify ne sait pas imbriquer. À évaluer
+franchement : si archify ne peut pas porter les zones, dis-le et compare les deux rendus sur ce
+qu'ils savent faire, **sans bricoler archify pour lui faire dire ce qu'il ne sait pas dire**.
+
+## bpmn-js — exigence PROC-2
+
+- **Position du Design System** : son plan de migration (commit `d3b5e0ca` du 18/09) retient
+  **xyflow + bpmn-js** dès son étape A, et l'owner a choisi bpmn-js pour le BPMN. **L'autorisation
+  formelle au titre de la règle D7 n'est pas encore prononcée** ; h-cond préviendra avant notre commit
+  en cas de refus ou de condition.
+- **Licence** : bpmn.io est sous MIT, **avec une clause qui impose que le logo bpmn.io reste visible
+  et non recouvert**. À respecter dans la page.
+- **Placement automatique : ne pas utiliser `bpmn-auto-layout` tel quel.** Dans l'essai de h-cond,
+  il perd les **pools, les couloirs, le second processus et les flux de messages** : 29 éléments de
+  dessin tombent à 19. Or l'owner veut **un couloir par acteur** — GitHub Actions, CronJob,
+  administrateur du cluster, owner. La piste à évaluer : **placer les éléments BPMN avec ELK**, que
+  nous utilisons déjà, en couloirs partitionnés, puis émettre les coordonnées BPMN DI que bpmn-js
+  affiche. Cela garde les couloirs et soumet le BPMN au **même objectif de lisibilité mesurée** que
+  les autres schémas.
+- **Thème** : l'owner veut les **formes BPMN standard**, au style du Design System — cartes, couleurs.
+
+## Lisibilité — s'applique à tous les rendus
+
+Les exigences de `DOSSIER_BACKUP_LISIBILITE.md` restent en vigueur :
+- taille effective minimale du texte mesurée une fois le schéma ajusté à la vue ;
+- porte de lisibilité ;
+- placement choisi par la mesure ;
+- aucune information retirée.
+
+La mesure de ce matin a établi qu'**au-delà d'une dizaine de cartes par vue, aucun placement ne tient
+11 px à 1440×900** : la scission de vue est donc probable. L'owner n'a pas encore choisi entre scinder
+par domaine, ouvrir à taille lisible, ou garder la vue compacte.
+
+### Faits B3 — divergences résiduelles
+
+# PRA v3 — divergences résiduelles (2026-09-20, i-cond, + complément débits)
+
+**Réconciliation du 2026-09-20 : aucune.** Les 31 constats des deux revues (F1–F30 + F19bis)
+ont été appariés un par un. Sur les 31, Fable 5.1 et Gemini 3.8 high disent la même chose,
+preuves et corrections convergentes, vérifiées sur pièces (code, reçus, Makefile, manifestes).
+Les 5 volets RPO-1 (source Gemini seule, Fable ne les traitant pas) ont été examinés sur pièces
+et retenus. Deux nuances de formulation ont été réconciliées par le conducteur, sans reste
+ouvert : gravité de V32 (Fable : mineur, Gemini : important) — tranchée **important** pour la
+ligne de matrice affichée « couvert » à tort, mineur pour le corps, transparent ; remèdes F27
+(sourcer ou marquer) et F30 (destruction vérifiée, anonymisation ou audit) — combinés. Aucune
+contradiction sur les faits, aucune correction refusée, aucun constat écarté.
+
+**Complément de l'owner du 2026-09-20 (S1 §5, DEB-1, V43) : postérieur aux deux revues.**
+Ni Fable 5.1 ni Gemini 3.8 high ne l'ont relu. Restent ouverts :
+
+| ID | Objet | État | Renvoi |
+|---|---|---|---|
+| DV-1 | DEB-1 (§3.6, Q21–Q23) non soumis au double challenge | ouvert : à faire relire contre le verbatim S1 §5 | spec §3.6, §15 lot 6 |
+| DV-2 | Outil (rclone ou autre), chemins proposés, persistance : sans réponse | ouvert, à l'owner (Q21, Q22) | spec §3.6, Q21–Q22 |
+| DV-3 | « etc » (V43) : fin ouverte, non complétée | ouvert, à l'owner (Q23) | spec Q23 |
+
+V44 (« actualisation du dossier ») est hors spec : la spec est mise à jour, le dossier de rendu
+suit en phase de rendu. Les quatre passages inachevés de la section 1 (Q1–Q4) restent intacts.
+Transparence (non-divergence) : ID DEB-1 posé par la spec (S1 §5 n'assigne pas d'ID) ; écart de
+forme signalé (transmission non accentuée, S1 accentué), sens identique.
+
+## Annexe C — Demande de l'owner, sections 1 à 5 (verbatim)
+
+Source de vérité de la reprise PRA v3. Texte intégral, sans modification.
+
+### Demande C1 — owner, sections 1 à 5
+
+# PRA v3 — demande de l'owner du 2026-09-19, tracée mot pour mot
+
+Ce fichier est la **source de vérité** de la reprise du plan de sauvegarde et de reprise immo + geo.
+
+**Règle de lecture, posée par l'owner : « 0 interprétation » au niveau du conducteur.**
+- **Le texte verbatim de la section 1 fait foi.** La grille de la section 2 n'est qu'une aide de
+  navigation : elle découpe le texte en identifiants pour permettre de vérifier la couverture, mais
+  **elle ne le remplace pas**.
+- Toute spécification et toute revue vérifient la couverture **contre le verbatim**, pas seulement
+  contre la grille.
+- **Ce que le conducteur a ajouté au texte de l'owner est marqué `[ajout conducteur]`.** Ces ajouts
+  ne sont **pas** des exigences de l'owner : une livraison peut les écarter, en le disant.
+- En cas d'écart entre la grille et le verbatim, **le verbatim l'emporte**, et l'écart est signalé.
+
+Toute spécification, toute revue et tout dossier qui découle de ce fichier cite les identifiants et
+montre, exigence par exigence, comment elle est couverte — ou pourquoi elle ne l'est pas.
+
+## 1. Le texte de l'owner, verbatim (coquilles d'origine conservées)
+
+> backup
+> 1. pour le diagramme du backup global, on s'attend d'avoir une symétrie entre preprod et prod pour mieux comprendre visuellement les elements commun et différence. D'autre part, il faut représenter la zone k8s - et ovh (vs ce qui est géré en dehors). eventuellement des clé etc. Pour les alertes, on ne sais pas cocmment et uqi les recoit. il faut symboliser l'admin cluster, et peut être les mails pour les notifs des alertes ? (via TEM scw ?? ou via gh ou autre ??).
+> certains composants ne sont pas les memes en preprod qui smeble avoir moins de composants (5 vs 3 pour geo, 3 vs 2 pour immo). C'est difficile de comprendre pourquoi. Par ailleurs j'imagine que github action doit être la dedans
+>
+> 2. processus: il manque encore une fois les consommateurs: est-ce que la sauvegarde est trigger par gh action ? un admin ? "Coordinateur immo" n,est pas un rôle clair, il arrive plusieurs fois. il a plusieurs icones, on ne comprends pas si c un job ou uoi. In fine, peut être qu'un bpmn (avec bpmn js et autolayout) serait favorable iic pour la repreésnetation non ?
+>
+> Selon moi le processus est tres mauvais: il doit y avoir des triggers
+> a. go to preprod: restoration de prod a prerod (go to preprod doit écraser la preprod avec la donnée de prod, et faire un test de migration de donnée) - doit être full automatique. la preprod recupere le dernier snapshot de preprod (que ce soit un go to preprod geo ou immo)
+> b. demande de restauration owner: selon devrait être full automatique, selon les différents types de reprise:
+> b.i crash complet k8s (nouveau provisionnement de k8s + tenant de preprod ou prod sur base du backup) - doit être démontré sur preprod (on récupere la sauvegarde de prod sur preprod) - a priori doit pouvoir être trigger par un github action. la démonstration
+> b.ii demande de restauration complete (immo + geo) a parir d'un github action: doit être full automatisé également - comme sur i, doit être démontré que prperod récup total la prod
+> b.iii demande de restauration immo ou geo ou d'un sous composant (bucket s3, db) - idem - doit être automatisé avec les guardrails de cohérence.
+>
+> on doit pouvoir gérer les situations : restauration + migration (quand preprod est en avance sur prod), ou iso (aligné, pas besoin de remigration)
+>
+> ce pourrait être le meme job github action avec un paramètre (e.g scope target de restauration preprod / prod - tenant tiers k8s etc).
+>
+> note pour k8s et les agents ia : k8s doit être un enabler, mais pas un blocant. s'il y a crash, immo/geo doivent pouvoir se reprovisionner sur leur propre k8s. et le cas échéant, k8s (le repo) peut être trigger pour déclencher des jobs spécifiques d'infra via github action. en aucune situation, il doit y avoir besoin d'une ia pour le processus. au mieux elle doit pouvoir aider a gérer / monitor une situation (aide au monitoring) sur la base d'une documentation claire. en cas de github action defaillant, des scripts doivent permettre de pouvoir faire la meme chose sans avec une clareté sur la gestion des secrets.
+>
+> ah oui les délai de retour a l'objectif RTO RPO doivent, et le retour en opération doit être démontré comme étant moins de 2h (provisionnement d'infra k8s comprise / redéploiement complet). pour un upgrade ou on ne restore que des elements de composant, la restauration doit prendre moins de 5 min. Il faut donc peut être deux niveau de backup (snapshot et sync dispo aux bons endroit)
+>
+> au fait stp supprimer la visauliation grafphviz. j,avais demandé une représentation archifify ... je me fous ed graphviz
+>
+> comme demandé initialement j'avais demandé des sauvegarde daily sur une semaine (10j donc), weekly sur un mois (5 semaines du coup), et monthly sur 13 mois. ca veut dire 28 sauvegardes, pour lesquelles la gestion et l'externalisation doivent être au clair (compliances normes). La sauvegarde sur une plateforme hors ovh pourrait être une autre carte, mais au moins faut prévoir un autre datacenter ou region.
+>
+> j'imagine que
+>
+> reprend - trace bien ma demande stp, avec double challenge merci
+
+**Passages ambigus ou inachevés, posés à l'owner et à ne trancher par personne d'autre que lui :**
+- en (a), « la preprod recupere le dernier snapshot **de preprod** » alors que la phrase précédente
+  dit que la préprod est écrasée par la donnée **de prod**. Les deux lectures sont possibles, et
+  **aucune n'est retenue** tant que l'owner n'a pas répondu ;
+- en (b.i), la phrase se termine sur « **la démonstration** », sans suite ;
+- « les délai de retour a l'objectif RTO RPO **doivent,** » : la phrase s'interrompt sur « doivent » ;
+- « **j'imagine que** », en fin de message, est inachevé.
+
+Une livraison qui a besoin de l'un de ces passages le signale comme **question ouverte à l'owner**
+et ne le complète pas elle-même.
+
+## 2. Grille d'exigences
+
+### Schéma d'architecture — ARCH
+
+| ID | Exigence |
+|---|---|
+| ARCH-1 | **Symétrie préprod / prod** : les deux environnements côte à côte, mêmes positions, pour voir d'un coup d'œil ce qui est commun et ce qui diffère. |
+| ARCH-2 | **Zones de responsabilité** : ce qui vit dans le cluster k8s, ce qui vit chez OVH hors cluster, ce qui est géré en dehors — GitHub, poste de l'owner, autre fournisseur. |
+| ARCH-3 | **Les clés** : où elles vivent, qui les détient, ce qu'elles ouvrent. |
+| ARCH-4 | **Les alertes** : l'owner dit « on ne sait pas comment et qui les reçoit ». Symboliser l'**administrateur du cluster**, et « peut-être les mails pour les notifs des alertes ? (via TEM scw ?? ou via gh ou autre ??) » — question posée par l'owner, à laquelle la livraison répond. |
+| ARCH-5 | **Chaque différence préprod / prod est expliquée** là où elle apparaît. Aujourd'hui geo montre 5 composants en prod contre 3 en préprod, immo 3 contre 2, sans raison lisible. |
+| ARCH-6 | **GitHub Actions figure dans le schéma**, comme déclencheur et comme exécutant. |
+| ARCH-7 | **Graphviz est supprimé** du dossier. |
+| ARCH-8 | **Le rendu « archifify »** demandé par l'owner est produit. Déterminer ce qu'est cet outil — la lane h2a l'a cité dans son banc de placement — avant de conclure qu'il n'existe pas. |
+
+### Processus — PROC
+
+| ID | Exigence |
+|---|---|
+| PROC-1 | **Chaque étape nomme son déclencheur et son exécutant réel** : workflow GitHub Actions, CronJob, administrateur du cluster, owner. **Le rôle « Coordinateur immo » disparaît** : il n'est pas clair, il revient plusieurs fois avec des icônes différentes, et on ne sait pas si c'est un job ou une personne. |
+| PROC-2 | L'owner demande : « peut être qu'un bpmn (avec bpmn js et autolayout) serait favorable ici pour la représentation non ? » — question posée, à laquelle la livraison répond. |
+| PROC-3 | **Déclencheur (a) « passage en préprod »** : la préprod est écrasée par la donnée de prod depuis le dernier instantané, avec un **test de migration de données**. **Entièrement automatique.** Vaut pour immo comme pour geo. |
+| PROC-4 | **Déclencheur (b.i) « perte totale du cluster »** : provisionnement d'un nouveau cluster, puis restauration du tenant de préprod ou de prod depuis la sauvegarde. Déclenchable par GitHub Actions. **Démontré sur la préprod** en y restaurant la sauvegarde de prod. |
+| PROC-5 | **Déclencheur (b.ii) « restauration complète immo + geo »** depuis GitHub Actions. Entièrement automatique. **Démontré** : la préprod récupère intégralement la prod. |
+| PROC-6 | **Déclencheur (b.iii) « restauration partielle »** — immo seul, geo seul, ou un sous-composant, bucket S3 ou base. Entièrement automatique, **avec garde-fous de cohérence**. |
+| PROC-7 | **Deux régimes** : restauration **avec migration** quand la préprod est en avance de schéma sur la prod, et restauration **iso** quand elles sont alignées. |
+| PROC-8 | **Un seul workflow paramétré** si possible : périmètre, cible — préprod, prod, tenant d'un cluster tiers. |
+| PROC-9 | **Les notifications d'alerte** : qui, par quel canal. `[ajout conducteur : « avec quel accusé de réception »]` |
+
+### Principes d'exploitation — OPS
+
+| ID | Exigence |
+|---|---|
+| OPS-1 | **k8s est un facilitateur, jamais un point de blocage.** En cas de crash, immo et geo doivent pouvoir se reprovisionner **sur leur propre cluster**. Le dépôt k8s peut être déclenché par GitHub Actions pour des tâches d'infrastructure spécifiques, **sans être un passage obligé**. |
+| OPS-2 | **Aucune IA n'est nécessaire au processus, dans aucune situation.** Une IA peut au mieux aider à suivre une situation, sur la base d'une documentation claire. |
+| OPS-3 | **Si GitHub Actions est défaillant, des scripts font la même chose**, avec une gestion des secrets explicite : où ils sont, qui les charge, comment, sans les afficher. |
+
+### Objectifs de reprise — RTO
+
+| ID | Exigence |
+|---|---|
+| RTO-1 | **Retour en opération complet en moins de 2 h**, provisionnement du cluster et redéploiement compris. **Démontré**, pas estimé. |
+| RTO-2 | **Restauration d'un composant en moins de 5 min**, pour une mise à jour qui ne restaure qu'un élément. |
+| RTO-3 | **Deux niveaux de sauvegarde** si nécessaire pour tenir RTO-1 et RTO-2 : un niveau rapide — instantané, synchronisation proche — et un niveau complet externalisé. |
+| RTO-4 | L'owner écrit « les délai de retour a l'objectif RTO RPO doivent, » — **phrase inachevée**, question ouverte à l'owner. `[ajout conducteur : déclarer le RPO par composant et par niveau]` |
+
+### Rétention et externalisation — RET
+
+| ID | Exigence |
+|---|---|
+| RET-1 | **Quotidienne sur une semaine, soit 10 jours ; hebdomadaire sur un mois, soit 5 semaines ; mensuelle sur 13 mois. Soit 28 sauvegardes.** C'est la demande initiale de l'owner, réaffirmée. |
+| RET-2 | « la gestion et l'externalisation doivent être au clair (compliances normes) ». `[ajout conducteur : exemples de normes à examiner — loi 25 au Québec, résidence des données]` |
+| RET-3 | « La sauvegarde sur une plateforme hors ovh pourrait être une autre carte, mais au moins faut prévoir un autre datacenter ou region. » |
+| RET-4 | `[ajout conducteur, pas une exigence de l'owner]` La rétention mensuelle sur 13 mois interagit avec le verrou d'objet : un verrou de conformité sur cette tranche engagerait 13 mois d'irréversibilité, ce qui remet en cause la recommandation D2 antérieure. À traiter comme conséquence à exposer, pas comme demande. |
+
+## 3. Double challenge
+
+L'owner demande « avec double challenge », puis précise : **« attention a bien mettre un astra xhigh
++ fable5.1 et de pas perdre une miette avec ta coordination (0 interprétation a ton niveau) »**.
+
+Les deux contradicteurs sont donc **Astra (`gpt-6-astra`) en effort `xhigh`** et **Fable 5.1
+(`claude-fable-5-1`)**. Chacun vérifie la couverture contre le **verbatim** de la section 1, puis
+discute le fond. Leurs deux avis figurent verbatim dans le dossier.
+
+(Une version antérieure de ce fichier nommait « Fable 5.1 et Gemini 3.8 high » : c'était un choix du
+conducteur, non demandé par l'owner, et il est corrigé.)
+
+---
+
+## 4. Complément de l'owner du 2026-09-19 (après lecture de la spec), verbatim
+
+> non jamais le RPO (Objective) ne sera 8j. il faut que ce soit 24h. utilise fable 5.1 + gemini 3.8 high stp pour itérer
+
+### Exigence ajoutée — RPO
+
+| ID | Exigence |
+|---|---|
+| RPO-1 | **Le RPO objectif est de 24 h.** « non jamais le RPO (Objective) ne sera 8j. il faut que ce soit 24h. » Les 8 jours relevés par la spec sont le RPO **constaté** aujourd'hui sur la base de production : c'est un écart à corriger, en aucun cas un objectif. Toute conception, tout palier de sauvegarde et tout calendrier de déclenchement doivent tenir **24 h au plus** de perte de données, pour chaque composant couvert. L'écart actuel est présenté comme tel, avec ce qui le referme et à quelle échéance. |
+
+### Contradicteurs — correction
+
+Les deux contradicteurs sont désormais **Fable 5.1** et **Gemini 3.8 high**. L'owner a demandé Astra
+xhigh dans son message précédent ; Astra est **injoignable** — le compte Codex est épuisé jusqu'au
+2026-09-24 et la passerelle `agy` ne propose pas ce modèle. L'owner a été informé et a remplacé
+Astra par Gemini 3.8 high. **C'est sa décision, pas une substitution du conducteur.**
+
+---
+
+## 5. Complément de l'owner du 2026-09-20, verbatim
+
+> débits: il faut être au clair sur les méthodes de copie (par ou tu fais les copies de bucket, comment avec les sync diff pour accélérer avec un rclone ou autre depuis le cluster, peut être avec une persistance limitée de donnée pour pas réindexer les buckets a chaque fois etc)
+
+> pour le putain de dossier de PRA' j'attends une putain d'actualisation du dossier.
 
 ## Annexe D — Scènes Focus (sources canoniques)
 
-Trois scènes, trois blocs Mermaid `flowchart LR`. Elles ne changent rien au fond :
-elles rendent lisibles les sections 2, 3 et 5 (l'architecture immo + geo), la
-section 7 (la séquence de bout en bout) et la section 8 (la mise en service).
-Chaque nœud est une carte A' 460 × 200 du gabarit ratifié ; chaque `subgraph` est
-un conteneur natif `parentId`.
+Trois scènes, trois blocs Mermaid `flowchart LR`. Elles rendent lisibles la section 4
+(l'architecture symétrique préprod/prod, clés, alertes), la section 5 (les déclencheurs a, b.i,
+b.ii, b.iii, garde-fous, régimes) et la section 11 (mesures conservatoires, lots de questions,
+exercices E1–E9). Chaque nœud est une carte A' 460 × 200 du gabarit ratifié ; chaque `subgraph`
+est un conteneur natif `parentId`. Contenu PRA v3 (§12.1–12.3 de la spec).
 
-### `architecture-sauvegardes` — Scène 1 · l'architecture des sauvegardes, immo et geo ensemble
+**Mise en page de la scène 1, imposée par l'owner** (texte du 2026-09-20, repris bloc par bloc) :
+une case **UTILISATEUR au nord**, une boîte **ADMINISTRATION ET COFFRE au sud** — **sur une seule
+rangée horizontale**, le pendant sud de la case utilisateur — et entre les deux une **bande de cinq
+colonnes**, de l'ouest vers l'est :
+
+1. **GitHub, verticale à 100 %** — les workflows et l'alerte émise par GitHub, et rien d'autre
+   (`GH_PILOTAGE`) ;
+2. **hors GitHub, verticale** et **nettement séparée de la précédente** — courriel TEM Scaleway,
+   DNS Cloudflare (`HORS_GH`) ;
+3. **le cluster k8s** (`OVH_CLUSTER`) : **immo au nord** (préproduction à l'**ouest**, production à
+   l'**est**), **geo au centre** (même partage), **plateforme partagée au sud, sur toute la largeur** — elle est reprise à la
+   largeur du plus large des deux tenants, en second passage du placement ;
+4. **les buckets OVH** (`BUCKETS_OVH`) : **immo au nord** (préproduction au nord du nord, production
+   au sud du nord), **geo au centre** (préproduction au nord du centre, production au sud du
+   centre), **les clés tout au sud** ;
+5. **la réplication en autre région OVH** (`EXT_REGION`), **verticale**, **à l'est de la zone est**.
+
+Les niveaux de conteneurs suivent la convention de `docs/architecture/focus/scenes.js` :
+`OVH_CLUSTER` > `immo_tenant` > `immo_pp` / `immo_pr`, et le même schéma côté stockage
+`BUCKETS_OVH` > `S3_IMMO` > `S3_IMMO_PP` / `S3_IMMO_PR`. Les six zones Z1–Z6 de la section 4 restent
+la **taxonomie du contenu** ; elles ne sont plus six boîtes à plat, elles sont réparties sur ces
+cinq colonnes.
+
+**Ce que le rendu tient, et comment.** Le plan est contrôlé **sur le rendu**, pas sur l'intention :
+une porte de build et un test échouent si l'utilisateur n'est pas au-dessus de tout le reste, si
+l'administration n'est pas en dessous, si deux colonnes se chevauchent, si l'ordre imposé n'est pas
+tenu dans l'un des dix conteneurs nommés, si la plateforme partagée n'est pas aussi large que le
+plus large des deux tenants, si l'administration au sud n'est pas sur une seule rangée horizontale,
+ou si une colonne dite verticale porte deux cartes côte à côte.
+
+ELK `layered` place par le **flux**, pas par les points cardinaux : trois leviers natifs ont été
+essayés pour le lui faire faire — `elk.position` en mode semi-interactif, `crossingMinimization.strategy`
+à `NONE` puis `INTERACTIVE`, contrainte de couche — **sans effet ou refusés par le moteur** (les deux
+derniers font échouer elkjs avec `INCLUDE_CHILDREN`, la contrainte de couche ne connaît que le
+premier et le dernier rang). **On ne lui demande donc plus l'emplacement des blocs.** Le placement de
+cette scène (`elk-layout.mjs`, mode `frame`) pose **les blocs racine à des coordonnées calculées à
+partir des tailles que les sous-placements renvoient** — jamais devinées — et, **à l'intérieur de
+chaque conteneur que le plan nomme**, lui donne l'ordre imposé par le **placement semi-interactif**
+d'ELK (`layering`, `crossingMinimization` et `cycleBreaking` en `INTERACTIVE`, placement `SIMPLE`,
+repère `TOP_LEFT`) : le moteur reçoit l'ordre et **garde le routage**, qui est son métier. Il ne
+place librement que dans les conteneurs que le plan ne nomme pas.
+
+Deux contraintes du moteur, mesurées et publiées parce qu'elles ont dicté la forme du routage :
+un **port posé au nord ou au sud** d'un conteneur en placement descendant l'oblige à rejoindre la
+première ou la dernière couche, ce qui **écrase l'ordre du plan** (mesuré : deux cartes de rangs
+différents ramenées sur la même rangée) ; et un conteneur dont les **ports sont libres** voit ELK
+les déplacer sur un bord de flux, avec le même effet. Les colonnes ne sont donc **abordées que par
+leur flanc**, et les conteneurs du plan gardent leurs ports fixés au bord qu'on leur a donné.
+
+Les tronçons de bloc à bloc sont tracés dans les **couloirs** laissés libres entre les colonnes,
+dimensionnés sur les étiquettes qu'ils portent et sur le nombre de voies qu'ils doivent porter.
+**Deux colonnes voisines** se joignent dans le couloir qui les sépare ; **deux colonnes séparées par
+une troisième ne se voient pas** : la liaison monte par le couloir qui borde le départ, **survole
+toute la bande** et redescend par le couloir d'arrivée — elle ne traverse donc aucune colonne non
+concernée. C'est un **cadre fixe avec plusieurs placements**, pas un placement fait à la main :
+aucune carte, aucun conteneur n'est posé à la main.
+
+**Ce que le moteur choisit encore** : dans chaque conteneur de feuilles que le plan ne nomme pas, le
+cadre essaie **le sens et onze rapports d'aspect**, relève la forme que chaque feuille prend, puis
+rejoue le bloc avec des **mélanges** — sous un plafond de largeur, chaque feuille prend la forme la
+plus plate qui y tient. Les formes dominées sont écartées et la combinaison retenue est celle dont
+la **hauteur finale est la plus faible** en tenant le rapport, parce que c'est la hauteur qui fixe la
+taille du texte sur une vue plus large que la scène. Deux autres voies ont été mesurées et écartées :
+`rectpacking` et `box` posés sur les conteneurs de feuilles rangent bien en grille mais **ne routent
+aucune liaison** (0 tronçon sur 3, mesuré), et un découpage limité aux seules frontières utiles
+(hiérarchie incluse dans le bloc) **fait échouer elkjs** dès qu'un bloc porte ses propres ports.
+
+### `architecture-sauvegardes` — Scène 1 · le cluster, ses tenants et leurs environnements, entre l'utilisateur au nord et l'administration au sud
 
 ```mermaid
 flowchart LR
-  subgraph IMMO_PP["Immo · préproduction"]
-    PG_PP["Base PostgreSQL PostGIS 16 de préproduction"]
-    CJ_PP["CronJob de sauvegarde de préproduction"]
-    EPH_PP["Restauration sur instance éphémère"]
+  USER["Navigateur utilisateur hors cluster"]
+  subgraph Z_GHX["Pilotage · GitHub et hors GitHub"]
+    subgraph HORS_GH["Hors GitHub · courriel et DNS"]
+      ALT_TEM["Courriel TEM second canal"]
+      CF_LE["Cloudflare DNS et Let's Encrypt"]
+    end
+    subgraph GH_PILOTAGE["GitHub · workflows et alertes"]
+      GHA["Workflows pra.yml et pra-watch à créer"]
+      GHA_CD["CD armée deploy promote rollback"]
+      ALT_GH["Ticket pra-alert et accusé"]
+    end
   end
-  subgraph IMMO_PR["Immo · production"]
-    PG_PR["Base PostgreSQL PostGIS 16 de production"]
-    CJ_PR["CronJob de sauvegarde de production"]
-    QUOTA["Marge du quota mémoire de production"]
+  subgraph OVH_CLUSTER["Cluster MKS poc-ca"]
+    subgraph immo_tenant["Tenant immo"]
+      subgraph immo_pp["Préproduction"]
+        PG_PP["Base PostgreSQL préproduction 950 MiB"]
+        CJ_PP["CronJob N2 préproduction 2 fois par jour"]
+        FH_PP["Fraîcheur et état préproduction"]
+        CL_PP["Clone N1 préproduction avant migration"]
+        KR_PP["Keyring refresh préproduction à confirmer"]
+      end
+      subgraph immo_pr["Production"]
+        PG_PR["Base PostgreSQL production 1 002 MiB"]
+        CJ_PR["CronJob N2 production 2 fois par jour"]
+        FH_PR["Fraîcheur et état production"]
+        CL_PR["Clone N1 production avant migration"]
+        KR_PR["Keyring refresh production 1 Gi"]
+      end
+    end
+    subgraph geo_tenant["Tenant geo"]
+      subgraph geo_pp["Préproduction"]
+        GA_PP["Service geo-api préproduction"]
+        GP_PP["PostGIS geo préproduction absent"]
+        GS_PP["Job preprod-sync geo sens unique"]
+      end
+      subgraph geo_pr["Production"]
+        GA_PR["Service geo-api production"]
+        GP_PR["PostGIS geo production 139 MiB"]
+        GC_PR["Job copie geo production prévu"]
+      end
+    end
+    subgraph PLATEFORME["Plateforme partagée"]
+      PF["Plateforme cert-manager Traefik KEDA scellés"]
+      IDP["IdP sentropic dépendance connexion"]
+      K_SEAL["Clés sealed-secrets 2 actives Q10"]
+    end
   end
-  subgraph S3_IMMO["S3 OVH bhs · immo"]
-    B_PP["Bucket de sauvegarde de préproduction"]
-    B_PR["Bucket de sauvegarde de production"]
-    PFX["Préfixes des jeux et des reçus"]
-    LOCK["Verrou d'objet"]
-    LC["Cycle de vie"]
+  subgraph BUCKETS_OVH["Buckets OVH"]
+    subgraph S3_IMMO["S3 immo"]
+      subgraph S3_IMMO_PP["S3 immo préprod"]
+        OBJ_PP["Objets immo préproduction RAW et graph"]
+        BK_PP["Bucket N2 préproduction quotidien seul"]
+        PRE_PP["Dump avant publication préproduction armé"]
+      end
+      subgraph S3_IMMO_PR["S3 immo prod"]
+        OBJ_PR["Objets immo production 59 017 objets"]
+        BK_PR["Bucket N2 production 10 5 13"]
+        PRE_PR["Dump avant publication production armé"]
+      end
+    end
+    subgraph S3_GEO["S3 geo"]
+      subgraph S3_GEO_PP["S3 geo préprod"]
+        GB_PP["Bucket geo préproduction normalized seul"]
+        GI_PP["Irremplaçables geo préproduction absents"]
+        G5_PP["Reprise geo préproduction absente"]
+      end
+      subgraph S3_GEO_PR["S3 geo prod"]
+        GB_PR["Bucket geo production 45 378 objets"]
+        GI_PR["Irremplaçables geo production 44 objets"]
+        GD_PR["Bucket reprise geo production prévu"]
+        GS_PR["Source preprod-sync geo production"]
+      end
+    end
+    subgraph CLES_S3["Clés S3"]
+      K_S3["Identités S3 données et PRA 7 par env"]
+    end
   end
-  subgraph IDS["Identités S3"]
-    ID_W["Identité écrivain"]
-    ID_R["Identité lecteur"]
-    ID_P["Identité purgeur"]
-    ID_ADM["Clés d'administration du propriétaire"]
+  subgraph EXT_REGION["Autre région OVH"]
+    R6_PP["Réplique immo préproduction absente"]
+    R6_PR["Réplique immo production bucket verrouillé"]
+    GR_PP["Réplique geo préproduction absente"]
+    GR_PR["Réplique geo production selon Q14"]
+    OPT_HORS["Option hors OVH non conçue"]
   end
-  subgraph SURV["Surveillance"]
-    FRESH["Contrôle horaire de fraîcheur"]
-    ACL["Contrôle continu de l'ACL du bucket"]
-    ALERT["Alerte vers l'astreinte immo"]
+  subgraph SUD_ADMIN["Administration et coffre"]
+    OWNER["Owner déclenche approuve acquitte"]
+    ADMIN["Administrateur cluster rôle humain"]
+    K_VAULT["Coffre sops age clé privée"]
+    K_OVH["Jeton API OVH projet entier F16"]
   end
-  subgraph GEO["Geo · geo#390"]
-    GEO_SRC["Bucket source geo"]
-    GEO_IRR["Préfixes irremplaçables geo"]
-    GEO_COPY["Job de copie geo"]
-    GEO_DST["Bucket de reprise geo"]
-  end
-  PG_PP -->|"même transaction"| CJ_PP
-  CJ_PP -->|"dépôt · écrivain"| B_PP
-  B_PP -->|"lecture · lecteur"| EPH_PP
-  PG_PR -->|"même transaction"| CJ_PR
-  CJ_PR -.->|"dépôt · non activé"| B_PR
-  B_PP -->|"reçus vérifiés"| FRESH
-  FRESH -->|"échec = alerte"| ALERT
-  LOCK -->|"prime sur l'expiration"| LC
-  GEO_SRC -.->|"lecture seule"| GEO_COPY
-  GEO_COPY -.->|"écriture sans suppression"| GEO_DST
+  USER -->|"accès web · Traefik"| PF
+  USER -.->|"connexion · IdP"| IDP
+  CJ_PP -.->|"dépôt · écrivain"| BK_PP
+  CJ_PR -.->|"dépôt · écrivain"| BK_PR
+  BK_PR -.->|"lecture · vérifie"| CJ_PR
+  BK_PP -.->|"reçus · vérifiés"| FH_PP
+  BK_PR -.->|"reçus · vérifiés"| FH_PR
+  FH_PP -.->|"état · watcher"| GHA
+  FH_PR -.->|"état · watcher"| GHA
+  GHA -.->|"ticket · alerte"| ALT_GH
+  GHA -.->|"courriel · TEM"| ALT_TEM
+  ALT_GH -.->|"accusé · ack"| OWNER
+  BK_PR -.->|"réplique · E7a"| R6_PR
+  OWNER -.->|"déclenche · b"| GHA
+  GHA -.->|"rebuild · tofu"| PF
+  GHA -.->|"DNS · certificats"| CF_LE
+  GHA_CD -->|"push · dump+clone"| PRE_PP
+  GHA_CD -->|"tag · dump+clone"| PRE_PR
+  K_VAULT -.->|"synchronise · secrets"| GHA
+  K_SEAL -->|"déchiffre · scellés"| PF
+  K_S3 -->|"lit · copie N2"| OBJ_PR
+  K_OVH -->|"provisionne · MKS"| PF
+  GB_PR -->|"lit · lecture seule"| GS_PP
+  GS_PP -->|"normalized/ · idempotent"| GB_PP
+  GC_PR -.->|"copie · idempotente"| GD_PR
+  ADMIN -->|"actes · cluster"| PF
 ```
 
-### `sequence-bout-en-bout` — Scène 2 · la séquence de bout en bout, sauvegarde puis restauration
+### `sequence-bout-en-bout` — Scène 2 · les déclencheurs et la reprise, de la demande au reçu
 
 ```mermaid
 flowchart LR
-  subgraph SAVE["Sauvegarde · un cycle"]
-    C1["Identifiant de cycle commun et T0"]
-    C2["Gel des écritures côté immo seulement"]
-    C3["Instantané et dump PostgreSQL dans la même transaction"]
-    C4["Copie des objets immo"]
-    C5["Copie geo sans gel"]
-    C6["Marqueur commun publié en dernier"]
-    C7["Dégel"]
+  subgraph DECL["Déclencheurs · demande et plan"]
+    D_OWNER["Owner demande restauration b"]
+    D_GHA["Workflow pra.yml dispatch paramétré"]
+    D_AUTO["Passage auto restreint Q12 Q1"]
+    D_PLAN["Plan garde-fous confirm"]
   end
-  subgraph REST["Restauration · inverse"]
-    R1["Choix d'un cycle complet"]
-    R2["Environnement vide provisionné"]
-    R3["Restauration geo puis re-dérivation"]
-    R4["Restauration des objets immo"]
-    R5["Restauration PostgreSQL et rôles"]
-    R6["Réouverture de l'API"]
+  subgraph PASSAGE["P-a · passage en préprod"]
+    A_STOP["Arrêt écrivains préprod G7"]
+    A_SEC["Point sécurité N1 G5"]
+    A_DB["Restore-into base préprod"]
+    A_MIG["Test migration iso ou migration"]
+    A_OBJ["Miroir objets côté serveur"]
+    A_GO["Fermeture réouverture reçu E4"]
   end
-  C1 -->|"cycle alloué"| C2
-  C2 -->|"écrivains drainés"| C3
-  C3 -->|"dump vérifié"| C4
-  C4 -->|"objets inventoriés"| C5
-  C5 -->|"inventaire réconcilié"| C6
-  C6 -->|"marqueur publié"| C7
-  C7 -->|"cycle complet disponible"| R1
-  R1 -->|"cycle retenu"| R2
-  R2 -->|"environnement prêt"| R3
-  R3 -->|"exports geo prêts"| R4
-  R4 -->|"références fermées"| R5
-  R5 -->|"comptes exacts"| R6
+  subgraph SINISTRE["P-bi · crash complet cluster"]
+    B_TFU["Cluster neuf tofu backend région"]
+    B_PLAT["Plateforme et clés selon Q10"]
+    B_TEN["Tenants kubeconfigs déploiement"]
+    B_DNS["DNS Cloudflare certificats DNS-01"]
+    B_DATA["Restore-into base keyring"]
+    B_APP["Apps par empreinte GO reçu E1"]
+  end
+  subgraph REPRISE["P-bii et P-biii · restaurations"]
+    R_SCOPE["Scope point régime G1 G2 G4"]
+    R_GEO["Geo d'abord irremplaçables exports"]
+    R_IMMO["Immo objets puis base"]
+    R_GARD["Garde-fous G3 reçu E2 E3"]
+  end
+  D_OWNER -.->|"demande · b"| D_GHA
+  D_GHA -.->|"plan · G8+confirm"| D_PLAN
+  D_AUTO -.->|"cycle · Q12"| D_PLAN
+  D_PLAN -.->|"go · P-a"| A_STOP
+  A_STOP -.->|"écrivains · arrêtés"| A_SEC
+  A_SEC -.->|"point · sécurité"| A_DB
+  A_DB -.->|"base · restaurée"| A_MIG
+  A_MIG -.->|"régime · iso-mig"| A_OBJ
+  A_OBJ -.->|"objets · miroir"| A_GO
+  D_PLAN -.->|"go · P-bi"| B_TFU
+  B_TFU -.->|"cluster · neuf"| B_PLAT
+  B_PLAT -.->|"plateforme · clés"| B_TEN
+  B_TEN -.->|"tenants · kubeconfigs"| B_DNS
+  B_DNS -.->|"DNS · certificats"| B_DATA
+  B_DATA -.->|"données · restaurées"| B_APP
+  D_PLAN -.->|"go · P-bii-biii"| R_SCOPE
+  R_SCOPE -.->|"scope · T0"| R_GEO
+  R_GEO -.->|"geo · d'abord"| R_IMMO
+  R_IMMO -.->|"immo · ensuite"| R_GARD
 ```
 
-### `mise-en-service` — Scène 3 · la preuve avant la fusion, puis l'activation simultanée
+### `mise-en-service` — Scène 3 · mesures conservatoires, lots et exercices
 
 ```mermaid
 flowchart LR
-  subgraph AVANT["Avant fusion · preuve"]
-    M1["Correction des défauts bloquants"]
-    M2["Décision sur le verrou d'objet"]
-    M3["Provisionnement de la préproduction"]
-    M4["Sauvegarde de preuve en préproduction"]
-    M5["Restauration de preuve depuis S3"]
-    M6["Preuve de livraison de l'alerte"]
-    M7["Preuve geo appariée"]
-    M8["Provisionnement de la production"]
-    M9["Contrôles de quota et de droits"]
+  subgraph URGENCE["Lot 0 · avant toute réponse"]
+    A1_KEYS["A1 export clés avant rotation"]
+    Q0_GO["Q0 GO activation intérimaire prod"]
   end
-  subgraph FUSION["Fusion · activation"]
-    F1["Fusion des deux PR"]
-    F2["Activation préproduction et production"]
+  subgraph LOTS["Lots 1 à 6 · questions"]
+    L1["Lot 1 passages Q1 à Q4"]
+    L2["Lot 2 rétention alertes verrou"]
+    L3["Lot 3 région données garde"]
+    L4["Lot 4 périmètre Q13 à Q16"]
+    L5["Lot 5 GitHub chrono risque coût"]
+    L6["Lot 6 copies Q21 à Q23"]
   end
-  subgraph APRES["Après activation"]
-    A1["Premiers Jobs manuels"]
-    A2["Réactivation de la fraîcheur"]
-    A3["Compte rendu sur la carte 698"]
+  subgraph PREUVES["Exercices E1 à E9 · preuves"]
+    E1["E1 reconstruction moins de 2 h"]
+    E2["E2 préprod récupère total prod"]
+    E3["E3 partielles et un refus"]
+    E4["E4 passage iso et migration"]
+    E5["E5 retour N1 moins de 5 min"]
+    E6["E6 rejoué par pra.sh"]
+    E7["E7 garde sans IA"]
+    E8["E8 alertes reçues acquittées"]
+    E9["E9 depuis la réplique"]
   end
-  M1 -->|"revue sans bloquant"| M2
-  M2 -->|"mode et durée écrits"| M3
-  M3 -->|"sonde verte"| M4
-  M4 -->|"reçu vérifié"| M5
-  M5 -->|"comptes exacts · durée"| M6
-  M6 -->|"alerte reçue"| M7
-  M7 -->|"inventaire geo"| M8
-  M8 -->|"sonde prod verte"| M9
-  M9 -->|"marge et droits relevés"| F1
-  F1 -->|"deux PR fusionnées"| F2
-  F2 -->|"deux namespaces appliqués"| A1
-  A1 -->|"deux reçus vérifiés"| A2
-  A2 -->|"fraîcheur verte"| A3
+  A1_KEYS -.->|"clés · exportées"| Q0_GO
+  Q0_GO -.->|"prod · activée"| L1
+  L1 -.->|"lot · répondu"| L2
+  L2 -.->|"lot · répondu"| L3
+  L3 -.->|"lot · répondu"| L4
+  L4 -.->|"lot · répondu"| L5
+  L5 -.->|"lot · répondu"| L6
+  L6 -.->|"spec · EVOL"| E1
+  E1 -.->|"E1 · reçu"| E2
+  E2 -.->|"E2 · reçu"| E3
+  E3 -.->|"E3 · reçu"| E4
+  E4 -.->|"E4 · reçu"| E5
+  E5 -.->|"E5 · reçu"| E6
+  E6 -.->|"E6 · reçu"| E7
+  E7 -.->|"E7 · reçu"| E8
+  E8 -.->|"E8 · reçu"| E9
 ```
