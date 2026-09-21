@@ -45,8 +45,9 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 
 // ── petits utilitaires de sortie (jamais de secret imprimé) ─────────────────
 const log = (msg) => console.log(`[bascule] ${msg}`);
@@ -145,6 +146,149 @@ function s5Env() {
     AWS_SECRET_ACCESS_KEY: req("AWS_SECRET_ACCESS_KEY"),
     AWS_REGION: opt("AWS_REGION", ""),
   };
+}
+
+// =============================================================================
+// PRÉ-CHECK runs/ — garde fail-closed « mémoire de collecte peuplée »
+//
+// Le refresh S6 (worker-live delta) NE re-télécharge PAS le back-catalogue tant
+// que l'état object-store `runs/{source}/collected-urls.jsonl` est présent dans
+// le bucket qu'il LIT (= PREPROD_DOCS, APRÈS la copie S3). Si le préfixe `runs/`
+// est ENTIÈREMENT absent, `loadCollectedUrls` renvoie « rien de connu » pour
+// chaque source → fail-open → rescrape complet (le rescrape des 528 qu'a vu
+// l'owner). Cette garde LIT (s5cmd ls, read-only) le préfixe `runs/` du bucket
+// cible et refuse S6 dans ce seul cas :
+//   - `runs/` VIDE/ABSENT                    → die/exit 1 (rescrape imminent).  [hard-fail]
+//   - source sans `collected-urls.jsonl`     → WARN : refetch borné self-heal
+//                                              de CETTE source (bootstrap depuis
+//                                              ses manifests) — acceptable.     [pas hard-fail]
+//
+// Layout lu (cf. api/src/services/sources/known-urls.ts) :
+//   runs/{source}/collected-urls.jsonl        ← mémoire cumulée par URL (cible)
+//   runs/{source}/{runId}/manifest.jsonl      ← fallback bootstrap borné
+//
+// source-gap : l'énumération des sources ACTIVES vit dans la config TS de l'app
+// (villes config-only) et n'est PAS disponible cheap à ce CLI .mjs (aucun dist
+// importable au runner). On applique donc le PLANCHER SÛR fondé sur l'état du
+// store : les « sources » sont les préfixes réellement présents sous `runs/`.
+// Repli optionnel : PRECHECK_EXPECTED_SOURCES="a,b,c" → WARN (jamais hard-fail)
+// sur les sources attendues absentes de `runs/`.
+// =============================================================================
+
+// Pure (testable sans I/O) : sortie d'un `s5cmd ls s3://BUCKET/runs/` (listing
+// délimité) → noms de sources (entrées `DIR` = préfixes communs `runs/{src}/`).
+export function parseRunsDirListing(stdout) {
+  const sources = [];
+  for (const raw of (stdout || "").split("\n")) {
+    const line = raw.trim();
+    if (!line) continue;
+    const m = line.match(/^DIR\s+(.+?)\/?$/);
+    if (m) sources.push(m[1].replace(/\/+$/, ""));
+  }
+  return sources;
+}
+
+// Pure : sortie d'un `s5cmd ls s3://BUCKET/runs/*/collected-urls.jsonl` → noms
+// de sources possédant l'objet d'état (on extrait `{src}` de la clé complète).
+export function parseCollectedUrlsListing(stdout) {
+  const sources = [];
+  for (const raw of (stdout || "").split("\n")) {
+    const line = raw.trim();
+    if (!line) continue;
+    const key = line.split(/\s+/).pop() || "";
+    const m = key.match(/(?:^|\/)([^/]+)\/collected-urls\.jsonl$/);
+    if (m) sources.push(m[1]);
+  }
+  return sources;
+}
+
+// Pure : classe le résultat d'un `s5cmd ls` du préfixe `runs/`. s5cmd renvoie un
+// code non nul + « no object found » quand le préfixe est vide → c'est le cas
+// hard-fail (runs/ absent), PAS une erreur d'infra. Tout autre code non nul =
+// erreur d'infra (creds/endpoint) → non vérifiable (fail-closed distinct).
+export function classifyRunsListing(res) {
+  const lines = (res?.stdout || "").split("\n").map((s) => s.trim()).filter(Boolean);
+  if ((res?.status ?? 0) === 0) return { empty: lines.length === 0, error: false };
+  const blob = `${res?.stderr || ""}\n${res?.stdout || ""}`;
+  if (/no object found/i.test(blob)) return { empty: true, error: false };
+  return { empty: false, error: true };
+}
+
+// Lister s5cmd par défaut (read-only). `req`/`s5Env` restent obligatoires sur un
+// run réel ; le paramètre `lister` de assertRunsMemory est un point d'injection
+// pour le self-test (sorties s5cmd mockées, aucun appel réseau).
+function defaultRunsLister() {
+  const bhs = req("BHS");
+  const env = s5Env();
+  return (target) => run("s5cmd", ["--endpoint-url", bhs, "ls", target], { env, capture: true, allowFail: true });
+}
+
+// GARDE fail-closed « mémoire de collecte peuplée » (read-only, s5cmd ls).
+// advisory=true (cible PROD_DOCS, prédiction précoce) → ne bloque JAMAIS (WARN).
+export function assertRunsMemory({ bucket, advisory = false, label, lister }) {
+  section(`pré-check runs/ (mémoire de collecte) — cible ${label}`);
+  const ls = lister || defaultRunsLister();
+  // 1) préfixes source + vacuité (listing délimité, cheap).
+  const listing = ls(`s3://${bucket}/runs/`);
+  const cls = classifyRunsListing(listing);
+  if (cls.error) {
+    const msg = `pré-check runs/ — listing 's3://${bucket}/runs/' a échoué (creds/endpoint ?) : impossible de garantir le delta. ${(listing.stderr || "").trim().slice(0, 160)}`;
+    if (advisory) { warn(`${msg} [advisory — non bloquant]`); return; }
+    die(msg);
+  }
+  if (cls.empty) {
+    const msg = `pré-check runs/ — préfixe 'runs/' VIDE/ABSENT dans s3://${bucket} : mémoire de collecte absente → le refresh S6 RESCRAPE l'intégralité (rescrape complet imminent).`;
+    if (advisory) { warn(`${msg} [advisory — non bloquant, cible ${label}]`); return; }
+    die(msg);
+  }
+  const sources = [...new Set(parseRunsDirListing(listing.stdout))].sort();
+  // 2) présence de collected-urls.jsonl par source (listing filtré).
+  const stateRes = ls(`s3://${bucket}/runs/*/collected-urls.jsonl`);
+  let withState = [];
+  if ((stateRes.status ?? 0) === 0) {
+    withState = parseCollectedUrlsListing(stateRes.stdout);
+  } else if (!/no object found/i.test(`${stateRes.stderr || ""}\n${stateRes.stdout || ""}`)) {
+    warn(`pré-check runs/ — listing '.../collected-urls.jsonl' a échoué (${(stateRes.stderr || "").trim().slice(0, 120)}) : présence par-source non vérifiée.`);
+  }
+  const withStateSet = new Set(withState);
+  const missing = sources.filter((s) => !withStateSet.has(s));
+  const withStateAmongFound = sources.length - missing.length;
+  log(`pré-check runs/ — ${sources.length} préfixe(s) source sous 'runs/', ${withStateAmongFound} avec collected-urls.jsonl, ${missing.length} sans.`);
+  if (missing.length) {
+    warn(`pré-check runs/ — ${missing.length} source(s) sans collected-urls.jsonl (refetch borné self-heal, PAS de hard-fail) : ${missing.slice(0, 50).join(", ")}${missing.length > 50 ? " …" : ""}`);
+  } else {
+    log("pré-check runs/ — toutes les sources présentes ont leur collected-urls.jsonl.");
+  }
+  // Repli optionnel : sources ACTIVES attendues fournies par l'opérateur (source-gap).
+  const expected = opt("PRECHECK_EXPECTED_SOURCES", "").split(",").map((s) => s.trim()).filter(Boolean);
+  if (expected.length) {
+    const foundSet = new Set(sources);
+    const expectedAbsent = expected.filter((s) => !foundSet.has(s));
+    log(`pré-check runs/ — overlay sources attendues : ${expected.length} fournie(s), ${expectedAbsent.length} absente(s) de 'runs/'.`);
+    if (expectedAbsent.length) {
+      warn(`pré-check runs/ — source(s) attendue(s) ABSENTE(s) de 'runs/' (refetch borné de ces sources) : ${expectedAbsent.slice(0, 50).join(", ")}${expectedAbsent.length > 50 ? " …" : ""}`);
+    }
+  }
+  log(`pré-check runs/ OK — 'runs/' peuplé : le refresh S6 fera un DELTA (pas un rescrape complet).${advisory ? " [advisory]" : ""}`);
+}
+
+// =============================================================================
+// precheck-runs — sous-commande garde « mémoire de collecte » (read-only).
+// Cible par défaut = PREPROD_DOCS (bucket réellement lu par le refresh, APRÈS
+// la copie S3). --prod (ou PRECHECK_TARGET=prod) → PROD_DOCS en mode advisory
+// (prédiction précoce, non bloquant). DRY=1/--dry ne RELÂCHE PAS le gate : la
+// liste est read-only donc jouée à l'identique et le hard-fail « runs/ vide »
+// reste actif (visibilité précoce). PAS de CONFIRM (aucune mutation).
+// =============================================================================
+function cmdPrecheckRuns() {
+  const wantsProd = process.argv.includes("--prod") || opt("PRECHECK_TARGET", "") === "prod";
+  const advisory = wantsProd || opt("PRECHECK_ADVISORY", "") === "1";
+  if (opt("DRY", "") === "1" || process.argv.includes("--dry")) {
+    log("pré-check runs/ — read-only : DRY ne relâche pas le gate (identique au run réel).");
+  }
+  const bucket = wantsProd ? req("PROD_DOCS") : req("PREPROD_DOCS");
+  const label = `${wantsProd ? "PROD_DOCS" : "PREPROD_DOCS"}${advisory ? " (advisory)" : ""}`;
+  assertRunsMemory({ bucket, advisory, label });
 }
 
 // =============================================================================
@@ -615,6 +759,16 @@ function cmdRefresh() {
   } else {
     warn(`MEDIUM2 — assertion bucket refresh désactivée ; ConfigMap ${servedKey}='${cmBucket || "<absent>"}', servi='${served || "<non fourni>"}'.`);
   }
+  // MEDIUM 3 — mémoire de collecte : le préfixe `runs/` DOIT être présent dans le
+  // bucket servi (PREPROD_DOCS) avant le delta, sinon worker-live rescrape tout.
+  // Le workflow joue déjà `precheck-runs` entre S3 et S6 ; on re-vérifie ici pour
+  // gater aussi un `refresh` lancé seul (défense en profondeur, read-only).
+  // Échappatoire documentée : ASSERT_RUNS_MEMORY=0 (dégrade en warning).
+  if (opt("ASSERT_RUNS_MEMORY", "1") !== "0") {
+    assertRunsMemory({ bucket: req("PREPROD_DOCS"), advisory: false, label: "PREPROD_DOCS" });
+  } else {
+    warn("MEDIUM3 — pré-check runs/ (mémoire de collecte) DÉSACTIVÉ (ASSERT_RUNS_MEMORY=0).");
+  }
   const image = resolvePreprodImage(ns);
   runJobFromTemplate({
     tmpl: "refresh-job.tmpl.yaml",
@@ -660,6 +814,7 @@ const COMMANDS = {
   migrate: cmdMigrate,
   "copy-docs": cmdCopyDocs,
   recon: cmdRecon,
+  "precheck-runs": cmdPrecheckRuns,
   flip: cmdFlip,
   unquiesce: cmdUnquiesce,
   refresh: cmdRefresh,
@@ -671,14 +826,24 @@ function main() {
   const isHelp = !cmd || cmd === "-h" || cmd === "--help";
   if (isHelp || !COMMANDS[cmd]) {
     console.log(
-      "usage: node bascule.mjs <preflight|quiesce|dump|restore|migrate|copy-docs|recon|flip|unquiesce|refresh|smoke>\n" +
+      "usage: node bascule.mjs <preflight|quiesce|dump|restore|migrate|copy-docs|recon|precheck-runs|flip|unquiesce|refresh|smoke>\n" +
         "  DRY=1 (ou --dry) sur copy-docs → --dry-run (0 écriture).\n" +
+        "  precheck-runs : garde read-only 'mémoire de collecte' (préfixe runs/ du store docs).\n" +
+        "    cible défaut = PREPROD_DOCS (gate) ; --prod (ou PRECHECK_TARGET=prod) = PROD_DOCS advisory.\n" +
+        "    hard-fail UNIQUEMENT si runs/ vide/absent (rescrape complet imminent) ; WARN sinon.\n" +
+        "    DRY ne relâche PAS le gate (lecture seule, jouée à l'identique).\n" +
         "  quiesce/unquiesce : met/rétablit les consommateurs préprod (unquiesce = reprise, sans CONFIRM).\n" +
-        "  GARDES fail-closed : G1 rollback préprod, G2 quiesce, G3 CONFIRM, G4 recon-avant-flip.",
+        "  GARDES fail-closed : G1 rollback préprod, G2 quiesce, G3 CONFIRM, G4 recon-avant-flip,\n" +
+        "    précheck runs/ (mémoire de collecte) avant refresh.",
     );
     process.exit(isHelp ? 0 : 1); // help = 0 ; commande inconnue = 1 (fail-closed)
   }
   COMMANDS[cmd]();
 }
 
-main();
+// N'exécute la CLI que si invoqué directement (`node bascule.mjs …`) — un import
+// (self-test des fonctions pures ci-dessus) ne doit PAS déclencher main().
+const invokedDirectly = process.argv[1]
+  ? resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+  : false;
+if (invokedDirectly) main();
