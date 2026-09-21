@@ -1,0 +1,95 @@
+# =============================================================================
+# refresh-job.tmpl.yaml — REFRESH DIFFÉRENTIEL (S6), Job one-shot in-cluster.
+#
+# Patron du worker de deploy/k8s/34-refresh-cronjob.yaml, paramétré pour la
+# BASCULE : rendu + appliqué + poll fail-closed par bascule.mjs (refresh) dans le
+# namespace PRÉPROD, image radar-api EXACTE servie en préprod (iso-prod).
+#
+# MODE DELTA : `node dist/scripts/worker-live.js` SANS argument = toutes les
+# villes config-only, HEAD-skip CAS → ne capte QUE le NOUVEAU (lit runs/ préprod
+# = état prod restauré). PAS de `--all` (le binaire n'en a pas ; l'invocation
+# nue EST le delta). Le CronJob radar-refresh-pv reste, lui, SUSPENDU.
+#
+# FAIL-CLOSED : backoffLimit 0 + restartPolicy Never ; worker-live exit !=0 si
+# des villes sont en erreur → le poll du CLI en fait un abort d'étape.
+#
+# Placeholders rendus par bascule.mjs : ${NAMESPACE} ${IMAGE} ${S3_SECRET}
+# ${SCRAPE_S3_SECRET} ${TTL_SECONDS}.
+# =============================================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-refresh-bascule
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: scrape
+    sentropic.io/bascule: refresh
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: ${TTL_SECONDS}
+  activeDeadlineSeconds: 7200
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: scrape
+        sentropic.io/bascule: refresh
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: refresh
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          image: ${IMAGE}
+          imagePullPolicy: Always
+          workingDir: /workspace/api
+          command: ["node", "dist/scripts/worker-live.js"]
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=200 --dns-result-order=ipv4first"
+            - name: LIVE_SCRAPE_EXPLOIT
+              value: "1"
+            - name: S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: ${S3_SECRET}, key: S3_ACCESS_KEY } }
+            - name: S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: ${S3_SECRET}, key: S3_SECRET_KEY } }
+            # ── CIBLE D'ÉCRITURE = bucket SERVI, config-driven (#738) ─────────
+            # SCRAPE_S3_ENDPOINT/BUCKET/REGION/FORCE_PATH_STYLE viennent du
+            # ConfigMap radar-api (l'overlay préprod y met docs-preprod), lu par
+            # l'API ET par ce refresh → le worker écrit là où l'API LIT. Prendre
+            # le bucket depuis un secret divergent = la classe du bug Farid (PV
+            # écrits hors served bucket → re-404). Seuls les creds viennent du
+            # secret scrape. bascule.mjs asserte en plus ConfigMap==PREPROD_DOCS.
+            - name: SCRAPE_S3_ENDPOINT
+              valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_ENDPOINT } }
+            - name: SCRAPE_S3_BUCKET
+              valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_BUCKET } }
+            - name: SCRAPE_S3_REGION
+              valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_REGION } }
+            - name: SCRAPE_S3_FORCE_PATH_STYLE
+              valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_FORCE_PATH_STYLE } }
+            - name: SCRAPE_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: ${SCRAPE_S3_SECRET}, key: SCRAPE_S3_ACCESS_KEY } }
+            - name: SCRAPE_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: ${SCRAPE_S3_SECRET}, key: SCRAPE_S3_SECRET_KEY } }
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 150m, memory: 256Mi }

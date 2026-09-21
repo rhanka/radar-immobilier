@@ -1,0 +1,232 @@
+# bascule-preprod — BASCULE PROD → PRÉPROD (« iso-prod »), rejouable SANS IA.
+#
+# Enchaîne S0→S7 (cf. deploy/ci/bascule-preprod/bascule.mjs) : sauvegarde prod →
+# restauration préprod → migrations → copie docs → recon → flip serving →
+# refresh différentiel → smoke. Toute la LOGIQUE + les GARDES fail-closed sont
+# en Node ; ce workflow reste fin (installe les outils, câble les secrets,
+# appelle le CLI dans l'ordre). AUCUNE IA au runtime.
+#
+# GO owner matérialisé = l'input CONFIRM (GARDE G3, motif iso-prod-AAAA-MM-JJ),
+# recoupé au jour courant (anti-rejeu). DRY_RUN=true par défaut = un dispatch nu
+# ne fait RIEN de destructif (preflight + plan de copie + recon + smoke).
+#
+# S5 (flip) ISOLABLE via SKIP_FLIP : si la CI n'a pas encore le RBAC kubectl
+# préprod pour muter l'env, mettre SKIP_FLIP=true — le flip est alors le seul pas
+# porté hors-CI (owner / enabler k8s). Idem SKIP_REFRESH pour S6.
+name: bascule-preprod (iso-prod)
+
+on:
+  workflow_dispatch:
+    inputs:
+      CONFIRM:
+        description: "GO owner — motif exact iso-prod-AAAA-MM-JJ (doit être la date du jour)"
+        required: true
+        type: string
+      DRY_RUN:
+        description: "true = preflight + plan de copie + recon + smoke, RIEN de destructif"
+        required: true
+        type: boolean
+        default: true
+      SKIP_FLIP:
+        description: "true = ne pas jouer S5 (flip serving) — pas isolé si la CI n'a pas le kubectl préprod"
+        required: false
+        type: boolean
+        default: false
+      SKIP_REFRESH:
+        description: "true = ne pas jouer S6 (refresh différentiel)"
+        required: false
+        type: boolean
+        default: false
+      SKIP_QUIESCE:
+        description: "true = quiesce préprod fait à la main (owner/k8s) ; l'UN-QUIESCE reste automatisé (via UNQUIESCE_REPLICAS)"
+        required: false
+        type: boolean
+        default: false
+
+# Jamais deux bascules en parallèle (write préprod).
+concurrency:
+  group: bascule-preprod
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  bascule:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      # ── GO owner + anti-rejeu (CONFIRM_EXPECTED calculé au pas 'compute') ──
+      CONFIRM: ${{ inputs.CONFIRM }}
+      # ── DB source prod (RO) — libpq, jamais d'URI mot-de-passe en clair ────
+      PROD_PGHOST: ${{ secrets.BASCULE_PROD_PGHOST }}
+      PROD_PGPORT: ${{ secrets.BASCULE_PROD_PGPORT }}
+      PROD_PGUSER: ${{ secrets.BASCULE_PROD_PGUSER }}
+      PROD_PGPASSWORD: ${{ secrets.BASCULE_PROD_PGPASSWORD }}
+      PROD_PGDATABASE: ${{ secrets.BASCULE_PROD_PGDATABASE }}
+      # ── DB cible préprod — libpq ──────────────────────────────────────────
+      PREPROD_PGHOST: ${{ secrets.BASCULE_PREPROD_PGHOST }}
+      PREPROD_PGPORT: ${{ secrets.BASCULE_PREPROD_PGPORT }}
+      PREPROD_PGUSER: ${{ secrets.BASCULE_PREPROD_PGUSER }}
+      PREPROD_PGPASSWORD: ${{ secrets.BASCULE_PREPROD_PGPASSWORD }}
+      PREPROD_PGDATABASE: ${{ secrets.BASCULE_PREPROD_PGDATABASE }}
+      # ── Docs S3 (identité spanning read prod / write préprod, même endpoint) ─
+      AWS_ACCESS_KEY_ID: ${{ secrets.BASCULE_DOCS_AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.BASCULE_DOCS_AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ vars.BASCULE_AWS_REGION }}
+      BHS: ${{ vars.BASCULE_BHS_ENDPOINT }}
+      PROD_DOCS: ${{ vars.BASCULE_PROD_DOCS_BUCKET }}
+      PREPROD_DOCS: ${{ vars.BASCULE_PREPROD_DOCS_BUCKET }}
+      # ── Contrôle positif source + cible cluster + smoke ───────────────────
+      EXPECTED_DATABASE: ${{ vars.BASCULE_EXPECTED_DATABASE }}
+      PREPROD_NAMESPACE: ${{ vars.BASCULE_PREPROD_NAMESPACE || 'radar-immobilier-preprod' }}
+      PREPROD_HEALTH_URL: ${{ vars.BASCULE_PREPROD_HEALTH_URL }}
+      # Repli d'un-quiesce quand le quiesce est fait à la main (SKIP_QUIESCE) :
+      # aucun état enregistré → l'un-quiesce scale-back à partir de cette carte.
+      UNQUIESCE_REPLICAS: ${{ vars.BASCULE_UNQUIESCE_REPLICAS }}
+      BASCULE_WORKDIR: ${{ github.workspace }}/.bascule-work
+      CLI: deploy/ci/bascule-preprod/bascule.mjs
+      S5CMD_VERSION: "2.2.2"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute CONFIRM_EXPECTED (anti-rejeu = date du jour UTC)
+        run: echo "CONFIRM_EXPECTED=iso-prod-$(date -u +%F)" >> "$GITHUB_ENV"
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # postgresql-client 16 (dump 16 → restore 16, custom-format).
+      - name: Install postgresql-client 16
+        run: |
+          set -euo pipefail
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends postgresql-client-16
+          pg_dump --version && pg_restore --version
+
+      - name: Install s5cmd
+        run: |
+          set -euo pipefail
+          cd "$(mktemp -d)"
+          curl -fsSL -o s5cmd.tgz "https://github.com/peak/s5cmd/releases/download/v${S5CMD_VERSION}/s5cmd_${S5CMD_VERSION}_Linux-64bit.tar.gz"
+          tar xzf s5cmd.tgz s5cmd
+          sudo install -m 0755 s5cmd /usr/local/bin/s5cmd
+          s5cmd version
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig (préprod)
+        run: |
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      # Contrôle POSITIF du cluster cible AVANT tout write kubectl (identique au
+      # pré-vol de run-job.yaml / build-push-images.yml).
+      - name: Pre-flight — assert target cluster
+        env:
+          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
+          expected="${EXPECTED_KUBE_APISERVER_HOST:-$DEFAULT_HOST}"
+          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "kubeconfig apiserver host : ${host:-<none>}"
+          echo "expected apiserver host   : ${expected}"
+          if [ "$host" != "$expected" ]; then
+            echo "::error title=Wrong cluster — bascule refused::kubeconfig targets '${host:-<none>}' but expected '${expected}'."
+            exit 1
+          fi
+          kubectl -n "$PREPROD_NAMESPACE" get deploy radar-api -o name
+          echo "pre-flight cluster OK — ${expected} / ${PREPROD_NAMESPACE}"
+
+      # ── S0 ────────────────────────────────────────────────────────────────
+      - name: S0 preflight (binaires + secrets + EXPECTED_DATABASE)
+        run: node "$CLI" preflight
+
+      # ══════════════ DRY_RUN : rien de destructif ══════════════
+      - name: S3 copy-docs (plan --dry)
+        if: ${{ inputs.DRY_RUN }}
+        env:
+          DRY: "1"
+        run: node "$CLI" copy-docs
+
+      - name: S3b recon (informatif en DRY)
+        if: ${{ inputs.DRY_RUN }}
+        continue-on-error: true
+        run: node "$CLI" recon
+
+      # ══════════════ EXÉCUTION : séquence complète fail-closed ══════════════
+      # QUIESCE — enregistre les replicas d'origine puis scale 0 + suspend, et
+      # attend le drain, pour que la GARDE G2 de S2 passe. (Owner peut le faire à
+      # la main via SKIP_QUIESCE ; l'UN-QUIESCE plus bas reste automatisé.)
+      - name: QUIESCE consommateurs préprod (avant S2)
+        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_QUIESCE }}
+        run: node "$CLI" quiesce
+
+      - name: S1 dump prod (pg_dump custom, T0)
+        if: ${{ !inputs.DRY_RUN }}
+        run: node "$CLI" dump
+
+      - name: S2 restore préprod (G1 rollback + G2 quiesce + G3 confirm)
+        if: ${{ !inputs.DRY_RUN }}
+        run: node "$CLI" restore
+
+      - name: S2c migrate préprod (iso-prod, Job in-cluster)
+        if: ${{ !inputs.DRY_RUN }}
+        run: node "$CLI" migrate
+
+      - name: S3 copy-docs (s5cmd sync server-side, additif)
+        if: ${{ !inputs.DRY_RUN }}
+        run: node "$CLI" copy-docs
+
+      - name: S3b recon (assert dest ⊇ src — fatal)
+        if: ${{ !inputs.DRY_RUN }}
+        run: node "$CLI" recon
+
+      # S5 ISOLABLE : dépend du kubectl préprod (RBAC enabler k8s).
+      - name: S5 flip serving (retrait GEO_DOCUMENTS_REPOINT — G4 recon)
+        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_FLIP }}
+        run: node "$CLI" flip
+
+      # UN-QUIESCE — rétablit préprod (scale-back aux replicas enregistrés +
+      # rollout status) APRÈS le flip et AVANT le smoke. `if: always()` : joué
+      # même si une étape précédente a échoué, pour ne JAMAIS laisser préprod à
+      # terre (0 pod → /health KO). No-op sûr si aucun quiesce n'a eu lieu.
+      - name: UN-QUIESCE consommateurs préprod (reprise — après S5, avant S7)
+        if: ${{ always() && !inputs.DRY_RUN }}
+        run: node "$CLI" unquiesce
+
+      - name: S6 refresh différentiel (worker-live delta, Job in-cluster)
+        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_REFRESH }}
+        run: node "$CLI" refresh
+
+      # ── S7 : smoke (read-only ; joué aussi en DRY) ─────────────────────────
+      - name: S7 smoke préprod/health (db.ok + objectStore.ok)
+        run: node "$CLI" smoke
+
+      # ── Rollback DURABLE (MEDIUM 1) : sort les dumps du workdir éphémère ────
+      # Uploade le dump prod (S1) + le dump rollback préprod (G1) + les états, en
+      # `if: always()` pour les capturer même sur échec (le rollback G1 est créé
+      # AVANT le restore destructif). Alternative pour très gros dumps : pousser
+      # le rollback vers un bucket S3 de backups via s5cmd (voir README).
+      - name: Rollback artefacts (dumps + états)
+        if: ${{ always() && !inputs.DRY_RUN }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: bascule-rollback-${{ github.run_id }}
+          path: |
+            ${{ github.workspace }}/.bascule-work/*.dump
+            ${{ github.workspace }}/.bascule-work/T0.txt
+            ${{ github.workspace }}/.bascule-work/quiesce-state.json
+            ${{ github.workspace }}/.bascule-work/recon.ok.json
+          if-no-files-found: warn
+          retention-days: 7
