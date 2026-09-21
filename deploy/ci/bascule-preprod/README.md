@@ -16,7 +16,7 @@ l'ordre.
 
 | Fichier | Rôle |
 | --- | --- |
-| `bascule.mjs` | CLI Node : sous-commandes `preflight quiesce dump restore migrate copy-docs recon flip unquiesce refresh smoke` + les 4 gardes. |
+| `bascule.mjs` | CLI Node : sous-commandes `preflight quiesce dump restore migrate copy-docs recon precheck-runs flip unquiesce refresh smoke` + les gardes fail-closed. |
 | `db-migrate-job.tmpl.yaml` | Patron du Job migrate (S2c) rendu + appliqué en préprod (patron de `deploy/k8s/36-db-migrate-job.yaml`). |
 | `refresh-job.tmpl.yaml` | Patron du Job refresh différentiel (S6), worker-live delta (patron de `deploy/k8s/34-refresh-cronjob.yaml`). |
 | `../../../.github/workflows/bascule-preprod.yml` | `workflow_dispatch` qui enchaîne S0→S7. |
@@ -32,12 +32,13 @@ l'ordre.
 | S2c | `migrate` | Job in-cluster `node dist/db/migrate.js` (image préprod exacte) = test iso-prod. | préprod (kubectl) |
 | S3 | `copy-docs` | `s5cmd --endpoint-url $BHS sync 's3://$PROD_DOCS/*' 's3://$PREPROD_DOCS/'` server-side, additif. | runner → S3 |
 | S3b | `recon` | re-`s5cmd --dry-run sync` ; **sortie VIDE exigée** (dest ⊇ src) sinon exit 1. Écrit le sentinel `recon.ok`. | runner |
+| S3c | `precheck-runs` | garde **mémoire de collecte** (read-only) : `s5cmd ls` du préfixe `runs/` du bucket servi (PREPROD_DOCS). `runs/` **vide** → exit 1 (rescrape complet imminent) ; source sans `collected-urls.jsonl` → WARN (refetch borné). | runner → S3 |
 | S5 | `flip` | `kubectl set env deploy/radar-api GEO_DOCUMENTS_REPOINT-` (défaut OFF = iso-prod, réversible). | préprod (kubectl) |
 | U | `unquiesce` | **scale-back aux replicas enregistrés + `rollout status`** ; restaure le suspend d'origine. Joué en `if: always()` (jamais préprod à terre). **Sans CONFIRM** (reprise). | préprod (kubectl) |
 | S6 | `refresh` | Job in-cluster worker-live **delta** (PAS `--all`) ; écrit dans le **bucket servi config-driven** (assert `ConfigMap SCRAPE_S3_BUCKET == PREPROD_DOCS`) ; le CronJob refresh reste suspendu. | préprod (kubectl) |
 | S7 | `smoke` | `curl préprod/health` ; `db.ok` + `objectStore.ok` exigés. UAT Farid = hors script. | runner |
 
-Ordre workflow : S0 → **Q** → S1 → S2 → S2c → S3 → S3b → S5 → **U (`always`)** → S6 → S7 → upload rollback (`always`).
+Ordre workflow : S0 → **S0.b (`precheck-runs --prod`, advisory)** → **Q** → S1 → S2 → S2c → S3 → S3b → S5 → **U (`always`)** → **S3c (`precheck-runs`, gate)** → S6 → S7 → upload rollback (`always`).
 
 ## Gardes fail-closed (clé OPS-3), et où elles sont câblées
 
@@ -62,6 +63,10 @@ Toutes sont **en Node** dans `bascule.mjs` :
   (`assertReconOk`)
 - **+ contrôle positif source.** `preflight` et `dump` refusent si
   `PROD_PGDATABASE != EXPECTED_DATABASE` (on ne dumpe pas la mauvaise DB).
+- **+ pré-check mémoire de collecte (`runs/`).** `precheck-runs` (et `refresh`
+  en interne) refusent S6 si le préfixe `runs/` est **entièrement absent** du
+  bucket servi (rescrape complet imminent). Cf. section « MEDIUM 3 » ci-dessous.
+  (`assertRunsMemory`)
 
 Idempotence / rejouabilité : `s5cmd sync` saute l'inchangé ; `pg_restore --clean`
 = remplacement ; `migrate` saute les migrations déjà appliquées ; `flip`
@@ -141,10 +146,55 @@ Le Job refresh (S6) écrit les nouveaux PV dans le **bucket servi config-driven*
   Échappatoire documentée : `ASSERT_REFRESH_BUCKET=0` (dégrade en warning),
   `REFRESH_SERVED_BUCKET_KEY` si la clé du ConfigMap diffère.
 
+## MEDIUM 3 — mémoire de collecte (`pré-check runs/`)
+
+Le refresh S6 (`worker-live` delta) ne fait un **delta** — et pas un **rescrape
+complet** — que si l'état object-store `runs/{source}/collected-urls.jsonl` est
+présent dans le bucket qu'il **lit** (PREPROD_DOCS, **après** la copie S3). Cet
+état pilote le skip « déjà scrapé → on ne re-télécharge pas » (clé par URL, cf.
+`api/src/services/sources/known-urls.ts`). Si le préfixe `runs/` est **entièrement
+absent**, `loadCollectedUrls` renvoie « rien de connu » pour chaque source →
+fail-open → re-téléchargement de tout le back-catalogue (le rescrape des 528).
+
+La sous-commande **`precheck-runs`** (read-only, `s5cmd ls`) matérialise la garde :
+
+- **Cible par défaut = PREPROD_DOCS** (le bucket réellement lu par S6). C'est le
+  **gate** : `runs/` vide/absent → **exit 1** (rescrape complet imminent).
+- **`--prod`** (ou `PRECHECK_TARGET=prod`) → cible **PROD_DOCS** en mode
+  **advisory** (prédiction précoce : la copie amènera-t-elle `runs/` ?) — ne
+  bloque **jamais** (WARN seulement).
+- **Plancher fail-closed** : hard-fail **uniquement** si `runs/` est vide/absent.
+  Sinon la garde liste `runs/*/collected-urls.jsonl`, **rapporte** N préfixes
+  source / M avec état / la liste des manquants, et **WARN** (pas de hard-fail)
+  sur les sources sans `collected-urls.jsonl` — un refetch **borné** de CETTE
+  source (self-heal via bootstrap des manifests), pas un rescrape global.
+- **DRY** : la garde est **read-only**, donc `DRY=1`/`--dry` ne la relâche pas :
+  la liste est jouée à l'identique et le hard-fail « `runs/` vide » reste actif
+  (visibilité précoce). En **workflow DRY** la copie S3 réelle n'a pas eu lieu →
+  seul l'appel **advisory PROD_DOCS** (S0.b) est joué ; le **gate PREPROD_DOCS**
+  (S3c) n'est joué qu'en exécution réelle (sinon faux négatif sur un préprod
+  pas encore copié).
+- **source-gap** : l'énumération des sources **actives** vit dans la config TS de
+  l'app (villes config-only) et n'est pas disponible cheap à ce CLI `.mjs` (aucun
+  `dist` importable au runner). Le plancher se fonde donc sur l'état du store
+  (sources = préfixes présents sous `runs/`). Repli optionnel :
+  `PRECHECK_EXPECTED_SOURCES="a,b,c"` → WARN (jamais hard-fail) sur les sources
+  attendues absentes de `runs/`.
+- **Défense en profondeur** : `refresh` (S6) rejoue `assertRunsMemory` en interne
+  (cible PREPROD_DOCS) pour gater aussi un `refresh` lancé seul. Échappatoire
+  documentée `ASSERT_RUNS_MEMORY=0` (dégrade en warning — à n'utiliser qu'en
+  connaissance de cause).
+
+Où c'est câblé dans le workflow : **S0.b** `precheck-runs --prod` (advisory, joué
+aussi en DRY, `continue-on-error`) après S0 ; **S3c** `precheck-runs` (gate) après
+S3/S3b (copie docs) et **avant** S6, `if: !DRY_RUN && !SKIP_REFRESH`.
+
 ## Lancer une sous-commande à la main (hors workflow)
 
 ```bash
 # mêmes variables d'env que le workflow (voir tableau secrets/vars)
 node deploy/ci/bascule-preprod/bascule.mjs preflight
-DRY=1 node deploy/ci/bascule-preprod/bascule.mjs copy-docs   # plan seul
+DRY=1 node deploy/ci/bascule-preprod/bascule.mjs copy-docs        # plan seul
+node deploy/ci/bascule-preprod/bascule.mjs precheck-runs --prod   # advisory (PROD_DOCS)
+node deploy/ci/bascule-preprod/bascule.mjs precheck-runs          # gate (PREPROD_DOCS)
 ```
