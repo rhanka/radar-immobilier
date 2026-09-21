@@ -46,3 +46,25 @@ configMapGenerator:
     behavior: replace
     files:
       - default.conf=nginx/default.conf
+
+# Per-env object-storage bucket. The base ConfigMap radar-api carries the PROD
+# buckets (SCRAPE/GRAPH_S3_BUCKET=radar-immobilier-docs); in preprod, scrape AND
+# graph must land in the SERVED preprod bucket. The refresh CronJob reads
+# SCRAPE_S3_BUCKET from THIS ConfigMap (configMapKeyRef), and the api serves from
+# it too, so both converge on one value — no per-workload literal that can
+# silently diverge (this is the fix for the graph-preprod PDF misroute).
+# `replace` because both keys already exist in the base ConfigMap.
+# NB: reconcile-preprod.sh whitelists ConfigMap radar-api so this override is
+# actually applied to the live preprod ConfigMap (it was previously excluded to
+# avoid leaking the base's PROD buckets — safe now that the override exists).
+patches:
+  - target:
+      kind: ConfigMap
+      name: radar-api
+    patch: |
+      - op: replace
+        path: /data/SCRAPE_S3_BUCKET
+        value: radar-immobilier-docs-preprod
+      - op: replace
+        path: /data/GRAPH_S3_BUCKET
+        value: radar-immobilier-docs-preprod
