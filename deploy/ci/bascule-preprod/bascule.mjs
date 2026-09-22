@@ -152,9 +152,13 @@ function jobDefaults() {
     // Secret PRA = S3 SEULEMENT (RW bucket backups) — clés S3_ACCESS_KEY/S3_SECRET_KEY.
     // PAS de POSTGRES_* (mesure k8s). Owner/immo-délivré, HORS de ce patch.
     PRA_SECRET: opt("PRA_SECRET", "radar-pra-admin"),
-    // Secret docs PRÉPROD (identité de l'API préprod) — clés DOCS_S3_ACCESS_KEY/
-    // DOCS_S3_SECRET_KEY. Utilisé pour le gate runs/ PREPROD (état vu par l'API).
-    DOCS_SECRET: opt("DOCS_SECRET", "radar-docs-s3-credentials"),
+    // Secrets PERSISTANTS des Jobs de CHECK (verdict-only, LIST/HEAD/dryrun) —
+    // distincts de la cred docs-sync ÉPHÉMÈRE (sinon CreateContainerConfigError
+    // aux pas de check). Mêmes clés S3_ACCESS_KEY/S3_SECRET_KEY.
+    //  - freshness (S1)          : RO-reader du bucket backups (minté par k8s) ;
+    //  - recon + runs/ (S3b/S3c) : LIST prod+préprod docs (cred applicative).
+    FRESHNESS_CHECK_SECRET: opt("FRESHNESS_CHECK_SECRET", "radar-backups-reader-preprod"),
+    CHECK_DOCS_SECRET: opt("CHECK_DOCS_SECRET", "radar-s3-credentials"),
     // Secret docs PROD-READ ÉPHÉMÈRE (Option A, co-val i-infra) : identité
     // PROPRIÉTAIRE des objets docs prod (immo-docs-prod), montée en préprod dans un
     // secret dédié `radar-docs-src-preprod` — clés S3_ACCESS_KEY/S3_SECRET_KEY.
@@ -206,18 +210,16 @@ export function classifyJobStatus(status) {
 // (freshness S1, recon S3b, runs/ S3c/MEDIUM3) sont des Jobs PRÉPROD qui font le
 // LIST/HEAD/--dryrun DANS le pod (cred in-cluster) et ne renvoient qu'un exit code.
 //
-// cred = "backups"   (radar-pra-admin, clés S3_*) pour le bucket de dumps ;
-//        "docs-prod"  (radar-docs-prod-read, clés S3_*) pour toute LECTURE du
-//                     bucket docs PROD (recon prod↔préprod, advisory runs/ prod) ;
-//        "docs"       (radar-docs-s3-credentials préprod, clés DOCS_S3_*) pour le
-//                     gate runs/ PRÉPROD (état vu par l'API préprod).
+// `secret` = NOM du secret PERSISTANT à monter, FIXÉ PAR PAS par l'appelant
+// (pas de cred éphémère docs-sync ici, sinon CreateContainerConfigError aux pas
+// de check). Défauts (mêmes clés S3_ACCESS_KEY/S3_SECRET_KEY) :
+//   - freshness (S1)          → radar-backups-reader-preprod (RO-reader backups) ;
+//   - recon + runs/ (S3b/S3c) → radar-s3-credentials (LIST prod+préprod docs).
 // failClosed=false → renvoie { ok } au lieu de die (S1 doit re-suspendre AVANT
 // de trancher). Le runner ne lit que .status (via runJobFromTemplate).
 // =============================================================================
-function dispatchS3Check({ mode, jobName, cred, params = {}, timeoutSec, failClosed = true }) {
+function dispatchS3Check({ mode, jobName, secret, accessKeyName = "S3_ACCESS_KEY", secretKeyName = "S3_SECRET_KEY", params = {}, timeoutSec, failClosed = true }) {
   const jd = jobDefaults();
-  const useS3keys = cred === "backups" || cred === "docs-prod";
-  const secret = cred === "backups" ? jd.PRA_SECRET : cred === "docs-prod" ? jd.DOCS_SYNC_READ_SECRET : jd.DOCS_SECRET;
   return runJobFromTemplate({
     tmpl: "s3-check-job.tmpl.yaml",
     jobName,
@@ -228,8 +230,8 @@ function dispatchS3Check({ mode, jobName, cred, params = {}, timeoutSec, failClo
       NAMESPACE: jd.NAMESPACE,
       AWSCLI_IMAGE: jd.AWSCLI_IMAGE,
       CHECK_SECRET: secret,
-      CHECK_ACCESS_KEY: useS3keys ? "S3_ACCESS_KEY" : "DOCS_S3_ACCESS_KEY",
-      CHECK_SECRET_KEY: useS3keys ? "S3_SECRET_KEY" : "DOCS_S3_SECRET_KEY",
+      CHECK_ACCESS_KEY: accessKeyName,
+      CHECK_SECRET_KEY: secretKeyName,
       S3_ENDPOINT: jd.S3_ENDPOINT,
       S3_REGION: jd.S3_REGION,
       CHECK_MODE: mode,
@@ -268,9 +270,9 @@ function cmdPrecheckRuns() {
   dispatchS3Check({
     mode: "runs",
     jobName: wantsProd ? "radar-bascule-runs-prod" : "radar-bascule-runs-preprod",
-    // prod (advisory) lit le bucket PROD → identité prod-owner ; préprod (gate)
-    // lit le bucket préprod avec l'identité de l'API préprod (état réellement vu).
-    cred: wantsProd ? "docs-prod" : "docs",
+    // Secret PERSISTANT radar-s3-credentials (LIST prod+préprod docs) — PAS la
+    // cred docs-sync éphémère. Overridable via CHECK_DOCS_SECRET.
+    secret: jobDefaults().CHECK_DOCS_SECRET,
     params: { bucket, prefix: opt("RUNS_PREFIX", "runs/") },
     timeoutSec: Number(opt("CHECK_TIMEOUT", "180")),
   });
@@ -373,13 +375,15 @@ function cmdDump() {
   run("kubectl", [...kprod, "-n", cjNs, "patch", "cronjob", cj, "--type=merge", "-p", '{"spec":{"suspend":false}}']);
   log(`CronJob ${cjNs}/${cj} dé-suspendu (cluster PROD) — le pg_dump prod (owner) → s3://${bucket} démarre hors runner.`);
 
-  // Freshness = Job PRÉPROD verdict-only (poll interne au pod, cred backups).
+  // Freshness = Job PRÉPROD verdict-only (poll interne au pod). Secret PERSISTANT
+  // RO-reader du bucket backups (radar-backups-reader-preprod) — PAS la cred
+  // docs-sync éphémère. Overridable via FRESHNESS_CHECK_SECRET.
   // failClosed:false → on récupère { ok } pour RE-SUSPENDRE avant de trancher.
   section("S1.b freshness — Job in-cluster (aws s3api list, verdict-only, 0 S3 runner)");
   const verdict = dispatchS3Check({
     mode: "freshness",
     jobName: "radar-bascule-freshness",
-    cred: "backups",
+    secret: jobDefaults().FRESHNESS_CHECK_SECRET,
     failClosed: false,
     params: {
       bucket, prefix, t1Epoch, expectedDb: keyMustContain, keySuffix,
@@ -820,7 +824,9 @@ function cmdRecon() {
   dispatchS3Check({
     mode: "recon",
     jobName: "radar-bascule-recon",
-    cred: "docs-prod", // lit le bucket docs PROD (identité prod-owner)
+    // Secret PERSISTANT radar-s3-credentials (LIST prod+préprod docs) — PAS la
+    // cred docs-sync éphémère. Overridable via CHECK_DOCS_SECRET.
+    secret: jobDefaults().CHECK_DOCS_SECRET,
     params: { srcBucket: prod, dstBucket: preprod },
     timeoutSec: Number(opt("RECON_TIMEOUT", "600")),
   });
@@ -905,7 +911,7 @@ function cmdRefresh() {
     dispatchS3Check({
       mode: "runs",
       jobName: "radar-bascule-runs-preprod",
-      cred: "docs",
+      secret: jobDefaults().CHECK_DOCS_SECRET, // radar-s3-credentials (persistant)
       params: { bucket: req("PREPROD_DOCS"), prefix: opt("RUNS_PREFIX", "runs/") },
       timeoutSec: Number(opt("CHECK_TIMEOUT", "180")),
     });

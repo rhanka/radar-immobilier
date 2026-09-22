@@ -110,9 +110,10 @@ aucun `AWS_*` ni secret S3/DB côté runner. Plus d'install `s5cmd`/postgresql-c
 | --- | --- | --- | --- |
 | `radar-pra-admin` | restore (fetch), rollback (upload) | `S3_ACCESS_KEY`/`S3_SECRET_KEY` — **S3 SEULEMENT** (mesure k8s, PAS de POSTGRES_*) | fetch/upload S3 du bucket backups. |
 | `radar-db-credentials` | restore, rollback, migrate | `POSTGRES_USER/PASSWORD/DB` (user préprod `radar` = superuser → `--clean` OK) | libpq PG* du pg_restore/pg_dump. |
-| `radar-docs-src-preprod` **(ÉPHÉMÈRE)** | docs-sync (`docs-sync-prod-to-preprod`), recon, advisory runs/ prod | `S3_ACCESS_KEY`/`S3_SECRET_KEY` (identité **prod-owner** immo-docs-prod) | LECTURE docs PROD + rw préprod + CopyObject. **Créé par k8s** (ownerRef=Job) / **GC cascade au TTL** ; la CI n'y touche jamais. |
-| `radar-docs-s3-credentials` | gate runs/ préprod | `DOCS_S3_ACCESS_KEY`/`DOCS_S3_SECRET_KEY` (identité API préprod) | LIST `runs/` préprod (état vu par l'API). |
-| `radar-s3-credentials` / `radar-scrape-s3-credentials` | migrate / refresh | `S3_ACCESS_KEY/SECRET_KEY` / `SCRAPE_S3_*` | S3 applicatif / écriture PV scrape. |
+| `radar-docs-src-preprod` **(ÉPHÉMÈRE)** | **docs-sync UNIQUEMENT** (`docs-sync-prod-to-preprod`) | `S3_ACCESS_KEY`/`S3_SECRET_KEY` (identité **prod-owner** immo-docs-prod) | LECTURE docs PROD + rw préprod + CopyObject. **Créé par k8s** (ownerRef=Job) / **GC cascade au TTL** ; la CI n'y touche jamais. **Jamais référencé par les Jobs de check** (sinon CreateContainerConfigError). |
+| `radar-backups-reader-preprod` | **Job freshness (S1)** | `S3_ACCESS_KEY`/`S3_SECRET_KEY` | RO-reader PERSISTANT du bucket backups (LIST/HEAD). Var `FRESHNESS_CHECK_SECRET`. |
+| `radar-s3-credentials` | **Jobs recon (S3b) + runs/ (S3c, prod & préprod)** + migrate/refresh | `S3_ACCESS_KEY`/`S3_SECRET_KEY` | PERSISTANT, LIST prod+préprod docs (0 changement de clé) + S3 applicatif. Var `CHECK_DOCS_SECRET`. |
+| `radar-scrape-s3-credentials` | refresh | `SCRAPE_S3_*` | écriture PV scrape. |
 
 > **0 Python, 0 image nouvelle non validée.** Runner : kubectl + curl. Jobs :
 > `postgis/postgis:16-3.4` (pg_dump/pg_restore 16) + `amazon/aws-cli` (LIST/HEAD/
@@ -168,10 +169,14 @@ pendant que k8s le crée. **La CI ne crée / ne lit / ne supprime AUCUN secret**
    récursif). Le Job freshness/restore matche `radar` (EXPECTED_DATABASE) + `.dump`.
    Dump owner = `pg_dump --format=custom --no-owner --no-privileges` (contrat).
 3. **Secrets in-cluster à provisionner (owner/immo, 0 minté ici) :**
-   `radar-pra-admin` (S3-only : S3_ACCESS_KEY/S3_SECRET_KEY, RW backups) ;
-   `radar-docs-src-preprod` (identité prod-owner : S3_ACCESS_KEY/S3_SECRET_KEY, read
-   prod + rw préprod). Clés/nom à confirmer (sinon régler `PRA_SECRET`/
-   `DOCS_SYNC_READ_SECRET`).
+   `radar-pra-admin` (S3-only, RW backups, restore/rollback) ;
+   `radar-backups-reader-preprod` (RO-reader **PERSISTANT** backups, Job freshness ;
+   var `FRESHNESS_CHECK_SECRET`) ; `radar-s3-credentials` (**PERSISTANT**, LIST
+   prod+préprod docs, Jobs recon + runs/ ; var `CHECK_DOCS_SECRET`) ;
+   `radar-docs-src-preprod` (prod-owner **ÉPHÉMÈRE**, docs-sync uniquement). Tous
+   clés `S3_ACCESS_KEY`/`S3_SECRET_KEY`. **Les Jobs de check ne réfèrent JAMAIS le
+   secret éphémère** (sinon CreateContainerConfigError aux pas de check — bug
+   attrapé en DRY). Clés/nom à confirmer (sinon régler les vars ci-dessus).
    - **`radar-docs-src-preprod` est ÉPHÉMÈRE, géré 100% par k8s** (co-val k8s) : la
      CI **dispatche** le Job `docs-sync-prod-to-preprod` ; **k8s** watch ce nom,
      lit l'UID et crée le secret `ownerRef=Job.UID` → **GC cascade au TTL**
