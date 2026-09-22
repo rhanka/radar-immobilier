@@ -54,7 +54,7 @@ dossier). **0 pg_dump / 0 pg_restore / 0 s5cmd / 0 aws / 0 cred S3 sur le runner
 | S2 | `restore` | **G2 quiesce** puis **G1 Job rollback** (pg_dump préprod → bucket) puis **Job restore** (fetch **self-select** du dump frais + `pg_restore --clean --if-exists --single-transaction`). 0 S3/DB runner. | préprod (Jobs) |
 | S2c | `migrate` | Job `node dist/db/migrate.js` (image préprod exacte) = test iso-prod. | préprod (Job) |
 | S3/S4 | `copy-docs` | **Job radar-api aws-sdk** (Option A, `docs-sync-prod-to-preprod`) : pré-check GET prod fail-closed + boucle `CopyObject` server-side additif **+ `GrantFullControl`** (→ canonical préprod). Identité prod-owner éphémère `radar-docs-src-preprod` (GC ownerRef). DRY : copie NON jouée (0 S3 runner). | préprod (Job) |
-| S3b | `recon` | **Job aws s3 sync --dryrun** (verdict-only) : dest ⊇ src → exit 0, sinon exit 1. Écrit un sentinel LOCAL `recon.ok.json` (verdict, PAS de contenu). | préprod (Job) |
+| S3b | `recon` | **Job DIFF LIST-only** (verdict-only, 0 HEAD/GET) : dual `s3api list-objects-v2` src+dst, compare **Key+Size** (ETag ignoré : docs content-addressed par sha ⇒ robuste au re-chunk multipart) → dest ⊇ src → exit 0, sinon exit 1. Écrit un sentinel LOCAL `recon.ok.json` (verdict). | préprod (Job) |
 | S3c | `precheck-runs` | **Job aws s3api list runs/** (verdict-only) : `runs/` vide → exit 1. | préprod (Job) |
 | S5 | `flip` | `kubectl set env deploy/radar-api GEO_DOCUMENTS_REPOINT-` (défaut OFF = iso-prod, réversible). | préprod (kubectl) |
 | U | `unquiesce` | scale-back aux replicas enregistrés + `rollout status` ; restaure suspend. `if: always()`, sans CONFIRM. | préprod (kubectl) |
@@ -112,8 +112,8 @@ aucun `AWS_*` ni secret S3/DB côté runner. Plus d'install `s5cmd`/postgresql-c
 | `radar-db-credentials` | restore, rollback, migrate | `POSTGRES_USER/PASSWORD/DB` (user préprod `radar` = superuser → `--clean` OK) | libpq PG* du pg_restore/pg_dump. |
 | `radar-docs-src-preprod` **(ÉPHÉMÈRE)** | **docs-sync UNIQUEMENT** (`docs-sync-prod-to-preprod`) | `S3_ACCESS_KEY`/`S3_SECRET_KEY` (identité **prod-owner** immo-docs-prod) | LECTURE docs PROD + rw préprod + CopyObject. **Créé par k8s** (ownerRef=Job) / **GC cascade au TTL** ; la CI n'y touche jamais. **Jamais référencé par les Jobs de check** (sinon CreateContainerConfigError). |
 | `radar-backups-reader-preprod` | **Job freshness (S1)** | `S3_ACCESS_KEY`/`S3_SECRET_KEY` | RO-reader PERSISTANT du bucket backups (LIST/HEAD). Var `FRESHNESS_CHECK_SECRET`. |
-| `radar-s3-credentials` | **Jobs recon (S3b) + runs/ (S3c, prod & préprod)** + migrate/refresh | `S3_ACCESS_KEY`/`S3_SECRET_KEY` | PERSISTANT, LIST prod+préprod docs (0 changement de clé) + S3 applicatif. Var `CHECK_DOCS_SECRET`. |
-| `radar-scrape-s3-credentials` | refresh | `SCRAPE_S3_*` | écriture PV scrape. |
+| `radar-docs-s3-credentials` | **migrate (S2c) + refresh (S6)** | `DOCS_S3_ACCESS_KEY`/`DOCS_S3_SECRET_KEY` | creds S3 applicatifs — **aligné sur `radar-refresh-pv` QUI MARCHE (#738)** (l'ancien défaut `radar-s3-credentials` a un access-key bidon, `radar-scrape-s3-credentials` est absent en préprod = RUN blocker corrigé). Vars `S3_SECRET`/`SCRAPE_S3_SECRET`. |
+| `radar-s3-credentials` **(⚠ access-key bidon, cf. QA#6)** | Jobs recon (S3b) + runs/ (S3c) — via `CHECK_DOCS_SECRET` | `S3_ACCESS_KEY`/`S3_SECRET_KEY` | LIST prod+préprod docs. **DRY#4 a réussi avec `radar-docs-reader-preprod`** (RO-reader) → défaut `CHECK_DOCS_SECRET` à trancher (cf. QA#6). |
 
 > **0 Python, 0 image nouvelle non validée.** Runner : kubectl + curl. Jobs :
 > `postgis/postgis:16-3.4` (pg_dump/pg_restore 16) + `amazon/aws-cli` (LIST/HEAD/
@@ -189,6 +189,13 @@ pendant que k8s le crée. **La CI ne crée / ne lit / ne supprime AUCUN secret**
    par objet) ; sinon l'API préprod pourrait 403 sur les objets copiés (à traiter
    avec i-infra). `forcePathStyle` par défaut `true` (`DOCS_S3_FORCE_PATH_STYLE`).
 5. **user préprod `radar` superuser** (pour `pg_restore --clean --if-exists`) — à confirmer.
+6. **Secret des Jobs de CHECK (recon/runs).** Défaut `CHECK_DOCS_SECRET=radar-s3-credentials`
+   — or **k8s LIVE dit que `radar-s3-credentials/S3_ACCESS_KEY` est BIDON** (seul S6
+   le lisait, corrigé) et **DRY#4 a fait passer recon+runs avec `radar-docs-reader-preprod`**
+   (RO-reader). → **À trancher** : basculer le défaut `CHECK_DOCS_SECRET` sur
+   `radar-docs-reader-preprod` (LIVE-confirmé) plutôt que `radar-s3-credentials`
+   (bidon). Non changé ici (hors scope du fix S6/migrate demandé) mais overridable
+   via `CHECK_DOCS_SECRET` ; sinon recon/runs échoueraient au RUN sans override.
 
 ## MEDIUM 2 / MEDIUM 3
 

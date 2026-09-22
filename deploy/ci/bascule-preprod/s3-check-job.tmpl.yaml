@@ -103,18 +103,20 @@ spec:
                   ;;
                 recon)
                   # DIFF LIST-only (0 HEAD/GET) : dual list-objects-v2 (aws-cli auto-
-                  # pagine et agrège), compare Key+Size+ETag (rendus SANS HEAD) → un
-                  # « dest ⊇ src » fort. awk -F'\t' (clés S3 peuvent avoir des espaces).
+                  # pagine et agrège), compare Key+Size (rendus SANS HEAD) → dest ⊇ src.
+                  # ETag VOLONTAIREMENT ignoré (docs content-addressed par sha : même
+                  # key = même contenu ; l'ETag re-chunke en multipart via CopyObject →
+                  # faux PENDING). awk -F'\t' (clés S3 peuvent avoir des espaces).
                   se=/tmp/recon-src-err.txt; de=/tmp/recon-dst-err.txt
                   if ! aws "${common[@]}" s3api list-objects-v2 --bucket "$CHECK_SRC_BUCKET" ${CHECK_PREFIX:+--prefix "$CHECK_PREFIX"} \
-                        --query 'Contents[].[Key,Size,ETag]' --output text > /tmp/recon-src.txt 2>"$se"; then
+                        --query 'Contents[].[Key,Size]' --output text > /tmp/recon-src.txt 2>"$se"; then
                     echo "[check recon] LIST src ECHOUE (config/cred/endpoint) : $(tr '\n' ' ' < "$se" | tail -c 300)"; exit 2; fi
                   if ! aws "${common[@]}" s3api list-objects-v2 --bucket "$CHECK_DST_BUCKET" ${CHECK_PREFIX:+--prefix "$CHECK_PREFIX"} \
-                        --query 'Contents[].[Key,Size,ETag]' --output text > /tmp/recon-dst.txt 2>"$de"; then
+                        --query 'Contents[].[Key,Size]' --output text > /tmp/recon-dst.txt 2>"$de"; then
                     echo "[check recon] LIST dst ECHOUE (config/cred/endpoint) : $(tr '\n' ' ' < "$de" | tail -c 300)"; exit 2; fi
-                  miss=$(awk -F'\t' 'NR==FNR{if($1!=""){seen[$1]=1;m[$1]=$2 FS $3}next} { if($1!=""){ if(!($1 in seen)||m[$1]!=($2 FS $3)) c++ } } END{print c+0}' /tmp/recon-dst.txt /tmp/recon-src.txt)
-                  if [ "${miss:-0}" -gt 0 ]; then echo "[check recon] PENDING — $miss objet(s) src absent(s)/differents (Key/Size/ETag) en dst (dest NE contient PAS src)"; exit 1; fi
-                  echo "[check recon] OK — dest contient src (DIFF LIST-only Key+Size+ETag, 0 HEAD/GET)"; exit 0
+                  miss=$(awk -F'\t' 'NR==FNR{if($1!=""){seen[$1]=1;sz[$1]=$2}next} { if($1!=""){ if(!($1 in seen)||sz[$1]!=$2) c++ } } END{print c+0}' /tmp/recon-dst.txt /tmp/recon-src.txt)
+                  if [ "${miss:-0}" -gt 0 ]; then echo "[check recon] PENDING — $miss objet(s) src absent(s)/differents (Key/Size) en dst (dest NE contient PAS src)"; exit 1; fi
+                  echo "[check recon] OK — dest contient src (DIFF LIST-only Key+Size, 0 HEAD/GET)"; exit 0
                   ;;
                 runs)
                   re=/tmp/runs-err.txt
