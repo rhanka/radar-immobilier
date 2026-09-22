@@ -1,0 +1,89 @@
+# TRANSVERSE PRA — CronJob backup DB PROD, NATIF (0 python). Code committé (OPS-3) ; apply = kubectl apply owner-direct
+#   (ns prod radar-immobilier). Comble le trou PRA prod (aucun backup déployé aujourd'hui).
+# Chemin données 100% cluster/S3 : dump → radar-immobilier-backups-preprod (S3, immo-owned). Le runner GitHub ne GET
+#   JAMAIS le contenu (PII/Loi 25). Secrets référencés par NOM, matérialisés du .env au GO (radar-db-ro-prod,
+#   radar-pra-admin-prod) — NON committés en clair (hardening étape-2 = SealedSecrets).
+#
+# HARD-GATE RO : conteneur dump = user DB prod RO STRICT (SELECT-only / rôle pg_read_all_data) via secretKeyRef
+#   radar-db-ro-prod (rôle provisionné par le Job db-ro-role-provision) — JAMAIS radar-db-credentials applicatif (full).
+# 0 PYTHON : dump = image postgis/postgis:16-3.4 (DÉJÀ dans le cluster, a pg_dump) ; upload = image radar-api déjà
+#   en cluster (Node + @aws-sdk PutObject) — 0 nouvelle image.
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: radar-db-backup-prod
+  namespace: radar-immobilier
+  labels: { app.kubernetes.io/name: radar-immobilier, app.kubernetes.io/part-of: sentropic, role: pra-backup }
+spec:
+  schedule: "*/5 * * * *"      # fixé i-cond : déclencheur bascule T1 (le CI un-suspend → run ≤5 min → HEAD dump frais → re-suspend)
+  suspend: true                # PAR DÉFAUT suspendu : ce cronjob ne fait PAS de PRA régulier (= étape-2 #743) ; il sert le trigger bascule
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  startingDeadlineSeconds: 600
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 3600
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels: { app.kubernetes.io/name: radar-immobilier, role: pra-backup }
+        spec:
+          restartPolicy: Never
+          securityContext: { runAsNonRoot: true, runAsUser: 1001, runAsGroup: 1001, fsGroup: 1001, seccompProfile: { type: RuntimeDefault } }
+          volumes:
+            - { name: work, emptyDir: { sizeLimit: 8Gi } }
+            - { name: scratch, emptyDir: { sizeLimit: 256Mi } }
+          initContainers:
+            # DUMP natif : pg_dump custom depuis un user RO strict → /work/backup.dump (aucun réseau sortant hors DB prod).
+            - name: dump
+              image: postgis/postgis:16-3.4    # déjà présent/validé dans le cluster (= radar-postgres), a pg_dump
+              command: ["/bin/sh","-ceu"]
+              args:
+                - |
+                  # ASSERT DB (i-cond) : refuse de dumper si la DB connectée != EXPECTED_DATABASE (garde-fou natif, sans backup.py).
+                  DB=$(/usr/lib/postgresql/16/bin/psql -tAc 'select current_database()' | tr -d '[:space:]')
+                  [ "$DB" = "$EXPECTED_DATABASE" ] || { echo "ABORT: db connectée=$DB != EXPECTED_DATABASE=$EXPECTED_DATABASE" >&2; exit 1; }
+                  # env libpq (PGHOST/PGUSER/PGPASSWORD/PGDATABASE), pas d'URI.
+                  /usr/lib/postgresql/16/bin/pg_dump --format=custom --no-owner --no-privileges --file=/work/backup.dump
+              env:
+                - { name: PGHOST, value: "radar-postgres" }
+                - { name: PGPORT, value: "5432" }
+                - { name: EXPECTED_DATABASE, value: "radar" }   # fixé i-cond (owner confirme à l'apply que la DB prod = radar)
+                - { name: PGUSER,     valueFrom: { secretKeyRef: { name: "radar-db-ro-prod", key: POSTGRES_USER } } }   # RO SELECT-only (immo/owner)
+                - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: "radar-db-ro-prod", key: POSTGRES_PASSWORD } } }
+                - { name: PGDATABASE, valueFrom: { secretKeyRef: { name: "radar-db-ro-prod", key: POSTGRES_DB } } }
+              securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: ["ALL"] } }
+              volumeMounts: [ { name: work, mountPath: /work } ]
+          containers:
+            # UPLOAD : image radar-api DÉJÀ présente/validée en cluster (Node + @aws-sdk) → PutObject. 0 NOUVELLE image (supply-chain), 0 python.
+            # (Réponse à ta demande : pas besoin d'image s5cmd dédiée ; on réutilise radar-api. Bucket dump immo-owned, jamais un bucket servi.)
+            - name: upload
+              image: "ghcr.io/rhanka/radar-api@sha256:cb2ab4ec8bde643d0b7d0799b7c737f007f1ba7dd2f54392221275e042c22ac8"   # digest prod MESURÉ, pinné (OPS-3, immunisé roll CD) ; re-pin en maintenance si l'image prod avance nettement
+              command: ["node","-e"]
+              args:
+                - |
+                  const fs=require('fs');
+                  const {S3Client,PutObjectCommand}=require('@aws-sdk/client-s3');
+                  const f='/work/backup.dump', sz=fs.statSync(f).size;
+                  const db=process.env.EXPECTED_DATABASE;   // convention clé : contient EXPECTED_DATABASE (=radar) + suffixe .dump
+                  const key='postgres/prod/sets/'+new Date().toISOString().replace(/[:.]/g,'-')+'/'+db+'.dump';
+                  const c=new S3Client({endpoint:process.env.S3_ENDPOINT,region:process.env.AWS_REGION,forcePathStyle:false,
+                    credentials:{accessKeyId:process.env.AWS_ACCESS_KEY_ID,secretAccessKey:process.env.AWS_SECRET_ACCESS_KEY}});
+                  c.send(new PutObjectCommand({Bucket:process.env.BACKUP_BUCKET,Key:key,Body:fs.createReadStream(f),ContentLength:sz}))
+                    .then(()=>console.log('uploaded s3://'+process.env.BACKUP_BUCKET+'/'+key+' ('+sz+' bytes)'))
+                    .catch(e=>{console.error('ERR',e.name,e.message);process.exit(1);});
+              env:
+                - { name: NODE_PATH, value: "/workspace/node_modules" }
+                - { name: S3_ENDPOINT, value: "https://s3.bhs.io.cloud.ovh.net" }
+                - { name: AWS_REGION, value: "bhs" }
+                - { name: BACKUP_BUCKET, value: "radar-immobilier-backups-preprod" }
+                - { name: EXPECTED_DATABASE, value: "radar" }   # convention clé : postgres/prod/sets/<ts>/radar.dump
+                - { name: NODE_OPTIONS, value: "--dns-result-order=ipv4first" }
+                # Cred = radar-pra-admin, déposé comme SECRET k8s en ns prod (bundlé GO owner, depuis .env via subshell).
+                - { name: AWS_ACCESS_KEY_ID,     valueFrom: { secretKeyRef: { name: "radar-pra-admin-prod", key: S3_ACCESS_KEY } } }
+                - { name: AWS_SECRET_ACCESS_KEY, valueFrom: { secretKeyRef: { name: "radar-pra-admin-prod", key: S3_SECRET_KEY } } }
+              securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: ["ALL"] } }
+              volumeMounts: [ { name: work, mountPath: /work }, { name: scratch, mountPath: /tmp } ]
