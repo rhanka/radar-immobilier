@@ -36,7 +36,7 @@ Three distinct roles (executor ≠ certifier; i-infra's live-access limits; inde
 
 Set once: `PNS=radar-immobilier-preprod ; CJNS=radar-immobilier ; CJ=radar-db-backup-prod`.
 
-## [a] token identity = radar-ci-trigger-prod (NOT radar-ci-dump-prod) — CAPTURE i-cond
+## [a] token identity = radar-ci-trigger-prod (NOT radar-ci-dump-prod) — CAPTURE i-cond → CERTIF i-infra
 
     date -u +%FT%TZ
     kubectl --kubeconfig "$DUMP_KUBECONFIG" auth whoami -o yaml   # expect SA radar-ci-trigger-prod
@@ -68,11 +68,11 @@ Set once: `PNS=radar-immobilier-preprod ; CJNS=radar-immobilier ; CJ=radar-db-ba
 - docs grant: PUT to docs-preprod OK, PUT to docs-prod DENIED (preprod-only, not bucket-owner-full-control).
 - i-cond captures only the Job `.status` verdicts that consume these; the ACL/grant proof is CAPTURED by k8s and CERTIFIED by i-infra.
 
-## [e] KUBE_CONFIG_DATA_BASCULE_PREPROD = radar-ci-bascule-preprod — CAPTURE i-cond
+## [e] KUBE_CONFIG_DATA_BASCULE_PREPROD = radar-ci-bascule-preprod — CAPTURE i-cond → CERTIF i-infra
 
     kubectl auth whoami -o yaml   # preprod kubeconfig → expect SA radar-ci-bascule-preprod
 
-## [f] freshness GREEN + re-suspend after (always) — CAPTURE i-cond (verdict) + k8s (fresh-key meta)
+## [f] freshness GREEN + re-suspend after (always) — CAPTURE i-cond (verdict) + k8s (fresh-key meta) → CERTIF i-infra
 
     cat <run-dir>/T1.txt <run-dir>/T1_EPOCH.txt          # T1 boundary persisted by S1
     kubectl -n "$PNS" get job radar-bascule-freshness -o jsonpath='{.status}'   # EXPECT: succeeded
