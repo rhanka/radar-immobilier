@@ -171,7 +171,7 @@ function jobDefaults() {
     //  - freshness (S1)          : RO-reader du bucket backups (minté par k8s) ;
     //  - recon + runs/ (S3b/S3c) : LIST prod+préprod docs (cred applicative).
     FRESHNESS_CHECK_SECRET: opt("FRESHNESS_CHECK_SECRET", "radar-backups-reader-preprod"),
-    CHECK_DOCS_SECRET: opt("CHECK_DOCS_SECRET", "radar-s3-credentials"),
+    CHECK_DOCS_SECRET: opt("CHECK_DOCS_SECRET", "radar-docs-reader-preprod"),
     // Secret docs PROD-READ ÉPHÉMÈRE (Option A, co-val i-infra) : identité
     // PROPRIÉTAIRE des objets docs prod (immo-docs-prod), montée en préprod dans un
     // secret dédié `radar-docs-src-preprod` — clés S3_ACCESS_KEY/S3_SECRET_KEY.
