@@ -2,36 +2,52 @@
 // =============================================================================
 // bascule.mjs — BASCULE PROD → PRÉPROD (« iso-prod »), CLI natif, 0 Python.
 //
-// Orchestre, en Node pur (aucune IA au runtime), la séquence S0→S7 fournie par
-// i-infra : sauvegarde prod → restauration préprod → migrations → copie docs →
-// recon → flip serving → refresh différentiel → smoke. Rejouable par la CI immo
-// / l'owner SANS IA (OPS-3), avec des gardes fail-closed en Node.
+// Orchestre, en Node pur (aucune IA au runtime), la séquence S0→S7 : dump prod
+// (déclencheur) → restore préprod → migrations → copie docs → recon → flip
+// serving → refresh différentiel → smoke. Rejouable par la CI immo / l'owner
+// SANS IA (OPS-3), avec des gardes fail-closed en Node.
 //
-// Le CLI ne fait qu'INVOQUER les outils natifs via child_process — il ne parle
-// jamais SQL/S3 lui-même : pg_dump / pg_restore (postgresql-client 16), s5cmd
-// (copie + diff/recon server-side), kubectl (flip + Jobs migrate/refresh),
-// curl (smoke). Toute la LOGIQUE et toutes les GARDES sont ici, en Node ; le
-// workflow GitHub reste fin.
+// DATA-PLANE 100% CLUSTER-SIDE, RUNNER KUBECTL-ONLY (contrat owner + co-val
+// i-infra, NON négociable) : AUCUNE donnée PII, AUCUNE cred S3, AUCUN listing/clé
+// ne transite ni n'est lu par le runner GitHub (OVH n'a pas de scope S3 list-only
+// → toute cred S3 runner pourrait GET le dump PII → 0 cred S3 runner). Le runner
+// ne fait QUE du kubectl (2 kubeconfigs : préprod par défaut + PROD pour le seul
+// trigger dump) + `curl` /health (smoke, ni S3 ni PII) :
+//   - kubectl : patch cronjob (suspend), dispatch/OBSERVE Jobs (.status SEUL,
+//     JAMAIS `kubectl logs`), scale (quiesce), flip (set-env).
+// TOUT l'accès object-store ET DB (fetch/upload/copie/LIST/HEAD/dryrun) vit dans
+// des Jobs PRÉPROD verdict-only (creds via secretKeyRef in-cluster, jamais d'URI
+// mot-de-passe ; ils ne renvoient qu'un exit code). Le runner reste PII-free, ses
+// LOGS compris. dump prod = CronJob owner (`radar-db-backup-prod`, HORS de ce
+// patch) ; restore/rollback/docs-sync + checks freshness/recon/runs = patrons ici.
 //
 //   Sous-commandes :
-//     preflight    S0  — prérequis binaires + secrets + EXPECTED_DATABASE.
-//     dump         S1  — pg_dump prod (custom, --no-owner --no-privileges), T0.
-//     restore      S2  — GARDES puis pg_restore préprod (rollback d'abord).
+//     preflight    S0  — binaires runner (kubectl/node/curl) + params + EXPECTED_DATABASE.
+//     dump         S1  — DÉCLENCHEUR T1 : patch CronJob prod suspend=false (via
+//                        kubeconfig PROD dédié DUMP_KUBECONFIG — les 2 SEULS
+//                        kubectl prod), puis Job freshness (poll interne, verdict),
+//                        re-suspend. 0 pg_dump/0 S3 runner.
+//     restore      S2  — GARDES (G2 quiesce, G1 Job rollback) puis Job restore
+//                        (fetch self-select + pg_restore). 0 pg_restore/0 S3 runner.
 //     migrate      S2c — Job in-cluster `node dist/db/migrate.js` (patron 36).
-//     copy-docs    S3  — s5cmd sync server-side (additif) ; --dry pour le DRY.
-//     recon        S3b — s5cmd --dry-run sync, assert sortie VIDE (dest ⊇ src).
+//     copy-docs    S3  — Job in-cluster aws-cli (pré-check GET + s3 sync additif).
+//     recon        S3b — Job aws s3 sync --dryrun (verdict-only, dest ⊇ src).
+//     precheck-runs S3c — Job aws s3api list runs/ (verdict-only, gate MEDIUM3).
 //     flip         S5  — kubectl set env deploy/radar-api GEO_DOCUMENTS_REPOINT-
 //     refresh      S6  — Job in-cluster worker-live.js en mode delta (PAS --all).
 //     smoke        S7  — curl préprod/health (db.ok + objectStore.ok).
 //
 //   GARDES fail-closed (clé OPS-3) :
-//     G1  restore refuse de partir sans dump rollback préprod réussi d'abord.
+//     G1  restore refuse de partir sans Job rollback préprod réussi (pg_dump
+//         préprod → bucket, DURABLE). Fail-closed : pas de restore sans rollback.
 //     G2  restore refuse si les consommateurs préprod ne sont pas quiesce
-//         (Deployments scale 0 + CronJobs suspend).
+//         (Deployments scale 0 + CronJobs suspend + 0 Job batch NON-bascule actif).
 //     G3  CONFIRM explicite (input workflow_dispatch, ex. iso-prod-<date>) —
 //         sans quoi aucune étape mutante ne s'exécute.
-//     G4  flip ne s'exécute QUE si recon (S3b) a produit un sentinel exit 0.
-//     +   EXPECTED_DATABASE : contrôle POSITIF de la DB source avant dump.
+//     G4  flip ne s'exécute QUE si recon (S3b, Job verdict) est vert (sentinel + re-run).
+//     +   EXPECTED_DATABASE : contrôle POSITIF hors runner — clé du dump frais
+//         (Jobs freshness/restore) ⊇ EXPECTED_DATABASE, et header du custom-archive
+//         (`;   dbname:`) == EXPECTED_DATABASE vérifié DANS le Job restore.
 //
 //   AUCUNE exécution réelle n'est faite par ce fichier au moment du build ;
 //   il est piloté par .github/workflows/bascule-preprod.yml (workflow_dispatch).
@@ -42,7 +58,6 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
-  statSync,
   writeFileSync,
 } from "node:fs";
 import { join, resolve } from "node:path";
@@ -115,20 +130,47 @@ function assertConfirm() {
   log(`GARDE G3 OK — CONFIRM='${confirm}'`);
 }
 
-// ── env libpq par rôle (jamais d'URI mot-de-passe en clair) ─────────────────
-// prod   : PROD_PG* (RO)   → PG* pour l'enfant.
-// preprod: PREPROD_PG*     → PG* pour l'enfant.
-function pgEnv(role) {
-  const p = role === "prod" ? "PROD_" : "PREPROD_";
+// ── Défauts partagés des Jobs data-plane (images + secrets in-cluster) ──────
+// Le runner ne touche JAMAIS à ces creds NI à S3 : tout l'accès object-store
+// (fetch/upload/check/recon/runs) vit dans des Jobs préprod, creds résolus au
+// runtime via secretKeyRef. Ici on ne rend que des NOMS de secret + des
+// images/params NON secrets. Overridables par env pour la QA / autres clusters.
+function jobDefaults() {
   return {
-    PGHOST: req(`${p}PGHOST`),
-    PGPORT: opt(`${p}PGPORT`, "5432"),
-    PGUSER: req(`${p}PGUSER`),
-    PGPASSWORD: req(`${p}PGPASSWORD`),
-    PGDATABASE: req(`${p}PGDATABASE`),
-    // Sûreté réseau : refuse une connexion en clair si le serveur l'exige,
-    // et borne le temps de connexion pour ne pas pendre le runner.
-    PGCONNECT_TIMEOUT: opt(`${p}PGCONNECT_TIMEOUT`, "15"),
+    NAMESPACE: opt("PREPROD_NAMESPACE", "radar-immobilier-preprod"),
+    // Images natives déjà validées (0 image Python). postgis = pg_dump/pg_restore 16 ;
+    // amazon/aws-cli (déjà pinné in-repo, cf. object-storage-inventory) = LIST/HEAD/cp/sync
+    // scriptable (0 s5cmd runner ni Job — un seul outil S3 in-cluster, image prouvée).
+    DUMP_IMAGE: opt("BASCULE_PG_IMAGE", "postgis/postgis:16-3.4"),
+    AWSCLI_IMAGE: opt(
+      "BASCULE_AWSCLI_IMAGE",
+      "amazon/aws-cli:2.34.53@sha256:cf53765c0de54ad3a8ea21818f1c4c845a8cf7ca87831c078a00fef244031493",
+    ),
+    // Secret DB préprod (restore/rollback/migrate) — clés POSTGRES_USER/PASSWORD/DB.
+    // user préprod `radar` = superuser → `pg_restore --clean --if-exists` OK.
+    DB_SECRET: opt("DB_SECRET", "radar-db-credentials"),
+    // Secret PRA = S3 SEULEMENT (RW bucket backups) — clés S3_ACCESS_KEY/S3_SECRET_KEY.
+    // PAS de POSTGRES_* (mesure k8s). Owner/immo-délivré, HORS de ce patch.
+    PRA_SECRET: opt("PRA_SECRET", "radar-pra-admin"),
+    // Secret docs PRÉPROD (identité de l'API préprod) — clés DOCS_S3_ACCESS_KEY/
+    // DOCS_S3_SECRET_KEY. Utilisé pour le gate runs/ PREPROD (état vu par l'API).
+    DOCS_SECRET: opt("DOCS_SECRET", "radar-docs-s3-credentials"),
+    // Secret docs PROD-READ ÉPHÉMÈRE (Option A, co-val i-infra) : identité
+    // PROPRIÉTAIRE des objets docs prod (immo-docs-prod), montée en préprod dans un
+    // secret dédié `radar-docs-src-preprod` — clés S3_ACCESS_KEY/S3_SECRET_KEY.
+    // CRÉÉ par k8s au GO (le runner ne l'a jamais) et GC par ownerReference du Job
+    // docs-sync (ttl auto-clean) → la CI ne crée/lit/supprime AUCUN secret.
+    // SPANNING read prod + rw préprod : docs-sync (copie), recon, advisory runs/ prod.
+    DOCS_SYNC_READ_SECRET: opt("DOCS_SYNC_READ_SECRET", "radar-docs-src-preprod"),
+    // Grantee canonical id radar-docs PRÉPROD (GrantFullControl sur les objets
+    // copiés → lisibles par l'API préprod, sinon 403 propagé). Vide → pas de grant.
+    DOCS_SYNC_GRANTEE: opt("DOCS_SYNC_GRANTEE", ""),
+    // Hôte service Postgres préprod (libpq côté Job, jamais côté runner).
+    PGHOST: opt("PREPROD_PGHOST_SERVICE", "radar-postgres"),
+    // Endpoint object-store (BHS) + région — rendus dans les Jobs (non secrets).
+    S3_ENDPOINT: req("BHS"),
+    S3_REGION: opt("S3_REGION", ""),
+    TTL_SECONDS: opt("JOB_TTL_SECONDS", "3600"),
   };
 }
 
@@ -139,156 +181,100 @@ function workdir() {
   return dir;
 }
 
-// ── s5cmd : env AWS_* (identité spanning) + endpoint BHS ────────────────────
-function s5Env() {
-  return {
-    AWS_ACCESS_KEY_ID: req("AWS_ACCESS_KEY_ID"),
-    AWS_SECRET_ACCESS_KEY: req("AWS_SECRET_ACCESS_KEY"),
-    AWS_REGION: opt("AWS_REGION", ""),
-  };
+// =============================================================================
+// classifyJobStatus — fonction PURE (testable) : interprète le `.status` d'un
+// Job k8s (kubectl get job -o json) en verdict pass/fail/en-cours. C'EST la
+// SEULE information que le runner lit d'un Job : JAMAIS `kubectl logs` ni le
+// stdout du pod (qui portent clés/tables/listings/contenu). Runner PII-free,
+// logs runner compris. backoffLimit 0 → 1 pod : succeeded>=1 = OK, failed>=1 = KO.
+// =============================================================================
+export function classifyJobStatus(status) {
+  const s = status || {};
+  const succeeded = Number(s.succeeded ?? 0);
+  const failed = Number(s.failed ?? 0);
+  const active = Number(s.active ?? 0);
+  if (Number.isFinite(succeeded) && succeeded >= 1) return { done: true, ok: true, state: "succeeded" };
+  if (Number.isFinite(failed) && failed >= 1) return { done: true, ok: false, state: "failed" };
+  return { done: false, ok: false, state: active > 0 ? "active" : "pending" };
 }
 
 // =============================================================================
-// PRÉ-CHECK runs/ — garde fail-closed « mémoire de collecte peuplée »
+// dispatchS3Check — dispatche un Job de CHECK S3 verdict-only (s3-check-job).
 //
-// Le refresh S6 (worker-live delta) NE re-télécharge PAS le back-catalogue tant
-// que l'état object-store `runs/{source}/collected-urls.jsonl` est présent dans
-// le bucket qu'il LIT (= PREPROD_DOCS, APRÈS la copie S3). Si le préfixe `runs/`
-// est ENTIÈREMENT absent, `loadCollectedUrls` renvoie « rien de connu » pour
-// chaque source → fail-open → rescrape complet (le rescrape des 528 qu'a vu
-// l'owner). Cette garde LIT (s5cmd ls, read-only) le préfixe `runs/` du bucket
-// cible et refuse S6 dans ce seul cas :
-//   - `runs/` VIDE/ABSENT                    → die/exit 1 (rescrape imminent).  [hard-fail]
-//   - source sans `collected-urls.jsonl`     → WARN : refetch borné self-heal
-//                                              de CETTE source (bootstrap depuis
-//                                              ses manifests) — acceptable.     [pas hard-fail]
+// Le runner NE TOUCHE PLUS S3 (0 cred S3 runner : OVH n'a pas de scope list-only,
+// donc toute cred S3 runner pourrait GET le dump PII). Les 3 vérifs S3
+// (freshness S1, recon S3b, runs/ S3c/MEDIUM3) sont des Jobs PRÉPROD qui font le
+// LIST/HEAD/--dryrun DANS le pod (cred in-cluster) et ne renvoient qu'un exit code.
 //
-// Layout lu (cf. api/src/services/sources/known-urls.ts) :
-//   runs/{source}/collected-urls.jsonl        ← mémoire cumulée par URL (cible)
-//   runs/{source}/{runId}/manifest.jsonl      ← fallback bootstrap borné
-//
-// source-gap : l'énumération des sources ACTIVES vit dans la config TS de l'app
-// (villes config-only) et n'est PAS disponible cheap à ce CLI .mjs (aucun dist
-// importable au runner). On applique donc le PLANCHER SÛR fondé sur l'état du
-// store : les « sources » sont les préfixes réellement présents sous `runs/`.
-// Repli optionnel : PRECHECK_EXPECTED_SOURCES="a,b,c" → WARN (jamais hard-fail)
-// sur les sources attendues absentes de `runs/`.
+// cred = "backups"   (radar-pra-admin, clés S3_*) pour le bucket de dumps ;
+//        "docs-prod"  (radar-docs-prod-read, clés S3_*) pour toute LECTURE du
+//                     bucket docs PROD (recon prod↔préprod, advisory runs/ prod) ;
+//        "docs"       (radar-docs-s3-credentials préprod, clés DOCS_S3_*) pour le
+//                     gate runs/ PRÉPROD (état vu par l'API préprod).
+// failClosed=false → renvoie { ok } au lieu de die (S1 doit re-suspendre AVANT
+// de trancher). Le runner ne lit que .status (via runJobFromTemplate).
 // =============================================================================
-
-// Pure (testable sans I/O) : sortie d'un `s5cmd ls s3://BUCKET/runs/` (listing
-// délimité) → noms de sources (entrées `DIR` = préfixes communs `runs/{src}/`).
-export function parseRunsDirListing(stdout) {
-  const sources = [];
-  for (const raw of (stdout || "").split("\n")) {
-    const line = raw.trim();
-    if (!line) continue;
-    const m = line.match(/^DIR\s+(.+?)\/?$/);
-    if (m) sources.push(m[1].replace(/\/+$/, ""));
-  }
-  return sources;
-}
-
-// Pure : sortie d'un `s5cmd ls s3://BUCKET/runs/*/collected-urls.jsonl` → noms
-// de sources possédant l'objet d'état (on extrait `{src}` de la clé complète).
-export function parseCollectedUrlsListing(stdout) {
-  const sources = [];
-  for (const raw of (stdout || "").split("\n")) {
-    const line = raw.trim();
-    if (!line) continue;
-    const key = line.split(/\s+/).pop() || "";
-    const m = key.match(/(?:^|\/)([^/]+)\/collected-urls\.jsonl$/);
-    if (m) sources.push(m[1]);
-  }
-  return sources;
-}
-
-// Pure : classe le résultat d'un `s5cmd ls` du préfixe `runs/`. s5cmd renvoie un
-// code non nul + « no object found » quand le préfixe est vide → c'est le cas
-// hard-fail (runs/ absent), PAS une erreur d'infra. Tout autre code non nul =
-// erreur d'infra (creds/endpoint) → non vérifiable (fail-closed distinct).
-export function classifyRunsListing(res) {
-  const lines = (res?.stdout || "").split("\n").map((s) => s.trim()).filter(Boolean);
-  if ((res?.status ?? 0) === 0) return { empty: lines.length === 0, error: false };
-  const blob = `${res?.stderr || ""}\n${res?.stdout || ""}`;
-  if (/no object found/i.test(blob)) return { empty: true, error: false };
-  return { empty: false, error: true };
-}
-
-// Lister s5cmd par défaut (read-only). `req`/`s5Env` restent obligatoires sur un
-// run réel ; le paramètre `lister` de assertRunsMemory est un point d'injection
-// pour le self-test (sorties s5cmd mockées, aucun appel réseau).
-function defaultRunsLister() {
-  const bhs = req("BHS");
-  const env = s5Env();
-  return (target) => run("s5cmd", ["--endpoint-url", bhs, "ls", target], { env, capture: true, allowFail: true });
-}
-
-// GARDE fail-closed « mémoire de collecte peuplée » (read-only, s5cmd ls).
-// advisory=true (cible PROD_DOCS, prédiction précoce) → ne bloque JAMAIS (WARN).
-export function assertRunsMemory({ bucket, advisory = false, label, lister }) {
-  section(`pré-check runs/ (mémoire de collecte) — cible ${label}`);
-  const ls = lister || defaultRunsLister();
-  // 1) préfixes source + vacuité (listing délimité, cheap).
-  const listing = ls(`s3://${bucket}/runs/`);
-  const cls = classifyRunsListing(listing);
-  if (cls.error) {
-    const msg = `pré-check runs/ — listing 's3://${bucket}/runs/' a échoué (creds/endpoint ?) : impossible de garantir le delta. ${(listing.stderr || "").trim().slice(0, 160)}`;
-    if (advisory) { warn(`${msg} [advisory — non bloquant]`); return; }
-    die(msg);
-  }
-  if (cls.empty) {
-    const msg = `pré-check runs/ — préfixe 'runs/' VIDE/ABSENT dans s3://${bucket} : mémoire de collecte absente → le refresh S6 RESCRAPE l'intégralité (rescrape complet imminent).`;
-    if (advisory) { warn(`${msg} [advisory — non bloquant, cible ${label}]`); return; }
-    die(msg);
-  }
-  const sources = [...new Set(parseRunsDirListing(listing.stdout))].sort();
-  // 2) présence de collected-urls.jsonl par source (listing filtré).
-  const stateRes = ls(`s3://${bucket}/runs/*/collected-urls.jsonl`);
-  let withState = [];
-  if ((stateRes.status ?? 0) === 0) {
-    withState = parseCollectedUrlsListing(stateRes.stdout);
-  } else if (!/no object found/i.test(`${stateRes.stderr || ""}\n${stateRes.stdout || ""}`)) {
-    warn(`pré-check runs/ — listing '.../collected-urls.jsonl' a échoué (${(stateRes.stderr || "").trim().slice(0, 120)}) : présence par-source non vérifiée.`);
-  }
-  const withStateSet = new Set(withState);
-  const missing = sources.filter((s) => !withStateSet.has(s));
-  const withStateAmongFound = sources.length - missing.length;
-  log(`pré-check runs/ — ${sources.length} préfixe(s) source sous 'runs/', ${withStateAmongFound} avec collected-urls.jsonl, ${missing.length} sans.`);
-  if (missing.length) {
-    warn(`pré-check runs/ — ${missing.length} source(s) sans collected-urls.jsonl (refetch borné self-heal, PAS de hard-fail) : ${missing.slice(0, 50).join(", ")}${missing.length > 50 ? " …" : ""}`);
-  } else {
-    log("pré-check runs/ — toutes les sources présentes ont leur collected-urls.jsonl.");
-  }
-  // Repli optionnel : sources ACTIVES attendues fournies par l'opérateur (source-gap).
-  const expected = opt("PRECHECK_EXPECTED_SOURCES", "").split(",").map((s) => s.trim()).filter(Boolean);
-  if (expected.length) {
-    const foundSet = new Set(sources);
-    const expectedAbsent = expected.filter((s) => !foundSet.has(s));
-    log(`pré-check runs/ — overlay sources attendues : ${expected.length} fournie(s), ${expectedAbsent.length} absente(s) de 'runs/'.`);
-    if (expectedAbsent.length) {
-      warn(`pré-check runs/ — source(s) attendue(s) ABSENTE(s) de 'runs/' (refetch borné de ces sources) : ${expectedAbsent.slice(0, 50).join(", ")}${expectedAbsent.length > 50 ? " …" : ""}`);
-    }
-  }
-  log(`pré-check runs/ OK — 'runs/' peuplé : le refresh S6 fera un DELTA (pas un rescrape complet).${advisory ? " [advisory]" : ""}`);
+function dispatchS3Check({ mode, jobName, cred, params = {}, timeoutSec, failClosed = true }) {
+  const jd = jobDefaults();
+  const useS3keys = cred === "backups" || cred === "docs-prod";
+  const secret = cred === "backups" ? jd.PRA_SECRET : cred === "docs-prod" ? jd.DOCS_SYNC_READ_SECRET : jd.DOCS_SECRET;
+  return runJobFromTemplate({
+    tmpl: "s3-check-job.tmpl.yaml",
+    jobName,
+    failClosed,
+    timeoutSec,
+    vars: {
+      JOB_NAME: jobName,
+      NAMESPACE: jd.NAMESPACE,
+      AWSCLI_IMAGE: jd.AWSCLI_IMAGE,
+      CHECK_SECRET: secret,
+      CHECK_ACCESS_KEY: useS3keys ? "S3_ACCESS_KEY" : "DOCS_S3_ACCESS_KEY",
+      CHECK_SECRET_KEY: useS3keys ? "S3_SECRET_KEY" : "DOCS_S3_SECRET_KEY",
+      S3_ENDPOINT: jd.S3_ENDPOINT,
+      S3_REGION: jd.S3_REGION,
+      CHECK_MODE: mode,
+      CHECK_BUCKET: params.bucket || "",
+      CHECK_PREFIX: params.prefix || "",
+      CHECK_SRC_BUCKET: params.srcBucket || "",
+      CHECK_DST_BUCKET: params.dstBucket || "",
+      CHECK_T1_EPOCH: String(params.t1Epoch ?? "0"),
+      CHECK_EXPECTED_DATABASE: params.expectedDb || "",
+      CHECK_KEY_SUFFIX: params.keySuffix || ".dump",
+      CHECK_TIMEOUT_SEC: String(params.checkTimeoutSec ?? "0"),
+      CHECK_POLL_SEC: String(params.pollSec ?? "15"),
+      TTL_SECONDS: jd.TTL_SECONDS,
+    },
+  });
 }
 
 // =============================================================================
-// precheck-runs — sous-commande garde « mémoire de collecte » (read-only).
-// Cible par défaut = PREPROD_DOCS (bucket réellement lu par le refresh, APRÈS
-// la copie S3). --prod (ou PRECHECK_TARGET=prod) → PROD_DOCS en mode advisory
-// (prédiction précoce, non bloquant). DRY=1/--dry ne RELÂCHE PAS le gate : la
-// liste est read-only donc jouée à l'identique et le hard-fail « runs/ vide »
-// reste actif (visibilité précoce). PAS de CONFIRM (aucune mutation).
+// precheck-runs — garde « mémoire de collecte » = Job PRÉPROD verdict-only.
+//
+// MEDIUM 3 : le refresh S6 (worker-live delta) ne fait un DELTA — pas un rescrape
+// complet — que si le préfixe `runs/` (état object-store des URLs collectées) est
+// présent dans le bucket qu'il LIT. Le runner ne touchant plus S3, cette garde est
+// un Job PRÉPROD (aws s3api list, cred docs in-cluster) qui EXIT 1 si `runs/` est
+// vide/absent (ou accès refusé), EXIT 0 sinon. Le runner ne lit que .status.
+//
+// Cible défaut = PREPROD_DOCS (gate, bucket réellement lu par S6). --prod (ou
+// PRECHECK_TARGET=prod) → PROD_DOCS : advisory (prédiction précoce) rendu
+// non-bloquant par `continue-on-error` côté workflow (le Job, lui, tranche pareil).
 // =============================================================================
 function cmdPrecheckRuns() {
   const wantsProd = process.argv.includes("--prod") || opt("PRECHECK_TARGET", "") === "prod";
-  const advisory = wantsProd || opt("PRECHECK_ADVISORY", "") === "1";
-  if (opt("DRY", "") === "1" || process.argv.includes("--dry")) {
-    log("pré-check runs/ — read-only : DRY ne relâche pas le gate (identique au run réel).");
-  }
   const bucket = wantsProd ? req("PROD_DOCS") : req("PREPROD_DOCS");
-  const label = `${wantsProd ? "PROD_DOCS" : "PREPROD_DOCS"}${advisory ? " (advisory)" : ""}`;
-  assertRunsMemory({ bucket, advisory, label });
+  const label = wantsProd ? "PROD_DOCS (advisory)" : "PREPROD_DOCS (gate)";
+  section(`pré-check runs/ (mémoire de collecte) — Job in-cluster, cible ${label}`);
+  dispatchS3Check({
+    mode: "runs",
+    jobName: wantsProd ? "radar-bascule-runs-prod" : "radar-bascule-runs-preprod",
+    // prod (advisory) lit le bucket PROD → identité prod-owner ; préprod (gate)
+    // lit le bucket préprod avec l'identité de l'API préprod (état réellement vu).
+    cred: wantsProd ? "docs-prod" : "docs",
+    params: { bucket, prefix: opt("RUNS_PREFIX", "runs/") },
+    timeoutSec: Number(opt("CHECK_TIMEOUT", "180")),
+  });
+  log(`pré-check runs/ OK — 'runs/' peuplé dans ${label} (verdict Job, 0 listing runner).`);
 }
 
 // =============================================================================
@@ -296,70 +282,126 @@ function cmdPrecheckRuns() {
 // =============================================================================
 function cmdPreflight() {
   section("S0 preflight");
-  const bins = ["pg_dump", "pg_restore", "s5cmd", "node", "kubectl", "curl"];
+  // Binaires RUNNER = kubectl-only (data-plane + object-store 100% cluster-side).
+  // Plus AUCUN pg_dump/pg_restore NI s5cmd/aws sur le runner. `node` exécute ce
+  // CLI ; `curl` sert au seul smoke S7 (GET /health, ni S3 ni PII) ; `bash` pour
+  // command -v / sleep. AUCUN outil S3 côté runner.
+  const bins = ["node", "kubectl", "curl"];
   const missing = bins.filter((b) => run("bash", ["-lc", `command -v ${b}`], { capture: true, allowFail: true }).status !== 0);
   if (missing.length) die(`binaires manquants sur le runner : ${missing.join(", ")}`);
-  log(`binaires présents : ${bins.join(", ")}`);
+  log(`binaires présents (runner kubectl-only + curl smoke) : ${bins.join(", ")}`);
 
-  // pg-client 16 attendu (custom-format cross-version : dump 16 → restore 16).
-  const pv = run("pg_dump", ["--version"], { capture: true }).stdout.trim();
-  log(`pg client : ${pv}`);
-
-  // Secrets/params indispensables (présence seule — jamais la valeur).
+  // Params indispensables côté runner (présence seule — jamais la valeur). AUCUNE
+  // cred S3 ni DB sur le runner : 0 AWS_*, 0 PROD_PG*/PREPROD_PG*. Ne restent que
+  // des paramètres NON secrets rendus dans les Jobs (endpoint/buckets/DB attendue).
   const required = [
-    "EXPECTED_DATABASE",
-    "PROD_PGHOST", "PROD_PGUSER", "PROD_PGPASSWORD", "PROD_PGDATABASE",
-    "PREPROD_PGHOST", "PREPROD_PGUSER", "PREPROD_PGPASSWORD", "PREPROD_PGDATABASE",
-    "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "BHS", "PROD_DOCS", "PREPROD_DOCS",
+    "EXPECTED_DATABASE", "BHS",
+    "PROD_DOCS", "PREPROD_DOCS", "DUMP_BUCKET",
   ];
   const absent = required.filter((k) => !process.env[k]);
-  if (absent.length) die(`secrets/paramètres CI absents : ${absent.join(", ")}`);
-  log(`secrets/paramètres présents : ${required.length} clés`);
+  if (absent.length) die(`paramètres CI absents : ${absent.join(", ")}`);
+  log(`paramètres présents : ${required.length} clés (0 cred S3/DB runner)`);
 
-  // Contrôle POSITIF : la DB source déclarée == EXPECTED_DATABASE (nom DB prod).
-  if (process.env.PROD_PGDATABASE !== process.env.EXPECTED_DATABASE) {
-    die(
-      `contrôle positif KO — PROD_PGDATABASE='${process.env.PROD_PGDATABASE}' ≠ ` +
-        `EXPECTED_DATABASE='${process.env.EXPECTED_DATABASE}'. On refuse de dumper la mauvaise DB.`,
-    );
-  }
-  log("contrôle positif OK — la DB source correspond à EXPECTED_DATABASE");
+  // Contrôle POSITIF EXPECTED_DATABASE — hors runner (le runner ne parle à AUCUNE
+  // DB ni S3). Assuré fail-closed in-cluster : (a) Job freshness/restore — la clé
+  // du dump frais ⊇ EXPECTED_DATABASE ; (b) Job restore — header du custom-archive
+  // (`; dbname:`) == EXPECTED_DATABASE. Le CronJob dump owner dumpe la DB nommée
+  // EXPECTED_DATABASE (pg_dump --format=custom --no-owner --no-privileges).
+  log(`EXPECTED_DATABASE='${process.env.EXPECTED_DATABASE}' — contrôle positif assuré in-cluster (Jobs freshness/restore).`);
   log("S0 preflight OK");
 }
 
 // =============================================================================
-// S1 — dump prod : pg_dump custom, snapshot MVCC cohérent, T0 = label
+// S1 — DÉCLENCHEUR DU DUMP (T1). 0 pg_dump runner, 0 S3 runner.
+//
+// Le runner ne dumpe RIEN et ne touche PAS S3 : il DÉCLENCHE le CronJob prod
+// owner (`radar-db-backup-prod`) en le dé-suspendant (kubeconfig PROD dédié ;
+// patch name-scopé — VAP owner suspend-only), puis DISPATCHE un Job PRÉPROD de
+// FRESHNESS (cred backups in-cluster) qui POLL EN INTERNE la présence d'un dump
+// FRAIS (LastModified epoch > T1, clé ⊇ EXPECTED_DATABASE, suffixe .dump,
+// taille>0) et renvoie exit 0/non-0. Le runner ne lit que `.status` du Job
+// (JAMAIS ses logs). Il RE-SUSPEND TOUJOURS le CronJob (best-effort, kubeconfig
+// PROD), y compris si la freshness a échoué, PUIS tranche fail-closed.
+// Contrôle POSITIF EXPECTED_DATABASE : (a) clé ⊇ EXPECTED_DATABASE (freshness
+// Job), (b) header du custom-archive (Job restore). Aucune donnée ne remonte.
 // =============================================================================
 function cmdDump() {
-  section("S1 dump prod");
-  assertConfirm(); // le dump ouvre la séquence armée
+  section("S1 dump prod — DÉCLENCHEUR T1 (patch CronJob + Job freshness, 0 pg_dump/0 S3 runner)");
+  assertConfirm(); // le déclencheur ouvre la séquence armée (G3)
   const expected = req("EXPECTED_DATABASE");
-  const env = pgEnv("prod");
-  // Contrôle positif AVANT toute lecture : bonne DB source.
-  if (env.PGDATABASE !== expected) {
-    die(`GARDE source — PGDATABASE='${env.PGDATABASE}' ≠ EXPECTED_DATABASE='${expected}'`);
-  }
+  const bucket = req("DUMP_BUCKET"); // radar-immobilier-backups-preprod
+  const prefix = opt("DUMP_PREFIX", "postgres/prod/sets").replace(/^\/+|\/+$/g, "");
+  const cjNs = opt("DUMP_CRONJOB_NAMESPACE", "radar-immobilier");
+  const cj = opt("DUMP_CRONJOB", "radar-db-backup-prod");
+  const assertDbInKey = opt("DUMP_KEY_ASSERT_DB", "1") !== "0";
+  const keyMustContain = assertDbInKey ? expected : "";
+  const keySuffix = opt("DUMP_KEY_SUFFIX", ".dump");
+  const skewSec = Number(opt("FRESHNESS_SKEW_SEC", "120"));
+  const checkTimeoutSec = Number(opt("DUMP_TIMEOUT", "1800"));
+  const pollSec = Number(opt("DUMP_POLL_INTERVAL", "20"));
   const dir = workdir();
-  const t0 = new Date().toISOString().replace(/[:.]/g, "-");
-  writeFileSync(join(dir, "T0.txt"), `${t0}\n`, { mode: 0o600 });
-  const out = join(dir, `prod-${t0}.dump`);
-  log(`T0=${t0} → ${out}`);
-  // --format=custom : dump transactionnel (snapshot MVCC cohérent, pas besoin de
-  // pg_export_snapshot) ; --no-owner --no-privileges : restaurable tel quel en
-  // préprod sans les rôles prod.
-  run("pg_dump", [
-    "--format=custom",
-    "--no-owner",
-    "--no-privileges",
-    "--verbose",
-    "--file", out,
-  ], { env });
-  // Vérifie que le dump est lisible (TOC) et enregistre le pointeur courant.
-  run("pg_restore", ["--list", out], { capture: true });
-  writeFileSync(join(dir, "LATEST_PROD_DUMP.txt"), `${out}\n`, { mode: 0o600 });
-  const bytes = statSync(out).size;
-  if (bytes <= 0) die("dump prod vide");
-  log(`S1 dump OK — ${bytes} octets, TOC lisible`);
+
+  // DUAL-KUBECONFIG — le déclencheur cible le cluster PROD (le CronJob dumpe la
+  // DB prod IN-CLUSTER). Les 2 SEULS kubectl prod du CLI (suspend=false ET
+  // re-suspend=true) passent par un kubeconfig PROD DÉDIÉ (DUMP_KUBECONFIG),
+  // name-scopé au patch de CE CronJob + VAP suspend-only. TOUS les autres kubectl
+  // (quiesce, dispatch Jobs, flip, refresh) restent sur le kubeconfig PRÉPROD par
+  // défaut. Fail-closed : sans DUMP_KUBECONFIG, AUCUN patch tenté (le kubeconfig
+  // préprod ferait 403 sur la prod ; on ne veut pas de trigger sans token prod).
+  const dumpKubeconfig = opt("DUMP_KUBECONFIG", "");
+  if (!dumpKubeconfig || !existsSync(dumpKubeconfig)) {
+    die(
+      "S1 — DUMP_KUBECONFIG (kubeconfig PROD dédié au patch du CronJob dump) absent ou introuvable : " +
+        `le déclencheur patche '${cj}' dans le cluster PROD (ns ${cjNs}) — le kubeconfig préprod par défaut ferait 403. ` +
+        "Fail-closed : aucun patch tenté.",
+    );
+  }
+  const kprod = ["--kubeconfig", dumpKubeconfig]; // préfixe kubectl PROD (2 appels seulement)
+
+  // T1 = instant de déclenchement (epoch secondes), moins une marge d'horloge
+  // (skew runner/S3) pour ne pas rejeter un dump légitimement frais. Persisté
+  // (T1.txt) pour que le Job restore re-sélectionne le même dump frais.
+  const t1Ms = Date.now();
+  const t1Epoch = Math.floor((t1Ms - skewSec * 1000) / 1000);
+  writeFileSync(join(dir, "T1.txt"), `${new Date(t1Ms).toISOString()}\n`, { mode: 0o600 });
+  writeFileSync(join(dir, "T1_EPOCH.txt"), `${t1Epoch}\n`, { mode: 0o600 });
+  log(`T1=${new Date(t1Ms).toISOString()} (fraîcheur exigée : LastModified epoch > ${t1Epoch}, skew ${skewSec}s)`);
+
+  // Déclencheur : dé-suspendre le CronJob prod (kubeconfig PROD ; name-scopé ;
+  // VAP owner = suspend-only). --kubeconfig sur CET appel prod uniquement.
+  section("S1.a déclencheur — kubectl (PROD) patch cronjob suspend=false");
+  run("kubectl", [...kprod, "-n", cjNs, "patch", "cronjob", cj, "--type=merge", "-p", '{"spec":{"suspend":false}}']);
+  log(`CronJob ${cjNs}/${cj} dé-suspendu (cluster PROD) — le pg_dump prod (owner) → s3://${bucket} démarre hors runner.`);
+
+  // Freshness = Job PRÉPROD verdict-only (poll interne au pod, cred backups).
+  // failClosed:false → on récupère { ok } pour RE-SUSPENDRE avant de trancher.
+  section("S1.b freshness — Job in-cluster (aws s3api list, verdict-only, 0 S3 runner)");
+  const verdict = dispatchS3Check({
+    mode: "freshness",
+    jobName: "radar-bascule-freshness",
+    cred: "backups",
+    failClosed: false,
+    params: {
+      bucket, prefix, t1Epoch, expectedDb: keyMustContain, keySuffix,
+      checkTimeoutSec, pollSec,
+    },
+    // le runner attend un peu plus que le poll interne du pod.
+    timeoutSec: checkTimeoutSec + Number(opt("CHECK_POLL_BUFFER", "180")),
+  });
+
+  // Re-suspend TOUJOURS (best-effort, même si freshness KO ; kubeconfig PROD).
+  const resus = run("kubectl", [...kprod, "-n", cjNs, "patch", "cronjob", cj, "--type=merge", "-p", '{"spec":{"suspend":true}}'], { allowFail: true });
+  if ((resus.status ?? 0) !== 0) warn(`S1 — re-suspend du CronJob ${cjNs}/${cj} a ÉCHOUÉ : à re-suspendre à la main (kubectl patch ... suspend=true).`);
+  else log(`CronJob ${cjNs}/${cj} re-suspendu.`);
+
+  if (!verdict.ok) {
+    die(
+      `S1 — Job freshness '${verdict.jobName || "radar-bascule-freshness"}' ${verdict.state || "KO"} : aucun dump FRAIS ` +
+        `(exigé : LastModified > T1${keyMustContain ? `, clé ⊇ '${keyMustContain}'` : ""}, suffixe '${keySuffix}', taille>0) ` +
+        `sous s3://${bucket}/${prefix || ""} dans le délai. Fail-closed — inspecter le Job in-cluster (0 logs runner).`,
+    );
+  }
+  log("S1 dump OK — Job freshness a confirmé un dump frais (verdict .status). 0 pg_dump runner, 0 S3/contenu runner.");
 }
 
 // =============================================================================
@@ -401,12 +443,21 @@ function assertQuiesced() {
       let items = [];
       try { items = JSON.parse(jr.stdout || "{}").items || []; } catch { problems.push("sortie 'kubectl get jobs -o json' illisible"); }
       const active = [];
+      let skippedBascule = 0;
       for (const j of items) {
         const name = j?.metadata?.name ?? "<sans-nom>";
+        // EXCLUSION G2 — les Jobs que CETTE bascule dispatche (restore, rollback,
+        // docs-sync, migrate, refresh) portent le label `sentropic.io/bascule`.
+        // Ils sont ATTENDUS actifs pendant la séquence : ils ne doivent PAS se
+        // compter eux-mêmes comme « Job actif » bloquant (sinon G1-rollback ⇒ G2
+        // se bloquerait lui-même). Le quiesce ordonné AVANT tout dispatch reste la
+        // 1re barrière ; cette exclusion couvre le rejeu (TTL) et l'ordre interne.
+        if (j?.metadata?.labels?.["sentropic.io/bascule"]) { skippedBascule += 1; continue; }
         const st = j?.status ?? {};
         const nActive = Number(st.active ?? 0);
         if (Number.isFinite(nActive) && nActive > 0) active.push(`${name} (active=${nActive})`);
       }
+      if (skippedBascule) log(`GARDE G2 — ${skippedBascule} Job(s) labelisé(s) 'bascule' exclu(s) du check (attendus).`);
       if (active.length) {
         problems.push(
           `Job(s) batch ACTIF(s) en préprod (connexion radar-postgres possible) : ${active.join(", ")} ` +
@@ -535,49 +586,88 @@ function cmdUnquiesce() {
 }
 
 // =============================================================================
-// S2 — restore préprod : GARDES d'abord, puis pg_restore destructif
+// S2 — restore préprod : GARDES (G2 quiesce, G1 rollback-Job) puis Job restore.
+// 0 pg_restore / 0 pg_dump / 0 get-object-contenu runner : tout le data-plane
+// vit dans des Jobs PRÉPROD (creds via secretKeyRef in-cluster).
 // =============================================================================
 function cmdRestore() {
-  section("S2 restore préprod");
+  section("S2 restore préprod (Jobs in-cluster — 0 pg_restore/0 S3 runner)");
   assertConfirm(); // G3
   const dir = workdir();
-  // Le dump prod produit par S1 (ou fourni via PROD_DUMP).
-  const prodDump = opt("PROD_DUMP", existsSync(join(dir, "LATEST_PROD_DUMP.txt")) ? readFileSync(join(dir, "LATEST_PROD_DUMP.txt"), "utf8").trim() : "");
-  if (!prodDump || !existsSync(prodDump)) die("dump prod introuvable — lancer 'dump' (S1) d'abord ou fournir PROD_DUMP.");
+  const jd = jobDefaults();
+  const bucket = req("DUMP_BUCKET");
+  const expected = req("EXPECTED_DATABASE");
+  const prefix = opt("DUMP_PREFIX", "postgres/prod/sets").replace(/^\/+|\/+$/g, "");
+  const keySuffix = opt("DUMP_KEY_SUFFIX", ".dump");
+  const assertDbInKey = opt("DUMP_KEY_ASSERT_DB", "1") !== "0";
+  // T1 (epoch) posé par S1 : le Job restore RE-SÉLECTIONNE lui-même le dump frais
+  // le plus récent (mtime > T1, clé ⊇ EXPECTED_DATABASE, .dump) — le runner ne
+  // connaît AUCUNE clé S3 (0 S3 runner). Le CronJob étant re-suspendu après S1,
+  // la sélection est stable.
+  const t1Epoch = existsSync(join(dir, "T1_EPOCH.txt"))
+    ? readFileSync(join(dir, "T1_EPOCH.txt"), "utf8").trim()
+    : opt("T1_EPOCH", "0");
 
-  // Pré-check : TOC lisible AVANT tout load destructif.
-  run("pg_restore", ["--list", prodDump], { capture: true });
-  log(`dump prod OK (TOC lisible) : ${prodDump}`);
-
-  const env = pgEnv("preprod");
-
-  // GARDE G2 — quiesce des consommateurs préprod (avant tout write).
+  // GARDE G2 — quiesce des consommateurs préprod AVANT tout dispatch. Les Jobs
+  // 'bascule' (rollback/restore dispatchés ci-dessous) sont exclus du check G2.
   assertQuiesced();
 
-  // GARDE G1 — dump rollback de la DB préprod AVANT le restore destructif.
+  // GARDE G1 — rollback de la DB préprod AVANT le restore destructif, en Job
+  // PRÉPROD (pg_dump préprod → bucket DURABLE). DB via radar-db-credentials,
+  // écriture S3 via radar-pra-admin (S3-only). Fail-closed : die si Job KO.
+  section("GARDE G1 — Job rollback préprod (pg_dump préprod → bucket)");
   const ts = new Date().toISOString().replace(/[:.]/g, "-");
-  const rollback = join(dir, `preprod-rollback-${ts}.dump`);
-  log(`GARDE G1 — dump rollback préprod → ${rollback}`);
-  run("pg_dump", ["--format=custom", "--no-owner", "--no-privileges", "--file", rollback], { env });
-  if (!existsSync(rollback) || statSync(rollback).size <= 0) die("GARDE G1 — dump rollback préprod vide/absent : restore refusé.");
-  run("pg_restore", ["--list", rollback], { capture: true }); // rollback lisible
-  writeFileSync(join(dir, "LATEST_PREPROD_ROLLBACK.txt"), `${rollback}\n`, { mode: 0o600 });
-  log(`GARDE G1 OK — rollback préprod capturé (${statSync(rollback).size} octets, TOC lisible)`);
+  const rollbackKey = `${opt("ROLLBACK_PREFIX", "rollback").replace(/^\/+|\/+$/g, "")}/preprod-rollback-${ts}.dump`;
+  runJobFromTemplate({
+    tmpl: "db-rollback-job.tmpl.yaml",
+    jobName: "radar-db-rollback-bascule",
+    vars: {
+      NAMESPACE: jd.NAMESPACE,
+      DUMP_IMAGE: jd.DUMP_IMAGE,
+      AWSCLI_IMAGE: jd.AWSCLI_IMAGE,
+      DB_SECRET: jd.DB_SECRET,
+      PRA_SECRET: jd.PRA_SECRET,
+      S3_ENDPOINT: jd.S3_ENDPOINT,
+      BACKUP_S3_BUCKET: bucket,
+      S3_REGION: jd.S3_REGION,
+      ROLLBACK_KEY: rollbackKey,
+      PGHOST: jd.PGHOST,
+      TTL_SECONDS: jd.TTL_SECONDS,
+    },
+    timeoutSec: Number(opt("ROLLBACK_TIMEOUT", "1200")),
+  });
+  writeFileSync(join(dir, "LATEST_PREPROD_ROLLBACK_KEY.txt"), `${rollbackKey}\n`, { mode: 0o600 });
+  log(`GARDE G1 OK — rollback préprod capturé (DURABLE) : s3://${bucket}/${rollbackKey}`);
 
-  // Restore destructif fail-closed : --single-transaction + --exit-on-error →
-  // tout-ou-rien ; --clean --if-exists = remplacement idempotent.
-  log("pg_restore préprod (--clean --if-exists --single-transaction --exit-on-error) …");
-  run("pg_restore", [
-    "--clean",
-    "--if-exists",
-    "--no-owner",
-    "--no-privileges",
-    "--exit-on-error",
-    "--single-transaction",
-    "--dbname", env.PGDATABASE,
-    prodDump,
-  ], { env });
-  log("S2 restore OK — données prod chargées en préprod (rollback disponible).");
+  // Restore destructif — Job PRÉPROD (fetch aws-cli self-select + pg_restore
+  // --clean --if-exists --single-transaction). DB via radar-db-credentials,
+  // lecture S3 via radar-pra-admin. EXPECTED_DATABASE vérifié IN-CLUSTER (clé
+  // sélectionnée ⊇ EXPECTED_DATABASE ET header du custom-archive).
+  section("S2.b restore — Job (fetch self-select + pg_restore --clean --single-transaction)");
+  runJobFromTemplate({
+    tmpl: "db-restore-job.tmpl.yaml",
+    jobName: "radar-db-restore-bascule",
+    vars: {
+      NAMESPACE: jd.NAMESPACE,
+      DUMP_IMAGE: jd.DUMP_IMAGE,
+      AWSCLI_IMAGE: jd.AWSCLI_IMAGE,
+      DB_SECRET: jd.DB_SECRET,
+      PRA_SECRET: jd.PRA_SECRET,
+      S3_ENDPOINT: jd.S3_ENDPOINT,
+      BACKUP_S3_BUCKET: bucket,
+      S3_REGION: jd.S3_REGION,
+      DUMP_PREFIX: prefix,
+      DUMP_KEY_SUFFIX: keySuffix,
+      T1_EPOCH: String(t1Epoch),
+      PGHOST: jd.PGHOST,
+      EXPECTED_DATABASE: expected,
+      ASSERT_KEY_DB: assertDbInKey ? "1" : "0",
+      RESTORE_ASSERT_DB: opt("RESTORE_ASSERT_DB", "1") !== "0" ? "1" : "0",
+      TTL_SECONDS: jd.TTL_SECONDS,
+    },
+    timeoutSec: Number(opt("RESTORE_TIMEOUT", "1800")),
+  });
+  log("S2 restore OK — données prod chargées en préprod (Job in-cluster ; rollback DURABLE ; EXPECTED_DATABASE vérifié in-cluster).");
 }
 
 // =============================================================================
@@ -603,7 +693,17 @@ function renderTemplate(tmplPath, vars) {
   return text;
 }
 
-function runJobFromTemplate({ tmpl, jobName, vars, timeoutSec }) {
+// Rendu + apply + poll STATUS-ONLY d'un Job in-cluster.
+//
+// PII-free (mesure i-infra) : le runner lit UNIQUEMENT `.status` du Job (via
+// classifyJobStatus) — JAMAIS `kubectl logs` ni le stdout du pod, qui portent
+// clés/tables/listings/contenu. Sur échec/timeout, on reporte « inspecter
+// in-cluster » (le debug se fait au cluster, pas dans les logs du runner).
+//
+// failClosed=true (défaut) → die() sur échec/timeout (étape avortée).
+// failClosed=false → renvoie { ok, state, jobName } sans die (l'appelant tranche,
+// ex. S1 qui doit re-suspendre le CronJob avant de conclure).
+function runJobFromTemplate({ tmpl, jobName, vars, timeoutSec, failClosed = true }) {
   const ns = vars.NAMESPACE;
   const dir = workdir();
   const rendered = join(dir, `${jobName}.rendered.yaml`);
@@ -611,18 +711,24 @@ function runJobFromTemplate({ tmpl, jobName, vars, timeoutSec }) {
   // Jobs immuables : on supprime l'éventuelle instance précédente (idempotent).
   run("kubectl", ["-n", ns, "delete", "job", jobName, "--ignore-not-found"], { allowFail: true });
   run("kubectl", ["-n", ns, "apply", "-f", rendered]);
+  const inspect = `inspecter in-cluster : kubectl -n ${ns} logs job/${jobName} --all-containers`;
   const deadline = Date.now() + timeoutSec * 1000;
   for (;;) {
-    const succ = run("kubectl", ["-n", ns, "get", "job", jobName, "-o", "jsonpath={.status.succeeded}"], { capture: true, allowFail: true }).stdout.trim();
-    const fail = run("kubectl", ["-n", ns, "get", "job", jobName, "-o", "jsonpath={.status.failed}"], { capture: true, allowFail: true }).stdout.trim();
-    if (succ && Number(succ) >= 1) { log(`Job ${jobName} terminé OK`); break; }
-    if (fail && Number(fail) >= 1) {
-      run("kubectl", ["-n", ns, "logs", `job/${jobName}`, "--all-containers=true", "--tail=80"], { allowFail: true });
-      die(`Job ${jobName} en ÉCHEC — étape avortée (fail-closed).`);
+    // STATUS-ONLY : un seul get -o json, interprété par classifyJobStatus.
+    const st = run("kubectl", ["-n", ns, "get", "job", jobName, "-o", "jsonpath={.status}"], { capture: true, allowFail: true });
+    let status = {};
+    try { status = st.stdout && st.stdout.trim() ? JSON.parse(st.stdout) : {}; } catch { status = {}; }
+    const v = classifyJobStatus(status);
+    if (v.done && v.ok) { log(`Job ${jobName} terminé OK (.status=succeeded)`); return { ok: true, state: "succeeded", jobName }; }
+    if (v.done && !v.ok) {
+      const msg = `Job ${jobName} en ÉCHEC (.status=failed) — étape avortée (fail-closed). ${inspect} (0 logs runner).`;
+      if (!failClosed) { warn(msg); return { ok: false, state: "failed", jobName }; }
+      die(msg);
     }
     if (Date.now() >= deadline) {
-      run("kubectl", ["-n", ns, "logs", `job/${jobName}`, "--all-containers=true", "--tail=80"], { allowFail: true });
-      die(`Job ${jobName} non terminé dans ${timeoutSec}s — étape avortée.`);
+      const msg = `Job ${jobName} non terminé dans ${timeoutSec}s — étape avortée. ${inspect} (0 logs runner).`;
+      if (!failClosed) { warn(msg); return { ok: false, state: "timeout", jobName }; }
+      die(msg);
     }
     // Attente passive sans dépendance : petite boucle bloquante native.
     spawnSync("bash", ["-lc", "sleep 10"], { stdio: "ignore" });
@@ -655,48 +761,79 @@ function cmdMigrate() {
 }
 
 // =============================================================================
-// S3 — copie docs : s5cmd sync server-side (CopyObject same-endpoint), additif.
-// --dry (env DRY=1) → même commande en --dry-run (0 octet, sans écriture).
+// S3/S4 — copie docs : Job PRÉPROD aws-cli (pré-check GET fail-closed + s3 sync
+// server-side, additif). 0 S3 runner. DRY (env DRY=1) : le runner ne touchant
+// plus S3, la copie réelle n'est PAS jouée (dispatchée en exécution) ; le signal
+// DRY est porté par le Job recon (informatif, `continue-on-error` côté workflow).
 // =============================================================================
 function cmdCopyDocs() {
-  section("S3 copie docs (s5cmd sync server-side, additif)");
   const dry = opt("DRY", "") === "1" || process.argv.includes("--dry");
-  if (!dry) assertConfirm(); // G3 pour la copie réelle ; le DRY reste libre
-  const bhs = req("BHS");
   const prod = req("PROD_DOCS");
   const preprod = req("PREPROD_DOCS");
-  const args = ["--endpoint-url", bhs];
-  if (dry) args.push("--dry-run");
-  // Additif volontaire (PAS de --delete) : `runs/` vient gratis. Même endpoint →
-  // s5cmd fait un CopyObject côté serveur (0 octet par le runner).
-  args.push("sync", `s3://${prod}/*`, `s3://${preprod}/`);
-  run("s5cmd", args, { env: s5Env() });
-  log(dry ? "S3 DRY OK — plan de copie affiché, aucune écriture." : "S3 copie OK — docs prod → préprod (server-side, additif).");
+  if (dry) {
+    log("S3 DRY — copie docs réelle NON jouée (0 S3 runner ; dispatchée en exécution). Signal DRY = Job recon informatif.");
+    return;
+  }
+  // Copie réelle = Job PRÉPROD (Option A canonique, co-val k8s) : image radar-api
+  // (aws-sdk `CopyObject`, 0 python), identité PROD-OWNER ÉPHÉMÈRE
+  // (radar-docs-src-preprod, créée par k8s au GO / GC par ownerRef du Job) →
+  // pré-check GET prod fail-closed, puis boucle List(prod) → CopyObject(préprod,
+  // GrantFullControl id=<canonical préprod>) SERVER-SIDE (0 octet pod), idempotent.
+  // La CI dispatche + lit .status ; AUCUNE opération secret (0 droit secrets runner).
+  section("S3 copie docs — Job in-cluster (radar-api aws-sdk CopyObject + grant, additif)");
+  assertConfirm(); // G3 pour la copie réelle
+  const ns = opt("PREPROD_NAMESPACE", "radar-immobilier-preprod");
+  const jd = jobDefaults();
+  const image = resolvePreprodImage(ns);
+  runJobFromTemplate({
+    tmpl: "docs-sync-job.tmpl.yaml",
+    // NOM EXACT figé (co-val k8s) : k8s watch `docs-sync-prod-to-preprod` pour
+    // lire l'UID du Job et créer le secret radar-docs-src-preprod ownerRef=UID.
+    jobName: "docs-sync-prod-to-preprod",
+    vars: {
+      NAMESPACE: jd.NAMESPACE,
+      IMAGE: image,
+      DOCS_SYNC_READ_SECRET: jd.DOCS_SYNC_READ_SECRET,
+      S3_ENDPOINT: jd.S3_ENDPOINT,
+      S3_REGION: jd.S3_REGION,
+      S3_FORCE_PATH_STYLE: opt("DOCS_S3_FORCE_PATH_STYLE", "true"),
+      SRC_BUCKET: prod,
+      DST_BUCKET: preprod,
+      COPY_GRANTEE: jd.DOCS_SYNC_GRANTEE,
+      COPY_PREFIX: opt("DOCS_SYNC_PREFIX", ""),
+    },
+    timeoutSec: Number(opt("COPYDOCS_TIMEOUT", "1800")),
+  });
+  log("S3 copie OK — docs prod → préprod (Job radar-api aws-sdk CopyObject + grant, additif). 0 S3 runner.");
 }
 
 // =============================================================================
-// S3b — recon : re-jouer s5cmd --dry-run sync, ASSERTER sortie VIDE (dest ⊇ src).
-// Écrit un sentinel recon.ok (consommé par la GARDE G4 du flip).
+// S3b — recon (dest ⊇ src) : Job PRÉPROD aws-cli (aws s3 sync --dryrun) qui EXIT
+// 0 si rien à copier (dest ⊇ src), EXIT 1 si des objets manquent en préprod. Le
+// runner ne lit que `.status` (0 listing runner). Sur succès, écrit un sentinel
+// LOCAL recon.ok.json (verdict, PAS de contenu S3) consommé par la GARDE G4.
 // =============================================================================
 function cmdRecon() {
-  section("S3b recon (dest ⊇ src)");
-  const bhs = req("BHS");
+  section("S3b recon (dest ⊇ src) — Job in-cluster (aws s3 sync --dryrun, verdict-only)");
   const prod = req("PROD_DOCS");
   const preprod = req("PREPROD_DOCS");
-  const r = run("s5cmd", ["--endpoint-url", bhs, "--dry-run", "sync", `s3://${prod}/*`, `s3://${preprod}/`], { env: s5Env(), capture: true });
-  const pending = r.stdout.split("\n").map((l) => l.trim()).filter(Boolean);
-  if (pending.length > 0) {
-    console.log(pending.slice(0, 50).join("\n"));
-    die(`RECON FAIL — ${pending.length} objet(s) manquant(s) en préprod (dest ⊉ src). Relancer la copie (S3).`);
-  }
+  dispatchS3Check({
+    mode: "recon",
+    jobName: "radar-bascule-recon",
+    cred: "docs-prod", // lit le bucket docs PROD (identité prod-owner)
+    params: { srcBucket: prod, dstBucket: preprod },
+    timeoutSec: Number(opt("RECON_TIMEOUT", "600")),
+  });
   const dir = workdir();
-  const sentinel = { ok: true, prod, preprod, bhs, at: new Date().toISOString() };
+  const sentinel = { ok: true, prod, preprod, at: new Date().toISOString() };
   writeFileSync(join(dir, "recon.ok.json"), `${JSON.stringify(sentinel)}\n`, { mode: 0o600 });
-  log("S3b recon OK — sortie dry-run VIDE (dest ⊇ src). Sentinel recon.ok écrit.");
+  log("S3b recon OK — Job dry-run VIDE (dest ⊇ src, verdict .status). Sentinel recon.ok écrit (0 listing runner).");
 }
 
 // =============================================================================
-// GARDE G4 — le flip (S5) ne part QUE si recon (S3b) a réussi (sentinel + re-run).
+// GARDE G4 — le flip (S5) ne part QUE si recon (S3b) a réussi. Le sentinel LOCAL
+// (verdict, PAS de contenu S3) est vérifié, puis la recon est REJOUÉE en direct
+// (Job aws s3 sync --dryrun) — verdict .status uniquement, 0 listing runner.
 // =============================================================================
 function assertReconOk() {
   const dir = workdir();
@@ -709,9 +846,9 @@ function assertReconOk() {
   if (!s.ok || s.prod !== prod || s.preprod !== preprod) {
     die("GARDE G4 — sentinel recon.ok ne correspond pas aux buckets courants : recon à rejouer.");
   }
-  // Défense en profondeur : on rejoue la recon en direct (doit rester VIDE).
+  // Défense en profondeur : on rejoue la recon (Job) juste avant le flip.
   cmdRecon();
-  log("GARDE G4 OK — recon confirmé vert immédiatement avant le flip.");
+  log("GARDE G4 OK — recon confirmé vert (Job) immédiatement avant le flip.");
 }
 
 // =============================================================================
@@ -761,11 +898,18 @@ function cmdRefresh() {
   }
   // MEDIUM 3 — mémoire de collecte : le préfixe `runs/` DOIT être présent dans le
   // bucket servi (PREPROD_DOCS) avant le delta, sinon worker-live rescrape tout.
-  // Le workflow joue déjà `precheck-runs` entre S3 et S6 ; on re-vérifie ici pour
-  // gater aussi un `refresh` lancé seul (défense en profondeur, read-only).
-  // Échappatoire documentée : ASSERT_RUNS_MEMORY=0 (dégrade en warning).
+  // Le workflow joue déjà `precheck-runs` (Job) entre S3 et S6 ; on re-vérifie ici
+  // (défense en profondeur) en dispatchant le MÊME Job runs verdict-only — 0 S3
+  // runner. Échappatoire documentée : ASSERT_RUNS_MEMORY=0 (dégrade en warning).
   if (opt("ASSERT_RUNS_MEMORY", "1") !== "0") {
-    assertRunsMemory({ bucket: req("PREPROD_DOCS"), advisory: false, label: "PREPROD_DOCS" });
+    dispatchS3Check({
+      mode: "runs",
+      jobName: "radar-bascule-runs-preprod",
+      cred: "docs",
+      params: { bucket: req("PREPROD_DOCS"), prefix: opt("RUNS_PREFIX", "runs/") },
+      timeoutSec: Number(opt("CHECK_TIMEOUT", "180")),
+    });
+    log("MEDIUM3 OK — 'runs/' peuplé (Job verdict) : le refresh fera un DELTA.");
   } else {
     warn("MEDIUM3 — pré-check runs/ (mémoire de collecte) DÉSACTIVÉ (ASSERT_RUNS_MEMORY=0).");
   }
@@ -827,14 +971,17 @@ function main() {
   if (isHelp || !COMMANDS[cmd]) {
     console.log(
       "usage: node bascule.mjs <preflight|quiesce|dump|restore|migrate|copy-docs|recon|precheck-runs|flip|unquiesce|refresh|smoke>\n" +
-        "  DRY=1 (ou --dry) sur copy-docs → --dry-run (0 écriture).\n" +
-        "  precheck-runs : garde read-only 'mémoire de collecte' (préfixe runs/ du store docs).\n" +
-        "    cible défaut = PREPROD_DOCS (gate) ; --prod (ou PRECHECK_TARGET=prod) = PROD_DOCS advisory.\n" +
-        "    hard-fail UNIQUEMENT si runs/ vide/absent (rescrape complet imminent) ; WARN sinon.\n" +
-        "    DRY ne relâche PAS le gate (lecture seule, jouée à l'identique).\n" +
+        "  RUNNER KUBECTL-ONLY : 0 cred S3, 0 pg_dump/pg_restore, 0 listing/clé sur le runner.\n" +
+        "    Toute S3/DB vit dans des Jobs préprod verdict-only ; le runner ne lit que .status (0 kubectl logs).\n" +
+        "  dump (S1) : DÉCLENCHEUR — patch CronJob prod suspend=false (kubeconfig PROD), Job freshness\n" +
+        "    (poll interne, verdict), re-suspend. Dump réel = CronJob owner (radar-db-backup-prod).\n" +
+        "  restore (S2) : G2 quiesce + G1 Job rollback préprod, puis Job restore (fetch self-select + pg_restore).\n" +
+        "  copy-docs (S3) : Job aws-cli (pré-check GET + s3 sync additif) ; DRY=1 → copie non jouée (0 S3 runner).\n" +
+        "  recon (S3b) / precheck-runs (S3c) : Jobs verdict-only (aws s3 sync --dryrun / list runs/).\n" +
+        "    precheck cible défaut = PREPROD_DOCS (gate) ; --prod = PROD_DOCS (advisory via workflow continue-on-error).\n" +
         "  quiesce/unquiesce : met/rétablit les consommateurs préprod (unquiesce = reprise, sans CONFIRM).\n" +
-        "  GARDES fail-closed : G1 rollback préprod, G2 quiesce, G3 CONFIRM, G4 recon-avant-flip,\n" +
-        "    précheck runs/ (mémoire de collecte) avant refresh.",
+        "  GARDES fail-closed : G1 rollback préprod (Job), G2 quiesce, G3 CONFIRM, G4 recon-avant-flip,\n" +
+        "    EXPECTED_DATABASE (Jobs freshness/restore : clé + header archive), précheck runs/ avant refresh.",
     );
     process.exit(isHelp ? 0 : 1); // help = 0 ; commande inconnue = 1 (fail-closed)
   }
