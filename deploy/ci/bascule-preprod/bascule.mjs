@@ -225,10 +225,14 @@ export function classifyJobStatus(status) {
 // réelle reste le awk in-pod, aws-cli, verdict par exit code).
 // =============================================================================
 
-// Pure : parse une sortie `--output text` de `Contents[].[Key,Size,ETag]` (lignes
-// TAB-séparées « <key>\t<size>\t<etag> ») → Map key→meta (« size\tetag »). Split
-// sur TAB (les clés S3 peuvent contenir des espaces ; aws --output text sépare les
-// colonnes par TAB). Lignes vides ignorées.
+// Pure : parse une sortie `--output text` de `Contents[].[Key,Size]` (lignes
+// TAB-séparées « <key>\t<size> ») → Map key→size. Split sur TAB (les clés S3
+// peuvent contenir des espaces ; aws --output text sépare les colonnes par TAB).
+// On ne retient QUE la Size (colonne 1 après la clé) : un éventuel ETag (col 2+)
+// est IGNORÉ — les docs sont content-addressed par sha (key = raw/…/<sha>.pdf ⇒
+// même key = même contenu ; Size confirme ; l'ETag n'ajoute que la fragilité
+// multipart : CopyObject server-side peut re-chunker → ETag ≠ source, faux PENDING).
+// Lignes vides ignorées.
 export function parseListingMeta(text) {
   const m = new Map();
   for (const raw of (text || "").split("\n")) {
@@ -236,18 +240,18 @@ export function parseListingMeta(text) {
     if (!line) continue;
     const cols = line.split("\t");
     if (cols[0] === "" || cols[0] === undefined) continue;
-    m.set(cols[0], cols.slice(1).join("\t")); // Size[+ETag]
+    m.set(cols[0], cols[1] ?? ""); // Size SEULEMENT (ETag ignoré)
   }
   return m;
 }
 
-// Pure : clés de src ABSENTES de dst OU de meta (Size+ETag) différente (dest ⊉
-// src). Vide ⇒ dest ⊇ src (recon OK, 0 HEAD/GET). Miroir du awk -F'\t' in-pod.
+// Pure : clés de src ABSENTES de dst OU de Size différente (dest ⊉ src). Vide ⇒
+// dest ⊇ src (recon OK, 0 HEAD/GET). Miroir du awk -F'\t' in-pod (Key+Size).
 export function reconMissing(srcText, dstText) {
   const dst = parseListingMeta(dstText);
   const missing = [];
-  for (const [key, meta] of parseListingMeta(srcText)) {
-    if (!dst.has(key) || dst.get(key) !== meta) missing.push(key);
+  for (const [key, size] of parseListingMeta(srcText)) {
+    if (!dst.has(key) || dst.get(key) !== size) missing.push(key);
   }
   return missing;
 }
@@ -264,7 +268,7 @@ export function reconMissing(srcText, dstText) {
 // (pas de cred éphémère docs-sync ici, sinon CreateContainerConfigError aux pas
 // de check). Défauts (mêmes clés S3_ACCESS_KEY/S3_SECRET_KEY) :
 //   - freshness (S1)          → radar-backups-reader-preprod (RO-reader backups) ;
-//   - recon + runs/ (S3b/S3c) → radar-s3-credentials (LIST prod+préprod docs).
+//   - recon + runs/ (S3b/S3c) → radar-docs-reader-preprod (RO-reader, LIST prod+préprod docs).
 // failClosed=false → renvoie { ok } au lieu de die (S1 doit re-suspendre AVANT
 // de trancher). Le runner ne lit que .status (via runJobFromTemplate).
 // =============================================================================
@@ -320,7 +324,7 @@ function cmdPrecheckRuns() {
   dispatchS3Check({
     mode: "runs",
     jobName: wantsProd ? "radar-bascule-runs-prod" : "radar-bascule-runs-preprod",
-    // Secret PERSISTANT radar-s3-credentials (LIST prod+préprod docs) — PAS la
+    // Secret PERSISTANT radar-docs-reader-preprod (RO-reader, LIST prod+préprod docs) — PAS la
     // cred docs-sync éphémère. Overridable via CHECK_DOCS_SECRET.
     secret: jobDefaults().CHECK_DOCS_SECRET,
     params: { bucket, prefix: opt("RUNS_PREFIX", "runs/") },
@@ -806,7 +810,10 @@ function cmdMigrate() {
       NAMESPACE: ns,
       IMAGE: image,
       DB_SECRET: opt("DB_SECRET", "radar-db-credentials"),
-      S3_SECRET: opt("S3_SECRET", "radar-s3-credentials"),
+      // Aligné sur radar-refresh-pv (#738) : creds S3 = radar-docs-s3-credentials
+      // (clés DOCS_S3_*). L'ancien secret S3 par défaut avait un access-key bidon
+      // (len-19) ; mount-only si db-migrate n'exerce pas S3, wiring corrigé.
+      S3_SECRET: opt("S3_SECRET", "radar-docs-s3-credentials"),
       TTL_SECONDS: opt("JOB_TTL_SECONDS", "3600"),
     },
     timeoutSec: Number(opt("MIGRATE_TIMEOUT", "900")),
@@ -874,7 +881,7 @@ function cmdRecon() {
   dispatchS3Check({
     mode: "recon",
     jobName: "radar-bascule-recon",
-    // Secret PERSISTANT radar-s3-credentials (LIST prod+préprod docs) — PAS la
+    // Secret PERSISTANT radar-docs-reader-preprod (RO-reader, LIST prod+préprod docs) — PAS la
     // cred docs-sync éphémère. Overridable via CHECK_DOCS_SECRET.
     secret: jobDefaults().CHECK_DOCS_SECRET,
     params: { srcBucket: prod, dstBucket: preprod },
@@ -961,7 +968,7 @@ function cmdRefresh() {
     dispatchS3Check({
       mode: "runs",
       jobName: "radar-bascule-runs-preprod",
-      secret: jobDefaults().CHECK_DOCS_SECRET, // radar-s3-credentials (persistant)
+      secret: jobDefaults().CHECK_DOCS_SECRET, // radar-docs-reader-preprod (RO-reader persistant)
       params: { bucket: req("PREPROD_DOCS"), prefix: opt("RUNS_PREFIX", "runs/") },
       timeoutSec: Number(opt("CHECK_TIMEOUT", "180")),
     });
@@ -977,8 +984,12 @@ function cmdRefresh() {
       NAMESPACE: ns,
       IMAGE: image,
       DB_SECRET: opt("DB_SECRET", "radar-db-credentials"),
-      S3_SECRET: opt("S3_SECRET", "radar-s3-credentials"),
-      SCRAPE_S3_SECRET: opt("SCRAPE_S3_SECRET", "radar-scrape-s3-credentials"),
+      // Alignement sur le CronJob radar-refresh-pv préprod QUI MARCHE (#738) :
+      // creds S3 = radar-docs-s3-credentials (clés DOCS_S3_*). L'ancien secret S3
+      // par défaut avait un access-key BIDON (seul S6 le lisait) et l'ancien secret
+      // scrape est ABSENT en préprod → l'ancien défaut bloquait le RUN. Overridable.
+      S3_SECRET: opt("S3_SECRET", "radar-docs-s3-credentials"),
+      SCRAPE_S3_SECRET: opt("SCRAPE_S3_SECRET", "radar-docs-s3-credentials"),
       TTL_SECONDS: opt("JOB_TTL_SECONDS", "3600"),
     },
     timeoutSec: Number(opt("REFRESH_TIMEOUT", "3600")),

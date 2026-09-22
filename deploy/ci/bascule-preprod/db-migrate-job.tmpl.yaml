@@ -67,7 +67,11 @@ spec:
               valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_PASSWORD } }
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_DB } }
+            # Creds S3 = ${S3_SECRET} (= radar-docs-s3-credentials, clés DOCS_S3_*) —
+            # aligné sur radar-refresh-pv (#738 ; l'ancien secret S3 par défaut avait
+            # un access-key bidon). Mount-only si db-migrate n'exerce pas S3, wiring
+            # corrigé quand même.
             - name: S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: ${S3_SECRET}, key: S3_ACCESS_KEY } }
+              valueFrom: { secretKeyRef: { name: ${S3_SECRET}, key: DOCS_S3_ACCESS_KEY } }
             - name: S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: ${S3_SECRET}, key: S3_SECRET_KEY } }
+              valueFrom: { secretKeyRef: { name: ${S3_SECRET}, key: DOCS_S3_SECRET_KEY } }
