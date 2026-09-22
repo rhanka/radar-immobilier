@@ -31,7 +31,7 @@
 //                        (fetch self-select + pg_restore). 0 pg_restore/0 S3 runner.
 //     migrate      S2c — Job in-cluster `node dist/db/migrate.js` (patron 36).
 //     copy-docs    S3  — Job in-cluster aws-cli (pré-check GET + s3 sync additif).
-//     recon        S3b — Job aws s3 sync --dryrun (verdict-only, dest ⊇ src).
+//     recon        S3b — Job list-objects-v2 diff Key+Size (verdict-only, dest ⊇ src).
 //     precheck-runs S3c — Job aws s3api list runs/ (verdict-only, gate MEDIUM3).
 //     flip         S5  — kubectl set env deploy/radar-api GEO_DOCUMENTS_REPOINT-
 //     refresh      S6  — Job in-cluster worker-live.js en mode delta (PAS --all).
@@ -869,13 +869,13 @@ function cmdCopyDocs() {
 }
 
 // =============================================================================
-// S3b — recon (dest ⊇ src) : Job PRÉPROD aws-cli (aws s3 sync --dryrun) qui EXIT
+// S3b — recon (dest ⊇ src) : Job PRÉPROD aws-cli (list-objects-v2 diff Key+Size) qui EXIT
 // 0 si rien à copier (dest ⊇ src), EXIT 1 si des objets manquent en préprod. Le
 // runner ne lit que `.status` (0 listing runner). Sur succès, écrit un sentinel
 // LOCAL recon.ok.json (verdict, PAS de contenu S3) consommé par la GARDE G4.
 // =============================================================================
 function cmdRecon() {
-  section("S3b recon (dest ⊇ src) — Job in-cluster (aws s3 sync --dryrun, verdict-only)");
+  section("S3b recon (dest ⊇ src) — Job in-cluster (list-objects-v2 diff Key+Size, verdict-only)");
   const prod = req("PROD_DOCS");
   const preprod = req("PREPROD_DOCS");
   dispatchS3Check({
@@ -896,7 +896,7 @@ function cmdRecon() {
 // =============================================================================
 // GARDE G4 — le flip (S5) ne part QUE si recon (S3b) a réussi. Le sentinel LOCAL
 // (verdict, PAS de contenu S3) est vérifié, puis la recon est REJOUÉE en direct
-// (Job aws s3 sync --dryrun) — verdict .status uniquement, 0 listing runner.
+// (Job list-objects-v2 diff Key+Size) — verdict .status uniquement, 0 listing runner.
 // =============================================================================
 function assertReconOk() {
   const dir = workdir();
@@ -1044,7 +1044,7 @@ function main() {
         "    (poll interne, verdict), re-suspend. Dump réel = CronJob owner (radar-db-backup-prod).\n" +
         "  restore (S2) : G2 quiesce + G1 Job rollback préprod, puis Job restore (fetch self-select + pg_restore).\n" +
         "  copy-docs (S3) : Job aws-cli (pré-check GET + s3 sync additif) ; DRY=1 → copie non jouée (0 S3 runner).\n" +
-        "  recon (S3b) / precheck-runs (S3c) : Jobs verdict-only (aws s3 sync --dryrun / list runs/).\n" +
+        "  recon (S3b) / precheck-runs (S3c) : Jobs verdict-only (list-objects-v2 diff Key+Size / list runs/).\n" +
         "    precheck cible défaut = PREPROD_DOCS (gate) ; --prod = PROD_DOCS (advisory via workflow continue-on-error).\n" +
         "  quiesce/unquiesce : met/rétablit les consommateurs préprod (unquiesce = reprise, sans CONFIRM).\n" +
         "  GARDES fail-closed : G1 rollback préprod (Job), G2 quiesce, G3 CONFIRM, G4 recon-avant-flip,\n" +
