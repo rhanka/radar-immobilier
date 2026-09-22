@@ -1,0 +1,196 @@
+# =============================================================================
+# db-restore-job.tmpl.yaml — RESTORE préprod (S2), Job one-shot in-cluster.
+#
+# RUNNER KUBECTL-ONLY / DATA-PLANE CLUSTER-SIDE : le runner ne fait AUCUN
+# pg_restore, AUCUN get-object, et ne connaît AUCUNE clé S3. Ce Job PRÉPROD,
+# rendu (placeholders remplacés) + appliqué + poll STATUS-ONLY par bascule.mjs
+# (`restore`), fait tout in-cluster :
+#
+#   initContainer `fetch`  (aws-cli) : SELF-SELECT du dump prod FRAIS le plus
+#                          récent sous s3://${BACKUP_S3_BUCKET}/${DUMP_PREFIX}
+#                          (récursif) : LastModified epoch > ${T1_EPOCH}, clé ⊇
+#                          EXPECTED_DATABASE (si ASSERT_KEY_DB=1), suffixe
+#                          ${DUMP_KEY_SUFFIX}, Size>0 → aws s3 cp → /work/prod.dump.
+#                          Creds S3 = ${PRA_SECRET} (S3 SEULEMENT : S3_ACCESS_KEY/
+#                          S3_SECRET_KEY). Le runner ne passe AUCUNE clé.
+#   container     `restore` (postgis) : pg_restore --list (contrôle POSITIF
+#                          header dbname==EXPECTED_DATABASE) puis pg_restore
+#                          --clean --if-exists --single-transaction. Creds DB =
+#                          ${DB_SECRET} (radar-db-credentials, POSTGRES_*) en env
+#                          libpq PG* — JAMAIS d'URI mot-de-passe. user préprod
+#                          `radar` = superuser → --clean OK.
+#
+# EXPECTED_DATABASE (contrôle POSITIF, hors runner) vérifié IN-CLUSTER à 2 niveaux :
+# la clé sélectionnée ⊇ EXPECTED_DATABASE (fetch) ET le header du custom-archive
+# (`pg_restore --list` → `;   dbname:`) == EXPECTED_DATABASE. Escapes documentés
+# ASSERT_KEY_DB=0 / RESTORE_ASSERT_DB=0 (rendus par bascule.mjs), ON par défaut.
+#
+# FAIL-CLOSED : backoffLimit 0 + restartPolicy Never ; --single-transaction +
+# --exit-on-error = tout-ou-rien. Le runner ne lit que .status (0 kubectl logs).
+#
+# PRÉREQUIS OWNER/IMMO (source-gap — à confirmer en QA) :
+#   - ${DB_SECRET} (radar-db-credentials, préprod) : POSTGRES_USER/PASSWORD/DB.
+#   - ${PRA_SECRET} (radar-pra-admin, préprod) : S3_ACCESS_KEY/S3_SECRET_KEY (RW
+#     bucket backups) — S3 SEULEMENT, PAS de POSTGRES_*.
+#   - CronJob dump prod = pg_dump --format=custom --no-owner --no-privileges dont
+#     le header porte dbname==EXPECTED_DATABASE ; clé `postgres/prod/sets/<ts>/radar.dump`.
+#
+# Placeholders : ${NAMESPACE} ${DUMP_IMAGE} ${AWSCLI_IMAGE} ${DB_SECRET}
+# ${PRA_SECRET} ${S3_ENDPOINT} ${BACKUP_S3_BUCKET} ${S3_REGION} ${DUMP_PREFIX}
+# ${DUMP_KEY_SUFFIX} ${T1_EPOCH} ${PGHOST} ${EXPECTED_DATABASE} ${ASSERT_KEY_DB}
+# ${RESTORE_ASSERT_DB} ${TTL_SECONDS}. Les $VAR du pod sont RUNTIME (sans accolades).
+# =============================================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-db-restore-bascule
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: db-restore
+    sentropic.io/bascule: restore
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: ${TTL_SECONDS}
+  activeDeadlineSeconds: 3600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: db-restore
+        sentropic.io/bascule: restore
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: work
+          emptyDir: {}
+        - name: tmp
+          emptyDir: { sizeLimit: 128Mi }
+      initContainers:
+        - name: fetch
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          image: ${AWSCLI_IMAGE}
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/bash", "-c"]
+          # NB : variables RUNTIME sans accolades ; ${DUMP_PREFIX:+…} (avec ':')
+          # échappe le rendu placeholder de bascule.mjs.
+          args:
+            - |
+              set -o pipefail
+              common=(--no-cli-pager --endpoint-url "$S3_ENDPOINT")
+              [ -n "$S3_REGION" ] && common+=(--region "$S3_REGION")
+              echo "[fetch] self-select dump frais sous s3://$BACKUP_S3_BUCKET/$DUMP_PREFIX (mtime>$T1_EPOCH, *$DUMP_KEY_SUFFIX)"
+              best_key=""; best_e=0
+              while read -r lm key; do
+                [ -z "$key" ] && continue
+                case "$key" in *"$DUMP_KEY_SUFFIX") ;; *) continue ;; esac
+                if [ "$ASSERT_KEY_DB" = "1" ] && [ -n "$EXPECTED_DATABASE" ]; then
+                  case "$key" in *"$EXPECTED_DATABASE"*) ;; *) continue ;; esac
+                fi
+                e=$(date -d "$lm" +%s 2>/dev/null || echo 0)
+                if [ "$e" -gt "$T1_EPOCH" ] && [ "$e" -ge "$best_e" ]; then best_e="$e"; best_key="$key"; fi
+              done < <(aws "${common[@]}" s3api list-objects-v2 --bucket "$BACKUP_S3_BUCKET" ${DUMP_PREFIX:+--prefix "$DUMP_PREFIX"} \
+                           --query "Contents[?Size>\`0\`].[LastModified,Key]" --output text 2>/dev/null)
+              if [ -z "$best_key" ]; then echo "[fetch] ERROR — aucun dump frais selectionnable (fail-closed)"; exit 1; fi
+              echo "[fetch] dump selectionne : $best_key"
+              aws "${common[@]}" s3 cp "s3://$BACKUP_S3_BUCKET/$best_key" /work/prod.dump
+              [ -s /work/prod.dump ] || { echo "[fetch] ERROR dump telecharge vide"; exit 1; }
+              echo "[fetch] ok $(wc -c < /work/prod.dump) octets"
+          env:
+            - name: HOME
+              value: /tmp
+            - name: AWS_EC2_METADATA_DISABLED
+              value: "true"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: ${PRA_SECRET}, key: S3_ACCESS_KEY } }
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: ${PRA_SECRET}, key: S3_SECRET_KEY } }
+            - name: S3_ENDPOINT
+              value: "${S3_ENDPOINT}"
+            - name: S3_REGION
+              value: "${S3_REGION}"
+            - name: BACKUP_S3_BUCKET
+              value: "${BACKUP_S3_BUCKET}"
+            - name: DUMP_PREFIX
+              value: "${DUMP_PREFIX}"
+            - name: DUMP_KEY_SUFFIX
+              value: "${DUMP_KEY_SUFFIX}"
+            - name: T1_EPOCH
+              value: "${T1_EPOCH}"
+            - name: EXPECTED_DATABASE
+              value: "${EXPECTED_DATABASE}"
+            - name: ASSERT_KEY_DB
+              value: "${ASSERT_KEY_DB}"
+          volumeMounts:
+            - { name: work, mountPath: /work }
+            - { name: tmp, mountPath: /tmp }
+      containers:
+        - name: restore
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          image: ${DUMP_IMAGE}
+          imagePullPolicy: IfNotPresent
+          command: ["bash", "-c"]
+          # NB : $PGDATABASE/$PGHOST/$EXPECTED_DATABASE/$RESTORE_ASSERT_DB/$src_db
+          # sont RUNTIME (sans accolades) ; ${src_db:-…} échappe le rendu.
+          args:
+            - |
+              set -euo pipefail
+              echo "[restore] TOC + controle POSITIF dbname (pg_restore --list)"
+              pg_restore --list /work/prod.dump > /work/toc.txt
+              src_db="$(awk -F': ' '/^;[[:space:]]+dbname:/ {print $2; exit}' /work/toc.txt | tr -d '[:space:]')"
+              echo "[restore] archive dbname='${src_db:-<none>}' expected='$EXPECTED_DATABASE'"
+              if [ "$RESTORE_ASSERT_DB" = "1" ]; then
+                if [ -z "$src_db" ] || [ "$src_db" != "$EXPECTED_DATABASE" ]; then
+                  echo "[restore] ERROR — archive dbname != EXPECTED_DATABASE : mauvais dump, restore REFUSE (fail-closed)."
+                  exit 1
+                fi
+                echo "[restore] controle POSITIF OK — dbname == EXPECTED_DATABASE"
+              else
+                echo "[restore] controle dbname DESACTIVE (RESTORE_ASSERT_DB=0)"
+              fi
+              echo "[restore] pg_restore --clean --if-exists --single-transaction -> db=$PGDATABASE host=$PGHOST"
+              pg_restore --clean --if-exists --no-owner --no-privileges \
+                --exit-on-error --single-transaction \
+                --dbname "$PGDATABASE" /work/prod.dump
+              echo "[restore] ok — donnees prod chargees en preprod"
+          env:
+            - name: PGHOST
+              value: "${PGHOST}"
+            - name: EXPECTED_DATABASE
+              value: "${EXPECTED_DATABASE}"
+            - name: RESTORE_ASSERT_DB
+              value: "${RESTORE_ASSERT_DB}"
+            - name: PGUSER
+              valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_USER } }
+            - name: PGPASSWORD
+              valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_PASSWORD } }
+            - name: PGDATABASE
+              valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_DB } }
+          volumeMounts:
+            - { name: work, mountPath: /work }
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: "1", memory: 1Gi }
+      # /tmp partagé par l'initContainer aws-cli (cache aws, readOnlyRootFilesystem off).
