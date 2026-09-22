@@ -10,6 +10,7 @@
 //   node deploy/ci/bascule-preprod/bascule.selftest.mjs   → exit 0 si tout passe.
 // =============================================================================
 import process from "node:process";
+import console from "node:console";
 import { classifyJobStatus } from "./bascule.mjs";
 
 let passed = 0;
