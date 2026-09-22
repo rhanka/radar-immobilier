@@ -67,17 +67,23 @@ spec:
               value: "--max-old-space-size=200 --dns-result-order=ipv4first"
             - name: LIVE_SCRAPE_EXPLOIT
               value: "1"
+            # Creds S3 = ${S3_SECRET} (= radar-docs-s3-credentials, clés DOCS_S3_*) —
+            # alignement sur le CronJob radar-refresh-pv préprod QUI MARCHE (#738 ;
+            # l'ancien secret S3 par défaut avait un access-key bidon que seul S6
+            # lisait → RUN blocker).
             - name: S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: ${S3_SECRET}, key: S3_ACCESS_KEY } }
+              valueFrom: { secretKeyRef: { name: ${S3_SECRET}, key: DOCS_S3_ACCESS_KEY } }
             - name: S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: ${S3_SECRET}, key: S3_SECRET_KEY } }
+              valueFrom: { secretKeyRef: { name: ${S3_SECRET}, key: DOCS_S3_SECRET_KEY } }
             # ── CIBLE D'ÉCRITURE = bucket SERVI, config-driven (#738) ─────────
             # SCRAPE_S3_ENDPOINT/BUCKET/REGION/FORCE_PATH_STYLE viennent du
             # ConfigMap radar-api (l'overlay préprod y met docs-preprod), lu par
             # l'API ET par ce refresh → le worker écrit là où l'API LIT. Prendre
             # le bucket depuis un secret divergent = la classe du bug Farid (PV
             # écrits hors served bucket → re-404). Seuls les creds viennent du
-            # secret scrape. bascule.mjs asserte en plus ConfigMap==PREPROD_DOCS.
+            # secret ${SCRAPE_S3_SECRET} = radar-docs-s3-credentials (clés DOCS_S3_*,
+            # comme radar-refresh-pv ; l'ancien secret scrape par défaut est ABSENT
+            # en préprod). bascule.mjs asserte en plus ConfigMap==PREPROD_DOCS.
             - name: SCRAPE_S3_ENDPOINT
               valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_ENDPOINT } }
             - name: SCRAPE_S3_BUCKET
@@ -87,9 +93,9 @@ spec:
             - name: SCRAPE_S3_FORCE_PATH_STYLE
               valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_FORCE_PATH_STYLE } }
             - name: SCRAPE_S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: ${SCRAPE_S3_SECRET}, key: SCRAPE_S3_ACCESS_KEY } }
+              valueFrom: { secretKeyRef: { name: ${SCRAPE_S3_SECRET}, key: DOCS_S3_ACCESS_KEY } }
             - name: SCRAPE_S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: ${SCRAPE_S3_SECRET}, key: SCRAPE_S3_SECRET_KEY } }
+              valueFrom: { secretKeyRef: { name: ${SCRAPE_S3_SECRET}, key: DOCS_S3_SECRET_KEY } }
           resources:
             requests: { cpu: 50m, memory: 96Mi }
             limits: { cpu: 150m, memory: 256Mi }
