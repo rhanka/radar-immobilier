@@ -121,9 +121,12 @@ jobs:
         uses: azure/setup-kubectl@v4
 
       - name: Configure kubeconfig (préprod)
+        # Token DÉDIÉ moindre-privilège (SA radar-ci-bascule-preprod), PAS le secret
+        # PARTAGÉ KUBE_CONFIG_DATA (scope plus large, utilisé par d'autres workflows :
+        # build-push-images / run-job / k8s-apply-mcp / rollback).
         run: |
           mkdir -p "$HOME/.kube"
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > "$HOME/.kube/config"
+          echo "${{ secrets.KUBE_CONFIG_DATA_BASCULE_PREPROD }}" | base64 -d > "$HOME/.kube/config"
           chmod 600 "$HOME/.kube/config"
 
       # Contrôle POSITIF du cluster cible AVANT tout write kubectl (identique au
