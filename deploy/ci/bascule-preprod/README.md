@@ -92,7 +92,7 @@ Ordre workflow : S0 → **S0.b (`precheck-runs --prod`, Job advisory)** → **Q*
 
 | Clé | Type | Contenu / usage |
 | --- | --- | --- |
-| `KUBE_CONFIG_DATA` | secret | kubeconfig base64 **préprod**. Pilotage par défaut. **CONSERVÉ.** |
+| `KUBE_CONFIG_DATA_BASCULE_PREPROD` | secret | kubeconfig base64 **préprod** — token **DÉDIÉ moindre-privilège** (SA `radar-ci-bascule-preprod`), **PAS** le secret partagé `KUBE_CONFIG_DATA` (scope plus large : build-push-images / run-job / k8s-apply-mcp / rollback). Pilotage par défaut. |
 | `KUBE_CONFIG_DATA_PROD` | secret | kubeconfig base64 **PROD** (token name-scopé patch `radar-db-backup-prod` + VAP suspend-only, généré au prod-apply) → `DUMP_KUBECONFIG`, utilisé **UNIQUEMENT** sur les 2 patch cronjob prod. Non requis en DRY. |
 | `BHS` / `S3_REGION` / `PROD_DOCS` / `PREPROD_DOCS` / `DUMP_BUCKET` / `DUMP_PREFIX` | var | endpoint + buckets + préfixe dump (`postgres/prod/sets`), rendus dans les Jobs. **NON secrets.** |
 | `DUMP_CRONJOB` / `DUMP_CRONJOB_NAMESPACE` | var | CronJob dump owner (défauts `radar-db-backup-prod` / `radar-immobilier`). |
