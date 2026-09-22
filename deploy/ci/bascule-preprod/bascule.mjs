@@ -130,6 +130,19 @@ function assertConfirm() {
   log(`GARDE G3 OK — CONFIRM='${confirm}'`);
 }
 
+// ── Normalisation d'endpoint object-store — fonction PURE ───────────────────
+// aws-cli ET aws-sdk EXIGENT un schéma sur --endpoint-url : un host nu comme
+// `s3.bhs.io.cloud.ovh.net` (valeur de BHS) fait ERRORER aws-cli → le
+// `length(Contents)` rend `None` (faux « vide ») et `aws s3 …` rc≠0. On préfixe
+// `https://` si le schéma est absent (idempotent sur une URL déjà schémée). C'est
+// le ROOT CAUSE UNIQUE des faux-négatifs de check en DRY (PAS le path-style : BHS
+// accepte virtual ET path).
+export function withScheme(endpoint) {
+  const e = String(endpoint || "").trim();
+  if (!e) return e;
+  return /^[a-z][a-z0-9+.-]*:\/\//i.test(e) ? e : `https://${e}`;
+}
+
 // ── Défauts partagés des Jobs data-plane (images + secrets in-cluster) ──────
 // Le runner ne touche JAMAIS à ces creds NI à S3 : tout l'accès object-store
 // (fetch/upload/check/recon/runs) vit dans des Jobs préprod, creds résolus au
@@ -172,7 +185,9 @@ function jobDefaults() {
     // Hôte service Postgres préprod (libpq côté Job, jamais côté runner).
     PGHOST: opt("PREPROD_PGHOST_SERVICE", "radar-postgres"),
     // Endpoint object-store (BHS) + région — rendus dans les Jobs (non secrets).
-    S3_ENDPOINT: req("BHS"),
+    // withScheme() garantit https:// (BHS est un host nu → aws-cli/aws-sdk errorent
+    // sans schéma). S'applique à TOUS les Jobs (checks/docs-sync/restore/rollback).
+    S3_ENDPOINT: withScheme(req("BHS")),
     S3_REGION: opt("S3_REGION", ""),
     TTL_SECONDS: opt("JOB_TTL_SECONDS", "3600"),
   };
@@ -200,6 +215,41 @@ export function classifyJobStatus(status) {
   if (Number.isFinite(succeeded) && succeeded >= 1) return { done: true, ok: true, state: "succeeded" };
   if (Number.isFinite(failed) && failed >= 1) return { done: true, ok: false, state: "failed" };
   return { done: false, ok: false, state: active > 0 ? "active" : "pending" };
+}
+
+// =============================================================================
+// recon DIFF (dest ⊇ src) — fonctions PURES (miroir du awk in-pod du Job recon
+// s3-check-job, mode=recon). La recon ne HEAD/GET plus (403 ACL prod) : elle
+// LISTE src et dst (`s3api list-objects-v2 --query Contents[].[Key,Size]`) et
+// compare Key+Size. Exportées pour verrouiller l'algo au self-test (l'exécution
+// réelle reste le awk in-pod, aws-cli, verdict par exit code).
+// =============================================================================
+
+// Pure : parse une sortie `--output text` de `Contents[].[Key,Size,ETag]` (lignes
+// TAB-séparées « <key>\t<size>\t<etag> ») → Map key→meta (« size\tetag »). Split
+// sur TAB (les clés S3 peuvent contenir des espaces ; aws --output text sépare les
+// colonnes par TAB). Lignes vides ignorées.
+export function parseListingMeta(text) {
+  const m = new Map();
+  for (const raw of (text || "").split("\n")) {
+    const line = raw.replace(/\r$/, "");
+    if (!line) continue;
+    const cols = line.split("\t");
+    if (cols[0] === "" || cols[0] === undefined) continue;
+    m.set(cols[0], cols.slice(1).join("\t")); // Size[+ETag]
+  }
+  return m;
+}
+
+// Pure : clés de src ABSENTES de dst OU de meta (Size+ETag) différente (dest ⊉
+// src). Vide ⇒ dest ⊇ src (recon OK, 0 HEAD/GET). Miroir du awk -F'\t' in-pod.
+export function reconMissing(srcText, dstText) {
+  const dst = parseListingMeta(dstText);
+  const missing = [];
+  for (const [key, meta] of parseListingMeta(srcText)) {
+    if (!dst.has(key) || dst.get(key) !== meta) missing.push(key);
+  }
+  return missing;
 }
 
 // =============================================================================

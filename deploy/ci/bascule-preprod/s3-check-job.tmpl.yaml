@@ -4,17 +4,28 @@
 # RUNNER KUBECTL-ONLY : le runner ne touche plus S3 (0 cred S3 runner ; OVH n'a
 # pas de scope list-only → toute cred runner pourrait GET le dump PII). Les 3
 # vérifs S3 sont ce Job PRÉPROD (aws-cli, cred in-cluster) qui fait le
-# LIST/HEAD/--dryrun DANS le pod et renvoie UNIQUEMENT un exit code (0/non-0).
+# LIST + diff DANS le pod (0 HEAD/GET) et renvoie UNIQUEMENT un exit code (0/non-0).
 # Le runner ne lit que `.status` (JAMAIS `kubectl logs` ni le stdout du pod, qui
 # porteraient clés/listings). Runner PII-free, logs runner compris.
 #
 #   CHECK_MODE=freshness : poll interne (jusqu'à CHECK_TIMEOUT_SEC) un dump FRAIS
 #       sous s3://CHECK_BUCKET/CHECK_PREFIX (récursif) : LastModified epoch >
 #       CHECK_T1_EPOCH, clé ⊇ CHECK_EXPECTED_DATABASE, suffixe CHECK_KEY_SUFFIX,
-#       Size>0. Cred = backups (radar-pra-admin, S3_*).
-#   CHECK_MODE=recon     : aws s3 sync --dryrun src→dst ; sortie VIDE = dest ⊇ src
-#       (exit 0), sinon exit 1. Cred = docs (radar-docs-s3-credentials, DOCS_S3_*).
-#   CHECK_MODE=runs      : aws s3api list runs/ ; peuplé = exit 0, vide/denied = exit 1.
+#       Size>0. Secret = radar-backups-reader-preprod (RO-reader backups, S3_*).
+#   CHECK_MODE=recon     : DIFF LIST-only (0 HEAD/GET) — dual `s3api list-objects-v2`
+#       paginé SRC vs DST, compare Key+Size → dest ⊇ src ? (exit 0) sinon exit 1.
+#       (l'ancien `s3 sync --dryrun` HEADait les objets source = 403 ACL prod.)
+#       Secret = radar-s3-credentials (LIST prod+préprod docs, S3_*).
+#   CHECK_MODE=runs      : `s3api list runs/` ; peuplé = exit 0 ; VIDE réel = exit 1 ;
+#       LIST échoué (config/cred) = exit 2 (messages distincts, erreur NON masquée).
+#
+# ROOT CAUSE (confirmé k8s + i-infra) des faux-négatifs DRY (2262 objets non vus)
+# = endpoint SANS schéma : BHS = host nu `s3.bhs.io.cloud.ovh.net` → aws-cli errore
+# sur --endpoint-url → `length(Contents)` rend None (faux « vide ») + recon rc≠0.
+# Fix (SUFFISANT, minimal) : schéma https:// via withScheme() (bascule.mjs,
+# S3_ENDPOINT) — s'applique aux 4 Jobs, les 3 modes partagent `common` → couvre
+# AUSSI freshness (S1). PAS de path-style (inutile, BHS indifférent). On ne masque
+# plus les erreurs (rc capturé, « échec config/cred/endpoint » distinct de « vide »).
 #
 # FAIL-CLOSED : backoffLimit 0 + restartPolicy Never = un seul essai.
 #
@@ -65,6 +76,8 @@ spec:
           args:
             - |
               set -o pipefail
+              # NB endpoint : $CHECK_S3_ENDPOINT porte le schéma https:// (normalisé
+              # par withScheme() dans bascule.mjs) — un host nu ferait errorer aws-cli.
               common=(--no-cli-pager --endpoint-url "$CHECK_S3_ENDPOINT")
               [ -n "$CHECK_S3_REGION" ] && common+=(--region "$CHECK_S3_REGION")
               case "$CHECK_MODE" in
@@ -72,7 +85,7 @@ spec:
                   end=$(( $(date +%s) + CHECK_TIMEOUT_SEC ))
                   while : ; do
                     fresh=$(aws "${common[@]}" s3api list-objects-v2 --bucket "$CHECK_BUCKET" ${CHECK_PREFIX:+--prefix "$CHECK_PREFIX"} \
-                              --query "Contents[?Size>\`0\`].[LastModified,Key]" --output text 2>/dev/null \
+                              --query "Contents[?Size>\`0\`].[LastModified,Key]" --output text \
                             | while read -r lm key; do
                                 [ -z "$key" ] && continue
                                 case "$key" in *"$CHECK_KEY_SUFFIX") ;; *) continue ;; esac
@@ -89,19 +102,28 @@ spec:
                   done
                   ;;
                 recon)
-                  out=$(aws "${common[@]}" s3 sync --dryrun "s3://$CHECK_SRC_BUCKET/" "s3://$CHECK_DST_BUCKET/" 2>/dev/null)
-                  rc=$?
-                  if [ "$rc" -ne 0 ]; then echo "[check recon] erreur aws (creds/endpoint ?)"; exit 1; fi
-                  if [ -n "$out" ]; then echo "[check recon] PENDING — dest ne contient pas src"; exit 1; fi
-                  echo "[check recon] OK — dest contient src"; exit 0
+                  # DIFF LIST-only (0 HEAD/GET) : dual list-objects-v2 (aws-cli auto-
+                  # pagine et agrège), compare Key+Size+ETag (rendus SANS HEAD) → un
+                  # « dest ⊇ src » fort. awk -F'\t' (clés S3 peuvent avoir des espaces).
+                  se=/tmp/recon-src-err.txt; de=/tmp/recon-dst-err.txt
+                  if ! aws "${common[@]}" s3api list-objects-v2 --bucket "$CHECK_SRC_BUCKET" ${CHECK_PREFIX:+--prefix "$CHECK_PREFIX"} \
+                        --query 'Contents[].[Key,Size,ETag]' --output text > /tmp/recon-src.txt 2>"$se"; then
+                    echo "[check recon] LIST src ECHOUE (config/cred/endpoint) : $(tr '\n' ' ' < "$se" | tail -c 300)"; exit 2; fi
+                  if ! aws "${common[@]}" s3api list-objects-v2 --bucket "$CHECK_DST_BUCKET" ${CHECK_PREFIX:+--prefix "$CHECK_PREFIX"} \
+                        --query 'Contents[].[Key,Size,ETag]' --output text > /tmp/recon-dst.txt 2>"$de"; then
+                    echo "[check recon] LIST dst ECHOUE (config/cred/endpoint) : $(tr '\n' ' ' < "$de" | tail -c 300)"; exit 2; fi
+                  miss=$(awk -F'\t' 'NR==FNR{if($1!=""){seen[$1]=1;m[$1]=$2 FS $3}next} { if($1!=""){ if(!($1 in seen)||m[$1]!=($2 FS $3)) c++ } } END{print c+0}' /tmp/recon-dst.txt /tmp/recon-src.txt)
+                  if [ "${miss:-0}" -gt 0 ]; then echo "[check recon] PENDING — $miss objet(s) src absent(s)/differents (Key/Size/ETag) en dst (dest NE contient PAS src)"; exit 1; fi
+                  echo "[check recon] OK — dest contient src (DIFF LIST-only Key+Size+ETag, 0 HEAD/GET)"; exit 0
                   ;;
                 runs)
+                  re=/tmp/runs-err.txt
                   n=$(aws "${common[@]}" s3api list-objects-v2 --bucket "$CHECK_BUCKET" --prefix "$CHECK_PREFIX" --max-keys 1 \
-                        --query 'length(Contents)' --output text 2>/dev/null)
+                        --query 'length(Contents)' --output text 2>"$re")
                   rc=$?
-                  if [ "$rc" -ne 0 ] || [ -z "$n" ] || [ "$n" = "None" ]; then echo "[check runs] runs/ vide ou LIST refuse"; exit 1; fi
-                  if [ "$n" -lt 1 ] 2>/dev/null; then echo "[check runs] runs/ vide"; exit 1; fi
-                  echo "[check runs] runs/ peuple"; exit 0
+                  if [ "$rc" -ne 0 ]; then echo "[check runs] LIST ECHOUE (config/cred) rc=$rc : $(tr '\n' ' ' < "$re" | tail -c 300)"; exit 2; fi
+                  if [ -z "$n" ] || [ "$n" = "None" ] || [ "$n" = "0" ]; then echo "[check runs] runs/ REELLEMENT VIDE (LIST OK, 0 objet sous $CHECK_PREFIX)"; exit 1; fi
+                  echo "[check runs] runs/ peuple ($n+ objet[s])"; exit 0
                   ;;
                 *)
                   echo "[check] CHECK_MODE inconnu: $CHECK_MODE"; exit 2
