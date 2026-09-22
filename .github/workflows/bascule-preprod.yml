@@ -1,10 +1,19 @@
 # bascule-preprod — BASCULE PROD → PRÉPROD (« iso-prod »), rejouable SANS IA.
 #
-# Enchaîne S0→S7 (cf. deploy/ci/bascule-preprod/bascule.mjs) : sauvegarde prod →
-# restauration préprod → migrations → copie docs → recon → flip serving →
+# Enchaîne S0→S7 (cf. deploy/ci/bascule-preprod/bascule.mjs) : DÉCLENCHEUR dump
+# prod → restore préprod → migrations → copie docs → recon → flip serving →
 # refresh différentiel → smoke. Toute la LOGIQUE + les GARDES fail-closed sont
 # en Node ; ce workflow reste fin (installe les outils, câble les secrets,
 # appelle le CLI dans l'ordre). AUCUNE IA au runtime.
+#
+# RUNNER KUBECTL-ONLY (contrat owner + co-val i-infra) : AUCUNE PII, AUCUNE cred
+# S3, AUCUN listing/clé ne transite ni n'est lu par le runner GitHub (OVH n'a pas
+# de scope S3 list-only). Le runner ne fait QUE kubectl (patch cronjob suspend,
+# dispatch + OBSERVE .status des Jobs — JAMAIS `kubectl logs`, scale quiesce, flip
+# set-env) + curl /health (smoke). Les 3 vérifs S3 (freshness/recon/runs) + la
+# copie docs + restore/rollback sont des Jobs PRÉPROD verdict-only (creds via
+# secretKeyRef in-cluster). dump prod = CronJob owner (radar-db-backup-prod).
+# 0 cred S3 runner / 0 pg_dump / 0 pg_restore / 0 s5cmd / 0 aws sur le runner.
 #
 # GO owner matérialisé = l'input CONFIRM (GARDE G3, motif iso-prod-AAAA-MM-JJ),
 # recoupé au jour courant (anti-rejeu). DRY_RUN=true par défaut = un dispatch nu
@@ -58,25 +67,30 @@ jobs:
     env:
       # ── GO owner + anti-rejeu (CONFIRM_EXPECTED calculé au pas 'compute') ──
       CONFIRM: ${{ inputs.CONFIRM }}
-      # ── DB source prod (RO) — libpq, jamais d'URI mot-de-passe en clair ────
-      PROD_PGHOST: ${{ secrets.BASCULE_PROD_PGHOST }}
-      PROD_PGPORT: ${{ secrets.BASCULE_PROD_PGPORT }}
-      PROD_PGUSER: ${{ secrets.BASCULE_PROD_PGUSER }}
-      PROD_PGPASSWORD: ${{ secrets.BASCULE_PROD_PGPASSWORD }}
-      PROD_PGDATABASE: ${{ secrets.BASCULE_PROD_PGDATABASE }}
-      # ── DB cible préprod — libpq ──────────────────────────────────────────
-      PREPROD_PGHOST: ${{ secrets.BASCULE_PREPROD_PGHOST }}
-      PREPROD_PGPORT: ${{ secrets.BASCULE_PREPROD_PGPORT }}
-      PREPROD_PGUSER: ${{ secrets.BASCULE_PREPROD_PGUSER }}
-      PREPROD_PGPASSWORD: ${{ secrets.BASCULE_PREPROD_PGPASSWORD }}
-      PREPROD_PGDATABASE: ${{ secrets.BASCULE_PREPROD_PGDATABASE }}
-      # ── Docs S3 (identité spanning read prod / write préprod, même endpoint) ─
-      AWS_ACCESS_KEY_ID: ${{ secrets.BASCULE_DOCS_AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.BASCULE_DOCS_AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ vars.BASCULE_AWS_REGION }}
+      # ── RUNNER KUBECTL-ONLY (0 cred S3, 0 cred DB) ────────────────────────
+      # Le runner ne se connecte à AUCUNE DB ET NE TOUCHE PLUS S3 : plus de
+      # BASCULE_PROD_PG*/BASCULE_PREPROD_PG* NI de BASCULE_S3_LIST_AWS_*/AWS_*
+      # (OVH n'a pas de scope S3 list-only → toute cred S3 runner pourrait GET le
+      # dump PII). Les 3 vérifs S3 (freshness/recon/runs) + la copie docs +
+      # restore/rollback sont des Jobs PRÉPROD verdict-only, creds via secretKeyRef
+      # in-cluster (radar-pra-admin S3-only, radar-db-credentials, radar-docs-s3-credentials).
+      # Ne restent ici que des PARAMÈTRES NON secrets (endpoint/buckets rendus
+      # dans les Jobs). AUCUN AWS_* / secret S3 côté runner.
       BHS: ${{ vars.BASCULE_BHS_ENDPOINT }}
+      S3_REGION: ${{ vars.BASCULE_AWS_REGION }}
       PROD_DOCS: ${{ vars.BASCULE_PROD_DOCS_BUCKET }}
       PREPROD_DOCS: ${{ vars.BASCULE_PREPROD_DOCS_BUCKET }}
+      # ── Dump prod (déclencheur T1) : CronJob owner + bucket de backups ─────
+      DUMP_BUCKET: ${{ vars.BASCULE_DUMP_BUCKET }}
+      DUMP_PREFIX: ${{ vars.BASCULE_DUMP_PREFIX || 'postgres/prod/sets' }}
+      DUMP_CRONJOB: ${{ vars.BASCULE_DUMP_CRONJOB || 'radar-db-backup-prod' }}
+      DUMP_CRONJOB_NAMESPACE: ${{ vars.BASCULE_DUMP_CRONJOB_NAMESPACE || 'radar-immobilier' }}
+      # ── Docs-sync Option A (NON secrets : nom de secret éphémère + grantee id) ──
+      # Le secret ÉPHÉMÈRE radar-docs-src-preprod (creds immo-docs-prod) est créé
+      # par k8s au GO (ownerRef=Job docs-sync, GC cascade au TTL) — jamais ici.
+      # DOCS_SYNC_GRANTEE = canonical id radar-docs préprod (GrantFullControl).
+      DOCS_SYNC_READ_SECRET: ${{ vars.BASCULE_DOCS_SYNC_READ_SECRET || 'radar-docs-src-preprod' }}
+      DOCS_SYNC_GRANTEE: ${{ vars.BASCULE_DOCS_SYNC_GRANTEE || '1901410700457444:user-Wq74B63YQum8' }}
       # ── Contrôle positif source + cible cluster + smoke ───────────────────
       EXPECTED_DATABASE: ${{ vars.BASCULE_EXPECTED_DATABASE }}
       PREPROD_NAMESPACE: ${{ vars.BASCULE_PREPROD_NAMESPACE || 'radar-immobilier-preprod' }}
@@ -86,7 +100,6 @@ jobs:
       UNQUIESCE_REPLICAS: ${{ vars.BASCULE_UNQUIESCE_REPLICAS }}
       BASCULE_WORKDIR: ${{ github.workspace }}/.bascule-work
       CLI: deploy/ci/bascule-preprod/bascule.mjs
-      S5CMD_VERSION: "2.2.2"
     steps:
       - uses: actions/checkout@v4
 
@@ -98,26 +111,11 @@ jobs:
         with:
           node-version: "22"
 
-      # postgresql-client 16 (dump 16 → restore 16, custom-format).
-      - name: Install postgresql-client 16
-        run: |
-          set -euo pipefail
-          sudo install -d /usr/share/postgresql-common/pgdg
-          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
-          . /etc/os-release
-          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends postgresql-client-16
-          pg_dump --version && pg_restore --version
-
-      - name: Install s5cmd
-        run: |
-          set -euo pipefail
-          cd "$(mktemp -d)"
-          curl -fsSL -o s5cmd.tgz "https://github.com/peak/s5cmd/releases/download/v${S5CMD_VERSION}/s5cmd_${S5CMD_VERSION}_Linux-64bit.tar.gz"
-          tar xzf s5cmd.tgz s5cmd
-          sudo install -m 0755 s5cmd /usr/local/bin/s5cmd
-          s5cmd version
+      # RUNNER KUBECTL-ONLY : plus AUCUN outil de données/S3 sur le runner (0
+      # postgresql-client, 0 s5cmd, 0 aws). Le runner ne fait que kubectl (pilotage
+      # + dispatch/observe Jobs) + curl (smoke /health). pg_dump/pg_restore/aws-cli
+      # vivent dans les Jobs préprod (postgis:16-3.4, amazon/aws-cli) et le CronJob
+      # owner du dump prod. AUCUN téléchargement d'outil S3 ici.
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
@@ -148,26 +146,68 @@ jobs:
           kubectl -n "$PREPROD_NAMESPACE" get deploy radar-api -o name
           echo "pre-flight cluster OK — ${expected} / ${PREPROD_NAMESPACE}"
 
+      # ── DUAL-KUBECONFIG (déclencheur dump S1 = cluster/namespace PROD) ──────
+      # Le déclencheur S1 patche le CronJob `radar-db-backup-prod` dans la PROD
+      # (`radar-immobilier`) : le kubeconfig préprod par défaut n'a PAS le RBAC
+      # prod (403). On monte un kubeconfig PROD DÉDIÉ dans un FICHIER SÉPARÉ
+      # (secret KUBE_CONFIG_DATA_PROD = token name-scopé patch de CE CronJob +
+      # VAP suspend-only, généré par k8s au prod-apply) et on exporte
+      # DUMP_KUBECONFIG (lu par bascule.mjs, utilisé UNIQUEMENT sur les 2 patch
+      # cronjob prod ; tout le reste reste sur le kubeconfig préprod par défaut).
+      # Joué HORS DRY (pas de token prod avant l'apply ; le DRY ne trigger pas).
+      - name: Configure kubeconfig PROD (déclencheur dump S1)
+        if: ${{ !inputs.DRY_RUN }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBE_CONFIG_DATA_PROD }}" | base64 -d > "$HOME/.kube/config-prod"
+          chmod 600 "$HOME/.kube/config-prod"
+          echo "DUMP_KUBECONFIG=$HOME/.kube/config-prod" >> "$GITHUB_ENV"
+
+      # Contrôle POSITIF du cluster PROD (kubeconfig dump) — LOCAL (config view,
+      # aucun appel API : le token est name-scopé patch-only). Refuse si le
+      # kubeconfig prod ne cible pas le cluster attendu.
+      - name: Pre-flight — assert PROD cluster (kubeconfig dump)
+        if: ${{ !inputs.DRY_RUN }}
+        env:
+          EXPECTED_KUBE_APISERVER_HOST_PROD: ${{ vars.EXPECTED_KUBE_APISERVER_HOST_PROD || vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
+          expected="${EXPECTED_KUBE_APISERVER_HOST_PROD:-$DEFAULT_HOST}"
+          server="$(kubectl --kubeconfig "$HOME/.kube/config-prod" config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "PROD kubeconfig apiserver host : ${host:-<none>}"
+          echo "expected PROD apiserver host   : ${expected}"
+          if [ "$host" != "$expected" ]; then
+            echo "::error title=Wrong PROD cluster — bascule refused::dump kubeconfig targets '${host:-<none>}' but expected '${expected}'."
+            exit 1
+          fi
+          echo "pre-flight PROD cluster OK — ${expected} (déclencheur dump S1)"
+
       # ── S0 ────────────────────────────────────────────────────────────────
       - name: S0 preflight (binaires + secrets + EXPECTED_DATABASE)
         run: node "$CLI" preflight
 
       # ── S0.b (advisory) — prédiction précoce de la mémoire de collecte ─────
-      # Lit `runs/` de PROD_DOCS (read-only) : prédit si la copie S3 amènera bien
-      # la mémoire de collecte → delta. ADVISORY : ne bloque JAMAIS (WARN seul),
-      # joué aussi en DRY (0 écriture). Le vrai gate est plus bas (PREPROD_DOCS).
-      - name: S0.b precheck-runs (advisory, cible PROD_DOCS)
+      # Job PRÉPROD (read-only) qui liste `runs/` de PROD_DOCS : prédit si la copie
+      # S3 amènera la mémoire de collecte → delta. ADVISORY : `continue-on-error`
+      # rend le Job non bloquant (le runner ne lit que .status). Le vrai gate est
+      # plus bas (PREPROD_DOCS).
+      - name: S0.b precheck-runs (advisory, Job cible PROD_DOCS)
         continue-on-error: true
         run: node "$CLI" precheck-runs --prod
 
       # ══════════════ DRY_RUN : rien de destructif ══════════════
-      - name: S3 copy-docs (plan --dry)
+      # 0 S3 runner : la copie réelle n'est PAS jouée en DRY (dispatchée en
+      # exécution). Le signal DRY = Job recon informatif (dest ⊇ src, verdict).
+      - name: S3 copy-docs (DRY — copie non jouée)
         if: ${{ inputs.DRY_RUN }}
         env:
           DRY: "1"
         run: node "$CLI" copy-docs
 
-      - name: S3b recon (informatif en DRY)
+      - name: S3b recon (Job informatif en DRY)
         if: ${{ inputs.DRY_RUN }}
         continue-on-error: true
         run: node "$CLI" recon
@@ -180,11 +220,11 @@ jobs:
         if: ${{ !inputs.DRY_RUN && !inputs.SKIP_QUIESCE }}
         run: node "$CLI" quiesce
 
-      - name: S1 dump prod (pg_dump custom, T0)
+      - name: S1 dump prod (DÉCLENCHEUR T1 — patch CronJob + Job freshness)
         if: ${{ !inputs.DRY_RUN }}
         run: node "$CLI" dump
 
-      - name: S2 restore préprod (G1 rollback + G2 quiesce + G3 confirm)
+      - name: S2 restore préprod (G2 quiesce + G1 Job rollback + Jobs restore)
         if: ${{ !inputs.DRY_RUN }}
         run: node "$CLI" restore
 
@@ -192,11 +232,14 @@ jobs:
         if: ${{ !inputs.DRY_RUN }}
         run: node "$CLI" migrate
 
-      - name: S3 copy-docs (s5cmd sync server-side, additif)
+      # docs-sync = Job radar-api (aws-sdk CopyObject + grant). Le secret éphémère
+      # radar-docs-src-preprod est créé par k8s (ownerRef=Job.UID) et GC en cascade
+      # au TTL du Job — la CI ne fait AUCUNE opération secret (0 droit secrets).
+      - name: S3 copy-docs (Job radar-api aws-sdk CopyObject + grant, additif)
         if: ${{ !inputs.DRY_RUN }}
         run: node "$CLI" copy-docs
 
-      - name: S3b recon (assert dest ⊇ src — fatal)
+      - name: S3b recon (Job aws s3 sync --dryrun — dest ⊇ src, fatal)
         if: ${{ !inputs.DRY_RUN }}
         run: node "$CLI" recon
 
@@ -213,13 +256,12 @@ jobs:
         if: ${{ always() && !inputs.DRY_RUN }}
         run: node "$CLI" unquiesce
 
-      # Pré-check runs/ (mémoire de collecte) — APRÈS S3/S3b (copie docs) et
-      # AVANT S6 (refresh). Gate fail-closed sur PREPROD_DOCS = bucket réellement
-      # LU par le delta : `runs/` VIDE → exit 1 (rescrape complet imminent) ;
-      # source sans collected-urls.jsonl → WARN (refetch borné self-heal). Non
-      # joué en DRY (la copie S3 réelle n'a pas eu lieu → faux négatif) ; S6
-      # re-vérifie en interne (ASSERT_RUNS_MEMORY, défense en profondeur).
-      - name: precheck-runs (gate mémoire de collecte — PREPROD_DOCS, avant S6)
+      # Pré-check runs/ (mémoire de collecte) — Job PRÉPROD verdict-only, APRÈS
+      # S3/S3b (copie docs) et AVANT S6 (refresh). Gate fail-closed sur PREPROD_DOCS
+      # = bucket réellement LU par le delta : `runs/` VIDE → Job exit 1 (rescrape
+      # complet imminent). Non joué en DRY (la copie S3 réelle n'a pas eu lieu →
+      # faux négatif) ; S6 re-vérifie en interne (ASSERT_RUNS_MEMORY, défense en profondeur).
+      - name: precheck-runs (gate mémoire de collecte — Job PREPROD_DOCS, avant S6)
         if: ${{ !inputs.DRY_RUN && !inputs.SKIP_REFRESH }}
         run: node "$CLI" precheck-runs
 
@@ -231,19 +273,22 @@ jobs:
       - name: S7 smoke préprod/health (db.ok + objectStore.ok)
         run: node "$CLI" smoke
 
-      # ── Rollback DURABLE (MEDIUM 1) : sort les dumps du workdir éphémère ────
-      # Uploade le dump prod (S1) + le dump rollback préprod (G1) + les états, en
-      # `if: always()` pour les capturer même sur échec (le rollback G1 est créé
-      # AVANT le restore destructif). Alternative pour très gros dumps : pousser
-      # le rollback vers un bucket S3 de backups via s5cmd (voir README).
-      - name: Rollback artefacts (dumps + états)
+      # ── Rollback DURABLE : les DUMPS ne transitent plus par le runner ──────
+      # Le dump prod (S1, CronJob owner) ET le dump rollback préprod (G1, Job)
+      # vivent dans le bucket de backups (radar-immobilier-backups-preprod) —
+      # DURABLES, hors workdir éphémère. On n'uploade en artefact GitHub que les
+      # POINTEURS/états (clés S3 + T1 + quiesce/recon), en `if: always()` pour la
+      # traçabilité même sur échec. Restaurer le rollback : rejouer le Job restore
+      # avec DUMP_KEY = contenu de LATEST_PREPROD_ROLLBACK_KEY.txt (voir README).
+      - name: Rollback pointeurs + états (clés S3, PAS de dump runner)
         if: ${{ always() && !inputs.DRY_RUN }}
         uses: actions/upload-artifact@v4
         with:
           name: bascule-rollback-${{ github.run_id }}
           path: |
-            ${{ github.workspace }}/.bascule-work/*.dump
-            ${{ github.workspace }}/.bascule-work/T0.txt
+            ${{ github.workspace }}/.bascule-work/T1.txt
+            ${{ github.workspace }}/.bascule-work/LATEST_PROD_DUMP_KEY.txt
+            ${{ github.workspace }}/.bascule-work/LATEST_PREPROD_ROLLBACK_KEY.txt
             ${{ github.workspace }}/.bascule-work/quiesce-state.json
             ${{ github.workspace }}/.bascule-work/recon.ok.json
           if-no-files-found: warn
