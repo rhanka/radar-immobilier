@@ -51,6 +51,16 @@ on:
         required: false
         type: boolean
         default: false
+      FORCE_REFRESH:
+        description: "true = précipiter le CronJob préprod radar-refresh-pv APRÈS la bascule (ordre bascule→refresh câblé, GH-triggered)"
+        required: false
+        type: boolean
+        default: false
+      FORCE_REFRESH_WAIT_COMPLETE:
+        description: "true = attendre la fin du balayage refresh (fail-closed) ; false = confirmer le démarrage puis rendre la main (async)"
+        required: false
+        type: boolean
+        default: false
 
 # Jamais deux bascules en parallèle (write préprod).
 concurrency:
@@ -296,3 +306,68 @@ jobs:
             ${{ github.workspace }}/.bascule-work/recon.ok.json
           if-no-files-found: warn
           retention-days: 7
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # ORDRE CÂBLÉ (owner) : bascule (restore prod → préprod) PUIS refresh sur les
+  # données restaurées — le tout GH-triggered, 0 geste manuel. Ce job précipite
+  # le CronJob préprod radar-refresh-pv (hors planning 5/11/17/23h) APRÈS le
+  # succès de `bascule`, quand FORCE_REFRESH=true. `needs: bascule` garantit
+  # l'ORDRE ; `if` exige le succès de la bascule (jamais un refresh sur un restore
+  # échoué). Décorrélé aussi via le workflow autonome bascule-refresh.yml.
+  #
+  # Cred = KUBE_CONFIG_DATA_PREPROD (SA radar-ci-deployer-preprod) : a déjà
+  # batch/jobs:create + batch/cronjobs:get en préprod (deploy/k8s/11-ci-deployer-
+  # preprod-rbac.yaml) — aucune extension RBAC. Runner kubectl-only + STATUS-ONLY.
+  # ═══════════════════════════════════════════════════════════════════════════
+  force-refresh:
+    needs: bascule
+    # Joué seulement si demandé ET si la bascule a réussi (jamais en DRY : rien
+    # n'a été restauré). `create job --from=cronjob` n'est pas destructif pour la prod.
+    if: ${{ inputs.FORCE_REFRESH && !inputs.DRY_RUN && needs.bascule.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 420
+    permissions:
+      contents: read
+    env:
+      PREPROD_NAMESPACE: ${{ vars.BASCULE_PREPROD_NAMESPACE || 'radar-immobilier-preprod' }}
+      REFRESH_CRONJOB: ${{ vars.BASCULE_REFRESH_CRONJOB || 'radar-refresh-pv' }}
+      FORCE_REFRESH_WAIT_COMPLETE: ${{ inputs.FORCE_REFRESH_WAIT_COMPLETE && '1' || '0' }}
+      GITHUB_RUN_ID: ${{ github.run_id }}
+      CLI: deploy/ci/bascule-preprod/bascule.mjs
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig (preprod deployer)
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBE_CONFIG_DATA_PREPROD }}" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Pre-flight — assert preprod cluster + namespace
+        env:
+          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
+          expected="${EXPECTED_KUBE_APISERVER_HOST:-$DEFAULT_HOST}"
+          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "kubeconfig apiserver host : ${host:-<none>}"
+          echo "expected apiserver host   : ${expected}"
+          if [ "$host" != "$expected" ]; then
+            echo "::error title=Wrong cluster — refresh refused::kubeconfig targets '${host:-<none>}' but expected '${expected}'."; exit 1
+          fi
+          kubectl -n "$PREPROD_NAMESPACE" get cronjob "$REFRESH_CRONJOB" -o name
+          echo "pre-flight OK — ${expected} / ${PREPROD_NAMESPACE} / cronjob ${REFRESH_CRONJOB}"
+
+      - name: Force preprod refresh (precipitate radar-refresh-pv, après la bascule)
+        run: node "$CLI" force-refresh

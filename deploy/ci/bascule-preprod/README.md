@@ -4,6 +4,13 @@ Bascule **rejouable par la CI immo / l'owner SANS IA** (OPS-3) : déclencheur du
 prod → restore préprod → migrations → copie docs → recon → flip serving → refresh
 différentiel → smoke. **0 Python.**
 
+> **CD-native (toute action de prod pilotée par du code)** — l'apply du bundle prod
+> (VAP + RBAC T1 + RO-role + CronJob dump) et le mint des 2 secrets sont désormais
+> des pas de pipeline (`.github/workflows/bascule-apply-bundle.yml`), plus aucun
+> `kubectl apply` owner-direct. Le refresh préprod est GH-triggerable à la demande
+> (`bascule-refresh.yml`) et câblé APRÈS la bascule (`bascule-preprod.yml`, input
+> `FORCE_REFRESH`). Détails, secrets GH exacts et gestes éliminés : **`CD_NATIVE_MIGRATION.md`**.
+
 ## RUNNER KUBECTL-ONLY (contrat owner + co-val i-infra, NON négociable)
 
 **Contrainte dure : AUCUNE donnée PII, AUCUNE cred S3, AUCUN listing/clé ne
