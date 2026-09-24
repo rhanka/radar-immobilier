@@ -1015,6 +1015,88 @@ function cmdSmoke() {
 }
 
 // =============================================================================
+// force-refresh — PRÉCIPITE un run du CronJob préprod `radar-refresh-pv` à la
+// demande (hors planning 5/11/17/23h), 100% code-driven (complément owner CD).
+//
+// Le runner reste kubectl-only + STATUS-ONLY (0 S3/DB runner, 0 `kubectl logs`) :
+//   `kubectl create job <name> --from=cronjob/radar-refresh-pv` lit le jobTemplate
+//   du CronJob (MÊME s'il est suspendu → précipitation possible hors créneau) et
+//   crée un Job one-off ; le Job tourne sous `serviceAccountName: radar-app`
+//   (creds in-cluster via secretKeyRef, jamais côté runner). Le runner ne lit que
+//   `.status` (classifyJobStatus). À jouer APRÈS la bascule (données prod
+//   restaurées en préprod) — l'ordre est câblé côté workflow (needs: bascule).
+//
+// Le balayage refresh-pv peut durer ~5 h (activeDeadlineSeconds 19800) : par
+// défaut on CONFIRME un démarrage propre (Active/succeeded, borné
+// FORCE_REFRESH_START_CONFIRM_SEC) puis on rend la main VERT (async, sémantique
+// CronJob) ; FORCE_REFRESH_WAIT_COMPLETE=1 attend la fin (fail-closed).
+// =============================================================================
+
+// Pure : nom de Job RFC1123 sûr dérivé d'un suffixe (run id / horodatage).
+// Exportée pour le self-test (déterminisme + borne 63 car + charset [a-z0-9-],
+// pas de tiret en tête/fin même après troncature).
+export function refreshJobName(suffix) {
+  const base = "radar-refresh-pv-forced";
+  const clean = String(suffix ?? "")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "-")
+    .replace(/^-+|-+$/g, "");
+  const name = clean ? `${base}-${clean}` : base;
+  return name.slice(0, 63).replace(/-+$/g, "");
+}
+
+function cmdForceRefresh() {
+  section("force-refresh — précipiter le CronJob préprod radar-refresh-pv (hors planning)");
+  const ns = opt("PREPROD_NAMESPACE", "radar-immobilier-preprod");
+  const cronjob = opt("REFRESH_CRONJOB", "radar-refresh-pv");
+  const suffix = opt("GITHUB_RUN_ID", "") || new Date().toISOString().replace(/[:.]/g, "-");
+  const jobName = refreshJobName(suffix);
+  const startConfirmSec = Number(opt("FORCE_REFRESH_START_CONFIRM_SEC", "180"));
+  const waitComplete = opt("FORCE_REFRESH_WAIT_COMPLETE", "0") === "1";
+  const completeTimeoutSec = Number(opt("FORCE_REFRESH_TIMEOUT_SEC", "21600")); // 6 h
+
+  // Le CronJob doit exister (activé par l'overlay préprod refresh-cronjobs).
+  // Fail-closed : sans lui, `--from=cronjob` échouerait sans signal clair.
+  const exists = run("kubectl", ["-n", ns, "get", "cronjob", cronjob, "-o", "name"], { capture: true, allowFail: true });
+  if (exists.status !== 0) {
+    die(
+      `force-refresh — CronJob ${ns}/${cronjob} introuvable : l'overlay préprod doit l'avoir activé ` +
+        `(step CD « Deploy refresh CronJobs (preprod) », armé par REFRESH_CRONJOB_PREPROD_ENABLED). ` +
+        `Détail : ${(exists.stderr || "").trim() || "not found"}`,
+    );
+  }
+
+  // Job immuable : purge une éventuelle instance homonyme (rejeu) puis crée depuis
+  // le CronJob. create --from=cronjob ignore spec.suspend (précipitation à la demande).
+  run("kubectl", ["-n", ns, "delete", "job", jobName, "--ignore-not-found"], { allowFail: true });
+  run("kubectl", ["-n", ns, "create", "job", jobName, `--from=cronjob/${cronjob}`]);
+  log(`Job ${ns}/${jobName} créé depuis cronjob/${cronjob} — refresh précipité (hors planning).`);
+
+  const deadline = Date.now() + (waitComplete ? completeTimeoutSec : startConfirmSec) * 1000;
+  for (;;) {
+    const st = run("kubectl", ["-n", ns, "get", "job", jobName, "-o", "jsonpath={.status}"], { capture: true, allowFail: true });
+    let status = {};
+    try { status = st.stdout && st.stdout.trim() ? JSON.parse(st.stdout) : {}; } catch { status = {}; }
+    const v = classifyJobStatus(status);
+    if (v.done && v.ok) { log(`force-refresh OK — Job ${jobName} terminé (.status=succeeded).`); return; }
+    if (v.done && !v.ok) {
+      die(`force-refresh — Job ${jobName} en ÉCHEC (.status=failed) — inspecter in-cluster : kubectl -n ${ns} logs job/${jobName} (0 logs runner).`);
+    }
+    if (Date.now() >= deadline) {
+      if (waitComplete) {
+        die(`force-refresh — Job ${jobName} non terminé dans ${completeTimeoutSec}s (FORCE_REFRESH_WAIT_COMPLETE=1) — inspecter in-cluster (0 logs runner).`);
+      }
+      // Démarrage confirmé sans échec : le balayage se poursuit en tâche de fond
+      // (sémantique CronJob). VERT (async) — suivi via le rapport durable
+      // refresh/018/sweep/latest.json et `kubectl get job`.
+      log(`force-refresh OK (async) — Job ${jobName} démarré (.status=${v.state}) ; le balayage continue en tâche de fond. Suivi : kubectl -n ${ns} get job ${jobName}.`);
+      return;
+    }
+    spawnSync("bash", ["-lc", "sleep 10"], { stdio: "ignore" });
+  }
+}
+
+// =============================================================================
 // dispatch
 // =============================================================================
 const COMMANDS = {
@@ -1029,6 +1111,7 @@ const COMMANDS = {
   flip: cmdFlip,
   unquiesce: cmdUnquiesce,
   refresh: cmdRefresh,
+  "force-refresh": cmdForceRefresh,
   smoke: cmdSmoke,
 };
 
@@ -1037,9 +1120,11 @@ function main() {
   const isHelp = !cmd || cmd === "-h" || cmd === "--help";
   if (isHelp || !COMMANDS[cmd]) {
     console.log(
-      "usage: node bascule.mjs <preflight|quiesce|dump|restore|migrate|copy-docs|recon|precheck-runs|flip|unquiesce|refresh|smoke>\n" +
+      "usage: node bascule.mjs <preflight|quiesce|dump|restore|migrate|copy-docs|recon|precheck-runs|flip|unquiesce|refresh|force-refresh|smoke>\n" +
         "  RUNNER KUBECTL-ONLY : 0 cred S3, 0 pg_dump/pg_restore, 0 listing/clé sur le runner.\n" +
         "    Toute S3/DB vit dans des Jobs préprod verdict-only ; le runner ne lit que .status (0 kubectl logs).\n" +
+        "  force-refresh : précipite le CronJob préprod radar-refresh-pv à la demande (kubectl create job\n" +
+        "    --from=cronjob), hors planning 5/11/17/23h. À jouer APRÈS la bascule (ordre câblé côté workflow).\n" +
         "  dump (S1) : DÉCLENCHEUR — patch CronJob prod suspend=false (kubeconfig PROD), Job freshness\n" +
         "    (poll interne, verdict), re-suspend. Dump réel = CronJob owner (radar-db-backup-prod).\n" +
         "  restore (S2) : G2 quiesce + G1 Job rollback préprod, puis Job restore (fetch self-select + pg_restore).\n" +
