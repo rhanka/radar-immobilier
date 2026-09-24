@@ -74,6 +74,17 @@ schedule).
 > `bascule-apply-bundle.yml` (the RO-role Job re-asserts the new password); no app
 > impact (dump-only role). See `CRED_CYCLE.md`.
 
+### MANDATORY `.env` backup (PRA — étape 1)
+
+**Every value secret above MUST also be stored in the local `.env`, not only in the GitHub secret.** GitHub secrets are write-only and GitHub-bound — they are the CI runtime cache, NOT a recovery store. The `.env` copy is the étape-1 recovery vault (owner ops rule, settled with the k8s lane):
+
+- `RADAR_DB_RO_PROD_PASSWORD` — the generated RO password, stored in **`.env` AND** the GitHub secret.
+- `radar-pra-admin` S3 keys — already in `.env`; mirror the two values into the GitHub secrets.
+
+Losing a GitHub secret loses **access** (re-mintable: the RO-role Job re-asserts the password, S3 keys regenerate), **not data** (the Postgres rows and S3 objects are independent of these credentials, which are access creds, not encryption keys). The `.env` copy lets you re-run the restore locally (`node bascule.mjs …`) without re-minting, and is what keeps recovery independent of GitHub.
+
+> **PRA scope.** GitHub secrets + `.env` are operational copies, not a PRA-grade secret store. A durable third-party vault (external, off-region) is **étape 2** — see the #740 dossier ("externalisation hors-région, PRA complet"). Étape 1 proves the backup+restore mechanism with `.env` as the recovery copy.
+
 ### Kubeconfig secrets (cluster access)
 
 | GH secret | Identity | Used by | Required cluster rights |
