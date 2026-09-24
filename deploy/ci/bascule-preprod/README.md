@@ -4,12 +4,17 @@ Bascule **rejouable par la CI immo / l'owner SANS IA** (OPS-3) : déclencheur du
 prod → restore préprod → migrations → copie docs → recon → flip serving → refresh
 différentiel → smoke. **0 Python.**
 
-> **CD-native (toute action de prod pilotée par du code)** — l'apply du bundle prod
-> (VAP + RBAC T1 + RO-role + CronJob dump) et le mint des 2 secrets sont désormais
-> des pas de pipeline (`.github/workflows/bascule-apply-bundle.yml`), plus aucun
-> `kubectl apply` owner-direct. Le refresh préprod est GH-triggerable à la demande
-> (`bascule-refresh.yml`) et câblé APRÈS la bascule (`bascule-preprod.yml`, input
-> `FORCE_REFRESH`). Détails, secrets GH exacts et gestes éliminés : **`CD_NATIVE_MIGRATION.md`**.
+> **CD-native v2 (toute action de prod pilotée par du code, 0 owner-in-the-loop)** —
+> l'apply du bundle prod (2 SealedSecrets + VAP + RBAC T1 + RO-role + CronJob dump)
+> se fait **au merge sur `main`** (`.github/workflows/bascule-bundle-cd.yml`,
+> cred permanent `KUBE_CONFIG_DATA_PROD` = SA `radar-ci-bascule-prod`), plus aucun
+> token éphémère, plus aucun `kubectl apply` owner-direct, plus aucune
+> matérialisation GH-secret des 2 creds (SealedSecrets committées, matérialisées
+> par le controller sealed-secrets in-cluster). La bascule tourne en
+> **planification nocturne** (`bascule-preprod.yml`, `schedule`) ; le refresh reste
+> GH-triggerable à la demande (`bascule-refresh.yml`) et câblé APRÈS la bascule.
+> Flux complet, install 1×, secrets GH devenus supprimables et gestes éliminés :
+> **`CD_NATIVE_MIGRATION.md`**.
 
 ## RUNNER KUBECTL-ONLY (contrat owner + co-val i-infra, NON négociable)
 
@@ -100,7 +105,7 @@ Ordre workflow : S0 → **S0.b (`precheck-runs --prod`, Job advisory)** → **Q*
 | Clé | Type | Contenu / usage |
 | --- | --- | --- |
 | `KUBE_CONFIG_DATA_BASCULE_PREPROD` | secret | kubeconfig base64 **préprod** — token **DÉDIÉ moindre-privilège** (SA `radar-ci-bascule-preprod`), **PAS** le secret partagé `KUBE_CONFIG_DATA` (scope plus large : build-push-images / run-job / k8s-apply-mcp / rollback). Pilotage par défaut. |
-| `KUBE_CONFIG_DATA_PROD` | secret | kubeconfig base64 **PROD** (token name-scopé patch `radar-db-backup-prod` + VAP suspend-only, généré au prod-apply) → `DUMP_KUBECONFIG`, utilisé **UNIQUEMENT** sur les 2 patch cronjob prod. Non requis en DRY. |
+| `KUBE_CONFIG_DATA_PROD_TRIGGER` | secret | kubeconfig base64 **PROD** (token name-scopé patch `radar-db-backup-prod` + VAP suspend-only, SA `radar-ci-trigger-prod`) → `DUMP_KUBECONFIG`, utilisé **UNIQUEMENT** sur les 2 patch cronjob prod. Non requis en DRY. **Renommé v2** (le nom `KUBE_CONFIG_DATA_PROD` désigne désormais la SA d'apply du bundle). |
 | `BHS` / `S3_REGION` / `PROD_DOCS` / `PREPROD_DOCS` / `DUMP_BUCKET` / `DUMP_PREFIX` | var | endpoint + buckets + préfixe dump (`postgres/prod/sets`), rendus dans les Jobs. **NON secrets.** |
 | `DUMP_CRONJOB` / `DUMP_CRONJOB_NAMESPACE` | var | CronJob dump owner (défauts `radar-db-backup-prod` / `radar-immobilier`). |
 | `DOCS_SYNC_READ_SECRET` / `DOCS_SYNC_GRANTEE` | var | nom du secret éphémère (`radar-docs-src-preprod`) + canonical id du `GrantFullControl` (défaut `1901410700457444:user-Wq74B63YQum8`). **NON secrets** (nom + id, pas de valeur cred). |
@@ -168,8 +173,8 @@ pendant que k8s le crée. **La CI ne crée / ne lit / ne supprime AUCUN secret**
 1. **Kubeconfig PROD du trigger (résolu par dual-kubeconfig).** Le CronJob dump
    reste en PROD (`radar-immobilier`) ; le RBAC ci-deployer préprod exclut la prod
    (`deploy/k8s/11-ci-deployer-preprod-rbac.yaml`) → patch préprod = 403. S1 passe
-   par `DUMP_KUBECONFIG` (secret `KUBE_CONFIG_DATA_PROD` : token name-scopé patch
-   `radar-db-backup-prod` + **VAP suspend-only**, à fournir au prod-apply). Fail-closed
+   par `DUMP_KUBECONFIG` (secret `KUBE_CONFIG_DATA_PROD_TRIGGER` : token name-scopé
+   patch `radar-db-backup-prod` + **VAP suspend-only**, minté à l'install). Fail-closed
    si absent. DRY ne trigger pas.
 2. **Convention de clé dump (figée k8s) :** `postgres/prod/sets/<ISO-ts>/radar.dump`
    → `DUMP_PREFIX=postgres/prod/sets`, listing **récursif** (list-objects-v2 est
