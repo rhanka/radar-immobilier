@@ -1400,21 +1400,61 @@ jobs:
             kubectl -n "$NAMESPACE" set image deploy/radar-immo-mcp mcp="${IMAGE_PREFIX}/radar-api@${DIG_API}"
           fi
 
+      # §6-prod DEPLOY REFRESH CRONJOB (prod) — jumeau prod de l'étape préprod :
+      # applique + dé-suspend `radar-refresh-pv` dans radar-immobilier via
+      # l'overlay refresh-cronjobs-prod. Placée APRÈS la promotion des images :
+      # le CronJob doit porter exactement l'empreinte que les Deployments
+      # viennent de recevoir, jamais une plus ancienne ni une plus récente.
+      #
+      # Épinglage par EMPREINTE (et non par tag `<sha7>` comme en préprod) : la
+      # prod est build-once et survit au GC des tags. Le rendu passe par la cible
+      # `render-prod` de refresh-018.mk — la MÊME que la CI exécute dans
+      # `verify-renders` sur chaque PR. Trois conséquences voulues :
+      #   - ce qui est appliqué est ce que la CI a vérifié, au caractère près ;
+      #   - la cible refuse un IMAGE_REF qui n'est pas une empreinte `@sha256:`,
+      #     et refuse un rendu portant encore le placeholder fail-loud ou
+      #     `:latest` — un apply non épinglé est impossible, pas seulement
+      #     improbable ;
+      #   - plus de binaire kustomize à télécharger : `kubectl kustomize` suffit.
+      #
+      # GARDE : `REFRESH_CRONJOB_PROD_ENABLED`. Tant qu'elle n'est pas définie à
+      # 'true', l'étape est sautée et la promotion continue — l'étape suivante
+      # le dit à voix haute. L'armement n'est PAS un effet de bord d'une fusion :
+      # c'est un acte owner, et ses préalables (Secrets runtime + bootstrap
+      # keyring, PVC, Role appliqué, marge de quota) sont dans
+      # deploy/ci/README.md, « Armer le rafraîchissement de production ».
       - name: Deploy refresh CronJobs (prod)
         if: ${{ vars.REFRESH_CRONJOB_PROD_ENABLED == 'true' }}
         env:
           DIG_API: ${{ steps.pick.outputs.api }}
         run: |
           set -euo pipefail
-          kver=5.4.3
-          tmp="$(mktemp -d)"
-          curl -fsSL "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv${kver}/kustomize_v${kver}_linux_amd64.tar.gz" | tar -xz -C "$tmp" kustomize
-          sudo install -m 0755 "$tmp/kustomize" /usr/local/bin/kustomize
-          cd deploy/k8s/refresh-cronjobs-prod
-          kustomize edit set image ghcr.io/rhanka/radar-api=ghcr.io/rhanka/radar-api@${DIG_API}
-          kustomize build --load-restrictor LoadRestrictionsNone . | kubectl -n radar-immobilier apply -f -
-          echo "Causal PV refresh deployed to radar-immobilier (radar-api@${DIG_API}):"
-          kubectl -n radar-immobilier get cronjob radar-refresh-pv -o wide
+          render="$(mktemp)"
+          trap 'rm -f "$render"' EXIT
+          make -f deploy/k8s/refresh-cronjobs/refresh-018.mk render-prod \
+            IMAGE_REF="${IMAGE_PREFIX}/radar-api@${DIG_API}" RENDER_OUT="$render"
+          kubectl -n "$NAMESPACE" apply -f "$render"
+          echo "Causal PV refresh deployed to ${NAMESPACE} (radar-api@${DIG_API}):"
+          kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv \
+            -o custom-columns=NAME:.metadata.name,SUSPEND:.spec.suspend,SCHEDULE:.spec.schedule,IMAGE:.spec.jobTemplate.spec.template.spec.containers[0].image
+          # Preuve d'état, pas de log d'intention : le CronJob live doit être
+          # actif ET porter l'empreinte promue, sinon la promotion est rouge.
+          live_suspend="$(kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv -o jsonpath='{.spec.suspend}')"
+          live_image="$(kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}')"
+          if [ "$live_suspend" = "true" ] || [ "$live_image" != "${IMAGE_PREFIX}/radar-api@${DIG_API}" ]; then
+            echo "::error title=Refresh CronJob not armed as expected::suspend='${live_suspend}' image='${live_image}' expected image='${IMAGE_PREFIX}/radar-api@${DIG_API}'"
+            exit 1
+          fi
+          echo "refresh CronJob armed: suspend=${live_suspend}, image=${live_image}"
+
+      # Le saut de l'étape ci-dessus est SILENCIEUX par défaut : une promotion
+      # verte ne prouve alors rien sur le rafraîchissement. Même parti pris que
+      # le « Warn if DB backup+migrate DISARMED » : désarmé n'est pas une faute,
+      # mais ne doit jamais être invisible.
+      - name: Warn if refresh CronJob DISARMED (prod)
+        if: ${{ vars.REFRESH_CRONJOB_PROD_ENABLED != 'true' }}
+        run: |
+          echo "::warning title=Refresh CronJob DISARMED (prod)::REFRESH_CRONJOB_PROD_ENABLED is not 'true' — radar-refresh-pv was NOT deployed to radar-immobilier by this promotion. Production is not refreshing PV to signals. See deploy/ci/README.md, 'Armer le rafraîchissement de production'."
 
       - name: Wait for rollouts
         run: |
