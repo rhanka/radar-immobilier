@@ -9,9 +9,10 @@ services:
       - "${POSTGRES_HOST_PORT:-5532}:5432"
 
   minio:
+    # s3mock exposes only the S3 HTTP API (no web console). The former MinIO
+    # console mapping (…:9001) is dropped.
     ports:
       - "${S3_HOST_PORT:-9100}:9000"
-      - "${S3_CONSOLE_HOST_PORT:-9101}:9001"
 
   obscura:
     ports:
