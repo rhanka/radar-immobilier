@@ -242,7 +242,7 @@ jobs:
         if: ${{ !inputs.DRY_RUN }}
         run: node "$CLI" copy-docs
 
-      - name: S3b recon (Job aws s3 sync --dryrun — dest ⊇ src, fatal)
+      - name: S3b recon (Job list-objects-v2 diff Key+Size — dest ⊇ src, fatal)
         if: ${{ !inputs.DRY_RUN }}
         run: node "$CLI" recon
 

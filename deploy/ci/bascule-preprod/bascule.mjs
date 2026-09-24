@@ -31,7 +31,7 @@
 //                        (fetch self-select + pg_restore). 0 pg_restore/0 S3 runner.
 //     migrate      S2c — Job in-cluster `node dist/db/migrate.js` (patron 36).
 //     copy-docs    S3  — Job in-cluster aws-cli (pré-check GET + s3 sync additif).
-//     recon        S3b — Job aws s3 sync --dryrun (verdict-only, dest ⊇ src).
+//     recon        S3b — Job list-objects-v2 diff Key+Size (verdict-only, dest ⊇ src).
 //     precheck-runs S3c — Job aws s3api list runs/ (verdict-only, gate MEDIUM3).
 //     flip         S5  — kubectl set env deploy/radar-api GEO_DOCUMENTS_REPOINT-
 //     refresh      S6  — Job in-cluster worker-live.js en mode delta (PAS --all).
@@ -130,6 +130,19 @@ function assertConfirm() {
   log(`GARDE G3 OK — CONFIRM='${confirm}'`);
 }
 
+// ── Normalisation d'endpoint object-store — fonction PURE ───────────────────
+// aws-cli ET aws-sdk EXIGENT un schéma sur --endpoint-url : un host nu comme
+// `s3.bhs.io.cloud.ovh.net` (valeur de BHS) fait ERRORER aws-cli → le
+// `length(Contents)` rend `None` (faux « vide ») et `aws s3 …` rc≠0. On préfixe
+// `https://` si le schéma est absent (idempotent sur une URL déjà schémée). C'est
+// le ROOT CAUSE UNIQUE des faux-négatifs de check en DRY (PAS le path-style : BHS
+// accepte virtual ET path).
+export function withScheme(endpoint) {
+  const e = String(endpoint || "").trim();
+  if (!e) return e;
+  return /^[a-z][a-z0-9+.-]*:\/\//i.test(e) ? e : `https://${e}`;
+}
+
 // ── Défauts partagés des Jobs data-plane (images + secrets in-cluster) ──────
 // Le runner ne touche JAMAIS à ces creds NI à S3 : tout l'accès object-store
 // (fetch/upload/check/recon/runs) vit dans des Jobs préprod, creds résolus au
@@ -152,9 +165,13 @@ function jobDefaults() {
     // Secret PRA = S3 SEULEMENT (RW bucket backups) — clés S3_ACCESS_KEY/S3_SECRET_KEY.
     // PAS de POSTGRES_* (mesure k8s). Owner/immo-délivré, HORS de ce patch.
     PRA_SECRET: opt("PRA_SECRET", "radar-pra-admin"),
-    // Secret docs PRÉPROD (identité de l'API préprod) — clés DOCS_S3_ACCESS_KEY/
-    // DOCS_S3_SECRET_KEY. Utilisé pour le gate runs/ PREPROD (état vu par l'API).
-    DOCS_SECRET: opt("DOCS_SECRET", "radar-docs-s3-credentials"),
+    // Secrets PERSISTANTS des Jobs de CHECK (verdict-only, LIST/HEAD/dryrun) —
+    // distincts de la cred docs-sync ÉPHÉMÈRE (sinon CreateContainerConfigError
+    // aux pas de check). Mêmes clés S3_ACCESS_KEY/S3_SECRET_KEY.
+    //  - freshness (S1)          : RO-reader du bucket backups (minté par k8s) ;
+    //  - recon + runs/ (S3b/S3c) : LIST prod+préprod docs (cred applicative).
+    FRESHNESS_CHECK_SECRET: opt("FRESHNESS_CHECK_SECRET", "radar-backups-reader-preprod"),
+    CHECK_DOCS_SECRET: opt("CHECK_DOCS_SECRET", "radar-docs-reader-preprod"),
     // Secret docs PROD-READ ÉPHÉMÈRE (Option A, co-val i-infra) : identité
     // PROPRIÉTAIRE des objets docs prod (immo-docs-prod), montée en préprod dans un
     // secret dédié `radar-docs-src-preprod` — clés S3_ACCESS_KEY/S3_SECRET_KEY.
@@ -168,7 +185,9 @@ function jobDefaults() {
     // Hôte service Postgres préprod (libpq côté Job, jamais côté runner).
     PGHOST: opt("PREPROD_PGHOST_SERVICE", "radar-postgres"),
     // Endpoint object-store (BHS) + région — rendus dans les Jobs (non secrets).
-    S3_ENDPOINT: req("BHS"),
+    // withScheme() garantit https:// (BHS est un host nu → aws-cli/aws-sdk errorent
+    // sans schéma). S'applique à TOUS les Jobs (checks/docs-sync/restore/rollback).
+    S3_ENDPOINT: withScheme(req("BHS")),
     S3_REGION: opt("S3_REGION", ""),
     TTL_SECONDS: opt("JOB_TTL_SECONDS", "3600"),
   };
@@ -199,6 +218,45 @@ export function classifyJobStatus(status) {
 }
 
 // =============================================================================
+// recon DIFF (dest ⊇ src) — fonctions PURES (miroir du awk in-pod du Job recon
+// s3-check-job, mode=recon). La recon ne HEAD/GET plus (403 ACL prod) : elle
+// LISTE src et dst (`s3api list-objects-v2 --query Contents[].[Key,Size]`) et
+// compare Key+Size. Exportées pour verrouiller l'algo au self-test (l'exécution
+// réelle reste le awk in-pod, aws-cli, verdict par exit code).
+// =============================================================================
+
+// Pure : parse une sortie `--output text` de `Contents[].[Key,Size]` (lignes
+// TAB-séparées « <key>\t<size> ») → Map key→size. Split sur TAB (les clés S3
+// peuvent contenir des espaces ; aws --output text sépare les colonnes par TAB).
+// On ne retient QUE la Size (colonne 1 après la clé) : un éventuel ETag (col 2+)
+// est IGNORÉ — les docs sont content-addressed par sha (key = raw/…/<sha>.pdf ⇒
+// même key = même contenu ; Size confirme ; l'ETag n'ajoute que la fragilité
+// multipart : CopyObject server-side peut re-chunker → ETag ≠ source, faux PENDING).
+// Lignes vides ignorées.
+export function parseListingMeta(text) {
+  const m = new Map();
+  for (const raw of (text || "").split("\n")) {
+    const line = raw.replace(/\r$/, "");
+    if (!line) continue;
+    const cols = line.split("\t");
+    if (cols[0] === "" || cols[0] === undefined) continue;
+    m.set(cols[0], cols[1] ?? ""); // Size SEULEMENT (ETag ignoré)
+  }
+  return m;
+}
+
+// Pure : clés de src ABSENTES de dst OU de Size différente (dest ⊉ src). Vide ⇒
+// dest ⊇ src (recon OK, 0 HEAD/GET). Miroir du awk -F'\t' in-pod (Key+Size).
+export function reconMissing(srcText, dstText) {
+  const dst = parseListingMeta(dstText);
+  const missing = [];
+  for (const [key, size] of parseListingMeta(srcText)) {
+    if (!dst.has(key) || dst.get(key) !== size) missing.push(key);
+  }
+  return missing;
+}
+
+// =============================================================================
 // dispatchS3Check — dispatche un Job de CHECK S3 verdict-only (s3-check-job).
 //
 // Le runner NE TOUCHE PLUS S3 (0 cred S3 runner : OVH n'a pas de scope list-only,
@@ -206,18 +264,16 @@ export function classifyJobStatus(status) {
 // (freshness S1, recon S3b, runs/ S3c/MEDIUM3) sont des Jobs PRÉPROD qui font le
 // LIST/HEAD/--dryrun DANS le pod (cred in-cluster) et ne renvoient qu'un exit code.
 //
-// cred = "backups"   (radar-pra-admin, clés S3_*) pour le bucket de dumps ;
-//        "docs-prod"  (radar-docs-prod-read, clés S3_*) pour toute LECTURE du
-//                     bucket docs PROD (recon prod↔préprod, advisory runs/ prod) ;
-//        "docs"       (radar-docs-s3-credentials préprod, clés DOCS_S3_*) pour le
-//                     gate runs/ PRÉPROD (état vu par l'API préprod).
+// `secret` = NOM du secret PERSISTANT à monter, FIXÉ PAR PAS par l'appelant
+// (pas de cred éphémère docs-sync ici, sinon CreateContainerConfigError aux pas
+// de check). Défauts (mêmes clés S3_ACCESS_KEY/S3_SECRET_KEY) :
+//   - freshness (S1)          → radar-backups-reader-preprod (RO-reader backups) ;
+//   - recon + runs/ (S3b/S3c) → radar-docs-reader-preprod (RO-reader, LIST prod+préprod docs).
 // failClosed=false → renvoie { ok } au lieu de die (S1 doit re-suspendre AVANT
 // de trancher). Le runner ne lit que .status (via runJobFromTemplate).
 // =============================================================================
-function dispatchS3Check({ mode, jobName, cred, params = {}, timeoutSec, failClosed = true }) {
+function dispatchS3Check({ mode, jobName, secret, accessKeyName = "S3_ACCESS_KEY", secretKeyName = "S3_SECRET_KEY", params = {}, timeoutSec, failClosed = true }) {
   const jd = jobDefaults();
-  const useS3keys = cred === "backups" || cred === "docs-prod";
-  const secret = cred === "backups" ? jd.PRA_SECRET : cred === "docs-prod" ? jd.DOCS_SYNC_READ_SECRET : jd.DOCS_SECRET;
   return runJobFromTemplate({
     tmpl: "s3-check-job.tmpl.yaml",
     jobName,
@@ -228,8 +284,8 @@ function dispatchS3Check({ mode, jobName, cred, params = {}, timeoutSec, failClo
       NAMESPACE: jd.NAMESPACE,
       AWSCLI_IMAGE: jd.AWSCLI_IMAGE,
       CHECK_SECRET: secret,
-      CHECK_ACCESS_KEY: useS3keys ? "S3_ACCESS_KEY" : "DOCS_S3_ACCESS_KEY",
-      CHECK_SECRET_KEY: useS3keys ? "S3_SECRET_KEY" : "DOCS_S3_SECRET_KEY",
+      CHECK_ACCESS_KEY: accessKeyName,
+      CHECK_SECRET_KEY: secretKeyName,
       S3_ENDPOINT: jd.S3_ENDPOINT,
       S3_REGION: jd.S3_REGION,
       CHECK_MODE: mode,
@@ -268,9 +324,9 @@ function cmdPrecheckRuns() {
   dispatchS3Check({
     mode: "runs",
     jobName: wantsProd ? "radar-bascule-runs-prod" : "radar-bascule-runs-preprod",
-    // prod (advisory) lit le bucket PROD → identité prod-owner ; préprod (gate)
-    // lit le bucket préprod avec l'identité de l'API préprod (état réellement vu).
-    cred: wantsProd ? "docs-prod" : "docs",
+    // Secret PERSISTANT radar-docs-reader-preprod (RO-reader, LIST prod+préprod docs) — PAS la
+    // cred docs-sync éphémère. Overridable via CHECK_DOCS_SECRET.
+    secret: jobDefaults().CHECK_DOCS_SECRET,
     params: { bucket, prefix: opt("RUNS_PREFIX", "runs/") },
     timeoutSec: Number(opt("CHECK_TIMEOUT", "180")),
   });
@@ -373,13 +429,15 @@ function cmdDump() {
   run("kubectl", [...kprod, "-n", cjNs, "patch", "cronjob", cj, "--type=merge", "-p", '{"spec":{"suspend":false}}']);
   log(`CronJob ${cjNs}/${cj} dé-suspendu (cluster PROD) — le pg_dump prod (owner) → s3://${bucket} démarre hors runner.`);
 
-  // Freshness = Job PRÉPROD verdict-only (poll interne au pod, cred backups).
+  // Freshness = Job PRÉPROD verdict-only (poll interne au pod). Secret PERSISTANT
+  // RO-reader du bucket backups (radar-backups-reader-preprod) — PAS la cred
+  // docs-sync éphémère. Overridable via FRESHNESS_CHECK_SECRET.
   // failClosed:false → on récupère { ok } pour RE-SUSPENDRE avant de trancher.
   section("S1.b freshness — Job in-cluster (aws s3api list, verdict-only, 0 S3 runner)");
   const verdict = dispatchS3Check({
     mode: "freshness",
     jobName: "radar-bascule-freshness",
-    cred: "backups",
+    secret: jobDefaults().FRESHNESS_CHECK_SECRET,
     failClosed: false,
     params: {
       bucket, prefix, t1Epoch, expectedDb: keyMustContain, keySuffix,
@@ -752,7 +810,10 @@ function cmdMigrate() {
       NAMESPACE: ns,
       IMAGE: image,
       DB_SECRET: opt("DB_SECRET", "radar-db-credentials"),
-      S3_SECRET: opt("S3_SECRET", "radar-s3-credentials"),
+      // Aligné sur radar-refresh-pv (#738) : creds S3 = radar-docs-s3-credentials
+      // (clés DOCS_S3_*). L'ancien secret S3 par défaut avait un access-key bidon
+      // (len-19) ; mount-only si db-migrate n'exerce pas S3, wiring corrigé.
+      S3_SECRET: opt("S3_SECRET", "radar-docs-s3-credentials"),
       TTL_SECONDS: opt("JOB_TTL_SECONDS", "3600"),
     },
     timeoutSec: Number(opt("MIGRATE_TIMEOUT", "900")),
@@ -808,19 +869,21 @@ function cmdCopyDocs() {
 }
 
 // =============================================================================
-// S3b — recon (dest ⊇ src) : Job PRÉPROD aws-cli (aws s3 sync --dryrun) qui EXIT
+// S3b — recon (dest ⊇ src) : Job PRÉPROD aws-cli (list-objects-v2 diff Key+Size) qui EXIT
 // 0 si rien à copier (dest ⊇ src), EXIT 1 si des objets manquent en préprod. Le
 // runner ne lit que `.status` (0 listing runner). Sur succès, écrit un sentinel
 // LOCAL recon.ok.json (verdict, PAS de contenu S3) consommé par la GARDE G4.
 // =============================================================================
 function cmdRecon() {
-  section("S3b recon (dest ⊇ src) — Job in-cluster (aws s3 sync --dryrun, verdict-only)");
+  section("S3b recon (dest ⊇ src) — Job in-cluster (list-objects-v2 diff Key+Size, verdict-only)");
   const prod = req("PROD_DOCS");
   const preprod = req("PREPROD_DOCS");
   dispatchS3Check({
     mode: "recon",
     jobName: "radar-bascule-recon",
-    cred: "docs-prod", // lit le bucket docs PROD (identité prod-owner)
+    // Secret PERSISTANT radar-docs-reader-preprod (RO-reader, LIST prod+préprod docs) — PAS la
+    // cred docs-sync éphémère. Overridable via CHECK_DOCS_SECRET.
+    secret: jobDefaults().CHECK_DOCS_SECRET,
     params: { srcBucket: prod, dstBucket: preprod },
     timeoutSec: Number(opt("RECON_TIMEOUT", "600")),
   });
@@ -833,7 +896,7 @@ function cmdRecon() {
 // =============================================================================
 // GARDE G4 — le flip (S5) ne part QUE si recon (S3b) a réussi. Le sentinel LOCAL
 // (verdict, PAS de contenu S3) est vérifié, puis la recon est REJOUÉE en direct
-// (Job aws s3 sync --dryrun) — verdict .status uniquement, 0 listing runner.
+// (Job list-objects-v2 diff Key+Size) — verdict .status uniquement, 0 listing runner.
 // =============================================================================
 function assertReconOk() {
   const dir = workdir();
@@ -905,7 +968,7 @@ function cmdRefresh() {
     dispatchS3Check({
       mode: "runs",
       jobName: "radar-bascule-runs-preprod",
-      cred: "docs",
+      secret: jobDefaults().CHECK_DOCS_SECRET, // radar-docs-reader-preprod (RO-reader persistant)
       params: { bucket: req("PREPROD_DOCS"), prefix: opt("RUNS_PREFIX", "runs/") },
       timeoutSec: Number(opt("CHECK_TIMEOUT", "180")),
     });
@@ -921,8 +984,12 @@ function cmdRefresh() {
       NAMESPACE: ns,
       IMAGE: image,
       DB_SECRET: opt("DB_SECRET", "radar-db-credentials"),
-      S3_SECRET: opt("S3_SECRET", "radar-s3-credentials"),
-      SCRAPE_S3_SECRET: opt("SCRAPE_S3_SECRET", "radar-scrape-s3-credentials"),
+      // Alignement sur le CronJob radar-refresh-pv préprod QUI MARCHE (#738) :
+      // creds S3 = radar-docs-s3-credentials (clés DOCS_S3_*). L'ancien secret S3
+      // par défaut avait un access-key BIDON (seul S6 le lisait) et l'ancien secret
+      // scrape est ABSENT en préprod → l'ancien défaut bloquait le RUN. Overridable.
+      S3_SECRET: opt("S3_SECRET", "radar-docs-s3-credentials"),
+      SCRAPE_S3_SECRET: opt("SCRAPE_S3_SECRET", "radar-docs-s3-credentials"),
       TTL_SECONDS: opt("JOB_TTL_SECONDS", "3600"),
     },
     timeoutSec: Number(opt("REFRESH_TIMEOUT", "3600")),
@@ -977,7 +1044,7 @@ function main() {
         "    (poll interne, verdict), re-suspend. Dump réel = CronJob owner (radar-db-backup-prod).\n" +
         "  restore (S2) : G2 quiesce + G1 Job rollback préprod, puis Job restore (fetch self-select + pg_restore).\n" +
         "  copy-docs (S3) : Job aws-cli (pré-check GET + s3 sync additif) ; DRY=1 → copie non jouée (0 S3 runner).\n" +
-        "  recon (S3b) / precheck-runs (S3c) : Jobs verdict-only (aws s3 sync --dryrun / list runs/).\n" +
+        "  recon (S3b) / precheck-runs (S3c) : Jobs verdict-only (list-objects-v2 diff Key+Size / list runs/).\n" +
         "    precheck cible défaut = PREPROD_DOCS (gate) ; --prod = PROD_DOCS (advisory via workflow continue-on-error).\n" +
         "  quiesce/unquiesce : met/rétablit les consommateurs préprod (unquiesce = reprise, sans CONFIRM).\n" +
         "  GARDES fail-closed : G1 rollback préprod (Job), G2 quiesce, G3 CONFIRM, G4 recon-avant-flip,\n" +
