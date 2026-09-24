@@ -1,0 +1,59 @@
+# T1 DURCI — ValidatingAdmissionPolicy : contraint la SA de déclenchement à ne muter QUE spec.suspend du cronjob dump.
+# Rend T1 réellement 0-FOOTHOLD : la SA radar-ci-trigger-prod peut un-suspend, mais NE PEUT PAS réécrire jobTemplate
+# (command = vecteur RCE) ni schedule. VAP GA (admissionregistration.k8s.io/v1, dispo cluster). DRY ; apply = GO owner-direct.
+# N'impacte QUE les updates faits PAR la SA CI (matchConditions userInfo) → éditions owner/admin non affectées.
+#
+# ══ GATE T1 ANTI-RCE — RE-RUN DU TEST-NÉGATIF EN PROD (i-cond, co-val i-infra) ═══════════════════════════════
+# La VAP est validée en PRÉPROD ; il faut PROUVER qu'elle enforce PAREIL en PROD avant d'ouvrir T1.
+# ORDRE D'APPLY PROD CORRIGÉ (l'authZ RBAC précède l'admission VAP dans le pipeline API → la SA doit passer RBAC
+#   pour ATTEINDRE la VAP ; sinon 403 RBAC = faux négatif). Donc :
+#   1) apply VAP (ce fichier) ; 2) apply RBAC T1 (SA+Role cronjobs patch resourceNames+RoleBinding) ;
+#   3) attendre la propagation VAP (~20s, lag mesuré 4-8s) ; 4) TEST-NÉGATIF PROD par IMPERSONATION, non destructif
+#      (--dry-run=server : l'admission tourne, rien n'est persisté) :
+#        SA=system:serviceaccount:radar-immobilier:radar-ci-trigger-prod ; NS=radar-immobilier ; CJ=radar-db-backup-prod
+#        # (A) mutation jobTemplate → ATTENDU: DENIED par la VAP ("jobTemplate immuable")
+#        kubectl --as=$SA -n $NS patch cronjob $CJ --type=merge --dry-run=server \
+#          -p '{"spec":{"jobTemplate":{"spec":{"template":{"spec":{"containers":[{"name":"upload","image":"evil"}]}}}}}}'
+#        # (B) flip suspend → ATTENDU: ALLOWED (cronjob patched, dry-run)
+#        kubectl --as=$SA -n $NS patch cronjob $CJ --type=merge --dry-run=server -p '{"spec":{"suspend":false}}'
+#   5) GATE : (A) DOIT être refusé par le message VAP ET (B) DOIT passer. Sinon → **ABORT** : NE PAS générer le token
+#      T1, retirer SA/Role/RoleBinding, remonter à owner+i-cond+i-infra (T1 sans VAP prod-enforce = RCE ouverte).
+#   6) seulement si GATE PASS : générer KUBE_CONFIG_DATA_PROD (bound token COURT pour radar-ci-trigger-prod).
+#   Évidence HORODATÉE (VAP-apply ts → test-prod A DENIED ts + B ALLOWED ts → mint ts) → i-cond + i-infra pour revue
+#     (i-infra co-val, ne re-joue pas). Capturer les timestamps à chaque étape de la séquence.
+# ══════════════════════════════════════════════════════════════════════════════════════════════════════════
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: radar-ci-trigger-suspend-only
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+      - apiGroups: ["batch"]
+        apiVersions: ["v1"]
+        operations: ["UPDATE"]
+        resources: ["cronjobs"]
+  matchConditions:
+    - name: only-ci-trigger-sa
+      expression: "request.userInfo.username == 'system:serviceaccount:radar-immobilier:radar-ci-trigger-prod'"
+  validations:
+    - expression: "object.metadata.name == 'radar-db-backup-prod'"
+      message: "trigger SA: cronjob autorisé = radar-db-backup-prod uniquement"
+    - expression: "object.spec.jobTemplate == oldObject.spec.jobTemplate"
+      message: "trigger SA: mutation de jobTemplate INTERDITE (garde RCE) — seul spec.suspend est modifiable"
+    - expression: "object.spec.schedule == oldObject.spec.schedule"
+      message: "trigger SA: mutation de schedule INTERDITE — seul spec.suspend est modifiable"
+    - expression: "object.spec.concurrencyPolicy == oldObject.spec.concurrencyPolicy"
+      message: "trigger SA: mutation de concurrencyPolicy INTERDITE — seul spec.suspend est modifiable"
+# NB labels/annotations : non contraints ici (non exploitables pour RCE ; les contraindre risque des faux-refus via managed-fields).
+#     Extensible si i-infra exige un suspend-only absolu — dire le mot.
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: radar-ci-trigger-suspend-only
+spec:
+  policyName: radar-ci-trigger-suspend-only
+  validationActions: ["Deny"]
