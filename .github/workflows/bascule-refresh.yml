@@ -1,0 +1,89 @@
+# bascule-refresh — FORCE (precipitate) the preprod refresh on demand, CD-native.
+#
+# Owner complement: the refresh must also be GH-triggerable, not only the
+# bascule. This workflow precipitates a run of the preprod CronJob
+# `radar-refresh-pv` BEYOND its 5/11/17/23h schedule, entirely code-driven
+# (`kubectl create job --from=cronjob/...` via bascule.mjs), 0 manual kubectl.
+#
+# ORDER (owner): the bascule (prod DB+S3 restore → preprod) runs FIRST, then the
+# refresh on the restored data. This standalone workflow is the DECOUPLED,
+# on-demand entry point; the SAME step is also WIRED after the bascule as a job
+# in bascule-preprod.yml (input FORCE_REFRESH=true) so a single dispatch does
+# bascule → refresh in order.
+#
+# Runner is kubectl-only + STATUS-ONLY (0 S3/DB, 0 `kubectl logs`). The created
+# Job runs under serviceAccountName: radar-app (creds via secretKeyRef in-cluster).
+# Cred: KUBE_CONFIG_DATA_PREPROD (SA radar-ci-deployer-preprod), which already has
+# batch/jobs:create + batch/cronjobs:get in preprod (deploy/k8s/11-ci-deployer-
+# preprod-rbac.yaml) — no RBAC extension needed. 0 Python.
+name: bascule-refresh (force preprod refresh)
+
+on:
+  workflow_dispatch:
+    inputs:
+      RUN:
+        description: "true = précipiter radar-refresh-pv (préprod) maintenant, hors planning"
+        required: true
+        type: boolean
+        default: false
+      WAIT_COMPLETE:
+        description: "true = attendre la fin du balayage (fail-closed, ~jusqu'à 6h) ; false = confirmer le démarrage puis rendre la main (async)"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: bascule-refresh
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  force-refresh:
+    if: ${{ inputs.RUN }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 420
+    env:
+      PREPROD_NAMESPACE: ${{ vars.BASCULE_PREPROD_NAMESPACE || 'radar-immobilier-preprod' }}
+      REFRESH_CRONJOB: ${{ vars.BASCULE_REFRESH_CRONJOB || 'radar-refresh-pv' }}
+      FORCE_REFRESH_WAIT_COMPLETE: ${{ inputs.WAIT_COMPLETE && '1' || '0' }}
+      GITHUB_RUN_ID: ${{ github.run_id }}
+      CLI: deploy/ci/bascule-preprod/bascule.mjs
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig (preprod deployer)
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.kube"
+          echo "${{ secrets.KUBE_CONFIG_DATA_PREPROD }}" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Pre-flight — assert preprod cluster + namespace
+        env:
+          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
+          expected="${EXPECTED_KUBE_APISERVER_HOST:-$DEFAULT_HOST}"
+          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "kubeconfig apiserver host : ${host:-<none>}"
+          echo "expected apiserver host   : ${expected}"
+          if [ "$host" != "$expected" ]; then
+            echo "::error title=Wrong cluster — refresh refused::kubeconfig targets '${host:-<none>}' but expected '${expected}'."; exit 1
+          fi
+          kubectl -n "$PREPROD_NAMESPACE" get cronjob "$REFRESH_CRONJOB" -o name
+          echo "pre-flight OK — ${expected} / ${PREPROD_NAMESPACE} / cronjob ${REFRESH_CRONJOB}"
+
+      - name: Force preprod refresh (precipitate radar-refresh-pv)
+        run: node "$CLI" force-refresh

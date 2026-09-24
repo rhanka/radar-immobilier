@@ -11,7 +11,7 @@
 // =============================================================================
 import process from "node:process";
 import console from "node:console";
-import { classifyJobStatus, withScheme, parseListingMeta, reconMissing } from "./bascule.mjs";
+import { classifyJobStatus, withScheme, parseListingMeta, reconMissing, refreshJobName } from "./bascule.mjs";
 
 let passed = 0;
 let failed = 0;
@@ -69,6 +69,16 @@ eq("recon — ETag différent + Size identique ⇒ [] (ETag ignoré)", reconMiss
 eq("recon — src vide ⇒ [] (dest ⊇ ∅)", reconMissing("", DST_OK), []);
 ok("recon — parseListingMeta ne retient que la Size (col1), ETag ignoré", parseListingMeta("a\t1\t\"e\"").get("a") === "1");
 ok("recon — parseListingMeta ignore lignes vides", parseListingMeta("a\t1\n\n").size === 1);
+
+// ── refreshJobName : nom de Job RFC1123 sûr (force-refresh) ──────────────────
+eq("refreshJobName — suffixe simple", refreshJobName("12345"), "radar-refresh-pv-forced-12345");
+eq("refreshJobName — charset non-RFC1123 remplacé + minusculé", refreshJobName("Abc_DEF.9"), "radar-refresh-pv-forced-abc-def-9");
+eq("refreshJobName — suffixe vide ⇒ base seule", refreshJobName(""), "radar-refresh-pv-forced");
+eq("refreshJobName — undefined ⇒ base seule", refreshJobName(undefined), "radar-refresh-pv-forced");
+eq("refreshJobName — tirets en tête/fin taillés", refreshJobName("--foo--"), "radar-refresh-pv-forced-foo");
+ok("refreshJobName — borné à 63 caractères", refreshJobName("x".repeat(100)).length <= 63);
+ok("refreshJobName — pas de tiret final après troncature", !/-$/.test(refreshJobName("a".repeat(60) + "-".repeat(10))));
+ok("refreshJobName — charset RFC1123 [a-z0-9-] uniquement", /^[a-z0-9-]+$/.test(refreshJobName("Wéîrd Run #42!")));
 
 console.log(`\nbascule.selftest — ${passed} passés, ${failed} échoués`);
 process.exit(failed ? 1 : 0);
