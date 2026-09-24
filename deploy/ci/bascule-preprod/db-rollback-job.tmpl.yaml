@@ -1,0 +1,137 @@
+# =============================================================================
+# db-rollback-job.tmpl.yaml — GARDE G1 rollback préprod (S2), Job in-cluster.
+#
+# RUNNER KUBECTL-ONLY : le rollback de la préprod AVANT le restore destructif est
+# un Job PRÉPROD (0 pg_dump / 0 S3 runner), poll STATUS-ONLY par bascule.mjs
+# (`restore`, AVANT le restore). Il capture un dump de repli DURABLE :
+#
+#   initContainer `dump`   (postgis) : pg_dump --format=custom de la DB préprod
+#                          → /work/rollback.dump + pg_restore --list (TOC lisible).
+#                          Creds DB = ${DB_SECRET} (radar-db-credentials, POSTGRES_*),
+#                          env libpq PG*.
+#   container     `upload` (aws-cli) : aws s3 cp /work/rollback.dump →
+#                          s3://${BACKUP_S3_BUCKET}/${ROLLBACK_KEY}. Creds S3 =
+#                          ${PRA_SECRET} (radar-pra-admin, S3_ACCESS_KEY/S3_SECRET_KEY).
+#
+# GARDE G1 FAIL-CLOSED : bascule.mjs REFUSE le restore tant que ce Job n'a pas
+# réussi (.status). Le dump rollback est DURABLE (bucket backups). backoffLimit 0.
+#
+# Restaurer depuis ce rollback : rejouer le Job restore avec DUMP_PREFIX pointant
+# ${ROLLBACK_KEY} (ou fournir DUMP_KEY_SUFFIX/EXPECTED_DATABASE adaptés).
+#
+# Placeholders : ${NAMESPACE} ${DUMP_IMAGE} ${AWSCLI_IMAGE} ${DB_SECRET}
+# ${PRA_SECRET} ${S3_ENDPOINT} ${BACKUP_S3_BUCKET} ${S3_REGION} ${ROLLBACK_KEY}
+# ${PGHOST} ${TTL_SECONDS}. Les $VAR du pod sont RUNTIME (sans accolades).
+# =============================================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-db-rollback-bascule
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: db-rollback
+    sentropic.io/bascule: rollback
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: ${TTL_SECONDS}
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: db-rollback
+        sentropic.io/bascule: rollback
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: work
+          emptyDir: {}
+        - name: tmp
+          emptyDir: { sizeLimit: 128Mi }
+      initContainers:
+        - name: dump
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          image: ${DUMP_IMAGE}
+          imagePullPolicy: IfNotPresent
+          command: ["bash", "-c"]
+          # NB : $PGHOST/$PGUSER/$PGDATABASE RUNTIME (sans accolades).
+          args:
+            - |
+              set -euo pipefail
+              echo "[rollback] pg_dump --format=custom preprod db=$PGDATABASE host=$PGHOST"
+              pg_dump --format=custom --no-owner --no-privileges \
+                -h "$PGHOST" -U "$PGUSER" -d "$PGDATABASE" -f /work/rollback.dump
+              [ -s /work/rollback.dump ] || { echo "[rollback] ERROR dump vide"; exit 1; }
+              pg_restore --list /work/rollback.dump > /dev/null
+              echo "[rollback] ok $(wc -c < /work/rollback.dump) octets, TOC lisible"
+          env:
+            - name: PGHOST
+              value: "${PGHOST}"
+            - name: PGUSER
+              valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_USER } }
+            - name: PGPASSWORD
+              valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_PASSWORD } }
+            - name: PGDATABASE
+              valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_DB } }
+          volumeMounts:
+            - { name: work, mountPath: /work }
+      containers:
+        - name: upload
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          image: ${AWSCLI_IMAGE}
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              common=(--no-cli-pager --endpoint-url "$S3_ENDPOINT")
+              [ -n "$S3_REGION" ] && common+=(--region "$S3_REGION")
+              echo "[upload] aws s3 cp rollback -> s3://$BACKUP_S3_BUCKET/$ROLLBACK_KEY"
+              aws "${common[@]}" s3 cp /work/rollback.dump "s3://$BACKUP_S3_BUCKET/$ROLLBACK_KEY"
+              echo "[upload] ok"
+          env:
+            - name: HOME
+              value: /tmp
+            - name: AWS_EC2_METADATA_DISABLED
+              value: "true"
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom: { secretKeyRef: { name: ${PRA_SECRET}, key: S3_ACCESS_KEY } }
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: ${PRA_SECRET}, key: S3_SECRET_KEY } }
+            - name: S3_ENDPOINT
+              value: "${S3_ENDPOINT}"
+            - name: S3_REGION
+              value: "${S3_REGION}"
+            - name: BACKUP_S3_BUCKET
+              value: "${BACKUP_S3_BUCKET}"
+            - name: ROLLBACK_KEY
+              value: "${ROLLBACK_KEY}"
+          volumeMounts:
+            - { name: work, mountPath: /work }
+            - { name: tmp, mountPath: /tmp }
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 250m, memory: 512Mi }
