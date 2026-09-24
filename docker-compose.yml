@@ -21,18 +21,29 @@ services:
     networks: [radar]
 
   minio:
-    image: quay.io/minio/minio:latest
-    command: server /data --console-address ":9001"
+    # Local/test S3 backend. MinIO closed ALL its public images (minio/minio AND
+    # minio/mc → HTTP 401 on Docker Hub AND quay.io, on `latest` and every RELEASE
+    # tag) with no public fallback, which broke `make test` on every CI run. The
+    # backend is therefore a maintained, public S3 mock: adobe/s3mock is S3-API
+    # only (no web console), accepts ANY credentials, and pre-creates its buckets.
+    # The service KEEPS the name `minio` so every `minio:9000` / `depends_on: minio`
+    # reference stays valid; the S3 HTTP port is forced to 9000 (s3mock defaults to
+    # 9090). A k8s-lane mirror (ghcr.io/rhanka/s3mock:3.12.0) will replace this
+    # direct adobe/s3mock ref later for supply-chain durability.
+    image: adobe/s3mock:3.12.0
     environment:
-      MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:-minioadmin}
+      # Serve the S3 HTTP API on 9000 so http://minio:9000 refs are unchanged.
+      COM_ADOBE_TESTING_S3MOCK_HTTPPORT: "9000"
+      # Buckets the app expects: main store + dedicated scraping-document store.
+      # s3mock creates them at startup; the app's ensureBucket() is then a no-op.
+      initialBuckets: radar-immobilier-raw,radar-immobilier-docs
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:9000/minio/health/live || exit 1"]
+      # s3mock ships no curl; its busybox base has wget. /favicon.ico always
+      # returns 200 once the S3 API is up (no actuator profile required).
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:9000/favicon.ico || exit 1"]
       interval: 10s
       timeout: 3s
       retries: 10
-    volumes:
-      - minio-data:/data
     networks: [radar]
 
   obscura:
@@ -118,4 +129,5 @@ networks:
 
 volumes:
   postgres-data:
-  minio-data:
+  # No minio-data volume: adobe/s3mock keeps its objects in the container's
+  # ephemeral store, which is the intended behaviour for a fresh test/dev backend.
