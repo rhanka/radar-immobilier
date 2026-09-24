@@ -103,5 +103,5 @@ then `kubectl patch ... suspend=true` runs (bascule.mjs:451), THEN `die` if `!ve
 
 ## Order (matches i-infra gates)
 
-VAP → RBAC T1 → test-prod DENIED → mint KUBE_CONFIG_DATA_PROD → CronJob suspend=false (trigger)
+VAP → RBAC T1 → test-prod DENIED → mint KUBE_CONFIG_DATA_PROD_TRIGGER → CronJob suspend=false (trigger)
 → freshness → re-suspend=true → restore → migrate → docs-sync → recon (G4) → flip → refresh → smoke.

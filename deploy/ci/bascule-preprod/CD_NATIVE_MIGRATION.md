@@ -1,146 +1,147 @@
-# Bascule iso-prod — CD-native migration
+# Bascule iso-prod — CD-native v2 (fully automated)
 
-Owner directive: **every production action must be driven by code through the
-CI/CD pipeline** — zero manual `kubectl apply`, zero cross-session manual steps
-(`"kubectl apply hors CD ça va pas"`). This document describes how the bascule
-prod bundle and the preprod refresh became fully pipeline-driven, the exact
-GitHub secrets/vars the owner+infra must provision, and the manual steps that are
-now eliminated.
+Owner directive: **every production action is driven by code; the owner validates
+nothing per-act.** v2 removes the ephemeral setup token, the manual bootstrap, the
+owner-in-the-loop `CONFIRM`, and the GitHub-secret materialization of the two app
+creds. The **only** human step is a one-time cluster install by the k8s lane.
 
-Constraints kept: **0 Python**, secrets **never committed** (materialized from
-GitHub Actions secrets), all existing fail-closed gates (VAP anti-RCE, recon G4,
-quiesce G2, EXPECTED_DATABASE positive control), runner stays **kubectl-only +
-STATUS-ONLY** (no `kubectl logs`, no S3/DB creds, no PII). The bundle-apply +
-secret-create are new runner kubectl actions — control-plane only, not PII.
+Constraints kept: **0 Python**, secrets **never committed in plaintext** (they are
+committed as **SealedSecrets**, encrypted, safe in git), all fail-closed gates
+(VAP anti-RCE, recon G4, quiesce G2, EXPECTED_DATABASE positive control), runner
+stays **kubectl-only + STATUS-ONLY** (no `kubectl logs`, no S3/DB creds, no PII).
 
-## Flow (setup → gate → run → refresh), all GH-triggered
+## What changed vs v1
+
+| v1 (removed) | v2 (this) |
+| --- | --- |
+| `bascule-apply-bundle.yml` — `workflow_dispatch` + `CONFIRM` (owner-in-the-loop) | `bascule-bundle-cd.yml` — applies the bundle **on merge to `main`** (path-scoped), idempotent |
+| **ephemeral** privileged token `KUBE_CONFIG_DATA_PROD_SETUP` | **permanent** `KUBE_CONFIG_DATA_PROD` = SA `radar-ci-bascule-prod`, minted **once** at cluster install |
+| 2 app Secrets materialized from GH secrets (`RADAR_DB_RO_PROD_PASSWORD`, `RADAR_PRA_ADMIN_PROD_*`) | 2 **SealedSecrets committed** → the in-cluster sealed-secrets controller materializes the core Secrets |
+| bootstrap SA `radar-ci-setup-prod` (`rbac-ci-setup-prod.yaml`) | permanent SA `radar-ci-bascule-prod` (`rbac-ci-bascule-prod.yaml`), **0 `secrets:create`** |
+| run only via `workflow_dispatch` | run on a **nightly schedule** (`17 3 * * *`) + `workflow_dispatch` kept |
+
+## Flow — one-time install, then everything automated
 
 ```
-                         ┌───────────────────────────────────────────────┐
-  workflow_dispatch  ──▶ │ bascule-apply-bundle.yml   (PROD, one-time /   │
-  (CONFIRM=              │                             on bundle change)  │
-   apply-bundle-prod)    │  1. pre-flight assert PROD cluster             │
-                         │  2. materialize Secrets from GH secrets        │
-                         │       radar-db-ro-prod, radar-pra-admin-prod   │
-                         │  3. Job db-ro-role-provision (wait Complete)   │
-                         │  4. apply dormant CronJob radar-db-backup-prod │
-                         │  5. apply VAP + RBAC T1 + wait propagation     │
-                         │  6. ANTI-RCE GATE (impersonation --dry-run):   │
-                         │       (A) jobTemplate mutation  → DENIED        │
-                         │       (B) suspend flip          → ALLOWED       │
-                         │       fail ⇒ rollback RBAC T1 + abort          │
-                         └───────────────────────────────────────────────┘
-                                              │  (bundle in place, T1 enforce-verified)
-                                              ▼
-                         ┌───────────────────────────────────────────────┐
-  workflow_dispatch  ──▶ │ bascule-preprod.yml         (the run)          │
-  (CONFIRM=iso-prod-     │  job: bascule    S0→S7 (dump→restore→migrate→  │
-   <today>,             │                  docs→recon G4→flip→refresh S6→ │
-   DRY_RUN=false,       │                  smoke)                         │
-   FORCE_REFRESH=true)   │  job: force-refresh  needs: bascule (success)  │
-                         │        precipitate CronJob radar-refresh-pv    │
-                         │        (preprod) on the restored data          │
-                         └───────────────────────────────────────────────┘
-                                              ▲
-  workflow_dispatch  ──▶ bascule-refresh.yml  (decoupled, on-demand)
-  (RUN=true)             same force-refresh step, run independently
+  ┌── ONE-TIME, k8s lane at cluster install (the ONLY human step) ──────────────┐
+  │ 1. kubectl apply -f deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml      │
+  │      (cluster-admin) → SA radar-ci-bascule-prod (VAP cluster + ns bundle     │
+  │      + impersonate name-scoped, 0 secrets:create).                           │
+  │ 2. kubectl -n radar-immobilier create token radar-ci-bascule-prod            │
+  │      → kubeconfig → base64 → GH secret KUBE_CONFIG_DATA_PROD (PERMANENT).     │
+  │ 3. gh variable set BASCULE_BUNDLE_CD_ENABLED --body true   (arm the apply)    │
+  │ (later, after the first apply created the trigger SA)                         │
+  │ 4. kubectl -n radar-immobilier create token radar-ci-trigger-prod            │
+  │      → base64 → GH secret KUBE_CONFIG_DATA_PROD_TRIGGER (name-scoped run cred)│
+  │ 5. gh variable set BASCULE_SCHEDULE_ENABLED --body true    (arm the run)      │
+  └─────────────────────────────────────────────────────────────────────────────┘
+                                   │
+   ── then, forever, 0 owner action ──
+                                   ▼
+  ┌── on every merge to main touching the bundle ──────────────────────────────┐
+  │ bascule-bundle-cd.yml (auth = KUBE_CONFIG_DATA_PROD, idempotent)            │
+  │   1. pre-flight assert PROD cluster                                         │
+  │   2. apply 2 SealedSecrets → controller materializes radar-db-ro-prod +     │
+  │        radar-pra-admin-prod (runner never sees plaintext)                   │
+  │   3. Job db-ro-role-provision (wait Complete, fail-closed)                  │
+  │   4. apply dormant CronJob radar-db-backup-prod (suspend:true)              │
+  │   5. apply VAP + RBAC T1 + wait propagation                                 │
+  │   6. ANTI-RCE GATE (impersonation --dry-run=server):                        │
+  │        (A) jobTemplate mutation → DENIED   (B) suspend flip → ALLOWED       │
+  │        fail ⇒ NEUTRALIZE T1 (Role rules emptied) + abort                    │
+  └────────────────────────────────────────────────────────────────────────────┘
+  ┌── nightly (03:17 UTC), armed by BASCULE_SCHEDULE_ENABLED ───────────────────┐
+  │ bascule-preprod.yml (the run, auto-CONFIRM = the schedule IS the GO)        │
+  │   job bascule       S0→S7 (dump→restore→migrate→docs→recon G4→flip→S6→smoke)│
+  │   job force-refresh needs: bascule (success) → precipitate radar-refresh-pv │
+  │                     (order bascule→refresh preserved on the scheduled run)  │
+  └────────────────────────────────────────────────────────────────────────────┘
+   bascule-refresh.yml — decoupled on-demand force-refresh (unchanged)
 ```
 
-**Wired order (owner):** the bascule (prod DB+S3 restore → preprod) runs FIRST;
-the refresh runs on the restored data. In `bascule-preprod.yml` the `force-refresh`
-job `needs: bascule` and its `if` requires `needs.bascule.result == 'success'` — a
-refresh never runs on a failed/absent restore. `bascule-refresh.yml` is the same
-step exposed as a standalone on-demand trigger (precipitate beyond the 5/11/17/23h
-schedule).
+## The credential rename (important)
 
-## GitHub Actions **secrets** the owner/infra must create
+`KUBE_CONFIG_DATA_PROD` now names the **permanent bundle-apply SA**
+(`radar-ci-bascule-prod`). The run's **name-scoped 0-foothold dump trigger**
+(SA `radar-ci-trigger-prod`, patch `radar-db-backup-prod` + VAP suspend-only) moved
+to **`KUBE_CONFIG_DATA_PROD_TRIGGER`**. Keeping them separate is deliberate: the
+trigger token stays VAP-enforced and least-privilege; the broad apply SA (not
+VAP-constrained) must never be the run runner's cred.
 
-### Value secrets (materialized into k8s Secrets by `bascule-apply-bundle.yml`)
+## GitHub Actions secrets — v2
 
-| GH secret | Holds | k8s Secret / key it populates | How to generate |
+| GH secret | Identity | Used by | Notes |
 | --- | --- | --- | --- |
-| `RADAR_DB_RO_PROD_PASSWORD` | password of the strict RO Postgres login `radar_db_ro_prod` | `radar-db-ro-prod` / `POSTGRES_PASSWORD` | `openssl rand -base64 32` — generated ONCE by the owner, stored here. Deterministic re-runs re-assert the same password (idempotent RO-role Job). |
-| `RADAR_PRA_ADMIN_PROD_ACCESS_KEY` | S3 access key (RW on the backups bucket `radar-immobilier-backups-preprod`) | `radar-pra-admin-prod` / `S3_ACCESS_KEY` | value of the existing `radar-pra-admin` S3 credential (`.env` `AWS_*`). |
-| `RADAR_PRA_ADMIN_PROD_SECRET_KEY` | S3 secret key (same credential) | `radar-pra-admin-prod` / `S3_SECRET_KEY` | same source. |
+| `KUBE_CONFIG_DATA_PROD` **(PERMANENT)** | SA `radar-ci-bascule-prod` | `bascule-bundle-cd.yml` | applies the bundle on merge; **0 `secrets:create`**. Minted once at install. |
+| `KUBE_CONFIG_DATA_PROD_TRIGGER` **(renamed)** | name-scoped SA `radar-ci-trigger-prod` | `bascule-preprod.yml` S1 dump trigger | patch `radar-db-backup-prod` suspend, VAP-enforced. Was `KUBE_CONFIG_DATA_PROD`. |
+| `KUBE_CONFIG_DATA_BASCULE_PREPROD` (existing) | SA `radar-ci-bascule-preprod` | `bascule-preprod.yml` bascule job | preprod control-plane (quiesce/dispatch/flip). |
+| `KUBE_CONFIG_DATA_PREPROD` (existing) | SA `radar-ci-deployer-preprod` | force-refresh (wired + standalone) | already has `batch/jobs:create` + `batch/cronjobs:get` — **no RBAC change**. |
 
-> **RO password decision (read from a GH secret, not pipeline-generated).** The
-> owner sets `RADAR_DB_RO_PROD_PASSWORD` once. This keeps the pipeline
-> deterministic and idempotent, avoids leaking a generated plaintext into Actions
-> logs, and avoids a cross-session copy-back step (which the directive forbids).
-> `POSTGRES_USER=radar_db_ro_prod` and `POSTGRES_DB=radar` are **non-secret
-> literals** set in the workflow; the S3 key **structure** (key names
-> `S3_ACCESS_KEY`/`S3_SECRET_KEY`) is non-secret — only the two key **values** are
-> secrets. Rotation: update `RADAR_DB_RO_PROD_PASSWORD`, re-run
-> `bascule-apply-bundle.yml` (the RO-role Job re-asserts the new password); no app
-> impact (dump-only role). See `CRED_CYCLE.md`.
+### No more app-cred GH secrets
 
-### MANDATORY `.env` backup (PRA — étape 1)
+The two app creds are **no longer GH secrets** — they are committed SealedSecrets
+(`radar-db-ro-prod-sealed.yaml`, `radar-pra-admin-prod-sealed.yaml`) that the
+in-cluster sealed-secrets controller materializes. See `CRED_CYCLE.md`.
 
-**Every value secret above MUST also be stored in the local `.env`, not only in the GitHub secret.** GitHub secrets are write-only and GitHub-bound — they are the CI runtime cache, NOT a recovery store. The `.env` copy is the étape-1 recovery vault (owner ops rule, settled with the k8s lane):
+## Repo **variables** (non-secret; safe fallbacks built in)
 
-- `RADAR_DB_RO_PROD_PASSWORD` — the generated RO password, stored in **`.env` AND** the GitHub secret.
-- `radar-pra-admin` S3 keys — already in `.env`; mirror the two values into the GitHub secrets.
-
-Losing a GitHub secret loses **access** (re-mintable: the RO-role Job re-asserts the password, S3 keys regenerate), **not data** (the Postgres rows and S3 objects are independent of these credentials, which are access creds, not encryption keys). The `.env` copy lets you re-run the restore locally (`node bascule.mjs …`) without re-minting, and is what keeps recovery independent of GitHub.
-
-> **PRA scope.** GitHub secrets + `.env` are operational copies, not a PRA-grade secret store. A durable third-party vault (external, off-region) is **étape 2** — see the #740 dossier ("externalisation hors-région, PRA complet"). Étape 1 proves the backup+restore mechanism with `.env` as the recovery copy.
-
-### Kubeconfig secrets (cluster access)
-
-| GH secret | Identity | Used by | Required cluster rights |
-| --- | --- | --- | --- |
-| `KUBE_CONFIG_DATA_PROD_SETUP` **(NEW)** | privileged PROD bootstrap SA (e.g. `radar-ci-bascule-setup-prod`) | `bascule-apply-bundle.yml` **only** | cluster-scoped: create/get/update `validatingadmissionpolicies` + `validatingadmissionpolicybindings` (admissionregistration.k8s.io/v1). ns `radar-immobilier`: create/get/patch/update on `serviceaccounts`, `roles`, `rolebindings` (rbac.authorization.k8s.io), `secrets`, `configmaps`, `jobs` (batch), `cronjobs` (batch); get on `deployments` (pre-flight). **`impersonate` on `serviceaccounts`** (to run the anti-RCE gate as `radar-ci-trigger-prod`). |
-| `KUBE_CONFIG_DATA_PROD` (existing) | name-scoped trigger SA `radar-ci-trigger-prod` (patch cronjob `radar-db-backup-prod` + VAP suspend-only) | `bascule-preprod.yml` S1 dump trigger | get/patch on `cronjobs` resourceName `radar-db-backup-prod` only (already in `rbac-ci-trigger-prod.yaml`, enforced by the VAP). |
-| `KUBE_CONFIG_DATA_BASCULE_PREPROD` (existing) | dedicated preprod bascule SA `radar-ci-bascule-preprod` | `bascule-preprod.yml` bascule job (quiesce/dispatch Jobs/flip) | preprod control-plane per the run README. |
-| `KUBE_CONFIG_DATA_PREPROD` (existing) | preprod deployer SA `radar-ci-deployer-preprod` | force-refresh (both the wired job and `bascule-refresh.yml`) | `batch/jobs: create` + `batch/cronjobs: get` in `radar-immobilier-preprod` — **already granted** by `deploy/k8s/11-ci-deployer-preprod-rbac.yaml`. **No RBAC extension needed** for force-refresh. |
-
-## Optional non-secret repo **variables** (safe fallbacks built in)
-
+- `BASCULE_BUNDLE_CD_ENABLED` — arms `bascule-bundle-cd.yml` (off by default; set
+  `true` at install once the SA + `KUBE_CONFIG_DATA_PROD` exist).
+- `BASCULE_SCHEDULE_ENABLED` — arms the nightly run (off by default; set `true`
+  once `KUBE_CONFIG_DATA_PROD_TRIGGER` + preprod creds exist). The cron **cadence**
+  (`17 3 * * *`) is fixed in code — GitHub does not allow a variable in the cron
+  literal, so tuning the time is a one-line code change; arming is the variable.
 - `EXPECTED_KUBE_APISERVER_HOST_PROD` (falls back to `EXPECTED_KUBE_APISERVER_HOST`,
-  then the OVH host default) — PROD cluster identity for `bascule-apply-bundle`.
-- `BASCULE_EXPECTED_DATABASE` (default `radar`) — the `POSTGRES_DB` value for
-  `radar-db-ro-prod`.
+  then the OVH host) — PROD cluster identity for the apply.
 - `BASCULE_VAP_PROPAGATION_SEC` (default `20`) — VAP propagation wait.
 - `BASCULE_PREPROD_NAMESPACE` (default `radar-immobilier-preprod`),
   `BASCULE_REFRESH_CRONJOB` (default `radar-refresh-pv`) — force-refresh target.
 
-## Manual steps **eliminated**
+## What is now ELIMINATED
 
-Previously owner-direct (out of CD), now pipeline-driven:
+1. **Ephemeral setup token** `KUBE_CONFIG_DATA_PROD_SETUP` — gone; replaced by the
+   permanent `KUBE_CONFIG_DATA_PROD` (minted once at install).
+2. **Manual bootstrap workflow** `bascule-apply-bundle.yml` + its owner `CONFIRM`
+   dispatch — gone; the bundle applies on merge (`bascule-bundle-cd.yml`).
+3. **Owner-in-the-loop** per-act GO on the apply — gone (arming is a one-time
+   install variable, not a per-act validation).
+4. **GH-secret materialization of the 2 app creds** (`kubectl create secret … from
+   GH secrets`) — gone; SealedSecrets committed + controller-materialized.
+5. **Manual `kubectl apply`** of VAP / RBAC T1 / RO-role / dump CronJob — all in
+   the on-merge apply.
+6. **Manual dispatch of the run** as the only entry — the run is scheduled nightly
+   (`workflow_dispatch` kept for the first run / on-demand).
+7. **`.env` fragility for the app creds** — the material now lives encrypted in git
+   (SealedSecrets). `.env` remains a recovery convenience per `CRED_CYCLE.md`, not
+   a pipeline dependency.
 
-1. `kubectl apply -f vap-ci-trigger-suspend-only.yaml` (cluster-scoped VAP) →
-   `bascule-apply-bundle.yml` step 5.
-2. `kubectl apply -f rbac-ci-trigger-prod.yaml` (T1 SA/Role/RoleBinding) → step 5.
-3. `kubectl apply -f db-ro-role-provision.yaml` + waiting for the Job → step 3.
-4. `kubectl apply -f cronjob-db-backup-prod.yaml` (dormant dump CronJob) → step 4.
-5. **Minting `radar-db-ro-prod` and `radar-pra-admin-prod` by hand from `.env`** →
-   step 2 materializes them from GitHub Actions secrets (never committed).
-6. The manual **impersonation `--dry-run=server` anti-RCE negative test** and its
-   timestamped evidence → step 6 (fail-closed, with automatic RBAC rollback on
-   failure). `EVIDENCE_CAPTURE_RUN.md` [a][b][e][f][g] reads are still available
-   for i-infra certification against the run's `.status` output.
-7. **`kubectl create job --from=cronjob/radar-refresh-pv`** to precipitate a
-   preprod refresh → `bascule-refresh.yml` (on-demand) and the wired
-   `force-refresh` job in `bascule-preprod.yml` (after the bascule).
+## GH secrets the owner can now DELETE
+
+Once this PR is merged and the install is done, these are unused by the pipeline:
+
+- `KUBE_CONFIG_DATA_PROD_SETUP` (ephemeral bootstrap token — gone)
+- `RADAR_DB_RO_PROD_PASSWORD` (now the RO SealedSecret)
+- `RADAR_PRA_ADMIN_PROD_ACCESS_KEY` / `RADAR_PRA_ADMIN_PROD_SECRET_KEY` (now the
+  pra-admin SealedSecret)
 
 ## Idempotency / re-runnability
 
-- Secrets: `create ... --dry-run=client -o yaml | kubectl apply -f -` = create-or-update.
+- SealedSecrets: `kubectl apply` = create-or-update; the controller reconciles the
+  core Secret. The apply waits for `Synced` (tolerant) before the RO-role Job.
 - RO-role Job: immutable → delete `--ignore-not-found` then apply, wait Complete.
 - VAP / RBAC / CronJob: `kubectl apply` is idempotent; the CronJob stays
   `suspend: true` (dormant) until the bascule's S1 trigger un-suspends it.
-- Anti-RCE gate: non-destructive (`--dry-run=server`); on failure it deletes the
-  T1 RBAC to close the RCE window, so a re-run starts from a safe state.
-- force-refresh: per-run Job name (`radar-refresh-pv-forced-<run_id>`, RFC1123),
-  delete-then-create; default confirms a clean start then returns green (the
-  ~5 h sweep continues in the background), `FORCE_REFRESH_WAIT_COMPLETE=1` waits
-  fail-closed.
+- Anti-RCE gate: non-destructive (`--dry-run=server`); on failure it **empties the
+  T1 Role rules** to close the RCE window (the permanent SA has no `delete` verb —
+  a deliberate least-privilege trade-off, and a stronger closure than a delete).
+- Run: scheduled = auto-CONFIRM of the day (G3 anti-replay kept); force-refresh
+  per-run Job name, delete-then-create.
 
 ## Still 0 Python, still runner kubectl-only
 
-`bascule-apply-bundle.yml` runs `kubectl` (apply committed manifests + create
-Secrets from GH secrets + an impersonation dry-run) — control-plane, no PII, no
-dump bytes, and the S3 keys are written into a k8s Secret, never printed. The run
-and force-refresh stay kubectl + STATUS-ONLY (`bascule.mjs`). Data-plane
+`bascule-bundle-cd.yml` runs `kubectl` only (apply committed manifests + an
+impersonation dry-run) — control-plane, no PII, no dump bytes, and the S3 keys
+never reach the runner (they arrive as a SealedSecret, decrypted only in-cluster).
+The run and force-refresh stay kubectl + STATUS-ONLY (`bascule.mjs`). Data-plane
 (pg_dump/pg_restore/aws-cli) lives in in-cluster Jobs on already-validated native
 images. No new container image, no Python anywhere.
