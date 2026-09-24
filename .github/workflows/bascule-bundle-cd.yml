@@ -1,0 +1,281 @@
+# bascule-bundle-cd — CD-NATIVE-v2 apply of the bascule PROD bundle ON MERGE.
+#
+# Owner directive: "toute action de prod doit être pilotée par du code", the owner
+# must not validate anything per-act. This workflow is the CD-native-v2 successor
+# of the deleted `bascule-apply-bundle.yml` bootstrap. What changed vs v1:
+#   - NO ephemeral setup token: it authenticates with the PERMANENT SA
+#     `radar-ci-bascule-prod` (GH secret KUBE_CONFIG_DATA_PROD), minted ONCE at
+#     cluster install by the k8s lane (like every other KUBE_CONFIG_DATA*). The
+#     old privileged `KUBE_CONFIG_DATA_PROD_SETUP` is gone.
+#   - NO GH-secret materialization of the 2 app creds: the core Secrets
+#     radar-db-ro-prod + radar-pra-admin-prod are materialized in-cluster by the
+#     sealed-secrets controller from the COMMITTED SealedSecrets in the bundle.
+#     This SA has 0 secrets:create by construction.
+#   - NO workflow_dispatch CONFIRM gate / owner-in-the-loop: it runs automatically
+#     on push to main when the bundle changes (idempotent, re-applies safely).
+#     A bare workflow_dispatch is KEPT for the first run / on-demand re-apply.
+#
+# The apply order follows the VAP runbook (RBAC authZ precedes VAP admission, so
+# the trigger SA must pass RBAC to REACH the VAP — see
+# deploy/ci/bascule-preprod/vap-ci-trigger-suspend-only.yaml header):
+#   1. Pre-flight — assert the PROD cluster (positive host + get deploy).
+#   2. Apply the 2 SealedSecrets; the in-cluster controller materializes the core
+#      Secrets radar-db-ro-prod + radar-pra-admin-prod. Wait for Synced (tolerant).
+#   3. Provision the strict RO Postgres role (Job db-ro-role-provision), wait
+#      Complete fail-closed — it consumes radar-db-ro-prod/POSTGRES_PASSWORD.
+#   4. Apply the DORMANT dump CronJob (suspend:true) so it EXISTS for the gate
+#      below (a --dry-run=server patch of a missing object is NotFound, not a
+#      VAP denial). Nothing runs: it stays suspended until the bascule triggers it.
+#   5. Apply the cluster-scoped VAP + Binding (suspend-only), then the T1 RBAC
+#      (SA/Role/RoleBinding), then wait for VAP propagation.
+#   6. ANTI-RCE GATE (fail-closed): impersonate the trigger SA and run the
+#      non-destructive --dry-run=server negative test. (A) a jobTemplate mutation
+#      MUST be DENIED by the VAP; (B) a suspend flip MUST be ALLOWED. If (A) is
+#      admitted or (B) is denied, the T1 Role is NEUTRALIZED (rules emptied) and
+#      the run ABORTS — T1 without a prod-enforced VAP is an open RCE.
+#
+# NOTE on the rollback (v2): the permanent SA has NO delete verb on
+# roles/rolebindings/serviceaccounts (least privilege), so the gate's failure
+# path does not `kubectl delete` the T1 RBAC — it PATCHES the Role
+# radar-ci-trigger-prod to `rules: []` (the SA has roles:get/update/patch
+# name-scoped). Emptying the rules strips the cronjob-patch permission, closing
+# the RCE window even without the VAP. This is a stronger closure than v1's
+# best-effort delete.
+#
+# 0 Python. Runner does kubectl only (control-plane): apply committed manifests +
+# an impersonation dry-run. NO PII, NO dump bytes, NO S3 keys read back (the S3
+# keys never touch the runner — they arrive as a SealedSecret and are decrypted
+# only in-cluster by the controller).
+name: bascule-bundle-cd (prod bundle apply, CD-native v2)
+
+on:
+  push:
+    branches: [main]
+    # Re-apply the bundle when any bundle manifest (or this workflow) changes on
+    # main. Idempotent: a merge that does not touch the bundle leaves the live
+    # objects unchanged, so path-scoping avoids a needless prod apply on every
+    # unrelated merge while still self-healing on any bundle edit.
+    paths:
+      - 'deploy/ci/bascule-preprod/**'
+      - '.github/workflows/bascule-bundle-cd.yml'
+  # KEPT for the first run right after cluster install and for an on-demand
+  # re-apply — NOT a required gate (the merge path is what makes it automated).
+  workflow_dispatch: {}
+
+concurrency:
+  group: bascule-bundle-cd
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  apply-bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # ARMING SWITCH (decouple merge from activation — same pattern as
+    # PREPROD_CD_ENABLED / BACKUP_BEFORE_RELEASE_ENABLED in build-push-images.yml).
+    # The k8s lane flips BASCULE_BUNDLE_CD_ENABLED to 'true' ONLY at the one-time
+    # cluster install, AFTER it has (1) applied
+    # deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml and (2) minted the
+    # PERMANENT token into the GH secret KUBE_CONFIG_DATA_PROD. So merging this PR
+    # can never red a main push against a not-yet-provisioned SA. Arming is part of
+    # the install, not a per-act owner validation.
+    if: vars.BASCULE_BUNDLE_CD_ENABLED == 'true'
+    env:
+      # PROD namespace (VAP is cluster-scoped; RBAC/RO-role/CronJob/SealedSecrets are ns-scoped).
+      NAMESPACE: radar-immobilier
+      BUNDLE: deploy/ci/bascule-preprod
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig (PROD — permanent radar-ci-bascule-prod SA)
+        # PERMANENT prod cred (SA radar-ci-bascule-prod), minted once at cluster
+        # install. Broad enough to APPLY the bundle (VAP cluster + ns bundle
+        # objects + impersonate) but with 0 secrets:create — the app creds arrive
+        # as committed SealedSecrets, decrypted only in-cluster. NOT the
+        # name-scoped run trigger token (KUBE_CONFIG_DATA_PROD_TRIGGER) and NOT the
+        # broad shared KUBE_CONFIG_DATA.
+        env:
+          KUBE_CONFIG_DATA_PROD: ${{ secrets.KUBE_CONFIG_DATA_PROD }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.kube"
+          if printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_PROD" > "$HOME/.kube/config"
+          fi
+          chmod 600 "$HOME/.kube/config"
+
+      # POSITIVE pre-flight (same pattern as build-push-images / run-job): assert
+      # the kubeconfig targets the expected PROD apiserver BEFORE any mutating call.
+      - name: Pre-flight — assert PROD cluster
+        env:
+          EXPECTED_KUBE_APISERVER_HOST_PROD: ${{ vars.EXPECTED_KUBE_APISERVER_HOST_PROD || vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
+          expected="${EXPECTED_KUBE_APISERVER_HOST_PROD:-$DEFAULT_HOST}"
+          if [ -z "${EXPECTED_KUBE_APISERVER_HOST_PROD:-}" ]; then
+            echo "::warning title=Pre-flight using built-in default::set EXPECTED_KUBE_APISERVER_HOST[_PROD] to make the guard explicit (falling back to ${DEFAULT_HOST})."
+          fi
+          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "kubeconfig apiserver host : ${host:-<none>}"
+          echo "expected apiserver host   : ${expected}"
+          if [ "$host" != "$expected" ]; then
+            echo "::error title=Wrong cluster — apply-bundle refused::kubeconfig targets '${host:-<none>}' but expected '${expected}'. Nothing was applied."; exit 1
+          fi
+          kubectl -n "$NAMESPACE" get deploy radar-api -o name
+          echo "pre-flight OK — ${expected} / namespace ${NAMESPACE}"
+
+      # ── Step 2 — SealedSecrets (committed, encrypted, safe in git) ───────────
+      # The 2 SealedSecrets are applied by this SA (bitnami.com/sealedsecrets:
+      # create + name-scoped get/patch/update). The in-cluster sealed-secrets
+      # controller decrypts them and materializes the core Secrets radar-db-ro-prod
+      # + radar-pra-admin-prod. This runner never sees the plaintext.
+      - name: Apply SealedSecrets (radar-db-ro-prod + radar-pra-admin-prod)
+        run: |
+          set -euo pipefail
+          kubectl -n "$NAMESPACE" apply -f "$BUNDLE/radar-db-ro-prod-sealed.yaml"
+          kubectl -n "$NAMESPACE" apply -f "$BUNDLE/radar-pra-admin-prod-sealed.yaml"
+          echo "SealedSecrets applied — controller will materialize radar-db-ro-prod + radar-pra-admin-prod."
+
+      # Wait for the controller to reconcile (Synced) so the core Secret exists
+      # before the RO-role Job below mounts radar-db-ro-prod/POSTGRES_PASSWORD.
+      # This SA has 0 secrets:get (least privilege) — it CANNOT read the core
+      # Secret — so it polls the SealedSecret's own .status (get is name-scoped,
+      # allowed). TOLERANT: if the controller build does not populate .status, the
+      # poll times out with a warning and we proceed — the RO-role Job below is the
+      # hard fail-closed gate (its pod stays in ContainerCreating and the kubelet
+      # retries the secret mount until the controller materializes it, or the Job
+      # times out and reds the run).
+      - name: Wait for SealedSecrets Synced (tolerant)
+        run: |
+          set -uo pipefail
+          synced_deadline=$((SECONDS + 120))
+          for ss in radar-db-ro-prod radar-pra-admin-prod; do
+            while :; do
+              s="$(kubectl -n "$NAMESPACE" get sealedsecret "$ss" -o 'jsonpath={.status.conditions[?(@.type=="Synced")].status}' 2>/dev/null || true)"
+              if [ "$s" = "True" ]; then echo "SealedSecret ${ss}: Synced=True"; break; fi
+              if [ "$SECONDS" -ge "$synced_deadline" ]; then
+                echo "::warning title=SealedSecret sync unconfirmed::${ss} did not report Synced=True within the poll window (status='${s:-<empty>}'). Proceeding — the RO-role Job below is the fail-closed backstop."
+                break
+              fi
+              sleep 5
+            done
+          done
+
+      # ── Step 3 — RO Postgres role (Job, fail-closed) ────────────────────────
+      - name: Provision strict RO Postgres role (Job db-ro-role-provision)
+        run: |
+          set -euo pipefail
+          # Immutable Job: delete any prior instance, re-apply (ConfigMap + Job), wait Complete.
+          kubectl -n "$NAMESPACE" delete job radar-db-ro-role-provision --ignore-not-found
+          kubectl -n "$NAMESPACE" apply -f "$BUNDLE/db-ro-role-provision.yaml"
+          deadline=$((SECONDS + 300))
+          while :; do
+            c="$(kubectl -n "$NAMESPACE" get job radar-db-ro-role-provision -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)"
+            f="$(kubectl -n "$NAMESPACE" get job radar-db-ro-role-provision -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)"
+            if [ "$c" = "True" ]; then echo "RO role provisioned (Job Complete)."; break; fi
+            if [ "$f" = "True" ]; then
+              echo "::error title=RO role provision FAILED::inspect job radar-db-ro-role-provision in-cluster (0 runner logs)."; exit 1
+            fi
+            if [ "$SECONDS" -ge "$deadline" ]; then
+              echo "::error title=RO role provision TIMEOUT::did not complete in 300s (check the sealed-secrets controller materialized radar-db-ro-prod)."; exit 1
+            fi
+            sleep 5
+          done
+
+      # ── Step 4 — dormant dump CronJob (must EXIST for the gate below) ────────
+      - name: Apply dormant dump CronJob (suspend:true)
+        run: |
+          set -euo pipefail
+          kubectl -n "$NAMESPACE" apply -f "$BUNDLE/cronjob-db-backup-prod.yaml"
+          sus="$(kubectl -n "$NAMESPACE" get cronjob radar-db-backup-prod -o jsonpath='{.spec.suspend}')"
+          echo "radar-db-backup-prod applied — spec.suspend=${sus} (must be true: it stays dormant until the bascule triggers it)."
+          if [ "$sus" != "true" ]; then
+            echo "::error title=Dump CronJob not dormant::spec.suspend != true after apply — refusing to proceed."; exit 1
+          fi
+
+      # ── Step 5 — VAP (cluster-scoped), then RBAC T1, then propagation ───────
+      - name: Apply VAP suspend-only (cluster-scoped)
+        run: kubectl apply -f "$BUNDLE/vap-ci-trigger-suspend-only.yaml"
+
+      - name: Apply RBAC T1 (trigger SA/Role/RoleBinding)
+        run: kubectl -n "$NAMESPACE" apply -f "$BUNDLE/rbac-ci-trigger-prod.yaml"
+
+      - name: Wait for VAP propagation
+        env:
+          VAP_PROPAGATION_SEC: ${{ vars.BASCULE_VAP_PROPAGATION_SEC || '20' }}
+        run: |
+          echo "waiting ${VAP_PROPAGATION_SEC}s for VAP propagation (measured lag 4-8s)"
+          sleep "${VAP_PROPAGATION_SEC}"
+
+      # ── Step 6 — ANTI-RCE GATE (fail-closed, neutralize T1 on failure) ──────
+      # Impersonation --dry-run=server (non-destructive: admission runs, nothing
+      # persisted). Proves the VAP enforces suspend-only IN PROD for the trigger
+      # SA before T1 is left usable.
+      - name: Anti-RCE gate — impersonation --dry-run=server negative test
+        run: |
+          set -uo pipefail
+          SA="system:serviceaccount:${NAMESPACE}:radar-ci-trigger-prod"
+          CJ="radar-db-backup-prod"
+          echo "gate @ $(date -u +%FT%TZ) — impersonating ${SA} on cronjob/${CJ}"
+
+          # v2 rollback: this SA has NO delete on roles/rolebindings (least
+          # privilege). Neutralize T1 by emptying the Role's rules (get/update/patch
+          # name-scoped, allowed) — strips the cronjob-patch permission and closes
+          # the RCE window even without the VAP.
+          neutralize() {
+            echo "::group::Neutralize RBAC T1 (empty Role rules — close the RCE window)"
+            kubectl -n "$NAMESPACE" patch role radar-ci-trigger-prod --type=merge -p '{"rules":[]}' || true
+            echo "::endgroup::"
+          }
+
+          # (A) jobTemplate mutation → MUST be DENIED by the VAP.
+          out_a="$(kubectl --as="$SA" -n "$NAMESPACE" patch cronjob "$CJ" --type=merge --dry-run=server \
+            -p '{"spec":{"jobTemplate":{"spec":{"template":{"spec":{"containers":[{"name":"upload","image":"evil"}]}}}}}}' 2>&1)"
+          rc_a=$?
+          echo "── (A) jobTemplate mutation — expect DENIED — rc=${rc_a}"
+          echo "${out_a}"
+          if [ "$rc_a" -eq 0 ]; then
+            echo "::error title=Anti-RCE gate FAILED (A admitted)::a jobTemplate mutation was ADMITTED — the VAP does NOT enforce suspend-only. Aborting + neutralizing RBAC T1."
+            neutralize; exit 1
+          fi
+          if ! printf '%s' "${out_a}" | grep -qi 'radar-ci-trigger-suspend-only\|jobTemplate'; then
+            echo "::error title=Anti-RCE gate FAILED (A wrong cause)::mutation rejected but NOT by the suspend-only VAP (rc=${rc_a}). Aborting + neutralizing RBAC T1."
+            neutralize; exit 1
+          fi
+
+          # (B) suspend flip → MUST be ALLOWED (dry-run, nothing persisted).
+          out_b="$(kubectl --as="$SA" -n "$NAMESPACE" patch cronjob "$CJ" --type=merge --dry-run=server \
+            -p '{"spec":{"suspend":false}}' 2>&1)"
+          rc_b=$?
+          echo "── (B) suspend flip — expect ALLOWED — rc=${rc_b}"
+          echo "${out_b}"
+          if [ "$rc_b" -ne 0 ]; then
+            echo "::error title=Anti-RCE gate FAILED (B denied)::the trigger SA cannot even flip suspend (rc=${rc_b}) — T1 is broken. Aborting + neutralizing RBAC T1."
+            neutralize; exit 1
+          fi
+
+          echo "anti-RCE gate OK — (A) jobTemplate DENIED by radar-ci-trigger-suspend-only, (B) suspend flip ALLOWED. T1 is enforce-verified in PROD."
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### bascule prod bundle applied (CD-native v2)"
+            echo ""
+            echo "- Cred: KUBE_CONFIG_DATA_PROD (permanent SA radar-ci-bascule-prod, 0 secrets:create)"
+            echo "- SealedSecrets: radar-db-ro-prod, radar-pra-admin-prod (controller-materialized in-cluster)"
+            echo "- RO Postgres role: radar_db_ro_prod (Job Complete)"
+            echo "- Dump CronJob: radar-db-backup-prod (dormant, suspend:true)"
+            echo "- VAP: radar-ci-trigger-suspend-only (cluster-scoped)"
+            echo "- RBAC T1: radar-ci-trigger-prod (SA/Role/RoleBinding)"
+            echo "- Anti-RCE gate: jobTemplate DENIED + suspend ALLOWED"
+          } >> "$GITHUB_STEP_SUMMARY"

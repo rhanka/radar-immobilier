@@ -25,6 +25,14 @@
 name: bascule-preprod (iso-prod)
 
 on:
+  # CD-native-v2 : la bascule est AUTOMATISÉE par une planification nocturne
+  # (03:17 UTC). GitHub interdit une variable de dépôt dans le littéral cron → la
+  # CADENCE est figée ici ; l'ARMEMENT est la variable de dépôt
+  # BASCULE_SCHEDULE_ENABLED (voir `if` du job `bascule`), OFF par défaut, pour
+  # qu'une fusion ne déclenche jamais une bascule prod nocturne avant que l'env
+  # ne soit prêt. Le workflow_dispatch ci-dessous reste (1re fois / à la demande).
+  schedule:
+    - cron: '17 3 * * *'
   workflow_dispatch:
     inputs:
       CONFIRM:
@@ -72,6 +80,13 @@ permissions:
 
 jobs:
   bascule:
+    # ARMEMENT PLANIFICATION (CD-native-v2) : un dispatch manuel tourne TOUJOURS
+    # (GO owner = l'input CONFIRM) ; un déclenchement PLANIFIÉ ne joue la bascule
+    # QUE si armé par la lane k8s via vars.BASCULE_SCHEDULE_ENABLED == 'true' (OFF
+    # par défaut). La planification est ce qui rend la bascule automatique (0
+    # dispatch manuel) ; la variable d'armement empêche un env pas-encore-prêt de
+    # basculer tout seul dès la fusion.
+    if: ${{ github.event_name != 'schedule' || vars.BASCULE_SCHEDULE_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
     env:
@@ -113,8 +128,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Compute CONFIRM_EXPECTED (anti-rejeu = date du jour UTC)
-        run: echo "CONFIRM_EXPECTED=iso-prod-$(date -u +%F)" >> "$GITHUB_ENV"
+      - name: Compute CONFIRM_EXPECTED (anti-rejeu = date du jour UTC) + auto-CONFIRM planifié
+        run: |
+          set -euo pipefail
+          today="iso-prod-$(date -u +%F)"
+          echo "CONFIRM_EXPECTED=${today}" >> "$GITHUB_ENV"
+          # CD-native-v2 : un run PLANIFIÉ n'a pas d'input CONFIRM (inputs.* vides
+          # hors workflow_dispatch) → la PLANIFICATION EST le GO (0 owner-in-the-loop).
+          # On matérialise le CONFIRM du jour pour que la GARDE G3 passe (le motif
+          # anti-rejeu reste la date du jour). Un dispatch manuel garde le CONFIRM
+          # tapé par l'owner (env de job depuis inputs.CONFIRM), inchangé.
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            echo "CONFIRM=${today}" >> "$GITHUB_ENV"
+            echo "auto-CONFIRM (schedule) = ${today}"
+          fi
 
       - name: Setup Node 22
         uses: actions/setup-node@v4
@@ -163,17 +190,21 @@ jobs:
       # Le déclencheur S1 patche le CronJob `radar-db-backup-prod` dans la PROD
       # (`radar-immobilier`) : le kubeconfig préprod par défaut n'a PAS le RBAC
       # prod (403). On monte un kubeconfig PROD DÉDIÉ dans un FICHIER SÉPARÉ
-      # (secret KUBE_CONFIG_DATA_PROD = token name-scopé patch de CE CronJob +
-      # VAP suspend-only, généré par k8s au prod-apply) et on exporte
+      # (secret KUBE_CONFIG_DATA_PROD_TRIGGER = token name-scopé patch de CE
+      # CronJob + VAP suspend-only, SA radar-ci-trigger-prod) et on exporte
       # DUMP_KUBECONFIG (lu par bascule.mjs, utilisé UNIQUEMENT sur les 2 patch
       # cronjob prod ; tout le reste reste sur le kubeconfig préprod par défaut).
-      # Joué HORS DRY (pas de token prod avant l'apply ; le DRY ne trigger pas).
+      # RENOMMAGE CD-native-v2 : ce token 0-foothold s'appelait KUBE_CONFIG_DATA_PROD ;
+      # ce nom désigne désormais la SA d'APPLY du bundle (radar-ci-bascule-prod),
+      # d'où KUBE_CONFIG_DATA_PROD_TRIGGER pour le déclencheur name-scopé.
+      # Joué HORS DRY (pas de token prod avant l'apply ; le DRY ne trigger pas ;
+      # un run PLANIFIÉ n'est pas DRY → le déclencheur joue).
       - name: Configure kubeconfig PROD (déclencheur dump S1)
         if: ${{ !inputs.DRY_RUN }}
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.kube"
-          echo "${{ secrets.KUBE_CONFIG_DATA_PROD }}" | base64 -d > "$HOME/.kube/config-prod"
+          echo "${{ secrets.KUBE_CONFIG_DATA_PROD_TRIGGER }}" | base64 -d > "$HOME/.kube/config-prod"
           chmod 600 "$HOME/.kube/config-prod"
           echo "DUMP_KUBECONFIG=$HOME/.kube/config-prod" >> "$GITHUB_ENV"
 
@@ -321,9 +352,11 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   force-refresh:
     needs: bascule
-    # Joué seulement si demandé ET si la bascule a réussi (jamais en DRY : rien
-    # n'a été restauré). `create job --from=cronjob` n'est pas destructif pour la prod.
-    if: ${{ inputs.FORCE_REFRESH && !inputs.DRY_RUN && needs.bascule.result == 'success' }}
+    # Joué si demandé (input FORCE_REFRESH) OU sur un run PLANIFIÉ (CD-native-v2 :
+    # l'ordre câblé bascule→refresh est automatique la nuit), ET si la bascule a
+    # réussi (jamais en DRY : rien n'a été restauré). `create job --from=cronjob`
+    # n'est pas destructif pour la prod.
+    if: ${{ (inputs.FORCE_REFRESH || github.event_name == 'schedule') && !inputs.DRY_RUN && needs.bascule.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 420
     permissions:
