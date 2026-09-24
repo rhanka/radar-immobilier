@@ -112,6 +112,33 @@ grep -Eiq 's3\.fr-par\.scw\.cloud|radar-minio|radar-immobilier-docs-pocs|radar-s
   "$ROOT/deploy/k8s/34-refresh-cronjob.yaml" && fail 'deploy/k8s/34-refresh-cronjob.yaml retains a legacy storage binding'
 grep -Fq 'name: radar-refresh-pv' "$ROOT/deploy/k8s/34-refresh-cronjob.yaml" ||
   fail 'deploy/k8s/34-refresh-cronjob.yaml lost radar-refresh-pv'
+
+# Overlay patches on the scrape/refresh WORKLOAD must not pin storage coordinates
+# (endpoint/bucket/region/force-path-style) as per-env LITERALS — they come from
+# the radar-api ConfigMap (configMapKeyRef). This is the graph-preprod class of
+# bug: a literal SCRAPE_S3_BUCKET in the refresh-cronjobs overlay silently
+# diverged from the api's served bucket, invisible to the base-file checks above
+# (which never look at overlays). The per-env VALUE lives ONLY in the ConfigMap
+# (patched in deploy/overlays/preprod), never on a workload. Read creds may still
+# be pinned via secretKeyRef (radar-scrape-s3-credentials is absent in preprod).
+OVERLAY_WORKLOAD_PATCHES=(
+  deploy/k8s/refresh-cronjobs/kustomization.yaml
+  deploy/k8s/refresh-cronjobs-prod/kustomization.yaml
+  deploy/k8s/reexploit-proof/kustomization.yaml
+)
+for rel in "${OVERLAY_WORKLOAD_PATCHES[@]}"; do
+  [ -f "$ROOT/$rel" ] || continue
+  awk '
+    /name:[[:space:]]*(SCRAPE|GRAPH)_S3_(ENDPOINT|BUCKET|REGION|FORCE_PATH_STYLE)([^A-Z_]|$)/ {
+      if ($0 ~ /value:/) { bad = 1 }        # inline "{ name: <coord>, value: <literal> }"
+      pend = 1; next
+    }
+    pend && /value:/ { bad = 1 }
+    pend && /(valueFrom|configMapKeyRef|secretKeyRef|- name:|- \{)/ { pend = 0 }
+    END { exit(bad ? 0 : 1) }
+  ' "$ROOT/$rel" &&
+    fail "$rel pins a scrape/refresh storage coordinate as a workload literal (must inherit from ConfigMap radar-api)"
+done
 for rel in "${PUBLIC_IMAGE_FILES[@]}"; do
   grep -Eiq 'radar-registry-pull|rg\.fr-par\.scw\.cloud' "$ROOT/$rel" &&
     fail "$rel retains a legacy SCW registry reference"

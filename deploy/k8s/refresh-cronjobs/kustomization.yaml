@@ -70,11 +70,16 @@ patches:
                 containers:
                   - name: refresh-pv
                     env:
-                      - { name: SCRAPE_S3_ENDPOINT, value: "https://s3.bhs.io.cloud.ovh.net", valueFrom: null }
-                      - { name: SCRAPE_S3_BUCKET, value: "radar-immobilier-graph-preprod", valueFrom: null }
-                      - { name: SCRAPE_S3_REGION, value: "bhs", valueFrom: null }
-                      - { name: SCRAPE_S3_FORCE_PATH_STYLE, value: "false", valueFrom: null }
+                      # Bucket/endpoint/region/force-path-style are INHERITED from the
+                      # radar-api ConfigMap (SCRAPE_S3_* → radar-immobilier-docs-preprod,
+                      # set per-env in deploy/overlays/preprod). No literal here — that is
+                      # exactly the block that silently diverged to graph-preprod.
+                      # Only the WRITE creds are repointed, because
+                      # radar-scrape-s3-credentials does not exist in preprod;
+                      # radar-docs-s3-credentials writes docs-preprod (proven by the
+                      # SCW→OVH migration df6h2), and via config.ts GRAPH_S3→SCRAPE creds
+                      # fallback it also lands the graph in docs-preprod — as in prod.
                       - name: SCRAPE_S3_ACCESS_KEY
-                        valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_ACCESS_KEY } }
+                        valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
                       - name: SCRAPE_S3_SECRET_KEY
-                        valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_SECRET_KEY } }
+                        valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }
