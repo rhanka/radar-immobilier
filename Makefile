@@ -19,7 +19,7 @@ export UI_PORT             ?= 5301
 export MAILDEV_UI_PORT     ?= 1101
 export POSTGRES_HOST_PORT  ?= 5532
 export S3_HOST_PORT        ?= 9100
-export S3_CONSOLE_HOST_PORT ?= 9101
+# (No S3 console port: adobe/s3mock serves only the S3 API, not a web console.)
 export OBSCURA_HOST_PORT   ?= 9222
 export MAILDEV_SMTP_HOST_PORT ?= 1025
 
@@ -249,29 +249,28 @@ db-status: ## Check DB readiness
 	  pg_isready -U $(POSTGRES_USER) -d $(POSTGRES_DB)
 
 # ─────────────────────────────────────────────────────────────────────
-# Object storage (MinIO local, OVH S3 in deployed environments)
+# Object storage (adobe/s3mock local, OVH S3 in deployed environments)
 # ─────────────────────────────────────────────────────────────────────
+# NOTE: the `minio`-named service now runs adobe/s3mock (MinIO closed all its
+# public images). s3mock has no `mc` client and pre-creates its buckets via the
+# `initialBuckets` env in docker-compose.yml, so these targets no longer shell
+# out to `mc`; the status/ls helpers hit s3mock's S3 HTTP API with the busybox
+# `wget` already in the image (no extra image added).
 
 .PHONY: s3-init
-s3-init: ## Create the local MinIO bucket if missing
-	@$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) exec -T minio sh -c '\
-	  mc alias set local http://localhost:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} >/dev/null && \
-	  mc mb -p local/$${S3_BUCKET:-radar-immobilier-raw} >/dev/null 2>&1 || true && \
-	  echo "[s3-init] bucket ready: $${S3_BUCKET:-radar-immobilier-raw}"' || \
-	echo "[s3-init] minio not running yet — skip"
+s3-init: ## No-op: buckets are pre-created by s3mock (initialBuckets)
+	@echo "[s3-init] buckets are auto-created by s3mock (initialBuckets in docker-compose.yml) — nothing to do"
 
 .PHONY: s3-status
-s3-status: ## List buckets in MinIO
-	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) exec -T minio sh -c '\
-	  mc alias set local http://localhost:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} >/dev/null && \
-	  mc ls local/'
+s3-status: ## List buckets (raw S3 ListBuckets XML from s3mock)
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) exec -T minio \
+	  wget -q -O - http://localhost:9000/
 
 .PHONY: s3-ls
-s3-ls: ## List keys under PREFIX=<prefix>
+s3-ls: ## List keys under PREFIX=<prefix> (raw S3 ListObjectsV2 XML from s3mock)
 	@test -n "$$PREFIX" || (echo "Pass PREFIX=raw/<...>"; exit 1)
-	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) exec -T minio sh -c '\
-	  mc alias set local http://localhost:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} >/dev/null && \
-	  mc ls -r local/$${S3_BUCKET:-radar-immobilier-raw}/$$PREFIX'
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_DEV) exec -T minio \
+	  wget -q -O - "http://localhost:9000/$${S3_BUCKET:-radar-immobilier-raw}?list-type=2&prefix=$$PREFIX"
 
 # ─────────────────────────────────────────────────────────────────────
 # Worker live (config-only PV cities → scraping object store)
