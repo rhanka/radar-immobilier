@@ -11,7 +11,7 @@
 // =============================================================================
 import process from "node:process";
 import console from "node:console";
-import { classifyJobStatus } from "./bascule.mjs";
+import { classifyJobStatus, withScheme, parseListingMeta, reconMissing } from "./bascule.mjs";
 
 let passed = 0;
 let failed = 0;
@@ -46,6 +46,29 @@ eq("failed=1 & active=1 ⇒ failed", classifyJobStatus({ failed: 1, active: 1 })
 // 8) champs string (jsonpath peut renvoyer des strings) → coercés en nombre.
 eq("succeeded='1' (string) ⇒ succeeded", classifyJobStatus({ succeeded: "1" }), { done: true, ok: true, state: "succeeded" });
 eq("failed='2' (string) ⇒ failed", classifyJobStatus({ failed: "2" }), { done: true, ok: false, state: "failed" });
+
+// ── withScheme : root cause endpoint sans schéma (BHS = host nu) ─────────────
+eq("withScheme — host nu ⇒ https://", withScheme("s3.bhs.io.cloud.ovh.net"), "https://s3.bhs.io.cloud.ovh.net");
+eq("withScheme — déjà https:// (idempotent)", withScheme("https://s3.bhs.io.cloud.ovh.net"), "https://s3.bhs.io.cloud.ovh.net");
+eq("withScheme — http:// conservé", withScheme("http://minio.local:9000"), "http://minio.local:9000");
+eq("withScheme — espaces trim + préfixe", withScheme("  s3.example  "), "https://s3.example");
+eq("withScheme — vide ⇒ vide", withScheme(""), "");
+
+// ── reconMissing : DIFF LIST-only Key+Size (ETag IGNORÉ) — dest ⊇ src ? ───────
+const SRC = ["a/1.txt\t10", "b/2.txt\t20", "c 3.txt\t30"].join("\n"); // clé avec espace
+const DST_OK = ["a/1.txt\t10", "b/2.txt\t20", "c 3.txt\t30", "extra\t99"].join("\n");
+eq("recon — dest ⊇ src ⇒ [] (aucun manquant)", reconMissing(SRC, DST_OK), []);
+const DST_MISS = ["a/1.txt\t10", "b/2.txt\t20"].join("\n"); // manque c 3.txt
+eq("recon — clé src absente de dst ⇒ manquante", reconMissing(SRC, DST_MISS), ["c 3.txt"]);
+const DST_SIZE = ["a/1.txt\t10", "b/2.txt\t999", "c 3.txt\t30"].join("\n"); // size diff
+eq("recon — Size différent ⇒ manquante", reconMissing(SRC, DST_SIZE), ["b/2.txt"]);
+// ETag différent mais MÊME Size ⇒ PLUS flaggé (ETag ignoré = fix multipart).
+const SRC3 = ["a/1.txt\t10\t\"e1\"", "b/2.txt\t20\t\"e2\""].join("\n");
+const DST3 = ["a/1.txt\t10\t\"DIFF-multipart\"", "b/2.txt\t20\t\"e2\""].join("\n");
+eq("recon — ETag différent + Size identique ⇒ [] (ETag ignoré)", reconMissing(SRC3, DST3), []);
+eq("recon — src vide ⇒ [] (dest ⊇ ∅)", reconMissing("", DST_OK), []);
+ok("recon — parseListingMeta ne retient que la Size (col1), ETag ignoré", parseListingMeta("a\t1\t\"e\"").get("a") === "1");
+ok("recon — parseListingMeta ignore lignes vides", parseListingMeta("a\t1\n\n").size === 1);
 
 console.log(`\nbascule.selftest — ${passed} passés, ${failed} échoués`);
 process.exit(failed ? 1 : 0);
