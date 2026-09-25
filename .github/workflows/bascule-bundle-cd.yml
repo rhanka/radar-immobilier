@@ -222,6 +222,12 @@ jobs:
       # SA before T1 is left usable.
       - name: Anti-RCE gate — impersonation --dry-run=server negative test
         run: |
+          # GitHub exécute `run:` en `bash -e` : sans `set +e`, la substitution
+          # out_a="$(kubectl … --dry-run=server …)" du refus ATTENDU (test A, rc≠0)
+          # tue l'étape AVANT la capture `rc_a=$?` → faux-échec (log « gate @ … »
+          # puis exit 1 sans verdict). On désactive -e ; le gate reste fail-closed :
+          # chaque mauvais verdict (A admis / A mauvaise cause / B refusé) = neutralize + exit 1.
+          set +e
           set -uo pipefail
           SA="system:serviceaccount:${NAMESPACE}:radar-ci-trigger-prod"
           CJ="radar-db-backup-prod"
