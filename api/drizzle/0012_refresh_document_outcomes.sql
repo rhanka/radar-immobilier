@@ -1,12 +1,25 @@
 -- Append-only submission results in the same radar database as the graph projection.
 -- No references to legacy documents/ingestions and no document or error payloads.
-CREATE TYPE "refresh_outcome_status" AS ENUM ('submitted', 'accepted', 'refused');
+--
+-- IDEMPOTENT (garde DO/EXCEPTION sur les CREATE TYPE + IF NOT EXISTS sur table/index).
+-- Motif : sur une base où 0012 est DÉJÀ dans le schéma alors que le journal drizzle
+-- ne l'enregistre pas (drift bookkeeping — schéma en avance sur __drizzle_migrations,
+-- constaté en prod), le migrator rejoue 0012 ; sans garde il plante ("type already
+-- exists"). Rendu idempotent, il no-ope et inscrit la row manquante → corrige la
+-- préprod (au restore) ET la prod (à la prochaine MEP) sans écriture manuelle.
+DO $$ BEGIN
+  CREATE TYPE "refresh_outcome_status" AS ENUM ('submitted', 'accepted', 'refused');
+EXCEPTION WHEN duplicate_object THEN null; END $$;
 --> statement-breakpoint
-CREATE TYPE "refresh_outcome_reason" AS ENUM ('quota', 'timeout', 'empty-output', 'transport', 'quality', 'forced', 'circuit-open');
+DO $$ BEGIN
+  CREATE TYPE "refresh_outcome_reason" AS ENUM ('quota', 'timeout', 'empty-output', 'transport', 'quality', 'forced', 'circuit-open');
+EXCEPTION WHEN duplicate_object THEN null; END $$;
 --> statement-breakpoint
-CREATE TYPE "refresh_outcome_transition" AS ENUM ('primary', 'same-model-retry', 'fallback', 'verification');
+DO $$ BEGIN
+  CREATE TYPE "refresh_outcome_transition" AS ENUM ('primary', 'same-model-retry', 'fallback', 'verification');
+EXCEPTION WHEN duplicate_object THEN null; END $$;
 --> statement-breakpoint
-CREATE TABLE "refresh_document_outcomes" (
+CREATE TABLE IF NOT EXISTS "refresh_document_outcomes" (
   "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "cycle_id" uuid NOT NULL,
   "document_sha" text NOT NULL,
@@ -30,6 +43,6 @@ CREATE TABLE "refresh_document_outcomes" (
   "skipped_fallback" integer NOT NULL DEFAULT 0
 );
 --> statement-breakpoint
-CREATE INDEX "refresh_document_outcomes_created_at_idx" ON "refresh_document_outcomes" ("created_at");
+CREATE INDEX IF NOT EXISTS "refresh_document_outcomes_created_at_idx" ON "refresh_document_outcomes" ("created_at");
 --> statement-breakpoint
-CREATE INDEX "refresh_document_outcomes_status_idx" ON "refresh_document_outcomes" ("status");
+CREATE INDEX IF NOT EXISTS "refresh_document_outcomes_status_idx" ON "refresh_document_outcomes" ("status");
