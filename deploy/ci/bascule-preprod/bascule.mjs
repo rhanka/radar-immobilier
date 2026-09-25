@@ -468,7 +468,7 @@ function cmdDump() {
 function assertQuiesced() {
   const ns = opt("PREPROD_NAMESPACE", "radar-immobilier-preprod");
   const deployments = opt("QUIESCE_DEPLOYMENTS", "radar-api,radar-immo-mcp").split(",").map((s) => s.trim()).filter(Boolean);
-  const cronjobs = opt("QUIESCE_CRONJOBS", "radar-refresh-pv,radar-consistency-snapshot,radar-populate-geo-daily").split(",").map((s) => s.trim()).filter(Boolean);
+  const cronjobs = presentCronjobs(ns, opt("QUIESCE_CRONJOBS", "radar-refresh-pv,radar-consistency-snapshot,radar-populate-geo-daily").split(",").map((s) => s.trim()).filter(Boolean));
   const problems = [];
   for (const d of deployments) {
     const spec = run("kubectl", ["-n", ns, "get", "deploy", d, "-o", "jsonpath={.spec.replicas}"], { capture: true, allowFail: true });
@@ -545,6 +545,22 @@ function quiesceTargets() {
   };
 }
 
+// Filtre une liste de CronJobs pour ne garder que ceux réellement présents dans
+// le namespace. Un CronJob absent = rien à quiescer : la préprod n'a pas toujours
+// le même jeu de crons que la prod (ex. radar-populate-geo-daily non déployé en
+// préprod). On tolère donc l'absence (fail-open sur un objet inexistant), au lieu
+// de faire échouer quiesce/G2 sur un NotFound. La quiesce reste fail-CLOSED sur
+// tout cron PRÉSENT non suspendu — on n'élargit pas la surface, on ignore le vide.
+function presentCronjobs(ns, cronjobs) {
+  const present = [];
+  for (const c of cronjobs) {
+    const r = run("kubectl", ["-n", ns, "get", "cronjob", c, "-o", "name"], { capture: true, allowFail: true });
+    if (r.status === 0) present.push(c);
+    else log(`quiesce — cronjob/${c} absent en préprod → ignoré (rien à quiescer).`);
+  }
+  return present;
+}
+
 // =============================================================================
 // QUIESCE — met les consommateurs préprod au repos (scale 0 + suspend) APRÈS
 // avoir ENREGISTRÉ les replicas d'origine (replay-safe) et attend le drain
@@ -555,6 +571,7 @@ function cmdQuiesce() {
   section("QUIESCE consommateurs préprod (scale 0 + suspend)");
   assertConfirm(); // G3
   const { ns, deployments, cronjobs } = quiesceTargets();
+  const presentCrons = presentCronjobs(ns, cronjobs);
   const dir = workdir();
   const statePath = join(dir, "quiesce-state.json");
   let state;
@@ -573,8 +590,8 @@ function cmdQuiesce() {
       }
       state.deployments[d] = n;
     }
-    for (const c of cronjobs) {
-      const r = run("kubectl", ["-n", ns, "get", "cronjob", c, "-o", "jsonpath={.spec.suspend}"], { capture: true });
+    for (const c of presentCrons) {
+      const r = run("kubectl", ["-n", ns, "get", "cronjob", c, "-o", "jsonpath={.spec.suspend}"], { capture: true, allowFail: true });
       state.cronjobs[c] = (r.stdout || "").trim() === "true";
     }
     writeFileSync(statePath, `${JSON.stringify(state)}\n`, { mode: 0o600 });
@@ -582,7 +599,7 @@ function cmdQuiesce() {
   }
   // Appliquer le quiesce (idempotent).
   for (const d of deployments) run("kubectl", ["-n", ns, "scale", `deploy/${d}`, "--replicas=0"]);
-  for (const c of cronjobs) run("kubectl", ["-n", ns, "patch", "cronjob", c, "-p", '{"spec":{"suspend":true}}']);
+  for (const c of presentCrons) run("kubectl", ["-n", ns, "patch", "cronjob", c, "-p", '{"spec":{"suspend":true}}'], { allowFail: true });
   // Attendre le drain (status.replicas → 0) pour que G2 passe immédiatement après.
   const deadline = Date.now() + Number(opt("QUIESCE_TIMEOUT", "300")) * 1000;
   for (const d of deployments) {
