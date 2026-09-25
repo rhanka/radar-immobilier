@@ -602,6 +602,41 @@ function cmdQuiesce() {
   for (const c of presentCrons) run("kubectl", ["-n", ns, "patch", "cronjob", c, "-p", '{"spec":{"suspend":true}}'], { allowFail: true });
   // Attendre le drain (status.replicas → 0) pour que G2 passe immédiatement après.
   const deadline = Date.now() + Number(opt("QUIESCE_TIMEOUT", "300")) * 1000;
+  // Drainer les Jobs EN VOL des cronjobs suspendus. Un Job déjà lancé continue
+  // malgré le suspend et tient une connexion à radar-postgres → il ferait échouer
+  // G2 (fail-closed) et corromprait un restore destructif (ex. un long sweep
+  // radar-refresh-pv-<n>). On supprime les Jobs ACTIFS appartenant (ownerReference
+  // CronJob) aux cronjobs quiescés, puis on attend leur disparition. allowFail :
+  // si `delete jobs` manque au RBAC, on n'aggrave rien — G2 reste la barrière.
+  if (presentCrons.length) {
+    const jr = run("kubectl", ["-n", ns, "get", "jobs", "-o", "json"], { capture: true, allowFail: true });
+    if (jr.status !== 0) {
+      warn(`quiesce — liste des Jobs illisible (${(jr.stderr || "").trim() || "kubectl get jobs a échoué"}) ; drain des Jobs en vol sauté (G2 reste la barrière).`);
+    } else {
+      let items = [];
+      try { items = JSON.parse(jr.stdout || "{}").items || []; } catch { items = []; }
+      const drained = [];
+      for (const j of items) {
+        const owner = (j?.metadata?.ownerReferences || []).find((o) => o?.kind === "CronJob" && presentCrons.includes(o?.name));
+        const active = Number(j?.status?.active ?? 0) > 0;
+        const name = j?.metadata?.name;
+        if (owner && active && name) {
+          warn(`quiesce — Job en vol ${name} (cronjob ${owner.name}, active) → suppression pour libérer le restore.`);
+          run("kubectl", ["-n", ns, "delete", "job", name, "--wait=false"], { allowFail: true });
+          drained.push(name);
+        }
+      }
+      for (const name of drained) {
+        for (;;) {
+          const g = run("kubectl", ["-n", ns, "get", "job", name, "-o", "jsonpath={.status.active}"], { capture: true, allowFail: true });
+          const stillActive = g.status === 0 && (g.stdout || "").trim() !== "" && (g.stdout || "").trim() !== "0";
+          if (!stillActive) { log(`Job en vol ${name} drainé (supprimé/inactif).`); break; }
+          if (Date.now() >= deadline) { warn(`quiesce — Job en vol ${name} pas encore disparu dans le délai ; G2 tranchera.`); break; }
+          spawnSync("bash", ["-lc", "sleep 5"], { stdio: "ignore" });
+        }
+      }
+    }
+  }
   for (const d of deployments) {
     for (;;) {
       const cur = run("kubectl", ["-n", ns, "get", "deploy", d, "-o", "jsonpath={.status.replicas}"], { capture: true, allowFail: true }).stdout.trim();
