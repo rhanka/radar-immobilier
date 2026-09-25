@@ -123,7 +123,7 @@ ok("refreshJobName — charset RFC1123 [a-z0-9-] uniquement", /^[a-z0-9-]+$/.tes
         if (cmd instanceof HeadObjectCommand) return {};
         if (cmd instanceof CopyObjectCommand) {
           inFlight += 1; maxInFlight = Math.max(maxInFlight, inFlight);
-          await new Promise((r) => setTimeout(r, 2));
+          await new Promise((r) => globalThis.setTimeout(r, 2));
           inFlight -= 1;
           if (i.Key === failCopyKey) throw Object.assign(new Error("boom"), { name: "InternalError" });
           copies.push(i);
