@@ -129,5 +129,11 @@ spec:
             - name: COPY_PREFIX
               value: "${COPY_PREFIX}"
           resources:
-            requests: { cpu: 100m, memory: 192Mi }
+            # cpu 25m (était 100m) : le container ne fait QUE List/CopyObject
+            # server-side (0 octet transitant par le pod, cf. commentaire de
+            # tête) — même profil CPU que s3-check-job (25m), même argument que
+            # geo #394 pour son propre docs-sync. Trim CPU nœud préprod (node
+            # saturé 95%/1749m requests, breakdown k8s du 2026-09-25) ; mémoire
+            # inchangée (192Mi, non concernée par la pression CPU).
+            requests: { cpu: 25m, memory: 192Mi }
             limits: { cpu: 500m, memory: 512Mi }
