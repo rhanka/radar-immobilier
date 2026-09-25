@@ -68,3 +68,28 @@ patches:
       - op: replace
         path: /data/GRAPH_S3_BUCKET
         value: radar-immobilier-docs-preprod
+
+# CPU pressure fix (nœud préprod unique OVH saturé, 95%/1749m requests — pod
+# radar-api Pending "Insufficient cpu" sur le rollout image 0e8807b, breakdown
+# k8s confirmé) :
+#   - requests.cpu 100m -> 40m (iso prod) : le préprod n'a pas de trafic réel
+#     justifiant 2,5x le request prod ; libère 60m persistants sur le nœud.
+#   - strategy Recreate (au lieu du RollingUpdate maxSurge:1/maxUnavailable:0 de
+#     la base) : sur un nœud plein, le surge pod RollingUpdate ne trouve jamais
+#     de place (il lui faut le request ENTIER en plus, pendant que l'ancien pod
+#     tourne encore) -> Pending permanent. Recreate libère les 40m de l'ancien
+#     pod AVANT de créer le nouveau : ~30s d'indispo préprod, acceptable (pas de
+#     SLA préprod), et le rollout peut enfin scheduler. PROD reste RollingUpdate
+#     (base, inchangée) : c'est un choix préprod uniquement, où la dispo
+#     continue importe moins que débloquer le déploiement sur nœud contraint.
+  - target:
+      kind: Deployment
+      name: radar-api
+    patch: |
+      - op: replace
+        path: /spec/strategy
+        value:
+          type: Recreate
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 40m
