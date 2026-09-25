@@ -227,3 +227,38 @@ spec:
       ports:
         - protocol: TCP
           port: 5432
+---
+# Bascule iso-prod (UAT) — les pods du bundle bascule (db-rollback, db-restore,
+# db-migrate, docs-sync, refresh) portent TOUS le label `sentropic.io/bascule`
+# (vérifié côté immo : chaque template le pose). Ils doivent joindre
+# radar-postgres:5432 en préprod : rollback = pg_dump snapshot de sécurité,
+# restore = pg_restore du dump prod, migrate/refresh = migrations + reprojection.
+# allow-backup-to-postgres n'ouvre QUE `component: db-backup` (le dump nocturne) ;
+# la bascule a ses propres composants, d'où cette policy dédiée, purement additive.
+# Sélection par label de bundle (matchExpressions Exists) plutôt que par composant :
+# une seule policy couvre tous les pods bascule sans énumérer chaque composant.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-bascule-to-postgres
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: postgres
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: radar-immobilier
+      app.kubernetes.io/component: postgres
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: radar-immobilier
+            matchExpressions:
+              - { key: sentropic.io/bascule, operator: Exists }
+      ports:
+        - protocol: TCP
+          port: 5432
