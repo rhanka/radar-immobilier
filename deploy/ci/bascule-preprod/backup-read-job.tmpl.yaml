@@ -1,0 +1,94 @@
+# =============================================================================
+# backup-read-job.tmpl.yaml — READ-ONLY Job of the bascule MODE=restore|list.
+#
+# BR_STEP=resolve : BACKUP_ID (latest | YYYY-MM-DD) → date D + guards (manifest
+#                   status 'complete', 24 h age guard for `latest`, dump sidecar
+#                   sha256 == manifest, sizes) → PIN. Dispatched BEFORE the quiesce:
+#                   a refused backup never touches preprod.
+# BR_STEP=list    : every dated manifest still listed (date, status, size, schema, sha).
+#
+# Identity = reader of the backup bucket, Secret ${READER_SECRET}
+# (radar-backup-reader in the preprod namespace; keys S3_ACCESS_KEY, S3_SECRET_KEY,
+# BACKUP_BUCKET): GetObject (incl. versionId), ListBucket, ListBucketVersions.
+# No write right, no DB access.
+#
+# Runner = kubectl only: it reads the Job `.status` and this pod's termination
+# message (verdict JSON <= 4 KiB written by backup-restore.cjs: dates, statuses,
+# sizes, sha256 — never a doc key, a row or a credential). Never `kubectl logs`.
+#
+# Placeholders (rendered by restore-mode.mjs): ${JOB_NAME} ${NAMESPACE} ${IMAGE}
+# ${BR_STEP} ${READER_SECRET} ${S3_ENDPOINT} ${S3_REGION} ${S3_FORCE_PATH_STYLE}
+# ${EXPECTED_BACKUP_BUCKET} ${BACKUP_ID} ${ALLOW_STALE_BACKUP} ${MAX_AGE_HOURS}
+# ${TTL_SECONDS}, plus the BR_SCRIPT placeholder under `args:` (= backup-restore.cjs,
+# indented; never written in a comment: it spans many lines).
+# =============================================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ${JOB_NAME}
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: backup-read
+    sentropic.io/bascule: backup-read
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: ${TTL_SECONDS}
+  activeDeadlineSeconds: 900
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: backup-read
+        sentropic.io/bascule: backup-read
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: tmp
+          emptyDir: { sizeLimit: 64Mi }
+      containers:
+        - name: read
+          image: ${IMAGE}
+          imagePullPolicy: IfNotPresent
+          workingDir: /workspace/api
+          command: ["node", "-e"]
+          args:
+            - |
+${BR_SCRIPT}
+          env:
+            - { name: BR_STEP, value: "${BR_STEP}" }
+            - { name: NODE_PATH, value: "/workspace/node_modules" }
+            - { name: AWS_EC2_METADATA_DISABLED, value: "true" }
+            - { name: S3_ENDPOINT, value: "${S3_ENDPOINT}" }
+            - { name: S3_REGION, value: "${S3_REGION}" }
+            - { name: S3_FORCE_PATH_STYLE, value: "${S3_FORCE_PATH_STYLE}" }
+            - { name: EXPECTED_BACKUP_BUCKET, value: "${EXPECTED_BACKUP_BUCKET}" }
+            - { name: BACKUP_ID, value: "${BACKUP_ID}" }
+            - { name: ALLOW_STALE_BACKUP, value: "${ALLOW_STALE_BACKUP}" }
+            - { name: MAX_AGE_HOURS, value: "${MAX_AGE_HOURS}" }
+            - { name: READER_ACCESS_KEY, valueFrom: { secretKeyRef: { name: ${READER_SECRET}, key: S3_ACCESS_KEY } } }
+            - { name: READER_SECRET_KEY, valueFrom: { secretKeyRef: { name: ${READER_SECRET}, key: S3_SECRET_KEY } } }
+            - { name: BACKUP_BUCKET, valueFrom: { secretKeyRef: { name: ${READER_SECRET}, key: BACKUP_BUCKET } } }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests: { cpu: 25m, memory: 96Mi }
+            limits: { cpu: 250m, memory: 256Mi }
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }

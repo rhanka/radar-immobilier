@@ -1,0 +1,607 @@
+#!/usr/bin/env node
+// =============================================================================
+// restore-mode.selftest.mjs — offline selftest of the bascule MODE=restore|list.
+//
+// 0 kubectl, 0 S3, 0 DB, 0 network. Covers:
+//   - backup-restore.cjs (in-pod) pure functions + every step (resolve, list,
+//     fetch-dump, docs, recon) against an in-memory VERSIONED S3 fake with one
+//     client PER IDENTITY (reader / copy signer): a read through the wrong
+//     identity is AccessDenied, so the test proves which identity does what;
+//   - the script really runs under `node -e` (the way the Jobs embed it);
+//   - restore-mode.mjs (runner) pure functions (PIN, listing, termination message);
+//   - the three Job templates render with the embedded script (no leftover
+//     placeholder, script recovered byte-identical; YAML parsed when the `yaml`
+//     package is resolvable);
+//   - the workflow wiring of bascule-preprod.yml (MODE, steps, conditions, no
+//     input/secret interpolated in the new `run:` blocks);
+//   - served-ids.mjs (legs.immo, verdict mapping, served-ids guards).
+//
+//   node deploy/ci/bascule-preprod/restore-mode.selftest.mjs   → exit 0 when all pass.
+// =============================================================================
+import { Buffer } from "node:buffer";
+import console from "node:console";
+import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { mkdtempSync, readFileSync, writeFileSync, existsSync, mkdirSync, statSync } from "node:fs";
+import { createRequire } from "node:module";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import process from "node:process";
+
+import {
+  assertScriptEmbeddable, assertYamlSafeVars, basculeMode, formatBackupTable, indentBlock, JOBS, parseTermination,
+  pickTerminationMessage, safeReason, validateBackupIdInput, validateCycleId, validateListing, validatePin,
+} from "./restore-mode.mjs";
+import {
+  assertServedZoneIds, buildImmoLeg, combine, immoVerdict, mapOutcome, normalizeRawRefs, readServedIdsSha,
+  servedIdsArtifactName, cycleLegArtifactName, sha256FileLine,
+} from "./served-ids.mjs";
+import {
+  buildSecretManifest, DOCS_SYNC_SECRET_KEYS, redact, secretValuesFromEnv, writePrivateManifest,
+} from "./docs-sync-secret.mjs";
+
+const require = createRequire(import.meta.url);
+const br = require("./backup-restore.cjs");
+const DIR = import.meta.dirname;
+
+let passed = 0;
+let failed = 0;
+const ok = (name, cond) => { if (cond) { passed += 1; console.log(`  ok   ${name}`); } else { failed += 1; console.log(`  FAIL ${name}`); } };
+const eq = (name, a, b) => ok(`${name} (got ${JSON.stringify(a)})`, JSON.stringify(a) === JSON.stringify(b));
+const throwsCode = (name, fn, code) => {
+  try { fn(); ok(name, false); } catch (e) { ok(`${name} (exit ${e.exitCode})`, code === undefined ? true : e.exitCode === code); }
+};
+const throws = (name, fn) => { try { fn(); ok(name, false); } catch { ok(name, true); } };
+const sha = (b) => createHash("sha256").update(b).digest("hex");
+const md5q = (b) => `"${createHash("md5").update(b).digest("hex")}"`;
+
+// ═════════════════════════════ in-memory versioned S3 ═════════════════════════
+class Cmd { constructor(input) { this.input = input; } }
+const sdk = {};
+for (const n of ["GetObjectCommand", "HeadObjectCommand", "ListObjectsV2Command", "ListObjectVersionsCommand", "CopyObjectCommand", "PutObjectCommand"]) {
+  sdk[n] = { [n]: class extends Cmd {} }[n];
+}
+const denied = () => Object.assign(new Error("AccessDenied"), { name: "AccessDenied", $metadata: { httpStatusCode: 403 } });
+const notFound = () => Object.assign(new Error("NoSuchKey"), { name: "NoSuchKey", $metadata: { httpStatusCode: 404 } });
+
+class Store {
+  constructor() { this.b = new Map(); this.seq = 0; this.copies = []; }
+  put(bucket, key, body, lastModified) {
+    if (!this.b.has(bucket)) this.b.set(bucket, new Map());
+    const m = this.b.get(bucket);
+    if (!m.has(key)) m.set(key, []);
+    const buf = Buffer.from(body);
+    const v = { VersionId: `v${++this.seq}`, body: buf, ETag: md5q(buf), Size: buf.length, LastModified: new Date(lastModified || "2026-09-26T03:00:00Z") };
+    m.get(key).push(v);
+    return v;
+  }
+  versions(bucket, key) { return (this.b.get(bucket) && this.b.get(bucket).get(key)) || []; }
+  latest(bucket, key) { const v = this.versions(bucket, key); return v.length ? v[v.length - 1] : null; }
+}
+// policy: { read: [buckets], list: [buckets], write: [buckets] }
+function client(store, policy) {
+  const can = (op, bucket) => (policy[op] || []).includes(bucket);
+  return {
+    async send(cmd) {
+      const i = cmd.input;
+      if (cmd instanceof sdk.GetObjectCommand || cmd instanceof sdk.HeadObjectCommand) {
+        if (!can("read", i.Bucket)) throw denied();
+        const v = i.VersionId ? store.versions(i.Bucket, i.Key).find((x) => x.VersionId === i.VersionId) : store.latest(i.Bucket, i.Key);
+        if (!v) throw notFound();
+        if (cmd instanceof sdk.HeadObjectCommand) return { ContentLength: v.Size, ETag: v.ETag, VersionId: v.VersionId };
+        const body = v.body;
+        return { VersionId: v.VersionId, Body: (async function* gen() { yield body.subarray(0, 7); yield body.subarray(7); })() };
+      }
+      if (cmd instanceof sdk.ListObjectsV2Command) {
+        if (!can("list", i.Bucket)) throw denied();
+        const m = store.b.get(i.Bucket) || new Map();
+        const all = [...m.keys()].filter((k) => !i.Prefix || k.startsWith(i.Prefix)).sort()
+          .map((k) => { const v = store.latest(i.Bucket, k); return { Key: k, Size: v.Size, ETag: v.ETag, LastModified: v.LastModified }; });
+        const start = i.ContinuationToken ? Number(i.ContinuationToken) : 0;
+        const page = all.slice(start, start + 2);
+        const more = start + 2 < all.length;
+        return { Contents: page, IsTruncated: more, NextContinuationToken: more ? String(start + 2) : undefined };
+      }
+      if (cmd instanceof sdk.ListObjectVersionsCommand) {
+        if (!can("list", i.Bucket)) throw denied();
+        const m = store.b.get(i.Bucket) || new Map();
+        const all = [];
+        for (const k of [...m.keys()].filter((x) => !i.Prefix || x.startsWith(i.Prefix)).sort()) {
+          const vs = m.get(k);
+          vs.forEach((v, idx) => all.push({ Key: k, VersionId: v.VersionId, ETag: v.ETag, Size: v.Size, LastModified: v.LastModified, IsLatest: idx === vs.length - 1 }));
+        }
+        const start = i.KeyMarker ? Number(i.KeyMarker) : 0;
+        const page = all.slice(start, start + 3);
+        const more = start + 3 < all.length;
+        return { Versions: page, DeleteMarkers: [], IsTruncated: more, NextKeyMarker: more ? String(start + 3) : undefined, NextVersionIdMarker: more ? "x" : undefined };
+      }
+      if (cmd instanceof sdk.CopyObjectCommand) {
+        const m = /^\/([^/]+)\/(.+?)(?:\?versionId=(.+))?$/.exec(i.CopySource);
+        const srcBucket = m[1]; const srcKey = decodeURIComponent(m[2]); const vid = m[3] ? decodeURIComponent(m[3]) : null;
+        if (!can("read", srcBucket) || !can("write", i.Bucket)) throw denied();
+        const v = vid ? store.versions(srcBucket, srcKey).find((x) => x.VersionId === vid) : store.latest(srcBucket, srcKey);
+        if (!v) throw notFound();
+        store.copies.push({ key: i.Key, from: srcKey, versionId: vid, grant: i.GrantFullControl || null });
+        store.put(i.Bucket, i.Key, v.body, "2026-09-27T05:00:00Z");
+        return { CopyObjectResult: { ETag: v.ETag } };
+      }
+      throw new Error("unexpected command");
+    },
+  };
+}
+
+// ═════════════════════════════ fixture: backup of D ═══════════════════════════
+const B = "radar-immobilier-backup";
+const DST = "radar-immobilier-docs-preprod";
+const PROD = "radar-immobilier-docs";
+const D = "2026-09-26";
+const D1 = "2026-09-25";
+const NOW_FRESH = Date.parse("2026-09-26T12:00:00Z");
+const NOW_STALE = Date.parse("2026-09-27T08:00:00Z"); // dump 02:23 D → 29.6 h
+
+function fixture({ tamperDump = false, rewriteBAfterD = true } = {}) {
+  const s = new Store();
+  const dump = Buffer.from("PGDMP-fake-custom-archive-bytes-0123456789");
+  const dumpV = s.put(B, `pg/${D}/radar.dump`, tamperDump ? Buffer.concat([dump, Buffer.from("x")]) : dump);
+  s.put(B, `pg/${D}/radar.dump.sha256`, `${sha(dump)}  radar.dump\n`);
+  // docs: a (versionId recorded), b (no versionId; rewritten AFTER D), c (preprod already current)
+  const a = s.put(B, "docs/raw/a b.pdf", "AAAA-content", "2026-09-20T01:00:00Z");
+  const bD = s.put(B, "docs/raw/b.pdf", "BBBB-at-D", "2026-09-21T01:00:00Z");
+  const c = s.put(B, "docs/raw/c.pdf", "CCCC", "2026-09-22T01:00:00Z");
+  if (rewriteBAfterD) s.put(B, "docs/raw/b.pdf", "BBBB-rewritten-later!", "2026-09-28T01:00:00Z");
+  const inventory = {
+    format: "radar-backup-docs-inventory/v1", date: D, createdAt: "2026-09-26T03:40:00.000Z",
+    sourceBucket: PROD, backupBucket: B, backupPrefix: "docs/", counts: { objects: 3 },
+    objects: [
+      { key: "raw/a b.pdf", size: a.Size, etag: a.ETag, state: "backed-up", backupEtag: a.ETag, versionId: a.VersionId },
+      { key: "raw/b.pdf", size: bD.Size, etag: bD.ETag, state: "backed-up", backupEtag: bD.ETag, versionId: null },
+      { key: "raw/c.pdf", size: c.Size, etag: c.ETag, state: "backed-up", backupEtag: c.ETag, versionId: null },
+    ],
+  };
+  const invBuf = Buffer.from(JSON.stringify(inventory));
+  s.put(B, `docs-inventory/${D}.json`, invBuf);
+  const manifest = {
+    format: "radar-backup-manifest/v1", date: D, status: "complete",
+    startedAt: "2026-09-26T02:23:00Z", completedAt: "2026-09-26T03:41:00Z", backupBucket: B,
+    pg: { database: "radar", key: `pg/${D}/radar.dump`, sha256: sha(dump), sizeBytes: dump.length, versionId: dumpV.VersionId,
+      tocEntries: 189, dumpStartedAt: "2026-09-26T02:23:05Z" },
+    schema: { status: "ok", migrationsApplied: 11, lastMigration: { id: 11, tag: "0011_geo" } },
+    code: { servedSha: "a4a2c00" },
+    docs: { status: "complete", objects: 3, inventoryKey: `docs-inventory/${D}.json`, inventorySha256: sha(invBuf) },
+  };
+  const manBuf = Buffer.from(JSON.stringify(manifest, null, 2));
+  s.put(B, `manifests/${D}.json`, manBuf);
+  s.put(B, `manifests/${D1}.json`, JSON.stringify({ ...manifest, date: D1, status: "partial", pg: { ...manifest.pg, key: `pg/${D1}/radar.dump` } }));
+  s.put(B, "manifests/latest.json", JSON.stringify({
+    format: "radar-backup-latest/v1", date: D, status: "complete", manifestKey: `manifests/${D}.json`, manifestSha256: sha(manBuf),
+    latestComplete: { date: D, manifestKey: `manifests/${D}.json` }, firstBackupDate: D1,
+  }));
+  // preprod: c already current, a absent, b holds the LATER content (must be restored to D)
+  s.put(DST, "raw/c.pdf", "CCCC");
+  s.put(DST, "raw/b.pdf", "BBBB-rewritten-later!");
+  s.put(DST, "runs/extra-newer-than-D.json", "{}");
+  return { s, dump, manifest, manSha: sha(manBuf), inventory };
+}
+const readerPolicy = { read: [B], list: [B] };
+const copierPolicy = { read: [B], list: [DST], write: [DST] };
+const baseEnv = (extra = {}) => ({
+  S3_ENDPOINT: "s3.bhs.io.cloud.ovh.net", S3_REGION: "bhs", READER_ACCESS_KEY: "r", READER_SECRET_KEY: "r",
+  BACKUP_BUCKET: B, EXPECTED_BACKUP_BUCKET: B, ...extra,
+});
+const tmp = mkdtempSync(join(tmpdir(), "restore-mode-selftest-"));
+let tcount = 0;
+async function step({ s, env, now = NOW_FRESH }) {
+  const term = join(tmp, `term-${++tcount}.json`);
+  const logs = [];
+  let r = null; let err = null;
+  try {
+    r = await br.runStep({ env: { ...env, TERMINATION_LOG: term }, sdk, clients: { reader: client(s, readerPolicy), copier: client(s, copierPolicy) }, now: () => now, log: (m) => logs.push(m) });
+  } catch (e) { err = e; }
+  const t = existsSync(term) ? JSON.parse(readFileSync(term, "utf8")) : null;
+  return { r, err, t, logs, code: err ? err.exitCode ?? 1 : r.exitCode };
+}
+
+// ═════════════════════════════ pure functions (in-pod) ════════════════════════
+eq("parseBackupId — default latest", br.parseBackupId("", D), { kind: "latest", id: "latest" });
+eq("parseBackupId — explicit date", br.parseBackupId(D, D).date, D);
+throwsCode("parseBackupId — garbage refused", () => br.parseBackupId("2026-13-40", D), 2);
+throwsCode("parseBackupId — injection refused", () => br.parseBackupId('x"; rm -rf /', D), 2);
+throwsCode("parseBackupId — future refused", () => br.parseBackupId("2026-09-30", D), 2);
+throwsCode("chooseDate — no latest.json refused", () => br.chooseDate({ kind: "latest" }, null), 2);
+throwsCode("chooseDate — latestComplete empty refused", () => br.chooseDate({ kind: "latest" }, { date: D, latestComplete: null }), 2);
+eq("chooseDate — latest → latestComplete (not the newest partial)",
+  br.chooseDate({ kind: "latest" }, { date: "2026-09-27", status: "partial", latestComplete: { date: D, manifestKey: `manifests/${D}.json` } }).date, D);
+{
+  const { manifest } = fixture();
+  throwsCode("checkManifest — partial refused", () => br.checkManifest({ ...manifest, status: "partial" }, D), 2);
+  throwsCode("checkManifest — incomplete refused", () => br.checkManifest({ ...manifest, status: "incomplete" }, D), 2);
+  throwsCode("checkManifest — wrong date refused", () => br.checkManifest(manifest, D1), 2);
+  throwsCode("checkManifest — missing refused", () => br.checkManifest(null, D), 2);
+  ok("checkManifest — complete accepted", br.checkManifest(manifest, D) === manifest);
+  eq("backupReferenceTime — dump start", br.backupReferenceTime(manifest), { source: "pg.dumpStartedAt", at: "2026-09-26T02:23:05.000Z" });
+  const g = br.staleGuard({ parsed: { kind: "latest" }, manifest, nowMs: NOW_FRESH, maxAgeHours: 24 });
+  eq("staleGuard — fresh latest accepted", [g.stale, g.ageHours], [false, 9.6]);
+  throwsCode("staleGuard — latest > 24 h refused", () => br.staleGuard({ parsed: { kind: "latest" }, manifest, nowMs: NOW_STALE, maxAgeHours: 24 }), 2);
+  const o = br.staleGuard({ parsed: { kind: "latest" }, manifest, nowMs: NOW_STALE, maxAgeHours: 24, allowStale: true });
+  eq("staleGuard — ALLOW_STALE_BACKUP overrides", [o.stale, o.overridden], [true, true]);
+  const x = br.staleGuard({ parsed: { kind: "date", date: D }, manifest, nowMs: NOW_STALE + 30 * 86400000, maxAgeHours: 24 });
+  eq("staleGuard — explicit date never blocked (logged)", [x.stale, x.blocking], [true, false]);
+}
+{
+  const vs = br.indexVersions([
+    { Key: "docs/k", VersionId: "v1", ETag: '"e1"', Size: 5, LastModified: "2026-09-20T00:00:00Z" },
+    { Key: "docs/k", VersionId: "v2", ETag: '"e2"', Size: 6, LastModified: "2026-09-28T00:00:00Z" },
+    { Key: "other/k", VersionId: "v9", ETag: '"e9"', Size: 1 },
+  ]).get("k");
+  const created = Date.parse("2026-09-26T03:40:00Z");
+  eq("chooseVersion — recorded versionId", br.chooseVersion({ size: 5, backupEtag: '"e1"', versionId: "v1" }, vs, created), { versionId: "v1", how: "version-id" });
+  eq("chooseVersion — rewritten since D → ETag of the inventory", br.chooseVersion({ size: 5, backupEtag: '"e1"', versionId: null }, vs, created), { versionId: "v1", how: "etag-before-inventory" });
+  eq("chooseVersion — recorded version expired, identical ETag kept", br.chooseVersion({ size: 5, backupEtag: '"e1"', versionId: "gone" }, vs, created).versionId, "v1");
+  eq("chooseVersion — size mismatch on recorded version", br.chooseVersion({ size: 9, backupEtag: '"e1"', versionId: "v1" }, vs, created), { error: "size-mismatch" });
+  eq("chooseVersion — ETag not found", br.chooseVersion({ size: 5, backupEtag: '"zz"', versionId: null }, vs, created), { error: "etag-not-found" });
+  eq("chooseVersion — no version at all", br.chooseVersion({ size: 5, backupEtag: '"e1"' }, undefined, created), { error: "no-version" });
+  eq("copySourceFor — encoded key + versionId", br.copySourceFor(B, "raw/a b.pdf", "v 1"), `/${B}/docs/raw/a%20b.pdf?versionId=v%201`);
+  const inv = { createdAt: "2026-09-26T03:40:00Z", objects: [{ key: "x", size: 1, state: "pending" }, { key: "y", size: 2, etag: '"e"', state: "backed-up" }] };
+  const r = br.reconInventory(inv, new Map([["y", { Size: 2 }], ["z", { Size: 3 }]]));
+  eq("reconInventory — not-in-backup fails, extra tolerated", [r.ok, r.notInBackup, r.missing, r.extra], [false, 1, 0, 1]);
+  const big = br.buildListing({ bucket: B, latest: null, manifests: Array.from({ length: 80 }, (_, k) => ({ date: `2026-0${1 + (k % 9)}-${String(1 + (k % 28)).padStart(2, "0")}`, status: "complete", pg: { sizeBytes: 1, sha256: "a".repeat(64) } })), maxBytes: 1500 });
+  ok("buildListing — truncated to fit the termination message", big.truncated && Buffer.byteLength(JSON.stringify(big)) <= 1500);
+}
+throwsCode("readConfig — docs into the backup bucket refused", () => br.readConfig(baseEnv({ BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c", DST_BUCKET: B }), "docs"), 2);
+throwsCode("readConfig — docs into a production bucket refused", () => br.readConfig(baseEnv({ BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c", DST_BUCKET: PROD, FORBIDDEN_DST_BUCKETS: PROD }), "docs"), 2);
+throwsCode("readConfig — reader Secret bucket ≠ expected refused", () => br.readConfig(baseEnv({ BACKUP_BUCKET: "other-bucket" }), "resolve"), 2);
+throwsCode("readConfig — invalid PIN refused", () => br.readConfig(baseEnv({ BACKUP_DATE: D, PIN_MANIFEST_SHA256: "nope", PIN_PG_SHA256: "a".repeat(64) }), "fetch-dump"), 2);
+
+// ═════════════════════════════ steps against the fake ═════════════════════════
+async function suite() {
+  // resolve
+  {
+    const { s, manSha, dump } = fixture();
+    const r = await step({ s, env: baseEnv({ BR_STEP: "resolve", BACKUP_ID: "latest" }) });
+    eq("resolve latest — exit 0", r.code, 0);
+    eq("resolve latest — PIN date/sha", [r.t.date, r.t.manifestSha256 === manSha, r.t.pgSha256 === sha(dump), r.t.source], [D, true, true, "latestComplete"]);
+    ok("resolve — termination message fits 4 KiB", Buffer.byteLength(JSON.stringify(r.t)) < 4096);
+    ok("resolve — logs carry no doc key", !r.logs.join("\n").includes("raw/"));
+    const pin = validatePin(r.t);
+    eq("validatePin — accepts the resolve verdict", pin.date, D);
+    const st = await step({ s, env: baseEnv({ BR_STEP: "resolve", BACKUP_ID: "latest" }), now: NOW_STALE });
+    eq("resolve latest > 24 h — refused (exit 2)", st.code, 2);
+    ok("resolve stale — reason in the termination message", /ALLOW_STALE_BACKUP/.test(st.t.reason) && st.t.ok === false);
+    const ov = await step({ s, env: baseEnv({ BR_STEP: "resolve", BACKUP_ID: "latest", ALLOW_STALE_BACKUP: "true" }), now: NOW_STALE });
+    eq("resolve latest > 24 h + ALLOW_STALE_BACKUP — accepted", [ov.code, ov.t.staleOverridden], [0, true]);
+    const ex = await step({ s, env: baseEnv({ BR_STEP: "resolve", BACKUP_ID: D }), now: NOW_STALE });
+    eq("resolve explicit date > 24 h — accepted, age logged", [ex.code, ex.t.stale, ex.t.ageBlocking], [0, true, false]);
+    const pa = await step({ s, env: baseEnv({ BR_STEP: "resolve", BACKUP_ID: D1 }) });
+    eq("resolve partial backup — refused (complete required)", pa.code, 2);
+    const gone = await step({ s, env: baseEnv({ BR_STEP: "resolve", BACKUP_ID: "2026-09-01" }) });
+    eq("resolve purged/absent date — refused", gone.code, 2);
+  }
+  {
+    const { s } = fixture();
+    s.put(B, `pg/${D}/radar.dump.sha256`, `${"b".repeat(64)}  radar.dump\n`);
+    const r = await step({ s, env: baseEnv({ BR_STEP: "resolve" }) });
+    eq("resolve — sidecar sha256 ≠ manifest ⇒ fail", r.code, 1);
+  }
+  // list
+  {
+    const { s } = fixture();
+    const r = await step({ s, env: baseEnv({ BR_STEP: "list" }) });
+    eq("list — exit 0, 2 backups, newest first", [r.code, r.t.count, r.t.backups.map((b) => b.date)], [0, 2, [D, D1]]);
+    const l = validateListing(r.t);
+    eq("validateListing — statuses", l.backups.map((b) => b.status), ["complete", "partial"]);
+    ok("formatBackupTable — marks latest complete", formatBackupTable(l).text.includes(`${D} *`));
+  }
+  // fetch-dump
+  {
+    const { s, manSha, dump } = fixture();
+    const work = join(tmp, "work-ok");
+    const r = await step({ s, env: baseEnv({ BR_STEP: "fetch-dump", BACKUP_DATE: D, PIN_MANIFEST_SHA256: manSha, PIN_PG_SHA256: sha(dump), WORK_DIR: work }) });
+    eq("fetch-dump — exit 0", r.code, 0);
+    ok("fetch-dump — dump bytes identical", readFileSync(join(work, "radar.dump")).equals(dump));
+    ok("fetch-dump — backup.env facts", /EXPECTED_TOC_ENTRIES=189/.test(readFileSync(join(work, "backup.env"), "utf8")));
+    const pinBad = await step({ s, env: baseEnv({ BR_STEP: "fetch-dump", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "c".repeat(64), PIN_PG_SHA256: sha(dump), WORK_DIR: join(tmp, "w2") }) });
+    eq("fetch-dump — manifest changed since resolve ⇒ refused", pinBad.code, 2);
+  }
+  {
+    const { s, manSha, dump } = fixture({ tamperDump: true });
+    const r = await step({ s, env: baseEnv({ BR_STEP: "fetch-dump", BACKUP_DATE: D, PIN_MANIFEST_SHA256: manSha, PIN_PG_SHA256: sha(dump), WORK_DIR: join(tmp, "w3") }) });
+    eq("fetch-dump — tampered dump (size/sha) ⇒ restore refused", r.code, 1);
+  }
+  // docs
+  const docsEnv = (manSha, extra = {}) => baseEnv({ BR_STEP: "docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: manSha, COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c",
+    DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "1901410700457444:user-x", COPY_CONCURRENCY: "2", ...extra });
+  {
+    const { s, manSha } = fixture();
+    const dry = await step({ s, env: docsEnv(manSha, { DOCS_DRY: "1" }) });
+    eq("docs DRY — plan: 1 up to date, 2 to copy, 0 copy done", [dry.code, dry.t.upToDate, dry.t.toCopy, s.copies.length], [0, 1, 2, 0]);
+    const r = await step({ s, env: docsEnv(manSha) });
+    eq("docs — exit 0, 2 copies, recon ok", [r.code, r.t.copied, r.t.recon.ok], [0, 2, true]);
+    ok("docs — b.pdf restored to its content AT D (not the later rewrite)", s.latest(DST, "raw/b.pdf").body.toString() === "BBBB-at-D");
+    ok("docs — a b.pdf copied by recorded versionId + grant", s.copies.some((c) => c.key === "raw/a b.pdf" && c.versionId && c.grant === "id=1901410700457444:user-x"));
+    ok("docs — additive: preprod object newer than D kept", !!s.latest(DST, "runs/extra-newer-than-D.json"));
+    eq("docs — extra counted in recon", r.t.recon.extra, 1);
+    ok("docs — logs carry no doc key", !r.logs.join("\n").includes("raw/"));
+    const again = await step({ s, env: docsEnv(manSha) });
+    eq("docs — idempotent re-run: 0 copy", [again.code, again.t.copied], [0, 0]);
+    const rec = await step({ s, env: { ...docsEnv(manSha), BR_STEP: "recon" } });
+    eq("recon — preprod ⊇ inventory(D)", [rec.code, rec.t.ok], [0, true]);
+  }
+  {
+    const { s, manSha } = fixture();
+    // make b unresolvable: drop every backup version of b.pdf
+    s.b.get(B).delete("docs/raw/b.pdf");
+    const r = await step({ s, env: docsEnv(manSha) });
+    eq("docs — an unrestorable object ⇒ refused before any copy", [r.code, s.copies.length, r.t.unresolved], [2, 0, 1]);
+  }
+  {
+    const { s, manSha } = fixture();
+    const wrong = await br.runStep({
+      env: { ...docsEnv(manSha), TERMINATION_LOG: join(tmp, "t-wrong.json") }, sdk,
+      clients: { reader: client(s, readerPolicy), copier: client(s, readerPolicy) }, now: () => NOW_FRESH, log: () => {},
+    }).then((x) => x.exitCode, (e) => e.exitCode ?? 1);
+    eq("docs — copy identity without preprod rights ⇒ fails (identity split enforced)", wrong, 1);
+  }
+  {
+    const { s, manSha } = fixture();
+    const before = await step({ s, env: { ...docsEnv(manSha), BR_STEP: "recon" } });
+    eq("recon — before the restore: a missing, b size differs ⇒ fail", [before.code, before.t.missing, before.t.sizeMismatch], [1, 1, 1]);
+    await step({ s, env: docsEnv(manSha) });
+    s.b.get(DST).delete("raw/c.pdf");
+    const rec = await step({ s, env: { ...docsEnv(manSha), BR_STEP: "recon" } });
+    eq("recon — object deleted after the restore ⇒ fail", [rec.code, rec.t.missing], [1, 1]);
+  }
+}
+
+// ═════════════════════════════ runner pure functions ══════════════════════════
+eq("basculeMode — default chain", basculeMode({}), "chain");
+throws("basculeMode — unknown refused", () => basculeMode({ MODE: "wipe" }));
+eq("validateBackupIdInput — latest", validateBackupIdInput("", D), "latest");
+throws("validateBackupIdInput — quote refused", () => validateBackupIdInput('2026-09-26"', D));
+eq("validateCycleId — orchestrator id", validateCycleId("iso-prod-2026-09-26-t0abc"), "iso-prod-2026-09-26-t0abc");
+throws("validateCycleId — space refused", () => validateCycleId("a b"));
+eq("indentBlock — empty lines kept empty", indentBlock("a\n\nb", 2), "  a\n\n  b");
+throws("assertYamlSafeVars — quote refused", () => assertYamlSafeVars({ X: 'a"b' }));
+ok("assertYamlSafeVars — BR_SCRIPT skipped", assertYamlSafeVars({ BR_SCRIPT: 'a"b', Y: "ok" }));
+throws("assertScriptEmbeddable — placeholder pattern refused", () => assertScriptEmbeddable("x ${NAMESPACE} y"));
+ok("safeReason — no workflow command, one line", !/::|\n/.test(safeReason("a\n::error::x")));
+{
+  const pods = { items: [
+    { metadata: { creationTimestamp: "2026-09-26T10:00:00Z" }, status: { initContainerStatuses: [{ name: "fetch", state: { terminated: { message: '{"ok":false,"reason":"old"}' } } }] } },
+    { metadata: { creationTimestamp: "2026-09-26T11:00:00Z" }, status: { initContainerStatuses: [{ name: "fetch", state: { terminated: { message: '{"ok":true,"step":"fetch-dump"}' } } }], containerStatuses: [{ name: "restore", state: { running: {} } }] } },
+  ] };
+  eq("pickTerminationMessage — newest pod, init container", parseTermination(pickTerminationMessage(pods, "fetch")), { ok: true, step: "fetch-dump" });
+  eq("pickTerminationMessage — none", pickTerminationMessage(pods, "restore"), null);
+}
+throws("validatePin — bad sha refused", () => validatePin({ ok: true, date: D, manifestSha256: "x", pgSha256: "a".repeat(64), pgSizeBytes: 1, backupId: "latest" }));
+throws("validatePin — not ok refused", () => validatePin({ ok: false }));
+eq("JOBS — stable Job names", JOBS.db, "radar-db-restore-backup");
+
+// ═════════════════════════════ script under `node -e` ═════════════════════════
+const SCRIPT = readFileSync(join(DIR, "backup-restore.cjs"), "utf8");
+ok("backup-restore.cjs — embeddable (no ${UPPER} sequence)", assertScriptEmbeddable(SCRIPT));
+{
+  const term = join(tmp, "node-e.json");
+  const r = spawnSync(process.execPath, ["-e", SCRIPT], { cwd: tmp, env: { PATH: process.env.PATH, BR_STEP: "resolve", TERMINATION_LOG: term }, encoding: "utf8" });
+  const t = existsSync(term) ? JSON.parse(readFileSync(term, "utf8")) : null;
+  eq("node -e — main triggered, exit 1 without the SDK, verdict written", [r.status, t && t.ok, /client-s3/.test(t && t.reason)], [1, false, true]);
+  const r2 = spawnSync(process.execPath, ["-e", SCRIPT], { cwd: tmp, env: { PATH: process.env.PATH, BR_STEP: "bogus", TERMINATION_LOG: term }, encoding: "utf8" });
+  eq("node -e — unknown step refused (exit 2)", r2.status, 2);
+}
+
+// ═════════════════════════════ templates render ═══════════════════════════════
+function render(tmpl, vars) {
+  let text = readFileSync(join(DIR, tmpl), "utf8");
+  for (const [k, v] of Object.entries(vars)) text = text.split(`\${${k}}`).join(v);
+  return { text, leftover: text.match(/\$\{[A-Z0-9_]+\}/g) };
+}
+let YAML = null;
+try { YAML = (await import("yaml")).default; } catch { YAML = null; }
+const common = { NAMESPACE: "radar-immobilier-preprod", IMAGE: "ghcr.io/rhanka/radar-api@sha256:" + "a".repeat(64), READER_SECRET: "radar-backup-reader",
+  S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net", S3_REGION: "bhs", S3_FORCE_PATH_STYLE: "true", EXPECTED_BACKUP_BUCKET: B, TTL_SECONDS: "3600",
+  BR_SCRIPT: indentBlock(SCRIPT, 14) };
+const renders = {
+  "backup-read-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.resolve, BR_STEP: "resolve", BACKUP_ID: "latest", ALLOW_STALE_BACKUP: "false", MAX_AGE_HOURS: "24" },
+  "db-restore-backup-job.tmpl.yaml": { ...common, DUMP_IMAGE: "postgis/postgis:16-3.4", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), PIN_PG_SHA256: "b".repeat(64),
+    DB_SECRET: "radar-db-credentials", PGHOST: "radar-postgres", EXPECTED_DATABASE: "radar", RESTORE_ASSERT_DB: "1" },
+  "docs-restore-backup-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.docs, BR_STEP: "docs", COPY_SECRET: "radar-backup-reader", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64),
+    DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "g", COPY_CONCURRENCY: "8", DOCS_DRY: "0" },
+};
+for (const [tmpl, vars] of Object.entries(renders)) {
+  const { text, leftover } = render(tmpl, vars);
+  ok(`${tmpl} — no leftover placeholder`, !leftover);
+  const m = text.match(/command: \["node", "-e"\]\n {10}args:\n {12}- \|\n([\s\S]*?)\n {10}env:/);
+  const back = m ? m[1].split("\n").map((l) => l.replace(/^ {14}/, "")).join("\n") : "";
+  ok(`${tmpl} — embedded script recovered byte-identical`, back.trimEnd() === SCRIPT.trimEnd());
+  ok(`${tmpl} — carries the bascule label (G2 exclusion + netpol)`, /sentropic\.io\/bascule:/.test(text));
+  if (YAML) {
+    const doc = YAML.parse(text);
+    const pod = doc.spec.template.spec;
+    const node = [...(pod.initContainers || []), ...pod.containers].find((c) => c.command && c.command[0] === "node");
+    ok(`${tmpl} — YAML parses, node -e arg == script`, node && node.args[0].trimEnd() === SCRIPT.trimEnd());
+    ok(`${tmpl} — automountServiceAccountToken false`, pod.automountServiceAccountToken === false);
+  }
+}
+if (!YAML) console.log("  info yaml package not resolvable — YAML parse checks skipped (structure checks done)");
+
+// ═════════════════════════════ workflow wiring ════════════════════════════════
+{
+  const wf = readFileSync(join(DIR, "..", "..", "..", ".github", "workflows", "bascule-preprod.yml"), "utf8");
+  for (const c of ["preflight-backup", "backup-resolve", "backup-list", "restore-backup", "docs-restore", "recon-backup"]) {
+    ok(`workflow — step runs '${c}'`, wf.includes(`node "$CLI" ${c}`));
+  }
+  ok("workflow — MODE choice chain|restore|list", /MODE:\n\s+description:[^\n]*\n\s+required: false\n\s+type: choice\n\s+options: \[chain, restore, list\]\n\s+default: chain/.test(wf));
+  ok("workflow — S1 dump chain only", /id: dump\n\s+if: \$\{\{ !inputs\.DRY_RUN && env\.MODE == 'chain' \}\}/.test(wf));
+  ok("workflow — PROD kubeconfig chain only", /Configure kubeconfig PROD[^\n]*\n\s+if: \$\{\{ !inputs\.DRY_RUN && env\.MODE == 'chain' \}\}/.test(wf));
+  ok("workflow — resolve before quiesce", wf.indexOf('node "$CLI" backup-resolve') < wf.indexOf('node "$CLI" quiesce'));
+  ok("workflow — refresh never in restore mode", /S6 refresh[^\n]*\n\s+if: \$\{\{[^}]*env\.MODE == 'chain' \}\}/.test(wf));
+  ok("workflow — scheduled gate unchanged", wf.includes("if: ${{ github.event_name != 'schedule' || vars.BASCULE_SCHEDULE_ENABLED == 'true' }}"));
+  const runs = [...wf.matchAll(/run: (?:\|\n((?: {10,}.*\n?)+)|(.*))/g)].map((m) => m[1] || m[2]);
+  const newRuns = runs.filter((r) => /served-ids\.mjs|preflight-backup|backup-|restore-backup|docs-restore|recon-backup/.test(r));
+  ok(`workflow — no \${{ }} interpolation in the ${newRuns.length} new run blocks`, newRuns.length >= 9 && newRuns.every((r) => !r.includes("${{")));
+  ok("workflow — no input interpolated in any run block", runs.every((r) => !/\$\{\{\s*inputs\./.test(r)));
+  if (YAML) {
+    const doc = YAML.parse(wf);
+    const n = Object.keys(doc.on.workflow_dispatch.inputs).length;
+    ok(`workflow — ${n} dispatch inputs (<= 25)`, n <= 25);
+    ok("workflow — served-ids + cycle-leg jobs hold no secret", !JSON.stringify(doc.jobs["served-ids"]).includes("secrets.") && !JSON.stringify(doc.jobs["cycle-leg"]).includes("secrets."));
+  }
+}
+
+// ═════════════════════════════ docs-sync Secret (rewritten every run) ═════════
+{
+  const AK = "0123456789abcdef0123456789abcdef";
+  const SK = "fedcba9876543210fedcba9876543210";
+  const v = secretValuesFromEnv({ RADAR_DOCS_SYNC_ACCESS_KEY: `${AK}\n`, RADAR_DOCS_SYNC_SECRET_KEY: SK });
+  eq("secretValuesFromEnv — keys of docs-sync-job, trailing newline stripped", v, { S3_ACCESS_KEY: AK, S3_SECRET_KEY: SK });
+  throws("secretValuesFromEnv — missing GitHub secret ⇒ fail-closed", () => secretValuesFromEnv({ RADAR_DOCS_SYNC_ACCESS_KEY: AK }));
+  throws("secretValuesFromEnv — not ^[0-9a-f]{32,64}$ ⇒ fail-closed", () => secretValuesFromEnv({ RADAR_DOCS_SYNC_ACCESS_KEY: AK, RADAR_DOCS_SYNC_SECRET_KEY: "AKIA-UPPER-not-hex" }));
+  throws("secretValuesFromEnv — too short ⇒ fail-closed", () => secretValuesFromEnv({ RADAR_DOCS_SYNC_ACCESS_KEY: "abc123", RADAR_DOCS_SYNC_SECRET_KEY: SK }));
+  try { secretValuesFromEnv({ RADAR_DOCS_SYNC_ACCESS_KEY: AK, RADAR_DOCS_SYNC_SECRET_KEY: "zz" + SK }); } catch (e) {
+    ok("secretValuesFromEnv — error names the secret, never the value", /RADAR_DOCS_SYNC_SECRET_KEY/.test(e.message) && !e.message.includes(SK));
+  }
+  const tmplKeys = [...readFileSync(join(DIR, "docs-sync-job.tmpl.yaml"), "utf8").matchAll(/name: \$\{DOCS_SYNC_READ_SECRET\}, key: ([A-Z0-9_]+)/g)].map((m) => m[1]).sort();
+  eq("DOCS_SYNC_SECRET_KEYS — exactly the keys docs-sync-job.tmpl.yaml reads", Object.keys(DOCS_SYNC_SECRET_KEYS).sort(), tmplKeys);
+  const man = buildSecretManifest({ name: "radar-docs-src-preprod", namespace: "radar-immobilier-preprod", values: v,
+    labels: { "app.kubernetes.io/name": "radar-immobilier" }, annotations: { "kubectl.kubernetes.io/last-applied-configuration": "{}", keep: "1" } });
+  eq("buildSecretManifest — base64 data, Opaque, no ownerReferences", [man.type, man.data.S3_ACCESS_KEY, !!man.metadata.ownerReferences], ["Opaque", Buffer.from(AK).toString("base64"), false]);
+  eq("buildSecretManifest — only the 2 keys", Object.keys(man.data).sort(), ["S3_ACCESS_KEY", "S3_SECRET_KEY"]);
+  eq("buildSecretManifest — labels kept, last-applied dropped", [man.metadata.labels["app.kubernetes.io/name"], Object.keys(man.metadata.annotations)], ["radar-immobilier", ["keep"]]);
+  throws("buildSecretManifest — invalid name refused", () => buildSecretManifest({ name: "Bad_Name", namespace: "b", values: {} }));
+  const rbac = readFileSync(join(DIR, "rbac-ci-bascule-preprod-docs-secret.yaml"), "utf8");
+  if (YAML) {
+    const [role] = YAML.parseAllDocuments(rbac).map((d) => d.toJSON());
+    eq("RBAC — secrets get/update on radar-docs-src-preprod only", role.rules, [{ apiGroups: [""], resources: ["secrets"], verbs: ["get", "update"], resourceNames: ["radar-docs-src-preprod"] }]);
+  } else ok("RBAC — name-scoped get/update", /verbs: \["get", "update"\]\n\s+resourceNames: \["radar-docs-src-preprod"\]/.test(rbac));
+  const red = redact(`error: ${v.S3_SECRET_KEY} / ${Buffer.from(v.S3_SECRET_KEY).toString("base64")}`, v);
+  ok("redact — raw and base64 values removed", !red.includes(v.S3_SECRET_KEY) && !red.includes(Buffer.from(v.S3_SECRET_KEY).toString("base64")));
+  const f = writePrivateManifest(man);
+  const modeOf = (p) => statSync(p).mode & 0o777;
+  eq("writePrivateManifest — dir 0700, file 0600", [modeOf(f.dir), modeOf(f.file)], [0o700, 0o600]);
+  f.cleanup();
+  ok("writePrivateManifest — cleanup removes the file", !existsSync(f.file));
+  const wf = readFileSync(join(DIR, "..", "..", "..", ".github", "workflows", "bascule-preprod.yml"), "utf8");
+  ok("workflow — bascule job in environment radar-bascule", /\n {4}environment: radar-bascule\n/.test(wf));
+  const fill = wf.match(/- name: S3\.0 docs-sync Secret[^\n]*\n((?: {8}.*\n)+)/);
+  ok("workflow — fill step: secrets via env:, run without interpolation", !!fill && /RADAR_DOCS_SYNC_ACCESS_KEY: \$\{\{ secrets\.RADAR_DOCS_SYNC_ACCESS_KEY \}\}/.test(fill[1]) &&
+    /run: node "\$CLI" docs-secret-fill\n/.test(fill[1]));
+  const fillAt = wf.indexOf('node "$CLI" docs-secret-fill');
+  ok("workflow — rewrite right before the docs copy (after migrate)", fillAt > wf.indexOf('node "$CLI" migrate') &&
+    fillAt < wf.indexOf('node "$CLI" copy-docs\n', fillAt) && fillAt < wf.indexOf('node "$CLI" docs-restore\n', fillAt));
+  ok("workflow — the Secret is NOT blanked at the end (durable credential)", !wf.includes("docs-secret-blank"));
+  ok("workflow — no RADAR_DOCS_SYNC secret in any run block", ![...wf.matchAll(/run: (.*)/g)].some((m) => /RADAR_DOCS_SYNC|secrets\./.test(m[1]) && !/KUBE_CONFIG_DATA/.test(m[1])));
+}
+
+// ═════════════════════════════ served-ids.mjs ═════════════════════════════════
+eq("mapOutcome — skipped ⇒ failure", mapOutcome("skipped"), "failure");
+eq("combine — all success", combine(["success", "success"]), "success");
+eq("combine — one pending", combine(["success", ""]), "pending");
+eq("immoVerdict — restore", immoVerdict("restore", { restoreBackup: "success", migrate: "success", docsBackup: "success", reconBackup: "success", smoke: "failure" }), { pg: "success", s3: "failure" });
+{
+  const leg = buildImmoLeg({ cycleId: "c1", runId: "42", gitSha: "abcdef1234", mode: "restore",
+    backup: { id: "latest", date: D, manifestSha256: "a".repeat(64), pgSha256: "b".repeat(64), dumpStartedAt: "2026-09-26T02:23:05Z" },
+    outcomes: { restoreBackup: "success", migrate: "success", docsBackup: "success", reconBackup: "success", smoke: "success" }, servedIdsSha256: null });
+  eq("buildImmoLeg — legs.immo shape", [leg.run_id, leg.sha_main, leg.backup.date, leg.t1, leg.verdict, leg.served_ids_artifact],
+    ["42", "abcdef1", D, "2026-09-26T02:23:05.000Z", { pg: "success", s3: "success" }, "immo-served-canonical-ids-c1"]);
+  throws("buildImmoLeg — list mode refused", () => buildImmoLeg({ cycleId: "c1", runId: "1", gitSha: "abcdef1", mode: "list" }));
+}
+eq("artefact names", [servedIdsArtifactName("c1"), cycleLegArtifactName("c1")], ["immo-served-canonical-ids-c1", "cycle-leg-immo-c1"]);
+throws("normalizeRawRefs — bad slug refused", () => normalizeRawRefs({ zones: [{ citySlug: "Bad Slug", zoneCode: "A1" }] }));
+eq("normalizeRawRefs — empty code dropped, lots ignored", (({ zones, dropped, lotsIgnored }) => [zones.length, dropped, lotsIgnored])(normalizeRawRefs({ zones: [{ citySlug: "laval", zoneCode: "A1" }, { citySlug: "laval", zoneCode: " " }], lots: [{}] })), [1, 1, 1]);
+throws("assertServedZoneIds — unsorted refused", () => assertServedZoneIds(["ogc:zones:b:1", "ogc:zones:a:1"]));
+throws("assertServedZoneIds — empty refused", () => assertServedZoneIds([]));
+{
+  const d = join(tmp, "served");
+  mkdirSync(d, { recursive: true });
+  const text = "ogc:zones:laval:A-1\n";
+  writeFileSync(join(d, "served-ids.txt"), text);
+  writeFileSync(join(d, "served-ids.txt.sha256"), sha256FileLine(sha(Buffer.from(text))));
+  eq("readServedIdsSha — consistent artefact", readServedIdsSha(d), sha(Buffer.from(text)));
+  eq("readServedIdsSha — absent artefact ⇒ null", readServedIdsSha(join(tmp, "nope")), null);
+}
+
+// ═════════════════════════════ runner CLI end-to-end (fake kubectl) ═══════════
+// The real bascule.mjs subcommands against a fake `kubectl` (bash, temp dir):
+// Jobs succeed, pods carry the termination messages produced by the in-pod
+// steps above. Proves the wiring R0 → S2 → S3' → S3b' → S5 (G4) and what the
+// runner renders/records, with 0 cluster.
+async function cliSuite() {
+  const { s, manSha, dump } = fixture();
+  const resolved = await step({ s, env: baseEnv({ BR_STEP: "resolve", BACKUP_ID: "latest" }) });
+  const docsVerdict = { ok: true, step: "docs", date: D, copied: 2, recon: { ok: true } };
+  const bin = join(tmp, "fakebin");
+  mkdirSync(bin, { recursive: true });
+  const pods = (container, msg) => JSON.stringify({ items: [{ metadata: { creationTimestamp: "2026-09-26T12:00:00Z" },
+    status: { initContainerStatuses: container === "fetch" ? [{ name: "fetch", state: { terminated: { message: msg } } }] : [],
+      containerStatuses: container === "fetch" ? [] : [{ name: container, state: { terminated: { message: msg } } }] } }] });
+  writeFileSync(join(tmp, "pods-read.json"), pods("read", JSON.stringify(resolved.t)));
+  writeFileSync(join(tmp, "pods-fetch.json"), pods("fetch", JSON.stringify({ ok: true, step: "fetch-dump", date: D })));
+  writeFileSync(join(tmp, "pods-docs.json"), pods("docs", JSON.stringify(docsVerdict)));
+  const kubectlLog = join(tmp, "kubectl.log");
+  writeFileSync(join(bin, "kubectl"), [
+    "#!/usr/bin/env bash",
+    `echo "$*" >> "${kubectlLog}"`,
+    'case "$*" in',
+    '  *"containers[0].image"*) printf "ghcr.io/rhanka/radar-api@sha256:%064d" 0 ;;',
+    '  *"jsonpath={.spec.replicas}"*|*"jsonpath={.status.replicas}"*) printf 0 ;;',
+    '  *"jsonpath={.spec.suspend}"*) printf true ;;',
+    '  *"get cronjob"*"-o name"*) printf "cronjob/x" ;;',
+    '  *"get jobs -o json"*) printf \'{"items":[]}\' ;;',
+    '  *"get job "*"jsonpath={.status}"*) printf \'{"succeeded":1}\' ;;',
+    `  *"job-name=${JOBS.resolve}"*) cat "${join(tmp, "pods-read.json")}" ;;`,
+    `  *"job-name=${JOBS.db}"*) cat "${join(tmp, "pods-fetch.json")}" ;;`,
+    `  *"job-name=${JOBS.docs}"*|*"job-name=${JOBS.recon}"*) cat "${join(tmp, "pods-docs.json")}" ;;`,
+    "  *) : ;;",
+    "esac",
+    "exit 0",
+    "",
+  ].join("\n"), { mode: 0o755 });
+  const work = join(tmp, "cli-work");
+  const out = join(tmp, "gh-output");
+  writeFileSync(out, "");
+  const env = {
+    PATH: `${bin}:${process.env.PATH}`, MODE: "restore", BACKUP_ID: "latest", BHS: "s3.bhs.io.cloud.ovh.net", S3_REGION: "bhs",
+    EXPECTED_DATABASE: "radar", PREPROD_DOCS: DST, PROD_DOCS: PROD, DUMP_BUCKET: "radar-immobilier-backups-preprod",
+    CONFIRM: `iso-prod-${new Date().toISOString().slice(0, 10)}`, CONFIRM_EXPECTED: `iso-prod-${new Date().toISOString().slice(0, 10)}`,
+    BASCULE_WORKDIR: work, GITHUB_OUTPUT: out, DOCS_SYNC_GRANTEE: "1901410700457444:user-x", QUIESCE_TIMEOUT: "5",
+  };
+  const cli = (cmd) => spawnSync(process.execPath, [join(DIR, "bascule.mjs"), cmd], { env, encoding: "utf8" });
+  const pre = cli("preflight-backup");
+  eq("CLI preflight-backup — exit 0", pre.status, 0);
+  const r0 = cli("backup-resolve");
+  eq("CLI backup-resolve — exit 0", r0.status, 0);
+  const pin = JSON.parse(readFileSync(join(work, "backup-pin.json"), "utf8"));
+  eq("CLI backup-resolve — backup-pin.json pinned", [pin.date, pin.manifestSha256 === manSha, pin.pgSha256 === sha(dump)], [D, true, true]);
+  ok("CLI backup-resolve — GITHUB_OUTPUT backup_date", readFileSync(out, "utf8").includes(`backup_date=${D}\n`));
+  const rr = readFileSync(join(work, `${JOBS.resolve}.rendered.yaml`), "utf8");
+  ok("CLI backup-resolve — rendered Job carries BACKUP_ID + reader Secret, no leftover", /BACKUP_ID, value: "latest"/.test(rr) && /name: radar-backup-reader, key: S3_ACCESS_KEY/.test(rr) && !/\$\{[A-Z0-9_]+\}/.test(rr));
+  if (YAML) ok("CLI backup-resolve — rendered Job is valid YAML", YAML.parse(rr).kind === "Job");
+  const s2 = cli("restore-backup");
+  eq("CLI restore-backup — exit 0 (G2 + G1 + Job)", s2.status, 0);
+  const rd = readFileSync(join(work, `${JOBS.db}.rendered.yaml`), "utf8");
+  ok("CLI restore-backup — Job pinned to D + manifest/dump sha256", rd.includes(`value: "${D}"`) && rd.includes(manSha) && rd.includes(sha(dump)));
+  ok("CLI restore-backup — G1 rollback Job dispatched before the restore", (() => { const l = readFileSync(kubectlLog, "utf8"); return l.indexOf("radar-db-rollback-bascule") > -1 && l.indexOf("radar-db-rollback-bascule") < l.indexOf(JOBS.db); })());
+  ok("CLI restore-backup — never a live dump / PROD kubeconfig", !/radar-db-backup-prod|--kubeconfig/.test(readFileSync(kubectlLog, "utf8")));
+  eq("CLI docs-restore — exit 0", cli("docs-restore").status, 0);
+  const rdoc = readFileSync(join(work, `${JOBS.docs}.rendered.yaml`), "utf8");
+  ok("CLI docs-restore — prod bucket forbidden, preprod target, grant", rdoc.includes(`FORBIDDEN_DST_BUCKETS, value: "${PROD}"`) && rdoc.includes(`DST_BUCKET, value: "${DST}"`) && rdoc.includes("user-x"));
+  eq("CLI recon-backup — exit 0 + sentinel", [cli("recon-backup").status, JSON.parse(readFileSync(join(work, "recon.ok.json"), "utf8")).backupDate], [0, D]);
+  const flip = cli("flip");
+  eq("CLI flip — G4 = recon vs inventory(D) re-run, exit 0", flip.status, 0);
+  ok("CLI flip — set env issued after the recon re-run", /set env deploy\/radar-api GEO_DOCUMENTS_REPOINT-/.test(readFileSync(kubectlLog, "utf8")));
+  const bad = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "backup-resolve"], { env: { ...env, BACKUP_ID: "2026-99-01" }, encoding: "utf8" });
+  ok("CLI backup-resolve — malformed BACKUP_ID refused before any kubectl", bad.status === 1 && /BACKUP_ID must be/.test(bad.stdout));
+  const wrongMode = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "restore-backup"], { env: { ...env, MODE: "chain" }, encoding: "utf8" });
+  eq("CLI restore-backup — refused in MODE=chain", wrongMode.status, 1);
+  const secretFill = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "docs-secret-fill"], { env: { ...env, RADAR_DOCS_SYNC_ACCESS_KEY: "0".repeat(32), RADAR_DOCS_SYNC_SECRET_KEY: "f".repeat(40) }, encoding: "utf8" });
+  const klog = readFileSync(kubectlLog, "utf8");
+  ok("CLI docs-secret-fill — dry-run=server then replace, values never in argv/stdout",
+    secretFill.status === 0 && /replace --dry-run=server -f \S+ -o name/.test(klog) && /replace -f \S+ -o name/.test(klog) &&
+    !klog.includes("f".repeat(40)) && !secretFill.stdout.includes("f".repeat(40)));
+  const noSecret = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "docs-secret-fill"], { env, encoding: "utf8" });
+  ok("CLI docs-secret-fill — GitHub secret absent ⇒ fail-closed", noSecret.status === 1 && /missing or not/.test(noSecret.stdout));
+}
+
+await suite();
+await cliSuite();
+console.log(`\nrestore-mode.selftest — ${passed} passed, ${failed} failed`);
+process.exit(failed ? 1 : 0);
