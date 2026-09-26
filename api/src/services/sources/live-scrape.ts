@@ -253,8 +253,36 @@ export interface RunLiveScrapeOptions {
    * of nothing until the final recap. Pure side-channel (logging): never affects
    * control flow. It does NOT bound memory — the per-city working set (the raw PV
    * bytes held in `records`) is unaffected; see the worker-live memory follow-up.
+   *
+   * ORDERING: with `concurrency > 1`, `onCity` streams live as each city finishes,
+   * so it may arrive OUT OF the input order. The RETURNED recap array is always in
+   * input order (the documented contract) regardless of concurrency.
    */
   readonly onCity?: (recap: LiveScrapeCityRecap) => void;
+  /**
+   * Maximum number of cities SCRAPED in parallel. Default `1` (serial) — the
+   * historical behaviour, and what every existing caller/test relies on for recap
+   * and `onCity` ordering. A value `> 1` runs a bounded worker pool over the
+   * config-only cities: each city writes ONLY its own source-scoped S3 prefixes
+   * (`raw/…-<city>/`, `runs/…-<city>/`, `ontology/<city>/`), so parallel cities
+   * are additive and cannot corrupt one another's writes; and each city has its
+   * OWN adapter holding the per-SOURCE `minRequestIntervalMs` pacing, so the 1
+   * req / 2 s Scraping Policy (which is per source) is respected regardless of
+   * concurrency. The point is to MASK slow-source latency: a city stalled on slow
+   * `.doc` downloads no longer blocks the rest.
+   *
+   * MEMORY IS THE BOUND, NOT CPU: the per-city working set (raw PV bytes in
+   * `records`, plus the corpus reload when EXPLOITATION runs on a city with new
+   * docs) is held for the duration of that city. Peak memory scales with
+   * concurrency, so the caller must keep `concurrency × per-city footprint` within
+   * the Node heap (`--max-old-space-size`). Values `< 1`, non-finite, or paired
+   * with `reexploit` collapse to `1`.
+   *
+   * REEXPLOIT is always serial (this option is ignored): it shares one decreasing
+   * parse budget across cities and breaks on the first error — a bounded, ordered
+   * replay tranche that parallelism would corrupt.
+   */
+  readonly concurrency?: number;
 }
 
 /**
@@ -397,61 +425,21 @@ export async function runLiveScrape(
     });
   }
 
-  for (const config of configs) {
-    if (signal?.aborted) {
-      pushRecap({
-        city: config.citySlug,
-        sourceId: config.sourceId,
-        status: "error",
-        casKeys: [],
-        count: 0,
-        error: "aborted",
-      });
-      continue;
-    }
+  const abortedRecap = (config: PvCityConfig): LiveScrapeCityRecap => ({
+    city: config.citySlug,
+    sourceId: config.sourceId,
+    status: "error",
+    casKeys: [],
+    count: 0,
+    error: "aborted",
+  });
 
-    // REEXPLOIT (no network): reconstruct the stored records from the object
-    // store and replay PARSE + EXPLOITATION (+ PG feed via `db`). The adapter is
-    // NEVER constructed here, so the injected `fetch` is never called. Non-fatal:
-    // a reload/exploit failure becomes a per-city `status: "error"` recap entry.
-    if (reexploit) {
-      try {
-        const { result, progress } = await reexploitScrapedCityChunk(store, config.citySlug, parseBudget, {
-          ...(pdfToText !== undefined ? { pdfToText } : {}),
-          ...(now !== undefined ? { now } : {}),
-          ...(db !== undefined ? { db } : {}),
-        });
-        parseBudget -= progress.newDocuments;
-        if (result?.exploitation.graphFeed?.ok === false) {
-          throw new Error(result.exploitation.graphFeed.error ?? "reexploit PG feed failed");
-        }
-        pushRecap({
-          city: config.citySlug,
-          sourceId: config.sourceId,
-          // No scrape ran: nothing new was written to raw CAS this run, so the
-          // aggregate scrape status is `seen` (the raw was already collected).
-          status: "seen",
-          casKeys: result?.parsed.map((p) => p.rawRef) ?? [],
-          count: progress.newDocuments + progress.skippedExisting,
-          ...(result ? { signals: result.designationEventCount } : {}),
-          reexploitProgress: progress,
-        });
-      } catch (e) {
-        pushRecap({
-          city: config.citySlug,
-          sourceId: config.sourceId,
-          status: "error",
-          casKeys: [],
-          count: 0,
-          error: e instanceof Error ? e.message : String(e),
-        });
-        // A failed tranche may have consumed its budget before throwing.
-        // Stop this process; a retry resumes from durable parsed pairs.
-        break;
-      }
-      continue;
-    }
-
+  // SCRAPE one city end to end (RECUEIL + optional EXPLOITATION) and RETURN its
+  // recap entry. Extracted so it can run serially OR inside the bounded worker
+  // pool: it never touches the shared `recap` array itself — the caller decides
+  // ordering (serial `pushRecap`, or an indexed slot with a streamed `onCity`).
+  // This is the NON-reexploit path only; reexploit stays inline + serial below.
+  const scrapeOneCity = async (config: PvCityConfig): Promise<LiveScrapeCityRecap> => {
     const adapter = new ProcesVerbauxGenericAdapter(config, {
       ...(onRequest ? { onRequest: (diagnostic: PvFetchDiagnostic) =>
         onRequest({ city: config.citySlug, ...diagnostic }) } : {}),
@@ -482,7 +470,7 @@ export async function runLiveScrape(
     // that collected documents and then hit a failure comes back `ok: true`,
     // with its harvest and its holes both reported below.
     if (!outcome.ok) {
-      pushRecap({
+      return {
         city: config.citySlug,
         sourceId: config.sourceId,
         status: "error",
@@ -490,8 +478,7 @@ export async function runLiveScrape(
         count: 0,
         error: `[${outcome.error}] ${outcome.detail}`,
         ...(outcome.fetchFailure ? { fetchFailure: outcome.fetchFailure } : {}),
-      });
-      continue;
+      };
     }
 
     // PERSIST THE GUARD STATE, MONOTONICALLY. The set read above plus the URLs
@@ -557,7 +544,7 @@ export async function runLiveScrape(
 
     // A document that failed is reported ALONGSIDE what was collected, never
     // instead of it: `count` stays the number of documents actually in the CAS.
-    pushRecap({
+    return {
       city: config.citySlug,
       sourceId: config.sourceId,
       status: anyNew ? "new" : "seen",
@@ -584,7 +571,94 @@ export async function runLiveScrape(
         : {}),
       ...(signals !== undefined ? { signals } : {}),
       ...(exploitError !== undefined ? { exploitError } : {}),
-    });
+    };
+  };
+
+  // Bound the city-level parallelism. REEXPLOIT collapses to serial (shared
+  // decreasing parse budget + break-on-error); an invalid/non-finite value
+  // collapses to 1. See `RunLiveScrapeOptions.concurrency` for the memory bound.
+  const requestedConcurrency = Math.floor(options.concurrency ?? 1);
+  const concurrency =
+    reexploit || !Number.isFinite(requestedConcurrency) || requestedConcurrency < 1
+      ? 1
+      : requestedConcurrency;
+
+  if (concurrency <= 1) {
+    // SERIAL path — unchanged behaviour and ordering. Carries the REEXPLOIT
+    // branch (no network; shared parse budget; stop-the-process on first error).
+    for (const config of configs) {
+      if (signal?.aborted) {
+        pushRecap(abortedRecap(config));
+        continue;
+      }
+
+      // REEXPLOIT (no network): reconstruct the stored records from the object
+      // store and replay PARSE + EXPLOITATION (+ PG feed via `db`). The adapter is
+      // NEVER constructed here, so the injected `fetch` is never called. Non-fatal:
+      // a reload/exploit failure becomes a per-city `status: "error"` recap entry.
+      if (reexploit) {
+        try {
+          const { result, progress } = await reexploitScrapedCityChunk(store, config.citySlug, parseBudget, {
+            ...(pdfToText !== undefined ? { pdfToText } : {}),
+            ...(now !== undefined ? { now } : {}),
+            ...(db !== undefined ? { db } : {}),
+          });
+          parseBudget -= progress.newDocuments;
+          if (result?.exploitation.graphFeed?.ok === false) {
+            throw new Error(result.exploitation.graphFeed.error ?? "reexploit PG feed failed");
+          }
+          pushRecap({
+            city: config.citySlug,
+            sourceId: config.sourceId,
+            // No scrape ran: nothing new was written to raw CAS this run, so the
+            // aggregate scrape status is `seen` (the raw was already collected).
+            status: "seen",
+            casKeys: result?.parsed.map((p) => p.rawRef) ?? [],
+            count: progress.newDocuments + progress.skippedExisting,
+            ...(result ? { signals: result.designationEventCount } : {}),
+            reexploitProgress: progress,
+          });
+        } catch (e) {
+          pushRecap({
+            city: config.citySlug,
+            sourceId: config.sourceId,
+            status: "error",
+            casKeys: [],
+            count: 0,
+            error: e instanceof Error ? e.message : String(e),
+          });
+          // A failed tranche may have consumed its budget before throwing.
+          // Stop this process; a retry resumes from durable parsed pairs.
+          break;
+        }
+        continue;
+      }
+
+      pushRecap(await scrapeOneCity(config));
+    }
+  } else {
+    // BOUNDED WORKER POOL (scrape path only). `configs` are handed out by a shared
+    // cursor to `lanes` workers; each result lands in its INPUT-ORDER slot so the
+    // returned recap keeps its contract, while `onCity` streams live as each city
+    // finishes (observability; may arrive out of order). Cursor reads/writes are
+    // between awaits on JS's single thread, so no two workers take the same index.
+    const slots: (LiveScrapeCityRecap | undefined)[] = new Array(configs.length);
+    let cursor = 0;
+    const worker = async (): Promise<void> => {
+      for (;;) {
+        const i = cursor;
+        cursor += 1;
+        if (i >= configs.length) return;
+        const config = configs[i]!;
+        const entry = signal?.aborted ? abortedRecap(config) : await scrapeOneCity(config);
+        slots[i] = entry;
+        options.onCity?.(entry);
+      }
+    };
+    const lanes = Math.min(concurrency, configs.length);
+    await Promise.all(Array.from({ length: lanes }, () => worker()));
+    // Append in input order (onCity already fired live inside the workers).
+    for (const entry of slots) if (entry) recap.push(entry);
   }
 
   return recap;
