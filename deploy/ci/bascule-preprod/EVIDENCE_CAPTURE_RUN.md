@@ -31,7 +31,7 @@ Three distinct roles (executor ≠ certifier; i-infra's live-access limits; inde
 | preprod ns | `radar-immobilier-preprod` |
 | dump bucket / prefix / suffix | `radar-immobilier-backups-preprod` / `postgres/prod/sets` / `.dump` |
 | ephemeral docs secret | `radar-docs-src-preprod` (ownerRef=Job.UID, ttl 3600, preprod ns) |
-| Jobs | freshness `radar-bascule-freshness` · restore `radar-db-restore-bascule` · rollback `radar-db-rollback-bascule` · migrate `radar-db-migrate-bascule` · docs-sync `docs-sync-prod-to-preprod` · recon `radar-bascule-recon` · runs `radar-bascule-runs-preprod` · refresh `radar-refresh-bascule` |
+| Jobs | freshness `radar-bascule-freshness` · restore `radar-db-restore-bascule` · rollback `radar-db-rollback-bascule` · migrate `radar-db-migrate-bascule` · docs-sync `docs-sync-prod-to-preprod` · recon `radar-bascule-recon` · runs `radar-bascule-runs-preprod` (no refresh Job: the bascule never refreshes) |
 | kubeconfigs | prod `$DUMP_KUBECONFIG` (SA radar-ci-trigger-prod) · preprod (SA radar-ci-bascule-preprod) |
 
 Set once: `PNS=radar-immobilier-preprod ; CJNS=radar-immobilier ; CJ=radar-db-backup-prod`.
@@ -91,11 +91,11 @@ then `kubectl patch ... suspend=true` runs (bascule.mjs:451), THEN `die` if `!ve
 
 ## [g] Jobs START (0 CreateContainerConfigError) + G4 recon 0-gap → flip — CAPTURE i-cond(.status)/k8s(container-start) → CERTIF i-infra
 
-    for J in radar-db-restore-bascule radar-db-migrate-bascule radar-refresh-bascule \
+    for J in radar-db-restore-bascule radar-db-migrate-bascule \
              radar-db-rollback-bascule ; do
       echo "== $J =="; kubectl -n "$PNS" get job "$J" -o jsonpath='{.status}{"\n"}'
     done   # EXPECT: started, no CreateContainerConfigError (k8s captures container start; i-infra certifies)
-    # secrets: restore/rollback → radar-pra-admin ; migrate/refresh(S6) → radar-docs-s3-credentials
+    # secrets: restore/rollback → radar-pra-admin ; migrate → radar-docs-s3-credentials
     kubectl -n "$PNS" get job docs-sync-prod-to-preprod -o jsonpath='{.status}'   # ~2057 objects copied
     kubectl -n "$PNS" get job radar-bascule-recon -o jsonpath='{.status}'         # S3b 0-gap
     cat <run-dir>/recon.ok.json                                                   # sentinel, bucket match
@@ -109,4 +109,4 @@ then `kubectl patch ... suspend=true` runs (bascule.mjs:451), THEN `die` if `!ve
 ## Order (matches i-infra gates)
 
 VAP → RBAC T1 → test-prod DENIED → mint KUBE_CONFIG_DATA_PROD_TRIGGER → CronJob suspend=false (trigger)
-→ freshness → re-suspend=true → restore → migrate → docs-sync → recon (G4) → flip → refresh → smoke.
+→ freshness → re-suspend=true → restore → migrate → docs-sync → recon (G4) → flip → smoke (no refresh).
