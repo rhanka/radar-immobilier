@@ -3,7 +3,7 @@
 - **Date** : 2026-09-24 — **actualisé le 2026-09-26** (faits mesurés le 2026-09-26)
 - **Décideur** : owner (principal, tous tenants)
 - **Orchestrateur / maître PRA** : i-cond (tenant immo)
-- **Statut** : **RATIFIÉ (owner 2026-09-24)** — backups quotidiens immo et geo en place (un premier backup `complete` chacun ; premiers runs nocturnes à vérifier) ; restore immo + geo **depuis les backups d'une date commune** démontré (D = 2026-09-26 ; côté geo : docs seulement, restore PG geo à venir) ; join-verify vert en **contrôle de fidélité** ; restore planifié prod→préprod **gelé** (décision owner).
+- **Statut** : **RATIFIÉ (owner 2026-09-24)** — backups quotidiens immo et geo en place (un premier backup `complete` chacun ; premiers runs nocturnes à vérifier) ; restore immo + geo **depuis les backups d'une date commune** démontré, DB + S3 des deux tenants (D = 2026-09-26 ; PG geo restauré par un run geo séparé) ; join-verify vert en **contrôle de fidélité** ; restore planifié prod→préprod **gelé** (décision owner, restores manuels seulement).
 - **Antécédents ratifiés** :
   - `DOSSIER_DECISION_PREPROD_2026-08-15.md` §6–§7 — « PREPROD JOINTE SYNCHRONISÉE » (tier cross-repo unique immo+geo, même point de cohérence).
   - `DRAFT_CIRCUIT_RB_PREPROD_PROD_2026-09-06.md` §4.2 — retour de données : extraction coordonnée PG/objets GEO, watermark par jambe, contrôles de jointure avant/après, re-capture si dérive. (Draft, mécanisme cohérent, à ratifier globalement.)
@@ -19,29 +19,29 @@ Convention : **FAIT** = constaté, avec identifiant de run ou de PR ; **JUGEMENT
    - immo (`radar-backup-daily`, 02:23 UTC) : dump PG de 270 Mo (sha256 relu), 59 017 docs (12,53 Go) ;
    - geo (`geo-backup-daily`, 03:23 UTC) : dump PG de 19,4 Mo (sha256 intact), 70 440 objets docs (62,04 Go), 46 144 exclus ;
    - premiers runs nocturnes : cette nuit, à vérifier.
-2. **Restore immo + geo depuis les backups démontré (FAIT)**. Run `bascule-e2e` 36255243747 (2026-09-26, 16:22–16:44Z), date de backup D = 2026-09-26 :
-   - jambe immo verte (run 36255315042 : PG + docs, migrate, remise en service) ;
-   - jambe geo verte (run 36255326915 : docs `normalized/`, rollout).
-   C'est le premier restore depuis une sauvegarde datée. Le PG geo n'est pas encore restauré en préprod (branche prête).
+2. **Restore immo + geo depuis les backups démontré, DB + S3 des deux tenants (FAIT)**. Date de backup D = 2026-09-26. C'est le premier restore depuis une sauvegarde datée.
+   - Run `bascule-e2e` 36255243747 (16:22–16:44Z) : jambe immo verte (run 36255315042 : PG + docs, migrate, remise en service) et jambe geo verte (run 36255326915 : docs `normalized/`, rollout).
+   - Restore PG geo, fait et vert : run geo 36266037303 (rhanka/geo, 19:26:03–19:29:36Z, `MODE=restore BACKUP_ID=2026-09-26`), toutes étapes vertes. geo-cond a vérifié `geo.lots` = 45 099 lignes, égal à la prod au 26/09. PR geo#411 et geo#412.
+   - Le point 5 du §5 (préprod geo S3-only) est dépassé : décision owner, restore PG geo en préprod.
 3. **Join-verify immo ⊆ geo = contrôle de fidélité (décision owner, FAIT)**. Sur 9 064 références immo, 5 070 sont incluses dans geo. Les 3 994 autres sont des dérives connues, déjà présentes dans la prod sauvegardée. Le rejeu sans restore relève **0 nouvelle dérive** : verdict vert. Les 3 dettes data sont à planifier (§8.5.2).
 4. **Identités de restore préprod dédiées (FAIT)**. 4 identités, aucune clé prod en préprod. Chaque clé est à 4 emplacements. Rotation tous les 90 j, échéance le 2026-12-25.
 5. **Restore planifié prod→préprod gelé (décision owner, FAIT)**. `BASCULE_SCHEDULE_ENABLED=false` sur immo et geo : restores manuels seulement. #767 est mergée : plus aucun refresh dans la bascule.
-6. **Refresh séparé de la bascule (FAIT)**. Un refresh a été lancé après l'e2e, à 16:45Z. Résultats au §8.3.
+6. **Refresh séparé de la bascule (FAIT)**. Le refresh lancé après l'e2e (16:45:45Z) a été arrêté par la deadline Kubernetes après 5 h 30, avec 344 villes sur 528 traitées (91 publiées). Le refresh planifié `radar-refresh-pv` de 23:17Z reprend au curseur. La lenteur vient de la latence de gpt-6-astra (siège) ; les résultats publiés restent en place. UAT : 288 signaux nouveaux dans 54 villes, aucun ne passe les filtres par défaut de la carte (§8.3).
 7. **Correction (FAIT)**. La version précédente de ce dossier affirmait qu'il n'existait aucun backup. C'est inexact : des backups PG pré-release existaient déjà via `build-push-images` (bucket `sentropic-pgbackup-preprod`, rétention 14, secrets repo-level `BACKUP_S3_*`). Ce qui n'existait pas avant le 2026-09-26, c'est le backup quotidien. Dette : passer ces secrets derrière un environment (action A1 de la note commune k8s-ops #73).
 8. **Reste à faire** :
-   - restore PG geo ;
    - vérification des runs nocturnes ;
    - les 3 dettes data ;
    - alignement des SealedSecrets préexistants des bundles ;
    - A1 pré-release ;
-   - remplacement de `GEO_DISPATCH_TOKEN` par un PAT fine-grained.
+   - remplacement de `GEO_DISPATCH_TOKEN` par un PAT fine-grained ;
+   - carte backlog #782 : benchmark Muse 1.3 / Opus 5.5, rappel B′.
    Détail dans les Suites immédiates.
 9. **Attendu de l'owner** : 4 décisions, listées au §0.2.
 
 **JUGEMENT (i-cond)** :
-- L'étape 1 ratifiée (§2) est démontrée une fois, pour D = 2026-09-26, sauf sur un point : le PG geo n'est pas encore restauré en préprod.
+- L'étape 1 ratifiée (§2) est démontrée pour D = 2026-09-26 sur les deux tenants, DB + S3 : immo et docs geo par l'e2e, PG geo par un run geo lancé à part depuis le même backup.
 - La préprod restaurée est une image **fidèle** de la prod sauvegardée. Elle ne satisfait pas l'inclusion stricte immo ⊆ geo, parce que la prod elle-même porte 3 994 dérives. Ce sont des dettes data de la prod, pas des défauts de la bascule.
-- Le dispositif sera acquis quand trois conditions seront remplies : les premiers runs nocturnes constatés verts, le restore PG geo mergé et exécuté, un canal d'alerte pour le contrôle de fraîcheur.
+- Le dispositif sera acquis quand deux conditions seront remplies : les premiers runs nocturnes constatés verts, et un canal d'alerte pour le contrôle de fraîcheur.
 - Tant que le restore planifié reste gelé, la préprod ne suit la prod que par un restore manuel.
 
 ### 0.1 Tableau récapitulatif
@@ -51,12 +51,12 @@ Convention : **FAIT** = constaté, avec identifiant de run ou de PR ; **JUGEMENT
 | 1 | immo — restore PG | **Démontré** (copie prod en direct, puis depuis backup) | vague 1 : run 36215473088 ; depuis backup : run 36255315042 (`pg/2026-09-26/radar.dump`, sha256 vérifié) | — |
 | 2 | immo — restore S3 (docs) | **Démontré** (copie prod en direct, puis depuis backup) | vague 1 : run 36215473088 ; depuis backup : run 36255315042 (docs à l'état de D, recon) | — |
 | 3 | immo — PG + S3 ensemble | **Démontré** | run 36215473088 (smoke `db.ok` + `objectStore.ok`) ; run 36255315042 (remise en service) | — |
-| 4 | geo — PG | **Démontré en copie (vague 1)** ; **non restauré depuis backup** | run geo 36198909160 (opéré par geo-cond) | branche `feat/bascule-restore-pg-preprod` prête, PR à ouvrir par geo-cond (avec le postgis préprod) |
+| 4 | geo — PG | ✅ **Démontré depuis backup** (après une copie en vague 1) | vague 1 : run geo 36198909160 ; depuis backup : run geo 36266037303 (`MODE=restore BACKUP_ID=2026-09-26`, S2 pg_restore) | `geo.lots` = 45 099 lignes, égal à la prod au 26/09 (vérifié par geo-cond) ; postgis 3.4.3 ; geo#411, geo#412 |
 | 5 | geo — S3 | **Démontré** (copie, puis depuis backup) | vague 1 : run 36198909160 ; depuis backup : run 36255326915 (docs `normalized/` à l'état de D) | — |
-| 6 | geo — PG + S3 ensemble | **Démontré en copie (vague 1)** | run 36198909160 | depuis backup : docs seulement |
-| 7 | e2e immo + geo depuis les backups d'une date commune | ✅ **Démontré (D = 2026-09-26)** | run `bascule-e2e` 36255243747 ; jambes 36255315042 et 36255326915 vertes ; PR #777, #778, #781 | run orchestrateur conclu `failure` (join-verify encore strict, avant #781) ; verdict vert au rejeu (ligne 8) |
+| 6 | geo — PG + S3 ensemble | ✅ **Démontré depuis backup** (après une copie en vague 1) | vague 1 : run 36198909160 ; depuis backup : run geo 36266037303 (pg-check, G1, S2, S3', recon, rollout, smoke, toutes vertes) | — |
+| 7 | e2e immo + geo depuis les backups d'une date commune | ✅ **Démontré (D = 2026-09-26)** | run `bascule-e2e` 36255243747 ; jambes 36255315042 et 36255326915 vertes ; PR #777, #778, #781 | run orchestrateur conclu `failure` (join-verify encore strict, avant #781) ; verdict vert au rejeu (ligne 8). PG geo restauré par un run à part (ligne 4) |
 | 8 | Join-verify immo ⊆ geo | ✅ **Vert en contrôle de fidélité** | 9 064 références ; 5 070 incluses ; 3 994 dérives connues ; 0 nouvelle (rejeu sans restore) | 3 dettes data à planifier (§8.5.2) |
-| 9 | Refresh PV + signaux après restore | **Démontré** (hors bascule) ; **refresh post-e2e lancé** | run 36218358113 : 528/528 villes, 0 erreur ; run 36256573263 lancé à 16:45Z | résultats du refresh post-e2e : §8.3, à compléter |
+| 9 | Refresh PV + signaux après restore | **Démontré** (hors bascule) ; refresh post-e2e **partiel** | run 36218358113 : 528/528 villes, 0 erreur ; Job `radar-refresh-pv-forced-36256573263` : 344/528 villes, 91 publiées, arrêté par la deadline (5 h 30) | le refresh planifié de 23:17Z reprend au curseur ; lenteur due à gpt-6-astra (siège) ; §8.3 |
 | 10 | Backup quotidien immo | ✅ **En place, 1er backup `complete`** | PR #771, #772, #773, #775, #779 mergées ; Job `radar-backup-manual-20260926065729` (sha256 relu, 59 017 docs) | 1er run nocturne (02:23 UTC) : cette nuit, à vérifier ; canal d'alerte à choisir |
 | 11 | Backup quotidien geo | ✅ **En place, 1er backup `complete`** (15:42Z) | rhanka/geo#402, geo#403, geo#409 ; dump 19,4 Mo, 70 440 objets docs | 1er run nocturne (03:23 UTC) : cette nuit, à vérifier |
 | 12 | Identités de restore préprod | ✅ **En place** | 4 identités dédiées ; registre `deploy/ci/bascule-preprod/CRED_CYCLE.md` | rotation 90 j, échéance 2026-12-25 |
@@ -72,6 +72,7 @@ Convention : **FAIT** = constaté, avec identifiant de run ou de PR ; **JUGEMENT
 | Join-verify = contrôle de **fidélité** contre une référence de dérive | #781 : référence `deploy/ci/bascule-2tenants/join-verify-baseline.json` (D = 2026-09-26). Une dérive connue est comptée sans échec ; une nouvelle dérive fait échouer. |
 | Gel du restore planifié prod→préprod | `BASCULE_SCHEDULE_ENABLED=false` sur immo et geo. Restores manuels seulement. Le cron du dimanche 03:17 UTC reste dans le code (#776). |
 | « Un restore c'est un restore » | #767 mergée le 2026-09-26 : plus aucun refresh dans la bascule. |
+| Restore PG geo en préprod (dépasse le §5 point 5, préprod geo S3-only) | geo#411 (postgis préprod + S2/G1) et geo#412 (correctif) ; run geo 36266037303 vert. |
 
 **Décisions de la version précédente, closes (FAIT)** :
 - Commit des 3 SealedSecrets geo : sans objet. Les secrets de backup viennent désormais des GitHub Secrets d'environment + `.env` (immo #775, geo#403) ; les SealedSecrets de backup sont supprimés.
@@ -98,6 +99,7 @@ Convention : **FAIT** = constaté, avec identifiant de run ou de PR ; **JUGEMENT
   - §8.5 : réécrit (e2e depuis les backups, join-verify, identités préprod) ;
   - §8.6 : jugement.
 - §9, Suites.
+- 2e passe du 2026-09-26 : restore PG geo fait (§0, §4.1, §5, §6, §8.4, §8.5, §9), bilan du refresh post-e2e (§8.3), carte backlog #782.
 - §1 à §3 : inchangés.
 
 ---
@@ -140,7 +142,7 @@ Mesure code (worktree `lane/conductor`) — références vérifiées :
 
 > **État au 2026-09-26** — FAIT :
 > - Un déclenchement unique (`bascule-e2e`, run 36255243747) a restauré les deux tenants depuis les backups d'une même date D = 2026-09-26 (§8.5) : immo PG + docs + migrations, geo docs `normalized/`.
-> - Le PG geo n'est pas encore restauré en préprod (branche `feat/bascule-restore-pg-preprod` prête).
+> - Le PG geo est restauré en préprod depuis le même backup D par un run geo lancé à part (run 36266037303, vert ; `geo.lots` = 45 099 lignes, égal à la prod au 26/09). Les deux tenants sont donc restaurés DB + S3 depuis D, en deux déclenchements.
 > - Le contrôle de jointure est désormais un contrôle de fidélité (décision owner) : 0 nouvelle dérive, 3 994 dérives connues.
 > - La re-capture sur dérive est sans objet avec des backups immuables (§5).
 
@@ -161,7 +163,7 @@ Pas de snapshot distribué atomique (acté impossible). Garantie = **cohérence 
 2. **`CYCLE_ID` (=coherence_id) généré par immo à T0** (ouverture fenêtre quiesce), injecté par env dans la jambe geo.
 3. **Ordre garant de cohérence** : dump immo (T0) **PUIS** capture geo **≥ T0** (append-only ⇒ geo est un sur-ensemble de ce qu'immo référence) → pas de skew d'intégrité.
 4. **Reçu / manifestes** (bucket `radar-immobilier-backups-preprod`, `sets/<CYCLE_ID>/`) : `cycle.json` (tête immo : cycleId, snapshotAt, confirm, status open|captured|restored|verified) + `immo.json` + `geo.json` (1 objet/tenant, écritures disjointes). `geo.json` distingue **servi** (`normalized/`, preuve = verify-through-API) et **irremplaçable** (`raw/cas`+captures, preuve = réconciliation sha256).
-5. **Restore** : restore immo complet (PG+S3, migrations) → restore geo **S3-only** vers geo-préprod (le PG geo n'est PAS restauré en préprod ; `geo.dump` = archive DR re-dérivable).
+5. **Restore** : restore immo complet (PG+S3, migrations) → restore geo **S3-only** vers geo-préprod (le PG geo n'est PAS restauré en préprod ; `geo.dump` = archive DR re-dérivable). — **Dépassé le 2026-09-26 (décision owner)** : le PG geo est restauré en préprod (note ci-dessous).
 6. **Join-verify avant flip, fail-closed** : tout `canonical_id`/`lot_version_id` référencé par immo doit résoudre dans le **servi geo-préprod** au CYCLE_ID (diff ensembliste `immo_refs ⊆ served`, surface = `served-canonical-ids.json` du cycle, à confirmer geo-cond). ≥1 pendant = die.
 7. **Redo-on-drift** : dérive prod pendant la capture (watermark pré/post immo) ⇒ re-capturer ou reprendre.
 
@@ -169,7 +171,7 @@ Pas de snapshot distribué atomique (acté impossible). Garantie = **cohérence 
 > - **Point 1** : la brique quiesce (#753) est mergée depuis le 2026-09-25.
 > - **Point 2** : l'orchestrateur génère le `CYCLE_ID` (`CONFIRM` du jour + T0) et le transmet aux deux jambes ; `cycle.json` est publié (#781).
 > - **Point 3** : l'orchestrateur consigne `geo_after_immo` (début du backup geo ≥ début du dump immo).
-> - **Point 5** : la jambe geo restaure les docs `normalized/`. Un restore PG geo en préprod est préparé (branche `feat/bascule-restore-pg-preprod`), alors que ce point prévoyait une préprod geo S3-only.
+> - **Point 5**, dépassé par décision owner : la préprod geo n'est plus S3-only. Le PG geo est restauré en préprod depuis le backup quotidien (geo#411, geo#412 ; run geo 36266037303, vert). Dans l'e2e du 16:22Z, la jambe geo n'a restauré que les docs `normalized/`.
 > - **Point 6**, amendé par décision owner : le join-verify juge la **fidélité** contre une référence de dérive (#781) ; seule une dérive absente de la référence fait échouer. Il porte sur les zones (`ogc:zones:`).
 > - **Point 7** : pas de boucle de re-capture. Les backups sont immuables, un nouveau run donne la même réponse (README `deploy/ci/bascule-2tenants/`).
 >
@@ -183,8 +185,8 @@ Répartition ratifiée : **geo authore sa jambe en autonomie** (geo-cond), immo 
 |---|---|---|
 | immo DB | immo (existant) | dump/restore/migrate (`deploy/ci/bascule-preprod/`) ; `MODE=restore|list` depuis un backup quotidien (#777) ; hook migration S3 post-restore = #751 (ticket ouvert au 2026-09-26) |
 | immo S3 | immo (existant) | copy server-side + recon ; restore des docs à l'état de D depuis `radar-immobilier-backup` (#777) |
-| **geo S3 (servi + irremplaçable)** | **geo-cond (autonome)** | entrypoint committé backup→reconcile→restore-verify ; **CAS dédupliqué** `geo-objects/cas/<sha256>` + `inventory.json`/cycle ; restore préprod **S3-only** ; preuve servi=verify-through-API, irremplaçable=sha256 ; restore préprod depuis un backup quotidien (`MODE=restore|list`, rhanka/geo#408) |
-| **geo PG** | **geo-cond** | `geo.dump` = **archive DR re-dérivable** ; restore PG préprod : branche `feat/bascule-restore-pg-preprod` prête, PR à ouvrir par geo-cond (avec le postgis préprod) |
+| **geo S3 (servi + irremplaçable)** | **geo-cond (autonome)** | entrypoint committé backup→reconcile→restore-verify ; **CAS dédupliqué** `geo-objects/cas/<sha256>` + `inventory.json`/cycle ; preuve servi=verify-through-API, irremplaçable=sha256 ; restore préprod depuis un backup quotidien (`MODE=restore|list`, rhanka/geo#408) |
+| **geo PG** | **geo-cond** | `geo.dump` = **archive DR re-dérivable** ; **restauré en préprod** depuis le backup quotidien : postgis préprod + S2 pg_restore + G1 snapshot `geo_pra_rollback` (geo#411), correctif des extensions (geo#412) ; run geo 36266037303 vert |
 | **Top-level / coordination** | **immo** — orchestrateur `deploy/ci/bascule-2tenants/` + workflow `bascule-e2e.yml` (#778, remplace #764) | `CYCLE_ID`/`cycle.json` ; choix de la date commune D ; dispatch des deux jambes (`GEO_DISPATCH_TOKEN`) ; join-verify de fidélité (#781) ; ~~redo-on-drift~~ sans objet (backups immuables) ; ~~refresh index~~ retiré de la bascule (#767, §8.2) |
 | Refresh PV + signaux | immo | CronJob `radar-refresh-pv`, **hors bascule**, déclenchable à la main via `bascule-refresh.yml` (§8.3) |
 | Backup quotidien immo | immo | CronJobs `radar-backup-daily` + `radar-backup-freshness` (`deploy/ci/backup/`), bucket `radar-immobilier-backup` (§8.4) |
@@ -227,9 +229,20 @@ Répartition ratifiée : **geo authore sa jambe en autonomie** (geo-cond), immo 
 
 Le refresh est séparé de la bascule : CronJob `radar-refresh-pv`, déclenchable à la main via `bascule-refresh.yml`.
 
-**Refresh après l'e2e du 2026-09-26 (FAIT)** : lancé à 16:45Z via `bascule-refresh.yml` (run 36256573263), après le restore depuis les backups (§8.5.1).
+**Refresh après l'e2e du 2026-09-26 (FAIT)** : déclenché via `bascule-refresh.yml` (run 36256573263), après le restore depuis les backups (§8.5.1). Bilan mesuré dans les logs du Job `radar-refresh-pv-forced-36256573263` :
 
-RÉSULTATS DU REFRESH : à compléter à la fin du run (Job radar-refresh-pv-forced-36256573263)
+| Élément | Mesure |
+|---|---|
+| Durée | lancé à 16:45:45Z après le restore e2e ; arrêté par la deadline Kubernetes à 22:15:41Z (`DeadlineExceeded`, 5 h 30) |
+| Couverture | 344 villes sur 528 traitées |
+| Résultat par ville | 91 publiées, 208 déjà à jour, 26 sans entrée, 16 en échec, 3 sans baseline |
+| Signaux | 167 signaux levés dans le graphe complet des 91 villes publiées (stock, pas des nouveaux) : 151 avaient déjà leur source, 6 sources rattachées pendant le run, 10 sans source d'événement |
+| LLM | primaire gpt-6-astra, passé par le siège Codex (un seul compte, transport codex) : 117 appels réussis, latence médiane 145 s, p90 222 s ; bascules vers gemini-3.8-flash : 15 transport, 9 quota, 5 circuit ouvert |
+| Reprise | le refresh planifié `radar-refresh-pv` de 23:17Z reprend au curseur |
+| UAT | 288 signaux nouveaux relevés dans 54 villes, soit les signaux dont la source est un document extrait par ce refresh. 32 datent de moins de 3 mois (8 villes) ; aucun ne passe les filtres par défaut de la carte. Liste et 5 exemples sur #703 : [liste](https://github.com/rhanka/radar-immobilier/issues/703#issuecomment-5849978399), [exemples](https://github.com/rhanka/radar-immobilier/issues/703#issuecomment-5849978545) |
+| Cause de la lenteur | latence de gpt-6-astra (siège) ; les résultats publiés restent en place |
+
+Suite (backlog) : carte #782, mettre à jour le benchmark avec Muse 1.3 et Opus 5.5 et viser le rappel maximal après filtrage selon les critères B′.
 
 **Refresh précédent (FAIT, run 36218358113)**, déclenché après le restore immo de la vague 1 :
 - **Couverture** : 528/528 villes en 1 h 55 min 53 s ; sortie 0 ; 0 erreur.
@@ -275,7 +288,7 @@ RÉSULTATS DU REFRESH : à compléter à la fin du run (Job radar-refresh-pv-for
   - docs : 70 440 objets copiés (62,04 Go) et 46 144 exclus, soit 116 584 objets, le nombre relevé précédemment en source ;
   - inventaire de 33,7 Mo ; purge OK ; verrou jusqu'au 2026-10-03.
 - **Premier essai** : resté bloqué sur une copie S3 sans timeout. Corrigé par geo#409, même correctif qu'immo #779.
-- Ce backup a servi de source à la jambe geo de l'e2e, pour les docs `normalized/` (§8.5.1).
+- Ce backup a servi de source à la jambe geo de l'e2e pour les docs `normalized/`, puis au restore PG geo (run geo 36266037303) (§8.5.1).
 - **Premier run nocturne (03:23 UTC) : cette nuit, à vérifier.**
 
 **Défauts attrapés en route (FAIT)** :
@@ -285,8 +298,7 @@ RÉSULTATS DU REFRESH : à compléter à la fin du run (Job radar-refresh-pv-for
 - le premier essai geo bloqué sur une copie S3 sans timeout → geo#409 (immo : #779).
 
 **JUGEMENT** :
-- Les deux premiers backups sont constatés complets et intègres. Chacun a servi de source à un restore réussi (§8.5.1).
-- Le dump PG geo, lui, n'est pas encore éprouvé en restauration.
+- Les deux premiers backups sont constatés complets et intègres. Chacun a servi de source à un restore réussi, PG et docs compris (§8.5.1).
 - Le dispositif sera pleinement prouvé après les premiers runs nocturnes verts et un premier passage vert du contrôle de fraîcheur.
 
 ### 8.5 Vague 2 — carte #769 (ouverte) : restore immo + geo depuis les backups
@@ -299,6 +311,16 @@ Run `bascule-e2e` **36255243747**, le 2026-09-26 de 16:22 à 16:44Z. Date de bac
 - **Jambe geo** (run 36255326915), **verte** : restore des docs `normalized/` à l'état de D → recon → rollout.
 - **PR** : #777 (bascule `MODE=restore|list`), #778 (orchestrateur, remplace #764), #781 (join-verify en contrôle de fidélité).
 - **Conclusion du run orchestrateur** : `failure`. Ses étapes join-verify et publish sont en échec ; à ce moment, le join-verify jugeait encore l'inclusion stricte (avant #781). Le verdict de fidélité vient d'un rejeu sans restore sur les artefacts des deux jambes (§8.5.2).
+
+**Restore PG geo depuis le backup (FAIT, vert)** — décision owner : restore PG geo en préprod (le §5 point 5, préprod geo S3-only, est dépassé).
+- **Run** : run geo 36266037303 (rhanka/geo), le 2026-09-26 de 19:26:03 à 19:29:36Z, `MODE=restore BACKUP_ID=2026-09-26`.
+- **Étapes**, toutes vertes : pg-check, G1 snapshot `geo_pra_rollback`, S2 pg_restore, S3', recon, rollout, smoke.
+- **Vérification par geo-cond** : `geo.lots` = 45 099 lignes, égal à la prod au 26/09 ; postgis 3.4.3.
+- **PR** : geo#411 (postgis préprod + S2/G1), geo#412 (correctif).
+- **Premier essai en échec vers 19:07Z** (run 36264826332), annulé sans dégât grâce à `--single-transaction`.
+  - Cause : conflit d'extension `postgis_tiger_geocoder` (fuzzystrmatch dans le schéma `geo`).
+  - Correctif geo#412 : `--use-list` sans les 12 entrées EXTENSION/SCHEMA de l'image.
+- **Place dans le cycle** : ce run a été lancé à part, après l'e2e du 16:22Z, car geo#411 n'a été mergée qu'à 19:03Z. Il n'a pas été déclenché par l'orchestrateur.
 
 #### 8.5.2 Join-verify immo ⊆ geo — contrôle de fidélité (décision owner)
 
@@ -331,9 +353,9 @@ Run `bascule-e2e` **36255243747**, le 2026-09-26 de 16:22 à 16:44Z. Date de bac
   - références servies (O1) lues depuis la base restaurée (#777) ;
   - orchestrateur e2e (#778) ;
   - join-verify de fidélité (#781) ;
+  - restore PG geo en préprod depuis le backup (geo#411, geo#412 ; run geo 36266037303) ;
   - jeton cross-repo `GEO_DISPATCH_TOKEN` en place, avec une dette (ci-dessous).
 - **Reste à faire** :
-  - **Restore PG geo** : la branche `feat/bascule-restore-pg-preprod` est prête ; la PR est à ouvrir par geo-cond, avec le postgis préprod.
   - **`GEO_DISPATCH_TOKEN`** : le remplacer par un PAT fine-grained.
   - **Test de restauration automatique** : l'e2e est démontré à la main, et le restore planifié est gelé (§8.2).
   - **Canal d'alerte** du contrôle de fraîcheur.
@@ -361,28 +383,33 @@ Run `bascule-e2e` **36255243747**, le 2026-09-26 de 16:22 à 16:44Z. Date de bac
 - **Python** : les jobs geo doivent respecter « 0 python » (pg_dump/pg_restore + binaires natifs + Node/TS ; pas de script ni image Python).
 - **Consistance immo↔geo = fidélité, pas inclusion (2026-09-26)**. FAIT : la préprod restaurée depuis D est fidèle à la prod sauvegardée (0 nouvelle dérive). 3 994 références immo ne résolvent pas dans geo ; elles sont héritées de la prod. JUGEMENT : tant que les 3 dettes data ne sont pas traitées, l'inclusion stricte immo ⊆ geo du §5 point 6 n'est pas satisfaite, ni en prod ni en préprod.
 - **Join-verify limité aux zones** : FAIT — le contrôle porte sur les `canonical_id` de zones (`ogc:zones:`).
-- **PG geo non restauré depuis backup** : FAIT — la jambe geo de l'e2e restaure les docs `normalized/` seulement ; la branche du restore PG geo n'a pas encore de PR.
+- **PG geo restauré hors orchestrateur** : FAIT — le PG geo est restauré depuis le backup D (run geo 36266037303, vert), mais par un run lancé à part ; dans l'e2e du 16:22Z, la jambe geo n'a restauré que les docs `normalized/`. Le restore des deux tenants DB + S3 n'a donc pas encore été fait en un seul déclenchement.
 - **Runs nocturnes non constatés** : FAIT — le premier run nocturne immo (02:23 UTC) et le premier run nocturne geo (03:23 UTC) ont lieu cette nuit ; à vérifier.
 - **Restore planifié gelé** : FAIT — `BASCULE_SCHEDULE_ENABLED=false` sur immo et geo. JUGEMENT : la préprod s'écarte de la prod entre deux restores manuels, et aucun restore n'est exercé automatiquement.
 - **Contrôle de fraîcheur sans canal d'alerte** : FAIT — le canal n'est pas choisi. JUGEMENT : un backup manquant n'est détecté que par une consultation active du cluster.
 - **`GEO_DISPATCH_TOKEN`** : FAIT — c'est le jeton OAuth `gh` de rhanka, qui atteint tous ses dépôts et est invalidé par une déconnexion `gh`. À remplacer par un PAT fine-grained limité à `rhanka/geo`.
 - **Secrets pré-release au niveau du dépôt** : FAIT — `BACKUP_S3_*` ne sont pas derrière un environment (action A1, note commune k8s-ops #73).
 - **SealedSecrets préexistants des bundles non alignés** : FAIT — immo `radar-db-ro-prod`/`radar-pra-admin-prod`, geo `geo-db-ro-prod`/`geo-pra-writer-prod`.
-- **Refresh** : FAIT — 37 villes en échec lors du refresh précédent (run 36218358113), dont la cause n'est lisible qu'en base (`refresh_document_outcomes.reason`) ; primaire LLM astra en échec pendant tout ce run (repli sur gemini-3.8-flash). Résultats du refresh post-e2e : à compléter (§8.3).
+- **Refresh** : FAIT —
+  - refresh post-e2e arrêté par la deadline Kubernetes après 5 h 30 : 344 villes sur 528 traitées, 16 en échec. La cause de la lenteur est la latence de gpt-6-astra passé par le siège Codex (médiane 145 s, p90 222 s). Le refresh planifié de 23:17Z reprend au curseur (§8.3) ;
+  - refresh précédent (run 36218358113) : 37 villes en échec, dont la cause n'est lisible qu'en base (`refresh_document_outcomes.reason`) ; primaire LLM astra en échec pendant tout ce run (repli sur gemini-3.8-flash).
 - **Correctif #765 non mergé** : JUGEMENT — l'exposition à l'injection dans les workflows GitHub Actions corrigée par #765 reste ouverte tant que la PR n'est pas mergée.
 - **Bucket orphelin** `radar-immobilier-p3-backup` : FAIT — vide ; suppression sur décision owner.
 
 ---
 
 ### Suites immédiates (actualisées 2026-09-26)
+Rappel : le restore planifié prod→préprod est **gelé** par décision owner (`BASCULE_SCHEDULE_ENABLED=false`, immo et geo). Tout restore est manuel.
+
 1. Vérifier les premiers runs nocturnes : `radar-backup-daily` (02:23 UTC), `geo-backup-daily` (03:23 UTC) et le contrôle de fraîcheur `radar-backup-freshness` (06:53 UTC).
-2. Restore PG geo : PR à ouvrir par geo-cond depuis la branche `feat/bascule-restore-pg-preprod`, avec le postgis préprod.
-3. Planifier les 3 dettes data (§8.5.2) : miroir `zone_versions` immo, écarts de slug, Saint-Hyacinthe sans `zone_code`.
-4. Aligner les SealedSecrets préexistants des bundles : immo `radar-db-ro-prod`/`radar-pra-admin-prod`, geo `geo-db-ro-prod`/`geo-pra-writer-prod`.
-5. A1 pré-release : passer les secrets repo-level `BACKUP_S3_*` derrière un environment (note commune k8s-ops #73).
-6. Remplacer le jeton `GEO_DISPATCH_TOKEN` par un PAT fine-grained.
-7. Compléter les résultats du refresh post-e2e (§8.3).
-8. Obtenir les 4 décisions owner en attente (§0.2).
+2. Planifier les 3 dettes data (§8.5.2) : miroir `zone_versions` immo, écarts de slug, Saint-Hyacinthe sans `zone_code`.
+3. Aligner les SealedSecrets préexistants des bundles : immo `radar-db-ro-prod`/`radar-pra-admin-prod`, geo `geo-db-ro-prod`/`geo-pra-writer-prod`.
+4. A1 pré-release : passer les secrets repo-level `BACKUP_S3_*` derrière un environment (note commune k8s-ops #73).
+5. Remplacer le jeton `GEO_DISPATCH_TOKEN` par un PAT fine-grained.
+6. Carte backlog #782 : benchmark Muse 1.3 / Opus 5.5, rappel maximal après filtrage selon les critères B′.
+7. Obtenir les 4 décisions owner en attente (§0.2).
+
+Faits depuis la passe précédente : restore PG geo fait et vert (run geo 36266037303, §8.5.1) ; bilan du refresh post-e2e reporté (§8.3).
 
 ### Suites de la version précédente (2026-09-26 matin) — état
 1. Premier backup planifié immo et premier passage du contrôle de fraîcheur → **à vérifier** (Suites 1).
@@ -393,5 +420,5 @@ Run `bascule-e2e` **36255243747**, le 2026-09-26 de 16:22 à 16:44Z. Date de bac
 ### Suites du 2026-09-24 — état au 2026-09-26
 1. Merge PR #753 (quiesce, brique de sync) → **fait** (2026-09-25).
 2. Coordination geo-cond (primitive/creds geo, in-cluster) → **faite** ; le « GO owner-direct session geo » est remplacé par le pattern d'autonomie (§7).
-3. Jobs geo (dump/restore/migrate PG+S3) → **livrés** par geo-cond (run 36198909160).
+3. Jobs geo (dump/restore/migrate PG+S3) → **livrés** par geo-cond (run 36198909160) ; restore PG + S3 depuis le backup quotidien : run geo 36266037303 (geo#411, geo#412).
 4. Contrôle de jointure + `coherence_id` partagé + redo-on-drift → **livré** sous forme de restore depuis les backups : `CYCLE_ID` partagé et join-verify de fidélité (#778, #781) ; redo-on-drift sans objet (backups immuables).
