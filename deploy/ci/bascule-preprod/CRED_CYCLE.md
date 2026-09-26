@@ -115,10 +115,17 @@ SealedSecret). `BACKUP_BUCKET` is the fixed value `radar-immobilier-backup`.
 | secret (k8s name) | OVH user | GitHub secrets (env `radar-bascule`) | scope |
 | --- | --- | --- | --- |
 | `radar-backup-reader-preprod` | 809853 | `RADAR_BACKUP_READER_PREPROD_ACCESS_KEY`, `RADAR_BACKUP_READER_PREPROD_SECRET_KEY` | backup bucket: GetObject on `pg/*`, `manifests/*`, `docs-inventory/*` + ListBucket; `docs/` → 403; no write, no delete |
-| `radar-backup-restore-docs` | `radar-backup-restore-preprod` (809849) | `RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY`, `RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY` | backup bucket: GetObject on `docs/*`; preprod docs bucket: PutObject + PutObjectAcl (versioned CopyObject with GrantFullControl), no delete |
+| `radar-backup-restore-docs` | `radar-backup-restore-preprod` (809849) | `RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY`, `RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY` | backup bucket: GetObject on `docs/*`; preprod docs bucket `radar-immobilier-docs-preprod`: ListBucket + GetBucketLocation (preprod listing of S3'/S3b') + PutObject + PutObjectAcl (versioned CopyObject with GrantFullControl), no delete |
 
 OVH: `s3:GetObjectVersion` is refused in policies; a versioned read (GetObject /
 CopyObject with `versionId`) is covered by GetObject.
+
+k8s check 2026-09-26 (effective policy + real tests 7/7): `radar-backup-restore-preprod`
+has ListBucket + GetBucketLocation on the preprod docs bucket (real LIST 200) and no
+delete of any kind. The docs-sync identity held by `radar-docs-src-preprod`
+(`radar-docs-sync` in the k8s check; older bascule docs name it `immo-docs-prod`) is
+read-only on the prod docs bucket (PUT, DELETE and PUT `?acl` answer 403) and writes
+without delete on the preprod docs bucket.
 
 **Rotation: every 90 days** (and at once on suspected exposure), one identity at a time:
 
@@ -154,7 +161,7 @@ places**; the `.env` variable names are the GitHub secret names:
 | --- | --- | --- | --- | --- | --- |
 | `radar-backup-reader-preprod` | 809853 | `RADAR_BACKUP_READER_PREPROD_ACCESS_KEY`, `RADAR_BACKUP_READER_PREPROD_SECRET_KEY` — `radar-bascule` | `radar-backup-reader-preprod` — `radar-immobilier-preprod` | bascule `MODE=list|restore` | before 2026-12-25 |
 | `radar-backup-restore-preprod` | 809849 | `RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY`, `RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY` — `radar-bascule` | `radar-backup-restore-docs` — `radar-immobilier-preprod` | bascule `MODE=restore` | before 2026-12-25 |
-| `immo-docs-prod` (docs-sync of the chain S3) | à compléter (registre k8s) | `RADAR_DOCS_SYNC_ACCESS_KEY`, `RADAR_DOCS_SYNC_SECRET_KEY` — `radar-bascule` | `radar-docs-src-preprod` — `radar-immobilier-preprod` | bascule `MODE=chain` (step S3.0) | à compléter (registre k8s) |
+| `radar-docs-sync` / `immo-docs-prod` (docs-sync of the chain S3; read-only prod docs, write without delete preprod docs) | à compléter (registre k8s) | `RADAR_DOCS_SYNC_ACCESS_KEY`, `RADAR_DOCS_SYNC_SECRET_KEY` — `radar-bascule` | `radar-docs-src-preprod` — `radar-immobilier-preprod` | bascule `MODE=chain` (step S0.s, before the quiesce; DRY: server dry-run only) | à compléter (registre k8s) |
 
 (2) and (3) hold the same variable names for every row.
 
