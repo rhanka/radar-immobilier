@@ -43,8 +43,8 @@ else the single run created after the dispatch; two candidates ⇒ refusal (no g
 | --- | --- |
 | Environment **`radar-e2e`** (deployment branch = `main` only) with secret **`GEO_DISPATCH_TOKEN`**: fine-grained token on `rhanka/geo` — **Actions: read and write**, **Contents: read** (workflow file for the capability check) | cross-repo dispatch + run status + artefacts of the geo leg |
 | nothing else for the immo leg: this workflow's `GITHUB_TOKEN` with `actions: write` | immo dispatch, run status, artefacts |
-| immo leg prerequisites (PR "restore preprod from a daily backup"): Secret `radar-backup-reader` in `radar-immobilier-preprod`, docs copy signer rights, RBAC pods get/list, environment `radar-bascule` | immo `MODE=list` / `MODE=restore` |
-| geo leg: a **reader identity of `geo-backup`** available to the geo restore Jobs in `geo-preprod` (same shape as immo: GetObject incl. versionId, ListBucket, ListBucketVersions), created from GitHub Secrets (never a SealedSecret) | geo `MODE=list` / `MODE=restore` |
+| immo leg prerequisites (#777): pre-created Secrets `radar-backup-reader-preprod` + `radar-backup-restore-docs` (rewritten by the immo bascule from the environment `radar-bascule`), RBAC (secrets get/update by name, configmaps `immo-served-refs-*`, pods get/list), SA `radar-bascule-refs-writer` | immo `MODE=list` / `MODE=restore`, O1 refs |
+| geo leg: pre-created Secret `geo-backup-reader-preprod` in `geo-preprod` (OVH user 809855: `pg/*`, `manifests/*`, `docs-inventory/*`, `docs/*`), rewritten by the geo bascule from the environment `geo-bascule` (`GEO_BACKUP_READER_PREPROD_*`), never a SealedSecret | geo `MODE=list` / `MODE=restore` |
 
 ## What geo must add (geo-cond) — `rhanka/geo` `bascule-preprod.yml`
 
@@ -60,7 +60,7 @@ Until then `capabilities` fails closed with this list:
 
 ## Still open before a real e2e run
 
-- **O1** — immo endpoint enumerating the RAW zone codes immo references (`vars.BASCULE_IMMO_SERVED_REFS_URL` of the immo leg): not delivered; the immo `served-ids` job and this `join-verify` fail closed until then.
+- **O1** — decided (no HTTP endpoint): the immo leg extracts the zone references read-only from its restored preprod DB (Job `radar-bascule-served-refs`, ConfigMaps `immo-served-refs-*`, #777) before its `served-ids` job; the orchestrator's `join-verify` fails closed while that artefact is missing.
 - geo restore-from-backup mode (above) + geo daily backup armed (dossier §0.2).
 - `GEO_DISPATCH_TOKEN` in `radar-e2e`.
 - immo leg PR merged + its k8s prerequisites.
