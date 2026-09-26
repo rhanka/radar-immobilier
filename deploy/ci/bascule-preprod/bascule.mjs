@@ -4,7 +4,7 @@
 //
 // Orchestre, en Node pur (aucune IA au runtime), la séquence S0→S7 : dump prod
 // (déclencheur) → restore préprod → migrations → copie docs → recon → flip
-// serving → refresh différentiel → smoke. Rejouable par la CI immo / l'owner
+// serving → smoke (NO refresh: a restore is a restore). Rejouable par la CI immo / l'owner
 // SANS IA (OPS-3), avec des gardes fail-closed en Node.
 //
 // DATA-PLANE 100% CLUSTER-SIDE, RUNNER KUBECTL-ONLY (contrat owner + co-val
@@ -34,7 +34,6 @@
 //     recon        S3b — Job list-objects-v2 diff Key+Size (verdict-only, dest ⊇ src).
 //     precheck-runs S3c — Job aws s3api list runs/ (verdict-only, gate MEDIUM3).
 //     flip         S5  — kubectl set env deploy/radar-api GEO_DOCUMENTS_REPOINT-
-//     refresh      S6  — Job in-cluster worker-live.js en mode delta (PAS --all).
 //     smoke        S7  — curl préprod/health (db.ok + objectStore.ok).
 //
 //   GARDES fail-closed (clé OPS-3) :
@@ -331,13 +330,13 @@ function dispatchS3Check({ mode, jobName, secret, accessKeyName = "S3_ACCESS_KEY
 // =============================================================================
 // precheck-runs — garde « mémoire de collecte » = Job PRÉPROD verdict-only.
 //
-// MEDIUM 3 : le refresh S6 (worker-live delta) ne fait un DELTA — pas un rescrape
+// MEDIUM 3 : le refresh (CronJob radar-refresh-pv, HORS bascule) ne fait un DELTA — pas un rescrape
 // complet — que si le préfixe `runs/` (état object-store des URLs collectées) est
 // présent dans le bucket qu'il LIT. Le runner ne touchant plus S3, cette garde est
 // un Job PRÉPROD (aws s3api list, cred docs in-cluster) qui EXIT 1 si `runs/` est
 // vide/absent (ou accès refusé), EXIT 0 sinon. Le runner ne lit que .status.
 //
-// Cible défaut = PREPROD_DOCS (gate, bucket réellement lu par S6). --prod (ou
+// Cible défaut = PREPROD_DOCS (bucket lu par le refresh). --prod (ou
 // PRECHECK_TARGET=prod) → PROD_DOCS : advisory (prédiction précoce) rendu
 // non-bloquant par `continue-on-error` côté workflow (le Job, lui, tranche pareil).
 // =============================================================================
@@ -427,7 +426,7 @@ function cmdDump() {
   // DB prod IN-CLUSTER). Les 2 SEULS kubectl prod du CLI (suspend=false ET
   // re-suspend=true) passent par un kubeconfig PROD DÉDIÉ (DUMP_KUBECONFIG),
   // name-scopé au patch de CE CronJob + VAP suspend-only. TOUS les autres kubectl
-  // (quiesce, dispatch Jobs, flip, refresh) restent sur le kubeconfig PRÉPROD par
+  // (quiesce, dispatch Jobs, flip) restent sur le kubeconfig PRÉPROD par
   // défaut. Fail-closed : sans DUMP_KUBECONFIG, AUCUN patch tenté (le kubeconfig
   // préprod ferait 403 sur la prod ; on ne veut pas de trigger sans token prod).
   const dumpKubeconfig = opt("DUMP_KUBECONFIG", "");
@@ -531,7 +530,7 @@ function assertQuiesced() {
       for (const j of items) {
         const name = j?.metadata?.name ?? "<sans-nom>";
         // EXCLUSION G2 — les Jobs que CETTE bascule dispatche (restore, rollback,
-        // docs-sync, migrate, refresh) portent le label `sentropic.io/bascule`.
+        // docs-sync, migrate) portent le label `sentropic.io/bascule`.
         // Ils sont ATTENDUS actifs pendant la séquence : ils ne doivent PAS se
         // compter eux-mêmes comme « Job actif » bloquant (sinon G1-rollback ⇒ G2
         // se bloquerait lui-même). Le quiesce ordonné AVANT tout dispatch reste la
@@ -823,7 +822,7 @@ function runRollbackG1() {
 }
 
 // =============================================================================
-// Rendu + apply + poll fail-closed d'un Job in-cluster (migrate / refresh)
+// Rendu + apply + poll fail-closed d'un Job in-cluster (migrate)
 // =============================================================================
 function resolvePreprodImage(ns) {
   const override = opt("IMAGE", "");
@@ -1034,192 +1033,6 @@ function cmdFlip() {
 }
 
 // =============================================================================
-// S6 bornage (repli) — fonctions PURES (testables) : construisent l'argv que le
-// Job refresh passe à worker-live.js à partir des knobs REFRESH_CHUNK / REFRESH_CITIES.
-//
-// Vide des deux ⇒ [] = TOUTES les villes config-only (delta complet, 530). Sinon
-// un sous-ensemble borné (démo pouvant finir vert sur moins de villes) :
-//   REFRESH_CHUNK='k/n'         → ["--chunk","k/n"]   (shard déterministe worker-live)
-//   REFRESH_CITIES='a b,c'      → ["a","b","c"]       (liste explicite de slugs)
-// Les deux sont MUTUELLEMENT EXCLUSIFS. Les slugs sont validés [a-z0-9-] pour que
-// l'injection dans la liste YAML/JSON (args: [...]) ne puisse jamais s'échapper.
-// Lève une Error (jamais process.exit) → l'appelant en fait un die() fail-closed.
-// =============================================================================
-export function buildRefreshArgs({ chunk = "", cities = "" } = {}) {
-  const c = String(chunk).trim();
-  const list = String(cities).trim();
-  if (c && list) {
-    throw new Error("REFRESH_CHUNK et REFRESH_CITIES sont mutuellement exclusifs (choisir l'un ou aucun).");
-  }
-  if (c) {
-    const m = /^(\d+)\/(\d+)$/.exec(c);
-    if (!m) throw new Error(`REFRESH_CHUNK invalide '${c}' — attendu k/n (ex. 1/4).`);
-    const k = Number(m[1]);
-    const n = Number(m[2]);
-    if (n < 1 || k < 1 || k > n) throw new Error(`REFRESH_CHUNK invalide ${k}/${n} — exigé 1 <= k <= n et n >= 1.`);
-    return { args: ["--chunk", c], label: `chunk ${c} (borné)` };
-  }
-  if (list) {
-    const slugs = list.split(/[\s,]+/).filter(Boolean);
-    const bad = slugs.filter((s) => !/^[a-z0-9-]+$/.test(s));
-    if (bad.length) throw new Error(`REFRESH_CITIES: slugs invalides (${bad.join(", ")}) — attendu [a-z0-9-].`);
-    return { args: slugs, label: `${slugs.length} ville(s) bornée(s)` };
-  }
-  return { args: [], label: "toutes les villes config-only (delta complet)" };
-}
-
-// Pure : rend un argv worker-live en CORPS de liste inline YAML/JSON (sans les
-// crochets), chaque élément JSON-quoté. Ex. ["--chunk","1/4"] → '"--chunk", "1/4"'.
-// Vide ⇒ '' (le template rend alors `args: []`). JSON.stringify neutralise tout
-// caractère spécial résiduel (défense en profondeur par-dessus la validation slug).
-export function refreshArgsYaml(args) {
-  return (args || []).map((a) => JSON.stringify(String(a))).join(", ");
-}
-
-// =============================================================================
-// S6 — refresh différentiel : Job one-off worker-live.js en mode delta (lit
-// runs/ préprod = état prod ; PAS --all). Le CronJob refresh reste suspendu.
-//
-// GOULOT (mesuré) : les ~530 villes config-only étaient parcourues EN SÉRIE
-// (~6,3 h), au-delà de la fenêtre du run (poll runner + activeDeadline). Le fix :
-//   (a) CONCURRENCE — worker-live parallélise le parcours (LIVE_SCRAPE_CONCURRENCY)
-//       pour masquer la latence des sources lentes (drummondville ~9 min = I/O) ;
-//   (b) TIMEOUT ALIGNÉ — le poll runner (REFRESH_TIMEOUT) est aligné sur, et
-//       dépasse d'un tampon, l'activeDeadlineSeconds du Job, pour ne PLUS abandonner
-//       un Job encore vivant (le bug d'origine : runner 1 h < Job 2 h < besoin réel) ;
-//   (c) RESSOURCES TRANSITOIRES — heap + limites CPU/mémoire relevables pour ce Job
-//       éphémère seul (requests inchangées → 0 pression steady-state du nœud) ;
-//   (d) BORNAGE (repli) — REFRESH_CHUNK / REFRESH_CITIES bornent le refresh à un
-//       sous-ensemble si (a)+(b)+(c) ne tenaient pas la fenêtre (démo).
-// Tous les leviers sont des ENV overridables (défauts = amélioration mesurée).
-// =============================================================================
-function cmdRefresh() {
-  section("S6 refresh différentiel (worker-live delta)");
-  assertConfirm(); // G3
-  const ns = opt("PREPROD_NAMESPACE", "radar-immobilier-preprod");
-  // MEDIUM 2 (classe du bug Farid) — la cible d'écriture du refresh DOIT être le
-  // bucket SERVI config-driven (ConfigMap radar-api, #738), pas un SCRAPE_S3_BUCKET
-  // divergent : sinon les nouveaux PV atterrissent là où l'API ne LIT pas → re-404.
-  const assertBucket = opt("ASSERT_REFRESH_BUCKET", "1") !== "0";
-  const servedKey = opt("REFRESH_SERVED_BUCKET_KEY", "SCRAPE_S3_BUCKET");
-  const served = opt("PREPROD_DOCS", "");
-  const cmBucket = run("kubectl", ["-n", ns, "get", "cm", "radar-api", "-o", `jsonpath={.data.${servedKey}}`], { capture: true, allowFail: true }).stdout.trim();
-  if (assertBucket) {
-    if (!cmBucket) die(`MEDIUM2 — ConfigMap radar-api préprod sans clé ${servedKey} : cible d'écriture du refresh non garantie (ASSERT_REFRESH_BUCKET=0 pour forcer).`);
-    if (served && cmBucket !== served) {
-      die(
-        `MEDIUM2 — cible d'écriture refresh DIVERGENTE : ConfigMap ${servedKey}='${cmBucket}' ≠ ` +
-          `bucket servi PREPROD_DOCS='${served}'. Le refresh écrirait hors served bucket (re-404). ` +
-          `Aligner le ConfigMap radar-api préprod sur le bucket servi avant S6.`,
-      );
-    }
-    log(`MEDIUM2 OK — refresh écrira dans le bucket servi config-driven (${servedKey}='${cmBucket}').`);
-  } else {
-    warn(`MEDIUM2 — assertion bucket refresh désactivée ; ConfigMap ${servedKey}='${cmBucket || "<absent>"}', servi='${served || "<non fourni>"}'.`);
-  }
-  // MEDIUM 3 — mémoire de collecte : le préfixe `runs/` DOIT être présent dans le
-  // bucket servi (PREPROD_DOCS) avant le delta, sinon worker-live rescrape tout.
-  // Le workflow joue déjà `precheck-runs` (Job) entre S3 et S6 ; on re-vérifie ici
-  // (défense en profondeur) en dispatchant le MÊME Job runs verdict-only — 0 S3
-  // runner. Échappatoire documentée : ASSERT_RUNS_MEMORY=0 (dégrade en warning).
-  if (opt("ASSERT_RUNS_MEMORY", "1") !== "0") {
-    dispatchS3Check({
-      mode: "runs",
-      jobName: "radar-bascule-runs-preprod",
-      secret: jobDefaults().CHECK_DOCS_SECRET, // radar-docs-reader-preprod (RO-reader persistant)
-      params: { bucket: req("PREPROD_DOCS"), prefix: opt("RUNS_PREFIX", "runs/") },
-      timeoutSec: Number(opt("CHECK_TIMEOUT", "180")),
-    });
-    log("MEDIUM3 OK — 'runs/' peuplé (Job verdict) : le refresh fera un DELTA.");
-  } else {
-    warn("MEDIUM3 — pré-check runs/ (mémoire de collecte) DÉSACTIVÉ (ASSERT_RUNS_MEMORY=0).");
-  }
-  // ── (a) CONCURRENCE + (c) RESSOURCES TRANSITOIRES ─────────────────────────
-  // worker-live parcourt les villes EN PARALLÈLE (LIVE_SCRAPE_CONCURRENCY) pour
-  // masquer la latence des sources lentes. MÉMOIRE = la borne : le heap doit tenir
-  // concurrence × empreinte_par_ville, donc heap relevé EN MÊME TEMPS. Ces relèvements
-  // (heap, limites CPU/mémoire, deadline) sont TRANSITOIRES : le Job n'existe que
-  // pendant la bascule puis est GC au TTL — 0 effet sur la pression steady-state
-  // du nœud (les REQUESTS restent basses : cpu 50m / mem 96Mi, scheduling inchangé).
-  const concurrency = opt("REFRESH_CONCURRENCY", "6");
-  const heapMb = opt("REFRESH_HEAP_MB", "768");
-  // LIMIT CPU transitoire : ne donne que du CPU INUTILISÉ du nœud (aucune garantie).
-  // Rester <= 1000m (quota preprod-cap limits.cpu=3, ~950m déjà consommés hors Jobs).
-  const cpuLimit = opt("REFRESH_CPU_LIMIT", "150m");
-  const memLimit = opt("REFRESH_MEM_LIMIT", "1Gi");
-  // REQUEST mémoire alignée sur l'usage réel (~1Gi) et NON sur 96Mi : avec la
-  // concurrence, le pod consomme ~la LIMIT ; une request trop basse (usage >> request)
-  // en ferait le 1er candidat à l'éviction sous pression mémoire du nœud (reco k8s).
-  // 512Mi tient dans le quota requests preprod-cap. La request CPU, elle, reste 50m.
-  const memRequest = opt("REFRESH_MEM_REQUEST", "512Mi");
-
-  // ── (b) TIMEOUT ALIGNÉ ────────────────────────────────────────────────────
-  // Le poll runner (REFRESH_TIMEOUT) DOIT >= activeDeadlineSeconds du Job, sinon
-  // le runner abandonne (fail-closed) un Job encore vivant AVANT son propre deadline
-  // (le bug d'origine : runner 3600s < Job 7200s). Défaut = deadline + tampon, pour
-  // que le runner observe le VERDICT terminal du Job (succeeded/failed) plutôt que
-  // de conclure « timeout runner » à l'instant où le Job atteint sa borne.
-  const activeDeadline = Number(opt("REFRESH_ACTIVE_DEADLINE", "7200"));
-  const pollBuffer = Number(opt("REFRESH_POLL_BUFFER", "300"));
-  const refreshTimeout = process.env.REFRESH_TIMEOUT && process.env.REFRESH_TIMEOUT !== ""
-    ? Number(process.env.REFRESH_TIMEOUT)
-    : activeDeadline + pollBuffer;
-  if (!Number.isFinite(activeDeadline) || activeDeadline <= 0) {
-    die(`S6 — REFRESH_ACTIVE_DEADLINE invalide ('${opt("REFRESH_ACTIVE_DEADLINE", "7200")}').`);
-  }
-  if (!Number.isFinite(refreshTimeout) || refreshTimeout <= 0) {
-    die(`S6 — REFRESH_TIMEOUT invalide ('${process.env.REFRESH_TIMEOUT}').`);
-  }
-  if (refreshTimeout < activeDeadline) {
-    warn(
-      `S6 — REFRESH_TIMEOUT (${refreshTimeout}s) < activeDeadlineSeconds du Job (${activeDeadline}s) : ` +
-        "le runner abandonnerait un Job encore vivant. Aligner (REFRESH_TIMEOUT >= activeDeadline).",
-    );
-  }
-
-  // ── (d) BORNAGE (repli) ───────────────────────────────────────────────────
-  let refreshArgs;
-  try {
-    refreshArgs = buildRefreshArgs({ chunk: opt("REFRESH_CHUNK", ""), cities: opt("REFRESH_CITIES", "") });
-  } catch (e) {
-    die(`S6 — bornage invalide : ${e instanceof Error ? e.message : String(e)}`);
-  }
-  log(
-    `S6 périmètre = ${refreshArgs.label} ; concurrence=${concurrency} ; heap=${heapMb}MB ; ` +
-      `requests cpu=50m/mem=${memRequest} ; limits cpu=${cpuLimit}/mem=${memLimit} ; ` +
-      `Job activeDeadline=${activeDeadline}s ; poll runner=${refreshTimeout}s.`,
-  );
-
-  const image = resolvePreprodImage(ns);
-  runJobFromTemplate({
-    tmpl: "refresh-job.tmpl.yaml",
-    jobName: "radar-refresh-bascule",
-    vars: {
-      NAMESPACE: ns,
-      IMAGE: image,
-      DB_SECRET: opt("DB_SECRET", "radar-db-credentials"),
-      // Alignement sur le CronJob radar-refresh-pv préprod QUI MARCHE (#738) :
-      // creds S3 = radar-docs-s3-credentials (clés DOCS_S3_*). L'ancien secret S3
-      // par défaut avait un access-key BIDON (seul S6 le lisait) et l'ancien secret
-      // scrape est ABSENT en préprod → l'ancien défaut bloquait le RUN. Overridable.
-      S3_SECRET: opt("S3_SECRET", "radar-docs-s3-credentials"),
-      SCRAPE_S3_SECRET: opt("SCRAPE_S3_SECRET", "radar-docs-s3-credentials"),
-      TTL_SECONDS: opt("JOB_TTL_SECONDS", "3600"),
-      // (a)+(c)+(d) rendus dans le template (fix S6).
-      REFRESH_ARGS: refreshArgsYaml(refreshArgs.args),
-      REFRESH_CONCURRENCY: concurrency,
-      REFRESH_HEAP_MB: heapMb,
-      REFRESH_ACTIVE_DEADLINE: String(activeDeadline),
-      REFRESH_CPU_LIMIT: cpuLimit,
-      REFRESH_MEM_REQUEST: memRequest,
-      REFRESH_MEM_LIMIT: memLimit,
-    },
-    timeoutSec: refreshTimeout,
-  });
-  log("S6 refresh OK — delta worker-live joué (aucun --all ; CronJob refresh laissé suspendu).");
-}
-
-// =============================================================================
 // S7 — smoke : curl préprod/health, assert db.ok + objectStore.ok
 // =============================================================================
 function cmdSmoke() {
@@ -1245,8 +1058,8 @@ function cmdSmoke() {
 //   du CronJob (MÊME s'il est suspendu → précipitation possible hors créneau) et
 //   crée un Job one-off ; le Job tourne sous `serviceAccountName: radar-app`
 //   (creds in-cluster via secretKeyRef, jamais côté runner). Le runner ne lit que
-//   `.status` (classifyJobStatus). À jouer APRÈS la bascule (données prod
-//   restaurées en préprod) — l'ordre est câblé côté workflow (needs: bascule).
+//   `.status` (classifyJobStatus). Triggered INDEPENDENTLY (workflow
+//   bascule-refresh.yml) — NEVER by the bascule (a restore is a restore).
 //
 // Le balayage refresh-pv peut durer ~5 h (activeDeadlineSeconds 19800) : par
 // défaut on CONFIRME un démarrage propre (Active/succeeded, borné
@@ -1415,7 +1228,7 @@ const COMMANDS = {
   "precheck-runs": cmdPrecheckRuns,
   flip: cmdFlip,
   unquiesce: cmdUnquiesce,
-  refresh: cmdRefresh,
+  // Used by bascule-refresh.yml only (on-demand refresh, OUTSIDE the bascule).
   "force-refresh": cmdForceRefresh,
   smoke: cmdSmoke,
 };
@@ -1425,11 +1238,11 @@ function main() {
   const isHelp = !cmd || cmd === "-h" || cmd === "--help";
   if (isHelp || !COMMANDS[cmd]) {
     console.log(
-      "usage: node bascule.mjs <preflight|quiesce|dump|restore|migrate|copy-docs|recon|precheck-runs|flip|unquiesce|refresh|force-refresh|smoke>\n" +
+      "usage: node bascule.mjs <preflight|quiesce|dump|restore|migrate|copy-docs|recon|precheck-runs|flip|unquiesce|force-refresh|smoke>\n" +
         "  RUNNER KUBECTL-ONLY : 0 cred S3, 0 pg_dump/pg_restore, 0 listing/clé sur le runner.\n" +
         "    Toute S3/DB vit dans des Jobs préprod verdict-only ; le runner ne lit que .status (0 kubectl logs).\n" +
         "  force-refresh : précipite le CronJob préprod radar-refresh-pv à la demande (kubectl create job\n" +
-        "    --from=cronjob), hors planning 5/11/17/23h. À jouer APRÈS la bascule (ordre câblé côté workflow).\n" +
+        "    --from=cronjob), hors planning 5/11/17/23h. Used by bascule-refresh.yml only: the bascule never refreshes.\n" +
         "  dump (S1) : DÉCLENCHEUR — patch CronJob prod suspend=false (kubeconfig PROD), Job freshness\n" +
         "    (poll interne, verdict), re-suspend. Dump réel = CronJob owner (radar-db-backup-prod).\n" +
         "  restore (S2) : G2 quiesce + G1 Job rollback préprod, puis Job restore (fetch self-select + pg_restore).\n" +
@@ -1438,7 +1251,7 @@ function main() {
         "    precheck cible défaut = PREPROD_DOCS (gate) ; --prod = PROD_DOCS (advisory via workflow continue-on-error).\n" +
         "  quiesce/unquiesce : met/rétablit les consommateurs préprod (unquiesce = reprise, sans CONFIRM).\n" +
         "  GARDES fail-closed : G1 rollback préprod (Job), G2 quiesce, G3 CONFIRM, G4 recon-avant-flip,\n" +
-        "    EXPECTED_DATABASE (Jobs freshness/restore : clé + header archive), précheck runs/ avant refresh.\n" +
+        "    EXPECTED_DATABASE (Jobs freshness/restore : clé + header archive).\n" +
         "  MODE=restore|list (restore-mode.mjs): preflight-backup | backup-resolve | backup-list |\n" +
         "    restore-backup | docs-restore [--dry] | recon-backup — restore FROM a daily backup (BACKUP_ID).",
     );
