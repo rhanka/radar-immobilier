@@ -3,9 +3,10 @@
 // artefacts, workflow file). fetch + unzip injectable (the selftest uses fakes).
 //
 // Tokens: immo leg = the orchestrator's GITHUB_TOKEN (same repo, actions:write);
-// geo leg = GEO_DISPATCH_TOKEN (environment radar-e2e, main-only): fine-grained
-// token on rhanka/geo with Actions read/write + Contents read. A token is never
-// logged; a missing geo token fails closed before any dispatch.
+// geo leg = GEO_DISPATCH_TOKEN (environment radar-e2e, main-only): needs Actions
+// read/write + Contents read on rhanka/geo (today the gh OAuth token of rhanka —
+// see CRED_CYCLE.md). A token is never logged; a missing geo token fails closed
+// before any dispatch.
 // =============================================================================
 import { Buffer } from "node:buffer";
 import { spawnSync } from "node:child_process";
