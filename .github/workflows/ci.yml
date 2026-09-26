@@ -24,6 +24,9 @@ jobs:
           docker compose -f docker-compose.yml -f docker-compose.test.yml config -q
           docker compose -f docker-compose.yml -f docker-compose.e2e.yml config -q
 
+      - name: Validate e2e immo+geo orchestrator (offline selftest)
+        run: node deploy/ci/bascule-2tenants/orchestrator.selftest.mjs
+
       - name: Install kubectl
         uses: azure/setup-kubectl@v4
 
