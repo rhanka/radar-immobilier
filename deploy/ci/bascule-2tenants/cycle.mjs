@@ -7,9 +7,12 @@
 // (immo ⊆ geo, zones first). Everything here is side-effect free and unit-tested
 // (orchestrator.selftest.mjs):
 //   - CYCLE_ID (RFC1123, also valid for the geo pattern ^[A-Za-z0-9._-]{1,100}$);
-//   - workflow_dispatch input discovery (capability check before any dispatch);
-//   - run correlation (run-name carrying MODE + CYCLE_ID, time fallback);
-//   - common backup date D (both tenants `complete`);
+//   - workflow_dispatch input discovery (capability check before any dispatch,
+//     MODE choice with options list + restore);
+//   - CONFIRM computed at each dispatch (today UTC at that instant);
+//   - run correlation by run-name carrying MODE + CYCLE_ID only (never by time);
+//   - common backup date D (both tenants `complete`, ≤ 48 h old unless
+//     ALLOW_STALE_BACKUP; a date outside a truncated list refused);
 //   - inclusion join-verify with classes `city-not-served-by-geo` (tolerated,
 //     reported) vs `divergent-code` (fails);
 //   - cycle.json schema.
@@ -31,6 +34,10 @@ export const LEGS = Object.freeze({
 });
 export const REQUIRED_INPUTS = Object.freeze(["CONFIRM", "DRY_RUN", "MODE", "BACKUP_ID", "CYCLE_ID"]);
 export const REQUIRED_MODES = Object.freeze(["list", "restore"]);
+// Freshness of the common date D (dossier §5): at most 48 h old by default;
+// older only with the explicit input ALLOW_STALE_BACKUP=true (recorded).
+export const DEFAULT_MAX_AGE_HOURS = 48;
+const HOUR_MS = 3600000;
 export const artefacts = Object.freeze({
   backupList: (t, c) => `backup-list-${t}-${c}`,
   cycleLeg: (t, c) => `cycle-leg-${t}-${c}`,
@@ -107,13 +114,25 @@ export function parseDispatchInputs(yamlText) {
 }
 
 // Capability of a leg for the restore-from-backup e2e; `missing` lists what the
-// leg's workflow must still declare.
+// leg's workflow must still declare. MODE must be a `choice` whose options hold
+// `list` and `restore` (a free string MODE, or options without them, is refused).
 export function checkCapabilities(inputs) {
   const missing = REQUIRED_INPUTS.filter((k) => !inputs[k]);
   if (inputs.MODE) {
-    for (const m of REQUIRED_MODES) if (inputs.MODE.options.length && !inputs.MODE.options.includes(m)) missing.push(`MODE option '${m}'`);
+    if (inputs.MODE.type !== "choice") missing.push("MODE type 'choice'");
+    const options = Array.isArray(inputs.MODE.options) ? inputs.MODE.options : [];
+    for (const m of REQUIRED_MODES) if (!options.includes(m)) missing.push(`MODE option '${m}'`);
   }
   return { ok: missing.length === 0, missing };
+}
+
+// CONFIRM sent to a leg = today UTC AT THE DISPATCH (the legs check their own
+// anti-replay against their day): a cycle crossing midnight UTC still dispatches
+// a CONFIRM the leg accepts. The owner's CONFIRM is checked once, at cycle-open.
+export function confirmAt(ms) {
+  const t = Number(ms);
+  if (!Number.isFinite(t) || t <= 0) throw new Error("confirmAt needs an epoch-ms");
+  return `iso-prod-${new Date(t).toISOString().slice(0, 10)}`;
 }
 
 // Only the inputs the target workflow declares (GitHub refuses unknown inputs, 422).
@@ -121,18 +140,17 @@ export function filterInputs(wanted, declared) {
   return Object.fromEntries(Object.entries(wanted).filter(([k]) => Object.prototype.hasOwnProperty.call(declared, k)));
 }
 
-// Correlate a workflow_dispatch with its run: run-name carrying MODE + CYCLE_ID
-// first (immo: "bascule-preprod <MODE> <CYCLE_ID>"), else the single run created
-// after the dispatch (time fallback, ambiguous ⇒ null).
-export function correlateRun(runs, { cycleId, mode, dispatchedAtMs, skewMs = 15000 }) {
+// Correlate a workflow_dispatch with its run ONLY by the run-name carrying MODE +
+// CYCLE_ID (both legs: "bascule-preprod <MODE> <CYCLE_ID>", immo #777, geo #408).
+// Never by time: no match ⇒ not-found (the caller waits, then fails closed);
+// two matches ⇒ ambiguous (no guess).
+export function correlateRun(runs, { cycleId, mode }) {
   const list = Array.isArray(runs) ? runs : [];
   const byTitle = list.filter((r) => typeof r?.display_title === "string" &&
     r.display_title.split(/\s+/).includes(cycleId) && r.display_title.split(/\s+/).includes(mode));
   if (byTitle.length === 1) return { run: byTitle[0], correlation: "run-name" };
   if (byTitle.length > 1) return { run: null, correlation: "ambiguous-run-name" };
-  const after = list.filter((r) => r?.event === "workflow_dispatch" && Date.parse(r.created_at) >= dispatchedAtMs - skewMs);
-  if (after.length === 1) return { run: after[0], correlation: "time" };
-  return { run: null, correlation: after.length ? "ambiguous-time" : "not-found" };
+  return { run: null, correlation: "not-found" };
 }
 
 // Backup list artefact (format radar-backup-list/v1) → validated entries.
@@ -154,28 +172,59 @@ export function parseBackupList(json, tenant) {
   };
 }
 
+// Age of the common date D: from the OLDER capture of the two backups (their
+// `startedAt`), else D at 00:00 UTC (earlier than any capture of D: conservative).
+export function backupAge({ date, immoStartedAt, geoStartedAt, nowMs }) {
+  const refs = [immoStartedAt, geoStartedAt].filter((v) => typeof v === "string" && Number.isFinite(Date.parse(v))).map((v) => Date.parse(v));
+  const refMs = refs.length === 2 ? Math.min(...refs) : Date.parse(`${date}T00:00:00Z`);
+  const source = refs.length === 2 ? "older startedAt of the two backups" : "D 00:00 UTC (a startedAt is missing)";
+  return { ageHours: Math.round(((nowMs - refMs) / HOUR_MS) * 10) / 10, reference: new Date(refMs).toISOString(), source };
+}
+
+// A requested date absent from a TRUNCATED list (newest entries only: the immo
+// list travels in a termination message, ~15 dates) cannot be confirmed: refused
+// with the listed window, never assumed complete.
+function notCompleteReason(tenant, list, date) {
+  const dates = list.backups.map((x) => x.date).sort();
+  if (list.truncated && dates.length && date < dates[0]) {
+    return `${tenant} list is truncated to its newest ${dates.length} backups (${dates[0]}..${dates[dates.length - 1]}): ` +
+      `${date} is outside the listed window and cannot be confirmed — choose a date inside it`;
+  }
+  return `${tenant} has no complete backup at ${date}`;
+}
+
 // Common date D: newest date where BOTH tenants have a `complete` backup, or the
-// requested date (refused unless complete on both sides).
-export function chooseCommonDate({ immo, geo, requested }) {
+// requested date (refused unless complete on both sides). D older than
+// maxAgeHours (default 48) is refused unless allowStale (explicit input).
+export function chooseCommonDate({ immo, geo, requested, nowMs = Date.now(), maxAgeHours = DEFAULT_MAX_AGE_HOURS, allowStale = false }) {
   const complete = (l) => new Map(l.backups.filter((b) => b.status === "complete").map((b) => [b.date, b]));
   const a = complete(immo);
   const b = complete(geo);
   const common = [...a.keys()].filter((d) => b.has(d)).sort().reverse();
+  const truncatedLists = immo.truncated || geo.truncated;
   let date;
   if (requested) {
     if (!isValidDate(requested)) throw new Error("BACKUP_DATE must be YYYY-MM-DD");
-    if (!a.has(requested)) throw new Error(`immo has no complete backup at ${requested}`);
-    if (!b.has(requested)) throw new Error(`geo has no complete backup at ${requested}`);
+    if (!a.has(requested)) throw new Error(notCompleteReason("immo", immo, requested));
+    if (!b.has(requested)) throw new Error(notCompleteReason("geo", geo, requested));
     date = requested;
   } else {
-    if (!common.length) throw new Error("no date with a complete backup on BOTH tenants");
+    if (!common.length) throw new Error(`no date with a complete backup on BOTH tenants${truncatedLists ? " within the listed windows (a list was truncated to its newest entries)" : ""}`);
     date = common[0];
   }
   const ia = a.get(date).startedAt; const gb = b.get(date).startedAt;
   // Coherence by order (dossier §5): geo captured at or after immo ⇒ superset.
   const geoAfterImmo = ia && gb ? Date.parse(gb) >= Date.parse(ia) : null;
-  return { date, requested: requested || null, candidates: common.slice(0, 7), immo: a.get(date), geo: b.get(date), geoAfterImmo,
-    truncatedLists: immo.truncated || geo.truncated };
+  const age = backupAge({ date, immoStartedAt: ia, geoStartedAt: gb, nowMs });
+  const max = Number(maxAgeHours) > 0 ? Number(maxAgeHours) : DEFAULT_MAX_AGE_HOURS;
+  const stale = !(age.ageHours <= max);
+  if (stale && !allowStale) {
+    throw new Error(`common backup date ${date} is ${age.ageHours} h old (> ${max} h, reference ${age.source}): ` +
+      "refused — pass ALLOW_STALE_BACKUP=true to restore it anyway (recorded in cycle.json)");
+  }
+  const freshness = { age_hours: age.ageHours, max_age_hours: max, reference: age.reference, reference_source: age.source, stale, allow_stale: !!allowStale,
+    overridden: stale && !!allowStale };
+  return { date, requested: requested || null, candidates: common.slice(0, 7), immo: a.get(date), geo: b.get(date), geoAfterImmo, freshness, truncatedLists };
 }
 
 // Served-ids file → ids, checked: `ogc:zones:<slug>:<code>`, strictly increasing byte order.
@@ -242,6 +291,7 @@ export function newCycle({ cycleId, confirm, createdAt, orchestratorRunId = null
     created_at: createdAt,
     orchestrator_run_id: orchestratorRunId,
     dry_run: !!dryRun,
+    allow_stale_backup: false,
     backup: null,
     legs: { immo: leg("immo"), geo: leg("geo") },
     join_verify: { status: "pending", scope: "zones", compared_at: null, diff_summary: null },
