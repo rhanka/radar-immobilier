@@ -761,6 +761,11 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
     wf.includes("'deploy/ci/backup/**'") && wf.includes('BACKUP_DAILY_CD_ENABLED') && wf.includes('for id in writer reader purger') &&
     wf.includes("grep -q '^kind: SealedSecret'") && wf.includes('radar-backup-daily-script') && wf.includes('cronjob-backup-daily.yaml') &&
     wf.includes('cronjob-backup-freshness.yaml'));
+  ok('CD workflow: apply-bundle is skipped on a backup_run_now dispatch (no CPU race with the backup pod)',
+    wf.includes("if: vars.BASCULE_BUNDLE_CD_ENABLED == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.backup_run_now)"));
+  const ro = read('deploy/ci/bascule-preprod/db-ro-role-provision.yaml');
+  ok('RO-role provision Job: explicit small requests/limits (no LimitRange default)',
+    /requests: \{ cpu: 10m, memory: 32Mi \}/.test(ro) && /limits: \{ cpu: 100m, memory: 64Mi \}/.test(ro));
 }
 
 fs.rmSync(TMP, { recursive: true, force: true });
