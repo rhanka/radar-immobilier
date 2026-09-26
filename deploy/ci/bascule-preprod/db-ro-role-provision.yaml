@@ -147,6 +147,13 @@ spec:
             # RO password from the minted secret (read by psql \getenv, kept out of argv/pod-spec).
             - { name: RO_PASSWORD, valueFrom: { secretKeyRef: { name: radar-db-ro-prod, key: POSTGRES_PASSWORD } } }
           securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: ["ALL"] } }
+          # Explicit, tiny (one psql script): without it the LimitRange default (50m
+          # request) left the Job unschedulable next to a backup pod (Insufficient
+          # cpu). Limits kept low so the pod also fits the namespace limits.cpu quota
+          # headroom during a backup (≈ 2350m / 2500m used).
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { cpu: 100m, memory: 64Mi }
           volumeMounts:
             - { name: sql, mountPath: /sql, readOnly: true }
             - { name: home, mountPath: /home/psql }
