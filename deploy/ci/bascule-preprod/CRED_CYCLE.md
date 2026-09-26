@@ -38,3 +38,35 @@ Committing the secrets to git as SealedSecrets = **étape-2, DONE** (v2). The
 encrypted SealedSecrets are the committed source; the sealed-secrets controller is
 the materializer; `.env` remains a recovery copy (not a pipeline dependency), and
 this record documents the rotation cycle.
+
+## Daily prod backup identities (deploy/ci/backup/)
+
+| secret (k8s name) | keys | consumer | rights |
+| --- | --- | --- | --- |
+| `radar-backup-writer` | `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `BACKUP_BUCKET`, `SOURCE_DOCS_BUCKET` | CronJob `radar-backup-daily` | read `radar-immobilier-docs`; backup bucket Put/Get/List/multipart + DeleteObject without VersionId (delete-marker only); no DeleteObjectVersion, no BypassGovernanceRetention |
+| `radar-backup-reader` | `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `BACKUP_BUCKET` | restores (`deploy/ci/backup/RESTORE.md`) | backup bucket GetObject (incl. versionId), ListBucket, ListBucketVersions |
+
+Both are SealedSecrets minted by the k8s lane (scope strict ns `radar-immobilier`),
+committed verbatim as `deploy/ci/backup/radar-backup-{writer,reader}-sealed.yaml`
+and applied by `bascule-bundle-cd.yml` job `apply-backup`.
+
+**Rotation: every 90 days** (and at once on suspected exposure), one identity at a time:
+
+1. k8s lane: re-POST `s3Credentials` for the OVH user of the identity (new access
+   key + secret; the old credential stays valid for now).
+2. k8s lane: reseal the Secret with the new values (same name, same keys, scope
+   strict ns) and hand over the SealedSecret YAML.
+3. immo: commit it over `deploy/ci/backup/radar-backup-<writer|reader>-sealed.yaml`
+   (PR → merge → `apply-backup` applies it → the controller updates the Secret).
+4. Verify with the NEW credential:
+   - writer: one backup run (next night, or `workflow_dispatch` input
+     `backup_run_now=true`) → Job `Complete`, `manifests/latest.json` date = today
+     and `status: complete`;
+   - reader: a restore check of that backup (`RESTORE.md` §0–1: download
+     `pg/D/radar.dump`, `sha256sum -c` OK, `pg_restore --list` lists).
+5. Only after BOTH checks pass: k8s lane deletes the old credential of that user.
+6. Update the `.env` recovery copy and record the rotation date (next due = +90 days).
+
+Verify recovery at any time: `kubectl -n radar-immobilier get secret radar-backup-writer
+radar-backup-reader`; last `radar-backup-daily` Job `Complete`; `manifests/latest.json`
+fresh.
