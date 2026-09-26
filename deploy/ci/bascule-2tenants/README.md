@@ -41,7 +41,7 @@ else the single run created after the dispatch; two candidates ⇒ refusal (no g
 
 | Item | For |
 | --- | --- |
-| Environment **`radar-e2e`** (deployment branch = `main` only) with secret **`GEO_DISPATCH_TOKEN`**: fine-grained token on `rhanka/geo` — **Actions: read and write**, **Contents: read** (workflow file for the capability check) | cross-repo dispatch + run status + artefacts of the geo leg |
+| Environment **`radar-e2e`** (deployment branch = `main` only, created) with secret **`GEO_DISPATCH_TOKEN`** (set): needs **Actions: read and write** + **Contents: read** on `rhanka/geo`. Today the `gh` OAuth token of rhanka (scope: all rhanka repos; revoked by any `gh auth logout`/refresh); debt: fine-grained PAT limited to `rhanka/geo` — record in [`CRED_CYCLE.md`](CRED_CYCLE.md). Only the job `e2e` declares this environment | cross-repo dispatch + run status + artefacts of the geo leg |
 | nothing else for the immo leg: this workflow's `GITHUB_TOKEN` with `actions: write` | immo dispatch, run status, artefacts |
 | immo leg prerequisites (#777): pre-created Secrets `radar-backup-reader-preprod` + `radar-backup-restore-docs` (rewritten by the immo bascule from the environment `radar-bascule`), RBAC (secrets get/update by name, configmaps `immo-served-refs-*`, pods get/list), SA `radar-bascule-refs-writer` | immo `MODE=list` / `MODE=restore`, O1 refs |
 | geo leg: pre-created Secret `geo-backup-reader-preprod` in `geo-preprod` (OVH user 809855: `pg/*`, `manifests/*`, `docs-inventory/*`, `docs/*`), rewritten by the geo bascule from the environment `geo-bascule` (`GEO_BACKUP_READER_PREPROD_*`), never a SealedSecret | geo `MODE=list` / `MODE=restore` |
@@ -62,7 +62,7 @@ Until then `capabilities` fails closed with this list:
 
 - **O1** — decided (no HTTP endpoint): the immo leg extracts the zone references read-only from its restored preprod DB (Job `radar-bascule-served-refs`, ConfigMaps `immo-served-refs-*`, #777) before its `served-ids` job; the orchestrator's `join-verify` fails closed while that artefact is missing.
 - geo restore-from-backup mode (above) + geo daily backup armed (dossier §0.2).
-- `GEO_DISPATCH_TOKEN` in `radar-e2e`.
+- `GEO_DISPATCH_TOKEN` in `radar-e2e`: set (gh OAuth token); owner debt = fine-grained PAT (`CRED_CYCLE.md`).
 - immo leg PR merged + its k8s prerequisites.
 
 ## Run
