@@ -16,8 +16,9 @@ workspace (same pin on both sides), so the orchestrator only compares files.
 | File | Role |
 | --- | --- |
 | `.github/workflows/bascule-e2e.yml` | `workflow_dispatch` (CONFIRM, DRY_RUN, BACKUP_DATE, ALLOW_STALE_BACKUP), environment `radar-e2e`, main-only; actions pinned by commit SHA |
-| `orchestrator.mjs` | CLI: `cycle-open`, `capabilities`, `list-backups`, `choose-date`, `dispatch-restore`, `follow`, `collect`, `join-verify`, `publish` |
-| `cycle.mjs` | pure model: CYCLE_ID, dispatch-input discovery, run correlation, common date, inclusion join-verify, `cycle.json` |
+| `orchestrator.mjs` | CLI: `cycle-open`, `capabilities`, `list-backups`, `choose-date`, `dispatch-restore`, `follow`, `collect`, `join-verify`, `publish`, `replay-seed` |
+| `cycle.mjs` | pure model: CYCLE_ID, dispatch-input discovery, run correlation, common date, inclusion join-verify + baseline (fidelity), `cycle.json` |
+| `join-verify-baseline.json` | recorded drift of D=2026-09-26 (run 36255243747): known-drift ids with class and cause |
 | `github.mjs` | GitHub API seam (dispatch, run status, artefacts, workflow file), fetch + unzip injectable |
 | `orchestrator.selftest.mjs` | offline selftest (pure model + the whole chain against a fake GitHub + workflow wiring), run by `ci.yml` |
 
@@ -30,8 +31,47 @@ workspace (same pin on both sides), so the orchestrator only compares files.
 5. **dispatch-restore** — (not DRY) `MODE=restore BACKUP_ID=D CYCLE_ID DRY_RUN=false` on both legs, in parallel (only the inputs each workflow declares are sent; `SKIP_ROLLOUT=false` for geo when declared). **Every dispatch (list and restore) sends `CONFIRM` = today UTC at that instant** (a cycle may cross midnight; the owner's `CONFIRM` is checked at cycle-open), recorded as `confirm_sent`.
 6. **follow** — run status only (`GET /actions/runs/{id}`).
 7. **collect** — `cycle-leg-<tenant>-<CYCLE_ID>` / `cycle-leg-<tenant>.json`: `verdict.pg` and `verdict.s3` = `success`, `backup.date` = D.
-8. **join-verify** — `<tenant>-served-canonical-ids-<CYCLE_ID>` / `served-ids.txt` (+ `.sha256`, checked, and equal to `legs.<tenant>.served_ids_sha256`). Both files: `ogc:zones:<slug>:<code>`, one per line, strictly increasing byte order. For each immo id absent from geo: **`city-not-served-by-geo`** when geo serves no zone of that city (tolerated, reported with the city list) vs **`divergent-code`** when geo serves the city but not that code (**fails**). No redo loop: backups are immutable, a re-run gives the same answer.
-9. **publish** (always) — `cycle.json` (artefact `cycle-<CYCLE_ID>`, format `radar-bascule-cycle/v1`) + step summary; exit 1 unless the verdict is `success` (`dry-run-ok` in DRY).
+8. **join-verify** — `<tenant>-served-canonical-ids-<CYCLE_ID>` / `served-ids.txt` (+ `.sha256`, checked, and equal to `legs.<tenant>.served_ids_sha256`). Both files: `ogc:zones:<slug>:<code>`, one per line, strictly increasing byte order. Each immo id absent from geo is **`city-not-served-by-geo`** (geo serves no zone of that city) or **`divergent-code`** (geo serves the city but not that code), then judged on **fidelity** against the recorded baseline (below): **known-drift** (in the baseline) is counted and never fails, **new drift** (absent from the baseline, either class) **fails**, **resolved** (a baseline id that no longer drifts) is reported so it can be purged. No redo loop: backups are immutable, a re-run gives the same answer.
+9. **publish** (always) — `cycle.json` (artefact `cycle-<CYCLE_ID>`, format `radar-bascule-cycle/v1`; the dot-directory workdir needs `include-hidden-files: true`) + step summary with the three counters; exit 1 unless the verdict is `success` (`dry-run-ok` in DRY).
+
+## Join-verify baseline (fidelity control)
+
+Owner decision 2026-09-26, after run 36255243747 (D=2026-09-26: 5070 included,
+2888 `divergent-code`, 1106 `city-not-served-by-geo`): the join-verify proves
+that the restore is **faithful**, not that the data are clean. The drift present
+in the backups of D is recorded in [`join-verify-baseline.json`](join-verify-baseline.json)
+(`radar-join-verify-baseline/v1`: D, orchestrator run, both served-ids sha256,
+groups `{ city, class, cause, note, ids[] }`). `BASCULE2_JOIN_BASELINE` overrides
+the path; `none` runs the strict check. A missing or malformed baseline fails closed.
+
+- A `resolved` id: delete it from its group. Never add an id by hand: a new drift
+  is a failure to investigate.
+- None of the recorded drift is a canonicalisation issue: 0/2888 codes match a geo
+  code of their city under a loose key (case, separators, leading zeros, order),
+  and immo's own pull rule applied to today's geo features gives 100 % inclusion.
+
+Data debts behind the baseline (tracked apart, not fixed by this control):
+
+| Cause | Ids | Debt |
+| --- | --- | --- |
+| `referential-version` | 2829 | immo `zone_versions` mirror behind geo for levis, mont-tremblant, saint-eustache, sutton, repentigny — `api/src/services/geo/ogc-pull.ts` upserts but **never closes** obsolete versions (`known_to`): re-pull the 11 cities **and** retire the codes geo no longer serves |
+| `data-gap` | 59 | same re-pull: beaumont, saint-henri, saint-anselme, mont-saint-hilaire, cowansville, saint-denis-sur-richelieu |
+| `slug-variant` | 19 | immo slugs `l-epiphanie` → `lepiphanie`, `l-assomption` → `lassomption` (drop the MRC affectation layer `qc-zonage-l-assomption`); the registry is the same file in both repos |
+| `geo-no-zone-code` | 1087 | geo: `qc-zonage-saint-hyacinthe` has `NUM_ZONE` only, no `zone_code` (geo emits 0 ids for the city) — geo-cond |
+
+## Replay (no dispatch)
+
+`collect` + `join-verify` + `publish` can re-evaluate the artefacts of existing
+leg restore runs (e.g. after a baseline change), without restoring anything:
+
+```bash
+export BASCULE2_WORKDIR=$(mktemp -d) DRY_RUN=false GH_TOKEN_IMMO=<token> GEO_DISPATCH_TOKEN=<token> \
+  REPLAY_IMMO_RUN_ID=<immo restore run> REPLAY_GEO_RUN_ID=<geo restore run> \
+  REPLAY_CYCLE_ID=<CYCLE_ID of those runs> REPLAY_BACKUP_DATE=<D> REPLAY_OF_RUN_ID=<orchestrator run>
+for c in replay-seed collect join-verify publish; do node deploy/ci/bascule-2tenants/orchestrator.mjs $c; done
+```
+
+Leg artefacts are kept 7 days (a replay after that needs a new cycle).
 
 Run correlation: GitHub does not return the run id of a `workflow_dispatch`. The
 orchestrator matches **only** the run name `bascule-preprod <MODE> <CYCLE_ID>`
