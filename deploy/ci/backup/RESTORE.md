@@ -1,10 +1,31 @@
 # Restore a backup of date D
 
-All reads use the **reader** identity `radar-backup-reader` (keys `S3_ENDPOINT`,
-`S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `BACKUP_BUCKET`): GetObject (also
-with a version id), ListBucket, ListBucketVersions. It cannot write or delete.
-Never restore in place over production: restore into an empty database / an
-empty bucket or prefix, verify, then switch.
+**Into preprod, automated:** `.github/workflows/bascule-preprod.yml` with
+`MODE=restore` (`BACKUP_ID=latest` or a date) does §0–§2 below in-cluster (dump
+sha256 verified before `pg_restore`, docs state at D from the inventory by
+server-side copy, recon), then migrate, flip and smoke; `MODE=list` lists the
+available backups. See `../bascule-preprod/README.md` "Restore from a backup". The
+manual procedure below stays the reference for any other target.
+
+Identities:
+
+| Identity (k8s Secret) | Namespace | Reads | Used for |
+| --- | --- | --- | --- |
+| `radar-backup-reader` | `radar-immobilier` (prod) | the whole backup bucket (GetObject, ListBucket, ListBucketVersions) | freshness check, manual restores (this page) |
+| `radar-backup-reader-preprod` (dedicated, OVH user 809853) | `radar-immobilier-preprod` | `pg/*`, `manifests/*`, `docs-inventory/*` only (`docs/` → 403) | bascule `MODE=restore|list`: manifest, dump, inventory |
+| `radar-backup-restore-docs` (OVH user `radar-backup-restore-preprod`, 809849) | `radar-immobilier-preprod` | `docs/*`; writes the preprod docs bucket (PutObject + PutObjectAcl, no delete) | bascule `MODE=restore`: server-side copy of the docs at D |
+
+The two preprod Secrets are pre-created by the k8s lane and **rewritten by the
+bascule** from the GitHub environment `radar-bascule` (`kubectl replace
+--dry-run=server` then `kubectl replace`; never `create`/`apply`, never a
+SealedSecret). Rotation 90 days: `../bascule-preprod/CRED_CYCLE.md`.
+
+**OVH:** `s3:GetObjectVersion` is refused in OVH policies. A read of a given
+version (`GetObject`/`CopyObject` with `versionId`, `s5cmd cp --version-id`) is
+covered by `GetObject`: grant `GetObject`, never a separate version permission.
+
+No identity above can delete. Never restore in place over production: restore
+into an empty database / an empty bucket or prefix, verify, then switch.
 
 Examples use `s5cmd` (>= 2.2, native binary of the validated stack) on an
 operator workstation; the in-cluster restore-test of wave 2 will use the same

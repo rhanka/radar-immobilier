@@ -100,3 +100,76 @@ Verify recovery at any time (any operator/owner/AI, no owner GO):
   radar-backup-reader`; the last `apply-backup` run is green;
 - last `radar-backup-daily` and `radar-backup-freshness` Jobs `Complete`;
   `manifests/latest.json` fresh.
+
+## Preprod restore-from-backup identities (bascule `MODE=restore|list`)
+
+Dedicated preprod identities, created and tested by the k8s lane (2026-09-26).
+Each k8s Secret is **pre-created** (Opaque, no ownerReference, keys
+`S3_ACCESS_KEY`, `S3_SECRET_KEY`, `BACKUP_BUCKET`) in ns `radar-immobilier-preprod`
+and **rewritten by the bascule** at every `MODE=restore|list` run from the secrets
+of the GitHub environment `radar-bascule` (main-only): `kubectl replace
+--dry-run=server` then `kubectl replace` (CI SA `radar-ci-bascule-preprod`:
+secrets get/update by resourceNames only; never create/apply; never a
+SealedSecret). `BACKUP_BUCKET` is the fixed value `radar-immobilier-backup`.
+
+| secret (k8s name) | OVH user | GitHub secrets (env `radar-bascule`) | scope |
+| --- | --- | --- | --- |
+| `radar-backup-reader-preprod` | 809853 | `RADAR_BACKUP_READER_PREPROD_ACCESS_KEY`, `RADAR_BACKUP_READER_PREPROD_SECRET_KEY` | backup bucket: GetObject on `pg/*`, `manifests/*`, `docs-inventory/*` + ListBucket; `docs/` → 403; no write, no delete |
+| `radar-backup-restore-docs` | `radar-backup-restore-preprod` (809849) | `RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY`, `RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY` | backup bucket: GetObject on `docs/*`; preprod docs bucket `radar-immobilier-docs-preprod`: ListBucket + GetBucketLocation (preprod listing of S3'/S3b') + PutObject + PutObjectAcl (versioned CopyObject with GrantFullControl), no delete |
+
+OVH: `s3:GetObjectVersion` is refused in policies; a versioned read (GetObject /
+CopyObject with `versionId`) is covered by GetObject.
+
+k8s check 2026-09-26 (effective policy + real tests 7/7): `radar-backup-restore-preprod`
+has ListBucket + GetBucketLocation on the preprod docs bucket (real LIST 200) and no
+delete of any kind. The docs-sync identity held by `radar-docs-src-preprod`
+(`radar-docs-sync` in the k8s check; older bascule docs name it `immo-docs-prod`) is
+read-only on the prod docs bucket (PUT, DELETE and PUT `?acl` answer 403) and writes
+without delete on the preprod docs bucket.
+
+**Rotation: every 90 days** (and at once on suspected exposure), one identity at a time:
+
+1. k8s lane: new `s3Credentials` for the OVH user (the old one stays valid for now).
+2. Update locations 1 to 3 by hand (section "Where every bascule key lives" below): the two
+   GitHub secrets of that identity in the environment `radar-bascule`, the central `.env`,
+   the immo `.env`.
+3. Verify with the NEW credential: a `bascule-preprod.yml` run `MODE=list`
+   (reader: step "Write backup Secrets" rewrites the k8s Secret and is green, then the
+   backup list printed) and a `MODE=restore` `DRY_RUN=true` run (copy signer: the docs plan
+   of S3' green).
+4. Only then: k8s lane deletes the old credential; record the date (next = +90 days).
+
+Verify recovery at any time: `kubectl -n radar-immobilier-preprod get secret
+radar-backup-reader-preprod radar-backup-restore-docs` (present, 3 keys), last
+`MODE=list` run green.
+
+## Where every bascule key lives (4 locations) and how to rotate it
+
+Identities serving the bascule (written by the bascule job itself). Each key lives in **four
+places**; the `.env` variable names are the GitHub secret names:
+
+1. the GitHub Environment secret (`radar-bascule`; the prod backup identities above belong
+   to `radar-backup-prod` once they leave SealedSecrets);
+2. the central `.env` `/home/antoinefa/src/sentropic/.env` — source of the mint scripts,
+   referenced by the k8s-ops registry;
+3. the tenant `.env` `/home/antoinefa/src/radar-immobilier/.env` (recovery copy; perms 600,
+   ignored by git);
+4. the k8s Secret (ns `radar-immobilier-preprod`), rewritten from (1) by the bascule
+   (`ci-secrets.mjs`, `kubectl replace --dry-run=server` then `replace`) — never edited by hand.
+
+| identity (OVH user) | OVH user id | (1) GitHub secrets — Environment | (4) k8s Secret — ns | rewritten by | rotation due |
+| --- | --- | --- | --- | --- | --- |
+| `radar-backup-reader-preprod` | 809853 | `RADAR_BACKUP_READER_PREPROD_ACCESS_KEY`, `RADAR_BACKUP_READER_PREPROD_SECRET_KEY` — `radar-bascule` | `radar-backup-reader-preprod` — `radar-immobilier-preprod` | bascule `MODE=list|restore` | before 2026-12-25 |
+| `radar-backup-restore-preprod` | 809849 | `RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY`, `RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY` — `radar-bascule` | `radar-backup-restore-docs` — `radar-immobilier-preprod` | bascule `MODE=restore` | before 2026-12-25 |
+| `radar-docs-sync` / `immo-docs-prod` (docs-sync of the chain S3; read-only prod docs, write without delete preprod docs) | à compléter (registre k8s) | `RADAR_DOCS_SYNC_ACCESS_KEY`, `RADAR_DOCS_SYNC_SECRET_KEY` — `radar-bascule` | `radar-docs-src-preprod` — `radar-immobilier-preprod` | bascule `MODE=chain` (step S0.s, before the quiesce; DRY: server dry-run only) | à compléter (registre k8s) |
+
+(2) and (3) hold the same variable names for every row.
+
+**Rotation procedure** (every 90 days, and at once on suspected exposure; one identity at a
+time; the k8s lane first mints a new `s3Credential` for the OVH user, the old one staying
+valid):
+
+- mettre à jour 1 à 3 à la main ;
+- le CD ou la bascule propage vers 4 ;
+- vérifier le backup ou le restore suivant ;
+- seulement alors, supprimer l'ancienne s3Credential OVH.
