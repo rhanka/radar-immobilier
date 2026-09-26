@@ -184,7 +184,7 @@ const GEO_IDS = "ogc:zones:laval:A-1\nogc:zones:laval:B-2\nogc:zones:montreal:C-
 }
 {
   const r = await runChain(fakeGh({ geoIdsText: GEO_IDS, immoIdsText: null }));
-  ok("chain — immo served-ids missing (O1) ⇒ join-verify fails closed", r.error?.step === "join-verify" && /PENDING O1/.test(r.error.message));
+  ok("chain — immo served-ids missing (O1) ⇒ join-verify fails closed", r.error?.step === "join-verify" && /served-refs Job on the restored DB/.test(r.error.message));
 }
 {
   const r = await runChain(fakeGh({ geoIdsText: GEO_IDS, immoIdsText: GEO_IDS, geoLegDate: "2026-09-27" }));

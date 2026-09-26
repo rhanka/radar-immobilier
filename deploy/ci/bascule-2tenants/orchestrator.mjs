@@ -224,7 +224,7 @@ export function makeOrchestrator({ gh, now = Date.now, pollSec = Number(opt("BAS
         const name = artefacts.servedIds(t, cycle.cycle_id);
         const ids = await client.artefactFile(t, runId, name, FILES.servedIds);
         const side = await client.artefactFile(t, runId, name, FILES.servedIdsSha);
-        if (!ids || !side) die(`join-verify — ${t}: artefact ${name} (${FILES.servedIds} + ${FILES.servedIdsSha}) missing${t === "immo" ? " (PENDING O1: immo RAW refs endpoint)" : ""}.`);
+        if (!ids || !side) die(`join-verify — ${t}: artefact ${name} (${FILES.servedIds} + ${FILES.servedIdsSha}) missing${t === "immo" ? " (immo leg: served-refs Job on the restored DB, then its served-ids job)" : ""}.`);
         const declared = /^([0-9a-f]{64})/.exec(side.toString("utf8").trim())?.[1];
         const actual = sha256(ids);
         if (declared !== actual) die(`join-verify — ${t}: ${FILES.servedIdsSha} differs from sha256(${FILES.servedIds}).`);
