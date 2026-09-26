@@ -43,6 +43,23 @@ export const JOBS = Object.freeze({
 });
 export const PIN_FILE = "backup-pin.json";
 export const LIST_FILE = "backup-list.json";
+// Production docs bucket, frozen here (repo var BASCULE_PROD_DOCS_BUCKET =
+// radar-immobilier-docs, 2026-09-22): ALWAYS a forbidden destination of the
+// restore copy, whatever the vars say, so the list is never empty.
+export const FROZEN_PROD_DOCS_BUCKETS = Object.freeze(["radar-immobilier-docs"]);
+
+// FORBIDDEN_DST_BUCKETS rendered into the docs Jobs: the frozen production docs
+// bucket(s) + PROD_DOCS (required in MODE=restore) + the backup bucket + extras.
+// Never empty; a malformed name is refused.
+export function forbiddenDstBuckets({ prodDocs, extra = "", backupBucket }) {
+  const prod = String(prodDocs ?? "").trim();
+  if (!prod) throw new Error("PROD_DOCS (var BASCULE_PROD_DOCS_BUCKET) is required in MODE=restore: it is a forbidden destination of the docs copy");
+  const names = [...FROZEN_PROD_DOCS_BUCKETS, prod, String(backupBucket ?? "").trim(),
+    ...String(extra ?? "").split(",").map((s) => s.trim())].filter(Boolean);
+  const bad = names.filter((n) => !BUCKET_RE.test(n));
+  if (bad.length) throw new Error(`invalid bucket name(s) in the forbidden destinations: ${bad.length}`);
+  return [...new Set(names)].join(",");
+}
 
 // ── pure helpers (exported for the selftest) ─────────────────────────────────
 export function isValidDate(date) {
@@ -94,10 +111,23 @@ export function assertScriptEmbeddable(script) {
   return true;
 }
 
-// Termination message of `container` in the newest pod of a Job
-// (`kubectl get pods -l job-name=<job> -o json`), init containers included.
-export function pickTerminationMessage(podList, container) {
-  const items = Array.isArray(podList?.items) ? [...podList.items] : [];
+// A pod belongs to the Job instance `jobUid` (the one this run created) when its
+// controller ownerReference or its controller-uid label carries that uid. A pod
+// of an older instance of the same Job name (deleted, pods still terminating) is
+// never read.
+export function podOfJob(pod, jobUid) {
+  if (!jobUid) return false;
+  const owners = Array.isArray(pod?.metadata?.ownerReferences) ? pod.metadata.ownerReferences : [];
+  if (owners.some((o) => o?.kind === "Job" && o?.uid === jobUid)) return true;
+  const labels = pod?.metadata?.labels ?? {};
+  return labels["batch.kubernetes.io/controller-uid"] === jobUid || labels["controller-uid"] === jobUid;
+}
+
+// Termination message of `container` in the newest pod of the Job instance
+// `jobUid` (`kubectl get pods -l job-name=<job> -o json`, then filtered by uid),
+// init containers included. No uid ⇒ null (never a guess).
+export function pickTerminationMessage(podList, container, jobUid) {
+  const items = (Array.isArray(podList?.items) ? [...podList.items] : []).filter((p) => podOfJob(p, jobUid));
   items.sort((a, b) => String(b?.metadata?.creationTimestamp ?? "").localeCompare(String(a?.metadata?.creationTimestamp ?? "")));
   for (const pod of items) {
     const statuses = [...(pod?.status?.initContainerStatuses ?? []), ...(pod?.status?.containerStatuses ?? [])];
@@ -237,17 +267,19 @@ export function makeRestoreMode(h) {
     return runJobFromTemplate({ tmpl, jobName, vars: { ...vars, BR_SCRIPT: brScript() }, timeoutSec, failClosed: false });
   }
 
-  // Verdict JSON of a Job's container (pods .status only — never logs).
-  function readVerdict(ns, jobName, container) {
+  // Verdict JSON of a Job's container (pods .status only — never logs), read only
+  // from the pods of the Job instance created by this run (uid from runJobFromTemplate).
+  function readVerdict(ns, jobName, container, jobUid) {
+    if (!jobUid) return { verdict: null, readable: true };
     const r = run("kubectl", ["-n", ns, "get", "pods", "-l", `job-name=${jobName}`, "-o", "json"], { capture: true, allowFail: true });
     if (r.status !== 0) return { verdict: null, readable: false };
     let pods = null;
     try { pods = JSON.parse(r.stdout || "{}"); } catch { pods = null; }
-    return { verdict: parseTermination(pickTerminationMessage(pods, container)), readable: true };
+    return { verdict: parseTermination(pickTerminationMessage(pods, container, jobUid)), readable: true };
   }
 
   function failWithVerdict(res, ns, jobName, container, what) {
-    const { verdict, readable } = readVerdict(ns, jobName, container);
+    const { verdict, readable } = readVerdict(ns, jobName, container, res.uid);
     const reason = verdict && verdict.reason ? safeReason(verdict.reason)
       : verdict && verdict.ok === true ? `step '${container}' OK — a later container failed (inspect the Job in-cluster)`
         : readable ? "no verdict recorded (inspect the Job in-cluster)"
@@ -274,10 +306,11 @@ export function makeRestoreMode(h) {
     const m = mode();
     section(`S0 preflight (MODE=${m})`);
     if (m === "chain") die("preflight-backup is for MODE=restore|list (MODE=chain uses 'preflight').");
+    assertConfirm(); // G3 in every MODE, before any Secret write or Job (list included)
     const bins = ["node", "kubectl", "curl"];
     const missing = bins.filter((b) => run("bash", ["-lc", `command -v ${b}`], { capture: true, allowFail: true }).status !== 0);
     if (missing.length) die(`missing runner binaries: ${missing.join(", ")}`);
-    const required = m === "restore" ? ["EXPECTED_DATABASE", "BHS", "PREPROD_DOCS", "DUMP_BUCKET"] : ["BHS"];
+    const required = m === "restore" ? ["EXPECTED_DATABASE", "BHS", "PROD_DOCS", "PREPROD_DOCS", "DUMP_BUCKET"] : ["BHS"];
     const absent = required.filter((k) => !process.env[k]);
     if (absent.length) die(`missing CI parameters: ${absent.join(", ")}`);
     const bp = backupParams();
@@ -287,9 +320,11 @@ export function makeRestoreMode(h) {
       validateCycleId(opt("CYCLE_ID", ""));
     } catch (e) { die(e.message); }
     if (m === "restore") {
-      const prod = opt("PROD_DOCS", "");
-      if (prod && prod === req("PREPROD_DOCS")) die("PREPROD_DOCS equals PROD_DOCS — refusing to restore docs into production.");
       if (!BUCKET_RE.test(req("PREPROD_DOCS"))) die("PREPROD_DOCS invalid");
+      let forbidden;
+      try { forbidden = forbiddenDstBuckets({ prodDocs: req("PROD_DOCS"), extra: opt("BACKUP_FORBIDDEN_DST_BUCKETS", ""), backupBucket: bp.bucket }); } catch (e) { die(e.message); }
+      if (forbidden.split(",").includes(req("PREPROD_DOCS"))) die("PREPROD_DOCS is a forbidden destination (production docs or backup bucket) — refusing to restore docs there.");
+      log(`forbidden docs destinations: ${forbidden}`);
     }
     log(`MODE=${m} backup_bucket=${bp.bucket} reader_secret=${bp.readerSecret} docs_copy_secret=${bp.copySecret} ` +
       `backup_id=${backupId} allow_stale=${opt("ALLOW_STALE_BACKUP", "false")} max_age_h=${bp.maxAgeHours} (0 S3/DB credential on the runner)`);
@@ -300,6 +335,7 @@ export function makeRestoreMode(h) {
   function cmdBackupResolve() {
     section("R0 backup-resolve — Job read-only (BACKUP_ID → date D + guards + PIN)");
     if (mode() !== "restore") die("backup-resolve requires MODE=restore.");
+    assertConfirm(); // G3 before the (read-only) Job
     const bp = backupParams();
     let backupId;
     try { backupId = validateBackupIdInput(opt("BACKUP_ID", "latest"), today()); } catch (e) { die(e.message); }
@@ -317,7 +353,7 @@ export function makeRestoreMode(h) {
       timeoutSec: Number(opt("BACKUP_RESOLVE_TIMEOUT", "600")),
     });
     if (!res.ok) failWithVerdict(res, ns, JOBS.resolve, "read", "R0 backup refused");
-    const { verdict, readable } = readVerdict(ns, JOBS.resolve, "read");
+    const { verdict, readable } = readVerdict(ns, JOBS.resolve, "read", res.uid);
     if (!verdict) {
       die(readable ? "R0 — resolve Job succeeded but wrote no PIN (termination message missing)."
         : "R0 — the CI cannot read the resolve pod status (RBAC get/list pods in the preprod namespace is required for MODE=restore — see README).");
@@ -341,6 +377,7 @@ export function makeRestoreMode(h) {
   function cmdBackupList() {
     section("backup-list — Job read-only (backups available)");
     if (mode() !== "list") die("backup-list requires MODE=list.");
+    assertConfirm(); // G3 before the (read-only) Job, list included
     const bp = backupParams();
     const ns = bp.jd.NAMESPACE;
     const res = dispatch({
@@ -355,7 +392,7 @@ export function makeRestoreMode(h) {
       timeoutSec: Number(opt("BACKUP_LIST_TIMEOUT", "600")),
     });
     if (!res.ok) failWithVerdict(res, ns, JOBS.list, "read", "backup-list failed");
-    const { verdict, readable } = readVerdict(ns, JOBS.list, "read");
+    const { verdict, readable } = readVerdict(ns, JOBS.list, "read", res.uid);
     if (!verdict) die(readable ? "backup-list wrote no verdict." : "the CI cannot read the list pod status (RBAC get/list pods — see README).");
     let listing;
     try { listing = validateListing(verdict); } catch (e) { die(e.message); }
@@ -399,7 +436,9 @@ export function makeRestoreMode(h) {
     const bp = backupParams();
     const ns = bp.jd.NAMESPACE;
     const dst = req("PREPROD_DOCS");
-    const forbidden = [opt("PROD_DOCS", ""), opt("BACKUP_FORBIDDEN_DST_BUCKETS", "")].filter(Boolean).join(",");
+    let forbidden;
+    try { forbidden = forbiddenDstBuckets({ prodDocs: opt("PROD_DOCS", ""), extra: opt("BACKUP_FORBIDDEN_DST_BUCKETS", ""), backupBucket: bp.bucket }); } catch (e) { die(e.message); }
+    if (forbidden.split(",").includes(dst)) die(`PREPROD_DOCS (${dst}) is a forbidden destination (production docs or backup bucket).`);
     const jobName = step === "docs" ? JOBS.docs : JOBS.recon;
     const res = dispatch({
       tmpl: "docs-restore-backup-job.tmpl.yaml",
@@ -415,7 +454,7 @@ export function makeRestoreMode(h) {
       },
       timeoutSec: Number(opt(step === "docs" ? "DOCS_RESTORE_TIMEOUT" : "RECON_TIMEOUT", step === "docs" ? "7500" : "900")),
     });
-    const { verdict } = readVerdict(ns, jobName, "docs");
+    const { verdict } = readVerdict(ns, jobName, "docs", res.uid);
     return { res, verdict, pin, dst, ns, jobName };
   }
 

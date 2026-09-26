@@ -29,9 +29,10 @@ import { join } from "node:path";
 import process from "node:process";
 
 import {
-  assertScriptEmbeddable, assertYamlSafeVars, basculeMode, formatBackupTable, indentBlock, JOBS, parseTermination,
-  pickTerminationMessage, safeReason, validateBackupIdInput, validateCycleId, validateListing, validatePin,
+  assertScriptEmbeddable, assertYamlSafeVars, basculeMode, forbiddenDstBuckets, formatBackupTable, FROZEN_PROD_DOCS_BUCKETS, indentBlock, JOBS,
+  parseTermination, pickTerminationMessage, podOfJob, safeReason, validateBackupIdInput, validateCycleId, validateListing, validatePin,
 } from "./restore-mode.mjs";
+import { buildFailureSummary } from "./bascule.mjs";
 import {
   assertServedZoneIds, buildImmoLeg, combine, immoVerdict, mapOutcome, normalizeRawRefs, readServedIdsSha,
   servedIdsArtifactName, cycleLegArtifactName, sha256FileLine, refsFromTsv,
@@ -251,11 +252,26 @@ eq("chooseDate — latest → latestComplete (not the newest partial)",
   const inv = { createdAt: "2026-09-26T03:40:00Z", objects: [{ key: "x", size: 1, state: "pending" }, { key: "y", size: 2, etag: '"e"', state: "backed-up" }] };
   const r = br.reconInventory(inv, new Map([["y", { Size: 2 }], ["z", { Size: 3 }]]));
   eq("reconInventory — not-in-backup fails, extra tolerated", [r.ok, r.notInBackup, r.missing, r.extra], [false, 1, 0, 1]);
+  // `excluded` (prefix the backup skips on purpose, backup still complete): not
+  // required, counted apart — like the backup; pending/failed still block.
+  const invEx = { createdAt: "2026-09-26T03:40:00Z", objects: [{ key: "archive/2019/big.pdf", size: 9, state: "excluded" },
+    { key: "y", size: 2, etag: '"e"', backupEtag: '"e"', state: "backed-up" }] };
+  const rEx = br.reconInventory(invEx, new Map([["y", { Size: 2, ETag: '"e"' }]]));
+  eq("reconInventory — excluded entry not required, counted apart", [rEx.ok, rEx.excluded, rEx.notInBackup, rEx.missing, rEx.extra], [true, 1, 0, 0, 0]);
+  const pEx = br.planDocsRestore({ inventory: invEx, versionsIndex: new Map(), destIndex: new Map([["y", { Size: 2, ETag: '"e"' }]]) });
+  eq("planDocsRestore — excluded entry skipped (not a refusal), counted apart", [pEx.excluded, pEx.notInBackup, pEx.unresolved, pEx.upToDate, pEx.toCopy.length], [1, 0, 0, 1, 0]);
+  const pPend = br.planDocsRestore({ inventory: { ...invEx, objects: [{ key: "p", size: 1, state: "pending" }] }, versionsIndex: new Map(), destIndex: new Map() });
+  eq("planDocsRestore — pending entry still blocks (notInBackup)", [pPend.notInBackup, pPend.excluded], [1, 0]);
   const big = br.buildListing({ bucket: B, latest: null, manifests: Array.from({ length: 80 }, (_, k) => ({ date: `2026-0${1 + (k % 9)}-${String(1 + (k % 28)).padStart(2, "0")}`, status: "complete", pg: { sizeBytes: 1, sha256: "a".repeat(64) } })), maxBytes: 1500 });
   ok("buildListing — truncated to fit the termination message", big.truncated && Buffer.byteLength(JSON.stringify(big)) <= 1500);
 }
 throwsCode("readConfig — docs into the backup bucket refused", () => br.readConfig(baseEnv({ BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c", DST_BUCKET: B }), "docs"), 2);
 throwsCode("readConfig — docs into a production bucket refused", () => br.readConfig(baseEnv({ BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c", DST_BUCKET: PROD, FORBIDDEN_DST_BUCKETS: PROD }), "docs"), 2);
+throwsCode("readConfig — empty FORBIDDEN_DST_BUCKETS refused (never 'nothing forbidden')", () => br.readConfig(baseEnv({ BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), COPIER_ACCESS_KEY: "c", COPIER_SECRET_KEY: "c", DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: " , " }), "recon"), 2);
+eq("forbiddenDstBuckets — frozen prod docs + PROD_DOCS + backup bucket, deduplicated", forbiddenDstBuckets({ prodDocs: PROD, backupBucket: B }), `${PROD},${B}`);
+eq("forbiddenDstBuckets — another PROD_DOCS keeps the frozen one", forbiddenDstBuckets({ prodDocs: "other-prod-docs", backupBucket: B, extra: "x-1,  " }), `${FROZEN_PROD_DOCS_BUCKETS[0]},other-prod-docs,${B},x-1`);
+throws("forbiddenDstBuckets — PROD_DOCS empty refused (MODE=restore)", () => forbiddenDstBuckets({ prodDocs: "", backupBucket: B }));
+throws("forbiddenDstBuckets — malformed name refused", () => forbiddenDstBuckets({ prodDocs: PROD, backupBucket: B, extra: 'a"b' }));
 throwsCode("readConfig — reader Secret bucket ≠ expected refused", () => br.readConfig(baseEnv({ BACKUP_BUCKET: "other-bucket" }), "resolve"), 2);
 throwsCode("readConfig — invalid PIN refused", () => br.readConfig(baseEnv({ BACKUP_DATE: D, PIN_MANIFEST_SHA256: "nope", PIN_PG_SHA256: "a".repeat(64) }), "fetch-dump"), 2);
 
@@ -387,12 +403,35 @@ ok("assertYamlSafeVars — BR_SCRIPT skipped", assertYamlSafeVars({ BR_SCRIPT: '
 throws("assertScriptEmbeddable — placeholder pattern refused", () => assertScriptEmbeddable("x ${NAMESPACE} y"));
 ok("safeReason — no workflow command, one line", !/::|\n/.test(safeReason("a\n::error::x")));
 {
+  const U1 = "11111111-1111-4111-8111-111111111111";
+  const U0 = "00000000-0000-4000-8000-000000000000";
+  const own = (uid) => [{ kind: "Job", name: "radar-db-restore-backup", uid, controller: true }];
   const pods = { items: [
-    { metadata: { creationTimestamp: "2026-09-26T10:00:00Z" }, status: { initContainerStatuses: [{ name: "fetch", state: { terminated: { message: '{"ok":false,"reason":"old"}' } } }] } },
-    { metadata: { creationTimestamp: "2026-09-26T11:00:00Z" }, status: { initContainerStatuses: [{ name: "fetch", state: { terminated: { message: '{"ok":true,"step":"fetch-dump"}' } } }], containerStatuses: [{ name: "restore", state: { running: {} } }] } },
+    { metadata: { creationTimestamp: "2026-09-26T10:00:00Z", ownerReferences: own(U1) }, status: { initContainerStatuses: [{ name: "fetch", state: { terminated: { message: '{"ok":false,"reason":"old"}' } } }] } },
+    { metadata: { creationTimestamp: "2026-09-26T11:00:00Z", ownerReferences: own(U1) }, status: { initContainerStatuses: [{ name: "fetch", state: { terminated: { message: '{"ok":true,"step":"fetch-dump"}' } } }], containerStatuses: [{ name: "restore", state: { running: {} } }] } },
+    // pod of a PREVIOUS instance of the same Job name (deleted, still listed), newest of all
+    { metadata: { creationTimestamp: "2026-09-26T12:00:00Z", ownerReferences: own(U0), labels: { "batch.kubernetes.io/controller-uid": U0 } }, status: { initContainerStatuses: [{ name: "fetch", state: { terminated: { message: '{"ok":true,"step":"stale"}' } } }] } },
   ] };
-  eq("pickTerminationMessage — newest pod, init container", parseTermination(pickTerminationMessage(pods, "fetch")), { ok: true, step: "fetch-dump" });
-  eq("pickTerminationMessage — none", pickTerminationMessage(pods, "restore"), null);
+  eq("pickTerminationMessage — newest pod OF THIS Job instance, init container", parseTermination(pickTerminationMessage(pods, "fetch", U1)), { ok: true, step: "fetch-dump" });
+  eq("pickTerminationMessage — a pod of an older instance is never read", parseTermination(pickTerminationMessage({ items: [pods.items[2]] }, "fetch", U1)), null);
+  eq("pickTerminationMessage — no Job uid ⇒ nothing read (no guess)", pickTerminationMessage(pods, "fetch", null), null);
+  eq("pickTerminationMessage — none", pickTerminationMessage(pods, "restore", U1), null);
+  ok("podOfJob — controller-uid label accepted (legacy or batch.kubernetes.io)", podOfJob({ metadata: { labels: { "controller-uid": U1 } } }, U1) &&
+    podOfJob({ metadata: { labels: { "batch.kubernetes.io/controller-uid": U1 } } }, U1) && !podOfJob({ metadata: { labels: { "controller-uid": U0 } } }, U1));
+}
+{
+  const common0 = { mode: "restore", backupDate: D, rollbackKey: "rollback/preprod-rollback-2026-09-26T12-00-00-000Z.dump", dumpBucket: "radar-immobilier-backups-preprod",
+    expectedDatabase: "radar", bhs: "s3.bhs.io.cloud.ovh.net", namespace: "radar-immobilier-preprod" };
+  const s1 = buildFailureSummary({ ...common0, outcomes: { migrate: "success", docs: "failure", recon: "skipped", flip: "skipped", unquiesce: "success", smoke: "success" } });
+  ok("failure-summary — restore, docs failed: 'back in service on a database at day D, docs/flip INCOMPLETE'",
+    s1.head === `Preprod back in service on a database at day D = ${D} (backup) — docs/flip INCOMPLETE`);
+  ok("failure-summary — G1 rollback procedure with the exact key (quiesce → restore DUMP_PREFIX=<key> → unquiesce)",
+    s1.markdown.includes(`DUMP_PREFIX=${common0.rollbackKey} T1_EPOCH=0 DUMP_KEY_ASSERT_DB=0 node deploy/ci/bascule-preprod/bascule.mjs restore`) &&
+    s1.markdown.indexOf("bascule.mjs quiesce") < s1.markdown.indexOf("bascule.mjs restore") && s1.markdown.includes(`s3://radar-immobilier-backups-preprod/${common0.rollbackKey}`));
+  const s2 = buildFailureSummary({ ...common0, mode: "chain", backupDate: null, t1: "2026-09-26T03:17:00.000Z", outcomes: { unquiesce: "failure" } });
+  ok("failure-summary — un-quiesce failed ⇒ 'NOT back in service'", /NOT back in service \(un-quiesce: failure\)/.test(s2.head) && /T1 2026-09-26T03:17:00.000Z/.test(s2.head));
+  const s3 = buildFailureSummary({ ...common0, rollbackKey: null, outcomes: { docs: "success", recon: "success", flip: "success", unquiesce: "success", smoke: "failure" } });
+  ok("failure-summary — after the flip / no rollback key recorded", /failed after the flip/.test(s3.head) && /No G1 rollback key recorded/.test(s3.markdown));
 }
 throws("validatePin — bad sha refused", () => validatePin({ ok: true, date: D, manifestSha256: "x", pgSha256: "a".repeat(64), pgSizeBytes: 1, backupId: "latest" }));
 throws("validatePin — not ok refused", () => validatePin({ ok: false }));
@@ -530,14 +569,35 @@ if (!YAML) console.log("  info yaml package not resolvable — YAML parse checks
   f.cleanup();
   ok("writePrivateManifest — cleanup removes the file", !existsSync(f.file));
   ok("workflow — bascule job in environment radar-bascule", /\n {4}environment: radar-bascule\n/.test(wf));
-  const fill = wf.match(/- name: S3\.0 docs-sync Secret[^\n]*\n((?: {8}.*\n)+)/);
-  ok("workflow — fill step: secrets via env:, run without interpolation", !!fill && /RADAR_DOCS_SYNC_ACCESS_KEY: \$\{\{ secrets\.RADAR_DOCS_SYNC_ACCESS_KEY \}\}/.test(fill[1]) &&
-    /run: node "\$CLI" docs-secret-fill\n/.test(fill[1]));
+  const fill = wf.match(/- name: docs-sync Secret — rewrite from GitHub[^\n]*\n((?: {8}.*\n)+)/);
+  ok("workflow — fill step (chain, not DRY): secrets via env:, run without interpolation", !!fill &&
+    /if: \$\{\{ env\.MODE == 'chain' && !inputs\.DRY_RUN \}\}/.test(fill[1]) &&
+    /RADAR_DOCS_SYNC_ACCESS_KEY: \$\{\{ secrets\.RADAR_DOCS_SYNC_ACCESS_KEY \}\}/.test(fill[1]) && /run: node "\$CLI" docs-secret-fill\n/.test(fill[1]));
+  const check = wf.match(/- name: docs-sync Secret — check only[^\n]*\n((?: {8}.*\n)+)/);
+  ok("workflow — DRY chain: server dry-run check only (nothing written)", !!check && /if: \$\{\{ env\.MODE == 'chain' && inputs\.DRY_RUN \}\}/.test(check[1]) &&
+    /run: node "\$CLI" docs-secret-fill --check\n/.test(check[1]));
   const fillAt = wf.indexOf('node "$CLI" docs-secret-fill');
-  ok("workflow — rewrite right before the docs copy (after migrate)", fillAt > wf.indexOf('node "$CLI" migrate') &&
-    fillAt < wf.indexOf('node "$CLI" copy-docs\n', fillAt) && fillAt < wf.indexOf('node "$CLI" docs-restore\n', fillAt));
+  ok("workflow — docs-sync Secret written BEFORE the quiesce and any destructive step (like the backup Secrets)",
+    fillAt > 0 && fillAt < wf.indexOf('node "$CLI" quiesce') && fillAt < wf.indexOf('node "$CLI" dump') && fillAt < wf.indexOf('node "$CLI" restore\n') &&
+    fillAt < wf.indexOf('node "$CLI" precheck-runs --prod'));
   ok("workflow — the Secret is NOT blanked at the end (durable credential)", !wf.includes("docs-secret-blank"));
-  ok("workflow — no RADAR_DOCS_SYNC secret in any run block", ![...wf.matchAll(/run: (.*)/g)].some((m) => /RADAR_DOCS_SYNC|secrets\./.test(m[1]) && !/KUBE_CONFIG_DATA/.test(m[1])));
+  ok("workflow — no secrets.* in any run block", ![...wf.matchAll(/run: (?:\|\n((?: {10,}.*\n?)+)|(.*))/g)].some((m) => /secrets\./.test(m[1] || m[2])));
+  ok("workflow — no ${{ github.* }} in any run block", ![...wf.matchAll(/run: (?:\|\n((?: {10,}.*\n?)+)|(.*))/g)].some((m) => /\$\{\{\s*github\./.test(m[1] || m[2])));
+  // G3 in every MODE, before any kubectl write / Secret write / Job
+  const g3At = wf.indexOf('node "$CLI" confirm');
+  ok("workflow — G3 step unconditional (every MODE), before kubectl setup, Secrets and Jobs",
+    /- name: G3 CONFIRM[^\n]*\n\s+run: node "\$CLI" confirm\n/.test(wf) && g3At > 0 && g3At < wf.indexOf("Install kubectl") &&
+    g3At < wf.indexOf('node "$CLI" backup-secrets-fill') && g3At < fillAt && g3At < wf.indexOf('node "$CLI" backup-list'));
+  ok("workflow — job budget per MODE: restore 330, else 180 (cap 360)", wf.includes("timeout-minutes: ${{ (inputs.MODE || 'chain') == 'restore' && 330 || 180 }}"));
+  ok("workflow — un-quiesce: always(), own step budget, SKIP_QUIESCE passed to the CLI", /id: unquiesce\n\s+if: \$\{\{ always\(\)[^\n]*\n\s+timeout-minutes: 15\n\s+run: node "\$CLI" unquiesce/.test(wf) &&
+    wf.includes("SKIP_QUIESCE: ${{ inputs.SKIP_QUIESCE && 'true' || 'false' }}"));
+  const qsAt = wf.indexOf("name: bascule-quiesce-state-");
+  ok("workflow — quiesce-state uploaded right after the quiesce (recovery after a job timeout)", qsAt > wf.indexOf('node "$CLI" quiesce') &&
+    qsAt < wf.indexOf('node "$CLI" dump'));
+  const fsum = wf.match(/- name: Failure after S2[^\n]*\n((?: {8}.*\n)+)/);
+  ok("workflow — failure after a successful S2 ⇒ summary step (failure(), S2 success, outcomes via env:)", !!fsum &&
+    /if: \$\{\{ failure\(\) && !inputs\.DRY_RUN && env\.MODE != 'list' && \(steps\.restore_chain\.outcome == 'success' \|\| steps\.restore_backup\.outcome == 'success'\) \}\}/.test(fsum[1]) &&
+    /run: node "\$CLI" failure-summary\n/.test(fsum[1]));
 }
 
 // ═════════════════════════════ served-ids.mjs ═════════════════════════════════
@@ -635,9 +695,14 @@ async function cliSuite() {
   const docsVerdict = { ok: true, step: "docs", date: D, copied: 2, recon: { ok: true } };
   const bin = join(tmp, "fakebin");
   mkdirSync(bin, { recursive: true });
-  const pods = (container, msg) => JSON.stringify({ items: [{ metadata: { creationTimestamp: "2026-09-26T12:00:00Z" },
+  // Every applied Job gets JOB_UID; each pod list also holds a NEWER pod of a
+  // previous instance (other uid) whose verdict must never be read.
+  const JOB_UID = "22222222-2222-4222-8222-222222222222";
+  const podOf = (uid, ts, container, msg) => ({ metadata: { creationTimestamp: ts, ownerReferences: [{ kind: "Job", uid, controller: true }] },
     status: { initContainerStatuses: container === "fetch" ? [{ name: "fetch", state: { terminated: { message: msg } } }] : [],
-      containerStatuses: container === "fetch" ? [] : [{ name: container, state: { terminated: { message: msg } } }] } }] });
+      containerStatuses: container === "fetch" ? [] : [{ name: container, state: { terminated: { message: msg } } }] } });
+  const pods = (container, msg) => JSON.stringify({ items: [podOf(JOB_UID, "2026-09-26T12:00:00Z", container, msg),
+    podOf("99999999-9999-4999-8999-999999999999", "2026-09-26T13:00:00Z", container, '{"ok":false,"reason":"stale pod of a previous instance"}')] });
   writeFileSync(join(tmp, "pods-read.json"), pods("read", JSON.stringify(resolved.t)));
   writeFileSync(join(tmp, "pods-fetch.json"), pods("fetch", JSON.stringify({ ok: true, step: "fetch-dump", date: D })));
   writeFileSync(join(tmp, "pods-docs.json"), pods("docs", JSON.stringify(docsVerdict)));
@@ -659,6 +724,7 @@ async function cliSuite() {
     '  *"get cronjob"*"-o name"*) printf "cronjob/x" ;;',
     '  *"get jobs -o json"*) printf \'{"items":[]}\' ;;',
     '  *"get job "*"jsonpath={.status}"*) printf \'{"succeeded":1}\' ;;',
+    `  *"get job "*"jsonpath={.metadata.uid}"*) printf "${JOB_UID}" ;;`,
     `  *"job-name=${JOBS.resolve}"*) cat "${join(tmp, "pods-read.json")}" ;;`,
     `  *"job-name=${JOBS.db}"*) cat "${join(tmp, "pods-fetch.json")}" ;;`,
     `  *"job-name=${JOBS.docs}"*|*"job-name=${JOBS.recon}"*) cat "${join(tmp, "pods-docs.json")}" ;;`,
@@ -697,7 +763,11 @@ async function cliSuite() {
   ok("CLI restore-backup — never a live dump / PROD kubeconfig", !/radar-db-backup-prod|--kubeconfig/.test(readFileSync(kubectlLog, "utf8")));
   eq("CLI docs-restore — exit 0", cli("docs-restore").status, 0);
   const rdoc = readFileSync(join(work, `${JOBS.docs}.rendered.yaml`), "utf8");
-  ok("CLI docs-restore — prod bucket forbidden, preprod target, grant", rdoc.includes(`FORBIDDEN_DST_BUCKETS, value: "${PROD}"`) && rdoc.includes(`DST_BUCKET, value: "${DST}"`) && rdoc.includes("user-x"));
+  ok("CLI docs-restore — prod docs + backup bucket forbidden, preprod target, grant", rdoc.includes(`FORBIDDEN_DST_BUCKETS, value: "${PROD},${B}"`) && rdoc.includes(`DST_BUCKET, value: "${DST}"`) && rdoc.includes("user-x"));
+  const noProd = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "preflight-backup"], { env: { ...env, PROD_DOCS: "" }, encoding: "utf8" });
+  ok("CLI preflight-backup (restore) — PROD_DOCS absent ⇒ refused", noProd.status === 1 && /PROD_DOCS/.test(noProd.stdout));
+  const intoProd = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "preflight-backup"], { env: { ...env, PROD_DOCS: "some-other-prod", PREPROD_DOCS: PROD }, encoding: "utf8" });
+  ok("CLI preflight-backup (restore) — PREPROD_DOCS = frozen prod docs bucket ⇒ refused", intoProd.status === 1 && /forbidden destination/.test(intoProd.stdout));
   eq("CLI recon-backup — exit 0 + sentinel", [cli("recon-backup").status, JSON.parse(readFileSync(join(work, "recon.ok.json"), "utf8")).backupDate], [0, D]);
   const flip = cli("flip");
   eq("CLI flip — G4 = recon vs inventory(D) re-run, exit 0", flip.status, 0);
@@ -713,6 +783,35 @@ async function cliSuite() {
     !klog.includes("f".repeat(40)) && !secretFill.stdout.includes("f".repeat(40)));
   const noSecret = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "docs-secret-fill"], { env, encoding: "utf8" });
   ok("CLI docs-secret-fill — GitHub secret absent ⇒ fail-closed", noSecret.status === 1 && /missing or malformed/.test(noSecret.stdout));
+  const before = readFileSync(kubectlLog, "utf8").length;
+  const check = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "docs-secret-fill", "--check"], { env: { ...env, RADAR_DOCS_SYNC_ACCESS_KEY: "0".repeat(32), RADAR_DOCS_SYNC_SECRET_KEY: "f".repeat(40) }, encoding: "utf8" });
+  const klogCheck = readFileSync(kubectlLog, "utf8").slice(before);
+  ok("CLI docs-secret-fill --check (DRY) — server dry-run only, no write", check.status === 0 && /replace --dry-run=server -f/.test(klogCheck) && !/replace -f/.test(klogCheck));
+  // G3 in every MODE, before any Secret write or Job (list included)
+  const g3env = { ...env, CONFIRM: "iso-prod-2020-01-01" };
+  const beforeG3 = readFileSync(kubectlLog, "utf8").length;
+  const g3list = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "preflight-backup"], { env: { ...g3env, MODE: "list" }, encoding: "utf8" });
+  const g3fill = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "backup-secrets-fill"], { env: { ...g3env, MODE: "list",
+    RADAR_BACKUP_READER_PREPROD_ACCESS_KEY: "a".repeat(32), RADAR_BACKUP_READER_PREPROD_SECRET_KEY: "b".repeat(32) }, encoding: "utf8" });
+  const g3job = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "backup-list"], { env: { ...g3env, MODE: "list" }, encoding: "utf8" });
+  const g3cmd = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "confirm"], { env: g3env, encoding: "utf8" });
+  ok("CLI G3 — stale CONFIRM refused in MODE=list: preflight, Secret write, Job, confirm step — 0 kubectl call",
+    [g3list, g3fill, g3job, g3cmd].every((r) => r.status === 1 && /GARDE G3/.test(r.stdout)) && readFileSync(kubectlLog, "utf8").length === beforeG3);
+  eq("CLI confirm — today's CONFIRM accepted", spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "confirm"], { env, encoding: "utf8" }).status, 0);
+  // un-quiesce: nothing recorded ⇒ nothing scaled (unless a declared manual quiesce)
+  const uqEnv = { ...env, BASCULE_WORKDIR: join(tmp, "uq-work"), UNQUIESCE_REPLICAS: "radar-api=2" };
+  const beforeUq = readFileSync(kubectlLog, "utf8").length;
+  const uq = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "unquiesce"], { env: uqEnv, encoding: "utf8" });
+  ok("CLI unquiesce — no quiesce recorded, SKIP_QUIESCE≠true ⇒ no-op (0 scale)", uq.status === 0 && !/scale/.test(readFileSync(kubectlLog, "utf8").slice(beforeUq)));
+  const uqManual = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "unquiesce"], { env: { ...uqEnv, SKIP_QUIESCE: "true" }, encoding: "utf8" });
+  ok("CLI unquiesce — declared manual quiesce (SKIP_QUIESCE=true) ⇒ UNQUIESCE_REPLICAS applied", uqManual.status === 0 && /scale deploy\/radar-api --replicas=2/.test(readFileSync(kubectlLog, "utf8").slice(beforeUq)));
+  // failure-summary: reads the workdir pointers of this run (PIN of D)
+  const sumFile = join(tmp, "summary.md");
+  writeFileSync(sumFile, "");
+  const fs1 = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "failure-summary"], { env: { ...env, GITHUB_STEP_SUMMARY: sumFile,
+    O_MIGRATE: "success", O_DOCS: "failure", O_RECON: "skipped", O_FLIP: "skipped", O_UNQUIESCE: "success", O_SMOKE: "success" }, encoding: "utf8" });
+  ok("CLI failure-summary — day D from the PIN, docs/flip incomplete, G1 key, written to the step summary",
+    fs1.status === 0 && readFileSync(sumFile, "utf8").includes(`day D = ${D} (backup) — docs/flip INCOMPLETE`) && /DUMP_PREFIX=rollback\/preprod-rollback-/.test(readFileSync(sumFile, "utf8")));
   const h = (c) => c.repeat(32);
   const backupFill = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "backup-secrets-fill"], { env: { ...env,
     RADAR_BACKUP_READER_PREPROD_ACCESS_KEY: h("a"), RADAR_BACKUP_READER_PREPROD_SECRET_KEY: h("b"), RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY: h("c"), RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY: h("d") }, encoding: "utf8" });

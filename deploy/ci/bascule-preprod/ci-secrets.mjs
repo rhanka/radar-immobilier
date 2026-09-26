@@ -3,8 +3,9 @@
 //
 // Owner rule (2026-09-26): no k8s watcher, no SealedSecret. Each Secret below is
 // PRE-CREATED by k8s (Opaque, no ownerReference) in radar-immobilier-preprod and
-// REWRITTEN by the bascule at every run, right before first use, from the
-// secrets of the GitHub environment `radar-bascule` (main-only):
+// REWRITTEN by the bascule at every run, BEFORE the quiesce and any destructive
+// step, from the secrets of the GitHub environment `radar-bascule` (main-only).
+// G3 (CONFIRM) is checked before any write:
 //
 //   spec                 Secret (default name)          keys ← GitHub secret
 //   docs-sync            radar-docs-src-preprod         S3_ACCESS_KEY ← RADAR_DOCS_SYNC_ACCESS_KEY
@@ -138,10 +139,18 @@ export function writePrivateManifest(manifest) {
   return { file, dir, cleanup: () => rmSync(dir, { recursive: true, force: true }) };
 }
 
-export function makeCiSecrets(h) {
-  const { log, die, section, run, jobDefaults } = h;
+// Passes of `kubectl replace` for a write (server dry-run, then the write) or a
+// check only (server dry-run: GitHub secrets well-formed, Secret pre-created,
+// RBAC get/update granted — nothing written).
+export function replacePasses(checkOnly) {
+  return checkOnly ? [["--dry-run=server"]] : [["--dry-run=server"], []];
+}
 
-  function writeSecret(spec) {
+export function makeCiSecrets(h) {
+  const { log, die, section, run, jobDefaults, assertConfirm } = h;
+
+  function writeSecret(spec, { checkOnly = false } = {}) {
+    if (typeof assertConfirm === "function") assertConfirm(); // G3 before any Secret write
     const s = SECRET_SPECS[spec];
     let values;
     let name;
@@ -160,7 +169,7 @@ export function makeCiSecrets(h) {
     });
     const tmp = writePrivateManifest(manifest);
     try {
-      for (const pass of [["--dry-run=server"], []]) {
+      for (const pass of replacePasses(checkOnly)) {
         const r = run("kubectl", ["-n", ns, "replace", ...pass, "-f", tmp.file, "-o", "name"], { capture: true, allowFail: true });
         if (r.status !== 0) {
           const first = redact(String(r.stderr || "").split("\n")[0], values).slice(0, 240);
@@ -170,12 +179,16 @@ export function makeCiSecrets(h) {
     } finally {
       tmp.cleanup();
     }
-    log(`${spec} OK — Secret ${ns}/${name} rewritten (keys ${Object.keys(values).join(", ")}; values never printed).`);
+    log(`${spec} OK — Secret ${ns}/${name} ${checkOnly ? "checked (server dry-run only, nothing written)" : "rewritten"} ` +
+      `(keys ${Object.keys(values).join(", ")}; values never printed).`);
   }
 
+  // MODE=chain, BEFORE the quiesce: a missing GitHub secret, Secret or RBAC fails
+  // before any destructive step. `--check` (DRY_RUN): server dry-run only.
   function cmdDocsFill() {
-    section("S3.0 docs-sync Secret — rewrite from GitHub (environment radar-bascule)");
-    writeSecret("docs-sync");
+    const checkOnly = process.argv.includes("--check");
+    section(`docs-sync Secret — ${checkOnly ? "check (DRY: server dry-run, nothing written)" : "rewrite"} from GitHub (environment radar-bascule)`);
+    writeSecret("docs-sync", { checkOnly });
   }
 
   function cmdBackupFill() {
