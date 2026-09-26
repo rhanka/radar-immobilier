@@ -1,0 +1,252 @@
+# =============================================================================
+# radar-backup-daily — DAILY PROD BACKUP (PostgreSQL + docs S3), ns radar-immobilier.
+#
+# A real backup, independent of the bascule: dated, retained, restorable by date,
+# in the DEDICATED bucket radar-immobilier-backup (versioning ON, object-lock
+# GOVERNANCE 7 d, lifecycle — provisioned by the k8s lane, see README.md).
+# NOT the bascule trigger radar-db-backup-prod (suspended by design, untouched).
+#
+# Applied on merge by .github/workflows/bascule-bundle-cd.yml, job `apply-backup`
+# (permanent SA radar-ci-bascule-prod, positive PROD pre-flight, arming var
+# BACKUP_DAILY_CD_ENABLED). The script is the ConfigMap radar-backup-daily-script,
+# rendered by that job from deploy/ci/backup/backup-daily.cjs.
+#
+# Pod = 3 sequential steps, one coherent backup of day D (UTC), one identity each:
+#   initContainer `dump`   postgis/postgis:16-3.4 (already in the cluster), RO DB role:
+#                          manual-run window guard → DB assert → pg_dump -Fc →
+#                          pg_restore --list (readability) → schema rows from the dump
+#                          → sha256sum → pg_dumpall --globals-only --no-role-passwords.
+#   initContainer `backup` radar-api image pinned by digest (Node + @aws-sdk), identity
+#                          radar-backup-writer (Put/Get/List/multipart, NO delete right):
+#                          guards, upload + re-read sha256, docs server-side incremental
+#                          copy, inventory, manifest, latest pointer, purge PLAN.
+#   container     `purge`  same image, identity radar-backup-purger (DeleteObject only,
+#                          dated prefixes): starts only if `backup` exited 0, executes
+#                          the plan only when the day's backup is `complete`
+#                          (delete-markers only, no VersionId).
+# 0 python, 0 new image. Logs = verdict only (counts, backup keys, sha256).
+# Freshness is checked by the separate CronJob radar-backup-freshness (reader).
+#
+# NETWORK: pod label app.kubernetes.io/component=db-backup → existing netpol
+# allow-backup-to-postgres (deploy/k8s/70-networkpolicy.yaml). No netpol change.
+# Egress: S3 endpoint + optional public /health (namespace has no egress policy).
+# =============================================================================
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: radar-backup-daily
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: db-backup
+    role: daily-backup
+spec:
+  # 02:23 UTC: after the 23:17 UTC refresh, before the 04:45/05:17 UTC jobs.
+  schedule: "23 2 * * *"
+  timeZone: "Etc/UTC"
+  suspend: false
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 3600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      # One retry for transient failures (exit 1). Exit 2/3/4 = no retry (a
+      # retry would re-dump prod for nothing): refusal, purge failed after a
+      # valid manifest, manifest written as incomplete (docs errors). A
+      # `partial` backup (docs seed still pending) exits 0: not a failure.
+      backoffLimit: 1
+      activeDeadlineSeconds: 10800
+      ttlSecondsAfterFinished: 259200
+      podFailurePolicy:
+        rules:
+          - action: FailJob
+            onExitCodes:
+              operator: In
+              values: [2, 3, 4]
+          - action: Ignore
+            onPodConditions:
+              - type: DisruptionTarget
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: radar-immobilier
+            app.kubernetes.io/part-of: sentropic
+            app.kubernetes.io/component: db-backup
+            role: daily-backup
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            fsGroup: 1001
+            seccompProfile: { type: RuntimeDefault }
+          volumes:
+            - { name: work, emptyDir: { sizeLimit: 8Gi } }
+            - { name: scratch, emptyDir: { sizeLimit: 256Mi } }
+            - name: script
+              configMap:
+                name: radar-backup-daily-script
+                defaultMode: 0444
+          initContainers:
+            - name: dump
+              image: postgis/postgis:16-3.4
+              command: ["/bin/sh", "-ceu"]
+              args:
+                - |
+                  # Exit 1 = retryable (DB unreachable, dump error); exit 2 = refusal (wrong DB).
+                  # Every pg tool is `|| exit 1` so its own exit code (psql: 2 = connection)
+                  # never collides with the no-retry codes of the podFailurePolicy.
+                  umask 077
+                  # Manual-run guard: `kubectl create job --from=cronjob/...` escapes
+                  # concurrencyPolicy: Forbid. A Job not created by the CronJob controller
+                  # (name != radar-backup-daily-<n>) is refused inside the scheduled
+                  # window, BEFORE any load on the prod DB.
+                  case "${JOB_NAME:-}" in
+                    radar-backup-daily-[0-9]*) ;;
+                    *)
+                      NOW=$(date -u +%H%M)
+                      if [ "$NOW" -ge "$SCHEDULED_WINDOW_START" ] && [ "$NOW" -lt "$SCHEDULED_WINDOW_END" ]; then
+                        echo "[dump] ABORT manual run refused inside the scheduled window ${SCHEDULED_WINDOW_START}-${SCHEDULED_WINDOW_END} UTC" >&2
+                        exit 2
+                      fi
+                      ;;
+                  esac
+                  B=/usr/lib/postgresql/16/bin
+                  W=/work
+                  DATE=$(date -u +%F)
+                  STARTED_AT=$(date -u +%FT%TZ)
+                  # Positive DB assert (same guard as radar-db-backup-prod).
+                  DB=$($B/psql -X -tAc 'select current_database()' | tr -d '[:space:]')
+                  [ -n "$DB" ] || { echo "[dump] ERROR database unreachable" >&2; exit 1; }
+                  [ "$DB" = "$EXPECTED_DATABASE" ] || { echo "[dump] ABORT connected database != EXPECTED_DATABASE" >&2; exit 2; }
+                  SERVER_VERSION=$($B/psql -X -tAc "select current_setting('server_version')") || exit 1
+                  POSTGIS_VERSION=$($B/psql -X -tAc "select coalesce((select extversion from pg_extension where extname = 'postgis'), 'absent')") || exit 1
+                  $B/pg_dump --format=custom --no-owner --no-privileges --file=$W/radar.dump || exit 1
+                  FINISHED_AT=$(date -u +%FT%TZ)
+                  # Readability: the archive TOC must list (a truncated file fails here).
+                  $B/pg_restore --list $W/radar.dump > $W/radar.toc || exit 1
+                  TOC_ENTRIES=$(grep -c '^[0-9]' $W/radar.toc || true)
+                  [ "${TOC_ENTRIES:-0}" -gt 0 ] || { echo "[dump] ERROR empty TOC" >&2; exit 1; }
+                  # Schema version read from the dump itself (consistent with it by construction).
+                  $B/pg_restore --data-only --schema=drizzle --table=__drizzle_migrations --file=$W/migrations.sql $W/radar.dump 2>/dev/null || : > $W/migrations.sql
+                  (cd $W && sha256sum radar.dump > radar.dump.sha256)
+                  # Globals (roles, memberships, tablespaces) WITHOUT passwords; best-effort for a RO role.
+                  if $B/pg_dumpall --globals-only --no-role-passwords --database="$PGDATABASE" --file=$W/globals.sql 2>$W/globals.err; then
+                    GLOBALS_STATUS=ok
+                  else
+                    GLOBALS_STATUS=failed
+                    echo "[dump] WARN globals not dumped: $(head -c 160 $W/globals.err | head -n 1)" >&2
+                    rm -f $W/globals.sql
+                  fi
+                  {
+                    echo "DATE=$DATE"
+                    echo "STARTED_AT=$STARTED_AT"
+                    echo "FINISHED_AT=$FINISHED_AT"
+                    echo "DATABASE=$DB"
+                    echo "SERVER_VERSION=$SERVER_VERSION"
+                    echo "POSTGIS_VERSION=$POSTGIS_VERSION"
+                    echo "PG_DUMP_VERSION=$($B/pg_dump --version)"
+                    echo "TOC_ENTRIES=$TOC_ENTRIES"
+                    echo "GLOBALS_STATUS=$GLOBALS_STATUS"
+                  } > $W/dump.env
+                  echo "[dump] ok date=$DATE bytes=$(wc -c < $W/radar.dump) toc_entries=$TOC_ENTRIES globals=$GLOBALS_STATUS"
+              env:
+                - { name: PGHOST, value: "radar-postgres" }
+                - { name: PGPORT, value: "5432" }
+                - { name: PGCONNECT_TIMEOUT, value: "20" }
+                - { name: PGAPPNAME, value: "radar-backup-daily" }
+                # Job name (label set by the Job controller) for the manual-run guard.
+                - name: JOB_NAME
+                  valueFrom: { fieldRef: { fieldPath: "metadata.labels['job-name']" } }
+                # 02:00-05:30 UTC covers the 02:23 run and its 3 h activeDeadlineSeconds.
+                - { name: SCHEDULED_WINDOW_START, value: "0200" }
+                - { name: SCHEDULED_WINDOW_END, value: "0530" }
+                - { name: EXPECTED_DATABASE, value: "radar" }
+                # RO SELECT-only role (pg_read_all_data), provisioned by the bascule bundle.
+                - { name: PGUSER,     valueFrom: { secretKeyRef: { name: radar-db-ro-prod, key: POSTGRES_USER } } }
+                - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: radar-db-ro-prod, key: POSTGRES_PASSWORD } } }
+                - { name: PGDATABASE, valueFrom: { secretKeyRef: { name: radar-db-ro-prod, key: POSTGRES_DB } } }
+              securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: ["ALL"] } }
+              resources:
+                requests: { cpu: 100m, memory: 128Mi }
+                limits: { cpu: "1", memory: 512Mi }
+              volumeMounts:
+                - { name: work, mountPath: /work }
+                - { name: scratch, mountPath: /tmp }
+            - name: backup
+              image: "ghcr.io/rhanka/radar-api@sha256:cb2ab4ec8bde643d0b7d0799b7c737f007f1ba7dd2f54392221275e042c22ac8"
+              command: ["node", "/opt/backup/backup-daily.cjs", "backup"]
+              env:
+                - { name: NODE_PATH, value: "/workspace/node_modules" }
+                - { name: NODE_OPTIONS, value: "--max-old-space-size=512 --dns-result-order=ipv4first" }
+                - { name: AWS_EC2_METADATA_DISABLED, value: "true" }
+                # Identity radar-backup-writer (SealedSecret, k8s lane): read docs prod;
+                # backup bucket Put/Get/List/multipart. NO delete right of any kind.
+                - { name: S3_ENDPOINT,        valueFrom: { secretKeyRef: { name: radar-backup-writer, key: S3_ENDPOINT } } }
+                - { name: S3_REGION,          valueFrom: { secretKeyRef: { name: radar-backup-writer, key: S3_REGION } } }
+                - { name: S3_ACCESS_KEY,      valueFrom: { secretKeyRef: { name: radar-backup-writer, key: S3_ACCESS_KEY } } }
+                - { name: S3_SECRET_KEY,      valueFrom: { secretKeyRef: { name: radar-backup-writer, key: S3_SECRET_KEY } } }
+                - { name: BACKUP_BUCKET,      valueFrom: { secretKeyRef: { name: radar-backup-writer, key: BACKUP_BUCKET } } }
+                - { name: SOURCE_DOCS_BUCKET, valueFrom: { secretKeyRef: { name: radar-backup-writer, key: SOURCE_DOCS_BUCKET } } }
+                - { name: S3_FORCE_PATH_STYLE, value: "false" }
+                # Positive guards: the secret must point at exactly these buckets.
+                - { name: EXPECTED_BACKUP_BUCKET, value: "radar-immobilier-backup" }
+                - { name: EXPECTED_SOURCE_DOCS_BUCKET, value: "radar-immobilier-docs" }
+                - { name: EXPECTED_DATABASE, value: "radar" }
+                - { name: WORK_DIR, value: "/work" }
+                - { name: PUBLIC_HEALTH_URL, value: "https://immo.sent-tech.ca/health" }
+                - { name: DRIZZLE_JOURNAL, value: "/workspace/api/drizzle/meta/_journal.json" }
+                - { name: BACKUP_IMAGE, value: "ghcr.io/rhanka/radar-api@sha256:cb2ab4ec8bde643d0b7d0799b7c737f007f1ba7dd2f54392221275e042c22ac8" }
+                - { name: COPY_CONCURRENCY, value: "8" }
+                - { name: DOCS_COPY_BUDGET_SECONDS, value: "5400" }
+                - { name: DOCS_EXCLUDE_PREFIXES, value: "" }
+                - { name: MIN_DUMP_BYTES, value: "1048576" }
+                - { name: MIN_DUMP_RATIO, value: "0.5" }
+                - { name: MIN_DOCS_RATIO, value: "0.5" }
+                - { name: RETENTION_DAILY_DAYS, value: "7" }
+                - { name: RETENTION_WEEKLY_WEEKS, value: "4" }
+                - { name: RETENTION_MONTHLY_MONTHS, value: "6" }
+                - { name: RETENTION_MIN_KEEP, value: "7" }
+              securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: ["ALL"] } }
+              resources:
+                requests: { cpu: 50m, memory: 192Mi }
+                limits: { cpu: 500m, memory: 768Mi }
+              volumeMounts:
+                - { name: work, mountPath: /work }
+                - { name: scratch, mountPath: /tmp }
+                - { name: script, mountPath: /opt/backup, readOnly: true }
+          containers:
+            # Runs only after `dump` and `backup` exited 0. Executes WORK_DIR/purge-plan.json
+            # only when it records a complete backup; re-checks every key is dated and
+            # outside the daily window. Needs no List/Get: DeleteObject only.
+            - name: purge
+              image: "ghcr.io/rhanka/radar-api@sha256:cb2ab4ec8bde643d0b7d0799b7c737f007f1ba7dd2f54392221275e042c22ac8"
+              command: ["node", "/opt/backup/backup-daily.cjs", "purge"]
+              env:
+                - { name: NODE_PATH, value: "/workspace/node_modules" }
+                - { name: NODE_OPTIONS, value: "--max-old-space-size=128 --dns-result-order=ipv4first" }
+                - { name: AWS_EC2_METADATA_DISABLED, value: "true" }
+                # Identity radar-backup-purger (SealedSecret, k8s lane): DeleteObject without
+                # VersionId on pg/*, manifests/*, docs-inventory/* ONLY.
+                - { name: S3_ENDPOINT,   valueFrom: { secretKeyRef: { name: radar-backup-purger, key: S3_ENDPOINT } } }
+                - { name: S3_REGION,     valueFrom: { secretKeyRef: { name: radar-backup-purger, key: S3_REGION } } }
+                - { name: S3_ACCESS_KEY, valueFrom: { secretKeyRef: { name: radar-backup-purger, key: S3_ACCESS_KEY } } }
+                - { name: S3_SECRET_KEY, valueFrom: { secretKeyRef: { name: radar-backup-purger, key: S3_SECRET_KEY } } }
+                - { name: BACKUP_BUCKET, valueFrom: { secretKeyRef: { name: radar-backup-purger, key: BACKUP_BUCKET } } }
+                - { name: S3_FORCE_PATH_STYLE, value: "false" }
+                - { name: EXPECTED_BACKUP_BUCKET, value: "radar-immobilier-backup" }
+                - { name: WORK_DIR, value: "/work" }
+                - { name: RETENTION_DAILY_DAYS, value: "7" }
+                - { name: PURGE_DRY_RUN, value: "false" }
+              securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: ["ALL"] } }
+              resources:
+                requests: { cpu: 10m, memory: 64Mi }
+                limits: { cpu: 200m, memory: 256Mi }
+              volumeMounts:
+                - { name: work, mountPath: /work, readOnly: true }
+                - { name: scratch, mountPath: /tmp }
+                - { name: script, mountPath: /opt/backup, readOnly: true }
