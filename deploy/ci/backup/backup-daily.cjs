@@ -3,12 +3,19 @@
 // =============================================================================
 // backup-daily.cjs — DAILY PROD BACKUP of radar-immobilier (PostgreSQL + docs S3).
 //
-// Runs as the `backup` container of CronJob `radar-backup-daily`
-// (cronjob-backup-daily.yaml, ns radar-immobilier), mounted from the ConfigMap
-// `radar-backup-daily-script` that the CD renders from THIS file. Image =
-// radar-api (Node + @aws-sdk/client-s3) already pinned by digest in the prod
-// bundle: 0 python, 0 new image. The `dump` initContainer (postgis image:
-// pg_dump / pg_restore / pg_dumpall) ran first and left in WORK_DIR:
+// One file, three modes (argv[2]), each run with its OWN identity:
+//   backup     initContainer `backup` of CronJob radar-backup-daily — identity
+//              radar-backup-writer (Put/Get/List/multipart, NO delete right);
+//              writes the backup of the day + a purge PLAN in WORK_DIR.
+//   purge      container `purge` of the same pod, starts only after `backup`
+//              exited 0 — identity radar-backup-purger (DeleteObject only, dated
+//              prefixes); executes the plan, and only when the backup is complete.
+//   freshness  CronJob radar-backup-freshness — identity radar-backup-reader;
+//              fails when the newest backup is stale or not complete for too long.
+// Mounted from the ConfigMap `radar-backup-daily-script` that the CD renders from
+// THIS file. Image = radar-api (Node + @aws-sdk/client-s3) already pinned by
+// digest in the prod bundle: 0 python, 0 new image. The `dump` initContainer
+// (postgis image: pg_dump / pg_restore / pg_dumpall) ran first and left in WORK_DIR:
 //   radar.dump            pg_dump -Fc of the prod DB (RO role radar_db_ro_prod)
 //   radar.dump.sha256     `sha256sum` line of the dump (coreutils)
 //   dump.env              KEY=VALUE facts (DATE, versions, TOC count, globals)
@@ -24,9 +31,13 @@
 //   docs-inventory/D.json                source state at D (key, size, ETag) +
 //                                        the backup ETag/version that holds it
 //   manifests/D.json                     THE backup record of day D
-//   manifests/latest.json                pointer to the newest manifest
-// then the retention purge (RETENTION.md): delete-markers ONLY (DeleteObject
-// without VersionId) on dated objects outside the daily/weekly/monthly policy.
+//   manifests/latest.json                pointer: newest + latestComplete
+// then the retention purge (RETENTION.md), in the separate `purge` step:
+// delete-markers ONLY (DeleteObject without VersionId) on dated objects outside
+// the daily/weekly/monthly policy, planned by `backup`, executed by `purge`.
+//
+// Manifest status: complete | partial (docs seed still pending within the time
+// budget, no error — exit 0, not a failure) | incomplete (docs errors — exit 4).
 //
 // Order = DB first, docs second: prod docs are append-mostly, so every doc the
 // DB references at dump time is already listed when the docs step runs.
@@ -35,11 +46,13 @@
 // row, never a credential. SDK errors are reported as name/http-status.
 //
 // EXIT CODES (podFailurePolicy in the CronJob maps 2/3/4 to FailJob, no retry):
-//   0 complete backup (manifest status=complete, purge done)
+//   0 backup complete or partial (seed in progress) / purge done or skipped / fresh
 //   1 retryable failure before the manifest (network, S3 5xx, re-read mismatch)
-//   2 integrity/config refusal (bucket guard, versioning off, dump size anomaly)
-//   3 purge failed AFTER a complete manifest (backup is valid, do not re-dump)
-//   4 manifest written with status=partial (docs pending/failed), purge done
+//   2 refusal: bucket guard, versioning off, dump size anomaly, docs source
+//     empty or collapsed (no manifest, no purge)
+//   3 purge planning or execution failed AFTER a complete manifest (backup valid)
+//   4 manifest written with status=incomplete (docs copy/listing errors)
+//   5 freshness check failed (stale or not complete for too long)
 // =============================================================================
 
 // CommonJS on purpose: the SDK is resolved through NODE_PATH=/workspace/node_modules of
@@ -54,7 +67,7 @@ const process = require('node:process');
 const console = require('node:console');
 const { Buffer } = require('node:buffer');
 
-const EXIT = Object.freeze({ OK: 0, RETRYABLE: 1, INTEGRITY: 2, PURGE_FAILED: 3, DOCS_INCOMPLETE: 4 });
+const EXIT = Object.freeze({ OK: 0, RETRYABLE: 1, INTEGRITY: 2, PURGE_FAILED: 3, DOCS_INCOMPLETE: 4, STALE: 5 });
 
 class BackupError extends Error {
   constructor(exitCode, message) {
@@ -225,15 +238,55 @@ function checkDumpSize({ size, previousSize, minBytes, minRatio }) {
   return { ok: true, reason: null };
 }
 
+// Docs source guard: an empty or collapsed source listing (wrong bucket, broken
+// credentials returning nothing, mass deletion) must never produce a "complete"
+// backup — refuse (exit 2, no manifest, no purge).
+function checkDocsSource({ count, previousCount, minRatio }) {
+  if (!(count > 0)) return { ok: false, reason: 'docs source lists 0 objects' };
+  if (minRatio > 0 && Number(previousCount) > 0 && count < previousCount * minRatio) {
+    return { ok: false, reason: `docs source lists ${count} objects < ${minRatio} x previous ${previousCount}` };
+  }
+  return { ok: true, reason: null };
+}
+
+// Manifest status from the docs outcome (PG is always complete once we get here).
+function docsStatus(counts, docsError) {
+  if (docsError || !counts || counts.failed > 0) return 'incomplete';
+  if (counts.pending > 0) return 'partial';
+  return 'complete';
+}
+
+// Freshness of manifests/latest.json (mode `freshness`, reader identity):
+//   stale      newest backup older than maxAgeDays (default 1 = today or yesterday)
+//   not complete for too long: last complete backup (or, when none yet, the first
+//              backup) older than maxIncompleteDays (default 3)
+function checkFreshness({ today, latest, maxAgeDays = 1, maxIncompleteDays = 3 }) {
+  if (!latest || !isValidDate(latest.date)) return { ok: false, reasons: ['no valid manifests/latest.json'] };
+  const t = dayNumber(today);
+  const reasons = [];
+  const age = t - dayNumber(latest.date);
+  if (age > maxAgeDays) reasons.push(`newest backup ${latest.date} is ${age} days old (max ${maxAgeDays})`);
+  const lc = latest.latestComplete && latest.latestComplete.date;
+  const since = isValidDate(lc) ? lc : latest.firstBackupDate;
+  if (!isValidDate(since)) reasons.push('no complete backup recorded and no first backup date');
+  else if (t - dayNumber(since) > maxIncompleteDays) {
+    reasons.push(isValidDate(lc)
+      ? `last complete backup ${lc} is ${t - dayNumber(lc)} days old (max ${maxIncompleteDays})`
+      : `no complete backup since the first one (${since}, max ${maxIncompleteDays} days)`);
+  }
+  return { ok: reasons.length === 0, reasons, age };
+}
+
 // ── docs planning ────────────────────────────────────────────────────────────
-// Up to date in the backup = same Size AND (same ETag OR backup copy written at
-// or after the last source write). ETag alone is not enough: a server-side copy
-// of a multipart source gets a different ETag. LastModified catches a source
-// object rewritten under the same name (its LastModified moves past the copy).
+// Up to date in the backup = same Size AND (same ETag OR backup copy written
+// strictly after the last source write). ETag alone is not enough: a server-side
+// copy of a multipart source gets a different ETag. LastModified catches a
+// source object rewritten under the same name (its LastModified moves past the
+// copy); strict `>` recopies on a same-second tie (safe direction).
 function upToDate(src, dst) {
   return !!dst && Number(dst.Size) === Number(src.Size) &&
     (dst.ETag === src.ETag ||
-      (!!dst.LastModified && !!src.LastModified && new Date(dst.LastModified).getTime() >= new Date(src.LastModified).getTime()));
+      (!!dst.LastModified && !!src.LastModified && new Date(dst.LastModified).getTime() > new Date(src.LastModified).getTime()));
 }
 function planDocs(srcObjs, dstIndex, excludePrefixes) {
   const fresh = []; const todo = []; const excluded = [];
@@ -280,7 +333,8 @@ function buildInventory({ date, createdAt, sourceBucket, backupBucket, excludePr
 }
 
 // ── config ───────────────────────────────────────────────────────────────────
-function readConfig(env) {
+// mode: backup (writer: needs SOURCE_DOCS_BUCKET) | purge (purger) | freshness (reader).
+function readConfig(env, mode = 'backup') {
   const req = (name) => {
     const v = String(env[name] || '').trim();
     if (!v) throw new BackupError(EXIT.INTEGRITY, `missing ${name}`);
@@ -299,8 +353,9 @@ function readConfig(env) {
     forcePathStyle: String(env.S3_FORCE_PATH_STYLE || 'false').trim() === 'true',
     accessKeyId: req('S3_ACCESS_KEY'),
     secretAccessKey: req('S3_SECRET_KEY'),
+    mode,
     backupBucket: req('BACKUP_BUCKET'),
-    sourceBucket: req('SOURCE_DOCS_BUCKET'),
+    sourceBucket: mode === 'backup' ? req('SOURCE_DOCS_BUCKET') : String(env.SOURCE_DOCS_BUCKET || '').trim(),
     expectedBackupBucket: String(env.EXPECTED_BACKUP_BUCKET || '').trim(),
     expectedSourceBucket: String(env.EXPECTED_SOURCE_DOCS_BUCKET || '').trim(),
     expectedDatabase: String(env.EXPECTED_DATABASE || 'radar').trim(),
@@ -313,6 +368,7 @@ function readConfig(env) {
     excludePrefixes: parsePrefixes(env.DOCS_EXCLUDE_PREFIXES),
     minDumpBytes: num('MIN_DUMP_BYTES', MIB, { min: 1 }),
     minDumpRatio: num('MIN_DUMP_RATIO', 0.5, { min: 0, integer: false }),
+    minDocsRatio: num('MIN_DOCS_RATIO', 0.5, { min: 0, integer: false }),
     multipartThreshold: num('MULTIPART_THRESHOLD_BYTES', 4096 * MIB, { min: 5 * MIB }),
     partSize: num('MULTIPART_PART_BYTES', 64 * MIB, { min: 5 * MIB }),
     retention: {
@@ -322,17 +378,23 @@ function readConfig(env) {
       minKeep: num('RETENTION_MIN_KEEP', 7, { min: 1 }),
     },
     purgeDryRun: String(env.PURGE_DRY_RUN || 'false').trim() === 'true',
+    freshness: {
+      maxAgeDays: num('FRESHNESS_MAX_AGE_DAYS', 1, { min: 0 }),
+      maxIncompleteDays: num('FRESHNESS_MAX_INCOMPLETE_DAYS', 3, { min: 0 }),
+    },
   };
   if (cfg.minDumpRatio >= 1) throw new BackupError(EXIT.INTEGRITY, 'invalid MIN_DUMP_RATIO (must be < 1)');
+  if (cfg.minDocsRatio >= 1) throw new BackupError(EXIT.INTEGRITY, 'invalid MIN_DOCS_RATIO (must be < 1)');
   return cfg;
 }
 // Positive bucket guard (same idea as EXPECTED_DATABASE): a mis-sealed secret
 // must never make this job write into the docs bucket or read the wrong one.
 function assertBuckets(cfg) {
-  if (cfg.backupBucket === cfg.sourceBucket) throw new BackupError(EXIT.INTEGRITY, 'BACKUP_BUCKET equals SOURCE_DOCS_BUCKET');
   if (cfg.expectedBackupBucket && cfg.backupBucket !== cfg.expectedBackupBucket) {
     throw new BackupError(EXIT.INTEGRITY, 'BACKUP_BUCKET differs from EXPECTED_BACKUP_BUCKET');
   }
+  if (cfg.mode !== 'backup') return;
+  if (cfg.backupBucket === cfg.sourceBucket) throw new BackupError(EXIT.INTEGRITY, 'BACKUP_BUCKET equals SOURCE_DOCS_BUCKET');
   if (cfg.expectedSourceBucket && cfg.sourceBucket !== cfg.expectedSourceBucket) {
     throw new BackupError(EXIT.INTEGRITY, 'SOURCE_DOCS_BUCKET differs from EXPECTED_SOURCE_DOCS_BUCKET');
   }
@@ -340,11 +402,10 @@ function assertBuckets(cfg) {
 
 // ── manifest ─────────────────────────────────────────────────────────────────
 function buildManifest({ date, startedAt, completedAt, cfg, pg, schema, code, docs, tool }) {
-  const docsOk = docs.status === 'complete';
   return {
     format: 'radar-backup-manifest/v1',
     date,
-    status: docsOk ? 'complete' : 'partial',
+    status: docs.status, // complete | partial | incomplete (PG is complete at this point)
     startedAt,
     completedAt,
     backupBucket: cfg.backupBucket,
@@ -352,11 +413,17 @@ function buildManifest({ date, startedAt, completedAt, cfg, pg, schema, code, do
     schema,
     code,
     docs,
-    retention: { ...cfg.retention, mechanism: 'delete-marker purge of dated folders + bucket lifecycle (RETENTION.md)' },
+    retention: { ...cfg.retention, mechanism: 'delete-marker purge of dated folders (purger identity) + bucket lock/lifecycle (RETENTION.md)' },
     tool,
   };
 }
-function buildLatestPointer(manifest, manifestKey, manifestSha256) {
+// latestComplete / firstBackupDate carry over from the previous pointer so the
+// freshness check can tell "seed in progress since D" from "complete yesterday".
+function buildLatestPointer(manifest, manifestKey, manifestSha256, previous) {
+  const prev = previous && typeof previous === 'object' ? previous : {};
+  const latestComplete = manifest.status === 'complete'
+    ? { date: manifest.date, manifestKey }
+    : (prev.latestComplete && isValidDate(prev.latestComplete.date) ? prev.latestComplete : null);
   return {
     format: 'radar-backup-latest/v1',
     date: manifest.date,
@@ -366,7 +433,10 @@ function buildLatestPointer(manifest, manifestKey, manifestSha256) {
     pgKey: manifest.pg.key,
     pgSha256: manifest.pg.sha256,
     pgSizeBytes: manifest.pg.sizeBytes,
+    docsObjects: Number.isFinite(manifest.docs.objects) ? manifest.docs.objects : (prev.docsObjects || null),
     inventoryKey: manifest.docs.inventoryKey || null,
+    latestComplete,
+    firstBackupDate: isValidDate(prev.firstBackupDate) ? prev.firstBackupDate : manifest.date,
     updatedAt: manifest.completedAt,
   };
 }
@@ -524,9 +594,9 @@ async function readOptional(file) {
 }
 
 // ── docs step ────────────────────────────────────────────────────────────────
-async function backupDocs(ctx, date) {
+// srcObjs = the source listing taken (and guarded) before any write.
+async function backupDocs(ctx, date, srcObjs) {
   const { cfg, log } = ctx;
-  const srcObjs = await listAll(ctx, cfg.sourceBucket, undefined);
   let dstIndex = new Map();
   let versionIds = 'list-versions';
   try {
@@ -570,8 +640,10 @@ async function backupDocs(ctx, date) {
   return { inventory, copied: copied.size, alreadyUpToDate: plan.fresh.length, budgetHit, versionIds };
 }
 
-// ── purge step (delete-markers only) ─────────────────────────────────────────
-async function purgeRetention(ctx, today) {
+// ── retention: PLAN (backup step, writer: list only) ─────────────────────────
+const PLAN_FILE = 'purge-plan.json';
+const PLAN_FORMAT = 'radar-backup-purge-plan/v1';
+async function planPurge(ctx, today) {
   const { cfg } = ctx;
   const byDate = new Map();
   const complete = new Set();
@@ -584,26 +656,98 @@ async function purgeRetention(ctx, today) {
       if (c.kind === 'manifest') complete.add(c.date);
     }
   }
-  if (!complete.has(today)) throw new BackupError(EXIT.PURGE_FAILED, 'purge refused: manifest of today is not listed');
+  if (!complete.has(today)) throw new BackupError(EXIT.PURGE_FAILED, 'purge plan refused: manifest of today is not listed');
   const plan = planRetention({ today, dates: [...byDate.keys()], completeDates: [...complete], ...cfg.retention });
-  const t = dayNumber(today);
-  for (const d of plan.purge) {
-    if (t - dayNumber(d) < cfg.retention.dailyDays) throw new BackupError(EXIT.PURGE_FAILED, `purge refused: ${d} is inside the daily window`);
+  return {
+    keptDates: plan.keep.length,
+    purgedDates: plan.purge,
+    keys: plan.purge.flatMap((d) => byDate.get(d)).sort(),
+  };
+}
+
+// Validation the PURGE step applies to the plan before deleting anything. The
+// plan comes from the writer step of the same pod; the purger re-checks it with
+// its own retention floor (defence in depth).
+function validatePurgePlan(plan, { today, dailyDays }) {
+  if (!plan || plan.format !== PLAN_FORMAT) throw new BackupError(EXIT.PURGE_FAILED, 'purge refused: no valid purge plan (backup step incomplete)');
+  if (!isValidDate(plan.date)) throw new BackupError(EXIT.PURGE_FAILED, 'purge refused: plan date invalid');
+  if (Math.abs(dayNumber(today) - dayNumber(plan.date)) > 1) throw new BackupError(EXIT.PURGE_FAILED, 'purge refused: plan is not from this run');
+  if (plan.backupStatus !== 'complete') return { run: false, keys: [] };
+  if (!Array.isArray(plan.keys)) throw new BackupError(EXIT.PURGE_FAILED, 'purge refused: plan keys missing');
+  const t = dayNumber(plan.date);
+  for (const key of plan.keys) {
+    const c = typeof key === 'string' ? classifyKey(key) : null;
+    if (!c) throw new BackupError(EXIT.PURGE_FAILED, 'purge refused: plan holds a non-dated key');
+    if (t - dayNumber(c.date) < dailyDays) throw new BackupError(EXIT.PURGE_FAILED, `purge refused: ${c.date} is inside the daily window`);
+  }
+  return { run: true, keys: plan.keys };
+}
+
+// ── retention: EXECUTE (purge step, purger identity: DeleteObject only) ──────
+async function runPurge({ env, sdk, s3, now = Date.now, log = console.log }) {
+  const cfg = readConfig(env, 'purge');
+  assertBuckets(cfg);
+  const today = new Date(now()).toISOString().slice(0, 10);
+  const text = await readOptional(path.join(cfg.workDir, PLAN_FILE));
+  let plan = null;
+  try { plan = text === null ? null : JSON.parse(text); } catch { plan = null; }
+  const v = validatePurgePlan(plan, { today, dailyDays: cfg.retention.dailyDays });
+  if (!v.run) {
+    log(`PURGE SKIPPED date=${plan.date} backup.status=${plan.backupStatus} (purge runs only after a complete backup)`);
+    return { exitCode: EXIT.OK, deleteMarkers: 0, skipped: true };
   }
   let deleteMarkers = 0;
-  for (const d of plan.purge) {
-    for (const Key of byDate.get(d)) {
-      // NO VersionId: a delete-marker; the locked version stays until lifecycle expiry.
-      if (!cfg.purgeDryRun) await ctx.s3.send(new ctx.sdk.DeleteObjectCommand({ Bucket: cfg.backupBucket, Key }));
-      deleteMarkers += 1;
+  for (const Key of v.keys) {
+    // NO VersionId: a delete-marker; the locked version stays until lifecycle expiry.
+    if (!cfg.purgeDryRun) {
+      try {
+        await s3.send(new sdk.DeleteObjectCommand({ Bucket: cfg.backupBucket, Key }));
+      } catch (e) {
+        throw new BackupError(EXIT.PURGE_FAILED, `purge failed after ${deleteMarkers} delete-markers: ${errName(e)}`);
+      }
     }
+    deleteMarkers += 1;
   }
-  return { keptDates: plan.keep.length, purgedDates: plan.purge, deleteMarkers, dryRun: cfg.purgeDryRun };
+  log(`PURGE OK date=${plan.date} kept_dates=${plan.keptDates} dates=${plan.purgedDates.length}` +
+    `${plan.purgedDates.length ? '[' + plan.purgedDates.join(',') + ']' : ''} delete_markers=${deleteMarkers}${cfg.purgeDryRun ? ' dry_run=true' : ''}`);
+  return { exitCode: EXIT.OK, deleteMarkers, skipped: false };
+}
+
+// ── freshness (reader identity) ──────────────────────────────────────────────
+async function runFreshness({ env, sdk, s3, now = Date.now, log = console.log }) {
+  const cfg = readConfig(env, 'freshness');
+  assertBuckets(cfg);
+  const ctx = { cfg, sdk, s3, now, log };
+  const today = new Date(now()).toISOString().slice(0, 10);
+  const latest = await getJsonOrNull(ctx, LAYOUT.latestKey);
+  const f = checkFreshness({ today, latest, ...cfg.freshness });
+  const reasons = [...f.reasons];
+  if (latest && isValidDate(latest.date)) {
+    // The pointer must match the objects it points to (manifest bytes, dump size).
+    try {
+      const got = await s3.send(new sdk.GetObjectCommand({ Bucket: cfg.backupBucket, Key: latest.manifestKey }));
+      const sha = crypto.createHash('sha256').update(await bodyToBuffer(got.Body)).digest('hex');
+      if (sha !== latest.manifestSha256) reasons.push(`manifest ${latest.manifestKey} sha256 differs from the pointer`);
+    } catch (e) { reasons.push(`manifest ${latest.manifestKey} unreadable (${errName(e)})`); }
+    try {
+      const head = await s3.send(new sdk.HeadObjectCommand({ Bucket: cfg.backupBucket, Key: latest.pgKey }));
+      if (Number(head.ContentLength) !== Number(latest.pgSizeBytes)) reasons.push(`dump ${latest.pgKey} size differs from the pointer`);
+    } catch (e) { reasons.push(`dump ${latest.pgKey} unreadable (${errName(e)})`); }
+  }
+  const lc = latest && latest.latestComplete ? latest.latestComplete.date : 'none';
+  if (reasons.length) {
+    log(`FRESHNESS FAIL today=${today} latest=${latest ? latest.date : 'none'} status=${latest ? latest.status : 'none'} latest_complete=${lc} reasons=${reasons.join('; ')}`);
+    return { exitCode: EXIT.STALE, reasons };
+  }
+  log(`FRESHNESS OK today=${today} latest=${latest.date} status=${latest.status} latest_complete=${lc}`);
+  return { exitCode: EXIT.OK, reasons };
 }
 
 // ── main flow ────────────────────────────────────────────────────────────────
+// Backup step (writer identity). Never deletes: the retention is only PLANNED
+// here (purge-plan.json in WORK_DIR) and executed by runPurge in the next step.
 async function runBackup({ env, sdk, s3, fetchImpl, now = Date.now, log = console.log, overrides = {} }) {
-  const cfg = { ...readConfig(env), ...overrides };
+  const cfg = { ...readConfig(env, 'backup'), ...overrides };
   assertBuckets(cfg);
   const ctx = { cfg, sdk, s3, now, log };
   const W = cfg.workDir;
@@ -627,6 +771,15 @@ async function runBackup({ env, sdk, s3, fetchImpl, now = Date.now, log = consol
   const previous = await getJsonOrNull(ctx, LAYOUT.latestKey);
   const size = checkDumpSize({ size: info.size, previousSize: previous && previous.pgSizeBytes, minBytes: cfg.minDumpBytes, minRatio: cfg.minDumpRatio });
   if (!size.ok) throw new BackupError(EXIT.INTEGRITY, `dump size anomaly: ${size.reason}`);
+  // Docs source listed (after the dump, before any write) and guarded against an
+  // empty/collapsed listing. A listing ERROR is not a refusal: the PG backup is
+  // still recorded, the docs part is marked incomplete (exit 4).
+  let srcObjs = null; let sourceError = null;
+  try { srcObjs = await listAll(ctx, cfg.sourceBucket, undefined); } catch (e) { sourceError = e; }
+  if (srcObjs) {
+    const src = checkDocsSource({ count: srcObjs.length, previousCount: previous && previous.docsObjects, minRatio: cfg.minDocsRatio });
+    if (!src.ok) throw new BackupError(EXIT.INTEGRITY, `docs source anomaly: ${src.reason}`);
+  }
 
   // 3) PG upload + re-read
   const up = await putFile(ctx, keys.dump, dumpFile, info);
@@ -664,14 +817,16 @@ async function runBackup({ env, sdk, s3, fetchImpl, now = Date.now, log = consol
     : { status: 'unknown', source: 'dump: drizzle.__drizzle_migrations' };
   const servedSha = await fetchServedSha(fetchImpl, cfg.publicHealthUrl);
 
-  // 5) docs (a docs failure still records the PG backup: status=partial, exit 4)
+  // 5) docs (a docs error still records the PG backup: status=incomplete, exit 4;
+  //    pending objects left by the time budget = partial, exit 0, resumed next run)
   let docs;
   try {
-    const d = await backupDocs(ctx, date);
+    if (sourceError) throw sourceError;
+    const d = await backupDocs(ctx, date, srcObjs);
     const inv = await putBuffer(ctx, keys.inventory, JSON.stringify(d.inventory), 'application/json');
     const c = d.inventory.counts;
     docs = {
-      status: c.pending === 0 && c.failed === 0 ? 'complete' : 'partial',
+      status: docsStatus(c, null),
       sourceBucket: cfg.sourceBucket,
       backupPrefix: LAYOUT.docsPrefix,
       objects: c.objects,
@@ -684,6 +839,7 @@ async function runBackup({ env, sdk, s3, fetchImpl, now = Date.now, log = consol
       excluded: c.excluded,
       excludedPrefixes: cfg.excludePrefixes,
       budgetExhausted: d.budgetHit,
+      sourceGuard: { previousObjects: (previous && previous.docsObjects) || null, minRatio: cfg.minDocsRatio },
       versionIds: d.versionIds,
       inventoryKey: keys.inventory,
       inventorySha256: inv.sha256,
@@ -691,7 +847,7 @@ async function runBackup({ env, sdk, s3, fetchImpl, now = Date.now, log = consol
   } catch (e) {
     if (e instanceof BackupError) throw e;
     log(`docs step failed ${errName(e)}`);
-    docs = { status: 'failed', sourceBucket: cfg.sourceBucket, backupPrefix: LAYOUT.docsPrefix, error: errName(e), inventoryKey: null };
+    docs = { status: docsStatus(null, e), sourceBucket: cfg.sourceBucket, backupPrefix: LAYOUT.docsPrefix, error: errName(e), inventoryKey: null };
   }
 
   // 6) manifest + latest pointer
@@ -732,29 +888,28 @@ async function runBackup({ env, sdk, s3, fetchImpl, now = Date.now, log = consol
     tool: { script: 'deploy/ci/backup/backup-daily.cjs', scriptSha256, image: cfg.backupImage, bucketVersioning: versioning },
   });
   const man = await putBuffer(ctx, keys.manifest, JSON.stringify(manifest, null, 2), 'application/json');
-  await putBuffer(ctx, LAYOUT.latestKey, JSON.stringify(buildLatestPointer(manifest, keys.manifest, man.sha256), null, 2), 'application/json');
+  const pointer = buildLatestPointer(manifest, keys.manifest, man.sha256, previous);
+  await putBuffer(ctx, LAYOUT.latestKey, JSON.stringify(pointer, null, 2), 'application/json');
 
-  // 7) retention purge (after the manifest: today is always a recorded backup)
-  let purge; let purgeError = null;
-  try { purge = await purgeRetention(ctx, date); } catch (e) { purgeError = e instanceof BackupError ? e.message : errName(e); }
+  // 7) retention PLAN for the purge step (only a complete backup gets a non-empty
+  //    plan; a partial/incomplete day writes a skip plan). No delete here.
+  const plan = { format: PLAN_FORMAT, date, backupStatus: manifest.status, manifestKey: keys.manifest, manifestSha256: man.sha256,
+    retention: cfg.retention, keptDates: null, purgedDates: [], keys: [] };
+  if (manifest.status === 'complete') Object.assign(plan, await planPurge(ctx, date));
+  await fsp.writeFile(path.join(W, PLAN_FILE), JSON.stringify(plan));
 
-  const verdict = manifest.status === 'complete' && !purgeError ? 'OK' : manifest.status !== 'complete' ? 'PARTIAL' : 'OK-PURGE-FAILED';
-  const purgeText = purgeError
-    ? `purge=failed(${purgeError})`
-    : `purge.kept_dates=${purge.keptDates} purge.dates=${purge.purgedDates.length}${purge.purgedDates.length ? '[' + purge.purgedDates.join(',') + ']' : ''} purge.delete_markers=${purge.deleteMarkers}${purge.dryRun ? ' purge.dry_run=true' : ''}`;
+  const verdict = { complete: 'OK', partial: 'PARTIAL', incomplete: 'INCOMPLETE' }[manifest.status];
   log(`VERDICT ${verdict} date=${date} status=${manifest.status} pg.bytes=${info.size} pg.sha256=${info.sha256} ` +
     `schema.migrations=${schema.migrationsApplied === undefined ? 'unknown' : schema.migrationsApplied} code.sha=${servedSha} ` +
     `docs.status=${docs.status} docs.objects=${docs.objects === undefined ? 'n/a' : docs.objects} docs.copied=${docs.copied === undefined ? 'n/a' : docs.copied} ` +
-    `docs.pending=${docs.pending === undefined ? 'n/a' : docs.pending} manifest=${keys.manifest} manifest.sha256=${man.sha256} ${purgeText}`);
-  const exitCode = manifest.status !== 'complete' ? EXIT.DOCS_INCOMPLETE : purgeError ? EXIT.PURGE_FAILED : EXIT.OK;
-  return { exitCode, manifest, purge: purge || null, purgeError };
+    `docs.pending=${docs.pending === undefined ? 'n/a' : docs.pending} manifest=${keys.manifest} manifest.sha256=${man.sha256} ` +
+    `latest_complete=${pointer.latestComplete ? pointer.latestComplete.date : 'none'} purge.planned_dates=${plan.purgedDates.length}`);
+  const exitCode = manifest.status === 'incomplete' ? EXIT.DOCS_INCOMPLETE : EXIT.OK;
+  return { exitCode, manifest, pointer, plan };
 }
 
-async function main() {
-  // Lazy: resolved from the radar-api image (NODE_PATH=/workspace/node_modules); the selftest never loads it.
-  const sdk = require('@aws-sdk/client-s3');
-  const cfg = readConfig(process.env);
-  const s3 = new sdk.S3Client({
+function makeClient(sdk, cfg) {
+  return new sdk.S3Client({
     endpoint: cfg.endpoint,
     region: cfg.region,
     forcePathStyle: cfg.forcePathStyle,
@@ -765,23 +920,33 @@ async function main() {
     requestChecksumCalculation: 'WHEN_REQUIRED',
     responseChecksumValidation: 'WHEN_REQUIRED',
   });
-  const log = (m) => console.log(`[backup] ${m}`);
-  const r = await runBackup({ env: process.env, sdk, s3, fetchImpl: globalThis.fetch, log });
-  return r.exitCode;
 }
 
+async function main(mode) {
+  if (!['backup', 'purge', 'freshness'].includes(mode)) throw new BackupError(EXIT.INTEGRITY, `unknown mode ${mode}`);
+  // Lazy: resolved from the radar-api image (NODE_PATH=/workspace/node_modules); the selftest never loads it.
+  const sdk = require('@aws-sdk/client-s3');
+  const cfg = readConfig(process.env, mode);
+  const s3 = makeClient(sdk, cfg);
+  const log = (m) => console.log(`[${mode}] ${m}`);
+  const run = { backup: runBackup, purge: runPurge, freshness: runFreshness }[mode];
+  const r = await run({ env: process.env, sdk, s3, fetchImpl: globalThis.fetch, log });
+  return r.exitCode;
+}
 module.exports = {
-  EXIT, BackupError, LAYOUT, keysFor, classifyKey, dayNumber, isValidDate, isoWeekIndex, monthIndex, weekdayUtc,
-  planRetention, parseEnvFile, parseSha256Line, parseMigrationsCopy, resolveMigrationTag, parsePrefixes, withScheme,
-  encodeKey, checkDumpSize, upToDate, planDocs, buildInventory, readConfig, assertBuckets, buildManifest,
-  buildLatestPointer, runBackup, purgeRetention,
+  EXIT, BackupError, LAYOUT, PLAN_FILE, PLAN_FORMAT, keysFor, classifyKey, dayNumber, isValidDate, isoWeekIndex,
+  monthIndex, weekdayUtc, planRetention, parseEnvFile, parseSha256Line, parseMigrationsCopy, resolveMigrationTag,
+  parsePrefixes, withScheme, encodeKey, checkDumpSize, checkDocsSource, docsStatus, checkFreshness, upToDate, planDocs,
+  buildInventory, readConfig, assertBuckets, buildManifest, buildLatestPointer, validatePurgePlan, runBackup, runPurge,
+  runFreshness,
 };
 
 if (require.main === module) {
-  main().then((code) => process.exit(code)).catch((e) => {
+  const mode = process.argv[2] || 'backup';
+  main(mode).then((code) => process.exit(code)).catch((e) => {
     const code = e instanceof BackupError ? e.exitCode : EXIT.RETRYABLE;
     const msg = e instanceof BackupError ? e.message : errName(e);
-    console.error(`[backup] VERDICT FAIL exit=${code} ${msg}`);
+    console.error(`[${mode}] VERDICT FAIL exit=${code} ${msg}`);
     process.exit(code);
   });
 }
