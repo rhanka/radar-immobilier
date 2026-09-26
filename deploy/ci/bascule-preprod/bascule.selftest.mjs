@@ -14,7 +14,7 @@ import console from "node:console";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import vm from "node:vm";
-import { classifyJobStatus, withScheme, parseListingMeta, reconMissing, refreshJobName, buildRefreshArgs, refreshArgsYaml } from "./bascule.mjs";
+import { classifyJobStatus, withScheme, parseListingMeta, reconMissing, refreshJobName } from "./bascule.mjs";
 
 let passed = 0;
 let failed = 0;
@@ -82,30 +82,6 @@ eq("refreshJobName — tirets en tête/fin taillés", refreshJobName("--foo--"),
 ok("refreshJobName — borné à 63 caractères", refreshJobName("x".repeat(100)).length <= 63);
 ok("refreshJobName — pas de tiret final après troncature", !/-$/.test(refreshJobName("a".repeat(60) + "-".repeat(10))));
 ok("refreshJobName — charset RFC1123 [a-z0-9-] uniquement", /^[a-z0-9-]+$/.test(refreshJobName("Wéîrd Run #42!")));
-
-// ── buildRefreshArgs / refreshArgsYaml : bornage (d) du refresh S6 ───────────
-const throws = (fn) => { try { fn(); return false; } catch { return true; } };
-// Défaut (vides) ⇒ [] = delta complet des 530 villes config-only.
-eq("refreshArgs — vides ⇒ [] (delta complet)", buildRefreshArgs({}).args, []);
-eq("refreshArgs — vides ⇒ [] (aucun champ)", buildRefreshArgs().args, []);
-// --chunk k/n ⇒ shard worker-live.
-eq("refreshArgs — chunk 1/4 ⇒ --chunk", buildRefreshArgs({ chunk: "1/4" }).args, ["--chunk", "1/4"]);
-eq("refreshArgs — chunk trim", buildRefreshArgs({ chunk: "  2/5 " }).args, ["--chunk", "2/5"]);
-// Liste de slugs (espaces et/ou virgules).
-eq("refreshArgs — cities espace", buildRefreshArgs({ cities: "carignan delson" }).args, ["carignan", "delson"]);
-eq("refreshArgs — cities virgule + espaces", buildRefreshArgs({ cities: " saint-henri, laval " }).args, ["saint-henri", "laval"]);
-// Mutuellement exclusifs + validations (throw, jamais process.exit).
-ok("refreshArgs — chunk + cities ⇒ throw (exclusifs)", throws(() => buildRefreshArgs({ chunk: "1/4", cities: "laval" })));
-ok("refreshArgs — chunk mal formé ⇒ throw", throws(() => buildRefreshArgs({ chunk: "1-4" })));
-ok("refreshArgs — chunk k>n ⇒ throw", throws(() => buildRefreshArgs({ chunk: "5/4" })));
-ok("refreshArgs — chunk 0/n ⇒ throw", throws(() => buildRefreshArgs({ chunk: "0/4" })));
-ok("refreshArgs — slug injection (espace/quote) ⇒ throw", throws(() => buildRefreshArgs({ cities: 'laval","--evil' })));
-ok("refreshArgs — slug majuscule ⇒ throw", throws(() => buildRefreshArgs({ cities: "Laval" })));
-// refreshArgsYaml : corps de liste inline JSON-quoté (sans crochets), injection-safe.
-eq("refreshArgsYaml — vide ⇒ '' (args: [])", refreshArgsYaml([]), "");
-eq("refreshArgsYaml — chunk", refreshArgsYaml(["--chunk", "1/4"]), '"--chunk", "1/4"');
-eq("refreshArgsYaml — slugs", refreshArgsYaml(["carignan", "delson"]), '"carignan", "delson"');
-ok("refreshArgsYaml — sortie sans crochets (le template fournit args: [...])", !/[[\]]/.test(refreshArgsYaml(["a", "b"])));
 
 // ── docs-sync : copie INCRÉMENTALE + CONCURRENTE (script réel du template) ──────
 // Parité rhanka/geo#396. Le script `node -e` du Job est extrait du template et
@@ -223,6 +199,31 @@ ok("refreshArgsYaml — sortie sans crochets (le template fournit args: [...])",
   eq("bascule-preprod.yml — un seul cron, hebdomadaire dimanche 03:17 UTC", crons, ["17 3 * * 0"]);
   ok("bascule-preprod.yml — run planifié armé par vars.BASCULE_SCHEDULE_ENABLED (inchangé)",
     wf.includes("github.event_name != 'schedule' || vars.BASCULE_SCHEDULE_ENABLED == 'true'"));
+  // A scheduled run = MODE=restore from the LATEST complete backup, 24 h guard active.
+  ok("schedule ⇒ MODE=restore (dispatch keeps its input, default chain)",
+    wf.includes("MODE: ${{ github.event_name == 'schedule' && 'restore' || inputs.MODE || 'chain' }}"));
+  ok("schedule ⇒ BACKUP_ID latest (= latestComplete), ALLOW_STALE_BACKUP forced false (24 h guard active)",
+    wf.includes("BACKUP_ID: ${{ inputs.BACKUP_ID || 'latest' }}") &&
+    wf.includes("ALLOW_STALE_BACKUP: ${{ github.event_name != 'schedule' && inputs.ALLOW_STALE_BACKUP && 'true' || 'false' }}"));
+  ok("schedule ⇒ auto-CONFIRM of the day kept", /if \[ "\$EVENT_NAME" = "schedule" \]; then\n\s+echo "CONFIRM=\$\{today\}" >> "\$GITHUB_ENV"/.test(wf));
+  ok("schedule ⇒ restore budget (330 min) and run-name 'restore'", wf.includes("timeout-minutes: ${{ (github.event_name == 'schedule' || inputs.MODE == 'restore') && 330 || 180 }}") &&
+    wf.includes("run-name: \"bascule-preprod ${{ github.event_name == 'schedule' && 'restore' || inputs.MODE || 'chain' }}"));
+}
+// ── NO refresh in the bascule (owner decision: "a restore is a restore") ──────
+{
+  const wf = readFileSync(join(import.meta.dirname, "../../../.github/workflows/bascule-preprod.yml"), "utf8");
+  const active = wf.split("\n").filter((l) => !/^\s*#/.test(l)).join("\n");
+  ok("bascule-preprod.yml — no refresh step, no force-refresh job", !/node "\$CLI" (refresh|force-refresh|precheck-runs)\s*$/m.test(active) && !/\n {2}force-refresh:\n/.test(wf));
+  ok("bascule-preprod.yml — no SKIP_REFRESH / FORCE_REFRESH / REFRESH_* input or env", !/SKIP_REFRESH|FORCE_REFRESH|REFRESH_(CHUNK|CITIES|CONCURRENCY|CRONJOB)/.test(active));
+  ok("bascule-preprod.yml — advisory precheck-runs --prod kept (information only, chain)", active.includes('node "$CLI" precheck-runs --prod'));
+  let tmplGone = false;
+  try { readFileSync(join(import.meta.dirname, "refresh-job.tmpl.yaml"), "utf8"); } catch { tmplGone = true; }
+  ok("refresh-job.tmpl.yaml removed (the refresh Job of S6 no longer exists)", tmplGone);
+  const cli = readFileSync(join(import.meta.dirname, "bascule.mjs"), "utf8");
+  ok("bascule.mjs — no `refresh` subcommand, force-refresh kept for bascule-refresh.yml", !/\n\s+refresh: cmdRefresh,/.test(cli) && !/function cmdRefresh\b/.test(cli) &&
+    /"force-refresh": cmdForceRefresh/.test(cli));
+  const standalone = readFileSync(join(import.meta.dirname, "../../../.github/workflows/bascule-refresh.yml"), "utf8");
+  ok("bascule-refresh.yml — the on-demand refresh stays OUTSIDE the bascule", standalone.includes('node "$CLI" force-refresh'));
 }
 
 console.log(`\nbascule.selftest — ${passed} passés, ${failed} échoués`);
