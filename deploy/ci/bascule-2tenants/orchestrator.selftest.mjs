@@ -357,6 +357,8 @@ const GEO_IDS = "ogc:zones:laval:A-1\nogc:zones:laval:B-2\nogc:zones:montreal:C-
   ok(`bascule-e2e.yml — no \${{ }} in any of the ${runs.length} run blocks`, runs.length >= 8 && runs.every((r) => !r.includes("${{")));
   ok("bascule-e2e.yml — permissions actions: write, contents: read", /permissions:\n\s+contents: read\n\s+actions: write/.test(w));
   ok("bascule-e2e.yml — publish always()", /- name: publish[^\n]*\n\s+if: \$\{\{ always\(\) \}\}/.test(w));
+  ok("bascule-e2e.yml — cycle artefact uploads the dot-directory workdir (include-hidden-files: true)",
+    /path: \$\{\{ github\.workspace \}\}\/\.bascule2-work\/\n(?:\s+#.*\n)*\s+include-hidden-files: true\n/.test(w));
 }
 
 console.log(`\norchestrator.selftest — ${passed} passed, ${failed} failed`);
