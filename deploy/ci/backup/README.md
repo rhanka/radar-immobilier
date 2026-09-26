@@ -12,9 +12,12 @@ untouched).
 | `cronjob-backup-freshness.yaml` | CronJob `radar-backup-freshness`: fails when the backup is stale or not complete for too long |
 | `backup-daily.cjs` | Node script, modes `backup` / `purge` / `freshness` (shipped as ConfigMap `radar-backup-daily-script`) |
 | `backup-daily.selftest.mjs` | Offline selftest (in-memory versioned S3 fake, per-identity SDK views, wiring checks) |
-| `radar-backup-{writer,purger,reader}-sealed.yaml` | SealedSecrets of the three identities (committed verbatim from the k8s lane) |
 | [`RETENTION.md`](RETENTION.md) | Retention policy and how it is enforced |
 | [`RESTORE.md`](RESTORE.md) | Restore a backup of date D (PG + docs) |
+
+No credential is committed here, sealed or not: the three S3 identities live in
+the GitHub Environment `radar-backup-prod` (+ the k8s lane `.env` recovery copy)
+and the CD writes them into the cluster — see [Credentials](#credentials).
 
 ## What one run produces (day D, UTC)
 
@@ -137,8 +140,56 @@ a failed `radar-backup-daily` Job is the signal for a real backup error.
 - `radar-backup-reader` (keys `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY`,
   `S3_SECRET_KEY`, `BACKUP_BUCKET`): GetObject (with versionId), ListBucket,
   ListBucketVersions. Used by the freshness check and restores.
+- The three k8s Secrets above are **pre-created** in ns `radar-immobilier`
+  (type `Opaque`); their content is written by the CD from GitHub (below).
 - Secret quota of the prod namespace raised to 24.
 - Rotation every 90 days: `../bascule-preprod/CRED_CYCLE.md`.
+
+## Credentials
+
+**Source of truth: the GitHub Environment `radar-backup-prod` + the `.env`
+recovery copy of the k8s lane. No SealedSecret.** The Environment has a
+deployment branch policy of `main` only (a job started from any other branch
+cannot read it) and no required reviewer (the merge path stays automatic). It is
+created and filled by the k8s lane; nothing about these values is committed.
+
+| k8s Secret / key | `radar-backup-writer` | `radar-backup-reader` | `radar-backup-purger` |
+| --- | --- | --- | --- |
+| `S3_ENDPOINT` | variable `BACKUP_S3_ENDPOINT` (= `https://s3.bhs.io.cloud.ovh.net`) | same | same |
+| `S3_REGION` | variable `BACKUP_S3_REGION` (= `bhs`) | same | same |
+| `S3_ACCESS_KEY` | secret `RADAR_BACKUP_WRITER_ACCESS_KEY` | secret `RADAR_BACKUP_READER_ACCESS_KEY` | secret `RADAR_BACKUP_PURGER_ACCESS_KEY` |
+| `S3_SECRET_KEY` | secret `RADAR_BACKUP_WRITER_SECRET_KEY` | secret `RADAR_BACKUP_READER_SECRET_KEY` | secret `RADAR_BACKUP_PURGER_SECRET_KEY` |
+| `BACKUP_BUCKET` | variable `BACKUP_BUCKET` (= `radar-immobilier-backup`) | same | same |
+| `SOURCE_DOCS_BUCKET` | variable `BACKUP_SOURCE_BUCKET` (= `radar-immobilier-docs`) | — | — |
+
+The step **Write backup Secrets from GitHub** of job `apply-backup` runs at
+every CD run, before the ConfigMap and the CronJobs:
+
+1. **Fail-closed guard, before any write**: the 6 secrets and 4 variables are set
+   and single-line; access keys match `^[A-Za-z0-9]{16,128}$` and secret keys
+   `^[A-Za-z0-9/+=]{16,128}$`; `BACKUP_S3_ENDPOINT` is exactly
+   `https://s3.bhs.io.cloud.ovh.net` and `BACKUP_S3_REGION` exactly `bhs` (the
+   pinned OVH BHS target); `BACKUP_BUCKET` / `BACKUP_SOURCE_BUCKET` equal the
+   `EXPECTED_*` guards of `cronjob-backup-daily.yaml`; the three Secrets exist.
+   A failing value is named — never printed — and nothing is applied.
+2. For each identity: render the Secret client-side (`kubectl create secret
+   generic --dry-run=client`, each value read from a file of a `0700` temp dir —
+   never in argv, never echoed; the dir is removed on exit), label it
+   `app.kubernetes.io/component: db-backup`. **No partial write**: a
+   server-side dry-run of the three PUTs (`kubectl replace --dry-run=server`)
+   must pass for all three, then the real `kubectl replace` (GET + PUT) runs.
+   The PUT makes the live key set **exactly** the one the CronJobs mount (a stale
+   extra key is dropped), writes no `last-applied-configuration` annotation (a
+   client-side `kubectl apply` would copy the credentials into it) and clears a
+   former sealed-secrets `ownerReference`.
+3. The key set returned by the server is compared with the expected one.
+
+Values reach the script through the step `env:` only (never a `${{ }}` inside
+`run:`), GitHub masks the secrets, there is no `set -x`; the log carries
+names and key names only. The SA `radar-ci-bascule-prod` holds
+**get/update on these three Secret names only** — no create, patch, list,
+watch or delete on Secrets (`../bascule-preprod/rbac-ci-bascule-prod.yaml`): a
+missing Secret is a hard error, never a create.
 
 DB access reuses the RO role secret `radar-db-ro-prod` (bascule bundle). Network:
 the pod carries `app.kubernetes.io/component: db-backup`, allowed to
@@ -152,10 +203,11 @@ namespace has no egress policy today — if one is added, these two must stay op
 `.github/workflows/bascule-bundle-cd.yml`, job **`apply-backup`** — same path and
 guards as the bascule bundle: permanent SA `radar-ci-bascule-prod`
 (`KUBE_CONFIG_DATA_PROD`), positive PROD apiserver pre-flight, runner = kubectl
-only. Steps: selftest (fail-closed before any apply) → apply the three
-SealedSecrets (refused if one is still a placeholder) → wait Synced (tolerant) →
-render the ConfigMap from `backup-daily.cjs` and apply it → apply both CronJobs
-and assert their live schedule/suspend/concurrency. Triggered on push to `main`
+only, job bound to the Environment `radar-backup-prod`. Steps: selftest
+(fail-closed before any apply) → write the three Secrets from GitHub
+([Credentials](#credentials)) → render the ConfigMap from `backup-daily.cjs`
+and apply it → apply both CronJobs and assert their live
+schedule/suspend/concurrency. Triggered on push to `main`
 touching `deploy/ci/backup/**`; independent of the `apply-bundle` job. A
 `workflow_dispatch` with `backup_run_now=true` **skips `apply-bundle`**, so the
 bundle's RO-role Job never competes with the backup pod for CPU (a plain
@@ -168,18 +220,36 @@ manual launches during the day (manual backup runs, one-shot Jobs, bundle
 re-applies) while a backup runs; the scheduled 02:23 UTC run is alone by design,
 and manual backup runs are refused inside 02:00–05:30 UTC.
 
-Activation order (once):
+Arming (repo variables): `BASCULE_BUNDLE_CD_ENABLED=true` and
+`BACKUP_DAILY_CD_ENABLED=true`, set by the k8s lane after it re-applied
+`deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml` (install-time,
+cluster-admin: name-scoped get/update on the Secrets
+`radar-backup-writer`, `radar-backup-reader`, `radar-backup-purger`, the
+ConfigMap `radar-backup-daily-script`, the CronJobs `radar-backup-daily`,
+`radar-backup-freshness`), pre-created the three Secrets and filled the
+Environment `radar-backup-prod`.
 
-1. Merge the PR (the `apply-backup` job stays skipped: not armed yet).
-2. k8s lane re-applies `deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml`
-   (install-time, cluster-admin): the SA gains name-scoped get/patch/update on
-   `radar-backup-writer`, `radar-backup-reader`, `radar-backup-purger`
-   (sealedsecrets), `radar-backup-daily-script` (configmap),
-   `radar-backup-daily`, `radar-backup-freshness` (cronjobs).
-3. Set the repo variable `BACKUP_DAILY_CD_ENABLED=true`.
-4. `workflow_dispatch` of `bascule-bundle-cd` (input `backup_run_now=true` also
-   starts a first run, outside 02:00–05:30 UTC), or wait for the next change
-   under `deploy/ci/backup/`.
+**Cutover from the SealedSecrets of the first delivery (one-time).** The first
+delivery committed the three identities as SealedSecrets; they are removed (owner
+rule: no SealedSecret). Order, before the next 02:23 UTC run:
+
+1. k8s lane: create the Environment `radar-backup-prod` (deployment branches:
+   `main` only, no reviewer), set its 6 secrets and 4 variables (current values,
+   same as `.env`); make sure the three Secrets exist (today they do,
+   materialized by the controller); re-apply `rbac-ci-bascule-prod.yaml`.
+2. Merge: the push runs `apply-backup`, which rewrites the three Secrets from
+   GitHub (the PUT also clears their sealed-secrets `ownerReference`).
+3. k8s lane: delete the three SealedSecret objects **with `--cascade=orphan`**
+   (`kubectl -n radar-immobilier delete sealedsecret radar-backup-writer
+   radar-backup-reader radar-backup-purger --cascade=orphan`): the Secrets are
+   kept even if step 2 did not run.
+4. `workflow_dispatch` of `bascule-bundle-cd` **without** `backup_run_now`:
+   `apply-backup` rewrites the three Secrets again, with no SealedSecret left.
+5. Verify: the run is green and logs `secret/radar-backup-<id> replaced from
+   GitHub — keys: …` for the three; `kubectl -n radar-immobilier get
+   sealedsecret` lists only `radar-db-ro-prod` and `radar-pra-admin-prod`;
+   the three Secrets have no `ownerReferences`; the next `radar-backup-daily`
+   and `radar-backup-freshness` Jobs are `Complete`.
 
 ## Verification
 
