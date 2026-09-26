@@ -691,6 +691,38 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
   ok('commands: backup / purge modes', cj.includes('["node", "/opt/backup/backup-daily.cjs", "backup"]') && cj.includes('["node", "/opt/backup/backup-daily.cjs", "purge"]'));
   ok('DB via the RO role secret', /name: radar-db-ro-prod, key: POSTGRES_PASSWORD/.test(cj) && !cj.includes('radar-db-credentials'));
   ok('podFailurePolicy FailJob on 2/3/4', /values: \[2, 3, 4\]/.test(cj));
+  // Server-side schema of batch/v1 PodFailurePolicy (not checked by --dry-run=client):
+  // every rule has an action and exactly one matcher; onExitCodes has operator + values
+  // (unique, ascending, no 0 with In); every onPodConditions entry has type AND status.
+  for (const [file, text] of [['cronjob-backup-daily.yaml', cj], ['cronjob-backup-freshness.yaml', read('deploy/ci/backup/cronjob-backup-freshness.yaml')]]) {
+    const at = text.indexOf('\n      podFailurePolicy:');
+    if (at < 0) { ok(`${file}: no podFailurePolicy (nothing to validate)`, !/podFailurePolicy:/.test(text.replace(/#.*$/mg, ''))); continue; }
+    const block = text.slice(at + 1).split('\n').slice(1).filter((l, i, a) => a.slice(0, i + 1).every((x) => /^ {8,}\S|^\s*$/.test(x))).join('\n');
+    const rules = block.split(/\n {10}- /).slice(1).map((r) => '- ' + r);
+    const problems = [];
+    rules.forEach((r, i) => {
+      if (!/^- action: (FailJob|FailIndex|Ignore|Count)\b/.test(r)) problems.push(`rules[${i}].action`);
+      const hasCodes = /\n {12}onExitCodes:/.test(r); const hasConds = /\n {12}onPodConditions:/.test(r);
+      if (hasCodes === hasConds) problems.push(`rules[${i}]: exactly one of onExitCodes/onPodConditions`);
+      if (hasCodes) {
+        if (!/\n {14}operator: (In|NotIn)\b/.test(r)) problems.push(`rules[${i}].onExitCodes.operator`);
+        const m = /\n {14}values: \[([^\]]*)\]/.exec(r);
+        const vals = m ? m[1].split(',').map((v) => Number(v.trim())) : [];
+        if (!vals.length || vals.some((v, j) => !Number.isInteger(v) || (j && v <= vals[j - 1])) || (/operator: In/.test(r) && vals.includes(0))) {
+          problems.push(`rules[${i}].onExitCodes.values`);
+        }
+      }
+      if (hasConds) {
+        const conds = r.split(/\n {14}- /).slice(1);
+        if (!conds.length) problems.push(`rules[${i}].onPodConditions empty`);
+        conds.forEach((c, j) => {
+          if (!/^type: \S+/.test(c)) problems.push(`rules[${i}].onPodConditions[${j}].type`);
+          if (!/(^|\n {16})status: "(True|False|Unknown)"/.test(c)) problems.push(`rules[${i}].onPodConditions[${j}].status`);
+        });
+      }
+    });
+    eq(`${file}: podFailurePolicy matches the batch/v1 schema (${rules.length} rules)`, problems, []);
+  }
   ok('manual-run guard: non-CronJob Job refused in the scheduled window', cj.includes("fieldPath: \"metadata.labels['job-name']\"") &&
     cj.includes('radar-backup-daily-[0-9]*)') && /SCHEDULED_WINDOW_START, value: "0200"/.test(cj) && /SCHEDULED_WINDOW_END, value: "0530"/.test(cj));
   const active = (t) => t.split('\n').filter((l) => !/^\s*(#|\/\/)/.test(l)).join('\n');
