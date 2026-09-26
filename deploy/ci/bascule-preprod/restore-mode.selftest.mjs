@@ -494,7 +494,8 @@ if (!YAML) console.log("  info yaml package not resolvable — YAML parse checks
   ok("workflow — S1 dump chain only", /id: dump\n\s+if: \$\{\{ !inputs\.DRY_RUN && env\.MODE == 'chain' \}\}/.test(wf));
   ok("workflow — PROD kubeconfig chain only", /Configure kubeconfig PROD[^\n]*\n\s+if: \$\{\{ !inputs\.DRY_RUN && env\.MODE == 'chain' \}\}/.test(wf));
   ok("workflow — resolve before quiesce", wf.indexOf('node "$CLI" backup-resolve') < wf.indexOf('node "$CLI" quiesce'));
-  ok("workflow — refresh never in restore mode", /S6 refresh[^\n]*\n\s+if: \$\{\{[^}]*env\.MODE == 'chain' \}\}/.test(wf));
+  ok("workflow — no refresh at all (no S6 step, no force-refresh job)", !/node "\$CLI" refresh\n/.test(wf) && !/\n {2}force-refresh:\n/.test(wf));
+  ok("workflow — a scheduled run is MODE=restore", wf.includes("MODE: ${{ github.event_name == 'schedule' && 'restore' || inputs.MODE || 'chain' }}"));
   ok("workflow — scheduled gate unchanged", wf.includes("if: ${{ github.event_name != 'schedule' || vars.BASCULE_SCHEDULE_ENABLED == 'true' }}"));
   const runs = [...wf.matchAll(/run: (?:\|\n((?: {10,}.*\n?)+)|(.*))/g)].map((m) => m[1] || m[2]);
   const newRuns = runs.filter((r) => /served-ids\.mjs|preflight-backup|backup-|restore-backup|docs-restore|recon-backup/.test(r));
@@ -588,7 +589,8 @@ if (!YAML) console.log("  info yaml package not resolvable — YAML parse checks
   ok("workflow — G3 step unconditional (every MODE), before kubectl setup, Secrets and Jobs",
     /- name: G3 CONFIRM[^\n]*\n\s+run: node "\$CLI" confirm\n/.test(wf) && g3At > 0 && g3At < wf.indexOf("Install kubectl") &&
     g3At < wf.indexOf('node "$CLI" backup-secrets-fill') && g3At < fillAt && g3At < wf.indexOf('node "$CLI" backup-list'));
-  ok("workflow — job budget per MODE: restore 330, else 180 (cap 360)", wf.includes("timeout-minutes: ${{ (inputs.MODE || 'chain') == 'restore' && 330 || 180 }}"));
+  ok("workflow — job budget per MODE: restore (dispatch or schedule) 330, else 180 (cap 360)",
+    wf.includes("timeout-minutes: ${{ (github.event_name == 'schedule' || inputs.MODE == 'restore') && 330 || 180 }}"));
   ok("workflow — un-quiesce: always(), own step budget, SKIP_QUIESCE passed to the CLI", /id: unquiesce\n\s+if: \$\{\{ always\(\)[^\n]*\n\s+timeout-minutes: 15\n\s+run: node "\$CLI" unquiesce/.test(wf) &&
     wf.includes("SKIP_QUIESCE: ${{ inputs.SKIP_QUIESCE && 'true' || 'false' }}"));
   const qsAt = wf.indexOf("name: bascule-quiesce-state-");

@@ -1,8 +1,18 @@
 # bascule-preprod — bascule PROD → PRÉPROD (« iso-prod »)
 
 Bascule **rejouable par la CI immo / l'owner SANS IA** (OPS-3) : déclencheur dump
-prod → restore préprod → migrations → copie docs → recon → flip serving → refresh
-différentiel → smoke. **0 Python.**
+prod → restore préprod → migrations → copie docs → recon → flip serving → smoke. **0 Python.**
+
+> **No refresh in the bascule** (owner decision: "a restore is a restore"). The
+> refresh lives in its own CronJob `radar-refresh-pv` (its own schedule) and in
+> `bascule-refresh.yml` (on demand) — never triggered by the bascule.
+>
+> **A scheduled run is `MODE=restore` from the LATEST `complete` backup** (the
+> source is the last verified backup, never a live prod dump): `BACKUP_ID` latest =
+> `manifests/latest.json` `latestComplete`, 24 h freshness guard active (refused
+> otherwise, before any quiesce), auto-CONFIRM of the day. Cron `17 3 * * 0`
+> (Sunday 03:17 UTC) and the arming gate `BASCULE_SCHEDULE_ENABLED` unchanged. A
+> `workflow_dispatch` keeps its inputs (default `chain`).
 
 > **CD-native v2 (toute action de prod pilotée par du code, 0 owner-in-the-loop)** —
 > l'apply du bundle prod (2 SealedSecrets + VAP + RBAC T1 + RO-role + CronJob dump)
@@ -12,7 +22,7 @@ différentiel → smoke. **0 Python.**
 > matérialisation GH-secret des 2 creds (SealedSecrets committées, matérialisées
 > par le controller sealed-secrets in-cluster). La bascule tourne en
 > **planification hebdomadaire** (dimanche 03:17 UTC, `bascule-preprod.yml`, `schedule`) ; le refresh reste
-> GH-triggerable à la demande (`bascule-refresh.yml`) et câblé APRÈS la bascule.
+> GH-triggerable à la demande (`bascule-refresh.yml`), découplé de la bascule.
 > Flux complet, install 1×, secrets GH devenus supprimables et gestes éliminés :
 > **`CD_NATIVE_MIGRATION.md`**.
 
@@ -51,7 +61,6 @@ dossier). **0 pg_dump / 0 pg_restore / 0 s5cmd / 0 aws / 0 cred S3 sur le runner
 | `db-rollback-job.tmpl.yaml` | Patron Job rollback G1 : `dump` (postgis, pg_dump préprod) + `upload` (aws-cli → bucket). |
 | `docs-sync-job.tmpl.yaml` | Patron Job docs-sync (S3/S4) `docs-sync-prod-to-preprod` : image radar-api, **aws-sdk `CopyObject`** server-side + `GrantFullControl` (Option A) ; Secret `radar-docs-src-preprod` pre-created by k8s (durable, no ownerReference), rewritten by the bascule before the quiesce. |
 | `db-migrate-job.tmpl.yaml` | Patron Job migrate (S2c), `node dist/db/migrate.js`. |
-| `refresh-job.tmpl.yaml` | Patron Job refresh différentiel (S6), worker-live delta. |
 | `bascule.selftest.mjs` | Self-test de `classifyJobStatus` (0 appel réel). |
 | `restore-mode.mjs` | `MODE=restore\|list` runner side (restore FROM a daily backup) — section "Restore from a backup". |
 | `backup-restore.cjs` | In-pod steps resolve / list / fetch-dump / docs / recon (embedded in the 3 templates below). |
@@ -77,13 +86,12 @@ dossier). **0 pg_dump / 0 pg_restore / 0 s5cmd / 0 aws / 0 cred S3 sur le runner
 | S2c | `migrate` | Job `node dist/db/migrate.js` (image préprod exacte) = test iso-prod. | préprod (Job) |
 | S3/S4 | `copy-docs` | **Job radar-api aws-sdk** (Option A, `docs-sync-prod-to-preprod`) : pré-check GET prod fail-closed + boucle `CopyObject` server-side additif **+ `GrantFullControl`** (→ canonical préprod). Identité prod-owner `radar-docs-src-preprod` (durable Secret, rewritten at S0.s). DRY : copie NON jouée (0 S3 runner). | préprod (Job) |
 | S3b | `recon` | **Job DIFF LIST-only** (verdict-only, 0 HEAD/GET) : dual `s3api list-objects-v2` src+dst, compare **Key+Size** (ETag ignoré : docs content-addressed par sha ⇒ robuste au re-chunk multipart) → dest ⊇ src → exit 0, sinon exit 1. Écrit un sentinel LOCAL `recon.ok.json` (verdict). | préprod (Job) |
-| S3c | `precheck-runs` | **Job aws s3api list runs/** (verdict-only) : `runs/` vide → exit 1. | préprod (Job) |
+| S3c | `precheck-runs` | **Job aws s3api list runs/** (verdict-only) : `runs/` vide → exit 1. Played by the workflow only as the advisory `--prod` (S0.b, chain). | préprod (Job) |
 | S5 | `flip` | `kubectl set env deploy/radar-api GEO_DOCUMENTS_REPOINT-` (défaut OFF = iso-prod, réversible). | préprod (kubectl) |
 | U | `unquiesce` | scale-back aux replicas enregistrés + `rollout status` ; restaure suspend. `if: always()`, sans CONFIRM. **No quiesce recorded in this run ⇒ no-op** (the `UNQUIESCE_REPLICAS` map only applies with `SKIP_QUIESCE=true`). | préprod (kubectl) |
-| S6 | `refresh` | Job worker-live **delta** (PAS `--all`) ; assert `ConfigMap SCRAPE_S3_BUCKET == PREPROD_DOCS` (MEDIUM2, kubectl) + Job runs/ (MEDIUM3). | préprod (Job) |
 | S7 | `smoke` | `curl préprod/health` ; `db.ok` + `objectStore.ok` exigés. | runner (curl) |
 
-Ordre workflow : **G3** → S0 → **S0.s (docs-sync Secret)** → **S0.b (`precheck-runs --prod`, Job advisory)** → **Q** (+ artefact `bascule-quiesce-state-<run_id>`) → S1 → S2 → S2c → S3 → S3b → S5 → **U (`always`)** → **S3c (Job gate)** → S6 → S7 → failure summary (`failure()` after a successful S2) → upload pointeurs (`always`).
+Ordre workflow : **G3** → S0 → **S0.s (docs-sync Secret)** → **S0.b (`precheck-runs --prod`, Job advisory)** → **Q** (+ artefact `bascule-quiesce-state-<run_id>`) → S1 → S2 → S2c → S3 → S3b → S5 → **U (`always`)** → S7 → failure summary (`failure()` after a successful S2) → upload pointeurs (`always`).
 
 ### Timeouts and the un-quiesce
 
@@ -125,7 +133,7 @@ matched by the exact `DUMP_PREFIX`). Debt: no automatic rollback (noted in the P
 - **STATUS-ONLY (mesure i-infra) :** `runJobFromTemplate` lit UNIQUEMENT `.status`
   (via `classifyJobStatus`) — **0 `kubectl logs`**, sur échec/timeout il reporte
   « inspecter in-cluster » (le debug se fait au cluster). Pour TOUS les Jobs
-  (freshness/recon/runs/restore/rollback/docs-sync/migrate/refresh).
+  (freshness/recon/runs/restore/rollback/docs-sync/migrate).
 - **G1 — rollback avant restore (Job préprod).** `restore` dispatche
   `radar-db-rollback-bascule` (pg_dump préprod → `s3://$DUMP_BUCKET/rollback/…`,
   DURABLE). Fail-closed : pas de restore sans rollback réussi. DB via
@@ -140,8 +148,6 @@ matched by the exact `DUMP_PREFIX`). Debt: no automatic rollback (noted in the P
   (a) Jobs freshness/restore : la clé du dump frais ⊇ EXPECTED_DATABASE ;
   (b) Job restore : header du custom-archive (`;   dbname:`) == EXPECTED_DATABASE ;
   (c) CronJob owner : dumpe la DB **nommée** EXPECTED_DATABASE.
-- **MEDIUM 2 (kubectl, pas S3) :** `refresh` exige `ConfigMap radar-api.SCRAPE_S3_BUCKET
-  == PREPROD_DOCS`. **MEDIUM 3 :** Job runs/ verdict-only avant S6.
 
 ## Matrice « quel secret / où » (runner vs cluster)
 
@@ -169,13 +175,13 @@ aucun `AWS_*` ni secret S3/DB côté runner. Plus d'install `s5cmd`/postgresql-c
 | `radar-db-credentials` | restore, rollback, migrate | `POSTGRES_USER/PASSWORD/DB` (user préprod `radar` = superuser → `--clean` OK) | libpq PG* du pg_restore/pg_dump. |
 | `radar-docs-src-preprod` | **docs-sync UNIQUEMENT** (`docs-sync-prod-to-preprod`) | `S3_ACCESS_KEY`/`S3_SECRET_KEY` (identité **prod-owner** immo-docs-prod) | LECTURE docs PROD + rw préprod + CopyObject. **Pre-created by k8s** (Opaque, no ownerReference); **rewritten by the bascule at every run** before the quiesce from the GitHub environment `radar-bascule` (see "docs-sync Secret" below). **Jamais référencé par les Jobs de check**. |
 | `radar-backups-reader-preprod` | **Job freshness (S1)** | `S3_ACCESS_KEY`/`S3_SECRET_KEY` | RO-reader PERSISTANT du bucket backups (LIST/HEAD). Var `FRESHNESS_CHECK_SECRET`. |
-| `radar-docs-s3-credentials` | **migrate (S2c) + refresh (S6)** | `DOCS_S3_ACCESS_KEY`/`DOCS_S3_SECRET_KEY` | creds S3 applicatifs — **aligné sur `radar-refresh-pv` QUI MARCHE (#738)** (l'ancien défaut `radar-s3-credentials` a un access-key bidon, `radar-scrape-s3-credentials` est absent en préprod = RUN blocker corrigé). Vars `S3_SECRET`/`SCRAPE_S3_SECRET`. |
+| `radar-docs-s3-credentials` | **migrate (S2c)** | `DOCS_S3_ACCESS_KEY`/`DOCS_S3_SECRET_KEY` | creds S3 applicatifs — **aligné sur `radar-refresh-pv` QUI MARCHE (#738)** (l'ancien défaut `radar-s3-credentials` a un access-key bidon, `radar-scrape-s3-credentials` est absent en préprod = RUN blocker corrigé). Vars `S3_SECRET`/`SCRAPE_S3_SECRET`. |
 | `radar-s3-credentials` **(⚠ access-key bidon, cf. QA#6)** | Jobs recon (S3b) + runs/ (S3c) — via `CHECK_DOCS_SECRET` | `S3_ACCESS_KEY`/`S3_SECRET_KEY` | LIST prod+préprod docs. **DRY#4 a réussi avec `radar-docs-reader-preprod`** (RO-reader) → défaut `CHECK_DOCS_SECRET` à trancher (cf. QA#6). |
 
 > **0 Python, 0 image nouvelle non validée.** Runner : kubectl + curl. Jobs :
 > `postgis/postgis:16-3.4` (pg_dump/pg_restore 16) + `amazon/aws-cli` (LIST/HEAD/
 > cp/sync — déjà pinné in-repo, cf. `object-storage-inventory-preprod`). Jobs
-> migrate/refresh : image radar-api exacte servie en préprod.
+> migrate : image radar-api exacte servie en préprod.
 
 ## Docs-sync — Option A CANONIQUE (aws-sdk CopyObject, co-val k8s)
 
@@ -229,7 +235,7 @@ Secrets. Never a SealedSecret.
    R0 (read-only Job) — see "Restore from a backup".
 2. **Exécution.** `DRY_RUN=false` + `CONFIRM=iso-prod-<date du jour UTC>`. quiesce
    automatisé + un-quiesce `if: always()` (jamais préprod à terre).
-3. **Isolation S5/S6** : `SKIP_FLIP` / `SKIP_REFRESH`.
+3. **Isolation S5** : `SKIP_FLIP`.
 4. **Quiesce manuel** : `SKIP_QUIESCE=true` + `BASCULE_UNQUIESCE_REPLICAS=radar-api=1,radar-immo-mcp=1`
    (the map is applied ONLY with `SKIP_QUIESCE=true`; without it and without a
    recorded quiesce, the un-quiesce does nothing).
@@ -280,23 +286,21 @@ Secrets. Never a SealedSecret.
 
 ## MEDIUM 2 / MEDIUM 3
 
-- **MEDIUM 2** (classe du bug Farid, kubectl pas S3) : `refresh` exige
-  `ConfigMap radar-api.SCRAPE_S3_BUCKET == PREPROD_DOCS` (sinon PV écrits hors
-  served bucket → re-404). Échappatoire `ASSERT_REFRESH_BUCKET=0`.
-- **MEDIUM 3** (mémoire de collecte) : le delta S6 n'est un delta que si `runs/`
-  est présent dans PREPROD_DOCS. Job runs/ verdict-only (gate PREPROD_DOCS ;
-  advisory PROD_DOCS). Défense en profondeur : `refresh` re-dispatche le Job runs/.
-  Échappatoire `ASSERT_RUNS_MEMORY=0`.
+Removed with S6: these guards protected the differential refresh the bascule
+used to run. The refresh is no longer part of the bascule (CronJob
+`radar-refresh-pv`, triggered independently); `precheck-runs` stays available
+(advisory `--prod`).
 
 ## Restore from a backup — `MODE=restore` / `MODE=list`
 
-Workflow input `MODE`: `chain` (default, and always for a scheduled run: live
-dump S1, sequence above, unchanged) | `restore` (restore preprod FROM a daily
+Workflow input `MODE`: `chain` (default of a dispatch: live dump S1, sequence
+above) | `restore` (**always for a scheduled run**, from the latest complete
+backup, 24 h guard active) (restore preprod FROM a daily
 backup of `radar-immobilier-backup`, see `../backup/`) | `list` (read-only).
 Logic: `restore-mode.mjs` (runner, kubectl only) + `backup-restore.cjs` (in-pod
 steps, embedded verbatim in the Job templates with `node -e`, image radar-api =
 Node + `@aws-sdk/client-s3`, 0 python, 0 new image). The scheduled restore stays
-frozen by `BASCULE_SCHEDULE_ENABLED=false` (untouched).
+gated by `BASCULE_SCHEDULE_ENABLED` (armed by the k8s lane; OFF by default).
 
 ### Inputs
 
@@ -324,7 +328,7 @@ frozen by `BASCULE_SCHEDULE_ENABLED=false` (untouched).
 | S5 | `flip` | **G4** = sentinel of THIS backup + `recon-backup` re-run | kubectl |
 | U / S7 | `unquiesce` / `smoke` | unchanged | kubectl / curl |
 
-No refresh in `MODE=restore` (a restore is a restore). `DRY_RUN=true` runs G3 +
+No refresh in any MODE (a restore is a restore). `DRY_RUN=true` runs G3 +
 S0 + S0.s (**the backup Secrets are still written** — same values; the read-only
 Jobs need them) + R0 (read-only Job) + `docs-restore --dry` (plan only: every
 inventory object restorable?) + S7. No quiesce, no restore, no copy.

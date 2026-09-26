@@ -1,10 +1,12 @@
 # bascule-preprod — BASCULE PROD → PRÉPROD (« iso-prod »), rejouable SANS IA.
 #
-# Enchaîne S0→S7 (cf. deploy/ci/bascule-preprod/bascule.mjs) : DÉCLENCHEUR dump
-# prod → restore préprod → migrations → copie docs → recon → flip serving →
-# refresh différentiel → smoke. Toute la LOGIQUE + les GARDES fail-closed sont
-# en Node ; ce workflow reste fin (installe les outils, câble les secrets,
-# appelle le CLI dans l'ordre). AUCUNE IA au runtime.
+# Enchaîne S0→S5 + S7 (cf. deploy/ci/bascule-preprod/bascule.mjs) : restore
+# préprod → migrations → copie docs → recon → flip serving → smoke. NO REFRESH in
+# the bascule (owner decision: "a restore is a restore"): the refresh lives in
+# its own CronJob radar-refresh-pv and in bascule-refresh.yml, never triggered by
+# the bascule. Toute la LOGIQUE + les GARDES fail-closed sont en Node ; ce
+# workflow reste fin (installe les outils, câble les secrets, appelle le CLI
+# dans l'ordre). AUCUNE IA au runtime.
 #
 # RUNNER KUBECTL-ONLY (contrat owner + co-val i-infra) : AUCUNE PII, AUCUNE cred
 # S3, AUCUN listing/clé ne transite ni n'est lu par le runner GitHub (OVH n'a pas
@@ -21,10 +23,14 @@
 #
 # S5 (flip) ISOLABLE via SKIP_FLIP : si la CI n'a pas encore le RBAC kubectl
 # préprod pour muter l'env, mettre SKIP_FLIP=true — le flip est alors le seul pas
-# porté hors-CI (owner / enabler k8s). Idem SKIP_REFRESH pour S6.
+# porté hors-CI (owner / enabler k8s).
 #
-# MODE (input, default `chain`; a scheduled run is always `chain`):
-#   chain   the sequence above (LIVE dump S1 → restore → …). Changed by the
+# MODE (input, default `chain` for a dispatch). A SCHEDULED run is ALWAYS
+# `restore` from the LATEST `complete` backup (BACKUP_ID latest =
+# manifests/latest.json latestComplete, 24 h freshness guard active, refused
+# otherwise), with the auto-CONFIRM of the day — the source is the last verified
+# backup, never a live prod dump.
+#   chain   (dispatch only) LIVE dump S1 → restore → …. Changed by the
 #           restore work: the job runs in the environment `radar-bascule`, G3 is
 #           checked first in every MODE, and the docs-sync Secret is rewritten from
 #           GitHub BEFORE the quiesce (DRY: server dry-run only).
@@ -42,7 +48,8 @@
 #   backup-list-immo-<CYCLE_ID> in MODE=list.
 name: bascule-preprod (iso-prod)
 # The e2e orchestrator correlates its dispatch with MODE + CYCLE_ID in the run name.
-run-name: "bascule-preprod ${{ inputs.MODE || 'chain' }} ${{ inputs.CYCLE_ID }}"
+# A scheduled run is `restore` (no inputs on a schedule event).
+run-name: "bascule-preprod ${{ github.event_name == 'schedule' && 'restore' || inputs.MODE || 'chain' }} ${{ inputs.CYCLE_ID }}"
 
 on:
   # CD-native-v2 : la bascule est AUTOMATISÉE par une planification HEBDOMADAIRE
@@ -51,7 +58,8 @@ on:
   # figée ici ; l'ARMEMENT est la variable de dépôt BASCULE_SCHEDULE_ENABLED (voir
   # `if` du job `bascule`), OFF par défaut, pour qu'une fusion ne déclenche jamais
   # une bascule prod planifiée avant que l'env ne soit prêt. Le workflow_dispatch
-  # ci-dessous reste (1re fois / à la demande).
+  # ci-dessous reste (1re fois / à la demande). The scheduled run is MODE=restore
+  # from the latest complete backup (see the job env), never a refresh.
   schedule:
     - cron: '17 3 * * 0'
   workflow_dispatch:
@@ -70,41 +78,11 @@ on:
         required: false
         type: boolean
         default: false
-      SKIP_REFRESH:
-        description: "true = ne pas jouer S6 (refresh différentiel)"
-        required: false
-        type: boolean
-        default: false
       SKIP_QUIESCE:
         description: "true = quiesce préprod fait à la main (owner/k8s) ; l'UN-QUIESCE reste automatisé (via UNQUIESCE_REPLICAS)"
         required: false
         type: boolean
         default: false
-      FORCE_REFRESH:
-        description: "true = précipiter le CronJob préprod radar-refresh-pv APRÈS la bascule (ordre bascule→refresh câblé, GH-triggered)"
-        required: false
-        type: boolean
-        default: false
-      FORCE_REFRESH_WAIT_COMPLETE:
-        description: "true = attendre la fin du balayage refresh (fail-closed) ; false = confirmer le démarrage puis rendre la main (async)"
-        required: false
-        type: boolean
-        default: false
-      REFRESH_CHUNK:
-        description: "S6 bornage (repli) — shard worker-live 'k/n' (ex. 1/4). Vide = delta complet des 530 villes. Exclusif de REFRESH_CITIES."
-        required: false
-        type: string
-        default: ""
-      REFRESH_CITIES:
-        description: "S6 bornage (repli) — liste explicite de slugs (ex. 'carignan delson'). Vide = delta complet. Exclusif de REFRESH_CHUNK."
-        required: false
-        type: string
-        default: ""
-      REFRESH_CONCURRENCY:
-        description: "S6 concurrence — villes scrapées en parallèle (défaut template = 6). Baisser si la mémoire (heap) est contrainte."
-        required: false
-        type: string
-        default: ""
       MODE:
         description: "chain = live dump (default) · restore = FROM a daily backup (BACKUP_ID) · list = backups available (read-only)"
         required: false
@@ -154,8 +132,10 @@ jobs:
     # environment, its secrets, the pre-created Secret and the RBAC
     # (rbac-ci-bascule-preprod-docs-secret.yaml) BEFORE the merge is exercised.
     environment: radar-bascule
-    # Budget per MODE (GitHub cap 360). chain: 180 min (S0→S5 + the S6 window
-    # aligned on the Job activeDeadline 7200 s + S7; happy path ~1 h 45). restore:
+    # Budget per MODE (GitHub cap 360). chain: 180 min (sum of the runner-side Job
+    # waits: dump 33 + G1 20 + restore 30 + migrate 15 + docs 30 + recon 2 × 10 +
+    # quiesce 5 + un-quiesce 10 + served-refs 15 ≈ 178 min; no refresh). restore
+    # (also every scheduled run):
     # 330 min > the sum of the runner-side Job waits (R0 10 + quiesce 5 + G1 20 +
     # restore 30 + migrate 15 + docs 125 + recon 15 + G4 recon 15 + un-quiesce 10 +
     # served-refs 15 ≈ 260 min). A hung Job therefore ends by its OWN Node timeout
@@ -165,7 +145,7 @@ jobs:
     # guaranteed to finish. Recovery then: `node bascule.mjs unquiesce` with the
     # quiesce-state.json of the artefact bascule-quiesce-state-<run_id> (uploaded
     # right after the quiesce) — README "Timeouts and the un-quiesce".
-    timeout-minutes: ${{ (inputs.MODE || 'chain') == 'restore' && 330 || 180 }}
+    timeout-minutes: ${{ (github.event_name == 'schedule' || inputs.MODE == 'restore') && 330 || 180 }}
     # Consumed by the served-ids / cycle-leg jobs (e2e contract, CYCLE_ID set).
     # Values are validated by restore-mode.mjs before being written.
     outputs:
@@ -187,11 +167,14 @@ jobs:
       # ── GO owner + anti-rejeu (CONFIRM_EXPECTED calculé au pas 'compute') ──
       CONFIRM: ${{ inputs.CONFIRM }}
       # ── MODE (chain | restore | list) + restore-from-backup parameters ────
-      # A scheduled run has no inputs → chain. Every value is re-validated in
-      # Node before use (never interpolated into a shell).
-      MODE: ${{ inputs.MODE || 'chain' }}
+      # A SCHEDULED run (no inputs) is MODE=restore from the LATEST complete
+      # backup: BACKUP_ID latest (= latestComplete), ALLOW_STALE_BACKUP false (the
+      # 24 h freshness guard refuses an older backup: nothing is quiesced then).
+      # A dispatch keeps its inputs (default chain). Every value is re-validated
+      # in Node before use (never interpolated into a shell).
+      MODE: ${{ github.event_name == 'schedule' && 'restore' || inputs.MODE || 'chain' }}
       BACKUP_ID: ${{ inputs.BACKUP_ID || 'latest' }}
-      ALLOW_STALE_BACKUP: ${{ inputs.ALLOW_STALE_BACKUP && 'true' || 'false' }}
+      ALLOW_STALE_BACKUP: ${{ github.event_name != 'schedule' && inputs.ALLOW_STALE_BACKUP && 'true' || 'false' }}
       CYCLE_ID: ${{ inputs.CYCLE_ID }}
       # Daily backup bucket + dedicated preprod identities (NAMES only here): the
       # pre-created Secrets radar-backup-reader-preprod (pg/, manifests/,
@@ -433,8 +416,8 @@ jobs:
       # ── S0.b (advisory) — prédiction précoce de la mémoire de collecte ─────
       # Job PRÉPROD (read-only) qui liste `runs/` de PROD_DOCS : prédit si la copie
       # S3 amènera la mémoire de collecte → delta. ADVISORY : `continue-on-error`
-      # rend le Job non bloquant (le runner ne lit que .status). Le vrai gate est
-      # plus bas (PREPROD_DOCS).
+      # rend le Job non bloquant (le runner ne lit que .status). Information only:
+      # the bascule itself never refreshes.
       - name: S0.b precheck-runs (advisory, Job cible PROD_DOCS)
         if: ${{ env.MODE == 'chain' }}
         continue-on-error: true
@@ -545,28 +528,9 @@ jobs:
         timeout-minutes: 15
         run: node "$CLI" unquiesce
 
-      # Pré-check runs/ (mémoire de collecte) — Job PRÉPROD verdict-only, APRÈS
-      # S3/S3b (copie docs) et AVANT S6 (refresh). Gate fail-closed sur PREPROD_DOCS
-      # = bucket réellement LU par le delta : `runs/` VIDE → Job exit 1 (rescrape
-      # complet imminent). Non joué en DRY (la copie S3 réelle n'a pas eu lieu →
-      # faux négatif) ; S6 re-vérifie en interne (ASSERT_RUNS_MEMORY, défense en profondeur).
-      # MODE=restore never refreshes (a restore is a restore).
-      - name: precheck-runs (gate mémoire de collecte — Job PREPROD_DOCS, avant S6)
-        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_REFRESH && env.MODE == 'chain' }}
-        run: node "$CLI" precheck-runs
-
-      - name: S6 refresh différentiel (worker-live delta, Job in-cluster)
-        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_REFRESH && env.MODE == 'chain' }}
-        # Fix S6 : (a) concurrence worker-live (masque la latence des sources
-        # lentes), (b) poll runner aligné sur l'activeDeadline du Job (bascule.mjs),
-        # (d) bornage optionnel (repli démo). Vides ⇒ delta COMPLET des 530 villes
-        # à la concurrence par défaut du template. REFRESH_CHUNK/REFRESH_CITIES
-        # sont mutuellement exclusifs (bascule.mjs fail-closed).
-        env:
-          REFRESH_CHUNK: ${{ inputs.REFRESH_CHUNK }}
-          REFRESH_CITIES: ${{ inputs.REFRESH_CITIES }}
-          REFRESH_CONCURRENCY: ${{ inputs.REFRESH_CONCURRENCY }}
-        run: node "$CLI" refresh
+      # NO S6: the bascule never refreshes (owner decision: "a restore is a
+      # restore"). The refresh is the CronJob radar-refresh-pv (its own schedule)
+      # or bascule-refresh.yml on demand — never triggered by this workflow.
 
       # ── S7 : smoke (read-only ; joué aussi en DRY) ─────────────────────────
       - name: S7 smoke préprod/health (db.ok + objectStore.ok)
@@ -630,76 +594,6 @@ jobs:
             ${{ github.workspace }}/.bascule-work/backup-pin.json
           if-no-files-found: warn
           retention-days: 7
-
-  # ═══════════════════════════════════════════════════════════════════════════
-  # ORDRE CÂBLÉ (owner) : bascule (restore prod → préprod) PUIS refresh sur les
-  # données restaurées — le tout GH-triggered, 0 geste manuel. Ce job précipite
-  # le CronJob préprod radar-refresh-pv (hors planning 5/11/17/23h) APRÈS le
-  # succès de `bascule`, quand FORCE_REFRESH=true. `needs: bascule` garantit
-  # l'ORDRE ; `if` exige le succès de la bascule (jamais un refresh sur un restore
-  # échoué). Décorrélé aussi via le workflow autonome bascule-refresh.yml.
-  #
-  # Cred = KUBE_CONFIG_DATA_PREPROD (SA radar-ci-deployer-preprod) : a déjà
-  # batch/jobs:create + batch/cronjobs:get en préprod (deploy/k8s/11-ci-deployer-
-  # preprod-rbac.yaml) — aucune extension RBAC. Runner kubectl-only + STATUS-ONLY.
-  # ═══════════════════════════════════════════════════════════════════════════
-  force-refresh:
-    needs: bascule
-    # Joué si demandé (input FORCE_REFRESH) OU sur un run PLANIFIÉ (CD-native-v2 :
-    # l'ordre câblé bascule→refresh est automatique au run planifié), ET si la bascule a
-    # réussi (jamais en DRY : rien n'a été restauré). `create job --from=cronjob`
-    # n'est pas destructif pour la prod.
-    # MODE=restore|list never refreshes (a restore is a restore).
-    if: ${{ (inputs.FORCE_REFRESH || github.event_name == 'schedule') && !inputs.DRY_RUN && (inputs.MODE || 'chain') == 'chain' && needs.bascule.result == 'success' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 420
-    permissions:
-      contents: read
-    env:
-      PREPROD_NAMESPACE: ${{ vars.BASCULE_PREPROD_NAMESPACE || 'radar-immobilier-preprod' }}
-      REFRESH_CRONJOB: ${{ vars.BASCULE_REFRESH_CRONJOB || 'radar-refresh-pv' }}
-      FORCE_REFRESH_WAIT_COMPLETE: ${{ inputs.FORCE_REFRESH_WAIT_COMPLETE && '1' || '0' }}
-      GITHUB_RUN_ID: ${{ github.run_id }}
-      CLI: deploy/ci/bascule-preprod/bascule.mjs
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-
-      - name: Configure kubeconfig (preprod deployer)
-        env:
-          KUBE_CONFIG_B64: ${{ secrets.KUBE_CONFIG_DATA_PREPROD }}
-        run: |
-          set -euo pipefail
-          mkdir -p "$HOME/.kube"
-          printf '%s' "$KUBE_CONFIG_B64" | base64 -d > "$HOME/.kube/config"
-          chmod 600 "$HOME/.kube/config"
-
-      - name: Pre-flight — assert preprod cluster + namespace
-        env:
-          EXPECTED_KUBE_APISERVER_HOST: ${{ vars.EXPECTED_KUBE_APISERVER_HOST }}
-        run: |
-          set -euo pipefail
-          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
-          expected="${EXPECTED_KUBE_APISERVER_HOST:-$DEFAULT_HOST}"
-          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
-          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
-          echo "kubeconfig apiserver host : ${host:-<none>}"
-          echo "expected apiserver host   : ${expected}"
-          if [ "$host" != "$expected" ]; then
-            echo "::error title=Wrong cluster — refresh refused::kubeconfig targets '${host:-<none>}' but expected '${expected}'."; exit 1
-          fi
-          kubectl -n "$PREPROD_NAMESPACE" get cronjob "$REFRESH_CRONJOB" -o name
-          echo "pre-flight OK — ${expected} / ${PREPROD_NAMESPACE} / cronjob ${REFRESH_CRONJOB}"
-
-      - name: Force preprod refresh (precipitate radar-refresh-pv, après la bascule)
-        run: node "$CLI" force-refresh
 
   # ═══════════════════════════════════════════════════════════════════════════
   # e2e CONTRACT (CYCLE_ID set by bascule-e2e.yml) — two jobs WITHOUT any cluster
