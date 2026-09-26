@@ -132,6 +132,40 @@ describe("SignalPdfOverlay — attribution carte masquée pendant l'ouverture", 
   });
 });
 
+describe("SignalPdfOverlay — Ctrl/Cmd+F route vers la recherche du viewer", () => {
+  it("Ctrl+F focus l'input de recherche plein-texte et empêche le find natif", async () => {
+    const { container, getByRole } = render(SignalPdfOverlay, {
+      props: { rawRef: "raw/test/ctrlf.pdf" },
+    });
+    await waitFor(() =>
+      expect(container.querySelectorAll(".pdf-page-slot")).toHaveLength(5),
+    );
+    const input = getByRole("searchbox", {
+      name: /Rechercher dans le document/i,
+    }) as HTMLInputElement;
+    expect(document.activeElement).not.toBe(input);
+    // preventDefault() → fireEvent renvoie false (find natif du navigateur bloqué).
+    const notPrevented = await fireEvent.keyDown(window, { key: "f", ctrlKey: true });
+    expect(notPrevented).toBe(false);
+    expect(document.activeElement).toBe(input);
+  });
+
+  it("Cmd+F (metaKey) route aussi vers la cellule de recherche", async () => {
+    const { container, getByRole } = render(SignalPdfOverlay, {
+      props: { rawRef: "raw/test/cmdf.pdf" },
+    });
+    await waitFor(() =>
+      expect(container.querySelectorAll(".pdf-page-slot")).toHaveLength(5),
+    );
+    const input = getByRole("searchbox", {
+      name: /Rechercher dans le document/i,
+    }) as HTMLInputElement;
+    const notPrevented = await fireEvent.keyDown(window, { key: "f", metaKey: true });
+    expect(notPrevented).toBe(false);
+    expect(document.activeElement).toBe(input);
+  });
+});
+
 describe("SignalPdfOverlay continuous page stack", () => {
   it("dimensions five slots while rendering only the page window", async () => {
     const { container } = render(SignalPdfOverlay, {
