@@ -783,6 +783,97 @@ describe("runLiveScrape — onCity streaming (a, observability)", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// BOUNDED CONCURRENCY (a): scrape several cities in parallel to mask slow-source
+// latency, while keeping the returned recap in INPUT order and never exceeding
+// the requested lane count. Default (unset) stays serial (1 in-flight).
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("runLiveScrape — bounded city concurrency (a, latency masking)", () => {
+  /**
+   * A fetch that wraps `fakeFetchForSlugs` with a per-fetch delay and tracks how
+   * many fetches are in flight AT ONCE — the observable proxy for how many cities
+   * are being scraped in parallel. `delayMs` is applied to EVERY fetch so the
+   * lanes overlap deterministically enough to fill the pool.
+   */
+  function instrumentedFetch(
+    slugs: readonly string[],
+    pdfBody: string,
+    delayMs: number,
+  ): { fetch: PvFetchLike; maxInFlight: () => number } {
+    const inner = fakeFetchForSlugs(slugs, pdfBody);
+    let inFlight = 0;
+    let maxInFlight = 0;
+    const fetch: PvFetchLike = async (url: string) => {
+      inFlight += 1;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      try {
+        await new Promise((r) => setTimeout(r, delayMs));
+        return await inner(url);
+      } finally {
+        inFlight -= 1;
+      }
+    };
+    return { fetch, maxInFlight: () => maxInFlight };
+  }
+
+  it("keeps the recap in INPUT order and covers every city exactly once at concurrency > 1", async () => {
+    const slugs = configOnlySlugs(12);
+    const store = new MemoryStore();
+    const { fetch } = instrumentedFetch(slugs, "PV bytes — parallel order", 4);
+
+    const streamed: string[] = [];
+    const recap = await runLiveScrape(slugs, {
+      store,
+      fetch,
+      concurrency: 4,
+      onCity: (r) => streamed.push(r.city),
+    });
+
+    // Returned recap is in INPUT order (the documented contract), even though the
+    // cities finished concurrently and possibly out of order.
+    expect(recap.map((r) => r.city)).toEqual(slugs);
+    // Every city appears exactly once — no dropped or double-processed index.
+    expect([...streamed].sort()).toEqual([...slugs].sort());
+    expect(streamed).toHaveLength(slugs.length);
+    for (const r of recap) expect(r.status).toBe("new");
+  });
+
+  it("actually parallelizes (in-flight > 1) but never exceeds the requested lanes", async () => {
+    const slugs = configOnlySlugs(12);
+    const store = new MemoryStore();
+    const { fetch, maxInFlight } = instrumentedFetch(slugs, "PV bytes — parallel bound", 8);
+
+    await runLiveScrape(slugs, { store, fetch, concurrency: 4 });
+
+    // Effectiveness: more than one city was in flight at once (latency masked).
+    expect(maxInFlight()).toBeGreaterThan(1);
+    // Safety: the bound is honoured — never more than 4 concurrent fetches.
+    expect(maxInFlight()).toBeLessThanOrEqual(4);
+  });
+
+  it("defaults to SERIAL (1 in-flight) when concurrency is unset — the ordering contract", async () => {
+    const slugs = configOnlySlugs(6);
+    const store = new MemoryStore();
+    const { fetch, maxInFlight } = instrumentedFetch(slugs, "PV bytes — serial default", 4);
+
+    await runLiveScrape(slugs, { store, fetch });
+
+    // No option ⇒ one city at a time (protects the onCity/recap in-order test).
+    expect(maxInFlight()).toBe(1);
+  });
+
+  it("collapses an invalid concurrency (< 1 / non-finite) to serial", async () => {
+    const slugs = configOnlySlugs(4);
+    const store = new MemoryStore();
+    const { fetch, maxInFlight } = instrumentedFetch(slugs, "PV bytes — invalid concurrency", 4);
+
+    const recap = await runLiveScrape(slugs, { store, fetch, concurrency: 0 });
+    expect(recap.map((r) => r.city)).toEqual(slugs);
+    expect(maxInFlight()).toBe(1);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // REEXPLOIT: replay EXPLOITATION from already-stored raw (no network scrape).
 // Seeds a city's raw PV (`raw/proces-verbaux-<city>/cas/<sha>.pdf` + sidecar
 // `.meta.json`) as RECUEIL would, then re-exploits from the store alone.
