@@ -52,11 +52,11 @@ stays **kubectl-only + STATUS-ONLY** (no `kubectl logs`, no S3/DB creds, no PII)
   └────────────────────────────────────────────────────────────────────────────┘
   ┌── weekly (Sunday 03:17 UTC), armed by BASCULE_SCHEDULE_ENABLED ─────────────┐
   │ bascule-preprod.yml (the run, auto-CONFIRM = the schedule IS the GO)        │
-  │   job bascule       S0→S7 (dump→restore→migrate→docs→recon G4→flip→S6→smoke)│
-  │   job force-refresh needs: bascule (success) → precipitate radar-refresh-pv │
-  │                     (order bascule→refresh preserved on the scheduled run)  │
+  │   job bascule  MODE=restore from the LATEST complete backup (24 h guard):   │
+  │                R0→restore→migrate→docs at D→recon G4→flip→smoke. NO refresh │
   └────────────────────────────────────────────────────────────────────────────┘
-   bascule-refresh.yml — decoupled on-demand force-refresh (unchanged)
+   bascule-refresh.yml — decoupled on-demand force-refresh (the ONLY refresh path from CI;
+   the bascule never refreshes)
 ```
 
 ## The credential rename (important)
@@ -75,7 +75,7 @@ VAP-constrained) must never be the run runner's cred.
 | `KUBE_CONFIG_DATA_PROD` **(PERMANENT)** | SA `radar-ci-bascule-prod` | `bascule-bundle-cd.yml` | applies the bundle on merge; **0 `secrets:create`**. Minted once at install. |
 | `KUBE_CONFIG_DATA_PROD_TRIGGER` **(renamed)** | name-scoped SA `radar-ci-trigger-prod` | `bascule-preprod.yml` S1 dump trigger | patch `radar-db-backup-prod` suspend, VAP-enforced. Was `KUBE_CONFIG_DATA_PROD`. |
 | `KUBE_CONFIG_DATA_BASCULE_PREPROD` (existing) | SA `radar-ci-bascule-preprod` | `bascule-preprod.yml` bascule job | preprod control-plane (quiesce/dispatch/flip). |
-| `KUBE_CONFIG_DATA_PREPROD` (existing) | SA `radar-ci-deployer-preprod` | force-refresh (wired + standalone) | already has `batch/jobs:create` + `batch/cronjobs:get` — **no RBAC change**. |
+| `KUBE_CONFIG_DATA_PREPROD` (existing) | SA `radar-ci-deployer-preprod` | force-refresh (`bascule-refresh.yml` only; no longer wired into the bascule) | already has `batch/jobs:create` + `batch/cronjobs:get` — **no RBAC change**. |
 
 ### No more app-cred GH secrets
 
@@ -95,7 +95,8 @@ in-cluster sealed-secrets controller materializes. See `CRED_CYCLE.md`.
   then the OVH host) — PROD cluster identity for the apply.
 - `BASCULE_VAP_PROPAGATION_SEC` (default `20`) — VAP propagation wait.
 - `BASCULE_PREPROD_NAMESPACE` (default `radar-immobilier-preprod`),
-  `BASCULE_REFRESH_CRONJOB` (default `radar-refresh-pv`) — force-refresh target.
+  `BASCULE_REFRESH_CRONJOB` (default `radar-refresh-pv`) — force-refresh target
+  (`bascule-refresh.yml`).
 
 ## What is now ELIMINATED
 
@@ -134,7 +135,8 @@ Once this PR is merged and the install is done, these are unused by the pipeline
 - Anti-RCE gate: non-destructive (`--dry-run=server`); on failure it **empties the
   T1 Role rules** to close the RCE window (the permanent SA has no `delete` verb —
   a deliberate least-privilege trade-off, and a stronger closure than a delete).
-- Run: scheduled = auto-CONFIRM of the day (G3 anti-replay kept); force-refresh
+- Run: scheduled = `MODE=restore` from the latest complete backup, auto-CONFIRM of
+  the day (G3 anti-replay kept), no refresh; force-refresh (`bascule-refresh.yml`)
   per-run Job name, delete-then-create.
 
 ## Still 0 Python, still runner kubectl-only
