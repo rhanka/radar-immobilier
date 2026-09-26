@@ -13,8 +13,9 @@
 //   - run correlation by run-name carrying MODE + CYCLE_ID only (never by time);
 //   - common backup date D (both tenants `complete`, ≤ 48 h old unless
 //     ALLOW_STALE_BACKUP; a date outside a truncated list refused);
-//   - inclusion join-verify with classes `city-not-served-by-geo` (tolerated,
-//     reported) vs `divergent-code` (fails);
+//   - inclusion join-verify (classes `city-not-served-by-geo` / `divergent-code`)
+//     judged on FIDELITY against the recorded baseline: known-drift (counted),
+//     new drift (fails), resolved (reported, to purge from the baseline);
 //   - cycle.json schema.
 // =============================================================================
 import { Buffer } from "node:buffer";
@@ -240,32 +241,107 @@ export function parseServedIds(text, label) {
 }
 const cityOf = (id) => id.split(":")[2];
 
+// ── join-verify baseline (FIDELITY control, owner decision 2026-09-26) ────────
+// The drift measured on the backups of D=2026-09-26 (immo's zone_versions mirror
+// behind geo, slug variants, a geo collection without zone_code) is RECORDED in
+// join-verify-baseline.json; the restore is then judged on FIDELITY: an entry of
+// the baseline is `known-drift` (counted, never fails), an entry absent from it
+// FAILS, a baseline entry that no longer drifts is `resolved` (reported, to purge).
+// The data drift itself is tracked as a separate debt (README).
+export const BASELINE_FORMAT = "radar-join-verify-baseline/v1";
+export const DRIFT_CLASSES = Object.freeze(["divergent-code", "city-not-served-by-geo"]);
+const SLUG_RE = /^[a-z0-9][a-z0-9-]*$/;
+const ZONE_ID_RE = /^ogc:zones:[a-z0-9][a-z0-9-]*:\S+$/;
+
+// Baseline JSON → { entries: Map(id → { city, class, cause }), recorded_from }.
+// Fail-closed: unknown format/scope, a group with an invalid city, an unknown
+// class, an undeclared cause, an id out of format or of another city, a duplicate.
+export function parseBaseline(json) {
+  if (!json || json.format !== BASELINE_FORMAT || json.scope !== "zones" || !Array.isArray(json.groups)) {
+    throw new Error(`join-verify baseline is not ${BASELINE_FORMAT} (scope zones, groups[])`);
+  }
+  const causes = json.causes && typeof json.causes === "object" ? json.causes : {};
+  const entries = new Map();
+  for (const [i, g] of json.groups.entries()) {
+    const where = `baseline group ${i} (${g?.city ?? "?"})`;
+    if (!g || typeof g.city !== "string" || !SLUG_RE.test(g.city)) throw new Error(`${where}: invalid city`);
+    if (!DRIFT_CLASSES.includes(g.class)) throw new Error(`${where}: class must be one of ${DRIFT_CLASSES.join(", ")}`);
+    if (typeof g.cause !== "string" || !Object.prototype.hasOwnProperty.call(causes, g.cause)) throw new Error(`${where}: cause not declared in causes`);
+    if (!Array.isArray(g.ids)) throw new Error(`${where}: ids[] missing`);
+    for (const id of g.ids) {
+      if (typeof id !== "string" || !ZONE_ID_RE.test(id) || cityOf(id) !== g.city) throw new Error(`${where}: id out of format or of another city: ${id}`);
+      if (entries.has(id)) throw new Error(`baseline: duplicate id ${id}`);
+      entries.set(id, { city: g.city, class: g.class, cause: g.cause });
+    }
+  }
+  const r = json.recorded_from && typeof json.recorded_from === "object" ? json.recorded_from : {};
+  return {
+    entries,
+    recorded_from: { backup_date: r.backup_date ?? null, orchestrator_run_id: r.orchestrator_run_id ?? null, cycle_id: r.cycle_id ?? null },
+  };
+}
+
+const bump = (o, k) => { o[k] = (o[k] || 0) + 1; };
+
 // INCLUSION immo ⊆ geo (zones). An immo id absent from geo is
-//   city-not-served-by-geo  when geo serves NO zone of that city (tolerated, reported),
-//   divergent-code          when geo serves the city but not that code (FAILS).
-export function inclusionCheck(immoText, geoText, { sample = 50 } = {}) {
+//   city-not-served-by-geo  when geo serves NO zone of that city,
+//   divergent-code          when geo serves the city but not that code.
+// Judged against the baseline (parseBaseline): known-drift (in the baseline, any
+// class — a class change is counted in `reclassified`) never fails; NEW drift
+// (absent from the baseline, either class) FAILS; baseline ids no longer drifting
+// are `resolved`. Without a baseline, every drift is new (strict mode).
+// status: match (no drift) | known-drift (only baseline entries) | drift (new).
+export function inclusionCheck(immoText, geoText, { sample = 50, baseline = null } = {}) {
   const immo = parseServedIds(immoText, "immo");
   const geo = parseServedIds(geoText, "geo");
   const geoSet = new Set(geo);
+  const immoSet = new Set(immo);
   const geoCities = new Set(geo.map(cityOf));
-  const notServed = new Map();
-  const divergent = [];
+  const known = baseline?.entries ?? new Map();
+  const drifting = new Set();
+  const all = { divergent: [], notServed: new Map() };
+  const fresh = { divergent: [], notServedIds: [], notServed: new Map() };
+  const knownDrift = { count: 0, by_class: {}, by_cause: {}, reclassified: 0 };
   let included = 0;
   for (const id of immo) {
     if (geoSet.has(id)) { included += 1; continue; }
+    drifting.add(id);
     const city = cityOf(id);
-    if (!geoCities.has(city)) notServed.set(city, (notServed.get(city) || 0) + 1);
-    else divergent.push(id);
+    const cls = geoCities.has(city) ? "divergent-code" : "city-not-served-by-geo";
+    if (cls === "divergent-code") all.divergent.push(id); else all.notServed.set(city, (all.notServed.get(city) || 0) + 1);
+    const b = known.get(id);
+    if (b) {
+      knownDrift.count += 1; bump(knownDrift.by_class, cls); bump(knownDrift.by_cause, b.cause);
+      if (b.class !== cls) knownDrift.reclassified += 1;
+    } else if (cls === "divergent-code") fresh.divergent.push(id);
+    else { fresh.notServedIds.push(id); fresh.notServed.set(city, (fresh.notServed.get(city) || 0) + 1); }
   }
-  const cities = [...notServed.keys()].sort();
+  const resolved = { count: 0, included_now: 0, absent_from_immo: 0, sample: [] };
+  for (const id of known.keys()) {
+    if (drifting.has(id)) continue;
+    resolved.count += 1;
+    if (immoSet.has(id)) resolved.included_now += 1; else resolved.absent_from_immo += 1;
+    if (resolved.sample.length < sample) resolved.sample.push(id);
+  }
+  const cities = [...all.notServed.keys()].sort();
+  const freshCities = [...fresh.notServed.keys()].sort();
+  const newCount = fresh.divergent.length + fresh.notServedIds.length;
   return {
-    status: divergent.length ? "drift" : "match",
+    status: newCount ? "drift" : knownDrift.count ? "known-drift" : "match",
     scope: "zones",
     immo_count: immo.length,
     geo_count: geo.length,
     included,
-    city_not_served_by_geo: { count: [...notServed.values()].reduce((s, n) => s + n, 0), cities: cities.length, sample: cities.slice(0, sample) },
-    divergent_code: { count: divergent.length, sample: divergent.slice(0, sample) },
+    known_drift: knownDrift,
+    new_drift: {
+      count: newCount,
+      divergent_code: { count: fresh.divergent.length, sample: fresh.divergent.slice(0, sample) },
+      city_not_served_by_geo: { count: fresh.notServedIds.length, cities: freshCities.length, sample: freshCities.slice(0, sample), ids_sample: fresh.notServedIds.slice(0, sample) },
+    },
+    resolved,
+    baseline: baseline ? { entries: known.size, ...baseline.recorded_from } : null,
+    city_not_served_by_geo: { count: [...all.notServed.values()].reduce((s, n) => s + n, 0), cities: cities.length, sample: cities.slice(0, sample) },
+    divergent_code: { count: all.divergent.length, sample: all.divergent.slice(0, sample) },
   };
 }
 
@@ -294,7 +370,7 @@ export function newCycle({ cycleId, confirm, createdAt, orchestratorRunId = null
     allow_stale_backup: false,
     backup: null,
     legs: { immo: leg("immo"), geo: leg("geo") },
-    join_verify: { status: "pending", scope: "zones", compared_at: null, diff_summary: null },
+    join_verify: { status: "pending", scope: "zones", compared_at: null, baseline: null, diff_summary: null },
     verdict: "pending",
     problems: [],
   };
