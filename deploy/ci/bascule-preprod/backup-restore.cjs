@@ -19,7 +19,9 @@
 //   fetch-dump  initContainer of the DB restore Job (reader): re-reads manifest D
 //               (sha256 must equal the PIN), downloads pg/D/radar.dump streaming a
 //               sha256, refuses unless it equals the manifest, the sidecar and the PIN.
-//   docs        docs restore Job (reader + copy identity): restores into the preprod
+//   docs        docs restore Job: reader = manifest + inventory (pg/, manifests/,
+//               docs-inventory/ only); copy identity = version listing of
+//               <backup>/docs/, preprod listing and the copies. Restores into the preprod
 //               docs bucket the docs state AT DAY D from docs-inventory/D.json by
 //               server-side CopyObject from <backup>/docs/<key>?versionId=<v> (the
 //               version whose ETag is the inventory's when the key was rewritten
@@ -245,13 +247,30 @@ function destUpToDate(entry, d) {
   return !!de && (de === normEtag(entry.etag) || de === normEtag(entry.backupEtag));
 }
 
+// versionsIndex = null when the version listing is not permitted: then an entry
+// with a recorded versionId is copied by that id (CopyObject fails if it is
+// gone; the recon checks the size), and an entry without one goes to `needsHead`
+// (current version accepted only if its ETag + size are the inventory's).
 function planDocsRestore({ inventory, versionsIndex, destIndex }) {
   const createdAtMs = Date.parse(inventory.createdAt);
-  const plan = { objects: 0, upToDate: 0, notInBackup: 0, unresolved: 0, unresolvedReasons: {}, toCopy: [], bytesToCopy: 0, how: {} };
+  const plan = { objects: 0, upToDate: 0, notInBackup: 0, unresolved: 0, unresolvedReasons: {}, toCopy: [], needsHead: [], bytesToCopy: 0, how: {} };
   for (const e of inventory.objects) {
     plan.objects += 1;
     if (e.state !== 'backed-up') { plan.notInBackup += 1; continue; }
     if (destUpToDate(e, destIndex.get(e.key))) { plan.upToDate += 1; continue; }
+    if (!versionsIndex) {
+      if (e.versionId) {
+        plan.toCopy.push({ key: e.key, versionId: String(e.versionId), size: Number(e.size) });
+        plan.bytesToCopy += Number(e.size) || 0;
+        plan.how['version-id-unlisted'] = (plan.how['version-id-unlisted'] || 0) + 1;
+      } else if (normEtag(e.backupEtag)) {
+        plan.needsHead.push({ key: e.key, size: Number(e.size), backupEtag: normEtag(e.backupEtag) });
+      } else {
+        plan.unresolved += 1;
+        plan.unresolvedReasons['no-backup-etag'] = (plan.unresolvedReasons['no-backup-etag'] || 0) + 1;
+      }
+      continue;
+    }
     const c = chooseVersion(e, versionsIndex.get(e.key), createdAtMs);
     if (c.error) {
       plan.unresolved += 1;
@@ -541,15 +560,50 @@ async function runFetchDump({ cfg, reader, log }) {
   return { exitCode: EXIT.OK, termination: { ok: true, step: 'fetch-dump', date: cfg.date, pgSha256: got.sha256, pgSizeBytes: got.size } };
 }
 
+// Entries without a recorded version when versions cannot be listed: HEAD the
+// current backup copy (copy identity, GetObject on docs/*); accepted only when
+// its size and ETag are the inventory's (same content as at D).
+async function resolveByHead(copier, cfg, plan) {
+  let next = 0;
+  const worker = async () => {
+    while (next < plan.needsHead.length) {
+      const e = plan.needsHead[next++];
+      const h = await headOrNull(copier, cfg.backupBucket, LAYOUT.docsPrefix + e.key);
+      if (h && Number(h.ContentLength) === e.size && normEtag(h.ETag) === e.backupEtag) {
+        plan.toCopy.push({ key: e.key, versionId: null, size: e.size });
+        plan.bytesToCopy += e.size;
+        plan.how['current-etag-checked'] = (plan.how['current-etag-checked'] || 0) + 1;
+      } else {
+        plan.unresolved += 1;
+        const why = h ? 'current-differs' : 'no-current';
+        plan.unresolvedReasons[why] = (plan.unresolvedReasons[why] || 0) + 1;
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(cfg.concurrency, plan.needsHead.length) }, () => worker()));
+  plan.needsHead = [];
+}
+
 async function runDocs({ cfg, reader, copier, log }) {
   const manifest = await loadPinnedManifest(reader, cfg);
   const inventory = await loadInventory(reader, cfg, manifest);
-  const versionsIndex = indexVersions(await listAllVersions(reader, cfg.backupBucket, LAYOUT.docsPrefix));
+  // The copy identity reads <backup>/docs/* (the reader only sees pg/, manifests/,
+  // docs-inventory/). On OVH a versioned read is a GetObject/CopyObject with
+  // versionId: no distinct GetObjectVersion permission is assumed anywhere.
+  let versionsIndex = null;
+  try {
+    versionsIndex = indexVersions(await listAllVersions(copier, cfg.backupBucket, LAYOUT.docsPrefix));
+  } catch (e) {
+    if (!(e && (e.name === 'AccessDenied' || (e.$metadata && e.$metadata.httpStatusCode === 403)))) throw e;
+    log('WARN version listing of <backup>/docs/ not permitted to the copy identity: recorded versionIds used as is, others checked by HEAD');
+  }
   const destIndex = await destIndexOf(copier, cfg.dstBucket);
   const plan = planDocsRestore({ inventory, versionsIndex, destIndex });
+  if (plan.needsHead.length) await resolveByHead(copier, cfg, plan);
   log(`PLAN date=${cfg.date} inventory=${plan.objects} up_to_date=${plan.upToDate} to_copy=${plan.toCopy.length} ` +
     `bytes_to_copy=${plan.bytesToCopy} not_in_backup=${plan.notInBackup} unresolved=${plan.unresolved} ` +
-    `reasons=${JSON.stringify(plan.unresolvedReasons)} how=${JSON.stringify(plan.how)} dest_objects=${destIndex.size} dry=${cfg.dry}`);
+    `reasons=${JSON.stringify(plan.unresolvedReasons)} how=${JSON.stringify(plan.how)} dest_objects=${destIndex.size} ` +
+    `versions_listed=${versionsIndex !== null} dry=${cfg.dry}`);
   const base = { step: 'docs', date: cfg.date, dry: cfg.dry, inventory: plan.objects, upToDate: plan.upToDate, toCopy: plan.toCopy.length,
     bytesToCopy: plan.bytesToCopy, notInBackup: plan.notInBackup, unresolved: plan.unresolved, unresolvedReasons: plan.unresolvedReasons };
   if (plan.notInBackup > 0 || plan.unresolved > 0) {

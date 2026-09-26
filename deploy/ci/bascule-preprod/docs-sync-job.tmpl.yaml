@@ -7,7 +7,7 @@
 # immo-docs-prod, durable least-privilege) is PRE-CREATED by k8s; the bascule
 # REWRITES it at every run from the GitHub secrets of the environment
 # radar-bascule right before this Job (`docs-secret-fill`, kubectl replace,
-# get/update by name) — docs-sync-secret.mjs. No k8s watcher, no ownerReference.
+# get/update by name) — ci-secrets.mjs. No k8s watcher, no ownerReference.
 # The pod references the Secret by NAME.
 #
 #   container `sync` (image radar-api = aws-sdk @aws-sdk/client-s3, 0 python) :

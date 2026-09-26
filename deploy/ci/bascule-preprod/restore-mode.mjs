@@ -209,8 +209,9 @@ export function makeRestoreMode(h) {
   function backupParams() {
     const jd = jobDefaults();
     const bucket = opt("BACKUP_BUCKET", "radar-immobilier-backup");
-    const readerSecret = opt("BACKUP_READER_SECRET", "radar-backup-reader");
-    const copySecret = opt("BACKUP_DOCS_COPY_SECRET", readerSecret);
+    const readerSecret = opt("BACKUP_READER_SECRET", "radar-backup-reader-preprod");
+    // Dedicated copy signer, never a fallback on the reader (the reader cannot read docs/*).
+    const copySecret = opt("BACKUP_DOCS_COPY_SECRET", "radar-backup-restore-docs");
     if (!BUCKET_RE.test(bucket)) die("BACKUP_BUCKET invalid");
     for (const [k, v] of [["BACKUP_READER_SECRET", readerSecret], ["BACKUP_DOCS_COPY_SECRET", copySecret]]) {
       if (!K8S_NAME_RE.test(v)) die(`${k} is not a valid Secret name`);

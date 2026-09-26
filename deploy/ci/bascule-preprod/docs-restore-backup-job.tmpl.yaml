@@ -15,13 +15,15 @@
 # BR_STEP=recon : recon only (G4 re-check right before the flip).
 #
 # Identities (keys S3_ACCESS_KEY / S3_SECRET_KEY):
-#   reader ${READER_SECRET} (radar-backup-reader, + key BACKUP_BUCKET): manifest,
-#          inventory, version listing — GetObject(+versionId), ListBucket(Versions).
-#   copy   ${COPY_SECRET}: SIGNS the server-side CopyObject and lists the preprod
-#          bucket. It needs GetObject + GetObjectVersion on <backup>/docs/* AND
-#          ListBucket + PutObject (+ PutObjectAcl for the grant) on the preprod docs
-#          bucket. Default = the reader Secret (then the reader user needs those
-#          preprod rights) — see README "Restore from a backup — identities".
+#   reader ${READER_SECRET} (radar-backup-reader-preprod, + key BACKUP_BUCKET):
+#          manifest + inventory only (GetObject on pg/*, manifests/*, docs-inventory/*).
+#   copy   ${COPY_SECRET} (radar-backup-restore-docs, OVH user
+#          radar-backup-restore-preprod): lists the versions of <backup>/docs/
+#          (ListBucketVersions; if refused, recorded versionIds are used and the
+#          others checked by HEAD), SIGNS the server-side CopyObject (GetObject on
+#          <backup>/docs/* — on OVH a read with versionId is a GetObject, there is no
+#          distinct GetObjectVersion permission) and lists/writes the preprod docs
+#          bucket (ListBucket + PutObject + PutObjectAcl, no delete).
 # GrantFullControl id=${COPY_GRANTEE} (preprod API canonical id) keeps the copied
 # objects readable by the preprod API, as in docs-sync.
 #

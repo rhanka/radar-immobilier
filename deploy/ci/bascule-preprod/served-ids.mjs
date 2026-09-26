@@ -10,9 +10,10 @@
 // `bascule` job):
 //
 //   build        job `served-ids` (needs bascule, non-DRY, CYCLE_ID set): reads
-//                the RAW zone refs immo references (IMMO_SERVED_REFS_URL — public
-//                preprod endpoint, 0 credential — or IMMO_SERVED_REFS_FILE) and
-//                computes the ids with the PUBLISHED builder
+//                the zone refs immo holds (IMMO_SERVED_REFS_FILE = artefact
+//                immo-served-refs-<CYCLE_ID>, TSV city_slug<TAB>zone_code extracted
+//                READ-ONLY from the restored preprod DB by the served-refs Job —
+//                decision O1, no HTTP endpoint) and computes the ids with the PUBLISHED builder
 //                @sentropic/geo@<BUILDER_VERSION> (installed outside the workspace,
 //                exactly like the geo leg: same builder on both sides ⇒ byte-
 //                identical canonicalisation by construction). Artefact files (same
@@ -21,8 +22,9 @@
 //                  served-ids.txt.sha256  `<hex>  served-ids.txt` (sha256sum -c)
 //                  served-ids.meta.json   counts, scope, builder, source
 //                SCOPE = ZONES (zones first, arbitration i-cond 2026-09-25; geo serves
-//                zones only for now). PENDING O1: the immo endpoint enumerating the
-//                referenced RAW zone codes is not delivered yet → fail-closed.
+//                zones only for now). NB: immo does not persist the raw OGC zone
+//                code; the refs carry zone_versions.code_affiche (immo-normalised),
+//                re-canonicalised here by the geo builder.
 //   cycle-leg    job `cycle-leg` (needs [bascule, served-ids], always): writes
 //                `legs.immo` (run, sha, MODE, backup date + sha256, verdict pg/s3).
 //   validate-cycle-id / builder-version  small helpers for the workflow.
@@ -34,6 +36,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { gunzipSync } from "node:zlib";
 
 export const CYCLE_ID_PATTERN = /^[A-Za-z0-9._-]{1,100}$/;
 export const BUILDER_PACKAGE = "@sentropic/geo";
@@ -197,18 +200,26 @@ function parseArgs(argv) {
 }
 const envOr = (n, d) => { const v = process.env[n]; return v === undefined || v === "" ? d : v; };
 
+// TSV "city_slug<TAB>zone_code" (optionally gzip) produced by the served-refs
+// Job on the restored preprod DB (artefact immo-served-refs-<CYCLE_ID>).
+export function refsFromTsv(buf) {
+  const text = (buf[0] === 0x1f && buf[1] === 0x8b ? gunzipSync(buf) : buf).toString("utf8");
+  const zones = [];
+  for (const line of text.split("\n")) {
+    if (!line) continue;
+    const [citySlug, zoneCode, extra] = line.split("\t");
+    if (extra !== undefined || zoneCode === undefined) throw new Error("malformed refs line (expected city_slug<TAB>zone_code)");
+    zones.push({ citySlug, zoneCode });
+  }
+  return { zones };
+}
+
 async function loadRawRefs() {
   const file = envOr("IMMO_SERVED_REFS_FILE", "");
-  const url = envOr("IMMO_SERVED_REFS_URL", "");
-  if (file) return { raw: JSON.parse(readFileSync(file, "utf8")), source: "file" };
-  if (url) {
-    if (!/^https:\/\//.test(url)) throw new Error("IMMO_SERVED_REFS_URL must be https");
-    const res = await globalThis.fetch(url, { headers: { Accept: "application/json" }, signal: globalThis.AbortSignal.timeout(300000) });
-    if (!res.ok) throw new Error(`raw refs endpoint → HTTP ${res.status}`);
-    return { raw: await res.json(), source: "url" };
+  if (!file || !existsSync(file)) {
+    throw new Error("IMMO_SERVED_REFS_FILE absent: the artefact immo-served-refs-<CYCLE_ID> (served-refs Job on the restored DB) is missing — fail-closed");
   }
-  throw new Error("no RAW refs source: set vars.BASCULE_IMMO_SERVED_REFS_URL (public immo preprod endpoint enumerating the " +
-    "referenced RAW zone codes) — PENDING O1, endpoint not delivered yet (fail-closed)");
+  return { raw: refsFromTsv(readFileSync(file)), source: "restored-db (served-refs Job)" };
 }
 
 async function cmdBuild(argv) {
