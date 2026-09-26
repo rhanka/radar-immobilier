@@ -7,9 +7,10 @@
 # `create` non name-scopable (RBAC) → create ns-wide ; get/patch/update/delete name-scopés aux objets EXACTS du bundle.
 # impersonate name-scopé radar-ci-trigger-prod (gate anti-RCE `--dry-run=server`).
 # Daily prod backup (deploy/ci/backup/README.md) : the same SA applies, in job `apply-backup` of
-# bascule-bundle-cd.yml, the SealedSecrets radar-backup-writer/-reader, the ConfigMap radar-backup-daily-script and
-# the CronJob radar-backup-daily → those 4 names are added to the name-scoped verbs below. RE-APPLY this file
-# (install-time, cluster-admin) BEFORE arming BACKUP_DAILY_CD_ENABLED.
+# bascule-bundle-cd.yml, the SealedSecrets radar-backup-writer/-reader/-purger, the ConfigMap
+# radar-backup-daily-script and the CronJobs radar-backup-daily + radar-backup-freshness → those 6 names are added
+# to the name-scoped verbs below. RE-APPLY this file (install-time, cluster-admin) BEFORE arming
+# BACKUP_DAILY_CD_ENABLED.
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -53,11 +54,11 @@ rules:
   - apiGroups: ["bitnami.com"]
     resources: ["sealedsecrets"]
     verbs: ["create"]
-  # + radar-backup-writer / radar-backup-reader : daily prod backup identities (deploy/ci/backup/, job apply-backup).
+  # + radar-backup-writer / -reader / -purger : daily prod backup identities (deploy/ci/backup/, job apply-backup).
   - apiGroups: ["bitnami.com"]
     resources: ["sealedsecrets"]
     verbs: ["get", "patch", "update"]
-    resourceNames: ["radar-db-ro-prod", "radar-pra-admin-prod", "radar-backup-writer", "radar-backup-reader"]
+    resourceNames: ["radar-db-ro-prod", "radar-pra-admin-prod", "radar-backup-writer", "radar-backup-reader", "radar-backup-purger"]
   # configmaps (SQL du rôle RO + script du backup quotidien radar-backup-daily-script) :
   - apiGroups: [""]
     resources: ["configmaps"]
@@ -86,14 +87,14 @@ rules:
   - apiGroups: ["batch"]
     resources: ["jobs"]
     verbs: ["create", "get", "list", "watch", "delete"]
-  # cronjobs (dump bascule + backup quotidien radar-backup-daily) :
+  # cronjobs (dump bascule + backup quotidien radar-backup-daily + contrôle de fraîcheur radar-backup-freshness) :
   - apiGroups: ["batch"]
     resources: ["cronjobs"]
     verbs: ["create"]
   - apiGroups: ["batch"]
     resources: ["cronjobs"]
     verbs: ["get", "patch", "update"]
-    resourceNames: ["radar-db-backup-prod", "radar-backup-daily"]
+    resourceNames: ["radar-db-backup-prod", "radar-backup-daily", "radar-backup-freshness"]
   # deployments : LECTURE SEULE (vérif iso-prod/readiness) :
   - apiGroups: ["apps"]
     resources: ["deployments"]
