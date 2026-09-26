@@ -73,7 +73,7 @@ on:
   workflow_dispatch:
     inputs:
       backup_run_now:
-        description: "apply-backup: also start one radar-backup-daily run now (create job --from=cronjob)"
+        description: "apply-backup: also start one radar-backup-daily run now (create job --from=cronjob); apply-bundle is skipped"
         type: boolean
         default: false
 
@@ -96,7 +96,17 @@ jobs:
     # PERMANENT token into the GH secret KUBE_CONFIG_DATA_PROD. So merging this PR
     # can never red a main push against a not-yet-provisioned SA. Arming is part of
     # the install, not a per-act owner validation.
-    if: vars.BASCULE_BUNDLE_CD_ENABLED == 'true'
+    #
+    # SKIPPED on a `backup_run_now` dispatch: that dispatch exists to start a
+    # backup, and re-applying the (idempotent) bundle at the same time made its
+    # RO-role Job compete with the backup pod for CPU on a node at 97 % of
+    # requests (Insufficient cpu → DeadlineExceeded, run 36225276353). Skipping is
+    # the simplest safe choice: nothing in the bundle is needed by the backup
+    # (radar-db-ro-prod already exists), and a plain dispatch or a push touching
+    # the bundle still re-applies it. Sequencing with `needs` was rejected: it
+    # would still load the node right before the backup and tie the backup to the
+    # bundle's anti-RCE gate.
+    if: vars.BASCULE_BUNDLE_CD_ENABLED == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.backup_run_now)
     env:
       # PROD namespace (VAP is cluster-scoped; RBAC/RO-role/CronJob/SealedSecrets are ns-scoped).
       NAMESPACE: radar-immobilier
