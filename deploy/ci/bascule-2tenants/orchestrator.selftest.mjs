@@ -286,6 +286,24 @@ const GEO_IDS = "ogc:zones:laval:A-1\nogc:zones:laval:B-2\nogc:zones:montreal:C-
   ok("chain — baseline file missing ⇒ join-verify fails closed", r5.error?.step === "join-verify" && /baseline .* missing/.test(r5.error.message) && r5.cycle.verdict === "failure");
 }
 {
+  // replay-seed: collect + join-verify + publish on the artefacts of EXISTING restore runs, 0 dispatch
+  const gh = fakeGh({ geoIdsText: GEO_IDS, immoIdsText: "ogc:zones:laval:A-1\nogc:zones:laval:Z-9\n" });
+  const first = await runChain(gh);
+  const before = gh.dispatched.length;
+  const replay = await runChain(gh, {
+    REPLAY_IMMO_RUN_ID: String(first.cycle.legs.immo.restore_run.run_id), REPLAY_GEO_RUN_ID: String(first.cycle.legs.geo.restore_run.run_id),
+    REPLAY_CYCLE_ID: first.cycle.cycle_id, REPLAY_BACKUP_DATE: first.cycle.backup.date, REPLAY_OF_RUN_ID: "42",
+    BASCULE2_JOIN_BASELINE: baselineFile([{ city: "laval", class: "divergent-code", cause: "data-gap", ids: ["ogc:zones:laval:Z-9"] }]),
+  }, ["replay-seed", "collect", "join-verify"]);
+  eq("replay-seed — the drifting cycle re-evaluated against a baseline recording it: green, no dispatch",
+    [first.cycle.verdict, replay.error, replay.publishError, replay.cycle.verdict, replay.cycle.join_verify.diff_summary.known_drift.count, replay.cycle.replay_of.orchestrator_run_id, gh.dispatched.length - before],
+    ["failure", null, null, "success", 1, "42", 0]);
+  const bad = await runChain(gh, { REPLAY_IMMO_RUN_ID: "x", REPLAY_GEO_RUN_ID: "1", REPLAY_CYCLE_ID: "c1", REPLAY_BACKUP_DATE: "2026-09-26" }, ["replay-seed"]);
+  ok("replay-seed — a malformed run id is refused", bad.error?.step === "replay-seed" && /REPLAY_IMMO_RUN_ID/.test(bad.error.message));
+  const dry = await runChain(gh, { DRY_RUN: "true", REPLAY_IMMO_RUN_ID: "1", REPLAY_GEO_RUN_ID: "2", REPLAY_CYCLE_ID: "c1", REPLAY_BACKUP_DATE: "2026-09-26" }, ["replay-seed"]);
+  ok("replay-seed — refused in DRY (collect/join-verify would be skipped silently)", dry.error?.step === "replay-seed" && /DRY_RUN=false/.test(dry.error.message));
+}
+{
   const gh = fakeGh({ geoHasMode: false, geoIdsText: GEO_IDS, immoIdsText: GEO_IDS });
   const r = await runChain(gh);
   ok("chain — geo without MODE/BACKUP_ID ⇒ fail-closed at capabilities, nothing dispatched",
