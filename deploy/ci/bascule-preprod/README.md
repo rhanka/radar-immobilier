@@ -11,7 +11,7 @@ différentiel → smoke. **0 Python.**
 > token éphémère, plus aucun `kubectl apply` owner-direct, plus aucune
 > matérialisation GH-secret des 2 creds (SealedSecrets committées, matérialisées
 > par le controller sealed-secrets in-cluster). La bascule tourne en
-> **planification nocturne** (`bascule-preprod.yml`, `schedule`) ; le refresh reste
+> **planification hebdomadaire** (dimanche 03:17 UTC, `bascule-preprod.yml`, `schedule`) ; le refresh reste
 > GH-triggerable à la demande (`bascule-refresh.yml`) et câblé APRÈS la bascule.
 > Flux complet, install 1×, secrets GH devenus supprimables et gestes éliminés :
 > **`CD_NATIVE_MIGRATION.md`**.

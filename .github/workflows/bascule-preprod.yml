@@ -25,14 +25,15 @@
 name: bascule-preprod (iso-prod)
 
 on:
-  # CD-native-v2 : la bascule est AUTOMATISÉE par une planification nocturne
-  # (03:17 UTC). GitHub interdit une variable de dépôt dans le littéral cron → la
-  # CADENCE est figée ici ; l'ARMEMENT est la variable de dépôt
-  # BASCULE_SCHEDULE_ENABLED (voir `if` du job `bascule`), OFF par défaut, pour
-  # qu'une fusion ne déclenche jamais une bascule prod nocturne avant que l'env
-  # ne soit prêt. Le workflow_dispatch ci-dessous reste (1re fois / à la demande).
+  # CD-native-v2 : la bascule est AUTOMATISÉE par une planification HEBDOMADAIRE
+  # (dimanche 03:17 UTC, décision owner 2026-09-26 ; auparavant quotidienne).
+  # GitHub interdit une variable de dépôt dans le littéral cron → la CADENCE est
+  # figée ici ; l'ARMEMENT est la variable de dépôt BASCULE_SCHEDULE_ENABLED (voir
+  # `if` du job `bascule`), OFF par défaut, pour qu'une fusion ne déclenche jamais
+  # une bascule prod planifiée avant que l'env ne soit prêt. Le workflow_dispatch
+  # ci-dessous reste (1re fois / à la demande).
   schedule:
-    - cron: '17 3 * * *'
+    - cron: '17 3 * * 0'
   workflow_dispatch:
     inputs:
       CONFIRM:
@@ -382,7 +383,7 @@ jobs:
   force-refresh:
     needs: bascule
     # Joué si demandé (input FORCE_REFRESH) OU sur un run PLANIFIÉ (CD-native-v2 :
-    # l'ordre câblé bascule→refresh est automatique la nuit), ET si la bascule a
+    # l'ordre câblé bascule→refresh est automatique au run planifié), ET si la bascule a
     # réussi (jamais en DRY : rien n'a été restauré). `create job --from=cronjob`
     # n'est pas destructif pour la prod.
     if: ${{ (inputs.FORCE_REFRESH || github.event_name == 'schedule') && !inputs.DRY_RUN && needs.bascule.result == 'success' }}

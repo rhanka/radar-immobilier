@@ -18,7 +18,7 @@ stays **kubectl-only + STATUS-ONLY** (no `kubectl logs`, no S3/DB creds, no PII)
 | **ephemeral** privileged token `KUBE_CONFIG_DATA_PROD_SETUP` | **permanent** `KUBE_CONFIG_DATA_PROD` = SA `radar-ci-bascule-prod`, minted **once** at cluster install |
 | 2 app Secrets materialized from GH secrets (`RADAR_DB_RO_PROD_PASSWORD`, `RADAR_PRA_ADMIN_PROD_*`) | 2 **SealedSecrets committed** → the in-cluster sealed-secrets controller materializes the core Secrets |
 | bootstrap SA `radar-ci-setup-prod` (`rbac-ci-setup-prod.yaml`) | permanent SA `radar-ci-bascule-prod` (`rbac-ci-bascule-prod.yaml`), **0 `secrets:create`** |
-| run only via `workflow_dispatch` | run on a **nightly schedule** (`17 3 * * *`) + `workflow_dispatch` kept |
+| run only via `workflow_dispatch` | run on a **weekly schedule** (Sunday 03:17 UTC, `17 3 * * 0`) + `workflow_dispatch` kept |
 
 ## Flow — one-time install, then everything automated
 
@@ -50,7 +50,7 @@ stays **kubectl-only + STATUS-ONLY** (no `kubectl logs`, no S3/DB creds, no PII)
   │        (A) jobTemplate mutation → DENIED   (B) suspend flip → ALLOWED       │
   │        fail ⇒ NEUTRALIZE T1 (Role rules emptied) + abort                    │
   └────────────────────────────────────────────────────────────────────────────┘
-  ┌── nightly (03:17 UTC), armed by BASCULE_SCHEDULE_ENABLED ───────────────────┐
+  ┌── weekly (Sunday 03:17 UTC), armed by BASCULE_SCHEDULE_ENABLED ─────────────┐
   │ bascule-preprod.yml (the run, auto-CONFIRM = the schedule IS the GO)        │
   │   job bascule       S0→S7 (dump→restore→migrate→docs→recon G4→flip→S6→smoke)│
   │   job force-refresh needs: bascule (success) → precipitate radar-refresh-pv │
@@ -87,9 +87,9 @@ in-cluster sealed-secrets controller materializes. See `CRED_CYCLE.md`.
 
 - `BASCULE_BUNDLE_CD_ENABLED` — arms `bascule-bundle-cd.yml` (off by default; set
   `true` at install once the SA + `KUBE_CONFIG_DATA_PROD` exist).
-- `BASCULE_SCHEDULE_ENABLED` — arms the nightly run (off by default; set `true`
+- `BASCULE_SCHEDULE_ENABLED` — arms the weekly run (off by default; set `true`
   once `KUBE_CONFIG_DATA_PROD_TRIGGER` + preprod creds exist). The cron **cadence**
-  (`17 3 * * *`) is fixed in code — GitHub does not allow a variable in the cron
+  (`17 3 * * 0`, Sunday 03:17 UTC, owner decision 2026-09-26) is fixed in code — GitHub does not allow a variable in the cron
   literal, so tuning the time is a one-line code change; arming is the variable.
 - `EXPECTED_KUBE_APISERVER_HOST_PROD` (falls back to `EXPECTED_KUBE_APISERVER_HOST`,
   then the OVH host) — PROD cluster identity for the apply.
@@ -109,7 +109,7 @@ in-cluster sealed-secrets controller materializes. See `CRED_CYCLE.md`.
    GH secrets`) — gone; SealedSecrets committed + controller-materialized.
 5. **Manual `kubectl apply`** of VAP / RBAC T1 / RO-role / dump CronJob — all in
    the on-merge apply.
-6. **Manual dispatch of the run** as the only entry — the run is scheduled nightly
+6. **Manual dispatch of the run** as the only entry — the run is scheduled weekly
    (`workflow_dispatch` kept for the first run / on-demand).
 7. **`.env` fragility for the app creds** — the material now lives encrypted in git
    (SealedSecrets). `.env` remains a recovery convenience per `CRED_CYCLE.md`, not
