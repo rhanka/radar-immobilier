@@ -216,5 +216,14 @@ ok("refreshArgsYaml — sortie sans crochets (le template fournit args: [...])",
   eq("docs-sync — source vide ⇒ « rien à copier », exit 0 (écart immo, inchangé)", [r7.code, r7.copies.length], [0, 0]);
 }
 
+// ── Cadence du run planifié : HEBDOMADAIRE, dimanche 03:17 UTC (décision owner 2026-09-26) ──
+{
+  const wf = readFileSync(join(import.meta.dirname, "../../../.github/workflows/bascule-preprod.yml"), "utf8");
+  const crons = [...wf.matchAll(/^\s*- cron: '([^']*)'/mg)].map((x) => x[1]);
+  eq("bascule-preprod.yml — un seul cron, hebdomadaire dimanche 03:17 UTC", crons, ["17 3 * * 0"]);
+  ok("bascule-preprod.yml — run planifié armé par vars.BASCULE_SCHEDULE_ENABLED (inchangé)",
+    wf.includes("github.event_name != 'schedule' || vars.BASCULE_SCHEDULE_ENABLED == 'true'"));
+}
+
 console.log(`\nbascule.selftest — ${passed} passés, ${failed} échoués`);
 process.exit(failed ? 1 : 0);
