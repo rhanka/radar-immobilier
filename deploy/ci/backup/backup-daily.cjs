@@ -36,8 +36,18 @@
 // delete-markers ONLY (DeleteObject without VersionId) on dated objects outside
 // the daily/weekly/monthly policy, planned by `backup`, executed by `purge`.
 //
-// Manifest status: complete | partial (docs seed still pending within the time
-// budget, no error — exit 0, not a failure) | incomplete (docs errors — exit 4).
+// Manifest status: complete | partial (docs objects still pending — time budget,
+// request deadline, SIGTERM — or inventory not written; no error answer — exit 0,
+// not a failure; `partialReason` says why) | incomplete (docs errors — exit 4).
+//
+// S3 DEADLINES (incident 2026-09-26 on geo: one CopyObject never answered, the Job
+// died on activeDeadlineSeconds with no manifest, no inventory, no latest.json):
+// every S3 call goes through s3send() — a wall-clock deadline per command (SDK
+// retries included), an AbortSignal handed to the SDK AND a race on it. The docs
+// budget aborts the copies in flight (they stay `pending`); SIGTERM stops the copy
+// and the inventory + manifest (partial) + latest.json are still written, each
+// request capped to the termination grace period. Same design and variable names
+// as rhanka/geo#409 (README.md "S3 request timeouts, budget and SIGTERM").
 //
 // Order = DB first, docs second: prod docs are append-mostly, so every doc the
 // DB references at dump time is already listed when the docs step runs.
@@ -46,8 +56,10 @@
 // row, never a credential. SDK errors are reported as name/http-status.
 //
 // EXIT CODES (podFailurePolicy in the CronJob maps 2/3/4 to FailJob, no retry):
-//   0 backup complete or partial (seed in progress) / purge done or skipped / fresh
-//   1 retryable failure before the manifest (network, S3 5xx, re-read mismatch)
+//   0 backup complete or partial (seed in progress, budget, request deadlines) /
+//     purge done or skipped / fresh
+//   1 retryable failure before the manifest (network, S3 5xx / request deadline,
+//     re-read mismatch), or SIGTERM (partial manifest recorded when the PG part was)
 //   2 refusal: bucket guard, versioning off, dump size anomaly, docs source
 //     empty or collapsed (no manifest, no purge)
 //   3 purge planning or execution failed AFTER a complete manifest (backup valid)
@@ -66,6 +78,8 @@ const path = require('node:path');
 const process = require('node:process');
 const console = require('node:console');
 const { Buffer } = require('node:buffer');
+const { setTimeout, clearTimeout } = require('node:timers');
+const { AbortController } = globalThis;
 
 const EXIT = Object.freeze({ OK: 0, RETRYABLE: 1, INTEGRITY: 2, PURGE_FAILED: 3, DOCS_INCOMPLETE: 4, STALE: 5 });
 
@@ -250,10 +264,31 @@ function checkDocsSource({ count, previousCount, minRatio }) {
 }
 
 // Manifest status from the docs outcome (PG is always complete once we get here).
-function docsStatus(counts, docsError) {
+// `complete` needs EVERY listed object backed up or excluded (0 pending, 0 failed,
+// backedUp + excluded = objects) AND the inventory that proves it written
+// (`inventoryWritten` false → partial). Never complete with an object missing.
+function docsStatus(counts, docsError, inventoryWritten = true) {
   if (docsError || !counts || counts.failed > 0) return 'incomplete';
-  if (counts.pending > 0) return 'partial';
+  const allThere = counts.pending === 0 && counts.backedUp + counts.excluded === counts.objects;
+  if (!allThere || !inventoryWritten) return 'partial';
   return 'complete';
+}
+
+// Why a backup is not complete, in one line (null when complete). Counts and stop
+// reasons only, never a key. A request deadline leaves the object `pending` on immo
+// (counted in `timedOut`): partial, exit 0, retried next night — geo#409 counts it
+// `failed`, which is also partial / exit 0 there; `failed` stays a real S3 error
+// answer on immo (incomplete, exit 4).
+function partialReasonOf(docs, budgetSeconds) {
+  if (!docs || docs.status === 'complete') return null;
+  if (docs.error) return `docs step failed (${docs.error})`;
+  const parts = [];
+  if (docs.stopReason === 'terminated') parts.push('terminated (SIGTERM) before the copy finished');
+  else if (docs.budgetExhausted) parts.push(`docs copy budget reached (${budgetSeconds} s)`);
+  if (docs.failed) parts.push(`${docs.failed} object(s) failed`);
+  if (docs.pending) parts.push(`${docs.pending} object(s) pending${docs.timedOut ? ` (${docs.timedOut} timed out)` : ''}`);
+  if (!docs.inventoryKey) parts.push(`inventory not written (${docs.inventoryError || 'unknown'})`);
+  return parts.length ? parts.join('; ') : 'docs not complete';
 }
 
 // Freshness of manifests/latest.json (mode `freshness`, reader identity):
@@ -333,6 +368,28 @@ function buildInventory({ date, createdAt, sourceBucket, backupBucket, excludePr
 }
 
 // ── config ───────────────────────────────────────────────────────────────────
+// Per-request S3 deadlines, the three modes (names and defaults of rhanka/geo#409):
+//   connectMs      TCP/TLS connect (NodeHttpHandler connectionTimeout)
+//   requestMs      socket idle bound (NodeHttpHandler socketTimeout) AND floor of
+//                  the wall-clock deadline of a copy / write / body transfer
+//   metaMs         wall-clock deadline of HEAD / LIST / versioning / delete / small GET
+//   minBytesPerSec a body or server-side copy of N bytes gets max(requestMs, N / minBytesPerSec)
+const DEFAULT_TIMEOUTS = Object.freeze({ connectMs: 10000, requestMs: 120000, metaMs: 30000, minBytesPerSec: 8 * MIB });
+function numEnv(env, name, def, { min = 0, integer = true } = {}) {
+  const raw = env[name];
+  if (raw === undefined || String(raw).trim() === '') return def;
+  const v = Number(raw);
+  if (!Number.isFinite(v) || v < min || (integer && !Number.isInteger(v))) throw new BackupError(EXIT.INTEGRITY, `invalid ${name}`);
+  return v;
+}
+function readTimeouts(env) {
+  return {
+    connectMs: numEnv(env, 'S3_CONNECT_TIMEOUT_MS', DEFAULT_TIMEOUTS.connectMs, { min: 1 }),
+    requestMs: numEnv(env, 'S3_REQUEST_TIMEOUT_MS', DEFAULT_TIMEOUTS.requestMs, { min: 1 }),
+    metaMs: numEnv(env, 'S3_META_TIMEOUT_MS', DEFAULT_TIMEOUTS.metaMs, { min: 1 }),
+    minBytesPerSec: numEnv(env, 'S3_MIN_THROUGHPUT_BYTES_PER_SEC', DEFAULT_TIMEOUTS.minBytesPerSec, { min: 1 }),
+  };
+}
 // mode: backup (writer: needs SOURCE_DOCS_BUCKET) | purge (purger) | freshness (reader).
 function readConfig(env, mode = 'backup') {
   const req = (name) => {
@@ -348,6 +405,7 @@ function readConfig(env, mode = 'backup') {
     return v;
   };
   const cfg = {
+    timeouts: readTimeouts(env),
     endpoint: withScheme(req('S3_ENDPOINT')),
     region: req('S3_REGION'),
     forcePathStyle: String(env.S3_FORCE_PATH_STYLE || 'false').trim() === 'true',
@@ -365,6 +423,9 @@ function readConfig(env, mode = 'backup') {
     backupImage: String(env.BACKUP_IMAGE || 'unknown').trim(),
     copyConcurrency: Math.min(32, num('COPY_CONCURRENCY', 8, { min: 1 })),
     docsBudgetSeconds: num('DOCS_COPY_BUDGET_SECONDS', 5400, { min: 1 }),
+    // = the pod terminationGracePeriodSeconds: after SIGTERM, the final writes
+    // (inventory, manifest, latest.json) are bounded to fit in it.
+    terminationGraceSeconds: num('TERMINATION_GRACE_SECONDS', 120, { min: 15 }),
     excludePrefixes: parsePrefixes(env.DOCS_EXCLUDE_PREFIXES),
     minDumpBytes: num('MIN_DUMP_BYTES', MIB, { min: 1 }),
     minDumpRatio: num('MIN_DUMP_RATIO', 0.5, { min: 0, integer: false }),
@@ -406,6 +467,7 @@ function buildManifest({ date, startedAt, completedAt, cfg, pg, schema, code, do
     format: 'radar-backup-manifest/v1',
     date,
     status: docs.status, // complete | partial | incomplete (PG is complete at this point)
+    partialReason: partialReasonOf(docs, cfg.docsBudgetSeconds),
     startedAt,
     completedAt,
     backupBucket: cfg.backupBucket,
@@ -424,6 +486,12 @@ function buildLatestPointer(manifest, manifestKey, manifestSha256, previous) {
   const latestComplete = manifest.status === 'complete'
     ? { date: manifest.date, manifestKey }
     : (prev.latestComplete && isValidDate(prev.latestComplete.date) ? prev.latestComplete : null);
+  // First day of the current run of non-complete backups (null once complete).
+  const prevNotComplete = !!prev.status && prev.status !== 'complete';
+  const partialSince = manifest.status === 'complete' ? null
+    : prevNotComplete && isValidDate(prev.partialSince) ? prev.partialSince
+      : prevNotComplete && isValidDate(prev.date) && prev.date <= manifest.date ? prev.date
+        : manifest.date;
   return {
     format: 'radar-backup-latest/v1',
     date: manifest.date,
@@ -436,9 +504,86 @@ function buildLatestPointer(manifest, manifestKey, manifestSha256, previous) {
     docsObjects: Number.isFinite(manifest.docs.objects) ? manifest.docs.objects : (prev.docsObjects || null),
     inventoryKey: manifest.docs.inventoryKey || null,
     latestComplete,
+    partialSince,
+    partialReason: manifest.partialReason || null,
     firstBackupDate: isValidDate(prev.firstBackupDate) ? prev.firstBackupDate : manifest.date,
     updatedAt: manifest.completedAt,
   };
+}
+
+// ── S3 request deadlines ─────────────────────────────────────────────────────
+// Error used as the abort reason of the docs copy (budget / SIGTERM).
+function stoppedError(stop) {
+  return Object.assign(new Error(`stopped: ${stop}`), { name: 'BackupStopped', stop });
+}
+function isStopped(e) { return !!e && e.name === 'BackupStopped'; }
+function isRequestTimeout(e) { return !!e && (e.name === 'S3RequestTimeout' || e.name === 'TimeoutError'); }
+// Wall-clock deadline of one command. kind 'meta' (HEAD/LIST/...) or 'body'
+// (copy / write / transfer of `bytes`). After SIGTERM (ctx.finalDeadline) every
+// deadline is capped so the final writes fit in the termination grace period.
+function requestDeadlineMs(ctx, kind, bytes, nowMs = Date.now()) {
+  const t = (ctx.cfg && ctx.cfg.timeouts) || DEFAULT_TIMEOUTS;
+  let ms = kind === 'meta' ? t.metaMs : Math.max(t.requestMs, Math.ceil((Number(bytes) || 0) / t.minBytesPerSec * 1000));
+  if (ctx.finalDeadline) ms = Math.max(1000, Math.min(ms, ctx.finalDeadline - nowMs));
+  return ms;
+}
+// ctx.s3.send(cmd) with a deadline: the SDK gets an AbortSignal (it aborts the
+// HTTP request and stops retrying) AND the returned promise settles on that
+// signal whatever the SDK does, so a request that never answers cannot block.
+// `consume(out, signal)` (a body read) runs under the same deadline. `signal`
+// (optional) aborts the command early with its reason (docs budget / SIGTERM).
+async function s3send(ctx, cmd, { kind = 'meta', bytes = 0, signal = null, consume = null } = {}) {
+  const ms = requestDeadlineMs(ctx, kind, bytes);
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(Object.assign(new Error(`S3 request exceeded ${ms} ms`), { name: 'S3RequestTimeout' })), ms);
+  const onParent = () => ac.abort(signal.reason);
+  if (signal) {
+    if (signal.aborted) onParent();
+    else signal.addEventListener('abort', onParent, { once: true });
+  }
+  try {
+    if (ac.signal.aborted) throw ac.signal.reason;
+    return await new Promise((resolve, reject) => {
+      ac.signal.addEventListener('abort', () => reject(ac.signal.reason), { once: true });
+      Promise.resolve()
+        .then(() => ctx.s3.send(cmd, { abortSignal: ac.signal }))
+        .then((out) => (consume ? consume(out, ac.signal) : out))
+        .then(resolve, reject);
+    });
+  } finally {
+    clearTimeout(timer);
+    if (signal) signal.removeEventListener('abort', onParent);
+  }
+}
+// Reads a response body chunk by chunk; the stream is destroyed on abort.
+async function readBody(body, signal, onChunk) {
+  if (!body) return;
+  if (Buffer.isBuffer(body) || typeof body === 'string') { onChunk(Buffer.from(body)); return; }
+  const onAbort = () => { if (typeof body.destroy === 'function') body.destroy(signal.reason); };
+  if (signal) signal.addEventListener('abort', onAbort, { once: true });
+  try {
+    for await (const c of body) onChunk(Buffer.isBuffer(c) ? c : Buffer.from(c));
+  } finally {
+    if (signal) signal.removeEventListener('abort', onAbort);
+  }
+}
+// Transport-level bounds for the real client (main()). @smithy/node-http-handler is
+// a dependency of @aws-sdk/client-s3, hoisted in /workspace/node_modules of the
+// radar-api image (NODE_PATH). Only `connectionTimeout` + `socketTimeout` are
+// passed: both are honoured by the 2.x..4.x handlers (4.x `requestTimeout` only
+// warns), and neither logs a URL. The wall-clock bound never depends on it:
+// s3send() enforces it in every mode.
+function buildRequestHandler(timeouts, load = require) {
+  try {
+    const { NodeHttpHandler } = load('@smithy/node-http-handler');
+    if (typeof NodeHttpHandler !== 'function') throw new Error('no NodeHttpHandler');
+    return {
+      requestHandler: new NodeHttpHandler({ connectionTimeout: timeouts.connectMs, socketTimeout: timeouts.requestMs }),
+      mode: 'node-http-handler',
+    };
+  } catch {
+    return { requestHandler: undefined, mode: 'abort-signal-only' };
+  }
 }
 
 // ── S3 helpers (client + sdk injected: the selftest passes an in-memory fake) ─
@@ -449,19 +594,11 @@ async function hashFile(file) {
   for await (const chunk of fs.createReadStream(file)) { sha.update(chunk); md5.update(chunk); size += chunk.length; }
   return { sha256: sha.digest('hex'), md5: md5.digest('base64'), size };
 }
-async function bodyToBuffer(body) {
-  if (!body) return Buffer.alloc(0);
-  if (Buffer.isBuffer(body)) return body;
-  if (typeof body === 'string') return Buffer.from(body);
-  const chunks = [];
-  for await (const c of body) chunks.push(Buffer.isBuffer(c) ? c : Buffer.from(c));
-  return Buffer.concat(chunks);
-}
-async function listAll(ctx, Bucket, Prefix) {
+async function listAll(ctx, Bucket, Prefix, signal = ctx.signal) {
   const all = [];
   let ContinuationToken;
   do {
-    const out = await ctx.s3.send(new ctx.sdk.ListObjectsV2Command({ Bucket, Prefix, ContinuationToken }));
+    const out = await s3send(ctx, new ctx.sdk.ListObjectsV2Command({ Bucket, Prefix, ContinuationToken }), { signal });
     for (const o of out.Contents || []) all.push(o);
     ContinuationToken = out.IsTruncated ? out.NextContinuationToken : undefined;
   } while (ContinuationToken);
@@ -469,11 +606,11 @@ async function listAll(ctx, Bucket, Prefix) {
 }
 // Latest version per key (needs s3:ListBucketVersions). A delete-marker as
 // latest means "absent". Throws on AccessDenied; the caller falls back.
-async function listLatestVersions(ctx, Bucket, Prefix) {
+async function listLatestVersions(ctx, Bucket, Prefix, signal = ctx.signal) {
   const latest = new Map();
   let KeyMarker; let VersionIdMarker;
   do {
-    const out = await ctx.s3.send(new ctx.sdk.ListObjectVersionsCommand({ Bucket, Prefix, KeyMarker, VersionIdMarker }));
+    const out = await s3send(ctx, new ctx.sdk.ListObjectVersionsCommand({ Bucket, Prefix, KeyMarker, VersionIdMarker }), { signal });
     for (const v of out.Versions || []) if (v.IsLatest) latest.set(v.Key, v);
     for (const m of out.DeleteMarkers || []) if (m.IsLatest) latest.delete(m.Key);
     const more = out.IsTruncated;
@@ -484,24 +621,25 @@ async function listLatestVersions(ctx, Bucket, Prefix) {
 }
 async function putBuffer(ctx, Key, body, ContentType) {
   const buf = Buffer.isBuffer(body) ? body : Buffer.from(body);
-  const out = await ctx.s3.send(new ctx.sdk.PutObjectCommand({
+  const out = await s3send(ctx, new ctx.sdk.PutObjectCommand({
     Bucket: ctx.cfg.backupBucket, Key, Body: buf, ContentLength: buf.length,
     ContentMD5: crypto.createHash('md5').update(buf).digest('base64'), ContentType,
-  }));
+  }), { kind: 'body', bytes: buf.length, signal: ctx.signal });
   return { sha256: crypto.createHash('sha256').update(buf).digest('hex'), size: buf.length, versionId: out.VersionId || null };
 }
 // Single PUT up to the threshold, multipart above. Content-MD5 on every body
 // (object-lock buckets require an integrity header on writes).
 async function putFile(ctx, Key, file, info) {
   const Bucket = ctx.cfg.backupBucket;
+  const signal = ctx.signal;
   if (info.size <= ctx.cfg.multipartThreshold) {
-    const out = await ctx.s3.send(new ctx.sdk.PutObjectCommand({
+    const out = await s3send(ctx, new ctx.sdk.PutObjectCommand({
       Bucket, Key, Body: fs.createReadStream(file), ContentLength: info.size, ContentMD5: info.md5,
       ContentType: 'application/octet-stream',
-    }));
+    }), { kind: 'body', bytes: info.size, signal });
     return { multipart: false, parts: 1, versionId: out.VersionId || null };
   }
-  const { UploadId } = await ctx.s3.send(new ctx.sdk.CreateMultipartUploadCommand({ Bucket, Key, ContentType: 'application/octet-stream' }));
+  const { UploadId } = await s3send(ctx, new ctx.sdk.CreateMultipartUploadCommand({ Bucket, Key, ContentType: 'application/octet-stream' }), { signal });
   try {
     const parts = [];
     const fh = await fsp.open(file, 'r');
@@ -515,31 +653,35 @@ async function putFile(ctx, Key, file, info) {
           if (!bytesRead) throw new BackupError(EXIT.RETRYABLE, 'short read on dump file');
           off += bytesRead;
         }
-        const out = await ctx.s3.send(new ctx.sdk.UploadPartCommand({
+        const out = await s3send(ctx, new ctx.sdk.UploadPartCommand({
           Bucket, Key, UploadId, PartNumber: n, Body: buf, ContentLength: len,
           ContentMD5: crypto.createHash('md5').update(buf).digest('base64'),
-        }));
+        }), { kind: 'body', bytes: len, signal });
         parts.push({ PartNumber: n, ETag: out.ETag });
       }
     } finally {
       await fh.close();
     }
-    const done = await ctx.s3.send(new ctx.sdk.CompleteMultipartUploadCommand({ Bucket, Key, UploadId, MultipartUpload: { Parts: parts } }));
+    const done = await s3send(ctx, new ctx.sdk.CompleteMultipartUploadCommand({ Bucket, Key, UploadId, MultipartUpload: { Parts: parts } }),
+      { kind: 'body', signal });
     return { multipart: true, parts: parts.length, versionId: done.VersionId || null };
   } catch (e) {
-    await ctx.s3.send(new ctx.sdk.AbortMultipartUploadCommand({ Bucket, Key, UploadId })).catch(() => {});
+    // Not tied to `signal`: the upload is aborted even when the run was stopped.
+    await s3send(ctx, new ctx.sdk.AbortMultipartUploadCommand({ Bucket, Key, UploadId })).catch(() => {});
     throw e;
   }
 }
 // Re-read AFTER upload: HEAD size + full GET re-hash. Mismatch = retryable failure.
 async function verifyObject(ctx, Key, expected) {
   const Bucket = ctx.cfg.backupBucket;
-  const head = await ctx.s3.send(new ctx.sdk.HeadObjectCommand({ Bucket, Key }));
+  const head = await s3send(ctx, new ctx.sdk.HeadObjectCommand({ Bucket, Key }), { signal: ctx.signal });
   if (Number(head.ContentLength) !== expected.size) throw new BackupError(EXIT.RETRYABLE, `size mismatch after upload key=${Key}`);
-  const got = await ctx.s3.send(new ctx.sdk.GetObjectCommand({ Bucket, Key }));
   const h = crypto.createHash('sha256');
   let n = 0;
-  for await (const chunk of got.Body) { h.update(chunk); n += chunk.length; }
+  const got = await s3send(ctx, new ctx.sdk.GetObjectCommand({ Bucket, Key }), {
+    kind: 'body', bytes: expected.size, signal: ctx.signal,
+    consume: async (out, sig) => { await readBody(out.Body, sig, (chunk) => { h.update(chunk); n += chunk.length; }); return out; },
+  });
   const sha256 = h.digest('hex');
   if (sha256 !== expected.sha256 || n !== expected.size) throw new BackupError(EXIT.RETRYABLE, `sha256 mismatch after upload key=${Key}`);
   return { sha256, versionId: head.VersionId || got.VersionId || null };
@@ -549,8 +691,11 @@ async function verifyObject(ctx, Key, expected) {
 async function getJsonOrNull(ctx, Key) {
   let text;
   try {
-    const got = await ctx.s3.send(new ctx.sdk.GetObjectCommand({ Bucket: ctx.cfg.backupBucket, Key }));
-    text = (await bodyToBuffer(got.Body)).toString('utf8');
+    const chunks = [];
+    await s3send(ctx, new ctx.sdk.GetObjectCommand({ Bucket: ctx.cfg.backupBucket, Key }), {
+      signal: ctx.signal, consume: (out, sig) => readBody(out.Body, sig, (c) => chunks.push(c)),
+    });
+    text = Buffer.concat(chunks).toString('utf8');
   } catch (e) {
     if (isNotFound(e)) return null;
     throw e;
@@ -565,7 +710,7 @@ async function getJsonOrNull(ctx, Key) {
 
 async function checkVersioning(ctx) {
   try {
-    const out = await ctx.s3.send(new ctx.sdk.GetBucketVersioningCommand({ Bucket: ctx.cfg.backupBucket }));
+    const out = await s3send(ctx, new ctx.sdk.GetBucketVersioningCommand({ Bucket: ctx.cfg.backupBucket }), { signal: ctx.signal });
     if (out.Status !== 'Enabled') {
       throw new BackupError(EXIT.INTEGRITY, `backup bucket versioning is ${out.Status || 'off'} (must be Enabled)`);
     }
@@ -610,34 +755,64 @@ async function backupDocs(ctx, date, srcObjs) {
   }
   const plan = planDocs(srcObjs, dstIndex, cfg.excludePrefixes);
   log(`docs source=${srcObjs.length} up_to_date=${plan.fresh.length} to_copy=${plan.todo.length} excluded=${plan.excluded.length} concurrency=${cfg.copyConcurrency} version_ids=${versionIds}`);
-  const deadline = ctx.now() + cfg.docsBudgetSeconds * 1000;
+  // The budget really cuts: at the deadline (real timer, or the clock seen between
+  // two copies) or on SIGTERM (ctx.terminate), `stop` aborts every copy in flight
+  // and no worker starts a new one. An interrupted copy stays `pending`
+  // (`interrupted`, retried next run). A copy past its request deadline (after the
+  // SDK retries) stays `pending` too (`timedOut`); an S3 error answer is `failed`.
+  const budgetMs = cfg.docsBudgetSeconds * 1000;
+  const deadline = ctx.now() + budgetMs;
+  const stop = new AbortController();
+  const stopWith = (reason) => { if (!stop.signal.aborted) stop.abort(stoppedError(reason)); };
+  const budgetTimer = setTimeout(() => stopWith('budget'), budgetMs);
+  const onTerminate = () => stopWith('terminated');
+  if (ctx.terminate) {
+    if (ctx.terminate.aborted) onTerminate();
+    else ctx.terminate.addEventListener('abort', onTerminate, { once: true });
+  }
   const copied = new Map();
   const failed = new Set();
-  let next = 0; let budgetHit = false; let errorsLogged = 0;
+  let next = 0; let errorsLogged = 0; let timedOut = 0; let interrupted = 0;
   const worker = async () => {
     while (next < plan.todo.length) {
-      if (ctx.now() >= deadline) { budgetHit = true; return; }
+      if (stop.signal.aborted) return;
+      if (ctx.now() >= deadline) { stopWith('budget'); return; }
       const o = plan.todo[next++];
       try {
-        const out = await ctx.s3.send(new ctx.sdk.CopyObjectCommand({
+        const out = await s3send(ctx, new ctx.sdk.CopyObjectCommand({
           Bucket: cfg.backupBucket, Key: LAYOUT.docsPrefix + o.Key,
           CopySource: '/' + cfg.sourceBucket + '/' + encodeKey(o.Key), MetadataDirective: 'COPY',
-        }));
+        }), { kind: 'body', bytes: Number(o.Size), signal: stop.signal });
         copied.set(o.Key, { etag: (out.CopyObjectResult && out.CopyObjectResult.ETag) || null, versionId: out.VersionId || null });
       } catch (e) {
-        failed.add(o.Key);
+        if (stop.signal.aborted && (e === stop.signal.reason || isStopped(e) || (e && e.name === 'AbortError'))) {
+          interrupted += 1;
+          continue;
+        }
+        if (isRequestTimeout(e)) {
+          timedOut += 1; // stays pending: no answer is not an error answer
+        } else {
+          failed.add(o.Key);
+        }
         if (errorsLogged < 5) { errorsLogged += 1; log(`docs copy error ${errName(e)} (object key not logged)`); }
       }
-      const doneCount = copied.size + failed.size;
+      const doneCount = copied.size + failed.size + timedOut;
       if (doneCount % 500 === 0) log(`docs progress ${doneCount}/${plan.todo.length}`);
     }
   };
-  await Promise.all(Array.from({ length: Math.min(cfg.copyConcurrency, plan.todo.length) }, () => worker()));
+  try {
+    await Promise.all(Array.from({ length: Math.min(cfg.copyConcurrency, plan.todo.length) }, () => worker()));
+  } finally {
+    clearTimeout(budgetTimer);
+    if (ctx.terminate) ctx.terminate.removeEventListener('abort', onTerminate);
+  }
+  const stopReason = stop.signal.aborted ? stop.signal.reason.stop : null;
+  if (stopReason) log(`docs copy stopped reason=${stopReason} copied=${copied.size} failed=${failed.size} timed_out=${timedOut} interrupted=${interrupted} not_started=${plan.todo.length - next}`);
   const inventory = buildInventory({
     date, createdAt: new Date(ctx.now()).toISOString(), sourceBucket: cfg.sourceBucket, backupBucket: cfg.backupBucket,
     excludePrefixes: cfg.excludePrefixes, versionIds, srcObjs, dstIndex, copied, failed,
   });
-  return { inventory, copied: copied.size, alreadyUpToDate: plan.fresh.length, budgetHit, versionIds };
+  return { inventory, copied: copied.size, alreadyUpToDate: plan.fresh.length, budgetHit: stopReason === 'budget', stopReason, timedOut, interrupted, versionIds };
 }
 
 // ── retention: PLAN (backup step, writer: list only) ─────────────────────────
@@ -696,12 +871,13 @@ async function runPurge({ env, sdk, s3, now = Date.now, log = console.log }) {
     log(`PURGE SKIPPED date=${plan.date} backup.status=${plan.backupStatus} (purge runs only after a complete backup)`);
     return { exitCode: EXIT.OK, deleteMarkers: 0, skipped: true };
   }
+  const ctx = { cfg, sdk, s3, now, log };
   let deleteMarkers = 0;
   for (const Key of v.keys) {
     // NO VersionId: a delete-marker; the locked version stays until lifecycle expiry.
     if (!cfg.purgeDryRun) {
       try {
-        await s3.send(new sdk.DeleteObjectCommand({ Bucket: cfg.backupBucket, Key }));
+        await s3send(ctx, new sdk.DeleteObjectCommand({ Bucket: cfg.backupBucket, Key }));
       } catch (e) {
         throw new BackupError(EXIT.PURGE_FAILED, `purge failed after ${deleteMarkers} delete-markers: ${errName(e)}`);
       }
@@ -725,12 +901,15 @@ async function runFreshness({ env, sdk, s3, now = Date.now, log = console.log })
   if (latest && isValidDate(latest.date)) {
     // The pointer must match the objects it points to (manifest bytes, dump size).
     try {
-      const got = await s3.send(new sdk.GetObjectCommand({ Bucket: cfg.backupBucket, Key: latest.manifestKey }));
-      const sha = crypto.createHash('sha256').update(await bodyToBuffer(got.Body)).digest('hex');
+      const h = crypto.createHash('sha256');
+      await s3send(ctx, new sdk.GetObjectCommand({ Bucket: cfg.backupBucket, Key: latest.manifestKey }), {
+        consume: (out, sig) => readBody(out.Body, sig, (c) => h.update(c)),
+      });
+      const sha = h.digest('hex');
       if (sha !== latest.manifestSha256) reasons.push(`manifest ${latest.manifestKey} sha256 differs from the pointer`);
     } catch (e) { reasons.push(`manifest ${latest.manifestKey} unreadable (${errName(e)})`); }
     try {
-      const head = await s3.send(new sdk.HeadObjectCommand({ Bucket: cfg.backupBucket, Key: latest.pgKey }));
+      const head = await s3send(ctx, new sdk.HeadObjectCommand({ Bucket: cfg.backupBucket, Key: latest.pgKey }));
       if (Number(head.ContentLength) !== Number(latest.pgSizeBytes)) reasons.push(`dump ${latest.pgKey} size differs from the pointer`);
     } catch (e) { reasons.push(`dump ${latest.pgKey} unreadable (${errName(e)})`); }
   }
@@ -746,10 +925,31 @@ async function runFreshness({ env, sdk, s3, now = Date.now, log = console.log })
 // ── main flow ────────────────────────────────────────────────────────────────
 // Backup step (writer identity). Never deletes: the retention is only PLANNED
 // here (purge-plan.json in WORK_DIR) and executed by runPurge in the next step.
-async function runBackup({ env, sdk, s3, fetchImpl, now = Date.now, log = console.log, overrides = {} }) {
+// `terminate` (AbortSignal, fired by main() on SIGTERM): before the PG part is
+// recorded it aborts the run (exit 1, nothing to record); during the docs copy it
+// stops the copy, and the inventory + manifest (partial) + latest.json are still
+// written, each request capped to fit in the termination grace period.
+async function runBackup({ env, sdk, s3, fetchImpl, now = Date.now, log = console.log, overrides = {}, terminate = null }) {
   const cfg = { ...readConfig(env, 'backup'), ...overrides };
   assertBuckets(cfg);
-  const ctx = { cfg, sdk, s3, now, log };
+  const ctx = { cfg, sdk, s3, now, log, fetchImpl, terminate, signal: terminate, finalDeadline: null };
+  const onTerminate = () => { ctx.finalDeadline = Date.now() + Math.max(5, cfg.terminationGraceSeconds - 10) * 1000; };
+  if (terminate) {
+    if (terminate.aborted) onTerminate();
+    else terminate.addEventListener('abort', onTerminate, { once: true });
+  }
+  try {
+    return await runBackupSteps(ctx);
+  } catch (e) {
+    // SIGTERM before the PG part was recorded: nothing valid to record.
+    if (isStopped(e)) throw new BackupError(EXIT.RETRYABLE, 'terminated (SIGTERM) before the PG backup was recorded');
+    throw e;
+  } finally {
+    if (terminate) terminate.removeEventListener('abort', onTerminate);
+  }
+}
+async function runBackupSteps(ctx) {
+  const { cfg, now, log, fetchImpl } = ctx;
   const W = cfg.workDir;
 
   // 1) facts left by the dump initContainer
@@ -818,15 +1018,36 @@ async function runBackup({ env, sdk, s3, fetchImpl, now = Date.now, log = consol
   const servedSha = await fetchServedSha(fetchImpl, cfg.publicHealthUrl);
 
   // 5) docs (a docs error still records the PG backup: status=incomplete, exit 4;
-  //    pending objects left by the time budget = partial, exit 0, resumed next run)
+  //    pending objects left by the budget, a request deadline or SIGTERM = partial,
+  //    resumed next run). From here on the PG part is recorded: whatever stops the
+  //    copy, the inventory, the manifest and latest.json are written.
   let docs;
+  let d = null;
   try {
     if (sourceError) throw sourceError;
-    const d = await backupDocs(ctx, date, srcObjs);
-    const inv = await putBuffer(ctx, keys.inventory, JSON.stringify(d.inventory), 'application/json');
+    d = await backupDocs(ctx, date, srcObjs);
+  } catch (e) {
+    if (e instanceof BackupError) throw e;
+    log(`docs step failed ${errName(e)}`);
+    docs = { status: docsStatus(null, e), sourceBucket: cfg.sourceBucket, backupPrefix: LAYOUT.docsPrefix, error: errName(e), inventoryKey: null };
+  }
+  // Final writes: no longer aborted by SIGTERM (only bounded, see s3send).
+  ctx.signal = null;
+  const finalStarted = Date.now();
+  let inventoryBytes = 0;
+  if (d) {
+    let inv = null; let inventoryError = null;
+    try {
+      const text = JSON.stringify(d.inventory);
+      inventoryBytes = Buffer.byteLength(text);
+      inv = await putBuffer(ctx, keys.inventory, text, 'application/json');
+    } catch (e) {
+      inventoryError = errName(e);
+      log(`docs inventory not written ${inventoryError}`);
+    }
     const c = d.inventory.counts;
     docs = {
-      status: docsStatus(c, null),
+      status: docsStatus(c, null, !!inv),
       sourceBucket: cfg.sourceBucket,
       backupPrefix: LAYOUT.docsPrefix,
       objects: c.objects,
@@ -839,15 +1060,15 @@ async function runBackup({ env, sdk, s3, fetchImpl, now = Date.now, log = consol
       excluded: c.excluded,
       excludedPrefixes: cfg.excludePrefixes,
       budgetExhausted: d.budgetHit,
+      stopReason: d.stopReason,
+      timedOut: d.timedOut,
+      interrupted: d.interrupted,
       sourceGuard: { previousObjects: (previous && previous.docsObjects) || null, minRatio: cfg.minDocsRatio },
       versionIds: d.versionIds,
-      inventoryKey: keys.inventory,
-      inventorySha256: inv.sha256,
+      inventoryKey: inv ? keys.inventory : null,
+      inventorySha256: inv ? inv.sha256 : null,
+      ...(inventoryError ? { inventoryError } : {}),
     };
-  } catch (e) {
-    if (e instanceof BackupError) throw e;
-    log(`docs step failed ${errName(e)}`);
-    docs = { status: docsStatus(null, e), sourceBucket: cfg.sourceBucket, backupPrefix: LAYOUT.docsPrefix, error: errName(e), inventoryKey: null };
   }
 
   // 6) manifest + latest pointer
@@ -890,26 +1111,38 @@ async function runBackup({ env, sdk, s3, fetchImpl, now = Date.now, log = consol
   const man = await putBuffer(ctx, keys.manifest, JSON.stringify(manifest, null, 2), 'application/json');
   const pointer = buildLatestPointer(manifest, keys.manifest, man.sha256, previous);
   await putBuffer(ctx, LAYOUT.latestKey, JSON.stringify(pointer, null, 2), 'application/json');
+  log(`final writes ms=${Date.now() - finalStarted} inventory.bytes=${inventoryBytes} (inventory + manifest + latest.json; grace ${cfg.terminationGraceSeconds} s)`);
 
   // 7) retention PLAN for the purge step (only a complete backup gets a non-empty
   //    plan; a partial/incomplete day writes a skip plan). No delete here.
+  //    Not after SIGTERM: the pod is going away, the purge container will not run.
+  const terminated = !!(ctx.terminate && ctx.terminate.aborted);
   const plan = { format: PLAN_FORMAT, date, backupStatus: manifest.status, manifestKey: keys.manifest, manifestSha256: man.sha256,
     retention: cfg.retention, keptDates: null, purgedDates: [], keys: [] };
-  if (manifest.status === 'complete') Object.assign(plan, await planPurge(ctx, date));
-  await fsp.writeFile(path.join(W, PLAN_FILE), JSON.stringify(plan));
+  if (!terminated) {
+    if (manifest.status === 'complete') Object.assign(plan, await planPurge(ctx, date));
+    await fsp.writeFile(path.join(W, PLAN_FILE), JSON.stringify(plan));
+  }
 
-  const verdict = { complete: 'OK', partial: 'PARTIAL', incomplete: 'INCOMPLETE' }[manifest.status];
+  const verdict = terminated ? 'TERMINATED' : { complete: 'OK', partial: 'PARTIAL', incomplete: 'INCOMPLETE' }[manifest.status];
+  const na = (v) => (v === undefined ? 'n/a' : v);
   log(`VERDICT ${verdict} date=${date} status=${manifest.status} pg.bytes=${info.size} pg.sha256=${info.sha256} ` +
     `schema.migrations=${schema.migrationsApplied === undefined ? 'unknown' : schema.migrationsApplied} code.sha=${servedSha} ` +
-    `docs.status=${docs.status} docs.objects=${docs.objects === undefined ? 'n/a' : docs.objects} docs.copied=${docs.copied === undefined ? 'n/a' : docs.copied} ` +
-    `docs.pending=${docs.pending === undefined ? 'n/a' : docs.pending} manifest=${keys.manifest} manifest.sha256=${man.sha256} ` +
-    `latest_complete=${pointer.latestComplete ? pointer.latestComplete.date : 'none'} purge.planned_dates=${plan.purgedDates.length}`);
-  const exitCode = manifest.status === 'incomplete' ? EXIT.DOCS_INCOMPLETE : EXIT.OK;
-  return { exitCode, manifest, pointer, plan };
+    `docs.status=${docs.status} docs.objects=${na(docs.objects)} docs.copied=${na(docs.copied)} ` +
+    `docs.pending=${na(docs.pending)} docs.failed=${na(docs.failed)} docs.timed_out=${na(docs.timedOut)} docs.stop=${docs.stopReason || 'none'} ` +
+    `manifest=${keys.manifest} manifest.sha256=${man.sha256} ` +
+    `latest_complete=${pointer.latestComplete ? pointer.latestComplete.date : 'none'} ` +
+    `${terminated ? 'purge=skipped(terminated)' : `purge.planned_dates=${plan.purgedDates.length}`}` +
+    `${manifest.partialReason ? ` reason="${manifest.partialReason}"` : ''}`);
+  // SIGTERM: recorded (partial), but the run did not finish → exit 1 (retryable;
+  // on activeDeadlineSeconds the Job is failed anyway, with its manifest written).
+  const exitCode = terminated ? EXIT.RETRYABLE : manifest.status === 'incomplete' ? EXIT.DOCS_INCOMPLETE : EXIT.OK;
+  return { exitCode, manifest, pointer, plan: terminated ? null : plan };
 }
 
-function makeClient(sdk, cfg) {
+function makeClient(sdk, cfg, requestHandler) {
   return new sdk.S3Client({
+    ...(requestHandler ? { requestHandler } : {}),
     endpoint: cfg.endpoint,
     region: cfg.region,
     forcePathStyle: cfg.forcePathStyle,
@@ -927,10 +1160,25 @@ async function main(mode) {
   // Lazy: resolved from the radar-api image (NODE_PATH=/workspace/node_modules); the selftest never loads it.
   const sdk = require('@aws-sdk/client-s3');
   const cfg = readConfig(process.env, mode);
-  const s3 = makeClient(sdk, cfg);
   const log = (m) => console.log(`[${mode}] ${m}`);
+  const handler = buildRequestHandler(cfg.timeouts);
+  const t = cfg.timeouts;
+  log(`s3 timeouts connect_ms=${t.connectMs} request_ms=${t.requestMs} meta_ms=${t.metaMs} min_bytes_per_sec=${t.minBytesPerSec} handler=${handler.mode}` +
+    `${mode === 'backup' ? ` docs_budget_s=${cfg.docsBudgetSeconds} grace_s=${cfg.terminationGraceSeconds}` : ''}`);
+  const s3 = makeClient(sdk, cfg, handler.requestHandler);
+  // SIGTERM (kubelet, on activeDeadlineSeconds or a node drain; SIGKILL follows
+  // after terminationGracePeriodSeconds): mode `backup` stops the copy and still
+  // records the day (inventory, manifest partial, latest.json). Other modes keep
+  // the default behaviour (exit on SIGTERM): they write nothing to preserve.
+  const terminate = new AbortController();
+  if (mode === 'backup') {
+    process.once('SIGTERM', () => {
+      log('SIGTERM received: stopping the copy, recording a partial backup');
+      terminate.abort(stoppedError('terminated'));
+    });
+  }
   const run = { backup: runBackup, purge: runPurge, freshness: runFreshness }[mode];
-  const r = await run({ env: process.env, sdk, s3, fetchImpl: globalThis.fetch, log });
+  const r = await run({ env: process.env, sdk, s3, fetchImpl: globalThis.fetch, log, terminate: terminate.signal });
   return r.exitCode;
 }
 module.exports = {
@@ -939,6 +1187,7 @@ module.exports = {
   parsePrefixes, withScheme, encodeKey, checkDumpSize, checkDocsSource, docsStatus, checkFreshness, upToDate, planDocs,
   buildInventory, readConfig, assertBuckets, buildManifest, buildLatestPointer, validatePurgePlan, runBackup, runPurge,
   runFreshness,
+  DEFAULT_TIMEOUTS, readTimeouts, requestDeadlineMs, s3send, buildRequestHandler, partialReasonOf, stoppedError,
 };
 
 if (require.main === module) {

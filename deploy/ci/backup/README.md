@@ -49,7 +49,7 @@ so every doc the DB references is in the inventory.
 | status | meaning | Job |
 | --- | --- | --- |
 | `complete` | PG + every docs object backed up | Complete, purge runs |
-| `partial` | PG complete; docs seed still pending within the 90-min budget, **no error** (resumes next run) | Complete (exit 0, verdict `PARTIAL`), purge skipped |
+| `partial` | PG complete; docs objects still pending (90-min budget reached, a request past its deadline, SIGTERM) or inventory not written, **no error answer** (resumes next run); `partialReason` says why | Complete (exit 0, verdict `PARTIAL`), purge skipped — after SIGTERM: exit 1, verdict `TERMINATED` |
 | `incomplete` | PG complete; docs copy/listing **errors** | Failed (exit 4), purge skipped |
 
 ## How a run works
@@ -83,13 +83,13 @@ uploaded object is re-read after upload: identical bytes, so the uploaded dump
 is listable too.
 
 Logs are verdict only (counts, backup keys, sha256) — never a doc key, a row or
-a credential. Last lines: `VERDICT OK|PARTIAL|INCOMPLETE date=…` (backup) and
+a credential. Last lines: `VERDICT OK|PARTIAL|INCOMPLETE|TERMINATED date=…` (backup) and
 `PURGE OK|SKIPPED …` (purge).
 
 | Exit | Step | Meaning | Retry |
 | --- | --- | --- | --- |
 | 0 | all | backup complete or partial / purge done or skipped | — |
-| 1 | dump, backup | transient failure before the manifest (DB unreachable, S3 5xx, re-read mismatch) | once |
+| 1 | dump, backup | transient failure before the manifest (DB unreachable, S3 5xx / request deadline, re-read mismatch), or SIGTERM (partial manifest recorded when the PG part was) | once |
 | 2 | dump, backup | refusal: manual run in the scheduled window, wrong DB/bucket, versioning off, dump size anomaly, docs source empty or collapsed (no manifest, no purge) | no |
 | 3 | backup, purge | retention plan or purge failed after a complete manifest (backup valid) | no |
 | 4 | backup | manifest written with `status=incomplete` | no — next night resumes |
@@ -108,6 +108,59 @@ The docs copy is idempotent and resumable: an initial seed larger than the
 manual run outside the window). `DOCS_EXCLUDE_PREFIXES` (comma list) keeps a
 frozen, already-seeded archive prefix out of the daily copy; its objects are
 reported `excluded` in the inventory.
+
+## S3 request timeouts, budget and SIGTERM
+
+Incident 2026-09-26 (geo, same script design — `geo-backup-manual-20260926123119`):
+one server-side `CopyObject` out of 70 440 never answered; the SDK had no request
+timeout, so the worker awaited it forever; the budget was only checked
+**between** two copies, so it could not cut; `activeDeadlineSeconds` then killed
+the Job → no manifest, no inventory, no `latest.json`. The immo script had the
+same three gaps. Fixed here with the design of rhanka/geo#409 (same names, same
+behaviour):
+
+- **Every S3 call has a wall-clock deadline** (`s3send()`, the three modes, SDK
+  retries included): `S3_META_TIMEOUT_MS` (30 s) for HEAD / LIST / versioning /
+  delete / small GET; for a copy, a write or a body of N bytes
+  `max(S3_REQUEST_TIMEOUT_MS, N / S3_MIN_THROUGHPUT_BYTES_PER_SEC)` (120 s for a
+  small object, 640 s for a 5 GiB `CopyObject`). Enforced twice: an `AbortSignal`
+  handed to the SDK (`send(cmd, { abortSignal })`) **and** a race on it, so the run
+  never waits on a request that never answers whatever the SDK does.
+- **Transport bounds**: `@smithy/node-http-handler` (a dependency of
+  `@aws-sdk/client-s3`, resolved through `NODE_PATH=/workspace/node_modules`) gives
+  a `NodeHttpHandler` with `connectionTimeout` = `S3_CONNECT_TIMEOUT_MS` and
+  `socketTimeout` (idle) = `S3_REQUEST_TIMEOUT_MS`; if it does not resolve the log
+  says `handler=abort-signal-only` and the per-request deadline still applies. The
+  first log line of each mode states the values and the handler mode.
+- **A copy past its deadline** stays `pending` (counted in `docs.timedOut`,
+  `partialReason` "N object(s) pending (T timed out)") → `partial`, exit 0,
+  retried the next night. (geo#409 counts it `failed`, which is also `partial` /
+  exit 0 on geo; on immo `failed` stays an S3 **error answer** → `incomplete`,
+  exit 4, unchanged.)
+- **The budget really cuts**: at `DOCS_COPY_BUDGET_SECONDS` a timer aborts every
+  copy in flight and no worker starts a new one. Interrupted copies stay
+  `pending` (`docs.interrupted`), `docs.stopReason: budget`. Then the inventory,
+  the manifest (`partial`, `partialReason`), `latest.json` (`partialSince`,
+  `partialReason`, `latestComplete` unchanged) and the verdict are written; exit 0;
+  skip plan (no purge).
+- **SIGTERM** (kubelet on `activeDeadlineSeconds` or a node drain; SIGKILL after
+  `terminationGracePeriodSeconds: 120`): during the copy, same as the budget with
+  `docs.stopReason: terminated`, verdict `TERMINATED`, **exit 1**, no purge plan;
+  each final write is capped to the grace left minus 10 s
+  (`TERMINATION_GRACE_SECONDS` = 120 = the pod grace). SIGTERM before the PG part
+  is recorded aborts the run (exit 1, nothing written: no valid backup to record).
+- **Never `complete` with an object missing**: `complete` needs 0 pending, 0
+  failed, backedUp + excluded = objects, and the inventory written; an inventory
+  that could not be written leaves the backup `partial`.
+- **Final writes measured** (selftest, inventory sized like the current 59 017
+  docs): 14.9 MiB, built + hashed in ~0.3 s, uploaded in 1.9 s at the 8 MiB/s
+  floor; with the manifest and `latest.json` ≈ 12 s worst case, far below the
+  110 s window. The real duration is logged by every run: `final writes ms=…
+  inventory.bytes=…`.
+- **Budget vs deadline** (selftest, static): 1800 s (dump + PG upload margin) +
+  5400 s budget + 640 s (longest request) + 3 × 120 s (final writes) + 120 s grace
+  = 8320 s < `activeDeadlineSeconds` 10 800 s — margin 2480 s. The normal end is
+  the budget, never the kill.
 
 ## Freshness check — `radar-backup-freshness`
 
@@ -276,6 +329,11 @@ the manifest; resolve a sample of inventory entries with the reader).
 cleanup, set it to 0 by PR for one run, then back — `RETENTION_*` (see
 `RETENTION.md`), `PURGE_DRY_RUN` (false), `SCHEDULED_WINDOW_START/END`
 (0200/0530), `FRESHNESS_MAX_AGE_DAYS` (1), `FRESHNESS_MAX_INCOMPLETE_DAYS` (3).
+S3 deadlines (all three modes, set explicitly on `backup`, defaults elsewhere):
+`S3_CONNECT_TIMEOUT_MS` (10 000), `S3_REQUEST_TIMEOUT_MS` (120 000),
+`S3_META_TIMEOUT_MS` (30 000), `S3_MIN_THROUGHPUT_BYTES_PER_SEC` (8 MiB/s);
+`backup` only: `TERMINATION_GRACE_SECONDS` (120, = the pod
+`terminationGracePeriodSeconds`).
 
 ## Known limits
 
