@@ -36,6 +36,9 @@ jobs:
       - name: Validate object-storage contracts (offline)
         run: bash deploy/ci/check-object-storage-bindings.test.sh
 
+      - name: Validate daily prod backup logic (offline selftest)
+        run: node deploy/ci/backup/backup-daily.selftest.mjs
+
       - name: Install workspace deps
         run: make install ENV=ci
 
