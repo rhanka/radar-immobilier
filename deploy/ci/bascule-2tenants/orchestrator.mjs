@@ -16,8 +16,11 @@
 //                     tenant reads its own backup bucket with its own reader
 //                     identity, in its own cluster).
 //   choose-date       common date D with a `complete` backup on BOTH tenants
-//                     (newest, or BACKUP_DATE when given).
+//                     (newest, or BACKUP_DATE when given), at most 48 h old
+//                     unless ALLOW_STALE_BACKUP=true (recorded in cycle.json).
 //   dispatch-restore  (not DRY) MODE=restore BACKUP_ID=D CYCLE_ID on both legs.
+//   Every dispatch sends CONFIRM = today UTC at that instant, and its run is
+//   correlated by run-name (MODE + CYCLE_ID) only, never by time.
 //   follow            status only, until both runs complete.
 //   collect           `cycle-leg-<tenant>-<CYCLE_ID>`: verdict pg/s3 + backup date.
 //   join-verify       `<tenant>-served-canonical-ids-<CYCLE_ID>`: INCLUSION
@@ -35,8 +38,8 @@ import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 import {
-  artefacts, assertCycleId, checkCapabilities, checkLeg, chooseCommonDate, CONFIRM_RE, correlateRun, FILES, filterInputs,
-  inclusionCheck, isValidDate, LEGS, makeCycleId, newCycle, parseBackupList, parseDispatchInputs, TENANTS,
+  artefacts, assertCycleId, checkCapabilities, checkLeg, chooseCommonDate, CONFIRM_RE, confirmAt, correlateRun, DEFAULT_MAX_AGE_HOURS, FILES,
+  filterInputs, inclusionCheck, isValidDate, LEGS, makeCycleId, newCycle, parseBackupList, parseDispatchInputs, TENANTS,
 } from "./cycle.mjs";
 import { GithubClient } from "./github.mjs";
 
@@ -76,22 +79,28 @@ const isDry = () => opt("DRY_RUN", "true") !== "false";
 export function makeOrchestrator({ gh, now = Date.now, pollSec = Number(opt("BASCULE2_POLL_SEC", "30")) } = {}) {
   const client = gh || new GithubClient({ env: process.env, legs: LEGS });
 
+  // CONFIRM is recomputed HERE, at each dispatch (today UTC now), never taken
+  // once at the top: a cycle crossing midnight UTC still sends a CONFIRM the leg
+  // accepts. The run is correlated by its run-name (MODE + CYCLE_ID) only.
   async function dispatchAndCorrelate(cycle, tenant, mode, wanted) {
     const declared = cycle.legs[tenant].capabilities?.inputs || {};
-    const inputs = filterInputs(wanted, declared);
     const dispatchedAtMs = now();
+    const confirmSent = confirmAt(dispatchedAtMs);
+    const inputs = filterInputs({ ...wanted, CONFIRM: confirmSent }, declared);
     await client.dispatch(tenant, inputs);
-    log(`${tenant}: dispatched ${LEGS[tenant].repo} ${LEGS[tenant].workflow}@${LEGS[tenant].ref} MODE=${mode} (${Object.keys(inputs).join(", ")})`);
+    log(`${tenant}: dispatched ${LEGS[tenant].repo} ${LEGS[tenant].workflow}@${LEGS[tenant].ref} MODE=${mode} CONFIRM=${confirmSent} (${Object.keys(inputs).join(", ")})`);
     const deadline = now() + Number(opt("BASCULE2_CORRELATE_TIMEOUT_SEC", "180")) * 1000;
     const since = new Date(dispatchedAtMs - 60000).toISOString();
     for (;;) {
-      const { run, correlation } = correlateRun(await client.recentRuns(tenant, since), { cycleId: cycle.cycle_id, mode, dispatchedAtMs });
+      const { run, correlation } = correlateRun(await client.recentRuns(tenant, since), { cycleId: cycle.cycle_id, mode });
       if (run) {
-        if (correlation !== "run-name") warn(`${tenant}: run correlated by time only — the leg should put MODE + CYCLE_ID in its run-name.`);
-        return { run_id: run.id, html_url: run.html_url, correlation, dispatched_at: new Date(dispatchedAtMs).toISOString() };
+        return { run_id: run.id, html_url: run.html_url, correlation, dispatched_at: new Date(dispatchedAtMs).toISOString(), confirm_sent: confirmSent };
       }
       if (correlation.startsWith("ambiguous")) die(`${tenant}: dispatched run is ambiguous (${correlation}) — refusing to guess.`);
-      if (now() >= deadline) die(`${tenant}: dispatched run not found (${correlation}).`);
+      if (now() >= deadline) {
+        die(`${tenant}: no run named "bascule-preprod ${mode} ${cycle.cycle_id}" found after the dispatch (${correlation}) — ` +
+          "the leg must carry MODE + CYCLE_ID in its run-name; never correlated by time.");
+      }
       await sleep(Math.min(pollSec, 10) * 1000);
     }
   }
@@ -147,9 +156,9 @@ export function makeOrchestrator({ gh, now = Date.now, pollSec = Number(opt("BAS
 
     async "list-backups"() {
       const cycle = loadCycle();
-      const confirm = assertConfirm();
+      assertConfirm(); // G3 of the owner's CONFIRM (the CONFIRM sent is recomputed per dispatch)
       for (const t of TENANTS) {
-        cycle.legs[t].list_run = await dispatchAndCorrelate(cycle, t, "list", { CONFIRM: confirm, DRY_RUN: "true", MODE: "list", CYCLE_ID: cycle.cycle_id });
+        cycle.legs[t].list_run = await dispatchAndCorrelate(cycle, t, "list", { DRY_RUN: "true", MODE: "list", CYCLE_ID: cycle.cycle_id });
         saveCycle(cycle);
       }
       await followRuns(cycle, "list_run", Number(opt("BASCULE2_LIST_TIMEOUT_SEC", "1800")));
@@ -169,26 +178,40 @@ export function makeOrchestrator({ gh, now = Date.now, pollSec = Number(opt("BAS
       const read = (t) => JSON.parse(readFileSync(join(workdir(), `backup-list-${t}.json`), "utf8"));
       const requested = opt("BACKUP_DATE", "");
       if (requested && !isValidDate(requested)) die("BACKUP_DATE must be YYYY-MM-DD.");
+      const allowStale = opt("ALLOW_STALE_BACKUP", "false") === "true";
+      const maxAgeHours = Number(opt("BASCULE2_MAX_AGE_HOURS", String(DEFAULT_MAX_AGE_HOURS)));
+      cycle.allow_stale_backup = allowStale;
       let choice;
-      try { choice = chooseCommonDate({ immo: read("immo"), geo: read("geo"), requested }); } catch (e) { die(`choose-date — ${e.message}`); }
+      try { choice = chooseCommonDate({ immo: read("immo"), geo: read("geo"), requested, nowMs: now(), maxAgeHours, allowStale }); } catch (e) {
+        saveCycle(cycle);
+        die(`choose-date — ${e.message}`);
+      }
       cycle.backup = { date: choice.date, requested: choice.requested, candidates: choice.candidates,
-        immo: choice.immo, geo: choice.geo, geo_after_immo: choice.geoAfterImmo };
+        immo: choice.immo, geo: choice.geo, geo_after_immo: choice.geoAfterImmo, freshness: choice.freshness };
       saveCycle(cycle);
+      if (choice.freshness.overridden) warn(`common date ${choice.date} is ${choice.freshness.age_hours} h old (> ${choice.freshness.max_age_hours} h) — accepted by ALLOW_STALE_BACKUP=true (recorded).`);
       if (choice.geoAfterImmo === false) warn(`geo backup of ${choice.date} started BEFORE immo's: the superset-by-order property may not hold (join-verify decides).`);
-      if (choice.truncatedLists) warn("a backup list was truncated to its newest entries.");
+      if (choice.truncatedLists) warn("a backup list was truncated to its newest entries (termination message ≤ 4 KiB): older dates cannot be chosen.");
       exportEnv("BACKUP_DATE_CHOSEN", choice.date);
-      log(`date D=${choice.date} (${choice.requested ? "requested" : "newest common complete"}; candidates ${choice.candidates.join(", ")})`);
+      log(`date D=${choice.date} (${choice.requested ? "requested" : "newest common complete"}; age ${choice.freshness.age_hours} h ≤ ${choice.freshness.max_age_hours} h` +
+        `${choice.freshness.overridden ? " — STALE, allowed" : ""}; candidates ${choice.candidates.join(", ")})`);
     },
 
     async "dispatch-restore"() {
       const cycle = loadCycle();
       if (isDry()) { log("DRY_RUN — no restore dispatched (capabilities + lists + date only)."); return; }
-      const confirm = assertConfirm();
+      assertConfirm(); // G3 of the owner's CONFIRM (the CONFIRM sent is recomputed per dispatch)
       if (!cycle.backup?.date) die("no backup date chosen.");
       assertCycleId(cycle.cycle_id);
+      const allowStale = cycle.backup.freshness?.allow_stale === true;
       for (const t of TENANTS) {
+        // ALLOW_STALE_BACKUP forwarded when the leg declares it (informative there:
+        // an explicit BACKUP_ID is never age-blocked by a leg) and recorded per leg.
         cycle.legs[t].restore_run = await dispatchAndCorrelate(cycle, t, "restore",
-          { CONFIRM: confirm, DRY_RUN: "false", MODE: "restore", BACKUP_ID: cycle.backup.date, CYCLE_ID: cycle.cycle_id, SKIP_ROLLOUT: "false" });
+          { DRY_RUN: "false", MODE: "restore", BACKUP_ID: cycle.backup.date, CYCLE_ID: cycle.cycle_id, SKIP_ROLLOUT: "false",
+            ALLOW_STALE_BACKUP: allowStale ? "true" : "false" });
+        cycle.legs[t].restore_run.allow_stale_backup = allowStale;
+        cycle.legs[t].restore_run.backup_age_hours = cycle.backup.freshness?.age_hours ?? null;
         saveCycle(cycle);
       }
     },
@@ -250,6 +273,7 @@ export function makeOrchestrator({ gh, now = Date.now, pollSec = Number(opt("BAS
       const j = cycle.join_verify.diff_summary;
       summary(`### bascule e2e immo + geo — ${cycle.cycle_id}\n\n| item | value |\n|---|---|\n` +
         `| verdict | **${cycle.verdict}** |\n| backup date D | ${cycle.backup?.date ?? "-"} (geo after immo: ${cycle.backup?.geo_after_immo ?? "unknown"}) |\n` +
+        `| age of D | ${cycle.backup?.freshness ? `${cycle.backup.freshness.age_hours} h (max ${cycle.backup.freshness.max_age_hours} h${cycle.backup.freshness.overridden ? ", STALE accepted by ALLOW_STALE_BACKUP" : ""})` : "-"} |\n` +
         TENANTS.map((t) => `| ${t} restore run | ${cycle.legs[t].restore_run?.html_url ?? "-"} (${cycle.legs[t].restore_run?.conclusion ?? "-"}) |`).join("\n") + "\n" +
         `| join-verify (zones, immo ⊆ geo) | ${cycle.join_verify.status}${j ? ` — included ${j.included}/${j.immo_count}, city-not-served-by-geo ${j.city_not_served_by_geo.count}, divergent-code ${j.divergent_code.count}` : ""} |`);
       log(`verdict ${cycle.verdict} — cycle.json at ${cyclePath()}`);

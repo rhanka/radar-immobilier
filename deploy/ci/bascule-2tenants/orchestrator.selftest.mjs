@@ -14,7 +14,7 @@ import { join } from "node:path";
 import process from "node:process";
 
 import {
-  artefacts, checkCapabilities, checkLeg, chooseCommonDate, correlateRun, filterInputs, inclusionCheck, makeCycleId,
+  artefacts, backupAge, checkCapabilities, checkLeg, chooseCommonDate, confirmAt, correlateRun, filterInputs, inclusionCheck, makeCycleId,
   parseBackupList, parseDispatchInputs, parseServedIds,
 } from "./cycle.mjs";
 import { GithubClient, tokenFor } from "./github.mjs";
@@ -52,6 +52,8 @@ const wf = ({ inline = true, withMode = true, extra = "" } = {}) => [
   eq("checkCapabilities — geo today lacks MODE + BACKUP_ID", checkCapabilities(geoToday).missing, ["MODE", "BACKUP_ID"]);
   const noList = parseDispatchInputs(wf().replace("[chain, restore, list]", "[chain, restore]"));
   eq("checkCapabilities — MODE without list", checkCapabilities(noList).missing, ["MODE option 'list'"]);
+  const freeMode = parseDispatchInputs(wf().replace("        type: choice\n        options: [chain, restore, list]\n", "        type: string\n"));
+  eq("checkCapabilities — MODE as a free string (no options) refused", checkCapabilities(freeMode).missing, ["MODE type 'choice'", "MODE option 'list'", "MODE option 'restore'"]);
   const mainWf = readFileSync(join(DIR, "..", "..", "..", ".github", "workflows", "bascule-preprod.yml"), "utf8");
   const mainInputs = parseDispatchInputs(mainWf);
   ok("parseDispatchInputs — real bascule-preprod.yml parsed (CONFIRM, DRY_RUN found)", !!mainInputs.CONFIRM && !!mainInputs.DRY_RUN);
@@ -69,16 +71,30 @@ const wf = ({ inline = true, withMode = true, extra = "" } = {}) => [
     { id: 2, event: "workflow_dispatch", created_at: "2026-09-27T10:00:05Z", display_title: "bascule-preprod restore c1" },
   ];
   eq("correlateRun — run-name MODE + CYCLE_ID", correlateRun(runs, { cycleId: "c1", mode: "restore", dispatchedAtMs: t }).run.id, 2);
-  const geoRuns = [{ id: 7, event: "workflow_dispatch", created_at: "2026-09-27T10:00:03Z", display_title: "bascule-preprod (iso-prod)" }];
-  eq("correlateRun — time fallback (single run)", correlateRun(geoRuns, { cycleId: "c1", mode: "restore", dispatchedAtMs: t }).correlation, "time");
-  eq("correlateRun — two candidates ⇒ ambiguous (no guess)", correlateRun([...geoRuns, { ...geoRuns[0], id: 8 }], { cycleId: "c1", mode: "restore", dispatchedAtMs: t }).run, null);
+  const noName = [{ id: 7, event: "workflow_dispatch", created_at: "2026-09-27T10:00:03Z", display_title: "bascule-preprod (iso-prod)" }];
+  eq("correlateRun — a run without MODE + CYCLE_ID in its name is never taken (no time fallback)", correlateRun(noName, { cycleId: "c1", mode: "restore", dispatchedAtMs: t }), { run: null, correlation: "not-found" });
+  eq("correlateRun — two run-name matches ⇒ ambiguous (no guess)", correlateRun([runs[1], { ...runs[1], id: 8 }], { cycleId: "c1", mode: "restore" }).correlation, "ambiguous-run-name");
+  eq("confirmAt — today UTC at the dispatch instant (crossing midnight)", [confirmAt(Date.parse("2026-09-27T23:59:59Z")), confirmAt(Date.parse("2026-09-28T00:00:01Z"))], ["iso-prod-2026-09-27", "iso-prod-2026-09-28"]);
   const L = (tenant, rows, extra = {}) => parseBackupList({ format: "radar-backup-list/v1", bucket: `${tenant}-backup`, latestComplete: null, backups: rows, ...extra }, tenant);
   const immo = L("immo", [{ date: "2026-09-27", status: "partial" }, { date: "2026-09-26", status: "complete", startedAt: "2026-09-26T02:23:00Z" }, { date: "2026-09-25", status: "complete" }]);
   const geo = L("geo", [{ date: "2026-09-27", status: "complete" }, { date: "2026-09-26", status: "complete", startedAt: "2026-09-26T03:10:00Z" }]);
-  const c = chooseCommonDate({ immo, geo });
+  const NOW = Date.parse("2026-09-27T10:00:00Z");
+  const c = chooseCommonDate({ immo, geo, nowMs: NOW });
   eq("chooseCommonDate — newest date complete on BOTH", [c.date, c.geoAfterImmo], ["2026-09-26", true]);
-  throws("chooseCommonDate — requested date not complete on geo", () => chooseCommonDate({ immo, geo, requested: "2026-09-25" }));
-  throws("chooseCommonDate — no common date", () => chooseCommonDate({ immo: L("immo", [{ date: "2026-09-20", status: "complete" }]), geo }));
+  eq("chooseCommonDate — age from the OLDER capture, ≤ 48 h", [c.freshness.age_hours, c.freshness.max_age_hours, c.freshness.stale], [31.6, 48, false]);
+  throws("chooseCommonDate — requested date not complete on geo", () => chooseCommonDate({ immo, geo, requested: "2026-09-25", nowMs: NOW }));
+  throws("chooseCommonDate — no common date", () => chooseCommonDate({ immo: L("immo", [{ date: "2026-09-20", status: "complete" }]), geo, nowMs: NOW }));
+  const later = Date.parse("2026-09-28T03:00:00Z"); // 48.6 h after immo's 02:23 capture of 09-26
+  try { chooseCommonDate({ immo, geo, nowMs: later }); ok("chooseCommonDate — D older than 48 h refused by default", false); } catch (e) {
+    ok("chooseCommonDate — D older than 48 h refused by default (ALLOW_STALE_BACKUP named)", /48\.6 h old \(> 48 h/.test(e.message) && /ALLOW_STALE_BACKUP=true/.test(e.message));
+  }
+  const st = chooseCommonDate({ immo, geo, nowMs: later, allowStale: true });
+  eq("chooseCommonDate — ALLOW_STALE_BACKUP=true accepts and records it", [st.date, st.freshness.stale, st.freshness.allow_stale, st.freshness.overridden], ["2026-09-26", true, true, true]);
+  eq("backupAge — a missing startedAt ⇒ D 00:00 UTC (conservative)", backupAge({ date: "2026-09-26", immoStartedAt: null, geoStartedAt: "2026-09-26T03:00:00Z", nowMs: NOW }).ageHours, 34);
+  const trunc = L("immo", Array.from({ length: 15 }, (_, k) => ({ date: `2026-09-${String(26 - k).padStart(2, "0")}`, status: "complete", startedAt: `2026-09-${String(26 - k).padStart(2, "0")}T02:00:00Z` })), { truncated: true });
+  try { chooseCommonDate({ immo: trunc, geo: L("geo", [{ date: "2026-09-05", status: "complete" }]), requested: "2026-09-05", nowMs: NOW, allowStale: true }); ok("chooseCommonDate — date outside a truncated list refused", false); } catch (e) {
+    ok("chooseCommonDate — date outside a truncated list refused cleanly (window named)", /truncated to its newest 15 backups \(2026-09-12\.\.2026-09-26\)/.test(e.message) && /outside the listed window/.test(e.message));
+  }
   throws("parseBackupList — wrong format", () => parseBackupList({ backups: [] }, "geo"));
   const G = "ogc:zones:laval:A-1\nogc:zones:laval:B-2\nogc:zones:montreal:C-408\n";
   eq("inclusionCheck — immo ⊆ geo ⇒ match", inclusionCheck("ogc:zones:laval:A-1\nogc:zones:montreal:C-408\n", G).status, "match");
@@ -99,12 +115,12 @@ eq("tokenFor — immo uses the workflow token", tokenFor({ GH_TOKEN_IMMO: "t" },
 throws("GithubClient.headers — geo token missing", () => new GithubClient({ env: {}, legs: {}, fetchImpl: () => {} }).headers("geo"));
 
 // ── full chain against a fake GitHub (fake clock) ────────────────────────────
-function fakeGh({ geoHasMode = true, geoIdsText, immoIdsText, geoLegDate = "2026-09-26", restoreConclusion = "success" }) {
+function fakeGh({ geoHasMode = true, geoIdsText, immoIdsText, geoLegDate = "2026-09-26", restoreConclusion = "success", geoRunName = true, startClock = "2026-09-27T10:00:00Z" }) {
   const runs = { immo: [], geo: [] };
   const art = new Map();
   const dispatched = [];
   let id = 1000;
-  let clock = Date.parse("2026-09-27T10:00:00Z");
+  let clock = Date.parse(startClock);
   const now = () => (clock += 60000);
   const lists = {
     immo: { format: "radar-backup-list/v1", bucket: "radar-immobilier-backup", latestComplete: "2026-09-26",
@@ -117,10 +133,11 @@ function fakeGh({ geoHasMode = true, geoIdsText, immoIdsText, geoLegDate = "2026
     headers() { return {}; },
     async workflowFile(t) { return t === "geo" && !geoHasMode ? wf({ withMode: false, extra: "      SKIP_ROLLOUT:\n        type: boolean" }) : wf({ inline: t === "immo", extra: t === "geo" ? "      SKIP_ROLLOUT:\n        type: boolean" : "" }); },
     async dispatch(t, inputs) {
-      dispatched.push({ t, inputs });
+      dispatched.push({ t, inputs, at: clock });
       const rid = ++id;
+      // both legs carry "bascule-preprod <MODE> <CYCLE_ID>" (immo #777, geo #408)
       runs[t].push({ id: rid, event: "workflow_dispatch", created_at: new Date(clock).toISOString(), html_url: `https://github.test/${t}/${rid}`,
-        display_title: t === "immo" ? `bascule-preprod ${inputs.MODE} ${inputs.CYCLE_ID}` : "bascule-preprod (iso-prod)" });
+        display_title: t === "geo" && !geoRunName ? "bascule-preprod (iso-prod)" : `bascule-preprod ${inputs.MODE} ${inputs.CYCLE_ID}` });
       const c = inputs.CYCLE_ID;
       if (inputs.MODE === "list") art.set(`${rid}/${artefacts.backupList(t, c)}/backup-list.json`, Buffer.from(JSON.stringify(lists[t])));
       if (inputs.MODE === "restore") {
@@ -170,7 +187,34 @@ const GEO_IDS = "ogc:zones:laval:A-1\nogc:zones:laval:B-2\nogc:zones:montreal:C-
   ok("chain — list runs are read-only (DRY_RUN=true, MODE=list) and come first", gh.dispatched.slice(0, 2).every((d) => d.inputs.MODE === "list" && d.inputs.DRY_RUN === "true"));
   eq("chain — join-verify reports city-not-served-by-geo, match", [r.cycle.join_verify.status, r.cycle.join_verify.diff_summary.city_not_served_by_geo.sample], ["match", ["sutton"]]);
   eq("chain — geo captured after immo recorded", r.cycle.backup.geo_after_immo, true);
-  ok("chain — geo correlated by time (no run-name yet)", r.cycle.legs.geo.restore_run.correlation === "time" && r.cycle.legs.immo.restore_run.correlation === "run-name");
+  ok("chain — both legs correlated by run-name (MODE + CYCLE_ID)", r.cycle.legs.geo.restore_run.correlation === "run-name" && r.cycle.legs.immo.restore_run.correlation === "run-name");
+  ok("chain — CONFIRM recomputed at each dispatch (today UTC of that instant)", gh.dispatched.every((d) => d.inputs.CONFIRM === confirmAt(d.at)) &&
+    r.cycle.legs.immo.restore_run.confirm_sent === confirmAt(gh.dispatched.find((d) => d.t === "immo" && d.inputs.MODE === "restore").at));
+  eq("chain — freshness recorded (age, max 48 h, not stale, no override)", [r.cycle.backup.freshness.max_age_hours, r.cycle.backup.freshness.stale, r.cycle.allow_stale_backup, r.cycle.legs.geo.restore_run.allow_stale_backup], [48, false, false, false]);
+  ok("chain — ALLOW_STALE_BACKUP forwarded only where declared (neither fake leg declares it)", restores.every((d) => !("ALLOW_STALE_BACKUP" in d.inputs)));
+}
+{
+  // a cycle crossing midnight UTC: lists dispatched on day N, restores on day N+1
+  const gh = fakeGh({ geoIdsText: GEO_IDS, immoIdsText: GEO_IDS, startClock: "2026-09-27T23:57:00Z" });
+  const r = await runChain(gh);
+  const sent = [...new Set(gh.dispatched.map((d) => d.inputs.CONFIRM))];
+  eq("chain — crossing midnight: each dispatch carries its own day's CONFIRM", [r.error, sent], [null, ["iso-prod-2026-09-27", "iso-prod-2026-09-28"]]);
+}
+{
+  const gh = fakeGh({ geoIdsText: GEO_IDS, immoIdsText: GEO_IDS, geoRunName: false });
+  const r = await runChain(gh);
+  ok("chain — geo run without MODE + CYCLE_ID in its name ⇒ fail-closed at list-backups (never correlated by time)",
+    r.error?.step === "list-backups" && /no run named "bascule-preprod list /.test(r.error.message) && /never correlated by time/.test(r.error.message));
+}
+{
+  const gh = fakeGh({ geoIdsText: GEO_IDS, immoIdsText: GEO_IDS, startClock: "2026-09-29T10:00:00Z" });
+  const r = await runChain(gh);
+  ok("chain — common date older than 48 h ⇒ refused at choose-date, no restore dispatched",
+    r.error?.step === "choose-date" && /ALLOW_STALE_BACKUP=true/.test(r.error.message) && gh.dispatched.every((d) => d.inputs.MODE === "list"));
+  const gh2 = fakeGh({ geoIdsText: GEO_IDS, immoIdsText: GEO_IDS, startClock: "2026-09-29T10:00:00Z" });
+  const r2 = await runChain(gh2, { ALLOW_STALE_BACKUP: "true" });
+  eq("chain — stale D + ALLOW_STALE_BACKUP=true ⇒ green, override recorded in cycle.json and per leg",
+    [r2.error, r2.cycle.verdict, r2.cycle.allow_stale_backup, r2.cycle.backup.freshness.overridden, r2.cycle.legs.immo.restore_run.allow_stale_backup], [null, "success", true, true, true]);
 }
 {
   const r = await runChain(fakeGh({ geoIdsText: GEO_IDS, immoIdsText: "ogc:zones:laval:A-1\nogc:zones:laval:Z-9\n" }));
@@ -206,12 +250,26 @@ const GEO_IDS = "ogc:zones:laval:A-1\nogc:zones:laval:B-2\nogc:zones:montreal:C-
   ok("bascule-e2e.yml — environment radar-e2e", /\n {4}environment: radar-e2e\n/.test(w));
   ok("bascule-e2e.yml — a single job declares environment radar-e2e (the one dispatching geo)",
     (w.match(/environment: radar-e2e/g) || []).length === 1 && /\n {2}e2e:\n[\s\S]*?\n {4}environment: radar-e2e\n[\s\S]*dispatch-restore/.test(w) && (w.match(/\n {2}[a-z][a-z0-9-]*:\n {4}(if|runs-on|needs|environment)/g) || []).length === 1);
-  ok("bascule-e2e.yml — GEO_DISPATCH_TOKEN only in that job's env", (w.match(/secrets\.GEO_DISPATCH_TOKEN/g) || []).length === 1);
+  // GEO_DISPATCH_TOKEN: never at job level, only in the env of the steps that call geo
+  const jobEnv = (w.match(/\n {4}env:\n((?: {6}.*\n)+)/) || [])[1] || "";
+  ok("bascule-e2e.yml — no token in the job-level env", !/GEO_DISPATCH_TOKEN|GH_TOKEN_IMMO|secrets\./.test(jobEnv));
+  const steps = w.split(/\n {6}- /).slice(1);
+  const stepOf = (re) => steps.find((s) => re.test(s)) || "";
+  const geoCallers = ["capabilities", "list-backups", "dispatch-restore", "follow", "collect", "join-verify"];
+  ok("bascule-e2e.yml — GEO_DISPATCH_TOKEN in the env of each step calling geo", geoCallers.every((c) =>
+    new RegExp(`GEO_DISPATCH_TOKEN: \\$\\{\\{ secrets\\.GEO_DISPATCH_TOKEN \\}\\}\\n\\s+run: node "\\$ORCH" ${c}\\n`).test(stepOf(new RegExp(`run: node "\\$ORCH" ${c}\\n`)))));
+  ok("bascule-e2e.yml — token count = the geo-calling steps only", (w.match(/secrets\.GEO_DISPATCH_TOKEN/g) || []).length === geoCallers.length);
+  ok("bascule-e2e.yml — no token for checkout / setup-node / upload-artifact / cycle-open / choose-date / publish",
+    steps.filter((s) => /uses: actions\/|ORCH" (cycle-open|choose-date|publish)\n/.test(s)).every((s) => !/GEO_DISPATCH_TOKEN|GH_TOKEN_IMMO/.test(s)));
+  const uses = [...w.matchAll(/uses: (\S+)/g)].map((m) => m[1]);
+  ok(`bascule-e2e.yml — every action pinned by a full commit SHA (${uses.length})`, uses.length === 3 && uses.every((u) => /^actions\/[a-z-]+@[0-9a-f]{40}$/.test(u)));
+  ok("bascule-e2e.yml — input ALLOW_STALE_BACKUP (boolean, default false) passed via env", /ALLOW_STALE_BACKUP:\n\s+description:[^\n]*\n\s+required: false\n\s+type: boolean\n\s+default: false/.test(w) &&
+    w.includes("ALLOW_STALE_BACKUP: ${{ inputs.ALLOW_STALE_BACKUP && 'true' || 'false' }}"));
+  ok("bascule-e2e.yml — doc states the real token (gh OAuth, every rhanka repo, PAT debt)", /`gh` OAuth token of rhanka/.test(w) && /EVERY repository of rhanka/.test(w) && /fine-grained PAT/.test(w));
   const cred = readFileSync(join(DIR, "CRED_CYCLE.md"), "utf8");
   ok("CRED_CYCLE.md — GEO_DISPATCH_TOKEN: source, real scope, invalidation, debt", /gh auth token/.test(cred) && /every repository of `rhanka`/.test(cred) &&
     /gh auth logout/.test(cred) && /fine-grained PAT/.test(cred) && /radar-e2e/.test(cred));
   ok("bascule-e2e.yml — main-only guard", w.includes("if: ${{ github.ref == 'refs/heads/main' }}"));
-  ok("bascule-e2e.yml — GEO_DISPATCH_TOKEN via env only", /GEO_DISPATCH_TOKEN: \$\{\{ secrets\.GEO_DISPATCH_TOKEN \}\}/.test(w));
   const runs = [...w.matchAll(/run: (?:\|\n((?: {10,}.*\n?)+)|(.*))/g)].map((m) => m[1] || m[2]);
   ok(`bascule-e2e.yml — no \${{ }} in any of the ${runs.length} run blocks`, runs.length >= 8 && runs.every((r) => !r.includes("${{")));
   ok("bascule-e2e.yml — permissions actions: write, contents: read", /permissions:\n\s+contents: read\n\s+actions: write/.test(w));
