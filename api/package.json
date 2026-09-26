@@ -21,7 +21,7 @@
     "@radar/domain": "*",
     "@radar/sources": "*",
     "@sentropic/chat-core": "^0.1.2",
-    "@sentropic/geo": "^0.1.1",
+    "@sentropic/geo": "^0.6.2",
     "@sentropic/geo-sources-americas": "^0.1.1",
     "@sentropic/graphify": "0.18.0",
     "@sentropic/h2a": "^0.26.1",
