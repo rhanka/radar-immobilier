@@ -82,6 +82,13 @@ spec:
             role: daily-backup
         spec:
           restartPolicy: Never
+          # SIGTERM → SIGKILL delay (activeDeadlineSeconds, node drain). On SIGTERM the
+          # `backup` step stops the copy and still writes inventory + manifest (partial)
+          # + latest.json, each request capped to this grace minus 10 s
+          # (= TERMINATION_GRACE_SECONDS). Measured need on the current inventory
+          # (59 017 docs, 14.9 MiB): build + hash 0.3 s, upload 1.9 s at the 8 MiB/s
+          # floor, + manifest + latest.json ≈ 12 s worst case << 110 s (selftest).
+          terminationGracePeriodSeconds: 120
           automountServiceAccountToken: false
           securityContext:
             runAsNonRoot: true
@@ -207,7 +214,24 @@ spec:
                 - { name: DRIZZLE_JOURNAL, value: "/workspace/api/drizzle/meta/_journal.json" }
                 - { name: BACKUP_IMAGE, value: "ghcr.io/rhanka/radar-api@sha256:cb2ab4ec8bde643d0b7d0799b7c737f007f1ba7dd2f54392221275e042c22ac8" }
                 - { name: COPY_CONCURRENCY, value: "8" }
+                # Docs copy budget, measured from the start of the docs step. At the
+                # budget a timer aborts the copies in flight (pending), then inventory +
+                # manifest (partial) + latest.json are written, exit 0. It cuts well
+                # before the kill: 1800 (dump + PG upload margin) + 5400 (budget) + 640
+                # (longest request: 5 GiB CopyObject at 8 MiB/s) + 360 (3 final writes)
+                # + 120 (grace) = 8320 s < activeDeadlineSeconds 10800 — margin 2480 s
+                # (checked by the selftest).
                 - { name: DOCS_COPY_BUDGET_SECONDS, value: "5400" }
+                # Per-request S3 deadlines (incident 2026-09-26: one CopyObject hung
+                # forever, geo). Every S3 call: wall-clock deadline (AbortSignal + race)
+                # = 30 s for HEAD/LIST/small GET, max(120 s, bytes / 8 MiB/s) for a copy,
+                # a write or a body; connect 10 s + idle socket 120 s on the HTTP handler.
+                - { name: S3_CONNECT_TIMEOUT_MS, value: "10000" }
+                - { name: S3_REQUEST_TIMEOUT_MS, value: "120000" }
+                - { name: S3_META_TIMEOUT_MS, value: "30000" }
+                - { name: S3_MIN_THROUGHPUT_BYTES_PER_SEC, value: "8388608" }
+                # = terminationGracePeriodSeconds above: final writes after SIGTERM fit in it.
+                - { name: TERMINATION_GRACE_SECONDS, value: "120" }
                 - { name: DOCS_EXCLUDE_PREFIXES, value: "" }
                 - { name: MIN_DUMP_BYTES, value: "1048576" }
                 - { name: MIN_DUMP_RATIO, value: "0.5" }
