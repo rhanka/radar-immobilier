@@ -154,6 +154,42 @@ echo "$rmd" | grep -q "preprod-abc1234-${CUR_TS}" && bad "excl_cur: CURRENT key 
 echo "$rmd" | grep -q 'preprod-t2-' && ok "excl_cur: pruned oldest OTHER backup t2" || bad "excl_cur: t2 not pruned"
 echo "$rmd" | grep -q 'preprod-t3-' && bad "excl_cur: t3 wrongly pruned" || ok "excl_cur: kept t3"
 
+# 6d. DISCRIMINATING test — locks the off-by-one fix. The current key is date-NEWEST
+#     and PRESENT in the listing (as in prod: uploaded before prune). t1<t2<t3<cur,
+#     RETAIN=2. NEW logic (exclude cur up front) keeps 2 prior (t2,t3) → prunes ONLY
+#     t1. OLD logic (exclude after head) counted cur in total, dropped total-RETAIN=2
+#     → pruned t1 AND t2. Asserting t2 is KEPT therefore FAILS on the old prune and
+#     PASSES on the current head — it is the test that actually verifies the fix.
+CUR_TS_NEW=20241231T235959Z
+LSNEW="$(printf '%s\n' \
+  '2024/01/01 00:00:00  10 preprod-t1-20240101T000000Z.sql.gz' \
+  '2024/02/01 00:00:00  10 preprod-t2-20240201T000000Z.sql.gz' \
+  '2024/03/01 00:00:00  10 preprod-t3-20240301T000000Z.sql.gz' \
+  "2024/12/31 23:59:59  10 preprod-abc1234-${CUR_TS_NEW}.sql.gz")"
+EXTRA="export FAKE_JOB_SUCCEEDED=1; export BACKUP_RETAIN_COUNT=2; export TS_KEY=${CUR_TS_NEW}; export FAKE_S5_LS=$(printf '%q' "$LSNEW")"
+run_case retention_lock; code=$CODE
+eq "$code" 0 "retention_lock: exit 0"
+rmd="$(rm_calls)"
+echo "$rmd" | grep -q 'preprod-t1-' && ok "retention_lock: pruned oldest prior t1" || bad "retention_lock: t1 not pruned"
+echo "$rmd" | grep -q 'preprod-t2-' && bad "retention_lock: t2 pruned (OLD off-by-one logic)" || ok "retention_lock: kept t2 (LOCKS fix — old logic would prune it)"
+echo "$rmd" | grep -q 'preprod-t3-' && bad "retention_lock: t3 wrongly pruned" || ok "retention_lock: kept t3"
+echo "$rmd" | grep -q "preprod-abc1234-${CUR_TS_NEW}" && bad "retention_lock: current key pruned" || ok "retention_lock: kept current key (date-newest)"
+
+# 6e. date-guard: a line with NF>=3 but a NON-date first field is skipped — never
+#     counted toward retention, never pruned (we never delete what we cannot
+#     time-order).
+LSBAD="$(printf '%s\n' \
+  '2024/01/01 00:00:00  10 preprod-t1-20240101T000000Z.sql.gz' \
+  '2024/02/01 00:00:00  10 preprod-t2-20240201T000000Z.sql.gz' \
+  'not-a-date 99:99:99  10 preprod-NODATE-junk.sql.gz')"
+EXTRA="export FAKE_JOB_SUCCEEDED=1; export BACKUP_RETAIN_COUNT=1; export FAKE_S5_LS=$(printf '%q' "$LSBAD")"
+run_case retention_dateguard; code=$CODE
+eq "$code" 0 "retention_dateguard: exit 0"
+rmd="$(rm_calls)"
+echo "$rmd" | grep -q 'preprod-NODATE-junk' && bad "dateguard: non-date line pruned" || ok "dateguard: non-date line never pruned"
+echo "$rmd" | grep -q 'preprod-t1-' && ok "dateguard: pruned oldest datable t1" || bad "dateguard: t1 not pruned"
+echo "$rmd" | grep -q 'preprod-t2-' && bad "dateguard: t2 wrongly pruned" || ok "dateguard: kept t2"
+
 # 7. retention failure is NON-fatal (backup already landed).
 EXTRA='export FAKE_JOB_SUCCEEDED=1; export FAKE_S5_LS_MODE=fail'; run_case retention_nonfatal; code=$CODE
 eq "$code" 0 "retention failure does not red the release"
