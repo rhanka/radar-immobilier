@@ -69,6 +69,15 @@ on:
         required: false
         type: boolean
         default: false
+      # e2e 2-tenant coherence id (quadrant 7). Set by the cycle-orchestrator
+      # (deploy/ci/bascule-2tenants) when this bascule is one leg of the immo+geo
+      # e2e run; empty for a standalone immo bascule. When set (and not DRY), the
+      # immo served-canonical-ids join-verify artefact is published at the end.
+      CYCLE_ID:
+        description: "e2e 2-tenant coherence id (cycle-orchestrator); empty = standalone immo bascule"
+        required: false
+        type: string
+        default: ""
 
 # Jamais deux bascules en parallèle (write préprod).
 concurrency:
@@ -92,6 +101,8 @@ jobs:
     env:
       # ── GO owner + anti-rejeu (CONFIRM_EXPECTED calculé au pas 'compute') ──
       CONFIRM: ${{ inputs.CONFIRM }}
+      # ── e2e 2-tenant coherence id (empty = standalone immo bascule) ────────
+      CYCLE_ID: ${{ inputs.CYCLE_ID }}
       # ── RUNNER KUBECTL-ONLY (0 cred S3, 0 cred DB) ────────────────────────
       # Le runner ne se connecte à AUCUNE DB ET NE TOUCHE PLUS S3 : plus de
       # BASCULE_PROD_PG*/BASCULE_PREPROD_PG* NI de BASCULE_S3_LIST_AWS_*/AWS_*
@@ -316,6 +327,40 @@ jobs:
       # ── S7 : smoke (read-only ; joué aussi en DRY) ─────────────────────────
       - name: S7 smoke préprod/health (db.ok + objectStore.ok)
         run: node "$CLI" smoke
+
+      # ══════════════ e2e JOIN-VERIFY hook (2-tenant coherence, quadrant 7) ═══
+      # When driven by the cycle-orchestrator (CYCLE_ID set, non-DRY), publish
+      # immo's served canonical_id set — built from RAW refs via @sentropic/geo
+      # buildServedCanonicalIds (dossier §9(a): byte-identical to geo's served set
+      # BY CONSTRUCTION, no local-normalizer divergence). 0 cred, from the immo
+      # PUBLIC preprod API. Skipped entirely for a standalone / scheduled bascule.
+      # The orchestrator downloads this artefact + geo's and compares byte-à-byte.
+      - name: e2e served-ids — install deps (@sentropic/geo@0.6.2)
+        if: ${{ inputs.CYCLE_ID != '' && !inputs.DRY_RUN }}
+        run: npm ci --no-audit --no-fund
+      - name: e2e served-ids — build immo served-canonical-ids artefact
+        if: ${{ inputs.CYCLE_ID != '' && !inputs.DRY_RUN }}
+        env:
+          # PENDING (O1, SPEC §7): the exact immo preprod served-entities endpoint
+          # (RAW code_zone / no_lot enumeration) is not yet arrested — provide it
+          # via this repo var once locked with geo-cond; the builder fails closed
+          # with an actionable message until then.
+          IMMO_SERVED_REFS_URL: ${{ vars.BASCULE_IMMO_SERVED_REFS_URL }}
+          IMMO_SERVED_IDS_OUT: ${{ github.workspace }}/.bascule2-work/immo-served-canonical-ids.txt
+        run: |
+          set -euo pipefail
+          mkdir -p "${{ github.workspace }}/.bascule2-work"
+          node deploy/ci/bascule-2tenants/publish-immo-served-ids.mjs
+      - name: e2e served-ids — upload artefact immo-served-canonical-ids-<CYCLE_ID>
+        if: ${{ inputs.CYCLE_ID != '' && !inputs.DRY_RUN }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: immo-served-canonical-ids-${{ inputs.CYCLE_ID }}
+          path: |
+            ${{ github.workspace }}/.bascule2-work/immo-served-canonical-ids.txt
+            ${{ github.workspace }}/.bascule2-work/immo-served-canonical-ids.txt.sha256
+          if-no-files-found: error
+          retention-days: 7
 
       # ── Rollback DURABLE : les DUMPS ne transitent plus par le runner ──────
       # Le dump prod (S1, CronJob owner) ET le dump rollback préprod (G1, Job)
