@@ -14,7 +14,7 @@ import console from "node:console";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import vm from "node:vm";
-import { classifyJobStatus, withScheme, parseListingMeta, reconMissing, refreshJobName } from "./bascule.mjs";
+import { classifyJobStatus, withScheme, parseListingMeta, reconMissing, refreshJobName, buildRefreshArgs, refreshArgsYaml } from "./bascule.mjs";
 
 let passed = 0;
 let failed = 0;
@@ -82,6 +82,30 @@ eq("refreshJobName — tirets en tête/fin taillés", refreshJobName("--foo--"),
 ok("refreshJobName — borné à 63 caractères", refreshJobName("x".repeat(100)).length <= 63);
 ok("refreshJobName — pas de tiret final après troncature", !/-$/.test(refreshJobName("a".repeat(60) + "-".repeat(10))));
 ok("refreshJobName — charset RFC1123 [a-z0-9-] uniquement", /^[a-z0-9-]+$/.test(refreshJobName("Wéîrd Run #42!")));
+
+// ── buildRefreshArgs / refreshArgsYaml : bornage (d) du refresh S6 ───────────
+const throws = (fn) => { try { fn(); return false; } catch { return true; } };
+// Défaut (vides) ⇒ [] = delta complet des 530 villes config-only.
+eq("refreshArgs — vides ⇒ [] (delta complet)", buildRefreshArgs({}).args, []);
+eq("refreshArgs — vides ⇒ [] (aucun champ)", buildRefreshArgs().args, []);
+// --chunk k/n ⇒ shard worker-live.
+eq("refreshArgs — chunk 1/4 ⇒ --chunk", buildRefreshArgs({ chunk: "1/4" }).args, ["--chunk", "1/4"]);
+eq("refreshArgs — chunk trim", buildRefreshArgs({ chunk: "  2/5 " }).args, ["--chunk", "2/5"]);
+// Liste de slugs (espaces et/ou virgules).
+eq("refreshArgs — cities espace", buildRefreshArgs({ cities: "carignan delson" }).args, ["carignan", "delson"]);
+eq("refreshArgs — cities virgule + espaces", buildRefreshArgs({ cities: " saint-henri, laval " }).args, ["saint-henri", "laval"]);
+// Mutuellement exclusifs + validations (throw, jamais process.exit).
+ok("refreshArgs — chunk + cities ⇒ throw (exclusifs)", throws(() => buildRefreshArgs({ chunk: "1/4", cities: "laval" })));
+ok("refreshArgs — chunk mal formé ⇒ throw", throws(() => buildRefreshArgs({ chunk: "1-4" })));
+ok("refreshArgs — chunk k>n ⇒ throw", throws(() => buildRefreshArgs({ chunk: "5/4" })));
+ok("refreshArgs — chunk 0/n ⇒ throw", throws(() => buildRefreshArgs({ chunk: "0/4" })));
+ok("refreshArgs — slug injection (espace/quote) ⇒ throw", throws(() => buildRefreshArgs({ cities: 'laval","--evil' })));
+ok("refreshArgs — slug majuscule ⇒ throw", throws(() => buildRefreshArgs({ cities: "Laval" })));
+// refreshArgsYaml : corps de liste inline JSON-quoté (sans crochets), injection-safe.
+eq("refreshArgsYaml — vide ⇒ '' (args: [])", refreshArgsYaml([]), "");
+eq("refreshArgsYaml — chunk", refreshArgsYaml(["--chunk", "1/4"]), '"--chunk", "1/4"');
+eq("refreshArgsYaml — slugs", refreshArgsYaml(["carignan", "delson"]), '"carignan", "delson"');
+ok("refreshArgsYaml — sortie sans crochets (le template fournit args: [...])", !/[[\]]/.test(refreshArgsYaml(["a", "b"])));
 
 // ── docs-sync : copie INCRÉMENTALE + CONCURRENTE (script réel du template) ──────
 // Parité rhanka/geo#396. Le script `node -e` du Job est extrait du template et
