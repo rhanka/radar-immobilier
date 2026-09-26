@@ -24,22 +24,29 @@
 //   follow            status only, until both runs complete.
 //   collect           `cycle-leg-<tenant>-<CYCLE_ID>`: verdict pg/s3 + backup date.
 //   join-verify       `<tenant>-served-canonical-ids-<CYCLE_ID>`: INCLUSION
-//                     immo ⊆ geo (zones first); `city-not-served-by-geo` is
-//                     reported, only `divergent-code` fails.
+//                     immo ⊆ geo (zones first), FIDELITY control against the
+//                     recorded baseline (join-verify-baseline.json, or
+//                     BASCULE2_JOIN_BASELINE; `none` = strict): known-drift is
+//                     counted, new drift (divergent-code or city-not-served-by-geo
+//                     absent from the baseline) fails, resolved is reported.
 //   publish           cycle.json + step summary; exit 1 unless the verdict is green.
+//   replay-seed       (no dispatch) writes a cycle.json pointing at EXISTING leg
+//                     restore runs (REPLAY_IMMO_RUN_ID, REPLAY_GEO_RUN_ID,
+//                     REPLAY_CYCLE_ID, REPLAY_BACKUP_DATE) so that collect +
+//                     join-verify + publish re-evaluate their artefacts offline.
 // =============================================================================
 import { Buffer } from "node:buffer";
 import console from "node:console";
 import { createHash } from "node:crypto";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import process from "node:process";
 import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 import {
   artefacts, assertCycleId, checkCapabilities, checkLeg, chooseCommonDate, CONFIRM_RE, confirmAt, correlateRun, DEFAULT_MAX_AGE_HOURS, FILES,
-  filterInputs, inclusionCheck, isValidDate, LEGS, makeCycleId, newCycle, parseBackupList, parseDispatchInputs, TENANTS,
+  filterInputs, inclusionCheck, isValidDate, LEGS, makeCycleId, newCycle, parseBackupList, parseBaseline, parseDispatchInputs, TENANTS,
 } from "./cycle.mjs";
 import { GithubClient } from "./github.mjs";
 
@@ -49,6 +56,7 @@ class Die extends Error {}
 const die = (m) => { throw new Die(m); };
 const opt = (n, d) => { const v = process.env[n]; return v === undefined || v === "" ? d : v; };
 const sha256 = (b) => createHash("sha256").update(b).digest("hex");
+export const DEFAULT_BASELINE_PATH = join(dirname(fileURLToPath(import.meta.url)), "join-verify-baseline.json");
 
 function workdir() {
   const d = opt("BASCULE2_WORKDIR", join(process.cwd(), ".bascule2-work"));
@@ -255,27 +263,73 @@ export function makeOrchestrator({ gh, now = Date.now, pollSec = Number(opt("BAS
         if (legSha && legSha !== actual) die(`join-verify — ${t}: artefact sha256 differs from legs.${t}.served_ids_sha256.`);
         texts[t] = Buffer.from(ids).toString("utf8");
       }
+      // Baseline (fidelity control): a missing or malformed baseline fails closed;
+      // BASCULE2_JOIN_BASELINE=none runs the strict check (every drift is new).
+      const baselinePath = opt("BASCULE2_JOIN_BASELINE", DEFAULT_BASELINE_PATH);
+      let baseline = null;
+      let baselineMeta = null;
+      if (baselinePath !== "none") {
+        if (!existsSync(baselinePath)) die(`join-verify — baseline ${baselinePath} missing (BASCULE2_JOIN_BASELINE=none for a strict run).`);
+        const raw = readFileSync(baselinePath);
+        try { baseline = parseBaseline(JSON.parse(raw.toString("utf8"))); } catch (e) { die(`join-verify — ${e.message}`); }
+        baselineMeta = { path: baselinePath === DEFAULT_BASELINE_PATH ? "deploy/ci/bascule-2tenants/join-verify-baseline.json" : baselinePath,
+          sha256: sha256(raw), entries: baseline.entries.size, ...baseline.recorded_from };
+      }
       let diff;
-      try { diff = inclusionCheck(texts.immo, texts.geo); } catch (e) { die(`join-verify — ${e.message}`); }
-      cycle.join_verify = { status: diff.status, scope: diff.scope, compared_at: new Date(now()).toISOString(), diff_summary: diff };
+      try { diff = inclusionCheck(texts.immo, texts.geo, { baseline }); } catch (e) { die(`join-verify — ${e.message}`); }
+      cycle.join_verify = { status: diff.status, scope: diff.scope, compared_at: new Date(now()).toISOString(), baseline: baselineMeta, diff_summary: diff };
       saveCycle(cycle);
+      const n = diff.new_drift;
       log(`join-verify ${diff.status.toUpperCase()} — immo=${diff.immo_count} geo=${diff.geo_count} included=${diff.included} ` +
-        `city-not-served-by-geo=${diff.city_not_served_by_geo.count} (${diff.city_not_served_by_geo.cities} cities) divergent-code=${diff.divergent_code.count}`);
-      if (diff.status !== "match") die(`join-verify DRIFT — ${diff.divergent_code.count} immo zone id(s) whose city geo serves but not the code (sample in cycle.json).`);
+        `known-drift=${diff.known_drift.count} new-drift=${n.count} (divergent-code ${n.divergent_code.count}, city-not-served-by-geo ${n.city_not_served_by_geo.count} ` +
+        `in ${n.city_not_served_by_geo.cities} cities) resolved=${diff.resolved.count} — baseline ${baselineMeta ? `${baselineMeta.entries} entries (D=${baselineMeta.backup_date})` : "none (strict)"}`);
+      if (diff.known_drift.reclassified) warn(`${diff.known_drift.reclassified} known-drift id(s) changed class since the baseline (see cycle.json).`);
+      if (diff.resolved.count) warn(`${diff.resolved.count} baseline id(s) no longer drift (resolved: ${diff.resolved.included_now} now included, ${diff.resolved.absent_from_immo} gone from immo) — purge them from the baseline.`);
+      if (diff.status === "drift") {
+        die(`join-verify DRIFT — ${n.count} new drift id(s) absent from the baseline: ${n.divergent_code.count} divergent-code, ` +
+          `${n.city_not_served_by_geo.count} city-not-served-by-geo (sample in cycle.json).`);
+      }
+    },
+
+    async "replay-seed"() {
+      // No dispatch, no CONFIRM: re-evaluates the artefacts of EXISTING leg restore
+      // runs (collect + join-verify + publish), e.g. after a baseline change.
+      if (isDry()) die("replay-seed — set DRY_RUN=false: collect and join-verify are skipped in DRY (nothing is dispatched either way).");
+      const runIds = { immo: opt("REPLAY_IMMO_RUN_ID", ""), geo: opt("REPLAY_GEO_RUN_ID", "") };
+      for (const t of TENANTS) if (!/^\d+$/.test(runIds[t])) die(`replay-seed — REPLAY_${t.toUpperCase()}_RUN_ID must be a run id.`);
+      const date = opt("REPLAY_BACKUP_DATE", "");
+      if (!isValidDate(date)) die("replay-seed — REPLAY_BACKUP_DATE must be YYYY-MM-DD.");
+      let cycleId;
+      try { cycleId = assertCycleId(opt("REPLAY_CYCLE_ID", "")); } catch (e) { die(`replay-seed — REPLAY_CYCLE_ID: ${e.message}`); }
+      const cycle = newCycle({ cycleId, confirm: `iso-prod-${date}`, createdAt: new Date(now()).toISOString(), orchestratorRunId: opt("GITHUB_RUN_ID", null), dryRun: false });
+      cycle.replay_of = { orchestrator_run_id: opt("REPLAY_OF_RUN_ID", null), note: "replay: no dispatch, artefacts of existing leg restore runs" };
+      cycle.backup = { date };
+      for (const t of TENANTS) {
+        const r = await client.run(t, Number(runIds[t])); // read-only: status of the existing run
+        cycle.legs[t].restore_run = { run_id: Number(runIds[t]), html_url: r.html_url ?? null, status: r.status, conclusion: r.conclusion ?? null, replay: true };
+      }
+      saveCycle(cycle);
+      exportEnv("CYCLE_ID", cycleId);
+      log(`replay-seed — CYCLE_ID=${cycleId} D=${date} immo run ${runIds.immo} geo run ${runIds.geo} (no dispatch)`);
     },
 
     async publish() {
       const cycle = loadCycle();
       const legsOk = TENANTS.every((t) => checkLeg(t, cycle.legs[t].cycle_leg, cycle.backup?.date).ok);
       cycle.verdict = cycle.dry_run ? (cycle.backup?.date ? "dry-run-ok" : "failure")
-        : legsOk && cycle.join_verify.status === "match" ? "success" : "failure";
+        : legsOk && ["match", "known-drift"].includes(cycle.join_verify.status) ? "success" : "failure";
       saveCycle(cycle);
       const j = cycle.join_verify.diff_summary;
+      const b = cycle.join_verify.baseline;
       summary(`### bascule e2e immo + geo — ${cycle.cycle_id}\n\n| item | value |\n|---|---|\n` +
         `| verdict | **${cycle.verdict}** |\n| backup date D | ${cycle.backup?.date ?? "-"} (geo after immo: ${cycle.backup?.geo_after_immo ?? "unknown"}) |\n` +
         `| age of D | ${cycle.backup?.freshness ? `${cycle.backup.freshness.age_hours} h (max ${cycle.backup.freshness.max_age_hours} h${cycle.backup.freshness.overridden ? ", STALE accepted by ALLOW_STALE_BACKUP" : ""})` : "-"} |\n` +
         TENANTS.map((t) => `| ${t} restore run | ${cycle.legs[t].restore_run?.html_url ?? "-"} (${cycle.legs[t].restore_run?.conclusion ?? "-"}) |`).join("\n") + "\n" +
-        `| join-verify (zones, immo ⊆ geo) | ${cycle.join_verify.status}${j ? ` — included ${j.included}/${j.immo_count}, city-not-served-by-geo ${j.city_not_served_by_geo.count}, divergent-code ${j.divergent_code.count}` : ""} |`);
+        `| join-verify (zones, immo ⊆ geo, fidelity) | ${cycle.join_verify.status}${j ? ` — included ${j.included}/${j.immo_count}` : ""} |\n` +
+        `| known-drift (baseline) | ${j ? `${j.known_drift.count} (divergent-code ${j.known_drift.by_class["divergent-code"] ?? 0}, city-not-served-by-geo ${j.known_drift.by_class["city-not-served-by-geo"] ?? 0})` : "-"} |\n` +
+        `| new drift (fails) | ${j ? `${j.new_drift.count} (divergent-code ${j.new_drift.divergent_code.count}, city-not-served-by-geo ${j.new_drift.city_not_served_by_geo.count})` : "-"} |\n` +
+        `| resolved (purge from baseline) | ${j ? j.resolved.count : "-"} |\n` +
+        `| baseline | ${b ? `${b.entries} entries, D=${b.backup_date}, run ${b.orchestrator_run_id}, sha256 ${b.sha256.slice(0, 12)}` : "none (strict)"} |`);
       log(`verdict ${cycle.verdict} — cycle.json at ${cyclePath()}`);
       if (cycle.verdict === "failure") die("e2e verdict failure (see cycle.json).");
     },
