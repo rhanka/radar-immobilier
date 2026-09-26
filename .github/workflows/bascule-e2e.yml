@@ -14,8 +14,9 @@
 #   5. dispatch-restore  MODE=restore BACKUP_ID=D CYCLE_ID on both (skipped in DRY)
 #   6. follow            status only
 #   7. collect           cycle-leg-<tenant>-<CYCLE_ID>: pg/s3 success, backup date = D
-#   8. join-verify       served canonical ids, INCLUSION immo ⊆ geo (zones first):
-#                        city-not-served-by-geo reported, divergent-code fails
+#   8. join-verify       served canonical ids, INCLUSION immo ⊆ geo (zones first),
+#                        FIDELITY vs join-verify-baseline.json: known-drift counted,
+#                        new drift fails, resolved reported
 #   9. publish           cycle.json (artefact cycle-<CYCLE_ID>) + summary, always
 # Every dispatch sends CONFIRM = today UTC at that instant (a cycle may cross
 # midnight) and its run is correlated by run-name (MODE + CYCLE_ID) only.
@@ -144,5 +145,8 @@ jobs:
         with:
           name: cycle-${{ env.CYCLE_ID }}
           path: ${{ github.workspace }}/.bascule2-work/
+          # the workdir is a dot-directory: upload-artifact v4.4+ skips hidden
+          # files by default (run 36255243747 uploaded nothing without this)
+          include-hidden-files: true
           if-no-files-found: warn
           retention-days: 30
