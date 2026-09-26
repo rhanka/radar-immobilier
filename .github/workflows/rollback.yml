@@ -62,8 +62,11 @@ jobs:
           DEPLOYMENTS: radar-api radar-ui
           PUBLIC_HOST: ${{ vars.PREPROD_ENDPOINT_HOST || 'preprod.immo.sent-tech.ca' }}
           FAILED_REF: ${{ inputs.failed_ref }}
+          # SECURITY: user-controlled input passed via env, never interpolated
+          # as ${{ inputs.reason }} inside the script (shell injection).
+          REASON: ${{ inputs.reason }}
         run: |
-          echo "::warning title=Manual rollback (preprod)::reason: ${{ inputs.reason }}"
+          echo "::warning title=Manual rollback (preprod)::reason: $REASON"
           bash deploy/ci/rollback-release.sh
 
   rollback-prod:
@@ -96,6 +99,9 @@ jobs:
           DEPLOYMENTS: radar-api radar-ui
           PUBLIC_HOST: ${{ vars.PUBLIC_ENDPOINT_HOST || 'immo.sent-tech.ca' }}
           FAILED_REF: ${{ inputs.failed_ref }}
+          # SECURITY: user-controlled input passed via env, never interpolated
+          # as ${{ inputs.reason }} inside the script (shell injection).
+          REASON: ${{ inputs.reason }}
         run: |
-          echo "::warning title=Manual rollback (prod)::reason: ${{ inputs.reason }}"
+          echo "::warning title=Manual rollback (prod)::reason: $REASON"
           bash deploy/ci/rollback-release.sh
