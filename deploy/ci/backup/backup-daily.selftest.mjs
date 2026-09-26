@@ -48,6 +48,14 @@ const sdk = Object.fromEntries(OPS.map((op) => {
   const name = `${op}Command`;
   return [name, ({ [name]: class { constructor(input) { this.input = input; } } })[name]];
 }));
+// Per-identity SDK views: a step that tries a command its identity lacks throws
+// (TypeError: not a constructor) → the test fails. This PROVES, by construction:
+//   backup (writer)  cannot issue any delete;
+//   purge  (purger)  needs nothing but DeleteObject (no List/Get);
+//   freshness (reader) only reads.
+const sdkWriter = Object.fromEntries(Object.entries(sdk).filter(([k]) => k !== 'DeleteObjectCommand'));
+const sdkPurger = { DeleteObjectCommand: sdk.DeleteObjectCommand };
+const sdkReader = { GetObjectCommand: sdk.GetObjectCommand, HeadObjectCommand: sdk.HeadObjectCommand };
 const s3err = (name, status) => Object.assign(new Error(name), { name, $metadata: { httpStatusCode: status } });
 async function toBuf(body) {
   if (Buffer.isBuffer(body)) return body;
@@ -226,15 +234,34 @@ function mkWorld(iso = '2026-09-26T02:20:00Z') {
   clock.t = Date.parse(iso);
   return { clock, fake };
 }
-async function run(fake, clock, env, { overrides, fetchImpl = okFetch } = {}) {
+const purgerEnv = (dir, extra = {}) => ({
+  S3_ENDPOINT: 's3.bhs.io.cloud.ovh.net', S3_REGION: 'bhs', S3_ACCESS_KEY: 'AKFAKE', S3_SECRET_KEY: 'SKFAKE',
+  BACKUP_BUCKET: BK, EXPECTED_BACKUP_BUCKET: BK, WORK_DIR: dir, ...extra,
+});
+const readerEnv = (extra = {}) => ({
+  S3_ENDPOINT: 's3.bhs.io.cloud.ovh.net', S3_REGION: 'bhs', S3_ACCESS_KEY: 'AKFAKE', S3_SECRET_KEY: 'SKFAKE',
+  BACKUP_BUCKET: BK, EXPECTED_BACKUP_BUCKET: BK, ...extra,
+});
+async function capture(fn) {
   const logs = [];
   try {
-    const r = await lib.runBackup({ env, sdk, s3: fake, fetchImpl, now: () => clock.now(), log: (m) => logs.push(m), overrides });
+    const r = await fn((m) => logs.push(m));
     return { code: r.exitCode, r, logs };
   } catch (e) {
     return { code: e instanceof lib.BackupError ? e.exitCode : `unexpected:${e && e.stack}`, err: e, logs };
   }
 }
+// backup step = writer identity (sdkWriter: no DeleteObjectCommand at all)
+const run = (fake, clock, env, { overrides, fetchImpl = okFetch } = {}) =>
+  capture((log) => lib.runBackup({ env, sdk: sdkWriter, s3: fake, fetchImpl, now: () => clock.now(), log, overrides }));
+// purge step = purger identity (sdkPurger: DeleteObjectCommand only)
+const runPurge = (fake, clock, dir, extra) =>
+  capture((log) => lib.runPurge({ env: purgerEnv(dir, extra), sdk: sdkPurger, s3: fake, now: () => clock.now(), log }));
+// freshness = reader identity (sdkReader: Get/Head only)
+const runFresh = (fake, clock, extra) =>
+  capture((log) => lib.runFreshness({ env: readerEnv(extra), sdk: sdkReader, s3: fake, now: () => clock.now(), log }));
+const deletes = (fake) => fake.calls.filter((c) => c.op === 'DeleteObject');
+const readPlan = (dir) => JSON.parse(fs.readFileSync(path.join(dir, lib.PLAN_FILE), 'utf8'));
 const noLeak = (name, logs, extra = '') => {
   const text = logs.join('\n') + extra;
   ok(`${name} — no doc key / credential in logs`, LEAK_MARKERS.every((m) => !text.includes(m)));
@@ -341,7 +368,41 @@ eq('checkDumpSize ratio 0 disables relative check', lib.checkDumpSize({ size: 10
   ok('not upToDate: rewritten same size after the copy', !lib.upToDate({ Size: 5, ETag: '"c"', LastModified: t1 }, { Size: 5, ETag: '"a"', LastModified: t0 }));
   ok('not upToDate: size differs', !lib.upToDate({ Size: 6, ETag: '"a"', LastModified: t0 }, { Size: 5, ETag: '"a"', LastModified: t1 }));
   ok('not upToDate: absent', !lib.upToDate({ Size: 6, ETag: '"a"' }, undefined));
+  ok('not upToDate: ETag differs and LastModified tie (strict >)', !lib.upToDate({ Size: 5, ETag: '"a-2"', LastModified: t1 }, { Size: 5, ETag: '"b"', LastModified: t1 }));
 }
+eq('checkDocsSource ok', lib.checkDocsSource({ count: 7, previousCount: 7, minRatio: 0.5 }).ok, true);
+eq('checkDocsSource: empty source refused', lib.checkDocsSource({ count: 0, previousCount: 0, minRatio: 0.5 }).ok, false);
+eq('checkDocsSource: collapsed source refused (< 0.5 x previous)', lib.checkDocsSource({ count: 49, previousCount: 100, minRatio: 0.5 }).ok, false);
+eq('checkDocsSource: first run (no previous) accepted', lib.checkDocsSource({ count: 3, previousCount: null, minRatio: 0.5 }).ok, true);
+eq('docsStatus', [lib.docsStatus({ pending: 0, failed: 0 }), lib.docsStatus({ pending: 2, failed: 0 }), lib.docsStatus({ pending: 2, failed: 1 }), lib.docsStatus(null, new Error('x'))],
+  ['complete', 'partial', 'incomplete', 'incomplete']);
+{
+  const L = (o) => ({ date: '2026-09-26', status: 'complete', latestComplete: { date: '2026-09-26' }, firstBackupDate: '2026-09-01', ...o });
+  eq('checkFreshness: today → ok', lib.checkFreshness({ today: '2026-09-26', latest: L() }).ok, true);
+  eq('checkFreshness: yesterday → ok (J-1 allowed)', lib.checkFreshness({ today: '2026-09-27', latest: L() }).ok, true);
+  eq('checkFreshness: 2 days old → stale', lib.checkFreshness({ today: '2026-09-28', latest: L() }).ok, false);
+  eq('checkFreshness: partial for 3 days → ok, 4 days → fail', [
+    lib.checkFreshness({ today: '2026-09-29', latest: L({ date: '2026-09-29', status: 'partial' }) }).ok,
+    lib.checkFreshness({ today: '2026-09-30', latest: L({ date: '2026-09-30', status: 'partial' }) }).ok], [true, false]);
+  eq('checkFreshness: N configurable (maxIncompleteDays=1)', lib.checkFreshness({ today: '2026-09-28', latest: L({ date: '2026-09-28', status: 'partial' }), maxIncompleteDays: 1 }).ok, false);
+  eq('checkFreshness: seed in progress since the first backup (no complete yet)', [
+    lib.checkFreshness({ today: '2026-09-27', latest: L({ date: '2026-09-27', status: 'partial', latestComplete: null, firstBackupDate: '2026-09-26' }) }).ok,
+    lib.checkFreshness({ today: '2026-09-30', latest: L({ date: '2026-09-30', status: 'partial', latestComplete: null, firstBackupDate: '2026-09-26' }) }).ok], [true, false]);
+  eq('checkFreshness: no pointer → fail', lib.checkFreshness({ today: '2026-09-26', latest: null }).ok, false);
+}
+{
+  const P = (o) => ({ format: lib.PLAN_FORMAT, date: '2026-09-26', backupStatus: 'complete', keys: ['pg/2026-09-01/radar.dump'], ...o });
+  eq('validatePurgePlan: complete plan runs', lib.validatePurgePlan(P(), { today: '2026-09-26', dailyDays: 7 }).run, true);
+  eq('validatePurgePlan: partial backup → purge does not run', lib.validatePurgePlan(P({ backupStatus: 'partial' }), { today: '2026-09-26', dailyDays: 7 }), { run: false, keys: [] });
+  throwsCode('validatePurgePlan: no plan → exit 3', () => lib.validatePurgePlan(null, { today: '2026-09-26', dailyDays: 7 }), 3);
+  throwsCode('validatePurgePlan: non-dated key (docs/) → exit 3', () => lib.validatePurgePlan(P({ keys: ['docs/raw/x.pdf'] }), { today: '2026-09-26', dailyDays: 7 }), 3);
+  throwsCode('validatePurgePlan: latest.json → exit 3', () => lib.validatePurgePlan(P({ keys: ['manifests/latest.json'] }), { today: '2026-09-26', dailyDays: 7 }), 3);
+  throwsCode('validatePurgePlan: key inside the daily window → exit 3', () => lib.validatePurgePlan(P({ keys: ['pg/2026-09-21/radar.dump'] }), { today: '2026-09-26', dailyDays: 7 }), 3);
+  throwsCode('validatePurgePlan: stale plan (other run) → exit 3', () => lib.validatePurgePlan(P(), { today: '2026-10-02', dailyDays: 7 }), 3);
+}
+eq('readConfig purge mode needs no SOURCE_DOCS_BUCKET', lib.readConfig(purgerEnv('/w'), 'purge').mode, 'purge');
+throwsCode('readConfig backup mode requires SOURCE_DOCS_BUCKET', () => lib.readConfig({ ...envFor('/w'), SOURCE_DOCS_BUCKET: '' }, 'backup'), 2);
+throwsCode('readConfig: MIN_DOCS_RATIO >= 1 → exit 2', () => lib.readConfig({ ...envFor('/w'), MIN_DOCS_RATIO: '1' }), 2);
 throwsCode('readConfig: missing secret key → exit 2', () => lib.readConfig({ ...envFor('/w'), S3_SECRET_KEY: '' }), 2);
 throwsCode('readConfig: invalid number → exit 2', () => lib.readConfig({ ...envFor('/w'), COPY_CONCURRENCY: 'many' }), 2);
 throwsCode('readConfig: MIN_DUMP_RATIO >= 1 → exit 2', () => lib.readConfig({ ...envFor('/w'), MIN_DUMP_RATIO: '1' }), 2);
@@ -361,11 +422,16 @@ console.log('# runBackup — first run with 210 days of un-purged history');
     fake.seed(BK, `docs-inventory/${d}.json`, '{}');
     if (!partial.has(d)) fake.seed(BK, `manifests/${d}.json`, '{}');
   }
-  fake.seed(BK, 'manifests/latest.json', JSON.stringify({ date: '2026-09-25', pgSizeBytes: 400 * 1024 }));
+  fake.seed(BK, 'manifests/latest.json', JSON.stringify({ date: '2026-09-25', pgSizeBytes: 400 * 1024, docsObjects: 7, firstBackupDate: '2026-03-01' }));
   fake.seed(BK, 'pg/notes.txt', 'operator note');
   const { dir, dump } = makeWork('2026-09-26');
   const res = await run(fake, clock, envFor(dir));
   eq('exit 0', res.code, 0);
+  eq('backup step (writer) issued ZERO delete', deletes(fake).length, 0);
+  ok('backup step left a purge plan for a complete backup', readPlan(dir).backupStatus === 'complete' && readPlan(dir).keys.length > 0);
+  const pres = await runPurge(fake, clock, dir);
+  eq('purge step (purger: DeleteObject only, no List/Get) exit 0', pres.code, 0);
+  ok('purge step issued only DeleteObject calls', fake.calls.slice(fake.calls.findIndex((c) => c.op === 'DeleteObject')).every((c) => c.op === 'DeleteObject'));
   const m = res.r && res.r.manifest;
   const stored = JSON.parse(fake.text(BK, 'manifests/2026-09-26.json') || '{}');
   eq('manifest stored = manifest returned', stored, m);
@@ -388,7 +454,9 @@ console.log('# runBackup — first run with 210 days of un-purged history');
   ok('inventory: every object backed-up with a versionId and backup ETag', inv.objects.length === 7 && inv.objects.every((o) => o.state === 'backed-up' && o.versionId && o.backupEtag));
   ok('inventory sorted by key', inv.objects.map((o) => o.key).join('|') === [...DOC_KEYS].sort().join('|'));
   const latest = JSON.parse(fake.text(BK, 'manifests/latest.json'));
-  eq('latest pointer', [latest.date, latest.manifestKey, latest.pgSizeBytes, latest.status], ['2026-09-26', 'manifests/2026-09-26.json', dump.length, 'complete']);
+  eq('latest pointer', [latest.date, latest.manifestKey, latest.pgSizeBytes, latest.status, latest.docsObjects], ['2026-09-26', 'manifests/2026-09-26.json', dump.length, 'complete', 7]);
+  eq('latest pointer: latestComplete = today, firstBackupDate carried over', [latest.latestComplete, latest.firstBackupDate],
+    [{ date: '2026-09-26', manifestKey: 'manifests/2026-09-26.json' }, '2026-03-01']);
   eq('manifest checks record the previous size', m.pg.checks.previousSizeBytes, 400 * 1024);
   // retention: 1st of Apr..Sep (monthly), Sundays Aug 30 / Sep 6 / Sep 13 (weekly), Sep 20..26 (daily),
   // Sep 19 (min-keep: Sep 24 is unfinished, so the 7 newest complete backups reach back to Sep 19).
@@ -396,13 +464,15 @@ console.log('# runBackup — first run with 210 days of un-purged history');
     '2026-09-06', '2026-09-13', '2026-09-19', ...range('2026-09-20', '2026-09-26')];
   const datesLeft = [...new Set(fake.current(BK).map((o) => lib.classifyKey(o.Key)).filter(Boolean).map((c) => c.date))].sort();
   eq('retention: dated folders left', datesLeft, keptExpected);
-  ok('retention: purge used delete-markers only (no VersionId)', fake.calls.filter((c) => c.op === 'DeleteObject').every((c) => !c.input.VersionId));
-  ok('retention: never touched docs/ nor latest nor unknown keys', fake.calls.filter((c) => c.op === 'DeleteObject').every((c) => lib.classifyKey(c.input.Key)) &&
+  ok('retention: purge used delete-markers only (no VersionId)', deletes(fake).every((c) => !c.input.VersionId));
+  ok('retention: never touched docs/ nor latest nor unknown keys', deletes(fake).every((c) => lib.classifyKey(c.input.Key)) &&
     fake.text(BK, 'pg/notes.txt') === 'operator note' && fake.text(BK, 'manifests/latest.json'));
   ok('retention: purged versions are still there as noncurrent (lock/lifecycle expire them)', fake.b(BK).keys.get('pg/2026-03-02/radar.dump').length === 2);
-  eq('retention: result', [res.r.purge.keptDates, res.r.purge.purgedDates.length], [17, 210 - 17]);
-  noLeak('first run', res.logs, JSON.stringify(m));
-  ok('verdict line', res.logs.some((l) => l.startsWith('VERDICT OK date=2026-09-26 status=complete')));
+  eq('retention: plan result', [readPlan(dir).keptDates, readPlan(dir).purgedDates.length, pres.r.deleteMarkers], [17, 210 - 17, readPlan(dir).keys.length]);
+  noLeak('first run', res.logs.concat(pres.logs), JSON.stringify(m));
+  ok('verdict line', res.logs.some((l) => l.startsWith('VERDICT OK date=2026-09-26 status=complete')) && pres.logs.some((l) => l.startsWith('PURGE OK')));
+  const f1 = await runFresh(fake, clock);
+  eq('freshness (reader: Get/Head only) right after the backup → exit 0', f1.code, 0);
 
   console.log('# runBackup — next day is incremental and idempotent');
   clock.t += 86400000;
@@ -410,8 +480,23 @@ console.log('# runBackup — first run with 210 days of un-purged history');
   const res2 = await run(fake, clock, envFor(w2.dir));
   eq('day 2 exit 0', res2.code, 0);
   eq('day 2 docs: nothing to copy', [res2.r.manifest.docs.copied, res2.r.manifest.docs.alreadyUpToDate], [0, 7]);
-  ok('day 2 purge kept the Sunday + 6 previous days', res2.r.purge.purgedDates.every((d) => d < '2026-09-20') && !res2.r.purge.purgedDates.includes('2026-09-20'));
+  const plan2 = readPlan(w2.dir);
+  ok('day 2 plan kept the Sunday + 6 previous days', plan2.purgedDates.every((d) => d < '2026-09-20') && !plan2.purgedDates.includes('2026-09-20'));
+  eq('day 2 purge exit 0', (await runPurge(fake, clock, w2.dir)).code, 0);
   noLeak('day 2', res2.logs);
+
+  console.log('# freshness — stale / tampered');
+  clock.t += 2 * 86400000; // 2026-09-29, no backup since 09-27
+  const f2 = await runFresh(fake, clock);
+  eq('no backup for 2 days → freshness exit 5', f2.code, 5);
+  ok('…reason logged, verdict only', f2.logs.some((l) => l.startsWith('FRESHNESS FAIL') && l.includes('days old')));
+  clock.t -= 2 * 86400000;
+  fake.seed(BK, 'manifests/2026-09-27.json', '{"tampered":true}');
+  eq('manifest bytes differ from the pointer → freshness exit 5', (await runFresh(fake, clock)).code, 5);
+}
+{
+  const { clock, fake } = mkWorld();
+  eq('no latest.json at all → freshness exit 5', (await runFresh(fake, clock)).code, 5);
 }
 
 console.log('# runBackup — multipart above the threshold');
@@ -465,25 +550,61 @@ console.log('# runBackup — refusals and degraded paths');
 }
 {
   const { clock, fake } = mkWorld();
+  for (const d of range('2026-01-01', '2026-01-10')) fake.seed(BK, `manifests/${d}.json`, '{}');
+  fake.seed(BK, 'manifests/latest.json', JSON.stringify({ date: '2026-09-25', status: 'complete', pgSizeBytes: 1000, docsObjects: 7,
+    latestComplete: { date: '2026-09-25', manifestKey: 'manifests/2026-09-25.json' }, firstBackupDate: '2026-09-01' }));
   fake.hooks.CopyObject = () => { clock.t += 5401 * 1000; }; // the first copy exhausts the budget
-  const res = await run(fake, clock, envFor(makeWork('2026-09-26').dir, { COPY_CONCURRENCY: '1' }));
-  eq('docs budget exhausted → manifest partial, exit 4', [res.code, res.r && res.r.manifest.status], [4, 'partial']);
+  const w = makeWork('2026-09-26');
+  const res = await run(fake, clock, envFor(w.dir, { COPY_CONCURRENCY: '1' }));
+  eq('docs seed still pending (budget) → status partial, exit 0 (NOT a failed Job)', [res.code, res.r && res.r.manifest.status], [0, 'partial']);
   eq('…1 copied, 5 pending, budget flag', [res.r.manifest.docs.copied, res.r.manifest.docs.pending, res.r.manifest.docs.budgetExhausted], [1, 5, true]);
-  ok('…PG backup still recorded and purge ran', !!fake.text(BK, 'pg/2026-09-26/radar.dump.sha256') && res.r.purge !== null);
-  ok('verdict PARTIAL', res.logs.some((l) => l.startsWith('VERDICT PARTIAL')));
+  ok('…PG backup recorded, verdict PARTIAL explicit', !!fake.text(BK, 'pg/2026-09-26/radar.dump.sha256') && res.logs.some((l) => l.startsWith('VERDICT PARTIAL')));
+  const latest = JSON.parse(fake.text(BK, 'manifests/latest.json'));
+  eq('…latest.status partial, latestComplete still the previous complete day', [latest.status, latest.latestComplete.date], ['partial', '2026-09-25']);
+  eq('…plan marks the backup partial with no key', [readPlan(w.dir).backupStatus, readPlan(w.dir).keys.length], ['partial', 0]);
+  const p = await runPurge(fake, clock, w.dir);
+  eq('purge after a partial backup: skipped, exit 0, zero delete', [p.code, p.r.skipped, deletes(fake).length], [0, true, 0]);
 }
 {
   const { clock, fake } = mkWorld();
   fake.hooks.CopyObject = (input) => (input.Key.endsWith('x.pdf') ? s3err('InternalError', 500) : undefined);
-  const res = await run(fake, clock, envFor(makeWork('2026-09-26').dir));
-  eq('one copy fails → exit 4, inventory state=failed', [res.code, JSON.parse(fake.text(BK, 'docs-inventory/2026-09-26.json')).counts.failed], [4, 1]);
+  const w = makeWork('2026-09-26');
+  const res = await run(fake, clock, envFor(w.dir));
+  eq('one copy fails → status incomplete, exit 4 (real error), inventory state=failed',
+    [res.code, res.r.manifest.status, JSON.parse(fake.text(BK, 'docs-inventory/2026-09-26.json')).counts.failed], [4, 'incomplete', 1]);
+  eq('…plan: no purge after an incomplete backup', readPlan(w.dir).keys.length, 0);
   noLeak('copy failure', res.logs);
 }
 {
   const { clock, fake } = mkWorld();
   fake.hooks.ListObjectsV2 = (input) => (input.Bucket === DOCS ? s3err('AccessDenied', 403) : undefined);
   const res = await run(fake, clock, envFor(makeWork('2026-09-26').dir));
-  eq('docs source unreadable → exit 4, docs failed, PG recorded', [res.code, res.r.manifest.docs.status, !!res.r.manifest.pg.sha256], [4, 'failed', true]);
+  eq('docs source unreadable → exit 4, incomplete, PG recorded', [res.code, res.r.manifest.docs.status, !!res.r.manifest.pg.sha256], [4, 'incomplete', true]);
+}
+{
+  const { clock, fake } = mkWorld();
+  for (const k of DOC_KEYS) fake.b(DOCS).keys.delete(k);
+  const res = await run(fake, clock, envFor(makeWork('2026-09-26').dir));
+  eq('docs source EMPTY → refused, exit 2', res.code, 2);
+  ok('…nothing written (no PG upload, no manifest, no plan)', !fake.calls.some((c) => c.op === 'PutObject' || c.op === 'CreateMultipartUpload'));
+}
+{
+  const { clock, fake } = mkWorld();
+  fake.seed(BK, 'manifests/latest.json', JSON.stringify({ date: '2026-09-25', pgSizeBytes: 1000, docsObjects: 20 }));
+  const w = makeWork('2026-09-26');
+  const res = await run(fake, clock, envFor(w.dir));
+  eq('docs source collapsed (7 < 0.5 x 20) → refused, exit 2', res.code, 2);
+  ok('…nothing written and no purge plan', !fake.calls.some((c) => c.op === 'PutObject') && !fs.existsSync(path.join(w.dir, lib.PLAN_FILE)));
+  const p = await runPurge(fake, clock, w.dir);
+  eq('…purge step without plan refuses (exit 3), zero delete', [p.code, deletes(fake).length], [3, 0]);
+}
+{
+  const { clock, fake } = mkWorld();
+  const w = makeWork('2026-09-26');
+  fs.writeFileSync(path.join(w.dir, lib.PLAN_FILE), JSON.stringify({ format: lib.PLAN_FORMAT, date: '2026-09-26', backupStatus: 'complete',
+    keptDates: 1, purgedDates: ['2026-09-01'], keys: ['pg/2026-09-01/radar.dump', 'docs/raw/ville-c/a.pdf'] }));
+  const p = await runPurge(fake, clock, w.dir);
+  eq('tampered plan (a docs/ key) → purge refused, exit 3, zero delete', [p.code, deletes(fake).length], [3, 0]);
 }
 {
   const { clock, fake } = mkWorld();
@@ -500,18 +621,21 @@ console.log('# runBackup — refusals and degraded paths');
   const { clock, fake } = mkWorld();
   fake.hooks.DeleteObject = () => s3err('InternalError', 500);
   for (const d of range('2026-01-01', '2026-01-10')) fake.seed(BK, `manifests/${d}.json`, '{}');
-  const res = await run(fake, clock, envFor(makeWork('2026-09-26').dir));
-  eq('purge failure after a complete manifest → exit 3', res.code, 3);
+  const w = makeWork('2026-09-26');
+  const res = await run(fake, clock, envFor(w.dir));
+  eq('backup complete (exit 0) …', res.code, 0);
+  eq('…then a purge failure → purge step exit 3', (await runPurge(fake, clock, w.dir)).code, 3);
   ok('…manifest of the day is complete', JSON.parse(fake.text(BK, 'manifests/2026-09-26.json')).status === 'complete');
 }
 {
   const { clock, fake } = mkWorld();
   for (const d of range('2026-01-01', '2026-01-10')) fake.seed(BK, `manifests/${d}.json`, '{}');
-  const cfg = { ...lib.readConfig(envFor('/w')), purgeDryRun: false };
-  let code = null;
-  try { await lib.purgeRetention({ cfg, sdk, s3: fake, now: () => clock.now(), log: () => {} }, '2026-09-26'); } catch (e) { code = e.exitCode; }
-  eq('purge refuses to run when the manifest of today is not listed (exit 3)', code, 3);
-  ok('…and deleted nothing', !fake.calls.some((c) => c.op === 'DeleteObject'));
+  // the listing of manifests/ does not show today's manifest → the plan is refused
+  fake.hooks.ListObjectsV2 = (input) => (input.Bucket === BK && input.Prefix === 'manifests/' ? { Contents: [], IsTruncated: false } : undefined);
+  const w = makeWork('2026-09-26');
+  const res = await run(fake, clock, envFor(w.dir));
+  eq('purge plan refused when the manifest of today is not listed (exit 3)', res.code, 3);
+  ok('…no plan written, nothing deleted', !fs.existsSync(path.join(w.dir, lib.PLAN_FILE)) && deletes(fake).length === 0);
 }
 {
   const { clock, fake } = mkWorld();
@@ -552,15 +676,34 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
   ok('same radar-api digest as the prod bundle (no new image)', cj.includes(`image: "${pinned}"`) && cj.includes(`name: BACKUP_IMAGE, value: "${pinned}"`));
   ok('dump image = postgis/postgis:16-3.4', /image: postgis\/postgis:16-3\.4\n/.test(cj));
   ok('pod label component=db-backup (netpol allow-backup-to-postgres)', (cj.match(/app\.kubernetes\.io\/component: db-backup/g) || []).length >= 2);
-  ok('writer identity only (reader never mounted by the job)', /name: radar-backup-writer, key: S3_SECRET_KEY/.test(cj) && !cj.includes('radar-backup-reader'));
+  // Step order: initContainers dump → backup, then the only main container purge
+  // (a main container starts only after every initContainer exited 0).
+  const iInit = cj.indexOf('\n          initContainers:'); const iDump = cj.indexOf('- name: dump');
+  const iBackup = cj.indexOf('- name: backup'); const iMain = cj.indexOf('\n          containers:'); const iPurge = cj.indexOf('- name: purge');
+  ok('steps: initContainers [dump, backup] then containers [purge]', iInit > 0 && iInit < iDump && iDump < iBackup && iBackup < iMain && iMain < iPurge &&
+    (cj.slice(iMain).match(/\n {12}- name: /g) || []).length === 1);
+  const initPart = cj.slice(iInit, iMain); const purgePart = cj.slice(iMain);
+  ok('backup step mounts the writer only (no purger, no reader)', /name: radar-backup-writer, key: S3_SECRET_KEY/.test(initPart) &&
+    !initPart.includes('radar-backup-purger') && !initPart.includes('radar-backup-reader'));
+  ok('purge step mounts the purger only (no writer, no reader)', /name: radar-backup-purger, key: S3_SECRET_KEY/.test(purgePart) &&
+    !purgePart.includes('radar-backup-writer') && !purgePart.includes('radar-backup-reader'));
+  ok('purge step reads the work volume read-only', /name: work, mountPath: \/work, readOnly: true/.test(purgePart));
+  ok('commands: backup / purge modes', cj.includes('["node", "/opt/backup/backup-daily.cjs", "backup"]') && cj.includes('["node", "/opt/backup/backup-daily.cjs", "purge"]'));
   ok('DB via the RO role secret', /name: radar-db-ro-prod, key: POSTGRES_PASSWORD/.test(cj) && !cj.includes('radar-db-credentials'));
   ok('podFailurePolicy FailJob on 2/3/4', /values: \[2, 3, 4\]/.test(cj));
+  ok('manual-run guard: non-CronJob Job refused in the scheduled window', cj.includes("fieldPath: \"metadata.labels['job-name']\"") &&
+    cj.includes('radar-backup-daily-[0-9]*)') && /SCHEDULED_WINDOW_START, value: "0200"/.test(cj) && /SCHEDULED_WINDOW_END, value: "0530"/.test(cj));
   const active = (t) => t.split('\n').filter((l) => !/^\s*(#|\/\/)/.test(l)).join('\n');
   ok('no python in any active line of the backup bundle', !/python|\.py\b/i.test(active(cj) + active(read('deploy/ci/backup/backup-daily.cjs'))));
   const cfgKeys = ['S3_ENDPOINT', 'S3_REGION', 'S3_ACCESS_KEY', 'S3_SECRET_KEY', 'BACKUP_BUCKET', 'SOURCE_DOCS_BUCKET', 'EXPECTED_BACKUP_BUCKET',
     'EXPECTED_SOURCE_DOCS_BUCKET', 'WORK_DIR', 'PUBLIC_HEALTH_URL', 'DRIZZLE_JOURNAL', 'COPY_CONCURRENCY', 'DOCS_COPY_BUDGET_SECONDS',
-    'MIN_DUMP_BYTES', 'MIN_DUMP_RATIO', 'RETENTION_DAILY_DAYS', 'RETENTION_WEEKLY_WEEKS', 'RETENTION_MONTHLY_MONTHS', 'RETENTION_MIN_KEEP'];
+    'MIN_DUMP_BYTES', 'MIN_DUMP_RATIO', 'MIN_DOCS_RATIO', 'RETENTION_DAILY_DAYS', 'RETENTION_WEEKLY_WEEKS', 'RETENTION_MONTHLY_MONTHS', 'RETENTION_MIN_KEEP'];
   ok('every runtime knob is set explicitly in the CronJob', cfgKeys.every((k) => cj.includes(`name: ${k},`)));
+  const fj = read('deploy/ci/backup/cronjob-backup-freshness.yaml');
+  ok('freshness CronJob: name/schedule/Forbid, reader identity only, same image', /name: radar-backup-freshness\n/.test(fj) && /schedule: "53 6 \* \* \*"/.test(fj) &&
+    /concurrencyPolicy: Forbid/.test(fj) && /name: radar-backup-reader, key: S3_SECRET_KEY/.test(fj) && !fj.includes('radar-backup-writer') &&
+    !fj.includes('radar-backup-purger') && fj.includes(`image: "${pinned}"`) && fj.includes('["node", "/opt/backup/backup-daily.cjs", "freshness"]'));
+  ok('freshness knobs explicit (J-1, N=3)', /FRESHNESS_MAX_AGE_DAYS, value: "1"/.test(fj) && /FRESHNESS_MAX_INCOMPLETE_DAYS, value: "3"/.test(fj));
   const cfg = lib.readConfig(Object.fromEntries([...cj.matchAll(/\{ name: ([A-Z_0-9]+), value: "([^"]*)" \}/g)].map((x) => [x[1], x[2]])
     .concat([['S3_ENDPOINT', 'e'], ['S3_REGION', 'r'], ['S3_ACCESS_KEY', 'a'], ['S3_SECRET_KEY', 's'], ['BACKUP_BUCKET', BK], ['SOURCE_DOCS_BUCKET', DOCS]])));
   eq('CronJob values parse into the documented retention', cfg.retention, { dailyDays: 7, weeklyWeeks: 4, monthlyMonths: 6, minKeep: 7 });
@@ -573,15 +716,19 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
   eq('writer keys', keys(w), ['BACKUP_BUCKET', 'S3_ACCESS_KEY', 'S3_ENDPOINT', 'S3_REGION', 'S3_SECRET_KEY', 'SOURCE_DOCS_BUCKET']);
   ok('reader SealedSecret name/ns', /kind: SealedSecret/.test(r) && /name: radar-backup-reader\n\s+namespace: radar-immobilier/.test(r));
   eq('reader keys', keys(r), ['BACKUP_BUCKET', 'S3_ACCESS_KEY', 'S3_ENDPOINT', 'S3_REGION', 'S3_SECRET_KEY']);
+  const p = read('deploy/ci/backup/radar-backup-purger-sealed.yaml');
+  ok('purger SealedSecret name/ns', /^kind: SealedSecret/m.test(p) && /name: radar-backup-purger\n\s+namespace: radar-immobilier/.test(p));
+  eq('purger keys', keys(p), ['BACKUP_BUCKET', 'S3_ACCESS_KEY', 'S3_ENDPOINT', 'S3_REGION', 'S3_SECRET_KEY']);
 }
 {
   const rbac = read('deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml');
-  ok('CD Role: backup SealedSecrets name-scoped', /resourceNames: \["radar-db-ro-prod", "radar-pra-admin-prod", "radar-backup-writer", "radar-backup-reader"\]/.test(rbac));
-  ok('CD Role: backup CronJob + script ConfigMap name-scoped', /"radar-backup-daily"\]/.test(rbac) && /"radar-backup-daily-script"\]/.test(rbac));
+  ok('CD Role: the 3 backup SealedSecrets name-scoped', /resourceNames: \["radar-db-ro-prod", "radar-pra-admin-prod", "radar-backup-writer", "radar-backup-reader", "radar-backup-purger"\]/.test(rbac));
+  ok('CD Role: both CronJobs + script ConfigMap name-scoped', /"radar-backup-daily", "radar-backup-freshness"\]/.test(rbac) && /"radar-backup-daily-script"\]/.test(rbac));
   const wf = read('.github/workflows/bascule-bundle-cd.yml');
-  ok('CD workflow: path trigger + arming var + apply of the 4 backup objects', wf.includes("'deploy/ci/backup/**'") && wf.includes('BACKUP_DAILY_CD_ENABLED') &&
-    wf.includes('radar-backup-writer-sealed.yaml') && wf.includes('radar-backup-reader-sealed.yaml') &&
-    wf.includes('radar-backup-daily-script') && wf.includes('cronjob-backup-daily.yaml'));
+  ok('CD workflow: path trigger + arming var + 3 SealedSecrets (fail-closed on placeholder) + ConfigMap + 2 CronJobs',
+    wf.includes("'deploy/ci/backup/**'") && wf.includes('BACKUP_DAILY_CD_ENABLED') && wf.includes('for id in writer reader purger') &&
+    wf.includes("grep -q '^kind: SealedSecret'") && wf.includes('radar-backup-daily-script') && wf.includes('cronjob-backup-daily.yaml') &&
+    wf.includes('cronjob-backup-freshness.yaml'));
 }
 
 fs.rmSync(TMP, { recursive: true, force: true });

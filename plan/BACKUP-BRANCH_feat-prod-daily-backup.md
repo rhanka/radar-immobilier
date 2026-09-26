@@ -39,5 +39,10 @@ bucket `radar-immobilier-backup` provisioned by the k8s lane.
 - [x] **Lot 3 — Docs**: README (provisioning, CD, verification), RETENTION, RESTORE, CRED_CYCLE rotation (90 d).
 - [x] **Lot 4 — Verification**: offline selftest (CI + CD gate), eslint, offline manifest render,
   local dump run on PostGIS 16 with a `pg_read_all_data` role, real-SDK run against s3mock.
-- [ ] **Lot 5 — Activation (k8s lane / conductor, after merge)**: re-apply RBAC, arm
+- [x] **Lot 5 — Cross-review corrections (geo-cond)**: purge moved to a separate step with a
+  3rd identity `radar-backup-purger` (writer has no delete right); `partial` = exit 0 with an
+  explicit verdict, `incomplete` = failure; freshness CronJob `radar-backup-freshness` (reader,
+  J-1 / N=3) + `latestComplete` in the pointer; docs source guard (0 objects or < 0.5 × previous
+  → exit 2, no purge); strict `upToDate`; manual runs refused in the scheduled window.
+- [ ] **Lot 6 — Activation (k8s lane / conductor, after merge)**: re-apply RBAC, arm
   `BACKUP_DAILY_CD_ENABLED`, first run, restore-test (wave 2).

@@ -25,9 +25,10 @@ D=2026-09-26
 $S5 cp $B/manifests/$D.json manifest.json
 ```
 
-Use a manifest with `status: "complete"`. `status: "partial"` means the PG part
-is valid but some docs were not backed up that day (`docs.pending` /
-`docs.failed` > 0). The manifest gives the dump key + sha256, the schema version
+Use a manifest with `status: "complete"` (`manifests/latest.json` →
+`latestComplete` names the newest one). `partial` (docs seed still pending) and
+`incomplete` (docs errors) mean the PG part is valid but some docs were not
+backed up that day (`docs.pending` / `docs.failed` > 0). The manifest gives the dump key + sha256, the schema version
 (`schema.lastMigration`), the PostgreSQL / PostGIS versions and the inventory key.
 
 A date purged by the retention less than 7 days ago is still readable by version

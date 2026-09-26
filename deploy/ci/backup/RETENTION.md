@@ -10,7 +10,18 @@ enforcement is split in two:
 | --- | --- | --- |
 | Object lock GOVERNANCE, default retention 7 days | k8s lane (bucket) | Every object version is undeletable for 7 days after it is written. |
 | Lifecycle | k8s lane (bucket) | Noncurrent versions expire 7 days after they become noncurrent; incomplete multipart uploads after 1 day; orphan delete-markers removed. |
-| Dated-folder purge | `radar-backup-daily` (identity `radar-backup-writer`) | After the manifest of the day is written, puts a **delete-marker** (DeleteObject without VersionId) on every dated object outside the policy. |
+| Dated-folder purge | `radar-backup-daily`, step `purge` (identity `radar-backup-purger`) | After a **complete** backup, puts a **delete-marker** (DeleteObject without VersionId) on every dated object outside the policy. |
+
+Two identities, two steps of the same pod: the `backup` step (writer, **no delete
+right**) lists the dated objects after writing the manifest of the day and
+writes the plan (`purge-plan.json`: backup status, keys, dates) to the pod's
+work volume; the `purge` step (purger: DeleteObject on `pg/*`, `manifests/*`,
+`docs-inventory/*` only, no GET/PUT, nothing on `docs/`) starts only when the
+backup step exited 0, runs the plan only if it records a `complete` backup, and
+refuses the whole plan (exit 3) if any key is not dated or falls inside the
+daily window. A partial/incomplete day purges nothing. A leaked writer key can
+therefore not erase history; a leaked purger key can only put delete-markers on
+dated objects, recoverable for 7 days (object lock + version grace).
 
 The job never deletes a version. A purged object becomes a noncurrent version,
 stays readable by version id for 7 more days (restore grace), then the lifecycle
@@ -39,8 +50,9 @@ Sundays + 6 monthly, fewer when they overlap), plus the purged ones during their
 
 Never purged: `docs/` (the mirror), `manifests/latest.json`, any key that does not
 match the dated layout, and anything at all when the manifest of today is not
-listed (the purge refuses and the run exits 3). If the job stops running,
-nothing is purged: the failure mode is accumulation, never loss.
+listed (the plan is refused, exit 3) or the day's backup is not `complete`. If
+the job stops running, nothing is purged: the failure mode is accumulation,
+never loss.
 
 ## Timeline of one daily dump
 
@@ -87,7 +99,9 @@ prefixes).
 ## Knobs (CronJob env, defaults = policy)
 
 `RETENTION_DAILY_DAYS=7`, `RETENTION_WEEKLY_WEEKS=4`, `RETENTION_MONTHLY_MONTHS=6`,
-`RETENTION_MIN_KEEP=7`, `PURGE_DRY_RUN=false` (true = compute and log the plan,
-put no delete-marker). The algorithm is `planRetention` in `backup-daily.cjs`,
+`RETENTION_MIN_KEEP=7` (backup step), `RETENTION_DAILY_DAYS=7` and
+`PURGE_DRY_RUN=false` (purge step; true = log the plan, put no delete-marker).
+The algorithm is `planRetention` / `validatePurgePlan` in `backup-daily.cjs`,
 covered by `backup-daily.selftest.mjs` (500-day simulation, missing Sunday,
-outage, unfinished days, boundaries).
+outage, unfinished days, boundaries, purge only after a complete backup, the
+backup step unable to delete, tampered plans refused).

@@ -51,10 +51,10 @@
 # same permanent SA, same positive PROD pre-flight, its own arming switch
 # BACKUP_DAILY_CD_ENABLED and its own failure domain (no `needs`: a backup apply
 # problem never blocks the bascule bundle or its anti-RCE gate, and vice versa).
-# It applies the SealedSecrets radar-backup-writer/-reader, the ConfigMap
+# It applies the SealedSecrets radar-backup-writer/-reader/-purger, the ConfigMap
 # radar-backup-daily-script (rendered from deploy/ci/backup/backup-daily.cjs) and
-# the CronJob radar-backup-daily. Same runner contract: kubectl only, 0 backup
-# content read, 0 secret material on the runner.
+# the CronJobs radar-backup-daily + radar-backup-freshness. Same runner contract:
+# kubectl only, 0 backup content read, 0 secret material on the runner.
 name: bascule-bundle-cd (prod bundle apply, CD-native v2)
 
 on:
@@ -355,18 +355,27 @@ jobs:
 
       # Committed SealedSecrets (k8s lane, scope strict ns radar-immobilier);
       # the in-cluster controller materializes the core Secrets. The runner never
-      # sees the plaintext and this SA has 0 secrets verbs.
-      - name: Apply SealedSecrets (radar-backup-writer + radar-backup-reader)
+      # sees the plaintext and this SA has 0 secrets verbs. Fail-closed: all three
+      # must be real SealedSecrets (a placeholder file refuses the whole apply —
+      # the CronJob pod cannot start without its three identities).
+      - name: Apply SealedSecrets (radar-backup-writer + -reader + -purger)
         run: |
           set -euo pipefail
-          kubectl -n "$NAMESPACE" apply -f "$BACKUP_DIR/radar-backup-writer-sealed.yaml"
-          kubectl -n "$NAMESPACE" apply -f "$BACKUP_DIR/radar-backup-reader-sealed.yaml"
+          for id in writer reader purger; do
+            f="$BACKUP_DIR/radar-backup-${id}-sealed.yaml"
+            if ! grep -q '^kind: SealedSecret' "$f"; then
+              echo "::error title=Backup SealedSecret missing::${f} is still a placeholder — commit the SealedSecret from the k8s lane before arming. Nothing applied."; exit 1
+            fi
+          done
+          for id in writer reader purger; do
+            kubectl -n "$NAMESPACE" apply -f "$BACKUP_DIR/radar-backup-${id}-sealed.yaml"
+          done
 
       - name: Wait for SealedSecrets Synced (tolerant)
         run: |
           set -uo pipefail
           synced_deadline=$((SECONDS + 120))
-          for ss in radar-backup-writer radar-backup-reader; do
+          for ss in radar-backup-writer radar-backup-reader radar-backup-purger; do
             while :; do
               s="$(kubectl -n "$NAMESPACE" get sealedsecret "$ss" -o 'jsonpath={.status.conditions[?(@.type=="Synced")].status}' 2>/dev/null || true)"
               if [ "$s" = "True" ]; then echo "SealedSecret ${ss}: Synced=True"; break; fi
@@ -380,7 +389,7 @@ jobs:
 
       # The script ships as a ConfigMap rendered from the committed file (single
       # source of truth, the same bytes the selftest exercised), then the CronJob.
-      - name: Apply script ConfigMap + CronJob radar-backup-daily
+      - name: Apply script ConfigMap + CronJobs radar-backup-daily / radar-backup-freshness
         run: |
           set -euo pipefail
           kubectl -n "$NAMESPACE" create configmap radar-backup-daily-script \
@@ -389,13 +398,20 @@ jobs:
                 app.kubernetes.io/component=db-backup -o yaml \
             | kubectl -n "$NAMESPACE" apply -f -
           kubectl -n "$NAMESPACE" apply -f "$BACKUP_DIR/cronjob-backup-daily.yaml"
-          got="$(kubectl -n "$NAMESPACE" get cronjob radar-backup-daily -o jsonpath='{.spec.schedule}|{.spec.suspend}|{.spec.concurrencyPolicy}')"
-          echo "radar-backup-daily schedule|suspend|concurrencyPolicy = ${got}"
-          if [ "$got" != "23 2 * * *|false|Forbid" ]; then
-            echo "::error title=radar-backup-daily not as committed::live spec '${got}' differs from the committed manifest."; exit 1
-          fi
+          kubectl -n "$NAMESPACE" apply -f "$BACKUP_DIR/cronjob-backup-freshness.yaml"
+          check() {
+            got="$(kubectl -n "$NAMESPACE" get cronjob "$1" -o jsonpath='{.spec.schedule}|{.spec.suspend}|{.spec.concurrencyPolicy}')"
+            echo "$1 schedule|suspend|concurrencyPolicy = ${got}"
+            if [ "$got" != "$2" ]; then
+              echo "::error title=$1 not as committed::live spec '${got}' differs from the committed manifest."; exit 1
+            fi
+          }
+          check radar-backup-daily "23 2 * * *|false|Forbid"
+          check radar-backup-freshness "53 6 * * *|false|Forbid"
           echo "script sha256 = $(sha256sum "$BACKUP_DIR/backup-daily.cjs" | cut -d' ' -f1) (recorded by each run as manifest.tool.scriptSha256)"
 
+      # A manual Job escapes concurrencyPolicy: Forbid; the `dump` step itself
+      # refuses a non-CronJob run inside the scheduled window (02:00-05:30 UTC).
       - name: Start one run now (workflow_dispatch input backup_run_now)
         if: github.event_name == 'workflow_dispatch' && inputs.backup_run_now
         run: |
@@ -410,7 +426,8 @@ jobs:
           {
             echo "### daily prod backup applied"
             echo ""
-            echo "- SealedSecrets: radar-backup-writer (job identity), radar-backup-reader (restore identity)"
+            echo "- SealedSecrets: radar-backup-writer (backup, no delete), radar-backup-purger (delete-markers, dated prefixes), radar-backup-reader (freshness + restore)"
             echo "- ConfigMap: radar-backup-daily-script (from deploy/ci/backup/backup-daily.cjs)"
             echo "- CronJob: radar-backup-daily (23 2 * * * UTC, Forbid) → s3://radar-immobilier-backup"
+            echo "- CronJob: radar-backup-freshness (53 6 * * * UTC) — a failed Job = stale or not complete for too long"
           } >> "$GITHUB_STEP_SUMMARY"
