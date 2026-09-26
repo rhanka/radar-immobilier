@@ -17,9 +17,11 @@
 #                        city-not-served-by-geo reported, divergent-code fails
 #   9. publish           cycle.json (artefact cycle-<CYCLE_ID>) + summary, always
 #
-# Environment `radar-e2e` (main-only) holds GEO_DISPATCH_TOKEN (fine-grained,
-# rhanka/geo: Actions read/write + Contents read), provisioned by the owner. The
-# immo leg is dispatched with this workflow's GITHUB_TOKEN (actions: write).
+# Environment `radar-e2e` (main-only) holds GEO_DISPATCH_TOKEN — today the `gh`
+# OAuth token of rhanka (all rhanka repos; debt: a fine-grained PAT limited to
+# rhanka/geo Actions R/W + Contents R), see deploy/ci/bascule-2tenants/CRED_CYCLE.md.
+# Only this job declares the environment. The immo leg is dispatched with this
+# workflow's GITHUB_TOKEN (actions: write).
 # DRY_RUN=true (default) = steps 1–4 only: no restore is dispatched.
 name: bascule-e2e (immo + geo, from backups)
 run-name: "bascule-e2e ${{ inputs.BACKUP_DATE || 'latest-common' }}${{ inputs.DRY_RUN && ' (dry)' || '' }}"

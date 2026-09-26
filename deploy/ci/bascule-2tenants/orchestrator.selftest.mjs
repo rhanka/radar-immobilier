@@ -204,6 +204,12 @@ const GEO_IDS = "ogc:zones:laval:A-1\nogc:zones:laval:B-2\nogc:zones:montreal:C-
 {
   const w = readFileSync(join(DIR, "..", "..", "..", ".github", "workflows", "bascule-e2e.yml"), "utf8");
   ok("bascule-e2e.yml — environment radar-e2e", /\n {4}environment: radar-e2e\n/.test(w));
+  ok("bascule-e2e.yml — a single job declares environment radar-e2e (the one dispatching geo)",
+    (w.match(/environment: radar-e2e/g) || []).length === 1 && /\n {2}e2e:\n[\s\S]*?\n {4}environment: radar-e2e\n[\s\S]*dispatch-restore/.test(w) && (w.match(/\n {2}[a-z][a-z0-9-]*:\n {4}(if|runs-on|needs|environment)/g) || []).length === 1);
+  ok("bascule-e2e.yml — GEO_DISPATCH_TOKEN only in that job's env", (w.match(/secrets\.GEO_DISPATCH_TOKEN/g) || []).length === 1);
+  const cred = readFileSync(join(DIR, "CRED_CYCLE.md"), "utf8");
+  ok("CRED_CYCLE.md — GEO_DISPATCH_TOKEN: source, real scope, invalidation, debt", /gh auth token/.test(cred) && /every repository of `rhanka`/.test(cred) &&
+    /gh auth logout/.test(cred) && /fine-grained PAT/.test(cred) && /radar-e2e/.test(cred));
   ok("bascule-e2e.yml — main-only guard", w.includes("if: ${{ github.ref == 'refs/heads/main' }}"));
   ok("bascule-e2e.yml — GEO_DISPATCH_TOKEN via env only", /GEO_DISPATCH_TOKEN: \$\{\{ secrets\.GEO_DISPATCH_TOKEN \}\}/.test(w));
   const runs = [...w.matchAll(/run: (?:\|\n((?: {10,}.*\n?)+)|(.*))/g)].map((m) => m[1] || m[2]);
