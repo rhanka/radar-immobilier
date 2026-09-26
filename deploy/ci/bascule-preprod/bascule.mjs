@@ -984,8 +984,64 @@ function cmdFlip() {
 }
 
 // =============================================================================
+// S6 bornage (repli) — fonctions PURES (testables) : construisent l'argv que le
+// Job refresh passe à worker-live.js à partir des knobs REFRESH_CHUNK / REFRESH_CITIES.
+//
+// Vide des deux ⇒ [] = TOUTES les villes config-only (delta complet, 530). Sinon
+// un sous-ensemble borné (démo pouvant finir vert sur moins de villes) :
+//   REFRESH_CHUNK='k/n'         → ["--chunk","k/n"]   (shard déterministe worker-live)
+//   REFRESH_CITIES='a b,c'      → ["a","b","c"]       (liste explicite de slugs)
+// Les deux sont MUTUELLEMENT EXCLUSIFS. Les slugs sont validés [a-z0-9-] pour que
+// l'injection dans la liste YAML/JSON (args: [...]) ne puisse jamais s'échapper.
+// Lève une Error (jamais process.exit) → l'appelant en fait un die() fail-closed.
+// =============================================================================
+export function buildRefreshArgs({ chunk = "", cities = "" } = {}) {
+  const c = String(chunk).trim();
+  const list = String(cities).trim();
+  if (c && list) {
+    throw new Error("REFRESH_CHUNK et REFRESH_CITIES sont mutuellement exclusifs (choisir l'un ou aucun).");
+  }
+  if (c) {
+    const m = /^(\d+)\/(\d+)$/.exec(c);
+    if (!m) throw new Error(`REFRESH_CHUNK invalide '${c}' — attendu k/n (ex. 1/4).`);
+    const k = Number(m[1]);
+    const n = Number(m[2]);
+    if (n < 1 || k < 1 || k > n) throw new Error(`REFRESH_CHUNK invalide ${k}/${n} — exigé 1 <= k <= n et n >= 1.`);
+    return { args: ["--chunk", c], label: `chunk ${c} (borné)` };
+  }
+  if (list) {
+    const slugs = list.split(/[\s,]+/).filter(Boolean);
+    const bad = slugs.filter((s) => !/^[a-z0-9-]+$/.test(s));
+    if (bad.length) throw new Error(`REFRESH_CITIES: slugs invalides (${bad.join(", ")}) — attendu [a-z0-9-].`);
+    return { args: slugs, label: `${slugs.length} ville(s) bornée(s)` };
+  }
+  return { args: [], label: "toutes les villes config-only (delta complet)" };
+}
+
+// Pure : rend un argv worker-live en CORPS de liste inline YAML/JSON (sans les
+// crochets), chaque élément JSON-quoté. Ex. ["--chunk","1/4"] → '"--chunk", "1/4"'.
+// Vide ⇒ '' (le template rend alors `args: []`). JSON.stringify neutralise tout
+// caractère spécial résiduel (défense en profondeur par-dessus la validation slug).
+export function refreshArgsYaml(args) {
+  return (args || []).map((a) => JSON.stringify(String(a))).join(", ");
+}
+
+// =============================================================================
 // S6 — refresh différentiel : Job one-off worker-live.js en mode delta (lit
 // runs/ préprod = état prod ; PAS --all). Le CronJob refresh reste suspendu.
+//
+// GOULOT (mesuré) : les ~530 villes config-only étaient parcourues EN SÉRIE
+// (~6,3 h), au-delà de la fenêtre du run (poll runner + activeDeadline). Le fix :
+//   (a) CONCURRENCE — worker-live parallélise le parcours (LIVE_SCRAPE_CONCURRENCY)
+//       pour masquer la latence des sources lentes (drummondville ~9 min = I/O) ;
+//   (b) TIMEOUT ALIGNÉ — le poll runner (REFRESH_TIMEOUT) est aligné sur, et
+//       dépasse d'un tampon, l'activeDeadlineSeconds du Job, pour ne PLUS abandonner
+//       un Job encore vivant (le bug d'origine : runner 1 h < Job 2 h < besoin réel) ;
+//   (c) RESSOURCES TRANSITOIRES — heap + limites CPU/mémoire relevables pour ce Job
+//       éphémère seul (requests inchangées → 0 pression steady-state du nœud) ;
+//   (d) BORNAGE (repli) — REFRESH_CHUNK / REFRESH_CITIES bornent le refresh à un
+//       sous-ensemble si (a)+(b)+(c) ne tenaient pas la fenêtre (démo).
+// Tous les leviers sont des ENV overridables (défauts = amélioration mesurée).
 // =============================================================================
 function cmdRefresh() {
   section("S6 refresh différentiel (worker-live delta)");
@@ -1028,6 +1084,62 @@ function cmdRefresh() {
   } else {
     warn("MEDIUM3 — pré-check runs/ (mémoire de collecte) DÉSACTIVÉ (ASSERT_RUNS_MEMORY=0).");
   }
+  // ── (a) CONCURRENCE + (c) RESSOURCES TRANSITOIRES ─────────────────────────
+  // worker-live parcourt les villes EN PARALLÈLE (LIVE_SCRAPE_CONCURRENCY) pour
+  // masquer la latence des sources lentes. MÉMOIRE = la borne : le heap doit tenir
+  // concurrence × empreinte_par_ville, donc heap relevé EN MÊME TEMPS. Ces relèvements
+  // (heap, limites CPU/mémoire, deadline) sont TRANSITOIRES : le Job n'existe que
+  // pendant la bascule puis est GC au TTL — 0 effet sur la pression steady-state
+  // du nœud (les REQUESTS restent basses : cpu 50m / mem 96Mi, scheduling inchangé).
+  const concurrency = opt("REFRESH_CONCURRENCY", "6");
+  const heapMb = opt("REFRESH_HEAP_MB", "768");
+  // LIMIT CPU transitoire : ne donne que du CPU INUTILISÉ du nœud (aucune garantie).
+  // Rester <= 1000m (quota preprod-cap limits.cpu=3, ~950m déjà consommés hors Jobs).
+  const cpuLimit = opt("REFRESH_CPU_LIMIT", "150m");
+  const memLimit = opt("REFRESH_MEM_LIMIT", "1Gi");
+  // REQUEST mémoire alignée sur l'usage réel (~1Gi) et NON sur 96Mi : avec la
+  // concurrence, le pod consomme ~la LIMIT ; une request trop basse (usage >> request)
+  // en ferait le 1er candidat à l'éviction sous pression mémoire du nœud (reco k8s).
+  // 512Mi tient dans le quota requests preprod-cap. La request CPU, elle, reste 50m.
+  const memRequest = opt("REFRESH_MEM_REQUEST", "512Mi");
+
+  // ── (b) TIMEOUT ALIGNÉ ────────────────────────────────────────────────────
+  // Le poll runner (REFRESH_TIMEOUT) DOIT >= activeDeadlineSeconds du Job, sinon
+  // le runner abandonne (fail-closed) un Job encore vivant AVANT son propre deadline
+  // (le bug d'origine : runner 3600s < Job 7200s). Défaut = deadline + tampon, pour
+  // que le runner observe le VERDICT terminal du Job (succeeded/failed) plutôt que
+  // de conclure « timeout runner » à l'instant où le Job atteint sa borne.
+  const activeDeadline = Number(opt("REFRESH_ACTIVE_DEADLINE", "7200"));
+  const pollBuffer = Number(opt("REFRESH_POLL_BUFFER", "300"));
+  const refreshTimeout = process.env.REFRESH_TIMEOUT && process.env.REFRESH_TIMEOUT !== ""
+    ? Number(process.env.REFRESH_TIMEOUT)
+    : activeDeadline + pollBuffer;
+  if (!Number.isFinite(activeDeadline) || activeDeadline <= 0) {
+    die(`S6 — REFRESH_ACTIVE_DEADLINE invalide ('${opt("REFRESH_ACTIVE_DEADLINE", "7200")}').`);
+  }
+  if (!Number.isFinite(refreshTimeout) || refreshTimeout <= 0) {
+    die(`S6 — REFRESH_TIMEOUT invalide ('${process.env.REFRESH_TIMEOUT}').`);
+  }
+  if (refreshTimeout < activeDeadline) {
+    warn(
+      `S6 — REFRESH_TIMEOUT (${refreshTimeout}s) < activeDeadlineSeconds du Job (${activeDeadline}s) : ` +
+        "le runner abandonnerait un Job encore vivant. Aligner (REFRESH_TIMEOUT >= activeDeadline).",
+    );
+  }
+
+  // ── (d) BORNAGE (repli) ───────────────────────────────────────────────────
+  let refreshArgs;
+  try {
+    refreshArgs = buildRefreshArgs({ chunk: opt("REFRESH_CHUNK", ""), cities: opt("REFRESH_CITIES", "") });
+  } catch (e) {
+    die(`S6 — bornage invalide : ${e instanceof Error ? e.message : String(e)}`);
+  }
+  log(
+    `S6 périmètre = ${refreshArgs.label} ; concurrence=${concurrency} ; heap=${heapMb}MB ; ` +
+      `requests cpu=50m/mem=${memRequest} ; limits cpu=${cpuLimit}/mem=${memLimit} ; ` +
+      `Job activeDeadline=${activeDeadline}s ; poll runner=${refreshTimeout}s.`,
+  );
+
   const image = resolvePreprodImage(ns);
   runJobFromTemplate({
     tmpl: "refresh-job.tmpl.yaml",
@@ -1043,8 +1155,16 @@ function cmdRefresh() {
       S3_SECRET: opt("S3_SECRET", "radar-docs-s3-credentials"),
       SCRAPE_S3_SECRET: opt("SCRAPE_S3_SECRET", "radar-docs-s3-credentials"),
       TTL_SECONDS: opt("JOB_TTL_SECONDS", "3600"),
+      // (a)+(c)+(d) rendus dans le template (fix S6).
+      REFRESH_ARGS: refreshArgsYaml(refreshArgs.args),
+      REFRESH_CONCURRENCY: concurrency,
+      REFRESH_HEAP_MB: heapMb,
+      REFRESH_ACTIVE_DEADLINE: String(activeDeadline),
+      REFRESH_CPU_LIMIT: cpuLimit,
+      REFRESH_MEM_REQUEST: memRequest,
+      REFRESH_MEM_LIMIT: memLimit,
     },
-    timeoutSec: Number(opt("REFRESH_TIMEOUT", "3600")),
+    timeoutSec: refreshTimeout,
   });
   log("S6 refresh OK — delta worker-live joué (aucun --all ; CronJob refresh laissé suspendu).");
 }
