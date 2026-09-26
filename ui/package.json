@@ -25,7 +25,7 @@
     "@sentropic/geo-core": "^0.6.0",
     "@sentropic/geo-map-engine": "^0.6.0",
     "@sentropic/geo-ui-svelte": "^0.1.1",
-    "maplibre-gl": "^5.24.0",
+    "maplibre-gl": "^6.4.1",
     "pdfjs-dist": "^4.10.38",
     "svelte": "^5.0.0",
     "svelte-streamdown": "^3.0.1"
