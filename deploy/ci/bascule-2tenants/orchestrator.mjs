@@ -30,6 +30,10 @@
 //                     counted, new drift (divergent-code or city-not-served-by-geo
 //                     absent from the baseline) fails, resolved is reported.
 //   publish           cycle.json + step summary; exit 1 unless the verdict is green.
+//   replay-seed       (no dispatch) writes a cycle.json pointing at EXISTING leg
+//                     restore runs (REPLAY_IMMO_RUN_ID, REPLAY_GEO_RUN_ID,
+//                     REPLAY_CYCLE_ID, REPLAY_BACKUP_DATE) so that collect +
+//                     join-verify + publish re-evaluate their artefacts offline.
 // =============================================================================
 import { Buffer } from "node:buffer";
 import console from "node:console";
@@ -285,6 +289,28 @@ export function makeOrchestrator({ gh, now = Date.now, pollSec = Number(opt("BAS
         die(`join-verify DRIFT — ${n.count} new drift id(s) absent from the baseline: ${n.divergent_code.count} divergent-code, ` +
           `${n.city_not_served_by_geo.count} city-not-served-by-geo (sample in cycle.json).`);
       }
+    },
+
+    async "replay-seed"() {
+      // No dispatch, no CONFIRM: re-evaluates the artefacts of EXISTING leg restore
+      // runs (collect + join-verify + publish), e.g. after a baseline change.
+      if (isDry()) die("replay-seed — set DRY_RUN=false: collect and join-verify are skipped in DRY (nothing is dispatched either way).");
+      const runIds = { immo: opt("REPLAY_IMMO_RUN_ID", ""), geo: opt("REPLAY_GEO_RUN_ID", "") };
+      for (const t of TENANTS) if (!/^\d+$/.test(runIds[t])) die(`replay-seed — REPLAY_${t.toUpperCase()}_RUN_ID must be a run id.`);
+      const date = opt("REPLAY_BACKUP_DATE", "");
+      if (!isValidDate(date)) die("replay-seed — REPLAY_BACKUP_DATE must be YYYY-MM-DD.");
+      let cycleId;
+      try { cycleId = assertCycleId(opt("REPLAY_CYCLE_ID", "")); } catch (e) { die(`replay-seed — REPLAY_CYCLE_ID: ${e.message}`); }
+      const cycle = newCycle({ cycleId, confirm: `iso-prod-${date}`, createdAt: new Date(now()).toISOString(), orchestratorRunId: opt("GITHUB_RUN_ID", null), dryRun: false });
+      cycle.replay_of = { orchestrator_run_id: opt("REPLAY_OF_RUN_ID", null), note: "replay: no dispatch, artefacts of existing leg restore runs" };
+      cycle.backup = { date };
+      for (const t of TENANTS) {
+        const r = await client.run(t, Number(runIds[t])); // read-only: status of the existing run
+        cycle.legs[t].restore_run = { run_id: Number(runIds[t]), html_url: r.html_url ?? null, status: r.status, conclusion: r.conclusion ?? null, replay: true };
+      }
+      saveCycle(cycle);
+      exportEnv("CYCLE_ID", cycleId);
+      log(`replay-seed — CYCLE_ID=${cycleId} D=${date} immo run ${runIds.immo} geo run ${runIds.geo} (no dispatch)`);
     },
 
     async publish() {
