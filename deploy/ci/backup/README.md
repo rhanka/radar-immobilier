@@ -156,7 +156,17 @@ only. Steps: selftest (fail-closed before any apply) → apply the three
 SealedSecrets (refused if one is still a placeholder) → wait Synced (tolerant) →
 render the ConfigMap from `backup-daily.cjs` and apply it → apply both CronJobs
 and assert their live schedule/suspend/concurrency. Triggered on push to `main`
-touching `deploy/ci/backup/**`; independent of the `apply-bundle` job.
+touching `deploy/ci/backup/**`; independent of the `apply-bundle` job. A
+`workflow_dispatch` with `backup_run_now=true` **skips `apply-bundle`**, so the
+bundle's RO-role Job never competes with the backup pod for CPU (a plain
+dispatch or a push touching the bundle still re-applies it).
+
+**Capacity during a backup.** A running backup pod counts 1 CPU of limits (its
+`dump` step) against the namespace quota: `limits.cpu` measured at ≈ 2350m /
+2500m and the node at ≈ 97 % of requests during the first run. Avoid concurrent
+manual launches during the day (manual backup runs, one-shot Jobs, bundle
+re-applies) while a backup runs; the scheduled 02:23 UTC run is alone by design,
+and manual backup runs are refused inside 02:00–05:30 UTC.
 
 Activation order (once):
 
