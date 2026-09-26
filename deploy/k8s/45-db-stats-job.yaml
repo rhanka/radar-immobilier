@@ -1,0 +1,161 @@
+# 45-db-stats-job.yaml — READ-ONLY row counts / max dates of the immo Postgres,
+# run on demand by `.github/workflows/run-job.yaml` (job=stats) against PREPROD
+# (namespace radar-immobilier-preprod, kubeconfig KUBE_CONFIG_DATA_PREPROD).
+# Purpose: measure documents / signals before and after a refresh.
+#
+# READ-ONLY: every session runs with default_transaction_read_only=on (PGOPTIONS);
+# the query set is SELECT-only. Output = counts and timestamps only, no row
+# content, no personal data.
+#
+# RESULT CHANNEL: the preprod CI SA (radar-ci-deployer-preprod) has NO pods/log,
+# so the runner cannot `kubectl logs`. The result is written to the container
+# termination message (/dev/termination-log, <= 4 KiB), readable with pods get.
+# On failure, FallbackToLogsOnError copies the log tail (psql error) there.
+#
+# NETWORK: the pod carries `sentropic.io/bascule: stats` so the EXISTING
+# `allow-bascule-to-postgres` NetworkPolicy (70-networkpolicy.yaml, selector
+# `sentropic.io/bascule` Exists) admits it to radar-postgres:5432. No policy is
+# widened.
+#
+# WHAT MOVES AFTER A REFRESH: refresh-pv (api/src/scripts/refresh-pv.ts →
+# services/graph/refresh-run.ts) does NOT write the legacy `documents` / `signals`
+# tables (no production code inserts or updates them). It writes S3, graph_nodes
+# (upsert ON CONFLICT (id); created_at is absent on OVH graph_nodes, #450) and
+# refresh_document_outcomes (insert-only, one immutable row per submission). So:
+#   - documents / signals: fetched_at / detected_at are insert defaults and are
+#     never rewritten → `>= SINCE` is reliable, but a refresh is not expected to
+#     move them;
+#   - graph_nodes Signal / DesignationEvent totals: compare two runs (no
+#     reliable insertion date on OVH);
+#   - refresh_document_outcomes.created_at (immutable) = reliable "processed
+#     since SINCE".
+#
+# Namespace is NOT set here: run-job applies with `kubectl -n <preprod ns>`.
+# __SINCE__ is templated by run-job (validated ISO-8601, or empty).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-db-stats
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: db-stats
+    sentropic.io/bascule: stats
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: db-stats
+        sentropic.io/bascule: stats
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: tmp
+          emptyDir: { sizeLimit: 16Mi }
+      containers:
+        - name: stats
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          image: postgis/postgis:16-3.4
+          imagePullPolicy: IfNotPresent
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: FallbackToLogsOnError
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              export PGOPTIONS='-c default_transaction_read_only=on -c statement_timeout=120000'
+              # SINCE is bound as a psql variable (:'since' = quoted literal), never
+              # spliced into the SQL text. Empty ⇒ the "added since" fields are null.
+              out="$(psql -X -q -At -v ON_ERROR_STOP=1 -v since="${SINCE:-}" <<'SQL'
+              SELECT to_regclass('public.refresh_document_outcomes') IS NOT NULL AS has_rdo \gset
+              SELECT json_build_object(
+                'section', 'core',
+                'generated_at', now(),
+                'database', current_database(),
+                'transaction_read_only', current_setting('transaction_read_only'),
+                'since', NULLIF(:'since', '')::timestamptz,
+                'documents', (SELECT json_build_object(
+                    'total', count(*),
+                    'max_fetched_at', max(fetched_at),
+                    'max_extracted_at', max(extracted_at),
+                    'added_since', CASE WHEN NULLIF(:'since', '') IS NULL THEN NULL
+                      ELSE count(*) FILTER (WHERE fetched_at >= NULLIF(:'since', '')::timestamptz) END,
+                    'added_since_max_fetched_at', max(fetched_at) FILTER (WHERE fetched_at >= NULLIF(:'since', '')::timestamptz))
+                  FROM documents),
+                'signals', (SELECT json_build_object(
+                    'total', count(*),
+                    'max_detected_at', max(detected_at),
+                    'last_7_days', count(*) FILTER (WHERE detected_at >= now() - interval '7 days'),
+                    'added_since', CASE WHEN NULLIF(:'since', '') IS NULL THEN NULL
+                      ELSE count(*) FILTER (WHERE detected_at >= NULLIF(:'since', '')::timestamptz) END,
+                    'added_since_max_detected_at', max(detected_at) FILTER (WHERE detected_at >= NULLIF(:'since', '')::timestamptz))
+                  FROM signals),
+                'graph_nodes', (SELECT json_build_object(
+                    'signal', count(*) FILTER (WHERE type = 'Signal'),
+                    'designation_event', count(*) FILTER (WHERE type = 'DesignationEvent'),
+                    'signal_or_designation_event_with_city', count(*) FILTER (WHERE type IN ('Signal', 'DesignationEvent') AND city_slug IS NOT NULL))
+                  FROM graph_nodes)
+              );
+              \if :has_rdo
+              SELECT json_build_object(
+                'section', 'refresh_document_outcomes',
+                'total', count(*),
+                'max_created_at', max(created_at),
+                'last_7_days', count(*) FILTER (WHERE created_at >= now() - interval '7 days'),
+                'added_since', CASE WHEN NULLIF(:'since', '') IS NULL THEN NULL
+                  ELSE count(*) FILTER (WHERE created_at >= NULLIF(:'since', '')::timestamptz) END,
+                'added_since_distinct_documents', CASE WHEN NULLIF(:'since', '') IS NULL THEN NULL
+                  ELSE count(DISTINCT document_sha) FILTER (WHERE created_at >= NULLIF(:'since', '')::timestamptz) END,
+                'added_since_accepted', CASE WHEN NULLIF(:'since', '') IS NULL THEN NULL
+                  ELSE count(*) FILTER (WHERE created_at >= NULLIF(:'since', '')::timestamptz AND status::text = 'accepted') END,
+                'added_since_max_created_at', max(created_at) FILTER (WHERE created_at >= NULLIF(:'since', '')::timestamptz))
+              FROM refresh_document_outcomes;
+              \else
+              SELECT json_build_object('section', 'refresh_document_outcomes', 'status', 'table absent');
+              \endif
+              SQL
+              )"
+              printf '%s\n' "$out"
+              printf '%s\n' "$out" > /dev/termination-log
+          env:
+            - name: HOME
+              value: /tmp
+            - name: SINCE
+              value: "__SINCE__"
+            - name: PGHOST
+              value: radar-postgres
+            - name: PGCONNECT_TIMEOUT
+              value: "10"
+            - name: PGAPPNAME
+              value: radar-db-stats
+            - name: PGUSER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: PGPASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: PGDATABASE
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { cpu: 200m, memory: 128Mi }
