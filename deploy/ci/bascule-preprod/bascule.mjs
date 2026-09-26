@@ -70,7 +70,8 @@ import { join, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { basculeMode, makeRestoreMode } from "./restore-mode.mjs";
-import { makeDocsSyncSecret } from "./docs-sync-secret.mjs";
+import { makeCiSecrets } from "./ci-secrets.mjs";
+import { makeE2eRefs } from "./e2e-refs.mjs";
 
 // ── petits utilitaires de sortie (jamais de secret imprimé) ─────────────────
 const log = (msg) => console.log(`[bascule] ${msg}`);
@@ -185,7 +186,7 @@ function jobDefaults() {
     // secret dédié `radar-docs-src-preprod` — clés S3_ACCESS_KEY/S3_SECRET_KEY.
     // PRE-CREATED by k8s; the bascule REWRITES it at every run from the GitHub
     // secrets of the environment radar-bascule right before S3 —
-    // docs-sync-secret.mjs (kubectl replace, get/update by name). No k8s watcher.
+    // ci-secrets.mjs (kubectl replace, get/update by name). No k8s watcher.
     // SPANNING read prod + rw préprod : docs-sync (copie).
     DOCS_SYNC_READ_SECRET: opt("DOCS_SYNC_READ_SECRET", "radar-docs-src-preprod"),
     // Grantee canonical id radar-docs PRÉPROD (GrantFullControl sur les objets
@@ -1297,15 +1298,18 @@ const restoreMode = makeRestoreMode({
   log, warn, die, section, req, opt, run, assertConfirm, assertQuiesced, runJobFromTemplate, jobDefaults, workdir,
   resolvePreprodImage, runRollbackG1,
 });
-// docs-sync Secret rewritten by the bascule itself at every run, before S3.
-const docsSyncSecret = makeDocsSyncSecret({ log, die, section, run, jobDefaults });
+// In-cluster Secrets (docs-sync, backup reader, copy signer) rewritten by the bascule from GitHub.
+const ciSecrets = makeCiSecrets({ log, die, section, run, jobDefaults });
+// e2e O1: zone references read from the restored DB, published via ConfigMaps.
+const e2eRefs = makeE2eRefs({ log, die, section, run, opt, runJobFromTemplate, jobDefaults, workdir, resolvePreprodImage });
 
 // =============================================================================
 // dispatch
 // =============================================================================
 const COMMANDS = {
   ...restoreMode.commands,
-  ...docsSyncSecret.commands,
+  ...ciSecrets.commands,
+  ...e2eRefs.commands,
   preflight: cmdPreflight,
   quiesce: cmdQuiesce,
   dump: cmdDump,

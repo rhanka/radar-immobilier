@@ -1,0 +1,37 @@
+# e2e O1 — the 4 ConfigMaps the served-refs Job rewrites (ns radar-immobilier-preprod).
+# Pre-created ONCE by the k8s lane (install-time, `kubectl create` — not re-applied
+# afterwards: the Job replaces their content at every e2e run). Content = gzip TSV
+# "city_slug<TAB>zone_code" of the zone references immo holds (public zoning codes,
+# no PII) in binaryData.refs.tsv.gz.part + data.meta.json. 4 × ~900 KiB of gzip is
+# far above the expected size (tens of thousands of short couples ≈ a few hundred KiB).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immo-served-refs-0
+  namespace: radar-immobilier-preprod
+  labels: { app.kubernetes.io/name: radar-immobilier, sentropic.io/bascule: served-refs }
+data: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immo-served-refs-1
+  namespace: radar-immobilier-preprod
+  labels: { app.kubernetes.io/name: radar-immobilier, sentropic.io/bascule: served-refs }
+data: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immo-served-refs-2
+  namespace: radar-immobilier-preprod
+  labels: { app.kubernetes.io/name: radar-immobilier, sentropic.io/bascule: served-refs }
+data: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immo-served-refs-3
+  namespace: radar-immobilier-preprod
+  labels: { app.kubernetes.io/name: radar-immobilier, sentropic.io/bascule: served-refs }
+data: {}

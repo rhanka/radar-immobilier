@@ -34,14 +34,16 @@ import {
 } from "./restore-mode.mjs";
 import {
   assertServedZoneIds, buildImmoLeg, combine, immoVerdict, mapOutcome, normalizeRawRefs, readServedIdsSha,
-  servedIdsArtifactName, cycleLegArtifactName, sha256FileLine,
+  servedIdsArtifactName, cycleLegArtifactName, sha256FileLine, refsFromTsv,
 } from "./served-ids.mjs";
+import { assembleRefs } from "./e2e-refs.mjs";
 import {
-  buildSecretManifest, DOCS_SYNC_SECRET_KEYS, redact, secretValuesFromEnv, writePrivateManifest,
-} from "./docs-sync-secret.mjs";
+  buildSecretManifest, DOCS_SYNC_SECRET_KEYS, redact, SECRET_SPECS, secretNameFor, secretValuesFromEnv, specsForMode, writePrivateManifest,
+} from "./ci-secrets.mjs";
 
 const require = createRequire(import.meta.url);
 const br = require("./backup-restore.cjs");
+const sr = require("./served-refs.cjs");
 const DIR = import.meta.dirname;
 
 let passed = 0;
@@ -78,14 +80,16 @@ class Store {
   versions(bucket, key) { return (this.b.get(bucket) && this.b.get(bucket).get(key)) || []; }
   latest(bucket, key) { const v = this.versions(bucket, key); return v.length ? v[v.length - 1] : null; }
 }
-// policy: { read: [buckets], list: [buckets], write: [buckets] }
+// policy: { read: ["bucket" | "bucket/prefix"], list: [buckets], listVersions: [buckets], write: [buckets] }
+// (OVH: a read with versionId is a GetObject — no distinct GetObjectVersion right.)
 function client(store, policy) {
-  const can = (op, bucket) => (policy[op] || []).includes(bucket);
+  const can = (op, bucket, key) => (policy[op] || []).some((e) => e === bucket || (key !== undefined && e.includes("/") &&
+    e.slice(0, e.indexOf("/")) === bucket && key.startsWith(e.slice(e.indexOf("/") + 1))));
   return {
     async send(cmd) {
       const i = cmd.input;
       if (cmd instanceof sdk.GetObjectCommand || cmd instanceof sdk.HeadObjectCommand) {
-        if (!can("read", i.Bucket)) throw denied();
+        if (!can("read", i.Bucket, i.Key)) throw denied();
         const v = i.VersionId ? store.versions(i.Bucket, i.Key).find((x) => x.VersionId === i.VersionId) : store.latest(i.Bucket, i.Key);
         if (!v) throw notFound();
         if (cmd instanceof sdk.HeadObjectCommand) return { ContentLength: v.Size, ETag: v.ETag, VersionId: v.VersionId };
@@ -103,7 +107,7 @@ function client(store, policy) {
         return { Contents: page, IsTruncated: more, NextContinuationToken: more ? String(start + 2) : undefined };
       }
       if (cmd instanceof sdk.ListObjectVersionsCommand) {
-        if (!can("list", i.Bucket)) throw denied();
+        if (!can("listVersions", i.Bucket)) throw denied();
         const m = store.b.get(i.Bucket) || new Map();
         const all = [];
         for (const k of [...m.keys()].filter((x) => !i.Prefix || x.startsWith(i.Prefix)).sort()) {
@@ -118,7 +122,7 @@ function client(store, policy) {
       if (cmd instanceof sdk.CopyObjectCommand) {
         const m = /^\/([^/]+)\/(.+?)(?:\?versionId=(.+))?$/.exec(i.CopySource);
         const srcBucket = m[1]; const srcKey = decodeURIComponent(m[2]); const vid = m[3] ? decodeURIComponent(m[3]) : null;
-        if (!can("read", srcBucket) || !can("write", i.Bucket)) throw denied();
+        if (!can("read", srcBucket, srcKey) || !can("write", i.Bucket)) throw denied();
         const v = vid ? store.versions(srcBucket, srcKey).find((x) => x.VersionId === vid) : store.latest(srcBucket, srcKey);
         if (!v) throw notFound();
         store.copies.push({ key: i.Key, from: srcKey, versionId: vid, grant: i.GrantFullControl || null });
@@ -182,20 +186,23 @@ function fixture({ tamperDump = false, rewriteBAfterD = true } = {}) {
   s.put(DST, "runs/extra-newer-than-D.json", "{}");
   return { s, dump, manifest, manSha: sha(manBuf), inventory };
 }
-const readerPolicy = { read: [B], list: [B] };
-const copierPolicy = { read: [B], list: [DST], write: [DST] };
+// Dedicated preprod identities (k8s, 2026-09-26): the reader sees pg/, manifests/,
+// docs-inventory/ only (docs/ → 403); the copy signer reads docs/* and writes preprod.
+const readerPolicy = { read: [`${B}/pg/`, `${B}/manifests/`, `${B}/docs-inventory/`], list: [B] };
+const copierPolicy = { read: [`${B}/docs/`], listVersions: [B], list: [DST], write: [DST] };
+const copierNoVersions = { read: [`${B}/docs/`], list: [DST], write: [DST] };
 const baseEnv = (extra = {}) => ({
   S3_ENDPOINT: "s3.bhs.io.cloud.ovh.net", S3_REGION: "bhs", READER_ACCESS_KEY: "r", READER_SECRET_KEY: "r",
   BACKUP_BUCKET: B, EXPECTED_BACKUP_BUCKET: B, ...extra,
 });
 const tmp = mkdtempSync(join(tmpdir(), "restore-mode-selftest-"));
 let tcount = 0;
-async function step({ s, env, now = NOW_FRESH }) {
+async function step({ s, env, now = NOW_FRESH, copier = copierPolicy }) {
   const term = join(tmp, `term-${++tcount}.json`);
   const logs = [];
   let r = null; let err = null;
   try {
-    r = await br.runStep({ env: { ...env, TERMINATION_LOG: term }, sdk, clients: { reader: client(s, readerPolicy), copier: client(s, copierPolicy) }, now: () => now, log: (m) => logs.push(m) });
+    r = await br.runStep({ env: { ...env, TERMINATION_LOG: term }, sdk, clients: { reader: client(s, readerPolicy), copier: client(s, copier) }, now: () => now, log: (m) => logs.push(m) });
   } catch (e) { err = e; }
   const t = existsSync(term) ? JSON.parse(readFileSync(term, "utf8")) : null;
   return { r, err, t, logs, code: err ? err.exitCode ?? 1 : r.exitCode };
@@ -339,7 +346,22 @@ async function suite() {
       env: { ...docsEnv(manSha), TERMINATION_LOG: join(tmp, "t-wrong.json") }, sdk,
       clients: { reader: client(s, readerPolicy), copier: client(s, readerPolicy) }, now: () => NOW_FRESH, log: () => {},
     }).then((x) => x.exitCode, (e) => e.exitCode ?? 1);
-    eq("docs — copy identity without preprod rights ⇒ fails (identity split enforced)", wrong, 1);
+    eq("docs — the reader (no docs/*, no preprod) as copy identity ⇒ fails (identity split enforced)", wrong, 1);
+  }
+  {
+    // copy signer without ListBucketVersions: recorded versionIds used as is, the
+    // others checked by HEAD — b rewritten after D ⇒ current differs ⇒ refusal.
+    const { s, manSha } = fixture();
+    const r = await step({ s, env: docsEnv(manSha), copier: copierNoVersions });
+    eq("docs — no version listing + object rewritten since D ⇒ refused before any copy", [r.code, s.copies.length, r.t.unresolvedReasons], [2, 0, { "current-differs": 1 }]);
+    ok("docs — fallback announced in the log", r.logs.some((l) => /version listing .* not permitted/.test(l)));
+  }
+  {
+    const { s, manSha } = fixture({ rewriteBAfterD: false });
+    s.b.get(DST).delete("raw/b.pdf");
+    const r = await step({ s, env: docsEnv(manSha), copier: copierNoVersions });
+    eq("docs — no version listing, current = D content ⇒ recorded versionId + HEAD-checked current copied, recon ok",
+      [r.code, r.t.copied, r.t.recon.ok, s.copies.map((c) => [c.key, !!c.versionId]).sort()], [0, 2, true, [["raw/a b.pdf", true], ["raw/b.pdf", false]]]);
   }
   {
     const { s, manSha } = fixture();
@@ -396,14 +418,14 @@ function render(tmpl, vars) {
 }
 let YAML = null;
 try { YAML = (await import("yaml")).default; } catch { YAML = null; }
-const common = { NAMESPACE: "radar-immobilier-preprod", IMAGE: "ghcr.io/rhanka/radar-api@sha256:" + "a".repeat(64), READER_SECRET: "radar-backup-reader",
+const common = { NAMESPACE: "radar-immobilier-preprod", IMAGE: "ghcr.io/rhanka/radar-api@sha256:" + "a".repeat(64), READER_SECRET: "radar-backup-reader-preprod",
   S3_ENDPOINT: "https://s3.bhs.io.cloud.ovh.net", S3_REGION: "bhs", S3_FORCE_PATH_STYLE: "true", EXPECTED_BACKUP_BUCKET: B, TTL_SECONDS: "3600",
   BR_SCRIPT: indentBlock(SCRIPT, 14) };
 const renders = {
   "backup-read-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.resolve, BR_STEP: "resolve", BACKUP_ID: "latest", ALLOW_STALE_BACKUP: "false", MAX_AGE_HOURS: "24" },
   "db-restore-backup-job.tmpl.yaml": { ...common, DUMP_IMAGE: "postgis/postgis:16-3.4", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64), PIN_PG_SHA256: "b".repeat(64),
     DB_SECRET: "radar-db-credentials", PGHOST: "radar-postgres", EXPECTED_DATABASE: "radar", RESTORE_ASSERT_DB: "1" },
-  "docs-restore-backup-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.docs, BR_STEP: "docs", COPY_SECRET: "radar-backup-reader", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64),
+  "docs-restore-backup-job.tmpl.yaml": { ...common, JOB_NAME: JOBS.docs, BR_STEP: "docs", COPY_SECRET: "radar-backup-restore-docs", BACKUP_DATE: D, PIN_MANIFEST_SHA256: "a".repeat(64),
     DST_BUCKET: DST, FORBIDDEN_DST_BUCKETS: PROD, COPY_GRANTEE: "g", COPY_CONCURRENCY: "8", DOCS_DRY: "0" },
 };
 for (const [tmpl, vars] of Object.entries(renders)) {
@@ -467,11 +489,39 @@ if (!YAML) console.log("  info yaml package not resolvable — YAML parse checks
   eq("buildSecretManifest — only the 2 keys", Object.keys(man.data).sort(), ["S3_ACCESS_KEY", "S3_SECRET_KEY"]);
   eq("buildSecretManifest — labels kept, last-applied dropped", [man.metadata.labels["app.kubernetes.io/name"], Object.keys(man.metadata.annotations)], ["radar-immobilier", ["keep"]]);
   throws("buildSecretManifest — invalid name refused", () => buildSecretManifest({ name: "Bad_Name", namespace: "b", values: {} }));
+  const wf = readFileSync(join(DIR, "..", "..", "..", ".github", "workflows", "bascule-preprod.yml"), "utf8");
   const rbac = readFileSync(join(DIR, "rbac-ci-bascule-preprod-docs-secret.yaml"), "utf8");
   if (YAML) {
     const [role] = YAML.parseAllDocuments(rbac).map((d) => d.toJSON());
-    eq("RBAC — secrets get/update on radar-docs-src-preprod only", role.rules, [{ apiGroups: [""], resources: ["secrets"], verbs: ["get", "update"], resourceNames: ["radar-docs-src-preprod"] }]);
-  } else ok("RBAC — name-scoped get/update", /verbs: \["get", "update"\]\n\s+resourceNames: \["radar-docs-src-preprod"\]/.test(rbac));
+    const docs = YAML.parseAllDocuments(rbac).map((d) => d.toJSON());
+    const cms = ["immo-served-refs-0", "immo-served-refs-1", "immo-served-refs-2", "immo-served-refs-3"];
+    eq("RBAC — runner: secrets get/update on the 3 Secrets only + configmaps get on the refs", role.rules, [
+      { apiGroups: [""], resources: ["secrets"], verbs: ["get", "update"], resourceNames: ["radar-docs-src-preprod", "radar-backup-reader-preprod", "radar-backup-restore-docs"] },
+      { apiGroups: [""], resources: ["configmaps"], verbs: ["get"], resourceNames: cms }]);
+    const writer = docs.find((d) => d.kind === "Role" && d.metadata.name === "radar-bascule-refs-writer");
+    eq("RBAC — refs writer: configmaps get/update on the 4 names only", writer.rules, [{ apiGroups: [""], resources: ["configmaps"], verbs: ["get", "update"], resourceNames: cms }]);
+    ok("RBAC — no create/patch/delete/list anywhere", !/"(create|patch|delete|list|watch)"/.test(JSON.stringify(docs.filter((d) => d.kind === "Role"))));
+  } else ok("RBAC — name-scoped get/update", /verbs: \["get", "update"\]\n\s+resourceNames: \["radar-docs-src-preprod", "radar-backup-reader-preprod", "radar-backup-restore-docs"\]/.test(rbac));
+  // every backup Secret spec keeps the key set of the pre-created Secrets (k8s)
+  const h32 = "0123456789abcdef0123456789abcdef";
+  const benv = { RADAR_BACKUP_READER_PREPROD_ACCESS_KEY: h32, RADAR_BACKUP_READER_PREPROD_SECRET_KEY: h32, RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY: h32, RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY: h32 };
+  for (const spec of ["backup-reader", "backup-restore-docs"]) {
+    const sp = SECRET_SPECS[spec];
+    eq(`ci-secrets — ${spec}: keys S3_ACCESS_KEY, S3_SECRET_KEY, BACKUP_BUCKET`, Object.keys(secretValuesFromEnv(benv, sp.keys, sp.fixed)).sort(), ["BACKUP_BUCKET", "S3_ACCESS_KEY", "S3_SECRET_KEY"]);
+  }
+  eq("ci-secrets — default names", ["docs-sync", "backup-reader", "backup-restore-docs"].map((s) => secretNameFor(s, {})), ["radar-docs-src-preprod", "radar-backup-reader-preprod", "radar-backup-restore-docs"]);
+  eq("ci-secrets — BACKUP_BUCKET fixed value from the var", secretValuesFromEnv({ ...benv, BACKUP_BUCKET: "radar-immobilier-backup" }, SECRET_SPECS["backup-reader"].keys, SECRET_SPECS["backup-reader"].fixed).BACKUP_BUCKET, "radar-immobilier-backup");
+  throws("ci-secrets — malformed BACKUP_BUCKET ⇒ fail-closed", () => secretValuesFromEnv({ ...benv, BACKUP_BUCKET: 'x"; drop' }, SECRET_SPECS["backup-reader"].keys, SECRET_SPECS["backup-reader"].fixed));
+  eq("ci-secrets — specs per MODE", ["chain", "list", "restore"].map(specsForMode), [["docs-sync"], ["backup-reader"], ["backup-reader", "backup-restore-docs"]]);
+  const bfill = wf.match(/- name: Write backup Secrets from GitHub[^\n]*\n((?: {8}.*\n)+)/);
+  ok("workflow — backup Secrets step: 4 secrets via env:, run without interpolation, not in MODE=chain",
+    !!bfill && /if: \$\{\{ env\.MODE != 'chain' \}\}/.test(bfill[1]) && (bfill[1].match(/\$\{\{ secrets\.RADAR_BACKUP_(READER_PREPROD|RESTORE_DOCS)_(ACCESS|SECRET)_KEY \}\}/g) || []).length === 4 &&
+    /run: node "\$CLI" backup-secrets-fill\n/.test(bfill[1]));
+  ok("workflow — backup Secrets written before R0 / list", wf.indexOf('node "$CLI" backup-secrets-fill') < wf.indexOf('node "$CLI" backup-resolve') && wf.indexOf('node "$CLI" backup-secrets-fill') < wf.indexOf('node "$CLI" backup-list'));
+  const preprodFiles = ["restore-mode.mjs", "backup-restore.cjs", "ci-secrets.mjs", "backup-read-job.tmpl.yaml", "db-restore-backup-job.tmpl.yaml", "docs-restore-backup-job.tmpl.yaml", "README.md"]
+    .map((f) => readFileSync(join(DIR, f), "utf8")).join("\n") + wf;
+  ok("no reference to an unsuffixed preprod Secret radar-backup-reader", !/radar-backup-reader(?![-\w])/.test(preprodFiles.replace(/ns `radar-immobilier`[^\n]*radar-backup-reader[^\n]*/g, "")));
+  ok("no GetObjectVersion permission required (OVH refuses it in policies)", !/GetObject \+ GetObjectVersion|GetObjectVersion on|`GetObjectVersion`/.test(preprodFiles));
   const red = redact(`error: ${v.S3_SECRET_KEY} / ${Buffer.from(v.S3_SECRET_KEY).toString("base64")}`, v);
   ok("redact — raw and base64 values removed", !red.includes(v.S3_SECRET_KEY) && !red.includes(Buffer.from(v.S3_SECRET_KEY).toString("base64")));
   const f = writePrivateManifest(man);
@@ -479,7 +529,6 @@ if (!YAML) console.log("  info yaml package not resolvable — YAML parse checks
   eq("writePrivateManifest — dir 0700, file 0600", [modeOf(f.dir), modeOf(f.file)], [0o700, 0o600]);
   f.cleanup();
   ok("writePrivateManifest — cleanup removes the file", !existsSync(f.file));
-  const wf = readFileSync(join(DIR, "..", "..", "..", ".github", "workflows", "bascule-preprod.yml"), "utf8");
   ok("workflow — bascule job in environment radar-bascule", /\n {4}environment: radar-bascule\n/.test(wf));
   const fill = wf.match(/- name: S3\.0 docs-sync Secret[^\n]*\n((?: {8}.*\n)+)/);
   ok("workflow — fill step: secrets via env:, run without interpolation", !!fill && /RADAR_DOCS_SYNC_ACCESS_KEY: \$\{\{ secrets\.RADAR_DOCS_SYNC_ACCESS_KEY \}\}/.test(fill[1]) &&
@@ -519,6 +568,62 @@ throws("assertServedZoneIds — empty refused", () => assertServedZoneIds([]));
   eq("readServedIdsSha — absent artefact ⇒ null", readServedIdsSha(join(tmp, "nope")), null);
 }
 
+// ═════════════════════════════ e2e O1: served refs (restored DB → ConfigMaps) ═
+const REFS_TSV = "laval\tA-1\nsutton\tZ9\nlaval\tA-1\nBad Slug\tX\nmontreal\tC408\nlaval\t\n";
+{
+  const p = sr.parseRefsTsv(REFS_TSV);
+  eq("served-refs — rows validated, deduplicated, byte-sorted", [p.lines, p.rejected], [["laval\tA-1", "montreal\tC408", "sutton\tZ9"], 2]);
+  eq("served-refs — sources parsed", sr.parseSources("geo_resolutions\t12\nzone_versions\t3400\n"), { geo_resolutions: 12, zone_versions: 3400 });
+  eq("served-refs — splitParts", sr.splitParts(Buffer.alloc(10), 4).map((b) => b.length), [4, 4, 2]);
+  throws("served-refs — empty result refused (fail-closed)", () => sr.buildPayload({ lines: [], rejected: 0, sources: {}, cycleId: "c1", maxParts: 4, prefix: "immo-served-refs", now: Date.now }));
+}
+async function refsSuite() {
+  const puts = [];
+  const files = { "/work/refs.tsv": REFS_TSV, "/work/sources.tsv": "zone_versions\t3\n", "/tok/token": "tkn\n", "/tok/ca.crt": "CA" };
+  const env = { CYCLE_ID: "iso-prod-2026-09-27-abc", POD_NAMESPACE: "radar-immobilier-preprod", KUBE_TOKEN_DIR: "/tok", BACKUP_DATE: D };
+  const r = await sr.run({ env, readFile: (p) => files[p], put: async (a) => { puts.push(a); return 200; }, log: () => {} });
+  eq("served-refs run — 1 ConfigMap rewritten via the in-cluster API (token, namespace)", [r.exitCode, puts.length, puts[0].name, puts[0].token, puts[0].namespace],
+    [0, 1, "immo-served-refs-0", "tkn", "radar-immobilier-preprod"]);
+  const cm = puts[0].body;
+  ok("served-refs run — ConfigMap: binaryData part + meta.json, bascule label", !!cm.binaryData["refs.tsv.gz.part"] && JSON.parse(cm.data["meta.json"]).rows === 3 && cm.metadata.labels["sentropic.io/bascule"] === "served-refs");
+  const a = assembleRefs([cm, { data: {} }], { cycleId: env.CYCLE_ID });
+  eq("assembleRefs — roundtrip (rows, sources, TSV)", [a.rows, a.meta.sources, a.tsv.toString()], [3, { zone_versions: 3 }, "laval\tA-1\nmontreal\tC408\nsutton\tZ9\n"]);
+  throws("assembleRefs — ConfigMaps of another CYCLE_ID refused (stale)", () => assembleRefs([cm], { cycleId: "other" }));
+  const bad = JSON.parse(JSON.stringify(cm));
+  bad.binaryData["refs.tsv.gz.part"] = Buffer.from("tampered").toString("base64");
+  throws("assembleRefs — tampered part refused (sha256)", () => assembleRefs([bad], { cycleId: env.CYCLE_ID }));
+  // multi-part: force small parts through buildPayload + buildConfigMap
+  const many = Array.from({ length: 4000 }, (_, i) => `city-${String(i).padStart(5, "0")}\tZ-${createHash("md5").update(String(i)).digest("hex")}`);
+  const pay = sr.buildPayload({ lines: many, rejected: 0, sources: {}, cycleId: "c1", maxParts: 16, prefix: "immo-served-refs", now: Date.now });
+  const small = sr.splitParts(Buffer.concat(pay.parts), 20000);
+  const meta = { ...pay.meta, parts: small.length, names: small.map((_, i) => `immo-served-refs-${i}`) };
+  const cmsMany = small.map((part, i) => sr.buildConfigMap({ namespace: "ns", name: meta.names[i], part, meta: { ...meta, part: i } }));
+  eq("assembleRefs — multi-part reassembly", [small.length > 1, assembleRefs(cmsMany, { cycleId: "c1" }).rows], [true, 4000]);
+  throws("served-refs — more parts than pre-created ConfigMaps refused", () => sr.buildPayload({ lines: many, rejected: 0, sources: {}, cycleId: "c1", maxParts: 0.5, prefix: "p", now: Date.now }));
+  eq("refsFromTsv — gzip TSV → builder input", refsFromTsv(a.gz).zones, [{ citySlug: "laval", zoneCode: "A-1" }, { citySlug: "montreal", zoneCode: "C408" }, { citySlug: "sutton", zoneCode: "Z9" }]);
+  throws("refsFromTsv — malformed line refused", () => refsFromTsv(Buffer.from("a\tb\tc\n")));
+  const script = readFileSync(join(DIR, "served-refs.cjs"), "utf8");
+  ok("served-refs.cjs — embeddable (no ${UPPER} sequence)", assertScriptEmbeddable(script));
+  const { text, leftover } = render("served-refs-job.tmpl.yaml", { NAMESPACE: "radar-immobilier-preprod", IMAGE: "img", DUMP_IMAGE: "postgis/postgis:16-3.4",
+    DB_SECRET: "radar-db-credentials", PGHOST: "radar-postgres", CYCLE_ID: "c1", BACKUP_DATE: D, REFS_CONFIGMAP_PREFIX: "immo-served-refs", REFS_CONFIGMAP_COUNT: "4",
+    REFS_WRITER_SA: "radar-bascule-refs-writer", TTL_SECONDS: "3600", BR_SCRIPT: indentBlock(script, 14) });
+  ok("served-refs-job — renders, no leftover", !leftover);
+  ok("served-refs-job — read-only DB session (default_transaction_read_only=on)", /PGOPTIONS, value: "-c default_transaction_read_only=on"/.test(text));
+  if (YAML) {
+    const pod = YAML.parse(text).spec.template.spec;
+    ok("served-refs-job — pod automount off, token projected into `publish` only",
+      pod.automountServiceAccountToken === false && pod.serviceAccountName === "radar-bascule-refs-writer" &&
+      pod.containers[0].volumeMounts.some((m) => m.name === "refs-writer") && !pod.initContainers[0].volumeMounts.some((m) => m.name === "refs-writer"));
+    ok("served-refs-job — SQL reads only zone reference tables", /geo_resolutions[\s\S]*opportunity_dossiers[\s\S]*constraint_hits[\s\S]*zone_versions/.test(pod.initContainers[0].args[0]) &&
+      !/\b(INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|TRUNCATE)\b/i.test(pod.initContainers[0].args[0]));
+  }
+  const w = readFileSync(join(DIR, "..", "..", "..", ".github", "workflows", "bascule-preprod.yml"), "utf8");
+  ok("workflow — served refs step after S7, CYCLE_ID + not DRY + not list", /id: served_refs\n\s+if: \$\{\{ !inputs\.DRY_RUN && env\.MODE != 'list' && env\.CYCLE_ID != '' \}\}\n\s+run: node "\$CLI" served-refs/.test(w) &&
+    w.indexOf('node "$CLI" served-refs') > w.indexOf('node "$CLI" smoke'));
+  ok("workflow — served-ids job consumes the immo-served-refs artefact", /name: immo-served-refs-\$\{\{ inputs\.CYCLE_ID \}\}\n\s+path: \$\{\{ runner\.temp \}\}\/served-refs/.test(w) && /IMMO_SERVED_REFS_FILE: \$\{\{ runner\.temp \}\}\/served-refs\/immo-served-refs\.tsv\.gz/.test(w));
+  ok("workflow — no dependency on vars.BASCULE_IMMO_SERVED_REFS_URL", !/IMMO_SERVED_REFS_URL/.test(w));
+}
+
 // ═════════════════════════════ runner CLI end-to-end (fake kubectl) ═══════════
 // The real bascule.mjs subcommands against a fake `kubectl` (bash, temp dir):
 // Jobs succeed, pods carry the termination messages produced by the in-pod
@@ -536,6 +641,13 @@ async function cliSuite() {
   writeFileSync(join(tmp, "pods-read.json"), pods("read", JSON.stringify(resolved.t)));
   writeFileSync(join(tmp, "pods-fetch.json"), pods("fetch", JSON.stringify({ ok: true, step: "fetch-dump", date: D })));
   writeFileSync(join(tmp, "pods-docs.json"), pods("docs", JSON.stringify(docsVerdict)));
+  // what the served-refs Job would have published for this CYCLE_ID
+  const CLI_CYCLE = "iso-prod-2026-09-27-cli";
+  const refsPuts = [];
+  await sr.run({ env: { CYCLE_ID: CLI_CYCLE, POD_NAMESPACE: "radar-immobilier-preprod", KUBE_TOKEN_DIR: "/tok" },
+    readFile: (p) => ({ "/work/refs.tsv": REFS_TSV, "/work/sources.tsv": "", "/tok/token": "t", "/tok/ca.crt": "c" })[p] ?? "",
+    put: async (a) => { refsPuts.push(a); return 200; }, log: () => {} });
+  writeFileSync(join(tmp, "cm-refs-0.json"), JSON.stringify(refsPuts[0].body));
   const kubectlLog = join(tmp, "kubectl.log");
   writeFileSync(join(bin, "kubectl"), [
     "#!/usr/bin/env bash",
@@ -550,6 +662,8 @@ async function cliSuite() {
     `  *"job-name=${JOBS.resolve}"*) cat "${join(tmp, "pods-read.json")}" ;;`,
     `  *"job-name=${JOBS.db}"*) cat "${join(tmp, "pods-fetch.json")}" ;;`,
     `  *"job-name=${JOBS.docs}"*|*"job-name=${JOBS.recon}"*) cat "${join(tmp, "pods-docs.json")}" ;;`,
+    `  *"get configmap immo-served-refs-0 -o json"*) cat "${join(tmp, "cm-refs-0.json")}" ;;`,
+    '  *"get configmap immo-served-refs-"*) printf \'{"data":{}}\' ;;',
     "  *) : ;;",
     "esac",
     "exit 0",
@@ -573,7 +687,7 @@ async function cliSuite() {
   eq("CLI backup-resolve — backup-pin.json pinned", [pin.date, pin.manifestSha256 === manSha, pin.pgSha256 === sha(dump)], [D, true, true]);
   ok("CLI backup-resolve — GITHUB_OUTPUT backup_date", readFileSync(out, "utf8").includes(`backup_date=${D}\n`));
   const rr = readFileSync(join(work, `${JOBS.resolve}.rendered.yaml`), "utf8");
-  ok("CLI backup-resolve — rendered Job carries BACKUP_ID + reader Secret, no leftover", /BACKUP_ID, value: "latest"/.test(rr) && /name: radar-backup-reader, key: S3_ACCESS_KEY/.test(rr) && !/\$\{[A-Z0-9_]+\}/.test(rr));
+  ok("CLI backup-resolve — rendered Job carries BACKUP_ID + reader Secret, no leftover", /BACKUP_ID, value: "latest"/.test(rr) && /name: radar-backup-reader-preprod, key: S3_ACCESS_KEY/.test(rr) && !/\$\{[A-Z0-9_]+\}/.test(rr));
   if (YAML) ok("CLI backup-resolve — rendered Job is valid YAML", YAML.parse(rr).kind === "Job");
   const s2 = cli("restore-backup");
   eq("CLI restore-backup — exit 0 (G2 + G1 + Job)", s2.status, 0);
@@ -598,10 +712,28 @@ async function cliSuite() {
     secretFill.status === 0 && /replace --dry-run=server -f \S+ -o name/.test(klog) && /replace -f \S+ -o name/.test(klog) &&
     !klog.includes("f".repeat(40)) && !secretFill.stdout.includes("f".repeat(40)));
   const noSecret = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "docs-secret-fill"], { env, encoding: "utf8" });
-  ok("CLI docs-secret-fill — GitHub secret absent ⇒ fail-closed", noSecret.status === 1 && /missing or not/.test(noSecret.stdout));
+  ok("CLI docs-secret-fill — GitHub secret absent ⇒ fail-closed", noSecret.status === 1 && /missing or malformed/.test(noSecret.stdout));
+  const h = (c) => c.repeat(32);
+  const backupFill = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "backup-secrets-fill"], { env: { ...env,
+    RADAR_BACKUP_READER_PREPROD_ACCESS_KEY: h("a"), RADAR_BACKUP_READER_PREPROD_SECRET_KEY: h("b"), RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY: h("c"), RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY: h("d") }, encoding: "utf8" });
+  const klog2 = readFileSync(kubectlLog, "utf8");
+  ok("CLI backup-secrets-fill (restore) — reader-preprod + restore-docs replaced, values never in argv/stdout",
+    backupFill.status === 0 && /get secret radar-backup-reader-preprod/.test(klog2) && /get secret radar-backup-restore-docs/.test(klog2) &&
+    !["a", "b", "c", "d"].some((c) => klog2.includes(h(c)) || backupFill.stdout.includes(h(c))));
+  const listFill = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "backup-secrets-fill"], { env: { ...env, MODE: "list",
+    RADAR_BACKUP_READER_PREPROD_ACCESS_KEY: h("a"), RADAR_BACKUP_READER_PREPROD_SECRET_KEY: h("b") }, encoding: "utf8" });
+  ok("CLI backup-secrets-fill (list) — reader only, copy-signer secrets not required", listFill.status === 0);
+  const refs = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "served-refs"], { env: { ...env, CYCLE_ID: CLI_CYCLE }, encoding: "utf8" });
+  const got = readFileSync(join(work, "served-refs", "immo-served-refs.tsv.gz"));
+  eq("CLI served-refs — Job + ConfigMaps reassembled into the artefact file", [refs.status, refsFromTsv(got).zones.length], [0, 3]);
+  ok("CLI served-refs — rendered Job read-only + refs writer SA", /default_transaction_read_only=on/.test(readFileSync(join(work, "radar-bascule-served-refs.rendered.yaml"), "utf8")) &&
+    /serviceAccountName: radar-bascule-refs-writer/.test(readFileSync(join(work, "radar-bascule-served-refs.rendered.yaml"), "utf8")));
+  const stale = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "served-refs"], { env: { ...env, CYCLE_ID: "another-cycle" }, encoding: "utf8" });
+  ok("CLI served-refs — ConfigMaps of another cycle ⇒ fail-closed", stale.status === 1 && /another CYCLE_ID/.test(stale.stdout));
 }
 
 await suite();
+await refsSuite();
 await cliSuite();
 console.log(`\nrestore-mode.selftest — ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);
