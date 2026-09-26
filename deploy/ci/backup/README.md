@@ -317,9 +317,10 @@ Every day (any operator, no cluster write):
    `manifests/D.json` `pg.sha256`.
 4. `pg_restore --list radar.dump` lists the archive.
 
-Wave 2 (not in this PR): an automated restore-test job (restore the latest dump
-into a scratch database and compare the drizzle migrations count/last hash with
-the manifest; resolve a sample of inventory entries with the reader).
+Restore into preprod from a backup: `bascule-preprod.yml` `MODE=restore`
+(`BACKUP_ID`), backups listed with `MODE=list` — `../bascule-preprod/README.md`
+"Restore from a backup". Wave 2 (not here): an automated restore-test job into a
+scratch database.
 
 ## Knobs (CronJob env)
 

@@ -1,0 +1,150 @@
+# =============================================================================
+# db-restore-backup-job.tmpl.yaml — S2 of the bascule MODE=restore: restore the
+# preprod database FROM the daily backup pg/<D>/radar.dump (no live dump, no S1).
+#
+#   initContainer `fetch`   (radar-api image, backup-restore.cjs BR_STEP=fetch-dump,
+#                           reader identity ${READER_SECRET}): re-reads manifests/<D>.json
+#                           (sha256 must equal the PIN of the resolve Job), downloads
+#                           the dump streaming a sha256 and REFUSES unless it equals
+#                           the manifest, the .sha256 sidecar and the PIN; writes
+#                           /work/radar.dump + /work/backup.env.
+#   container     `restore` (postgis): pg_restore --list (TOC entry count == manifest,
+#                           header dbname == EXPECTED_DATABASE) then pg_restore
+#                           --clean --if-exists --single-transaction --exit-on-error.
+#                           DB creds = ${DB_SECRET} as libpq PG* (never a password URI).
+#
+# Guards G2 (quiesce) and G1 (rollback of the preprod DB) run BEFORE this Job
+# (bascule.mjs), exactly as in the chain mode. Fail-closed: backoffLimit 0,
+# restartPolicy Never, single transaction = all or nothing.
+# Runner = kubectl only (.status + termination message of `fetch`, never logs).
+#
+# Placeholders: ${NAMESPACE} ${IMAGE} ${DUMP_IMAGE} ${READER_SECRET} ${S3_ENDPOINT}
+# ${S3_REGION} ${S3_FORCE_PATH_STYLE} ${EXPECTED_BACKUP_BUCKET} ${BACKUP_DATE}
+# ${PIN_MANIFEST_SHA256} ${PIN_PG_SHA256} ${DB_SECRET} ${PGHOST} ${EXPECTED_DATABASE}
+# ${RESTORE_ASSERT_DB} ${TTL_SECONDS}, plus the BR_SCRIPT placeholder under the
+# `fetch` args (never written in a comment: it spans many lines). The $VAR of the
+# restore shell are RUNTIME variables (no braces).
+# =============================================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-db-restore-backup
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: db-restore
+    sentropic.io/bascule: restore-backup
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: ${TTL_SECONDS}
+  activeDeadlineSeconds: 3600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: db-restore
+        sentropic.io/bascule: restore-backup
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: work
+          emptyDir: { sizeLimit: 4Gi }
+        - name: tmp
+          emptyDir: { sizeLimit: 128Mi }
+      initContainers:
+        - name: fetch
+          image: ${IMAGE}
+          imagePullPolicy: IfNotPresent
+          workingDir: /workspace/api
+          command: ["node", "-e"]
+          args:
+            - |
+${BR_SCRIPT}
+          env:
+            - { name: BR_STEP, value: "fetch-dump" }
+            - { name: NODE_PATH, value: "/workspace/node_modules" }
+            - { name: AWS_EC2_METADATA_DISABLED, value: "true" }
+            - { name: WORK_DIR, value: "/work" }
+            - { name: S3_ENDPOINT, value: "${S3_ENDPOINT}" }
+            - { name: S3_REGION, value: "${S3_REGION}" }
+            - { name: S3_FORCE_PATH_STYLE, value: "${S3_FORCE_PATH_STYLE}" }
+            - { name: EXPECTED_BACKUP_BUCKET, value: "${EXPECTED_BACKUP_BUCKET}" }
+            - { name: BACKUP_DATE, value: "${BACKUP_DATE}" }
+            - { name: PIN_MANIFEST_SHA256, value: "${PIN_MANIFEST_SHA256}" }
+            - { name: PIN_PG_SHA256, value: "${PIN_PG_SHA256}" }
+            - { name: READER_ACCESS_KEY, valueFrom: { secretKeyRef: { name: ${READER_SECRET}, key: S3_ACCESS_KEY } } }
+            - { name: READER_SECRET_KEY, valueFrom: { secretKeyRef: { name: ${READER_SECRET}, key: S3_SECRET_KEY } } }
+            - { name: BACKUP_BUCKET, valueFrom: { secretKeyRef: { name: ${READER_SECRET}, key: BACKUP_BUCKET } } }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+          volumeMounts:
+            - { name: work, mountPath: /work }
+            - { name: tmp, mountPath: /tmp }
+      containers:
+        - name: restore
+          image: ${DUMP_IMAGE}
+          imagePullPolicy: IfNotPresent
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              # shellcheck disable=SC1091
+              . /work/backup.env
+              echo "[restore] backup date=$BACKUP_DATE sha256=$PG_SHA256 (verified by fetch)"
+              pg_restore --list /work/radar.dump > /tmp/toc.txt
+              toc="$(grep -c '^[0-9]' /tmp/toc.txt || true)"
+              if [ -n "$EXPECTED_TOC_ENTRIES" ] && [ "$toc" != "$EXPECTED_TOC_ENTRIES" ]; then
+                echo "[restore] ERROR — TOC entries $toc != manifest $EXPECTED_TOC_ENTRIES (restore refused)"; exit 1
+              fi
+              src_db="$(awk -F': ' '/^;[[:space:]]+dbname:/ {print $2; exit}' /tmp/toc.txt | tr -d '[:space:]')"
+              echo "[restore] toc_entries=$toc archive dbname='${src_db:-<none>}' expected='$EXPECTED_DATABASE'"
+              if [ "$RESTORE_ASSERT_DB" = "1" ]; then
+                if [ -z "$src_db" ] || [ "$src_db" != "$EXPECTED_DATABASE" ]; then
+                  echo "[restore] ERROR — archive dbname != EXPECTED_DATABASE (restore refused)"; exit 1
+                fi
+              else
+                echo "[restore] dbname check DISABLED (RESTORE_ASSERT_DB=0)"
+              fi
+              echo "[restore] pg_restore --clean --if-exists --single-transaction -> db=$PGDATABASE host=$PGHOST"
+              pg_restore --clean --if-exists --no-owner --no-privileges \
+                --exit-on-error --single-transaction \
+                --dbname "$PGDATABASE" /work/radar.dump
+              echo "[restore] ok — backup $BACKUP_DATE loaded into preprod"
+          env:
+            - { name: PGHOST, value: "${PGHOST}" }
+            - { name: EXPECTED_DATABASE, value: "${EXPECTED_DATABASE}" }
+            - { name: RESTORE_ASSERT_DB, value: "${RESTORE_ASSERT_DB}" }
+            - { name: PGUSER, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_USER } } }
+            - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_PASSWORD } } }
+            - { name: PGDATABASE, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_DB } } }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { cpu: "1", memory: 1Gi }
+          volumeMounts:
+            - { name: work, mountPath: /work }
+            - { name: tmp, mountPath: /tmp }
