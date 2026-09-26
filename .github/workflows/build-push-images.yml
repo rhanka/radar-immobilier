@@ -742,7 +742,7 @@ jobs:
             echo "kind: Kustomization"
             echo "resources: [job.yaml]"
             echo "namespace: ${NAMESPACE}"
-            echo "nameSuffix: -${SHA}"
+            echo "nameSuffix: \"-${SHA}\""  # quoted: an all-digit sha7 (e.g. 85055419) would parse as a negative integer
             echo "images:"
             echo "  - name: ghcr.io/rhanka/radar-api"
             echo "    newName: ${IMAGE_PREFIX}/radar-api"
@@ -1335,7 +1335,7 @@ jobs:
             echo "kind: Kustomization"
             echo "resources: [job.yaml]"
             echo "namespace: ${NAMESPACE}"
-            echo "nameSuffix: -${SHA}"
+            echo "nameSuffix: \"-${SHA}\""  # quoted: an all-digit sha7 (e.g. 85055419) would parse as a negative integer
             echo "images:"
             echo "  - name: ghcr.io/rhanka/radar-api"
             echo "    newName: ${IMAGE_PREFIX}/radar-api"
