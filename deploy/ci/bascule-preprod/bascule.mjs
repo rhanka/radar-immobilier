@@ -1097,6 +1097,11 @@ function cmdRefresh() {
   // Rester <= 1000m (quota preprod-cap limits.cpu=3, ~950m déjà consommés hors Jobs).
   const cpuLimit = opt("REFRESH_CPU_LIMIT", "150m");
   const memLimit = opt("REFRESH_MEM_LIMIT", "1Gi");
+  // REQUEST mémoire alignée sur l'usage réel (~1Gi) et NON sur 96Mi : avec la
+  // concurrence, le pod consomme ~la LIMIT ; une request trop basse (usage >> request)
+  // en ferait le 1er candidat à l'éviction sous pression mémoire du nœud (reco k8s).
+  // 512Mi tient dans le quota requests preprod-cap. La request CPU, elle, reste 50m.
+  const memRequest = opt("REFRESH_MEM_REQUEST", "512Mi");
 
   // ── (b) TIMEOUT ALIGNÉ ────────────────────────────────────────────────────
   // Le poll runner (REFRESH_TIMEOUT) DOIT >= activeDeadlineSeconds du Job, sinon
@@ -1131,7 +1136,8 @@ function cmdRefresh() {
   }
   log(
     `S6 périmètre = ${refreshArgs.label} ; concurrence=${concurrency} ; heap=${heapMb}MB ; ` +
-      `limits cpu=${cpuLimit}/mem=${memLimit} ; Job activeDeadline=${activeDeadline}s ; poll runner=${refreshTimeout}s.`,
+      `requests cpu=50m/mem=${memRequest} ; limits cpu=${cpuLimit}/mem=${memLimit} ; ` +
+      `Job activeDeadline=${activeDeadline}s ; poll runner=${refreshTimeout}s.`,
   );
 
   const image = resolvePreprodImage(ns);
@@ -1155,6 +1161,7 @@ function cmdRefresh() {
       REFRESH_HEAP_MB: heapMb,
       REFRESH_ACTIVE_DEADLINE: String(activeDeadline),
       REFRESH_CPU_LIMIT: cpuLimit,
+      REFRESH_MEM_REQUEST: memRequest,
       REFRESH_MEM_LIMIT: memLimit,
     },
     timeoutSec: refreshTimeout,
