@@ -10,7 +10,7 @@
 # WRITES the core Secrets radar-backup-writer/-reader/-purger from the GitHub Environment radar-backup-prod (NO
 # SealedSecret for them), and applies the ConfigMap radar-backup-daily-script and the CronJobs radar-backup-daily +
 # radar-backup-freshness → those 6 names are in the name-scoped verbs below. The 3 Secrets are PRE-CREATED by the
-# k8s lane: secrets = get/patch/update on these 3 names ONLY — 0 secrets:create/list/watch/delete.
+# k8s lane: secrets = get/update on these 3 names ONLY — 0 secrets:create/patch/list/watch/delete.
 # RE-APPLY this file (install-time, cluster-admin) BEFORE the CD writes them.
 ---
 apiVersion: v1
@@ -60,11 +60,11 @@ rules:
     verbs: ["get", "patch", "update"]
     resourceNames: ["radar-db-ro-prod", "radar-pra-admin-prod"]
   # core secrets : ONLY the 3 daily prod backup identities (deploy/ci/backup/, job apply-backup), written from the
-  # GitHub Environment radar-backup-prod by `kubectl replace` (get + update). Pre-created by the k8s lane.
-  # NO create (a missing Secret stays missing), NO list/watch, NO delete.
+  # GitHub Environment radar-backup-prod by `kubectl replace` (GET + PUT = get + update; a server-side dry-run first). Pre-created by the k8s lane.
+  # NO create (a missing Secret stays missing), NO patch (never used), NO list/watch, NO delete.
   - apiGroups: [""]
     resources: ["secrets"]
-    verbs: ["get", "patch", "update"]
+    verbs: ["get", "update"]
     resourceNames: ["radar-backup-writer", "radar-backup-reader", "radar-backup-purger"]
   # configmaps (SQL du rôle RO + script du backup quotidien radar-backup-daily-script) :
   - apiGroups: [""]
@@ -125,8 +125,8 @@ metadata:
 roleRef: { apiGroup: rbac.authorization.k8s.io, kind: Role, name: radar-ci-bascule-prod }
 subjects: [ { kind: ServiceAccount, name: radar-ci-bascule-prod, namespace: radar-immobilier } ]
 ---
-# EXCLUS : core secrets (tous verbes, sauf get/patch/update sur les 3 identités backup radar-backup-*),
-#   secrets:create/list/watch/delete, pods/exec, deployments:patch/scale, PV/PVC,
+# EXCLUS : core secrets (tous verbes, sauf get/update sur les 3 identités backup radar-backup-*),
+#   secrets:create/patch/list/watch/delete, pods/exec, deployments:patch/scale, PV/PVC,
 #   namespaces, nodes, autres ns, impersonate users/groups.
 # INSTALL : appliqué UNE fois (cluster-admin/install). Token permanent → KUBE_CONFIG_DATA_PROD (secret CD standard).
 #   Réversible : delete SA/Role/RB/ClusterRole/CRB.
