@@ -39,6 +39,11 @@ jobs:
       - name: Validate daily prod backup logic (offline selftest)
         run: node deploy/ci/backup/backup-daily.selftest.mjs
 
+      - name: Validate bascule preprod logic — chain + restore-from-backup (offline selftests)
+        run: |
+          node deploy/ci/bascule-preprod/bascule.selftest.mjs
+          node deploy/ci/bascule-preprod/restore-mode.selftest.mjs
+
       - name: Install workspace deps
         run: make install ENV=ci
 

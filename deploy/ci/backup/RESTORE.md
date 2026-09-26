@@ -1,5 +1,12 @@
 # Restore a backup of date D
 
+**Into preprod, automated:** `.github/workflows/bascule-preprod.yml` with
+`MODE=restore` (`BACKUP_ID=latest` or a date) does §0–§2 below in-cluster (reader
+identity, dump sha256 verified before `pg_restore`, docs state at D from the
+inventory by server-side copy, recon), then migrate, flip and smoke; `MODE=list`
+lists the available backups. See `../bascule-preprod/README.md` "Restore from a
+backup". The manual procedure below stays the reference for any other target.
+
 All reads use the **reader** identity `radar-backup-reader` (keys `S3_ENDPOINT`,
 `S3_REGION`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `BACKUP_BUCKET`): GetObject (also
 with a version id), ListBucket, ListBucketVersions. It cannot write or delete.

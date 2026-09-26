@@ -22,7 +22,24 @@
 # S5 (flip) ISOLABLE via SKIP_FLIP : si la CI n'a pas encore le RBAC kubectl
 # préprod pour muter l'env, mettre SKIP_FLIP=true — le flip est alors le seul pas
 # porté hors-CI (owner / enabler k8s). Idem SKIP_REFRESH pour S6.
+#
+# MODE (input, default `chain`; a scheduled run is always `chain`):
+#   chain   the sequence above (LIVE dump S1 → restore → …), unchanged.
+#   restore restore preprod FROM a daily backup of radar-immobilier-backup
+#           (BACKUP_ID = latest | YYYY-MM-DD): S0 → R0 resolve (read-only guards,
+#           before quiesce) → QUIESCE → S2 restore pg/<D>/radar.dump (G2 + G1, no S1)
+#           → S2c migrate → S3' docs state at D (docs-inventory/<D>.json, server-side
+#           copy) → S3b' recon vs inventory → S5 flip → UN-QUIESCE → S7 smoke. No
+#           refresh. `latest` older than 24 h is refused unless ALLOW_STALE_BACKUP;
+#           an explicit date is never blocked by its age. Same runner contract
+#           (kubectl only). Logic: deploy/ci/bascule-preprod/restore-mode.mjs.
+#   list    read-only: backups available (date, status, size, schema, sha).
+# CYCLE_ID (optional, set by the e2e orchestrator bascule-e2e.yml): publishes
+#   cycle-leg-immo-<CYCLE_ID> (+ immo-served-canonical-ids-<CYCLE_ID>), or
+#   backup-list-immo-<CYCLE_ID> in MODE=list.
 name: bascule-preprod (iso-prod)
+# The e2e orchestrator correlates its dispatch with MODE + CYCLE_ID in the run name.
+run-name: "bascule-preprod ${{ inputs.MODE || 'chain' }} ${{ inputs.CYCLE_ID }}"
 
 on:
   # CD-native-v2 : la bascule est AUTOMATISÉE par une planification HEBDOMADAIRE
@@ -85,6 +102,27 @@ on:
         required: false
         type: string
         default: ""
+      MODE:
+        description: "chain = live dump (default) · restore = FROM a daily backup (BACKUP_ID) · list = backups available (read-only)"
+        required: false
+        type: choice
+        options: [chain, restore, list]
+        default: chain
+      BACKUP_ID:
+        description: "MODE=restore — 'latest' (latest complete backup, refused if older than 24 h) or a date YYYY-MM-DD (age not blocking)"
+        required: false
+        type: string
+        default: latest
+      ALLOW_STALE_BACKUP:
+        description: "MODE=restore — true = accept a 'latest' backup older than 24 h"
+        required: false
+        type: boolean
+        default: false
+      CYCLE_ID:
+        description: "e2e immo+geo cycle id (set by bascule-e2e.yml, ^[A-Za-z0-9._-]{1,100}$); empty = standalone bascule"
+        required: false
+        type: string
+        default: ""
 
 # Jamais deux bascules en parallèle (write préprod).
 concurrency:
@@ -104,15 +142,52 @@ jobs:
     # basculer tout seul dès la fusion.
     if: ${{ github.event_name != 'schedule' || vars.BASCULE_SCHEDULE_ENABLED == 'true' }}
     runs-on: ubuntu-latest
+    # Environment `radar-bascule` (main-only, created by k8s): holds the GitHub
+    # secrets RADAR_DOCS_SYNC_ACCESS_KEY / RADAR_DOCS_SYNC_SECRET_KEY that the
+    # bascule rewrites into the pre-created Secret radar-docs-src-preprod at every
+    # run, right before S3 (docs-secret-fill).
+    environment: radar-bascule
     # Plafond GitHub = 3ᵉ contrainte au-dessus du couple (poll runner S6 / activeDeadline
     # du Job). Le poll runner S6 est aligné sur l'activeDeadline du Job (défaut 7200s +
     # tampon), donc le budget du job GitHub doit couvrir S0→S5 + la fenêtre S6 + S7 :
     # relevé à 180 min pour que le runner puisse observer le verdict terminal du Job S6
     # sans être coupé par GitHub. Chemin heureux (concurrence) : total ~1 h 45.
     timeout-minutes: 180
+    # Consumed by the served-ids / cycle-leg jobs (e2e contract, CYCLE_ID set).
+    # Values are validated by restore-mode.mjs before being written.
+    outputs:
+      backup_id: ${{ steps.resolve.outputs.backup_id }}
+      backup_date: ${{ steps.resolve.outputs.backup_date }}
+      manifest_sha256: ${{ steps.resolve.outputs.manifest_sha256 }}
+      pg_sha256: ${{ steps.resolve.outputs.pg_sha256 }}
+      dump_started_at: ${{ steps.resolve.outputs.dump_started_at }}
+      o_dump: ${{ steps.dump.outcome }}
+      o_restore_chain: ${{ steps.restore_chain.outcome }}
+      o_restore_backup: ${{ steps.restore_backup.outcome }}
+      o_migrate: ${{ steps.migrate.outcome }}
+      o_docs_chain: ${{ steps.docs_chain.outcome }}
+      o_recon_chain: ${{ steps.recon_chain.outcome }}
+      o_docs_backup: ${{ steps.docs_backup.outcome }}
+      o_recon_backup: ${{ steps.recon_backup.outcome }}
+      o_smoke: ${{ steps.smoke.outcome }}
     env:
       # ── GO owner + anti-rejeu (CONFIRM_EXPECTED calculé au pas 'compute') ──
       CONFIRM: ${{ inputs.CONFIRM }}
+      # ── MODE (chain | restore | list) + restore-from-backup parameters ────
+      # A scheduled run has no inputs → chain. Every value is re-validated in
+      # Node before use (never interpolated into a shell).
+      MODE: ${{ inputs.MODE || 'chain' }}
+      BACKUP_ID: ${{ inputs.BACKUP_ID || 'latest' }}
+      ALLOW_STALE_BACKUP: ${{ inputs.ALLOW_STALE_BACKUP && 'true' || 'false' }}
+      CYCLE_ID: ${{ inputs.CYCLE_ID }}
+      # Daily backup bucket + in-cluster identities (NAMES only, no credential):
+      # reader Secret radar-backup-reader in the preprod namespace (created by the
+      # CD from GitHub Secrets — see deploy/ci/bascule-preprod/README.md
+      # "Restore from a backup"); docs copy signer defaults to the reader.
+      BACKUP_BUCKET: ${{ vars.BASCULE_BACKUP_BUCKET || 'radar-immobilier-backup' }}
+      BACKUP_READER_SECRET: ${{ vars.BASCULE_BACKUP_READER_SECRET || 'radar-backup-reader' }}
+      BACKUP_DOCS_COPY_SECRET: ${{ vars.BASCULE_BACKUP_DOCS_COPY_SECRET || vars.BASCULE_BACKUP_READER_SECRET || 'radar-backup-reader' }}
+      BACKUP_MAX_AGE_HOURS: ${{ vars.BASCULE_BACKUP_MAX_AGE_HOURS || '24' }}
       # ── RUNNER KUBECTL-ONLY (0 cred S3, 0 cred DB) ────────────────────────
       # Le runner ne se connecte à AUCUNE DB ET NE TOUCHE PLUS S3 : plus de
       # BASCULE_PROD_PG*/BASCULE_PREPROD_PG* NI de BASCULE_S3_LIST_AWS_*/AWS_*
@@ -132,8 +207,8 @@ jobs:
       DUMP_CRONJOB: ${{ vars.BASCULE_DUMP_CRONJOB || 'radar-db-backup-prod' }}
       DUMP_CRONJOB_NAMESPACE: ${{ vars.BASCULE_DUMP_CRONJOB_NAMESPACE || 'radar-immobilier' }}
       # ── Docs-sync Option A (NON secrets : nom de secret éphémère + grantee id) ──
-      # Le secret ÉPHÉMÈRE radar-docs-src-preprod (creds immo-docs-prod) est créé
-      # par k8s au GO (ownerRef=Job docs-sync, GC cascade au TTL) — jamais ici.
+      # Secret radar-docs-src-preprod (creds immo-docs-prod): PRE-CREATED by k8s,
+      # rewritten by this job before S3 at every run (see environment above).
       # DOCS_SYNC_GRANTEE = canonical id radar-docs préprod (GrantFullControl).
       DOCS_SYNC_READ_SECRET: ${{ vars.BASCULE_DOCS_SYNC_READ_SECRET || 'radar-docs-src-preprod' }}
       DOCS_SYNC_GRANTEE: ${{ vars.BASCULE_DOCS_SYNC_GRANTEE || '1901410700457444:user-Wq74B63YQum8' }}
@@ -168,6 +243,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+
+      # e2e contract: a malformed CYCLE_ID fails BEFORE any kubectl action.
+      - name: e2e — validate CYCLE_ID
+        if: ${{ env.CYCLE_ID != '' }}
+        run: node deploy/ci/bascule-preprod/served-ids.mjs validate-cycle-id
 
       # RUNNER KUBECTL-ONLY : plus AUCUN outil de données/S3 sur le runner (0
       # postgresql-client, 0 s5cmd, 0 aws). Le runner ne fait que kubectl (pilotage
@@ -220,8 +300,9 @@ jobs:
       # d'où KUBE_CONFIG_DATA_PROD_TRIGGER pour le déclencheur name-scopé.
       # Joué HORS DRY (pas de token prod avant l'apply ; le DRY ne trigger pas ;
       # un run PLANIFIÉ n'est pas DRY → le déclencheur joue).
+      # MODE=restore|list: no S1 → no PROD kubeconfig at all.
       - name: Configure kubeconfig PROD (déclencheur dump S1)
-        if: ${{ !inputs.DRY_RUN }}
+        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.kube"
@@ -233,7 +314,7 @@ jobs:
       # aucun appel API : le token est name-scopé patch-only). Refuse si le
       # kubeconfig prod ne cible pas le cluster attendu.
       - name: Pre-flight — assert PROD cluster (kubeconfig dump)
-        if: ${{ !inputs.DRY_RUN }}
+        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
         env:
           EXPECTED_KUBE_APISERVER_HOST_PROD: ${{ vars.EXPECTED_KUBE_APISERVER_HOST_PROD || vars.EXPECTED_KUBE_APISERVER_HOST }}
         run: |
@@ -252,7 +333,36 @@ jobs:
 
       # ── S0 ────────────────────────────────────────────────────────────────
       - name: S0 preflight (binaires + secrets + EXPECTED_DATABASE)
+        if: ${{ env.MODE == 'chain' }}
         run: node "$CLI" preflight
+
+      - name: S0 preflight (MODE=restore|list — backup bucket + identities)
+        if: ${{ env.MODE != 'chain' }}
+        run: node "$CLI" preflight-backup
+
+      # ══════════════ MODE=list : read-only, nothing else runs ══════════════
+      - name: backup-list (Job read-only — backups available)
+        if: ${{ env.MODE == 'list' }}
+        run: node "$CLI" backup-list
+
+      - name: backup-list artefact (backup-list-immo-<CYCLE_ID|run_id>)
+        if: ${{ env.MODE == 'list' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: backup-list-immo-${{ inputs.CYCLE_ID || github.run_id }}
+          path: ${{ github.workspace }}/.bascule-work/backup-list.json
+          if-no-files-found: error
+          retention-days: 7
+
+      # ══════════════ MODE=restore : R0 resolve BEFORE any mutation ══════════════
+      # Read-only Job: BACKUP_ID → date D, manifest status 'complete', 24 h guard
+      # for `latest` (ALLOW_STALE_BACKUP), dump sidecar sha256 + sizes → PIN
+      # (backup-pin.json) re-checked by every later Job. A refusal stops here:
+      # preprod is never quiesced for a backup that cannot be restored.
+      - name: R0 backup-resolve (Job read-only — BACKUP_ID → date + guards + PIN)
+        id: resolve
+        if: ${{ env.MODE == 'restore' }}
+        run: node "$CLI" backup-resolve
 
       # ── S0.b (advisory) — prédiction précoce de la mémoire de collecte ─────
       # Job PRÉPROD (read-only) qui liste `runs/` de PROD_DOCS : prédit si la copie
@@ -260,6 +370,7 @@ jobs:
       # rend le Job non bloquant (le runner ne lit que .status). Le vrai gate est
       # plus bas (PREPROD_DOCS).
       - name: S0.b precheck-runs (advisory, Job cible PROD_DOCS)
+        if: ${{ env.MODE == 'chain' }}
         continue-on-error: true
         run: node "$CLI" precheck-runs --prod
 
@@ -267,50 +378,94 @@ jobs:
       # 0 S3 runner : la copie réelle n'est PAS jouée en DRY (dispatchée en
       # exécution). Le signal DRY = Job recon informatif (dest ⊇ src, verdict).
       - name: S3 copy-docs (DRY — copie non jouée)
-        if: ${{ inputs.DRY_RUN }}
+        if: ${{ inputs.DRY_RUN && env.MODE == 'chain' }}
         env:
           DRY: "1"
         run: node "$CLI" copy-docs
 
       - name: S3b recon (Job informatif en DRY)
-        if: ${{ inputs.DRY_RUN }}
+        if: ${{ inputs.DRY_RUN && env.MODE == 'chain' }}
         continue-on-error: true
         run: node "$CLI" recon
+
+      # MODE=restore DRY: full read-only plan of the docs state at D (every
+      # inventory object restorable from the backup?), 0 copy.
+      - name: S3' docs-restore (DRY — plan only, 0 copy)
+        if: ${{ inputs.DRY_RUN && env.MODE == 'restore' }}
+        env:
+          DRY: "1"
+        run: node "$CLI" docs-restore
 
       # ══════════════ EXÉCUTION : séquence complète fail-closed ══════════════
       # QUIESCE — enregistre les replicas d'origine puis scale 0 + suspend, et
       # attend le drain, pour que la GARDE G2 de S2 passe. (Owner peut le faire à
       # la main via SKIP_QUIESCE ; l'UN-QUIESCE plus bas reste automatisé.)
       - name: QUIESCE consommateurs préprod (avant S2)
-        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_QUIESCE }}
+        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_QUIESCE && env.MODE != 'list' }}
         run: node "$CLI" quiesce
 
       - name: S1 dump prod (DÉCLENCHEUR T1 — patch CronJob + Job freshness)
-        if: ${{ !inputs.DRY_RUN }}
+        id: dump
+        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
         run: node "$CLI" dump
 
       - name: S2 restore préprod (G2 quiesce + G1 Job rollback + Jobs restore)
-        if: ${{ !inputs.DRY_RUN }}
+        id: restore_chain
+        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
         run: node "$CLI" restore
 
+      - name: S2 restore préprod FROM backup (G2 + G1 + Job pg/<D>/radar.dump, sha256 verified)
+        id: restore_backup
+        if: ${{ !inputs.DRY_RUN && env.MODE == 'restore' }}
+        run: node "$CLI" restore-backup
+
       - name: S2c migrate préprod (iso-prod, Job in-cluster)
-        if: ${{ !inputs.DRY_RUN }}
+        id: migrate
+        if: ${{ !inputs.DRY_RUN && env.MODE != 'list' }}
         run: node "$CLI" migrate
 
-      # docs-sync = Job radar-api (aws-sdk CopyObject + grant). Le secret éphémère
-      # radar-docs-src-preprod est créé par k8s (ownerRef=Job.UID) et GC en cascade
-      # au TTL du Job — la CI ne fait AUCUNE opération secret (0 droit secrets).
+      # docs-sync Secret REWRITTEN BY THE BASCULE at every run (no k8s watcher):
+      # values from the environment secrets (guard ^[0-9a-f]{32,64}$, fail-closed)
+      # → `kubectl replace` of the pre-created Secret (--dry-run=server first; 0600
+      # file in a 0700 temp dir; never argv/log). Durable least-privilege
+      # credential: not blanked afterwards. MODE=restore only when the docs copy
+      # signer is this same Secret (BACKUP_DOCS_COPY_SECRET).
+      - name: S3.0 docs-sync Secret — rewrite from GitHub (environment radar-bascule)
+        id: docs_secret_fill
+        if: ${{ !inputs.DRY_RUN && (env.MODE == 'chain' || (env.MODE == 'restore' && env.BACKUP_DOCS_COPY_SECRET == env.DOCS_SYNC_READ_SECRET)) }}
+        env:
+          RADAR_DOCS_SYNC_ACCESS_KEY: ${{ secrets.RADAR_DOCS_SYNC_ACCESS_KEY }}
+          RADAR_DOCS_SYNC_SECRET_KEY: ${{ secrets.RADAR_DOCS_SYNC_SECRET_KEY }}
+        run: node "$CLI" docs-secret-fill
+
+      # docs-sync = Job radar-api (aws-sdk CopyObject + grant), reads the Secret
+      # rewritten just above.
       - name: S3 copy-docs (Job radar-api aws-sdk CopyObject + grant, additif)
-        if: ${{ !inputs.DRY_RUN }}
+        id: docs_chain
+        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
         run: node "$CLI" copy-docs
 
       - name: S3b recon (Job list-objects-v2 diff Key+Size — dest ⊇ src, fatal)
-        if: ${{ !inputs.DRY_RUN }}
+        id: recon_chain
+        if: ${{ !inputs.DRY_RUN && env.MODE == 'chain' }}
         run: node "$CLI" recon
+
+      # MODE=restore: docs state at D from docs-inventory/<D>.json, server-side
+      # CopyObject from the backup bucket (versioned), additive; then recon
+      # preprod ⊇ inventory(D). G4 (flip) re-runs this recon.
+      - name: S3' docs-restore FROM backup (Job server-side CopyObject, state at D, additive)
+        id: docs_backup
+        if: ${{ !inputs.DRY_RUN && env.MODE == 'restore' }}
+        run: node "$CLI" docs-restore
+
+      - name: S3b' recon-backup (Job — preprod docs ⊇ docs-inventory(D), Key+Size, fatal)
+        id: recon_backup
+        if: ${{ !inputs.DRY_RUN && env.MODE == 'restore' }}
+        run: node "$CLI" recon-backup
 
       # S5 ISOLABLE : dépend du kubectl préprod (RBAC enabler k8s).
       - name: S5 flip serving (retrait GEO_DOCUMENTS_REPOINT — G4 recon)
-        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_FLIP }}
+        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_FLIP && env.MODE != 'list' }}
         run: node "$CLI" flip
 
       # UN-QUIESCE — rétablit préprod (scale-back aux replicas enregistrés +
@@ -318,7 +473,7 @@ jobs:
       # même si une étape précédente a échoué, pour ne JAMAIS laisser préprod à
       # terre (0 pod → /health KO). No-op sûr si aucun quiesce n'a eu lieu.
       - name: UN-QUIESCE consommateurs préprod (reprise — après S5, avant S7)
-        if: ${{ always() && !inputs.DRY_RUN }}
+        if: ${{ always() && !inputs.DRY_RUN && env.MODE != 'list' }}
         run: node "$CLI" unquiesce
 
       # Pré-check runs/ (mémoire de collecte) — Job PRÉPROD verdict-only, APRÈS
@@ -326,12 +481,13 @@ jobs:
       # = bucket réellement LU par le delta : `runs/` VIDE → Job exit 1 (rescrape
       # complet imminent). Non joué en DRY (la copie S3 réelle n'a pas eu lieu →
       # faux négatif) ; S6 re-vérifie en interne (ASSERT_RUNS_MEMORY, défense en profondeur).
+      # MODE=restore never refreshes (a restore is a restore).
       - name: precheck-runs (gate mémoire de collecte — Job PREPROD_DOCS, avant S6)
-        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_REFRESH }}
+        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_REFRESH && env.MODE == 'chain' }}
         run: node "$CLI" precheck-runs
 
       - name: S6 refresh différentiel (worker-live delta, Job in-cluster)
-        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_REFRESH }}
+        if: ${{ !inputs.DRY_RUN && !inputs.SKIP_REFRESH && env.MODE == 'chain' }}
         # Fix S6 : (a) concurrence worker-live (masque la latence des sources
         # lentes), (b) poll runner aligné sur l'activeDeadline du Job (bascule.mjs),
         # (d) bornage optionnel (repli démo). Vides ⇒ delta COMPLET des 530 villes
@@ -345,6 +501,8 @@ jobs:
 
       # ── S7 : smoke (read-only ; joué aussi en DRY) ─────────────────────────
       - name: S7 smoke préprod/health (db.ok + objectStore.ok)
+        id: smoke
+        if: ${{ env.MODE != 'list' }}
         run: node "$CLI" smoke
 
       # ── Rollback DURABLE : les DUMPS ne transitent plus par le runner ──────
@@ -354,8 +512,9 @@ jobs:
       # POINTEURS/états (clés S3 + T1 + quiesce/recon), en `if: always()` pour la
       # traçabilité même sur échec. Restaurer le rollback : rejouer le Job restore
       # avec DUMP_KEY = contenu de LATEST_PREPROD_ROLLBACK_KEY.txt (voir README).
+      # MODE=restore adds backup-pin.json (backup date + manifest/dump sha256).
       - name: Rollback pointeurs + états (clés S3, PAS de dump runner)
-        if: ${{ always() && !inputs.DRY_RUN }}
+        if: ${{ always() && !inputs.DRY_RUN && env.MODE != 'list' }}
         uses: actions/upload-artifact@v4
         with:
           name: bascule-rollback-${{ github.run_id }}
@@ -365,6 +524,7 @@ jobs:
             ${{ github.workspace }}/.bascule-work/LATEST_PREPROD_ROLLBACK_KEY.txt
             ${{ github.workspace }}/.bascule-work/quiesce-state.json
             ${{ github.workspace }}/.bascule-work/recon.ok.json
+            ${{ github.workspace }}/.bascule-work/backup-pin.json
           if-no-files-found: warn
           retention-days: 7
 
@@ -386,7 +546,8 @@ jobs:
     # l'ordre câblé bascule→refresh est automatique au run planifié), ET si la bascule a
     # réussi (jamais en DRY : rien n'a été restauré). `create job --from=cronjob`
     # n'est pas destructif pour la prod.
-    if: ${{ (inputs.FORCE_REFRESH || github.event_name == 'schedule') && !inputs.DRY_RUN && needs.bascule.result == 'success' }}
+    # MODE=restore|list never refreshes (a restore is a restore).
+    if: ${{ (inputs.FORCE_REFRESH || github.event_name == 'schedule') && !inputs.DRY_RUN && (inputs.MODE || 'chain') == 'chain' && needs.bascule.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 420
     permissions:
@@ -434,3 +595,109 @@ jobs:
 
       - name: Force preprod refresh (precipitate radar-refresh-pv, après la bascule)
         run: node "$CLI" force-refresh
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # e2e CONTRACT (CYCLE_ID set by bascule-e2e.yml) — two jobs WITHOUT any cluster
+  # credential (the kubeconfigs stay in `bascule`):
+  #   served-ids  immo-served-canonical-ids-<CYCLE_ID>: zone ids immo references,
+  #               computed with the PUBLISHED builder @sentropic/geo (same pin as
+  #               the geo leg, installed outside the workspace). PENDING O1: the
+  #               RAW refs endpoint (vars.BASCULE_IMMO_SERVED_REFS_URL) is not
+  #               delivered yet → this job fails closed until then.
+  #   cycle-leg   cycle-leg-immo-<CYCLE_ID>: `legs.immo` (run, sha, MODE, backup
+  #               date + sha256, verdict pg/s3). Reports only, always runs.
+  # A standalone or scheduled bascule (CYCLE_ID empty) never runs them.
+  # ═══════════════════════════════════════════════════════════════════════════
+  served-ids:
+    needs: bascule
+    if: ${{ inputs.CYCLE_ID != '' && !inputs.DRY_RUN && (inputs.MODE || 'chain') != 'list' && needs.bascule.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    env:
+      CYCLE_ID: ${{ inputs.CYCLE_ID }}
+      IMMO_SERVED_REFS_URL: ${{ vars.BASCULE_IMMO_SERVED_REFS_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: e2e — validate CYCLE_ID
+        run: node deploy/ci/bascule-preprod/served-ids.mjs validate-cycle-id
+
+      - name: e2e — install the published builder @sentropic/geo (temp dir, pinned version)
+        run: |
+          set -euo pipefail
+          version="$(node deploy/ci/bascule-preprod/served-ids.mjs builder-version)"
+          npm install --prefix "$RUNNER_TEMP/served-ids-builder" --no-save --no-audit --no-fund --ignore-scripts "@sentropic/geo@${version}"
+
+      - name: e2e — served canonical ids (zones) referenced by immo
+        run: node deploy/ci/bascule-preprod/served-ids.mjs build --builder-dir "$RUNNER_TEMP/served-ids-builder" --out "$RUNNER_TEMP/served-ids"
+
+      - name: e2e — artefact immo-served-canonical-ids-<CYCLE_ID>
+        uses: actions/upload-artifact@v4
+        with:
+          name: immo-served-canonical-ids-${{ inputs.CYCLE_ID }}
+          path: ${{ runner.temp }}/served-ids/
+          if-no-files-found: error
+          retention-days: 7
+          overwrite: true
+
+  cycle-leg:
+    needs: [bascule, served-ids]
+    if: ${{ always() && inputs.CYCLE_ID != '' && (inputs.MODE || 'chain') != 'list' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      CYCLE_ID: ${{ inputs.CYCLE_ID }}
+      MODE: ${{ inputs.MODE || 'chain' }}
+      BACKUP_ID: ${{ needs.bascule.outputs.backup_id }}
+      BACKUP_DATE: ${{ needs.bascule.outputs.backup_date }}
+      MANIFEST_SHA256: ${{ needs.bascule.outputs.manifest_sha256 }}
+      PG_SHA256: ${{ needs.bascule.outputs.pg_sha256 }}
+      DUMP_STARTED_AT: ${{ needs.bascule.outputs.dump_started_at }}
+      O_DUMP: ${{ needs.bascule.outputs.o_dump }}
+      O_RESTORE_CHAIN: ${{ needs.bascule.outputs.o_restore_chain }}
+      O_RESTORE_BACKUP: ${{ needs.bascule.outputs.o_restore_backup }}
+      O_MIGRATE: ${{ needs.bascule.outputs.o_migrate }}
+      O_DOCS_CHAIN: ${{ needs.bascule.outputs.o_docs_chain }}
+      O_RECON_CHAIN: ${{ needs.bascule.outputs.o_recon_chain }}
+      O_DOCS_BACKUP: ${{ needs.bascule.outputs.o_docs_backup }}
+      O_RECON_BACKUP: ${{ needs.bascule.outputs.o_recon_backup }}
+      O_SMOKE: ${{ needs.bascule.outputs.o_smoke }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: e2e — validate CYCLE_ID
+        run: node deploy/ci/bascule-preprod/served-ids.mjs validate-cycle-id
+
+      # Absent when served-ids did not run or failed → served_ids_sha256 = null.
+      - name: Download the served-ids artefact
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: immo-served-canonical-ids-${{ inputs.CYCLE_ID }}
+          path: ${{ runner.temp }}/cycle-leg/served-ids
+
+      - name: Build legs.immo (report only)
+        run: node deploy/ci/bascule-preprod/served-ids.mjs cycle-leg --served-dir "$RUNNER_TEMP/cycle-leg/served-ids" --out "$RUNNER_TEMP/cycle-leg/out/cycle-leg-immo.json"
+
+      - name: e2e — artefact cycle-leg-immo-<CYCLE_ID>
+        uses: actions/upload-artifact@v4
+        with:
+          name: cycle-leg-immo-${{ inputs.CYCLE_ID }}
+          path: ${{ runner.temp }}/cycle-leg/out/cycle-leg-immo.json
+          if-no-files-found: error
+          retention-days: 7
+          overwrite: true

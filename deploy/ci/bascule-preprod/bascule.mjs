@@ -51,6 +51,12 @@
 //
 //   AUCUNE exécution réelle n'est faite par ce fichier au moment du build ;
 //   il est piloté par .github/workflows/bascule-preprod.yml (workflow_dispatch).
+//
+//   MODE (workflow input): chain (default, the sequence above, LIVE dump) |
+//   restore (restore FROM a daily backup, no S1) | list (read-only).
+//   restore/list live in restore-mode.mjs (subcommands preflight-backup,
+//   backup-resolve, backup-list, restore-backup, docs-restore, recon-backup),
+//   same kubectl-only runner contract.
 // =============================================================================
 import { spawnSync } from "node:child_process";
 import console from "node:console";
@@ -63,6 +69,8 @@ import {
 import { join, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { basculeMode, makeRestoreMode } from "./restore-mode.mjs";
+import { makeDocsSyncSecret } from "./docs-sync-secret.mjs";
 
 // ── petits utilitaires de sortie (jamais de secret imprimé) ─────────────────
 const log = (msg) => console.log(`[bascule] ${msg}`);
@@ -175,9 +183,10 @@ function jobDefaults() {
     // Secret docs PROD-READ ÉPHÉMÈRE (Option A, co-val i-infra) : identité
     // PROPRIÉTAIRE des objets docs prod (immo-docs-prod), montée en préprod dans un
     // secret dédié `radar-docs-src-preprod` — clés S3_ACCESS_KEY/S3_SECRET_KEY.
-    // CRÉÉ par k8s au GO (le runner ne l'a jamais) et GC par ownerReference du Job
-    // docs-sync (ttl auto-clean) → la CI ne crée/lit/supprime AUCUN secret.
-    // SPANNING read prod + rw préprod : docs-sync (copie), recon, advisory runs/ prod.
+    // PRE-CREATED by k8s; the bascule REWRITES it at every run from the GitHub
+    // secrets of the environment radar-bascule right before S3 —
+    // docs-sync-secret.mjs (kubectl replace, get/update by name). No k8s watcher.
+    // SPANNING read prod + rw préprod : docs-sync (copie).
     DOCS_SYNC_READ_SECRET: opt("DOCS_SYNC_READ_SECRET", "radar-docs-src-preprod"),
     // Grantee canonical id radar-docs PRÉPROD (GrantFullControl sur les objets
     // copiés → lisibles par l'API préprod, sinon 403 propagé). Vide → pas de grant.
@@ -722,32 +731,8 @@ function cmdRestore() {
   // 'bascule' (rollback/restore dispatchés ci-dessous) sont exclus du check G2.
   assertQuiesced();
 
-  // GARDE G1 — rollback de la DB préprod AVANT le restore destructif, en Job
-  // PRÉPROD (pg_dump préprod → bucket DURABLE). DB via radar-db-credentials,
-  // écriture S3 via radar-pra-admin (S3-only). Fail-closed : die si Job KO.
-  section("GARDE G1 — Job rollback préprod (pg_dump préprod → bucket)");
-  const ts = new Date().toISOString().replace(/[:.]/g, "-");
-  const rollbackKey = `${opt("ROLLBACK_PREFIX", "rollback").replace(/^\/+|\/+$/g, "")}/preprod-rollback-${ts}.dump`;
-  runJobFromTemplate({
-    tmpl: "db-rollback-job.tmpl.yaml",
-    jobName: "radar-db-rollback-bascule",
-    vars: {
-      NAMESPACE: jd.NAMESPACE,
-      DUMP_IMAGE: jd.DUMP_IMAGE,
-      AWSCLI_IMAGE: jd.AWSCLI_IMAGE,
-      DB_SECRET: jd.DB_SECRET,
-      PRA_SECRET: jd.PRA_SECRET,
-      S3_ENDPOINT: jd.S3_ENDPOINT,
-      BACKUP_S3_BUCKET: bucket,
-      S3_REGION: jd.S3_REGION,
-      ROLLBACK_KEY: rollbackKey,
-      PGHOST: jd.PGHOST,
-      TTL_SECONDS: jd.TTL_SECONDS,
-    },
-    timeoutSec: Number(opt("ROLLBACK_TIMEOUT", "1200")),
-  });
-  writeFileSync(join(dir, "LATEST_PREPROD_ROLLBACK_KEY.txt"), `${rollbackKey}\n`, { mode: 0o600 });
-  log(`GARDE G1 OK — rollback préprod capturé (DURABLE) : s3://${bucket}/${rollbackKey}`);
+  // GARDE G1 — preprod DB rollback BEFORE the destructive restore.
+  runRollbackG1();
 
   // Restore destructif — Job PRÉPROD (fetch aws-cli self-select + pg_restore
   // --clean --if-exists --single-transaction). DB via radar-db-credentials,
@@ -778,6 +763,38 @@ function cmdRestore() {
     timeoutSec: Number(opt("RESTORE_TIMEOUT", "1800")),
   });
   log("S2 restore OK — données prod chargées en préprod (Job in-cluster ; rollback DURABLE ; EXPECTED_DATABASE vérifié in-cluster).");
+}
+
+// GARDE G1 — preprod DB rollback BEFORE any destructive restore (MODE=chain AND
+// MODE=restore), as a preprod Job (pg_dump preprod → DURABLE bucket). DB via
+// radar-db-credentials, S3 write via radar-pra-admin (S3-only). Fail-closed.
+function runRollbackG1() {
+  const dir = workdir();
+  const jd = jobDefaults();
+  const bucket = req("DUMP_BUCKET");
+  section("GARDE G1 — Job rollback préprod (pg_dump préprod → bucket)");
+  const ts = new Date().toISOString().replace(/[:.]/g, "-");
+  const rollbackKey = `${opt("ROLLBACK_PREFIX", "rollback").replace(/^\/+|\/+$/g, "")}/preprod-rollback-${ts}.dump`;
+  runJobFromTemplate({
+    tmpl: "db-rollback-job.tmpl.yaml",
+    jobName: "radar-db-rollback-bascule",
+    vars: {
+      NAMESPACE: jd.NAMESPACE,
+      DUMP_IMAGE: jd.DUMP_IMAGE,
+      AWSCLI_IMAGE: jd.AWSCLI_IMAGE,
+      DB_SECRET: jd.DB_SECRET,
+      PRA_SECRET: jd.PRA_SECRET,
+      S3_ENDPOINT: jd.S3_ENDPOINT,
+      BACKUP_S3_BUCKET: bucket,
+      S3_REGION: jd.S3_REGION,
+      ROLLBACK_KEY: rollbackKey,
+      PGHOST: jd.PGHOST,
+      TTL_SECONDS: jd.TTL_SECONDS,
+    },
+    timeoutSec: Number(opt("ROLLBACK_TIMEOUT", "1200")),
+  });
+  writeFileSync(join(dir, "LATEST_PREPROD_ROLLBACK_KEY.txt"), `${rollbackKey}\n`, { mode: 0o600 });
+  log(`GARDE G1 OK — rollback préprod capturé (DURABLE) : s3://${bucket}/${rollbackKey}`);
 }
 
 // =============================================================================
@@ -889,10 +906,11 @@ function cmdCopyDocs() {
   }
   // Copie réelle = Job PRÉPROD (Option A canonique, co-val k8s) : image radar-api
   // (aws-sdk `CopyObject`, 0 python), identité PROD-OWNER ÉPHÉMÈRE
-  // (radar-docs-src-preprod, créée par k8s au GO / GC par ownerRef du Job) →
+  // (radar-docs-src-preprod, rewritten by the `docs-secret-fill` step right
+  // before, from the GitHub environment radar-bascule) →
   // pré-check GET prod fail-closed, puis boucle List(prod) → CopyObject(préprod,
   // GrantFullControl id=<canonical préprod>) SERVER-SIDE (0 octet pod), idempotent.
-  // La CI dispatche + lit .status ; AUCUNE opération secret (0 droit secrets runner).
+  // La CI dispatche + lit .status.
   section("S3 copie docs — Job in-cluster (radar-api aws-sdk CopyObject + grant, additif)");
   assertConfirm(); // G3 pour la copie réelle
   const ns = opt("PREPROD_NAMESPACE", "radar-immobilier-preprod");
@@ -900,8 +918,7 @@ function cmdCopyDocs() {
   const image = resolvePreprodImage(ns);
   runJobFromTemplate({
     tmpl: "docs-sync-job.tmpl.yaml",
-    // NOM EXACT figé (co-val k8s) : k8s watch `docs-sync-prod-to-preprod` pour
-    // lire l'UID du Job et créer le secret radar-docs-src-preprod ownerRef=UID.
+    // Stable Job name (evidence + runbooks). The Secret no longer depends on it.
     jobName: "docs-sync-prod-to-preprod",
     vars: {
       NAMESPACE: jd.NAMESPACE,
@@ -951,6 +968,8 @@ function cmdRecon() {
 // (Job list-objects-v2 diff Key+Size) — verdict .status uniquement, 0 listing runner.
 // =============================================================================
 function assertReconOk() {
+  // MODE=restore: G4 = recon of preprod against docs-inventory(D) of the backup.
+  if (currentMode() === "restore") { restoreMode.assertReconOk(); return; }
   const dir = workdir();
   const path = join(dir, "recon.ok.json");
   if (!existsSync(path)) die("GARDE G4 — sentinel recon.ok absent : lancer recon (S3b) et l'obtenir VERT avant le flip.");
@@ -1269,9 +1288,24 @@ function cmdForceRefresh() {
 }
 
 // =============================================================================
+// MODE=restore|list (restore-mode.mjs) — helpers injected, no circular import.
+// =============================================================================
+function currentMode() {
+  try { return basculeMode(process.env); } catch (e) { return die(e.message); }
+}
+const restoreMode = makeRestoreMode({
+  log, warn, die, section, req, opt, run, assertConfirm, assertQuiesced, runJobFromTemplate, jobDefaults, workdir,
+  resolvePreprodImage, runRollbackG1,
+});
+// docs-sync Secret rewritten by the bascule itself at every run, before S3.
+const docsSyncSecret = makeDocsSyncSecret({ log, die, section, run, jobDefaults });
+
+// =============================================================================
 // dispatch
 // =============================================================================
 const COMMANDS = {
+  ...restoreMode.commands,
+  ...docsSyncSecret.commands,
   preflight: cmdPreflight,
   quiesce: cmdQuiesce,
   dump: cmdDump,
@@ -1305,7 +1339,9 @@ function main() {
         "    precheck cible défaut = PREPROD_DOCS (gate) ; --prod = PROD_DOCS (advisory via workflow continue-on-error).\n" +
         "  quiesce/unquiesce : met/rétablit les consommateurs préprod (unquiesce = reprise, sans CONFIRM).\n" +
         "  GARDES fail-closed : G1 rollback préprod (Job), G2 quiesce, G3 CONFIRM, G4 recon-avant-flip,\n" +
-        "    EXPECTED_DATABASE (Jobs freshness/restore : clé + header archive), précheck runs/ avant refresh.",
+        "    EXPECTED_DATABASE (Jobs freshness/restore : clé + header archive), précheck runs/ avant refresh.\n" +
+        "  MODE=restore|list (restore-mode.mjs): preflight-backup | backup-resolve | backup-list |\n" +
+        "    restore-backup | docs-restore [--dry] | recon-backup — restore FROM a daily backup (BACKUP_ID).",
     );
     process.exit(isHelp ? 0 : 1); // help = 0 ; commande inconnue = 1 (fail-closed)
   }
