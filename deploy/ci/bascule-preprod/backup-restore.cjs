@@ -251,11 +251,18 @@ function destUpToDate(entry, d) {
 // with a recorded versionId is copied by that id (CopyObject fails if it is
 // gone; the recon checks the size), and an entry without one goes to `needsHead`
 // (current version accepted only if its ETag + size are the inventory's).
+//
+// `excluded` entries (prefixes the backup deliberately skips, BACKUP_EXCLUDE_PREFIXES:
+// the backup is still `complete`) are treated as the backup treats them: not
+// required, counted apart (`excluded`) and logged. Any other state that is not
+// `backed-up` (pending, failed: never in a complete backup) stays `notInBackup`
+// and blocks.
 function planDocsRestore({ inventory, versionsIndex, destIndex }) {
   const createdAtMs = Date.parse(inventory.createdAt);
-  const plan = { objects: 0, upToDate: 0, notInBackup: 0, unresolved: 0, unresolvedReasons: {}, toCopy: [], needsHead: [], bytesToCopy: 0, how: {} };
+  const plan = { objects: 0, upToDate: 0, excluded: 0, notInBackup: 0, unresolved: 0, unresolvedReasons: {}, toCopy: [], needsHead: [], bytesToCopy: 0, how: {} };
   for (const e of inventory.objects) {
     plan.objects += 1;
+    if (e.state === 'excluded') { plan.excluded += 1; continue; }
     if (e.state !== 'backed-up') { plan.notInBackup += 1; continue; }
     if (destUpToDate(e, destIndex.get(e.key))) { plan.upToDate += 1; continue; }
     if (!versionsIndex) {
@@ -286,12 +293,14 @@ function planDocsRestore({ inventory, versionsIndex, destIndex }) {
 
 // dest ⊇ inventory(D), Key + Size (same rule as the chain recon; ETag ignored:
 // a server-side copy of a multipart object may re-chunk). Extra preprod objects
-// (newer than D) are tolerated and counted: the restore is additive.
+// (newer than D) are tolerated and counted: the restore is additive. `excluded`
+// entries are not required (counted apart), as in planDocsRestore.
 function reconInventory(inventory, destIndex) {
-  const r = { checked: 0, missing: 0, sizeMismatch: 0, notInBackup: 0, extra: 0 };
+  const r = { checked: 0, missing: 0, sizeMismatch: 0, excluded: 0, notInBackup: 0, extra: 0 };
   const keys = new Set();
   for (const e of inventory.objects) {
     keys.add(e.key);
+    if (e.state === 'excluded') { r.excluded += 1; continue; }
     if (e.state !== 'backed-up') { r.notInBackup += 1; continue; }
     r.checked += 1;
     const d = destIndex.get(e.key);
@@ -384,6 +393,9 @@ function readConfig(env, step) {
     const c = Math.floor(Number(env.COPY_CONCURRENCY || '8'));
     cfg.concurrency = Number.isFinite(c) ? Math.max(1, Math.min(32, c)) : 8;
     const forbidden = String(env.FORBIDDEN_DST_BUCKETS || '').split(',').map((s) => s.trim()).filter(Boolean);
+    // The runner always names the production docs bucket: an empty list means a
+    // mis-rendered Job, never "nothing forbidden".
+    if (!forbidden.length) throw refused('FORBIDDEN_DST_BUCKETS is empty: the production docs bucket must be named');
     // Never write into the backup bucket nor into a production bucket.
     if (cfg.dstBucket === cfg.backupBucket || forbidden.includes(cfg.dstBucket)) {
       throw refused('DST_BUCKET is the backup bucket or a forbidden (production) bucket');
@@ -601,11 +613,12 @@ async function runDocs({ cfg, reader, copier, log }) {
   const plan = planDocsRestore({ inventory, versionsIndex, destIndex });
   if (plan.needsHead.length) await resolveByHead(copier, cfg, plan);
   log(`PLAN date=${cfg.date} inventory=${plan.objects} up_to_date=${plan.upToDate} to_copy=${plan.toCopy.length} ` +
-    `bytes_to_copy=${plan.bytesToCopy} not_in_backup=${plan.notInBackup} unresolved=${plan.unresolved} ` +
+    `bytes_to_copy=${plan.bytesToCopy} excluded=${plan.excluded} not_in_backup=${plan.notInBackup} unresolved=${plan.unresolved} ` +
     `reasons=${JSON.stringify(plan.unresolvedReasons)} how=${JSON.stringify(plan.how)} dest_objects=${destIndex.size} ` +
     `versions_listed=${versionsIndex !== null} dry=${cfg.dry}`);
   const base = { step: 'docs', date: cfg.date, dry: cfg.dry, inventory: plan.objects, upToDate: plan.upToDate, toCopy: plan.toCopy.length,
-    bytesToCopy: plan.bytesToCopy, notInBackup: plan.notInBackup, unresolved: plan.unresolved, unresolvedReasons: plan.unresolvedReasons };
+    bytesToCopy: plan.bytesToCopy, excluded: plan.excluded, notInBackup: plan.notInBackup, unresolved: plan.unresolved, unresolvedReasons: plan.unresolvedReasons };
+  if (plan.excluded > 0) log(`NOTE ${plan.excluded} inventory object(s) excluded by the backup itself (excluded prefixes): not required, not restored`);
   if (plan.notInBackup > 0 || plan.unresolved > 0) {
     log(`DOCS REFUSED — ${plan.notInBackup} inventory object(s) not in the backup of ${cfg.date}, ${plan.unresolved} without a restorable version (fail-closed)`);
     return { exitCode: EXIT.REFUSED, termination: { ok: false, ...base } };
@@ -647,7 +660,7 @@ async function runRecon({ cfg, reader, copier, log }) {
   const inventory = await loadInventory(reader, cfg, manifest);
   const recon = reconInventory(inventory, await destIndexOf(copier, cfg.dstBucket));
   log(`${recon.ok ? 'RECON OK' : 'RECON FAIL'} date=${cfg.date} checked=${recon.checked} missing=${recon.missing} ` +
-    `size_mismatch=${recon.sizeMismatch} not_in_backup=${recon.notInBackup} dest_extra=${recon.extra}`);
+    `size_mismatch=${recon.sizeMismatch} excluded=${recon.excluded} not_in_backup=${recon.notInBackup} dest_extra=${recon.extra}`);
   return { exitCode: recon.ok ? EXIT.OK : EXIT.ERROR, termination: { ok: recon.ok, step: 'recon', date: cfg.date, ...recon } };
 }
 
