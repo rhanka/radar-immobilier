@@ -1,0 +1,148 @@
+# bascule-e2e — restore BOTH tenants' preprod (immo + geo) FROM their daily
+# backups of the SAME date D, and prove the cross-tenant coherence.
+#
+# Orchestrator only (deploy/ci/bascule-2tenants/orchestrator.mjs): GitHub API
+# calls, 0 kubectl, 0 S3/DB credential. Each tenant's own bascule-preprod.yml
+# drives its own cluster:
+#   1. cycle-open        G3 CONFIRM (today, anti-replay) → CYCLE_ID
+#   2. capabilities      both legs declare MODE (choice: list, restore), BACKUP_ID,
+#                        CYCLE_ID — a leg without them ⇒ fail-closed
+#   3. list-backups      MODE=list on both legs (read-only; each tenant reads its own
+#                        backup bucket with its own reader identity)
+#   4. choose-date       newest date with a `complete` backup on BOTH (or BACKUP_DATE),
+#                        at most 48 h old unless ALLOW_STALE_BACKUP=true (recorded)
+#   5. dispatch-restore  MODE=restore BACKUP_ID=D CYCLE_ID on both (skipped in DRY)
+#   6. follow            status only
+#   7. collect           cycle-leg-<tenant>-<CYCLE_ID>: pg/s3 success, backup date = D
+#   8. join-verify       served canonical ids, INCLUSION immo ⊆ geo (zones first):
+#                        city-not-served-by-geo reported, divergent-code fails
+#   9. publish           cycle.json (artefact cycle-<CYCLE_ID>) + summary, always
+# Every dispatch sends CONFIRM = today UTC at that instant (a cycle may cross
+# midnight) and its run is correlated by run-name (MODE + CYCLE_ID) only.
+#
+# Environment `radar-e2e` (main-only) holds GEO_DISPATCH_TOKEN. Real token today:
+# the `gh` OAuth token of rhanka (`gh auth token`) — scopes repo, workflow, …: it
+# reaches EVERY repository of rhanka, far beyond the need (Actions R/W + Contents R
+# on rhanka/geo). Owner debt: replace it with a fine-grained PAT limited to
+# rhanka/geo — deploy/ci/bascule-2tenants/CRED_CYCLE.md. Only this job declares
+# the environment, and the token is passed ONLY to the steps that call the geo
+# repository (never to checkout / setup-node / upload-artifact, pinned by SHA).
+# The immo leg is dispatched with this workflow's GITHUB_TOKEN (actions: write).
+# DRY_RUN=true (default) = steps 1–4 only: no restore is dispatched.
+name: bascule-e2e (immo + geo, from backups)
+run-name: "bascule-e2e ${{ inputs.BACKUP_DATE || 'latest-common' }}${{ inputs.DRY_RUN && ' (dry)' || '' }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      CONFIRM:
+        description: "GO owner — exact pattern iso-prod-AAAA-MM-JJ (must be today UTC)"
+        required: true
+        type: string
+      DRY_RUN:
+        description: "true = capabilities + backup lists + common date only, NO restore dispatched"
+        required: true
+        type: boolean
+        default: true
+      BACKUP_DATE:
+        description: "YYYY-MM-DD with a complete backup on BOTH tenants; empty = newest common complete date"
+        required: false
+        type: string
+        default: ""
+      ALLOW_STALE_BACKUP:
+        description: "true = accept a common date D older than 48 h (recorded in cycle.json)"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: bascule-e2e
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  e2e:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    environment: radar-e2e
+    # Two legs of up to ~3 h each run in parallel, plus the two list runs.
+    timeout-minutes: 360
+    permissions:
+      contents: read
+      actions: write
+    # No token at job level: GH_TOKEN_IMMO / GEO_DISPATCH_TOKEN only in the steps
+    # that call GitHub for the legs.
+    env:
+      CONFIRM: ${{ inputs.CONFIRM }}
+      DRY_RUN: ${{ inputs.DRY_RUN && 'true' || 'false' }}
+      BACKUP_DATE: ${{ inputs.BACKUP_DATE }}
+      ALLOW_STALE_BACKUP: ${{ inputs.ALLOW_STALE_BACKUP && 'true' || 'false' }}
+      BASCULE2_WORKDIR: ${{ github.workspace }}/.bascule2-work
+      ORCH: deploy/ci/bascule-2tenants/orchestrator.mjs
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Setup Node 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Compute CONFIRM_EXPECTED (anti-replay = today UTC)
+        run: echo "CONFIRM_EXPECTED=iso-prod-$(date -u +%F)" >> "$GITHUB_ENV"
+
+      - name: cycle-open (G3 CONFIRM → CYCLE_ID)
+        run: node "$ORCH" cycle-open
+
+      - name: capabilities (both legs support MODE=list|restore + BACKUP_ID + CYCLE_ID)
+        env:
+          GH_TOKEN_IMMO: ${{ github.token }}
+          GEO_DISPATCH_TOKEN: ${{ secrets.GEO_DISPATCH_TOKEN }}
+        run: node "$ORCH" capabilities
+
+      - name: list-backups (MODE=list on both legs, read-only)
+        env:
+          GH_TOKEN_IMMO: ${{ github.token }}
+          GEO_DISPATCH_TOKEN: ${{ secrets.GEO_DISPATCH_TOKEN }}
+        run: node "$ORCH" list-backups
+
+      - name: choose-date (common complete backup date D, ≤ 48 h unless ALLOW_STALE_BACKUP)
+        run: node "$ORCH" choose-date
+
+      - name: dispatch-restore (MODE=restore BACKUP_ID=D on both legs — skipped in DRY)
+        env:
+          GH_TOKEN_IMMO: ${{ github.token }}
+          GEO_DISPATCH_TOKEN: ${{ secrets.GEO_DISPATCH_TOKEN }}
+        run: node "$ORCH" dispatch-restore
+
+      - name: follow (status only)
+        env:
+          GH_TOKEN_IMMO: ${{ github.token }}
+          GEO_DISPATCH_TOKEN: ${{ secrets.GEO_DISPATCH_TOKEN }}
+        run: node "$ORCH" follow
+
+      - name: collect (cycle-leg artefacts — pg/s3 verdict + backup date)
+        env:
+          GH_TOKEN_IMMO: ${{ github.token }}
+          GEO_DISPATCH_TOKEN: ${{ secrets.GEO_DISPATCH_TOKEN }}
+        run: node "$ORCH" collect
+
+      - name: join-verify (served canonical ids, inclusion immo ⊆ geo, zones)
+        env:
+          GH_TOKEN_IMMO: ${{ github.token }}
+          GEO_DISPATCH_TOKEN: ${{ secrets.GEO_DISPATCH_TOKEN }}
+        run: node "$ORCH" join-verify
+
+      - name: publish (cycle.json + summary)
+        if: ${{ always() }}
+        run: node "$ORCH" publish
+
+      - name: artefact cycle-<CYCLE_ID>
+        if: ${{ always() && env.CYCLE_ID != '' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cycle-${{ env.CYCLE_ID }}
+          path: ${{ github.workspace }}/.bascule2-work/
+          if-no-files-found: warn
+          retention-days: 30
