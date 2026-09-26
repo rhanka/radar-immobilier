@@ -51,10 +51,14 @@
 # same permanent SA, same positive PROD pre-flight, its own arming switch
 # BACKUP_DAILY_CD_ENABLED and its own failure domain (no `needs`: a backup apply
 # problem never blocks the bascule bundle or its anti-RCE gate, and vice versa).
-# It applies the SealedSecrets radar-backup-writer/-reader/-purger, the ConfigMap
+# It writes the core Secrets radar-backup-writer/-reader/-purger from the GitHub
+# Environment `radar-backup-prod` (main only) — NO SealedSecret, nothing committed:
+# the three Secrets are pre-created by the k8s lane and replaced by name
+# (get/update, no create), after a server-side dry-run of the 3 —, then applies the ConfigMap
 # radar-backup-daily-script (rendered from deploy/ci/backup/backup-daily.cjs) and
-# the CronJobs radar-backup-daily + radar-backup-freshness. Same runner contract:
-# kubectl only, 0 backup content read, 0 secret material on the runner.
+# the CronJobs radar-backup-daily + radar-backup-freshness. Runner contract:
+# kubectl only, 0 backup content read; the three S3 credentials transit the runner
+# as masked env values and 0600 temp files, never argv, never logged.
 name: bascule-bundle-cd (prod bundle apply, CD-native v2)
 
 on:
@@ -319,6 +323,13 @@ jobs:
     # lane armed the backup AFTER re-applying rbac-ci-bascule-prod.yaml (the new
     # name-scoped verbs). Merging can never red main against an old Role.
     if: vars.BASCULE_BUNDLE_CD_ENABLED == 'true' && vars.BACKUP_DAILY_CD_ENABLED == 'true'
+    # SECRET VAULT `radar-backup-prod` (created by the k8s lane: deployment branch = main
+    # ONLY, no required reviewer, so the merge push stays automatic): holds the three
+    # backup identities (secrets RADAR_BACKUP_{WRITER,READER,PURGER}_{ACCESS,SECRET}_KEY)
+    # and the variables BACKUP_S3_ENDPOINT / BACKUP_S3_REGION / BACKUP_BUCKET /
+    # BACKUP_SOURCE_BUCKET, readable only by a job started from main. KUBE_CONFIG_DATA_PROD
+    # stays a repository secret (still visible to an environment job).
+    environment: radar-backup-prod
     env:
       NAMESPACE: radar-immobilier
       BACKUP_DIR: deploy/ci/backup
@@ -363,38 +374,130 @@ jobs:
           kubectl -n "$NAMESPACE" get deploy radar-api -o name
           echo "pre-flight OK — ${expected} / namespace ${NAMESPACE}"
 
-      # Committed SealedSecrets (k8s lane, scope strict ns radar-immobilier);
-      # the in-cluster controller materializes the core Secrets. The runner never
-      # sees the plaintext and this SA has 0 secrets verbs. Fail-closed: all three
-      # must be real SealedSecrets (a placeholder file refuses the whole apply —
-      # the CronJob pod cannot start without its three identities).
-      - name: Apply SealedSecrets (radar-backup-writer + -reader + -purger)
+      # ── Backup identities: GitHub Environment → core Secrets (NO SealedSecret) ──
+      # Source of truth = the GitHub Environment `radar-backup-prod` + the `.env`
+      # recovery copy of the k8s lane (deploy/ci/bascule-preprod/CRED_CYCLE.md).
+      # Nothing about these credentials is committed, sealed or not.
+      # The three Secrets are PRE-CREATED by the k8s lane: this SA holds get/update
+      # on exactly these three names and NO create/patch/list/watch/delete — a
+      # missing Secret is a hard error here, never a create.
+      # Method: `kubectl replace` (GET + PUT = get + update) of objects rendered
+      # client-side (`kubectl create secret generic --dry-run=client`, each value read
+      # from a file in a 0700 temp dir: never in argv, never echoed). The PUT makes
+      # the live data EXACTLY the key set below (a stale extra key is dropped),
+      # writes no last-applied annotation (a client-side `kubectl apply` would copy
+      # the credentials into it) and clears a former sealed-secrets ownerReference.
+      # No partial write: a server-side dry-run of the 3 PUTs (RBAC, admission,
+      # immutable fields, key set) must pass for all 3 before the first real PUT.
+      # Values reach the script through `env:` only (never a `${{ }}` inside `run:`);
+      # GitHub masks the secrets; no `set -x`; logs carry names and key names only.
+      # Fail-closed: every check (10 GitHub values present, single-line, keys of the
+      # expected charset/length, S3 endpoint/region = the pinned BHS target, bucket
+      # variables = the CronJob guards, the 3 Secrets exist) runs before any write.
+      - name: Write backup Secrets from GitHub (radar-backup-writer + -reader + -purger)
+        env:
+          RADAR_BACKUP_WRITER_ACCESS_KEY: ${{ secrets.RADAR_BACKUP_WRITER_ACCESS_KEY }}
+          RADAR_BACKUP_WRITER_SECRET_KEY: ${{ secrets.RADAR_BACKUP_WRITER_SECRET_KEY }}
+          RADAR_BACKUP_READER_ACCESS_KEY: ${{ secrets.RADAR_BACKUP_READER_ACCESS_KEY }}
+          RADAR_BACKUP_READER_SECRET_KEY: ${{ secrets.RADAR_BACKUP_READER_SECRET_KEY }}
+          RADAR_BACKUP_PURGER_ACCESS_KEY: ${{ secrets.RADAR_BACKUP_PURGER_ACCESS_KEY }}
+          RADAR_BACKUP_PURGER_SECRET_KEY: ${{ secrets.RADAR_BACKUP_PURGER_SECRET_KEY }}
+          BACKUP_S3_ENDPOINT: ${{ vars.BACKUP_S3_ENDPOINT }}
+          BACKUP_S3_REGION: ${{ vars.BACKUP_S3_REGION }}
+          BACKUP_BUCKET: ${{ vars.BACKUP_BUCKET }}
+          BACKUP_SOURCE_BUCKET: ${{ vars.BACKUP_SOURCE_BUCKET }}
         run: |
           set -euo pipefail
+          umask 077
+          # Keys of each Secret = exactly what the CronJobs mount (checked by the selftest).
+          declare -A KEYS=(
+            [writer]="S3_ENDPOINT S3_REGION S3_ACCESS_KEY S3_SECRET_KEY BACKUP_BUCKET SOURCE_DOCS_BUCKET"
+            [reader]="S3_ENDPOINT S3_REGION S3_ACCESS_KEY S3_SECRET_KEY BACKUP_BUCKET"
+            [purger]="S3_ENDPOINT S3_REGION S3_ACCESS_KEY S3_SECRET_KEY BACKUP_BUCKET"
+          )
+          # Shared (non-secret) values: GitHub variable feeding each key.
+          declare -A FROM_VAR=([S3_ENDPOINT]=BACKUP_S3_ENDPOINT [S3_REGION]=BACKUP_S3_REGION [BACKUP_BUCKET]=BACKUP_BUCKET [SOURCE_DOCS_BUCKET]=BACKUP_SOURCE_BUCKET)
+          # Pinned S3 target (OVH BHS; the egress allowed to the backup pods) and credential shape.
+          PINNED_S3_ENDPOINT="https://s3.bhs.io.cloud.ovh.net"
+          PINNED_S3_REGION="bhs"
+          RE_ACCESS_KEY='^[A-Za-z0-9]{16,128}$'
+          RE_SECRET_KEY='^[A-Za-z0-9/+=]{16,128}$'
+
+          # 1. GitHub values present, single-line, well-formed (names only in the log).
+          bad=""
+          for v in RADAR_BACKUP_WRITER_ACCESS_KEY RADAR_BACKUP_WRITER_SECRET_KEY \
+                   RADAR_BACKUP_READER_ACCESS_KEY RADAR_BACKUP_READER_SECRET_KEY \
+                   RADAR_BACKUP_PURGER_ACCESS_KEY RADAR_BACKUP_PURGER_SECRET_KEY \
+                   BACKUP_S3_ENDPOINT BACKUP_S3_REGION BACKUP_BUCKET BACKUP_SOURCE_BUCKET; do
+            if [ -z "${!v:-}" ]; then bad="${bad} ${v}(missing)"; continue; fi
+            case "${!v}" in *$'\n'*|*$'\r'*) bad="${bad} ${v}(multi-line)"; continue ;; esac
+            case "$v" in
+              *_ACCESS_KEY) [[ "${!v}" =~ $RE_ACCESS_KEY ]] || bad="${bad} ${v}(format ${RE_ACCESS_KEY})" ;;
+              *_SECRET_KEY) [[ "${!v}" =~ $RE_SECRET_KEY ]] || bad="${bad} ${v}(format ${RE_SECRET_KEY})" ;;
+              BACKUP_S3_ENDPOINT) [ "${!v}" = "$PINNED_S3_ENDPOINT" ] || bad="${bad} ${v}(must be ${PINNED_S3_ENDPOINT})" ;;
+              BACKUP_S3_REGION) [ "${!v}" = "$PINNED_S3_REGION" ] || bad="${bad} ${v}(must be ${PINNED_S3_REGION})" ;;
+            esac
+          done
+          if [ -n "$bad" ]; then
+            echo "::error title=Backup credentials missing or invalid in GitHub::Environment radar-backup-prod:${bad}. Nothing was applied."; exit 1
+          fi
+
+          # 2. Bucket variables = the positive guards of the committed CronJob.
+          cj="$BACKUP_DIR/cronjob-backup-daily.yaml"
+          exp_backup="$(sed -n 's/.*name: EXPECTED_BACKUP_BUCKET, value: "\([^"]*\)".*/\1/p' "$cj" | sort -u)"
+          exp_source="$(sed -n 's/.*name: EXPECTED_SOURCE_DOCS_BUCKET, value: "\([^"]*\)".*/\1/p' "$cj" | sort -u)"
+          if [ -z "$exp_backup" ] || [ -z "$exp_source" ] || [ "$BACKUP_BUCKET" != "$exp_backup" ] || [ "$BACKUP_SOURCE_BUCKET" != "$exp_source" ]; then
+            echo "::error title=Backup bucket variables mismatch::BACKUP_BUCKET='${BACKUP_BUCKET}' / BACKUP_SOURCE_BUCKET='${BACKUP_SOURCE_BUCKET}' must equal the CronJob guards '${exp_backup}' / '${exp_source}'. Nothing was applied."; exit 1
+          fi
+
+          # 3. The three Secrets exist (pre-created by the k8s lane; this SA cannot create).
           for id in writer reader purger; do
-            f="$BACKUP_DIR/radar-backup-${id}-sealed.yaml"
-            if ! grep -q '^kind: SealedSecret' "$f"; then
-              echo "::error title=Backup SealedSecret missing::${f} is still a placeholder — commit the SealedSecret from the k8s lane before arming. Nothing applied."; exit 1
+            if ! kubectl -n "$NAMESPACE" get secret "radar-backup-${id}" -o name >/dev/null; then
+              echo "::error title=Backup Secret not pre-created::secret/radar-backup-${id} is absent or not readable by radar-ci-bascule-prod (k8s lane: pre-create the three Secrets, re-apply rbac-ci-bascule-prod.yaml). Nothing was applied."; exit 1
             fi
           done
-          for id in writer reader purger; do
-            kubectl -n "$NAMESPACE" apply -f "$BACKUP_DIR/radar-backup-${id}-sealed.yaml"
-          done
 
-      - name: Wait for SealedSecrets Synced (tolerant)
-        run: |
-          set -uo pipefail
-          synced_deadline=$((SECONDS + 120))
-          for ss in radar-backup-writer radar-backup-reader radar-backup-purger; do
-            while :; do
-              s="$(kubectl -n "$NAMESPACE" get sealedsecret "$ss" -o 'jsonpath={.status.conditions[?(@.type=="Synced")].status}' 2>/dev/null || true)"
-              if [ "$s" = "True" ]; then echo "SealedSecret ${ss}: Synced=True"; break; fi
-              if [ "$SECONDS" -ge "$synced_deadline" ]; then
-                echo "::warning title=SealedSecret sync unconfirmed::${ss} did not report Synced=True within the poll window (status='${s:-<empty>}'). The CronJob pod is the backstop: it cannot start without radar-backup-writer."
-                break
-              fi
-              sleep 5
+          # 4. Render the 3 Secrets client-side (values from 0600 files; the rendered
+          #    manifests stay in the 0700 temp dir, removed on exit).
+          tmp="$(mktemp -d "${RUNNER_TEMP:-/tmp}/radar-backup-secrets.XXXXXX")"
+          trap 'rm -rf "$tmp"' EXIT
+          for id in writer reader purger; do
+            ID="${id^^}"
+            read -ra keys <<< "${KEYS[$id]}"
+            mkdir "$tmp/$id"
+            args=()
+            for k in "${keys[@]}"; do
+              case "$k" in
+                S3_ACCESS_KEY) src="RADAR_BACKUP_${ID}_ACCESS_KEY" ;;
+                S3_SECRET_KEY) src="RADAR_BACKUP_${ID}_SECRET_KEY" ;;
+                *) src="${FROM_VAR[$k]}" ;;
+              esac
+              printf '%s' "${!src}" > "$tmp/$id/$k"
+              args+=("--from-file=${k}=${tmp}/${id}/${k}")
             done
+            kubectl -n "$NAMESPACE" create secret generic "radar-backup-${id}" --type=Opaque "${args[@]}" --dry-run=client -o yaml \
+              | kubectl label --local -f - app.kubernetes.io/name=radar-immobilier app.kubernetes.io/part-of=sentropic app.kubernetes.io/component=db-backup -o yaml \
+              > "$tmp/${id}.yaml"
+            rm -rf "${tmp:?}/${id}"
+          done
+          # Key names of the object the server returns (never a value).
+          keys_json() { node -e 'let s="";process.stdin.on("data",(c)=>{s+=c;}).on("end",()=>{let k="<unreadable>";try{k=Object.keys(JSON.parse(s).data||{}).sort().join(" ");}catch{}process.stdout.write(k);});'; }
+          want_of() { local -a ks; read -ra ks <<< "${KEYS[$1]}"; printf '%s\n' "${ks[@]}" | sort | paste -sd' ' -; }
+
+          # 5a. Server-side dry-run of the 3 PUTs: nothing is written unless all 3 pass.
+          for id in writer reader purger; do
+            if ! live="$(kubectl -n "$NAMESPACE" replace --dry-run=server -f "$tmp/${id}.yaml" -o json | keys_json)" || [ "$live" != "$(want_of "$id")" ]; then
+              echo "::error title=radar-backup-${id} refused by the server-side dry-run::keys '${live:-}' (expected '$(want_of "$id")'). Nothing was written."; exit 1
+            fi
+          done
+          echo "server-side dry-run OK for the 3 Secrets"
+
+          # 5b. Real PUTs, same manifests; check the key set the server returns.
+          for id in writer reader purger; do
+            if ! live="$(kubectl -n "$NAMESPACE" replace -f "$tmp/${id}.yaml" -o json | keys_json)" || [ "$live" != "$(want_of "$id")" ]; then
+              echo "::error title=radar-backup-${id} not written as expected::keys '${live:-}' (expected '$(want_of "$id")')."; exit 1
+            fi
+            echo "secret/radar-backup-${id} replaced from GitHub — keys: ${live}"
           done
 
       # The script ships as a ConfigMap rendered from the committed file (single
@@ -436,7 +539,7 @@ jobs:
           {
             echo "### daily prod backup applied"
             echo ""
-            echo "- SealedSecrets: radar-backup-writer (backup, no delete), radar-backup-purger (delete-markers, dated prefixes), radar-backup-reader (freshness + restore)"
+            echo "- Secrets (from GitHub Environment radar-backup-prod, no SealedSecret): radar-backup-writer (backup, no delete), radar-backup-purger (delete-markers, dated prefixes), radar-backup-reader (freshness + restore)"
             echo "- ConfigMap: radar-backup-daily-script (from deploy/ci/backup/backup-daily.cjs)"
             echo "- CronJob: radar-backup-daily (23 2 * * * UTC, Forbid) → s3://radar-immobilier-backup"
             echo "- CronJob: radar-backup-freshness (53 6 * * * UTC) — a failed Job = stale or not complete for too long"
