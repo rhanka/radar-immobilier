@@ -69,6 +69,21 @@ on:
         required: false
         type: boolean
         default: false
+      REFRESH_CHUNK:
+        description: "S6 bornage (repli) — shard worker-live 'k/n' (ex. 1/4). Vide = delta complet des 530 villes. Exclusif de REFRESH_CITIES."
+        required: false
+        type: string
+        default: ""
+      REFRESH_CITIES:
+        description: "S6 bornage (repli) — liste explicite de slugs (ex. 'carignan delson'). Vide = delta complet. Exclusif de REFRESH_CHUNK."
+        required: false
+        type: string
+        default: ""
+      REFRESH_CONCURRENCY:
+        description: "S6 concurrence — villes scrapées en parallèle (défaut template = 6). Baisser si la mémoire (heap) est contrainte."
+        required: false
+        type: string
+        default: ""
 
 # Jamais deux bascules en parallèle (write préprod).
 concurrency:
@@ -88,7 +103,12 @@ jobs:
     # basculer tout seul dès la fusion.
     if: ${{ github.event_name != 'schedule' || vars.BASCULE_SCHEDULE_ENABLED == 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    # Plafond GitHub = 3ᵉ contrainte au-dessus du couple (poll runner S6 / activeDeadline
+    # du Job). Le poll runner S6 est aligné sur l'activeDeadline du Job (défaut 7200s +
+    # tampon), donc le budget du job GitHub doit couvrir S0→S5 + la fenêtre S6 + S7 :
+    # relevé à 180 min pour que le runner puisse observer le verdict terminal du Job S6
+    # sans être coupé par GitHub. Chemin heureux (concurrence) : total ~1 h 45.
+    timeout-minutes: 180
     env:
       # ── GO owner + anti-rejeu (CONFIRM_EXPECTED calculé au pas 'compute') ──
       CONFIRM: ${{ inputs.CONFIRM }}
@@ -311,6 +331,15 @@ jobs:
 
       - name: S6 refresh différentiel (worker-live delta, Job in-cluster)
         if: ${{ !inputs.DRY_RUN && !inputs.SKIP_REFRESH }}
+        # Fix S6 : (a) concurrence worker-live (masque la latence des sources
+        # lentes), (b) poll runner aligné sur l'activeDeadline du Job (bascule.mjs),
+        # (d) bornage optionnel (repli démo). Vides ⇒ delta COMPLET des 530 villes
+        # à la concurrence par défaut du template. REFRESH_CHUNK/REFRESH_CITIES
+        # sont mutuellement exclusifs (bascule.mjs fail-closed).
+        env:
+          REFRESH_CHUNK: ${{ inputs.REFRESH_CHUNK }}
+          REFRESH_CITIES: ${{ inputs.REFRESH_CITIES }}
+          REFRESH_CONCURRENCY: ${{ inputs.REFRESH_CONCURRENCY }}
         run: node "$CLI" refresh
 
       # ── S7 : smoke (read-only ; joué aussi en DRY) ─────────────────────────

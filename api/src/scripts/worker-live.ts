@@ -47,6 +47,18 @@
  * Env:
  *   LIVE_SCRAPE_LIMIT    optional per-city cap on newly written raw documents;
  *                        existing CAS documents are skipped before it is consumed.
+ *   LIVE_SCRAPE_CONCURRENCY
+ *                        positive integer; how many cities to SCRAPE in parallel
+ *                        (default 1 = serial). A value > 1 runs a bounded worker
+ *                        pool over the config-only cities to MASK slow-source
+ *                        latency (a city stalled on slow .doc downloads no longer
+ *                        blocks the rest). Each city writes only its own
+ *                        source-scoped S3 prefixes (additive, no cross-city
+ *                        corruption) and holds its own per-source request pacing.
+ *                        MEMORY is the bound, not CPU: peak heap scales with
+ *                        concurrency, so keep `concurrency × per-city footprint`
+ *                        within `--max-old-space-size`. Ignored under
+ *                        `--reexploit` (always serial: shared parse budget).
  *   LIVE_SCRAPE_RECOLLECT_ALL
  *                        when "1"/"true", re-download every document the index
  *                        lists, even one an earlier run already collected.
@@ -157,6 +169,20 @@ async function main(): Promise<number> {
   }
   const recollectAllEnv = (process.env.LIVE_SCRAPE_RECOLLECT_ALL ?? "").toLowerCase();
   const recollectAll = recollectAllEnv === "1" || recollectAllEnv === "true";
+  // City-level parallelism (scrape path only; reexploit stays serial). Invalid,
+  // non-positive or non-integer values fall back to 1 (serial) — never a crash.
+  const concurrencyRaw = process.env.LIVE_SCRAPE_CONCURRENCY;
+  const concurrencyParsed = concurrencyRaw ? Number.parseInt(concurrencyRaw, 10) : undefined;
+  const concurrency =
+    concurrencyParsed !== undefined && Number.isSafeInteger(concurrencyParsed) && concurrencyParsed > 0
+      ? concurrencyParsed
+      : undefined;
+  if (concurrencyRaw && concurrency === undefined) {
+    logger.warn(
+      { LIVE_SCRAPE_CONCURRENCY: concurrencyRaw },
+      "worker-live: LIVE_SCRAPE_CONCURRENCY is not a positive integer — falling back to serial (1).",
+    );
+  }
   const exploitEnv = (process.env.LIVE_SCRAPE_EXPLOIT ?? "").toLowerCase();
   // `--reexploit` implies exploitation; a plain exploit run is opt-in via env.
   const exploit = reexploit || exploitEnv === "1" || exploitEnv === "true";
@@ -166,7 +192,7 @@ async function main(): Promise<number> {
   const pgFeed = decidePgFeed({ exploit, reexploit, env: process.env });
 
   logger.info(
-    { cities: label, limit, exploit, reexploit, pgFeed: pgFeed.feed },
+    { cities: label, limit, exploit, reexploit, pgFeed: pgFeed.feed, concurrency: concurrency ?? 1 },
     "worker-live: starting live PV scrape",
   );
 
@@ -234,6 +260,7 @@ async function main(): Promise<number> {
       ...(limit !== undefined && Number.isFinite(limit) ? { limit } : {}),
       ...(exploit ? { exploit: true } : {}),
       ...(reexploit ? { reexploit: true } : {}),
+      ...(concurrency !== undefined ? { concurrency } : {}),
       ...(handle ? { db: handle.db } : {}),
       // Stream per-city progress AS each city finishes — no more "0 lines until the
       // final recap" on a long all-cities run. (Observability only; it does not
