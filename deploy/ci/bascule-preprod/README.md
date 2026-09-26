@@ -56,7 +56,8 @@ dossier). **0 pg_dump / 0 pg_restore / 0 s5cmd / 0 aws / 0 cred S3 sur le runner
 | `restore-mode.mjs` | `MODE=restore\|list` runner side (restore FROM a daily backup) — section "Restore from a backup". |
 | `backup-restore.cjs` | In-pod steps resolve / list / fetch-dump / docs / recon (embedded in the 3 templates below). |
 | `backup-read-job.tmpl.yaml` · `db-restore-backup-job.tmpl.yaml` · `docs-restore-backup-job.tmpl.yaml` | Jobs of `MODE=restore\|list`. |
-| `docs-sync-secret.mjs` | `docs-secret-fill`: the bascule rewrites `radar-docs-src-preprod` before S3 (GitHub environment `radar-bascule`). |
+| `ci-secrets.mjs` | `docs-secret-fill` / `backup-secrets-fill`: the bascule rewrites its pre-created Secrets (`radar-docs-src-preprod`, `radar-backup-reader-preprod`, `radar-backup-restore-docs`) from the GitHub environment `radar-bascule`. |
+| `served-refs-job.tmpl.yaml` · `served-refs.cjs` · `e2e-refs.mjs` · `served-refs-configmaps.yaml` | e2e O1: zone references read-only from the restored DB → ConfigMaps → artefact `immo-served-refs-<CYCLE_ID>`. |
 | `served-ids.mjs` | e2e contract: `immo-served-canonical-ids-<CYCLE_ID>` + `cycle-leg-immo-<CYCLE_ID>`. |
 | `rbac-ci-bascule-preprod-docs-secret.yaml` · `rbac-ci-bascule-preprod-pods-read.yaml` | RBAC additions for SA `radar-ci-bascule-preprod` (k8s applies after review). |
 | `restore-mode.selftest.mjs` | Offline selftest of all of the above (+ workflow wiring). |
@@ -159,7 +160,7 @@ No k8s watcher any more (a scheduled run failed on S3 when nobody created the
 Secret). The Secret `radar-docs-src-preprod` (ns `radar-immobilier-preprod`) is
 **pre-created by k8s** (Opaque, keys `S3_ACCESS_KEY` + `S3_SECRET_KEY` only, no
 ownerReference) and the bascule **rewrites it at every run**, right before S3
-(step `S3.0`, subcommand `docs-secret-fill`, `docs-sync-secret.mjs`):
+(step `S3.0`, subcommand `docs-secret-fill`, `ci-secrets.mjs`):
 
 1. the job `bascule` runs in the GitHub **environment `radar-bascule`** (main-only),
    secrets `RADAR_DOCS_SYNC_ACCESS_KEY` / `RADAR_DOCS_SYNC_SECRET_KEY` (32–64
@@ -176,7 +177,9 @@ ownerReference) and the bascule **rewrites it at every run**, right before S3
 
 RBAC (k8s applies after review): `rbac-ci-bascule-preprod-docs-secret.yaml` — SA
 `radar-ci-bascule-preprod`, `secrets` verbs `get`,`update`, `resourceNames:
-["radar-docs-src-preprod"]`, nothing else on Secrets. Never a SealedSecret.
+["radar-docs-src-preprod", "radar-backup-reader-preprod", "radar-backup-restore-docs"]`
+(the two backup identities: section "Restore from a backup"), nothing else on
+Secrets. Never a SealedSecret.
 
 ## Rejouer SANS IA
 
@@ -267,11 +270,12 @@ frozen by `BASCULE_SCHEDULE_ENABLED=false` (untouched).
 | Step | Subcommand | What happens | Where |
 | --- | --- | --- | --- |
 | S0 | `preflight-backup` | binaries, params (`EXPECTED_DATABASE`, `BHS`, `PREPROD_DOCS`, `DUMP_BUCKET`), `BACKUP_ID`/`CYCLE_ID` format, `PREPROD_DOCS` ≠ `PROD_DOCS` | runner |
+| S0.s | `backup-secrets-fill` | rewrites the pre-created Secrets `radar-backup-reader-preprod` (and, in restore, `radar-backup-restore-docs`) from the environment `radar-bascule` (see "Identities" below) | kubectl |
 | R0 | `backup-resolve` | **read-only Job, BEFORE the quiesce**: `BACKUP_ID` → date D; refuses unless `status: complete`; `latest` older than 24 h (age = `pg.dumpStartedAt`, the RPO point) refused unless `ALLOW_STALE_BACKUP=true`; an explicit date is never blocked by its age (logged); `.sha256` sidecar = manifest `pg.sha256`, dump size = manifest, inventory present. Writes the **PIN** `backup-pin.json` (D + manifest sha256 + dump sha256) | Job `radar-bascule-backup-resolve` |
 | Q | `quiesce` | unchanged | kubectl |
 | S2 | `restore-backup` | G3, **G2** quiesce, **G1** rollback of the preprod DB (same Job as chain), then Job: `fetch` (re-reads `manifests/<D>.json`, sha256 must equal the PIN — a same-day manual backup re-run rewrites it; downloads `pg/<D>/radar.dump` by its manifest version id streaming a sha256; refuses unless it equals manifest = sidecar = PIN) → `restore` (`pg_restore --list`: TOC entries = manifest, archive dbname = `EXPECTED_DATABASE`; `pg_restore --clean --if-exists --single-transaction --exit-on-error`). **No S1** | Job `radar-db-restore-backup` |
 | S2c | `migrate` | unchanged (delta migrations of `main` on the data of D) | Job |
-| S3' | `docs-restore` | G3; docs state **at D**: `docs-inventory/<D>.json` (sha256 = manifest) + `ListObjectVersions(<backup>/docs/)` + preprod listing → every `backed-up` entry whose preprod copy is not already the same content (size + ETag) is copied **server-side** (`CopyObject`, 0 byte through the pod or the runner) from `<backup>/docs/<key>?versionId=<v>` — the recorded version, else the version whose ETag is the inventory's (object rewritten since D). Additive (no delete; preprod objects newer than D are kept and counted). Any object not in the backup or without a restorable version ⇒ refusal before the first copy | Job `radar-docs-restore-backup` |
+| S3' | `docs-restore` | G3; docs state **at D**: `docs-inventory/<D>.json` (reader; sha256 = manifest) + `ListObjectVersions(<backup>/docs/)` and preprod listing (copy signer) → every `backed-up` entry whose preprod copy is not already the same content (size + ETag) is copied **server-side** (`CopyObject`, 0 byte through the pod or the runner) from `<backup>/docs/<key>?versionId=<v>` — the recorded version, else the version whose ETag is the inventory's (object rewritten since D). If the version listing is refused: recorded versionIds used as is, the others copied only when the current backup copy has the inventory ETag + size (HEAD). Additive (no delete; preprod objects newer than D are kept and counted). Any object not in the backup or without a restorable version ⇒ refusal before the first copy | Job `radar-docs-restore-backup` |
 | S3b' | `recon-backup` | preprod docs ⊇ inventory(D), Key + Size; writes the `recon.ok.json` sentinel (mode restore + D + manifest sha256) | Job `radar-bascule-recon-backup` |
 | S5 | `flip` | **G4** = sentinel of THIS backup + `recon-backup` re-run | kubectl |
 | U / S7 | `unquiesce` / `smoke` | unchanged | kubectl / curl |
@@ -294,28 +298,49 @@ it from the pod `.status` (`kubectl get pods -l job-name=<job> -o json`), never
 
 ### Identities, Secrets, RBAC, network (what k8s provides)
 
+Dedicated preprod identities (created and tested by the k8s lane 2026-09-26).
+**OVH:** `s3:GetObjectVersion` is refused in OVH policies — a versioned read is a
+`GetObject` / `CopyObject` with `versionId`, covered by `GetObject`; nothing here
+relies on a distinct version permission.
+
 | Item | Where | Content | Used by |
 | --- | --- | --- | --- |
-| Secret **`radar-backup-reader`** | ns `radar-immobilier-preprod` (**new**: today only in ns `radar-immobilier`) | keys `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `BACKUP_BUCKET` (= `radar-immobilier-backup`; `S3_ENDPOINT`/`S3_REGION` may be present, unused: the endpoint comes from `BHS`) — same OVH reader user as prod: `GetObject` (incl. versionId), `ListBucket`, `ListBucketVersions` on the backup bucket | R0, list, S2 fetch, S3'/S3b' reads |
-| its material | GitHub Secrets (+ `.env` recovery copy, `CRED_CYCLE.md` rotation 90 days) | **created by the CD from GitHub Secrets** (never a SealedSecret): `kubectl create secret generic radar-backup-reader --from-env-file=<0600 file> --dry-run=client -o json \| kubectl apply -f -` with values passed via `env:` only | k8s lane / CD |
-| docs copy signer | var `BASCULE_BACKUP_DOCS_COPY_SECRET` (default = the reader Secret) | the identity that SIGNS the server-side `CopyObject` must hold `GetObject` + `GetObjectVersion` on `radar-immobilier-backup/docs/*` **and** `ListBucket` + `PutObject` (+ `PutObjectAcl`, `GrantFullControl` to `DOCS_SYNC_GRANTEE`) on the preprod docs bucket. Either (a) add those preprod rights to the reader user, or (b) give `immo-docs-prod` a read statement on `radar-immobilier-backup/docs/*` and set the var to `radar-docs-src-preprod` (the bascule then rewrites that Secret before S3' too), or (c) a dedicated preprod-only restore user | S3', S3b' |
+| Secret **`radar-backup-reader-preprod`** (OVH user 809853) | ns `radar-immobilier-preprod`, pre-created Opaque | keys `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `BACKUP_BUCKET` (= `radar-immobilier-backup`); `GetObject` on `pg/*`, `manifests/*`, `docs-inventory/*` + `ListBucket` (`docs/` → 403) | R0, list, S2 fetch, S3'/S3b' manifest + inventory |
+| Secret **`radar-backup-restore-docs`** (OVH user `radar-backup-restore-preprod`, 809849) | ns `radar-immobilier-preprod`, pre-created Opaque | same keys; `GetObject` on `radar-immobilier-backup/docs/*` (+ version listing when granted), `PutObject` + `PutObjectAcl` on the preprod docs bucket, no delete — the versioned `CopyObject` with `GrantFullControl` answers 200 | S3' (signer of the copies), S3b' (preprod listing) |
+| their material | GitHub environment **`radar-bascule`** (main-only): `RADAR_BACKUP_READER_PREPROD_ACCESS_KEY`/`_SECRET_KEY`, `RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY`/`_SECRET_KEY` (+ `.env` recovery copy; rotation 90 days, `CRED_CYCLE.md`) | **rewritten by the bascule** before first use (step "Write backup Secrets", `ci-secrets.mjs`): `kubectl replace --dry-run=server` then `kubectl replace` on the pre-created Secrets — never `create`/`apply` (RBAC by resourceNames), never a SealedSecret; keys guarded `^[0-9a-f]{32,64}$`, `BACKUP_BUCKET` = fixed var value | bascule job |
+| RBAC `radar-ci-bascule-preprod` | `rbac-ci-bascule-preprod-docs-secret.yaml` | secrets get/update on `radar-docs-src-preprod`, `radar-backup-reader-preprod`, `radar-backup-restore-docs`; configmaps get on `immo-served-refs-0..3` | Secret writes, e2e O1 |
 | RBAC `radar-ci-bascule-preprod` | `rbac-ci-bascule-preprod-pods-read.yaml` | `pods` get/list (read the termination messages) — no `pods/log` | R0, list, failure reasons |
-| NetworkPolicy | ns `radar-immobilier-preprod` | the restore Jobs carry `sentropic.io/bascule` → `radar-postgres:5432` already open by `allow-bascule-to-postgres`; **egress**: no egress policy today; if one is added, the pods labelled `sentropic.io/bascule` need TCP 443 to the S3 endpoint (`s3.bhs.io.cloud.ovh.net`) + DNS | all backup Jobs |
+| SA `radar-bascule-refs-writer` + 4 ConfigMaps | `rbac-ci-bascule-preprod-docs-secret.yaml`, `served-refs-configmaps.yaml` | configmaps get/update on `immo-served-refs-0..3` (pre-created, create is not name-scopable) | e2e O1 served-refs Job |
+| NetworkPolicy | ns `radar-immobilier-preprod` | the restore Jobs carry `sentropic.io/bascule` → `radar-postgres:5432` already open by `allow-bascule-to-postgres`; **egress**: no egress policy today; if one is added, the pods labelled `sentropic.io/bascule` need TCP 443 to the S3 endpoint (`s3.bhs.io.cloud.ovh.net`) + DNS, and the served-refs pod the API server | all backup Jobs |
 
 Repo variables (optional): `BASCULE_BACKUP_BUCKET` (`radar-immobilier-backup`),
-`BASCULE_BACKUP_READER_SECRET` (`radar-backup-reader`),
-`BASCULE_BACKUP_DOCS_COPY_SECRET` (= reader), `BASCULE_BACKUP_MAX_AGE_HOURS` (24),
-`BASCULE_IMMO_SERVED_REFS_URL` (e2e, PENDING O1).
+`BASCULE_BACKUP_READER_SECRET` (`radar-backup-reader-preprod`),
+`BASCULE_BACKUP_DOCS_COPY_SECRET` (`radar-backup-restore-docs`, no fallback on the
+reader), `BASCULE_BACKUP_MAX_AGE_HOURS` (24).
 
 ### e2e contract (`CYCLE_ID` set)
 
+- **O1 — zone references immo holds (decision: no HTTP endpoint).** After S7,
+  step `served-refs` dispatches the Job `radar-bascule-served-refs`: `extract`
+  (psql, `default_transaction_read_only=on`) reads the RESTORED preprod database —
+  canonical zone ids referenced by `geo_resolutions` (`target_type = 'Zone'`),
+  `opportunity_dossiers.zone_canonical_id`, `constraint_hits` (`target_kind =
+  'zone'`) and the current `zone_versions` referential — and outputs the distinct
+  `(city_slug, zone_code)`: `zone_versions.city_slug` + `code_affiche` when the
+  canonical id is known there, else parsed from `ogc:zones:<city>:<code>`. **Fact:
+  immo does not persist the raw OGC zone code** (`code_affiche` holds
+  `normalizeZoneCode(raw)`), so the geo builder re-canonicalises immo's normalised
+  code; a residual divergence of that lossy step shows up as `divergent-code`.
+  `publish` (served-refs.cjs) gzips the TSV (a few hundred KiB expected) and
+  rewrites the pre-created ConfigMaps `immo-served-refs-0..3` (≤ 900 KiB each) with
+  the SA `radar-bascule-refs-writer`; the runner reads them (configmaps get),
+  checks CYCLE_ID + sha256 + row count and uploads `immo-served-refs-<CYCLE_ID>`.
 - `MODE=restore|chain`: job `served-ids` (no cluster credential) builds
   `immo-served-canonical-ids-<CYCLE_ID>` (`served-ids.txt` + `.sha256` + meta, zone
   ids through the published `@sentropic/geo@0.6.2`, same pin as the geo leg) from
-  the RAW zone refs at `vars.BASCULE_IMMO_SERVED_REFS_URL` — **PENDING O1**: that
-  endpoint is not delivered, the job fails closed until then; job `cycle-leg`
-  (always) publishes `cycle-leg-immo-<CYCLE_ID>` (`legs.immo`: run, sha, MODE,
-  backup id/date/manifest+dump sha256, `t1` = backup dump start, verdict pg/s3).
+  that artefact; job `cycle-leg` (always) publishes `cycle-leg-immo-<CYCLE_ID>`
+  (`legs.immo`: run, sha, MODE, backup id/date/manifest+dump sha256, `t1` = backup
+  dump start, verdict pg/s3).
 - `MODE=list`: artefact `backup-list-immo-<CYCLE_ID>`.
 - The run name is `bascule-preprod <MODE> <CYCLE_ID>` (orchestrator correlation).
 

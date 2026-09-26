@@ -1,0 +1,149 @@
+# =============================================================================
+# served-refs-job.tmpl.yaml — e2e O1: zone references immo holds, read from the
+# RESTORED preprod database, published for the runner through ConfigMaps.
+# Dispatched after S7 when CYCLE_ID is set (MODE=restore|chain, not DRY).
+#
+#   initContainer `extract` (postgis, psql, PGOPTIONS default_transaction_read_only=on
+#                 → READ ONLY): canonical zone ids referenced by geo_resolutions
+#                 (target_type 'Zone'), opportunity_dossiers.zone_canonical_id,
+#                 constraint_hits (target_kind 'zone') and the current zone_versions
+#                 referential → distinct (city_slug, zone_code): zone_versions
+#                 city_slug + code_affiche when the canonical id is known there,
+#                 else parsed from ogc:zones:<city>:<code>. NB: immo does not persist
+#                 the raw OGC code; code_affiche holds immo's normalised code
+#                 (normalizeZoneCode). → /work/refs.tsv + /work/sources.tsv.
+#   container `publish` (radar-api, served-refs.cjs embedded with `node -e`):
+#                 validates, sorts, gzips, cuts in parts ≤ 900 KiB and REWRITES the
+#                 pre-created ConfigMaps ${REFS_CONFIGMAP_PREFIX}-0..N-1 through the
+#                 Kubernetes API with ServiceAccount ${REFS_WRITER_SA} (configmaps
+#                 get/update on those names only). Its token is projected into THIS
+#                 container only (automountServiceAccountToken: false on the pod).
+#
+# Runner = kubectl only: Job .status + `kubectl get configmap` (get on those
+# names). Never `kubectl logs`, no S3 credential. Zone codes are public (no PII).
+# Placeholders: ${NAMESPACE} ${IMAGE} ${DUMP_IMAGE} ${DB_SECRET} ${PGHOST}
+# ${CYCLE_ID} ${BACKUP_DATE} ${REFS_CONFIGMAP_PREFIX} ${REFS_CONFIGMAP_COUNT}
+# ${REFS_WRITER_SA} ${TTL_SECONDS}, plus the BR_SCRIPT placeholder under the
+# `publish` args (never written in a comment: it spans many lines).
+# =============================================================================
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-bascule-served-refs
+  namespace: ${NAMESPACE}
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: served-refs
+    sentropic.io/bascule: served-refs
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: ${TTL_SECONDS}
+  activeDeadlineSeconds: 900
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/part-of: sentropic
+        app.kubernetes.io/component: served-refs
+        sentropic.io/bascule: served-refs
+    spec:
+      restartPolicy: Never
+      serviceAccountName: ${REFS_WRITER_SA}
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+        - name: work
+          emptyDir: { sizeLimit: 256Mi }
+        - name: tmp
+          emptyDir: { sizeLimit: 64Mi }
+        - name: refs-writer
+          projected:
+            sources:
+              - serviceAccountToken: { path: token, expirationSeconds: 3600 }
+              - configMap: { name: kube-root-ca.crt, items: [{ key: ca.crt, path: ca.crt }] }
+      initContainers:
+        - name: extract
+          image: ${DUMP_IMAGE}
+          imagePullPolicy: IfNotPresent
+          command: ["bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              refs="WITH refs AS (
+                SELECT target_id AS canonical_id, 'geo_resolutions'::text AS src FROM geo_resolutions WHERE target_type = 'Zone'
+                UNION ALL SELECT zone_canonical_id, 'opportunity_dossiers' FROM opportunity_dossiers WHERE zone_canonical_id IS NOT NULL
+                UNION ALL SELECT target_canonical_id, 'constraint_hits' FROM constraint_hits WHERE target_kind = 'zone'
+                UNION ALL SELECT canonical_id, 'zone_versions' FROM zone_versions WHERE known_to IS NULL
+              )"
+              psql -X -v ON_ERROR_STOP=1 -At -F "$(printf '\t')" -c "$refs,
+                zv AS (
+                  SELECT DISTINCT ON (canonical_id) canonical_id, city_slug, code_affiche
+                  FROM zone_versions ORDER BY canonical_id, (known_to IS NULL) DESC, known_from DESC
+                )
+                SELECT DISTINCT
+                  COALESCE(zv.city_slug, split_part(r.canonical_id, ':', 3)) AS city_slug,
+                  COALESCE(zv.code_affiche, regexp_replace(r.canonical_id, '^ogc:zones:[^:]+:', '')) AS zone_code
+                FROM refs r LEFT JOIN zv ON zv.canonical_id = r.canonical_id
+                WHERE r.canonical_id LIKE 'ogc:zones:%'
+                ORDER BY 1, 2" > /work/refs.tsv
+              psql -X -v ON_ERROR_STOP=1 -At -F "$(printf '\t')" -c "$refs
+                SELECT src, count(DISTINCT canonical_id) FROM refs WHERE canonical_id LIKE 'ogc:zones:%' GROUP BY src ORDER BY src" > /work/sources.tsv
+              echo "[extract] rows=$(wc -l < /work/refs.tsv) (read-only transaction)"
+          env:
+            - { name: PGHOST, value: "${PGHOST}" }
+            - { name: PGOPTIONS, value: "-c default_transaction_read_only=on" }
+            - { name: PGAPPNAME, value: "radar-bascule-served-refs" }
+            - { name: PGUSER, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_USER } } }
+            - { name: PGPASSWORD, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_PASSWORD } } }
+            - { name: PGDATABASE, valueFrom: { secretKeyRef: { name: ${DB_SECRET}, key: POSTGRES_DB } } }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests: { cpu: 25m, memory: 64Mi }
+            limits: { cpu: 250m, memory: 256Mi }
+          volumeMounts:
+            - { name: work, mountPath: /work }
+            - { name: tmp, mountPath: /tmp }
+      containers:
+        - name: publish
+          image: ${IMAGE}
+          imagePullPolicy: IfNotPresent
+          workingDir: /workspace/api
+          command: ["node", "-e"]
+          args:
+            - |
+${BR_SCRIPT}
+          env:
+            - { name: CYCLE_ID, value: "${CYCLE_ID}" }
+            - { name: BACKUP_DATE, value: "${BACKUP_DATE}" }
+            - { name: WORK_DIR, value: "/work" }
+            - { name: REFS_CONFIGMAP_PREFIX, value: "${REFS_CONFIGMAP_PREFIX}" }
+            - { name: REFS_CONFIGMAP_COUNT, value: "${REFS_CONFIGMAP_COUNT}" }
+            - { name: KUBE_TOKEN_DIR, value: "/var/run/secrets/refs-writer" }
+            - name: POD_NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests: { cpu: 25m, memory: 128Mi }
+            limits: { cpu: 250m, memory: 512Mi }
+          volumeMounts:
+            - { name: work, mountPath: /work, readOnly: true }
+            - { name: tmp, mountPath: /tmp }
+            - { name: refs-writer, mountPath: /var/run/secrets/refs-writer, readOnly: true }

@@ -8,9 +8,10 @@
 # BR_STEP=list    : every dated manifest still listed (date, status, size, schema, sha).
 #
 # Identity = reader of the backup bucket, Secret ${READER_SECRET}
-# (radar-backup-reader in the preprod namespace; keys S3_ACCESS_KEY, S3_SECRET_KEY,
-# BACKUP_BUCKET): GetObject (incl. versionId), ListBucket, ListBucketVersions.
-# No write right, no DB access.
+# (radar-backup-reader-preprod, dedicated preprod reader, rewritten by the bascule
+# from GitHub before use; keys S3_ACCESS_KEY, S3_SECRET_KEY, BACKUP_BUCKET):
+# GetObject on pg/*, manifests/*, docs-inventory/* (a read with versionId is a
+# GetObject on OVH) + ListBucket. No write right, no DB access.
 #
 # Runner = kubectl only: it reads the Job `.status` and this pod's termination
 # message (verdict JSON <= 4 KiB written by backup-restore.cjs: dates, statuses,

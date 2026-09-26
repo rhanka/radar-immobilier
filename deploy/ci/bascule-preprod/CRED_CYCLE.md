@@ -100,3 +100,36 @@ Verify recovery at any time (any operator/owner/AI, no owner GO):
   radar-backup-reader`; the last `apply-backup` run is green;
 - last `radar-backup-daily` and `radar-backup-freshness` Jobs `Complete`;
   `manifests/latest.json` fresh.
+
+## Preprod restore-from-backup identities (bascule `MODE=restore|list`)
+
+Dedicated preprod identities, created and tested by the k8s lane (2026-09-26).
+Each k8s Secret is **pre-created** (Opaque, no ownerReference, keys
+`S3_ACCESS_KEY`, `S3_SECRET_KEY`, `BACKUP_BUCKET`) in ns `radar-immobilier-preprod`
+and **rewritten by the bascule** at every `MODE=restore|list` run from the secrets
+of the GitHub environment `radar-bascule` (main-only): `kubectl replace
+--dry-run=server` then `kubectl replace` (CI SA `radar-ci-bascule-preprod`:
+secrets get/update by resourceNames only; never create/apply; never a
+SealedSecret). `BACKUP_BUCKET` is the fixed value `radar-immobilier-backup`.
+
+| secret (k8s name) | OVH user | GitHub secrets (env `radar-bascule`) | scope |
+| --- | --- | --- | --- |
+| `radar-backup-reader-preprod` | 809853 | `RADAR_BACKUP_READER_PREPROD_ACCESS_KEY`, `RADAR_BACKUP_READER_PREPROD_SECRET_KEY` | backup bucket: GetObject on `pg/*`, `manifests/*`, `docs-inventory/*` + ListBucket; `docs/` → 403; no write, no delete |
+| `radar-backup-restore-docs` | `radar-backup-restore-preprod` (809849) | `RADAR_BACKUP_RESTORE_DOCS_ACCESS_KEY`, `RADAR_BACKUP_RESTORE_DOCS_SECRET_KEY` | backup bucket: GetObject on `docs/*`; preprod docs bucket: PutObject + PutObjectAcl (versioned CopyObject with GrantFullControl), no delete |
+
+OVH: `s3:GetObjectVersion` is refused in policies; a versioned read (GetObject /
+CopyObject with `versionId`) is covered by GetObject.
+
+**Rotation: every 90 days** (and at once on suspected exposure), one identity at a time:
+
+1. k8s lane: new `s3Credentials` for the OVH user (the old one stays valid for now).
+2. Owner/k8s: update the two GitHub secrets of that identity in the environment
+   `radar-bascule` and the `.env` recovery copy.
+3. Verify with the NEW credential: a `bascule-preprod.yml` run `MODE=list`
+   (reader: step "Write backup Secrets" green, then the backup list printed) and a
+   `MODE=restore` `DRY_RUN=true` run (copy signer: the docs plan of S3' green).
+4. Only then: k8s lane deletes the old credential; record the date (next = +90 days).
+
+Verify recovery at any time: `kubectl -n radar-immobilier-preprod get secret
+radar-backup-reader-preprod radar-backup-restore-docs` (present, 3 keys), last
+`MODE=list` run green.
