@@ -162,13 +162,19 @@ jobs:
 
       - name: Image tags
         id: tags
+        # SECURITY: `tag` is a user-controlled workflow_dispatch input. It is
+        # passed through the step `env` and referenced as the shell variable
+        # `$TAG` — never interpolated as `${{ inputs.tag }}` inside `run:`, which
+        # would splice the raw value into the script (shell injection).
+        env:
+          TAG: ${{ inputs.tag }}
         run: |
           {
             echo "tags<<EOF"
             echo "${IMAGE_PREFIX}/${{ matrix.image }}:${{ steps.vars.outputs.sha }}"
             echo "${IMAGE_PREFIX}/${{ matrix.image }}:latest"
-            if [ -n "${{ inputs.tag }}" ]; then
-              echo "${IMAGE_PREFIX}/${{ matrix.image }}:${{ inputs.tag }}"
+            if [ -n "$TAG" ]; then
+              echo "${IMAGE_PREFIX}/${{ matrix.image }}:$TAG"
             fi
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
