@@ -2,12 +2,13 @@
 # docs-sync-job.tmpl.yaml — COPIE DOCS prod → préprod (S3/S4), Job in-cluster.
 # OPTION A CANONIQUE (server-side aws-sdk CopyObject, co-val k8s + i-infra).
 #
-# RUNNER KUBECTL-ONLY : la copie ne transite JAMAIS par le runner (0 S3 runner),
-# et la CI ne fait AUCUNE opération secret (0 droit secrets). La CI dispatche ce
-# Job + lit `.status` ; k8s crée le secret ÉPHÉMÈRE ${DOCS_SYNC_READ_SECRET}
-# (radar-docs-src-preprod = creds immo-docs-prod) avec ownerRef=Job.UID → GC
-# cascade au TTL du Job (déterministe, Complete OU Failed). Le pod le référence
-# par NOM ; activeDeadlineSeconds couvre le retry de montage pendant la création.
+# RUNNER KUBECTL-ONLY : la copie ne transite JAMAIS par le runner (0 S3 runner).
+# The Secret ${DOCS_SYNC_READ_SECRET} (radar-docs-src-preprod = creds
+# immo-docs-prod, durable least-privilege) is PRE-CREATED by k8s; the bascule
+# REWRITES it at every run from the GitHub secrets of the environment
+# radar-bascule right before this Job (`docs-secret-fill`, kubectl replace,
+# get/update by name) — ci-secrets.mjs. No k8s watcher, no ownerReference.
+# The pod references the Secret by NAME.
 #
 #   container `sync` (image radar-api = aws-sdk @aws-sdk/client-s3, 0 python) :
 #     `node -e` : (1) PRÉ-CHECK GET fail-closed (HEAD 1 objet prod — l'owner
@@ -35,8 +36,8 @@
 #
 # FAIL-CLOSED : backoffLimit 0 + restartPolicy Never. Runner ne lit que .status.
 #
-# PRÉREQUIS OWNER/IMMO : secret ${DOCS_SYNC_READ_SECRET} créé au GO
-# (S3_ACCESS_KEY/S3_SECRET_KEY, read prod + rw préprod, ownerRef=ce Job) ;
+# PRÉREQUIS : secret ${DOCS_SYNC_READ_SECRET} pre-created (keys
+# S3_ACCESS_KEY/S3_SECRET_KEY, rewritten by the bascule: read prod + rw préprod) ;
 # ${COPY_GRANTEE} = canonical id radar-docs préprod.
 #
 # Placeholders : ${NAMESPACE} ${IMAGE} ${DOCS_SYNC_READ_SECRET} ${S3_ENDPOINT}
@@ -46,8 +47,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  # NOM EXACT (co-val k8s) : k8s watch `docs-sync-prod-to-preprod` pour lire l'UID
-  # et créer le secret éphémère radar-docs-src-preprod avec ownerRef=Job.UID.
+  # Stable name (evidence/runbooks); the Secret no longer depends on it.
   name: docs-sync-prod-to-preprod
   namespace: ${NAMESPACE}
   labels:
@@ -57,10 +57,7 @@ metadata:
     sentropic.io/bascule: docs-sync
 spec:
   backoffLimit: 0
-  # TTL figé côté template CI : borne la vie du secret éphémère (ownerRef) à ~1h
-  # après l'état terminal du Job.
   ttlSecondsAfterFinished: 3600
-  # Couvre le retry de montage du secret pendant que k8s le crée (ownerRef).
   activeDeadlineSeconds: 7200
   template:
     metadata:

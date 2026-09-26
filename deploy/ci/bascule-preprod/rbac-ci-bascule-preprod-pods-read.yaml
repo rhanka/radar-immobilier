@@ -1,0 +1,31 @@
+# Bascule MODE=restore|list — RBAC ADDITION for the SA radar-ci-bascule-preprod
+# (kubeconfig KUBE_CONFIG_DATA_BASCULE_PREPROD), ns radar-immobilier-preprod.
+# Applied by the k8s lane after review (install-time). Read-only.
+#
+# Why: the backup Jobs (backup-read / db-restore-backup / docs-restore-backup)
+# return their verdict details — resolved backup date, manifest and dump
+# sha256, backup list, counts — in the container TERMINATION MESSAGE (JSON
+# <= 4 KiB written by backup-restore.cjs: dates, statuses, sizes, sha256,
+# counts; never a doc key, a row or a credential). The runner reads it from the
+# pod `.status` (`kubectl get pods -l job-name=<job> -o json`). No `pods/log`,
+# no exec, no write.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: radar-ci-bascule-preprod-pods-read
+  namespace: radar-immobilier-preprod
+  labels: { role: ci-bascule-preprod, usage: bascule-restore-verdict }
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: radar-ci-bascule-preprod-pods-read
+  namespace: radar-immobilier-preprod
+  labels: { role: ci-bascule-preprod, usage: bascule-restore-verdict }
+roleRef: { apiGroup: rbac.authorization.k8s.io, kind: Role, name: radar-ci-bascule-preprod-pods-read }
+subjects:
+  - { kind: ServiceAccount, name: radar-ci-bascule-preprod, namespace: radar-immobilier-preprod }
