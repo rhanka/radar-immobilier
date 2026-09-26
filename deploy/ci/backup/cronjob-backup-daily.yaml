@@ -189,7 +189,7 @@ spec:
                 - { name: NODE_PATH, value: "/workspace/node_modules" }
                 - { name: NODE_OPTIONS, value: "--max-old-space-size=512 --dns-result-order=ipv4first" }
                 - { name: AWS_EC2_METADATA_DISABLED, value: "true" }
-                # Identity radar-backup-writer (SealedSecret, k8s lane): read docs prod;
+                # Identity radar-backup-writer (Secret written by the CD from GitHub): read docs prod;
                 # backup bucket Put/Get/List/multipart. NO delete right of any kind.
                 - { name: S3_ENDPOINT,        valueFrom: { secretKeyRef: { name: radar-backup-writer, key: S3_ENDPOINT } } }
                 - { name: S3_REGION,          valueFrom: { secretKeyRef: { name: radar-backup-writer, key: S3_REGION } } }
@@ -235,7 +235,7 @@ spec:
                 - { name: NODE_PATH, value: "/workspace/node_modules" }
                 - { name: NODE_OPTIONS, value: "--max-old-space-size=128 --dns-result-order=ipv4first" }
                 - { name: AWS_EC2_METADATA_DISABLED, value: "true" }
-                # Identity radar-backup-purger (SealedSecret, k8s lane): DeleteObject without
+                # Identity radar-backup-purger (Secret written by the CD from GitHub): DeleteObject without
                 # VersionId on pg/*, manifests/*, docs-inventory/* ONLY.
                 - { name: S3_ENDPOINT,   valueFrom: { secretKeyRef: { name: radar-backup-purger, key: S3_ENDPOINT } } }
                 - { name: S3_REGION,     valueFrom: { secretKeyRef: { name: radar-backup-purger, key: S3_REGION } } }

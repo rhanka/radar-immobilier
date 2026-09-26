@@ -5,7 +5,7 @@
 // 0 network, 0 cluster, 0 real S3, 0 DB: pure helpers + the full runBackup flow
 // against an in-memory VERSIONED S3 fake (delete-markers, ListObjectVersions,
 // multipart, Content-MD5 verification, pagination), plus static checks of the
-// CronJob / SealedSecrets / RBAC / CD wiring.
+// CronJob / RBAC / CD wiring (incl. the step writing the backup Secrets from GitHub).
 //
 //   node deploy/ci/backup/backup-daily.selftest.mjs   → exit 0 when all pass.
 // =============================================================================
@@ -19,6 +19,7 @@ import path from 'node:path';
 import { Readable } from 'node:stream';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 
 const require = createRequire(import.meta.url);
 const lib = require('./backup-daily.cjs');
@@ -740,27 +741,131 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
     .concat([['S3_ENDPOINT', 'e'], ['S3_REGION', 'r'], ['S3_ACCESS_KEY', 'a'], ['S3_SECRET_KEY', 's'], ['BACKUP_BUCKET', BK], ['SOURCE_DOCS_BUCKET', DOCS]])));
   eq('CronJob values parse into the documented retention', cfg.retention, { dailyDays: 7, weeklyWeeks: 4, monthlyMonths: 6, minKeep: 7 });
 }
+// ── Backup identities: GitHub Environment radar-backup-prod → core Secrets written by the CD.
+// Owner rule: NO SealedSecret committed for them; source of truth = GitHub + the k8s lane `.env`.
+const IDS = ['writer', 'reader', 'purger'];
+const WANT_KEYS = {
+  writer: ['BACKUP_BUCKET', 'S3_ACCESS_KEY', 'S3_ENDPOINT', 'S3_REGION', 'S3_SECRET_KEY', 'SOURCE_DOCS_BUCKET'],
+  reader: ['BACKUP_BUCKET', 'S3_ACCESS_KEY', 'S3_ENDPOINT', 'S3_REGION', 'S3_SECRET_KEY'],
+  purger: ['BACKUP_BUCKET', 'S3_ACCESS_KEY', 'S3_ENDPOINT', 'S3_REGION', 'S3_SECRET_KEY'],
+};
+const GH_SECRETS = IDS.flatMap((id) => [`RADAR_BACKUP_${id.toUpperCase()}_ACCESS_KEY`, `RADAR_BACKUP_${id.toUpperCase()}_SECRET_KEY`]);
+const GH_VARS = ['BACKUP_S3_ENDPOINT', 'BACKUP_S3_REGION', 'BACKUP_BUCKET', 'BACKUP_SOURCE_BUCKET'];
+const wf = read('.github/workflows/bascule-bundle-cd.yml');
+const backupJob = (/\n {2}apply-backup:\n([\s\S]*?)(?=\n {2}[a-z][a-z0-9-]*:\n|$)/.exec(wf) || [])[1] || '';
+const jobSteps = backupJob.split(/\n(?= {6}- (?:name|uses): )/).slice(1);
+const secretStep = jobSteps.find((s) => /^ {6}- name: Write backup Secrets from GitHub/.test(s)) || '';
+// `run:` bodies of a workflow text (block `run: |` and one-line `run: …`).
+const runBodies = (text) => {
+  const out = []; const lines = text.split('\n');
+  for (let i = 0; i < lines.length; i += 1) {
+    const m = /^(\s*)(?:- )?run: ?(.*)$/.exec(lines[i]);
+    if (!m) continue;
+    if (!/^[|>]/.test(m[2])) { out.push(m[2]); continue; }
+    const body = [];
+    for (let j = i + 1; j < lines.length && (lines[j].trim() === '' || lines[j].search(/\S/) > m[1].length); j += 1) body.push(lines[j]);
+    out.push(body.join('\n'));
+  }
+  return out;
+};
+const secretRun = runBodies(secretStep).join('\n');
+const activeLines = (t) => t.split('\n').filter((l) => !/^\s*(#|\/\/)/.test(l)).join('\n');
 {
-  const w = read('deploy/ci/backup/radar-backup-writer-sealed.yaml');
-  const r = read('deploy/ci/backup/radar-backup-reader-sealed.yaml');
-  const keys = (t) => [...t.matchAll(/^ {4}([A-Z_0-9]+): Ag/mg)].map((x) => x[1]).sort();
-  ok('writer SealedSecret name/ns', /kind: SealedSecret/.test(w) && /name: radar-backup-writer\n\s+namespace: radar-immobilier/.test(w));
-  eq('writer keys', keys(w), ['BACKUP_BUCKET', 'S3_ACCESS_KEY', 'S3_ENDPOINT', 'S3_REGION', 'S3_SECRET_KEY', 'SOURCE_DOCS_BUCKET']);
-  ok('reader SealedSecret name/ns', /kind: SealedSecret/.test(r) && /name: radar-backup-reader\n\s+namespace: radar-immobilier/.test(r));
-  eq('reader keys', keys(r), ['BACKUP_BUCKET', 'S3_ACCESS_KEY', 'S3_ENDPOINT', 'S3_REGION', 'S3_SECRET_KEY']);
-  const p = read('deploy/ci/backup/radar-backup-purger-sealed.yaml');
-  ok('purger SealedSecret name/ns', /^kind: SealedSecret/m.test(p) && /name: radar-backup-purger\n\s+namespace: radar-immobilier/.test(p));
-  eq('purger keys', keys(p), ['BACKUP_BUCKET', 'S3_ACCESS_KEY', 'S3_ENDPOINT', 'S3_REGION', 'S3_SECRET_KEY']);
+  const dir = path.join(ROOT, 'deploy/ci/backup');
+  const files = fs.readdirSync(dir);
+  ok('no SealedSecret committed for the backup identities (no *sealed* file, no kind: SealedSecret)',
+    !files.some((f) => /sealed/i.test(f)) && files.filter((f) => /\.ya?ml$/.test(f)).every((f) => !/^kind: SealedSecret/m.test(read(`deploy/ci/backup/${f}`))));
+  ok('CD apply-backup: no SealedSecret apply/wait left in the job', !/kubectl[^\n]*sealedsecret|sealed[^\s]*\.ya?ml|kind: SealedSecret/i.test(activeLines(backupJob)));
+  ok('CD apply-backup: runs in the main-only Environment radar-backup-prod', /\n {4}environment: radar-backup-prod\n/.test(backupJob));
+  const envMap = Object.fromEntries([...secretStep.matchAll(/^ {10}([A-Z0-9_]+): \$\{\{ (secrets|vars)\.([A-Z0-9_]+) \}\}$/mg)].map((x) => [x[1], `${x[2]}.${x[3]}`]));
+  eq('CD secret step: env = the 6 GitHub secrets + the 4 GitHub variables, same names',
+    envMap, Object.fromEntries([...GH_SECRETS.map((n) => [n, `secrets.${n}`]), ...GH_VARS.map((n) => [n, `vars.${n}`])]));
+  ok('CD workflow: no ${{ secrets.* }} interpolated in any run: block', runBodies(wf).every((b) => !/\$\{\{\s*secrets\./.test(b)));
+  ok('CD secret step: no ${{ }} expression at all in its run: block', secretRun.length > 0 && !secretRun.includes('${{'));
+  ok('CD apply-backup: no xtrace, no --from-literal (values never in argv or logs)',
+    !/set -[a-z]*x|set -o xtrace|--from-literal/.test(activeLines(backupJob)));
+  const keysOf = (id) => ((new RegExp(`\\n\\s+\\[${id}\\]="([^"]*)"`).exec(secretRun) || [])[1] || '').split(/\s+/).filter(Boolean).sort();
+  for (const id of IDS) eq(`CD secret step: radar-backup-${id} keys`, keysOf(id), WANT_KEYS[id]);
+  // The keys written = exactly the keys the two CronJobs mount from each identity.
+  const mounted = {};
+  for (const t of [read('deploy/ci/backup/cronjob-backup-daily.yaml'), read('deploy/ci/backup/cronjob-backup-freshness.yaml')]) {
+    for (const x of t.matchAll(/secretKeyRef: \{ name: radar-backup-([a-z]+), key: ([A-Z_0-9]+) \}/g)) (mounted[x[1]] ||= new Set()).add(x[2]);
+  }
+  eq('CD secret step keys = keys mounted by the CronJobs, per identity', IDS.map((id) => keysOf(id)), IDS.map((id) => [...(mounted[id] || [])].sort()));
+  const iGuard = secretRun.indexOf('(missing)'); const iBucket = secretRun.indexOf('EXPECTED_BACKUP_BUCKET');
+  const iGet = secretRun.indexOf('get secret'); const iDry = secretRun.indexOf(' replace --dry-run=server -f ');
+  const iDryOk = secretRun.indexOf('server-side dry-run OK for the 3 Secrets'); const iReplace = secretRun.indexOf(' replace -f "$tmp/');
+  ok('CD secret step: fail-closed order — values guard, bucket guard, Secrets exist, dry-run of the 3, then the real replace',
+    iGuard > 0 && iGuard < iBucket && iBucket < iGet && iGet < iDry && iDry < iDryOk && iDryOk < iReplace && secretRun.indexOf('kubectl') > iGuard &&
+    secretRun.includes('EXPECTED_SOURCE_DOCS_BUCKET') && /multi-line/.test(secretRun));
+  const kubectlCalls = [...activeLines(secretRun).matchAll(/\bkubectl\s+(?:-n\s+"\$NAMESPACE"\s+)?([a-z-]+)([^\n]*)/g)].map((x) => [x[1], x[2]]);
+  eq('CD secret step: kubectl verbs = get, create (client-side), label (local), replace — never apply/patch/delete',
+    [...new Set(kubectlCalls.map((c) => c[0]))].sort(), ['create', 'get', 'label', 'replace']);
+  const replaces = kubectlCalls.filter(([v]) => v === 'replace').map(([, rest]) => rest.trim());
+  eq('CD secret step: exactly 2 replace calls — server-side dry-run, then the real PUT — of the rendered manifests',
+    replaces, ['--dry-run=server -f "$tmp/${id}.yaml" -o json | keys_json)" || [ "$live" != "$(want_of "$id")" ]; then', '-f "$tmp/${id}.yaml" -o json | keys_json)" || [ "$live" != "$(want_of "$id")" ]; then']);
+  ok('CD secret step: create is client-side only (--dry-run=client), label is --local',
+    kubectlCalls.every(([v, rest]) => (v !== 'create' || /--dry-run=client/.test(rest)) && (v !== 'label' || /--local/.test(rest))) &&
+    /create secret generic "radar-backup-\$\{id\}" --type=Opaque "\$\{args\[@\]\}" --dry-run=client -o yaml/.test(secretRun));
+  ok('CD secret step: S3 target pinned + credential charset/length', /PINNED_S3_ENDPOINT="https:\/\/s3\.bhs\.io\.cloud\.ovh\.net"/.test(secretRun) &&
+    /PINNED_S3_REGION="bhs"/.test(secretRun) && secretRun.includes("RE_ACCESS_KEY='^[A-Za-z0-9]{16,128}$'") && secretRun.includes("RE_SECRET_KEY='^[A-Za-z0-9/+=]{16,128}$'"));
+  const guardEnd = secretRun.indexOf('# 3. The three Secrets exist');
+  // kubectl is a function that aborts (97): the guard must decide before any cluster call.
+  const guardScript = guardEnd > 0 ? `kubectl() { echo KUBECTL-CALLED; exit 97; }\n${secretRun.slice(0, guardEnd)}\necho GUARD-PASSED\n` : 'exit 99';
+  const fakeVals = Object.fromEntries(GH_SECRETS.map((n, i) => [n, n.endsWith('_ACCESS_KEY') ? `AKFAKE${i}0123456789abcdef` : `SKFAKE${i}/+=0123456789abcdef`]));
+  const goodEnv = { NAMESPACE: 'radar-immobilier', BACKUP_DIR: 'deploy/ci/backup', ...fakeVals, BACKUP_S3_ENDPOINT: 'https://s3.bhs.io.cloud.ovh.net', BACKUP_S3_REGION: 'bhs',
+    BACKUP_BUCKET: BK, BACKUP_SOURCE_BUCKET: DOCS };
+  const guard = (over) => {
+    const r = spawnSync('bash', ['-e', '-c', guardScript], { cwd: ROOT, encoding: 'utf8', env: { PATH: '/usr/bin:/bin', ...goodEnv, ...over } });
+    const out = `${r.stdout || ''}${r.stderr || ''}`;
+    return { passed: r.status === 0 && out.includes('GUARD-PASSED'), refused: r.status === 1 && out.includes('Nothing was applied') && !out.includes('GUARD-PASSED'),
+      leak: Object.values(fakeVals).some((v) => out.includes(v)) };
+  };
+  const good = guard({});
+  ok('CD secret step guard (bash): valid GitHub values pass, nothing echoed', good.passed && !good.leak);
+  const W = 'RADAR_BACKUP_WRITER', R = 'RADAR_BACKUP_READER', U = 'RADAR_BACKUP_PURGER';
+  for (const [name, over] of [
+    ['missing secret', { [`${U}_SECRET_KEY`]: '' }], ['missing variable', { BACKUP_S3_REGION: '' }],
+    ['multi-line secret', { [`${R}_ACCESS_KEY`]: 'AKFAKE0123456789abcd\n' }], ['CR in a value', { [`${W}_SECRET_KEY`]: 'SKFAKE0123456789abcd\r' }],
+    ['access key charset', { [`${W}_ACCESS_KEY`]: 'AKFAKE-0123456789abc' }], ['access key too short', { [`${R}_ACCESS_KEY`]: 'AKFAKE012345678' }],
+    ['access key too long', { [`${U}_ACCESS_KEY`]: `AKFAKE${'a'.repeat(123)}` }], ['secret key charset (quote)', { [`${W}_SECRET_KEY`]: 'SKFAKE"0123456789abc' }],
+    ['secret key charset (space)', { [`${U}_SECRET_KEY`]: 'SKFAKE 0123456789abc' }], ['endpoint not pinned (no scheme)', { BACKUP_S3_ENDPOINT: 's3.bhs.io.cloud.ovh.net' }],
+    ['endpoint not pinned (other region)', { BACKUP_S3_ENDPOINT: 'https://s3.gra.io.cloud.ovh.net' }], ['region not pinned', { BACKUP_S3_REGION: 'gra' }],
+    ['backup bucket mismatch', { BACKUP_BUCKET: 'other-bucket' }], ['source bucket mismatch', { BACKUP_SOURCE_BUCKET: 'other-source' }],
+  ]) {
+    const g = guard(over);
+    ok(`CD secret step guard (bash): ${name} → refused before any kubectl, no value echoed`, g.refused && !g.leak);
+  }
+  ok('CD secret step: values from 0600 files of a temp dir removed on exit', /umask 077/.test(secretRun) && /mktemp -d/.test(secretRun) &&
+    /trap 'rm -rf "\$tmp"' EXIT/.test(secretRun) && /--from-file=\$\{k\}=/.test(secretRun));
+  ok('CD secret step: Secrets labelled app.kubernetes.io/component=db-backup', /app\.kubernetes\.io\/component=db-backup/.test(secretRun));
+  const names = jobSteps.map((s) => (/- name: (.*)/.exec(s) || [])[1] || '');
+  const at = (p) => names.findIndex((n) => n.startsWith(p));
+  ok('CD apply-backup: kubeconfig → pre-flight → Secrets → ConfigMap/CronJobs', at('Configure kubeconfig') < at('Pre-flight') &&
+    at('Pre-flight') < at('Write backup Secrets') && at('Write backup Secrets') < at('Apply script ConfigMap'));
 }
 {
   const rbac = read('deploy/ci/bascule-preprod/rbac-ci-bascule-prod.yaml');
-  ok('CD Role: the 3 backup SealedSecrets name-scoped', /resourceNames: \["radar-db-ro-prod", "radar-pra-admin-prod", "radar-backup-writer", "radar-backup-reader", "radar-backup-purger"\]/.test(rbac));
+  const role = rbac.split(/^---\s*$/m).find((d) => /^kind: Role$/m.test(d) && /^ {2}name: radar-ci-bascule-prod$/m.test(d)) || '';
+  const list = (s) => (s || '').split(',').map((x) => x.trim()).filter(Boolean).map((x) => x.replace(/^"|"$/g, ''));
+  const rules = role.split(/\n {2}- apiGroups: /).slice(1).map((r) => ({
+    groups: list((/^\[([^\]]*)\]/.exec(r) || [])[1]),
+    resources: list((/\n {4}resources: \[([^\]]*)\]/.exec(r) || [])[1]),
+    verbs: list((/\n {4}verbs: \[([^\]]*)\]/.exec(r) || [])[1]),
+    names: list((/\n {4}resourceNames: \[([^\]]*)\]/.exec(r) || [])[1]),
+  }));
+  const secretRules = rules.filter((r) => r.groups.includes('') && r.resources.some((x) => x === 'secrets' || x === '*'));
+  eq('CD Role: core secrets = ONE rule, get/update on the 3 backup names only (no create/patch/list/watch/delete)',
+    secretRules.map((r) => [r.resources, [...r.verbs].sort(), [...r.names].sort()]),
+    [[['secrets'], ['get', 'update'], ['radar-backup-purger', 'radar-backup-reader', 'radar-backup-writer']]]);
+  ok('CD Role: no wildcard verb or resource', rules.every((r) => !r.verbs.includes('*') && !r.resources.includes('*')));
+  const ssRules = rules.filter((r) => r.resources.includes('sealedsecrets'));
+  eq('CD Role: sealedsecrets name-scoped to the 2 bundle SealedSecrets only (no backup name)',
+    ssRules.filter((r) => r.names.length).map((r) => r.names), [['radar-db-ro-prod', 'radar-pra-admin-prod']]);
   ok('CD Role: both CronJobs + script ConfigMap name-scoped', /"radar-backup-daily", "radar-backup-freshness"\]/.test(rbac) && /"radar-backup-daily-script"\]/.test(rbac));
-  const wf = read('.github/workflows/bascule-bundle-cd.yml');
-  ok('CD workflow: path trigger + arming var + 3 SealedSecrets (fail-closed on placeholder) + ConfigMap + 2 CronJobs',
-    wf.includes("'deploy/ci/backup/**'") && wf.includes('BACKUP_DAILY_CD_ENABLED') && wf.includes('for id in writer reader purger') &&
-    wf.includes("grep -q '^kind: SealedSecret'") && wf.includes('radar-backup-daily-script') && wf.includes('cronjob-backup-daily.yaml') &&
-    wf.includes('cronjob-backup-freshness.yaml'));
+  ok('CD workflow: path trigger + arming var + ConfigMap + 2 CronJobs',
+    wf.includes("'deploy/ci/backup/**'") && wf.includes('BACKUP_DAILY_CD_ENABLED') && wf.includes('radar-backup-daily-script') &&
+    wf.includes('cronjob-backup-daily.yaml') && wf.includes('cronjob-backup-freshness.yaml'));
   ok('CD workflow: apply-bundle is skipped on a backup_run_now dispatch (no CPU race with the backup pod)',
     wf.includes("if: vars.BASCULE_BUNDLE_CD_ENABLED == 'true' && !(github.event_name == 'workflow_dispatch' && inputs.backup_run_now)"));
   const ro = read('deploy/ci/bascule-preprod/db-ro-role-provision.yaml');
