@@ -46,6 +46,15 @@
 # an impersonation dry-run. NO PII, NO dump bytes, NO S3 keys read back (the S3
 # keys never touch the runner — they arrive as a SealedSecret and are decrypted
 # only in-cluster by the controller).
+#
+# SECOND JOB `apply-backup` — the DAILY PROD BACKUP (deploy/ci/backup/README.md):
+# same permanent SA, same positive PROD pre-flight, its own arming switch
+# BACKUP_DAILY_CD_ENABLED and its own failure domain (no `needs`: a backup apply
+# problem never blocks the bascule bundle or its anti-RCE gate, and vice versa).
+# It applies the SealedSecrets radar-backup-writer/-reader, the ConfigMap
+# radar-backup-daily-script (rendered from deploy/ci/backup/backup-daily.cjs) and
+# the CronJob radar-backup-daily. Same runner contract: kubectl only, 0 backup
+# content read, 0 secret material on the runner.
 name: bascule-bundle-cd (prod bundle apply, CD-native v2)
 
 on:
@@ -57,10 +66,16 @@ on:
     # unrelated merge while still self-healing on any bundle edit.
     paths:
       - 'deploy/ci/bascule-preprod/**'
+      - 'deploy/ci/backup/**'
       - '.github/workflows/bascule-bundle-cd.yml'
   # KEPT for the first run right after cluster install and for an on-demand
   # re-apply — NOT a required gate (the merge path is what makes it automated).
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      backup_run_now:
+        description: "apply-backup: also start one radar-backup-daily run now (create job --from=cronjob)"
+        type: boolean
+        default: false
 
 concurrency:
   group: bascule-bundle-cd
@@ -284,4 +299,118 @@ jobs:
             echo "- VAP: radar-ci-trigger-suspend-only (cluster-scoped)"
             echo "- RBAC T1: radar-ci-trigger-prod (SA/Role/RoleBinding)"
             echo "- Anti-RCE gate: jobTemplate DENIED + suspend ALLOWED"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ── Daily prod backup (deploy/ci/backup/) — independent job ──────────────────
+  apply-backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Two switches: the bundle CD is armed (the permanent SA exists) AND the k8s
+    # lane armed the backup AFTER re-applying rbac-ci-bascule-prod.yaml (the new
+    # name-scoped verbs). Merging can never red main against an old Role.
+    if: vars.BASCULE_BUNDLE_CD_ENABLED == 'true' && vars.BACKUP_DAILY_CD_ENABLED == 'true'
+    env:
+      NAMESPACE: radar-immobilier
+      BACKUP_DIR: deploy/ci/backup
+    steps:
+      - uses: actions/checkout@v4
+
+      # Fail-closed BEFORE touching the cluster: the retention/manifest/upload
+      # logic must pass its selftest (in-memory S3 fake, 0 network).
+      - name: Selftest backup logic (0 network)
+        run: node "$BACKUP_DIR/backup-daily.selftest.mjs"
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig (PROD — permanent radar-ci-bascule-prod SA)
+        env:
+          KUBE_CONFIG_DATA_PROD: ${{ secrets.KUBE_CONFIG_DATA_PROD }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.kube"
+          if printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d 2>/dev/null | grep -q '^apiVersion:'; then
+            printf '%s' "$KUBE_CONFIG_DATA_PROD" | base64 -d > "$HOME/.kube/config"
+          else
+            printf '%s' "$KUBE_CONFIG_DATA_PROD" > "$HOME/.kube/config"
+          fi
+          chmod 600 "$HOME/.kube/config"
+
+      - name: Pre-flight — assert PROD cluster
+        env:
+          EXPECTED_KUBE_APISERVER_HOST_PROD: ${{ vars.EXPECTED_KUBE_APISERVER_HOST_PROD || vars.EXPECTED_KUBE_APISERVER_HOST }}
+        run: |
+          set -euo pipefail
+          DEFAULT_HOST='hlhedx.c1.bhs5.k8s.ovh.net'
+          expected="${EXPECTED_KUBE_APISERVER_HOST_PROD:-$DEFAULT_HOST}"
+          server="$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')"
+          host="${server#*://}"; host="${host%%/*}"; host="${host%%:*}"
+          echo "kubeconfig apiserver host : ${host:-<none>}"
+          echo "expected apiserver host   : ${expected}"
+          if [ "$host" != "$expected" ]; then
+            echo "::error title=Wrong cluster — apply-backup refused::kubeconfig targets '${host:-<none>}' but expected '${expected}'. Nothing was applied."; exit 1
+          fi
+          kubectl -n "$NAMESPACE" get deploy radar-api -o name
+          echo "pre-flight OK — ${expected} / namespace ${NAMESPACE}"
+
+      # Committed SealedSecrets (k8s lane, scope strict ns radar-immobilier);
+      # the in-cluster controller materializes the core Secrets. The runner never
+      # sees the plaintext and this SA has 0 secrets verbs.
+      - name: Apply SealedSecrets (radar-backup-writer + radar-backup-reader)
+        run: |
+          set -euo pipefail
+          kubectl -n "$NAMESPACE" apply -f "$BACKUP_DIR/radar-backup-writer-sealed.yaml"
+          kubectl -n "$NAMESPACE" apply -f "$BACKUP_DIR/radar-backup-reader-sealed.yaml"
+
+      - name: Wait for SealedSecrets Synced (tolerant)
+        run: |
+          set -uo pipefail
+          synced_deadline=$((SECONDS + 120))
+          for ss in radar-backup-writer radar-backup-reader; do
+            while :; do
+              s="$(kubectl -n "$NAMESPACE" get sealedsecret "$ss" -o 'jsonpath={.status.conditions[?(@.type=="Synced")].status}' 2>/dev/null || true)"
+              if [ "$s" = "True" ]; then echo "SealedSecret ${ss}: Synced=True"; break; fi
+              if [ "$SECONDS" -ge "$synced_deadline" ]; then
+                echo "::warning title=SealedSecret sync unconfirmed::${ss} did not report Synced=True within the poll window (status='${s:-<empty>}'). The CronJob pod is the backstop: it cannot start without radar-backup-writer."
+                break
+              fi
+              sleep 5
+            done
+          done
+
+      # The script ships as a ConfigMap rendered from the committed file (single
+      # source of truth, the same bytes the selftest exercised), then the CronJob.
+      - name: Apply script ConfigMap + CronJob radar-backup-daily
+        run: |
+          set -euo pipefail
+          kubectl -n "$NAMESPACE" create configmap radar-backup-daily-script \
+            --from-file=backup-daily.cjs="$BACKUP_DIR/backup-daily.cjs" --dry-run=client -o yaml \
+            | kubectl label --local -f - app.kubernetes.io/name=radar-immobilier app.kubernetes.io/part-of=sentropic \
+                app.kubernetes.io/component=db-backup -o yaml \
+            | kubectl -n "$NAMESPACE" apply -f -
+          kubectl -n "$NAMESPACE" apply -f "$BACKUP_DIR/cronjob-backup-daily.yaml"
+          got="$(kubectl -n "$NAMESPACE" get cronjob radar-backup-daily -o jsonpath='{.spec.schedule}|{.spec.suspend}|{.spec.concurrencyPolicy}')"
+          echo "radar-backup-daily schedule|suspend|concurrencyPolicy = ${got}"
+          if [ "$got" != "23 2 * * *|false|Forbid" ]; then
+            echo "::error title=radar-backup-daily not as committed::live spec '${got}' differs from the committed manifest."; exit 1
+          fi
+          echo "script sha256 = $(sha256sum "$BACKUP_DIR/backup-daily.cjs" | cut -d' ' -f1) (recorded by each run as manifest.tool.scriptSha256)"
+
+      - name: Start one run now (workflow_dispatch input backup_run_now)
+        if: github.event_name == 'workflow_dispatch' && inputs.backup_run_now
+        run: |
+          set -euo pipefail
+          job="radar-backup-manual-$(date -u +%Y%m%d%H%M%S)"
+          kubectl -n "$NAMESPACE" create job "$job" --from=cronjob/radar-backup-daily
+          echo "started job/${job} — verdict in-cluster (Job .status + manifests/latest.json); the runner reads no backup content."
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### daily prod backup applied"
+            echo ""
+            echo "- SealedSecrets: radar-backup-writer (job identity), radar-backup-reader (restore identity)"
+            echo "- ConfigMap: radar-backup-daily-script (from deploy/ci/backup/backup-daily.cjs)"
+            echo "- CronJob: radar-backup-daily (23 2 * * * UTC, Forbid) → s3://radar-immobilier-backup"
           } >> "$GITHUB_STEP_SUMMARY"
