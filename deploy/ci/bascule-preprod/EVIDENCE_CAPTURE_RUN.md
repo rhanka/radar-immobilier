@@ -58,7 +58,8 @@ Set once: `PNS=radar-immobilier-preprod ; CJNS=radar-immobilier ; CJ=radar-db-ba
 
 SUPERSEDED (owner rule 2026-09-26): no more k8s watcher / ownerReference / GC.
 The Secret is pre-created (no ownerReference) and the bascule rewrites it at every
-run before S3 (step `S3.0 docs-sync Secret`, README "docs-sync Secret"). Evidence:
+run before the quiesce (step `docs-sync Secret — rewrite from GitHub`, S0.s, README
+"docs-sync Secret"; DRY: server dry-run only). Evidence:
 
     kubectl -n "$PNS" get secret radar-docs-src-preprod \
       -o jsonpath='{.metadata.ownerReferences}'          # EXPECT: empty
