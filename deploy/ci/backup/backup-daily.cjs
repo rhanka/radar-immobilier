@@ -387,7 +387,7 @@ function readConfig(env, mode = 'backup') {
   if (cfg.minDocsRatio >= 1) throw new BackupError(EXIT.INTEGRITY, 'invalid MIN_DOCS_RATIO (must be < 1)');
   return cfg;
 }
-// Positive bucket guard (same idea as EXPECTED_DATABASE): a mis-sealed secret
+// Positive bucket guard (same idea as EXPECTED_DATABASE): a misconfigured secret
 // must never make this job write into the docs bucket or read the wrong one.
 function assertBuckets(cfg) {
   if (cfg.expectedBackupBucket && cfg.backupBucket !== cfg.expectedBackupBucket) {
