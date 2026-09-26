@@ -53,6 +53,13 @@ dossier). **0 pg_dump / 0 pg_restore / 0 s5cmd / 0 aws / 0 cred S3 sur le runner
 | `db-migrate-job.tmpl.yaml` | Patron Job migrate (S2c), `node dist/db/migrate.js`. |
 | `refresh-job.tmpl.yaml` | Patron Job refresh différentiel (S6), worker-live delta. |
 | `bascule.selftest.mjs` | Self-test de `classifyJobStatus` (0 appel réel). |
+| `restore-mode.mjs` | `MODE=restore\|list` runner side (restore FROM a daily backup) — section "Restore from a backup". |
+| `backup-restore.cjs` | In-pod steps resolve / list / fetch-dump / docs / recon (embedded in the 3 templates below). |
+| `backup-read-job.tmpl.yaml` · `db-restore-backup-job.tmpl.yaml` · `docs-restore-backup-job.tmpl.yaml` | Jobs of `MODE=restore\|list`. |
+| `docs-sync-secret.mjs` | `docs-secret-fill`: the bascule rewrites `radar-docs-src-preprod` before S3 (GitHub environment `radar-bascule`). |
+| `served-ids.mjs` | e2e contract: `immo-served-canonical-ids-<CYCLE_ID>` + `cycle-leg-immo-<CYCLE_ID>`. |
+| `rbac-ci-bascule-preprod-docs-secret.yaml` · `rbac-ci-bascule-preprod-pods-read.yaml` | RBAC additions for SA `radar-ci-bascule-preprod` (k8s applies after review). |
+| `restore-mode.selftest.mjs` | Offline selftest of all of the above (+ workflow wiring). |
 | `../../../.github/workflows/bascule-preprod.yml` | `workflow_dispatch` S0→S7. |
 | *(NON créé ici)* CronJob `radar-db-backup-prod` | **owner/k8s-délivré**, HORS de ce dossier. `pg_dump --format=custom` prod → `s3://radar-immobilier-backups-preprod/postgres/prod/sets/<ts>/radar.dump`. |
 
@@ -122,7 +129,7 @@ aucun `AWS_*` ni secret S3/DB côté runner. Plus d'install `s5cmd`/postgresql-c
 | --- | --- | --- | --- |
 | `radar-pra-admin` | restore (fetch), rollback (upload) | `S3_ACCESS_KEY`/`S3_SECRET_KEY` — **S3 SEULEMENT** (mesure k8s, PAS de POSTGRES_*) | fetch/upload S3 du bucket backups. |
 | `radar-db-credentials` | restore, rollback, migrate | `POSTGRES_USER/PASSWORD/DB` (user préprod `radar` = superuser → `--clean` OK) | libpq PG* du pg_restore/pg_dump. |
-| `radar-docs-src-preprod` **(ÉPHÉMÈRE)** | **docs-sync UNIQUEMENT** (`docs-sync-prod-to-preprod`) | `S3_ACCESS_KEY`/`S3_SECRET_KEY` (identité **prod-owner** immo-docs-prod) | LECTURE docs PROD + rw préprod + CopyObject. **Créé par k8s** (ownerRef=Job) / **GC cascade au TTL** ; la CI n'y touche jamais. **Jamais référencé par les Jobs de check** (sinon CreateContainerConfigError). |
+| `radar-docs-src-preprod` | **docs-sync UNIQUEMENT** (`docs-sync-prod-to-preprod`) | `S3_ACCESS_KEY`/`S3_SECRET_KEY` (identité **prod-owner** immo-docs-prod) | LECTURE docs PROD + rw préprod + CopyObject. **Pre-created by k8s** (Opaque, no ownerReference); **rewritten by the bascule at every run** right before S3 from the GitHub environment `radar-bascule` (see "docs-sync Secret" below). **Jamais référencé par les Jobs de check**. |
 | `radar-backups-reader-preprod` | **Job freshness (S1)** | `S3_ACCESS_KEY`/`S3_SECRET_KEY` | RO-reader PERSISTANT du bucket backups (LIST/HEAD). Var `FRESHNESS_CHECK_SECRET`. |
 | `radar-docs-s3-credentials` | **migrate (S2c) + refresh (S6)** | `DOCS_S3_ACCESS_KEY`/`DOCS_S3_SECRET_KEY` | creds S3 applicatifs — **aligné sur `radar-refresh-pv` QUI MARCHE (#738)** (l'ancien défaut `radar-s3-credentials` a un access-key bidon, `radar-scrape-s3-credentials` est absent en préprod = RUN blocker corrigé). Vars `S3_SECRET`/`SCRAPE_S3_SECRET`. |
 | `radar-s3-credentials` **(⚠ access-key bidon, cf. QA#6)** | Jobs recon (S3b) + runs/ (S3c) — via `CHECK_DOCS_SECRET` | `S3_ACCESS_KEY`/`S3_SECRET_KEY` | LIST prod+préprod docs. **DRY#4 a réussi avec `radar-docs-reader-preprod`** (RO-reader) → défaut `CHECK_DOCS_SECRET` à trancher (cf. QA#6). |
@@ -134,9 +141,9 @@ aucun `AWS_*` ni secret S3/DB côté runner. Plus d'install `s5cmd`/postgresql-c
 
 ## Docs-sync — Option A CANONIQUE (aws-sdk CopyObject, co-val k8s)
 
-Le Job **`docs-sync-prod-to-preprod`** (nom EXACT, watché par k8s) tourne dans
+Le Job **`docs-sync-prod-to-preprod`** tourne dans
 l'**image radar-api** (aws-sdk `@aws-sdk/client-s3`, 0 python) et utilise
-l'identité **prod-owner ÉPHÉMÈRE** `radar-docs-src-preprod` (creds immo-docs-prod) :
+l'identité **prod-owner** `radar-docs-src-preprod` (creds immo-docs-prod) :
 
 1. **pré-check GET fail-closed** : `HeadObject` d'un objet prod (l'owner passe,
    sinon exit 1) ;
@@ -146,12 +153,30 @@ l'identité **prod-owner ÉPHÉMÈRE** `radar-docs-src-preprod` (creds immo-docs
    explicite (canonical radar-docs préprod) rend les objets copiés **lisibles par
    l'API préprod** (sinon 403 propagé).
 
-**Cycle de vie du secret éphémère (co-val k8s) :** la **CI dispatche le Job** +
-lit `.status` ; **k8s** crée `radar-docs-src-preprod` avec `ownerRef=Job.UID` →
-**GC cascade au `ttlSecondsAfterFinished` (3600s)** du Job (déterministe, Complete
-OU Failed). `activeDeadlineSeconds: 7200` couvre le retry de montage du secret
-pendant que k8s le crée. **La CI ne crée / ne lit / ne supprime AUCUN secret**
-(0 droit secrets runner — pas d'étape cleanup).
+### docs-sync Secret — rewritten by the bascule (owner rule 2026-09-26)
+
+No k8s watcher any more (a scheduled run failed on S3 when nobody created the
+Secret). The Secret `radar-docs-src-preprod` (ns `radar-immobilier-preprod`) is
+**pre-created by k8s** (Opaque, keys `S3_ACCESS_KEY` + `S3_SECRET_KEY` only, no
+ownerReference) and the bascule **rewrites it at every run**, right before S3
+(step `S3.0`, subcommand `docs-secret-fill`, `docs-sync-secret.mjs`):
+
+1. the job `bascule` runs in the GitHub **environment `radar-bascule`** (main-only),
+   secrets `RADAR_DOCS_SYNC_ACCESS_KEY` / `RADAR_DOCS_SYNC_SECRET_KEY` (32–64
+   lowercase hex, one line), passed through the step `env:` only (never
+   interpolated in `run:`, no `set -x`);
+2. guard `^[0-9a-f]{32,64}$` on both values — fail-closed before any kubectl call;
+3. `kubectl get` of the Secret labels/annotations, then `kubectl replace
+   --dry-run=server -f` and `kubectl replace -f` of a JSON manifest written 0600
+   in a 0700 temp dir (removed in `finally`); nothing in argv or logs, kubectl
+   output captured and redacted;
+4. **not blanked** at the end: the credential is durable and least-privilege
+   (read-only on prod docs, write without delete on preprod docs); rewriting it at
+   every run means a crashed run never leaves an empty Secret.
+
+RBAC (k8s applies after review): `rbac-ci-bascule-preprod-docs-secret.yaml` — SA
+`radar-ci-bascule-preprod`, `secrets` verbs `get`,`update`, `resourceNames:
+["radar-docs-src-preprod"]`, nothing else on Secrets. Never a SealedSecret.
 
 ## Rejouer SANS IA
 
@@ -185,16 +210,14 @@ pendant que k8s le crée. **La CI ne crée / ne lit / ne supprime AUCUN secret**
    `radar-backups-reader-preprod` (RO-reader **PERSISTANT** backups, Job freshness ;
    var `FRESHNESS_CHECK_SECRET`) ; `radar-s3-credentials` (**PERSISTANT**, LIST
    prod+préprod docs, Jobs recon + runs/ ; var `CHECK_DOCS_SECRET`) ;
-   `radar-docs-src-preprod` (prod-owner **ÉPHÉMÈRE**, docs-sync uniquement). Tous
+   `radar-docs-src-preprod` (prod-owner, docs-sync uniquement). Tous
    clés `S3_ACCESS_KEY`/`S3_SECRET_KEY`. **Les Jobs de check ne réfèrent JAMAIS le
-   secret éphémère** (sinon CreateContainerConfigError aux pas de check — bug
+   secret docs-sync** (sinon CreateContainerConfigError aux pas de check — bug
    attrapé en DRY). Clés/nom à confirmer (sinon régler les vars ci-dessus).
-   - **`radar-docs-src-preprod` est ÉPHÉMÈRE, géré 100% par k8s** (co-val k8s) : la
-     CI **dispatche** le Job `docs-sync-prod-to-preprod` ; **k8s** watch ce nom,
-     lit l'UID et crée le secret `ownerRef=Job.UID` → **GC cascade au TTL**
-     (3600s). La CI ne crée / ne lit / ne supprime **AUCUN secret** (0 droit
-     secrets runner) — pas d'étape cleanup. `activeDeadlineSeconds: 7200` couvre le
-     retry de montage pendant la création. **RIEN à ajouter au RBAC ci-deployer.**
+   - **`radar-docs-src-preprod`** : pre-created by k8s, **rewritten by the bascule
+     at every run** from the GitHub environment `radar-bascule` (section
+     "docs-sync Secret" above; RBAC `rbac-ci-bascule-preprod-docs-secret.yaml`).
+     No k8s watcher.
 4. **Grant docs-sync sur OVH BHS.** `DOCS_SYNC_GRANTEE` = canonical id radar-docs
    préprod (défaut `1901410700457444:user-Wq74B63YQum8`). **Item DRY** : vérifier
    que l'endpoint OVH BHS honore bien `CopyObject` avec `GrantFullControl` (ACL S3
@@ -219,6 +242,83 @@ pendant que k8s le crée. **La CI ne crée / ne lit / ne supprime AUCUN secret**
   advisory PROD_DOCS). Défense en profondeur : `refresh` re-dispatche le Job runs/.
   Échappatoire `ASSERT_RUNS_MEMORY=0`.
 
+## Restore from a backup — `MODE=restore` / `MODE=list`
+
+Workflow input `MODE`: `chain` (default, and always for a scheduled run: live
+dump S1, sequence above, unchanged) | `restore` (restore preprod FROM a daily
+backup of `radar-immobilier-backup`, see `../backup/`) | `list` (read-only).
+Logic: `restore-mode.mjs` (runner, kubectl only) + `backup-restore.cjs` (in-pod
+steps, embedded verbatim in the Job templates with `node -e`, image radar-api =
+Node + `@aws-sdk/client-s3`, 0 python, 0 new image). The scheduled restore stays
+frozen by `BASCULE_SCHEDULE_ENABLED=false` (untouched).
+
+### Inputs
+
+| Input | Values | Effect |
+| --- | --- | --- |
+| `MODE` | `chain` \| `restore` \| `list` | see above |
+| `BACKUP_ID` | `latest` (default) \| `YYYY-MM-DD` | `latest` = `manifests/latest.json` → `latestComplete` (never the newest partial/incomplete); a date = `manifests/<D>.json` |
+| `ALLOW_STALE_BACKUP` | `false` (default) \| `true` | accept a `latest` older than 24 h |
+| `CYCLE_ID` | empty \| `^[A-Za-z0-9._-]{1,100}$` | e2e contract (orchestrator `bascule-e2e.yml`) |
+| `CONFIRM` / `DRY_RUN` | unchanged | G3 anti-replay unchanged; `DRY_RUN=true` = read-only |
+
+### Sequence (`MODE=restore`)
+
+| Step | Subcommand | What happens | Where |
+| --- | --- | --- | --- |
+| S0 | `preflight-backup` | binaries, params (`EXPECTED_DATABASE`, `BHS`, `PREPROD_DOCS`, `DUMP_BUCKET`), `BACKUP_ID`/`CYCLE_ID` format, `PREPROD_DOCS` ≠ `PROD_DOCS` | runner |
+| R0 | `backup-resolve` | **read-only Job, BEFORE the quiesce**: `BACKUP_ID` → date D; refuses unless `status: complete`; `latest` older than 24 h (age = `pg.dumpStartedAt`, the RPO point) refused unless `ALLOW_STALE_BACKUP=true`; an explicit date is never blocked by its age (logged); `.sha256` sidecar = manifest `pg.sha256`, dump size = manifest, inventory present. Writes the **PIN** `backup-pin.json` (D + manifest sha256 + dump sha256) | Job `radar-bascule-backup-resolve` |
+| Q | `quiesce` | unchanged | kubectl |
+| S2 | `restore-backup` | G3, **G2** quiesce, **G1** rollback of the preprod DB (same Job as chain), then Job: `fetch` (re-reads `manifests/<D>.json`, sha256 must equal the PIN — a same-day manual backup re-run rewrites it; downloads `pg/<D>/radar.dump` by its manifest version id streaming a sha256; refuses unless it equals manifest = sidecar = PIN) → `restore` (`pg_restore --list`: TOC entries = manifest, archive dbname = `EXPECTED_DATABASE`; `pg_restore --clean --if-exists --single-transaction --exit-on-error`). **No S1** | Job `radar-db-restore-backup` |
+| S2c | `migrate` | unchanged (delta migrations of `main` on the data of D) | Job |
+| S3' | `docs-restore` | G3; docs state **at D**: `docs-inventory/<D>.json` (sha256 = manifest) + `ListObjectVersions(<backup>/docs/)` + preprod listing → every `backed-up` entry whose preprod copy is not already the same content (size + ETag) is copied **server-side** (`CopyObject`, 0 byte through the pod or the runner) from `<backup>/docs/<key>?versionId=<v>` — the recorded version, else the version whose ETag is the inventory's (object rewritten since D). Additive (no delete; preprod objects newer than D are kept and counted). Any object not in the backup or without a restorable version ⇒ refusal before the first copy | Job `radar-docs-restore-backup` |
+| S3b' | `recon-backup` | preprod docs ⊇ inventory(D), Key + Size; writes the `recon.ok.json` sentinel (mode restore + D + manifest sha256) | Job `radar-bascule-recon-backup` |
+| S5 | `flip` | **G4** = sentinel of THIS backup + `recon-backup` re-run | kubectl |
+| U / S7 | `unquiesce` / `smoke` | unchanged | kubectl / curl |
+
+No refresh in `MODE=restore` (a restore is a restore). `DRY_RUN=true` runs S0 +
+R0 + `docs-restore --dry` (plan only: every inventory object restorable?) + S7.
+`MODE=list` runs S0 + Job `radar-bascule-backup-list` (every dated manifest still
+listed: date, status, dump size, schema migrations + last tag, dump sha256 (16),
+docs objects, served code; `*` = latest complete), printed in the log and the step
+summary, and uploaded as artefact `backup-list-immo-<CYCLE_ID|run_id>`
+(`backup-list.json`, format `radar-backup-list/v1`).
+
+### How the runner learns D without touching S3
+
+The runner stays kubectl-only (0 S3 credential). Each backup Job writes its
+verdict JSON (≤ 4 KiB: dates, statuses, sizes, sha256, counts — never a doc key,
+a row or a credential) to its container **termination message**; the runner reads
+it from the pod `.status` (`kubectl get pods -l job-name=<job> -o json`), never
+`kubectl logs`. A refusal reason (e.g. stale backup) is printed from there.
+
+### Identities, Secrets, RBAC, network (what k8s provides)
+
+| Item | Where | Content | Used by |
+| --- | --- | --- | --- |
+| Secret **`radar-backup-reader`** | ns `radar-immobilier-preprod` (**new**: today only in ns `radar-immobilier`) | keys `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `BACKUP_BUCKET` (= `radar-immobilier-backup`; `S3_ENDPOINT`/`S3_REGION` may be present, unused: the endpoint comes from `BHS`) — same OVH reader user as prod: `GetObject` (incl. versionId), `ListBucket`, `ListBucketVersions` on the backup bucket | R0, list, S2 fetch, S3'/S3b' reads |
+| its material | GitHub Secrets (+ `.env` recovery copy, `CRED_CYCLE.md` rotation 90 days) | **created by the CD from GitHub Secrets** (never a SealedSecret): `kubectl create secret generic radar-backup-reader --from-env-file=<0600 file> --dry-run=client -o json \| kubectl apply -f -` with values passed via `env:` only | k8s lane / CD |
+| docs copy signer | var `BASCULE_BACKUP_DOCS_COPY_SECRET` (default = the reader Secret) | the identity that SIGNS the server-side `CopyObject` must hold `GetObject` + `GetObjectVersion` on `radar-immobilier-backup/docs/*` **and** `ListBucket` + `PutObject` (+ `PutObjectAcl`, `GrantFullControl` to `DOCS_SYNC_GRANTEE`) on the preprod docs bucket. Either (a) add those preprod rights to the reader user, or (b) give `immo-docs-prod` a read statement on `radar-immobilier-backup/docs/*` and set the var to `radar-docs-src-preprod` (the bascule then rewrites that Secret before S3' too), or (c) a dedicated preprod-only restore user | S3', S3b' |
+| RBAC `radar-ci-bascule-preprod` | `rbac-ci-bascule-preprod-pods-read.yaml` | `pods` get/list (read the termination messages) — no `pods/log` | R0, list, failure reasons |
+| NetworkPolicy | ns `radar-immobilier-preprod` | the restore Jobs carry `sentropic.io/bascule` → `radar-postgres:5432` already open by `allow-bascule-to-postgres`; **egress**: no egress policy today; if one is added, the pods labelled `sentropic.io/bascule` need TCP 443 to the S3 endpoint (`s3.bhs.io.cloud.ovh.net`) + DNS | all backup Jobs |
+
+Repo variables (optional): `BASCULE_BACKUP_BUCKET` (`radar-immobilier-backup`),
+`BASCULE_BACKUP_READER_SECRET` (`radar-backup-reader`),
+`BASCULE_BACKUP_DOCS_COPY_SECRET` (= reader), `BASCULE_BACKUP_MAX_AGE_HOURS` (24),
+`BASCULE_IMMO_SERVED_REFS_URL` (e2e, PENDING O1).
+
+### e2e contract (`CYCLE_ID` set)
+
+- `MODE=restore|chain`: job `served-ids` (no cluster credential) builds
+  `immo-served-canonical-ids-<CYCLE_ID>` (`served-ids.txt` + `.sha256` + meta, zone
+  ids through the published `@sentropic/geo@0.6.2`, same pin as the geo leg) from
+  the RAW zone refs at `vars.BASCULE_IMMO_SERVED_REFS_URL` — **PENDING O1**: that
+  endpoint is not delivered, the job fails closed until then; job `cycle-leg`
+  (always) publishes `cycle-leg-immo-<CYCLE_ID>` (`legs.immo`: run, sha, MODE,
+  backup id/date/manifest+dump sha256, `t1` = backup dump start, verdict pg/s3).
+- `MODE=list`: artefact `backup-list-immo-<CYCLE_ID>`.
+- The run name is `bascule-preprod <MODE> <CYCLE_ID>` (orchestrator correlation).
+
 ## Lancer une sous-commande à la main (hors workflow)
 
 ```bash
@@ -227,4 +327,5 @@ node deploy/ci/bascule-preprod/bascule.mjs preflight
 node deploy/ci/bascule-preprod/bascule.mjs precheck-runs --prod   # Job advisory (PROD_DOCS)
 node deploy/ci/bascule-preprod/bascule.mjs precheck-runs          # Job gate (PREPROD_DOCS)
 node deploy/ci/bascule-preprod/bascule.selftest.mjs               # self-test classifyJobStatus (0 appel réel)
+node deploy/ci/bascule-preprod/restore-mode.selftest.mjs          # MODE=restore|list + docs-sync Secret + e2e (offline)
 ```

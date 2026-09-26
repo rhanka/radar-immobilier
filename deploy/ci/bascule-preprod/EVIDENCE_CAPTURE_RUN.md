@@ -54,13 +54,17 @@ Set once: `PNS=radar-immobilier-preprod ; CJNS=radar-immobilier ; CJ=radar-db-ba
     kubectl -n "$CJNS" get cronjob "$CJ" -o yaml > /tmp/cj.after.yaml
     diff /tmp/cj.before.yaml /tmp/cj.after.yaml   # EXPECT: only .spec.suspend differs
 
-## [c] ephemeral secret radar-docs-src-preprod — ownerRef + GC — CAPTURE k8s → CERTIF i-infra
+## [c] secret radar-docs-src-preprod — rewritten by the bascule — CAPTURE k8s → CERTIF i-infra
 
-    JUID=$(kubectl -n "$PNS" get job docs-sync-prod-to-preprod -o jsonpath='{.metadata.uid}')
+SUPERSEDED (owner rule 2026-09-26): no more k8s watcher / ownerReference / GC.
+The Secret is pre-created (no ownerReference) and the bascule rewrites it at every
+run before S3 (step `S3.0 docs-sync Secret`, README "docs-sync Secret"). Evidence:
+
     kubectl -n "$PNS" get secret radar-docs-src-preprod \
-      -o jsonpath='{.metadata.ownerReferences[0].uid}'   # EXPECT: == $JUID
-    # after Job terminal / ttlSecondsAfterFinished:3600
-    kubectl -n "$PNS" get secret radar-docs-src-preprod   # EXPECT: NotFound (GC observed)
+      -o jsonpath='{.metadata.ownerReferences}'          # EXPECT: empty
+    kubectl -n "$PNS" get secret radar-docs-src-preprod \
+      -o jsonpath='{.metadata.managedFields[*].manager}' # EXPECT: kubectl-replace among managers after a run
+    # the run log shows "docs-secret-fill OK — Secret ... rewritten" (no value printed)
 
 ## [d] radar-db-ro-prod SELECT-only + immo-docs-prod PUT preprod OK / prod DENIED — CAPTURE k8s → CERTIF i-infra
 
