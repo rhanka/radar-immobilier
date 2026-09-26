@@ -8,14 +8,14 @@
 import { Buffer } from "node:buffer";
 import console from "node:console";
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import process from "node:process";
 
 import {
-  artefacts, backupAge, checkCapabilities, checkLeg, chooseCommonDate, confirmAt, correlateRun, filterInputs, inclusionCheck, makeCycleId,
-  parseBackupList, parseDispatchInputs, parseServedIds,
+  artefacts, backupAge, BASELINE_FORMAT, checkCapabilities, checkLeg, chooseCommonDate, confirmAt, correlateRun, filterInputs, inclusionCheck, makeCycleId,
+  parseBackupList, parseBaseline, parseDispatchInputs, parseServedIds,
 } from "./cycle.mjs";
 import { GithubClient, tokenFor } from "./github.mjs";
 import { makeOrchestrator } from "./orchestrator.mjs";
@@ -27,6 +27,15 @@ const eq = (name, a, b) => ok(`${name} (got ${JSON.stringify(a)})`, JSON.stringi
 const throws = (name, fn) => { try { fn(); ok(name, false); } catch { ok(name, true); } };
 const sha = (s) => createHash("sha256").update(s).digest("hex");
 const DIR = import.meta.dirname;
+// join-verify baselines (fidelity control): JSON object, parsed model, file on disk
+const baselineJson = (groups) => ({ format: BASELINE_FORMAT, scope: "zones", recorded_from: { backup_date: "2026-09-26", orchestrator_run_id: "1" },
+  causes: { "slug-variant": "s", "data-gap": "d" }, groups });
+const baselineOf = (groups) => parseBaseline(baselineJson(groups));
+const baselineFile = (groups) => {
+  const p = join(mkdtempSync(join(tmpdir(), "jvb-")), "baseline.json");
+  writeFileSync(p, JSON.stringify(baselineJson(groups)));
+  return p;
+};
 
 // ── workflow input discovery ─────────────────────────────────────────────────
 const wf = ({ inline = true, withMode = true, extra = "" } = {}) => [
@@ -98,10 +107,46 @@ const wf = ({ inline = true, withMode = true, extra = "" } = {}) => [
   throws("parseBackupList — wrong format", () => parseBackupList({ backups: [] }, "geo"));
   const G = "ogc:zones:laval:A-1\nogc:zones:laval:B-2\nogc:zones:montreal:C-408\n";
   eq("inclusionCheck — immo ⊆ geo ⇒ match", inclusionCheck("ogc:zones:laval:A-1\nogc:zones:montreal:C-408\n", G).status, "match");
-  const tol = inclusionCheck("ogc:zones:laval:A-1\nogc:zones:sutton:Z-9\n", G);
-  eq("inclusionCheck — city-not-served-by-geo tolerated + reported", [tol.status, tol.city_not_served_by_geo.count, tol.city_not_served_by_geo.sample], ["match", 1, ["sutton"]]);
+  const strict = inclusionCheck("ogc:zones:laval:A-1\nogc:zones:sutton:Z-9\n", G);
+  eq("inclusionCheck — no baseline: a city not served by geo is NEW drift ⇒ drift",
+    [strict.status, strict.new_drift.city_not_served_by_geo.count, strict.new_drift.city_not_served_by_geo.sample, strict.city_not_served_by_geo.count], ["drift", 1, ["sutton"], 1]);
   const dr = inclusionCheck("ogc:zones:laval:A-1\nogc:zones:laval:C-9\n", G);
-  eq("inclusionCheck — divergent-code ⇒ drift", [dr.status, dr.divergent_code.count, dr.divergent_code.sample], ["drift", 1, ["ogc:zones:laval:C-9"]]);
+  eq("inclusionCheck — divergent-code absent from the baseline ⇒ drift", [dr.status, dr.new_drift.divergent_code.count, dr.divergent_code.sample], ["drift", 1, ["ogc:zones:laval:C-9"]]);
+  // fidelity: known-drift does not fail, new drift fails, resolved is reported
+  const base = baselineOf([
+    { city: "sutton", class: "city-not-served-by-geo", cause: "slug-variant", ids: ["ogc:zones:sutton:Z-9"] },
+    { city: "laval", class: "divergent-code", cause: "data-gap", ids: ["ogc:zones:laval:C-9", "ogc:zones:laval:B-2", "ogc:zones:laval:Q-7"] },
+  ]);
+  const kd = inclusionCheck("ogc:zones:laval:A-1\nogc:zones:laval:C-9\nogc:zones:sutton:Z-9\n", G, { baseline: base });
+  eq("inclusionCheck — known-drift only ⇒ status known-drift (does not fail), counted by class and cause",
+    [kd.status, kd.included, kd.known_drift.count, kd.known_drift.by_class, kd.known_drift.by_cause, kd.new_drift.count],
+    ["known-drift", 1, 2, { "divergent-code": 1, "city-not-served-by-geo": 1 }, { "data-gap": 1, "slug-variant": 1 }, 0]);
+  eq("inclusionCheck — resolved: baseline ids no longer drifting (gone from immo) are reported only",
+    [kd.resolved.count, kd.resolved.included_now, kd.resolved.absent_from_immo, kd.resolved.sample], [2, 0, 2, ["ogc:zones:laval:B-2", "ogc:zones:laval:Q-7"]]);
+  const rs = inclusionCheck("ogc:zones:laval:A-1\nogc:zones:laval:B-2\n", G, { baseline: base });
+  eq("inclusionCheck — no drift left ⇒ match, every baseline id resolved (laval:B-2 now included)",
+    [rs.status, rs.resolved.count, rs.resolved.included_now, rs.resolved.absent_from_immo], ["match", 4, 1, 3]);
+  const nd = inclusionCheck("ogc:zones:laval:C-9\nogc:zones:laval:D-4\nogc:zones:quebec:Q-1\nogc:zones:sutton:Z-9\n", G, { baseline: base });
+  eq("inclusionCheck — new divergent-code + new city not served ⇒ drift, known-drift still counted",
+    [nd.status, nd.new_drift.count, nd.new_drift.divergent_code.sample, nd.new_drift.city_not_served_by_geo.ids_sample, nd.known_drift.count],
+    ["drift", 2, ["ogc:zones:laval:D-4"], ["ogc:zones:quebec:Q-1"], 2]);
+  const rc = inclusionCheck("ogc:zones:laval:C-9\n", "ogc:zones:montreal:C-408\n", { baseline: base });
+  eq("inclusionCheck — a known id changing class stays known-drift, counted as reclassified", [rc.status, rc.known_drift.reclassified], ["known-drift", 1]);
+  throws("parseBaseline — wrong format refused", () => parseBaseline({ ...baselineJson([]), format: "x" }));
+  throws("parseBaseline — duplicate id refused", () => baselineOf([{ city: "laval", class: "divergent-code", cause: "data-gap", ids: ["ogc:zones:laval:C-9", "ogc:zones:laval:C-9"] }]));
+  throws("parseBaseline — id of another city refused", () => baselineOf([{ city: "laval", class: "divergent-code", cause: "data-gap", ids: ["ogc:zones:sutton:C-9"] }]));
+  throws("parseBaseline — unknown class refused", () => baselineOf([{ city: "laval", class: "tolerated", cause: "data-gap", ids: [] }]));
+  throws("parseBaseline — undeclared cause refused", () => baselineOf([{ city: "laval", class: "divergent-code", cause: "whatever", ids: [] }]));
+  // the recorded baseline (D=2026-09-26, run 36255243747)
+  const real = JSON.parse(readFileSync(join(DIR, "join-verify-baseline.json"), "utf8"));
+  const rb = parseBaseline(real);
+  const byClass = {};
+  for (const v of rb.entries.values()) byClass[v.class] = (byClass[v.class] || 0) + 1;
+  eq("join-verify-baseline.json — parses; 2888 divergent-code + 1106 city-not-served-by-geo", [rb.entries.size, byClass], [3994, { "divergent-code": 2888, "city-not-served-by-geo": 1106 }]);
+  eq("join-verify-baseline.json — recorded from D, run, served-ids sha256 of both legs",
+    [real.recorded_from.backup_date, real.recorded_from.orchestrator_run_id, real.recorded_from.immo.served_ids_sha256, real.recorded_from.geo.served_ids_sha256],
+    ["2026-09-26", "36255243747", "d823f9621312af18938a31ed87e32cb50745271810d301ad3457e1a0506ed313", "64d4aecbb2d6d2f67d108c6d3a5a65a8af50bf8dceefac96bea48424c8a0312a"]);
+  eq("join-verify-baseline.json — causes", Object.keys(real.causes).sort(), ["data-gap", "geo-no-zone-code", "referential-version", "slug-variant"]);
   throws("parseServedIds — unsorted refused", () => parseServedIds("ogc:zones:b:1\nogc:zones:a:1\n", "x"));
   throws("parseServedIds — lots id refused (zones scope)", () => parseServedIds("ogc:lots:laval:123\n", "x"));
   throws("parseServedIds — empty refused", () => parseServedIds("", "x"));
@@ -158,12 +203,14 @@ function fakeGh({ geoHasMode = true, geoIdsText, immoIdsText, geoLegDate = "2026
   return gh;
 }
 const today = new Date().toISOString().slice(0, 10);
-async function runChain(gh, env) {
+// default baseline of the chain tests: sutton (not served by geo) is known-drift
+const SUTTON_BASELINE = baselineFile([{ city: "sutton", class: "city-not-served-by-geo", cause: "slug-variant", ids: ["ogc:zones:sutton:Z-1"] }]);
+const CHAIN_STEPS = ["cycle-open", "capabilities", "list-backups", "choose-date", "dispatch-restore", "follow", "collect", "join-verify"];
+async function runChain(gh, env, steps = CHAIN_STEPS) {
   const saved = { ...process.env };
-  Object.assign(process.env, { CONFIRM: `iso-prod-${today}`, CONFIRM_EXPECTED: `iso-prod-${today}`, DRY_RUN: "false",
+  Object.assign(process.env, { CONFIRM: `iso-prod-${today}`, CONFIRM_EXPECTED: `iso-prod-${today}`, DRY_RUN: "false", BASCULE2_JOIN_BASELINE: SUTTON_BASELINE,
     BASCULE2_WORKDIR: mkdtempSync(join(tmpdir(), "bascule2-")), GITHUB_ENV: "", GITHUB_OUTPUT: "", GITHUB_STEP_SUMMARY: "", ...env });
   const o = makeOrchestrator({ gh, now: gh.now, pollSec: 0 });
-  const steps = ["cycle-open", "capabilities", "list-backups", "choose-date", "dispatch-restore", "follow", "collect", "join-verify"];
   let error = null;
   for (const s of steps) { try { await o[s](); } catch (e) { error = { step: s, message: e.message }; break; } }
   let publishError = null;
@@ -185,7 +232,10 @@ const GEO_IDS = "ogc:zones:laval:A-1\nogc:zones:laval:B-2\nogc:zones:montreal:C-
     [["immo", "2026-09-26", true], ["geo", "2026-09-26", true]]);
   ok("chain — undeclared inputs never sent (immo: no SKIP_ROLLOUT; geo: SKIP_ROLLOUT)", !("SKIP_ROLLOUT" in restores[0].inputs) && restores[1].inputs.SKIP_ROLLOUT === "false");
   ok("chain — list runs are read-only (DRY_RUN=true, MODE=list) and come first", gh.dispatched.slice(0, 2).every((d) => d.inputs.MODE === "list" && d.inputs.DRY_RUN === "true"));
-  eq("chain — join-verify reports city-not-served-by-geo, match", [r.cycle.join_verify.status, r.cycle.join_verify.diff_summary.city_not_served_by_geo.sample], ["match", ["sutton"]]);
+  const j = r.cycle.join_verify;
+  eq("chain — known-drift (sutton in the baseline) does not fail; the three counters are in cycle.json",
+    [j.status, j.diff_summary.known_drift.count, j.diff_summary.new_drift.count, j.diff_summary.resolved.count, j.diff_summary.city_not_served_by_geo.sample], ["known-drift", 1, 0, 0, ["sutton"]]);
+  eq("chain — cycle.json records the baseline used (entries, D, sha256)", [j.baseline.entries, j.baseline.backup_date, j.baseline.sha256], [1, "2026-09-26", sha(readFileSync(SUTTON_BASELINE))]);
   eq("chain — geo captured after immo recorded", r.cycle.backup.geo_after_immo, true);
   ok("chain — both legs correlated by run-name (MODE + CYCLE_ID)", r.cycle.legs.geo.restore_run.correlation === "run-name" && r.cycle.legs.immo.restore_run.correlation === "run-name");
   ok("chain — CONFIRM recomputed at each dispatch (today UTC of that instant)", gh.dispatched.every((d) => d.inputs.CONFIRM === confirmAt(d.at)) &&
@@ -218,7 +268,40 @@ const GEO_IDS = "ogc:zones:laval:A-1\nogc:zones:laval:B-2\nogc:zones:montreal:C-
 }
 {
   const r = await runChain(fakeGh({ geoIdsText: GEO_IDS, immoIdsText: "ogc:zones:laval:A-1\nogc:zones:laval:Z-9\n" }));
-  eq("chain — divergent-code ⇒ join-verify fails, verdict failure", [r.error?.step, r.cycle.join_verify.status, r.cycle.verdict], ["join-verify", "drift", "failure"]);
+  eq("chain — new divergent-code (absent from the baseline) ⇒ join-verify fails, verdict failure",
+    [r.error?.step, r.cycle.join_verify.status, r.cycle.join_verify.diff_summary.new_drift.divergent_code.count, r.cycle.verdict], ["join-verify", "drift", 1, "failure"]);
+  const r2 = await runChain(fakeGh({ geoIdsText: GEO_IDS, immoIdsText: "ogc:zones:laval:A-1\nogc:zones:quebec:Q-1\nogc:zones:sutton:Z-1\n" }));
+  eq("chain — new city not served by geo ⇒ join-verify fails (known sutton still counted)",
+    [r2.error?.step, r2.cycle.join_verify.diff_summary.new_drift.city_not_served_by_geo.sample, r2.cycle.join_verify.diff_summary.known_drift.count, r2.cycle.verdict],
+    ["join-verify", ["quebec"], 1, "failure"]);
+  const r3 = await runChain(fakeGh({ geoIdsText: GEO_IDS, immoIdsText: GEO_IDS }), { BASCULE2_JOIN_BASELINE: baselineFile([
+    { city: "sutton", class: "city-not-served-by-geo", cause: "slug-variant", ids: ["ogc:zones:sutton:Z-1"] },
+    { city: "laval", class: "divergent-code", cause: "data-gap", ids: ["ogc:zones:laval:B-2"] }]) });
+  eq("chain — resolved baseline ids are reported (1 now included, 1 gone), verdict success",
+    [r3.error, r3.cycle.join_verify.status, r3.cycle.join_verify.diff_summary.resolved.included_now, r3.cycle.join_verify.diff_summary.resolved.absent_from_immo, r3.cycle.verdict],
+    [null, "match", 1, 1, "success"]);
+  const r4 = await runChain(fakeGh({ geoIdsText: GEO_IDS, immoIdsText: "ogc:zones:laval:A-1\nogc:zones:sutton:Z-1\n" }), { BASCULE2_JOIN_BASELINE: "none" });
+  eq("chain — BASCULE2_JOIN_BASELINE=none (strict): the city not served fails", [r4.error?.step, r4.cycle.join_verify.baseline, r4.cycle.verdict], ["join-verify", null, "failure"]);
+  const r5 = await runChain(fakeGh({ geoIdsText: GEO_IDS, immoIdsText: GEO_IDS }), { BASCULE2_JOIN_BASELINE: join(tmpdir(), "no-such-baseline.json") });
+  ok("chain — baseline file missing ⇒ join-verify fails closed", r5.error?.step === "join-verify" && /baseline .* missing/.test(r5.error.message) && r5.cycle.verdict === "failure");
+}
+{
+  // replay-seed: collect + join-verify + publish on the artefacts of EXISTING restore runs, 0 dispatch
+  const gh = fakeGh({ geoIdsText: GEO_IDS, immoIdsText: "ogc:zones:laval:A-1\nogc:zones:laval:Z-9\n" });
+  const first = await runChain(gh);
+  const before = gh.dispatched.length;
+  const replay = await runChain(gh, {
+    REPLAY_IMMO_RUN_ID: String(first.cycle.legs.immo.restore_run.run_id), REPLAY_GEO_RUN_ID: String(first.cycle.legs.geo.restore_run.run_id),
+    REPLAY_CYCLE_ID: first.cycle.cycle_id, REPLAY_BACKUP_DATE: first.cycle.backup.date, REPLAY_OF_RUN_ID: "42",
+    BASCULE2_JOIN_BASELINE: baselineFile([{ city: "laval", class: "divergent-code", cause: "data-gap", ids: ["ogc:zones:laval:Z-9"] }]),
+  }, ["replay-seed", "collect", "join-verify"]);
+  eq("replay-seed — the drifting cycle re-evaluated against a baseline recording it: green, no dispatch",
+    [first.cycle.verdict, replay.error, replay.publishError, replay.cycle.verdict, replay.cycle.join_verify.diff_summary.known_drift.count, replay.cycle.replay_of.orchestrator_run_id, gh.dispatched.length - before],
+    ["failure", null, null, "success", 1, "42", 0]);
+  const bad = await runChain(gh, { REPLAY_IMMO_RUN_ID: "x", REPLAY_GEO_RUN_ID: "1", REPLAY_CYCLE_ID: "c1", REPLAY_BACKUP_DATE: "2026-09-26" }, ["replay-seed"]);
+  ok("replay-seed — a malformed run id is refused", bad.error?.step === "replay-seed" && /REPLAY_IMMO_RUN_ID/.test(bad.error.message));
+  const dry = await runChain(gh, { DRY_RUN: "true", REPLAY_IMMO_RUN_ID: "1", REPLAY_GEO_RUN_ID: "2", REPLAY_CYCLE_ID: "c1", REPLAY_BACKUP_DATE: "2026-09-26" }, ["replay-seed"]);
+  ok("replay-seed — refused in DRY (collect/join-verify would be skipped silently)", dry.error?.step === "replay-seed" && /DRY_RUN=false/.test(dry.error.message));
 }
 {
   const gh = fakeGh({ geoHasMode: false, geoIdsText: GEO_IDS, immoIdsText: GEO_IDS });
@@ -274,6 +357,8 @@ const GEO_IDS = "ogc:zones:laval:A-1\nogc:zones:laval:B-2\nogc:zones:montreal:C-
   ok(`bascule-e2e.yml — no \${{ }} in any of the ${runs.length} run blocks`, runs.length >= 8 && runs.every((r) => !r.includes("${{")));
   ok("bascule-e2e.yml — permissions actions: write, contents: read", /permissions:\n\s+contents: read\n\s+actions: write/.test(w));
   ok("bascule-e2e.yml — publish always()", /- name: publish[^\n]*\n\s+if: \$\{\{ always\(\) \}\}/.test(w));
+  ok("bascule-e2e.yml — cycle artefact uploads the dot-directory workdir (include-hidden-files: true)",
+    /path: \$\{\{ github\.workspace \}\}\/\.bascule2-work\/\n(?:\s+#.*\n)*\s+include-hidden-files: true\n/.test(w));
 }
 
 console.log(`\norchestrator.selftest — ${passed} passed, ${failed} failed`);
