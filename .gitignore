@@ -61,6 +61,10 @@ data/
 *.dump
 *.pid
 
+# Bascule orchestrator working dirs (dumps / sentinels / cycle.json — ephemeral)
+.bascule-work/
+.bascule2-work/
+
 # Scaleway / cloud creds
 .scw/
 .aws/
