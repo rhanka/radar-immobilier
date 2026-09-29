@@ -102,8 +102,13 @@ jobs:
 
       - name: Resolve manifest + job name
         id: resolve
+        # SECURITY: `job` is a user-controlled workflow_dispatch input. Even as a
+        # `choice`, it is passed through the step `env` and matched as the shell
+        # variable `$JOB` — never interpolated as `${{ ... }}` inside `run:`.
+        env:
+          JOB: ${{ github.event.inputs.job }}
         run: |
-          case "${{ github.event.inputs.job }}" in
+          case "$JOB" in
             mapper)
               echo "file=deploy/k8s/35-run-geo-mapper-job.yaml" >> "$GITHUB_OUTPUT"
               echo "name=radar-run-geo-mapper" >> "$GITHUB_OUTPUT" ;;
