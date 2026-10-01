@@ -17,7 +17,14 @@
  *
  * Environnement jsdom — aucun docker, aucune API (données fabriquées).
  */
-import { describe, it, expect, afterEach, beforeAll, vi } from "vitest";
+import { describe, it, expect, afterEach, beforeEach, beforeAll, vi } from "vitest";
+import { activePageState } from "$lib/router/router.js";
+import { normalizeGeoRouteState } from "$lib/router/geo-route.js";
+
+beforeEach(() => {
+  window.history.replaceState(null, "", "/#/sources");
+  activePageState.set(normalizeGeoRouteState());
+});
 import { render, cleanup, fireEvent, within } from "@testing-library/svelte";
 import SourceConsole from "./SourceConsole.svelte";
 import type { PalierMatrix } from "$lib/palier/palier-matrix-client.js";
