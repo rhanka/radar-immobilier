@@ -320,7 +320,7 @@ export async function runRecueil(
 
       // Sidecar meta.json (RawDocumentRecord) so each CAS object is
       // self-describing on S3 (url, fetchedAt, provenance, sha256).
-      record = (await persistDocumentDate(store, record.storageKey, date, record))!;
+      record = (await persistDocumentDate(store, record.storageKey, date, record)) ?? record;
 
       records.push(record);
       manifestEntries.push({

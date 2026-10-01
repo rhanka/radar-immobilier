@@ -113,6 +113,24 @@ function manyDocumentsAdapter(count: number): SourceAdapter {
 }
 
 describe("runRecueil — raw bytes + sidecar meta.json", () => {
+  it("should date an undated PDF from its header only after preserving its original bytes", async () => {
+    const store = new MemoryStore();
+    const base = fakeAdapter("original PDF bytes", { url: "https://testville.qc.ca/cm-26-07-28.pdf" });
+    const adapter: SourceAdapter = { ...base, kind: "pv", async fetch(ref) {
+      return { ...await base.fetch(ref), contentType: "application/pdf" };
+    } };
+    let calls = 0;
+    const out = await runRecueil("proces-verbaux-testville", adapter, store, {
+      pdfToText: async () => {
+        calls++;
+        expect([...store.objects.keys()].some((key) => key.endsWith(".pdf"))).toBe(true);
+        return "Procès-verbal d'une séance ordinaire du Conseil municipal\ntenu e le 28 juillet 2026, à 19 h";
+      },
+    });
+    expect(calls).toBe(1);
+    expect(out.ok && out.records[0]).toMatchObject({ publishedAt: "2026-07-28",
+      fetchedAt: "2026-06-08T09:30:00.000Z", documentDate: { method: "header", kind: "session" } });
+  });
   it("emits the exact terminal JSON for a no-new-documents run", async () => {
     const store = new MemoryStore();
     const adapter = manyDocumentsAdapter(1);
