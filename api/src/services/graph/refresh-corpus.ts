@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import { documentDateFromPublishedAt, documentDateHeader, extractDocumentHeaderDate,
+  resolveDocumentDate, type DocumentDate } from "@radar/sources";
 
 import type { ObjectReader } from "../../storage/object-store.js";
 
@@ -6,6 +8,8 @@ const HEADER = "source_id\tcity_slug\tsha\trepresentation_key\tsidecar_key";
 const SHA256 = /^[0-9a-f]{64}$/;
 
 export interface RefreshCorpusChunk {
+  readonly documentDate?: DocumentDate;
+  readonly documentHeader?: { readonly page: number; readonly text: string };
   readonly id: string;
   readonly docSha: string;
   readonly originalKey: string;
@@ -38,6 +42,9 @@ export function containsNormalizedPdfExcerpt(
 }
 
 export interface RefreshCorpusDocument {
+  readonly documentDate?: DocumentDate;
+  readonly publishedAt?: string;
+  readonly fetchedAt?: string;
   readonly sourceId: string;
   readonly citySlug: string;
   readonly sha256: string;
@@ -78,6 +85,7 @@ export function refreshCorpusInputHash(
 }
 
 export interface MaterializeRefreshCorpusOptions {
+  readonly publishedAtByKey?: ReadonlyMap<string, string>;
   readonly citySlug: string;
   readonly manifestKey: string;
   readonly reader: Pick<ObjectReader, "get">;
@@ -148,6 +156,10 @@ function chunkDocument(doc: Omit<RefreshCorpusDocument, "chunks">): RefreshCorpu
     docSha: doc.sha256,
     originalKey: doc.originalKey,
     sourceUrl: doc.sourceUrl,
+    ...(doc.documentDate ? { documentDate: doc.documentDate } : {}),
+    ...(index === 0 && doc.documentDate?.status === "unknown" ? {
+      documentHeader: { page: 1, text: documentDateHeader(doc.pages[0]?.text ?? "") },
+    } : {}),
     pages: [...new Set(chunk.pages)],
     text: chunk.parts.join("\n\n"),
   }));
@@ -166,7 +178,8 @@ export async function materializeRefreshCorpus(options: MaterializeRefreshCorpus
     const bytes = await options.reader.get(entry.representationKey);
     const digest = createHash("sha256").update(bytes).digest("hex");
     if (digest !== entry.sha256) throw new Error(`Checksum mismatch for ${entry.representationKey}`);
-    const sidecar = JSON.parse(new TextDecoder().decode(await options.reader.get(entry.sidecarKey))) as { sourceUrl?: unknown };
+    const sidecar = JSON.parse(new TextDecoder().decode(await options.reader.get(entry.sidecarKey))) as {
+      sourceUrl?: unknown; publishedAt?: unknown; documentDate?: unknown; fetchedAt?: unknown };
     if (typeof sidecar.sourceUrl !== "string" || !URL.canParse(sidecar.sourceUrl)) {
       throw new Error(`Missing public source URL for ${entry.representationKey}`);
     }
@@ -174,8 +187,15 @@ export async function materializeRefreshCorpus(options: MaterializeRefreshCorpus
     const pageTexts = text.split("\f");
     if (pageTexts.at(-1) === "") pageTexts.pop();
     if (!pageTexts.some((page) => page.trim())) throw new Error(`Unsupported scanned PDF ${entry.representationKey}`);
+    let documentDate = resolveDocumentDate(sidecar);
+    if (documentDate.status === "unknown") documentDate = documentDateFromPublishedAt(
+      options.publishedAtByKey?.get(entry.representationKey), "manifest", "session");
+    if (documentDate.status === "unknown") documentDate = extractDocumentHeaderDate(pageTexts[0] ?? "");
     const base = { sourceId: entry.sourceId, citySlug: entry.citySlug, sha256: entry.sha256,
       originalKey: entry.representationKey, sourceUrl: sidecar.sourceUrl,
+      documentDate, ...(documentDate.status === "known" ? { publishedAt: documentDate.value } : {}),
+      ...(typeof sidecar.fetchedAt === "string" && Number.isFinite(Date.parse(sidecar.fetchedAt))
+        ? { fetchedAt: sidecar.fetchedAt } : {}),
       pages: pageTexts.map((page, index) => ({ page: index + 1, text: page })) };
     documents.push({ ...base, chunks: chunkDocument(base) });
   }
