@@ -4,9 +4,13 @@ import {
   buildGeoRoute,
   isGeoRoutePathname,
   parseGeoRoute,
+  parseGeoQuery,
+  buildGeoQuery,
+  type GeoRouteStateInput,
   type GeoRoute,
   type GeoRouteTarget,
 } from "./geo-route.js";
+import { readGeoFilters, writeGeoFilters } from "./geo-filter-state.js";
 
 export {
   buildFallbackZoneKey,
@@ -76,7 +80,31 @@ function geoRouteFromLocation(
   location: Pick<Location, "pathname" | "search">,
 ): GeoRoute | null {
   const result = parseGeoRoute(location);
+  if (result.ok && result.route.state.filters.subset) {
+    const filters = { ...result.route.state.filters };
+    const axes = writeGeoFilters(readGeoFilters({ subset: filters.subset }));
+    delete filters.subset;
+    result.route.state.filters = { ...axes, ...filters };
+    if (typeof window !== "undefined") {
+      window.history.replaceState(window.history.state, "", buildGeoRoute(result.route));
+    }
+  }
   return result.ok ? result.route : null;
+}
+
+function pageStateFromLocation() {
+  return parseGeoQuery(typeof window === "undefined" ? "" : window.location.hash.split("?")[1] ?? "");
+}
+
+export const activePageState = writable(pageStateFromLocation());
+
+/** Existing hash views use the same named filter grammar as geographic routes. */
+export function navigateToPageState(view: DemoView, state: GeoRouteStateInput): void {
+  if (typeof window === "undefined") return;
+  const hash = `#/${view}${buildGeoQuery(state)}`;
+  if (window.location.hash !== hash) window.history.pushState({ view }, "", hash);
+  activePageState.set(pageStateFromLocation());
+  activeRouteView.set(view);
 }
 
 /** Store réactif de la vue courante (synchronisé avec l'URL). */
@@ -98,6 +126,7 @@ export function navigateTo(view: DemoView): void {
     window.history.pushState({ view }, "", newHash);
   }
   activeRouteView.set(view);
+  activePageState.set(pageStateFromLocation());
 }
 
 export function navigateToGeoRoute(
@@ -131,6 +160,7 @@ export function initRouter(): () => void {
   function onPopState(): void {
     activeRouteView.set(viewFromHash(window.location.hash));
     activeGeoRoute.set(geoRouteFromLocation(window.location));
+    activePageState.set(pageStateFromLocation());
   }
 
   /**
@@ -142,6 +172,7 @@ export function initRouter(): () => void {
    */
   function onHashChange(): void {
     activeRouteView.set(viewFromHash(window.location.hash));
+    activePageState.set(pageStateFromLocation());
   }
 
   window.addEventListener("popstate", onPopState);
