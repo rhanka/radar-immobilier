@@ -124,6 +124,38 @@ const largeInvalidJsonResponses = [
 ] as const;
 
 describe("refresh profile extraction", () => {
+  it("should recover an evidenced document date in the same signal call even with zero signals", async () => {
+    const header = "Council meeting held on September 29, 2026";
+    const input = { ...chunk(), documentDate: { status: "unknown" as const },
+      documentHeader: { page: 1, text: header } };
+    const seen: TextJsonGenerationInput[] = [];
+    const body = { nodes: [], edges: [], evidence: [], input_tokens: 1, output_tokens: 1,
+      document_date: { status: "known", value: "2026-09-29", precision: "day", kind: "session",
+        evidence: { page: 1, excerpt: header } } };
+    const result = await extractRefreshProfile([input], { context, textClient: client([
+      { text: JSON.stringify(body) }], seen), maxOutputTokens: 512 });
+    expect(seen).toHaveLength(1);
+    expect(seen[0]?.prompt).toContain(header);
+    expect(result[0]).toMatchObject({ documentDate: { status: "known", method: "signal-llm",
+      value: "2026-09-29" }, extraction: { nodes: [] } });
+    expect(result[0]?.extraction).not.toHaveProperty("document_date");
+  });
+  it.each([
+    { status: "known", value: "2026-02-31", precision: "day", kind: "session",
+      evidence: { page: 1, excerpt: "Council meeting held on September 29, 2026" } },
+    { status: "known", value: "2026-07-28", precision: "day", kind: "session",
+      evidence: { page: 1, excerpt: "Council meeting held on September 29, 2026" } },
+    { status: "known", value: "2026-09-29", precision: "day", kind: "session",
+      evidence: { page: 2, excerpt: "Council meeting held on September 29, 2026" } },
+    { status: "known", value: "2026-09-29", precision: "day", kind: "session",
+      evidence: { page: 1, excerpt: "Invented Council meeting held on September 29, 2026" } },
+  ])("should reject invalid or unsupported documentary date output", async (document_date) => {
+    const input = { ...chunk(), documentDate: { status: "unknown" as const },
+      documentHeader: { page: 1, text: "Council meeting held on September 29, 2026" } };
+    await expect(extractRefreshProfile([input], { context, maxOutputTokens: 512,
+      textClient: client([{ text: JSON.stringify({ nodes: [], edges: [], input_tokens: 1,
+        output_tokens: 1, document_date }) }], []) })).rejects.toThrow();
+  });
   it.each([
     ["direct JSON", () => JSON.stringify(extraction())],
     ["a JSON fence", () => ` \n\`\`\`JSON\n${JSON.stringify(extraction())}\n\`\`\`  \n `],
@@ -541,7 +573,7 @@ describe("refresh profile extraction", () => {
     expect(results[1]).toMatchObject({ chunk: { originalKey: oracle.originalKey },
       extraction: { nodes: [], edges: [] } });
     const schema = JSON.parse(seen[0]!.schema);
-    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v9");
+    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v10");
     expect(schema.contract_version).toBe(REFRESH_PROFILE_CONTRACT_VERSION);
     expect(schema.ontology.node_properties.Signal.reglement_number.description).toContain("ANTI-INVENTION");
     const nodeStatuses = ["candidate", "attached", "needs_review", "validated", "rejected", "superseded"];
