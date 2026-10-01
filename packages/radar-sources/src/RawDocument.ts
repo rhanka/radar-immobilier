@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
+import { DocumentDateSchema, type DocumentDate } from "./DocumentDate.js";
 
 /**
  * RECUEIL substrate — the persisted record of one raw document collected from
@@ -48,6 +49,7 @@ export const RawDocumentRecordSchema = z.object({
    * May be an ISO date (`YYYY-MM-DD`) or an ISO datetime depending on source.
    */
   publishedAt: z.string().min(4).optional(),
+  documentDate: DocumentDateSchema.optional(),
   /** SHA-256 hex digest of the raw bytes — the idempotency key. */
   sha256: z.string().regex(/^[a-f0-9]{64}$/),
   /** ISO timestamp of the fetch. */
@@ -68,7 +70,10 @@ export const RawDocumentRecordSchema = z.object({
   provenance: RawDocumentRecordProvenanceSchema,
   /** Length of the raw payload in bytes. */
   bytesLen: z.number().int().nonnegative(),
-});
+}).refine((record) => record.documentDate === undefined
+  || (record.documentDate.status === "known"
+    ? record.publishedAt === record.documentDate.value : record.publishedAt === undefined),
+"Documentary metadata and publishedAt must agree");
 export type RawDocumentRecord = z.infer<typeof RawDocumentRecordSchema>;
 
 /** SHA-256 hex digest of raw bytes (idempotency primitive). */
@@ -148,6 +153,7 @@ export function buildRawDocumentRecord(input: {
   sourceUrl: string;
   title?: string;
   publishedAt?: string;
+  documentDate?: DocumentDate;
   body: Uint8Array;
   /** Parseable text extracted from a binary body (pdftotext); when present, the
    *  record carries a `textKey` and the RECUEIL persists the text beside the
@@ -169,6 +175,7 @@ export function buildRawDocumentRecord(input: {
     sourceUrl: input.sourceUrl,
     ...(input.title !== undefined ? { title: input.title } : {}),
     ...(input.publishedAt !== undefined ? { publishedAt: input.publishedAt } : {}),
+    ...(input.documentDate !== undefined ? { documentDate: input.documentDate } : {}),
     sha256,
     fetchedAt: input.fetchedAt,
     storageKey,
