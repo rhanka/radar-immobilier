@@ -1628,7 +1628,10 @@
             {:else}
             <!-- Recherche PAR SECTION (zones) — champ DS Search en tête de la
                  liste, filtre UNIQUEMENT les zones (façon rail villes). -->
-            <div class="sel-section-search" on:input={(event) => onZoneSearchChange((event.target as HTMLInputElement).value)}>
+            <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions (Delegates native DS button clicks, including keyboard activation.) -->
+            <div class="sel-section-search"
+              on:input={(event) => onZoneSearchChange((event.target as HTMLInputElement).value)}
+              on:click={(event) => { if ((event.target as Element).closest(".st-search__clear")) onZoneSearchChange(""); }}>
               <Search
                 size="sm"
                 placeholder="Rechercher une zone…"
@@ -1870,7 +1873,10 @@
             {:else}
             <!-- Recherche PAR SECTION (lots) — champ DS Search en tête de la
                  liste, filtre UNIQUEMENT les lots (façon rail villes). -->
-            <div class="sel-section-search" on:input={(event) => onLotSearchChange((event.target as HTMLInputElement).value)}>
+            <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions (Delegates native DS button clicks, including keyboard activation.) -->
+            <div class="sel-section-search"
+              on:input={(event) => onLotSearchChange((event.target as HTMLInputElement).value)}
+              on:click={(event) => { if ((event.target as Element).closest(".st-search__clear")) onLotSearchChange(""); }}>
               <Search
                 size="sm"
                 placeholder="Rechercher un lot…"

@@ -28,6 +28,8 @@ await page.route('**/api/**', route => {
   else if (url.includes('/graph-signals/by-city')) body = { ok: true, cities: ['val-des-monts', 'salaberry-de-valleyfield'].map(citySlug => ({ citySlug, signalCount: 1, subsetCounts: {}, vivierV2Counts: counts })) };
   else if (url.includes('/graph-signals/')) body = { ok: true, nodes: [], legacyProjection: null };
   else if (url.includes('/source/coverage')) body = { cities: [], totals: { cities: 0, l1Raw: 0, l2Graph: 0, signals: 0, l4Zonage: 0, l5Lots: 0 }, generatedAt: '2026-10-01T00:00:00Z' };
+  else if (url.endsWith('/api/geo/cities')) body = { ok: true, cities: ['salaberry-de-valleyfield', 'val-des-monts'].map(citySlug => ({ citySlug, zoneCount: 1, lotCount: 0, signalCount: 1 })) };
+  else if (url.includes('/api/geo/features/')) body = { ok: true, zoneCount: 0, lotCount: 0, opportuniteCount: 0, zones: { type: 'FeatureCollection', features: [] }, lots: { type: 'FeatureCollection', features: [] }, opportunites: { type: 'FeatureCollection', features: [] } };
   else if (url.includes('/collections/qc-lots-')) body = { type: 'FeatureCollection', numberMatched: 1, numberReturned: 1, features: [{ type: 'Feature', geometry: polygon, properties: { noLot: '1000001', zoneCode: 'H-01', superficieM2: 1600, multifamilial4plus: true, valuation: { usageCode: '1000', nbLogements: 4 } } }] };
   else if (url.includes('/collections/qc-zonage-')) body = { type: 'FeatureCollection', numberMatched: 2, numberReturned: 2, features: [2008, 2020].map(year => ({ type: 'Feature', geometry: polygon, properties: { code: `H-${year === 2008 ? '01' : '02'}`, kind: 'H', reglementMillesime: String(year) } })) };
   else if (url.includes('/collections/ca-qc-constraints-')) body = { type: 'FeatureCollection', features: [{ type: 'Feature', geometry: polygon, properties: {} }] };
@@ -75,7 +77,8 @@ try {
   await page.goBack({ waitUntil: 'domcontentloaded' }); await check('Précoce', false);
   await page.goForward({ waitUntil: 'domcontentloaded' }); await check('Précoce', true);
   results.push('Browser back/forward restores user filter changes.');
-  await page.getByLabel('Rechercher une ville', { exact: true }).fill('');
+  await page.getByLabel('Rechercher une ville', { exact: true }).locator('..').getByRole('button', { name: 'Clear search', exact: true }).click();
+  await expect(page).not.toHaveURL(/filter.citySearch=/);
   const businessParams = new URL(page.url()).search;
   await openBucket('Zones');
   await page.locator('button.sel-entity-head').filter({ hasText: 'H-01' }).press('Enter');
@@ -141,6 +144,15 @@ try {
   await page.getByRole('tab', { name: 'Lots & Zonage', exact: true }).click();
   await expect(page.getByRole('slider', { name: 'Superficie min.' })).toHaveValue('1200');
   results.push('Evaluation restores lot category, usages, minimum area and prospect restrictions on share/reload.');
+  await page.goto(`${base}/#/geo?selected=municipality%3Aval-des-monts`, { waitUntil: 'load' });
+  await expect(page.getByRole('combobox', { name: 'Municipalité' })).toHaveValue('val-des-monts');
+  await page.reload({ waitUntil: 'load' });
+  await expect(page.getByRole('combobox', { name: 'Municipalité' })).toHaveValue('val-des-monts');
+  await page.getByRole('combobox', { name: 'Municipalité' }).selectOption('salaberry-de-valleyfield');
+  await expect(page).toHaveURL(/selected=municipality%3Asalaberry-de-valleyfield/);
+  await page.goBack({ waitUntil: 'load' });
+  await expect(page.getByRole('combobox', { name: 'Municipalité' })).toHaveValue('val-des-monts');
+  results.push('The discrete Geo view municipality selector restores on share, reload and back navigation.');
   await page.goto(`${base}/#/sources?mode=data&filter.sourceTab=couverture&filter.coverageScope=focus30&filter.citySearch=Val`, { waitUntil: 'load' });
   await expect(page.getByRole('radio', { name: /Villes à signaux précoces/ })).toBeChecked();
   await expect(page.getByLabel('Rechercher une ville', { exact: true })).toHaveValue('Val');
@@ -150,6 +162,10 @@ try {
   await expect(page).toHaveURL(/filter.coverageKpi=/);
   await page.goBack({ waitUntil: 'load' });
   await expect(kpiSelect).toHaveValue(firstKpi);
+  await page.getByRole('button', { name: 'Clear search', exact: true }).click();
+  await expect(page).not.toHaveURL(/filter.citySearch=/);
+  await page.goBack({ waitUntil: 'load' });
+  await expect(page.getByLabel('Rechercher une ville', { exact: true })).toHaveValue('Val');
   await page.getByText('Toutes', { exact: true }).click();
   await expect(page).toHaveURL(/filter.coverageScope=all/);
   await page.goBack({ waitUntil: 'load' });
