@@ -45,6 +45,7 @@ Make every existing geographic view restore its applicable active filters and pe
 - [x] BR787-D4: canonical named axes replace outward `filter.subset`; bounded old-link parsing normalizes into the sole residual vivier.
 - [x] BR787-D5: hash-based geographic views require their existing page query state; no new top-level view or business control.
 - [x] BR787-D6: preserve the existing zones-only URL restriction across navigation; date-only requests clear it. Ignore superseded bulk date responses during history navigation.
+- [x] BR787-D7: local API bootstrap hid UI-specific dependencies behind its empty named volume; seed that isolated UI volume and keep host dependencies removed. Temporary gate makefile mounts both volumes; rollback stops only this stack.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (template label only; no cherry-pick or additional integration branch)
@@ -82,7 +83,7 @@ Make every existing geographic view restore its applicable active filters and pe
   - [ ] Gate: scoped view tests and real browser proof.
 
 - [ ] **Lot 4 — Verification and reviewable draft**
-  - [ ] Full UI tests, make typecheck, make lint, make build; report exact failures/limits.
+  - [x] Full UI suite: 1612 passed / 10 todo; typecheck: 0 errors / 7 warnings; build passed; lint recheck underway.
   - [ ] Real Playwright/CDP 9222 proof against isolated branch UI; local screenshots and readable evidence.
   - [ ] Harness scope/branch gates and bounded complementary review, with explicit failed review legs if unavailable.
   - [ ] Reconcile findings and update this plan/status with evidence.

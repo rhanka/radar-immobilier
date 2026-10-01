@@ -32,8 +32,15 @@ describe("shareable geographic restrictions", () => {
     expect(state.lots).toEqual({ category: "all", usages: new Set(), superficieMin: 0 });
     expect(state.zoneKinds.size).toBe(0);
     expect(state.zoneMillesime).toBeNull();
+    expect(state.lotsEnabled).toBe(true);
     expect(state.timeRange.mode).toBe("absolute");
     expect(writeGeoFilters(state)).toEqual({ dateFrom: ["2026-06-01"], dateTo: ["2026-06-30"] });
+  });
+
+  it("should normalize a zones-only link without losing its restriction", () => {
+    const state = readGeoFilters(parseGeoQuery("?lots=off").filters);
+    expect(state.lotsEnabled).toBe(false);
+    expect(writeGeoFilters(state)).toEqual({ lots: ["0"] });
   });
 
   it("should retain disabled axes in old residual-vivier links", () => {
