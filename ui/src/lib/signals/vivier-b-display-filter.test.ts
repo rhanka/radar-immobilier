@@ -15,7 +15,7 @@ import {
   isHiddenByVivierBExclusions,
   isPiiaLie,
   type VivierBExclusions,
-} from "./vivier-b-display-filter.js";
+} from "@radar/domain";
 
 function node(
   id: string,

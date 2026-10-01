@@ -11,7 +11,13 @@
  * résidentiel » sans preuve : masquer n'est pas classer.
  */
 
-import type { GraphSignalNode } from "./graph-signal-detail-client.js";
+export interface VivierDisplayNode {
+  label: string;
+  description?: string | null;
+  props: Record<string, unknown>;
+  classification?: { instrument: string | null };
+  docRefs?: readonly { excerpt?: string }[];
+}
 
 export interface VivierBExclusions {
   /** « Exclure PIIA sans projet résidentiel » */
@@ -49,13 +55,13 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 /** `props.properties` (forme graphify) avec repli sur `props` à plat. */
-function propertyRecords(node: GraphSignalNode): Record<string, unknown>[] {
+function propertyRecords(node: VivierDisplayNode): Record<string, unknown>[] {
   const props = isRecord(node.props) ? node.props : {};
   const nested = isRecord(props.properties) ? props.properties : {};
   return [nested, props];
 }
 
-function readProperty(node: GraphSignalNode, key: string): unknown {
+function readProperty(node: VivierDisplayNode, key: string): unknown {
   for (const record of propertyRecords(node)) {
     const value = record[key];
     if (value !== undefined && value !== null && value !== "") return value;
@@ -64,7 +70,7 @@ function readProperty(node: GraphSignalNode, key: string): unknown {
 }
 
 /** `nb_unites_max` présent ET numérique — la borne d'unités du projet. */
-function hasNbUnitesMax(node: GraphSignalNode): boolean {
+function hasNbUnitesMax(node: VivierDisplayNode): boolean {
   const value = readProperty(node, "nb_unites_max");
   if (typeof value === "number") return Number.isFinite(value);
   if (typeof value === "string") return Number.isFinite(Number(value));
@@ -76,7 +82,7 @@ function hasNbUnitesMax(node: GraphSignalNode): boolean {
  * document (la citation est la preuve — c'est elle qui porte « quatre
  * logements » dans le cas Austin).
  */
-function evidenceText(node: GraphSignalNode): string {
+function evidenceText(node: VivierDisplayNode): string {
   const excerpts = (node.docRefs ?? [])
     .map((ref) => ref.excerpt ?? "")
     .join(" ");
@@ -96,7 +102,7 @@ function evidenceText(node: GraphSignalNode): string {
  * signal qualifié (c'est la définition de « qualifié ») : s'en servir comme
  * preuve rendrait la règle vacuously vraie et le filtre inopérant.
  */
-export function hasResidentialProjectProof(node: GraphSignalNode): boolean {
+export function hasResidentialProjectProof(node: VivierDisplayNode): boolean {
   if (hasNbUnitesMax(node)) return true;
   const annotated = readProperty(node, "residentiel");
   if (typeof annotated === "string" && foldText(annotated) === "oui") return true;
@@ -104,7 +110,7 @@ export function hasResidentialProjectProof(node: GraphSignalNode): boolean {
 }
 
 /** L'instrument tel que classé par le serveur — jamais redéduit ici. */
-function instrumentOf(node: GraphSignalNode): string | null {
+function instrumentOf(node: VivierDisplayNode): string | null {
   return node.classification?.instrument ?? null;
 }
 
@@ -112,7 +118,7 @@ function instrumentOf(node: GraphSignalNode): string | null {
  * Un PIIA porteur d'un projet résidentiel prouvé : gardé, mais signalé pour ce
  * qu'il est — un instrument indirect, donc une confiance faible.
  */
-export function isPiiaLie(node: GraphSignalNode): boolean {
+export function isPiiaLie(node: VivierDisplayNode): boolean {
   return instrumentOf(node) === "piia" && hasResidentialProjectProof(node);
 }
 
@@ -126,7 +132,7 @@ export const PIIA_LIE_BADGE = "PIIA lié · confiance faible" as const;
  * « PIIA 4 plex »). Exclure tout PIIA les écarterait — ce serait un bug.
  */
 export function isHiddenByVivierBExclusions(
-  node: GraphSignalNode,
+  node: VivierDisplayNode,
   exclusions: VivierBExclusions,
 ): boolean {
   const instrument = instrumentOf(node);
@@ -140,9 +146,9 @@ export function isHiddenByVivierBExclusions(
   return exclusions.derogationsMineures && instrument === "derogation";
 }
 
-export function applyVivierBExclusions(
-  nodes: readonly GraphSignalNode[],
+export function applyVivierBExclusions<T extends VivierDisplayNode>(
+  nodes: readonly T[],
   exclusions: VivierBExclusions,
-): GraphSignalNode[] {
+): T[] {
   return nodes.filter((node) => !isHiddenByVivierBExclusions(node, exclusions));
 }

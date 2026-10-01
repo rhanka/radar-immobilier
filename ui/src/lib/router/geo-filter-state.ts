@@ -1,7 +1,7 @@
 import { EVAL_CATEGORIES, USAGE_GROUPS, type EvalLotFilter } from "$lib/maps/eval-lot-filters.js";
 import { ZONE_KIND_GROUPS, type ZoneKindFilter } from "$lib/maps/zone-kind-filter.js";
 import { bAxesFromVivierKey, DEFAULT_B_AXES, keyForVivierB, type BAxes } from "$lib/signals/vivier-view-mode.js";
-import { DEFAULT_VIVIER_B_EXCLUSIONS, type VivierBExclusions } from "$lib/signals/vivier-b-display-filter.js";
+import { DEFAULT_VIVIER_B_EXCLUSIONS, type VivierBExclusions } from "@radar/domain";
 import {
   defaultSignalTimeRange,
   normalizeSignalTimeRange,
