@@ -8,6 +8,7 @@ const HEADER = "source_id\tcity_slug\tsha\trepresentation_key\tsidecar_key";
 const SHA256 = /^[0-9a-f]{64}$/;
 
 export interface RefreshCorpusChunk {
+  readonly documentSourceId?: string;
   readonly documentDate?: DocumentDate;
   readonly documentHeader?: { readonly page: number; readonly text: string };
   readonly id: string;
