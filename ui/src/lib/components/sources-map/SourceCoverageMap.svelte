@@ -155,7 +155,7 @@
   let selectedCity: CityCoverage | null = null;
   let selectedZoneCode: string | null = null;
   let restoredPageState: unknown = null;
-  $: if ($activePageState !== restoredPageState && cities.length) {
+  $: if ($activePageState !== restoredPageState) {
     restoredPageState = $activePageState;
     const filters = $activePageState.filters;
     scope = COVERAGE_SCOPE_OPTIONS.find(({ value }) => value === filters.coverageScope?.[0])?.value ?? DEFAULT_COVERAGE_SCOPE;

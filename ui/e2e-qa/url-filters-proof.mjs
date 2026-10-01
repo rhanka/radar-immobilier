@@ -1,0 +1,94 @@
+/* global process, console, localStorage, URL */
+import { expect as playwrightExpect } from '@playwright/test';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dedicatedCdpPage } from './url-filters-cdp.mjs';
+
+const base = process.env.URL_FILTERS_BASE_URL ?? 'http://localhost:5398';
+const expect = playwrightExpect.configure({ timeout: 1800 });
+const proof = 'tmp/issue-787-proof';
+await mkdir(proof, { recursive: true });
+const connection = await dedicatedCdpPage();
+const { page } = connection;
+const results = [];
+const errors = [];
+const stages = { avis_motion: 1, projet_reglement: 0, consultation_publique: 0, second_projet: 0, adoption: 0, entree_vigueur: 0, inconnu: 0 };
+const zeroStages = Object.fromEntries(Object.keys(stages).map(key => [key, 0]));
+const counts = { total: 1, qualified: 1, residentialUnknown: 0, excludedByReason: { non_residentiel_franc: 0, piia_non_pertinent: 0, hors_zonage: 0, derogation_hors_sujet: 0 }, stageCounts: stages, stageCountsResEligible: stages, stageCountsHorsZonage: zeroStages, stageCountsResEligibleHorsZonage: zeroStages };
+page.on('pageerror', error => errors.push(error.message));
+await page.setViewportSize({ width: 1600, height: 1000 });
+page.setDefaultTimeout(1800);
+// Navigation includes cold Vite module compilation; rendered controls retain a 1.8s limit.
+page.setDefaultNavigationTimeout(30000);
+await page.route('**/api/**', route => {
+  const url = route.request().url();
+  let body = {};
+  if (url.includes('/auth/me')) body = { authenticated: true, authDisabled: false, user: { sub: 'url-filter-qa', name: 'URL QA', email: 'qa@example.com', status: 'active', isAdmin: true } };
+  else if (url.includes('/graph-signals/by-city')) body = { ok: true, cities: ['val-des-monts', 'salaberry-de-valleyfield'].map(citySlug => ({ citySlug, signalCount: 1, subsetCounts: {}, vivierV2Counts: counts })) };
+  else if (url.includes('/graph-signals/')) body = { ok: true, nodes: [], legacyProjection: null };
+  else if (url.includes('/source/coverage')) body = { cities: [], totals: { cities: 0, l1Raw: 0, l2Graph: 0, signals: 0, l4Zonage: 0, l5Lots: 0 }, generatedAt: '2026-10-01T00:00:00Z' };
+  else if (url.includes('/lots/') || url.includes('/zones/') || url.includes('/features/') || url.includes('/cptaq/')) body = { ok: false, absent: true, zoneCount: 0, lotCount: 0, featureCollection: { type: 'FeatureCollection', features: [] } };
+  return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+});
+const box = label => page.getByRole('checkbox', { name: label, exact: true });
+const check = async (label, expected) => expected ? expect(box(label)).toBeChecked() : expect(box(label)).not.toBeChecked();
+const open = async path => {
+  await page.goto(`${base}${path}`, { waitUntil: 'load' });
+  await expect(box('Zonage')).toBeVisible();
+};
+try {
+  const shared = '/geo/city/val-des-monts?mode=signal&filter.dateFrom=2026-06-01&filter.dateTo=2026-06-30&filter.zonage=1&filter.excludePiia=1&filter.lotCategory=quatrePlus&filter.lotUsage=multi&filter.lotMinArea=1200&filter.zoneKind=H&filter.zoneMillesime=2008';
+  await open(shared);
+  await check('Zonage', true); await check('Résidentiel', false); await check('Précoce', false);
+  await check('Exclure PIIA sans projet résidentiel', true); await check('Exclure dérogations mineures', false);
+  await expect(page.getByText('2026-06-01 – 2026-06-30', { exact: true })).toBeVisible();
+  await page.screenshot({ path: `${proof}/01-shared-business-and-dates.png` });
+  await page.evaluate(() => localStorage.setItem('signaux-filter-subset', 'vivier-v2|p'));
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await check('Précoce', false); await check('Zonage', true);
+  results.push('Shared dates/business state overrides conflicting local preferences and survives reload.');
+  await box('Précoce').check();
+  await expect(page).toHaveURL(/filter.precoce=1/);
+  await page.goBack({ waitUntil: 'domcontentloaded' }); await check('Précoce', false);
+  await page.goForward({ waitUntil: 'domcontentloaded' }); await check('Précoce', true);
+  results.push('Browser back/forward restores user filter changes.');
+  const businessParams = new URL(page.url()).search;
+  await page.locator('button.rail-city-row').filter({ hasText: 'Salaberry-de-Valleyfield' }).click();
+  await expect(page).toHaveURL(/\/geo\/city\/salaberry-de-valleyfield/);
+  expect(new URL(page.url()).search).toBe(businessParams);
+  await page.getByRole('button', { name: 'Province', exact: true }).click();
+  await expect(page).toHaveURL(/\/geo\/region\/quebec/);
+  expect(new URL(page.url()).search).toBe(businessParams);
+  results.push('City and province navigation preserve the complete business/date query.');
+  await open('/geo/city/val-des-monts?filter.dateFrom=2026-05-01&filter.dateTo=2026-05-31');
+  for (const label of ['Zonage', 'Résidentiel', 'Précoce', 'Exclure PIIA sans projet résidentiel', 'Exclure dérogations mineures']) await check(label, false);
+  await box('Zonage').check();
+  const reset = new URL(page.url()).searchParams;
+  for (const key of ['lotCategory', 'lotUsage', 'lotMinArea', 'zoneKind', 'zoneMillesime', 'lots']) expect(reset.has(`filter.${key}`)).toBe(false);
+  results.push('Dates-only request clears all other business and layer restrictions without a reset action.');
+  await open('/geo/city/val-des-monts?mode=signal&filter.subset=vivier-v2%7C-z%7C-p');
+  await check('Zonage', false); await check('Résidentiel', true); await check('Précoce', false);
+  await expect(page).toHaveURL(/filter.residentiel=1/);
+  expect(page.url()).not.toContain('filter.subset');
+  await page.screenshot({ path: `${proof}/02-normalized-old-link.png` });
+  results.push('Old residual-vivier link normalizes to named restrictions without adding a second vivier.');
+  await page.goto(`${base}/#/sources?mode=data&filter.sourceTab=couverture&filter.coverageScope=focus30`, { waitUntil: 'load' });
+  await expect(page.getByRole('radio', { name: /Villes à signaux précoces/ })).toBeChecked();
+  await page.getByRole('radio', { name: /Toutes/ }).check();
+  await expect(page).toHaveURL(/filter.coverageScope=all/);
+  await page.goBack({ waitUntil: 'load' });
+  await expect(page.getByRole('radio', { name: /Villes à signaux précoces/ })).toBeChecked();
+  await page.goto(`${base}/#/sources?mode=data&filter.sourceTab=console&filter.consoleView=legacy&filter.sourceStatus=verified&filter.sourceFocus=1&filter.sourceSearch=Valleyfield`, { waitUntil: 'load' });
+  await expect(page.getByRole('tab', { name: 'Console', exact: true })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('button', { name: 'Servies', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'Villes à signaux précoces', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('searchbox')).toHaveValue('Valleyfield');
+  await page.reload({ waitUntil: 'load' });
+  await expect(page.getByRole('searchbox')).toHaveValue('Valleyfield');
+  await page.screenshot({ path: `${proof}/03-sources-shared-restrictions.png` });
+  results.push('Sources coverage scope, console status/focus/search and tab restore on share, reload and history.');
+} finally {
+  await writeFile(`${proof}/results.json`, JSON.stringify({ browser: connection.version, targetId: connection.targetId, base, fixtures: 'API fixtures; real branch UI served on isolated stack', results, errors }, null, 2));
+  await connection.close();
+}
+console.log(JSON.stringify({ results, errors }, null, 2));
+expect(errors).toEqual([]);

@@ -1,3 +1,4 @@
+/* global fetch, WebSocket, setTimeout, clearTimeout */
 import { chromium } from '@playwright/test';
 
 /** Attach only the newly created test tab; never auto-attach user tabs. */

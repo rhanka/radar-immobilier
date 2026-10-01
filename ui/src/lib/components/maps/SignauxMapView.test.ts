@@ -20,7 +20,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildCityMapEntries } from "$lib/maps/maps-data.js";
 import {
-  normalizeGeoRouteState,
+  parseGeoQuery,
   type GeoRoute,
 } from "$lib/router/geo-route.js";
 import type { GeoZonesResponse } from "$lib/maps/geo-zones-client.js";
@@ -162,7 +162,7 @@ function cityRoute(): GeoRoute {
   return {
     level: "city",
     citySlug: CITY_SLUG,
-    state: normalizeGeoRouteState({ mode: "signal" }),
+    state: parseGeoQuery(window.location.search),
   };
 }
 
