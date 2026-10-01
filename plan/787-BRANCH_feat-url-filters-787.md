@@ -67,12 +67,12 @@ Make every existing geographic view restore its applicable active filters and pe
   - [x] Add typed local signal/lot/zone URL serialization and restoration with unrestricted omitted filters.
   - [x] Preserve exact relative/absolute civil-date bounds and normalize old subset links.
   - [x] Regression tests: round trip, preferences independence, date-only reset, canonical old links.
-  - [ ] Gate: scoped UI tests.
+  - [x] Gate: five codec regressions pass; 30 scoped router/navigation/component checks pass.
 
 - [ ] **Lot 2 — Signal geographic controls and navigation**
   - [x] Wire all existing dates/axes/exclusions/lots/zones controls to URL.
-  - [ ] Restore complete state before data loading, including same-city back/forward.
-  - [ ] Preserve filters across province/city/zone navigation and reload.
+  - [x] Restore complete state before data loading, including same-city back/forward.
+  - [x] Preserve filters across province/city/zone navigation and reload.
   - [ ] Gate: component/router regressions and browser proof for dates/business filters.
 
 - [ ] **Lot 3 — Other geographic views, Sources second**

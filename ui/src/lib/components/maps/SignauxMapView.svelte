@@ -2389,6 +2389,7 @@
   }
 
   onMount(() => {
+    if (!geoRoute) syncFilterRoute();
     // Restaurer le filtre depuis l'URL au premier chargement
     // m5 — restaurer les préférences d'affichage des libellés (persistance
     // session). Défaut si rien de persisté : n° de zone AFFICHÉ, n° de lot masqué.
