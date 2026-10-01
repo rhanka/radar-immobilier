@@ -396,14 +396,11 @@ export async function runLiveScrape(
     throw new Error("reexploit limit must be a positive integer");
   }
 
-  // Resolve the PDF→text extractor once (used when `exploit` OR `reexploit`).
+  // Collection also needs the existing PDF text extractor for missing documentary dates.
   // Defaults to real poppler; tests inject a mock. A scrape source URL is not
   // meaningful here (we extract from raw bytes), so a generic label is passed to
   // the factory.
-  const pdfToText: PdfToText | undefined =
-    exploit || reexploit
-      ? (options.pdfToText ?? pdfToTextViaPoppler("live-scrape"))
-      : undefined;
+  const pdfToText: PdfToText = options.pdfToText ?? pdfToTextViaPoppler("live-scrape");
 
   const recap: LiveScrapeCityRecap[] = [];
   // Collect the recap AND stream it per-city (observability): a long run emits
@@ -458,6 +455,7 @@ export async function runLiveScrape(
       ? await loadCollectedUrls(store, config.sourceId)
       : undefined;
     const outcome = await runRecueilWithManifest(config.sourceId, adapter, store, {
+      pdfToText,
       ...(limit !== undefined ? { limit } : {}),
       ...(acceptRef !== undefined ? { acceptRef } : {}),
       ...(guardState !== undefined ? { alreadyCollected: guardState.urls } : {}),

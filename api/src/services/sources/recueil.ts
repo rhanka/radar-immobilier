@@ -1,16 +1,19 @@
 import {
   buildRawDocumentRecord,
-  rawMetaKey,
+  documentDateFromPublishedAt,
+  extractDocumentHeaderDate,
   SourceFetchError,
   PvSourceFetchError,
   type PvFetchDiagnostic,
   type RawDocumentRecord,
   type RawDocumentRef,
+  type PdfToText,
   type SourceAdapter,
   type SourceErrorKind,
 } from "@radar/sources";
 
 import type { ObjectStore } from "../../storage/object-store.js";
+import { applyDocumentDate, persistDocumentDate } from "./document-date-metadata.js";
 import {
   manifestKey,
   writeRunManifest,
@@ -52,6 +55,7 @@ import {
  */
 
 export interface RecueilOptions {
+  readonly pdfToText?: PdfToText;
   readonly limit?: number;
   /** Skip listed representations before they count toward `limit` or get fetched. */
   readonly acceptRef?: (ref: RawDocumentRef) => boolean;
@@ -257,7 +261,7 @@ export async function runRecueil(
       if (options.signal?.aborted) break;
       const raw = await adapter.fetch(ref);
 
-      const record = buildRawDocumentRecord({
+      let record = buildRawDocumentRecord({
         source,
         sourceUrl: raw.url,
         ...(raw.ref.title !== undefined ? { title: raw.ref.title } : {}),
@@ -290,6 +294,15 @@ export async function runRecueil(
         metrics = { ...metrics, skippedExisting: metrics.skippedExisting + 1 };
       }
 
+      let date = documentDateFromPublishedAt(record.publishedAt, "listing",
+        adapter.kind === "pv" ? "session" : "document");
+      if (date.status === "unknown") {
+        const text = raw.text ?? (record.contentType.startsWith("application/pdf") && options.pdfToText
+          ? await options.pdfToText(raw.body, 30_000) : undefined);
+        date = text !== undefined ? extractDocumentHeaderDate(text) : { status: "unknown" };
+      }
+      record = applyDocumentDate(record, date);
+
       // Persist the parseable text (pdftotext) BESIDE the binary body so
       // EXPLOITATION reconciles on real text — the binary stays the canonical,
       // openable evidence (classify:13-17 / RawDocument.text intent). Gated on the
@@ -307,14 +320,7 @@ export async function runRecueil(
 
       // Sidecar meta.json (RawDocumentRecord) so each CAS object is
       // self-describing on S3 (url, fetchedAt, provenance, sha256).
-      const metaKey = rawMetaKey(record.storageKey);
-      if (!(await store.head(metaKey))) {
-        await store.put(
-          metaKey,
-          JSON.stringify(record, null, 2),
-          "application/json",
-        );
-      }
+      record = (await persistDocumentDate(store, record.storageKey, date, record))!;
 
       records.push(record);
       manifestEntries.push({
