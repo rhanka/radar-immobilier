@@ -35,7 +35,7 @@
   import {
     isPiiaLie,
     PIIA_LIE_BADGE,
-  } from "$lib/signals/vivier-b-display-filter.js";
+  } from "@radar/domain";
   import { signalStageLabel } from "$lib/signals/vivier-b-ranking.js";
   import { signalColorAt } from "$lib/signals/pdf-signal-colors.js";
   import type {
