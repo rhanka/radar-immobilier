@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { activePageState, navigateToPageState } from "$lib/router/router.js";
   /**
    * SourceConsole — onglet « Console » de la vue Source, RECONSTRUIT sur le VRAI
    * endpoint /api/source/coverage (l'ancienne Console est supprimée).
@@ -80,6 +81,24 @@
   const SEG_FOCUS = "Villes à signaux précoces";
   const SEGMENTS = [SEG_PROVINCE, SEG_FOCUS] as const;
   let focusOnly = false;
+  let restoredPageState: unknown = null;
+  $: if ($activePageState !== restoredPageState) {
+    restoredPageState = $activePageState;
+    const filters = $activePageState.filters;
+    filter = FILTERS.find(({ value }) => value === filters.sourceStatus?.[0])?.value ?? "all";
+    focusOnly = filters.sourceFocus?.[0] === "1";
+    query = filters.sourceSearch?.[0] ?? "";
+    consoleView = filters.consoleView?.[0] === "legacy" ? "legacy" : initialView;
+  }
+
+  function syncConsoleUrl(): void {
+    const filters = { ...$activePageState.filters, sourceTab: ["console"], sourceStatus: [filter], consoleView: [consoleView] };
+    delete filters.sourceFocus;
+    delete filters.sourceSearch;
+    if (focusOnly) filters.sourceFocus = ["1"];
+    if (query) filters.sourceSearch = [query];
+    navigateToPageState("sources", { ...$activePageState, mode: "data", filters });
+  }
   $: activeSegment = focusOnly ? SEG_FOCUS : SEG_PROVINCE;
   $: displayCities = cities.map((city) => {
     const normes = normesOverlay[city.citySlug];
@@ -243,6 +262,7 @@
 
   function selectConsoleView(view: ConsoleView): void {
     consoleView = view;
+    syncConsoleUrl();
     if (view === "palier") closeSelectedCity();
   }
 
@@ -350,7 +370,7 @@
                 : "cursor-pointer text-slate-600 hover:bg-slate-100"
             }`}
             aria-pressed={activeSegment === seg}
-            on:click={() => { focusOnly = seg === SEG_FOCUS; }}
+            on:click={() => { focusOnly = seg === SEG_FOCUS; syncConsoleUrl(); }}
           >
             {seg}
           </button>
@@ -369,7 +389,7 @@
                 ? "border-teal-300 bg-teal-50 font-semibold text-teal-800"
                 : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
             }`}
-            on:click={() => { filter = f.value; }}
+            on:click={() => { filter = f.value; syncConsoleUrl(); }}
             aria-pressed={filter === f.value}
           >
             {f.label}
@@ -399,6 +419,7 @@
           type="search"
           placeholder="Rechercher une ville / MRC…"
           bind:value={query}
+          on:input={syncConsoleUrl}
           class="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-300"
         />
         <span class="shrink-0 text-xs text-slate-400" data-testid="console-count">
