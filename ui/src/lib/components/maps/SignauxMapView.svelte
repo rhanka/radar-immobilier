@@ -164,7 +164,7 @@
   import {
     dateRangeFromSignalTimeRange,
     defaultSignalTimeRange,
-    filterNodesByEtapeDate,
+    filterNodesByDocumentDate,
     normalizeSignalTimeRange,
     type SignalDateRange,
     type SignalTimeRange,
@@ -565,7 +565,7 @@
   ): GraphSignalNode[] {
     const mode = modeFromSubsetKey(subsetKey);
     const projected = projectNodesForVivierKey(nodes, authority, subsetKey).nodes;
-    const dated = filterNodesByEtapeDate(projected, range);
+    const dated = filterNodesByDocumentDate(projected, range);
     return mode === "b" ? applyVivierBExclusions(dated, exclusions) : dated;
   }
 
@@ -782,7 +782,7 @@
    * densifiant → précocité d'étape → instrument → preuve → fraîcheur → id). En A,
    * l'ordre reste EXACTEMENT celui de la projection serveur (aucun changement).
    */
-  $: dateScopedProjectionNodes = filterNodesByEtapeDate(detailProjection.nodes, dateRange);
+  $: dateScopedProjectionNodes = filterNodesByDocumentDate(detailProjection.nodes, dateRange);
   // Set vivier « précoce » trié (INCHANGÉ : classification + axes + exclusions B).
   $: gatedDetailNodes = activeViewMode === "b"
     ? rankVivierBNodes(
