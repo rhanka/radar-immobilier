@@ -304,6 +304,9 @@ export function parseGeoQuery(search: string | URLSearchParams): GeoRouteState {
     .filter((ref): ref is GeoEntityRef => ref !== null);
 
   const filters: Record<string, string[]> = {};
+  if (["0", "off", "false", "no"].includes(params.get("lots") ?? "") || params.get("layers") === "zones") {
+    filters.lots = ["0"];
+  }
   for (const [key, value] of params.entries()) {
     if (!key.startsWith("filter.") || key === "filter.") continue;
 
