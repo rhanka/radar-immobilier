@@ -15,8 +15,14 @@ describe("router compatibility", () => {
   it("should canonicalize old links while retaining residual-vivier axes", async () => {
     const router = await loadRouterAt("/geo/city/val-des-monts?filter.subset=vivier-v2%7C-z%7C-p");
     const cleanup = router.initRouter();
-    expect(window.location.search).toBe("?mode=signal&filter.residentiel=1");
-    expect(get(router.activeGeoRoute)?.state.filters).toEqual({ residentiel: ["1"] });
+    expect(Object.fromEntries(new URLSearchParams(window.location.search))).toEqual({
+      mode: "signal", "filter.residentiel": "1", "filter.excludePiia": "1",
+      "filter.excludeDerogations": "1", "filter.period": "6mo",
+    });
+    expect(get(router.activeGeoRoute)?.state.filters).toEqual({
+      residentiel: ["1"], excludePiia: ["1"], excludeDerogations: ["1"], period: ["6mo"],
+    });
+    expect(window.location.search).not.toContain("subset");
     cleanup();
   });
 
