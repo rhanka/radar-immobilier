@@ -57,7 +57,7 @@
   - [x] Add a shared pure persisted-reference date predicate, independent of presentation enrichment and event/creation dates.
   - [ ] Consume document metadata and scrape timestamp; reject unknown/partial/ambiguous dates in bounded periods without another clock fallback.
   - [ ] Share one inclusive date policy between aggregation and client detail, including unbounded periods and multiple references.
-  - [ ] Regression tests cover the September/July fixture, missing dates, partial/ambiguous dates, scrape-only timestamps and calendar boundaries.
+  - [x] Regression tests cover the September/July fixture, missing dates, partial/ambiguous dates, scrape-only timestamps and calendar boundaries.
 - [ ] **Lot 2 — Selector and shared URL**
   - [ ] Add the document/scrape selector to the existing period control for relative and custom periods, default document.
   - [ ] Serialize/restore `filter.dateBasis` with period and retain it across geo navigation, reload and browser history.
