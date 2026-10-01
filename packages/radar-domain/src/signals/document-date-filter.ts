@@ -22,7 +22,9 @@ export function persistedDocumentRefs(props: unknown): Record<string, unknown>[]
 
 function civilDate(value: unknown): string | null {
   if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
-  const [year, month, day] = value.split("-").map(Number);
+  const year = Number(value.slice(0, 4));
+  const month = Number(value.slice(5, 7));
+  const day = Number(value.slice(8, 10));
   const date = new Date(`${value}T00:00:00.000Z`);
   return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
     ? value : null;
@@ -36,7 +38,7 @@ export function documentRefCivilDate(ref: unknown, basis: DocumentDateBasis): st
   const metadata = record(ref);
   if (basis === "scrap") {
     const value = metadata.fetchedAt;
-    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
+    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.test(value)
       || !civilDate(value.slice(0, 10))) return null;
     const timestamp = new Date(value);
     return Number.isNaN(timestamp.getTime()) ? null : scrapeCalendar.format(timestamp);

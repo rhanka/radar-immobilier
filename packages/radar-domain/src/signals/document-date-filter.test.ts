@@ -58,6 +58,7 @@ describe("document date window", () => {
     expect(matchesDocumentDateWindow(props, period)).toBe(false);
     expect(matchesDocumentDateWindow(props, { ...period, dateBasis: "scrap" })).toBe(true);
     expect(documentRefCivilDate({ fetchedAt: "2026-09-29" }, "scrap")).toBeNull();
+    expect(documentRefCivilDate({ fetchedAt: "2026-09-29T24:00:00Z" }, "scrap")).toBeNull();
   });
 
   it("counts a multi-document result once if any reference matches, including nested refs", () => {
