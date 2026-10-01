@@ -100,10 +100,16 @@ Make every existing geographic view restore its applicable active filters and pe
   - [x] Real Playwright/CDP 9222 proof against isolated branch UI: nine scenarios, zero JS errors. API fixtures make this browser integration proof; full live-data E2E and owner UAT remain unaccepted.
   - [x] Harness C1 branch and C2 scope gates pass.
   - [ ] Complementary peer review: selection-failed; absent live catalog, no eligible pair selected. See local proof dossier; no consensus verdict.
-  - [ ] Reconcile findings and update this plan/status with evidence.
-  - [ ] Push branch and create draft PR linked to #787; no merge/deploy.
-  - [ ] Report full head SHA, PR, checks and remaining acceptance limits to conductor.
-  - [ ] Stop isolated stack after evidence collection; preserve all root services and data.
+  - [x] Reconcile observed restoration/navigation failures and update plan/status/evidence; peer findings remain unavailable.
+  - [x] Push branch and create draft PR #789 linked to #787; no merge/deploy.
+  - [x] Report full head SHA, PR, checks and remaining acceptance limits to conductor.
+  - [x] Stop only test-url-filters-787 stack after proof; preserve volumes, root services and CDP 9222.
+
+## Publication
+- Draft PR: https://github.com/rhanka/radar-immobilier/pull/789
+- Verified implementation/browser proof: `5c2d4104ed279b4e02e1349d226af98b13ba0172`; nine browser scenarios, API fixtures disclosed.
+- Local evidence: `tmp/issue-787-proof/` and `tmp/issue-787-*.log`; review dossier is selection-failed.
+- Branch policy passed on the implementation commit; CI was in progress at publication. Peer review, live-data E2E and owner UAT stay open.
 
 - [ ] **Lot 5 — Owner-controlled merge & close**
   - [ ] Owner UAT and CI accepted.
