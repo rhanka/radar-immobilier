@@ -45,7 +45,7 @@
 - [ ] **Lot 1 — Deterministic date detection and metadata**
   - [x] Add validated documentary date status, precision, nature, provenance and evidence contract.
   - [ ] Extract session dates from listing/filename and relevant document header without LLM.
-  - [ ] Persist/enrich missing dates while preserving known dates, first fetchedAt and payload identity.
+  - [x] Persist/enrich missing dates while preserving known dates, first fetchedAt and payload identity.
   - [ ] Test July/September headers, ambiguous dates, invalid dates, month precision and immutable known metadata.
   - [ ] Lot gate: scoped sources and recueil/resolver tests, API typecheck and scoped lint.
 - [ ] **Lot 2 — Existing signal-workflow extension**
