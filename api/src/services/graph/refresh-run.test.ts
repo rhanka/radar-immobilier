@@ -1,10 +1,14 @@
+import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
+import type { Extraction } from "@sentropic/graphify";
 import { describe, expect, it } from "vitest";
 
 import type { LiveScrapeCityRecap } from "../sources/live-scrape.js";
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
-import { refreshCorpusInputHash } from "./refresh-corpus.js";
-import { acquireRefreshPdfCandidates, orderRefreshPdfCandidates,
-  refreshSourceDelayMs, writeRefreshPdfManifest } from "./refresh-run.js";
+import { hydrateGraphDocumentDates } from "../sources/document-date-metadata.js";
+import { extractionToV23Graph } from "./refresh-v23.js";
+import { refreshCorpusInputHash, type RefreshCorpus, type RefreshCorpusDocument } from "./refresh-corpus.js";
+import { acquireRefreshPdfCandidates, bindDocumentSourceIds, orderRefreshPdfCandidates,
+  recoverRefreshDocumentDates, refreshSourceDelayMs, writeRefreshPdfManifest } from "./refresh-run.js";
 
 class MemoryStore implements ObjectStore {
   readonly objects = new Map<string, Uint8Array>();
@@ -182,5 +186,83 @@ describe("orderRefreshPdfCandidates", () => {
       casKeys: [key("a"), key("b")], count: 2 });
 
     expect(ordered.map((candidate) => candidate.representationKey)).toEqual([key("a"), key("b")]);
+  });
+});
+
+describe("documentary dates in the existing refresh", () => {
+  const header = "Procès-verbal d'une séance ordinaire du Conseil municipal tenue le 28 juillet 2026, à 19 h";
+  async function undatedDocument(store: MemoryStore) {
+    const record = buildRawDocumentRecord({ source: "pv-test", sourceUrl: "https://example.test/pv.pdf",
+      body: new TextEncoder().encode("original-pdf"), contentType: "application/pdf",
+      fetchedAt: "2026-07-30T10:00:00.000Z", provenance: { version: "1", userAgent: "test", viaObscura: false } });
+    await store.put(rawMetaKey(record.storageKey), JSON.stringify(record));
+    const chunk = { id: `${record.sha256}.1`, docSha: record.sha256, originalKey: record.storageKey,
+      sourceUrl: record.sourceUrl, pages: [1], text: `[PDF PAGE 1]\n${header}`,
+      documentDate: { status: "unknown" as const }, documentHeader: { page: 1, text: header } };
+    const document: RefreshCorpusDocument = { sourceId: "pv-test", citySlug: "testville", sha256: record.sha256,
+      originalKey: record.storageKey, sourceUrl: record.sourceUrl, fetchedAt: record.fetchedAt,
+      documentDate: { status: "unknown" }, pages: [{ page: 1, text: header }], chunks: [chunk] };
+    return { record, chunk, document };
+  }
+  function sourceExtraction(id: string, docSha: string, rawRef: string, date?: string): Extraction {
+    return { nodes: [{ id, label: "PV", node_type: "Source", file_type: "document", source_file: rawRef,
+      properties: { docSha, rawRef, ...(date ? { date } : {}) },
+      citations: [{ page: 1, excerpt: header, source_file: rawRef, rawRef, docSha,
+        sourceUrl: "https://example.test/pv.pdf", modality: "pdf" }] }],
+    edges: [], input_tokens: 1, output_tokens: 1 } as unknown as Extraction;
+  }
+
+  it("should persist a date recovered with zero signals and carry it, with the scrap date, to graph refs", async () => {
+    const store = new MemoryStore();
+    const { record, chunk, document } = await undatedDocument(store);
+    const extraction = sourceExtraction(`source-${record.sha256}`, record.sha256, record.storageKey, "2026-07-28");
+    const [dated] = await recoverRefreshDocumentDates(store, [document], [{ chunk, extraction }]);
+    expect(dated).toMatchObject({ publishedAt: "2026-07-28", fetchedAt: record.fetchedAt,
+      documentDate: { status: "known", method: "signal-llm", kind: "session" } });
+    const persisted = JSON.parse(new TextDecoder().decode(await store.get(rawMetaKey(record.storageKey))));
+    expect(persisted).toMatchObject({ publishedAt: "2026-07-28", fetchedAt: record.fetchedAt,
+      sha256: record.sha256, documentDate: { method: "signal-llm" } });
+    const graph = extractionToV23Graph(extraction, { municipality: "testville", generatedAt: "2026-10-01T00:00:00Z",
+      documents: [dated!], baseline: { nodes: [], edges: [] } });
+    expect(graph.nodes.map((node) => node.type)).toEqual(["Source"]);
+    expect(graph.nodes[0]?.refs?.[0]).toMatchObject({ publishedAt: "2026-07-28", fetchedAt: record.fetchedAt });
+  });
+
+  it("should keep a known upstream date and never let the model output replace it", async () => {
+    const store = new MemoryStore();
+    const { record, chunk, document } = await undatedDocument(store);
+    const known = { status: "known" as const, value: "2026-07-27", precision: "day" as const,
+      kind: "session" as const, method: "listing" as const, evidence: { field: "publishedAt" } };
+    const extraction = sourceExtraction(`source-${record.sha256}`, record.sha256, record.storageKey, "2026-07-28");
+    const [dated] = await recoverRefreshDocumentDates(store, [{ ...document, documentDate: known,
+      publishedAt: known.value }], [{ chunk, extraction }]);
+    expect(dated).toMatchObject({ publishedAt: "2026-07-27", documentDate: { method: "listing" } });
+    const persisted = JSON.parse(new TextDecoder().decode(await store.get(rawMetaKey(record.storageKey))));
+    expect(persisted).not.toHaveProperty("publishedAt");
+  });
+
+  it("should leave the date unknown when the existing call proves none", async () => {
+    const store = new MemoryStore();
+    const { record, chunk, document } = await undatedDocument(store);
+    const [dated] = await recoverRefreshDocumentDates(store, [document], [{ chunk,
+      extraction: sourceExtraction(`source-${record.sha256}`, record.sha256, record.storageKey) }]);
+    expect(dated).toMatchObject({ documentDate: { status: "unknown" } });
+    expect(dated).not.toHaveProperty("publishedAt");
+  });
+
+  it("should reuse the published Source identity and date that baseline Source in the same refresh", async () => {
+    const store = new MemoryStore();
+    const { record, document } = await undatedDocument(store);
+    const baseline = { nodes: [{ id: "src:legacy", label: "PV", type: "Source",
+      properties: { docSha: record.sha256, rawRef: record.storageKey } }], edges: [] };
+    const corpus: RefreshCorpus = { inputHash: "h", documents: [document], chunks: document.chunks };
+    const bound = bindDocumentSourceIds(corpus, baseline);
+    expect(bound.inputHash).toBe("h");
+    expect(bound.chunks[0]?.documentSourceId).toBe("src:legacy");
+    const extraction = sourceExtraction("src:legacy", record.sha256, record.storageKey, "2026-07-28");
+    await recoverRefreshDocumentDates(store, bound.documents, [{ chunk: bound.chunks[0]!, extraction }]);
+    const hydrated = await hydrateGraphDocumentDates(store, baseline);
+    expect(hydrated.nodes[0]?.properties).toMatchObject({ date: "2026-07-28" });
+    expect(baseline.nodes[0]?.properties).not.toHaveProperty("date");
   });
 });
