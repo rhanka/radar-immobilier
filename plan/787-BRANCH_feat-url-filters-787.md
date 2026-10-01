@@ -60,6 +60,10 @@ Make every existing geographic view restore its applicable active filters and pe
 - [x] BR787-D11: the existing DS Search clear button changes its bound value without emitting native input. Trace that explicit button event in the existing search wrappers so clearing a city/zone/lot search updates its URL and browser history too.
 - [x] BR787-EX2: route inventory includes the existing discrete `#/geo` view. Bind its municipality selector to existing selected query state (including initial default selection) and prove share/reload/history. No added filter UI or API changes. Rollback is confined to this selector binding. OpportunitesMapView and embedded CadastreMapView expose no business filter controls.
 
+- [x] BR787-D12: review against the owner need. A filterless link is the product default (entry links, bookmarks), not "everything unchecked"; old `filter.subset` links normalize to the defaults they used to display (exclusions + 6-month period), not to an unbounded unfiltered view. An all-unchecked, unbounded snapshot (Farid case) is written `filter.period=all`.
+- [x] BR787-D13: relative presets are shared as `filter.period=<3mo|6mo|12mo|all>` alone and resolved when the link is opened; absolute ranges as `filter.dateFrom`+`filter.dateTo`. This removes stale bounds displayed under a relative label and an extra bulk reload on every route application.
+- [x] BR787-D14: `filter.dateBasis=document|scrap` (default `document`, omitted) is reserved for #786 per the accepted contract; #786 rebases on this grammar.
+
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (template label only; no cherry-pick or additional integration branch)
 - [ ] **Multi-branch**
@@ -110,6 +114,11 @@ Make every existing geographic view restore its applicable active filters and pe
 - Verified implementation/browser proof: `5c2d4104ed279b4e02e1349d226af98b13ba0172`; nine browser scenarios, API fixtures disclosed.
 - Local evidence: `tmp/issue-787-proof/` and `tmp/issue-787-*.log`; review dossier is selection-failed.
 - Branch policy passed on the implementation commit; CI was in progress at publication. Peer review, live-data E2E and owner UAT stay open.
+
+- [x] **Lot 4b — Owner-need review follow-up**
+  - [x] Defaults vs authoritative snapshot, legacy-link defaults, relative period resolution, Evaluation lot-only encoding.
+  - [x] Full UI: 1621 passed / 10 todo; typecheck 0 errors / 7 existing warnings; lint passed.
+  - [x] CDP 9222 runner: ten scenarios (adds defaults / all-unchecked share), zero JavaScript errors, API fixtures.
 
 - [ ] **Lot 5 — Owner-controlled merge & close**
   - [ ] Owner UAT and CI accepted.
