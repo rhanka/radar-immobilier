@@ -56,6 +56,8 @@
   export let loading = false;
   /** Couverture indisponible : état vide honnête, pas un faux zéro. */
   export let dataUnavailable = false;
+  export let citySearch = "";
+  export let onCitySearchChange: (query: string) => void = () => {};
   /** Portée active (contrôlée par la vue — pilote liste ET carte). */
   export let scope: CoverageScope = "all";
   export let kpiRows: PalierCityRow[] = [];
@@ -218,6 +220,8 @@
       {selectedSlug}
       {loading}
       {dataUnavailable}
+      searchQuery={citySearch}
+      onSearchChange={onCitySearchChange}
       onSelect={handleSelectSlug}
     />
   </RailSection>

@@ -200,6 +200,28 @@ beforeEach(() => {
 });
 
 describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
+  it("restores a dates-only request in the same city without inheriting restrictions", async () => {
+    localStorage.setItem("signaux-cptaq-enabled", "1");
+    vi.mocked(fetchCptaqConstraints).mockResolvedValue(cptaqResponse(true));
+    setSearch("?filter.zonage=1&filter.excludePiia=1&filter.cptaq=1&filter.citySearch=Valleyfield&filter.lots=0");
+    const view = render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+    const cptaq = await screen.findByTestId("legend-cptaq-toggle");
+    await waitFor(() => expect(cptaq.getAttribute("aria-pressed")).toBe("true"));
+    expect((screen.getByLabelText("Zonage") as HTMLInputElement).checked).toBe(true);
+    expect((screen.getByLabelText("Rechercher une ville") as HTMLInputElement).value).toBe("Valleyfield");
+    expect(fetchAllLots).not.toHaveBeenCalled();
+
+    setSearch("?filter.dateFrom=2026-05-01&filter.dateTo=2026-05-31");
+    await view.rerender({ geoRoute: cityRoute() });
+    await waitFor(() => expect(fetchAllLots).toHaveBeenCalled());
+    for (const label of ["Zonage", "Résidentiel", "Précoce", "Exclure PIIA sans projet résidentiel", "Exclure dérogations mineures"]) {
+      expect((screen.getByLabelText(label) as HTMLInputElement).checked).toBe(false);
+    }
+    expect(cptaq.getAttribute("aria-pressed")).toBe("false");
+    expect((screen.getByLabelText("Rechercher une ville") as HTMLInputElement).value).toBe("");
+    expect(screen.getByText("2026-05-01 – 2026-05-31")).toBeTruthy();
+  });
+
   it("(a) ?lots=0 : fetchAllLots N'EST PAS appelé, les zones se chargent quand même", async () => {
     setSearch("?lots=0");
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });

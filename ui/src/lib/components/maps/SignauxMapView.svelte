@@ -441,6 +441,7 @@
   function setCptaqEnabled(value: boolean): void {
     cptaqEnabled = value;
     persistLabelPref(CPTAQ_LS_KEY, value);
+    syncFilterRoute();
     if (value) {
       if (selectedCity && cptaqAvailable) void loadCptaq(selectedCity.municipality.slug);
     } else {
@@ -533,6 +534,9 @@
 
   const FILTER_DEFAULT: string = B_SUBSET_KEY;
   const initialFilters = geoRoute ? readGeoFilters(geoRoute.state.filters) : null;
+  let citySearch = initialFilters?.citySearch ?? "";
+  let zoneSearch = initialFilters?.zoneSearch ?? "";
+  let lotSearch = initialFilters?.lotSearch ?? "";
   let activeSubsetKey: string = geoRoute ? subsetFromGeoFilters(geoRoute.state.filters) : FILTER_DEFAULT;
 
   /**
@@ -610,6 +614,7 @@
     return writeGeoFilters({
       axes: bAxesFromVivierKey(activeSubsetKey), exclusions: vivierBExclusions,
       timeRange, lots: lotDataFilter, zoneKinds: zoneKindFilter, zoneMillesime: zoneMillesimeFilter, lotsEnabled,
+      cptaqEnabled, citySearch, zoneSearch, lotSearch,
     });
   }
 
@@ -1866,6 +1871,15 @@
     lotDataFilter = filters.lots;
     zoneKindFilter = filters.zoneKinds;
     zoneMillesimeFilter = filters.zoneMillesime;
+    citySearch = filters.citySearch ?? "";
+    zoneSearch = filters.zoneSearch ?? "";
+    lotSearch = filters.lotSearch ?? "";
+    const cptaqChanged = cptaqEnabled !== filters.cptaqEnabled;
+    cptaqEnabled = filters.cptaqEnabled ?? false;
+    if (cptaqChanged) {
+      if (!cptaqEnabled) clearCptaq();
+      else if (selectedCity && cptaqAvailable) void loadCptaq(selectedCity.municipality.slug);
+    }
     applyActiveSubsetKey(subsetFromGeoFilters(route.state.filters));
     if (dateChanged) void load();
     updateGeoLayers();
@@ -2404,7 +2418,7 @@
     // session). Défaut si rien de persisté : n° de zone AFFICHÉ, n° de lot masqué.
     showLotLabels = readLabelPref(LOT_LABELS_LS_KEY, false);
     showZoneLabels = readLabelPref(ZONE_LABELS_LS_KEY, true);
-    cptaqEnabled = readLabelPref(CPTAQ_LS_KEY, false);
+    // Overlay activation is authoritative in the shared URL.
     void load();
     // L'init MapLibre est portée par le socle GeoCityMapBase (cf. template).
   });
@@ -2430,6 +2444,8 @@
       exclusions={vivierBExclusions}
       {timeRange}
       {selectedCityLiveCount}
+      {citySearch}
+      onCitySearchChange={(query) => { citySearch = query; syncFilterRoute(); }}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
@@ -2732,6 +2748,10 @@
       {selectionState}
       activeSubsetKey=""
       lotFilter={lotDataFilter}
+      zoneSearchQuery={zoneSearch}
+      lotSearchQuery={lotSearch}
+      onZoneSearchChange={(query) => { zoneSearch = query; syncFilterRoute(); }}
+      onLotSearchChange={(query) => { lotSearch = query; syncFilterRoute(); }}
       onLotFilterChange={handleLotDataFilterChange}
       {zoneKindFilter}
       onZoneKindFilterChange={handleZoneKindFilterChange}
