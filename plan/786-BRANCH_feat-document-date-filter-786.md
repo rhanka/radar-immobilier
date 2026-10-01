@@ -54,6 +54,7 @@
   - [x] Define `test-document-date-filter-786` / `e2e-document-date-filter-786`; API 8896, UI 5396, Mail UI 1196, Postgres 5636, S3 9196, Obscura 9396, SMTP 1096.
   - [x] Obtain conductor scope gate and data/URL contract coordination (C1/C2 checked).
 - [ ] **Lot 1 — Deterministic date basis**
+  - [x] Add a shared pure persisted-reference date predicate, independent of presentation enrichment and event/creation dates.
   - [ ] Consume document metadata and scrape timestamp; reject unknown/partial/ambiguous dates in bounded periods without another clock fallback.
   - [ ] Share one inclusive date policy between aggregation and client detail, including unbounded periods and multiple references.
   - [ ] Regression tests cover the September/July fixture, missing dates, partial/ambiguous dates, scrape-only timestamps and calendar boundaries.
