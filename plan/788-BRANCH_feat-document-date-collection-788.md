@@ -22,6 +22,9 @@
 - [ ] **Exception process**: declare BR788-EXn with rationale, impact and rollback before conditional changes.
 
 ## Feedback Loop
+- [x] `clarification`: canonical dates belong to persisted graph refs; list/detail membership shares PostgreSQL refs while S3 only enriches presentation.
+- [x] `clarification`: hydrate related baseline refs in the existing refresh; no new index/job/workflow or production execution.
+- [x] `BR788-EX1`: allow `api/src/services/sources/live-scrape.ts` and its existing tests for injecting the existing PdfToText into collection; missing dates require header text when exploit=false. Impact is deterministic PDF parsing of undated newly collected documents. Rollback removes this injection and its tests; raw payloads and timestamps remain unchanged.
 - [ ] `attention`: conductor coordination gate required before application edits.
 - [ ] `attention`: request an owner decision if the existing workflow cannot recover dates cleanly; continue independent work without a workaround.
 - [ ] `attention`: complementary review requires exact author identity and two eligible reviewer hosts/models; report selection failure without inventing consensus.
@@ -37,10 +40,10 @@
   - [x] Verify isolated worktree, branch and source baseline.
   - [x] Read MASTER, workflow, subagent, source and testing rules; load harness skills.
   - [x] Read existing root-cause, stock and owner decision evidence without new production access.
-  - [ ] Open harness branch/debug/plan recorders and obtain conductor scope coordination.
-  - [ ] Confirm isolated ports before starting services.
+  - [x] Open harness branch/debug/plan recorders and obtain conductor scope coordination (C1/C2 passed).
+  - [x] Confirm isolated ports before starting services.
 - [ ] **Lot 1 — Deterministic date detection and metadata**
-  - [ ] Add validated documentary date status, precision, nature, provenance and evidence contract.
+  - [x] Add validated documentary date status, precision, nature, provenance and evidence contract.
   - [ ] Extract session dates from listing/filename and relevant document header without LLM.
   - [ ] Persist/enrich missing dates while preserving known dates, first fetchedAt and payload identity.
   - [ ] Test July/September headers, ambiguous dates, invalid dates, month precision and immutable known metadata.
