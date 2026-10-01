@@ -11,6 +11,8 @@
  * Aucun docker, aucune API : jsdom + stub du socle + loader mocké.
  */
 import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
+import { activePageState } from "$lib/router/router.js";
+import { normalizeGeoRouteState } from "$lib/router/geo-route.js";
 import {
   render,
   fireEvent,
@@ -56,6 +58,8 @@ import {
 
 afterEach(() => cleanup());
 beforeEach(() => {
+  window.history.replaceState(null, "", "/#/sources");
+  activePageState.set(normalizeGeoRouteState());
   resetStubCalls();
   vi.mocked(loadSignauxZones).mockClear();
 });

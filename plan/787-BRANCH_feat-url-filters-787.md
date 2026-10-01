@@ -25,7 +25,7 @@ Make every existing geographic view restore its applicable active filters and pe
   - `ui/src/lib/components/sources-map/SourceMapView.svelte`, `SourceCoverageMap.svelte`, `SourceConsole.svelte` and their tests
   - `ui/src/lib/maps/geo-level-navigation.ts` and its tests
   - `ui/src/lib/signals/vivier-view-mode.ts` and directly related route tests
-  - `ui/qa/*url-filters*` (browser regression proof)
+  - `ui/e2e-qa/*url-filters*` (browser regression proof)
   - `plan/787-BRANCH_feat-url-filters-787.md`
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`, `docker-compose*.yml`, `rules/**`

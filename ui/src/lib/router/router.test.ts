@@ -12,6 +12,34 @@ afterEach(() => {
 });
 
 describe("router compatibility", () => {
+  it("should canonicalize old links while retaining residual-vivier axes", async () => {
+    const router = await loadRouterAt("/geo/city/val-des-monts?filter.subset=vivier-v2%7C-z%7C-p");
+    const cleanup = router.initRouter();
+    expect(window.location.search).toBe("?mode=signal&filter.residentiel=1");
+    expect(get(router.activeGeoRoute)?.state.filters).toEqual({ residentiel: ["1"] });
+    cleanup();
+  });
+
+  it("should replace every restriction from the current history URL", async () => {
+    const router = await loadRouterAt("/geo/city/plaisance?filter.precoce=1&filter.lotMinArea=1000");
+    const cleanup = router.initRouter();
+    window.history.replaceState(null, "", "/geo/city/plaisance?filter.dateFrom=2026-06-01&filter.dateTo=2026-06-30");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    expect(get(router.activeGeoRoute)?.state.filters).toEqual({ dateFrom: ["2026-06-01"], dateTo: ["2026-06-30"] });
+    cleanup();
+  });
+
+  it("should restore Sources restrictions from hash history entries", async () => {
+    const router = await loadRouterAt("/#/sources?filter.coverageScope=focus30");
+    const cleanup = router.initRouter();
+    expect(get(router.activePageState).filters.coverageScope).toEqual(["focus30"]);
+    router.navigateToPageState("sources", { filters: { sourceStatus: ["verified"] } });
+    expect(window.location.hash).toContain("filter.sourceStatus=verified");
+    window.history.replaceState(null, "", "/#/sources?filter.sourceSearch=Valleyfield");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+    expect(get(router.activePageState).filters).toEqual({ sourceSearch: ["Valleyfield"] });
+    cleanup();
+  });
   it("keeps initializing the legacy hash route outside geo paths", async () => {
     const router = await loadRouterAt("/");
 
