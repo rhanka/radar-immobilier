@@ -54,6 +54,8 @@ Make every existing geographic view restore its applicable active filters and pe
 - [x] BR787-D7: local API bootstrap hid UI-specific dependencies behind its empty named volume; seed that isolated UI volume and keep host dependencies removed. Temporary gate makefile mounts both volumes; rollback stops only this stack.
 - [x] BR787-EX1: final control audit found local CPTAQ activation and city/zone/lot searches. Add their existing control files to scope and bind their state to the same URL snapshot. Impact: shared links override those local restrictions too; rollback is limited to these bindings. Basemap and label presentation remain unchanged.
 - [x] BR787-D8: browser navigation exposed the existing lot-to-city route collapse and missing Zone-to-City URL transition. Preserve lot focus through existing selected/focused query primitives on its zone route, and synchronize the existing City/Close controls. No new geographic route or UX.
+- [x] BR787-D9: CDP evidence showed the test page becoming hidden and receiving no animation frame in 500ms after reload. Create and dispose only an owned browser context/window/tab on existing CDP 9222, preserving user tabs and control waits below 2s.
+- [x] BR787-D10: harness review selection has no configured live gateway catalog and no two exact complementary Claude model IDs. Record `selection-failed` in local proof dossier; no leg dispatched or consensus claimed. Draft publication remains reviewable; merge/UAT remain gated.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (template label only; no cherry-pick or additional integration branch)
@@ -79,21 +81,22 @@ Make every existing geographic view restore its applicable active filters and pe
   - [x] Regression tests: round trip, preferences independence, date-only reset, canonical old links.
   - [x] Gate: five codec regressions pass; 30 scoped router/navigation/component checks pass.
 
-- [ ] **Lot 2 — Signal geographic controls and navigation**
+- [x] **Lot 2 — Signal geographic controls and navigation**
   - [x] Wire existing dates/axes/exclusions/lots/zones/CPTAQ and list searches to URL.
   - [x] Restore complete state before data loading, including same-city back/forward.
   - [x] Preserve filters across province/city/zone navigation and reload.
-  - [ ] Gate: component/router regressions and browser proof for dates/business filters.
+  - [x] Gate: component/router regressions and real CDP browser proof for dates/business filters, searches, CPTAQ, zone/lot/city/province and reload/history.
 
-- [ ] **Lot 3 — Other geographic views, Sources second**
+- [x] **Lot 3 — Other geographic views, Sources second**
   - [x] Wire Evaluation source/category/usages/minimum area/prospect/tab and Sources scope/status/focus/search/KPI/tab.
-  - [ ] Restore hash page filters on share/reload/back/forward without hidden preferences.
-  - [ ] Gate: scoped view tests and real browser proof.
+  - [x] Restore hash page filters on share/reload/back/forward without hidden preferences.
+  - [x] Gate: scoped view tests and real browser proof, with API fixtures disclosed.
 
 - [ ] **Lot 4 — Verification and reviewable draft**
-  - [x] Full UI suite: 1612 passed / 10 todo; same-city dates-only regression: 23 scoped checks passed; typecheck: 0 errors / 7 existing warnings; build/lint passed.
-  - [ ] Real Playwright/CDP 9222 proof against isolated branch UI; local screenshots and readable evidence.
-  - [ ] Harness scope/branch gates and bounded complementary review, with explicit failed review legs if unavailable.
+  - [x] Full UI suite: 1615 passed / 10 todo; same-city/lot restoration: 18 component checks; 7 final router checks; typecheck: 0 errors / 7 existing warnings; build/lint passed.
+  - [x] Real Playwright/CDP 9222 proof against isolated branch UI: eight scenarios, zero JS errors. API fixtures make this browser integration proof; full live-data E2E and owner UAT remain unaccepted.
+  - [x] Harness C1 branch and C2 scope gates pass.
+  - [ ] Complementary peer review: selection-failed; absent live catalog, no eligible pair selected. See local proof dossier; no consensus verdict.
   - [ ] Reconcile findings and update this plan/status with evidence.
   - [ ] Push branch and create draft PR linked to #787; no merge/deploy.
   - [ ] Report full head SHA, PR, checks and remaining acceptance limits to conductor.
