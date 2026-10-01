@@ -83,10 +83,14 @@ function hasNbUnitesMax(node: VivierDisplayNode): boolean {
  * logements » dans le cas Austin).
  */
 function evidenceText(node: VivierDisplayNode): string {
+  const persisted = propertyRecords(node).flatMap((props) => [props,
+    ...(Array.isArray(props.refs) ? props.refs.filter(isRecord) : [])]);
+  const canonicalExcerpts = persisted.map((ref) => ["excerpt", "citation", "quote", "text", "selection", "highlight"]
+    .map((key) => ref[key]).find((value) => typeof value === "string" && value.trim()));
   const excerpts = (node.docRefs ?? [])
     .map((ref) => ref.excerpt ?? "")
     .join(" ");
-  return foldText(`${node.label ?? ""} ${node.description ?? ""} ${excerpts}`);
+  return foldText(`${node.label ?? ""} ${node.description ?? ""} ${excerpts} ${canonicalExcerpts.join(" ")}`);
 }
 
 /**
