@@ -27,7 +27,8 @@ export async function dedicatedCdpPage(endpoint = 'http://127.0.0.1:9222') {
       return result.result;
     } finally { clearTimeout(timer); requests.delete(id); }
   }
-  const { targetId } = await command('Target.createTarget', { url: 'about:blank' });
+  const { browserContextId } = await command('Target.createBrowserContext', {});
+  const { targetId } = await command('Target.createTarget', { url: 'about:blank', browserContextId, newWindow: true });
   const ws = new WebSocket(version.webSocketDebuggerUrl);
   await new Promise((resolve, reject) => { ws.onopen = resolve; ws.onerror = reject; });
   const transport = {
@@ -46,18 +47,20 @@ export async function dedicatedCdpPage(endpoint = 'http://127.0.0.1:9222') {
   let browser;
   try {
     browser = await chromium.connectOverCDP(transport, { noDefaults: true, timeout: 10000 });
-    const page = browser.contexts()[0].pages()[0];
+    const page = browser.contexts().flatMap(context => context.pages())[0];
     if (!page) throw new Error('Dedicated CDP target was not attached');
     return {
       page, version: version.Browser, targetId,
       async close() {
         await command('Target.closeTarget', { targetId });
+        await command('Target.disposeBrowserContext', { browserContextId });
         await browser.close();
         control.close();
       },
     };
   } catch (error) {
     await command('Target.closeTarget', { targetId });
+    await command('Target.disposeBrowserContext', { browserContextId });
     ws.close(); control.close();
     throw error;
   }
