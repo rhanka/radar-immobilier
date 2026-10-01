@@ -53,6 +53,7 @@ Make every existing geographic view restore its applicable active filters and pe
 - [x] BR787-D6: preserve the existing zones-only URL restriction across navigation; date-only requests clear it. Ignore superseded bulk date responses during history navigation.
 - [x] BR787-D7: local API bootstrap hid UI-specific dependencies behind its empty named volume; seed that isolated UI volume and keep host dependencies removed. Temporary gate makefile mounts both volumes; rollback stops only this stack.
 - [x] BR787-EX1: final control audit found local CPTAQ activation and city/zone/lot searches. Add their existing control files to scope and bind their state to the same URL snapshot. Impact: shared links override those local restrictions too; rollback is limited to these bindings. Basemap and label presentation remain unchanged.
+- [x] BR787-D8: browser navigation exposed the existing lot-to-city route collapse and missing Zone-to-City URL transition. Preserve lot focus through existing selected/focused query primitives on its zone route, and synchronize the existing City/Close controls. No new geographic route or UX.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (template label only; no cherry-pick or additional integration branch)

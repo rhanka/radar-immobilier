@@ -86,7 +86,7 @@ function geoRouteFromLocation(
     delete filters.subset;
     result.route.state.filters = { ...axes, ...filters };
     if (typeof window !== "undefined") {
-      window.history.replaceState(window.history.state, "", buildGeoRoute(result.route));
+      window.history.replaceState(window.history.state, "", `${buildGeoRoute(result.route)}${window.location.hash}`);
     }
   }
   return result.ok ? result.route : null;

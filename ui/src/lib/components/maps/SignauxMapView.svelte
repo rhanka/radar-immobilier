@@ -531,6 +531,7 @@
   const detailCache = new Map<string, GraphSignalNode[]>();
   let appliedGeoRouteKey: string | null = null;
   let pendingRouteZoneKey: string | null = null;
+  let pendingRouteLotId: string | null = null;
 
   const FILTER_DEFAULT: string = B_SUBSET_KEY;
   const initialFilters = geoRoute ? readGeoFilters(geoRoute.state.filters) : null;
@@ -1585,6 +1586,8 @@
       // Redescente Zone/Lot → Ville : on efface la sélection zone/lot et on
       // recadre sur la ville entière (état zoomé).
       selectionState = createSelectionBucketState();
+      navigateToGeoRoute({ level: "city", citySlug: selectedCity.municipality.slug,
+        state: { mode: geoRoute?.state.mode ?? "signal", filters: currentGeoFilters() } });
       updateGeoLayers();
       flyToCity(selectedCity);
       villeZoomed = true;
@@ -1902,9 +1905,11 @@
 
     if (route.level === "zone") {
       pendingRouteZoneKey = route.zoneKey;
+      pendingRouteLotId = route.state.focused?.kind === "lot" ? route.state.focused.id : null;
       applyPendingRouteZone();
     } else {
       pendingRouteZoneKey = null;
+      pendingRouteLotId = null;
       selectionState = clearSelectionGroup(clearSelectionGroup(selectionState, "lot"), "zone");
       selectionState = setFocus(selectionState, makeKey("municipality", entry.municipality.slug));
     }
@@ -1932,22 +1937,36 @@
     );
     if (!zone) return;
     selectBucketKey(makeKey("zone", `${citySlug}/${zone.properties.code}`));
+    if (pendingRouteLotId?.startsWith(`${citySlug}/`)) {
+      const lotKey = makeKey("lot", pendingRouteLotId);
+      if (!selectionState.selectedKeys.has(lotKey)) {
+        selectionState = toggleExclusiveSelection(selectionState, lotKey, ["lot"]);
+      }
+      selectionState = setFocus(selectionState, lotKey);
+      updateGeoLayers();
+    }
+    pendingRouteLotId = null;
     pendingRouteZoneKey = null;
   }
 
   function syncRouteForSelectionKey(key: SelectionKey): void {
     const parsed = parseKey(key);
     if (!parsed) return;
-    // C3 — sélectionner un LOT désélectionne la zone : si l'URL est au niveau
-    // zone, on la ramène au niveau ville (cohérence URL ↔ sélection exclusive).
+    // Keep the active zone and lot focus in the existing selection grammar.
     if (parsed.kind === "lot") {
       if (geoRoute?.level === "zone") {
         navigateToGeoRoute({
-          level: "city",
+          level: "zone",
           citySlug: geoRoute.citySlug,
+          zoneKey: geoRoute.zoneKey,
           state: {
             mode: geoRoute.state.mode ?? "signal",
             filters: currentGeoFilters(),
+            selected: [...selectionState.selectedKeys].flatMap((selected) => {
+              const ref = parseKey(selected);
+              return ref && (ref.kind === "zone" || ref.kind === "lot") ? [ref] : [];
+            }),
+            focused: selectionState.focusedKey === key ? { kind: "lot", id: parsed.id } : null,
           },
         });
       }
@@ -2757,7 +2776,7 @@
       onZoneKindFilterChange={handleZoneKindFilterChange}
       {zoneMillesimeFilter}
       onZoneMillesimeFilterChange={handleZoneMillesimeFilterChange}
-      onClear={() => clearSelection()}
+      onClear={() => handleGeoLevelClick("Province")}
       onToggleKey={toggleBucketKey}
       onOpenDocument={openDocument}
       onOpenEvidence={openEvidence}
