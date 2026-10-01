@@ -20,10 +20,16 @@ Make every existing geographic view restore its applicable active filters and pe
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
   - `ui/src/lib/router/*` (filter grammar, URL/router restoration and tests)
-  - `ui/src/lib/components/maps/SignauxMapView.svelte`, `SignauxRail.svelte` and their tests
-  - `ui/src/lib/components/maps/EvaluationMapView.svelte` and its tests
-  - `ui/src/lib/components/sources-map/SourceMapView.svelte`, `SourceCoverageMap.svelte`, `SourceConsole.svelte` and their tests
-  - `ui/src/lib/maps/geo-level-navigation.ts` and its tests
+  - `ui/src/lib/components/maps/SignauxMapView*`
+  - `ui/src/lib/components/maps/SignauxRail*`
+  - `ui/src/lib/components/maps/SignauxSelPanel.svelte`
+  - `ui/src/lib/components/maps/RailCityList.svelte`
+  - `ui/src/lib/components/maps/EvaluationMapView*`
+  - `ui/src/lib/components/sources-map/SourceMapView*`
+  - `ui/src/lib/components/sources-map/SourceCoverageMap*`
+  - `ui/src/lib/components/sources-map/SourceConsole*`
+  - `ui/src/lib/components/sources-map/SourcesRail.svelte`
+  - `ui/src/lib/maps/geo-level-navigation*`
   - `ui/src/lib/signals/vivier-view-mode.ts` and directly related route tests
   - `ui/e2e-qa/*url-filters*` (browser regression proof)
   - `plan/787-BRANCH_feat-url-filters-787.md`
@@ -46,6 +52,7 @@ Make every existing geographic view restore its applicable active filters and pe
 - [x] BR787-D5: hash-based geographic views require their existing page query state; no new top-level view or business control.
 - [x] BR787-D6: preserve the existing zones-only URL restriction across navigation; date-only requests clear it. Ignore superseded bulk date responses during history navigation.
 - [x] BR787-D7: local API bootstrap hid UI-specific dependencies behind its empty named volume; seed that isolated UI volume and keep host dependencies removed. Temporary gate makefile mounts both volumes; rollback stops only this stack.
+- [x] BR787-EX1: final control audit found local CPTAQ activation and city/zone/lot searches. Add their existing control files to scope and bind their state to the same URL snapshot. Impact: shared links override those local restrictions too; rollback is limited to these bindings. Basemap and label presentation remain unchanged.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (template label only; no cherry-pick or additional integration branch)
@@ -65,14 +72,14 @@ Make every existing geographic view restore its applicable active filters and pe
   - [x] Trace incomplete axes/date/exclusion persistence and navigation loss.
   - [x] Confirm bounded scope and request entry point.
 
-- [ ] **Lot 1 — Dates and business filter grammar**
+- [x] **Lot 1 — Dates and business filter grammar**
   - [x] Add typed local signal/lot/zone URL serialization and restoration with unrestricted omitted filters.
   - [x] Preserve exact relative/absolute civil-date bounds and normalize old subset links.
   - [x] Regression tests: round trip, preferences independence, date-only reset, canonical old links.
   - [x] Gate: five codec regressions pass; 30 scoped router/navigation/component checks pass.
 
 - [ ] **Lot 2 — Signal geographic controls and navigation**
-  - [x] Wire all existing dates/axes/exclusions/lots/zones controls to URL.
+  - [x] Wire existing dates/axes/exclusions/lots/zones/CPTAQ and list searches to URL.
   - [x] Restore complete state before data loading, including same-city back/forward.
   - [x] Preserve filters across province/city/zone navigation and reload.
   - [ ] Gate: component/router regressions and browser proof for dates/business filters.
@@ -83,7 +90,7 @@ Make every existing geographic view restore its applicable active filters and pe
   - [ ] Gate: scoped view tests and real browser proof.
 
 - [ ] **Lot 4 — Verification and reviewable draft**
-  - [x] Full UI suite: 1612 passed / 10 todo; typecheck: 0 errors / 7 warnings; build passed; lint recheck underway.
+  - [x] Full UI suite: 1612 passed / 10 todo; same-city dates-only regression: 23 scoped checks passed; typecheck: 0 errors / 7 existing warnings; build/lint passed.
   - [ ] Real Playwright/CDP 9222 proof against isolated branch UI; local screenshots and readable evidence.
   - [ ] Harness scope/branch gates and bounded complementary review, with explicit failed review legs if unavailable.
   - [ ] Reconcile findings and update this plan/status with evidence.

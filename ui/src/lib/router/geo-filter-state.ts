@@ -12,6 +12,10 @@ export interface GeoFilterState {
   zoneKinds: ZoneKindFilter;
   zoneMillesime: string | null;
   lotsEnabled?: boolean;
+  cptaqEnabled?: boolean;
+  citySearch?: string;
+  zoneSearch?: string;
+  lotSearch?: string;
 }
 
 export function unrestrictedTimeRange(): SignalTimeRange {
@@ -59,6 +63,10 @@ export function readGeoFilters(filters: Record<string, readonly string[]>): GeoF
     zoneKinds: new Set(ZONE_KIND_GROUPS.filter(({ id }) => filters.zoneKind?.includes(id)).map(({ id }) => id)),
     zoneMillesime: value("zoneMillesime") ?? null,
     lotsEnabled: value("lots") !== "0",
+    cptaqEnabled: value("cptaq") === "1",
+    citySearch: value("citySearch") ?? "",
+    zoneSearch: value("zoneSearch") ?? "",
+    lotSearch: value("lotSearch") ?? "",
   };
 }
 
@@ -83,6 +91,11 @@ export function writeGeoFilters(state: GeoFilterState): Record<string, string[]>
   if (state.zoneKinds.size) filters.zoneKind = [...state.zoneKinds];
   if (state.zoneMillesime) filters.zoneMillesime = [state.zoneMillesime];
   if (state.lotsEnabled === false) filters.lots = ["0"];
+  flag("cptaq", state.cptaqEnabled === true);
+  for (const key of ["citySearch", "zoneSearch", "lotSearch"] as const) {
+    const query = state[key];
+    if (query) filters[key] = [query];
+  }
   return filters;
 }
 

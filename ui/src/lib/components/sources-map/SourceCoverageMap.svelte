@@ -146,6 +146,7 @@
   // ── Portée (rail gauche, radio EXCLUSIF) — remplace le toggle Focus 30 ─────
   /** Défaut « Toutes » = comportement Province historique. */
   let scope: CoverageScope = DEFAULT_COVERAGE_SCOPE;
+  let citySearch = "";
 
   function handleScopeChange(next: CoverageScope): void {
     scope = next;
@@ -158,6 +159,7 @@
   $: if ($activePageState !== restoredPageState) {
     restoredPageState = $activePageState;
     const filters = $activePageState.filters;
+    citySearch = filters.citySearch?.[0] ?? "";
     scope = COVERAGE_SCOPE_OPTIONS.find(({ value }) => value === filters.coverageScope?.[0])?.value ?? DEFAULT_COVERAGE_SCOPE;
     activeKpiId = PALIER_KPIS_20.find(({ id }) => id === filters.coverageKpi?.[0])?.id ?? PALIER_KPIS_20[0]!.id;
     const citySlug = $activePageState.selected.find(({ kind }) => kind === "municipality")?.id;
@@ -167,9 +169,12 @@
   }
 
   function syncCoverageUrl(): void {
+    const filters: Record<string, string[]> = { ...$activePageState.filters, sourceTab: ["couverture"], coverageScope: [scope], coverageKpi: [activeKpiId] };
+    if (citySearch) filters.citySearch = [citySearch];
+    else delete filters.citySearch;
     navigateToPageState("sources", {
       ...$activePageState, mode: "data",
-      filters: { ...$activePageState.filters, sourceTab: ["couverture"], coverageScope: [scope], coverageKpi: [activeKpiId] },
+      filters,
       selected: selectedCity ? [{ kind: "municipality", id: selectedCity.citySlug }] : [],
       focused: selectedZoneCode ? { kind: "zone", id: selectedZoneCode } : null,
     });
@@ -596,6 +601,8 @@
       {activeKpiId}
       activeKpiLabel={activeKpi.label}
       {scope}
+      {citySearch}
+      onCitySearchChange={(query) => { citySearch = query; syncCoverageUrl(); }}
       onScopeChange={handleScopeChange}
       onSelectCity={handleRailSelect}
       onRefresh={reloadAll}
