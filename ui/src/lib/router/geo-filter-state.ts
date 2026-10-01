@@ -11,6 +11,7 @@ export interface GeoFilterState {
   lots: EvalLotFilter;
   zoneKinds: ZoneKindFilter;
   zoneMillesime: string | null;
+  lotsEnabled?: boolean;
 }
 
 export function unrestrictedTimeRange(): SignalTimeRange {
@@ -57,6 +58,7 @@ export function readGeoFilters(filters: Record<string, readonly string[]>): GeoF
     lots: { category, usages, superficieMin: Number.isFinite(minimum) && minimum > 0 ? minimum : 0 },
     zoneKinds: new Set(ZONE_KIND_GROUPS.filter(({ id }) => filters.zoneKind?.includes(id)).map(({ id }) => id)),
     zoneMillesime: value("zoneMillesime") ?? null,
+    lotsEnabled: value("lots") !== "0",
   };
 }
 
@@ -80,6 +82,7 @@ export function writeGeoFilters(state: GeoFilterState): Record<string, string[]>
   if (state.lots.superficieMin > 0) filters.lotMinArea = [String(state.lots.superficieMin)];
   if (state.zoneKinds.size) filters.zoneKind = [...state.zoneKinds];
   if (state.zoneMillesime) filters.zoneMillesime = [state.zoneMillesime];
+  if (state.lotsEnabled === false) filters.lots = ["0"];
   return filters;
 }
 

@@ -44,6 +44,7 @@ Make every existing geographic view restore its applicable active filters and pe
 - [x] BR787-D3: no new chat/MCP UX; current chat has no geographic-filter mapping, so URL is the evidenced request entry point.
 - [x] BR787-D4: canonical named axes replace outward `filter.subset`; bounded old-link parsing normalizes into the sole residual vivier.
 - [x] BR787-D5: hash-based geographic views require their existing page query state; no new top-level view or business control.
+- [x] BR787-D6: preserve the existing zones-only URL restriction across navigation; date-only requests clear it. Ignore superseded bulk date responses during history navigation.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (template label only; no cherry-pick or additional integration branch)
