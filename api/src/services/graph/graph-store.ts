@@ -1983,15 +1983,17 @@ export function aggregateGraphSignalProjectionRows(
   for (const row of rows) {
     if (!row.citySlug) continue;
     if (!matchesDocumentDateWindow(row.props, dateRange)) continue;
-    if (dateRange?.excludePiia || dateRange?.excludeDerogations) {
-      const classification = classifyGraphNodeVivierV2({ ...row, category: row.category ?? null,
-        description: row.description ?? null, etapeAnnote: row.etapeAnnote ?? null });
-      if (isHiddenByVivierBExclusions({ label: row.label, description: row.description ?? null,
-        props: (row.props ?? {}) as Record<string, unknown>, classification }, {
+    // B display exclusions only gate the B (vivier_v2) path, exactly like the
+    // client detail; legacy A counts keep the full date-scoped projection.
+    const hiddenInB = (dateRange?.excludePiia || dateRange?.excludeDerogations)
+      ? isHiddenByVivierBExclusions({ label: row.label, description: row.description ?? null,
+        props: (row.props ?? {}) as Record<string, unknown>,
+        classification: classifyGraphNodeVivierV2({ ...row, category: row.category ?? null,
+          description: row.description ?? null, etapeAnnote: row.etapeAnnote ?? null }) }, {
         piiaSansProjetResidentiel: dateRange.excludePiia === true,
         derogationsMineures: dateRange.excludeDerogations === true,
-      })) continue;
-    }
+      })
+      : false;
     if (!byCity.has(row.citySlug)) {
       byCity.set(row.citySlug, {
         signalCount: 0,
@@ -2015,7 +2017,7 @@ export function aggregateGraphSignalProjectionRows(
       props: row.props,
       sourceRef: row.sourceRef,
     };
-    entry.signals.push(signal);
+    if (!hiddenInB) entry.signals.push(signal);
 
     // Legacy A (z|m|p) is derived from the full projection. B′ only gates
     // the new residential axis `r`; it must not rewrite legacy membership.

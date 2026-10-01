@@ -651,6 +651,29 @@ describe("server-side signal date windows", () => {
     expect(counts.vivierV2Counts.total).toBe(1);
   });
 
+  it("gates only the B counters with display exclusions while retaining cited residential PIIA projects", () => {
+    const refs = [{ publishedAt: "2026-09-29" }];
+    const piia = { ...datedSignal("piia-no-project", {}), category: "piia", nbUnitesMax: null,
+      label: "PIIA — secteur résidentiel", props: { refs, properties: { category: "piia", etape: "adoption" } } };
+    const linked = { ...piia, id: "piia-project", props: { ...piia.props,
+      refs: [{ ...refs[0], excerpt: "Projet de quatre logements" }] } };
+    const derogation = { ...datedSignal("derogation", {}), category: "derogation",
+      label: "Dérogation mineure — quatre logements", props: { refs, properties: { category: "derogation" } } };
+    const rows = [piia, linked, derogation];
+    const period = { dateFrom: "2026-09-29", dateTo: "2026-09-30" };
+    const counts = (extra: { excludePiia?: boolean; excludeDerogations?: boolean }) =>
+      aggregateGraphSignalProjectionRows(rows, { ...period, ...extra })[0]!;
+    const base = counts({});
+    expect(base.vivierV2Counts.total).toBe(3);
+    expect(counts({ excludePiia: true }).vivierV2Counts.total).toBe(2);
+    expect(counts({ excludeDerogations: true }).vivierV2Counts.total).toBe(2);
+    const both = counts({ excludePiia: true, excludeDerogations: true });
+    expect(both.vivierV2Counts.total).toBe(1);
+    // The A view never applies B display exclusions, in the detail or the rail.
+    expect(both.signalCount).toBe(3);
+    expect(both.subsetCounts).toEqual(base.subsetCounts);
+  });
+
   it("keeps all rows when no date window is supplied", () => {
     const rows = [
       datedSignal("dated", { properties: { date: "2025-01-01" } }),
