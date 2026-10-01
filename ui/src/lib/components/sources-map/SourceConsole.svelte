@@ -92,7 +92,7 @@
   }
 
   function syncConsoleUrl(): void {
-    const filters = { ...$activePageState.filters, sourceTab: ["console"], sourceStatus: [filter], consoleView: [consoleView] };
+    const filters: Record<string, string[]> = { ...$activePageState.filters, sourceTab: ["console"], sourceStatus: [filter], consoleView: [consoleView] };
     delete filters.sourceFocus;
     delete filters.sourceSearch;
     if (focusOnly) filters.sourceFocus = ["1"];
