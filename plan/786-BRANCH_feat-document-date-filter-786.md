@@ -34,8 +34,11 @@
 - [x] `clarification`: membership reads persisted document refs only; S3 presentation cannot change membership, and historical unknown dates await a separately prepared replay.
 - [x] `clarification`: bounded windows exclude unknown/partial/ambiguous dates; unlimited includes them; any matching document ref includes a result once. Scrape timestamps use America/Toronto civil dates.
 - [x] `clarification`: the DS TimeRangePicker has no content slot; use the standard DS Select adjacent to it in the same period group, available in both relative/custom modes, without DOM grafting.
-- [ ] `attention`: confirm the #788 document-date/fetchedAt contract and one metadata projection for both API views before editing shared files.
+- [x] `attention`: confirm the #788 document-date/fetchedAt contract and one metadata projection for both API views before editing shared files.
 - [ ] `attention`: any necessary business interpretation beyond the selected date basis goes to the conductor with evidence; no workaround.
+
+- [x] `evidence`: aggregation applies B display exclusions to the vivier_v2 path only (A counters unchanged), matching the client detail; Postgres integration spec `api/tests/integration/graph-signals-date-parity.spec.ts` proves aggregate = detail on the Val-des-Monts shape in both modes.
+- [x] `dependency`: #788 (`feat/document-date-collection-788`) projects `documentDate` {status, precision, value}, `publishedAt` (= known value) and the first `fetchedAt` on canonical refs; the filter only reads these fields. Historical refs without `documentDate` fall back to a day-precision `publishedAt` only.
 
 ## Orchestration Mode (AI-selected)
 - [ ] **Mono-branch + cherry-pick**: not used; do not copy URL commits.
@@ -53,23 +56,23 @@
   - [x] Inspect aggregate/list-vs-detail date mismatch and existing DS TimeRangePicker.
   - [x] Define `test-document-date-filter-786` / `e2e-document-date-filter-786`; API 8896, UI 5396, Mail UI 1196, Postgres 5636, S3 9196, Obscura 9396, SMTP 1096.
   - [x] Obtain conductor scope gate and data/URL contract coordination (C1/C2 checked).
-- [ ] **Lot 1 — Deterministic date basis**
+- [x] **Lot 1 — Deterministic date basis**
   - [x] Move the existing display exclusions to domain without a shim so the API and UI share its unchanged semantics.
   - [x] Add a shared pure persisted-reference date predicate, independent of presentation enrichment and event/creation dates.
-  - [ ] Consume document metadata and scrape timestamp; reject unknown/partial/ambiguous dates in bounded periods without another clock fallback.
-  - [ ] Share one inclusive date policy between aggregation and client detail, including unbounded periods and multiple references.
+  - [x] Consume document metadata and scrape timestamp; reject unknown/partial/ambiguous dates in bounded periods without another clock fallback.
+  - [x] Share one inclusive date policy between aggregation and client detail, including unbounded periods and multiple references.
   - [x] Regression tests cover the September/July fixture, missing dates, partial/ambiguous dates, scrape-only timestamps and calendar boundaries.
-- [ ] **Lot 2 — Selector and shared URL**
+- [x] **Lot 2 — Selector and shared URL**
   - [x] Extend the existing geo URL codec with explicit scrape basis and implicit document default, including dates-only reset semantics.
   - [x] Add the document/scrape selector to the existing period group for relative and custom periods, default document.
-  - [ ] Serialize/restore `filter.dateBasis` with period and retain it across geo navigation, reload and browser history.
-  - [ ] Reload bulk counts and reconcile detail/selection using the same basis.
+  - [x] Serialize/restore `filter.dateBasis` with period and retain it across geo navigation, reload and browser history.
+  - [x] Reload bulk counts and reconcile detail/selection using the same basis.
   - [x] UI/client/codec tests cover default and both modes without extracting dates.
 - [ ] **Lot 3 — Gates and browser evidence**
-  - [ ] Run relevant API/domain/UI tests, typecheck and lint through Make on the isolated test environment.
-  - [ ] Prove identical city count, badge, total and detail membership in a dedicated CDP browser context/tab.
+  - [x] Run relevant API/domain/UI tests, typecheck and lint through Make on the isolated test environment.
+  - [x] Prove identical city count, badge, total and detail membership in a dedicated CDP browser context/tab.
   - [ ] Review every hunk for scope; request independent review through the conductor.
 - [ ] **Lot 4 — Reviewable delivery**
-  - [ ] Push the branch and open a draft PR against `feat/url-filters-787`.
+  - [ ] Push the branch and open a PR against `main`, stacked on #789 (`feat/url-filters-787`), which must merge first.
   - [ ] Report full SHA, checks, browser artifacts, limitations and unresolved decisions to the conductor.
   - [ ] Verify CI green before any later merge; preserve branch and defer merge/deploy to conductor authorization.
