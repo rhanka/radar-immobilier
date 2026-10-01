@@ -888,10 +888,16 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
   app.get("/api/graph-signals/by-city", async (c) => {
     const dateFrom = c.req.query("dateFrom")?.trim() || undefined;
     const dateTo = c.req.query("dateTo")?.trim() || undefined;
-    const dateRange = dateFrom || dateTo
+    const scrape = c.req.query("dateBasis") === "scrap";
+    const excludePiia = c.req.query("excludePiia") === "1";
+    const excludeDerogations = c.req.query("excludeDerogations") === "1";
+    const dateRange = dateFrom || dateTo || scrape || excludePiia || excludeDerogations
       ? {
           ...(dateFrom ? { dateFrom } : {}),
           ...(dateTo ? { dateTo } : {}),
+          ...(scrape ? { dateBasis: "scrap" as const } : {}),
+          ...(excludePiia ? { excludePiia: true } : {}),
+          ...(excludeDerogations ? { excludeDerogations: true } : {}),
         }
       : undefined;
     const cities = dateRange
