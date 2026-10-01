@@ -29,6 +29,15 @@ describe("router compatibility", () => {
     cleanup();
   });
 
+  it("should retain the existing hash view when normalizing an old geo link", async () => {
+    const router = await loadRouterAt("/geo/city/val-des-monts?filter.subset=vivier-v2#/sources?filter.sourceStatus=verified");
+    const cleanup = router.initRouter();
+    expect(window.location.hash).toBe("#/sources?filter.sourceStatus=verified");
+    expect(get(router.activePageState).filters.sourceStatus).toEqual(["verified"]);
+    expect(get(router.activeRouteView)).toBe("sources");
+    cleanup();
+  });
+
   it("should restore Sources restrictions from hash history entries", async () => {
     const router = await loadRouterAt("/#/sources?filter.coverageScope=focus30");
     const cleanup = router.initRouter();
