@@ -4,6 +4,7 @@ export * from "./scoring.js";
 export * from "./source-kind.js";
 export * from "./signals/b-prime.js";
 export * from "./signals/document-date-filter.js";
+export * from "./signals/vivier-display-exclusions.js";
 export * from "./valleyfield-dossiers.js";
 export * from "./vivier/vivier-v2.js";
 export * from "./vivier/counts.js";
