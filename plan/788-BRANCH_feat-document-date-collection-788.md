@@ -44,23 +44,23 @@
   - [x] Confirm isolated ports before starting services.
 - [ ] **Lot 1 — Deterministic date detection and metadata**
   - [x] Add validated documentary date status, precision, nature, provenance and evidence contract.
-  - [ ] Extract session dates from listing/filename and relevant document header without LLM.
+  - [x] Extract session dates from the relevant document header without LLM (listing/filename detection unchanged: open item).
   - [x] Persist/enrich missing dates while preserving known dates, first fetchedAt and payload identity.
-  - [ ] Test July/September headers, ambiguous dates, invalid dates, month precision and immutable known metadata.
-  - [ ] Lot gate: scoped sources and recueil/resolver tests, API typecheck and scoped lint.
+  - [x] Test July/September headers, ambiguous dates, invalid dates, month precision and immutable known metadata.
+  - [x] Lot gate: scoped sources and recueil/resolver tests, API typecheck and scoped lint.
 - [ ] **Lot 2 — Existing signal-workflow extension**
   - [x] Resolve known metadata and carry document date/fetchedAt into corpus.
-  - [x] Request missing document metadata in the existing first signal chunk; expose the header independently of entity citations.
+  - [x] Request missing document dates as native Source.date/citations in the existing first signal chunk; remove the experimental top-level model field.
   - [x] Validate grounded date evidence and calendar semantics without mixing signal/business dates.
-  - [ ] Persist date metadata even with zero signals; propagate it to graph references and document API.
-  - [ ] Test existing call count, zero signals, known-date preservation, invalid/ungrounded LLM output and resumed chunks.
-  - [ ] Lot gate: scoped corpus/profile/run/v23 tests, API typecheck and scoped lint.
+  - [x] Persist date metadata even with zero signals; propagate it to graph references and document API.
+  - [x] Test existing call count, zero signals, known-date preservation, invalid/ungrounded LLM output and resumed chunks.
+  - [x] Lot gate: scoped corpus/profile/run/v23 tests, API typecheck and scoped lint.
 - [ ] **Lot 3 — Stock preview and consolidation**
-  - [ ] Provide an idempotent fixture/local-stock preview separating manifest recovery, remaining unknowns and conflicts without writes.
-  - [ ] Consolidate documentary versus collection-date contract and measured coverage limitations.
+  - [x] Provide an idempotent fixture/local-stock preview separating manifest recovery, remaining unknowns and conflicts without writes.
+  - [x] Consolidate documentary versus collection-date contract and measured coverage limitations.
   - [ ] Review every hunk for minimal scope; run branch verification and available complementary review.
 - [ ] **Lot 4 — Reviewable delivery**
-  - [ ] Push atomic commits and open draft PR with checks and limitations.
+  - [x] Push atomic commits and open draft PR with checks and limitations.
   - [ ] Verify CI using full head SHA; report pending/failing checks accurately.
   - [ ] Hand off full SHA, diff stats, proof artifacts, PR and open questions to conductor.
   - [ ] Leave merge, deployment and production data mutation to separately authorized integration work.
