@@ -28,7 +28,8 @@
   /** Appelé au clic d'une ligne ville. */
   export let onSelect: (slug: string) => void = () => {};
 
-  let searchQuery = "";
+  export let searchQuery = "";
+  export let onSearchChange: (query: string) => void = () => {};
 
   // Liste COMPLÈTE (aucun plafond — P02) : toute ville trouvable par la
   // recherche est présente dans la liste non filtrée. Seule la RECHERCHE
@@ -39,7 +40,7 @@
 </script>
 
 <!-- Recherche villes (Search DS fluid — remplit le rail) -->
-<div class="px-3 pb-2 pt-1">
+<div class="px-3 pb-2 pt-1" on:input={(event) => onSearchChange((event.target as HTMLInputElement).value)}>
   <Search
     placeholder="Rechercher une ville…"
     size="sm"

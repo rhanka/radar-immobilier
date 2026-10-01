@@ -11,6 +11,7 @@ describe("shareable geographic restrictions", () => {
       dateFrom: ["2026-01-31"], dateTo: ["2026-07-31"], period: ["6mo"],
       lotCategory: ["quatrePlus"], lotUsage: ["residentiel", "multi"], lotMinArea: ["1200"],
       zoneKind: ["H", "MIXTE"], zoneMillesime: ["2008"],
+      cptaq: ["1"], citySearch: ["Val-des"], zoneSearch: ["H-01"], lotSearch: ["1000001"],
     };
     const url = buildGeoQuery({ filters });
     const sender = readGeoFilters(parseGeoQuery(url).filters);
@@ -33,6 +34,8 @@ describe("shareable geographic restrictions", () => {
     expect(state.zoneKinds.size).toBe(0);
     expect(state.zoneMillesime).toBeNull();
     expect(state.lotsEnabled).toBe(true);
+    expect(state.cptaqEnabled).toBe(false);
+    expect([state.citySearch, state.zoneSearch, state.lotSearch]).toEqual(["", "", ""]);
     expect(state.timeRange.mode).toBe("absolute");
     expect(writeGeoFilters(state)).toEqual({ dateFrom: ["2026-06-01"], dateTo: ["2026-06-30"] });
   });
