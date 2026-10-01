@@ -1986,7 +1986,7 @@ export function aggregateGraphSignalProjectionRows(
     if (dateRange?.excludePiia || dateRange?.excludeDerogations) {
       const classification = classifyGraphNodeVivierV2({ ...row, category: row.category ?? null,
         description: row.description ?? null, etapeAnnote: row.etapeAnnote ?? null });
-      if (isHiddenByVivierBExclusions({ label: row.label, description: row.description,
+      if (isHiddenByVivierBExclusions({ label: row.label, description: row.description ?? null,
         props: (row.props ?? {}) as Record<string, unknown>, classification }, {
         piiaSansProjetResidentiel: dateRange.excludePiia === true,
         derogationsMineures: dateRange.excludeDerogations === true,

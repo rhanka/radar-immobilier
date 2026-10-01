@@ -64,7 +64,7 @@
   - [x] Add the document/scrape selector to the existing period group for relative and custom periods, default document.
   - [ ] Serialize/restore `filter.dateBasis` with period and retain it across geo navigation, reload and browser history.
   - [ ] Reload bulk counts and reconcile detail/selection using the same basis.
-  - [ ] UI/client/codec tests cover default and both modes without extracting dates.
+  - [x] UI/client/codec tests cover default and both modes without extracting dates.
 - [ ] **Lot 3 — Gates and browser evidence**
   - [ ] Run relevant API/domain/UI tests, typecheck and lint through Make on the isolated test environment.
   - [ ] Prove identical city count, badge, total and detail membership in a dedicated CDP browser context/tab.
