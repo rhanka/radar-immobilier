@@ -73,6 +73,17 @@ describe("shareable geographic restrictions", () => {
     expect(writeGeoFilters(state)).not.toHaveProperty("dateBasis");
   });
 
+  it("should combine the scrape basis with relative and unrestricted periods", () => {
+    expect(writeGeoFilters(readGeoFilters({ dateBasis: ["scrap"], period: ["6mo"] })))
+      .toEqual({ dateBasis: ["scrap"], period: ["6mo"] });
+    // A scrape-only snapshot is not empty, so it never collapses to the product defaults.
+    const unrestricted = readGeoFilters({ dateBasis: ["scrap"], period: ["all"] });
+    expect(unrestricted.axes).toEqual({ z: false, r: false, p: false });
+    expect(writeGeoFilters(unrestricted)).toEqual({ dateBasis: ["scrap"] });
+    expect(readGeoFilters(writeGeoFilters(unrestricted))).toEqual(unrestricted);
+    expect(writeGeoFilters({ ...unrestricted, dateBasis: "document" })).toEqual({ period: ["all"] });
+  });
+
   it("should retain disabled axes in old residual-vivier links", () => {
     const state = readGeoFilters({ subset: ["vivier-v2|-z|-p"] });
     expect(state.axes).toEqual({ z: false, r: true, p: false });
