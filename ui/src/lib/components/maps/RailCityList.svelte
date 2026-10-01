@@ -40,7 +40,10 @@
 </script>
 
 <!-- Recherche villes (Search DS fluid — remplit le rail) -->
-<div class="px-3 pb-2 pt-1" on:input={(event) => onSearchChange((event.target as HTMLInputElement).value)}>
+<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions (Delegates native DS button clicks, including keyboard activation.) -->
+<div class="px-3 pb-2 pt-1"
+  on:input={(event) => onSearchChange((event.target as HTMLInputElement).value)}
+  on:click={(event) => { if ((event.target as Element).closest(".st-search__clear")) onSearchChange(""); }}>
   <Search
     placeholder="Rechercher une ville…"
     size="sm"
