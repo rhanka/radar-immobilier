@@ -1,7 +1,7 @@
 import { buildRawDocumentRecord, documentDateFromPublishedAt, rawMetaKey } from "@radar/sources";
 import { describe, expect, it } from "vitest";
 import type { ObjectStore } from "../../storage/object-store.js";
-import { persistDocumentDate, previewDocumentDateRecovery } from "./document-date-metadata.js";
+import { hydrateGraphDocumentDates, persistDocumentDate, previewDocumentDateRecovery } from "./document-date-metadata.js";
 
 function fixture(publishedAt?: string) {
   const objects = new Map<string, Uint8Array>();
@@ -20,6 +20,16 @@ function fixture(publishedAt?: string) {
 }
 
 describe("document date persistence and stock preview", () => {
+  it("should hydrate existing graph refs from exact metadata in the existing publication input", async () => {
+    const fx = fixture("2026-07-28");
+    await fx.store.put(rawMetaKey(fx.record.storageKey), JSON.stringify(fx.record));
+    const graph = { nodes: [{ id: "existing-event", label: "Existing event", type: "DesignationEvent",
+      refs: [{ rawRef: fx.record.storageKey, docSha: fx.record.sha256, page: 1, excerpt: "original" }] }], edges: [] };
+    const hydrated = await hydrateGraphDocumentDates(fx.store, graph);
+    expect(hydrated.nodes[0]?.refs?.[0]).toMatchObject({ publishedAt: "2026-07-28",
+      fetchedAt: fx.record.fetchedAt, documentDate: { status: "known" } });
+    expect(graph.nodes[0]?.refs?.[0]).not.toHaveProperty("publishedAt");
+  });
   it("should enrich metadata idempotently without altering identity or the first scrap timestamp", async () => {
     const fx = fixture();
     await fx.store.put(rawMetaKey(fx.record.storageKey), JSON.stringify(fx.record));
@@ -38,6 +48,15 @@ describe("document date persistence and stock preview", () => {
       documentDateFromPublishedAt("2026-09-29"));
     expect(updated?.documentDate).toMatchObject({ status: "known", value: "2026-07", precision: "month" });
     expect(updated?.publishedAt).toBe("2026-07");
+  });
+  it("should leave a schema-incompatible sidecar untouched instead of failing the caller", async () => {
+    const fx = fixture();
+    const legacy = JSON.stringify({ sourceUrl: fx.record.sourceUrl });
+    await fx.store.put(rawMetaKey(fx.record.storageKey), legacy);
+    await expect(persistDocumentDate(fx.store, fx.record.storageKey, documentDateFromPublishedAt("2026-07-28")))
+      .resolves.toBeNull();
+    expect(new TextDecoder().decode(fx.objects.get(rawMetaKey(fx.record.storageKey)))).toBe(legacy);
+    expect(fx.writes()).toBe(1);
   });
   it("should refuse cross-document metadata before any enrichment write", async () => {
     const fx = fixture();
