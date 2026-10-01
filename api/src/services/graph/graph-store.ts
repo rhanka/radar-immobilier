@@ -18,7 +18,7 @@ import { eq, or, sql, inArray, notInArray, and, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
-import { classifyBPrime, deriveRegulatoryStatus, matchesDocumentDateWindow, type DocumentDateWindow, type RegulatoryStageKindT } from "@radar/domain";
+import { classifyBPrime, deriveRegulatoryStatus, isHiddenByVivierBExclusions, matchesDocumentDateWindow, type DocumentDateWindow, type RegulatoryStageKindT } from "@radar/domain";
 import {
   computeLegacySubsetCounts,
   computeVivierV2,
@@ -1949,7 +1949,10 @@ export interface GraphSignalProjectionRow {
   sourceRef: string | null;
 }
 
-export type GraphSignalDateRange = DocumentDateWindow;
+export interface GraphSignalDateRange extends DocumentDateWindow {
+  excludePiia?: boolean;
+  excludeDerogations?: boolean;
+}
 
 export interface CitySignalCounts {
   citySlug: string;
@@ -1980,6 +1983,15 @@ export function aggregateGraphSignalProjectionRows(
   for (const row of rows) {
     if (!row.citySlug) continue;
     if (!matchesDocumentDateWindow(row.props, dateRange)) continue;
+    if (dateRange?.excludePiia || dateRange?.excludeDerogations) {
+      const classification = classifyGraphNodeVivierV2({ ...row, category: row.category ?? null,
+        description: row.description ?? null, etapeAnnote: row.etapeAnnote ?? null });
+      if (isHiddenByVivierBExclusions({ label: row.label, description: row.description,
+        props: (row.props ?? {}) as Record<string, unknown>, classification }, {
+        piiaSansProjetResidentiel: dateRange.excludePiia === true,
+        derogationsMineures: dateRange.excludeDerogations === true,
+      })) continue;
+    }
     if (!byCity.has(row.citySlug)) {
       byCity.set(row.citySlug, {
         signalCount: 0,
