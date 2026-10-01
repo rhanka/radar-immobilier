@@ -81,10 +81,9 @@ function geoRouteFromLocation(
 ): GeoRoute | null {
   const result = parseGeoRoute(location);
   if (result.ok && result.route.state.filters.subset) {
-    const filters = { ...result.route.state.filters };
-    const axes = writeGeoFilters(readGeoFilters({ subset: filters.subset }));
-    delete filters.subset;
-    result.route.state.filters = { ...axes, ...filters };
+    // Retired multi-vivier link: rewrite it as the residual vivier snapshot.
+    const { subset: _legacy, ...rest } = result.route.state.filters;
+    result.route.state.filters = { ...rest, ...writeGeoFilters(readGeoFilters(result.route.state.filters)) };
     if (typeof window !== "undefined") {
       window.history.replaceState(window.history.state, "", `${buildGeoRoute(result.route)}${window.location.hash}`);
     }
