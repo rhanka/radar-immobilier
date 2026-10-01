@@ -49,9 +49,9 @@
   - [ ] Test July/September headers, ambiguous dates, invalid dates, month precision and immutable known metadata.
   - [ ] Lot gate: scoped sources and recueil/resolver tests, API typecheck and scoped lint.
 - [ ] **Lot 2 — Existing signal-workflow extension**
-  - [ ] Resolve known metadata and carry document date/fetchedAt into corpus.
-  - [ ] Request missing document metadata in the existing first signal chunk; expose the header independently of entity citations.
-  - [ ] Validate grounded date evidence and calendar semantics without mixing signal/business dates.
+  - [x] Resolve known metadata and carry document date/fetchedAt into corpus.
+  - [x] Request missing document metadata in the existing first signal chunk; expose the header independently of entity citations.
+  - [x] Validate grounded date evidence and calendar semantics without mixing signal/business dates.
   - [ ] Persist date metadata even with zero signals; propagate it to graph references and document API.
   - [ ] Test existing call count, zero signals, known-date preservation, invalid/ungrounded LLM output and resumed chunks.
   - [ ] Lot gate: scoped corpus/profile/run/v23 tests, API typecheck and scoped lint.

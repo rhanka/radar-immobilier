@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { DocumentDateSchema, extractIsoFromLabel, type DocumentDate } from "@radar/sources";
 
 import {
   buildProfileChunkPrompt,
@@ -44,10 +45,11 @@ export interface ExtractRefreshProfileOptions {
   readonly outputDir?: string;
 }
 export interface RefreshProfileChunk {
+  readonly documentDate?: DocumentDate;
   readonly chunk: RefreshCorpusChunk;
   readonly extraction: Extraction;
 }
-export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v9";
+export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v10";
 // Entity citation excerpts are bounded by truncation, in Unicode code points rather than UTF-16 units.
 const MAX_CITATION_EXCERPT_CODE_POINTS = 200;
 const MIN_CITATION_EXCERPT_CODE_POINTS = 20;
@@ -115,7 +117,13 @@ function schemaFor(chunk: RefreshCorpusChunk, context: RefreshProfileContext): s
   return JSON.stringify({
     contract_version: REFRESH_PROFILE_CONTRACT_VERSION,
     type: "Graphify Extraction",
-    required: ["nodes", "edges", "input_tokens", "output_tokens"],
+    required: ["nodes", "edges", "input_tokens", "output_tokens",
+      ...(chunk.documentHeader ? ["document_date"] : [])],
+    ...(chunk.documentHeader ? { document_date: { status: ["known", "unknown", "ambiguous"],
+      value: "Calendar-valid YYYY-MM-DD or YYYY-MM; never a signal's business date",
+      precision: ["day", "month"], kind: ["session", "publication", "document"],
+      evidence: { page: chunk.documentHeader.page, excerpt: "Verbatim dated header passage" },
+      candidates: "Only for ambiguous dates", reason: "Explain unknown/ambiguous dates" } } : {}),
     ontology: { profile_id: context.profile.id, profile_version: context.profile.version,
       allowed_node_types: [...allowed], node_properties: properties, relation_signatures: relations },
     graph_contract: {
@@ -292,8 +300,35 @@ function validateDeclaredContractVersion(value: unknown, chunk: RefreshCorpusChu
   delete root["contract_version"];
 }
 
+function validatedDocumentDate(value: unknown, chunk: RefreshCorpusChunk): DocumentDate | undefined {
+  if (!chunk.documentHeader) {
+    if (value !== undefined) throw new Error("Unrequested documentary date output");
+    return undefined;
+  }
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Missing documentary date output");
+  const candidate = value as Record<string, unknown>;
+  const date = DocumentDateSchema.parse({ ...candidate,
+    ...(candidate["status"] === "known" ? { method: "signal-llm" } : {}) });
+  if (date.status !== "known") return date;
+  const excerpt = date.evidence.excerpt;
+  if (date.evidence.page !== chunk.documentHeader.page || !excerpt
+    || !containsNormalizedPdfExcerpt(chunk.documentHeader.text, excerpt)) {
+    throw new Error("Ungrounded documentary date output");
+  }
+  const englishMonths = ["january", "february", "march", "april", "may", "june", "july",
+    "august", "september", "october", "november", "december"];
+  const english = excerpt.match(/\b([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?[,]?\s+(20\d{2})\b/i);
+  const month = english ? englishMonths.indexOf(english[1]!.toLowerCase()) + 1 : 0;
+  const englishDate = english && month ? `${english[3]}-${String(month).padStart(2, "0")}-${english[2]!.padStart(2, "0")}` : null;
+  const semantic = date.kind === "session" ? /s[ée]ance|conseil|council|meeting/i
+    : date.kind === "publication" ? /publi[ée]|published|publication/i : /date|dated|dat[ée]/i;
+  if (!semantic.test(excerpt) || (extractIsoFromLabel(excerpt) !== date.value
+    && englishDate !== date.value)) throw new Error("Unsupported documentary date meaning or value");
+  return date;
+}
+
 function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: RefreshProfileContext,
-  pageTexts: ReadonlyMap<number, string>): Extraction {
+  pageTexts: ReadonlyMap<number, string>): RefreshProfileChunk {
   let parsed: unknown;
   try {
     parsed = parseStrictJsonResponse(text);
@@ -304,6 +339,9 @@ function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: R
     throw error;
   }
   validateDeclaredContractVersion(parsed, chunk);
+  const root = parsed as Record<string, unknown>;
+  const documentDate = validatedDocumentDate(root?.["document_date"], chunk);
+  if (root && typeof root === "object") delete root["document_date"];
   parsed = normalizeEntityCitations(parsed, chunk);
   const baseErrors = validateExtraction(parsed);
   if (baseErrors.length > 0) throw new Error(`Invalid Graphify extraction for chunk ${chunk.id}: ${baseErrors.join("; ")}`);
@@ -320,7 +358,7 @@ function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: R
   if (!profileResult.valid) throw new Error(`Invalid profile extraction for chunk ${chunk.id}: ${profileResult.issues
     .filter((issue) => issue.severity === "error").map((issue) => issue.code).join(", ")}`);
   validateProvenance(parsed as Extraction, chunk, pageTexts);
-  return parsed as Extraction;
+  return { chunk, extraction: parsed as Extraction, ...(documentDate ? { documentDate } : {}) };
 }
 export async function extractRefreshProfile(
   chunks: readonly RefreshCorpusChunk[], options: ExtractRefreshProfileOptions,
@@ -339,11 +377,16 @@ export async function extractRefreshProfile(
   const results: RefreshProfileChunk[] = [];
   try {
     for (const { chunk, pageTexts } of prepared) {
-      let accepted: Extraction | undefined;
+      let accepted: RefreshProfileChunk | undefined;
       const outputPath = join(outputDir, `${chunk.id}.json`);
       const generation = await options.textClient.generateJson({
         schema: schemaFor(chunk, options.context),
-        prompt: `Contract ${REFRESH_PROFILE_CONTRACT_VERSION}. Emit only these node types: ${allowedNodeTypes(options.context).join(", ")}.
+        prompt: `${chunk.documentHeader ? `The document date is missing upstream. In THIS existing signal extraction response,
+also return document_date separately from nodes/edges, including when no signal is found.
+Use the session date of a PV/agenda, otherwise an explicitly identified publication/document date.
+Never use a signal/decision date or ingestion time. Return unknown/ambiguous when unproven.
+Provide page and a verbatim header excerpt proving nature and value; do not invent a day.
+Document header (physical page ${chunk.documentHeader.page}):\n${chunk.documentHeader.text}\n\n` : ""}Contract ${REFRESH_PROFILE_CONTRACT_VERSION}. Emit only these node types: ${allowedNodeTypes(options.context).join(", ")}.
 Every node file_type must be "document" for this PDF. Edge confidence, when present, must be
 "AMBIGUOUS", "EXTRACTED", or "INFERRED"; never emit a numeric confidence.
 Node status is type-specific: use only ontology.node_properties.<node_type>.status.enum. These enums
@@ -381,7 +424,7 @@ If no supported fact is grounded in the PDF, return empty nodes, edges, and evid
         throw new Error(`Required chunk ${chunk.id} was not completed`);
       }
       const persisted = validatedExtraction(await readFile(outputPath, "utf8"), chunk, options.context, pageTexts);
-      results.push({ chunk, extraction: persisted });
+      results.push(persisted);
     }
     return results;
   } finally {
