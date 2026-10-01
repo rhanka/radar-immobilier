@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { RawDocumentRecordSchema, rawMetaKey } from "@radar/sources";
+import { RawDocumentRecordSchema, rawMetaKey, resolveDocumentDate, type DocumentDate } from "@radar/sources";
 import { isMissingObjectError } from "../../storage/s3-object-store.js";
 
 import type { ObjectReader } from "../../storage/object-store.js";
@@ -193,6 +193,7 @@ export function geoKeyCandidates(
 }
 
 export interface DocumentMetadata {
+  readonly documentDate: DocumentDate;
   readonly rawRef: string;
   readonly docSha: string;
   readonly sourceUrl: string;
@@ -250,14 +251,16 @@ export async function loadDocumentMetadata(
   if (!parsed.success) return null;
 
   const record = parsed.data;
+  const documentDate = resolveDocumentDate(record);
   return {
     rawRef: record.storageKey,
     docSha: record.sha256,
     sourceUrl: record.sourceUrl,
     contentType: record.contentType,
     fetchedAt: record.fetchedAt,
+    documentDate,
     ...(record.title !== undefined ? { title: record.title } : {}),
-    ...(record.publishedAt !== undefined ? { publishedAt: record.publishedAt } : {}),
+    ...(documentDate.status === "known" ? { publishedAt: documentDate.value } : {}),
   };
 }
 
