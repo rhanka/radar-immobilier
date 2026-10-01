@@ -200,6 +200,23 @@ beforeEach(() => {
 });
 
 describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
+  it("restores lot focus inside its zone and clears it on city navigation", async () => {
+    vi.mocked(fetchAllLots).mockResolvedValueOnce({
+      ok: true, citySlug: CITY_SLUG, source: "donnees-quebec", collectionId: `qc-lots-${CITY_SLUG}`,
+      numberMatched: 1, numberReturned: 1,
+      featureCollection: { type: "FeatureCollection", features: [{ type: "Feature", geometry: null,
+        properties: { noLot: "1000001", citySlug: CITY_SLUG, zoneCode: "H-01" } }] },
+    });
+    const state = parseGeoQuery(`?filter.zonage=1&focused=lot:${CITY_SLUG}/1000001`);
+    const view = render(SignauxMapView, { props: { geoRoute: {
+      level: "zone", citySlug: CITY_SLUG, zoneKey: "H-01", state,
+    } } });
+    expect((await screen.findByTestId("sel-lot-drawer")).textContent).toContain("1000001");
+    await view.rerender({ geoRoute: { level: "city", citySlug: CITY_SLUG, state: parseGeoQuery("?filter.zonage=1") } });
+    await waitFor(() => expect(screen.queryByTestId("sel-lot-drawer")).toBeNull());
+    expect((screen.getByLabelText("Zonage") as HTMLInputElement).checked).toBe(true);
+  });
+
   it("restores a dates-only request in the same city without inheriting restrictions", async () => {
     localStorage.setItem("signaux-cptaq-enabled", "1");
     vi.mocked(fetchCptaqConstraints).mockResolvedValue(cptaqResponse(true));
