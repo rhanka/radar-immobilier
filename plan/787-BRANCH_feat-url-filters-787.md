@@ -20,6 +20,7 @@ Make every existing geographic view restore its applicable active filters and pe
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
   - `ui/src/lib/router/*` (filter grammar, URL/router restoration and tests)
+  - `ui/src/lib/components/geo/GeoView*`
   - `ui/src/lib/components/maps/SignauxMapView*`
   - `ui/src/lib/components/maps/SignauxRail*`
   - `ui/src/lib/components/maps/SignauxSelPanel.svelte`
@@ -56,6 +57,8 @@ Make every existing geographic view restore its applicable active filters and pe
 - [x] BR787-D8: browser navigation exposed the existing lot-to-city route collapse and missing Zone-to-City URL transition. Preserve lot focus through existing selected/focused query primitives on its zone route, and synchronize the existing City/Close controls. No new geographic route or UX.
 - [x] BR787-D9: CDP evidence showed the test page becoming hidden and receiving no animation frame in 500ms after reload. Create and dispose only an owned browser context/window/tab on existing CDP 9222, preserving user tabs and control waits below 2s.
 - [x] BR787-D10: harness review selection has no configured live gateway catalog and no two exact complementary Claude model IDs. Record `selection-failed` in local proof dossier; no leg dispatched or consensus claimed. Draft publication remains reviewable; merge/UAT remain gated.
+- [x] BR787-D11: the existing DS Search clear button changes its bound value without emitting native input. Trace that explicit button event in the existing search wrappers so clearing a city/zone/lot search updates its URL and browser history too.
+- [x] BR787-EX2: route inventory includes the existing discrete `#/geo` view. Bind its municipality selector to existing selected query state (including initial default selection) and prove share/reload/history. No added filter UI or API changes. Rollback is confined to this selector binding. OpportunitesMapView and embedded CadastreMapView expose no business filter controls.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (template label only; no cherry-pick or additional integration branch)
@@ -88,13 +91,13 @@ Make every existing geographic view restore its applicable active filters and pe
   - [x] Gate: component/router regressions and real CDP browser proof for dates/business filters, searches, CPTAQ, zone/lot/city/province and reload/history.
 
 - [x] **Lot 3 — Other geographic views, Sources second**
-  - [x] Wire Evaluation source/category/usages/minimum area/prospect/tab and Sources scope/status/focus/search/KPI/tab.
+  - [x] Wire Evaluation source/category/usages/minimum area/prospect/tab, discrete Geo municipality and Sources scope/status/focus/search/KPI/tab.
   - [x] Restore hash page filters on share/reload/back/forward without hidden preferences.
   - [x] Gate: scoped view tests and real browser proof, with API fixtures disclosed.
 
 - [ ] **Lot 4 — Verification and reviewable draft**
-  - [x] Full UI suite: 1615 passed / 10 todo; same-city/lot restoration: 18 component checks; 7 final router checks; typecheck: 0 errors / 7 existing warnings; build/lint passed.
-  - [x] Real Playwright/CDP 9222 proof against isolated branch UI: eight scenarios, zero JS errors. API fixtures make this browser integration proof; full live-data E2E and owner UAT remain unaccepted.
+  - [x] Full UI suite: 1617 passed / 10 todo; Geo + same-city/lot restoration: 20 scoped component checks; 7 router checks; typecheck: 0 errors / 7 existing warnings; build/lint passed.
+  - [x] Real Playwright/CDP 9222 proof against isolated branch UI: nine scenarios, zero JS errors. API fixtures make this browser integration proof; full live-data E2E and owner UAT remain unaccepted.
   - [x] Harness C1 branch and C2 scope gates pass.
   - [ ] Complementary peer review: selection-failed; absent live catalog, no eligible pair selected. See local proof dossier; no consensus verdict.
   - [ ] Reconcile findings and update this plan/status with evidence.

@@ -228,6 +228,10 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     expect((screen.getByLabelText("Rechercher une ville") as HTMLInputElement).value).toBe("Valleyfield");
     expect(fetchAllLots).not.toHaveBeenCalled();
 
+    await fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
+    expect(window.location.search).not.toContain("filter.citySearch");
+    expect((screen.getByLabelText("Rechercher une ville") as HTMLInputElement).value).toBe("");
+
     setSearch("?filter.dateFrom=2026-05-01&filter.dateTo=2026-05-31");
     await view.rerender({ geoRoute: cityRoute() });
     await waitFor(() => expect(fetchAllLots).toHaveBeenCalled());
