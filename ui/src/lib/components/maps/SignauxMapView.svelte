@@ -609,7 +609,7 @@
   function currentGeoFilters(): Record<string, string[]> {
     return writeGeoFilters({
       axes: bAxesFromVivierKey(activeSubsetKey), exclusions: vivierBExclusions,
-      timeRange, lots: lotDataFilter, zoneKinds: zoneKindFilter, zoneMillesime: zoneMillesimeFilter,
+      timeRange, lots: lotDataFilter, zoneKinds: zoneKindFilter, zoneMillesime: zoneMillesimeFilter, lotsEnabled,
     });
   }
 
@@ -1857,6 +1857,8 @@
     if (appliedGeoRouteKey === key) return;
     appliedGeoRouteKey = key;
     const filters = readGeoFilters(route.state.filters);
+    const layersChanged = lotsEnabled !== filters.lotsEnabled;
+    lotsEnabled = filters.lotsEnabled ?? true;
     const dateChanged = JSON.stringify(timeRange) !== JSON.stringify(filters.timeRange);
     timeRange = filters.timeRange;
     dateRange = dateRangeFromSignalTimeRange(timeRange);
@@ -1882,12 +1884,15 @@
     if (!entry) return;
 
     await selectCity(entry, { syncUrl: false });
+    if (layersChanged) void loadGeoForCity(entry.municipality.slug);
 
     if (route.level === "zone") {
       pendingRouteZoneKey = route.zoneKey;
       applyPendingRouteZone();
     } else {
       pendingRouteZoneKey = null;
+      selectionState = clearSelectionGroup(clearSelectionGroup(selectionState, "lot"), "zone");
+      selectionState = setFocus(selectionState, makeKey("municipality", entry.municipality.slug));
     }
   }
 
@@ -2368,7 +2373,9 @@
     return `${y}-${m}-${day}`;
   }
 
+  let bulkLoadVersion = 0;
   async function load() {
+    const version = ++bulkLoadVersion;
     loading = true;
     loadError = null;
     try {
@@ -2379,12 +2386,14 @@
         dateFrom: toApiDate(dateRange.start),
         dateTo: toApiDate(dateRange.end),
       });
+      if (version !== bulkLoadVersion) return;
       graphItems = res.cities;
     } catch (e) {
+      if (version !== bulkLoadVersion) return;
       console.warn("Signals by city load failed:", e);
       loadError = "Données des signaux indisponibles.";
     } finally {
-      loading = false;
+      if (version === bulkLoadVersion) loading = false;
     }
   }
 
