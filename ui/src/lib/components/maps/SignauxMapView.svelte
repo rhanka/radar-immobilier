@@ -154,7 +154,7 @@
     reconcileVivierSelection,
     retainProjectedSignalId,
   } from "$lib/signals/vivier-view-mode.js";
-  import { readGeoFilters, writeGeoFilters, subsetFromGeoFilters } from "$lib/router/geo-filter-state.js";
+  import { readGeoFilters, writeGeoFilters, subsetFromGeoFilters, sameTimeRange } from "$lib/router/geo-filter-state.js";
   import { buildGeoRoute } from "$lib/router/geo-route.js";
   import {
     applyVivierBExclusions,
@@ -1867,9 +1867,12 @@
     const filters = readGeoFilters(route.state.filters);
     const layersChanged = lotsEnabled !== filters.lotsEnabled;
     lotsEnabled = filters.lotsEnabled ?? true;
-    const dateChanged = JSON.stringify(timeRange) !== JSON.stringify(filters.timeRange);
-    timeRange = filters.timeRange;
-    dateRange = dateRangeFromSignalTimeRange(timeRange);
+    // A relative period is resolved when read: only a different period reloads.
+    const dateChanged = !sameTimeRange(timeRange, filters.timeRange);
+    if (dateChanged) {
+      timeRange = filters.timeRange;
+      dateRange = dateRangeFromSignalTimeRange(timeRange);
+    }
     vivierBExclusions = filters.exclusions;
     lotDataFilter = filters.lots;
     zoneKindFilter = filters.zoneKinds;

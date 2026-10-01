@@ -1,6 +1,6 @@
 <script lang="ts">
   import { activePageState, navigateToPageState } from "$lib/router/router.js";
-  import { readGeoFilters, writeGeoFilters } from "$lib/router/geo-filter-state.js";
+  import { readGeoFilters, writeLotFilters } from "$lib/router/geo-filter-state.js";
   /**
    * EvaluationMapView — Vue Évaluation (maille zone/lots) — WP B slice-2.
    *
@@ -250,9 +250,7 @@
   }
 
   function syncEvaluationUrl(): void {
-    const filters = writeGeoFilters({
-      ...readGeoFilters({}), lots: { category: evalCategory, usages: new Set(evalUsages), superficieMin },
-    });
+    const filters = writeLotFilters({ category: evalCategory, usages: new Set(evalUsages), superficieMin });
     filters.lotSource = [sourceFilter];
     filters.evaluationTab = [activeTab];
     if (prospectFilter !== "all") filters.prospect = [prospectFilter];

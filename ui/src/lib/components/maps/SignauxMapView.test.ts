@@ -243,6 +243,21 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     expect(screen.getByText("2026-05-01 – 2026-05-31")).toBeTruthy();
   });
 
+  it("opens a filterless link on the defaults and an all-unchecked link with nothing checked", async () => {
+    const labels = ["Zonage", "Résidentiel", "Précoce", "Exclure PIIA sans projet résidentiel", "Exclure dérogations mineures"];
+    setSearch("?mode=signal");
+    const view = render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+    await waitFor(() => expect((screen.getByLabelText("Zonage") as HTMLInputElement).checked).toBe(true));
+    for (const label of labels) expect((screen.getByLabelText(label) as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByText("6 derniers mois")).toBeTruthy();
+
+    setSearch("?mode=signal&filter.period=all");
+    await view.rerender({ geoRoute: cityRoute() });
+    await waitFor(() => expect((screen.getByLabelText("Zonage") as HTMLInputElement).checked).toBe(false));
+    for (const label of labels) expect((screen.getByLabelText(label) as HTMLInputElement).checked).toBe(false);
+    expect(screen.getByText("Illimité")).toBeTruthy();
+  });
+
   it("(a) ?lots=0 : fetchAllLots N'EST PAS appelé, les zones se chargent quand même", async () => {
     setSearch("?lots=0");
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });
