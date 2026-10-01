@@ -23,6 +23,7 @@
    * carto (MapLibre, caméra, échafaudage des couches) vit dans le socle.
    */
   import { onMount } from "svelte";
+  import { activePageState, navigateToPageState } from "$lib/router/router.js";
   import { Alert } from "@sentropic/design-system-svelte";
   import { MapPin } from "@lucide/svelte";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
@@ -49,6 +50,7 @@
   import {
     buildScopeOpacityExpression,
     DEFAULT_COVERAGE_SCOPE,
+    COVERAGE_SCOPE_OPTIONS,
     type CoverageScope,
   } from "$lib/sources/coverage-scope.js";
   import {
@@ -147,10 +149,31 @@
 
   function handleScopeChange(next: CoverageScope): void {
     scope = next;
+    syncCoverageUrl();
   }
   // ── Sélection ville + zone (drill, parité Signaux) ─────────────────────────
   let selectedCity: CityCoverage | null = null;
   let selectedZoneCode: string | null = null;
+  let restoredPageState: unknown = null;
+  $: if ($activePageState !== restoredPageState && cities.length) {
+    restoredPageState = $activePageState;
+    const filters = $activePageState.filters;
+    scope = COVERAGE_SCOPE_OPTIONS.find(({ value }) => value === filters.coverageScope?.[0])?.value ?? DEFAULT_COVERAGE_SCOPE;
+    activeKpiId = PALIER_KPIS_20.find(({ id }) => id === filters.coverageKpi?.[0])?.id ?? PALIER_KPIS_20[0]!.id;
+    const citySlug = $activePageState.selected.find(({ kind }) => kind === "municipality")?.id;
+    if (citySlug && selectedCity?.citySlug !== citySlug) selectCity(cities.find((city) => city.citySlug === citySlug) ?? syntheticAbsentCity(citySlug), false);
+    if (!citySlug && selectedCity) clearSelection({ recenter: false, syncUrl: false });
+    selectedZoneCode = $activePageState.focused?.kind === "zone" ? $activePageState.focused.id : null;
+  }
+
+  function syncCoverageUrl(): void {
+    navigateToPageState("sources", {
+      ...$activePageState, mode: "data",
+      filters: { ...$activePageState.filters, sourceTab: ["couverture"], coverageScope: [scope], coverageKpi: [activeKpiId] },
+      selected: selectedCity ? [{ kind: "municipality", id: selectedCity.citySlug }] : [],
+      focused: selectedZoneCode ? { kind: "zone", id: selectedZoneCode } : null,
+    });
+  }
 
   // ── Couche ZONES de la ville sélectionnée (waiter propre + anti-course) ────
   let zonesLoading = false;
@@ -307,6 +330,7 @@
     if (!selectedCity) return;
     if (label === "Ville") {
       selectedZoneCode = null;
+      syncCoverageUrl();
       updateZoneLayers();
       return;
     }
@@ -331,9 +355,10 @@
     selectCity(city);
   }
 
-  function selectCity(city: CityCoverage): void {
+  function selectCity(city: CityCoverage, syncUrl = true): void {
     selectedCity = city;
     selectedZoneCode = null;
+    if (syncUrl) syncCoverageUrl();
     // Cadrage caméra sur le contour de la ville (parité Signaux). Repli : si le
     // contour n'est pas en cache (géométrie absente), on ne force pas la caméra.
     fitCityBounds(city.citySlug);
@@ -346,12 +371,13 @@
     if (bounds) mapApi?.fitMapToBounds(bounds, { maxZoom: 11 });
   }
 
-  function clearSelection(options: { recenter?: boolean } = {}): void {
+  function clearSelection(options: { recenter?: boolean; syncUrl?: boolean } = {}): void {
     // Supersède toute requête zones en vol : aucune réponse en retard ne
     // repeindra la carte après « Fermer ».
     geoGuard.cancel();
     selectedCity = null;
     selectedZoneCode = null;
+    if (options.syncUrl !== false) syncCoverageUrl();
     zonesResponse = null;
     zonesError = null;
     zonesLoading = false;
@@ -369,6 +395,7 @@
   // ── Sélection de zone (exclusive) + zoom bbox (parité Signaux #12) ─────────
   function selectZone(code: string): void {
     selectedZoneCode = code;
+    syncCoverageUrl();
     updateZoneLayers();
     zoomToZone(code);
   }
@@ -377,6 +404,7 @@
   function handleZoneClick(zone: { citySlug: string; code: string }): void {
     if (selectedZoneCode === zone.code) {
       selectedZoneCode = null;
+      syncCoverageUrl();
       updateZoneLayers();
       return;
     }
@@ -598,6 +626,7 @@
           id="coverage-kpi-select"
           data-testid="coverage-kpi-select"
           bind:value={activeKpiId}
+          on:change={syncCoverageUrl}
           class="w-full rounded border border-slate-200 bg-white px-2 py-1 text-slate-700"
         >
           {#each PALIER_KPIS_20 as kpi (kpi.id)}
@@ -664,7 +693,7 @@
               class={`mb-1 flex w-full items-center gap-2 rounded border px-2 py-2 text-left text-xs ${activeKpiId === kpi.id ? "border-teal-400 bg-teal-50" : "border-slate-100 bg-white hover:bg-slate-50"}`}
               aria-pressed={activeKpiId === kpi.id}
               data-testid={`coverage-kpi-${kpi.id}`}
-              on:click={() => { activeKpiId = kpi.id; }}
+              on:click={() => { activeKpiId = kpi.id; syncCoverageUrl(); }}
             >
               <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style={`background-color: ${PALIER_CELL_COLOR[cell.status]}`}></span>
               <span class="min-w-0 flex-1 font-medium text-slate-700">{kpi.label}</span>

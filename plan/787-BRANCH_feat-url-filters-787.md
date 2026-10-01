@@ -76,7 +76,7 @@ Make every existing geographic view restore its applicable active filters and pe
   - [ ] Gate: component/router regressions and browser proof for dates/business filters.
 
 - [ ] **Lot 3 — Other geographic views, Sources second**
-  - [ ] Inventory active Evaluation/Sources controls and persist their existing page state.
+  - [x] Inventory active Evaluation/Sources controls; wire Sources coverage scope, KPI, tab and geographic state.
   - [ ] Restore hash page filters on share/reload/back/forward without hidden preferences.
   - [ ] Gate: scoped view tests and real browser proof.
 
