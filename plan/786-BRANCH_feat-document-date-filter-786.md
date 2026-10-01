@@ -60,6 +60,7 @@
   - [ ] Share one inclusive date policy between aggregation and client detail, including unbounded periods and multiple references.
   - [x] Regression tests cover the September/July fixture, missing dates, partial/ambiguous dates, scrape-only timestamps and calendar boundaries.
 - [ ] **Lot 2 — Selector and shared URL**
+  - [x] Extend the existing geo URL codec with explicit scrape basis and implicit document default, including dates-only reset semantics.
   - [ ] Add the document/scrape selector to the existing period control for relative and custom periods, default document.
   - [ ] Serialize/restore `filter.dateBasis` with period and retain it across geo navigation, reload and browser history.
   - [ ] Reload bulk counts and reconcile detail/selection using the same basis.
