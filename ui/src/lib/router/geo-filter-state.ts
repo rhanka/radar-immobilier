@@ -1,7 +1,7 @@
 import { EVAL_CATEGORIES, USAGE_GROUPS, type EvalLotFilter } from "$lib/maps/eval-lot-filters.js";
 import { ZONE_KIND_GROUPS, type ZoneKindFilter } from "$lib/maps/zone-kind-filter.js";
 import { bAxesFromVivierKey, DEFAULT_B_AXES, keyForVivierB, type BAxes } from "$lib/signals/vivier-view-mode.js";
-import { DEFAULT_VIVIER_B_EXCLUSIONS, type VivierBExclusions } from "@radar/domain";
+import { DEFAULT_VIVIER_B_EXCLUSIONS, type DocumentDateBasis, type VivierBExclusions } from "@radar/domain";
 import {
   defaultSignalTimeRange,
   normalizeSignalTimeRange,
@@ -22,12 +22,15 @@ import {
  * - legacy `subset=vivier-v2[|-z|-r|-p|p]` (retired multi-vivier syntax) is
  *   normalized to the sole residual vivier, with product defaults elsewhere;
  * - legacy top-level `lots=0` / `layers=zones` without any `filter.*` key
- *   (parsed as `legacyLayers`) keeps the product defaults, zones only.
+ *   (parsed as `legacyLayers`) keeps the product defaults, zones only;
+ * - date basis: `dateBasis=scrap` (collection clock); document dates are the
+ *   default and are never written.
  */
 export interface GeoFilterState {
   axes: BAxes;
   exclusions: VivierBExclusions;
   timeRange: SignalTimeRange;
+  dateBasis: DocumentDateBasis;
   lots: EvalLotFilter;
   zoneKinds: ZoneKindFilter;
   zoneMillesime: string | null;
@@ -50,6 +53,7 @@ export function unrestrictedGeoFilters(): GeoFilterState {
     axes: { z: false, r: false, p: false },
     exclusions: { piiaSansProjetResidentiel: false, derogationsMineures: false },
     timeRange: unrestrictedTimeRange(),
+    dateBasis: "document",
     lots: { category: "all", usages: new Set(), superficieMin: 0 },
     zoneKinds: new Set(),
     zoneMillesime: null,
@@ -97,6 +101,11 @@ function readTimeRange(value: (key: string) => string | undefined, now: number):
     : unrestrictedTimeRange();
 }
 
+/** `dateBasis=scrap` selects the collection clock; absent or invalid means document dates. */
+function readDateBasis(value: (key: string) => string | undefined): DocumentDateBasis {
+  return value("dateBasis") === "scrap" ? "scrap" : "document";
+}
+
 /** Omitted restrictions are unrestricted, independent of browser preferences. */
 export function readGeoFilters(filters: Record<string, readonly string[]>, now = Date.now()): GeoFilterState {
   const value = (key: string) => filters[key]?.[0];
@@ -105,6 +114,7 @@ export function readGeoFilters(filters: Record<string, readonly string[]>, now =
     const defaults = defaultGeoFilters(now);
     if (legacy) defaults.axes = bAxesFromVivierKey(legacy.includes("vivier-v2") ? legacy.join("|") : "vivier-v2");
     if (value("lots") === "0") defaults.lotsEnabled = false;
+    defaults.dateBasis = readDateBasis(value);
     return defaults;
   }
   const category = EVAL_CATEGORIES.find(({ id }) => id === value("lotCategory"))?.id ?? "all";
@@ -117,6 +127,7 @@ export function readGeoFilters(filters: Record<string, readonly string[]>, now =
       derogationsMineures: value("excludeDerogations") === "1",
     },
     timeRange: readTimeRange(value, now),
+    dateBasis: readDateBasis(value),
     lots: { category, usages, superficieMin: Number.isFinite(minimum) && minimum > 0 ? minimum : 0 },
     zoneKinds: new Set(ZONE_KIND_GROUPS.filter(({ id }) => filters.zoneKind?.includes(id)).map(({ id }) => id)),
     zoneMillesime: value("zoneMillesime") ?? null,
@@ -147,6 +158,7 @@ export function writeGeoFilters(state: GeoFilterState): Record<string, string[]>
   flag("excludePiia", state.exclusions.piiaSansProjetResidentiel);
   flag("excludeDerogations", state.exclusions.derogationsMineures);
   const range = state.timeRange;
+  if (state.dateBasis === "scrap") filters.dateBasis = ["scrap"];
   if (range.mode === "relative" && range.relative && RELATIVE_PERIODS.has(range.relative)) {
     if (range.relative !== "all") filters.period = [range.relative];
   } else {
