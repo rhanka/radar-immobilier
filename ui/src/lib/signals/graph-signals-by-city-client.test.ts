@@ -43,4 +43,13 @@ describe("fetchGraphSignalsByCity — #4 fenêtre date (dateFrom/dateTo)", () =>
     await fetchGraphSignalsByCity("", { dateFrom: "2026-05-01" });
     expect(calls[0]).toBe("/api/graph-signals/by-city?dateFrom=2026-05-01");
   });
+
+  it("shares the selected clock and exclusions with aggregate counts", async () => {
+    const { calls } = stubFetch();
+    await fetchGraphSignalsByCity("", { dateFrom: "2026-09-29", dateTo: "2026-09-30",
+      dateBasis: "scrap", excludePiia: true, excludeDerogations: true });
+    const params = new URL(calls[0]!, "http://localhost").searchParams;
+    expect(Object.fromEntries(params)).toEqual({ dateFrom: "2026-09-29", dateTo: "2026-09-30",
+      dateBasis: "scrap", excludePiia: "1", excludeDerogations: "1" });
+  });
 });
