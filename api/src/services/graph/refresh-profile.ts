@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { DocumentDateSchema, extractIsoFromLabel, type DocumentDate } from "@radar/sources";
 
 import {
   buildProfileChunkPrompt,
@@ -47,7 +48,7 @@ export interface RefreshProfileChunk {
   readonly chunk: RefreshCorpusChunk;
   readonly extraction: Extraction;
 }
-export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v9";
+export const REFRESH_PROFILE_CONTRACT_VERSION = "immo-pv-extraction-v10";
 // Entity citation excerpts are bounded by truncation, in Unicode code points rather than UTF-16 units.
 const MAX_CITATION_EXCERPT_CODE_POINTS = 200;
 const MIN_CITATION_EXCERPT_CODE_POINTS = 20;
@@ -292,6 +293,84 @@ function validateDeclaredContractVersion(value: unknown, chunk: RefreshCorpusChu
   delete root["contract_version"];
 }
 
+function validatedSourceDate(value: unknown, citation: { page?: unknown; excerpt?: unknown },
+  chunk: RefreshCorpusChunk): DocumentDate {
+  if (typeof citation.excerpt !== "string") throw new Error("Ungrounded documentary date output");
+  const excerpt: string = citation.excerpt;
+  const kind = /s[ée]ance|conseil|council|meeting/i.test(excerpt) ? "session"
+    : /publi[ée]|published|publication/i.test(excerpt) ? "publication" : "document";
+  const date = DocumentDateSchema.parse({ status: "known", value,
+    precision: typeof value === "string" && value.length === 7 ? "month" : "day", kind,
+    method: "signal-llm", evidence: { page: citation.page, excerpt } });
+  if (date.status !== "known" || !chunk.documentHeader) throw new Error("Missing documentary header");
+  if (date.evidence.page !== chunk.documentHeader.page || !excerpt
+    || !containsNormalizedPdfExcerpt(chunk.documentHeader.text, excerpt)) {
+    throw new Error("Ungrounded documentary date output");
+  }
+  const englishMonths = ["january", "february", "march", "april", "may", "june", "july",
+    "august", "september", "october", "november", "december"];
+  const english = excerpt.match(/\b([a-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?[,]?\s+(20\d{2})\b/i);
+  const month = english ? englishMonths.indexOf(english[1]!.toLowerCase()) + 1 : 0;
+  const englishDate = english && month ? `${english[3]}-${String(month).padStart(2, "0")}-${english[2]!.padStart(2, "0")}` : null;
+  const semantic = date.kind === "session" ? /s[ée]ance|conseil|council|meeting/i
+    : date.kind === "publication" ? /publi[ée]|published|publication/i : /date|dated|dat[ée]/i;
+  if (!semantic.test(excerpt) || (extractIsoFromLabel(excerpt) !== date.value
+    && englishDate !== date.value)) throw new Error("Unsupported documentary date meaning or value");
+  return date;
+}
+
+function sourceProperties(node: Extraction["nodes"][number]): Record<string, unknown> | undefined {
+  const properties = node["properties"];
+  return properties && typeof properties === "object" && !Array.isArray(properties)
+    ? properties as Record<string, unknown> : undefined;
+}
+
+/** The bound documentary Source date with its header citation, or why it is not retained. */
+function sourceDocumentDate(node: Extraction["nodes"][number], chunk: RefreshCorpusChunk):
+DocumentDate | Error | undefined {
+  const properties = sourceProperties(node);
+  const value = properties?.["date"];
+  if (node.node_type !== "Source" || value === undefined || !chunk.documentHeader) return undefined;
+  if (node.id !== (chunk.documentSourceId ?? `source-${chunk.docSha}`)
+    || properties?.["docSha"] !== chunk.docSha || properties?.["rawRef"] !== chunk.originalKey) {
+    return new Error("Documentary Source identity mismatch");
+  }
+  const citation = node.citations?.find((item) => item.page === chunk.documentHeader?.page);
+  if (!citation) return new Error("Missing documentary Source citation");
+  try {
+    return validatedSourceDate(value, citation, chunk);
+  } catch (error) {
+    return error instanceof Error ? error : new Error(String(error));
+  }
+}
+
+/**
+ * On the chunk that carries a missing-date header, a Source.date that is not bound to this
+ * document or not proven by the cited header is dropped: the date stays unknown and the
+ * signal extraction itself is neither refused nor retried because of it.
+ */
+function dropUnprovenSourceDates(extraction: Extraction, chunk: RefreshCorpusChunk): Extraction {
+  if (!chunk.documentHeader) return extraction;
+  for (const node of extraction.nodes) {
+    if (!(sourceDocumentDate(node, chunk) instanceof Error)) continue;
+    const properties = { ...sourceProperties(node) };
+    delete properties["date"];
+    node["properties"] = properties;
+  }
+  return extraction;
+}
+
+/** Recover metadata from the native document Source, before merge or baseline deduplication. */
+export function refreshSourceDocumentDate(extraction: Extraction, chunk: RefreshCorpusChunk): DocumentDate | undefined {
+  if (!chunk.documentHeader) return undefined;
+  const candidates = extraction.nodes.map((node) => sourceDocumentDate(node, chunk))
+    .filter((date): date is DocumentDate => date !== undefined && !(date instanceof Error));
+  const values = [...new Set(candidates.flatMap((date) => date.status === "known" ? [date.value] : []))];
+  if (values.length > 1) return { status: "ambiguous", candidates: values,
+    reason: "Conflicting dates on native document Sources" };
+  return candidates[0] ?? { status: "unknown", reason: "No grounded documentary date in the native extraction" };
+}
+
 function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: RefreshProfileContext,
   pageTexts: ReadonlyMap<number, string>): Extraction {
   let parsed: unknown;
@@ -320,7 +399,7 @@ function validatedExtraction(text: string, chunk: RefreshCorpusChunk, context: R
   if (!profileResult.valid) throw new Error(`Invalid profile extraction for chunk ${chunk.id}: ${profileResult.issues
     .filter((issue) => issue.severity === "error").map((issue) => issue.code).join(", ")}`);
   validateProvenance(parsed as Extraction, chunk, pageTexts);
-  return parsed as Extraction;
+  return dropUnprovenSourceDates(parsed as Extraction, chunk);
 }
 export async function extractRefreshProfile(
   chunks: readonly RefreshCorpusChunk[], options: ExtractRefreshProfileOptions,
@@ -343,7 +422,15 @@ export async function extractRefreshProfile(
       const outputPath = join(outputDir, `${chunk.id}.json`);
       const generation = await options.textClient.generateJson({
         schema: schemaFor(chunk, options.context),
-        prompt: `Contract ${REFRESH_PROFILE_CONTRACT_VERSION}. Emit only these node types: ${allowedNodeTypes(options.context).join(", ")}.
+        prompt: `${chunk.documentHeader ? `The document date is missing upstream. In THIS existing native graph extraction response,
+identify the actual document as a Source node, even when no Signal/DesignationEvent is found.
+Use id ${chunk.documentSourceId ?? `source-${chunk.docSha}`} and properties.docSha ${chunk.docSha},
+properties.rawRef ${chunk.originalKey}; its identity never depends on its date.
+Put the grounded documentary date in Source.properties.date, separately from business-event dates.
+Use the session date of a PV/agenda, otherwise an explicitly identified publication/document date.
+Never use a signal/decision date or ingestion time. Omit Source.date when unknown or ambiguous.
+Use the native Source.citations page and verbatim dated header excerpt; do not invent a day.
+Document header (physical page ${chunk.documentHeader.page}):\n${chunk.documentHeader.text}\n\n` : ""}Contract ${REFRESH_PROFILE_CONTRACT_VERSION}. Emit only these node types: ${allowedNodeTypes(options.context).join(", ")}.
 Every node file_type must be "document" for this PDF. Edge confidence, when present, must be
 "AMBIGUOUS", "EXTRACTED", or "INFERRED"; never emit a numeric confidence.
 Node status is type-specific: use only ontology.node_properties.<node_type>.status.enum. These enums

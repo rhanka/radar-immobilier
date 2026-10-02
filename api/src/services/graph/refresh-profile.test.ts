@@ -16,6 +16,7 @@ import { beforeAll, describe, expect, it } from "vitest";
 import type { RefreshCorpusChunk } from "./refresh-corpus.js";
 import {
   extractRefreshProfile, loadRefreshProfileContext, parseStrictJsonResponse, REFRESH_PROFILE_CONTRACT_VERSION,
+  refreshSourceDocumentDate,
   type RefreshProfileContext,
 } from "./refresh-profile.js";
 
@@ -124,6 +125,75 @@ const largeInvalidJsonResponses = [
 ] as const;
 
 describe("refresh profile extraction", () => {
+  it("should recover an evidenced document date in the same signal call even with zero signals", async () => {
+    const header = "Council meeting held on September 29, 2026";
+    const input = { ...chunk(), pages: [1], text: `[PDF PAGE 1]\n${header}`, documentDate: { status: "unknown" as const },
+      documentHeader: { page: 1, text: header } };
+    const seen: TextJsonGenerationInput[] = [];
+    const body = { nodes: [{ id: `source-${input.docSha}`, label: "Council document", node_type: "Source",
+      file_type: "document", source_file: input.originalKey, properties: { date: "2026-09-29",
+        docSha: input.docSha, rawRef: input.originalKey }, citations: [{ page: 1, excerpt: header }] }],
+      edges: [], input_tokens: 1, output_tokens: 1 };
+    const result = await extractRefreshProfile([input], { context, textClient: client([
+      { text: JSON.stringify(body) }], seen), maxOutputTokens: 512 });
+    expect(seen).toHaveLength(1);
+    expect(seen[0]?.prompt).toContain(header);
+    expect(result[0]?.extraction.nodes.map((node) => node.node_type)).toEqual(["Source"]);
+    expect(refreshSourceDocumentDate(result[0]!.extraction, input)).toMatchObject({ status: "known",
+      method: "signal-llm", value: "2026-09-29" });
+    expect(result[0]?.extraction).not.toHaveProperty("document_date");
+  });
+  function sourceDateBody(input: RefreshCorpusChunk, value: string, citation: { page: number; excerpt: string },
+    id = `source-${input.docSha}`) {
+    return JSON.stringify({ nodes: [{ id, label: "Document", node_type: "Source", file_type: "document",
+      source_file: input.originalKey, properties: { date: value, docSha: input.docSha, rawRef: input.originalKey },
+      citations: [citation] }], edges: [], input_tokens: 1, output_tokens: 1 });
+  }
+  function headerChunk(header: string): RefreshCorpusChunk {
+    return { ...chunk(), pages: [1], text: `[PDF PAGE 1]\n${header}`, documentDate: { status: "unknown" },
+      documentHeader: { page: 1, text: header } };
+  }
+  it("should recover a French session date from the header of an undated agenda", async () => {
+    const header = "Procès-verbal d'une séance ordinaire du Conseil municipal tenue le 28 juillet 2026, à 19 h";
+    const input = headerChunk(header);
+    const result = await extractRefreshProfile([input], { context, maxOutputTokens: 512,
+      textClient: client([{ text: sourceDateBody(input, "2026-07-28", { page: 1, excerpt: header }) }], []) });
+    expect(refreshSourceDocumentDate(result[0]!.extraction, input)).toMatchObject({ status: "known",
+      value: "2026-07-28", precision: "day", kind: "session", method: "signal-llm" });
+  });
+  it.each([
+    ["an impossible calendar day", "2026-02-31", undefined],
+    ["a value absent from the cited header", "2026-07-28", undefined],
+    ["a Source that is not bound to the document", "2026-09-29", "source-other-document"],
+  ])("should drop a documentary date given as %s without refusing the signal extraction", async (_case, value, id) => {
+    const header = "Council meeting held on September 29, 2026";
+    const input = headerChunk(header);
+    const seen: TextJsonGenerationInput[] = [];
+    const result = await extractRefreshProfile([input], { context, maxOutputTokens: 512,
+      textClient: client([{ text: sourceDateBody(input, value, { page: 1, excerpt: header }, id) }], seen) });
+    expect(seen).toHaveLength(1);
+    expect(result[0]?.extraction.nodes[0]?.["properties"]).not.toHaveProperty("date");
+    expect(refreshSourceDocumentDate(result[0]!.extraction, input)).toMatchObject({ status: "unknown" });
+  });
+  it.each([
+    ["a citation outside the chunk pages", { page: 2, excerpt: "Council meeting held on September 29, 2026" }],
+    ["an excerpt absent from the page", { page: 1, excerpt: "Invented Council meeting held on September 29, 2026" }],
+  ])("should keep refusing %s under the existing provenance rule", async (_case, citation) => {
+    const input = headerChunk("Council meeting held on September 29, 2026");
+    await expect(extractRefreshProfile([input], { context, maxOutputTokens: 512,
+      textClient: client([{ text: sourceDateBody(input, "2026-09-29", citation) }], []) })).rejects.toThrow();
+  });
+  it("should neither request nor recover a documentary date when it is known upstream", async () => {
+    const header = "Council meeting held on September 29, 2026";
+    const input: RefreshCorpusChunk = { ...chunk(), pages: [1], text: `[PDF PAGE 1]\n${header}`,
+      documentDate: { status: "known", value: "2026-09-28", precision: "day", kind: "session",
+        method: "listing", evidence: { field: "publishedAt" } } };
+    const seen: TextJsonGenerationInput[] = [];
+    const result = await extractRefreshProfile([input], { context, maxOutputTokens: 512,
+      textClient: client([{ text: sourceDateBody(input, "2026-09-29", { page: 1, excerpt: header }) }], seen) });
+    expect(seen[0]?.prompt).not.toContain("The document date is missing upstream");
+    expect(refreshSourceDocumentDate(result[0]!.extraction, input)).toBeUndefined();
+  });
   it.each([
     ["direct JSON", () => JSON.stringify(extraction())],
     ["a JSON fence", () => ` \n\`\`\`JSON\n${JSON.stringify(extraction())}\n\`\`\`  \n `],
@@ -541,7 +611,7 @@ describe("refresh profile extraction", () => {
     expect(results[1]).toMatchObject({ chunk: { originalKey: oracle.originalKey },
       extraction: { nodes: [], edges: [] } });
     const schema = JSON.parse(seen[0]!.schema);
-    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v9");
+    expect(REFRESH_PROFILE_CONTRACT_VERSION).toBe("immo-pv-extraction-v10");
     expect(schema.contract_version).toBe(REFRESH_PROFILE_CONTRACT_VERSION);
     expect(schema.ontology.node_properties.Signal.reglement_number.description).toContain("ANTI-INVENTION");
     const nodeStatuses = ["candidate", "attached", "needs_review", "validated", "rejected", "superseded"];

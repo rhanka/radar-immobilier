@@ -72,6 +72,9 @@ function refsFor(
       docSha: document.sha256,
       rawRef: document.originalKey,
       sourceUrl: document.sourceUrl,
+      ...(document.documentDate ? { documentDate: document.documentDate } : {}),
+      ...(document.publishedAt ? { publishedAt: document.publishedAt } : {}),
+      ...(document.fetchedAt ? { fetchedAt: document.fetchedAt } : {}),
       page,
       excerpt,
     };
