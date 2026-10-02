@@ -52,7 +52,7 @@
 ## Plan / Todo (lot-based)
 - [ ] **Lot 0 — Baseline & constraints**
   - [x] Read MASTER, workflow, subagents, testing and harness method/debug/plan/test skills.
-  - [x] Confirm branch/worktree and URL base `a1b9bbe8a33c620531ae92fe6486c3ad8f357014`, rebased on #789 head `69167ed2`.
+  - [x] Confirm branch/worktree and URL base `a1b9bbe8a33c620531ae92fe6486c3ad8f357014`, rebased on the final #789 head `daa4c21d`.
   - [x] Inspect aggregate/list-vs-detail date mismatch and existing DS TimeRangePicker.
   - [x] Define `test-document-date-filter-786` / `e2e-document-date-filter-786`; API 8896, UI 5396, Mail UI 1196, Postgres 5636, S3 9196, Obscura 9396, SMTP 1096.
   - [x] Obtain conductor scope gate and data/URL contract coordination (C1/C2 checked).
