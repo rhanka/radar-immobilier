@@ -58,6 +58,15 @@ describe("router compatibility", () => {
     cleanup();
   });
 
+  it("should keep the acquisition date basis when a bare /geo link is canonicalized", async () => {
+    const router = await loadRouterAt("/geo?mode=signal&filter.period=3mo&filter.dateBasis=acquisition#/geo");
+    const cleanup = router.initRouter();
+    expect(window.location.pathname).toBe("/geo/region/quebec");
+    expect(new URLSearchParams(window.location.search).get("filter.dateBasis")).toBe("acquisition");
+    expect(get(router.activeGeoRoute)?.state.filters).toEqual({ period: ["3mo"], dateBasis: ["acquisition"] });
+    cleanup();
+  });
+
   it("should replace every restriction from the current history URL", async () => {
     const router = await loadRouterAt("/geo/city/plaisance?filter.precoce=1&filter.lotMinArea=1000");
     const cleanup = router.initRouter();
