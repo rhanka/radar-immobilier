@@ -154,9 +154,18 @@ async function main(): Promise<void> {
       continue;
     }
     const body = new TextEncoder().encode(JSON.stringify(plan.nextGraph, null, 2));
-    const archive = await archiveCityGraphPrefix(store, city, backupId);
-    await writeCanonicalCityGraph(store, { citySlug: city, body, archive, readAnchor });
-    const result = await upsertGraphAtomic(db, city, plan.nextGraph);
+    let archive: Awaited<ReturnType<typeof archiveCityGraphPrefix>>;
+    let result: Awaited<ReturnType<typeof upsertGraphAtomic>>;
+    try {
+      archive = await archiveCityGraphPrefix(store, city, backupId);
+      // A concurrent refresh publication fails the read-anchor guard: the city is reported, the run goes on.
+      await writeCanonicalCityGraph(store, { citySlug: city, body, archive, readAnchor });
+      result = await upsertGraphAtomic(db, city, plan.nextGraph);
+    } catch (error) {
+      report.citiesAborted += 1;
+      logger.error({ city, err: String(error) }, "recover: write aborted for this city (rerun is idempotent)");
+      continue;
+    }
     if (result.aborted) {
       report.citiesAborted += 1;
       logger.error({ city, reason: result.reason }, "recover: PG projection aborted (latest.json written; investigate)");
