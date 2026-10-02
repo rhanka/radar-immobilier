@@ -1,6 +1,7 @@
 import { writable } from "svelte/store";
 import type { DemoView } from "$lib/demo/views.js";
 import {
+  GEO_REGION_KEY,
   buildGeoRoute,
   isGeoRoutePathname,
   parseGeoRoute,
@@ -76,10 +77,26 @@ function viewFromHash(hash: string): DemoView {
   return VALID_VIEWS.has(segment) ? (segment as DemoView) : DEFAULT_VIEW;
 }
 
+/**
+ * A bare `/geo` link (no level) is the region view. Canonicalize it in place while keeping
+ * the query string (shared `filter.*` restrictions) and the hash; otherwise the map view
+ * rebuilt the region URL from its defaults and dropped the shared filters.
+ */
+function canonicalizeBareGeoLocation(
+  location: Pick<Location, "pathname" | "search">,
+): Pick<Location, "pathname" | "search"> {
+  if (location.pathname !== "/geo" && location.pathname !== "/geo/") return location;
+  const pathname = `/geo/region/${GEO_REGION_KEY}`;
+  if (typeof window !== "undefined" && window.location.pathname === location.pathname) {
+    window.history.replaceState(window.history.state, "", `${pathname}${location.search}${window.location.hash}`);
+  }
+  return { pathname, search: location.search };
+}
+
 function geoRouteFromLocation(
   location: Pick<Location, "pathname" | "search">,
 ): GeoRoute | null {
-  const result = parseGeoRoute(location);
+  const result = parseGeoRoute(canonicalizeBareGeoLocation(location));
   if (result.ok && (result.route.state.filters.subset || result.route.state.filters.legacyLayers)) {
     // Retired multi-vivier or zones-only link: rewrite it as the residual vivier snapshot.
     const { subset: _legacy, legacyLayers: _legacyLayers, ...rest } = result.route.state.filters;

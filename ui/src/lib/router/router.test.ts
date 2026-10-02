@@ -39,6 +39,25 @@ describe("router compatibility", () => {
     }
   });
 
+  it("should keep shared filters when a bare /geo link is canonicalized to the region", async () => {
+    const router = await loadRouterAt(
+      "/geo?mode=signal&filter.dateFrom=2026-09-28&filter.dateTo=2026-10-01&filter.dateBasis=scrap&filter.residentiel=0#/geo",
+    );
+    const cleanup = router.initRouter();
+    expect(window.location.pathname).toBe("/geo/region/quebec");
+    expect(window.location.hash).toBe("#/geo");
+    expect(Object.fromEntries(new URLSearchParams(window.location.search))).toEqual({
+      mode: "signal", "filter.dateFrom": "2026-09-28", "filter.dateTo": "2026-10-01",
+      "filter.dateBasis": "scrap", "filter.residentiel": "0",
+    });
+    const route = get(router.activeGeoRoute);
+    expect(route).toMatchObject({ level: "region", region: "quebec" });
+    expect(route?.state.filters).toEqual({
+      dateFrom: ["2026-09-28"], dateTo: ["2026-10-01"], dateBasis: ["scrap"], residentiel: ["0"],
+    });
+    cleanup();
+  });
+
   it("should replace every restriction from the current history URL", async () => {
     const router = await loadRouterAt("/geo/city/plaisance?filter.precoce=1&filter.lotMinArea=1000");
     const cleanup = router.initRouter();
