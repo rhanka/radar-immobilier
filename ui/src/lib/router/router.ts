@@ -80,9 +80,9 @@ function geoRouteFromLocation(
   location: Pick<Location, "pathname" | "search">,
 ): GeoRoute | null {
   const result = parseGeoRoute(location);
-  if (result.ok && result.route.state.filters.subset) {
-    // Retired multi-vivier link: rewrite it as the residual vivier snapshot.
-    const { subset: _legacy, ...rest } = result.route.state.filters;
+  if (result.ok && (result.route.state.filters.subset || result.route.state.filters.legacyLayers)) {
+    // Retired multi-vivier or zones-only link: rewrite it as the residual vivier snapshot.
+    const { subset: _legacy, legacyLayers: _legacyLayers, ...rest } = result.route.state.filters;
     result.route.state.filters = { ...rest, ...writeGeoFilters(readGeoFilters(result.route.state.filters)) };
     if (typeof window !== "undefined") {
       window.history.replaceState(window.history.state, "", `${buildGeoRoute(result.route)}${window.location.hash}`);

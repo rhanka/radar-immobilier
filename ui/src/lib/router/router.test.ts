@@ -26,6 +26,19 @@ describe("router compatibility", () => {
     cleanup();
   });
 
+  it("should canonicalize old zones-only links with the defaults they used to show", async () => {
+    for (const legacy of ["lots=0", "layers=zones"]) {
+      const router = await loadRouterAt(`/geo/city/val-des-monts?${legacy}`);
+      const cleanup = router.initRouter();
+      expect(Object.fromEntries(new URLSearchParams(window.location.search))).toEqual({
+        mode: "signal", "filter.zonage": "1", "filter.residentiel": "1", "filter.precoce": "1",
+        "filter.excludePiia": "1", "filter.excludeDerogations": "1", "filter.period": "6mo", "filter.lots": "0",
+      });
+      expect(get(router.activeGeoRoute)?.state.filters).not.toHaveProperty("legacyLayers");
+      cleanup();
+    }
+  });
+
   it("should replace every restriction from the current history URL", async () => {
     const router = await loadRouterAt("/geo/city/plaisance?filter.precoce=1&filter.lotMinArea=1000");
     const cleanup = router.initRouter();

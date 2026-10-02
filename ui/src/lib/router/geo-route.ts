@@ -306,6 +306,9 @@ export function parseGeoQuery(search: string | URLSearchParams): GeoRouteState {
   const filters: Record<string, string[]> = {};
   if (["0", "off", "false", "no"].includes(params.get("lots") ?? "") || params.get("layers") === "zones") {
     filters.lots = ["0"];
+    // Old zones-only link without any filter.* parameter: keep it a legacy link
+    // (product defaults + zones only), not an authoritative filter snapshot.
+    if (![...params.keys()].some((key) => key.startsWith("filter."))) filters.legacyLayers = ["zones"];
   }
   for (const [key, value] of params.entries()) {
     if (!key.startsWith("filter.") || key === "filter.") continue;
