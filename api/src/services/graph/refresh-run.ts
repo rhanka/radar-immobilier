@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
 
+import type { DocumentDate } from "@radar/sources";
 import { mergeExtractions, type TextJsonGenerationClient } from "@sentropic/graphify";
 
 import type { Database } from "../../db/client.js";
@@ -9,18 +10,20 @@ import {
   type LiveScrapeCityRecap,
   type RunLiveScrapeOptions,
 } from "../sources/live-scrape.js";
+import { hydrateGraphDocumentDates, persistDocumentDate } from "../sources/document-date-metadata.js";
 import { readCanonicalCityGraph, type CanonicalReadAnchor } from "./canonical-graph-writer.js";
-import { graphifyGraphSchema, upsertGraphAtomic } from "./graph-store.js";
+import { graphifyGraphSchema, upsertGraphAtomic, type GraphifyGraph } from "./graph-store.js";
 import { enrichGraphify34Snapshot, type Graphify34Snapshot } from "./graphify-34-enrichment.js";
 import { applyGraphify34Snapshots, applyPlanKey, buildGraphify34Manifest,
   type Graphify34SnapshotStore } from "./graphify-34-snapshot.js";
-import { materializeRefreshCorpus, refreshCorpusInputHash } from "./refresh-corpus.js";
+import { materializeRefreshCorpus, refreshCorpusInputHash, type RefreshCorpus,
+  type RefreshCorpusDocument } from "./refresh-corpus.js";
 import { coverRefreshDocument, failRefreshDocument, planRefreshCoverage, readRefreshCoverage,
   summarizeRefreshCoverage, writeRefreshCoverage } from "./refresh-coverage.js";
 import { appendRefreshDocumentOutcome } from "./refresh-document-outcomes.js";
 import { refreshFallbackReason, type RefreshDocumentModels,
   type RefreshModelReceipt } from "./refresh-model-policy.js";
-import { extractRefreshProfile, type RefreshProfileChunk,
+import { extractRefreshProfile, refreshSourceDocumentDate, type RefreshProfileChunk,
   type RefreshProfileContext } from "./refresh-profile.js";
 import { canonicalHash } from "./replay/canonical-json.js";
 import { extractionToV23Graph } from "./refresh-v23.js";
@@ -408,8 +411,10 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
       inputHash: selected.inputHash, documentSha: selected.sha, candidates: candidates.length,
       status: "published" as const };
   }
-  const corpus = await materializeRefreshCorpus({ citySlug: options.citySlug,
-    manifestKey, reader: options.store, extractPdf: options.extractPdf });
+  const corpus = bindDocumentSourceIds(await materializeRefreshCorpus({ citySlug: options.citySlug,
+    manifestKey, reader: options.store, extractPdf: options.extractPdf,
+    publishedAtByKey: new Map(selected.publishedAt ? [[selected.representationKey, selected.publishedAt]] : []) }),
+  baseline);
   if (corpus.inputHash !== selected.inputHash) {
     throw new Error(`Refresh input identity diverged for ${options.citySlug}`);
   }
@@ -420,6 +425,9 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
   }
   const profiled: RefreshProfileChunk[] = [];
   for (const document of corpus.documents) {
+    if (document.documentDate?.status === "known") {
+      await persistDocumentDate(options.store, document.originalKey, document.documentDate);
+    }
     const receipts: RefreshModelReceipt[] = [];
     let submittedAt: Date | undefined;
     let attempts = 0;
@@ -473,10 +481,12 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
       });
     }
   }
+  const datedDocuments = await recoverRefreshDocumentDates(options.store, corpus.documents, profiled);
   const extraction = profiled.map((item) => item.extraction).reduce(mergeExtractions);
   handle = await completeStage(options.store, handle, "profile", canonicalHash(extraction), now);
   const candidate = extractionToV23Graph(extraction, { municipality: options.citySlug,
-    generatedAt: handle.state.createdAt, documents: corpus.documents, baseline,
+    generatedAt: handle.state.createdAt, documents: datedDocuments,
+    baseline: await hydrateGraphDocumentDates(options.store, baseline),
     excludedNodeIds: new Set(options.excludedNodeIds ?? []) });
   handle = await writeRefreshCandidate(options.store, handle, candidate);
   handle = await completeStage(options.store, handle, "candidate", canonicalHash(candidate), now);
@@ -487,6 +497,63 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
     cycleId, inputHash: corpus.inputHash, documentSha: selected.sha,
     candidates: candidates.length, status: "published" as const };
   }
+}
+
+function sourceDocSha(properties: unknown): string | undefined {
+  if (!properties || typeof properties !== "object" || Array.isArray(properties)) return undefined;
+  const values = properties as Record<string, unknown>;
+  const sha = values["docSha"] ?? values["sha256"];
+  return typeof sha === "string" ? sha : undefined;
+}
+
+/**
+ * Reuse the documentary Source identity already published for a document, so the existing
+ * signal call names the same native Source node instead of minting a second one.
+ * The chunk set and the run input identity are unchanged.
+ */
+export function bindDocumentSourceIds(corpus: RefreshCorpus, baseline: GraphifyGraph): RefreshCorpus {
+  const sourceIds = new Map<string, string>();
+  for (const node of baseline.nodes) {
+    const sha = (node.type ?? node.file_type) === "Source" ? sourceDocSha(node.properties) : undefined;
+    if (sha && !sourceIds.has(sha)) sourceIds.set(sha, node.id);
+  }
+  if (sourceIds.size === 0) return corpus;
+  const documents = corpus.documents.map((document) => {
+    const documentSourceId = sourceIds.get(document.sha256);
+    return documentSourceId
+      ? { ...document, chunks: document.chunks.map((chunk) => ({ ...chunk, documentSourceId })) }
+      : document;
+  });
+  return { ...corpus, documents, chunks: documents.flatMap((document) => document.chunks) };
+}
+
+/**
+ * Persist a documentary date recovered from the native Source of the existing signal extraction,
+ * only where the upstream metadata is still missing, and return the documents the graph refs use.
+ * Known upstream dates always win (persistDocumentDate never overwrites them).
+ */
+export async function recoverRefreshDocumentDates(store: ObjectStore,
+  documents: readonly RefreshCorpusDocument[], profiled: readonly RefreshProfileChunk[],
+): Promise<RefreshCorpusDocument[]> {
+  const dated: RefreshCorpusDocument[] = [];
+  for (const document of documents) {
+    let recovered: DocumentDate | undefined;
+    if (document.documentDate?.status !== "known") {
+      for (const result of profiled) {
+        if (result.chunk.docSha !== document.sha256) continue;
+        const date = refreshSourceDocumentDate(result.extraction, result.chunk);
+        if (date?.status === "known") { recovered = date; break; }
+      }
+    }
+    const persisted = recovered ? await persistDocumentDate(store, document.originalKey, recovered) : null;
+    const date = persisted?.documentDate ?? recovered ?? document.documentDate;
+    const next: { -readonly [K in keyof RefreshCorpusDocument]: RefreshCorpusDocument[K] } = { ...document };
+    delete next.publishedAt;
+    if (date) next.documentDate = date;
+    if (date?.status === "known") next.publishedAt = date.value;
+    dated.push(next);
+  }
+  return dated;
 }
 
 /**

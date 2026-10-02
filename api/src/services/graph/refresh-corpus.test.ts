@@ -44,6 +44,15 @@ async function materialize(input: ReturnType<typeof fixture>) {
 }
 
 describe("refresh corpus", () => {
+  it("should resolve a manifest-only date before requesting LLM metadata", async () => {
+    const input = fixture(encoder.encode("manifest-dated"), "undated header\f");
+    const corpus = await materializeRefreshCorpus({ citySlug: "waterloo", manifestKey: "manifest.tsv",
+      reader: input.reader, extractPdf: input.extractPdf,
+      publishedAtByKey: new Map([[input.pdfKey, "2026-09-29"]]) });
+    expect(corpus.documents[0]).toMatchObject({ publishedAt: "2026-09-29",
+      documentDate: { status: "known", method: "manifest" } });
+    expect(corpus.chunks[0]?.documentHeader).toBeUndefined();
+  });
   it("should anchor excerpts after typographic normalization without allowing paraphrases", () => {
     const page = "La demande de M. YvesMalouin vise la propriété désignée.";
     expect(containsNormalizedPdfExcerpt(page, "YVES-MALOUÏN vise la propriété")).toBe(true);
