@@ -79,18 +79,22 @@ describe("shareable geographic restrictions", () => {
     expect(legacy.dateBasis).toBe("scrap");
     expect(writeGeoFilters(legacy))
       .toEqual({ dateBasis: ["acquisition"], dateFrom: ["2026-09-29"], dateTo: ["2026-09-30"] });
-    expect(readGeoFilters({ subset: ["vivier-v2"], dateBasis: ["scrap"] }).dateBasis).toBe("scrap");
+    // A legacy relative-period link falls back to document dates.
+    expect(readGeoFilters({ subset: ["vivier-v2"], dateBasis: ["scrap"] }).dateBasis).toBe("document");
   });
 
-  it("should combine the acquisition basis with relative and unrestricted periods", () => {
-    expect(writeGeoFilters(readGeoFilters({ dateBasis: ["acquisition"], period: ["6mo"] })))
-      .toEqual({ dateBasis: ["acquisition"], period: ["6mo"] });
-    // An acquisition-only snapshot is not empty, so it never collapses to the product defaults.
+  it("should ignore the acquisition basis for relative and unrestricted periods", () => {
+    for (const period of ["3mo", "6mo", "12mo"]) {
+      const state = readGeoFilters({ dateBasis: ["acquisition"], period: [period] });
+      expect(state.dateBasis).toBe("document");
+      expect(writeGeoFilters(state)).toEqual({ period: [period] });
+    }
     const unrestricted = readGeoFilters({ dateBasis: ["acquisition"], period: ["all"] });
-    expect(unrestricted.axes).toEqual({ z: false, r: false, p: false });
-    expect(writeGeoFilters(unrestricted)).toEqual({ dateBasis: ["acquisition"] });
-    expect(readGeoFilters(writeGeoFilters(unrestricted))).toEqual(unrestricted);
-    expect(writeGeoFilters({ ...unrestricted, dateBasis: "document" })).toEqual({ period: ["all"] });
+    expect(unrestricted.dateBasis).toBe("document");
+    expect(writeGeoFilters(unrestricted)).toEqual({ period: ["all"] });
+    // Even a stale acquisition state is never written for a relative period.
+    expect(writeGeoFilters({ ...unrestricted, dateBasis: "scrap" })).toEqual({ period: ["all"] });
+    expect(readGeoFilters({ dateBasis: ["acquisition"] }).dateBasis).toBe("document");
   });
 
   it("should retain disabled axes in old residual-vivier links", () => {

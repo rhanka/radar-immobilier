@@ -81,17 +81,17 @@
   export let dateBasis: DocumentDateBasis = "document";
   export let onDateBasisChange: (next: DocumentDateBasis) => void = () => {};
   /**
-   * Date basis belongs to the custom-period tab of the DS picker. Until the DS
-   * exposes a slot there, the switch is shown right under the picker only for
-   * a custom period, or whenever the non-default basis is active so it always
-   * stays visible and reversible. The internal value stays `scrap` (API
+   * Date basis only applies to a custom period (owner decision): a relative
+   * preset always reads document dates. It belongs to the custom tab of the DS
+   * picker; until the DS ships that slot, the switch is shown right under the
+   * picker, and only while a custom period is active. The internal value stays `scrap` (API
    * contract); the UI only ever says « Date d'acquisition ».
    */
   const DATE_BASIS_ITEMS = [
     { value: "document", label: "Date du document" },
     { value: "scrap", label: "Date d'acquisition" },
   ];
-  $: showDateBasis = timeRange.mode === "absolute" || dateBasis !== "document";
+  $: showDateBasis = timeRange.mode === "absolute";
   function selectDateBasis(next: string): void {
     if ((next === "document" || next === "scrap") && next !== dateBasis) onDateBasisChange(next);
   }

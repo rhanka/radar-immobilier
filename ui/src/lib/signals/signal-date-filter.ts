@@ -10,6 +10,14 @@ export interface SignalTimeRange {
   to: number;
 }
 
+/**
+ * The acquisition clock only applies to a custom (absolute) period: every
+ * relative preset, `Illimité` included, always reads document dates.
+ */
+export function dateBasisForTimeRange(range: SignalTimeRange, basis: DocumentDateBasis): DocumentDateBasis {
+  return range.mode === "absolute" ? basis : "document";
+}
+
 export interface SignalTimeRangePreset {
   token: string;
   label: string;

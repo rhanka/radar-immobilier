@@ -21,7 +21,7 @@ it("removes the separate « Filtrer selon » menu and never shows the word scrap
   expect(labelled.join(" ")).not.toMatch(/scrap/i);
 });
 
-it("keeps the date basis hidden for a relative period on the default document basis", () => {
+it("keeps the date basis hidden on the default relative period", () => {
   const view = render(SignauxRail, { props: { entries: [] } });
   expect(view.queryByRole("group", { name: "Base de date" })).toBeNull();
 });
@@ -45,11 +45,15 @@ it("restores the acquisition basis alongside a custom period", () => {
   expect(view.getByRole("button", { name: "Période des signaux 2026-09-29 – 2026-09-30" })).toBeTruthy();
 });
 
-it("keeps an active acquisition basis visible and reversible on a relative period", async () => {
-  const onDateBasisChange = vi.fn();
-  const view = render(SignauxRail, { props: { entries: [], dateBasis: "scrap", onDateBasisChange } });
-  await fireEvent.click(view.getByRole("radio", { name: "Date du document" }));
-  expect(onDateBasisChange).toHaveBeenCalledWith("document");
+it("shows the date basis only for a custom period, never for a relative preset", () => {
+  for (const relative of ["3mo", "6mo", "12mo", "all"]) {
+    const view = render(SignauxRail, { props: {
+      entries: [], dateBasis: "scrap", timeRange: { mode: "relative", relative, from: 0, to: 0 },
+    } });
+    expect(view.queryByRole("group", { name: "Base de date" })).toBeNull();
+    expect(view.queryByRole("radio", { name: "Date d'acquisition" })).toBeNull();
+    cleanup();
+  }
 });
 
 /** Comptes v2 serveur : total = qualified + residentialUnknown + Σ exclusions. */
