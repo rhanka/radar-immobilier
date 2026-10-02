@@ -64,6 +64,8 @@ Make every existing geographic view restore its applicable active filters and pe
 - [x] BR787-D13: relative presets are shared as `filter.period=<3mo|6mo|12mo|all>` alone and resolved when the link is opened; absolute ranges as `filter.dateFrom`+`filter.dateTo`. This removes stale bounds displayed under a relative label and an extra bulk reload on every route application.
 - [x] BR787-D14: `filter.dateBasis=document|scrap` (default `document`, omitted) is reserved for #786 per the accepted contract; #786 rebases on this grammar.
 
+- [x] BR787-D15: owner validated the sharing rules (filterless = defaults; any `filter.*` = full snapshot; relative period resolved when opened, fixed range keeps exact dates). Owner decision: old top-level `lots=0` / `layers=zones` links without any `filter.*` are legacy links: product defaults plus zones only, rewritten to the named snapshot on load.
+
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (template label only; no cherry-pick or additional integration branch)
 - [ ] **Multi-branch**
@@ -119,6 +121,7 @@ Make every existing geographic view restore its applicable active filters and pe
   - [x] Defaults vs authoritative snapshot, legacy-link defaults, relative period resolution, Evaluation lot-only encoding.
   - [x] Full UI: 1621 passed / 10 todo; typecheck 0 errors / 7 existing warnings; lint passed.
   - [x] CDP 9222 runner: ten scenarios (adds defaults / all-unchecked share), zero JavaScript errors, API fixtures.
+  - [x] Legacy zones-only links (BR787-D15): full UI 1623 passed / 10 todo; typecheck 0 errors; lint passed; eleven browser scenarios pass on an isolated headless Chromium CDP endpoint (`URL_FILTERS_CDP`), the shared Chrome 9222 tab being throttled.
 
 - [ ] **Lot 5 — Owner-controlled merge & close**
   - [ ] Owner UAT and CI accepted.
