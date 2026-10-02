@@ -384,6 +384,7 @@ k8s-validate: ## Validate the radar/sentropic-app manifests offline (no cluster)
 	@echo "[k8s-validate] structural check (every doc has apiVersion + kind)…"
 	@$(KUBECTL) kustomize $(K8S_MANIFEST_DIR) \
 	  | awk 'BEGIN{RS="\n---\n"} /[^[:space:]]/ { if ($$0 !~ /apiVersion:/ || $$0 !~ /kind:/) { print "missing apiVersion/kind in a document"; bad=1 } } END{ exit bad }'
+	@$(MAKE) --no-print-directory document-date-recovery-validate
 	@if [ "$(K8S_VALIDATE_WITH_CLUSTER)" = "1" ]; then \
 	  echo "[k8s-validate] server-side dry-run (KUBECONFIG required)…"; \
 	  $(KUBECTL) apply --dry-run=server -k $(K8S_MANIFEST_DIR); \
@@ -710,6 +711,59 @@ object-storage-inventory-preprod-fetch: ## Fetch receipts without printing them 
 	  find . -type f ! -name SHA256SUMS -print0 | LC_ALL=C sort -z | \
 	    xargs -0 -r sha256sum >SHA256SUMS; \
 	  echo "[object-storage-inventory] evidence fetched and hashed at $$destination"
+
+# ── Documentary date stock recovery (PREPROD only) ─────────────────────
+# Projects raw-sidecar fetchedAt + documentary dates onto served graph refs, no model
+# call. RECOVERY_MODE=preview (default, read-only) | apply (needs RECOVERY_CONFIRM=1).
+# RECOVERY_ARGS adds script options/slugs (e.g. "--heal" or "val-des-monts brossard").
+# RECOVERY_IMAGE defaults to the radar-api image currently served by preprod.
+DOCUMENT_DATE_RECOVERY_JOB := deploy/k8s/document-date-recovery/job.yaml
+DOCUMENT_DATE_RECOVERY_NAMESPACE := radar-immobilier-preprod
+RECOVERY_MODE ?= preview
+RECOVERY_ARGS ?=
+RECOVERY_IMAGE ?=
+RECOVERY_TIMEOUT_SECONDS ?= 5700
+
+.PHONY: document-date-recovery-validate
+document-date-recovery-validate: ## Render the preprod documentary-date recovery Job offline
+	@command -v $(KUBECTL) >/dev/null 2>&1 || { echo "[document-date-recovery] kubectl not found"; exit 1; }
+	@sed -e "s#__IMAGE__#ghcr.io/rhanka/radar-api:validate#" -e "s#__RECOVERY_ARGS__##" $(DOCUMENT_DATE_RECOVERY_JOB) \
+	  | $(KUBECTL) create --dry-run=client --validate=false -f - -o name >/dev/null
+	@grep -q 'namespace: $(DOCUMENT_DATE_RECOVERY_NAMESPACE)$$' $(DOCUMENT_DATE_RECOVERY_JOB)
+	@echo "[document-date-recovery] offline render ok"
+
+.PHONY: document-date-recovery-preprod
+document-date-recovery-preprod: ## Run the documentary-date recovery Job in preprod (RECOVERY_MODE=preview|apply)
+	@if [ "$(ENV)" != "preprod" ] || [ -z "$$KUBECONFIG" ]; then \
+	  echo "[document-date-recovery] refused: require KUBECONFIG and ENV=preprod"; exit 1; \
+	fi
+	@case "$(RECOVERY_MODE)" in \
+	  preview) ;; \
+	  apply) [ "$(RECOVERY_CONFIRM)" = "1" ] || { echo "[document-date-recovery] refused: apply needs RECOVERY_CONFIRM=1"; exit 1; } ;; \
+	  *) echo "[document-date-recovery] refused: RECOVERY_MODE must be preview or apply"; exit 1 ;; \
+	esac
+	@[ -z "$(RECOVERY_ARGS)" ] || printf "%s\n" "$(RECOVERY_ARGS)" | grep -Eq '^[A-Za-z0-9 ._-]*$$' || { echo "[document-date-recovery] refused: RECOVERY_ARGS must match [A-Za-z0-9 ._-]*"; exit 1; }
+	@set -euo pipefail; namespace="$(DOCUMENT_DATE_RECOVERY_NAMESPACE)"; job=radar-document-date-recovery; \
+	  server="$$( $(KUBECTL) config view --minify -o jsonpath='{.clusters[0].cluster.server}' )"; \
+	  [ "$$server" = "$(OBJECT_STORAGE_OVH_SERVER)" ] || { echo "[document-date-recovery] refused: unexpected cluster $$server"; exit 1; }; \
+	  image="$(RECOVERY_IMAGE)"; \
+	  [ -n "$$image" ] || image="$$( $(KUBECTL) -n "$$namespace" get deploy radar-api -o jsonpath='{.spec.template.spec.containers[0].image}' )"; \
+	  [[ "$$image" =~ ^ghcr\.io/rhanka/radar-api:[A-Za-z0-9._-]+$$ ]] || { echo "[document-date-recovery] refused: unexpected image $$image"; exit 1; }; \
+	  args="$(RECOVERY_ARGS)"; if [ "$(RECOVERY_MODE)" = "apply" ]; then args="--apply $$args"; fi; \
+	  echo "[document-date-recovery] $(RECOVERY_MODE) in $$namespace with $$image (args: $${args:-none})"; \
+	  $(KUBECTL) -n "$$namespace" delete job "$$job" --ignore-not-found --wait=true; \
+	  sed -e "s#__IMAGE__#$$image#" -e "s#__RECOVERY_ARGS__#$$args#" $(DOCUMENT_DATE_RECOVERY_JOB) \
+	    | $(KUBECTL) -n "$$namespace" apply -f -; \
+	  deadline=$$(( $$(date +%s) + $(RECOVERY_TIMEOUT_SECONDS) )); \
+	  while :; do \
+	    succeeded="$$( $(KUBECTL) -n "$$namespace" get job "$$job" -o jsonpath='{.status.succeeded}' )"; \
+	    failed="$$( $(KUBECTL) -n "$$namespace" get job "$$job" -o jsonpath='{.status.failed}' )"; \
+	    if [ "$${succeeded:-0}" = "1" ] || [ "$${failed:-0}" != "0" ]; then break; fi; \
+	    [ "$$(date +%s)" -lt "$$deadline" ] || { echo "[document-date-recovery] timeout; job left running"; exit 1; }; \
+	    sleep 15; \
+	  done; \
+	  $(KUBECTL) -n "$$namespace" logs "job/$$job" | grep -E 'recover-document-dates:(city|report)|HALT|aborted|fatal' || true; \
+	  [ "$${succeeded:-0}" = "1" ] || { echo "[document-date-recovery] job failed"; exit 1; }
 
 .PHONY: deploy-db-migrate-k8s
 deploy-db-migrate-k8s: ## Run the one-shot DB migrator Job in the live namespace
