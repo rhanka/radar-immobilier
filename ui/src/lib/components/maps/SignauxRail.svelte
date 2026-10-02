@@ -60,6 +60,8 @@
   export let loading = false;
   /** Signal data failed to load; avoid rendering a fake zero state. */
   export let dataUnavailable = false;
+  export let citySearch = "";
+  export let onCitySearchChange: (query: string) => void = () => {};
 
   /**
    * Clé de MODE initiale (toujours une clé B `vivier-v2*` après migration),
@@ -461,6 +463,8 @@
       {selectedSlug}
       {loading}
       {dataUnavailable}
+      searchQuery={citySearch}
+      onSearchChange={onCitySearchChange}
       onSelect={handleSelectSlug}
     />
   </RailSection>

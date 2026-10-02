@@ -91,6 +91,7 @@ export interface GeoLevelNavInput {
   mode?: string;
   /** Clé de filtre subset active, ex. "z|m|p" (préservée dans la route). */
   subsetKey?: string;
+  filters?: Record<string, string[]>;
 }
 
 /**
@@ -130,6 +131,7 @@ function buildState(input: GeoLevelNavInput): {
   filters?: Record<string, string[]>;
 } {
   const mode = toGeoMode(input.mode);
+  if (input.filters) return { mode, filters: input.filters };
   const subsetValues = input.subsetKey ? input.subsetKey.split("|") : [];
   return subsetValues.length > 0
     ? { mode, filters: { subset: subsetValues } }

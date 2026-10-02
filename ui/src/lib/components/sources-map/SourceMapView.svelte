@@ -14,6 +14,7 @@
    * « Console » pré-sélectionné (App.svelte passe initialTab="console").
    */
   import { onMount } from "svelte";
+  import { activePageState, navigateToPageState } from "$lib/router/router.js";
   import SourceCoverageMap from "./SourceCoverageMap.svelte";
   import SourceConsole from "./SourceConsole.svelte";
   import {
@@ -23,6 +24,13 @@
 
   export let initialTab: "couverture" | "console" = "couverture";
   let activeTab: "couverture" | "console" = initialTab;
+  $: activeTab = $activePageState.filters.sourceTab?.[0] === "console" ? "console"
+    : $activePageState.filters.sourceTab?.[0] === "couverture" ? "couverture" : initialTab;
+
+  function selectTab(tab: "couverture" | "console"): void {
+    activeTab = tab;
+    navigateToPageState("sources", { ...$activePageState, mode: "data", filters: { ...$activePageState.filters, sourceTab: [tab] } });
+  }
 
   const TABS: { id: "couverture" | "console"; label: string }[] = [
     { id: "couverture", label: "Couverture" },
@@ -69,7 +77,7 @@
               ? "border-teal-600 text-teal-700"
               : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
           }`}
-          on:click={() => { activeTab = tab.id; }}
+          on:click={() => selectTab(tab.id)}
         >
           {tab.label}
         </button>

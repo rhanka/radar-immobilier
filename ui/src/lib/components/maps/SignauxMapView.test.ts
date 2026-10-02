@@ -20,7 +20,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildCityMapEntries } from "$lib/maps/maps-data.js";
 import {
-  normalizeGeoRouteState,
+  parseGeoQuery,
   type GeoRoute,
 } from "$lib/router/geo-route.js";
 import type { GeoZonesResponse } from "$lib/maps/geo-zones-client.js";
@@ -162,7 +162,7 @@ function cityRoute(): GeoRoute {
   return {
     level: "city",
     citySlug: CITY_SLUG,
-    state: normalizeGeoRouteState({ mode: "signal" }),
+    state: parseGeoQuery(window.location.search),
   };
 }
 
@@ -200,6 +200,64 @@ beforeEach(() => {
 });
 
 describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
+  it("restores lot focus inside its zone and clears it on city navigation", async () => {
+    vi.mocked(fetchAllLots).mockResolvedValueOnce({
+      ok: true, citySlug: CITY_SLUG, source: "donnees-quebec", collectionId: `qc-lots-${CITY_SLUG}`,
+      numberMatched: 1, numberReturned: 1,
+      featureCollection: { type: "FeatureCollection", features: [{ type: "Feature", geometry: null,
+        properties: { noLot: "1000001", citySlug: CITY_SLUG, zoneCode: "H-01" } }] },
+    });
+    const state = parseGeoQuery(`?filter.zonage=1&focused=lot:${CITY_SLUG}/1000001`);
+    const view = render(SignauxMapView, { props: { geoRoute: {
+      level: "zone", citySlug: CITY_SLUG, zoneKey: "H-01", state,
+    } } });
+    expect((await screen.findByTestId("sel-lot-drawer")).textContent).toContain("1000001");
+    await view.rerender({ geoRoute: { level: "city", citySlug: CITY_SLUG, state: parseGeoQuery("?filter.zonage=1") } });
+    await waitFor(() => expect(screen.queryByTestId("sel-lot-drawer")).toBeNull());
+    expect((screen.getByLabelText("Zonage") as HTMLInputElement).checked).toBe(true);
+  });
+
+  it("restores a dates-only request in the same city without inheriting restrictions", async () => {
+    localStorage.setItem("signaux-cptaq-enabled", "1");
+    vi.mocked(fetchCptaqConstraints).mockResolvedValue(cptaqResponse(true));
+    setSearch("?filter.zonage=1&filter.excludePiia=1&filter.cptaq=1&filter.citySearch=Valleyfield&filter.lots=0");
+    const view = render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+    const cptaq = await screen.findByTestId("legend-cptaq-toggle");
+    await waitFor(() => expect(cptaq.getAttribute("aria-pressed")).toBe("true"));
+    expect((screen.getByLabelText("Zonage") as HTMLInputElement).checked).toBe(true);
+    expect((screen.getByLabelText("Rechercher une ville") as HTMLInputElement).value).toBe("Valleyfield");
+    expect(fetchAllLots).not.toHaveBeenCalled();
+
+    await fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
+    expect(window.location.search).not.toContain("filter.citySearch");
+    expect((screen.getByLabelText("Rechercher une ville") as HTMLInputElement).value).toBe("");
+
+    setSearch("?filter.dateFrom=2026-05-01&filter.dateTo=2026-05-31");
+    await view.rerender({ geoRoute: cityRoute() });
+    await waitFor(() => expect(fetchAllLots).toHaveBeenCalled());
+    for (const label of ["Zonage", "Résidentiel", "Précoce", "Exclure PIIA sans projet résidentiel", "Exclure dérogations mineures"]) {
+      expect((screen.getByLabelText(label) as HTMLInputElement).checked).toBe(false);
+    }
+    expect(cptaq.getAttribute("aria-pressed")).toBe("false");
+    expect((screen.getByLabelText("Rechercher une ville") as HTMLInputElement).value).toBe("");
+    expect(screen.getByText("2026-05-01 – 2026-05-31")).toBeTruthy();
+  });
+
+  it("opens a filterless link on the defaults and an all-unchecked link with nothing checked", async () => {
+    const labels = ["Zonage", "Résidentiel", "Précoce", "Exclure PIIA sans projet résidentiel", "Exclure dérogations mineures"];
+    setSearch("?mode=signal");
+    const view = render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+    await waitFor(() => expect((screen.getByLabelText("Zonage") as HTMLInputElement).checked).toBe(true));
+    for (const label of labels) expect((screen.getByLabelText(label) as HTMLInputElement).checked).toBe(true);
+    expect(screen.getByText("6 derniers mois")).toBeTruthy();
+
+    setSearch("?mode=signal&filter.period=all");
+    await view.rerender({ geoRoute: cityRoute() });
+    await waitFor(() => expect((screen.getByLabelText("Zonage") as HTMLInputElement).checked).toBe(false));
+    for (const label of labels) expect((screen.getByLabelText(label) as HTMLInputElement).checked).toBe(false);
+    expect(screen.getByText("Illimité")).toBeTruthy();
+  });
+
   it("(a) ?lots=0 : fetchAllLots N'EST PAS appelé, les zones se chargent quand même", async () => {
     setSearch("?lots=0");
     render(SignauxMapView, { props: { geoRoute: cityRoute() } });
