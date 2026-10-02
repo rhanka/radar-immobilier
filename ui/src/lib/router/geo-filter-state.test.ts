@@ -60,26 +60,35 @@ describe("shareable geographic restrictions", () => {
     }
   });
 
-  it("should default to document dates and share an explicit scrape basis", () => {
+  it("should default to document dates and share an explicit acquisition basis", () => {
     expect(readGeoFilters({}).dateBasis).toBe("document");
     expect(readGeoFilters({ dateBasis: ["invalid"] }).dateBasis).toBe("document");
-    const state = readGeoFilters({ dateBasis: ["scrap"], dateFrom: ["2026-09-29"], dateTo: ["2026-09-30"] });
+    const state = readGeoFilters({ dateBasis: ["acquisition"], dateFrom: ["2026-09-29"], dateTo: ["2026-09-30"] });
     expect(state.dateBasis).toBe("scrap");
     expect(state.axes).toEqual({ z: false, r: false, p: false });
-    expect(writeGeoFilters(state)).toEqual({ dateBasis: ["scrap"], dateFrom: ["2026-09-29"], dateTo: ["2026-09-30"] });
+    expect(writeGeoFilters(state))
+      .toEqual({ dateBasis: ["acquisition"], dateFrom: ["2026-09-29"], dateTo: ["2026-09-30"] });
     const shared = readGeoFilters(parseGeoQuery(buildGeoQuery({ filters: writeGeoFilters(state) })).filters);
     expect(shared).toEqual(state);
     state.dateBasis = "document";
     expect(writeGeoFilters(state)).not.toHaveProperty("dateBasis");
   });
 
-  it("should combine the scrape basis with relative and unrestricted periods", () => {
-    expect(writeGeoFilters(readGeoFilters({ dateBasis: ["scrap"], period: ["6mo"] })))
-      .toEqual({ dateBasis: ["scrap"], period: ["6mo"] });
-    // A scrape-only snapshot is not empty, so it never collapses to the product defaults.
-    const unrestricted = readGeoFilters({ dateBasis: ["scrap"], period: ["all"] });
+  it("should keep reading links shared with the legacy scrap spelling and rewrite them", () => {
+    const legacy = readGeoFilters({ dateBasis: ["scrap"], dateFrom: ["2026-09-29"], dateTo: ["2026-09-30"] });
+    expect(legacy.dateBasis).toBe("scrap");
+    expect(writeGeoFilters(legacy))
+      .toEqual({ dateBasis: ["acquisition"], dateFrom: ["2026-09-29"], dateTo: ["2026-09-30"] });
+    expect(readGeoFilters({ subset: ["vivier-v2"], dateBasis: ["scrap"] }).dateBasis).toBe("scrap");
+  });
+
+  it("should combine the acquisition basis with relative and unrestricted periods", () => {
+    expect(writeGeoFilters(readGeoFilters({ dateBasis: ["acquisition"], period: ["6mo"] })))
+      .toEqual({ dateBasis: ["acquisition"], period: ["6mo"] });
+    // An acquisition-only snapshot is not empty, so it never collapses to the product defaults.
+    const unrestricted = readGeoFilters({ dateBasis: ["acquisition"], period: ["all"] });
     expect(unrestricted.axes).toEqual({ z: false, r: false, p: false });
-    expect(writeGeoFilters(unrestricted)).toEqual({ dateBasis: ["scrap"] });
+    expect(writeGeoFilters(unrestricted)).toEqual({ dateBasis: ["acquisition"] });
     expect(readGeoFilters(writeGeoFilters(unrestricted))).toEqual(unrestricted);
     expect(writeGeoFilters({ ...unrestricted, dateBasis: "document" })).toEqual({ period: ["all"] });
   });
