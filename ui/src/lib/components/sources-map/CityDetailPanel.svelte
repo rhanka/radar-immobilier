@@ -36,7 +36,7 @@
 
   const STATUS_LABELS: Record<string, string> = {
     graphified: "Graphifié",
-    scraped: "Scrapé",
+    scraped: "Acquis",
     identified: "Identifié",
     todo: "À faire",
     error: "Erreur",

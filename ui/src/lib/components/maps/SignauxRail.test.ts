@@ -7,24 +7,49 @@ import type { VivierV2Counts } from "@radar/domain";
 
 afterEach(() => cleanup());
 
-it("defaults to document dates and reports an explicit scrape selection", async () => {
+const CUSTOM_RANGE = {
+  mode: "absolute" as const, from: new Date(2026, 8, 29).getTime(), to: new Date(2026, 8, 30).getTime(),
+};
+
+it("removes the separate « Filtrer selon » menu and never shows the word scrap", () => {
+  const view = render(SignauxRail, { props: { entries: [], dateBasis: "scrap", timeRange: CUSTOM_RANGE } });
+  expect(view.queryByRole("combobox", { name: "Filtrer selon" })).toBeNull();
+  expect(view.container.textContent).not.toMatch(/filtrer selon/i);
+  expect(view.container.textContent).not.toMatch(/scrap/i);
+  const labelled = Array.from(view.container.querySelectorAll("[aria-label],[title]"))
+    .map((el) => `${el.getAttribute("aria-label") ?? ""} ${el.getAttribute("title") ?? ""}`);
+  expect(labelled.join(" ")).not.toMatch(/scrap/i);
+});
+
+it("keeps the date basis hidden for a relative period on the default document basis", () => {
+  const view = render(SignauxRail, { props: { entries: [] } });
+  expect(view.queryByRole("group", { name: "Base de date" })).toBeNull();
+});
+
+it("offers document (default) or acquisition dates for a custom period", async () => {
   const onDateBasisChange = vi.fn();
-  const view = render(SignauxRail, { props: { entries: [], onDateBasisChange } });
-  const select = view.getByRole("combobox", { name: "Filtrer selon" }) as HTMLSelectElement;
-  expect(select.value).toBe("document");
-  expect(view.getByRole("option", { name: "Date du document" })).toBeTruthy();
-  expect(view.getByRole("option", { name: "Date du scrap" })).toBeTruthy();
-  await fireEvent.change(select, { target: { value: "scrap" } });
+  const view = render(SignauxRail, { props: { entries: [], timeRange: CUSTOM_RANGE, onDateBasisChange } });
+  const group = view.getByRole("group", { name: "Base de date" });
+  const documentDate = getByRole(group, "radio", { name: "Date du document" }) as HTMLInputElement;
+  const acquisitionDate = getByRole(group, "radio", { name: "Date d'acquisition" }) as HTMLInputElement;
+  expect(documentDate.checked).toBe(true);
+  expect(acquisitionDate.checked).toBe(false);
+  await fireEvent.click(acquisitionDate);
   expect(onDateBasisChange).toHaveBeenCalledOnce();
   expect(onDateBasisChange).toHaveBeenCalledWith("scrap");
 });
 
-it("restores scrape mode alongside a custom period", () => {
-  const view = render(SignauxRail, { props: { entries: [], dateBasis: "scrap", timeRange: {
-    mode: "absolute", from: new Date(2026, 8, 29).getTime(), to: new Date(2026, 8, 30).getTime(),
-  } } });
-  expect((view.getByRole("combobox", { name: "Filtrer selon" }) as HTMLSelectElement).value).toBe("scrap");
+it("restores the acquisition basis alongside a custom period", () => {
+  const view = render(SignauxRail, { props: { entries: [], dateBasis: "scrap", timeRange: CUSTOM_RANGE } });
+  expect((view.getByRole("radio", { name: "Date d'acquisition" }) as HTMLInputElement).checked).toBe(true);
   expect(view.getByRole("button", { name: "Période des signaux 2026-09-29 – 2026-09-30" })).toBeTruthy();
+});
+
+it("keeps an active acquisition basis visible and reversible on a relative period", async () => {
+  const onDateBasisChange = vi.fn();
+  const view = render(SignauxRail, { props: { entries: [], dateBasis: "scrap", onDateBasisChange } });
+  await fireEvent.click(view.getByRole("radio", { name: "Date du document" }));
+  expect(onDateBasisChange).toHaveBeenCalledWith("document");
 });
 
 /** Comptes v2 serveur : total = qualified + residentialUnknown + Σ exclusions. */
@@ -233,6 +258,23 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
     await nextFrame();
 
     expect(popover.style.top).toBe("120px");
+  });
+
+  it("portals the opened temporal overlay inside the DS theme scope so its tokens apply", async () => {
+    const themed = document.createElement("div");
+    themed.setAttribute("data-st-theme", "sent-tech");
+    document.body.append(themed);
+    try {
+      const { container } = render(SignauxRail, { target: themed, props: { entries: [] } });
+      await fireEvent.click(getByRole(container, "button", { name: /Période des signaux.*6 derniers mois/i }));
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      const popover = getByRole(document.body, "dialog", { name: "Période des signaux" });
+      expect(popover.parentElement).toBe(themed);
+      expect(popover.closest("[data-st-theme]")).toBe(themed);
+    } finally {
+      cleanup();
+      themed.remove();
+    }
   });
 
   it("direct/reload B key vivier-v2 defaults its three axes to Z✓ R✓ P✓, none locked", async () => {

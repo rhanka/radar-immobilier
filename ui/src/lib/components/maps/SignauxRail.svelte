@@ -26,7 +26,7 @@
    * ZÉRO couleur hex en dur · ZÉRO override composant DS · ZÉRO icône lucide
    * ZÉRO checkbox/tabs/search bespoke.
    */
-  import { Checkbox, Select, TimeRangePicker } from "@sentropic/design-system-svelte";
+  import { Checkbox, RadioGroup, TimeRangePicker } from "@sentropic/design-system-svelte";
   import {
     B_SUBSET_KEY,
     bAxesFromVivierKey,
@@ -80,10 +80,20 @@
   export let timeRange: SignalTimeRange = defaultSignalTimeRange();
   export let dateBasis: DocumentDateBasis = "document";
   export let onDateBasisChange: (next: DocumentDateBasis) => void = () => {};
-  let selectedDateBasis: string = dateBasis;
-  $: selectedDateBasis = dateBasis;
-  $: if ((selectedDateBasis === "document" || selectedDateBasis === "scrap") && selectedDateBasis !== dateBasis) {
-    onDateBasisChange(selectedDateBasis);
+  /**
+   * Date basis belongs to the custom-period tab of the DS picker. Until the DS
+   * exposes a slot there, the switch is shown right under the picker only for
+   * a custom period, or whenever the non-default basis is active so it always
+   * stays visible and reversible. The internal value stays `scrap` (API
+   * contract); the UI only ever says « Date d'acquisition ».
+   */
+  const DATE_BASIS_ITEMS = [
+    { value: "document", label: "Date du document" },
+    { value: "scrap", label: "Date d'acquisition" },
+  ];
+  $: showDateBasis = timeRange.mode === "absolute" || dateBasis !== "document";
+  function selectDateBasis(next: string): void {
+    if ((next === "document" || next === "scrap") && next !== dateBasis) onDateBasisChange(next);
   }
 
   /**
@@ -125,8 +135,12 @@
   /**
    * The DS popover is inline, but computes document coordinates while its
    * picker ancestor is positioned. Keep the DS control and portal its overlay
-   * to the document body once it opens, so the overlay is no longer clipped
-   * or overlaid by the rail and every preset receives pointer events.
+   * out of the rail once it opens, so the overlay is no longer clipped or
+   * overlaid by the rail and every preset receives pointer events.
+   *
+   * The portal target is the DS ThemeProvider root (`[data-st-theme]`), never
+   * the bare document body: DS tokens are scoped to that root, and an overlay
+   * moved outside it loses every token (no selected tab, no range highlight).
    */
   function positionTimeRangePopover(node: HTMLElement): { destroy: () => void } {
     let animationFrame: number | null = null;
@@ -170,7 +184,7 @@
       if (!inlinePopover) return;
       popover = inlinePopover;
       popover.classList.add("signals-time-range-picker__portal");
-      document.body.append(popover);
+      (node.closest<HTMLElement>("[data-st-theme]") ?? document.body).append(popover);
       scheduleSync();
     });
     observer.observe(node, { childList: true, subtree: true });
@@ -386,10 +400,6 @@
      directement dans la section « Signaux » — plus aucun onglet. -->
 {#snippet panelB()}
   <div class="vivier-panel">
-    <Select label="Filtrer selon" size="sm" bind:value={selectedDateBasis}>
-      <option value="document">Date du document</option>
-      <option value="scrap">Date du scrap</option>
-    </Select>
     <div class="signals-time-range-picker-wrap" use:positionTimeRangePopover>
       <TimeRangePicker
         class="signals-time-range-picker"
@@ -403,6 +413,17 @@
         formatRange={formatSignalTimeRange}
       />
     </div>
+    {#if showDateBasis}
+      <RadioGroup
+        class="signals-date-basis"
+        legend="Base de date"
+        name="signals-date-basis"
+        orientation="horizontal"
+        options={DATE_BASIS_ITEMS}
+        value={dateBasis}
+        onchange={selectDateBasis}
+      />
+    {/if}
     <div class="vivier-toggles">
       <!-- Trois axes COMBINABLES, librement cochables/décochables (défauts
            Zonage ✓, Résidentiel ✓, Précoce ✗). Décocher un axe RELÂCHE le filtre
@@ -516,6 +537,11 @@
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
+  }
+
+  /* Interim date-basis switch: same compact choice token as the rail toggles. */
+  .vivier-panel :global(.signals-date-basis .st-choice) {
+    --st-component-selection-choiceLabelFontSize: var(--rail-fs-small, 0.75rem);
   }
 
   .vivier-toggles :global(.st-choice) {
