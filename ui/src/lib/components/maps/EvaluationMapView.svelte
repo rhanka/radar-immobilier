@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { activePageState, navigateToPageState } from "$lib/router/router.js";
+  import { readGeoFilters, writeLotFilters } from "$lib/router/geo-filter-state.js";
   /**
    * EvaluationMapView — Vue Évaluation (maille zone/lots) — WP B slice-2.
    *
@@ -221,12 +223,41 @@
     evalUsages = evalUsages.includes(usage)
       ? evalUsages.filter((u) => u !== usage)
       : [...evalUsages, usage];
+    syncEvaluationUrl();
   }
 
   function resetEvalFilter(): void {
     evalCategory = "all";
     evalUsages = [];
     superficieMin = 0;
+    syncEvaluationUrl();
+  }
+
+  let restoredPageState: unknown = null;
+  $: if ($activePageState !== restoredPageState) {
+    restoredPageState = $activePageState;
+    const filters = $activePageState.filters;
+    const lots = readGeoFilters(filters).lots;
+    evalCategory = lots.category;
+    evalUsages = [...lots.usages];
+    superficieMin = lots.superficieMin;
+    prospectFilter = PROSPECT_FILTERS.find(({ value }) => value === filters.prospect?.[0])?.value ?? "all";
+    sourceFilter = filters.lotSource?.[0] === "mrnf" ? "mrnf" : "steve";
+    activeTab = filters.evaluationTab?.[0] === "grilles" ? "grilles" : initialTab;
+    const citySlug = $activePageState.selected.find(({ kind }) => kind === "municipality")?.id;
+    const city = EVAL_CITIES.find((entry) => entry.slug === citySlug && entry.source === sourceFilter);
+    if (city && city.slug !== selectedEvalCity?.slug) selectEvalCity(city, false);
+  }
+
+  function syncEvaluationUrl(): void {
+    const filters = writeLotFilters({ category: evalCategory, usages: new Set(evalUsages), superficieMin });
+    filters.lotSource = [sourceFilter];
+    filters.evaluationTab = [activeTab];
+    if (prospectFilter !== "all") filters.prospect = [prospectFilter];
+    navigateToPageState("evaluation", {
+      mode: "data", filters,
+      selected: selectedEvalCity ? [{ kind: "municipality", id: selectedEvalCity.slug }] : [],
+    });
   }
 
   // ── State changements de zonage ──────────────────────────────────────────
@@ -292,7 +323,6 @@
     prospectMarksLoading = true;
     prospectMarksError = null;
     prospectMarks = [];
-    prospectFilter = "all";
     try {
       const marks = await fetchProspectMarksForZone(citySlug, undefined, { signal: lease.signal });
       if (!lease.isCurrent()) return;
@@ -370,9 +400,9 @@
     }
   }
 
-  function selectEvalCity(city: (typeof EVAL_CITIES)[0]): void {
+  function selectEvalCity(city: (typeof EVAL_CITIES)[0], syncUrl = true): void {
     selectedEvalCity = city;
-    resetEvalFilter();
+    if (syncUrl) syncEvaluationUrl();
     // Supersède TOUTE requête en vol de la ville précédente.
     const lease = evalGuard.lease();
     void loadLots(city.slug, lotsGuard.lease());
@@ -403,7 +433,7 @@
 
   onMount(() => {
     const first = filteredCities[0];
-    if (first) {
+    if (first && !selectedEvalCity) {
       // Passe par selectEvalCity → garde anti-course commune (evalGuard).
       selectEvalCity(first);
     }
@@ -606,7 +636,7 @@
               ? "border-teal-600 text-teal-700"
               : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
           }`}
-          on:click={() => { activeTab = tab.id; }}
+          on:click={() => { activeTab = tab.id; syncEvaluationUrl(); }}
         >
           {tab.label}
         </button>
@@ -638,7 +668,7 @@
               ? "border-orange-400 bg-orange-50 text-orange-800"
               : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
           }`}
-          on:click={() => { sourceFilter = "steve"; }}
+          on:click={() => { sourceFilter = "steve"; syncEvaluationUrl(); }}
           aria-pressed={sourceFilter === "steve"}
         >
           Steve (rôle 2022 + zonage + TOD)
@@ -650,7 +680,7 @@
               ? "border-teal-400 bg-teal-50 text-teal-800"
               : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
           }`}
-          on:click={() => { sourceFilter = "mrnf"; }}
+          on:click={() => { sourceFilter = "mrnf"; syncEvaluationUrl(); }}
           aria-pressed={sourceFilter === "mrnf"}
         >
           Nos signaux (MRNF)
@@ -1015,7 +1045,7 @@
                           ? "border-teal-300 bg-teal-50 font-semibold text-teal-800"
                           : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
                       }`}
-                      on:click={() => { prospectFilter = filter.value; }}
+                      on:click={() => { prospectFilter = filter.value; syncEvaluationUrl(); }}
                       aria-pressed={prospectFilter === filter.value}
                     >
                       {filter.label} <span class="tabular-nums text-slate-400">{prospectCounterFor(filter.value)}</span>
@@ -1063,7 +1093,7 @@
                           ? "border-teal-300 bg-teal-50 font-semibold text-teal-800"
                           : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
                       }`}
-                      on:click={() => { evalCategory = cat.id; }}
+                      on:click={() => { evalCategory = cat.id; syncEvaluationUrl(); }}
                       aria-pressed={evalCategory === cat.id}
                       data-testid={`eval-filter-${cat.id}`}
                     >
@@ -1105,6 +1135,7 @@
                     max="5000"
                     step="50"
                     bind:value={superficieMin}
+                    on:input={syncEvaluationUrl}
                     class="min-w-0 flex-1 accent-teal-600"
                     data-testid="eval-superficie-slider"
                   />
