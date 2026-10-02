@@ -53,15 +53,57 @@ export function documentRefCivilDate(ref: unknown, basis: DocumentDateBasis): st
   return civilDate(metadata.publishedAt);
 }
 
-/** Inclusive civil days. Any matching bound reference includes a result once. */
+/**
+ * Signal stage keys: the business date read in the document itself (meeting, stage).
+ * Nested `properties` win over root props; the first non-empty value is authoritative.
+ */
+export const SIGNAL_DATE_KEYS = [
+  "etapeDate",
+  "etape_date",
+  "meetingDate",
+  "meeting_date",
+  "documentDate",
+  "date",
+] as const;
+
+/** Civil day of the signal stage date, or null when absent/unreadable. Never node creation. */
+export function signalStageCivilDate(props: unknown): string | null {
+  const root = record(props);
+  for (const values of [record(root.properties), root]) {
+    for (const key of SIGNAL_DATE_KEYS) {
+      const value = values[key];
+      if (typeof value !== "string" || value.trim() === "") continue;
+      const trimmed = value.trim();
+      // A date-time stage keeps the civil day as written; partial dates are not days.
+      return /^\d{4}-\d{2}-\d{2}(?:T|$)/.test(trimmed) ? civilDate(trimmed.slice(0, 10)) : null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Civil days a result can be placed on for one clock.
+ * - `scrap`: only the collection day of each reference (`fetchedAt`).
+ * - `document`: each reference's documentary date; a reference without one (or a result
+ *   without references) falls back to the signal stage date. Never `createdAt`.
+ */
+export function resultCivilDates(props: unknown, basis: DocumentDateBasis = "document"): string[] {
+  const refs = persistedDocumentRefs(props);
+  if (basis === "scrap") {
+    return refs.map((ref) => documentRefCivilDate(ref, "scrap")).filter((date): date is string => date !== null);
+  }
+  const dates = refs.map((ref) => documentRefCivilDate(ref, "document"));
+  const stage = dates.length === 0 || dates.includes(null) ? signalStageCivilDate(props) : null;
+  return [...new Set([...dates.filter((date): date is string => date !== null), ...(stage ? [stage] : [])])];
+}
+
+/** Inclusive civil days. Any matching date (reference or stage fallback) includes a result once. */
 export function matchesDocumentDateWindow(props: unknown, window: DocumentDateWindow = {}): boolean {
   if (!window.dateFrom && !window.dateTo) return true;
   const lower = window.dateFrom === undefined ? null : civilDate(window.dateFrom);
   const upper = window.dateTo === undefined ? null : civilDate(window.dateTo);
   if ((window.dateFrom !== undefined && !lower) || (window.dateTo !== undefined && !upper)
     || (lower && upper && lower > upper)) return false;
-  return persistedDocumentRefs(props).some((ref) => {
-    const date = documentRefCivilDate(ref, window.dateBasis ?? "document");
-    return date !== null && (!lower || date >= lower) && (!upper || date <= upper);
-  });
+  return resultCivilDates(props, window.dateBasis ?? "document")
+    .some((date) => (!lower || date >= lower) && (!upper || date <= upper));
 }
