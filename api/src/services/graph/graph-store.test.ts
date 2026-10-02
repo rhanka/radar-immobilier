@@ -608,23 +608,23 @@ describe("server-side signal date windows", () => {
     sourceRef: null,
   });
 
-  it("filters every projection rail using the JSONB date-key precedence", () => {
+  it("filters every projection rail using only persisted documentary refs", () => {
     const rows = [
-      datedSignal("nested-camel-in", { properties: { etapeDate: "2026-01-10" } }),
-      datedSignal("nested-snake-in", { properties: { etape_date: "2026-02-10" } }),
-      datedSignal("nested-meeting-in", {
-        properties: { meetingDate: "2026-03-31T23:59:59.999Z" },
+      datedSignal("root-ref-in", { refs: [{ publishedAt: "2026-01-10" }] }),
+      datedSignal("nested-ref-in", { properties: { refs: [{ publishedAt: "2026-02-10" }] } }),
+      datedSignal("inclusive-upper-in", {
+        refs: [{ publishedAt: "2026-03-31" }],
       }),
-      datedSignal("published-fallback-in", { publishedAt: "2026-02-20" }),
-      datedSignal("root-date-in", { meeting_date: "2026-03-01" }),
-      datedSignal("nested-out", { properties: { meeting_date: "2026-04-10" } }),
-      datedSignal("nested-document-out", { properties: { documentDate: "2026-04-10" } }),
-      datedSignal("nested-date-out", { properties: { date: "2026-04-10" } }),
+      datedSignal("proven-date-in", { refs: [{ documentDate: { status: "known", value: "2026-02-20", precision: "day" } }] }),
+      datedSignal("multi-doc-in", { refs: [{ publishedAt: "2025-01-01" }, { publishedAt: "2026-03-01" }] }),
+      datedSignal("out", { refs: [{ publishedAt: "2026-04-10" }] }),
+      datedSignal("event-date-only", { properties: { etape_date: "2026-02-10" } }),
+      datedSignal("node-publication-only", { publishedAt: "2026-02-20" }),
       datedSignal("no-date", {}),
-      datedSignal("invalid-date", { properties: { date: "not-a-date" } }),
-      datedSignal("nested-wins", {
-        properties: { etapeDate: "2025-12-01", date: "2026-02-01" },
-        date: "2026-02-01",
+      datedSignal("invalid-date", { refs: [{ publishedAt: "not-a-date" }] }),
+      datedSignal("ref-wins", {
+        properties: { etapeDate: "2026-02-01" },
+        refs: [{ publishedAt: "2025-12-01" }],
       }),
     ];
 
@@ -636,6 +636,42 @@ describe("server-side signal date windows", () => {
     expect(aggregate.signalCount).toBe(5);
     expect(aggregate.subsetCounts["z|m|p"]).toBe(5);
     expect(aggregate.vivierV2Counts).toMatchObject({ total: 5, qualified: 5 });
+  });
+
+  it("uses the explicitly selected scrape calendar across all aggregate counters", () => {
+    const rows = [
+      datedSignal("before-quebec-midnight", { refs: [{ publishedAt: "2026-07-28", fetchedAt: "2026-09-29T00:49:00Z" }] }),
+      datedSignal("after-quebec-midnight", { refs: [{ publishedAt: "2026-07-28", fetchedAt: "2026-09-29T04:00:00Z" }] }),
+    ];
+    const period = { dateFrom: "2026-09-29", dateTo: "2026-09-30" };
+    expect(aggregateGraphSignalProjectionRows(rows, period)).toEqual([]);
+    const counts = aggregateGraphSignalProjectionRows(rows, { ...period, dateBasis: "scrap" })[0]!;
+    expect(counts.signalCount).toBe(1);
+    expect(counts.subsetCounts["z|m|p"]).toBe(1);
+    expect(counts.vivierV2Counts.total).toBe(1);
+  });
+
+  it("gates only the B counters with display exclusions while retaining cited residential PIIA projects", () => {
+    const refs = [{ publishedAt: "2026-09-29" }];
+    const piia = { ...datedSignal("piia-no-project", {}), category: "piia", nbUnitesMax: null,
+      label: "PIIA — secteur résidentiel", props: { refs, properties: { category: "piia", etape: "adoption" } } };
+    const linked = { ...piia, id: "piia-project", props: { ...piia.props,
+      refs: [{ ...refs[0], excerpt: "Projet de quatre logements" }] } };
+    const derogation = { ...datedSignal("derogation", {}), category: "derogation",
+      label: "Dérogation mineure — quatre logements", props: { refs, properties: { category: "derogation" } } };
+    const rows = [piia, linked, derogation];
+    const period = { dateFrom: "2026-09-29", dateTo: "2026-09-30" };
+    const counts = (extra: { excludePiia?: boolean; excludeDerogations?: boolean }) =>
+      aggregateGraphSignalProjectionRows(rows, { ...period, ...extra })[0]!;
+    const base = counts({});
+    expect(base.vivierV2Counts.total).toBe(3);
+    expect(counts({ excludePiia: true }).vivierV2Counts.total).toBe(2);
+    expect(counts({ excludeDerogations: true }).vivierV2Counts.total).toBe(2);
+    const both = counts({ excludePiia: true, excludeDerogations: true });
+    expect(both.vivierV2Counts.total).toBe(1);
+    // The A view never applies B display exclusions, in the detail or the rail.
+    expect(both.signalCount).toBe(3);
+    expect(both.subsetCounts).toEqual(base.subsetCounts);
   });
 
   it("keeps all rows when no date window is supplied", () => {

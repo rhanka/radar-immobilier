@@ -7,6 +7,26 @@ import type { VivierV2Counts } from "@radar/domain";
 
 afterEach(() => cleanup());
 
+it("defaults to document dates and reports an explicit scrape selection", async () => {
+  const onDateBasisChange = vi.fn();
+  const view = render(SignauxRail, { props: { entries: [], onDateBasisChange } });
+  const select = view.getByRole("combobox", { name: "Filtrer selon" }) as HTMLSelectElement;
+  expect(select.value).toBe("document");
+  expect(view.getByRole("option", { name: "Date du document" })).toBeTruthy();
+  expect(view.getByRole("option", { name: "Date du scrap" })).toBeTruthy();
+  await fireEvent.change(select, { target: { value: "scrap" } });
+  expect(onDateBasisChange).toHaveBeenCalledOnce();
+  expect(onDateBasisChange).toHaveBeenCalledWith("scrap");
+});
+
+it("restores scrape mode alongside a custom period", () => {
+  const view = render(SignauxRail, { props: { entries: [], dateBasis: "scrap", timeRange: {
+    mode: "absolute", from: new Date(2026, 8, 29).getTime(), to: new Date(2026, 8, 30).getTime(),
+  } } });
+  expect((view.getByRole("combobox", { name: "Filtrer selon" }) as HTMLSelectElement).value).toBe("scrap");
+  expect(view.getByRole("button", { name: "Période des signaux 2026-09-29 – 2026-09-30" })).toBeTruthy();
+});
+
 /** Comptes v2 serveur : total = qualified + residentialUnknown + Σ exclusions. */
 function vivierCounts(
   qualified: number,
