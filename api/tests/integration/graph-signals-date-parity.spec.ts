@@ -22,6 +22,8 @@ const config = loadConfig();
 const { db, pool } = createDb(config);
 const store = createObjectStore(config);
 const city = "val-des-monts-786-parity";
+// Stock refs (published before #788): no documentary date on the ref, only the stage date read in the document.
+const stageCity = "val-des-monts-786-stage-only";
 
 const september = {
   docSha: "a".repeat(64),
@@ -37,12 +39,13 @@ const july = {
   fetchedAt: "2026-09-29T14:00:00.000Z",
 };
 
-function node(id: string, ref: Record<string, unknown>, properties: Record<string, unknown> = {}) {
+function node(id: string, ref: Record<string, unknown>, properties: Record<string, unknown> = {},
+  citySlug = city) {
   return {
-    id: `${city}-${id}`,
+    id: `${citySlug}-${id}`,
     type: "Signal",
     label: `Avis de motion — projet de ${id} logements`,
-    citySlug: city,
+    citySlug,
     props: {
       refs: [{ ...ref, excerpt: "Projet de huit logements" }],
       properties: { category: "rezonage", etape: "avis_motion", nb_unites_max: "8", ...properties },
@@ -63,14 +66,25 @@ const rows = [
   node("j2", july),
 ];
 
+const undated = { docSha: "c".repeat(64), rawRef: `raw/proces-verbaux-x/cas/${"c".repeat(64)}.pdf`,
+  fetchedAt: "2026-09-30T14:00:00.000Z" };
+const stageRows = [
+  // Stage date only: placed by the stage date in document mode, by fetchedAt in scrape mode.
+  node("st1", undated, { etape_date: "2026-09-29" }, stageCity),
+  node("st2", undated, { etapeDate: "2026-07-15" }, stageCity),
+  // No stage date and no documentary date: excluded from every bounded document window.
+  node("st3", undated, {}, stageCity),
+];
+const allRows = [...rows, ...stageRows];
+
 beforeAll(async () => {
   await store.ensureBucket();
-  await db.delete(graphNodes).where(inArray(graphNodes.id, rows.map((row) => row.id)));
-  await db.insert(graphNodes).values(rows);
+  await db.delete(graphNodes).where(inArray(graphNodes.id, allRows.map((row) => row.id)));
+  await db.insert(graphNodes).values(allRows);
 });
 
 afterAll(async () => {
-  await db.delete(graphNodes).where(inArray(graphNodes.id, rows.map((row) => row.id)));
+  await db.delete(graphNodes).where(inArray(graphNodes.id, allRows.map((row) => row.id)));
   await pool.end();
 });
 
@@ -81,7 +95,7 @@ interface DetailNode {
   classification: { instrument: string | null };
 }
 
-async function compare(window: DocumentDateWindow, exclusions = DEFAULT_VIVIER_B_EXCLUSIONS) {
+async function compare(window: DocumentDateWindow, exclusions = DEFAULT_VIVIER_B_EXCLUSIONS, target = city) {
   const app = graphSignalsRoute({ db, store });
   const query = new URLSearchParams({
     ...(window.dateFrom ? { dateFrom: window.dateFrom } : {}),
@@ -95,9 +109,9 @@ async function compare(window: DocumentDateWindow, exclusions = DEFAULT_VIVIER_B
   const aggregate = (await aggregateRes.json()) as {
     cities: { citySlug: string; signalCount: number; vivierV2Counts: { total: number } }[];
   };
-  const counts = aggregate.cities.find((entry) => entry.citySlug === city);
+  const counts = aggregate.cities.find((entry) => entry.citySlug === target);
 
-  const detailRes = await app.request(`/api/graph-signals/${city}`);
+  const detailRes = await app.request(`/api/graph-signals/${target}`);
   expect(detailRes.status).toBe(200);
   const detail = (await detailRes.json()) as { nodes: DetailNode[] };
   // Same predicates as the UI detail pipeline (filterNodesByDocumentDate, then B exclusions).
@@ -134,5 +148,18 @@ describe("graph signal aggregate/detail date parity (#786)", () => {
     expect(await compare({ dateBasis: "document", dateFrom: "2026-09-29", dateTo: "2026-09-30" }, none))
       .toEqual({ aggregateA: 4, detailA: 4, aggregateB: 4, detailB: 4 });
     expect(await compare({}, none)).toEqual({ aggregateA: 6, detailA: 6, aggregateB: 6, detailB: 6 });
+  });
+
+  it("falls back to the stage date for undated refs, identically in both views", async () => {
+    const none = { piiaSansProjetResidentiel: false, derogationsMineures: false };
+    expect(await compare({ dateBasis: "document", dateFrom: "2026-09-29", dateTo: "2026-09-30" }, none, stageCity))
+      .toEqual({ aggregateA: 1, detailA: 1, aggregateB: 1, detailB: 1 });
+    expect(await compare({ dateBasis: "document", dateFrom: "2026-07-01", dateTo: "2026-07-31" }, none, stageCity))
+      .toEqual({ aggregateA: 1, detailA: 1, aggregateB: 1, detailB: 1 });
+    // Scrape mode ignores the stage date: all three were collected on 2026-09-30.
+    expect(await compare({ dateBasis: "scrap", dateFrom: "2026-09-29", dateTo: "2026-09-29" }, none, stageCity))
+      .toEqual({ aggregateA: 0, detailA: 0, aggregateB: 0, detailB: 0 });
+    expect(await compare({ dateBasis: "scrap", dateFrom: "2026-09-30", dateTo: "2026-09-30" }, none, stageCity))
+      .toEqual({ aggregateA: 3, detailA: 3, aggregateB: 3, detailB: 3 });
   });
 });

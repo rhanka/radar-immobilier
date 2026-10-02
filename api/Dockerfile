@@ -70,6 +70,7 @@ RUN npm install --no-save esbuild@0.24.0 \
   "    'api/src/db/scripts/backfill-0004-tracking.ts'," \
   "    'api/src/scripts/project-graph-from-s3.ts'," \
   "    'api/src/scripts/purge-avis-bylaws.ts'," \
+  "    'api/src/scripts/recover-document-dates.ts'," \
   "    'api/src/scripts/worker-live.ts'," \
   "    'api/src/scripts/collect-exploit-source.ts'," \
   "    'api/src/scripts/populate-geo.ts'," \
