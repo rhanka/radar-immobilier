@@ -160,11 +160,13 @@
     applyVivierBExclusions,
     DEFAULT_VIVIER_B_EXCLUSIONS,
     type VivierBExclusions,
-  } from "$lib/signals/vivier-b-display-filter.js";
+    type DocumentDateBasis,
+  } from "@radar/domain";
   import {
     dateRangeFromSignalTimeRange,
     defaultSignalTimeRange,
-    filterNodesByEtapeDate,
+    filterNodesByDocumentDate,
+    signalDocumentDateWindow,
     normalizeSignalTimeRange,
     type SignalDateRange,
     type SignalTimeRange,
@@ -546,6 +548,7 @@
    */
   let vivierBExclusions: VivierBExclusions = initialFilters?.exclusions ?? { ...DEFAULT_VIVIER_B_EXCLUSIONS };
   let timeRange: SignalTimeRange = initialFilters?.timeRange ?? defaultSignalTimeRange();
+  let dateBasis: DocumentDateBasis = initialFilters?.dateBasis ?? "document";
   let dateRange: SignalDateRange = dateRangeFromSignalTimeRange(timeRange);
 
   /**
@@ -562,10 +565,11 @@
     subsetKey: string,
     exclusions: VivierBExclusions,
     range: SignalDateRange,
+    basis: DocumentDateBasis,
   ): GraphSignalNode[] {
     const mode = modeFromSubsetKey(subsetKey);
     const projected = projectNodesForVivierKey(nodes, authority, subsetKey).nodes;
-    const dated = filterNodesByEtapeDate(projected, range);
+    const dated = filterNodesByDocumentDate(projected, range, basis);
     return mode === "b" ? applyVivierBExclusions(dated, exclusions) : dated;
   }
 
@@ -586,6 +590,7 @@
         activeSubsetKey,
         vivierBExclusions,
         dateRange,
+        dateBasis,
       ).map((node) => node.id),
     );
     selectionState = reconcileVivierSelection(selectionState, allowedIds);
@@ -598,6 +603,16 @@
     vivierBExclusions = next;
     syncFilterRoute();
     reconcileToVisibleNodes();
+    void load();
+    updateGeoLayers();
+  }
+
+  function handleDateBasisChange(next: DocumentDateBasis): void {
+    dateBasis = next;
+    syncFilterRoute();
+    void load();
+    reconcileToVisibleNodes();
+    updateGeoLayers();
   }
 
   function handleTimeRangeChange(next: SignalTimeRange): void {
@@ -614,7 +629,7 @@
   function currentGeoFilters(): Record<string, string[]> {
     return writeGeoFilters({
       axes: bAxesFromVivierKey(activeSubsetKey), exclusions: vivierBExclusions,
-      timeRange, lots: lotDataFilter, zoneKinds: zoneKindFilter, zoneMillesime: zoneMillesimeFilter, lotsEnabled,
+      timeRange, dateBasis, lots: lotDataFilter, zoneKinds: zoneKindFilter, zoneMillesime: zoneMillesimeFilter, lotsEnabled,
       cptaqEnabled, citySearch, zoneSearch, lotSearch,
     });
   }
@@ -782,7 +797,7 @@
    * densifiant → précocité d'étape → instrument → preuve → fraîcheur → id). En A,
    * l'ordre reste EXACTEMENT celui de la projection serveur (aucun changement).
    */
-  $: dateScopedProjectionNodes = filterNodesByEtapeDate(detailProjection.nodes, dateRange);
+  $: dateScopedProjectionNodes = filterNodesByDocumentDate(detailProjection.nodes, dateRange, dateBasis);
   // Set vivier « précoce » trié (INCHANGÉ : classification + axes + exclusions B).
   $: gatedDetailNodes = activeViewMode === "b"
     ? rankVivierBNodes(
@@ -1868,11 +1883,15 @@
     const layersChanged = lotsEnabled !== filters.lotsEnabled;
     lotsEnabled = filters.lotsEnabled ?? true;
     // A relative period is resolved when read: only a different period reloads.
-    const dateChanged = !sameTimeRange(timeRange, filters.timeRange);
-    if (dateChanged) {
+    const periodChanged = !sameTimeRange(timeRange, filters.timeRange);
+    if (periodChanged) {
       timeRange = filters.timeRange;
       dateRange = dateRangeFromSignalTimeRange(timeRange);
     }
+    // Bulk counters also depend on the date basis and the B display exclusions.
+    const dateChanged = periodChanged || dateBasis !== filters.dateBasis
+      || JSON.stringify(vivierBExclusions) !== JSON.stringify(filters.exclusions);
+    dateBasis = filters.dateBasis;
     vivierBExclusions = filters.exclusions;
     lotDataFilter = filters.lots;
     zoneKindFilter = filters.zoneKinds;
@@ -2399,16 +2418,6 @@
   }
 
   // ── Chargement API ─────────────────────────────────────────────────────────
-  // #4 — borne date locale → ISO YYYY-MM-DD pour le serveur date-aware. null
-  // (fenêtre « Illimité ») → aucune borne envoyée (= all-time).
-  function toApiDate(d: Date | null): string | null {
-    if (!d) return null;
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  }
-
   let bulkLoadVersion = 0;
   async function load() {
     const version = ++bulkLoadVersion;
@@ -2419,8 +2428,9 @@
       // date-cohérents avec le filtre date actif → fin du 0/50 (parité globale,
       // pas seulement la ville sélectionnée). Sans borne = all-time (Illimité).
       const res = await fetchGraphSignalsByCity("", {
-        dateFrom: toApiDate(dateRange.start),
-        dateTo: toApiDate(dateRange.end),
+        ...signalDocumentDateWindow(dateRange, dateBasis),
+        excludePiia: vivierBExclusions.piiaSansProjetResidentiel,
+        excludeDerogations: vivierBExclusions.derogationsMineures,
       });
       if (version !== bulkLoadVersion) return;
       graphItems = res.cities;
@@ -2465,6 +2475,7 @@
       initialSubsetKey={activeSubsetKey}
       exclusions={vivierBExclusions}
       {timeRange}
+      {dateBasis}
       {selectedCityLiveCount}
       {citySearch}
       onCitySearchChange={(query) => { citySearch = query; syncFilterRoute(); }}
@@ -2473,6 +2484,7 @@
       onFilterChange={handleFilterChange}
       onExclusionsChange={handleExclusionsChange}
       onTimeRangeChange={handleTimeRangeChange}
+      onDateBasisChange={handleDateBasisChange}
     />
   </svelte:fragment>
 

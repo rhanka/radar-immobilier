@@ -1,4 +1,5 @@
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
+import { matchesDocumentDateWindow, type DocumentDateBasis, type DocumentDateWindow } from "@radar/domain";
 
 const DAY_MS = 24 * 60 * 60 * 1_000;
 
@@ -121,91 +122,22 @@ export function dateRangeFromSignalTimeRange(range: SignalTimeRange): SignalDate
   return { start: localDate(range.from), end: localDate(range.to) };
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+/** The API and client consume identical civil-date boundaries and date basis. */
+export function signalDocumentDateWindow(range: SignalDateRange, dateBasis: DocumentDateBasis = "document"): DocumentDateWindow {
+  const civil = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  return {
+    dateBasis,
+    ...(range.start ? { dateFrom: civil(range.start) } : {}),
+    ...(range.end ? { dateTo: civil(range.end) } : {}),
+  };
 }
 
-function dateValue(node: GraphSignalNode): string | null {
-  const props = isRecord(node.props) ? node.props : {};
-  const nested = isRecord(props.properties) ? props.properties : {};
-  const keys = [
-    "etapeDate",
-    "etape_date",
-    "meetingDate",
-    "meeting_date",
-    "documentDate",
-    "date",
-  ];
-
-  for (const record of [nested, props]) {
-    for (const key of keys) {
-      const value = record[key];
-      if (typeof value === "string" && value.trim() !== "") return value;
-    }
-  }
-
-  return node.publishedAt ?? node.createdAt ?? null;
-}
-
-function parseSignalDate(value: string): Date | null {
-  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (dateOnly) {
-    const year = Number(dateOnly[1]);
-    const month = Number(dateOnly[2]);
-    const day = Number(dateOnly[3]);
-    const parsed = new Date(year, month - 1, day);
-    return parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day
-      ? parsed
-      : null;
-  }
-
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
-
-/** Unknown or invalid dates remain visible: the filter never invents recency. */
-export function signalEtapeDate(node: GraphSignalNode): Date | null {
-  const value = dateValue(node);
-  if (!value) return null;
-  return parseSignalDate(value);
-}
-
-function startOfDay(date: Date): number {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    0,
-    0,
-    0,
-    0,
-  ).getTime();
-}
-
-function endOfDay(date: Date): number {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    23,
-    59,
-    59,
-    999,
-  ).getTime();
-}
-
-export function isWithinRange(date: Date | null, range: SignalDateRange): boolean {
-  if (!date) return true;
-  const timestamp = date.getTime();
-  const lower = range.start ? startOfDay(range.start) : Number.NEGATIVE_INFINITY;
-  const upper = range.end ? endOfDay(range.end) : Number.POSITIVE_INFINITY;
-  return timestamp >= lower && timestamp <= upper;
-}
-
-/** Applies the date lens after the server-authoritative A/B projection. */
-export function filterNodesByEtapeDate(
+/** Presentation metadata never changes the persisted-reference membership. */
+export function filterNodesByDocumentDate(
   nodes: readonly GraphSignalNode[],
   range: SignalDateRange,
+  dateBasis: DocumentDateBasis = "document",
 ): GraphSignalNode[] {
-  return nodes.filter((node) => isWithinRange(signalEtapeDate(node), range));
+  const window = signalDocumentDateWindow(range, dateBasis);
+  return nodes.filter((node) => matchesDocumentDateWindow(node.props, window));
 }
