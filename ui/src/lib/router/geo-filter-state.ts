@@ -23,8 +23,10 @@ import {
  *   normalized to the sole residual vivier, with product defaults elsewhere;
  * - legacy top-level `lots=0` / `layers=zones` without any `filter.*` key
  *   (parsed as `legacyLayers`) keeps the product defaults, zones only;
- * - date basis: `dateBasis=scrap` (collection clock); document dates are the
- *   default and are never written.
+ * - date basis: `dateBasis=acquisition` (acquisition clock, internal value
+ *   `scrap`); the legacy `dateBasis=scrap` spelling is still read so links
+ *   shared before the rename keep working. Document dates are the default and
+ *   are never written.
  */
 export interface GeoFilterState {
   axes: BAxes;
@@ -101,9 +103,13 @@ function readTimeRange(value: (key: string) => string | undefined, now: number):
     : unrestrictedTimeRange();
 }
 
-/** `dateBasis=scrap` selects the collection clock; absent or invalid means document dates. */
+/** URL spelling of the acquisition clock; the domain value stays `scrap` (API contract). */
+const ACQUISITION_DATE_BASIS_PARAM = "acquisition";
+const ACQUISITION_DATE_BASIS_URL_VALUES = new Set([ACQUISITION_DATE_BASIS_PARAM, "scrap"]);
+
+/** `dateBasis=acquisition` (or legacy `scrap`) selects the acquisition clock; absent or invalid means document dates. */
 function readDateBasis(value: (key: string) => string | undefined): DocumentDateBasis {
-  return value("dateBasis") === "scrap" ? "scrap" : "document";
+  return ACQUISITION_DATE_BASIS_URL_VALUES.has(value("dateBasis") ?? "") ? "scrap" : "document";
 }
 
 /** Omitted restrictions are unrestricted, independent of browser preferences. */
@@ -158,7 +164,7 @@ export function writeGeoFilters(state: GeoFilterState): Record<string, string[]>
   flag("excludePiia", state.exclusions.piiaSansProjetResidentiel);
   flag("excludeDerogations", state.exclusions.derogationsMineures);
   const range = state.timeRange;
-  if (state.dateBasis === "scrap") filters.dateBasis = ["scrap"];
+  if (state.dateBasis === "scrap") filters.dateBasis = [ACQUISITION_DATE_BASIS_PARAM];
   if (range.mode === "relative" && range.relative && RELATIVE_PERIODS.has(range.relative)) {
     if (range.relative !== "all") filters.period = [range.relative];
   } else {
