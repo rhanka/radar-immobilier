@@ -12,7 +12,14 @@
  *   5. Anti-PII (Loi 25)
  *   6. État vide (ville sans source lots / sans zonage)
  */
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
+import { activePageState } from "$lib/router/router.js";
+import { normalizeGeoRouteState } from "$lib/router/geo-route.js";
+
+beforeEach(() => {
+  window.history.replaceState(null, "", "/#/evaluation");
+  activePageState.set(normalizeGeoRouteState());
+});
 import { fetchLots, resolveLotsUrl, type LotFeature } from "$lib/maps/lots-client.js";
 import {
   fetchSignalDetail,
