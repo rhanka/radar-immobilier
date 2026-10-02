@@ -20,7 +20,9 @@ import {
  *   `dateFrom`+`dateTo` (inclusive civil dates). A fully unrestricted snapshot
  *   is written as `period=all` so it stays distinct from the defaults.
  * - legacy `subset=vivier-v2[|-z|-r|-p|p]` (retired multi-vivier syntax) is
- *   normalized to the sole residual vivier, with product defaults elsewhere.
+ *   normalized to the sole residual vivier, with product defaults elsewhere;
+ * - legacy top-level `lots=0` / `layers=zones` without any `filter.*` key
+ *   (parsed as `legacyLayers`) keeps the product defaults, zones only.
  */
 export interface GeoFilterState {
   axes: BAxes;
@@ -99,7 +101,7 @@ function readTimeRange(value: (key: string) => string | undefined, now: number):
 export function readGeoFilters(filters: Record<string, readonly string[]>, now = Date.now()): GeoFilterState {
   const value = (key: string) => filters[key]?.[0];
   const legacy = filters.subset?.flatMap((item) => item.split("|"));
-  if (legacy || Object.keys(filters).length === 0) {
+  if (legacy || filters.legacyLayers || Object.keys(filters).length === 0) {
     const defaults = defaultGeoFilters(now);
     if (legacy) defaults.axes = bAxesFromVivierKey(legacy.includes("vivier-v2") ? legacy.join("|") : "vivier-v2");
     if (value("lots") === "0") defaults.lotsEnabled = false;
