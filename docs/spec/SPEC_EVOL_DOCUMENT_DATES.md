@@ -34,12 +34,20 @@
 - [x] The existing refresh projects the same value onto canonical graph refs (`refs[].documentDate`, `refs[].publishedAt`, `refs[].fetchedAt`) consumed by detail routes from PostgreSQL.
 - [x] The collection clock stays `fetchedAt` (first collection, never rewritten); signal business dates (`etape_date`, decisions) are a different clock.
 
+## Shared period rule (aggregate = detail)
+
+- [x] One domain rule, `matchesDocumentDateWindow` (`packages/radar-domain/src/signals/document-date-filter.ts`), is used by the aggregate route and the detail panel.
+- [x] Scrape basis: only `refs[].fetchedAt`, as a Quebec civil day.
+- [x] Document basis: each ref's documentary day (`documentDate` known/day, else `publishedAt`). A ref without one, or a result without refs, falls back to the signal stage date read in the document (`SIGNAL_DATE_KEYS`: `etapeDate`, `etape_date`, `meetingDate`, `meeting_date`, `documentDate`, `date`; nested `properties` first). A dated ref is never replaced by the stage date, and node creation (`createdAt`) is never a period clock.
+
 ## Coverage and stock
 
 - [x] Deterministic header checks use bounded first-page text, not arbitrary dates in agenda items or cited legal history.
 - [x] Date metadata preserves status, precision, nature, extraction method and evidence; month-only dates never gain an invented day.
 - [x] Metadata enrichment preserves raw bytes/SHA and the first collection timestamp.
 - [x] Stock preview is read-only and distinguishes preserved dates, identity-matched manifest recovery, unknowns and conflicts.
-- [ ] Already-covered production documents require an explicit documentary stock-recovery/projection step (preview only here: `previewDocumentDateRecovery`); this change does not silently re-submit them to LLM calls.
+- [x] Already-covered documents get an explicit, executable stock recovery without model calls: `api/src/scripts/recover-document-dates.ts` (planner `planGraphDocumentDateRecovery`) projects the raw sidecar `fetchedAt` and the known documentary date (with its provenance) onto the refs of each published city graph (`graph/<city>/latest.json` → archive → guarded write → `upsertGraphAtomic`).
+- [x] The recovery never overwrites a value present on a ref (an explicit `unknown` status may be completed), reports disagreements (`fetchedAt`, documentary date, `docSha` identity) as conflicts, and is idempotent. Preview (dry-run) is the default, `--apply` writes, `--heal` recovers from the served PG graph when `latest.json` and PG node sets differ (otherwise such a city is halted).
+- [x] Preprod execution: `make document-date-recovery-preprod RECOVERY_MODE=preview ENV=preprod`, then `RECOVERY_MODE=apply RECOVERY_CONFIRM=1`. The Job (`deploy/k8s/document-date-recovery/job.yaml`) runs the image served by preprod and prints one JSON line per city plus a final report.
 - [x] Scanned or unsupported PDFs remain unknown; no new OCR or date-only model job is added.
 - [ ] Listing/filename detection (glued or two-digit-year filenames) is unchanged; the header covers the controlled Val-des-Monts cases.
