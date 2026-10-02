@@ -3,6 +3,7 @@ import { ZONE_KIND_GROUPS, type ZoneKindFilter } from "$lib/maps/zone-kind-filte
 import { bAxesFromVivierKey, DEFAULT_B_AXES, keyForVivierB, type BAxes } from "$lib/signals/vivier-view-mode.js";
 import { DEFAULT_VIVIER_B_EXCLUSIONS, type DocumentDateBasis, type VivierBExclusions } from "@radar/domain";
 import {
+  dateBasisForTimeRange,
   defaultSignalTimeRange,
   normalizeSignalTimeRange,
   SIGNAL_TIME_RANGE_PRESETS,
@@ -23,8 +24,11 @@ import {
  *   normalized to the sole residual vivier, with product defaults elsewhere;
  * - legacy top-level `lots=0` / `layers=zones` without any `filter.*` key
  *   (parsed as `legacyLayers`) keeps the product defaults, zones only;
- * - date basis: `dateBasis=scrap` (collection clock); document dates are the
- *   default and are never written.
+ * - date basis: `dateBasis=acquisition` (acquisition clock, internal value
+ *   `scrap`), only meaningful with a custom `dateFrom`+`dateTo` period; the
+ *   legacy `dateBasis=scrap` spelling is still read so links shared before
+ *   the rename keep working. With a relative period the key is ignored on read
+ *   and never written. Document dates are the default and are never written.
  */
 export interface GeoFilterState {
   axes: BAxes;
@@ -101,9 +105,13 @@ function readTimeRange(value: (key: string) => string | undefined, now: number):
     : unrestrictedTimeRange();
 }
 
-/** `dateBasis=scrap` selects the collection clock; absent or invalid means document dates. */
+/** URL spelling of the acquisition clock; the domain value stays `scrap` (API contract). */
+const ACQUISITION_DATE_BASIS_PARAM = "acquisition";
+const ACQUISITION_DATE_BASIS_URL_VALUES = new Set([ACQUISITION_DATE_BASIS_PARAM, "scrap"]);
+
+/** `dateBasis=acquisition` (or legacy `scrap`) selects the acquisition clock; absent or invalid means document dates. */
 function readDateBasis(value: (key: string) => string | undefined): DocumentDateBasis {
-  return value("dateBasis") === "scrap" ? "scrap" : "document";
+  return ACQUISITION_DATE_BASIS_URL_VALUES.has(value("dateBasis") ?? "") ? "scrap" : "document";
 }
 
 /** Omitted restrictions are unrestricted, independent of browser preferences. */
@@ -114,20 +122,20 @@ export function readGeoFilters(filters: Record<string, readonly string[]>, now =
     const defaults = defaultGeoFilters(now);
     if (legacy) defaults.axes = bAxesFromVivierKey(legacy.includes("vivier-v2") ? legacy.join("|") : "vivier-v2");
     if (value("lots") === "0") defaults.lotsEnabled = false;
-    defaults.dateBasis = readDateBasis(value);
     return defaults;
   }
   const category = EVAL_CATEGORIES.find(({ id }) => id === value("lotCategory"))?.id ?? "all";
   const usages = new Set(USAGE_GROUPS.filter(({ id }) => filters.lotUsage?.includes(id)).map(({ id }) => id));
   const minimum = Number(value("lotMinArea") ?? 0);
+  const timeRange = readTimeRange(value, now);
   return {
     axes: { z: value("zonage") === "1", r: value("residentiel") === "1", p: value("precoce") === "1" },
     exclusions: {
       piiaSansProjetResidentiel: value("excludePiia") === "1",
       derogationsMineures: value("excludeDerogations") === "1",
     },
-    timeRange: readTimeRange(value, now),
-    dateBasis: readDateBasis(value),
+    timeRange,
+    dateBasis: dateBasisForTimeRange(timeRange, readDateBasis(value)),
     lots: { category, usages, superficieMin: Number.isFinite(minimum) && minimum > 0 ? minimum : 0 },
     zoneKinds: new Set(ZONE_KIND_GROUPS.filter(({ id }) => filters.zoneKind?.includes(id)).map(({ id }) => id)),
     zoneMillesime: value("zoneMillesime") ?? null,
@@ -158,7 +166,7 @@ export function writeGeoFilters(state: GeoFilterState): Record<string, string[]>
   flag("excludePiia", state.exclusions.piiaSansProjetResidentiel);
   flag("excludeDerogations", state.exclusions.derogationsMineures);
   const range = state.timeRange;
-  if (state.dateBasis === "scrap") filters.dateBasis = ["scrap"];
+  if (dateBasisForTimeRange(range, state.dateBasis) === "scrap") filters.dateBasis = [ACQUISITION_DATE_BASIS_PARAM];
   if (range.mode === "relative" && range.relative && RELATIVE_PERIODS.has(range.relative)) {
     if (range.relative !== "all") filters.period = [range.relative];
   } else {

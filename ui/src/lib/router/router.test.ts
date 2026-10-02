@@ -1,5 +1,6 @@
 import { get } from "svelte/store";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { readGeoFilters, writeGeoFilters } from "./geo-filter-state.js";
 
 async function loadRouterAt(path: string) {
   window.history.replaceState(null, "", path);
@@ -55,6 +56,28 @@ describe("router compatibility", () => {
     expect(route?.state.filters).toEqual({
       dateFrom: ["2026-09-28"], dateTo: ["2026-10-01"], dateBasis: ["scrap"], residentiel: ["0"],
     });
+    cleanup();
+  });
+
+  it("should keep the acquisition date basis of a custom period when a bare /geo link is canonicalized", async () => {
+    const router = await loadRouterAt(
+      "/geo?mode=signal&filter.dateFrom=2026-09-28&filter.dateTo=2026-10-01&filter.dateBasis=acquisition#/geo",
+    );
+    const cleanup = router.initRouter();
+    expect(window.location.pathname).toBe("/geo/region/quebec");
+    expect(new URLSearchParams(window.location.search).get("filter.dateBasis")).toBe("acquisition");
+    const filters = get(router.activeGeoRoute)?.state.filters ?? {};
+    expect(filters).toEqual({ dateFrom: ["2026-09-28"], dateTo: ["2026-10-01"], dateBasis: ["acquisition"] });
+    expect(readGeoFilters(filters).dateBasis).toBe("scrap");
+    cleanup();
+  });
+
+  it("should read document dates for a relative link that carries an acquisition basis", async () => {
+    const router = await loadRouterAt("/geo?mode=signal&filter.period=3mo&filter.dateBasis=acquisition#/geo");
+    const cleanup = router.initRouter();
+    const filters = get(router.activeGeoRoute)?.state.filters ?? {};
+    expect(readGeoFilters(filters).dateBasis).toBe("document");
+    expect(writeGeoFilters(readGeoFilters(filters))).toEqual({ period: ["3mo"] });
     cleanup();
   });
 

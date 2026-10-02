@@ -163,6 +163,7 @@
     type DocumentDateBasis,
   } from "@radar/domain";
   import {
+    dateBasisForTimeRange,
     dateRangeFromSignalTimeRange,
     defaultSignalTimeRange,
     filterNodesByDocumentDate,
@@ -548,7 +549,7 @@
    */
   let vivierBExclusions: VivierBExclusions = initialFilters?.exclusions ?? { ...DEFAULT_VIVIER_B_EXCLUSIONS };
   let timeRange: SignalTimeRange = initialFilters?.timeRange ?? defaultSignalTimeRange();
-  let dateBasis: DocumentDateBasis = initialFilters?.dateBasis ?? "document";
+  let dateBasis: DocumentDateBasis = dateBasisForTimeRange(timeRange, initialFilters?.dateBasis ?? "document");
   let dateRange: SignalDateRange = dateRangeFromSignalTimeRange(timeRange);
 
   /**
@@ -608,7 +609,7 @@
   }
 
   function handleDateBasisChange(next: DocumentDateBasis): void {
-    dateBasis = next;
+    dateBasis = dateBasisForTimeRange(timeRange, next);
     syncFilterRoute();
     void load();
     reconcileToVisibleNodes();
@@ -618,6 +619,8 @@
   function handleTimeRangeChange(next: SignalTimeRange): void {
     timeRange = normalizeSignalTimeRange(next);
     dateRange = dateRangeFromSignalTimeRange(timeRange);
+    // A relative preset always falls back to document dates.
+    dateBasis = dateBasisForTimeRange(timeRange, dateBasis);
     syncFilterRoute();
     // #4 — re-charge les comptes BULK date-cohérents pour la nouvelle fenêtre
     // (rail + badges de toutes les villes), pas seulement la lentille locale.

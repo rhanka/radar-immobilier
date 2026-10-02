@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import {
+  dateBasisForTimeRange,
   dateRangeFromSignalTimeRange,
   defaultSignalTimeRange,
   filterNodesByDocumentDate,
@@ -140,5 +141,15 @@ describe("signal date filter", () => {
     const period = { start: new Date(2026, 5, 1), end: new Date(2026, 6, 31) };
     expect(filterNodesByDocumentDate([old], period)).toEqual([]);
     expect(filterNodesByDocumentDate([old], period, "scrap")).toEqual([old]);
+  });
+});
+
+describe("dateBasisForTimeRange", () => {
+  it("keeps the acquisition basis only for a custom period", () => {
+    expect(dateBasisForTimeRange({ mode: "absolute", from: 1, to: 2 }, "scrap")).toBe("scrap");
+    expect(dateBasisForTimeRange({ mode: "absolute", from: 1, to: 2 }, "document")).toBe("document");
+    for (const relative of ["3mo", "6mo", "12mo", "all"]) {
+      expect(dateBasisForTimeRange({ mode: "relative", relative, from: 0, to: 0 }, "scrap")).toBe("document");
+    }
   });
 });
