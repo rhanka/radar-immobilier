@@ -18,7 +18,7 @@ import { eq, or, sql, inArray, notInArray, and, isNotNull } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
 import { graphNodes, graphEdges } from "../../db/schema.js";
 import { QC_MUNICIPALITIES } from "@radar/sources";
-import { classifyBPrime, deriveRegulatoryStatus, type RegulatoryStageKindT } from "@radar/domain";
+import { classifyBPrime, deriveRegulatoryStatus, isHiddenByVivierBExclusions, matchesDocumentDateWindow, type DocumentDateWindow, type RegulatoryStageKindT } from "@radar/domain";
 import {
   computeLegacySubsetCounts,
   computeVivierV2,
@@ -1949,87 +1949,9 @@ export interface GraphSignalProjectionRow {
   sourceRef: string | null;
 }
 
-export interface GraphSignalDateRange {
-  dateFrom?: string;
-  dateTo?: string;
-}
-
-const SIGNAL_DATE_KEYS = [
-  "etapeDate",
-  "etape_date",
-  "meetingDate",
-  "meeting_date",
-  "documentDate",
-  "date",
-] as const;
-
-function signalRecord(value: unknown): Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-}
-
-function parseServerSignalDate(value: string): Date | null {
-  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
-  if (dateOnly) {
-    const year = Number(dateOnly[1]);
-    const month = Number(dateOnly[2]);
-    const day = Number(dateOnly[3]);
-    const parsed = new Date(year, month - 1, day);
-    return parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day
-      ? parsed
-      : null;
-  }
-
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
-
-function parseServerSignalBoundary(value: string, endOfDay: boolean): Date | null {
-  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
-  if (!dateOnly) return parseServerSignalDate(value);
-
-  const year = Number(dateOnly[1]);
-  const month = Number(dateOnly[2]);
-  const day = Number(dateOnly[3]);
-  const parsed = new Date(year, month - 1, day, endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, endOfDay ? 999 : 0);
-  return parsed.getFullYear() === year && parsed.getMonth() === month - 1 && parsed.getDate() === day
-    ? parsed
-    : null;
-}
-
-/**
- * Server mirror of the client signal date lens. Keep the key list and
- * properties-before-root precedence synchronized with signal-date-filter.ts.
- * graph_nodes has no created_at column on OVH, so the only server fallback is
- * props.publishedAt; createdAt is intentionally unavailable and treated as null.
- */
-export function serverSignalEtapeDate(props: unknown): Date | null {
-  const root = signalRecord(props);
-  const nested = signalRecord(root.properties);
-  for (const record of [nested, root]) {
-    for (const key of SIGNAL_DATE_KEYS) {
-      const value = record[key];
-      if (typeof value === "string" && value.trim() !== "") return parseServerSignalDate(value);
-    }
-  }
-
-  const publishedAt = root.publishedAt;
-  return typeof publishedAt === "string" && publishedAt.trim() !== ""
-    ? parseServerSignalDate(publishedAt)
-    : null;
-}
-
-function isSignalInDateRange(props: unknown, range?: GraphSignalDateRange): boolean {
-  if (!range?.dateFrom && !range?.dateTo) return true;
-
-  const date = serverSignalEtapeDate(props);
-  // A bounded window cannot place a row with no extractable, parseable date.
-  if (!date) return false;
-
-  const lower = range.dateFrom ? parseServerSignalBoundary(range.dateFrom, false) : null;
-  const upper = range.dateTo ? parseServerSignalBoundary(range.dateTo, true) : null;
-  return (!lower || date >= lower) && (!upper || date <= upper);
+export interface GraphSignalDateRange extends DocumentDateWindow {
+  excludePiia?: boolean;
+  excludeDerogations?: boolean;
 }
 
 export interface CitySignalCounts {
@@ -2060,7 +1982,18 @@ export function aggregateGraphSignalProjectionRows(
 
   for (const row of rows) {
     if (!row.citySlug) continue;
-    if (!isSignalInDateRange(row.props, dateRange)) continue;
+    if (!matchesDocumentDateWindow(row.props, dateRange)) continue;
+    // B display exclusions only gate the B (vivier_v2) path, exactly like the
+    // client detail; legacy A counts keep the full date-scoped projection.
+    const hiddenInB = (dateRange?.excludePiia || dateRange?.excludeDerogations)
+      ? isHiddenByVivierBExclusions({ label: row.label, description: row.description ?? null,
+        props: (row.props ?? {}) as Record<string, unknown>,
+        classification: classifyGraphNodeVivierV2({ ...row, category: row.category ?? null,
+          description: row.description ?? null, etapeAnnote: row.etapeAnnote ?? null }) }, {
+        piiaSansProjetResidentiel: dateRange.excludePiia === true,
+        derogationsMineures: dateRange.excludeDerogations === true,
+      })
+      : false;
     if (!byCity.has(row.citySlug)) {
       byCity.set(row.citySlug, {
         signalCount: 0,
@@ -2084,7 +2017,7 @@ export function aggregateGraphSignalProjectionRows(
       props: row.props,
       sourceRef: row.sourceRef,
     };
-    entry.signals.push(signal);
+    if (!hiddenInB) entry.signals.push(signal);
 
     // Legacy A (z|m|p) is derived from the full projection. B′ only gates
     // the new residential axis `r`; it must not rewrite legacy membership.

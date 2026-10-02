@@ -26,7 +26,7 @@
    * ZÉRO couleur hex en dur · ZÉRO override composant DS · ZÉRO icône lucide
    * ZÉRO checkbox/tabs/search bespoke.
    */
-  import { Checkbox, TimeRangePicker } from "@sentropic/design-system-svelte";
+  import { Checkbox, Select, TimeRangePicker } from "@sentropic/design-system-svelte";
   import {
     B_SUBSET_KEY,
     bAxesFromVivierKey,
@@ -38,7 +38,8 @@
   import {
     DEFAULT_VIVIER_B_EXCLUSIONS,
     type VivierBExclusions,
-  } from "$lib/signals/vivier-b-display-filter.js";
+    type DocumentDateBasis,
+  } from "@radar/domain";
   import {
     defaultSignalTimeRange,
     formatSignalTimeRange,
@@ -60,6 +61,8 @@
   export let loading = false;
   /** Signal data failed to load; avoid rendering a fake zero state. */
   export let dataUnavailable = false;
+  export let citySearch = "";
+  export let onCitySearchChange: (query: string) => void = () => {};
 
   /**
    * Clé de MODE initiale (toujours une clé B `vivier-v2*` après migration),
@@ -75,6 +78,13 @@
 
   /** Parent-owned DS temporal selection shared by both Vivier tabs. */
   export let timeRange: SignalTimeRange = defaultSignalTimeRange();
+  export let dateBasis: DocumentDateBasis = "document";
+  export let onDateBasisChange: (next: DocumentDateBasis) => void = () => {};
+  let selectedDateBasis: string = dateBasis;
+  $: selectedDateBasis = dateBasis;
+  $: if ((selectedDateBasis === "document" || selectedDateBasis === "scrap") && selectedDateBasis !== dateBasis) {
+    onDateBasisChange(selectedDateBasis);
+  }
 
   /**
    * m1.7 — Compte LIVE de `selectedSlug`, calculé par le parent sur les mêmes
@@ -376,6 +386,10 @@
      directement dans la section « Signaux » — plus aucun onglet. -->
 {#snippet panelB()}
   <div class="vivier-panel">
+    <Select label="Filtrer selon" size="sm" bind:value={selectedDateBasis}>
+      <option value="document">Date du document</option>
+      <option value="scrap">Date du scrap</option>
+    </Select>
     <div class="signals-time-range-picker-wrap" use:positionTimeRangePopover>
       <TimeRangePicker
         class="signals-time-range-picker"
@@ -461,6 +475,8 @@
       {selectedSlug}
       {loading}
       {dataUnavailable}
+      searchQuery={citySearch}
+      onSearchChange={onCitySearchChange}
       onSelect={handleSelectSlug}
     />
   </RailSection>
