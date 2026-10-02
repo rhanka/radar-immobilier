@@ -18,6 +18,7 @@
   import type { GeoFeatureHit } from "@sentropic/geo-ui-svelte";
   import type { FeatureCollection, Feature } from "@sentropic/geo-core";
   import ViewLayout from "$lib/components/ViewLayout.svelte";
+  import { activePageState, navigateToPageState } from "$lib/router/router.js";
   import {
     fetchGeoCities,
     fetchGeoFeatures,
@@ -37,6 +38,15 @@
   let citiesLoading = true;
   let citiesError: string | null = null;
   let selectedCity: string = "";
+  let restoredPageState: unknown = null;
+  $: if ($activePageState !== restoredPageState) {
+    restoredPageState = $activePageState;
+    selectedCity = $activePageState.selected.find(({ kind }) => kind === "municipality")?.id ?? "";
+  }
+  function syncCityUrl(): void {
+    navigateToPageState("geo", { ...$activePageState,
+      selected: selectedCity ? [{ kind: "municipality", id: selectedCity }] : [], focused: null });
+  }
 
   // Données géo pour la ville sélectionnée
   let zonesCount = 0;
@@ -61,7 +71,10 @@
       cities = res.cities;
       // Pré-sélectionner la première ville avec des zones ou des résolutions
       const first = cities.find((c) => c.zoneCount > 0 || c.signalCount > 0);
-      if (first) selectedCity = first.citySlug;
+      if (first && !selectedCity) {
+        selectedCity = first.citySlug;
+        syncCityUrl();
+      }
     } catch (e) {
       citiesError = e instanceof Error ? e.message : "Erreur chargement villes";
     } finally {
@@ -180,6 +193,7 @@
             <select
               id="geo-city-select"
               bind:value={selectedCity}
+              on:change={syncCityUrl}
               class="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-8 text-sm text-slate-800 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
             >
               <option value="" disabled>Choisir une ville…</option>

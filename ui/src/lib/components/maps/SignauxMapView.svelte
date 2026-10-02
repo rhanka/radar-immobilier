@@ -148,24 +148,25 @@
     B_SUBSET_KEY,
     clearVivierCityTransientState,
     countForVivierCity,
-    initialVivierSubsetKey,
+    bAxesFromVivierKey,
     modeFromSubsetKey,
     projectNodesForVivierKey,
-    reconcileVivierRouteSubset,
     reconcileVivierSelection,
     retainProjectedSignalId,
-    subsetKeyForMode,
-    vivierRouteKey,
   } from "$lib/signals/vivier-view-mode.js";
+  import { readGeoFilters, writeGeoFilters, subsetFromGeoFilters, sameTimeRange } from "$lib/router/geo-filter-state.js";
+  import { buildGeoRoute } from "$lib/router/geo-route.js";
   import {
     applyVivierBExclusions,
     DEFAULT_VIVIER_B_EXCLUSIONS,
     type VivierBExclusions,
-  } from "$lib/signals/vivier-b-display-filter.js";
+    type DocumentDateBasis,
+  } from "@radar/domain";
   import {
     dateRangeFromSignalTimeRange,
     defaultSignalTimeRange,
-    filterNodesByEtapeDate,
+    filterNodesByDocumentDate,
+    signalDocumentDateWindow,
     normalizeSignalTimeRange,
     type SignalDateRange,
     type SignalTimeRange,
@@ -442,6 +443,7 @@
   function setCptaqEnabled(value: boolean): void {
     cptaqEnabled = value;
     persistLabelPref(CPTAQ_LS_KEY, value);
+    syncFilterRoute();
     if (value) {
       if (selectedCity && cptaqAvailable) void loadCptaq(selectedCity.municipality.slug);
     } else {
@@ -531,20 +533,22 @@
   const detailCache = new Map<string, GraphSignalNode[]>();
   let appliedGeoRouteKey: string | null = null;
   let pendingRouteZoneKey: string | null = null;
+  let pendingRouteLotId: string | null = null;
 
-  // ── Projection globale du vivier B ───────────────────────────────────────
-  // Défaut B : le rail « Référence A » est retiré. La migration d'une clé A
-  // persistée/deep-linkée → B vit dans `initialVivierSubsetKey` (subsetKeyFromRoute).
   const FILTER_DEFAULT: string = B_SUBSET_KEY;
-  const FILTER_LS_KEY = "signaux-filter-subset";
-  let activeSubsetKey: string = FILTER_DEFAULT;
+  const initialFilters = geoRoute ? readGeoFilters(geoRoute.state.filters) : null;
+  let citySearch = initialFilters?.citySearch ?? "";
+  let zoneSearch = initialFilters?.zoneSearch ?? "";
+  let lotSearch = initialFilters?.lotSearch ?? "";
+  let activeSubsetKey: string = geoRoute ? subsetFromGeoFilters(geoRoute.state.filters) : FILTER_DEFAULT;
 
   /**
    * Exclusions d'AFFICHAGE de la vue B. Elles ne touchent ni la classification
    * serveur ni les compteurs : elles ne font que masquer.
    */
-  let vivierBExclusions: VivierBExclusions = { ...DEFAULT_VIVIER_B_EXCLUSIONS };
-  let timeRange: SignalTimeRange = defaultSignalTimeRange();
+  let vivierBExclusions: VivierBExclusions = initialFilters?.exclusions ?? { ...DEFAULT_VIVIER_B_EXCLUSIONS };
+  let timeRange: SignalTimeRange = initialFilters?.timeRange ?? defaultSignalTimeRange();
+  let dateBasis: DocumentDateBasis = initialFilters?.dateBasis ?? "document";
   let dateRange: SignalDateRange = dateRangeFromSignalTimeRange(timeRange);
 
   /**
@@ -561,10 +565,11 @@
     subsetKey: string,
     exclusions: VivierBExclusions,
     range: SignalDateRange,
+    basis: DocumentDateBasis,
   ): GraphSignalNode[] {
     const mode = modeFromSubsetKey(subsetKey);
     const projected = projectNodesForVivierKey(nodes, authority, subsetKey).nodes;
-    const dated = filterNodesByEtapeDate(projected, range);
+    const dated = filterNodesByDocumentDate(projected, range, basis);
     return mode === "b" ? applyVivierBExclusions(dated, exclusions) : dated;
   }
 
@@ -585,6 +590,7 @@
         activeSubsetKey,
         vivierBExclusions,
         dateRange,
+        dateBasis,
       ).map((node) => node.id),
     );
     selectionState = reconcileVivierSelection(selectionState, allowedIds);
@@ -595,12 +601,24 @@
 
   function handleExclusionsChange(next: VivierBExclusions): void {
     vivierBExclusions = next;
+    syncFilterRoute();
     reconcileToVisibleNodes();
+    void load();
+    updateGeoLayers();
+  }
+
+  function handleDateBasisChange(next: DocumentDateBasis): void {
+    dateBasis = next;
+    syncFilterRoute();
+    void load();
+    reconcileToVisibleNodes();
+    updateGeoLayers();
   }
 
   function handleTimeRangeChange(next: SignalTimeRange): void {
     timeRange = normalizeSignalTimeRange(next);
     dateRange = dateRangeFromSignalTimeRange(timeRange);
+    syncFilterRoute();
     // #4 — re-charge les comptes BULK date-cohérents pour la nouvelle fenêtre
     // (rail + badges de toutes les villes), pas seulement la lentille locale.
     void load();
@@ -608,54 +626,24 @@
     updateGeoLayers();
   }
 
-  /**
-   * Restaure la clé filtre depuis l'URL au chargement.
-   * Priorité : URL > localStorage > A. Seule la clé B explicite sélectionne B.
-   * Le filtre est stocké dans geoRoute.state.filters["subset"] en tant que tableau de valeurs.
-   * Tout état vide, ancien ou hybride (dont l'ancien `z|p`) revient à A.
-   */
-  function subsetKeyFromRoute(route: GeoRoute | null): string {
-    const stored = typeof localStorage === "undefined"
-      ? null
-      : localStorage.getItem(FILTER_LS_KEY);
-    return initialVivierSubsetKey(route, stored);
+  function currentGeoFilters(): Record<string, string[]> {
+    return writeGeoFilters({
+      axes: bAxesFromVivierKey(activeSubsetKey), exclusions: vivierBExclusions,
+      timeRange, dateBasis, lots: lotDataFilter, zoneKinds: zoneKindFilter, zoneMillesime: zoneMillesimeFilter, lotsEnabled,
+      cptaqEnabled, citySearch, zoneSearch, lotSearch,
+    });
+  }
+
+  function syncFilterRoute(): void {
+    const route = geoRoute ?? { level: "region" as const, region: "quebec" as const, state: { mode: "signal" as const } };
+    navigateToGeoRoute({ ...route, state: { ...route.state, filters: currentGeoFilters() } });
   }
 
   function handleFilterChange(
     subsetKey: string,
   ): void {
-    // La clé LIVE (composée) pilote carte + détail…
     applyActiveSubsetKey(subsetKey);
-    // …mais SEULE la clé de MODE est persistée (défaut du tab). La sous-sélection
-    // vive (axes A décochés, précoce B) reste une lentille de session : au reload
-    // le tab repart de son défaut (défaut A = z|m|p ; `z|p` jamais collant).
-    const persistKey = subsetKeyForMode(modeFromSubsetKey(subsetKey));
-    if (typeof localStorage !== "undefined") {
-      localStorage.setItem(FILTER_LS_KEY, persistKey);
-    }
-    // Persiste le filtre dans l'URL (remplace sans ajouter à l'historique)
-    const currentRoute = geoRoute;
-    if (currentRoute) {
-      const subsetValues = persistKey.split("|");
-      const newFilters: Record<string, string[]> = { subset: subsetValues };
-      const newState = { ...currentRoute.state, filters: newFilters };
-      if (currentRoute.level === "zone") {
-        navigateToGeoRoute(
-          { level: "zone", citySlug: currentRoute.citySlug, zoneKey: currentRoute.zoneKey, state: newState },
-          { replace: true },
-        );
-      } else if (currentRoute.level === "city") {
-        navigateToGeoRoute(
-          { level: "city", citySlug: currentRoute.citySlug, state: newState },
-          { replace: true },
-        );
-      } else {
-        navigateToGeoRoute(
-          { level: "region", state: newState },
-          { replace: true },
-        );
-      }
-    }
+    syncFilterRoute();
     updateGeoLayers();
   }
 
@@ -667,7 +655,7 @@
   // ne fait que recalculer les expressions de peinture. Fermer un accordéon ne
   // réinitialise PAS son filtre (le compteur N/M du bandeau reste visible).
   /** Filtre LOTS (catégorie exclusive × usages additifs × superficie min). */
-  let lotDataFilter: EvalLotFilter = {
+  let lotDataFilter: EvalLotFilter = initialFilters?.lots ?? {
     category: "all",
     usages: new Set(),
     superficieMin: 0,
@@ -675,13 +663,15 @@
 
   function handleLotDataFilterChange(next: EvalLotFilter): void {
     lotDataFilter = next;
+    syncFilterRoute();
   }
 
   /** Filtre par TYPE de zone (chips additives — catégories de la légende). */
-  let zoneKindFilter: ZoneKindFilter = DEFAULT_ZONE_KIND_FILTER;
+  let zoneKindFilter: ZoneKindFilter = initialFilters?.zoneKinds ?? DEFAULT_ZONE_KIND_FILTER;
 
   function handleZoneKindFilterChange(next: ZoneKindFilter): void {
     zoneKindFilter = next;
+    syncFilterRoute();
   }
 
   /**
@@ -689,10 +679,11 @@
    * Défaut « tous » (`null`). Réinitialisé au changement de ville (selectCity)
    * pour ne jamais estomper une nouvelle ville avec un millésime périmé.
    */
-  let zoneMillesimeFilter: ZoneMillesimeFilter = DEFAULT_ZONE_MILLESIME_FILTER;
+  let zoneMillesimeFilter: ZoneMillesimeFilter = initialFilters?.zoneMillesime ?? DEFAULT_ZONE_MILLESIME_FILTER;
 
   function handleZoneMillesimeFilterChange(next: ZoneMillesimeFilter): void {
     zoneMillesimeFilter = next;
+    syncFilterRoute();
   }
 
   // Recalque la peinture quand un filtre données change (assignations ci-dessus).
@@ -785,12 +776,6 @@
   ] satisfies readonly GeoLayerSpec[]) : [];
   $: activeViewMode = modeFromSubsetKey(activeSubsetKey);
   /**
-   * Clé de MODE dérivée (z|m|p / vivier-v2) : c'est ELLE qu'on persiste et qu'on
-   * renvoie au rail, jamais la clé LIVE composée — sinon `z|p` redeviendrait
-   * collant. Le rail en re-dérive ses axes (idempotent).
-   */
-  $: persistedSubsetKey = subsetKeyForMode(activeViewMode);
-  /**
    * Détail projeté selon la clé LIVE composée : A applique les axes cochés,
    * B restreint aux précoces si l'axe est coché. `z|m|p` reste la projection
    * EXACTE validée par l'autorité serveur (aucune régression du vivier).
@@ -812,7 +797,7 @@
    * densifiant → précocité d'étape → instrument → preuve → fraîcheur → id). En A,
    * l'ordre reste EXACTEMENT celui de la projection serveur (aucun changement).
    */
-  $: dateScopedProjectionNodes = filterNodesByEtapeDate(detailProjection.nodes, dateRange);
+  $: dateScopedProjectionNodes = filterNodesByDocumentDate(detailProjection.nodes, dateRange, dateBasis);
   // Set vivier « précoce » trié (INCHANGÉ : classification + axes + exclusions B).
   $: gatedDetailNodes = activeViewMode === "b"
     ? rankVivierBNodes(
@@ -1412,7 +1397,7 @@
         citySlug: entry.municipality.slug,
         state: {
           mode: geoRoute?.state.mode ?? "signal",
-          filters: { subset: persistedSubsetKey.split("|") },
+          filters: currentGeoFilters(),
         },
       });
     }
@@ -1424,9 +1409,6 @@
     // Contrat « lot suivant » : changement de ville → plus de lot caméra de
     // référence (le prochain lot cliqué est un PREMIER lot, cadrage existant).
     cameraLot = null;
-    // Millésime exclusif : un choix d'une ville précédente n'a aucun sens sur la
-    // nouvelle couche → retour à « tous » pour éviter de tout estomper.
-    zoneMillesimeFilter = DEFAULT_ZONE_MILLESIME_FILTER;
     const cityKey = makeKey("municipality", entry.municipality.slug);
     selectionState = createSelectionBucketState({
       selectedKeys: [cityKey],
@@ -1574,7 +1556,7 @@
         current: activeGeoLevel as GeoLevel,
         hasSelectedCity: !!selectedCity,
         mode: geoRoute?.state.mode,
-        subsetKey: persistedSubsetKey,
+        filters: currentGeoFilters(),
       });
       if (nav) navigateToGeoRoute(nav);
       // Filet local immédiat (au cas où la route n'aurait pas changé d'identité,
@@ -1619,6 +1601,8 @@
       // Redescente Zone/Lot → Ville : on efface la sélection zone/lot et on
       // recadre sur la ville entière (état zoomé).
       selectionState = createSelectionBucketState();
+      navigateToGeoRoute({ level: "city", citySlug: selectedCity.municipality.slug,
+        state: { mode: geoRoute?.state.mode ?? "signal", filters: currentGeoFilters() } });
       updateGeoLayers();
       flyToCity(selectedCity);
       villeZoomed = true;
@@ -1892,10 +1876,38 @@
   }
 
   async function applyGeoRoute(route: GeoRoute): Promise<void> {
-    const key = vivierRouteKey(route);
+    const key = buildGeoRoute(route);
     if (appliedGeoRouteKey === key) return;
     appliedGeoRouteKey = key;
-    applyActiveSubsetKey(reconcileVivierRouteSubset(route, activeSubsetKey));
+    const filters = readGeoFilters(route.state.filters);
+    const layersChanged = lotsEnabled !== filters.lotsEnabled;
+    lotsEnabled = filters.lotsEnabled ?? true;
+    // A relative period is resolved when read: only a different period reloads.
+    const periodChanged = !sameTimeRange(timeRange, filters.timeRange);
+    if (periodChanged) {
+      timeRange = filters.timeRange;
+      dateRange = dateRangeFromSignalTimeRange(timeRange);
+    }
+    // Bulk counters also depend on the date basis and the B display exclusions.
+    const dateChanged = periodChanged || dateBasis !== filters.dateBasis
+      || JSON.stringify(vivierBExclusions) !== JSON.stringify(filters.exclusions);
+    dateBasis = filters.dateBasis;
+    vivierBExclusions = filters.exclusions;
+    lotDataFilter = filters.lots;
+    zoneKindFilter = filters.zoneKinds;
+    zoneMillesimeFilter = filters.zoneMillesime;
+    citySearch = filters.citySearch ?? "";
+    zoneSearch = filters.zoneSearch ?? "";
+    lotSearch = filters.lotSearch ?? "";
+    const cptaqChanged = cptaqEnabled !== filters.cptaqEnabled;
+    cptaqEnabled = filters.cptaqEnabled ?? false;
+    if (cptaqChanged) {
+      if (!cptaqEnabled) clearCptaq();
+      else if (selectedCity && cptaqAvailable) void loadCptaq(selectedCity.municipality.slug);
+    }
+    applyActiveSubsetKey(subsetFromGeoFilters(route.state.filters));
+    if (dateChanged) void load();
+    updateGeoLayers();
 
     if (route.level === "region") {
       // Au montage / restauration d'URL, la carte démarre déjà au niveau
@@ -1911,12 +1923,17 @@
     if (!entry) return;
 
     await selectCity(entry, { syncUrl: false });
+    if (layersChanged) void loadGeoForCity(entry.municipality.slug);
 
     if (route.level === "zone") {
       pendingRouteZoneKey = route.zoneKey;
+      pendingRouteLotId = route.state.focused?.kind === "lot" ? route.state.focused.id : null;
       applyPendingRouteZone();
     } else {
       pendingRouteZoneKey = null;
+      pendingRouteLotId = null;
+      selectionState = clearSelectionGroup(clearSelectionGroup(selectionState, "lot"), "zone");
+      selectionState = setFocus(selectionState, makeKey("municipality", entry.municipality.slug));
     }
   }
 
@@ -1942,22 +1959,36 @@
     );
     if (!zone) return;
     selectBucketKey(makeKey("zone", `${citySlug}/${zone.properties.code}`));
+    if (pendingRouteLotId?.startsWith(`${citySlug}/`)) {
+      const lotKey = makeKey("lot", pendingRouteLotId);
+      if (!selectionState.selectedKeys.has(lotKey)) {
+        selectionState = toggleExclusiveSelection(selectionState, lotKey, ["lot"]);
+      }
+      selectionState = setFocus(selectionState, lotKey);
+      updateGeoLayers();
+    }
+    pendingRouteLotId = null;
     pendingRouteZoneKey = null;
   }
 
   function syncRouteForSelectionKey(key: SelectionKey): void {
     const parsed = parseKey(key);
     if (!parsed) return;
-    // C3 — sélectionner un LOT désélectionne la zone : si l'URL est au niveau
-    // zone, on la ramène au niveau ville (cohérence URL ↔ sélection exclusive).
+    // Keep the active zone and lot focus in the existing selection grammar.
     if (parsed.kind === "lot") {
       if (geoRoute?.level === "zone") {
         navigateToGeoRoute({
-          level: "city",
+          level: "zone",
           citySlug: geoRoute.citySlug,
+          zoneKey: geoRoute.zoneKey,
           state: {
             mode: geoRoute.state.mode ?? "signal",
-            filters: { subset: persistedSubsetKey.split("|") },
+            filters: currentGeoFilters(),
+            selected: [...selectionState.selectedKeys].flatMap((selected) => {
+              const ref = parseKey(selected);
+              return ref && (ref.kind === "zone" || ref.kind === "lot") ? [ref] : [];
+            }),
+            focused: selectionState.focusedKey === key ? { kind: "lot", id: parsed.id } : null,
           },
         });
       }
@@ -1974,7 +2005,7 @@
       zoneKey,
       state: {
         mode: geoRoute?.state.mode ?? "signal",
-        filters: { subset: persistedSubsetKey.split("|") },
+        filters: currentGeoFilters(),
       },
     });
   }
@@ -2387,17 +2418,9 @@
   }
 
   // ── Chargement API ─────────────────────────────────────────────────────────
-  // #4 — borne date locale → ISO YYYY-MM-DD pour le serveur date-aware. null
-  // (fenêtre « Illimité ») → aucune borne envoyée (= all-time).
-  function toApiDate(d: Date | null): string | null {
-    if (!d) return null;
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
-  }
-
+  let bulkLoadVersion = 0;
   async function load() {
+    const version = ++bulkLoadVersion;
     loading = true;
     loadError = null;
     try {
@@ -2405,29 +2428,29 @@
       // date-cohérents avec le filtre date actif → fin du 0/50 (parité globale,
       // pas seulement la ville sélectionnée). Sans borne = all-time (Illimité).
       const res = await fetchGraphSignalsByCity("", {
-        dateFrom: toApiDate(dateRange.start),
-        dateTo: toApiDate(dateRange.end),
+        ...signalDocumentDateWindow(dateRange, dateBasis),
+        excludePiia: vivierBExclusions.piiaSansProjetResidentiel,
+        excludeDerogations: vivierBExclusions.derogationsMineures,
       });
+      if (version !== bulkLoadVersion) return;
       graphItems = res.cities;
     } catch (e) {
+      if (version !== bulkLoadVersion) return;
       console.warn("Signals by city load failed:", e);
       loadError = "Données des signaux indisponibles.";
     } finally {
-      loading = false;
+      if (version === bulkLoadVersion) loading = false;
     }
   }
 
   onMount(() => {
+    if (!geoRoute) syncFilterRoute();
     // Restaurer le filtre depuis l'URL au premier chargement
-    const initialSubsetKey = subsetKeyFromRoute(geoRoute);
-    if (initialSubsetKey !== activeSubsetKey) {
-      applyActiveSubsetKey(initialSubsetKey);
-    }
     // m5 — restaurer les préférences d'affichage des libellés (persistance
     // session). Défaut si rien de persisté : n° de zone AFFICHÉ, n° de lot masqué.
     showLotLabels = readLabelPref(LOT_LABELS_LS_KEY, false);
     showZoneLabels = readLabelPref(ZONE_LABELS_LS_KEY, true);
-    cptaqEnabled = readLabelPref(CPTAQ_LS_KEY, false);
+    // Overlay activation is authoritative in the shared URL.
     void load();
     // L'init MapLibre est portée par le socle GeoCityMapBase (cf. template).
   });
@@ -2452,12 +2475,16 @@
       initialSubsetKey={activeSubsetKey}
       exclusions={vivierBExclusions}
       {timeRange}
+      {dateBasis}
       {selectedCityLiveCount}
+      {citySearch}
+      onCitySearchChange={(query) => { citySearch = query; syncFilterRoute(); }}
       onSelectCity={selectCity}
       onRefresh={load}
       onFilterChange={handleFilterChange}
       onExclusionsChange={handleExclusionsChange}
       onTimeRangeChange={handleTimeRangeChange}
+      onDateBasisChange={handleDateBasisChange}
     />
   </svelte:fragment>
 
@@ -2755,12 +2782,16 @@
       {selectionState}
       activeSubsetKey=""
       lotFilter={lotDataFilter}
+      zoneSearchQuery={zoneSearch}
+      lotSearchQuery={lotSearch}
+      onZoneSearchChange={(query) => { zoneSearch = query; syncFilterRoute(); }}
+      onLotSearchChange={(query) => { lotSearch = query; syncFilterRoute(); }}
       onLotFilterChange={handleLotDataFilterChange}
       {zoneKindFilter}
       onZoneKindFilterChange={handleZoneKindFilterChange}
       {zoneMillesimeFilter}
       onZoneMillesimeFilterChange={handleZoneMillesimeFilterChange}
-      onClear={() => clearSelection()}
+      onClear={() => handleGeoLevelClick("Province")}
       onToggleKey={toggleBucketKey}
       onOpenDocument={openDocument}
       onOpenEvidence={openEvidence}

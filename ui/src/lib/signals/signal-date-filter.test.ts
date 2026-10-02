@@ -3,10 +3,9 @@ import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 import {
   dateRangeFromSignalTimeRange,
   defaultSignalTimeRange,
-  filterNodesByEtapeDate,
+  filterNodesByDocumentDate,
   formatSignalTimeRange,
   normalizeSignalTimeRange,
-  signalEtapeDate,
 } from "./signal-date-filter.js";
 
 function node(id: string, props: Record<string, unknown>): GraphSignalNode {
@@ -49,7 +48,7 @@ describe("signal date filter", () => {
       node("recent", { etapeDate: "2026-06-01" }),
       node("sans-date", {}),
     ];
-    expect(filterNodesByEtapeDate(nodes, dateRange).map((n) => n.id)).toEqual([
+    expect(filterNodesByDocumentDate(nodes, dateRange).map((n) => n.id)).toEqual([
       "ancien",
       "recent",
       "sans-date",
@@ -99,10 +98,10 @@ describe("signal date filter", () => {
     expect(formatted).toBe("2025-07-17 – 2025-08-28");
   });
 
-  it("should read an etape date from graph properties", () => {
-    const dated = node("dated", { properties: { etape_date: "2026-06-15" } });
-
-    expect(signalEtapeDate(dated)?.toISOString().slice(0, 10)).toBe("2026-06-15");
+  it("should use persisted documentary refs rather than an event date", () => {
+    const dated = node("dated", { refs: [{ publishedAt: "2026-06-15" }], properties: { etape_date: "2025-01-01" } });
+    expect(filterNodesByDocumentDate([dated], { start: new Date(2026, 5, 15), end: new Date(2026, 5, 15) }))
+      .toEqual([dated]);
   });
 
   it("should retain a date-only signal on the selected day in America/Toronto", () => {
@@ -110,15 +109,12 @@ describe("signal date filter", () => {
     process.env.TZ = "America/Toronto";
 
     try {
-      const dated = node("dated", { etape_date: "2026-06-15" });
-      const parsed = signalEtapeDate(dated);
-      const visible = filterNodesByEtapeDate([dated], {
+      const dated = node("dated", { refs: [{ publishedAt: "2026-06-15" }] });
+      const visible = filterNodesByDocumentDate([dated], {
         start: new Date(2026, 5, 15),
         end: new Date(2026, 5, 15),
       });
 
-      expect(parsed?.getHours()).toBe(0);
-      expect(parsed?.getDate()).toBe(15);
       expect(visible.map(({ id }) => id)).toEqual(["dated"]);
     } finally {
       if (originalTimezone === undefined) delete process.env.TZ;
@@ -126,16 +122,23 @@ describe("signal date filter", () => {
     }
   });
 
-  it("should narrow dated signals while retaining signals with no usable date", () => {
-    const visible = filterNodesByEtapeDate(
+  it("should exclude undated results from a bounded document period", () => {
+    const visible = filterNodesByDocumentDate(
       [
-        node("recent", { etape_date: "2026-07-01" }),
-        node("old", { etape_date: "2025-11-01" }),
+        node("recent", { refs: [{ publishedAt: "2026-07-01" }] }),
+        node("old", { refs: [{ publishedAt: "2025-11-01" }] }),
         node("undated", {}),
       ],
-      { start: new Date("2026-06-01"), end: new Date("2026-07-31") },
+      { start: new Date(2026, 5, 1), end: new Date(2026, 6, 31) },
     );
 
-    expect(visible.map(({ id }) => id)).toEqual(["recent", "undated"]);
+    expect(visible.map(({ id }) => id)).toEqual(["recent"]);
+  });
+
+  it("should change only the document clock when scrape mode is selected", () => {
+    const old = node("old", { refs: [{ publishedAt: "2025-11-01", fetchedAt: "2026-07-01T12:00:00Z" }] });
+    const period = { start: new Date(2026, 5, 1), end: new Date(2026, 6, 31) };
+    expect(filterNodesByDocumentDate([old], period)).toEqual([]);
+    expect(filterNodesByDocumentDate([old], period, "scrap")).toEqual([old]);
   });
 });

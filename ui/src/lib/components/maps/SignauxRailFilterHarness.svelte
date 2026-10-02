@@ -21,7 +21,7 @@
     applyVivierBExclusions,
     DEFAULT_VIVIER_B_EXCLUSIONS,
     type VivierBExclusions,
-  } from "$lib/signals/vivier-b-display-filter.js";
+  } from "@radar/domain";
 
   export let entries: CityMapEntry[] = [];
   export let detailNodes: GraphSignalNode[] = [];
