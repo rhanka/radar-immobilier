@@ -40,10 +40,24 @@ describe("shareable geographic restrictions", () => {
     expect(writeGeoFilters(state)).toEqual({ dateFrom: ["2026-06-01"], dateTo: ["2026-06-30"] });
   });
 
-  it("should normalize a zones-only link without losing its restriction", () => {
-    const state = readGeoFilters(parseGeoQuery("?lots=off").filters);
-    expect(state.lotsEnabled).toBe(false);
-    expect(writeGeoFilters(state)).toEqual({ lots: ["0"] });
+  it("should keep the defaults for an old zones-only link and add its layer restriction", () => {
+    for (const query of ["?lots=off", "?lots=0", "?layers=zones"]) {
+      const state = readGeoFilters(parseGeoQuery(query).filters);
+      expect(state.lotsEnabled).toBe(false);
+      expect(writeGeoFilters(state)).toEqual({
+        zonage: ["1"], residentiel: ["1"], precoce: ["1"], excludePiia: ["1"], excludeDerogations: ["1"],
+        period: ["6mo"], lots: ["0"],
+      });
+    }
+  });
+
+  it("should treat a zones-only restriction with filter parameters as a snapshot", () => {
+    for (const query of ["?filter.lots=0", "?lots=0&filter.zonage=1"]) {
+      const state = readGeoFilters(parseGeoQuery(query).filters);
+      expect(state.lotsEnabled).toBe(false);
+      expect(state.exclusions.piiaSansProjetResidentiel).toBe(false);
+      expect(state.timeRange.relative).toBe("all");
+    }
   });
 
   it("should retain disabled axes in old residual-vivier links", () => {
