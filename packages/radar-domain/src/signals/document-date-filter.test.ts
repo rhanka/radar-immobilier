@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { documentRefCivilDate, matchesDocumentDateWindow } from "./document-date-filter.js";
+import { documentRefCivilDate, matchesDocumentDateWindow, resultCivilDates, signalStageCivilDate } from "./document-date-filter.js";
 
 const period = { dateFrom: "2026-09-29", dateTo: "2026-09-30" };
 const september = { publishedAt: "2026-09-29", fetchedAt: "2026-09-29T12:00:00.000Z" };
@@ -20,8 +20,8 @@ describe("document date window", () => {
       .toEqual(["event-lot", "signal-lot", "event-parcs", "signal-parcs"]);
   });
 
-  it("does not read event dates, node creation, or S3-enriched DTO dates", () => {
-    expect(matchesDocumentDateWindow({ etape_date: "2026-09-29", createdAt: "2026-09-29",
+  it("does not read node creation or S3-enriched DTO dates", () => {
+    expect(matchesDocumentDateWindow({ createdAt: "2026-09-29",
       docRefs: [september], publishedAt: "2026-09-29" }, period)).toBe(false);
     expect(matchesDocumentDateWindow({ refs: [{ publishedAt: "2026-07-28" }],
       docRefs: [september] }, period)).toBe(false);
@@ -80,5 +80,34 @@ describe("document date window", () => {
       expect(matchesDocumentDateWindow(props)).toBe(true);
       expect(matchesDocumentDateWindow(props, { dateBasis: "scrap" })).toBe(true);
     }
+  });
+
+  it("falls back to the signal stage date when a reference has no documentary date (document basis only)", () => {
+    const stageOnly = { refs: [{ rawRef: "raw/a.pdf", fetchedAt: "2026-09-30T12:00:00.000Z" }],
+      properties: { etape_date: "2026-09-29" }, createdAt: "2026-09-29" };
+    expect(matchesDocumentDateWindow(stageOnly, period)).toBe(true);
+    expect(matchesDocumentDateWindow(stageOnly, { dateFrom: "2026-07-01", dateTo: "2026-07-31" })).toBe(false);
+    // Scrape basis never reads the stage date.
+    expect(matchesDocumentDateWindow({ ...stageOnly, refs: [{ rawRef: "raw/a.pdf" }] },
+      { ...period, dateBasis: "scrap" })).toBe(false);
+    // A result without references is placed by its stage date alone.
+    expect(matchesDocumentDateWindow({ etapeDate: "2026-09-30" }, period)).toBe(true);
+  });
+
+  it("keeps a dated reference authoritative and adds the stage date only for undated references", () => {
+    expect(matchesDocumentDateWindow({ refs: [july], properties: { etape_date: "2026-09-29" } }, period)).toBe(false);
+    expect(resultCivilDates({ refs: [july, { rawRef: "raw/b.pdf" }], properties: { etape_date: "2026-09-29" } }))
+      .toEqual(["2026-07-28", "2026-09-29"]);
+    expect(resultCivilDates({ refs: [july], properties: { etape_date: "2026-09-29" } }, "scrap")).toEqual(["2026-09-30"]);
+  });
+
+  it("reads stage keys nested first, ignores partial values and never uses createdAt", () => {
+    expect(signalStageCivilDate({ properties: { meeting_date: "2026-09-29" }, date: "2026-01-01" })).toBe("2026-09-29");
+    expect(signalStageCivilDate({ properties: { etape_date: "2026-09-29T19:00:00-04:00" } })).toBe("2026-09-29");
+    expect(signalStageCivilDate({ properties: { etape_date: "2026-09" } })).toBeNull();
+    expect(signalStageCivilDate({ properties: { etape_date: "2026-02-31" } })).toBeNull();
+    expect(signalStageCivilDate({ createdAt: "2026-09-29T12:00:00Z" })).toBeNull();
+    expect(matchesDocumentDateWindow({ createdAt: "2026-09-29T12:00:00Z", refs: [{ rawRef: "raw/a.pdf" }] }, period))
+      .toBe(false);
   });
 });

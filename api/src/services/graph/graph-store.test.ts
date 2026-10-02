@@ -608,7 +608,7 @@ describe("server-side signal date windows", () => {
     sourceRef: null,
   });
 
-  it("filters every projection rail using only persisted documentary refs", () => {
+  it("filters every projection rail on persisted documentary refs, with the stage date as fallback", () => {
     const rows = [
       datedSignal("root-ref-in", { refs: [{ publishedAt: "2026-01-10" }] }),
       datedSignal("nested-ref-in", { properties: { refs: [{ publishedAt: "2026-02-10" }] } }),
@@ -618,7 +618,8 @@ describe("server-side signal date windows", () => {
       datedSignal("proven-date-in", { refs: [{ documentDate: { status: "known", value: "2026-02-20", precision: "day" } }] }),
       datedSignal("multi-doc-in", { refs: [{ publishedAt: "2025-01-01" }, { publishedAt: "2026-03-01" }] }),
       datedSignal("out", { refs: [{ publishedAt: "2026-04-10" }] }),
-      datedSignal("event-date-only", { properties: { etape_date: "2026-02-10" } }),
+      // No documentary ref: the stage date read in the document places the result.
+      datedSignal("stage-date-only-in", { properties: { etape_date: "2026-02-10" } }),
       datedSignal("node-publication-only", { publishedAt: "2026-02-20" }),
       datedSignal("no-date", {}),
       datedSignal("invalid-date", { refs: [{ publishedAt: "not-a-date" }] }),
@@ -633,9 +634,9 @@ describe("server-side signal date windows", () => {
       dateTo: "2026-03-31",
     })[0]!;
 
-    expect(aggregate.signalCount).toBe(5);
-    expect(aggregate.subsetCounts["z|m|p"]).toBe(5);
-    expect(aggregate.vivierV2Counts).toMatchObject({ total: 5, qualified: 5 });
+    expect(aggregate.signalCount).toBe(6);
+    expect(aggregate.subsetCounts["z|m|p"]).toBe(6);
+    expect(aggregate.vivierV2Counts).toMatchObject({ total: 6, qualified: 6 });
   });
 
   it("uses the explicitly selected scrape calendar across all aggregate counters", () => {
