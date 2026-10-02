@@ -203,6 +203,15 @@ describe("GET /api/graph-signals/by-city", () => {
     expect(listCitiesWithSignalNodes).toHaveBeenCalledWith(mockDb);
   });
 
+  it("forwards the explicit scrape basis and display exclusions even without date bounds", async () => {
+    vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([]);
+    const res = await freshRoute().request("/api/graph-signals/by-city?dateBasis=scrap&excludePiia=1&excludeDerogations=1");
+    expect(res.status).toBe(200);
+    expect(listCitiesWithSignalNodes).toHaveBeenCalledWith(mockDb, {
+      dateBasis: "scrap", excludePiia: true, excludeDerogations: true,
+    });
+  });
+
   it("returns city list with legacy subset counts and v2 named counters", async () => {
     vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([
       {
