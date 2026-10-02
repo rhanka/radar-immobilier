@@ -5,7 +5,7 @@
  * (graphify pipeline, ~197 villes), NOT the old ontology project-state.
  */
 
-import type { VivierV2Counts } from "@radar/domain";
+import type { DocumentDateBasis, VivierV2Counts } from "@radar/domain";
 
 export interface GraphSignalCityItem {
   citySlug: string;
@@ -45,6 +45,9 @@ export interface GraphSignalsByCityResponse {
 export interface GraphSignalsByCityOptions {
   dateFrom?: string | null;
   dateTo?: string | null;
+  dateBasis?: DocumentDateBasis;
+  excludePiia?: boolean;
+  excludeDerogations?: boolean;
 }
 
 export async function fetchGraphSignalsByCity(
@@ -54,6 +57,9 @@ export async function fetchGraphSignalsByCity(
   const params = new URLSearchParams();
   if (opts.dateFrom) params.set("dateFrom", opts.dateFrom);
   if (opts.dateTo) params.set("dateTo", opts.dateTo);
+  if (opts.dateBasis === "scrap") params.set("dateBasis", "scrap");
+  if (opts.excludePiia) params.set("excludePiia", "1");
+  if (opts.excludeDerogations) params.set("excludeDerogations", "1");
   const qs = params.toString();
   const res = await fetch(
     `${baseUrl}/api/graph-signals/by-city${qs ? `?${qs}` : ""}`,
