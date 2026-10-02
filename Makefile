@@ -727,8 +727,10 @@ RECOVERY_TIMEOUT_SECONDS ?= 5700
 .PHONY: document-date-recovery-validate
 document-date-recovery-validate: ## Render the preprod documentary-date recovery Job offline
 	@command -v $(KUBECTL) >/dev/null 2>&1 || { echo "[document-date-recovery] kubectl not found"; exit 1; }
-	@sed -e "s#__IMAGE__#ghcr.io/rhanka/radar-api:validate#" -e "s#__RECOVERY_ARGS__##" $(DOCUMENT_DATE_RECOVERY_JOB) \
-	  | $(KUBECTL) create --dry-run=client --validate=false -f - -o name >/dev/null
+	@set -euo pipefail; work="$$(mktemp -d)"; trap 'rm -rf "$$work"' EXIT; \
+	  sed -e "s#__IMAGE__#ghcr.io/rhanka/radar-api:validate#" -e "s#__RECOVERY_ARGS__##" $(DOCUMENT_DATE_RECOVERY_JOB) >"$$work/job.yaml"; \
+	  printf "resources:\n  - job.yaml\n" >"$$work/kustomization.yaml"; \
+	  $(KUBECTL) kustomize "$$work" >"$$work/out.yaml"; grep -q "^kind: Job$$" "$$work/out.yaml"
 	@grep -q 'namespace: $(DOCUMENT_DATE_RECOVERY_NAMESPACE)$$' $(DOCUMENT_DATE_RECOVERY_JOB)
 	@echo "[document-date-recovery] offline render ok"
 
