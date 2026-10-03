@@ -692,4 +692,11 @@ describe("runRecueil — oversize documents and the attempt journal (#805)", () 
     await runRecueil("proces-verbaux-vsad", adapterWith(["dead", "pv"], "", "dead"), new MemoryStore(), { journal });
     expect(events.slice(0, 2)).toEqual([`open ${url("dead")}`, `close ${url("dead")} failed`]);
   });
+
+  it("never closes an attempt it did not open", async () => {
+    const { journal, events } = recordingJournal();
+    await runRecueil("proces-verbaux-vsad", adapterWith(["pv"], ""), new MemoryStore(), {
+      journal, beforeFetch: async () => { throw new Error("pacing hook failed"); } });
+    expect(events).toEqual([]);
+  });
 });

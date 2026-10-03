@@ -1,4 +1,5 @@
 import type { ObjectStore } from "../../storage/object-store.js";
+import { isMissingObjectError } from "../../storage/s3-object-store.js";
 import type { RecueilDocumentJournal, RecueilSetAsideDocument, RecueilSetAsideReason } from "./recueil.js";
 import type { RunManifestEntry } from "./run-manifest.js";
 
@@ -142,6 +143,18 @@ export interface CollectedUrlsState extends DocumentMarks {
    * bootstrap happens once instead of every night.
    */
   readonly fromState: boolean;
+  /**
+   * `true` when the store FAILED to answer (an S3 fault other than "absent").
+   * The run still downloads fail-open, but must write NOTHING back: the object
+   * on storage may hold set-aside marks that cannot be rebuilt from manifests.
+   */
+  readonly unreadable: boolean;
+}
+
+/** An S3 client error (every one carries `$metadata`) that does not mean "absent". */
+function isStoreFault(error: unknown): boolean {
+  return typeof (error as { $metadata?: unknown } | null)?.$metadata === "object"
+    && !isMissingObjectError(error);
 }
 
 /** Parse the JSONL state body. A malformed line costs one re-download. */
@@ -196,15 +209,17 @@ export async function loadCollectedUrls(
   store: ObjectStore,
   source: string,
 ): Promise<CollectedUrlsState> {
+  let unreadable = false;
   try {
     const text = decoder.decode(await store.get(collectedUrlsKey(source)));
-    return { ...parseStateBody(text), fromState: true };
-  } catch {
+    return { ...parseStateBody(text), fromState: true, unreadable };
+  } catch (error) {
     // Absent (the normal first-run case) or unreadable — fall through to the
     // one-off bootstrap below.
+    unreadable = isStoreFault(error);
   }
   return { urls: await bootstrapFromRunManifests(store, source), setAside: new Map(),
-    attempts: new Map(), fromState: false };
+    attempts: new Map(), fromState: false, unreadable };
 }
 
 /**
@@ -306,18 +321,25 @@ export async function saveCollectedUrls(
  *
  * `changed()` tells the caller to write the state back at the end of the city
  * even when no URL was added.
+ *
+ * An `oversize` mark holds only while the run's cap (`maxDocumentBytes`,
+ * omitted = none) is not above the cap it was made under: raising the cap lets
+ * the document be tried once more, and a caller with no cap is not bound by
+ * another caller's. `oom-suspected` marks hold until removed by hand.
  */
 export function guardDocumentJournal(
   store: ObjectStore,
   source: string,
   state: CollectedUrlsState,
   now: () => Date = () => new Date(),
+  maxDocumentBytes = Number.POSITIVE_INFINITY,
 ): RecueilDocumentJournal & { changed(): boolean } {
   let changed = false;
   return {
     setAside(url) {
       const mark = state.setAside.get(url);
-      if (mark) return { url, ...mark, newlySetAside: false };
+      const outgrown = mark?.reason === "oversize" && maxDocumentBytes > (mark.capBytes ?? Number.POSITIVE_INFINITY);
+      if (mark && !outgrown) return { url, ...mark, newlySetAside: false };
       const attempt = state.attempts.get(url);
       if (!attempt || attempt.open < OOM_SUSPECTED_ATTEMPTS) return undefined;
       const quarantined: SetAsideMark = {
@@ -335,6 +357,8 @@ export function guardDocumentJournal(
     },
     close(url, settlement) {
       if (state.attempts.delete(url)) changed = true;
+      // Collected under a raised cap: the old oversize mark no longer applies.
+      if (settlement === "collected" && state.setAside.delete(url)) changed = true;
       if (typeof settlement === "object") {
         const { url: _url, newlySetAside: _newlySetAside, ...mark } = settlement;
         state.setAside.set(url, mark);
