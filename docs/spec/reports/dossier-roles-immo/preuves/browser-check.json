@@ -1,0 +1,534 @@
+{
+  "status": "pass",
+  "checkedAt": "2026-10-03T13:27:40.493Z",
+  "url": "file:///home/antoinefa/src/radar-immobilier/.worktrees/dossier-roles-immo/docs/spec/reports/dossier-roles-immo/focus/../decision-focus.html",
+  "chromiumCdpPort": "9244",
+  "offline": {
+    "url": "file:///home/antoinefa/src/radar-immobilier/.worktrees/dossier-roles-immo/docs/spec/reports/dossier-roles-immo/decision-focus.html",
+    "title": "Rôles et droits de décision dans radar-immobilier : application du modèle de rôles humains issu du quorum h2a",
+    "external": 0,
+    "blockedExternal": true
+  },
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "scenes": [
+    {
+      "sceneId": "roles-perimetres",
+      "sceneHash": "829e1ee23005241c27d180a06dacad49377f59f37274ea79ab2e84573d12f8c3",
+      "initialScale": 0.543118,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 13,
+      "edges": 11,
+      "groups": 4,
+      "edgeLabels": 11,
+      "panel": {
+        "left": 40,
+        "top": 9122.4375,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.99874451776594,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "matrice-decide-valide",
+      "sceneHash": "2cbebc788a7a5355e272898ad5cb421c517a0032220d4b77b9a8a3b2c6c26b09",
+      "initialScale": 0.222482,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 15,
+      "edges": 12,
+      "groups": 4,
+      "edgeLabels": 12,
+      "panel": {
+        "left": 40,
+        "top": 10398.375,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.99776245943491,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "circuit-validation",
+      "sceneHash": "85617eedfb3611abe8e439e005a6e31b137d7ae2907ec808925bfa2876776703",
+      "initialScale": 0.272986,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 12,
+      "edges": 12,
+      "groups": 7,
+      "edgeLabels": 12,
+      "panel": {
+        "left": 40,
+        "top": 11674.3125,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.99772309752149,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "deux-branches-d10",
+      "sceneHash": "e93f943aaacda2d24b0167fea63ff51b16c12606fb6fab308cd438b4c67545b6",
+      "initialScale": 0.278846,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 12,
+      "edges": 13,
+      "groups": 5,
+      "edgeLabels": 7,
+      "panel": {
+        "left": 40,
+        "top": 12950.25,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.99761405040776,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "immo-vs-geo",
+      "sceneHash": "06d96a3157d0aa2d498244d08764af493b1a5706b3dd72f11ab7eaa463df194d",
+      "initialScale": 0.35316,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 18,
+      "edges": 11,
+      "groups": 6,
+      "edgeLabels": 9,
+      "panel": {
+        "left": 40,
+        "top": 14233.9375,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.99859305980293,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "scenesAt1920": [
+    {
+      "sceneId": "roles-perimetres",
+      "sceneHash": "829e1ee23005241c27d180a06dacad49377f59f37274ea79ab2e84573d12f8c3",
+      "initialScale": 0.614591,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 13,
+      "edges": 11,
+      "groups": 4,
+      "edgeLabels": 11,
+      "panel": {
+        "left": 52.5,
+        "top": 8346.03125,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.9985971361442,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "matrice-decide-valide",
+      "sceneHash": "2cbebc788a7a5355e272898ad5cb421c517a0032220d4b77b9a8a3b2c6c26b09",
+      "initialScale": 0.244145,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 15,
+      "edges": 12,
+      "groups": 4,
+      "edgeLabels": 12,
+      "panel": {
+        "left": 52.5,
+        "top": 9679.640625,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99874562247844,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "circuit-validation",
+      "sceneHash": "85617eedfb3611abe8e439e005a6e31b137d7ae2907ec808925bfa2876776703",
+      "initialScale": 0.365149,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 12,
+      "edges": 12,
+      "groups": 7,
+      "edgeLabels": 12,
+      "panel": {
+        "left": 52.5,
+        "top": 11013.25,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 70.00032007481877,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "deux-branches-d10",
+      "sceneHash": "e93f943aaacda2d24b0167fea63ff51b16c12606fb6fab308cd438b4c67545b6",
+      "initialScale": 0.372987,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 12,
+      "edges": 13,
+      "groups": 5,
+      "edgeLabels": 7,
+      "panel": {
+        "left": 52.5,
+        "top": 12346.859375,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99814588041943,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "immo-vs-geo",
+      "sceneHash": "06d96a3157d0aa2d498244d08764af493b1a5706b3dd72f11ab7eaa463df194d",
+      "initialScale": 0.387546,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 18,
+      "edges": 11,
+      "groups": 6,
+      "edgeLabels": 9,
+      "panel": {
+        "left": 52.5,
+        "top": 13710.546875,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99925089537759,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "choices": {
+    "blocks": 18,
+    "single": 18,
+    "radio": 55,
+    "recommended": 18,
+    "selected": [
+      "a"
+    ],
+    "decides": [
+      "Fabien",
+      "Fabien",
+      "Farid",
+      "Farid",
+      "Fabien",
+      "Farid",
+      "Farid",
+      "Fabien",
+      "Fabien",
+      "Fabien",
+      "Farid",
+      "Farid",
+      "Fabien",
+      "Fabien",
+      "Fabien",
+      "Fabien",
+      "Farid",
+      "Fabien"
+    ],
+    "persisted": {
+      "D7": "a",
+      "D16": "b"
+    },
+    "defer": 18,
+    "jsonControls": 0,
+    "copyButton": "Copier mes décisions (YAML)",
+    "steps": "1. Copier, 2. ouvrir la PR, 3. coller dans un commentaire.",
+    "person": "Farid",
+    "scope": "mine",
+    "link": {
+      "href": "https://github.com/rhanka/radar-immobilier/pull/795",
+      "target": "_blank",
+      "rel": "noopener",
+      "text": "Ouvrir la PR #795 sur GitHub"
+    },
+    "header": [
+      "```yaml",
+      "dossier: \"Rôles et droits de décision dans radar-immobilier : application du modèle de rôles humains issu du quorum h2a\"",
+      "fichier: DOSSIER_DECISION_ROLES_IMMO_2026-10-03.md",
+      "version: \"r1 · sha256:11c750ce6ad27669e6050ac2e0645ccdfde3e7b7847e4568977081d9f0363811\"",
+      "decideur: Farid",
+      "date: \"2026-10-03T09:27:32-04:00\"",
+      "coller_dans: \"https://github.com/rhanka/radar-immobilier/pull/795\"",
+      "decisions:"
+    ],
+    "entries": [
+      {
+        "id": "D3",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D4",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D5",
+        "role": "valide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D6",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D7",
+        "role": "decide",
+        "option": "a",
+        "statut": "tranchee"
+      },
+      {
+        "id": "D8",
+        "role": "valide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D9",
+        "role": "valide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D10",
+        "role": "valide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D11",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D12",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D17",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      }
+    ],
+    "answered": [
+      "D7"
+    ]
+  },
+  "copy": {
+    "realClick": "copied",
+    "clipboardMatchesZone": true,
+    "status": "11 décision(s) copiée(s) en YAML. Ouvrez la PR et collez-les dans un commentaire.",
+    "forcedRefusal": {
+      "message": "Copie refusée par le navigateur (fréquent dans un artefact publié). Le bloc YAML ci-dessous est sélectionné : copiez-le avec Ctrl+C (Cmd+C sur Mac), puis collez-le dans un commentaire de la PR.",
+      "focused": true,
+      "selectedAll": true
+    },
+    "hasDecisions": true
+  },
+  "exportFilter": {
+    "faridMine": 11,
+    "all": 18,
+    "fabienMine": 13,
+    "fabienDecideur": "decideur: Fabien",
+    "fabienRoles": {
+      "D1": "decide",
+      "D2": "decide",
+      "D5": "decide",
+      "D8": "decide",
+      "D9": "decide",
+      "D10": "decide",
+      "D11": "valide",
+      "D12": "valide",
+      "D13": "decide",
+      "D14": "decide",
+      "D15": "decide",
+      "D16": "decide",
+      "D18": "decide"
+    },
+    "allOptions": {
+      "D7": "a",
+      "D16": "b"
+    }
+  },
+  "oneToOne": [
+    {
+      "sceneId": "roles-perimetres",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 8346.03125,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "matrice-decide-valide",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 9679.640625,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "circuit-validation",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 11013.25,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "deux-branches-d10",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 12346.859375,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "immo-vs-geo",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 13710.546875,
+        "width": 1800,
+        "height": 900
+      }
+    }
+  ],
+  "overview": [
+    {
+      "sceneId": "roles-perimetres",
+      "clip": {
+        "x": 52.5,
+        "y": 8346.03125,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "matrice-decide-valide",
+      "clip": {
+        "x": 52.5,
+        "y": 9679.640625,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "circuit-validation",
+      "clip": {
+        "x": 52.5,
+        "y": 11013.25,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "deux-branches-d10",
+      "clip": {
+        "x": 52.5,
+        "y": 12346.859375,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "immo-vs-geo",
+      "clip": {
+        "x": 52.5,
+        "y": 13710.546875,
+        "width": 1800,
+        "height": 900
+      }
+    }
+  ],
+  "captures": [
+    ".generated/dossier-preview-1440x1000.png",
+    ".generated/dossier-preview-1920x1080.png",
+    ".generated/scene-1a1-roles-perimetres.png",
+    ".generated/scene-1a1-matrice-decide-valide.png",
+    ".generated/scene-1a1-circuit-validation.png",
+    ".generated/scene-1a1-deux-branches-d10.png",
+    ".generated/scene-1a1-immo-vs-geo.png",
+    ".generated/scene-vue-ensemble-roles-perimetres.png",
+    ".generated/scene-vue-ensemble-matrice-decide-valide.png",
+    ".generated/scene-vue-ensemble-circuit-validation.png",
+    ".generated/scene-vue-ensemble-deux-branches-d10.png",
+    ".generated/scene-vue-ensemble-immo-vs-geo.png"
+  ],
+  "consoleErrors": [],
+  "runtimeErrors": [],
+  "externalRequests": []
+}

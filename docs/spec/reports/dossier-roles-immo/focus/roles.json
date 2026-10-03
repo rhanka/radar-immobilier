@@ -1,0 +1,20 @@
+{
+ "D1": ["Fabien", "Steve, Farid, Mathieu", ""],
+ "D2": ["Fabien", "Farid", ""],
+ "D3": ["Farid", "Fabien, Mathieu, Steve", ""],
+ "D4": ["Farid", "Fabien", ""],
+ "D5": ["Fabien", "—", "Validation PO : Farid"],
+ "D6": ["Farid", "Steve, Fabien", ""],
+ "D7": ["Farid", "Mathieu, Steve, Fabien", ""],
+ "D8": ["Fabien", "—", "Validation PO : Farid"],
+ "D9": ["Fabien", "Steve (informé)", "Validation PO : Farid"],
+ "D10": ["Fabien", "—", "Validation PO : Farid (forme adressée au PO)"],
+ "D11": ["Farid", "Mathieu", "Validation AI Builder : Fabien (canal, archivage)"],
+ "D12": ["Farid", "Mathieu", "Validation AI Builder : Fabien (outillage)"],
+ "D13": ["Fabien", "Farid", ""],
+ "D14": ["Fabien", "Farid, Mathieu, Steve", ""],
+ "D15": ["Fabien", "Farid", ""],
+ "D16": ["Fabien", "Farid ; chaque personne confirme son association", ""],
+ "D17": ["Farid", "Mathieu, Fabien", ""],
+ "D18": ["Fabien", "Farid", ""]
+}

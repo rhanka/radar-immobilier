@@ -1,0 +1,46 @@
+{
+  "output": "docs/spec/reports/dossier-roles-immo/decision-focus.html",
+  "bytes": 724844,
+  "htmlSha256": "e8ab90cd0f6577f63f86ebebd61443b78210605f6641c3f0d339b8f8efa73af4",
+  "embeddedSha256": "11c750ce6ad27669e6050ac2e0645ccdfde3e7b7847e4568977081d9f0363811",
+  "embeddedSha256Rule": "sha256 of the file with the embedded value replaced by 64 zeros",
+  "dossierHash": "dd346f976f5fe78b513930aa03c79da21ecb752c6883d7a46e655ad8593be289",
+  "artifactInputHash": "9ae0f64d2ee2bba342ef666044925dedf09d1738227e5a89d38831017bf7fc28",
+  "graphs": [
+    {
+      "id": "roles-perimetres",
+      "nodes": 13,
+      "edges": 11,
+      "subflows": 4,
+      "sceneHash": "829e1ee23005241c27d180a06dacad49377f59f37274ea79ab2e84573d12f8c3"
+    },
+    {
+      "id": "matrice-decide-valide",
+      "nodes": 15,
+      "edges": 12,
+      "subflows": 4,
+      "sceneHash": "2cbebc788a7a5355e272898ad5cb421c517a0032220d4b77b9a8a3b2c6c26b09"
+    },
+    {
+      "id": "circuit-validation",
+      "nodes": 12,
+      "edges": 12,
+      "subflows": 7,
+      "sceneHash": "85617eedfb3611abe8e439e005a6e31b137d7ae2907ec808925bfa2876776703"
+    },
+    {
+      "id": "deux-branches-d10",
+      "nodes": 12,
+      "edges": 13,
+      "subflows": 5,
+      "sceneHash": "e93f943aaacda2d24b0167fea63ff51b16c12606fb6fab308cd438b4c67545b6"
+    },
+    {
+      "id": "immo-vs-geo",
+      "nodes": 18,
+      "edges": 11,
+      "subflows": 6,
+      "sceneHash": "06d96a3157d0aa2d498244d08764af493b1a5706b3dd72f11ab7eaa463df194d"
+    }
+  ]
+}
