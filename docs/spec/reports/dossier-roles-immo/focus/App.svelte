@@ -38,7 +38,7 @@
         <li><strong>D'abord l'intention de l'owner, les destinataires et la synthèse</strong>, dépliées : le cadre fixé par l'owner (§1.1), qui décide quoi (§2), les 18 décisions et les deux tableaux « Décisions de Farid » et « Décisions de Fabien » (§3).</li>
         <li><strong>Les neuf autres sections</strong>, repliées : ce que le quorum a établi et ce qui reste ouvert côté h2a (§4), l'affectation et les deux branches de D10 (§5), la matrice (§6), les règles de validation PO et AI Builder (§7), la règle de présentation « qui décide » (§8), la comparaison immo / geo (§9), les options (§10), les risques (§11), le plan (§12).</li>
         <li><strong>Cinq scènes</strong> : rôles et périmètres, matrice décide / valide, circuit de validation PO puis AI Builder, les deux branches de D10, immo et geo côte à côte.</li>
-        <li><strong>Les décisions D1 à D18</strong> — Farid décide 7, Fabien 11 ; chacune porte « Décide : … · Consulté : … » et sa validation croisée —, sélectionnables, exportables en JSON — brouillon local seulement.</li>
+        <li><strong>Les décisions D1 à D18</strong> — Farid décide 7, Fabien 11 ; chacune porte « Décide : … · Consulté : … » et sa validation croisée —, sélectionnables, à copier en YAML dans la PR GitHub — brouillon local seulement.</li>
         <li><strong>L'annexe A</strong> : le tableau de consensus Fable / Astra — faits F01-F15, matrice et règles, décisions D1-D18, manques, désaccords restants.</li>
       </ol>
       <p class="caption">Conventions : <code>FAIT</code> = constaté dans une source citée · <code>CADRE</code> = fixé par l'owner · <code>JUGEMENT</code> = appréciation ·

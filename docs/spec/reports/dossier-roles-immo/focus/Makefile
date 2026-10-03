@@ -27,7 +27,7 @@ chrome-stop:
 map:
 	$(RUN) build-map.mjs
 test: map
-	$(RUN) --test mapping.test.mjs
+	$(RUN) --test mapping.test.mjs decision-yaml.test.mjs
 	git diff --check
 build: map
 	$(RUN) /docs/node_modules/vite/bin/vite.js build --config vite.config.js --configLoader runner
