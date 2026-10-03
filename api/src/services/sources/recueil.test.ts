@@ -10,6 +10,7 @@ import {
   PvSourceFetchError,
   rawMetaKey,
   RawDocumentRecordSchema,
+  SourceFetchError,
   type RawDocument,
   type RawDocumentRef,
   type SourceAdapter,
@@ -661,21 +662,21 @@ describe("runRecueil — oversize documents and the attempt journal (#805)", () 
     if (!out.ok) return;
     expect(out.documentFailures).toEqual([]);
     expect(out.setAside).toEqual([{
-      url: url("zonage"), reason: "oversize", newlySetAside: true, markedAt: expect.any(String),
+      url: url("zonage"), reason: "deferred-oversize", newlySetAside: true, markedAt: expect.any(String),
       bytesAnnounced: 180_215_792, bytesRead: 0, capBytes: 52_428_800,
     }]);
     expect(out.count).toBe(1);
     expect(out.records.map((record) => record.sourceUrl)).toEqual([url("pv")]);
     // Every request is opened BEFORE it is made and closed once settled.
     expect(events).toEqual([
-      `open ${url("zonage")}`, `close ${url("zonage")} oversize`,
+      `open ${url("zonage")}`, `close ${url("zonage")} deferred-oversize`,
       `open ${url("pv")}`, `close ${url("pv")} collected`,
     ]);
   });
 
   it("skips a set-aside URL with no request and without consuming the new-write limit", async () => {
     const calls: string[] = [];
-    const marks = new Map([[url("killer"), { url: url("killer"), reason: "oom-suspected" as const,
+    const marks = new Map([[url("killer"), { url: url("killer"), reason: "interrupted-repeatedly" as const,
       newlySetAside: false, markedAt: "2026-10-01T00:00:00.000Z", attempts: 2 }]]);
     const { journal, events } = recordingJournal(marks);
     const out = await runRecueil("proces-verbaux-vsad",
@@ -691,6 +692,38 @@ describe("runRecueil — oversize documents and the attempt journal (#805)", () 
     const { journal, events } = recordingJournal();
     await runRecueil("proces-verbaux-vsad", adapterWith(["dead", "pv"], "", "dead"), new MemoryStore(), { journal });
     expect(events.slice(0, 2)).toEqual([`open ${url("dead")}`, `close ${url("dead")} failed`]);
+  });
+
+  it("closes the attempt on a PUT error and on a date timeout, then collects the next document", async () => {
+    const store = new MemoryStore();
+    let failedPut = false;
+    const flaky: ObjectStore = {
+      head: (key) => store.head(key), get: (key) => store.get(key),
+      put: async (key, body) => {
+        if (!failedPut && !key.endsWith(".json")) { failedPut = true; throw new Error("S3 PUT 500"); }
+        return store.put(key, body);
+      },
+    };
+    const putRun = recordingJournal();
+    const afterPut = await runRecueil("proces-verbaux-vsad", adapterWith(["a", "b"], ""), flaky,
+      { journal: putRun.journal, pdfToText: async () => "" });
+    expect(putRun.events).toEqual([`open ${url("a")}`, `close ${url("a")} failed`,
+      `open ${url("b")}`, `close ${url("b")} collected`]);
+    expect(afterPut.ok && afterPut.documentFailures[0]).toMatchObject({ error: "storage", url: url("a") });
+
+    let dated = 0;
+    const dateRun = recordingJournal();
+    const afterTimeout = await runRecueil("proces-verbaux-vsad", adapterWith(["c", "d"], ""), new MemoryStore(), {
+      journal: dateRun.journal,
+      pdfToText: async () => {
+        dated += 1;
+        if (dated === 1) throw new SourceFetchError("timeout", "pdftotext timed out", "live-scrape");
+        return "";
+      },
+    });
+    expect(dateRun.events).toEqual([`open ${url("c")}`, `close ${url("c")} failed`,
+      `open ${url("d")}`, `close ${url("d")} collected`]);
+    expect(afterTimeout.ok && afterTimeout.documentFailures[0]).toMatchObject({ error: "timeout", url: url("c") });
   });
 
   it("never closes an attempt it did not open", async () => {
