@@ -1,4 +1,7 @@
 import { spawn } from "node:child_process";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import type { SourceKind } from "@radar/domain";
 
@@ -120,66 +123,97 @@ export async function isPdftotextAvailable(): Promise<boolean> {
  * never lets a raw child-process error escape.
  */
 export function pdfToTextViaPoppler(url: string): PdfToText {
-  return (bytes, timeoutMs) =>
-    new Promise<string>((resolve, reject) => {
-      let child;
-      try {
-        child = spawn("pdftotext", ["-q", "-enc", "UTF-8", "-", "-"], {
-          stdio: ["pipe", "pipe", "pipe"],
-        });
-      } catch (e) {
+  return (bytes, timeoutMs) => runPdftotext(["-q", "-enc", "UTF-8", "-", "-"], url, timeoutMs, bytes);
+}
+
+/**
+ * Text of the FIRST PAGE only, for the documentary date (issue #805): the date
+ * reader keeps nothing past page 1 (`documentDateHeader`), yet the full-document
+ * stdin form made poppler hold the whole PDF — a 250 MiB child and 23 s at
+ * 0.15 CPU on a 903-page bylaw. `pdftotext -l 1` on a FILE maps only what page 1
+ * needs (≈10 MiB, 0.2 s on the same document). The bytes go to a private temp
+ * directory under the OS tmpdir, removed whatever the outcome; same timeout and
+ * same typed errors as {@link pdfToTextViaPoppler}.
+ */
+export function pdfFirstPageToTextViaPoppler(url: string): PdfToText {
+  return async (bytes, timeoutMs) => {
+    const dir = await mkdtemp(join(tmpdir(), "radar-pdf-page1-"));
+    try {
+      const file = join(dir, "document.pdf");
+      await writeFile(file, bytes);
+      return await runPdftotext(["-q", "-enc", "UTF-8", "-l", "1", file, "-"], url, timeoutMs);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  };
+}
+
+/** Run `pdftotext` with `args`, feeding `stdin` when given; stdout is the text. */
+function runPdftotext(
+  args: readonly string[],
+  url: string,
+  timeoutMs: number,
+  stdin?: Uint8Array,
+): Promise<string> {
+  return new Promise<string>((resolve, reject) => {
+    let child;
+    try {
+      child = spawn("pdftotext", [...args], {
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+    } catch (e) {
+      reject(
+        new SourceFetchError(
+          "parse",
+          `pdftotext spawn failed: ${e instanceof Error ? e.message : String(e)}`,
+          url,
+        ),
+      );
+      return;
+    }
+
+    const chunks: Buffer[] = [];
+    const errChunks: Buffer[] = [];
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      child.kill("SIGKILL");
+      reject(new SourceFetchError("timeout", "pdftotext timed out", url));
+    }, timeoutMs);
+
+    child.stdout.on("data", (d: Buffer) => chunks.push(d));
+    child.stderr.on("data", (d: Buffer) => errChunks.push(d));
+    child.on("error", (e) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      reject(new SourceFetchError("parse", `pdftotext error: ${e.message}`, url));
+    });
+    child.on("close", (code) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (code === 0) {
+        resolve(Buffer.concat(chunks).toString("utf-8"));
+      } else {
+        const detail = Buffer.concat(errChunks).toString("utf-8").trim();
         reject(
           new SourceFetchError(
             "parse",
-            `pdftotext spawn failed: ${e instanceof Error ? e.message : String(e)}`,
+            `pdftotext exited ${code}${detail ? `: ${detail}` : ""}`,
             url,
           ),
         );
-        return;
       }
-
-      const chunks: Buffer[] = [];
-      const errChunks: Buffer[] = [];
-      let settled = false;
-      const timer = setTimeout(() => {
-        if (settled) return;
-        settled = true;
-        child.kill("SIGKILL");
-        reject(new SourceFetchError("timeout", "pdftotext timed out", url));
-      }, timeoutMs);
-
-      child.stdout.on("data", (d: Buffer) => chunks.push(d));
-      child.stderr.on("data", (d: Buffer) => errChunks.push(d));
-      child.on("error", (e) => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timer);
-        reject(new SourceFetchError("parse", `pdftotext error: ${e.message}`, url));
-      });
-      child.on("close", (code) => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timer);
-        if (code === 0) {
-          resolve(Buffer.concat(chunks).toString("utf-8"));
-        } else {
-          const detail = Buffer.concat(errChunks).toString("utf-8").trim();
-          reject(
-            new SourceFetchError(
-              "parse",
-              `pdftotext exited ${code}${detail ? `: ${detail}` : ""}`,
-              url,
-            ),
-          );
-        }
-      });
-
-      child.stdin.on("error", () => {
-        /* ignore EPIPE if poppler closes stdin early */
-      });
-      child.stdin.write(bytes);
-      child.stdin.end();
     });
+
+    child.stdin.on("error", () => {
+      /* ignore EPIPE if poppler closes stdin early */
+    });
+    if (stdin) child.stdin.write(stdin);
+    child.stdin.end();
+  });
 }
 
 export interface ReglementsUrbanismeOptions {
