@@ -25,6 +25,7 @@ FILES=(
   deploy/k8s/36-db-migrate-job.yaml deploy/k8s/37-graphify34-apply-job.yaml
   deploy/k8s/38-graphify34-emit-candidates-job.yaml deploy/k8s/39-export-graph-nodes-job.yaml
   deploy/k8s/40-export-gt-designation-events-job.yaml
+  deploy/k8s/41-document-date-recovery-job.yaml
   deploy/k8s/34-refresh-cronjob.yaml
   deploy/k8s/refresh-cronjobs-prod/kustomization.yaml
   deploy/k8s/10-rbac.yaml deploy/k8s/11-ci-deployer-preprod-rbac.yaml
@@ -72,6 +73,12 @@ run_bad "$CASE_ROOT" 'rejects DOCS reuse of the GRAPH identity'; rm -rf "$CASE_R
 
 fixture; sed -i '0,/radar-scrape-s3-credentials/{s/radar-scrape-s3-credentials/sentropic-geo-s3-credentials/}' "$CASE_ROOT/deploy/k8s/33b-scrape-cities-job.yaml"
 run_bad "$CASE_ROOT" 'rejects DOCS reuse of a Geo identity'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i 's/name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY/name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY/' "$CASE_ROOT/deploy/k8s/41-document-date-recovery-job.yaml"
+run_bad "$CASE_ROOT" 'rejects the preprod docs identity on the PROD recovery Job'; rm -rf "$CASE_ROOT"
+
+fixture; sed -i '/- name: SCRAPE_S3_BUCKET/,+1d' "$CASE_ROOT/deploy/k8s/41-document-date-recovery-job.yaml"
+run_bad "$CASE_ROOT" 'rejects a PROD recovery Job without an explicit bucket binding'; rm -rf "$CASE_ROOT"
 
 fixture; sed -i '0,/DOCS_S3_BUCKET/{s/DOCS_S3_BUCKET/S3_BUCKET/}' "$CASE_ROOT/deploy/k8s/30-api.yaml"
 run_bad "$CASE_ROOT" 'rejects a generic PROD canonical credential binding'; rm -rf "$CASE_ROOT"

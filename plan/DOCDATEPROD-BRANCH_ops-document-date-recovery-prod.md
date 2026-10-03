@@ -27,7 +27,7 @@
 - [x] BRDDP-EX2 — `.github/workflows/run-job.yaml`: add the `document-date-recovery` route and its inputs, per-job wait deadline and timeout, recovery log filter + run summary. Impact: run-job only; other jobs unchanged. Rollback: revert the commit.
 
 ## Plan / Todo (lot-based)
-- [ ] Lot 1 — prod manifest `deploy/k8s/41-document-date-recovery-job.yaml` + SCRAPE binding guard entry and two negative tests.
+- [x] Lot 1 — prod manifest `deploy/k8s/41-document-date-recovery-job.yaml` + SCRAPE binding guard entry and two negative tests.
 - [ ] Lot 2 — run-job route: inputs `recovery_mode`/`recovery_heal`/`recovery_cities`/`recovery_image`, validation, served-image default, refusal while refresh/backup/recovery Jobs are active, 110 min timeout + 5700 s wait for this job only, fail-fast + Job delete when the pod cannot start, report lines + run summary.
 - [ ] Lot 3 — Makefile offline validate (preprod + prod) and header comment.
 - [ ] Lot 4 — spec section "Production run (run-job)".
