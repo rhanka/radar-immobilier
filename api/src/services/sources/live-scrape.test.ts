@@ -28,6 +28,7 @@ import {
 
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
 import { projectStateKey } from "../exploitation/project-state.js";
+import { acquisitionStateKey } from "./acquisition-state.js";
 import { collectedUrlsKey } from "./known-urls.js";
 import { citiesChunk, configOnlyCitySlugs, runLiveScrape } from "./live-scrape.js";
 import { recueilMetrics, recueilMetricsJson, resetRecueilMetrics } from "./recueil.js";
@@ -587,18 +588,21 @@ describe("runLiveScrape — config-only PV cities → object store", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Issue #805: a document too large to buffer, or one the process keeps dying
-// on, is set aside DURABLY in the guard state and never requested again.
+// Issue #805: a document too large to buffer, or one the process keeps not
+// coming back from, is deferred DURABLY in the source's acquisition state —
+// never in the known-URL guard, which means "collected" — and never requested
+// again.
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("runLiveScrape — oversize and oom-suspected documents (#805)", () => {
+describe("runLiveScrape — deferred-oversize and interrupted-repeatedly documents (#805)", () => {
   const slug = configOnlySlugs(1)[0]!;
   const config = ALL_PV_CITIES.find((c) => c.config.citySlug === slug)!.config;
   const origin = new URL(config.pvIndexUrl).origin;
   const pdf = (name: string) => `${origin}/pv/${name}-2026-06-12.pdf`;
-  const guardLines = (store: MemoryStore) =>
-    new TextDecoder().decode(store.objects.get(collectedUrlsKey(config.sourceId)) ?? new Uint8Array())
+  const linesOf = (store: MemoryStore, key: string) =>
+    new TextDecoder().decode(store.objects.get(key) ?? new Uint8Array())
       .trim().split("\n").filter(Boolean).map((line) => JSON.parse(line) as Record<string, unknown>);
+  const stateLines = (store: MemoryStore) => linesOf(store, acquisitionStateKey(config.sourceId));
   /** Index listing `names`; `onDocument` may throw to stand for a process death. */
   function cityFetch(names: string[], downloads: string[], onDocument: (url: string) => void = () => {}): PvFetchLike {
     return async (url) => {
@@ -622,22 +626,24 @@ describe("runLiveScrape — oversize and oom-suspected documents (#805)", () => 
     now: () => new Date("2026-06-20T00:00:00Z"), ...(limit !== undefined ? { limit } : {}),
   });
 
-  it("refuses an oversize document unread, marks it, and never requests it again", async () => {
+  it("defers an oversize document unread, collects the one after it, and never requests it again", async () => {
     const store = new MemoryStore();
     const downloads: string[] = [];
     let openAttempt: Record<string, unknown> | undefined;
     const fetch = cityFetch(["zonage", "pv"], downloads, (url) => {
-      if (url === pdf("pv")) openAttempt = guardLines(store).find((line) => line.attemptUrl === url);
+      if (url === pdf("pv")) openAttempt = stateLines(store).find((line) => line.url === url);
     });
 
     const first = (await night(store, fetch))[0]!;
     expect(first.count).toBe(1);
     expect(first.failedDocs).toBeUndefined();
-    expect(first.setAside).toEqual([expect.objectContaining({ url: pdf("zonage"), reason: "oversize",
+    expect(first.setAside).toEqual([expect.objectContaining({ url: pdf("zonage"), reason: "deferred-oversize",
       newlySetAside: true, bytesAnnounced: 180_215_792, bytesRead: 0, capBytes: 52_428_800 })]);
     // The attempt was on storage while the request ran, and is closed after it.
-    expect(openAttempt).toMatchObject({ attemptUrl: pdf("pv"), open: 1 });
-    expect(guardLines(store).filter((line) => "attemptUrl" in line)).toEqual([]);
+    expect(openAttempt).toMatchObject({ state: "attempt-open", open: 1 });
+    expect(stateLines(store)).toEqual([expect.objectContaining({ url: pdf("zonage"), state: "deferred-oversize" })]);
+    // The guard records only what was COLLECTED.
+    expect(linesOf(store, collectedUrlsKey(config.sourceId))).toEqual([{ url: pdf("pv") }]);
 
     downloads.length = 0;
     const second = (await night(store, fetch))[0]!;
@@ -646,31 +652,28 @@ describe("runLiveScrape — oversize and oom-suspected documents (#805)", () => 
     expect(second.setAside).toEqual([expect.objectContaining({ url: pdf("zonage"), newlySetAside: false })]);
   });
 
-  it("writes nothing back over a guard state the store failed to return", async () => {
+  it("fetches nothing for a city whose acquisition state the store failed to return", async () => {
     const store = new MemoryStore();
     await night(store, cityFetch(["zonage", "pv"], []));
-    const stored = store.objects.get(collectedUrlsKey(config.sourceId));
-    // One S3 fault on the guard read: the run goes on fail-open (the cap still
-    // refuses the oversize body) but must not erase the marks it could not see.
+    const stored = store.objects.get(acquisitionStateKey(config.sourceId));
     const faulty = Object.assign(Object.create(store) as MemoryStore, {
       get: async (key: string) => {
-        if (key === collectedUrlsKey(config.sourceId)) {
+        if (key === acquisitionStateKey(config.sourceId)) {
           throw Object.assign(new Error("Service Unavailable"), { $metadata: { httpStatusCode: 503 } });
         }
         return store.get(key);
       },
     });
     const downloads: string[] = [];
-    const recap = (await night(faulty, cityFetch(["zonage", "pv"], downloads)))[0]!;
-    // `pv` is still known through the manifest bootstrap; `zonage` is requested
-    // again because its mark could not be read, and refused on its header.
-    expect(downloads).toEqual([pdf("zonage")]);
-    expect(recap.setAside).toEqual([expect.objectContaining({ url: pdf("zonage"), reason: "oversize",
-      newlySetAside: true })]);
-    expect(store.objects.get(collectedUrlsKey(config.sourceId))).toBe(stored);
+    const recap = (await night(faulty, cityFetch(["zonage", "pv", "new"], downloads)))[0]!;
+    // A deferred document must never be requested again, and the deferrals are
+    // what could not be read: the city waits for the next pass.
+    expect(recap).toMatchObject({ status: "error", error: "[storage] acquisition state unreadable" });
+    expect(downloads).toEqual([]);
+    expect(store.objects.get(acquisitionStateKey(config.sourceId))).toBe(stored);
   });
 
-  it("sets aside, after two process deaths, the document it died on — within the new-write limit", async () => {
+  it("sets aside, after two interrupted passes, the document they stopped on — within the new-write limit", async () => {
     // A process death is simulated by keeping what storage held at the instant
     // of the fatal request and starting the next pass from exactly that.
     const deathOn = (store: MemoryStore, downloads: string[]) => {
@@ -689,22 +692,27 @@ describe("runLiveScrape — oversize and oom-suspected documents (#805)", () => 
       await night(store, fetch, 5);
       expect(downloads).toContain(pdf("killer"));
       store = dead;
+      expect(stateLines(store)).toEqual([expect.objectContaining({ url: pdf("killer"), state: "attempt-open",
+        open: pass })]);
     }
 
     const downloads: string[] = [];
     const third = (await night(store, cityFetch(["a", "killer", "b", "c", "d", "e", "f"], downloads), 5))[0]!;
     expect(downloads).not.toContain(pdf("killer"));
-    expect(third.setAside).toEqual([{ url: pdf("killer"), reason: "oom-suspected", newlySetAside: true,
+    expect(third.setAside).toEqual([{ url: pdf("killer"), reason: "interrupted-repeatedly", newlySetAside: true,
       markedAt: expect.any(String), attempts: 2 }]);
     // `a` was collected before each death but never committed: it is fetched
     // again (and HEAD-skipped), then five new writes fill the limit.
     expect(downloads).toEqual(["a", "b", "c", "d", "e", "f"].map(pdf));
     expect(third.documents?.filter((document) => document.status === "new")).toHaveLength(5);
+    expect(linesOf(store, collectedUrlsKey(config.sourceId)).map((line) => line.url))
+      .not.toContain(pdf("killer"));
 
     const fourth = (await night(store, cityFetch(["a", "killer", "b", "c", "d", "e", "f"], []), 5))[0]!;
     expect(fourth.setAside).toEqual([expect.objectContaining({ url: pdf("killer"), newlySetAside: false })]);
   });
 });
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EXPLOITATION on live scrape: `exploit: true` runs PARSE + projects real
