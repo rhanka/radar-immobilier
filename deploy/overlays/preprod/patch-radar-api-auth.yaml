@@ -1,0 +1,38 @@
+# PREPROD OIDC relying-party settings for the api (ConfigMap radar-api, read
+# by the radar-api Deployment through envFrom). Strategic-merge patch: every key
+# below is SET in preprod whether or not the base defines it, so no auth key can
+# silently fall back to the base's PROD value (deploy/k8s/30-api.yaml targets
+# auth.sent-tech.ca + client radar-immobilier + immo.sent-tech.ca).
+#
+# Why this exists: reconcile-preprod.sh server-side-applies the rendered
+# radar-api ConfigMap (since #738). Without these overrides that apply wrote the
+# base PROD issuer / client id / redirect_uri / callback base into preprod, and
+# every new preprod login then failed (`missing_flow_state` on the PROD
+# callback).
+#
+# Values = the preprod sentropic IdP and the `radar-immobilier-preprod` client
+# registered there with this redirect_uri. Its client secret is the preprod
+# Secret radar-sentropic-auth/SENTROPIC_OAUTH_CLIENT_SECRET (not in git).
+#
+# Runtime use (api/src/config.ts): ISSUER, CLIENT_ID, REDIRECT_URI, SCOPES and
+# AUTH_CALLBACK_BASE_URL drive the OIDC flow, the session cookie scope, the
+# bearer audiences and the invitation links (mailer). The JWKS used at runtime
+# is SENTROPIC_IDP_JWKS_URI, unset here, hence derived from the issuer
+# (`${issuer}/.well-known/jwks.json`). AUTH_MODE / DISCOVERY_URL / JWKS_URL are
+# not read by the api; they mirror the preprod ConfigMap radar-sentropic-auth so
+# both records agree.
+#
+# Guarded by deploy/ci/check-preprod-auth-isolation.sh (CI + reconcile).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: radar-api
+data:
+  SENTROPIC_AUTH_MODE: "oidc-rp"
+  SENTROPIC_IDP_DISCOVERY_URL: "https://preprod.auth.sent-tech.ca/.well-known/openid-configuration"
+  SENTROPIC_IDP_ISSUER: "https://preprod.auth.sent-tech.ca"
+  SENTROPIC_IDP_JWKS_URL: "https://preprod.auth.sent-tech.ca/.well-known/jwks.json"
+  SENTROPIC_OAUTH_CLIENT_ID: "radar-immobilier-preprod"
+  SENTROPIC_OAUTH_REDIRECT_URI: "https://preprod.immo.sent-tech.ca/api/v1/auth/oauth/callback"
+  SENTROPIC_OAUTH_SCOPES: "openid profile email"
+  AUTH_CALLBACK_BASE_URL: "https://preprod.immo.sent-tech.ca"
