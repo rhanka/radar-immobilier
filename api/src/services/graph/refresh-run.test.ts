@@ -7,8 +7,10 @@ import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
 import { hydrateGraphDocumentDates } from "../sources/document-date-metadata.js";
 import { extractionToV23Graph } from "./refresh-v23.js";
 import { refreshCorpusInputHash, type RefreshCorpus, type RefreshCorpusDocument } from "./refresh-corpus.js";
-import { acquireRefreshPdfCandidates, bindDocumentSourceIds, orderRefreshPdfCandidates,
-  recoverRefreshDocumentDates, refreshSourceDelayMs, writeRefreshPdfManifest } from "./refresh-run.js";
+import { acquireRefreshPdfCandidates, bindDocumentSourceIds, DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS,
+  DEFAULT_REFRESH_MAX_DOCUMENT_BYTES,
+  orderRefreshPdfCandidates, recoverRefreshDocumentDates, refreshSourceDelayMs, writeRefreshPdfManifest,
+  type RefreshAcquire } from "./refresh-run.js";
 
 class MemoryStore implements ObjectStore {
   readonly objects = new Map<string, Uint8Array>();
@@ -101,6 +103,32 @@ describe("acquireRefreshPdfCandidates", () => {
     // No GET and no HEAD on a document already in storage: the skip is decided
     // on the URL, before any request.
     expect(sawGuard).toBe(true);
+  });
+
+  it("caps every document body at 50 MiB and 120 s unless told otherwise (#805)", async () => {
+    const store = new MemoryStore();
+    const caps: (number | undefined)[][] = [];
+    const acquire: RefreshAcquire = async (_cities, options) => {
+      caps.push([options.maxDocumentBytes, options.documentTimeoutMs]);
+      return [{ city: "city", sourceId: "proces-verbaux-city", status: "seen", casKeys: [], count: 0 }];
+    };
+    await acquireRefreshPdfCandidates({ citySlug: "city", store, acquire });
+    await acquireRefreshPdfCandidates({ citySlug: "city", store, acquire, maxDocumentBytes: 1_000,
+      documentTimeoutMs: 5_000 });
+    expect(caps).toEqual([[DEFAULT_REFRESH_MAX_DOCUMENT_BYTES, DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS], [1_000, 5_000]]);
+    expect(DEFAULT_REFRESH_MAX_DOCUMENT_BYTES).toBe(52_428_800);
+  });
+
+  it("reports the documents set aside even when the city's acquisition then fails (#805)", async () => {
+    const store = new MemoryStore();
+    const setAside = { url: "https://vsad.ca/zonage.pdf", reason: "deferred-oversize" as const, newlySetAside: true,
+      markedAt: "2026-10-03T00:00:00.000Z", bytesAnnounced: 180_215_792, bytesRead: 0, capBytes: 52_428_800 };
+    const reported: unknown[] = [];
+    await expect(acquireRefreshPdfCandidates({ citySlug: "city", store, onSetAside: (d) => reported.push(d),
+      acquire: async () => [{ city: "city", sourceId: "proces-verbaux-city", status: "error", casKeys: [],
+        count: 0, error: "[http] HTTP 404", setAside: [setAside] }] }))
+      .rejects.toMatchObject({ code: "REFRESH_NO_ACQUISITION" });
+    expect(reported).toEqual([setAside]);
   });
 
   it("fails before manifest publication when acquisition has no exact PDF", async () => {

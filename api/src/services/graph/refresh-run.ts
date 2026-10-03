@@ -10,6 +10,7 @@ import {
   type LiveScrapeCityRecap,
   type RunLiveScrapeOptions,
 } from "../sources/live-scrape.js";
+import type { RecueilSetAsideDocument } from "../sources/recueil.js";
 import { hydrateGraphDocumentDates, persistDocumentDate } from "../sources/document-date-metadata.js";
 import { readCanonicalCityGraph, type CanonicalReadAnchor } from "./canonical-graph-writer.js";
 import { graphifyGraphSchema, upsertGraphAtomic, type GraphifyGraph } from "./graph-store.js";
@@ -51,7 +52,28 @@ export interface AcquireRefreshPdfOptions {
    */
   readonly windowDays?: number;
   readonly acquire?: RefreshAcquire;
+  /** Byte cap on one document body; defaults to {@link DEFAULT_REFRESH_MAX_DOCUMENT_BYTES}. */
+  readonly maxDocumentBytes?: number;
+  /** Time bound on one document body; defaults to {@link DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS}. */
+  readonly documentTimeoutMs?: number;
+  /** Each document the acquisition did NOT process (deferred-oversize, interrupted-repeatedly). */
+  readonly onSetAside?: (document: RecueilSetAsideDocument) => void;
 }
+
+/**
+ * Largest document body the refresh downloads: 50 MiB (issue #805, owner GO).
+ * A larger one is refused before it is buffered and set aside for good — the
+ * pod's 768 Mi held a 180 MB PDF three to four times over and was OOM-killed
+ * on every pass. `REFRESH_MAX_DOCUMENT_BYTES` overrides it.
+ */
+export const DEFAULT_REFRESH_MAX_DOCUMENT_BYTES = 52_428_800;
+
+/**
+ * Longest a document body may take to arrive once its headers did (issue
+ * #805): 50 MiB at under 0.5 MB/s. Past it the read is abandoned as a typed
+ * timeout. `REFRESH_DOCUMENT_TIMEOUT_MS` overrides it.
+ */
+export const DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS = 120_000;
 
 /** One exact-PDF representation a city offers this cycle, before any choice is made. */
 export interface RefreshPdfCandidate {
@@ -168,9 +190,14 @@ export async function acquireRefreshPdfCandidates(
     ...(options.signal !== undefined ? { signal: options.signal } : {}),
     ...(options.limit !== undefined ? { limit: options.limit } : {}),
     ...(options.windowDays !== undefined ? { windowDays: options.windowDays } : {}),
+    maxDocumentBytes: options.maxDocumentBytes ?? DEFAULT_REFRESH_MAX_DOCUMENT_BYTES,
+    documentTimeoutMs: options.documentTimeoutMs ?? DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS,
   });
-  if (options.signal?.aborted) throw new Error("Refresh aborted after acquisition");
   const recap = recaps[0];
+  // Reported before any verdict on the city: a document set aside is news
+  // whether the rest of the acquisition succeeded, failed or was aborted.
+  if (recap?.city === options.citySlug) for (const document of recap.setAside ?? []) options.onSetAside?.(document);
+  if (options.signal?.aborted) throw new Error("Refresh aborted after acquisition");
   // A genuine failure: no recap, the wrong city, an index that did not answer,
   // or a recap whose own invariant (`casKeys.length === count`) is broken.
   if (recaps.length !== 1 || !recap || recap.city !== options.citySlug
@@ -226,6 +253,12 @@ export interface RunPvRefreshOptions {
   readonly acquisitionLimit?: number;
   /** Source look-back in days; see {@link AcquireRefreshPdfOptions.windowDays}. */
   readonly acquisitionWindowDays?: number;
+  /** See {@link AcquireRefreshPdfOptions.maxDocumentBytes}. */
+  readonly maxDocumentBytes?: number;
+  /** See {@link AcquireRefreshPdfOptions.documentTimeoutMs}. */
+  readonly documentTimeoutMs?: number;
+  /** See {@link AcquireRefreshPdfOptions.onSetAside}. */
+  readonly onSetAside?: (document: RecueilSetAsideDocument) => void;
   readonly excludedNodeIds?: readonly string[];
   readonly signal?: AbortSignal;
   readonly now?: () => Date;
@@ -318,6 +351,9 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
     ...(options.acquire ? { acquire: options.acquire } : {}),
     ...(options.acquisitionLimit ? { limit: options.acquisitionLimit } : {}),
     ...(options.acquisitionWindowDays ? { windowDays: options.acquisitionWindowDays } : {}),
+    ...(options.maxDocumentBytes ? { maxDocumentBytes: options.maxDocumentBytes } : {}),
+    ...(options.documentTimeoutMs ? { documentTimeoutMs: options.documentTimeoutMs } : {}),
+    ...(options.onSetAside ? { onSetAside: options.onSetAside } : {}),
     onSkippedKey: (key) => note("skipped-non-cas-key", { key }) });
 
   // The coverage ledger — not the run states — decides what this city owes. It
