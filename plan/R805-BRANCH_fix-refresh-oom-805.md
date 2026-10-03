@@ -11,7 +11,7 @@
 
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
-  - `packages/radar-sources/src/document-size-cap.ts`, `packages/radar-sources/src/document-size-cap.test.ts`
+  - `packages/radar-sources/src/document-size-cap.ts`
   - `packages/radar-sources/src/index.ts`
   - `packages/radar-sources/src/sources/proces-verbaux-generic.ts`
   - `packages/radar-sources/src/sources/proces-verbaux-size-cap.test.ts`
@@ -41,7 +41,7 @@
 - [x] No UI change; root UAT untouched.
 
 ## Plan / Todo (lot-based)
-- [ ] Lot 1 — Size guard in the PV adapter: `Content-Length` over the cap cancels the body unread; without it the body is read through its reader and aborted as soon as the cap is exceeded; typed `DocumentOversizeError` (bytes announced / read).
+- [x] Lot 1 — Size guard in the PV adapter: `Content-Length` over the cap cancels the body unread; without it the body is read through its reader and aborted as soon as the cap is exceeded; typed `DocumentOversizeError` (bytes announced / read).
 - [ ] Lot 2 — `pdfFirstPageToTextViaPoppler`: `pdftotext -l 1` on a temp file under the OS tmpdir, always removed, same timeout.
 - [ ] Lot 3 — Known-URL guard carries durable set-aside marks (`oversize`, `oom-suspected`) and open attempt markers; journal written before each document request.
 - [ ] Lot 4 — RECUEIL: set-aside documents skipped with no request, oversize becomes a typed `setAside` outcome, attempts opened before the fetch and closed on every in-process settlement.
