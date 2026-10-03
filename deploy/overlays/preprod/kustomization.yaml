@@ -69,6 +69,26 @@ patches:
         path: /data/GRAPH_S3_BUCKET
         value: radar-immobilier-docs-preprod
 
+# Per-env OIDC auth. Same mechanism as the buckets above, same trap: once
+# reconcile-preprod.sh applies ConfigMap radar-api (#738), EVERY key the overlay
+# does not override is written with the base PROD value. The base carries the
+# PROD IdP issuer, client id `radar-immobilier`, redirect_uri and callback base
+# (immo.sent-tech.ca); applied to preprod they broke every new login
+# (`missing_flow_state` on the PROD callback). These patches pin ALL the auth
+# keys to the preprod IdP + `radar-immobilier-preprod` client. The ConfigMap
+# radar-sentropic-auth (80-auth.yaml, not reconciled, read by no workload) is
+# patched too so the render carries no PROD auth value at all.
+# deploy/ci/check-preprod-auth-isolation.sh enforces it on the rendered overlay
+# (CI, and reconcile-preprod.sh before any apply).
+  - target:
+      kind: ConfigMap
+      name: radar-api
+    path: patch-radar-api-auth.yaml
+  - target:
+      kind: ConfigMap
+      name: radar-sentropic-auth
+    path: patch-radar-sentropic-auth.yaml
+
 # CPU pressure fix (nœud préprod unique OVH saturé, 95%/1749m requests — pod
 # radar-api Pending "Insufficient cpu" sur le rollout image 0e8807b, breakdown
 # k8s confirmé) :
