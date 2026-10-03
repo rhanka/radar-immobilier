@@ -235,15 +235,18 @@ jobs:
             if ! [[ "${recovery_image}" =~ ${image_re} ]]; then
               echo "::error title=Invalid recovery image::the image must match ghcr.io/rhanka/radar-api:<tag> or ghcr.io/rhanka/radar-api@sha256:<64 hex>. Nothing was applied."; exit 1
             fi
-            # Never alongside a refresh pass, the daily backup or a recovery still in flight
-            # (deleting it below would kill it mid-write): namespace memory quota and
-            # concurrent graph writes. Fails closed if the Jobs cannot be listed.
-            jobs_table="$(kubectl -n "$NAMESPACE" get jobs -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .metadata.ownerReferences[*]}{.name}{end}{"\t"}{.status.active}{"\n"}{end}')" \
-              || { echo "::error title=Cannot list Jobs::kubectl get jobs failed, so a running refresh/backup cannot be ruled out. Nothing was applied."; exit 1; }
-            busy="$(printf '%s\n' "${jobs_table}" | awk -F'\t' '($3 + 0) > 0 && ($1 == "radar-document-date-recovery" || $1 ~ /^radar-(refresh-pv|backup-daily)-/ || $2 ~ /^radar-(refresh-pv|backup-daily)$/) { printf "%s ", $1 }')"
+            # Fail-closed pre-check, BEFORE delete/apply, read-only: never alongside a refresh
+            # pass (name radar-refresh-pv* or owner CronJob/radar-refresh-pv), a backup Job
+            # (name radar-backup*) or a recovery still in flight (deleting it below would
+            # kill it mid-write). Why: namespace memory quota + concurrent graph writes.
+            jobs_table="$(kubectl -n "$NAMESPACE" get jobs -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .metadata.ownerReferences[*]}{.kind}/{.name}{end}{"\t"}{.status.active}{"\t"}{.status.startTime}{"\n"}{end}')" \
+              || { echo "::error title=Cannot list Jobs::kubectl get jobs in ${NAMESPACE} failed (RBAC or API), so a running refresh/backup cannot be ruled out. Nothing was applied."; exit 1; }
+            busy="$(printf '%s\n' "${jobs_table}" | awk -F'\t' '($3 + 0) > 0 && ($1 ~ /^radar-refresh-pv/ || $2 == "CronJob/radar-refresh-pv" || $1 ~ /^radar-backup/ || $1 == "radar-document-date-recovery") { printf "%s (started %s) ", $1, ($4 == "" ? "unknown" : $4) }')"
             if [ -n "${busy}" ]; then
+              echo "active Job(s) found: ${busy}"
               echo "::error title=Recovery refused — Job(s) active::${busy}— retry once they have finished. Nothing was applied."; exit 1
             fi
+            echo "pre-check OK: no active refresh, backup or recovery Job in ${NAMESPACE}"
             if [ "${RECOVERY_MODE}" = "apply" ]; then recovery_args="--apply"; fi
             if [ "${RECOVERY_HEAL}" = "true" ]; then recovery_args="${recovery_args:+${recovery_args} }--heal"; fi
             if [ -n "${RECOVERY_CITIES}" ]; then recovery_args="${recovery_args:+${recovery_args} }${RECOVERY_CITIES}"; fi
