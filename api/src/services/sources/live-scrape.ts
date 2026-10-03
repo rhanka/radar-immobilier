@@ -48,7 +48,8 @@ import {
   type ReexploitProgress,
   type ExploitScrapeResult,
 } from "./exploit-scrape.js";
-import { guardDocumentJournal, loadCollectedUrls, saveCollectedUrls } from "./known-urls.js";
+import { acquisitionJournal, loadAcquisitionState, saveAcquisitionState } from "./acquisition-state.js";
+import { loadCollectedUrls, saveCollectedUrls } from "./known-urls.js";
 import {
   runRecueilWithManifest,
   type RecueilFetchFailure,
@@ -211,9 +212,11 @@ export interface RunLiveScrapeOptions {
   /**
    * Byte cap on one document body, refused before it is buffered (issue #805).
    * Omitted ⇒ no cap. With `skipAlreadyCollectedUrls`, a refused document is
-   * marked in the guard state and never requested again.
+   * deferred in the source's acquisition state and never requested again.
    */
   readonly maxDocumentBytes?: number;
+  /** Time bound on reading one document body (issue #805). Omitted ⇒ none. */
+  readonly documentTimeoutMs?: number;
   /** Per-city collection cap; in replay mode, process-wide parse cap (default 25). */
   readonly limit?: number;
   /** Optional representation filter applied before the collection limit. */
@@ -399,7 +402,7 @@ export async function runLiveScrape(
   options: RunLiveScrapeOptions,
 ): Promise<LiveScrapeCityRecap[]> {
   const { store, fetch, limit, acceptRef, beforeFetch, windowDays, now, signal, onRequest,
-    exploit, reexploit, db, maxDocumentBytes } =
+    exploit, reexploit, db, maxDocumentBytes, documentTimeoutMs } =
     options;
   // Spacing is ON by default on the real network and OFF behind an injected
   // fetch: pacing a test double would add 2 s per fetch to the suite and
@@ -465,6 +468,7 @@ export async function runLiveScrape(
       ...(windowDays !== undefined ? { windowDays } : {}),
       ...(now !== undefined ? { now } : {}),
       ...(maxDocumentBytes !== undefined ? { maxDocumentBytes } : {}),
+      ...(documentTimeoutMs !== undefined ? { documentTimeoutMs } : {}),
       minRequestIntervalMs,
     });
 
@@ -476,13 +480,16 @@ export async function runLiveScrape(
     const guardState = skipAlreadyCollectedUrls
       ? await loadCollectedUrls(store, config.sourceId)
       : undefined;
-    // Set-aside marks and attempt markers ride on the same state (issue #805).
-    // A state the store failed to return is never written back this run: the
-    // object it could not read may hold marks no manifest can rebuild.
-    const writable = guardState !== undefined && !guardState.unreadable;
-    const journal = guardState && writable
-      ? guardDocumentJournal(store, config.sourceId, guardState, now, maxDocumentBytes)
-      : undefined;
+    // Deferred URLs and attempt markers live in their own per-URL acquisition
+    // state, never in the guard (issue #805). If the store fails to return it,
+    // the city fetches nothing this run: a deferred document must never be
+    // requested again, and the deferrals are exactly what could not be read.
+    const acquisition = guardState ? await loadAcquisitionState(store, config.sourceId) : undefined;
+    if (acquisition?.unreadable) {
+      return { city: config.citySlug, sourceId: config.sourceId, status: "error", casKeys: [], count: 0,
+        error: "[storage] acquisition state unreadable" };
+    }
+    const journal = acquisition ? acquisitionJournal(store, config.sourceId, acquisition, now) : undefined;
     const outcome = await runRecueilWithManifest(config.sourceId, adapter, store, {
       pdfToText: datePdfToText,
       ...(limit !== undefined ? { limit } : {}),
@@ -493,17 +500,14 @@ export async function runLiveScrape(
       ...(signal !== undefined ? { signal } : {}),
     });
     const setAside = outcome.setAside ?? [];
+    // Closed attempts and new deferrals are kept whatever the city's outcome.
+    if (acquisition && journal?.changed()) await saveAcquisitionState(store, config.sourceId, acquisition);
 
     // `ok: false` now means the source could collect NOTHING (index / sitemap
     // unreachable), so `count: 0` is a fact here rather than an erasure. A run
     // that collected documents and then hit a failure comes back `ok: true`,
     // with its harvest and its holes both reported below.
     if (!outcome.ok) {
-      // The journal's settlements (closed attempts, new set-aside marks) are
-      // kept even when the source failed; the URL set is unchanged.
-      if (guardState && journal?.changed()) {
-        await saveCollectedUrls(store, config.sourceId, guardState.urls, guardState);
-      }
       return {
         city: config.citySlug,
         sourceId: config.sourceId,
@@ -523,11 +527,11 @@ export async function runLiveScrape(
     // bootstrap from past manifests is not redone every night. A failure to
     // write costs re-downloads next run and must never cost the city, so it is
     // swallowed by `saveCollectedUrls`.
-    if (guardState && writable) {
+    if (guardState) {
       const before = guardState.urls.size;
       for (const entry of outcome.manifestEntries) guardState.urls.add(entry.sourceUrl);
-      if (guardState.urls.size !== before || !guardState.fromState || journal?.changed()) {
-        await saveCollectedUrls(store, config.sourceId, guardState.urls, guardState);
+      if (guardState.urls.size !== before || !guardState.fromState) {
+        await saveCollectedUrls(store, config.sourceId, guardState.urls);
       }
     }
 

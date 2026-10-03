@@ -57,13 +57,13 @@ import {
 
 /**
  * WHY A DOCUMENT IS KEPT OUT OF THE RUN (issue #805):
- *   - `oversize`: its body exceeds the adapter's byte cap and was refused
- *     before being buffered;
- *   - `oom-suspected`: it was requested at least twice and the process never
- *     came back from it — the signature of an OOM kill, which cannot be caught
- *     in-process.
+ *   - `deferred-oversize`: its body exceeds the adapter's byte cap and was
+ *     refused before being buffered;
+ *   - `interrupted-repeatedly`: it was requested at least twice and the process
+ *     never came back from it. That is what an OOM kill looks like, but also a
+ *     deadline, an eviction or a lost node — the label says what is known.
  */
-export type RecueilSetAsideReason = "oversize" | "oom-suspected";
+export type RecueilSetAsideReason = "deferred-oversize" | "interrupted-repeatedly";
 
 /** One document NOT processed, and why, for the logs and the sweep report. */
 export interface RecueilSetAsideDocument {
@@ -73,13 +73,13 @@ export interface RecueilSetAsideDocument {
   readonly newlySetAside: boolean;
   /** When the durable mark was made. */
   readonly markedAt: string;
-  /** `oversize`: `Content-Length` as announced, `null` when absent. */
+  /** `deferred-oversize`: `Content-Length` as announced, `null` when absent. */
   readonly bytesAnnounced?: number | null;
-  /** `oversize`: body bytes read before the refusal. */
+  /** `deferred-oversize`: body bytes read before the refusal. */
   readonly bytesRead?: number;
-  /** `oversize`: the cap in force. */
+  /** `deferred-oversize`: the cap in force. */
   readonly capBytes?: number;
-  /** `oom-suspected`: unclosed attempts found. */
+  /** `interrupted-repeatedly`: unclosed attempts found. */
   readonly attempts?: number;
 }
 
@@ -318,8 +318,8 @@ export async function runRecueil(
       skippedKnown += 1;
       continue;
     }
-    // Set aside by an earlier run (oversize, or a process that died on it
-    // twice): no GET, no HEAD, and no share of `limit`.
+    // Set aside by an earlier run (deferred as oversize, or interrupted twice):
+    // no GET, no HEAD, and no share of `limit`.
     const marked = options.journal?.setAside(ref.url);
     if (marked) {
       setAside.push(marked);
@@ -412,7 +412,7 @@ export async function runRecueil(
       // good — a typed outcome, never a failure that would be retried.
       if (e instanceof DocumentOversizeError) {
         const oversize: RecueilSetAsideDocument = {
-          url: ref.url, reason: "oversize", newlySetAside: true, markedAt: new Date().toISOString(),
+          url: ref.url, reason: "deferred-oversize", newlySetAside: true, markedAt: new Date().toISOString(),
           bytesAnnounced: e.bytesAnnounced, bytesRead: e.bytesRead, capBytes: e.capBytes,
         };
         setAside.push(oversize);
