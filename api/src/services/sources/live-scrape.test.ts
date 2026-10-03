@@ -646,6 +646,30 @@ describe("runLiveScrape — oversize and oom-suspected documents (#805)", () => 
     expect(second.setAside).toEqual([expect.objectContaining({ url: pdf("zonage"), newlySetAside: false })]);
   });
 
+  it("writes nothing back over a guard state the store failed to return", async () => {
+    const store = new MemoryStore();
+    await night(store, cityFetch(["zonage", "pv"], []));
+    const stored = store.objects.get(collectedUrlsKey(config.sourceId));
+    // One S3 fault on the guard read: the run goes on fail-open (the cap still
+    // refuses the oversize body) but must not erase the marks it could not see.
+    const faulty = Object.assign(Object.create(store) as MemoryStore, {
+      get: async (key: string) => {
+        if (key === collectedUrlsKey(config.sourceId)) {
+          throw Object.assign(new Error("Service Unavailable"), { $metadata: { httpStatusCode: 503 } });
+        }
+        return store.get(key);
+      },
+    });
+    const downloads: string[] = [];
+    const recap = (await night(faulty, cityFetch(["zonage", "pv"], downloads)))[0]!;
+    // `pv` is still known through the manifest bootstrap; `zonage` is requested
+    // again because its mark could not be read, and refused on its header.
+    expect(downloads).toEqual([pdf("zonage")]);
+    expect(recap.setAside).toEqual([expect.objectContaining({ url: pdf("zonage"), reason: "oversize",
+      newlySetAside: true })]);
+    expect(store.objects.get(collectedUrlsKey(config.sourceId))).toBe(stored);
+  });
+
   it("sets aside, after two process deaths, the document it died on — within the new-write limit", async () => {
     // A process death is simulated by keeping what storage held at the instant
     // of the fatal request and starting the next pass from exactly that.

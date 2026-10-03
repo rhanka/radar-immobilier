@@ -477,8 +477,11 @@ export async function runLiveScrape(
       ? await loadCollectedUrls(store, config.sourceId)
       : undefined;
     // Set-aside marks and attempt markers ride on the same state (issue #805).
-    const journal = guardState
-      ? guardDocumentJournal(store, config.sourceId, guardState, now)
+    // A state the store failed to return is never written back this run: the
+    // object it could not read may hold marks no manifest can rebuild.
+    const writable = guardState !== undefined && !guardState.unreadable;
+    const journal = guardState && writable
+      ? guardDocumentJournal(store, config.sourceId, guardState, now, maxDocumentBytes)
       : undefined;
     const outcome = await runRecueilWithManifest(config.sourceId, adapter, store, {
       pdfToText: datePdfToText,
@@ -520,7 +523,7 @@ export async function runLiveScrape(
     // bootstrap from past manifests is not redone every night. A failure to
     // write costs re-downloads next run and must never cost the city, so it is
     // swallowed by `saveCollectedUrls`.
-    if (guardState) {
+    if (guardState && writable) {
       const before = guardState.urls.size;
       for (const entry of outcome.manifestEntries) guardState.urls.add(entry.sourceUrl);
       if (guardState.urls.size !== before || !guardState.fromState || journal?.changed()) {
