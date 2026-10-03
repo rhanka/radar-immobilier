@@ -12,6 +12,7 @@
  *   - No (or a lying) `Content-Length` ⇒ the body is read through its stream
  *     reader, bytes are counted, and the read is aborted on the chunk that
  *     crosses the cap — never more than one chunk past it is held.
+ *   - An optional time bound abandons a body that keeps trickling in.
  *
  * The refusal is a typed {@link DocumentOversizeError} carrying the bytes
  * announced and the bytes actually read, which RECUEIL turns into an `oversize`
@@ -54,40 +55,76 @@ export function announcedContentLength(headers: { get(name: string): string | nu
   return Number.isSafeInteger(value) ? value : null;
 }
 
+/** A document body that did not finish arriving within its time bound. */
+export class DocumentBodyTimeoutError extends Error {
+  constructor(readonly url: string, readonly timeoutMs: number, readonly bytesRead: number) {
+    super(`Document body not received within ${timeoutMs} ms (read ${bytesRead})`);
+    this.name = "DocumentBodyTimeoutError";
+  }
+}
+
 /**
- * Read `res`'s body, refusing it as soon as it is known to exceed `capBytes`.
- * `capBytes` of `Infinity` reads the body with no refusal.
+ * Read `res`'s body, refusing it as soon as it is known to exceed `capBytes`
+ * and abandoning it once `timeoutMs` has elapsed. Either refusal cancels the
+ * body explicitly, so the connection is released instead of draining. An
+ * `Infinity` cap or timeout applies none.
  */
 export async function readBodyWithinCap(
   res: CappedBodySource,
   url: string,
   capBytes: number,
+  timeoutMs = Number.POSITIVE_INFINITY,
 ): Promise<Uint8Array> {
   const announced = announcedContentLength(res.headers);
   if (announced !== null && announced > capBytes) {
     await res.body?.cancel().catch(() => undefined);
     throw new DocumentOversizeError(url, capBytes, announced, 0);
   }
-  if (!res.body) {
-    const body = new Uint8Array(await res.arrayBuffer());
-    if (body.byteLength > capBytes) {
-      throw new DocumentOversizeError(url, capBytes, announced, body.byteLength);
+  let total = 0;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const expired = new Promise<never>((_, reject) => {
+    if (Number.isFinite(timeoutMs)) {
+      timer = setTimeout(() => reject(new DocumentBodyTimeoutError(url, timeoutMs, total)), timeoutMs);
     }
-    return body;
+  });
+  const bounded = <T>(step: Promise<T>): Promise<T> => Promise.race([step, expired]);
+  try {
+    if (!res.body) {
+      const body = new Uint8Array(await bounded(res.arrayBuffer()));
+      if (body.byteLength > capBytes) {
+        throw new DocumentOversizeError(url, capBytes, announced, body.byteLength);
+      }
+      return body;
+    }
+    return await readCounted(res.body.getReader(), url, capBytes, announced, bounded, (n) => { total = n; });
+  } finally {
+    clearTimeout(timer);
   }
+}
 
-  const reader = res.body.getReader();
+async function readCounted(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  url: string,
+  capBytes: number,
+  announced: number | null,
+  bounded: <T>(step: Promise<T>) => Promise<T>,
+  progress: (bytes: number) => void,
+): Promise<Uint8Array> {
   const chunks: Uint8Array[] = [];
   let total = 0;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    total += value.byteLength;
-    if (total > capBytes) {
-      await reader.cancel().catch(() => undefined);
-      throw new DocumentOversizeError(url, capBytes, announced, total);
+  try {
+    for (;;) {
+      const { done, value } = await bounded(reader.read());
+      if (done) break;
+      total += value.byteLength;
+      progress(total);
+      if (total > capBytes) throw new DocumentOversizeError(url, capBytes, announced, total);
+      chunks.push(value);
     }
-    chunks.push(value);
+  } catch (error) {
+    // Refused, timed out or interrupted: release the body, never drain it.
+    await reader.cancel().catch(() => undefined);
+    throw error;
   }
   if (chunks.length === 1) return chunks[0]!;
   const body = new Uint8Array(total);

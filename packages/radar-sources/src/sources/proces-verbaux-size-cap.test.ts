@@ -7,7 +7,12 @@ import { describe, expect, it, vi } from "vitest";
 
 import { DocumentOversizeError } from "../document-size-cap.js";
 import { sha256Hex } from "../RawDocument.js";
-import { ProcesVerbauxGenericAdapter, SAINT_DAMASE_PV_CONFIG, type PvFetchLike } from "./proces-verbaux-generic.js";
+import {
+  ProcesVerbauxGenericAdapter,
+  PvSourceFetchError,
+  SAINT_DAMASE_PV_CONFIG,
+  type PvFetchLike,
+} from "./proces-verbaux-generic.js";
 
 const ref = {
   url: "https://example.org/zonage.pdf", sourceKind: "pv" as const,
@@ -100,5 +105,42 @@ describe("PV document byte cap (#805)", () => {
   it("applies no cap unless one is configured", async () => {
     const res = response(countedStream([chunk(4_000, 1), chunk(4_000, 2)]).stream, {});
     expect((await adapter(res).fetch(ref)).body.byteLength).toBe(8_000);
+  });
+
+  it("abandons and cancels a body that does not arrive within the time bound", async () => {
+    let cancelled = false;
+    let sent = false;
+    const stalled = new ReadableStream<Uint8Array>({
+      pull(controller) { if (!sent) { sent = true; controller.enqueue(chunk(100, 1)); } },
+      cancel() { cancelled = true; },
+    }, { highWaterMark: 0 });
+    const slow = new ProcesVerbauxGenericAdapter(SAINT_DAMASE_PV_CONFIG, {
+      fetchImpl: async () => response(stalled, {}), onRequest: () => {}, documentTimeoutMs: 30,
+    });
+    const error = await slow.fetch(ref).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(PvSourceFetchError);
+    expect(error).toMatchObject({ kind: "timeout", phase: "document", url: ref.url, detail: "Document body timed out" });
+    expect(cancelled).toBe(true);
+  });
+
+  it("turns a body cut off mid-transfer into a typed network failure", async () => {
+    let pulls = 0;
+    const cut = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        pulls += 1;
+        if (pulls === 1) controller.enqueue(chunk(100, 1));
+        else controller.error(new TypeError("terminated"));
+      },
+    }, { highWaterMark: 0 });
+    await expect(adapter(response(cut, {}), 1_000).fetch(ref)).rejects.toMatchObject({
+      name: "PvSourceFetchError", kind: "network", detail: "Document body interrupted" });
+  });
+
+  it("cancels the body of an HTTP error instead of leaving it to drain", async () => {
+    const body = countedStream([chunk(400, 1)]);
+    const res = { ...response(body.stream, {}), ok: false, status: 503 };
+    await expect(adapter(res, 1_000).fetch(ref)).rejects.toMatchObject({ kind: "http", httpStatus: 503 });
+    expect(body.cancelled()).toBe(true);
+    expect(body.pulls()).toBe(0);
   });
 });
