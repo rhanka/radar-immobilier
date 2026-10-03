@@ -1,6 +1,7 @@
 import {
   buildRawDocumentRecord,
   documentDateFromPublishedAt,
+  DocumentOversizeError,
   extractDocumentHeaderDate,
   SourceFetchError,
   PvSourceFetchError,
@@ -54,7 +55,54 @@ import {
  * this one has to make the same distinction; the callers do.
  */
 
+/**
+ * WHY A DOCUMENT IS KEPT OUT OF THE RUN (issue #805):
+ *   - `oversize`: its body exceeds the adapter's byte cap and was refused
+ *     before being buffered;
+ *   - `oom-suspected`: it was requested at least twice and the process never
+ *     came back from it — the signature of an OOM kill, which cannot be caught
+ *     in-process.
+ */
+export type RecueilSetAsideReason = "oversize" | "oom-suspected";
+
+/** One document NOT processed, and why, for the logs and the sweep report. */
+export interface RecueilSetAsideDocument {
+  readonly url: string;
+  readonly reason: RecueilSetAsideReason;
+  /** True when THIS run set it aside; false when an earlier run's mark skipped it. */
+  readonly newlySetAside: boolean;
+  /** When the durable mark was made. */
+  readonly markedAt: string;
+  /** `oversize`: `Content-Length` as announced, `null` when absent. */
+  readonly bytesAnnounced?: number | null;
+  /** `oversize`: body bytes read before the refusal. */
+  readonly bytesRead?: number;
+  /** `oversize`: the cap in force. */
+  readonly capBytes?: number;
+  /** `oom-suspected`: unclosed attempts found. */
+  readonly attempts?: number;
+}
+
+/**
+ * DURABLE PER-DOCUMENT JOURNAL (issue #805). An OOM kill cannot be caught, so
+ * the only way to count it is to write that a document is being requested
+ * BEFORE requesting it and to close that mark once the process has settled the
+ * document. A mark still open on a later run is a process that died on it.
+ */
+export interface RecueilDocumentJournal {
+  /** The durable mark keeping `url` out of this run with no request, if any. */
+  setAside(url: string): RecueilSetAsideDocument | undefined;
+  /** Record, durably, that `url` is about to be requested. Never throws. */
+  open(url: string): Promise<void>;
+  /** Settle the attempt opened for `url`. */
+  close(url: string, settlement: "collected" | "failed" | RecueilSetAsideDocument): void;
+}
+
 export interface RecueilOptions {
+  /**
+   * PDF text reader for the DOCUMENTARY DATE only, read from the first-page
+   * header (`documentDateHeader`); live scrape passes a first-page extractor.
+   */
   readonly pdfToText?: PdfToText;
   readonly limit?: number;
   /** Skip listed representations before they count toward `limit` or get fetched. */
@@ -70,6 +118,12 @@ export interface RecueilOptions {
    * unable to tell an up-to-date city from a broken one.
    */
   readonly alreadyCollected?: ReadonlySet<string>;
+  /**
+   * Durable journal: a URL it holds a set-aside mark for is skipped with no
+   * request, every other document is opened before its request and closed on
+   * every in-process settlement. Absent ⇒ no mark is read or written.
+   */
+  readonly journal?: RecueilDocumentJournal;
   /** Optional source-specific pacing hook, invoked immediately before each fetch. */
   readonly beforeFetch?: (ref: RawDocumentRef) => Promise<void>;
   /**
@@ -142,6 +196,12 @@ export interface RecueilSuccess {
    */
   readonly skippedKnown: number;
   /**
+   * Documents NOT processed this run: refused as oversize now, or skipped with
+   * no request because of an earlier set-aside mark. Never counted as failures
+   * nor as harvest; listed so the operator sees what the radar does not read.
+   */
+  readonly setAside: readonly RecueilSetAsideDocument[];
+  /**
    * Set when ENUMERATION stopped early (the index page, the sitemap or the
    * generator itself failed) after at least one document had been collected.
    * The harvest is kept and committed; this says the list may be incomplete, so
@@ -157,6 +217,8 @@ export interface RecueilFailure {
   readonly error: SourceErrorKind;
   readonly detail: string;
   readonly fetchedAt: string;
+  /** Documents set aside before the source failed; absent when none. */
+  readonly setAside?: readonly RecueilSetAsideDocument[];
 }
 
 export type RecueilOutcome = RecueilSuccess | RecueilFailure;
@@ -210,6 +272,7 @@ export async function runRecueil(
   let skippedExisting = 0;
 
   const documentFailures: RecueilFetchFailure[] = [];
+  const setAside: RecueilSetAsideDocument[] = [];
   let skippedKnown = 0;
   let listingTruncatedBy: RecueilFetchFailure | undefined;
   // Kept so a run that collected NOTHING can still report the typed error that
@@ -236,7 +299,7 @@ export async function runRecueil(
       countHttp404(failure);
       // Nothing collected yet ⇒ the source genuinely failed (index / sitemap
       // unreachable): the city is lost, and THAT is the only case where it is.
-      if (records.length === 0) return failureOutcome(e, source, fetchedAt);
+      if (records.length === 0) return failureOutcome(e, source, fetchedAt, setAside);
       // Something WAS collected: keep it, commit it, and record that the list
       // is incomplete. The next run re-reads the index and picks up the rest.
       listingTruncatedBy = failure;
@@ -255,10 +318,18 @@ export async function runRecueil(
       skippedKnown += 1;
       continue;
     }
+    // Set aside by an earlier run (oversize, or a process that died on it
+    // twice): no GET, no HEAD, and no share of `limit`.
+    const marked = options.journal?.setAside(ref.url);
+    if (marked) {
+      setAside.push(marked);
+      continue;
+    }
 
     try {
       await options.beforeFetch?.(ref);
       if (options.signal?.aborted) break;
+      await options.journal?.open(ref.url);
       const raw = await adapter.fetch(ref);
 
       let record = buildRawDocumentRecord({
@@ -332,7 +403,20 @@ export async function runRecueil(
           ? { publishedAt: record.publishedAt }
           : {}),
       });
+      options.journal?.close(ref.url, "collected");
     } catch (e) {
+      // Too large to buffer: refused before it was buffered, set aside for
+      // good — a typed outcome, never a failure that would be retried.
+      if (e instanceof DocumentOversizeError) {
+        const oversize: RecueilSetAsideDocument = {
+          url: ref.url, reason: "oversize", newlySetAside: true, markedAt: new Date().toISOString(),
+          bytesAnnounced: e.bytesAnnounced, bytesRead: e.bytesRead, capBytes: e.capBytes,
+        };
+        setAside.push(oversize);
+        options.journal?.close(ref.url, oversize);
+        continue;
+      }
+      options.journal?.close(ref.url, "failed");
       // ONE document failed — counted, journalled with its URL and its phase,
       // and the run goes on. Nothing already written to the CAS is discarded.
       const failure = toFetchFailure(e, "document", ref.url);
@@ -361,7 +445,7 @@ export async function runRecueil(
   // 2016. A run that skipped documents HAS a harvest; it is simply already on
   // disk.
   if (records.length === 0 && documentFailures.length > 0 && skippedKnown === 0) {
-    return failureOutcome(firstDocumentError, source, fetchedAt);
+    return failureOutcome(firstDocumentError, source, fetchedAt, setAside);
   }
 
   return {
@@ -376,6 +460,7 @@ export async function runRecueil(
     manifestEntries,
     documentFailures,
     skippedKnown,
+    setAside,
     ...(listingTruncatedBy !== undefined ? { listingTruncatedBy } : {}),
   };
 }
@@ -432,16 +517,18 @@ function failureOutcome(
   e: unknown,
   source: string,
   fetchedAt: string,
+  setAside: readonly RecueilSetAsideDocument[] = [],
 ): RecueilFailure {
+  const marks = setAside.length > 0 ? { setAside } : {};
   if (e instanceof PvSourceFetchError) {
     const { url, phase, httpStatus, headers, durationMs } = e;
     return {
       ok: false, source, error: e.kind, detail: e.detail, fetchedAt,
-      fetchFailure: { url, phase, httpStatus, headers, durationMs },
+      fetchFailure: { url, phase, httpStatus, headers, durationMs }, ...marks,
     };
   }
   if (e instanceof SourceFetchError) {
-    return { ok: false, source, error: e.kind, detail: e.detail, fetchedAt };
+    return { ok: false, source, error: e.kind, detail: e.detail, fetchedAt, ...marks };
   }
   // Storage / unexpected failure — surface as a typed network-class error
   // rather than crashing the request.
@@ -451,6 +538,7 @@ function failureOutcome(
     error: "network",
     detail: e instanceof Error ? e.message : String(e),
     fetchedAt,
+    ...marks,
   };
 }
 
