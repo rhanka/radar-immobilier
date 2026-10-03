@@ -44,7 +44,7 @@
 - [x] Lot 1 — Size guard in the PV adapter: `Content-Length` over the cap cancels the body unread; without it the body is read through its reader and aborted as soon as the cap is exceeded; typed `DocumentOversizeError` (bytes announced / read).
 - [x] Lot 2 — `pdfFirstPageToTextViaPoppler`: `pdftotext -l 1` on a temp file under the OS tmpdir, always removed, same timeout.
 - [ ] Lot 3 — Known-URL guard carries durable set-aside marks (`oversize`, `oom-suspected`) and open attempt markers; journal written before each document request.
-- [ ] Lot 4 — RECUEIL: set-aside documents skipped with no request, oversize becomes a typed `setAside` outcome, attempts opened before the fetch and closed on every in-process settlement.
+- [x] Lot 4 — RECUEIL: set-aside documents skipped with no request, oversize becomes a typed `setAside` outcome, attempts opened before the fetch and closed on every in-process settlement.
 - [ ] Lot 5 — Live scrape wiring: journal on the guard, cap option, first-page date extractor, `setAside` in the city recap; guard written even when the city RECUEIL fails.
 - [ ] Lot 6 — Refresh: `REFRESH_MAX_DOCUMENT_BYTES` (code default 52428800), set-aside documents in the per-city notes, sweep entries and sweep report.
 - [ ] Lot 7 — Crash replay with the #805 analysis harness under the prod envelope (768Mi, heap 512, 150m CPU): 172 MB PDF reported `oversize` without OOM kill; small PDF still collected.
