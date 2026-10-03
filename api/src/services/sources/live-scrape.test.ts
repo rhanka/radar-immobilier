@@ -28,6 +28,7 @@ import {
 
 import type { ObjectInfo, ObjectStore } from "../../storage/object-store.js";
 import { projectStateKey } from "../exploitation/project-state.js";
+import { acquisitionStateKey } from "./acquisition-state.js";
 import { collectedUrlsKey } from "./known-urls.js";
 import { citiesChunk, configOnlyCitySlugs, runLiveScrape } from "./live-scrape.js";
 import { recueilMetrics, recueilMetricsJson, resetRecueilMetrics } from "./recueil.js";
@@ -585,6 +586,133 @@ describe("runLiveScrape — config-only PV cities → object store", () => {
     expect(recap[0]!.casKeys).toHaveLength(1);
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Issue #805: a document too large to buffer, or one the process keeps not
+// coming back from, is deferred DURABLY in the source's acquisition state —
+// never in the known-URL guard, which means "collected" — and never requested
+// again.
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("runLiveScrape — deferred-oversize and interrupted-repeatedly documents (#805)", () => {
+  const slug = configOnlySlugs(1)[0]!;
+  const config = ALL_PV_CITIES.find((c) => c.config.citySlug === slug)!.config;
+  const origin = new URL(config.pvIndexUrl).origin;
+  const pdf = (name: string) => `${origin}/pv/${name}-2026-06-12.pdf`;
+  const linesOf = (store: MemoryStore, key: string) =>
+    new TextDecoder().decode(store.objects.get(key) ?? new Uint8Array())
+      .trim().split("\n").filter(Boolean).map((line) => JSON.parse(line) as Record<string, unknown>);
+  const stateLines = (store: MemoryStore) => linesOf(store, acquisitionStateKey(config.sourceId));
+  /** Index listing `names`; `onDocument` may throw to stand for a process death. */
+  function cityFetch(names: string[], downloads: string[], onDocument: (url: string) => void = () => {}): PvFetchLike {
+    return async (url) => {
+      if (url === config.pvIndexUrl) {
+        return htmlResponse(names.map((name) => `<a href="${pdf(name)}">Procès-verbal du 2026-06-12</a>`).join(""),
+        ) as Awaited<ReturnType<PvFetchLike>>;
+      }
+      downloads.push(url);
+      onDocument(url);
+      if (url === pdf("zonage")) {
+        return {
+          ok: true, status: 200, headers: new Headers({ "content-type": "application/pdf", "content-length": "180215792" }),
+          arrayBuffer: async () => { throw new Error("the oversize body must never be read"); },
+        } as Awaited<ReturnType<PvFetchLike>>;
+      }
+      return pdfResponse(`bytes for ${url}`) as Awaited<ReturnType<PvFetchLike>>;
+    };
+  }
+  const night = (store: MemoryStore, fetch: PvFetchLike, limit?: number) => runLiveScrape([slug], {
+    store, fetch, skipAlreadyCollectedUrls: true, maxDocumentBytes: 52_428_800,
+    now: () => new Date("2026-06-20T00:00:00Z"), ...(limit !== undefined ? { limit } : {}),
+  });
+
+  it("defers an oversize document unread, collects the one after it, and never requests it again", async () => {
+    const store = new MemoryStore();
+    const downloads: string[] = [];
+    let openAttempt: Record<string, unknown> | undefined;
+    const fetch = cityFetch(["zonage", "pv"], downloads, (url) => {
+      if (url === pdf("pv")) openAttempt = stateLines(store).find((line) => line.url === url);
+    });
+
+    const first = (await night(store, fetch))[0]!;
+    expect(first.count).toBe(1);
+    expect(first.failedDocs).toBeUndefined();
+    expect(first.setAside).toEqual([expect.objectContaining({ url: pdf("zonage"), reason: "deferred-oversize",
+      newlySetAside: true, bytesAnnounced: 180_215_792, bytesRead: 0, capBytes: 52_428_800 })]);
+    // The attempt was on storage while the request ran, and is closed after it.
+    expect(openAttempt).toMatchObject({ state: "attempt-open", open: 1 });
+    expect(stateLines(store)).toEqual([expect.objectContaining({ url: pdf("zonage"), state: "deferred-oversize" })]);
+    // The guard records only what was COLLECTED.
+    expect(linesOf(store, collectedUrlsKey(config.sourceId))).toEqual([{ url: pdf("pv") }]);
+
+    downloads.length = 0;
+    const second = (await night(store, fetch))[0]!;
+    expect(downloads).toEqual([]);
+    expect(second.status).not.toBe("error");
+    expect(second.setAside).toEqual([expect.objectContaining({ url: pdf("zonage"), newlySetAside: false })]);
+  });
+
+  it("fetches nothing for a city whose acquisition state the store failed to return", async () => {
+    const store = new MemoryStore();
+    await night(store, cityFetch(["zonage", "pv"], []));
+    const stored = store.objects.get(acquisitionStateKey(config.sourceId));
+    const faulty = Object.assign(Object.create(store) as MemoryStore, {
+      get: async (key: string) => {
+        if (key === acquisitionStateKey(config.sourceId)) {
+          throw Object.assign(new Error("Service Unavailable"), { $metadata: { httpStatusCode: 503 } });
+        }
+        return store.get(key);
+      },
+    });
+    const downloads: string[] = [];
+    const recap = (await night(faulty, cityFetch(["zonage", "pv", "new"], downloads)))[0]!;
+    // A deferred document must never be requested again, and the deferrals are
+    // what could not be read: the city waits for the next pass.
+    expect(recap).toMatchObject({ status: "error", error: "[storage] acquisition state unreadable" });
+    expect(downloads).toEqual([]);
+    expect(store.objects.get(acquisitionStateKey(config.sourceId))).toBe(stored);
+  });
+
+  it("sets aside, after two interrupted passes, the document they stopped on — within the new-write limit", async () => {
+    // A process death is simulated by keeping what storage held at the instant
+    // of the fatal request and starting the next pass from exactly that.
+    const deathOn = (store: MemoryStore, downloads: string[]) => {
+      const dead = new MemoryStore();
+      const fetch = cityFetch(["a", "killer", "b", "c", "d", "e", "f"], downloads, (url) => {
+        if (url !== pdf("killer")) return;
+        for (const [key, value] of store.objects) dead.objects.set(key, value);
+        throw new Error("process killed");
+      });
+      return { fetch, dead };
+    };
+    let store = new MemoryStore();
+    for (let pass = 1; pass <= 2; pass++) {
+      const downloads: string[] = [];
+      const { fetch, dead } = deathOn(store, downloads);
+      await night(store, fetch, 5);
+      expect(downloads).toContain(pdf("killer"));
+      store = dead;
+      expect(stateLines(store)).toEqual([expect.objectContaining({ url: pdf("killer"), state: "attempt-open",
+        open: pass })]);
+    }
+
+    const downloads: string[] = [];
+    const third = (await night(store, cityFetch(["a", "killer", "b", "c", "d", "e", "f"], downloads), 5))[0]!;
+    expect(downloads).not.toContain(pdf("killer"));
+    expect(third.setAside).toEqual([{ url: pdf("killer"), reason: "interrupted-repeatedly", newlySetAside: true,
+      markedAt: expect.any(String), attempts: 2 }]);
+    // `a` was collected before each death but never committed: it is fetched
+    // again (and HEAD-skipped), then five new writes fill the limit.
+    expect(downloads).toEqual(["a", "b", "c", "d", "e", "f"].map(pdf));
+    expect(third.documents?.filter((document) => document.status === "new")).toHaveLength(5);
+    expect(linesOf(store, collectedUrlsKey(config.sourceId)).map((line) => line.url))
+      .not.toContain(pdf("killer"));
+
+    const fourth = (await night(store, cityFetch(["a", "killer", "b", "c", "d", "e", "f"], []), 5))[0]!;
+    expect(fourth.setAside).toEqual([expect.objectContaining({ url: pdf("killer"), newlySetAside: false })]);
+  });
+});
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // EXPLOITATION on live scrape: `exploit: true` runs PARSE + projects real
