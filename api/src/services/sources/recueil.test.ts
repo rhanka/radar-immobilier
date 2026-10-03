@@ -6,6 +6,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  DocumentOversizeError,
   PvSourceFetchError,
   rawMetaKey,
   RawDocumentRecordSchema,
@@ -20,6 +21,8 @@ import {
   resetRecueilMetrics,
   runRecueil,
   runRecueilWithManifest,
+  type RecueilDocumentJournal,
+  type RecueilSetAsideDocument,
 } from "./recueil.js";
 import { manifestKey } from "./run-manifest.js";
 
@@ -614,5 +617,79 @@ describe("runRecueil — a failed document must not cost the city (#723)", () =>
       error: "storage", detail: "S3 unavailable", phase: "document",
     });
     expect(out.count).toBe(3);
+  });
+});
+
+describe("runRecueil — oversize documents and the attempt journal (#805)", () => {
+  const url = (name: string) => `https://vsad.ca/uploads/${name}.pdf`;
+  function adapterWith(names: string[], oversize: string, failing = "", calls: string[] = []): SourceAdapter {
+    return {
+      ...manyDocumentsAdapter(0),
+      async *list() {
+        for (const name of names) {
+          yield { sourceKind: "pv", city: "testville", url: url(name), discoveredAt: "2026-10-03T00:00:00.000Z",
+            contentType: "application/pdf" } satisfies RawDocumentRef;
+        }
+      },
+      async fetch(ref) {
+        calls.push(ref.url);
+        if (ref.url === url(oversize)) throw new DocumentOversizeError(ref.url, 52_428_800, 180_215_792, 0);
+        if (ref.url === url(failing)) throw new PvSourceFetchError("http", "HTTP 404", ref.url, "document", 404);
+        return {
+          ref, sourceKind: "pv", city: "testville", url: ref.url, fetchedAt: "2026-10-03T09:30:00.000Z",
+          contentType: "application/pdf", body: new TextEncoder().encode(ref.url),
+          provenance: { adapterVersion: "1.0.0", fetchedViaObscura: false },
+        };
+      },
+    };
+  }
+  function recordingJournal(marks = new Map<string, RecueilSetAsideDocument>()) {
+    const events: string[] = [];
+    const journal: RecueilDocumentJournal = {
+      setAside: (u) => marks.get(u),
+      open: async (u) => { events.push(`open ${u}`); },
+      close: (u, s) => { events.push(`close ${u} ${typeof s === "string" ? s : s.reason}`); },
+    };
+    return { journal, events };
+  }
+
+  it("turns an oversize document into a typed set-aside outcome, not a failure, and goes on", async () => {
+    const store = new MemoryStore();
+    const { journal, events } = recordingJournal();
+    const out = await runRecueil("proces-verbaux-vsad", adapterWith(["zonage", "pv"], "zonage"), store, { journal });
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(out.documentFailures).toEqual([]);
+    expect(out.setAside).toEqual([{
+      url: url("zonage"), reason: "oversize", newlySetAside: true, markedAt: expect.any(String),
+      bytesAnnounced: 180_215_792, bytesRead: 0, capBytes: 52_428_800,
+    }]);
+    expect(out.count).toBe(1);
+    expect(out.records.map((record) => record.sourceUrl)).toEqual([url("pv")]);
+    // Every request is opened BEFORE it is made and closed once settled.
+    expect(events).toEqual([
+      `open ${url("zonage")}`, `close ${url("zonage")} oversize`,
+      `open ${url("pv")}`, `close ${url("pv")} collected`,
+    ]);
+  });
+
+  it("skips a set-aside URL with no request and without consuming the new-write limit", async () => {
+    const calls: string[] = [];
+    const marks = new Map([[url("killer"), { url: url("killer"), reason: "oom-suspected" as const,
+      newlySetAside: false, markedAt: "2026-10-01T00:00:00.000Z", attempts: 2 }]]);
+    const { journal, events } = recordingJournal(marks);
+    const out = await runRecueil("proces-verbaux-vsad",
+      adapterWith(["killer", "a", "b", "c"], "", "", calls), new MemoryStore(), { journal, limit: 2 });
+    expect(out.ok).toBe(true);
+    if (!out.ok) return;
+    expect(calls).toEqual([url("a"), url("b")]);
+    expect(out.setAside).toEqual([marks.get(url("killer"))]);
+    expect(events).not.toContain(`open ${url("killer")}`);
+  });
+
+  it("closes the attempt of a document that failed in-process", async () => {
+    const { journal, events } = recordingJournal();
+    await runRecueil("proces-verbaux-vsad", adapterWith(["dead", "pv"], "", "dead"), new MemoryStore(), { journal });
+    expect(events.slice(0, 2)).toEqual([`open ${url("dead")}`, `close ${url("dead")} failed`]);
   });
 });
