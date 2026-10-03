@@ -712,27 +712,43 @@ object-storage-inventory-preprod-fetch: ## Fetch receipts without printing them 
 	    xargs -0 -r sha256sum >SHA256SUMS; \
 	  echo "[object-storage-inventory] evidence fetched and hashed at $$destination"
 
-# ── Documentary date stock recovery (PREPROD only) ─────────────────────
+# ── Documentary date stock recovery ───────────────────────────────────
 # Projects raw-sidecar fetchedAt + documentary dates onto served graph refs, no model
-# call. RECOVERY_MODE=preview (default, read-only) | apply (needs RECOVERY_CONFIRM=1).
-# RECOVERY_ARGS adds script options/slugs (e.g. "--heal" or "val-des-monts brossard").
-# RECOVERY_IMAGE defaults to the radar-api image currently served by preprod.
+# call. Preprod runs from here: RECOVERY_MODE=preview (default, read-only) | apply
+# (needs RECOVERY_CONFIRM=1). RECOVERY_ARGS adds script options/slugs (e.g. "--heal" or
+# "val-des-monts brossard"). RECOVERY_IMAGE defaults to the radar-api image served by preprod.
+# PROD has NO Make target: it runs only through .github/workflows/run-job.yaml
+# (job=document-date-recovery, manifest deploy/k8s/41-document-date-recovery-job.yaml);
+# document-date-recovery-validate renders both manifests offline.
 DOCUMENT_DATE_RECOVERY_JOB := deploy/k8s/document-date-recovery/job.yaml
 DOCUMENT_DATE_RECOVERY_NAMESPACE := radar-immobilier-preprod
+DOCUMENT_DATE_RECOVERY_PROD_JOB := deploy/k8s/41-document-date-recovery-job.yaml
+DOCUMENT_DATE_RECOVERY_PROD_NAMESPACE := radar-immobilier
 RECOVERY_MODE ?= preview
 RECOVERY_ARGS ?=
 RECOVERY_IMAGE ?=
 RECOVERY_TIMEOUT_SECONDS ?= 5700
 
 .PHONY: document-date-recovery-validate
-document-date-recovery-validate: ## Render the preprod documentary-date recovery Job offline
+document-date-recovery-validate: ## Render the preprod + prod documentary-date recovery Jobs offline
 	@command -v $(KUBECTL) >/dev/null 2>&1 || { echo "[document-date-recovery] kubectl not found"; exit 1; }
 	@set -euo pipefail; work="$$(mktemp -d)"; trap 'rm -rf "$$work"' EXIT; \
-	  sed -e "s#__IMAGE__#ghcr.io/rhanka/radar-api:validate#" -e "s#__RECOVERY_ARGS__##" $(DOCUMENT_DATE_RECOVERY_JOB) >"$$work/job.yaml"; \
-	  printf "resources:\n  - job.yaml\n" >"$$work/kustomization.yaml"; \
-	  $(KUBECTL) kustomize "$$work" >"$$work/out.yaml"; grep -q "^kind: Job$$" "$$work/out.yaml"
-	@grep -q 'namespace: $(DOCUMENT_DATE_RECOVERY_NAMESPACE)$$' $(DOCUMENT_DATE_RECOVERY_JOB)
-	@echo "[document-date-recovery] offline render ok"
+	  for spec in "$(DOCUMENT_DATE_RECOVERY_JOB)|$(DOCUMENT_DATE_RECOVERY_NAMESPACE)" "$(DOCUMENT_DATE_RECOVERY_PROD_JOB)|$(DOCUMENT_DATE_RECOVERY_PROD_NAMESPACE)"; do \
+	    manifest="$${spec%%|*}"; namespace="$${spec#*|}"; \
+	    rm -rf "$$work/render"; mkdir "$$work/render"; \
+	    sed -e "s#__IMAGE__#ghcr.io/rhanka/radar-api:validate#" -e "s#__RECOVERY_ARGS__#--apply --heal brossard#" "$$manifest" >"$$work/render/job.yaml"; \
+	    printf "resources:\n  - job.yaml\n" >"$$work/render/kustomization.yaml"; \
+	    $(KUBECTL) kustomize "$$work/render" >"$$work/out.yaml"; \
+	    grep -q "^kind: Job$$" "$$work/out.yaml"; \
+	    grep -q "^  name: radar-document-date-recovery$$" "$$work/out.yaml"; \
+	    grep -q "image: ghcr.io/rhanka/radar-api:validate$$" "$$work/out.yaml" && \
+	      grep -q "recover-document-dates.js --apply --heal brossard$$" "$$work/out.yaml" || \
+	      { echo "[document-date-recovery] $$manifest lost __IMAGE__ or __RECOVERY_ARGS__"; exit 1; }; \
+	    grep -q "^  namespace: $$namespace$$" "$$work/out.yaml" || { echo "[document-date-recovery] $$manifest is not in $$namespace"; exit 1; }; \
+	    ! grep -q '__[A-Z_]*__' "$$work/out.yaml" || { echo "[document-date-recovery] $$manifest keeps an unrendered placeholder"; exit 1; }; \
+	  done
+	@grep -Fq 'file=$(DOCUMENT_DATE_RECOVERY_PROD_JOB)' .github/workflows/run-job.yaml || { echo "[document-date-recovery] run-job.yaml does not route the prod manifest"; exit 1; }
+	@echo "[document-date-recovery] offline render ok (preprod + prod)"
 
 .PHONY: document-date-recovery-preprod
 document-date-recovery-preprod: ## Run the documentary-date recovery Job in preprod (RECOVERY_MODE=preview|apply)
