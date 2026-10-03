@@ -1,6 +1,7 @@
 export * from "./SourceAdapter.js";
 export * from "./RawDocument.js";
 export * from "./DocumentDate.js";
+export * from "./document-size-cap.js";
 export * from "./prioritySources.js";
 export * from "./sources/avis-publics-parser.js";
 export * from "./sources/role-evaluation-parser.js";
