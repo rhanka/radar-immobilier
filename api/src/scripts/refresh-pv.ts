@@ -41,11 +41,13 @@ import {
 } from "../services/graph/refresh-mesh.js";
 import { createRefreshModelPolicy, type RefreshModel } from "../services/graph/refresh-model-policy.js";
 import { loadRefreshProfileContext } from "../services/graph/refresh-profile.js";
-import { runPvRefresh, type RefreshAcquire } from "../services/graph/refresh-run.js";
+import { DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS, DEFAULT_REFRESH_MAX_DOCUMENT_BYTES, runPvRefresh,
+  type RefreshAcquire } from "../services/graph/refresh-run.js";
 import { assessRefreshSweepHealth, parseRefreshTarget,
   runRefreshSweep, writeRefreshSweepReport } from "../services/graph/refresh-sweep.js";
 import { canonicalHash } from "../services/graph/replay/canonical-json.js";
 import { configOnlyCitySlugs } from "../services/sources/live-scrape.js";
+import type { RecueilSetAsideDocument } from "../services/sources/recueil.js";
 import { canonicalGraphKey } from "../storage/object-store.js";
 import { getScrapeObjectStore, type S3ObjectStore } from "../storage/s3-object-store.js";
 
@@ -182,6 +184,12 @@ async function main(): Promise<void> {
     // (528 cities, 2026-09-05) ran at this window, so it is the window whose
     // cost is known; narrowing it would be a behaviour change with no measure.
     acquisitionWindowDays: positive("REFRESH_WINDOW_DAYS", 183, 3_650),
+    // Largest document body downloaded, and longest it may take to arrive
+    // (issue #805). Above the cap the document is refused before it is
+    // buffered and deferred, instead of OOM-killing the pod on every pass. The
+    // defaults live in code, not in the manifests.
+    maxDocumentBytes: positive("REFRESH_MAX_DOCUMENT_BYTES", DEFAULT_REFRESH_MAX_DOCUMENT_BYTES, 1_073_741_824),
+    documentTimeoutMs: positive("REFRESH_DOCUMENT_TIMEOUT_MS", DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS, 3_600_000),
   };
   const sweepOptions = {
     // The sweep must stop itself, cursor up to date, before the Job's own
@@ -216,9 +224,17 @@ async function main(): Promise<void> {
   process.once("SIGINT", stop("sigint"));
   const hardStop = setTimeout(stop("deadline"), sweepOptions.deadlineMs);
   hardStop.unref();
-  const refreshCity = (citySlug: string, mode: { extract: boolean } = { extract: true }) =>
+  const refreshCity = (citySlug: string, mode: { extract: boolean } = { extract: true },
+    onSetAside?: (document: RecueilSetAsideDocument) => void) =>
     runPvRefresh({ cycleId, citySlug, store, db, profileContext,
       documentModels,
+      // What the radar does NOT read, one line per document, every pass that
+      // meets it: the PO's view of deferred-oversize and interrupted-repeatedly
+      // documents.
+      onSetAside(document) {
+        logger.warn({ citySlug, ...document }, "refresh-pv: document set aside");
+        onSetAside?.(document);
+      },
       onModelReceipt(docSha, chunkId, receipt) {
         modelCalls += 1;
         if (receipt.modelUsed) submissions += 1;
@@ -242,7 +258,8 @@ async function main(): Promise<void> {
       ...(acquire ? { acquire } : {}) });
 
   logger.info({ mode: target.all ? "all" : "city", city, cities: cities.length, cycleId,
-    modelPolicy: documentModels.policy, maximumAttempts, primaryQualityAttempts, timeoutMs },
+    modelPolicy: documentModels.policy, maximumAttempts, primaryQualityAttempts, timeoutMs,
+    maxDocumentBytes: runOptions.maxDocumentBytes, documentTimeoutMs: runOptions.documentTimeoutMs },
   "refresh-pv: starting");
   const startedAt = new Date().toISOString();
   try {
@@ -254,9 +271,9 @@ async function main(): Promise<void> {
     }
     const report = await runRefreshSweep({
       cities, store,
-      async refreshCity(citySlug, mode) {
+      async refreshCity(citySlug, mode, onSetAside) {
         try {
-          return await refreshCity(citySlug, mode);
+          return await refreshCity(citySlug, mode, onSetAside);
         } catch (error) {
           // The sweep keeps only a reason code; the redacted diagnostic is
           // logged here, where the error is still in hand.
