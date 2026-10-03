@@ -268,17 +268,22 @@ jobs:
             | kubectl -n "$NAMESPACE" apply -f -
 
       - name: Wait for completion
+        env:
+          JOB: ${{ github.event.inputs.job }}
+          WAIT_SECONDS: ${{ steps.resolve.outputs.wait_seconds }}
         run: |
           set -eu
           NAME="${{ steps.resolve.outputs.name }}"
           # Poll the Job to a TERMINAL state (Complete OR Failed) with a deadline that
-          # EXCEEDS its activeDeadlineSeconds (jobs 37/38 use 3600s), so this workflow
+          # EXCEEDS its activeDeadlineSeconds (jobs 37/38 use 3600s → 3900s here;
+          # document-date-recovery uses 5400s → 5700s, see Resolve), so this workflow
           # observes the REAL outcome instead of giving up early. A Job that FAILED must
           # RED this run. Incident 2026-08-02 (PASS-1): the old `kubectl wait
           # --timeout=900s; exit 0` reported a misleading SUCCESS while the emit job
           # actually Failed at ~29m (S3 scratch left empty) — the exact "green but broken"
           # trap. Now: succeeded ⇒ green; failed ⇒ red; neither by the deadline ⇒ red.
-          deadline=$(( $(date +%s) + 3900 ))
+          deadline=$(( $(date +%s) + WAIT_SECONDS ))
+          stuck=0
           while :; do
             succeeded="$(kubectl -n "$NAMESPACE" get job "$NAME" -o jsonpath='{.status.succeeded}' 2>/dev/null || echo '')"
             failed="$(kubectl -n "$NAMESPACE" get job "$NAME" -o jsonpath='{.status.failed}' 2>/dev/null || echo '')"
@@ -288,15 +293,61 @@ jobs:
             if [ -n "${failed:-}" ] && [ "${failed:-0}" != "0" ]; then
               echo "::error title=Job failed::${NAME} failed (status.failed=${failed}). See 'Job logs' below for the pod error."; exit 1
             fi
+            # document-date-recovery only: a pod that cannot start (unknown image tag,
+            # missing Secret/ConfigMap key) would otherwise hold the namespace memory quota
+            # and this run for the whole 5400s deadline. Four polls in a row ⇒ red + delete.
+            if [ "${JOB}" = "document-date-recovery" ]; then
+              reason="$(kubectl -n "$NAMESPACE" get pods -l job-name="$NAME" -o jsonpath='{.items[*].status.containerStatuses[*].state.waiting.reason}' 2>/dev/null || echo '')"
+              case " ${reason} " in
+                *" ImagePullBackOff "*|*" ErrImagePull "*|*" InvalidImageName "*|*" CreateContainerConfigError "*|*" CreateContainerError "*)
+                  stuck=$((stuck + 1)) ;;
+                *) stuck=0 ;;
+              esac
+              if [ "${stuck}" -ge 4 ]; then
+                echo "::error title=Job cannot start::${NAME} pod waiting on '${reason}' for 4 polls; the Job is deleted so it does not hold the namespace quota."
+                kubectl -n "$NAMESPACE" delete job "$NAME" --ignore-not-found || true
+                exit 1
+              fi
+            fi
             if [ "$(date +%s)" -ge "$deadline" ]; then
-              echo "::error title=Job wait deadline::${NAME} did not reach a terminal state within 3900s. See 'Job logs'."; exit 1
+              echo "::error title=Job wait deadline::${NAME} did not reach a terminal state within ${WAIT_SECONDS}s. See 'Job logs'."; exit 1
             fi
             sleep 15
           done
 
       - name: Job logs (diagnostic)
         if: always()
+        env:
+          JOB: ${{ github.event.inputs.job }}
+          JOB_NAME: ${{ steps.resolve.outputs.name }}
+          APPLY_OUTCOME: ${{ steps.apply.outcome }}
         run: |
-          kubectl -n "$NAMESPACE" logs "job/${{ steps.resolve.outputs.name }}" --tail=80 || true
+          if [ "${JOB}" != "document-date-recovery" ]; then
+            kubectl -n "$NAMESPACE" logs "job/${JOB_NAME}" --tail=80 || true
+          elif [ "${APPLY_OUTCOME}" != "success" ]; then
+            # Logs of an earlier run would be misread as this run's report.
+            echo "document-date-recovery: Job not (re)applied by this run — no report."
+            echo "Job not (re)applied by this run — no report." >> "$GITHUB_STEP_SUMMARY"
+          else
+            # Every city/report line, every written city (its backupPrefix is the rollback
+            # archive) and every HALT/aborted/fatal line, whatever the log length; the
+            # report line also goes to the run summary.
+            log="${RUNNER_TEMP}/document-date-recovery.log"
+            kubectl -n "$NAMESPACE" logs "job/${JOB_NAME}" >"${log}" 2>&1 || true
+            grep -E 'recover-document-dates:(city|report)|recover: written|HALT|aborted|fatal' "${log}" || echo "(no recovery line in the Job log)"
+            echo "--- last 20 log lines ---"
+            tail -n 20 "${log}"
+            report="$(grep -F 'recover-document-dates:report' "${log}" || true)"
+            {
+              echo ""
+              if [ -n "${report}" ]; then
+                echo '```json'
+                printf '%s\n' "${report}"
+                echo '```'
+              else
+                echo "No recover-document-dates:report line in the Job log (failed before the end, or still running) — see the Job logs step."
+              fi
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
           echo "--- status ---"
-          kubectl -n "$NAMESPACE" get "job/${{ steps.resolve.outputs.name }}" -o wide || true
+          kubectl -n "$NAMESPACE" get "job/${JOB_NAME}" -o wide || true
