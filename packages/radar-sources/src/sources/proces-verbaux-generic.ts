@@ -1,6 +1,6 @@
 import type { SourceKind } from "@radar/domain";
 
-import { readBodyWithinCap } from "../document-size-cap.js";
+import { DocumentBodyTimeoutError, DocumentOversizeError, readBodyWithinCap } from "../document-size-cap.js";
 import { sha256Hex } from "../RawDocument.js";
 import type {
   IsoDateString,
@@ -319,6 +319,12 @@ export interface PvAdapterOptions {
    * Defaults to no cap; the refresh cycle sets it.
    */
   readonly maxDocumentBytes?: number;
+  /**
+   * Time bound on reading a document body once its headers arrived (the
+   * request itself is bounded by `timeoutMs`). Defaults to none; the refresh
+   * cycle sets it.
+   */
+  readonly documentTimeoutMs?: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -368,6 +374,7 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
   private readonly sleep: (ms: number) => Promise<void>;
   private readonly random: () => number;
   private readonly maxDocumentBytes: number;
+  private readonly documentTimeoutMs: number;
   /** Wall-clock ms of the last request this adapter issued; -Infinity before the first. */
   private lastRequestAt = Number.NEGATIVE_INFINITY;
 
@@ -387,6 +394,7 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
       ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
     this.random = options.random ?? Math.random;
     this.maxDocumentBytes = options.maxDocumentBytes ?? Number.POSITIVE_INFINITY;
+    this.documentTimeoutMs = options.documentTimeoutMs ?? Number.POSITIVE_INFINITY;
   }
 
   // ── helpers ────────────────────────────────────────────────────────────────
@@ -457,6 +465,8 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
         if (value !== null) headers[name] = value;
       }
       if (!res.ok) {
+        // Release the error body instead of leaving it to drain (#805).
+        await res.body?.cancel().catch(() => undefined);
         throw new PvSourceFetchError("http", `HTTP ${res.status}`, url, phase,
           httpStatus, headers, Math.max(0, this.now().getTime() - started));
       }
@@ -614,7 +624,16 @@ export class ProcesVerbauxGenericAdapter implements SourceAdapter {
     const accept = isPdf ? "application/pdf" : "text/html,*/*";
 
     const res = await this.fetchWithTimeout(ref.url, "document", accept);
-    const body = await readBodyWithinCap(res, ref.url, this.maxDocumentBytes);
+    let body: Uint8Array;
+    try {
+      body = await readBodyWithinCap(res, ref.url, this.maxDocumentBytes, this.documentTimeoutMs);
+    } catch (e) {
+      if (e instanceof DocumentOversizeError) throw e;
+      // A body cut off or too slow is a typed document failure, never a crash.
+      const timedOut = e instanceof DocumentBodyTimeoutError;
+      throw new PvSourceFetchError(timedOut ? "timeout" : "network",
+        timedOut ? "Document body timed out" : "Document body interrupted", ref.url, "document", res.status);
+    }
     const contentType =
       res.headers.get("content-type") ??
       ref.contentType ??
