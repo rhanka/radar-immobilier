@@ -137,10 +137,14 @@ export function pdfToTextViaPoppler(url: string): PdfToText {
  */
 export function pdfFirstPageToTextViaPoppler(url: string): PdfToText {
   return async (bytes, timeoutMs) => {
-    const dir = await mkdtemp(join(tmpdir(), "radar-pdf-page1-"));
+    const tempFileError = (e: unknown) => new SourceFetchError("parse",
+      `pdftotext temp file failed: ${e instanceof Error ? e.message : String(e)}`, url);
+    const dir = await mkdtemp(join(tmpdir(), "radar-pdf-page1-")).catch((e: unknown) => {
+      throw tempFileError(e);
+    });
     try {
       const file = join(dir, "document.pdf");
-      await writeFile(file, bytes);
+      await writeFile(file, bytes).catch((e: unknown) => { throw tempFileError(e); });
       return await runPdftotext(["-q", "-enc", "UTF-8", "-l", "1", file, "-"], url, timeoutMs);
     } finally {
       await rm(dir, { recursive: true, force: true });
