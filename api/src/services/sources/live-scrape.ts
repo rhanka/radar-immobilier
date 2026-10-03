@@ -27,6 +27,7 @@
 
 import {
   ALL_PV_CITIES,
+  pdfFirstPageToTextViaPoppler,
   pdfToTextViaPoppler,
   ProcesVerbauxGenericAdapter,
   PV_MIN_REQUEST_INTERVAL_MS,
@@ -47,8 +48,12 @@ import {
   type ReexploitProgress,
   type ExploitScrapeResult,
 } from "./exploit-scrape.js";
-import { loadCollectedUrls, saveCollectedUrls } from "./known-urls.js";
-import { runRecueilWithManifest, type RecueilFetchFailure } from "./recueil.js";
+import { guardDocumentJournal, loadCollectedUrls, saveCollectedUrls } from "./known-urls.js";
+import {
+  runRecueilWithManifest,
+  type RecueilFetchFailure,
+  type RecueilSetAsideDocument,
+} from "./recueil.js";
 
 /**
  * Cap on the failed documents echoed back in a per-city recap. The full number
@@ -132,6 +137,12 @@ export interface LiveScrapeCityRecap {
    */
   readonly documentFailures?: readonly RecueilFetchFailure[];
   /**
+   * Documents NOT processed (issue #805): refused as oversize this run, or
+   * skipped with no request because of an earlier set-aside mark. Present on
+   * success and on error alike; absent when there are none.
+   */
+  readonly setAside?: readonly RecueilSetAsideDocument[];
+  /**
    * Set when enumeration stopped early but what had been collected was kept and
    * committed. The list is incomplete; the next run re-reads the index.
    */
@@ -197,6 +208,12 @@ export interface RunLiveScrapeOptions {
   readonly skipAlreadyCollectedUrls?: boolean;
   /** Injected fetch for the PV adapter (tests). Defaults to globalThis.fetch. */
   readonly fetch?: PvFetchLike;
+  /**
+   * Byte cap on one document body, refused before it is buffered (issue #805).
+   * Omitted ⇒ no cap. With `skipAlreadyCollectedUrls`, a refused document is
+   * marked in the guard state and never requested again.
+   */
+  readonly maxDocumentBytes?: number;
   /** Per-city collection cap; in replay mode, process-wide parse cap (default 25). */
   readonly limit?: number;
   /** Optional representation filter applied before the collection limit. */
@@ -382,7 +399,7 @@ export async function runLiveScrape(
   options: RunLiveScrapeOptions,
 ): Promise<LiveScrapeCityRecap[]> {
   const { store, fetch, limit, acceptRef, beforeFetch, windowDays, now, signal, onRequest,
-    exploit, reexploit, db } =
+    exploit, reexploit, db, maxDocumentBytes } =
     options;
   // Spacing is ON by default on the real network and OFF behind an injected
   // fetch: pacing a test double would add 2 s per fetch to the suite and
@@ -401,6 +418,10 @@ export async function runLiveScrape(
   // meaningful here (we extract from raw bytes), so a generic label is passed to
   // the factory.
   const pdfToText: PdfToText = options.pdfToText ?? pdfToTextViaPoppler("live-scrape");
+  // The documentary date reads the first-page header only, so poppler reads
+  // page 1 only, from a temp file (issue #805): ~10 MiB instead of a child
+  // holding the whole document. An injected extractor serves both uses.
+  const datePdfToText: PdfToText = options.pdfToText ?? pdfFirstPageToTextViaPoppler("live-scrape");
 
   const recap: LiveScrapeCityRecap[] = [];
   // Collect the recap AND stream it per-city (observability): a long run emits
@@ -443,6 +464,7 @@ export async function runLiveScrape(
       ...(fetch !== undefined ? { fetchImpl: fetch } : {}),
       ...(windowDays !== undefined ? { windowDays } : {}),
       ...(now !== undefined ? { now } : {}),
+      ...(maxDocumentBytes !== undefined ? { maxDocumentBytes } : {}),
       minRequestIntervalMs,
     });
 
@@ -454,20 +476,31 @@ export async function runLiveScrape(
     const guardState = skipAlreadyCollectedUrls
       ? await loadCollectedUrls(store, config.sourceId)
       : undefined;
+    // Set-aside marks and attempt markers ride on the same state (issue #805).
+    const journal = guardState
+      ? guardDocumentJournal(store, config.sourceId, guardState, now)
+      : undefined;
     const outcome = await runRecueilWithManifest(config.sourceId, adapter, store, {
-      pdfToText,
+      pdfToText: datePdfToText,
       ...(limit !== undefined ? { limit } : {}),
       ...(acceptRef !== undefined ? { acceptRef } : {}),
       ...(guardState !== undefined ? { alreadyCollected: guardState.urls } : {}),
+      ...(journal !== undefined ? { journal } : {}),
       ...(beforeFetch !== undefined ? { beforeFetch } : {}),
       ...(signal !== undefined ? { signal } : {}),
     });
+    const setAside = outcome.setAside ?? [];
 
     // `ok: false` now means the source could collect NOTHING (index / sitemap
     // unreachable), so `count: 0` is a fact here rather than an erasure. A run
     // that collected documents and then hit a failure comes back `ok: true`,
     // with its harvest and its holes both reported below.
     if (!outcome.ok) {
+      // The journal's settlements (closed attempts, new set-aside marks) are
+      // kept even when the source failed; the URL set is unchanged.
+      if (guardState && journal?.changed()) {
+        await saveCollectedUrls(store, config.sourceId, guardState.urls, guardState);
+      }
       return {
         city: config.citySlug,
         sourceId: config.sourceId,
@@ -476,6 +509,7 @@ export async function runLiveScrape(
         count: 0,
         error: `[${outcome.error}] ${outcome.detail}`,
         ...(outcome.fetchFailure ? { fetchFailure: outcome.fetchFailure } : {}),
+        ...(setAside.length > 0 ? { setAside } : {}),
       };
     }
 
@@ -489,8 +523,8 @@ export async function runLiveScrape(
     if (guardState) {
       const before = guardState.urls.size;
       for (const entry of outcome.manifestEntries) guardState.urls.add(entry.sourceUrl);
-      if (guardState.urls.size !== before || !guardState.fromState) {
-        await saveCollectedUrls(store, config.sourceId, guardState.urls);
+      if (guardState.urls.size !== before || !guardState.fromState || journal?.changed()) {
+        await saveCollectedUrls(store, config.sourceId, guardState.urls, guardState);
       }
     }
 
@@ -567,6 +601,7 @@ export async function runLiveScrape(
       ...(outcome.listingTruncatedBy !== undefined
         ? { listingTruncatedBy: outcome.listingTruncatedBy }
         : {}),
+      ...(setAside.length > 0 ? { setAside } : {}),
       ...(signals !== undefined ? { signals } : {}),
       ...(exploitError !== undefined ? { exploitError } : {}),
     };
