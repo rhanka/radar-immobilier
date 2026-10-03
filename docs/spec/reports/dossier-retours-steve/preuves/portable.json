@@ -1,0 +1,44 @@
+{
+  "output": "docs/spec/reports/dossier-retours-steve/decision-focus.html",
+  "bytes": 663652,
+  "htmlSha256": "3beabbed731f9cff21cb5135e2d314dfc97c2276c8587f95109d98beeb67b78c",
+  "dossierHash": "f9066e532bd560e36b2225993936beb70421ee1125554ceff729d637ecb25b83",
+  "artifactInputHash": "82bf3348ef24616c820c616e36f32b28042b77bd71e0d36c5fd6ed1f9c471b70",
+  "graphs": [
+    {
+      "id": "criteres-steve",
+      "nodes": 10,
+      "edges": 9,
+      "subflows": 5,
+      "sceneHash": "8d3f825fce7c2738b790ab3a6fd1d15d39847a3bb4e85c7b6bf556ac3e179e44"
+    },
+    {
+      "id": "modele-donnees",
+      "nodes": 11,
+      "edges": 10,
+      "subflows": 5,
+      "sceneHash": "b87aacb0f2030bb54bfdd42a480417c453e7c66c54fc3b16ec21b8d21e376a1a"
+    },
+    {
+      "id": "flux-import-oracle",
+      "nodes": 13,
+      "edges": 12,
+      "subflows": 6,
+      "sceneHash": "5ff3efd5348c2319e72b2e590171d070697dd938dad5e1eabdfb9fef54d27dd7"
+    },
+    {
+      "id": "architecture-ui",
+      "nodes": 13,
+      "edges": 12,
+      "subflows": 3,
+      "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac"
+    },
+    {
+      "id": "affichage-abc",
+      "nodes": 10,
+      "edges": 10,
+      "subflows": 4,
+      "sceneHash": "b1d7776fd1c90d436293c87e47a2a673d7f2bb67c0da0a1b7f52efcc159fab5e"
+    }
+  ]
+}
