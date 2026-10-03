@@ -28,7 +28,7 @@
 
 ## Plan / Todo (lot-based)
 - [x] Lot 1 — prod manifest `deploy/k8s/41-document-date-recovery-job.yaml` + SCRAPE binding guard entry and two negative tests.
-- [ ] Lot 2 — run-job route: inputs `recovery_mode`/`recovery_heal`/`recovery_cities`/`recovery_image`, validation, served-image default, refusal while refresh/backup/recovery Jobs are active, 110 min timeout + 5700 s wait for this job only, fail-fast + Job delete when the pod cannot start, report lines + run summary.
+- [x] Lot 2 — run-job route: inputs `recovery_mode`/`recovery_heal`/`recovery_cities`/`recovery_image`, validation, served-image default, refusal while refresh/backup/recovery Jobs are active, 110 min timeout + 5700 s wait for this job only, fail-fast + Job delete when the pod cannot start, report lines + run summary.
 - [ ] Lot 3 — Makefile offline validate (preprod + prod) and header comment.
 - [ ] Lot 4 — spec section "Production run (run-job)".
 - [ ] Lot gate: `make document-date-recovery-validate ENV=ci`, `make k8s-validate ENV=ci`, `bash deploy/ci/check-object-storage-bindings.test.sh`, `make -f deploy/k8s/refresh-cronjobs/refresh-018.mk verify-renders ENV=ci`, `harness verify --category static`.
