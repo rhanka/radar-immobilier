@@ -29,6 +29,7 @@ on:
           - graphify34-emit-candidates
           - export-graph-nodes
           - export-gt
+          - document-date-recovery
       backup_id:
         description: "Optional --backup-id for graphify34-apply (empty ⇒ date-based default phaseA-144-<UTC>)"
         required: false
@@ -49,6 +50,29 @@ on:
         required: false
         type: string
         default: ""
+      recovery_mode:
+        description: "For job=document-date-recovery: preview (read-only) or apply (writes graph + PG)"
+        required: false
+        type: choice
+        options:
+          - preview
+          - apply
+        default: preview
+      recovery_heal:
+        description: "For job=document-date-recovery: add --heal (plan from the served PG graph for cities whose latest.json drifted; writes only with apply)"
+        required: false
+        type: boolean
+        default: false
+      recovery_cities:
+        description: "For job=document-date-recovery: space-separated city slugs (empty ⇒ every graph/<city>/latest.json)"
+        required: false
+        type: string
+        default: ""
+      recovery_image:
+        description: "For job=document-date-recovery: ghcr.io/rhanka/radar-api:<tag> or @sha256:<digest> (empty ⇒ image served by deploy/radar-api)"
+        required: false
+        type: string
+        default: ""
 
 concurrency:
   group: run-job-${{ github.event.inputs.job }}
@@ -57,7 +81,10 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 20 min for every job, unchanged. document-date-recovery only: its Job runs up to
+    # activeDeadlineSeconds 5400 and the wait below observes it for 5700s, so the run
+    # needs 110 min (setup + wait + logs) to report the real outcome.
+    timeout-minutes: ${{ github.event.inputs.job == 'document-date-recovery' && 110 || 20 }}
     env:
       NAMESPACE: radar-immobilier
     steps:
@@ -103,6 +130,8 @@ jobs:
       - name: Resolve manifest + job name
         id: resolve
         run: |
+          # Wait deadline (seconds) for the Job to reach a terminal state; overridden per job.
+          wait_seconds=3900
           case "${{ github.event.inputs.job }}" in
             mapper)
               echo "file=deploy/k8s/35-run-geo-mapper-job.yaml" >> "$GITHUB_OUTPUT"
@@ -132,20 +161,32 @@ jobs:
               echo "file=deploy/k8s/40-export-gt-designation-events-job.yaml" >> "$GITHUB_OUTPUT"
               echo "configmap=deploy/k8s/38-graphify34-set167-configmap.yaml" >> "$GITHUB_OUTPUT"
               echo "name=radar-export-gt-designation-events" >> "$GITHUB_OUTPUT" ;;
+            document-date-recovery)
+              echo "file=deploy/k8s/41-document-date-recovery-job.yaml" >> "$GITHUB_OUTPUT"
+              echo "name=radar-document-date-recovery" >> "$GITHUB_OUTPUT"
+              # Job activeDeadlineSeconds is 5400; observe past it to see the real outcome.
+              wait_seconds=5700 ;;
             *)
               echo "job inconnu"; exit 1 ;;
           esac
+          echo "wait_seconds=${wait_seconds}" >> "$GITHUB_OUTPUT"
 
       # Jobs are immutable : on supprime une éventuelle instance précédente avant
       # de ré-appliquer (sinon `apply` échoue sur un Job terminé/existant).
       - name: Apply job (delete previous, then apply)
+        id: apply
         env:
           # User input — injected via env (never inline ${{ }} in the script) and
           # validated below before it touches sed.
+          JOB: ${{ github.event.inputs.job }}
           BACKUP_ID: ${{ github.event.inputs.backup_id }}
           SCRAPE_CITIES: ${{ github.event.inputs.scrape_cities }}
           SCRAPE_CHUNK_SIZE: ${{ github.event.inputs.scrape_chunk_size }}
           PROJECT_CITIES: ${{ github.event.inputs.project_cities }}
+          RECOVERY_MODE: ${{ github.event.inputs.recovery_mode }}
+          RECOVERY_HEAL: ${{ github.event.inputs.recovery_heal }}
+          RECOVERY_CITIES: ${{ github.event.inputs.recovery_cities }}
+          RECOVERY_IMAGE: ${{ github.event.inputs.recovery_image }}
           CONFIGMAP: ${{ steps.resolve.outputs.configmap }}
           MANIFEST: ${{ steps.resolve.outputs.file }}
           JOB_NAME: ${{ steps.resolve.outputs.name }}
@@ -166,6 +207,54 @@ jobs:
           if [ -n "${PROJECT_CITIES}" ] && ! printf '%s' "${PROJECT_CITIES}" | grep -Eq '^[A-Za-z0-9 ._-]+$'; then
             echo "::error title=Invalid project_cities::project_cities must match [A-Za-z0-9 ._-]+"; exit 1
           fi
+          # document-date-recovery: __IMAGE__ + __RECOVERY_ARGS__ (absent from every other
+          # manifest, so both substitutions below are no-ops for the other jobs).
+          recovery_image=""
+          recovery_args=""
+          if [ "${JOB}" = "document-date-recovery" ]; then
+            case "${RECOVERY_MODE}" in
+              preview|apply) ;;
+              *) echo "::error title=Invalid recovery_mode::recovery_mode must be preview or apply"; exit 1 ;;
+            esac
+            case "${RECOVERY_HEAL}" in
+              true|false) ;;
+              *) echo "::error title=Invalid recovery_heal::recovery_heal must be true or false"; exit 1 ;;
+            esac
+            # bash =~ anchors on the whole value: a newline cannot slip past the check.
+            cities_re='^[A-Za-z0-9 ._-]*$'
+            if ! [[ "${RECOVERY_CITIES}" =~ ${cities_re} ]]; then
+              echo "::error title=Invalid recovery_cities::recovery_cities must match [A-Za-z0-9 ._-]*"; exit 1
+            fi
+            image_re='^ghcr\.io/rhanka/radar-api(:[A-Za-z0-9._-]+|@sha256:[0-9a-f]{64})$'
+            recovery_image="${RECOVERY_IMAGE}"
+            if [ -z "${recovery_image}" ]; then
+              recovery_image="$(kubectl -n "$NAMESPACE" get deploy radar-api -o jsonpath='{.spec.template.spec.containers[?(@.name=="api")].image}')" \
+                || { echo "::error title=Cannot read the served image::kubectl get deploy/radar-api failed. Nothing was applied."; exit 1; }
+              echo "recovery_image empty ⇒ image of deploy/radar-api (container api): ${recovery_image:-<none>}"
+            fi
+            if ! [[ "${recovery_image}" =~ ${image_re} ]]; then
+              echo "::error title=Invalid recovery image::the image must match ghcr.io/rhanka/radar-api:<tag> or ghcr.io/rhanka/radar-api@sha256:<64 hex>. Nothing was applied."; exit 1
+            fi
+            # Never alongside a refresh pass, the daily backup or a recovery still in flight
+            # (deleting it below would kill it mid-write): namespace memory quota and
+            # concurrent graph writes. Fails closed if the Jobs cannot be listed.
+            jobs_table="$(kubectl -n "$NAMESPACE" get jobs -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .metadata.ownerReferences[*]}{.name}{end}{"\t"}{.status.active}{"\n"}{end}')" \
+              || { echo "::error title=Cannot list Jobs::kubectl get jobs failed, so a running refresh/backup cannot be ruled out. Nothing was applied."; exit 1; }
+            busy="$(printf '%s\n' "${jobs_table}" | awk -F'\t' '($3 + 0) > 0 && ($1 == "radar-document-date-recovery" || $1 ~ /^radar-(refresh-pv|backup-daily)-/ || $2 ~ /^radar-(refresh-pv|backup-daily)$/) { printf "%s ", $1 }')"
+            if [ -n "${busy}" ]; then
+              echo "::error title=Recovery refused — Job(s) active::${busy}— retry once they have finished. Nothing was applied."; exit 1
+            fi
+            if [ "${RECOVERY_MODE}" = "apply" ]; then recovery_args="--apply"; fi
+            if [ "${RECOVERY_HEAL}" = "true" ]; then recovery_args="${recovery_args:+${recovery_args} }--heal"; fi
+            if [ -n "${RECOVERY_CITIES}" ]; then recovery_args="${recovery_args:+${recovery_args} }${RECOVERY_CITIES}"; fi
+            echo "document-date-recovery: mode=${RECOVERY_MODE} image=${recovery_image} args=${recovery_args:-<none>}"
+            {
+              echo "### document-date-recovery (${RECOVERY_MODE})"
+              echo ""
+              echo "- image: \`${recovery_image}\`"
+              echo "- args: \`${recovery_args:-<none>}\`"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
           kubectl -n "$NAMESPACE" delete job "${JOB_NAME}" --ignore-not-found
           # ConfigMap(s) FIRST (the Job mounts them). apply is idempotent.
           if [ -n "${CONFIGMAP}" ]; then
@@ -174,7 +263,8 @@ jobs:
           # Template BACKUP_ID (placeholder only present in the apply manifest;
           # a no-op for every other job). Empty ⇒ the manifest's date-based
           # default phaseA-144-<UTC> kicks in.
-          sed -e "s/__BACKUP_ID__/${BACKUP_ID}/" -e "s/__SCRAPE_CITIES__/${SCRAPE_CITIES}/" -e "s/__SCRAPE_CHUNK_SIZE__/${SCRAPE_CHUNK_SIZE}/" -e "s/__PROJECT_CITIES__/${PROJECT_CITIES}/" "${MANIFEST}" \
+          sed -e "s/__BACKUP_ID__/${BACKUP_ID}/" -e "s/__SCRAPE_CITIES__/${SCRAPE_CITIES}/" -e "s/__SCRAPE_CHUNK_SIZE__/${SCRAPE_CHUNK_SIZE}/" -e "s/__PROJECT_CITIES__/${PROJECT_CITIES}/" \
+            -e "s#__IMAGE__#${recovery_image}#" -e "s#__RECOVERY_ARGS__#${recovery_args}#" "${MANIFEST}" \
             | kubectl -n "$NAMESPACE" apply -f -
 
       - name: Wait for completion
