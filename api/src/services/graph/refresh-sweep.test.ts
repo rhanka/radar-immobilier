@@ -331,9 +331,9 @@ describe("runRefreshSweep", () => {
 
   it("lists the documents set aside per city and for the whole sweep, failed cities included (#805)", async () => {
     const store = new MemoryStore();
-    const oversize = { url: "https://vsad.ca/zonage.pdf", reason: "oversize" as const, newlySetAside: true,
+    const oversize = { url: "https://vsad.ca/zonage.pdf", reason: "deferred-oversize" as const, newlySetAside: true,
       markedAt: "2026-10-03T00:00:00.000Z", bytesAnnounced: 180_215_792, bytesRead: 0, capBytes: 52_428_800 };
-    const suspect = { url: "https://delta.qc.ca/pv.pdf", reason: "oom-suspected" as const, newlySetAside: false,
+    const suspect = { url: "https://delta.qc.ca/pv.pdf", reason: "interrupted-repeatedly" as const, newlySetAside: false,
       markedAt: "2026-10-02T00:00:00.000Z", attempts: 2 };
     const report = await runRefreshSweep(options(store, {
       refreshCity: async (city, _mode, onSetAside) => {
