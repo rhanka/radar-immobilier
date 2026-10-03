@@ -260,6 +260,38 @@ describe("set-aside marks and attempt markers in the guard state (#805)", () => 
       .toMatchObject({ reason: "oom-suspected", newlySetAside: false, attempts: 2 });
   });
 
+  it("tells an absent state from a store fault, which must not be written over", async () => {
+    const failing = (error: unknown): ObjectStore => ({
+      get: async () => { throw error; }, head: async () => null, put: async (k) => ({ key: k }),
+    });
+    const absent = Object.assign(new Error("NoSuchKey"), { name: "NoSuchKey", $metadata: { httpStatusCode: 404 } });
+    const fault = Object.assign(new Error("Service Unavailable"), { name: "ServiceUnavailable",
+      $metadata: { httpStatusCode: 503 } });
+    expect((await loadCollectedUrls(failing(absent), SOURCE)).unreadable).toBe(false);
+    expect((await loadCollectedUrls(failing(fault), SOURCE)).unreadable).toBe(true);
+    expect((await loadCollectedUrls(new MemoryStore(), SOURCE)).unreadable).toBe(false);
+  });
+
+  it("lets an oversize document back in only when the cap is raised above the one that refused it", async () => {
+    const store = new MemoryStore();
+    await saveCollectedUrls(store, SOURCE, new Set(), {
+      setAside: new Map([[big, { reason: "oversize", markedAt: "t", capBytes: 52_428_800 }]]),
+      attempts: new Map([[killer, { open: 2, lastAt: "t" }]]),
+    });
+    const at = async (cap?: number) => guardDocumentJournal(store, SOURCE, await loadCollectedUrls(store, SOURCE),
+      undefined, cap);
+    expect((await at(52_428_800)).setAside(big)).toMatchObject({ reason: "oversize", newlySetAside: false });
+    expect((await at(10_000_000)).setAside(big)).toMatchObject({ reason: "oversize" });
+    expect((await at(104_857_600)).setAside(big)).toBeUndefined();
+    // `oom-suspected` holds whatever the cap.
+    expect((await at()).setAside(killer)).toMatchObject({ reason: "oom-suspected" });
+
+    const state = await loadCollectedUrls(store, SOURCE);
+    const raised = guardDocumentJournal(store, SOURCE, state, undefined, 104_857_600);
+    raised.close(big, "collected");
+    expect(state.setAside.has(big)).toBe(false);
+  });
+
   it("records an oversize settlement as a mark and never throws when the state cannot be written", async () => {
     const readOnly: ObjectStore = {
       get: async () => { throw new Error("absent"); }, head: async () => null,

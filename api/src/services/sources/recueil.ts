@@ -326,10 +326,13 @@ export async function runRecueil(
       continue;
     }
 
+    // Only an attempt actually opened is ever closed.
+    let opened = false;
     try {
       await options.beforeFetch?.(ref);
       if (options.signal?.aborted) break;
       await options.journal?.open(ref.url);
+      opened = true;
       const raw = await adapter.fetch(ref);
 
       let record = buildRawDocumentRecord({
@@ -416,7 +419,7 @@ export async function runRecueil(
         options.journal?.close(ref.url, oversize);
         continue;
       }
-      options.journal?.close(ref.url, "failed");
+      if (opened) options.journal?.close(ref.url, "failed");
       // ONE document failed — counted, journalled with its URL and its phase,
       // and the run goes on. Nothing already written to the CAS is discarded.
       const failure = toFetchFailure(e, "document", ref.url);
