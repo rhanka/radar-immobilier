@@ -56,7 +56,7 @@ export interface RefreshSweepEntry {
   readonly outcome: RefreshCityOutcome;
   /** Redacted reason code; never an upstream message. */
   readonly reason?: string;
-  /** Documents of this city NOT processed (oversize, oom-suspected); absent when none. */
+  /** Documents of this city NOT processed (deferred-oversize, interrupted-repeatedly); absent when none. */
   readonly setAside?: readonly RecueilSetAsideDocument[];
   readonly durationMs: number;
 }
@@ -83,9 +83,10 @@ export interface RefreshSweepReport {
   /** Cities whose cursor write failed; the rotation continued regardless. */
   readonly cursorWriteFailures: number;
   /**
-   * Every document the visited cities did NOT process — refused as oversize, or
-   * set aside after repeated process deaths — so what the radar does not read
-   * is visible in the summary line and the persisted report. Absent when none.
+   * Every document the visited cities did NOT process — `deferred-oversize`, or
+   * `interrupted-repeatedly` after unclosed attempts — so what the radar does
+   * not read is visible in the summary line and the persisted report. Absent
+   * when none.
    */
   readonly setAside?: readonly RefreshSweepSetAside[];
 }

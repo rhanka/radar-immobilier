@@ -54,7 +54,9 @@ export interface AcquireRefreshPdfOptions {
   readonly acquire?: RefreshAcquire;
   /** Byte cap on one document body; defaults to {@link DEFAULT_REFRESH_MAX_DOCUMENT_BYTES}. */
   readonly maxDocumentBytes?: number;
-  /** Each document the acquisition did NOT process (oversize, oom-suspected). */
+  /** Time bound on one document body; defaults to {@link DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS}. */
+  readonly documentTimeoutMs?: number;
+  /** Each document the acquisition did NOT process (deferred-oversize, interrupted-repeatedly). */
   readonly onSetAside?: (document: RecueilSetAsideDocument) => void;
 }
 
@@ -65,6 +67,13 @@ export interface AcquireRefreshPdfOptions {
  * on every pass. `REFRESH_MAX_DOCUMENT_BYTES` overrides it.
  */
 export const DEFAULT_REFRESH_MAX_DOCUMENT_BYTES = 52_428_800;
+
+/**
+ * Longest a document body may take to arrive once its headers did (issue
+ * #805): 50 MiB at under 0.5 MB/s. Past it the read is abandoned as a typed
+ * timeout. `REFRESH_DOCUMENT_TIMEOUT_MS` overrides it.
+ */
+export const DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS = 120_000;
 
 /** One exact-PDF representation a city offers this cycle, before any choice is made. */
 export interface RefreshPdfCandidate {
@@ -182,6 +191,7 @@ export async function acquireRefreshPdfCandidates(
     ...(options.limit !== undefined ? { limit: options.limit } : {}),
     ...(options.windowDays !== undefined ? { windowDays: options.windowDays } : {}),
     maxDocumentBytes: options.maxDocumentBytes ?? DEFAULT_REFRESH_MAX_DOCUMENT_BYTES,
+    documentTimeoutMs: options.documentTimeoutMs ?? DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS,
   });
   const recap = recaps[0];
   // Reported before any verdict on the city: a document set aside is news
@@ -245,6 +255,8 @@ export interface RunPvRefreshOptions {
   readonly acquisitionWindowDays?: number;
   /** See {@link AcquireRefreshPdfOptions.maxDocumentBytes}. */
   readonly maxDocumentBytes?: number;
+  /** See {@link AcquireRefreshPdfOptions.documentTimeoutMs}. */
+  readonly documentTimeoutMs?: number;
   /** See {@link AcquireRefreshPdfOptions.onSetAside}. */
   readonly onSetAside?: (document: RecueilSetAsideDocument) => void;
   readonly excludedNodeIds?: readonly string[];
@@ -340,6 +352,7 @@ export async function runPvRefresh(options: RunPvRefreshOptions) {
     ...(options.acquisitionLimit ? { limit: options.acquisitionLimit } : {}),
     ...(options.acquisitionWindowDays ? { windowDays: options.acquisitionWindowDays } : {}),
     ...(options.maxDocumentBytes ? { maxDocumentBytes: options.maxDocumentBytes } : {}),
+    ...(options.documentTimeoutMs ? { documentTimeoutMs: options.documentTimeoutMs } : {}),
     ...(options.onSetAside ? { onSetAside: options.onSetAside } : {}),
     onSkippedKey: (key) => note("skipped-non-cas-key", { key }) });
 

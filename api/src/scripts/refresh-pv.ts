@@ -41,7 +41,7 @@ import {
 } from "../services/graph/refresh-mesh.js";
 import { createRefreshModelPolicy, type RefreshModel } from "../services/graph/refresh-model-policy.js";
 import { loadRefreshProfileContext } from "../services/graph/refresh-profile.js";
-import { DEFAULT_REFRESH_MAX_DOCUMENT_BYTES, runPvRefresh,
+import { DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS, DEFAULT_REFRESH_MAX_DOCUMENT_BYTES, runPvRefresh,
   type RefreshAcquire } from "../services/graph/refresh-run.js";
 import { assessRefreshSweepHealth, parseRefreshTarget,
   runRefreshSweep, writeRefreshSweepReport } from "../services/graph/refresh-sweep.js";
@@ -184,11 +184,12 @@ async function main(): Promise<void> {
     // (528 cities, 2026-09-05) ran at this window, so it is the window whose
     // cost is known; narrowing it would be a behaviour change with no measure.
     acquisitionWindowDays: positive("REFRESH_WINDOW_DAYS", 183, 3_650),
-    // Largest document body downloaded (issue #805). Above it the document is
-    // refused before it is buffered and set aside for good, instead of
-    // OOM-killing the pod on every pass. The default lives here, not in the
-    // manifests.
+    // Largest document body downloaded, and longest it may take to arrive
+    // (issue #805). Above the cap the document is refused before it is
+    // buffered and deferred, instead of OOM-killing the pod on every pass. The
+    // defaults live in code, not in the manifests.
     maxDocumentBytes: positive("REFRESH_MAX_DOCUMENT_BYTES", DEFAULT_REFRESH_MAX_DOCUMENT_BYTES, 1_073_741_824),
+    documentTimeoutMs: positive("REFRESH_DOCUMENT_TIMEOUT_MS", DEFAULT_REFRESH_DOCUMENT_TIMEOUT_MS, 3_600_000),
   };
   const sweepOptions = {
     // The sweep must stop itself, cursor up to date, before the Job's own
@@ -228,7 +229,8 @@ async function main(): Promise<void> {
     runPvRefresh({ cycleId, citySlug, store, db, profileContext,
       documentModels,
       // What the radar does NOT read, one line per document, every pass that
-      // meets it — the PO's view of oversize and oom-suspected documents.
+      // meets it: the PO's view of deferred-oversize and interrupted-repeatedly
+      // documents.
       onSetAside(document) {
         logger.warn({ citySlug, ...document }, "refresh-pv: document set aside");
         onSetAside?.(document);
@@ -257,7 +259,7 @@ async function main(): Promise<void> {
 
   logger.info({ mode: target.all ? "all" : "city", city, cities: cities.length, cycleId,
     modelPolicy: documentModels.policy, maximumAttempts, primaryQualityAttempts, timeoutMs,
-    maxDocumentBytes: runOptions.maxDocumentBytes },
+    maxDocumentBytes: runOptions.maxDocumentBytes, documentTimeoutMs: runOptions.documentTimeoutMs },
   "refresh-pv: starting");
   const startedAt = new Date().toISOString();
   try {
