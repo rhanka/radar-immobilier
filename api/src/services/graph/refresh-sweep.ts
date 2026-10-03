@@ -29,6 +29,7 @@
  */
 
 import type { ObjectStore } from "../../storage/object-store.js";
+import type { RecueilSetAsideDocument } from "../sources/recueil.js";
 
 /** Where a city landed this sweep. Only `failed` is an anomaly. */
 export type RefreshCityOutcome =
@@ -55,7 +56,14 @@ export interface RefreshSweepEntry {
   readonly outcome: RefreshCityOutcome;
   /** Redacted reason code; never an upstream message. */
   readonly reason?: string;
+  /** Documents of this city NOT processed (deferred-oversize, interrupted-repeatedly); absent when none. */
+  readonly setAside?: readonly RecueilSetAsideDocument[];
   readonly durationMs: number;
+}
+
+/** One document the sweep did not process, with its city. */
+export interface RefreshSweepSetAside extends RecueilSetAsideDocument {
+  readonly citySlug: string;
 }
 
 export interface RefreshSweepReport {
@@ -74,6 +82,13 @@ export interface RefreshSweepReport {
   readonly extractionHaltedBy?: string;
   /** Cities whose cursor write failed; the rotation continued regardless. */
   readonly cursorWriteFailures: number;
+  /**
+   * Every document the visited cities did NOT process — `deferred-oversize`, or
+   * `interrupted-repeatedly` after unclosed attempts — so what the radar does
+   * not read is visible in the summary line and the persisted report. Absent
+   * when none.
+   */
+  readonly setAside?: readonly RefreshSweepSetAside[];
 }
 
 export interface RefreshSweepCursor {
@@ -94,6 +109,8 @@ export interface RefreshSweepOptions {
   readonly refreshCity: (
     citySlug: string,
     mode: { readonly extract: boolean },
+    /** Report one document of this city that was NOT processed. */
+    onSetAside: (document: RecueilSetAsideDocument) => void,
   ) => Promise<{ readonly status?: string } | void>;
   /** Wall-clock budget for the whole sweep, in milliseconds. */
   readonly deadlineMs: number;
@@ -277,6 +294,7 @@ export async function runRefreshSweep(options: RefreshSweepOptions): Promise<Ref
   let extracting = true;
   let extractionHaltedBy: string | undefined;
   let cursorWriteFailures = 0;
+  const setAsideDocuments: RefreshSweepSetAside[] = [];
   const submissions = () => options.submissions?.() ?? 0;
 
   for (let step = 0; step < cities.length; step++) {
@@ -308,16 +326,22 @@ export async function runRefreshSweep(options: RefreshSweepOptions): Promise<Ref
     const cityStartedAt = now();
     let outcome: RefreshCityOutcome;
     let reason: string | undefined;
+    // Collected through a callback, not the result, so a city that then fails
+    // still reports what it set aside.
+    const setAside: RecueilSetAsideDocument[] = [];
     try {
-      outcome = classifyRefreshCityStatus(await options.refreshCity(citySlug, { extract: extracting }));
+      outcome = classifyRefreshCityStatus(await options.refreshCity(citySlug, { extract: extracting },
+        (document) => { setAside.push(document); }));
       if (outcome === "failed") reason = "unknown-status";
       if (outcome === "published") documentsExtracted += 1;
     } catch (error) {
       outcome = classifyRefreshCityError(error);
       reason = outcome;
     }
+    setAsideDocuments.push(...setAside.map((document) => ({ citySlug, ...document })));
     const entry: RefreshSweepEntry = { citySlug, outcome,
-      ...(reason ? { reason } : {}), durationMs: now() - cityStartedAt };
+      ...(reason ? { reason } : {}), ...(setAside.length > 0 ? { setAside } : {}),
+      durationMs: now() - cityStartedAt };
     entries.push(entry);
     counts[outcome] += 1;
     visited += 1;
@@ -327,7 +351,8 @@ export async function runRefreshSweep(options: RefreshSweepOptions): Promise<Ref
   return { visited, counts, entries, nextCity: cities[index]!,
     completedFullSweep: visited === cities.length, stoppedBy, documentsExtracted,
     submissions: submissions(), cursorWriteFailures,
-    ...(extractionHaltedBy ? { extractionHaltedBy } : {}) };
+    ...(extractionHaltedBy ? { extractionHaltedBy } : {}),
+    ...(setAsideDocuments.length > 0 ? { setAside: setAsideDocuments } : {}) };
 }
 
 /**
