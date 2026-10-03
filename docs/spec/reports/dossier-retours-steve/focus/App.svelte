@@ -36,7 +36,7 @@
         <li><strong>D’abord l’intention de l’owner et ce que veut Steve</strong>, dépliées : objectifs et renvois, destinataires et rôles (§1.1), lexique des termes (§1.2), trois critères cités et chiffrés, écart avec l’existant.</li>
         <li><strong>La synthèse et les 16 décisions</strong>, dépliées, puis les neuf autres sections dans leur texte d’origine.</li>
         <li><strong>Cinq scènes</strong> : critères de Steve en regard de l’existant, modèle de données, flux import → annotation → oracle → affichage, architecture UI, affichage A/B/C.</li>
-        <li><strong>Les décisions D1 à D16</strong> — Farid décide le produit (10), Fabien valide la technique (6) —, sélectionnables, exportables en JSON — brouillon local seulement.</li>
+        <li><strong>Les décisions D1 à D16</strong> — Farid décide le produit (10), Fabien valide la technique (6) —, sélectionnables, à copier en YAML dans la PR GitHub — brouillon local seulement.</li>
         <li><strong>L’annexe A</strong> : convergence et divergences entre les deux auteurs, avec la source qui tranche.</li>
       </ol>
       <p class="caption">Conventions : <code>FAIT</code> = constaté dans une source citée · <code>CALCUL</code> = dérivé des

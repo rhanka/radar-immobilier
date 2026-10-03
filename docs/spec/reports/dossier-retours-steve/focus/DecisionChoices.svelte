@@ -1,24 +1,32 @@
 <script>
-  // Même contrat d'interaction que Choices.svelte de la chaîne d'architecture
-  // (brouillon local, export JSON réel), une réponse par décision D1 à D16 ;
-  // l'option recommandée par le dossier est signalée, jamais présélectionnée.
-  import { onMount } from 'svelte';
-  import { questions, responsePack, minimalValidAnswer } from './choices.js';
+  // Same interaction contract as Choices.svelte in the architecture chain (local draft),
+  // one answer per decision D1 to D16; the recommended option is flagged, never preselected.
+  // Export: a paste-ready Markdown block (```yaml … ```) for the GitHub PR, copied to the
+  // clipboard and always shown in a read-only textarea (artifacts may refuse the clipboard
+  // and block downloads). The JSON pack (responsePack) stays internal, for the backend.
+  import { onMount, tick } from 'svelte';
+  import { questions, minimalValidAnswer, exportBlock, PEOPLE, DECISIONS_TARGET_URL, DECISIONS_TARGET_LABEL } from './choices.js';
   let { manifest } = $props();
-  let selections = $state({}), comments = $state({}), status = $state(''), copyError = $state('');
+  let selections = $state({}), comments = $state({}), deferred = $state({});
+  let person = $state(PEOPLE[0]), scope = $state('mine'), stamp = $state(new Date());
+  let status = $state(''), copyError = $state(''), yamlArea = $state();
   let storageKey = $derived(`immo-steve-decision-responses:${manifest.artifactInputHash}`);
-  let json = $derived(JSON.stringify(responsePack(manifest, selections, comments, null), null, 2));
+  let exported = $derived(exportBlock(manifest, { selections, comments, deferred }, person, scope, stamp));
   const groups = [...new Set(questions.map(question => question.group))];
   onMount(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) ?? 'null');
-      if (saved) { selections = saved.selections ?? {}; comments = saved.comments ?? {}; }
+      if (saved) {
+        selections = saved.selections ?? {}; comments = saved.comments ?? {}; deferred = saved.deferred ?? {};
+        if (PEOPLE.includes(saved.person)) person = saved.person;
+        if (['mine', 'all'].includes(saved.scope)) scope = saved.scope;
+      }
     } catch { status = 'Lecture du brouillon local indisponible.'; }
   });
   function persist() {
     copyError = '';
-    try { localStorage.setItem(storageKey, JSON.stringify({ selections, comments })); status = 'Choix et commentaires enregistrés localement — non ratifiés.'; }
-    catch { status = 'Sauvegarde locale indisponible : copiez ou téléchargez le JSON.'; }
+    try { localStorage.setItem(storageKey, JSON.stringify({ selections, comments, deferred, person, scope })); status = 'Choix et commentaires enregistrés localement — non ratifiés.'; }
+    catch { status = 'Sauvegarde locale indisponible : copiez le bloc YAML avant de quitter la page.'; }
   }
   function pick(question, option) { selections = { ...selections, [question]: option }; persist(); }
   function toggle(question, option) {
@@ -31,15 +39,21 @@
     ? (selections[question.key] ?? []).includes(option.key)
     : selections[question.key] === option.key;
   function comment(question, value) { comments = { ...comments, [question]: value }; persist(); }
-  const packText = () => JSON.stringify(responsePack(manifest, selections, comments, new Date().toISOString()), null, 2);
+  function defer(question, value) { deferred = { ...deferred, [question]: value }; persist(); }
   async function copy() {
     copyError = '';
-    try { await navigator.clipboard.writeText(packText()); status = 'Questions, choix et commentaires réellement copiés en JSON.'; }
-    catch { copyError = 'Copie refusée par le navigateur. Le JSON reste sélectionnable et téléchargeable.'; }
-  }
-  function download() {
-    const url = URL.createObjectURL(new Blob([packText()], { type: 'application/json' }));
-    const a = document.createElement('a'); a.href = url; a.download = 'reponses-dossier-retours-steve.json'; a.click(); URL.revokeObjectURL(url);
+    stamp = new Date();
+    const { text, records } = exported;
+    try {
+      if (!navigator.clipboard?.writeText) throw Error('clipboard unavailable');
+      await navigator.clipboard.writeText(text);
+      status = `${records.length} décision(s) copiée(s) en YAML. Ouvrez la PR et collez-les dans un commentaire.`;
+    } catch {
+      copyError = 'Copie refusée par le navigateur (fréquent dans un artefact publié). Le bloc YAML ci-dessous est sélectionné : copiez-le avec Ctrl+C (Cmd+C sur Mac), puis collez-le dans un commentaire de la PR.';
+      await tick();
+      yamlArea?.focus();
+      yamlArea?.select();
+    }
   }
 </script>
 
@@ -76,6 +90,8 @@
               </article>
             {/each}
           </div>
+          <label class="defer"><input type="checkbox" data-defer checked={Boolean(deferred[question.key])}
+            onchange={event => defer(question.key, event.currentTarget.checked)} /> Différer cette décision (statut « différée » dans l’export)</label>
           <label class="comment">Commentaire — {question.question}
             <textarea value={comments[question.key] ?? ''} rows="2" oninput={event => comment(question.key, event.currentTarget.value)}></textarea>
           </label>
@@ -83,16 +99,33 @@
       {/each}
     </section>
   {/each}
-  <div class="flex-row">
-    <button onclick={copy}>Copier les réponses en JSON</button>
-    <button onclick={download}>Télécharger les réponses en JSON</button>
-    <button onclick={() => { selections = {}; comments = {}; persist(); }}>Effacer les réponses</button>
-  </div>
-  <p role="status">{copyError || status}</p>
-  <details class="choice-json" open={Boolean(copyError)}>
-    <summary>Voir le JSON réel des questions, options, choix et commentaires</summary>
-    <textarea aria-label="JSON des réponses au dossier retours de Steve" readonly value={json} rows={18}></textarea>
-  </details>
+
+  <section class="export" aria-labelledby="export-title">
+    <h3 id="export-title" class="group-title">Copier mes décisions dans GitHub</h3>
+    <p class="steps-line"><strong>1.</strong> Copier, <strong>2.</strong> ouvrir la PR, <strong>3.</strong> coller dans un commentaire.</p>
+    <div class="flex-row export-controls">
+      <label>Je suis
+        <select data-export-person value={person} onchange={event => { person = event.currentTarget.value; persist(); }}>
+          {#each PEOPLE as name}<option value={name}>{name}</option>{/each}
+        </select>
+      </label>
+      <label>Décisions copiées
+        <select data-export-scope value={scope} onchange={event => { scope = event.currentTarget.value; persist(); }}>
+          <option value="mine">les miennes (je décide ou je valide)</option>
+          <option value="all">toutes</option>
+        </select>
+      </label>
+    </div>
+    <div class="flex-row export-actions">
+      <button data-export-copy onclick={copy}>Copier mes décisions (YAML)</button>
+      <a class="target-link" data-export-target href={DECISIONS_TARGET_URL} target="_blank" rel="noopener">{DECISIONS_TARGET_LABEL}</a>
+      <button onclick={() => { selections = {}; comments = {}; deferred = {}; persist(); }}>Effacer les réponses</button>
+    </div>
+    <p role="status" class:copy-error={Boolean(copyError)}>{copyError || status}</p>
+    <label class="yaml-label" for="decisions-yaml">Bloc à coller (Markdown, YAML) · {exported.records.length} décision(s) · sélectionnable si la copie est refusée</label>
+    <textarea id="decisions-yaml" class="decisions-yaml" bind:this={yamlArea} readonly value={exported.text} rows="16"
+      onfocus={event => event.currentTarget.select()}></textarea>
+  </section>
 </section>
 
 <style>
@@ -107,7 +140,15 @@
   h2, h4 { margin: 0; } h4 { font-size: 1rem; }
   p { font-size: .9rem; line-height: 1.55; }
   .option label { display: block; margin: 8px 0; font-weight: 650; font-size: .92rem; }
+  .defer { display: block; margin-bottom: 10px; font-size: .85rem; }
   .comment { display: block; font-size: .8rem; color: var(--st-semantic-text-secondary); }
-  .choice-json textarea { width: 100%; margin-top: 14px; font-family: monospace; font-size: .78rem; }
+  .export-controls, .export-actions { justify-content: flex-start; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+  .export-controls label { display: flex; flex-direction: column; gap: 4px; font-size: .85rem; }
+  .export-controls select { padding: 6px 8px; }
+  .export-actions { align-items: center; margin-top: 14px; }
+  .target-link { color: var(--st-semantic-action-primary); font-weight: 650; }
+  .copy-error { border-left: 4px solid var(--st-semantic-action-primary); padding-left: 10px; font-weight: 650; }
+  .yaml-label { display: block; margin-top: 12px; font-size: .8rem; color: var(--st-semantic-text-secondary); }
+  .decisions-yaml { width: 100%; font-family: monospace; font-size: .78rem; white-space: pre; overflow: auto; }
   @media (max-width: 900px) { .option-grid { grid-template-columns: 1fr; } .choices { padding: 18px 14px; } }
 </style>

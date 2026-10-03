@@ -1,6 +1,6 @@
 // Contrôles Chromium réels, sur la page autonome ouverte en file://.
 // Même protocole que docs/architecture/focus/browser-check.mjs, réduit aux cinq
-// scènes de ce dossier et étendu aux décisions D1 à D16. Onglet neuf, fermé à la fin.
+// scènes de ce dossier et étendu aux décisions D1 à D16 et à leur copie en YAML. Onglet neuf, fermé à la fin.
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
 const { graphs } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
@@ -173,32 +173,105 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 1920, height: 10
   await writeFile(`.generated/dossier-preview-${viewport.width}x${viewport.height}.png`, Buffer.from(shot.data, 'base64'));
 }
 
-// Les décisions : une réponse par décision, réellement sélectionnable et exportée.
-await evaluate(`(() => {
-  document.querySelector('[data-question="D12"] [data-option="b"] input').click();
-  document.querySelector('[data-question="D12"] [data-option="a"] input').click();
-  document.querySelector('[data-question="D9"] [data-option="1"] input').click();
-  return true;
-})()`);
+// Les décisions : une réponse par décision, réellement sélectionnable, copiée en YAML.
+// EXPECT : ce que le dossier porte (décisions, options, filtres « Je suis », PR cible).
+const EXPECT = {
+  picks: [['D12', 'b'], ['D12', 'a'], ['D9', '1']], selectedQuestion: 'D12', selectedOption: 'a', persisted: [['D12', 'a'], ['D9', '1']],
+  storagePrefix: 'immo-steve-decision-responses:', blocks: 16, options: 48, recommended: 15, decides: { Farid: 10, Fabien: 6 },
+  url: 'https://github.com/rhanka/radar-immobilier/pull/794', mine: { Farid: 10, Fabien: 6 },
+  faridAnswered: ['D12'], notFarid: ['D9'], faridRoles: { D12: 'decide' }, fabienRoles: { D9: 'decide' }, allOptions: { D9: '"1"', D12: 'a' },
+};
+const pickScript = picks => `(() => { ${picks.map(([question, option]) =>
+  `document.querySelector('[data-question="${question}"] [data-option="${option}"] input').click();`).join(' ')} return true; })()`;
+const readExport = `(() => {
+  const text = document.querySelector('#decisions-yaml').value;
+  const field = (chunk, key) => (chunk.match(new RegExp('^    ' + key + ': (.*)$', 'm')) || [])[1];
+  const entries = text.split(/^  - id: /m).slice(1).map(chunk => ({ id: chunk.split('\\n')[0],
+    role: field(chunk, 'role'), option: field(chunk, 'option'), statut: field(chunk, 'statut') }));
+  return { text, entries, header: text.split('\\n').slice(0, 8) };
+})()`;
+const setSelect = (selector, value) => `(() => { const select = document.querySelector('${selector}');
+  select.value = '${value}'; select.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`;
+await call('Emulation.setFocusEmulationEnabled', { enabled: true });
+await evaluate(pickScript(EXPECT.picks));
 await pause(400);
 const choices = await evaluate(`(() => {
   const blocks = [...document.querySelectorAll('.question-block')];
   const single = blocks.filter(block => block.dataset.mode === 'single');
   const radio = document.querySelectorAll('.question-block[data-mode="single"] input[type="radio"]').length;
   const recommended = [...document.querySelectorAll('.question-block .option .badge.warning')].length;
-  const selected = [...document.querySelectorAll('[data-question="D12"] [data-option][data-selected="true"]')].map(option => option.dataset.option);
-  const pack = JSON.parse(document.querySelector('.choice-json textarea').value);
-  const answered = pack.responses.filter(response => response.decisionStatus === 'owner-draft-not-ratified').map(response => response.key);
-  const persisted = JSON.parse(localStorage.getItem(Object.keys(localStorage).find(key => key.startsWith('immo-steve-decision-responses:'))) ?? '{}').selections ?? {};
-  return { blocks: blocks.length, single: single.length, radio, recommended, selected, answered,
-    keys: pack.responses.map(response => response.key), schema: pack.schema, status: pack.status, persisted,
-    options: pack.responses.reduce((total, response) => total + response.options.length, 0) };
+  const selected = [...document.querySelectorAll('[data-question="${EXPECT.selectedQuestion}"] [data-option][data-selected="true"]')].map(option => option.dataset.option);
+  const decides = blocks.map(block => block.querySelector('.roles').dataset.decides);
+  const link = document.querySelector('a[data-export-target]');
+  const exported = ${readExport};
+  const persisted = JSON.parse(localStorage.getItem(Object.keys(localStorage).find(key => key.startsWith('${EXPECT.storagePrefix}'))) ?? '{}').selections ?? {};
+  return { blocks: blocks.length, single: single.length, radio, recommended, selected, decides, persisted,
+    defer: document.querySelectorAll('.question-block input[data-defer]').length,
+    jsonControls: [...document.querySelectorAll('.choices button, .choices summary, .choices a')].filter(element => /JSON/i.test(element.textContent)).length,
+    copyButton: document.querySelector('[data-export-copy]')?.textContent.trim(),
+    steps: document.querySelector('.export .steps-line')?.textContent.trim(),
+    person: document.querySelector('[data-export-person]').value, scope: document.querySelector('[data-export-scope]').value,
+    link: link && { href: link.getAttribute('href'), target: link.target, rel: link.rel, text: link.textContent.trim() },
+    header: exported.header, entries: exported.entries,
+    answered: exported.entries.filter(entry => entry.statut === 'tranchee').map(entry => entry.id) };
 })()`);
-if (choices.blocks !== 16 || choices.single !== 16 || choices.radio !== 48 || choices.options !== 48 || choices.recommended !== 15
-  || JSON.stringify(choices.selected) !== JSON.stringify(['a'])
-  || JSON.stringify(choices.answered) !== JSON.stringify(['D9', 'D12'])
-  || choices.persisted.D12 !== 'a' || choices.persisted.D9 !== '1' || choices.status !== 'draft-not-ratified')
-  throw Error(`choix non sélectionnables : ${JSON.stringify(choices)}`);
+const own = Object.fromEntries(choices.entries.map(entry => [entry.id, entry]));
+if (choices.blocks !== EXPECT.blocks || choices.single !== EXPECT.blocks || choices.radio !== EXPECT.options || choices.recommended !== EXPECT.recommended
+  || choices.defer !== EXPECT.blocks || JSON.stringify(choices.selected) !== JSON.stringify([EXPECT.selectedOption])
+  || EXPECT.persisted.some(([question, option]) => choices.persisted[question] !== option)
+  || Object.entries(EXPECT.decides).some(([name, count]) => choices.decides.filter(value => value === name).length !== count)
+  || choices.jsonControls !== 0 || choices.copyButton !== 'Copier mes décisions (YAML)'
+  || choices.steps !== '1. Copier, 2. ouvrir la PR, 3. coller dans un commentaire.'
+  || choices.person !== 'Farid' || choices.scope !== 'mine'
+  || !choices.link || choices.link.href !== EXPECT.url || choices.link.target !== '_blank' || !choices.link.rel.split(' ').includes('noopener')
+  || choices.header[0] !== '```yaml' || !choices.header[1].startsWith('dossier: ') || choices.header[4] !== 'decideur: Farid'
+  || choices.header[6] !== `coller_dans: "${EXPECT.url}"` || choices.header[7] !== 'decisions:'
+  || choices.entries.length !== EXPECT.mine.Farid || JSON.stringify(choices.answered) !== JSON.stringify(EXPECT.faridAnswered)
+  || own[EXPECT.selectedQuestion]?.option !== EXPECT.selectedOption || own[EXPECT.selectedQuestion]?.role !== 'decide'
+  || EXPECT.notFarid.some(id => own[id]) || Object.entries(EXPECT.faridRoles).some(([id, role]) => own[id]?.role !== role))
+  throw Error(`choix non sélectionnables ou export YAML incorrect : ${JSON.stringify(choices)}`);
+
+// Clic réel sur « Copier mes décisions (YAML) » : la zone en lecture seule porte le même bloc.
+try { await call('Browser.grantPermissions', { permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'] }); } catch {}
+const copyAt = await evaluate(`(() => { const button = document.querySelector('[data-export-copy]'); button.scrollIntoView({ block: 'center' });
+  const rect = button.getBoundingClientRect(); return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }; })()`);
+await pause(250);
+for (const type of ['mousePressed', 'mouseReleased']) await call('Input.dispatchMouseEvent', { type, x: copyAt.x, y: copyAt.y, button: 'left', clickCount: 1 });
+await pause(600);
+const readZone = `(() => { const area = document.querySelector('#decisions-yaml');
+  return { status: document.querySelector('.export [role="status"]').textContent.trim(), refused: Boolean(document.querySelector('.export .copy-error')),
+    hasDecisions: area.value.includes('\\ndecisions:'), fenced: area.value.startsWith('\`\`\`yaml\\n') && area.value.endsWith('\\n\`\`\`'),
+    focused: document.activeElement === area, selectedAll: area.selectionStart === 0 && area.selectionEnd === area.value.length, value: area.value }; })()`;
+const clicked = await evaluate(readZone);
+let clipboardMatchesZone = null;
+if (!clicked.refused) clipboardMatchesZone = await evaluate(`navigator.clipboard.readText().then(text => text === document.querySelector('#decisions-yaml').value, () => null)`);
+if (!clicked.hasDecisions || !clicked.fenced || (!clicked.refused && !/copiée\(s\) en YAML/.test(clicked.status)) || clipboardMatchesZone === false)
+  throw Error(`clic sur le bouton de copie : ${JSON.stringify({ ...clicked, value: clicked.value.slice(0, 200), clipboardMatchesZone })}`);
+// Presse-papiers refusé (cas d'un artefact) : message clair, bloc sélectionné dans la zone.
+await evaluate(`(() => { Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: () => Promise.reject(new Error('denied')) } });
+  document.querySelector('[data-export-copy]').click(); return true; })()`);
+await pause(400);
+const refused = await evaluate(readZone);
+if (!refused.refused || !refused.status.startsWith('Copie refusée par le navigateur') || !refused.focused || !refused.selectedAll || !refused.hasDecisions)
+  throw Error(`repli presse-papiers refusé : ${JSON.stringify({ ...refused, value: refused.value.slice(0, 200) })}`);
+const copy = { realClick: clicked.refused ? 'refused' : 'copied', clipboardMatchesZone, status: clicked.status,
+  forcedRefusal: { message: refused.status, focused: refused.focused, selectedAll: refused.selectedAll }, hasDecisions: clicked.hasDecisions && refused.hasDecisions };
+
+// Filtre « Je suis » : les miennes (décide ou valide) ou toutes.
+await evaluate(setSelect('[data-export-scope]', 'all'));
+await pause(200);
+const all = await evaluate(readExport);
+await evaluate(setSelect('[data-export-person]', 'Fabien'));
+await evaluate(setSelect('[data-export-scope]', 'mine'));
+await pause(200);
+const fabien = await evaluate(readExport);
+const exportFilter = { faridMine: choices.entries.length, all: all.entries.length, fabienMine: fabien.entries.length,
+  fabienDecideur: fabien.header[4], fabienRoles: Object.fromEntries(fabien.entries.map(entry => [entry.id, entry.role])),
+  allOptions: Object.fromEntries(all.entries.filter(entry => entry.option !== 'null').map(entry => [entry.id, entry.option])) };
+if (exportFilter.all !== EXPECT.blocks || exportFilter.fabienMine !== EXPECT.mine.Fabien || exportFilter.fabienDecideur !== 'decideur: Fabien'
+  || JSON.stringify(exportFilter.allOptions) !== JSON.stringify(EXPECT.allOptions)
+  || Object.entries(EXPECT.fabienRoles).some(([id, role]) => exportFilter.fabienRoles[id] !== role))
+  throw Error(`filtre « Je suis » : ${JSON.stringify(exportFilter)}`);
 // Le brouillon de contrôle est effacé : la page livrée ne porte aucune réponse.
 await evaluate(`(() => { localStorage.clear(); return true; })()`);
 
@@ -250,14 +323,14 @@ const report = {
   offline: { ...offline, blockedExternal: true },
   viewports: viewports.map(viewport => ({ width: viewport.width, height: viewport.height })),
   scenes: viewports[0].metrics, scenesAt1920: viewports[1].metrics,
-  choices, oneToOne, overview,
+  choices, copy, exportFilter, oneToOne, overview,
   captures: ['.generated/dossier-preview-1440x1000.png', '.generated/dossier-preview-1920x1080.png',
     ...graphs.map(graph => `.generated/scene-1a1-${graph.id}.png`),
     ...graphs.map(graph => `.generated/scene-vue-ensemble-${graph.id}.png`)],
   consoleErrors, runtimeErrors, externalRequests,
 };
 await writeFile('.generated/browser-check.json', `${JSON.stringify(report, null, 2)}\n`);
-console.log(JSON.stringify({ status: report.status, scenes: report.scenes.map(scene => ({ id: scene.sceneId, cards: scene.cards, edges: scene.edges, groups: scene.groups, labels: scene.edgeLabels, fitView: Number(scene.initialScale.toFixed(4)) })), choices: { blocks: choices.blocks, radio: choices.radio, recommended: choices.recommended, selected: choices.selected, answered: choices.answered.length }, captures: report.captures.length, consoleErrors: consoleErrors.length, runtimeErrors: runtimeErrors.length, externalRequests: externalRequests.length }));
+console.log(JSON.stringify({ status: report.status, scenes: report.scenes.map(scene => ({ id: scene.sceneId, cards: scene.cards, edges: scene.edges, groups: scene.groups, labels: scene.edgeLabels, fitView: Number(scene.initialScale.toFixed(4)) })), choices: { blocks: choices.blocks, radio: choices.radio, recommended: choices.recommended, selected: choices.selected, answered: choices.answered }, yaml: { copy: copy.realClick, clipboardMatchesZone: copy.clipboardMatchesZone, forcedRefusalHandled: true, hasDecisions: copy.hasDecisions, link: choices.link.href, faridMine: exportFilter.faridMine, fabienMine: exportFilter.fabienMine, all: exportFilter.all }, captures: report.captures.length, consoleErrors: consoleErrors.length, runtimeErrors: runtimeErrors.length, externalRequests: externalRequests.length }));
 ws.close();
 // L'onglet de contrôle est refermé : le Chromium partagé ou isolé ne garde rien.
 await fetch(`${base}/json/close/${page.id}`).catch(() => {});
