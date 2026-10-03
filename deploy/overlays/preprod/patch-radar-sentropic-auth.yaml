@@ -1,0 +1,20 @@
+# PREPROD auth source-of-record (ConfigMap radar-sentropic-auth, base
+# deploy/k8s/80-auth.yaml carries the PROD IdP). No workload reads this
+# ConfigMap and reconcile-preprod.sh does NOT apply it; it is patched so the
+# preprod render carries no PROD auth value anywhere (the isolation gate scans
+# the whole render) and so git mirrors the live preprod record.
+# Same values as patch-radar-api-auth.yaml, which is the one the api reads.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: radar-sentropic-auth
+  labels:
+    sentropic.dev/idp: preprod.auth.sent-tech.ca
+data:
+  SENTROPIC_AUTH_MODE: "oidc-rp"
+  SENTROPIC_IDP_DISCOVERY_URL: "https://preprod.auth.sent-tech.ca/.well-known/openid-configuration"
+  SENTROPIC_IDP_ISSUER: "https://preprod.auth.sent-tech.ca"
+  SENTROPIC_IDP_JWKS_URL: "https://preprod.auth.sent-tech.ca/.well-known/jwks.json"
+  SENTROPIC_OAUTH_CLIENT_ID: "radar-immobilier-preprod"
+  SENTROPIC_OAUTH_REDIRECT_URI: "https://preprod.immo.sent-tech.ca/api/v1/auth/oauth/callback"
+  SENTROPIC_OAUTH_SCOPES: "openid profile email"

@@ -134,6 +134,7 @@ debugging, but this is **best-effort and voie-dependent**:
 | `db-backup-job.tmpl.yaml` | Backup Job template consumed by `run-db-backup.sh`. |
 | `rollback-release.sh` | Roll a Deployment back to a prior image. |
 | `reconcile-preprod.sh` | Targeted server-side apply of preprod manifests. |
+| `check-preprod-auth-isolation.sh` | Fails if the rendered preprod overlay carries a PROD auth value (PROD IdP/app host outside `preprod.`, client id `radar-immobilier`) or if ConfigMap `radar-api` does not pin the preprod OIDC keys. Run by CI and by `reconcile-preprod.sh` before any apply. |
 | `kfilter.py` | Manifest filter used by the reconcile step. |
 | `*.test.sh` | Shell tests for the runners above. |
 
