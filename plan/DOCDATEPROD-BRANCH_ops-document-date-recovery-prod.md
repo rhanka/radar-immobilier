@@ -19,17 +19,17 @@
   - `docker-compose*.yml`, `rules/**`, `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`
   - `plan/NN-BRANCH_*.md` (except this branch file)
 - **Conditional Paths (allowed only with explicit exception)**:
-  - `Makefile` (BRDDP-EX1)
-  - `.github/workflows/run-job.yaml` (BRDDP-EX2)
+  - `Makefile` (BR792p-EX1)
+  - `.github/workflows/run-job.yaml` (BR792p-EX2)
 
 ## Feedback Loop
-- [x] BRDDP-EX1 — `Makefile`: extend `document-date-recovery-validate` to render the prod manifest offline and update the section header; no prod Make target. Impact: `make k8s-validate` (CI) also checks the prod manifest. Rollback: revert the two hunks.
-- [x] BRDDP-EX2 — `.github/workflows/run-job.yaml`: add the `document-date-recovery` route and its inputs, per-job wait deadline and timeout, recovery log filter + run summary. Impact: run-job only; other jobs unchanged. Rollback: revert the commit.
+- [x] BR792p-EX1 (BR792p = prod follow-up of #792) — `Makefile`: extend `document-date-recovery-validate` to render the prod manifest offline and update the section header; no prod Make target. Impact: `make k8s-validate` (CI) also checks the prod manifest. Rollback: revert the two hunks.
+- [x] BR792p-EX2 — `.github/workflows/run-job.yaml`: add the `document-date-recovery` route and its inputs, per-job wait deadline and timeout, recovery log filter + run summary. Impact: run-job only; other jobs unchanged. Rollback: revert the commit.
 
 ## Plan / Todo (lot-based)
 - [x] Lot 1 — prod manifest `deploy/k8s/41-document-date-recovery-job.yaml` + SCRAPE binding guard entry and two negative tests.
-- [x] Lot 2 — run-job route: inputs `recovery_mode`/`recovery_heal`/`recovery_cities`/`recovery_image`, validation, served-image default, refusal while refresh/backup/recovery Jobs are active, 110 min timeout + 5700 s wait for this job only, fail-fast + Job delete when the pod cannot start, report lines + run summary.
-- [ ] Lot 3 — Makefile offline validate (preprod + prod) and header comment.
-- [ ] Lot 4 — spec section "Production run (run-job)".
-- [ ] Lot gate: `make document-date-recovery-validate ENV=ci`, `make k8s-validate ENV=ci`, `bash deploy/ci/check-object-storage-bindings.test.sh`, `make -f deploy/k8s/refresh-cronjobs/refresh-018.mk verify-renders ENV=ci`, `harness verify --category static`.
+- [x] Lot 2 — run-job route: inputs `recovery_mode`/`recovery_heal`/`recovery_cities`/`recovery_image`, validation, served-image default, fail-closed read-only pre-check before delete/apply (active `radar-refresh-pv*` or CronJob-owned refresh, `radar-backup*`, in-flight recovery; names + startTime), 110 min timeout + 5700 s wait for this job only, fail-fast + Job delete when the pod cannot start, report lines + run summary.
+- [x] Lot 3 — Makefile offline validate (preprod + prod) and header comment.
+- [x] Lot 4 — spec section "Production run (run-job)".
+- [x] Lot gate: `make document-date-recovery-validate ENV=ci`, `make k8s-validate ENV=ci`, `bash deploy/ci/check-object-storage-bindings.test.sh`, `make -f deploy/k8s/refresh-cronjobs/refresh-018.mk verify-renders ENV=ci`, `harness verify --category static`.
 - [ ] Post-merge (conductor) — after promote: prod preview via run-job, review the report, then apply.
