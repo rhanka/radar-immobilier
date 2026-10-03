@@ -1,0 +1,519 @@
+{
+  "status": "pass",
+  "checkedAt": "2026-10-03T13:28:12.753Z",
+  "url": "file:///home/antoinefa/src/radar-immobilier/.worktrees/dossier-retours-steve/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
+  "chromiumCdpPort": "9243",
+  "offline": {
+    "url": "file:///home/antoinefa/src/radar-immobilier/.worktrees/dossier-retours-steve/docs/spec/reports/dossier-retours-steve/decision-focus.html",
+    "title": "Analyse des retours d’usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage",
+    "external": 0,
+    "blockedExternal": true
+  },
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "scenes": [
+    {
+      "sceneId": "criteres-steve",
+      "sceneHash": "8d3f825fce7c2738b790ab3a6fd1d15d39847a3bb4e85c7b6bf556ac3e179e44",
+      "initialScale": 0.492228,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 10,
+      "edges": 9,
+      "groups": 5,
+      "edgeLabels": 9,
+      "panel": {
+        "left": 40,
+        "top": 8906.5625,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.99820840139122,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "modele-donnees",
+      "sceneHash": "b87aacb0f2030bb54bfdd42a480417c453e7c66c54fc3b16ec21b8d21e376a1a",
+      "initialScale": 0.371131,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 11,
+      "edges": 10,
+      "groups": 5,
+      "edgeLabels": 10,
+      "panel": {
+        "left": 40,
+        "top": 10190.25,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.99823680856625,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "flux-import-oracle",
+      "sceneHash": "5ff3efd5348c2319e72b2e590171d070697dd938dad5e1eabdfb9fef54d27dd7",
+      "initialScale": 0.275885,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 13,
+      "edges": 12,
+      "groups": 6,
+      "edgeLabels": 12,
+      "panel": {
+        "left": 40,
+        "top": 11443.859375,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.9984538394621,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "architecture-ui",
+      "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac",
+      "initialScale": 0.440948,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 13,
+      "edges": 12,
+      "groups": 3,
+      "edgeLabels": 12,
+      "panel": {
+        "left": 40,
+        "top": 12697.46875,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.99966194993515,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "affichage-abc",
+      "sceneHash": "b1d7776fd1c90d436293c87e47a2a673d7f2bb67c0da0a1b7f52efcc159fab5e",
+      "initialScale": 0.365904,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 10,
+      "edges": 10,
+      "groups": 4,
+      "edgeLabels": 10,
+      "panel": {
+        "left": 40,
+        "top": 13951.078125,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.9973345126044,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "scenesAt1920": [
+    {
+      "sceneId": "criteres-steve",
+      "sceneHash": "8d3f825fce7c2738b790ab3a6fd1d15d39847a3bb4e85c7b6bf556ac3e179e44",
+      "initialScale": 0.540155,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 10,
+      "edges": 9,
+      "groups": 5,
+      "edgeLabels": 9,
+      "panel": {
+        "left": 52.5,
+        "top": 8433.65625,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99943881848728,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "modele-donnees",
+      "sceneHash": "b87aacb0f2030bb54bfdd42a480417c453e7c66c54fc3b16ec21b8d21e376a1a",
+      "initialScale": 0.496429,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 11,
+      "edges": 10,
+      "groups": 5,
+      "edgeLabels": 10,
+      "panel": {
+        "left": 52.5,
+        "top": 9797.34375,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.9999395683975,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "flux-import-oracle",
+      "sceneHash": "5ff3efd5348c2319e72b2e590171d070697dd938dad5e1eabdfb9fef54d27dd7",
+      "initialScale": 0.369027,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 13,
+      "edges": 12,
+      "groups": 6,
+      "edgeLabels": 12,
+      "panel": {
+        "left": 52.5,
+        "top": 11130.953125,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 70.00038276332084,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "architecture-ui",
+      "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac",
+      "initialScale": 0.589816,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 13,
+      "edges": 12,
+      "groups": 3,
+      "edgeLabels": 12,
+      "panel": {
+        "left": 52.5,
+        "top": 12464.5625,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99998198590747,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "affichage-abc",
+      "sceneHash": "b1d7776fd1c90d436293c87e47a2a673d7f2bb67c0da0a1b7f52efcc159fab5e",
+      "initialScale": 0.489437,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 10,
+      "edges": 10,
+      "groups": 4,
+      "edgeLabels": 10,
+      "panel": {
+        "left": 52.5,
+        "top": 13798.171875,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 70.000310944003,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "choices": {
+    "blocks": 16,
+    "single": 16,
+    "radio": 48,
+    "recommended": 15,
+    "selected": [
+      "a"
+    ],
+    "decides": [
+      "Farid",
+      "Fabien",
+      "Fabien",
+      "Fabien",
+      "Farid",
+      "Farid",
+      "Farid",
+      "Farid",
+      "Fabien",
+      "Fabien",
+      "Fabien",
+      "Farid",
+      "Farid",
+      "Farid",
+      "Farid",
+      "Farid"
+    ],
+    "persisted": {
+      "D12": "a",
+      "D9": "1"
+    },
+    "defer": 16,
+    "jsonControls": 0,
+    "copyButton": "Copier mes décisions (YAML)",
+    "steps": "1. Copier, 2. ouvrir la PR, 3. coller dans un commentaire.",
+    "person": "Farid",
+    "scope": "mine",
+    "link": {
+      "href": "https://github.com/rhanka/radar-immobilier/pull/794",
+      "target": "_blank",
+      "rel": "noopener",
+      "text": "Ouvrir la PR #794 sur GitHub"
+    },
+    "header": [
+      "```yaml",
+      "dossier: \"Analyse des retours d'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage\"",
+      "fichier: DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md",
+      "version: \"2026-10-03 · sha256:0b0e0115916614faa997085664a481703677c45cbe656bb181d8ec79816d2d65\"",
+      "decideur: Farid",
+      "date: \"2026-10-03T09:28:04-04:00\"",
+      "coller_dans: \"https://github.com/rhanka/radar-immobilier/pull/794\"",
+      "decisions:"
+    ],
+    "entries": [
+      {
+        "id": "D1",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D5",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D6",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D7",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D8",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D12",
+        "role": "decide",
+        "option": "a",
+        "statut": "tranchee"
+      },
+      {
+        "id": "D13",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D14",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D15",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D16",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      }
+    ],
+    "answered": [
+      "D12"
+    ]
+  },
+  "copy": {
+    "realClick": "copied",
+    "clipboardMatchesZone": true,
+    "status": "10 décision(s) copiée(s) en YAML. Ouvrez la PR et collez-les dans un commentaire.",
+    "forcedRefusal": {
+      "message": "Copie refusée par le navigateur (fréquent dans un artefact publié). Le bloc YAML ci-dessous est sélectionné : copiez-le avec Ctrl+C (Cmd+C sur Mac), puis collez-le dans un commentaire de la PR.",
+      "focused": true,
+      "selectedAll": true
+    },
+    "hasDecisions": true
+  },
+  "exportFilter": {
+    "faridMine": 10,
+    "all": 16,
+    "fabienMine": 6,
+    "fabienDecideur": "decideur: Fabien",
+    "fabienRoles": {
+      "D2": "decide",
+      "D3": "decide",
+      "D4": "decide",
+      "D9": "decide",
+      "D10": "decide",
+      "D11": "decide"
+    },
+    "allOptions": {
+      "D9": "\"1\"",
+      "D12": "a"
+    }
+  },
+  "oneToOne": [
+    {
+      "sceneId": "criteres-steve",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 8433.65625,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "modele-donnees",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 9797.34375,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "flux-import-oracle",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 11130.953125,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "architecture-ui",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 12464.5625,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "affichage-abc",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 13798.171875,
+        "width": 1800,
+        "height": 900
+      }
+    }
+  ],
+  "overview": [
+    {
+      "sceneId": "criteres-steve",
+      "clip": {
+        "x": 52.5,
+        "y": 8433.65625,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "modele-donnees",
+      "clip": {
+        "x": 52.5,
+        "y": 9797.34375,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "flux-import-oracle",
+      "clip": {
+        "x": 52.5,
+        "y": 11130.953125,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "architecture-ui",
+      "clip": {
+        "x": 52.5,
+        "y": 12464.5625,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "affichage-abc",
+      "clip": {
+        "x": 52.5,
+        "y": 13798.171875,
+        "width": 1800,
+        "height": 900
+      }
+    }
+  ],
+  "captures": [
+    ".generated/dossier-preview-1440x1000.png",
+    ".generated/dossier-preview-1920x1080.png",
+    ".generated/scene-1a1-criteres-steve.png",
+    ".generated/scene-1a1-modele-donnees.png",
+    ".generated/scene-1a1-flux-import-oracle.png",
+    ".generated/scene-1a1-architecture-ui.png",
+    ".generated/scene-1a1-affichage-abc.png",
+    ".generated/scene-vue-ensemble-criteres-steve.png",
+    ".generated/scene-vue-ensemble-modele-donnees.png",
+    ".generated/scene-vue-ensemble-flux-import-oracle.png",
+    ".generated/scene-vue-ensemble-architecture-ui.png",
+    ".generated/scene-vue-ensemble-affichage-abc.png"
+  ],
+  "consoleErrors": [],
+  "runtimeErrors": [],
+  "externalRequests": []
+}
