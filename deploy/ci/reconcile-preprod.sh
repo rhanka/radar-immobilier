@@ -12,14 +12,17 @@
 #   - ConfigMap radar-api                   (per-env storage buckets: the preprod
 #                                            overlay overrides SCRAPE/GRAPH_S3_BUCKET
 #                                            -> docs-preprod, read by the refresh
-#                                            CronJob AND the api)
+#                                            CronJob AND the api; per-env OIDC auth:
+#                                            the overlay pins every auth key to the
+#                                            preprod IdP + client, see step 2b)
 #   - Deployment radar-api, radar-ui        (#611: securityContext; pre-flight-present)
 #   - CronJob    radar-consistency-snapshot (#611: securityContext)
 # EXCLUDED: the Namespace (PSS labels = operator act, cluster-scoped), Services /
 # StatefulSets / NetworkPolicies / Ingress (operator-owned, not in the SA Role),
-# the env ConfigMap radar-sentropic-auth (avoid overwriting preprod config with
-# base content — radar-api is NOW reconciled: the preprod overlay patches its
-# per-env storage buckets, so applying it no longer leaks the base PROD buckets),
+# the env ConfigMap radar-sentropic-auth (read by no workload; the overlay patches
+# it to the preprod IdP so the render is PROD-free, but it is still not applied —
+# radar-api is NOW reconciled: the preprod overlay patches its per-env storage
+# buckets AND its auth keys, so applying it no longer leaks base PROD values),
 # and the radar-maildev / radar-obscura Deployments
 # (the SA has no `create`, so an absent one would 403). A comprehensive reconcile
 # is a documented PR follow-up (grant deployments:create OR patch-existing-only,
@@ -53,6 +56,13 @@ bash deploy/k8s/nginx/check-header-parity.sh
 RENDER="$(mktemp)"
 trap 'rm -f "$RENDER"' EXIT
 kubectl kustomize --load-restrictor LoadRestrictionsNone deploy/overlays/preprod > "$RENDER"
+
+# 2b. Guard: the render must carry no PROD auth value. Applying ConfigMap
+#     radar-api writes EVERY key it holds; a key the overlay does not pin keeps
+#     the base PROD value (that is how #738 pushed the PROD IdP issuer, client id
+#     and redirect_uri into preprod and broke login). Checked on the exact file
+#     applied below, before any diff/apply (fail-closed, set -e).
+bash deploy/ci/check-preprod-auth-isolation.sh "$RENDER"
 
 kf() { python3 deploy/ci/kfilter.py "$@"; }
 
