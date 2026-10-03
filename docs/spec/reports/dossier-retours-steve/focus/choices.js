@@ -2,8 +2,19 @@
 // et du §10 du dossier « retours de Steve ». Une réponse par décision.
 // Rien n'est ratifié ici : la page ne produit qu'un brouillon local exportable.
 import roles from './roles.json' with { type: 'json' };
+import { decisionRecords, decisionsYaml, isoWithOffset, markdownBlock } from './decision-yaml.js';
+
+// Export target, per dossier: the PR where Farid pastes his decisions.
+export const DECISIONS_TARGET_URL = 'https://github.com/rhanka/radar-immobilier/pull/794';
+export const DECISIONS_TARGET_LABEL = 'Ouvrir la PR #794 sur GitHub';
+// The dossier carries no revision label: its date stands for the revision.
+export const DOSSIER_REVISION = '2026-10-03';
+// The "Je suis" selector. This dossier names no validation beside the decider,
+// so a person's own decisions are the ones they decide.
+export const PEOPLE = ['Farid', 'Fabien'];
+
 const q = (key, group, question, recommended, context, options) => ({ key, mode: 'single', group, question, recommended, context, options,
-  decides: roles[key][0], consulted: roles[key][1] });
+  decides: roles[key][0], consulted: roles[key][1], validators: [] });
 const o = (key, title, detail) => ({ key, title, detail });
 
 export const questions = [
@@ -107,6 +118,19 @@ export const questions = [
 
 export const minimalValidAnswer = 'Une option par décision D1 à D16 ; à défaut, au minimum D9, D12 et D13, les trois points ouverts';
 
+// The block the copy button puts in the clipboard: ```yaml, the YAML, ```.
+// `manifest.htmlSha256` is the page's own hash, injected by portable.mjs.
+export function exportBlock(manifest, state, person, scope = 'mine', now = new Date()) {
+  const header = {
+    dossier: manifest.title, fichier: manifest.dossier.split('/').pop(),
+    version: `${DOSSIER_REVISION} · sha256:${manifest.htmlSha256}`,
+    decideur: person, date: isoWithOffset(now), coller_dans: DECISIONS_TARGET_URL,
+  };
+  const records = decisionRecords(questions, state, person, scope);
+  return { records, text: markdownBlock(decisionsYaml(header, records)) };
+}
+
+// Reserved for the backend connection: kept internal, not exposed in the page.
 export function responsePack(manifest, selections = {}, comments = {}, capturedAt = null) {
   const responses = questions.map(question => {
     const raw = selections[question.key];

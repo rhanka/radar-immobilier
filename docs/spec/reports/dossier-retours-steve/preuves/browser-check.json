@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-03T00:49:26.441Z",
+  "checkedAt": "2026-10-03T13:28:12.753Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/.worktrees/dossier-retours-steve/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
   "chromiumCdpPort": "9243",
   "offline": {
@@ -261,35 +261,144 @@
     "selected": [
       "a"
     ],
-    "answered": [
-      "D9",
-      "D12"
+    "decides": [
+      "Farid",
+      "Fabien",
+      "Fabien",
+      "Fabien",
+      "Farid",
+      "Farid",
+      "Farid",
+      "Farid",
+      "Fabien",
+      "Fabien",
+      "Fabien",
+      "Farid",
+      "Farid",
+      "Farid",
+      "Farid",
+      "Farid"
     ],
-    "keys": [
-      "D1",
-      "D2",
-      "D3",
-      "D4",
-      "D5",
-      "D6",
-      "D7",
-      "D8",
-      "D9",
-      "D10",
-      "D11",
-      "D12",
-      "D13",
-      "D14",
-      "D15",
-      "D16"
-    ],
-    "schema": "immo-steve-decision-owner-response/v1",
-    "status": "draft-not-ratified",
     "persisted": {
       "D12": "a",
       "D9": "1"
     },
-    "options": 48
+    "defer": 16,
+    "jsonControls": 0,
+    "copyButton": "Copier mes décisions (YAML)",
+    "steps": "1. Copier, 2. ouvrir la PR, 3. coller dans un commentaire.",
+    "person": "Farid",
+    "scope": "mine",
+    "link": {
+      "href": "https://github.com/rhanka/radar-immobilier/pull/794",
+      "target": "_blank",
+      "rel": "noopener",
+      "text": "Ouvrir la PR #794 sur GitHub"
+    },
+    "header": [
+      "```yaml",
+      "dossier: \"Analyse des retours d'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage\"",
+      "fichier: DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md",
+      "version: \"2026-10-03 · sha256:0b0e0115916614faa997085664a481703677c45cbe656bb181d8ec79816d2d65\"",
+      "decideur: Farid",
+      "date: \"2026-10-03T09:28:04-04:00\"",
+      "coller_dans: \"https://github.com/rhanka/radar-immobilier/pull/794\"",
+      "decisions:"
+    ],
+    "entries": [
+      {
+        "id": "D1",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D5",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D6",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D7",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D8",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D12",
+        "role": "decide",
+        "option": "a",
+        "statut": "tranchee"
+      },
+      {
+        "id": "D13",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D14",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D15",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D16",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      }
+    ],
+    "answered": [
+      "D12"
+    ]
+  },
+  "copy": {
+    "realClick": "copied",
+    "clipboardMatchesZone": true,
+    "status": "10 décision(s) copiée(s) en YAML. Ouvrez la PR et collez-les dans un commentaire.",
+    "forcedRefusal": {
+      "message": "Copie refusée par le navigateur (fréquent dans un artefact publié). Le bloc YAML ci-dessous est sélectionné : copiez-le avec Ctrl+C (Cmd+C sur Mac), puis collez-le dans un commentaire de la PR.",
+      "focused": true,
+      "selectedAll": true
+    },
+    "hasDecisions": true
+  },
+  "exportFilter": {
+    "faridMine": 10,
+    "all": 16,
+    "fabienMine": 6,
+    "fabienDecideur": "decideur: Fabien",
+    "fabienRoles": {
+      "D2": "decide",
+      "D3": "decide",
+      "D4": "decide",
+      "D9": "decide",
+      "D10": "decide",
+      "D11": "decide"
+    },
+    "allOptions": {
+      "D9": "\"1\"",
+      "D12": "a"
+    }
   },
   "oneToOne": [
     {
