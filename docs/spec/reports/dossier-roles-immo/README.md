@@ -9,7 +9,7 @@
 
 - Les 12 sections du Markdown (en tête : intention et cadre owner, destinataires et rôles, synthèse avec les deux tableaux « Décisions de Farid » et « Décisions de Fabien ») et l'annexe A, découpées sur leurs titres de niveau 2, rendues telles quelles. Les blocs Mermaid du corps sont remplacés par un renvoi aux scènes.
 - Cinq scènes SvelteFlow natives, tirées des cinq blocs Mermaid canoniques de l'annexe B : `roles-perimetres`, `matrice-decide-valide`, `circuit-validation`, `deux-branches-d10`, `immo-vs-geo`. Carte unique A' 460 × 200, Dagre LR récursif, routeur orthogonal du kit h2a.
-- Les décisions D1 à D18, sélectionnables, exportables en JSON ; brouillon local, rien n'est ratifié.
+- Les décisions D1 à D18, sélectionnables ; le bouton « Copier mes décisions (YAML) » copie un bloc Markdown ```yaml prêt à coller dans un commentaire de la PR #795, filtré par « Je suis » (Farid ou Fabien : les décisions qu'il prend et celles où il porte une validation nommée, ou toutes) et affiché aussi dans une zone en lecture seule si le presse-papiers est refusé. Le JSON reste interne, réservé à la connexion backend. Brouillon local, rien n'est ratifié.
 
 ## Reconstruire
 

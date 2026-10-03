@@ -7,6 +7,8 @@ import { decorateGraph, sceneIds } from './scene-metadata.js';
 const DOSSIER = '../DOSSIER_DECISION_ROLES_IMMO_2026-10-03.md';
 const markdown = await readFile(DOSSIER, 'utf8');
 const sha256 = value => createHash('sha256').update(value).digest('hex');
+// Must match portable.mjs: 64 zeros, present exactly once in the bundled page.
+const HTML_SHA256_PLACEHOLDER = '0'.repeat(64);
 
 const expected = [
   ['roles-perimetres', 'Scène 1 · rôles et périmètres : personnes, fonctions, rôle h2a, domaines'],
@@ -60,7 +62,7 @@ const annexes = sections.filter(section => section.heading.startsWith('Annexe'))
 if (annexes.length < 1 || !annexes[0].heading.startsWith('Annexe A')) throw Error('missing the consensus annexe');
 const header = sections[0];
 
-const choices = (await readFile('choices.js', 'utf8')) + (await readFile('roles.json', 'utf8'));
+const choices = (await readFile('choices.js', 'utf8')) + (await readFile('roles.json', 'utf8')) + (await readFile('decision-yaml.js', 'utf8'));
 const rendererSources = Object.fromEntries(await Promise.all([
   'scenes.js', 'Flow.svelte', 'ServiceNode.svelte', 'ServiceIcon.svelte', 'Subflow.svelte',
   'RoutedEdge.svelte', 'Viewport.svelte', 'service-icons.js', 'style.css', 'parse-mermaid.mjs',
@@ -69,6 +71,9 @@ const rendererSources = Object.fromEntries(await Promise.all([
 const manifest = {
   schema: 'immo-focus-roles-decision-map/v1',
   dossier: 'docs/spec/reports/dossier-roles-immo/DOSSIER_DECISION_ROLES_IMMO_2026-10-03.md',
+  title: header.heading,
+  // Placeholder for the page's own sha256, replaced by portable.mjs (see there).
+  htmlSha256: HTML_SHA256_PLACEHOLDER,
   dossierHash: sha256(markdown), choicesHash: sha256(choices),
   reuse: 'gabarit A’, géométrie Dagre LR et routeur du kit h2a réutilisés depuis docs/architecture/focus',
   serviceRendererHash: sha256(JSON.stringify(rendererSources)),

@@ -3,8 +3,20 @@
 // après relecture d'Astra). Une réponse par décision.
 // Rien n'est ratifié ici : la page ne produit qu'un brouillon local exportable.
 import roles from './roles.json' with { type: 'json' };
+import { decisionRecords, decisionsYaml, isoWithOffset, markdownBlock } from './decision-yaml.js';
+
+// Export target, per dossier: the PR where Farid pastes his decisions.
+export const DECISIONS_TARGET_URL = 'https://github.com/rhanka/radar-immobilier/pull/795';
+export const DECISIONS_TARGET_LABEL = 'Ouvrir la PR #795 sur GitHub';
+// Review state of the dossier ("État de relecture : r1").
+export const DOSSIER_REVISION = 'r1';
+// The "Je suis" selector. A person's own decisions: those they decide, plus those
+// where they carry a named validation (Validation PO / Validation AI Builder).
+export const PEOPLE = ['Farid', 'Fabien'];
+const validatorsOf = text => PEOPLE.filter(name => new RegExp(`^Validation [^:]+ : ${name}\\b`).test(text ?? ''));
+
 const q = (key, group, question, recommended, context, options) => ({ key, mode: 'single', group, question, recommended, context, options,
-  decides: roles[key][0], consulted: roles[key][1], validation: roles[key][2] });
+  decides: roles[key][0], consulted: roles[key][1], validation: roles[key][2], validators: validatorsOf(roles[key][2]) });
 const o = (key, title, detail) => ({ key, title, detail });
 
 export const questions = [
@@ -77,7 +89,7 @@ export const questions = [
     ]),
   q('D12', 'C · Présentation « qui décide »', 'D12 — Cartes GitHub et board : conventions de la surface PO', 'a',
     'Recommandé : (a). Validation AI Builder de Fabien limitée à l’outillage.', [
-      o('a', '(a) Carte de type décision = bloc réduit + étiquettes decide:farid / decide:fabien (décideur) et porte:… (question transmise à Steve ou à une autre autorité) ; vue « Décisions » ; créer ou prioriser ≠ engager', 'Porteur, destinataire et décideur distingués ; un automate ne confond pas « priorisé » et « engagé ».'),
+      o('a', '(a) Carte de type décision = bloc réduit + étiquettes decide:farid / decide:fabien (décideur) et porte:… (question transmise à Steve ou à une autre autorité) ; vue « Décisions » ; cartes de décision et d’orientation adressées au PO dans la colonne « Validation PO (UAT preprod, orientations design) », cartes de mise en œuvre en design ou dev ; décisions collées en YAML dans la carte ; créer ou prioriser ≠ engager', 'Porteur, destinataire et décideur distingués ; un automate ne confond pas « priorisé » et « engagé ».'),
       o('b', '(b) Étiquettes seules', 'Léger ; pas de décideur lisible sur la carte détachée.'),
       o('c', '(c) Aucune convention', 'Le board reste muet sur qui décide.'),
     ]),
@@ -121,6 +133,19 @@ export const questions = [
 
 export const minimalValidAnswer = 'Une option par décision D1 à D18, ou « différer » ; Farid répond au moins à D3, D6 et D7 ; Fabien au moins à D1, D14 et D15';
 
+// The block the copy button puts in the clipboard: ```yaml, the YAML, ```.
+// `manifest.htmlSha256` is the page's own hash, injected by portable.mjs.
+export function exportBlock(manifest, state, person, scope = 'mine', now = new Date()) {
+  const header = {
+    dossier: manifest.title, fichier: manifest.dossier.split('/').pop(),
+    version: `${DOSSIER_REVISION} · sha256:${manifest.htmlSha256}`,
+    decideur: person, date: isoWithOffset(now), coller_dans: DECISIONS_TARGET_URL,
+  };
+  const records = decisionRecords(questions, state, person, scope);
+  return { records, text: markdownBlock(decisionsYaml(header, records)) };
+}
+
+// Reserved for the backend connection: kept internal, not exposed in the page.
 export function responsePack(manifest, selections = {}, comments = {}, capturedAt = null) {
   const responses = questions.map(question => {
     const raw = selections[question.key];
