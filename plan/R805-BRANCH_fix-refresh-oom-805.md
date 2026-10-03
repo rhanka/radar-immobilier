@@ -1,13 +1,13 @@
 # Feature: Refresh OOM on oversize PDFs — size guard, durable set-aside, attempt marker (#805)
 
 ## Objective
-- [ ] Stop the prod `radar-refresh-pv` CronJob from being OOM-killed on every pass by one 180 MB PDF: never buffer a document past a byte cap, keep oversize and repeatedly-fatal documents out of later passes with a durable mark, and read the documentary date from page 1 only.
+- [x] Stop the prod `radar-refresh-pv` CronJob from being OOM-killed on every pass by one 180 MB PDF: never buffer a document past a byte cap, keep oversize and repeatedly-fatal documents out of later passes with a durable mark, and read the documentary date from page 1 only.
 
 ## Scope / Guardrails
-- [ ] Owner GO scope only (#805): size guard, durable set-aside mark, durable attempt marker, `pdftotext -l 1` on a temp file for the date, PO visibility in logs and sweep report.
-- [ ] Stay on `pdftotext`; no streaming pipeline; `RawDocument.body: Uint8Array` contract unchanged; no memory limit change; no manifest change unless env plumbing requires it.
-- [ ] No cluster, bucket or workflow action; no merge. Node/TS only, 0 Python, no SealedSecret.
-- [ ] Test environment: `test-r805`; no UI change, root UAT untouched.
+- [x] Owner GO scope only (#805): size guard, durable set-aside mark, durable attempt marker, `pdftotext -l 1` on a temp file for the date, PO visibility in logs and sweep report.
+- [x] Stay on `pdftotext`; no streaming pipeline; `RawDocument.body: Uint8Array` contract unchanged; no memory limit change; no manifest change unless env plumbing requires it.
+- [x] No cluster, bucket or workflow action; no merge. Node/TS only, 0 Python, no SealedSecret.
+- [x] Test environment: `test-r805`; no UI change, root UAT untouched.
 
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
@@ -32,7 +32,7 @@
   - `.github/workflows/**`
 
 ## Feedback Loop
-- [ ] None yet.
+- [x] None.
 
 ## Orchestration Mode (AI-selected)
 - [x] Single branch, single agent; replay harness kept outside the repo (scratchpad).
@@ -46,6 +46,7 @@
 - [x] Lot 3 — Known-URL guard carries durable set-aside marks (`oversize`, `oom-suspected`) and open attempt markers; journal written before each document request.
 - [x] Lot 4 — RECUEIL: set-aside documents skipped with no request, oversize becomes a typed `setAside` outcome, attempts opened before the fetch and closed on every in-process settlement.
 - [x] Lot 5 — Live scrape wiring: journal on the guard, cap option, first-page date extractor, `setAside` in the city recap; guard written even when the city RECUEIL fails.
-- [x] Lot 6 — Refresh: `REFRESH_MAX_DOCUMENT_BYTES` (code default 52428800), set-aside documents in the per-city notes, sweep entries and sweep report.
-- [ ] Lot 7 — Crash replay with the #805 analysis harness under the prod envelope (768Mi, heap 512, 150m CPU): 172 MB PDF reported `oversize` without OOM kill; small PDF still collected.
-- [ ] Lot gate: `harness verify --category static`, `harness verify --category unit`, `make typecheck ENV=test-r805`, `make lint ENV=test-r805`, `make test ENV=test-r805` then `make clean ENV=test-r805`.
+- [x] Lot 6 — Refresh: `REFRESH_MAX_DOCUMENT_BYTES` (code default 52428800), set-aside documents in a per-document log line, the per-city sweep entries and the sweep report.
+- [x] Lot 7 — Crash replay with the #805 analysis harness under the prod envelope (768Mi, heap 512, 150m CPU): 172 MB PDF reported `oversize` without OOM kill (peak 127.8 MiB), skipped with no GET on the next pass; 6.9 MB and 52.15 MB PDFs still collected and extracted (peaks 165.7 / 431.3 MiB); two real fetch-phase OOM kills (cap off, 640Mi) leave `open: 2`, the third pass sets the document aside as `oom-suspected` with no GET.
+- [x] Lot gate: `harness verify --category static`, `harness verify --category unit`, `make typecheck ENV=test-r805`, `make lint ENV=test-r805`, `make test ENV=test-r805` then `make clean ENV=test-r805`.
+- [ ] Post-merge (conductor) — release to prod, then read the first passes: `refresh-pv: document set aside` lines and `setAside` in `refresh/018/sweep/latest.json`.
