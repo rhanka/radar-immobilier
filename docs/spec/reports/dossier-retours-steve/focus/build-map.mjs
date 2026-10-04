@@ -15,7 +15,7 @@ const HTML_SHA256_PLACEHOLDER = '0'.repeat(64);
 
 const expected = [
   ['criteres-steve', "Scène 1 · les trois critères de Steve en regard de l'existant"],
-  ['modele-donnees', 'Scène 2 · modèle de données, de la source à la publication'],
+  ['modele-donnees', 'Scène 2 · modèle de données minimal, à partir des besoins de Steve'],
   ['flux-import-oracle', "Scène 3 · architecture de l'import à l'affichage, oracle transversal"],
   ['architecture-ui', 'Scène 4 · architecture UI et état de la migration'],
   ['affichage-abc', "Scène 5 · A, B et C : ce que voit l'application, ce que mesure l'évaluation"],
@@ -131,7 +131,7 @@ const rendererSources = Object.fromEntries(await Promise.all([
 // Renderers of the matrix, table and swimlane scenes, local to this dossier.
 const diagramSources = Object.fromEntries(await Promise.all([
   'diagram-router.js', 'diagram-layout.js', 'diagram-specs.js', 'parse-er.mjs', 'DiagramFrame.svelte', 'ErDiagram.svelte',
-  'LaneDiagram.svelte', 'MatrixScene.svelte', 'Scenes.svelte', 'BarChart.svelte', 'charts.js', 'Sections.svelte', 'protocol.js', 'ZoomFrame.svelte', 'doc-diagrams.js', 'option-details.js',
+  'LaneDiagram.svelte', 'MatrixScene.svelte', 'Scenes.svelte', 'BarChart.svelte', 'charts.js', 'Sections.svelte', 'protocol.js', 'ZoomFrame.svelte', 'doc-diagrams.js', 'option-details.js', 'steve-model.js',
 ].map(async name => [name, await readFile(name, 'utf8')])));
 
 const manifest = {
