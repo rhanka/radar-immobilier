@@ -1,11 +1,11 @@
 {
   "output": "docs/spec/reports/dossier-retours-steve/decision-focus.html",
-  "bytes": 714660,
-  "htmlSha256": "a06365a6df6f3d5a86326bedb00439ee3484370d0c5d1b81f6e35417a03d8a48",
-  "embeddedSha256": "c86c3e7af20fe138b0d59f730b5cdf0813d3c96ad42a2c0e936649d44e1c14fd",
+  "bytes": 776442,
+  "htmlSha256": "b139697dd3f61f3c2224ccce43c81e3063d9433dc4e2810f3f5f4cb50e25f633",
+  "embeddedSha256": "7f46976b39fa710105590ad2a7f32dcb15ab6b003c07090a957556dfb91eb5c4",
   "embeddedSha256Rule": "sha256 of the file with the embedded value replaced by 64 zeros",
-  "dossierHash": "7e3746a8e6ce30bad2ac3bded9ff0dcd10b0e9d5d3fa4290f54a209c6e67d608",
-  "artifactInputHash": "d9fefa68c6580fce17f3e50bee371b74a512bd4b785a01aa059b20cd550519b9",
+  "dossierHash": "29796b53c408b17a4fe1bf0d28f7c62d6d25c62d80bdb70b0b5d8e4eb6f24809",
+  "artifactInputHash": "aa466d83196faa99e602e03a48412580a3fc3957b11f9bbbdd272c2cbba62fe9",
   "graphs": [
     {
       "id": "criteres-steve",
@@ -26,7 +26,7 @@
       "nodes": 24,
       "edges": 26,
       "subflows": 7,
-      "sceneHash": "32d65a31fb389a2b164916bbc827bc5a209e19f8ab2b1c0f54d120a9faee2d62"
+      "sceneHash": "c37606b8438f3b2e9b2156c3f2bf057a2efd204057d067a89ec430db7c0e33a8"
     },
     {
       "id": "architecture-ui",
@@ -37,10 +37,10 @@
     },
     {
       "id": "affichage-abc",
-      "nodes": 10,
-      "edges": 10,
-      "subflows": 4,
-      "sceneHash": "b1d7776fd1c90d436293c87e47a2a673d7f2bb67c0da0a1b7f52efcc159fab5e"
+      "nodes": 16,
+      "edges": 19,
+      "subflows": 5,
+      "sceneHash": "19305d932bcac4c039572515c78dbefa59e31393e5d01c69bb8ee26c48615f70"
     }
   ]
 }
