@@ -4,7 +4,7 @@
   // (diagram-layout.js); colours from the design-system tokens, light and dark.
   import DiagramFrame from './DiagramFrame.svelte';
   import { ER } from './diagram-layout.js';
-  let { graph } = $props();
+  let { graph, compact = false } = $props();
   const layout = $derived(graph.layout);
   const boxOf = $derived(Object.fromEntries(layout.boxes.map(box => [box.id, box])));
   const marker = cardinality => `url(#${graph.id}-${cardinality})`;
@@ -12,7 +12,7 @@
   const CHAR = ER.columnSize * ER.mono;
 </script>
 
-<DiagramFrame id={graph.id} kind="er" width={layout.width} height={layout.height}
+<DiagramFrame id={graph.id} kind="er" width={layout.width} height={layout.height} tools={!compact}
   label="Diagramme entité-relation : tables, colonnes clés, relations et cardinalités">
   <defs>
     {#each [['one', 'M14,3 L14,17 M18,3 L18,17'], ['zero-or-one', 'M18,3 L18,17'], ['one-or-many', 'M22,3 L12,10 L22,17 M12,10 L22,10 M9,3 L9,17'], ['zero-or-many', 'M22,3 L12,10 L22,17 M12,10 L22,10']] as [name, shape]}
@@ -52,7 +52,7 @@
         <text class="er-type" x={box.x + ER.padX} {y}>{attribute.type}</text>
         <text class="er-keys" x={box.x + ER.padX + 12 * CHAR} {y}>{attribute.keys.join(',')}</text>
         <text class="er-column" x={box.x + ER.padX + 19 * CHAR} {y} data-text-role="entity-column" data-box-right={box.x + box.width}
-          class:key={attribute.keys.includes('PK')}>{attribute.name}{#if attribute.comment}<tspan class="er-comment"> · {attribute.comment}</tspan>{/if}</text>
+          class:key={attribute.keys.includes('PK')}>{attribute.name}{#if attribute.comment}<tspan class="er-comment">{' · '}{attribute.comment}</tspan>{/if}</text>
       {/each}
     </g>
   {/each}
@@ -67,10 +67,10 @@
     {/if}
   {/each}
 </DiagramFrame>
-<p class="diagram-legend"><strong>Lecture</strong> · PK clé primaire · FK clé étrangère · UK unique ·
+{#if !compact}<p class="diagram-legend"><strong>Lecture</strong> · PK clé primaire · FK clé étrangère · UK unique ·
   deux barres : exactement un · cercle et barre : zéro ou un · patte d’oie : plusieurs (cercle : zéro ou plus) ·
   trait plein : relation par clé · tirets : rattachement par clé texte, sans clé étrangère ·
-  table <em>existe</em> sur main ou <em>proposée</em> par le dossier (bordure en tirets).</p>
+  table <em>existe</em> sur main ou <em>proposée</em> par le dossier (bordure en tirets).</p>{/if}
 
 <style>
   .er-layer rect { fill: var(--st-semantic-surface-subtle); }

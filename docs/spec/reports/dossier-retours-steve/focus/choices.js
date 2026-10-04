@@ -3,6 +3,7 @@
 // Rien n'est ratifié ici : la page ne produit qu'un brouillon local exportable.
 import roles from './roles.json' with { type: 'json' };
 import { decisionRecords, decisionsYaml, isoWithOffset, markdownBlock } from './decision-yaml.js';
+import { DESCRIPTIONS, DIAGRAMS } from './option-details.js';
 
 // Export target, per dossier: the PR where Farid pastes his decisions.
 export const DECISIONS_TARGET_URL = 'https://github.com/rhanka/radar-immobilier/pull/794';
@@ -322,6 +323,14 @@ export const questions = [
   ]),
 ];
 
+// Each option: a description of what is concretely proposed and, for D2 and D3, a small
+// entity-relationship diagram.
+for (const question of questions) for (const option of question.options) {
+  option.description = DESCRIPTIONS[question.key]?.[option.key];
+  if (!option.description) throw Error(`missing description ${question.key}/${option.key}`);
+  option.diagram = DIAGRAMS[question.key]?.[option.key] ?? null;
+}
+
 // Decisions that build on each one (reverse of dependsOn), for the "conditionne" line.
 export const usedBy = Object.fromEntries(questions.map(question => [question.key,
   questions.filter(other => other.dependsOn.includes(question.key)).map(other => other.key)]));
@@ -355,7 +364,7 @@ export function responsePack(manifest, selections = {}, comments = {}, capturedA
       recommended: question.recommended, decides: question.decides, consulted: question.consulted,
       selection, decisionStatus: answered ? 'owner-draft-not-ratified' : 'open',
       comment: comments[question.key] ?? '',
-      options: question.options.map(option => ({ key: option.key, title: option.title, pros: option.pros, cons: option.cons })),
+      options: question.options.map(option => ({ key: option.key, title: option.title, description: option.description, pros: option.pros, cons: option.cons })),
     };
   });
   return {
