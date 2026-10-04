@@ -108,7 +108,7 @@ for (const graph of graphs) {
 const mermaidNote = '> Diagramme : rendu dans la page, dans les scènes Focus ou dans les options de décision (source Mermaid dans le Markdown du dossier).';
 const [head, ...rest] = body.split(/\n## /);
 // A Mermaid block followed by a diagram marker is rendered natively at the marker.
-const strip = text => text.replace(/```mermaid\n(?:(?!```)[\s\S])*```\n\n(<!-- diagram:[\w-]+ -->)/g, '$1').replace(/```mermaid\n[\s\S]*?```/g, mermaidNote);
+const strip = text => text.replace(/```mermaid\n(?:(?!```)[\s\S])*```\n\n(<!-- (?:diagram|lanes):[\w-]+ -->)/g, '$1').replace(/```mermaid\n[\s\S]*?```/g, mermaidNote);
 const sections = [{ id: 'entete', heading: head.split('\n')[0].replace(/^# /, ''), markdown: strip(head.split('\n').slice(1).join('\n').trim()) },
   ...rest.map((chunk, index) => {
     const heading = chunk.split('\n')[0].trim();
@@ -152,5 +152,8 @@ const manifest = {
   sections: sections.map(section => ({ id: section.id, heading: section.heading })),
 };
 await mkdir('.generated', { recursive: true });
-await writeFile('.generated/data.json', JSON.stringify({ graphs, sections, header, glossary, decisionSections, annexes, manifest }));
+// Lane diagrams of the text: the Mermaid block just above each <!-- lanes:<id> --> marker.
+const docLanes = Object.fromEntries([...markdown.matchAll(/```mermaid\n((?:(?!```)[\s\S])*)```\n\n<!-- lanes:([\w-]+) -->/g)]
+  .map(([, source, id]) => [id, laneScene(source, id, id)]));
+await writeFile('.generated/data.json', JSON.stringify({ graphs, sections, header, glossary, decisionSections, annexes, manifest, docLanes }));
 console.log(JSON.stringify(manifest.graphs.map(graph => ({ id: graph.id, nodes: graph.nodes, edges: graph.edges, subflows: graph.subflows }))));

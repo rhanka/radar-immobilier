@@ -59,7 +59,7 @@ await call('Network.enable');
 await call('Network.setBlockedURLs', { urls: ['http://*', 'https://*'] });
 await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
 await call('Page.navigate', { url: focusFile });
-const READY = `document.querySelectorAll('.scene').length === 5 && document.querySelectorAll('.flow').length === 1 && document.querySelectorAll('[data-diagram]').length === 4 && document.querySelectorAll('[data-node-kind]').length > 0`;
+const READY = `document.querySelectorAll('.scene').length === 5 && document.querySelectorAll('.flow').length === 1 && document.querySelectorAll('.scene [data-diagram]').length === 4 && document.querySelectorAll('[data-node-kind]').length > 0`;
 await waitUntil(READY, 'les cinq scènes sont absentes');
 const expectedGraphs = `window.expectedGraphs=${JSON.stringify(graphs.map(graph => ({ id: graph.id, kind: graph.kind, projection: graph.projection, sceneHash: graph.sceneHash, groups: (graph.groups ?? []).length })))};true`;
 await evaluate(expectedGraphs);
@@ -69,7 +69,7 @@ const checkExpression = `(() => {
   const order = graphs.map(graph => graph.id);
   const actualOrder = [...document.querySelectorAll('.scene')].map(scene => scene.dataset.scene);
   if (JSON.stringify(actualOrder) !== JSON.stringify(order)) throw Error('ordre des scènes : ' + actualOrder);
-  if (document.querySelectorAll('.flow').length !== 1 || document.querySelectorAll('[data-diagram]').length !== 4) throw Error('une scène SvelteFlow et quatre diagrammes attendus');
+  if (document.querySelectorAll('.flow').length !== 1 || document.querySelectorAll('.scene [data-diagram]').length !== 4) throw Error('une scène SvelteFlow et quatre diagrammes attendus');
   const inside = (inner, outer, pad = 1) => inner.left >= outer.left - pad && inner.top >= outer.top - pad && inner.right <= outer.right + pad && inner.bottom <= outer.bottom + pad;
   const hit = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
   const orthogonal = points => points.slice(1).every((point, index) => point.x === points[index].x || point.y === points[index].y);
@@ -331,7 +331,7 @@ const zoomOne = async (id, { drag = false, shot = null } = {}) => {
   return { id, mode: opened.mode, fit: opened.scale || null, zoomed, dragged: Boolean(moved) };
 };
 const zoomIds = await evaluate(`[...document.querySelectorAll('[data-zoom]')].map(frame => frame.dataset.zoom)`);
-if (zoomIds.length !== 22) throw Error(`22 diagrammes zoomables attendus, ${zoomIds.length}`);
+if (zoomIds.length !== 23) throw Error(`23 diagrammes zoomables attendus, ${zoomIds.length}`);
 const zoom = [];
 for (const id of zoomIds) zoom.push(await zoomOne(id, { drag: id === 'flux-import-oracle', shot: id === 'affichage-abc' ? '.generated/zoom-plein-ecran-affichage-abc.png' : null }));
 // Zoom direct dans la page, sur un grand diagramme : le panneau ne déborde pas.
@@ -364,9 +364,9 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 1920, height: 10
 // EXPECT : ce que le dossier porte (décisions, options, filtres « Je suis », PR cible).
 const EXPECT = {
   picks: [['D12', 'b'], ['D12', 'a'], ['D9', '1']], selectedQuestion: 'D12', selectedOption: 'a', persisted: [['D12', 'a'], ['D9', '1']],
-  storagePrefix: 'immo-steve-decision-responses:', blocks: 16, options: 48, recommended: 15, decides: { Farid: 10, Fabien: 6 },
-  url: 'https://github.com/rhanka/radar-immobilier/pull/794', mine: { Farid: 10, Fabien: 6 },
-  faridAnswered: ['D12'], notFarid: ['D9'], faridRoles: { D12: 'decide' }, fabienRoles: { D9: 'decide' }, allOptions: { D9: '1', D12: 'a' },
+  storagePrefix: 'immo-steve-decision-responses:', blocks: 16, options: 48, recommended: 15, decides: { Farid: 9, Fabien: 7 },
+  url: 'https://github.com/rhanka/radar-immobilier/pull/794', mine: { Farid: 9, Fabien: 7 },
+  faridAnswered: ['D12'], notFarid: ['D9'], faridRoles: { D12: 'decide' }, fabienRoles: { D9: 'decide' }, allOptions: { D1: 'b', D9: '1', D12: 'a' },
   headerKeys: ['dossier', 'fichier', 'version', 'decideur', 'date', 'coller_dans'],
   title: 'Analyse des retours d\'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage',
 };

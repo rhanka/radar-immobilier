@@ -51,7 +51,7 @@ Les termes employés sans définition dans la suite du dossier, dans l'ordre où
 | ODJ | Ordre du jour d'une séance du conseil : un point inscrit n'est pas une décision. |
 | PV, MRC | Procès-verbal d'une séance du conseil ; municipalité régionale de comté (regroupement de municipalités). |
 | Annotation | Note ou verdict attaché à un objet du radar (ville, zone, lot, signal, règlement). |
-| Ancre | La référence qui attache un retour de Steve à son objet : une ligne de la table retours_cibles (ville + id texte du graphe, scène 2). |
+| Ancre | La référence qui attache un retour de Steve à son objet : une ligne de la table annotation_cibles (ville + id texte du graphe, scène 2). |
 | UUID, identifiant texte | UUID : identifiant aléatoire d'une ligne de base de données. Les signaux du graphe ont un identifiant texte (« signal-… ») ; l'API actuelle des notes exige un UUID, d'où le défaut corrigé par B0. |
 | B0 et lots L1, L2, U1, O1, C1, C2 | Les étapes de mise en œuvre proposées (§7). B0 : petit correctif qui répare l'annotation des signaux (l'API accepte l'identifiant texte). L1 : tables et import ; L2 : API de lecture ; U1 : affichage ; O1 : oracle de ciblage ; C1, C2 : sélection C puis bascule. |
 | Tombstone | Marque laissée à la place d'un élément supprimé (qui, quand, pourquoi), au lieu de l'effacer physiquement ; exigée par la décision owner O1 du dossier COLLAB, à ne pas confondre avec l'objectif O1 ni le lot O1. |
@@ -92,8 +92,8 @@ Ce dossier s'adresse à **Farid**. Il est rédigé pour le produit ; la partie t
 |---|---|---|
 | Steve Chaperon | Client (financeur) et utilisateur principal | Ses retours sont la matière du dossier ; il est consulté sur ses critères et les cas ambigus (D7, D8). |
 | Mathieu Portier | Product Manager : oriente | Consulté sur les orientations produit (priorités, exposition de la nouvelle sélection, retour à Steve). |
-| Farid | Product Owner / proxy : définit et valide le backlog | **Décide** le produit, le backlog et les priorités : 10 décisions (D1, D5, D6, D7, D8, D12, D13, D14, D15, D16). |
-| Fabien | AI Builder : propriétaire du code, garant de la livraison | **Valide** l'architecture, les algorithmes d'IA, les modèles, l'oracle et la modélisation technique : 6 décisions (D2, D3, D4, D9, D10, D11). |
+| Farid | Product Owner / proxy : définit et valide le backlog | **Décide** le produit, le backlog et les priorités : 9 décisions (D5, D6, D7, D8, D12, D13, D14, D15, D16). |
+| Fabien | AI Builder : propriétaire du code, garant de la livraison | **Valide** l'architecture, les algorithmes d'IA, les modèles, l'oracle et la modélisation technique : 7 décisions (D1, D2, D3, D4, D9, D10, D11) ; **D1 est actée par l'owner le 2026-10-04** (tout conserver). |
 
 Chaque décision porte la mention « Décide : … · Consulté : … » (§3 et §10).
 
@@ -207,18 +207,18 @@ Existant lu sur `origin/main` `27891b10` : vue A retirée de l'UI depuis `f2c205
 
 ### Décisions demandées (D1 à D16)
 
-**Ordre de décision.** Fabien décide d'abord ses six décisions techniques (D2, D3, D4, D9, D10, D11 : architecture, données, IA, oracle) ; elles sont prises telles quelles, sauf incohérence avec une autre décision. Farid décide ensuite ses dix décisions produit (D1, D5, D6, D7, D8, D12, D13, D14, D15, D16 : backlog, affichage, priorités), en connaissant les choix de Fabien. Si un choix de Farid contredit un choix de Fabien, on revient à Fabien sur ce seul point. Steve et Mathieu sont consultés là où leur avis porte. Les dépendances entre décisions sont indiquées au §10 (« Dépend de », « Conditionne »).
+**Ordre de décision.** Fabien décide d'abord ses sept décisions techniques (D1, D2, D3, D4, D9, D10, D11 : conservation, architecture, données, IA, oracle) ; **D1 est déjà actée par l'owner le 2026-10-04 (tout conserver)**, les autres sont prises telles quelles, sauf incohérence avec une autre décision. Farid décide ensuite ses neuf décisions produit (D5, D6, D7, D8, D12, D13, D14, D15, D16 : backlog, affichage, priorités), en connaissant les choix de Fabien. Si un choix de Farid contredit un choix de Fabien, on revient à Fabien sur ce seul point. Steve et Mathieu sont consultés là où leur avis porte. Les dépendances entre décisions sont indiquées au §10 (« Dépend de », « Conditionne »).
 
 | Étape | # | Décision | Décide · Consulté | Option recommandée | Alternatives |
 |---|---|---|---|---|---|
-| 1 · Fabien | D2 | Modèle de données | **Fabien** · Farid | **(a)** modèle minimal « besoins de Steve » : fichiers, lignes, motifs, cibles, versions d'oracle | (b) modèle complet en couches ; (c) table de contrôle seule ; (d) attendre le paquet |
+| 1 · Fabien | D1 | Périmètre de conservation | **Fabien** · Farid, Steve, Mathieu | **Tranchée, actée par l'owner le 2026-10-04 : (b)** tout le classeur et l'analyse, brut immuable | (a) Triage seul ; (c) notes libres seules |
+| 1 · Fabien | D2 | Modèle de données | **Fabien** · Farid | **(a)** modèle minimal « besoins de Steve » : fichiers, annotations vivantes, validations, motifs, cibles, versions d'oracle | (b) modèle complet en couches ; (c) table de contrôle seule ; (d) attendre le paquet |
 | 1 · Fabien | D3 | Ancre signal et correctif | **Fabien** · Farid | **(a)** clé texte namespacée sans clé étrangère + instantané observé ; B0 immédiat | (b) attendre une clé métier stable ; (c) passer par l'UUID `signals` |
 | 1 · Fabien | D4 | Conformité sentropic et suppression | **Fabien** · Farid | **(a)** cibles, lecture et événements conformes ; import immuable ; réponses dans `prospect_notes` v1 ; demande de tombstone à sentropic | (b) adaptateur `CommentStore` à tombstone hôte ; (c) attendre le port complet |
 | 1 · Fabien | D9 | Sens de « double annotation » | **Fabien** · Farid | **Point ouvert** — lecture proposée : verdict Steve source + ancienne classification radar + adjudication C + prédiction C | ancienne / nouvelle grille de Steve ; oracle 676 / oracle Steve |
 | 1 · Fabien | D10 | Oracle #783 | **Fabien** · Steve, Farid | **Double oracle E / C** ; unité signal regroupée par dossier ; développement 51 villes, test 52 villes, partition par dossier | remplacer v3 par le tableur ; campagne C entièrement nouvelle |
 | 1 · Fabien | D11 | Benchmark #782 | **Fabien** · Farid | **Volet ciblage séparé** ; enrichir le contrat d'extraction = nouvelle version, décision dédiée | fusion des métriques ; statu quo |
-| 2 · Farid | D1 | Périmètre de conservation | **Farid** · Steve, Mathieu | **(b)** tout le classeur et l'analyse, brut immuable | (a) Triage seul ; (c) notes libres seules |
-| 2 · Farid | D5 | Auteur des retours importés | **Farid** · Steve, Fabien | **(a)** auteur documentaire externe + importateur réel tracé, sans droit de mutation | (b) importateur seul comme auteur ; (c) compte Steve |
+| 2 · Farid | D5 | Auteur des retours importés | **Farid** · Steve, Fabien | **(c)** compte Steve, pour l'import et la saisie ; importateur tracé à part | (a) auteur documentaire externe + importateur tracé ; (b) importateur seul comme auteur |
 | 2 · Farid | D6 | Visibilité et données personnelles | **Farid** · Steve, Mathieu, Fabien | **(c)** utilisateurs approuvés, verbatims caviardés | (a) tous les approuvés sans caviardage ; (b) administrateurs et Steve |
 | 2 · Farid | D7 | Définition de C v1 | **Farid** · Steve, Mathieu, Fabien | **K1–K9 (neuf critères, §9.2) + trois états** : confirmé, à instruire, exclu prouvé | triplet strict ; tri seulement |
 | 2 · Farid | D8 | Cas contradictoires | **Farid** · Steve, Mathieu | **Revue métier** par Steve et Mathieu ; abstention explicite en attendant | arbitrage par l'équipe ; statu quo |
@@ -465,7 +465,7 @@ erDiagram
 
 **Aucune table d'oracle n'existe en base aujourd'hui.** L'oracle actuel (oracle d'extraction v3, dit E) est un ensemble de fichiers JSON versionnés dans le dépôt, hors de `main` : `docs/reviews/refresh-benchmark/v101b/oracle-v3/` sur la branche `feat/t1-model-benchmark-real` (commit `dd0561f6`, 674 éléments sur 100 documents) ; la version 676 n'existe qu'en copie locale. Les campagnes du benchmark #782 lisent ces fichiers. Le §9.3 décrit comment l'oracle de ciblage C s'y ajoute.
 
-La suite (§6.1 à §6.6 et scène 2) distingue ce qui **existe** sur `main` (en-tête ocre, bordure pleine : `graph_nodes`) de ce qui est **proposé** (en-tête bleu, bordure en tirets : `retours_fichiers`, `retours_lignes`, `motifs`, `retours_cibles`, `oracle_versions`).
+La suite (§6.1 à §6.6 et scène 2) distingue ce qui **existe** sur `main` (en-tête ocre, bordure pleine : `graph_nodes`) de ce qui est **proposé** (en-tête bleu, bordure en tirets : `retours_fichiers`, `annotations`, `validations`, `motifs`, `annotation_cibles`, `oracle_versions`).
 
 ### 6.1 Contraintes établies
 
@@ -521,66 +521,126 @@ La suite (§6.1 à §6.6 et scène 2) distingue ce qui **existe** sur `main` (en
 
 On part de ce que Steve a produit et de ce qu'il demande, pas des tables existantes. Les tables `prospect_marks` et `prospect_notes` (§6.0) restent telles quelles : elles servent au travail de l'équipe sur les lots, et les étendre mélangerait deux usages sans couvrir les besoins de Steve ; elles ne sont ni étendues ni réutilisées.
 
+**Vision de l'owner.** Steve poursuit son travail d'annotation, de validation et de triage **dans l'application**, avec son propre compte. L'application porte des **boucles de validation** : Steve annote, l'équipe ou le PO valide ou conteste, la décision est gardée et chaque changement crée une nouvelle version. Les annotations sont donc des **données d'application vivantes en Postgres**, pas seulement un import. L'oracle C est **stocké** (versions gelées tirées des annotations validées), mais l'**évaluation et l'optimisation des prompts d'engram se font hors ligne**, jamais dans l'application.
+
+**Architecture des données : cinq ensembles.** Chacun est marqué **existe** ou **proposé** (titre du couloir, bordure pleine ou en tirets) et **en ligne** (zone du haut) ou **hors ligne** (bande du bas) ; les flèches disent qui alimente qui.
+
+```mermaid
+flowchart LR
+  subgraph U["Utilisateurs de l'application"]
+    STV["Steve · son compte"]
+    EQP["Équipe et PO"]
+  end
+  subgraph DA["(a) Données de Steve · proposé"]
+    XLS["Classeur du 21 sept."]
+    SRC["Import unique, tel quel"]
+  end
+  subgraph DB["(b) Annotations · proposé"]
+    ANN["Annotations de Steve"]
+    VAL["Validations équipe / PO"]
+    HIS["Historique versionné"]
+  end
+  subgraph DC["(c) Graphe · existe"]
+    S3G["S3 · latest.json"]
+    GRN["graph_nodes"]
+  end
+  subgraph DD["(d) Oracle · proposé"]
+    ORC["Oracle C · versions gelées"]
+    ORE["Oracle E v3 · fichiers"]
+  end
+  subgraph EV["(e) Évaluation et optimisation des prompts · hors ligne"]
+    BEN["Benchmark #782"]
+    ENG["Optimisation des prompts"]
+  end
+  XLS -->|"importé une fois"| SRC
+  SRC -->|"pré-remplit"| ANN
+  STV -->|"annote, trie"| ANN
+  EQP -->|"valide ou conteste"| VAL
+  ANN -->|"à valider"| VAL
+  VAL -->|"décision gardée"| HIS
+  ANN -.->|"ville + id texte"| GRN
+  S3G -->|"projection"| GRN
+  HIS -->|"validées, gelées"| ORC
+  ORC -->|"volet ciblage"| BEN
+  ORE -->|"volet extraction"| BEN
+  BEN -->|"résultats"| ENG
+  ENG -.->|"prompt retenu, sur décision"| S3G
+```
+
+<!-- lanes:architecture-donnees -->
+
+| Ensemble | Existe ou proposé | En ligne ou hors ligne | Où | Rôle |
+|---|---|---|---|---|
+| (a) Données de Steve | proposé | en ligne, statique | Postgres (`retours_fichiers`, lignes importées) et octets sur S3 | Son classeur source, importé une fois et gardé tel quel : la provenance de tout ce qui suit. |
+| (b) Annotations | proposé | en ligne, vivant | Postgres (`annotations`, `annotation_cibles`, `validations`, `motifs`) | Ce que Steve et l'équipe produisent et valident dans l'application, dans la durée ; l'import pré-remplit, la saisie continue. |
+| (c) Graphe | existe | en ligne | S3 (`graph/<ville>/latest.json`) et Postgres (`graph_nodes`) | Les signaux, désignés par ville + id texte (clé décidée pour #812). |
+| (d) Oracle | proposé (C) ; existe (E, fichiers) | stocké, gelé | Postgres (`oracle_versions`) et export JSON gelé ; oracle E en fichiers JSON | Versions gelées tirées des annotations validées ; jamais modifiées en place. |
+| (e) Évaluation et optimisation des prompts | existe en partie (benchmark #782) | hors ligne | jobs et campagnes, hors de l'application | Mesure B et C sur l'oracle, optimisation des prompts d'engram ; un prompt retenu n'entre en production que sur décision. |
+
 **Besoins de Steve → données nécessaires.**
 
 | # | Besoin (source) | Donnée nécessaire | Table |
 |---|---|---|---|
-| 1 | Garder son verdict sur chaque signal : Pertinent, À surveiller, Non pertinent, avec motif, sens, passe (feuille Triage, 124 lignes) | classement, code de motif, sens, passe | `retours_lignes` |
-| 2 | Garder sans perte ses 121 contrôles d'exclusion, 77 constats et 26 règles (autres feuilles) | feuille, ligne, référence (#, C-xx, R-xx), toutes les cellules brutes | `retours_lignes` |
+| 1 | Garder son verdict sur chaque signal : Pertinent, À surveiller, Non pertinent, avec motif, sens, passe (feuille Triage, 124 lignes) | classement, code de motif, sens, passe | `annotations` |
+| 2 | Garder sans perte ses 121 contrôles d'exclusion, 77 constats et 26 règles (autres feuilles) | feuille, ligne, référence (#, C-xx, R-xx), toutes les cellules brutes | `annotations` |
 | 3 | Relier ses 28 codes de motif à ses critères et exclusions (table de dérivation relue par Steve, D7, D8) | code → critère K1 à K9 ou exclusion, règle R-xx | `motifs` |
-| 4 | Une ligne vise 1 à N objets : signal, ville, règlement (la #7 nomme deux événements ; une ligne agrégée vise une ville) | type d'objet, ville, id texte, état du rattachement, ce que Steve a vu | `retours_cibles` |
-| 5 | Savoir d'où vient chaque verdict | fichier (sha256), nom, révision, auteur, importateur ; feuille et ligne | `retours_fichiers`, `retours_lignes` |
-| 6 | Recevoir les révisions et les 52 villes suivantes sans rien écraser | nouveau fichier ; ligne qui en remplace une autre ; statut active, retirée, remplacée | `retours_fichiers`, `retours_lignes` |
-| 7 | Voir son avis sur le signal dans l'outil : badge, section « Avis de Steve », compteurs (U1) | lecture par ville + id du signal | `retours_cibles` → `retours_lignes` |
+| 4 | Une ligne vise 1 à N objets : signal, ville, règlement (la #7 nomme deux événements ; une ligne agrégée vise une ville) | type d'objet, ville, id texte, état du rattachement, ce que Steve a vu | `annotation_cibles` |
+| 5 | Savoir d'où vient chaque verdict | fichier (sha256), nom, révision, auteur, importateur ; feuille et ligne | `retours_fichiers`, `annotations` |
+| 6 | Recevoir les révisions et les 52 villes suivantes sans rien écraser | nouveau fichier ; ligne qui en remplace une autre ; statut active, retirée, remplacée | `retours_fichiers`, `annotations` |
+| 7 | Voir son avis sur le signal dans l'outil : badge, section « Avis de Steve », compteurs (U1) | lecture par ville + id du signal | `annotation_cibles` → `annotations` |
 | 8 | Archiver, classer, lier, épingler (#760) | états durables par utilisateur | hors du modèle minimal, voir plus bas |
-| 9 | Oracle C : un jeu gelé, versionné, partagé en développement (51 villes) et test (52 villes) | liste des lignes retenues, partition, empreinte du fichier gelé, validateur | `oracle_versions` |
+| 9 | Oracle C : un jeu gelé, versionné, partagé en développement (51 villes) et test (52 villes) | liste des annotations validées retenues, partition, empreinte du fichier gelé | `oracle_versions` |
+| 10 | Poursuivre son annotation, sa validation et son triage dans l'application (vision owner) | saisie avec son propre compte, origine « saisie », nouvelle version à chaque changement | `annotations`, `account_users` |
+| 11 | Boucle de validation : l'équipe ou le PO valide ou conteste, la décision est gardée | décideur (compte), décision, motif, date ; statut courant de l'annotation | `validations`, `annotations` |
 
 ```mermaid
 erDiagram
-    retours_fichiers ||--o{ retours_lignes : contient
-    retours_lignes }o--o| motifs : motif
-    retours_lignes |o--o| retours_lignes : remplace
-    retours_lignes ||--o{ retours_cibles : vise
-    retours_cibles }o..o| graph_nodes : ville_et_id_texte
-    oracle_versions }o..o{ retours_lignes : fige
+    retours_fichiers ||--o{ annotations : importe
+    annotations }o--o| motifs : motif
+    annotations |o--o| annotations : remplace
+    annotations ||--o{ annotation_cibles : vise
+    annotation_cibles }o..o| graph_nodes : ville_et_id_texte
+    annotations ||--o{ validations : decide
+    annotations }o--|| account_users : auteur
+    validations }o--|| account_users : decideur
+    oracle_versions }o..o{ annotations : fige
     retours_fichiers {
       uuid id PK
       text fichier_sha256 UK "même fichier = 0 écriture"
       text nom "radar-triage-signaux.xlsx"
       text revision "21 sept. 2026"
-      text auteur "Steve Chaperon, externe"
       uuid importe_par FK "compte de l'importateur"
     }
-    retours_lignes {
+    annotations {
       uuid id PK
-      uuid fichier_id FK
-      text feuille "Triage, Écartés, Constats…"
-      int ligne "ligne Excel"
-      text ref "#7, C-79, R-21…"
-      jsonb cellules "toutes les cellules, brutes"
-      text classement "P, S, N ou vide"
+      text origine "import ou saisie"
+      uuid fichier_id FK "si import : feuille, ligne"
+      text ref "feuille, ligne, #7, C-79…"
+      jsonb cellules "import : cellules brutes"
+      uuid auteur_id FK "compte de Steve"
+      text classement "P, S, N"
       text motif_code FK
       text sens "assouplissement…"
       text passe "1, 2 ou 3"
-      text statut "active, retirée, remplacée"
-      uuid remplace_id FK "révision suivante"
+      text commentaire
+      text statut "proposée, validée, contestée"
+      uuid remplace_id FK "version précédente"
     }
     motifs {
       text code PK "P-DENSITE, N-RESTRICTIF…"
-      text classement "P, S, N ou V2"
       text critere "K1 à K9 ou exclusion"
       text regle "R-xx qui le justifie"
     }
-    oracle_versions {
+    validations {
       uuid id PK
-      text libelle UK "oracle-ciblage-steve-v1"
-      text fichier_sha256 "export JSON gelé"
-      jsonb unites "lignes retenues, dev / test"
-      text valide_par "Fabien"
+      uuid annotation_id FK
+      uuid decideur_id FK "équipe ou PO"
+      text decision "validée ou contestée"
+      text motif "pourquoi"
     }
-    retours_cibles {
+    annotation_cibles {
       uuid id PK
-      uuid ligne_id FK
+      uuid annotation_id FK
       text cible_type "signal, ville, règlement…"
       text city_slug "clé du graphe (#812)"
       text cible_id "id texte, ex. signal-…"
@@ -591,25 +651,35 @@ erDiagram
       text city_slug PK "clé (city_slug, id), #812"
       text id PK "signal-… (texte)"
     }
+    account_users {
+      uuid id PK "Steve, équipe, PO"
+    }
+    oracle_versions {
+      uuid id PK
+      text libelle UK "oracle-ciblage-steve-v1"
+      jsonb unites "annotations validées, dev / test"
+      text fichier_sha256 "export JSON gelé"
+    }
 ```
 
 <!-- diagram:modele-minimal -->
 
 | Table | En clair | Clés et relations |
 |---|---|---|
-| `retours_fichiers` | Un fichier reçu de Steve (le classeur, l'analyse) : son empreinte, sa révision, son auteur externe et la personne qui l'a importé. | `fichier_sha256` unique : réimporter le même fichier n'écrit rien. |
-| `retours_lignes` | Une ligne de n'importe quelle feuille, avec toutes ses cellules brutes ; pour le Triage et les Écartés, le verdict lisible (classement, motif, sens, passe). | Rattachée à son fichier ; `motif_code` → `motifs` ; `remplace_id` chaîne une révision à la précédente, jamais d'effacement. |
+| `retours_fichiers` | Un fichier reçu de Steve (le classeur, l'analyse) : son empreinte, sa révision et la personne qui l'a importé. | `fichier_sha256` unique : réimporter le même fichier n'écrit rien. |
+| `annotations` | Un verdict de Steve sur 1 à N objets : classement, motif, sens, passe, commentaire. Origine « import » (une ligne du classeur, avec feuille, ligne, référence et toutes ses cellules brutes) ou « saisie » (dans l'application). Statut courant : proposée, validée, contestée. | `auteur_id` → `account_users` (le compte de Steve, D5) ; `motif_code` → `motifs` ; `remplace_id` chaîne chaque version à la précédente, jamais d'effacement. |
+| `validations` | La boucle de validation : qui (équipe ou PO) a validé ou contesté une annotation, quand et pourquoi. Chaque décision est gardée. | `annotation_id` → `annotations` ; `decideur_id` → `account_users`. |
 | `motifs` | Les 28 codes de Steve et la table de dérivation : à quel critère (K1 à K9) ou à quelle exclusion chaque code correspond, et quelle règle le justifie. | `code` comme clé. |
-| `retours_cibles` | Chaque objet visé par une ligne : un signal, une ville, un règlement, une zone, un lot ou un document, avec l'état du rattachement et ce que Steve a vu (instantané). | `ligne_id` → `retours_lignes` ; l'objet est désigné par `city_slug` + `cible_id` (id texte), la clé du graphe décidée pour #812, **sans clé étrangère** : une ré-extraction du graphe ne détruit rien, la cible passe « disparue ». |
-| `oracle_versions` | Une version gelée de l'oracle C : son libellé, la liste des lignes retenues avec leur partition (développement, test), l'empreinte de l'export JSON gelé et qui l'a validée (Fabien, D10). | Une correction crée une nouvelle version ; l'adjudication C se prépare hors ligne et n'entre en base que par sa version gelée. |
+| `annotation_cibles` | Chaque objet visé par une annotation : un signal, une ville, un règlement, une zone, un lot ou un document, avec l'état du rattachement et ce que Steve a vu (instantané). | `annotation_id` → `annotations` ; l'objet est désigné par `city_slug` + `cible_id` (id texte), la clé du graphe décidée pour #812, **sans clé étrangère** : une ré-extraction du graphe ne détruit rien, la cible passe « disparue ». |
+| `oracle_versions` | Une version gelée de l'oracle C, tirée des annotations **validées** : son libellé, les annotations retenues avec leur partition (développement, test) et l'empreinte de l'export JSON gelé. Fabien valide le gel (D10). | Une correction crée une nouvelle version ; l'évaluation qui l'utilise se fait hors ligne. |
 
 **Ce que le modèle minimal ne fait pas, volontairement.**
-- Pas de fil de réponses ni de commentaires : le premier lot affiche les retours en lecture seule (D14) ; les réponses viendront avec le port sentropic complet (D4).
+- Pas de fil de discussion libre : la boucle de validation passe par des décisions (validée, contestée) avec un motif ; un fil de commentaires sentropic pourra s'ajouter avec le port complet (D4).
 - Pas d'états archiver, classer, lier, épingler (#760) : ils attendent la maquette de Steve et Mathieu (lot L7) ; une table dédiée s'ajoutera alors sans toucher à celles-ci.
 - Pas de clé étrangère vers le graphe, pas de suppression physique : un retrait est un statut.
-- Pas de stockage de la prédiction C ni de la classification du radar : la première vit dans les versions d'oracle et les campagnes, la seconde se recalcule.
+- Pas d'évaluation dans l'application : la prédiction C, les mesures et l'optimisation des prompts vivent hors ligne (ensemble e) ; la classification du radar se recalcule.
 
-**Clé d'une ligne** : fichier + feuille + référence de Steve (#, C-xx, R-xx) ; le numéro « # » peut changer d'une révision à l'autre, il reste lisible dans `ref` et la nouvelle ligne remplace l'ancienne.
+**Clé d'une annotation importée** : fichier + feuille + référence de Steve (#, C-xx, R-xx) ; le numéro « # » peut changer d'une révision à l'autre, il reste lisible dans `ref` et la nouvelle version remplace l'ancienne. Une annotation saisie dans l'application n'a pas de fichier : son origine est « saisie ».
 
 Le modèle complet en couches de la version précédente (neuf tables, projection vers les fils sentropic) reste l'option b de D2, avec son schéma au §10.
 
@@ -647,7 +717,7 @@ Ordre de résolution : id exact + ville → identité documentaire + étape → 
 
 ### 6.6 Double annotation
 
-**JUGEMENT, à confirmer (D9).** Plusieurs jeux d'étiquettes coexistent sans table supplémentaire : le verdict de Steve est dans `retours_lignes` ; l'adjudication et la prédiction C vivent dans les versions gelées de l'oracle (`oracle_versions`) et les campagnes ; la classification du radar se recalcule.
+**JUGEMENT, à confirmer (D9).** Plusieurs jeux d'étiquettes coexistent sans table supplémentaire : le verdict de Steve est dans `annotations` ; l'adjudication et la prédiction C vivent dans les versions gelées de l'oracle (`oracle_versions`) et les campagnes ; la classification du radar se recalcule.
 
 | Jeu | Contenu | Statut |
 |---|---|---|
@@ -668,6 +738,7 @@ Cela permet de mesurer B contre Steve aujourd'hui, puis C contre Steve, de trace
 | **L1** — schéma et import | Migration nouvelle (tables du §6.3) ; script Node/TS dry-run puis réel en préprod ; rapport de résolution | 124 + 121 + 77 + 26 + 28 lignes stockées ; ré-import du même fichier = 0 écriture ; taux de résolution mesuré | M | D1, D2, D3 |
 | **L2** — ancres et API lecture | Résolution sur snapshot ; `GET` par entité, lecture groupée par lot d'ancres (badges), lecture complète d'un retour sans limite de 10 000 ; cibles désignées selon le contrat sentropic (`kind:'record'`) ; événement SSE étendu | Contrat zod et tests ; une seule requête par vue pour les compteurs | S–M | L1, D4, D6 |
 | **U1** — affichage lecture seule | Dans `SignauxSelPanel` : badge de classement (vert, jaune, rouge), sens et code, section « Avis de Steve » (analyse, suite, niveau de preuve, provenance, statut de résolution) ; compteurs P / S / N par ville dans le rail ; migration DS des 3 composants `collab/*` | Exemples réels consultables avec contenu complet ; aucun nouveau `<button>` brut | M | L2, D14 |
+| **U2** — annotation et validation dans l'application | Steve annote, trie et corrige avec son compte ; l'équipe ou le PO valide ou conteste avec un motif ; chaque changement est une nouvelle version (tables `annotations`, `validations`, §6.3) | Une boucle complète en préprod : annotation de Steve, contestation, correction, validation, historique lisible | M | U1, D2, D5 |
 | **O1** — oracle de ciblage v1 | Export `oracle-ciblage-steve-v1.json` depuis les évaluations et ancres ; partitions ; scoreur Node pour B (et C ensuite) | Tableau précision / rappel de B sur l'oracle | S–M | L1, D10 |
 | **C1** — classifieur C en shadow | Extraction du sens par disposition, de la portée (plein droit / individuel), de la nature de la source (ODJ / PV), de l'effet sur les unités ; prédicat C côté serveur en parallèle de B | Précision / rappel de C contre B | L | O1, D7 |
 | **C2** — comparaison et bascule | Diff B → C nommé ; parité API / rail / carte / panneau ; bascule si le seuil D13 est franchi | Décision de Farid sur mesure | S | C1, D12, D13 |
@@ -772,14 +843,14 @@ Un signal est **dans C** si aucune exclusion **établie** ne s'applique ; il est
 ```mermaid
 erDiagram
     consensus_modeles ||--|| oracle_e_v3 : construit
-    retours_lignes ||--|| oracle_c_v1 : adjugees_gelees
+    annotations ||--|| oracle_c_v1 : adjugees_gelees
     oracle_e_v3 ||--|| volet_extraction : note
     oracle_c_v1 ||--|| volet_ciblage : note_b_puis_c
     consensus_modeles {
       text methode "7 passes, 3 familles de modèles"
       text arbitrage "vote unanime + arbitrage"
     }
-    retours_lignes {
+    annotations {
       text source "verdicts de Steve (124 lignes)"
       text adjudication "par critère, auteur nommé"
     }
@@ -887,74 +958,91 @@ Les tableaux extraction et ciblage restent séparés, sans fusion des F1. Pont p
 
 ## 10. Options et recommandation
 
-**Ordre de décision.** Fabien décide d’abord ses six décisions (D2, D3, D4, D9, D10, D11) : elles sont prises telles quelles, sauf incohérence avec une autre décision. Farid décide ensuite ses dix décisions (D1, D5, D6, D7, D8, D12, D13, D14, D15, D16), en connaissant les choix de Fabien. Si un choix de Farid contredit un choix de Fabien (par exemple D1 « tout conserver » avec D2 = (c), une table de contrôle qui n’affiche rien), on revient à Fabien sur ce seul point.
+**Ordre de décision.** Fabien décide d’abord ses sept décisions (D1, D2, D3, D4, D9, D10, D11) : D1 est déjà actée par l’owner le 2026-10-04 (tout conserver) ; les autres sont prises telles quelles, sauf incohérence avec une autre décision. Farid décide ensuite ses neuf décisions (D5, D6, D7, D8, D12, D13, D14, D15, D16), en connaissant les choix de Fabien. Si un choix de Farid contredit un choix de Fabien (par exemple D1 « tout conserver » avec D2 = (c), une table de contrôle qui n’affiche rien), on revient à Fabien sur ce seul point.
 
 Chaque décision s'ouvre sur une courte introduction (le problème, pourquoi maintenant, ce qui change selon le choix, les renvois au dossier), dit de quelles décisions elle dépend, puis détaille chaque option : une description de ce qui est proposé, ses avantages et ses inconvénients, et pour D2 et D3 un schéma de tables par option. Les coûts sont des jugements relatifs de périmètre, pas des estimations d'heures ni de budget (`N-A` jusqu'à l'inventaire des rattachements).
 
 ### Étape 1 · Fabien décide d’abord (architecture, données, oracle)
 
-#### D2 — Modèle de données
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+#### D1 — Périmètre de conservation des retours de Steve
+**Étape 1 · Décide : Fabien · Consulté : Farid, Steve, Mathieu.** **Tranchée : actée par l’owner le 2026-10-04, option (b) Tout le classeur et l’analyse, brut immuable.**
 
-Le classeur de Steve (7 feuilles, 433 lignes, une cellule de 17 114 caractères, §5.1) doit être stocké en base et rattaché aux objets du radar (#784). Les tables d’annotation existantes, prospect_marks et prospect_notes (§6.0), servent à l’équipe sur les lots : elles restent telles quelles, ni étendues ni réutilisées. Le §6.3 part des besoins réels de Steve (verdict, motif, provenance, 1 à N objets visés, révisions, oracle C) et propose un modèle minimal de cinq tables (scène 2). Il faut choisir la forme des tables maintenant : l’import (lot L1), l’affichage (U1) et l’oracle (O1) en dépendent tous (§7).
+Décision actée par l’owner le 2026-10-04 : on conserve tous les retours de Steve ; c’est sa décision, il en a besoin pour l’oracle. Steve a livré un classeur de 7 feuilles (124 lignes de triage, 121 contrôles d’exclusion, 77 constats, 26 règles, 28 codes de motif) et une analyse écrite qui pose ses trois critères (§2, §5.1). Ce choix fixe ce que l’équipe pourra montrer sur les objets du radar et ce que l’oracle pourra mesurer (D10). Conséquence pour D2 : « tout conserver » suppose un modèle qui garde toutes les lignes, l’option a (ou b) de D2.
 
-**Dépend de :** aucune décision antérieure. **Conditionne :** D3 (Ancre signal et correctif B0), D4 (Conformité sentropic et suppression), D9 (Sens de « double annotation »), D10 (Oracle #783), D1 (Périmètre de conservation des retours de Steve).
+**Dépend de :** aucune décision antérieure. **Conditionne :** D2 (Modèle de données).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **(a) Modèle minimal « besoins de Steve » (5 tables)** (recommandée) | On crée cinq tables nommées en clair, une par besoin de Steve (§6.3) : le fichier reçu (provenance), ses lignes avec le verdict (classement, motif, sens, passe) et toutes les cellules brutes, les codes de motif reliés aux critères, les objets visés par chaque ligne (1 à N, par ville + id texte du graphe) et les versions gelées de l’oracle C. Exemple : la ligne #7 donne une ligne et deux cibles ; une nouvelle révision du classeur ajoute des lignes qui remplacent les anciennes sans les effacer. | • Une table par besoin réel : provenance, verdict, codes et critères, objets visés, oracle gelé.<br>• Aucune perte : toutes les cellules sont gardées ; une révision remplace sans effacer.<br>• Signaux visés par ville + id texte, la clé du graphe décidée pour #812 : survit à la ré-extraction.<br>• Le moins de code d’import et de migration parmi les options utiles. | • Pas de fil de réponses ni d’états utilisateur au premier lot (assumé, §6.3).<br>• Une file de rapprochement (identifiants abrégés, ambiguïtés) reste à traiter à la main. |
+| (a) Triage seul | On importe seulement la feuille Triage : 124 lignes, 51 villes. Les 121 contrôles d’exclusion (dont 3 faux négatifs « écartés à tort »), les 77 constats et les 26 règles restent dans le fichier. | • Rapide : une feuille, 124 lignes.<br>• Moins de rattachements à vérifier à l’import. | • Perd les 121 contrôles d’exclusion, là où se trouvent les faux négatifs, ainsi que les constats et les règles.<br>• Oracle incomplet : impossible de mesurer ce que les filtres cachent à tort. |
+| **(b) Tout le classeur et l’analyse, brut immuable** (recommandée) | On importe les 7 feuilles et l’analyse du 21 septembre, sans rien modifier : 124 lignes de triage, 121 contrôles d’exclusion, 77 constats, 26 règles, 28 codes, et la Synthèse avec ses formules et leurs valeurs mémorisées. L’analyse est conservée à part, comme annotation distincte. | • Aucune perte : chaque cellule, formule et valeur mémorisée.<br>• L’oracle (D10) dispose des exclusions et des règles.<br>• Les 52 villes suivantes s’importeront de la même façon. | • Plus de tables et de curation (rattachements à vérifier).<br>• Import un peu plus long à écrire et à recetter. |
+| (c) Notes libres seules | Chaque ligne devient une note de texte libre sur une ville ou un signal, dans l’UI des notes actuelle. Le classement, le motif et le sens ne sont plus des champs : ils sont dans le texte. | • Surface existante : les notes des lots et des signaux.<br>• Aucun schéma nouveau : livrable vite. | • Perd la structure (classement, motif, sens), les groupes et la provenance.<br>• Inutilisable pour l’oracle ; une note est limitée à 10 000 caractères. |
+
+**Recommandation : (b) Tout le classeur et l’analyse, brut immuable.** Tranchée : (b), tout conserver, actée par l’owner le 2026-10-04 ; les options a et c restent affichées pour mémoire.
+
+#### D2 — Modèle de données
+**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+
+Le classeur de Steve (7 feuilles, 433 lignes, une cellule de 17 114 caractères, §5.1) doit être stocké en base et rattaché aux objets du radar (#784), et Steve doit pouvoir poursuivre son annotation dans l’application, avec des boucles de validation par l’équipe ou le PO (vision owner, §6.3). Les tables d’annotation existantes, prospect_marks et prospect_notes (§6.0), servent à l’équipe sur les lots : elles restent telles quelles, ni étendues ni réutilisées. Le §6.3 part des besoins réels de Steve (verdict, motif, provenance, 1 à N objets visés, révisions, saisie et validation dans l’application, oracle C) et propose un modèle minimal de six tables (scène 2). Il faut choisir la forme des tables maintenant : l’import (lot L1), l’affichage (U1) et l’oracle (O1) en dépendent tous (§7).
+
+**Dépend de :** D1 (Périmètre de conservation des retours de Steve). **Conditionne :** D3 (Ancre signal et correctif B0), D4 (Conformité sentropic et suppression), D9 (Sens de « double annotation »), D10 (Oracle #783), D5 (Auteur des retours importés).
+
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| **(a) Modèle minimal « besoins de Steve » (6 tables)** (recommandée) | On crée six tables nommées en clair, une par besoin de Steve (§6.3) : le fichier reçu (provenance), les annotations (importées du classeur ou saisies par Steve avec son compte, chaque changement étant une nouvelle version), les validations de l’équipe ou du PO (validée, contestée, motif), les codes de motif reliés aux critères, les objets visés (1 à N, par ville + id texte du graphe) et les versions gelées de l’oracle C tirées des annotations validées. Exemple : la ligne #7 donne une annotation et deux cibles ; Farid la valide, Steve corrige une autre ligne contestée, et l’historique garde tout. | • Une table par besoin réel : provenance, annotations vivantes, validations, codes et critères, objets visés, oracle gelé.<br>• Aucune perte : toutes les cellules sont gardées ; une révision remplace sans effacer.<br>• Signaux visés par ville + id texte, la clé du graphe décidée pour #812 : survit à la ré-extraction.<br>• Le moins de code d’import et de migration parmi les options utiles. | • Pas de fil de discussion libre ni d’états archiver, classer, lier, épingler au premier lot (assumé, §6.3).<br>• Une file de rapprochement (identifiants abrégés, ambiguïtés) reste à traiter à la main. |
 | (b) Modèle complet en couches (version précédente) | On crée le modèle complet en couches de la version précédente : fichier, lignes brutes, évaluations versionnées séparées des lignes, ancres, référentiels en trois tables (codes, règles, constats), projection vers les fils de commentaires sentropic et table d’oracle : neuf tables. Il prévoit d’emblée les réponses de l’équipe et plusieurs jeux d’étiquettes dans les mêmes tables. | • Prévoit d’emblée les réponses de l’équipe (projection Comment) et plusieurs jeux d’étiquettes.<br>• Sépare lignes brutes et évaluations, référentiels en trois tables distinctes. | • Neuf tables nouvelles et une migration plus lourde à écrire et tester.<br>• Des tables sans usage immédiat (projection, jeux d’étiquettes) : coût sans besoin exprimé par Steve.<br>• Plus de code d’import que l’option a. |
 | (c) Table de contrôle seule (oracle) | On crée une seule table de contrôle qui recopie le classeur pour mesurer le radar, sans aucun lien vers ce qui est affiché. Le nom de table est indicatif. Rien n’apparaît dans le panneau du signal : Steve ne retrouve pas son verdict sur le signal qu’il a trié ; seul l’oracle lit la table. | • Rapide : une table.<br>• Respecte le précédent du 2026-06-11 : la mesure ne nourrit pas la production. | • Rien d’affichable : ne répond pas à #784 (« attaché à l’élément associé »).<br>• Steve ne voit pas ses retours dans l’outil.<br>• Une seconde structure sera nécessaire plus tard pour l’affichage. |
 | (d) Attendre le paquet sentropic complet | On ne construit rien côté radar : on attend que le paquet comments de sentropic porte tout (cibles, verdict, provenance). En attendant, le classeur reste un fichier hors de l’outil. Même livré, le paquet ne porte ni classement, ni motif, ni sens : il faudrait encore des tables radar. | • Aucune dette côté radar : tout vit dans sentropic.<br>• Aucune migration à écrire ni à maintenir maintenant. | • Bloquant sans date : #784 et l’oracle attendent.<br>• Le paquet ne porte de toute façon ni verdict structuré ni provenance (§6.1). |
 
-Schéma de l'option (a) Modèle minimal « besoins de Steve » (5 tables) :
+Schéma de l'option (a) Modèle minimal « besoins de Steve » (6 tables) :
 
 ```mermaid
 erDiagram
-    retours_fichiers ||--o{ retours_lignes : contient
-    retours_lignes }o--o| motifs : motif
-    retours_lignes |o--o| retours_lignes : remplace
-    retours_lignes ||--o{ retours_cibles : vise
-    retours_cibles }o..o| graph_nodes : ville_et_id_texte
-    oracle_versions }o..o{ retours_lignes : fige
+    retours_fichiers ||--o{ annotations : importe
+    annotations }o--o| motifs : motif
+    annotations |o--o| annotations : remplace
+    annotations ||--o{ annotation_cibles : vise
+    annotation_cibles }o..o| graph_nodes : ville_et_id_texte
+    annotations ||--o{ validations : decide
+    annotations }o--|| account_users : auteur
+    validations }o--|| account_users : decideur
+    oracle_versions }o..o{ annotations : fige
     retours_fichiers {
       uuid id PK
       text fichier_sha256 UK "même fichier = 0 écriture"
       text nom "radar-triage-signaux.xlsx"
       text revision "21 sept. 2026"
-      text auteur "Steve Chaperon, externe"
       uuid importe_par FK "compte de l'importateur"
     }
-    retours_lignes {
+    annotations {
       uuid id PK
-      uuid fichier_id FK
-      text feuille "Triage, Écartés, Constats…"
-      int ligne "ligne Excel"
-      text ref "#7, C-79, R-21…"
-      jsonb cellules "toutes les cellules, brutes"
-      text classement "P, S, N ou vide"
+      text origine "import ou saisie"
+      uuid fichier_id FK "si import : feuille, ligne"
+      text ref "feuille, ligne, #7, C-79…"
+      jsonb cellules "import : cellules brutes"
+      uuid auteur_id FK "compte de Steve"
+      text classement "P, S, N"
       text motif_code FK
       text sens "assouplissement…"
       text passe "1, 2 ou 3"
-      text statut "active, retirée, remplacée"
-      uuid remplace_id FK "révision suivante"
+      text commentaire
+      text statut "proposée, validée, contestée"
+      uuid remplace_id FK "version précédente"
     }
     motifs {
       text code PK "P-DENSITE, N-RESTRICTIF…"
-      text classement "P, S, N ou V2"
       text critere "K1 à K9 ou exclusion"
       text regle "R-xx qui le justifie"
     }
-    oracle_versions {
+    validations {
       uuid id PK
-      text libelle UK "oracle-ciblage-steve-v1"
-      text fichier_sha256 "export JSON gelé"
-      jsonb unites "lignes retenues, dev / test"
-      text valide_par "Fabien"
+      uuid annotation_id FK
+      uuid decideur_id FK "équipe ou PO"
+      text decision "validée ou contestée"
+      text motif "pourquoi"
     }
-    retours_cibles {
+    annotation_cibles {
       uuid id PK
-      uuid ligne_id FK
+      uuid annotation_id FK
       text cible_type "signal, ville, règlement…"
       text city_slug "clé du graphe (#812)"
       text cible_id "id texte, ex. signal-…"
@@ -964,6 +1052,15 @@ erDiagram
     graph_nodes {
       text city_slug PK "clé (city_slug, id), #812"
       text id PK "signal-… (texte)"
+    }
+    account_users {
+      uuid id PK "Steve, équipe, PO"
+    }
+    oracle_versions {
+      uuid id PK
+      text libelle UK "oracle-ciblage-steve-v1"
+      jsonb unites "annotations validées, dev / test"
+      text fichier_sha256 "export JSON gelé"
     }
 ```
 
@@ -1037,18 +1134,18 @@ erDiagram
     }
 ```
 
-**Recommandation : (a) Modèle minimal « besoins de Steve » (5 tables).** (a) couvre exactement les besoins listés au §6.3 avec cinq tables nommées en clair ; ce qu’il ne fait pas (réponses de l’équipe, états archiver, classer, lier, épingler) reste possible plus tard, sans le défaire.
+**Recommandation : (a) Modèle minimal « besoins de Steve » (6 tables).** (a) couvre exactement les besoins listés au §6.3 avec six tables nommées en clair, dont la boucle de validation ; ce qu’il ne fait pas (fil de discussion libre, états archiver, classer, lier, épingler, évaluation en ligne) reste possible plus tard, sans le défaire.
 
 #### D3 — Ancre signal et correctif B0
 **Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
 
-Une ancre est la référence qui attache une annotation à un objet du radar (signal, ville, zone, lot…) ; c’est une ligne de la table retours_cibles (ville + id texte, scène 2). Aujourd’hui l’annotation d’un signal est cassée : l’UI envoie l’identifiant texte du graphe (« signal-… »), alors que l’API exige un UUID, identifiant aléatoire de l’ancienne table signals que plus aucun code n’alimente (§6.1, défaut 1). « B0 » est le petit lot correctif qui répare cela (§7). Sans ancre fiable, aucun retour de Steve ne s’affiche sur son signal. Risque connu : une ré-extraction du graphe peut supprimer ou renommer des identifiants (graph-store.ts, §6.1).
+Une ancre est la référence qui attache une annotation à un objet du radar (signal, ville, zone, lot…) ; c’est une ligne de la table annotation_cibles (ville + id texte, scène 2). Aujourd’hui l’annotation d’un signal est cassée : l’UI envoie l’identifiant texte du graphe (« signal-… »), alors que l’API exige un UUID, identifiant aléatoire de l’ancienne table signals que plus aucun code n’alimente (§6.1, défaut 1). « B0 » est le petit lot correctif qui répare cela (§7). Sans ancre fiable, aucun retour de Steve ne s’affiche sur son signal. Risque connu : une ré-extraction du graphe peut supprimer ou renommer des identifiants (graph-store.ts, §6.1).
 
 **Dépend de :** D2 (Modèle de données). **Conditionne :** D14 (Première livraison UI), D15 (Séquencement).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **(a) Clé texte namespacée + instantané observé, B0 immédiat** (recommandée) | On stocke la cible sous forme de texte (« radar.signal:<ville>:<id> ») dans retours_cibles (ville + id texte du graphe), sans clé étrangère vers le graphe, avec un instantané de ce que Steve a vu (ville, date, type, verbatim). B0 corrige l’API pour accepter cet identifiant texte. Si une ré-extraction supprime le signal, l’ancre passe « disparue » et le panneau montre l’instantané au lieu de perdre le retour. | • Survit à la ré-extraction : l’ancre passe « disparue » au lieu d’effacer l’annotation, et l’instantané observé (ville, date, type, verbatim) reste lisible.<br>• Répare tout de suite l’annotation existante (B0, taille S).<br>• Aucune clé étrangère vers le graphe, donc aucune suppression en cascade. | • Si l’extraction renomme un identifiant, un rapprochement est nécessaire (file de revue).<br>• La clé texte n’est pas une identité métier définitive. |
+| **(a) Clé texte namespacée + instantané observé, B0 immédiat** (recommandée) | On stocke la cible sous forme de texte (« radar.signal:<ville>:<id> ») dans annotation_cibles (ville + id texte du graphe), sans clé étrangère vers le graphe, avec un instantané de ce que Steve a vu (ville, date, type, verbatim). B0 corrige l’API pour accepter cet identifiant texte. Si une ré-extraction supprime le signal, l’ancre passe « disparue » et le panneau montre l’instantané au lieu de perdre le retour. | • Survit à la ré-extraction : l’ancre passe « disparue » au lieu d’effacer l’annotation, et l’instantané observé (ville, date, type, verbatim) reste lisible.<br>• Répare tout de suite l’annotation existante (B0, taille S).<br>• Aucune clé étrangère vers le graphe, donc aucune suppression en cascade. | • Si l’extraction renomme un identifiant, un rapprochement est nécessaire (file de revue).<br>• La clé texte n’est pas une identité métier définitive. |
 | (b) Attendre une clé métier stable | On n’ancre rien tant qu’une clé métier stable (dossier réglementaire, étape) n’existe pas dans une ontologie du radar. Aucun lot B0 : l’annotation de signal reste en échec 400 et les retours de Steve ne s’affichent sur aucun signal. | • Identité propre et stable par conception.<br>• Évite plus tard tout rapprochement d’identifiants. | • Dépend d’une ontologie qui n’existe pas : bloquant, sans date.<br>• L’annotation de signal reste cassée en attendant. |
 | (c) Passer par l’UUID signals | On garde le contrat v1 : une annotation de signal pointe vers l’UUID de la table signals. Mais aucun code de main n’écrit dans signals : il n’existe aucun UUID à viser pour les 124 lignes de Steve. L’ancre ne peut pas être créée. | • Contrat v1 (migration 0011) inchangé.<br>• Aucune nouvelle colonne d’ancre à créer. | • Aucune insertion dans signals sur main : l’ancre est impossible en pratique.<br>• Maintient le défaut actuel (refus 400 attendu). |
 
@@ -1056,8 +1153,8 @@ Schéma de l'option (a) Clé texte namespacée + instantané observé, B0 imméd
 
 ```mermaid
 erDiagram
-    retours_cibles }o..o| graph_nodes : cle_texte_sans_fk
-    retours_cibles {
+    annotation_cibles }o..o| graph_nodes : cle_texte_sans_fk
+    annotation_cibles {
       uuid id PK
       text city_slug "ville"
       text cible_id "signal-… (texte)"
@@ -1073,8 +1170,8 @@ Schéma de l'option (b) Attendre une clé métier stable :
 
 ```mermaid
 erDiagram
-    retours_cibles }o..o| cle_metier_stable : attend
-    retours_cibles {
+    annotation_cibles }o..o| cle_metier_stable : attend
+    annotation_cibles {
       uuid id PK
       text business_key "à définir"
     }
@@ -1108,7 +1205,7 @@ Les annotations doivent suivre le contrat du module comments de sentropic, la pl
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **(a) Cibles et lecture conformes, import immuable, demande de tombstone** (recommandée) | Les annotations utilisent les cibles et la lecture du module comments, sans modifier le paquet. Les retours importés sont immuables : aucun bouton de suppression. Le premier lot affiche les retours en lecture seule : les réponses de l’équipe viendront avec le port complet. On demande à sentropic une version avec tombstone, puis on adopte le port complet. | • Respecte O1 et la ligne COLLAB « le paquet porte l’intégrité ».<br>• Livrable maintenant : cibles et lecture conformes, sans modifier le paquet.<br>• Premier lot en lecture seule : aucune suppression à gérer tant que le paquet n’a pas de tombstone. | • Conformité partielle : pas encore le port complet CommentStore.<br>• Une demande à sentropic (tombstone) à suivre.<br>• Une migration vers le port complet plus tard. |
+| **(a) Cibles et lecture conformes, import immuable, demande de tombstone** (recommandée) | Les annotations utilisent les cibles et la lecture du module comments, sans modifier le paquet. Les retours importés sont immuables : aucun bouton de suppression. Les validations et contestations vivent dans les tables du radar (validations) ; un fil de commentaires sentropic pourra s’ajouter avec le port complet. On demande à sentropic une version avec tombstone, puis on adopte le port complet. | • Respecte O1 et la ligne COLLAB « le paquet porte l’intégrité ».<br>• Livrable maintenant : cibles et lecture conformes, sans modifier le paquet.<br>• Premier lot en lecture seule : aucune suppression à gérer tant que le paquet n’a pas de tombstone. | • Conformité partielle : pas encore le port complet CommentStore.<br>• Une demande à sentropic (tombstone) à suivre.<br>• Une migration vers le port complet plus tard. |
 | (b) Adaptateur CommentStore à tombstone hôte | On écrit un adaptateur CommentStore côté radar dont le delete pose une marque (tombstone) au lieu d’effacer. Les retours et réponses passent tout de suite par le port complet. Mais le delete du port ne supprime plus vraiment : sa sémantique diffère de celle du paquet. | • Port complet utilisé dès maintenant.<br>• Un seul chemin d’écriture et de lecture : celui du port. | • Contredit COLLAB §2 : un tombstone porté seulement par Radar est un piège.<br>• Un delete qui ne supprime pas trahit la sémantique du port.<br>• Dette à défaire quand sentropic livrera. |
 | (c) Attendre le port complet | On attend que sentropic publie un paquet avec tombstone et rétention, puis on branche tout dessus. Aucun retour de Steve n’est affiché avant cette version, sans date connue. | • Conformité intégrale, aucun écart.<br>• Aucune migration ultérieure vers le port complet. | • Bloquant tant que sentropic n’a pas livré, sans date.<br>• Rien d’affiché pour Steve en attendant. |
 
@@ -1117,7 +1214,7 @@ Les annotations doivent suivre le contrat du module comments de sentropic, la pl
 #### D9 — Sens de « double annotation » (point ouvert)
 **Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
 
-La demande initiale parle de « double annotation (ancienne / nouvelle) » sans dire ce qui est comparé à quoi. Le modèle retenu (D2) garde le verdict de Steve dans retours_lignes ; les autres jeux (adjudication C, prédiction C) vivent dans les versions gelées de l’oracle, et la classification du radar se recalcule (§6.6) : les trois lectures sont donc possibles techniquement. Mais chacune produit une mesure différente et fixe ce que l’oracle (D10) comparera : il faut la préciser avant de geler l’oracle de ciblage. Le sens de la demande appartient à Fabien.
+La demande initiale parle de « double annotation (ancienne / nouvelle) » sans dire ce qui est comparé à quoi. Le modèle retenu (D2) garde le verdict de Steve dans annotations ; les autres jeux (adjudication C, prédiction C) vivent dans les versions gelées de l’oracle, et la classification du radar se recalcule (§6.6) : les trois lectures sont donc possibles techniquement. Mais chacune produit une mesure différente et fixe ce que l’oracle (D10) comparera : il faut la préciser avant de geler l’oracle de ciblage. Le sens de la demande appartient à Fabien.
 
 **Dépend de :** D2 (Modèle de données). **Conditionne :** D10 (Oracle #783), D7 (Définition de C v1).
 
@@ -1134,7 +1231,7 @@ La demande initiale parle de « double annotation (ancienne / nouvelle) » sans 
 
 Un oracle est un jeu de réponses de référence qui note automatiquement le radar. L’oracle actuel (674 unités committées, 676 en copie locale) note l’extraction des actes dans les procès-verbaux, pas le choix des signaux à montrer (§9.3). Les retours de Steve sont la première vérité humaine sur ce choix : dans sa vue de travail, 24 signaux sur 73 sont du bruit (32,9 %, scène 1). Il faut décider comment construire l’oracle de ciblage (#783) avant de développer C (D7), car c’est lui qui dira si C fait mieux que B (D13). Dans la scène 3, l’oracle est la bande du bas : hors ligne, alimenté par les annotations en base. La proposition complète (ancien oracle → nouvel oracle, construction, gel, validation) est au §9.3.
 
-**Dépend de :** D2 (Modèle de données), D9 (Sens de « double annotation »). **Conditionne :** D11 (Benchmark #782), D1 (Périmètre de conservation des retours de Steve), D7 (Définition de C v1), D8 (Cas contradictoires), D12 (Exposition A/B/C), D13 (Seuil de bascule B → C), D15 (Séquencement).
+**Dépend de :** D2 (Modèle de données), D9 (Sens de « double annotation »). **Conditionne :** D11 (Benchmark #782), D7 (Définition de C v1), D8 (Cas contradictoires), D12 (Exposition A/B/C), D13 (Seuil de bascule B → C), D15 (Séquencement).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
@@ -1146,9 +1243,9 @@ Schéma de l'option Remplacer v3 par le tableur :
 
 ```mermaid
 erDiagram
-    retours_lignes ||--|| oracle_tableur : remplace
+    annotations ||--|| oracle_tableur : remplace
     oracle_tableur ||--|| benchmark : note_tout
-    retours_lignes {
+    annotations {
       text source "124 lignes de Steve"
     }
     oracle_tableur {
@@ -1168,13 +1265,13 @@ Schéma de l'option Double oracle E / C, jeu test indépendant :
 ```mermaid
 erDiagram
     consensus_modeles ||--|| oracle_e_v3 : construit
-    retours_lignes ||--|| oracle_c_v1 : adjugees_gelees
+    annotations ||--|| oracle_c_v1 : adjugees_gelees
     oracle_e_v3 ||--|| volet_extraction : note
     oracle_c_v1 ||--|| volet_ciblage : note_b_puis_c
     consensus_modeles {
       text methode "7 passes, 3 familles"
     }
-    retours_lignes {
+    annotations {
       text source "verdicts de Steve"
     }
     oracle_e_v3 {
@@ -1196,12 +1293,12 @@ Schéma de l'option Campagne C entièrement nouvelle :
 ```mermaid
 erDiagram
     campagne_c ||--|| oracle_c_neuf : construit
-    retours_lignes }o..o| oracle_c_neuf : exemples
+    annotations }o..o| oracle_c_neuf : exemples
     oracle_c_neuf ||--|| volet_ciblage : note
     campagne_c {
       text corpus "nouveau, conçu pour C"
     }
-    retours_lignes {
+    annotations {
       text role "124 lignes, exemples"
     }
     oracle_c_neuf {
@@ -1230,35 +1327,20 @@ Le benchmark #782 compare des modèles et des réglages sur un même oracle. Si 
 
 ### Étape 2 · Farid décide ensuite (produit, affichage, priorités)
 
-#### D1 — Périmètre de conservation des retours de Steve
-**Étape 2 · Décide : Farid · Consulté : Steve, Mathieu.** Décidée après les décisions de Fabien.
-
-Steve a livré un classeur de 7 feuilles (124 lignes de triage, 121 contrôles d’exclusion, 77 constats, 26 règles, 28 codes de motif) et une analyse écrite qui pose ses trois critères (§2, §5.1). Il faut décider ce qu’on garde en base : seulement le triage, tout, ou de simples notes. Ce choix fixe ce que l’équipe pourra montrer sur les objets du radar et ce que l’oracle pourra mesurer (D10). Cohérence avec D2 : « tout conserver » suppose un modèle qui garde toutes les lignes, l’option a (ou b) de D2.
-
-**Dépend de :** D2 (Modèle de données), D10 (Oracle #783).
-
-| Option | Description | Avantages | Inconvénients |
-|---|---|---|---|
-| (a) Triage seul | On importe seulement la feuille Triage : 124 lignes, 51 villes. Les 121 contrôles d’exclusion (dont 3 faux négatifs « écartés à tort »), les 77 constats et les 26 règles restent dans le fichier. | • Rapide : une feuille, 124 lignes.<br>• Moins de rattachements à vérifier à l’import. | • Perd les 121 contrôles d’exclusion, là où se trouvent les faux négatifs, ainsi que les constats et les règles.<br>• Oracle incomplet : impossible de mesurer ce que les filtres cachent à tort. |
-| **(b) Tout le classeur et l’analyse, brut immuable** (recommandée) | On importe les 7 feuilles et l’analyse du 21 septembre, sans rien modifier : 124 lignes de triage, 121 contrôles d’exclusion, 77 constats, 26 règles, 28 codes, et la Synthèse avec ses formules et leurs valeurs mémorisées. L’analyse est conservée à part, comme annotation distincte. | • Aucune perte : chaque cellule, formule et valeur mémorisée.<br>• L’oracle (D10) dispose des exclusions et des règles.<br>• Les 52 villes suivantes s’importeront de la même façon. | • Plus de tables et de curation (rattachements à vérifier).<br>• Import un peu plus long à écrire et à recetter. |
-| (c) Notes libres seules | Chaque ligne devient une note de texte libre sur une ville ou un signal, dans l’UI des notes actuelle. Le classement, le motif et le sens ne sont plus des champs : ils sont dans le texte. | • Surface existante : les notes des lots et des signaux.<br>• Aucun schéma nouveau : livrable vite. | • Perd la structure (classement, motif, sens), les groupes et la provenance.<br>• Inutilisable pour l’oracle ; une note est limitée à 10 000 caractères. |
-
-**Recommandation : (b) Tout le classeur et l’analyse, brut immuable.** (b) : conserve tout ce que Steve a produit et sert à la fois l’affichage et l’oracle. La recommandation changerait seulement si le besoin se limitait à quelques commentaires.
-
 #### D5 — Auteur des retours importés
 **Étape 2 · Décide : Farid · Consulté : Steve, Fabien.** Décidée après les décisions de Fabien.
 
-Quand les retours de Steve apparaîtront dans le radar, chacun portera un auteur. Steve n’a pas de compte vérifié, et ce n’est pas lui qui lance l’import. Il faut décider qui est affiché comme auteur, sans usurper l’identité de Steve ni effacer celle de l’importateur (exigence E5, §6.2). Le contrat sentropic accepte un auteur externe sans compte (§6.1), dans le cadre fixé par D4. Effet visible : la ligne « auteur » de chaque retour dans le panneau du signal.
+Steve poursuivra son annotation dans l’application (vision owner, §6.3) : ses retours importés et ses annotations futures doivent porter le même auteur. Aujourd’hui il n’a pas de compte vérifié, et ce n’est pas lui qui lance l’import. Il faut décider qui est affiché comme auteur, sans usurper son identité ni effacer celle de l’importateur (exigence E5, §6.2). Effet visible : la ligne « auteur » de chaque annotation dans le panneau du signal, et le nom de qui valide ou conteste.
 
-**Dépend de :** D4 (Conformité sentropic et suppression). **Conditionne :** D6 (Visibilité et données personnelles).
+**Dépend de :** D2 (Modèle de données), D4 (Conformité sentropic et suppression). **Conditionne :** D6 (Visibilité et données personnelles).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **(a) Auteur documentaire externe + importateur tracé** (recommandée) | Chaque retour importé affiche « Steve Chaperon — importé par <nom> ». Steve est un auteur externe (ext:chaperon:steve) sans compte ; l’importateur réel est enregistré à part (recorded_by). Personne ne peut modifier ni supprimer un retour importé. | • Le contenu est attribué à son vrai auteur, Steve Chaperon.<br>• L’importateur réel est tracé (recorded_by) : on sait qui a chargé quoi.<br>• Aucun droit de modifier ou supprimer un retour importé. | • Un auteur sans compte apparaît dans les fils.<br>• Steve ne peut pas répondre sous son nom tant qu’il n’a pas de compte. |
-| (b) Importateur seul comme auteur | Le retour est affiché comme écrit par la personne qui a lancé l’import ; le nom de Steve n’apparaît que dans la provenance (fichier, feuille, ligne). | • Aucune identité externe à gérer.<br>• Aucun libellé spécial à afficher dans les fils. | • Le fil attribue le texte de Steve à l’importateur : faux pour le lecteur.<br>• Perd la valeur de la parole du client. |
-| (c) Compte Steve | On crée un compte pour Steve et ses retours importés sont rattachés à ce compte, comme s’il les avait saisis lui-même dans l’outil. | • Steve pourra répondre et annoter lui-même.<br>• Ses réponses futures seront attribuées à un compte réel. | • Compte non vérifié aujourd’hui.<br>• Ne doit jamais servir pour l’import : ce n’est pas lui qui importe. |
+| (a) Auteur documentaire externe + importateur tracé | Chaque retour importé affiche « Steve Chaperon — importé par <nom> ». Steve est un auteur externe (ext:chaperon:steve) sans compte ; l’importateur réel est enregistré à part. Steve ne peut pas annoter lui-même tant que cette identité externe est utilisée. | • Le contenu est attribué à son vrai auteur sans attendre la création d’un compte.<br>• L’importateur réel est tracé : on sait qui a chargé quoi. | • Steve ne peut ni annoter ni valider dans l’application sous ce nom externe.<br>• Deux identités pour la même personne le jour où il aura un compte. |
+| (b) Importateur seul comme auteur | Le retour est affiché comme écrit par la personne qui a lancé l’import ; le nom de Steve n’apparaît que dans la provenance (fichier, feuille, ligne). | • Aucune identité externe à gérer.<br>• Aucun libellé spécial à afficher. | • Le texte de Steve est attribué à l’importateur : faux pour le lecteur.<br>• Perd la valeur de la parole du client et empêche la boucle de validation. |
+| **(c) Compte Steve, pour l’import et la saisie** (recommandée) | On crée et vérifie un compte pour Steve. Ses retours importés sont attribués à ce compte (l’importateur est tracé dans importe_par), et ses annotations, triages et réponses aux contestations dans l’application portent le même compte. | • Une seule identité : ses retours importés et ses annotations futures portent son compte.<br>• Il annote, trie et répond aux contestations lui-même dans l’application.<br>• L’importateur reste tracé à part (importe_par). | • Compte à créer et vérifier avant l’import.<br>• Droits à cadrer : Steve annote, l’équipe ou le PO valide. |
 
-**Recommandation : (a) Auteur documentaire externe + importateur tracé.** (a) : attribue le contenu à son vrai auteur sans créer de compte ni usurper de session. (c) viendra le jour où Steve annotera lui-même dans l’UI.
+**Recommandation : (c) Compte Steve, pour l’import et la saisie.** (c) : Steve annote et valide avec son propre compte ; ses retours importés lui sont attribués, l’importateur est tracé à part. (a) ne vaut que si la création du compte tarde.
 
 #### D6 — Visibilité et données personnelles
 **Étape 2 · Décide : Farid · Consulté : Steve, Mathieu, Fabien.** Décidée après les décisions de Fabien.
@@ -1532,50 +1614,52 @@ Cinq scènes, chacune dans la forme qui convient à ce qu'elle montre. Elles ne 
 
 ```mermaid
 erDiagram
-    retours_fichiers ||--o{ retours_lignes : contient
-    retours_lignes }o--o| motifs : motif
-    retours_lignes |o--o| retours_lignes : remplace
-    retours_lignes ||--o{ retours_cibles : vise
-    retours_cibles }o..o| graph_nodes : ville_et_id_texte
-    oracle_versions }o..o{ retours_lignes : fige
+    retours_fichiers ||--o{ annotations : importe
+    annotations }o--o| motifs : motif
+    annotations |o--o| annotations : remplace
+    annotations ||--o{ annotation_cibles : vise
+    annotation_cibles }o..o| graph_nodes : ville_et_id_texte
+    annotations ||--o{ validations : decide
+    annotations }o--|| account_users : auteur
+    validations }o--|| account_users : decideur
+    oracle_versions }o..o{ annotations : fige
     retours_fichiers {
       uuid id PK
       text fichier_sha256 UK "même fichier = 0 écriture"
       text nom "radar-triage-signaux.xlsx"
       text revision "21 sept. 2026"
-      text auteur "Steve Chaperon, externe"
       uuid importe_par FK "compte de l'importateur"
     }
-    retours_lignes {
+    annotations {
       uuid id PK
-      uuid fichier_id FK
-      text feuille "Triage, Écartés, Constats…"
-      int ligne "ligne Excel"
-      text ref "#7, C-79, R-21…"
-      jsonb cellules "toutes les cellules, brutes"
-      text classement "P, S, N ou vide"
+      text origine "import ou saisie"
+      uuid fichier_id FK "si import : feuille, ligne"
+      text ref "feuille, ligne, #7, C-79…"
+      jsonb cellules "import : cellules brutes"
+      uuid auteur_id FK "compte de Steve"
+      text classement "P, S, N"
       text motif_code FK
       text sens "assouplissement…"
       text passe "1, 2 ou 3"
-      text statut "active, retirée, remplacée"
-      uuid remplace_id FK "révision suivante"
+      text commentaire
+      text statut "proposée, validée, contestée"
+      uuid remplace_id FK "version précédente"
     }
     motifs {
       text code PK "P-DENSITE, N-RESTRICTIF…"
-      text classement "P, S, N ou V2"
       text critere "K1 à K9 ou exclusion"
       text regle "R-xx qui le justifie"
     }
-    oracle_versions {
+    validations {
       uuid id PK
-      text libelle UK "oracle-ciblage-steve-v1"
-      text fichier_sha256 "export JSON gelé"
-      jsonb unites "lignes retenues, dev / test"
-      text valide_par "Fabien"
+      uuid annotation_id FK
+      uuid decideur_id FK "équipe ou PO"
+      text decision "validée ou contestée"
+      text motif "pourquoi"
     }
-    retours_cibles {
+    annotation_cibles {
       uuid id PK
-      uuid ligne_id FK
+      uuid annotation_id FK
       text cible_type "signal, ville, règlement…"
       text city_slug "clé du graphe (#812)"
       text cible_id "id texte, ex. signal-…"
@@ -1585,6 +1669,15 @@ erDiagram
     graph_nodes {
       text city_slug PK "clé (city_slug, id), #812"
       text id PK "signal-… (texte)"
+    }
+    account_users {
+      uuid id PK "Steve, équipe, PO"
+    }
+    oracle_versions {
+      uuid id PK
+      text libelle UK "oracle-ciblage-steve-v1"
+      jsonb unites "annotations validées, dev / test"
+      text fichier_sha256 "export JSON gelé"
     }
 ```
 
@@ -1619,7 +1712,7 @@ flowchart LR
     end
     subgraph PG["PostgreSQL"]
       GRA["graph_nodes · signaux"]
-      ANN["retours_* · verdicts"]
+      ANN["annotations · verdicts"]
       PNO["prospect_notes v1"]
     end
   end
@@ -1714,7 +1807,7 @@ flowchart LR
   end
   subgraph A4["Base · PostgreSQL"]
     GRA["graph_nodes · inventaire"]
-    ANN["retours_* · verdicts Steve"]
+    ANN["annotations · verdicts Steve"]
     ORR["oracle_versions"]
   end
   subgraph EV["Évaluation hors ligne · job Node"]

@@ -60,15 +60,19 @@ function assertGeometry(graph, edges) {
 test('le modèle de données (scène 2) est le modèle minimal : cinq tables nouvelles, graphe par ville + id texte', () => {
   const model = graphs.find(graph => graph.id === 'modele-donnees');
   assert.equal(model.kind, 'er');
-  assert.deepEqual(model.entities.map(entity => entity.id).sort(), ['graph_nodes', 'motifs', 'oracle_versions', 'retours_cibles', 'retours_fichiers', 'retours_lignes']);
-  // Seule graph_nodes existe déjà : les cinq autres tables sont proposées.
-  assert.deepEqual(model.entities.filter(entity => entity.existing).map(entity => entity.id), ['graph_nodes']);
+  assert.deepEqual(model.entities.map(entity => entity.id).sort(), ['account_users', 'annotation_cibles', 'annotations', 'graph_nodes', 'motifs', 'oracle_versions', 'retours_fichiers', 'validations']);
+  // Seuls graph_nodes et account_users existent déjà : les six autres tables sont proposées.
+  assert.deepEqual(model.entities.filter(entity => entity.existing).map(entity => entity.id), ['graph_nodes', 'account_users']);
   for (const entity of model.entities) assert.ok(entity.attributes.some(attribute => attribute.keys.includes('PK')), `${entity.id} sans clé primaire`);
   const relation = (source, label) => model.relations.find(item => item.source === source && item.label === label);
-  assert.deepEqual([relation('retours_fichiers', 'contient').sourceCardinality, relation('retours_fichiers', 'contient').targetCardinality], ['one', 'zero-or-many']);
-  assert.equal(relation('retours_cibles', 'ville_et_id_texte').identifying, false);
-  assert.equal(relation('retours_lignes', 'remplace').target, 'retours_lignes');
-  const cibles = model.entities.find(entity => entity.id === 'retours_cibles').attributes.map(attribute => attribute.name);
+  assert.deepEqual([relation('retours_fichiers', 'importe').sourceCardinality, relation('retours_fichiers', 'importe').targetCardinality], ['one', 'zero-or-many']);
+  assert.equal(relation('annotation_cibles', 'ville_et_id_texte').identifying, false);
+  assert.equal(relation('annotations', 'remplace').target, 'annotations');
+  // Boucle de validation : décision gardée, décideur et auteur sont des comptes.
+  assert.equal(relation('annotations', 'decide').target, 'validations');
+  assert.equal(relation('annotations', 'auteur').target, 'account_users');
+  assert.equal(relation('validations', 'decideur').target, 'account_users');
+  const cibles = model.entities.find(entity => entity.id === 'annotation_cibles').attributes.map(attribute => attribute.name);
   assert.ok(cibles.includes('city_slug') && cibles.includes('cible_id'), 'cible = ville + id texte (#812)');
   assert.equal(model.layout.layers.length, 3);
   assertGeometry(model, model.relations.filter(item => item.source !== item.target));
@@ -125,8 +129,8 @@ test('A/B/C : deux zones, application en couloirs (écran, backend, base) et év
 
 test('seize décisions D1 à D16, recommandation connue sauf le point ouvert D9', () => {
   // Ordre de décision : le bloc de Fabien d'abord, puis celui de Farid.
-  assert.deepEqual(questions.map(question => question.key), ['D2', 'D3', 'D4', 'D9', 'D10', 'D11', 'D1', 'D5', 'D6', 'D7', 'D8', 'D12', 'D13', 'D14', 'D15', 'D16']);
-  assert.deepEqual(questions.map(question => question.step), [...Array(6).fill(1), ...Array(10).fill(2)]);
+  assert.deepEqual(questions.map(question => question.key), ['D1', 'D2', 'D3', 'D4', 'D9', 'D10', 'D11', 'D5', 'D6', 'D7', 'D8', 'D12', 'D13', 'D14', 'D15', 'D16']);
+  assert.deepEqual(questions.map(question => question.step), [...Array(7).fill(1), ...Array(9).fill(2)]);
   assert.ok(questions.every(question => (question.step === 1) === (question.decides === 'Fabien')));
   for (const question of questions) {
     if (question.key === 'D9') { assert.equal(question.recommended, null); continue; }
@@ -152,7 +156,7 @@ test('chaque décision : introduction, dépendances antérieures, avantages et i
   const order = questions.map(question => question.key);
   const markdown = await readFile('../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md', 'utf8');
   const section10 = markdown.split('\n## 10. Options et recommandation')[1].split('\n## 11. ')[0];
-  assert.match(section10, /Fabien décide d’abord ses six décisions/);
+  assert.match(section10, /Fabien décide d’abord ses sept décisions/);
   for (const question of questions) {
     const sentences = question.intro.split(/(?<=[.?!»)])\s+(?=[A-ZÀ-Ý«])/).length;
     assert.ok(sentences >= 3 && sentences <= 6 && question.intro.length <= 900, `${question.key} : introduction de ${sentences} phrases`);
@@ -265,12 +269,24 @@ test('§6.3 : besoins de Steve → données, modèle minimal, ce qu\'il ne fait 
   const s63 = markdown.split('\n### 6.3 ')[1].split('\n### 6.4 ')[0];
   assert.match(s63, /\*\*Besoins de Steve → données nécessaires\.\*\*/);
   assert.equal(s63.split('\n').filter(line => /^\| [1-9] \|/.test(line)).length, 9);
-  for (const table of ['retours_fichiers', 'retours_lignes', 'motifs', 'retours_cibles', 'oracle_versions']) assert.ok(s63.includes(`| \`${table}\` |`), table);
+  for (const table of ['retours_fichiers', 'annotations', 'validations', 'motifs', 'annotation_cibles', 'oracle_versions']) assert.ok(s63.includes(`| \`${table}\` |`), table);
   assert.match(s63, /Ce que le modèle minimal ne fait pas, volontairement/);
   assert.match(s63, /ni étendues ni réutilisées/);
   assert.match(s63, /#812/);
+  // Architecture des données : cinq ensembles, en ligne (zone) ou hors ligne (bande), existe ou proposé.
+  const { docLanes } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
+  const arch = docLanes['architecture-donnees'];
+  assert.deepEqual(arch.layout.lanes.map(lane => lane.title), ['Utilisateurs de l’application', '(a) Données de Steve · proposé', '(b) Annotations · proposé', '(c) Graphe · existe', '(d) Oracle · proposé']);
+  assert.match(arch.layout.zone.title, /En ligne/);
+  assert.ok(arch.layout.band.y > arch.layout.zone.y + arch.layout.zone.height);
+  assert.ok(markdown.indexOf('<!-- lanes:architecture-donnees -->') < markdown.indexOf('<!-- diagram:modele-minimal -->'));
+  assertGeometry(arch, arch.edges);
+  assert.match(s63, /Vision de l'owner/);
+  const d1 = questions.find(question => question.key === 'D1');
+  assert.deepEqual([d1.decides, d1.step, d1.decided.option, d1.decided.date], ['Fabien', 1, 'b', '2026-10-04']);
+  assert.equal(questions.find(question => question.key === 'D5').recommended, 'c');
   const d2 = questions.find(question => question.key === 'D2');
   assert.deepEqual(d2.options.map(option => option.key), ['a', 'b', 'c', 'd']);
   assert.equal(d2.recommended, 'a');
-  assert.ok(!/annotation_\w+|label_set|prospect_notes v1/.test(markdown.split('\n## 10. ')[0].split('\n### 6.3 ')[1].split('\n## 7. ')[0]), 'plus de tables M3 dans §6.3 à §6.6');
+  assert.ok(!/annotation_(?:sources|raw_rows|assessments|anchors|codes|rules|findings)|label_set|prospect_notes v1/.test(markdown.split('\n## 10. ')[0].split('\n### 6.3 ')[1].split('\n## 7. ')[0]), 'plus de tables M3 dans §6.3 à §6.6');
 });

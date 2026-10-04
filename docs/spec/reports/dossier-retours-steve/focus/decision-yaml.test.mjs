@@ -95,8 +95,9 @@ test('"Je suis" filter: own decisions only (decider or named validator), "toutes
   assert.deepEqual(PEOPLE, ['Farid', 'Fabien']);
   const mine = person => decisionRecords(questions, {}, person, 'mine');
   // This dossier names no validation: own decisions = decisions decided.
-  assert.equal(mine('Farid').length, 10);
-  assert.equal(mine('Fabien').length, 6);
+  // D1 is decided by the owner (Fabien) since 2026-10-04.
+  assert.equal(mine('Farid').length, 9);
+  assert.equal(mine('Fabien').length, 7);
   assert.ok(mine('Farid').every(record => record.decide === 'Farid' && record.role === 'decide'));
   // D9: Fabien decides, Farid is only consulted, so it is not one of Farid's.
   assert.ok(questions.find(question => question.key === 'D9').consulted.includes('Farid'));
@@ -117,8 +118,13 @@ test('records: option id and label, statut, commentaire; unknown option rejected
   });
   assert.equal(byId.D13.statut, 'differee');
   assert.equal(byId.D13.option, 'b');
-  assert.equal(byId.D1.statut, 'non_traitee');
-  assert.equal(byId.D1.option, null);
+  // D1: decided by the owner, exported as such without any draft answer.
+  assert.equal(byId.D1.statut, 'tranchee');
+  assert.equal(byId.D1.option, 'b');
+  assert.equal(byId.D1.decide, 'Fabien');
+  assert.match(byId.D1.commentaire, /Actée par l’owner le 2026-10-04/);
+  assert.equal(byId.D5.statut, 'non_traitee');
+  assert.equal(byId.D5.option, null);
   assert.equal(byId.D9.option, '1');
   for (const record of Object.values(byId)) assert.ok(STATUSES.includes(record.statut));
   assert.throws(() => decisionRecords(questions, { selections: { D1: 'z' } }, 'Farid', 'all'), /Unknown option z for D1/);
@@ -147,8 +153,8 @@ test('export block: fenced YAML without quotes, agreed header, one entry per own
     `coller_dans: ${DECISIONS_TARGET_URL}`, 'decisions:',
   ]);
   assert.equal(DECISIONS_TARGET_URL, 'https://github.com/rhanka/radar-immobilier/pull/794');
-  assert.equal(records.length, 10);
-  assert.equal(lines.filter(line => line.startsWith('  - id: ')).length, 10);
+  assert.equal(records.length, 9);
+  assert.equal(lines.filter(line => line.startsWith('  - id: ')).length, 9);
   assert.ok(!text.includes('id: D9'));
   const d12 = text.split('  - id: D12\n')[1].split('\n  - id: ')[0];
   assert.equal(d12, [
