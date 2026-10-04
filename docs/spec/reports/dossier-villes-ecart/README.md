@@ -2,11 +2,12 @@
 
 - Source : [DOSSIER_DECISION_VILLES_ECART_2026-10-04.md](DOSSIER_DECISION_VILLES_ECART_2026-10-04.md). Carte [#812](https://github.com/rhanka/radar-immobilier/issues/812).
 - Rendu : [decision-focus.html](decision-focus.html), page h2a Focus autonome et hors ligne, thème clair et sombre, construite par `focus/Makefile`.
-- Preuves : [preuves/](preuves/) (contrôle Chromium clair et sombre, captures, empreintes) et [preuves/diagnostic/](preuves/diagnostic/) (fichiers du diagnostic en lecture seule du 2026-10-04).
+- Où : l’écart est mesuré **en prod** (`radar-immobilier`, 226 villes) et **en préprod** (`radar-immobilier-preprod`, 216 villes), en lecture seule le 2026-10-04 ; tableau côte à côte au §2.0, méthode de correction pas à pas (préprod d’abord, puis prod) au §6.
+- Preuves : [preuves/](preuves/) (contrôle Chromium clair et sombre, captures, empreintes) et [preuves/diagnostic/](preuves/diagnostic/) : fichiers du diagnostic prod, `mesure-lecture-seule.mjs` (script de mesure, SELECT en lecture seule et S3 Get/List) et `preprod-2026-10-04.json` (résultat préprod).
 
 ## Contenu de la page
 
-- Les sections 1 (intention), 2 (contexte en clair) et 3 (synthèse) dépliées ; les sections 4, 5, 6, 8, 9 et l'annexe A repliées, rendues telles quelles. Les blocs Mermaid du corps sont remplacés par un renvoi.
+- Les sections 1 (intention), 2 (contexte, avec le tableau prod / préprod), 3 (synthèse) et 6 (méthode de correction pas à pas) dépliées ; les sections 4, 5, 8, 9 et l'annexe A repliées, rendues telles quelles. Les blocs Mermaid du corps sont remplacés par un renvoi.
 - Scène 1 `architecture-ecart` : SvelteFlow natif tiré du bloc Mermaid de l'annexe B, cinq couloirs verticaux de gauche à droite (utilisateurs, écrans, déclencheurs, traitements, données), carte unique A' 460 × 200 pour les seuls composants réels.
 - Figure 2 : diagramme des tables `graph_nodes` et `graph_edges` (style entité-relation, sans carte de composant) et de la ligne `bylaw-242` partagée par gore et barkmere ; source lisible équivalente : bloc `erDiagram` du §4.2.
 - Tableau 3 : les huit groupes de villes en barres horizontales (couleur et texte : réparable maintenant ou après D2), puis en tableau détaillé ; comptes vérifiés contre `preuves/diagnostic/groups.json` (total 226).

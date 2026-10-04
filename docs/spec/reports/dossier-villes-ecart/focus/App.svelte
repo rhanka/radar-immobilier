@@ -11,18 +11,18 @@
   <main class="dossier">
     <header class="masthead">
       <div class="flex-row">
-        <span class="eyebrow">Dossier de décision · pour Fabien (owner, AI Builder) · Farid (PO) consulté sur D2 et D3 · carte #812</span>
+        <span class="eyebrow">Dossier de décision · écart mesuré en PROD (radar-immobilier) et en préprod · pour Fabien (owner, AI Builder) · Farid (PO) consulté sur D2 et D3 · carte #812</span>
         <span class="badge warning">1 SCÈNE · 1 FIGURE · 9 SECTIONS · 7 DÉCISIONS · 4 OCTOBRE 2026</span>
       </div>
       <h1>Villes dont la base et le graphe stocké<br>ne concordent plus</h1>
       <p class="subtitle">Corriger le mélange de nœuds entre villes et remettre 226 villes en cohérence</p>
       <p class="lede">Chaque ville a deux copies de son graphe : un fichier dans S3, produit par le rafraîchissement, et des lignes dans la base PG, que l’application sert.
-        Après la reprise des dates du 3 octobre, 226 villes ont deux copies différentes. Cause principale : les identifiants de nœuds ne sont pas propres à une ville,
+        <strong>En prod</strong> (namespace <code>radar-immobilier</code>), après la reprise des dates du 3 octobre, 226 villes ont deux copies différentes ; la préprod, restaurée depuis la prod le 1er octobre, en a 216. Cause principale : les identifiants de nœuds ne sont pas propres à une ville,
         et la base n’a qu’une clé <code>id</code> ; quand deux villes ont le même identifiant, la seconde écrase le contenu de la première.
-        Résultat : 109 villes affichent des preuves venant d’une autre ville, alors que S3 est propre. Le dossier explique le contexte, puis demande sept décisions.</p>
+        Résultat : 109 villes affichent des preuves venant d’une autre ville, alors que S3 est propre. Le dossier explique le contexte, la méthode de correction (préprod d’abord, puis prod), puis demande sept décisions.</p>
       <div class="truth-strip">
-        <span><strong>226 VILLES EN ÉCART</strong> 205 stoppées · 21 avortées</span>
-        <span><strong>109 VILLES</strong> 164 nœuds aux preuves d’une autre ville</span>
+        <span><strong>226 VILLES EN PROD</strong> 216 en préprod · lecture seule, 4 oct.</span>
+        <span><strong>109 VILLES EN PROD</strong> preuves d’une autre ville (88 en préprod)</span>
         <span><strong>0 CAS DANS S3</strong> les 226 latest.json sont propres</span>
         <span><strong>3 535 NŒUDS VIDES</strong> dans PG seulement, 71 villes</span>
         <span><strong>65 VILLES / PASSAGE</strong> extraites puis refusées</span>
@@ -32,12 +32,12 @@
     <section class="reading-map" aria-label="Comment lire ce dossier">
       <h2>Comment lire ce dossier</h2>
       <ol>
-        <li><strong>D’abord l’intention et le contexte</strong>, dépliés : ce que sont S3 et PG, qui lit quoi, la projection et ses garde-fous, le job de reprise et <code>--heal</code>, l’ancien flux d’exploitation, pourquoi les villes ont divergé (§1, §2).</li>
+        <li><strong>D’abord l’intention et le contexte</strong>, dépliés : où est l’écart (prod et préprod côte à côte, §2.0), ce que sont S3 et PG, qui lit quoi, la projection et ses garde-fous, le job de reprise et <code>--heal</code>, l’ancien flux d’exploitation, pourquoi les villes ont divergé (§1, §2).</li>
         <li><strong>La Scène 1</strong> : l’architecture réelle en cinq couloirs verticaux, de gauche à droite, avec l’endroit où naît l’écart et celui de la collision.</li>
         <li><strong>La Figure 2</strong> : les tables <code>graph_nodes</code> et <code>graph_edges</code>, et la ligne <code>bylaw-242</code> partagée par gore et barkmere.</li>
         <li><strong>Le Tableau 3</strong> : les huit groupes de villes, leurs comptes et leur remède ; puis la synthèse, l’ordre et les dépendances entre décisions (§3).</li>
         <li><strong>Les décisions D1 à D7</strong>, toutes décidées par Fabien, chacune avec son problème, ses options (avantages, inconvénients) et la recommandation, sélectionnables et à copier en YAML dans la PR — brouillon local seulement.</li>
-        <li><strong>Les autres sections</strong> (collision, groupes, principes de réparation, ordre d’exécution, risques) et l’annexe A (listes des villes).</li>
+        <li><strong>Les autres sections</strong>, dont la <strong>méthode de correction pas à pas</strong> (§6 : correctif, préprod, contrôle, tag, prod, contrôle, retour arrière), puis collision, groupes, ordre d’exécution, risques, et l’annexe A (listes des villes).</li>
       </ol>
       <p class="caption">Conventions : <code>FAIT</code> = constaté dans une source citée · <code>CALCUL</code> = dérivé des
         données · <code>JUGEMENT</code> = appréciation · <code>non vérifié</code>, <code>source manquante</code>,
@@ -50,8 +50,9 @@
     <TableDiagram />
     <GroupsTable />
     <Sections sections={[synthesis]} label="Synthèse et décisions demandées" open={true} />
+    <Sections sections={body.filter(section => section.heading.startsWith('6.'))} label="Méthode de correction, pas à pas" open={true} />
     <DecisionChoices {manifest} details={decisionDetails} intro={optionsIntro} />
-    <Sections sections={body} label="Les autres sections du dossier" open={false} />
+    <Sections sections={body.filter(section => !section.heading.startsWith('6.'))} label="Les autres sections du dossier" open={false} />
     <Sections sections={annexes} label="Annexe du dossier" open={false} />
 
     <footer>
