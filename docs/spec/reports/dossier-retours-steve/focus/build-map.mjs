@@ -3,6 +3,9 @@ import { createHash } from 'node:crypto';
 // Parseur Mermaid, gabarit, géométrie et routage : chaîne existante, pas de copie.
 import { parseMermaid } from '../../../../architecture/focus/parse-mermaid.mjs';
 import { decorateGraph, sceneIds } from './scene-metadata.js';
+import { parseEr } from './parse-er.mjs';
+import { erLayout, laneLayout } from './diagram-layout.js';
+import { SCENE_KINDS, MATRIX, ER_SPEC, LANE_SPEC } from './diagram-specs.js';
 
 const DOSSIER = '../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md';
 const markdown = await readFile(DOSSIER, 'utf8');
@@ -13,21 +16,72 @@ const HTML_SHA256_PLACEHOLDER = '0'.repeat(64);
 const expected = [
   ['criteres-steve', "Scène 1 · les trois critères de Steve en regard de l'existant"],
   ['modele-donnees', 'Scène 2 · modèle de données, de la source à la publication'],
-  ['flux-import-oracle', 'Scène 3 · flux import, annotation, oracle et affichage'],
+  ['flux-import-oracle', "Scène 3 · architecture de l'import à l'affichage, oracle transversal"],
   ['architecture-ui', 'Scène 4 · architecture UI et état de la migration'],
   ['affichage-abc', 'Scène 5 · A, B et C sur le même inventaire'],
 ];
 const [body, annexB] = markdown.split('\n## Annexe B — Scènes Focus');
 if (!annexB) throw Error('missing Annexe B');
-const matches = [...annexB.matchAll(/### `([^`]+)` — ([^\n]+)\n\n```mermaid\n([\s\S]*?)```/g)];
-if (matches.length !== expected.length) throw Error(`canonical Mermaid count ${matches.length}, expected ${expected.length}`);
+// Each scene: a Mermaid block (flowchart or erDiagram) or, for the matrix, a Markdown table.
+const matches = [...annexB.matchAll(/### `([^`]+)` — ([^\n]+)\n\n(```mermaid\n[\s\S]*?```|(?:\|[^\n]*\n)+)/g)];
+if (matches.length !== expected.length) throw Error(`canonical scene count ${matches.length}, expected ${expected.length}`);
+const cells = line => line.trim().replace(/^\||\|$/g, '').split('|').map(cell => cell.trim());
+
+// Matrix: one row per criterion, a closed coverage value, a noise count that adds up.
+function matrixScene(source, id, title) {
+  const [head, rule, ...lines] = source.trim().split('\n');
+  if (JSON.stringify(cells(head)) !== JSON.stringify(MATRIX.columns) || !/^\|[-:| ]+\|$/.test(rule)) throw Error(`${id}: matrix header`);
+  const rows = lines.map(line => {
+    const [criterion, steve, radar, coverage, noise] = cells(line);
+    return { criterion, steve, radar, coverage, noise: Number(noise) };
+  });
+  const total = rows.pop();
+  if (total.criterion !== MATRIX.totalRow) throw Error(`${id}: missing total row`);
+  for (const row of rows) if (!MATRIX.coverage.includes(row.coverage) || !Number.isInteger(row.noise)) throw Error(`${id}: bad row ${row.criterion}`);
+  if (rows.reduce((sum, row) => sum + row.noise, 0) !== total.noise) throw Error(`${id}: noise does not add up`);
+  const projection = { sceneId: id, kind: 'matrix', rows, total: { ...total, workingView: MATRIX.workingView } };
+  return { id, title, kind: 'matrix', date: '2026-10-03', source, projection };
+}
+
+function erScene(source, id, title) {
+  const model = parseEr(source, id);
+  for (const name of ER_SPEC.existing) if (!model.entities.some(entity => entity.id === name)) throw Error(`${id}: existing table ${name} missing`);
+  const entities = model.entities.map(entity => ({ ...entity, existing: ER_SPEC.existing.includes(entity.id) }));
+  const projection = { sceneId: id, kind: 'er',
+    entities: entities.map(entity => ({ id: entity.id, existing: entity.existing, columns: entity.attributes.map(attribute => [attribute.name, ...attribute.keys].join(' ')) })),
+    relations: model.relations.map(({ line, ...relation }) => relation) };
+  return { id, title, kind: 'er', date: '2026-10-03', source, entities, relations: model.relations, projection, layout: erLayout(model, ER_SPEC) };
+}
+
+function laneScene(source, id, title) {
+  const graph = parseMermaid(source, id, title, 'decision', '2026-10-03');
+  const lanes = [...LANE_SPEC.lanes.map(lane => lane.id), LANE_SPEC.band.id];
+  for (const lane of lanes) if (!graph.groups.some(group => group.id === lane && group.parent === null)) throw Error(`${id}: lane ${lane} missing`);
+  const laneOf = item => { while (item && !lanes.includes(item.id)) item = graph.groups.find(group => group.id === item.parent); return item?.id; };
+  for (const item of graph.nodes) if (!LANE_SPEC.nodes[item.id]) throw Error(`${id}: no lane metadata for ${item.id}`);
+  for (const key of Object.keys(LANE_SPEC.nodes)) if (!graph.nodes.some(item => item.id === key)) throw Error(`${id}: extra lane metadata ${key}`);
+  for (const key of Object.keys(LANE_SPEC.edges)) if (!graph.edges.some(edge => `${edge.source}|${edge.target}` === key)) throw Error(`${id}: extra edge metadata ${key}`);
+  const nodes = graph.nodes.map(item => ({ ...item, lane: laneOf(item), ...LANE_SPEC.nodes[item.id] }));
+  const edges = graph.edges.map(edge => ({ ...edge, evidence: LANE_SPEC.edges[`${edge.source}|${edge.target}`] ?? 'declared' }));
+  const projection = { sceneId: id, kind: 'lanes',
+    lanes: graph.groups.map(group => ({ id: group.id, label: group.label, parentId: group.parent })),
+    nodes: nodes.map(item => ({ id: item.id, label: item.label, lane: item.lane, parentId: item.parent, evidence: item.evidence, tag: item.tag, detail: item.detail })),
+    edges: edges.map(edge => ({ id: edge.id, source: edge.source, target: edge.target, label: edge.label, evidence: edge.evidence })) };
+  return { id, title, kind: 'lanes', date: '2026-10-03', source, groups: graph.groups, nodes, edges, projection, layout: laneLayout(graph, LANE_SPEC) };
+}
+
 const graphs = matches.map((match, index) => {
   const [sceneId, title] = expected[index];
   if (match[1] !== sceneId) throw Error(`scene order mismatch: ${match[1]} != ${sceneId}`);
   if (match[2].trim() !== title) throw Error(`scene title mismatch: ${match[2]} != ${title}`);
-  return decorateGraph(parseMermaid(match[3], sceneId, title, 'decision', '2026-10-03'));
+  const block = match[3].startsWith('```mermaid') ? match[3].replace(/^```mermaid\n/, '').replace(/```$/, '') : match[3];
+  const kind = SCENE_KINDS[sceneId];
+  if (kind === 'matrix') return matrixScene(block, sceneId, title);
+  if (kind === 'er') return erScene(block, sceneId, title);
+  if (kind === 'lanes') return laneScene(block, sceneId, title);
+  return { ...decorateGraph(parseMermaid(block, sceneId, title, 'decision', '2026-10-03')), kind: 'flow' };
 });
-if (JSON.stringify(graphs.map(graph => graph.id)) !== JSON.stringify(sceneIds)) throw Error('scene inventory differs from the metadata table');
+if (JSON.stringify(graphs.filter(graph => graph.kind === 'flow').map(graph => graph.id)) !== JSON.stringify(sceneIds)) throw Error('scene inventory differs from the metadata table');
 
 const canonicalProjection = graph => ({
   sceneId: graph.id, pair: graph.pair, date: graph.date,
@@ -39,7 +93,7 @@ const canonicalProjection = graph => ({
     runtimeState: edge.metadata.runtimeState })).sort((a, b) => a.id.localeCompare(b.id)),
 });
 for (const graph of graphs) {
-  graph.projection = canonicalProjection(graph);
+  if (graph.kind === 'flow') graph.projection = canonicalProjection(graph);
   graph.canonicalJson = JSON.stringify(graph.projection).normalize('NFC');
   graph.sceneHash = sha256(graph.canonicalJson);
 }
@@ -67,6 +121,11 @@ const rendererSources = Object.fromEntries(await Promise.all([
   'scenes.js', 'Flow.svelte', 'ServiceNode.svelte', 'ServiceIcon.svelte', 'Subflow.svelte',
   'RoutedEdge.svelte', 'Viewport.svelte', 'service-icons.js', 'style.css', 'parse-mermaid.mjs',
 ].map(async name => [name, await readFile(`../../../../architecture/focus/${name}`, 'utf8')])));
+// Renderers of the matrix, table and swimlane scenes, local to this dossier.
+const diagramSources = Object.fromEntries(await Promise.all([
+  'diagram-router.js', 'diagram-layout.js', 'diagram-specs.js', 'parse-er.mjs', 'DiagramFrame.svelte', 'ErDiagram.svelte',
+  'LaneDiagram.svelte', 'MatrixScene.svelte', 'Scenes.svelte',
+].map(async name => [name, await readFile(name, 'utf8')])));
 
 const manifest = {
   schema: 'immo-focus-steve-decision-map/v1',
@@ -76,13 +135,13 @@ const manifest = {
   htmlSha256: HTML_SHA256_PLACEHOLDER,
   dossierHash: sha256(markdown), choicesHash: sha256(choices),
   reuse: 'gabarit A’, géométrie Dagre LR et routeur du kit h2a réutilisés depuis docs/architecture/focus',
-  serviceRendererHash: sha256(JSON.stringify(rendererSources)),
-  artifactInputHash: sha256(JSON.stringify({ markdown, graphs, choices, rendererSources })),
-  mapping: 'Cinq graphes Mermaid canoniques produisent cinq scènes SvelteFlow natives ; les subgraphs gardent parentId.',
-  geometry: 'Placement Dagre récursif rankdir LR et routeur orthogonal du kit ; carte unique A’ 460 x 200.',
+  serviceRendererHash: sha256(JSON.stringify(rendererSources)), diagramRendererHash: sha256(JSON.stringify(diagramSources)),
+  artifactInputHash: sha256(JSON.stringify({ markdown, graphs, choices, rendererSources, diagramSources })),
+  mapping: 'Scène 1 : matrice (tableau Markdown) ; scène 2 : erDiagram rendu en tables et relations ; scène 3 : flowchart en couloirs verticaux, oracle en bande basse ; scènes 4 et 5 : SvelteFlow natif, subgraphs en parentId.',
+  geometry: 'Scènes 4 et 5 : Dagre récursif rankdir LR et routeur orthogonal du kit, carte A’ 460 x 200 ; scènes 2 et 3 : grille explicite et routeur orthogonal A* du dossier.',
   graphOrder: graphs.map(graph => graph.id),
-  graphs: graphs.map(graph => ({ id: graph.id, title: graph.title, sceneHash: graph.sceneHash,
-    projection: graph.projection, nodes: graph.nodes.length, edges: graph.edges.length, subflows: graph.groups.length })),
+  graphs: graphs.map(graph => ({ id: graph.id, title: graph.title, kind: graph.kind, sceneHash: graph.sceneHash, projection: graph.projection,
+    nodes: (graph.nodes ?? graph.entities ?? graph.projection.rows).length, edges: (graph.edges ?? graph.relations ?? []).length, subflows: (graph.groups ?? []).length })),
   sections: sections.map(section => ({ id: section.id, heading: section.heading })),
 };
 await mkdir('.generated', { recursive: true });
