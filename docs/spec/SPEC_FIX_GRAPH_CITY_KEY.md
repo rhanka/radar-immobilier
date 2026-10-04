@@ -62,36 +62,50 @@ Non-goals (explicitly out of this spec):
 - Renaming or prefixing ids (options A and B of D2, rejected by the owner).
 - Any change to S3 `graph/<city>/latest.json` content. The repair never writes `latest.json`.
 
-## 3. Design decisions (K1–K12)
+## 3. Design decisions (K1–K16)
 
 Numbered `K` to avoid confusion with the dossier's D1–D7.
 
 | # | Decision | Rationale |
 |---|---|---|
 | K1 | `graph_nodes` primary key becomes `(city_slug, id)`; `city_slug` becomes `NOT NULL`. | Matches S3 (one file per city). A PK column cannot be NULL. |
-| K2 | NULL-city rows are **not** given a sentinel. The migration starts with a precheck that **raises** if any `graph_nodes.city_slug IS NULL` row exists; the release then aborts before `set-image` (backup already taken). Lot 0 measures the prod count read-only before the release. | Preprod measured 0. A sentinel (`__global__`) would recreate a shared id space. Fail-closed, decided on evidence. |
+| K2 | NULL-city rows are **not** given a sentinel. The migration starts with a precheck that **raises** if any `graph_nodes.city_slug IS NULL` row exists; the release then aborts before `set-image` (backup already taken). R0 (`graph-drift-measure`, K13) measures the prod count read-only before the release. | Preprod measured 0. A sentinel (`__global__`) would recreate a shared id space. Fail-closed, decided on evidence. |
 | K3 | `graph_edges` gets `city_slug text NOT NULL`; unique natural key `(city_slug, src_id, dst_id, kind)` replaces `graph_edges_natural_key_idx`; `graph_edges_src_idx` / `graph_edges_dst_idx` become `(city_slug, src_id)` / `(city_slug, dst_id)`. No foreign key to `graph_nodes` (unchanged soft reference, keeps the projection's upsert order free). | An edge belongs to the graph of one city (one `latest.json`). |
 | K4 | Edge backfill in the migration: `city_slug` = city of the `src_id` node, else of the `dst_id` node (both lookups unique while the old PK still holds, i.e. **before** the PK swap inside the same migration). Edges with neither endpoint present are copied to `graph_edges_dangling_0013` then deleted. | Dangling edges are never served (every edge read requires the src node in the city set). Archive keeps them restorable. |
 | K5 | **One migration**, `api/drizzle/0013_graph_city_key.sql`, hand-authored (like 0002/0003), in one transaction; `schema.ts` aligned. The constraint name of the current PK is resolved from `pg_constraint` (prod has a schema drift on `graph_nodes`, e.g. no `created_at`), never hard-coded. | Branch template: one migration max. Drift-safe. |
-| K6 | Release ordering: the CD path already runs backup → migrate → set-image → assert (`.github/workflows/build-push-images.yml:719-770`). Between migrate and set-image, any old pod issuing `ON CONFLICT (id)` fails with a SQL error **inside its transaction**: fail-closed, nothing is written, the refresh marks the city `postgres-write-failed` and retries on the next pass. The release is still scheduled outside refresh windows (05:17, 11:17, 17:17, 23:17 UTC, 1 h 30–2 h each) and outside the 02:23 UTC backup. No expand/contract second migration. | Simpler than two releases; the transient failure mode loses no data. Reviewed in §13. |
+| K6 | Release ordering: the CD path runs backup → migrate → set-image → assert (`.github/workflows/build-push-images.yml:719-770`) **only when armed**: preprod by `vars.BACKUP_BEFORE_RELEASE_ENABLED` (`:688-692`, `:727-728`), prod by `vars.BACKUP_BEFORE_RELEASE_PROD_ENABLED` (`:1285`, `:1319`); the legacy main→prod job (`vars.PREPROD_CD_ENABLED != 'true'`, `:237`) never migrates. **Gate of R1**: the three variables read and recorded (`true`, `true`, `true`) before the release. Between migrate and set-image, an old pod issuing `ON CONFLICT (id)` fails **inside its transaction** (fail-closed, nothing written). The refresh CronJobs are re-applied with the new image only when `REFRESH_CRONJOB_PREPROD_ENABLED` / `REFRESH_CRONJOB_PROD_ENABLED` are armed (`:974-975`, `:1403-1427`); otherwise the old image would fail on **every** pass. Hence: the refresh CronJob is **suspended from R1 to R5** through its reviewed kustomize overlay (`deploy/k8s/refresh-cronjobs*/kustomization.yaml`, `/spec/suspend`), and after R1 a check asserts that the CronJob image equals the release digest before it is resumed. The release runs outside refresh windows (05:17, 11:17, 17:17, 23:17 UTC, 1 h 30–2 h each) and outside the 02:23 UTC backup. No expand/contract second migration. | One release, no data-loss window, no permanent failure mode. Reviewed in §13 (peer B #3, #4). |
 | K7 | All writes use the city in the conflict target: nodes `ON CONFLICT (city_slug, id)`, edges `ON CONFLICT (city_slug, src_id, dst_id, kind)`, in `upsertGraphAtomic` **and** the legacy `upsertGraph`. `citySlug: null` is removed from both signatures (the "cross-city upsert" branch at `graph-store.ts:1008-1018` is deleted). The one-line stop-gap `WHERE graph_nodes.city_slug = excluded.city_slug` is deleted. | No Legacy Fallback; a NULL city can no longer be stored (K1). |
-| K8 | Deletions in `upsertGraphAtomic` are city-scoped on **both** tables: dangling-edge purge adds `graph_edges.city_slug = $city` (today `graph-store.ts:1147-1156` deletes other cities' edges sharing an orphan id — a second cross-city defect, FACT). | Same root cause, same fix. |
+| K8 | Deletions in `upsertGraphAtomic` are city-scoped on **both** tables: dangling-edge purge adds `graph_edges.city_slug = $city` (today `graph-store.ts:1147-1156` deletes other cities' edges sharing an orphan id — a second cross-city defect, FACT). In addition, the projection **deletes the city's edges absent from the new graph** (same rule as for nodes), so that PG edges of a city equal its `latest.json` edges after a projection. | Same root cause. Without it, edges of city B that the backfill (K4) attached to city A on a shared id would survive at A and be served by `subgraphForCity` (peer B #6). |
 | K9 | Every read by id binds the city (inventory §5): neighbour/edge reads, geo joins, MRC aggregation. API **paths do not change** (all node-bearing routes are already `/:city`-scoped); multi-city responses (`/api/graph/mrc/:mrc`) add `citySlug` on every edge and the UI keys nodes and edges by `${citySlug}\u0000${id}`. | Ids visible to users and MCP stay identical (the main benefit of C). |
-| K10 | The repair is a **new script** `api/src/scripts/repair-graph-city-key.ts`, run by a **new** `run-job.yaml` job `graph-city-key-repair` (inputs `repair_mode` preview\|apply, `repair_cities`), with two passes per city: pass 1 **decontamination** of proven-foreign nodes, pass 2 **standard projection** with the unchanged three guards (§7). | Foreign rows are what makes the guards refuse G2/G4 today; removing exactly those, and nothing else, lets the unchanged guards do the rest. |
-| K11 | "Foreign" is defined on content provenance, not on slug strings: a PG ref `docSha` of a node `(C, id)` is **foreign** when it is absent from every node of `graph/C/latest.json` **and** present on node `id` of `graph/D/latest.json` for some `D ≠ C`. The `proces-verbaux-<slug>/` path test of the dossier is reported as a secondary signal only. | Slug/source naming differs from `city_slug` in places (dossier §4.3, lascension). The cross-file proof does not depend on naming. |
-| K12 | `run-job.yaml` gains a `target_env` input (`preprod` \| `prod`, default `prod`) that selects namespace and the matching manifest twin, for `projection`, `document-date-recovery` and `graph-city-key-repair`, as required by dossier §6.2 (a). Whether preprod uses the same kubeconfig secret is `unverified` (Lot 0). | Same jobs, same parameters, preprod first. |
+| K10 | The repair is a **new script** `api/src/scripts/repair-graph-city-key.ts`, run by a **new** `run-job.yaml` job `graph-city-key-repair` (inputs `repair_mode` preview\|apply, `repair_cities`), one transaction per city: pass 1 **decontamination** (delete proven-foreign rows), pass 2 **standard projection** in a savepoint with the unchanged three guards (§7). | Foreign rows are what makes the guards refuse G2/G4 today; removing exactly those, and nothing else, lets the unchanged guards do the rest. |
+| K11 | "Foreign" is a **per-node, same-id, loss-explained** rule: a PG node `(C, x)` is `foreign` when everything the projection of `graph/C/latest.json` would remove from it (docShas and business properties) is present on node `x` of `graph/D/latest.json` for one `D ≠ C`; `clean` when nothing would be removed; `unknown` otherwise (§7.2). The `proces-verbaux-<slug>/` path test of the dossier is a secondary signal only. | Slug naming differs from `city_slug` in places (dossier §4.3, lascension); the legacy additive merge can mix local properties with foreign refs (peer A #1, #2). |
+| K12 | `run-job.yaml` gains a `target_env` input (`preprod` \| `prod`, default `prod`) that selects **the kubeconfig secret** (`KUBE_CONFIG_DATA` for prod, `KUBE_CONFIG_DATA_PREPROD` for preprod, FACT `build-push-images.yml:595-604`), the namespace, the pre-flight expected host and the manifest twin, for `projection`, `document-date-recovery`, `graph-drift-measure`, `graph-city-key-repair` and `mapper`. The preprod CI service account has no `pods/log` nor `pods/exec` (FACT `deploy/k8s/11-ci-deployer-preprod-rbac.yaml:16,23,78-91`), so every such Job writes a summary (≤ 4 KiB) to its **termination message** and its full report to S3; the workflow prints the termination message. A preprod twin of `32-graph-projection-only-job.yaml` is added (today prod-only, namespace hard-coded). | Same jobs, same parameters, preprod first, without manual cluster access (peer B #1). |
+| K13 | The read-only measurement becomes a CD job `graph-drift-measure` (TypeScript script compiled in the image, read-only transaction, S3 list/get only, report to S3 + termination message). It must run on **both** schemas (before and after 0013). It ships in a **first, separate PR** (with K12), released before the migration, so that R0 runs on the pre-migration schema with the same tool used for acceptance. | Running the dossier `.mjs` "in the pod by stdin" needs `kubectl exec`, which no CI account has and which is a manual access (peer B #2). |
+| K14 | Derived geo data are re-derived for repaired cities: the repair deletes, city-scoped, the `geo_resolutions` and `geo_unresolved` rows of the node ids it replaced (pass 1) or deleted (pass 2), then the run order calls `mapper` (with a new `mapper_cities` input passing `CITIES`, already read by `35-run-geo-mapper-job.yaml:14`) and `snapshot`. | `geo_*` tables are insert-only (`resolve-refs.ts:111` `ON CONFLICT DO NOTHING`, no delete in `api/src`) and computed from node props: rows derived from foreign content would remain (peer B #7). |
+| K15 | Every graph writer (`upsertGraphAtomic`, `upsertGraph`, the repair) takes `pg_advisory_xact_lock(hashtext('graph-city:' \|\| city))` as the first statement of its city transaction. | A repair-only lock does not exclude the refresh or the legacy exploitation route (peer A #8, peer B #8). |
+| K16 | Rollback policy: down-migration only before the first graph write after R1; forward-fix after (§11). | Duplicate ids exist as soon as one colliding city is projected; no prod restore tooling exists (peer A #6, #7, peer B #5). |
+
 
 ## 4. Schema migration — `api/drizzle/0013_graph_city_key.sql`
 
 Single transaction, in this order (pseudo-SQL; the implementation keeps drizzle's
 `--> statement-breakpoint` markers and the journal entry in `api/drizzle/meta/_journal.json`):
 
+0. **Lock budget**: `SET LOCAL lock_timeout = '10s'`. If a refresh or API transaction holds the
+   tables, the migration fails fast (the migrate Job fails, CD aborts **before** set-image), instead
+   of queueing an `ACCESS EXCLUSIVE` that would block every API read until the Job deadline
+   (`36-db-migrate-job.yaml`, `activeDeadlineSeconds: 540`). The refresh CronJob is already
+   suspended (K6); a retry is a re-run of the release.
 1. **Precheck NULL cities** (K2): `DO $$ … IF EXISTS (SELECT 1 FROM graph_nodes WHERE city_slug IS
    NULL) THEN RAISE EXCEPTION 'graph_nodes has % rows with NULL city_slug; migration 0013 refused'`.
-2. **Edges: add and backfill city** (K4), while `graph_nodes.id` is still unique:
+2. **Edges: add and backfill city** (K4), while `graph_nodes.id` is still unique; the
+   pre-migration edge count is kept in a temp table for step 7:
    `ALTER TABLE graph_edges ADD COLUMN city_slug text;`
    `UPDATE graph_edges e SET city_slug = n.city_slug FROM graph_nodes n WHERE n.id = e.src_id;`
-   then the same from `dst_id` for rows still NULL.
+   then the same from `dst_id` for rows still NULL. The backfill is a **placement**, not a
+   provenance proof: an edge of city B on an id shared with A may land at A. Correctness is restored
+   by the per-city edge reconciliation of the projection (K8) during the repair (§7), and measured
+   (`edgesNotInS3`, §9).
 3. **Dangling edges**: `CREATE TABLE graph_edges_dangling_0013 AS SELECT * FROM graph_edges WHERE
    city_slug IS NULL; DELETE FROM graph_edges WHERE city_slug IS NULL;`
    `ALTER TABLE graph_edges ALTER COLUMN city_slug SET NOT NULL;`
@@ -105,28 +119,33 @@ Single transaction, in this order (pseudo-SQL; the implementation keeps drizzle'
    graph_nodes_pkey PRIMARY KEY (city_slug, id);`. Existing ids are unique, so the new key holds.
    `graph_nodes_city_idx` becomes redundant with the PK prefix and is dropped;
    `graph_nodes_city_type_idx`, GIN, trigram and `label_tsv` indexes are kept.
-6. **Postcheck**: assert row counts of `graph_nodes` unchanged and
-   `count(graph_edges) + count(graph_edges_dangling_0013)` equal to the pre-migration edge count
-   (captured in step 2 into a temp table); raise on mismatch.
+6. **Geo key** (K14): `geo_resolutions_natural_key_idx` `(node_id, relation_type, target_id)`
+   (`0007_geo_mapper.sql:93`) becomes `(city_slug, node_id, relation_type, target_id)`. FACT:
+   `match-refs.ts:231-237` accepts a lot of **another** city when unambiguous, so two cities with the
+   same node id can resolve the same lot `target_id`, and today the second insert is silently dropped
+   by `ON CONFLICT … DO NOTHING` (`resolve-refs.ts:111`). Existing rows are unique under the wider
+   key, so the swap holds. The missing resolutions are rebuilt by the `mapper` run of §7.5 (R5b).
+7. **Postcheck**: `graph_nodes` count unchanged; `count(graph_edges) +
+   count(graph_edges_dangling_0013)` equal to the step-2 count; `geo_resolutions` count unchanged;
+   raise on mismatch.
 
 `schema.ts`: `graphNodes` uses `primaryKey({ columns: [t.citySlug, t.id] })`, `citySlug` `notNull()`;
 `graphEdges` gets `citySlug: text("city_slug").notNull()` and the three new indexes; comments that
 say "null = cross-city / global" are removed.
 
-Lock and duration: `ALTER TABLE … ADD PRIMARY KEY` and the edge `UPDATE` take an
-`ACCESS EXCLUSIVE` / row locks on two tables of tens of thousands of rows (exact size `unverified`,
-measured in Lot 0); expected seconds, inside the CD migrate poll of 600 s.
+Duration: two tables of tens of thousands of rows (exact size `unverified`, measured by R0);
+expected seconds, inside the CD migrate poll of 600 s.
 
 Other tables (FACT, checked in `schema.ts` and `api/drizzle/*.sql`):
 
 | Table | Holds a graph node id? | Change |
 |---|---|---|
-| `geo_resolutions` | `node_id` + `city_slug` (natural key `(node_id, relation_type, target_id)`, `0007_geo_mapper.sql:93`) | none in schema: zone `target_id` is `zone-{city}-{code}` (`populate-geo.ts:249`), lot numbers are province-wide; readers must join on `(city_slug, node_id)` (§5). Whether the key needs the city is checked by an integration test (§10). |
-| `geo_unresolved` | `node_id` + `city_slug` | none |
+| `geo_resolutions` | `node_id` + `city_slug` | key widened with `city_slug` (step 6); conflict target in `resolve-refs.ts:111`; derived rows of repaired nodes purged and rebuilt (K14) |
+| `geo_unresolved` | `node_id` + `city_slug` (audit, no unique key) | derived rows of repaired nodes purged and rebuilt (K14) |
 | `prospect_marks` | no (lot anchor `lot_version_id`, `no_lot`, `city_slug`) | none |
 | `prospect_notes` (annotations) | no (`signal_id` → `signals.id` uuid, lot anchor) | none |
 | `opportunities`, `opportunity_dossiers`, `constraint_hits` | no (uuid `signals`, zone/lot canonical ids) | none |
-| `consistency_snapshots` | no (per city payload) | none |
+| `consistency_snapshots` | no (per city payload, rebuilt by `snapshot` in R5b) | none |
 | `refresh_document_outcomes` | no (per document) | none |
 | evidence / refs | inside `graph_nodes.props.refs` (jsonb) | moves with the node row |
 | SQL views / materialized views on graph tables | none found in `api/drizzle/*.sql` | none |
@@ -165,7 +184,8 @@ city-only filter (no change needed beyond the key). Line numbers on `128bde8b`.
 | `api/src/services/geo/geo-features.ts:156-181` | `geo_resolutions` by city, then `graphNodes` `inArray(id, nodeIds)` | **ID** | add `eq(graphNodes.citySlug, citySlug)` |
 | `geo-features.ts:350-375` `getOpportuniteFeatures` | signal nodes by city | C | none |
 | `api/src/services/geo/run-geo-mapper.ts:90-92`, `measure-geo-mapping.ts:230-232`, `populate-geo.ts:395-399` | raw SQL on `graph_nodes` `WHERE city_slug = …` | C | none |
-| `api/src/services/geo/resolve-refs.ts:103-112` | insert `geo_resolutions` `ON CONFLICT (node_id, relation_type, target_id)` | key without city | verified by test (§4 table); change only if the test shows a cross-city collision |
+| `api/src/services/geo/resolve-refs.ts:103-112` | insert `geo_resolutions` `ON CONFLICT (node_id, relation_type, target_id) DO NOTHING` | key without city; collides across cities (`match-refs.ts:231-237` accepts another city's lot) | conflict target `(city_slug, node_id, relation_type, target_id)` (0013 step 6) |
+| `api/src/services/geo/priority-resolver.ts:205-213` | in-memory adjacency by `srcId`/`dstId` over one graph | in memory | none while its input is a single-city graph (no production caller found); noted for review |
 | `api/src/services/consistency/load-consistency-raw.ts:53-81`, `api/src/routes/source-coverage.ts:702-760` | aggregates `GROUP BY city_slug` | C | none |
 | `api/src/services/graph/graphify-34-snapshot.ts:102-159` | snapshot from `subgraphForCity` | C | none (benefits from the edge fix) |
 
@@ -217,7 +237,7 @@ no route accepts one, so such a link cannot exist).
 | `deploy/k8s/39-export-graph-nodes-job.yaml:80-115` | read-only export by city | C | none |
 | `scripts/cohorte-vivier-b/reproduce-cohort.ts` | offline dump reader | — | none |
 | `deploy/k8s/36-db-migrate-job.yaml` | runs `dist/db/migrate.js` | — | runs 0013 |
-| `docs/spec/reports/dossier-villes-ecart/preuves/diagnostic/mesure-lecture-seule.mjs` (PR #815) | `pgCityById` = `id → city` map (assumes unique ids) | **ID** | versioned v2, §9 |
+| `docs/spec/reports/dossier-villes-ecart/preuves/diagnostic/mesure-lecture-seule.mjs` (PR #815) | `pgCityById` = `id → city` map (assumes unique ids); returns early when id sets agree (line 70) | **ID** | replaced by the CD job `graph-drift-measure` (K13, §9) |
 
 ### 5.7 Tests that assert the old key
 
@@ -226,22 +246,32 @@ at 1342-1414 and 1650), `api/src/routes/graph.test.ts`, `api/tests/integration/r
 (`upsertGraphAtomic` at 309), `api/tests/integration/graph-signals-date-parity.spec.ts`,
 `graph-signals.sainte-martine-508.test.ts`, `graphify-34-enrichment.integration.test.ts`,
 `geo/regulatory-status-zone.integration.test.ts`, `sources/live-scrape.test.ts`,
-`scripts/worker-live-reexploit.test.ts`, `ui/src/lib/components/reconciliation/CityGraphView.test.ts`.
+`scripts/worker-live-reexploit.test.ts`, `graph/project-state-to-graph.test.ts`,
+`graph/graphify-34-enrichment.test.ts`, `scripts/purge-avis-bylaws*.test.ts`,
+`ui/src/lib/components/reconciliation/CityGraphView.test.ts`.
 They are updated in the lot that changes the code they cover.
+
 
 ## 6. Code changes (behaviour)
 
 1. `graph-store.ts`: K7, K8, K9 as listed in §5.1–5.2; `buildEdgeRow(link, citySlug)`;
-   `UpsertAtomicResult.reason` no longer has the cross-city case.
-2. Guards (`findMissingBusinessProperties`, `findMissingSourceRefs`, `countCompleteSignals`,
-   `graph-store.ts:571-830`): **unchanged**. They already read the city's rows only; after the key
-   change those rows can no longer hold another city's content.
-3. New pure helpers in `graph-store.ts` used by the repair (§7): `indexS3DocShas` (per city, per id,
-   the set of docShas) and `classifyForeignNodes(cityRows, cityS3Graph, s3Index)`.
-4. New `decontaminateCityNodes(db, citySlug, cityS3Graph, foreign)`: one transaction, for each
-   proven-foreign node either replaces its row with the city's own S3 node (when the id is in
-   `graph/<city>/latest.json`) or deletes it (when it is not), edges untouched; refuses the city
-   (no write) if any affected node is `mixed` (§7.2).
+   `UpsertAtomicResult.reason` no longer has the cross-city case; `UpsertAtomicResult` gains
+   `deletedStaleEdges` (edges of the city absent from the new graph, K8).
+2. **Projection preparation extracted**: the part of `upsertGraphAtomic` that turns a
+   `latest.json` into rows (`graphifyGraphSchema.parse`, `buildNodeRow`, `mergeNodeRows`,
+   `buildEdgeRow`, `mergeEdgeRows`, `materializeSeveredSources`, `graph-store.ts:993-1004`) becomes
+   an exported pure `prepareCityProjection(citySlug, graphJson)`. The projection, the repair, its
+   preview and the measurement all use it, so a simulation is the projection, not a copy of it
+   (peer A #9).
+3. Guards (`findMissingBusinessProperties`, `findMissingSourceRefs`, `countCompleteSignals`,
+   `graph-store.ts:571-830`): **unchanged**. They read the city's rows only; after the key change
+   those rows can no longer receive another city's content.
+4. Shared per-city write lock (K15): `upsertGraphAtomic`, `upsertGraph` and the repair take
+   `pg_advisory_xact_lock(hashtext('graph-city:' || $city))` as the first statement of their
+   transaction.
+5. New pure helpers for the repair (§7): `indexS3Nodes` (per city, per id: docShas and business
+   properties, from `prepareCityProjection`) and `classifyCityNodes(pgRows, s3Index, citySlug)`.
+6. New `repairCityGraph(db, store, citySlug, s3Index, runId)`: the two-pass transaction of §7.2.
 
 ## 7. Repair — `api/src/scripts/repair-graph-city-key.ts`
 
@@ -251,67 +281,96 @@ They are updated in the lot that changes the code they cover.
   list is required, produced by the measurement of §9), `--run-id <token>` (default
   `graph-city-key-repair-<UTC>`).
 - **Preconditions (refuse to start, exit 2)**: migration 0013 applied (PK of `graph_nodes` is
-  `(city_slug, id)`, read from `pg_constraint`); a session advisory lock
-  `pg_try_advisory_lock(hashtext('graph-city-key-repair'))` obtained; in apply mode, no active
-  refresh, backup or recovery Job (the `run-job.yaml` pre-check already used for
-  `document-date-recovery`, extended to this job and to `projection`).
-- **Reads**: every `graph/<city>/latest.json` once, to build the docSha index (ids + docShas only,
-  the memory profile of `mesure-lecture-seule.mjs`); PG rows of the target city.
-- **Writes (apply only)**: S3 archive object
-  `graph-city-key-repair/<run-id>/<city>/pg-rows.json` (nodes and edges of the city before any write,
-  plus sha256), written and read back **before** pass 1; PG through pass 1 and pass 2. Never writes
-  `graph/<city>/latest.json`.
-- **Output**: one JSON line per city and a final report (same shape as `recover-document-dates`):
-  `{ city, foreign, mixed, pass1: { replaced, deleted } | refused, pass2: { nodeCount, edgeCount,
-  deletedNodes, deletedEdges } | refused(reason), archiveKey }`. Exit 1 when any city is refused or
-  errored, 0 otherwise. Per-city independence: a refused city never stops the others.
+  `(city_slug, id)`, read from `pg_constraint`); in apply mode, the refresh CronJob suspended and no
+  active refresh, backup, projection, recovery, mapper or repair Job — the `run-job.yaml` busy
+  pre-check (`run-job.yaml:238-249`) is extended so that `radar-graph-city-key-repair`,
+  `radar-graph-projection-only`, `radar-document-date-recovery` and `radar-run-geo-mapper` each list
+  the others; the in-script check is the per-city lock of K15, which every graph writer takes.
+- **Reads**: every `graph/<city>/latest.json` once, through `prepareCityProjection`, to build
+  `indexS3Nodes` (ids, docShas, business properties; the memory profile of the dossier script);
+  PG rows (nodes and edges) of the target city, inside the city transaction, under the lock.
+- **Writes (apply only)**: S3 archive `graph-city-key-repair/<run-id>/<city>/pg-rows.json` (nodes,
+  edges and `geo_*` rows of the city as read **under the lock in the same transaction**, plus
+  sha256), written and read back before any PG write of that transaction; PG through the passes
+  below. Never writes `graph/<city>/latest.json`. Run report
+  `graph-city-key-repair/<run-id>/report.json` and a ≤ 4 KiB summary in the termination message (K12).
+- **Output** per city: `{ city, classes: { clean, foreign, unknown }, pass1: { replaced, deleted }
+  | refused, pass2: { nodeCount, edgeCount, deletedNodes, deletedEdges, deletedStaleEdges } |
+  refused(reason), geoPurged, archiveKey }`. Exit 1 when any city is refused or errored, 0 otherwise.
+  Per-city independence: a refused city never stops the others.
 
 ### 7.2 Per-city algorithm
 
-1. Load `graph/C/latest.json` (S3) and PG rows of C.
-2. Classify each PG node of C (K11): `clean` (no foreign docSha), `foreign` (≥1 foreign docSha and
-   every docSha of the row is foreign), `mixed` (foreign and non-foreign docShas together — only the
-   legacy additive `upsertGraph` merge can produce this).
-3. **Pass 1 — decontamination** (only if `foreign` ≥ 1): `decontaminateCityNodes`. Guard: zero
-   `mixed` nodes, otherwise the city is refused for pass 1 and listed for manual review. Business
-   properties of a `foreign` row are entirely foreign (REPLACE semantics,
-   `graph-store.ts:1105-1110`), so replacing them is not a loss.
-4. **Pass 2 — projection**: `upsertGraphAtomic(db, C, latest.json)` unchanged, with its three
-   guards. Expected: pass for G2, G3, G4; refused for cities with a local loss (G5c, G6: these stay
-   under D6/D7). A pass-2 refusal leaves pass 1 committed: the city is decontaminated but not
-   re-aligned, which is the intended partial result.
-5. Idempotence: a second run on the same city finds 0 foreign nodes (pass 1 skipped) and pass 2
-   upserts identical content (0 deletions).
+Classification is **per node, against the same id**, and explains every loss against the
+**initial** PG state (peer A #1, #2). For each PG node `(C, x)` let `S` = the row that
+`prepareCityProjection(C, latest.json)` produces for `x` (absent if `x` is not in C's file), and
+`loss(C, x)` = the docShas of the PG row absent from `S` plus the business properties
+(`props.properties` keys with a value, same predicate as `findMissingBusinessProperties`) that `S`
+lacks or holds with a different value.
+
+- `clean`: `loss = ∅` (the three guards would accept this node).
+- `foreign` (K11): `loss ≠ ∅` and there is **one** city `D ≠ C` whose `latest.json` row for the same
+  id `x` contains every docSha and every property value of `loss` (the lost content is explained by
+  D's file). The `proces-verbaux-<slug>/` path test is a secondary signal in the report only.
+- `unknown`: anything else, including a loss partly explained (the legacy additive `upsertGraph`,
+  `graph-store.ts:877-892`, keeps old refs under new properties and can produce a row whose refs are
+  foreign and whose properties are local).
+
+Then, inside **one** transaction per city, under the K15 lock:
+
+1. Read PG rows of C, classify, write and verify the archive.
+2. **Pass 1 — decontamination**: refused for the whole city (no write, city listed for manual
+   review) if any node is `unknown`. Otherwise, for each `foreign` node: delete its row and its
+   city-scoped `geo_*` rows; delete the city's edges incident to it.
+3. **Pass 2 — projection** in a **savepoint**: the body of `upsertGraphAtomic` on the post-pass-1
+   state (upsert, orphan nodes, stale edges K8, dangling edges, three guards). Because pass 1
+   removed only rows whose every loss is explained by another city's file, a guard refusal here is
+   a **local** loss (G5c, G6): the savepoint is rolled back and pass 1 alone is committed, i.e. the
+   city is decontaminated but not re-aligned (intended partial result, reported).
+4. `geo_*` rows of nodes deleted by pass 2 are purged (city-scoped). Commit.
+
+Idempotence: a second run on the same city finds only `clean` nodes; pass 2 upserts identical
+content with 0 deletions.
 
 ### 7.3 Preview
 
-Preview performs steps 1–2 and simulates passes 1 and 2 in memory with the same pure guard functions
-(`findMissingBusinessProperties`, `findMissingSourceRefs`, `countCompleteSignals`), against the
-post-pass-1 state. Its report must reproduce the dossier simulation (`sim.json`) for the same cities
-(acceptance of Lot 3, §10).
+Preview runs steps 1–4 in a transaction that is always rolled back (no archive write), with the
+real code path. Its report carries two verdict sets per city: **before** (the three guards against
+the current PG state — must reproduce the dossier `sim.json` verdicts for the same cities and the
+same S3 content) and **after** (the outcome of pass 1 + pass 2). Example: gore is
+`refused (gate3-source-ref)` before (as in `sim.json`) and expected `pass` after (peer A #9).
 
-### 7.4 CD job
+### 7.4 CD jobs
 
 - Manifests: `deploy/k8s/42-graph-city-key-repair-job.yaml` (prod) and its preprod twin
   `deploy/k8s/graph-city-key-repair/job.yaml`, modelled on `41-document-date-recovery-job.yaml`
   (label `component: graph-projection` for the network policy, `backoffLimit: 0`,
-  `activeDeadlineSeconds` sized in Lot 0, SCRAPE S3 binding checked by
-  `deploy/ci/check-object-storage-bindings.sh`). Not in `kustomization.yaml`.
-- `run-job.yaml`: new option `graph-city-key-repair`, inputs `repair_mode` (preview|apply),
-  `repair_cities`, `target_env` (K12); same busy pre-check and log collection as
-  `document-date-recovery`.
+  `activeDeadlineSeconds` ≤ the ~3 h 45 between refresh windows, SCRAPE S3 binding, the manifest
+  added to `SCRAPE_FILES` in `deploy/ci/check-object-storage-bindings.sh:13-17`). Not in
+  `kustomization.yaml`. Same pattern for `graph-drift-measure` (K13), and a preprod twin of
+  `32-graph-projection-only-job.yaml`.
+- `run-job.yaml`: new options `graph-drift-measure`, `graph-city-key-repair`; inputs
+  `repair_mode` (preview|apply), `repair_cities`, `mapper_cities`, `target_env` (K12); busy
+  pre-check extended (§7.1); termination-message print.
 
 ### 7.5 Run order (each step outside refresh windows and 02:23 UTC, one job at a time)
 
+Target list `L` (per environment) = cities with id drift (G2, G3, G4) **∪** cities with ≥ 1 node
+`foreign` or `unknown` content (including cities whose id sets agree, e.g. fortierville in
+`sim.json`, peer A #3) **∪** cities owning an id shared in S3 **∪** cities with `edgesNotInS3 > 0`,
+minus nothing: G5c and G6 cities are included for pass 1 and expected `pass2 refused`.
+
 | Step | preprod (`radar-immobilier-preprod`) | prod (`radar-immobilier`) | Gate to continue |
 |---|---|---|---|
-| R0 | measurement v2, read-only: baseline JSON | same | baseline archived in the PR/issue |
-| R1 | release with 0013 (CD to preprod) | tag `vX.Y.Z` | served image = merged commit / tag; migrate Job Complete |
-| R2 | measurement v2 right after migration | same | counts unchanged vs R0 except `idsSharedAcrossCitiesInS3` semantics (§9) |
-| R3 | `graph-city-key-repair` preview on the G2+G3+G4 list (131) and G5c | same on 148 + G5c | preview verdicts match the dossier simulation |
-| R4 | `graph-city-key-repair` apply on the same list | same | report: pass 2 refused only for listed G5c/G6 cities |
-| R5 | `document-date-recovery`, `recovery_mode=apply`, `recovery_heal=false`, `recovery_cities` = cities whose pass 2 succeeded | same | 0 HALT, 0 abort on that list |
-| R6 | measurement v2: acceptance (§9) | same | all criteria of §9 |
+| P | PR-1 released (K12, K13) | same tag | `graph-drift-measure` runs in both namespaces |
+| R0 | `graph-drift-measure` on pre-migration schema: baseline + list `L` | same | report archived on #812 |
+| R1 | suspend refresh CronJob (overlay PR); check `BACKUP_BEFORE_RELEASE_ENABLED`, `PREPROD_CD_ENABLED` = true; release PR-2 through CD | suspend; check `BACKUP_BEFORE_RELEASE_PROD_ENABLED` = true; tag `vX.Y.Z` | migrate Job Complete; served image = release; backup object present |
+| R2 | `graph-drift-measure` | same | node and edge counts equal to R0 minus `graph_edges_dangling_0013` (refresh suspended, so no tolerance needed) |
+| R3 | `graph-city-key-repair` preview on `L` | same | before-verdicts reproduce `sim.json`; after-verdicts: `pass` except listed G5c/G6; 0 `unknown`, or each `unknown` reviewed |
+| R4 | `graph-city-key-repair` apply on `L` | same | report = preview |
+| R5 | `document-date-recovery` apply, `recovery_heal=false`, cities whose pass 2 succeeded | same | 0 HALT, 0 abort |
+| R5b | `mapper` (`mapper_cities` = `L`), then `snapshot` | same | jobs Complete |
+| R6 | `graph-drift-measure`: acceptance (§9); refresh CronJob image = release digest, then resume it (overlay PR) | same | all criteria of §9 |
 
 Prod starts only after R6 passes in preprod.
 
@@ -322,29 +381,41 @@ Prod starts only after R6 passes in preprod.
 of repaired cities are equal, so R5 writes dates (archive of `latest.json` first, as today) and
 re-projects. `--heal` stays forbidden on these cities (dossier §6.1 point 3).
 
-## 9. Acceptance measurement (same read-only script)
+## 9. Acceptance measurement (same read-only tool)
 
-The dossier's `mesure-lecture-seule.mjs` (PR #815) is versioned as
-`api/src/scripts/measure-graph-drift.mjs` (run in the `radar-api` pod by stdin, as in the dossier;
-Node only). Changes, and only these:
+`graph-drift-measure` (`api/src/scripts/measure-graph-drift.ts`, K13) carries the rules of the
+dossier script `mesure-lecture-seule.mjs` (PR #815) with these changes only:
 
-- `pgCityById` (`id → city`) is replaced by a set keyed `city\u0000id`; the "owned by another city"
-  exclusion in the completeness count (`ca`) is removed, because ownership is now per city.
-- Output adds `pgPrimaryKey` (columns of the PK read from `pg_constraint`) and `mixed` counts.
-- Equivalence: run v1 and v2 read-only on preprod **before** migration; the JSON outputs must be
-  equal except `measuredAt` (Lot 1 gate).
+- keyed by `(city, id)` (no `id → city` map); the "owned by another city" exclusion in the
+  completeness count is removed;
+- the content check runs for **every** city, not only those whose id sets differ (the dossier script
+  returns early at line 70 when ids agree);
+- node classes `clean` / `foreign` / `unknown` computed with the repair's `classifyCityNodes`;
+- edges: `edgesNotInS3` and `edgesMissingInPg` per city (PG edges of the city vs `latest.json`
+  edges through `prepareCityProjection`);
+- `pgPrimaryKey` (columns read from `pg_constraint`); refresh outcomes read from the S3 refresh
+  receipts (`postgres-regression-refused` per city since a given time).
+
+**Equivalence** (peer A #9): on a seeded database (integration test) and on preprod before
+migration (R0), the fields common to v1 (`groups`, `perCity.group`, `foreignPg`, `foreignS3`,
+`pgNullCity`, `drift`) are equal, except the documented expected differences: cities whose ids agree
+but whose content is foreign appear in v2 only (listed), and `ca` changes for cities affected by the
+removed exclusion (listed).
 
 Acceptance after R6, per environment:
 
 | Measure | Target |
 |---|---|
-| `foreignPg.nodes` | **0** |
+| nodes `foreign` | **0** |
+| nodes `unknown` | 0, or each listed and accepted by the owner |
+| `foreignPg.nodes` (path rule of the dossier) | **0**, residuals explained by a slug mismatch listed |
 | `foreignS3.nodes` | 0 (unchanged) |
 | groups `G2G4-collision-refused`, `G3-S3-collision-only` | **0** |
+| `edgesNotInS3`, `edgesMissingInPg` on cities whose pass 2 succeeded | **0** |
 | groups `G5c`, `G6`, `G5ab`, `G1` | only the cities listed under D1/D4–D7, unchanged or reduced |
 | `pgNullCity` | 0 |
 | `pgPrimaryKey` | `[city_slug, id]` |
-| refresh pass following R6 | 0 `postgres-regression-refused` for repaired cities (refresh state receipts) |
+| first refresh pass after resume | 0 `postgres-regression-refused` for cities whose pass 2 succeeded |
 
 ## 10. Tests
 
@@ -354,24 +425,31 @@ Unit (`api/src/services/graph/graph-store.test.ts`, new `repair-graph-city-key.t
 
 - two cities with the same id → two rows, each with its own props and refs;
 - edges with the same triple in two cities → two rows;
-- dangling-edge purge in city A leaves city B's edges on the shared id;
+- dangling-edge purge in city A leaves city B's edges on the shared id; stale edges of the city
+  absent from the new graph are deleted, other cities' edges untouched;
 - `subgraphForCity` never returns an edge of another city; `subgraphForMrc` keeps both
   `(A, x)` and `(B, x)`;
-- `classifyForeignNodes`: clean / foreign / mixed, including a slug that differs from the rawRef
-  path (K11);
-- `decontaminateCityNodes`: replace, delete, refuse on mixed; idempotence;
-- repair preview equals the in-memory simulation of the dossier for fixtures built from
-  `sim.json` cases gore / barkmere (`bylaw-242`, `bylaw-134`).
+- `classifyCityNodes`: clean / foreign / unknown, including (a) a foreign docSha that also appears
+  on **another** id of C's file (must stay `foreign`, peer A #2), (b) local properties with foreign
+  refs from the legacy merge (must be `unknown`, peer A #1), (c) a property-only contamination
+  without docSha, (d) a slug that differs from the rawRef path;
+- `repairCityGraph`: pass 1 refused on `unknown`; pass 2 refused → pass 1 still committed;
+  idempotence; archive equals the replaced state;
+- `prepareCityProjection` gives the same rows as the pre-refactor projection on existing fixtures.
 
 Integration (Postgres test stack, `api/tests/integration/`):
 
 - migration 0013 on a database seeded at 0012 with: shared ids, shared edge triples, dangling
-  edges, a renamed PK constraint (drift), and a NULL-city row (migration must raise);
-- the gore / barkmere scenario end to end: contaminate with the pre-0013 code path (seeded rows),
-  migrate, repair apply, then a second repair (no-op), then `recover-document-dates --apply`
-  (no HALT);
-- `geo_resolutions` with the same `node_id` in two cities and the same `target_id` lot: documents
-  whether its natural key needs the city (decides the open item of §4);
+  edges, a renamed PK constraint (drift), a held lock (must fail on `lock_timeout`), a NULL-city row
+  (must raise);
+- `geo_resolutions`: same node id in two cities resolving the same lot → two rows after 0013;
+- the gore / barkmere scenario end to end (seed contaminated rows as today's code produces them,
+  migrate, repair preview = expected before/after verdicts, apply, second repair no-op,
+  `recover-document-dates --apply` without HALT); fortierville-like case (ids equal, content
+  foreign);
+- concurrency: a projection of the same city started during a repair waits on the K15 lock;
+- down script: up → down → up with the real drizzle migrator (journal row removed by the down,
+  `dialect.js` skips an already-recorded migration, peer A #6);
 - `refresh-018.spec.ts`, `graph-signals-date-parity.spec.ts` green with the new key.
 
 E2E (`make test-e2e ENV=e2e-<slug>`): MRC graph view renders two cities that share an id
@@ -382,41 +460,72 @@ CI and manifests: `make k8s-validate ENV=ci` for the new job manifests; object-s
 
 ## 11. Rollback
 
+Policy (K16): **down-migration only before the first graph write after R1; forward-fix after.**
+
 | Layer | Mechanism |
 |---|---|
-| Release | `rollback.yml` to the previous image **plus** the down-migration below (the old image issues `ON CONFLICT (id)`, which needs a unique `id`). |
-| Schema (before any repair) | `api/drizzle/rollback/0013_graph_city_key.down.sql` (not in the drizzle journal, run by a reviewed one-shot Job): restore PK `(id)`, drop edge `city_slug` and indexes, recreate `graph_edges_natural_key_idx`, re-insert `graph_edges_dangling_0013`. Valid only while ids are still unique across cities. |
-| Schema (after repair) | ids are no longer unique across cities, so the down-migration refuses (precheck). Rollback = restore the pre-migration PG backup taken by the CD (backup → migrate), then re-run R1 later. The backup's presence and restorability are checked before R1 (`unverified` today, dossier §6.2 f). |
-| Repair data | per-city S3 archive `graph-city-key-repair/<run-id>/<city>/pg-rows.json`; a restore script is **not** built (JUDGEMENT): the S3 `latest.json` stays authoritative and a city can be re-projected at any time; the archive serves forensics and targeted manual restore. |
+| Image | The CD image-only auto-rollback (`build-push-images.yml:1032-1042`, `ROLLBACK_ON_FAILURE_ENABLED`) never touches the DB. On 0013 the old image keeps **reading** (extra column, wider key) and its **writes fail closed** (`ON CONFLICT (id)` has no matching constraint): no data loss, graph frozen. Recovery = forward fix (re-run the release), not a DB restore. The post-rollout assert adds a graph check (one `GET /api/graph/<city>` and one `GET /api/graph-signals/<city>` 200) to the `/health` probe, which only runs `SELECT 1` (`api/src/db/client.ts:36`). |
+| Refresh CronJob | `rollback.yml` only touches Deployments (`rollback.yml:4-8`); the CronJob stays suspended until R6 checks its image (K6), so it never runs a mismatched image. |
+| Schema, before any graph write after R1 | `api/drizzle/rollback/0013_graph_city_key.down.sql`, run by a reviewed one-shot Job through `run-job.yaml` (`graph-schema-down`, `target_env`): prechecks that ids are unique across cities and edge triples unique across cities (refuses otherwise); restores PK `(id)`, the edge triple key and indexes, re-inserts `graph_edges_dangling_0013`, restores the geo key; **deletes the 0013 row from `drizzle.__drizzle_migrations`** in the same transaction so a later release re-applies 0013. |
+| Schema, after a graph write | the down refuses (duplicate ids exist as soon as one colliding city is projected). Rollback = DB restore from the CD pre-migration backup `db-backups/<env>-<sha>-<ts>.sql.gz` (`run-db-backup.sh:48,59`). FACT: no restore tool targets prod today (the bascule restore reads `pg/<D>/radar.dump`, preprod only), and a restore loses every write since the backup. Per the global backup rule, restore is operated by the immo tenant, not by this branch. Decision Q5. |
+| Repair data | per-city S3 archive (nodes, edges, `geo_*`), taken under the lock in the repair transaction. No restore script (Q4): `latest.json` stays authoritative and a city can be re-projected at any time; the archive serves forensics and targeted restore. |
 | S3 | never written by the repair; R5 archives `latest.json` as today. |
 
 ## 12. Risks
 
 | Risk | Mitigation |
 |---|---|
-| NULL-city rows in prod | K2 precheck; Lot 0 read-only count; owner decision if > 0 (Q1). |
-| Old pods during release | K6 fail-closed; release outside windows. |
-| Misclassification of foreign content | K11 cross-file proof; `mixed` refused; preview compared with `sim.json`; preprod rehearsal. |
-| Run-job targets prod only today | K12; preprod verified first (Lot 0). |
+| NULL-city rows in prod | K2 precheck; R0 measures the count; owner decision if > 0 (Q1). |
+| CD migrate disarmed | R1 gate on the three variables (K6). |
+| Refresh CronJob on the old image | suspended R1→R6, image checked before resume (K6). |
+| Lock queue on migration | `lock_timeout` (§4 step 0). |
+| Misclassification of foreign content | per-node, same-id, loss-explained rule (K11); `unknown` refused; preview with before/after verdicts; preprod rehearsal. |
+| Concurrent graph writer during repair | shared per-city advisory lock in every writer (K15); suspended CronJob; extended busy pre-check; archive read under the lock. |
+| Legacy exploitation route writes during repair | it goes through `upsertGraph`, which takes the K15 lock. |
+| No prod DB restore tooling | K16 forward-fix policy; Q5. |
 | Unknown consumer of ids alone | inventory §5: none in routes, UI, MCP. |
-| Refresh pass writing during repair | advisory lock + busy pre-check + windows. |
 
 ## 13. Adversarial review log
 
-Reviewed by two independent peers with distinct lenses before planning (seats only, no API key):
-peer 1 — data correctness and migration safety; peer 2 — operations, repair, rollback and inventory
-completeness. Findings and their reconciliation are recorded in §13.1; open items needing the owner
-are in §14.
+Two independent peers, distinct lenses, seats only (no API key): **peer A** (Codex) — data
+correctness and migration safety; **peer B** (Claude) — operations, repair, rollback, inventory
+completeness. Round 1 verdicts: peer A **reject**, peer B **approve-with-changes**. Every finding
+was checked against the code before being accepted.
 
 ### 13.1 Findings and reconciliation
 
-_Filled after review (see PR thread)._
+| # | Peer | Severity | Finding | Resolution |
+|---|---|---|---|---|
+| A1 | A | blocker | Foreign refs do not prove foreign properties: legacy `upsertGraph` keeps old refs under new props (`graph-store.ts:877-892`). | Accepted. K11 rewritten: per node, every lost docSha **and** property explained by one other city's same-id row; else `unknown` → pass 1 refused (§7.2). |
+| A2 | A | major | K11 tested docSha absence on all nodes of C, the guard tests the same id. | Accepted. Same-id classification; unit test (a) in §10. |
+| A3 | A | blocker | Dossier script exits early when ids agree (fortierville case in `sim.json`). | Accepted. Measurement checks content for every city; list `L` includes content-only contamination (§7.5, §9). |
+| A4 | A | blocker | Edges not reconciled from S3. | Accepted. K8: projection deletes the city's edges absent from the new graph; pass 1 deletes edges incident to foreign nodes; `edgesNotInS3` / `edgesMissingInPg` acceptance. Same as B6. |
+| A5 | A | major | `geo_resolutions` key collides across cities (`match-refs.ts:231-237` allows another city's lot). | Accepted. Key widened in 0013 step 6; rebuild in R5b. Same family as B7. |
+| A6 | A | blocker | Down then up is skipped by the drizzle migrator (journal). | Accepted. Down deletes the journal row; up→down→up integration test; edge-triple uniqueness precheck. Same as B5. |
+| A7 | A | major | CD image auto-rollback without schema rollback; `/health` only `SELECT 1`. | Accepted. K16 forward-fix policy; graph check added to the post-rollout assert (§11). |
+| A8 | A | major | Repair lock not taken by other writers; archive may differ from replaced state. | Accepted. K15 shared per-city advisory lock in every writer; archive read under the lock in the same transaction. Same as B8. |
+| A9 | A | major | Equivalence and simulation criteria contradictory; simulation skipped `materializeSeveredSources`. | Accepted. `prepareCityProjection` shared by all; before/after verdicts; equivalence on common fields with listed expected differences (§7.3, §9). |
+| B1 | B | blocker | Preprod unreachable from `run-job.yaml` (prod secret, hard-coded namespace, no `pods/log` for the preprod SA, no preprod projection twin). | Accepted. K12 rewritten (secret by `target_env`, termination message + S3 report, projection twin). |
+| B2 | B | blocker | Measurement "in the pod by stdin" = manual `kubectl exec`. | Accepted. K13: CD job `graph-drift-measure`, TypeScript, shipped in a first PR so R0 runs pre-migration. |
+| B3 | B | major | CD migrate is conditional on three variables. | Accepted. R1 gate (K6, §7.5). |
+| B4 | B | major | Refresh CronJob image not guaranteed by the release; `rollback.yml` ignores it. | Accepted. CronJob suspended R1→R6, image checked before resume (K6). |
+| B5 | B | major | Rollback neither operable nor verifiable (no job, journal, validity limit, no prod restore path). | Accepted. `graph-schema-down` job; journal; validity "before first graph write"; Q5 for prod restore. |
+| B6 | B | major | Repair does not cover edges; list too narrow; no edge measure. | Accepted (see A4); list `L` widened. |
+| B7 | B | major | Derived geo data omitted. | Accepted. K14 purge + `mapper` + `snapshot` (R5b). |
+| B8 | B | major | No `lock_timeout`; busy lists not mutual; deadline sizing. | Accepted. §4 step 0; §7.1; §7.4. |
+| B9 | B | minor | Plan scope paths and exceptions missing; §5.7 incomplete. | Accepted. Plan updated; §5.7 completed. |
+| B10 | B | minor | R2 tolerance; receipts read path; `priority-resolver.ts:205-213` resolves edges by id in memory. | Accepted. Refresh suspended so no tolerance; receipts read by the measure job; priority-resolver noted in §5.2 (single-city input, no change). |
+
+Round 2: the revised spec is re-submitted to both peers on the PR (`harness review --consensus`
+during Lot 6 of the plan for the implementation, and a re-read of this revision before merge of
+this PR).
 
 ## 14. Open questions for the owner
 
 | # | Question | Context and stakes | Default if not answered |
 |---|---|---|---|
-| Q1 | If prod has `city_slug IS NULL` rows, delete them, or attach them to a city? | The migration refuses while any exist (K2). Preprod: 0. Prod: `unverified`, measured in Lot 0. | Release blocked until decided. |
-| Q2 | Accept the transient fail-closed window of K6 (an in-flight old-image projection fails and retries next pass), or require an expand/contract in two releases? | Two releases double the CD cycle; the single release loses no data. | K6 (single release). |
-| Q3 | Repair scope: G2+G3+G4 (+G5c for pass 1 only), or also G1 cities in the same job (instead of the `projection` job of D1)? | D1 is a separate owner decision; the repair job would also handle G1 (pass 2 removes empty nodes). | G1 stays under D1 with the `projection` job. |
+| Q1 | If prod has `city_slug IS NULL` rows, delete them, or attach them to a city? | The migration refuses while any exist (K2). Preprod: 0. Prod: `unverified`, measured by R0. | Release blocked until decided. |
+| Q2 | Accept the suspension of the refresh CronJob from R1 to R6 (a few hours per environment, no new PV extracted meanwhile)? | Needed so that no old image runs and no writer competes with the repair (K6, K15). The extraction cost of refused cities stops during the suspension. | Suspension. |
+| Q3 | Repair scope: list `L` (§7.5), or also G1 cities in the same job (instead of the `projection` job of D1)? | D1 is a separate owner decision; the repair job would also handle G1 (pass 2 removes empty nodes). | G1 stays under D1. |
 | Q4 | Keep the per-city S3 archive of PG rows without a restore script? | A restore script costs a lot; S3 `latest.json` is authoritative. | Archive only. |
+| Q5 | After the first graph write following R1, accept "forward-fix only" (no DB restore path), or require first a documented prod restore exercise by the immo operator? | No restore tool targets prod today; a restore loses every write since the backup. Owner of backups: the immo tenant. | Forward-fix only, stated in the release PR. |
