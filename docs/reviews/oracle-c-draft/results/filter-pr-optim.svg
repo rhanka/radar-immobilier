@@ -1,13 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 536" width="860" height="536" font-family="system-ui, sans-serif" font-size="12">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 298" width="860" height="298" font-family="system-ui, sans-serif" font-size="12">
 <title>Precision and recall, positive = Pertinent, optim set</title>
-<rect width="860" height="536" fill="#fcfcfb"/>
+<rect width="860" height="298" fill="#fcfcfb"/>
 <text x="16" y="22" font-size="14" font-weight="600" fill="#1a1a19">Show-to-Steve filter, optim (60 lines): precision and recall, positive = Pertinent</text>
 <rect x="16" y="32" width="10" height="10" rx="2" fill="#2a78d6"/><text x="30" y="41" fill="#52514e">Precision</text><rect x="100" y="32" width="10" height="10" rx="2" fill="#eb6834"/><text x="114" y="41" fill="#52514e">Recall</text>
-<line x1="340" x2="340" y1="50" y2="502" stroke="#e1e0d9"/><text x="340" y="516" text-anchor="middle" fill="#52514e">0%</text>
-<line x1="457.5" x2="457.5" y1="50" y2="502" stroke="#e1e0d9"/><text x="457.5" y="516" text-anchor="middle" fill="#52514e">25%</text>
-<line x1="575" x2="575" y1="50" y2="502" stroke="#e1e0d9"/><text x="575" y="516" text-anchor="middle" fill="#52514e">50%</text>
-<line x1="692.5" x2="692.5" y1="50" y2="502" stroke="#e1e0d9"/><text x="692.5" y="516" text-anchor="middle" fill="#52514e">75%</text>
-<line x1="810" x2="810" y1="50" y2="502" stroke="#e1e0d9"/><text x="810" y="516" text-anchor="middle" fill="#52514e">100%</text>
+<line x1="340" x2="340" y1="50" y2="264" stroke="#e1e0d9"/><text x="340" y="278" text-anchor="middle" fill="#52514e">0%</text>
+<line x1="457.5" x2="457.5" y1="50" y2="264" stroke="#e1e0d9"/><text x="457.5" y="278" text-anchor="middle" fill="#52514e">25%</text>
+<line x1="575" x2="575" y1="50" y2="264" stroke="#e1e0d9"/><text x="575" y="278" text-anchor="middle" fill="#52514e">50%</text>
+<line x1="692.5" x2="692.5" y1="50" y2="264" stroke="#e1e0d9"/><text x="692.5" y="278" text-anchor="middle" fill="#52514e">75%</text>
+<line x1="810" x2="810" y1="50" y2="264" stroke="#e1e0d9"/><text x="810" y="278" text-anchor="middle" fill="#52514e">100%</text>
 <text x="332" y="71" text-anchor="end" fill="#1a1a19">B pass 1 (5 filters)</text>
 <rect x="340" y="56" width="221.94444444444446" height="12" rx="3" fill="#2a78d6"><title>B pass 1 (5 filters): precision 47.2 %</title></rect><text x="565.9444444444445" y="66" fill="#52514e" font-size="11">47.2</text>
 <rect x="340" y="70" width="420.52631578947376" height="12" rx="3" fill="#eb6834"><title>B pass 1 (5 filters): recall 89.5 %</title></rect><text x="764.5263157894738" y="80" fill="#52514e" font-size="11">89.5</text>
@@ -26,25 +26,4 @@
 <text x="332" y="241" text-anchor="end" fill="#1a1a19">Exclude PIIA + dérogation alone (reconstructed)</text>
 <rect x="340" y="226" width="159.62264150943395" height="12" rx="3" fill="#2a78d6"><title>Exclude PIIA + dérogation alone (reconstructed): precision 34.0 %</title></rect><text x="503.62264150943395" y="236" fill="#52514e" font-size="11">34.0</text>
 <rect x="340" y="240" width="445.2631578947369" height="12" rx="3" fill="#eb6834"><title>Exclude PIIA + dérogation alone (reconstructed): recall 94.7 %</title></rect><text x="789.2631578947369" y="250" fill="#52514e" font-size="11">94.7</text>
-<text x="332" y="275" text-anchor="end" fill="#1a1a19">C v1 Astra low</text>
-<rect x="340" y="260" width="226.2962962962963" height="12" rx="3" fill="#2a78d6"><title>C v1 Astra low: precision 48.1 %</title></rect><text x="570.2962962962963" y="270" fill="#52514e" font-size="11">48.1</text>
-<rect x="340" y="274" width="321.57894736842104" height="12" rx="3" fill="#eb6834"><title>C v1 Astra low: recall 68.4 %</title></rect><text x="665.578947368421" y="284" fill="#52514e" font-size="11">68.4</text>
-<text x="332" y="309" text-anchor="end" fill="#1a1a19">C v1 Gemini low</text>
-<rect x="340" y="294" width="282" height="12" rx="3" fill="#2a78d6"><title>C v1 Gemini low: precision 60.0 %</title></rect><text x="626" y="304" fill="#52514e" font-size="11">60.0</text>
-<rect x="340" y="308" width="445.2631578947369" height="12" rx="3" fill="#eb6834"><title>C v1 Gemini low: recall 94.7 %</title></rect><text x="789.2631578947369" y="318" fill="#52514e" font-size="11">94.7</text>
-<text x="332" y="343" text-anchor="end" fill="#1a1a19">C v1 Opus 5.5 low</text>
-<rect x="340" y="328" width="256.36363636363626" height="12" rx="3" fill="#2a78d6"><title>C v1 Opus 5.5 low: precision 54.5 %</title></rect><text x="600.3636363636363" y="338" fill="#52514e" font-size="11">54.5</text>
-<rect x="340" y="342" width="445.2631578947369" height="12" rx="3" fill="#eb6834"><title>C v1 Opus 5.5 low: recall 94.7 %</title></rect><text x="789.2631578947369" y="352" fill="#52514e" font-size="11">94.7</text>
-<text x="332" y="377" text-anchor="end" fill="#1a1a19">C v2 Astra low</text>
-<rect x="340" y="362" width="235" height="12" rx="3" fill="#2a78d6"><title>C v2 Astra low: precision 50.0 %</title></rect><text x="579" y="372" fill="#52514e" font-size="11">50.0</text>
-<rect x="340" y="376" width="445.2631578947369" height="12" rx="3" fill="#eb6834"><title>C v2 Astra low: recall 94.7 %</title></rect><text x="789.2631578947369" y="386" fill="#52514e" font-size="11">94.7</text>
-<text x="332" y="411" text-anchor="end" fill="#1a1a19">C v2 Gemini low</text>
-<rect x="340" y="396" width="279.0625" height="12" rx="3" fill="#2a78d6"><title>C v2 Gemini low: precision 59.4 %</title></rect><text x="623.0625" y="406" fill="#52514e" font-size="11">59.4</text>
-<rect x="340" y="410" width="470" height="12" rx="3" fill="#eb6834"><title>C v2 Gemini low: recall 100.0 %</title></rect><text x="814" y="420" fill="#52514e" font-size="11">100.0</text>
-<text x="332" y="445" text-anchor="end" fill="#1a1a19">C v2 Opus 5.5 low</text>
-<rect x="340" y="430" width="255.1428571428571" height="12" rx="3" fill="#2a78d6"><title>C v2 Opus 5.5 low: precision 54.3 %</title></rect><text x="599.1428571428571" y="440" fill="#52514e" font-size="11">54.3</text>
-<rect x="340" y="444" width="470" height="12" rx="3" fill="#eb6834"><title>C v2 Opus 5.5 low: recall 100.0 %</title></rect><text x="814" y="454" fill="#52514e" font-size="11">100.0</text>
-<text x="332" y="479" text-anchor="end" fill="#1a1a19">C v2 majority of 3</text>
-<rect x="340" y="464" width="255.1428571428571" height="12" rx="3" fill="#2a78d6"><title>C v2 majority of 3: precision 54.3 %</title></rect><text x="599.1428571428571" y="474" fill="#52514e" font-size="11">54.3</text>
-<rect x="340" y="478" width="470" height="12" rx="3" fill="#eb6834"><title>C v2 majority of 3: recall 100.0 %</title></rect><text x="814" y="488" fill="#52514e" font-size="11">100.0</text>
 </svg>
