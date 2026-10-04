@@ -1,2 +1,5 @@
 work/
 runs/
+# Frozen sets stay local: public repository, owner decision pending (D6).
+optim.jsonl
+blind.jsonl
