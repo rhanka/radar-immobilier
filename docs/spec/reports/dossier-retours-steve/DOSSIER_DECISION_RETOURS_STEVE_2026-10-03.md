@@ -109,6 +109,8 @@ Avec une réserve explicite : « Quand le sens d'une modification n'est pas dét
 | Neutre | 6 | 14 | 1 / 0 / 13 |
 | Motif N-RESTRICTIF (resserrement) | 4 | 7 | Non pertinent |
 
+<!-- chart:sens-classement -->
+
 **Critère 3 — Densification.**
 > « Le résultat est plus d'unités que le règlement en permettait avant. C'est le critère qui tranche : un assouplissement résidentiel qui ne change pas le nombre d'unités possibles ne m'apporte rien. » (analyse, §1)
 
@@ -126,6 +128,8 @@ Avec une réserve explicite : « Quand le sens d'une modification n'est pas dét
 - « Distinguer une règle générale d'une autorisation individuelle. Un PPCMOI ou une dérogation accordés à un demandeur pour un immeuble précis ne créent de droit pour personne d'autre. » (analyse, §5) — V2-PRECEDENT : 8 en passe 1, 21 au total, tous Non pertinent (« hors de mon périmètre actuel », analyse, §3).
 
 Bilan de la passe 1 (CALCUL, recompté par motif) : les 24 Non pertinent se répartissent en **3** hors résidentiel ou hors urbanisme, **4** resserrements, **6** sans effet sur la capacité, **11** hors portée (8 autorisations individuelles, 3 points d'ordre du jour). 22 signaux réunissent les trois critères ; 27 ne sont pas qualifiables avec l'information servie.
+
+<!-- chart:bruit-familles -->
 
 ### 2.3 Écart avec l'existant, critère par critère
 
@@ -245,6 +249,8 @@ Les options, leurs meilleurs arguments contraires et les conditions qui feraient
 | 3 — reste | 2 | 3 | 12 | 17 |
 | Hors radar | 0 | 0 | 1 | 1 |
 | **Total** | **40** | **29** | **55** | **124** |
+
+<!-- chart:classement-passes -->
 
 Ce sont des distributions d'annotations, pas une précision ni un rappel du système. 34 des 40 Pertinent sont en passe 1, 38 en passe 1 ou 2.
 
@@ -661,6 +667,8 @@ Un signal est **dans C** si aucune exclusion **établie** ne s'applique ; il est
 | Part des P en passe 1 | 85 % | 34/40 |
 | Part des P en passe 1 ou 2 | 95 % | 38/40 |
 
+<!-- chart:base-b -->
+
 Biais : 124 signaux sur 146, 51 villes sur 103, choisies dans l'ordre du relevé ; non représentatif du parc (JUGEMENT).
 
 ### 9.4 Impacts sur le benchmark (#782)
@@ -701,7 +709,7 @@ Les tableaux extraction et ciblage restent séparés, sans fusion des F1. Pont p
 
 **Ordre de décision.** Fabien décide d’abord ses six décisions (D2, D3, D4, D9, D10, D11) : elles sont prises telles quelles, sauf incohérence avec une autre décision. Farid décide ensuite ses dix décisions (D1, D5, D6, D7, D8, D12, D13, D14, D15, D16), en connaissant les choix de Fabien. Si un choix de Farid contredit un choix de Fabien (par exemple D1 « tout conserver » avec D2 = M1, qui tronque une cellule de 17 114 caractères), on revient à Fabien sur ce seul point.
 
-Chaque décision s'ouvre sur une courte introduction (le problème, pourquoi maintenant, ce qui change selon le choix, les renvois au dossier), dit de quelles décisions elle dépend, puis détaille chaque option avec ses avantages et ses inconvénients. Les coûts sont des jugements relatifs de périmètre, pas des estimations d'heures ni de budget (`N-A` jusqu'à l'inventaire des rattachements).
+Chaque décision s'ouvre sur une courte introduction (le problème, pourquoi maintenant, ce qui change selon le choix, les renvois au dossier), dit de quelles décisions elle dépend, puis détaille chaque option : une description de ce qui est proposé, ses avantages et ses inconvénients, et pour D2 et D3 un schéma de tables par option. Les coûts sont des jugements relatifs de périmètre, pas des estimations d'heures ni de budget (`N-A` jusqu'à l'inventaire des rattachements).
 
 ### Étape 1 · Fabien décide d’abord (architecture, données, oracle)
 
@@ -712,12 +720,104 @@ Le classeur de Steve (7 feuilles, 433 lignes, une cellule de 17 114 caractères,
 
 **Dépend de :** aucune décision antérieure. **Conditionne :** D3 (Ancre signal et correctif B0), D4 (Conformité sentropic et suppression), D9 (Sens de « double annotation »), D10 (Oracle #783), D1 (Périmètre de conservation des retours de Steve).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| M1 — étendre prospect_notes | • Réutilise la migration 0011, l’API et l’UI existantes.<br>• Aucune nouvelle table à créer. | • Auteur = compte obligatoire : Steve n’en a pas (D5).<br>• Une seule cible par note, alors qu’une ligne vise 1 à N objets (signal, ville, règlement…).<br>• Corps limité à 10 000 caractères : la cellule de 17 114 caractères serait tronquée.<br>• Ni provenance (fichier, feuille, ligne) ni verdict structuré : inutilisable pour l’oracle. |
-| M2 — table de contrôle seule | • Rapide : une table.<br>• Respecte le précédent du 2026-06-11 : la mesure ne nourrit pas la production. | • Rien d’affichable : ne répond pas à #784 (« attaché à l’élément associé »).<br>• Steve ne voit pas ses retours dans l’outil.<br>• Une seconde structure sera nécessaire plus tard pour l’affichage. |
-| **M3 — couches hôtes + projection conforme** (recommandée) | • Couvre les neuf exigences E1 à E9 (§6.2) : aucune perte, 1 à N ancres, provenance, révisions sans doublon.<br>• Les couches brutes et évaluations servent de table de contrôle pour l’oracle ; la projection Comment, d’annotation visible.<br>• Conforme au contrat sentropic sans modifier le paquet. | • Neuf tables nouvelles et une migration à écrire et tester.<br>• Une file de rapprochement (identifiants abrégés, ambiguïtés) à traiter à la main.<br>• Plus de code d’import que les autres options. |
-| M4 — attendre le paquet complet | • Aucune dette côté radar : tout vit dans sentropic.<br>• Aucune migration à écrire ni à maintenir maintenant. | • Bloquant sans date : #784 et l’oracle attendent.<br>• Le paquet ne porte de toute façon ni verdict structuré ni provenance (§6.1). |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| M1 — étendre prospect_notes | On ajoute des colonnes à prospect_notes (migration 0011) et chaque ligne du classeur devient une note libre sur un lot ou un signal. Aucune nouvelle table ; l’UI des notes existante affiche le texte. Exemple : la ligne #7 du Triage, qui nomme deux événements, doit être dupliquée en deux notes ; la cellule E57 des Constats (17 114 caractères) ne rentre pas. | • Réutilise la migration 0011, l’API et l’UI existantes.<br>• Aucune nouvelle table à créer. | • Auteur = compte obligatoire : Steve n’en a pas (D5).<br>• Une seule cible par note, alors qu’une ligne vise 1 à N objets (signal, ville, règlement…).<br>• Corps limité à 10 000 caractères : la cellule de 17 114 caractères serait tronquée.<br>• Ni provenance (fichier, feuille, ligne) ni verdict structuré : inutilisable pour l’oracle. |
+| M2 — table de contrôle seule | On crée une seule table de contrôle qui recopie le classeur pour mesurer le radar, sans aucun lien vers ce qui est affiché. Le nom de table est indicatif. Rien n’apparaît dans le panneau du signal : Steve ne retrouve pas son verdict sur le signal qu’il a trié ; seul l’oracle lit la table. | • Rapide : une table.<br>• Respecte le précédent du 2026-06-11 : la mesure ne nourrit pas la production. | • Rien d’affichable : ne répond pas à #784 (« attaché à l’élément associé »).<br>• Steve ne voit pas ses retours dans l’outil.<br>• Une seconde structure sera nécessaire plus tard pour l’affichage. |
+| **M3 — couches hôtes + projection conforme** (recommandée) | On crée les tables de la scène 2 : le fichier reçu (sha256), toutes ses lignes brutes, une évaluation versionnée par ligne, 1 à N ancres vers les objets du radar, et une projection vers les fils de commentaires sentropic. Exemple : la ligne #7 donne une évaluation et deux ancres (deux événements) ; une ligne agrégée « 13 signaux PIIA » donne une ancre sur la ville. Le panneau affiche le verdict, l’oracle lit les mêmes évaluations. | • Couvre les neuf exigences E1 à E9 (§6.2) : aucune perte, 1 à N ancres, provenance, révisions sans doublon.<br>• Les couches brutes et évaluations servent de table de contrôle pour l’oracle ; la projection Comment, d’annotation visible.<br>• Conforme au contrat sentropic sans modifier le paquet. | • Neuf tables nouvelles et une migration à écrire et tester.<br>• Une file de rapprochement (identifiants abrégés, ambiguïtés) à traiter à la main.<br>• Plus de code d’import que les autres options. |
+| M4 — attendre le paquet complet | On ne construit rien côté radar : on attend que le paquet comments de sentropic porte tout (cibles, verdict, provenance). En attendant, le classeur reste un fichier hors de l’outil. Même livré, le paquet ne porte ni classement, ni motif, ni sens : il faudrait encore des tables radar. | • Aucune dette côté radar : tout vit dans sentropic.<br>• Aucune migration à écrire ni à maintenir maintenant. | • Bloquant sans date : #784 et l’oracle attendent.<br>• Le paquet ne porte de toute façon ni verdict structuré ni provenance (§6.1). |
+
+Schéma de l'option M1 — étendre prospect_notes :
+
+```mermaid
+erDiagram
+    prospect_notes }o--|| account_users : auteur
+    prospect_notes }o--o| signals : cible_signal
+    prospect_notes {
+      uuid id PK
+      text target_type "lot ou signal"
+      text city_slug
+      uuid signal_id FK "UUID"
+      uuid author_id FK "compte obligatoire"
+      text body "10 000 caractères max"
+    }
+    account_users {
+      uuid id PK
+    }
+    signals {
+      uuid id PK "aucune insertion sur main"
+    }
+```
+
+Schéma de l'option M2 — table de contrôle seule :
+
+```mermaid
+erDiagram
+    steve_control_rows {
+      uuid id PK
+      text sheet
+      int sheet_row
+      jsonb cells "toutes les cellules"
+      text verdict "classement, motif, sens"
+    }
+    graph_nodes {
+      text id PK "signal-…"
+      text city_slug
+    }
+```
+
+Schéma de l'option M3 — couches hôtes + projection conforme :
+
+```mermaid
+erDiagram
+    annotation_sources ||--o{ annotation_raw_rows : contient
+    annotation_raw_rows ||--o{ annotation_assessments : normalisee_en
+    annotation_assessments ||--o{ annotation_anchors : rattachee_a
+    annotation_anchors }o..o| graph_nodes : cle_texte_sans_fk
+    annotation_assessments ||--o| comment_projection : publie_en
+    annotation_sources {
+      uuid id PK
+      text file_sha256 UK
+    }
+    annotation_raw_rows {
+      uuid id PK
+      uuid source_id FK
+      jsonb cells
+    }
+    annotation_assessments {
+      uuid id PK
+      uuid raw_row_id FK
+      text classement
+      text motif_code
+      text sens
+    }
+    annotation_anchors {
+      uuid id PK
+      uuid assessment_id FK
+      text anchor_key "sans FK"
+    }
+    graph_nodes {
+      text id PK
+    }
+    comment_projection {
+      uuid id PK
+      uuid assessment_id FK
+      text thread_id
+    }
+```
+
+Schéma de l'option M4 — attendre le paquet complet :
+
+```mermaid
+erDiagram
+    sentropic_comments {
+      text id PK
+      text target_kind "record"
+      text target_id
+      text author_id
+      text body "ni classement ni provenance"
+    }
+```
 
 **Recommandation : M3 — couches hôtes + projection conforme.** M3 est la seule option qui conserve tout, rattache une ligne à plusieurs objets et sert à la fois l’affichage et l’oracle. Son vrai coût, la curation des identifiants abrégés, existe dans toutes les options.
 
@@ -728,11 +828,55 @@ Une ancre est la référence qui attache une annotation à un objet du radar (si
 
 **Dépend de :** D2 (Modèle de données). **Conditionne :** D14 (Première livraison UI), D15 (Séquencement).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| **(a) Clé texte namespacée + instantané observé, B0 immédiat** (recommandée) | • Survit à la ré-extraction : l’ancre passe « disparue » au lieu d’effacer l’annotation, et l’instantané observé (ville, date, type, verbatim) reste lisible.<br>• Répare tout de suite l’annotation existante (B0, taille S).<br>• Aucune clé étrangère vers le graphe, donc aucune suppression en cascade. | • Si l’extraction renomme un identifiant, un rapprochement est nécessaire (file de revue).<br>• La clé texte n’est pas une identité métier définitive. |
-| (b) Attendre une clé métier stable | • Identité propre et stable par conception.<br>• Évite plus tard tout rapprochement d’identifiants. | • Dépend d’une ontologie qui n’existe pas : bloquant, sans date.<br>• L’annotation de signal reste cassée en attendant. |
-| (c) Passer par l’UUID signals | • Contrat v1 (migration 0011) inchangé.<br>• Aucune nouvelle colonne d’ancre à créer. | • Aucune insertion dans signals sur main : l’ancre est impossible en pratique.<br>• Maintient le défaut actuel (refus 400 attendu). |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| **(a) Clé texte namespacée + instantané observé, B0 immédiat** (recommandée) | On stocke la cible sous forme de texte (« radar.signal:<ville>:<id> ») dans annotation_anchors, sans clé étrangère vers le graphe, avec un instantané de ce que Steve a vu (ville, date, type, verbatim). B0 corrige l’API pour accepter cet identifiant texte. Si une ré-extraction supprime le signal, l’ancre passe « disparue » et le panneau montre l’instantané au lieu de perdre le retour. | • Survit à la ré-extraction : l’ancre passe « disparue » au lieu d’effacer l’annotation, et l’instantané observé (ville, date, type, verbatim) reste lisible.<br>• Répare tout de suite l’annotation existante (B0, taille S).<br>• Aucune clé étrangère vers le graphe, donc aucune suppression en cascade. | • Si l’extraction renomme un identifiant, un rapprochement est nécessaire (file de revue).<br>• La clé texte n’est pas une identité métier définitive. |
+| (b) Attendre une clé métier stable | On n’ancre rien tant qu’une clé métier stable (dossier réglementaire, étape) n’existe pas dans une ontologie du radar. Aucun lot B0 : l’annotation de signal reste en échec 400 et les retours de Steve ne s’affichent sur aucun signal. | • Identité propre et stable par conception.<br>• Évite plus tard tout rapprochement d’identifiants. | • Dépend d’une ontologie qui n’existe pas : bloquant, sans date.<br>• L’annotation de signal reste cassée en attendant. |
+| (c) Passer par l’UUID signals | On garde le contrat v1 : une annotation de signal pointe vers l’UUID de la table signals. Mais aucun code de main n’écrit dans signals : il n’existe aucun UUID à viser pour les 124 lignes de Steve. L’ancre ne peut pas être créée. | • Contrat v1 (migration 0011) inchangé.<br>• Aucune nouvelle colonne d’ancre à créer. | • Aucune insertion dans signals sur main : l’ancre est impossible en pratique.<br>• Maintient le défaut actuel (refus 400 attendu). |
+
+Schéma de l'option (a) Clé texte namespacée + instantané observé, B0 immédiat :
+
+```mermaid
+erDiagram
+    annotation_anchors }o..o| graph_nodes : cle_texte_sans_fk
+    annotation_anchors {
+      uuid id PK
+      text anchor_key "radar.signal:<ville>:<id>"
+      jsonb observed "ville, date, verbatim"
+      text resolution "résolue … disparue"
+    }
+    graph_nodes {
+      text id PK "signal-… (texte)"
+    }
+```
+
+Schéma de l'option (b) Attendre une clé métier stable :
+
+```mermaid
+erDiagram
+    annotation_anchors }o..o| cle_metier_stable : attend
+    annotation_anchors {
+      uuid id PK
+      text business_key "à définir"
+    }
+    cle_metier_stable {
+      text key PK "n'existe pas encore"
+    }
+```
+
+Schéma de l'option (c) Passer par l’UUID signals :
+
+```mermaid
+erDiagram
+    prospect_notes }o--o| signals : signal_id
+    prospect_notes {
+      uuid id PK
+      uuid signal_id FK "UUID exigé par l'API"
+    }
+    signals {
+      uuid id PK "table vide sur main"
+    }
+```
 
 **Recommandation : (a) Clé texte namespacée + instantané observé, B0 immédiat.** (a) avec B0 tout de suite : c’est le seul choix qui rend l’annotation de signal utilisable maintenant et qui ne perd rien à la ré-extraction. Une clé métier stable reste un suivi séparé.
 
@@ -743,11 +887,11 @@ Les annotations doivent suivre le contrat du module comments de sentropic, la pl
 
 **Dépend de :** D2 (Modèle de données). **Conditionne :** D5 (Auteur des retours importés), D6 (Visibilité et données personnelles), D14 (Première livraison UI).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| **(a) Cibles et lecture conformes, import immuable, demande de tombstone** (recommandée) | • Respecte O1 et la ligne COLLAB « le paquet porte l’intégrité ».<br>• Livrable maintenant : cibles et lecture conformes, sans modifier le paquet.<br>• Les réponses des utilisateurs vont dans prospect_notes v1, qui sait déjà faire une suppression logique. | • Conformité partielle : pas encore le port complet CommentStore.<br>• Une demande à sentropic (tombstone) à suivre.<br>• Une migration vers le port complet plus tard. |
-| (b) Adaptateur CommentStore à tombstone hôte | • Port complet utilisé dès maintenant.<br>• Un seul chemin d’écriture et de lecture : celui du port. | • Contredit COLLAB §2 : un tombstone porté seulement par Radar est un piège.<br>• Un delete qui ne supprime pas trahit la sémantique du port.<br>• Dette à défaire quand sentropic livrera. |
-| (c) Attendre le port complet | • Conformité intégrale, aucun écart.<br>• Aucune migration ultérieure vers le port complet. | • Bloquant tant que sentropic n’a pas livré, sans date.<br>• Rien d’affiché pour Steve en attendant. |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| **(a) Cibles et lecture conformes, import immuable, demande de tombstone** (recommandée) | Les annotations utilisent les cibles et la lecture du module comments, sans modifier le paquet. Les retours importés sont immuables : aucun bouton de suppression. Les réponses de l’équipe vont dans prospect_notes v1, qui sait déjà effacer logiquement. On demande à sentropic une version avec tombstone, puis on adopte le port complet. | • Respecte O1 et la ligne COLLAB « le paquet porte l’intégrité ».<br>• Livrable maintenant : cibles et lecture conformes, sans modifier le paquet.<br>• Les réponses des utilisateurs vont dans prospect_notes v1, qui sait déjà faire une suppression logique. | • Conformité partielle : pas encore le port complet CommentStore.<br>• Une demande à sentropic (tombstone) à suivre.<br>• Une migration vers le port complet plus tard. |
+| (b) Adaptateur CommentStore à tombstone hôte | On écrit un adaptateur CommentStore côté radar dont le delete pose une marque (tombstone) au lieu d’effacer. Les retours et réponses passent tout de suite par le port complet. Mais le delete du port ne supprime plus vraiment : sa sémantique diffère de celle du paquet. | • Port complet utilisé dès maintenant.<br>• Un seul chemin d’écriture et de lecture : celui du port. | • Contredit COLLAB §2 : un tombstone porté seulement par Radar est un piège.<br>• Un delete qui ne supprime pas trahit la sémantique du port.<br>• Dette à défaire quand sentropic livrera. |
+| (c) Attendre le port complet | On attend que sentropic publie un paquet avec tombstone et rétention, puis on branche tout dessus. Aucun retour de Steve n’est affiché avant cette version, sans date connue. | • Conformité intégrale, aucun écart.<br>• Aucune migration ultérieure vers le port complet. | • Bloquant tant que sentropic n’a pas livré, sans date.<br>• Rien d’affiché pour Steve en attendant. |
 
 **Recommandation : (a) Cibles et lecture conformes, import immuable, demande de tombstone.** (a), puis adoption du port complet quand sentropic publiera la version avec tombstone. Réserve : le dossier COLLAB n’est pas sur main (non vérifié) ; s’il était abandonné, (b) redeviendrait défendable.
 
@@ -758,11 +902,11 @@ La demande initiale parle de « double annotation (ancienne / nouvelle) » sans 
 
 **Dépend de :** D2 (Modèle de données). **Conditionne :** D10 (Oracle #783), D7 (Définition de C v1).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| Steve contre classification radar | • Mesure directement l’écart entre ce que Steve juge et ce que le radar montre (B aujourd’hui, C demain).<br>• C’est la lecture qui sert la bascule B → C (D13). | • La classification serveur de septembre n’est pas archivée : la version radar sera reconstituée, en partie.<br>• Ne mesure pas l’accord entre deux humains. |
-| Ancienne grille de Steve contre grille C | • Suit l’évolution des critères de Steve dans le temps.<br>• Utile si Steve réétiquette ses lignes avec les critères C. | • Exige un second passage de Steve sur les mêmes lignes.<br>• Ne dit rien de la qualité du radar. |
-| Oracle 676 contre oracle Steve | • Relie l’extraction (oracle E) et le ciblage (oracle C).<br>• Réutilise deux références déjà constituées (674/676 et le tableur). | • Compare deux questions différentes : « a-t-on extrait l’acte ? » contre « fallait-il le montrer ? ».<br>• Recouvrement des deux corpus probablement faible (non vérifié). |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| Steve contre classification radar | Le jeu « steve-source » (verdict de Steve) est comparé à la classification du radar : B′ reconstituée à la date du relevé, puis C. Exemple : sur la passe 1, Steve juge 24 signaux sur 73 Non pertinent alors que B les affiche ; c’est cet écart que l’on mesure ligne par ligne. | • Mesure directement l’écart entre ce que Steve juge et ce que le radar montre (B aujourd’hui, C demain).<br>• C’est la lecture qui sert la bascule B → C (D13). | • La classification serveur de septembre n’est pas archivée : la version radar sera reconstituée, en partie.<br>• Ne mesure pas l’accord entre deux humains. |
+| Ancienne grille de Steve contre grille C | On compare deux grilles humaines de Steve : son classement actuel (P/S/N, motif) et un nouvel étiquetage selon les critères C. Steve repasse sur les mêmes lignes ; l’oracle mesure l’évolution de ses critères, pas le radar. | • Suit l’évolution des critères de Steve dans le temps.<br>• Utile si Steve réétiquette ses lignes avec les critères C. | • Exige un second passage de Steve sur les mêmes lignes.<br>• Ne dit rien de la qualité du radar. |
+| Oracle 676 contre oracle Steve | On rapproche l’oracle d’extraction (676 unités sur 100 procès-verbaux) et l’oracle de Steve (124 lignes). Le pont passe par les documents communs, probablement peu nombreux (non vérifié). | • Relie l’extraction (oracle E) et le ciblage (oracle C).<br>• Réutilise deux références déjà constituées (674/676 et le tableur). | • Compare deux questions différentes : « a-t-on extrait l’acte ? » contre « fallait-il le montrer ? ».<br>• Recouvrement des deux corpus probablement faible (non vérifié). |
 
 **Point ouvert.** Point ouvert : aucune option recommandée. La lecture (1) est celle que le dossier a modélisée (§6.6) ; les trois tiennent dans le même schéma.
 
@@ -773,11 +917,11 @@ Un oracle est un jeu de réponses de référence qui note automatiquement le rad
 
 **Dépend de :** D2 (Modèle de données), D9 (Sens de « double annotation »). **Conditionne :** D11 (Benchmark #782), D1 (Périmètre de conservation des retours de Steve), D7 (Définition de C v1), D8 (Cas contradictoires), D12 (Exposition A/B/C), D13 (Seuil de bascule B → C), D15 (Séquencement).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| Remplacer v3 par le tableur | • Rapide : une seule source.<br>• Aucune adjudication supplémentaire à organiser. | • Les retours ne portent que sur ce que l’écran affichait : échantillon biaisé, les sept dossiers manqués restent invisibles.<br>• Perd l’historique de l’extraction et la comparabilité des benchmarks passés. |
-| **Double oracle E / C, jeu test indépendant** (recommandée) | • Mesure séparément « a-t-on extrait l’acte ? » (E) et « fallait-il le montrer ? » (C).<br>• Jeu test indépendant : les 52 villes suivantes de Steve, jamais vues pendant le réglage (51 villes de développement).<br>• Partition par dossier : pas de fuite entre développement et test. | • Adjudication nommée et corpus de test coûtent du travail (Steve, l’équipe).<br>• Deux oracles à versionner et geler par empreinte (sha256). |
-| Campagne C entièrement nouvelle | • Conçue pour le besoin réel, sans biais d’affichage.<br>• Peut couvrir d’emblée les 52 villes restantes avec la méthode C. | • Comparaison moins directe avec l’historique.<br>• Repart de zéro : délai et coût d’annotation les plus élevés. |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| Remplacer v3 par le tableur | Les 124 lignes du tableur deviennent l’unique oracle, à la place de la version 674/676. Rapide à constituer, mais il ne contient que ce que l’écran montrait à Steve : les sept dossiers manqués (« l’information existait dans la base ») n’y figurent pas. | • Rapide : une seule source.<br>• Aucune adjudication supplémentaire à organiser. | • Les retours ne portent que sur ce que l’écran affichait : échantillon biaisé, les sept dossiers manqués restent invisibles.<br>• Perd l’historique de l’extraction et la comparabilité des benchmarks passés. |
+| **Double oracle E / C, jeu test indépendant** (recommandée) | Deux oracles versionnés et gelés par empreinte. E reste l’oracle d’extraction (676 unités). C est construit à partir des évaluations et ancres de Steve, adjugées et étayées. Développement sur ses 51 villes, test sur les 52 suivantes, jamais vues ; toutes les unités d’un même dossier dans la même partition. | • Mesure séparément « a-t-on extrait l’acte ? » (E) et « fallait-il le montrer ? » (C).<br>• Jeu test indépendant : les 52 villes suivantes de Steve, jamais vues pendant le réglage (51 villes de développement).<br>• Partition par dossier : pas de fuite entre développement et test. | • Adjudication nommée et corpus de test coûtent du travail (Steve, l’équipe).<br>• Deux oracles à versionner et geler par empreinte (sha256). |
+| Campagne C entièrement nouvelle | On lance une campagne d’annotation neuve, conçue pour le ciblage C, sur un nouveau corpus. Les 124 lignes de Steve servent seulement d’exemples ; la comparaison avec l’historique se fait à part. | • Conçue pour le besoin réel, sans biais d’affichage.<br>• Peut couvrir d’emblée les 52 villes restantes avec la méthode C. | • Comparaison moins directe avec l’historique.<br>• Repart de zéro : délai et coût d’annotation les plus élevés. |
 
 **Recommandation : Double oracle E / C, jeu test indépendant.** Double oracle : c’est la seule façon de mesurer l’utilité (ciblage) sans perdre la mesure de l’extraction ; campagne nouvelle seulement pour ce que les archives ne permettent pas d’évaluer. Unité : le signal, regroupé par dossier ; une unité « dossier » serait plus fidèle mais dépend d’une clé de règlement peu fiable (C-26).
 
@@ -788,10 +932,10 @@ Le benchmark #782 compare des modèles et des réglages sur un même oracle. Si 
 
 **Dépend de :** D10 (Oracle #783). **Conditionne :** D12 (Exposition A/B/C), D13 (Seuil de bascule B → C).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| **Volet ciblage séparé** (recommandée) | • Extraction et ciblage restent comparables chacun dans le temps.<br>• Colonnes historique, B et C distinctes : l’effet de C se lit directement.<br>• Tout changement du contrat d’extraction devient une nouvelle version, décidée à part. | • Deux tableaux à lire.<br>• Pont entre les deux seulement sur les 100 documents du corpus commun. |
-| Métriques fusionnées | • Un seul tableau, un seul score.<br>• Lecture plus simple pour un public non technique. | • Mélange deux questions différentes : un F1 fusionné ne dit plus rien.<br>• Perd la comparabilité avec les campagnes passées. |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| **Volet ciblage séparé** (recommandée) | Le rapport du benchmark #782 garde son tableau d’extraction inchangé et ajoute un tableau « ciblage » : précision et rappel de l’historique, de B, puis de C, sur l’oracle C. Le prompt gelé immo-pv-extraction-v9 n’est pas modifié ; l’enrichir serait une nouvelle version, décidée à part. | • Extraction et ciblage restent comparables chacun dans le temps.<br>• Colonnes historique, B et C distinctes : l’effet de C se lit directement.<br>• Tout changement du contrat d’extraction devient une nouvelle version, décidée à part. | • Deux tableaux à lire.<br>• Pont entre les deux seulement sur les 100 documents du corpus commun. |
+| Métriques fusionnées | Un seul tableau et un seul score mêlent l’extraction (étape et citation) et le ciblage (fallait-il montrer le signal). | • Un seul tableau, un seul score.<br>• Lecture plus simple pour un public non technique. | • Mélange deux questions différentes : un F1 fusionné ne dit plus rien.<br>• Perd la comparabilité avec les campagnes passées. |
 
 **Recommandation : Volet ciblage séparé.** Volet ciblage séparé : c’est la condition pour comparer B et C sans casser l’historique de l’extraction.
 
@@ -804,11 +948,11 @@ Steve a livré un classeur de 7 feuilles (124 lignes de triage, 121 contrôles d
 
 **Dépend de :** D2 (Modèle de données), D10 (Oracle #783).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| (a) Triage seul | • Rapide : une feuille, 124 lignes.<br>• Moins de rattachements à vérifier à l’import. | • Perd les 121 contrôles d’exclusion, là où se trouvent les faux négatifs, ainsi que les constats et les règles.<br>• Oracle incomplet : impossible de mesurer ce que les filtres cachent à tort. |
-| **(b) Tout le classeur et l’analyse, brut immuable** (recommandée) | • Aucune perte : chaque cellule, formule et valeur mémorisée.<br>• L’oracle (D10) dispose des exclusions et des règles.<br>• Les 52 villes suivantes s’importeront de la même façon. | • Plus de tables et de curation (rattachements à vérifier).<br>• Import un peu plus long à écrire et à recetter. |
-| (c) Notes libres seules | • Surface existante : les notes des lots et des signaux.<br>• Aucun schéma nouveau : livrable vite. | • Perd la structure (classement, motif, sens), les groupes et la provenance.<br>• Inutilisable pour l’oracle ; une note est limitée à 10 000 caractères. |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| (a) Triage seul | On importe seulement la feuille Triage : 124 lignes, 51 villes. Les 121 contrôles d’exclusion (dont 3 faux négatifs « écartés à tort »), les 77 constats et les 26 règles restent dans le fichier. | • Rapide : une feuille, 124 lignes.<br>• Moins de rattachements à vérifier à l’import. | • Perd les 121 contrôles d’exclusion, là où se trouvent les faux négatifs, ainsi que les constats et les règles.<br>• Oracle incomplet : impossible de mesurer ce que les filtres cachent à tort. |
+| **(b) Tout le classeur et l’analyse, brut immuable** (recommandée) | On importe les 7 feuilles et l’analyse du 21 septembre, sans rien modifier : 124 lignes de triage, 121 contrôles d’exclusion, 77 constats, 26 règles, 28 codes, et la Synthèse avec ses formules et leurs valeurs mémorisées. L’analyse est conservée à part, comme annotation distincte. | • Aucune perte : chaque cellule, formule et valeur mémorisée.<br>• L’oracle (D10) dispose des exclusions et des règles.<br>• Les 52 villes suivantes s’importeront de la même façon. | • Plus de tables et de curation (rattachements à vérifier).<br>• Import un peu plus long à écrire et à recetter. |
+| (c) Notes libres seules | Chaque ligne devient une note de texte libre sur une ville ou un signal, dans l’UI des notes actuelle. Le classement, le motif et le sens ne sont plus des champs : ils sont dans le texte. | • Surface existante : les notes des lots et des signaux.<br>• Aucun schéma nouveau : livrable vite. | • Perd la structure (classement, motif, sens), les groupes et la provenance.<br>• Inutilisable pour l’oracle ; une note est limitée à 10 000 caractères. |
 
 **Recommandation : (b) Tout le classeur et l’analyse, brut immuable.** (b) : conserve tout ce que Steve a produit et sert à la fois l’affichage et l’oracle. La recommandation changerait seulement si le besoin se limitait à quelques commentaires.
 
@@ -819,11 +963,11 @@ Quand les retours de Steve apparaîtront dans le radar, chacun portera un auteur
 
 **Dépend de :** D4 (Conformité sentropic et suppression). **Conditionne :** D6 (Visibilité et données personnelles).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| **(a) Auteur documentaire externe + importateur tracé** (recommandée) | • Le contenu est attribué à son vrai auteur, Steve Chaperon.<br>• L’importateur réel est tracé (recorded_by) : on sait qui a chargé quoi.<br>• Aucun droit de modifier ou supprimer un retour importé. | • Un auteur sans compte apparaît dans les fils.<br>• Steve ne peut pas répondre sous son nom tant qu’il n’a pas de compte. |
-| (b) Importateur seul comme auteur | • Aucune identité externe à gérer.<br>• Aucun libellé spécial à afficher dans les fils. | • Le fil attribue le texte de Steve à l’importateur : faux pour le lecteur.<br>• Perd la valeur de la parole du client. |
-| (c) Compte Steve | • Steve pourra répondre et annoter lui-même.<br>• Ses réponses futures seront attribuées à un compte réel. | • Compte non vérifié aujourd’hui.<br>• Ne doit jamais servir pour l’import : ce n’est pas lui qui importe. |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| **(a) Auteur documentaire externe + importateur tracé** (recommandée) | Chaque retour importé affiche « Steve Chaperon — importé par <nom> ». Steve est un auteur externe (ext:chaperon:steve) sans compte ; l’importateur réel est enregistré à part (recorded_by). Personne ne peut modifier ni supprimer un retour importé. | • Le contenu est attribué à son vrai auteur, Steve Chaperon.<br>• L’importateur réel est tracé (recorded_by) : on sait qui a chargé quoi.<br>• Aucun droit de modifier ou supprimer un retour importé. | • Un auteur sans compte apparaît dans les fils.<br>• Steve ne peut pas répondre sous son nom tant qu’il n’a pas de compte. |
+| (b) Importateur seul comme auteur | Le retour est affiché comme écrit par la personne qui a lancé l’import ; le nom de Steve n’apparaît que dans la provenance (fichier, feuille, ligne). | • Aucune identité externe à gérer.<br>• Aucun libellé spécial à afficher dans les fils. | • Le fil attribue le texte de Steve à l’importateur : faux pour le lecteur.<br>• Perd la valeur de la parole du client. |
+| (c) Compte Steve | On crée un compte pour Steve et ses retours importés sont rattachés à ce compte, comme s’il les avait saisis lui-même dans l’outil. | • Steve pourra répondre et annoter lui-même.<br>• Ses réponses futures seront attribuées à un compte réel. | • Compte non vérifié aujourd’hui.<br>• Ne doit jamais servir pour l’import : ce n’est pas lui qui importe. |
 
 **Recommandation : (a) Auteur documentaire externe + importateur tracé.** (a) : attribue le contenu à son vrai auteur sans créer de compte ni usurper de session. (c) viendra le jour où Steve annotera lui-même dans l’UI.
 
@@ -834,11 +978,11 @@ Le constat C-79 de Steve signale des noms de particuliers en clair dans des rés
 
 **Dépend de :** D4 (Conformité sentropic et suppression), D5 (Auteur des retours importés). **Conditionne :** D14 (Première livraison UI).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| (a) Tous les approuvés, sans caviardage | • Règle existante, aucun travail.<br>• Toute l’équipe voit tout. | • Expose des noms de particuliers.<br>• Ne répond pas à la demande C-79 de Steve. |
-| (b) Administrateurs et Steve | • Exposition minimale.<br>• Aucun caviardage à développer. | • L’équipe produit ne voit pas les retours : on perd l’intérêt de les afficher.<br>• Gestion de droits spécifique à construire. |
-| **(c) Approuvés, verbatims caviardés** (recommandée) | • Toute l’équipe voit les retours.<br>• Noms de particuliers masqués dans les retours et dans les résumés de signaux : répond à C-79. | • Détection des données personnelles à écrire et tester (colonne pii_status).<br>• Un caviardage peut masquer un nom utile (élu, promoteur) : règles à préciser. |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| (a) Tous les approuvés, sans caviardage | Tout utilisateur approuvé voit tous les retours, verbatims compris, comme pour les notes actuelles (règle 0011). Aucun masquage. | • Règle existante, aucun travail.<br>• Toute l’équipe voit tout. | • Expose des noms de particuliers.<br>• Ne répond pas à la demande C-79 de Steve. |
+| (b) Administrateurs et Steve | Seuls les administrateurs et Steve voient les retours ; le reste de l’équipe ne les voit pas dans le panneau. | • Exposition minimale.<br>• Aucun caviardage à développer. | • L’équipe produit ne voit pas les retours : on perd l’intérêt de les afficher.<br>• Gestion de droits spécifique à construire. |
+| **(c) Approuvés, verbatims caviardés** (recommandée) | Tout utilisateur approuvé voit les retours, mais les noms de particuliers sont masqués avant affichage, dans les verbatims importés comme dans les résumés de signaux (demande C-79 de Steve). Une colonne pii_status trace le traitement. | • Toute l’équipe voit les retours.<br>• Noms de particuliers masqués dans les retours et dans les résumés de signaux : répond à C-79. | • Détection des données personnelles à écrire et tester (colonne pii_status).<br>• Un caviardage peut masquer un nom utile (élu, promoteur) : règles à préciser. |
 
 **Recommandation : (c) Approuvés, verbatims caviardés.** (c) : toute l’équipe garde l’accès aux retours, et les noms de particuliers sont masqués, dans les retours comme dans les résumés de signaux.
 
@@ -849,11 +993,11 @@ C est la nouvelle sélection de signaux proposée, alignée sur les trois critè
 
 **Dépend de :** D9 (Sens de « double annotation »), D10 (Oracle #783). **Conditionne :** D8 (Cas contradictoires), D12 (Exposition A/B/C), D16 (Retour à Steve).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| Triplet strict pour toute visibilité | • Flux court et lisible : seulement ce qui réunit les trois critères (22 sur 73).<br>• Plus simple à calculer : un signal entre ou non. | • Masque les indéterminés : contredit la réserve explicite de Steve.<br>• Perte de rappel sur les dossiers mal lus. |
-| **K1–K9 + trois états** (recommandée) | • Respecte les trois critères et la réserve : on ne masque que ce qui est établi hors critères.<br>• Trois états (confirmé, à instruire, exclu prouvé) et deux compteurs : un cas incertain n’est pas présenté comme une opportunité. | • Le flux garde du travail manuel (les « à instruire »).<br>• Exige des extractions nouvelles (sens, effet sur les unités, portée) : lot C1 de taille L. |
-| B inchangé, critères pour trier | • Aucun changement d’appartenance, aucun risque.<br>• Aucune extraction nouvelle à développer. | • Le bruit connu (24 sur 73) persiste.<br>• Ne répond pas à Steve : « ce n’est pas une question de hiérarchie ». |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| Triplet strict pour toute visibilité | C n’affiche que les signaux qui réunissent les trois critères de façon établie. Exemple : sur la passe 1, seuls 22 signaux sur 73 resteraient ; les 12 Pertinent dont le sens n’est pas donné disparaîtraient. | • Flux court et lisible : seulement ce qui réunit les trois critères (22 sur 73).<br>• Plus simple à calculer : un signal entre ou non. | • Masque les indéterminés : contredit la réserve explicite de Steve.<br>• Perte de rappel sur les dossiers mal lus. |
+| **K1–K9 + trois états** (recommandée) | C applique les critères K1 à K9 (§9.2) avec trois états : confirmé (critères étayés), à instruire (sens ou effet non déterminable, reste visible), exclu prouvé (masqué, raison affichée). Deux compteurs distincts « confirmés » et « à instruire ». Aucun seuil de taille de projet ni filtre sur l’origine privée. | • Respecte les trois critères et la réserve : on ne masque que ce qui est établi hors critères.<br>• Trois états (confirmé, à instruire, exclu prouvé) et deux compteurs : un cas incertain n’est pas présenté comme une opportunité. | • Le flux garde du travail manuel (les « à instruire »).<br>• Exige des extractions nouvelles (sens, effet sur les unités, portée) : lot C1 de taille L. |
+| B inchangé, critères pour trier | La sélection affichée reste B ; les critères de Steve servent seulement à trier la liste (les « trois critères » en premier). Aucun signal n’entre ni ne sort. | • Aucun changement d’appartenance, aucun risque.<br>• Aucune extraction nouvelle à développer. | • Le bruit connu (24 sur 73) persiste.<br>• Ne répond pas à Steve : « ce n’est pas une question de hiérarchie ». |
 
 **Recommandation : K1–K9 + trois états.** K1–K9 + trois états, après relecture de la table de dérivation par Steve : c’est la seule règle qui applique ses trois critères sans masquer ce qui n’a pas pu être lu. Aucun seuil de taille de projet ni filtre sur l’origine privée.
 
@@ -864,11 +1008,11 @@ Certains cas ne se tranchent pas par une règle automatique : Saint-Victor (un r
 
 **Dépend de :** D7 (Définition de C v1), D10 (Oracle #783). **Conditionne :** D16 (Retour à Steve).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| **Revue métier, abstention en attendant** (recommandée) | • Steve et Mathieu tranchent sur exemples et preuves : la règle reste celle du client.<br>• En attendant, abstention explicite : ces cas ne comptent ni pour ni contre. | • Demande du temps à Steve et Mathieu.<br>• Quelques cas restent ouverts plus longtemps. |
-| Arbitrage par l’équipe | • Plus rapide.<br>• Ne mobilise ni Steve ni Mathieu. | • Risque de prêter à Steve une règle qu’il n’a pas posée.<br>• L’oracle refléterait l’avis de l’équipe, pas celui du client. |
-| Statu quo | • Aucun effort.<br>• L’oracle peut être gelé tout de suite. | • Cas sans statut dans l’oracle : mesures faussées.<br>• Désaccords invisibles. |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| **Revue métier, abstention en attendant** (recommandée) | Steve et Mathieu examinent les cas listés au §9.2 sur exemples et preuves (Saint-Victor, Amos, CPTAQ, seconds projets, ODJ, trois S-RESTRICTIF). Tant qu’un cas n’est pas tranché, il est marqué « abstention » dans l’oracle : il ne compte ni pour ni contre. | • Steve et Mathieu tranchent sur exemples et preuves : la règle reste celle du client.<br>• En attendant, abstention explicite : ces cas ne comptent ni pour ni contre. | • Demande du temps à Steve et Mathieu.<br>• Quelques cas restent ouverts plus longtemps. |
+| Arbitrage par l’équipe | L’équipe tranche elle-même chaque cas à partir de l’analyse et des règles de Steve, puis lui présente le résultat. | • Plus rapide.<br>• Ne mobilise ni Steve ni Mathieu. | • Risque de prêter à Steve une règle qu’il n’a pas posée.<br>• L’oracle refléterait l’avis de l’équipe, pas celui du client. |
+| Statu quo | Les cas restent dans l’oracle avec l’étiquette du tableur, sans statut particulier, même quand le tableur et l’analyse se contredisent. | • Aucun effort.<br>• L’oracle peut être gelé tout de suite. | • Cas sans statut dans l’oracle : mesures faussées.<br>• Désaccords invisibles. |
 
 **Recommandation : Revue métier, abstention en attendant.** (a) : la règle reste celle du client, et les cas ouverts ne faussent pas la mesure pendant qu’ils sont arbitrés.
 
@@ -879,12 +1023,12 @@ Aujourd’hui l’écran montre la sélection B ; le sélecteur A/B a été reti
 
 **Dépend de :** D7 (Définition de C v1), D10 (Oracle #783), D11 (Benchmark #782). **Conditionne :** D13 (Seuil de bascule B → C).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| **(a) C en shadow, comparaison réservée UAT, puis remplacement de B** (recommandée) | • Conforme à #787 : aucun choix de vivier pour les utilisateurs.<br>• Interface simple, comme Steve le demande.<br>• Retour arrière simple : désactiver C. | • Steve ne voit C qu’en UAT (mode réservé) avant la bascule.<br>• La comparaison reste un outil interne. |
-| (b) Sélecteur A/B/C visible + mode comparatif | • Littéralement « A/B étendu en C ».<br>• L’utilisateur compare lui-même les sélections. | • Réintroduit un choix de viviers, contraire à #787 (item 4).<br>• Plus complexe à expliquer et à maintenir (paramètre filter.targeting). |
-| (c) Incréments dans B | • Aligné avec #761 ; livrable par petits morceaux (sens, plein droit, second projet).<br>• Chaque amélioration est visible pour Steve dès sa livraison. | • Pas de mesure d’ensemble B contre C.<br>• Les filtres Résidentiel et Zonage restent. |
-| (d) Application C séparée | • Liberté totale de simplification.<br>• Aucun risque pour l’écran actuel de Steve. | • Duplique sélection, filtres et notes.<br>• Deux applications à maintenir. |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| **(a) C en shadow, comparaison réservée UAT, puis remplacement de B** (recommandée) | Steve et l’équipe continuent de voir B, sans sélecteur. C est calculée en parallèle par le backend ; une page de comparaison B / C n’est accessible qu’en recette UAT et aux administrateurs. Le jour où le seuil D13 est franchi et que Farid décide, C remplace B à l’écran (scène 5). | • Conforme à #787 : aucun choix de vivier pour les utilisateurs.<br>• Interface simple, comme Steve le demande.<br>• Retour arrière simple : désactiver C. | • Steve ne voit C qu’en UAT (mode réservé) avant la bascule.<br>• La comparaison reste un outil interne. |
+| (b) Sélecteur A/B/C visible + mode comparatif | Un sélecteur A / B / C apparaît dans le rail pour tous les utilisateurs, avec un mode comparatif ; le choix est porté dans l’URL (filter.targeting=a|b|c). | • Littéralement « A/B étendu en C ».<br>• L’utilisateur compare lui-même les sélections. | • Réintroduit un choix de viviers, contraire à #787 (item 4).<br>• Plus complexe à expliquer et à maintenir (paramètre filter.targeting). |
+| (c) Incréments dans B | On n’expose pas C comme un tout : on ajoute à B, un par un, les critères de C (sens, plein droit, second projet), chacun livré quand il est prêt. | • Aligné avec #761 ; livrable par petits morceaux (sens, plein droit, second projet).<br>• Chaque amélioration est visible pour Steve dès sa livraison. | • Pas de mesure d’ensemble B contre C.<br>• Les filtres Résidentiel et Zonage restent. |
+| (d) Application C séparée | On construit une seconde application dédiée à C, avec sa propre carte, ses filtres et ses notes ; Steve choisit l’une ou l’autre application. | • Liberté totale de simplification.<br>• Aucun risque pour l’écran actuel de Steve. | • Duplique sélection, filtres et notes.<br>• Deux applications à maintenir. |
 
 **Recommandation : (a) C en shadow, comparaison réservée UAT, puis remplacement de B.** (a), avec des emprunts à (c) : interface simple pour Steve, conforme à #787, retour arrière immédiat. Si Farid veut un sélecteur visible, (b).
 
@@ -895,11 +1039,11 @@ Si C tourne en parallèle de B (D12), il faut écrire à l’avance quand C remp
 
 **Dépend de :** D10 (Oracle #783), D11 (Benchmark #782), D12 (Exposition A/B/C).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| **Aucun P masqué, précision P ∪ S > B, parité** (recommandée) | • Protège la réserve de Steve : aucun Pertinent masqué.<br>• Exige un gain réel de précision, pas seulement un affichage plus court.<br>• Parité API, rail, carte, panneau : aucun écart entre écrans (#786). | • Demande le jeu test complet (52 villes) avant de basculer.<br>• La bascule peut tarder si un seul Pertinent est perdu. |
-| Seuil chiffré différent | • Farid fixe ses propres chiffres (à écrire dans le commentaire).<br>• Peut refléter un compromis métier que Farid connaît mieux. | • À préciser.<br>• Risque d’un seuil non mesurable par l’oracle. |
-| Bascule sur recette seule | • Rapide : recette de Farid seulement.<br>• Ne dépend pas de l’achèvement du jeu test. | • Sans mesure, aucune garantie de non-régression.<br>• Contraire à l’objet de l’oracle de ciblage. |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| **Aucun P masqué, précision P ∪ S > B, parité** (recommandée) | C remplace B seulement si, sur le jeu test des 52 villes : aucun signal que Steve juge Pertinent n’est masqué ; la précision P ∪ S de C dépasse celle de B (67,1 % sur la passe 1) ; l’API, le rail, la carte et le panneau montrent les mêmes ensembles ; Farid fait la recette. | • Protège la réserve de Steve : aucun Pertinent masqué.<br>• Exige un gain réel de précision, pas seulement un affichage plus court.<br>• Parité API, rail, carte, panneau : aucun écart entre écrans (#786). | • Demande le jeu test complet (52 villes) avant de basculer.<br>• La bascule peut tarder si un seul Pertinent est perdu. |
+| Seuil chiffré différent | Farid écrit d’autres chiffres dans le commentaire (par exemple une précision minimale ou un rappel minimal), mesurés par le même oracle. | • Farid fixe ses propres chiffres (à écrire dans le commentaire).<br>• Peut refléter un compromis métier que Farid connaît mieux. | • À préciser.<br>• Risque d’un seuil non mesurable par l’oracle. |
+| Bascule sur recette seule | La bascule se décide sur la recette de Farid seule, sans mesure chiffrée par l’oracle. | • Rapide : recette de Farid seulement.<br>• Ne dépend pas de l’achèvement du jeu test. | • Sans mesure, aucune garantie de non-régression.<br>• Contraire à l’objet de l’oracle de ciblage. |
 
 **Recommandation : Aucun P masqué, précision P ∪ S > B, parité.** (a) : garantit qu’aucun dossier utile ne disparaît et que C fait réellement mieux que B, sur des écrans cohérents entre eux. Résidentiel et Zonage ne sont retirés qu’après une décision #761 fondée sur la mesure.
 
@@ -910,12 +1054,12 @@ Une fois les retours en base, il faut les montrer. L’UI est en migration : 39 
 
 **Dépend de :** D3 (Ancre signal et correctif B0), D4 (Conformité sentropic et suppression), D6 (Visibilité et données personnelles). **Conditionne :** D15 (Séquencement).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| **(a) Panneau + rail + DS ciblé** (recommandée) | • Valeur immédiate : badge et section « Avis de Steve » dans le panneau, compteurs P / S / N dans le rail.<br>• Aucun code ajouté à un composant à remplacer.<br>• Les 3 composants d’annotation migrent au design system dans le même lot. | • Pas d’indicateur sur la carte au premier lot.<br>• Les badges par signal exigent la lecture groupée du lot L2. |
-| (b) Pastilles sur la carte actuelle dès L3 | • Visibilité cartographique immédiate.<br>• L’ancre ne dépend pas du moteur de carte. | • Code ajouté à un composant de 2 761 lignes voué au remplacement.<br>• Double travail à la migration geo. |
-| (c) Migration geo complète d’abord | • Expérience cohérente d’emblée.<br>• Aucun code d’annotation à reprendre après la migration. | • Dépend de la « Porte 2 » (moteur geo désactivé aujourd’hui).<br>• Retarde #784 sans date. |
-| (d) Tableau de retours séparé seul | • Toute la donnée consultable en un seul écran.<br>• Utile comme outil de curation des rattachements. | • N’annote pas l’élément associé : ne répond pas à #784.<br>• Un écran de plus. |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| **(a) Panneau + rail + DS ciblé** (recommandée) | Dans le panneau du signal, un badge « Retour de Steve » (vert, jaune, rouge) ouvre une section « Avis de Steve » : classement, motif, sens, analyse, provenance, état du rattachement. Dans le rail, des compteurs P / S / N par ville. Les 3 composants d’annotation passent au design system. Rien sur la carte au premier lot. | • Valeur immédiate : badge et section « Avis de Steve » dans le panneau, compteurs P / S / N dans le rail.<br>• Aucun code ajouté à un composant à remplacer.<br>• Les 3 composants d’annotation migrent au design system dans le même lot. | • Pas d’indicateur sur la carte au premier lot.<br>• Les badges par signal exigent la lecture groupée du lot L2. |
+| (b) Pastilles sur la carte actuelle dès L3 | En plus du panneau, des pastilles colorées sur la carte Signaux actuelle (composant local MapLibre de 2 761 lignes) dès le lot L3. | • Visibilité cartographique immédiate.<br>• L’ancre ne dépend pas du moteur de carte. | • Code ajouté à un composant de 2 761 lignes voué au remplacement.<br>• Double travail à la migration geo. |
+| (c) Migration geo complète d’abord | On termine d’abord la migration de la carte vers les composants geo partagés (Porte 2), puis on affiche les retours sur la nouvelle carte et dans le panneau. | • Expérience cohérente d’emblée.<br>• Aucun code d’annotation à reprendre après la migration. | • Dépend de la « Porte 2 » (moteur geo désactivé aujourd’hui).<br>• Retarde #784 sans date. |
+| (d) Tableau de retours séparé seul | Un écran séparé liste tous les retours de Steve (filtrable par ville, motif, statut de rattachement), sans rien afficher sur les objets du radar. | • Toute la donnée consultable en un seul écran.<br>• Utile comme outil de curation des rattachements. | • N’annote pas l’élément associé : ne répond pas à #784.<br>• Un écran de plus. |
 
 **Recommandation : (a) Panneau + rail + DS ciblé.** (a) : valeur visible tout de suite, sans investir dans un composant de carte destiné à être remplacé.
 
@@ -926,10 +1070,10 @@ La priorité n° 1 de Steve reste la fraîcheur des signaux (#703, rafraîchisse
 
 **Dépend de :** D3 (Ancre signal et correctif B0), D10 (Oracle #783), D14 (Première livraison UI).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| **(a) B0, import et oracle en parallèle de la fraîcheur** (recommandée) | • Valeur livrée tôt : annotation réparée, retours visibles, oracle prêt.<br>• Aucune interférence avec la chaîne de rafraîchissement.<br>• C1 démarre sur des signaux stabilisés. | • Deux chantiers en parallèle à suivre.<br>• L’attention de l’équipe est partagée. |
-| (b) Tout après #703 | • Une seule priorité à la fois.<br>• Aucun risque d’interférence, même indirecte, avec le rafraîchissement. | • Rien de visible pour Steve sur ses retours avant #703.<br>• L’annotation de signal reste cassée plus longtemps. |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| **(a) B0, import et oracle en parallèle de la fraîcheur** (recommandée) | B0, l’import (L1) et l’oracle de ciblage (O1) démarrent maintenant, en parallèle de #703, car ils ne touchent pas la chaîne de rafraîchissement. Le classifieur C (C1) attend que le rafraîchissement soit stable. | • Valeur livrée tôt : annotation réparée, retours visibles, oracle prêt.<br>• Aucune interférence avec la chaîne de rafraîchissement.<br>• C1 démarre sur des signaux stabilisés. | • Deux chantiers en parallèle à suivre.<br>• L’attention de l’équipe est partagée. |
+| (b) Tout après #703 | Tout le travail de ce dossier attend la clôture de #703 (rafraîchissement quotidien en production). | • Une seule priorité à la fois.<br>• Aucun risque d’interférence, même indirecte, avec le rafraîchissement. | • Rien de visible pour Steve sur ses retours avant #703.<br>• L’annotation de signal reste cassée plus longtemps. |
 
 **Recommandation : (a) B0, import et oracle en parallèle de la fraîcheur.** (a) : livre tôt ce qui ne gêne pas le rafraîchissement, et garde C1 pour après sa stabilisation.
 
@@ -940,10 +1084,10 @@ Steve a reconstitué le fonctionnement des filtres en observant l’écran, et �
 
 **Dépend de :** D7 (Définition de C v1), D8 (Cas contradictoires).
 
-| Option | Avantages | Inconvénients |
-|---|---|---|
-| **Renvoyer filtres réels et table de dérivation** (recommandée) | • Répond directement à sa demande R-16.<br>• Lui permet de corriger la table de dérivation avant le développement de C.<br>• Renforce la confiance du client. | • Un aller-retour à préparer (relecture par Mathieu et Farid).<br>• Une partie de ses observations date de septembre, en partie périmée depuis #793. |
-| Ne rien renvoyer avant C | • Évite un aller-retour intermédiaire.<br>• La réponse portera directement sur C, déjà développée. | • Steve continue à deviner le fonctionnement des filtres.<br>• Erreurs de dérivation découvertes trop tard. |
+| Option | Description | Avantages | Inconvénients |
+|---|---|---|---|
+| **Renvoyer filtres réels et table de dérivation** (recommandée) | Mathieu et Farid envoient à Steve la définition réelle des cinq filtres (§5.7, lue dans le code) et la table qui relie ses 28 codes de motif aux critères C, pour qu’il la corrige avant le développement de C. | • Répond directement à sa demande R-16.<br>• Lui permet de corriger la table de dérivation avant le développement de C.<br>• Renforce la confiance du client. | • Un aller-retour à préparer (relecture par Mathieu et Farid).<br>• Une partie de ses observations date de septembre, en partie périmée depuis #793. |
+| Ne rien renvoyer avant C | On ne répond pas à sa question R-16 avant que C soit développée ; il reçoit alors directement la nouvelle sélection. | • Évite un aller-retour intermédiaire.<br>• La réponse portera directement sur C, déjà développée. | • Steve continue à deviner le fonctionnement des filtres.<br>• Erreurs de dérivation découvertes trop tard. |
 
 **Recommandation : Renvoyer filtres réels et table de dérivation.** Renvoyer, par Mathieu et Farid après relecture : répond à sa question et lui permet de corriger la table de dérivation avant que C soit développée.
 
@@ -1081,7 +1225,8 @@ Cinq scènes, chacune dans la forme qui convient à ce qu'elle montre. Elles ne 
 - Scène 1 : une **matrice** (tableau ci-dessous), un critère par ligne.
 - Scène 2 : un **diagramme entité-relation** (`erDiagram`) : tables, colonnes clés, relations et cardinalités.
 - Scène 3 : une **architecture en couloirs verticaux** de gauche à droite (`flowchart LR`, un `subgraph` par couloir : utilisateurs, écrans UI, fonctions backend, données sur S3 et PostgreSQL), l'oracle en bande transversale en bas, système d'évaluation hors ligne.
-- Scènes 4 et 5 : des composants, en cartes A' 460 × 200 ; chaque `subgraph` est un conteneur natif `parentId`.
+- Scène 4 : des composants, en cartes A' 460 × 200 ; chaque `subgraph` est un conteneur natif `parentId`.
+- Scène 5 : **deux zones explicites** (`flowchart LR`, un `subgraph` par couloir) : en haut l'**application**, ce que voient les utilisateurs et où chaque élément vit (écran, backend, base) ; en bas l'**évaluation hors ligne** (job Node sans écran) : référence gelée, diff nommé, oracle C, mesure, seuil de bascule, décision de Farid.
 
 ### `criteres-steve` — Scène 1 · les trois critères de Steve en regard de l'existant
 
@@ -1290,36 +1435,53 @@ flowchart LR
   GCB -.->|"migration future"| GEO
 ```
 
-### `affichage-abc` — Scène 5 · A, B et C sur le même inventaire
+### `affichage-abc` — Scène 5 · A, B et C : ce que voit l'application, ce que mesure l'évaluation
 
 ```mermaid
 flowchart LR
-  subgraph I1["1 · Inventaire"]
-    SNAP["Snapshot commun"]
+  subgraph A1["Utilisateurs"]
+    USR["Steve et l'équipe"]
+    ADM["Farid · recette UAT"]
   end
-  subgraph P1["2 · Profils"]
-    PA["Profil A"]
-    PB["Profil B"]
-    PC["Profil C"]
+  subgraph A2["Écrans"]
+    MAPB["Carte et rail · profil B"]
+    MAPC["Carte et rail · profil C"]
+    UATC["Comparaison B / C · UAT"]
   end
-  subgraph C1["3 · États de C"]
-    CONF["Confirmé"]
-    INS["À instruire"]
-    EXC["Exclu prouvé"]
+  subgraph A3["Backend · API Hono"]
+    APIB["graph-signals · profil B"]
+    APIC["Calcul C · shadow"]
   end
-  subgraph M1["4 · Mesure et décision"]
-    DIFF["Diff B → C"]
-    ORA["Oracle C"]
-    GATE["Seuil de bascule"]
+  subgraph A4["Base · PostgreSQL"]
+    GRA["graph_nodes · inventaire"]
+    ANN["annotation_* · labels Steve"]
+    ORR["oracle_releases"]
   end
-  SNAP -->|"référence gelée"| PA
-  SNAP -->|"défaut actuel"| PB
-  SNAP -->|"shadow"| PC
-  PC -->|"critères étayés"| CONF
-  PC -->|"indéterminé ou mixte"| INS
-  PC -->|"exclusion établie"| EXC
-  PB -->|"entrants et sortants"| DIFF
-  CONF -->|"comparé à B"| DIFF
-  DIFF -->|"noté sur"| ORA
-  ORA -->|"D13"| GATE
+  subgraph EV["Évaluation hors ligne · job Node"]
+    PA["Profil A gelé"]
+    DIFF["Diff B → C nommé"]
+    ORA["Oracle C gelé"]
+    MES["Mesure B et C"]
+    GATE["Seuil de bascule D13"]
+    DEC["Décision de Farid"]
+  end
+  USR -->|"voit B par défaut"| MAPB
+  USR -.->|"voit C après bascule"| MAPC
+  ADM -->|"recette"| UATC
+  MAPB -->|"liste B"| APIB
+  MAPC -->|"liste C"| APIC
+  UATC -->|"B et C côte à côte"| APIC
+  APIB -->|"lit"| GRA
+  APIC -->|"même snapshot"| GRA
+  GRA -->|"snapshot figé"| PA
+  PA -->|"référence"| DIFF
+  APIB -->|"sélection B"| DIFF
+  APIC -->|"sélection C"| DIFF
+  ANN -->|"labels étayés"| ORA
+  ORA -->|"version gelée"| ORR
+  DIFF -->|"écarts nommés"| MES
+  ORA -->|"noté sur"| MES
+  MES -->|"au seuil D13"| GATE
+  GATE -->|"proposition"| DEC
+  DEC -->|"bascule B → C"| MAPC
 ```
