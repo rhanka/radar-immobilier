@@ -6,8 +6,101 @@ reproduce oracle E's construction (no multi-pass consensus, no adjudication, no 
 bucket; one human annotator) and it is **not** D10's independent test set (blind v1 comes from the
 51 development municipalities, not from the next 52). It must not be used as D13 evidence.
 
+## Measurement level (read this first)
+
+- **Unit** = one line of Steve's Triage sheet attached to the radar record(s) it names: 121 lines
+  (3 of 124 excluded, no radar record), split by municipality into **optim 60 lines / 26
+  municipalities** and **blind 61 lines / 25 municipalities**. It is not a document, not a
+  bylaw, not a dossier.
+- **Truth** = Steve's verdict on that line (Pertinent / À surveiller / Non pertinent), given on
+  2026-09-15..21 from what the screen and the MCP tools showed him.
+- **Task measured** = the display decision "show this line to Steve" vs "hide it". A system
+  "shows" a line when:
+  - B (today's radar): the line was visible in the pass Steve ran with that filter combination;
+  - C (model): the model answers Pertinent or À surveiller (C hides only Non pertinent); "C strict"
+    shows only lines the model calls Pertinent.
+- **Two definitions of a positive**: positive = Pertinent (what Steve wants); positive =
+  Pertinent or À surveiller (what Steve wants to keep in sight).
+- **Precision** = shown positives / shown. **Recall** = shown positives / all positives of the
+  set. **F1** = harmonic mean. **Noise** = Steve-Non pertinent among shown = 1 − precision with
+  positive = P+S. **Pertinent lost** = Steve-Pertinent hidden (false negatives with positive = P).
+  Intervals: municipality-clustered bootstrap (whole cities resampled), 95 %.
+
+### Selection bias of the universe, and how it is handled
+Every line exists **because it was visible in one of Steve's passes** (pass 1 = five filters,
+pass 2 = without Précoce, pass 3 = no filter). Lines that today's radar never showed, and the
+records his filters rightly removed (sheet "Écartés par les filtres"), are outside the universe.
+Consequences:
+- **Recall is measured inside the 121-line universe only.** B pass 3 ("no filter") has recall
+  100 % by construction; the true recall of any system over the whole radar is not measurable here
+  (Steve's seven missed dossiers are absent).
+- **Precision is comparable** between systems on the same lines, but B's absolute precision is
+  flattered for pass 2 and pass 3 (the noise those passes add beyond the lines Steve recorded is
+  not counted) — so the comparison favours B, not C.
+- B pass 1 / 2 / 3 are **observed** (what the deployed radar showed Steve). Single filters
+  ("Précoce alone", "Zonage alone", "Exclude PIIA + dérogation alone") are **reconstructed** from
+  the record properties read on 2026-10-04 and are approximations (`non vérifié` against the code
+  deployed in September); "Résidentiel alone" is not computable from stored properties (N-A).
+  Sanity check: the reconstructed Précoce matches the observed pass 1 / pass 2 split on 51 of 52
+  optim lines and 53 of 54 blind lines.
+- **C v1 on blind is N-A**: blind is measured once, with the frozen final prompt (v2) only. No new
+  model call was made for this section; all C figures reuse the archived answers.
+
+### Comparison table — filtering task, same lines (values in %)
+
+**Optim (60 lines: 19 Pertinent, 14 À surveiller, 27 Non pertinent)**
+
+| System | Precision (P) | Recall (P) | F1 (P) | Precision (P+S) | Recall (P+S) | F1 (P+S) | Noise | Pertinent lost |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| B pass 1 (5 filters) | 47.2 | 89.5 | 61.8 | 69.4 | 75.8 | 72.5 | 30.6 | 2/19 |
+| B pass 2 (no Précoce) | 34.6 | 94.7 | 50.7 | 59.6 | 93.9 | 72.9 | 40.4 | 1/19 |
+| B pass 3 (no filter) | 31.7 | 100.0 | 48.1 | 55.0 | 100.0 | 71.0 | 45.0 | 0/19 |
+| Précoce alone (reconstructed) | 47.4 | 94.7 | 63.2 | 68.4 | 78.8 | 73.2 | 31.6 | 1/19 |
+| Zonage alone (reconstructed) | 39.6 | 100.0 | 56.7 | 68.8 | 100.0 | 81.5 | 31.3 | 0/19 |
+| Exclude PIIA + dérogation alone (reconstructed) | 34.0 | 94.7 | 50.0 | 60.4 | 97.0 | 74.4 | 39.6 | 1/19 |
+| C v1 Astra low | 48.1 | 68.4 | 56.5 | 81.5 | 66.7 | 73.3 | 18.5 | 6/19 |
+| C v1 Gemini low | 60.0 | 94.7 | 73.5 | 86.7 | 78.8 | 82.5 | 13.3 | 1/19 |
+| C v1 Opus 5.5 low | 54.5 | 94.7 | 69.2 | 84.8 | 84.8 | 84.8 | 15.2 | 1/19 |
+| C v2 Astra low | 50.0 | 94.7 | 65.5 | 80.6 | 87.9 | 84.1 | 19.4 | 1/19 |
+| C v2 Gemini low | 59.4 | 100.0 | 74.5 | 87.5 | 84.8 | 86.2 | 12.5 | 0/19 |
+| C v2 Opus 5.5 low | 54.3 | 100.0 | 70.4 | 85.7 | 90.9 | 88.2 | 14.3 | 0/19 |
+| C v2 strict Gemini low (Pertinent only) | 80.0 | 84.2 | 82.1 | 90.0 | 54.5 | 67.9 | 10.0 | 3/19 |
+
+**Blind (61 lines: 20 Pertinent, 15 À surveiller, 26 Non pertinent) — single pass, prompt v2**
+
+| System | Precision (P) | Recall (P) | F1 (P) | Precision (P+S) | Recall (P+S) | F1 (P+S) | Noise | Pertinent lost |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| B pass 1 (5 filters) | 45.9 | 85.0 | 59.6 | 64.9 | 68.6 | 66.7 | 35.1 | 3/20 |
+| B pass 2 (no Précoce) | 37.0 | 100.0 | 54.1 | 61.1 | 94.3 | 74.2 | 38.9 | 0/20 |
+| B pass 3 (no filter) | 32.8 | 100.0 | 49.4 | 57.4 | 100.0 | 72.9 | 42.6 | 0/20 |
+| Précoce alone (reconstructed) | 45.9 | 85.0 | 59.6 | 64.9 | 68.6 | 66.7 | 35.1 | 3/20 |
+| Zonage alone (reconstructed) | 38.3 | 90.0 | 53.7 | 66.0 | 88.6 | 75.6 | 34.0 | 2/20 |
+| Exclude PIIA + dérogation alone (reconstructed) | 33.3 | 100.0 | 50.0 | 58.3 | 100.0 | 73.7 | 41.7 | 0/20 |
+| C v1 (3 models) | N-A | N-A | N-A | N-A | N-A | N-A | N-A | not run on blind |
+| C v2 Astra low | 52.6 | 100.0 | 69.0 | 81.6 | 88.6 | 84.9 | 18.4 | 0/20 |
+| C v2 Gemini low | 57.1 | 100.0 | 72.7 | 88.6 | 88.6 | 88.6 | 11.4 | 0/20 |
+| C v2 Opus 5.5 low | 52.6 | 100.0 | 69.0 | 84.2 | 91.4 | 87.7 | 15.8 | 0/20 |
+| C v2 strict Gemini low (Pertinent only) | 81.0 | 85.0 | 82.9 | 90.5 | 54.3 | 67.9 | 9.5 | 3/20 |
+
+Full tables with TP / FP / FN / TN, clustered intervals and the other strict variants:
+`results/filter-metrics-optim.md`, `results/filter-metrics-blind.md` (JSON alongside); charts
+`results/filter-pr-optim.svg`, `results/filter-pr-blind.svg`.
+
+Reading (JUGEMENT, positive = Pertinent, blind): B pass 1 shows 37 lines for 17 of 20 Pertinent
+(precision 45.9, recall 85.0); C v2 shows 35-38 lines for all 20 (precision 52.6-57.1, recall
+100). C gains on both axes against pass 1, and on precision against pass 2 at equal recall. With
+positive = Pertinent or À surveiller, C v2 reaches precision 81.6-88.6 at recall 88.6-91.4, against
+64.9 / 68.6 for pass 1. The clustered intervals are wide and overlap: precision (positive = P) B pass 1 45.9 [28.1–62.9] vs C v2 52.6-57.1 [37.5–77.1]; the clear gains are recall at positive = P (85 → 100, 3 Pertinent no longer lost) and precision at positive = P+S (B pass 1 64.9 [48.3–80.6] vs C v2 81.6-88.6 [69.2–100], intervals still partly overlapping at n = 61). The intervals overlap between the three models. A "strict" C
+(only model-Pertinent shown) buys precision (≈81-87) at the cost of recall (65-85).
+
+![Precision and recall, blind](results/filter-pr-blind.svg)
+
+![Precision and recall, optim](results/filter-pr-optim.svg)
+
+## Model-level details (3-class verdict)
+
 All figures come from `scripts/06-score.mjs` (re-run by `scripts/rescore-all.mjs`, no model call)
-on the archived runs in `runs/` (not versioned); tables are copied from `results/score-*.md`
+on the archived runs in `runs/` (not versioned); tables are copied from `results/score-*.md` and `results/filter-metrics-*.md`
 without hand edits; machine-readable versions are `results/score-*.json`.
 
 ## Timeline (UTC, from commits and run receipts)

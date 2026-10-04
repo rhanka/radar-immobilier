@@ -31,6 +31,7 @@ rules only, iterated on `optim` only, frozen, then run **once** on `blind`.
 | `scripts/04-split.mjs` | stratified split, freeze, `split-balance.md` | yes |
 | `scripts/05-run.mjs`, `run-all.mjs` | seat-only model runner (blind guard) | yes |
 | `scripts/06-score.mjs`, `rescore-all.mjs` | metrics + robustness; re-scores archived runs without model calls | yes |
+| `scripts/08-filter-metrics.mjs` | show/hide filtering task: precision, recall, F1 for B passes, reconstructed single filters and C v1/v2 on the same lines (archived answers, no model call) → `results/filter-metrics-*`, `results/filter-pr-*.svg` | yes |
 | `scripts/07-review.mjs`, `review-brief.md` | adversarial review runner and brief | yes |
 | `scripts/selftest.mjs` | stats helpers + split integrity | yes |
 | `prompt-c-v*.md` | prompt iterations (optim only) | yes |
