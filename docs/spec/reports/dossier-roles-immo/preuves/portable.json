@@ -1,11 +1,11 @@
 {
   "output": "docs/spec/reports/dossier-roles-immo/decision-focus.html",
-  "bytes": 724844,
-  "htmlSha256": "e8ab90cd0f6577f63f86ebebd61443b78210605f6641c3f0d339b8f8efa73af4",
-  "embeddedSha256": "11c750ce6ad27669e6050ac2e0645ccdfde3e7b7847e4568977081d9f0363811",
+  "bytes": 724919,
+  "htmlSha256": "0d19617ecb06d1e774561e67c71aa617197518c80f80eb13dd0cfaff743217a9",
+  "embeddedSha256": "eb69e1468111a412116cbaf2ac919a6b51cbc020c0cdc01227a8d260510d181d",
   "embeddedSha256Rule": "sha256 of the file with the embedded value replaced by 64 zeros",
   "dossierHash": "dd346f976f5fe78b513930aa03c79da21ecb752c6883d7a46e655ad8593be289",
-  "artifactInputHash": "9ae0f64d2ee2bba342ef666044925dedf09d1738227e5a89d38831017bf7fc28",
+  "artifactInputHash": "653234ddbda5ef83ca2f80b2028b021138e2078ba67c478dc20f287a1dbc3189",
   "graphs": [
     {
       "id": "roles-perimetres",
