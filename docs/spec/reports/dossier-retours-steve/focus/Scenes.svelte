@@ -16,7 +16,7 @@
     },
     'modele-donnees': {
       badge: '§6 · modèle M3 proposé',
-      lede: "Un diagramme entité-relation : chaque boîte est une table avec ses colonnes clés (PK, FK, UK), chaque lien une relation avec sa cardinalité. Cinq couches de gauche à droite : sources immuables, référentiels de Steve, jugements versionnés, ancres durables, publication conforme au contrat sentropic. Seules graph_nodes et prospect_notes existent déjà ; les autres tables sont proposées (§6.3).",
+      lede: "Un diagramme entité-relation : chaque boîte est une table avec ses colonnes clés (PK, FK, UK), chaque lien une relation avec sa cardinalité. Cinq couches de gauche à droite : sources immuables, référentiels de Steve, jugements versionnés, ancres durables, publication conforme au contrat sentropic. Seules graph_nodes et prospect_notes existent déjà (en-tête ocre, bordure pleine, mention « existe ») ; toutes les autres tables sont proposées (en-tête bleu, bordure en tirets, mention « proposée »). L'existant complet, dont prospect_marks, est au §6.0.",
       note: "Une ligne du classeur produit une évaluation versionnée, rattachée à 1 à N objets par des clés texte sans clé étrangère : une ré-extraction du graphe ne détruit rien, l'ancre passe en « disparue » et l'instantané observé reste lisible. La projection Comment ({kind:'record', recordType:'radar.*'}) suit le contrat sans élargir le port ; aucune suppression physique, conformément à la décision O1.",
     },
     'flux-import-oracle': {

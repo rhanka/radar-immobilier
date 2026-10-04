@@ -10,12 +10,14 @@ ENV ?= test-dossier-steve
 WORKDIR := /docs/spec/reports/dossier-retours-steve/focus
 # The YAML readers of decision-yaml.test.mjs (yaml, js-yaml) come from the repository
 # root node_modules (shared by every worktree), mounted read-only at /node_modules.
+# mapping.test.mjs reads api/src/db/schema.ts (read-only) to check the « existant » diagram.
 ROOT_NODE_MODULES ?= $(abspath $(shell git -C $(FOCUS_DIR) rev-parse --path-format=absolute --git-common-dir)/../node_modules)
 # La chaîne est importée, jamais recopiée : /kit porte le kit h2a, et les
 # dépendances sont celles de docs/architecture/focus (cible `deps` de sa Makefile).
 RUN = docker run --rm --network none --cpus=1.5 --memory=1536m --pids-limit=256 --user "$$(id -u):$$(id -g)" \
   -e NODE_OPTIONS=--max-old-space-size=1100 \
   -v $(DOCS_DIR):/docs -v $(KIT_ROOT):/kit:ro -v $(CHAIN_DIR)/node_modules:/docs/node_modules:ro -v $(ROOT_NODE_MODULES):/node_modules:ro \
+  -v $(abspath $(DOCS_DIR)/../api/src/db/schema.ts):/api/src/db/schema.ts:ro \
   -w $(WORKDIR) $(NODE_IMAGE) node
 
 .PHONY: deps map test build browser chrome-run chrome-stop proofs
