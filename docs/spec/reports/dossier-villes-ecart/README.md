@@ -9,8 +9,8 @@
 - Les sections 1 (intention), 2 (contexte en clair) et 3 (synthèse) dépliées ; les sections 4, 5, 6, 8, 9 et l'annexe A repliées, rendues telles quelles. Les blocs Mermaid du corps sont remplacés par un renvoi.
 - Scène 1 `architecture-ecart` : SvelteFlow natif tiré du bloc Mermaid de l'annexe B, cinq couloirs verticaux de gauche à droite (utilisateurs, écrans, déclencheurs, traitements, données), carte unique A' 460 × 200 pour les seuls composants réels.
 - Figure 2 : diagramme des tables `graph_nodes` et `graph_edges` (style entité-relation, sans carte de composant) et de la ligne `bylaw-242` partagée par gore et barkmere ; source lisible équivalente : bloc `erDiagram` du §4.2.
-- Tableau 3 : les huit groupes de villes, vérifiés contre `preuves/diagnostic/groups.json` (total 226).
-- Décisions D1 à D7, toutes décidées par Fabien (Farid consulté sur D2 et D3) : chaque bloc rend le §7 du Markdown (problème, options avec avantages et inconvénients, recommandation), puis les options sélectionnables. Le bouton « Copier mes décisions (YAML) » copie un bloc Markdown ```yaml sans guillemets (émetteur repris du dossier retours Steve) à coller dans un commentaire de la PR #815. Brouillon local, rien n'est ratifié.
+- Tableau 3 : les huit groupes de villes en barres horizontales (couleur et texte : réparable maintenant ou après D2), puis en tableau détaillé ; comptes vérifiés contre `preuves/diagnostic/groups.json` (total 226).
+- Décisions D1 à D7, toutes décidées par Fabien (Farid consulté sur D2 et D3) : chaque bloc rend le §7 du Markdown : le problème, puis chaque option sélectionnable avec sa Description (job CD et paramètres, effet dans S3 et PG, ce que voit l’utilisateur, exemple réel), un mini-schéma pour D1, D2, D4, D5 et D7 (barres avant / après pour acton-vale, dixville, victoriaville, brigham ; lignes de `graph_nodes` et leur clé pour `bylaw-242`), ses avantages et inconvénients, enfin la recommandation. Le bouton « Copier mes décisions (YAML) » copie un bloc Markdown ```yaml sans guillemets (émetteur repris du dossier retours Steve) à coller dans un commentaire de la PR #815. Brouillon local, rien n'est ratifié.
 
 ## Reconstruire
 

@@ -185,7 +185,12 @@ const figureExpression = `(() => {
   const rows = [...table.querySelectorAll('tbody tr')].map(row => ({ id: row.dataset.group, cities: Number(row.querySelector('.count').textContent) }));
   const total = Number(table.querySelector('tfoot .count').textContent);
   if (rows.length !== 8 || total !== 226 || rows.reduce((sum, row) => sum + row.cities, 0) !== 226) throw Error('Tableau 3 incohérent ' + JSON.stringify(rows));
-  return { texts: figure.querySelectorAll('text').length, width: rect.width, height: rect.height, groups: rows, total };
+  const bars = [...document.querySelectorAll('[data-groups-bars] [data-bar]')].map(bar => ({ id: bar.dataset.bar, width: bar.querySelector('.fill').getBoundingClientRect().width,
+    track: bar.querySelector('.track').getBoundingClientRect().width, shared: bar.dataset.shared === 'true' }));
+  const widest = Math.max(...bars.map(bar => bar.width));
+  if (bars.length !== 8 || bars.find(bar => bar.width === widest).id !== 'G2' || Math.abs(widest - bars[0].track) > 3
+    || bars.some((bar, index) => Math.abs(bar.width / widest - Math.max(rows[index].cities / 81, .012)) > .02)) throw Error('barres des groupes incohérentes ' + JSON.stringify(bars));
+  return { texts: figure.querySelectorAll('text').length, width: rect.width, height: rect.height, groups: rows, total, bars: bars.map(bar => ({ id: bar.id, ratio: Number((bar.width / widest).toFixed(3)), shared: bar.shared })) };
 })()`;
 
 // Thème : fond, texte et cartes lus dans le DOM rendu ; contraste WCAG calculé.
@@ -246,6 +251,13 @@ for (const mode of ['light', 'dark']) {
   await pause(250);
   const figureShot = await call('Page.captureScreenshot', { format: 'png', fromSurface: true, clip: { ...box, scale: 1 } });
   await writeFile(`.generated/figure-tables-${mode}.png`, Buffer.from(figureShot.data, 'base64'));
+  for (const [name, selector] of [['groupes-barres', '[data-groups-bars]'], ['decision-D1', '[data-question="D1"]'], ['decision-D2', '[data-question="D2"]']]) {
+    const clip = await evaluate(`(() => { const element = document.querySelector('${selector}'); scrollTo(0, 0);
+      const rect = element.getBoundingClientRect(); return { x: rect.x + scrollX, y: rect.y + scrollY, width: rect.width, height: rect.height }; })()`);
+    await pause(250);
+    const part = await call('Page.captureScreenshot', { format: 'png', fromSurface: true, captureBeyondViewport: true, clip: { ...clip, scale: 1 } });
+    await writeFile(`.generated/figure-${name}-${mode}.png`, Buffer.from(part.data, 'base64'));
+  }
   // Une capture 1:1 de la scène, échelle réellement remise à 1 dans le panneau.
   await call('Emulation.setDeviceMetricsOverride', { width: 1920, height: 1080, deviceScaleFactor: 1, mobile: false });
   await pause(300);
@@ -278,6 +290,7 @@ const EXPECT = {
   picks: [['D2', 'B'], ['D2', 'C'], ['D3', 'a']], selectedQuestion: 'D2', selectedOption: 'C', persisted: [['D2', 'C'], ['D3', 'a']],
   storagePrefix: 'immo-villes-ecart-decision-responses:', blocks: 7, options: 19, recommended: 7, decides: { Fabien: 7 },
   url: 'https://github.com/rhanka/radar-immobilier/pull/815', mine: { Fabien: 7, Farid: 0 },
+  minis: ['D1-a', 'D1-b', 'D1-c', 'D2-A', 'D2-B', 'D2-C', 'D4-a', 'D4-b', 'D5-a', 'D5-b', 'D7-a', 'D7-b', 'D7-c'],
   answered: ['D2', 'D3'], roles: { D2: 'decide', D3: 'decide', D7: 'decide' }, allOptions: { D2: 'C', D3: 'a' },
 };
 const pickScript = picks => `(() => { ${picks.map(([question, option]) =>
@@ -304,13 +317,24 @@ const choices = await evaluate(`(() => {
   const recommended = [...document.querySelectorAll('.question-block .option .badge.warning')].length;
   const selected = [...document.querySelectorAll('[data-question="${EXPECT.selectedQuestion}"] [data-option][data-selected="true"]')].map(option => option.dataset.option);
   const decides = blocks.map(block => block.querySelector('.roles').dataset.decides);
-  const details = blocks.map(block => { const detail = block.querySelector('[data-detail]'); const head = [...(detail?.querySelectorAll('th') ?? [])].map(th => th.textContent.trim());
-    return { key: block.dataset.question, open: Boolean(detail?.open), avantages: head.includes('Avantages') && head.includes('Inconvénients'),
-      recommendation: /Recommandation/.test(detail?.textContent ?? '') }; });
+  const details = blocks.map(block => {
+    const options = [...block.querySelectorAll('.option')].map(option => {
+      const parts = [...option.children].map(child => child.dataset.optionDescription !== undefined ? 'description' : child.dataset.optionPros !== undefined ? 'pros'
+        : child.dataset.optionCons !== undefined ? 'cons' : child.dataset.mini ? 'mini' : null).filter(Boolean);
+      return { key: option.dataset.option, parts, description: option.querySelector('[data-option-description] p')?.textContent.trim().length ?? 0,
+        pros: option.querySelectorAll('[data-option-pros] li').length, cons: option.querySelectorAll('[data-option-cons] li').length };
+    });
+    return { key: block.dataset.question, intro: (block.querySelector('[data-detail]')?.textContent.trim().length ?? 0) > 200, options,
+      ordered: options.every(option => option.parts[0] === 'description' && option.parts.at(-2) === 'pros' && option.parts.at(-1) === 'cons'),
+      complete: options.every(option => option.description >= 140 && option.pros >= 1 && option.cons >= 1),
+      recommendation: /^Recommandation/.test(block.querySelector('[data-recommendation]')?.textContent.trim() ?? '') };
+  });
+  const minis = [...document.querySelectorAll('.question-block [data-mini]')].map(mini => ({ id: mini.dataset.mini, type: mini.dataset.miniType,
+    overflow: mini.scrollWidth > mini.clientWidth + 1, bars: mini.querySelectorAll('.bar').length, rows: mini.querySelectorAll('tbody tr').length }));
   const link = document.querySelector('a[data-export-target]');
   const exported = ${readExport};
   const persisted = JSON.parse(localStorage.getItem(Object.keys(localStorage).find(key => key.startsWith('${EXPECT.storagePrefix}'))) ?? '{}').selections ?? {};
-  return { blocks: blocks.length, single: single.length, radio, recommended, selected, decides, details, persisted,
+  return { blocks: blocks.length, single: single.length, radio, recommended, selected, decides, details, minis, persisted,
     defer: document.querySelectorAll('.question-block input[data-defer]').length,
     jsonControls: [...document.querySelectorAll('.choices button, .choices summary, .choices a')].filter(element => /JSON/i.test(element.textContent)).length,
     copyButton: document.querySelector('[data-export-copy]')?.textContent.trim(),
@@ -323,7 +347,9 @@ const choices = await evaluate(`(() => {
 const own = Object.fromEntries(choices.entries.map(entry => [entry.id, entry]));
 if (choices.blocks !== EXPECT.blocks || choices.single !== EXPECT.blocks || choices.radio !== EXPECT.options || choices.recommended !== EXPECT.recommended
   || choices.defer !== EXPECT.blocks || JSON.stringify(choices.selected) !== JSON.stringify([EXPECT.selectedOption])
-  || choices.details.some(detail => !detail.open || !detail.avantages || !detail.recommendation)
+  || choices.details.some(detail => !detail.intro || !detail.ordered || !detail.complete || !detail.recommendation)
+  || choices.minis.length !== EXPECT.minis.length || JSON.stringify(choices.minis.map(mini => mini.id).sort()) !== JSON.stringify([...EXPECT.minis].sort())
+  || choices.minis.some(mini => mini.overflow || (mini.type === 'bars' ? mini.bars < 2 : mini.rows !== 2))
   || EXPECT.persisted.some(([question, option]) => choices.persisted[question] !== option)
   || Object.entries(EXPECT.decides).some(([name, count]) => choices.decides.filter(value => value === name).length !== count)
   || choices.jsonControls !== 0 || choices.copyButton !== 'Copier mes décisions (YAML)'
@@ -386,7 +412,7 @@ const offline = await evaluate(`({ url: location.href, title: document.title, ex
 clearTimeout(timeout);
 const captures = [
   ...['light', 'dark'].flatMap(mode => ['1440x1000', '1920x1080', '390x844'].map(size => `.generated/dossier-preview-${size}-${mode}.png`)),
-  ...['light', 'dark'].map(mode => `.generated/figure-tables-${mode}.png`),
+  ...['light', 'dark'].flatMap(mode => ['tables', 'groupes-barres', 'decision-D1', 'decision-D2'].map(name => `.generated/figure-${name}-${mode}.png`)),
   ...['light', 'dark'].flatMap(mode => graphs.flatMap(graph => [`.generated/scene-1a1-${graph.id}-${mode}.png`, `.generated/scene-vue-ensemble-${graph.id}-${mode}.png`])),
 ];
 const report = {
@@ -401,7 +427,7 @@ const report = {
 await writeFile('.generated/browser-check.json', `${JSON.stringify(report, null, 2)}\n`);
 console.log(JSON.stringify({ status: report.status, themes: themes.map(theme => ({ mode: theme.mode, status: theme.status, contrast: theme.contrast })),
   scenes: report.scenes.map(scene => ({ id: scene.sceneId, cards: scene.cards, edges: scene.edges, labels: scene.edgeLabels, fitView: Number(scene.initialScale.toFixed(4)) })),
-  figure: { texts: figure.texts, total: figure.total }, choices: { blocks: choices.blocks, radio: choices.radio, recommended: choices.recommended, selected: choices.selected, answered: choices.answered },
+  figure: { texts: figure.texts, total: figure.total }, choices: { blocks: choices.blocks, minis: choices.minis.length, radio: choices.radio, recommended: choices.recommended, selected: choices.selected, answered: choices.answered },
   yaml: { copy: copy.realClick, clipboardMatchesZone: copy.clipboardMatchesZone, link: choices.link.href, fabienMine: exportFilter.fabienMine, faridMine: exportFilter.faridMine, all: exportFilter.all },
   captures: captures.length, consoleErrors: consoleErrors.length, runtimeErrors: runtimeErrors.length, externalRequests: externalRequests.length }));
 ws.close();
