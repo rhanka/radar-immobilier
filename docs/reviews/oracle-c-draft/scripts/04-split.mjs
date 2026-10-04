@@ -105,9 +105,9 @@ let md = `# Split balance — optim vs blind (oracle C draft)\n\n`;
 md += `Produced by \`scripts/04-split.mjs\` (seed ${SEED}, ${RESTARTS} restarts, local search over municipalities) **before any prompt was written or any model was run**.\n\n`;
 md += `- Source lines: ${items.length + data.excluded.length} triage lines; ${data.excluded.length} excluded (no resolvable radar record, listed below); **${items.length} items split**.\n`;
 md += `- Partition unit: the municipality (${cities.length} cities). Optim: ${sets.optim.length} items / ${new Set(sets.optim.map((i) => i.city)).size} cities. Blind: ${sets.blind.length} items / ${new Set(sets.blind.map((i) => i.city)).size} cities. No city appears in both sets.\n`;
-md += `- Which half became \`blind\` was decided by a seeded coin flip after the balance search.\n`;
+md += `- Which half became \`blind\` was decided by the next draw of the same seeded PRNG after the balance search. This is not an independent coin flip: the seed, chosen by the operator, fixes both the partition and the side (review m3). Future splits should commit the seed beforehand or derive it from a public future value.\n`;
 md += `- Frozen: \`optim.jsonl\` sha256 \`${shas.optim}\`; \`blind.jsonl\` sha256 \`${shas.blind}\` (see \`SHA256SUMS\`).\n\n`;
-md += `Test per stratum: chi-square test of independence (set x category). A high p-value means no detectable imbalance. With ~60 items per side, several categories have expected counts below 5, so the chi-square p-value is indicative only; the max absolute share gap is given as a plain balance metric.\n\n`;
+md += `Per stratum: chi-square statistic of the set x category table, **descriptive only**. The search deliberately minimised imbalance over these strata and assigned whole municipalities (clustered), so high p-values are expected by construction and do not certify homogeneity (reviews F07, m3). Several categories have expected counts below 5. The max absolute share gap is the plain balance metric.\n\n`;
 md += `| Stratum | Categories | chi² | df | p-value | Cramér's V | min expected | max share gap |\n|---|---:|---:|---:|---:|---:|---:|---:|\n`;
 const detail = [];
 const summary = {};
@@ -128,6 +128,16 @@ for (const p of ['pass1', 'pass2', 'pass3']) {
   const f = (list) => VERDICTS.map((v) => list.filter((i) => i.label.pass === p && i.label.verdict === v).length).join(' / ');
   md += `| ${p} | ${f(sets.optim)} | ${f(sets.blind)} |\n`;
 }
+const noEx = (list) => list.filter((i) => !i.input.includes('Extraits du document source')).length;
+const partial = (list) => list.filter((i) => i.missingNodeIds.length).length;
+md += `\n## Coverage caveats (reviews F07, F08, m3, m4)\n\n`;
+const famCount = (list, c) => list.filter((i) => STRATA.motifFamily(i) === c).length;
+const oneSided = cats.motifFamily.filter((c) => !famCount(sets.optim, c) || !famCount(sets.blind, c))
+  .map((c) => `${c} (optim ${famCount(sets.optim, c)} / blind ${famCount(sets.blind, c)})`);
+md += `- Motif families present on one side only: ${oneSided.join(', ') || 'none'}. Blind cannot validate such a family.\n`;
+md += `- Records with no verbatim excerpt (label and properties only): optim ${noEx(sets.optim)} / blind ${noEx(sets.blind)}.\n`;
+md += `- Lines scored with one cited record missing (partial mapping): optim ${partial(sets.optim)} / blind ${partial(sets.blind)}. Most are a twin mentioned by Steve without its full id (the bare word \`event\`), kept as extracted; they are scored against the whole-line verdict.\n`;
+md += `- Twins across neighbouring municipalities of the same MRC are not controlled.\n`;
 md += `\n## Excluded lines (not split, not scored)\n\n| Excel row | City | Verdict | Motif | Pass | Reason |\n|---:|---|---|---|---|---|\n`;
 for (const e of data.excluded) md += `| ${e.excelRow} | ${e.city} | ${e.verdict} | ${e.motif} | ${e.pass} | ${e.reason} |\n`;
 md += `\n## Partition unit and its cost\n\nGrouping by municipality is stricter than grouping by dossier (D10 asks that every unit of a dossier stay in one partition). It removes leakage through twin records (\`signal-\` / \`event-\` of the same act), coupled bylaws (plan + zoning concordance of the same session) and city-specific wording. The cost is that "city" cannot be balanced item-by-item; it is balanced instead through region and city-size strata.\n`;
