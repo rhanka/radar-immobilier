@@ -18,7 +18,7 @@
 
 <style>
   .dossier-sections { display: grid; gap: 14px; margin-block: 28px; }
-  .dossier-section { border: 1px solid var(--st-semantic-border-subtle); background: var(--st-semantic-surface-default); padding: 16px 18px; margin-top: 0; }
+  .dossier-section { border: 1px solid var(--st-semantic-border-subtle); background: var(--st-semantic-surface-default); padding: 16px 18px; margin-top: 0; min-width: 0; }
   summary { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; cursor: pointer; }
   summary strong { font-size: 1.15rem; }
   .prose { margin-top: 14px; }

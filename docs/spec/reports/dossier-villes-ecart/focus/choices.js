@@ -7,8 +7,8 @@ import roles from './roles.json' with { type: 'json' };
 import { decisionRecords, decisionsYaml, isoWithOffset, markdownBlock } from './decision-yaml.js';
 
 // Export target, per dossier: the PR of this dossier, where Fabien pastes his decisions.
-export const DECISIONS_TARGET_URL = 'https://github.com/rhanka/radar-immobilier/pull/0';
-export const DECISIONS_TARGET_LABEL = 'Ouvrir la PR du dossier sur GitHub';
+export const DECISIONS_TARGET_URL = 'https://github.com/rhanka/radar-immobilier/pull/815';
+export const DECISIONS_TARGET_LABEL = 'Ouvrir la PR #815 sur GitHub';
 // The dossier carries no revision label: its date stands for the revision.
 export const DOSSIER_REVISION = '2026-10-04';
 // The "Je suis" selector. Fabien decides every decision; Farid is consulted (D2, D3)

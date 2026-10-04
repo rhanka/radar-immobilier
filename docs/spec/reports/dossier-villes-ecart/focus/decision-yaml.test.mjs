@@ -1,66 +1,78 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+// Two independent YAML readers, from the repository root node_modules (the Makefile
+// mounts it at /node_modules): `yaml` (YAML 1.2 core) and `js-yaml` (with timestamps).
+import YAML from 'yaml';
+import jsyaml from 'js-yaml';
 import { yamlScalar, yamlBlock, isoWithOffset, decisionRecords, decisionsYaml, STATUSES } from './decision-yaml.js';
 import { questions, exportBlock, responsePack, PEOPLE, DECISIONS_TARGET_URL } from './choices.js';
 
-// Reads back what the emitter writes, without a YAML dependency, for the subset it
-// emits: plain scalars, `null`, folded `>-` (one line) and literal `|`, `|-` blocks,
-// with an optional indentation indicator.
-function readValue(lines, start, head, indent) {
-  const block = head.match(/^([>|])(\d?)(-?)$/);
-  if (!block) return { value: head === 'null' ? null : head, next: start };
-  const [, style, indicator, strip] = block;
-  const body = [];
-  let index = start;
-  while (index < lines.length && (lines[index] === '' || lines[index].startsWith(' '.repeat(indent)))) body.push(lines[index++]);
-  while (body.length && body.at(-1) === '') { body.pop(); index--; }
-  const content = body.map(line => line.slice(indent));
-  if (indicator) assert.equal(Number(indicator), 2);
-  let value = style === '|' ? content.join('\n') : content.join(' ');
-  if (!strip && value) value += '\n';
-  return { value, next: index };
-}
-function readYaml(text) {
-  const lines = text.split('\n');
-  const header = {}, decisions = [];
-  let index = 0, current = null;
-  while (index < lines.length) {
-    const line = lines[index++];
-    if (line === '' || line === 'decisions:' || line === 'decisions: []') continue;
-    const item = line.match(/^ {2}- (\w+): ?(.*)$/), field = line.match(/^ {4}(\w+): ?(.*)$/), top = line.match(/^(\w+): ?(.*)$/);
-    const [, key, head] = item ?? field ?? top ?? [];
-    if (!key) throw Error(`unreadable line ${JSON.stringify(line)}`);
-    const { value, next } = readValue(lines, index, head, top && !item && !field ? 2 : 6);
-    index = next;
-    if (item) { current = {}; decisions.push(current); }
-    (top && !item && !field ? header : current)[key] = value;
-  }
-  return { header, decisions };
-}
-const scalarRoundTrip = value => readYaml(`k: ${yamlScalar(value, 2)}`).header.k;
+const READERS = { yaml: text => YAML.parse(text), 'js-yaml': text => jsyaml.load(text) };
+// Reads `value` back through each reader, as a header value (indent 2) and as a record
+// value (indent 6), and returns what each reader loaded.
+const readBack = value => Object.entries(READERS).flatMap(([name, load]) => [
+  [name, load(`k: ${yamlScalar(value, 2)}\nnext: 1\n`).k],
+  [name, load(`list:\n  - id: X\n    k: ${yamlScalar(value, 6)}\n    next: 1\n`).list[0].k],
+]);
+const noQuotes = out => !/^["']/.test(out);
 
-test('scalars: never quoted; plain when YAML reads the same string back, otherwise a block', () => {
-  const plain = ['Fabien', 'D2', 'Farid (informé)', '(a) Laisser en l’état', 'C — Clé primaire (city_slug, id)', '—', 'tranchee',
-    'https://github.com/rhanka/radar-immobilier/pull/812', 'a:b', 'l\'option', 'dit "oui"', 'C#'];
-  for (const value of plain) assert.equal(yamlScalar(value), value, value);
-  const blocks = [
-    'D3 — Priorité : mesure d’attente', '#812', 'a # b', '- liste', '? clé', '& ancre', '* alias', '! tag', '| bloc', '> plié', '% directive',
-    '@x', '`x`', '[x]', '{x}', '"cité"', '\'cité\'', '1', '2026-10-04', '2026-10-04 · sha256:00', '-1', '.5', 'null', 'True', 'no', 'off', '~', '.inf',
-    ' espace', 'fin ', 'tab\tici', 'fin:',
+test('scalars: plain whenever YAML reads them back unchanged, never quoted', () => {
+  const plain = [
+    'Farid', 'D12', 'Steve, Mathieu, Fabien', '(a) Triage seul', 'M3 — couches hôtes + projection conforme', '—', 'tranchee',
+    'l\'option', 'Analyse des retours d\'usage', 'dit "oui"', 'C#', 'issue#784', 'https://github.com/rhanka/radar-immobilier/pull/794',
+    `2026-10-03 · sha256:${'0b'.repeat(32)}`, 'sha256:abc', '1er avis', '2026-10-03 matin', '10 décisions', 'a, [b] {c}', 'x:y', 'C:\\chemin',
   ];
-  for (const value of blocks) {
-    const out = yamlScalar(value, 2);
-    assert.match(out, /^>2?-\n {2}/, `${JSON.stringify(value)} -> ${out}`);
-    assert.equal(scalarRoundTrip(value), value, `round trip of ${JSON.stringify(value)}`);
+  for (const value of plain) {
+    assert.equal(yamlScalar(value), value, value);
+    for (const [name, read] of readBack(value)) assert.equal(read, value, `${name}: ${value}`);
   }
-  assert.equal(yamlScalar('deux\nlignes', 6), '|-\n      deux\n      lignes');
-  assert.equal(readYaml(`k: ${yamlScalar('deux\nlignes', 2)}`).header.k, 'deux\nlignes');
-  assert.equal(yamlScalar(''), '>-\n');
-  assert.equal(scalarRoundTrip(''), '');
-  assert.equal(yamlScalar('nul\u0000'), 'nul');
   assert.equal(yamlScalar(null), 'null');
   assert.equal(yamlScalar(undefined), 'null');
-  for (const value of [...plain, ...blocks]) assert.ok(!/^["']/.test(yamlScalar(value)), `quoted output for ${value}`);
+});
+
+test('date: plain ISO-8601 date-time, loaded as a timestamp by js-yaml, as a string by yaml', () => {
+  const iso = isoWithOffset(new Date('2026-10-04T13:25:28Z'));
+  assert.match(iso, /^2026-10-0[34]T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/);
+  assert.equal(yamlScalar(iso), iso);
+  assert.equal(yamlScalar('2026-10-04T09:25:28-04:00'), '2026-10-04T09:25:28-04:00');
+  assert.equal(YAML.parse(`date: ${iso}`).date, iso);
+  const loaded = jsyaml.load(`date: ${iso}`).date;
+  assert.ok(loaded instanceof Date);
+  assert.equal(loaded.toISOString(), new Date(iso).toISOString());
+});
+
+test('scalars that cannot be plain: block scalar (`>-` one line, `|-` several), read back identically', () => {
+  const single = [
+    'D6 — Recette : qui porte « UAT OK »', 'Oracle #783', 'a # b', 'fin:', '#784', '- liste', '-x', '? clé', ': deux', '& ancre', '* alias',
+    '! tag', '| bloc', '> plié', '% directive', '@x', '`x`', '[x]', '{x}', '\'apostrophe', '"guillemets"', ',virgule',
+    '1', '42', '2026-10-03', '-1', '+1', '.5', '1.0', '1e5', '0x1F', '0o17', '1_000', '1:20', 'null', 'Null', 'True', 'false', 'no', 'off',
+    'yes', 'on', 'y', 'N', '~', '.inf', '-.Inf', '.nan', ' espace', 'fin ', '  deux espaces', 'tab\tici', '\tdébut tabulé',
+  ];
+  for (const value of single) {
+    const out = yamlScalar(value, 2);
+    assert.match(out, /^>2?-\n/, `${JSON.stringify(value)} -> ${out}`);
+    assert.ok(noQuotes(out), out);
+    for (const [name, read] of readBack(value)) assert.equal(read, value, `${name}: ${JSON.stringify(value)}`);
+  }
+  assert.equal(yamlScalar('D6 — Recette : qui porte « UAT OK »', 6), '>-\n      D6 — Recette : qui porte « UAT OK »');
+  assert.equal(yamlScalar(' espace', 2), '>2-\n   espace');
+  const multi = ['deux\nlignes', ' a\nb', 'a\n b', '\n x', 'x\n\n\ny', 'Titre : sous-titre\n# pas un commentaire'];
+  for (const value of multi) {
+    const out = yamlScalar(value, 6);
+    assert.match(out, /^\|2?-\n/, out);
+    for (const [name, read] of readBack(value)) assert.equal(read, value, `${name}: ${JSON.stringify(value)}`);
+  }
+});
+
+test('normalisation: empty and blank values, line endings, characters a YAML stream cannot carry', () => {
+  for (const [value, expected] of [['', ''], [' ', ''], ['x\n', 'x'], ['a\r\nb', 'a\nb'], ['a\rb', 'a\nb'], ['nul\u0000', 'nul'],
+    ['sep\u2028', 'sep'], ['bom\ufeff', 'bom'], ['del\u007f', 'del'], ['bip\u0007 : x', 'bip : x'], ['a\n  \nb', 'a\n\nb']]) {
+    assert.ok(noQuotes(yamlScalar(value)), yamlScalar(value));
+    assert.ok(!/[\r\u0000\u2028\ufeff\u007f\u0007]/.test(yamlScalar(value)));
+    for (const [name, read] of readBack(value)) assert.equal(read, expected, `${name}: ${JSON.stringify(value)}`);
+  }
+  assert.equal(yamlScalar(''), '>-');
 });
 
 test('commentaire: literal block, normalised, indented, never closes the Markdown fence', () => {
@@ -71,10 +83,12 @@ test('commentaire: literal block, normalised, indented, never closes the Markdow
   assert.equal(out, '|\n      Ligne 1 : "oui" # pas un commentaire\n      l\'option b\n\n      ```\n      - pas une liste');
   assert.equal(yamlBlock('  indenté\nsuite', 6), '|2\n        indenté\n      suite');
   assert.equal(yamlBlock('bip\u0007', 6), '|\n      bip');
-});
-
-test('date: ISO-8601 with an explicit UTC offset', () => {
-  assert.match(isoWithOffset(new Date('2026-10-04T12:34:56Z')), /^2026-10-0[45]T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/);
+  // Clip chomping: readers get the text with one final line break.
+  for (const load of Object.values(READERS)) {
+    assert.equal(load(`list:\n  - c: ${out}\n    next: 1\n`).list[0].c, `${text.replace(/\r\n/g, '\n')}\n`);
+    assert.equal(load(`list:\n  - c: ${yamlBlock('  indenté\nsuite', 6)}\n`).list[0].c, '  indenté\nsuite\n');
+    assert.equal(load(`list:\n  - c: ${yamlBlock('', 6)}\n    next: 1\n`).list[0].c, '');
+  }
 });
 
 test('"Je suis" filter: Fabien decides all seven, Farid has none of his own, "toutes" keeps all', () => {
@@ -82,6 +96,7 @@ test('"Je suis" filter: Fabien decides all seven, Farid has none of his own, "to
   const mine = person => decisionRecords(questions, {}, person, 'mine');
   assert.equal(mine('Fabien').length, 7);
   assert.ok(mine('Fabien').every(record => record.decide === 'Fabien' && record.role === 'decide'));
+  // Farid is consulted (D2, D3) or informed: none of the decisions is his own.
   assert.equal(mine('Farid').length, 0);
   const all = decisionRecords(questions, {}, 'Farid', 'all');
   assert.equal(all.length, 7);
@@ -98,43 +113,75 @@ test('records: option id and label, statut, commentaire; unknown option rejected
     option: 'C', option_libelle: 'C — Clé primaire (city_slug, id), arêtes rattachées à la ville, réparation depuis latest.json', statut: 'tranchee', commentaire: 'Brainstorm : oui',
   });
   assert.equal(byId.D5.statut, 'differee');
+  assert.equal(byId.D5.option, 'b');
   assert.equal(byId.D1.statut, 'non_traitee');
   assert.equal(byId.D1.option, null);
   for (const record of Object.values(byId)) assert.ok(STATUSES.includes(record.statut));
   assert.throws(() => decisionRecords(questions, { selections: { D1: 'z' } }, 'Fabien', 'all'), /Unknown option z for D1/);
 });
 
-test('export block: fenced YAML, agreed header, no quotes, reads back exactly', () => {
-  const manifest = { title: 'Villes dont la base et le graphe stocké ne concordent plus : corriger le mélange de nœuds entre villes', htmlSha256: 'ab'.repeat(32),
-    dossier: 'docs/spec/reports/dossier-villes-ecart/DOSSIER_DECISION_VILLES_ECART_2026-10-04.md' };
-  const state = { selections: { D2: 'C', D1: 'a' }, comments: { D2: 'ligne 1\nligne 2 : "oui"' } };
-  const now = new Date('2026-10-04T12:00:00Z');
+// The manifest built from the dossier (`make map`), with a page sha256 in place of the
+// placeholder that portable.mjs replaces.
+const realManifest = async () => {
+  const { manifest } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
+  return { ...manifest, htmlSha256: '0b'.repeat(32) };
+};
+
+test('export block: fenced YAML without quotes, agreed header, coller_dans = the PR of this dossier', async () => {
+  const manifest = await realManifest();
+  assert.equal(manifest.title, 'Villes dont la base et le graphe stocké ne concordent plus : corriger le mélange de nœuds entre villes et remettre 226 villes en cohérence');
+  const state = { selections: { D2: 'C', D3: 'a' }, comments: { D2: 'ligne 1\nligne 2' } };
+  const now = new Date('2026-10-04T13:25:28Z');
   const { text, records } = exportBlock(manifest, state, 'Fabien', 'mine', now);
+  assert.ok(!text.includes('"'), 'no double quote in the export');
   const lines = text.split('\n');
   assert.equal(lines[0], '```yaml');
   assert.equal(lines.at(-1), '```');
-  assert.ok(!/^\s*(- )?\w+: ["']/m.test(text), 'no quoted scalar');
-  const yaml = lines.slice(1, -1).join('\n');
-  const { header, decisions } = readYaml(yaml);
-  assert.deepEqual(Object.keys(header), ['dossier', 'fichier', 'version', 'decideur', 'date', 'coller_dans']);
-  assert.equal(header.dossier, manifest.title);
-  assert.equal(lines[1], 'dossier: >-');
-  assert.equal(header.fichier, 'DOSSIER_DECISION_VILLES_ECART_2026-10-04.md');
-  assert.equal(header.version, `2026-10-04 · sha256:${'ab'.repeat(32)}`);
-  assert.equal(header.decideur, 'Fabien');
-  assert.equal(header.date, isoWithOffset(now));
-  assert.equal(header.coller_dans, DECISIONS_TARGET_URL);
-  assert.ok(text.includes(`\ncoller_dans: ${DECISIONS_TARGET_URL}\n`), 'URL stays a plain scalar');
-  assert.match(DECISIONS_TARGET_URL, /^https:\/\/github\.com\/rhanka\/radar-immobilier\/pull\/\d+$/);
+  assert.deepEqual(lines.slice(1, 9), [
+    'dossier: >-', `  ${manifest.title}`, 'fichier: DOSSIER_DECISION_VILLES_ECART_2026-10-04.md',
+    `version: 2026-10-04 · sha256:${'0b'.repeat(32)}`, 'decideur: Fabien', `date: ${isoWithOffset(now)}`,
+    `coller_dans: ${DECISIONS_TARGET_URL}`, 'decisions:',
+  ]);
+  assert.equal(DECISIONS_TARGET_URL, 'https://github.com/rhanka/radar-immobilier/pull/815');
   assert.equal(records.length, 7);
-  assert.equal(decisions.length, 7);
-  const d2 = decisions.find(decision => decision.id === 'D2');
-  assert.deepEqual(d2, { id: 'D2', titre: 'Principe de correction de la collision', role: 'decide', decide: 'Fabien', consulte: 'Farid',
-    option: 'C', option_libelle: 'C — Clé primaire (city_slug, id), arêtes rattachées à la ville, réparation depuis latest.json',
-    statut: 'tranchee', commentaire: 'ligne 1\nligne 2 : "oui"\n' });
-  assert.ok(text.includes('    commentaire: |\n      ligne 1\n      ligne 2 : "oui"'));
-  assert.equal(decisions.find(decision => decision.id === 'D7').option, null);
+  assert.equal(lines.filter(line => line.startsWith('  - id: ')).length, 7);
+  const d2 = text.split('  - id: D2\n')[1].split('\n  - id: ')[0];
+  assert.equal(d2, [
+    '    titre: Principe de correction de la collision', '    role: decide', '    decide: Fabien', '    consulte: Farid',
+    '    option: C', '    option_libelle: C — Clé primaire (city_slug, id), arêtes rattachées à la ville, réparation depuis latest.json', '    statut: tranchee',
+    '    commentaire: |', '      ligne 1', '      ligne 2',
+  ].join('\n'));
+  // Farid: no own decision, an empty list after the header.
+  assert.equal(exportBlock(manifest, state, 'Farid', 'mine', now).text.split('\n').at(-2), 'decisions: []');
   assert.equal(decisionsYaml({}, []).split('\n').at(-1), 'decisions: []');
+});
+
+test('round trip on the real dossier: yaml and js-yaml read back every header and record field', async () => {
+  const manifest = await realManifest();
+  const now = new Date('2026-10-04T13:25:28Z');
+  // Every option of every decision in turn, a deferred one, and comments with YAML-active text.
+  for (const pass of [0, 1, 2, 3]) {
+    const selections = Object.fromEntries(questions.map(question => [question.key, question.options[pass % question.options.length].key]));
+    delete selections.D1;
+    const comments = { D2: 'Voir #812 : oui\n- pas une liste\n\n```', D6: '  retrait\n« l\'étiquette » : porte:x' };
+    for (const person of PEOPLE) for (const scope of ['mine', 'all']) {
+      const { text, records } = exportBlock(manifest, { selections, comments, deferred: { D5: true } }, person, scope, now);
+      assert.ok(!text.includes('"'), 'no double quote in the export');
+      const yaml = text.slice('```yaml\n'.length, -'\n```'.length);
+      const expected = {
+        dossier: manifest.title, fichier: 'DOSSIER_DECISION_VILLES_ECART_2026-10-04.md',
+        version: `2026-10-04 · sha256:${'0b'.repeat(32)}`, decideur: person, date: isoWithOffset(now), coller_dans: DECISIONS_TARGET_URL,
+        decisions: records.map(record => ({ ...record, commentaire: record.commentaire ? `${record.commentaire}\n` : '' })),
+      };
+      for (const [name, load] of Object.entries(READERS)) {
+        const read = load(yaml);
+        if (read.date instanceof Date) read.date = read.date.toISOString() === new Date(expected.date).toISOString() ? expected.date : read.date;
+        assert.deepEqual(read, expected, `${name} ${person} ${scope} pass ${pass}`);
+        assert.deepEqual(Object.keys(read), ['dossier', 'fichier', 'version', 'decideur', 'date', 'coller_dans', 'decisions']);
+        if (records.length) assert.deepEqual(Object.keys(read.decisions[0]), ['id', 'titre', 'role', 'decide', 'consulte', 'option', 'option_libelle', 'statut', 'commentaire']);
+      }
+    }
+  }
 });
 
 test('the JSON pack stays available internally, for the backend connection', () => {

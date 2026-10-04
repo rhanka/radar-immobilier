@@ -67,7 +67,10 @@ const decisionDetails = Object.fromEntries(decisionChunks.map(chunk => {
   const key = title.match(/^(D\d+) — /)[1];
   if (!/\| Option \| Avantages \| Inconvénients \|/.test(chunk)) throw Error(`${key}: options table needs Avantages and Inconvénients`);
   if (!/\nRecommandation \*\*/.test(chunk)) throw Error(`${key}: recommendation line missing`);
-  return [key, { title: title.trim(), markdown: lines.join('\n').trim() }];
+  // La ligne « Décide · Consulté » du Markdown est portée par les badges du bloc : retirée ici.
+  const markdown = lines.join('\n').trim();
+  if (!/^\*\*Décide : Fabien/.test(markdown)) throw Error(`${key}: decider line missing`);
+  return [key, { title: title.trim(), markdown: markdown.replace(/^\*\*Décide :[^\n]*\n+/, '') }];
 }));
 if (Object.keys(decisionDetails).join() !== 'D1,D2,D3,D4,D5,D6,D7') throw Error(`decisions ${Object.keys(decisionDetails)}`);
 const [intention, context, synthesis, ...rest2] = numbered;

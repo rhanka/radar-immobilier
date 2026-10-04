@@ -11,10 +11,10 @@
       rows: ['municipality : barkmere', 'nœud bylaw-242 · Bylaw', 'resolution, refs → PV de barkmere'] },
   ];
   const tables = [
-    { id: 'graph_nodes', x: 560, y: 70, width: 520, title: 'PG · graph_nodes',
+    { id: 'graph_nodes', x: 560, y: 70, width: 520, typeX: 170, noteX: 250, title: 'PG · graph_nodes',
       rows: [['id', 'text', 'PK · seule clé'], ['type', 'text', 'Bylaw, Zone, Signal…'], ['label', 'text', ''],
         ['city_slug', 'text', 'ville, hors de la clé'], ['props', 'jsonb', 'properties, refs'], ['source_ref', 'text', '']] },
-    { id: 'graph_edges', x: 1200, y: 70, width: 380, title: 'PG · graph_edges',
+    { id: 'graph_edges', x: 1160, y: 70, width: 420, typeX: 130, noteX: 200, title: 'PG · graph_edges',
       rows: [['id', 'uuid', 'PK'], ['src_id', 'text', '→ graph_nodes.id'], ['dst_id', 'text', '→ graph_nodes.id'],
         ['kind', 'text', ''], ['props', 'jsonb', '']] },
   ];
@@ -67,9 +67,9 @@
           {#each table.rows as [column, type, note], index}
             <g data-column={column}>
               {#if index}<line x1={table.x} x2={table.x + table.width} y1={table.y + 46 + index * ROW} y2={table.y + 46 + index * ROW} class="rule" />{/if}
-              <text x={table.x + 16} y={table.y + 46 + 24 + index * ROW} class="cell strong" class:key={note.startsWith('PK')} data-fit="140">{column}</text>
-              <text x={table.x + 170} y={table.y + 46 + 24 + index * ROW} class="cell muted" data-fit="70">{type}</text>
-              <text x={table.x + 250} y={table.y + 46 + 24 + index * ROW} class="cell" class:alert-text={column === 'city_slug'} data-fit={table.width - 266}>{note}</text>
+              <text x={table.x + 16} y={table.y + 46 + 24 + index * ROW} class="cell strong" class:key={note.startsWith('PK')} data-fit={table.typeX - 30}>{column}</text>
+              <text x={table.x + table.typeX} y={table.y + 46 + 24 + index * ROW} class="cell muted" data-fit={table.noteX - table.typeX - 10}>{type}</text>
+              <text x={table.x + table.noteX} y={table.y + 46 + 24 + index * ROW} class="cell" class:alert-text={column === 'city_slug'} data-fit={table.width - table.noteX - 16}>{note}</text>
             </g>
           {/each}
         </g>
@@ -88,14 +88,13 @@
       <text x="446" y="155" class="link-label" data-fit="104">① INSERT</text>
       <!-- 2. barkmere projette : ON CONFLICT (id) remplace le contenu. -->
       <path d="M440 470 H556" class="link alert" marker-end="url(#fig2-arrow-alert)" />
-      <text x="300" y="610" class="link-label alert-text" data-fit="520">② ON CONFLICT (id) : props remplacées, city_slug inchangée</text>
+      <text x="36" y="524" class="link-label alert-text" data-fit="500">② ON CONFLICT (id) : props remplacées</text>
       <!-- graph_nodes ligne -> table -->
       <path d="M820 380 V326" class="link" marker-end="url(#fig2-arrow)" />
       <!-- graph_edges -> graph_nodes.id -->
-      <path d="M1200 185 H1084" class="link dashed" marker-end="url(#fig2-arrow)" />
-      <text x="1092" y="172" class="link-label" data-fit="104">src, dst</text>
-      <text x="1200" y="340" class="cell muted" data-fit="380">sans clé étrangère ni ville :</text>
-      <text x="1200" y="368" class="cell muted" data-fit="380">clé naturelle (src_id, dst_id, kind)</text>
+      <path d="M1160 185 H1084" class="link dashed" marker-end="url(#fig2-arrow)" />
+      <text x="1160" y="340" class="cell muted" data-fit="420">sans clé étrangère ni ville :</text>
+      <text x="1160" y="368" class="cell muted" data-fit="420">clé naturelle (src_id, dst_id, kind)</text>
 
       {#each effects as effect, index}
         <g data-effect={index + 1}>
@@ -134,6 +133,7 @@
   .arrow-head { fill: var(--st-semantic-text-secondary); }
   .arrow-head.alert { fill: var(--fig-alert); }
   .link-label { font-size: 19px; font-weight: 650; fill: var(--st-semantic-text-primary); }
+  .link-label.alert-text { fill: var(--fig-alert); }
   figure { --fig-alert: #b42318; }
   @media (prefers-color-scheme: dark) { figure { --fig-alert: #ff8a7a; } }
 </style>

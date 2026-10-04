@@ -78,7 +78,8 @@ test('chaque décision du §7 : introduction, Avantages / Inconvénients, recomm
   assert.deepEqual(Object.keys(decisionDetails), questions.map(question => question.key));
   for (const question of questions) {
     const detail = decisionDetails[question.key].markdown;
-    const intro = detail.split('\n\n')[1];
+    const intro = detail.split('\n\n')[0];
+    assert.ok(!detail.startsWith('**Décide'), `${question.key} : ligne décideur portée par les badges`);
     assert.ok(intro && intro.split(/(?<=\.) /).length >= 3, `${question.key} : introduction de plusieurs phrases`);
     assert.match(detail, /\| Option \| Avantages \| Inconvénients \|/);
     const rows = detail.split('\n').filter(line => /^\| (\*\*)?[(A-C]/.test(line));

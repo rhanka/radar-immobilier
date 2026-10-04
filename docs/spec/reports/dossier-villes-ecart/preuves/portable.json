@@ -1,0 +1,18 @@
+{
+  "output": "docs/spec/reports/dossier-villes-ecart/decision-focus.html",
+  "bytes": 555161,
+  "htmlSha256": "e549ec400a938f2b7bd6a47c0be781b527ee7c59b10ee569c23dcb8dab5e55a1",
+  "embeddedSha256": "7ee4c04176cdedb5b27a10d6fd61d302f5d4a2dbe6cc03e6f5ba46fca8a7827a",
+  "embeddedSha256Rule": "sha256 of the file with the embedded value replaced by 64 zeros",
+  "dossierHash": "eb0e6cbabc7fd7d7f2f9be25964168777e4019e40942cb8cc06177a5832a70b4",
+  "artifactInputHash": "42f79f8c80a83c2d2e0a32f415e275de9b957eaa8b27de1d5353997f3aa12ccd",
+  "graphs": [
+    {
+      "id": "architecture-ecart",
+      "nodes": 17,
+      "edges": 20,
+      "subflows": 6,
+      "sceneHash": "91a98a462f0d9b0bd2a41012036d97bb2848b9a4614b6d3673e997260cd994f2"
+    }
+  ]
+}
