@@ -290,3 +290,26 @@ test('§6.3 : besoins de Steve → données, modèle minimal, ce qu\'il ne fait 
   assert.equal(d2.recommended, 'a');
   assert.ok(!/annotation_(?:sources|raw_rows|assessments|anchors|codes|rules|findings)|label_set|prospect_notes v1/.test(markdown.split('\n## 10. ')[0].split('\n### 6.3 ')[1].split('\n## 7. ')[0]), 'plus de tables M3 dans §6.3 à §6.6');
 });
+
+test('§6.0 : état initial physique (PG, S3, geo), état proposé avec statuts, rattachement des cibles, tableau des écarts', async () => {
+  const { PHYSICAL } = await import('./physical-model.js');
+  const { parseEr } = await import('./parse-er.mjs');
+  const markdown = await readFile('../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md', 'utf8');
+  const schema = await readFile('../../../../../api/src/db/schema.ts', 'utf8');
+  const s60 = markdown.split('\n### 6.0 ')[1].split('\n### 6.1 ')[0];
+  // Chaque table Postgres du schéma « État actuel » existe dans schema.ts.
+  const current = parseEr(PHYSICAL['etat-actuel'].er, 'actuel');
+  const pgTables = current.entities.map(entity => entity.id).filter(id => !id.startsWith('s3_') && id !== 'registre_villes' && id !== 'geo_ogc');
+  for (const table of pgTables) assert.ok(schema.includes(`pgTable(\n  "${table}"`) || schema.includes(`pgTable("${table}"`), table);
+  // Statuts du schéma proposé : nouveau, modifié, inchangé ; rien de supprimé.
+  const status = PHYSICAL['etat-propose'].status;
+  assert.deepEqual(Object.keys(status).filter(id => status[id] === 'new').sort(), ['annotation_cibles', 'annotations', 'oracle_versions', 'retours_fichiers', 's3_retours', 'validations']);
+  assert.deepEqual(Object.keys(status).filter(id => status[id] === 'modified').sort(), ['account_users', 'graph_edges', 'graph_nodes', 'prospect_notes']);
+  assert.ok(!Object.values(status).includes('deleted'));
+  for (const text of ['Les signaux sont les nœuds de type \x60Signal\x60 et \x60DesignationEvent\x60', 'Villes : aucune table.', '1 106 municipalités', 'raw/proces-verbaux-<ville>/cas/<sha>.pdf',
+    'graph/<ville>/latest.json', 'api.geo.sent-tech.ca', 'Côté geo, rien ne change', '**Tableau des écarts.**', '| Service |', 'clé \x60(city_slug, id)\x60 décidée pour #812'])
+    assert.ok(s60.includes(text), text);
+  for (const kind of ['Signal', 'Ville', 'PV, document', 'Zone', 'Lot']) assert.ok(s60.includes(`| ${kind} |`), kind);
+  assert.ok(markdown.indexOf('<!-- diagram:etat-actuel -->') < markdown.indexOf('<!-- diagram:etat-propose -->'));
+  assert.ok(markdown.indexOf('<!-- diagram:etat-propose -->') < markdown.indexOf('<!-- diagram:modele-minimal -->'));
+});

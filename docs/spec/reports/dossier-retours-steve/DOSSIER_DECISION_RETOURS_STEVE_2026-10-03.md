@@ -399,7 +399,282 @@ Steve écrit (R-16) qu'« une seule réponse des développeurs remplacerait tout
 
 ## 6. Modèle de données conforme au contrat sentropic d'annotation et de canevas
 
-### 6.0 Existant aujourd'hui : deux tables d'annotation, aucune table d'oracle
+### 6.0 État initial et état proposé : le modèle physique
+
+FAIT, mesuré sur `origin/main` : `api/src/db/schema.ts`, `api/drizzle/*.sql`, `rebuild-from-s3.ts`, `graph-store.ts`, `ogc-pull.ts`, `geo-collections.ts`, `packages/radar-sources/src/municipalities.ts`. Principe en place : **S3 est la source de vérité, Postgres une projection reconstructible** (`rebuild-from-s3.ts`) ; la collecte écrit les documents sur S3, le refresh écrit le graphe d'une ville sur S3 puis le projette dans Postgres ; **l'application ne lit que Postgres** (et le service geo pour le zonage).
+
+**État initial — Postgres d'immo (tables pertinentes).**
+
+| Table | Ce qu'elle porte | Clés et liens réels | Écrite par | Lue par |
+|---|---|---|---|---|
+| `graph_nodes` | Un nœud du graphe par entité. **Les signaux sont les nœuds de type `Signal` et `DesignationEvent`.** | `id` texte (`signal-…`, `event-…`, `muni-<ville>`, `bylaw-…`), `type`, `city_slug`, `props`, `source_ref` (clé S3 du document) | refresh (`upsertGraphAtomic`), depuis `graph/<ville>/latest.json` | API `graph-signals` : carte, rail, panneau |
+| `graph_edges` | Les relations entre nœuds | `src_id`, `dst_id` texte, sans clé étrangère | refresh | API graphe |
+| `documents` | Les métadonnées d'un document (PV, avis) | `s3_key` (clé adressée par contenu), `sha256`, `extracted` | projection des sidecars `*.meta.json` de S3 (`rebuild-from-s3`) ; remplissage en prod : `non vérifié` | `non vérifié` |
+| `signals` (+ `opportunities`, `scores`) | Table historique de signaux à UUID | `id` UUID | **aucune écriture dans le code de main** | `prospect_notes.signal_id` |
+| `zone_versions`, `lot_versions` | Zones et lots bitemporels, **copiés du service geo** | `canonical_id` = `ogc:zones:<ville>:<code>` ou `ogc:lots:<ville>:<no_lot>` ; `city_slug` | pull OGC (`ogc-pull`) | carte (lots d'abord en local, zonage en secours), mapper |
+| `geo_resolutions`, `geo_unresolved` | Résultat du mapper G1 : quel signal concerne quelle zone ou quel lot, ou pourquoi ce n'est pas résolu | `node_id` (Signal, DesignationEvent) + `city_slug` → `target_id` (`canonical_id` zone ou lot), score, provenance | mapper G1 | carte, cohérence |
+| `regulatory_stages`, `constraint_hits` | Étapes d'un règlement ; contraintes sur un lot ou une zone | `bylaw_canonical_id` ; `target_canonical_id` | `non vérifié` | `non vérifié` |
+| `account_users` (+ invitations, événements de statut) | Les comptes de l'application | `id` UUID | authentification | partout |
+| `prospect_marks`, `prospect_notes` (+ contacts, journal d'accès) | Annotations de l'équipe sur les lots et les signaux (détail plus bas) | voir plus bas | fiche lot, panneau signal | idem |
+| `consistency_snapshots`, `refresh_document_outcomes`, `sources`, `ingestions` | Cohérence par ville ; résultat par document d'un cycle de refresh ; sources de collecte | `city_slug` ; `document_sha` | refresh, collecte | tableaux de bord |
+
+**Villes : aucune table.** Le registre `QC_MUNICIPALITIES` (**1 106 municipalités**, JSON dans `packages/radar-sources`) fait foi ; `city_slug` est une colonne texte dans les tables ; chaque ville est aussi un nœud `muni-<ville>` du graphe.
+
+**État initial — S3 d'immo (préfixes vus dans le code).**
+
+| Préfixe | Contenu | Écrit par | Projeté dans |
+|---|---|---|---|
+| `raw/proces-verbaux-<ville>/cas/<sha>.pdf` (aussi `raw/pv-index/cas/…`, `raw/avis-publics-<ville>/cas/…`) | Documents bruts adressés par leur sha256, chacun avec un sidecar `*.meta.json` (URL, dates, ville) | collecte | `documents` |
+| `graph/<ville>/latest.json`, `graph/<ville>/history/…` | Graphe canonique d'une ville et ses versions | refresh | `graph_nodes`, `graph_edges` |
+| `runs/<source>/<runId>/manifest.jsonl`, `runs/<source>/collected-urls.jsonl` | Manifestes de collecte | collecte | dates de `documents` |
+| `refresh/018/<ville>/runs/…`, `refresh/018/sweep/…` | Traces et curseur du refresh | refresh | `non vérifié` |
+| `state/<ville>/<source>.json`, `scrape-status/index.json` | État de collecte | collecte | état de collecte |
+
+Volumes : 1 106 municipalités au registre (FAIT) ; nombre de documents, de nœuds et de signaux en prod : `non vérifié`. Sauvegardes : hors du code applicatif, `non vérifié`.
+
+**Service geo (séparé).** API OGC `api.geo.sent-tech.ca`, collections `qc-zonage-<ville>`, `qc-lots-<ville>`, `qc-zoning-events-<ville>`. Immo **copie** zones et lots dans `zone_versions` / `lot_versions` (pull OGC) ; la carte lit le **zonage en direct** par le proxy `/api/geo/collections/…` (Postgres en secours) et les **lots** dans la copie Postgres d'abord ; les événements de zonage sont **seulement référencés** (proxy, aucune copie). Stockage interne du service geo (PostGIS, S3) : `non vérifié` depuis le code d'immo.
+
+```mermaid
+erDiagram
+    s3_raw ||..o| documents : projection
+    s3_graph ||..o{ graph_nodes : projection
+    graph_nodes ||..o{ graph_edges : aretes
+    registre_villes ||..o{ graph_nodes : city_slug
+    graph_nodes ||..o{ geo_resolutions : node_id
+    geo_resolutions }o..o| zone_versions : zone
+    geo_resolutions }o..o| lot_versions : lot
+    geo_ogc ||..o{ zone_versions : pull_ogc
+    geo_ogc ||..o{ lot_versions : pull_ogc_lots
+    prospect_notes }o--o| signals : signal_id
+    prospect_notes }o--|| account_users : auteur
+    s3_raw {
+      text cle PK "raw/proces-verbaux-<ville>/cas/<sha>.pdf"
+      text index "raw/pv-index/cas/<sha>.<ext>"
+      json sidecar "*.meta.json : url, dates, ville"
+    }
+    s3_graph {
+      text cle PK "graph/<ville>/latest.json"
+      text historique "graph/<ville>/history/…"
+    }
+    s3_runs {
+      text runs PK "runs/<source>/<runId>/manifest.jsonl"
+      text refresh "refresh/018/<ville>/runs/…"
+      text etat "state/<ville>/<source>.json"
+    }
+    registre_villes {
+      text city_slug PK "1 106 municipalités, JSON du code"
+      text mrc "homonymes suffixés par la MRC"
+    }
+    documents {
+      uuid id PK
+      text s3_key "clé raw/…/cas/<sha>"
+      text sha256 "empreinte du PV"
+      jsonb extracted
+    }
+    graph_nodes {
+      text id PK "signal-…, event-…, muni-…"
+      text type "Signal, DesignationEvent…"
+      text city_slug
+      text source_ref "clé S3 du document"
+    }
+    graph_edges {
+      uuid id PK
+      text src_id "→ graph_nodes.id, sans FK"
+      text dst_id "→ graph_nodes.id, sans FK"
+    }
+    signals {
+      uuid id PK "aucune écriture sur main"
+    }
+    zone_versions {
+      uuid id PK
+      text canonical_id "ogc:zones:<ville>:<code>"
+      text city_slug
+    }
+    lot_versions {
+      uuid id PK
+      text canonical_id "ogc:lots:<ville>:<no_lot>"
+      text no_lot
+    }
+    geo_resolutions {
+      uuid id PK
+      text node_id "Signal ou DesignationEvent"
+      text target_id "canonical_id zone ou lot"
+    }
+    account_users {
+      uuid id PK "comptes de l'équipe"
+    }
+    prospect_notes {
+      uuid id PK
+      uuid signal_id FK "UUID, cassé (B0)"
+    }
+    geo_ogc {
+      text zonage PK "qc-zonage-<ville>"
+      text lots "qc-lots-<ville>"
+      text evenements "qc-zoning-events-<ville>"
+    }
+```
+
+<!-- diagram:etat-actuel -->
+
+Qui lit quoi : la collecte et le refresh écrivent S3, puis projettent dans Postgres ; l'application lit Postgres ; le mapper relie les signaux du graphe aux zones et lots copiés du service geo.
+
+**Proposé : le même dessin, avec un statut par objet.**
+
+```mermaid
+erDiagram
+    s3_raw ||..o| documents : projection
+    s3_graph ||..o{ graph_nodes : projection
+    graph_nodes ||..o{ graph_edges : aretes
+    registre_villes ||..o{ graph_nodes : city_slug
+    graph_nodes ||..o{ geo_resolutions : node_id
+    geo_resolutions }o..o| zone_versions : zone
+    geo_resolutions }o..o| lot_versions : lot
+    geo_ogc ||..o{ zone_versions : pull_ogc
+    geo_ogc ||..o{ lot_versions : pull_ogc_lots
+    prospect_notes }o--o| signals : signal_id
+    prospect_notes }o--|| account_users : auteur
+    s3_retours ||..|| retours_fichiers : octets
+    retours_fichiers ||--o{ annotations : import
+    annotations ||--o{ validations : decide
+    annotations }o--|| account_users : auteur_steve
+    annotations ||--o{ annotation_cibles : vise
+    annotation_cibles }o..o| graph_nodes : signal
+    annotation_cibles }o..o| registre_villes : ville
+    annotation_cibles }o..o| documents : document
+    annotation_cibles }o..o| zone_versions : zone_cible
+    annotation_cibles }o..o| lot_versions : lot_cible
+    oracle_versions }o..o{ annotations : fige
+    s3_raw {
+      text cle PK "raw/proces-verbaux-<ville>/cas/<sha>.pdf"
+      text index "raw/pv-index/cas/<sha>.<ext>"
+      json sidecar "*.meta.json : url, dates, ville"
+    }
+    s3_graph {
+      text cle PK "graph/<ville>/latest.json"
+      text historique "graph/<ville>/history/…"
+    }
+    s3_runs {
+      text runs PK "runs/<source>/<runId>/manifest.jsonl"
+      text refresh "refresh/018/<ville>/runs/…"
+      text etat "state/<ville>/<source>.json"
+    }
+    registre_villes {
+      text city_slug PK "1 106 municipalités, JSON du code"
+      text mrc "homonymes suffixés par la MRC"
+    }
+    documents {
+      uuid id PK
+      text s3_key "clé raw/…/cas/<sha>"
+      text sha256 "empreinte du PV"
+      jsonb extracted
+    }
+    graph_nodes {
+      text city_slug PK "clé (city_slug, id), #812"
+      text id PK "signal-…, event-…, muni-…"
+      text type "Signal, DesignationEvent…"
+      text source_ref "clé S3 du document"
+    }
+    graph_edges {
+      uuid id PK
+      text src_id "+ ville du nœud (#812)"
+      text dst_id "+ ville du nœud (#812)"
+    }
+    signals {
+      uuid id PK "aucune écriture sur main"
+    }
+    zone_versions {
+      uuid id PK
+      text canonical_id "ogc:zones:<ville>:<code>"
+      text city_slug
+    }
+    lot_versions {
+      uuid id PK
+      text canonical_id "ogc:lots:<ville>:<no_lot>"
+      text no_lot
+    }
+    geo_resolutions {
+      uuid id PK
+      text node_id "Signal ou DesignationEvent"
+      text target_id "canonical_id zone ou lot"
+    }
+    account_users {
+      uuid id PK "+ compte de Steve (D5)"
+    }
+    prospect_notes {
+      uuid id PK
+      text signal_cle "ville + id texte (B0)"
+    }
+    geo_ogc {
+      text zonage PK "qc-zonage-<ville>"
+      text lots "qc-lots-<ville>"
+      text evenements "qc-zoning-events-<ville>"
+    }
+    s3_retours {
+      text cle PK "raw/retours-steve/cas/<sha>.xlsx"
+    }
+    retours_fichiers {
+      uuid id PK
+      text fichier_sha256 UK "= clé s3_retours"
+    }
+    annotations {
+      uuid id PK
+      uuid auteur_id FK "compte de Steve"
+      text statut "proposée, validée, contestée"
+    }
+    validations {
+      uuid id PK
+      uuid decideur_id FK "équipe ou PO"
+    }
+    annotation_cibles {
+      uuid id PK
+      text cible_type "signal, ville, document, zone, lot"
+      text city_slug
+      text cible_id "id, sha256 ou canonical_id"
+    }
+    oracle_versions {
+      uuid id PK
+      text libelle UK "oracle-ciblage-steve-v1"
+    }
+```
+
+<!-- diagram:etat-propose -->
+
+**Où une annotation de Steve se rattache aux données existantes** (table `annotation_cibles`, sans clé étrangère).
+
+| Cible | Objet physique existant | Clé utilisée | Clé existante ou nouvelle |
+|---|---|---|---|
+| Signal | nœud `graph_nodes` de type `Signal` ou `DesignationEvent` | `city_slug` + `id` texte | clé `(city_slug, id)` décidée pour #812 |
+| Ville | registre `QC_MUNICIPALITIES` (pas de table) | `city_slug` | existante |
+| PV, document | objet S3 `raw/proces-verbaux-<ville>/cas/<sha>.pdf` et ligne `documents` | `sha256` (+ page) | existante |
+| Zone | `zone_versions`, copie de `qc-zonage-<ville>` du service geo | `canonical_id` `ogc:zones:<ville>:<code>` | existante |
+| Lot | `lot_versions`, copie de `qc-lots-<ville>` | `canonical_id` `ogc:lots:<ville>:<no_lot>` | existante |
+| Règlement | nœud `bylaw-<ville>-<numéro>`, `regulatory_stages.bylaw_canonical_id` | `bylaw_canonical_id` | existante, peu fiable (C-05, C-26) |
+
+**Côté geo, rien ne change** : aucune table, aucune collection, aucune API nouvelle ; une annotation de zone ou de lot garde le `canonical_id` déjà utilisé par immo.
+
+**Tableau des écarts.**
+
+| Objet | Service | Existe aujourd'hui | Proposé | Détail | Pourquoi | Décision |
+|---|---|---|---|---|---|---|
+| `raw/retours-steve/cas/<sha>.xlsx` | immo S3 | non | **nouveau** | Octets du classeur, adressés par sha256, avec sidecar `*.meta.json` comme les PV | Source immuable, provenance | D1, D2 |
+| `retours_fichiers` | immo PG | non | **nouveau** | Un fichier reçu : sha256 unique, révision, importateur | Réimport sans doublon | D2 |
+| `annotations` | immo PG | non | **nouveau** | Verdicts importés ou saisis, statut, versions | Données vivantes de Steve | D2, D5 |
+| `validations` | immo PG | non | **nouveau** | Validée ou contestée, par qui, pourquoi | Boucle de validation | D2 |
+| `motifs` | immo PG | non | **nouveau** | Code → critère ou exclusion, règle | Table de dérivation | D2, D7 |
+| `annotation_cibles` | immo PG | non | **nouveau** | Objet visé : type + clé du tableau ci-dessus | 1 à N cibles, sans clé étrangère | D2, D3 |
+| `oracle_versions` | immo PG | non | **nouveau** | Versions gelées (et export JSON gelé dans le dépôt) | Oracle C | D10 |
+| `graph_nodes` | immo PG | oui : signaux et entités, clé `id` | **modifié** | Clé `(city_slug, id)` au lieu de `id` seul | Correction #812, déjà décidée : un même id dans deux villes | #812 |
+| `graph_edges` | immo PG | oui : relations, `src_id` / `dst_id` | **modifié** | Les références à un nœud portent la ville ; détail de mise en œuvre dans #812 (`non vérifié` ici) | Même raison | #812 |
+| `prospect_notes` | immo PG | oui : notes de l'équipe | **modifié** | Ancre signal acceptée en texte (`city_slug` + id) au lieu de l'UUID `signals` ; comparaison auteur corrigée | Réparer l'annotation de signal de l'équipe (B0), pas pour Steve | D3 |
+| `account_users` | immo PG | oui : comptes | **modifié (données)** | Un compte pour Steve ; schéma inchangé | Steve annote dans l'application | D5 |
+| `signals` (+ `opportunities`, `scores`) | immo PG | oui, aucune écriture | inchangé | Orpheline ; une suppression éventuelle est hors de ce dossier | — | aucune |
+| `documents`, `raw/…`, `graph/…`, `runs/…`, `refresh/…`, `state/…` | immo PG, immo S3 | oui | inchangé | Lus pour rattacher un PV ou un signal | — | — |
+| `zone_versions`, `lot_versions`, `geo_resolutions`, `geo_unresolved` | immo PG | oui | inchangé | `canonical_id` réutilisé comme clé de cible | — | — |
+| `prospect_marks` | immo PG | oui | inchangé | Usage de l'équipe sur les lots | — | — |
+| Collections `qc-zonage-*`, `qc-lots-*`, `qc-zoning-events-*` | geo PostGIS, geo S3 (`non vérifié`) | oui | inchangé | Aucune collection ni API nouvelle | — | — |
+| Supprimé | — | — | **aucun** | Rien n'est supprimé par cette proposition | — | — |
+
+#### Annotations existantes : deux tables, aucune table d'oracle
 
 **Oui, un modèle d'annotation existe déjà, mais il ne sert pas à ce dont Steve a besoin.** FAIT, lu dans `api/src/db/schema.ts` et les migrations `0005_prospect_marks.sql` et `0011_prospect_notes_annotations.sql` sur `origin/main`.
 
@@ -569,13 +844,7 @@ flowchart LR
 
 <!-- lanes:architecture-donnees -->
 
-| Ensemble | Existe ou proposé | En ligne ou hors ligne | Où | Rôle |
-|---|---|---|---|---|
-| (a) Données de Steve | proposé | en ligne, statique | Postgres (`retours_fichiers`, lignes importées) et octets sur S3 | Son classeur source, importé une fois et gardé tel quel : la provenance de tout ce qui suit. |
-| (b) Annotations | proposé | en ligne, vivant | Postgres (`annotations`, `annotation_cibles`, `validations`, `motifs`) | Ce que Steve et l'équipe produisent et valident dans l'application, dans la durée ; l'import pré-remplit, la saisie continue. |
-| (c) Graphe | existe | en ligne | S3 (`graph/<ville>/latest.json`) et Postgres (`graph_nodes`) | Les signaux, désignés par ville + id texte (clé décidée pour #812). |
-| (d) Oracle | proposé (C) ; existe (E, fichiers) | stocké, gelé | Postgres (`oracle_versions`) et export JSON gelé ; oracle E en fichiers JSON | Versions gelées tirées des annotations validées ; jamais modifiées en place. |
-| (e) Évaluation et optimisation des prompts | existe en partie (benchmark #782) | hors ligne | jobs et campagnes, hors de l'application | Mesure B et C sur l'oracle, optimisation des prompts d'engram ; un prompt retenu n'entre en production que sur décision. |
+Où chaque table nouvelle se rattache à l'existant (signal, ville, PV, zone, lot) : §6.0, diagrammes « État actuel » et « Proposé » et tableau des écarts.
 
 **Besoins de Steve → données nécessaires.**
 
