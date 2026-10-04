@@ -82,7 +82,14 @@
     "output": 8953,
     "reasoning": 1705
    },
-   "costUsdApiEquivalent": null
+   "costUsdApiEquivalent": null,
+   "onPass1": {
+    "lines": 36,
+    "kept": 25,
+    "noise": 2,
+    "pKept": 16,
+    "pTotal": 17
+   }
   },
   "gemini": {
    "label": "Gemini low",
@@ -163,7 +170,14 @@
     "output": 7902,
     "reasoning": 1425
    },
-   "costUsdApiEquivalent": null
+   "costUsdApiEquivalent": null,
+   "onPass1": {
+    "lines": 36,
+    "kept": 25,
+    "noise": 2,
+    "pKept": 17,
+    "pTotal": 17
+   }
   },
   "opus": {
    "label": "Claude Opus 5.5 low",
@@ -244,7 +258,14 @@
     "output": 15169,
     "reasoning": 0
    },
-   "costUsdApiEquivalent": 1.5093256000000002
+   "costUsdApiEquivalent": 1.5093256000000002,
+   "onPass1": {
+    "lines": 36,
+    "kept": 26,
+    "noise": 2,
+    "pKept": 17,
+    "pTotal": 17
+   }
   }
  },
  "baselineB": {
@@ -259,6 +280,13 @@
    "usefulHidden": 8,
    "noiseRemoved": 16,
    "noiseTotal": 27
+  },
+  "onPass1": {
+   "lines": 36,
+   "kept": 36,
+   "noise": 11,
+   "pKept": 17,
+   "pTotal": 17
   }
  },
  "interModel": {
@@ -343,6 +371,84 @@
     "Non pertinent": 22,
     "invalid": 0
    }
+  }
+ },
+ "robustness": {
+  "clusters": 26,
+  "models": {
+   "astra": {
+    "accuracyClusterCI95": [
+     0.6206896551724138,
+     0.828125
+    ],
+    "noiseClusterCI95": [
+     0.06896551724137931,
+     0.3235294117647059
+    ],
+    "pertinentKeptWilson95": [
+     0.7536078466345479,
+     0.99064824750947
+    ],
+    "sensAgreement": 0.5333333333333333
+   },
+   "gemini": {
+    "accuracyClusterCI95": [
+     0.6708860759493671,
+     0.8775510204081632
+    ],
+    "noiseClusterCI95": [
+     0.03225806451612903,
+     0.2222222222222222
+    ],
+    "pertinentKeptWilson95": [
+     0.8318156346315496,
+     1
+    ],
+    "sensAgreement": 0.6
+   },
+   "opus": {
+    "accuracyClusterCI95": [
+     0.6896551724137931,
+     0.8928571428571429
+    ],
+    "noiseClusterCI95": [
+     0.03333333333333333,
+     0.2727272727272727
+    ],
+    "pertinentKeptWilson95": [
+     0.8318156346315496,
+     1
+    ],
+    "sensAgreement": 0.6166666666666667
+   }
+  },
+  "mcnemar": {
+   "astra~gemini": {
+    "onlyFirstRight": 4,
+    "onlySecondRight": 6,
+    "exactP": 0.7539062500000001
+   },
+   "astra~opus": {
+    "onlyFirstRight": 3,
+    "onlySecondRight": 6,
+    "exactP": 0.5078125
+   },
+   "gemini~opus": {
+    "onlyFirstRight": 3,
+    "onlySecondRight": 4,
+    "exactP": 1
+   }
+  },
+  "unanimousNonPertinent": {
+   "count": 22,
+   "steveN": 20,
+   "steveP": 0
+  },
+  "splitVote": {
+   "count": 13,
+   "steveP": 5,
+   "steveS": 5,
+   "steveN": 3
   }
  }
 }

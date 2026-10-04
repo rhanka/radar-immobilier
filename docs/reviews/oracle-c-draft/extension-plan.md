@@ -1,67 +1,80 @@
 # Extension plan — from 121 items toward ~600 (proposal only, NOT executed)
 
+Revised after the adversarial review (findings F11-F13, M7, M8; see `review.md`).
+
 ## Target and why
 - The previous extraction oracle (oracle E, v3) holds **674 units over 100 documents in 100
-  municipalities** (sampled from 536 eligible documents in 225 municipalities, stratified by size
-  terciles; `docs/reports/benchmark-v101b-2026-09-17.md` lines 26-28 and 115; 676 units in the
-  uncommitted local copy used by v11alpha). The draft oracle C holds **121 items in 51
-  municipalities**, i.e. ~60 per half.
-- Precision of a measured accuracy around 70 % (95 % Wilson half-width): n = 60 → ±11.3 pts;
-  n = 121 → ±8.0; n = 300 → ±5.2; n = 600 → ±3.7. Today a 10-point gap between two models on
-  blind is not distinguishable from noise. ~600 items (≈300 blind) is the size at which a 5-point
-  gap becomes readable.
+  municipalities**, sampled from 536 eligible documents in 225 municipalities by size terciles
+  (`docs/reports/benchmark-v101b-2026-09-17.md` lines 26-28 and 115; 676 units in the uncommitted
+  local copy used by v11alpha). The draft oracle C holds **121 items in 51 municipalities**.
+- What size buys (computed, assumptions stated):
+  - single accuracy near 70 %, 95 % Wilson half-width: n = 60 → ±11.3 pts; 121 → ±8.0; 300 → ±5.2;
+    600 → ±3.7 (independent lines; clustering by municipality widens these);
+  - **paired model comparison** (McNemar, α = 0.05, power 0.8) with the discordance observed on
+    blind (11-18 % of lines): a 10-point difference needs ≈115 blind lines, a 6-point difference
+    ≈325, a 5-point difference ≈470, before the clustering design effect (ICC `non vérifié`).
+- So ~600 items with ≈300 **human-labelled, natural, blind** lines make a 6-7-point paired gap
+  readable; a 5-point gap needs more. Synthetic items do not count toward these numbers.
 
-## Sources of additional items (in order of label quality)
-| # | Source | Items (estimate) | Label available today | Work to reach Steve-grade labels |
-|---|---|---:|---|---|
-| S1 | Steve's next 52 municipalities, same three-pass method (announced in his analysis §7) | ~120-150 (his first 51 cities gave 124 lines) | none yet | Steve triages as before: verdict + motif. **Reserved as blind v2** |
-| S2 | Sheet "Écartés par les filtres" of the same workbook | 121 rows (some grouped) | filter verdict (102 "écarté à raison", 3 "écarté à tort"…), no P/S/N code | map rows to nodes; derive N for "écarté à raison" only after Steve confirms a motif per family; regroup aggregated rows |
-| S3 | Radar graph nodes (Signal / DesignationEvent) of the 103 municipalities of his view, not triaged | several hundred (`non vérifié`) | none | model pre-label + human validation (below) |
-| S4 | Signals bridged to the 100 documents of oracle E (`docRefs.docSha` → unit) | `non vérifié` (intersection with Steve's set judged small in the dossier) | extraction unit only | pre-label + validation; gives an E↔C bridge on a common corpus |
-| S5 | Synthetic hard cases derived from optim items only (verb flips "afin de permettre" ↔ "afin d'interdire", mixed bylaws, agenda-only wording, single-lot PPCMOI vs zone-wide change) | 60-100 | generated label by construction | Steve validates each; tagged `synthetic`, **never in blind**, scored in a separate column |
+## One permanent municipality registry (fixes F13 / M7)
+Every municipality gets one assignment, recorded once, never moved:
 
-Order of magnitude: S1 150 + S2 ~100 + S3 ~200 + S5 ~80 + current 121 ≈ 650; S4 adds a bridge.
+| Pool | Municipalities | Assignment |
+|---|---|---|
+| Steve's first survey | 51 (26 optim, 25 blind v1) | as frozen in this draft |
+| Steve's next survey (S1) | 52 announced | **blind v2**, entirely |
+| Other radar municipalities (outside Steve's 103) | from the radar inventory (oracle E universe: 225 with 2026 minutes; `non vérifié` for C) | drawn by stratified lot (size, region), 50 % optim / 50 % blind v3, recorded before any label is seen |
 
-## Annotation "à la Steve"
-1. **Codebook frozen first**: the 28 motif codes of his workbook, his three cumulative criteria,
-   the five exclusions and the asymmetry reserve; plus the motif-code → criteria derivation table
-   the dossier asks Steve to review (D8). Version the codebook (`codebook-c-v1`).
-2. **Pre-labelling by models** (S2, S3, S4, S5 only): three families (Astra, Opus, Gemini) at high
-   effort with the frozen prompt, each blind to the others, as in oracle E (independent passes,
-   then a vote with a mandatory reason).
-3. **Human validation**:
-   - Steve (or Mathieu, on Steve's codebook, with Steve arbitrating) validates: every item where
-     the models disagree, every model-"Pertinent", every model-"Non pertinent" whose motif is an
-     exclusion (V2-PRECEDENT, N-ODJ-SEUL, N-RESTRICTIF), and a 20 % random sample of unanimous
-     items to measure model-vs-human error on the "easy" part.
-   - The validator sees the radar record, not the model verdicts first (verdicts revealed after a
-     first human call) to limit anchoring; time per item recorded.
-   - Disagreement validator ↔ Steve → Steve decides; unresolved → `non résolu`, excluded from scoring
-     (oracle E rule).
-4. **S1 is annotated by Steve alone, without model pre-labels**: it is the next blind set, so no
-   model output may touch it before scoring.
+Consequence: new optim material can only come from the 26 optim municipalities and from the "other"
+pool; blind-v1 and S1 municipalities never feed optim, prompt examples, synthetic derivation or
+calibration. Items are de-duplicated at node level and at dossier level (same bylaw number in the
+same municipality, twins `signal-` / `event-`) before counting.
 
-## Leakage controls
-- Partition unit stays the **municipality**; a municipality in any blind set is never used in
-  optim, in prompt examples, in synthetic derivation or in pre-label calibration.
-- Blind v1 (61 items, this draft) stays frozen and is reported as-is; it is not re-used to tune.
-- Blind v2 = S1 (Steve's next 52 municipalities). Steve's survey method biases toward what the
-  screen showed; S3 items (not shown) are therefore split 50/50 by municipality too, to measure the
-  "never shown" population (the seven missed dossiers of his analysis §4).
-- Synthetic items derive from optim only, carry `synthetic: true`, never enter blind.
-- Few-shot examples, if any, come only from optim and are listed by id in the prompt file.
+## Sources and counting by label provenance
+| # | Source | Natural / synthetic | Partition | Label | Items (estimate, `non vérifié`) |
+|---|---|---|---|---|---:|
+| S1 | Steve's next 52 municipalities, same three passes | natural | blind v2 | Steve, alone, no model output shown | 120-150 |
+| S2 | Sheet "Écartés par les filtres" (121 rows, some grouped, some already in Triage) | natural | follows its municipality | Steve's filter verdict; P/S/N + motif to be confirmed by Steve per row | 60-90 after de-duplication |
+| S3 | Radar records of "other" municipalities, never shown to Steve | natural | registry | human annotator on Steve's codebook (below) | 250-300 |
+| S4 | Records bridged to oracle E's 100 documents (`docRefs.docSha`) | natural | registry | as S3 | `non vérifié` (overlap small) |
+| S5 | Synthetic hard cases derived from optim items only | synthetic | optim only, never blind | generated by construction, validated by Steve | 60-100, reported separately |
+| D | Documents with dossiers the radar never extracted (Steve's seven missed dossiers type) | natural | registry | human, from the document itself | 20-40 |
+
+Natural human-labelled blind lines ≈ 61 (v1) + 120-150 (S1) + ~125-150 (half of S3) ≈ 300-360.
+Natural total ≈ 121 + S1 + S2 + S3 + D ≈ 570-700; S5 is extra and never mixed into blind scores.
+
+## Annotation "à la Steve" (fixes F12 / M8)
+1. **Codebook first**, versioned (`codebook-c-v1`): Steve's 28 codes verbatim, his three criteria,
+   five exclusions, asymmetry reserve, plus the code → criteria table and his rulings on the D8
+   points (CPTAQ exception, agenda items, mixed bylaws, second drafts, S-RESTRICTIF vs R-21).
+2. **Gold = the human call made before any model output is revealed.** Revisions after a reveal
+   are logged as separate events with author and time; the pre-reveal call stays the reference for
+   scoring the models.
+3. **Anything that enters a blind set is 100 % human-labelled.** Model pre-labels are allowed only
+   for optim material, as triage help, never as gold.
+4. **Who**: Steve labels S1 and confirms S2 / S5; for S3 / S4 / D, a second annotator (Mathieu or a
+   delegate trained on the codebook) labels, Steve arbitrates disagreements and a random 10 %.
+   At least 50 items are double-annotated blind to each other; Cohen's κ (Steve vs second
+   annotator) is published. Unresolvable lines → `non résolu`, excluded from scores (oracle E rule).
+5. **No exposure**: Steve sees no C output (no UAT of C, no shadow screen) and no model answer until
+   S1 is frozen by sha256.
+6. **Tags set before scoring** by someone blind to model outputs: D8 lines, and lines where the
+   served record does not carry what the annotator used ("record insufficient"); results are
+   published with and without them.
 
 ## Freeze and version
-- `oracle-ciblage-steve-v1` = this draft (121 items) once the owner accepts it; `v2` = v1 + S1-S5.
-- Each version: manifest (items, sources, annotator per label, dates, codebook version), sha256 of
-  every set file, partition table, excluded lines with reasons. Corrections create a new version,
-  never an in-place edit; two arms are never compared on two different versions.
-- Storage proposed by the dossier (§9.3): `oracle_releases` row + frozen JSON in the repo. Given the
-  public repository, the frozen JSON may need a private location (D6).
+- `oracle-ciblage-steve-v1` = this draft once accepted; `v2` adds S1 (blind v2); `v3` adds the
+  registry pools. Each version: manifest (items, sources, annotator per label, pre/post-reveal
+  calls, codebook version, registry snapshot), sha256 of each set file committed **before** the
+  first prompt edit or model run that uses it, excluded lines with reasons. Corrections create a new
+  version; two arms are never compared on different versions.
+- Split seeds are committed before the split, or derived from a public future value.
+- Storage per dossier §9.3 (`oracle_releases` row + frozen JSON); given the public repository, the
+  frozen JSON may need a private location (D6).
 
 ## Effort and dependencies (estimates, `non vérifié`)
-- Steve: S1 survey (comparable to his first survey), validation of ~150-250 pre-labelled items,
-  review of the code → criteria table. Only Steve can produce S1; it gates blind v2.
-- Team: mapping S2 rows to nodes, pre-label runs (seat quotas), adjudication tooling (the oracle E
-  tooling can be reused: verify/vote/arbitrate steps, receipts with input/response sha256).
-- Dependencies: D8 (contradictory cases), D10 (oracle design), D6 (where the frozen sets may live).
+- Steve: S1 survey (comparable to his first, 124 lines), S2 / S5 confirmations, D8 rulings,
+  arbitration of the second annotator's disagreements.
+- Team: registry and de-duplication tooling, annotation interface showing the record only,
+  pre-reveal logging, reuse of oracle E receipts (input / response sha256).
+- Dependencies: D8, D10, D6; and no exposure of C to Steve before S1 is frozen (interacts with D12).
