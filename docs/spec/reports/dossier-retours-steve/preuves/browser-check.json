@@ -1,10 +1,10 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-03T13:28:12.753Z",
-  "url": "file:///home/antoinefa/src/radar-immobilier/.worktrees/dossier-retours-steve/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
+  "checkedAt": "2026-10-04T14:38:27.567Z",
+  "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
   "chromiumCdpPort": "9243",
   "offline": {
-    "url": "file:///home/antoinefa/src/radar-immobilier/.worktrees/dossier-retours-steve/docs/spec/reports/dossier-retours-steve/decision-focus.html",
+    "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/decision-focus.html",
     "title": "Analyse des retours d’usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage",
     "external": 0,
     "blockedExternal": true
@@ -22,75 +22,56 @@
   "scenes": [
     {
       "sceneId": "criteres-steve",
-      "sceneHash": "8d3f825fce7c2738b790ab3a6fd1d15d39847a3bb4e85c7b6bf556ac3e179e44",
-      "initialScale": 0.492228,
-      "contentInside": true,
-      "overlaps": 0,
-      "cards": 10,
-      "edges": 9,
-      "groups": 5,
-      "edgeLabels": 9,
-      "panel": {
-        "left": 40,
-        "top": 8906.5625,
-        "width": 1345,
-        "height": 820
-      },
-      "iconPx": 69.99820840139122,
-      "controls": {
-        "boutons": 4,
-        "unUn": true,
-        "minimap": true
-      }
+      "kind": "matrix",
+      "sceneHash": "0049d207cb0c8e8b37bc14353443e243cb23de307275cc73202e1978dbea5ab0",
+      "rows": 5,
+      "coverage": [
+        "partiel",
+        "absent",
+        "absent",
+        "partiel",
+        "absent"
+      ]
     },
     {
       "sceneId": "modele-donnees",
-      "sceneHash": "b87aacb0f2030bb54bfdd42a480417c453e7c66c54fc3b16ec21b8d21e376a1a",
-      "initialScale": 0.371131,
-      "contentInside": true,
-      "overlaps": 0,
-      "cards": 11,
-      "edges": 10,
-      "groups": 5,
-      "edgeLabels": 10,
-      "panel": {
-        "left": 40,
-        "top": 10190.25,
-        "width": 1345,
-        "height": 820
-      },
-      "iconPx": 69.99823680856625,
-      "controls": {
-        "boutons": 4,
-        "unUn": true,
-        "minimap": true
-      }
+      "kind": "er",
+      "sceneHash": "fd31ca9a0adfb1bc0180e314967a01ff3dd035fb9d7919cfd62dec04696a6257",
+      "initialScale": 0.6160550458715597,
+      "tables": 11,
+      "relations": 11,
+      "labels": 11,
+      "existing": [
+        "graph_nodes",
+        "prospect_notes"
+      ]
     },
     {
       "sceneId": "flux-import-oracle",
-      "sceneHash": "5ff3efd5348c2319e72b2e590171d070697dd938dad5e1eabdfb9fef54d27dd7",
-      "initialScale": 0.275885,
-      "contentInside": true,
-      "overlaps": 0,
-      "cards": 13,
-      "edges": 12,
-      "groups": 6,
-      "edgeLabels": 12,
-      "panel": {
-        "left": 40,
-        "top": 11443.859375,
-        "width": 1345,
-        "height": 820
+      "kind": "lanes",
+      "sceneHash": "32d65a31fb389a2b164916bbc827bc5a209e19f8ab2b1c0f54d120a9faee2d62",
+      "initialScale": 0.7736175115207373,
+      "lanes": [
+        "user",
+        "ui",
+        "backend",
+        "data"
+      ],
+      "stores": [
+        "S3 · stockage objet",
+        "PostgreSQL"
+      ],
+      "band": {
+        "below": true,
+        "widthShare": 1
       },
-      "iconPx": 69.9984538394621,
-      "controls": {
-        "boutons": 4,
-        "unUn": true,
-        "minimap": true
-      }
+      "nodes": 24,
+      "edges": 26,
+      "labels": 26
     },
     {
       "sceneId": "architecture-ui",
+      "kind": "flow",
       "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac",
       "initialScale": 0.440948,
       "contentInside": true,
@@ -101,7 +82,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 40,
-        "top": 12697.46875,
+        "top": 12787.140625,
         "width": 1345,
         "height": 820
       },
@@ -114,6 +95,7 @@
     },
     {
       "sceneId": "affichage-abc",
+      "kind": "flow",
       "sceneHash": "b1d7776fd1c90d436293c87e47a2a673d7f2bb67c0da0a1b7f52efcc159fab5e",
       "initialScale": 0.365904,
       "contentInside": true,
@@ -124,7 +106,7 @@
       "edgeLabels": 10,
       "panel": {
         "left": 40,
-        "top": 13951.078125,
+        "top": 14040.75,
         "width": 1345,
         "height": 820
       },
@@ -139,75 +121,56 @@
   "scenesAt1920": [
     {
       "sceneId": "criteres-steve",
-      "sceneHash": "8d3f825fce7c2738b790ab3a6fd1d15d39847a3bb4e85c7b6bf556ac3e179e44",
-      "initialScale": 0.540155,
-      "contentInside": true,
-      "overlaps": 0,
-      "cards": 10,
-      "edges": 9,
-      "groups": 5,
-      "edgeLabels": 9,
-      "panel": {
-        "left": 52.5,
-        "top": 8433.65625,
-        "width": 1800,
-        "height": 900
-      },
-      "iconPx": 69.99943881848728,
-      "controls": {
-        "boutons": 4,
-        "unUn": true,
-        "minimap": true
-      }
+      "kind": "matrix",
+      "sceneHash": "0049d207cb0c8e8b37bc14353443e243cb23de307275cc73202e1978dbea5ab0",
+      "rows": 5,
+      "coverage": [
+        "partiel",
+        "absent",
+        "absent",
+        "partiel",
+        "absent"
+      ]
     },
     {
       "sceneId": "modele-donnees",
-      "sceneHash": "b87aacb0f2030bb54bfdd42a480417c453e7c66c54fc3b16ec21b8d21e376a1a",
-      "initialScale": 0.496429,
-      "contentInside": true,
-      "overlaps": 0,
-      "cards": 11,
-      "edges": 10,
-      "groups": 5,
-      "edgeLabels": 10,
-      "panel": {
-        "left": 52.5,
-        "top": 9797.34375,
-        "width": 1800,
-        "height": 900
-      },
-      "iconPx": 69.9999395683975,
-      "controls": {
-        "boutons": 4,
-        "unUn": true,
-        "minimap": true
-      }
+      "kind": "er",
+      "sceneHash": "fd31ca9a0adfb1bc0180e314967a01ff3dd035fb9d7919cfd62dec04696a6257",
+      "initialScale": 0.8247706422018348,
+      "tables": 11,
+      "relations": 11,
+      "labels": 11,
+      "existing": [
+        "graph_nodes",
+        "prospect_notes"
+      ]
     },
     {
       "sceneId": "flux-import-oracle",
-      "sceneHash": "5ff3efd5348c2319e72b2e590171d070697dd938dad5e1eabdfb9fef54d27dd7",
-      "initialScale": 0.369027,
-      "contentInside": true,
-      "overlaps": 0,
-      "cards": 13,
-      "edges": 12,
-      "groups": 6,
-      "edgeLabels": 12,
-      "panel": {
-        "left": 52.5,
-        "top": 11130.953125,
-        "width": 1800,
-        "height": 900
+      "kind": "lanes",
+      "sceneHash": "32d65a31fb389a2b164916bbc827bc5a209e19f8ab2b1c0f54d120a9faee2d62",
+      "initialScale": 1,
+      "lanes": [
+        "user",
+        "ui",
+        "backend",
+        "data"
+      ],
+      "stores": [
+        "S3 · stockage objet",
+        "PostgreSQL"
+      ],
+      "band": {
+        "below": true,
+        "widthShare": 1
       },
-      "iconPx": 70.00038276332084,
-      "controls": {
-        "boutons": 4,
-        "unUn": true,
-        "minimap": true
-      }
+      "nodes": 24,
+      "edges": 26,
+      "labels": 26
     },
     {
       "sceneId": "architecture-ui",
+      "kind": "flow",
       "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac",
       "initialScale": 0.589816,
       "contentInside": true,
@@ -218,7 +181,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 52.5,
-        "top": 12464.5625,
+        "top": 12735.109375,
         "width": 1800,
         "height": 900
       },
@@ -231,6 +194,7 @@
     },
     {
       "sceneId": "affichage-abc",
+      "kind": "flow",
       "sceneHash": "b1d7776fd1c90d436293c87e47a2a673d7f2bb67c0da0a1b7f52efcc159fab5e",
       "initialScale": 0.489437,
       "contentInside": true,
@@ -241,7 +205,7 @@
       "edgeLabels": 10,
       "panel": {
         "left": 52.5,
-        "top": 13798.171875,
+        "top": 14068.71875,
         "width": 1800,
         "height": 900
       },
@@ -253,6 +217,112 @@
       }
     }
   ],
+  "dark": {
+    "background": "rgb(15, 23, 29)",
+    "text": "rgb(228, 237, 240)",
+    "backgroundLum": 0.008030588211407981,
+    "textLum": 0.8335362447962879,
+    "diagram": "rgb(15, 23, 29)",
+    "scenes": [
+      {
+        "sceneId": "criteres-steve",
+        "kind": "matrix",
+        "sceneHash": "0049d207cb0c8e8b37bc14353443e243cb23de307275cc73202e1978dbea5ab0",
+        "rows": 5,
+        "coverage": [
+          "partiel",
+          "absent",
+          "absent",
+          "partiel",
+          "absent"
+        ]
+      },
+      {
+        "sceneId": "modele-donnees",
+        "kind": "er",
+        "sceneHash": "fd31ca9a0adfb1bc0180e314967a01ff3dd035fb9d7919cfd62dec04696a6257",
+        "initialScale": 0.6160550458715597,
+        "tables": 11,
+        "relations": 11,
+        "labels": 11,
+        "existing": [
+          "graph_nodes",
+          "prospect_notes"
+        ]
+      },
+      {
+        "sceneId": "flux-import-oracle",
+        "kind": "lanes",
+        "sceneHash": "32d65a31fb389a2b164916bbc827bc5a209e19f8ab2b1c0f54d120a9faee2d62",
+        "initialScale": 0.7736175115207373,
+        "lanes": [
+          "user",
+          "ui",
+          "backend",
+          "data"
+        ],
+        "stores": [
+          "S3 · stockage objet",
+          "PostgreSQL"
+        ],
+        "band": {
+          "below": true,
+          "widthShare": 1
+        },
+        "nodes": 24,
+        "edges": 26,
+        "labels": 26
+      },
+      {
+        "sceneId": "architecture-ui",
+        "kind": "flow",
+        "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac",
+        "initialScale": 0.440948,
+        "contentInside": true,
+        "overlaps": 0,
+        "cards": 13,
+        "edges": 12,
+        "groups": 3,
+        "edgeLabels": 12,
+        "panel": {
+          "left": 40,
+          "top": 12787.140625,
+          "width": 1345,
+          "height": 820
+        },
+        "iconPx": 69.99966194993515,
+        "controls": {
+          "boutons": 4,
+          "unUn": true,
+          "minimap": true
+        }
+      },
+      {
+        "sceneId": "affichage-abc",
+        "kind": "flow",
+        "sceneHash": "b1d7776fd1c90d436293c87e47a2a673d7f2bb67c0da0a1b7f52efcc159fab5e",
+        "initialScale": 0.365904,
+        "contentInside": true,
+        "overlaps": 0,
+        "cards": 10,
+        "edges": 10,
+        "groups": 4,
+        "edgeLabels": 10,
+        "panel": {
+          "left": 40,
+          "top": 14040.75,
+          "width": 1345,
+          "height": 820
+        },
+        "iconPx": 69.9973345126044,
+        "controls": {
+          "boutons": 4,
+          "unUn": true,
+          "minimap": true
+        }
+      }
+    ]
+  },
   "choices": {
     "blocks": 16,
     "single": 16,
@@ -262,7 +332,9 @@
       "a"
     ],
     "decides": [
-      "Farid",
+      "Fabien",
+      "Fabien",
+      "Fabien",
       "Fabien",
       "Fabien",
       "Fabien",
@@ -270,9 +342,7 @@
       "Farid",
       "Farid",
       "Farid",
-      "Fabien",
-      "Fabien",
-      "Fabien",
+      "Farid",
       "Farid",
       "Farid",
       "Farid",
@@ -295,16 +365,23 @@
       "rel": "noopener",
       "text": "Ouvrir la PR #794 sur GitHub"
     },
-    "header": [
-      "```yaml",
-      "dossier: \"Analyse des retours d'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage\"",
-      "fichier: DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md",
-      "version: \"2026-10-03 · sha256:0b0e0115916614faa997085664a481703677c45cbe656bb181d8ec79816d2d65\"",
-      "decideur: Farid",
-      "date: \"2026-10-03T09:28:04-04:00\"",
-      "coller_dans: \"https://github.com/rhanka/radar-immobilier/pull/794\"",
-      "decisions:"
-    ],
+    "header": {
+      "fenced": true,
+      "keys": [
+        "dossier",
+        "fichier",
+        "version",
+        "decideur",
+        "date",
+        "coller_dans"
+      ],
+      "dossierStyle": ">-",
+      "dossier": "Analyse des retours d'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage",
+      "decideur": "Farid",
+      "coller_dans": "https://github.com/rhanka/radar-immobilier/pull/794",
+      "decisions": true,
+      "doubleQuotes": false
+    },
     "entries": [
       {
         "id": "D1",
@@ -386,7 +463,7 @@
     "faridMine": 10,
     "all": 16,
     "fabienMine": 6,
-    "fabienDecideur": "decideur: Fabien",
+    "fabienDecideur": "Fabien",
     "fabienRoles": {
       "D2": "decide",
       "D3": "decide",
@@ -396,47 +473,29 @@
       "D11": "decide"
     },
     "allOptions": {
-      "D9": "\"1\"",
+      "D9": "1",
       "D12": "a"
     }
   },
   "oneToOne": [
     {
       "sceneId": "criteres-steve",
-      "scale": 1,
-      "clip": {
-        "x": 52.5,
-        "y": 8433.65625,
-        "width": 1800,
-        "height": 900
-      }
+      "scale": 1
     },
     {
       "sceneId": "modele-donnees",
-      "scale": 1,
-      "clip": {
-        "x": 52.5,
-        "y": 9797.34375,
-        "width": 1800,
-        "height": 900
-      }
+      "scale": 1
     },
     {
       "sceneId": "flux-import-oracle",
-      "scale": 1,
-      "clip": {
-        "x": 52.5,
-        "y": 11130.953125,
-        "width": 1800,
-        "height": 900
-      }
+      "scale": 1
     },
     {
       "sceneId": "architecture-ui",
       "scale": 1,
       "clip": {
-        "x": 52.5,
-        "y": 12464.5625,
+        "x": 60,
+        "y": 12727.53125,
         "width": 1800,
         "height": 900
       }
@@ -446,7 +505,7 @@
       "scale": 1,
       "clip": {
         "x": 52.5,
-        "y": 13798.171875,
+        "y": 14061.140625,
         "width": 1800,
         "height": 900
       }
@@ -457,34 +516,34 @@
       "sceneId": "criteres-steve",
       "clip": {
         "x": 52.5,
-        "y": 8433.65625,
+        "y": 8546.046875,
         "width": 1800,
-        "height": 900
+        "height": 498.375
       }
     },
     {
       "sceneId": "modele-donnees",
       "clip": {
         "x": 52.5,
-        "y": 9797.34375,
+        "y": 9571.640625,
         "width": 1800,
-        "height": 900
+        "height": 824.578125
       }
     },
     {
       "sceneId": "flux-import-oracle",
       "clip": {
         "x": 52.5,
-        "y": 11130.953125,
+        "y": 10913.703125,
         "width": 1800,
-        "height": 900
+        "height": 1334
       }
     },
     {
       "sceneId": "architecture-ui",
       "clip": {
         "x": 52.5,
-        "y": 12464.5625,
+        "y": 12735.109375,
         "width": 1800,
         "height": 900
       }
@@ -493,7 +552,7 @@
       "sceneId": "affichage-abc",
       "clip": {
         "x": 52.5,
-        "y": 13798.171875,
+        "y": 14068.71875,
         "width": 1800,
         "height": 900
       }
@@ -511,7 +570,13 @@
     ".generated/scene-vue-ensemble-modele-donnees.png",
     ".generated/scene-vue-ensemble-flux-import-oracle.png",
     ".generated/scene-vue-ensemble-architecture-ui.png",
-    ".generated/scene-vue-ensemble-affichage-abc.png"
+    ".generated/scene-vue-ensemble-affichage-abc.png",
+    ".generated/dossier-preview-dark-1440x1000.png",
+    ".generated/scene-sombre-criteres-steve.png",
+    ".generated/scene-sombre-modele-donnees.png",
+    ".generated/scene-sombre-flux-import-oracle.png",
+    ".generated/scene-sombre-architecture-ui.png",
+    ".generated/scene-sombre-affichage-abc.png"
   ],
   "consoleErrors": [],
   "runtimeErrors": [],
