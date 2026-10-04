@@ -82,7 +82,9 @@ export function loadSet(set, { purpose, promptSha256 = null } = {}) {
 /** Guard before a test run: prompt frozen in git BEFORE the run, never run before on test. */
 export function assertTestRunAllowed({ promptVersion, promptSha256, model }) {
   const git = (...a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' });
-  const fin = JSON.parse(fs.readFileSync(path.join(ROOT, 'final-prompt.json'), 'utf8'));
+  const finFile = path.join(ROOT, 'final-prompt.json');
+  if (!fs.existsSync(finFile)) throw new Error('test run refused: no frozen prompt (final-prompt.json) committed');
+  const fin = JSON.parse(fs.readFileSync(finFile, 'utf8'));
   if (fin.version !== promptVersion || fin.sha256 !== promptSha256) throw new Error('test run refused: prompt is not the frozen final prompt');
   for (const f of ['final-prompt.json', `prompt-c-${promptVersion}.md`]) {
     if (git('ls-files', '--error-unmatch', f).status !== 0) throw new Error(`test run refused: ${f} is not committed`);

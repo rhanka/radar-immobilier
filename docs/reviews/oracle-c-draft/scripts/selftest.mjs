@@ -7,7 +7,8 @@ import crypto from 'node:crypto';
 import assert from 'node:assert/strict';
 import { ROOT } from './lib/common.mjs';
 import { chi2Test, cohenKappa, fleissKappa, wilson } from './lib/stats.mjs';
-import { sealBuffer, unsealBuffer, openTestSet, assertTestRunAllowed } from './lib/testset.mjs';
+import { sealBuffer, unsealBuffer, openTestSet, assertTestRunAllowed, readAudit } from './lib/testset.mjs';
+import { deriveVerdict } from './lib/derive-verdict.mjs';
 
 const near = (a, b, eps = 1e-3) => assert.ok(Math.abs(a - b) < eps, `${a} !~ ${b}`);
 
@@ -40,10 +41,26 @@ const [lo, hi] = wilson(5, 10); near(lo, 0.2366); near(hi, 0.7634);
   assert.throws(() => openTestSet({ purpose: 'selftest' }), /test-executor/);
   if (role) process.env.ORACLE_C_ROLE = role;
 }
-// a second test run of the frozen prompt is refused (the audit log holds the first)
+// test runs: refused without a committed frozen prompt; a prompt sha already in the audit log is refused
 {
-  const fin = JSON.parse(fs.readFileSync(path.join(ROOT, 'final-prompt.json'), 'utf8'));
-  assert.throws(() => assertTestRunAllowed({ promptVersion: fin.version, promptSha256: fin.sha256, model: 'gpt-6-astra' }), /already run|not committed|differs/);
+  const finFile = path.join(ROOT, 'final-prompt.json');
+  if (!fs.existsSync(finFile)) {
+    assert.throws(() => assertTestRunAllowed({ promptVersion: 'v1', promptSha256: '0'.repeat(64), model: 'gpt-6-astra' }), /no frozen prompt/);
+  } else {
+    const fin = JSON.parse(fs.readFileSync(finFile, 'utf8'));
+    const ran = readAudit().some((e) => e.action === 'test-run' && e.promptSha256 === fin.sha256);
+    if (ran) assert.throws(() => assertTestRunAllowed({ promptVersion: fin.version, promptSha256: fin.sha256, model: 'gpt-6-astra' }), /already run/);
+  }
+  // derived verdict: deterministic filter over the tags (schema-sortie.md)
+  const t = (o) => deriveVerdict({ residentiel: 'oui', sens: 'assouplissement', densification: 'oui', exclusions: [], ...o });
+  assert.equal(t({}).verdict, 'Pertinent');
+  assert.equal(t({ exclusions: ['ppcmoi'] }).verdict, 'Non pertinent');
+  assert.equal(t({ residentiel: 'non' }).verdict, 'Non pertinent');
+  assert.equal(t({ sens: 'mixte', densification: 'non' }).verdict, 'À surveiller');
+  assert.equal(t({ sens: 'restriction' }).verdict, 'Non pertinent');
+  assert.equal(t({ densification: 'non' }).verdict, 'Non pertinent');
+  assert.equal(t({ sens: 'indetermine' }).verdict, 'À surveiller');
+  assert.equal(t({ residentiel: 'indetermine', densification: 'indetermine' }).verdict, 'À surveiller');
 }
 
 // frozen split integrity: dev set hash; the test set is sealed outside the repo (hash only)
