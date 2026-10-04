@@ -8,6 +8,15 @@ import { ROOT, VERDICTS, VSHORT, MOTIF_FAMILY } from './lib/common.mjs';
 import { cohenKappa, fleissKappa, wilson, rng } from './lib/stats.mjs';
 import { MODELS } from './lib/models.mjs';
 import { loadSet } from './lib/testset.mjs';
+import { deriveVerdict, motifConsistent } from './lib/derive-verdict.mjs';
+
+// The system verdict is the one recomputed from the tags by the transparent filter when the answer
+// carries the tag schema (schema-sortie.md); otherwise the model's own verdict (exact enum).
+function systemVerdict(parsed) {
+  if (!parsed) return null;
+  if (parsed.residentiel !== undefined) { try { return deriveVerdict(parsed).verdict; } catch { return null; } }
+  return norm(parsed.verdict);
+}
 
 const arg = (k, d) => { const i = process.argv.indexOf(`--${k}`); return i > 0 ? process.argv[i + 1] : d; };
 const set = arg('set'); const pv = arg('prompt');
@@ -15,9 +24,7 @@ const showErrors = process.argv.includes('--errors');
 if (showErrors && set === 'blind') { console.error('--errors refused on blind'); process.exit(3); }
 
 const EXCLUDE = arg('exclude');
-// Sensitivity subset (review B2): the "12 sens non donné" row of Steve's analysis maps to
-// pass 1 ∧ Pertinent ∧ sens ∈ {Indéterminé, Mixte, Neutre}; v2's first rule leans on that row.
-const EXCLUSIONS = { 'sens-non-donne': (i) => i.label.pass === 'pass1' && i.label.verdict === 'Pertinent' && ['Indéterminé', 'Mixte', 'Neutre'].includes(i.label.sens) };
+const EXCLUSIONS = {}; // named sensitivity subsets, to be defined before any test run
 const items = loadSet(set, { purpose: `score ${pv}${EXCLUDE ? ` excl ${EXCLUDE}` : ''}` })
   .filter((i) => !(EXCLUDE && EXCLUSIONS[EXCLUDE](i)));
 const gold = new Map(items.map((i) => [i.id, i.label]));
@@ -88,9 +95,14 @@ for (const key of Object.keys(MODELS)) {
   const runs = load(key);
   if (!runs) continue;
   loaded[key] = runs;
-  const pred = new Map(items.map((i) => [i.id, norm(runs.get(i.id)?.parsed?.verdict)]));
+  const pred = new Map(items.map((i) => [i.id, systemVerdict(runs.get(i.id)?.parsed)]));
   const m = metrics(pred);
-  let motifExact = 0; let motifFamily = 0; let motifCodeValid = 0;
+  let motifExact = 0; let motifFamily = 0; let motifCodeValid = 0; let verdictMismatch = 0; let motifMismatch = 0;
+  for (const i of items) {
+    const p = runs.get(i.id)?.parsed; const sv = systemVerdict(p);
+    if (p && sv && p.verdict !== undefined && norm(p.verdict) !== sv) verdictMismatch++;
+    if (p && sv && p.motif && !motifConsistent(p.motif, sv)) motifMismatch++;
+  }
   for (const i of items) {
     const p = runs.get(i.id)?.parsed?.motif;
     if (p && MOTIF_FAMILY[p]) motifCodeValid++;
@@ -106,6 +118,7 @@ for (const key of Object.keys(MODELS)) {
     answered: recs.filter((r) => r.parsed).length, invalidVerdict: items.filter((i) => pred.get(i.id) == null).length,
     ...m,
     motif: { exact: motifExact / items.length, family: motifFamily / items.length, validCode: motifCodeValid / items.length },
+    coherence: { statedVerdictDiffersFromDerived: verdictMismatch, motifFamilyDiffersFromVerdict: motifMismatch },
     latency: { p50Ms: pctl(lat, 0.5), p90Ms: pctl(lat, 0.9), meanMs: lat.length ? Math.round(lat.reduce((a, b) => a + b, 0) / lat.length) : null },
     tokens: {
       input: sum('input_tokens') + sum('cache_creation_input_tokens') + sum('cache_read_input_tokens'),
@@ -126,7 +139,7 @@ for (const key of Object.keys(MODELS)) {
 
 const keys = Object.keys(loaded);
 if (keys.length >= 2) {
-  const verdictOf = (k, id) => norm(loaded[k].get(id)?.parsed?.verdict);
+  const verdictOf = (k, id) => systemVerdict(loaded[k].get(id)?.parsed);
   const pairs = {};
   for (let a = 0; a < keys.length; a++) for (let b = a + 1; b < keys.length; b++) {
     pairs[`${keys[a]}~${keys[b]}`] = cohenKappa(items.map((i) => verdictOf(keys[a], i.id)), items.map((i) => verdictOf(keys[b], i.id)), VERDICTS);
@@ -171,7 +184,7 @@ const onPass1 = (pred) => {
   return { lines: p1.length, kept: kept.length, noise: kept.filter((i) => i.label.verdict === 'Non pertinent').length,
     pKept: kept.filter((i) => i.label.verdict === 'Pertinent').length, pTotal: p1.filter((i) => i.label.verdict === 'Pertinent').length };
 };
-for (const k of keys) report.models[k].onPass1 = onPass1((id) => norm(loaded[k].get(id)?.parsed?.verdict));
+for (const k of keys) report.models[k].onPass1 = onPass1((id) => systemVerdict(loaded[k].get(id)?.parsed));
 const bp = onPass1(() => 'Pertinent');
 report.baselineB.onPass1 = bp;
 row('B view + C post-filter: noise kept (of pass-1 lines kept)', `${f(bp.noise / bp.kept)} (${bp.noise}/${bp.kept})`, (m) => `${f(m.onPass1.noise / m.onPass1.kept)} (${m.onPass1.noise}/${m.onPass1.kept})`, '');
@@ -204,7 +217,7 @@ for (const k of keys) {
     vals.sort((a, b) => a - b);
     return [vals[Math.floor(0.025 * vals.length)], vals[Math.floor(0.975 * vals.length)]];
   };
-  const vOf = (k, id) => norm(loaded[k].get(id)?.parsed?.verdict);
+  const vOf = (k, id) => systemVerdict(loaded[k].get(id)?.parsed);
   const normSens = (x) => String(x ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
   report.robustness = { clusters: cities.length, models: {}, mcnemar: {} };
   for (const k of keys) {

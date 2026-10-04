@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Runs 05-run.mjs for the three models in parallel. Same arguments as 05-run.mjs minus --model.
-// Usage: node run-all.mjs --set optim --prompt v2 [--concurrency 3] [--only id1,id2]
+// Usage: node run-all.mjs --set optim --prompt v1 [--concurrency 3] [--only id1,id2]
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
