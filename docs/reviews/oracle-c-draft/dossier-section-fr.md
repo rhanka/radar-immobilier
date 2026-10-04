@@ -136,6 +136,22 @@ Données pour graphiques simples (barres) :
   annotées deux fois (accord mesuré) ; Steve ne voit aucune sortie de C avant le gel de son relevé.
 - Cas synthétiques dérivés de `optim` seulement, jamais en aveugle, comptés à part.
 
+### Compatibilité avec la convergence sentropic / engram (terminologie et modèle générique)
+
+Une convergence sentropic + engram est en cours sur le vocabulaire (le terme « oracle » pourrait
+être remplacé par celui de l'état de l'art) et sur un modèle générique. Le brouillon reste
+compatible :
+- « oracle C » n'est qu'un **nom de dossier et de document** ; les données n'en dépendent pas.
+  Correspondance proposée avec l'état de l'art : oracle → **jeu de référence annoté** (*gold
+  standard* / *reference set*) ; `optim` → **jeu de développement** (*dev set*) ; `blind` → **jeu de
+  test réservé** (*held-out test set*) ; verdict de Steve → **étiquette** (*label*) ; motif →
+  **code de justification** (*rationale code*) ; accord avec Steve → **accord avec l'annotateur**.
+- Le format des items est générique : `id`, `label` (verdict, motif, famille, sens, passe),
+  `strata`, `input` (texte servi), `nodeIds` (ancres vers les objets du radar). Il se projette
+  sans perte sur une annotation ancrée à un objet métier (contrat d'ancre du dossier, §6.4).
+- Un renommage se fait en remplaçant les libellés des documents et le nom du dossier, sans
+  toucher aux jeux ni à leurs empreintes sha256.
+
 ### Revue adverse
 
 Deux revues indépendantes : **Astra max** (rejet) et **Opus 5.5 max** (acceptation avec
