@@ -1,0 +1,348 @@
+{
+ "set": "optim",
+ "promptVersion": "v2",
+ "n": 60,
+ "models": {
+  "astra": {
+   "label": "Astra low",
+   "model": "gpt-6-astra",
+   "effort": "low",
+   "route": "codex exec (ChatGPT seat), read-only sandbox, empty cwd",
+   "answered": 60,
+   "invalidVerdict": 0,
+   "n": 60,
+   "accuracy": 0.7333333333333333,
+   "accuracyCI95": [
+    0.6099104639810865,
+    0.8286750351292115
+   ],
+   "confusion": {
+    "Pertinent": {
+     "Pertinent": 14,
+     "À surveiller": 4,
+     "Non pertinent": 1,
+     "invalid": 0
+    },
+    "À surveiller": {
+     "Pertinent": 1,
+     "À surveiller": 10,
+     "Non pertinent": 3,
+     "invalid": 0
+    },
+    "Non pertinent": {
+     "Pertinent": 2,
+     "À surveiller": 5,
+     "Non pertinent": 20,
+     "invalid": 0
+    }
+   },
+   "perClass": {
+    "Pertinent": {
+     "precision": 0.8235294117647058,
+     "recall": 0.7368421052631579,
+     "support": 19,
+     "predicted": 17
+    },
+    "À surveiller": {
+     "precision": 0.5263157894736842,
+     "recall": 0.7142857142857143,
+     "support": 14,
+     "predicted": 19
+    },
+    "Non pertinent": {
+     "precision": 0.8333333333333334,
+     "recall": 0.7407407407407407,
+     "support": 27,
+     "predicted": 24
+    }
+   },
+   "view": {
+    "shown": 36,
+    "noiseShown": 7,
+    "noiseRate": 0.19444444444444445,
+    "pertinentKeptVisible": 18,
+    "pertinentTotal": 19,
+    "pertinentHidden": 1,
+    "usefulHidden": 4,
+    "noiseRemoved": 20,
+    "noiseTotal": 27
+   },
+   "motif": {
+    "exact": 0.48333333333333334,
+    "family": 0.6166666666666667,
+    "validCode": 1
+   },
+   "latency": {
+    "p50Ms": 9512,
+    "p90Ms": 11734,
+    "meanMs": 9590
+   },
+   "tokens": {
+    "input": 963649,
+    "output": 8953,
+    "reasoning": 1705
+   },
+   "costUsdApiEquivalent": null
+  },
+  "gemini": {
+   "label": "Gemini low",
+   "model": "gemini-3.8-flash-low",
+   "effort": "low",
+   "route": "agy --print (Antigravity seat), empty cwd",
+   "answered": 60,
+   "invalidVerdict": 0,
+   "n": 60,
+   "accuracy": 0.7666666666666667,
+   "accuracyCI95": [
+    0.6456348865960799,
+    0.8556056838156894
+   ],
+   "confusion": {
+    "Pertinent": {
+     "Pertinent": 16,
+     "À surveiller": 3,
+     "Non pertinent": 0,
+     "invalid": 0
+    },
+    "À surveiller": {
+     "Pertinent": 2,
+     "À surveiller": 7,
+     "Non pertinent": 5,
+     "invalid": 0
+    },
+    "Non pertinent": {
+     "Pertinent": 2,
+     "À surveiller": 2,
+     "Non pertinent": 23,
+     "invalid": 0
+    }
+   },
+   "perClass": {
+    "Pertinent": {
+     "precision": 0.8,
+     "recall": 0.8421052631578947,
+     "support": 19,
+     "predicted": 20
+    },
+    "À surveiller": {
+     "precision": 0.5833333333333334,
+     "recall": 0.5,
+     "support": 14,
+     "predicted": 12
+    },
+    "Non pertinent": {
+     "precision": 0.8214285714285714,
+     "recall": 0.8518518518518519,
+     "support": 27,
+     "predicted": 28
+    }
+   },
+   "view": {
+    "shown": 32,
+    "noiseShown": 4,
+    "noiseRate": 0.125,
+    "pertinentKeptVisible": 19,
+    "pertinentTotal": 19,
+    "pertinentHidden": 0,
+    "usefulHidden": 5,
+    "noiseRemoved": 23,
+    "noiseTotal": 27
+   },
+   "motif": {
+    "exact": 0.5166666666666667,
+    "family": 0.65,
+    "validCode": 1
+   },
+   "latency": {
+    "p50Ms": 4966,
+    "p90Ms": 6271,
+    "meanMs": 5305
+   },
+   "tokens": {
+    "input": 901731,
+    "output": 7902,
+    "reasoning": 1425
+   },
+   "costUsdApiEquivalent": null
+  },
+  "opus": {
+   "label": "Claude Opus 5.5 low",
+   "model": "claude-opus-5-5",
+   "effort": "low",
+   "route": "claude -p (Claude seat), --effort low, tools disabled, empty cwd",
+   "answered": 60,
+   "invalidVerdict": 0,
+   "n": 60,
+   "accuracy": 0.7833333333333333,
+   "accuracyCI95": [
+    0.6637973165265748,
+    0.8687707895359299
+   ],
+   "confusion": {
+    "Pertinent": {
+     "Pertinent": 15,
+     "À surveiller": 4,
+     "Non pertinent": 0,
+     "invalid": 0
+    },
+    "À surveiller": {
+     "Pertinent": 1,
+     "À surveiller": 10,
+     "Non pertinent": 3,
+     "invalid": 0
+    },
+    "Non pertinent": {
+     "Pertinent": 2,
+     "À surveiller": 3,
+     "Non pertinent": 22,
+     "invalid": 0
+    }
+   },
+   "perClass": {
+    "Pertinent": {
+     "precision": 0.8333333333333334,
+     "recall": 0.7894736842105263,
+     "support": 19,
+     "predicted": 18
+    },
+    "À surveiller": {
+     "precision": 0.5882352941176471,
+     "recall": 0.7142857142857143,
+     "support": 14,
+     "predicted": 17
+    },
+    "Non pertinent": {
+     "precision": 0.88,
+     "recall": 0.8148148148148148,
+     "support": 27,
+     "predicted": 25
+    }
+   },
+   "view": {
+    "shown": 35,
+    "noiseShown": 5,
+    "noiseRate": 0.14285714285714285,
+    "pertinentKeptVisible": 19,
+    "pertinentTotal": 19,
+    "pertinentHidden": 0,
+    "usefulHidden": 3,
+    "noiseRemoved": 22,
+    "noiseTotal": 27
+   },
+   "motif": {
+    "exact": 0.5833333333333334,
+    "family": 0.6833333333333333,
+    "validCode": 1
+   },
+   "latency": {
+    "p50Ms": 5537,
+    "p90Ms": 7826,
+    "meanMs": 5995
+   },
+   "tokens": {
+    "input": 340156,
+    "output": 15169,
+    "reasoning": 0
+   },
+   "costUsdApiEquivalent": 1.5093256000000002
+  }
+ },
+ "baselineB": {
+  "note": "B default view = pass 1 lines; only view metrics are meaningful",
+  "view": {
+   "shown": 36,
+   "noiseShown": 11,
+   "noiseRate": 0.3055555555555556,
+   "pertinentKeptVisible": 17,
+   "pertinentTotal": 19,
+   "pertinentHidden": 2,
+   "usefulHidden": 8,
+   "noiseRemoved": 16,
+   "noiseTotal": 27
+  }
+ },
+ "interModel": {
+  "pairwise": {
+   "astra~gemini": {
+    "kappa": 0.6949152542372882,
+    "n": 60,
+    "agreement": 0.8
+   },
+   "astra~opus": {
+    "kappa": 0.7722479966258964,
+    "n": 60,
+    "agreement": 0.85
+   },
+   "gemini~opus": {
+    "kappa": 0.8202054794520547,
+    "n": 60,
+    "agreement": 0.8833333333333333
+   }
+  },
+  "fleiss": {
+   "kappa": 0.7616119572415099,
+   "n": 60
+  },
+  "unanimous": 47,
+  "unanimousRate": 0.7833333333333333
+ },
+ "ensemble": {
+  "rule": "majority of 3; no majority -> À surveiller",
+  "accuracy": 0.8,
+  "accuracyCI95": [
+   0.6821795390818299,
+   0.8817161026314104
+  ],
+  "perClass": {
+   "Pertinent": {
+    "precision": 0.8421052631578947,
+    "recall": 0.8421052631578947,
+    "support": 19,
+    "predicted": 19
+   },
+   "À surveiller": {
+    "precision": 0.625,
+    "recall": 0.7142857142857143,
+    "support": 14,
+    "predicted": 16
+   },
+   "Non pertinent": {
+    "precision": 0.88,
+    "recall": 0.8148148148148148,
+    "support": 27,
+    "predicted": 25
+   }
+  },
+  "view": {
+   "shown": 35,
+   "noiseShown": 5,
+   "noiseRate": 0.14285714285714285,
+   "pertinentKeptVisible": 19,
+   "pertinentTotal": 19,
+   "pertinentHidden": 0,
+   "usefulHidden": 3,
+   "noiseRemoved": 22,
+   "noiseTotal": 27
+  },
+  "confusion": {
+   "Pertinent": {
+    "Pertinent": 16,
+    "À surveiller": 3,
+    "Non pertinent": 0,
+    "invalid": 0
+   },
+   "À surveiller": {
+    "Pertinent": 1,
+    "À surveiller": 10,
+    "Non pertinent": 3,
+    "invalid": 0
+   },
+   "Non pertinent": {
+    "Pertinent": 2,
+    "À surveiller": 3,
+    "Non pertinent": 22,
+    "invalid": 0
+   }
+  }
+ }
+}
