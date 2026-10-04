@@ -11,7 +11,7 @@ export const SCENE_KINDS = {
   'modele-donnees': 'er',
   'flux-import-oracle': 'lanes',
   'architecture-ui': 'flow',
-  'affichage-abc': 'flow',
+  'affichage-abc': 'lanes',
 };
 
 export const MATRIX = {
@@ -46,14 +46,16 @@ export const ER_SPEC = {
 
 const node = (evidence, tag, detail) => ({ evidence, tag, detail });
 
-export const LANE_SPEC = {
+const FLUX = {
   lanes: [
-    { id: 'L1', kind: 'user' },
-    { id: 'L2', kind: 'ui' },
-    { id: 'L3', kind: 'backend' },
-    { id: 'L4', kind: 'data' },
+    { id: 'L1', kind: 'user', title: 'Utilisateurs' },
+    { id: 'L2', kind: 'ui', title: 'Écrans UI' },
+    { id: 'L3', kind: 'backend', title: 'Fonctions backend' },
+    { id: 'L4', kind: 'data', title: 'Données' },
   ],
-  band: { id: 'OR', titleWidth: 1060, order: ['OE', 'BEN', 'SCO', 'OC', 'ADJ'] },
+  band: { id: 'OR', titleWidth: 1060, order: ['OE', 'BEN', 'SCO', 'OC', 'ADJ'],
+    subtitle: 'système transversal : alimenté par les annotations stockées en base, il note les sélections B et C' },
+  legend: 'couloirs de gauche à droite : qui agit, sur quel écran, quelle fonction backend, quelles données · bordure pleine : constaté sur main · tirets : proposé par le dossier · pointillés : référence gelée · les flèches suivent l’appel ou l’écriture · l’oracle, en bas, ne sert aucune vue : il évalue hors ligne.',
   rows: {
     EQP: 0, STV: 2, OPS: 3,
     MAP: 0, PAN: 1, RAI: 2, REV: 3,
@@ -93,4 +95,48 @@ export const LANE_SPEC = {
   },
 };
 
-export const LANE_TITLES = { user: 'Utilisateurs', ui: 'Écrans UI', backend: 'Fonctions backend', data: 'Données' };
+// Scène 5 : deux zones explicites. En haut, l'application (ce que les utilisateurs
+// voient, et où chaque élément vit : écran, backend, base) ; en bas, l'évaluation hors
+// ligne (job Node, aucune vue utilisateur) qui mesure B et C et prépare la bascule.
+const ABC = {
+  zone: { title: 'Application — ce que voient les utilisateurs', titleWidth: 640 },
+  lanes: [
+    { id: 'A1', kind: 'user', title: 'Utilisateurs' },
+    { id: 'A2', kind: 'ui', title: 'Écrans' },
+    { id: 'A3', kind: 'backend', title: 'Backend · API Hono' },
+    { id: 'A4', kind: 'data', title: 'Base · PostgreSQL' },
+  ],
+  band: { id: 'EV', titleWidth: 1180, nodeWidth: 200, order: ['PA', 'DIFF', 'MES', 'GATE', 'DEC', 'ORA'],
+    place: { PA: [0, 0], DIFF: [1, 0], MES: [2, 0], GATE: [3, 0], DEC: [4, 0], ORA: [4, 1] },
+    subtitle: 'job Node hors de l’application : aucun utilisateur ne voit ces éléments ; ils mesurent B et C et préparent la bascule' },
+  legend: 'zone du haut : ce que l’application montre et où chaque élément vit (écran, backend, base) · bande du bas : l’évaluation hors ligne, un job sans écran · bordure pleine : constaté sur main · tirets : proposé par le dossier · pointillés : référence gelée · seule la décision de Farid fait passer un utilisateur de B à C.',
+  rows: {
+    USR: 0, ADM: 2,
+    MAPB: 0, MAPC: 1, UATC: 2,
+    APIB: 0, APIC: 2,
+    GRA: 0, ANN: 2, ORR: 3,
+  },
+  nodes: {
+    USR: node('observed', 'personne', 'vue de travail quotidienne'),
+    ADM: node('declared', 'personne', 'mode réservé UAT et admin'),
+    MAPB: node('observed', 'écran', 'B par défaut, aucun sélecteur'),
+    MAPC: node('declared', 'écran', 'après bascule : mêmes états'),
+    UATC: node('declared', 'écran', 'confirmé, à instruire visibles'),
+    APIB: node('observed', 'backend', 'vivier B′ · filtres actuels'),
+    APIC: node('declared', 'backend', '3 états · exclu prouvé masqué'),
+    GRA: node('observed', 'PG', 'snapshot commun à A, B, C'),
+    ANN: node('declared', 'PG', 'verdicts de Steve rattachés'),
+    ORR: node('declared', 'PG', 'version gelée · sha256'),
+    PA: node('historical', 'job', 'référence z/m/p, gelée'),
+    DIFF: node('declared', 'job', 'entrants, sortants, raison'),
+    ORA: node('declared', 'job', 'labels C étayés, gelés'),
+    MES: node('declared', 'job', 'précision, rappel, parité'),
+    GATE: node('declared', 'job', 'aucun P masqué, P ∪ S > B'),
+    DEC: node('declared', 'personne', 'D12, D13 · B reste défaut'),
+  },
+  edges: {
+    'USR|MAPB': 'observed', 'MAPB|APIB': 'observed', 'APIB|GRA': 'observed', 'GRA|PA': 'historical', 'PA|DIFF': 'historical',
+  },
+};
+
+export const LANE_SPECS = { 'flux-import-oracle': FLUX, 'affichage-abc': ABC };

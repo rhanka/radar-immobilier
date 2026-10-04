@@ -30,8 +30,8 @@
     },
     'affichage-abc': {
       badge: '§9.5 · D12 et D13 ouverts',
-      lede: "Quatre conteneurs : un inventaire commun, les trois profils calculés côté serveur, les trois états de C, puis la mesure qui mène au seuil de bascule. B reste le défaut ; A est une référence gelée ; C est calculée en parallèle.",
-      note: "Une absence de donnée n'est jamais une exclusion : l'indéterminé et le mixte restent visibles dans l'état « à instruire ». L'exposition de la comparaison (UAT seulement ou sélecteur visible) et le seuil chiffré de bascule sont laissés à Farid.",
+      lede: "Deux zones. En haut, l'application : ce que voient les utilisateurs et où chaque élément vit (écran, backend, base). Steve et l'équipe voient B, par défaut et sans sélecteur ; C est calculée en shadow par le backend sur le même snapshot, et ne se voit qu'en recette UAT. En bas, l'évaluation hors ligne, un job sans écran : référence A gelée, diff B → C nommé, oracle C, mesure, seuil de bascule, puis décision de Farid, seule à faire passer les utilisateurs de B à C.",
+      note: "À l'écran, C a trois états : « confirmé » et « à instruire » sont visibles, « exclu prouvé » est masqué avec sa raison ; une absence de donnée n'est jamais une exclusion, l'indéterminé et le mixte restent donc visibles. L'exposition de la comparaison (UAT seulement ou sélecteur visible, D12) et le seuil chiffré de bascule (D13) sont laissés à Farid.",
     },
   };
 </script>
@@ -60,7 +60,7 @@
       {:else if graph.kind === 'er'}
         <p class="inventory">{graph.entities.length} tables · {graph.relations.length} relations · diagramme entité-relation tiré du bloc <code>erDiagram</code> de l’annexe B.</p>
       {:else if graph.kind === 'lanes'}
-        <p class="inventory">{graph.nodes.length} blocs · {graph.edges.length} liens · 4 couloirs, 2 magasins de données (S3, PostgreSQL), 1 bande oracle · grille explicite et routage orthogonal.</p>
+        <p class="inventory">{graph.nodes.length} blocs · {graph.edges.length} liens · {graph.projection.laneKinds.length} couloirs{#if graph.projection.zone}{' dans la zone « application »'}{/if}{#if graph.projection.stores} · {graph.projection.stores} magasins de données{/if} · 1 bande d’évaluation hors ligne · grille explicite et routage orthogonal.</p>
       {:else}
         <p class="inventory">{graph.nodes.length} cartes · {graph.edges.length} liens · {graph.groups.length} conteneurs natifs <code>parentId</code> · gabarit A’ 460 × 200 à l’échelle 1 · Dagre <code>rankdir LR</code>.</p>
       {/if}
