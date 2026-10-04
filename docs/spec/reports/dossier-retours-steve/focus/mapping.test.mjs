@@ -57,20 +57,20 @@ function assertGeometry(graph, edges) {
   }
 }
 
-test('le modèle de données est un diagramme entité-relation : tables, colonnes clés, cardinalités', () => {
+test('le modèle de données (scène 2) est le modèle minimal : cinq tables nouvelles, graphe par ville + id texte', () => {
   const model = graphs.find(graph => graph.id === 'modele-donnees');
   assert.equal(model.kind, 'er');
-  const names = model.entities.map(entity => entity.id);
-  for (const name of ['annotation_sources', 'annotation_raw_rows', 'annotation_codes', 'annotation_rules', 'annotation_findings', 'annotation_assessments',
-    'annotation_anchors', 'oracle_releases', 'comment_projection', 'graph_nodes', 'prospect_notes']) assert.ok(names.includes(name), name);
-  // Seules graph_nodes et prospect_notes existent déjà : toute autre table est une proposition.
-  assert.deepEqual(model.entities.filter(entity => entity.existing).map(entity => entity.id), ['graph_nodes', 'prospect_notes']);
+  assert.deepEqual(model.entities.map(entity => entity.id).sort(), ['graph_nodes', 'motifs', 'oracle_versions', 'retours_cibles', 'retours_fichiers', 'retours_lignes']);
+  // Seule graph_nodes existe déjà : les cinq autres tables sont proposées.
+  assert.deepEqual(model.entities.filter(entity => entity.existing).map(entity => entity.id), ['graph_nodes']);
   for (const entity of model.entities) assert.ok(entity.attributes.some(attribute => attribute.keys.includes('PK')), `${entity.id} sans clé primaire`);
   const relation = (source, label) => model.relations.find(item => item.source === source && item.label === label);
-  assert.deepEqual([relation('annotation_sources', 'contient').sourceCardinality, relation('annotation_sources', 'contient').targetCardinality], ['one', 'zero-or-many']);
-  assert.equal(relation('annotation_anchors', 'cle_texte_sans_fk').identifying, false);
-  assert.equal(relation('annotation_assessments', 'supersedes').target, 'annotation_assessments');
-  assert.equal(model.layout.layers.length, 5);
+  assert.deepEqual([relation('retours_fichiers', 'contient').sourceCardinality, relation('retours_fichiers', 'contient').targetCardinality], ['one', 'zero-or-many']);
+  assert.equal(relation('retours_cibles', 'ville_et_id_texte').identifying, false);
+  assert.equal(relation('retours_lignes', 'remplace').target, 'retours_lignes');
+  const cibles = model.entities.find(entity => entity.id === 'retours_cibles').attributes.map(attribute => attribute.name);
+  assert.ok(cibles.includes('city_slug') && cibles.includes('cible_id'), 'cible = ville + id texte (#812)');
+  assert.equal(model.layout.layers.length, 3);
   assertGeometry(model, model.relations.filter(item => item.source !== item.target));
 });
 
@@ -99,7 +99,7 @@ test('les chiffres des cartes sont ceux du dossier', () => {
   assert.match(card('architecture-ui', 'GCB').detail, /2 761 lignes/);
   assert.match(card('architecture-ui', 'DS').detail, /39 sur 69/);
   assert.match(card('architecture-ui', 'COL').detail, /0 sur 3/);
-  assert.equal(graphs.find(graph => graph.id === 'modele-donnees').entities.find(entity => entity.id === 'annotation_codes').attributes[0].comment, '28 codes');
+  assert.match(graphs.find(graph => graph.id === 'modele-donnees').entities.find(entity => entity.id === 'motifs').attributes[0].comment, /P-DENSITE/);
 });
 
 test('A/B/C : deux zones, application en couloirs (écran, backend, base) et évaluation hors ligne en bas', () => {
@@ -210,7 +210,7 @@ test('options : description concrète pour chacune, schéma de tables pour D2 et
     assert.ok(section10.includes(option.description), `${question.key}/${option.key} description absente du §10`);
   }
   const withDiagram = questions.flatMap(question => question.options.filter(option => option.diagram).map(option => `${question.key}/${option.key}`));
-  assert.deepEqual(withDiagram, ['D2/M1', 'D2/M2', 'D2/M3', 'D2/M4', 'D3/a', 'D3/b', 'D3/c', 'D10/a', 'D10/b', 'D10/c']);
+  assert.deepEqual(withDiagram, ['D2/a', 'D2/b', 'D2/c', 'D2/d', 'D3/a', 'D3/b', 'D3/c', 'D10/a', 'D10/b', 'D10/c']);
   for (const question of questions) for (const option of question.options.filter(item => item.diagram)) {
     const model = parseEr(option.diagram.er, option.key);
     const layout = erLayout(model, option.diagram);
@@ -258,4 +258,19 @@ test("existant et oracles : schémas du texte, aucune table d'oracle en base, pr
   assert.match(s93, /#### Ancien oracle → nouvel oracle : la proposition/);
   assert.match(s93, /Rien n'est remplacé/);
   assert.match(s93, /décision \*\*D10\*\*/);
+});
+
+test('§6.3 : besoins de Steve → données, modèle minimal, ce qu\'il ne fait pas, tables existantes laissées telles quelles', async () => {
+  const markdown = await readFile('../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md', 'utf8');
+  const s63 = markdown.split('\n### 6.3 ')[1].split('\n### 6.4 ')[0];
+  assert.match(s63, /\*\*Besoins de Steve → données nécessaires\.\*\*/);
+  assert.equal(s63.split('\n').filter(line => /^\| [1-9] \|/.test(line)).length, 9);
+  for (const table of ['retours_fichiers', 'retours_lignes', 'motifs', 'retours_cibles', 'oracle_versions']) assert.ok(s63.includes(`| \`${table}\` |`), table);
+  assert.match(s63, /Ce que le modèle minimal ne fait pas, volontairement/);
+  assert.match(s63, /ni étendues ni réutilisées/);
+  assert.match(s63, /#812/);
+  const d2 = questions.find(question => question.key === 'D2');
+  assert.deepEqual(d2.options.map(option => option.key), ['a', 'b', 'c', 'd']);
+  assert.equal(d2.recommended, 'a');
+  assert.ok(!/annotation_\w+|label_set|prospect_notes v1/.test(markdown.split('\n## 10. ')[0].split('\n### 6.3 ')[1].split('\n## 7. ')[0]), 'plus de tables M3 dans §6.3 à §6.6');
 });

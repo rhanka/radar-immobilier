@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-04T20:45:18.484Z",
+  "checkedAt": "2026-10-04T21:01:32.674Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
   "chromiumCdpPort": "9243",
   "offline": {
@@ -36,20 +36,19 @@
     {
       "sceneId": "modele-donnees",
       "kind": "er",
-      "sceneHash": "fd31ca9a0adfb1bc0180e314967a01ff3dd035fb9d7919cfd62dec04696a6257",
-      "initialScale": 0.6160550458715597,
-      "tables": 11,
-      "relations": 11,
-      "labels": 11,
+      "sceneHash": "6bc793ef8e37553c3b72f80d7f2119dfaecc76f19bc7b724baff846177a727fe",
+      "initialScale": 0.7024058577405857,
+      "tables": 6,
+      "relations": 6,
+      "labels": 6,
       "existing": [
-        "graph_nodes",
-        "prospect_notes"
+        "graph_nodes"
       ]
     },
     {
       "sceneId": "flux-import-oracle",
       "kind": "lanes",
-      "sceneHash": "c37606b8438f3b2e9b2156c3f2bf057a2efd204057d067a89ec430db7c0e33a8",
+      "sceneHash": "e5b7c8e8fd8e3ea20e69382e0299ee7657b201d6fbfeee2d449356b614f58364",
       "initialScale": 0.7736175115207373,
       "lanes": [
         "user",
@@ -83,7 +82,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 40,
-        "top": -28202.765625,
+        "top": -28255.609375,
         "width": 1345,
         "height": 820
       },
@@ -97,7 +96,7 @@
     {
       "sceneId": "affichage-abc",
       "kind": "lanes",
-      "sceneHash": "19305d932bcac4c039572515c78dbefa59e31393e5d01c69bb8ee26c48615f70",
+      "sceneHash": "cc098fdf01ed4cd0d017886f1748459e8d88c7589ccabc5d7f31d260bdeb55bc",
       "initialScale": 0.7736175115207373,
       "lanes": [
         "user",
@@ -133,20 +132,19 @@
     {
       "sceneId": "modele-donnees",
       "kind": "er",
-      "sceneHash": "fd31ca9a0adfb1bc0180e314967a01ff3dd035fb9d7919cfd62dec04696a6257",
-      "initialScale": 0.8247706422018348,
-      "tables": 11,
-      "relations": 11,
-      "labels": 11,
+      "sceneHash": "6bc793ef8e37553c3b72f80d7f2119dfaecc76f19bc7b724baff846177a727fe",
+      "initialScale": 0.9403765690376569,
+      "tables": 6,
+      "relations": 6,
+      "labels": 6,
       "existing": [
-        "graph_nodes",
-        "prospect_notes"
+        "graph_nodes"
       ]
     },
     {
       "sceneId": "flux-import-oracle",
       "kind": "lanes",
-      "sceneHash": "c37606b8438f3b2e9b2156c3f2bf057a2efd204057d067a89ec430db7c0e33a8",
+      "sceneHash": "e5b7c8e8fd8e3ea20e69382e0299ee7657b201d6fbfeee2d449356b614f58364",
       "initialScale": 1,
       "lanes": [
         "user",
@@ -180,7 +178,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 52.5,
-        "top": -27334.328125,
+        "top": -27537.828125,
         "width": 1800,
         "height": 900
       },
@@ -194,7 +192,7 @@
     {
       "sceneId": "affichage-abc",
       "kind": "lanes",
-      "sceneHash": "19305d932bcac4c039572515c78dbefa59e31393e5d01c69bb8ee26c48615f70",
+      "sceneHash": "cc098fdf01ed4cd0d017886f1748459e8d88c7589ccabc5d7f31d260bdeb55bc",
       "initialScale": 1,
       "lanes": [
         "user",
@@ -236,20 +234,19 @@
       {
         "sceneId": "modele-donnees",
         "kind": "er",
-        "sceneHash": "fd31ca9a0adfb1bc0180e314967a01ff3dd035fb9d7919cfd62dec04696a6257",
-        "initialScale": 0.6160550458715597,
-        "tables": 11,
-        "relations": 11,
-        "labels": 11,
+        "sceneHash": "6bc793ef8e37553c3b72f80d7f2119dfaecc76f19bc7b724baff846177a727fe",
+        "initialScale": 0.7024058577405857,
+        "tables": 6,
+        "relations": 6,
+        "labels": 6,
         "existing": [
-          "graph_nodes",
-          "prospect_notes"
+          "graph_nodes"
         ]
       },
       {
         "sceneId": "flux-import-oracle",
         "kind": "lanes",
-        "sceneHash": "c37606b8438f3b2e9b2156c3f2bf057a2efd204057d067a89ec430db7c0e33a8",
+        "sceneHash": "e5b7c8e8fd8e3ea20e69382e0299ee7657b201d6fbfeee2d449356b614f58364",
         "initialScale": 0.7736175115207373,
         "lanes": [
           "user",
@@ -283,7 +280,7 @@
         "edgeLabels": 12,
         "panel": {
           "left": 40,
-          "top": 15691.015625,
+          "top": 15620.125,
           "width": 1345,
           "height": 820
         },
@@ -297,7 +294,7 @@
       {
         "sceneId": "affichage-abc",
         "kind": "lanes",
-        "sceneHash": "19305d932bcac4c039572515c78dbefa59e31393e5d01c69bb8ee26c48615f70",
+        "sceneHash": "cc098fdf01ed4cd0d017886f1748459e8d88c7589ccabc5d7f31d260bdeb55bc",
         "initialScale": 0.7736175115207373,
         "lanes": [
           "user",
@@ -347,27 +344,32 @@
           "scale": 1
         },
         {
+          "id": "doc-modele-minimal",
+          "tables": 6,
+          "scale": 1
+        },
+        {
           "id": "doc-oracles",
           "tables": 6,
           "scale": 1
         },
         {
-          "id": "option-D2-M1",
-          "tables": 3,
-          "scale": 1
+          "id": "option-D2-a",
+          "tables": 6,
+          "scale": 0.647
         },
         {
-          "id": "option-D2-M2",
-          "tables": 2,
-          "scale": 1
-        },
-        {
-          "id": "option-D2-M3",
+          "id": "option-D2-b",
           "tables": 6,
           "scale": 0.883
         },
         {
-          "id": "option-D2-M4",
+          "id": "option-D2-c",
+          "tables": 2,
+          "scale": 1
+        },
+        {
+          "id": "option-D2-d",
           "tables": 1,
           "scale": 1
         },
@@ -406,8 +408,8 @@
     "zoom": {
       "id": "modele-donnees",
       "mode": "transform",
-      "fit": 0.646,
-      "zoomed": 1.009,
+      "fit": 0.736,
+      "zoomed": 1.151,
       "dragged": false
     }
   },
@@ -442,27 +444,32 @@
         "scale": 1
       },
       {
+        "id": "doc-modele-minimal",
+        "tables": 6,
+        "scale": 1
+      },
+      {
         "id": "doc-oracles",
         "tables": 6,
         "scale": 1
       },
       {
-        "id": "option-D2-M1",
-        "tables": 3,
-        "scale": 1
+        "id": "option-D2-a",
+        "tables": 6,
+        "scale": 0.647
       },
       {
-        "id": "option-D2-M2",
-        "tables": 2,
-        "scale": 1
-      },
-      {
-        "id": "option-D2-M3",
+        "id": "option-D2-b",
         "tables": 6,
         "scale": 0.883
       },
       {
-        "id": "option-D2-M4",
+        "id": "option-D2-c",
+        "tables": 2,
+        "scale": 1
+      },
+      {
+        "id": "option-D2-d",
         "tables": 1,
         "scale": 1
       },
@@ -529,6 +536,13 @@
         "dragged": false
       },
       {
+        "id": "doc-modele-minimal",
+        "mode": "transform",
+        "fit": 0.736,
+        "zoomed": 1.151,
+        "dragged": false
+      },
+      {
         "id": "doc-oracles",
         "mode": "transform",
         "fit": 0.71,
@@ -552,8 +566,8 @@
       {
         "id": "modele-donnees",
         "mode": "transform",
-        "fit": 0.646,
-        "zoomed": 1.009,
+        "fit": 0.736,
+        "zoomed": 1.151,
         "dragged": false
       },
       {
@@ -578,28 +592,28 @@
         "dragged": false
       },
       {
-        "id": "option-D2-M1",
+        "id": "option-D2-a",
         "mode": "transform",
-        "fit": 1.282,
-        "zoomed": 2.004,
+        "fit": 0.736,
+        "zoomed": 1.151,
         "dragged": false
       },
       {
-        "id": "option-D2-M2",
-        "mode": "transform",
-        "fit": 1.428,
-        "zoomed": 2.231,
-        "dragged": false
-      },
-      {
-        "id": "option-D2-M3",
+        "id": "option-D2-b",
         "mode": "transform",
         "fit": 1.005,
         "zoomed": 1.57,
         "dragged": false
       },
       {
-        "id": "option-D2-M4",
+        "id": "option-D2-c",
+        "mode": "transform",
+        "fit": 1.428,
+        "zoomed": 2.231,
+        "dragged": false
+      },
+      {
+        "id": "option-D2-d",
         "mode": "transform",
         "fit": 2.647,
         "zoomed": 4,
@@ -608,8 +622,8 @@
       {
         "id": "option-D3-a",
         "mode": "transform",
-        "fit": 1.291,
-        "zoomed": 2.016,
+        "fit": 1.219,
+        "zoomed": 1.905,
         "dragged": false
       },
       {
@@ -649,8 +663,8 @@
       }
     ],
     "inPage": {
-      "before": 0.616,
-      "scale": 0.77,
+      "before": 0.702,
+      "scale": 0.878,
       "inside": true,
       "overflow": false
     },
@@ -658,8 +672,8 @@
       {
         "id": "modele-donnees",
         "mode": "transform",
-        "fit": 0.164,
-        "zoomed": 0.257,
+        "fit": 0.187,
+        "zoomed": 0.293,
         "dragged": false
       },
       {
@@ -847,7 +861,7 @@
       "scale": 1,
       "clip": {
         "x": 60,
-        "y": 47500.671875,
+        "y": 48668.171875,
         "width": 1800,
         "height": 900
       }
@@ -858,7 +872,7 @@
       "sceneId": "criteres-steve",
       "clip": {
         "x": 52.5,
-        "y": 11132.375,
+        "y": 11153.59375,
         "width": 1800,
         "height": 540
       }
@@ -867,16 +881,16 @@
       "sceneId": "modele-donnees",
       "clip": {
         "x": 52.5,
-        "y": 12229.671875,
+        "y": 12250.890625,
         "width": 1800,
-        "height": 823
+        "height": 733
       }
     },
     {
       "sceneId": "flux-import-oracle",
       "clip": {
         "x": 52.5,
-        "y": 13570.15625,
+        "y": 13501.375,
         "width": 1800,
         "height": 1332
       }
@@ -885,7 +899,7 @@
       "sceneId": "architecture-ui",
       "clip": {
         "x": 52.5,
-        "y": 15431.5625,
+        "y": 15362.78125,
         "width": 1800,
         "height": 900
       }
@@ -894,7 +908,7 @@
       "sceneId": "affichage-abc",
       "clip": {
         "x": 52.5,
-        "y": 16825.328125,
+        "y": 16756.546875,
         "width": 1800,
         "height": 1248
       }
