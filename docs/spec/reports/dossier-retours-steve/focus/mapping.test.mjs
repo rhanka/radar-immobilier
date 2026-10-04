@@ -111,7 +111,10 @@ test('A/B/C : B observé, C proposé, trois états de C', () => {
 });
 
 test('seize décisions D1 à D16, recommandation connue sauf le point ouvert D9', () => {
-  assert.deepEqual(questions.map(question => question.key), Array.from({ length: 16 }, (_, index) => `D${index + 1}`));
+  // Ordre de décision : le bloc de Fabien d'abord, puis celui de Farid.
+  assert.deepEqual(questions.map(question => question.key), ['D2', 'D3', 'D4', 'D9', 'D10', 'D11', 'D1', 'D5', 'D6', 'D7', 'D8', 'D12', 'D13', 'D14', 'D15', 'D16']);
+  assert.deepEqual(questions.map(question => question.step), [...Array(6).fill(1), ...Array(10).fill(2)]);
+  assert.ok(questions.every(question => (question.step === 1) === (question.decides === 'Fabien')));
   for (const question of questions) {
     if (question.key === 'D9') { assert.equal(question.recommended, null); continue; }
     assert.ok(question.options.some(option => option.key === question.recommended), question.key);
@@ -130,4 +133,26 @@ test('critères de Steve : une matrice, trois critères, deux exclusions, bruit 
   assert.equal(total.workingView, 73);
   assert.match(total.steve, /22 sur 73/);
   assert.match(total.radar, /34 des 40/);
+});
+
+test('chaque décision : introduction, dépendances antérieures, avantages et inconvénients par option, recommandation motivée', async () => {
+  const order = questions.map(question => question.key);
+  const markdown = await readFile('../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md', 'utf8');
+  const section10 = markdown.split('\n## 10. Options et recommandation')[1].split('\n## 11. ')[0];
+  assert.match(section10, /Fabien décide d’abord ses six décisions/);
+  for (const question of questions) {
+    const sentences = question.intro.split(/(?<=[.?!»)])\s+(?=[A-ZÀ-Ý«])/).length;
+    assert.ok(sentences >= 3 && sentences <= 6 && question.intro.length <= 900, `${question.key} : introduction de ${sentences} phrases`);
+    assert.match(question.intro, /§\d|scène/, `${question.key} : renvoi au dossier`);
+    // Une décision ne dépend que de décisions prises avant elle.
+    for (const key of question.dependsOn) assert.ok(order.indexOf(key) < order.indexOf(question.key), `${question.key} dépend de ${key}, décidée après`);
+    for (const option of question.options) {
+      assert.ok(option.pros.length >= 2 && option.pros.length <= 4, `${question.key}/${option.key} avantages`);
+      assert.ok(option.cons.length >= 2 && option.cons.length <= 4, `${question.key}/${option.key} inconvénients`);
+      for (const item of [...option.pros, ...option.cons]) assert.ok(section10.includes(item), `${question.key}/${option.key} absent du §10 : ${item}`);
+    }
+    assert.ok(question.recommendation.length > 40, question.key);
+    assert.ok(section10.includes(`#### ${question.question}`) && section10.includes(question.intro), `${question.key} : §10 désaligné`);
+  }
+  assert.ok(!/honn[êe]te/i.test(markdown + JSON.stringify(questions)));
 });
