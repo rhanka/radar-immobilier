@@ -1,5 +1,7 @@
 # Draft targeting oracle C (Refs #797, #783)
 
+**Status: exploratory Steve-agreement pilot** (see `review.md`), not a D13-grade oracle.
+
 Files-only draft of a targeting oracle ("C": should this signal be shown to Steve?) built from
 Steve Chaperon's triage of 21 Sept 2026, measured with three models at low effort. Nothing here
 writes to a database, cluster or bucket. Owner-facing summary in French: `dossier-section-fr.md`.
@@ -9,8 +11,9 @@ Steve's workbook (`radar-triage-signaux.xlsx`, sha256 `c7e19f46…0dc1bb8`, shee
 gives a verdict (Pertinent / À surveiller / Non pertinent) and one motif code per line. Each line
 is joined, read-only, with the radar records it names (`signal-…` / `event-…` nodes of
 `graph_nodes`, one SELECT in a read-only session). 121 lines resolve; 3 are excluded and listed.
-The 121 items are split 50/50 **before any prompt work**, by municipality, balanced on nine strata,
-and frozen by sha256 (`split-balance.md`). A prompt prefiguring C is written from Steve's general
+The 121 items are split 50/50 by a deterministic script committed before the first model call,
+by municipality, balanced on nine strata; the set hashes are in `SHA256SUMS` / `split-balance.md`
+(committed later, see `results.md` timeline). A prompt prefiguring C is written from Steve's general
 rules only, iterated on `optim` only, frozen, then run **once** on `blind`.
 
 ## Layout
@@ -21,11 +24,15 @@ rules only, iterated on `optim` only, frozen, then run **once** on `blind`.
 | `scripts/03-build-items.mjs` | items = labels + radar record rendered as model input | yes |
 | `scripts/04-split.mjs` | stratified split, freeze, `split-balance.md` | yes |
 | `scripts/05-run.mjs`, `run-all.mjs` | seat-only model runner (blind guard) | yes |
-| `scripts/06-score.mjs` | metrics (frozen before the first run) | yes |
+| `scripts/06-score.mjs`, `rescore-all.mjs` | metrics + robustness; re-scores archived runs without model calls | yes |
+| `scripts/07-review.mjs`, `review-brief.md` | adversarial review runner and brief | yes |
 | `scripts/selftest.mjs` | stats helpers + split integrity | yes |
 | `prompt-c-v*.md` | prompt iterations (optim only) | yes |
-| `results.md`, `extension-plan.md`, `review.md` | results, extension proposal, adversarial review | yes |
-| `optim.jsonl`, `blind.jsonl`, `SHA256SUMS`, `split-manifest.json` | frozen sets | see below |
+| `results.md`, `results/score-*.{md,json}` | results (aggregates only) | yes |
+| `extension-plan.md`, `review.md`, `dossier-section-fr.md` | extension proposal, review + reconciliation, French section | yes |
+| `selection-rule.md`, `final-prompt.json` | prompt selection rule, frozen final prompt (sha256) | yes |
+| `optim.jsonl`, `blind.jsonl` | frozen sets (Steve codes + radar records) | **no** (see below) |
+| `SHA256SUMS`, `split-manifest.json`, `split-balance.md` | set hashes and balance (no item content) | proposed |
 | `runs/`, `work/` | raw model answers, intermediate prod reads | no (git-ignored) |
 
 ### Why the frozen sets may not be in git
@@ -53,8 +60,11 @@ sha256 only against the same `work/nodes.json` (read at 2026-10-04T21:03Z).
 | Gemini low | `gemini-3.8-flash-low` | `agy --print` (Antigravity seat), empty cwd |
 | Claude Opus 5.5 low | `claude-opus-5-5`, `--effort low` | `claude -p` (Claude seat), tools disabled, empty cwd |
 
-Same model ids as the previous benchmarks (v101b / M1 v4: `gpt-6-astra`, `gemini-3.8-flash`;
-v11alpha: `claude-opus-5-5` through `claude -p --effort`). v101b reached Astra and Gemini through
-llm-mesh (Codex / Cloud Code runtime clients) rather than the `codex` / `agy` CLIs used here: same
-seats and model ids, different client. Every child process runs with all `*_API_KEY` variables
-removed from its environment.
+Astra and Opus use the same model ids as the previous benchmarks (v101b / M1 v4: `gpt-6-astra`;
+v11alpha: `claude-opus-5-5` through `claude -p --effort`). Gemini uses the Antigravity id
+`gemini-3.8-flash-low`, where v101b used `gemini-3.8-flash` with an effort parameter: same family
+and effort, different id and client. v101b reached Astra and Gemini through llm-mesh (Codex /
+Cloud Code runtime clients) rather than the `codex` / `agy` CLIs used here. During this campaign
+every child process ran without `*_API_KEY` and a few base-URL variables; the scrub was widened
+after review (auth tokens, routing, cloud variables). The effective auth mode was not logged
+(`non vérifié`). CLI versions: codex-cli 0.160.0, agy 1.2.16, Claude Code 2.1.289.
