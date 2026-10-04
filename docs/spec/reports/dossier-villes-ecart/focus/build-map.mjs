@@ -58,26 +58,49 @@ const annexes = sections.filter(section => section.heading.startsWith('Annexe'))
 if (annexes.length !== 1 || !annexes[0].heading.startsWith('Annexe A')) throw Error('missing the city lists annexe');
 const header = sections[0];
 
-// §7 : chaque décision (### Dx — titre) est rendue dans son bloc de choix, avec
-// son introduction, son tableau Avantages / Inconvénients et sa recommandation.
+// §7 : chaque décision (### Dx — titre) est rendue dans son bloc de choix : son
+// introduction, puis chaque option (#### titre) avec sa Description, ses Avantages et ses
+// Inconvénients, enfin la recommandation. Le texte vient tel quel du Markdown.
 const options = numbered.find(section => section.heading.startsWith('7.'));
 const [optionsIntro, ...decisionChunks] = options.markdown.split(/\n### (?=D\d+ — )/);
+const listAfter = (text, label, key) => {
+  const block = text.split(`**${label}.**\n`)[1];
+  if (!block) throw Error(`${key}: ${label} missing`);
+  const items = block.split('\n\n')[0].split('\n').filter(line => line.startsWith('- ')).map(line => line.slice(2));
+  if (items.length < 1) throw Error(`${key}: ${label} empty`);
+  return items;
+};
 const decisionDetails = Object.fromEntries(decisionChunks.map(chunk => {
   const [title, ...lines] = chunk.split('\n');
   const key = title.match(/^(D\d+) — /)[1];
-  if (!/\| Option \| Avantages \| Inconvénients \|/.test(chunk)) throw Error(`${key}: options table needs Avantages and Inconvénients`);
-  if (!/\nRecommandation \*\*/.test(chunk)) throw Error(`${key}: recommendation line missing`);
   // La ligne « Décide · Consulté » du Markdown est portée par les badges du bloc : retirée ici.
   const markdown = lines.join('\n').trim();
   if (!/^\*\*Décide : Fabien/.test(markdown)) throw Error(`${key}: decider line missing`);
-  return [key, { title: title.trim(), markdown: markdown.replace(/^\*\*Décide :[^\n]*\n+/, '') }];
+  const [head, ...optionChunks] = markdown.replace(/^\*\*Décide :[^\n]*\n+/, '').split(/\n#### /);
+  const last = optionChunks.at(-1).split(/\n(?=Recommandation \*\*)/);
+  if (last.length !== 2) throw Error(`${key}: recommendation line missing after the options`);
+  optionChunks[optionChunks.length - 1] = last[0];
+  const parsed = optionChunks.map(optionChunk => {
+    const [optionTitle, ...body] = optionChunk.split('\n');
+    const text = body.join('\n').trim();
+    const optionKey = (optionTitle.match(/^\(([a-z])\) /) ?? optionTitle.match(/^([A-Z])\. /) ?? [])[1];
+    if (!optionKey) throw Error(`${key}: option title ${optionTitle}`);
+    const description = (text.match(/^\*\*Description\.\*\* ([^\n]+)/) ?? [])[1];
+    if (!description) throw Error(`${key}/${optionKey}: Description missing before Avantages`);
+    if (text.indexOf('**Description.**') > text.indexOf('**Avantages.**')) throw Error(`${key}/${optionKey}: Description must precede Avantages`);
+    return { key: optionKey, title: optionTitle.replace(/ — recommandée$/, '').trim(), recommended: / — recommandée$/.test(optionTitle),
+      description, pros: listAfter(text, 'Avantages', `${key}/${optionKey}`), cons: listAfter(text, 'Inconvénients', `${key}/${optionKey}`) };
+  });
+  if (parsed.filter(option => option.recommended).length !== 1) throw Error(`${key}: exactly one recommended option`);
+  return [key, { title: title.trim(), intro: head.trim(), options: parsed, recommendation: last[1].trim() }];
 }));
 if (Object.keys(decisionDetails).join() !== 'D1,D2,D3,D4,D5,D6,D7') throw Error(`decisions ${Object.keys(decisionDetails)}`);
 const [intention, context, synthesis, ...rest2] = numbered;
 const body2 = rest2.filter(section => !section.heading.startsWith('7.'));
 
 const choices = (await readFile('choices.js', 'utf8')) + (await readFile('roles.json', 'utf8')) + (await readFile('decision-yaml.js', 'utf8'));
-const figure = (await readFile('TableDiagram.svelte', 'utf8')) + (await readFile('groups.js', 'utf8'));
+const figure = (await Promise.all(['TableDiagram.svelte', 'groups.js', 'GroupsTable.svelte', 'mini-diagrams.js', 'MiniDiagram.svelte', 'DecisionChoices.svelte']
+  .map(name => readFile(name, 'utf8')))).join('\n');
 const rendererSources = Object.fromEntries(await Promise.all([
   'scenes.js', 'Flow.svelte', 'ServiceNode.svelte', 'ServiceIcon.svelte', 'Subflow.svelte',
   'RoutedEdge.svelte', 'Viewport.svelte', 'service-icons.js', 'style.css', 'parse-mermaid.mjs',

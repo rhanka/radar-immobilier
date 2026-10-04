@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-04T15:25:40.116Z",
+  "checkedAt": "2026-10-04T15:41:29.898Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/.worktrees/dossier-villes-ecart/docs/spec/reports/dossier-villes-ecart/focus/../decision-focus.html",
   "chromiumCdpPort": "9245",
   "offline": {
@@ -187,7 +187,49 @@
         "cities": 1
       }
     ],
-    "total": 226
+    "total": 226,
+    "bars": [
+      {
+        "id": "G1",
+        "ratio": 0.877,
+        "shared": false
+      },
+      {
+        "id": "G2",
+        "ratio": 1,
+        "shared": true
+      },
+      {
+        "id": "G3",
+        "ratio": 0.605,
+        "shared": true
+      },
+      {
+        "id": "G4",
+        "ratio": 0.222,
+        "shared": true
+      },
+      {
+        "id": "G5a",
+        "ratio": 0.037,
+        "shared": false
+      },
+      {
+        "id": "G5b",
+        "ratio": 0.012,
+        "shared": false
+      },
+      {
+        "id": "G5c",
+        "ratio": 0.025,
+        "shared": true
+      },
+      {
+        "id": "G6",
+        "ratio": 0.012,
+        "shared": false
+      }
+    ]
   },
   "choices": {
     "blocks": 7,
@@ -209,45 +251,381 @@
     "details": [
       {
         "key": "D1",
-        "open": true,
-        "avantages": true,
+        "intro": true,
+        "options": [
+          {
+            "key": "a",
+            "parts": [
+              "description",
+              "mini",
+              "pros",
+              "cons"
+            ],
+            "description": 856,
+            "pros": 3,
+            "cons": 2
+          },
+          {
+            "key": "b",
+            "parts": [
+              "description",
+              "mini",
+              "pros",
+              "cons"
+            ],
+            "description": 228,
+            "pros": 1,
+            "cons": 2
+          },
+          {
+            "key": "c",
+            "parts": [
+              "description",
+              "mini",
+              "pros",
+              "cons"
+            ],
+            "description": 389,
+            "pros": 1,
+            "cons": 2
+          }
+        ],
+        "ordered": true,
+        "complete": true,
         "recommendation": true
       },
       {
         "key": "D4",
-        "open": true,
-        "avantages": true,
+        "intro": true,
+        "options": [
+          {
+            "key": "a",
+            "parts": [
+              "description",
+              "mini",
+              "pros",
+              "cons"
+            ],
+            "description": 482,
+            "pros": 2,
+            "cons": 1
+          },
+          {
+            "key": "b",
+            "parts": [
+              "description",
+              "mini",
+              "pros",
+              "cons"
+            ],
+            "description": 214,
+            "pros": 1,
+            "cons": 1
+          }
+        ],
+        "ordered": true,
+        "complete": true,
         "recommendation": true
       },
       {
         "key": "D5",
-        "open": true,
-        "avantages": true,
+        "intro": true,
+        "options": [
+          {
+            "key": "a",
+            "parts": [
+              "description",
+              "mini",
+              "pros",
+              "cons"
+            ],
+            "description": 438,
+            "pros": 2,
+            "cons": 2
+          },
+          {
+            "key": "b",
+            "parts": [
+              "description",
+              "mini",
+              "pros",
+              "cons"
+            ],
+            "description": 200,
+            "pros": 1,
+            "cons": 1
+          }
+        ],
+        "ordered": true,
+        "complete": true,
         "recommendation": true
       },
       {
         "key": "D2",
-        "open": true,
-        "avantages": true,
+        "intro": true,
+        "options": [
+          {
+            "key": "A",
+            "parts": [
+              "description",
+              "mini",
+              "pros",
+              "cons"
+            ],
+            "description": 765,
+            "pros": 2,
+            "cons": 2
+          },
+          {
+            "key": "B",
+            "parts": [
+              "description",
+              "mini",
+              "pros",
+              "cons"
+            ],
+            "description": 697,
+            "pros": 2,
+            "cons": 2
+          },
+          {
+            "key": "C",
+            "parts": [
+              "description",
+              "mini",
+              "pros",
+              "cons"
+            ],
+            "description": 785,
+            "pros": 2,
+            "cons": 2
+          }
+        ],
+        "ordered": true,
+        "complete": true,
         "recommendation": true
       },
       {
         "key": "D3",
-        "open": true,
-        "avantages": true,
+        "intro": true,
+        "options": [
+          {
+            "key": "a",
+            "parts": [
+              "description",
+              "pros",
+              "cons"
+            ],
+            "description": 621,
+            "pros": 2,
+            "cons": 2
+          },
+          {
+            "key": "b",
+            "parts": [
+              "description",
+              "pros",
+              "cons"
+            ],
+            "description": 387,
+            "pros": 1,
+            "cons": 2
+          },
+          {
+            "key": "c",
+            "parts": [
+              "description",
+              "pros",
+              "cons"
+            ],
+            "description": 285,
+            "pros": 1,
+            "cons": 2
+          }
+        ],
+        "ordered": true,
+        "complete": true,
         "recommendation": true
       },
       {
         "key": "D6",
-        "open": true,
-        "avantages": true,
+        "intro": true,
+        "options": [
+          {
+            "key": "a",
+            "parts": [
+              "description",
+              "pros",
+              "cons"
+            ],
+            "description": 500,
+            "pros": 2,
+            "cons": 1
+          },
+          {
+            "key": "b",
+            "parts": [
+              "description",
+              "pros",
+              "cons"
+            ],
+            "description": 194,
+            "pros": 1,
+            "cons": 1
+          },
+          {
+            "key": "c",
+            "parts": [
+              "description",
+              "pros",
+              "cons"
+            ],
+            "description": 166,
+            "pros": 1,
+            "cons": 1
+          }
+        ],
+        "ordered": true,
+        "complete": true,
         "recommendation": true
       },
       {
         "key": "D7",
-        "open": true,
-        "avantages": true,
+        "intro": true,
+        "options": [
+          {
+            "key": "a",
+            "parts": [
+              "description",
+              "mini",
+              "pros",
+              "cons"
+            ],
+            "description": 428,
+            "pros": 2,
+            "cons": 2
+          },
+          {
+            "key": "b",
+            "parts": [
+              "description",
+              "mini",
+              "pros",
+              "cons"
+            ],
+            "description": 149,
+            "pros": 1,
+            "cons": 1
+          },
+          {
+            "key": "c",
+            "parts": [
+              "description",
+              "mini",
+              "pros",
+              "cons"
+            ],
+            "description": 271,
+            "pros": 1,
+            "cons": 1
+          }
+        ],
+        "ordered": true,
+        "complete": true,
         "recommendation": true
+      }
+    ],
+    "minis": [
+      {
+        "id": "D1-a",
+        "type": "bars",
+        "overflow": false,
+        "bars": 4,
+        "rows": 0
+      },
+      {
+        "id": "D1-b",
+        "type": "bars",
+        "overflow": false,
+        "bars": 2,
+        "rows": 0
+      },
+      {
+        "id": "D1-c",
+        "type": "bars",
+        "overflow": false,
+        "bars": 3,
+        "rows": 0
+      },
+      {
+        "id": "D4-a",
+        "type": "bars",
+        "overflow": false,
+        "bars": 3,
+        "rows": 0
+      },
+      {
+        "id": "D4-b",
+        "type": "bars",
+        "overflow": false,
+        "bars": 2,
+        "rows": 0
+      },
+      {
+        "id": "D5-a",
+        "type": "bars",
+        "overflow": false,
+        "bars": 3,
+        "rows": 0
+      },
+      {
+        "id": "D5-b",
+        "type": "bars",
+        "overflow": false,
+        "bars": 2,
+        "rows": 0
+      },
+      {
+        "id": "D2-A",
+        "type": "table",
+        "overflow": false,
+        "bars": 0,
+        "rows": 2
+      },
+      {
+        "id": "D2-B",
+        "type": "table",
+        "overflow": false,
+        "bars": 0,
+        "rows": 2
+      },
+      {
+        "id": "D2-C",
+        "type": "table",
+        "overflow": false,
+        "bars": 0,
+        "rows": 2
+      },
+      {
+        "id": "D7-a",
+        "type": "bars",
+        "overflow": false,
+        "bars": 3,
+        "rows": 0
+      },
+      {
+        "id": "D7-b",
+        "type": "bars",
+        "overflow": false,
+        "bars": 2,
+        "rows": 0
+      },
+      {
+        "id": "D7-c",
+        "type": "bars",
+        "overflow": false,
+        "bars": 3,
+        "rows": 0
       }
     ],
     "persisted": {
@@ -356,7 +734,13 @@
     ".generated/dossier-preview-1920x1080-dark.png",
     ".generated/dossier-preview-390x844-dark.png",
     ".generated/figure-tables-light.png",
+    ".generated/figure-groupes-barres-light.png",
+    ".generated/figure-decision-D1-light.png",
+    ".generated/figure-decision-D2-light.png",
     ".generated/figure-tables-dark.png",
+    ".generated/figure-groupes-barres-dark.png",
+    ".generated/figure-decision-D1-dark.png",
+    ".generated/figure-decision-D2-dark.png",
     ".generated/scene-1a1-architecture-ecart-light.png",
     ".generated/scene-vue-ensemble-architecture-ecart-light.png",
     ".generated/scene-1a1-architecture-ecart-dark.png",
