@@ -3,6 +3,7 @@
   // en couloirs avec l'oracle en bande basse (scène 3) ; les composants (scènes 4 et 5)
   // gardent Flow.svelte de la chaîne existante (SvelteFlow, Dagre LR, carte A' 460 x 200).
   import Flow from '../../../../architecture/focus/Flow.svelte';
+  import ZoomFrame from './ZoomFrame.svelte';
   import MatrixScene from './MatrixScene.svelte';
   import ErDiagram from './ErDiagram.svelte';
   import LaneDiagram from './LaneDiagram.svelte';
@@ -52,7 +53,7 @@
       {:else if graph.kind === 'lanes'}
         <LaneDiagram {graph} />
       {:else}
-        <Flow {graph} />
+        <ZoomFrame id={graph.id} label={graph.title} mode="native"><Flow {graph} /></ZoomFrame>
       {/if}
       <p class="scene-note">{sceneInfo[graph.id].note}</p>
       {#if graph.kind === 'matrix'}
