@@ -89,7 +89,7 @@ const checkExpression = `(() => {
     }
     const svg = root.querySelector('svg');
     const scale = svg.getBoundingClientRect().width / Number(root.dataset.canvasWidth);
-    if (root.dataset.scaleMode !== 'fit' || scale <= 0 || scale > 1.0001 || svg.getBoundingClientRect().width > frame.width + 1) throw Error(graph.id + ' : vue d’ensemble hors panneau ' + scale);
+    if (root.querySelector('[data-action="fit"]').getAttribute('aria-pressed') !== 'true' || scale <= 0 || scale > 1.0001 || svg.getBoundingClientRect().width > frame.width + 1) throw Error(graph.id + ' : vue d’ensemble hors panneau ' + scale);
     if (!root.querySelector('[data-action="actual-size"]') || !root.querySelector('[data-action="fit"]')) throw Error(graph.id + ' : boutons de zoom absents');
     const routes = [...root.querySelectorAll('[data-route-points]')];
     for (const route of routes) {
@@ -289,6 +289,68 @@ for (const [name, selector] of [['graphique-sens', '[data-chart="sens-classement
   contentCaptures.push(`.generated/${name}.png`);
 }
 
+// Zoom : chaque diagramme s'ouvre en plein écran, se zoome, se ferme par Échap, sans
+// débordement ni erreur ; zoom direct dans la page ; déplacement à la souris ; mobile 390 px.
+const zoomOne = async (id, { drag = false, shot = null } = {}) => {
+  const sel = `[data-zoom="${id}"]`;
+  await evaluate(`(() => { const frame = document.querySelector('${sel}'); frame.scrollIntoView({ block: 'center' });
+    frame.querySelector('[data-action="expand"]').click(); return true; })()`);
+  await pause(250);
+  const opened = await evaluate(`(() => { const frame = document.querySelector('${sel}'), rect = frame.getBoundingClientRect();
+    return { open: frame.dataset.zoomOpen, mode: frame.dataset.zoomMode, scale: Number(frame.dataset.scale), rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
+      locked: document.documentElement.classList.contains('zoom-frame-open'), flowH: frame.querySelector('.flow')?.getBoundingClientRect().height ?? null,
+      focus: document.activeElement?.dataset.action ?? null }; })()`);
+  const W = await evaluate('innerWidth'), H = await evaluate('innerHeight');
+  if (opened.open !== 'true' || !opened.locked || Math.abs(opened.rect.left) > 1 || Math.abs(opened.rect.top) > 1 || Math.abs(opened.rect.width - W) > 1 || Math.abs(opened.rect.height - H) > 1 || opened.focus !== 'close')
+    throw Error(`plein écran ${id} : ${JSON.stringify(opened)}`);
+  if (opened.mode === 'native' && opened.flowH < H * 0.7) throw Error(`plein écran ${id} : scène trop petite ${opened.flowH}`);
+  // Capture at the fitted full-screen view, before zooming.
+  if (shot) await capture({ x: 0, y: await evaluate('scrollY'), width: W, height: H }, shot);
+  let zoomed = null, moved = null;
+  if (opened.mode === 'transform') {
+    await evaluate(`(() => { const frame = document.querySelector('${sel}'); frame.querySelector('[data-action="zoom-in"]').click(); frame.querySelector('[data-action="zoom-in"]').click(); return true; })()`);
+    await pause(120);
+    zoomed = await evaluate(`Number(document.querySelector('${sel}').dataset.scale)`);
+    if (!(zoomed > opened.scale * 1.4)) throw Error(`zoom ${id} : ${opened.scale} → ${zoomed}`);
+    if (drag) {
+      const before = await evaluate(`document.querySelector('${sel} .zoom-stage').style.transform`);
+      const at = await evaluate(`(() => { const r = document.querySelector('${sel} .zoom-viewport').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
+      await call('Input.dispatchMouseEvent', { type: 'mousePressed', x: at.x, y: at.y, button: 'left', clickCount: 1 });
+      await call('Input.dispatchMouseEvent', { type: 'mouseMoved', x: at.x - 120, y: at.y - 80, button: 'left' });
+      await call('Input.dispatchMouseEvent', { type: 'mouseReleased', x: at.x - 120, y: at.y - 80, button: 'left', clickCount: 1 });
+      await pause(100);
+      moved = await evaluate(`document.querySelector('${sel} .zoom-stage').style.transform`);
+      if (moved === before) throw Error(`déplacement ${id} sans effet`);
+    }
+  }
+  const overflow = await evaluate('document.documentElement.scrollWidth > innerWidth + 1');
+  await evaluate(`(() => { document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); return true; })()`);
+  await pause(200);
+  const closed = await evaluate(`({ open: document.querySelector('${sel}').dataset.zoomOpen, locked: document.documentElement.classList.contains('zoom-frame-open') })`);
+  if (overflow || closed.open !== 'false' || closed.locked) throw Error(`fermeture ${id} : ${JSON.stringify({ overflow, ...closed })}`);
+  return { id, mode: opened.mode, fit: opened.scale || null, zoomed, dragged: Boolean(moved) };
+};
+const zoomIds = await evaluate(`[...document.querySelectorAll('[data-zoom]')].map(frame => frame.dataset.zoom)`);
+if (zoomIds.length !== 16) throw Error(`16 diagrammes zoomables attendus, ${zoomIds.length}`);
+const zoom = [];
+for (const id of zoomIds) zoom.push(await zoomOne(id, { drag: id === 'flux-import-oracle', shot: id === 'affichage-abc' ? '.generated/zoom-plein-ecran-affichage-abc.png' : null }));
+// Zoom direct dans la page, sur un grand diagramme : le panneau ne déborde pas.
+const inPage = await evaluate(`(() => { const frame = document.querySelector('[data-zoom="modele-donnees"]'), before = Number(frame.dataset.scale);
+  frame.querySelector('[data-action="zoom-in"]').click(); return before; })()`);
+await pause(150);
+const inPageAfter = await evaluate(`(() => { const frame = document.querySelector('[data-zoom="modele-donnees"]'), panel = frame.querySelector('.zoom-viewport').getBoundingClientRect(), outer = frame.getBoundingClientRect();
+  const result = { scale: Number(frame.dataset.scale), inside: panel.right <= outer.right + 1, overflow: document.documentElement.scrollWidth > innerWidth + 1 };
+  frame.querySelector('[data-action="fit"]').click(); return result; })()`);
+if (!(inPageAfter.scale > inPage) || !inPageAfter.inside || inPageAfter.overflow) throw Error(`zoom dans la page : ${JSON.stringify({ inPage, ...inPageAfter })}`);
+// Mobile 390 px : pas de défilement horizontal, plein écran utilisable.
+await call('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
+await pause(500);
+const mobileOverflow = await evaluate('document.documentElement.scrollWidth - innerWidth');
+if (mobileOverflow > 1) throw Error(`mobile 390 px : débordement horizontal de ${mobileOverflow}px`);
+const mobile = [await zoomOne('modele-donnees', { shot: '.generated/zoom-mobile-modele-donnees.png' }), await zoomOne('criteres-steve')];
+await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
+await pause(400);
+
 const viewports = [];
 for (const viewport of [{ width: 1440, height: 1000 }, { width: 1920, height: 1080 }]) {
   await call('Emulation.setDeviceMetricsOverride', { ...viewport, deviceScaleFactor: 1, mobile: false });
@@ -483,6 +545,7 @@ const dark = await evaluate(`(() => { const theme = document.querySelector('[dat
 if (dark.backgroundLum > .05 || dark.textLum < .6) throw Error(`thème sombre non appliqué : ${JSON.stringify(dark)}`);
 await capture({ x: 0, y: 0, width: 1440, height: 1000 }, '.generated/dossier-preview-dark-1440x1000.png');
 const darkContent = await evaluate(contentExpression);
+const darkZoom = await zoomOne('modele-donnees', { shot: '.generated/sombre-zoom-plein-ecran-modele-donnees.png' });
 const darkCaptures = [];
 for (const [name, selector] of [['graphique-sens', '[data-chart="sens-classement"]'], ['decision-D2', '[data-question="D2"]']]) {
   await capture(await sceneBox(selector), `.generated/sombre-${name}.png`);
@@ -502,15 +565,16 @@ const report = {
   offline: { ...offline, blockedExternal: true },
   viewports: viewports.map(viewport => ({ width: viewport.width, height: viewport.height })),
   scenes: viewports[0].metrics, scenesAt1920: viewports[1].metrics,
-  dark: { ...dark, scenes: darkMetrics, content: darkContent }, content, choices, copy, exportFilter, oneToOne, overview,
+  dark: { ...dark, scenes: darkMetrics, content: darkContent, zoom: darkZoom }, content, zoom: { frames: zoom, inPage: { before: inPage, ...inPageAfter }, mobile }, choices, copy, exportFilter, oneToOne, overview,
   captures: ['.generated/dossier-preview-1440x1000.png', '.generated/dossier-preview-1920x1080.png',
     ...graphs.map(graph => `.generated/scene-1a1-${graph.id}.png`),
     ...graphs.map(graph => `.generated/scene-vue-ensemble-${graph.id}.png`),
-    '.generated/dossier-preview-dark-1440x1000.png', ...darkCaptures, ...contentCaptures],
+    '.generated/dossier-preview-dark-1440x1000.png', ...darkCaptures, ...contentCaptures,
+    '.generated/zoom-plein-ecran-affichage-abc.png', '.generated/zoom-mobile-modele-donnees.png', '.generated/sombre-zoom-plein-ecran-modele-donnees.png'],
   consoleErrors, runtimeErrors, externalRequests,
 };
 await writeFile('.generated/browser-check.json', `${JSON.stringify(report, null, 2)}\n`);
-console.log(JSON.stringify({ status: report.status, scenes: report.scenes.map(scene => ({ id: scene.sceneId, kind: scene.kind, cards: scene.cards ?? scene.tables ?? scene.nodes ?? scene.rows, edges: scene.edges ?? scene.relations, labels: scene.edgeLabels ?? scene.labels, fitView: scene.initialScale && Number(scene.initialScale.toFixed(4)) })), dark: { background: dark.background, scenes: darkMetrics.length }, choices: { blocks: choices.blocks, radio: choices.radio, recommended: choices.recommended, selected: choices.selected, answered: choices.answered }, yaml: { copy: copy.realClick, clipboardMatchesZone: copy.clipboardMatchesZone, forcedRefusalHandled: true, hasDecisions: copy.hasDecisions, link: choices.link.href, faridMine: exportFilter.faridMine, fabienMine: exportFilter.fabienMine, all: exportFilter.all }, captures: report.captures.length, consoleErrors: consoleErrors.length, runtimeErrors: runtimeErrors.length, externalRequests: externalRequests.length }));
+console.log(JSON.stringify({ status: report.status, scenes: report.scenes.map(scene => ({ id: scene.sceneId, kind: scene.kind, cards: scene.cards ?? scene.tables ?? scene.nodes ?? scene.rows, edges: scene.edges ?? scene.relations, labels: scene.edgeLabels ?? scene.labels, fitView: scene.initialScale && Number(scene.initialScale.toFixed(4)) })), dark: { background: dark.background, scenes: darkMetrics.length }, zoom: { frames: zoom.length, mobile: mobile.length }, choices: { blocks: choices.blocks, radio: choices.radio, recommended: choices.recommended, selected: choices.selected, answered: choices.answered }, yaml: { copy: copy.realClick, clipboardMatchesZone: copy.clipboardMatchesZone, forcedRefusalHandled: true, hasDecisions: copy.hasDecisions, link: choices.link.href, faridMine: exportFilter.faridMine, fabienMine: exportFilter.fabienMine, all: exportFilter.all }, captures: report.captures.length, consoleErrors: consoleErrors.length, runtimeErrors: runtimeErrors.length, externalRequests: externalRequests.length }));
 ws.close();
 // L'onglet de contrôle est refermé : le Chromium partagé ou isolé ne garde rien.
 await fetch(`${base}/json/close/${page.id}`).catch(() => {});

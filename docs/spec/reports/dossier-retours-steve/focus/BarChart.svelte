@@ -4,6 +4,7 @@
   // values are written in the bars (or at their end), the legend names the series, and the
   // table next to each chart carries every figure, so colour is never the only carrier.
   import { CHARTS, SERIES } from './charts.js';
+  import ZoomFrame from './ZoomFrame.svelte';
   let { id } = $props();
   const chart = $derived(CHARTS[id]);
   const W = 960, LABEL = 300, RIGHT = 120, ROW = 40, BAR = 24, TOP = 8;
@@ -29,6 +30,7 @@
   {:else if chart.kind === 'grouped'}
     <p class="legend" aria-hidden="true">{#each chart.series as name, index}<span><i class="swatch fill-g{index}"></i>{name}</span>{/each}</p>
   {/if}
+  <ZoomFrame id={`chart-${id}`} label={chart.title} inline={false} minWidth={720}>
   <svg viewBox={`0 0 ${W} ${height}`} role="img" aria-label={chart.title}>
     {#each chart.rows as row, index}
       {@const y = TOP + index * rowHeight}
@@ -63,6 +65,7 @@
       </g>
     {/each}
   </svg>
+  </ZoomFrame>
   <p class="chart-note">{chart.note} <span class="chart-source">Source : {chart.source}.</span></p>
 </figure>
 

@@ -80,10 +80,18 @@
 <style>
   .subtitle { margin: 6px 0 18px; font-size: 1.6rem; font-weight: 600; line-height: 1.3; color: var(--st-semantic-text-secondary); }
   .protocol { margin: 22px 0 8px; padding: 16px 20px; max-width: 1200px; border-left: 5px solid var(--st-semantic-data-category2); background: var(--st-semantic-surface-subtle); }
+  .protocol { overflow-x: auto; }
+  @media (max-width: 640px) {
+    :global(.dossier) { padding: 20px 16px 40px; }
+    :global(.truth-strip) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .protocol { padding: 12px; }
+    .protocol table { min-width: 560px; }
+  }
   .protocol h2 { margin: 0 0 10px; font-size: 1.1rem; }
   .protocol table { width: 100%; border-collapse: collapse; font-size: .9rem; }
   .protocol th, .protocol td { padding: 8px 10px; border-bottom: 1px solid var(--st-semantic-border-subtle); text-align: left; vertical-align: top; }
-  .protocol .num { text-align: right; white-space: nowrap; }
+  .protocol .num, .protocol tbody th { white-space: nowrap; }
+  .protocol .num { text-align: right; }
   .protocol p { margin: 10px 0 0; font-size: .92rem; line-height: 1.55; }
   .reading-map { margin-block: 28px; padding: 22px 24px; border: 1px solid var(--st-semantic-border-subtle); background: var(--st-semantic-surface-subtle); }
   .reading-map h2 { margin-top: 0; font-size: 1.3rem; }
