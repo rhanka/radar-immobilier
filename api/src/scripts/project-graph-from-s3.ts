@@ -82,6 +82,10 @@ async function main(): Promise<void> {
   let totalDeletedNodes = 0;
   let totalDeletedEdges = 0;
   const abortedCities: string[] = [];
+  // GH #812 — node ids NOT written because their row belongs to another city.
+  // Reported (never silently dropped) so the repair can list them; they do not
+  // change the exit code: the city itself is projected, minus those ids.
+  const crossCityCollisions: Array<{ city: string; id: string; ownerCitySlug: string | null }> = [];
 
   for (const key of keys) {
     // Extraire le citySlug depuis la clé : graph/<citySlug>/latest.json
@@ -144,9 +148,19 @@ async function main(): Promise<void> {
             edges: result.edgeCount,
             deletedNodes: result.deletedNodes,
             deletedEdges: result.deletedEdges,
+            crossCityIdCollisions: result.crossCityCollisions.length,
           },
           "project-graph-from-s3: ville projetée",
         );
+        for (const collision of result.crossCityCollisions) {
+          crossCityCollisions.push({ city: citySlug, ...collision });
+        }
+        if (result.crossCityCollisions.length > 0) {
+          logger.warn(
+            { citySlug, crossCityCollisions: result.crossCityCollisions },
+            "project-graph-from-s3: cross-city-id-collision — ids not written (row owned by another city)",
+          );
+        }
         ok++;
       }
     } catch (err) {
@@ -165,6 +179,8 @@ async function main(): Promise<void> {
       deletedNodes: totalDeletedNodes,
       deletedEdges: totalDeletedEdges,
       ...(abortedCities.length > 0 ? { abortedCities } : {}),
+      crossCityIdCollisions: crossCityCollisions.length,
+      ...(crossCityCollisions.length > 0 ? { crossCityCollisions } : {}),
     },
     "project-graph-from-s3: terminé",
   );
