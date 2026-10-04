@@ -5,7 +5,7 @@ import { parseMermaid } from '../../../../architecture/focus/parse-mermaid.mjs';
 import { decorateGraph, sceneIds } from './scene-metadata.js';
 import { parseEr } from './parse-er.mjs';
 import { erLayout, laneLayout } from './diagram-layout.js';
-import { SCENE_KINDS, MATRIX, ER_SPEC, LANE_SPEC } from './diagram-specs.js';
+import { SCENE_KINDS, MATRIX, ER_SPEC, LANE_SPECS } from './diagram-specs.js';
 
 const DOSSIER = '../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md';
 const markdown = await readFile(DOSSIER, 'utf8');
@@ -18,7 +18,7 @@ const expected = [
   ['modele-donnees', 'Scène 2 · modèle de données, de la source à la publication'],
   ['flux-import-oracle', "Scène 3 · architecture de l'import à l'affichage, oracle transversal"],
   ['architecture-ui', 'Scène 4 · architecture UI et état de la migration'],
-  ['affichage-abc', 'Scène 5 · A, B et C sur le même inventaire'],
+  ['affichage-abc', "Scène 5 · A, B et C : ce que voit l'application, ce que mesure l'évaluation"],
 ];
 const [body, annexB] = markdown.split('\n## Annexe B — Scènes Focus');
 if (!annexB) throw Error('missing Annexe B');
@@ -54,6 +54,8 @@ function erScene(source, id, title) {
 }
 
 function laneScene(source, id, title) {
+  const LANE_SPEC = LANE_SPECS[id];
+  if (!LANE_SPEC) throw Error(`${id}: no lane spec`);
   const graph = parseMermaid(source, id, title, 'decision', '2026-10-03');
   const lanes = [...LANE_SPEC.lanes.map(lane => lane.id), LANE_SPEC.band.id];
   for (const lane of lanes) if (!graph.groups.some(group => group.id === lane && group.parent === null)) throw Error(`${id}: lane ${lane} missing`);
@@ -63,7 +65,8 @@ function laneScene(source, id, title) {
   for (const key of Object.keys(LANE_SPEC.edges)) if (!graph.edges.some(edge => `${edge.source}|${edge.target}` === key)) throw Error(`${id}: extra edge metadata ${key}`);
   const nodes = graph.nodes.map(item => ({ ...item, lane: laneOf(item), ...LANE_SPEC.nodes[item.id] }));
   const edges = graph.edges.map(edge => ({ ...edge, evidence: LANE_SPEC.edges[`${edge.source}|${edge.target}`] ?? 'declared' }));
-  const projection = { sceneId: id, kind: 'lanes',
+  const projection = { sceneId: id, kind: 'lanes', laneKinds: LANE_SPEC.lanes.map(lane => lane.kind), zone: LANE_SPEC.zone?.title ?? null,
+    stores: graph.groups.filter(group => group.parent && lanes.includes(group.parent)).length,
     lanes: graph.groups.map(group => ({ id: group.id, label: group.label, parentId: group.parent })),
     nodes: nodes.map(item => ({ id: item.id, label: item.label, lane: item.lane, parentId: item.parent, evidence: item.evidence, tag: item.tag, detail: item.detail })),
     edges: edges.map(edge => ({ id: edge.id, source: edge.source, target: edge.target, label: edge.label, evidence: edge.evidence })) };
@@ -102,7 +105,7 @@ for (const graph of graphs) {
 // puis l'annexe A (convergence). Le texte n'est pas réécrit. Seuls les blocs
 // Mermaid du corps sont remplacés par un renvoi : la page les rend en scènes
 // natives (annexe B), le Markdown reste la source lisible telle quelle.
-const mermaidNote = '> Diagramme : voir les scènes Focus rendues plus bas (source Mermaid dans le Markdown du dossier).';
+const mermaidNote = '> Diagramme : rendu dans la page, dans les scènes Focus ou dans les options de décision (source Mermaid dans le Markdown du dossier).';
 const [head, ...rest] = body.split(/\n## /);
 const strip = text => text.replace(/```mermaid\n[\s\S]*?```/g, mermaidNote);
 const sections = [{ id: 'entete', heading: head.split('\n')[0].replace(/^# /, ''), markdown: strip(head.split('\n').slice(1).join('\n').trim()) },
@@ -124,7 +127,7 @@ const rendererSources = Object.fromEntries(await Promise.all([
 // Renderers of the matrix, table and swimlane scenes, local to this dossier.
 const diagramSources = Object.fromEntries(await Promise.all([
   'diagram-router.js', 'diagram-layout.js', 'diagram-specs.js', 'parse-er.mjs', 'DiagramFrame.svelte', 'ErDiagram.svelte',
-  'LaneDiagram.svelte', 'MatrixScene.svelte', 'Scenes.svelte',
+  'LaneDiagram.svelte', 'MatrixScene.svelte', 'Scenes.svelte', 'BarChart.svelte', 'charts.js', 'Sections.svelte',
 ].map(async name => [name, await readFile(name, 'utf8')])));
 
 const manifest = {

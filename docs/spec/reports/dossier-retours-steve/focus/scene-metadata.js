@@ -1,8 +1,8 @@
 // Contenu des cartes du dossier de décision « retours de Steve ».
 // Le gabarit, la géométrie et le routage viennent de la chaîne existante
 // (`docs/architecture/focus`), qui importe elle-même le kit h2a monté en /kit.
-// Ici : uniquement le contenu des deux scènes de composants (4 et 5) et le contrôle
-// de contrat. Les scènes 1 à 3 (matrice, entité-relation, couloirs) sont dans diagram-specs.js.
+// Ici : uniquement le contenu de la scène de composants (4) et le contrôle de contrat.
+// Les scènes 1, 2, 3 et 5 (matrice, entité-relation, couloirs) sont dans diagram-specs.js.
 // Classes : observed = constaté dans le code ou les fichiers ; declared = proposé
 // par le dossier, non réalisé ; historical = référence gelée.
 import { roleIsShort } from '../../../../architecture/focus/scene-metadata.js';
@@ -62,38 +62,6 @@ const scenes = {
       'AV|DS|Badge, Card, Alert': PROPOSED,
       'GV|GEO|pilote #/geo': OBSERVED,
       'GCB|GEO|migration future': PROPOSED,
-    },
-  },
-
-  // Scène 5 — §9.5 : trois profils calculés sur le même inventaire.
-  'affichage-abc': {
-    nodes: {
-      I1: BOX(IMMO, 'declared', 'dormant', { code: 'I1', name: '1 · Inventaire' }),
-      SNAP: P('data', 'postgres', { code: 'INV', role: 'Base · commune', name: 'Snapshot commun', detail: 'mêmes dates, mêmes filtres' }),
-      P1: BOX(IMMO, 'observed', 'active', { code: 'P1', name: '2 · Profils' }),
-      PA: A(IMMO, 'profile', 'historical', 'retained', 'graph', { code: 'PRF-A', role: 'Profil · gelé', name: 'Référence z / m / p', detail: 'comptes encore calculés' }),
-      PB: O('profile', 'graph', { code: 'PRF-B', role: 'Profil · défaut', name: 'Vivier B′ actuel', detail: 'zonage, résidentiel, précoce' }),
-      PC: P('profile', 'graph', { code: 'PRF-C', role: 'Profil · shadow', name: 'Ciblage Steve v1', detail: 'K1 à K9 · asymétrie' }),
-      C1: BOX(IMMO, 'declared', 'dormant', { code: 'C1', name: '3 · États de C' }),
-      CONF: P('state', 'check', { code: 'C-OK', role: 'État · confirmé', name: 'Opportunité confirmée', detail: 'critères requis étayés' }),
-      INS: P('state', 'unknown', { code: 'C-AI', role: 'État · visible', name: 'À instruire', detail: 'indéterminé ou mixte' }),
-      EXC: P('state', 'check', { code: 'C-EX', role: 'État · masqué', name: 'Exclu prouvé', detail: 'motif établi et expliqué' }),
-      M1: BOX(IMMO, 'declared', 'dormant', { code: 'M1', name: '4 · Mesure et décision' }),
-      DIFF: P('measure', 'graph', { code: 'M-1', role: 'Diff · nommé', name: 'Entrants et sortants', detail: 'raison par signal' }),
-      ORA: P('measure', 'release', { code: 'M-2', role: 'Oracle · C', name: 'Précision et rappel', detail: 'jeu test · 52 villes' }),
-      GATE: P('decision', 'check', { code: 'M-3', role: 'Décision · Farid', name: 'Seuil de bascule', detail: 'D13 · aucun P masqué' }),
-    },
-    edges: {
-      'SNAP|PA|référence gelée': PROPOSED,
-      'SNAP|PB|défaut actuel': PROPOSED,
-      'SNAP|PC|shadow': PROPOSED,
-      'PC|CONF|critères étayés': PROPOSED,
-      'PC|INS|indéterminé ou mixte': PROPOSED,
-      'PC|EXC|exclusion établie': PROPOSED,
-      'PB|DIFF|entrants et sortants': PROPOSED,
-      'CONF|DIFF|comparé à B': PROPOSED,
-      'DIFF|ORA|noté sur': PROPOSED,
-      'ORA|GATE|D13': PROPOSED,
     },
   },
 };
