@@ -118,6 +118,9 @@ if (decisionSections.length !== 12) throw Error(`expected the 12 dossier section
 const annexes = sections.filter(section => section.heading.startsWith('Annexe'));
 if (annexes.length !== 1 || !annexes[0].heading.startsWith('Annexe A')) throw Error('missing the convergence annexe');
 const header = sections[0];
+// Glossaire, en tête du dossier : rendu ouvert dans la page, juste après « Comment lire ce dossier ».
+const glossary = sections.find(section => section.heading === 'Glossaire');
+if (!glossary) throw Error('missing the glossary');
 
 const choices = (await readFile('choices.js', 'utf8')) + (await readFile('roles.json', 'utf8')) + (await readFile('decision-yaml.js', 'utf8'));
 const rendererSources = Object.fromEntries(await Promise.all([
@@ -127,7 +130,7 @@ const rendererSources = Object.fromEntries(await Promise.all([
 // Renderers of the matrix, table and swimlane scenes, local to this dossier.
 const diagramSources = Object.fromEntries(await Promise.all([
   'diagram-router.js', 'diagram-layout.js', 'diagram-specs.js', 'parse-er.mjs', 'DiagramFrame.svelte', 'ErDiagram.svelte',
-  'LaneDiagram.svelte', 'MatrixScene.svelte', 'Scenes.svelte', 'BarChart.svelte', 'charts.js', 'Sections.svelte',
+  'LaneDiagram.svelte', 'MatrixScene.svelte', 'Scenes.svelte', 'BarChart.svelte', 'charts.js', 'Sections.svelte', 'protocol.js',
 ].map(async name => [name, await readFile(name, 'utf8')])));
 
 const manifest = {
@@ -148,5 +151,5 @@ const manifest = {
   sections: sections.map(section => ({ id: section.id, heading: section.heading })),
 };
 await mkdir('.generated', { recursive: true });
-await writeFile('.generated/data.json', JSON.stringify({ graphs, sections, header, decisionSections, annexes, manifest }));
+await writeFile('.generated/data.json', JSON.stringify({ graphs, sections, header, glossary, decisionSections, annexes, manifest }));
 console.log(JSON.stringify(manifest.graphs.map(graph => ({ id: graph.id, nodes: graph.nodes, edges: graph.edges, subflows: graph.subflows }))));

@@ -2,7 +2,8 @@
   import Scenes from './Scenes.svelte';
   import Sections from './Sections.svelte';
   import DecisionChoices from './DecisionChoices.svelte';
-  import { graphs, header, decisionSections, annexes, manifest } from './.generated/data.json';
+  import { PROTOCOL } from './protocol.js';
+  import { graphs, header, glossary, decisionSections, annexes, manifest } from './.generated/data.json';
   const [intention, wants, synthesis, ...body] = decisionSections;
 </script>
 
@@ -20,6 +21,14 @@
         résidentiel, assouplissement, densification. Le dossier propose de conserver tout le classeur avec sa provenance,
         de l’afficher sur les objets concernés selon le contrat d’annotation de la plateforme commune sentropic, et de construire un oracle de ciblage
         qui mesure une nouvelle sélection proposée (vue C) contre la sélection affichée aujourd’hui (vue B) — sans toucher à la priorité n° 1 de Steve, le rafraîchissement.</p>
+      <section class="protocol" data-protocol aria-labelledby="protocol-title">
+        <h2 id="protocol-title">{PROTOCOL.title}</h2>
+        <table>
+          <thead><tr><th scope="col">Passe</th><th scope="col">Filtres</th><th scope="col" class="num">Signaux</th><th scope="col">But</th></tr></thead>
+          <tbody>{#each PROTOCOL.passes as row}<tr data-pass={row.pass}><th scope="row">{row.pass}</th><td>{row.filters}</td><td class="num">{row.signals}</td><td>{row.aim}</td></tr>{/each}</tbody>
+        </table>
+        <p>{PROTOCOL.summary}</p>
+      </section>
       <div class="truth-strip">
         <span><strong>124 LIGNES</strong> 40 P · 29 S · 55 N</span>
         <span><strong>PASSE 1</strong> 34 / 15 / 24 sur 73</span>
@@ -33,7 +42,7 @@
     <section class="reading-map" aria-label="Comment lire ce dossier">
       <h2>Comment lire ce dossier</h2>
       <ol>
-        <li><strong>D’abord l’intention de l’owner et ce que veut Steve</strong>, dépliées : objectifs et renvois, destinataires et rôles (§1.1), lexique des termes (§1.2), trois critères cités et chiffrés, écart avec l’existant.</li>
+        <li><strong>D’abord l’intention de l’owner et ce que veut Steve</strong>, dépliées : objectifs et renvois, destinataires et rôles (§1.1), glossaire en tête, trois critères cités et chiffrés, écart avec l’existant.</li>
         <li><strong>La synthèse et les 16 décisions</strong>, dépliées, puis les neuf autres sections dans leur texte d’origine.</li>
         <li><strong>Cinq scènes</strong> : critères de Steve en regard de l’existant (matrice), modèle de données (entité-relation), architecture de l’import à l’affichage avec l’oracle transversal (couloirs), architecture UI, affichage A/B/C.</li>
         <li><strong>Les décisions D1 à D16, dans l’ordre où elles se prennent</strong> : Fabien décide d’abord ses 6 décisions techniques (prises telles quelles sauf incohérence), puis Farid ses 10 décisions produit. Chacune s’ouvre sur une introduction, ses dépendances et, par option, avantages et inconvénients ; sélectionnables, à copier en YAML dans la PR GitHub — brouillon local seulement.</li>
@@ -44,6 +53,7 @@
         <code>N-A</code> = limites déclarées.</p>
     </section>
 
+    <Sections sections={[glossary]} label="Glossaire" open={true} />
     <Sections sections={[header]} label="En-tête du dossier" open={false} />
     <Sections sections={[intention, wants]} label="Intention du dossier et ce que veut Steve" open={true} />
     <Sections sections={[synthesis]} label="Synthèse et décisions demandées" open={true} />
@@ -69,6 +79,12 @@
 
 <style>
   .subtitle { margin: 6px 0 18px; font-size: 1.6rem; font-weight: 600; line-height: 1.3; color: var(--st-semantic-text-secondary); }
+  .protocol { margin: 22px 0 8px; padding: 16px 20px; max-width: 1200px; border-left: 5px solid var(--st-semantic-data-category2); background: var(--st-semantic-surface-subtle); }
+  .protocol h2 { margin: 0 0 10px; font-size: 1.1rem; }
+  .protocol table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  .protocol th, .protocol td { padding: 8px 10px; border-bottom: 1px solid var(--st-semantic-border-subtle); text-align: left; vertical-align: top; }
+  .protocol .num { text-align: right; white-space: nowrap; }
+  .protocol p { margin: 10px 0 0; font-size: .92rem; line-height: 1.55; }
   .reading-map { margin-block: 28px; padding: 22px 24px; border: 1px solid var(--st-semantic-border-subtle); background: var(--st-semantic-surface-subtle); }
   .reading-map h2 { margin-top: 0; font-size: 1.3rem; }
   .reading-map ol { margin: 0 0 14px; padding-left: 22px; line-height: 1.7; font-size: .95rem; }
