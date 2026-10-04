@@ -5,6 +5,7 @@ import { CARD, sceneFor } from '../../../../architecture/focus/scenes.js';
 import { roleIsShort } from '../../../../architecture/focus/scene-metadata.js';
 import { questions } from './choices.js';
 import { groups, totals } from './groups.js';
+import { miniDiagrams } from './mini-diagrams.js';
 
 const { graphs, sections, intention, context, synthesis, body, decisionDetails, annexes, manifest } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
 const markdown = await readFile('../DOSSIER_DECISION_VILLES_ECART_2026-10-04.md', 'utf8');
@@ -74,22 +75,38 @@ test('sept décisions, toutes décidées par Fabien, Farid consulté sur D2 et D
   assert.deepEqual(questions.filter(question => question.consulted === 'Farid').map(question => question.key), ['D2', 'D3']);
 });
 
-test('chaque décision du §7 : introduction, Avantages / Inconvénients, recommandation, options du formulaire', () => {
+test('chaque décision du §7 : introduction, puis chaque option avec Description, Avantages, Inconvénients', () => {
   assert.deepEqual(Object.keys(decisionDetails), questions.map(question => question.key));
   for (const question of questions) {
-    const detail = decisionDetails[question.key].markdown;
-    const intro = detail.split('\n\n')[0];
-    assert.ok(!detail.startsWith('**Décide'), `${question.key} : ligne décideur portée par les badges`);
-    assert.ok(intro && intro.split(/(?<=\.) /).length >= 3, `${question.key} : introduction de plusieurs phrases`);
-    assert.match(detail, /\| Option \| Avantages \| Inconvénients \|/);
-    const rows = detail.split('\n').filter(line => /^\| (\*\*)?[(A-C]/.test(line));
-    assert.equal(rows.length, question.options.length, `${question.key} : une ligne par option`);
-    const recommended = rows.filter(line => line.startsWith('| **'));
-    assert.equal(recommended.length, 1, `${question.key} : une seule option recommandée en gras`);
-    const key = recommended[0].match(/^\| \*\*\(?([a-zA-Z])/)[1];
-    assert.equal(key, question.recommended, `${question.key} : recommandation du tableau = formulaire`);
-    assert.match(detail, new RegExp(`Recommandation \\*\\*\\(?${question.recommended}\\)?\\*\\*`), question.key);
+    const detail = decisionDetails[question.key];
+    assert.ok(detail.intro.split(/(?<=\.) /).length >= 3, `${question.key} : introduction de plusieurs phrases`);
+    assert.ok(!detail.intro.startsWith('**Décide'), `${question.key} : ligne décideur portée par les badges`);
+    assert.deepEqual(detail.options.map(option => option.key), question.options.map(option => option.key), `${question.key} : mêmes options`);
+    assert.deepEqual(detail.options.filter(option => option.recommended).map(option => option.key), [question.recommended], `${question.key} : recommandation`);
+    assert.match(detail.recommendation, new RegExp(`^Recommandation \\*\\*\\(?${question.recommended}\\)?\\*\\*`), question.key);
+    for (const option of detail.options) {
+      assert.ok(option.description.length >= 140, `${question.key}/${option.key} : description concrète`);
+      assert.ok(option.pros.length >= 1 && option.cons.length >= 1, `${question.key}/${option.key} : avantages et inconvénients`);
+    }
+    // Les options qui lancent un job nomment le job et ses paramètres.
+    for (const option of detail.options.filter(option => /job=/.test(option.description)))
+      assert.match(option.description, /(project_cities|recovery_cities)/, `${question.key}/${option.key} : paramètres du job`);
   }
+});
+
+test('mini-schémas : D1, D2, D4, D5 et D7, un par option ; chiffres présents dans le texte de l’option', () => {
+  for (const key of ['D1', 'D2', 'D4', 'D5', 'D7']) for (const option of questions.find(question => question.key === key).options)
+    assert.ok(miniDiagrams[`${key}-${option.key}`], `${key}-${option.key}`);
+  for (const [id, spec] of Object.entries(miniDiagrams)) {
+    const [key, optionKey] = id.split('-');
+    const detail = decisionDetails[key];
+    const text = detail.intro + detail.options.find(option => option.key === optionKey).description;
+    if (spec.type === 'bars') for (const row of spec.rows) assert.ok(new RegExp(`(^|[^\\d])${row.value}([^\\d]|$)`).test(text), `${id} : ${row.label} ${row.value}`);
+    else for (const [nodeId] of spec.rows) assert.ok(text.includes(nodeId), `${id} : ${nodeId}`);
+  }
+  assert.deepEqual(miniDiagrams['D2-C'].rows.map(row => row[0]), ['bylaw-242', 'bylaw-242']);
+  assert.equal(miniDiagrams['D2-C'].key, 'city_slug, id');
+  assert.deepEqual(miniDiagrams['D1-a'].rows.map(row => row.value), [37, 473, 37, 37]);
 });
 
 test('Tableau 3 : comptes = groups.json des preuves, total 226', () => {

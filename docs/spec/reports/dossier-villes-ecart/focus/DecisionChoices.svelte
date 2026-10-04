@@ -7,10 +7,13 @@
   import { onMount, tick } from 'svelte';
   import { marked } from 'marked';
   import DOMPurify from 'dompurify';
+  import MiniDiagram from './MiniDiagram.svelte';
+  import { miniDiagrams } from './mini-diagrams.js';
   import { questions, minimalValidAnswer, exportBlock, PEOPLE, DECISIONS_TARGET_URL, DECISIONS_TARGET_LABEL } from './choices.js';
   let { manifest, details, intro } = $props();
   // Le détail de chaque décision est le §7 du Markdown, rendu tel quel, assaini.
   const html = source => DOMPurify.sanitize(marked.parse(source, { async: false, gfm: true }));
+  const inline = source => DOMPurify.sanitize(marked.parseInline(source, { async: false, gfm: true }));
   let selections = $state({}), comments = $state({}), deferred = $state({});
   let person = $state(PEOPLE[0]), scope = $state('mine'), stamp = $state(new Date());
   let status = $state(''), copyError = $state(''), yamlArea = $state();
@@ -80,22 +83,26 @@
             <span class="badge" class:warning={question.mode === 'multi'}>{question.mode === 'multi' ? 'plusieurs réponses' : 'une seule réponse'}</span>
           </div>
           <p class="roles" data-decides={question.decides}><span class="badge warning">Décide : {question.decides}</span> <span class="badge">{question.consulted.includes('informé') ? question.consulted : `Consulté : ${question.consulted}`}</span></p>
-          <details class="decision-detail" open data-detail={question.key}><summary>Problème, options avantages et inconvénients, recommandation (§7)</summary><div class="prose">{@html html(details[question.key].markdown)}</div></details>
-          <p class="context"><strong>{question.context}</strong></p>
+          <div class="prose decision-intro" data-detail={question.key}>{@html html(details[question.key].intro)}</div>
           <div class="option-grid" aria-label={`Options pour ${question.question}`}>
-            {#each question.options as option}
-              <article class="option" data-option={option.key} data-selected={checked(question, option)}>
-                <div class="flex-row"><span class="badge">{option.key}</span>{#if option.key === question.recommended}<span class="badge warning">Recommandée</span>{/if}{#if checked(question, option)}<span class="badge selected">Sélectionnée</span>{/if}</div>
+            {#each question.options as option, index}
+              {@const detail = details[question.key].options[index]}
+              <article class="option" data-option={option.key} data-selected={checked(question, option)} data-recommended={detail.recommended}>
+                <div class="flex-row option-head"><span class="badge">{option.key}</span>{#if option.key === question.recommended}<span class="badge warning">Recommandée</span>{/if}{#if checked(question, option)}<span class="badge selected">Sélectionnée</span>{/if}</div>
                 <label>
                   <input type={question.mode === 'multi' ? 'checkbox' : 'radio'} name={question.key} value={option.key}
                     checked={checked(question, option)}
                     onchange={() => question.mode === 'multi' ? toggle(question.key, option.key) : pick(question.key, option.key)} />
-                  {option.title}
+                  <span class="option-title">{@html inline(detail.title)}</span>
                 </label>
-                <p>{option.detail}</p>
+                <div class="option-part" data-option-description><h5>Description</h5><p>{@html inline(detail.description)}</p></div>
+                {#if miniDiagrams[`${question.key}-${option.key}`]}<MiniDiagram id={`${question.key}-${option.key}`} spec={miniDiagrams[`${question.key}-${option.key}`]} />{/if}
+                <div class="option-part pros" data-option-pros><h5>Avantages</h5><ul>{#each detail.pros as item}<li>{@html inline(item)}</li>{/each}</ul></div>
+                <div class="option-part cons" data-option-cons><h5>Inconvénients</h5><ul>{#each detail.cons as item}<li>{@html inline(item)}</li>{/each}</ul></div>
               </article>
             {/each}
           </div>
+          <div class="prose recommendation" data-recommendation={question.key}>{@html html(details[question.key].recommendation)}</div>
           <label class="defer"><input type="checkbox" data-defer checked={Boolean(deferred[question.key])}
             onchange={event => defer(question.key, event.currentTarget.checked)} /> Différer cette décision (statut « différée » dans l’export)</label>
           <label class="comment">Commentaire — {question.question}
@@ -139,13 +146,23 @@
   .choices { margin-block: 36px; padding: 28px; border: 1px solid var(--st-semantic-border-subtle); background: var(--st-semantic-surface-subtle); }
   .group-title { margin: 28px 0 0; font-size: 1.1rem; border-bottom: 3px solid var(--st-semantic-border-strong); padding-bottom: 8px; }
   .question-block { border-top: 1px solid var(--st-semantic-border-subtle); padding-block: 20px; }
-  .option-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-block: 16px; }
+  .option-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 14px; margin-block: 16px; }
   .option { padding: 14px; border: 1px solid var(--st-semantic-border-subtle); background: var(--st-semantic-surface-default); }
   .option[data-selected='true'] { border-color: var(--st-semantic-action-primary); border-left-width: 6px; }
   .roles { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 8px 0 0; }
-  .decision-detail { margin: 12px 0 0; font-size: .9rem; }
-  .decision-detail summary { cursor: pointer; font-weight: 650; }
-  .decision-detail .prose :global(strong:first-child) { display: inline; }
+  .decision-intro, .recommendation { font-size: .92rem; }
+  .recommendation { padding: 10px 14px; border-left: 5px solid var(--st-semantic-data-category2); background: var(--st-semantic-surface-default); }
+  .option { display: flex; flex-direction: column; min-width: 0; }
+  .option[data-recommended='true'] { border-top: 4px solid var(--st-semantic-data-category2); }
+  .option-part h5 { margin: 10px 0 4px; font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; color: var(--st-semantic-text-secondary); }
+  .option-part p, .option-part li { font-size: .86rem; line-height: 1.5; }
+  .option-part p { margin: 0; }
+  .option-part ul { margin: 0; padding-left: 18px; }
+  .option-part.pros h5 { color: var(--choice-good); }
+  .option-part.cons h5 { color: var(--choice-alert); }
+  .choices { --choice-good: #17633a; --choice-alert: #a3271a; }
+  @media (prefers-color-scheme: dark) { .choices { --choice-good: #7ddda4; --choice-alert: #ff9c8f; } }
+  .option :global(code) { overflow-wrap: anywhere; }
   .intro { font-size: .9rem; }
   h2, h4 { margin: 0; } h4 { font-size: 1rem; }
   p { font-size: .9rem; line-height: 1.55; }
