@@ -1,6 +1,8 @@
 # Draft targeting oracle C (Refs #797, #783)
 
 **Status: exploratory Steve-agreement pilot** (see `review.md`), not a D13-grade oracle.
+**The test-set scores of prompt v2 are contaminated** (rule 1 + exposure of the optimiser): see
+`TEST-SET-PROTOCOL.md`. Reference figures must come from a new, sealed, virgin test set.
 
 Files-only draft of a targeting oracle ("C": should this signal be shown to Steve?) built from
 Steve Chaperon's triage of 21 Sept 2026, measured with three models at low effort. Nothing here
@@ -33,12 +35,15 @@ rules only, iterated on `optim` only, frozen, then run **once** on `blind`.
 | `scripts/06-score.mjs`, `rescore-all.mjs` | metrics + robustness; re-scores archived runs without model calls | yes |
 | `scripts/08-filter-metrics.mjs` | show/hide filtering task: precision, recall, F1 for B passes, reconstructed single filters and C v1/v2 on the same lines (archived answers, no model call) → `results/filter-metrics-*`, `results/filter-pr-*.svg` | yes |
 | `scripts/07-review.mjs`, `review-brief.md` | adversarial review runner and brief | yes |
-| `scripts/selftest.mjs` | stats helpers + split integrity | yes |
+| `scripts/09-seal-test.mjs`, `scripts/lib/testset.mjs` | test-set sealing (encrypted outside the repo), run guards (frozen prompt, one run), audit log | yes |
+| `TEST-SET-PROTOCOL.md`, `test-access-log.jsonl` | test-set protocol, leak audit, audit log of test accesses | yes |
+| `scripts/selftest.mjs` | stats helpers, sealing and guards, split integrity | yes |
 | `prompt-c-v*.md` | prompt iterations (optim only) | yes |
 | `results.md`, `results/score-*.{md,json}` | results (aggregates only) | yes |
 | `extension-plan.md`, `review.md`, `dossier-section-fr.md` | extension proposal, review + reconciliation, French section | yes |
 | `selection-rule.md`, `final-prompt.json` | prompt selection rule, frozen final prompt (sha256) | yes |
-| `optim.jsonl`, `blind.jsonl` | frozen sets (Steve codes + radar records) | **no** (see below) |
+| `optim.jsonl` | development set (Steve codes + radar records) | **no**, local only (see below) |
+| test set | sealed (AES-256-GCM) outside the repository; key held by the test executor | **no**, hash only |
 | `SHA256SUMS`, `split-manifest.json`, `split-balance.md` | set hashes and balance (no item content) | yes (`cbc1185d`) |
 | `runs/`, `work/` | raw model answers, intermediate prod reads | no (git-ignored) |
 
