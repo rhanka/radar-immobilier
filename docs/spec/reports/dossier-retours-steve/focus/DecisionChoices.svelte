@@ -42,7 +42,7 @@
   }
   const checked = (question, option) => question.mode === 'multi'
     ? (selections[question.key] ?? []).includes(option.key)
-    : selections[question.key] === option.key;
+    : (selections[question.key] ?? question.decided?.option) === option.key;
   function comment(question, value) { comments = { ...comments, [question]: value }; persist(); }
   function defer(question, value) { deferred = { ...deferred, [question]: value }; persist(); }
   async function copy() {
@@ -84,6 +84,7 @@
             <h4 id={`question-${question.key}`}>{question.question}</h4>
             <span class="badge" class:warning={question.mode === 'multi'}>{question.mode === 'multi' ? 'plusieurs réponses' : 'une seule réponse'}</span>
           </div>
+          {#if question.decided}<p class="decided" data-decided={question.decided.option}><span class="badge selected">Tranchée · actée par l’owner le {question.decided.date}</span> {question.decided.note}</p>{/if}
           <p class="roles" data-decides={question.decides}><span class="badge step" data-step={question.step}>Étape {question.step} · {question.decides} décide</span> <span class="badge">Consulté : {question.consulted}</span>{#if question.decides === 'Fabien'} <span class="role-note">validation technique, prise telle quelle sauf incohérence</span>{:else} <span class="role-note">après les décisions de Fabien</span>{/if}</p>
           <p class="intro" data-intro>{question.intro}</p>
           <p class="deps" data-depends-on={question.dependsOn.join(' ')}>
@@ -157,6 +158,7 @@
   .option[data-selected='true'] { border-color: var(--st-semantic-action-primary); border-left-width: 6px; }
   .roles { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 8px 0 0; }
   .role-note { font-size: .8rem; color: var(--st-semantic-text-secondary); }
+  .decided { margin: 8px 0 0; font-size: .9rem; font-weight: 600; }
   .sequence { margin: 16px 0; padding: 14px 16px; border-left: 5px solid var(--st-semantic-data-category2); background: var(--st-semantic-surface-default); font-size: .92rem; line-height: 1.55; }
   .sequence ol { margin: 8px 0 0; padding-left: 20px; }
   .badge.step[data-step='1'] { border-color: var(--st-semantic-data-category1); }

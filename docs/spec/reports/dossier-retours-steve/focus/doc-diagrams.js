@@ -7,7 +7,7 @@ export const DIAGRAM_MARKER = /<!-- diagram:([\w-]+) -->/;
 
 export const DOC_DIAGRAMS = {
   // §6.3 — the minimal model proposed from Steve’s needs (same as scene 2 and D2 option a).
-  'modele-minimal': { title: 'Modèle minimal proposé : cinq tables, une par besoin de Steve', ...STEVE_MODEL },
+  'modele-minimal': { title: 'Modèle minimal proposé : six tables nouvelles, une par besoin de Steve', ...STEVE_MODEL },
   // §6.0 — what exists on main today (schema.ts, migrations 0005 and 0011).
   existant: {
     title: 'Existant sur main : deux tables d’annotation, aucune table d’oracle',
@@ -70,7 +70,7 @@ export const DOC_DIAGRAMS = {
     title: 'Ancien oracle (E, extraction) et nouvel oracle (C, ciblage) : deux volets du benchmark #782',
     layers: ['Sources', 'Oracles, versions gelées', 'Benchmark #782'],
     placement: {
-      consensus_modeles: { col: 0, row: 0 }, retours_lignes: { col: 0, row: 1 },
+      consensus_modeles: { col: 0, row: 0 }, annotations: { col: 0, row: 1 },
       oracle_e_v3: { col: 1, row: 0 }, oracle_c_v1: { col: 1, row: 1 },
       volet_extraction: { col: 2, row: 0 }, volet_ciblage: { col: 2, row: 1 },
     },
@@ -79,14 +79,14 @@ export const DOC_DIAGRAMS = {
     colGap: 190,
     er: `erDiagram
     consensus_modeles ||--|| oracle_e_v3 : construit
-    retours_lignes ||--|| oracle_c_v1 : adjugees_gelees
+    annotations ||--|| oracle_c_v1 : adjugees_gelees
     oracle_e_v3 ||--|| volet_extraction : note
     oracle_c_v1 ||--|| volet_ciblage : note_b_puis_c
     consensus_modeles {
       text methode "7 passes, 3 familles de modèles"
       text arbitrage "vote unanime + arbitrage"
     }
-    retours_lignes {
+    annotations {
       text source "verdicts de Steve (124 lignes)"
       text adjudication "par critère, auteur nommé"
     }

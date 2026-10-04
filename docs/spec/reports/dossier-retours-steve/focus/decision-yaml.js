@@ -83,7 +83,8 @@ export function decisionRecords(questions, { selections = {}, comments = {}, def
   return questions.flatMap(question => {
     const role = roleOf(question, person);
     if (scope === 'mine' && !role) return [];
-    const raw = selections[question.key];
+    // A decision already taken (question.decided) stands unless a draft answer overrides it.
+    const raw = selections[question.key] ?? question.decided?.option;
     const picked = (Array.isArray(raw) ? raw : [raw]).filter(value => value !== null && value !== undefined);
     const options = picked.map(key => {
       const option = question.options.find(item => item.key === key);
@@ -99,7 +100,7 @@ export function decisionRecords(questions, { selections = {}, comments = {}, def
       option: options.length ? options.map(option => option.key).join(', ') : null,
       option_libelle: options.length ? options.map(option => option.title).join(' ; ') : null,
       statut: deferred[question.key] ? 'differee' : options.length ? 'tranchee' : 'non_traitee',
-      commentaire: comments[question.key] ?? '',
+      commentaire: comments[question.key] ?? question.decided?.note ?? '',
     }];
   });
 }

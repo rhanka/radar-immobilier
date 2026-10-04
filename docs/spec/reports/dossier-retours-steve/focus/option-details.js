@@ -4,18 +4,18 @@
 
 export const DESCRIPTIONS = {
   D2: {
-    a: 'On crée cinq tables nommées en clair, une par besoin de Steve (§6.3) : le fichier reçu (provenance), ses lignes avec le verdict (classement, motif, sens, passe) et toutes les cellules brutes, les codes de motif reliés aux critères, les objets visés par chaque ligne (1 à N, par ville + id texte du graphe) et les versions gelées de l’oracle C. Exemple : la ligne #7 donne une ligne et deux cibles ; une nouvelle révision du classeur ajoute des lignes qui remplacent les anciennes sans les effacer.',
+    a: 'On crée six tables nommées en clair, une par besoin de Steve (§6.3) : le fichier reçu (provenance), les annotations (importées du classeur ou saisies par Steve avec son compte, chaque changement étant une nouvelle version), les validations de l’équipe ou du PO (validée, contestée, motif), les codes de motif reliés aux critères, les objets visés (1 à N, par ville + id texte du graphe) et les versions gelées de l’oracle C tirées des annotations validées. Exemple : la ligne #7 donne une annotation et deux cibles ; Farid la valide, Steve corrige une autre ligne contestée, et l’historique garde tout.',
     b: 'On crée le modèle complet en couches de la version précédente : fichier, lignes brutes, évaluations versionnées séparées des lignes, ancres, référentiels en trois tables (codes, règles, constats), projection vers les fils de commentaires sentropic et table d’oracle : neuf tables. Il prévoit d’emblée les réponses de l’équipe et plusieurs jeux d’étiquettes dans les mêmes tables.',
     c: 'On crée une seule table de contrôle qui recopie le classeur pour mesurer le radar, sans aucun lien vers ce qui est affiché. Le nom de table est indicatif. Rien n’apparaît dans le panneau du signal : Steve ne retrouve pas son verdict sur le signal qu’il a trié ; seul l’oracle lit la table.',
     d: 'On ne construit rien côté radar : on attend que le paquet comments de sentropic porte tout (cibles, verdict, provenance). En attendant, le classeur reste un fichier hors de l’outil. Même livré, le paquet ne porte ni classement, ni motif, ni sens : il faudrait encore des tables radar.',
   },
   D3: {
-    a: 'On stocke la cible sous forme de texte (« radar.signal:<ville>:<id> ») dans retours_cibles (ville + id texte du graphe), sans clé étrangère vers le graphe, avec un instantané de ce que Steve a vu (ville, date, type, verbatim). B0 corrige l’API pour accepter cet identifiant texte. Si une ré-extraction supprime le signal, l’ancre passe « disparue » et le panneau montre l’instantané au lieu de perdre le retour.',
+    a: 'On stocke la cible sous forme de texte (« radar.signal:<ville>:<id> ») dans annotation_cibles (ville + id texte du graphe), sans clé étrangère vers le graphe, avec un instantané de ce que Steve a vu (ville, date, type, verbatim). B0 corrige l’API pour accepter cet identifiant texte. Si une ré-extraction supprime le signal, l’ancre passe « disparue » et le panneau montre l’instantané au lieu de perdre le retour.',
     b: 'On n’ancre rien tant qu’une clé métier stable (dossier réglementaire, étape) n’existe pas dans une ontologie du radar. Aucun lot B0 : l’annotation de signal reste en échec 400 et les retours de Steve ne s’affichent sur aucun signal.',
     c: 'On garde le contrat v1 : une annotation de signal pointe vers l’UUID de la table signals. Mais aucun code de main n’écrit dans signals : il n’existe aucun UUID à viser pour les 124 lignes de Steve. L’ancre ne peut pas être créée.',
   },
   D4: {
-    a: 'Les annotations utilisent les cibles et la lecture du module comments, sans modifier le paquet. Les retours importés sont immuables : aucun bouton de suppression. Le premier lot affiche les retours en lecture seule : les réponses de l’équipe viendront avec le port complet. On demande à sentropic une version avec tombstone, puis on adopte le port complet.',
+    a: 'Les annotations utilisent les cibles et la lecture du module comments, sans modifier le paquet. Les retours importés sont immuables : aucun bouton de suppression. Les validations et contestations vivent dans les tables du radar (validations) ; un fil de commentaires sentropic pourra s’ajouter avec le port complet. On demande à sentropic une version avec tombstone, puis on adopte le port complet.',
     b: 'On écrit un adaptateur CommentStore côté radar dont le delete pose une marque (tombstone) au lieu d’effacer. Les retours et réponses passent tout de suite par le port complet. Mais le delete du port ne supprime plus vraiment : sa sémantique diffère de celle du paquet.',
     c: 'On attend que sentropic publie un paquet avec tombstone et rétention, puis on branche tout dessus. Aucun retour de Steve n’est affiché avant cette version, sans date connue.',
   },
@@ -39,9 +39,9 @@ export const DESCRIPTIONS = {
     c: 'Chaque ligne devient une note de texte libre sur une ville ou un signal, dans l’UI des notes actuelle. Le classement, le motif et le sens ne sont plus des champs : ils sont dans le texte.',
   },
   D5: {
-    a: 'Chaque retour importé affiche « Steve Chaperon — importé par <nom> ». Steve est un auteur externe (ext:chaperon:steve) sans compte ; l’importateur réel est enregistré à part (recorded_by). Personne ne peut modifier ni supprimer un retour importé.',
+    a: 'Chaque retour importé affiche « Steve Chaperon — importé par <nom> ». Steve est un auteur externe (ext:chaperon:steve) sans compte ; l’importateur réel est enregistré à part. Steve ne peut pas annoter lui-même tant que cette identité externe est utilisée.',
     b: 'Le retour est affiché comme écrit par la personne qui a lancé l’import ; le nom de Steve n’apparaît que dans la provenance (fichier, feuille, ligne).',
-    c: 'On crée un compte pour Steve et ses retours importés sont rattachés à ce compte, comme s’il les avait saisis lui-même dans l’outil.',
+    c: 'On crée et vérifie un compte pour Steve. Ses retours importés sont attribués à ce compte (l’importateur est tracé dans importe_par), et ses annotations, triages et réponses aux contestations dans l’application portent le même compte.',
   },
   D6: {
     a: 'Tout utilisateur approuvé voit tous les retours, verbatims compris, comme pour les notes actuelles (règle 0011). Aucun masquage.',
@@ -176,13 +176,13 @@ export const DIAGRAMS = {
     a: {
       colGap: 180,
       layers: ['Source', 'Oracle unique', 'Benchmark #782'],
-      placement: { retours_lignes: { col: 0, row: 0 }, oracle_tableur: { col: 1, row: 0 }, oracle_e_v3: { col: 1, row: 1 }, benchmark: { col: 2, row: 0 } },
+      placement: { annotations: { col: 0, row: 0 }, oracle_tableur: { col: 1, row: 0 }, oracle_e_v3: { col: 1, row: 1 }, benchmark: { col: 2, row: 0 } },
       existing: ['oracle_e_v3'],
       labels: { remplace: 'remplace', note_tout: 'note tout' },
       er: `erDiagram
-    retours_lignes ||--|| oracle_tableur : remplace
+    annotations ||--|| oracle_tableur : remplace
     oracle_tableur ||--|| benchmark : note_tout
-    retours_lignes {
+    annotations {
       text source "124 lignes de Steve"
     }
     oracle_tableur {
@@ -199,19 +199,19 @@ export const DIAGRAMS = {
     b: {
       colGap: 180,
       layers: ['Sources', 'Deux oracles gelés', 'Benchmark #782, deux volets'],
-      placement: { consensus_modeles: { col: 0, row: 0 }, retours_lignes: { col: 0, row: 1 }, oracle_e_v3: { col: 1, row: 0 }, oracle_c_v1: { col: 1, row: 1 },
+      placement: { consensus_modeles: { col: 0, row: 0 }, annotations: { col: 0, row: 1 }, oracle_e_v3: { col: 1, row: 0 }, oracle_c_v1: { col: 1, row: 1 },
         volet_extraction: { col: 2, row: 0 }, volet_ciblage: { col: 2, row: 1 } },
       existing: ['consensus_modeles', 'oracle_e_v3', 'volet_extraction'],
       labels: { adjugees_gelees: 'adjugées, gelées', note_b_puis_c: 'note B puis C' },
       er: `erDiagram
     consensus_modeles ||--|| oracle_e_v3 : construit
-    retours_lignes ||--|| oracle_c_v1 : adjugees_gelees
+    annotations ||--|| oracle_c_v1 : adjugees_gelees
     oracle_e_v3 ||--|| volet_extraction : note
     oracle_c_v1 ||--|| volet_ciblage : note_b_puis_c
     consensus_modeles {
       text methode "7 passes, 3 familles"
     }
-    retours_lignes {
+    annotations {
       text source "verdicts de Steve"
     }
     oracle_e_v3 {
@@ -230,17 +230,17 @@ export const DIAGRAMS = {
     c: {
       colGap: 180,
       layers: ['Nouvelle campagne', 'Oracle C neuf', 'Benchmark #782'],
-      placement: { campagne_c: { col: 0, row: 0 }, retours_lignes: { col: 0, row: 1 }, oracle_c_neuf: { col: 1, row: 0 }, volet_ciblage: { col: 2, row: 0 } },
+      placement: { campagne_c: { col: 0, row: 0 }, annotations: { col: 0, row: 1 }, oracle_c_neuf: { col: 1, row: 0 }, volet_ciblage: { col: 2, row: 0 } },
       existing: [],
       labels: { exemples: 'exemples seulement' },
       er: `erDiagram
     campagne_c ||--|| oracle_c_neuf : construit
-    retours_lignes }o..o| oracle_c_neuf : exemples
+    annotations }o..o| oracle_c_neuf : exemples
     oracle_c_neuf ||--|| volet_ciblage : note
     campagne_c {
       text corpus "nouveau, conçu pour C"
     }
-    retours_lignes {
+    annotations {
       text role "124 lignes, exemples"
     }
     oracle_c_neuf {
@@ -255,12 +255,12 @@ export const DIAGRAMS = {
     a: {
       colGap: 260,
       layers: ['Ancre proposée', 'Graphe existant'],
-      placement: { retours_cibles: { col: 0, row: 0 }, graph_nodes: { col: 1, row: 0 } },
+      placement: { annotation_cibles: { col: 0, row: 0 }, graph_nodes: { col: 1, row: 0 } },
       existing: ['graph_nodes'],
       labels: { cle_texte_sans_fk: 'clé texte, sans FK' },
       er: `erDiagram
-    retours_cibles }o..o| graph_nodes : cle_texte_sans_fk
-    retours_cibles {
+    annotation_cibles }o..o| graph_nodes : cle_texte_sans_fk
+    annotation_cibles {
       uuid id PK
       text city_slug "ville"
       text cible_id "signal-… (texte)"
@@ -274,12 +274,12 @@ export const DIAGRAMS = {
     b: {
       colGap: 180,
       layers: ['Ancre en attente', 'Clé métier'],
-      placement: { retours_cibles: { col: 0, row: 0 }, cle_metier_stable: { col: 1, row: 0 } },
+      placement: { annotation_cibles: { col: 0, row: 0 }, cle_metier_stable: { col: 1, row: 0 } },
       existing: [],
       labels: {},
       er: `erDiagram
-    retours_cibles }o..o| cle_metier_stable : attend
-    retours_cibles {
+    annotation_cibles }o..o| cle_metier_stable : attend
+    annotation_cibles {
       uuid id PK
       text business_key "à définir"
     }

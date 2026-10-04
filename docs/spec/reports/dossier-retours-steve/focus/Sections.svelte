@@ -7,11 +7,13 @@
   import BarChart from './BarChart.svelte';
   import MiniEr from './MiniEr.svelte';
   import { DOC_DIAGRAMS } from './doc-diagrams.js';
+  import LaneDiagram from './LaneDiagram.svelte';
+  import { docLanes } from './.generated/data.json';
   let { sections, label, open = true } = $props();
   const html = source => DOMPurify.sanitize(marked.parse(source, { async: false, gfm: true }));
   // Markers <!-- chart:<id> --> and <!-- diagram:<id> -->: [text, kind, id, text, kind, id, text…].
   const parts = source => {
-    const split = source.split(/<!-- (chart|diagram):([\w-]+) -->/g), out = [];
+    const split = source.split(/<!-- (chart|diagram|lanes):([\w-]+) -->/g), out = [];
     for (let index = 0; index < split.length; index += 3) {
       out.push({ text: split[index] });
       if (index + 2 < split.length) out.push({ kind: split[index + 1], id: split[index + 2] });
@@ -28,6 +30,7 @@
         {#each parts(section.markdown) as part}
           {#if part.kind === 'chart'}<BarChart id={part.id} />
           {:else if part.kind === 'diagram'}<figure class="doc-diagram" data-doc-diagram={part.id}><figcaption><strong>{DOC_DIAGRAMS[part.id].title}</strong></figcaption><MiniEr id={`doc-${part.id}`} spec={DOC_DIAGRAMS[part.id]} /></figure>
+          {:else if part.kind === 'lanes'}<figure class="doc-diagram" data-doc-lanes={part.id}><LaneDiagram graph={docLanes[part.id]} /></figure>
           {:else}{@html html(part.text)}{/if}
         {/each}
       </div>
