@@ -43,7 +43,8 @@ proofs:
 	test -s $(FOCUS_DIR)/.generated/browser-check.json
 	mkdir -p $(FOCUS_DIR)/../preuves
 	cp $(FOCUS_DIR)/.generated/browser-check.json $(FOCUS_DIR)/.generated/portable.json $(FOCUS_DIR)/../preuves/
-	cp $(FOCUS_DIR)/.generated/dossier-preview-*.png $(FOCUS_DIR)/.generated/scene-*.png $(FOCUS_DIR)/../preuves/
+	cp $(FOCUS_DIR)/.generated/dossier-preview-*.png $(FOCUS_DIR)/.generated/scene-*.png $(FOCUS_DIR)/.generated/graphique-*.png \
+	  $(FOCUS_DIR)/.generated/decision-*.png $(FOCUS_DIR)/.generated/sombre-*.png $(FOCUS_DIR)/../preuves/
 	node -e "const r=require('$(FOCUS_DIR)/.generated/browser-check.json'); \
 	  if(r.status!=='pass') throw Error('browser check did not pass'); \
 	  if(r.scenes.length!==5) throw Error('five scenes expected'); \
