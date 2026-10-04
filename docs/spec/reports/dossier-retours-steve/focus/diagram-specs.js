@@ -122,4 +122,37 @@ const ABC = {
   },
 };
 
-export const LANE_SPECS = { 'flux-import-oracle': FLUX, 'affichage-abc': ABC };
+// §6.3 — data architecture: five sets, each marked existe / proposé (lane title, border)
+// and en ligne (zone) / hors ligne (band); arrows: who feeds whom.
+const ARCH = {
+  zone: { title: 'En ligne : application et données stockées', titleWidth: 640 },
+  lanes: [
+    { id: 'U', kind: 'user', title: 'Utilisateurs de l’application' },
+    { id: 'DA', kind: 'backend', title: '(a) Données de Steve · proposé' },
+    { id: 'DB', kind: 'data', title: '(b) Annotations · proposé' },
+    { id: 'DC', kind: 'ui', title: '(c) Graphe · existe' },
+    { id: 'DD', kind: 'data', title: '(d) Oracle · proposé' },
+  ],
+  band: { id: 'EV', titleWidth: 1400, order: ['BEN', 'ENG'],
+    subtitle: 'jamais dans l’application : mesure sur les versions gelées de l’oracle, optimisation des prompts d’engram' },
+  legend: 'zone du haut : en ligne (application et données stockées en Postgres ou S3) · bande du bas : hors ligne · titre de couloir et bordure : existe (pleine) ou proposé (tirets) · les flèches disent qui alimente qui.',
+  rows: { STV: 0, EQP: 2, XLS: 0, SRC: 1, ANN: 1, VAL: 2, HIS: 3, S3G: 0, GRN: 1, ORC: 3, ORE: 4 },
+  nodes: {
+    STV: node('declared', 'personne', 'son compte : annote, trie'),
+    EQP: node('observed', 'personne', 'Farid (PO), Fabien, Mathieu'),
+    XLS: node('observed', 'fichier', '7 feuilles, 433 lignes'),
+    SRC: node('declared', 'PG + S3', 'gardé tel quel, sha256'),
+    ANN: node('declared', 'PG', 'verdict, motif, cibles'),
+    VAL: node('declared', 'PG', 'validée ou contestée, motif'),
+    HIS: node('declared', 'PG', 'chaque version gardée'),
+    S3G: node('observed', 'S3', 'graph/<ville>/latest.json'),
+    GRN: node('observed', 'PG', 'signaux, clé ville + id'),
+    ORC: node('declared', 'PG + JSON', 'tirées des validées, sha256'),
+    ORE: node('observed', 'fichiers', '674 / 676, branche bench'),
+    BEN: node('observed', 'job', 'extraction et ciblage séparés'),
+    ENG: node('declared', 'job', 'prompts testés, puis décision'),
+  },
+  edges: { 'S3G|GRN': 'observed', 'ORE|BEN': 'observed' },
+};
+
+export const LANE_SPECS = { 'flux-import-oracle': FLUX, 'affichage-abc': ABC, 'architecture-donnees': ARCH };

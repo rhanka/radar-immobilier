@@ -45,7 +45,7 @@
         <li><strong>D’abord l’intention de l’owner et ce que veut Steve</strong>, dépliées : objectifs et renvois, destinataires et rôles (§1.1), glossaire en tête, trois critères cités et chiffrés, écart avec l’existant.</li>
         <li><strong>La synthèse et les 16 décisions</strong>, dépliées, puis les neuf autres sections dans leur texte d’origine.</li>
         <li><strong>Cinq scènes</strong> : critères de Steve en regard de l’existant (matrice), modèle de données (entité-relation), architecture de l’import à l’affichage avec l’oracle transversal (couloirs), architecture UI, affichage A/B/C.</li>
-        <li><strong>Les décisions D1 à D16, dans l’ordre où elles se prennent</strong> : Fabien décide d’abord ses 6 décisions techniques (prises telles quelles sauf incohérence), puis Farid ses 10 décisions produit. Chacune s’ouvre sur une introduction, ses dépendances et, par option, avantages et inconvénients ; sélectionnables, à copier en YAML dans la PR GitHub — brouillon local seulement.</li>
+        <li><strong>Les décisions D1 à D16, dans l’ordre où elles se prennent</strong> : Fabien décide d’abord ses 7 décisions techniques (D1 déjà actée par l’owner le 2026-10-04 ; les autres prises telles quelles sauf incohérence), puis Farid ses 9 décisions produit. Chacune s’ouvre sur une introduction, ses dépendances et, par option, avantages et inconvénients ; sélectionnables, à copier en YAML dans la PR GitHub — brouillon local seulement.</li>
         <li><strong>L’annexe A</strong> : convergence et divergences entre les deux auteurs, avec la source qui tranche.</li>
       </ol>
       <p class="caption">Conventions : <code>FAIT</code> = constaté dans une source citée · <code>CALCUL</code> = dérivé des

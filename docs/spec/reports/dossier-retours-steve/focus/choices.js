@@ -14,7 +14,7 @@ export const DOSSIER_REVISION = '2026-10-03';
 // so a person's own decisions are the ones they decide.
 export const PEOPLE = ['Farid', 'Fabien'];
 
-// Ordre de décision : Fabien décide d'abord ses six décisions (architecture, données,
+// Ordre de décision : Fabien décide d'abord ses sept décisions (D1 actée, architecture, données,
 // oracle) ; elles sont prises telles quelles, sauf incohérence avec une autre décision.
 // Farid décide ensuite les dix siennes (produit, affichage, priorités), en connaissant
 // les choix de Fabien. Chaque décision : une introduction (problème, pourquoi maintenant,
@@ -24,30 +24,50 @@ export const STEPS = [
   { id: 'fabien', step: 1, decides: 'Fabien', label: 'Étape 1 · Fabien décide d’abord (architecture, données, oracle)' },
   { id: 'farid', step: 2, decides: 'Farid', label: 'Étape 2 · Farid décide ensuite (produit, affichage, priorités)' },
 ];
-export const SEQUENCE = 'Fabien décide d’abord ses six décisions (D2, D3, D4, D9, D10, D11) : elles sont prises telles quelles, sauf incohérence avec une autre décision. '
-  + 'Farid décide ensuite ses dix décisions (D1, D5, D6, D7, D8, D12, D13, D14, D15, D16), en connaissant les choix de Fabien. '
+export const SEQUENCE = 'Fabien décide d’abord ses sept décisions (D1, D2, D3, D4, D9, D10, D11) : D1 est déjà actée par l’owner le 2026-10-04 (tout conserver) ; les autres sont prises telles quelles, sauf incohérence avec une autre décision. '
+  + 'Farid décide ensuite ses neuf décisions (D5, D6, D7, D8, D12, D13, D14, D15, D16), en connaissant les choix de Fabien. '
   + 'Si un choix de Farid contredit un choix de Fabien (par exemple D1 « tout conserver » avec D2 = (c), une table de contrôle qui n’affiche rien), on revient à Fabien sur ce seul point.';
 
 const q = (key, question, recommended, text, options) => ({
   key, mode: 'single', question, recommended, options,
   step: roles[key][0] === 'Fabien' ? 1 : 2, group: STEPS.find(step => step.decides === roles[key][0]).label,
-  intro: text.intro, dependsOn: text.dependsOn ?? [], recommendation: text.recommendation,
+  intro: text.intro, dependsOn: text.dependsOn ?? [], recommendation: text.recommendation, decided: text.decided ?? null,
   decides: roles[key][0], consulted: roles[key][1], validators: [],
 });
 const o = (key, title, pros, cons) => ({ key, title, pros, cons });
 
 export const questions = [
   // ——— Étape 1 · Fabien ———
-  q('D2', 'D2 — Modèle de données', 'a', {
-    intro: 'Le classeur de Steve (7 feuilles, 433 lignes, une cellule de 17 114 caractères, §5.1) doit être stocké en base et rattaché aux objets du radar (#784). '
-      + 'Les tables d’annotation existantes, prospect_marks et prospect_notes (§6.0), servent à l’équipe sur les lots : elles restent telles quelles, ni étendues ni réutilisées. '
-      + 'Le §6.3 part des besoins réels de Steve (verdict, motif, provenance, 1 à N objets visés, révisions, oracle C) et propose un modèle minimal de cinq tables (scène 2). '
-      + 'Il faut choisir la forme des tables maintenant : l’import (lot L1), l’affichage (U1) et l’oracle (O1) en dépendent tous (§7).',
-    recommendation: '(a) couvre exactement les besoins listés au §6.3 avec cinq tables nommées en clair ; ce qu’il ne fait pas (réponses de l’équipe, états archiver, classer, lier, épingler) reste possible plus tard, sans le défaire.',
+  q('D1', 'D1 — Périmètre de conservation des retours de Steve', 'b', {
+    decided: { option: 'b', by: 'Fabien (owner)', date: '2026-10-04', note: 'Actée par l’owner le 2026-10-04 : on conserve tous les retours de Steve ; il en a besoin pour l’oracle.' },
+    intro: 'Décision actée par l’owner le 2026-10-04 : on conserve tous les retours de Steve ; c’est sa décision, il en a besoin pour l’oracle. '
+      + 'Steve a livré un classeur de 7 feuilles (124 lignes de triage, 121 contrôles d’exclusion, 77 constats, 26 règles, 28 codes de motif) et une analyse écrite qui pose ses trois critères (§2, §5.1). '
+      + 'Ce choix fixe ce que l’équipe pourra montrer sur les objets du radar et ce que l’oracle pourra mesurer (D10). '
+      + 'Conséquence pour D2 : « tout conserver » suppose un modèle qui garde toutes les lignes, l’option a (ou b) de D2.',
+    dependsOn: [],
+    recommendation: 'Tranchée : (b), tout conserver, actée par l’owner le 2026-10-04 ; les options a et c restent affichées pour mémoire.',
   }, [
-    o('a', '(a) Modèle minimal « besoins de Steve » (5 tables)',
-      ['Une table par besoin réel : provenance, verdict, codes et critères, objets visés, oracle gelé.', 'Aucune perte : toutes les cellules sont gardées ; une révision remplace sans effacer.', 'Signaux visés par ville + id texte, la clé du graphe décidée pour #812 : survit à la ré-extraction.', 'Le moins de code d’import et de migration parmi les options utiles.'],
-      ['Pas de fil de réponses ni d’états utilisateur au premier lot (assumé, §6.3).', 'Une file de rapprochement (identifiants abrégés, ambiguïtés) reste à traiter à la main.']),
+    o('a', '(a) Triage seul',
+      ['Rapide : une feuille, 124 lignes.', 'Moins de rattachements à vérifier à l’import.'],
+      ['Perd les 121 contrôles d’exclusion, là où se trouvent les faux négatifs, ainsi que les constats et les règles.', 'Oracle incomplet : impossible de mesurer ce que les filtres cachent à tort.']),
+    o('b', '(b) Tout le classeur et l’analyse, brut immuable',
+      ['Aucune perte : chaque cellule, formule et valeur mémorisée.', 'L’oracle (D10) dispose des exclusions et des règles.', 'Les 52 villes suivantes s’importeront de la même façon.'],
+      ['Plus de tables et de curation (rattachements à vérifier).', 'Import un peu plus long à écrire et à recetter.']),
+    o('c', '(c) Notes libres seules',
+      ['Surface existante : les notes des lots et des signaux.', 'Aucun schéma nouveau : livrable vite.'],
+      ['Perd la structure (classement, motif, sens), les groupes et la provenance.', 'Inutilisable pour l’oracle ; une note est limitée à 10 000 caractères.']),
+  ]),
+  q('D2', 'D2 — Modèle de données', 'a', {
+    intro: 'Le classeur de Steve (7 feuilles, 433 lignes, une cellule de 17 114 caractères, §5.1) doit être stocké en base et rattaché aux objets du radar (#784), et Steve doit pouvoir poursuivre son annotation dans l’application, avec des boucles de validation par l’équipe ou le PO (vision owner, §6.3). '
+      + 'Les tables d’annotation existantes, prospect_marks et prospect_notes (§6.0), servent à l’équipe sur les lots : elles restent telles quelles, ni étendues ni réutilisées. '
+      + 'Le §6.3 part des besoins réels de Steve (verdict, motif, provenance, 1 à N objets visés, révisions, saisie et validation dans l’application, oracle C) et propose un modèle minimal de six tables (scène 2). '
+      + 'Il faut choisir la forme des tables maintenant : l’import (lot L1), l’affichage (U1) et l’oracle (O1) en dépendent tous (§7).',
+    dependsOn: ['D1'],
+    recommendation: '(a) couvre exactement les besoins listés au §6.3 avec six tables nommées en clair, dont la boucle de validation ; ce qu’il ne fait pas (fil de discussion libre, états archiver, classer, lier, épingler, évaluation en ligne) reste possible plus tard, sans le défaire.',
+  }, [
+    o('a', '(a) Modèle minimal « besoins de Steve » (6 tables)',
+      ['Une table par besoin réel : provenance, annotations vivantes, validations, codes et critères, objets visés, oracle gelé.', 'Aucune perte : toutes les cellules sont gardées ; une révision remplace sans effacer.', 'Signaux visés par ville + id texte, la clé du graphe décidée pour #812 : survit à la ré-extraction.', 'Le moins de code d’import et de migration parmi les options utiles.'],
+      ['Pas de fil de discussion libre ni d’états archiver, classer, lier, épingler au premier lot (assumé, §6.3).', 'Une file de rapprochement (identifiants abrégés, ambiguïtés) reste à traiter à la main.']),
     o('b', '(b) Modèle complet en couches (version précédente)',
       ['Prévoit d’emblée les réponses de l’équipe (projection Comment) et plusieurs jeux d’étiquettes.', 'Sépare lignes brutes et évaluations, référentiels en trois tables distinctes.'],
       ['Neuf tables nouvelles et une migration plus lourde à écrire et tester.', 'Des tables sans usage immédiat (projection, jeux d’étiquettes) : coût sans besoin exprimé par Steve.', 'Plus de code d’import que l’option a.']),
@@ -59,7 +79,7 @@ export const questions = [
       ['Bloquant sans date : #784 et l’oracle attendent.', 'Le paquet ne porte de toute façon ni verdict structuré ni provenance (§6.1).']),
   ]),
   q('D3', 'D3 — Ancre signal et correctif B0', 'a', {
-    intro: 'Une ancre est la référence qui attache une annotation à un objet du radar (signal, ville, zone, lot…) ; c’est une ligne de la table retours_cibles (ville + id texte, scène 2). '
+    intro: 'Une ancre est la référence qui attache une annotation à un objet du radar (signal, ville, zone, lot…) ; c’est une ligne de la table annotation_cibles (ville + id texte, scène 2). '
       + 'Aujourd’hui l’annotation d’un signal est cassée : l’UI envoie l’identifiant texte du graphe (« signal-… »), alors que l’API exige un UUID, identifiant aléatoire de l’ancienne table signals que plus aucun code n’alimente (§6.1, défaut 1). '
       + '« B0 » est le petit lot correctif qui répare cela (§7). Sans ancre fiable, aucun retour de Steve ne s’affiche sur son signal. '
       + 'Risque connu : une ré-extraction du graphe peut supprimer ou renommer des identifiants (graph-store.ts, §6.1).',
@@ -96,7 +116,7 @@ export const questions = [
   ]),
   q('D9', 'D9 — Sens de « double annotation » (point ouvert)', null, {
     intro: 'La demande initiale parle de « double annotation (ancienne / nouvelle) » sans dire ce qui est comparé à quoi. '
-      + 'Le modèle retenu (D2) garde le verdict de Steve dans retours_lignes ; les autres jeux (adjudication C, prédiction C) vivent dans les versions gelées de l’oracle, et la classification du radar se recalcule (§6.6) : les trois lectures sont donc possibles techniquement. '
+      + 'Le modèle retenu (D2) garde le verdict de Steve dans annotations ; les autres jeux (adjudication C, prédiction C) vivent dans les versions gelées de l’oracle, et la classification du radar se recalcule (§6.6) : les trois lectures sont donc possibles techniquement. '
       + 'Mais chacune produit une mesure différente et fixe ce que l’oracle (D10) comparera : il faut la préciser avant de geler l’oracle de ciblage. '
       + 'Le sens de la demande appartient à Fabien.',
     dependsOn: ['D2'],
@@ -147,41 +167,23 @@ export const questions = [
   ]),
 
   // ——— Étape 2 · Farid ———
-  q('D1', 'D1 — Périmètre de conservation des retours de Steve', 'b', {
-    intro: 'Steve a livré un classeur de 7 feuilles (124 lignes de triage, 121 contrôles d’exclusion, 77 constats, 26 règles, 28 codes de motif) et une analyse écrite qui pose ses trois critères (§2, §5.1). '
-      + 'Il faut décider ce qu’on garde en base : seulement le triage, tout, ou de simples notes. '
-      + 'Ce choix fixe ce que l’équipe pourra montrer sur les objets du radar et ce que l’oracle pourra mesurer (D10). '
-      + 'Cohérence avec D2 : « tout conserver » suppose un modèle qui garde toutes les lignes, l’option a (ou b) de D2.',
-    dependsOn: ['D2', 'D10'],
-    recommendation: '(b) : conserve tout ce que Steve a produit et sert à la fois l’affichage et l’oracle. La recommandation changerait seulement si le besoin se limitait à quelques commentaires.',
-  }, [
-    o('a', '(a) Triage seul',
-      ['Rapide : une feuille, 124 lignes.', 'Moins de rattachements à vérifier à l’import.'],
-      ['Perd les 121 contrôles d’exclusion, là où se trouvent les faux négatifs, ainsi que les constats et les règles.', 'Oracle incomplet : impossible de mesurer ce que les filtres cachent à tort.']),
-    o('b', '(b) Tout le classeur et l’analyse, brut immuable',
-      ['Aucune perte : chaque cellule, formule et valeur mémorisée.', 'L’oracle (D10) dispose des exclusions et des règles.', 'Les 52 villes suivantes s’importeront de la même façon.'],
-      ['Plus de tables et de curation (rattachements à vérifier).', 'Import un peu plus long à écrire et à recetter.']),
-    o('c', '(c) Notes libres seules',
-      ['Surface existante : les notes des lots et des signaux.', 'Aucun schéma nouveau : livrable vite.'],
-      ['Perd la structure (classement, motif, sens), les groupes et la provenance.', 'Inutilisable pour l’oracle ; une note est limitée à 10 000 caractères.']),
-  ]),
-  q('D5', 'D5 — Auteur des retours importés', 'a', {
-    intro: 'Quand les retours de Steve apparaîtront dans le radar, chacun portera un auteur. Steve n’a pas de compte vérifié, et ce n’est pas lui qui lance l’import. '
-      + 'Il faut décider qui est affiché comme auteur, sans usurper l’identité de Steve ni effacer celle de l’importateur (exigence E5, §6.2). '
-      + 'Le contrat sentropic accepte un auteur externe sans compte (§6.1), dans le cadre fixé par D4. '
-      + 'Effet visible : la ligne « auteur » de chaque retour dans le panneau du signal.',
-    dependsOn: ['D4'],
-    recommendation: '(a) : attribue le contenu à son vrai auteur sans créer de compte ni usurper de session. (c) viendra le jour où Steve annotera lui-même dans l’UI.',
+  q('D5', 'D5 — Auteur des retours importés', 'c', {
+    intro: 'Steve poursuivra son annotation dans l’application (vision owner, §6.3) : ses retours importés et ses annotations futures doivent porter le même auteur. '
+      + 'Aujourd’hui il n’a pas de compte vérifié, et ce n’est pas lui qui lance l’import. '
+      + 'Il faut décider qui est affiché comme auteur, sans usurper son identité ni effacer celle de l’importateur (exigence E5, §6.2). '
+      + 'Effet visible : la ligne « auteur » de chaque annotation dans le panneau du signal, et le nom de qui valide ou conteste.',
+    dependsOn: ['D2', 'D4'],
+    recommendation: '(c) : Steve annote et valide avec son propre compte ; ses retours importés lui sont attribués, l’importateur est tracé à part. (a) ne vaut que si la création du compte tarde.',
   }, [
     o('a', '(a) Auteur documentaire externe + importateur tracé',
-      ['Le contenu est attribué à son vrai auteur, Steve Chaperon.', 'L’importateur réel est tracé (recorded_by) : on sait qui a chargé quoi.', 'Aucun droit de modifier ou supprimer un retour importé.'],
-      ['Un auteur sans compte apparaît dans les fils.', 'Steve ne peut pas répondre sous son nom tant qu’il n’a pas de compte.']),
+      ['Le contenu est attribué à son vrai auteur sans attendre la création d’un compte.', 'L’importateur réel est tracé : on sait qui a chargé quoi.'],
+      ['Steve ne peut ni annoter ni valider dans l’application sous ce nom externe.', 'Deux identités pour la même personne le jour où il aura un compte.']),
     o('b', '(b) Importateur seul comme auteur',
-      ['Aucune identité externe à gérer.', 'Aucun libellé spécial à afficher dans les fils.'],
-      ['Le fil attribue le texte de Steve à l’importateur : faux pour le lecteur.', 'Perd la valeur de la parole du client.']),
-    o('c', '(c) Compte Steve',
-      ['Steve pourra répondre et annoter lui-même.', 'Ses réponses futures seront attribuées à un compte réel.'],
-      ['Compte non vérifié aujourd’hui.', 'Ne doit jamais servir pour l’import : ce n’est pas lui qui importe.']),
+      ['Aucune identité externe à gérer.', 'Aucun libellé spécial à afficher.'],
+      ['Le texte de Steve est attribué à l’importateur : faux pour le lecteur.', 'Perd la valeur de la parole du client et empêche la boucle de validation.']),
+    o('c', '(c) Compte Steve, pour l’import et la saisie',
+      ['Une seule identité : ses retours importés et ses annotations futures portent son compte.', 'Il annote, trie et répond aux contestations lui-même dans l’application.', 'L’importateur reste tracé à part (importe_par).'],
+      ['Compte à créer et vérifier avant l’import.', 'Droits à cadrer : Steve annote, l’équipe ou le PO valide.']),
   ]),
   q('D6', 'D6 — Visibilité et données personnelles', 'c', {
     intro: 'Le constat C-79 de Steve signale des noms de particuliers en clair dans des résumés de signaux (§5.6) ; les verbatims importés peuvent en contenir aussi. '

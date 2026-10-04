@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-04T21:01:32.674Z",
+  "checkedAt": "2026-10-04T21:38:33.450Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
   "chromiumCdpPort": "9243",
   "offline": {
@@ -36,19 +36,20 @@
     {
       "sceneId": "modele-donnees",
       "kind": "er",
-      "sceneHash": "6bc793ef8e37553c3b72f80d7f2119dfaecc76f19bc7b724baff846177a727fe",
-      "initialScale": 0.7024058577405857,
-      "tables": 6,
-      "relations": 6,
-      "labels": 6,
+      "sceneHash": "d5d69a02e5fb2869e841c69abae9fff2a09bbb85b0b84ef78396fb78ef941d48",
+      "initialScale": 0.693698347107438,
+      "tables": 8,
+      "relations": 9,
+      "labels": 9,
       "existing": [
-        "graph_nodes"
+        "graph_nodes",
+        "account_users"
       ]
     },
     {
       "sceneId": "flux-import-oracle",
       "kind": "lanes",
-      "sceneHash": "e5b7c8e8fd8e3ea20e69382e0299ee7657b201d6fbfeee2d449356b614f58364",
+      "sceneHash": "c967edfd97e56fe2173358b03bc12f0b393b514b88ae0ac3633e9879d8694fbb",
       "initialScale": 0.7736175115207373,
       "lanes": [
         "user",
@@ -82,7 +83,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 40,
-        "top": -28255.609375,
+        "top": -28527.9375,
         "width": 1345,
         "height": 820
       },
@@ -96,7 +97,7 @@
     {
       "sceneId": "affichage-abc",
       "kind": "lanes",
-      "sceneHash": "cc098fdf01ed4cd0d017886f1748459e8d88c7589ccabc5d7f31d260bdeb55bc",
+      "sceneHash": "bf3f3eff6c5ae17198dff36534a7ace9a3901b31d4203b6c9bcfb4903cd62ae2",
       "initialScale": 0.7736175115207373,
       "lanes": [
         "user",
@@ -132,19 +133,20 @@
     {
       "sceneId": "modele-donnees",
       "kind": "er",
-      "sceneHash": "6bc793ef8e37553c3b72f80d7f2119dfaecc76f19bc7b724baff846177a727fe",
-      "initialScale": 0.9403765690376569,
-      "tables": 6,
-      "relations": 6,
-      "labels": 6,
+      "sceneHash": "d5d69a02e5fb2869e841c69abae9fff2a09bbb85b0b84ef78396fb78ef941d48",
+      "initialScale": 0.9287190082644629,
+      "tables": 8,
+      "relations": 9,
+      "labels": 9,
       "existing": [
-        "graph_nodes"
+        "graph_nodes",
+        "account_users"
       ]
     },
     {
       "sceneId": "flux-import-oracle",
       "kind": "lanes",
-      "sceneHash": "e5b7c8e8fd8e3ea20e69382e0299ee7657b201d6fbfeee2d449356b614f58364",
+      "sceneHash": "c967edfd97e56fe2173358b03bc12f0b393b514b88ae0ac3633e9879d8694fbb",
       "initialScale": 1,
       "lanes": [
         "user",
@@ -178,7 +180,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 52.5,
-        "top": -27537.828125,
+        "top": -27929.03125,
         "width": 1800,
         "height": 900
       },
@@ -192,7 +194,7 @@
     {
       "sceneId": "affichage-abc",
       "kind": "lanes",
-      "sceneHash": "cc098fdf01ed4cd0d017886f1748459e8d88c7589ccabc5d7f31d260bdeb55bc",
+      "sceneHash": "bf3f3eff6c5ae17198dff36534a7ace9a3901b31d4203b6c9bcfb4903cd62ae2",
       "initialScale": 1,
       "lanes": [
         "user",
@@ -234,19 +236,20 @@
       {
         "sceneId": "modele-donnees",
         "kind": "er",
-        "sceneHash": "6bc793ef8e37553c3b72f80d7f2119dfaecc76f19bc7b724baff846177a727fe",
-        "initialScale": 0.7024058577405857,
-        "tables": 6,
-        "relations": 6,
-        "labels": 6,
+        "sceneHash": "d5d69a02e5fb2869e841c69abae9fff2a09bbb85b0b84ef78396fb78ef941d48",
+        "initialScale": 0.693698347107438,
+        "tables": 8,
+        "relations": 9,
+        "labels": 9,
         "existing": [
-          "graph_nodes"
+          "graph_nodes",
+          "account_users"
         ]
       },
       {
         "sceneId": "flux-import-oracle",
         "kind": "lanes",
-        "sceneHash": "e5b7c8e8fd8e3ea20e69382e0299ee7657b201d6fbfeee2d449356b614f58364",
+        "sceneHash": "c967edfd97e56fe2173358b03bc12f0b393b514b88ae0ac3633e9879d8694fbb",
         "initialScale": 0.7736175115207373,
         "lanes": [
           "user",
@@ -280,7 +283,7 @@
         "edgeLabels": 12,
         "panel": {
           "left": 40,
-          "top": 15620.125,
+          "top": 15853.640625,
           "width": 1345,
           "height": 820
         },
@@ -294,7 +297,7 @@
       {
         "sceneId": "affichage-abc",
         "kind": "lanes",
-        "sceneHash": "cc098fdf01ed4cd0d017886f1748459e8d88c7589ccabc5d7f31d260bdeb55bc",
+        "sceneHash": "bf3f3eff6c5ae17198dff36534a7ace9a3901b31d4203b6c9bcfb4903cd62ae2",
         "initialScale": 0.7736175115207373,
         "lanes": [
           "user",
@@ -345,7 +348,7 @@
         },
         {
           "id": "doc-modele-minimal",
-          "tables": 6,
+          "tables": 8,
           "scale": 1
         },
         {
@@ -355,8 +358,8 @@
         },
         {
           "id": "option-D2-a",
-          "tables": 6,
-          "scale": 0.647
+          "tables": 8,
+          "scale": 0.639
         },
         {
           "id": "option-D2-b",
@@ -408,8 +411,8 @@
     "zoom": {
       "id": "modele-donnees",
       "mode": "transform",
-      "fit": 0.736,
-      "zoomed": 1.151,
+      "fit": 0.727,
+      "zoomed": 1.136,
       "dragged": false
     }
   },
@@ -445,7 +448,7 @@
       },
       {
         "id": "doc-modele-minimal",
-        "tables": 6,
+        "tables": 8,
         "scale": 1
       },
       {
@@ -455,8 +458,8 @@
       },
       {
         "id": "option-D2-a",
-        "tables": 6,
-        "scale": 0.647
+        "tables": 8,
+        "scale": 0.639
       },
       {
         "id": "option-D2-b",
@@ -536,10 +539,17 @@
         "dragged": false
       },
       {
+        "id": "architecture-donnees",
+        "mode": "transform",
+        "fit": 0.655,
+        "zoomed": 1.023,
+        "dragged": false
+      },
+      {
         "id": "doc-modele-minimal",
         "mode": "transform",
-        "fit": 0.736,
-        "zoomed": 1.151,
+        "fit": 0.727,
+        "zoomed": 1.136,
         "dragged": false
       },
       {
@@ -566,8 +576,8 @@
       {
         "id": "modele-donnees",
         "mode": "transform",
-        "fit": 0.736,
-        "zoomed": 1.151,
+        "fit": 0.727,
+        "zoomed": 1.136,
         "dragged": false
       },
       {
@@ -594,8 +604,8 @@
       {
         "id": "option-D2-a",
         "mode": "transform",
-        "fit": 0.736,
-        "zoomed": 1.151,
+        "fit": 0.727,
+        "zoomed": 1.136,
         "dragged": false
       },
       {
@@ -663,8 +673,8 @@
       }
     ],
     "inPage": {
-      "before": 0.702,
-      "scale": 0.878,
+      "before": 0.694,
+      "scale": 0.867,
       "inside": true,
       "overflow": false
     },
@@ -672,8 +682,8 @@
       {
         "id": "modele-donnees",
         "mode": "transform",
-        "fit": 0.187,
-        "zoomed": 0.293,
+        "fit": 0.185,
+        "zoomed": 0.289,
         "dragged": false
       },
       {
@@ -700,7 +710,7 @@
       "Fabien",
       "Fabien",
       "Fabien",
-      "Farid",
+      "Fabien",
       "Farid",
       "Farid",
       "Farid",
@@ -745,12 +755,6 @@
       "doubleQuotes": false
     },
     "entries": [
-      {
-        "id": "D1",
-        "role": "decide",
-        "option": "null",
-        "statut": "non_traitee"
-      },
       {
         "id": "D5",
         "role": "decide",
@@ -813,7 +817,7 @@
   "copy": {
     "realClick": "copied",
     "clipboardMatchesZone": true,
-    "status": "10 décision(s) copiée(s) en YAML. Ouvrez la PR et collez-les dans un commentaire.",
+    "status": "9 décision(s) copiée(s) en YAML. Ouvrez la PR et collez-les dans un commentaire.",
     "forcedRefusal": {
       "message": "Copie refusée par le navigateur (fréquent dans un artefact publié). Le bloc YAML ci-dessous est sélectionné : copiez-le avec Ctrl+C (Cmd+C sur Mac), puis collez-le dans un commentaire de la PR.",
       "focused": true,
@@ -822,11 +826,12 @@
     "hasDecisions": true
   },
   "exportFilter": {
-    "faridMine": 10,
+    "faridMine": 9,
     "all": 16,
-    "fabienMine": 6,
+    "fabienMine": 7,
     "fabienDecideur": "Fabien",
     "fabienRoles": {
+      "D1": "decide",
       "D2": "decide",
       "D3": "decide",
       "D4": "decide",
@@ -835,6 +840,7 @@
       "D11": "decide"
     },
     "allOptions": {
+      "D1": "b",
       "D9": "1",
       "D12": "a"
     }
@@ -861,7 +867,7 @@
       "scale": 1,
       "clip": {
         "x": 60,
-        "y": 48668.171875,
+        "y": 51319.96875,
         "width": 1800,
         "height": 900
       }
@@ -872,7 +878,7 @@
       "sceneId": "criteres-steve",
       "clip": {
         "x": 52.5,
-        "y": 11153.59375,
+        "y": 11223.25,
         "width": 1800,
         "height": 540
       }
@@ -881,16 +887,16 @@
       "sceneId": "modele-donnees",
       "clip": {
         "x": 52.5,
-        "y": 12250.890625,
+        "y": 12350.625,
         "width": 1800,
-        "height": 733
+        "height": 943
       }
     },
     {
       "sceneId": "flux-import-oracle",
       "clip": {
         "x": 52.5,
-        "y": 13501.375,
+        "y": 13811.109375,
         "width": 1800,
         "height": 1332
       }
@@ -899,7 +905,7 @@
       "sceneId": "architecture-ui",
       "clip": {
         "x": 52.5,
-        "y": 15362.78125,
+        "y": 15672.515625,
         "width": 1800,
         "height": 900
       }
@@ -908,7 +914,7 @@
       "sceneId": "affichage-abc",
       "clip": {
         "x": 52.5,
-        "y": 16756.546875,
+        "y": 17066.28125,
         "width": 1800,
         "height": 1248
       }
