@@ -25,6 +25,7 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
   - `api/src/services/data-quality/summary.ts`
   - `api/src/services/geo/geo-features.ts`
   - `api/src/services/geo/resolve-refs.ts`
+  - `api/src/services/geo/run-geo-mapper.ts`
   - `api/src/services/geo/*.test.ts`
   - `api/src/services/sources/exploitation.ts`
   - `api/src/services/sources/live-scrape.test.ts`
@@ -73,7 +74,7 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
 
 ## Feedback Loop
 - [ ] `attention` BR812-EX1 — `api/drizzle/0013_graph_city_key.sql` + journal entry (spec §5); impact: NULL-city rows and dangling edges deleted, composite keys, geo key widened; rollback: forward-fix only (owner Q5).
-- [ ] `attention` BR812-EX2 — `.github/workflows/run-job.yaml`: `target_env` (secret, namespace, pre-flight host, manifest twin), options `graph-drift-measure`, `graph-city-key-repair`, `refresh-suspend`, `refresh-resume`, preprod `projection` / `mapper` / `snapshot`, inputs `repair_mode`, `repair_cities`, `mapper_cities`, termination-message print, mutual busy pre-check; default stays `prod`; rollback: revert the commit.
+- [ ] `attention` BR812-EX2 — `.github/workflows/run-job.yaml`: `target_env` (secret, namespace, pre-flight host, manifest twin), options `graph-drift-measure`, `graph-city-key-repair`, `refresh-suspend`, `refresh-resume`, preprod `projection` / `mapper` / `snapshot`, inputs `repair_mode`, `repair_cities`, `mapper_cities`, `mapper_reset`, termination-message print, mutual busy pre-check; default stays `prod`; rollback: revert the commit.
 - [ ] `attention` BR812-EX3 — `.github/workflows/build-push-images.yml`: post-rollout assert adds one `GET /api/graph/<city>` and one `GET /api/graph-signals/<city>` 200; promote CronJob assert unchanged; rollback: revert the commit.
 - [ ] `acknowledge` Owner decisions 2026-10-04: Q1 NULL-city rows deleted; Q2 refresh suspended and graph-touching merges frozen during the preprod run; Q3 G1 under D1; Q4 no archive; Q5 forward-fix only.
 
@@ -93,7 +94,7 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
   - [ ] Create isolated worktree `./tmp/fix-graph-city-key` from fresh `origin/main` (after the one-line stop-gap PR is merged).
   - [ ] Define environment mapping for test/branch stacks only (`test-fix-graph-city-key`, `e2e-fix-graph-city-key`) with a unique port block per `rules/conductor.md`; command style `make ... ENV=<env>` with `ENV` last.
   - [ ] Record BR812-EX1 to EX3 as acknowledged before touching their paths.
-  - [ ] Read and record `BACKUP_BEFORE_RELEASE_ENABLED`, `BACKUP_BEFORE_RELEASE_PROD_ENABLED`, `PREPROD_CD_ENABLED`, `REFRESH_CRONJOB_PREPROD_ENABLED`, `REFRESH_CRONJOB_PROD_ENABLED`, `ROLLBACK_ON_FAILURE_ENABLED`.
+  - [ ] Read and record `BACKUP_BEFORE_RELEASE_ENABLED`, `BACKUP_BEFORE_RELEASE_PROD_ENABLED`, `PREPROD_CD_ENABLED`, `REFRESH_CRONJOB_PREPROD_ENABLED`, `REFRESH_CRONJOB_PROD_ENABLED`, `ROLLBACK_ON_FAILURE_ENABLED`, `ROLLBACK_ON_FAILURE_PROD_ENABLED`.
 
 - [ ] **Lot 1 — Migration 0013 and store** (size M)
   - [ ] Integration tests first: seeded 0012 database with shared ids, shared edge triples, dangling edges, NULL-city rows, drifted PK name, held lock; geo same node id in two cities on the same lot.
@@ -115,8 +116,9 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
   - [ ] UAT on root `ENV=dev`: MRC graph view with two cities sharing an id; Signals T1 and PDF overlay unchanged.
 
 - [ ] **Lot 3 — Repair, measurement and CD jobs** (size L)
-  - [ ] Unit tests first: classifier (same-id foreign docSha also on another id, legacy-merge local props with foreign refs → unknown, property-only contamination, slug mismatch); repair (unknown refuses, replace keeps the local part, pass-2 refusal keeps pass 1, idempotence).
-  - [ ] `api/src/scripts/repair-graph-city-key.ts` per spec §7.2 (preview in a rolled-back transaction, before/after verdicts, geo purge, report to S3, termination message).
+  - [ ] Unit tests first: classifier on full ref objects and property values (same-id foreign docSha also on another id, citation or rawRef lost under an unchanged docSha, legacy-merge local props with foreign refs → unknown, property-only contamination, slug mismatch); repair (baseline minus foreign rows, local completeness, city rolled back whole on any refusal, idempotence).
+  - [ ] `api/src/scripts/repair-graph-city-key.ts` per spec §7.2 (one all-or-nothing transaction per city, preview in a rolled-back transaction, before/after verdicts, run report to S3, termination message).
+  - [ ] `run-geo-mapper.ts` reset mode: per city, purge `geo_resolutions` and `geo_unresolved`, then resolve.
   - [ ] `api/src/scripts/measure-graph-drift.ts` per spec §9, with its integration test against the dossier script rules.
   - [ ] Integration tests: gore / barkmere end to end, fortierville-like case, concurrent projection waits on the lock.
   - [ ] Jobs 42 and 43 with preprod twins; preprod twins for projection, geo mapper, consistency snapshot; bindings in `check-object-storage-bindings.sh`; `run-job.yaml` (BR812-EX2); post-rollout graph check (BR812-EX3).
@@ -131,9 +133,9 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
   - [ ] Merge commit (NO squash, NO rebase merge); preserve branch.
 
 - [ ] **Lot 5 — Preprod then prod runs (spec §7.4)** (size M, operational)
-  - [ ] Preprod R1: K6 gate (five variables `true`, `ROLLBACK_ON_FAILURE_ENABLED` = `false`); release outside windows; migrate Job Complete with NOTICE counts recorded.
+  - [ ] Preprod R1: K6 gate (five variables `true`, `ROLLBACK_ON_FAILURE_ENABLED` and `ROLLBACK_ON_FAILURE_PROD_ENABLED` = `false`); release outside windows; migrate Job Complete with NOTICE counts recorded.
   - [ ] Preprod R1b `refresh-suspend` and merge freeze; R2 measurement and list `L`; R3 repair preview reviewed; R4 apply.
-  - [ ] Preprod R5 `document-date-recovery` apply without `--heal` on cities whose pass 2 succeeded, then `mapper` and `snapshot`.
+  - [ ] Preprod R5 `document-date-recovery` apply without `--heal` on the repaired cities, then `mapper` with `mapper_reset=true` on the same cities, then `snapshot`.
   - [ ] Preprod R6 acceptance (spec §9); `refresh-resume`; freeze lifted; first pass 0 `postgres-regression-refused` on repaired cities.
   - [ ] Prod: same steps after preprod R6, tag `vX.Y.Z`; result posted on #812.
   - [ ] Move this file to `plan/done/812-BRANCH_fix-graph-city-key.md`.
