@@ -97,6 +97,7 @@
                 </label>
                 <div class="option-part" data-option-description><h5>Description</h5><p>{@html inline(detail.description)}</p></div>
                 {#if miniDiagrams[`${question.key}-${option.key}`]}<MiniDiagram id={`${question.key}-${option.key}`} spec={miniDiagrams[`${question.key}-${option.key}`]} />{/if}
+                <div class="option-part method" data-option-method><h5>Méthode · préprod puis prod</h5><p>{@html inline(detail.method)}</p></div>
                 <div class="option-part pros" data-option-pros><h5>Avantages</h5><ul>{#each detail.pros as item}<li>{@html inline(item)}</li>{/each}</ul></div>
                 <div class="option-part cons" data-option-cons><h5>Inconvénients</h5><ul>{#each detail.cons as item}<li>{@html inline(item)}</li>{/each}</ul></div>
               </article>
@@ -158,6 +159,8 @@
   .option-part p, .option-part li { font-size: .86rem; line-height: 1.5; }
   .option-part p { margin: 0; }
   .option-part ul { margin: 0; padding-left: 18px; }
+  .option-part.method { margin-top: 8px; padding: 6px 10px; border-left: 4px solid var(--st-semantic-data-category1); background: var(--st-semantic-surface-subtle); }
+  .option-part.method h5 { margin-top: 2px; }
   .option-part.pros h5 { color: var(--choice-good); }
   .option-part.cons h5 { color: var(--choice-alert); }
   .choices { --choice-good: #17633a; --choice-alert: #a3271a; }

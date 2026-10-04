@@ -87,9 +87,12 @@ const decisionDetails = Object.fromEntries(decisionChunks.map(chunk => {
     if (!optionKey) throw Error(`${key}: option title ${optionTitle}`);
     const description = (text.match(/^\*\*Description\.\*\* ([^\n]+)/) ?? [])[1];
     if (!description) throw Error(`${key}/${optionKey}: Description missing before Avantages`);
-    if (text.indexOf('**Description.**') > text.indexOf('**Avantages.**')) throw Error(`${key}/${optionKey}: Description must precede Avantages`);
+    const method = (text.match(/\n\*\*Méthode\.\*\* ([^\n]+)/) ?? [])[1];
+    if (!method) throw Error(`${key}/${optionKey}: Méthode missing`);
+    const at = label => text.indexOf(`**${label}.**`);
+    if (!(at('Description') < at('Méthode') && at('Méthode') < at('Avantages') && at('Avantages') < at('Inconvénients'))) throw Error(`${key}/${optionKey}: order Description, Méthode, Avantages, Inconvénients`);
     return { key: optionKey, title: optionTitle.replace(/ — recommandée$/, '').trim(), recommended: / — recommandée$/.test(optionTitle),
-      description, pros: listAfter(text, 'Avantages', `${key}/${optionKey}`), cons: listAfter(text, 'Inconvénients', `${key}/${optionKey}`) };
+      description, method, pros: listAfter(text, 'Avantages', `${key}/${optionKey}`), cons: listAfter(text, 'Inconvénients', `${key}/${optionKey}`) };
   });
   if (parsed.filter(option => option.recommended).length !== 1) throw Error(`${key}: exactly one recommended option`);
   return [key, { title: title.trim(), intro: head.trim(), options: parsed, recommendation: last[1].trim() }];
