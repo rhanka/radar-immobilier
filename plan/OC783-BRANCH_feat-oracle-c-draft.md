@@ -1,7 +1,7 @@
 # Feature: Draft targeting oracle C from Steve's triage (files only)
 
 ## Objective
-- [x] Build a draft targeting oracle (C) from Steve's 21 Sept 2026 triage, with a frozen optim/blind split, a first C prompt iterated on optim only, a three-model low-effort alignment measure, an extension plan and an adversarial review (Refs #797, #783).
+- [x] Build the measurement frame of a targeting oracle (C) from Steve's 21 Sept 2026 triage: frozen and sealed split, test-set protocol, baseline of today's filters, author sandbox, extension plan, adversarial review (Refs #797, #783).
 
 ## Scope / Guardrails
 - [x] Files only: no DB, cluster, bucket or prod write; prod access limited to one read-only SELECT on graph_nodes (session forced read-only).
@@ -37,10 +37,12 @@
   - [x] Resolve radar records read-only; list excluded lines.
 - [x] **Lot 1 — Split before analysis**
   - [x] Stratified 50/50 split by municipality; balance report; sha256 recorded.
-- [x] **Lot 2 — Prompt C on optim**
-  - [x] Prompt v1, runs with three models, metrics, one iteration (v2) on optim only.
-- [x] **Lot 3 — Final blind measure**
-  - [x] Freeze final prompt; single blind run per model; results.
+- [x] **Lot 2 — Baseline and protocol**
+  - [x] Precision / recall of today's B filters on the same lines; earlier prompts discarded (owner decision).
+- [x] **Lot 3 — Sealed test set and author sandbox**
+  - [x] Test set sealed outside the repo; run guards and audit log; author sandbox prepared; tag schema with derived verdict.
 - [x] **Lot 4 — Extension plan, review, French section**
-  - [x] Extension plan; Astra max + Opus 5.5 max review; reconciliation; dossier section in French.
+  - [x] Extension plan; Astra max + Opus 5.5 max review (retained scope); dossier section in French.
+- [ ] **Lot 5 — C v1 by a new author (not this branch's preparer)**
+  - [ ] Prompt from the author sandbox only; single test run by the executor.
   - [x] Lot gate: `node docs/reviews/oracle-c-draft/scripts/selftest.mjs`; CI green.
