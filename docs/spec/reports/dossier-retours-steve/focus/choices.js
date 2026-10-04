@@ -116,7 +116,8 @@ export const questions = [
     intro: 'Un oracle est un jeu de réponses de référence qui note automatiquement le radar. L’oracle actuel (674 unités committées, 676 en copie locale) note l’extraction des actes dans les procès-verbaux, pas le choix des signaux à montrer (§9.3). '
       + 'Les retours de Steve sont la première vérité humaine sur ce choix : dans sa vue de travail, 24 signaux sur 73 sont du bruit (32,9 %, scène 1). '
       + 'Il faut décider comment construire l’oracle de ciblage (#783) avant de développer C (D7), car c’est lui qui dira si C fait mieux que B (D13). '
-      + 'Dans la scène 3, l’oracle est la bande du bas : hors ligne, alimenté par les annotations en base.',
+      + 'Dans la scène 3, l’oracle est la bande du bas : hors ligne, alimenté par les annotations en base. '
+      + 'La proposition complète (ancien oracle → nouvel oracle, construction, gel, validation) est au §9.3.',
     dependsOn: ['D2', 'D9'],
     recommendation: 'Double oracle : c’est la seule façon de mesurer l’utilité (ciblage) sans perdre la mesure de l’extraction ; campagne nouvelle seulement pour ce que les archives ne permettent pas d’évaluer. Unité : le signal, regroupé par dossier ; une unité « dossier » serait plus fidèle mais dépend d’une clé de règlement peu fiable (C-26).',
   }, [

@@ -1,11 +1,11 @@
 {
   "output": "docs/spec/reports/dossier-retours-steve/decision-focus.html",
-  "bytes": 791558,
-  "htmlSha256": "fa6b8d5b2a2b016a796da852c015ad753ccead770033bc3ab9f5ab04a2d8557b",
-  "embeddedSha256": "b4b3fe9bc3a10938551f173ab110af3cfbf07b55c23b7f1566fde287053a27d6",
+  "bytes": 804828,
+  "htmlSha256": "4234637790254799f27ca99b600aba35aeba1df30e55da507efddb874c6d0ad7",
+  "embeddedSha256": "0a39c2aa6f762e60e24e9e195033e5f62be11d27dd3c34b514393f0106165fab",
   "embeddedSha256Rule": "sha256 of the file with the embedded value replaced by 64 zeros",
-  "dossierHash": "8c36a874b63200587ee85cf273992aab9324f6c8a8635dc9fd046f7fb4f800f1",
-  "artifactInputHash": "c78cec8436a5362f932e1fe6f9adda5a8ee46efef9c41fc75923059ef1b0054a",
+  "dossierHash": "a8df8875a28fd7664498e973707e83c2a88e2fc00f6c0e5278fdd44f98df4d9f",
+  "artifactInputHash": "f3a17f564ccc1a244baa92843b8dc40161b56a17aeb317d7bdd6bb4fbc9f2e07",
   "graphs": [
     {
       "id": "criteres-steve",

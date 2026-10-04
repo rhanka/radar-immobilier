@@ -210,7 +210,7 @@ test('options : description concrète pour chacune, schéma de tables pour D2 et
     assert.ok(section10.includes(option.description), `${question.key}/${option.key} description absente du §10`);
   }
   const withDiagram = questions.flatMap(question => question.options.filter(option => option.diagram).map(option => `${question.key}/${option.key}`));
-  assert.deepEqual(withDiagram, ['D2/M1', 'D2/M2', 'D2/M3', 'D2/M4', 'D3/a', 'D3/b', 'D3/c']);
+  assert.deepEqual(withDiagram, ['D2/M1', 'D2/M2', 'D2/M3', 'D2/M4', 'D3/a', 'D3/b', 'D3/c', 'D10/a', 'D10/b', 'D10/c']);
   for (const question of questions) for (const option of question.options.filter(item => item.diagram)) {
     const model = parseEr(option.diagram.er, option.key);
     const layout = erLayout(model, option.diagram);
@@ -232,4 +232,30 @@ test('introduction : protocole des trois passes et glossaire, avant toute mesure
   const terms = glossaryText.split('\n').filter(line => line.startsWith('| ')).map(line => line.split('|')[1]).join(' ; ');
   for (const term of ['Passe 1', '124 lignes', 'B′', 'Profil A gelé', 'Shadow', 'Oracle C', 'Oracle E', 'Seuil D13', 'Ancre', 'B0', 'Tombstone',
     'Motifs N-', 'K1 à K9', 'PIIA', 'PPCMOI', 'ODJ', 'CPTAQ', 'UAT', 'MCP']) assert.ok(terms.includes(term), term);
+});
+
+test("existant et oracles : schémas du texte, aucune table d'oracle en base, proposition ancien → nouvel oracle", async () => {
+  const { DOC_DIAGRAMS } = await import('./doc-diagrams.js');
+  const { parseEr } = await import('./parse-er.mjs');
+  const { erLayout } = await import('./diagram-layout.js');
+  const markdown = await readFile('../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md', 'utf8');
+  const schema = await readFile('../../../../../api/src/db/schema.ts', 'utf8');
+  for (const [id, spec] of Object.entries(DOC_DIAGRAMS)) {
+    assert.ok(markdown.includes(`\`\`\`mermaid\n${spec.er}\n\`\`\`\n\n<!-- diagram:${id} -->`), id);
+    const model = parseEr(spec.er, id);
+    assertGeometry({ id, layout: erLayout(model, spec) }, model.relations.filter(relation => relation.source !== relation.target));
+  }
+  // Les colonnes du schéma « existant » sont celles de schema.ts.
+  const existing = parseEr(DOC_DIAGRAMS.existant.er, 'existant');
+  for (const table of ['prospect_marks', 'prospect_notes'])
+    for (const column of existing.entities.find(entity => entity.id === table).attributes) assert.ok(schema.includes(`("${column.name}"`), `${table}.${column.name}`);
+  assert.ok(!/pgTable\(\s*"oracle/.test(schema), "aucune table d'oracle sur main");
+  const s6 = markdown.split('\n### 6.0 ')[1].split('\n### 6.1 ')[0];
+  assert.match(s6, /Aucune table d'oracle n'existe en base aujourd'hui/);
+  for (const reason of ['Auteur avec compte obligatoire', 'Une seule cible par note', '10 000 caractères au plus', 'Aucune provenance', 'défaut corrigé par B0']) assert.ok(s6.includes(reason), reason);
+  assert.ok(markdown.indexOf('### 6.0 ') < markdown.indexOf('### 6.3 '));
+  const s93 = markdown.split('\n### 9.3 ')[1].split('\n### 9.4 ')[0];
+  assert.match(s93, /#### Ancien oracle → nouvel oracle : la proposition/);
+  assert.match(s93, /Rien n'est remplacé/);
+  assert.match(s93, /décision \*\*D10\*\*/);
 });

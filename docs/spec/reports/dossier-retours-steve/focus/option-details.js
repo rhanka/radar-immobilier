@@ -193,6 +193,85 @@ export const DIAGRAMS = {
     }`,
     },
   },
+  D10: {
+    a: {
+      colGap: 180,
+      layers: ['Source', 'Oracle unique', 'Benchmark #782'],
+      placement: { annotation_assessments: { col: 0, row: 0 }, oracle_tableur: { col: 1, row: 0 }, oracle_e_v3: { col: 1, row: 1 }, benchmark: { col: 2, row: 0 } },
+      existing: ['oracle_e_v3'],
+      labels: { remplace: 'remplace', note_tout: 'note tout' },
+      er: `erDiagram
+    annotation_assessments ||--|| oracle_tableur : remplace
+    oracle_tableur ||--|| benchmark : note_tout
+    annotation_assessments {
+      text source "124 lignes de Steve"
+    }
+    oracle_tableur {
+      text unite "ce que l'écran montrait"
+      text biais "7 dossiers manqués absents"
+    }
+    oracle_e_v3 {
+      text statut "retiré, historique perdu"
+    }
+    benchmark {
+      text tableau "un seul, extraction et ciblage"
+    }`,
+    },
+    b: {
+      colGap: 180,
+      layers: ['Sources', 'Deux oracles gelés', 'Benchmark #782, deux volets'],
+      placement: { consensus_modeles: { col: 0, row: 0 }, annotation_assessments: { col: 0, row: 1 }, oracle_e_v3: { col: 1, row: 0 }, oracle_c_v1: { col: 1, row: 1 },
+        volet_extraction: { col: 2, row: 0 }, volet_ciblage: { col: 2, row: 1 } },
+      existing: ['consensus_modeles', 'oracle_e_v3', 'volet_extraction'],
+      labels: { adjugees_gelees: 'adjugées, gelées', note_b_puis_c: 'note B puis C' },
+      er: `erDiagram
+    consensus_modeles ||--|| oracle_e_v3 : construit
+    annotation_assessments ||--|| oracle_c_v1 : adjugees_gelees
+    oracle_e_v3 ||--|| volet_extraction : note
+    oracle_c_v1 ||--|| volet_ciblage : note_b_puis_c
+    consensus_modeles {
+      text methode "7 passes, 3 familles"
+    }
+    annotation_assessments {
+      text source "verdicts de Steve"
+    }
+    oracle_e_v3 {
+      int taille "674 / 100 documents"
+    }
+    oracle_c_v1 {
+      text jeux "dev 51 villes, test 52"
+    }
+    volet_extraction {
+      text mesure "inchangée"
+    }
+    volet_ciblage {
+      text mesure "précision, rappel"
+    }`,
+    },
+    c: {
+      colGap: 180,
+      layers: ['Nouvelle campagne', 'Oracle C neuf', 'Benchmark #782'],
+      placement: { campagne_c: { col: 0, row: 0 }, annotation_assessments: { col: 0, row: 1 }, oracle_c_neuf: { col: 1, row: 0 }, volet_ciblage: { col: 2, row: 0 } },
+      existing: [],
+      labels: { exemples: 'exemples seulement' },
+      er: `erDiagram
+    campagne_c ||--|| oracle_c_neuf : construit
+    annotation_assessments }o..o| oracle_c_neuf : exemples
+    oracle_c_neuf ||--|| volet_ciblage : note
+    campagne_c {
+      text corpus "nouveau, conçu pour C"
+    }
+    annotation_assessments {
+      text role "124 lignes, exemples"
+    }
+    oracle_c_neuf {
+      text comparaison "historique à part"
+    }
+    volet_ciblage {
+      text mesure "précision, rappel"
+    }`,
+    },
+  },
   D3: {
     a: {
       colGap: 180,

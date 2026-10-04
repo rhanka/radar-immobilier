@@ -107,7 +107,8 @@ for (const graph of graphs) {
 // natives (annexe B), le Markdown reste la source lisible telle quelle.
 const mermaidNote = '> Diagramme : rendu dans la page, dans les scènes Focus ou dans les options de décision (source Mermaid dans le Markdown du dossier).';
 const [head, ...rest] = body.split(/\n## /);
-const strip = text => text.replace(/```mermaid\n[\s\S]*?```/g, mermaidNote);
+// A Mermaid block followed by a diagram marker is rendered natively at the marker.
+const strip = text => text.replace(/```mermaid\n(?:(?!```)[\s\S])*```\n\n(<!-- diagram:[\w-]+ -->)/g, '$1').replace(/```mermaid\n[\s\S]*?```/g, mermaidNote);
 const sections = [{ id: 'entete', heading: head.split('\n')[0].replace(/^# /, ''), markdown: strip(head.split('\n').slice(1).join('\n').trim()) },
   ...rest.map((chunk, index) => {
     const heading = chunk.split('\n')[0].trim();
@@ -130,7 +131,7 @@ const rendererSources = Object.fromEntries(await Promise.all([
 // Renderers of the matrix, table and swimlane scenes, local to this dossier.
 const diagramSources = Object.fromEntries(await Promise.all([
   'diagram-router.js', 'diagram-layout.js', 'diagram-specs.js', 'parse-er.mjs', 'DiagramFrame.svelte', 'ErDiagram.svelte',
-  'LaneDiagram.svelte', 'MatrixScene.svelte', 'Scenes.svelte', 'BarChart.svelte', 'charts.js', 'Sections.svelte', 'protocol.js',
+  'LaneDiagram.svelte', 'MatrixScene.svelte', 'Scenes.svelte', 'BarChart.svelte', 'charts.js', 'Sections.svelte', 'protocol.js', 'ZoomFrame.svelte', 'doc-diagrams.js', 'option-details.js',
 ].map(async name => [name, await readFile(name, 'utf8')])));
 
 const manifest = {
