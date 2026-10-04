@@ -1,23 +1,27 @@
 <script>
-  // Rendu natif : Flow.svelte de la chaîne existante (SvelteFlow, Dagre LR,
-  // carte unique A' 460 x 200, fitView, zoom, 1:1, minimap, routeur du kit h2a).
+  // Une forme par contenu : matrice (scène 1), entité-relation (scène 2), architecture
+  // en couloirs avec l'oracle en bande basse (scène 3) ; les composants (scènes 4 et 5)
+  // gardent Flow.svelte de la chaîne existante (SvelteFlow, Dagre LR, carte A' 460 x 200).
   import Flow from '../../../../architecture/focus/Flow.svelte';
+  import MatrixScene from './MatrixScene.svelte';
+  import ErDiagram from './ErDiagram.svelte';
+  import LaneDiagram from './LaneDiagram.svelte';
   let { graphs } = $props();
   const sceneInfo = {
     'criteres-steve': {
       badge: '§2 · ce que veut Steve',
-      lede: "Quatre conteneurs, un par critère de Steve (et un pour ses deux exclusions transversales) : à gauche ce qu'il demande, chiffré sur son tableur ; à droite ce que fait le radar aujourd'hui, couvert, partiel ou absent. Le dernier conteneur porte l'effet mesuré sur sa vue de travail.",
-      note: "Les 24 signaux de bruit de la passe 1 se répartissent par critère : 3 hors résidentiel ou hors urbanisme, 4 resserrements, 6 sans effet sur la capacité, 11 hors portée (8 autorisations individuelles, 3 points d'ordre du jour). Le radar filtre par nature d'instrument et par étape ; Steve demande un filtre par effet du règlement, sens et nombre d'unités, pour lequel aucune donnée n'existe encore.",
+      lede: "Une matrice : une ligne par critère de Steve et par exclusion transversale ; ce qu'il demande, ce que fait le radar aujourd'hui, la couverture (partiel ou absent) et le bruit que chaque écart laisse dans sa vue de travail (passe 1, 73 signaux).",
+      note: "Les 24 signaux de bruit de la passe 1 se répartissent par critère : 3 hors résidentiel ou hors urbanisme, 4 resserrements, 6 sans effet sur la capacité, 8 autorisations individuelles, 3 points d'ordre du jour. Le radar filtre par nature d'instrument et par étape ; Steve demande un filtre par effet du règlement, sens et nombre d'unités, pour lequel aucune donnée n'existe encore (§2.3).",
     },
     'modele-donnees': {
       badge: '§6 · modèle M3 proposé',
-      lede: "Cinq conteneurs de gauche à droite : les octets reçus et toutes leurs cellules, les référentiels de Steve (codes, règles, constats), les jugements versionnés, les ancres durables, puis la publication conforme au contrat sentropic. Les tables sont des propositions ; seule prospect_notes existe déjà.",
+      lede: "Un diagramme entité-relation : chaque boîte est une table avec ses colonnes clés (PK, FK, UK), chaque lien une relation avec sa cardinalité. Cinq couches de gauche à droite : sources immuables, référentiels de Steve, jugements versionnés, ancres durables, publication conforme au contrat sentropic. Seules graph_nodes et prospect_notes existent déjà ; les autres tables sont proposées (§6.3).",
       note: "Une ligne du classeur produit une évaluation versionnée, rattachée à 1 à N objets par des clés texte sans clé étrangère : une ré-extraction du graphe ne détruit rien, l'ancre passe en « disparue » et l'instantané observé reste lisible. La projection Comment ({kind:'record', recordType:'radar.*'}) suit le contrat sans élargir le port ; aucune suppression physique, conformément à la décision O1.",
     },
     'flux-import-oracle': {
-      badge: '§6.5, §7, §9.3 · de l’entrée à la mesure',
-      lede: "Six conteneurs : les deux fichiers de Steve, l'import idempotent en dry-run par défaut, le rattachement sur snapshot avec sa file manuelle, l'annotation visible dans le panneau et le rail, les deux oracles, puis la mesure.",
-      note: "L'oracle de ciblage C et l'oracle d'extraction E restent séparés jusqu'au benchmark, où ils alimentent deux volets distincts. L'analyse du 21 septembre entre comme annotation distincte de l'adjudication : elle n'écrase pas les classes du tableur, qui font foi pour l'import.",
+      badge: '§6.5, §7, §9.3 · architecture et oracle',
+      lede: "Une architecture en couloirs verticaux, de gauche à droite : les utilisateurs, les écrans de l'UI, les fonctions backend (collecte, détection de signal, import, rattachement, API), puis les données sur les composants réels, S3 et PostgreSQL. L'oracle est en bas, en bande transversale : un système d'évaluation hors ligne, alimenté par les annotations stockées en base.",
+      note: "L'oracle de ciblage C et l'oracle d'extraction E restent séparés jusqu'au benchmark, où ils alimentent deux volets distincts. L'analyse du 21 septembre entre comme annotation distincte de l'adjudication : elle n'écrase pas les classes du tableur, qui font foi pour l'import. L'import est un acte owner distinct, sur l'image Node existante de l'API (§6.5).",
     },
     'architecture-ui': {
       badge: '§8 · état mesuré sur main 27891b10',
@@ -41,10 +45,26 @@
       </header>
       <p class="scene-id"><code>{graph.id}</code> · <code>{graph.sceneHash.slice(0, 12)}…</code></p>
       <p class="lede">{sceneInfo[graph.id].lede}</p>
-      <Flow {graph} />
+      {#if graph.kind === 'matrix'}
+        <MatrixScene {graph} />
+      {:else if graph.kind === 'er'}
+        <ErDiagram {graph} />
+      {:else if graph.kind === 'lanes'}
+        <LaneDiagram {graph} />
+      {:else}
+        <Flow {graph} />
+      {/if}
       <p class="scene-note">{sceneInfo[graph.id].note}</p>
-      <p class="inventory">{graph.nodes.length} cartes · {graph.edges.length} liens · {graph.groups.length} conteneurs natifs <code>parentId</code> · gabarit A’ 460 × 200 à l’échelle 1 · Dagre <code>rankdir LR</code>.</p>
-      <details><summary>Source Mermaid canonique de cette scène</summary><pre>{graph.source}</pre></details>
+      {#if graph.kind === 'matrix'}
+        <p class="inventory">{graph.projection.rows.length} lignes · matrice tirée du tableau canonique de l’annexe B.</p>
+      {:else if graph.kind === 'er'}
+        <p class="inventory">{graph.entities.length} tables · {graph.relations.length} relations · diagramme entité-relation tiré du bloc <code>erDiagram</code> de l’annexe B.</p>
+      {:else if graph.kind === 'lanes'}
+        <p class="inventory">{graph.nodes.length} blocs · {graph.edges.length} liens · 4 couloirs, 2 magasins de données (S3, PostgreSQL), 1 bande oracle · grille explicite et routage orthogonal.</p>
+      {:else}
+        <p class="inventory">{graph.nodes.length} cartes · {graph.edges.length} liens · {graph.groups.length} conteneurs natifs <code>parentId</code> · gabarit A’ 460 × 200 à l’échelle 1 · Dagre <code>rankdir LR</code>.</p>
+      {/if}
+      <details><summary>Source canonique de cette scène</summary><pre>{graph.source}</pre></details>
     </article>
   {/each}
 </section>

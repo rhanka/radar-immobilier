@@ -1,6 +1,8 @@
 // Contrôles Chromium réels, sur la page autonome ouverte en file://.
-// Même protocole que docs/architecture/focus/browser-check.mjs, réduit aux cinq
-// scènes de ce dossier et étendu aux décisions D1 à D16 et à leur copie en YAML. Onglet neuf, fermé à la fin.
+// Même protocole que docs/architecture/focus/browser-check.mjs pour les deux scènes de
+// composants (SvelteFlow) ; contrôles propres à la matrice, au diagramme entité-relation
+// et à l'architecture en couloirs ; décisions D1 à D16 et leur copie en YAML ; thèmes
+// clair et sombre. Onglet neuf, fermé à la fin.
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
 const { graphs } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
@@ -51,18 +53,97 @@ await call('Network.enable');
 await call('Network.setBlockedURLs', { urls: ['http://*', 'https://*'] });
 await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
 await call('Page.navigate', { url: focusFile });
-await waitUntil(`document.querySelectorAll('.flow').length === 5 && document.querySelectorAll('[data-node-kind]').length > 0`, 'les cinq scènes natives sont absentes');
-await evaluate(`window.expectedGraphs=${JSON.stringify(graphs.map(graph => ({ id: graph.id, projection: graph.projection, sceneHash: graph.sceneHash, groups: graph.groups.length })))};true`);
+const READY = `document.querySelectorAll('.scene').length === 5 && document.querySelectorAll('.flow').length === 2 && document.querySelectorAll('[data-diagram]').length === 3 && document.querySelectorAll('[data-node-kind]').length > 0`;
+await waitUntil(READY, 'les cinq scènes sont absentes');
+const expectedGraphs = `window.expectedGraphs=${JSON.stringify(graphs.map(graph => ({ id: graph.id, kind: graph.kind, projection: graph.projection, sceneHash: graph.sceneHash, groups: (graph.groups ?? []).length })))};true`;
+await evaluate(expectedGraphs);
 
 const checkExpression = `(() => {
   const graphs = window.expectedGraphs;
   const order = graphs.map(graph => graph.id);
   const actualOrder = [...document.querySelectorAll('.scene')].map(scene => scene.dataset.scene);
   if (JSON.stringify(actualOrder) !== JSON.stringify(order)) throw Error('ordre des scènes : ' + actualOrder);
-  if (document.querySelectorAll('.flow').length !== 5) throw Error('cinq scènes attendues');
+  if (document.querySelectorAll('.flow').length !== 2 || document.querySelectorAll('[data-diagram]').length !== 3) throw Error('deux scènes SvelteFlow et trois diagrammes attendus');
+  const inside = (inner, outer, pad = 1) => inner.left >= outer.left - pad && inner.top >= outer.top - pad && inner.right <= outer.right + pad && inner.bottom <= outer.bottom + pad;
+  const hit = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+  const orthogonal = points => points.slice(1).every((point, index) => point.x === points[index].x || point.y === points[index].y);
+  // Texts of a box must stay inside it; labels must not cover any box.
+  const textsInside = (box, texts, name) => { for (const text of texts) if (text.textContent.trim() && !inside(text.getBoundingClientRect(), box, 0.5)) throw Error(name + ' : texte hors de sa boîte : ' + text.textContent); };
+  const checkDiagram = graph => {
+    const root = document.querySelector('[data-scene="' + graph.id + '"] [data-diagram]');
+    if (!root || root.dataset.diagramKind !== graph.kind) throw Error(graph.id + ' : diagramme ' + graph.kind + ' absent');
+    const frame = root.getBoundingClientRect();
+    if (graph.kind === 'matrix') {
+      const rows = [...root.querySelectorAll('tbody tr[data-row]')].map(row => ({ criterion: row.dataset.row, coverage: row.dataset.coverage, noise: Number(row.dataset.noise) }));
+      const expected = graph.projection.rows.map(row => ({ criterion: row.criterion, coverage: row.coverage, noise: row.noise }));
+      if (JSON.stringify(rows) !== JSON.stringify(expected)) throw Error(graph.id + ' : lignes de la matrice différentes');
+      if (Number(root.querySelector('tfoot tr').dataset.noise) !== graph.projection.total.noise) throw Error(graph.id + ' : total de bruit');
+      if (root.scrollWidth > root.clientWidth + 1) throw Error(graph.id + ' : matrice plus large que son panneau');
+      return { sceneId: graph.id, kind: 'matrix', sceneHash: graph.sceneHash, rows: rows.length, coverage: rows.map(row => row.coverage) };
+    }
+    const svg = root.querySelector('svg');
+    const scale = svg.getBoundingClientRect().width / Number(root.dataset.canvasWidth);
+    if (root.dataset.scaleMode !== 'fit' || scale <= 0 || scale > 1.0001 || svg.getBoundingClientRect().width > frame.width + 1) throw Error(graph.id + ' : vue d’ensemble hors panneau ' + scale);
+    if (!root.querySelector('[data-action="actual-size"]') || !root.querySelector('[data-action="fit"]')) throw Error(graph.id + ' : boutons de zoom absents');
+    const routes = [...root.querySelectorAll('[data-route-points]')];
+    for (const route of routes) {
+      const path = route.querySelector('path'), style = getComputedStyle(path);
+      if (path.getTotalLength() <= 0 || style.stroke === 'none') throw Error(graph.id + ' : lien invisible ' + (route.dataset.relation || route.dataset.laneEdge));
+      if (!orthogonal(JSON.parse(route.dataset.routePoints))) throw Error(graph.id + ' : route non orthogonale');
+    }
+    if (graph.kind === 'er') {
+      const entities = [...root.querySelectorAll('[data-entity]')];
+      const ids = entities.map(entity => entity.dataset.entity).sort();
+      if (JSON.stringify(ids) !== JSON.stringify(graph.projection.entities.map(entity => entity.id).sort())) throw Error(graph.id + ' : tables différentes');
+      const relations = [...root.querySelectorAll('[data-relation]')].map(relation => [relation.dataset.relation, relation.dataset.sourceCardinality, relation.dataset.targetCardinality, relation.dataset.identifying].join('|')).sort();
+      const expected = graph.projection.relations.map(relation => [relation.id, relation.sourceCardinality, relation.targetCardinality, String(relation.identifying)].join('|')).sort();
+      if (JSON.stringify(relations) !== JSON.stringify(expected)) throw Error(graph.id + ' : relations différentes');
+      const boxes = entities.map(entity => ({ id: entity.dataset.entity, rect: entity.querySelector('.er-body').getBoundingClientRect() }));
+      for (const [index, a] of boxes.entries()) {
+        textsInside(a.rect, entities[index].querySelectorAll('text'), graph.id + '/' + a.id);
+        for (const b of boxes.slice(index + 1)) if (hit(a.rect, b.rect)) throw Error(graph.id + ' : tables superposées ' + a.id + '/' + b.id);
+      }
+      const labels = [...root.querySelectorAll('[data-relation-label] rect')];
+      for (const label of labels) for (const box of boxes) if (hit(label.getBoundingClientRect(), box.rect)) throw Error(graph.id + ' : libellé sur la table ' + box.id);
+      for (const [index, a] of labels.entries()) for (const b of labels.slice(index + 1)) if (hit(a.getBoundingClientRect(), b.getBoundingClientRect())) throw Error(graph.id + ' : libellés superposés');
+      return { sceneId: graph.id, kind: 'er', sceneHash: graph.sceneHash, initialScale: scale, tables: entities.length, relations: relations.length, labels: labels.length,
+        existing: entities.filter(entity => entity.dataset.existing === 'true').map(entity => entity.dataset.entity) };
+    }
+    // Swimlanes: lanes left to right in the agreed order, oracle band below all of them.
+    const lanes = [...root.querySelectorAll('[data-lane-kind]')].map(lane => ({ id: lane.dataset.lane, kind: lane.dataset.laneKind, rect: lane.querySelector('.lane-bg').getBoundingClientRect() }));
+    if (JSON.stringify(lanes.map(lane => lane.kind)) !== JSON.stringify(['user', 'ui', 'backend', 'data'])) throw Error(graph.id + ' : ordre des couloirs');
+    if (lanes.some((lane, index) => index && lane.rect.left < lanes[index - 1].rect.right - 1)) throw Error(graph.id + ' : couloirs non alignés de gauche à droite');
+    const band = root.querySelector('[data-band] .band-bg').getBoundingClientRect();
+    const lanesBox = { left: lanes[0].rect.left, right: lanes.at(-1).rect.right, bottom: Math.max(...lanes.map(lane => lane.rect.bottom)) };
+    if (band.top < lanesBox.bottom || band.width < (lanesBox.right - lanesBox.left) * .95) throw Error(graph.id + ' : bande oracle pas en bas ni transversale');
+    const nodes = [...root.querySelectorAll('[data-lane-node]')];
+    const projected = graph.projection.nodes.map(node => node.id + '|' + node.lane + '|' + node.evidence).sort();
+    if (JSON.stringify(nodes.map(node => node.dataset.laneNode + '|' + node.dataset.lane + '|' + node.dataset.evidence).sort()) !== JSON.stringify(projected)) throw Error(graph.id + ' : blocs différents');
+    const laneRect = Object.fromEntries(lanes.map(lane => [lane.id, lane.rect]));
+    const boxes = nodes.map(node => ({ id: node.dataset.laneNode, rect: node.querySelector('.node-body').getBoundingClientRect(), lane: node.dataset.lane }));
+    for (const [index, box] of boxes.entries()) {
+      if (!inside(box.rect, laneRect[box.lane] ?? band)) throw Error(graph.id + '/' + box.id + ' : bloc hors de son couloir');
+      textsInside(box.rect, nodes[index].querySelectorAll('text'), graph.id + '/' + box.id);
+      for (const other of boxes.slice(index + 1)) if (hit(box.rect, other.rect)) throw Error(graph.id + ' : blocs superposés ' + box.id + '/' + other.id);
+    }
+    const data = laneRect[lanes.find(lane => lane.kind === 'data').id];
+    const stores = [...root.querySelectorAll('[data-container]')].map(store => ({ id: store.dataset.container, rect: store.querySelector('rect').getBoundingClientRect(), label: store.querySelector('text').textContent }));
+    if (stores.length !== 2 || stores.some(store => !inside(store.rect, data))) throw Error(graph.id + ' : magasins S3 et PostgreSQL hors du couloir données');
+    const edges = [...root.querySelectorAll('[data-lane-edge]')].map(edge => edge.dataset.laneEdge).sort();
+    if (JSON.stringify(edges) !== JSON.stringify(graph.projection.edges.map(edge => edge.id).sort())) throw Error(graph.id + ' : liens différents');
+    const labels = [...root.querySelectorAll('[data-edge-label] rect')];
+    for (const label of labels) {
+      const rect = label.getBoundingClientRect();
+      if (!inside(rect, svg.getBoundingClientRect())) throw Error(graph.id + ' : libellé hors du canevas');
+      for (const box of boxes) if (hit(rect, box.rect)) throw Error(graph.id + ' : libellé sur le bloc ' + box.id + ' : ' + label.nextElementSibling.textContent);
+    }
+    return { sceneId: graph.id, kind: 'lanes', sceneHash: graph.sceneHash, initialScale: scale, lanes: lanes.map(lane => lane.kind), stores: stores.map(store => store.label),
+      band: { below: true, widthShare: Number((band.width / (lanesBox.right - lanesBox.left)).toFixed(3)) }, nodes: nodes.length, edges: edges.length, labels: labels.length };
+  };
   if (!document.querySelector('.masthead').textContent.includes('5 SCÈNES · 12 SECTIONS · 16 DÉCISIONS')) throw Error('bandeau absent');
   const metrics = [];
   for (const graph of graphs) {
+    if (graph.kind !== 'flow') { metrics.push(checkDiagram(graph)); continue; }
     const scene = document.querySelector('[data-scene="' + graph.id + '"]');
     const flow = scene.querySelector('.flow');
     const transform = getComputedStyle(flow.querySelector('.svelte-flow__viewport')).transform;
@@ -155,7 +236,7 @@ const checkExpression = `(() => {
     const contentInside = content.left >= flowRect.left - 1 && content.top >= flowRect.top - 1
       && content.right <= flowRect.right + 1 && content.bottom <= flowRect.bottom + 1;
     if (!contentInside) throw Error(graph.id + ' : le contenu complet sort du panneau ' + JSON.stringify({ content, flowRect }));
-    metrics.push({ sceneId: graph.id, sceneHash: graph.sceneHash, initialScale: scale, contentInside, overlaps,
+    metrics.push({ sceneId: graph.id, kind: 'flow', sceneHash: graph.sceneHash, initialScale: scale, contentInside, overlaps,
       cards: cards.length, edges: nativeEdges.length, groups: graph.groups, edgeLabels: labels.length,
       panel: { left: flowRect.left, top: flowRect.top, width: flowRect.width, height: flowRect.height },
       iconPx: Math.min(...cards.map(card => card.iconPx)), controls });
@@ -290,7 +371,28 @@ await evaluate(`(() => { localStorage.clear(); return true; })()`);
 const oneToOne = [];
 await call('Emulation.setDeviceMetricsOverride', { width: 1920, height: 1080, deviceScaleFactor: 1, mobile: false });
 await pause(300);
-for (const graph of graphs) {
+// Matrice, tables et couloirs : clic réel sur 1:1, l'échelle du SVG doit valoir 1.
+const sceneBox = selector => evaluate(`(() => { const element = document.querySelector('${selector}'); element.scrollIntoView({ block: 'start' });
+  const rect = element.getBoundingClientRect(); return { x: rect.x + scrollX, y: rect.y + scrollY, width: rect.width, height: rect.height }; })()`);
+const capture = async (box, file) => {
+  const shot = await call('Page.captureScreenshot', { format: 'png', fromSurface: true, captureBeyondViewport: true, clip: { ...box, scale: 1 } });
+  await writeFile(file, Buffer.from(shot.data, 'base64'));
+};
+for (const graph of graphs.filter(item => item.kind !== 'flow')) {
+  if (graph.kind === 'matrix') {
+    await capture(await sceneBox(`[data-scene="${graph.id}"] [data-diagram]`), `.generated/scene-1a1-${graph.id}.png`);
+    oneToOne.push({ sceneId: graph.id, scale: 1 });
+    continue;
+  }
+  await evaluate(`(() => { document.querySelector('[data-scene="${graph.id}"] [data-action="actual-size"]').click(); return true; })()`);
+  await pause(250);
+  const scale = await evaluate(`(() => { const root = document.querySelector('[data-scene="${graph.id}"] [data-diagram]');
+    return root.querySelector('svg').getBoundingClientRect().width / Number(root.dataset.canvasWidth); })()`);
+  if (Math.abs(scale - 1) > 0.001) throw Error(`${graph.id} : le bouton 1:1 ne remet pas l’échelle à 1 (${scale})`);
+  await capture(await sceneBox(`[data-scene="${graph.id}"] [data-diagram] svg`), `.generated/scene-1a1-${graph.id}.png`);
+  oneToOne.push({ sceneId: graph.id, scale });
+}
+for (const graph of graphs.filter(item => item.kind === 'flow')) {
   const box = await evaluate(`(() => {
     const scene = document.querySelector('[data-scene="${graph.id}"]');
     scene.scrollIntoView({ block: 'center' });
@@ -310,14 +412,14 @@ for (const graph of graphs) {
 
 // Vue d'ensemble par scène, après retour au fitView (rechargement de la page).
 await call('Page.navigate', { url: focusFile });
-await waitUntil(`document.querySelectorAll('.flow').length === 5`, 'rechargement hors ligne sans les cinq scènes');
+await waitUntil(READY, 'rechargement hors ligne sans les cinq scènes');
 await pause(500);
 const overview = [];
 for (const graph of graphs) {
   const box = await evaluate(`(() => {
     const scene = document.querySelector('[data-scene="${graph.id}"]');
     scene.scrollIntoView({ block: 'center' });
-    const rect = scene.querySelector('.flow').getBoundingClientRect();
+    const rect = (scene.querySelector('.flow') ?? scene.querySelector('[data-diagram]')).getBoundingClientRect();
     return { x: rect.x + scrollX, y: rect.y + scrollY, width: rect.width, height: rect.height };
   })()`);
   await pause(300);
@@ -325,6 +427,29 @@ for (const graph of graphs) {
   await writeFile(`.generated/scene-vue-ensemble-${graph.id}.png`, Buffer.from(shot.data, 'base64'));
   overview.push({ sceneId: graph.id, clip: box });
 }
+
+// Thème sombre : préférence système émulée, mêmes contrôles de géométrie, contraste vérifié,
+// une capture de page et une capture par scène.
+await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'dark' }] });
+await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
+await call('Page.navigate', { url: focusFile });
+await waitUntil(READY, 'thème sombre : scènes absentes');
+await pause(500);
+await evaluate(expectedGraphs);
+const darkMetrics = await evaluate(checkExpression);
+const luminance = `(color => { const [r, g, b] = color.match(/[\\d.]+/g).map(Number).map(value => value / 255).map(value => value <= .03928 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4); return .2126 * r + .7152 * g + .0722 * b; })`;
+const dark = await evaluate(`(() => { const theme = document.querySelector('[data-st-theme]'), style = getComputedStyle(theme);
+  const lum = ${luminance};
+  return { background: style.backgroundColor, text: style.color, backgroundLum: lum(style.backgroundColor), textLum: lum(style.color),
+    diagram: getComputedStyle(document.querySelector('[data-diagram]')).backgroundColor }; })()`);
+if (dark.backgroundLum > .05 || dark.textLum < .6) throw Error(`thème sombre non appliqué : ${JSON.stringify(dark)}`);
+await capture({ x: 0, y: 0, width: 1440, height: 1000 }, '.generated/dossier-preview-dark-1440x1000.png');
+const darkCaptures = [];
+for (const graph of graphs) {
+  await capture(await sceneBox(`[data-scene="${graph.id}"]`), `.generated/scene-sombre-${graph.id}.png`);
+  darkCaptures.push(`.generated/scene-sombre-${graph.id}.png`);
+}
+await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'light' }] });
 
 const offline = await evaluate(`({ url: location.href, title: document.title, external: performance.getEntriesByType('resource').filter(entry => /^https?:/.test(entry.name)).length })`);
 clearTimeout(timeout);
@@ -334,14 +459,15 @@ const report = {
   offline: { ...offline, blockedExternal: true },
   viewports: viewports.map(viewport => ({ width: viewport.width, height: viewport.height })),
   scenes: viewports[0].metrics, scenesAt1920: viewports[1].metrics,
-  choices, copy, exportFilter, oneToOne, overview,
+  dark: { ...dark, scenes: darkMetrics }, choices, copy, exportFilter, oneToOne, overview,
   captures: ['.generated/dossier-preview-1440x1000.png', '.generated/dossier-preview-1920x1080.png',
     ...graphs.map(graph => `.generated/scene-1a1-${graph.id}.png`),
-    ...graphs.map(graph => `.generated/scene-vue-ensemble-${graph.id}.png`)],
+    ...graphs.map(graph => `.generated/scene-vue-ensemble-${graph.id}.png`),
+    '.generated/dossier-preview-dark-1440x1000.png', ...darkCaptures],
   consoleErrors, runtimeErrors, externalRequests,
 };
 await writeFile('.generated/browser-check.json', `${JSON.stringify(report, null, 2)}\n`);
-console.log(JSON.stringify({ status: report.status, scenes: report.scenes.map(scene => ({ id: scene.sceneId, cards: scene.cards, edges: scene.edges, groups: scene.groups, labels: scene.edgeLabels, fitView: Number(scene.initialScale.toFixed(4)) })), choices: { blocks: choices.blocks, radio: choices.radio, recommended: choices.recommended, selected: choices.selected, answered: choices.answered }, yaml: { copy: copy.realClick, clipboardMatchesZone: copy.clipboardMatchesZone, forcedRefusalHandled: true, hasDecisions: copy.hasDecisions, link: choices.link.href, faridMine: exportFilter.faridMine, fabienMine: exportFilter.fabienMine, all: exportFilter.all }, captures: report.captures.length, consoleErrors: consoleErrors.length, runtimeErrors: runtimeErrors.length, externalRequests: externalRequests.length }));
+console.log(JSON.stringify({ status: report.status, scenes: report.scenes.map(scene => ({ id: scene.sceneId, kind: scene.kind, cards: scene.cards ?? scene.tables ?? scene.nodes ?? scene.rows, edges: scene.edges ?? scene.relations, labels: scene.edgeLabels ?? scene.labels, fitView: scene.initialScale && Number(scene.initialScale.toFixed(4)) })), dark: { background: dark.background, scenes: darkMetrics.length }, choices: { blocks: choices.blocks, radio: choices.radio, recommended: choices.recommended, selected: choices.selected, answered: choices.answered }, yaml: { copy: copy.realClick, clipboardMatchesZone: copy.clipboardMatchesZone, forcedRefusalHandled: true, hasDecisions: copy.hasDecisions, link: choices.link.href, faridMine: exportFilter.faridMine, fabienMine: exportFilter.fabienMine, all: exportFilter.all }, captures: report.captures.length, consoleErrors: consoleErrors.length, runtimeErrors: runtimeErrors.length, externalRequests: externalRequests.length }));
 ws.close();
 // L'onglet de contrôle est refermé : le Chromium partagé ou isolé ne garde rien.
 await fetch(`${base}/json/close/${page.id}`).catch(() => {});

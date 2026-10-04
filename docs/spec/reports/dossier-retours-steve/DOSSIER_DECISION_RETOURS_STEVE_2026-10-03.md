@@ -693,7 +693,7 @@ Les tableaux extraction et ciblage restent séparés, sans fusion des F1. Pont p
 
 **Dates orthogonales au ciblage.** Date documentaire, de collecte, de l'acte, du retour et de l'import restent distinctes. C consomme les dates de #788 via la politique de #786, sans relancer de LLM à l'affichage. Un dossier épinglé hors période figure dans une liste de suivi, pas dans un total limité à la période. Les comparaisons A/B/C figent l'horloge des périodes relatives.
 
-**Diagrammes** : critères de Steve en regard de l'existant, modèle de données, flux import → annotation → oracle → affichage, architecture UI et A/B/C sont rendus en scènes Focus (annexe B).
+**Diagrammes** : critères de Steve en regard de l'existant (matrice), modèle de données (entité-relation), architecture de l'import à l'affichage avec l'oracle transversal (couloirs), architecture UI et A/B/C sont rendus en scènes Focus (annexe B).
 
 ---
 
@@ -966,119 +966,178 @@ Légende : **=** convergence · **≈** convergence de fond, forme différente �
 
 ## Annexe B — Scènes Focus (sources canoniques)
 
-Cinq scènes, cinq blocs Mermaid `flowchart LR`. Elles ne changent rien au fond : elles rendent lisibles les critères de Steve en regard de l'existant (§2), le modèle de données (§6), le flux import → annotation → oracle → affichage (§6.5, §9.3), l'architecture UI (§8) et l'affichage A/B/C (§9.5). Chaque nœud est une carte A' 460 × 200 ; chaque `subgraph` est un conteneur natif `parentId`.
+Cinq scènes, chacune dans la forme qui convient à ce qu'elle montre. Elles ne changent rien au fond : elles rendent lisibles les critères de Steve en regard de l'existant (§2), le modèle de données (§6), l'architecture de l'import à l'affichage avec l'oracle (§6.5, §7, §9.3), l'architecture UI (§8) et l'affichage A/B/C (§9.5).
+- Scène 1 : une **matrice** (tableau ci-dessous), un critère par ligne.
+- Scène 2 : un **diagramme entité-relation** (`erDiagram`) : tables, colonnes clés, relations et cardinalités.
+- Scène 3 : une **architecture en couloirs verticaux** de gauche à droite (`flowchart LR`, un `subgraph` par couloir : utilisateurs, écrans UI, fonctions backend, données sur S3 et PostgreSQL), l'oracle en bande transversale en bas, système d'évaluation hors ligne.
+- Scènes 4 et 5 : des composants, en cartes A' 460 × 200 ; chaque `subgraph` est un conteneur natif `parentId`.
 
 ### `criteres-steve` — Scène 1 · les trois critères de Steve en regard de l'existant
 
-```mermaid
-flowchart LR
-  subgraph K1["Critère 1 · Résidentiel"]
-    S1C["Steve · habitation seulement"]
-    R1C["Radar · filtre Résidentiel"]
-  end
-  subgraph K2["Critère 2 · Assouplissement"]
-    S2C["Steve · ouvre, ne resserre pas"]
-    R2C["Radar · aucun champ sens"]
-  end
-  subgraph K3["Critère 3 · Densification"]
-    S3C["Steve · plus d'unités qu'avant"]
-    R3C["Radar · effet toujours inconnu"]
-  end
-  subgraph KX["Exclusions transversales"]
-    SXC["Steve · règle générale et décision"]
-    RXC["Radar · PIIA et dérogation"]
-  end
-  subgraph EF["Effet sur la vue de travail"]
-    NOI["Bruit · 24 sur 73"]
-    REC["Pertinents affichés · 34 sur 40"]
-  end
-  S1C -->|"partiel"| R1C
-  S2C -->|"absent"| R2C
-  S3C -->|"absent"| R3C
-  SXC -->|"partiel"| RXC
-  R1C -->|"3 hors critère"| NOI
-  R2C -->|"4 resserrements"| NOI
-  R3C -->|"6 sans effet"| NOI
-  RXC -->|"11 hors portée"| NOI
-  NOI -->|"même vue · passe 1"| REC
-```
+| Critère | Steve demande | Radar aujourd'hui | Couverture | Bruit passe 1 |
+|---|---|---|---|---:|
+| 1 · Résidentiel | Habitation seulement, et un règlement d'urbanisme | Filtre Résidentiel par marqueurs regex ; nature de l'acte non reconnue | partiel | 3 |
+| 2 · Assouplissement | La modification ouvre, elle ne resserre pas | Aucun champ de sens, aucun filtre | absent | 4 |
+| 3 · Densification | Plus d'unités qu'avant | Champ d'effet toujours `inconnu` ; B′ ne prouve pas la densité | absent | 6 |
+| Exclusion · autorisation individuelle | Une règle générale, pas un PPCMOI ni une dérogation accordés à un demandeur | PIIA et dérogation exclus ; PPCMOI et usage conditionnel non exclus | partiel | 8 |
+| Exclusion · point d'ordre du jour | Une décision du conseil, pas un point inscrit à l'ordre du jour | Aucune distinction entre ordre du jour et décision | absent | 3 |
+| Vue de travail · passe 1 | 22 sur 73 réunissent les trois critères | 34 des 40 Pertinent affichés | — | 24 |
 
 ### `modele-donnees` — Scène 2 · modèle de données, de la source à la publication
 
 ```mermaid
-flowchart LR
-  subgraph S1["1 · Sources immuables"]
-    SRC["annotation_sources"]
-    ROW["annotation_raw_rows"]
-  end
-  subgraph S2["2 · Référentiels de Steve"]
-    COD["annotation_codes"]
-    RUL["annotation_rules"]
-    FND["annotation_findings"]
-  end
-  subgraph S3["3 · Jugements versionnés"]
-    ASS["annotation_assessments"]
-    ORC["oracle_releases"]
-  end
-  subgraph S4["4 · Ancres durables"]
-    ANC["annotation_anchors"]
-    QUE["file de résolution"]
-  end
-  subgraph S5["5 · Publication conforme"]
-    CMT["projection Comment"]
-    PN["prospect_notes v1"]
-  end
-  SRC -->|"1 fichier · N lignes"| ROW
-  ROW -->|"normalisée en"| ASS
-  RUL -->|"justifie"| COD
-  COD -->|"motif"| ASS
-  ASS -->|"1 à N ancres"| ANC
-  FND -->|"constat rattaché"| ANC
-  ANC -->|"ambiguë ou disparue"| QUE
-  ASS -->|"lecture conforme"| CMT
-  CMT -.->|"réponses v1"| PN
-  ASS -->|"sélection gelée"| ORC
+erDiagram
+    annotation_sources ||--o{ annotation_raw_rows : contient
+    annotation_raw_rows ||--o{ annotation_assessments : normalisee_en
+    annotation_rules ||--o{ annotation_codes : justifie
+    annotation_assessments }o--o| annotation_codes : motif
+    annotation_assessments }o--o| annotation_assessments : supersedes
+    annotation_assessments ||--o{ annotation_anchors : rattachee_a
+    annotation_findings ||--o{ annotation_anchors : rattache_a
+    annotation_anchors }o..o| graph_nodes : cle_texte_sans_fk
+    oracle_releases }o--o{ annotation_assessments : selection_gelee
+    annotation_assessments ||--o| comment_projection : publie_en
+    comment_projection ||..o{ prospect_notes : reponses_v1
+    annotation_sources {
+      uuid id PK
+      text file_sha256 UK
+      text revision_label
+      text author_ext_id
+      uuid recorded_by
+      text parser_version
+    }
+    annotation_raw_rows {
+      uuid id PK
+      uuid source_id FK
+      text sheet
+      int sheet_row
+      jsonb cells
+    }
+    annotation_rules {
+      text rule_id PK "R-01 à R-26"
+    }
+    annotation_codes {
+      text code PK "28 codes"
+      text rule_id FK
+    }
+    annotation_findings {
+      text finding_id PK "77 constats"
+    }
+    annotation_assessments {
+      uuid id PK
+      text assessment_key UK
+      uuid raw_row_id FK
+      text motif_code FK
+      uuid supersedes FK
+      text label_set
+      text annotator_kind
+      text sens
+      text status
+    }
+    oracle_releases {
+      uuid id PK
+      text release_label UK
+      text manifest_sha256
+      text scorer_version
+    }
+    annotation_anchors {
+      uuid id PK
+      uuid assessment_id FK
+      text finding_id FK
+      text anchor_kind
+      text anchor_key "sans FK"
+      text role
+      text resolution
+    }
+    graph_nodes {
+      text id PK
+      text type
+      text city_slug
+      text source_ref "clé S3"
+    }
+    comment_projection {
+      uuid id PK
+      uuid assessment_id FK
+      text target_kind
+      text target_id
+      text thread_id
+    }
+    prospect_notes {
+      uuid id PK
+      text target_type
+      text city_slug
+      uuid signal_id FK
+      text body
+      timestamptz deleted_at
+    }
 ```
 
-### `flux-import-oracle` — Scène 3 · flux import, annotation, oracle et affichage
+### `flux-import-oracle` — Scène 3 · architecture de l'import à l'affichage, oracle transversal
 
 ```mermaid
 flowchart LR
-  subgraph F1["1 · Entrée"]
-    XLS["Classeur de Steve"]
-    DOC["Analyse du 21 sept."]
+  subgraph L1["Utilisateurs"]
+    EQP["Équipe · Farid, Mathieu"]
+    STV["Steve · client"]
+    OPS["Opérateur · owner"]
   end
-  subgraph F2["2 · Import idempotent"]
-    DRY["Dry-run et rapport"]
-    TXN["Transaction par fichier"]
-  end
-  subgraph F3["3 · Rattachement"]
-    RES["Résolution sur snapshot"]
-    MAN["File manuelle"]
-  end
-  subgraph F4["4 · Annotation visible"]
+  subgraph L2["Écrans UI"]
+    MAP["Carte Signaux"]
     PAN["Panneau signal"]
     RAI["Rail · compteurs"]
+    REV["File de revue des ancres"]
   end
-  subgraph F5["5 · Oracles"]
-    ADJ["Adjudication par critère"]
-    OC["Oracle C gelé"]
+  subgraph L3["Fonctions backend"]
+    COL["Collecte des documents"]
+    DET["Détection de signal"]
+    IMP["Import du classeur"]
+    RAT["Rattachement"]
+    GSA["API graph-signals"]
+    ANA["API annotations"]
+  end
+  subgraph L4["Données"]
+    subgraph S3["S3 · stockage objet"]
+      DOCS["Documents sources"]
+      SNAP["Snapshots du graphe"]
+      XLSB["Octets du classeur"]
+    end
+    subgraph PG["PostgreSQL"]
+      GRA["graph_nodes · signaux"]
+      ANN["annotation_*"]
+      PNO["prospect_notes v1"]
+    end
+  end
+  subgraph OR["Oracle · évaluation hors ligne"]
     OE["Oracle E 674 / 676"]
-  end
-  subgraph F6["6 · Mesure"]
-    SHA["C en shadow"]
     BEN["Benchmark #782"]
+    SCO["Scoreur Node"]
+    OC["Oracle C gelé"]
+    ADJ["Adjudication par critère"]
   end
-  XLS -->|"sha256 · 7 feuilles"| DRY
-  DOC -->|"annotation distincte"| ADJ
-  DRY -->|"0 écriture si connu"| TXN
-  TXN -->|"lignes et évaluations"| RES
-  RES -->|"ambiguë"| MAN
-  RES -->|"ancre confirmée"| PAN
-  PAN -->|"même cible"| RAI
-  RES -->|"labels étayés"| ADJ
+  EQP -->|"consulte"| MAP
+  STV -->|"classeur + analyse"| OPS
+  OPS -->|"cible Make · dry-run"| IMP
+  OPS -->|"revue"| REV
+  MAP -->|"sélection"| PAN
+  MAP -->|"vivier B"| GSA
+  PAN -->|"lecture groupée"| ANA
+  RAI -->|"compteurs"| ANA
+  REV -->|"décision humaine"| RAT
+  COL -->|"PV et règlements"| DOCS
+  DET -->|"lit"| DOCS
+  DET -->|"latest.json"| SNAP
+  DET -->|"signaux"| GRA
+  IMP -->|"octets · sha256"| XLSB
+  IMP -->|"lignes et évaluations"| ANN
+  RAT -->|"ids présents"| GRA
+  RAT -->|"ancres"| ANN
+  GSA -->|"lecture"| GRA
+  ANA -->|"lecture conforme"| ANN
+  ANA -->|"réponses v1"| PNO
+  ANN -->|"export évaluations et ancres"| ADJ
   ADJ -->|"version gelée"| OC
-  OC -->|"précision et rappel"| SHA
+  OC -->|"précision, rappel"| SCO
+  GRA -->|"sélection B, C en shadow"| SCO
   OC -->|"volet ciblage"| BEN
   OE -->|"volet extraction"| BEN
 ```

@@ -7,7 +7,7 @@
 ## Contenu de la page
 
 - Les 12 sections du Markdown (dont, en tête, « Intention du dossier, objectifs de l'owner » et « Ce que veut Steve ») et l'annexe A, découpées sur leurs titres de niveau 2, rendues telles quelles. Les blocs Mermaid du corps sont remplacés par un renvoi aux scènes.
-- Cinq scènes SvelteFlow natives, tirées des cinq blocs Mermaid canoniques de l'annexe B : `criteres-steve`, `modele-donnees`, `flux-import-oracle`, `architecture-ui`, `affichage-abc`. Carte unique A' 460 × 200, Dagre LR récursif, routeur orthogonal du kit h2a.
+- Cinq scènes tirées des sources canoniques de l'annexe B, chacune dans la forme de son contenu : `criteres-steve` en matrice (tableau Markdown), `modele-donnees` en diagramme entité-relation (`erDiagram` : tables, colonnes clés, cardinalités), `flux-import-oracle` en architecture à couloirs verticaux (utilisateurs, écrans UI, fonctions backend, données S3 et PostgreSQL ; oracle en bande transversale en bas), puis `architecture-ui` et `affichage-abc` en composants SvelteFlow natifs (carte A' 460 × 200, Dagre LR récursif, routeur orthogonal du kit h2a). Thèmes clair et sombre (préférence système, ou `data-theme` sur `html`).
 - Les décisions D1 à D16, sélectionnables ; le bouton « Copier mes décisions (YAML) » copie un bloc Markdown ```yaml prêt à coller dans un commentaire de la PR #794, filtré par « Je suis » (Farid ou Fabien : ses propres décisions, ou toutes) et affiché aussi dans une zone en lecture seule si le presse-papiers est refusé. Le JSON reste interne, réservé à la connexion backend. Brouillon local, rien n'est ratifié.
 
 ## Reconstruire
