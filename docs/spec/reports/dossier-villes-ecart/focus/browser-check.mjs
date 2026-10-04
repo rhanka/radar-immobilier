@@ -246,12 +246,15 @@ for (const mode of ['light', 'dark']) {
   await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
   await pause(300);
   figure = await evaluate(figureExpression);
+  const placement = await evaluate(`(() => { const method = document.querySelector('[data-section="section-6"]'); const table = document.querySelector('[data-section="section-2"] .prose table');
+    return { method: Boolean(method?.open) && /^6\\. Méthode de correction/.test(method.querySelector('summary strong').textContent), table: Boolean(table) && /Prod/.test(table.textContent) && /Préprod/.test(table.textContent) && /216/.test(table.textContent) }; })()`);
+  if (!placement.method || !placement.table) throw Error(`${mode} : méthode ou tableau prod / préprod absent ${JSON.stringify(placement)}`);
   const box = await evaluate(`(() => { const element = document.querySelector('[data-figure="tables"]'); element.scrollIntoView({ block: 'start' });
     const rect = element.getBoundingClientRect(); return { x: rect.x + scrollX, y: rect.y + scrollY, width: rect.width, height: rect.height }; })()`);
   await pause(250);
   const figureShot = await call('Page.captureScreenshot', { format: 'png', fromSurface: true, clip: { ...box, scale: 1 } });
   await writeFile(`.generated/figure-tables-${mode}.png`, Buffer.from(figureShot.data, 'base64'));
-  for (const [name, selector] of [['groupes-barres', '[data-groups-bars]'], ['decision-D1', '[data-question="D1"]'], ['decision-D2', '[data-question="D2"]']]) {
+  for (const [name, selector] of [['ou-prod-preprod', '[data-section="section-2"] .prose table'], ['methode', '[data-section="section-6"]'], ['groupes-barres', '[data-groups-bars]'], ['decision-D1', '[data-question="D1"]'], ['decision-D2', '[data-question="D2"]']]) {
     const clip = await evaluate(`(() => { const element = document.querySelector('${selector}'); scrollTo(0, 0);
       const rect = element.getBoundingClientRect(); return { x: rect.x + scrollX, y: rect.y + scrollY, width: rect.width, height: rect.height }; })()`);
     await pause(250);
@@ -320,12 +323,12 @@ const choices = await evaluate(`(() => {
   const details = blocks.map(block => {
     const options = [...block.querySelectorAll('.option')].map(option => {
       const parts = [...option.children].map(child => child.dataset.optionDescription !== undefined ? 'description' : child.dataset.optionPros !== undefined ? 'pros'
-        : child.dataset.optionCons !== undefined ? 'cons' : child.dataset.mini ? 'mini' : null).filter(Boolean);
+        : child.dataset.optionCons !== undefined ? 'cons' : child.dataset.optionMethod !== undefined ? 'method' : child.dataset.mini ? 'mini' : null).filter(Boolean);
       return { key: option.dataset.option, parts, description: option.querySelector('[data-option-description] p')?.textContent.trim().length ?? 0,
         pros: option.querySelectorAll('[data-option-pros] li').length, cons: option.querySelectorAll('[data-option-cons] li').length };
     });
-    return { key: block.dataset.question, intro: (block.querySelector('[data-detail]')?.textContent.trim().length ?? 0) > 200, options,
-      ordered: options.every(option => option.parts[0] === 'description' && option.parts.at(-2) === 'pros' && option.parts.at(-1) === 'cons'),
+    return { key: block.dataset.question, intro: (block.querySelector('[data-detail]')?.textContent.trim().length ?? 0) > 200 && /^Où\. .*préprod/.test(block.querySelector('[data-detail]')?.textContent.trim() ?? ''), options,
+      ordered: options.every(option => option.parts[0] === 'description' && option.parts.at(-3) === 'method' && option.parts.at(-2) === 'pros' && option.parts.at(-1) === 'cons'),
       complete: options.every(option => option.description >= 140 && option.pros >= 1 && option.cons >= 1),
       recommendation: /^Recommandation/.test(block.querySelector('[data-recommendation]')?.textContent.trim() ?? '') };
   });
@@ -412,7 +415,7 @@ const offline = await evaluate(`({ url: location.href, title: document.title, ex
 clearTimeout(timeout);
 const captures = [
   ...['light', 'dark'].flatMap(mode => ['1440x1000', '1920x1080', '390x844'].map(size => `.generated/dossier-preview-${size}-${mode}.png`)),
-  ...['light', 'dark'].flatMap(mode => ['tables', 'groupes-barres', 'decision-D1', 'decision-D2'].map(name => `.generated/figure-${name}-${mode}.png`)),
+  ...['light', 'dark'].flatMap(mode => ['tables', 'ou-prod-preprod', 'methode', 'groupes-barres', 'decision-D1', 'decision-D2'].map(name => `.generated/figure-${name}-${mode}.png`)),
   ...['light', 'dark'].flatMap(mode => graphs.flatMap(graph => [`.generated/scene-1a1-${graph.id}-${mode}.png`, `.generated/scene-vue-ensemble-${graph.id}-${mode}.png`])),
 ];
 const report = {

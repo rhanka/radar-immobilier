@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-04T15:41:29.898Z",
+  "checkedAt": "2026-10-04T16:31:49.763Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/.worktrees/dossier-villes-ecart/docs/spec/reports/dossier-villes-ecart/focus/../decision-focus.html",
   "chromiumCdpPort": "9245",
   "offline": {
@@ -112,7 +112,7 @@
       "edgeLabels": 20,
       "panel": {
         "left": 40,
-        "top": 4176.4375,
+        "top": 5405.5,
         "width": 1345,
         "height": 820
       },
@@ -137,7 +137,7 @@
       "edgeLabels": 20,
       "panel": {
         "left": 52.5,
-        "top": 3914.53125,
+        "top": 5045.9375,
         "width": 1800,
         "height": 900
       },
@@ -258,6 +258,7 @@
             "parts": [
               "description",
               "mini",
+              "method",
               "pros",
               "cons"
             ],
@@ -270,6 +271,7 @@
             "parts": [
               "description",
               "mini",
+              "method",
               "pros",
               "cons"
             ],
@@ -282,6 +284,7 @@
             "parts": [
               "description",
               "mini",
+              "method",
               "pros",
               "cons"
             ],
@@ -303,6 +306,7 @@
             "parts": [
               "description",
               "mini",
+              "method",
               "pros",
               "cons"
             ],
@@ -315,6 +319,7 @@
             "parts": [
               "description",
               "mini",
+              "method",
               "pros",
               "cons"
             ],
@@ -336,6 +341,7 @@
             "parts": [
               "description",
               "mini",
+              "method",
               "pros",
               "cons"
             ],
@@ -348,6 +354,7 @@
             "parts": [
               "description",
               "mini",
+              "method",
               "pros",
               "cons"
             ],
@@ -369,6 +376,7 @@
             "parts": [
               "description",
               "mini",
+              "method",
               "pros",
               "cons"
             ],
@@ -381,6 +389,7 @@
             "parts": [
               "description",
               "mini",
+              "method",
               "pros",
               "cons"
             ],
@@ -393,6 +402,7 @@
             "parts": [
               "description",
               "mini",
+              "method",
               "pros",
               "cons"
             ],
@@ -413,6 +423,7 @@
             "key": "a",
             "parts": [
               "description",
+              "method",
               "pros",
               "cons"
             ],
@@ -424,6 +435,7 @@
             "key": "b",
             "parts": [
               "description",
+              "method",
               "pros",
               "cons"
             ],
@@ -435,6 +447,7 @@
             "key": "c",
             "parts": [
               "description",
+              "method",
               "pros",
               "cons"
             ],
@@ -455,6 +468,7 @@
             "key": "a",
             "parts": [
               "description",
+              "method",
               "pros",
               "cons"
             ],
@@ -466,6 +480,7 @@
             "key": "b",
             "parts": [
               "description",
+              "method",
               "pros",
               "cons"
             ],
@@ -477,6 +492,7 @@
             "key": "c",
             "parts": [
               "description",
+              "method",
               "pros",
               "cons"
             ],
@@ -498,6 +514,7 @@
             "parts": [
               "description",
               "mini",
+              "method",
               "pros",
               "cons"
             ],
@@ -510,6 +527,7 @@
             "parts": [
               "description",
               "mini",
+              "method",
               "pros",
               "cons"
             ],
@@ -522,6 +540,7 @@
             "parts": [
               "description",
               "mini",
+              "method",
               "pros",
               "cons"
             ],
@@ -734,10 +753,14 @@
     ".generated/dossier-preview-1920x1080-dark.png",
     ".generated/dossier-preview-390x844-dark.png",
     ".generated/figure-tables-light.png",
+    ".generated/figure-ou-prod-preprod-light.png",
+    ".generated/figure-methode-light.png",
     ".generated/figure-groupes-barres-light.png",
     ".generated/figure-decision-D1-light.png",
     ".generated/figure-decision-D2-light.png",
     ".generated/figure-tables-dark.png",
+    ".generated/figure-ou-prod-preprod-dark.png",
+    ".generated/figure-methode-dark.png",
     ".generated/figure-groupes-barres-dark.png",
     ".generated/figure-decision-D1-dark.png",
     ".generated/figure-decision-D2-dark.png",

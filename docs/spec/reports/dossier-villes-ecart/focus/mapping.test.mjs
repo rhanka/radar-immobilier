@@ -81,12 +81,14 @@ test('chaque décision du §7 : introduction, puis chaque option avec Descriptio
     const detail = decisionDetails[question.key];
     assert.ok(detail.intro.split(/(?<=\.) /).length >= 3, `${question.key} : introduction de plusieurs phrases`);
     assert.ok(!detail.intro.startsWith('**Décide'), `${question.key} : ligne décideur portée par les badges`);
+    assert.match(detail.intro, /^\*\*Où\.\*\* .*préprod/, `${question.key} : où est le problème`);
     assert.deepEqual(detail.options.map(option => option.key), question.options.map(option => option.key), `${question.key} : mêmes options`);
     assert.deepEqual(detail.options.filter(option => option.recommended).map(option => option.key), [question.recommended], `${question.key} : recommandation`);
     assert.match(detail.recommendation, new RegExp(`^Recommandation \\*\\*\\(?${question.recommended}\\)?\\*\\*`), question.key);
     for (const option of detail.options) {
       assert.ok(option.description.length >= 140, `${question.key}/${option.key} : description concrète`);
       assert.ok(option.pros.length >= 1 && option.cons.length >= 1, `${question.key}/${option.key} : avantages et inconvénients`);
+      assert.ok(/préprod|^Aucune étape/i.test(option.method), `${question.key}/${option.key} : méthode préprod puis prod`);
     }
     // Les options qui lancent un job nomment le job et ses paramètres.
     for (const option of detail.options.filter(option => /job=/.test(option.description)))
@@ -115,6 +117,22 @@ test('Tableau 3 : comptes = groups.json des preuves, total 226', () => {
   assert.equal(totals.halted + totals.aborted, totals.cities);
   assert.equal(Object.keys(evidence).length, groups.length);
   for (const group of groups) assert.ok(markdown.includes(`| ${group.id} `), `${group.id} présent au §5.1`);
+});
+
+test('prod et préprod : comptes de la préprod = mesure en lecture seule, contamination présente, S3 propre', async () => {
+  const preprod = JSON.parse(await readFile('../preuves/diagnostic/preprod-2026-10-04.json', 'utf8'));
+  assert.equal(preprod.readOnly, 'on');
+  assert.equal(preprod.bucket, 'radar-immobilier-docs-preprod');
+  assert.equal(preprod.drift, totals.preprod);
+  assert.equal(groups.reduce((sum, group) => sum + (group.preprod ?? 0), 0), totals.preprod);
+  const byKey = { G1: 'G1-PG-ontology', G2: 'G2G4-collision-refused', G3: 'G3-S3-collision-only', G5b: 'G5ab-completeness', G5c: 'G5c-local-ref-loss', G6: 'G6-both' };
+  for (const [id, key] of Object.entries(byKey)) assert.equal(groups.find(group => group.id === id).preprod, preprod.groups[key] ?? 0, id);
+  assert.deepEqual(preprod.foreignPg, { nodes: 121, cities: 88 });
+  assert.deepEqual(preprod.foreignS3, { nodes: 0, cities: 0 });
+  for (const text of ['216 villes', '121 nœuds dans 88 villes', '3 858', 'radar-immobilier-preprod', '`radar-immobilier`']) assert.ok(markdown.includes(text), text);
+  assert.match(markdown, /### 6\.2 Les étapes/);
+  for (const step of ['(a) Correctif de code', '(b) Réparation en préprod', '(c) Mise en prod', '(d) Réparation en prod', '(e) Contrôle en prod', '(f) Retour arrière']) assert.ok(markdown.includes(step), step);
+  for (const text of ['02:23 UTC', '05:17, 11:17, 17:17, 23:17 UTC', 'recovery_heal', 'project_cities']) assert.ok(markdown.includes(text), text);
 });
 
 test('Figure 2 : tables, ligne partagée et chiffres repris du dossier', () => {

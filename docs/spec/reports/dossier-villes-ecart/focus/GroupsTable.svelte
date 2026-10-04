@@ -5,8 +5,8 @@
 </script>
 
 <section class="groups" data-groups-table aria-labelledby="table-3-title">
-  <span class="eyebrow">Tableau 3 · §5.1 · 226 villes en huit groupes, en barres puis en détail</span>
-  <h2 id="table-3-title">Les groupes de villes, chiffrés</h2>
+  <span class="eyebrow">Tableau 3 · §5.1 et §2.0 · prod (226 villes) et préprod (216 villes), en barres puis en détail</span>
+  <h2 id="table-3-title">Les groupes de villes, chiffrés : prod et préprod</h2>
   <p class="caption">« Identifiant partagé » : au moins une ville du groupe a un identifiant rattaché dans PG à une autre ville ; sa réparation attend la correction de la collision (D2).</p>
   <div class="groups-bars" data-groups-bars role="img" aria-label="Nombre de villes par groupe : barres horizontales">
     <p class="legend"><span class="swatch shared"></span> réparation après la correction de la collision (D2) <span class="swatch free"></span> réparable dès maintenant</p>
@@ -14,19 +14,20 @@
       <div class="group-bar" data-bar={group.id} data-shared={group.shared}>
         <span class="group-name"><strong>{group.id}</strong> {group.label}</span>
         <span class="track"><span class="fill" style={`width:${Math.max(group.cities / max * 100, 1.2)}%`}></span></span>
-        <span class="value"><strong>{group.cities}</strong> {group.cities > 1 ? 'villes' : 'ville'} · {group.decision}{group.shared ? ' · attend D2' : ''}</span>
+        <span class="value"><strong>{group.cities}</strong> en prod · préprod {group.preprod ?? 'avec G2'} · {group.decision}{group.shared ? ' · attend D2' : ''}</span>
       </div>
     {/each}
-    <p class="caption">Total {totals.cities} villes. Échelle : la barre la plus longue vaut {max} villes.</p>
+    <p class="caption">Barres = prod, total {totals.cities} villes ; préprod {totals.preprod} villes (G2 et G4 comptés ensemble en préprod). Échelle : la barre la plus longue vaut {max} villes.</p>
   </div>
   <div class="table-scroll">
     <table>
-      <thead><tr><th>Groupe</th><th>Villes</th><th>Ce qui diverge</th><th>Cause</th><th>Remède proposé</th><th>Identifiant partagé</th><th>Décision</th></tr></thead>
+      <thead><tr><th>Groupe</th><th>Prod</th><th>Préprod</th><th>Ce qui diverge</th><th>Cause</th><th>Remède proposé</th><th>Identifiant partagé</th><th>Décision</th></tr></thead>
       <tbody>
         {#each groups as group}
           <tr data-group={group.id}>
             <th scope="row"><strong>{group.id}</strong><span>{group.label}</span></th>
             <td class="count">{group.cities}</td>
+            <td class="count preprod" data-preprod={group.preprod ?? ''}>{group.preprod ?? 'avec G2'}</td>
             <td>{group.gap}</td>
             <td>{group.cause}</td>
             <td>{group.remedy}</td>
@@ -35,7 +36,7 @@
           </tr>
         {/each}
       </tbody>
-      <tfoot><tr><th scope="row">Total</th><td class="count">{totals.cities}</td><td colspan="5">{totals.halted} stoppées le 2026-10-03 (G1, G2, G3, G5b, G5c, G6) · {totals.aborted} avortées (G4, G5a)</td></tr></tfoot>
+      <tfoot><tr><th scope="row">Total</th><td class="count">{totals.cities}</td><td class="count preprod">{totals.preprod}</td><td colspan="5">Prod : {totals.halted} stoppées le 2026-10-03 (G1, G2, G3, G5b, G5c, G6) · {totals.aborted} avortées (G4, G5a)</td></tr></tfoot>
     </table>
   </div>
 </section>
