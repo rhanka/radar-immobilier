@@ -7,6 +7,7 @@
   // clipboard and always shown in a read-only textarea (artifacts may refuse the clipboard
   // and block downloads). The JSON pack (responsePack) stays internal, for the backend.
   import { onMount, tick } from 'svelte';
+  import MiniEr from './MiniEr.svelte';
   import { questions, minimalValidAnswer, exportBlock, PEOPLE, DECISIONS_TARGET_URL, DECISIONS_TARGET_LABEL, SEQUENCE, STEPS, usedBy } from './choices.js';
   let { manifest } = $props();
   let selections = $state({}), comments = $state({}), deferred = $state({});
@@ -89,7 +90,7 @@
             <strong>Dépend de :</strong> {#if question.dependsOn.length}{#each question.dependsOn as key, index}{index ? ' · ' : ''}<a href={`#question-${key}`}>{key} {short[key]}</a>{/each}{:else}aucune décision antérieure{/if}
             {#if usedBy[question.key].length}<br><strong>Conditionne :</strong> {usedBy[question.key].map(key => `${key} ${short[key]}`).join(' · ')}{/if}
           </p>
-          <div class="option-grid" aria-label={`Options pour ${question.question}`}>
+          <div class="option-grid" class:wide={question.options.some(option => option.diagram)} aria-label={`Options pour ${question.question}`}>
             {#each question.options as option}
               <article class="option" data-option={option.key} data-selected={checked(question, option)}>
                 <div class="flex-row"><span class="badge">{option.key}</span>{#if option.key === question.recommended}<span class="badge warning">Recommandée</span>{/if}{#if checked(question, option)}<span class="badge selected">Sélectionnée</span>{/if}</div>
@@ -99,6 +100,8 @@
                     onchange={() => question.mode === 'multi' ? toggle(question.key, option.key) : pick(question.key, option.key)} />
                   {option.title}
                 </label>
+                <p class="description" data-description><span class="pc-title">Description</span><br>{option.description}</p>
+                {#if option.diagram}<div class="option-diagram"><MiniEr id={`option-${question.key}-${option.key}`} spec={option.diagram} /></div>{/if}
                 <div class="pros-cons">
                   <div><span class="pc-title">Avantages</span><ul data-pros>{#each option.pros as item}<li>{item}</li>{/each}</ul></div>
                   <div><span class="pc-title">Inconvénients</span><ul data-cons>{#each option.cons as item}<li>{item}</li>{/each}</ul></div>
@@ -161,6 +164,9 @@
   .intro { max-width: 1050px; font-size: .95rem; line-height: 1.6; }
   .deps { font-size: .85rem; color: var(--st-semantic-text-secondary); }
   .deps a { color: var(--st-semantic-action-primary); }
+  .option-grid.wide { grid-template-columns: 1fr; }
+  .description { margin: 6px 0 10px; font-size: .88rem; line-height: 1.55; }
+  .option-diagram { margin: 4px 0 12px; padding: 8px; border: 1px dashed var(--st-semantic-border-subtle); overflow-x: auto; }
   .pros-cons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .pros-cons ul { margin: 4px 0 0; padding-left: 18px; font-size: .84rem; line-height: 1.5; }
   .pc-title { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--st-semantic-text-secondary); }
