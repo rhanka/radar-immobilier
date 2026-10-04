@@ -1,0 +1,7239 @@
+{
+ "ayers-cliff": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-2025-07",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 22,
+  "ca": 28,
+  "s3Only": 18,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2023-12",
+    "t": "Bylaw",
+    "owner": "westbury"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "acton-vale": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 10,
+  "ca": 10,
+  "s3Only": 0,
+  "pgOnly": 436,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "austin": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 0,
+  "pgOnly": 38,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "arundel": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 0,
+  "pgOnly": 293,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "baie-durfe": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 3,
+  "ca": 3,
+  "s3Only": 0,
+  "pgOnly": 29,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "beauceville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 110,
+  "ca": 110,
+  "s3Only": 2,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "constraint-cptaq-agricole",
+    "t": "Constraint",
+    "owner": "montcerf-lytton"
+   },
+   {
+    "id": "constraint-milieu-humide-parc-industriel",
+    "t": "Constraint",
+    "owner": "saint-joseph-de-beauce"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "barkmere": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-134",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 10,
+  "ca": 22,
+  "s3Only": 33,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-223",
+    "t": "Bylaw",
+    "owner": "pointe-des-cascades"
+   },
+   {
+    "id": "bylaw-242",
+    "t": "Bylaw",
+    "owner": "gore"
+   },
+   {
+    "id": "bylaw-251",
+    "t": "Bylaw",
+    "owner": "havelock"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "blainville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 9,
+  "ca": 9,
+  "s3Only": 0,
+  "pgOnly": 67,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "bois-des-filion": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 2,
+  "ca": 2,
+  "s3Only": 0,
+  "pgOnly": 11,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "berthier-sur-mer": {
+  "verdict": "gate1-business-property",
+  "g1": 2,
+  "g1s": [
+   {
+    "id": "bylaw-262",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   },
+   {
+    "id": "bylaw-268",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 4,
+  "g3s": [
+   {
+    "id": "bylaw-306",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-266",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-262",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 20,
+  "ca": 88,
+  "s3Only": 97,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-265",
+    "t": "Bylaw",
+    "owner": "barkmere"
+   },
+   {
+    "id": "bylaw-276",
+    "t": "Bylaw",
+    "owner": "gore"
+   },
+   {
+    "id": "bylaw-309",
+    "t": "Bylaw",
+    "owner": "hemmingford"
+   },
+   {
+    "id": "bylaw-310",
+    "t": "Bylaw",
+    "owner": "hemmingford"
+   },
+   {
+    "id": "bylaw-311",
+    "t": "Bylaw",
+    "owner": "chute-saint-philippe"
+   },
+   {
+    "id": "bylaw-313",
+    "t": "Bylaw",
+    "owner": "portneuf"
+   },
+   {
+    "id": "bylaw-316",
+    "t": "Bylaw",
+    "owner": "sainte-justine-de-newton"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 2,
+  "g3InS3": 4
+ },
+ "boischatel": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "source-pv-2026-07-06",
+    "t": "Source",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 10,
+  "ca": 17,
+  "s3Only": 15,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "de-2026-04-102",
+    "t": "DesignationEvent",
+    "owner": "saint-joseph-de-beauce"
+   },
+   {
+    "id": "de-2026-04-103",
+    "t": "DesignationEvent",
+    "owner": "saint-joseph-de-beauce"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "bouchette": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 3,
+  "g3s": [
+   {
+    "id": "event-derogation-2026-004",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "event-dm-2026-002",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "event-dm-2026-003",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 22,
+  "ca": 22,
+  "s3Only": 4,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 3
+ },
+ "bolton-est": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 10,
+  "ca": 10,
+  "s3Only": 0,
+  "pgOnly": 17,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "bolton-ouest": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-470-2025",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 3,
+  "g3s": [
+   {
+    "id": "bylaw-470-2025",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-478-2025",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-395-2023",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 19,
+  "ca": 22,
+  "s3Only": 19,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-393-2023",
+    "t": "Bylaw",
+    "owner": "saint-aime"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 3
+ },
+ "campbells-bay": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-104-2026",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 3,
+  "g3s": [
+   {
+    "id": "bylaw-102-2026",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-103-2026",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-104-2026",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 9,
+  "ca": 13,
+  "s3Only": 16,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 3
+ },
+ "brigham": {
+  "verdict": "gate1-business-property",
+  "g1": 22,
+  "g1s": [
+   {
+    "id": "desg-evt-vente-taxes",
+    "t": "DesignationEvent",
+    "miss": [
+     "docSha",
+     "extract",
+     "sourceUrl",
+     "date_vente",
+     "event_type",
+     "resolution",
+     "description"
+    ],
+    "inS3": false
+   },
+   {
+    "id": "lot-3521520",
+    "t": "Lot",
+    "miss": [
+     "no_lot",
+     "address",
+     "extract"
+    ],
+    "inS3": false
+   },
+   {
+    "id": "signal-subdiv-3520533",
+    "t": "Signal",
+    "miss": [
+     "docSha",
+     "extract",
+     "sourceUrl",
+     "description",
+     "signal_type"
+    ],
+    "inS3": false
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-2025-05",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": false
+   }
+  ],
+  "cb": 0,
+  "ca": 9,
+  "s3Only": 35,
+  "pgOnly": 21,
+  "owned": [],
+  "pgOnlyWithProps": 21,
+  "pgOnlyWithRefs": 1,
+  "pgOnlyTypes": [
+   "DesignationEvent",
+   "Lot",
+   "Signal",
+   "Source",
+   "Bylaw"
+  ],
+  "g1InS3": 1,
+  "g3InS3": 0
+ },
+ "chambly": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 2,
+  "ca": 2,
+  "s3Only": 0,
+  "pgOnly": 24,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "champlain": {
+  "verdict": "gate1-business-property",
+  "g1": 2,
+  "g1s": [
+   {
+    "id": "bylaw-2026-04",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   },
+   {
+    "id": "bylaw-2026-15",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 3,
+  "g3s": [
+   {
+    "id": "bylaw-2026-04",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-2026-14",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-2026-15",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 16,
+  "ca": 20,
+  "s3Only": 18,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2009-04",
+    "t": "Bylaw",
+    "owner": "ayers-cliff"
+   },
+   {
+    "id": "bylaw-2026-02",
+    "t": "Bylaw",
+    "owner": "lisle-aux-coudres"
+   },
+   {
+    "id": "bylaw-2026-05",
+    "t": "Bylaw",
+    "owner": "val-joli"
+   },
+   {
+    "id": "bylaw-2026-06",
+    "t": "Bylaw",
+    "owner": "melbourne"
+   },
+   {
+    "id": "bylaw-2026-07",
+    "t": "Bylaw",
+    "owner": "lac-tremblant-nord"
+   },
+   {
+    "id": "bylaw-2026-08",
+    "t": "Bylaw",
+    "owner": "lac-tremblant-nord"
+   },
+   {
+    "id": "bylaw-2026-09",
+    "t": "Bylaw",
+    "owner": "notre-dame-du-sacre-coeur-dissoudun"
+   },
+   {
+    "id": "bylaw-2026-10",
+    "t": "Bylaw",
+    "owner": "kingsey-falls"
+   },
+   {
+    "id": "bylaw-2026-11",
+    "t": "Bylaw",
+    "owner": "kingsey-falls"
+   },
+   {
+    "id": "bylaw-2026-13",
+    "t": "Bylaw",
+    "owner": "danville"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 2,
+  "g3InS3": 3
+ },
+ "chartierville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 13,
+  "ca": 13,
+  "s3Only": 2,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "constraint-cptaq-domtar",
+    "t": "Constraint",
+    "owner": "saint-claude"
+   },
+   {
+    "id": "constraint-cptaq-zone-agricole",
+    "t": "Constraint",
+    "owner": "saint-roch-de-richelieu"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "brome": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 5,
+  "ca": 5,
+  "s3Only": 0,
+  "pgOnly": 15,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "brossard": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 42,
+  "ca": 42,
+  "s3Only": 0,
+  "pgOnly": 9,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "carignan": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 0,
+  "pgOnly": 101,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "cheneville": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-2024-121",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 10,
+  "ca": 20,
+  "s3Only": 27,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "clarenceville": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 2,
+  "g3s": [
+   {
+    "id": "bylaw-428",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-2026-681",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 7,
+  "ca": 15,
+  "s3Only": 15,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "event-dm-2026-04",
+    "t": "DesignationEvent",
+    "owner": "saint-lucien"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 2
+ },
+ "compton": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-c4",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 7,
+  "ca": 17,
+  "s3Only": 34,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-i-1",
+    "t": "Zone",
+    "owner": "saint-urbain-premier"
+   },
+   {
+    "id": "zone-p-6",
+    "t": "Zone",
+    "owner": "danville"
+   },
+   {
+    "id": "zone-v-3",
+    "t": "Zone",
+    "owner": "stoke"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "cleveland": {
+  "verdict": "gate1-business-property",
+  "g1": 2,
+  "g1s": [
+   {
+    "id": "bylaw-604",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   },
+   {
+    "id": "bylaw-605",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 5,
+  "g3s": [
+   {
+    "id": "bylaw-604",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-605",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "constraint-cptaq",
+    "t": "Constraint",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 9,
+  "ca": 19,
+  "s3Only": 33,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-445",
+    "t": "Bylaw",
+    "owner": "sainte-justine-de-newton"
+   },
+   {
+    "id": "bylaw-591",
+    "t": "Bylaw",
+    "owner": "stoke"
+   },
+   {
+    "id": "bylaw-599",
+    "t": "Bylaw",
+    "owner": "saint-boniface"
+   },
+   {
+    "id": "bylaw-600",
+    "t": "Bylaw",
+    "owner": "saint-boniface"
+   },
+   {
+    "id": "bylaw-601",
+    "t": "Bylaw",
+    "owner": "saint-boniface"
+   },
+   {
+    "id": "bylaw-603",
+    "t": "Bylaw",
+    "owner": "saint-boniface"
+   },
+   {
+    "id": "bylaw-607",
+    "t": "Bylaw",
+    "owner": "val-david"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 2,
+  "g3InS3": 5
+ },
+ "danville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 22,
+  "ca": 22,
+  "s3Only": 13,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2025-05",
+    "t": "Bylaw",
+    "owner": "brigham"
+   },
+   {
+    "id": "bylaw-2025-10",
+    "t": "Bylaw",
+    "owner": "ham-sud"
+   },
+   {
+    "id": "bylaw-2026-02",
+    "t": "Bylaw",
+    "owner": "lisle-aux-coudres"
+   },
+   {
+    "id": "bylaw-2026-06",
+    "t": "Bylaw",
+    "owner": "melbourne"
+   },
+   {
+    "id": "bylaw-2026-07",
+    "t": "Bylaw",
+    "owner": "lac-tremblant-nord"
+   },
+   {
+    "id": "bylaw-2026-08",
+    "t": "Bylaw",
+    "owner": "lac-tremblant-nord"
+   },
+   {
+    "id": "bylaw-2026-09",
+    "t": "Bylaw",
+    "owner": "notre-dame-du-sacre-coeur-dissoudun"
+   },
+   {
+    "id": "bylaw-2026-14",
+    "t": "Bylaw",
+    "owner": "champlain"
+   },
+   {
+    "id": "bylaw-2026-15",
+    "t": "Bylaw",
+    "owner": "champlain"
+   },
+   {
+    "id": "zone-a-3",
+    "t": "Zone",
+    "owner": "saint-esprit"
+   },
+   {
+    "id": "zone-af-7",
+    "t": "Zone",
+    "owner": "saint-francois-xavier-de-brompton"
+   },
+   {
+    "id": "zone-r-1",
+    "t": "Zone",
+    "owner": "saint-albert"
+   },
+   {
+    "id": "zone-r-22",
+    "t": "Zone",
+    "owner": "hudson"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "chute-saint-philippe": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-311",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 19,
+  "ca": 22,
+  "s3Only": 7,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "denholm": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-sq-2021-005",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 4,
+  "ca": 4,
+  "s3Only": 16,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2025-04",
+    "t": "Bylaw",
+    "owner": "saints-anges"
+   },
+   {
+    "id": "bylaw-2025-05",
+    "t": "Bylaw",
+    "owner": "brigham"
+   },
+   {
+    "id": "bylaw-2025-06",
+    "t": "Bylaw",
+    "owner": "notre-dame-du-sacre-coeur-dissoudun"
+   },
+   {
+    "id": "bylaw-2025-07",
+    "t": "Bylaw",
+    "owner": "ayers-cliff"
+   },
+   {
+    "id": "bylaw-2025-08",
+    "t": "Bylaw",
+    "owner": "notre-dame-du-sacre-coeur-dissoudun"
+   },
+   {
+    "id": "bylaw-2025-10",
+    "t": "Bylaw",
+    "owner": "ham-sud"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "daveluyville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 7,
+  "ca": 7,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-m-05",
+    "t": "Zone",
+    "owner": "deschaillons-sur-saint-laurent"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "dollard-des-ormeaux": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 3,
+  "ca": 3,
+  "s3Only": 0,
+  "pgOnly": 18,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "donnacona": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-ra-1",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 66,
+  "ca": 82,
+  "s3Only": 29,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-c-12",
+    "t": "Zone",
+    "owner": "saint-raymond"
+   },
+   {
+    "id": "zone-c-6",
+    "t": "Zone",
+    "owner": "saint-casimir"
+   },
+   {
+    "id": "zone-c-7",
+    "t": "Zone",
+    "owner": "saint-agapit"
+   },
+   {
+    "id": "zone-m-4",
+    "t": "Zone",
+    "owner": "danville"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "dundee": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 1,
+  "ca": 1,
+  "s3Only": 0,
+  "pgOnly": 2,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "esterel": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-r-7",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 46,
+  "ca": 61,
+  "s3Only": 25,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2024-733",
+    "t": "Bylaw",
+    "owner": "la-minerve"
+   },
+   {
+    "id": "event-2024-08-123",
+    "t": "DesignationEvent",
+    "owner": "terrasse-vaudreuil"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "deschaillons-sur-saint-laurent": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-m-05",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 8,
+  "ca": 29,
+  "s3Only": 66,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-177-2021",
+    "t": "Bylaw",
+    "owner": "lac-edouard"
+   },
+   {
+    "id": "zone-m-04",
+    "t": "Zone",
+    "owner": "fortierville"
+   },
+   {
+    "id": "zone-rec-01",
+    "t": "Zone",
+    "owner": "ferme-neuve"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "eastman": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 9,
+  "ca": 9,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-v-3",
+    "t": "Zone",
+    "owner": "stoke"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "gore": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-242",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-242",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 45,
+  "ca": 66,
+  "s3Only": 41,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-262",
+    "t": "Bylaw",
+    "owner": "berthier-sur-mer"
+   },
+   {
+    "id": "bylaw-280",
+    "t": "Bylaw",
+    "owner": "saint-gabriel-de-valcartier"
+   },
+   {
+    "id": "bylaw-282",
+    "t": "Bylaw",
+    "owner": "val-racine"
+   },
+   {
+    "id": "event-2026-07-177",
+    "t": "DesignationEvent",
+    "owner": "kingsey-falls"
+   },
+   {
+    "id": "zone-ru-4",
+    "t": "Zone",
+    "owner": "chartierville"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "ferme-neuve": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-149",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 2,
+  "g3s": [
+   {
+    "id": "bylaw-141",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-149",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 16,
+  "ca": 36,
+  "s3Only": 48,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-136",
+    "t": "Bylaw",
+    "owner": "saint-andre-dargenteuil"
+   },
+   {
+    "id": "zone-res-11",
+    "t": "Zone",
+    "owner": "ayers-cliff"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 2
+ },
+ "farnham": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-750",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 9,
+  "ca": 56,
+  "s3Only": 62,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "frelighsburg": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 7,
+  "ca": 7,
+  "s3Only": 0,
+  "pgOnly": 17,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "ham-sud": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-2025-10",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 4,
+  "ca": 8,
+  "s3Only": 16,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2025-06",
+    "t": "Bylaw",
+    "owner": "notre-dame-du-sacre-coeur-dissoudun"
+   },
+   {
+    "id": "bylaw-2025-07",
+    "t": "Bylaw",
+    "owner": "ayers-cliff"
+   },
+   {
+    "id": "bylaw-2025-08",
+    "t": "Bylaw",
+    "owner": "notre-dame-du-sacre-coeur-dissoudun"
+   },
+   {
+    "id": "bylaw-2026-04",
+    "t": "Bylaw",
+    "owner": "champlain"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "grenville-sur-la-rouge": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 10,
+  "ca": 10,
+  "s3Only": 0,
+  "pgOnly": 59,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "havelock": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-251",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 3,
+  "g3s": [
+   {
+    "id": "zone-id-3",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-251",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-324",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 3,
+  "ca": 6,
+  "s3Only": 8,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 3
+ },
+ "hinchinbrooke": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 19,
+  "ca": 19,
+  "s3Only": 2,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-280",
+    "t": "Bylaw",
+    "owner": "saint-gabriel-de-valcartier"
+   },
+   {
+    "id": "bylaw-411",
+    "t": "Bylaw",
+    "owner": "sainte-petronille"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "hudson": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-r-22",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 19,
+  "ca": 32,
+  "s3Only": 35,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-526",
+    "t": "Bylaw",
+    "owner": "sainte-clotilde"
+   },
+   {
+    "id": "zone-r-7",
+    "t": "Zone",
+    "owner": "esterel"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "ham-nord": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 3,
+  "g3s": [
+   {
+    "id": "bylaw-453",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-315",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "zone-c1",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 12,
+  "ca": 12,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-c4",
+    "t": "Zone",
+    "owner": "compton"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 3
+ },
+ "kingsey-falls": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-2026-10",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 4,
+  "ca": 4,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2025-10",
+    "t": "Bylaw",
+    "owner": "ham-sud"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "huntingdon": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 19,
+  "ca": 19,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "source-pv-2026-07-06",
+    "t": "Source",
+    "owner": "boischatel"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "lac-du-cerf": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-384-2022",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-384-2022",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 9,
+  "ca": 17,
+  "s3Only": 17,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-428-2026",
+    "t": "Bylaw",
+    "owner": "parisville"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "lac-brome": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 2,
+  "ca": 2,
+  "s3Only": 0,
+  "pgOnly": 22,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "la-minerve": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-2024-733",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-2024-733",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 7,
+  "ca": 7,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2026-765",
+    "t": "Bylaw",
+    "owner": "saint-augustin-de-desmaures"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "lac-superieur": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 36,
+  "ca": 36,
+  "s3Only": 3,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2026-681",
+    "t": "Bylaw",
+    "owner": "clarenceville"
+   },
+   {
+    "id": "event-dm-2026-0027",
+    "t": "DesignationEvent",
+    "owner": "sainte-emelie-de-lenergie"
+   },
+   {
+    "id": "event-piia-2026-0012",
+    "t": "DesignationEvent",
+    "owner": "piedmont"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "lac-tremblant-nord": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 2,
+  "g3s": [
+   {
+    "id": "bylaw-2026-08",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-2026-07",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 3,
+  "ca": 17,
+  "s3Only": 22,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2026-04",
+    "t": "Bylaw",
+    "owner": "champlain"
+   },
+   {
+    "id": "bylaw-2026-05",
+    "t": "Bylaw",
+    "owner": "val-joli"
+   },
+   {
+    "id": "bylaw-2026-06",
+    "t": "Bylaw",
+    "owner": "melbourne"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 2
+ },
+ "lac-edouard": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 10,
+  "ca": 10,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-205-2026",
+    "t": "Bylaw",
+    "owner": "herouxville"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "lambton": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 17,
+  "ca": 17,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-m-3",
+    "t": "Zone",
+    "owner": "saints-anges"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "lavenir": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 11,
+  "ca": 11,
+  "s3Only": 0,
+  "pgOnly": 12,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "hampstead": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 2,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-1001",
+    "t": "Bylaw",
+    "owner": "sainte-anne-des-lacs"
+   },
+   {
+    "id": "zone-ra-1",
+    "t": "Zone",
+    "owner": "donnacona"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "lascension": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 0,
+  "ca": 0,
+  "s3Only": 47,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "adresse-lascension-de-notre-seigneur-2150-chemin-baie-moreau",
+    "t": "Adresse",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "adresse-lascension-de-notre-seigneur-2350-chemin-baie-moreau",
+    "t": "Adresse",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "adresse-lascension-de-notre-seigneur-2450-chemin-baie-moreau",
+    "t": "Adresse",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "bylaw-lascension-de-notre-seigneur-2005-304",
+    "t": "Bylaw",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "bylaw-lascension-de-notre-seigneur-2025-525",
+    "t": "Bylaw",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "bylaw-lascension-de-notre-seigneur-2025-526",
+    "t": "Bylaw",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "bylaw-lascension-de-notre-seigneur-2025-527",
+    "t": "Bylaw",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "bylaw-lascension-de-notre-seigneur-2026-532",
+    "t": "Bylaw",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "bylaw-lascension-de-notre-seigneur-2026-534",
+    "t": "Bylaw",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "bylaw-lascension-de-notre-seigneur-2026-535",
+    "t": "Bylaw",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "event-lascension-de-notre-seigneur-acquisition-terrains-2026-02-02",
+    "t": "DesignationEvent",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "event-lascension-de-notre-seigneur-derogation-2025-07-07-6070-rosiers",
+    "t": "DesignationEvent",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "event-lascension-de-notre-seigneur-derogation-2026-05-04-958-rang5",
+    "t": "DesignationEvent",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "event-lascension-de-notre-seigneur-derogation-2026-05-11-baie-moreau-2450",
+    "t": "DesignationEvent",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "event-lascension-de-notre-seigneur-piia-2026-02-02-baie-moreau-2350",
+    "t": "DesignationEvent",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "event-lascension-de-notre-seigneur-piia-2026-05-04-baie-moreau-2150",
+    "t": "DesignationEvent",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "event-lascension-de-notre-seigneur-rezonage-2025-525",
+    "t": "DesignationEvent",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "event-lascension-de-notre-seigneur-rezonage-2026-535",
+    "t": "DesignationEvent",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "lot-lascension-de-notre-seigneur-4702334",
+    "t": "Lot",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "lot-lascension-de-notre-seigneur-4702335",
+    "t": "Lot",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "lot-lascension-de-notre-seigneur-4702336",
+    "t": "Lot",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "lot-lascension-de-notre-seigneur-5291453",
+    "t": "Lot",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "lot-lascension-de-notre-seigneur-6701126",
+    "t": "Lot",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "lot-lascension-de-notre-seigneur-6701127",
+    "t": "Lot",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "lot-lascension-de-notre-seigneur-6701129",
+    "t": "Lot",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "lot-lascension-de-notre-seigneur-6701130",
+    "t": "Lot",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "muni-lascension-de-notre-seigneur",
+    "t": "Municipality",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "signal-lascension-de-notre-seigneur-developpement-residentiel-2026",
+    "t": "Signal",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "signal-lascension-de-notre-seigneur-energie-solaire-2025",
+    "t": "Signal",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "signal-lascension-de-notre-seigneur-rezonage-riverain-2026",
+    "t": "Signal",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "source-lascension-de-notre-seigneur-pv-2025-05-05",
+    "t": "Source",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "source-lascension-de-notre-seigneur-pv-2025-06-02",
+    "t": "Source",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "source-lascension-de-notre-seigneur-pv-2025-07-07",
+    "t": "Source",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "source-lascension-de-notre-seigneur-pv-2025-09-02",
+    "t": "Source",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "source-lascension-de-notre-seigneur-pv-2025-12-01",
+    "t": "Source",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "source-lascension-de-notre-seigneur-pv-2026-01-12",
+    "t": "Source",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "source-lascension-de-notre-seigneur-pv-2026-02-02",
+    "t": "Source",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "source-lascension-de-notre-seigneur-pv-2026-03-02",
+    "t": "Source",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "source-lascension-de-notre-seigneur-pv-2026-03-23",
+    "t": "Source",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "source-lascension-de-notre-seigneur-pv-2026-04-13",
+    "t": "Source",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "source-lascension-de-notre-seigneur-pv-2026-05-04",
+    "t": "Source",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "source-lascension-de-notre-seigneur-pv-2026-05-11",
+    "t": "Source",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "zone-lascension-de-notre-seigneur-123-ca",
+    "t": "Zone",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "zone-lascension-de-notre-seigneur-124-r",
+    "t": "Zone",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "zone-lascension-de-notre-seigneur-125-r",
+    "t": "Zone",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "zone-lascension-de-notre-seigneur-13-pr",
+    "t": "Zone",
+    "owner": "lascension-de-notre-seigneur"
+   },
+   {
+    "id": "zone-lascension-de-notre-seigneur-26-v",
+    "t": "Zone",
+    "owner": "lascension-de-notre-seigneur"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "lawrenceville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 0,
+  "pgOnly": 22,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "lepiphanie": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "event-273-08-2026",
+    "t": "DesignationEvent",
+    "miss": [
+     "etape",
+     "etape_date",
+     "instrument"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "event-273-08-2026",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 36,
+  "ca": 67,
+  "s3Only": 37,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "louiseville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 8,
+  "ca": 8,
+  "s3Only": 0,
+  "pgOnly": 74,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "longueuil": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 4,
+  "ca": 4,
+  "s3Only": 0,
+  "pgOnly": 5,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "low": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 1,
+  "ca": 1,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-sq-2021-005",
+    "t": "Bylaw",
+    "owner": "denholm"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "maricourt": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 3,
+  "ca": 3,
+  "s3Only": 0,
+  "pgOnly": 30,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "melbourne": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-2026-06",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 4,
+  "ca": 28,
+  "s3Only": 71,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2023-02",
+    "t": "Bylaw",
+    "owner": "sainte-seraphine"
+   },
+   {
+    "id": "bylaw-2023-03",
+    "t": "Bylaw",
+    "owner": "sainte-seraphine"
+   },
+   {
+    "id": "bylaw-2024-02",
+    "t": "Bylaw",
+    "owner": "notre-dame-du-sacre-coeur-dissoudun"
+   },
+   {
+    "id": "bylaw-2025-02",
+    "t": "Bylaw",
+    "owner": "saint-leonard-daston"
+   },
+   {
+    "id": "bylaw-2026-04",
+    "t": "Bylaw",
+    "owner": "champlain"
+   },
+   {
+    "id": "bylaw-2026-05",
+    "t": "Bylaw",
+    "owner": "val-joli"
+   },
+   {
+    "id": "bylaw-2026-09",
+    "t": "Bylaw",
+    "owner": "notre-dame-du-sacre-coeur-dissoudun"
+   },
+   {
+    "id": "zone-r-5",
+    "t": "Zone",
+    "owner": "inverness"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "lile-perrot": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 15,
+  "ca": 15,
+  "s3Only": 0,
+  "pgOnly": 24,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "mont-laurier": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-436",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 27,
+  "ca": 47,
+  "s3Only": 34,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "lisle-aux-coudres": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-2026-02",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 11,
+  "ca": 11,
+  "s3Only": 3,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2026-03",
+    "t": "Bylaw",
+    "owner": "val-joli"
+   },
+   {
+    "id": "bylaw-2026-04",
+    "t": "Bylaw",
+    "owner": "champlain"
+   },
+   {
+    "id": "bylaw-2026-05",
+    "t": "Bylaw",
+    "owner": "val-joli"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "neuville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 21,
+  "ca": 21,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-131",
+    "t": "Bylaw",
+    "owner": "saint-norbert"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "notre-dame-de-ham": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-327",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 7,
+  "ca": 8,
+  "s3Only": 8,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-324",
+    "t": "Bylaw",
+    "owner": "havelock"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "mont-blanc": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 5,
+  "ca": 5,
+  "s3Only": 0,
+  "pgOnly": 38,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "nicolet": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 0,
+  "pgOnly": 26,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "notre-dame-du-sacre-coeur-dissoudun": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-2026-09",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-2026-09",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 26,
+  "ca": 30,
+  "s3Only": 14,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2024-03",
+    "t": "Bylaw",
+    "owner": "saint-leonard-daston"
+   },
+   {
+    "id": "bylaw-2025-02",
+    "t": "Bylaw",
+    "owner": "saint-leonard-daston"
+   },
+   {
+    "id": "bylaw-2025-05",
+    "t": "Bylaw",
+    "owner": "brigham"
+   },
+   {
+    "id": "bylaw-2025-07",
+    "t": "Bylaw",
+    "owner": "ayers-cliff"
+   },
+   {
+    "id": "bylaw-2026-04",
+    "t": "Bylaw",
+    "owner": "champlain"
+   },
+   {
+    "id": "bylaw-2026-05",
+    "t": "Bylaw",
+    "owner": "val-joli"
+   },
+   {
+    "id": "bylaw-2026-07",
+    "t": "Bylaw",
+    "owner": "lac-tremblant-nord"
+   },
+   {
+    "id": "bylaw-2026-08",
+    "t": "Bylaw",
+    "owner": "lac-tremblant-nord"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "notre-dame-de-la-merci": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 0,
+  "pgOnly": 78,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "ogden": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 20,
+  "ca": 20,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2023-02",
+    "t": "Bylaw",
+    "owner": "sainte-seraphine"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "otterburn-park": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 9,
+  "ca": 9,
+  "s3Only": 0,
+  "pgOnly": 13,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "parisville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 14,
+  "ca": 14,
+  "s3Only": 3,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-417-2024",
+    "t": "Bylaw",
+    "owner": "saint-come-liniere"
+   },
+   {
+    "id": "bylaw-427-2025",
+    "t": "Bylaw",
+    "owner": "saint-patrice-de-beaurivage"
+   },
+   {
+    "id": "zone-m-04",
+    "t": "Zone",
+    "owner": "fortierville"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "orford": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 8,
+  "ca": 8,
+  "s3Only": 0,
+  "pgOnly": 12,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "montreal-est": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 5,
+  "ca": 5,
+  "s3Only": 0,
+  "pgOnly": 59,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "petite-riviere-saint-francois": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-691",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-691",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 16,
+  "ca": 30,
+  "s3Only": 25,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-581",
+    "t": "Bylaw",
+    "owner": "cleveland"
+   },
+   {
+    "id": "bylaw-585",
+    "t": "Bylaw",
+    "owner": "cleveland"
+   },
+   {
+    "id": "bylaw-603",
+    "t": "Bylaw",
+    "owner": "saint-boniface"
+   },
+   {
+    "id": "bylaw-778",
+    "t": "Bylaw",
+    "owner": "saint-hyacinthe"
+   },
+   {
+    "id": "bylaw-789",
+    "t": "Bylaw",
+    "owner": "val-david"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "piedmont": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "event-piia-2026-0012",
+    "t": "DesignationEvent",
+    "miss": [
+     "etape_date",
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "event-piia-2026-0012",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 40,
+  "ca": 43,
+  "s3Only": 11,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "event-dm-2026-0002",
+    "t": "DesignationEvent",
+    "owner": "saint-anicet"
+   },
+   {
+    "id": "event-dm-2026-0004",
+    "t": "DesignationEvent",
+    "owner": "saint-anicet"
+   },
+   {
+    "id": "event-piia-2026-0001",
+    "t": "DesignationEvent",
+    "owner": "prevost"
+   },
+   {
+    "id": "event-piia-2026-0006",
+    "t": "DesignationEvent",
+    "owner": "prevost"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "portneuf": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-313",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 14,
+  "ca": 14,
+  "s3Only": 3,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-309",
+    "t": "Bylaw",
+    "owner": "hemmingford"
+   },
+   {
+    "id": "bylaw-310",
+    "t": "Bylaw",
+    "owner": "hemmingford"
+   },
+   {
+    "id": "bylaw-311",
+    "t": "Bylaw",
+    "owner": "chute-saint-philippe"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "plessisville": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-204",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 79,
+  "ca": 79,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-111",
+    "t": "Zone",
+    "owner": "upton"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "prevost": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "event-piia-2026-0006",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 38,
+  "ca": 64,
+  "s3Only": 53,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-282",
+    "t": "Bylaw",
+    "owner": "val-racine"
+   },
+   {
+    "id": "bylaw-776",
+    "t": "Bylaw",
+    "owner": "petite-riviere-saint-francois"
+   },
+   {
+    "id": "bylaw-863",
+    "t": "Bylaw",
+    "owner": "notre-dame-du-mont-carmel"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "pierreville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 4,
+  "ca": 4,
+  "s3Only": 0,
+  "pgOnly": 14,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "racine": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 9,
+  "ca": 9,
+  "s3Only": 0,
+  "pgOnly": 28,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "rawdon": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 2,
+  "g3s": [
+   {
+    "id": "zone-rd-9",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "zone-rec-10",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 33,
+  "ca": 43,
+  "s3Only": 28,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-162-2025",
+    "t": "Bylaw",
+    "owner": "saint-roch-ouest"
+   },
+   {
+    "id": "bylaw-2021-03",
+    "t": "Bylaw",
+    "owner": "westbury"
+   },
+   {
+    "id": "zone-i-1",
+    "t": "Zone",
+    "owner": "saint-urbain-premier"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 2
+ },
+ "richelieu": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 16,
+  "ca": 16,
+  "s3Only": 0,
+  "pgOnly": 77,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "riviere-beaudette": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "event-2026-06-08",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 12,
+  "ca": 12,
+  "s3Only": 5,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2025-07",
+    "t": "Bylaw",
+    "owner": "ayers-cliff"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-agapit": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "event-2026-06-205",
+    "t": "DesignationEvent",
+    "miss": [
+     "instrument"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 2,
+  "g3s": [
+   {
+    "id": "zone-c-7",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "event-2026-06-205",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 22,
+  "ca": 34,
+  "s3Only": 25,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-107",
+    "t": "Zone",
+    "owner": "rougemont"
+   },
+   {
+    "id": "zone-108",
+    "t": "Zone",
+    "owner": "saint-pie"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 2
+ },
+ "saint-aime": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 18,
+  "ca": 18,
+  "s3Only": 4,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-384-2022",
+    "t": "Bylaw",
+    "owner": "lac-du-cerf"
+   },
+   {
+    "id": "bylaw-395-2023",
+    "t": "Bylaw",
+    "owner": "bolton-ouest"
+   },
+   {
+    "id": "zone-a-2",
+    "t": "Zone",
+    "owner": "saint-barnabe-sud"
+   },
+   {
+    "id": "zone-a-3",
+    "t": "Zone",
+    "owner": "saint-esprit"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-albert": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-r-1",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 10,
+  "ca": 15,
+  "s3Only": 17,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2025-03",
+    "t": "Bylaw",
+    "owner": "denholm"
+   },
+   {
+    "id": "bylaw-2026-01",
+    "t": "Bylaw",
+    "owner": "lisle-aux-coudres"
+   },
+   {
+    "id": "bylaw-2026-04",
+    "t": "Bylaw",
+    "owner": "champlain"
+   },
+   {
+    "id": "bylaw-2026-05",
+    "t": "Bylaw",
+    "owner": "val-joli"
+   },
+   {
+    "id": "bylaw-2026-06",
+    "t": "Bylaw",
+    "owner": "melbourne"
+   },
+   {
+    "id": "bylaw-2026-07",
+    "t": "Bylaw",
+    "owner": "lac-tremblant-nord"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-alexis": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-r8",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 9,
+  "ca": 9,
+  "s3Only": 3,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2024-121",
+    "t": "Bylaw",
+    "owner": "cheneville"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "pointe-claire": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 29,
+  "ca": 29,
+  "s3Only": 0,
+  "pgOnly": 142,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-alexis-des-monts": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 24,
+  "ca": 24,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-478-2025",
+    "t": "Bylaw",
+    "owner": "bolton-ouest"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "roxton": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 0,
+  "pgOnly": 8,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-amable": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 15,
+  "ca": 15,
+  "s3Only": 0,
+  "pgOnly": 25,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-anicet": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 31,
+  "ca": 31,
+  "s3Only": 6,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-525",
+    "t": "Bylaw",
+    "owner": "sainte-clotilde"
+   },
+   {
+    "id": "bylaw-585",
+    "t": "Bylaw",
+    "owner": "cleveland"
+   },
+   {
+    "id": "bylaw-602",
+    "t": "Bylaw",
+    "owner": "saint-boniface"
+   },
+   {
+    "id": "bylaw-603",
+    "t": "Bylaw",
+    "owner": "saint-boniface"
+   },
+   {
+    "id": "bylaw-604",
+    "t": "Bylaw",
+    "owner": "cleveland"
+   },
+   {
+    "id": "bylaw-605",
+    "t": "Bylaw",
+    "owner": "cleveland"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-barnabe-sud": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 3,
+  "g3s": [
+   {
+    "id": "event-dm-2026-03",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "zone-a-2",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "event-dm-2026-01",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 10,
+  "ca": 10,
+  "s3Only": 2,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-02-2026",
+    "t": "Bylaw",
+    "owner": "notre-dame-de-lourdes--joliette"
+   },
+   {
+    "id": "zone-a1",
+    "t": "Zone",
+    "owner": "stratford"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 3
+ },
+ "saint-antoine-de-lisle-aux-grues": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 19,
+  "ca": 19,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "event-2026-06-08",
+    "t": "DesignationEvent",
+    "owner": "riviere-beaudette"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-andre-dargenteuil": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 49,
+  "ca": 49,
+  "s3Only": 4,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-134",
+    "t": "Bylaw",
+    "owner": "barkmere"
+   },
+   {
+    "id": "event-derogation-2026-004",
+    "t": "DesignationEvent",
+    "owner": "bouchette"
+   },
+   {
+    "id": "event-dm-2026-002",
+    "t": "DesignationEvent",
+    "owner": "bouchette"
+   },
+   {
+    "id": "event-dm-2026-003",
+    "t": "DesignationEvent",
+    "owner": "bouchette"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-barthelemy": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 1,
+  "ca": 1,
+  "s3Only": 0,
+  "pgOnly": 19,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-casimir": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-c-6",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 8,
+  "ca": 25,
+  "s3Only": 30,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "event-derogation-2026-02",
+    "t": "DesignationEvent",
+    "owner": "sainte-anne-de-la-perade"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-basile-le-grand": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 0,
+  "pgOnly": 68,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-christophe-darthabaska": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 28,
+  "ca": 28,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "src-1",
+    "t": "Source",
+    "owner": "saint-stanislas-de-kostka"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-cleophas-de-brandon": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 0,
+  "ca": 0,
+  "s3Only": 0,
+  "pgOnly": 7,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-claude": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "constraint-cptaq-domtar",
+    "t": "Constraint",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 7,
+  "ca": 9,
+  "s3Only": 8,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-colomban": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 41,
+  "ca": 41,
+  "s3Only": 3,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-600",
+    "t": "Bylaw",
+    "owner": "saint-boniface"
+   },
+   {
+    "id": "bylaw-602",
+    "t": "Bylaw",
+    "owner": "saint-boniface"
+   },
+   {
+    "id": "source-doc",
+    "t": "Source",
+    "owner": "saint-esprit"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-bruno-de-montarville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 13,
+  "ca": 13,
+  "s3Only": 0,
+  "pgOnly": 26,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-come": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 2,
+  "ca": 2,
+  "s3Only": 0,
+  "pgOnly": 15,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "potton": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 11,
+  "ca": 11,
+  "s3Only": 0,
+  "pgOnly": 50,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-denis-de-brompton": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-474",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 10,
+  "ca": 10,
+  "s3Only": 2,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-750",
+    "t": "Bylaw",
+    "owner": "farnham"
+   },
+   {
+    "id": "event-2026-07-13",
+    "t": "DesignationEvent",
+    "owner": "val-joli"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-cyrille-de-wendover": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 5,
+  "ca": 5,
+  "s3Only": 0,
+  "pgOnly": 22,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-cuthbert": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 8,
+  "ca": 8,
+  "s3Only": 0,
+  "pgOnly": 10,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-edouard-de-maskinonge": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 1,
+  "ca": 1,
+  "s3Only": 0,
+  "pgOnly": 16,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-donat--matawinie": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 0,
+  "pgOnly": 14,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-come-liniere": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-417-2024",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 22,
+  "ca": 30,
+  "s3Only": 14,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-francois-xavier-de-brompton": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 2,
+  "g3s": [
+   {
+    "id": "zone-p-3",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "zone-af-7",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 10,
+  "ca": 28,
+  "s3Only": 42,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "src-doc",
+    "t": "Source",
+    "owner": "la-peche"
+   },
+   {
+    "id": "zone-r-24",
+    "t": "Zone",
+    "owner": "hudson"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 2
+ },
+ "saint-francois-du-lac": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 7,
+  "ca": 7,
+  "s3Only": 0,
+  "pgOnly": 21,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-etienne-de-bolton": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 4,
+  "ca": 4,
+  "s3Only": 0,
+  "pgOnly": 17,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-gabriel": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 3,
+  "ca": 3,
+  "s3Only": 0,
+  "pgOnly": 13,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-germain-de-grantham": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 12,
+  "ca": 12,
+  "s3Only": 0,
+  "pgOnly": 120,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-gabriel-de-valcartier": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-280",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 0,
+  "ca": 9,
+  "s3Only": 42,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-147",
+    "t": "Bylaw",
+    "owner": "sainte-felicite--lislet"
+   },
+   {
+    "id": "bylaw-201",
+    "t": "Bylaw",
+    "owner": "barkmere"
+   },
+   {
+    "id": "bylaw-262",
+    "t": "Bylaw",
+    "owner": "berthier-sur-mer"
+   },
+   {
+    "id": "bylaw-263",
+    "t": "Bylaw",
+    "owner": "barkmere"
+   },
+   {
+    "id": "bylaw-267",
+    "t": "Bylaw",
+    "owner": "berthier-sur-mer"
+   },
+   {
+    "id": "bylaw-270",
+    "t": "Bylaw",
+    "owner": "saint-pie"
+   },
+   {
+    "id": "bylaw-272",
+    "t": "Bylaw",
+    "owner": "saint-pie"
+   },
+   {
+    "id": "bylaw-276",
+    "t": "Bylaw",
+    "owner": "gore"
+   },
+   {
+    "id": "source-doc",
+    "t": "Source",
+    "owner": "saint-esprit"
+   },
+   {
+    "id": "zone-a-2",
+    "t": "Zone",
+    "owner": "saint-barnabe-sud"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-gabriel-de-brandon": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 29,
+  "ca": 29,
+  "s3Only": 4,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-501",
+    "t": "Bylaw",
+    "owner": "godmanchester"
+   },
+   {
+    "id": "zone-108",
+    "t": "Zone",
+    "owner": "saint-pie"
+   },
+   {
+    "id": "zone-204",
+    "t": "Zone",
+    "owner": "plessisville"
+   },
+   {
+    "id": "zone-rec-10",
+    "t": "Zone",
+    "owner": "rawdon"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-gilbert": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 13,
+  "ca": 13,
+  "s3Only": 2,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-rmu-2021",
+    "t": "Bylaw",
+    "owner": "pont-rouge"
+   },
+   {
+    "id": "src-1",
+    "t": "Source",
+    "owner": "saint-stanislas-de-kostka"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-guillaume": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 18,
+  "ca": 18,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-c-6",
+    "t": "Zone",
+    "owner": "saint-casimir"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-jerome": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 64,
+  "ca": 64,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "source-doc",
+    "t": "Source",
+    "owner": "saint-esprit"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-jean-de-matha": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 12,
+  "ca": 12,
+  "s3Only": 0,
+  "pgOnly": 12,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-jacques-de-leeds": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-175",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 6,
+  "ca": 11,
+  "s3Only": 12,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-joachim-de-shefford": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 0,
+  "pgOnly": 21,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-leonard-daston": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 2,
+  "g3s": [
+   {
+    "id": "bylaw-2025-02",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-2024-03",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 5,
+  "ca": 12,
+  "s3Only": 21,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2024-06",
+    "t": "Bylaw",
+    "owner": "saints-anges"
+   },
+   {
+    "id": "zone-h-1",
+    "t": "Zone",
+    "owner": "saint-roch-de-lachigan"
+   },
+   {
+    "id": "zone-h-17",
+    "t": "Zone",
+    "owner": "saint-joseph-de-beauce"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 2
+ },
+ "saint-joseph-de-beauce": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 2,
+  "g3s": [
+   {
+    "id": "constraint-milieu-humide-parc-industriel",
+    "t": "Constraint",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "constraint-cptaq-lots",
+    "t": "Constraint",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 63,
+  "ca": 63,
+  "s3Only": 4,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "designation-event-2024-05-139",
+    "t": "DesignationEvent",
+    "owner": "upton"
+   },
+   {
+    "id": "designation-event-2024-05-141",
+    "t": "DesignationEvent",
+    "owner": "upton"
+   },
+   {
+    "id": "zone-h-33",
+    "t": "Zone",
+    "owner": "saint-tite-des-caps"
+   },
+   {
+    "id": "zone-i-3",
+    "t": "Zone",
+    "owner": "saint-roch-de-lachigan"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 2
+ },
+ "saint-louis": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "event-derogation-2026-03",
+    "t": "DesignationEvent",
+    "miss": [
+     "etape_date"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "event-derogation-2026-03",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 24,
+  "ca": 24,
+  "s3Only": 3,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "constraint-cptaq",
+    "t": "Constraint",
+    "owner": "cleveland"
+   },
+   {
+    "id": "constraint-cptaq-agricole",
+    "t": "Constraint",
+    "owner": "montcerf-lytton"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "saint-lucien": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "event-dm-2026-04",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 9,
+  "ca": 11,
+  "s3Only": 13,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "event-2026-08-219",
+    "t": "DesignationEvent",
+    "owner": "saint-ludger"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-leon-le-grand--maskinonge": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 9,
+  "ca": 9,
+  "s3Only": 0,
+  "pgOnly": 22,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-lambert": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 0,
+  "ca": 0,
+  "s3Only": 0,
+  "pgOnly": 11,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-mathieu-du-parc": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 3,
+  "ca": 3,
+  "s3Only": 2,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2026-03",
+    "t": "Bylaw",
+    "owner": "val-joli"
+   },
+   {
+    "id": "bylaw-2026-04",
+    "t": "Bylaw",
+    "owner": "champlain"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-mathieu-de-beloeil": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 22,
+  "ca": 22,
+  "s3Only": 0,
+  "pgOnly": 14,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-norbert": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-131",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 2,
+  "g3s": [
+   {
+    "id": "bylaw-432",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-131",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 5,
+  "ca": 11,
+  "s3Only": 19,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-426",
+    "t": "Bylaw",
+    "owner": "sainte-justine-de-newton"
+   },
+   {
+    "id": "zone-aa",
+    "t": "Zone",
+    "owner": "saint-roch-de-richelieu"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 2
+ },
+ "saint-paul-de-lile-aux-noix": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 3,
+  "g3s": [
+   {
+    "id": "bylaw-461-2026",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-464-2026",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-425-2022",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 10,
+  "ca": 20,
+  "s3Only": 17,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 3
+ },
+ "saint-mathias-sur-richelieu": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 8,
+  "ca": 8,
+  "s3Only": 0,
+  "pgOnly": 24,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-nazaire-dacton": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 11,
+  "ca": 11,
+  "s3Only": 0,
+  "pgOnly": 18,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-polycarpe": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "signal-ppcmoi-2026-01",
+    "t": "Signal",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 11,
+  "ca": 11,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "event-dm-2026-03",
+    "t": "DesignationEvent",
+    "owner": "saint-barnabe-sud"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-patrice-de-beaurivage": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-427-2025",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 7,
+  "ca": 18,
+  "s3Only": 20,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-426-2025",
+    "t": "Bylaw",
+    "owner": "parisville"
+   },
+   {
+    "id": "src-doc",
+    "t": "Source",
+    "owner": "la-peche"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-raymond": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-c-12",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 10,
+  "ca": 30,
+  "s3Only": 86,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-658-18",
+    "t": "Bylaw",
+    "owner": "saint-joseph-de-beauce"
+   },
+   {
+    "id": "zone-c-17",
+    "t": "Zone",
+    "owner": "saint-charles-borromee"
+   },
+   {
+    "id": "zone-c-6",
+    "t": "Zone",
+    "owner": "saint-casimir"
+   },
+   {
+    "id": "zone-cv-5",
+    "t": "Zone",
+    "owner": "donnacona"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-roch-de-richelieu": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "constraint-cptaq-zone-agricole",
+    "t": "Constraint",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 22,
+  "ca": 37,
+  "s3Only": 37,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-419-2024",
+    "t": "Bylaw",
+    "owner": "parisville"
+   },
+   {
+    "id": "bylaw-470-2025",
+    "t": "Bylaw",
+    "owner": "bolton-ouest"
+   },
+   {
+    "id": "zone-re-1",
+    "t": "Zone",
+    "owner": "montmagny"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-roch-de-lachigan": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 12,
+  "g3s": [
+   {
+    "id": "zone-h-22",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "signal-saint-roch-de-lachigan-derog-28-rue-beaucage",
+    "t": "Signal",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "event-saint-roch-de-lachigan-avis-motion-581-mars2026",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 17,
+  "ca": 19,
+  "s3Only": 22,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-h-3",
+    "t": "Zone",
+    "owner": "shannon"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 12
+ },
+ "saint-pie": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 2,
+  "g3s": [
+   {
+    "id": "zone-108",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "zone-203",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 37,
+  "ca": 43,
+  "s3Only": 12,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-268",
+    "t": "Bylaw",
+    "owner": "berthier-sur-mer"
+   },
+   {
+    "id": "zone-107",
+    "t": "Zone",
+    "owner": "rougemont"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 2
+ },
+ "saint-roch-ouest": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-162-2025",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 0,
+  "ca": 0,
+  "s3Only": 11,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-171-2026",
+    "t": "Bylaw",
+    "owner": "saint-pie"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-stanislas-de-kostka": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "src-1",
+    "t": "Source",
+    "miss": [
+     "date"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "src-1",
+    "t": "Source",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 22,
+  "ca": 36,
+  "s3Only": 28,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-425-2022",
+    "t": "Bylaw",
+    "owner": "saint-paul-de-lile-aux-noix"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "saint-tite-des-caps": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-h-33",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 37,
+  "ca": 49,
+  "s3Only": 23,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-h-26",
+    "t": "Zone",
+    "owner": "saint-esprit"
+   },
+   {
+    "id": "zone-i-4",
+    "t": "Zone",
+    "owner": "saint-roch-de-lachigan"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-rosaire": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 24,
+  "ca": 24,
+  "s3Only": 2,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-c1",
+    "t": "Zone",
+    "owner": "ham-nord"
+   },
+   {
+    "id": "zone-r8",
+    "t": "Zone",
+    "owner": "saint-alexis"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-theodore-dacton": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 0,
+  "ca": 0,
+  "s3Only": 0,
+  "pgOnly": 8,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-valerien-de-milton": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 34,
+  "ca": 34,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "event-273-08-2026",
+    "t": "DesignationEvent",
+    "owner": "lepiphanie"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-valere": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-2026-004",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 6,
+  "ca": 8,
+  "s3Only": 6,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-zotique": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 26,
+  "ca": 26,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "event-2026-06-205",
+    "t": "DesignationEvent",
+    "owner": "saint-agapit"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-anne-de-la-perade": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 35,
+  "ca": 35,
+  "s3Only": 5,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-461-2026",
+    "t": "Bylaw",
+    "owner": "saint-paul-de-lile-aux-noix"
+   },
+   {
+    "id": "bylaw-464-2026",
+    "t": "Bylaw",
+    "owner": "saint-paul-de-lile-aux-noix"
+   },
+   {
+    "id": "event-derogation-2026-03",
+    "t": "DesignationEvent",
+    "owner": "saint-louis"
+   },
+   {
+    "id": "event-dm-2026-01",
+    "t": "DesignationEvent",
+    "owner": "saint-barnabe-sud"
+   },
+   {
+    "id": "signal-ppcmoi-2026-01",
+    "t": "Signal",
+    "owner": "saint-polycarpe"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-zephirin-de-courval": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 4,
+  "ca": 4,
+  "s3Only": 0,
+  "pgOnly": 13,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-agathe-des-monts": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 2,
+  "ca": 2,
+  "s3Only": 0,
+  "pgOnly": 6,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-pie-de-guire": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 5,
+  "ca": 5,
+  "s3Only": 0,
+  "pgOnly": 25,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-anne-de-la-rochelle": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 3,
+  "ca": 3,
+  "s3Only": 0,
+  "pgOnly": 10,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-catherine-de-hatley": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-a-7",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 11,
+  "ca": 33,
+  "s3Only": 52,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-rv-9",
+    "t": "Zone",
+    "owner": "riviere-a-pierre"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "sainte-brigide-diberville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 7,
+  "ca": 7,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-a-7",
+    "t": "Zone",
+    "owner": "sainte-catherine-de-hatley"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-catherine-de-la-jacques-cartier": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 49,
+  "ca": 49,
+  "s3Only": 3,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-327",
+    "t": "Bylaw",
+    "owner": "notre-dame-de-ham"
+   },
+   {
+    "id": "event-194-2026",
+    "t": "DesignationEvent",
+    "owner": "sainte-croix"
+   },
+   {
+    "id": "event-195-2026",
+    "t": "DesignationEvent",
+    "owner": "sainte-croix"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-christine": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 1,
+  "ca": 1,
+  "s3Only": 0,
+  "pgOnly": 156,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-clotilde": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 25,
+  "g3s": [
+   {
+    "id": "event-sainte-clotilde-derog-dm2026-05-03",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "signal-sainte-clotilde-derog-dm2026-05-02",
+    "t": "Signal",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "signal-sainte-clotilde-derog-dm2026-05-01",
+    "t": "Signal",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 38,
+  "ca": 21,
+  "s3Only": 14,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-474",
+    "t": "Bylaw",
+    "owner": "saint-denis-de-brompton"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 25
+ },
+ "sainte-cecile-de-milton": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-co-3",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 12,
+  "ca": 22,
+  "s3Only": 35,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "sainte-clotilde-de-horton": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 20,
+  "ca": 20,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-119",
+    "t": "Bylaw",
+    "owner": "sainte-therese-de-la-gatineau"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-marguerite-du-lac-masson": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-r-8",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 2,
+  "ca": 8,
+  "s3Only": 22,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "sainte-justine-de-newton": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 24,
+  "ca": 24,
+  "s3Only": 8,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-311",
+    "t": "Bylaw",
+    "owner": "chute-saint-philippe"
+   },
+   {
+    "id": "bylaw-313",
+    "t": "Bylaw",
+    "owner": "portneuf"
+   },
+   {
+    "id": "bylaw-315",
+    "t": "Bylaw",
+    "owner": "ham-nord"
+   },
+   {
+    "id": "bylaw-411",
+    "t": "Bylaw",
+    "owner": "sainte-petronille"
+   },
+   {
+    "id": "bylaw-413",
+    "t": "Bylaw",
+    "owner": "sainte-petronille"
+   },
+   {
+    "id": "bylaw-428",
+    "t": "Bylaw",
+    "owner": "clarenceville"
+   },
+   {
+    "id": "bylaw-436",
+    "t": "Bylaw",
+    "owner": "mont-laurier"
+   },
+   {
+    "id": "zone-r-1",
+    "t": "Zone",
+    "owner": "saint-albert"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-marie": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 45,
+  "ca": 45,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-203",
+    "t": "Zone",
+    "owner": "saint-pie"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-felicite--lislet": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 19,
+  "ca": 19,
+  "s3Only": 3,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-141",
+    "t": "Bylaw",
+    "owner": "ferme-neuve"
+   },
+   {
+    "id": "bylaw-149",
+    "t": "Bylaw",
+    "owner": "ferme-neuve"
+   },
+   {
+    "id": "bylaw-151",
+    "t": "Bylaw",
+    "owner": "sainte-petronille"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-seraphine": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-2023-02",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 9,
+  "ca": 11,
+  "s3Only": 8,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "sainte-sophie-dhalifax": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 16,
+  "ca": 16,
+  "s3Only": 3,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-102-2026",
+    "t": "Bylaw",
+    "owner": "campbells-bay"
+   },
+   {
+    "id": "bylaw-103-2026",
+    "t": "Bylaw",
+    "owner": "campbells-bay"
+   },
+   {
+    "id": "bylaw-104-2026",
+    "t": "Bylaw",
+    "owner": "campbells-bay"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-brigitte-des-saults": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 2,
+  "ca": 2,
+  "s3Only": 0,
+  "pgOnly": 12,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-ursule": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 4,
+  "ca": 4,
+  "s3Only": 0,
+  "pgOnly": 14,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-monique--nicolet-yamaska": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 1,
+  "ca": 1,
+  "s3Only": 0,
+  "pgOnly": 21,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "sainte-petronille": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-151",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 3,
+  "g3s": [
+   {
+    "id": "bylaw-413",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-151",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-411",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 9,
+  "ca": 13,
+  "s3Only": 14,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-175",
+    "t": "Bylaw",
+    "owner": "saint-jacques-de-leeds"
+   },
+   {
+    "id": "bylaw-529-2026",
+    "t": "Bylaw",
+    "owner": "scott"
+   },
+   {
+    "id": "zone-co-3",
+    "t": "Zone",
+    "owner": "sainte-cecile-de-milton"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 3
+ },
+ "scott": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 11,
+  "ca": 11,
+  "s3Only": 5,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-266",
+    "t": "Bylaw",
+    "owner": "berthier-sur-mer"
+   },
+   {
+    "id": "bylaw-453",
+    "t": "Bylaw",
+    "owner": "ham-nord"
+   },
+   {
+    "id": "bylaw-523-2026",
+    "t": "Bylaw",
+    "owner": "notre-dame-des-bois"
+   },
+   {
+    "id": "bylaw-524-2026",
+    "t": "Bylaw",
+    "owner": "notre-dame-des-bois"
+   },
+   {
+    "id": "bylaw-527-2026",
+    "t": "Bylaw",
+    "owner": "notre-dame-des-bois"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "salaberry-de-valleyfield": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 79,
+  "ca": 79,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-432",
+    "t": "Bylaw",
+    "owner": "saint-norbert"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "stoke": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-v-3",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-id-3",
+    "t": "Zone",
+    "owner": "havelock"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saints-anges": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-m-3",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 11,
+  "ca": 26,
+  "s3Only": 41,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2022-03",
+    "t": "Bylaw",
+    "owner": "ogden"
+   },
+   {
+    "id": "bylaw-2022-07",
+    "t": "Bylaw",
+    "owner": "ogden"
+   },
+   {
+    "id": "bylaw-2023-03",
+    "t": "Bylaw",
+    "owner": "sainte-seraphine"
+   },
+   {
+    "id": "bylaw-2023-06",
+    "t": "Bylaw",
+    "owner": "ogden"
+   },
+   {
+    "id": "bylaw-2026-06",
+    "t": "Bylaw",
+    "owner": "melbourne"
+   },
+   {
+    "id": "bylaw-2026-09",
+    "t": "Bylaw",
+    "owner": "notre-dame-du-sacre-coeur-dissoudun"
+   },
+   {
+    "id": "bylaw-2026-10",
+    "t": "Bylaw",
+    "owner": "kingsey-falls"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "shefford": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 28,
+  "ca": 28,
+  "s3Only": 0,
+  "pgOnly": 23,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "stoneham-et-tewkesbury": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 18,
+  "ca": 18,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-26-xxx",
+    "t": "Bylaw",
+    "owner": "saint-severin--mekinac"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "terrasse-vaudreuil": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "event-2024-08-123",
+    "t": "DesignationEvent",
+    "miss": [
+     "instrument"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "event-2024-08-123",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 10,
+  "ca": 21,
+  "s3Only": 39,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-cb-1",
+    "t": "Zone",
+    "owner": "montmagny"
+   },
+   {
+    "id": "zone-ra-2",
+    "t": "Zone",
+    "owner": "hampstead"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "val-alain": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 13,
+  "ca": 13,
+  "s3Only": 2,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-ad-2",
+    "t": "Zone",
+    "owner": "notre-dame-des-prairies"
+   },
+   {
+    "id": "zone-p-3",
+    "t": "Zone",
+    "owner": "saint-francois-xavier-de-brompton"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "val-david": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 4,
+  "g3s": [
+   {
+    "id": "zone-h-30",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "zone-h-09",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-789",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 20,
+  "ca": 22,
+  "s3Only": 6,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-601",
+    "t": "Bylaw",
+    "owner": "saint-boniface"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 4
+ },
+ "upton": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "designation-event-2024-05-141",
+    "t": "DesignationEvent",
+    "miss": [
+     "etape",
+     "instrument",
+     "reglement_number"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 3,
+  "g3s": [
+   {
+    "id": "zone-111",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "designation-event-2024-05-139",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "designation-event-2024-05-141",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 24,
+  "ca": 33,
+  "s3Only": 21,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "event-2026-08-219",
+    "t": "DesignationEvent",
+    "owner": "saint-ludger"
+   },
+   {
+    "id": "zone-401",
+    "t": "Zone",
+    "owner": "saint-gabriel-de-brandon"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 3
+ },
+ "val-des-lacs": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 7,
+  "ca": 7,
+  "s3Only": 0,
+  "pgOnly": 213,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "senneville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 0,
+  "ca": 0,
+  "s3Only": 0,
+  "pgOnly": 259,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "designationevent",
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "stratford": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-a1",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 14,
+  "ca": 26,
+  "s3Only": 29,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "val-joli": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "event-2026-07-13",
+    "t": "DesignationEvent",
+    "miss": [
+     "etape",
+     "etape_date",
+     "instrument",
+     "reglement_number"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 3,
+  "g3s": [
+   {
+    "id": "bylaw-2026-05",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-2026-03",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "event-2026-07-13",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 3,
+  "ca": 15,
+  "s3Only": 27,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2025-02",
+    "t": "Bylaw",
+    "owner": "saint-leonard-daston"
+   },
+   {
+    "id": "bylaw-2025-03",
+    "t": "Bylaw",
+    "owner": "denholm"
+   },
+   {
+    "id": "bylaw-2026-01",
+    "t": "Bylaw",
+    "owner": "lisle-aux-coudres"
+   },
+   {
+    "id": "bylaw-2026-04",
+    "t": "Bylaw",
+    "owner": "champlain"
+   },
+   {
+    "id": "bylaw-2026-06",
+    "t": "Bylaw",
+    "owner": "melbourne"
+   },
+   {
+    "id": "zone-a-7",
+    "t": "Zone",
+    "owner": "sainte-catherine-de-hatley"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 3
+ },
+ "vercheres": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 2,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "event-dm-2026-03",
+    "t": "DesignationEvent",
+    "owner": "saint-barnabe-sud"
+   },
+   {
+    "id": "event-dm-2026-04",
+    "t": "DesignationEvent",
+    "owner": "saint-lucien"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "waterloo": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 23,
+  "ca": 23,
+  "s3Only": 0,
+  "pgOnly": 210,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "waterville": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 22,
+  "ca": 22,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-691",
+    "t": "Bylaw",
+    "owner": "petite-riviere-saint-francois"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "victoriaville": {
+  "verdict": "gate2-completeness",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 15,
+  "ca": 0,
+  "s3Only": 3,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "wentworth-nord": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 81,
+  "ca": 81,
+  "s3Only": 3,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-h-09",
+    "t": "Zone",
+    "owner": "val-david"
+   },
+   {
+    "id": "zone-h-22",
+    "t": "Zone",
+    "owner": "saint-roch-de-lachigan"
+   },
+   {
+    "id": "zone-h-30",
+    "t": "Zone",
+    "owner": "val-david"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "warden": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 0,
+  "pgOnly": 15,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "wentworth": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 15,
+  "ca": 15,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-2026-004",
+    "t": "Bylaw",
+    "owner": "saint-valere"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "val-racine": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-282",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 7,
+  "ca": 7,
+  "s3Only": 2,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "bylaw-262",
+    "t": "Bylaw",
+    "owner": "berthier-sur-mer"
+   },
+   {
+    "id": "bylaw-306",
+    "t": "Bylaw",
+    "owner": "berthier-sur-mer"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "westmount": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 8,
+  "ca": 8,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "source-doc",
+    "t": "Source",
+    "owner": "saint-esprit"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "wickham": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 0,
+  "pgOnly": 156,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source",
+   "designationevent"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "windsor": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 10,
+  "ca": 10,
+  "s3Only": 1,
+  "pgOnly": 0,
+  "owned": [
+   {
+    "id": "zone-r-8",
+    "t": "Zone",
+    "owner": "sainte-marguerite-du-lac-masson"
+   }
+  ],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "fortierville": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-m-04",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 4,
+  "ca": 4,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "dixville": {
+  "verdict": "gate2-completeness",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 10,
+  "ca": 5,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "herouxville": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-205-2026",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "nominingue": {
+  "verdict": "gate2-completeness",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 9,
+  "ca": 5,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "notre-dame-de-lourdes--joliette": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-02-2026",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 10,
+  "ca": 10,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "yamachiche": {
+  "verdict": "pass",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 3,
+  "ca": 3,
+  "s3Only": 0,
+  "pgOnly": 9,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [
+   "source"
+  ],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "montcerf-lytton": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "constraint-cptaq-agricole",
+    "t": "Constraint",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 3,
+  "ca": 3,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "notre-dame-des-bois": {
+  "verdict": "gate1-business-property",
+  "g1": 2,
+  "g1s": [
+   {
+    "id": "bylaw-523-2026",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   },
+   {
+    "id": "bylaw-524-2026",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 3,
+  "g3s": [
+   {
+    "id": "bylaw-523-2026",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-524-2026",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-527-2026",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 17,
+  "ca": 17,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 2,
+  "g3InS3": 3
+ },
+ "notre-dame-des-prairies": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-ad-2",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 15,
+  "ca": 15,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "rougemont": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-107",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 15,
+  "ca": 15,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-augustin-de-desmaures": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-2026-765",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-2026-765",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 0,
+  "ca": 0,
+  "s3Only": 7,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "westbury": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-2021-03",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 5,
+  "ca": 12,
+  "s3Only": 22,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-honore-de-shenley": {
+  "verdict": "gate2-completeness",
+  "g1": 0,
+  "g1s": [],
+  "g3": 0,
+  "g3s": [],
+  "cb": 6,
+  "ca": 3,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 0
+ },
+ "saint-boniface": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 5,
+  "g3s": [
+   {
+    "id": "bylaw-599",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-602",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "bylaw-603",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 8,
+  "ca": 8,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 5
+ },
+ "saint-esprit": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "source-doc",
+    "t": "Source",
+    "miss": [
+     "date"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 2,
+  "g3s": [
+   {
+    "id": "source-doc",
+    "t": "Source",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "zone-a-3",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 14,
+  "ca": 14,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 2
+ },
+ "saint-ludger": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "event-2026-08-219",
+    "t": "DesignationEvent",
+    "miss": [
+     "etape",
+     "etape_date",
+     "reglement_number"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "event-2026-08-219",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 4,
+  "ca": 4,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "saint-severin--mekinac": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-26-xxx",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 5,
+  "ca": 5,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "sainte-croix": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 2,
+  "g3s": [
+   {
+    "id": "event-194-2026",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   },
+   {
+    "id": "event-195-2026",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 12,
+  "ca": 12,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 2
+ },
+ "sainte-anne-des-lacs": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-1001",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 19,
+  "ca": 19,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ },
+ "saint-hyacinthe": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-778",
+    "t": "Bylaw",
+    "miss": [
+     "status"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-778",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 29,
+  "ca": 29,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "sainte-therese-de-la-gatineau": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "bylaw-119",
+    "t": "Bylaw",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "bylaw-119",
+    "t": "Bylaw",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 13,
+  "ca": 14,
+  "s3Only": 4,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "sainte-emelie-de-lenergie": {
+  "verdict": "gate1-business-property",
+  "g1": 1,
+  "g1s": [
+   {
+    "id": "event-dm-2026-0027",
+    "t": "DesignationEvent",
+    "miss": [
+     "resolution"
+    ],
+    "inS3": true
+   }
+  ],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "event-dm-2026-0027",
+    "t": "DesignationEvent",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 6,
+  "ca": 6,
+  "s3Only": 5,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 1,
+  "g3InS3": 1
+ },
+ "shannon": {
+  "verdict": "gate3-source-ref",
+  "g1": 0,
+  "g1s": [],
+  "g3": 1,
+  "g3s": [
+   {
+    "id": "zone-h-3",
+    "t": "Zone",
+    "n": 1,
+    "inS3": true
+   }
+  ],
+  "cb": 9,
+  "ca": 9,
+  "s3Only": 0,
+  "pgOnly": 0,
+  "owned": [],
+  "pgOnlyWithProps": 0,
+  "pgOnlyWithRefs": 0,
+  "pgOnlyTypes": [],
+  "g1InS3": 0,
+  "g3InS3": 1
+ }
+}

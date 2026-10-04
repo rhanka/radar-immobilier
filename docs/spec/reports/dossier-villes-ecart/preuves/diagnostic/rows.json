@@ -1,0 +1,7241 @@
+[
+ {
+  "city": "austin",
+  "grp": "HALT",
+  "log": {
+   "a": 29,
+   "b": 67
+  },
+  "s3n": 29,
+  "pgn": 67,
+  "onlyS3": 0,
+  "onlyPG": 38,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 8,
+   "source": 30
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:13:55.480Z",
+   "2026-09-10T14:13:55.480Z"
+  ],
+  "s3mod": "2026-09-13T21:48:46.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T04:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::austin::25-543",
+   "designationevent::austin::25-547",
+   "designationevent::austin::25-556",
+   "designationevent::austin::26-558"
+  ]
+ },
+ {
+  "city": "acton-vale",
+  "grp": "HALT",
+  "log": {
+   "a": 37,
+   "b": 473
+  },
+  "s3n": 37,
+  "pgn": 473,
+  "onlyS3": 0,
+  "onlyPG": 436,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 56,
+   "source": 380
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:08:53.084Z",
+   "2026-09-11T18:36:13.774Z"
+  ],
+  "s3mod": "2026-09-13T21:48:46.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T06:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "mention:designationevent:acton-vale-003-2022",
+   "mention:designationevent:acton-vale-003-2023-011-2023-010-2023-007-2023-009-2023-012-2023",
+   "mention:designationevent:acton-vale-003-2025-004-2025",
+   "mention:designationevent:acton-vale-004-2024-005-2024-006-2024-007-2024"
+  ]
+ },
+ {
+  "city": "beauceville",
+  "grp": "HALT",
+  "log": {
+   "a": 194,
+   "b": 192
+  },
+  "s3n": 194,
+  "pgn": 192,
+  "onlyS3": 2,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Constraint": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T12:14:30.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 85,
+  "runs": 8,
+  "lastPublished": "2026-10-03T12:14:30.000Z",
+  "lastProjected": "2026-10-03T12:14:31.000Z",
+  "sampleS3": [
+   "constraint-cptaq-agricole",
+   "constraint-milieu-humide-parc-industriel"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "arundel",
+  "grp": "HALT",
+  "log": {
+   "a": 21,
+   "b": 314
+  },
+  "s3n": 21,
+  "pgn": 314,
+  "onlyS3": 0,
+  "onlyPG": 293,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 1,
+   "source": 292
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:26:43.771Z",
+   "2026-09-11T19:09:34.674Z"
+  ],
+  "s3mod": "2026-09-13T21:48:46.000Z",
+  "s3keys": "ontology_version,municipality,generated_at,pv_count,nodes,edges",
+  "gen": "2026-06-13T04:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::arundel::112",
+   "source::arundel::raw-proces-verbaux-arundel-cas-00e34bb113bc804ac8a60b872bef2683a4b9037c304a7bb5001e0c9ab1c288e0-txt",
+   "source::arundel::raw-proces-verbaux-arundel-cas-01388fa36520f97eb644c64d092db06f4ac804721009ef67826d1eb74c679092-txt",
+   "source::arundel::raw-proces-verbaux-arundel-cas-022a1d5c530e4773e256a03d91a8b73eddc28988b96596d9b12342fdf037834d-txt"
+  ]
+ },
+ {
+  "city": "baie-durfe",
+  "grp": "HALT",
+  "log": {
+   "a": 8,
+   "b": 37
+  },
+  "s3n": 8,
+  "pgn": 37,
+  "onlyS3": 0,
+  "onlyPG": 29,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 29
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T15:13:48.591Z",
+   "2026-09-10T15:13:48.591Z"
+  ],
+  "s3mod": "2026-09-13T21:48:49.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::baie-durfe::raw-proces-verbaux-baie-durfe-cas-0c32d90216c13dfd0f6068c9fa4be3b05cce1163cec4f1bece88b6ff01d86dcb-txt",
+   "source::baie-durfe::raw-proces-verbaux-baie-durfe-cas-12956df06a9e519dbf7df8de4c2684834a62af08cab380e37742dc38fb102584-txt",
+   "source::baie-durfe::raw-proces-verbaux-baie-durfe-cas-1645a1cbd29e0895c0e0d7365ead6314d30f84a6ea948c2fae48a44651c7d172-txt",
+   "source::baie-durfe::raw-proces-verbaux-baie-durfe-cas-18b0d0f92a847e452d87bfdc29ed2edce163a564a6308ceab881f6cdbb3bb471-txt"
+  ]
+ },
+ {
+  "city": "blainville",
+  "grp": "HALT",
+  "log": {
+   "a": 54,
+   "b": 121
+  },
+  "s3n": 54,
+  "pgn": 121,
+  "onlyS3": 0,
+  "onlyPG": 67,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 16,
+   "source": 51
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T15:20:53.564Z",
+   "2026-09-10T15:20:53.564Z"
+  ],
+  "s3mod": "2026-09-13T21:48:49.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::blainville::1418-179",
+   "designationevent::blainville::1418-182",
+   "designationevent::blainville::1418-184",
+   "designationevent::blainville::1418-185"
+  ]
+ },
+ {
+  "city": "berthier-sur-mer",
+  "grp": "HALT",
+  "log": {
+   "a": 154,
+   "b": 57
+  },
+  "s3n": 154,
+  "pgn": 57,
+  "onlyS3": 97,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 14,
+   "Constraint": 4,
+   "DesignationEvent": 61,
+   "Source": 6,
+   "Signal": 7,
+   "Zone": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-02T06:09:38.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 61,
+  "runs": 4,
+  "lastPublished": "2026-10-02T06:09:38.000Z",
+  "lastProjected": "2026-10-02T06:09:38.000Z",
+  "sampleS3": [
+   "bylaw-215",
+   "bylaw-247",
+   "bylaw-265",
+   "bylaw-276"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "barkmere",
+  "grp": "HALT",
+  "log": {
+   "a": 80,
+   "b": 51
+  },
+  "s3n": 84,
+  "pgn": 51,
+  "onlyS3": 33,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 10,
+   "DesignationEvent": 7,
+   "Signal": 5,
+   "Source": 10,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:21:45.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 220,
+  "runs": 7,
+  "lastPublished": "2026-10-03T00:25:28.000Z",
+  "lastProjected": "2026-10-03T00:25:29.000Z",
+  "sampleS3": [
+   "bylaw-206",
+   "bylaw-223",
+   "bylaw-228",
+   "bylaw-230"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "bolton-est",
+  "grp": "HALT",
+  "log": {
+   "a": 31,
+   "b": 48
+  },
+  "s3n": 31,
+  "pgn": 48,
+  "onlyS3": 0,
+  "onlyPG": 17,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 17
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:42:17.037Z",
+   "2026-09-10T13:42:17.037Z"
+  ],
+  "s3mod": "2026-09-13T21:48:49.000Z",
+  "s3keys": "ontology_version,municipality,generated_at,pv_count,nodes,edges",
+  "gen": "2026-06-13T04:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::bolton-est::raw-proces-verbaux-bolton-est-cas-1d059a98fe6f8abaede2081a37235ada4f04e3e8bee3fa9d9b785766061557ad-txt",
+   "source::bolton-est::raw-proces-verbaux-bolton-est-cas-0cf32ef3ece9454dfd704126e521e23d9e617111f177ccfc3e3d783e93a6c9de-txt",
+   "source::bolton-est::raw-proces-verbaux-bolton-est-cas-150224692c822d8efc39fe873e3a56808a58f26bb5eba4b0b6d0b880c7a835cd-txt",
+   "source::bolton-est::raw-proces-verbaux-bolton-est-cas-1708940227de929934e4bae47bf4a207918837bc4240070f2c6c8af5177eab17-txt"
+  ]
+ },
+ {
+  "city": "bois-des-filion",
+  "grp": "HALT",
+  "log": {
+   "a": 31,
+   "b": 42
+  },
+  "s3n": 31,
+  "pgn": 42,
+  "onlyS3": 0,
+  "onlyPG": 11,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 11
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T15:03:25.964Z",
+   "2026-09-10T15:03:25.964Z"
+  ],
+  "s3mod": "2026-09-13T21:48:49.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::bois-des-filion::raw-proces-verbaux-bois-des-filion-cas-2433c499a30a19bedbac124552e8dc74fe9211f22757cb249b6f4818c9fb2cdb-txt",
+   "source::bois-des-filion::raw-proces-verbaux-bois-des-filion-cas-3c4370bff0fc97710f11337389f597287fbe0f5caa242a250c1ee00cd0e7f44b-txt",
+   "source::bois-des-filion::raw-proces-verbaux-bois-des-filion-cas-4524fbeb3d8fdc649054b87accf5d8529ea7ef47f872952634a991e30229d936-txt",
+   "source::bois-des-filion::raw-proces-verbaux-bois-des-filion-cas-5a3f4a0e180219378baca9b6efbd8369698293b47d541f9b0dafaa996d11bc3a-txt"
+  ]
+ },
+ {
+  "city": "boischatel",
+  "grp": "HALT",
+  "log": {
+   "a": 47,
+   "b": 32
+  },
+  "s3n": 47,
+  "pgn": 32,
+  "onlyS3": 15,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "DesignationEvent": 7,
+   "Signal": 2,
+   "Source": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T12:14:57.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 93,
+  "runs": 8,
+  "lastPublished": "2026-10-04T00:15:51.000Z",
+  "lastProjected": "2026-10-04T00:15:51.000Z",
+  "sampleS3": [
+   "bylaw-2026-1231",
+   "de-2026-04-102",
+   "de-2026-04-103",
+   "event-15-adoption-2026-1234"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "bolton-ouest",
+  "grp": "HALT",
+  "log": {
+   "a": 68,
+   "b": 51
+  },
+  "s3n": 70,
+  "pgn": 51,
+  "onlyS3": 19,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 8,
+   "DesignationEvent": 3,
+   "Source": 6,
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:24:13.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 127,
+  "runs": 8,
+  "lastPublished": "2026-10-04T12:24:13.000Z",
+  "lastProjected": "2026-10-04T12:24:13.000Z",
+  "sampleS3": [
+   "bylaw-393-2023",
+   "bylaw-461-2024",
+   "bylaw-461-2024-1",
+   "bylaw-467-2024"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "ayers-cliff",
+  "grp": "HALT",
+  "log": {
+   "a": 81,
+   "b": 63
+  },
+  "s3n": 81,
+  "pgn": 63,
+  "onlyS3": 18,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 8,
+   "DesignationEvent": 3,
+   "Signal": 3,
+   "Source": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T12:09:14.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 126,
+  "runs": 15,
+  "lastPublished": "2026-10-02T06:06:47.000Z",
+  "lastProjected": "2026-10-02T06:06:48.000Z",
+  "sampleS3": [
+   "bylaw-2009-07",
+   "bylaw-2009-09",
+   "bylaw-2023-09",
+   "bylaw-2023-10"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "bouchette",
+  "grp": "HALT",
+  "log": {
+   "a": 46,
+   "b": 44
+  },
+  "s3n": 48,
+  "pgn": 44,
+  "onlyS3": 4,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2,
+   "Source": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T18:45:08.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 99,
+  "runs": 7,
+  "lastPublished": "2026-10-04T06:14:14.000Z",
+  "lastProjected": "2026-10-04T06:14:14.000Z",
+  "sampleS3": [
+   "bylaw-2017-303",
+   "bylaw-2025-364",
+   "source-b6e74f98981f67058328c6c666f9a231a03284b61ac3a0afc0b38780e7fcf8cb",
+   "src-5862263fe5a4f17f3b122f57df348a87968b94f7ad20c8d7cf6ac812c6592b71"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "campbells-bay",
+  "grp": "HALT",
+  "log": {
+   "a": 43,
+   "b": 32
+  },
+  "s3n": 48,
+  "pgn": 32,
+  "onlyS3": 16,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 4,
+   "Signal": 3,
+   "Source": 7,
+   "DesignationEvent": 1,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T00:18:53.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 127,
+  "runs": 8,
+  "lastPublished": "2026-10-04T12:26:07.000Z",
+  "lastProjected": "2026-10-04T12:26:07.000Z",
+  "sampleS3": [
+   "bylaw-100-2022",
+   "bylaw-103-2024",
+   "bylaw-52-03",
+   "bylaw-reglement-de-taxation-2023"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "brigham",
+  "grp": "HALT",
+  "log": {
+   "a": 36,
+   "b": 22
+  },
+  "s3n": 36,
+  "pgn": 22,
+  "onlyS3": 35,
+  "onlyPG": 21,
+  "onlyS3T": {
+   "Source": 5,
+   "Bylaw": 13,
+   "Lot": 8,
+   "DesignationEvent": 2,
+   "Signal": 7
+  },
+  "onlyPGT": {
+   "DesignationEvent": 3,
+   "Lot": 8,
+   "Signal": 3,
+   "Source": 4,
+   "Bylaw": 3
+  },
+  "pgOnlyCreated": [
+   "2026-06-13T20:27:27.871Z",
+   "2026-06-21T14:14:33.997Z"
+  ],
+  "s3mod": "2026-09-13T21:48:51.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,provenance,nodes,edges",
+  "gen": "2026-07-04T01:26:22Z",
+  "refreshKeys": 0,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [
+   "source-brigham-pv-2026-01-13",
+   "source-brigham-pv-2026-01-22",
+   "source-brigham-pv-2026-01-22-budget",
+   "source-brigham-pv-2026-02-03"
+  ],
+  "samplePG": [
+   "desg-evt-vente-taxes",
+   "lot-3521520",
+   "signal-subdiv-3520533",
+   "source-brigham-html-pv-budget-2026-01-22"
+  ]
+ },
+ {
+  "city": "brome",
+  "grp": "HALT",
+  "log": {
+   "a": 23,
+   "b": 38
+  },
+  "s3n": 23,
+  "pgn": 38,
+  "onlyS3": 0,
+  "onlyPG": 15,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 15
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:43:03.635Z",
+   "2026-09-10T01:43:03.635Z"
+  ],
+  "s3mod": "2026-09-13T21:48:52.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T04:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::brome::raw-proces-verbaux-brome-cas-1b700f0423e35552f0263e096a9c361d51be13238e8cd4a0b1eb79b05f77dbd8-txt",
+   "source::brome::raw-proces-verbaux-brome-cas-207417f7937cc9ec1e9450c76c5c6c97b5cc6deda973bede24f8de2ddbb51187-txt",
+   "source::brome::raw-proces-verbaux-brome-cas-25259d58c5873b86115b0c568e6825d48f39da83dcc16ec59c039a5a282169b7-txt",
+   "source::brome::raw-proces-verbaux-brome-cas-374a25335fd467814ddedec517b4957b5e95084891e3809e48b07b99eb41bf00-txt"
+  ]
+ },
+ {
+  "city": "brossard",
+  "grp": "HALT",
+  "log": {
+   "a": 92,
+   "b": 101
+  },
+  "s3n": 92,
+  "pgn": 101,
+  "onlyS3": 0,
+  "onlyPG": 9,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 3,
+   "source": 6
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:42:49.933Z",
+   "2026-09-10T14:42:49.933Z"
+  ],
+  "s3mod": "2026-09-13T21:48:51.000Z",
+  "s3keys": "municipality,graphify_pass,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-08-03T13:46:20Z",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::brossard::reg-362-46",
+   "source::brossard::raw-proces-verbaux-brossard-cas-6b35c38372c0f95c25159edba88e329a5f5c5482932d43b55636844e97a9d340-txt",
+   "source::brossard::raw-proces-verbaux-brossard-cas-98cf2a01e8f1063480b81a4eafab1ad41c6e1178c27dd1519c5adcd6d525a9a0-txt",
+   "source::brossard::raw-proces-verbaux-brossard-cas-be39f29b60abdfca12fbfe4981e392a213848cc537bb4d8e103654b7ece5152d-txt"
+  ]
+ },
+ {
+  "city": "chartierville",
+  "grp": "HALT",
+  "log": {
+   "a": 39,
+   "b": 37
+  },
+  "s3n": 46,
+  "pgn": 44,
+  "onlyS3": 2,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Constraint": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:27:18.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 220,
+  "runs": 7,
+  "lastPublished": "2026-10-04T12:27:18.000Z",
+  "lastProjected": "2026-10-04T12:27:19.000Z",
+  "sampleS3": [
+   "constraint-cptaq-domtar",
+   "constraint-cptaq-zone-agricole"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "cheneville",
+  "grp": "HALT",
+  "log": {
+   "a": 63,
+   "b": 42
+  },
+  "s3n": 69,
+  "pgn": 42,
+  "onlyS3": 27,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 11,
+   "Source": 6,
+   "DesignationEvent": 8,
+   "Signal": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:27:47.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 115,
+  "runs": 9,
+  "lastPublished": "2026-10-04T06:16:18.000Z",
+  "lastProjected": "2026-10-04T06:16:18.000Z",
+  "sampleS3": [
+   "bylaw_2016_064",
+   "bylaw_2026_142",
+   "bylaw-2016-060",
+   "bylaw-2016-063"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "champlain",
+  "grp": "HALT",
+  "log": {
+   "a": 59,
+   "b": 41
+  },
+  "s3n": 59,
+  "pgn": 41,
+  "onlyS3": 18,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 13,
+   "DesignationEvent": 2,
+   "Signal": 2,
+   "Source": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-29T11:28:32.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 22,
+  "runs": 2,
+  "lastPublished": "2026-09-29T17:29:14.000Z",
+  "lastProjected": "2026-09-29T17:29:14.000Z",
+  "sampleS3": [
+   "bylaw-2009-04",
+   "bylaw-2009-05",
+   "bylaw-2009-06",
+   "bylaw-2024-147A"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "chute-saint-philippe",
+  "grp": "HALT",
+  "log": {
+   "a": 60,
+   "b": 56
+  },
+  "s3n": 63,
+  "pgn": 56,
+  "onlyS3": 7,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "DesignationEvent": 1,
+   "Signal": 2,
+   "Source": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T06:17:14.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 137,
+  "runs": 9,
+  "lastPublished": "2026-10-04T00:20:34.000Z",
+  "lastProjected": "2026-10-04T00:20:34.000Z",
+  "sampleS3": [
+   "event-13017-2025",
+   "signal-13019-2025",
+   "signal-13040-2025",
+   "source-5d7aff6d1fc99276922730ea007330ada1aedae6ae4e801c990c9eb6d403acf4"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "clarenceville",
+  "grp": "HALT",
+  "log": {
+   "a": 43,
+   "b": 38
+  },
+  "s3n": 53,
+  "pgn": 38,
+  "onlyS3": 15,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "DesignationEvent": 6,
+   "Signal": 3,
+   "Source": 3,
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:29:34.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 175,
+  "runs": 7,
+  "lastPublished": "2026-10-04T12:29:35.000Z",
+  "lastProjected": "2026-10-04T12:29:35.000Z",
+  "sampleS3": [
+   "bylaw-2025-677",
+   "event-2025-02-035",
+   "event-2025-02-036",
+   "event-2025-08-221"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "cleveland",
+  "grp": "HALT",
+  "log": {
+   "a": 72,
+   "b": 40
+  },
+  "s3n": 73,
+  "pgn": 40,
+  "onlyS3": 33,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 11,
+   "Constraint": 2,
+   "DesignationEvent": 9,
+   "Signal": 1,
+   "Source": 8,
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T06:17:42.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 160,
+  "runs": 8,
+  "lastPublished": "2026-10-03T06:18:43.000Z",
+  "lastProjected": "2026-10-03T06:18:43.000Z",
+  "sampleS3": [
+   "bylaw-445",
+   "bylaw-591",
+   "bylaw-593",
+   "bylaw-599"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "danville",
+  "grp": "HALT",
+  "log": {
+   "a": 46,
+   "b": 37
+  },
+  "s3n": 60,
+  "pgn": 47,
+  "onlyS3": 13,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 9,
+   "Zone": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:30:40.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 134,
+  "runs": 10,
+  "lastPublished": "2026-10-04T12:30:40.000Z",
+  "lastProjected": "2026-10-04T12:30:40.000Z",
+  "sampleS3": [
+   "bylaw-2025-05",
+   "bylaw-2025-10",
+   "bylaw-2026-02",
+   "bylaw-2026-06"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "compton",
+  "grp": "HALT",
+  "log": {
+   "a": 66,
+   "b": 32
+  },
+  "s3n": 66,
+  "pgn": 32,
+  "onlyS3": 34,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 8,
+   "Constraint": 1,
+   "DesignationEvent": 7,
+   "Signal": 3,
+   "Source": 6,
+   "Zone": 9
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T00:21:49.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 121,
+  "runs": 9,
+  "lastPublished": "2026-10-04T12:30:16.000Z",
+  "lastProjected": "2026-10-04T12:30:16.000Z",
+  "sampleS3": [
+   "bylaw-2018-158",
+   "bylaw-2018-158-5-23",
+   "bylaw-2020-166",
+   "bylaw-2020-166-11-24"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "chambly",
+  "grp": "HALT",
+  "log": {
+   "a": 16,
+   "b": 40
+  },
+  "s3n": 16,
+  "pgn": 40,
+  "onlyS3": 0,
+  "onlyPG": 24,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 3,
+   "source": 21
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:59:51.454Z",
+   "2026-09-10T14:59:51.454Z"
+  ],
+  "s3mod": "2026-09-13T21:48:51.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::chambly::2026-1431",
+   "source::chambly::raw-proces-verbaux-chambly-cas-133c1b4f5847f368f7b4cc1adafa42fca60209138b8b6ac44b3e9a4db1a7bd4e-txt",
+   "source::chambly::raw-proces-verbaux-chambly-cas-15bea6e64dc1a7f96707fc1038eced96d1aaf4532d429c30ef60b1f0ed5c4586-txt",
+   "source::chambly::raw-proces-verbaux-chambly-cas-1937fffebd776787227b1653800a7facb810841cf8e40cb1432ecd0f29ce5249-txt"
+  ]
+ },
+ {
+  "city": "daveluyville",
+  "grp": "HALT",
+  "log": {
+   "a": 38,
+   "b": 37
+  },
+  "s3n": 38,
+  "pgn": 37,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-30T06:38:51.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 41,
+  "runs": 4,
+  "lastPublished": "2026-09-30T06:38:51.000Z",
+  "lastProjected": "2026-09-30T06:38:51.000Z",
+  "sampleS3": [
+   "zone-m-05"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "deschaillons-sur-saint-laurent",
+  "grp": "HALT",
+  "log": {
+   "a": 94,
+   "b": 33
+  },
+  "s3n": 99,
+  "pgn": 33,
+  "onlyS3": 66,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 26,
+   "DesignationEvent": 16,
+   "Signal": 5,
+   "Source": 11,
+   "Zone": 8
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T06:23:17.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 179,
+  "runs": 8,
+  "lastPublished": "2026-10-04T06:23:17.000Z",
+  "lastProjected": "2026-10-04T06:23:18.000Z",
+  "sampleS3": [
+   "bylaw-102-2012",
+   "bylaw-103-2012",
+   "bylaw-104-2012",
+   "bylaw-126-2015"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "denholm",
+  "grp": "HALT",
+  "log": {
+   "a": 24,
+   "b": 21
+  },
+  "s3n": 37,
+  "pgn": 21,
+  "onlyS3": 16,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 12,
+   "Constraint": 1,
+   "Source": 3
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T00:25:19.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 147,
+  "runs": 8,
+  "lastPublished": "2026-10-03T18:53:28.000Z",
+  "lastProjected": "2026-10-03T18:53:29.000Z",
+  "sampleS3": [
+   "bylaw-116-07-99",
+   "bylaw-124-07-01",
+   "bylaw-2025-04",
+   "bylaw-2025-05"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "dollard-des-ormeaux",
+  "grp": "HALT",
+  "log": {
+   "a": 17,
+   "b": 35
+  },
+  "s3n": 17,
+  "pgn": 35,
+  "onlyS3": 0,
+  "onlyPG": 18,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 1,
+   "source": 17
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:34:40.771Z",
+   "2026-09-10T14:34:40.771Z"
+  ],
+  "s3mod": "2026-09-13T21:48:53.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::dollard-des-ormeaux::r-2025",
+   "source::dollard-des-ormeaux::raw-proces-verbaux-dollard-des-ormeaux-cas-0020db0e0683367d139bde70f2e9b992d8ee03b46134775ea2567ffa6759f8de-txt",
+   "source::dollard-des-ormeaux::raw-proces-verbaux-dollard-des-ormeaux-cas-07969d8171c57daef531336ebae029383b49d9eb1413c43b37e6ed8645b76e81-txt",
+   "source::dollard-des-ormeaux::raw-proces-verbaux-dollard-des-ormeaux-cas-1da9d1826cfe42ce78dc268eb4c5ef8f27760448cd09cf32c51b65c31f51964a-txt"
+  ]
+ },
+ {
+  "city": "esterel",
+  "grp": "HALT",
+  "log": {
+   "a": 116,
+   "b": 107
+  },
+  "s3n": 132,
+  "pgn": 107,
+  "onlyS3": 25,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 3,
+   "DesignationEvent": 15,
+   "Signal": 1,
+   "Source": 6
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:34:11.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 201,
+  "runs": 8,
+  "lastPublished": "2026-10-03T18:57:35.000Z",
+  "lastProjected": "2026-10-03T18:57:36.000Z",
+  "sampleS3": [
+   "bylaw-2019-677",
+   "bylaw-2020-681",
+   "bylaw-2024-733",
+   "desig-2019-03-029"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "dundee",
+  "grp": "HALT",
+  "log": {
+   "a": 6,
+   "b": 8
+  },
+  "s3n": 6,
+  "pgn": 8,
+  "onlyS3": 0,
+  "onlyPG": 2,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 2
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:44:07.900Z",
+   "2026-09-11T18:49:17.698Z"
+  ],
+  "s3mod": "2026-09-13T21:48:53.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::dundee::raw-proces-verbaux-dundee-cas-7b43c26d3328af5f067d3fae84f2ac03a71e98ac0680eb642c2981a3414b124c-txt",
+   "source::dundee::raw-proces-verbaux-dundee-cas-5ea87dc97c06ea9b010c2c2498e30abda431c93eda5b4485eb52e57c1c883fa9-txt"
+  ]
+ },
+ {
+  "city": "eastman",
+  "grp": "HALT",
+  "log": {
+   "a": 39,
+   "b": 38
+  },
+  "s3n": 39,
+  "pgn": 38,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-01T06:24:49.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 34,
+  "runs": 4,
+  "lastPublished": "2026-10-01T06:24:49.000Z",
+  "lastProjected": "2026-10-01T06:24:50.000Z",
+  "sampleS3": [
+   "zone-v-3"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "ferme-neuve",
+  "grp": "HALT",
+  "log": {
+   "a": 102,
+   "b": 63
+  },
+  "s3n": 111,
+  "pgn": 63,
+  "onlyS3": 48,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 6,
+   "Constraint": 1,
+   "DesignationEvent": 14,
+   "Source": 14,
+   "Signal": 6,
+   "Zone": 7
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:35:08.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 211,
+  "runs": 8,
+  "lastPublished": "2026-10-04T06:26:30.000Z",
+  "lastProjected": "2026-10-04T06:26:30.000Z",
+  "sampleS3": [
+   "bylaw-135",
+   "bylaw-136",
+   "bylaw-23-18",
+   "bylaw-23-19"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "farnham",
+  "grp": "HALT",
+  "log": {
+   "a": 97,
+   "b": 38
+  },
+  "s3n": 100,
+  "pgn": 38,
+  "onlyS3": 62,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 6,
+   "DesignationEvent": 36,
+   "Signal": 11,
+   "Source": 6,
+   "Zone": 3
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T06:25:43.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 103,
+  "runs": 8,
+  "lastPublished": "2026-10-04T12:34:21.000Z",
+  "lastProjected": "2026-10-04T12:34:21.000Z",
+  "sampleS3": [
+   "bylaw-715",
+   "bylaw-715-1",
+   "bylaw-715-modif-dispositions-diverses",
+   "bylaw-715-second-projet-2026-303"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "carignan",
+  "grp": "HALT",
+  "log": {
+   "a": 50,
+   "b": 151
+  },
+  "s3n": 50,
+  "pgn": 151,
+  "onlyS3": 0,
+  "onlyPG": 101,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 13,
+   "source": 88
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:55:02.199Z",
+   "2026-09-10T14:55:02.199Z"
+  ],
+  "s3mod": "2026-09-13T21:48:51.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::carignan::483-30",
+   "source::carignan::raw-proces-verbaux-carignan-cas-009391559b2777d7003b4a8f2ac076416b66eee634361c208c85dae6d174cda0-txt",
+   "source::carignan::raw-proces-verbaux-carignan-cas-01a61131a46d28a40b38b26164a0dcbfe08f8617857e5851649235c901aa8e9f-txt",
+   "source::carignan::raw-proces-verbaux-carignan-cas-05eba708c206188f2e5e12b92939ffb972e5e696a126e2b2e7a9c993ea476061-txt"
+  ]
+ },
+ {
+  "city": "ham-nord",
+  "grp": "HALT",
+  "log": {
+   "a": 49,
+   "b": 48
+  },
+  "s3n": 49,
+  "pgn": 48,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-30T18:47:18.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 73,
+  "runs": 7,
+  "lastPublished": "2026-09-30T18:47:18.000Z",
+  "lastProjected": "2026-09-30T18:47:19.000Z",
+  "sampleS3": [
+   "zone-c4"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "gore",
+  "grp": "HALT",
+  "log": {
+   "a": 122,
+   "b": 87
+  },
+  "s3n": 128,
+  "pgn": 87,
+  "onlyS3": 41,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 7,
+   "Constraint": 1,
+   "DesignationEvent": 21,
+   "Signal": 1,
+   "Source": 4,
+   "Zone": 7
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T00:31:19.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 145,
+  "runs": 8,
+  "lastPublished": "2026-10-04T12:35:34.000Z",
+  "lastProjected": "2026-10-04T12:35:35.000Z",
+  "sampleS3": [
+   "bylaw-214",
+   "bylaw-214-01",
+   "bylaw-216",
+   "bylaw-216-01"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "grenville-sur-la-rouge",
+  "grp": "HALT",
+  "log": {
+   "a": 45,
+   "b": 104
+  },
+  "s3n": 45,
+  "pgn": 104,
+  "onlyS3": 0,
+  "onlyPG": 59,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 50,
+   "designationevent": 9
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:46:42.856Z",
+   "2026-09-11T18:50:14.135Z"
+  ],
+  "s3mod": "2026-09-13T21:48:55.000Z",
+  "s3keys": "ontology_version,municipality,generated_at,pv_count,nodes,edges",
+  "gen": "2026-06-13T06:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::grenville-sur-la-rouge::raw-proces-verbaux-grenville-sur-la-rouge-cas-46d68fa5366c395116c8cc303ea023e65efbf13dcead1927ed0b26f58117b8ad-txt",
+   "source::grenville-sur-la-rouge::raw-proces-verbaux-grenville-sur-la-rouge-cas-82f2c3ba0abc80ff19e75fd341a22199d428e2df337af7eab8f3e8469d250214-txt",
+   "source::grenville-sur-la-rouge::raw-proces-verbaux-grenville-sur-la-rouge-cas-e87913f7ea362cc49b172d8f827641eecae65fa9eed40a3366868eb4f0d67b4d-txt",
+   "source::grenville-sur-la-rouge::raw-proces-verbaux-grenville-sur-la-rouge-cas-f4fe5778e74626b6abfcdc6c1d66a6d2da49c86e42484508089165519cd57bef-txt"
+  ]
+ },
+ {
+  "city": "hampstead",
+  "grp": "HALT",
+  "log": {
+   "a": 26,
+   "b": 24
+  },
+  "s3n": 26,
+  "pgn": 24,
+  "onlyS3": 2,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-02T19:11:58.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 11,
+  "runs": 1,
+  "lastPublished": "2026-10-02T19:11:58.000Z",
+  "lastProjected": "2026-10-02T19:11:59.000Z",
+  "sampleS3": [
+   "bylaw-1001",
+   "zone-ra-1"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "donnacona",
+  "grp": "HALT",
+  "log": {
+   "a": 103,
+   "b": 94
+  },
+  "s3n": 123,
+  "pgn": 94,
+  "onlyS3": 29,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 3,
+   "Constraint": 1,
+   "DesignationEvent": 15,
+   "Signal": 1,
+   "Source": 3,
+   "Zone": 6
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:33:06.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 175,
+  "runs": 7,
+  "lastPublished": "2026-10-04T06:23:30.000Z",
+  "lastProjected": "2026-10-04T06:23:30.000Z",
+  "sampleS3": [
+   "bylaw-v-539",
+   "bylaw-v-539-16",
+   "bylaw-v-640",
+   "constraint-cptaq-116994"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "hudson",
+  "grp": "HALT",
+  "log": {
+   "a": 97,
+   "b": 75
+  },
+  "s3n": 110,
+  "pgn": 75,
+  "onlyS3": 35,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 15,
+   "DesignationEvent": 13,
+   "Source": 6,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T06:29:05.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 192,
+  "runs": 9,
+  "lastPublished": "2026-10-04T06:29:05.000Z",
+  "lastProjected": "2026-10-04T06:29:06.000Z",
+  "sampleS3": [
+   "bylaw-526",
+   "bylaw-526-16",
+   "bylaw-527",
+   "bylaw-529"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "frelighsburg",
+  "grp": "HALT",
+  "log": {
+   "a": 36,
+   "b": 53
+  },
+  "s3n": 36,
+  "pgn": 53,
+  "onlyS3": 0,
+  "onlyPG": 17,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 17
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T00:39:03.409Z",
+   "2026-09-11T18:28:16.710Z"
+  ],
+  "s3mod": "2026-09-13T21:48:55.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T08:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::frelighsburg::raw-proces-verbaux-frelighsburg-cas-a8380faa444f2c69886147d075c2aa31972c4d7d618387dddc100c8c593bb07a-txt",
+   "source::frelighsburg::raw-proces-verbaux-frelighsburg-cas-be9335efa288f5139c7d9fb95acea173c85782ee93243e9fa87e2d9f95c33b71-txt",
+   "source::frelighsburg::raw-proces-verbaux-frelighsburg-cas-9fa4e41d589d18d60564fdf008c6fd6c4a42abc8442908adc2e502ad82ced75d-txt",
+   "source::frelighsburg::raw-proces-verbaux-frelighsburg-cas-aff2e766921a0fbefa7c85a72da8c17bb6ca1534765ddd48ada35c35439426d8-txt"
+  ]
+ },
+ {
+  "city": "havelock",
+  "grp": "HALT",
+  "log": {
+   "a": 35,
+   "b": 30
+  },
+  "s3n": 38,
+  "pgn": 30,
+  "onlyS3": 8,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "DesignationEvent": 2,
+   "Signal": 1,
+   "Source": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:37:23.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 89,
+  "runs": 8,
+  "lastPublished": "2026-10-04T12:37:23.000Z",
+  "lastProjected": "2026-10-04T12:37:23.000Z",
+  "sampleS3": [
+   "bylaw-352-2025",
+   "event-avis-motion-251-19",
+   "event-premier-projet-251-19",
+   "signal-avis-adoption-251-19"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "kingsey-falls",
+  "grp": "HALT",
+  "log": {
+   "a": 20,
+   "b": 19
+  },
+  "s3n": 20,
+  "pgn": 19,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-29T17:49:42.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 31,
+  "runs": 3,
+  "lastPublished": "2026-09-29T17:49:43.000Z",
+  "lastProjected": "2026-09-29T17:49:43.000Z",
+  "sampleS3": [
+   "bylaw-2025-10"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "hinchinbrooke",
+  "grp": "HALT",
+  "log": {
+   "a": 55,
+   "b": 53
+  },
+  "s3n": 61,
+  "pgn": 59,
+  "onlyS3": 2,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:37:49.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 182,
+  "runs": 9,
+  "lastPublished": "2026-10-03T06:30:04.000Z",
+  "lastProjected": "2026-10-03T06:30:04.000Z",
+  "sampleS3": [
+   "bylaw-280",
+   "bylaw-411"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "la-minerve",
+  "grp": "HALT",
+  "log": {
+   "a": 54,
+   "b": 53
+  },
+  "s3n": 54,
+  "pgn": 53,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-29T17:50:27.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 31,
+  "runs": 3,
+  "lastPublished": "2026-09-29T17:50:27.000Z",
+  "lastProjected": "2026-09-29T17:50:36.000Z",
+  "sampleS3": [
+   "bylaw-2026-765"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "huntingdon",
+  "grp": "HALT",
+  "log": {
+   "a": 56,
+   "b": 55
+  },
+  "s3n": 56,
+  "pgn": 55,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Source": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-02T00:34:20.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 73,
+  "runs": 7,
+  "lastPublished": "2026-10-02T00:34:21.000Z",
+  "lastProjected": "2026-10-02T00:34:22.000Z",
+  "sampleS3": [
+   "source-pv-2026-07-06"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "lac-edouard",
+  "grp": "HALT",
+  "log": {
+   "a": 33,
+   "b": 32
+  },
+  "s3n": 33,
+  "pgn": 32,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-30T18:55:13.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 71,
+  "runs": 7,
+  "lastPublished": "2026-09-30T18:55:14.000Z",
+  "lastProjected": "2026-09-30T18:55:17.000Z",
+  "sampleS3": [
+   "bylaw-205-2026"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "lac-superieur",
+  "grp": "HALT",
+  "log": {
+   "a": 103,
+   "b": 101
+  },
+  "s3n": 120,
+  "pgn": 117,
+  "onlyS3": 3,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "DesignationEvent": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T00:38:22.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 112,
+  "runs": 9,
+  "lastPublished": "2026-10-04T00:38:23.000Z",
+  "lastProjected": "2026-10-04T00:38:25.000Z",
+  "sampleS3": [
+   "bylaw-2026-681",
+   "event-dm-2026-0027",
+   "event-piia-2026-0012"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "lac-brome",
+  "grp": "HALT",
+  "log": {
+   "a": 37,
+   "b": 59
+  },
+  "s3n": 37,
+  "pgn": 59,
+  "onlyS3": 0,
+  "onlyPG": 22,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 21,
+   "designationevent": 1
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:34:01.155Z",
+   "2026-09-11T18:45:40.785Z"
+  ],
+  "s3mod": "2026-09-13T21:48:58.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T04:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::lac-brome::raw-proces-verbaux-lac-brome-cas-ec009b1866563b995aa15fb5af0659f99975a132230fadd70ca2b03ba1225745-txt",
+   "source::lac-brome::raw-proces-verbaux-lac-brome-cas-f5591157e428fb611ec8817029e30f1cf08d75cd5f0d872bae5219111d1a59a1-txt",
+   "source::lac-brome::raw-proces-verbaux-lac-brome-cas-8209f398cebd1c423a9066ebd4daca59a2831227a1832e06de591d8e791b4aeb-txt",
+   "source::lac-brome::raw-proces-verbaux-lac-brome-cas-260e73697ed3423dab2bab72dd8dc346661b4e2c6db195b6753e3272012a24f3-txt"
+  ]
+ },
+ {
+  "city": "lac-tremblant-nord",
+  "grp": "HALT",
+  "log": {
+   "a": 42,
+   "b": 20
+  },
+  "s3n": 42,
+  "pgn": 20,
+  "onlyS3": 22,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 3,
+   "DesignationEvent": 12,
+   "Signal": 2,
+   "Source": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-02T19:22:31.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 63,
+  "runs": 7,
+  "lastPublished": "2026-10-03T00:56:58.000Z",
+  "lastProjected": "2026-10-03T00:56:59.000Z",
+  "sampleS3": [
+   "bylaw-2026-04",
+   "bylaw-2026-05",
+   "bylaw-2026-06",
+   "event-2026-05-65"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "lac-du-cerf",
+  "grp": "HALT",
+  "log": {
+   "a": 56,
+   "b": 47
+  },
+  "s3n": 64,
+  "pgn": 47,
+  "onlyS3": 17,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 5,
+   "DesignationEvent": 4,
+   "Source": 4,
+   "Signal": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:42:41.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 148,
+  "runs": 8,
+  "lastPublished": "2026-10-04T12:42:41.000Z",
+  "lastProjected": "2026-10-04T12:42:41.000Z",
+  "sampleS3": [
+   "bylaw-327-2016",
+   "bylaw-415-2025",
+   "bylaw-427-2026",
+   "bylaw-428-2026"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "ham-sud",
+  "grp": "HALT",
+  "log": {
+   "a": 38,
+   "b": 22
+  },
+  "s3n": 38,
+  "pgn": 22,
+  "onlyS3": 16,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 9,
+   "Source": 3,
+   "DesignationEvent": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-30T12:35:58.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 41,
+  "runs": 4,
+  "lastPublished": "2026-10-01T00:41:17.000Z",
+  "lastProjected": "2026-10-01T00:41:18.000Z",
+  "sampleS3": [
+   "bylaw-2025-06",
+   "bylaw-2025-07",
+   "bylaw-2025-08",
+   "bylaw-2025-09"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "lambton",
+  "grp": "HALT",
+  "log": {
+   "a": 58,
+   "b": 57
+  },
+  "s3n": 58,
+  "pgn": 57,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-01T06:37:49.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 93,
+  "runs": 8,
+  "lastPublished": "2026-10-01T00:51:37.000Z",
+  "lastProjected": "2026-10-01T00:51:37.000Z",
+  "sampleS3": [
+   "zone-m-3"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "lascension",
+  "grp": "HALT",
+  "log": {
+   "a": 53,
+   "b": 6
+  },
+  "s3n": 53,
+  "pgn": 6,
+  "onlyS3": 47,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Adresse": 3,
+   "Bylaw": 7,
+   "DesignationEvent": 8,
+   "Lot": 8,
+   "Municipality": 1,
+   "Signal": 3,
+   "Source": 12,
+   "Zone": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-29T11:53:42.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 21,
+  "runs": 2,
+  "lastPublished": "2026-09-29T11:53:42.000Z",
+  "lastProjected": "2026-09-29T11:53:42.000Z",
+  "sampleS3": [
+   "adresse-lascension-de-notre-seigneur-2150-chemin-baie-moreau",
+   "adresse-lascension-de-notre-seigneur-2350-chemin-baie-moreau",
+   "adresse-lascension-de-notre-seigneur-2450-chemin-baie-moreau",
+   "bylaw-lascension-de-notre-seigneur-2005-304"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "lawrenceville",
+  "grp": "HALT",
+  "log": {
+   "a": 35,
+   "b": 57
+  },
+  "s3n": 35,
+  "pgn": 57,
+  "onlyS3": 0,
+  "onlyPG": 22,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 20,
+   "designationevent": 2
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:10:10.735Z",
+   "2026-09-10T13:10:10.735Z"
+  ],
+  "s3mod": "2026-09-13T21:48:58.000Z",
+  "s3keys": "ontology_version,municipality,generated_at,pv_count,nodes,edges",
+  "gen": "2026-06-13T12:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::lawrenceville::raw-proces-verbaux-lawrenceville-cas-2dfac45e02288d4a5bdcf77f3b5efb12ae111695f926e3606e8b7f378568e885-txt",
+   "source::lawrenceville::raw-proces-verbaux-lawrenceville-cas-65595acebdfafc7528f15abf244033edc8c5d23a39c604e654f2ab92f8678476-txt",
+   "source::lawrenceville::raw-proces-verbaux-lawrenceville-cas-6d2856da32656f4aa89afcdb2c9212c5f53708ad816e9bf7f600d172446c8f81-txt",
+   "source::lawrenceville::raw-proces-verbaux-lawrenceville-cas-70f767cc253008114caebedb25554383dad90bdbcc91a4623f54c3919310692a-txt"
+  ]
+ },
+ {
+  "city": "lavenir",
+  "grp": "HALT",
+  "log": {
+   "a": 30,
+   "b": 42
+  },
+  "s3n": 30,
+  "pgn": 42,
+  "onlyS3": 0,
+  "onlyPG": 12,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 12
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:53:10.342Z",
+   "2026-09-11T19:17:36.796Z"
+  ],
+  "s3mod": "2026-09-13T21:48:58.000Z",
+  "s3keys": "ontology_version,municipality,generated_at,pv_count,nodes,edges",
+  "gen": "2026-06-13T12:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::lavenir::raw-proces-verbaux-lavenir-cas-2c7d17cf037e1b440222ccbff7a584b82106c9d5c64487ce2602e0b12072e24a-txt",
+   "source::lavenir::raw-proces-verbaux-lavenir-cas-0b68ebfe7510212ebe0fbd76af8f6aea43e2885c3b6267b3f5e9aa2265c2c5af-txt",
+   "source::lavenir::raw-proces-verbaux-lavenir-cas-260f71c11b0732d7165a9f23f02e5003476b9fcf97546803b0b9ea75723001c5-txt",
+   "source::lavenir::raw-proces-verbaux-lavenir-cas-363dfa00262dc62f8fa8e51273692656dd39ae82d57e697175bb65db8cb29a13-txt"
+  ]
+ },
+ {
+  "city": "louiseville",
+  "grp": "HALT",
+  "log": {
+   "a": 33,
+   "b": 107
+  },
+  "s3n": 33,
+  "pgn": 107,
+  "onlyS3": 0,
+  "onlyPG": 74,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 62,
+   "designationevent": 12
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:30:14.991Z",
+   "2026-09-11T19:10:56.610Z"
+  ],
+  "s3mod": "2026-09-13T21:49:01.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T10:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::louiseville::raw-proces-verbaux-louiseville-cas-4c0895d2336a52bdbbe46a287f00ee900c4e0149a68ad029c60538893a072f47-txt",
+   "source::louiseville::raw-proces-verbaux-louiseville-cas-d63cd10c3b46ea83b7e0c16955940a73dfd1733809b8b1c5d4490a7556859e70-txt",
+   "mention:designationevent:louiseville-733-473-736-622-737",
+   "mention:designationevent:louiseville-736-622-737-738"
+  ]
+ },
+ {
+  "city": "low",
+  "grp": "HALT",
+  "log": {
+   "a": 17,
+   "b": 16
+  },
+  "s3n": 17,
+  "pgn": 16,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-01T12:43:26.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 64,
+  "runs": 6,
+  "lastPublished": "2026-10-01T12:43:26.000Z",
+  "lastProjected": "2026-10-01T12:43:26.000Z",
+  "sampleS3": [
+   "bylaw-sq-2021-005"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "longueuil",
+  "grp": "HALT",
+  "log": {
+   "a": 23,
+   "b": 28
+  },
+  "s3n": 23,
+  "pgn": 28,
+  "onlyS3": 0,
+  "onlyPG": 5,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 5
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T15:00:43.714Z",
+   "2026-09-10T15:00:43.714Z"
+  ],
+  "s3mod": "2026-09-13T21:49:01.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::longueuil::raw-proces-verbaux-longueuil-cas-18862648ba9b3dbc4beb3766f6f7ad270010a795e951841872ffaf8823031989-txt",
+   "source::longueuil::raw-proces-verbaux-longueuil-cas-67a9a3f1ae25552ba48bc73600dffdd6118f25b06c8a429ba456b5551b350816-txt",
+   "source::longueuil::raw-proces-verbaux-longueuil-cas-7f103c8beda665858eb8499ebf8c4ea3f744b57c846f80a96f9a857baa16c1a7-txt",
+   "source::longueuil::raw-proces-verbaux-longueuil-cas-d303f5da03f75f8eb3e41accbbb9c391d88693b70f396da5b045367b49f0a734-txt"
+  ]
+ },
+ {
+  "city": "lisle-aux-coudres",
+  "grp": "HALT",
+  "log": {
+   "a": 37,
+   "b": 34
+  },
+  "s3n": 37,
+  "pgn": 34,
+  "onlyS3": 3,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 3
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-02T13:09:38.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 125,
+  "runs": 8,
+  "lastPublished": "2026-10-02T06:36:27.000Z",
+  "lastProjected": "2026-10-02T06:36:27.000Z",
+  "sampleS3": [
+   "bylaw-2026-03",
+   "bylaw-2026-04",
+   "bylaw-2026-05"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "melbourne",
+  "grp": "HALT",
+  "log": {
+   "a": 90,
+   "b": 21
+  },
+  "s3n": 92,
+  "pgn": 21,
+  "onlyS3": 71,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 20,
+   "Constraint": 8,
+   "DesignationEvent": 18,
+   "Signal": 6,
+   "Source": 15,
+   "Zone": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T00:41:33.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 169,
+  "runs": 9,
+  "lastPublished": "2026-10-04T12:47:23.000Z",
+  "lastProjected": "2026-10-04T12:47:23.000Z",
+  "sampleS3": [
+   "bylaw-2008-01",
+   "bylaw-2008-03",
+   "bylaw-2008-04",
+   "bylaw-2008-06"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "mont-blanc",
+  "grp": "HALT",
+  "log": {
+   "a": 40,
+   "b": 78
+  },
+  "s3n": 40,
+  "pgn": 78,
+  "onlyS3": 0,
+  "onlyPG": 38,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 8,
+   "source": 30
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T12:49:19.856Z",
+   "2026-09-10T12:49:19.856Z"
+  ],
+  "s3mod": "2026-09-13T21:49:03.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::mont-blanc::194-75",
+   "designationevent::mont-blanc::194-78",
+   "designationevent::mont-blanc::194-82",
+   "designationevent::mont-blanc::194-84"
+  ]
+ },
+ {
+  "city": "maricourt",
+  "grp": "HALT",
+  "log": {
+   "a": 26,
+   "b": 56
+  },
+  "s3n": 26,
+  "pgn": 56,
+  "onlyS3": 0,
+  "onlyPG": 30,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 30
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:33:16.896Z",
+   "2026-09-11T19:13:13.044Z"
+  ],
+  "s3mod": "2026-09-13T21:49:01.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-12T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::maricourt::raw-proces-verbaux-maricourt-cas-158f5f78f0466ce00b38306c67b4661731a597716a88aff324880f9a2a3aa55d-txt",
+   "source::maricourt::raw-proces-verbaux-maricourt-cas-1b0c3f77cb0aa74888a8ef60666000c19f273a404f09d3378eafdaf49ad76a3f-txt",
+   "source::maricourt::raw-proces-verbaux-maricourt-cas-2bc8def15c772fcfe2f1b3297f846f74e29c48242093cd970ecca668116484af-txt",
+   "source::maricourt::raw-proces-verbaux-maricourt-cas-6f03bbd799982bd68752a93402a7b96f89a24b64c6ea716e5d4f32f8ba84dac9-txt"
+  ]
+ },
+ {
+  "city": "mont-laurier",
+  "grp": "HALT",
+  "log": {
+   "a": 78,
+   "b": 71
+  },
+  "s3n": 105,
+  "pgn": 71,
+  "onlyS3": 34,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "DesignationEvent": 20,
+   "Source": 4,
+   "Zone": 10
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:48:24.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 137,
+  "runs": 9,
+  "lastPublished": "2026-10-04T12:48:24.000Z",
+  "lastProjected": "2026-10-04T12:48:24.000Z",
+  "sampleS3": [
+   "event-26-08-455",
+   "event-26-08-456",
+   "event-26-08-457",
+   "event-26-08-458"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "lepiphanie",
+  "grp": "HALT",
+  "log": {
+   "a": 89,
+   "b": 58
+  },
+  "s3n": 95,
+  "pgn": 58,
+  "onlyS3": 37,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2,
+   "DesignationEvent": 28,
+   "Signal": 3,
+   "Source": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:46:21.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 107,
+  "runs": 8,
+  "lastPublished": "2026-10-04T12:46:21.000Z",
+  "lastProjected": "2026-10-04T12:46:22.000Z",
+  "sampleS3": [
+   "bylaw-e-034",
+   "bylaw-e-034-1",
+   "de-piia-2025-042",
+   "de-piia-2026-001"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "montreal-est",
+  "grp": "HALT",
+  "log": {
+   "a": 22,
+   "b": 81
+  },
+  "s3n": 22,
+  "pgn": 81,
+  "onlyS3": 0,
+  "onlyPG": 59,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 19,
+   "source": 40
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:32:30.265Z",
+   "2026-09-10T14:32:30.265Z"
+  ],
+  "s3mod": "2026-09-13T21:49:03.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::montreal-est::33-2013",
+   "source::montreal-est::raw-proces-verbaux-montreal-est-cas-0186a4a82dde74c2af53ef818370b399389aa4a0eee2ba4c332481c686fb66a4-txt",
+   "source::montreal-est::raw-proces-verbaux-montreal-est-cas-07b46319a9f4636edc4d44d227480ec1651e090dc80683567eed68c7ffc47e0d-txt",
+   "source::montreal-est::raw-proces-verbaux-montreal-est-cas-0d1d81ac15ed271952cd5d98dbe73143e4331d25557c70b5d58556875a2733db-txt"
+  ]
+ },
+ {
+  "city": "neuville",
+  "grp": "HALT",
+  "log": {
+   "a": 45,
+   "b": 44
+  },
+  "s3n": 45,
+  "pgn": 44,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-01T18:39:12.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 83,
+  "runs": 8,
+  "lastPublished": "2026-10-01T18:39:12.000Z",
+  "lastProjected": "2026-10-01T18:39:12.000Z",
+  "sampleS3": [
+   "bylaw-131"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "nicolet",
+  "grp": "HALT",
+  "log": {
+   "a": 23,
+   "b": 49
+  },
+  "s3n": 23,
+  "pgn": 49,
+  "onlyS3": 0,
+  "onlyPG": 26,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 4,
+   "source": 22
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:17:17.225Z",
+   "2026-09-10T14:17:17.225Z"
+  ],
+  "s3mod": "2026-09-13T21:49:03.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-18T17:24:22.220Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::nicolet::535-2026",
+   "designationevent::nicolet::538-2025",
+   "source::nicolet::raw-proces-verbaux-nicolet-cas-0df2ebb63cbd58369f3a731145dd8f5adad985052ba4db5e078341aa68a7fdc9-txt",
+   "source::nicolet::raw-proces-verbaux-nicolet-cas-2f235b19a6d46d4291043803fc031d88899e338622483836fa54a0634f6fa248-txt"
+  ]
+ },
+ {
+  "city": "notre-dame-de-ham",
+  "grp": "HALT",
+  "log": {
+   "a": 43,
+   "b": 38
+  },
+  "s3n": 46,
+  "pgn": 38,
+  "onlyS3": 8,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2,
+   "Constraint": 2,
+   "DesignationEvent": 1,
+   "Source": 3
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:52:55.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 157,
+  "runs": 8,
+  "lastPublished": "2026-10-04T06:36:47.000Z",
+  "lastProjected": "2026-10-04T06:36:47.000Z",
+  "sampleS3": [
+   "bylaw-324",
+   "bylaw-388",
+   "constraint-cptaq-sentiers-equestres",
+   "cst-cptaq-drouin"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "notre-dame-du-sacre-coeur-dissoudun",
+  "grp": "HALT",
+  "log": {
+   "a": 76,
+   "b": 68
+  },
+  "s3n": 82,
+  "pgn": 68,
+  "onlyS3": 14,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 8,
+   "DesignationEvent": 2,
+   "Signal": 2,
+   "Source": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:53:39.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 170,
+  "runs": 9,
+  "lastPublished": "2026-10-04T12:53:40.000Z",
+  "lastProjected": "2026-10-04T12:53:40.000Z",
+  "sampleS3": [
+   "bylaw-2024-03",
+   "bylaw-2025-02",
+   "bylaw-2025-05",
+   "bylaw-2025-07"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "ogden",
+  "grp": "HALT",
+  "log": {
+   "a": 53,
+   "b": 52
+  },
+  "s3n": 61,
+  "pgn": 60,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:54:20.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 147,
+  "runs": 9,
+  "lastPublished": "2026-10-04T06:37:51.000Z",
+  "lastProjected": "2026-10-04T06:37:51.000Z",
+  "sampleS3": [
+   "bylaw-2023-02"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "lile-perrot",
+  "grp": "HALT",
+  "log": {
+   "a": 58,
+   "b": 82
+  },
+  "s3n": 58,
+  "pgn": 82,
+  "onlyS3": 0,
+  "onlyPG": 24,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 24
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T15:35:19.103Z",
+   "2026-09-10T15:35:19.103Z"
+  ],
+  "s3mod": "2026-09-13T21:49:01.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::lile-perrot::raw-proces-verbaux-lile-perrot-cas-0c61c6267b088b5174cfa86c613173f72ff2d64c10cc78cfc8c0c13d0807e31b-txt",
+   "source::lile-perrot::raw-proces-verbaux-lile-perrot-cas-114b23a8f0df0630dff51918af38813999d9d8e4f13f1ea65f576ea35f8baf05-txt",
+   "source::lile-perrot::raw-proces-verbaux-lile-perrot-cas-13881edba01e1347bc459f19c0d31cb8d121a5c60e93c9f6d6f9efb5fb1cccdf-txt",
+   "source::lile-perrot::raw-proces-verbaux-lile-perrot-cas-162697fa2e2292798a2ac9b3dd5372e03f929ed93429ce02cd6c62de2d071d22-txt"
+  ]
+ },
+ {
+  "city": "notre-dame-de-la-merci",
+  "grp": "HALT",
+  "log": {
+   "a": 33,
+   "b": 111
+  },
+  "s3n": 33,
+  "pgn": 111,
+  "onlyS3": 0,
+  "onlyPG": 78,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 6,
+   "source": 72
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T02:02:37.725Z",
+   "2026-09-11T18:55:19.750Z"
+  ],
+  "s3mod": "2026-09-13T21:49:05.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-18T17:24:17.811Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "mention:designationevent:notre-dame-de-la-merci-214-7-214",
+   "source::notre-dame-de-la-merci::raw-proces-verbaux-notre-dame-de-la-merci-cas-75af9dc43ffda00b6ba69221c4c06f2dc428c5b5e7689bb508b1f55f9d6a60e1-txt",
+   "designationevent::notre-dame-de-la-merci::209-1",
+   "designationevent::notre-dame-de-la-merci::214-8"
+  ]
+ },
+ {
+  "city": "otterburn-park",
+  "grp": "HALT",
+  "log": {
+   "a": 28,
+   "b": 41
+  },
+  "s3n": 28,
+  "pgn": 41,
+  "onlyS3": 0,
+  "onlyPG": 13,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 1,
+   "source": 12
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T15:07:55.799Z",
+   "2026-09-10T15:07:55.799Z"
+  ],
+  "s3mod": "2026-09-13T21:49:05.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::otterburn-park::431-48",
+   "source::otterburn-park::raw-proces-verbaux-otterburn-park-cas-01a61131a46d28a40b38b26164a0dcbfe08f8617857e5851649235c901aa8e9f-txt",
+   "source::otterburn-park::raw-proces-verbaux-otterburn-park-cas-2165fc69851db4e9261c467d8794a0f1fda4e87e9f0cf130253ff755473ecb74-txt",
+   "source::otterburn-park::raw-proces-verbaux-otterburn-park-cas-26c6d5718bdd4a0ed5f4ddc82ce2ad03ad1b10f35122af9192ebba47072856ed-txt"
+  ]
+ },
+ {
+  "city": "petite-riviere-saint-francois",
+  "grp": "HALT",
+  "log": {
+   "a": 89,
+   "b": 65
+  },
+  "s3n": 90,
+  "pgn": 65,
+  "onlyS3": 25,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 7,
+   "DesignationEvent": 11,
+   "Signal": 3,
+   "Source": 3,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T19:17:42.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 94,
+  "runs": 7,
+  "lastPublished": "2026-10-04T06:37:58.000Z",
+  "lastProjected": "2026-10-04T06:37:58.000Z",
+  "sampleS3": [
+   "bylaw-581",
+   "bylaw-585",
+   "bylaw-603",
+   "bylaw-778"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "orford",
+  "grp": "HALT",
+  "log": {
+   "a": 43,
+   "b": 55
+  },
+  "s3n": 43,
+  "pgn": 55,
+  "onlyS3": 0,
+  "onlyPG": 12,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 12
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:14:57.171Z",
+   "2026-09-10T14:14:57.171Z"
+  ],
+  "s3mod": "2026-09-13T21:49:06.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-12T10:15:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::orford::raw-proces-verbaux-orford-cas-0aedbb0cbc99b76ed22840aa639f01baf3099eaabb315d0f938b698af41fe076-txt",
+   "source::orford::raw-proces-verbaux-orford-cas-156d8dc7fbfb1374b8438f2d7408b3d986d6c263caadcb551f545db39cc43380-txt",
+   "source::orford::raw-proces-verbaux-orford-cas-1c976e73a51dda668df7aabf4cd6fecd9ade73d1e63ce4f1aa131a7e95cd0e5e-txt",
+   "source::orford::raw-proces-verbaux-orford-cas-351cdeca014683cbbd38a260682acde390ec87d1460e7f182384177498e93172-txt"
+  ]
+ },
+ {
+  "city": "pierreville",
+  "grp": "HALT",
+  "log": {
+   "a": 38,
+   "b": 52
+  },
+  "s3n": 38,
+  "pgn": 52,
+  "onlyS3": 0,
+  "onlyPG": 14,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 2,
+   "source": 12
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:56:48.791Z",
+   "2026-09-10T01:56:48.791Z"
+  ],
+  "s3mod": "2026-09-13T21:49:07.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::pierreville::268-2025",
+   "source::pierreville::raw-proces-verbaux-pierreville-cas-1519477e9deb11c04b96ff83091ee8511a68166cd0ae5baaa151b54fecff6ca9-txt",
+   "source::pierreville::raw-proces-verbaux-pierreville-cas-2e93a9763b856a4b96fe7335dfe30fb5034585f8e3539e7ec37ea2a0a8d35be0-txt",
+   "source::pierreville::raw-proces-verbaux-pierreville-cas-6272e4865741fb35dd039cde4aca473266cc806ccc9f184a81b6399909da28d5-txt"
+  ]
+ },
+ {
+  "city": "parisville",
+  "grp": "HALT",
+  "log": {
+   "a": 58,
+   "b": 55
+  },
+  "s3n": 58,
+  "pgn": 55,
+  "onlyS3": 3,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-02T06:42:48.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 127,
+  "runs": 9,
+  "lastPublished": "2026-10-01T06:46:35.000Z",
+  "lastProjected": "2026-10-01T06:46:35.000Z",
+  "sampleS3": [
+   "bylaw-417-2024",
+   "bylaw-427-2025",
+   "zone-m-04"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "plessisville",
+  "grp": "HALT",
+  "log": {
+   "a": 143,
+   "b": 142
+  },
+  "s3n": 143,
+  "pgn": 142,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T06:47:23.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 157,
+  "runs": 9,
+  "lastPublished": "2026-10-03T06:47:23.000Z",
+  "lastProjected": "2026-10-03T06:47:23.000Z",
+  "sampleS3": [
+   "zone-111"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "potton",
+  "grp": "HALT",
+  "log": {
+   "a": 55,
+   "b": 105
+  },
+  "s3n": 55,
+  "pgn": 105,
+  "onlyS3": 0,
+  "onlyPG": 50,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 49,
+   "designationevent": 1
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:00:01.004Z",
+   "2026-09-10T14:00:01.004Z"
+  ],
+  "s3mod": "2026-09-13T21:49:07.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T10:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::potton::raw-proces-verbaux-potton-cas-0e5be21f9d747ba920f5445f4909ff188620e9696f66377d5db57d177cdd4c6e-txt",
+   "designationevent::potton::2001-292",
+   "source::potton::raw-proces-verbaux-potton-cas-009391559b2777d7003b4a8f2ac076416b66eee634361c208c85dae6d174cda0-txt",
+   "source::potton::raw-proces-verbaux-potton-cas-00d6abf434f31dae02791f245b1892b0378310f05ac66c2d8ae16ba0107e6f14-txt"
+  ]
+ },
+ {
+  "city": "piedmont",
+  "grp": "HALT",
+  "log": {
+   "a": 103,
+   "b": 92
+  },
+  "s3n": 103,
+  "pgn": 92,
+  "onlyS3": 11,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 3,
+   "DesignationEvent": 7,
+   "Source": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-01T01:05:26.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 66,
+  "runs": 8,
+  "lastPublished": "2026-10-01T12:48:59.000Z",
+  "lastProjected": "2026-10-01T12:48:59.000Z",
+  "sampleS3": [
+   "bylaw-890-01-26",
+   "bylaw-890-23",
+   "bylaw-945-26",
+   "event-dm-2026-0002"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "prevost",
+  "grp": "HALT",
+  "log": {
+   "a": 103,
+   "b": 66
+  },
+  "s3n": 119,
+  "pgn": 66,
+  "onlyS3": 53,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 14,
+   "DesignationEvent": 23,
+   "Signal": 3,
+   "Source": 11,
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:57:14.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 206,
+  "runs": 8,
+  "lastPublished": "2026-10-04T12:57:14.000Z",
+  "lastProjected": "2026-10-04T12:57:14.000Z",
+  "sampleS3": [
+   "bylaw-231",
+   "bylaw-282",
+   "bylaw-776",
+   "bylaw-838-2"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "rawdon",
+  "grp": "HALT",
+  "log": {
+   "a": 120,
+   "b": 97
+  },
+  "s3n": 125,
+  "pgn": 97,
+  "onlyS3": 28,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 11,
+   "DesignationEvent": 9,
+   "Signal": 1,
+   "Source": 3,
+   "Zone": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T06:41:52.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 160,
+  "runs": 8,
+  "lastPublished": "2026-10-03T12:48:34.000Z",
+  "lastProjected": "2026-10-03T12:48:35.000Z",
+  "sampleS3": [
+   "bylaw-1007-4",
+   "bylaw-114-02",
+   "bylaw-114-02-3",
+   "bylaw-162-2025"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "racine",
+  "grp": "HALT",
+  "log": {
+   "a": 39,
+   "b": 67
+  },
+  "s3n": 39,
+  "pgn": 67,
+  "onlyS3": 0,
+  "onlyPG": 28,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 3,
+   "source": 25
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:11:39.978Z",
+   "2026-09-11T19:26:05.390Z"
+  ],
+  "s3mod": "2026-09-13T21:49:07.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::racine::408-05",
+   "mention:designationevent:racine-409-05",
+   "source::racine::raw-proces-verbaux-racine-cas-12df48ae08ee589ea934c10df31fce77edd1e74739256c76fc227ccecc58d252-txt",
+   "source::racine::raw-proces-verbaux-racine-cas-20f2e12e91f7292afd1671f54b1d23f1df725cbf0ab5b81d41bf69976f38fb18-txt"
+  ]
+ },
+ {
+  "city": "pointe-claire",
+  "grp": "HALT",
+  "log": {
+   "a": 55,
+   "b": 197
+  },
+  "s3n": 55,
+  "pgn": 197,
+  "onlyS3": 0,
+  "onlyPG": 142,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 1,
+   "source": 141
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:42:31.634Z",
+   "2026-09-10T14:42:31.634Z"
+  ],
+  "s3mod": "2026-09-13T21:49:07.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::pointe-claire::pc-2775",
+   "source::pointe-claire::raw-proces-verbaux-pointe-claire-cas-02879246cc7e78bf74ca54eb182ac73e3fc412fd95fa6fed2fae891016e86176-txt",
+   "source::pointe-claire::raw-proces-verbaux-pointe-claire-cas-029cbf28438eac42f8389c946c6001bd1c6c267728292a7e57dcea2d083d7bc9-txt",
+   "source::pointe-claire::raw-proces-verbaux-pointe-claire-cas-0307404427b158cdd5fecb6e7a1cad8abaa63f5966592fd71989e1055fb047a3-txt"
+  ]
+ },
+ {
+  "city": "roxton",
+  "grp": "HALT",
+  "log": {
+   "a": 28,
+   "b": 36
+  },
+  "s3n": 28,
+  "pgn": 36,
+  "onlyS3": 0,
+  "onlyPG": 8,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 8
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:12:35.179Z",
+   "2026-09-11T18:38:08.482Z"
+  ],
+  "s3mod": "2026-09-13T21:49:11.000Z",
+  "s3keys": "ontology_version,municipality,generated_at,pv_count,nodes,edges",
+  "gen": "2026-06-13T04:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::roxton::raw-proces-verbaux-roxton-cas-db100551cb926a972b9cd857ea0c966785f004a5c02aedaf34392375fc7fbf7f-txt",
+   "source::roxton::raw-proces-verbaux-roxton-cas-e08ed0d2a982e4004a594bb9ef216bae7bdfded40887cc8dfcf4db55514e9a34-txt",
+   "source::roxton::raw-proces-verbaux-roxton-cas-091bc16418e5e4dcc7904a91971b4ee4a548ef162f30bcbbade49c0aef11ce5a-txt",
+   "source::roxton::raw-proces-verbaux-roxton-cas-15c6516aeb309706c277c605a8445b1e04d87cef87cdccb7eccf9461abe10499-txt"
+  ]
+ },
+ {
+  "city": "riviere-beaudette",
+  "grp": "HALT",
+  "log": {
+   "a": 28,
+   "b": 25
+  },
+  "s3n": 30,
+  "pgn": 25,
+  "onlyS3": 5,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "Constraint": 1,
+   "Source": 3
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T13:00:04.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 130,
+  "runs": 9,
+  "lastPublished": "2026-10-04T06:42:04.000Z",
+  "lastProjected": "2026-10-04T06:42:05.000Z",
+  "sampleS3": [
+   "bylaw-2025-07",
+   "constraint-pprlpi-riviere-beaudette",
+   "source-0042b282e3f5bc7159d0e48cf87a5cce5fbdd70eb42279df66c7a84fb0967d71",
+   "source-14f5dde8fab74a910b07d5a189348c155beeaa74347c1134c87a6fa57dc6148e"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "portneuf",
+  "grp": "HALT",
+  "log": {
+   "a": 50,
+   "b": 47
+  },
+  "s3n": 50,
+  "pgn": 47,
+  "onlyS3": 3,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 3
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-02T00:53:49.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 56,
+  "runs": 7,
+  "lastPublished": "2026-10-02T00:53:50.000Z",
+  "lastProjected": "2026-10-02T00:53:50.000Z",
+  "sampleS3": [
+   "bylaw-309",
+   "bylaw-310",
+   "bylaw-311"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-albert",
+  "grp": "HALT",
+  "log": {
+   "a": 49,
+   "b": 33
+  },
+  "s3n": 50,
+  "pgn": 33,
+  "onlyS3": 17,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 7,
+   "DesignationEvent": 3,
+   "Signal": 2,
+   "Source": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T00:49:21.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 90,
+  "runs": 9,
+  "lastPublished": "2026-10-04T13:00:31.000Z",
+  "lastProjected": "2026-10-04T13:00:31.000Z",
+  "sampleS3": [
+   "bylaw-2017-02",
+   "bylaw-2025-03",
+   "bylaw-2026-01",
+   "bylaw-2026-04"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-agapit",
+  "grp": "HALT",
+  "log": {
+   "a": 82,
+   "b": 57
+  },
+  "s3n": 82,
+  "pgn": 57,
+  "onlyS3": 25,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "Constraint": 1,
+   "DesignationEvent": 10,
+   "Signal": 2,
+   "Source": 3,
+   "Zone": 8
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T01:19:20.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 93,
+  "runs": 8,
+  "lastPublished": "2026-10-02T19:45:06.000Z",
+  "lastProjected": "2026-10-02T19:45:07.000Z",
+  "sampleS3": [
+   "bylaw-606-02-26",
+   "constraint-cptaq-451416",
+   "designation-event-2026-05-165",
+   "designation-event-2026-05-169"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-alexis",
+  "grp": "HALT",
+  "log": {
+   "a": 54,
+   "b": 51
+  },
+  "s3n": 54,
+  "pgn": 51,
+  "onlyS3": 3,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "Source": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T00:49:59.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 158,
+  "runs": 9,
+  "lastPublished": "2026-10-03T19:23:37.000Z",
+  "lastProjected": "2026-10-03T19:23:37.000Z",
+  "sampleS3": [
+   "bylaw-2024-121",
+   "source-29026549d3984ebb83527c6674895abc0f4a4aceb42cf0354523f27898ab4928",
+   "source-293208d46056e4f67c5a62488a0d359893ee26f34778abff538381b48e8ed220"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-amable",
+  "grp": "HALT",
+  "log": {
+   "a": 22,
+   "b": 47
+  },
+  "s3n": 22,
+  "pgn": 47,
+  "onlyS3": 0,
+  "onlyPG": 25,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 3,
+   "source": 22
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T15:07:03.018Z",
+   "2026-09-10T15:07:03.018Z"
+  ],
+  "s3mod": "2026-09-13T21:49:17.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::saint-amable::712-46",
+   "designationevent::saint-amable::712-47",
+   "designationevent::saint-amable::712-48",
+   "source::saint-amable::raw-proces-verbaux-saint-amable-cas-0b4a5fdb4e01ee63b39c74c7449c55e989576dacc28610b464f19823c491ba02-txt"
+  ]
+ },
+ {
+  "city": "saint-alexis-des-monts",
+  "grp": "HALT",
+  "log": {
+   "a": 59,
+   "b": 58
+  },
+  "s3n": 62,
+  "pgn": 61,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T19:24:08.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 146,
+  "runs": 7,
+  "lastPublished": "2026-10-03T12:50:28.000Z",
+  "lastProjected": "2026-10-03T12:50:28.000Z",
+  "sampleS3": [
+   "bylaw-478-2025"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "richelieu",
+  "grp": "HALT",
+  "log": {
+   "a": 45,
+   "b": 122
+  },
+  "s3n": 45,
+  "pgn": 122,
+  "onlyS3": 0,
+  "onlyPG": 77,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 77
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T15:12:04.171Z",
+   "2026-09-10T15:12:04.171Z"
+  ],
+  "s3mod": "2026-09-13T21:49:07.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::richelieu::raw-proces-verbaux-richelieu-cas-03f33ff36aeb8136866c1be1d10f199543baad3fe2596d48f66277c05673ce64-txt",
+   "source::richelieu::raw-proces-verbaux-richelieu-cas-04b15f2203e239159eff700379c5317a660c1894e716ad8f19cdd1c418e8a8c2-txt",
+   "source::richelieu::raw-proces-verbaux-richelieu-cas-0c01edd134d977c30f19c351e2543f4c0ff0215835dbaaef15fb791e44640737-txt",
+   "source::richelieu::raw-proces-verbaux-richelieu-cas-10258067b090bacda72d2f0bcb087945bfdbf91792106b569ca3eadda8313af7-txt"
+  ]
+ },
+ {
+  "city": "saint-antoine-de-lisle-aux-grues",
+  "grp": "HALT",
+  "log": {
+   "a": 37,
+   "b": 36
+  },
+  "s3n": 37,
+  "pgn": 36,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "DesignationEvent": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T12:51:43.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 175,
+  "runs": 9,
+  "lastPublished": "2026-10-03T01:22:24.000Z",
+  "lastProjected": "2026-10-03T01:22:24.000Z",
+  "sampleS3": [
+   "event-2026-06-08"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-barnabe-sud",
+  "grp": "HALT",
+  "log": {
+   "a": 24,
+   "b": 22
+  },
+  "s3n": 24,
+  "pgn": 22,
+  "onlyS3": 2,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-30T17:18:32.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 53,
+  "runs": 6,
+  "lastPublished": "2026-09-30T17:18:33.000Z",
+  "lastProjected": "2026-09-30T17:18:33.000Z",
+  "sampleS3": [
+   "bylaw-02-2026",
+   "zone-a1"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-anicet",
+  "grp": "HALT",
+  "log": {
+   "a": 82,
+   "b": 77
+  },
+  "s3n": 91,
+  "pgn": 85,
+  "onlyS3": 6,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 6
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T13:02:03.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 205,
+  "runs": 9,
+  "lastPublished": "2026-10-02T19:47:42.000Z",
+  "lastProjected": "2026-10-02T19:47:46.000Z",
+  "sampleS3": [
+   "bylaw-525",
+   "bylaw-585",
+   "bylaw-602",
+   "bylaw-603"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-bruno-de-montarville",
+  "grp": "HALT",
+  "log": {
+   "a": 29,
+   "b": 55
+  },
+  "s3n": 29,
+  "pgn": 55,
+  "onlyS3": 0,
+  "onlyPG": 26,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 26
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:44:36.450Z",
+   "2026-09-10T14:44:36.450Z"
+  ],
+  "s3mod": "2026-09-13T21:49:22.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-bruno-de-montarville::raw-proces-verbaux-saint-bruno-de-montarville-cas-040b600f1e681b081504c68ecad9d6aadc815c52d47e038896833b65c25a29e6-txt",
+   "source::saint-bruno-de-montarville::raw-proces-verbaux-saint-bruno-de-montarville-cas-05441ca77d404d668d2caa9a1dd1318bbb96dcf8af71b2193e1ba888cabee13a-txt",
+   "source::saint-bruno-de-montarville::raw-proces-verbaux-saint-bruno-de-montarville-cas-0872163b05efe6056528a7e32ad524b84274e062e6aea79fcf8c6657320b2174-txt",
+   "source::saint-bruno-de-montarville::raw-proces-verbaux-saint-bruno-de-montarville-cas-088657268f11b9a017a8221064b164baad79e2fb724cc2ed3b4fd3f101ee9d45-txt"
+  ]
+ },
+ {
+  "city": "saint-andre-dargenteuil",
+  "grp": "HALT",
+  "log": {
+   "a": 107,
+   "b": 103
+  },
+  "s3n": 112,
+  "pgn": 108,
+  "onlyS3": 4,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "DesignationEvent": 3
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T13:01:28.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 133,
+  "runs": 9,
+  "lastPublished": "2026-10-04T06:43:37.000Z",
+  "lastProjected": "2026-10-04T06:43:38.000Z",
+  "sampleS3": [
+   "bylaw-134",
+   "event-derogation-2026-004",
+   "event-dm-2026-002",
+   "event-dm-2026-003"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-basile-le-grand",
+  "grp": "HALT",
+  "log": {
+   "a": 15,
+   "b": 83
+  },
+  "s3n": 15,
+  "pgn": 83,
+  "onlyS3": 0,
+  "onlyPG": 68,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 5,
+   "source": 63
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:58:39.134Z",
+   "2026-09-10T14:58:39.134Z"
+  ],
+  "s3mod": "2026-09-13T21:49:17.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::saint-basile-le-grand::32-25",
+   "source::saint-basile-le-grand::raw-proces-verbaux-saint-basile-le-grand-cas-01f796072f89c529d818c269b0a65e9a185c1a09c726871f287b034e5a6e5147-txt",
+   "source::saint-basile-le-grand::raw-proces-verbaux-saint-basile-le-grand-cas-043786b3747a826c0ef7aebfdd13b64133212422891d1f0615d1f0a69e9217ea-txt",
+   "source::saint-basile-le-grand::raw-proces-verbaux-saint-basile-le-grand-cas-053874850a54b80d47986053fb08085ea9c5ae9f67a69181bbc55a26b7598148-txt"
+  ]
+ },
+ {
+  "city": "saint-aime",
+  "grp": "HALT",
+  "log": {
+   "a": 62,
+   "b": 58
+  },
+  "s3n": 62,
+  "pgn": 58,
+  "onlyS3": 4,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2,
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-02T13:22:55.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 92,
+  "runs": 8,
+  "lastPublished": "2026-10-02T13:22:56.000Z",
+  "lastProjected": "2026-10-02T13:22:56.000Z",
+  "sampleS3": [
+   "bylaw-384-2022",
+   "bylaw-395-2023",
+   "zone-a-2",
+   "zone-a-3"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-christophe-darthabaska",
+  "grp": "HALT",
+  "log": {
+   "a": 57,
+   "b": 56
+  },
+  "s3n": 57,
+  "pgn": 56,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Source": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-02T11:20:44.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 103,
+  "runs": 7,
+  "lastPublished": "2026-10-02T11:20:44.000Z",
+  "lastProjected": "2026-10-02T11:20:44.000Z",
+  "sampleS3": [
+   "src-1"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-casimir",
+  "grp": "HALT",
+  "log": {
+   "a": 42,
+   "b": 26
+  },
+  "s3n": 56,
+  "pgn": 26,
+  "onlyS3": 30,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2,
+   "DesignationEvent": 14,
+   "Signal": 4,
+   "Source": 7,
+   "Zone": 3
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:20:40.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 102,
+  "runs": 7,
+  "lastPublished": "2026-10-04T11:20:41.000Z",
+  "lastProjected": "2026-10-04T11:20:41.000Z",
+  "sampleS3": [
+   "bylaw-227-2024",
+   "bylaw-230-2024",
+   "de-2026-07-13-142",
+   "de-2026-07-13-143"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-come-liniere",
+  "grp": "HALT",
+  "log": {
+   "a": 85,
+   "b": 72
+  },
+  "s3n": 86,
+  "pgn": 72,
+  "onlyS3": 14,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "DesignationEvent": 5,
+   "Signal": 3,
+   "Source": 4,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T05:21:01.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 130,
+  "runs": 9,
+  "lastPublished": "2026-10-04T11:22:44.000Z",
+  "lastProjected": "2026-10-02T11:22:23.000Z",
+  "sampleS3": [
+   "bylaw-329-2019",
+   "designation-18-03-66",
+   "event-19-06-09",
+   "event-19-06-15"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-claude",
+  "grp": "HALT",
+  "log": {
+   "a": 41,
+   "b": 40
+  },
+  "s3n": 48,
+  "pgn": 40,
+  "onlyS3": 8,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2,
+   "DesignationEvent": 2,
+   "Source": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:22:35.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 203,
+  "runs": 9,
+  "lastPublished": "2026-10-03T23:21:05.000Z",
+  "lastProjected": "2026-10-03T23:21:05.000Z",
+  "sampleS3": [
+   "bylaw-2024-340",
+   "bylaw-2024-342",
+   "event-adoption-2024-340",
+   "event-entree-vigueur-2024-340"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-cleophas-de-brandon",
+  "grp": "HALT",
+  "log": {
+   "a": 10,
+   "b": 17
+  },
+  "s3n": 10,
+  "pgn": 17,
+  "onlyS3": 0,
+  "onlyPG": 7,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 7
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:12:10.669Z",
+   "2026-09-10T01:12:10.669Z"
+  ],
+  "s3mod": "2026-09-13T21:49:21.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-14T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-cleophas-de-brandon::raw-proces-verbaux-saint-cleophas-de-brandon-cas-7a45eafd5ae6bb154303a2f5763a2534e9ed1007394e49f597683e113c61bc07-txt",
+   "source::saint-cleophas-de-brandon::raw-proces-verbaux-saint-cleophas-de-brandon-cas-867d0a3b457768f68620772fe98665165dd5a3bcf18cde3887dc30d99f045a05-txt",
+   "source::saint-cleophas-de-brandon::raw-proces-verbaux-saint-cleophas-de-brandon-cas-af1238be5218699bf6a83ecceab7f122571b721b85856a857b8da4090b2ad9a7-txt",
+   "source::saint-cleophas-de-brandon::raw-proces-verbaux-saint-cleophas-de-brandon-cas-0e0ab2c8590fb5c5263fd384b772c27bca1ffcc6ef0381c504cb2cd2513540c6-txt"
+  ]
+ },
+ {
+  "city": "saint-come",
+  "grp": "HALT",
+  "log": {
+   "a": 29,
+   "b": 44
+  },
+  "s3n": 29,
+  "pgn": 44,
+  "onlyS3": 0,
+  "onlyPG": 15,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 15
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:43:49.060Z",
+   "2026-09-11T18:49:06.768Z"
+  ],
+  "s3mod": "2026-09-13T21:49:22.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T10:40:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-come::raw-proces-verbaux-saint-come-cas-dd776dce1bdba24c9134834b1d498d928ad649f814199d7c7c2abdb002f3769c-txt",
+   "source::saint-come::raw-proces-verbaux-saint-come-cas-3e80f44127b689c721d99b99182e7ba641546d77609c856e007696e759395b5c-txt",
+   "source::saint-come::raw-proces-verbaux-saint-come-cas-6d100ec748146ef6936bfa0793e4db76ed982c08177e1d6d51372ebbbd0dd2be-txt",
+   "source::saint-come::raw-proces-verbaux-saint-come-cas-f9d7c237ec5c09a00d1f8cda0e9390f5bf6e4dee2c7090506fcb55bc52ab4c26-txt"
+  ]
+ },
+ {
+  "city": "saint-barthelemy",
+  "grp": "HALT",
+  "log": {
+   "a": 14,
+   "b": 33
+  },
+  "s3n": 14,
+  "pgn": 33,
+  "onlyS3": 0,
+  "onlyPG": 19,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 15,
+   "designationevent": 4
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:18:53.053Z",
+   "2026-09-11T18:41:05.996Z"
+  ],
+  "s3mod": "2026-09-13T21:49:17.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-14T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-barthelemy::raw-proces-verbaux-saint-barthelemy-cas-aaec0988d923a474d9b52f7321278154c25d10b42251e7437e7192b2e35262d4-txt",
+   "source::saint-barthelemy::raw-proces-verbaux-saint-barthelemy-cas-398fc949d3be857692f78b6e791c74f7ecc55dd531c59ba9f089b0324411fc91-txt",
+   "source::saint-barthelemy::raw-proces-verbaux-saint-barthelemy-cas-52a89b36cf2f1d2cd6598e4fc483c67a1901585c0a7ef41d7fb80d95af4550bd-txt",
+   "source::saint-barthelemy::raw-proces-verbaux-saint-barthelemy-cas-799723afcb6c154d323e9fcb1b63ee27686d0881a26c0c490c76f8da77a7ff3a-txt"
+  ]
+ },
+ {
+  "city": "saint-donat--matawinie",
+  "grp": "HALT",
+  "log": {
+   "a": 28,
+   "b": 42
+  },
+  "s3n": 28,
+  "pgn": 42,
+  "onlyS3": 0,
+  "onlyPG": 14,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 3,
+   "source": 11
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:55:51.389Z",
+   "2026-09-11T19:20:49.389Z"
+  ],
+  "s3mod": "2026-09-13T21:49:23.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T09:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::saint-donat--matawinie::15-923",
+   "source::saint-donat--matawinie::raw-proces-verbaux-saint-donat-matawinie-cas-074f9b0c8f38836d3924a5a52fc45741299e3a631a1dcac08af7e3c098a76baf-txt",
+   "source::saint-donat--matawinie::raw-proces-verbaux-saint-donat-matawinie-cas-1768a103e69cee4733111950a2e95bb27d415b2fcf6b70d832a63645fea884a6-txt",
+   "source::saint-donat--matawinie::raw-proces-verbaux-saint-donat-matawinie-cas-22cf20010b6c761a310c7ea0a43e3f886abc845ff2dbc5f8e68f9c999bf669b9-txt"
+  ]
+ },
+ {
+  "city": "saint-cuthbert",
+  "grp": "HALT",
+  "log": {
+   "a": 18,
+   "b": 28
+  },
+  "s3n": 18,
+  "pgn": 28,
+  "onlyS3": 0,
+  "onlyPG": 10,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 10
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T02:22:52.246Z",
+   "2026-09-11T18:36:59.283Z"
+  ],
+  "s3mod": "2026-09-13T21:49:22.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-14T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-cuthbert::raw-proces-verbaux-saint-cuthbert-cas-621fd78fd56cc351b720feb4fcdd83bc4e32b16230df603940b8edf91a70ab96-txt",
+   "source::saint-cuthbert::raw-proces-verbaux-saint-cuthbert-cas-b9ce888bfbffb5e57e4b08c48cd58b5ef00ca2d8fa6eb23587e552e48964d934-txt",
+   "source::saint-cuthbert::raw-proces-verbaux-saint-cuthbert-cas-c6e44934dec3bd2753769bb27544c84bcf11e6ef5ea87dbcd02c8edaadbcd497-txt",
+   "source::saint-cuthbert::raw-proces-verbaux-saint-cuthbert-cas-9b712e1a3be9f9b850163db7450c7353447338ae5e7ae6a7a096d4dd252abead-txt"
+  ]
+ },
+ {
+  "city": "saint-etienne-de-bolton",
+  "grp": "HALT",
+  "log": {
+   "a": 21,
+   "b": 38
+  },
+  "s3n": 21,
+  "pgn": 38,
+  "onlyS3": 0,
+  "onlyPG": 17,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 16,
+   "designationevent": 1
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:30:56.801Z",
+   "2026-09-11T19:11:22.798Z"
+  ],
+  "s3mod": "2026-09-13T21:49:23.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T08:30:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-etienne-de-bolton::raw-proces-verbaux-saint-etienne-de-bolton-cas-5725b1728c790cde7c04e5d57ef8ad7f9635ff0d0fce12f11657e876339e7ef4-txt",
+   "designationevent::saint-etienne-de-bolton::2026-04",
+   "source::saint-etienne-de-bolton::raw-proces-verbaux-saint-etienne-de-bolton-cas-176905d12cebb92117dfad686e93c7eb49fd7e2c869fe4b69bec0dfe643bd46d-txt",
+   "source::saint-etienne-de-bolton::raw-proces-verbaux-saint-etienne-de-bolton-cas-50aa74a0beb4c61b9c98618f49143c26614668d5494620504b9f180318a28057-txt"
+  ]
+ },
+ {
+  "city": "saint-cyrille-de-wendover",
+  "grp": "HALT",
+  "log": {
+   "a": 36,
+   "b": 58
+  },
+  "s3n": 36,
+  "pgn": 58,
+  "onlyS3": 0,
+  "onlyPG": 22,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 18,
+   "designationevent": 4
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:41:24.952Z",
+   "2026-09-11T19:13:59.350Z"
+  ],
+  "s3mod": "2026-09-13T21:49:21.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T10:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-cyrille-de-wendover::raw-proces-verbaux-saint-cyrille-de-wendover-cas-3de94792a572d32ac49106672777fbe2ed2667a754a1110341a15ba898267837-txt",
+   "source::saint-cyrille-de-wendover::raw-proces-verbaux-saint-cyrille-de-wendover-cas-4a1e45e5a9e3b4b0f0ff228d6040a003a9ddd5df094c505cf2e52a09b1827992-txt",
+   "designationevent::saint-cyrille-de-wendover::437",
+   "source::saint-cyrille-de-wendover::raw-proces-verbaux-saint-cyrille-de-wendover-cas-1afe234ecc4f62c0b496bc82f18b4d945f30e2f86773bacc918face84370609b-txt"
+  ]
+ },
+ {
+  "city": "saint-denis-de-brompton",
+  "grp": "HALT",
+  "log": {
+   "a": 40,
+   "b": 38
+  },
+  "s3n": 40,
+  "pgn": 38,
+  "onlyS3": 2,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "DesignationEvent": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-01T17:23:18.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 93,
+  "runs": 7,
+  "lastPublished": "2026-10-01T17:23:20.000Z",
+  "lastProjected": "2026-10-01T17:23:23.000Z",
+  "sampleS3": [
+   "bylaw-750",
+   "event-2026-07-13"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-colomban",
+  "grp": "HALT",
+  "log": {
+   "a": 94,
+   "b": 91
+  },
+  "s3n": 94,
+  "pgn": 91,
+  "onlyS3": 3,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2,
+   "Source": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-02T17:28:29.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 87,
+  "runs": 6,
+  "lastPublished": "2026-10-02T17:28:30.000Z",
+  "lastProjected": "2026-10-02T17:28:34.000Z",
+  "sampleS3": [
+   "bylaw-600",
+   "bylaw-602",
+   "source-doc"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-francois-xavier-de-brompton",
+  "grp": "HALT",
+  "log": {
+   "a": 72,
+   "b": 35
+  },
+  "s3n": 77,
+  "pgn": 35,
+  "onlyS3": 42,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 10,
+   "Constraint": 1,
+   "DesignationEvent": 12,
+   "Signal": 6,
+   "Source": 8,
+   "Zone": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:24:10.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 151,
+  "runs": 7,
+  "lastPublished": "2026-10-04T11:24:10.000Z",
+  "lastProjected": "2026-10-04T11:24:10.000Z",
+  "sampleS3": [
+   "bylaw-2010-115",
+   "bylaw-2015-190",
+   "bylaw-2022-279",
+   "bylaw-2022-285"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-gabriel-de-brandon",
+  "grp": "HALT",
+  "log": {
+   "a": 52,
+   "b": 51
+  },
+  "s3n": 87,
+  "pgn": 83,
+  "onlyS3": 4,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "Zone": 3
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:29:48.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 85,
+  "runs": 8,
+  "lastPublished": "2026-10-04T11:29:48.000Z",
+  "lastProjected": "2026-10-04T11:29:49.000Z",
+  "sampleS3": [
+   "bylaw-501",
+   "zone-108",
+   "zone-204",
+   "zone-rec-10"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-francois-du-lac",
+  "grp": "HALT",
+  "log": {
+   "a": 18,
+   "b": 39
+  },
+  "s3n": 18,
+  "pgn": 39,
+  "onlyS3": 0,
+  "onlyPG": 21,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 20,
+   "designationevent": 1
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:18:15.648Z",
+   "2026-09-11T18:40:35.433Z"
+  ],
+  "s3mod": "2026-09-13T21:49:26.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-14T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-francois-du-lac::raw-proces-verbaux-saint-francois-du-lac-cas-d05d981b83cf9f628ba99b357286088fc95a7ef0079866e15148b96609c6af3a-txt",
+   "source::saint-francois-du-lac::raw-proces-verbaux-saint-francois-du-lac-cas-383e70aa48e7798e9aeeff9e113da87c7bf6283812ce410f604e1898f9b861d1-txt",
+   "source::saint-francois-du-lac::raw-proces-verbaux-saint-francois-du-lac-cas-4814fb94f86a64486fc3047d73a23f20603fa07aedb2d7417a7d47793c0fb7bd-txt",
+   "source::saint-francois-du-lac::raw-proces-verbaux-saint-francois-du-lac-cas-49d34cc9067c6e0679c6d87e3ead9b0379e86e24c304c362c1e45710f6685f80-txt"
+  ]
+ },
+ {
+  "city": "saint-edouard-de-maskinonge",
+  "grp": "HALT",
+  "log": {
+   "a": 10,
+   "b": 26
+  },
+  "s3n": 10,
+  "pgn": 26,
+  "onlyS3": 0,
+  "onlyPG": 16,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 16
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:31:34.640Z",
+   "2026-09-11T19:11:49.210Z"
+  ],
+  "s3mod": "2026-09-13T21:49:23.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-19T04:00:01.704Z",
+  "refreshKeys": 2,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-edouard-de-maskinonge::raw-proces-verbaux-saint-edouard-de-maskinonge-cas-8eaca90415192f31ff9e2be9c6dfc4509669b6ab99a5fb702c0c2ad64c07c963-txt",
+   "source::saint-edouard-de-maskinonge::raw-proces-verbaux-saint-edouard-de-maskinonge-cas-3b39e411832ff130c99594ff0359b3df2eb541a523d186326bddbf43220253d8-txt",
+   "source::saint-edouard-de-maskinonge::raw-proces-verbaux-saint-edouard-de-maskinonge-cas-3f6284d11fd36dae799966b65359fb35729ce5a75b9d11964d5184bf6d8d6458-txt",
+   "source::saint-edouard-de-maskinonge::raw-proces-verbaux-saint-edouard-de-maskinonge-cas-502b99f50edae562e2bfe075d0fa104867f244bebc041e3baa6fb7b6c9339aef-txt"
+  ]
+ },
+ {
+  "city": "saint-gabriel",
+  "grp": "HALT",
+  "log": {
+   "a": 21,
+   "b": 34
+  },
+  "s3n": 21,
+  "pgn": 34,
+  "onlyS3": 0,
+  "onlyPG": 13,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 13
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T02:13:23.241Z",
+   "2026-09-11T18:58:08.878Z"
+  ],
+  "s3mod": "2026-09-13T21:49:26.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T12:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-gabriel::raw-proces-verbaux-saint-gabriel-cas-3fddc485185b1e1b9e8e489645d4d2514f3fd4de1e709c39ac8338d534df9dd5-txt",
+   "source::saint-gabriel::raw-proces-verbaux-saint-gabriel-cas-c2a207e931b2a7c2aaaffb7115b7ba107aed4f05e4bc13a6cd49f41f067ae891-txt",
+   "source::saint-gabriel::raw-proces-verbaux-saint-gabriel-cas-d45a4a3700b3983e3f0bda2a7c3b1379b8a84db9de08f98de00d8ea3db3b126e-txt",
+   "source::saint-gabriel::raw-proces-verbaux-saint-gabriel-cas-dc9f397e0563516eb3705146ac72f506d00e44aa52a2e4c7a766ddee2cbeeea3-txt"
+  ]
+ },
+ {
+  "city": "saint-jean-de-matha",
+  "grp": "HALT",
+  "log": {
+   "a": 22,
+   "b": 34
+  },
+  "s3n": 22,
+  "pgn": 34,
+  "onlyS3": 0,
+  "onlyPG": 12,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 12
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:17:29.300Z",
+   "2026-09-10T01:17:29.300Z"
+  ],
+  "s3mod": "2026-09-13T21:49:28.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-18T17:27:23.581Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-jean-de-matha::raw-proces-verbaux-saint-jean-de-matha-cas-6076b9b60342570b132521f792fb148b3aefdb7e0964e913b9855c560793dd22-txt",
+   "source::saint-jean-de-matha::raw-proces-verbaux-saint-jean-de-matha-cas-0d27f662f17689938f2d82d150e72bdb1d61dca4abb4f3d65b744b5914a4d239-txt",
+   "source::saint-jean-de-matha::raw-proces-verbaux-saint-jean-de-matha-cas-3e42ca83030ab2dd3c573d7003e850bf12e4a8888cd2c9262cc3bf42824d800f-txt",
+   "source::saint-jean-de-matha::raw-proces-verbaux-saint-jean-de-matha-cas-28c5ef9c8c257882bc4b718adf2f25e546c0725d0af4e0abb15e415b14a7723c-txt"
+  ]
+ },
+ {
+  "city": "saint-germain-de-grantham",
+  "grp": "HALT",
+  "log": {
+   "a": 18,
+   "b": 138
+  },
+  "s3n": 18,
+  "pgn": 138,
+  "onlyS3": 0,
+  "onlyPG": 120,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 6,
+   "source": 114
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:41:20.752Z",
+   "2026-09-11T18:47:55.453Z"
+  ],
+  "s3mod": "2026-09-13T21:49:26.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-14T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "mention:designationevent:saint-germain-de-grantham-854-25",
+   "source::saint-germain-de-grantham::raw-proces-verbaux-saint-germain-de-grantham-cas-f205eb1d0757a0e62c71fea570e1e64274e9b3ab9eddb9ea193355bb6712d170-txt",
+   "source::saint-germain-de-grantham::raw-proces-verbaux-saint-germain-de-grantham-cas-f39876b2e7d314e5b1d1a3d4b2374239c60d3ce74dea270a13af3fc56c3ff9d2-txt",
+   "source::saint-germain-de-grantham::raw-proces-verbaux-saint-germain-de-grantham-cas-fa98e26940c45b4d0775903009e978609a95319b16c8791d12e04f8846b6b918-txt"
+  ]
+ },
+ {
+  "city": "saint-gilbert",
+  "grp": "HALT",
+  "log": {
+   "a": 53,
+   "b": 52
+  },
+  "s3n": 61,
+  "pgn": 59,
+  "onlyS3": 2,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "Source": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:31:45.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 171,
+  "runs": 9,
+  "lastPublished": "2026-10-02T17:39:07.000Z",
+  "lastProjected": "2026-10-02T17:39:08.000Z",
+  "sampleS3": [
+   "bylaw-rmu-2021",
+   "src-1"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-gabriel-de-valcartier",
+  "grp": "HALT",
+  "log": {
+   "a": 42,
+   "b": 9
+  },
+  "s3n": 51,
+  "pgn": 9,
+  "onlyS3": 42,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 19,
+   "Constraint": 2,
+   "Source": 10,
+   "DesignationEvent": 9,
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:30:34.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 154,
+  "runs": 7,
+  "lastPublished": "2026-10-04T11:30:34.000Z",
+  "lastProjected": "2026-10-04T11:30:34.000Z",
+  "sampleS3": [
+   "bylaw-147",
+   "bylaw-152",
+   "bylaw-201",
+   "bylaw-230"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-guillaume",
+  "grp": "HALT",
+  "log": {
+   "a": 74,
+   "b": 73
+  },
+  "s3n": 74,
+  "pgn": 73,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T05:28:43.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 116,
+  "runs": 8,
+  "lastPublished": "2026-10-03T05:28:43.000Z",
+  "lastProjected": "2026-10-03T05:28:44.000Z",
+  "sampleS3": [
+   "zone-c-6"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-jerome",
+  "grp": "HALT",
+  "log": {
+   "a": 119,
+   "b": 118
+  },
+  "s3n": 121,
+  "pgn": 120,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Source": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T23:33:18.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 187,
+  "runs": 9,
+  "lastPublished": "2026-10-03T23:33:19.000Z",
+  "lastProjected": "2026-10-03T23:33:21.000Z",
+  "sampleS3": [
+   "source-doc"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-lambert",
+  "grp": "HALT",
+  "log": {
+   "a": 12,
+   "b": 23
+  },
+  "s3n": 12,
+  "pgn": 23,
+  "onlyS3": 0,
+  "onlyPG": 11,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 11
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T15:00:29.172Z",
+   "2026-09-10T15:00:29.172Z"
+  ],
+  "s3mod": "2026-09-13T21:49:30.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-08-03T21:59:38Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-lambert::raw-proces-verbaux-saint-lambert-cas-0d66b4b15701132536bca930d394163fc51331f2d94a5917a51d99415bdf9141-txt",
+   "source::saint-lambert::raw-proces-verbaux-saint-lambert-cas-1c245374e9688be9fb658084b80b3220a6a620d69c04a7f9b136de999c527a72-txt",
+   "source::saint-lambert::raw-proces-verbaux-saint-lambert-cas-1ea3644c9559456a6871173a8a1ce85f54bb1e6751ee7111d3f5d13fc1905355-txt",
+   "source::saint-lambert::raw-proces-verbaux-saint-lambert-cas-262727d0e67c4339f8250fabba0376e9e41ee6069d542554913054f062df6131-txt"
+  ]
+ },
+ {
+  "city": "saint-leonard-daston",
+  "grp": "HALT",
+  "log": {
+   "a": 27,
+   "b": 18
+  },
+  "s3n": 39,
+  "pgn": 18,
+  "onlyS3": 21,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 3,
+   "Constraint": 1,
+   "DesignationEvent": 5,
+   "Signal": 2,
+   "Source": 5,
+   "Zone": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T05:41:09.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 95,
+  "runs": 8,
+  "lastPublished": "2026-10-04T11:35:18.000Z",
+  "lastProjected": "2026-10-04T11:35:19.000Z",
+  "sampleS3": [
+   "bylaw-2016-10",
+   "bylaw-2019-06",
+   "bylaw-2024-06",
+   "constraint-cptaq-6338192"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-lucien",
+  "grp": "HALT",
+  "log": {
+   "a": 36,
+   "b": 25
+  },
+  "s3n": 38,
+  "pgn": 25,
+  "onlyS3": 13,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 3,
+   "Constraint": 2,
+   "DesignationEvent": 2,
+   "Signal": 1,
+   "Source": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T23:36:24.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 107,
+  "runs": 8,
+  "lastPublished": "2026-10-03T18:00:26.000Z",
+  "lastProjected": "2026-10-03T18:00:26.000Z",
+  "sampleS3": [
+   "bylaw-2022-150",
+   "bylaw-2026-186",
+   "bylaw-occupation-entretien-batiments",
+   "constraint-cptaq-passerelle"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-leon-le-grand--maskinonge",
+  "grp": "HALT",
+  "log": {
+   "a": 28,
+   "b": 50
+  },
+  "s3n": 28,
+  "pgn": 50,
+  "onlyS3": 0,
+  "onlyPG": 22,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 3,
+   "source": 19
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:54:28.812Z",
+   "2026-09-10T13:54:28.812Z"
+  ],
+  "s3mod": "2026-09-13T21:49:30.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T10:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "mention:designationevent:saint-leon-le-grand-maskinonge-369-24",
+   "designationevent::saint-leon-le-grand--maskinonge::367-24",
+   "source::saint-leon-le-grand--maskinonge::raw-proces-verbaux-saint-leon-le-grand-maskinonge-cas-077c12a473cfbc0e994d11406350cc86e1184daaa4963fa72366186da2205ed7-txt",
+   "source::saint-leon-le-grand--maskinonge::raw-proces-verbaux-saint-leon-le-grand-maskinonge-cas-094d6e8f8365b829095119e0da60df1596609b0452c0ff43e96e996d70325d27-txt"
+  ]
+ },
+ {
+  "city": "saint-jacques-de-leeds",
+  "grp": "HALT",
+  "log": {
+   "a": 43,
+   "b": 35
+  },
+  "s3n": 47,
+  "pgn": 35,
+  "onlyS3": 12,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "Constraint": 2,
+   "DesignationEvent": 4,
+   "Signal": 1,
+   "Source": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:33:40.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 109,
+  "runs": 9,
+  "lastPublished": "2026-10-03T17:53:36.000Z",
+  "lastProjected": "2026-10-03T17:53:36.000Z",
+  "sampleS3": [
+   "bylaw-390",
+   "constraint-cptaq-4449943",
+   "constraint-cptaq-6460264",
+   "event-162-06-25"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-joseph-de-beauce",
+  "grp": "HALT",
+  "log": {
+   "a": 157,
+   "b": 153
+  },
+  "s3n": 157,
+  "pgn": 153,
+  "onlyS3": 4,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "DesignationEvent": 2,
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-02T17:47:10.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 154,
+  "runs": 8,
+  "lastPublished": "2026-10-01T05:34:19.000Z",
+  "lastProjected": "2026-10-01T05:34:19.000Z",
+  "sampleS3": [
+   "designation-event-2024-05-139",
+   "designation-event-2024-05-141",
+   "zone-h-33",
+   "zone-i-3"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-joachim-de-shefford",
+  "grp": "HALT",
+  "log": {
+   "a": 15,
+   "b": 36
+  },
+  "s3n": 15,
+  "pgn": 36,
+  "onlyS3": 0,
+  "onlyPG": 21,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 21
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:11:42.043Z",
+   "2026-09-11T18:37:36.290Z"
+  ],
+  "s3mod": "2026-09-13T21:49:28.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-14T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-joachim-de-shefford::raw-proces-verbaux-saint-joachim-de-shefford-cas-20c7a4b772a2874bbf962dd1763d79d859b96c6e199776fb947c82b9889456e4-txt",
+   "source::saint-joachim-de-shefford::raw-proces-verbaux-saint-joachim-de-shefford-cas-2159cfedf81eded3611fd1c4801bef9eb3f4a6b80f44998b5546b3740e75c538-txt",
+   "source::saint-joachim-de-shefford::raw-proces-verbaux-saint-joachim-de-shefford-cas-499bb9e8fbaadb4dba8a1cd3422b0b7bb577d44e87326cc3014d9fb87b928322-txt",
+   "source::saint-joachim-de-shefford::raw-proces-verbaux-saint-joachim-de-shefford-cas-4a8babaa44519236584fd0783427dc5c7dda6ff297544384a16da1bec77da395-txt"
+  ]
+ },
+ {
+  "city": "saint-mathias-sur-richelieu",
+  "grp": "HALT",
+  "log": {
+   "a": 19,
+   "b": 43
+  },
+  "s3n": 19,
+  "pgn": 43,
+  "onlyS3": 0,
+  "onlyPG": 24,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 6,
+   "source": 18
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T15:05:08.070Z",
+   "2026-09-10T15:05:08.070Z"
+  ],
+  "s3mod": "2026-09-13T21:49:31.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::saint-mathias-sur-richelieu::1059",
+   "source::saint-mathias-sur-richelieu::raw-proces-verbaux-saint-mathias-sur-richelieu-cas-0245f6f727684ef8b063d81e8a3a17e65c3849795f334ab96c9241211902cf54-txt",
+   "source::saint-mathias-sur-richelieu::raw-proces-verbaux-saint-mathias-sur-richelieu-cas-04ea1e13c6b0853a73a2b47c66bb00d2a98f96aa179f4fec9850aef798f3199e-txt",
+   "source::saint-mathias-sur-richelieu::raw-proces-verbaux-saint-mathias-sur-richelieu-cas-05b1b62ef72fc8900bf0bb99c013d16d4ebe4647e7dc80003254c84fbbe5b6d7-txt"
+  ]
+ },
+ {
+  "city": "saint-nazaire-dacton",
+  "grp": "HALT",
+  "log": {
+   "a": 20,
+   "b": 38
+  },
+  "s3n": 20,
+  "pgn": 38,
+  "onlyS3": 0,
+  "onlyPG": 18,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 18
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T00:40:20.946Z",
+   "2026-09-11T18:28:47.909Z"
+  ],
+  "s3mod": "2026-09-13T21:49:31.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-18T17:28:02.918Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-nazaire-dacton::raw-proces-verbaux-saint-nazaire-dacton-cas-fcd7936d10d9be2c716ffdb8c787a61c95bf4a82937b584ecd3e9c0d2c6a8491-txt",
+   "source::saint-nazaire-dacton::raw-proces-verbaux-saint-nazaire-dacton-cas-67596ee036a319def74a92d7091bdd713d41d463a2f3be813f406a7be3d560c0-txt",
+   "source::saint-nazaire-dacton::raw-proces-verbaux-saint-nazaire-dacton-cas-008b885029627435c81500004a886010a228e6ea28ae7b293692c7af384c4893-txt",
+   "source::saint-nazaire-dacton::raw-proces-verbaux-saint-nazaire-dacton-cas-3118dfbc2e803f6528f9e61e303111e20bad91cd7a8849adc4be222e5d7be2fa-txt"
+  ]
+ },
+ {
+  "city": "saint-patrice-de-beaurivage",
+  "grp": "HALT",
+  "log": {
+   "a": 49,
+   "b": 29
+  },
+  "s3n": 49,
+  "pgn": 29,
+  "onlyS3": 20,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 4,
+   "DesignationEvent": 8,
+   "Signal": 3,
+   "Source": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T23:38:54.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 105,
+  "runs": 9,
+  "lastPublished": "2026-10-04T11:37:03.000Z",
+  "lastProjected": "2026-10-04T11:37:03.000Z",
+  "sampleS3": [
+   "bylaw-355-2019",
+   "bylaw-425-2025",
+   "bylaw-426-2025",
+   "bylaw-428-2025"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-mathieu-de-beloeil",
+  "grp": "HALT",
+  "log": {
+   "a": 39,
+   "b": 53
+  },
+  "s3n": 39,
+  "pgn": 53,
+  "onlyS3": 0,
+  "onlyPG": 14,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 14
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T15:05:56.620Z",
+   "2026-09-10T15:05:56.620Z"
+  ],
+  "s3mod": "2026-09-13T21:49:31.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-mathieu-de-beloeil::raw-proces-verbaux-saint-mathieu-de-beloeil-cas-0d8b4ca96094fed6e8ee3f6804b5e4ed029b86fafeea7c79c822ec143584560b-txt",
+   "source::saint-mathieu-de-beloeil::raw-proces-verbaux-saint-mathieu-de-beloeil-cas-0e53534fd1a4582e96a7f68000374095faec64047511ee204c5bdd8fcc73d092-txt",
+   "source::saint-mathieu-de-beloeil::raw-proces-verbaux-saint-mathieu-de-beloeil-cas-475894860ac6839f916bcd9a7f274c9f989d02ea52247929925ff19d4e6d3f6b-txt",
+   "source::saint-mathieu-de-beloeil::raw-proces-verbaux-saint-mathieu-de-beloeil-cas-7060584c3e59f0b2f12f34aa0b40faadf4aa5790a0459f3319852bcd63262cbb-txt"
+  ]
+ },
+ {
+  "city": "saint-louis",
+  "grp": "HALT",
+  "log": {
+   "a": 54,
+   "b": 51
+  },
+  "s3n": 54,
+  "pgn": 51,
+  "onlyS3": 3,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Constraint": 2,
+   "Source": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-01T23:36:03.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 83,
+  "runs": 7,
+  "lastPublished": "2026-10-01T17:41:36.000Z",
+  "lastProjected": "2026-10-01T17:41:37.000Z",
+  "sampleS3": [
+   "constraint-cptaq",
+   "constraint-cptaq-agricole",
+   "source-7013ff26f0f7bb1a3dc55eac9083c1a82cab10168f96c1a9e36e229d0e0e6e15"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-paul-de-lile-aux-noix",
+  "grp": "HALT",
+  "log": {
+   "a": 54,
+   "b": 39
+  },
+  "s3n": 56,
+  "pgn": 39,
+  "onlyS3": 17,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "DesignationEvent": 7,
+   "Signal": 3,
+   "Source": 5,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T05:43:25.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 93,
+  "runs": 8,
+  "lastPublished": "2026-10-03T11:36:30.000Z",
+  "lastProjected": "2026-10-03T11:36:31.000Z",
+  "sampleS3": [
+   "bylaw-428-2022",
+   "event-2026-04-078",
+   "event-2026-04-079",
+   "event-462-2026-premier-projet"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-pie-de-guire",
+  "grp": "HALT",
+  "log": {
+   "a": 12,
+   "b": 37
+  },
+  "s3n": 12,
+  "pgn": 37,
+  "onlyS3": 0,
+  "onlyPG": 25,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 22,
+   "designationevent": 3
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:42:10.488Z",
+   "2026-09-11T18:48:21.929Z"
+  ],
+  "s3mod": "2026-09-13T21:49:33.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-14T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-pie-de-guire::raw-proces-verbaux-saint-pie-de-guire-cas-59156e47a11226dbc84810b6f5f69f7426a2e7988bd36e6bdd458c13ac810de8-txt",
+   "source::saint-pie-de-guire::raw-proces-verbaux-saint-pie-de-guire-cas-5cff0e443998e6245286cc4f655af51ea19d137facd7da536f99d4d5f30a7981-txt",
+   "source::saint-pie-de-guire::raw-proces-verbaux-saint-pie-de-guire-cas-754010a3b5548a35e95111b60eabd41069ddc01248c311e5d15a94dd84a1367c-txt",
+   "source::saint-pie-de-guire::raw-proces-verbaux-saint-pie-de-guire-cas-39c535bc65a7a3d151413ce4138041f1a048869ee1dfd575b5469572c4492c3b-txt"
+  ]
+ },
+ {
+  "city": "saint-pie",
+  "grp": "HALT",
+  "log": {
+   "a": 157,
+   "b": 149
+  },
+  "s3n": 161,
+  "pgn": 149,
+  "onlyS3": 12,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "DesignationEvent": 6,
+   "Source": 3,
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:38:11.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 162,
+  "runs": 8,
+  "lastPublished": "2026-10-04T11:38:12.000Z",
+  "lastProjected": "2026-10-04T11:38:12.000Z",
+  "sampleS3": [
+   "bylaw-268",
+   "event-10-02-2023",
+   "event-11-02-2023",
+   "event-12-02-2023"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-polycarpe",
+  "grp": "HALT",
+  "log": {
+   "a": 36,
+   "b": 35
+  },
+  "s3n": 36,
+  "pgn": 35,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "DesignationEvent": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-30T23:41:56.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 44,
+  "runs": 5,
+  "lastPublished": "2026-09-30T23:41:56.000Z",
+  "lastProjected": "2026-09-30T23:41:56.000Z",
+  "sampleS3": [
+   "event-dm-2026-03"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-mathieu-du-parc",
+  "grp": "HALT",
+  "log": {
+   "a": 29,
+   "b": 27
+  },
+  "s3n": 29,
+  "pgn": 27,
+  "onlyS3": 2,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-30T05:42:40.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 34,
+  "runs": 4,
+  "lastPublished": "2026-09-30T05:42:41.000Z",
+  "lastProjected": "2026-09-30T05:42:41.000Z",
+  "sampleS3": [
+   "bylaw-2026-03",
+   "bylaw-2026-04"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-raymond",
+  "grp": "HALT",
+  "log": {
+   "a": 135,
+   "b": 59
+  },
+  "s3n": 145,
+  "pgn": 59,
+  "onlyS3": 86,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 32,
+   "Constraint": 2,
+   "DesignationEvent": 13,
+   "Source": 14,
+   "Signal": 7,
+   "Zone": 18
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:40:13.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 182,
+  "runs": 9,
+  "lastPublished": "2026-10-03T23:41:45.000Z",
+  "lastProjected": "2026-10-03T23:41:46.000Z",
+  "sampleS3": [
+   "bylaw-241-03",
+   "bylaw-586-15",
+   "bylaw-658-18",
+   "bylaw-799-22"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-roch-ouest",
+  "grp": "HALT",
+  "log": {
+   "a": 36,
+   "b": 28
+  },
+  "s3n": 39,
+  "pgn": 28,
+  "onlyS3": 11,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 6,
+   "Source": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:42:03.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 127,
+  "runs": 8,
+  "lastPublished": "2026-10-04T11:42:03.000Z",
+  "lastProjected": "2026-10-04T11:42:03.000Z",
+  "sampleS3": [
+   "bylaw-125-2018",
+   "bylaw-148-2023",
+   "bylaw-171-2026",
+   "bylaw-176-2026"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-roch-de-lachigan",
+  "grp": "HALT",
+  "log": {
+   "a": 53,
+   "b": 33
+  },
+  "s3n": 55,
+  "pgn": 33,
+  "onlyS3": 22,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 4,
+   "Constraint": 1,
+   "DesignationEvent": 8,
+   "Source": 5,
+   "Signal": 3,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:41:08.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 94,
+  "runs": 8,
+  "lastPublished": "2026-10-04T11:41:08.000Z",
+  "lastProjected": "2026-10-04T11:41:09.000Z",
+  "sampleS3": [
+   "bylaw-573-1-2026",
+   "bylaw-573-2025",
+   "bylaw-578-1-2026",
+   "bylaw-578-2025"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-norbert",
+  "grp": "HALT",
+  "log": {
+   "a": 34,
+   "b": 18
+  },
+  "s3n": 37,
+  "pgn": 18,
+  "onlyS3": 19,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2,
+   "DesignationEvent": 6,
+   "Source": 6,
+   "Zone": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T23:38:26.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 89,
+  "runs": 9,
+  "lastPublished": "2026-10-04T11:36:49.000Z",
+  "lastProjected": "2026-10-03T18:01:47.000Z",
+  "sampleS3": [
+   "bylaw-135",
+   "bylaw-426",
+   "event-2023-06-178",
+   "event-2023-09-258"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-roch-de-richelieu",
+  "grp": "HALT",
+  "log": {
+   "a": 76,
+   "b": 39
+  },
+  "s3n": 76,
+  "pgn": 39,
+  "onlyS3": 37,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 11,
+   "Constraint": 2,
+   "DesignationEvent": 13,
+   "Signal": 2,
+   "Source": 4,
+   "Zone": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T23:42:26.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 159,
+  "runs": 9,
+  "lastPublished": "2026-10-04T11:41:24.000Z",
+  "lastProjected": "2026-10-04T05:45:35.000Z",
+  "sampleS3": [
+   "bylaw-220",
+   "bylaw-226",
+   "bylaw-419-2024",
+   "bylaw-438-2023-2"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-rosaire",
+  "grp": "HALT",
+  "log": {
+   "a": 68,
+   "b": 66
+  },
+  "s3n": 70,
+  "pgn": 68,
+  "onlyS3": 2,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:42:27.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 187,
+  "runs": 7,
+  "lastPublished": "2026-10-04T05:45:56.000Z",
+  "lastProjected": "2026-10-04T05:45:57.000Z",
+  "sampleS3": [
+   "zone-c1",
+   "zone-r8"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-tite-des-caps",
+  "grp": "HALT",
+  "log": {
+   "a": 120,
+   "b": 107
+  },
+  "s3n": 130,
+  "pgn": 107,
+  "onlyS3": 23,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Source": 4,
+   "Bylaw": 3,
+   "DesignationEvent": 12,
+   "Zone": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:45:09.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 159,
+  "runs": 9,
+  "lastPublished": "2026-10-02T23:50:05.000Z",
+  "lastProjected": "2026-10-02T23:50:05.000Z",
+  "sampleS3": [
+   "b7a0f7fecf8d7c899770e0ac8e3eb5c4f233e7d6428a6a084fa586abfdeba494",
+   "bylaw-518-2019",
+   "bylaw-519-2019",
+   "bylaw-522-2019"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-stanislas-de-kostka",
+  "grp": "HALT",
+  "log": {
+   "a": 71,
+   "b": 45
+  },
+  "s3n": 73,
+  "pgn": 45,
+  "onlyS3": 28,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 4,
+   "DesignationEvent": 11,
+   "Signal": 3,
+   "Source": 6,
+   "Zone": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:43:43.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 201,
+  "runs": 8,
+  "lastPublished": "2026-10-03T18:09:29.000Z",
+  "lastProjected": "2026-10-03T18:09:29.000Z",
+  "sampleS3": [
+   "bylaw-377-2019",
+   "bylaw-383-2020",
+   "bylaw-403-2021",
+   "bylaw-425-2022"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-zephirin-de-courval",
+  "grp": "HALT",
+  "log": {
+   "a": 16,
+   "b": 29
+  },
+  "s3n": 16,
+  "pgn": 29,
+  "onlyS3": 0,
+  "onlyPG": 13,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 13
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:10:38.569Z",
+   "2026-09-11T19:05:22.825Z"
+  ],
+  "s3mod": "2026-09-13T21:49:37.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T08:30:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-zephirin-de-courval::raw-proces-verbaux-saint-zephirin-de-courval-cas-88c2b0b92edb769dea66f37804684dd1169e95c052fac0d9f2adb7c49c9b4806-txt",
+   "source::saint-zephirin-de-courval::raw-proces-verbaux-saint-zephirin-de-courval-cas-cda64ad3ef0284415f5fa0156d71c766822a545928707b3905b3dda1d71d1d9a-txt",
+   "source::saint-zephirin-de-courval::raw-proces-verbaux-saint-zephirin-de-courval-cas-dce172e813d1147761ff8cb5992b36d5af530bcf8f71b54be786c18969361a92-txt",
+   "source::saint-zephirin-de-courval::raw-proces-verbaux-saint-zephirin-de-courval-cas-1e2d1a79166b9d14aa645a93657ac9e3feeaf82915e28439bb9bb7ea9aabff6c-txt"
+  ]
+ },
+ {
+  "city": "saint-valerien-de-milton",
+  "grp": "HALT",
+  "log": {
+   "a": 67,
+   "b": 66
+  },
+  "s3n": 88,
+  "pgn": 87,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "DesignationEvent": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:45:36.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 178,
+  "runs": 8,
+  "lastPublished": "2026-10-04T11:45:36.000Z",
+  "lastProjected": "2026-10-04T11:45:36.000Z",
+  "sampleS3": [
+   "event-273-08-2026"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-zotique",
+  "grp": "HALT",
+  "log": {
+   "a": 50,
+   "b": 49
+  },
+  "s3n": 50,
+  "pgn": 49,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "DesignationEvent": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-01T05:45:51.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 151,
+  "runs": 5,
+  "lastPublished": "2026-09-30T11:48:44.000Z",
+  "lastProjected": "2026-09-30T11:48:44.000Z",
+  "sampleS3": [
+   "event-2026-06-205"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-agathe-des-monts",
+  "grp": "HALT",
+  "log": {
+   "a": 6,
+   "b": 12
+  },
+  "s3n": 6,
+  "pgn": 12,
+  "onlyS3": 0,
+  "onlyPG": 6,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 6
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:42:17.493Z",
+   "2026-09-11T18:48:26.580Z"
+  ],
+  "s3mod": "2026-09-13T21:49:37.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-14T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::sainte-agathe-des-monts::raw-proces-verbaux-sainte-agathe-des-monts-cas-74693ed5c7078721647b7ff25f5bb84069bf66ea16db763ac763164b8a8ec3d8-txt",
+   "source::sainte-agathe-des-monts::raw-proces-verbaux-sainte-agathe-des-monts-cas-b54f2986e4590ffb5e75b352a68a92aa7fcd86eca22bd6b1e4da8ec479e77fbf-txt",
+   "source::sainte-agathe-des-monts::raw-proces-verbaux-sainte-agathe-des-monts-cas-dbbfe3aa248c71ec96ad5b99bbc0a968f1aed55e49ae983c03610cc4e51a2972-txt",
+   "source::sainte-agathe-des-monts::raw-proces-verbaux-sainte-agathe-des-monts-cas-ec3daf50a583fec0c69e714eb65ae532b7615cdaa2ffe3a7dba96208dfdbefa5-txt"
+  ]
+ },
+ {
+  "city": "saint-theodore-dacton",
+  "grp": "HALT",
+  "log": {
+   "a": 12,
+   "b": 20
+  },
+  "s3n": 12,
+  "pgn": 20,
+  "onlyS3": 0,
+  "onlyPG": 8,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 8
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:10:36.272Z",
+   "2026-09-11T18:37:11.531Z"
+  ],
+  "s3mod": "2026-09-13T21:49:35.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-14T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::saint-theodore-dacton::raw-proces-verbaux-saint-theodore-dacton-cas-417ae3f228091e579e55db6c71689b40832f4ba3ae0e983eea9bce77a5e6fb50-txt",
+   "source::saint-theodore-dacton::raw-proces-verbaux-saint-theodore-dacton-cas-0309e3781cfc778f15535296ee008c8868d04c675cfec4e3da8cfa3ee5fa8a8a-txt",
+   "source::saint-theodore-dacton::raw-proces-verbaux-saint-theodore-dacton-cas-3472b09b8d3cc43e353265debd5077e034f15404f975618e93317f28be8b4563-txt",
+   "source::saint-theodore-dacton::raw-proces-verbaux-saint-theodore-dacton-cas-498497ce48ff0a5a0b81007859ae1a9855aef45132ebc8ca38893bb381fb1077-txt"
+  ]
+ },
+ {
+  "city": "sainte-brigide-diberville",
+  "grp": "HALT",
+  "log": {
+   "a": 28,
+   "b": 27
+  },
+  "s3n": 28,
+  "pgn": 27,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-01T23:50:18.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 103,
+  "runs": 8,
+  "lastPublished": "2026-10-01T23:50:18.000Z",
+  "lastProjected": "2026-10-01T23:50:18.000Z",
+  "sampleS3": [
+   "zone-a-7"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-anne-de-la-perade",
+  "grp": "HALT",
+  "log": {
+   "a": 70,
+   "b": 65
+  },
+  "s3n": 80,
+  "pgn": 75,
+  "onlyS3": 5,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2,
+   "DesignationEvent": 2,
+   "Signal": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:57:03.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 188,
+  "runs": 8,
+  "lastPublished": "2026-10-04T05:52:28.000Z",
+  "lastProjected": "2026-10-04T05:52:28.000Z",
+  "sampleS3": [
+   "bylaw-461-2026",
+   "bylaw-464-2026",
+   "event-derogation-2026-03",
+   "event-dm-2026-01"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-catherine-de-hatley",
+  "grp": "HALT",
+  "log": {
+   "a": 93,
+   "b": 41
+  },
+  "s3n": 93,
+  "pgn": 41,
+  "onlyS3": 52,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 13,
+   "Constraint": 2,
+   "DesignationEvent": 16,
+   "Signal": 6,
+   "Source": 13,
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T11:50:09.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 164,
+  "runs": 9,
+  "lastPublished": "2026-10-03T11:50:09.000Z",
+  "lastProjected": "2026-10-03T11:50:09.000Z",
+  "sampleS3": [
+   "bylaw-2015-484",
+   "bylaw-2016-497",
+   "bylaw-2017-501",
+   "bylaw-2017-502"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-anne-de-la-rochelle",
+  "grp": "HALT",
+  "log": {
+   "a": 19,
+   "b": 29
+  },
+  "s3n": 19,
+  "pgn": 29,
+  "onlyS3": 0,
+  "onlyPG": 10,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 9,
+   "designationevent": 1
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T02:12:43.236Z",
+   "2026-09-10T02:12:43.236Z"
+  ],
+  "s3mod": "2026-09-13T21:49:37.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T11:30:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::sainte-anne-de-la-rochelle::raw-proces-verbaux-sainte-anne-de-la-rochelle-cas-60305b259821effbdf1682f69d6628e5f3dbddd7002d77dacda1d4db3cad07b6-txt",
+   "source::sainte-anne-de-la-rochelle::raw-proces-verbaux-sainte-anne-de-la-rochelle-cas-7f67d3c5aa607febb72f3f8ccb6e5dab9e87dba367bb0be4666834c8ec0079b5-txt",
+   "designationevent::sainte-anne-de-la-rochelle::2026-484",
+   "source::sainte-anne-de-la-rochelle::raw-proces-verbaux-sainte-anne-de-la-rochelle-cas-2768f4fbffbdc885d705acd9f8871fe98e40406c9785716b1e1c19a58b2d9335-txt"
+  ]
+ },
+ {
+  "city": "saint-valere",
+  "grp": "HALT",
+  "log": {
+   "a": 30,
+   "b": 24
+  },
+  "s3n": 30,
+  "pgn": 24,
+  "onlyS3": 6,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Constraint": 1,
+   "DesignationEvent": 2,
+   "Source": 2,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T05:48:52.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 99,
+  "runs": 8,
+  "lastPublished": "2026-10-04T11:45:15.000Z",
+  "lastProjected": "2026-10-04T11:45:16.000Z",
+  "sampleS3": [
+   "constraint-cptaq-2026-04-94",
+   "event-2026-04-94",
+   "evt-derogation-lot-6576834",
+   "source-2e16d4a3bbdeb5ea8a5fa1e404e8a5922b8e3c3c99c375178df0d92fd4e9acb1"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-christine",
+  "grp": "HALT",
+  "log": {
+   "a": 10,
+   "b": 166
+  },
+  "s3n": 10,
+  "pgn": 166,
+  "onlyS3": 0,
+  "onlyPG": 156,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 10,
+   "source": 146
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T02:12:05.934Z",
+   "2026-09-11T18:57:43.116Z"
+  ],
+  "s3mod": "2026-09-13T21:49:39.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T11:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::sainte-christine::366-2022",
+   "designationevent::sainte-christine::371-2023",
+   "designationevent::sainte-christine::372-2023",
+   "designationevent::sainte-christine::383-2024"
+  ]
+ },
+ {
+  "city": "sainte-catherine-de-la-jacques-cartier",
+  "grp": "HALT",
+  "log": {
+   "a": 114,
+   "b": 111
+  },
+  "s3n": 114,
+  "pgn": 111,
+  "onlyS3": 3,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "DesignationEvent": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T05:50:10.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 135,
+  "runs": 7,
+  "lastPublished": "2026-10-03T05:50:10.000Z",
+  "lastProjected": "2026-10-03T05:50:11.000Z",
+  "sampleS3": [
+   "bylaw-327",
+   "event-194-2026",
+   "event-195-2026"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-clotilde",
+  "grp": "HALT",
+  "log": {
+   "a": 85,
+   "b": 73
+  },
+  "s3n": 87,
+  "pgn": 73,
+  "onlyS3": 14,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 3,
+   "Constraint": 1,
+   "DesignationEvent": 4,
+   "Signal": 2,
+   "Source": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T05:53:49.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 135,
+  "runs": 9,
+  "lastPublished": "2026-10-03T23:51:49.000Z",
+  "lastProjected": "2026-10-03T23:51:49.000Z",
+  "sampleS3": [
+   "bylaw-474",
+   "bylaw-530",
+   "bylaw-ppcmoi-projet",
+   "constraint-cptaq-6200042"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-justine-de-newton",
+  "grp": "HALT",
+  "log": {
+   "a": 49,
+   "b": 46
+  },
+  "s3n": 72,
+  "pgn": 64,
+  "onlyS3": 8,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 7,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:01:52.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 190,
+  "runs": 9,
+  "lastPublished": "2026-10-04T05:58:26.000Z",
+  "lastProjected": "2026-10-04T05:58:27.000Z",
+  "sampleS3": [
+   "bylaw-311",
+   "bylaw-313",
+   "bylaw-315",
+   "bylaw-411"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-felicite--lislet",
+  "grp": "HALT",
+  "log": {
+   "a": 55,
+   "b": 52
+  },
+  "s3n": 62,
+  "pgn": 59,
+  "onlyS3": 3,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 3
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:59:53.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 177,
+  "runs": 7,
+  "lastPublished": "2026-10-04T05:55:53.000Z",
+  "lastProjected": "2026-10-04T05:55:54.000Z",
+  "sampleS3": [
+   "bylaw-141",
+   "bylaw-149",
+   "bylaw-151"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-marguerite-du-lac-masson",
+  "grp": "HALT",
+  "log": {
+   "a": 36,
+   "b": 20
+  },
+  "s3n": 42,
+  "pgn": 20,
+  "onlyS3": 22,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 6,
+   "DesignationEvent": 6,
+   "Source": 4,
+   "Zone": 6
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:03:27.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 93,
+  "runs": 8,
+  "lastPublished": "2026-10-04T12:03:27.000Z",
+  "lastProjected": "2026-10-04T12:03:27.000Z",
+  "sampleS3": [
+   "bylaw-128-2018-a32",
+   "bylaw-128-2018-a33",
+   "bylaw-ag-054-2023",
+   "bylaw-ag-054a-2024"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-brigitte-des-saults",
+  "grp": "HALT",
+  "log": {
+   "a": 15,
+   "b": 27
+  },
+  "s3n": 15,
+  "pgn": 27,
+  "onlyS3": 0,
+  "onlyPG": 12,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 1,
+   "source": 11
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:53:40.514Z",
+   "2026-09-11T19:17:48.650Z"
+  ],
+  "s3mod": "2026-09-13T21:49:39.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T10:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::sainte-brigitte-des-saults::494-2026",
+   "source::sainte-brigitte-des-saults::raw-proces-verbaux-sainte-brigitte-des-saults-cas-98d335090fdb3768840c6dbaa867d9a0f8eaf62e943d53a935e8f167c682f3cf-txt",
+   "source::sainte-brigitte-des-saults::raw-proces-verbaux-sainte-brigitte-des-saults-cas-030eaeaa8d7f42eeb388b46769d643e5cb14d582a8c1ca31b938c5f4cc3612ae-txt",
+   "source::sainte-brigitte-des-saults::raw-proces-verbaux-sainte-brigitte-des-saults-cas-0ddf0f9e014d8b7a11d67f3bdd39a5032fdd3b82eb7369ea2dda2e4f72d16c0e-txt"
+  ]
+ },
+ {
+  "city": "sainte-monique--nicolet-yamaska",
+  "grp": "HALT",
+  "log": {
+   "a": 5,
+   "b": 26
+  },
+  "s3n": 5,
+  "pgn": 26,
+  "onlyS3": 0,
+  "onlyPG": 21,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 21
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:16:01.085Z",
+   "2026-09-10T14:16:01.085Z"
+  ],
+  "s3mod": "2026-09-13T21:49:41.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-19T03:46:28.156Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::sainte-monique--nicolet-yamaska::raw-proces-verbaux-sainte-monique-nicolet-yamaska-cas-0e38e45e39157e086ffcdd0c3f9ae8257c38dfb698c4a381f8fdf5c79409532a-txt",
+   "source::sainte-monique--nicolet-yamaska::raw-proces-verbaux-sainte-monique-nicolet-yamaska-cas-10a26de71e7fefc7f5cd742aa4f3f6d2583bbd91d2f404b2d6531bf94b6ef8a5-txt",
+   "source::sainte-monique--nicolet-yamaska::raw-proces-verbaux-sainte-monique-nicolet-yamaska-cas-18cefeb283ce5b46e55c71b0161b249062d9f056fb73e9995e78bc3729130196-txt",
+   "source::sainte-monique--nicolet-yamaska::raw-proces-verbaux-sainte-monique-nicolet-yamaska-cas-1e3c1420fac55074771128e73cdad512f750ad8ec0af1c4711712697818c04cf-txt"
+  ]
+ },
+ {
+  "city": "sainte-cecile-de-milton",
+  "grp": "HALT",
+  "log": {
+   "a": 63,
+   "b": 31
+  },
+  "s3n": 66,
+  "pgn": 31,
+  "onlyS3": 35,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 12,
+   "Constraint": 2,
+   "DesignationEvent": 7,
+   "Signal": 3,
+   "Source": 9,
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T11:57:40.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 172,
+  "runs": 9,
+  "lastPublished": "2026-10-02T23:58:50.000Z",
+  "lastProjected": "2026-10-02T23:58:50.000Z",
+  "sampleS3": [
+   "bylaw-371-99",
+   "bylaw-435-2006",
+   "bylaw-461-2008",
+   "bylaw-538-2015"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-clotilde-de-horton",
+  "grp": "HALT",
+  "log": {
+   "a": 58,
+   "b": 57
+  },
+  "s3n": 61,
+  "pgn": 60,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T23:52:13.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 168,
+  "runs": 9,
+  "lastPublished": "2026-10-03T11:53:05.000Z",
+  "lastProjected": "2026-10-03T11:53:05.000Z",
+  "sampleS3": [
+   "bylaw-119"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-petronille",
+  "grp": "HALT",
+  "log": {
+   "a": 48,
+   "b": 38
+  },
+  "s3n": 52,
+  "pgn": 38,
+  "onlyS3": 14,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 5,
+   "Source": 4,
+   "DesignationEvent": 4,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T06:00:03.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 138,
+  "runs": 9,
+  "lastPublished": "2026-10-03T23:57:26.000Z",
+  "lastProjected": "2026-10-03T23:57:26.000Z",
+  "sampleS3": [
+   "bylaw-175",
+   "bylaw-483",
+   "bylaw-484",
+   "bylaw-485"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-marie",
+  "grp": "HALT",
+  "log": {
+   "a": 78,
+   "b": 77
+  },
+  "s3n": 78,
+  "pgn": 77,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T05:56:27.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 147,
+  "runs": 9,
+  "lastPublished": "2026-10-03T00:05:36.000Z",
+  "lastProjected": "2026-10-01T12:01:01.000Z",
+  "sampleS3": [
+   "zone-203"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-sophie-dhalifax",
+  "grp": "HALT",
+  "log": {
+   "a": 37,
+   "b": 34
+  },
+  "s3n": 51,
+  "pgn": 48,
+  "onlyS3": 3,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 3
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:05:43.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 207,
+  "runs": 9,
+  "lastPublished": "2026-10-04T06:01:02.000Z",
+  "lastProjected": "2026-10-04T06:01:02.000Z",
+  "sampleS3": [
+   "bylaw-102-2026",
+   "bylaw-103-2026",
+   "bylaw-104-2026"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saints-anges",
+  "grp": "HALT",
+  "log": {
+   "a": 73,
+   "b": 36
+  },
+  "s3n": 77,
+  "pgn": 36,
+  "onlyS3": 41,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 17,
+   "Constraint": 1,
+   "DesignationEvent": 12,
+   "Signal": 3,
+   "Source": 8
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T06:02:59.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 159,
+  "runs": 8,
+  "lastPublished": "2026-10-03T05:59:19.000Z",
+  "lastProjected": "2026-10-03T05:59:20.000Z",
+  "sampleS3": [
+   "bylaw-171",
+   "bylaw-2016-14",
+   "bylaw-2022-03",
+   "bylaw-2022-07"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "salaberry-de-valleyfield",
+  "grp": "HALT",
+  "log": {
+   "a": 90,
+   "b": 89
+  },
+  "s3n": 135,
+  "pgn": 134,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:07:42.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 177,
+  "runs": 8,
+  "lastPublished": "2026-10-04T06:03:28.000Z",
+  "lastProjected": "2026-10-04T06:03:29.000Z",
+  "sampleS3": [
+   "bylaw-432"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "shefford",
+  "grp": "HALT",
+  "log": {
+   "a": 43,
+   "b": 66
+  },
+  "s3n": 43,
+  "pgn": 66,
+  "onlyS3": 0,
+  "onlyPG": 23,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 22,
+   "designationevent": 1
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:09:51.477Z",
+   "2026-09-11T18:36:41.109Z"
+  ],
+  "s3mod": "2026-09-13T21:49:43.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-14T21:00:00Z",
+  "refreshKeys": 4,
+  "runs": 1,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::shefford::raw-proces-verbaux-shefford-cas-3a85a0b2e2b5bfb4cae4dcded6181cbdb0155fd6721dd92a23b83f87dabb17be-txt",
+   "source::shefford::raw-proces-verbaux-shefford-cas-4f60137ec18d1ff22cfc0ee7721d837affa98a26cc16731c09214e0727db50e8-txt",
+   "source::shefford::raw-proces-verbaux-shefford-cas-5a192d6e563ec8887ef2015a0f21a4be5bb0faf065ac92f9b28d3d3f3daab5ea-txt",
+   "source::shefford::raw-proces-verbaux-shefford-cas-7502a1a920a6452fca909863a4388fcd05e3b22b800a2ad48af184c217a8c83a-txt"
+  ]
+ },
+ {
+  "city": "scott",
+  "grp": "HALT",
+  "log": {
+   "a": 37,
+   "b": 32
+  },
+  "s3n": 46,
+  "pgn": 41,
+  "onlyS3": 5,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:08:20.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 52,
+  "runs": 5,
+  "lastPublished": "2026-10-04T12:08:20.000Z",
+  "lastProjected": "2026-10-04T12:08:24.000Z",
+  "sampleS3": [
+   "bylaw-266",
+   "bylaw-453",
+   "bylaw-523-2026",
+   "bylaw-524-2026"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "stoneham-et-tewkesbury",
+  "grp": "HALT",
+  "log": {
+   "a": 80,
+   "b": 79
+  },
+  "s3n": 92,
+  "pgn": 91,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:10:56.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 196,
+  "runs": 10,
+  "lastPublished": "2026-10-04T06:05:36.000Z",
+  "lastProjected": "2026-10-04T06:05:36.000Z",
+  "sampleS3": [
+   "bylaw-26-xxx"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "senneville",
+  "grp": "HALT",
+  "log": {
+   "a": 14,
+   "b": 273
+  },
+  "s3n": 14,
+  "pgn": 273,
+  "onlyS3": 0,
+  "onlyPG": 259,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 10,
+   "source": 249
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T15:34:18.378Z",
+   "2026-09-10T15:34:18.378Z"
+  ],
+  "s3mod": "2026-09-13T21:49:42.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::senneville::447-4",
+   "designationevent::senneville::447-5",
+   "source::senneville::raw-proces-verbaux-senneville-cas-0253dcde6b3f66c915d26a60db1a04fe17c78d8732a91e1b94366f75bbb6faf8-txt",
+   "source::senneville::raw-proces-verbaux-senneville-cas-02740069b661abc92f0ff327c56d115d2352b1554c37197662ed0edcdc32244a-txt"
+  ]
+ },
+ {
+  "city": "sainte-seraphine",
+  "grp": "HALT",
+  "log": {
+   "a": 49,
+   "b": 41
+  },
+  "s3n": 49,
+  "pgn": 41,
+  "onlyS3": 8,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 4,
+   "DesignationEvent": 2,
+   "Source": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T06:00:25.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 135,
+  "runs": 9,
+  "lastPublished": "2026-10-04T12:04:48.000Z",
+  "lastProjected": "2026-10-04T12:04:48.000Z",
+  "sampleS3": [
+   "bylaw-2010-03",
+   "bylaw-2022-10",
+   "bylaw-2022-13",
+   "bylaw-2023-01"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "terrasse-vaudreuil",
+  "grp": "HALT",
+  "log": {
+   "a": 61,
+   "b": 34
+  },
+  "s3n": 73,
+  "pgn": 34,
+  "onlyS3": 39,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 14,
+   "DesignationEvent": 6,
+   "Signal": 5,
+   "Source": 12,
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:12:27.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 210,
+  "runs": 9,
+  "lastPublished": "2026-10-03T06:03:00.000Z",
+  "lastProjected": "2026-10-03T06:03:00.000Z",
+  "sampleS3": [
+   "bylaw-572",
+   "bylaw-572-11",
+   "bylaw-574",
+   "bylaw-574-5"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "stratford",
+  "grp": "HALT",
+  "log": {
+   "a": 65,
+   "b": 42
+  },
+  "s3n": 71,
+  "pgn": 42,
+  "onlyS3": 29,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 11,
+   "Constraint": 1,
+   "Source": 5,
+   "DesignationEvent": 7,
+   "Signal": 5
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:11:24.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 110,
+  "runs": 9,
+  "lastPublished": "2026-10-04T06:05:40.000Z",
+  "lastProjected": "2026-10-03T12:02:02.000Z",
+  "sampleS3": [
+   "bylaw-1026",
+   "bylaw-1027",
+   "bylaw-1034",
+   "bylaw-1238"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-ursule",
+  "grp": "HALT",
+  "log": {
+   "a": 20,
+   "b": 34
+  },
+  "s3n": 20,
+  "pgn": 34,
+  "onlyS3": 0,
+  "onlyPG": 14,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 14
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:11:23.749Z",
+   "2026-09-10T13:11:23.749Z"
+  ],
+  "s3mod": "2026-09-13T21:49:41.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T08:30:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::sainte-ursule::raw-proces-verbaux-sainte-ursule-cas-55bfbc328e41d72477aa481d91193addc54f4b77b57a5b5fe0d60fcdd7565b2f-txt",
+   "source::sainte-ursule::raw-proces-verbaux-sainte-ursule-cas-135c2318a9dcd274bf0212238248ad6d6c8a7df566c99d33f5f855513a857e4f-txt",
+   "source::sainte-ursule::raw-proces-verbaux-sainte-ursule-cas-40311acd26884165954d47aab0f6272ed750a01220e2c4cb47fec6217e5f3765-txt",
+   "source::sainte-ursule::raw-proces-verbaux-sainte-ursule-cas-4a47dd2e86a5654ed4c56869f35b05e8b0d6268d441077d2a6c521100e9f626a-txt"
+  ]
+ },
+ {
+  "city": "val-david",
+  "grp": "HALT",
+  "log": {
+   "a": 44,
+   "b": 40
+  },
+  "s3n": 46,
+  "pgn": 40,
+  "onlyS3": 6,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1,
+   "DesignationEvent": 2,
+   "Source": 3
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:14:15.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 93,
+  "runs": 7,
+  "lastPublished": "2026-10-04T12:14:16.000Z",
+  "lastProjected": "2026-10-04T12:14:17.000Z",
+  "sampleS3": [
+   "bylaw-601",
+   "event-2026-04-126",
+   "event-2026-04-127",
+   "source-8f3e8a2f9ca6a44afd44ce6c833c7817705646933c6fd19ce5fd6812dfe797ea"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "upton",
+  "grp": "HALT",
+  "log": {
+   "a": 65,
+   "b": 63
+  },
+  "s3n": 84,
+  "pgn": 63,
+  "onlyS3": 21,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 3,
+   "Constraint": 1,
+   "DesignationEvent": 10,
+   "Source": 3,
+   "Zone": 4
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:13:40.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 147,
+  "runs": 7,
+  "lastPublished": "2026-10-03T18:33:56.000Z",
+  "lastProjected": "2026-10-03T18:33:56.000Z",
+  "sampleS3": [
+   "bylaw-2024-390",
+   "bylaw-2024-391",
+   "bylaw-2024-392",
+   "cst-cptaq-503"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "vercheres",
+  "grp": "HALT",
+  "log": {
+   "a": 23,
+   "b": 21
+  },
+  "s3n": 23,
+  "pgn": 21,
+  "onlyS3": 2,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "DesignationEvent": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-02T00:05:23.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 11,
+  "runs": 1,
+  "lastPublished": "2026-10-02T00:05:24.000Z",
+  "lastProjected": "2026-10-02T00:05:25.000Z",
+  "sampleS3": [
+   "event-dm-2026-03",
+   "event-dm-2026-04"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "stoke",
+  "grp": "HALT",
+  "log": {
+   "a": 33,
+   "b": 32
+  },
+  "s3n": 33,
+  "pgn": 32,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-30T18:13:30.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 54,
+  "runs": 6,
+  "lastPublished": "2026-09-30T18:13:30.000Z",
+  "lastProjected": "2026-09-30T18:13:31.000Z",
+  "sampleS3": [
+   "zone-id-3"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "val-des-lacs",
+  "grp": "HALT",
+  "log": {
+   "a": 28,
+   "b": 241
+  },
+  "s3n": 28,
+  "pgn": 241,
+  "onlyS3": 0,
+  "onlyPG": 213,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "designationevent": 23,
+   "source": 190
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T13:52:36.050Z",
+   "2026-09-11T19:17:16.385Z"
+  ],
+  "s3mod": "2026-09-13T21:49:45.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T10:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "designationevent::val-des-lacs::356-26",
+   "designationevent::val-des-lacs::367-25",
+   "designationevent::val-des-lacs::375-23",
+   "designationevent::val-des-lacs::399-21"
+  ]
+ },
+ {
+  "city": "val-racine",
+  "grp": "HALT",
+  "log": {
+   "a": 32,
+   "b": 30
+  },
+  "s3n": 32,
+  "pgn": 30,
+  "onlyS3": 2,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-01T00:14:14.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 63,
+  "runs": 7,
+  "lastPublished": "2026-10-01T00:14:14.000Z",
+  "lastProjected": "2026-10-01T00:14:15.000Z",
+  "sampleS3": [
+   "bylaw-262",
+   "bylaw-306"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "val-alain",
+  "grp": "HALT",
+  "log": {
+   "a": 40,
+   "b": 38
+  },
+  "s3n": 40,
+  "pgn": 38,
+  "onlyS3": 2,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-01T12:09:17.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 57,
+  "runs": 7,
+  "lastPublished": "2026-10-01T12:09:18.000Z",
+  "lastProjected": "2026-10-01T12:09:18.000Z",
+  "sampleS3": [
+   "zone-ad-2",
+   "zone-p-3"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "val-joli",
+  "grp": "HALT",
+  "log": {
+   "a": 39,
+   "b": 14
+  },
+  "s3n": 41,
+  "pgn": 14,
+  "onlyS3": 27,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 8,
+   "DesignationEvent": 8,
+   "Signal": 4,
+   "Source": 6,
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T18:35:04.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 84,
+  "runs": 7,
+  "lastPublished": "2026-10-04T06:07:26.000Z",
+  "lastProjected": "2026-10-04T06:07:26.000Z",
+  "sampleS3": [
+   "bylaw-2004-10",
+   "bylaw-2004-9",
+   "bylaw-2025-02",
+   "bylaw-2025-03"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "warden",
+  "grp": "HALT",
+  "log": {
+   "a": 14,
+   "b": 29
+  },
+  "s3n": 14,
+  "pgn": 29,
+  "onlyS3": 0,
+  "onlyPG": 15,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 11,
+   "designationevent": 4
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:32:44.281Z",
+   "2026-09-11T18:45:01.809Z"
+  ],
+  "s3mod": "2026-09-13T21:49:46.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-14T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::warden::raw-proces-verbaux-warden-cas-2723b333dc4b85299ab7b847ca4dbb205e24f7cba2efc348f13daa143eb74241-txt",
+   "source::warden::raw-proces-verbaux-warden-cas-58956f36e4546ee9d627ed2d2a680fb96d65c4493025efaeb296c272407506dc-txt",
+   "source::warden::raw-proces-verbaux-warden-cas-7d183403b111f8a58e62bf837129c25902cf4dcbe1f897be60052f6a12073710-txt",
+   "designationevent::warden::2026-179"
+  ]
+ },
+ {
+  "city": "victoriaville",
+  "grp": "HALT",
+  "log": {
+   "a": 32,
+   "b": 29
+  },
+  "s3n": 32,
+  "pgn": 29,
+  "onlyS3": 3,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2,
+   "Source": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-29T13:14:04.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 14,
+  "runs": 2,
+  "lastPublished": "2026-09-30T06:19:49.000Z",
+  "lastProjected": "2026-09-30T06:19:49.000Z",
+  "sampleS3": [
+   "bylaw-1504-2023",
+   "bylaw-352-1999",
+   "source-a11ab72356b1524f96ad665db07e1af226f79c179a6f9413654c0cdc6d9c5063"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "westbury",
+  "grp": "HALT",
+  "log": {
+   "a": 43,
+   "b": 23
+  },
+  "s3n": 45,
+  "pgn": 23,
+  "onlyS3": 22,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 7,
+   "DesignationEvent": 5,
+   "Signal": 2,
+   "Source": 6,
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T18:39:33.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 85,
+  "runs": 9,
+  "lastPublished": "2026-10-04T00:10:40.000Z",
+  "lastProjected": "2026-10-04T00:10:40.000Z",
+  "sampleS3": [
+   "bylaw-098-2010",
+   "bylaw-2004-58",
+   "bylaw-2023-13",
+   "bylaw-2023-17"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "westmount",
+  "grp": "HALT",
+  "log": {
+   "a": 29,
+   "b": 28
+  },
+  "s3n": 32,
+  "pgn": 31,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Source": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T18:40:01.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 46,
+  "runs": 5,
+  "lastPublished": "2026-10-03T18:40:01.000Z",
+  "lastProjected": "2026-10-03T18:40:01.000Z",
+  "sampleS3": [
+   "source-doc"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "windsor",
+  "grp": "HALT",
+  "log": {
+   "a": 43,
+   "b": 42
+  },
+  "s3n": 43,
+  "pgn": 42,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Zone": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-09-30T00:36:26.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 24,
+  "runs": 3,
+  "lastPublished": "2026-09-30T00:36:26.000Z",
+  "lastProjected": "2026-09-30T00:36:26.000Z",
+  "sampleS3": [
+   "zone-r-8"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "yamachiche",
+  "grp": "HALT",
+  "log": {
+   "a": 11,
+   "b": 20
+  },
+  "s3n": 11,
+  "pgn": 20,
+  "onlyS3": 0,
+  "onlyPG": 9,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 9
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T14:12:13.191Z",
+   "2026-09-10T14:12:13.191Z"
+  ],
+  "s3mod": "2026-09-13T21:49:46.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T09:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::yamachiche::raw-proces-verbaux-yamachiche-cas-01c789c93974107a79783733346e7134e7ef1f9bda54017d25e2b0b2a05e5088-txt",
+   "source::yamachiche::raw-proces-verbaux-yamachiche-cas-269fb1c8c1434da897f78a22bd4bb0e2176fadf1f0129206cffaa6323d005517-txt",
+   "source::yamachiche::raw-proces-verbaux-yamachiche-cas-34a03ae038223099846517d014071475d620a217a8c94db6714fc65d93cc1fb6-txt",
+   "source::yamachiche::raw-proces-verbaux-yamachiche-cas-3f43c7e6ffbe197fdf27a2cb41afad5fc0fad0d58a190d8e7e81b3f2ac010e66-txt"
+  ]
+ },
+ {
+  "city": "waterville",
+  "grp": "HALT",
+  "log": {
+   "a": 48,
+   "b": 47
+  },
+  "s3n": 48,
+  "pgn": 47,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-01T18:11:29.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 83,
+  "runs": 8,
+  "lastPublished": "2026-10-01T18:11:30.000Z",
+  "lastProjected": "2026-10-01T18:11:30.000Z",
+  "sampleS3": [
+   "bylaw-691"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "waterloo",
+  "grp": "HALT",
+  "log": {
+   "a": 33,
+   "b": 243
+  },
+  "s3n": 33,
+  "pgn": 243,
+  "onlyS3": 0,
+  "onlyPG": 210,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 205,
+   "designationevent": 5
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:32:20.378Z",
+   "2026-09-11T18:44:43.080Z"
+  ],
+  "s3mod": "2026-09-13T21:49:47.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-14T00:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::waterloo::raw-proces-verbaux-waterloo-cas-fcf10d33c9a1dd6e89937543f5127e2c9a2df2cf4fd1cd25fe7eaa185ecf8454-txt",
+   "source::waterloo::raw-proces-verbaux-waterloo-cas-feb573fd8907e4113eba7cc0916f6860acfe821f8b612ff7a071c0ff83bffd09-txt",
+   "source::waterloo::raw-proces-verbaux-waterloo-cas-40ea15d278833d731cf20da826c70067e9c4b016e865bf9a9f0b3f3a7b9bb511-txt",
+   "source::waterloo::raw-proces-verbaux-waterloo-cas-0a0ae2664bad9ee28eed2acce20e3347b472a2dffe7767d3d7944665952ae3c3-txt"
+  ]
+ },
+ {
+  "city": "wentworth",
+  "grp": "HALT",
+  "log": {
+   "a": 34,
+   "b": 33
+  },
+  "s3n": 34,
+  "pgn": 33,
+  "onlyS3": 1,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-01T06:06:53.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 73,
+  "runs": 7,
+  "lastPublished": "2026-10-01T06:06:53.000Z",
+  "lastProjected": "2026-10-01T06:06:53.000Z",
+  "sampleS3": [
+   "bylaw-2026-004"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "dixville",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 24,
+  "pgn": 24,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T16:40:37.000Z",
+  "s3keys": "ontology_version,municipality,generated_at,pv_count,nodes,edges",
+  "gen": "2026-06-13T10:00:00Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "montcerf-lytton",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 19,
+  "pgn": 19,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T16:52:55.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 31,
+  "runs": 3,
+  "lastPublished": "2026-09-29T18:04:49.000Z",
+  "lastProjected": "2026-09-29T18:04:49.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "wentworth-nord",
+  "grp": "HALT",
+  "log": {
+   "a": 113,
+   "b": 110
+  },
+  "s3n": 136,
+  "pgn": 133,
+  "onlyS3": 3,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Zone": 3
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T12:18:10.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 191,
+  "runs": 9,
+  "lastPublished": "2026-10-04T12:18:10.000Z",
+  "lastProjected": "2026-10-04T12:18:11.000Z",
+  "sampleS3": [
+   "zone-h-09",
+   "zone-h-22",
+   "zone-h-30"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "nominingue",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 26,
+  "pgn": 26,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T16:54:10.000Z",
+  "s3keys": "ontology_version,municipality,generated_at,pv_count,nodes,edges",
+  "gen": "2026-06-13T04:00:00Z",
+  "refreshKeys": 0,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "notre-dame-de-lourdes--joliette",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 27,
+  "pgn": 27,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T16:54:51.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 14,
+  "runs": 2,
+  "lastPublished": "2026-09-29T12:02:40.000Z",
+  "lastProjected": "2026-09-29T12:02:40.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "notre-dame-des-prairies",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 43,
+  "pgn": 43,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T16:55:10.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 11,
+  "runs": 1,
+  "lastPublished": "2026-09-30T01:25:34.000Z",
+  "lastProjected": "2026-09-30T01:25:34.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "wickham",
+  "grp": "HALT",
+  "log": {
+   "a": 28,
+   "b": 184
+  },
+  "s3n": 28,
+  "pgn": 184,
+  "onlyS3": 0,
+  "onlyPG": 156,
+  "onlyS3T": {},
+  "onlyPGT": {
+   "source": 142,
+   "designationevent": 14
+  },
+  "pgOnlyCreated": [
+   "2026-09-10T01:55:51.583Z",
+   "2026-09-11T18:52:44.242Z"
+  ],
+  "s3mod": "2026-09-13T21:49:46.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-13T10:50:00Z",
+  "refreshKeys": 4,
+  "runs": 1,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": [
+   "source::wickham::raw-proces-verbaux-wickham-cas-19603e9baeca08c76fbc5618227cf2acc0dde93148df87a665cc3a67a1ebe7de-txt",
+   "source::wickham::raw-proces-verbaux-wickham-cas-19ddf423feb7ad1c00a04ebcf159c0143e385db3a22f3006dc2ccd660de1811d-txt",
+   "source::wickham::raw-proces-verbaux-wickham-cas-1d9c27dd5b4d87291212663803bc4aac03d7a8382e198905093aa9ba409ae4b5-txt",
+   "source::wickham::raw-proces-verbaux-wickham-cas-1de2434a4b5ae226b72f408b6c3c347a8f4e446192635a5c395d4d7b99ae10b4-txt"
+  ]
+ },
+ {
+  "city": "saint-augustin-de-desmaures",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 27,
+  "pgn": 20,
+  "onlyS3": 7,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 4,
+   "Source": 1,
+   "Zone": 2
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T13:04:44.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 40,
+  "runs": 6,
+  "lastPublished": "2026-10-04T13:04:44.000Z",
+  "lastProjected": "2026-10-04T13:04:44.000Z",
+  "sampleS3": [
+   "bylaw-2025-755",
+   "bylaw-2026-773",
+   "bylaw-510-86",
+   "bylaw-89-863"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "rougemont",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 35,
+  "pgn": 35,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T16:58:35.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 34,
+  "runs": 4,
+  "lastPublished": "2026-09-30T07:13:23.000Z",
+  "lastProjected": "2026-09-30T07:13:24.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "fortierville",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 16,
+  "pgn": 16,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T16:42:35.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 11,
+  "runs": 1,
+  "lastPublished": "2026-09-28T17:51:03.000Z",
+  "lastProjected": "2026-09-28T17:51:03.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "herouxville",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 22,
+  "pgn": 22,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T16:44:12.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 21,
+  "runs": 2,
+  "lastPublished": "2026-09-29T11:43:24.000Z",
+  "lastProjected": "2026-09-29T11:43:25.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "saint-esprit",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 88,
+  "pgn": 88,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T17:07:27.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 63,
+  "runs": 7,
+  "lastPublished": "2026-10-01T05:24:00.000Z",
+  "lastProjected": "2026-10-01T05:24:01.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "saint-honore-de-shenley",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 26,
+  "pgn": 26,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T17:10:18.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-15T13:20:42Z",
+  "refreshKeys": 1,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "saint-severin--mekinac",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 25,
+  "pgn": 25,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T17:19:24.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 63,
+  "runs": 6,
+  "lastPublished": "2026-10-01T11:49:29.000Z",
+  "lastProjected": "2026-10-01T11:49:30.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-anne-des-lacs",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 44,
+  "pgn": 44,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T17:24:08.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 88,
+  "runs": 9,
+  "lastPublished": "2026-10-02T05:47:46.000Z",
+  "lastProjected": "2026-10-02T05:47:46.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-croix",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 40,
+  "pgn": 40,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T17:26:10.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 11,
+  "runs": 1,
+  "lastPublished": "2026-09-30T00:09:47.000Z",
+  "lastProjected": "2026-09-30T00:09:48.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "notre-dame-des-bois",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 58,
+  "pgn": 58,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T16:55:02.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 125,
+  "runs": 8,
+  "lastPublished": "2026-10-02T06:40:47.000Z",
+  "lastProjected": "2026-10-02T06:40:48.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-emelie-de-lenergie",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 21,
+  "pgn": 16,
+  "onlyS3": 5,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 4,
+   "Source": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T05:55:22.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 91,
+  "runs": 9,
+  "lastPublished": "2026-10-04T11:59:06.000Z",
+  "lastProjected": "2026-10-04T11:59:07.000Z",
+  "sampleS3": [
+   "bylaw:03RG-0621",
+   "bylaw:06RG-0724",
+   "bylaw:115-2026",
+   "bylaw:116-2026"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "sainte-therese-de-la-gatineau",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 42,
+  "pgn": 38,
+  "onlyS3": 4,
+  "onlyPG": 0,
+  "onlyS3T": {
+   "Bylaw": 2,
+   "DesignationEvent": 1,
+   "Source": 1
+  },
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-04T06:02:12.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 173,
+  "runs": 7,
+  "lastPublished": "2026-10-03T12:00:07.000Z",
+  "lastProjected": "2026-10-03T12:00:08.000Z",
+  "sampleS3": [
+   "bylaw-259-16",
+   "bylaw-330-23",
+   "event-avis-motion-roulottes",
+   "source-85cfcd5b5df5e6013e1c764600b8053d3011c3c59208727829da9c3a0fc0afb6"
+  ],
+  "samplePG": []
+ },
+ {
+  "city": "saint-ludger",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 21,
+  "pgn": 21,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T17:13:55.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 11,
+  "runs": 1,
+  "lastPublished": "2026-09-29T23:45:56.000Z",
+  "lastProjected": "2026-09-29T23:45:57.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "shannon",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 65,
+  "pgn": 65,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T17:33:12.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 14,
+  "runs": 2,
+  "lastPublished": "2026-09-29T13:07:40.000Z",
+  "lastProjected": "2026-09-29T13:07:41.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "saint-hyacinthe",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 59,
+  "pgn": 59,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T17:10:35.000Z",
+  "s3keys": "municipality,generated_at,ontology_version,pv_count,nodes,edges",
+  "gen": "2026-06-14T00:00:00Z",
+  "refreshKeys": 0,
+  "runs": 0,
+  "lastPublished": null,
+  "lastProjected": null,
+  "sampleS3": [],
+  "samplePG": []
+ },
+ {
+  "city": "saint-boniface",
+  "grp": "ABORT",
+  "log": null,
+  "s3n": 40,
+  "pgn": 40,
+  "onlyS3": 0,
+  "onlyPG": 0,
+  "onlyS3T": {},
+  "onlyPGT": {},
+  "pgOnlyCreated": null,
+  "s3mod": "2026-10-03T17:03:29.000Z",
+  "s3keys": "nodes,edges,municipality,ontology_version,graphify_pass",
+  "pass": "3.4",
+  "refreshKeys": 24,
+  "runs": 3,
+  "lastPublished": "2026-09-29T23:19:36.000Z",
+  "lastProjected": "2026-09-29T23:19:37.000Z",
+  "sampleS3": [],
+  "samplePG": []
+ }
+]
