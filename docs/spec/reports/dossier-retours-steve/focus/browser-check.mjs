@@ -179,16 +179,26 @@ const EXPECT = {
   picks: [['D12', 'b'], ['D12', 'a'], ['D9', '1']], selectedQuestion: 'D12', selectedOption: 'a', persisted: [['D12', 'a'], ['D9', '1']],
   storagePrefix: 'immo-steve-decision-responses:', blocks: 16, options: 48, recommended: 15, decides: { Farid: 10, Fabien: 6 },
   url: 'https://github.com/rhanka/radar-immobilier/pull/794', mine: { Farid: 10, Fabien: 6 },
-  faridAnswered: ['D12'], notFarid: ['D9'], faridRoles: { D12: 'decide' }, fabienRoles: { D9: 'decide' }, allOptions: { D9: '"1"', D12: 'a' },
+  faridAnswered: ['D12'], notFarid: ['D9'], faridRoles: { D12: 'decide' }, fabienRoles: { D9: 'decide' }, allOptions: { D9: '1', D12: 'a' },
+  headerKeys: ['dossier', 'fichier', 'version', 'decideur', 'date', 'coller_dans'],
+  title: 'Analyse des retours d\'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage',
 };
 const pickScript = picks => `(() => { ${picks.map(([question, option]) =>
   `document.querySelector('[data-question="${question}"] [data-option="${option}"] input').click();`).join(' ')} return true; })()`;
 const readExport = `(() => {
   const text = document.querySelector('#decisions-yaml').value;
-  const field = (chunk, key) => (chunk.match(new RegExp('^    ' + key + ': (.*)$', 'm')) || [])[1];
+  // A value is plain on its line, or a block scalar (>- or |-) on the next, indented line.
+  const field = (chunk, key, indent = '    ') => {
+    const match = chunk.match(new RegExp('^' + indent + key + ': (.*)(?:\\n' + indent + '  +(.*))?$', 'm'));
+    return match ? (/^[>|]2?-$/.test(match[1]) ? match[2] : match[1]) : undefined;
+  };
   const entries = text.split(/^  - id: /m).slice(1).map(chunk => ({ id: chunk.split('\\n')[0],
     role: field(chunk, 'role'), option: field(chunk, 'option'), statut: field(chunk, 'statut') }));
-  return { text, entries, header: text.split('\\n').slice(0, 8) };
+  const head = text.split('\\ndecisions:')[0];
+  const header = { fenced: text.startsWith('\`\`\`yaml\\n'), keys: [...head.matchAll(/^([a-z_]+):/gm)].map(match => match[1]),
+    dossierStyle: (head.match(/^dossier: (.*)$/m) || [])[1], dossier: field(head, 'dossier', ''), decideur: field(head, 'decideur', ''),
+    coller_dans: field(head, 'coller_dans', ''), decisions: text.includes('\\ndecisions:\\n'), doubleQuotes: text.includes('"') };
+  return { text, entries, header };
 })()`;
 const setSelect = (selector, value) => `(() => { const select = document.querySelector('${selector}');
   select.value = '${value}'; select.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`;
@@ -224,8 +234,9 @@ if (choices.blocks !== EXPECT.blocks || choices.single !== EXPECT.blocks || choi
   || choices.steps !== '1. Copier, 2. ouvrir la PR, 3. coller dans un commentaire.'
   || choices.person !== 'Farid' || choices.scope !== 'mine'
   || !choices.link || choices.link.href !== EXPECT.url || choices.link.target !== '_blank' || !choices.link.rel.split(' ').includes('noopener')
-  || choices.header[0] !== '```yaml' || !choices.header[1].startsWith('dossier: ') || choices.header[4] !== 'decideur: Farid'
-  || choices.header[6] !== `coller_dans: "${EXPECT.url}"` || choices.header[7] !== 'decisions:'
+  || !choices.header.fenced || JSON.stringify(choices.header.keys) !== JSON.stringify(EXPECT.headerKeys) || choices.header.doubleQuotes
+  || choices.header.dossierStyle !== '>-' || choices.header.dossier !== EXPECT.title || choices.header.decideur !== 'Farid'
+  || choices.header.coller_dans !== EXPECT.url || !choices.header.decisions
   || choices.entries.length !== EXPECT.mine.Farid || JSON.stringify(choices.answered) !== JSON.stringify(EXPECT.faridAnswered)
   || own[EXPECT.selectedQuestion]?.option !== EXPECT.selectedOption || own[EXPECT.selectedQuestion]?.role !== 'decide'
   || EXPECT.notFarid.some(id => own[id]) || Object.entries(EXPECT.faridRoles).some(([id, role]) => own[id]?.role !== role))
@@ -266,9 +277,9 @@ await evaluate(setSelect('[data-export-scope]', 'mine'));
 await pause(200);
 const fabien = await evaluate(readExport);
 const exportFilter = { faridMine: choices.entries.length, all: all.entries.length, fabienMine: fabien.entries.length,
-  fabienDecideur: fabien.header[4], fabienRoles: Object.fromEntries(fabien.entries.map(entry => [entry.id, entry.role])),
+  fabienDecideur: fabien.header.decideur, fabienRoles: Object.fromEntries(fabien.entries.map(entry => [entry.id, entry.role])),
   allOptions: Object.fromEntries(all.entries.filter(entry => entry.option !== 'null').map(entry => [entry.id, entry.option])) };
-if (exportFilter.all !== EXPECT.blocks || exportFilter.fabienMine !== EXPECT.mine.Fabien || exportFilter.fabienDecideur !== 'decideur: Fabien'
+if (exportFilter.all !== EXPECT.blocks || exportFilter.fabienMine !== EXPECT.mine.Fabien || exportFilter.fabienDecideur !== 'Fabien' || all.header.doubleQuotes
   || JSON.stringify(exportFilter.allOptions) !== JSON.stringify(EXPECT.allOptions)
   || Object.entries(EXPECT.fabienRoles).some(([id, role]) => exportFilter.fabienRoles[id] !== role))
   throw Error(`filtre « Je suis » : ${JSON.stringify(exportFilter)}`);
