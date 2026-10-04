@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-04T15:46:40.154Z",
+  "checkedAt": "2026-10-04T16:17:19.531Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
   "chromiumCdpPort": "9243",
   "offline": {
@@ -74,7 +74,7 @@
       "sceneId": "architecture-ui",
       "kind": "flow",
       "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac",
-      "initialScale": 0.445367,
+      "initialScale": 0.443574,
       "contentInside": true,
       "overlaps": 0,
       "cards": 13,
@@ -83,11 +83,11 @@
       "edgeLabels": 12,
       "panel": {
         "left": 40,
-        "top": -6462.421875,
+        "top": -6462.40625,
         "width": 1345,
         "height": 820
       },
-      "iconPx": 69.99910853015602,
+      "iconPx": 69.99915388976811,
       "controls": {
         "boutons": 4,
         "unUn": true,
@@ -180,7 +180,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 52.5,
-        "top": -9431.703125,
+        "top": -9752.53125,
         "width": 1800,
         "height": 900
       },
@@ -283,7 +283,7 @@
         "edgeLabels": 12,
         "panel": {
           "left": 40,
-          "top": 13646.71875,
+          "top": 15511.359375,
           "width": 1345,
           "height": 820
         },
@@ -617,7 +617,7 @@
       "scale": 1,
       "clip": {
         "x": 60,
-        "y": 42045.71875,
+        "y": 43993.890625,
         "width": 1800,
         "height": 900
       }
@@ -628,7 +628,7 @@
       "sceneId": "criteres-steve",
       "clip": {
         "x": 52.5,
-        "y": 9405.625,
+        "y": 11063.40625,
         "width": 1800,
         "height": 498.375
       }
@@ -637,7 +637,7 @@
       "sceneId": "modele-donnees",
       "clip": {
         "x": 52.5,
-        "y": 10431.21875,
+        "y": 12089,
         "width": 1800,
         "height": 824.578125
       }
@@ -646,7 +646,7 @@
       "sceneId": "flux-import-oracle",
       "clip": {
         "x": 52.5,
-        "y": 11773.28125,
+        "y": 13431.0625,
         "width": 1800,
         "height": 1334
       }
@@ -655,7 +655,7 @@
       "sceneId": "architecture-ui",
       "clip": {
         "x": 52.5,
-        "y": 13594.6875,
+        "y": 15252.46875,
         "width": 1800,
         "height": 900
       }
@@ -664,7 +664,7 @@
       "sceneId": "affichage-abc",
       "clip": {
         "x": 52.5,
-        "y": 14988.453125,
+        "y": 16646.234375,
         "width": 1800,
         "height": 1250
       }
