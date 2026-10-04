@@ -56,18 +56,98 @@ pour le seuil D13**.
   lignes du jeu aveugle. Steve doit les confirmer.
 - v2 a été gelée avant l'unique passage sur le jeu aveugle.
 
+### À quel niveau on mesure
+
+- **Unité** : une ligne du relevé de Steve rattachée au(x) signal(aux) du radar qu'elle cite.
+  121 lignes, optim 60 (26 villes) et aveugle 61 (25 villes). Ce n'est ni un document, ni un
+  règlement, ni un dossier.
+- **Vérité** : le verdict de Steve sur la ligne (Pertinent, À surveiller, Non pertinent).
+- **Ce qu'on mesure** : la décision d'affichage, « montrer à Steve » ou « masquer ».
+  - B (radar d'aujourd'hui) montre une ligne si elle était visible dans la passe que Steve a faite
+    avec cette combinaison de filtres.
+  - C montre une ligne si le modèle répond Pertinent ou À surveiller (C ne masque que Non
+    pertinent) ; « C strict » ne montre que ce que le modèle juge Pertinent.
+- **Deux définitions du positif** : positif = Pertinent ; positif = Pertinent ou À surveiller.
+- **Précision** = positifs montrés / lignes montrées. **Rappel** = positifs montrés / positifs du
+  jeu. **F1** = moyenne harmonique. **Bruit** = Non pertinent parmi les lignes montrées.
+  **Pertinents perdus** = Pertinent masqués. Intervalles à 95 % par rééchantillonnage des villes.
+
+**Biais de sélection.** Chaque ligne existe parce qu'elle était visible dans une des trois passes
+de Steve. Ce que le radar ne montrait jamais, et ce que ses filtres retiraient à raison (onglet
+« Écartés par les filtres »), est hors de l'univers. Donc : le rappel n'est mesuré que dans
+l'univers des 121 lignes (la passe 3, sans filtre, a 100 % de rappel par construction) ; la
+précision est comparable entre systèmes sur les mêmes lignes, et ce biais avantage B, pas C. Les
+passes 1, 2, 3 sont **observées** ; les filtres « seuls » sont **reconstitués** à partir des
+propriétés des signaux relues le 4 octobre (`non vérifié` face au code déployé en septembre) ;
+« Résidentiel seul » n'est pas calculable (N-A). Aucun nouvel appel de modèle : C réutilise les
+réponses déjà obtenues ; C v1 n'a pas été passé sur l'aveugle (mesuré une seule fois, avec v2).
+
+### Tableau comparatif — même lignes, positif = Pertinent puis Pertinent + À surveiller (en %)
+
+**Jeu aveugle (61 lignes : 20 Pertinent, 15 À surveiller, 26 Non pertinent), une seule passe, v2**
+
+| Système | Précision (P) | Rappel (P) | F1 (P) | Précision (P+S) | Rappel (P+S) | F1 (P+S) | Bruit | Pertinents perdus |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| B passe 1 (5 filtres) | 45,9 | 85,0 | 59,6 | 64,9 | 68,6 | 66,7 | 35,1 | 3/20 |
+| B passe 2 (sans Précoce) | 37,0 | 100,0 | 54,1 | 61,1 | 94,3 | 74,2 | 38,9 | 0/20 |
+| B passe 3 (aucun filtre) | 32,8 | 100,0 | 49,4 | 57,4 | 100,0 | 72,9 | 42,6 | 0/20 |
+| Précoce seul (reconstitué) | 45,9 | 85,0 | 59,6 | 64,9 | 68,6 | 66,7 | 35,1 | 3/20 |
+| Zonage seul (reconstitué) | 38,3 | 90,0 | 53,7 | 66,0 | 88,6 | 75,6 | 34,0 | 2/20 |
+| Exclure PIIA + dérogation seul (reconstitué) | 33,3 | 100,0 | 50,0 | 58,3 | 100,0 | 73,7 | 41,7 | 0/20 |
+| C v1 (3 modèles) | N-A | N-A | N-A | N-A | N-A | N-A | N-A | non passé sur l'aveugle |
+| C v2 Astra low | 52,6 | 100,0 | 69,0 | 81,6 | 88,6 | 84,9 | 18,4 | 0/20 |
+| C v2 Gemini low | 57,1 | 100,0 | 72,7 | 88,6 | 88,6 | 88,6 | 11,4 | 0/20 |
+| C v2 Opus 5.5 low | 52,6 | 100,0 | 69,0 | 84,2 | 91,4 | 87,7 | 15,8 | 0/20 |
+| C v2 strict Gemini low (Pertinent seul) | 81,0 | 85,0 | 82,9 | 90,5 | 54,3 | 67,9 | 9,5 | 3/20 |
+
+**Jeu optim (60 lignes : 19 Pertinent, 14 À surveiller, 27 Non pertinent)**
+
+| Système | Précision (P) | Rappel (P) | F1 (P) | Précision (P+S) | Rappel (P+S) | F1 (P+S) | Bruit | Pertinents perdus |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| B passe 1 (5 filtres) | 47,2 | 89,5 | 61,8 | 69,4 | 75,8 | 72,5 | 30,6 | 2/19 |
+| B passe 2 (sans Précoce) | 34,6 | 94,7 | 50,7 | 59,6 | 93,9 | 72,9 | 40,4 | 1/19 |
+| B passe 3 (aucun filtre) | 31,7 | 100,0 | 48,1 | 55,0 | 100,0 | 71,0 | 45,0 | 0/19 |
+| Précoce seul (reconstitué) | 47,4 | 94,7 | 63,2 | 68,4 | 78,8 | 73,2 | 31,6 | 1/19 |
+| Zonage seul (reconstitué) | 39,6 | 100,0 | 56,7 | 68,8 | 100,0 | 81,5 | 31,3 | 0/19 |
+| Exclure PIIA + dérogation seul (reconstitué) | 34,0 | 94,7 | 50,0 | 60,4 | 97,0 | 74,4 | 39,6 | 1/19 |
+| C v1 Astra low | 48,1 | 68,4 | 56,5 | 81,5 | 66,7 | 73,3 | 18,5 | 6/19 |
+| C v1 Gemini low | 60,0 | 94,7 | 73,5 | 86,7 | 78,8 | 82,5 | 13,3 | 1/19 |
+| C v1 Opus 5.5 low | 54,5 | 94,7 | 69,2 | 84,8 | 84,8 | 84,8 | 15,2 | 1/19 |
+| C v2 Astra low | 50,0 | 94,7 | 65,5 | 80,6 | 87,9 | 84,1 | 19,4 | 1/19 |
+| C v2 Gemini low | 59,4 | 100,0 | 74,5 | 87,5 | 84,8 | 86,2 | 12,5 | 0/19 |
+| C v2 Opus 5.5 low | 54,3 | 100,0 | 70,4 | 85,7 | 90,9 | 88,2 | 14,3 | 0/19 |
+| C v2 strict Gemini low (Pertinent seul) | 80,0 | 84,2 | 82,1 | 90,0 | 54,5 | 67,9 | 10,0 | 3/19 |
+
+<!-- chart:oracle-c-precision-rappel — barres précision / rappel (positif = Pertinent) par système ; SVG prêts : results/filter-pr-blind.svg, results/filter-pr-optim.svg -->
+
+**Classement à trois classes, jeu aveugle (précision / rappel par classe, en %)**
+
+| Classe | Astra low | Gemini low | Opus 5.5 low |
+|---|---|---|---|
+| Pertinent | 83,3 / 75,0 | 81,0 / 85,0 | 86,7 / 65,0 |
+| À surveiller | 45,0 / 60,0 | 64,3 / 60,0 | 47,8 / 73,3 |
+| Non pertinent | 82,6 / 73,1 | 84,6 / 84,6 | 87,0 / 76,9 |
+
+**Lecture (JUGEMENT).** Sur l'aveugle, positif = Pertinent : la passe 1 montre 37 lignes pour
+17 Pertinent sur 20 (précision 45,9, rappel 85,0) ; C v2 en montre 35 à 38 pour les 20 (précision
+52,6 à 57,1, rappel 100). Avec positif = Pertinent + À surveiller, C v2 atteint 81,6 à 88,6 de
+précision pour 88,6 à 91,4 de rappel, contre 64,9 / 68,6 pour la passe 1. Les intervalles par
+ville restent larges et se recouvrent en partie (précision P+S : passe 1 48–81, C v2 69–100) ;
+aucun écart entre les trois modèles n'est établi. Un C « strict » gagne en précision (≈81-87) au
+prix du rappel (65-85).
+
 ### Résultats par modèle (effort bas, sièges uniquement)
 
 Modèles : Astra low (`gpt-6-astra`, `codex exec`), Gemini low (`gemini-3.8-flash-low`, `agy`),
 Claude Opus 5.5 low (`claude-opus-5-5`, `claude -p --effort low`).
 
-**Mesure comparable à B en premier** : C posé en filtre sur la vue de travail B (passe 1).
+Indicateurs complémentaires : C posé en filtre sur la vue de travail B (passe 1).
 
 | Mesure (jeu aveugle, v2) | B seul | Astra low | Gemini low | Opus 5.5 low |
 |---|---:|---:|---:|---:|
 | **Bruit de la vue B + filtre C** | 35,1 % (13/37) | 12,0 % (3/25) | 8,3 % (2/24) | 11,5 % (3/26) |
 | **Pertinent gardés dans B + filtre C** | 17/17 | 17/17 | 17/17 | 17/17 |
-| Exactitude du verdict (3 classes) | — | 70,5 % | 78,7 % | 72,1 % |
+| Exactitude du verdict (3 classes, part de lignes où le verdict égale celui de Steve) | — | 70,5 % | 78,7 % | 72,1 % |
 | Intervalle à 95 % (par ville) | — | 58–81 % | 69–87 % | 60–82 % |
 | Sens de la modification = celui de Steve | — | 67,2 % | 72,1 % | 75,4 % |
 | Motif identique à Steve | — | 50,8 % | 59,0 % | 54,1 % |
