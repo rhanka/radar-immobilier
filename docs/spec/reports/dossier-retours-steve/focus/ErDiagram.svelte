@@ -10,6 +10,8 @@
   const marker = cardinality => `url(#${graph.id}-${cardinality})`;
   const path = points => points.map((point, index) => `${index ? 'L' : 'M'}${point.x},${point.y}`).join(' ');
   const CHAR = ER.columnSize * ER.mono;
+  // Delta diagrams (current vs proposed): one colour per status, named in the tag.
+  const STATUS = { new: 'nouveau', modified: 'modifié', deleted: 'supprimé', unchanged: 'inchangé', current: 'existe' };
 </script>
 
 <DiagramFrame id={graph.id} kind="er" width={layout.width} height={layout.height} tools={!compact}
@@ -42,11 +44,11 @@
 
   {#each graph.entities as entity}
     {@const box = boxOf[entity.id]}
-    <g class="er-entity" class:existing={entity.existing} data-entity={entity.id} data-existing={entity.existing}>
+    <g class="er-entity status-{entity.status ?? (entity.existing ? 'existing' : 'proposed')}" class:existing={entity.existing && !entity.status} data-entity={entity.id} data-existing={entity.existing} data-status={entity.status}>
       <rect class="er-body" x={box.x} y={box.y} width={box.width} height={box.height} />
       <rect class="er-head" x={box.x} y={box.y} width={box.width} height={ER.header} />
       <text class="er-name" x={box.x + ER.padX} y={box.y + 24} data-text-role="entity-name" data-box-right={box.x + box.width}>{entity.id}</text>
-      <text class="er-tag" x={box.x + box.width - ER.padX} y={box.y + 23} text-anchor="end">{entity.existing ? 'existe' : 'proposée'}</text>
+      <text class="er-tag" x={box.x + box.width - ER.padX} y={box.y + 23} text-anchor="end">{STATUS[entity.status] ?? (entity.existing ? 'existe' : 'proposée')}</text>
       {#each entity.attributes as attribute, index}
         {@const y = box.y + ER.header + index * ER.line + 18}
         <text class="er-type" x={box.x + ER.padX} {y}>{attribute.type}</text>
@@ -85,6 +87,17 @@
   .er-head { fill: color-mix(in srgb, var(--st-semantic-data-category1) 18%, var(--st-semantic-surface-raised)); stroke: var(--st-semantic-border-strong); stroke-width: 1.5; }
   .er-entity.existing .er-head { fill: color-mix(in srgb, var(--st-semantic-data-category2) 24%, var(--st-semantic-surface-raised)); }
   .er-name { font: 700 15px ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace; fill: var(--st-semantic-text-primary); }
+  .status-new .er-head { fill: var(--dossier-ok-bg); stroke: var(--dossier-ok); }
+  .status-new .er-body { stroke: var(--dossier-ok); stroke-width: 2; }
+  .status-modified .er-head { fill: var(--dossier-partial-bg); stroke: var(--dossier-partial); }
+  .status-modified .er-body { stroke: var(--dossier-partial); stroke-width: 2.5; stroke-dasharray: none; }
+  .status-deleted .er-head { fill: var(--dossier-gap-bg); stroke: var(--dossier-gap); }
+  .status-deleted .er-body { stroke: var(--dossier-gap); stroke-dasharray: 3 3; }
+  .status-unchanged .er-head, .status-current .er-head { fill: var(--st-semantic-surface-subtle); }
+  .status-unchanged .er-body, .status-current .er-body { stroke-dasharray: none; }
+  .status-new .er-tag { fill: var(--dossier-ok-text); }
+  .status-modified .er-tag { fill: var(--dossier-partial-text); }
+  .status-deleted .er-tag { fill: var(--dossier-gap-text); }
   .er-tag { font: 700 11px var(--st-font-sans, Inter, system-ui, sans-serif); fill: var(--st-semantic-text-secondary); text-transform: uppercase; letter-spacing: .06em; }
   .er-type, .er-keys, .er-column { font: 13px ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace; }
   .er-type, .er-comment { fill: var(--st-semantic-text-secondary); }

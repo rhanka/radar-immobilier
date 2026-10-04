@@ -8,7 +8,7 @@
   const graph = $derived.by(() => {
     const model = parseEr(spec.er, id);
     return { id, relations: model.relations, layout: erLayout(model, spec),
-      entities: model.entities.map(entity => ({ ...entity, existing: spec.existing.includes(entity.id) })) };
+      entities: model.entities.map(entity => ({ ...entity, existing: spec.existing.includes(entity.id), status: spec.status?.[entity.id] })) };
   });
 </script>
 

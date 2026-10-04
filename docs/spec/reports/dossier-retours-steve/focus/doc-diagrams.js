@@ -2,10 +2,13 @@
 // markers, rendered with the same engine as scene 2 (MiniEr). The Mermaid source is the
 // block just above the marker in the Markdown (mapping.test.mjs checks they are equal).
 import { STEVE_MODEL } from './steve-model.js';
+import { PHYSICAL } from './physical-model.js';
 
 export const DIAGRAM_MARKER = /<!-- diagram:([\w-]+) -->/;
 
 export const DOC_DIAGRAMS = {
+  // §6.0 — physical model: current state and proposed state (statuses).
+  ...PHYSICAL,
   // §6.3 — the minimal model proposed from Steve’s needs (same as scene 2 and D2 option a).
   'modele-minimal': { title: 'Modèle minimal proposé : six tables nouvelles, une par besoin de Steve', ...STEVE_MODEL },
   // §6.0 — what exists on main today (schema.ts, migrations 0005 and 0011).
