@@ -1,10 +1,8 @@
 <script>
-  // Architecture in vertical swimlanes, left to right: users, UI screens, backend
-  // functions, data on the real stores (S3, PostgreSQL). The oracle is a transversal band
-  // at the bottom: an offline evaluation system fed by the annotations stored in the base.
+  // Vertical swimlanes, left to right (users, screens, backend, data), with an optional
+  // zone around them, and a transversal band at the bottom (offline evaluation).
   // Geometry from build time (diagram-layout.js); colours from the design-system tokens.
   import DiagramFrame from './DiagramFrame.svelte';
-  import { LANE_TITLES } from './diagram-specs.js';
   let { graph } = $props();
   const layout = $derived(graph.layout);
   const boxOf = $derived(Object.fromEntries(layout.boxes.map(box => [box.id, box])));
@@ -15,18 +13,25 @@
 </script>
 
 <DiagramFrame id={graph.id} kind="lanes" width={layout.width} height={layout.height}
-  label="Architecture en couloirs : utilisateurs, écrans UI, fonctions backend, données S3 et PostgreSQL ; oracle transversal en bas">
+  label={layout.zone ? 'Deux zones : application en couloirs (utilisateurs, écrans, backend, base) et évaluation hors ligne en bas' : 'Architecture en couloirs : utilisateurs, écrans UI, fonctions backend, données S3 et PostgreSQL ; oracle transversal en bas'}>
   <defs>
     <marker id={`${graph.id}-arrow`} viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
       <path class="lane-arrow" d="M1,1 L11,6 L1,11 Z" />
     </marker>
   </defs>
 
+  {#if layout.zone}
+    <g class="zone" data-zone="application">
+      <rect x={layout.zone.x} y={layout.zone.y} width={layout.zone.width} height={layout.zone.height} />
+      <text x={layout.zone.x + 18} y={layout.zone.y + 34} data-text-role="zone-title">{layout.zone.title}</text>
+    </g>
+  {/if}
+
   {#each layout.lanes as lane, index}
     <g class="lane lane-{lane.kind}" data-lane={lane.id} data-lane-kind={lane.kind} data-lane-index={index}>
       <rect class="lane-bg" class:alt={index % 2} x={lane.x} y={lane.y} width={lane.width} height={lane.height} />
       <rect class="lane-accent" x={lane.x} y={lane.y} width={lane.width} height="6" />
-      <text class="lane-title" x={lane.x + lane.width / 2} y={lane.y + 40} text-anchor="middle" data-text-role="lane-title">{LANE_TITLES[lane.kind]}</text>
+      <text class="lane-title" x={lane.x + lane.width / 2} y={lane.y + 40} text-anchor="middle" data-text-role="lane-title">{lane.title}</text>
     </g>
   {/each}
 
@@ -34,7 +39,7 @@
     <rect class="band-bg" x={layout.band.x} y={layout.band.y} width={layout.band.width} height={layout.band.height} />
     <rect class="band-accent" x={layout.band.x} y={layout.band.y} width={layout.band.width} height="6" />
     <text class="lane-title" x={layout.band.x + 20} y={layout.band.y + 38} data-text-role="band-title">{groupLabel[layout.band.id]}
-      <tspan class="band-sub"> — système transversal : alimenté par les annotations stockées en base, il note les sélections B et C</tspan></text>
+      <tspan class="band-sub"> — {layout.band.subtitle}</tspan></text>
   </g>
 
   {#each layout.containers as container}
@@ -74,11 +79,11 @@
     {/if}
   {/each}
 </DiagramFrame>
-<p class="diagram-legend"><strong>Lecture</strong> · couloirs de gauche à droite : qui agit, sur quel écran, quelle fonction backend, quelles données ·
-  bordure pleine : constaté sur main · tirets : proposé par le dossier · pointillés : référence gelée ·
-  les flèches suivent l’appel ou l’écriture · l’oracle, en bas, ne sert aucune vue : il évalue hors ligne.</p>
+<p class="diagram-legend"><strong>Lecture</strong> · {layout.legend}</p>
 
 <style>
+  .zone rect { fill: none; stroke: var(--st-semantic-action-primary); stroke-width: 2.5; }
+  .zone text { font: 700 20px var(--st-font-sans, Inter, system-ui, sans-serif); fill: var(--st-semantic-action-primary); }
   .lane-bg { fill: var(--st-semantic-surface-subtle); }
   .lane-bg.alt { fill: color-mix(in srgb, var(--st-semantic-surface-subtle) 55%, var(--st-semantic-surface-default)); }
   .lane-accent { fill: var(--lane-color); }
