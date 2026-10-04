@@ -9,7 +9,7 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
 - Make-only workflow, no direct Docker commands.
 - Root workspace `~/src/radar-immobilier` is reserved for user dev/UAT (`ENV=dev`) and must remain stable.
 - Branch development must happen in repository-local isolated worktrees `./tmp/feat-graph-drift-measure` and `./tmp/fix-graph-city-key`. Do not use system `/tmp`.
-- Automated test campaigns must run on dedicated environments (`ENV=test-fix-graph-city-key` / `ENV=e2e-fix-graph-city-key`), never on root `dev`.
+- Automated test campaigns must run on dedicated environments (`ENV=test-feat-graph-drift-measure` for PR-1; `ENV=test-fix-graph-city-key` / `ENV=e2e-fix-graph-city-key` for PR-2), never on root `dev`.
 - UAT qualification branch/worktree must be commit-identical to the branch under qualification (same HEAD SHA).
 - In every `make` command, `ENV=<env>` must be passed as the last argument.
 - All new text in English. Discussions with the user may be in French.
@@ -20,38 +20,48 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
 
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
-  - `api/src/db/schema.ts`
-  - `api/src/services/graph/**`
-  - `api/src/services/data-quality/summary.ts`
-  - `api/src/services/geo/geo-features.ts`
-  - `api/src/services/geo/resolve-refs.ts`
-  - `api/src/services/geo/*.test.ts`
-  - `api/src/services/sources/exploitation.ts`
-  - `api/src/services/sources/live-scrape.test.ts`
-  - `api/src/routes/graph.ts`
-  - `api/src/routes/graph.test.ts`
-  - `api/src/routes/graph-signals*.test.ts`
-  - `api/src/scripts/repair-graph-city-key.ts`
-  - `api/src/scripts/measure-graph-drift.ts`
-  - `api/src/scripts/report-opportunity-proof.ts`
-  - `api/src/scripts/*.test.ts`
-  - `api/tests/integration/**`
-  - `ui/src/lib/components/reconciliation/MrcGraphView.svelte`
-  - `ui/src/lib/components/reconciliation/*.test.ts`
-  - `ui/src/lib/graph/graph-client.ts`
-  - `ui/src/lib/graph/*.test.ts`
-  - `packages/immo-mcp/src/*.test.ts`
-  - `e2e/**`
-  - `deploy/k8s/42-graph-city-key-repair-job.yaml`
-  - `deploy/k8s/43-graph-drift-measure-job.yaml`
-  - `deploy/k8s/44-graph-schema-down-job.yaml`
-  - `deploy/k8s/graph-city-key-repair/**`
-  - `deploy/k8s/graph-drift-measure/**`
-  - `deploy/k8s/graph-projection-preprod/**`
-  - `deploy/ci/check-object-storage-bindings.sh`
-  - `docs/spec/SPEC_FIX_GRAPH_CITY_KEY.md`
-  - `PLAN.md`
-  - `plan/812-BRANCH_fix-graph-city-key.md`
+  - PR-1 `feat/graph-drift-measure` (test ENV `test-feat-graph-drift-measure`):
+    - `api/src/scripts/measure-graph-drift.ts`
+    - `api/src/scripts/measure-graph-drift.test.ts`
+    - `api/tests/integration/graph-drift-measure*.spec.ts`
+    - `deploy/k8s/43-graph-drift-measure-job.yaml`
+    - `deploy/k8s/graph-drift-measure/**`
+    - `deploy/k8s/graph-projection-preprod/**`
+    - `deploy/k8s/geo-mapper-preprod/**`
+    - `deploy/k8s/consistency-snapshot-preprod/**`
+    - `deploy/ci/check-object-storage-bindings.sh`
+    - `plan/812-BRANCH_fix-graph-city-key.md`
+  - PR-2 `fix/graph-city-key` (test ENV `test-fix-graph-city-key`, e2e ENV `e2e-fix-graph-city-key`):
+    - `api/src/db/schema.ts`
+    - `api/src/services/graph/**`
+    - `api/src/services/data-quality/summary.ts`
+    - `api/src/services/geo/geo-features.ts`
+    - `api/src/services/geo/resolve-refs.ts`
+    - `api/src/services/geo/*.test.ts`
+    - `api/src/services/sources/exploitation.ts`
+    - `api/src/services/sources/live-scrape.test.ts`
+    - `api/src/routes/graph.ts`
+    - `api/src/routes/graph.test.ts`
+    - `api/src/routes/graph-signals*.test.ts`
+    - `api/src/scripts/repair-graph-city-key.ts`
+    - `api/src/scripts/measure-graph-drift.ts` (switch to the shared `prepareCityProjection`)
+    - `api/src/scripts/report-opportunity-proof.ts`
+    - `api/src/scripts/*.test.ts`
+    - `api/tests/integration/**`
+    - `ui/src/lib/components/reconciliation/MrcGraphView.svelte`
+    - `ui/src/lib/components/reconciliation/*.test.ts`
+    - `ui/src/lib/graph/graph-client.ts`
+    - `ui/src/lib/graph/*.test.ts`
+    - `packages/immo-mcp/src/*.test.ts`
+    - `e2e/**`
+    - `deploy/k8s/42-graph-city-key-repair-job.yaml`
+    - `deploy/k8s/44-graph-schema-down-job.yaml`
+    - `deploy/k8s/graph-city-key-repair/**`
+    - `deploy/k8s/graph-schema-down/**`
+    - `deploy/ci/check-object-storage-bindings.sh`
+    - `docs/spec/SPEC_FIX_GRAPH_CITY_KEY.md`
+    - `PLAN.md`
+    - `plan/812-BRANCH_fix-graph-city-key.md`
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`
   - `docker-compose*.yml`
@@ -64,8 +74,8 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
   - `api/drizzle/meta/_journal.json` (BR812-EX1)
   - `api/drizzle/rollback/**` (BR812-EX2)
   - `.github/workflows/run-job.yaml` (BR812-EX3)
-  - `.github/workflows/build-push-images.yml` (BR812-EX4, post-rollout graph check only)
-  - `deploy/k8s/refresh-cronjobs/kustomization.yaml`, `deploy/k8s/refresh-cronjobs-prod/kustomization.yaml` (suspend/resume PRs only, outside this branch)
+  - `.github/workflows/build-push-images.yml` (BR812-EX4)
+  - `deploy/k8s/refresh-cronjobs/**`, `deploy/k8s/refresh-cronjobs-prod/**` (not expected: suspension goes through `run-job.yaml`, never through the overlay, spec K6)
   - `../poc-k8s/**` (cross-repo work)
 - **Exception process**:
   - Declare exception ID `BRxx-EXn` in `## Feedback Loop` before touching any conditional/forbidden path.
@@ -74,10 +84,10 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
 ## Feedback Loop
 - [ ] `attention` BR812-EX1 — `api/drizzle/0013_graph_city_key.sql` + journal entry; reason: K1–K5 and geo key (spec §4); impact: composite PK, edge city, geo key; rollback: BR812-EX2 down script before the first graph write, forward-fix after (K16).
 - [ ] `attention` BR812-EX2 — `api/drizzle/rollback/0013_graph_city_key.down.sql`, outside the drizzle journal, run only by the `graph-schema-down` Job; it also deletes the 0013 row from `drizzle.__drizzle_migrations`; rollback: delete the file.
-- [ ] `attention` BR812-EX3 — `.github/workflows/run-job.yaml`: jobs `graph-drift-measure`, `graph-city-key-repair`, `graph-schema-down`; inputs `target_env`, `repair_mode`, `repair_cities`, `mapper_cities`; secret selected by `target_env`; mutual busy pre-check; termination-message print; default stays `prod`; rollback: revert the commit.
-- [ ] `attention` BR812-EX4 — `.github/workflows/build-push-images.yml`: post-rollout assert adds a graph read check (`/api/graph/<city>`, `/api/graph-signals/<city>`); rollback: revert the commit.
+- [ ] `attention` BR812-EX3 — `.github/workflows/run-job.yaml`: jobs `graph-drift-measure`, `graph-city-key-repair`, `graph-schema-down`; options `refresh-suspend`, `refresh-resume`, `mapper` and `snapshot` with `target_env`; inputs `target_env`, `repair_mode`, `repair_cities`, `mapper_cities`; secret, namespace and pre-flight host selected by `target_env`; mutual busy pre-check; termination-message print; default stays `prod`; rollback: revert the commit.
+- [ ] `attention` BR812-EX4 — `.github/workflows/build-push-images.yml`: post-rollout assert adds a graph read check (`/api/graph/<city>`, `/api/graph-signals/<city>`); the promote-prod CronJob assert (`:1438-1448`) is NOT changed (the CronJob is armed at release time, spec K6); rollback: revert the commit.
 - [ ] `attention` Q1 (owner) — NULL-city rows in prod, if R0 finds any: delete or attach to a city. Release of PR-2 blocked until answered.
-- [ ] `attention` Q2 (owner) — suspension of the refresh CronJob from R1 to R6 per environment.
+- [ ] `attention` Q2 (owner) — suspension of the refresh CronJob from R1b to R6 per environment and freeze of graph-touching merges to main during the preprod run.
 - [ ] `attention` Q3 (owner) — G1 cities in the repair job or kept under D1 `projection`.
 - [ ] `attention` Q4 (owner) — per-city S3 archive of PG rows without a restore script.
 - [ ] `attention` Q5 (owner) — forward-fix only after the first graph write, or a documented prod restore exercise by the immo operator first.
@@ -97,7 +107,7 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
   - [ ] Read `rules/MASTER.md` and pointers (`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`).
   - [ ] Create isolated worktrees `./tmp/feat-graph-drift-measure` and `./tmp/fix-graph-city-key` from fresh `origin/main` (after the one-line stop-gap PR is merged).
   - [ ] Capture Makefile targets needed for debug/testing.
-  - [ ] Define environment mapping for test/branch stacks only (`test-fix-graph-city-key`, `e2e-fix-graph-city-key`) with a unique port block per `rules/conductor.md`.
+  - [ ] Define environment mapping for test/branch stacks only (`test-feat-graph-drift-measure`, `test-fix-graph-city-key`, `e2e-fix-graph-city-key`) with a unique port block per `rules/conductor.md`.
   - [ ] Confirm command style: `make ... <vars> ENV=<env>` with `ENV` last.
   - [ ] Confirm scope and guardrails; record BR812-EX1 to EX4 as acknowledged before touching their paths.
   - [ ] Read the values of `BACKUP_BEFORE_RELEASE_ENABLED`, `BACKUP_BEFORE_RELEASE_PROD_ENABLED`, `PREPROD_CD_ENABLED`, `REFRESH_CRONJOB_PREPROD_ENABLED`, `REFRESH_CRONJOB_PROD_ENABLED`, `ROLLBACK_ON_FAILURE_ENABLED` and record them.
@@ -106,11 +116,11 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
 - [ ] **Lot 1 — PR-1 `feat/graph-drift-measure`: measurement job and run-job targeting** (size M)
   - [ ] Tests first: v1/v2 equivalence on a seeded database (common fields equal, expected differences listed), content check when id sets agree (fortierville-like fixture), edge drift counts, both schemas (pre and post 0013 fixtures).
   - [ ] `api/src/scripts/measure-graph-drift.ts` per spec §9 (read-only transaction, S3 list/get only, report to S3, ≤ 4 KiB termination message), using `prepareCityProjection` once extracted (Lot 3) or an identical local copy removed in Lot 3.
-  - [ ] Jobs `deploy/k8s/43-graph-drift-measure-job.yaml` + `deploy/k8s/graph-drift-measure/job.yaml`; preprod projection twin `deploy/k8s/graph-projection-preprod/job.yaml`; bindings in `check-object-storage-bindings.sh`.
-  - [ ] `run-job.yaml` (BR812-EX3): `target_env` with secret, namespace and pre-flight host per environment; `graph-drift-measure`; `mapper_cities`; termination-message print; mutual busy pre-check.
+  - [ ] Jobs `deploy/k8s/43-graph-drift-measure-job.yaml` + `deploy/k8s/graph-drift-measure/job.yaml`; preprod twins for projection, geo mapper and consistency snapshot; bindings in `check-object-storage-bindings.sh`.
+  - [ ] `run-job.yaml` (BR812-EX3): `target_env` with secret, namespace and pre-flight host per environment; `graph-drift-measure`; `refresh-suspend` / `refresh-resume`; `mapper_cities`; preprod `mapper` and `snapshot`; termination-message print; mutual busy pre-check.
   - [ ] Lot gate:
     - [ ] `make typecheck` + `make lint`
-    - [ ] `make test ENV=test-fix-graph-city-key`
+    - [ ] `make test ENV=test-feat-graph-drift-measure`
     - [ ] `make k8s-validate ENV=ci`
   - [ ] PR `Refs #812`, CI green, ≥2-peer review, merge commit, release; R0 in preprod and prod (spec §7.5), reports archived on #812.
 
@@ -148,7 +158,7 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
   - [ ] Unit tests first: `classifyCityNodes` (same-id foreign docSha also on another id, legacy-merge local props with foreign refs → unknown, property-only contamination, slug mismatch), `repairCityGraph` (unknown refuses pass 1, pass-2 refusal keeps pass 1, idempotence, archive equals replaced state).
   - [ ] `indexS3Nodes`, `classifyCityNodes`, `repairCityGraph` in `graph-store.ts`; `api/src/scripts/repair-graph-city-key.ts` per spec §7.1–7.3 (preview with before/after verdicts, archive under the lock, geo purge, report to S3, termination message).
   - [ ] Integration tests: gore / barkmere end to end, fortierville-like case, concurrent projection waits on the lock.
-  - [ ] Jobs `42-graph-city-key-repair-job.yaml` + preprod twin, `44-graph-schema-down-job.yaml`; `run-job.yaml` options `graph-city-key-repair`, `graph-schema-down` (BR812-EX3); graph check in the post-rollout assert (BR812-EX4).
+  - [ ] Jobs `42-graph-city-key-repair-job.yaml` + preprod twin, `44-graph-schema-down-job.yaml` + preprod twin; `run-job.yaml` options `graph-city-key-repair`, `graph-schema-down` (BR812-EX3); graph check in the post-rollout assert (BR812-EX4).
   - [ ] Lot gate:
     - [ ] `make typecheck` + `make lint`
     - [ ] `make test ENV=test-fix-graph-city-key`
@@ -161,11 +171,12 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
   - [ ] Merge commit (NO squash, NO rebase merge); preserve branch.
 
 - [ ] **Lot 7 — Preprod then prod runs (spec §7.5)** (size M, operational)
-  - [ ] Preprod R1: refresh CronJob suspended (overlay PR); CD variables checked; release PR-2; migrate Job Complete; backup object present.
-  - [ ] Preprod R2 measurement; R3 repair preview on list `L`; before-verdicts reproduce `sim.json`, after-verdicts reviewed, `unknown` reviewed.
+  - [ ] Preprod R1: five CD variables checked (spec K6); release PR-2 outside windows; migrate Job Complete; backup object present; CronJob image = release digest.
+  - [ ] Preprod R1b: `refresh-suspend` through run-job; graph-touching merges to main frozen until R6.
+  - [ ] Preprod R2 structural measurement and authoritative list `L`; R3 repair preview on `L`; before-verdicts compared with `sim.json`, after-verdicts and `unknown` reviewed.
   - [ ] Preprod R4 repair apply; R5 `document-date-recovery` apply without `--heal` on cities whose pass 2 succeeded; R5b `mapper` then `snapshot`.
-  - [ ] Preprod R6 acceptance (spec §9); CronJob image = release digest; refresh resumed (overlay PR); first pass 0 `postgres-regression-refused` on repaired cities.
-  - [ ] Prod R1 tag `vX.Y.Z` with the same gates; R2–R6 on the prod list `L`, one job at a time; result posted on #812.
+  - [ ] Preprod R6 acceptance (spec §9); `refresh-resume` through run-job; main unfrozen; first pass 0 `postgres-regression-refused` on repaired cities.
+  - [ ] Prod R1 tag `vX.Y.Z` with the same gates (promote assert armed CronJob); R1b–R6 on the prod list `L`, one job at a time; result posted on #812.
 
 - [ ] **Lot 8 — Close**
   - [ ] Drop `graph_edges_dangling_0013` in a later migration only after owner acknowledgement (separate branch).
