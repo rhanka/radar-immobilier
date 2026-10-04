@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-04T21:38:33.450Z",
+  "checkedAt": "2026-10-04T22:24:15.718Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
   "chromiumCdpPort": "9243",
   "offline": {
@@ -83,7 +83,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 40,
-        "top": -28527.9375,
+        "top": -28527.453125,
         "width": 1345,
         "height": 820
       },
@@ -180,7 +180,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 52.5,
-        "top": -27929.03125,
+        "top": -27928.921875,
         "width": 1800,
         "height": 900
       },
@@ -342,67 +342,92 @@
       "descriptions": 48,
       "minis": [
         {
+          "id": "doc-etat-actuel",
+          "option": false,
+          "tables": 14,
+          "scale": 1
+        },
+        {
+          "id": "doc-etat-propose",
+          "option": false,
+          "tables": 20,
+          "scale": 1
+        },
+        {
           "id": "doc-existant",
+          "option": false,
           "tables": 6,
           "scale": 1
         },
         {
           "id": "doc-modele-minimal",
+          "option": false,
           "tables": 8,
           "scale": 1
         },
         {
           "id": "doc-oracles",
+          "option": false,
           "tables": 6,
           "scale": 1
         },
         {
           "id": "option-D2-a",
+          "option": true,
           "tables": 8,
           "scale": 0.639
         },
         {
           "id": "option-D2-b",
+          "option": true,
           "tables": 6,
           "scale": 0.883
         },
         {
           "id": "option-D2-c",
+          "option": true,
           "tables": 2,
           "scale": 1
         },
         {
           "id": "option-D2-d",
+          "option": true,
           "tables": 1,
           "scale": 1
         },
         {
           "id": "option-D3-a",
+          "option": true,
           "tables": 2,
           "scale": 1
         },
         {
           "id": "option-D3-b",
+          "option": true,
           "tables": 2,
           "scale": 1
         },
         {
           "id": "option-D3-c",
+          "option": true,
           "tables": 2,
           "scale": 1
         },
         {
           "id": "option-D10-a",
+          "option": true,
           "tables": 4,
           "scale": 0.689
         },
         {
           "id": "option-D10-b",
+          "option": true,
           "tables": 6,
           "scale": 0.747
         },
         {
           "id": "option-D10-c",
+          "option": true,
           "tables": 4,
           "scale": 0.739
         }
@@ -442,67 +467,92 @@
     "descriptions": 48,
     "minis": [
       {
+        "id": "doc-etat-actuel",
+        "option": false,
+        "tables": 14,
+        "scale": 1
+      },
+      {
+        "id": "doc-etat-propose",
+        "option": false,
+        "tables": 20,
+        "scale": 1
+      },
+      {
         "id": "doc-existant",
+        "option": false,
         "tables": 6,
         "scale": 1
       },
       {
         "id": "doc-modele-minimal",
+        "option": false,
         "tables": 8,
         "scale": 1
       },
       {
         "id": "doc-oracles",
+        "option": false,
         "tables": 6,
         "scale": 1
       },
       {
         "id": "option-D2-a",
+        "option": true,
         "tables": 8,
         "scale": 0.639
       },
       {
         "id": "option-D2-b",
+        "option": true,
         "tables": 6,
         "scale": 0.883
       },
       {
         "id": "option-D2-c",
+        "option": true,
         "tables": 2,
         "scale": 1
       },
       {
         "id": "option-D2-d",
+        "option": true,
         "tables": 1,
         "scale": 1
       },
       {
         "id": "option-D3-a",
+        "option": true,
         "tables": 2,
         "scale": 1
       },
       {
         "id": "option-D3-b",
+        "option": true,
         "tables": 2,
         "scale": 1
       },
       {
         "id": "option-D3-c",
+        "option": true,
         "tables": 2,
         "scale": 1
       },
       {
         "id": "option-D10-a",
+        "option": true,
         "tables": 4,
         "scale": 0.689
       },
       {
         "id": "option-D10-b",
+        "option": true,
         "tables": 6,
         "scale": 0.747
       },
       {
         "id": "option-D10-c",
+        "option": true,
         "tables": 4,
         "scale": 0.739
       }
@@ -529,6 +579,20 @@
         "mode": "transform",
         "fit": 1.458,
         "zoomed": 2.277,
+        "dragged": false
+      },
+      {
+        "id": "doc-etat-actuel",
+        "mode": "transform",
+        "fit": 0.515,
+        "zoomed": 0.804,
+        "dragged": false
+      },
+      {
+        "id": "doc-etat-propose",
+        "mode": "transform",
+        "fit": 0.403,
+        "zoomed": 0.63,
         "dragged": false
       },
       {
@@ -867,7 +931,7 @@
       "scale": 1,
       "clip": {
         "x": 60,
-        "y": 51319.96875,
+        "y": 55512.078125,
         "width": 1800,
         "height": 900
       }
