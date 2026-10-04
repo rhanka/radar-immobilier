@@ -1,6 +1,8 @@
 # Villes dont la base et le graphe stocké ne concordent plus : corriger le mélange de nœuds entre villes et remettre 226 villes en cohérence
 
 - **Date** : 2026-10-04. Diagnostic en lecture seule du même jour, après la reprise des dates documentaires lancée en prod le 2026-10-03.
+- **Où est l'écart** : **en prod**, namespace `radar-immobilier` (version servie v1.2.9) : **226 villes**, mesurées le 2026-10-04 en lecture seule. **La préprod** (namespace `radar-immobilier-preprod`, image `radar-api:3d24bfc`), restaurée depuis la prod le 2026-10-01, a le même défaut : **216 villes** mesurées le 2026-10-04 à 16:18 UTC en lecture seule, avec contamination entre villes (121 nœuds dans 88 villes). Comparaison au §2.0.
+- **Méthode de correction** : correctif de code par PR, CI et déploiement en préprod, réparation et contrôle **d'abord en préprod**, mise en prod par tag, puis réparation et contrôle en prod avec les mêmes jobs, hors fenêtres ; détail pas à pas au §6.
 - **Type** : dossier de décision.
 - **Destinataire** : **Fabien** (owner, AI Builder), qui décide les sept décisions D1 à D7 : ce sont des décisions techniques et de données. **Farid** (Product Owner) est **consulté** pour D2 et D3, parce que des villes affichent aujourd'hui des preuves venant d'une autre ville, et **informé** des autres décisions.
 - **Statut** : **PROPOSITION**. Aucune réparation n'est lancée. Aucune écriture dans un cluster, un bucket ou une base n'a été faite pour ce dossier.
@@ -17,7 +19,7 @@ Conventions : **FAIT** = constaté dans une source citée · **CALCUL** = dériv
 
 ## 1. Intention du dossier et ce qu'on attend de Fabien
 
-Le diagnostic du 2026-10-04 a trouvé 226 villes dont les deux copies du graphe (le fichier stocké dans S3 et la base PG que l'application sert) ne contiennent pas les mêmes éléments. Ce dossier explique d'abord le contexte sans prérequis (§2), puis demande sept décisions. Rien n'est réparé avant ces décisions.
+Le diagnostic du 2026-10-04 a trouvé **en prod** 226 villes dont les deux copies du graphe (le fichier stocké dans S3 et la base PG que l'application sert) ne contiennent pas les mêmes éléments ; la préprod en a 216, pour les mêmes causes (§2.0). Ce dossier explique d'abord le contexte sans prérequis (§2), puis demande sept décisions. Rien n'est réparé avant ces décisions.
 
 | # | Objectif | Où le dossier y répond | Décisions |
 |---|---|---|---|
@@ -50,6 +52,29 @@ Le diagnostic du 2026-10-04 a trouvé 226 villes dont les deux copies du graphe 
 ---
 
 ## 2. Le contexte, en clair
+
+### 2.0 Où est l'écart : en prod, et aussi en préprod
+
+**FAIT.** Les 226 villes du dossier sont **en prod** (namespace `radar-immobilier`). La préprod a été mesurée le même jour avec les mêmes règles, par le script `preuves/diagnostic/mesure-lecture-seule.mjs` exécuté dans le pod `radar-api` de la préprod : SELECT en `default_transaction_read_only=on`, S3 en lecture et listage seulement, sur les 1 008 `latest.json`. Résultat complet : `preuves/diagnostic/preprod-2026-10-04.json`.
+
+| | Prod (`radar-immobilier`) | Préprod (`radar-immobilier-preprod`) |
+|---|---|---|
+| Mesure | 2026-10-04, lecture seule, après la reprise en apply du 03/10 (205 villes stoppées + 21 avortées) | 2026-10-04 16:18 UTC, lecture seule, toutes les villes dont les nœuds S3 et PG diffèrent |
+| Version servie | v1.2.9 | `radar-api:3d24bfc` |
+| Historique | reprise des dates en apply le 2026-10-03 (v1.2.8, sans `--heal`) | restaurée depuis la prod le 2026-10-01 ; reprise des dates du 2026-10-02 en preview (22:48 UTC) : 186 villes en écart, 122 villes à modifier, aucune écriture |
+| **Villes en écart** | **226** | **216** |
+| G1 PG en avance, nœuds vides | 71 villes (3 535 nœuds) | 81 villes (3 858 nœuds) |
+| G2 + G4 projection refusée, collision | 81 + 18 = 99 | 68 (G2 et G4 non séparés : pas de reprise en apply en préprod) |
+| G3 collision seule | 49 | 63 |
+| G5a reprise avortée, PG plus riche | 3 | 0 (dixville concorde : pas de reprise en apply) |
+| G5b victoriaville | 1 | 1 (victoriaville) |
+| G5c perte de refs | 2 | 2 (mêmes villes) |
+| G6 brigham | 1 | 1 (brigham) |
+| **Contamination entre villes dans PG** | **oui** : 164 nœuds dans 109 villes | **oui** : 121 nœuds dans 88 villes portent une preuve tirée du PV d'une autre ville |
+| S3 `latest.json` | propre | propre (0 nœud) |
+| Nœuds sans ville (`city_slug` nul) | `non vérifié` | 0 |
+
+Les exemples du dossier se retrouvent en préprod : acton-vale (37 nœuds S3 / 473 PG), victoriaville, brigham, sainte-clotilde ; gore et barkmere y sont en G3 (collision sans refus). La prod n'a pas été remesurée avec ce script : ses chiffres sont ceux du diagnostic du matin. Conséquence pour la méthode : la préprod reproduit le défaut, elle peut donc servir de répétition complète de la réparation avant la prod (§6).
 
 ### 2.1 Deux copies du graphe de chaque ville
 
@@ -110,7 +135,7 @@ Trois causes, détaillées aux §4 et §5 :
 
 ## 3. Synthèse et décisions demandées
 
-**Recommandation globale (JUGEMENT).** Corriger en priorité le mélange de nœuds entre villes, en partant de S3, qui est propre (aucun cas dans les 226 `latest.json`) ; poser tout de suite un garde-fou d'une ligne qui empêche toute nouvelle contamination ; traiter dès maintenant, hors fenêtres du rafraîchissement, les groupes qui ne partagent aucun identifiant avec une autre ville (G1, G5a, G5b) ; ne jamais utiliser `--heal` sur G1, G2, G3, G4, G5c et G6.
+**Recommandation globale (JUGEMENT).** Pour les deux environnements (prod : 226 villes ; préprod : 216, §2.0), et toujours préprod d'abord puis prod (§6) : corriger en priorité le mélange de nœuds entre villes, en partant de S3, qui est propre (aucun cas dans les 226 `latest.json`) ; poser tout de suite un garde-fou d'une ligne qui empêche toute nouvelle contamination ; traiter dès maintenant, hors fenêtres du rafraîchissement, les groupes qui ne partagent aucun identifiant avec une autre ville (G1, G5a, G5b) ; ne jamais utiliser `--heal` sur G1, G2, G3, G4, G5c et G6.
 
 | Sujet | Constat déterminant | Recommandation |
 |---|---|---|
@@ -227,7 +252,9 @@ Les listes de villes sont en annexe A.
 
 ---
 
-## 6. Réparer : principes communs
+## 6. Méthode de correction, pas à pas
+
+### 6.1 Principes
 
 1. **S3 fait foi pour la réparation de la collision** (G2, G3, G4, puis G5c) : chaque `latest.json` est propre et contient tout ce que l'extraction a produit. Le contenu des lignes PG contaminées est remplacé par celui du `latest.json` de la ville propriétaire.
 2. **PG fait foi seulement quand il est plus riche et sans contenu étranger** (G5a, G5b) : c'est le cas de `--heal`.
@@ -236,21 +263,48 @@ Les listes de villes sont en annexe A.
 5. **Hors des fenêtres du rafraîchissement** (05:17, 11:17, 17:17, 23:17 UTC, 1 h 30 à 2 h chacune) : le job `projection` ne pose pas de verrou de lecture et pourrait croiser une écriture du rafraîchissement.
 6. **Retour arrière** : `--heal` archive `latest.json` avant d'écrire. Une suppression dans PG ne se rattrape que par la sauvegarde PG quotidienne, dont le contenu est `non vérifié` ; pour D7, un export des lignes concernées précède l'opération.
 7. **Ne pas relancer l'ancien flux d'exploitation** tant que son sort n'est pas décidé : il recréerait les nœuds vides de G1.
+8. **Préprod d'abord, prod ensuite** : chaque réparation est répétée et contrôlée en préprod, qui reproduit le défaut (§2.0), avant d'être lancée en prod.
+
+### 6.2 Les étapes
+
+| Étape | Où | Ce qu'on fait | Comment, exactement | Contrôle avant de passer à la suite |
+|---|---|---|---|---|
+| (a) Correctif de code | dépôt, puis préprod | Garde-fou d'une ligne sur `ON CONFLICT (id)` (D3), puis l'option retenue en D2 (pour C : migration de schéma) ; pour D7, l'exposition des suppressions voulues au job `projection` | PR revue → CI verte → fusion → déploiement en préprod par la chaîne CD. Prérequis : `run-job.yaml` cible aujourd'hui seulement `radar-immobilier` (prod) ; une entrée de cible préprod / prod y est ajoutée dans la même PR, pour que la préprod passe par les mêmes jobs (sinon, application manuelle du même manifeste, comme pour le passage preview du 02/10) | Image servie en préprod = commit fusionné ; tests de la PR verts |
+| (b) Réparation en préprod | `radar-immobilier-preprod` | Les jobs existants, dans l'ordre : 1) `projection`, `project_cities` = les 81 villes G1 de la préprod ; 2) `document-date-recovery`, `recovery_mode=apply`, `recovery_heal=false`, `recovery_cities` = les mêmes 81 ; 3) `document-date-recovery`, `apply`, `recovery_heal=true`, `recovery_cities` = `victoriaville` ; 4) après (a) : `projection`, `project_cities` = les 131 villes G2, G3 et G4 de la préprod, puis `document-date-recovery` `apply` sans `--heal` sur les mêmes ; 5) brigham selon D7 | Hors fenêtres du rafraîchissement préprod (05:17, 11:17, 17:17, 23:17 UTC, 1 h 30 à 2 h) et de l'instantané de cohérence (04:45 UTC) ; un job à la fois | `mesure-lecture-seule.mjs` en préprod : groupes réparés à 0, aucune preuve étrangère dans PG (`foreignPg` = 0), S3 toujours propre |
+| (c) Mise en prod | `radar-immobilier` | Le même correctif | Tag de version (`vX.Y.Z`) → chaîne CD de prod | Version servie en prod = tag |
+| (d) Réparation en prod | `radar-immobilier` | Les mêmes jobs, mêmes paramètres, avec les listes de la prod : `projection` `project_cities` = 71 villes G1 ; `document-date-recovery` `apply` sans `--heal` sur les 71 ; `--heal` sur `dixville nominingue saint-honore-de-shenley` puis `victoriaville` ; après (c) : `projection` sur les 148 villes G2, G3 et G4, puis `document-date-recovery` sans `--heal` ; brigham selon D7 | Workflow `run-job.yaml`, hors fenêtres du rafraîchissement (05:17, 11:17, 17:17, 23:17 UTC, 1 h 30 à 2 h) et hors sauvegarde quotidienne (02:23 UTC) ; pour `document-date-recovery`, le workflow refuse déjà de démarrer si un rafraîchissement ou une sauvegarde tourne ; pour `projection`, aucune garde de ce type : l'opérateur vérifie | — |
+| (e) Contrôle en prod | `radar-immobilier` | Mesure en lecture seule | `mesure-lecture-seule.mjs` dans le pod `radar-api` de la prod | Groupes réparés à 0 ; aucune preuve étrangère dans PG ; S3 propre |
+| (f) Retour arrière | les deux | Revenir à l'état d'avant | S3 : `--heal` archive chaque `latest.json` avant d'écrire (une archive par ville) ; `projection` n'écrit pas S3. PG : sauvegarde prise au déploiement (promote) et sauvegarde quotidienne de 02:23 UTC (contenu `non vérifié`) ; export ciblé avant D7 | Vérifier la présence de la sauvegarde PG avant (b) et (d) |
+
+### 6.3 Préprod puis prod, décision par décision
+
+| Décision | Dépend de D2 ? | Préprod | Prod |
+|---|---|---|---|
+| D1 (G1) | non | 81 villes, étape (b) 1-2, tout de suite | 71 villes, étape (d), après contrôle préprod |
+| D2 / D3 (collision) | — | correctif (a), puis réparation de 131 villes (b) 4 | tag (c), puis 148 villes (d) |
+| D4 (G5a) | non | sans objet : 0 ville en préprod (pas de reprise en apply) ; la commande `--heal` est répétée sur une ville saine en preview | 3 villes, étape (d) |
+| D5 (victoriaville) | non | victoriaville, étape (b) 3 | victoriaville, étape (d) |
+| D6 (G5c) | analyse non ; réparation oui | reproduction du bug sur sainte-clotilde, correction (a) | réparation après (c) |
+| D7 (brigham) | non | brigham, après l'outillage (a) | brigham, étape (d) |
 
 ---
 
 ## 7. Options et recommandation
 
-Les coûts sont des jugements relatifs de périmètre, pas des estimations d'heures ni de budget. Chaque décision rappelle le problème, pourquoi décider maintenant, ce qui change concrètement et où regarder dans le dossier. Chaque option donne d'abord une **description** concrète (ce qu'on lance ou construit, quel job CD avec quels paramètres, ce qui change dans S3 et dans PG, ce que voit l'utilisateur, sur un exemple réel), puis ses avantages et inconvénients ; dans la page, un mini-schéma accompagne les options de D1, D2, D4, D5 et D7.
+Les coûts sont des jugements relatifs de périmètre, pas des estimations d'heures ni de budget. Chaque décision rappelle le problème, pourquoi décider maintenant, ce qui change concrètement et où regarder dans le dossier. Chaque décision dit d’abord **où** se trouve le problème (prod, préprod). Chaque option donne une **description** concrète (ce qu’on lance ou construit, quel job CD avec quels paramètres, ce qui change dans S3 et dans PG, ce que voit l’utilisateur, sur un exemple réel), puis sa **méthode** (préprod d’abord, puis prod, §6.2), puis ses avantages et inconvénients ; dans la page, un mini-schéma accompagne les options de D1, D2, D4, D5 et D7.
 
 ### D1 — G1 (71 villes) : supprimer de PG les 3 535 nœuds vides
 **Décide : Fabien · Farid informé.**
+
+**Où.** Prod : 71 villes (3 535 nœuds vides) ; préprod : 81 villes (3 858 nœuds vides).
 
 71 villes ont dans PG 3 535 nœuds `source` et `designationevent` (minuscules), vides, créés les 2026-09-10/11 par l'ancien flux d'exploitation (§2.5, Scène 1 : flèche « PG seul, sans S3 »). Tout le contenu de S3 est déjà dans PG ; ces villes restent bloquées pour la reprise des dates (HALT). Décider maintenant permet de débloquer 71 villes sans attendre la correction de la collision : aucune ne partage d'identifiant avec une autre ville (§3.2). Exemple suivi dans les trois options : acton-vale, 37 nœuds dans S3 et 473 dans PG, dont 380 `source` et 56 `designationevent` vides. Voir Tableau 3.
 
 #### (a) Projection S3 → PG des 71 villes, puis reprise des dates sans `--heal` — recommandée
 
 **Description.** Deux jobs CD du workflow `run-job.yaml`, l'un après l'autre, hors des fenêtres du rafraîchissement. 1) `job=projection`, `project_cities` = les 71 villes de l'annexe A : pour chaque ville, la projection lit `graph/<ville>/latest.json` et recopie le graphe dans PG ; comme elle supprime les nœuds de la ville absents de `latest.json`, les 3 535 nœuds vides disparaissent de PG. S3 ne change pas. 2) `job=document-date-recovery`, `recovery_mode=apply`, `recovery_heal=false`, `recovery_cities` = les mêmes 71 : les deux copies concordent désormais, le job ajoute la date documentaire dans chaque `latest.json`, puis projette. acton-vale passe de 37 nœuds S3 / 473 PG à 37 / 37, avec dates. L'utilisateur : rien ne change sur l'écran Signaux (ces nœuds n'y sont pas affichés, `non vérifié` à l'écran) ; la vue Couverture des sources affiche 37 nœuds au lieu de 473 pour acton-vale.
+
+**Méthode.** Préprod d'abord : les deux mêmes jobs sur les 81 villes G1 de la préprod (§6.2 b), contrôle par `mesure-lecture-seule.mjs` (G1 à 0) ; puis prod : les 71 villes (§6.2 d), hors fenêtres du rafraîchissement et hors sauvegarde de 02:23 UTC, et contrôle (§6.2 e). Ne dépend pas de D2. Retour arrière : sauvegarde PG (§6.2 f).
 
 **Avantages.**
 - La simulation fait passer les 71 villes aux trois garde-fous.
@@ -265,6 +319,8 @@ Les coûts sont des jugements relatifs de périmètre, pas des estimations d'heu
 
 **Description.** Aucun job. PG garde les 3 535 nœuds vides, S3 ne change pas. acton-vale reste à 37 nœuds S3 / 473 PG ; la prochaine reprise des dates s'arrête de nouveau sur ces 71 villes, et le rafraîchissement continue de les voir « à jour ».
 
+**Méthode.** Aucune étape ; G1 reste à 71 villes en prod et 81 en préprod.
+
 **Avantages.**
 - Aucun risque d'écriture.
 
@@ -275,6 +331,8 @@ Les coûts sont des jugements relatifs de périmètre, pas des estimations d'heu
 #### (c) Reprise des dates avec `--heal`
 
 **Description.** Un job : `job=document-date-recovery`, `recovery_mode=apply`, `recovery_heal=true`, `recovery_cities` = les 71. Pour chaque ville, il archive `latest.json` puis le réécrit à partir du graphe servi par PG, nœuds vides compris, et projette. acton-vale : `latest.json` passe de 37 à 473 nœuds (436 nœuds vides ajoutés) ; PG reste à 473. L'utilisateur ne voit rien de plus ; c'est S3 qui perd sa propreté.
+
+**Méthode.** Même chemin préprod puis prod, avec `recovery_heal=true` ; retour arrière par les archives S3 de chaque `latest.json` (§6.2 f). Déconseillé.
 
 **Avantages.**
 - Débloque la reprise sans projection préalable.
@@ -288,11 +346,15 @@ Recommandation **(a)**. Changerait si un usage de ces nœuds minuscules apparais
 ### D2 — Principe de correction de la collision
 **Décide : Fabien · Consulté : Farid.**
 
+**Où.** Prod : 148 villes (G2, G3, G4) et 164 nœuds aux preuves étrangères dans 109 villes ; préprod : 131 villes et 121 nœuds dans 88 villes.
+
 La base n'a qu'une clé, `id`, commune à toutes les villes, alors que les identifiants ne sont uniques qu'à l'intérieur d'une ville (§4.1, Figure 2). C'est la cause de 148 villes en écart (G2, G3, G4) et des 164 nœuds aux preuves étrangères dans 109 villes ; l'écart grandit à chaque passage (§5.2). Il faut choisir le principe avant toute réparation, car re-projeter ces villes sans correction rejoue la collision. Dans toutes les options, **S3 fait foi pour la réparation** : les `latest.json` sont propres (§6, point 1). Exemple suivi : `bylaw-242`, règlement de gore et de barkmere, aujourd'hui une seule ligne rattachée à gore avec le contenu de barkmere. Farid est consulté parce que des utilisateurs voient aujourd'hui des preuves d'une autre ville.
 
 #### A. Identifiant PG propre à la ville (`ville:id`), avec migration
 
 **Description.** On change l'identifiant stocké dans PG : chaque identifiant est préfixé par sa ville (`gore:bylaw-242`, `barkmere:bylaw-242`). À construire : une migration qui réécrit `graph_nodes.id`, `graph_edges.src_id` et `graph_edges.dst_id` pour toutes les villes ; une projection qui préfixe à l'écriture ; l'adaptation de tout ce qui reçoit ou renvoie un identifiant (API, UI, MCP, ancres d'annotation par identifiant texte). Puis réparation : `job=projection`, `project_cities` = les 148 villes de G2, G3 et G4, depuis leur `latest.json`. S3 ne change pas (identifiants sans préfixe). Dans PG, `bylaw-242` devient deux lignes, chacune avec le contenu de sa ville. L'utilisateur : gore retrouve sa preuve, barkmere son règlement ; les liens existants qui contiennent un identifiant changent.
+
+**Méthode.** (a) PR de migration et de code → CI → préprod ; (b) `projection`, `project_cities` = les 131 villes G2, G3, G4 de la préprod, puis `document-date-recovery` sans `--heal`, contrôle (aucune preuve étrangère) ; (c) tag ; (d) mêmes jobs sur les 148 villes de la prod ; (e) contrôle ; (f) migration inverse et sauvegarde PG.
 
 **Avantages.**
 - Plus aucune collision possible.
@@ -306,6 +368,8 @@ La base n'a qu'une clé, `id`, commune à toutes les villes, alors que les ident
 
 **Description.** On garde la clé `id` commune. À construire : 1) à la projection, tout identifiant déjà rattaché à une autre ville est refusé ou renommé (par exemple `barkmere--bylaw-242`) ; 2) dans le producteur (rafraîchissement), les identifiants génériques (`bylaw-<numéro>`, `zone-<code>`) sont préfixés par la ville pour les futurs PV ; 3) un script de réparation remet dans chaque ligne contaminée le contenu du `latest.json` de la ville propriétaire et crée la ligne renommée de l'autre ville, exécuté par un job CD revu. `bylaw-242` : la ligne reste à gore avec le contenu de gore ; barkmere obtient `barkmere--bylaw-242` dans PG, alors que son `latest.json` dit toujours `bylaw-242`. L'utilisateur voit les bonnes preuves.
 
+**Méthode.** (a) PR projection, producteur et script de réparation → CI → préprod ; (b) script de réparation puis `projection` sur les 131 villes de la préprod, contrôle ; (c) tag ; (d) même chose sur les 148 villes de la prod ; (e) contrôle ; (f) sauvegarde PG.
+
 **Avantages.**
 - Pas de changement de schéma ; changement local à la projection et au producteur.
 - Rapide à livrer.
@@ -317,6 +381,8 @@ La base n'a qu'une clé, `id`, commune à toutes les villes, alors que les ident
 #### C. Clé primaire `(city_slug, id)`, arêtes rattachées à la ville, réparation depuis chaque `latest.json` — recommandée
 
 **Description.** On change la clé de `graph_nodes` en `(city_slug, id)` et on ajoute `city_slug` à `graph_edges` (clé naturelle `(city_slug, src_id, dst_id, kind)`), sans changer aucun identifiant. À construire : la migration de schéma des deux tables ; la projection en `ON CONFLICT (city_slug, id)` ; la ville ajoutée aux lectures par identifiant seul (voisinage d'un nœud, routes par identifiant) ; un traitement des nœuds sans ville. Puis réparation : `job=projection`, `project_cities` = les 148 villes de G2, G3 et G4, depuis leur `latest.json`, puis `job=document-date-recovery` sans `--heal`. `bylaw-242` : deux lignes, `(gore, bylaw-242)` avec le contenu de gore et `(barkmere, bylaw-242)` avec celui de barkmere. S3 ne change pas. L'utilisateur voit chez gore la preuve de gore ; identifiants et liens restent les mêmes.
+
+**Méthode.** (a) PR de migration `(city_slug, id)` et de code → CI → préprod ; (b) `projection`, `project_cities` = les 131 villes G2, G3, G4 de la préprod, puis `document-date-recovery` `apply` sans `--heal`, contrôle : groupes à 0, aucune preuve étrangère ; (c) tag ; (d) mêmes jobs sur les 148 villes de la prod, hors fenêtres et hors 02:23 UTC ; (e) contrôle ; (f) sauvegarde PG prise au déploiement.
 
 **Avantages.**
 - Corrige la cause : chaque ville a son espace d'identifiants, comme dans S3.
@@ -331,11 +397,15 @@ Recommandation **C**, après un passage par `harness brainstorm` qui fixe le sch
 ### D3 — Priorité de la correction et mesure d'attente
 **Décide : Fabien · Consulté : Farid.**
 
+**Où.** Prod : 65 villes extraites puis refusées à chaque passage ; préprod : 68 villes refusées pour collision (G2 et G4), même rafraîchissement aux mêmes heures.
+
 Tant que la collision n'est pas corrigée, chaque passage du rafraîchissement extrait par modèle les nouveaux PV de 65 villes, les publie dans S3, puis voit la projection refusée (§5.3) ; l'écart grandit (§5.2) et 109 villes affichent des preuves étrangères (§4.3). Il faut fixer la priorité et ce qu'on fait en attendant. Un garde-fou d'une ligne existe : n'appliquer la mise à jour `ON CONFLICT (id)` que si `city_slug` est identique (`… DO UPDATE … WHERE graph_nodes.city_slug = excluded.city_slug`) ; il empêche toute nouvelle contamination, sans débloquer les villes déjà touchées. Suspendre les deux reprises de projection n'économiserait rien : elles sont gratuites.
 
 #### (a) Priorité immédiate : garde-fou d'une ligne tout de suite, coût d'extraction accepté jusqu'à la réparation — recommandée
 
 **Description.** Tout de suite : une PR d'une ligne dans `upsertGraphAtomic` (la condition ci-dessus), revue puis déployée par la chaîne CD. Dès ce déploiement, une projection de barkmere ne peut plus écraser la ligne `bylaw-242` de gore : barkmere ne reçoit simplement pas ce nœud, comme les villes de G3 aujourd'hui. Ensuite, le brainstorm puis la correction D2. Le rafraîchissement continue tel quel : à chaque passage, les 65 villes refusées paient l'extraction, le résultat reste dans S3 et sera projeté à la réparation. L'utilisateur : les 164 preuves étrangères restent visibles jusqu'à la réparation, mais leur nombre ne grandit plus.
+
+**Méthode.** Garde-fou : PR → CI → préprod (contrôle : les 121 nœuds aux preuves étrangères de la préprod ne grandissent plus entre deux passages du rafraîchissement) → tag → prod ; puis D2 par le même chemin.
 
 **Avantages.**
 - Arrête la contamination dès le déploiement du garde-fou ; aucun changement au rafraîchissement.
@@ -349,6 +419,8 @@ Tant que la collision n'est pas corrigée, chaque passage du rafraîchissement e
 
 **Description.** Le garde-fou de (a), plus un changement du rafraîchissement : pour les villes dont la dernière projection a été refusée pour collision (G2, G4), la collecte des PV continue (gratuite) mais l'extraction par modèle n'est plus lancée, jusqu'à la réparation, puis elle est réactivée. Dans S3, ces villes n'avancent plus ; PG ne change pas ; leurs nouveaux PV attendent dans le bucket des PV.
 
+**Méthode.** Même chemin que (a), plus un changement du rafraîchissement livré par PR → préprod → tag → prod, et une seconde livraison pour le réactiver après réparation.
+
 **Avantages.**
 - Économise les appels de modèle pendant l'attente.
 
@@ -359,6 +431,8 @@ Tant que la collision n'est pas corrigée, chaque passage du rafraîchissement e
 #### (c) Planification normale, sans garde-fou immédiat
 
 **Description.** Aucun changement immédiat ; la correction D2 est planifiée après les chantiers en cours. Chaque passage continue d'extraire puis de refuser, et chaque projection d'une ville qui partage un identifiant peut encore écraser le contenu d'une autre ville, comme barkmere l'a fait pour gore.
+
+**Méthode.** Aucune étape immédiate ; D2 plus tard, par le même chemin.
 
 **Avantages.**
 - Aucun changement de plan.
@@ -372,11 +446,15 @@ Recommandation **(a)**. Avant de l'accepter, une lecture d'un journal du rafraî
 ### D4 — G5a (3 villes) : `--heal`
 **Décide : Fabien · Farid informé.**
 
+**Où.** Prod : 3 villes ; préprod : aucune (pas de reprise en apply en préprod).
+
 dixville, nominingue et saint-honore-de-shenley ont été avortées le 2026-10-03 : la reprise a réécrit `latest.json`, mais les refs y ont perdu extrait et page par rapport à PG, et la projection a été refusée par le garde-fou de complétude (Tableau 3). Les deux copies ont les mêmes 76 nœuds ; PG a 25 signaux complets contre 13 dans S3. Aucune de ces villes ne partage d'identifiant avec une autre (§3.2), aucune preuve étrangère. Exemple suivi : dixville, 10 signaux complets dans PG contre 5 dans S3.
 
 #### (a) Reprise des dates avec `--heal` sur les 3 villes — recommandée
 
 **Description.** Un job : `job=document-date-recovery`, `recovery_mode=apply`, `recovery_heal=true`, `recovery_cities` = `dixville nominingue saint-honore-de-shenley`. Pour chaque ville, il archive `latest.json`, le réécrit depuis le graphe servi par PG (refs complètes, avec extrait et page), ajoute les dates, puis projette. dixville : S3 passe de 5 à 10 signaux complets, PG reste à 10, avec dates. L'utilisateur : rien ne change à l'écran, puisqu'il voit déjà PG, sinon l'apparition des dates documentaires.
+
+**Méthode.** Préprod : aucune ville G5a ; la commande est répétée en preview (`recovery_mode=preview`, `recovery_heal=true`, `recovery_cities` = `dixville`) pour vérifier le plan sans écrire ; prod : `apply` sur les 3 villes (§6.2 d), puis contrôle (§6.2 e). Retour arrière : archives S3 de chaque `latest.json`. Ne dépend pas de D2.
 
 **Avantages.**
 - Rend à S3 les citations complètes de PG ; dates ajoutées.
@@ -389,6 +467,8 @@ dixville, nominingue et saint-honore-de-shenley ont été avortées le 2026-10-0
 
 **Description.** Aucun job. S3 garde les refs appauvries, PG les citations complètes ; dixville reste à 5 signaux complets dans S3 contre 10 dans PG, sans date documentaire, et une prochaine reprise sans `--heal` s'arrête de nouveau.
 
+**Méthode.** Aucune étape.
+
 **Avantages.**
 - Aucune écriture.
 
@@ -400,11 +480,15 @@ Recommandation **(a)**. Risque faible.
 ### D5 — G5b victoriaville : `--heal` ou attendre
 **Décide : Fabien · Farid informé.**
 
+**Où.** victoriaville, en prod comme en préprod.
+
 Le rafraîchissement du 2026-09-29 a republié pour victoriaville des refs sans extrait : S3 a 0 signal complet contre 15 dans PG, et 3 nœuds de plus que PG. La projection est refusée depuis le 2026-09-30 (`postgres-regression-refused`). Les utilisateurs voient PG, donc les 15 citations, mais victoriaville ne reçoit plus de nouveau contenu dans PG. Voir Tableau 3 et §3.2 (lien avec D6).
 
 #### (a) Reprise des dates avec `--heal` sur victoriaville — recommandée
 
 **Description.** Un job : `job=document-date-recovery`, `recovery_mode=apply`, `recovery_heal=true`, `recovery_cities` = `victoriaville`. Il archive `latest.json`, le réécrit depuis PG (15 signaux complets), ajoute les dates et projette. Les 3 nœuds présents seulement dans S3 sortent de `latest.json` et restent dans l'archive. L'utilisateur voit toujours les 15 citations, désormais datées ; le prochain rafraîchissement de victoriaville peut de nouveau être projeté.
+
+**Méthode.** Préprod : victoriaville, même job (§6.2 b, étape 3), puis contrôle ; prod : même job (§6.2 d), puis contrôle. Retour arrière : archive S3 de `latest.json`. Ne dépend pas de D2.
 
 **Avantages.**
 - S3 retrouve les 15 citations ; dates ajoutées ; la ville sort du blocage.
@@ -418,6 +502,8 @@ Le rafraîchissement du 2026-09-29 a republié pour victoriaville des refs sans 
 
 **Description.** Aucun job. S3 reste à 0 signal complet, PG à 15 ; la projection de victoriaville est refusée à chaque passage, donc ses nouveaux PV n'arrivent pas dans PG tant que le bug producteur n'est pas corrigé.
 
+**Méthode.** Aucune étape ; victoriaville reste bloquée en prod comme en préprod.
+
 **Avantages.**
 - Aucune perte des 3 nœuds.
 
@@ -429,11 +515,15 @@ Recommandation **(a)**, risque faible. Changerait si les 3 nœuds propres à S3 
 ### D6 — G5c (2 villes) : analyse du bug producteur
 **Décide : Fabien · Farid informé.**
 
+**Où.** saint-roch-de-lachigan et sainte-clotilde, en prod comme en préprod.
+
 Pour saint-roch-de-lachigan et sainte-clotilde, le rafraîchissement a réécrit des nœuds avec des refs vidées ; le garde-fou refuse à raison (sainte-clotilde : signaux complets 38 → 21), et chaque ville a en plus un identifiant rattaché à une autre ville. Ni la projection ni `--heal` ne réparent sans perte. Le groupe grandit (§5.2), et la même famille de défaut explique G5b et peut-être G5a : le producteur (le rafraîchissement) publie des refs appauvries. Il faut décider la priorité de l'analyse, à mener avec `harness debug`.
 
 #### (a) Ouvrir l'analyse maintenant, priorité haute, en parallèle de D2 — recommandée
 
 **Description.** Ouvrir maintenant une carte de bug et la mener avec `harness debug` : sur sainte-clotilde, comparer les refs de `latest.json` avant et après le passage qui les a vidées (archives S3), localiser l'étape du rafraîchissement qui écrit des refs sans extrait, corriger avec un test qui reproduit le cas. Après D2, réparer les 2 villes par `job=projection`, `project_cities` = `saint-roch-de-lachigan sainte-clotilde`. Aucune écriture tant que l'analyse n'est pas finie ; l'utilisateur ne voit rien changer d'ici là.
+
+**Méthode.** Reproduction en lecture seule sur la préprod (sainte-clotilde y est passée de 42 à 19 signaux complets dans S3), correction par PR → CI → préprod → tag → prod ; réparation des 2 villes après D2, préprod puis prod.
 
 **Avantages.**
 - Le défaut touche potentiellement toutes les villes à chaque passage.
@@ -446,6 +536,8 @@ Pour saint-roch-de-lachigan et sainte-clotilde, le rafraîchissement a réécrit
 
 **Description.** La même analyse, menée une fois la collision corrigée. D'ici là, chaque passage peut appauvrir les refs d'autres villes ; les garde-fous protègent PG mais ces villes cessent d'être mises à jour.
 
+**Méthode.** Même chemin que (a), préprod puis prod, après D2.
+
 **Avantages.**
 - Concentre l'effort sur la collision.
 
@@ -455,6 +547,8 @@ Pour saint-roch-de-lachigan et sainte-clotilde, le rafraîchissement a réécrit
 #### (c) Ne rien ouvrir
 
 **Description.** Aucune carte. Les garde-fous continuent de refuser ces villes, qui restent figées dans PG ; sainte-clotilde reste à 38 signaux complets servis et ne reçoit plus rien.
+
+**Méthode.** Aucune étape.
 
 **Avantages.**
 - Aucune charge.
@@ -467,11 +561,15 @@ Recommandation **(a)**. La réparation des deux villes attend la correction du b
 ### D7 — G6 brigham : opération ponctuelle ou laisser
 **Décide : Fabien · Farid informé.**
 
+**Où.** brigham, en prod comme en préprod (36 nœuds S3 / 22 PG des deux côtés).
+
 Le `latest.json` de brigham est une ré-extraction du 2026-07-04 (36 nœuds, 9 signaux complets), jamais projetée : PG est resté sur la version de juin (22 nœuds, 0 signal complet). Le garde-fou de propriétés métier refuse parce que les 21 nœuds de juin disparaîtraient. Aucun identifiant partagé (§3.2). Aucun job CD existant n'accepte des suppressions voulues : `upsertGraphAtomic` a un paramètre `intendedRemovals`, utilisé par `purge-avis-bylaws`, mais pas exposé par le job `projection`.
 
 #### (a) Opération ponctuelle acceptant 21 suppressions, après export des lignes PG — recommandée
 
 **Description.** Deux actes revus. 1) Une petite PR qui expose au job `projection` une liste explicite de suppressions voulues (le paramètre `intendedRemovals` existe déjà). 2) Export des 22 lignes PG de brigham, puis `job=projection`, `project_cities` = `brigham`, avec les 21 identifiants de juin listés. PG passe à la version de juillet (36 nœuds, 9 signaux complets) ; S3 ne change pas. L'utilisateur voit 9 signaux complets pour brigham au lieu de 0.
+
+**Méthode.** (a) PR d'outillage → CI → préprod ; (b) export puis `projection`, `project_cities` = `brigham`, avec la liste des 21 suppressions, en préprod (brigham y est dans le même état), contrôle : 9 signaux complets servis ; (c) tag ; (d) même opération en prod ; (e) contrôle ; (f) export ciblé et sauvegarde PG. Ne dépend pas de D2.
 
 **Avantages.**
 - brigham sert enfin 9 signaux complets au lieu de 0.
@@ -485,6 +583,8 @@ Le `latest.json` de brigham est une ré-extraction du 2026-07-04 (36 nœuds, 9 s
 
 **Description.** Aucun acte. PG reste sur juin (22 nœuds, 0 signal complet), S3 sur juillet (36 nœuds, 9 signaux complets) ; chaque projection de brigham est refusée.
 
+**Méthode.** Aucune étape.
+
 **Avantages.**
 - Aucun outillage.
 
@@ -494,6 +594,8 @@ Le `latest.json` de brigham est une ré-extraction du 2026-07-04 (36 nœuds, 9 s
 #### (c) Reprise des dates avec `--heal`
 
 **Description.** `job=document-date-recovery`, `recovery_mode=apply`, `recovery_heal=true`, `recovery_cities` = `brigham` : le `latest.json` de juillet est archivé puis réécrit depuis la version de juin servie par PG. S3 perd la ré-extraction (36 → 22 nœuds, 9 → 0 signal complet) ; PG ne change pas.
+
+**Méthode.** Même chemin préprod puis prod, avec `recovery_heal=true` ; retour arrière par l'archive S3. Déconseillé.
 
 **Avantages.**
 - Débloque sans outillage.
@@ -507,9 +609,9 @@ Recommandation **(a)**, après D1 et D4, sans urgence.
 
 ## 8. Ordre d'exécution proposé
 
-Une fois les décisions prises, chaque étape passe par les jobs CD et hors des fenêtres du rafraîchissement.
+Une fois les décisions prises, chaque étape passe par les jobs CD, hors des fenêtres du rafraîchissement et de la sauvegarde, **d'abord en préprod puis en prod** (§6.2, étapes b puis d) ; les listes de villes ci-dessous sont celles de la prod, la préprod a les siennes (§2.0, `preprod-2026-10-04.json`).
 
-| Étape | Quoi | Job CD et entrées | Dépend de |
+| Étape | Quoi | Job CD et entrées (préprod d'abord, puis prod, §6.2) | Dépend de |
 |---|---|---|---|
 | 1 | G1 : projection des 71 villes, puis reprise sans `--heal` | `projection`, `project_cities` = 71 villes ; puis `document-date-recovery`, `recovery_mode=apply`, `recovery_heal=false`, `recovery_cities` = 71 villes | D1 |
 | 2 | G5a : reprise avec `--heal` | `document-date-recovery`, `apply`, `recovery_heal=true`, `recovery_cities` = dixville nominingue saint-honore-de-shenley | D4 |
@@ -528,6 +630,7 @@ Chaque étape se termine par un contrôle en lecture seule : comptes S3 et PG de
 
 | Risque ou limite | Effet | Mesure |
 |---|---|---|
+| `run-job.yaml` ne cible que la prod (`radar-immobilier`) | La répétition en préprod ne passerait pas par le même chemin | Ajouter une entrée de cible préprod / prod dans la PR de l'étape (a) |
 | Sauvegarde PG quotidienne : contenu `non vérifié` | Une suppression dans PG (D1, D7) ne serait pas rattrapable si la sauvegarde manque | Vérifier la sauvegarde avant l'étape 1 ; export ciblé avant D7 |
 | Job `projection` sans verrou de lecture | Croisement possible avec une écriture du rafraîchissement | Exécuter hors des fenêtres 05:17, 11:17, 17:17, 23:17 UTC |
 | Ancien flux d'exploitation encore appelable | Recréation des nœuds vides de G1 | Ne pas le relancer ; décider de son retrait à part |
