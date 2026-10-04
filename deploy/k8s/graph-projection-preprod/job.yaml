@@ -1,37 +1,35 @@
-# graph-projection-only-job.yaml — PROJECTION SEULE (sans migrate, sans backfill).
+# graph-projection-preprod — PREPROD one-shot Job: project graph/<city>/latest.json into
+# the preprod Postgres (api/src/scripts/project-graph-from-s3.ts). Preprod twin of
+# deploy/k8s/32-graph-projection-only-job.yaml (prod).
 #
-# Variante allégée de 31-graph-projection-job.yaml pour le cas où le schéma PG est
-# DÉJÀ à jour (migrations + backfill 0004 déjà appliqués une fois). N'exécute que
-# l'étape 3 : lire graph/<ville>/latest.json depuis le stockage objet et upsert dans PG.
+# NOT applied directly and NOT in any kustomization: run it through the run-job workflow,
+# which renders the two placeholders, refuses to start alongside a refresh/backup/
+# projection/recovery Job, deletes the previous Job and applies this one:
+#   gh workflow run run-job.yaml -f target=preprod -f job=projection -f project_cities="gore barkmere"
+#   __IMAGE__           = recovery_image input, else the image served by deploy/radar-api (preprod)
+#   __PROJECT_CITIES__  = space-separated slugs (empty ⇒ every graph/<city>/latest.json)
+# Procedure and windows: docs/spec/SPEC_EVOL_DOCUMENT_DATES.md (Production run).
 #
-# C'EST LE JOB À UTILISER POUR LES REPROJECTIONS RÉPÉTÉES (re-graphify v2.x, etc.) :
-# upsert ON CONFLICT → 100 % idempotent, aucune mutation de schéma, aucun risque
-# de re-jeu de migration. Plus court, plus sûr, plus léger.
+# Network: labelled `component: graph-projection` so the projection egress policies
+# (PG + object storage) apply unchanged, as for the preprod document-date-recovery Job.
 #
-# Le premier déploiement (ou après un reset DB) DOIT passer par
-# 31-graph-projection-job.yaml (qui chaîne backfill-0004 → migrate → projection).
-# Ensuite, ce job-ci suffit.
-#
-# Run it through the run-job workflow (it renders the placeholders, refuses to start
-# alongside a refresh/backup/projection/recovery Job, deletes the previous Job, applies):
-#   gh workflow run run-job.yaml -f job=projection                                  # every city
-#   gh workflow run run-job.yaml -f job=projection -f project_cities="sherbrooke ogden"
-#   __IMAGE__           = recovery_image input, else the image served by deploy/radar-api
-#                         (never :latest — on the preprod-first CD, :latest is main, not
-#                         the release tag prod serves)
-#   __PROJECT_CITIES__  = space-separated slugs (empty ⇒ every city)
-# Preprod twin: deploy/k8s/graph-projection-preprod/job.yaml (run-job target=preprod).
+# Storage: graph snapshots live in the preprod docs bucket. Coordinates (GRAPH_S3_*) come
+# from ConfigMap radar-api, whose bucket is overridden to radar-immobilier-docs-preprod by
+# deploy/overlays/preprod. Credentials: Secret radar-docs-s3-credentials, the same Secret as
+# the preprod refresh CronJob and the preprod document-date-recovery Job
+# (radar-graph-s3-credentials / radar-scrape-s3-credentials are prod-only names).
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: radar-graph-projection-only
-  namespace: radar-immobilier
+  namespace: radar-immobilier-preprod
   labels:
     app.kubernetes.io/name: radar-immobilier
     app.kubernetes.io/part-of: sentropic
     app.kubernetes.io/component: graph-projection
 spec:
   backoffLimit: 0
+  ttlSecondsAfterFinished: 604800
   template:
     metadata:
       labels:
@@ -58,9 +56,6 @@ spec:
           image: __IMAGE__
           imagePullPolicy: IfNotPresent
           workingDir: /workspace/api
-          # __PROJECT_CITIES__ = slugs espace-séparés (sed par run-job). Vide ⇒ toutes
-          # les villes (comportement par défaut préservé) ; ciblé ⇒ projection additive
-          # d'une ville (ex. acquisition brossard). sh -c pour splitter les slugs en argv.
           command: ["sh", "-c"]
           args:
             - |
@@ -77,7 +72,6 @@ spec:
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
             - name: POSTGRES_DB
               valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
-            # Complete required GRAPH_S3 bindings prevent resolver fallbacks.
             - name: GRAPH_S3_ENDPOINT
               valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_ENDPOINT } }
             - name: GRAPH_S3_BUCKET
@@ -87,9 +81,9 @@ spec:
             - name: GRAPH_S3_FORCE_PATH_STYLE
               valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_FORCE_PATH_STYLE } }
             - name: GRAPH_S3_ACCESS_KEY
-              valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_ACCESS_KEY } }
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
             - name: GRAPH_S3_SECRET_KEY
-              valueFrom: { secretKeyRef: { name: radar-graph-s3-credentials, key: GRAPH_S3_SECRET_KEY } }
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }
           resources:
             requests: { cpu: 50m, memory: 96Mi }
             limits: { cpu: 150m, memory: 256Mi }
