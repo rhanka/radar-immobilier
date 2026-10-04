@@ -76,10 +76,11 @@
   :global(.prose table) { display: block; overflow-x: auto; max-width: 100%; }
   :global(html), :global(body) { background: #fff; color-scheme: light dark; }
   :global(code) { overflow-wrap: anywhere; }
-  /* Thème sombre : mêmes jetons sémantiques, redéfinis ; la chaîne partagée n'est pas modifiée. */
+  /* Thème sombre : mêmes jetons sémantiques, redéfinis (sélecteur plus spécifique que
+     celui de la feuille partagée, chargée après) ; la chaîne partagée n'est pas modifiée. */
   @media (prefers-color-scheme: dark) {
     :global(html), :global(body) { background: #0e1618; }
-    :global([data-st-theme]) {
+    :global(html [data-st-theme]) {
       --st-semantic-surface-default: #0e1618; --st-semantic-surface-raised: #152124; --st-semantic-surface-subtle: #1a2a2e;
       --st-semantic-text-primary: #e7eff1; --st-semantic-text-secondary: #a8bcc1;
       --st-semantic-border-strong: #84a0a7; --st-semantic-border-subtle: #36494e;
@@ -87,11 +88,11 @@
       --st-semantic-data-category2: #e3a843; --st-semantic-data-category7: #a88ddb;
       color-scheme: dark;
     }
-    :global(.badge), :global(button), :global(.summary-grid article) { background: var(--st-semantic-surface-raised); color: var(--st-semantic-text-primary); }
-    :global(.badge.warning) { border-color: #c98d28; background: #3a2d12; }
-    :global(.badge.selected) { border-color: #3aa56a; background: #12301f; }
-    :global(textarea) { background: var(--st-semantic-surface-default); color: var(--st-semantic-text-primary); }
-    :global(.svelte-flow) {
+    :global(html .badge), :global(html button), :global(html .summary-grid article) { background: var(--st-semantic-surface-raised); color: var(--st-semantic-text-primary); }
+    :global(html .badge.warning) { border-color: #c98d28; background: #3a2d12; }
+    :global(html .badge.selected) { border-color: #3aa56a; background: #12301f; }
+    :global(html textarea) { background: var(--st-semantic-surface-default); color: var(--st-semantic-text-primary); }
+    :global(html .svelte-flow) {
       --xy-background-pattern-dots-color: #3b5055; --xy-minimap-background-color: #152124;
       --xy-minimap-mask-background-color: rgba(8, 14, 16, .6); --xy-minimap-node-background-color: #2e4449;
       --xy-controls-button-background-color: #1c2b2f; --xy-controls-button-background-color-hover: #26393e;
