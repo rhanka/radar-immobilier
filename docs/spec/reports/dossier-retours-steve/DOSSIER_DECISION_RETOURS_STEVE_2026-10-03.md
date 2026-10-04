@@ -399,6 +399,74 @@ Steve écrit (R-16) qu'« une seule réponse des développeurs remplacerait tout
 
 ## 6. Modèle de données conforme au contrat sentropic d'annotation et de canevas
 
+### 6.0 Existant aujourd'hui : deux tables d'annotation, aucune table d'oracle
+
+**Oui, un modèle d'annotation existe déjà, mais il ne sert pas à ce dont Steve a besoin.** FAIT, lu dans `api/src/db/schema.ts` et les migrations `0005_prospect_marks.sql` et `0011_prospect_notes_annotations.sql` sur `origin/main`.
+
+| Table | Créée par | Ce qu'elle porte | À quoi elle sert dans l'UI aujourd'hui |
+|---|---|---|---|
+| `prospect_marks` | migration 0005 | Le **marquage d'équipe d'un lot**, sur deux dimensions : pipeline (favori, écarté, sollicité, lettre envoyée) et marché (en vente, prix demandé, lien d'annonce). Ancre : `lot_version_id` (+ `no_lot`, `city_slug`) ; auteur : `author_id` → `account_users`, obligatoire ; chaîne append-only `supersedes` / `superseded_by` (une nouvelle marque remplace l'ancienne sans l'effacer) ; mode `real` (saisie) ou `simulation`. | Boutons de statut de la fiche lot (`LotFichePanel`) et carte d'évaluation. Ce n'est pas une annotation de signal. |
+| `prospect_notes` | migration 0005, revue en 0011 | Une **note libre** sur un lot (`no_lot` + `city_slug`) ou un signal (`signal_id` → `signals.id`, UUID, `ON DELETE SET NULL`) ; auteur = compte obligatoire ; `body` limité à 10 000 caractères ; édition en place, suppression logique (`deleted_at`) ; `tenant_id` inerte. | Composants `collab/*` : notes dans la fiche lot et dans le panneau signal (`SignalAnnotations`), flux en direct `prospect:note`. |
+
+```mermaid
+erDiagram
+    prospect_marks }o--|| lot_versions : lot_version_id
+    prospect_marks }o--|| account_users : auteur
+    prospect_notes }o--|| account_users : auteur
+    prospect_notes }o--o| signals : signal_id
+    prospect_notes }o..o| graph_nodes : id_texte_refuse
+    prospect_marks {
+      uuid id PK
+      uuid lot_version_id FK "lot (bitemporel)"
+      text no_lot
+      text city_slug
+      enum dimension "pipeline ou marche"
+      enum statut "favori, ecarte, en_vente…"
+      enum mode "real ou simulation"
+      uuid author_id FK "compte obligatoire"
+      uuid supersedes FK "chaîne append-only"
+      uuid superseded_by FK
+      numeric prix_demande
+      text lien_annonce
+    }
+    prospect_notes {
+      uuid id PK
+      enum target_type "lot ou signal"
+      text no_lot
+      text city_slug
+      uuid signal_id FK "UUID, ON DELETE SET NULL"
+      uuid author_id FK "compte obligatoire"
+      text body "10 000 caractères max"
+      text tenant_id "inerte"
+      timestamptz deleted_at "suppression logique"
+    }
+    lot_versions {
+      uuid id PK
+    }
+    account_users {
+      uuid id PK
+    }
+    signals {
+      uuid id PK "aucune insertion sur main"
+    }
+    graph_nodes {
+      text id PK "signal-… (texte)"
+    }
+```
+
+<!-- diagram:existant -->
+
+**Pourquoi ces tables ne suffisent pas pour les retours de Steve.**
+1. **Auteur avec compte obligatoire** : Steve n'a pas de compte vérifié, et ce n'est pas lui qui importe (D5).
+2. **Une seule cible par note**, alors qu'une ligne du classeur vise 1 à N objets (la ligne #7 nomme deux événements ; une ligne agrégée vise une ville).
+3. **10 000 caractères au plus** : la cellule E57 des Constats en compte 17 114.
+4. **Aucune provenance** (fichier, sha256, feuille, ligne, révision) **ni verdict structuré** (classement, motif, sens, filtrage) : on ne peut ni réimporter sans doublon, ni construire un oracle.
+5. **L'ancre signal est cassée (défaut corrigé par B0)** : l'UI envoie l'identifiant texte du graphe (`signal-…`, table `graph_nodes`), l'API exige l'UUID de la table `signals`, que plus aucun code de `main` n'alimente.
+
+**Aucune table d'oracle n'existe en base aujourd'hui.** L'oracle actuel (oracle d'extraction v3, dit E) est un ensemble de fichiers JSON versionnés dans le dépôt, hors de `main` : `docs/reviews/refresh-benchmark/v101b/oracle-v3/` sur la branche `feat/t1-model-benchmark-real` (commit `dd0561f6`, 674 éléments sur 100 documents) ; la version 676 n'existe qu'en copie locale. Les campagnes du benchmark #782 lisent ces fichiers. Le §9.3 décrit comment l'oracle de ciblage C s'y ajoute.
+
+La suite (§6.1 à §6.6 et scène 2) distingue ce qui **existe** sur `main` (en-tête ocre, bordure pleine : `graph_nodes`, `prospect_notes`) de ce qui est **proposé** (en-tête bleu, bordure en tirets : toutes les tables `annotation_*`, `comment_projection`, `oracle_releases`).
+
 ### 6.1 Contraintes établies
 
 **Identité des objets annotables (FAIT).**
@@ -679,6 +747,58 @@ Un signal est **dans C** si aucune exclusion **établie** ne s'applique ; il est
 
 ### 9.3 Nouvel oracle (#783)
 
+#### Ancien oracle → nouvel oracle : la proposition
+
+**Rien n'est remplacé ; on ajoute un oracle et un volet de mesure.** L'oracle d'extraction existant (E, v3) reste tel quel et continue de noter l'extraction des actes ; l'oracle de ciblage (C) est construit à partir des retours de Steve et note la sélection des signaux. Le benchmark #782 publie deux volets séparés, jamais fusionnés. Ce choix est la décision **D10** (option b, recommandée) ; les options a et c en sont les alternatives, chacune avec son schéma au §10.
+
+```mermaid
+erDiagram
+    consensus_modeles ||--|| oracle_e_v3 : construit
+    annotation_assessments ||--|| oracle_c_v1 : adjugees_gelees
+    oracle_e_v3 ||--|| volet_extraction : note
+    oracle_c_v1 ||--|| volet_ciblage : note_b_puis_c
+    consensus_modeles {
+      text methode "7 passes, 3 familles de modèles"
+      text arbitrage "vote unanime + arbitrage"
+    }
+    annotation_assessments {
+      text source "verdicts de Steve (124 lignes)"
+      text adjudication "par critère, auteur nommé"
+    }
+    oracle_e_v3 {
+      text question "a-t-on extrait l'acte ?"
+      text unite "acte d'un PV : étape + citation"
+      int taille "674 sur 100 documents"
+      text stockage "fichiers JSON du dépôt"
+    }
+    oracle_c_v1 {
+      text question "fallait-il montrer ce signal ?"
+      text unite "signal, regroupé par dossier"
+      text jeux "dev 51 villes, test 52 villes"
+      text stockage "oracle_releases + JSON gelé"
+    }
+    volet_extraction {
+      text mesure "extraction historique, inchangée"
+    }
+    volet_ciblage {
+      text mesure "précision, rappel : B puis C"
+    }
+```
+
+<!-- diagram:oracles -->
+
+| | Ancien : oracle E (extraction, v3) | Nouveau : oracle C (ciblage, v1) |
+|---|---|---|
+| Question | A-t-on extrait l'acte d'un procès-verbal (étape + citation) ? | Fallait-il montrer ce signal à Steve ? |
+| Construit par | 7 passes de 3 familles de modèles, vote unanime et arbitrage (commit `dd0561f6`) | Les évaluations et ancres de Steve (lot L1), adjugées critère par critère par un auteur nommé, avec preuve |
+| Stockage | Fichiers JSON du dépôt (`v101b/oracle-v3/`), hors `main` | Une ligne `oracle_releases` (manifeste, sha256, unités, partitions) + export gelé `oracle-ciblage-steve-v1.json` versionné dans le dépôt, à côté de l'oracle E |
+| Jeux | 100 documents | Développement : les 51 villes du relevé ; test : les 52 villes suivantes, jamais vues ; un dossier entier dans une seule partition |
+| Gel et version | 674 committé ; **676 à committer et geler par empreinte avant toute campagne** | Gelé par sha256 avant la mesure ; toute correction = nouvelle version (v2…), jamais une modification en place |
+| Qui valide | Fabien (D10, D11) | Fabien valide la construction et le gel (D10) ; Steve et Mathieu tranchent les cas contradictoires (D8) ; Farid fixe le seuil qui utilise la mesure (D13) |
+| Ce qu'il note | Toute campagne d'extraction (modèles, prompts) | B aujourd'hui, puis C en shadow ; base de la bascule B → C |
+
+**Étapes proposées.** 1) Committer et geler l'oracle E 676. 2) Importer les retours de Steve (L1). 3) Adjuger les labels C sur les 51 villes et geler `oracle-ciblage-steve-v1` (O1). 4) Mesurer B sur cet oracle. 5) Mesurer C en shadow (C1). 6) Quand Steve aura relevé les 52 villes suivantes, les annoter en jeu de test aveugle et geler v2. 7) Publier les deux volets du benchmark, chacun contre sa version gelée.
+
 | | Oracle E — extraction | Oracle C — ciblage |
 |---|---|---|
 | Question | A-t-on extrait l'acte ? | L'aurait-on montré à raison ? |
@@ -955,7 +1075,7 @@ La demande initiale parle de « double annotation (ancienne / nouvelle) » sans 
 #### D10 — Oracle #783
 **Étape 1 · Décide : Fabien · Consulté : Steve, Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
 
-Un oracle est un jeu de réponses de référence qui note automatiquement le radar. L’oracle actuel (674 unités committées, 676 en copie locale) note l’extraction des actes dans les procès-verbaux, pas le choix des signaux à montrer (§9.3). Les retours de Steve sont la première vérité humaine sur ce choix : dans sa vue de travail, 24 signaux sur 73 sont du bruit (32,9 %, scène 1). Il faut décider comment construire l’oracle de ciblage (#783) avant de développer C (D7), car c’est lui qui dira si C fait mieux que B (D13). Dans la scène 3, l’oracle est la bande du bas : hors ligne, alimenté par les annotations en base.
+Un oracle est un jeu de réponses de référence qui note automatiquement le radar. L’oracle actuel (674 unités committées, 676 en copie locale) note l’extraction des actes dans les procès-verbaux, pas le choix des signaux à montrer (§9.3). Les retours de Steve sont la première vérité humaine sur ce choix : dans sa vue de travail, 24 signaux sur 73 sont du bruit (32,9 %, scène 1). Il faut décider comment construire l’oracle de ciblage (#783) avant de développer C (D7), car c’est lui qui dira si C fait mieux que B (D13). Dans la scène 3, l’oracle est la bande du bas : hors ligne, alimenté par les annotations en base. La proposition complète (ancien oracle → nouvel oracle, construction, gel, validation) est au §9.3.
 
 **Dépend de :** D2 (Modèle de données), D9 (Sens de « double annotation »). **Conditionne :** D11 (Benchmark #782), D1 (Périmètre de conservation des retours de Steve), D7 (Définition de C v1), D8 (Cas contradictoires), D12 (Exposition A/B/C), D13 (Seuil de bascule B → C), D15 (Séquencement).
 
@@ -964,6 +1084,76 @@ Un oracle est un jeu de réponses de référence qui note automatiquement le rad
 | Remplacer v3 par le tableur | Les 124 lignes du tableur deviennent l’unique oracle, à la place de la version 674/676. Rapide à constituer, mais il ne contient que ce que l’écran montrait à Steve : les sept dossiers manqués (« l’information existait dans la base ») n’y figurent pas. | • Rapide : une seule source.<br>• Aucune adjudication supplémentaire à organiser. | • Les retours ne portent que sur ce que l’écran affichait : échantillon biaisé, les sept dossiers manqués restent invisibles.<br>• Perd l’historique de l’extraction et la comparabilité des benchmarks passés. |
 | **Double oracle E / C, jeu test indépendant** (recommandée) | Deux oracles versionnés et gelés par empreinte. E reste l’oracle d’extraction (676 unités). C est construit à partir des évaluations et ancres de Steve, adjugées et étayées. Développement sur ses 51 villes, test sur les 52 suivantes, jamais vues ; toutes les unités d’un même dossier dans la même partition. | • Mesure séparément « a-t-on extrait l’acte ? » (E) et « fallait-il le montrer ? » (C).<br>• Jeu test indépendant : les 52 villes suivantes de Steve, jamais vues pendant le réglage (51 villes de développement).<br>• Partition par dossier : pas de fuite entre développement et test. | • Adjudication nommée et corpus de test coûtent du travail (Steve, l’équipe).<br>• Deux oracles à versionner et geler par empreinte (sha256). |
 | Campagne C entièrement nouvelle | On lance une campagne d’annotation neuve, conçue pour le ciblage C, sur un nouveau corpus. Les 124 lignes de Steve servent seulement d’exemples ; la comparaison avec l’historique se fait à part. | • Conçue pour le besoin réel, sans biais d’affichage.<br>• Peut couvrir d’emblée les 52 villes restantes avec la méthode C. | • Comparaison moins directe avec l’historique.<br>• Repart de zéro : délai et coût d’annotation les plus élevés. |
+
+Schéma de l'option Remplacer v3 par le tableur :
+
+```mermaid
+erDiagram
+    annotation_assessments ||--|| oracle_tableur : remplace
+    oracle_tableur ||--|| benchmark : note_tout
+    annotation_assessments {
+      text source "124 lignes de Steve"
+    }
+    oracle_tableur {
+      text unite "ce que l'écran montrait"
+      text biais "7 dossiers manqués absents"
+    }
+    oracle_e_v3 {
+      text statut "retiré, historique perdu"
+    }
+    benchmark {
+      text tableau "un seul, extraction et ciblage"
+    }
+```
+
+Schéma de l'option Double oracle E / C, jeu test indépendant :
+
+```mermaid
+erDiagram
+    consensus_modeles ||--|| oracle_e_v3 : construit
+    annotation_assessments ||--|| oracle_c_v1 : adjugees_gelees
+    oracle_e_v3 ||--|| volet_extraction : note
+    oracle_c_v1 ||--|| volet_ciblage : note_b_puis_c
+    consensus_modeles {
+      text methode "7 passes, 3 familles"
+    }
+    annotation_assessments {
+      text source "verdicts de Steve"
+    }
+    oracle_e_v3 {
+      int taille "674 / 100 documents"
+    }
+    oracle_c_v1 {
+      text jeux "dev 51 villes, test 52"
+    }
+    volet_extraction {
+      text mesure "inchangée"
+    }
+    volet_ciblage {
+      text mesure "précision, rappel"
+    }
+```
+
+Schéma de l'option Campagne C entièrement nouvelle :
+
+```mermaid
+erDiagram
+    campagne_c ||--|| oracle_c_neuf : construit
+    annotation_assessments }o..o| oracle_c_neuf : exemples
+    oracle_c_neuf ||--|| volet_ciblage : note
+    campagne_c {
+      text corpus "nouveau, conçu pour C"
+    }
+    annotation_assessments {
+      text role "124 lignes, exemples"
+    }
+    oracle_c_neuf {
+      text comparaison "historique à part"
+    }
+    volet_ciblage {
+      text mesure "précision, rappel"
+    }
+```
 
 **Recommandation : Double oracle E / C, jeu test indépendant.** Double oracle : c’est la seule façon de mesurer l’utilité (ciblage) sans perdre la mesure de l’extraction ; campagne nouvelle seulement pour ce que les archives ne permettent pas d’évaluer. Unité : le signal, regroupé par dossier ; une unité « dossier » serait plus fidèle mais dépend d’une clé de règlement peu fiable (C-26).
 

@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-04T19:04:03.906Z",
+  "checkedAt": "2026-10-04T20:45:18.484Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
   "chromiumCdpPort": "9243",
   "offline": {
@@ -83,7 +83,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 40,
-        "top": -27046.296875,
+        "top": -28202.765625,
         "width": 1345,
         "height": 820
       },
@@ -180,7 +180,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 52.5,
-        "top": -25886.984375,
+        "top": -27334.328125,
         "width": 1800,
         "height": 900
       },
@@ -283,7 +283,7 @@
         "edgeLabels": 12,
         "panel": {
           "left": 40,
-          "top": 15660.9375,
+          "top": 15691.015625,
           "width": 1345,
           "height": 820
         },
@@ -342,6 +342,16 @@
       "descriptions": 48,
       "minis": [
         {
+          "id": "doc-existant",
+          "tables": 6,
+          "scale": 1
+        },
+        {
+          "id": "doc-oracles",
+          "tables": 6,
+          "scale": 1
+        },
+        {
           "id": "option-D2-M1",
           "tables": 3,
           "scale": 1
@@ -375,6 +385,21 @@
           "id": "option-D3-c",
           "tables": 2,
           "scale": 1
+        },
+        {
+          "id": "option-D10-a",
+          "tables": 4,
+          "scale": 0.689
+        },
+        {
+          "id": "option-D10-b",
+          "tables": 6,
+          "scale": 0.747
+        },
+        {
+          "id": "option-D10-c",
+          "tables": 4,
+          "scale": 0.739
         }
       ]
     },
@@ -412,6 +437,16 @@
     "descriptions": 48,
     "minis": [
       {
+        "id": "doc-existant",
+        "tables": 6,
+        "scale": 1
+      },
+      {
+        "id": "doc-oracles",
+        "tables": 6,
+        "scale": 1
+      },
+      {
         "id": "option-D2-M1",
         "tables": 3,
         "scale": 1
@@ -445,6 +480,21 @@
         "id": "option-D3-c",
         "tables": 2,
         "scale": 1
+      },
+      {
+        "id": "option-D10-a",
+        "tables": 4,
+        "scale": 0.689
+      },
+      {
+        "id": "option-D10-b",
+        "tables": 6,
+        "scale": 0.747
+      },
+      {
+        "id": "option-D10-c",
+        "tables": 4,
+        "scale": 0.739
       }
     ]
   },
@@ -469,6 +519,20 @@
         "mode": "transform",
         "fit": 1.458,
         "zoomed": 2.277,
+        "dragged": false
+      },
+      {
+        "id": "doc-existant",
+        "mode": "transform",
+        "fit": 0.841,
+        "zoomed": 1.314,
+        "dragged": false
+      },
+      {
+        "id": "doc-oracles",
+        "mode": "transform",
+        "fit": 0.71,
+        "zoomed": 1.109,
         "dragged": false
       },
       {
@@ -560,6 +624,27 @@
         "mode": "transform",
         "fit": 1.32,
         "zoomed": 2.062,
+        "dragged": false
+      },
+      {
+        "id": "option-D10-a",
+        "mode": "transform",
+        "fit": 0.784,
+        "zoomed": 1.226,
+        "dragged": false
+      },
+      {
+        "id": "option-D10-b",
+        "mode": "transform",
+        "fit": 0.85,
+        "zoomed": 1.328,
+        "dragged": false
+      },
+      {
+        "id": "option-D10-c",
+        "mode": "transform",
+        "fit": 0.842,
+        "zoomed": 1.315,
         "dragged": false
       }
     ],
@@ -762,7 +847,7 @@
       "scale": 1,
       "clip": {
         "x": 60,
-        "y": 44324.015625,
+        "y": 47500.671875,
         "width": 1800,
         "height": 900
       }
@@ -782,7 +867,7 @@
       "sceneId": "modele-donnees",
       "clip": {
         "x": 52.5,
-        "y": 12199.59375,
+        "y": 12229.671875,
         "width": 1800,
         "height": 823
       }
@@ -791,7 +876,7 @@
       "sceneId": "flux-import-oracle",
       "clip": {
         "x": 52.5,
-        "y": 13540.078125,
+        "y": 13570.15625,
         "width": 1800,
         "height": 1332
       }
@@ -800,7 +885,7 @@
       "sceneId": "architecture-ui",
       "clip": {
         "x": 52.5,
-        "y": 15401.484375,
+        "y": 15431.5625,
         "width": 1800,
         "height": 900
       }
@@ -809,7 +894,7 @@
       "sceneId": "affichage-abc",
       "clip": {
         "x": 52.5,
-        "y": 16795.25,
+        "y": 16825.328125,
         "width": 1800,
         "height": 1248
       }
