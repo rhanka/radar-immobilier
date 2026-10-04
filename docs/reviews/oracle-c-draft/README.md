@@ -6,6 +6,12 @@ Files-only draft of a targeting oracle ("C": should this signal be shown to Stev
 Steve Chaperon's triage of 21 Sept 2026, measured with three models at low effort. Nothing here
 writes to a database, cluster or bucket. Owner-facing summary in French: `dossier-section-fr.md`.
 
+Terminology note: a sentropic + engram convergence on vocabulary and on a generic model is in
+progress; "oracle" may be renamed. Mapping to standard terms: oracle → annotated reference set
+(gold standard); `optim` → development set; `blind` → held-out test set; verdict → label; motif →
+rationale code. Item fields (`id`, `label`, `strata`, `input`, `nodeIds`) are generic and map onto
+an object-anchored annotation; a rename touches document wording only, not the sets or hashes.
+
 ## Method in one paragraph
 Steve's workbook (`radar-triage-signaux.xlsx`, sha256 `c7e19f46…0dc1bb8`, sheet Triage, 124 lines)
 gives a verdict (Pertinent / À surveiller / Non pertinent) and one motif code per line. Each line
