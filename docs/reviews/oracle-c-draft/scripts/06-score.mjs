@@ -165,10 +165,22 @@ row('Noise rate in view (Non pertinent shown / shown)', `${f(bv.noiseRate)} (${b
 row('Pertinent kept visible', `${bv.pertinentKeptVisible}/${bv.pertinentTotal}`, (m) => `${m.view.pertinentKeptVisible}/${m.view.pertinentTotal}`, ev ? `${ev.pertinentKeptVisible}/${ev.pertinentTotal}` : '');
 row('Useful (P or S) hidden', `${bv.usefulHidden}`, (m) => `${m.view.usefulHidden}`, ev ? `${ev.usefulHidden}` : '');
 row('Noise removed', `${bv.noiseRemoved}/${bv.noiseTotal}`, (m) => `${m.view.noiseRemoved}/${m.view.noiseTotal}`, ev ? `${ev.noiseRemoved}/${ev.noiseTotal}` : '');
+// C applied as a post-filter of B's working view (pass-1 lines only).
+const onPass1 = (pred) => {
+  const p1 = items.filter((i) => i.label.pass === 'pass1');
+  const kept = p1.filter((i) => { const v = pred(i.id); return v == null || shown(v); });
+  return { lines: p1.length, kept: kept.length, noise: kept.filter((i) => i.label.verdict === 'Non pertinent').length,
+    pKept: kept.filter((i) => i.label.verdict === 'Pertinent').length, pTotal: p1.filter((i) => i.label.verdict === 'Pertinent').length };
+};
+for (const k of keys) report.models[k].onPass1 = onPass1((id) => norm(loaded[k].get(id)?.parsed?.verdict));
+const bp = onPass1(() => 'Pertinent');
+row('B view + C post-filter: noise kept (of pass-1 lines kept)', `${f(bp.noise / bp.kept)} (${bp.noise}/${bp.kept})`, (m) => `${f(m.onPass1.noise / m.onPass1.kept)} (${m.onPass1.noise}/${m.onPass1.kept})`, '');
+row('B view + C post-filter: Pertinent kept', `${bp.pKept}/${bp.pTotal}`, (m) => `${m.onPass1.pKept}/${m.onPass1.pTotal}`, '');
 row('Motif exact / family', 'N-A', (m) => `${f(m.motif.exact)} / ${f(m.motif.family)}`, '');
 row('Invalid or missing verdicts', 'N-A', (m) => `${m.invalidVerdict}`, '');
 row('Latency p50 / p90 (s)', 'N-A', (m) => `${(m.latency.p50Ms / 1000).toFixed(1)} / ${(m.latency.p90Ms / 1000).toFixed(1)}`, '');
 row('Tokens in / out (total)', 'N-A', (m) => `${m.tokens.input} / ${m.tokens.output}`, '');
+row('API-equivalent cost reported by the CLI (USD)', 'N-A', (m) => (m.costUsdApiEquivalent == null ? 'non vérifié' : m.costUsdApiEquivalent.toFixed(2)), '');
 if (report.interModel) {
   lines.push('\nInter-model agreement on the verdict: ' + Object.entries(report.interModel.pairwise).map(([k, v]) => `${k} κ = ${v.kappa?.toFixed(2)} (agreement ${f(v.agreement)})`).join('; ')
     + (report.interModel.fleiss ? `; Fleiss κ = ${report.interModel.fleiss.kappa?.toFixed(2)}` : '') + `; unanimous on ${report.interModel.unanimous}/${items.length}.`);
