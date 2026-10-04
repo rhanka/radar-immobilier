@@ -1,20 +1,26 @@
 #!/usr/bin/env node
 // Step 8 — filtering task "show to Steve or hide", precision / recall / F1, on the SAME lines for
-// today's B filter combinations (no model) and for C prompts v1 / v2 (archived answers, no new
-// model call). Unit = one Steve triage line attached to radar record(s). Truth = Steve's verdict.
+// today's B filter combinations (no model) and, with --prompts, for C prompt versions
+// (archived answers, no new model call). Unit = one Steve triage line attached to radar record(s). Truth = Steve's verdict.
 // Two positive definitions: positive = Pertinent; positive = Pertinent or À surveiller.
 // Writes results/filter-metrics-<set>.{md,json} and results/filter-pr-<set>.svg.
-// Usage: node 08-filter-metrics.mjs --set optim|blind
+// Usage: node 08-filter-metrics.mjs --set optim|blind [--prompts v1,...]
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, WORK } from './lib/common.mjs';
 import { rng } from './lib/stats.mjs';
 import { loadSet } from './lib/testset.mjs';
+import { deriveVerdict } from './lib/derive-verdict.mjs';
+
+const systemVerdict = (p) => {
+  if (p.residentiel !== undefined) { try { return deriveVerdict(p).verdict; } catch { return null; } }
+  return p.verdict;
+};
 
 const arg = (k, d) => { const i = process.argv.indexOf(`--${k}`); return i > 0 ? process.argv[i + 1] : d; };
 const set = arg('set');
 const EXCLUDE = arg('exclude');
-const EXCLUSIONS = { 'sens-non-donne': (i) => i.label.pass === 'pass1' && i.label.verdict === 'Pertinent' && ['Indéterminé', 'Mixte', 'Neutre'].includes(i.label.sens) };
+const EXCLUSIONS = {}; // named sensitivity subsets, to be defined before any test run
 const items = loadSet(set, { purpose: `filter-metrics${EXCLUDE ? ` excl ${EXCLUDE}` : ''}` }).filter((i) => !(EXCLUDE && EXCLUSIONS[EXCLUDE](i)));
 const SUFFIX = `${set}${EXCLUDE ? `-excl-${EXCLUDE}` : ''}`;
 const nodes = new Map(JSON.parse(fs.readFileSync(path.join(WORK, 'nodes.json'), 'utf8')).nodes.map((n) => [n.id, n]));
@@ -42,24 +48,25 @@ function loadRuns(pv, model) {
   const f = path.join(ROOT, 'runs', set, pv, `${model}.jsonl`);
   if (!fs.existsSync(f)) return null;
   const m = new Map();
-  for (const l of fs.readFileSync(f, 'utf8').split('\n').filter(Boolean)) { const r = JSON.parse(l); if (r.parsed) m.set(r.id, r.parsed.verdict); }
+  for (const l of fs.readFileSync(f, 'utf8').split('\n').filter(Boolean)) { const r = JSON.parse(l); if (r.parsed) m.set(r.id, systemVerdict(r.parsed)); }
   return m;
 }
 const MODELS = [['astra', 'Astra low'], ['gemini', 'Gemini low'], ['opus', 'Opus 5.5 low']];
-for (const pv of ['v1', 'v2']) {
+// C rows only for the prompt versions named with --prompts (none by default: B baseline only).
+for (const pv of (arg('prompts', '') ?? '').split(',').filter(Boolean)) {
   const runs = Object.fromEntries(MODELS.map(([k]) => [k, loadRuns(pv, k)]));
   for (const [k, lab] of MODELS) {
     const r = runs[k];
     add(`c-${pv}-${k}`, `C ${pv} ${lab}`, `C ${pv}`, r ? (i) => { const v = r.get(i.id); return VERD.has(v) ? v !== 'Non pertinent' : true; } : () => undefined,
-      r ? '' : `not run on ${set} (blind is measured once, with the frozen final prompt only)`);
+      r ? '' : `not run on ${set}`);
   }
-  if (pv === 'v2' && MODELS.every(([k]) => runs[k])) {
-    add('c-v2-maj', 'C v2 majority of 3', 'C v2', (i) => {
+  if (MODELS.every(([k]) => runs[k])) {
+    add(`c-${pv}-maj`, `C ${pv} majority of 3`, `C ${pv}`, (i) => {
       const vs = MODELS.map(([k]) => runs[k].get(i.id));
       return vs.filter((v) => v === 'Non pertinent').length < 2;
     });
     for (const [k, lab] of MODELS) {
-      add(`c-v2s-${k}`, `C v2 strict ${lab} (shows Pertinent only)`, 'C v2 strict', (i) => runs[k].get(i.id) === 'Pertinent');
+      add(`c-${pv}s-${k}`, `C ${pv} strict ${lab} (shows Pertinent only)`, `C ${pv} strict`, (i) => runs[k].get(i.id) === 'Pertinent');
     }
   }
 }
@@ -128,7 +135,7 @@ md += `- Sanity check: on the ${report.precoceSanity.linesPass1or2} lines of pas
 fs.writeFileSync(path.join(ROOT, 'results', `filter-metrics-${SUFFIX}.md`), md);
 
 // ---- SVG: grouped bars precision / recall (positive = Pertinent) ----
-const rows = P.filter((s) => !s.key.startsWith('c-v2s-'));
+const rows = P.filter((s) => !/^c-.*s-/.test(s.key));
 const W = 860; const rowH = 34; const left = 340; const top = 54; const H = top + rows.length * rowH + 40;
 const x = (v) => left + v * (W - left - 50);
 const BLUE = '#2a78d6'; const ORANGE = '#eb6834';
