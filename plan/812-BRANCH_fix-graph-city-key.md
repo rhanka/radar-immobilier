@@ -171,7 +171,7 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
   - [ ] Merge commit (NO squash, NO rebase merge); preserve branch.
 
 - [ ] **Lot 7 — Preprod then prod runs (spec §7.5)** (size M, operational)
-  - [ ] Preprod R1: five CD variables checked (spec K6); release PR-2 outside windows; migrate Job Complete; backup object present; CronJob image = release digest.
+  - [ ] Preprod R1: five CD variables checked and `ROLLBACK_ON_FAILURE_ENABLED` = false (spec K6, K16); release PR-2 outside windows; migrate Job Complete; backup object present; CronJob image = release digest.
   - [ ] Preprod R1b: `refresh-suspend` through run-job; graph-touching merges to main frozen until R6.
   - [ ] Preprod R2 structural measurement and authoritative list `L`; R3 repair preview on `L`; before-verdicts compared with `sim.json`, after-verdicts and `unknown` reviewed.
   - [ ] Preprod R4 repair apply; R5 `document-date-recovery` apply without `--heal` on cities whose pass 2 succeeded; R5b `mapper` then `snapshot`.
