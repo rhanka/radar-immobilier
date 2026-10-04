@@ -116,7 +116,7 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
   - [ ] UAT on root `ENV=dev`: MRC graph view with two cities sharing an id; Signals T1 and PDF overlay unchanged.
 
 - [ ] **Lot 3 — Repair, measurement and CD jobs** (size L)
-  - [ ] Unit tests first: classifier on full ref objects and property values (same-id foreign docSha also on another id, citation or rawRef lost under an unchanged docSha, legacy-merge local props with foreign refs → unknown, property-only contamination, slug mismatch); repair (baseline minus foreign rows, local completeness, city rolled back whole on any refusal, idempotence).
+  - [ ] Unit tests first: classifier on full ref objects and property values (same-id foreign docSha also on another id, citation or rawRef lost under an unchanged docSha, changed property value, foreign `sourceRef` or root prop only, legacy-merge local props with foreign refs → unknown, slug mismatch); repair (any `unknown` refuses the city before mutation, baseline minus foreign rows, local completeness, city rolled back whole on any guard refusal, idempotence).
   - [ ] `api/src/scripts/repair-graph-city-key.ts` per spec §7.2 (one all-or-nothing transaction per city, preview in a rolled-back transaction, before/after verdicts, run report to S3, termination message).
   - [ ] `run-geo-mapper.ts` reset mode: per city, purge `geo_resolutions` and `geo_unresolved`, then resolve.
   - [ ] `api/src/scripts/measure-graph-drift.ts` per spec §9, with its integration test against the dossier script rules.
