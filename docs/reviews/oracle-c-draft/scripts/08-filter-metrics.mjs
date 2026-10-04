@@ -9,10 +9,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, WORK } from './lib/common.mjs';
 import { rng } from './lib/stats.mjs';
+import { loadSet } from './lib/testset.mjs';
 
 const arg = (k, d) => { const i = process.argv.indexOf(`--${k}`); return i > 0 ? process.argv[i + 1] : d; };
 const set = arg('set');
-const items = fs.readFileSync(path.join(ROOT, `${set}.jsonl`), 'utf8').trim().split('\n').map((l) => JSON.parse(l));
+const EXCLUDE = arg('exclude');
+const EXCLUSIONS = { 'sens-non-donne': (i) => i.label.pass === 'pass1' && i.label.verdict === 'Pertinent' && ['Indéterminé', 'Mixte', 'Neutre'].includes(i.label.sens) };
+const items = loadSet(set, { purpose: `filter-metrics${EXCLUDE ? ` excl ${EXCLUDE}` : ''}` }).filter((i) => !(EXCLUDE && EXCLUSIONS[EXCLUDE](i)));
+const SUFFIX = `${set}${EXCLUDE ? `-excl-${EXCLUDE}` : ''}`;
 const nodes = new Map(JSON.parse(fs.readFileSync(path.join(WORK, 'nodes.json'), 'utf8')).nodes.map((n) => [n.id, n]));
 const props = (i) => i.nodeIds.map((id) => nodes.get(id)?.props?.properties ?? {});
 const VERD = new Set(['Pertinent', 'À surveiller', 'Non pertinent']);
@@ -98,14 +102,14 @@ for (const s of systems) {
 const p12 = items.filter((i) => i.label.pass !== 'pass3');
 report.precoceSanity = { linesPass1or2: p12.length, reconstructedPrecoceMatchesPass1: p12.filter((i) => systems.find((s) => s.key === 'f-precoce').fn(i) === (i.label.pass === 'pass1')).length };
 
-fs.writeFileSync(path.join(ROOT, 'results', `filter-metrics-${set}.json`), JSON.stringify(report, null, 1));
+fs.writeFileSync(path.join(ROOT, 'results', `filter-metrics-${SUFFIX}.json`), JSON.stringify(report, null, 1));
 
 // ---- markdown ----
 const f = (x) => (x == null ? 'N-A' : `${(100 * x).toFixed(1)}`);
 const fci = (v, c) => (v == null ? 'N-A' : `${f(v)} [${f(c[0])}–${f(c[1])}]`);
 const P = report.systems.filter((s) => s.available);
 const nP = items.filter(POS.P).length; const nPS = items.filter(POS.PS).length;
-let md = `### ${set} — ${items.length} lines, ${cities.length} municipalities (Steve: ${nP} Pertinent, ${nPS - nP} À surveiller, ${items.length - nPS} Non pertinent)\n\n`;
+let md = `### ${set}${EXCLUDE ? ` (excluding ${EXCLUDE})` : ''} — ${items.length} lines, ${cities.length} municipalities (Steve: ${nP} Pertinent, ${nPS - nP} À surveiller, ${items.length - nPS} Non pertinent)\n\n`;
 md += `Values in %, municipality-clustered bootstrap 95 % interval in brackets (2000 draws, seed 808).\n\n`;
 for (const [pk, title] of [['P', 'Positive = Pertinent'], ['PS', 'Positive = Pertinent or À surveiller']]) {
   md += `**${title}**\n\n| System | Shown | TP | FP | FN | TN | Precision | Recall | F1 |\n|---|---:|---:|---:|---:|---:|---:|---:|---:|\n`;
@@ -121,7 +125,7 @@ md += `\nReconstructed filters (approximation from 2026-10-04 record properties,
 for (const s of systems.filter((x) => x.family === 'B reconstructed')) md += `- ${s.label}: ${s.note}.\n`;
 md += `- Résidentiel alone: N-A — it depends on residential markers computed by the code, not stored in the record properties.\n`;
 md += `- Sanity check: on the ${report.precoceSanity.linesPass1or2} lines of pass 1 or 2, the reconstructed Précoce agrees with the observed pass on ${report.precoceSanity.reconstructedPrecoceMatchesPass1}.\n`;
-fs.writeFileSync(path.join(ROOT, 'results', `filter-metrics-${set}.md`), md);
+fs.writeFileSync(path.join(ROOT, 'results', `filter-metrics-${SUFFIX}.md`), md);
 
 // ---- SVG: grouped bars precision / recall (positive = Pertinent) ----
 const rows = P.filter((s) => !s.key.startsWith('c-v2s-'));
@@ -143,5 +147,5 @@ rows.forEach((s, k) => {
   }
 });
 svg += '</svg>\n';
-fs.writeFileSync(path.join(ROOT, 'results', `filter-pr-${set}.svg`), svg);
+fs.writeFileSync(path.join(ROOT, 'results', `filter-pr-${SUFFIX}.svg`), svg);
 console.log(`${set}: ${report.systems.length} systems written`);
