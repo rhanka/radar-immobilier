@@ -32,7 +32,7 @@ rules only, iterated on `optim` only, frozen, then run **once** on `blind`.
 | `extension-plan.md`, `review.md`, `dossier-section-fr.md` | extension proposal, review + reconciliation, French section | yes |
 | `selection-rule.md`, `final-prompt.json` | prompt selection rule, frozen final prompt (sha256) | yes |
 | `optim.jsonl`, `blind.jsonl` | frozen sets (Steve codes + radar records) | **no** (see below) |
-| `SHA256SUMS`, `split-manifest.json`, `split-balance.md` | set hashes and balance (no item content) | proposed |
+| `SHA256SUMS`, `split-manifest.json`, `split-balance.md` | set hashes and balance (no item content) | yes (`cbc1185d`) |
 | `runs/`, `work/` | raw model answers, intermediate prod reads | no (git-ignored) |
 
 ### Why the frozen sets may not be in git
