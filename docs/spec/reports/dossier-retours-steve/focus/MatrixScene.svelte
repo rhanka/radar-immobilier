@@ -2,6 +2,7 @@
   // Criteria matrix: one row per criterion of Steve (and per transversal exclusion),
   // what he asks, what the radar does today, the coverage, and the noise it leaves in his
   // working view (pass 1). The last row adds up the noise over the 73 signals of the view.
+  import ZoomFrame from './ZoomFrame.svelte';
   let { graph } = $props();
   const { rows, total } = $derived(graph.projection);
   const percent = (part, whole) => `${(part / whole * 100).toFixed(1).replace('.', ',')} %`;
@@ -9,6 +10,7 @@
 </script>
 
 <div class="matrix-wrap" data-diagram={graph.id} data-diagram-kind="matrix">
+  <ZoomFrame id={graph.id} label={graph.title} inline={false} minWidth={900}>
   <table class="matrix" data-matrix={graph.id}>
     <caption>Critères de Steve × radar actuel (origin/main 27891b10) · bruit mesuré sur sa vue de travail, passe 1</caption>
     <thead>
@@ -42,12 +44,13 @@
       </tr>
     </tfoot>
   </table>
+  </ZoomFrame>
 </div>
 <p class="diagram-legend"><strong>Lecture</strong> · une ligne par critère ou exclusion · couverture : ce que le radar sait filtrer aujourd’hui ·
   barre : part du bruit de la passe 1 laissée par ce critère (ligne du bas : bruit sur les 73 signaux de la vue).</p>
 
 <style>
-  .matrix-wrap { overflow-x: auto; border: 1px solid var(--st-semantic-border-subtle); background: var(--st-semantic-surface-default); }
+  .matrix-wrap { overflow: hidden; border: 1px solid var(--st-semantic-border-subtle); background: var(--st-semantic-surface-default); }
   .matrix { width: 100%; border-collapse: collapse; font-size: .95rem; line-height: 1.45; }
   .matrix caption { caption-side: top; text-align: left; padding: 12px 16px; font-size: .82rem; color: var(--st-semantic-text-secondary); background: var(--st-semantic-surface-subtle); }
   .matrix th, .matrix td { padding: 14px 16px; border-bottom: 1px solid var(--st-semantic-border-subtle); text-align: left; vertical-align: top; }
