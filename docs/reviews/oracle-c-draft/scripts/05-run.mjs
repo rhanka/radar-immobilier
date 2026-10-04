@@ -2,13 +2,13 @@
 // Step 5 — run one model over one frozen set with one prompt version (seats only).
 // Usage: node 05-run.mjs --set optim|blind --prompt v1 --model astra|gemini|opus [--concurrency 3]
 // Output: runs/<set>/<prompt>/<model>.jsonl (one line per item; resumable: ok items are skipped).
-// Blind guard: --set blind requires final-prompt.json naming this prompt (sha256 must match),
-// and a model is run on blind only once (an existing ok line is never re-run).
+// Test guard (--set blind): see TEST-SET-PROTOCOL.md and lib/testset.mjs.
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { ROOT } from './lib/common.mjs';
 import { MODELS, callModel, parseJsonObject } from './lib/models.mjs';
+import { loadSet, assertTestRunAllowed, audit } from './lib/testset.mjs';
 
 const arg = (k, d) => { const i = process.argv.indexOf(`--${k}`); return i > 0 ? process.argv[i + 1] : d; };
 const set = arg('set'); const pv = arg('prompt'); const model = arg('model');
@@ -23,23 +23,20 @@ const between = (a, b) => promptMd.split(`<!-- ${a} -->`)[1].split(`<!-- ${b} --
 const system = between('system:start', 'system:end');
 const userTpl = between('user:start', 'user:end');
 
+// Test set (blind): sealed, role- and key-gated, prompt frozen in git first, one run per prompt
+// and model, every access audited (TEST-SET-PROTOCOL.md).
 if (set === 'blind') {
-  const finalFile = path.join(ROOT, 'final-prompt.json');
-  if (!fs.existsSync(finalFile)) { console.error('blind refused: no final-prompt.json'); process.exit(3); }
-  const fin = JSON.parse(fs.readFileSync(finalFile, 'utf8'));
-  if (fin.version !== pv || fin.sha256 !== promptSha) { console.error('blind refused: prompt is not the frozen final prompt'); process.exit(3); }
-  if (only) { console.error('blind refused: --only is not allowed on blind'); process.exit(3); }
+  if (only) { console.error('test run refused: --only is not allowed on the test set'); process.exit(3); }
+  try { assertTestRunAllowed({ promptVersion: pv, promptSha256: promptSha, model: MODELS[model]?.model }); } catch (e) { console.error(e.message); process.exit(3); }
 }
-
-// Added after review (F05, m5): the set file must match SHA256SUMS; attempts are logged per item.
-const setBody = fs.readFileSync(path.join(ROOT, `${set}.jsonl`));
-const setSha = crypto.createHash('sha256').update(setBody).digest('hex');
-const sums = fs.readFileSync(path.join(ROOT, 'SHA256SUMS'), 'utf8');
-if (!sums.includes(`${setSha}  ${set}.jsonl`)) { console.error(`${set}.jsonl does not match SHA256SUMS`); process.exit(3); }
-const items = setBody.toString('utf8').trim().split('\n').map((l) => JSON.parse(l));
+let items;
+try { items = loadSet(set, { purpose: `run ${pv} ${model}`, promptSha256: promptSha }); } catch (e) { console.error(e.message); process.exit(3); }
+const setSha = crypto.createHash('sha256').update(items.map((i) => JSON.stringify(i)).join('\n') + '\n').digest('hex');
 const outDir = path.join(ROOT, 'runs', set, pv);
 fs.mkdirSync(outDir, { recursive: true });
 const outFile = path.join(outDir, `${model}.jsonl`);
+if (set === 'blind' && fs.existsSync(outFile)) { console.error('test run refused: a test run file already exists for this prompt and model'); process.exit(3); }
+if (set === 'blind') audit({ action: 'test-run', promptVersion: pv, promptSha256: promptSha, model: MODELS[model].model, datasetSha256: setSha });
 const done = new Set();
 if (fs.existsSync(outFile)) {
   for (const l of fs.readFileSync(outFile, 'utf8').split('\n').filter(Boolean)) { const r = JSON.parse(l); if (r.parsed) done.add(r.id); }

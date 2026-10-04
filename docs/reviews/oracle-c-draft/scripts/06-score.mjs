@@ -7,6 +7,7 @@ import path from 'node:path';
 import { ROOT, VERDICTS, VSHORT, MOTIF_FAMILY } from './lib/common.mjs';
 import { cohenKappa, fleissKappa, wilson, rng } from './lib/stats.mjs';
 import { MODELS } from './lib/models.mjs';
+import { loadSet } from './lib/testset.mjs';
 
 const arg = (k, d) => { const i = process.argv.indexOf(`--${k}`); return i > 0 ? process.argv[i + 1] : d; };
 const set = arg('set'); const pv = arg('prompt');
@@ -17,7 +18,7 @@ const EXCLUDE = arg('exclude');
 // Sensitivity subset (review B2): the "12 sens non donné" row of Steve's analysis maps to
 // pass 1 ∧ Pertinent ∧ sens ∈ {Indéterminé, Mixte, Neutre}; v2's first rule leans on that row.
 const EXCLUSIONS = { 'sens-non-donne': (i) => i.label.pass === 'pass1' && i.label.verdict === 'Pertinent' && ['Indéterminé', 'Mixte', 'Neutre'].includes(i.label.sens) };
-const items = fs.readFileSync(path.join(ROOT, `${set}.jsonl`), 'utf8').trim().split('\n').map((l) => JSON.parse(l))
+const items = loadSet(set, { purpose: `score ${pv}${EXCLUDE ? ` excl ${EXCLUDE}` : ''}` })
   .filter((i) => !(EXCLUDE && EXCLUSIONS[EXCLUDE](i)));
 const gold = new Map(items.map((i) => [i.id, i.label]));
 // Exact enum match only (review F14): anything else is an invalid verdict, kept visible by asymmetry.
