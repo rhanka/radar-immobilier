@@ -6,7 +6,10 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-const SCRUB = /(_API_KEY|^ANTHROPIC_BASE_URL|^OPENAI_BASE_URL|^GOOGLE_APPLICATION_CREDENTIALS|^GOOGLE_GENAI_USE_VERTEXAI)$/;
+// The campaign of 2026-10-04 ran with the narrower pattern
+//   /(_API_KEY|^ANTHROPIC_BASE_URL|^OPENAI_BASE_URL|^GOOGLE_APPLICATION_CREDENTIALS|^GOOGLE_GENAI_USE_VERTEXAI)$/
+// Widened after review (F04, M6) for later runs: auth tokens, provider-routing and cloud variables.
+const SCRUB = /(_API_KEY|_AUTH_TOKEN|_API_BASE|_BASE_URL)$|^(ANTHROPIC_|OPENAI_|GEMINI_|CLAUDE_CODE_USE_|AWS_|GOOGLE_CLOUD_|GOOGLE_APPLICATION_CREDENTIALS|GOOGLE_GENAI_USE_VERTEXAI|VERTEX)/;
 export function seatEnv() {
   const env = {};
   for (const [k, v] of Object.entries(process.env)) if (!SCRUB.test(k)) env[k] = v;

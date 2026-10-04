@@ -31,7 +31,12 @@ if (set === 'blind') {
   if (only) { console.error('blind refused: --only is not allowed on blind'); process.exit(3); }
 }
 
-const items = fs.readFileSync(path.join(ROOT, `${set}.jsonl`), 'utf8').trim().split('\n').map((l) => JSON.parse(l));
+// Added after review (F05, m5): the set file must match SHA256SUMS; attempts are logged per item.
+const setBody = fs.readFileSync(path.join(ROOT, `${set}.jsonl`));
+const setSha = crypto.createHash('sha256').update(setBody).digest('hex');
+const sums = fs.readFileSync(path.join(ROOT, 'SHA256SUMS'), 'utf8');
+if (!sums.includes(`${setSha}  ${set}.jsonl`)) { console.error(`${set}.jsonl does not match SHA256SUMS`); process.exit(3); }
+const items = setBody.toString('utf8').trim().split('\n').map((l) => JSON.parse(l));
 const outDir = path.join(ROOT, 'runs', set, pv);
 fs.mkdirSync(outDir, { recursive: true });
 const outFile = path.join(outDir, `${model}.jsonl`);
@@ -49,14 +54,15 @@ async function worker() {
   while (next < todo.length) {
     const it = todo[next++];
     const user = userTpl.replace('{{INPUT}}', it.input);
-    let res; let parsed = null;
+    let res; let parsed = null; let attempts = 0;
     for (let attempt = 1; attempt <= 2 && !parsed; attempt++) {
+      attempts = attempt;
       res = await callModel(model, system, user);
       parsed = parseJsonObject(res.text);
     }
     const rec = {
       id: it.id, set, promptVersion: pv, promptSha256: promptSha, model: m.model, effort: m.effort, route: m.route,
-      at: new Date().toISOString(), exitCode: res.code, latencyMs: res.latencyMs, usage: res.usage ?? null,
+      at: new Date().toISOString(), attempts, datasetSha256: setSha, exitCode: res.code, latencyMs: res.latencyMs, usage: res.usage ?? null,
       costUsdApiEquivalent: res.costUsdApiEquivalent ?? null, parsed, rawText: parsed ? undefined : res.text,
       stderrTail: parsed ? undefined : res.stderrTail,
     };

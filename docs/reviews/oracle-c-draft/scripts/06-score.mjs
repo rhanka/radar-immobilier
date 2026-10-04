@@ -5,7 +5,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, VERDICTS, VSHORT, MOTIF_FAMILY } from './lib/common.mjs';
-import { cohenKappa, fleissKappa, wilson } from './lib/stats.mjs';
+import { cohenKappa, fleissKappa, wilson, rng } from './lib/stats.mjs';
 import { MODELS } from './lib/models.mjs';
 
 const arg = (k, d) => { const i = process.argv.indexOf(`--${k}`); return i > 0 ? process.argv[i + 1] : d; };
@@ -13,15 +13,15 @@ const set = arg('set'); const pv = arg('prompt');
 const showErrors = process.argv.includes('--errors');
 if (showErrors && set === 'blind') { console.error('--errors refused on blind'); process.exit(3); }
 
-const items = fs.readFileSync(path.join(ROOT, `${set}.jsonl`), 'utf8').trim().split('\n').map((l) => JSON.parse(l));
+const EXCLUDE = arg('exclude');
+// Sensitivity subset (review B2): the "12 sens non donné" row of Steve's analysis maps to
+// pass 1 ∧ Pertinent ∧ sens ∈ {Indéterminé, Mixte, Neutre}; v2's first rule leans on that row.
+const EXCLUSIONS = { 'sens-non-donne': (i) => i.label.pass === 'pass1' && i.label.verdict === 'Pertinent' && ['Indéterminé', 'Mixte', 'Neutre'].includes(i.label.sens) };
+const items = fs.readFileSync(path.join(ROOT, `${set}.jsonl`), 'utf8').trim().split('\n').map((l) => JSON.parse(l))
+  .filter((i) => !(EXCLUDE && EXCLUSIONS[EXCLUDE](i)));
 const gold = new Map(items.map((i) => [i.id, i.label]));
-const norm = (v) => {
-  const s = String(v ?? '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-  if (s.startsWith('pertinent')) return 'Pertinent';
-  if (s.startsWith('a surveiller')) return 'À surveiller';
-  if (s.startsWith('non pertinent')) return 'Non pertinent';
-  return null;
-};
+// Exact enum match only (review F14): anything else is an invalid verdict, kept visible by asymmetry.
+const norm = (v) => (VERDICTS.includes(String(v ?? '').trim()) ? String(v).trim() : null);
 
 function load(model) {
   const f = path.join(ROOT, 'runs', set, pv, `${model}.jsonl`);
@@ -147,11 +147,9 @@ if (keys.length >= 2) {
   }
 }
 
-const out = arg('json');
-if (out) fs.writeFileSync(out, JSON.stringify(report, null, 1));
 const f = (x) => (x == null ? 'N-A' : `${(100 * x).toFixed(1)} %`);
 const lines = [];
-lines.push(`### ${set} — prompt ${pv} (n = ${items.length})\n`);
+lines.push(`### ${set} — prompt ${pv} (n = ${items.length})${EXCLUDE ? ` — excluding ${EXCLUDE}` : ''}\n`);
 lines.push('| Metric | B (pass 1) | ' + keys.map((k) => MODELS[k].label).join(' | ') + (report.ensemble ? ' | Majority of 3 |' : ' |'));
 lines.push('|---|---:|' + keys.map(() => '---:').join('|') + (report.ensemble ? '|---:|' : '|'));
 const row = (name, bVal, fn, ensVal) => lines.push(`| ${name} | ${bVal} | ${keys.map((k) => fn(report.models[k])).join(' | ')}${report.ensemble ? ` | ${ensVal}` : ''} |`);
@@ -174,6 +172,7 @@ const onPass1 = (pred) => {
 };
 for (const k of keys) report.models[k].onPass1 = onPass1((id) => norm(loaded[k].get(id)?.parsed?.verdict));
 const bp = onPass1(() => 'Pertinent');
+report.baselineB.onPass1 = bp;
 row('B view + C post-filter: noise kept (of pass-1 lines kept)', `${f(bp.noise / bp.kept)} (${bp.noise}/${bp.kept})`, (m) => `${f(m.onPass1.noise / m.onPass1.kept)} (${m.onPass1.noise}/${m.onPass1.kept})`, '');
 row('B view + C post-filter: Pertinent kept', `${bp.pKept}/${bp.pTotal}`, (m) => `${m.onPass1.pKept}/${m.onPass1.pTotal}`, '');
 row('Motif exact / family', 'N-A', (m) => `${f(m.motif.exact)} / ${f(m.motif.family)}`, '');
@@ -190,7 +189,62 @@ for (const k of keys) {
   lines.push(`\nConfusion — ${MODELS[k].label} (rows = Steve, columns = model):\n\n| Steve \\ model | P | S | N | invalid |\n|---|---:|---:|---:|---:|`);
   for (const g of VERDICTS) lines.push(`| ${g} | ${c[g].Pertinent} | ${c[g]['À surveiller']} | ${c[g]['Non pertinent']} | ${c[g].invalid} |`);
 }
+// ---- robustness (review M3/M5): clustered bootstrap, Wilson on retention, McNemar, sens, unanimous-N ----
+{
+  const cities = [...new Set(items.map((i) => i.city))];
+  const byCity = Object.fromEntries(cities.map((c) => [c, items.filter((i) => i.city === c)]));
+  const r = rng(797);
+  const boot = (fn) => {
+    const vals = [];
+    for (let b = 0; b < 2000; b++) {
+      const sample = []; for (let k = 0; k < cities.length; k++) sample.push(...byCity[cities[Math.floor(r() * cities.length)]]);
+      const v = fn(sample); if (v != null && Number.isFinite(v)) vals.push(v);
+    }
+    vals.sort((a, b) => a - b);
+    return [vals[Math.floor(0.025 * vals.length)], vals[Math.floor(0.975 * vals.length)]];
+  };
+  const vOf = (k, id) => norm(loaded[k].get(id)?.parsed?.verdict);
+  const normSens = (x) => String(x ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  report.robustness = { clusters: cities.length, models: {}, mcnemar: {} };
+  for (const k of keys) {
+    const m = report.models[k];
+    const acc = (sample) => sample.filter((i) => vOf(k, i.id) === i.label.verdict).length / sample.length;
+    const noise = (sample) => { const sh = sample.filter((i) => { const v = vOf(k, i.id); return v == null || shown(v); }); return sh.length ? sh.filter((i) => i.label.verdict === 'Non pertinent').length / sh.length : null; };
+    const sensOk = items.filter((i) => normSens(loaded[k].get(i.id)?.parsed?.criteres?.sens) === normSens(i.label.sens)).length;
+    report.robustness.models[k] = {
+      accuracyClusterCI95: boot(acc), noiseClusterCI95: boot(noise),
+      pertinentKeptWilson95: wilson(m.view.pertinentKeptVisible, m.view.pertinentTotal),
+      sensAgreement: sensOk / items.length,
+    };
+  }
+  for (let a = 0; a < keys.length; a++) for (let b = a + 1; b < keys.length; b++) {
+    let n01 = 0; let n10 = 0;
+    for (const i of items) { const ca = vOf(keys[a], i.id) === i.label.verdict; const cb = vOf(keys[b], i.id) === i.label.verdict; if (ca && !cb) n10++; if (!ca && cb) n01++; }
+    const n = n01 + n10; let p = 0;
+    const lnC = (nn, kk) => { let s2 = 0; for (let j = 1; j <= kk; j++) s2 += Math.log(nn - kk + j) - Math.log(j); return s2; };
+    for (let j = 0; j <= Math.min(n01, n10); j++) p += Math.exp(lnC(n, j) + n * Math.log(0.5));
+    report.robustness.mcnemar[`${keys[a]}~${keys[b]}`] = { onlyFirstRight: n10, onlySecondRight: n01, exactP: n ? Math.min(1, 2 * p) : 1 };
+  }
+  if (keys.length >= 3) {
+    const unanimousN = items.filter((i) => keys.every((k) => vOf(k, i.id) === 'Non pertinent'));
+    const split = items.filter((i) => new Set(keys.map((k) => vOf(k, i.id))).size > 1);
+    report.robustness.unanimousNonPertinent = { count: unanimousN.length, steveN: unanimousN.filter((i) => i.label.verdict === 'Non pertinent').length, steveP: unanimousN.filter((i) => i.label.verdict === 'Pertinent').length };
+    report.robustness.splitVote = { count: split.length, steveP: split.filter((i) => i.label.verdict === 'Pertinent').length, steveS: split.filter((i) => i.label.verdict === 'À surveiller').length, steveN: split.filter((i) => i.label.verdict === 'Non pertinent').length };
+  }
+  const rb = report.robustness;
+  lines.push(`\nRobustness (${rb.clusters} municipalities; bootstrap resamples whole municipalities, 2000 draws, seed 797):\n`);
+  lines.push('| Metric | ' + keys.map((k) => MODELS[k].label).join(' | ') + ' |');
+  lines.push('|---|' + keys.map(() => '---:').join('|') + '|');
+  lines.push('| Accuracy, municipality-clustered 95 % CI | ' + keys.map((k) => `${f(rb.models[k].accuracyClusterCI95[0])}–${f(rb.models[k].accuracyClusterCI95[1])}`).join(' | ') + ' |');
+  lines.push('| Noise in view, municipality-clustered 95 % CI | ' + keys.map((k) => `${f(rb.models[k].noiseClusterCI95[0])}–${f(rb.models[k].noiseClusterCI95[1])}`).join(' | ') + ' |');
+  lines.push('| Pertinent kept visible, Wilson 95 % lower bound | ' + keys.map((k) => f(rb.models[k].pertinentKeptWilson95[0])).join(' | ') + ' |');
+  lines.push('| Sens of the modification = Steve\'s sens (5 values) | ' + keys.map((k) => f(rb.models[k].sensAgreement)).join(' | ') + ' |');
+  lines.push('\nMcNemar exact test on verdict correctness: ' + Object.entries(rb.mcnemar).map(([k, v]) => `${k}: ${v.onlyFirstRight} vs ${v.onlySecondRight} discordant, p = ${v.exactP.toFixed(2)}`).join('; ') + '.');
+  if (rb.unanimousNonPertinent) lines.push(`\nUnanimous "Non pertinent" (3 models): ${rb.unanimousNonPertinent.count} lines, of which Steve N ${rb.unanimousNonPertinent.steveN}, Steve P ${rb.unanimousNonPertinent.steveP}. Split vote: ${rb.splitVote.count} lines (Steve P ${rb.splitVote.steveP} / S ${rb.splitVote.steveS} / N ${rb.splitVote.steveN}).`);
+}
 const md = lines.join('\n') + '\n';
+const out = arg('json'); // written after every metric is attached (review F06)
+if (out) fs.writeFileSync(out, JSON.stringify(report, null, 1));
 const mdOut = arg('md');
 if (mdOut) fs.writeFileSync(mdOut, md);
 if (!showErrors) process.stdout.write(md);
