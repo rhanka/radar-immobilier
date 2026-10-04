@@ -4,6 +4,9 @@
  * Persists graphify graph.json output (nodes + links) into the Postgres
  * `graph_nodes` / `graph_edges` tables. All writes are idempotent:
  *   - nodes   → INSERT … ON CONFLICT (id) DO UPDATE SET (label, type, props)
+ *               WHERE the existing row has the same city_slug (GH #812: a row
+ *               of another city is never overwritten; reported as
+ *               `cross-city-id-collision`)
  *   - edges   → INSERT … ON CONFLICT (src_id, dst_id, kind) DO UPDATE SET props
  *
  * Read helpers cover the two main access patterns:
@@ -817,15 +820,90 @@ export function findMissingSourceRefs(
 // Service
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * A node id of the incoming graph whose `graph_nodes` row belongs to ANOTHER city
+ * (or to the cross-city scope, `city_slug IS NULL`) — GH #812.
+ *
+ * `graph_nodes` is keyed by `id` alone while graphify ids are only unique within a
+ * city (`bylaw-242` exists in gore AND barkmere). The upsert therefore refuses to
+ * overwrite such a row (see `SAME_CITY_CONFLICT_GUARD`): the incoming node is NOT
+ * written, the owner's row stays untouched, and the collision is reported here so
+ * the repair (DOSSIER_DECISION_VILLES_ECART §6, D2) can find every skipped id.
+ */
+export interface CrossCityIdCollision {
+  /** The colliding node id (present in the incoming graph, not written). */
+  id: string;
+  /** `city_slug` of the row that kept the id (null = cross-city/global row). */
+  ownerCitySlug: string | null;
+}
+
+/**
+ * GH #812 interim guard (decision D3(a) of 2026-10-04): `ON CONFLICT (id) DO UPDATE`
+ * only applies when the existing row belongs to the SAME city scope as the incoming
+ * row. `IS NOT DISTINCT FROM` keeps the cross-city path (`city_slug` null on both
+ * sides) updatable. A row of another city is never overwritten; its id is reported
+ * as a `cross-city-id-collision`. The structural fix (PK `(city_slug, id)`) is
+ * tracked separately (D2).
+ */
+const SAME_CITY_CONFLICT_GUARD = sql`${graphNodes.citySlug} IS NOT DISTINCT FROM excluded.city_slug`;
+
+/**
+ * Pure: ids of `rows` that the guarded upsert did NOT return. With
+ * `ON CONFLICT … DO UPDATE … WHERE <guard>`, Postgres returns every inserted or
+ * updated row; a row skipped by the guard is absent from RETURNING. `rows` are
+ * already deduplicated by `mergeNodeRows`, so each id appears once.
+ */
+export function idsSkippedByCityGuard(rows: readonly NodeRow[], returnedIds: Iterable<string>): string[] {
+  const written = new Set(returnedIds);
+  return rows.filter((row) => !written.has(row.id)).map((row) => row.id);
+}
+
+/** Resolve the owner city of each id skipped by the guard (read inside the same tx). */
+async function resolveCrossCityCollisions(
+  reader: Pick<Database, "select">,
+  skippedIds: readonly string[],
+): Promise<CrossCityIdCollision[]> {
+  if (skippedIds.length === 0) return [];
+  const owners = await reader
+    .select({ id: graphNodes.id, citySlug: graphNodes.citySlug })
+    .from(graphNodes)
+    .where(inArray(graphNodes.id, [...skippedIds]));
+  const ownerById = new Map(owners.map((row) => [row.id, row.citySlug]));
+  return [...skippedIds]
+    .sort((a, b) => a.localeCompare(b))
+    .map((id) => ({ id, ownerCitySlug: ownerById.get(id) ?? null }));
+}
+
+/**
+ * One structured, greppable log line per projection that hit a collision, so the
+ * repair can list every skipped id from the job logs (`cross-city-id-collision`).
+ */
+function logCrossCityCollisions(citySlug: string | null, collisions: readonly CrossCityIdCollision[]): void {
+  if (collisions.length === 0) return;
+  console.warn(
+    JSON.stringify({
+      event: "graph-store:cross-city-id-collision",
+      city: citySlug,
+      count: collisions.length,
+      collisions,
+    }),
+  );
+}
+
 export interface UpsertResult {
+  /** Nodes in the incoming graph (after id dedup), including the ones skipped by the city guard. */
   nodeCount: number;
   edgeCount: number;
+  /** Incoming node ids NOT written because their row belongs to another city (GH #812). */
+  crossCityCollisions: CrossCityIdCollision[];
 }
 
 /**
  * Ingest a city-scoped graphify graph.json into Postgres (idempotent).
  *
- * Nodes are upserted by their natural text `id`. Edges are upserted by the
+ * Nodes are upserted by their natural text `id`, but only over a row of the
+ * same city scope: a row of another city is left untouched and its id is
+ * returned in `crossCityCollisions` (GH #812). Edges are upserted by the
  * (src_id, dst_id, kind) triple (unique index `graph_edges_natural_key_idx`).
  * Re-running with the same graph.json is safe and produces no duplicate rows.
  *
@@ -844,9 +922,10 @@ export async function upsertGraph(
   const nodeRows = mergeNodeRows(parsed.nodes.map((n) => buildNodeRow(n, citySlug)));
   const edgeRows = mergeEdgeRows(links.map(buildEdgeRow));
 
-  // Upsert nodes (ON CONFLICT on pk = id)
+  // Upsert nodes (ON CONFLICT on pk = id, same city scope only — GH #812)
+  let crossCityCollisions: CrossCityIdCollision[] = [];
   if (nodeRows.length > 0) {
-    await db
+    const written = await db
       .insert(graphNodes)
       .values(
         nodeRows.map((r) => ({
@@ -893,7 +972,14 @@ export async function upsertGraph(
           `,
           sourceRef: sql`excluded.source_ref`,
         },
-      });
+        setWhere: SAME_CITY_CONFLICT_GUARD,
+      })
+      .returning({ id: graphNodes.id });
+    crossCityCollisions = await resolveCrossCityCollisions(
+      db,
+      idsSkippedByCityGuard(nodeRows, written.map((row) => row.id)),
+    );
+    logCrossCityCollisions(citySlug, crossCityCollisions);
   }
 
   // Upsert edges (ON CONFLICT on the natural-key unique index)
@@ -916,7 +1002,7 @@ export async function upsertGraph(
       });
   }
 
-  return { nodeCount: nodeRows.length, edgeCount: edgeRows.length };
+  return { nodeCount: nodeRows.length, edgeCount: edgeRows.length, crossCityCollisions };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -944,6 +1030,11 @@ export interface UpsertAtomicResult {
   aborted: boolean;
   /** Message d'alerte loggable quand aborted=true (ou skip cross-city). */
   reason?: string;
+  /**
+   * Incoming node ids NOT written because their row belongs to another city
+   * (GH #812). Empty when the projection was refused before writing, or rolled back.
+   */
+  crossCityCollisions: CrossCityIdCollision[];
 }
 
 /**
@@ -953,6 +1044,10 @@ export interface UpsertAtomicResult {
  * disparus → « preuves fantômes »), cette variante exécute dans UNE transaction
  * par ville :
  *   1. upsert des nœuds/arêtes présents (conserve l'existant, idempotent) ;
+ *      a node id whose row belongs to ANOTHER city is not written (the owner's
+ *      row stays untouched) and is returned in `crossCityCollisions` + logged as
+ *      `cross-city-id-collision` — GH #812 interim guard. Edges are still keyed by
+ *      (src_id, dst_id, kind) without a city (structural fix: D2) ;
  *   2. SUPPRESSION des nœuds de cette `city_slug` ABSENTS du nouveau graphe ;
  *   3. SUPPRESSION des arêtes devenues pendantes (référençant un nœud qu'on vient
  *      de supprimer) et qui ne sont pas dans le nouveau graphe ;
@@ -1017,6 +1112,7 @@ export async function upsertGraphAtomic(
       deletedEdges: 0,
       aborted: false,
       reason: "cross-city (citySlug=null) : upsert pur sans suppression",
+      crossCityCollisions: base.crossCityCollisions,
     };
   }
 
@@ -1026,6 +1122,7 @@ export async function upsertGraphAtomic(
     deletedNodes: 0,
     deletedEdges: 0,
     aborted: false,
+    crossCityCollisions: [],
   };
 
   // Compte des signaux complets AVANT projection (état PG actuel de la ville),
@@ -1086,9 +1183,9 @@ export async function upsertGraphAtomic(
 
   try {
     await db.transaction(async (tx) => {
-      // 1. upsert nœuds (ON CONFLICT pk = id)
+      // 1. upsert nœuds (ON CONFLICT pk = id, même ville seulement — GH #812)
       if (nodeRows.length > 0) {
-        await tx
+        const written = await tx
           .insert(graphNodes)
           .values(
             nodeRows.map((r) => ({
@@ -1108,7 +1205,13 @@ export async function upsertGraphAtomic(
               props: sql`excluded.props`,
               sourceRef: sql`excluded.source_ref`,
             },
-          });
+            setWhere: SAME_CITY_CONFLICT_GUARD,
+          })
+          .returning({ id: graphNodes.id });
+        result.crossCityCollisions = await resolveCrossCityCollisions(
+          tx,
+          idsSkippedByCityGuard(nodeRows, written.map((row) => row.id)),
+        );
       }
 
       // 2. upsert arêtes (ON CONFLICT clé naturelle src_id,dst_id,kind)
@@ -1190,6 +1293,7 @@ export async function upsertGraphAtomic(
           ...result,
           deletedNodes: 0,
           deletedEdges: 0,
+          crossCityCollisions: [],
           aborted: true,
           reason:
             `régression de preuves pour ${citySlug} : signaux complets ` +
@@ -1208,6 +1312,7 @@ export async function upsertGraphAtomic(
     throw err;
   }
 
+  logCrossCityCollisions(citySlug, result.crossCityCollisions);
   return result;
 }
 

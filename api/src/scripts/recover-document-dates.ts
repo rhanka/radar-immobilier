@@ -109,6 +109,8 @@ async function main(): Promise<void> {
   const totals: DocumentDateRecoveryStats = emptyRecoveryStats();
   const report = { mode, heal, cities: cities.length, citiesChanged: 0, citiesWritten: 0, citiesSkipped: 0,
     citiesDrift: 0, citiesHalted: 0, citiesAborted: 0, metadataReadErrors: 0, conflictSamples: [] as unknown[],
+    // GH #812 — ids the projection did not write because their PG row belongs to another city.
+    crossCityIdCollisions: [] as Array<{ city: string; id: string; ownerCitySlug: string | null }>,
     totals };
 
   for (const city of cities) {
@@ -171,7 +173,9 @@ async function main(): Promise<void> {
       logger.error({ city, reason: result.reason }, "recover: PG projection aborted (latest.json written; investigate)");
     } else {
       report.citiesWritten += 1;
-      logger.info({ city, backupPrefix: archive.backup_prefix, nodes: result.nodeCount }, "recover: written (S3 + PG)");
+      report.crossCityIdCollisions.push(...result.crossCityCollisions.map((collision) => ({ city, ...collision })));
+      logger.info({ city, backupPrefix: archive.backup_prefix, nodes: result.nodeCount,
+        crossCityIdCollisions: result.crossCityCollisions.length }, "recover: written (S3 + PG)");
     }
   }
 
