@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-03T13:27:40.493Z",
+  "checkedAt": "2026-10-04T14:40:47.787Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/.worktrees/dossier-roles-immo/docs/spec/reports/dossier-roles-immo/focus/../decision-focus.html",
   "chromiumCdpPort": "9244",
   "offline": {
@@ -297,16 +297,23 @@
       "rel": "noopener",
       "text": "Ouvrir la PR #795 sur GitHub"
     },
-    "header": [
-      "```yaml",
-      "dossier: \"Rôles et droits de décision dans radar-immobilier : application du modèle de rôles humains issu du quorum h2a\"",
-      "fichier: DOSSIER_DECISION_ROLES_IMMO_2026-10-03.md",
-      "version: \"r1 · sha256:11c750ce6ad27669e6050ac2e0645ccdfde3e7b7847e4568977081d9f0363811\"",
-      "decideur: Farid",
-      "date: \"2026-10-03T09:27:32-04:00\"",
-      "coller_dans: \"https://github.com/rhanka/radar-immobilier/pull/795\"",
-      "decisions:"
-    ],
+    "header": {
+      "fenced": true,
+      "keys": [
+        "dossier",
+        "fichier",
+        "version",
+        "decideur",
+        "date",
+        "coller_dans"
+      ],
+      "dossierStyle": ">-",
+      "dossier": "Rôles et droits de décision dans radar-immobilier : application du modèle de rôles humains issu du quorum h2a",
+      "decideur": "Farid",
+      "coller_dans": "https://github.com/rhanka/radar-immobilier/pull/795",
+      "decisions": true,
+      "doubleQuotes": false
+    },
     "entries": [
       {
         "id": "D3",
@@ -394,7 +401,7 @@
     "faridMine": 11,
     "all": 18,
     "fabienMine": 13,
-    "fabienDecideur": "decideur: Fabien",
+    "fabienDecideur": "Fabien",
     "fabienRoles": {
       "D1": "decide",
       "D2": "decide",
