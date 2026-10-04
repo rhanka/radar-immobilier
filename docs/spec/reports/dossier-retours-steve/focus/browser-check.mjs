@@ -44,6 +44,12 @@ const waitUntil = async (expression, failure) => {
   throw Error(failure);
 };
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+const sceneBox = selector => evaluate(`(() => { const element = document.querySelector('${selector}'); element.scrollIntoView({ block: 'start' });
+  const rect = element.getBoundingClientRect(); return { x: rect.x + scrollX, y: rect.y + scrollY, width: rect.width, height: rect.height }; })()`);
+const capture = async (box, file) => {
+  const shot = await call('Page.captureScreenshot', { format: 'png', fromSurface: true, captureBeyondViewport: true, clip: { ...box, scale: 1 } });
+  await writeFile(file, Buffer.from(shot.data, 'base64'));
+};
 const timeout = setTimeout(() => { console.error('Browser verification timed out'); process.exit(1); }, 150000);
 
 await mkdir('.generated', { recursive: true });
@@ -53,7 +59,7 @@ await call('Network.enable');
 await call('Network.setBlockedURLs', { urls: ['http://*', 'https://*'] });
 await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
 await call('Page.navigate', { url: focusFile });
-const READY = `document.querySelectorAll('.scene').length === 5 && document.querySelectorAll('.flow').length === 2 && document.querySelectorAll('[data-diagram]').length === 3 && document.querySelectorAll('[data-node-kind]').length > 0`;
+const READY = `document.querySelectorAll('.scene').length === 5 && document.querySelectorAll('.flow').length === 1 && document.querySelectorAll('[data-diagram]').length === 4 && document.querySelectorAll('[data-node-kind]').length > 0`;
 await waitUntil(READY, 'les cinq scènes sont absentes');
 const expectedGraphs = `window.expectedGraphs=${JSON.stringify(graphs.map(graph => ({ id: graph.id, kind: graph.kind, projection: graph.projection, sceneHash: graph.sceneHash, groups: (graph.groups ?? []).length })))};true`;
 await evaluate(expectedGraphs);
@@ -63,7 +69,7 @@ const checkExpression = `(() => {
   const order = graphs.map(graph => graph.id);
   const actualOrder = [...document.querySelectorAll('.scene')].map(scene => scene.dataset.scene);
   if (JSON.stringify(actualOrder) !== JSON.stringify(order)) throw Error('ordre des scènes : ' + actualOrder);
-  if (document.querySelectorAll('.flow').length !== 2 || document.querySelectorAll('[data-diagram]').length !== 3) throw Error('deux scènes SvelteFlow et trois diagrammes attendus');
+  if (document.querySelectorAll('.flow').length !== 1 || document.querySelectorAll('[data-diagram]').length !== 4) throw Error('une scène SvelteFlow et quatre diagrammes attendus');
   const inside = (inner, outer, pad = 1) => inner.left >= outer.left - pad && inner.top >= outer.top - pad && inner.right <= outer.right + pad && inner.bottom <= outer.bottom + pad;
   const hit = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
   const orthogonal = points => points.slice(1).every((point, index) => point.x === points[index].x || point.y === points[index].y);
@@ -111,11 +117,16 @@ const checkExpression = `(() => {
     }
     // Swimlanes: lanes left to right in the agreed order, oracle band below all of them.
     const lanes = [...root.querySelectorAll('[data-lane-kind]')].map(lane => ({ id: lane.dataset.lane, kind: lane.dataset.laneKind, rect: lane.querySelector('.lane-bg').getBoundingClientRect() }));
-    if (JSON.stringify(lanes.map(lane => lane.kind)) !== JSON.stringify(['user', 'ui', 'backend', 'data'])) throw Error(graph.id + ' : ordre des couloirs');
+    if (JSON.stringify(lanes.map(lane => lane.kind)) !== JSON.stringify(graph.projection.laneKinds)) throw Error(graph.id + ' : ordre des couloirs');
     if (lanes.some((lane, index) => index && lane.rect.left < lanes[index - 1].rect.right - 1)) throw Error(graph.id + ' : couloirs non alignés de gauche à droite');
     const band = root.querySelector('[data-band] .band-bg').getBoundingClientRect();
     const lanesBox = { left: lanes[0].rect.left, right: lanes.at(-1).rect.right, bottom: Math.max(...lanes.map(lane => lane.rect.bottom)) };
     if (band.top < lanesBox.bottom || band.width < (lanesBox.right - lanesBox.left) * .95) throw Error(graph.id + ' : bande oracle pas en bas ni transversale');
+    // Scène à deux zones : la zone « application » contient tous les couloirs, la bande est dessous.
+    const zoneElement = root.querySelector('[data-zone] rect');
+    if (Boolean(zoneElement) !== Boolean(graph.projection.zone)) throw Error(graph.id + ' : zone application');
+    if (zoneElement) { const zone = zoneElement.getBoundingClientRect();
+      if (lanes.some(lane => !inside(lane.rect, zone)) || band.top < zone.bottom) throw Error(graph.id + ' : couloirs hors de la zone application ou bande non séparée'); }
     const nodes = [...root.querySelectorAll('[data-lane-node]')];
     const projected = graph.projection.nodes.map(node => node.id + '|' + node.lane + '|' + node.evidence).sort();
     if (JSON.stringify(nodes.map(node => node.dataset.laneNode + '|' + node.dataset.lane + '|' + node.dataset.evidence).sort()) !== JSON.stringify(projected)) throw Error(graph.id + ' : blocs différents');
@@ -128,7 +139,7 @@ const checkExpression = `(() => {
     }
     const data = laneRect[lanes.find(lane => lane.kind === 'data').id];
     const stores = [...root.querySelectorAll('[data-container]')].map(store => ({ id: store.dataset.container, rect: store.querySelector('rect').getBoundingClientRect(), label: store.querySelector('text').textContent }));
-    if (stores.length !== 2 || stores.some(store => !inside(store.rect, data))) throw Error(graph.id + ' : magasins S3 et PostgreSQL hors du couloir données');
+    if (stores.length !== graph.projection.stores || stores.some(store => !inside(store.rect, data))) throw Error(graph.id + ' : magasins de données hors du couloir données');
     const edges = [...root.querySelectorAll('[data-lane-edge]')].map(edge => edge.dataset.laneEdge).sort();
     if (JSON.stringify(edges) !== JSON.stringify(graph.projection.edges.map(edge => edge.id).sort())) throw Error(graph.id + ' : liens différents');
     const labels = [...root.querySelectorAll('[data-edge-label] rect')];
@@ -138,7 +149,7 @@ const checkExpression = `(() => {
       for (const box of boxes) if (hit(rect, box.rect)) throw Error(graph.id + ' : libellé sur le bloc ' + box.id + ' : ' + label.nextElementSibling.textContent);
     }
     return { sceneId: graph.id, kind: 'lanes', sceneHash: graph.sceneHash, initialScale: scale, lanes: lanes.map(lane => lane.kind), stores: stores.map(store => store.label),
-      band: { below: true, widthShare: Number((band.width / (lanesBox.right - lanesBox.left)).toFixed(3)) }, nodes: nodes.length, edges: edges.length, labels: labels.length };
+      zone: graph.projection.zone, band: { below: true, widthShare: Number((band.width / (lanesBox.right - lanesBox.left)).toFixed(3)) }, nodes: nodes.length, edges: edges.length, labels: labels.length };
   };
   if (!document.querySelector('.masthead').textContent.includes('5 SCÈNES · 12 SECTIONS · 16 DÉCISIONS')) throw Error('bandeau absent');
   const metrics = [];
@@ -244,6 +255,39 @@ const checkExpression = `(() => {
   if (document.documentElement.scrollWidth > innerWidth + 1) throw Error('débordement horizontal de la page');
   return metrics;
 })()`;
+
+// Graphiques du texte et options détaillées : présents, lisibles, rien ne déborde.
+const contentExpression = `(() => {
+  for (const details of document.querySelectorAll('details.dossier-section')) details.open = true;
+  const hit = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+  const charts = [...document.querySelectorAll('[data-chart]')].map(chart => {
+    const svg = chart.querySelector('svg').getBoundingClientRect();
+    const bars = [...chart.querySelectorAll('rect[data-value]')];
+    if (!bars.length || bars.some(bar => bar.getBoundingClientRect().right > svg.right + 1)) throw Error('graphique ' + chart.dataset.chart + ' : barres hors cadre');
+    const fills = new Set(bars.map(bar => getComputedStyle(bar).fill));
+    if (fills.has('none') || fills.has('rgb(0, 0, 0)')) throw Error('graphique ' + chart.dataset.chart + ' : couleur absente');
+    for (const text of chart.querySelectorAll('svg text')) if (!hit(text.getBoundingClientRect(), svg)) throw Error('graphique ' + chart.dataset.chart + ' : texte hors cadre');
+    return { id: chart.dataset.chart, kind: chart.dataset.chartKind, bars: bars.length };
+  });
+  const descriptions = document.querySelectorAll('.question-block [data-description]').length;
+  const minis = [...document.querySelectorAll('[data-mini-diagram]')].map(mini => {
+    const svg = mini.querySelector('svg').getBoundingClientRect();
+    const boxes = [...mini.querySelectorAll('.er-body')].map(box => box.getBoundingClientRect());
+    for (const label of mini.querySelectorAll('[data-relation-label] rect')) for (const box of boxes) if (hit(label.getBoundingClientRect(), box)) throw Error(mini.dataset.miniDiagram + ' : libellé sur une table');
+    for (const entity of mini.querySelectorAll('[data-entity]')) { const body = entity.querySelector('.er-body').getBoundingClientRect();
+      for (const text of entity.querySelectorAll('text')) if (text.textContent.trim()) { const r = text.getBoundingClientRect(); if (r.right > body.right + 1 || r.left < body.left - 1) throw Error(mini.dataset.miniDiagram + ' : texte hors table'); } }
+    return { id: mini.dataset.miniDiagram, tables: boxes.length, scale: Number((svg.width / Number(mini.dataset.canvasWidth)).toFixed(3)) };
+  });
+  if (charts.length !== 4 || descriptions !== 48 || minis.length !== 7) throw Error('contenu : ' + JSON.stringify({ charts: charts.length, descriptions, minis: minis.length }));
+  if (minis.some(mini => mini.scale < .6)) throw Error('schéma d’option trop réduit : ' + JSON.stringify(minis));
+  return { charts, descriptions, minis };
+})()`;
+const content = await evaluate(contentExpression);
+const contentCaptures = [];
+for (const [name, selector] of [['graphique-sens', '[data-chart="sens-classement"]'], ['graphique-bruit', '[data-chart="bruit-familles"]'], ['decision-D2', '[data-question="D2"]'], ['decision-D3', '[data-question="D3"]']]) {
+  await capture(await sceneBox(selector), `.generated/${name}.png`);
+  contentCaptures.push(`.generated/${name}.png`);
+}
 
 const viewports = [];
 for (const viewport of [{ width: 1440, height: 1000 }, { width: 1920, height: 1080 }]) {
@@ -372,12 +416,6 @@ const oneToOne = [];
 await call('Emulation.setDeviceMetricsOverride', { width: 1920, height: 1080, deviceScaleFactor: 1, mobile: false });
 await pause(300);
 // Matrice, tables et couloirs : clic réel sur 1:1, l'échelle du SVG doit valoir 1.
-const sceneBox = selector => evaluate(`(() => { const element = document.querySelector('${selector}'); element.scrollIntoView({ block: 'start' });
-  const rect = element.getBoundingClientRect(); return { x: rect.x + scrollX, y: rect.y + scrollY, width: rect.width, height: rect.height }; })()`);
-const capture = async (box, file) => {
-  const shot = await call('Page.captureScreenshot', { format: 'png', fromSurface: true, captureBeyondViewport: true, clip: { ...box, scale: 1 } });
-  await writeFile(file, Buffer.from(shot.data, 'base64'));
-};
 for (const graph of graphs.filter(item => item.kind !== 'flow')) {
   if (graph.kind === 'matrix') {
     await capture(await sceneBox(`[data-scene="${graph.id}"] [data-diagram]`), `.generated/scene-1a1-${graph.id}.png`);
@@ -444,7 +482,12 @@ const dark = await evaluate(`(() => { const theme = document.querySelector('[dat
     diagram: getComputedStyle(document.querySelector('[data-diagram]')).backgroundColor }; })()`);
 if (dark.backgroundLum > .05 || dark.textLum < .6) throw Error(`thème sombre non appliqué : ${JSON.stringify(dark)}`);
 await capture({ x: 0, y: 0, width: 1440, height: 1000 }, '.generated/dossier-preview-dark-1440x1000.png');
+const darkContent = await evaluate(contentExpression);
 const darkCaptures = [];
+for (const [name, selector] of [['graphique-sens', '[data-chart="sens-classement"]'], ['decision-D2', '[data-question="D2"]']]) {
+  await capture(await sceneBox(selector), `.generated/sombre-${name}.png`);
+  darkCaptures.push(`.generated/sombre-${name}.png`);
+}
 for (const graph of graphs) {
   await capture(await sceneBox(`[data-scene="${graph.id}"]`), `.generated/scene-sombre-${graph.id}.png`);
   darkCaptures.push(`.generated/scene-sombre-${graph.id}.png`);
@@ -459,11 +502,11 @@ const report = {
   offline: { ...offline, blockedExternal: true },
   viewports: viewports.map(viewport => ({ width: viewport.width, height: viewport.height })),
   scenes: viewports[0].metrics, scenesAt1920: viewports[1].metrics,
-  dark: { ...dark, scenes: darkMetrics }, choices, copy, exportFilter, oneToOne, overview,
+  dark: { ...dark, scenes: darkMetrics, content: darkContent }, content, choices, copy, exportFilter, oneToOne, overview,
   captures: ['.generated/dossier-preview-1440x1000.png', '.generated/dossier-preview-1920x1080.png',
     ...graphs.map(graph => `.generated/scene-1a1-${graph.id}.png`),
     ...graphs.map(graph => `.generated/scene-vue-ensemble-${graph.id}.png`),
-    '.generated/dossier-preview-dark-1440x1000.png', ...darkCaptures],
+    '.generated/dossier-preview-dark-1440x1000.png', ...darkCaptures, ...contentCaptures],
   consoleErrors, runtimeErrors, externalRequests,
 };
 await writeFile('.generated/browser-check.json', `${JSON.stringify(report, null, 2)}\n`);

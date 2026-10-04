@@ -22,7 +22,7 @@ test('les douze sections et l’annexe de convergence sont présentes ; l’anne
 
 test('chaque carte respecte le gabarit A’ et ses champs', () => {
   assert.deepEqual(CARD.A, { width: 460, height: 200 });
-  assert.deepEqual(graphs.map(graph => graph.kind), ['matrix', 'er', 'lanes', 'flow', 'flow']);
+  assert.deepEqual(graphs.map(graph => graph.kind), ['matrix', 'er', 'lanes', 'flow', 'lanes']);
   for (const graph of graphs.filter(item => item.kind === 'flow')) for (const node of graph.nodes) {
     const meta = node.metadata;
     assert.equal(meta.card, 'A', `${graph.id}/${node.id}`);
@@ -102,12 +102,25 @@ test('les chiffres des cartes sont ceux du dossier', () => {
   assert.equal(graphs.find(graph => graph.id === 'modele-donnees').entities.find(entity => entity.id === 'annotation_codes').attributes[0].comment, '28 codes');
 });
 
-test('A/B/C : B observé, C proposé, trois états de C', () => {
+test('A/B/C : deux zones, application en couloirs (écran, backend, base) et évaluation hors ligne en bas', () => {
   const abc = graphs.find(graph => graph.id === 'affichage-abc');
+  assert.equal(abc.kind, 'lanes');
+  assert.equal(abc.projection.zone, 'Application — ce que voient les utilisateurs');
+  const { zone, lanes, band } = abc.layout;
+  for (const lane of lanes) assert.ok(lane.x >= zone.x && lane.x + lane.width <= zone.x + zone.width && lane.y >= zone.y && lane.y + lane.height <= zone.y + zone.height, lane.id);
+  assert.ok(band.y > zone.y + zone.height, 'évaluation sous l’application');
   const byId = Object.fromEntries(abc.nodes.map(node => [node.id, node]));
-  assert.equal(byId.PB.metadata.evidenceClass, 'observed');
-  assert.equal(byId.PC.metadata.evidenceClass, 'declared');
-  assert.deepEqual(['CONF', 'INS', 'EXC'].map(id => byId[id].parent), ['C1', 'C1', 'C1']);
+  // Où chaque élément vit : écran, backend, base, ou job d'évaluation hors ligne.
+  assert.deepEqual(['MAPB', 'MAPC', 'UATC'].map(id => byId[id].tag), ['écran', 'écran', 'écran']);
+  assert.deepEqual(['APIB', 'APIC'].map(id => byId[id].tag), ['backend', 'backend']);
+  assert.deepEqual(['GRA', 'ANN', 'ORR'].map(id => byId[id].tag), ['PG', 'PG', 'PG']);
+  assert.deepEqual(['PA', 'DIFF', 'ORA', 'MES', 'GATE', 'DEC'].map(id => byId[id].lane), Array(6).fill('EV'));
+  assert.equal(byId.MAPB.evidence, 'observed');
+  assert.equal(byId.APIC.evidence, 'declared');
+  assert.equal(byId.PA.evidence, 'historical');
+  // Seule la décision de Farid fait passer les utilisateurs de B à C.
+  assert.deepEqual(abc.edges.filter(edge => edge.target === 'MAPC' && byId[edge.source].lane === 'EV').map(edge => edge.source), ['DEC']);
+  assertGeometry(abc, abc.edges);
 });
 
 test('seize décisions D1 à D16, recommandation connue sauf le point ouvert D9', () => {
@@ -155,4 +168,53 @@ test('chaque décision : introduction, dépendances antérieures, avantages et i
     assert.ok(section10.includes(`#### ${question.question}`) && section10.includes(question.intro), `${question.key} : §10 désaligné`);
   }
   assert.ok(!/honn[êe]te/i.test(markdown + JSON.stringify(questions)));
+});
+
+test('graphiques : chaque valeur reprend un tableau du dossier, repères présents dans le Markdown', async () => {
+  const { CHARTS } = await import('./charts.js');
+  const markdown = await readFile('../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md', 'utf8');
+  const markers = [...markdown.matchAll(/<!-- chart:([\w-]+) -->/g)].map(match => match[1]);
+  assert.deepEqual(markers.sort(), Object.keys(CHARTS).sort());
+  // Row of a table, looked up inside the section that carries the chart.
+  const section = (from, to) => markdown.split(from)[1].split(to)[0];
+  const rowIn = (text, start) => text.split('\n').find(line => line.startsWith(`| ${start} |`))?.split('|').slice(1, -1).map(cell => cell.trim().replaceAll('*', ''));
+  const s53 = section('\n### 5.3 ', '\n### 5.4 '), s52 = section('\n### 5.2 ', '\n### 5.3 '), s93 = section('\n### 9.3 ', '\n### 9.4 ');
+  for (const item of CHARTS['sens-classement'].rows) {
+    const [, p, s, n, total, pass1] = rowIn(s53, item.label);
+    assert.deepEqual([Number(p), Number(s), Number(n), Number(total), Number(pass1)],
+      [item.values.P, item.values.S, item.values.N, item.values.P + item.values.S + item.values.N, item.extra], item.label);
+  }
+  for (const item of CHARTS['classement-passes'].rows) {
+    const [, p, s, n, total] = rowIn(s52, item.label);
+    assert.deepEqual([Number(p), Number(s), Number(n), Number(total)], [item.values.P, item.values.S, item.values.N, item.values.P + item.values.S + item.values.N], item.label);
+  }
+  // Familles de bruit : §2.2 (bilan de la passe 1) et tableaux des critères (124 lignes).
+  assert.deepEqual(CHARTS['bruit-familles'].rows.map(item => item.values[0]), [3, 4, 6, 8, 3]);
+  assert.equal(CHARTS['bruit-familles'].rows.reduce((sum, item) => sum + item.values[0], 0), 24);
+  assert.equal(CHARTS['bruit-familles'].rows.reduce((sum, item) => sum + item.values[1], 0), 55);
+  assert.match(markdown, /les 24 Non pertinent se répartissent en \*\*3\*\* hors résidentiel ou hors urbanisme, \*\*4\*\* resserrements, \*\*6\*\* sans effet sur la capacité, \*\*11\*\* hors portée \(8 autorisations individuelles, 3 points d'ordre du jour\)/);
+  for (const item of CHARTS['base-b'].rows) {
+    const [, value, ratio] = rowIn(s93, item.label);
+    assert.equal(value, `${String(item.value).replace('.', ',')} %`, item.label);
+    assert.equal(ratio, item.ratio, item.label);
+  }
+});
+
+test('options : description concrète pour chacune, schéma de tables pour D2 et D3, géométrie propre', async () => {
+  const { parseEr } = await import('./parse-er.mjs');
+  const { erLayout } = await import('./diagram-layout.js');
+  const markdown = await readFile('../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md', 'utf8');
+  const section10 = markdown.split('\n## 10. Options et recommandation')[1].split('\n## 11. ')[0];
+  for (const question of questions) for (const option of question.options) {
+    assert.ok(option.description.length >= 80, `${question.key}/${option.key} description trop courte`);
+    assert.ok(section10.includes(option.description), `${question.key}/${option.key} description absente du §10`);
+  }
+  const withDiagram = questions.flatMap(question => question.options.filter(option => option.diagram).map(option => `${question.key}/${option.key}`));
+  assert.deepEqual(withDiagram, ['D2/M1', 'D2/M2', 'D2/M3', 'D2/M4', 'D3/a', 'D3/b', 'D3/c']);
+  for (const question of questions) for (const option of question.options.filter(item => item.diagram)) {
+    const model = parseEr(option.diagram.er, option.key);
+    const layout = erLayout(model, option.diagram);
+    assert.ok(section10.includes(option.diagram.er), `${question.key}/${option.key} schéma absent du §10`);
+    assertGeometry({ id: `${question.key}/${option.key}`, layout }, model.relations);
+  }
 });
