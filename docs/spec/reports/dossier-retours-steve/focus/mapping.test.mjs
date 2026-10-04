@@ -218,3 +218,18 @@ test('options : description concrète pour chacune, schéma de tables pour D2 et
     assertGeometry({ id: `${question.key}/${option.key}`, layout }, model.relations);
   }
 });
+
+test('introduction : protocole des trois passes et glossaire, avant toute mesure « Passe 1 »', async () => {
+  const { PROTOCOL } = await import('./protocol.js');
+  const markdown = await readFile('../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md', 'utf8');
+  const intro = markdown.indexOf(`### ${PROTOCOL.title}`);
+  assert.ok(intro > 0 && intro < markdown.indexOf('| Passe 1 |') + 1 && intro < markdown.indexOf('<!-- chart:'));
+  for (const row of PROTOCOL.passes) assert.ok(markdown.includes(`| ${row.pass} | ${row.filters} | ${row.signals} | ${row.aim} |`), row.pass);
+  assert.ok(markdown.includes(PROTOCOL.summary));
+  assert.equal(PROTOCOL.passes.reduce((sum, row) => sum + row.signals, 0) + 1, 124);
+  const glossaryText = markdown.split('\n## Glossaire\n')[1].split('\n## 1. ')[0];
+  // First column of the glossary table: the defined terms.
+  const terms = glossaryText.split('\n').filter(line => line.startsWith('| ')).map(line => line.split('|')[1]).join(' ; ');
+  for (const term of ['Passe 1', '124 lignes', 'B′', 'Profil A gelé', 'Shadow', 'Oracle C', 'Oracle E', 'Seuil D13', 'Ancre', 'B0', 'Tombstone',
+    'Motifs N-', 'K1 à K9', 'PIIA', 'PPCMOI', 'ODJ', 'CPTAQ', 'UAT', 'MCP']) assert.ok(terms.includes(term), term);
+});
