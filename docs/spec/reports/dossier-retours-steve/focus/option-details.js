@@ -4,18 +4,18 @@
 
 export const DESCRIPTIONS = {
   D2: {
-    M1: 'On ajoute des colonnes à prospect_notes (migration 0011) et chaque ligne du classeur devient une note libre sur un lot ou un signal. Aucune nouvelle table ; l’UI des notes existante affiche le texte. Exemple : la ligne #7 du Triage, qui nomme deux événements, doit être dupliquée en deux notes ; la cellule E57 des Constats (17 114 caractères) ne rentre pas.',
-    M2: 'On crée une seule table de contrôle qui recopie le classeur pour mesurer le radar, sans aucun lien vers ce qui est affiché. Le nom de table est indicatif. Rien n’apparaît dans le panneau du signal : Steve ne retrouve pas son verdict sur le signal qu’il a trié ; seul l’oracle lit la table.',
-    M3: 'On crée les tables de la scène 2 : le fichier reçu (sha256), toutes ses lignes brutes, une évaluation versionnée par ligne, 1 à N ancres vers les objets du radar, et une projection vers les fils de commentaires sentropic. Exemple : la ligne #7 donne une évaluation et deux ancres (deux événements) ; une ligne agrégée « 13 signaux PIIA » donne une ancre sur la ville. Le panneau affiche le verdict, l’oracle lit les mêmes évaluations.',
-    M4: 'On ne construit rien côté radar : on attend que le paquet comments de sentropic porte tout (cibles, verdict, provenance). En attendant, le classeur reste un fichier hors de l’outil. Même livré, le paquet ne porte ni classement, ni motif, ni sens : il faudrait encore des tables radar.',
+    a: 'On crée cinq tables nommées en clair, une par besoin de Steve (§6.3) : le fichier reçu (provenance), ses lignes avec le verdict (classement, motif, sens, passe) et toutes les cellules brutes, les codes de motif reliés aux critères, les objets visés par chaque ligne (1 à N, par ville + id texte du graphe) et les versions gelées de l’oracle C. Exemple : la ligne #7 donne une ligne et deux cibles ; une nouvelle révision du classeur ajoute des lignes qui remplacent les anciennes sans les effacer.',
+    b: 'On crée le modèle complet en couches de la version précédente : fichier, lignes brutes, évaluations versionnées séparées des lignes, ancres, référentiels en trois tables (codes, règles, constats), projection vers les fils de commentaires sentropic et table d’oracle : neuf tables. Il prévoit d’emblée les réponses de l’équipe et plusieurs jeux d’étiquettes dans les mêmes tables.',
+    c: 'On crée une seule table de contrôle qui recopie le classeur pour mesurer le radar, sans aucun lien vers ce qui est affiché. Le nom de table est indicatif. Rien n’apparaît dans le panneau du signal : Steve ne retrouve pas son verdict sur le signal qu’il a trié ; seul l’oracle lit la table.',
+    d: 'On ne construit rien côté radar : on attend que le paquet comments de sentropic porte tout (cibles, verdict, provenance). En attendant, le classeur reste un fichier hors de l’outil. Même livré, le paquet ne porte ni classement, ni motif, ni sens : il faudrait encore des tables radar.',
   },
   D3: {
-    a: 'On stocke la cible sous forme de texte (« radar.signal:<ville>:<id> ») dans annotation_anchors, sans clé étrangère vers le graphe, avec un instantané de ce que Steve a vu (ville, date, type, verbatim). B0 corrige l’API pour accepter cet identifiant texte. Si une ré-extraction supprime le signal, l’ancre passe « disparue » et le panneau montre l’instantané au lieu de perdre le retour.',
+    a: 'On stocke la cible sous forme de texte (« radar.signal:<ville>:<id> ») dans retours_cibles (ville + id texte du graphe), sans clé étrangère vers le graphe, avec un instantané de ce que Steve a vu (ville, date, type, verbatim). B0 corrige l’API pour accepter cet identifiant texte. Si une ré-extraction supprime le signal, l’ancre passe « disparue » et le panneau montre l’instantané au lieu de perdre le retour.',
     b: 'On n’ancre rien tant qu’une clé métier stable (dossier réglementaire, étape) n’existe pas dans une ontologie du radar. Aucun lot B0 : l’annotation de signal reste en échec 400 et les retours de Steve ne s’affichent sur aucun signal.',
     c: 'On garde le contrat v1 : une annotation de signal pointe vers l’UUID de la table signals. Mais aucun code de main n’écrit dans signals : il n’existe aucun UUID à viser pour les 124 lignes de Steve. L’ancre ne peut pas être créée.',
   },
   D4: {
-    a: 'Les annotations utilisent les cibles et la lecture du module comments, sans modifier le paquet. Les retours importés sont immuables : aucun bouton de suppression. Les réponses de l’équipe vont dans prospect_notes v1, qui sait déjà effacer logiquement. On demande à sentropic une version avec tombstone, puis on adopte le port complet.',
+    a: 'Les annotations utilisent les cibles et la lecture du module comments, sans modifier le paquet. Les retours importés sont immuables : aucun bouton de suppression. Le premier lot affiche les retours en lecture seule : les réponses de l’équipe viendront avec le port complet. On demande à sentropic une version avec tombstone, puis on adopte le port complet.',
     b: 'On écrit un adaptateur CommentStore côté radar dont le delete pose une marque (tombstone) au lieu d’effacer. Les retours et réponses passent tout de suite par le port complet. Mais le delete du port ne supprime plus vraiment : sa sémantique diffère de celle du paquet.',
     c: 'On attend que sentropic publie un paquet avec tombstone et rétention, puis on branche tout dessus. Aucun retour de Steve n’est affiché avant cette version, sans date connue.',
   },
@@ -85,35 +85,14 @@ export const DESCRIPTIONS = {
   },
 };
 
+import { STEVE_MODEL } from './steve-model.js';
+
 // Small entity-relationship diagrams (Mermaid erDiagram subset of parse-er.mjs), laid out
 // by erLayout. `existing`: tables present on main; the others are proposed or indicative.
 export const DIAGRAMS = {
   D2: {
-    M1: {
-      colGap: 180,
-      layers: ['Table existante, étendue', 'Tables référencées'],
-      placement: { prospect_notes: { col: 0, row: 0 }, account_users: { col: 1, row: 0 }, signals: { col: 1, row: 1 } },
-      existing: ['prospect_notes', 'account_users', 'signals'],
-      labels: { cible_signal: 'cible signal' },
-      er: `erDiagram
-    prospect_notes }o--|| account_users : auteur
-    prospect_notes }o--o| signals : cible_signal
-    prospect_notes {
-      uuid id PK
-      text target_type "lot ou signal"
-      text city_slug
-      uuid signal_id FK "UUID"
-      uuid author_id FK "compte obligatoire"
-      text body "10 000 caractères max"
-    }
-    account_users {
-      uuid id PK
-    }
-    signals {
-      uuid id PK "aucune insertion sur main"
-    }`,
-    },
-    M2: {
+    a: STEVE_MODEL,
+    c: {
       colGap: 180,
       layers: ['Mesure seule', 'Affichage, sans lien'],
       placement: { steve_control_rows: { col: 0, row: 0 }, graph_nodes: { col: 1, row: 0 } },
@@ -132,7 +111,7 @@ export const DIAGRAMS = {
       text city_slug
     }`,
     },
-    M3: {
+    b: {
       colGap: 180,
       layers: ['Source', 'Jugement', 'Ancres et publication'],
       placement: {
@@ -177,7 +156,7 @@ export const DIAGRAMS = {
       text thread_id
     }`,
     },
-    M4: {
+    d: {
       colGap: 180,
       layers: ['Paquet sentropic : aucune table radar'],
       placement: { sentropic_comments: { col: 0, row: 0 } },
@@ -197,13 +176,13 @@ export const DIAGRAMS = {
     a: {
       colGap: 180,
       layers: ['Source', 'Oracle unique', 'Benchmark #782'],
-      placement: { annotation_assessments: { col: 0, row: 0 }, oracle_tableur: { col: 1, row: 0 }, oracle_e_v3: { col: 1, row: 1 }, benchmark: { col: 2, row: 0 } },
+      placement: { retours_lignes: { col: 0, row: 0 }, oracle_tableur: { col: 1, row: 0 }, oracle_e_v3: { col: 1, row: 1 }, benchmark: { col: 2, row: 0 } },
       existing: ['oracle_e_v3'],
       labels: { remplace: 'remplace', note_tout: 'note tout' },
       er: `erDiagram
-    annotation_assessments ||--|| oracle_tableur : remplace
+    retours_lignes ||--|| oracle_tableur : remplace
     oracle_tableur ||--|| benchmark : note_tout
-    annotation_assessments {
+    retours_lignes {
       text source "124 lignes de Steve"
     }
     oracle_tableur {
@@ -220,19 +199,19 @@ export const DIAGRAMS = {
     b: {
       colGap: 180,
       layers: ['Sources', 'Deux oracles gelés', 'Benchmark #782, deux volets'],
-      placement: { consensus_modeles: { col: 0, row: 0 }, annotation_assessments: { col: 0, row: 1 }, oracle_e_v3: { col: 1, row: 0 }, oracle_c_v1: { col: 1, row: 1 },
+      placement: { consensus_modeles: { col: 0, row: 0 }, retours_lignes: { col: 0, row: 1 }, oracle_e_v3: { col: 1, row: 0 }, oracle_c_v1: { col: 1, row: 1 },
         volet_extraction: { col: 2, row: 0 }, volet_ciblage: { col: 2, row: 1 } },
       existing: ['consensus_modeles', 'oracle_e_v3', 'volet_extraction'],
       labels: { adjugees_gelees: 'adjugées, gelées', note_b_puis_c: 'note B puis C' },
       er: `erDiagram
     consensus_modeles ||--|| oracle_e_v3 : construit
-    annotation_assessments ||--|| oracle_c_v1 : adjugees_gelees
+    retours_lignes ||--|| oracle_c_v1 : adjugees_gelees
     oracle_e_v3 ||--|| volet_extraction : note
     oracle_c_v1 ||--|| volet_ciblage : note_b_puis_c
     consensus_modeles {
       text methode "7 passes, 3 familles"
     }
-    annotation_assessments {
+    retours_lignes {
       text source "verdicts de Steve"
     }
     oracle_e_v3 {
@@ -251,17 +230,17 @@ export const DIAGRAMS = {
     c: {
       colGap: 180,
       layers: ['Nouvelle campagne', 'Oracle C neuf', 'Benchmark #782'],
-      placement: { campagne_c: { col: 0, row: 0 }, annotation_assessments: { col: 0, row: 1 }, oracle_c_neuf: { col: 1, row: 0 }, volet_ciblage: { col: 2, row: 0 } },
+      placement: { campagne_c: { col: 0, row: 0 }, retours_lignes: { col: 0, row: 1 }, oracle_c_neuf: { col: 1, row: 0 }, volet_ciblage: { col: 2, row: 0 } },
       existing: [],
       labels: { exemples: 'exemples seulement' },
       er: `erDiagram
     campagne_c ||--|| oracle_c_neuf : construit
-    annotation_assessments }o..o| oracle_c_neuf : exemples
+    retours_lignes }o..o| oracle_c_neuf : exemples
     oracle_c_neuf ||--|| volet_ciblage : note
     campagne_c {
       text corpus "nouveau, conçu pour C"
     }
-    annotation_assessments {
+    retours_lignes {
       text role "124 lignes, exemples"
     }
     oracle_c_neuf {
@@ -274,17 +253,18 @@ export const DIAGRAMS = {
   },
   D3: {
     a: {
-      colGap: 180,
+      colGap: 260,
       layers: ['Ancre proposée', 'Graphe existant'],
-      placement: { annotation_anchors: { col: 0, row: 0 }, graph_nodes: { col: 1, row: 0 } },
+      placement: { retours_cibles: { col: 0, row: 0 }, graph_nodes: { col: 1, row: 0 } },
       existing: ['graph_nodes'],
       labels: { cle_texte_sans_fk: 'clé texte, sans FK' },
       er: `erDiagram
-    annotation_anchors }o..o| graph_nodes : cle_texte_sans_fk
-    annotation_anchors {
+    retours_cibles }o..o| graph_nodes : cle_texte_sans_fk
+    retours_cibles {
       uuid id PK
-      text anchor_key "radar.signal:<ville>:<id>"
-      jsonb observed "ville, date, verbatim"
+      text city_slug "ville"
+      text cible_id "signal-… (texte)"
+      jsonb vu_par_steve "ville, date, verbatim"
       text resolution "résolue … disparue"
     }
     graph_nodes {
@@ -294,12 +274,12 @@ export const DIAGRAMS = {
     b: {
       colGap: 180,
       layers: ['Ancre en attente', 'Clé métier'],
-      placement: { annotation_anchors: { col: 0, row: 0 }, cle_metier_stable: { col: 1, row: 0 } },
+      placement: { retours_cibles: { col: 0, row: 0 }, cle_metier_stable: { col: 1, row: 0 } },
       existing: [],
       labels: {},
       er: `erDiagram
-    annotation_anchors }o..o| cle_metier_stable : attend
-    annotation_anchors {
+    retours_cibles }o..o| cle_metier_stable : attend
+    retours_cibles {
       uuid id PK
       text business_key "à définir"
     }

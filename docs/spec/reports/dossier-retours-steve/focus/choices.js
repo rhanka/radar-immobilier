@@ -26,7 +26,7 @@ export const STEPS = [
 ];
 export const SEQUENCE = 'Fabien décide d’abord ses six décisions (D2, D3, D4, D9, D10, D11) : elles sont prises telles quelles, sauf incohérence avec une autre décision. '
   + 'Farid décide ensuite ses dix décisions (D1, D5, D6, D7, D8, D12, D13, D14, D15, D16), en connaissant les choix de Fabien. '
-  + 'Si un choix de Farid contredit un choix de Fabien (par exemple D1 « tout conserver » avec D2 = M1, qui tronque une cellule de 17 114 caractères), on revient à Fabien sur ce seul point.';
+  + 'Si un choix de Farid contredit un choix de Fabien (par exemple D1 « tout conserver » avec D2 = (c), une table de contrôle qui n’affiche rien), on revient à Fabien sur ce seul point.';
 
 const q = (key, question, recommended, text, options) => ({
   key, mode: 'single', question, recommended, options,
@@ -38,28 +38,28 @@ const o = (key, title, pros, cons) => ({ key, title, pros, cons });
 
 export const questions = [
   // ——— Étape 1 · Fabien ———
-  q('D2', 'D2 — Modèle de données', 'M3', {
+  q('D2', 'D2 — Modèle de données', 'a', {
     intro: 'Le classeur de Steve (7 feuilles, 433 lignes, une cellule de 17 114 caractères, §5.1) doit être stocké en base et rattaché aux objets du radar (#784). '
-      + 'La seule table d’annotation existante, prospect_notes (migration 0011), exige un auteur avec compte, une seule cible et au plus 10 000 caractères (§6.1). '
-      + 'Il faut choisir la forme des tables maintenant : l’import (lot L1), l’affichage (U1) et l’oracle (O1) en dépendent tous (§7). '
-      + 'Le schéma proposé est la scène 2 (diagramme entité-relation) : sources immuables → lignes brutes → évaluations versionnées → ancres → publication.',
-    recommendation: 'M3 est la seule option qui conserve tout, rattache une ligne à plusieurs objets et sert à la fois l’affichage et l’oracle. Son vrai coût, la curation des identifiants abrégés, existe dans toutes les options.',
+      + 'Les tables d’annotation existantes, prospect_marks et prospect_notes (§6.0), servent à l’équipe sur les lots : elles restent telles quelles, ni étendues ni réutilisées. '
+      + 'Le §6.3 part des besoins réels de Steve (verdict, motif, provenance, 1 à N objets visés, révisions, oracle C) et propose un modèle minimal de cinq tables (scène 2). '
+      + 'Il faut choisir la forme des tables maintenant : l’import (lot L1), l’affichage (U1) et l’oracle (O1) en dépendent tous (§7).',
+    recommendation: '(a) couvre exactement les besoins listés au §6.3 avec cinq tables nommées en clair ; ce qu’il ne fait pas (réponses de l’équipe, états archiver, classer, lier, épingler) reste possible plus tard, sans le défaire.',
   }, [
-    o('M1', 'M1 — étendre prospect_notes',
-      ['Réutilise la migration 0011, l’API et l’UI existantes.', 'Aucune nouvelle table à créer.'],
-      ['Auteur = compte obligatoire : Steve n’en a pas (D5).', 'Une seule cible par note, alors qu’une ligne vise 1 à N objets (signal, ville, règlement…).', 'Corps limité à 10 000 caractères : la cellule de 17 114 caractères serait tronquée.', 'Ni provenance (fichier, feuille, ligne) ni verdict structuré : inutilisable pour l’oracle.']),
-    o('M2', 'M2 — table de contrôle seule',
+    o('a', '(a) Modèle minimal « besoins de Steve » (5 tables)',
+      ['Une table par besoin réel : provenance, verdict, codes et critères, objets visés, oracle gelé.', 'Aucune perte : toutes les cellules sont gardées ; une révision remplace sans effacer.', 'Signaux visés par ville + id texte, la clé du graphe décidée pour #812 : survit à la ré-extraction.', 'Le moins de code d’import et de migration parmi les options utiles.'],
+      ['Pas de fil de réponses ni d’états utilisateur au premier lot (assumé, §6.3).', 'Une file de rapprochement (identifiants abrégés, ambiguïtés) reste à traiter à la main.']),
+    o('b', '(b) Modèle complet en couches (version précédente)',
+      ['Prévoit d’emblée les réponses de l’équipe (projection Comment) et plusieurs jeux d’étiquettes.', 'Sépare lignes brutes et évaluations, référentiels en trois tables distinctes.'],
+      ['Neuf tables nouvelles et une migration plus lourde à écrire et tester.', 'Des tables sans usage immédiat (projection, jeux d’étiquettes) : coût sans besoin exprimé par Steve.', 'Plus de code d’import que l’option a.']),
+    o('c', '(c) Table de contrôle seule (oracle)',
       ['Rapide : une table.', 'Respecte le précédent du 2026-06-11 : la mesure ne nourrit pas la production.'],
       ['Rien d’affichable : ne répond pas à #784 (« attaché à l’élément associé »).', 'Steve ne voit pas ses retours dans l’outil.', 'Une seconde structure sera nécessaire plus tard pour l’affichage.']),
-    o('M3', 'M3 — couches hôtes + projection conforme',
-      ['Couvre les neuf exigences E1 à E9 (§6.2) : aucune perte, 1 à N ancres, provenance, révisions sans doublon.', 'Les couches brutes et évaluations servent de table de contrôle pour l’oracle ; la projection Comment, d’annotation visible.', 'Conforme au contrat sentropic sans modifier le paquet.'],
-      ['Neuf tables nouvelles et une migration à écrire et tester.', 'Une file de rapprochement (identifiants abrégés, ambiguïtés) à traiter à la main.', 'Plus de code d’import que les autres options.']),
-    o('M4', 'M4 — attendre le paquet complet',
+    o('d', '(d) Attendre le paquet sentropic complet',
       ['Aucune dette côté radar : tout vit dans sentropic.', 'Aucune migration à écrire ni à maintenir maintenant.'],
       ['Bloquant sans date : #784 et l’oracle attendent.', 'Le paquet ne porte de toute façon ni verdict structuré ni provenance (§6.1).']),
   ]),
   q('D3', 'D3 — Ancre signal et correctif B0', 'a', {
-    intro: 'Une ancre est la référence qui attache une annotation à un objet du radar (signal, ville, zone, lot…) ; c’est la colonne anchor_key de la table annotation_anchors (scène 2). '
+    intro: 'Une ancre est la référence qui attache une annotation à un objet du radar (signal, ville, zone, lot…) ; c’est une ligne de la table retours_cibles (ville + id texte, scène 2). '
       + 'Aujourd’hui l’annotation d’un signal est cassée : l’UI envoie l’identifiant texte du graphe (« signal-… »), alors que l’API exige un UUID, identifiant aléatoire de l’ancienne table signals que plus aucun code n’alimente (§6.1, défaut 1). '
       + '« B0 » est le petit lot correctif qui répare cela (§7). Sans ancre fiable, aucun retour de Steve ne s’affiche sur son signal. '
       + 'Risque connu : une ré-extraction du graphe peut supprimer ou renommer des identifiants (graph-store.ts, §6.1).',
@@ -85,7 +85,7 @@ export const questions = [
     recommendation: '(a), puis adoption du port complet quand sentropic publiera la version avec tombstone. Réserve : le dossier COLLAB n’est pas sur main (non vérifié) ; s’il était abandonné, (b) redeviendrait défendable.',
   }, [
     o('a', '(a) Cibles et lecture conformes, import immuable, demande de tombstone',
-      ['Respecte O1 et la ligne COLLAB « le paquet porte l’intégrité ».', 'Livrable maintenant : cibles et lecture conformes, sans modifier le paquet.', 'Les réponses des utilisateurs vont dans prospect_notes v1, qui sait déjà faire une suppression logique.'],
+      ['Respecte O1 et la ligne COLLAB « le paquet porte l’intégrité ».', 'Livrable maintenant : cibles et lecture conformes, sans modifier le paquet.', 'Premier lot en lecture seule : aucune suppression à gérer tant que le paquet n’a pas de tombstone.'],
       ['Conformité partielle : pas encore le port complet CommentStore.', 'Une demande à sentropic (tombstone) à suivre.', 'Une migration vers le port complet plus tard.']),
     o('b', '(b) Adaptateur CommentStore à tombstone hôte',
       ['Port complet utilisé dès maintenant.', 'Un seul chemin d’écriture et de lecture : celui du port.'],
@@ -96,7 +96,7 @@ export const questions = [
   ]),
   q('D9', 'D9 — Sens de « double annotation » (point ouvert)', null, {
     intro: 'La demande initiale parle de « double annotation (ancienne / nouvelle) » sans dire ce qui est comparé à quoi. '
-      + 'Le modèle M3 (D2) porte plusieurs jeux d’étiquettes côte à côte (colonnes label_set et annotator_kind, §6.6) : les trois lectures sont donc possibles techniquement. '
+      + 'Le modèle retenu (D2) garde le verdict de Steve dans retours_lignes ; les autres jeux (adjudication C, prédiction C) vivent dans les versions gelées de l’oracle, et la classification du radar se recalcule (§6.6) : les trois lectures sont donc possibles techniquement. '
       + 'Mais chacune produit une mesure différente et fixe ce que l’oracle (D10) comparera : il faut la préciser avant de geler l’oracle de ciblage. '
       + 'Le sens de la demande appartient à Fabien.',
     dependsOn: ['D2'],
@@ -151,7 +151,7 @@ export const questions = [
     intro: 'Steve a livré un classeur de 7 feuilles (124 lignes de triage, 121 contrôles d’exclusion, 77 constats, 26 règles, 28 codes de motif) et une analyse écrite qui pose ses trois critères (§2, §5.1). '
       + 'Il faut décider ce qu’on garde en base : seulement le triage, tout, ou de simples notes. '
       + 'Ce choix fixe ce que l’équipe pourra montrer sur les objets du radar et ce que l’oracle pourra mesurer (D10). '
-      + 'Cohérence avec D2 : « tout conserver » suppose le modèle M3.',
+      + 'Cohérence avec D2 : « tout conserver » suppose un modèle qui garde toutes les lignes, l’option a (ou b) de D2.',
     dependsOn: ['D2', 'D10'],
     recommendation: '(b) : conserve tout ce que Steve a produit et sert à la fois l’affichage et l’oracle. La recommandation changerait seulement si le besoin se limitait à quelques commentaires.',
   }, [

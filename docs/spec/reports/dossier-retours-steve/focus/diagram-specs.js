@@ -6,6 +6,8 @@
 // Evidence: observed = exists on origin/main 27891b10; declared = proposed by the
 // dossier, not built; historical = frozen reference.
 
+import { STEVE_MODEL } from './steve-model.js';
+
 export const SCENE_KINDS = {
   'criteres-steve': 'matrix',
   'modele-donnees': 'er',
@@ -22,27 +24,8 @@ export const MATRIX = {
   workingView: 73,
 };
 
-export const ER_SPEC = {
-  layers: ['1 · Sources immuables', '2 · Référentiels de Steve', '3 · Jugements versionnés', '4 · Ancres durables', '5 · Publication conforme'],
-  placement: {
-    annotation_sources: { col: 0, row: 0 },
-    annotation_raw_rows: { col: 0, row: 1 },
-    annotation_rules: { col: 1, row: 0 },
-    annotation_codes: { col: 1, row: 1 },
-    annotation_findings: { col: 1, row: 2 },
-    annotation_assessments: { col: 2, row: 1 },
-    oracle_releases: { col: 2, row: 2 },
-    annotation_anchors: { col: 3, row: 1 },
-    graph_nodes: { col: 3, row: 2 },
-    comment_projection: { col: 4, row: 1 },
-    prospect_notes: { col: 4, row: 2 },
-  },
-  // Relation names are Mermaid identifiers (ASCII); this is how the scene prints them.
-  labels: { normalisee_en: 'normalisée en', rattachee_a: 'rattachée à', rattache_a: 'rattaché à', cle_texte_sans_fk: 'clé texte, sans FK',
-    selection_gelee: 'sélection gelée', publie_en: 'publiée en', reponses_v1: 'réponses v1' },
-  // Tables that already exist on main; every other table is a proposal (§6.3).
-  existing: ['graph_nodes', 'prospect_notes'],
-};
+// Scene 2: the minimal model built from Steve’s needs (steve-model.js, §6.3).
+export const ER_SPEC = { ...STEVE_MODEL };
 
 const node = (evidence, tag, detail) => ({ evidence, tag, detail });
 
@@ -80,10 +63,10 @@ const FLUX = {
     SNAP: node('observed', 'S3', 'graph/<ville>/latest.json'),
     XLSB: node('declared', 'S3', 'immuables · sha256'),
     GRA: node('observed', 'PG', 'graphe canonique · vivier'),
-    ANN: node('declared', 'PG', 'sources, évaluations, ancres'),
+    ANN: node('declared', 'PG', 'fichiers, lignes, cibles'),
     PNO: node('observed', 'PG', 'réponses · suppression logique'),
     ADJ: node('declared', 'oracle', 'labels C étayés · auteur'),
-    OC: node('declared', 'oracle', 'oracle_releases · #783'),
+    OC: node('declared', 'oracle', 'oracle_versions · #783'),
     SCO: node('declared', 'oracle', 'précision, rappel · B puis C'),
     OE: node('historical', 'oracle', 'extraction d’actes · v3'),
     BEN: node('declared', 'oracle', 'volets ciblage et extraction'),
