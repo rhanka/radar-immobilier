@@ -2,6 +2,25 @@
 
 Revised after the adversarial review (findings F11-F13, M7, M8; see `review.md`).
 
+## First step: a virgin reference test set (owner rule of 2026-10-04)
+
+The current test set is contaminated for prompt v2 (`TEST-SET-PROTOCOL.md` §1). Reference
+figures for C will come only from a new test set built under the protocol:
+1. Steve triages his next 52 municipalities with the same three passes, **before any C output
+   exists or is shown to him**.
+2. The test executor (not the optimiser) extracts the lines, resolves the radar records, writes
+   the set, commits its sha256 and **seals it** (`09-seal-test.mjs`, key outside the repository,
+   held by the executor only). The optimiser never sees the workbook rows, the set or Steve's
+   comments on those municipalities.
+3. The optimiser re-derives the prompt from allowed sources only — Steve's stated general
+   criteria (analysis §1, §5 exclusions and asymmetry reserve), the code legend, and the
+   development set — **without rule 1 of v2** (forbidden source) and with rule 2 re-checked. Each
+   prompt version is committed before it runs, even on the development set.
+4. The final prompt is frozen in git; the executor runs it once on the sealed set (the runner
+   refuses otherwise) and publishes aggregates; the audit log is committed with the results.
+5. Steve's rulings on the D8 points are collected before step 3, from the development
+   municipalities only.
+
 ## Target and why
 - The previous extraction oracle (oracle E, v3) holds **674 units over 100 documents in 100
   municipalities**, sampled from 536 eligible documents in 225 municipalities by size terciles

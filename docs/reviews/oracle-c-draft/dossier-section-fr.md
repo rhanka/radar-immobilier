@@ -1,90 +1,59 @@
 # Section prête à coller — §9.3 bis « Oracle C : premier brouillon mesuré »
 
-> Source : `docs/reviews/oracle-c-draft/` (branche `feat/oracle-c-draft`). Chiffres recalculables
-> par les scripts du dossier (Node, sans dépendance). **FAIT** = constaté dans une source vérifiable
-> par un tiers ; **CALCUL** = dérivé des données ; **JUGEMENT** = appréciation ; `non vérifié` =
-> non établi.
+> Source : `docs/reviews/oracle-c-draft/` (branche `feat/oracle-c-draft`, PR #821). Chiffres
+> recalculables par les scripts du dossier (Node, sans dépendance). **FAIT** = constaté dans une
+> source vérifiable par un tiers ; **CALCUL** = dérivé des données ; **JUGEMENT** = appréciation ;
+> `non vérifié` = non établi.
+
+> **Avertissement : scores du jeu de test contaminés.** La règle 1 du prompt v2 s'appuie sur un
+> tableau de l'analyse de Steve (§2) qui agrège ses 73 lignes de passe 1, dont 37 lignes du jeu de
+> test (6 exactement dans la catégorie sur laquelle repose la règle). C'est une fuite d'information
+> du test vers le prompt, même indirecte. De plus, l'agent qui a écrit les prompts avait lu des
+> documents couvrant le jeu de test (analyse complète avec ses listes, tableaux du dossier sur les
+> 124 lignes, deux lignes de test pendant l'exploration). **Les scores test de v2 sont donc
+> marqués « contaminés »** ; le calcul sans les 6 lignes est une atténuation, pas une preuve. Les
+> chiffres de référence de C devront venir d'un **nouveau jeu de test vierge** (les 52 villes
+> suivantes de Steve), scellé avant toute optimisation. Détail : `TEST-SET-PROTOCOL.md`.
 
 ### Ce qu'est le brouillon d'oracle C
 
 Un **pilote exploratoire d'accord avec Steve** sur la question du ciblage : « fallait-il montrer ce
 signal ? ». Il emprunte à l'oracle E le gel par empreinte sha256 et des mesures reproductibles,
-mais **pas** sa construction (l'oracle E : 674 unités sur 100 documents dans 100 villes, sept passes
-de trois familles de modèles, arbitrage, catégorie « non résolu »). Ici la vérité est celle d'une
-seule personne, Steve : ses verdicts du 21 septembre 2026 et ses codes de motif. Ce n'est pas non
-plus le jeu test indépendant de D10 (les 52 villes suivantes) : **à ne pas utiliser comme preuve
-pour le seuil D13**.
+mais **pas** sa construction (oracle E : 674 unités sur 100 documents dans 100 villes, sept passes
+de trois familles de modèles, arbitrage, catégorie « non résolu »). La vérité est celle d'une seule
+personne, Steve. **À ne pas utiliser comme preuve pour le seuil D13.**
 
-- **FAIT.** 124 lignes de triage ; 121 retrouvées dans le graphe du radar par une seule requête
-  SELECT en session forcée en lecture seule ; 3 exclues et listées. 9 lignes (5 + 4) sont notées
-  avec un enregistrement cité manquant.
-- **CALCUL.** Ce que voit le modèle : uniquement ce que le radar servait (libellé, propriétés,
-  extraits verbatim du procès-verbal), relu le 4 octobre ; identité avec ce que Steve voyait du 15
-  au 21 septembre : `non vérifié`.
-- Aucune écriture en base, sur le cluster ou dans un bucket.
-
-### Le partage 50/50, fait avant toute écriture de prompt
-
-- **CALCUL.** Unité de partage : la **municipalité** (toutes les lignes d'une ville du même côté),
-  plus stricte que le dossier demandé en D10.
-- **CALCUL.** `optim` : 60 lignes, 26 villes. `blind` (aveugle) : 61 lignes, 25 villes.
-- **CALCUL.** Écarts de répartition faibles sur neuf strates (verdict, famille de motif, sens,
-  passe, région, type de document, nature de l'enregistrement, longueur, taille de la ville) :
-  écart de part maximal 6,7 points. Ces écarts sont **descriptifs** : la recherche les a minimisés
-  par construction. La famille « point d'ordre du jour » n'existe que côté optim (4 / 0).
-- Le script de partage (déterministe) a été versionné avant le premier appel de modèle ; les
-  empreintes des deux jeux (`d724ed80…`, `51e32d2a…`) n'ont été versionnées qu'ensuite.
-
-| Verdict de Steve | optim | blind |
-|---|---:|---:|
-| Pertinent | 19 (31,7 %) | 20 (32,8 %) |
-| À surveiller | 14 (23,3 %) | 15 (24,6 %) |
-| Non pertinent | 27 (45,0 %) | 26 (42,6 %) |
-| dont passe 1 | 36 | 37 |
-
-<!-- chart:oracle-c-split -->
-
-### L'approche du prompt
-
-- **v1** : écrit à partir des règles générales de Steve (trois critères cumulatifs, cinq
-  exclusions, réserve d'asymétrie, légende de ses codes), sans aucune ligne ni ville de son relevé.
-- **v2** : une itération, sur `optim` seulement : rangement selon les quatre catégories de son
-  analyse ; l'étape précoce n'est jamais un motif de déclassement ; avis de motion numéroté ≠ point
-  d'ordre du jour ; CPTAQ, exclusion contre autorisation ; lotissement accessoire ; vocation
-  douteuse visible. **Ce sont des arbitrages de l'auteur sur des points que le dossier laisse à
-  Steve (D8)** ; la première règle s'appuie sur une catégorie de son analyse qui compte aussi des
-  lignes du jeu aveugle. Steve doit les confirmer.
-- v2 a été gelée avant l'unique passage sur le jeu aveugle.
+- **FAIT.** 124 lignes de triage ; 121 retrouvées dans le graphe du radar (une requête SELECT en
+  session forcée en lecture seule) ; 3 exclues et listées. Aucune écriture en base, sur le cluster
+  ou dans un bucket.
+- **CALCUL.** Le modèle ne voit que ce que le radar servait (libellé, propriétés, extraits
+  verbatim), relu le 4 octobre (`non vérifié` qu'il soit identique à ce que Steve voyait).
 
 ### À quel niveau on mesure
 
 - **Unité** : une ligne du relevé de Steve rattachée au(x) signal(aux) du radar qu'elle cite.
-  121 lignes, optim 60 (26 villes) et aveugle 61 (25 villes). Ce n'est ni un document, ni un
-  règlement, ni un dossier.
+- **Jeu de test réservé (référence)** : 61 lignes, 25 villes. **Jeu de mise au point (optim)** :
+  60 lignes, 26 villes, en annexe, diagnostic seulement. Partage par municipalité, équilibré sur
+  neuf strates (écart de part maximal 6,7 points).
 - **Vérité** : le verdict de Steve sur la ligne (Pertinent, À surveiller, Non pertinent).
-- **Ce qu'on mesure** : la décision d'affichage, « montrer à Steve » ou « masquer ».
-  - B (radar d'aujourd'hui) montre une ligne si elle était visible dans la passe que Steve a faite
-    avec cette combinaison de filtres.
-  - C montre une ligne si le modèle répond Pertinent ou À surveiller (C ne masque que Non
-    pertinent) ; « C strict » ne montre que ce que le modèle juge Pertinent.
-- **Deux définitions du positif** : positif = Pertinent ; positif = Pertinent ou À surveiller.
-- **Précision** = positifs montrés / lignes montrées. **Rappel** = positifs montrés / positifs du
-  jeu. **F1** = moyenne harmonique. **Bruit** = Non pertinent parmi les lignes montrées.
-  **Pertinents perdus** = Pertinent masqués. Intervalles à 95 % par rééchantillonnage des villes.
+- **Ce qu'on mesure** : la décision « montrer à Steve » ou « masquer ». B montre une ligne si elle
+  était visible dans la passe de Steve avec cette combinaison de filtres ; C la montre si le modèle
+  répond Pertinent ou À surveiller ; « C strict » ne montre que ce que le modèle juge Pertinent.
+- **Deux définitions du positif** : Pertinent ; Pertinent ou À surveiller.
+- **Précision** = positifs montrés / lignes montrées ; **rappel** = positifs montrés / positifs du
+  jeu ; **F1** ; **bruit** = Non pertinent parmi les lignes montrées ; **Pertinents perdus** =
+  Pertinent masqués. Intervalles à 95 % par rééchantillonnage des villes.
 
-**Biais de sélection.** Chaque ligne existe parce qu'elle était visible dans une des trois passes
-de Steve. Ce que le radar ne montrait jamais, et ce que ses filtres retiraient à raison (onglet
-« Écartés par les filtres »), est hors de l'univers. Donc : le rappel n'est mesuré que dans
-l'univers des 121 lignes (la passe 3, sans filtre, a 100 % de rappel par construction) ; la
-précision est comparable entre systèmes sur les mêmes lignes, et ce biais avantage B, pas C. Les
-passes 1, 2, 3 sont **observées** ; les filtres « seuls » sont **reconstitués** à partir des
-propriétés des signaux relues le 4 octobre (`non vérifié` face au code déployé en septembre) ;
-« Résidentiel seul » n'est pas calculable (N-A). Aucun nouvel appel de modèle : C réutilise les
-réponses déjà obtenues ; C v1 n'a pas été passé sur l'aveugle (mesuré une seule fois, avec v2).
+**Biais de sélection.** Chaque ligne existe parce qu'elle était visible dans une des trois passes.
+Le rappel n'est mesuré que dans cet univers (la passe 3, sans filtre, a 100 % par construction) ; la
+précision est comparable entre systèmes sur les mêmes lignes, et ce biais avantage B. Passes 1, 2, 3
+**observées** ; filtres « seuls » **reconstitués** (`non vérifié` face au code de septembre) ;
+« Résidentiel seul » non calculable (N-A).
 
-### Tableau comparatif — même lignes, positif = Pertinent puis Pertinent + À surveiller (en %)
+### Résultats de référence — jeu de test (61 lignes : 20 P, 15 S, 26 N), en %
 
-**Jeu aveugle (61 lignes : 20 Pertinent, 15 À surveiller, 26 Non pertinent), une seule passe, v2**
+Une seule exécution du prompt v2 gelé. **Lignes C v2 : contaminées (règle 1 + exposition).** C v1
+n'a jamais été passé sur le test. Les lignes B n'utilisent aucun prompt et ne sont pas contaminées.
 
 | Système | Précision (P) | Rappel (P) | F1 (P) | Précision (P+S) | Rappel (P+S) | F1 (P+S) | Bruit | Pertinents perdus |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -94,33 +63,25 @@ réponses déjà obtenues ; C v1 n'a pas été passé sur l'aveugle (mesuré une
 | Précoce seul (reconstitué) | 45,9 | 85,0 | 59,6 | 64,9 | 68,6 | 66,7 | 35,1 | 3/20 |
 | Zonage seul (reconstitué) | 38,3 | 90,0 | 53,7 | 66,0 | 88,6 | 75,6 | 34,0 | 2/20 |
 | Exclure PIIA + dérogation seul (reconstitué) | 33,3 | 100,0 | 50,0 | 58,3 | 100,0 | 73,7 | 41,7 | 0/20 |
-| C v1 (3 modèles) | N-A | N-A | N-A | N-A | N-A | N-A | N-A | non passé sur l'aveugle |
-| C v2 Astra low | 52,6 | 100,0 | 69,0 | 81,6 | 88,6 | 84,9 | 18,4 | 0/20 |
-| C v2 Gemini low | 57,1 | 100,0 | 72,7 | 88,6 | 88,6 | 88,6 | 11,4 | 0/20 |
-| C v2 Opus 5.5 low | 52,6 | 100,0 | 69,0 | 84,2 | 91,4 | 87,7 | 15,8 | 0/20 |
-| C v2 strict Gemini low (Pertinent seul) | 81,0 | 85,0 | 82,9 | 90,5 | 54,3 | 67,9 | 9,5 | 3/20 |
+| C v1 (3 modèles) | N-A | N-A | N-A | N-A | N-A | N-A | N-A | non passé sur le test |
+| C v2 Astra low — *contaminé* | 52,6 | 100,0 | 69,0 | 81,6 | 88,6 | 84,9 | 18,4 | 0/20 |
+| C v2 Gemini low — *contaminé* | 57,1 | 100,0 | 72,7 | 88,6 | 88,6 | 88,6 | 11,4 | 0/20 |
+| C v2 Opus 5.5 low — *contaminé* | 52,6 | 100,0 | 69,0 | 84,2 | 91,4 | 87,7 | 15,8 | 0/20 |
+| C v2 strict Gemini low — *contaminé* | 81,0 | 85,0 | 82,9 | 90,5 | 54,3 | 67,9 | 9,5 | 3/20 |
 
-**Jeu optim (60 lignes : 19 Pertinent, 14 À surveiller, 27 Non pertinent)**
+Intervalles (précision P+S) : B passe 1 48–81 ; C v2 69–93 (Astra), 76–100 (Gemini), 72–96 (Opus).
 
-| Système | Précision (P) | Rappel (P) | F1 (P) | Précision (P+S) | Rappel (P+S) | F1 (P+S) | Bruit | Pertinents perdus |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| B passe 1 (5 filtres) | 47,2 | 89,5 | 61,8 | 69,4 | 75,8 | 72,5 | 30,6 | 2/19 |
-| B passe 2 (sans Précoce) | 34,6 | 94,7 | 50,7 | 59,6 | 93,9 | 72,9 | 40,4 | 1/19 |
-| B passe 3 (aucun filtre) | 31,7 | 100,0 | 48,1 | 55,0 | 100,0 | 71,0 | 45,0 | 0/19 |
-| Précoce seul (reconstitué) | 47,4 | 94,7 | 63,2 | 68,4 | 78,8 | 73,2 | 31,6 | 1/19 |
-| Zonage seul (reconstitué) | 39,6 | 100,0 | 56,7 | 68,8 | 100,0 | 81,5 | 31,3 | 0/19 |
-| Exclure PIIA + dérogation seul (reconstitué) | 34,0 | 94,7 | 50,0 | 60,4 | 97,0 | 74,4 | 39,6 | 1/19 |
-| C v1 Astra low | 48,1 | 68,4 | 56,5 | 81,5 | 66,7 | 73,3 | 18,5 | 6/19 |
-| C v1 Gemini low | 60,0 | 94,7 | 73,5 | 86,7 | 78,8 | 82,5 | 13,3 | 1/19 |
-| C v1 Opus 5.5 low | 54,5 | 94,7 | 69,2 | 84,8 | 84,8 | 84,8 | 15,2 | 1/19 |
-| C v2 Astra low | 50,0 | 94,7 | 65,5 | 80,6 | 87,9 | 84,1 | 19,4 | 1/19 |
-| C v2 Gemini low | 59,4 | 100,0 | 74,5 | 87,5 | 84,8 | 86,2 | 12,5 | 0/19 |
-| C v2 Opus 5.5 low | 54,3 | 100,0 | 70,4 | 85,7 | 90,9 | 88,2 | 14,3 | 0/19 |
-| C v2 strict Gemini low (Pertinent seul) | 80,0 | 84,2 | 82,1 | 90,0 | 54,5 | 67,9 | 10,0 | 3/19 |
+**Atténuation, pas preuve — même jeu sans les 6 lignes « sens non donné »** (55 lignes ; ces 6
+lignes sont des Pertinent de passe 1, B les perd aussi) :
 
-<!-- chart:oracle-c-precision-rappel — barres précision / rappel (positif = Pertinent) par système ; SVG prêts : results/filter-pr-blind.svg, results/filter-pr-optim.svg -->
+| Système | Précision (P) | Rappel (P) | Précision (P+S) | Rappel (P+S) | Bruit | Pertinents perdus |
+|---|---:|---:|---:|---:|---:|---:|
+| B passe 1 | 35,5 | 78,6 | 58,1 | 62,1 | 41,9 | 3/14 |
+| C v2 Astra low | 43,8 | 100,0 | 78,1 | 86,2 | 21,9 | 0/14 |
+| C v2 Gemini low | 48,3 | 100,0 | 86,2 | 86,2 | 13,8 | 0/14 |
+| C v2 Opus 5.5 low | 43,8 | 100,0 | 81,3 | 89,7 | 18,8 | 0/14 |
 
-**Classement à trois classes, jeu aveugle (précision / rappel par classe, en %)**
+**Classement à trois classes sur le test (précision / rappel par classe, %) — contaminé**
 
 | Classe | Astra low | Gemini low | Opus 5.5 low |
 |---|---|---|---|
@@ -128,117 +89,110 @@ réponses déjà obtenues ; C v1 n'a pas été passé sur l'aveugle (mesuré une
 | À surveiller | 45,0 / 60,0 | 64,3 / 60,0 | 47,8 / 73,3 |
 | Non pertinent | 82,6 / 73,1 | 84,6 / 84,6 | 87,0 / 76,9 |
 
-**Lecture (JUGEMENT).** Sur l'aveugle, positif = Pertinent : la passe 1 montre 37 lignes pour
-17 Pertinent sur 20 (précision 45,9, rappel 85,0) ; C v2 en montre 35 à 38 pour les 20 (précision
-52,6 à 57,1, rappel 100). Avec positif = Pertinent + À surveiller, C v2 atteint 81,6 à 88,6 de
-précision pour 88,6 à 91,4 de rappel, contre 64,9 / 68,6 pour la passe 1. Les intervalles par
-ville restent larges et se recouvrent en partie (précision P+S : passe 1 48–81, C v2 69–100) ;
-aucun écart entre les trois modèles n'est établi. Un C « strict » gagne en précision (≈81-87) au
-prix du rappel (65-85).
+Aucun classement entre modèles (McNemar p = 0,13 à 1,00). Latence médiane : 9,8 s (Astra), 4,9 s
+(Gemini), 5,7 s (Opus). Coût : passages sur siège ; équivalent API annoncé par le CLI Claude 1,45 $
+pour les 61 lignes ; Astra et Gemini `non vérifié`.
 
-### Résultats par modèle (effort bas, sièges uniquement)
+<!-- chart:oracle-c-precision-rappel — barres précision / rappel (positif = Pertinent), jeu de test ; SVG prêt : results/filter-pr-blind.svg -->
 
-Modèles : Astra low (`gpt-6-astra`, `codex exec`), Gemini low (`gemini-3.8-flash-low`, `agy`),
-Claude Opus 5.5 low (`claude-opus-5-5`, `claude -p --effort low`).
+Données pour graphiques simples (barres, jeu de test, positif = Pertinent puis P+S) :
 
-Indicateurs complémentaires : C posé en filtre sur la vue de travail B (passe 1).
+| Série | B passe 1 | B passe 2 | B passe 3 | C v2 Astra* | C v2 Gemini* | C v2 Opus* |
+|---|---:|---:|---:|---:|---:|---:|
+| Précision (P) | 45.9 | 37.0 | 32.8 | 52.6 | 57.1 | 52.6 |
+| Rappel (P) | 85.0 | 100 | 100 | 100 | 100 | 100 |
+| Précision (P+S) | 64.9 | 61.1 | 57.4 | 81.6 | 88.6 | 84.2 |
+| Rappel (P+S) | 68.6 | 94.3 | 100 | 88.6 | 88.6 | 91.4 |
 
-| Mesure (jeu aveugle, v2) | B seul | Astra low | Gemini low | Opus 5.5 low |
-|---|---:|---:|---:|---:|
-| **Bruit de la vue B + filtre C** | 35,1 % (13/37) | 12,0 % (3/25) | 8,3 % (2/24) | 11,5 % (3/26) |
-| **Pertinent gardés dans B + filtre C** | 17/17 | 17/17 | 17/17 | 17/17 |
-| Exactitude du verdict (3 classes, part de lignes où le verdict égale celui de Steve) | — | 70,5 % | 78,7 % | 72,1 % |
-| Intervalle à 95 % (par ville) | — | 58–81 % | 69–87 % | 60–82 % |
-| Sens de la modification = celui de Steve | — | 67,2 % | 72,1 % | 75,4 % |
-| Motif identique à Steve | — | 50,8 % | 59,0 % | 54,1 % |
-| Latence médiane par signal | — | 9,8 s | 4,9 s | 5,7 s |
+\* contaminé (règle 1 + exposition).
 
-| Exactitude du verdict | Astra low | Gemini low | Opus 5.5 low |
-|---|---:|---:|---:|
-| optim, v1 | 56,7 % | 66,7 % | 58,3 % |
-| optim, v2 | 73,3 % | 76,7 % | 78,3 % |
-| aveugle, v2 | 70,5 % | 78,7 % | 72,1 % |
-| aveugle, v2, sans les 6 lignes « sens non donné » | 70,9 % | 78,2 % | 72,7 % |
+**Lecture (JUGEMENT).** Sur le test, la passe 1 montre 37 lignes pour 17 Pertinent sur 20 ; C v2
+en montre 35 à 38 pour les 20, avec une précision P+S de 82 à 89 contre 65. Comme v2 est
+contaminé, c'est une direction à vérifier sur un jeu vierge, pas un gain mesuré.
 
-<!-- chart:oracle-c-exactitude (optim v1, optim v2, aveugle v2 par modèle) -->
-<!-- chart:oracle-c-bruit (B seul et B + filtre C, par modèle, sur l'aveugle) -->
+### Le prompt et l'audit de ses règles
 
-- **CALCUL.** Aucun classement entre les trois modèles : test de McNemar p = 0,13 à 1,00.
-- **CALCUL.** « 17 Pertinent sur 17 gardés » : borne basse à 95 % de 81,6 % ; ce n'est pas une
-  garantie de zéro perte.
-- **CALCUL.** Accord entre modèles : κ de Fleiss 0,75 ; unanimité sur 46 lignes sur 61. Un
-  « Non pertinent » unanime touche 19 lignes, dont 16 Non pertinent selon Steve, 3 À surveiller,
-  0 Pertinent.
-- **CALCUL.** Coût : passages sur siège, sans facturation à l'appel ; le CLI Claude annonce un
-  équivalent API de 1,45 $ pour les 61 lignes aveugles ; Astra et Gemini : `non vérifié`.
+- **v1** : critères généraux de Steve (trois critères, cinq exclusions, réserve d'asymétrie) et
+  légende de ses codes. Sources autorisées.
+- **v2** (une itération sur optim) — audit des règles selon le critère de l'owner (seuls autorisés :
+  critères généraux énoncés, légende des codes, lignes optim) :
 
-Données pour graphiques simples (barres) :
+| Règle v2 | Source | Verdict |
+|---|---|---|
+| 1. Verdict selon les quatre catégories de l'analyse | Tableau §2 de l'analyse (agrégat incluant 37 lignes de test) | **Fuite — source interdite** |
+| 2. L'étape précoce n'est jamais un déclassement | Erreurs optim + vue de travail de Steve, formulée dans le cadre de la règle 1 | **Suspecte** ; contredit aussi le code S-PLANIFIE |
+| 3. Avis de motion numéroté ≠ point d'ordre du jour | Erreurs optim + code N-ODJ-SEUL | Autorisée (exposition déclarée) |
+| 4. CPTAQ : exclusion municipale ≠ autorisation de lots nommés | Critère 1 + code P-PERIM-URB + erreurs optim | Autorisée ; **risque de surajustement** |
+| 5. Lotissement accessoire → N-ACCESSOIRE | Code N-ACCESSOIRE + erreurs optim | Autorisée |
+| 6. Vocation douteuse reste visible | Réserve d'asymétrie (critère général) + erreurs optim | Autorisée |
 
-| Série | B seul | Astra low | Gemini low | Opus 5.5 low |
-|---|---:|---:|---:|---:|
-| Bruit de la vue B + filtre C, aveugle (%) | 35.1 | 12.0 | 8.3 | 11.5 |
-| Exactitude optim v1 (%) | — | 56.7 | 66.7 | 58.3 |
-| Exactitude optim v2 (%) | — | 73.3 | 76.7 | 78.3 |
-| Exactitude aveugle v2 (%) | — | 70.5 | 78.7 | 72.1 |
+Toutes ces règles tranchent aussi des points que le dossier laisse à Steve (D8) : à faire
+confirmer par lui.
 
-### Ce que cela suggère pour C (JUGEMENT)
+### Garantie pour la suite : jeu de test scellé (mis en place dans le dépôt)
 
-- Posé en filtre sur la vue B, un modèle à effort bas guidé par les règles de Steve retire
-  l'essentiel du bruit de sa passe 1 (35 % → 8-12 %) sans masquer de Pertinent, sur 25 villes
-  jamais vues pendant la mise au point.
-- La décision « montrer / masquer » est bien plus stable que le verdict à trois classes : la
-  frontière Pertinent / À surveiller reste fragile, le motif n'est juste qu'une fois sur deux.
-- Les erreurs restantes viennent surtout de points que seul Steve peut trancher (D8) et
-  d'enregistrements trop pauvres : la prochaine marche est son arbitrage, pas un prompt de plus.
+- **(a) Scellé** : le jeu de test est chiffré (AES-256-GCM) hors du dépôt, clé hors du dépôt ; seule
+  son empreinte est visible ; l'autotest échoue si une copie en clair traîne dans l'espace de
+  travail. Le jeu actuel est scellé (a posteriori, par le même agent : démonstratif ici).
+- **(b) Gel avant exécution** : le lanceur refuse toute exécution sur le test si le prompt n'est pas
+  le prompt final **commité et inchangé**, et refuse une seconde exécution de la même version
+  (vérifié : un nouveau passage de v2 est refusé).
+- **(c) Journal d'audit** horodaté de chaque accès au test (qui, quand, rôle, empreinte du prompt
+  et du jeu), versionné avec les résultats (`test-access-log.jsonl`).
+- **(d) Séparation des rôles** : l'optimiseur et l'exécutant du test sont deux exécutants distincts ;
+  seul l'exécutant détient la clé (le lanceur exige le rôle « test-executor » et la clé). Procédure
+  décrite, non vérifiable dans le dépôt seul.
+- **(e) Entrées propres** : l'optimiseur ne reçoit que les critères généraux de Steve, la légende des
+  codes et le jeu optim ; jamais les parties agrégées ou détaillées de l'analyse, ni les tableaux du
+  dossier sur toutes les lignes, ni le classeur.
+- **(f) Nouveau jeu de test vierge** : les 52 villes suivantes de Steve, triées par lui avant toute
+  sortie de C, scellées par l'exécutant ; prompt refait sans la règle 1. Les chiffres de référence
+  porteront sur ce jeu.
 
 ### Limites
 
-- Petits jeux (60 et 61 lignes, 26 et 25 villes) ; intervalles larges.
-- Une seule personne pour la vérité, sans arbitrage ni « non résolu » ; cas contradictoires (D8)
-  notés comme vrais.
-- Le jeu aveugle n'est pas parfaitement propre (règle v2 issue d'un agrégat du relevé entier) ;
-  l'effet mesuré de ce biais est faible (tableau ci-dessus).
-- Une seule réponse retenue par ligne ; isolement des modèles et mode d'authentification
-  `non vérifié` (aucune clé d'API utilisée ; journaux d'événements non conservés).
-- **Les deux jeux gelés ne sont pas publiés dans le dépôt** (dépôt public ; codes de Steve ligne
-  par ligne et extraits lus en production) : décision à prendre avec D6.
+- Scores v2 du test contaminés ; aucune mesure sur un jeu vierge à ce jour.
+- Petits jeux (61 lignes de test, 25 villes) ; intervalles larges.
+- Une seule personne pour la vérité, sans arbitrage ni « non résolu » ; cas D8 notés comme vrais.
+- Les deux jeux ne sont pas publiés dans le dépôt (dépôt public) : décision à prendre avec D6.
 
 ### Plan d'extension (proposition, non exécutée)
 
-- Cible : environ 600 lignes, dont environ 300 lignes réelles annotées par un humain en aveugle ;
-  à cette taille, un écart de 6 à 7 points entre deux modèles devient lisible (5 points demandent
-  environ 470 lignes).
-- Un registre unique des municipalités : les 52 villes suivantes de Steve forment le prochain jeu
-  aveugle, annotées par lui seul ; les autres villes du radar sont tirées au sort une fois pour
-  toutes entre optim et aveugle.
-- Annotation « à la Steve » : la vérité est la décision humaine prise avant de voir toute réponse
-  de modèle ; 100 % d'annotation humaine pour tout ce qui entre en aveugle ; au moins 50 lignes
-  annotées deux fois (accord mesuré) ; Steve ne voit aucune sortie de C avant le gel de son relevé.
-- Cas synthétiques dérivés de `optim` seulement, jamais en aveugle, comptés à part.
+- D'abord le jeu de test vierge (ci-dessus), puis environ 600 lignes dont environ 300 lignes
+  réelles annotées par un humain en test ; à cette taille, un écart de 6 à 7 points entre deux
+  modèles devient lisible.
+- Registre unique des municipalités ; vérité = décision humaine prise avant de voir toute réponse
+  de modèle ; 100 % d'annotation humaine en test ; au moins 50 lignes annotées deux fois ; Steve ne
+  voit aucune sortie de C avant le gel de son relevé ; cas synthétiques dérivés d'optim seulement.
 
 ### Compatibilité avec la convergence sentropic / engram (terminologie et modèle générique)
 
-Une convergence sentropic + engram est en cours sur le vocabulaire (le terme « oracle » pourrait
-être remplacé par celui de l'état de l'art) et sur un modèle générique. Le brouillon reste
-compatible :
-- « oracle C » n'est qu'un **nom de dossier et de document** ; les données n'en dépendent pas.
-  Correspondance proposée avec l'état de l'art : oracle → **jeu de référence annoté** (*gold
-  standard* / *reference set*) ; `optim` → **jeu de développement** (*dev set*) ; `blind` → **jeu de
-  test réservé** (*held-out test set*) ; verdict de Steve → **étiquette** (*label*) ; motif →
-  **code de justification** (*rationale code*) ; accord avec Steve → **accord avec l'annotateur**.
-- Le format des items est générique : `id`, `label` (verdict, motif, famille, sens, passe),
-  `strata`, `input` (texte servi), `nodeIds` (ancres vers les objets du radar). Il se projette
-  sans perte sur une annotation ancrée à un objet métier (contrat d'ancre du dossier, §6.4).
-- Un renommage se fait en remplaçant les libellés des documents et le nom du dossier, sans
-  toucher aux jeux ni à leurs empreintes sha256.
+« Oracle C » n'est qu'un nom de dossier et de document. Correspondance avec l'état de l'art :
+oracle → **jeu de référence annoté** ; `optim` → **jeu de développement** ; `blind` → **jeu de
+test réservé** ; verdict → **étiquette** ; motif → **code de justification**. Le format des items
+(`id`, `label`, `strata`, `input`, `nodeIds`) est générique et se projette sur une annotation ancrée
+à un objet métier (§6.4). Un renommage ne touche ni les jeux ni leurs empreintes.
 
 ### Revue adverse
 
 Deux revues indépendantes : **Astra max** (rejet) et **Opus 5.5 max** (acceptation avec
-modifications). Points communs retenus : gel des jeux sans ancrage dans l'historique, règle v2
-appuyée sur un agrégat incluant des lignes aveugles, règles v2 qui tranchent des points D8,
-méthode différente de l'oracle E, isolement et sièges affirmés plutôt que prouvés, plan d'extension
-incohérent sur le partage et la taille. Suite donnée : le brouillon est requalifié en pilote
-exploratoire ; toutes les corrections de code sont faites sans relancer de modèle (mesures par
-ville, McNemar, sens, bruit comparable à B, test de sensibilité) ; le reste est déclaré dans les
-limites ; le plan d'extension est réécrit. Tableau de réconciliation complet : `review.md`.
+modifications). Points communs : gel sans ancrage dans l'historique, règle v2 appuyée sur un
+agrégat incluant des lignes de test, règles v2 qui tranchent des points D8, méthode différente de
+l'oracle E, isolement affirmé plutôt que prouvé, plan d'extension incohérent. Suite donnée :
+requalification en pilote exploratoire, corrections de code sans relancer de modèle, limites
+déclarées, plan d'extension réécrit, puis protocole de jeu de test scellé. Réconciliation :
+`review.md`.
+
+---
+
+### Annexe — jeu de mise au point (optim, 60 lignes) : diagnostic seulement
+
+Ces chiffres ont servi à écrire et choisir le prompt ; ce ne sont pas des performances.
+
+| Système | Précision (P) | Rappel (P) | Précision (P+S) | Rappel (P+S) | Bruit | Pertinents perdus |
+|---|---:|---:|---:|---:|---:|---:|
+| B passe 1 | 47,2 | 89,5 | 69,4 | 75,8 | 30,6 | 2/19 |
+| B passe 2 | 34,6 | 94,7 | 59,6 | 93,9 | 40,4 | 1/19 |
+| B passe 3 | 31,7 | 100,0 | 55,0 | 100,0 | 45,0 | 0/19 |
+| C v1 Astra / Gemini / Opus | 48,1 / 60,0 / 54,5 | 68,4 / 94,7 / 94,7 | 81,5 / 86,7 / 84,8 | 66,7 / 78,8 / 84,8 | 18,5 / 13,3 / 15,2 | 6 / 1 / 1 |
+| C v2 Astra / Gemini / Opus | 50,0 / 59,4 / 54,3 | 94,7 / 100 / 100 | 80,6 / 87,5 / 85,7 | 87,9 / 84,8 / 90,9 | 19,4 / 12,5 / 14,3 | 1 / 0 / 0 |
