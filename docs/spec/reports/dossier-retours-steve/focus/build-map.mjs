@@ -15,7 +15,7 @@ const HTML_SHA256_PLACEHOLDER = '0'.repeat(64);
 
 const expected = [
   ['criteres-steve', "Scène 1 · les trois critères de Steve en regard de l'existant"],
-  ['modele-donnees', 'Scène 2 · modèle cible par propriétaire : sentropic, immo, engram'],
+  ['modele-donnees', 'Scène 2 · stockage réel et propriétaires : Postgres, S3, geo, dépôt'],
   ['flux-import-oracle', "Scène 3 · architecture de l'import à l'affichage, jeu de référence transversal"],
   ['architecture-ui', 'Scène 4 · architecture UI et état de la migration'],
   ['affichage-abc', "Scène 5 · A, B et C : ce que voit l'application, ce que mesure l'évaluation"],
@@ -46,7 +46,7 @@ function matrixScene(source, id, title) {
 function erScene(source, id, title) {
   const model = parseEr(source, id);
   for (const name of ER_SPEC.existing) if (!model.entities.some(entity => entity.id === name)) throw Error(`${id}: existing table ${name} missing`);
-  const entities = model.entities.map(entity => ({ ...entity, existing: ER_SPEC.existing.includes(entity.id) }));
+  const entities = model.entities.map(entity => ({ ...entity, existing: ER_SPEC.existing.includes(entity.id), status: ER_SPEC.status?.[entity.id], owner: ER_SPEC.owner?.[entity.id] }));
   const projection = { sceneId: id, kind: 'er',
     entities: entities.map(entity => ({ id: entity.id, existing: entity.existing, columns: entity.attributes.map(attribute => [attribute.name, ...attribute.keys].join(' ')) })),
     relations: model.relations.map(({ line, ...relation }) => relation) };

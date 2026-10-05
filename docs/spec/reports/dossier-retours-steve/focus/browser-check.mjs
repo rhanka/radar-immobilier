@@ -278,7 +278,7 @@ const contentExpression = `(() => {
       for (const text of entity.querySelectorAll('text')) if (text.textContent.trim()) { const r = text.getBoundingClientRect(); if (r.right > body.right + 1 || r.left < body.left - 1) throw Error(mini.dataset.miniDiagram + ' : texte hors table'); } }
     return { id: mini.dataset.miniDiagram, option: Boolean(mini.closest('.question-block')), tables: boxes.length, scale: Number((svg.width / Number(mini.dataset.canvasWidth)).toFixed(3)) };
   });
-  if (charts.length !== 4 || descriptions !== 75 || minis.length !== 15) throw Error('contenu : ' + JSON.stringify({ charts: charts.length, descriptions, minis: minis.length }));
+  if (charts.length !== 6 || descriptions !== 75 || minis.length !== 15) throw Error('contenu : ' + JSON.stringify({ charts: charts.length, descriptions, minis: minis.length }));
   if (minis.some(mini => mini.option && mini.scale < .6)) throw Error('schéma d’option trop réduit : ' + JSON.stringify(minis));
   return { charts, descriptions, minis };
 })()`;
@@ -331,7 +331,7 @@ const zoomOne = async (id, { drag = false, shot = null } = {}) => {
   return { id, mode: opened.mode, fit: opened.scale || null, zoomed, dragged: Boolean(moved) };
 };
 const zoomIds = await evaluate(`[...document.querySelectorAll('[data-zoom]')].map(frame => frame.dataset.zoom)`);
-if (zoomIds.length !== 25) throw Error(`25 diagrammes zoomables attendus, ${zoomIds.length}`);
+if (zoomIds.length !== 27) throw Error(`27 diagrammes zoomables attendus, ${zoomIds.length}`);
 const zoom = [];
 for (const id of zoomIds) zoom.push(await zoomOne(id, { drag: id === 'flux-import-oracle', shot: id === 'affichage-abc' ? '.generated/zoom-plein-ecran-affichage-abc.png' : null }));
 // Zoom direct dans la page, sur un grand diagramme : le panneau ne déborde pas.

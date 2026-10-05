@@ -15,9 +15,9 @@
       note: "Les 24 signaux de bruit de la passe 1 se répartissent par critère : 3 hors résidentiel ou hors urbanisme, 4 resserrements, 6 sans effet sur la capacité, 8 autorisations individuelles, 3 points d'ordre du jour. Le radar filtre par nature d'instrument et par étape ; Steve demande un filtre par effet du règlement, sens et nombre d'unités, pour lequel aucune donnée n'existe encore (§2.3).",
     },
     'modele-donnees': {
-      badge: '§6.3, §6.7 · modèle cible (D2 a, G2)',
-      lede: "Le modèle cible par propriétaire, issu de la convergence sentropic + engram : immo ne construit aucune table d'annotation. À gauche, les tables du paquet générique @sentropic/annotations, installées dans le Postgres d'immo (sources, révisions immuables, validations liées au hash, cibles) ; au centre, ce qui reste à immo (profil de domaine et son schéma d'étiquettes, comptes, graphe) ; à droite, engram (versions figées du jeu de référence, runs). En-tête ocre et bordure pleine : existe ; en-tête bleu et bordure en tirets : proposé.",
-      note: "Une annotation vise 1 à N objets par la clé d'immo (ville + id texte pour un signal, clé #812 ; city_slug ; sha256 ; canonical_id), sans clé étrangère. Chaque correction crée une révision ; une validation porte sur une révision précise. Seules les révisions validées partent, en instantané haché, vers un jeu de référence engram ; l'évaluation se fait hors ligne. Détail objet par objet au §6.0.",
+      badge: '§6.0 · stockage réel et propriétaires',
+      lede: "Les colonnes sont le stockage réel : exécution (jobs et application), Postgres d'immo (tables immo, puis tables du paquet @sentropic/annotations installées chez immo), S3 d'immo (bucket radar-immobilier-docs), service geo, dépôt git d'immo (code, profil, .track). Le badge de chaque boîte est le propriétaire du schéma ou du code : engram (détection et évaluation), sentropic (annotations), track (décisions), immo, geo. Vert : nouveau ; orange : modifié ; gris : inchangé ; rien n'est supprimé.",
+      note: "engram ne stocke rien lui-même : sa librairie (@sentropic/graphify 0.18.0, futur @sentropic/engram) est exécutée par le job immo radar-refresh-pv, qui écrit graph/<ville>/latest.json sur le S3 d'immo puis le projette dans graph_nodes. Les tables annotation_* appartiennent à sentropic mais vivent dans le Postgres d'immo ; les jeux de référence vont dans un préfixe privé du S3 d'immo ; les décisions dans .track/.",
     },
     'flux-import-oracle': {
       badge: '§6.5, §7, §9.3 · architecture et jeu de référence',
