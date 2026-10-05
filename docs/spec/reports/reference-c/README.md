@@ -22,8 +22,14 @@ survey of 2026-09-21). The repository is public, so the content is committed **e
 
 ```sh
 node scripts/reference-seal.mjs unseal docs/spec/reports/reference-c/*.sealed --out <private-dir>
+# reseal: outputs are never overwritten, delete the old sealed files first
+rm docs/spec/reports/reference-c/*.sealed
 node scripts/reference-seal.mjs seal <private-dir>/reference-c.xlsx <private-dir>/reference-c.csv <private-dir>/reference-c-legende.csv <private-dir>/README.md --out docs/spec/reports/reference-c
 ```
 
 The script prints the SHA-256 of each plaintext; compare with the table above.
+Outputs are created exclusively: an existing file or symlink at a target path is refused.
+Unseal writes mode-600 files into `<private-dir>`, created in mode 700; an existing
+`<private-dir>` with wider permissions is refused. The key lookup uses the repository that
+contains the script, whatever the current directory.
 Never commit the plaintext files. Format: `REFC1` | IV (12 bytes) | GCM tag (16 bytes) | AES-256-GCM ciphertext.
