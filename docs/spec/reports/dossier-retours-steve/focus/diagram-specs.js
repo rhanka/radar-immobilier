@@ -6,7 +6,7 @@
 // Evidence: observed = exists on origin/main 27891b10; declared = proposed by the
 // dossier, not built; historical = frozen reference.
 
-import { STEVE_MODEL } from './steve-model.js';
+import { PHYSICAL } from './physical-model.js';
 
 export const SCENE_KINDS = {
   'criteres-steve': 'matrix',
@@ -24,8 +24,8 @@ export const MATRIX = {
   workingView: 73,
 };
 
-// Scene 2: the minimal model built from Steve’s needs (steve-model.js, §6.3).
-export const ER_SPEC = { ...STEVE_MODEL };
+// Scene 2: the proposed physical model, columns = real storage, badge = owner (§6.0).
+export const ER_SPEC = { ...PHYSICAL['etat-propose'] };
 
 const node = (evidence, tag, detail) => ({ evidence, tag, detail });
 

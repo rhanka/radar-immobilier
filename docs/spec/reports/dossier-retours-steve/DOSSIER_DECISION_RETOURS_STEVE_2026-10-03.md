@@ -25,6 +25,19 @@ Conventions : **FAIT** = constaté dans une source citée · **CALCUL** = dériv
 
 Passe 1 → 34 Pertinent, 15 À surveiller, 24 Non pertinent (bruit 24/73 = 32,9 %). Les 124 lignes = total des lignes de triage sur les trois passes (73 + 33 + 17, plus 1 cas hors radar), 51 villes sur 103.
 
+**Ce que visent les 121 lignes retenues : signaux et documents distincts du radar** (comptes mesurés, recomptés pour ce dossier).
+
+| Verdict de Steve | Lignes | Signaux distincts | Documents (PV) distincts | Types de signaux |
+|---|---:|---:|---:|---|
+| Pertinent | 39 | 55 | 36 | 34 Signal, 21 DesignationEvent |
+| À surveiller | 29 | 38 | 26 | 25 Signal, 13 DesignationEvent |
+| Non pertinent | 53 | 69 | 39 | 42 Signal, 27 DesignationEvent |
+| **Total** | **121** | **162** | **80** (distincts, pas la somme) | 51 villes |
+
+121 lignes de Steve (3 exclues : un signal cité n’existe plus dans le graphe) → 162 signaux distincts du radar → 80 documents (PV) distincts, 51 villes. 81 lignes visent un seul signal, 40 en regroupent plusieurs ; 9 lignes citent au moins un signal qui n’existe plus. Les signaux à détecter sont ceux que Steve juge Pertinent : 39 lignes → 55 signaux distincts (34 Signal, 21 DesignationEvent) dans 36 documents. Son analyse cite 22 cas réunissant les trois critères : c’est un périmètre plus étroit, la seule passe 1 et le sens Assouplissement (22 des 34 Pertinent de la passe 1).
+
+<!-- chart:steve-signaux -->
+
 ## Glossaire
 
 Les termes employés sans définition dans la suite du dossier, dans l'ordre où on les rencontre.
@@ -448,8 +461,10 @@ Volumes : 1 106 municipalités au registre (FAIT) ; nombre de documents, de nœu
 
 ```mermaid
 erDiagram
+    s3_raw ||..o{ job_refresh : lit_pv
+    job_refresh ||..o{ s3_graph : ecrit
+    job_refresh ||..o{ graph_nodes : projette
     s3_raw ||..o| documents : projection
-    s3_graph ||..o{ graph_nodes : projection
     graph_nodes ||..o{ graph_edges : aretes
     registre_villes ||..o{ graph_nodes : city_slug
     graph_nodes ||..o{ geo_resolutions : node_id
@@ -457,6 +472,7 @@ erDiagram
     geo_resolutions }o..o| lot_versions : lot
     geo_ogc ||..o{ zone_versions : pull_ogc
     geo_ogc ||..o{ lot_versions : pull_ogc_lots
+    app_immo }o..o{ graph_nodes : lit
     prospect_notes }o--o| signals : signal_id
     prospect_notes }o--|| account_users : auteur
     s3_raw {
@@ -476,6 +492,16 @@ erDiagram
     registre_villes {
       text city_slug PK "1 106 municipalités, JSON du code"
       text mrc "homonymes suffixés par la MRC"
+    }
+    job_refresh {
+      text job PK "radar-refresh-pv (CronJob)"
+      text image "ghcr.io/rhanka/radar-api"
+      text moteur "@sentropic/graphify 0.18.0"
+      text ecrit "latest.json puis graph_nodes"
+    }
+    app_immo {
+      text service PK "API radar-api + UI"
+      text lit "Postgres d'immo, proxy geo"
     }
     documents {
       uuid id PK
@@ -530,12 +556,20 @@ erDiagram
 
 Qui lit quoi : la collecte et le refresh écrivent S3, puis projettent dans Postgres ; l'application lit Postgres ; le mapper relie les signaux du graphe aux zones et lots copiés du service geo.
 
-**Proposé : le même dessin, avec un statut et un propriétaire par objet.** Conformément à la convergence sentropic + engram (§6.7, G2, G7), immo ne construit pas de tables d'annotation : les annotations vivent dans les tables du paquet générique `@sentropic/annotations`, installées dans le Postgres d'immo ; le jeu de référence et les runs appartiennent à engram ; les décisions de gel et de promotion à track ; immo apporte son profil de domaine et ses données.
+**Qui possède quoi, et où c'est stocké : deux choses différentes.** Dans les deux diagrammes, les **colonnes** sont le **stockage réel** (Postgres d'immo, S3 d'immo, service geo, dépôt git d'immo) et le **badge** de chaque boîte est le **propriétaire du schéma ou du code** (immo, engram, sentropic, track, geo).
+- **engram = moteur de détection et d'évaluation.** Aujourd'hui, la librairie `@sentropic/graphify` 0.18.0 (futur `@sentropic/engram`) est **exécutée dans le job immo** `radar-refresh-pv` (CronJob, image `ghcr.io/rhanka/radar-api`) ; elle produit le graphe, que **le job immo écrit** dans `graph/<ville>/latest.json` sur le **S3 d'immo** (bucket `radar-immobilier-docs`), puis **projette** dans `graph_nodes` / `graph_edges` du **Postgres d'immo**. Format et code du graphe : engram ; exécution : job immo (demain : DAG geo, #699) ; stockage : S3 et Postgres d'immo. L'évaluation (jeu de référence, runs) est l'autre moitié d'engram, hors ligne.
+- **sentropic = propriétaire du modèle d'annotation** (paquet `@sentropic/annotations`), mais ses tables `annotation_*` sont **installées et stockées dans le Postgres d'immo**, par les migrations du paquet ; les octets du classeur vont dans le **S3 d'immo**, par le port du paquet.
+- **Jeux de référence et runs** : stockage objet privé de l'hôte derrière un port du paquet (synthèse §3.3), donc un **préfixe privé du S3 d'immo** (nom à fixer, `non vérifié`) ; manifestes et empreintes publics dans le dépôt. **Option, pas un fait** : la synthèse évoque aussi un port de stockage commun ; un stockage propre à engram n'est pas recommandé.
+- **track** : les décisions de gel et de promotion sont des événements dans les fichiers `.track/` du dépôt d'immo, attestés par h2a.
+
+**Proposé : le même dessin, avec un statut par objet.** Conformément à la convergence sentropic + engram (§6.7, G2, G7), immo ne construit pas de tables d'annotation : les annotations vivent dans les tables du paquet générique `@sentropic/annotations`, installées dans le Postgres d'immo ; le jeu de référence et les runs appartiennent à engram ; les décisions de gel et de promotion à track ; immo apporte son profil de domaine et ses données.
 
 ```mermaid
 erDiagram
+    s3_raw ||..o{ job_refresh : lit_pv
+    job_refresh ||..o{ s3_graph : ecrit
+    job_refresh ||..o{ graph_nodes : projette
     s3_raw ||..o| documents : projection
-    s3_graph ||..o{ graph_nodes : projection
     graph_nodes ||..o{ graph_edges : aretes
     registre_villes ||..o{ graph_nodes : city_slug
     graph_nodes ||..o{ geo_resolutions : node_id
@@ -543,22 +577,24 @@ erDiagram
     geo_resolutions }o..o| lot_versions : lot
     geo_ogc ||..o{ zone_versions : pull_ogc
     geo_ogc ||..o{ lot_versions : pull_ogc_lots
+    app_immo }o..o{ graph_nodes : lit
     prospect_notes }o--o| signals : signal_id
     prospect_notes }o--|| account_users : auteur
     s3_retours ||..|| annotation_sources : octets
     annotation_sources ||--o{ annotation_revisions : import
+    app_immo ||..o{ annotation_revisions : saisie
     annotation_revisions ||--o{ annotation_validations : decide
     annotation_revisions ||--o{ annotation_targets : vise
     annotation_targets }o..o| graph_nodes : signal
-    annotation_targets }o..o| registre_villes : ville
     annotation_targets }o..o| documents : document
     annotation_targets }o..o| zone_versions : zone_cible
     annotation_targets }o..o| lot_versions : lot_cible
-    annotation_validations }o..o{ reference_set_versions : export_hache
-    profil_domaine ||..o{ reference_set_versions : schema
-    reference_set_versions ||--o{ eval_runs : mesure
-    eval_runs }o..o| decisions_track : preuve
+    annotation_validations }o..o{ job_evaluation : export_hache
+    job_evaluation ||..o{ s3_reference_sets : ecrit_eval
+    job_evaluation ||..o{ manifestes : publie
+    job_evaluation }o..o| decisions_track : preuve
     decisions_track ||..o| profil_domaine : promotion
+    profil_domaine ||..o{ job_refresh : profil_prompt
     s3_raw {
       text cle PK "raw/proces-verbaux-<ville>/cas/<sha>.pdf"
       text index "raw/pv-index/cas/<sha>.<ext>"
@@ -576,6 +612,16 @@ erDiagram
     registre_villes {
       text city_slug PK "1 106 municipalités, JSON du code"
       text mrc "homonymes suffixés par la MRC"
+    }
+    job_refresh {
+      text job PK "radar-refresh-pv (CronJob)"
+      text image "ghcr.io/rhanka/radar-api"
+      text moteur "@sentropic/graphify 0.18.0"
+      text ecrit "latest.json puis graph_nodes"
+    }
+    app_immo {
+      text service PK "API radar-api + UI"
+      text lit "Postgres d'immo, proxy geo"
     }
     documents {
       uuid id PK
@@ -634,40 +680,43 @@ erDiagram
       text cle PK "classeur de Steve, par sha256"
       text ecrit_par "port de @sentropic/annotations"
     }
+    s3_reference_sets {
+      text prefixe PK "préfixe privé, nom à fixer"
+      text versions "éléments des versions figées"
+      text runs "prédictions et résultats"
+    }
     annotation_sources {
-      uuid id PK "sentropic"
+      uuid id PK
       text sha256 UK "fichier importé une fois"
     }
     annotation_revisions {
-      text content_hash PK "sentropic, immuable"
-      text prev_content_hash "version précédente"
-      text auteur "identité IdP sentropic"
-      jsonb corps "schéma d'étiquettes du profil immo"
+      text content_hash PK "immuable"
+      text prev_content_hash "révision précédente"
+      text auteur "identité IdP (compte de Steve)"
+      jsonb corps "schéma d'étiquettes du profil"
     }
     annotation_validations {
-      uuid id PK "sentropic"
+      uuid id PK
       text revision_hash FK "liée au hash"
       text decision "accepter, contester, rejeter…"
     }
     annotation_targets {
-      uuid id PK "sentropic"
+      uuid id PK
       text cible_type "signal, ville, PV, zone, lot"
-      text cle "clé du domaine immo"
+      text cle "clé fournie par immo"
     }
-    reference_set_versions {
-      text id PK "engram : ReferenceSet@version"
+    job_evaluation {
+      text job PK "évaluation hors ligne"
+      text moteur "engram (eval)"
+      text lit "instantané haché des validées"
+    }
+    manifestes {
+      text fichier PK "manifestes et empreintes publics"
       text label_provenance "E silver, C human_single"
-      text partitions "dev / test scellé"
-      text manifest_sha256
-    }
-    eval_runs {
-      text run_id PK "engram, hors ligne"
-      text candidat "profil + prompt + modèle"
-      text resultat "métriques, garde de promotion"
     }
     decisions_track {
-      text id PK "track : gel, promotion"
-      text attestation "signée par h2a"
+      text fichier PK ".track/events.jsonl"
+      text decisions "gel, promotion (attestées h2a)"
     }
 ```
 
@@ -688,28 +737,25 @@ erDiagram
 
 **Tableau des écarts.**
 
-| Objet | Service | Propriétaire | Existe aujourd'hui | Proposé | Détail | Pourquoi | Décision |
-|---|---|---|---|---|---|---|---|
-| Classeur de Steve sur S3 (par sha256, sidecar `*.meta.json`) | immo S3 | sentropic (écrit par le port du paquet) | non | **nouveau** | Octets importés une fois, gardés tels quels | Source immuable, provenance | D1, G2 |
-| `annotation_sources` | immo PG (tables du paquet) | sentropic | non | **nouveau** | Un fichier reçu : sha256 unique, importateur | Réimport sans doublon | G2, D2 |
-| `annotation_revisions` | immo PG (tables du paquet) | sentropic | non | **nouveau** | Révisions immuables (`content_hash`, `prev_content_hash`), corps au schéma d'étiquettes du profil immo, auteur = identité IdP | Annotations vivantes de Steve, sans écrasement | G2, G3, D5 |
-| `annotation_validations` (+ adjudications) | immo PG (tables du paquet) | sentropic | non | **nouveau** | Acte sur une révision désignée par son hash : accepter, contester, rejeter… | Boucle de validation | G3, G4 |
-| `annotation_targets` | immo PG (tables du paquet) | sentropic (forme) ; clé : immo | non | **nouveau** | Cible : type + clé du tableau ci-dessus | 1 à N cibles, sans clé étrangère | G2, D3 |
-| Profil de domaine (`radar/ontology/ontology-profile.yaml`) | dépôt immo | immo (contenu) ; format : engram | oui (ontologie) | **modifié** | + schéma d'étiquettes (verdicts, 28 motifs → critères K1 à K9 et exclusions, sens, tags), + règle de promotion D13, + unité de groupe (municipalité) | Les étiquettes de Steve suivent un schéma déclaré | D2, D7 |
-| `ReferenceSetVersion` (manifeste, partitions, sceau) | stockage objet privé de l'hôte (S3 d'immo) + manifestes publics | engram | non (E : fichiers JSON hors main) | **nouveau** | Version figée tirée d'un instantané haché des annotations validées ; `label_provenance` | Jeu de référence C ; E converti | G1, G5, D10 |
-| Runs d'évaluation, résultats | hors ligne (engram) | engram | en partie (campagnes #782) | **nouveau** | Runs par candidat, évaluateurs pluggables, statistiques, garde de promotion | Mesure hors de l'application | G6, D11 |
-| Décisions de gel et de promotion | `.track` | track (attestation h2a) | oui (track) | **nouveau (usage)** | Gel d'une version, promotion d'un candidat exact | Décision humaine tracée | G6, D13 |
-| `graph_nodes` | immo PG | immo | oui : signaux et entités, clé `id` | **modifié** | Clé `(city_slug, id)` au lieu de `id` seul | Correction #812, déjà décidée | #812 |
-| `graph_edges` | immo PG | immo | oui : relations | **modifié** | Les références à un nœud portent la ville ; détail dans #812 (`non vérifié` ici) | Même raison | #812 |
-| `prospect_notes` | immo PG | immo | oui : notes de l'équipe | **modifié** | Ancre signal en texte (`city_slug` + id) au lieu de l'UUID `signals` ; comparaison auteur corrigée | Réparer l'annotation de signal de l'équipe (B0) | D3 |
-| `account_users` | immo PG | immo (comptes) ; identité : IdP sentropic | oui | **modifié (données)** | Un compte pour Steve ; `sub` porte déjà le sujet de l'IdP sentropic | Steve annote dans l'application | D5, G4 |
-| `signals` (+ `opportunities`, `scores`) | immo PG | immo | oui, aucune écriture | inchangé | Orpheline ; une suppression éventuelle est hors de ce dossier | — | aucune |
-| `documents`, `raw/…`, `graph/…`, `runs/…`, `refresh/…`, `state/…` | immo PG, immo S3 | immo | oui | inchangé | Lus pour rattacher un PV ou un signal | — | — |
-| `zone_versions`, `lot_versions`, `geo_resolutions`, `geo_unresolved` | immo PG | immo (copie du service geo) | oui | inchangé | `canonical_id` réutilisé comme clé de cible | — | — |
-| `prospect_marks` | immo PG | immo | oui | inchangé | Usage de l'équipe sur les lots | — | — |
-| Collections `qc-zonage-*`, `qc-lots-*`, `qc-zoning-events-*` | geo PostGIS, geo S3 (`non vérifié`) | service geo | oui | inchangé | Aucune collection ni API nouvelle | — | — |
-| Six tables immo du brouillon (`retours_fichiers`, `annotations`, `validations`, `motifs`, `annotation_cibles`, `reference_set_versions`) | — | — | non (jamais construites) | **abandonnées** | Remplacées par les objets génériques ci-dessus (§6.3) | G7 : immo ne construit pas ses tables | G2, G7, D2 |
-| Supprimé de l'existant | — | — | — | **aucun** | Rien de ce qui existe n'est supprimé | — | — |
+| Objet | Stockage physique | Propriétaire du schéma / code | Exécuté par | Statut | Détail | Décision |
+|---|---|---|---|---|---|---|
+| `graph/<ville>/latest.json` (+ `history/`) | S3 d'immo (`radar-immobilier-docs`) | format : engram | job immo `radar-refresh-pv` (librairie `@sentropic/graphify` 0.18.0) | inchangé | Graphe produit par engram, écrit par le job immo | — |
+| `graph_nodes` | Postgres d'immo | engram (format) · immo (table) | job immo (projection) | **modifié** | Clé `(city_slug, id)` au lieu de `id` seul | #812 |
+| `graph_edges` | Postgres d'immo | engram · immo | job immo | **modifié** | Références portant la ville (détail dans #812, `non vérifié` ici) | #812 |
+| Classeur de Steve (par sha256, sidecar `*.meta.json`) | S3 d'immo | sentropic (port du paquet) | application immo (import) | **nouveau** | Importé une fois, gardé tel quel | D1, G2 |
+| `annotation_sources`, `annotation_revisions`, `annotation_validations` (+ adjudications), `annotation_targets` | Postgres d'immo (migrations du paquet) | sentropic (`@sentropic/annotations`) | application immo (saisie de Steve, validations de l'équipe) | **nouveau** | Révisions immuables liées au hash, validations, cibles par clé immo | G2, G3, G4, D2 |
+| Profil de domaine (`radar/ontology/ontology-profile.yaml`) | dépôt git d'immo | immo (contenu) ; format : engram | lu par le job immo et par l'évaluation | **modifié** | + schéma d'étiquettes, règle D13, unité de groupe | D2, D7 |
+| Jeux de référence (éléments des versions figées) et runs | S3 d'immo, préfixe privé (nom à fixer) | engram | job d'évaluation hors ligne (engram) | **nouveau** | Versions figées, partitions dev / test scellée, prédictions, résultats | G1, G5, D10, D11 |
+| Manifestes et empreintes | dépôt git d'immo | engram | job d'évaluation | **nouveau** | Publics ; `label_provenance` | G1, G5 |
+| Décisions de gel et de promotion | dépôt git d'immo (`.track/`) | track (attestation h2a) | humain (Fabien) | **nouveau (usage)** | Gel d'une version, promotion d'un candidat exact | G6, D13 |
+| `account_users` | Postgres d'immo | immo ; identité : IdP sentropic | application immo | **modifié (données)** | Un compte pour Steve | D5, G4 |
+| `prospect_notes` | Postgres d'immo | immo | application immo | **modifié** | Ancre signal en texte (`city_slug` + id), comparaison auteur corrigée | D3 |
+| `documents`, `raw/…`, `runs/…`, `refresh/…`, `state/…` | Postgres et S3 d'immo | immo | collecte et refresh immo | inchangé | Lus pour rattacher un PV | — |
+| `zone_versions`, `lot_versions`, `geo_resolutions`, `geo_unresolved` | Postgres d'immo (copie du service geo) | immo | pull OGC, mapper G1 | inchangé | `canonical_id` réutilisé comme clé de cible | — |
+| `signals`, `prospect_marks` | Postgres d'immo | immo | application immo | inchangé | `signals` orpheline ; `prospect_marks` pour l'équipe | — |
+| Collections `qc-zonage-*`, `qc-lots-*`, `qc-zoning-events-*` | service geo (PostGIS, S3 geo : `non vérifié`) | geo | service geo | inchangé | Aucune collection ni API nouvelle | — |
+| Six tables immo du brouillon | — | — | — | **abandonnées** | Remplacées par les tables du paquet (§6.3) | G7, D2 |
+| Supprimé de l'existant | — | — | — | **aucun** | Rien de ce qui existe n'est supprimé | — |
 
 #### Annotations existantes : deux tables, aucune table de jeu de référence
 
@@ -1291,6 +1337,18 @@ Les tableaux extraction et ciblage restent séparés, sans fusion des F1. Pont p
    - **motif** : l'un des 28 codes de Steve.
 
    **Le verdict se dérive des tags par une règle déterministe** : la table de dérivation relue par Steve (D7, D8). On mesure donc séparément ce que le modèle lit (les tags) et la règle qui en tire le verdict.
+
+**Ce que visent les 121 lignes retenues : signaux et documents distincts du radar** (comptes mesurés, recomptés pour ce dossier).
+
+| Verdict de Steve | Lignes | Signaux distincts | Documents (PV) distincts | Types de signaux |
+|---|---:|---:|---:|---|
+| Pertinent | 39 | 55 | 36 | 34 Signal, 21 DesignationEvent |
+| À surveiller | 29 | 38 | 26 | 25 Signal, 13 DesignationEvent |
+| Non pertinent | 53 | 69 | 39 | 42 Signal, 27 DesignationEvent |
+| **Total** | **121** | **162** | **80** (distincts, pas la somme) | 51 villes |
+
+121 lignes de Steve (3 exclues : un signal cité n’existe plus dans le graphe) → 162 signaux distincts du radar → 80 documents (PV) distincts, 51 villes. 81 lignes visent un seul signal, 40 en regroupent plusieurs ; 9 lignes citent au moins un signal qui n’existe plus. Les signaux à détecter sont ceux que Steve juge Pertinent : 39 lignes → 55 signaux distincts (34 Signal, 21 DesignationEvent) dans 36 documents. Son analyse cite 22 cas réunissant les trois critères : c’est un périmètre plus étroit, la seule passe 1 et le sens Assouplissement (22 des 34 Pertinent de la passe 1).
+
 
 **Métriques.**
 
@@ -2115,7 +2173,7 @@ Légende : **=** convergence · **≈** convergence de fond, forme différente �
 
 Cinq scènes, chacune dans la forme qui convient à ce qu'elle montre. Elles ne changent rien au fond : elles rendent lisibles les critères de Steve en regard de l'existant (§2), le modèle de données (§6), l'architecture de l'import à l'affichage avec le jeu de référence (§6.5, §7, §9.3), l'architecture UI (§8) et l'affichage A/B/C (§9.5).
 - Scène 1 : une **matrice** (tableau ci-dessous), un critère par ligne.
-- Scène 2 : un **diagramme entité-relation** (`erDiagram`) du modèle cible par propriétaire (§6.3, §6.7) : tables, colonnes clés, relations et cardinalités.
+- Scène 2 : un **diagramme entité-relation** (`erDiagram`) de l'état proposé du §6.0 : colonnes = stockage réel (Postgres, S3, geo, dépôt), badge = propriétaire du schéma ou du code, statut par objet.
 - Scène 3 : une **architecture en couloirs verticaux** de gauche à droite (`flowchart LR`, un `subgraph` par couloir : utilisateurs, écrans UI, fonctions backend, données sur S3 et PostgreSQL), le jeu de référence en bande transversale en bas, système d'évaluation hors ligne.
 - Scène 4 : des composants, en cartes A' 460 × 200 ; chaque `subgraph` est un conteneur natif `parentId`.
 - Scène 5 : **deux zones explicites** (`flowchart LR`, un `subgraph` par couloir) : en haut l'**application**, ce que voient les utilisateurs et où chaque élément vit (écran, backend, base) ; en bas l'**évaluation hors ligne** (job Node sans écran) : référence gelée, diff nommé, jeu de référence C, mesure, seuil de bascule, décision de Farid.
@@ -2131,70 +2189,161 @@ Cinq scènes, chacune dans la forme qui convient à ce qu'elle montre. Elles ne 
 | Exclusion · point d'ordre du jour | Une décision du conseil, pas un point inscrit à l'ordre du jour | Aucune distinction entre ordre du jour et décision | absent | 3 |
 | Vue de travail · passe 1 | 22 sur 73 réunissent les trois critères | 34 des 40 Pertinent affichés | — | 24 |
 
-### `modele-donnees` — Scène 2 · modèle cible par propriétaire : sentropic, immo, engram
+### `modele-donnees` — Scène 2 · stockage réel et propriétaires : Postgres, S3, geo, dépôt
 
 ```mermaid
 erDiagram
+    s3_raw ||..o{ job_refresh : lit_pv
+    job_refresh ||..o{ s3_graph : ecrit
+    job_refresh ||..o{ graph_nodes : projette
+    s3_raw ||..o| documents : projection
+    graph_nodes ||..o{ graph_edges : aretes
+    registre_villes ||..o{ graph_nodes : city_slug
+    graph_nodes ||..o{ geo_resolutions : node_id
+    geo_resolutions }o..o| zone_versions : zone
+    geo_resolutions }o..o| lot_versions : lot
+    geo_ogc ||..o{ zone_versions : pull_ogc
+    geo_ogc ||..o{ lot_versions : pull_ogc_lots
+    app_immo }o..o{ graph_nodes : lit
+    prospect_notes }o--o| signals : signal_id
+    prospect_notes }o--|| account_users : auteur
+    s3_retours ||..|| annotation_sources : octets
     annotation_sources ||--o{ annotation_revisions : import
-    annotation_revisions |o--o| annotation_revisions : remplace
+    app_immo ||..o{ annotation_revisions : saisie
     annotation_revisions ||--o{ annotation_validations : decide
     annotation_revisions ||--o{ annotation_targets : vise
-    annotation_targets }o..o| graph_nodes : ville_et_id_texte
-    annotation_revisions }o--|| account_users : auteur
-    annotation_validations }o--|| account_users : decideur
-    profil_domaine ||..o{ annotation_revisions : schema_corps
-    annotation_validations }o..o{ reference_set_versions : export_hache
-    reference_set_versions ||--o{ eval_runs : mesure
+    annotation_targets }o..o| graph_nodes : signal
+    annotation_targets }o..o| documents : document
+    annotation_targets }o..o| zone_versions : zone_cible
+    annotation_targets }o..o| lot_versions : lot_cible
+    annotation_validations }o..o{ job_evaluation : export_hache
+    job_evaluation ||..o{ s3_reference_sets : ecrit_eval
+    job_evaluation ||..o{ manifestes : publie
+    job_evaluation }o..o| decisions_track : preuve
+    decisions_track ||..o| profil_domaine : promotion
+    profil_domaine ||..o{ job_refresh : profil_prompt
+    s3_raw {
+      text cle PK "raw/proces-verbaux-<ville>/cas/<sha>.pdf"
+      text index "raw/pv-index/cas/<sha>.<ext>"
+      json sidecar "*.meta.json : url, dates, ville"
+    }
+    s3_graph {
+      text cle PK "graph/<ville>/latest.json"
+      text historique "graph/<ville>/history/…"
+    }
+    s3_runs {
+      text runs PK "runs/<source>/<runId>/manifest.jsonl"
+      text refresh "refresh/018/<ville>/runs/…"
+      text etat "state/<ville>/<source>.json"
+    }
+    registre_villes {
+      text city_slug PK "1 106 municipalités, JSON du code"
+      text mrc "homonymes suffixés par la MRC"
+    }
+    job_refresh {
+      text job PK "radar-refresh-pv (CronJob)"
+      text image "ghcr.io/rhanka/radar-api"
+      text moteur "@sentropic/graphify 0.18.0"
+      text ecrit "latest.json puis graph_nodes"
+    }
+    app_immo {
+      text service PK "API radar-api + UI"
+      text lit "Postgres d'immo, proxy geo"
+    }
+    documents {
+      uuid id PK
+      text s3_key "clé raw/…/cas/<sha>"
+      text sha256 "empreinte du PV"
+      jsonb extracted
+    }
+    graph_nodes {
+      text city_slug PK "clé (city_slug, id), #812"
+      text id PK "signal-…, event-…, muni-…"
+      text type "Signal, DesignationEvent…"
+      text source_ref "clé S3 du document"
+    }
+    graph_edges {
+      uuid id PK
+      text src_id "+ ville du nœud (#812)"
+      text dst_id "+ ville du nœud (#812)"
+    }
+    signals {
+      uuid id PK "aucune écriture sur main"
+    }
+    zone_versions {
+      uuid id PK
+      text canonical_id "ogc:zones:<ville>:<code>"
+      text city_slug
+    }
+    lot_versions {
+      uuid id PK
+      text canonical_id "ogc:lots:<ville>:<no_lot>"
+      text no_lot
+    }
+    geo_resolutions {
+      uuid id PK
+      text node_id "Signal ou DesignationEvent"
+      text target_id "canonical_id zone ou lot"
+    }
+    account_users {
+      uuid id PK "+ compte de Steve (D5)"
+      text sub "sujet IdP sentropic"
+    }
+    prospect_notes {
+      uuid id PK
+      text signal_cle "ville + id texte (B0)"
+    }
+    geo_ogc {
+      text zonage PK "qc-zonage-<ville>"
+      text lots "qc-lots-<ville>"
+      text evenements "qc-zoning-events-<ville>"
+    }
+    profil_domaine {
+      text fichier PK "radar/ontology/ontology-profile.yaml"
+      text etiquettes "+ verdicts, motifs, critères, sens"
+      text promotion "+ règle D13"
+    }
+    s3_retours {
+      text cle PK "classeur de Steve, par sha256"
+      text ecrit_par "port de @sentropic/annotations"
+    }
+    s3_reference_sets {
+      text prefixe PK "préfixe privé, nom à fixer"
+      text versions "éléments des versions figées"
+      text runs "prédictions et résultats"
+    }
     annotation_sources {
       uuid id PK
-      text sha256 UK "classeur de Steve, une fois"
-      text octets "S3 d’immo, par un port"
+      text sha256 UK "fichier importé une fois"
     }
     annotation_revisions {
       text content_hash PK "immuable"
-      text prev_content_hash FK "révision précédente"
-      uuid auteur FK "Steve, identité IdP"
-      text origine "import ou saisie"
-      jsonb corps "verdict, motif, sens, tags"
-      text statut "calculé des validations"
+      text prev_content_hash "révision précédente"
+      text auteur "identité IdP (compte de Steve)"
+      jsonb corps "schéma d'étiquettes du profil"
     }
     annotation_validations {
       uuid id PK
-      text revision_hash FK "révision visée"
-      uuid decideur FK "équipe ou PO"
+      text revision_hash FK "liée au hash"
       text decision "accepter, contester, rejeter…"
-      text motif "pourquoi"
     }
     annotation_targets {
       uuid id PK
       text cible_type "signal, ville, PV, zone, lot"
-      text city_slug "clé du graphe (#812)"
-      text cle "id, sha256 ou canonical_id"
-      jsonb vu_par_steve "instantané observé"
+      text cle "clé fournie par immo"
     }
-    profil_domaine {
-      text fichier PK "ontology-profile.yaml"
-      text etiquettes "verdicts, 28 motifs, critères"
-      text promotion "règle D13"
+    job_evaluation {
+      text job PK "évaluation hors ligne"
+      text moteur "engram (eval)"
+      text lit "instantané haché des validées"
     }
-    account_users {
-      uuid id PK
-      text sub "sujet IdP sentropic"
+    manifestes {
+      text fichier PK "manifestes et empreintes publics"
+      text label_provenance "E silver, C human_single"
     }
-    graph_nodes {
-      text city_slug PK "clé (city_slug, id), #812"
-      text id PK "signal-… (texte)"
-    }
-    reference_set_versions {
-      text id PK "ReferenceSet@version"
-      text label_provenance "human_single pour C"
-      text partitions "dev 51 villes, test 52"
-      text manifest_sha256 "gel décidé dans track"
-    }
-    eval_runs {
-      text run_id PK
-      text candidat "profil + prompt + modèle"
-      text resultat "métriques, garde"
+    decisions_track {
+      text fichier PK ".track/events.jsonl"
+      text decisions "gel, promotion (attestées h2a)"
     }
 ```
 

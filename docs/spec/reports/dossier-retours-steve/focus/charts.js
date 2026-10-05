@@ -37,6 +37,16 @@ export const CHARTS = {
       { label: 'Point d’ordre du jour', detail: 'N-ODJ-SEUL', values: [3, 4] },
     ],
   },
+  'steve-signaux': {
+    kind: 'stacked',
+    title: 'Lignes de Steve et signaux distincts du radar, par verdict (121 lignes retenues)',
+    note: 'Une ligne peut viser plusieurs signaux : 121 lignes → 162 signaux distincts. Les documents (80 distincts) ne s’additionnent pas par verdict : un même PV peut porter des signaux de verdicts différents.',
+    source: 'items.json, nodes.json du premier jet (recompté)',
+    rows: [
+      { label: 'Lignes de Steve', values: { P: 39, S: 29, N: 53 } },
+      { label: 'Signaux distincts', values: { P: 55, S: 38, N: 69 } },
+    ],
+  },
   'classement-passes': {
     kind: 'stacked',
     title: 'Classement de Steve par passe (124 lignes)',

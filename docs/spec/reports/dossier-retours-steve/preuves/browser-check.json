@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-05T00:02:23.984Z",
+  "checkedAt": "2026-10-05T00:17:51.617Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
   "chromiumCdpPort": "9243",
   "offline": {
@@ -36,15 +36,28 @@
     {
       "sceneId": "modele-donnees",
       "kind": "er",
-      "sceneHash": "785017f1b20952074dd0c408540feb11b71edede7786712acb5398f538bb0d40",
-      "initialScale": 0.6728456913827655,
-      "tables": 9,
-      "relations": 10,
-      "labels": 10,
+      "sceneHash": "2c9ef0b4f166a1e8f985a1eb6535b57410a2c997d29d1d2a5f717329b278ce24",
+      "initialScale": 0.3247098646034816,
+      "tables": 26,
+      "relations": 29,
+      "labels": 29,
       "existing": [
+        "s3_raw",
+        "job_refresh",
+        "s3_graph",
         "graph_nodes",
+        "documents",
+        "graph_edges",
+        "registre_villes",
+        "geo_resolutions",
+        "zone_versions",
+        "lot_versions",
+        "geo_ogc",
+        "app_immo",
+        "prospect_notes",
+        "signals",
         "account_users",
-        "profil_domaine"
+        "s3_runs"
       ]
     },
     {
@@ -84,7 +97,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 40,
-        "top": -37651.015625,
+        "top": -37650.40625,
         "width": 1345,
         "height": 820
       },
@@ -134,15 +147,28 @@
     {
       "sceneId": "modele-donnees",
       "kind": "er",
-      "sceneHash": "785017f1b20952074dd0c408540feb11b71edede7786712acb5398f538bb0d40",
-      "initialScale": 0.9008016032064128,
-      "tables": 9,
-      "relations": 10,
-      "labels": 10,
+      "sceneHash": "2c9ef0b4f166a1e8f985a1eb6535b57410a2c997d29d1d2a5f717329b278ce24",
+      "initialScale": 0.4347195357833656,
+      "tables": 26,
+      "relations": 29,
+      "labels": 29,
       "existing": [
+        "s3_raw",
+        "job_refresh",
+        "s3_graph",
         "graph_nodes",
+        "documents",
+        "graph_edges",
+        "registre_villes",
+        "geo_resolutions",
+        "zone_versions",
+        "lot_versions",
+        "geo_ogc",
+        "app_immo",
+        "prospect_notes",
+        "signals",
         "account_users",
-        "profil_domaine"
+        "s3_runs"
       ]
     },
     {
@@ -182,7 +208,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 52.5,
-        "top": -36577.59375,
+        "top": -36577,
         "width": 1800,
         "height": 900
       },
@@ -238,15 +264,28 @@
       {
         "sceneId": "modele-donnees",
         "kind": "er",
-        "sceneHash": "785017f1b20952074dd0c408540feb11b71edede7786712acb5398f538bb0d40",
-        "initialScale": 0.6728456913827655,
-        "tables": 9,
-        "relations": 10,
-        "labels": 10,
+        "sceneHash": "2c9ef0b4f166a1e8f985a1eb6535b57410a2c997d29d1d2a5f717329b278ce24",
+        "initialScale": 0.3247098646034816,
+        "tables": 26,
+        "relations": 29,
+        "labels": 29,
         "existing": [
+          "s3_raw",
+          "job_refresh",
+          "s3_graph",
           "graph_nodes",
+          "documents",
+          "graph_edges",
+          "registre_villes",
+          "geo_resolutions",
+          "zone_versions",
+          "lot_versions",
+          "geo_ogc",
+          "app_immo",
+          "prospect_notes",
+          "signals",
           "account_users",
-          "profil_domaine"
+          "s3_runs"
         ]
       },
       {
@@ -286,7 +325,7 @@
         "edgeLabels": 12,
         "panel": {
           "left": 40,
-          "top": 16902.453125,
+          "top": 17468.34375,
           "width": 1345,
           "height": 820
         },
@@ -322,6 +361,16 @@
     "content": {
       "charts": [
         {
+          "id": "steve-signaux",
+          "kind": "stacked",
+          "bars": 6
+        },
+        {
+          "id": "steve-signaux",
+          "kind": "stacked",
+          "bars": 6
+        },
+        {
           "id": "sens-classement",
           "kind": "stacked",
           "bars": 12
@@ -347,13 +396,13 @@
         {
           "id": "doc-etat-actuel",
           "option": false,
-          "tables": 14,
+          "tables": 16,
           "scale": 1
         },
         {
           "id": "doc-etat-propose",
           "option": false,
-          "tables": 23,
+          "tables": 26,
           "scale": 1
         },
         {
@@ -439,13 +488,23 @@
     "zoom": {
       "id": "modele-donnees",
       "mode": "transform",
-      "fit": 0.705,
-      "zoomed": 1.102,
+      "fit": 0.34,
+      "zoomed": 0.532,
       "dragged": false
     }
   },
   "content": {
     "charts": [
+      {
+        "id": "steve-signaux",
+        "kind": "stacked",
+        "bars": 6
+      },
+      {
+        "id": "steve-signaux",
+        "kind": "stacked",
+        "bars": 6
+      },
       {
         "id": "sens-classement",
         "kind": "stacked",
@@ -472,13 +531,13 @@
       {
         "id": "doc-etat-actuel",
         "option": false,
-        "tables": 14,
+        "tables": 16,
         "scale": 1
       },
       {
         "id": "doc-etat-propose",
         "option": false,
-        "tables": 23,
+        "tables": 26,
         "scale": 1
       },
       {
@@ -564,6 +623,20 @@
   "zoom": {
     "frames": [
       {
+        "id": "chart-steve-signaux",
+        "mode": "transform",
+        "fit": 1.458,
+        "zoomed": 2.277,
+        "dragged": false
+      },
+      {
+        "id": "chart-steve-signaux",
+        "mode": "transform",
+        "fit": 1.458,
+        "zoomed": 2.277,
+        "dragged": false
+      },
+      {
         "id": "chart-sens-classement",
         "mode": "transform",
         "fit": 1.458,
@@ -587,15 +660,15 @@
       {
         "id": "doc-etat-actuel",
         "mode": "transform",
-        "fit": 0.515,
-        "zoomed": 0.804,
+        "fit": 0.413,
+        "zoomed": 0.645,
         "dragged": false
       },
       {
         "id": "doc-etat-propose",
         "mode": "transform",
-        "fit": 0.336,
-        "zoomed": 0.525,
+        "fit": 0.34,
+        "zoomed": 0.532,
         "dragged": false
       },
       {
@@ -643,8 +716,8 @@
       {
         "id": "modele-donnees",
         "mode": "transform",
-        "fit": 0.705,
-        "zoomed": 1.102,
+        "fit": 0.34,
+        "zoomed": 0.532,
         "dragged": false
       },
       {
@@ -740,8 +813,8 @@
       }
     ],
     "inPage": {
-      "before": 0.673,
-      "scale": 0.841,
+      "before": 0.325,
+      "scale": 0.406,
       "inside": true,
       "overflow": false
     },
@@ -749,8 +822,8 @@
       {
         "id": "modele-donnees",
         "mode": "transform",
-        "fit": 0.179,
-        "zoomed": 0.28,
+        "fit": 0.1,
+        "zoomed": 0.156,
         "dragged": false
       },
       {
@@ -950,7 +1023,7 @@
       "scale": 1,
       "clip": {
         "x": 60,
-        "y": 64393.40625,
+        "y": 66522,
         "width": 1800,
         "height": 900
       }
@@ -961,7 +1034,7 @@
       "sceneId": "criteres-steve",
       "clip": {
         "x": 52.5,
-        "y": 12198,
+        "y": 12842.5625,
         "width": 1800,
         "height": 540
       }
@@ -970,16 +1043,16 @@
       "sceneId": "modele-donnees",
       "clip": {
         "x": 52.5,
-        "y": 13295.296875,
+        "y": 13939.859375,
         "width": 1800,
-        "height": 956
+        "height": 820
       }
     },
     {
       "sceneId": "flux-import-oracle",
       "clip": {
         "x": 52.5,
-        "y": 14768.78125,
+        "y": 15277.34375,
         "width": 1800,
         "height": 1332
       }
@@ -988,7 +1061,7 @@
       "sceneId": "architecture-ui",
       "clip": {
         "x": 52.5,
-        "y": 16630.1875,
+        "y": 17138.75,
         "width": 1800,
         "height": 900
       }
@@ -997,7 +1070,7 @@
       "sceneId": "affichage-abc",
       "clip": {
         "x": 52.5,
-        "y": 18023.953125,
+        "y": 18532.515625,
         "width": 1800,
         "height": 1248
       }

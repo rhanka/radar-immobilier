@@ -90,13 +90,16 @@ export const SIX_TABLES = {
 // immo profile carries the label schema (verdicts, motifs, criteria) and immo keeps its
 // data (graph, accounts); engram carries the frozen reference sets and the runs.
 export const STEVE_MODEL = {
-  layers: ['sentropic · @sentropic/annotations', 'immo · profil et données', 'engram · jeu de référence, hors ligne'],
+  // Columns = real storage; badge = owner of the schema or code.
+  layers: ['Postgres d’immo : tables du paquet', 'Postgres d’immo et dépôt : immo', 'S3 d’immo, préfixe privé'],
   placement: {
     annotation_sources: { col: 0, row: 0 }, annotation_revisions: { col: 0, row: 1 }, annotation_validations: { col: 0, row: 2 }, annotation_targets: { col: 0, row: 3 },
     profil_domaine: { col: 1, row: 0 }, account_users: { col: 1, row: 2 }, graph_nodes: { col: 1, row: 3 },
     reference_set_versions: { col: 2, row: 1 }, eval_runs: { col: 2, row: 2 },
   },
   existing: ['graph_nodes', 'account_users', 'profil_domaine'],
+  owner: { annotation_sources: 'sentropic', annotation_revisions: 'sentropic', annotation_validations: 'sentropic', annotation_targets: 'sentropic',
+    profil_domaine: 'immo', account_users: 'immo', graph_nodes: 'engram · immo', reference_set_versions: 'engram', eval_runs: 'engram' },
   labels: { import: 'import unique', remplace: 'révision suivante', decide: 'valide ou conteste', vise: '1 à N cibles', ville_et_id_texte: 'ville + id texte, sans FK',
     auteur: 'auteur (IdP)', decideur: 'décideur (IdP)', schema_corps: 'schéma d’étiquettes', export_hache: 'export haché des validées', mesure: 'runs' },
   colGap: 200,

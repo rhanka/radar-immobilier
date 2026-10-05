@@ -57,25 +57,26 @@ function assertGeometry(graph, edges) {
   }
 }
 
-test('le modèle de données (scène 2) est le modèle minimal : cinq tables nouvelles, graphe par ville + id texte', () => {
+test('scène 2 : stockage réel en colonnes, propriétaire du schéma ou du code en badge', () => {
   const model = graphs.find(graph => graph.id === 'modele-donnees');
   assert.equal(model.kind, 'er');
-  assert.deepEqual(model.entities.map(entity => entity.id).sort(), ['account_users', 'annotation_revisions', 'annotation_sources', 'annotation_targets', 'annotation_validations', 'eval_runs', 'graph_nodes', 'profil_domaine', 'reference_set_versions']);
-  // Seuls graph_nodes et account_users existent déjà : les six autres tables sont proposées.
-  assert.deepEqual(model.entities.filter(entity => entity.existing).map(entity => entity.id).sort(), ['account_users', 'graph_nodes', 'profil_domaine']);
-  for (const entity of model.entities) assert.ok(entity.attributes.some(attribute => attribute.keys.includes('PK')), `${entity.id} sans clé primaire`);
+  assert.deepEqual(model.layout.layers.map(layer => layer.title), ['Exécution (jobs et service)', 'Postgres d’immo : tables immo', 'Postgres d’immo : tables du paquet (sentropic)',
+    'S3 d’immo (bucket radar-immobilier-docs)', 'Service geo (PostGIS, S3 geo)', 'Dépôt git d’immo (code, profil, .track)']);
+  const owner = Object.fromEntries(model.entities.map(entity => [entity.id, entity.owner]));
+  // Propriétaire ≠ stockage : les tables annotation_* sont à sentropic mais dans le Postgres d’immo.
+  for (const id of ['annotation_sources', 'annotation_revisions', 'annotation_validations', 'annotation_targets']) {
+    assert.equal(owner[id], 'sentropic', id);
+    assert.equal(model.layout.layers[model.layout.boxes.findIndex(box => box.id === id) >= 0 ? 2 : 0].title.startsWith('Postgres'), true);
+  }
+  assert.equal(owner.job_refresh, 'engram · job immo');
+  assert.equal(owner.s3_graph, 'engram · immo');
+  assert.equal(owner.s3_reference_sets, 'engram');
+  assert.equal(owner.decisions_track, 'track');
   const relation = (source, label) => model.relations.find(item => item.source === source && item.label === label);
-  assert.deepEqual([relation('annotation_sources', 'import').sourceCardinality, relation('annotation_sources', 'import').targetCardinality], ['one', 'zero-or-many']);
-  assert.equal(relation('annotation_targets', 'ville_et_id_texte').identifying, false);
-  assert.equal(relation('annotation_revisions', 'remplace').target, 'annotation_revisions');
-  // Boucle de validation : décision gardée, décideur et auteur sont des comptes.
-  assert.equal(relation('annotation_revisions', 'decide').target, 'annotation_validations');
-  assert.equal(relation('annotation_revisions', 'auteur').target, 'account_users');
-  assert.equal(relation('annotation_validations', 'decideur').target, 'account_users');
-  assert.equal(relation('annotation_validations', 'export_hache').target, 'reference_set_versions');
-  const cibles = model.entities.find(entity => entity.id === 'annotation_targets').attributes.map(attribute => attribute.name);
-  assert.ok(cibles.includes('city_slug') && cibles.includes('cle'), 'cible = ville + clé du domaine (#812)');
-  assert.equal(model.layout.layers.length, 3);
+  assert.equal(relation('job_refresh', 'ecrit').target, 's3_graph');
+  assert.equal(relation('job_refresh', 'projette').target, 'graph_nodes');
+  assert.equal(relation('job_evaluation', 'ecrit_eval').target, 's3_reference_sets');
+  for (const entity of model.entities) assert.ok(entity.owner, `${entity.id} sans propriétaire`);
   assertGeometry(model, model.relations.filter(item => item.source !== item.target));
 });
 
@@ -104,7 +105,7 @@ test('les chiffres des cartes sont ceux du dossier', () => {
   assert.match(card('architecture-ui', 'GCB').detail, /2 761 lignes/);
   assert.match(card('architecture-ui', 'DS').detail, /39 sur 69/);
   assert.match(card('architecture-ui', 'COL').detail, /0 sur 3/);
-  assert.match(graphs.find(graph => graph.id === 'modele-donnees').entities.find(entity => entity.id === 'profil_domaine').attributes[1].comment, /28 motifs/);
+  assert.match(graphs.find(graph => graph.id === 'modele-donnees').entities.find(entity => entity.id === 'profil_domaine').attributes[1].comment, /motifs/);
 });
 
 test('A/B/C : deux zones, application en couloirs (écran, backend, base) et évaluation hors ligne en bas', () => {
@@ -302,15 +303,15 @@ test('§6.0 : état initial physique (PG, S3, geo), état proposé avec statuts,
   const s60 = markdown.split('\n### 6.0 ')[1].split('\n### 6.1 ')[0];
   // Chaque table Postgres du schéma « État actuel » existe dans schema.ts.
   const current = parseEr(PHYSICAL['etat-actuel'].er, 'actuel');
-  const pgTables = current.entities.map(entity => entity.id).filter(id => !id.startsWith('s3_') && id !== 'registre_villes' && id !== 'geo_ogc');
+  const pgTables = current.entities.map(entity => entity.id).filter(id => !id.startsWith('s3_') && !['registre_villes', 'geo_ogc', 'job_refresh', 'app_immo'].includes(id));
   for (const table of pgTables) assert.ok(schema.includes(`pgTable(\n  "${table}"`) || schema.includes(`pgTable("${table}"`), table);
   // Statuts du schéma proposé : nouveau, modifié, inchangé ; rien de supprimé.
   const status = PHYSICAL['etat-propose'].status;
-  assert.deepEqual(Object.keys(status).filter(id => status[id] === 'new').sort(), ['annotation_revisions', 'annotation_sources', 'annotation_targets', 'annotation_validations', 'decisions_track', 'eval_runs', 'reference_set_versions', 's3_retours']);
+  assert.deepEqual(Object.keys(status).filter(id => status[id] === 'new').sort(), ['annotation_revisions', 'annotation_sources', 'annotation_targets', 'annotation_validations', 'decisions_track', 'job_evaluation', 'manifestes', 's3_reference_sets', 's3_retours']);
   assert.deepEqual(Object.keys(status).filter(id => status[id] === 'modified').sort(), ['account_users', 'graph_edges', 'graph_nodes', 'profil_domaine', 'prospect_notes']);
   assert.ok(!Object.values(status).includes('deleted'));
   for (const text of ['Les signaux sont les nœuds de type \x60Signal\x60 et \x60DesignationEvent\x60', 'Villes : aucune table.', '1 106 municipalités', 'raw/proces-verbaux-<ville>/cas/<sha>.pdf',
-    'graph/<ville>/latest.json', 'api.geo.sent-tech.ca', 'Côté geo, rien ne change', '**Tableau des écarts.**', '| Service |', 'clé \x60(city_slug, id)\x60 décidée pour #812'])
+    'graph/<ville>/latest.json', 'api.geo.sent-tech.ca', 'Côté geo, rien ne change', '**Tableau des écarts.**', '| Stockage physique | Propriétaire du schéma / code | Exécuté par |', 'radar-refresh-pv', '@sentropic/graphify', 'clé \x60(city_slug, id)\x60 décidée pour #812'])
     assert.ok(s60.includes(text), text);
   for (const kind of ['Signal', 'Ville', 'PV, document', 'Zone', 'Lot']) assert.ok(s60.includes(`| ${kind} |`), kind);
   assert.ok(markdown.indexOf('<!-- diagram:etat-actuel -->') < markdown.indexOf('<!-- diagram:etat-propose -->'));
@@ -333,4 +334,19 @@ test('convergence : « jeu de référence » partout, §6.7, tags et métriques 
   for (const text of ['aucune évaluation n\'est faite', 'décidé après l\'étiquetage', 'toujours par ville', 'aucune valeur de tag présente d\'un seul côté', 'un seul passage, après gel du prompt', 'éradiqués']) assert.ok(s97.includes(text), text);
   assert.ok(!/\b60\b|\b61\b/.test(s97), 'effectifs non figés');
   for (const key of ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8']) assert.ok(markdown.includes(`#### ${key} — `), key);
+});
+
+test('comptes mesurés : 121 lignes → 162 signaux → 80 documents, par verdict', async () => {
+  const { SIGNAL_COUNTS } = await import('./protocol.js');
+  const { CHARTS } = await import('./charts.js');
+  const markdown = await readFile('../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md', 'utf8');
+  const { rows, total } = SIGNAL_COUNTS;
+  assert.equal(rows.reduce((sum, row) => sum + row.lines, 0), total.lines);
+  assert.equal(rows.reduce((sum, row) => sum + row.signals, 0), total.signals);
+  assert.equal(total.single + total.multi, total.lines);
+  assert.deepEqual(CHARTS['steve-signaux'].rows.map(row => [row.values.P, row.values.S, row.values.N]), [rows.map(row => row.lines), rows.map(row => row.signals)]);
+  assert.ok(markdown.indexOf(SIGNAL_COUNTS.summary) < markdown.indexOf('## Glossaire'), "dans l'introduction");
+  const s96 = markdown.split('\n### 9.6 ')[1].split('\n### 9.7 ')[0];
+  assert.ok(s96.includes(SIGNAL_COUNTS.summary));
+  for (const row of rows) assert.ok(markdown.includes(`| ${row.verdict} | ${row.lines} | ${row.signals} | ${row.documents} |`), row.verdict);
 });

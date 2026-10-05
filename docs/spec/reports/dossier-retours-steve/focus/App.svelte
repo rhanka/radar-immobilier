@@ -2,7 +2,8 @@
   import Scenes from './Scenes.svelte';
   import Sections from './Sections.svelte';
   import DecisionChoices from './DecisionChoices.svelte';
-  import { PROTOCOL } from './protocol.js';
+  import { PROTOCOL, SIGNAL_COUNTS } from './protocol.js';
+  import BarChart from './BarChart.svelte';
   import { graphs, header, glossary, decisionSections, annexes, manifest } from './.generated/data.json';
   const [intention, wants, synthesis, ...body] = decisionSections;
 </script>
@@ -28,6 +29,14 @@
           <tbody>{#each PROTOCOL.passes as row}<tr data-pass={row.pass}><th scope="row">{row.pass}</th><td>{row.filters}</td><td class="num">{row.signals}</td><td>{row.aim}</td></tr>{/each}</tbody>
         </table>
         <p>{PROTOCOL.summary}</p>
+        <h2 class="counts-title">{SIGNAL_COUNTS.title}</h2>
+        <table data-signal-counts>
+          <thead><tr><th scope="col">Verdict</th><th scope="col" class="num">Lignes</th><th scope="col" class="num">Signaux distincts</th><th scope="col" class="num">Documents distincts</th><th scope="col">Types</th></tr></thead>
+          <tbody>{#each SIGNAL_COUNTS.rows as row}<tr><th scope="row">{row.verdict}</th><td class="num">{row.lines}</td><td class="num">{row.signals}</td><td class="num">{row.documents}</td><td>{row.detail}</td></tr>{/each}
+          <tr><th scope="row">Total</th><td class="num">{SIGNAL_COUNTS.total.lines}</td><td class="num">{SIGNAL_COUNTS.total.signals}</td><td class="num">{SIGNAL_COUNTS.total.documents}</td><td>{SIGNAL_COUNTS.total.cities} villes</td></tr></tbody>
+        </table>
+        <p>{SIGNAL_COUNTS.summary}</p>
+        <BarChart id="steve-signaux" />
       </section>
       <div class="truth-strip">
         <span><strong>124 LIGNES</strong> 40 P · 29 S · 55 N</span>
@@ -87,6 +96,7 @@
     .protocol { padding: 12px; }
     .protocol table { min-width: 560px; }
   }
+  .protocol .counts-title { margin-top: 18px; }
   .protocol h2 { margin: 0 0 10px; font-size: 1.1rem; }
   .protocol table { width: 100%; border-collapse: collapse; font-size: .9rem; }
   .protocol th, .protocol td { padding: 8px 10px; border-bottom: 1px solid var(--st-semantic-border-subtle); text-align: left; vertical-align: top; }
