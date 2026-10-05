@@ -7,8 +7,9 @@ survey of 2026-09-21). The repository is public, so the content is committed **e
 
 | Sealed file | Content | SHA-256 of plaintext |
 |---|---|---|
-| `reference-c.xlsx.sealed` | Original 7 workbook tabs + "Référence C" (121 rows, 20 client columns + 35 added columns) + class definitions | `88c46fe1edbda2c5a780ac53374fa3678adb1084db8fa983717d6877ea805d41` |
-| `reference-c.csv.sealed` | "Référence C" tab, UTF-8 with BOM | `47634565fd6c7877c106e7800aabeb9e158e3810780a0cec1ea19848a14085ad` |
+| `reference-c.xlsx.sealed` | Original 7 workbook tabs + "Référence C" (121 rows, 54 columns, short headers) + "Référence C — légende" (column, author, full definition) + class definitions | `4a81b4d744a8dd76f768f401cc9d2b3b675abb65159f651b4d4b6ef585956afb` |
+| `reference-c.csv.sealed` | "Référence C" tab, UTF-8 with BOM | `f47ec61f0c14ad38e844732871ad5edaf0e1cc9bbda7e70b334ed91770703d07` |
+| `reference-c-legende.csv.sealed` | Legend: short column name, author, full definition | `37d2244a5645bb80396c58534782cf2dab0fa820b6af593124789589d20f6644` |
 | `README.md.sealed` | Column definitions, method, counts, verified links | `3b34c5bc8f78f9cd512a805e88e79c45c405c7a19101685bc65b3eae1290c599` |
 
 ## Key
@@ -21,7 +22,7 @@ survey of 2026-09-21). The repository is public, so the content is committed **e
 
 ```sh
 node scripts/reference-seal.mjs unseal docs/spec/reports/reference-c/*.sealed --out <private-dir>
-node scripts/reference-seal.mjs seal <private-dir>/reference-c.xlsx <private-dir>/reference-c.csv <private-dir>/README.md --out docs/spec/reports/reference-c
+node scripts/reference-seal.mjs seal <private-dir>/reference-c.xlsx <private-dir>/reference-c.csv <private-dir>/reference-c-legende.csv <private-dir>/README.md --out docs/spec/reports/reference-c
 ```
 
 The script prints the SHA-256 of each plaintext; compare with the table above.
