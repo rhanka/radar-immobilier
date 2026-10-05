@@ -64,7 +64,7 @@
 
 <section class="choices" id="ce-qu-on-demande" aria-labelledby="choice-title">
   <div class="flex-row">
-    <div><span class="eyebrow">§3 et §10 · Fabien décide d’abord, Farid ensuite</span><h2 id="choice-title">Décisions D1 à D16</h2></div>
+    <div><span class="eyebrow">§3 et §10 · Fabien décide d’abord, Farid ensuite</span><h2 id="choice-title">Décisions G1 à G8 et D1 à D16</h2></div>
     <span class="badge warning">Brouillon local · rien n’est ratifié</span>
   </div>
   <div class="sequence" data-sequence>
@@ -85,7 +85,7 @@
             <span class="badge" class:warning={question.mode === 'multi'}>{question.mode === 'multi' ? 'plusieurs réponses' : 'une seule réponse'}</span>
           </div>
           {#if question.decided}<p class="decided" data-decided={question.decided.option}><span class="badge selected">Tranchée · actée par l’owner le {question.decided.date}</span> {question.decided.note}</p>{/if}
-          <p class="roles" data-decides={question.decides}><span class="badge step" data-step={question.step}>Étape {question.step} · {question.decides} décide</span> <span class="badge">Consulté : {question.consulted}</span>{#if question.decides === 'Fabien'} <span class="role-note">validation technique, prise telle quelle sauf incohérence</span>{:else} <span class="role-note">après les décisions de Fabien</span>{/if}</p>
+          <p class="roles" data-decides={question.decides}><span class="badge step" data-step={question.step}>Étape {question.step} · {question.decides} décide</span> <span class="badge">Consulté : {question.consulted}</span>{#if question.family === 'générique'} <span class="badge generic">Décision générique · sentropic, engram, track</span>{/if}{#if question.decides === 'Fabien'} <span class="role-note">validation technique, prise telle quelle sauf incohérence</span>{:else} <span class="role-note">après les décisions de Fabien</span>{/if}</p>
           <p class="intro" data-intro>{question.intro}</p>
           <p class="deps" data-depends-on={question.dependsOn.join(' ')}>
             <strong>Dépend de :</strong> {#if question.dependsOn.length}{#each question.dependsOn as key, index}{index ? ' · ' : ''}<a href={`#question-${key}`}>{key} {short[key]}</a>{/each}{:else}aucune décision antérieure{/if}

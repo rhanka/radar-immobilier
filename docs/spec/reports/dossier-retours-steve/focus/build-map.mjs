@@ -15,8 +15,8 @@ const HTML_SHA256_PLACEHOLDER = '0'.repeat(64);
 
 const expected = [
   ['criteres-steve', "Scène 1 · les trois critères de Steve en regard de l'existant"],
-  ['modele-donnees', 'Scène 2 · modèle de données minimal, à partir des besoins de Steve'],
-  ['flux-import-oracle', "Scène 3 · architecture de l'import à l'affichage, oracle transversal"],
+  ['modele-donnees', 'Scène 2 · modèle cible par propriétaire : sentropic, immo, engram'],
+  ['flux-import-oracle', "Scène 3 · architecture de l'import à l'affichage, jeu de référence transversal"],
   ['architecture-ui', 'Scène 4 · architecture UI et état de la migration'],
   ['affichage-abc', "Scène 5 · A, B et C : ce que voit l'application, ce que mesure l'évaluation"],
 ];
@@ -131,7 +131,7 @@ const rendererSources = Object.fromEntries(await Promise.all([
 // Renderers of the matrix, table and swimlane scenes, local to this dossier.
 const diagramSources = Object.fromEntries(await Promise.all([
   'diagram-router.js', 'diagram-layout.js', 'diagram-specs.js', 'parse-er.mjs', 'DiagramFrame.svelte', 'ErDiagram.svelte',
-  'LaneDiagram.svelte', 'MatrixScene.svelte', 'Scenes.svelte', 'BarChart.svelte', 'charts.js', 'Sections.svelte', 'protocol.js', 'ZoomFrame.svelte', 'doc-diagrams.js', 'option-details.js', 'steve-model.js',
+  'LaneDiagram.svelte', 'MatrixScene.svelte', 'Scenes.svelte', 'BarChart.svelte', 'charts.js', 'Sections.svelte', 'protocol.js', 'ZoomFrame.svelte', 'doc-diagrams.js', 'option-details.js', 'steve-model.js', 'physical-model.js', 'generic-decisions.js',
 ].map(async name => [name, await readFile(name, 'utf8')])));
 
 const manifest = {
@@ -144,7 +144,7 @@ const manifest = {
   reuse: 'gabarit A’, géométrie Dagre LR et routeur du kit h2a réutilisés depuis docs/architecture/focus',
   serviceRendererHash: sha256(JSON.stringify(rendererSources)), diagramRendererHash: sha256(JSON.stringify(diagramSources)),
   artifactInputHash: sha256(JSON.stringify({ markdown, graphs, choices, rendererSources, diagramSources })),
-  mapping: 'Scène 1 : matrice (tableau Markdown) ; scène 2 : erDiagram rendu en tables et relations ; scène 3 : flowchart en couloirs verticaux, oracle en bande basse ; scènes 4 et 5 : SvelteFlow natif, subgraphs en parentId.',
+  mapping: 'Scène 1 : matrice (tableau Markdown) ; scène 2 : erDiagram rendu en tables et relations ; scène 3 : flowchart en couloirs verticaux, jeu de référence en bande basse ; scènes 4 et 5 : SvelteFlow natif, subgraphs en parentId.',
   geometry: 'Scènes 4 et 5 : Dagre récursif rankdir LR et routeur orthogonal du kit, carte A’ 460 x 200 ; scènes 2 et 3 : grille explicite et routeur orthogonal A* du dossier.',
   graphOrder: graphs.map(graph => graph.id),
   graphs: graphs.map(graph => ({ id: graph.id, title: graph.title, kind: graph.kind, sceneHash: graph.sceneHash, projection: graph.projection,

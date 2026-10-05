@@ -44,7 +44,7 @@ test('date: plain ISO-8601 date-time, loaded as a timestamp by js-yaml, as a str
 
 test('scalars that cannot be plain: block scalar (`>-` one line, `|-` several), read back identically', () => {
   const single = [
-    'D6 — Recette : qui porte « UAT OK »', 'Oracle #783', 'a # b', 'fin:', '#784', '- liste', '-x', '? clé', ': deux', '& ancre', '* alias',
+    'D6 — Recette : qui porte « UAT OK »', 'Jeu de référence #783', 'a # b', 'fin:', '#784', '- liste', '-x', '? clé', ': deux', '& ancre', '* alias',
     '! tag', '| bloc', '> plié', '% directive', '@x', '`x`', '[x]', '{x}', '\'apostrophe', '"guillemets"', ',virgule',
     '1', '42', '2026-10-03', '-1', '+1', '.5', '1.0', '1e5', '0x1F', '0o17', '1_000', '1:20', 'null', 'Null', 'True', 'false', 'no', 'off',
     'yes', 'on', 'y', 'N', '~', '.inf', '-.Inf', '.nan', ' espace', 'fin ', '  deux espaces', 'tab\tici', '\tdébut tabulé',
@@ -97,16 +97,17 @@ test('"Je suis" filter: own decisions only (decider or named validator), "toutes
   // This dossier names no validation: own decisions = decisions decided.
   // D1 is decided by the owner (Fabien) since 2026-10-04.
   assert.equal(mine('Farid').length, 9);
-  assert.equal(mine('Fabien').length, 7);
+  // Fabien also decides the eight generic decisions G1 to G8.
+  assert.equal(mine('Fabien').length, 15);
   assert.ok(mine('Farid').every(record => record.decide === 'Farid' && record.role === 'decide'));
   // D9: Fabien decides, Farid is only consulted, so it is not one of Farid's.
   assert.ok(questions.find(question => question.key === 'D9').consulted.includes('Farid'));
   assert.ok(!mine('Farid').some(record => record.id === 'D9'));
   assert.ok(mine('Fabien').some(record => record.id === 'D9'));
   const all = decisionRecords(questions, {}, 'Farid', 'all');
-  assert.equal(all.length, 16);
+  assert.equal(all.length, 24);
   assert.equal(all.find(record => record.id === 'D9').role, null);
-  assert.equal(new Set([...mine('Farid'), ...mine('Fabien')].map(record => record.id)).size, 16);
+  assert.equal(new Set([...mine('Farid'), ...mine('Fabien')].map(record => record.id)).size, 24);
 });
 
 test('records: option id and label, statut, commentaire; unknown option rejected', () => {
@@ -162,7 +163,7 @@ test('export block: fenced YAML without quotes, agreed header, one entry per own
     '    option: a', '    option_libelle: (a) C en shadow, comparaison réservée UAT, puis remplacement de B', '    statut: tranchee',
     '    commentaire: |', '      ligne 1', '      ligne 2',
   ].join('\n'));
-  assert.match(exportBlock(manifest, state, 'Fabien', 'mine', now).text, /\n {2}- id: D10\n {4}titre: >-\n {6}Oracle #783\n/);
+  assert.match(exportBlock(manifest, state, 'Fabien', 'mine', now).text, /\n {2}- id: D10\n {4}titre: >-\n {6}Jeu de référence #783\n/);
   assert.equal(decisionsYaml({}, []).split('\n').at(-1), 'decisions: []');
 });
 
@@ -196,6 +197,6 @@ test('round trip on the real dossier: yaml and js-yaml read back every header an
 
 test('the JSON pack stays available internally, for the backend connection', () => {
   const pack = responsePack({ dossier: 'x', dossierHash: 'h', artifactInputHash: 'i' }, { D12: 'a' });
-  assert.equal(pack.responses.length, 16);
+  assert.equal(pack.responses.length, 24);
   assert.equal(pack.responses.find(response => response.key === 'D12').selection, 'a');
 });

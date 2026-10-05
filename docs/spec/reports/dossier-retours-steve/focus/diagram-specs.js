@@ -1,7 +1,7 @@
 // Content and placement of the three scenes that are not component diagrams:
 //   criteres-steve      matrix (Markdown table of Annexe B)
 //   modele-donnees      entity-relationship diagram (Mermaid erDiagram of Annexe B)
-//   flux-import-oracle  architecture in vertical swimlanes, oracle band at the bottom
+//   flux-import-oracle  architecture in vertical swimlanes, jeu de référence band at the bottom
 //                       (Mermaid flowchart of Annexe B, one subgraph per lane)
 // Evidence: observed = exists on origin/main 27891b10; declared = proposed by the
 // dossier, not built; historical = frozen reference.
@@ -38,7 +38,7 @@ const FLUX = {
   ],
   band: { id: 'OR', titleWidth: 1060, order: ['OE', 'BEN', 'SCO', 'OC', 'ADJ'],
     subtitle: 'système transversal : alimenté par les annotations stockées en base, il note les sélections B et C' },
-  legend: 'couloirs de gauche à droite : qui agit, sur quel écran, quelle fonction backend, quelles données · bordure pleine : constaté sur main · tirets : proposé par le dossier · pointillés : référence gelée · les flèches suivent l’appel ou l’écriture · l’oracle, en bas, ne sert aucune vue : il évalue hors ligne.',
+  legend: 'couloirs de gauche à droite : qui agit, sur quel écran, quelle fonction backend, quelles données · bordure pleine : constaté sur main · tirets : proposé par le dossier · pointillés : référence gelée · les flèches suivent l’appel ou l’écriture · le jeu de référence, en bas, ne sert aucune vue : il évalue hors ligne.',
   rows: {
     EQP: 0, STV: 2, OPS: 3,
     MAP: 0, PAN: 1, RAI: 2, REV: 3,
@@ -65,11 +65,11 @@ const FLUX = {
     GRA: node('observed', 'PG', 'graphe canonique · vivier'),
     ANN: node('declared', 'PG', 'fichiers, lignes, cibles'),
     PNO: node('observed', 'PG', 'réponses · suppression logique'),
-    ADJ: node('declared', 'oracle', 'labels C étayés · auteur'),
-    OC: node('declared', 'oracle', 'oracle_versions · #783'),
-    SCO: node('declared', 'oracle', 'précision, rappel · B puis C'),
-    OE: node('historical', 'oracle', 'extraction d’actes · v3'),
-    BEN: node('declared', 'oracle', 'volets ciblage et extraction'),
+    ADJ: node('declared', 'jeu de référence', 'labels C étayés · auteur'),
+    OC: node('declared', 'jeu de référence', 'reference_set_versions · #783'),
+    SCO: node('declared', 'jeu de référence', 'précision, rappel · B puis C'),
+    OE: node('historical', 'jeu de référence', '674 / 676 unités, silver'),
+    BEN: node('declared', 'jeu de référence', 'volets ciblage et extraction'),
   },
   // Edges whose evidence differs from "declared" (proposed by the dossier).
   edges: {
@@ -128,13 +128,13 @@ const ARCH = {
   zone: { title: 'En ligne : application et données stockées', titleWidth: 640 },
   lanes: [
     { id: 'U', kind: 'user', title: 'Utilisateurs de l’application' },
-    { id: 'DA', kind: 'backend', title: '(a) Données de Steve · proposé' },
-    { id: 'DB', kind: 'data', title: '(b) Annotations · proposé' },
-    { id: 'DC', kind: 'ui', title: '(c) Graphe · existe' },
-    { id: 'DD', kind: 'data', title: '(d) Oracle · proposé' },
+    { id: 'DA', kind: 'backend', title: '(a) Données de Steve · immo · proposé' },
+    { id: 'DB', kind: 'data', title: '(b) Annotations · sentropic · proposé' },
+    { id: 'DC', kind: 'ui', title: '(c) Graphe · immo · existe' },
+    { id: 'DD', kind: 'data', title: '(d) Jeu de référence · engram · proposé' },
   ],
-  band: { id: 'EV', titleWidth: 1400, order: ['BEN', 'ENG'],
-    subtitle: 'jamais dans l’application : mesure sur les versions gelées de l’oracle, optimisation des prompts d’engram' },
+  band: { id: 'EV', titleWidth: 1400, order: ['BEN', 'ENG', 'TRK'],
+    subtitle: 'jamais dans l’application : mesure sur les versions gelées (engram), décisions de gel et de promotion (track)' },
   legend: 'zone du haut : en ligne (application et données stockées en Postgres ou S3) · bande du bas : hors ligne · titre de couloir et bordure : existe (pleine) ou proposé (tirets) · les flèches disent qui alimente qui.',
   rows: { STV: 0, EQP: 2, XLS: 0, SRC: 1, ANN: 1, VAL: 2, HIS: 3, S3G: 0, GRN: 1, ORC: 3, ORE: 4 },
   nodes: {
@@ -142,15 +142,16 @@ const ARCH = {
     EQP: node('observed', 'personne', 'Farid (PO), Fabien, Mathieu'),
     XLS: node('observed', 'fichier', '7 feuilles, 433 lignes'),
     SRC: node('declared', 'PG + S3', 'gardé tel quel, sha256'),
-    ANN: node('declared', 'PG', 'verdict, motif, cibles'),
-    VAL: node('declared', 'PG', 'validée ou contestée, motif'),
-    HIS: node('declared', 'PG', 'chaque version gardée'),
+    ANN: node('declared', 'PG · paquet', 'révisions immuables, cibles'),
+    VAL: node('declared', 'PG · paquet', 'liées au hash de la révision'),
+    HIS: node('declared', 'PG · paquet', 'export haché des validées'),
     S3G: node('observed', 'S3', 'graph/<ville>/latest.json'),
     GRN: node('observed', 'PG', 'signaux, clé ville + id'),
     ORC: node('declared', 'PG + JSON', 'tirées des validées, sha256'),
     ORE: node('observed', 'fichiers', '674 / 676, branche bench'),
-    BEN: node('observed', 'job', 'extraction et ciblage séparés'),
-    ENG: node('declared', 'job', 'prompts testés, puis décision'),
+    BEN: node('observed', 'engram', 'extraction et ciblage séparés'),
+    ENG: node('declared', 'engram', 'prompts testés sur dev, puis test'),
+    TRK: node('declared', 'track', 'gel, promotion ; attestation h2a'),
   },
   edges: { 'S3G|GRN': 'observed', 'ORE|BEN': 'observed' },
 };
