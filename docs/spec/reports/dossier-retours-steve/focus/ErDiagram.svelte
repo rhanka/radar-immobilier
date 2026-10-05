@@ -48,7 +48,7 @@
       <rect class="er-body" x={box.x} y={box.y} width={box.width} height={box.height} />
       <rect class="er-head" x={box.x} y={box.y} width={box.width} height={ER.header} />
       <text class="er-name" x={box.x + ER.padX} y={box.y + 24} data-text-role="entity-name" data-box-right={box.x + box.width}>{entity.id}</text>
-      <text class="er-tag" x={box.x + box.width - ER.padX} y={box.y + 23} text-anchor="end">{STATUS[entity.status] ?? (entity.existing ? 'existe' : 'proposée')}</text>
+      <text class="er-tag" x={box.x + box.width - ER.padX} y={box.y + 23} text-anchor="end">{STATUS[entity.status] ?? (entity.existing ? 'existe' : 'proposée')}{#if entity.owner}<tspan class="er-owner" data-owner={entity.owner}>{' · '}{entity.owner}</tspan>{/if}</text>
       {#each entity.attributes as attribute, index}
         {@const y = box.y + ER.header + index * ER.line + 18}
         <text class="er-type" x={box.x + ER.padX} {y}>{attribute.type}</text>
@@ -98,6 +98,7 @@
   .status-new .er-tag { fill: var(--dossier-ok-text); }
   .status-modified .er-tag { fill: var(--dossier-partial-text); }
   .status-deleted .er-tag { fill: var(--dossier-gap-text); }
+  .er-owner { fill: var(--st-semantic-action-primary); font-weight: 800; }
   .er-tag { font: 700 11px var(--st-font-sans, Inter, system-ui, sans-serif); fill: var(--st-semantic-text-secondary); text-transform: uppercase; letter-spacing: .06em; }
   .er-type, .er-keys, .er-column { font: 13px ui-monospace, 'DejaVu Sans Mono', Menlo, Consolas, monospace; }
   .er-type, .er-comment { fill: var(--st-semantic-text-secondary); }

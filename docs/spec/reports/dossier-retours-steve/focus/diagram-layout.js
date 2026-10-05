@@ -15,7 +15,8 @@ export function erLayout(model, spec) {
   for (const entity of model.entities) if (!placement[entity.id]) throw Error(`er: no placement for ${entity.id}`);
   for (const id of Object.keys(placement)) if (!model.entities.some(entity => entity.id === id)) throw Error(`er: placement for unknown ${id}`);
   const size = Object.fromEntries(model.entities.map(entity => {
-    const widest = Math.max(textWidth(entity.id, ER.nameSize, ER.mono) + 96,
+    // Room for the status tag, and for the owner badge when the diagram carries one.
+    const widest = Math.max(textWidth(entity.id, ER.nameSize, ER.mono) + (spec.owner?.[entity.id] ? 250 : 96),
       ...entity.attributes.map(attribute => textWidth(`${attribute.type.padEnd(11)} ${columnText(attribute)}${columnNote(attribute)}`, ER.columnSize, ER.mono)));
     return [entity.id, { width: widest + ER.padX * 2, height: ER.header + entity.attributes.length * ER.line + 8 }];
   }));
