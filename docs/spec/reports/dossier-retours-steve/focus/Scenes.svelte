@@ -1,6 +1,6 @@
 <script>
   // Une forme par contenu : matrice (scène 1), entité-relation (scène 2), architecture
-  // en couloirs avec l'oracle en bande basse (scène 3) ; les composants (scènes 4 et 5)
+  // en couloirs avec le jeu de référence en bande basse (scène 3) ; les composants (scènes 4 et 5)
   // gardent Flow.svelte de la chaîne existante (SvelteFlow, Dagre LR, carte A' 460 x 200).
   import Flow from '../../../../architecture/focus/Flow.svelte';
   import ZoomFrame from './ZoomFrame.svelte';
@@ -15,14 +15,14 @@
       note: "Les 24 signaux de bruit de la passe 1 se répartissent par critère : 3 hors résidentiel ou hors urbanisme, 4 resserrements, 6 sans effet sur la capacité, 8 autorisations individuelles, 3 points d'ordre du jour. Le radar filtre par nature d'instrument et par étape ; Steve demande un filtre par effet du règlement, sens et nombre d'unités, pour lequel aucune donnée n'existe encore (§2.3).",
     },
     'modele-donnees': {
-      badge: '§6.3 · modèle minimal proposé (D2 a)',
-      lede: "Le modèle minimal du §6.3, construit à partir des besoins de Steve : six tables nouvelles nommées en clair (fichiers reçus, annotations vivantes, validations, codes de motif, objets visés, versions gelées de l'oracle C), le graphe et les comptes existants. Chaque boîte est une table avec ses colonnes clés (PK, FK, UK), chaque lien une relation avec sa cardinalité. Seuls graph_nodes et account_users existent déjà (en-tête ocre, bordure pleine, mention « existe ») ; les six autres sont proposées (en-tête bleu, bordure en tirets). L'existant complet, dont prospect_marks et prospect_notes, est au §6.0.",
-      note: "Une ligne du classeur vise 1 à N objets par ville + id texte, la clé du graphe décidée pour #812, sans clé étrangère : une ré-extraction du graphe ne détruit rien, la cible passe « disparue » et ce que Steve a vu reste lisible. Une révision ajoute des lignes qui remplacent les anciennes sans les effacer. L'oracle C est une liste gelée de lignes, versionnée. Réponses de l'équipe et états archiver, classer, lier, épingler sont volontairement hors de ce modèle (§6.3).",
+      badge: '§6.3, §6.7 · modèle cible (D2 a, G2)',
+      lede: "Le modèle cible par propriétaire, issu de la convergence sentropic + engram : immo ne construit aucune table d'annotation. À gauche, les tables du paquet générique @sentropic/annotations, installées dans le Postgres d'immo (sources, révisions immuables, validations liées au hash, cibles) ; au centre, ce qui reste à immo (profil de domaine et son schéma d'étiquettes, comptes, graphe) ; à droite, engram (versions figées du jeu de référence, runs). En-tête ocre et bordure pleine : existe ; en-tête bleu et bordure en tirets : proposé.",
+      note: "Une annotation vise 1 à N objets par la clé d'immo (ville + id texte pour un signal, clé #812 ; city_slug ; sha256 ; canonical_id), sans clé étrangère. Chaque correction crée une révision ; une validation porte sur une révision précise. Seules les révisions validées partent, en instantané haché, vers un jeu de référence engram ; l'évaluation se fait hors ligne. Détail objet par objet au §6.0.",
     },
     'flux-import-oracle': {
-      badge: '§6.5, §7, §9.3 · architecture et oracle',
-      lede: "Une architecture en couloirs verticaux, de gauche à droite : les utilisateurs, les écrans de l'UI, les fonctions backend (collecte, détection de signal, import, rattachement, API), puis les données sur les composants réels, S3 et PostgreSQL. L'oracle est en bas, en bande transversale : un système d'évaluation hors ligne, alimenté par les annotations stockées en base.",
-      note: "L'oracle de ciblage C et l'oracle d'extraction E restent séparés jusqu'au benchmark, où ils alimentent deux volets distincts. L'analyse du 21 septembre entre comme annotation distincte de l'adjudication : elle n'écrase pas les classes du tableur, qui font foi pour l'import. L'import est un acte owner distinct, sur l'image Node existante de l'API (§6.5).",
+      badge: '§6.5, §7, §9.3 · architecture et jeu de référence',
+      lede: "Une architecture en couloirs verticaux, de gauche à droite : les utilisateurs, les écrans de l'UI, les fonctions backend (collecte, détection de signal, import, rattachement, API), puis les données sur les composants réels, S3 et PostgreSQL. Le jeu de référence est en bas, en bande transversale : un système d'évaluation hors ligne, alimenté par les annotations stockées en base.",
+      note: "Le jeu de référence de ciblage C et le jeu de référence d'extraction E restent séparés jusqu'au benchmark, où ils alimentent deux volets distincts. L'analyse du 21 septembre entre comme annotation distincte de l'adjudication : elle n'écrase pas les classes du tableur, qui font foi pour l'import. L'import est un acte owner distinct, sur l'image Node existante de l'API (§6.5).",
     },
     'architecture-ui': {
       badge: '§8 · état mesuré sur main 27891b10',
@@ -31,7 +31,7 @@
     },
     'affichage-abc': {
       badge: '§9.5 · D12 et D13 ouverts',
-      lede: "Deux zones. En haut, l'application : ce que voient les utilisateurs et où chaque élément vit (écran, backend, base). Steve et l'équipe voient B, par défaut et sans sélecteur ; C est calculée en shadow par le backend sur le même snapshot, et ne se voit qu'en recette UAT. En bas, l'évaluation hors ligne, un job sans écran : référence A gelée, diff B → C nommé, oracle C, mesure, seuil de bascule, puis décision de Farid, seule à faire passer les utilisateurs de B à C.",
+      lede: "Deux zones. En haut, l'application : ce que voient les utilisateurs et où chaque élément vit (écran, backend, base). Steve et l'équipe voient B, par défaut et sans sélecteur ; C est calculée en shadow par le backend sur le même snapshot, et ne se voit qu'en recette UAT. En bas, l'évaluation hors ligne, un job sans écran : référence A gelée, diff B → C nommé, jeu de référence C, mesure, seuil de bascule, puis décision de Farid, seule à faire passer les utilisateurs de B à C.",
       note: "À l'écran, C a trois états : « confirmé » et « à instruire » sont visibles, « exclu prouvé » est masqué avec sa raison ; une absence de donnée n'est jamais une exclusion, l'indéterminé et le mixte restent donc visibles. L'exposition de la comparaison (UAT seulement ou sélecteur visible, D12) et le seuil chiffré de bascule (D13) sont laissés à Farid.",
     },
   };

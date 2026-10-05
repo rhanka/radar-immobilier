@@ -13,7 +13,7 @@
 </script>
 
 <DiagramFrame id={graph.id} kind="lanes" width={layout.width} height={layout.height}
-  label={layout.zone ? 'Deux zones : application en couloirs (utilisateurs, écrans, backend, base) et évaluation hors ligne en bas' : 'Architecture en couloirs : utilisateurs, écrans UI, fonctions backend, données S3 et PostgreSQL ; oracle transversal en bas'}>
+  label={layout.zone ? 'Deux zones : application en couloirs (utilisateurs, écrans, backend, base) et évaluation hors ligne en bas' : 'Architecture en couloirs : utilisateurs, écrans UI, fonctions backend, données S3 et PostgreSQL ; jeu de référence transversal en bas'}>
   <defs>
     <marker id={`${graph.id}-arrow`} viewBox="0 0 12 12" refX="11" refY="6" markerWidth="12" markerHeight="12" markerUnits="userSpaceOnUse" orient="auto">
       <path class="lane-arrow" d="M1,1 L11,6 L1,11 Z" />

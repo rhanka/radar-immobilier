@@ -1,13 +1,13 @@
 // Option descriptions (what is concretely proposed: what is built or not, where, what the
-// user or the oracle sees, an example from Steve's data) and, where a picture helps, a
+// user or the jeu de référence sees, an example from Steve's data) and, where a picture helps, a
 // small entity-relationship diagram per option (D2, D3). Merged into choices.js by key.
 
 export const DESCRIPTIONS = {
   D2: {
-    a: 'On crée six tables nommées en clair, une par besoin de Steve (§6.3) : le fichier reçu (provenance), les annotations (importées du classeur ou saisies par Steve avec son compte, chaque changement étant une nouvelle version), les validations de l’équipe ou du PO (validée, contestée, motif), les codes de motif reliés aux critères, les objets visés (1 à N, par ville + id texte du graphe) et les versions gelées de l’oracle C tirées des annotations validées. Exemple : la ligne #7 donne une annotation et deux cibles ; Farid la valide, Steve corrige une autre ligne contestée, et l’historique garde tout.',
-    b: 'On crée le modèle complet en couches de la version précédente : fichier, lignes brutes, évaluations versionnées séparées des lignes, ancres, référentiels en trois tables (codes, règles, constats), projection vers les fils de commentaires sentropic et table d’oracle : neuf tables. Il prévoit d’emblée les réponses de l’équipe et plusieurs jeux d’étiquettes dans les mêmes tables.',
-    c: 'On crée une seule table de contrôle qui recopie le classeur pour mesurer le radar, sans aucun lien vers ce qui est affiché. Le nom de table est indicatif. Rien n’apparaît dans le panneau du signal : Steve ne retrouve pas son verdict sur le signal qu’il a trié ; seul l’oracle lit la table.',
-    d: 'On ne construit rien côté radar : on attend que le paquet comments de sentropic porte tout (cibles, verdict, provenance). En attendant, le classeur reste un fichier hors de l’outil. Même livré, le paquet ne porte ni classement, ni motif, ni sens : il faudrait encore des tables radar.',
+    a: 'Immo ne crée aucune table d’annotation. Il écrit son profil de domaine (schéma d’étiquettes : verdict Pertinent / À surveiller / Non pertinent, 28 motifs reliés aux critères K1 à K9 et aux exclusions, sens, règle de promotion D13) et branche @sentropic/annotations sur son Postgres et son S3 : le classeur de Steve est importé une fois, Steve annote et l’équipe valide dans l’application, chaque révision est immuable et liée à son hash. Les annotations validées partent, en instantané haché, vers un jeu de référence engram.',
+    b: 'Immo construit d’abord les six tables de la version précédente du dossier (retours_fichiers, annotations, validations, motifs, annotation_cibles, reference_set_versions), les utilise, puis les migre vers @sentropic/annotations et engram quand ils seront prêts : annotations → annotation_revisions, validations → annotation_validations, annotation_cibles → annotation_targets, motifs → profil, reference_set_versions → ReferenceSetVersion.',
+    c: 'On crée une seule table de contrôle qui recopie le classeur pour mesurer le radar, sans aucun lien vers ce qui est affiché. Le nom de table est indicatif. Rien n’apparaît dans le panneau du signal : Steve ne retrouve pas son verdict sur le signal qu’il a trié ; seul le jeu de référence lit la table.',
+    d: 'On ne construit rien côté immo et on attend que @sentropic/annotations et engram soient livrés, sans délai convenu. En attendant, le classeur reste un fichier hors de l’outil et Steve ne peut ni annoter ni valider dans l’application.',
   },
   D3: {
     a: 'On stocke la cible sous forme de texte (« radar.signal:<ville>:<id> ») dans annotation_cibles (ville + id texte du graphe), sans clé étrangère vers le graphe, avec un instantané de ce que Steve a vu (ville, date, type, verbatim). B0 corrige l’API pour accepter cet identifiant texte. Si une ré-extraction supprime le signal, l’ancre passe « disparue » et le panneau montre l’instantané au lieu de perdre le retour.',
@@ -21,16 +21,16 @@ export const DESCRIPTIONS = {
   },
   D9: {
     1: 'Le jeu « steve-source » (verdict de Steve) est comparé à la classification du radar : B′ reconstituée à la date du relevé, puis C. Exemple : sur la passe 1, Steve juge 24 signaux sur 73 Non pertinent alors que B les affiche ; c’est cet écart que l’on mesure ligne par ligne.',
-    2: 'On compare deux grilles humaines de Steve : son classement actuel (P/S/N, motif) et un nouvel étiquetage selon les critères C. Steve repasse sur les mêmes lignes ; l’oracle mesure l’évolution de ses critères, pas le radar.',
-    3: 'On rapproche l’oracle d’extraction (676 unités sur 100 procès-verbaux) et l’oracle de Steve (124 lignes). Le pont passe par les documents communs, probablement peu nombreux (non vérifié).',
+    2: 'On compare deux grilles humaines de Steve : son classement actuel (P/S/N, motif) et un nouvel étiquetage selon les critères C. Steve repasse sur les mêmes lignes ; le jeu de référence mesure l’évolution de ses critères, pas le radar.',
+    3: 'On rapproche le jeu de référence d’extraction (676 unités sur 100 procès-verbaux) et le jeu de référence de Steve (124 lignes). Le pont passe par les documents communs, probablement peu nombreux (non vérifié).',
   },
   D10: {
-    a: 'Les 124 lignes du tableur deviennent l’unique oracle, à la place de la version 674/676. Rapide à constituer, mais il ne contient que ce que l’écran montrait à Steve : les sept dossiers manqués (« l’information existait dans la base ») n’y figurent pas.',
-    b: 'Deux oracles versionnés et gelés par empreinte. E reste l’oracle d’extraction (676 unités). C est construit à partir des évaluations et ancres de Steve, adjugées et étayées. Développement sur ses 51 villes, test sur les 52 suivantes, jamais vues ; toutes les unités d’un même dossier dans la même partition.',
+    a: 'Les 124 lignes du tableur deviennent l’unique jeu de référence, à la place de la version 674/676. Rapide à constituer, mais il ne contient que ce que l’écran montrait à Steve : les sept dossiers manqués (« l’information existait dans la base ») n’y figurent pas.',
+    b: 'Deux jeux de référence versionnés et gelés par empreinte. E reste le jeu de référence d’extraction (676 unités). C est construit à partir des évaluations et ancres de Steve, adjugées et étayées. Développement sur ses 51 villes, test sur les 52 suivantes, jamais vues ; toutes les unités d’un même dossier dans la même partition.',
     c: 'On lance une campagne d’annotation neuve, conçue pour le ciblage C, sur un nouveau corpus. Les 124 lignes de Steve servent seulement d’exemples ; la comparaison avec l’historique se fait à part.',
   },
   D11: {
-    a: 'Le rapport du benchmark #782 garde son tableau d’extraction inchangé et ajoute un tableau « ciblage » : précision et rappel de l’historique, de B, puis de C, sur l’oracle C. Le prompt gelé immo-pv-extraction-v9 n’est pas modifié ; l’enrichir serait une nouvelle version, décidée à part.',
+    a: 'Le rapport du benchmark #782 garde son tableau d’extraction inchangé et ajoute un tableau « ciblage » : précision et rappel de l’historique, de B, puis de C, sur le jeu de référence C. Le prompt gelé immo-pv-extraction-v9 n’est pas modifié ; l’enrichir serait une nouvelle version, décidée à part.',
     b: 'Un seul tableau et un seul score mêlent l’extraction (étape et citation) et le ciblage (fallait-il montrer le signal).',
   },
   D1: {
@@ -54,9 +54,9 @@ export const DESCRIPTIONS = {
     T: 'La sélection affichée reste B ; les critères de Steve servent seulement à trier la liste (les « trois critères » en premier). Aucun signal n’entre ni ne sort.',
   },
   D8: {
-    a: 'Steve et Mathieu examinent les cas listés au §9.2 sur exemples et preuves (Saint-Victor, Amos, CPTAQ, seconds projets, ODJ, trois S-RESTRICTIF). Tant qu’un cas n’est pas tranché, il est marqué « abstention » dans l’oracle : il ne compte ni pour ni contre.',
+    a: 'Steve et Mathieu examinent les cas listés au §9.2 sur exemples et preuves (Saint-Victor, Amos, CPTAQ, seconds projets, ODJ, trois S-RESTRICTIF). Tant qu’un cas n’est pas tranché, il est marqué « abstention » dans le jeu de référence : il ne compte ni pour ni contre.',
     b: 'L’équipe tranche elle-même chaque cas à partir de l’analyse et des règles de Steve, puis lui présente le résultat.',
-    c: 'Les cas restent dans l’oracle avec l’étiquette du tableur, sans statut particulier, même quand le tableur et l’analyse se contredisent.',
+    c: 'Les cas restent dans le jeu de référence avec l’étiquette du tableur, sans statut particulier, même quand le tableur et l’analyse se contredisent.',
   },
   D12: {
     a: 'Steve et l’équipe continuent de voir B, sans sélecteur. C est calculée en parallèle par le backend ; une page de comparaison B / C n’est accessible qu’en recette UAT et aux administrateurs. Le jour où le seuil D13 est franchi et que Farid décide, C remplace B à l’écran (scène 5).',
@@ -66,8 +66,8 @@ export const DESCRIPTIONS = {
   },
   D13: {
     a: 'C remplace B seulement si, sur le jeu test des 52 villes : aucun signal que Steve juge Pertinent n’est masqué ; la précision P ∪ S de C dépasse celle de B (67,1 % sur la passe 1) ; l’API, le rail, la carte et le panneau montrent les mêmes ensembles ; Farid fait la recette.',
-    b: 'Farid écrit d’autres chiffres dans le commentaire (par exemple une précision minimale ou un rappel minimal), mesurés par le même oracle.',
-    c: 'La bascule se décide sur la recette de Farid seule, sans mesure chiffrée par l’oracle.',
+    b: 'Farid écrit d’autres chiffres dans le commentaire (par exemple une précision minimale ou un rappel minimal), mesurés par le même jeu de référence.',
+    c: 'La bascule se décide sur la recette de Farid seule, sans mesure chiffrée par le jeu de référence.',
   },
   D14: {
     a: 'Dans le panneau du signal, un badge « Retour de Steve » (vert, jaune, rouge) ouvre une section « Avis de Steve » : classement, motif, sens, analyse, provenance, état du rattachement. Dans le rail, des compteurs P / S / N par ville. Les 3 composants d’annotation passent au design system. Rien sur la carte au premier lot.',
@@ -76,7 +76,7 @@ export const DESCRIPTIONS = {
     d: 'Un écran séparé liste tous les retours de Steve (filtrable par ville, motif, statut de rattachement), sans rien afficher sur les objets du radar.',
   },
   D15: {
-    a: 'B0, l’import (L1) et l’oracle de ciblage (O1) démarrent maintenant, en parallèle de #703, car ils ne touchent pas la chaîne de rafraîchissement. Le classifieur C (C1) attend que le rafraîchissement soit stable.',
+    a: 'B0, l’import (L1) et le jeu de référence de ciblage (O1) démarrent maintenant, en parallèle de #703, car ils ne touchent pas la chaîne de rafraîchissement. Le classifieur C (C1) attend que le rafraîchissement soit stable.',
     b: 'Tout le travail de ce dossier attend la clôture de #703 (rafraîchissement quotidien en production).',
   },
   D16: {
@@ -85,7 +85,7 @@ export const DESCRIPTIONS = {
   },
 };
 
-import { STEVE_MODEL } from './steve-model.js';
+import { STEVE_MODEL, SIX_TABLES } from './steve-model.js';
 
 // Small entity-relationship diagrams (Mermaid erDiagram subset of parse-er.mjs), laid out
 // by erLayout. `existing`: tables present on main; the others are proposed or indicative.
@@ -111,51 +111,7 @@ export const DIAGRAMS = {
       text city_slug
     }`,
     },
-    b: {
-      colGap: 180,
-      layers: ['Source', 'Jugement', 'Ancres et publication'],
-      placement: {
-        annotation_sources: { col: 0, row: 0 }, annotation_raw_rows: { col: 0, row: 1 }, annotation_assessments: { col: 1, row: 1 },
-        comment_projection: { col: 2, row: 0 }, annotation_anchors: { col: 2, row: 1 }, graph_nodes: { col: 2, row: 2 },
-      },
-      existing: ['graph_nodes'],
-      labels: { normalisee_en: 'normalisée en', rattachee_a: '1 à N ancres', cle_texte_sans_fk: 'clé texte, sans FK', publie_en: 'publiée en' },
-      er: `erDiagram
-    annotation_sources ||--o{ annotation_raw_rows : contient
-    annotation_raw_rows ||--o{ annotation_assessments : normalisee_en
-    annotation_assessments ||--o{ annotation_anchors : rattachee_a
-    annotation_anchors }o..o| graph_nodes : cle_texte_sans_fk
-    annotation_assessments ||--o| comment_projection : publie_en
-    annotation_sources {
-      uuid id PK
-      text file_sha256 UK
-    }
-    annotation_raw_rows {
-      uuid id PK
-      uuid source_id FK
-      jsonb cells
-    }
-    annotation_assessments {
-      uuid id PK
-      uuid raw_row_id FK
-      text classement
-      text motif_code
-      text sens
-    }
-    annotation_anchors {
-      uuid id PK
-      uuid assessment_id FK
-      text anchor_key "sans FK"
-    }
-    graph_nodes {
-      text id PK
-    }
-    comment_projection {
-      uuid id PK
-      uuid assessment_id FK
-      text thread_id
-    }`,
-    },
+    b: SIX_TABLES,
     d: {
       colGap: 180,
       layers: ['Paquet sentropic : aucune table radar'],
@@ -175,21 +131,21 @@ export const DIAGRAMS = {
   D10: {
     a: {
       colGap: 180,
-      layers: ['Source', 'Oracle unique', 'Benchmark #782'],
-      placement: { annotations: { col: 0, row: 0 }, oracle_tableur: { col: 1, row: 0 }, oracle_e_v3: { col: 1, row: 1 }, benchmark: { col: 2, row: 0 } },
-      existing: ['oracle_e_v3'],
+      layers: ['Source', 'Jeu de référence unique', 'Benchmark #782'],
+      placement: { annotations: { col: 0, row: 0 }, jeu_ref_tableur: { col: 1, row: 0 }, jeu_ref_e_v3: { col: 1, row: 1 }, benchmark: { col: 2, row: 0 } },
+      existing: ['jeu_ref_e_v3'],
       labels: { remplace: 'remplace', note_tout: 'note tout' },
       er: `erDiagram
-    annotations ||--|| oracle_tableur : remplace
-    oracle_tableur ||--|| benchmark : note_tout
+    annotations ||--|| jeu_ref_tableur : remplace
+    jeu_ref_tableur ||--|| benchmark : note_tout
     annotations {
       text source "124 lignes de Steve"
     }
-    oracle_tableur {
+    jeu_ref_tableur {
       text unite "ce que l'écran montrait"
       text biais "7 dossiers manqués absents"
     }
-    oracle_e_v3 {
+    jeu_ref_e_v3 {
       text statut "retiré, historique perdu"
     }
     benchmark {
@@ -198,26 +154,26 @@ export const DIAGRAMS = {
     },
     b: {
       colGap: 180,
-      layers: ['Sources', 'Deux oracles gelés', 'Benchmark #782, deux volets'],
-      placement: { consensus_modeles: { col: 0, row: 0 }, annotations: { col: 0, row: 1 }, oracle_e_v3: { col: 1, row: 0 }, oracle_c_v1: { col: 1, row: 1 },
+      layers: ['Sources', 'Deux jeux de référence gelés', 'Benchmark #782, deux volets'],
+      placement: { consensus_modeles: { col: 0, row: 0 }, annotations: { col: 0, row: 1 }, jeu_ref_e_v3: { col: 1, row: 0 }, jeu_ref_c_v1: { col: 1, row: 1 },
         volet_extraction: { col: 2, row: 0 }, volet_ciblage: { col: 2, row: 1 } },
-      existing: ['consensus_modeles', 'oracle_e_v3', 'volet_extraction'],
+      existing: ['consensus_modeles', 'jeu_ref_e_v3', 'volet_extraction'],
       labels: { adjugees_gelees: 'adjugées, gelées', note_b_puis_c: 'note B puis C' },
       er: `erDiagram
-    consensus_modeles ||--|| oracle_e_v3 : construit
-    annotations ||--|| oracle_c_v1 : adjugees_gelees
-    oracle_e_v3 ||--|| volet_extraction : note
-    oracle_c_v1 ||--|| volet_ciblage : note_b_puis_c
+    consensus_modeles ||--|| jeu_ref_e_v3 : construit
+    annotations ||--|| jeu_ref_c_v1 : adjugees_gelees
+    jeu_ref_e_v3 ||--|| volet_extraction : note
+    jeu_ref_c_v1 ||--|| volet_ciblage : note_b_puis_c
     consensus_modeles {
       text methode "7 passes, 3 familles"
     }
     annotations {
       text source "verdicts de Steve"
     }
-    oracle_e_v3 {
+    jeu_ref_e_v3 {
       int taille "674 / 100 documents"
     }
-    oracle_c_v1 {
+    jeu_ref_c_v1 {
       text jeux "dev 51 villes, test 52"
     }
     volet_extraction {
@@ -229,21 +185,21 @@ export const DIAGRAMS = {
     },
     c: {
       colGap: 180,
-      layers: ['Nouvelle campagne', 'Oracle C neuf', 'Benchmark #782'],
-      placement: { campagne_c: { col: 0, row: 0 }, annotations: { col: 0, row: 1 }, oracle_c_neuf: { col: 1, row: 0 }, volet_ciblage: { col: 2, row: 0 } },
+      layers: ['Nouvelle campagne', 'Jeu de référence C neuf', 'Benchmark #782'],
+      placement: { campagne_c: { col: 0, row: 0 }, annotations: { col: 0, row: 1 }, jeu_ref_c_neuf: { col: 1, row: 0 }, volet_ciblage: { col: 2, row: 0 } },
       existing: [],
       labels: { exemples: 'exemples seulement' },
       er: `erDiagram
-    campagne_c ||--|| oracle_c_neuf : construit
-    annotations }o..o| oracle_c_neuf : exemples
-    oracle_c_neuf ||--|| volet_ciblage : note
+    campagne_c ||--|| jeu_ref_c_neuf : construit
+    annotations }o..o| jeu_ref_c_neuf : exemples
+    jeu_ref_c_neuf ||--|| volet_ciblage : note
     campagne_c {
       text corpus "nouveau, conçu pour C"
     }
     annotations {
       text role "124 lignes, exemples"
     }
-    oracle_c_neuf {
+    jeu_ref_c_neuf {
       text comparaison "historique à part"
     }
     volet_ciblage {
