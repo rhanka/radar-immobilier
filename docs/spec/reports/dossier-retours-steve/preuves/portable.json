@@ -1,11 +1,11 @@
 {
   "output": "docs/spec/reports/dossier-retours-steve/decision-focus.html",
-  "bytes": 841635,
-  "htmlSha256": "f8cc1fbbee4674c4a901bd6db5c6bec243c5a33e05f486bcfdd8ed3aba39cf4c",
-  "embeddedSha256": "abda5d092732300f266a60779156870729c8ec06eb2ce4a756139d2145e85c01",
+  "bytes": 904995,
+  "htmlSha256": "7366e124270b4180244f590f7d82b642ef819ffb98608086c34e18e155f52f33",
+  "embeddedSha256": "8d2801144b2420f2cd061f0722f4a0f509d9fad51ec507db4e54fec0c1bcc5ba",
   "embeddedSha256Rule": "sha256 of the file with the embedded value replaced by 64 zeros",
-  "dossierHash": "50aa8770c3b4ea11b0bd0d05394f0c1bfc09fde2d1fcd952f8f440133302651b",
-  "artifactInputHash": "2af315f3df50974f6b0133f46450f6989a0a3883b90fbc1bc6b526b09c6e50c3",
+  "dossierHash": "62d38f42c7bd5a31aa41f7360c583980c78631ae6751e11a7a7d178108cec85e",
+  "artifactInputHash": "18fae9885c4c398d297d823e73ee5b670a218a4249a969505447016609f16f63",
   "graphs": [
     {
       "id": "criteres-steve",
@@ -16,17 +16,17 @@
     },
     {
       "id": "modele-donnees",
-      "nodes": 8,
-      "edges": 9,
+      "nodes": 9,
+      "edges": 10,
       "subflows": 0,
-      "sceneHash": "d5d69a02e5fb2869e841c69abae9fff2a09bbb85b0b84ef78396fb78ef941d48"
+      "sceneHash": "785017f1b20952074dd0c408540feb11b71edede7786712acb5398f538bb0d40"
     },
     {
       "id": "flux-import-oracle",
       "nodes": 24,
       "edges": 26,
       "subflows": 7,
-      "sceneHash": "c967edfd97e56fe2173358b03bc12f0b393b514b88ae0ac3633e9879d8694fbb"
+      "sceneHash": "ba0071f705bb3b20d21cfe044606028520c8c88c8782256090dbc604d638e0f3"
     },
     {
       "id": "architecture-ui",
@@ -40,7 +40,7 @@
       "nodes": 16,
       "edges": 19,
       "subflows": 5,
-      "sceneHash": "bf3f3eff6c5ae17198dff36534a7ace9a3901b31d4203b6c9bcfb4903cd62ae2"
+      "sceneHash": "5ce17eb15e6b0f43d19366d776914e8f362a8daafc3a24dd8aec70389bd9422d"
     }
   ]
 }

@@ -83,47 +83,67 @@ const CURRENT_RELATIONS = `    s3_raw ||..o| documents : projection
     prospect_notes }o--o| signals : signal_id
     prospect_notes }o--|| account_users : auteur`;
 
+// Proposed objects, each with its owner (synthèse sentropic + engram, §2, §6.1): sentropic
+// (@sentropic/annotations, tables in the host database through its ./pg adapter, bytes in
+// the host object store through a port), engram (frozen reference sets, runs), track
+// (freeze and promotion decisions), immo (domain profile + its data).
 const NEW_ENTITIES = {
   s3_retours: `s3_retours {
-      text cle PK "raw/retours-steve/cas/<sha>.xlsx"
+      text cle PK "classeur de Steve, par sha256"
+      text ecrit_par "port de @sentropic/annotations"
     }`,
-  retours_fichiers: `retours_fichiers {
-      uuid id PK
-      text fichier_sha256 UK "= clé s3_retours"
+  annotation_sources: `annotation_sources {
+      uuid id PK "sentropic"
+      text sha256 UK "fichier importé une fois"
     }`,
-  annotations: `annotations {
-      uuid id PK
-      uuid auteur_id FK "compte de Steve"
-      text statut "proposée, validée, contestée"
+  annotation_revisions: `annotation_revisions {
+      text content_hash PK "sentropic, immuable"
+      text prev_content_hash "version précédente"
+      text auteur "identité IdP sentropic"
+      jsonb corps "schéma d'étiquettes du profil immo"
     }`,
-  validations: `validations {
-      uuid id PK
-      uuid decideur_id FK "équipe ou PO"
+  annotation_validations: `annotation_validations {
+      uuid id PK "sentropic"
+      text revision_hash FK "liée au hash"
+      text decision "accepter, contester, rejeter…"
     }`,
-  annotation_cibles: `annotation_cibles {
-      uuid id PK
-      text cible_type "signal, ville, document, zone, lot"
-      text city_slug
-      text cible_id "id, sha256 ou canonical_id"
+  annotation_targets: `annotation_targets {
+      uuid id PK "sentropic"
+      text cible_type "signal, ville, PV, zone, lot"
+      text cle "clé du domaine immo"
     }`,
-  oracle_versions: `oracle_versions {
-      uuid id PK
-      text libelle UK "oracle-ciblage-steve-v1"
+  reference_set_versions: `reference_set_versions {
+      text id PK "engram : ReferenceSet@version"
+      text label_provenance "E silver, C human_single"
+      text partitions "dev / test scellé"
+      text manifest_sha256
+    }`,
+  eval_runs: `eval_runs {
+      text run_id PK "engram, hors ligne"
+      text candidat "profil + prompt + modèle"
+      text resultat "métriques, garde de promotion"
+    }`,
+  decisions_track: `decisions_track {
+      text id PK "track : gel, promotion"
+      text attestation "signée par h2a"
     }`,
 };
 
 const PROPOSED_RELATIONS = `${CURRENT_RELATIONS}
-    s3_retours ||..|| retours_fichiers : octets
-    retours_fichiers ||--o{ annotations : import
-    annotations ||--o{ validations : decide
-    annotations }o--|| account_users : auteur_steve
-    annotations ||--o{ annotation_cibles : vise
-    annotation_cibles }o..o| graph_nodes : signal
-    annotation_cibles }o..o| registre_villes : ville
-    annotation_cibles }o..o| documents : document
-    annotation_cibles }o..o| zone_versions : zone_cible
-    annotation_cibles }o..o| lot_versions : lot_cible
-    oracle_versions }o..o{ annotations : fige`;
+    s3_retours ||..|| annotation_sources : octets
+    annotation_sources ||--o{ annotation_revisions : import
+    annotation_revisions ||--o{ annotation_validations : decide
+    annotation_revisions ||--o{ annotation_targets : vise
+    annotation_targets }o..o| graph_nodes : signal
+    annotation_targets }o..o| registre_villes : ville
+    annotation_targets }o..o| documents : document
+    annotation_targets }o..o| zone_versions : zone_cible
+    annotation_targets }o..o| lot_versions : lot_cible
+    annotation_validations }o..o{ reference_set_versions : export_hache
+    profil_domaine ||..o{ reference_set_versions : schema
+    reference_set_versions ||--o{ eval_runs : mesure
+    eval_runs }o..o| decisions_track : preuve
+    decisions_track ||..o| profil_domaine : promotion`;
 
 // What the proposal changes inside the modified boxes.
 const MODIFIED = {
@@ -144,6 +164,12 @@ const MODIFIED = {
     }`,
   account_users: `account_users {
       uuid id PK "+ compte de Steve (D5)"
+      text sub "sujet IdP sentropic"
+    }`,
+  profil_domaine: `profil_domaine {
+      text fichier PK "radar/ontology/ontology-profile.yaml"
+      text etiquettes "+ verdicts, motifs, critères, sens"
+      text promotion "+ règle D13"
     }`,
 };
 
@@ -156,7 +182,7 @@ const CURRENT_PLACEMENT = {
   zone_versions: { col: 3, row: 0 }, lot_versions: { col: 3, row: 1 }, geo_ogc: { col: 3, row: 3 },
 };
 const LABELS = { projection: 'projection', aretes: 'arêtes', node_id: 'node_id', pull_ogc: 'copie (pull OGC)', pull_ogc_lots: 'copie (pull OGC)', signal_id: 'signal_id', auteur: 'auteur',
-  octets: 'octets', import: 'import', decide: 'valide / conteste', auteur_steve: 'auteur', vise: '1 à N cibles', signal: 'signal : ville + id', ville: 'ville : city_slug',
+  octets: 'octets (port)', import: 'import', decide: 'valide / conteste', vise: '1 à N cibles', export_hache: 'export haché des validées', schema: 'schéma d’étiquettes', mesure: 'runs', preuve: 'preuve', promotion: 'promotion (prompt)', signal: 'signal : ville + id', ville: 'ville : city_slug',
   document: 'PV : sha256', zone_cible: 'zone : canonical_id', lot_cible: 'lot : canonical_id', fige: 'gèle', zone: 'zone', lot: 'lot', city_slug: 'city_slug' };
 
 export const PHYSICAL = {
@@ -170,12 +196,13 @@ export const PHYSICAL = {
     er: er(CURRENT_RELATIONS, ENTITIES),
   },
   'etat-propose': {
-    title: 'Proposé : nouveau (vert), modifié (orange), supprimé (rouge, aucun), inchangé (gris)',
-    layers: ['immo · S3', 'immo · Postgres : documents, graphe', 'immo · Postgres : géo, comptes, notes', 'géo copiée et service geo', 'immo · Postgres : annotations (nouveau)'],
-    placement: { ...CURRENT_PLACEMENT, s3_retours: { col: 0, row: 3 },
-      retours_fichiers: { col: 4, row: 0 }, annotations: { col: 4, row: 1 }, validations: { col: 4, row: 2 }, annotation_cibles: { col: 4, row: 3 }, oracle_versions: { col: 4, row: 4 } },
+    title: 'Proposé, par propriétaire : nouveau (vert), modifié (orange), inchangé (gris), aucun supprimé',
+    layers: ['immo · S3', 'immo · Postgres : documents, graphe, profil', 'immo · Postgres : géo, comptes, notes', 'géo copiée et service geo', 'sentropic · @sentropic/annotations (dans le PG d’immo)', 'engram et track · hors ligne'],
+    placement: { ...CURRENT_PLACEMENT, s3_retours: { col: 0, row: 3 }, profil_domaine: { col: 1, row: 4 },
+      annotation_sources: { col: 4, row: 0 }, annotation_revisions: { col: 4, row: 1 }, annotation_validations: { col: 4, row: 2 }, annotation_targets: { col: 4, row: 3 },
+      reference_set_versions: { col: 5, row: 1 }, eval_runs: { col: 5, row: 2 }, decisions_track: { col: 5, row: 3 } },
     existing: Object.keys(ENTITIES),
-    status: { ...Object.fromEntries(Object.keys(ENTITIES).map(id => [id, 'unchanged'])), graph_nodes: 'modified', graph_edges: 'modified', prospect_notes: 'modified', account_users: 'modified',
+    status: { ...Object.fromEntries(Object.keys(ENTITIES).map(id => [id, 'unchanged'])), graph_nodes: 'modified', graph_edges: 'modified', prospect_notes: 'modified', account_users: 'modified', profil_domaine: 'modified',
       ...Object.fromEntries(Object.keys(NEW_ENTITIES).map(id => [id, 'new'])) },
     labels: LABELS, colGap: 200,
     er: er(PROPOSED_RELATIONS, { ...ENTITIES, ...MODIFIED, ...NEW_ENTITIES }),

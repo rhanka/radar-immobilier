@@ -60,39 +60,40 @@ function assertGeometry(graph, edges) {
 test('le modèle de données (scène 2) est le modèle minimal : cinq tables nouvelles, graphe par ville + id texte', () => {
   const model = graphs.find(graph => graph.id === 'modele-donnees');
   assert.equal(model.kind, 'er');
-  assert.deepEqual(model.entities.map(entity => entity.id).sort(), ['account_users', 'annotation_cibles', 'annotations', 'graph_nodes', 'motifs', 'oracle_versions', 'retours_fichiers', 'validations']);
+  assert.deepEqual(model.entities.map(entity => entity.id).sort(), ['account_users', 'annotation_revisions', 'annotation_sources', 'annotation_targets', 'annotation_validations', 'eval_runs', 'graph_nodes', 'profil_domaine', 'reference_set_versions']);
   // Seuls graph_nodes et account_users existent déjà : les six autres tables sont proposées.
-  assert.deepEqual(model.entities.filter(entity => entity.existing).map(entity => entity.id), ['graph_nodes', 'account_users']);
+  assert.deepEqual(model.entities.filter(entity => entity.existing).map(entity => entity.id).sort(), ['account_users', 'graph_nodes', 'profil_domaine']);
   for (const entity of model.entities) assert.ok(entity.attributes.some(attribute => attribute.keys.includes('PK')), `${entity.id} sans clé primaire`);
   const relation = (source, label) => model.relations.find(item => item.source === source && item.label === label);
-  assert.deepEqual([relation('retours_fichiers', 'importe').sourceCardinality, relation('retours_fichiers', 'importe').targetCardinality], ['one', 'zero-or-many']);
-  assert.equal(relation('annotation_cibles', 'ville_et_id_texte').identifying, false);
-  assert.equal(relation('annotations', 'remplace').target, 'annotations');
+  assert.deepEqual([relation('annotation_sources', 'import').sourceCardinality, relation('annotation_sources', 'import').targetCardinality], ['one', 'zero-or-many']);
+  assert.equal(relation('annotation_targets', 'ville_et_id_texte').identifying, false);
+  assert.equal(relation('annotation_revisions', 'remplace').target, 'annotation_revisions');
   // Boucle de validation : décision gardée, décideur et auteur sont des comptes.
-  assert.equal(relation('annotations', 'decide').target, 'validations');
-  assert.equal(relation('annotations', 'auteur').target, 'account_users');
-  assert.equal(relation('validations', 'decideur').target, 'account_users');
-  const cibles = model.entities.find(entity => entity.id === 'annotation_cibles').attributes.map(attribute => attribute.name);
-  assert.ok(cibles.includes('city_slug') && cibles.includes('cible_id'), 'cible = ville + id texte (#812)');
+  assert.equal(relation('annotation_revisions', 'decide').target, 'annotation_validations');
+  assert.equal(relation('annotation_revisions', 'auteur').target, 'account_users');
+  assert.equal(relation('annotation_validations', 'decideur').target, 'account_users');
+  assert.equal(relation('annotation_validations', 'export_hache').target, 'reference_set_versions');
+  const cibles = model.entities.find(entity => entity.id === 'annotation_targets').attributes.map(attribute => attribute.name);
+  assert.ok(cibles.includes('city_slug') && cibles.includes('cle'), 'cible = ville + clé du domaine (#812)');
   assert.equal(model.layout.layers.length, 3);
   assertGeometry(model, model.relations.filter(item => item.source !== item.target));
 });
 
-test('architecture en couloirs : utilisateurs, UI, backend, données S3 et PostgreSQL ; oracle en bande basse', () => {
+test('architecture en couloirs : utilisateurs, UI, backend, données S3 et PostgreSQL ; jeu de référence en bande basse', () => {
   const lanes = graphs.find(graph => graph.id === 'flux-import-oracle');
   assert.equal(lanes.kind, 'lanes');
   assert.deepEqual(lanes.layout.lanes.map(lane => lane.kind), ['user', 'ui', 'backend', 'data']);
   for (const [index, lane] of lanes.layout.lanes.entries()) if (index) assert.ok(lane.x >= lanes.layout.lanes[index - 1].x + lanes.layout.lanes[index - 1].width);
   const bottom = Math.max(...lanes.layout.lanes.map(lane => lane.y + lane.height));
-  assert.ok(lanes.layout.band.y > bottom, 'oracle sous les couloirs');
-  assert.ok(lanes.layout.band.width >= lanes.layout.lanes.reduce((sum, lane) => sum + lane.width, 0) * 0.95, 'oracle transversal');
+  assert.ok(lanes.layout.band.y > bottom, 'jeu de référence sous les couloirs');
+  assert.ok(lanes.layout.band.width >= lanes.layout.lanes.reduce((sum, lane) => sum + lane.width, 0) * 0.95, 'jeu de référence transversal');
   const laneOf = id => lanes.nodes.find(node => node.id === id).lane;
   assert.deepEqual(['STV', 'MAP', 'COL', 'DET', 'IMP', 'RAT', 'GSA', 'ANA', 'DOCS', 'GRA', 'ADJ', 'OE'].map(laneOf), ['L1', 'L2', 'L3', 'L3', 'L3', 'L3', 'L3', 'L3', 'L4', 'L4', 'OR', 'OR']);
   assert.deepEqual(lanes.groups.filter(group => group.parent === 'L4').map(group => group.label), ['S3 · stockage objet', 'PostgreSQL']);
-  assert.ok(lanes.edges.some(edge => edge.source === 'ANN' && edge.target === 'ADJ'), 'oracle alimenté par les annotations en base');
+  assert.ok(lanes.edges.some(edge => edge.source === 'ANN' && edge.target === 'ADJ'), 'jeu de référence alimenté par les annotations en base');
   for (const node of lanes.nodes) {
     assert.ok(['observed', 'declared', 'historical'].includes(node.evidence), node.id);
-    assert.ok(node.label.length <= 26 && node.detail.length <= 32, `${node.id} texte trop long`);
+    assert.ok(node.label.length <= 30 && node.detail.length <= 32, `${node.id} texte trop long`);
   }
   assertGeometry(lanes, lanes.edges);
 });
@@ -103,7 +104,7 @@ test('les chiffres des cartes sont ceux du dossier', () => {
   assert.match(card('architecture-ui', 'GCB').detail, /2 761 lignes/);
   assert.match(card('architecture-ui', 'DS').detail, /39 sur 69/);
   assert.match(card('architecture-ui', 'COL').detail, /0 sur 3/);
-  assert.match(graphs.find(graph => graph.id === 'modele-donnees').entities.find(entity => entity.id === 'motifs').attributes[0].comment, /P-DENSITE/);
+  assert.match(graphs.find(graph => graph.id === 'modele-donnees').entities.find(entity => entity.id === 'profil_domaine').attributes[1].comment, /28 motifs/);
 });
 
 test('A/B/C : deux zones, application en couloirs (écran, backend, base) et évaluation hors ligne en bas', () => {
@@ -129,8 +130,9 @@ test('A/B/C : deux zones, application en couloirs (écran, backend, base) et év
 
 test('seize décisions D1 à D16, recommandation connue sauf le point ouvert D9', () => {
   // Ordre de décision : le bloc de Fabien d'abord, puis celui de Farid.
-  assert.deepEqual(questions.map(question => question.key), ['D1', 'D2', 'D3', 'D4', 'D9', 'D10', 'D11', 'D5', 'D6', 'D7', 'D8', 'D12', 'D13', 'D14', 'D15', 'D16']);
-  assert.deepEqual(questions.map(question => question.step), [...Array(7).fill(1), ...Array(9).fill(2)]);
+  assert.deepEqual(questions.map(question => question.key), ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'D1', 'D2', 'D3', 'D4', 'D9', 'D10', 'D11', 'D5', 'D6', 'D7', 'D8', 'D12', 'D13', 'D14', 'D15', 'D16']);
+  assert.deepEqual(questions.map(question => question.step), [...Array(15).fill(1), ...Array(9).fill(2)]);
+  assert.deepEqual(questions.filter(question => question.family === 'générique').map(question => question.key), ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8']);
   assert.ok(questions.every(question => (question.step === 1) === (question.decides === 'Fabien')));
   for (const question of questions) {
     if (question.key === 'D9') { assert.equal(question.recommended, null); continue; }
@@ -156,7 +158,7 @@ test('chaque décision : introduction, dépendances antérieures, avantages et i
   const order = questions.map(question => question.key);
   const markdown = await readFile('../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md', 'utf8');
   const section10 = markdown.split('\n## 10. Options et recommandation')[1].split('\n## 11. ')[0];
-  assert.match(section10, /Fabien décide d’abord ses sept décisions/);
+  assert.match(section10, /Fabien décide d’abord les huit décisions génériques G1 à G8/);
   for (const question of questions) {
     const sentences = question.intro.split(/(?<=[.?!»)])\s+(?=[A-ZÀ-Ý«])/).length;
     assert.ok(sentences >= 3 && sentences <= 6 && question.intro.length <= 900, `${question.key} : introduction de ${sentences} phrases`);
@@ -234,11 +236,11 @@ test('introduction : protocole des trois passes et glossaire, avant toute mesure
   const glossaryText = markdown.split('\n## Glossaire\n')[1].split('\n## 1. ')[0];
   // First column of the glossary table: the defined terms.
   const terms = glossaryText.split('\n').filter(line => line.startsWith('| ')).map(line => line.split('|')[1]).join(' ; ');
-  for (const term of ['Passe 1', '124 lignes', 'B′', 'Profil A gelé', 'Shadow', 'Oracle C', 'Oracle E', 'Seuil D13', 'Ancre', 'B0', 'Tombstone',
+  for (const term of ['Passe 1', '124 lignes', 'B′', 'Profil A gelé', 'Shadow', 'Jeu de référence C', 'Jeu de référence E', 'Seuil D13', 'Ancre', 'B0', 'Tombstone',
     'Motifs N-', 'K1 à K9', 'PIIA', 'PPCMOI', 'ODJ', 'CPTAQ', 'UAT', 'MCP']) assert.ok(terms.includes(term), term);
 });
 
-test("existant et oracles : schémas du texte, aucune table d'oracle en base, proposition ancien → nouvel oracle", async () => {
+test("existant et jeux de référence : schémas du texte, aucune table de jeu de référence en base, proposition ancien → nouveau jeu de référence", async () => {
   const { DOC_DIAGRAMS } = await import('./doc-diagrams.js');
   const { parseEr } = await import('./parse-er.mjs');
   const { erLayout } = await import('./diagram-layout.js');
@@ -253,13 +255,13 @@ test("existant et oracles : schémas du texte, aucune table d'oracle en base, pr
   const existing = parseEr(DOC_DIAGRAMS.existant.er, 'existant');
   for (const table of ['prospect_marks', 'prospect_notes'])
     for (const column of existing.entities.find(entity => entity.id === table).attributes) assert.ok(schema.includes(`("${column.name}"`), `${table}.${column.name}`);
-  assert.ok(!/pgTable\(\s*"oracle/.test(schema), "aucune table d'oracle sur main");
+  assert.ok(!/pgTable\(\s*"oracle/.test(schema), "aucune table de jeu de référence sur main");
   const s6 = markdown.split('\n### 6.0 ')[1].split('\n### 6.1 ')[0];
-  assert.match(s6, /Aucune table d'oracle n'existe en base aujourd'hui/);
+  assert.match(s6, /Aucune table de jeu de référence n'existe en base aujourd'hui/);
   for (const reason of ['Auteur avec compte obligatoire', 'Une seule cible par note', '10 000 caractères au plus', 'Aucune provenance', 'défaut corrigé par B0']) assert.ok(s6.includes(reason), reason);
   assert.ok(markdown.indexOf('### 6.0 ') < markdown.indexOf('### 6.3 '));
   const s93 = markdown.split('\n### 9.3 ')[1].split('\n### 9.4 ')[0];
-  assert.match(s93, /#### Ancien oracle → nouvel oracle : la proposition/);
+  assert.match(s93, /#### Ancien jeu de référence → nouveau jeu de référence : la proposition/);
   assert.match(s93, /Rien n'est remplacé/);
   assert.match(s93, /décision \*\*D10\*\*/);
 });
@@ -269,14 +271,15 @@ test('§6.3 : besoins de Steve → données, modèle minimal, ce qu\'il ne fait 
   const s63 = markdown.split('\n### 6.3 ')[1].split('\n### 6.4 ')[0];
   assert.match(s63, /\*\*Besoins de Steve → données nécessaires\.\*\*/);
   assert.equal(s63.split('\n').filter(line => /^\| [1-9] \|/.test(line)).length, 9);
-  for (const table of ['retours_fichiers', 'annotations', 'validations', 'motifs', 'annotation_cibles', 'oracle_versions']) assert.ok(s63.includes(`| \`${table}\` |`), table);
-  assert.match(s63, /Ce que le modèle minimal ne fait pas, volontairement/);
+  for (const table of ['retours_fichiers', 'annotations', 'validations', 'motifs', 'annotation_cibles', 'reference_set_versions']) assert.ok(s63.includes(`| \`${table}\` |`), table);
+  assert.match(s63, /Ce qui reste hors du périmètre, volontairement/);
+  assert.match(s63, /Sort des six tables du brouillon/);
   assert.match(s63, /ni étendues ni réutilisées/);
   assert.match(s63, /#812/);
   // Architecture des données : cinq ensembles, en ligne (zone) ou hors ligne (bande), existe ou proposé.
   const { docLanes } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
   const arch = docLanes['architecture-donnees'];
-  assert.deepEqual(arch.layout.lanes.map(lane => lane.title), ['Utilisateurs de l’application', '(a) Données de Steve · proposé', '(b) Annotations · proposé', '(c) Graphe · existe', '(d) Oracle · proposé']);
+  assert.deepEqual(arch.layout.lanes.map(lane => lane.title), ['Utilisateurs de l’application', '(a) Données de Steve · immo · proposé', '(b) Annotations · sentropic · proposé', '(c) Graphe · immo · existe', '(d) Jeu de référence · engram · proposé']);
   assert.match(arch.layout.zone.title, /En ligne/);
   assert.ok(arch.layout.band.y > arch.layout.zone.y + arch.layout.zone.height);
   assert.ok(markdown.indexOf('<!-- lanes:architecture-donnees -->') < markdown.indexOf('<!-- diagram:modele-minimal -->'));
@@ -288,7 +291,7 @@ test('§6.3 : besoins de Steve → données, modèle minimal, ce qu\'il ne fait 
   const d2 = questions.find(question => question.key === 'D2');
   assert.deepEqual(d2.options.map(option => option.key), ['a', 'b', 'c', 'd']);
   assert.equal(d2.recommended, 'a');
-  assert.ok(!/annotation_(?:sources|raw_rows|assessments|anchors|codes|rules|findings)|label_set|prospect_notes v1/.test(markdown.split('\n## 10. ')[0].split('\n### 6.3 ')[1].split('\n## 7. ')[0]), 'plus de tables M3 dans §6.3 à §6.6');
+  assert.ok(!/annotation_(?:raw_rows|assessments|anchors|codes|rules|findings)|label_set|prospect_notes v1/.test(markdown.split('\n## 10. ')[0].split('\n### 6.3 ')[1].split('\n## 7. ')[0]), 'plus de tables M3 dans §6.3 à §6.6');
 });
 
 test('§6.0 : état initial physique (PG, S3, geo), état proposé avec statuts, rattachement des cibles, tableau des écarts', async () => {
@@ -303,8 +306,8 @@ test('§6.0 : état initial physique (PG, S3, geo), état proposé avec statuts,
   for (const table of pgTables) assert.ok(schema.includes(`pgTable(\n  "${table}"`) || schema.includes(`pgTable("${table}"`), table);
   // Statuts du schéma proposé : nouveau, modifié, inchangé ; rien de supprimé.
   const status = PHYSICAL['etat-propose'].status;
-  assert.deepEqual(Object.keys(status).filter(id => status[id] === 'new').sort(), ['annotation_cibles', 'annotations', 'oracle_versions', 'retours_fichiers', 's3_retours', 'validations']);
-  assert.deepEqual(Object.keys(status).filter(id => status[id] === 'modified').sort(), ['account_users', 'graph_edges', 'graph_nodes', 'prospect_notes']);
+  assert.deepEqual(Object.keys(status).filter(id => status[id] === 'new').sort(), ['annotation_revisions', 'annotation_sources', 'annotation_targets', 'annotation_validations', 'decisions_track', 'eval_runs', 'reference_set_versions', 's3_retours']);
+  assert.deepEqual(Object.keys(status).filter(id => status[id] === 'modified').sort(), ['account_users', 'graph_edges', 'graph_nodes', 'profil_domaine', 'prospect_notes']);
   assert.ok(!Object.values(status).includes('deleted'));
   for (const text of ['Les signaux sont les nœuds de type \x60Signal\x60 et \x60DesignationEvent\x60', 'Villes : aucune table.', '1 106 municipalités', 'raw/proces-verbaux-<ville>/cas/<sha>.pdf',
     'graph/<ville>/latest.json', 'api.geo.sent-tech.ca', 'Côté geo, rien ne change', '**Tableau des écarts.**', '| Service |', 'clé \x60(city_slug, id)\x60 décidée pour #812'])
@@ -312,4 +315,22 @@ test('§6.0 : état initial physique (PG, S3, geo), état proposé avec statuts,
   for (const kind of ['Signal', 'Ville', 'PV, document', 'Zone', 'Lot']) assert.ok(s60.includes(`| ${kind} |`), kind);
   assert.ok(markdown.indexOf('<!-- diagram:etat-actuel -->') < markdown.indexOf('<!-- diagram:etat-propose -->'));
   assert.ok(markdown.indexOf('<!-- diagram:etat-propose -->') < markdown.indexOf('<!-- diagram:modele-minimal -->'));
+});
+
+test('convergence : « jeu de référence » partout, §6.7, tags et métriques (§9.6), anti-contamination (§9.7)', async () => {
+  const markdown = await readFile('../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md', 'utf8');
+  // « oracle » ne reste que dans des chemins ou noms de fichiers réels, et dans le glossaire comme ancien nom.
+  const stray = markdown.split('\n').flatMap(line => [...line.matchAll(/(?<![-_/.\w])[Oo]racles?(?![-_/\w]|\.\w)/g)].map(() => line))
+    .filter(line => !line.includes('« oracle »'));
+  assert.deepEqual(stray, []);
+  for (const heading of ['### 6.7 Convergence sentropic + engram', '### 9.6 Tags et métriques d\'évaluation', '### 9.7 Protocole anti-contamination'])
+    assert.ok(markdown.includes(heading), heading);
+  const s96 = markdown.split('\n### 9.6 ')[1].split('\n### 9.7 ')[0];
+  for (const text of ['« montrer à Steve »', 'deux classes positives', 'règle déterministe', 'kappa', 'Pertinents perdus', 'passes 1, 2 et 3', 'ligne de Steve rattachée à un signal', 'pool-limited-to-shown-items'])
+    assert.ok(s96.includes(text), text);
+  assert.ok((s96.match(/en attente du premier jet/g) ?? []).length >= 18, 'emplacements du premier jet');
+  const s97 = markdown.split('\n### 9.7 ')[1].split('\n## 10. ')[0];
+  for (const text of ['aucune évaluation n\'est faite', 'décidé après l\'étiquetage', 'toujours par ville', 'aucune valeur de tag présente d\'un seul côté', 'un seul passage, après gel du prompt', 'éradiqués']) assert.ok(s97.includes(text), text);
+  assert.ok(!/\b60\b|\b61\b/.test(s97), 'effectifs non figés');
+  for (const key of ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8']) assert.ok(markdown.includes(`#### ${key} — `), key);
 });

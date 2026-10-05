@@ -12,14 +12,14 @@
     <header class="masthead">
       <div class="flex-row">
         <span class="eyebrow">Dossier de décision · pour Farid (Product Owner), validation technique Fabien · 21 septembre 2026</span>
-        <span class="badge warning">5 SCÈNES · 12 SECTIONS · 16 DÉCISIONS · 3 OCTOBRE 2026</span>
+        <span class="badge warning">5 SCÈNES · 12 SECTIONS · 24 DÉCISIONS · 3 OCTOBRE 2026</span>
       </div>
       <h1>Analyse des retours d’usage<br>du 21 septembre 2026</h1>
       <p class="subtitle">Capitalisation des données annotées, vers de nouveaux critères de ciblage</p>
       <p class="lede">Steve Chaperon (Chaperon Immobilier), client et utilisateur du radar, a trié 124 signaux de 51 municipalités, contrôlé 121 exclusions et posé 26 règles.
         Sur sa vue de travail (73 signaux), 24 sont du bruit et 22 seulement réunissent ses trois critères :
         résidentiel, assouplissement, densification. Le dossier propose de conserver tout le classeur avec sa provenance,
-        de l’afficher sur les objets concernés selon le contrat d’annotation de la plateforme commune sentropic, et de construire un oracle de ciblage
+        de l’afficher sur les objets concernés selon le contrat d’annotation de la plateforme commune sentropic, et de construire un jeu de référence de ciblage
         qui mesure une nouvelle sélection proposée (vue C) contre la sélection affichée aujourd’hui (vue B) — sans toucher à la priorité n° 1 de Steve, le rafraîchissement.</p>
       <section class="protocol" data-protocol aria-labelledby="protocol-title">
         <h2 id="protocol-title">{PROTOCOL.title}</h2>
@@ -44,8 +44,8 @@
       <ol>
         <li><strong>D’abord l’intention de l’owner et ce que veut Steve</strong>, dépliées : objectifs et renvois, destinataires et rôles (§1.1), glossaire en tête, trois critères cités et chiffrés, écart avec l’existant.</li>
         <li><strong>La synthèse et les 16 décisions</strong>, dépliées, puis les neuf autres sections dans leur texte d’origine.</li>
-        <li><strong>Cinq scènes</strong> : critères de Steve en regard de l’existant (matrice), modèle de données (entité-relation), architecture de l’import à l’affichage avec l’oracle transversal (couloirs), architecture UI, affichage A/B/C.</li>
-        <li><strong>Les décisions D1 à D16, dans l’ordre où elles se prennent</strong> : Fabien décide d’abord ses 7 décisions techniques (D1 déjà actée par l’owner le 2026-10-04 ; les autres prises telles quelles sauf incohérence), puis Farid ses 9 décisions produit. Chacune s’ouvre sur une introduction, ses dépendances et, par option, avantages et inconvénients ; sélectionnables, à copier en YAML dans la PR GitHub — brouillon local seulement.</li>
+        <li><strong>Cinq scènes</strong> : critères de Steve en regard de l’existant (matrice), modèle de données (entité-relation), architecture de l’import à l’affichage avec le jeu de référence transversal (couloirs), architecture UI, affichage A/B/C.</li>
+        <li><strong>Les décisions G1 à G8 et D1 à D16, dans l’ordre où elles se prennent</strong> : Fabien décide d’abord les 8 décisions génériques (convergence sentropic + engram), puis ses 7 décisions techniques immo (D1 déjà actée par l’owner le 2026-10-04 ; les autres prises telles quelles sauf incohérence), puis Farid ses 9 décisions produit. Chacune s’ouvre sur une introduction, ses dépendances et, par option, avantages et inconvénients ; sélectionnables, à copier en YAML dans la PR GitHub — brouillon local seulement.</li>
         <li><strong>L’annexe A</strong> : convergence et divergences entre les deux auteurs, avec la source qui tranche.</li>
       </ol>
       <p class="caption">Conventions : <code>FAIT</code> = constaté dans une source citée · <code>CALCUL</code> = dérivé des
@@ -66,7 +66,7 @@
       <strong>Preuves embarquées · page autonome hors ligne</strong>
       <p>Cinq scènes tirées des sources canoniques de l’annexe B : une matrice (tableau Markdown), un diagramme
         entité-relation (<code>erDiagram</code>), une architecture en couloirs (<code>flowchart</code>, un couloir par
-        <code>subgraph</code>, oracle en bande basse), puis deux scènes de composants en SvelteFlow natif, conteneurs
+        <code>subgraph</code>, jeu de référence en bande basse), puis deux scènes de composants en SvelteFlow natif, conteneurs
         <code>parentId</code> réels, gabarit A’ 460 × 200, Dagre <code>rankdir LR</code> et routeur orthogonal du kit h2a —
         la chaîne de <code>docs/architecture/focus</code>, importée, pas recopiée. Thèmes clair et sombre.
         Empreinte du dossier : <code>{manifest.dossierHash.slice(0, 16)}…</code> ·

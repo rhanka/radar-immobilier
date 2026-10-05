@@ -115,13 +115,13 @@ const checkExpression = `(() => {
       return { sceneId: graph.id, kind: 'er', sceneHash: graph.sceneHash, initialScale: scale, tables: entities.length, relations: relations.length, labels: labels.length,
         existing: entities.filter(entity => entity.dataset.existing === 'true').map(entity => entity.dataset.entity) };
     }
-    // Swimlanes: lanes left to right in the agreed order, oracle band below all of them.
+    // Swimlanes: lanes left to right in the agreed order, jeu de référence band below all of them.
     const lanes = [...root.querySelectorAll('[data-lane-kind]')].map(lane => ({ id: lane.dataset.lane, kind: lane.dataset.laneKind, rect: lane.querySelector('.lane-bg').getBoundingClientRect() }));
     if (JSON.stringify(lanes.map(lane => lane.kind)) !== JSON.stringify(graph.projection.laneKinds)) throw Error(graph.id + ' : ordre des couloirs');
     if (lanes.some((lane, index) => index && lane.rect.left < lanes[index - 1].rect.right - 1)) throw Error(graph.id + ' : couloirs non alignés de gauche à droite');
     const band = root.querySelector('[data-band] .band-bg').getBoundingClientRect();
     const lanesBox = { left: lanes[0].rect.left, right: lanes.at(-1).rect.right, bottom: Math.max(...lanes.map(lane => lane.rect.bottom)) };
-    if (band.top < lanesBox.bottom || band.width < (lanesBox.right - lanesBox.left) * .95) throw Error(graph.id + ' : bande oracle pas en bas ni transversale');
+    if (band.top < lanesBox.bottom || band.width < (lanesBox.right - lanesBox.left) * .95) throw Error(graph.id + ' : bande jeu de référence pas en bas ni transversale');
     // Scène à deux zones : la zone « application » contient tous les couloirs, la bande est dessous.
     const zoneElement = root.querySelector('[data-zone] rect');
     if (Boolean(zoneElement) !== Boolean(graph.projection.zone)) throw Error(graph.id + ' : zone application');
@@ -151,7 +151,7 @@ const checkExpression = `(() => {
     return { sceneId: graph.id, kind: 'lanes', sceneHash: graph.sceneHash, initialScale: scale, lanes: lanes.map(lane => lane.kind), stores: stores.map(store => store.label),
       zone: graph.projection.zone, band: { below: true, widthShare: Number((band.width / (lanesBox.right - lanesBox.left)).toFixed(3)) }, nodes: nodes.length, edges: edges.length, labels: labels.length };
   };
-  if (!document.querySelector('.masthead').textContent.includes('5 SCÈNES · 12 SECTIONS · 16 DÉCISIONS')) throw Error('bandeau absent');
+  if (!document.querySelector('.masthead').textContent.includes('5 SCÈNES · 12 SECTIONS · 24 DÉCISIONS')) throw Error('bandeau absent');
   const metrics = [];
   for (const graph of graphs) {
     if (graph.kind !== 'flow') { metrics.push(checkDiagram(graph)); continue; }
@@ -278,7 +278,7 @@ const contentExpression = `(() => {
       for (const text of entity.querySelectorAll('text')) if (text.textContent.trim()) { const r = text.getBoundingClientRect(); if (r.right > body.right + 1 || r.left < body.left - 1) throw Error(mini.dataset.miniDiagram + ' : texte hors table'); } }
     return { id: mini.dataset.miniDiagram, option: Boolean(mini.closest('.question-block')), tables: boxes.length, scale: Number((svg.width / Number(mini.dataset.canvasWidth)).toFixed(3)) };
   });
-  if (charts.length !== 4 || descriptions !== 48 || minis.length !== 15) throw Error('contenu : ' + JSON.stringify({ charts: charts.length, descriptions, minis: minis.length }));
+  if (charts.length !== 4 || descriptions !== 75 || minis.length !== 15) throw Error('contenu : ' + JSON.stringify({ charts: charts.length, descriptions, minis: minis.length }));
   if (minis.some(mini => mini.option && mini.scale < .6)) throw Error('schéma d’option trop réduit : ' + JSON.stringify(minis));
   return { charts, descriptions, minis };
 })()`;
@@ -364,8 +364,8 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 1920, height: 10
 // EXPECT : ce que le dossier porte (décisions, options, filtres « Je suis », PR cible).
 const EXPECT = {
   picks: [['D12', 'b'], ['D12', 'a'], ['D9', '1']], selectedQuestion: 'D12', selectedOption: 'a', persisted: [['D12', 'a'], ['D9', '1']],
-  storagePrefix: 'immo-steve-decision-responses:', blocks: 16, options: 48, recommended: 15, decides: { Farid: 9, Fabien: 7 },
-  url: 'https://github.com/rhanka/radar-immobilier/pull/794', mine: { Farid: 9, Fabien: 7 },
+  storagePrefix: 'immo-steve-decision-responses:', blocks: 24, options: 75, recommended: 23, decides: { Farid: 9, Fabien: 15 },
+  url: 'https://github.com/rhanka/radar-immobilier/pull/794', mine: { Farid: 9, Fabien: 15 },
   faridAnswered: ['D12'], notFarid: ['D9'], faridRoles: { D12: 'decide' }, fabienRoles: { D9: 'decide' }, allOptions: { D1: 'b', D9: '1', D12: 'a' },
   headerKeys: ['dossier', 'fichier', 'version', 'decideur', 'date', 'coller_dans'],
   title: 'Analyse des retours d\'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage',

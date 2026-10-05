@@ -10,10 +10,10 @@ export const DOC_DIAGRAMS = {
   // §6.0 — physical model: current state and proposed state (statuses).
   ...PHYSICAL,
   // §6.3 — the minimal model proposed from Steve’s needs (same as scene 2 and D2 option a).
-  'modele-minimal': { title: 'Modèle minimal proposé : six tables nouvelles, une par besoin de Steve', ...STEVE_MODEL },
+  'modele-minimal': { title: 'Modèle cible par propriétaire : sentropic (annotations), immo (profil, données), engram (jeu de référence)', ...STEVE_MODEL },
   // §6.0 — what exists on main today (schema.ts, migrations 0005 and 0011).
   existant: {
-    title: 'Existant sur main : deux tables d’annotation, aucune table d’oracle',
+    title: 'Existant sur main : deux tables d’annotation, aucune table de jeu de référence',
     layers: ['Annotations existantes', 'Tables référencées', 'Graphe (identifiants texte)'],
     placement: {
       prospect_marks: { col: 0, row: 0 }, prospect_notes: { col: 0, row: 1 },
@@ -67,24 +67,24 @@ export const DOC_DIAGRAMS = {
       text id PK "signal-… (texte)"
     }`,
   },
-  // §9.3 — old oracle (extraction, E) and new oracle (targeting, C), two separate
+  // §9.3 — old jeu de référence (extraction, E) and new jeu de référence (targeting, C), two separate
   // sections of benchmark #782. Boxes are artefacts, columns their main properties.
-  oracles: {
-    title: 'Ancien oracle (E, extraction) et nouvel oracle (C, ciblage) : deux volets du benchmark #782',
-    layers: ['Sources', 'Oracles, versions gelées', 'Benchmark #782'],
+  'jeux-reference': {
+    title: 'Ancien jeu de référence (E, extraction) et nouveau jeu de référence (C, ciblage) : deux volets du benchmark #782',
+    layers: ['Sources', 'Jeux de référence, versions gelées', 'Benchmark #782'],
     placement: {
       consensus_modeles: { col: 0, row: 0 }, annotations: { col: 0, row: 1 },
-      oracle_e_v3: { col: 1, row: 0 }, oracle_c_v1: { col: 1, row: 1 },
+      jeu_ref_e_v3: { col: 1, row: 0 }, jeu_ref_c_v1: { col: 1, row: 1 },
       volet_extraction: { col: 2, row: 0 }, volet_ciblage: { col: 2, row: 1 },
     },
-    existing: ['consensus_modeles', 'oracle_e_v3', 'volet_extraction'],
+    existing: ['consensus_modeles', 'jeu_ref_e_v3', 'volet_extraction'],
     labels: { construit: 'construit', adjugees_gelees: 'adjugées, gelées', note: 'note', note_b_puis_c: 'note B puis C' },
     colGap: 190,
     er: `erDiagram
-    consensus_modeles ||--|| oracle_e_v3 : construit
-    annotations ||--|| oracle_c_v1 : adjugees_gelees
-    oracle_e_v3 ||--|| volet_extraction : note
-    oracle_c_v1 ||--|| volet_ciblage : note_b_puis_c
+    consensus_modeles ||--|| jeu_ref_e_v3 : construit
+    annotations ||--|| jeu_ref_c_v1 : adjugees_gelees
+    jeu_ref_e_v3 ||--|| volet_extraction : note
+    jeu_ref_c_v1 ||--|| volet_ciblage : note_b_puis_c
     consensus_modeles {
       text methode "7 passes, 3 familles de modèles"
       text arbitrage "vote unanime + arbitrage"
@@ -93,17 +93,17 @@ export const DOC_DIAGRAMS = {
       text source "verdicts de Steve (124 lignes)"
       text adjudication "par critère, auteur nommé"
     }
-    oracle_e_v3 {
+    jeu_ref_e_v3 {
       text question "a-t-on extrait l'acte ?"
       text unite "acte d'un PV : étape + citation"
       int taille "674 sur 100 documents"
       text stockage "fichiers JSON du dépôt"
     }
-    oracle_c_v1 {
+    jeu_ref_c_v1 {
       text question "fallait-il montrer ce signal ?"
       text unite "signal, regroupé par dossier"
       text jeux "dev 51 villes, test 52 villes"
-      text stockage "oracle_versions + JSON gelé"
+      text stockage "reference_set_versions + JSON gelé"
     }
     volet_extraction {
       text mesure "extraction historique, inchangée"
