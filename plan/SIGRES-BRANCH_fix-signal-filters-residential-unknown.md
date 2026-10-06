@@ -43,6 +43,7 @@ instead of being treated as non-residential.
   - `api/src/scripts/residential-tristate-dry-run.test.ts`
   - `docs/spec/SPEC_CONTRAT_VIVIER_BPRIME_v1.md`
   - `plan/SIGRES-BRANCH_fix-signal-filters-residential-unknown.md`
+  - `docs/reviews/pr-824/**` (blind review dossier)
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`
   - `docker-compose*.yml`
@@ -73,3 +74,4 @@ instead of being treated as non-residential.
       `make typecheck` exit 0, `make lint` exit 0, `make test` exit 0 — api
       2131 passed / 6 skipped, ui 1639 passed / 10 todo, radar-domain 292,
       radar-sources 1293, radar-scoring 57, immo-mcp 64.
+- [x] **Lot 4 — Independent review** (`docs/reviews/pr-824/`): gpt-6-astra xhigh (correctness) GO-with-nits, gpt-6.1-sol xhigh (reproduce + filter regression) GO-with-nits; both nits fixed, gate re-run green.
