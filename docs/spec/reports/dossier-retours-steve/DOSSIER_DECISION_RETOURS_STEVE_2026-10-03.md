@@ -547,62 +547,155 @@ Conséquences : les colonnes L à T ne sont ni des entrées des modèles (D17) n
 
 ### 4.5 Étiquetage de référence v0 par les 3 IA et accords (pilote exposé)
 
-<!-- A_INTEGRER: 4.5-etiquetage -->
-Section en cours de rédaction.
+**Statut : exploratoire (lignes exposées).** Les tags ci-dessous décrivent les 121 lignes du relevé ; ils servent à la mise au point des règles et des tags avec les 3 IA (arbitrage de l'owner), jamais à une mesure confirmatoire.
 
-*Ancien, à remplacer (§9.6 du 2026-10-03).* Les tags posés par Steve ou tirés de son code de motif :
+**Méthode (FAIT).** Trois annotateurs IA indépendants, sièges seulement, sans outil ni fichier : Astra (`gpt-6-astra`, effort max), Claude Opus 5.5 (effort max), Gemini 3.8 (high, sous `bwrap`, toute réponse ayant appelé un outil rejetée). Entrée : le texte du signal tel que le radar le sert (libellé, propriétés, extraits verbatim du document source), lots de 10 lignes groupées par ville ; ni le classement de Steve, ni ses colonnes, ni celles de l'assistant ne sont montrés. Majorité par tag (3/3 ou 2/3), sinon `non convergé` ; votes individuels et justifications conservés.
 
-   - **résidentiel** : oui, non, indéterminé ;
-   - **sens de la modification** : assouplissement, restriction, mixte, neutre, indéterminé ;
-   - **densification** (plus d'unités qu'avant) : oui, non, indéterminé ;
-   - **exclusions** : autorisation individuelle, point d'ordre du jour, pas un règlement d'urbanisme, sans effet sur la capacité ;
-   - **type d'acte** : avis de motion, projet, second projet, adoption, autre ;
-   - **motif** : l'un des 28 codes de Steve.
+| Tour | Guide | Tags posés |
+|---|---|---|
+| 1 (2026-10-04) | guide v1 | `densification`, `type_acte`, `motif` (Opus relisait Astra) |
+| 2 (2026-10-05) | guide v2 : point d'ordre du jour, résidentiel selon le préfixe de zone, `sans_effet_capacite` / `non_urbanisme`, restriction / mixte | `residentiel`, `sens`, `exclusions` ré-annotés ; 7 tags complémentaires (`portee`, `type_reglement`, `typologie_max`, `refonte_complete`, `contrainte_territoriale`, `contrainte_acquisition`, `serie_convergente`) ; relation `rattache_a` |
+| 3 (2026-10-06) | guide v3 : `sens` et `densification` **redéfinis sur l'effet sur la capacité de construire** (un resserrement qui sert à densifier est un assouplissement, R-22 ; jumelés, rangées et contiguës comptent comme densification, R-08) ; 5 tags retenus par la revue de R′ | `sens`, `densification` ré-annotés ; `instrument`, `finalite`, `nature_source`, `objet_capacite`, `zonage_associe` |
 
-   **Le verdict se dérive des tags par une règle déterministe** : la table de dérivation relue par Steve (D7, D8). On mesure donc séparément ce que le modèle lit (les tags) et la règle qui en tire le verdict.
+**Tags retenus par la revue de R′ (tour 2, CALCUL).** `instrument` 3/3, `nature_source` 3/3, `zonage_associe` 3/3, `finalite` 2/3 (Opus : fusion dans `residentiel`), `objet_capacite` 2/3 (Opus : fusion dans `sens`) ; `transaction_fonciere` et l'objet CPTAQ fusionnés dans `instrument` (3/3 et 2/3) ; `concordance_schema` rejeté (3/3) ; `droit_plein_droit` sans accord (non retenu : le plein droit est dérivé de l'instrument et de la portée).
 
-**Couverture des tags par les données de Steve** (ancien tableau, en attente du premier jet d'étiquetage).
+**Accord des 3 IA par tag (CALCUL, 121 lignes).**
 
-| Tag | Valeurs | Lignes couvertes | Valeurs « indéterminé » | Accord avec le motif de Steve |
-|---|---|---|---|---|
-| Résidentiel | oui, non, indéterminé | en attente du premier jet | en attente du premier jet | en attente du premier jet |
-| Sens | 5 valeurs | en attente du premier jet | en attente du premier jet | en attente du premier jet |
-| Densification | oui, non, indéterminé | en attente du premier jet | en attente du premier jet | en attente du premier jet |
-| Exclusions | 4 familles | en attente du premier jet | en attente du premier jet | en attente du premier jet |
-| Type d'acte | 5 valeurs | en attente du premier jet | en attente du premier jet | en attente du premier jet |
-| Motif | 28 codes | en attente du premier jet | en attente du premier jet | en attente du premier jet |
+| Tag | 3/3 | 2/3 | non convergé | Tour |
+|---|---:|---:|---:|---|
+| residentiel | 110 | 11 | 0 | 2 |
+| exclusions | 103 | 17 | 1 | 2 |
+| portee | 94 | 24 | 3 | 2 |
+| type_reglement | 112 | 9 | 0 | 2 |
+| typologie_max | 109 | 12 | 0 | 2 |
+| refonte_complete | 108 | 13 | 0 | 2 |
+| contrainte_territoriale | 107 | 14 | 0 | 2 |
+| contrainte_acquisition | 99 | 22 | 0 | 2 |
+| serie_convergente | 115 | 6 | 0 | 2 |
+| rattache_a | 117 | 4 | 0 | 2 |
+| sens (redéfini) | 99 | 21 | 1 | 3 |
+| densification (redéfini) | 97 | 24 | 0 | 3 |
+| instrument | 109 | 9 | 3 | 3 |
+| finalite | 117 | 4 | 0 | 3 |
+| nature_source | 73 | 44 | 4 | 3 |
+| objet_capacite | 99 | 21 | 1 | 3 |
+| zonage_associe | 118 | 3 | 0 | 3 |
+
+`nature_source` est le tag le moins stable (73 accords 3/3) : la nature de la pièce (procès-verbal, ordre du jour, avis) n'est souvent pas énoncée dans l'extrait servi. Un tag non convergé prend la valeur `indetermine` (règle prudente : une absence d'information n'est jamais négative).
+
+**Corrections de tags reconnus faux par les 3 IA (3/3, CALCUL).** Trois corrections explicites, chacune avec sa preuve : n° 9 (`sans_effet_capacite` non établi : « bâtiments accessoires » n'établit pas l'absence d'effet sur les marges et l'implantation, R-06 (2)) ; n° 71 (`cptaq_individuelle` retiré, contrôle mécanique de l'analyse d'écart) ; n° 120 (`usage_conditionnel` faux : premier projet d'un règlement modificateur de zonage ; `instrument` corrigé en `zonage`). Les autres tags contestés à 2/3 seulement (n° 51, 93, 94, 100) restent tels quels et sont comptés comme erreurs de nos tags non corrigées (§4.6). Effet sur le verdict : n° 120 passe de Non pertinent à Pertinent (Steve : À surveiller, code fondé sur l'étape, §4.8) ; n° 9 et 71 restent Non pertinent pour une autre raison (§4.6).
+
+**Ancien premier jet (guide v2, règle R1–R7).** Verdict dérivé : 51 À surveiller, 57 Non pertinent, 13 Pertinent ; égal à Steve sur 70 lignes ; accord des 3 IA sur le verdict : 3/3 sur 96 lignes, 2/3 sur 22, 1/3 sur 3. Le guide v2 a changé `residentiel`, `sens` ou `exclusions` sur 38 lignes (verdict changé : 17).
+
+Limites : `type_acte` et `motif` restent ceux du tour 1 ; `motif` n'est jamais une entrée de règle (un code = un classement chez Steve, §2.4) ; l'extrait servi est parfois mal apparié au signal (n° 85, défaut d'ingestion) ; 6 descriptions radar contenaient des étapes postérieures à la date du signal (retirées des entrées du ch. 6, pas de ces annotations).
 
 ### 4.6 Analyse d'écart
 
-<!-- A_INTEGRER: 4.6-ecarts -->
-Section en cours de rédaction.
+**Ce qu'est un écart.** Un écart est une ligne où le verdict **calculé** par notre outillage (tags des 3 IA, puis règle déterministe) diffère du classement de Steve (colonne Q). Un écart n'est pas un désaccord avec Steve : il peut venir de notre règle, de nos tags ou de notre entrée. Seuls les écarts qui restent une fois nos erreurs écartées sont des **points à clarifier avec Steve**, et parmi eux on distingue une **donnée manquante** (Steve savait quelque chose que le signal ne dit pas) d'un **vrai désaccord de jugement**.
 
-Repère de lecture, en attendant le tableau définitif, recalculé après R′ v1 (source : tableau de référence C du 2026-10-05, §4.4). Sur les 121 lignes, le verdict dérivé des tags des 3 IA par la règle R1–R7 diffère du classement de Steve dans **51 écarts**. Ce ne sont pas 51 désaccords avec Steve : 14 écarts viennent de **notre** règle R1–R7 (« règle différente ») et 6 de **nos** tags (« erreur d'étiquetage IA »), des erreurs de notre outillage à corriger de notre côté. Les **31 désaccords (avant R′ v1)** qui restent sont les points à clarifier avec Steve : 12 non convergés, 10 fondés sur une donnée hors immo (d2), 5 incohérences apparentes de Steve, 4 fondés sur une donnée présente ailleurs dans immo (d1).
+**Décomposition (CALCUL, 121 lignes ; JUGEMENT du pilote pour la classe de cause des écarts restants, appuyé sur la revue des 3 IA et l'analyse d'écart).**
+
+| | Avant : règle R1–R7, tags v2 | Après : R′ v1 gelée, tags v3 corrigés |
+|---|---:|---:|
+| **Écarts (verdict calculé ≠ Steve)** | **51** | **40** |
+| *Nos erreurs d'outillage* | **20** | **12** |
+| — notre règle (critère de Steve absent de la règle) | 14 | 7 (pratiques sans R-xx, P1 et P3, en attente de Steve) |
+| — nos tags (erreur d'étiquetage des IA) | 6 | 4 (accord 2/3 seulement, non corrigés) |
+| — notre entrée (document mal apparié au signal) | — | 1 |
+| *Points à clarifier avec Steve* | **31** | **28** |
+| — donnée manquante : hors immo (d2) | 10 | 9 |
+| — donnée manquante : ailleurs dans immo (d1) | 4 | 3 |
+| — désaccord de jugement : incohérence de Steve | 5 | 7 |
+| — désaccord de jugement : label contraire à ses propres règles | — | 4 |
+| — non convergé (cause non établie à 3/3 ; définition à préciser) | 12 | 5 |
+| Pertinent de Steve calculé Non pertinent (Pertinent masqué) | 1 (n° 121) | 1 (n° 121) |
+
+Lecture : **il n'y a pas 51 désaccords avec Steve.** Avant R′ v1, 20 écarts sur 51 étaient des erreurs de notre outillage et 31 des points à clarifier. Après R′ v1 et la correction des tags, il reste 40 écarts : 12 erreurs de notre outillage (dont 7 attendent seulement que Steve confirme une pratique qu'il applique sans l'avoir écrite) et **28 points à clarifier**, qui se partagent en **12 données manquantes**, **11 désaccords de jugement** et **5 non convergés**.
+
+**Ce qu'est devenu chacun des 51 écarts (CALCUL).**
+
+| Cause avant (R1–R7) | Résolus par R′ v1 et les tags v3 | Restent, nouvelle cause |
+|---|---|---|
+| notre règle (14) | 3 (n° 8, 37, 115 : lotissement accessoire, R-22) | 6 notre règle P1 / P3 (n° 10, 52, 84, 86, 113, 117) ; 2 nos tags (n° 51, 100) ; **3 labels de Steve contraires à ses règles** (n° 73, 92, 122) |
+| nos tags (6) | 2 (n° 28, 82 : densification « non » non établie) | 1 nos tags (n° 93) ; 1 notre entrée (n° 85) ; 1 incohérence de Steve (n° 71) ; 1 label contraire (n° 120) |
+| non convergé (12) | 4 (n° 77, 81, 98, 103 : CPTAQ par instrument et finalité, plein droit) | 5 non convergés (n° 1, 2, 9, 27, 114) ; 1 notre règle P3 (n° 50) ; 1 donnée d1 (n° 80) ; 1 incohérence (n° 34) |
+| donnée hors immo, d2 (10) | 1 (n° 119) | 9 d2 (n° 16, 35, 36, 43, 44, 49, 69, 70, 76) |
+| donnée dans immo, d1 (4) | 2 (n° 18, 40) | 2 d1 (n° 6, 102) |
+| incohérence de Steve (5) | 0 | 5 (n° 23, 88, 104, 111, 121) |
+| aucun écart avant | — | 1 nouvel écart : n° 94 (nos tags : sens 2/3 sur des usages complémentaires et des thermopompes) |
+
+Pourquoi trois écarts « notre règle » deviennent des points à clarifier : R1–R7 n'encodait pas les règles écrites de Steve ; R′ v1 les encode (chaque clause cite une R-xx). Sur n° 73 (S-PPCMOI-SERIE), 92 (S-RESTRICTIF), 120 (S-PLANIFIE) et 122 (S-PREEMPTION), c'est alors le label de Steve qui contredit sa propre règle (R-11, R-21, R-05, R-24 ; liste du tour 5, §2.4). La ligne 102 porte aussi S-PPCMOI-SERIE, mais la série n'y est connue qu'hors du signal : elle est comptée en donnée manquante (d1). Pourquoi n° 34 et 71 deviennent des incohérences : la même configuration (demande d'autorisation CPTAQ à finalité non énoncée) est À surveiller chez Steve en n° 34 et 71, Non pertinent en n° 112.
+
+**Mesure globale (CALCUL).**
+
+| Règle (tags) | Accord avec Steve /121 | Pertinent masqués | Rappel P | Précision P | Rappel P∪S | Précision P∪S |
+|---|---:|---:|---:|---:|---:|---:|
+| R1–R7 (v2) | 70 | 1 | 11/39 = 28,2 % | 11/13 = 84,6 % | 54/68 = 79,4 % | 54/64 = 84,4 % |
+| R′ stricte (v2) | 80 | 1 | 17/39 = 43,6 % | 17/20 = 85,0 % | 58/68 = 85,3 % | 58/68 = 85,3 % |
+| R′ v1 (v3) | 81 | 1 | 16/39 = 41,0 % | 16/19 = 84,2 % | 56/68 = 82,4 % | 56/62 = 90,3 % |
+| **R′ v1 (v3 corrigés)** | **81** | **1** | 16/39 = 41,0 % | 16/20 = 80,0 % | 57/68 = 83,8 % | 57/63 = 90,5 % |
+
+Ces chiffres décrivent l'accord de R′ appliquée aux **tags de référence** avec Steve, sur des lignes qui ont servi à mettre au point R′ et les tags : ils sont biaisés à la hausse et ne mesurent aucun prompt (ch. 6). Le Pertinent masqué restant (n° 121) est un Pertinent de Steve sur un point d'ordre du jour, contraire à R-01 (§4.8).
+
+Détail par ligne (n°, verdict calculé, clause, cause) : tableau de référence privé et `rule-r-prime/v1/tableaux-v1.md` (hors dépôt, empreintes en annexe I.2).
 
 ### 4.7 Motivations, classes de cause, critères détectables
 
-<!-- A_INTEGRER: 4.7-causes -->
-Section en cours de rédaction.
+**Classes de cause (définitions du tableau de référence C, appliquées sans changement).** Accord ; erreur d'étiquetage IA (tag majoritaire faux au regard du texte même du signal, retenue seulement à 3/3 et après contrôle mécanique) ; donnée dans immo (d1, information présente ailleurs dans immo, enregistrement revérifié en production) ; donnée hors immo (d2) ; règle différente (Steve applique de façon cohérente un critère que la règle n'encode pas, à 3/3) ; incohérence de Steve (sa décision P / Q / R se contredit ou contredit son propre texte ; une contradiction avec la seule colonne M de l'assistant n'en est pas une) ; tag manquant ; non convergé ; non vérifié. Deux classes ajoutées après R′ v1 : **label contraire à ses règles** (le classement de Steve contredit une R-xx qu'il a énoncée, liste du tour 5) et **notre entrée** (l'extrait servi ne correspond pas au signal).
+
+**Méthode (FAIT).** Passe indépendante des 3 modèles sur les 121 lignes (critères et analyse signée de Steve, onglets Codes de motif et Règles de classement, enregistrements immo de la ville, colonnes du relevé avec leur auteur), puis réconciliation sur les lignes non unanimes. Accord des modèles sur la classe : 3/3 sur 38 écarts, 2/3 sur 13. Vérification mécanique : 19 liens d1 tous présents en production ; 10 lignes d2, dont 1 URL externe vérifiée. Après R′ v1, la revue des 3 IA (tour 2) a réexaminé la cause des 41 écarts de R′ stricte : cause jugée juste 3/3 sur 8 lignes, partielle ou fausse sur les autres ; ses causes corrigées fondent la reclassification du §4.6.
+
+**Motivations de Steve (CALCUL).** Motivation retrouvée 3/3 sur 119 lignes, 2/3 sur 2. 726 extraits cités vérifiés mot pour mot dans leur source : décision de Steve 300, analyse signée du 21 septembre 210, règle R-xx énoncée par Steve 163, texte de l'assistant 39, cahier du 10 juillet 14 ; 82 extraits introuvables écartés ; 11 sources mal déclarées corrigées. Chaque motivation reformulée est marquée interprétative ; sa validation par Steve sur échantillon reste `not run` (étape 2d du plan).
+
+**Critère détectable proposé (CALCUL, 121 lignes).** Tag existant 79, règle 23, donnée à acquérir hors immo 10, donnée à ajouter à l'entrée depuis immo 5, nouveau tag 2, non détectable 2. Sur les écarts : règle 21, tag existant 11, d2 10, d1 5, nouveau tag 2, non détectable 2. Les critères de type « règle » ne passent jamais directement dans R′ : ils passent par Steve (D8) ; ceux de type « nouveau tag » ont été tranchés par la revue de R′ (§4.5).
+
+**Ce que disent les causes (JUGEMENT).**
+- Les **données manquantes** (12 points) relèvent d'abord de la couverture : 9 sur 12 sont hors immo (contenu de règlements non publiés dans le PV, consultations, grilles). Elles ne se corrigent pas par un prompt ; elles appellent une acquisition de données datées (décision de périmètre, D17 : rien de postérieur à la date du signal) ou restent `source-gap`.
+- Les **désaccords de jugement** (11 points) sont des cas où le texte disponible suffit à décider et où la décision de Steve diffère de ses propres règles ou de ses autres décisions : ils se tranchent par une question fermée à Steve (§4.8).
+- Les **pratiques sans R-xx** (P1 : unifamilial seul ; P3 : concordance territoriale et refonte → Pertinent) expliquent 7 écarts ; les 3 IA proposent de les soumettre à Steve plutôt que de les coder (3/3, risque de surajustement élevé).
 
 ### 4.8 Conséquences et arbitrage de Steve
 
-<!-- A_INTEGRER: 4.8-arbitrage-steve -->
-Section en cours de rédaction.
+**Statut : document prêt, non envoyé.** L'envoi à Steve est une décision de l'owner (D16, D8). Le document contient des codes de Steve par ligne et des extraits de procès-verbaux : il reste en emplacement privé, hors du dépôt public (chemin local du pilote : `rapport-suivi/QUESTIONS-STEVE.md`, empreinte en annexe I.2).
 
-*Ancien, à remplacer (§9.2 du 2026-10-03).* **Cas à arbitrer par Steve plutôt que par regex (D8)** : Saint-Victor (resserrement des maxima de lots qui favorise la densification, R-22) ; Amos (logement sur commerce rejeté par l'analyse) ; portée exacte de l'exception CPTAQ ; seconds projets (R-19 contre C-82) ; visibilité des ODJ ; trois restrictions À surveiller (S-RESTRICTIF) contre R-21 ; ligne Mixte #41 non pertinente alors que l'analyse protège les mixtes ; rangement des 5 Mixte dans la reconstitution 22/12/15/24 ; table de dérivation code de motif → critères (S-CONTRAINTE, S-PPCMOI-SERIE, S-PREEMPTION ne se projettent pas proprement). S'y ajoutent les points du tour 5 (§2.4) et les lignes #46, #53, #56 (§4.3).
+**Forme.** Une question **fermée** (oui / non) par cas, avec la ligne, la règle en jeu recopiée mot pour mot depuis l'onglet « Règles de classement » (contrôle automatique de sous-chaîne) et la citation verbatim du signal. Les questions sont reprises des propositions convergentes de la revue des 3 IA (tour 2), réécrites pour être fermées.
+
+| Bloc | Questions | Lignes |
+|---|---:|---|
+| A. Questions de principe (une réponse vaut pour plusieurs lignes) | 6 | P3 concordances et refontes (n° 10, 50, 52, 84, 113, 117) ; P1 unifamilial seul (n° 86) ; R-18 dans R1 (CPTAQ : exclusion à fin résidentielle de plein droit, autorisation non pertinente ; n° 34, 71, 81, 103, 112) ; définition de `sens` sur la capacité (n° 9, 27, 80, 94) ; « ou » de R-03 ; portée d'« À surveiller » (flux v1 ou veille ; n° 73, 92, 102, 122) |
+| B. Une question par ligne : donnée manquante | 12 | d2 : n° 16, 35, 36, 43, 44, 49, 69, 70, 76 ; d1 : n° 6, 80, 102 |
+| B. Une question par ligne : désaccord de jugement | 11 | incohérences : n° 23, 34, 71, 88, 104, 111, 121 ; labels contraires à ses règles : n° 73, 92, 120, 122 |
+| B. Une question par ligne : non convergé | 5 | n° 1, 2, 9, 27, 114 |
+| B. Une question par ligne : pratique sans R-xx | 7 | n° 10, 50, 52, 84, 86, 113, 117 |
+| C. Écarts dus à notre outillage (aucune question) | 0 | n° 51, 93, 94, 100 (nos tags) ; n° 85 (notre entrée) |
+| D. Cahier de juillet à confirmer | 3 | n° 46, 53, 56 (§4.3) |
+
+**Ce que les réponses changent (JUGEMENT).** Une réponse sur une donnée manquante ne change pas R′ : elle décide si la ligne reste dans la référence avec la strate `source-gap`. Une réponse de jugement ou de principe peut modifier une étiquette (`steve_v2`, provenance « après exposition aux arguments IA ») ou une clause de R′ (via D8 seulement) ; toute modification de R′ fait réexaminer tous les cas touchés. Tant qu'un cas n'est pas tranché, il est marqué `contested` et publié avec et sans.
+
+**Ordre recommandé.** D'abord le réexamen à l'aveugle d'un lot de 50 cas (les cas à soumettre + des cas en accord, sans tags ni verdict calculé), qui mesure l'accord de Steve entre deux dates (étape 2a) ; ensuite seulement les questions ci-dessus (étape 2b). Sans accord de Farid sur la sollicitation de Steve (volume, délai), aucune de ces étapes n'est lancée.
+
+**Extension à de nouvelles villes.** Elle n'a pas lieu tant que ces points ne sont pas clarifiés (arbitrage de l'owner, D10).
 
 ### 4.9 Jeu de référence C v2
 
-<!-- A_INTEGRER: 4.9-reference-v2 -->
-Section en cours de rédaction.
+Sens retenu de la « double annotation » : la **provenance par champ** (D9, proposée close). Chaque étiquette garde sa source ; une étiquette non réexaminée n'est jamais renommée.
 
-Sens retenu de la « double annotation » : la **provenance par champ** (D9, proposée close) ; chaque étiquette garde sa source (`steve_v1`, `steve_v2a`, `steve_v2`, `steve_test`, annotations IA individuelles, majorité IA), décrite par le manifeste `engram_reference_set_v1`.
+| Champ | Provenance | État au 2026-10-06 |
+|---|---|---|
+| Classement, sens, code de motif | `steve_v1` (relevé du 21 sept., colonnes Q, P, R) | 121 lignes, inchangées |
+| Réexamen à l'aveugle | `steve_v2a` | `not run` (étape 2a, accord de Farid requis) |
+| Adjudication après exposition aux arguments | `steve_v2` | `not run` (questions du §4.8) |
+| Tags v2 et v3 | annotations IA individuelles (Astra, Opus, Gemini) + majorité IA avec votes | fait (§4.5) ; 3 corrections 3/3 tracées |
+| Verdict calculé | R′ v1 (tags de référence) | fait (§4.6) ; R′ v1 gelée par empreinte (§5.2) |
+| Cause de l'écart, motivation, critère détectable | 3 IA, réconciliation, vérification mécanique | fait (§4.7) |
+| Annotation historique datée | cahier du 10 juillet | 12 paires ; contrôle et adjudication seulement (§4.3) |
+| Audit humain des tags qui changent R′ (`residentiel`, `sens`, `densification`, `portee`, `instrument`) | humain | `not run` (≥ 50 cas, étape 4 du plan) |
 
-*Ancien, à remplacer (§9.3 du 2026-10-03, antérieur au statut d'exposition et à D10 réécrite).*
+**Manifeste.** Le jeu C v2 se décrit par un manifeste `engram_reference_set_v1` : provenance par étiquette, règle de sélection (121 lignes sur 124 ; exclues : #14, #55, #58), `completeness`, exclusions, accords par paire, flags (`pilot-exposed`, `test-informed-schema`), fiche descriptive. Le découpage train / test aveugle du ch. 6 est une propriété de la campagne exploratoire, pas du jeu : il n'est pas publié dans le tableau de référence.
 
-#### Ancien jeu de référence → nouveau jeu de référence : la proposition
+**Stockage.** Les données de Steve et les extraits lus en production restent en emplacement privé (dépôt radar public : seuls manifestes, empreintes et agrégats). Le modèle de stockage cible (six objets S3 privés sous un préfixe de jeu de référence, store engram non déployé dans immo) est décrit au §9 et en annexe III.7 ; le choix du préfixe relève de G5.
 
-**Rien n'est remplacé ; on ajoute un jeu de référence et un volet de mesure.** Le jeu de référence d'extraction existant (E, v3) reste tel quel et continue de noter l'extraction des actes ; le jeu de référence de ciblage (C) est construit à partir des retours de Steve et note la sélection des signaux. Le benchmark #782 publie deux volets séparés, jamais fusionnés. Ce choix est la décision **D10** (option b, recommandée) ; les options a et c en sont les alternatives (options réécrites le 2026-10-05, §10.2).
+**Jeux de référence E et C.** Le jeu E (extraction, 674 unités committées, 676 en copie locale à committer et geler) reste inchangé et note l'extraction ; le jeu C note la sélection. Le benchmark #782 publie deux volets séparés, jamais fusionnés (D10, D11).
 
 ```mermaid
 erDiagram
@@ -640,50 +733,6 @@ erDiagram
 
 <!-- diagram:jeux-reference -->
 
-| | Ancien : jeu de référence E (extraction, v3) | Nouveau : jeu de référence C (ciblage, v1) |
-|---|---|---|
-| Question | A-t-on extrait l'acte d'un procès-verbal (étape + citation) ? | Fallait-il montrer ce signal à Steve ? |
-| Construit par | 7 passes de 3 familles de modèles, vote unanime et arbitrage (commit `dd0561f6`) | Les évaluations et ancres de Steve (lot L1), adjugées critère par critère par un auteur nommé, avec preuve |
-| Stockage | Fichiers JSON du dépôt (`v101b/oracle-v3/`), hors `main` | Une `ReferenceSetVersion` engram (manifeste, partitions, sceau, sha256) tirée d'un instantané haché des annotations validées + export gelé `reference-set-ciblage-steve-v1.json` versionné dans le dépôt, à côté du jeu de référence E |
-| Jeux | 100 documents | Développement : les 51 villes du relevé ; test : les 52 villes suivantes, jamais vues ; un dossier entier dans une seule partition |
-| Gel et version | 674 committé ; **676 à committer et geler par empreinte avant toute campagne** | Gelé par sha256 avant la mesure ; toute correction = nouvelle version (v2…), jamais une modification en place |
-| Qui valide | Fabien (D10, D11) | Fabien valide la construction et le gel (D10) ; Steve et Mathieu tranchent les cas contradictoires (D8) ; Farid fixe le seuil qui utilise la mesure (D13) |
-| Ce qu'il note | Toute campagne d'extraction (modèles, prompts) | B aujourd'hui, puis C en shadow ; base de la bascule B → C |
-
-**Étapes proposées.** 1) Committer et geler le jeu de référence E 676. 2) Importer les retours de Steve (L1). 3) Adjuger les labels C sur les 51 villes et geler `reference-set-ciblage-steve-v1` (O1). 4) Mesurer B sur ce jeu de référence. 5) Mesurer C en shadow (C1). 6) Quand Steve aura relevé les 52 villes suivantes, les annoter en jeu de test aveugle et geler v2. 7) Publier les deux volets du benchmark, chacun contre sa version gelée.
-
-| | Jeu de référence E — extraction | Jeu de référence C — ciblage |
-|---|---|---|
-| Question | A-t-on extrait l'acte ? | L'aurait-on montré à raison ? |
-| Unité | acte d'un PV (étape + citation) | signal (nœud du graphe), regroupé par dossier pour les jumeaux et les grappes |
-| Étiquettes | étape | classement P/S/N, motif, sens, filtrage, critères K1–K8 dérivés du motif (table relue par Steve) |
-| Origine | consensus de 3 familles de modèles, ancrage textuel, arbitrage ; pas d'annotation humaine | Steve (source), adjudication nommée |
-| Version | 674 unités / 47 non résolus committés sur `feat/t1-model-benchmark-real` (`dd0561f6`) ; 676 / 43 en copie locale identifiée par sha256 (`consensus.json` `8e8e9cc0…`), non committée | `reference-set-ciblage-steve-v1`, à geler |
-
-« 676 » est le nombre d'unités, pas la carte #676 (déploiement immo-mcp) ; le suivi du jeu de référence est #725. **La version 676 doit être committée et gelée par empreinte avant la campagne suivante.**
-
-**Construction.**
-1. Figer règles et unités ; séparer détection d'acte, qualification C et affichage.
-2. Manifeste de corpus : documents, empreintes, millésimes, profils de filtre, liens vers les retours. L'intersection avec les 100 documents du banc est `non vérifié`, probablement faible.
-3. Le jeu de Steve sert de régression et de jeu de développement ; seuls les labels rattachés et étayés entrent dans la référence notée.
-4. Étendre la vérité documentaire : les retours issus de l'écran ne mesurent pas les opportunités jamais extraites (sept dossiers manqués).
-5. Adjudication indépendante des sorties des modèles candidats ; désaccord métier → revue humaine ; absence de preuve → non résolu.
-6. **Séparation développement / test** : les 51 villes du relevé pour régler C, les 52 suivantes annoncées par Steve comme jeu de test aveugle ; toutes les unités d'un même dossier dans la même partition.
-7. Geler chaque version (sha256) ; ne jamais comparer deux bras sur deux versions différentes.
-
-*Ancien, à remplacer (§6.6 du 2026-10-03).* **Double annotation.**
-
-**JUGEMENT, à confirmer (D9).** Plusieurs jeux d'étiquettes coexistent sans table supplémentaire : le verdict de Steve est dans `annotation_revisions` (sentropic) ; l'adjudication et la prédiction C vivent dans les versions gelées du jeu de référence (`ReferenceSetVersion`, engram) et les campagnes ; la classification du radar se recalcule.
-
-| Jeu | Contenu | Statut |
-|---|---|---|
-| `steve-source-2026-09` | Verdict original de Steve (classement, motif, sens, passe, filtrage) ; faits et interprétations de l'analyse séparés | Immuable |
-| `radar-bprime` | Classification calculée par le radar (axes zonage, résidentiel, étape, exclusions, B′), reconstituée à la date du relevé | Partielle : la classification serveur de septembre n'est pas archivée |
-| `targeting-c-adjudication` | Adjudication par critère C, auteur nommé, preuves, motifs de changement | Une interprétation de l'équipe n'est pas un reclassement signé Steve |
-| `radar-c-v1` | Prédiction machine de C, version du classifieur, traces | Une prédiction ne devient jamais label de référence |
-
-Cela permet de mesurer B contre Steve aujourd'hui, puis C contre Steve, de tracer les désaccords ligne par ligne, et d'ajouter un second annotateur humain si Fabien veut mesurer l'accord.
-
 ---
 
 ## 5. Définition opérationnelle de C
@@ -712,15 +761,33 @@ Un signal est **dans C** si aucune exclusion **établie** ne s'applique ; il est
 
 ### 5.2 Règle de décision R′
 
-<!-- A_INTEGRER: ch5-rprime -->
-Section en cours de rédaction.
+**R′ v1 est gelée** (2026-10-06, empreinte sha256 `e5836deb69a6165907966868e6e06fedac582c7a74741b0cd89097a6cfa501a2` du fichier `derive-verdict-rprime-v1.mjs`, hors dépôt). Elle tire un verdict P / S / N des **seuls tags** ; elle ne lit jamais le code de motif, les décisions de Steve, les colonnes de l'assistant, la passe ni la ville. **Statut : référence de travail**, pas une règle validée par Steve ; toute modification passe par D8 (revue métier de Steve et Mathieu, décision de Farid), jamais pour améliorer un score.
 
-*Matériau du tour 5, à remplacer par R′ v1 gelée.* La règle actuelle R1–R7 (`derive-verdict.mjs`) tire le verdict des tags. R′ est issue des règles R-xx attribuées à Steve par la colonne « Source » du classeur ; elle ne change que par D8 (revue métier de Steve et Mathieu, décision de Farid), jamais par l'équipe IA, jamais pour améliorer un score. Points en accord entre les 3 relecteurs :
-- **Recouvrent R1–R7** : R-01, R-02 (R1), R-03 et R-21 (R3, R4, R7), R-06 (R1, critère central), R-09, R-10 (R1), R-13 (R7), R-15 (R1, PIIA quel que soit le sens).
-- **Complètent** : R-04 (initiateur hors critère), R-05 (étape hors verdict), R-07 (`rattache_a`), R-08 (`typologie_max`), R-11, R-12, R-22 (exception du lotissement orphelin), R-23 (`type_acte`), R-25 (épinglage).
-- **Contredisent** : R-18 / R1 (`cptaq_individuelle`) et propositions 7 à 9 ; R-24 / proposition 6 ; R-21 / proposition 5 ; R-11 / proposition 4 (`serie_convergente`) ; R-07 / proposition 3 si elle fusionne des étapes ; R-04 / « à l'initiative de la Ville ».
-- **Mesurent le radar, sans effet sur le verdict** : R-17, R-19, R-20, R-26 ; R-14 et R-16 sont des textes de l'assistant.
-- Propositions retirées ou reformulées : 5 (R-21), 6 (R-24), 7 et 9 (R-18 → tag `finalite`), 4 (R-11), 3 (R-22, R-07), 8 (« unifamilial isolé seulement »).
+**Construction (FAIT).** Point de départ : R′ stricte, où chaque clause dérive d'une règle R-xx attribuée à Steve par la colonne « Source » de l'onglet « Règles de classement » (R-14 et R-16, rédigées par l'assistant, ne fondent rien). Revue par les 3 IA en deux tours (avis indépendant, puis réconciliation, chaque changement de position justifié par une R-xx citée mot pour mot) : verdict 3/3 « oui avec amendements ». Fidélité des clauses au tour 2 : 9 fidèles à 3/3 ou 2/3, X05, X08, X16 « élargissent » (3/3), X13 « restreint » (3/3), X06 et X10 « trahissent » (3/3), X14 et X15 « trahissent » (2/3). Choix d'interprétation : le « ou » de R-03 fidèle (3/3) ; l'inférence typologique de densification (R-08) et la lecture de R-22 par `rattache_a` infidèles (3/3). Seuls les amendements majoritaires sont intégrés.
+
+| Clause | Règle de Steve | Condition (tags) | Verdict | Amendement |
+|---|---|---|---|---|
+| V01 | R-01 | `nature_source` = ordre du jour seul, ou exclusion « point d'ordre du jour » sans procès-verbal | N | Astra A1, Opus A9 |
+| V02 | R-02 | point retiré | N | inchangée |
+| V03 | R-06 (2), R-15 | PIIA (exclusion ou instrument) | N | inchangée |
+| V04 | R-06 (2) | sans effet sur la capacité, pas d'urbanisme, ou `objet_capacite` = forme, procédure, hors urbanisme | N | Astra A7, Opus A8 |
+| V05 | R-06 (1), R-09, R-10, R-11 | autorisation individuelle : PPCMOI, dérogation mineure, usage conditionnel, Loi 31 (la valeur « autre » ne déclenche plus) | N | Astra A2, Opus A7 |
+| V06 | R-24, R-06 | `instrument` = transaction foncière municipale | N | 3/3 |
+| V07 | R-06 (1), R-18 | demande CPTAQ individuelle hors exception : autorisation (sans exclusion), ou finalité non résidentielle, ou non résidentiel | N | Astra A4, Opus A4 |
+| V08 | R-03, R-21 (1) | sens = restriction sans densification (une restriction qui densifie est traitée comme mixte) | N | Opus A2, A12 |
+| V09 | R-18, R-13 | demande CPTAQ individuelle à finalité non établie | S | réserve maintenue |
+| V10 | R-26 | non résidentiel | N | inchangée |
+| V11 | R-22, R-06 (2) | construction → N ; lotissement : zonage associé → N, inconnu → S, absent → clauses suivantes | N ou S | Astra A5, Opus A5 |
+| V12 | R-06 (2), R-13 | sens = neutre (absence d'effet sur la capacité établie par le texte) | N | Opus A3 |
+| V13 | R-06, R-03, R-08, R-18, R-21 (1), R-04 | test positif commun, règlements mixtes compris : résidentiel établi, plein droit (instrument d'urbanisme, ou portée territoire / zone entière) ou exception CPTAQ à fin résidentielle, et ouverture (assouplissement, mixte ou densification) | P | Astra A6, A8, A9 ; Opus A1, A10, A11 ; Gemini A4, A5 |
+| V14 | R-06 (1), R-13 | immeubles désignés sans plein droit établi | S | Opus A1, Gemini A3 |
+| V15 | R-13, R-21 (2) | sinon (au moins un critère non établi, aucun en échec) | S | inchangée |
+
+**Retirés de R′ stricte** : la clause « mandat → À surveiller » (R-25 régit l'horizon d'affichage, pas le verdict ; 2/3) ; l'inférence de densification tirée de la seule typologie ; la lecture de `rattache_a` pour le lotissement. **Non retenus** (pas de majorité) : exiger densification ≠ non dans le test positif (Gemini seul), exiger une preuve positive de capacité (Astra seul), un tag `droit_plein_droit` (désaccord), la préemption → Non pertinent (Opus seul ; question à Steve, §4.8). **Hors R′ v1, soumis à Steve** : P1 (unifamilial seul → Non pertinent) et P3 (concordance territoriale ou refonte → Pertinent), 3/3 « proposer à Steve » ; P2 (contrainte territoriale plafonne à S) rejetée 2/3.
+
+**Mesure sur les 121 lignes (CALCUL, exploratoire, biaisée à la hausse : lignes de mise au point).** Accord avec Steve 81/121 (R1–R7 : 70 ; R′ stricte : 80) ; Pertinent masqués 1 (n° 121, point d'ordre du jour contraire à R-01) ; rappel P∪S 57/68 = 83,8 %, précision P∪S 57/63 = 90,5 %. Détail et décomposition des écarts : §4.6.
+
+**Écarts K1–K9 (D7) / R′ v1** : K4 (« plus d'unités qu'avant ») est plus strict que V13, qui suit le « ou » de R-03 (assouplissement ou densification) ; K6 exclut le lotissement sauf s'il agit seul, comme V11 ; K7 et K8 relèvent de `nature_source` et de l'étape, que R′ v1 ne lit que pour V01. Liste à soumettre à Farid avec D7.
 
 ### 5.3 Contrat d'entrée (D17)
 
@@ -1097,10 +1164,39 @@ FAIT pour la source : synthèse convergée de quatre sièges (engram et sentropi
 
 **Articulation avec les décisions immo.** D2 devient « adoption du générique » (options revues). D4 est modifiée : les annotations relèvent de G2 et G3, D4 ne porte plus que sur les commentaires de l'équipe. D3, D5, D9, D10, D11, D13 et D15 gardent leurs options et dépendent désormais de G1 à G7. Aucune décision immo n'est sans objet.
 
-<!-- A_INTEGRER: ch9-engram -->
-Section en cours de rédaction.
+#### Modèle engram vérifié (état au commit `c96fc01e`)
 
-Le modèle engram vérifié (objets, interfaces et stockage effectivement présents dans le code d'engram) viendra ici ; le détail technique ira en annexe III.7.
+Références : engram = dépôt `graphify` au commit `c96fc01e` (paquet `@sentropic/engram` 0.19.1, `package.json@c96fc01e:2-3`) ; immo = `radar-immobilier` `origin/main` `782d20c9` ; conception = `graphify/.graphify/scratch/design/learning-loop/SYNTHESE.md` (fichier non suivi par git, ignoré par `.gitignore@c96fc01e:60`, daté du 2026-10-04). S3 non listé : la présence réelle des objets est `unverified`. Seul le code qui écrit les clés a été lu.
+
+**Ce qui existe.** Le moteur d'engram tourne déjà dans immo comme bibliothèque : `@sentropic/graphify` 0.18.0 (`api/package.json@782d20c9:26`), utilisé pour `mergeExtractions` et pour des types (`api/src/services/graph/refresh-run.ts@782d20c9:4`). Engram n'a aucun client S3 (aucun `@aws-sdk` sous `src/`). **Toutes les clés S3 citées sont écrites par du code immo**, pas par engram. Le store Postgres d'engram (6 tables) est codé mais n'est câblé nulle part dans immo (aucune référence à `ENGRAM_POSTGRES_URL` ni à `graph_meta`). Le seul évaluateur codé est `profile evaluate` (rapprochement d'occurrences typées avec un gold, sans appel LLM). Il est présent dès la v0.18.0, mais immo ne produit aucun `occurrences.json` à évaluer.
+
+**Ce qui est en conception.** `ReferenceSet`, la version figée, le sceau, les runs, les résultats, les comparaisons et la garde de promotion sont décrits dans SYNTHESE §3 (« proposés, aucun n'existe », `SYNTHESE.md:137`). Aucun de ces objets n'apparaît dans le code au commit `c96fc01e` (`git grep ReferenceSet` ne renvoie rien).
+
+**Ce qu'immo doit faire, ou ne pas faire.** Ne pas créer le store engram dans le schéma par défaut de sa base (voir la collision ci-dessous). Ne pas construire ses tables d'annotation (G7 (b), recommandé, en attente de décision). Compléter son profil avec les blocs `evaluation`, `promotion` et le schéma d'étiquettes (`SYNTHESE.md:287-293`). Choisir le préfixe S3 privé (G5). Passer à `@sentropic/engram` ≥ 0.19 s'il veut le binaire `engram` : la v0.18.0 n'expose que `graphify` (`package.json@c96fc01e:23-25`).
+
+**Collisions et prérequis.**
+- **Tables `graph_nodes` et `graph_edges`.** Mêmes noms, schémas incompatibles. Immo : PK `id` seule, `city_slug` nullable, arêtes `src_id`/`dst_id`/`kind` (`api/src/db/schema.ts@782d20c9:285-290,314-319`). Engram : PK `(city_slug, id)`, arêtes `source_id`/`target_id`/`relation` (`src/storage/postgres.ts@c96fc01e:397-421`). Le `CREATE TABLE IF NOT EXISTS` ne fait rien en silence sur la table immo, puis les upserts échouent.
+- **Index.** L'index `graph_nodes_city_type_idx` porte le même nom des deux côtés (`postgres.ts@c96fc01e:490`, `schema.ts@782d20c9:299`).
+- **Parade.** Option `schema` du store (`postgres.ts@c96fc01e:577`) ou base séparée.
+- **Artefact `graph/{citySlug}/latest.json`.** Le store engram le réécrit à chaque push, avec `force: true` (`postgres.ts@c96fc01e:990-994`), sous un répertoire local (`target`, `:585`). C'est le même chemin que la clé canonique S3 d'immo (`api/src/storage/object-store.ts@782d20c9:46`). Il ne faut jamais faire pointer `target` sur le bucket.
+- **Homonymes.**
+  - Le terme « sealed » d'engram-memory désigne une enveloppe chiffrée de mémoire (`engram-memory/contracts/index.ts@c96fc01e:462`), pas le sceau d'un jeu de référence.
+  - « 6 tables » désigne deux choses différentes : le store engram, et les 6 tables d'annotation du dossier §6.3.
+
+| Objet | État | Preuve |
+|---|---|---|
+| Graphe sérialisé local `.engram/graph.json` | codé (outil local) | `src/paths.ts@c96fc01e:11,176` |
+| `graph/<ville>/latest.json` sur S3 | déployé (écrit par immo) ; présence `unverified` | `api/src/storage/object-store.ts@782d20c9:46` |
+| `graph/<ville>/graphify-3.4.manifest.json`, `graphify-34-backups/…` | codé (script immo, `--apply`) ; présence `unverified` | `api/src/services/graph/graphify-34-snapshot.ts@782d20c9:329` ; `canonical-graph-writer.ts@782d20c9:90-97` |
+| `ontology/<ville>/project-state.json`, `patches.json` | déployé (écrit par immo) ; présence `unverified` | `api/src/services/exploitation/project-state.ts@782d20c9:30` ; `patches.ts@782d20c9:105` |
+| État de run (profile_hash, sorties d'ontologie, cache) | codé, fichiers locaux | `src/ontology-profile.ts@c96fc01e:505,552` ; `src/paths.ts@c96fc01e:183,195,212-217` ; `src/cache.ts@c96fc01e:178` |
+| Store Postgres engram (6 tables) + `engram store push` | codé, non déployé dans immo | `src/storage/postgres.ts@c96fc01e:381-563` ; `src/cli.ts@c96fc01e:3421-3425` |
+| Évaluation par occurrences typées (`profile evaluate`) | codé (CLI seule, non exportée), non exécuté côté immo | `src/profile-evaluate.ts@c96fc01e:1-24` ; `src/cli.ts@c96fc01e:2858-2945` |
+| ReferenceSet, sceau, runs, promotion | conception | `SYNTHESE.md:137,165-213` (non suivi par git) |
+| Mémoire d'agent `engram-memory` (tables `memory_*`) | codé, paquet privé, sans lien avec immo | `engram-memory/package.json@c96fc01e:2-4` ; `engram-memory/postgres.ts@c96fc01e:89-109` |
+| `@sentropic/graph` | publié : rendu WebGL et calcul de mise en page, aucun stockage | `sent-tech-design-system` `packages/graph/package.json@d681d612:2-4` |
+
+Détail technique, tables, clés S3 et diagrammes : annexe III.7.
 
 ### 9.6 Première mise en œuvre : lots
 
@@ -2230,8 +2326,219 @@ erDiagram
 
 ### III.7 Modèle engram vérifié (détail technique)
 
-<!-- A_INTEGRER: annIII-engram -->
-Section en cours de rédaction.
+Conventions. Chaque citation suit la forme `chemin@commit:ligne`. `SYNTHESE.md` désigne `graphify/.graphify/scratch/design/learning-loop/SYNTHESE.md`, un fichier de conception non suivi par git. Le dossier en cours est `tmp/dossier-yaml-plain`, branche `docs/dossier-yaml-plain` au commit `07b9920a`. Aucun test n'a été exécuté pour cette annexe (`not run`).
+
+#### III.7.1 Store Postgres d'engram : 6 tables
+
+Source unique de la DDL : `postgresDdlStatements()` (`src/storage/postgres.ts@c96fc01e:381`). Toutes les tables sont préfixées par `city_slug`. Le nom de schéma est optionnel et validé (`:172-180`, `:577`). Le DSN vient uniquement de l'environnement (`ENGRAM_POSTGRES_URL`, ancien nom `GRAPHIFY_POSTGRES_URL`, `:572,666`).
+
+| Table | Colonnes clés | PK | Preuve |
+|---|---|---|---|
+| `graph_nodes` | `city_slug`, `id`, `label`, `type`, `community`, `props jsonb` | `(city_slug, id)` | `postgres.ts@c96fc01e:397-404` |
+| `graph_edges` | `city_slug`, `source_id`, `target_id`, `relation`, `confidence`, `props jsonb` | `(city_slug, source_id, target_id, relation)` | `:412-419` |
+| `graph_meta` | `city_slug`, `topology_signature`, `pushed_at`, `tool_version` | `(city_slug)` | `:427-432` |
+| `graph_group_counts` | `city_slug`, `snapshot_id`, `axis`, `key`, `label`, `count`, `parent_key` | `(city_slug, axis, key)` | `:446-454` |
+| `graph_positions` | `city_slug`, `snapshot_id`, `layout_id`, `node_id`, `x`, `y`, `degree` | `(city_slug, layout_id, node_id)` | `:469-477` |
+| `graph_tombstones` | `city_slug`, `target_kind`, `node_id`, `edge_source`, `edge_target`, `edge_relation`, `t`, `reason` | `(city_slug, target_kind, node_id, edge_source, edge_target, edge_relation)` | `:540-549` |
+
+Index :
+- `(city_slug, type)` ;
+- GIN plein texte français sur `label` ;
+- GIN `props jsonb_path_ops` ;
+- index temporels `t` et `t_end` ;
+- index de voisinage `(city_slug, source_id|target_id)` (`:483-531`).
+
+Écriture : `engram store push`, en mode « replace », reconstruit les agrégats (`src/store-cli.ts@c96fc01e:1-17` ; `src/cli.ts@c96fc01e:3421-3425`). Un push réécrit aussi `<target>/graph/{citySlug}/latest.json` en local (`postgres.ts@c96fc01e:582-585,990-994`). Le schéma pgvector, séparé, ajoute `graph_embeddings` (`src/storage/vector/pgvector.ts@c96fc01e:16,115`). Il n'est pas compté dans les 6.
+
+Déploiement :
+- immo : aucune référence dans le code ni dans `deploy/` (`git grep` des variables `ENGRAM_POSTGRES_URL`, `GRAPHIFY_STORE`, `graph_meta`, `graph_positions` : vide à `782d20c9`) ;
+- graphify : aucun répertoire de déploiement à `c96fc01e` ;
+- autres clusters : `unverified`.
+
+```mermaid
+erDiagram
+    graph_meta ||--o{ graph_nodes : city_slug
+    graph_nodes ||--o{ graph_edges : source_id_target_id
+    graph_nodes ||--o{ graph_positions : node_id
+    graph_meta ||--o{ graph_group_counts : snapshot_id
+    graph_nodes ||..o{ graph_tombstones : node_id
+    graph_edges ||..o{ graph_tombstones : edge_triple
+    graph_meta {
+        text city_slug PK
+        text topology_signature
+        text pushed_at
+        text tool_version
+    }
+    graph_nodes {
+        text city_slug PK
+        text id PK
+        text label
+        text type
+        int community
+        jsonb props
+    }
+    graph_edges {
+        text city_slug PK
+        text source_id PK
+        text target_id PK
+        text relation PK
+        text confidence
+        jsonb props
+    }
+    graph_group_counts {
+        text city_slug PK
+        text axis PK
+        text key PK
+        text snapshot_id
+        int count
+    }
+    graph_positions {
+        text city_slug PK
+        text layout_id PK
+        text node_id PK
+        float x
+        float y
+        int degree
+    }
+    graph_tombstones {
+        text city_slug PK
+        text target_kind PK
+        text node_id PK
+        text edge_source PK
+        text edge_target PK
+        text edge_relation PK
+        bigint t
+        text reason
+    }
+```
+
+Les relations sont logiques : la DDL ne déclare aucune clé étrangère.
+
+**Collision avec immo.**
+
+| Table | Immo (`api/src/db/schema.ts@782d20c9`) | Engram (`postgres.ts@c96fc01e`) |
+|---|---|---|
+| `graph_nodes` | PK `id` seule (`:287`), `city_slug` nullable (`:290`), en plus `source_ref` et `created_at` | PK `(city_slug, id)` |
+| `graph_edges` | PK `uuid id` (`:316`), `src_id`, `dst_id`, `kind` | PK naturelle (`source_id`, `target_id`, `relation`) |
+| Index `graph_nodes_city_type_idx` | même nom (`:299`) | même nom (`:490`) |
+
+La branche immo `fix/graph-city-key` (non fusionnée, `.worktrees/fix-812-city-scoped-pk`) passe immo en PK `(city_slug, id)`. Les noms de colonnes des arêtes restent différents. Parade : un schéma dédié (option `schema`) ou une base séparée.
+
+#### III.7.2 Clés S3 exactes et producteurs
+
+Engram n'écrit pas sur S3 : aucun `@aws-sdk` ni `S3Client` sous `src/` à `c96fc01e`. S3 n'a pas été listé, donc toutes les présences sont `unverified (S3 non listé)`.
+
+| Clé | Producteur (immo, `782d20c9`) | Contenu |
+|---|---|---|
+| `graph/<ville>/latest.json` | `canonicalGraphKey()`, `api/src/storage/object-store.ts:46`, via le writer protégé `canonical-graph-writer.ts` | graphe canonique d'une ville |
+| `graph/<ville>/graphify-3.4.manifest.json` | `applyGraphify34Snapshots`, `api/src/services/graph/graphify-34-snapshot.ts:327-330`, déclenché par `tsx src/scripts/graphify-34-enrich.ts --apply <ville>` (`api/src/scripts/graphify-34-enrich.ts:16-19`) | `municipality`, `graphify_pass`, `ontology_version`, `snapshot_key`, `snapshot_mode`, `source: "graph_nodes"`, comptes (`graphify-34-snapshot.ts:153-162`) |
+| `graphify-34-backups/<backupId>/graph/<ville>/…` + `_backup-complete.json` | `archiveCityGraphPrefix`, `canonical-graph-writer.ts:90-97,235-282` | copie du préfixe `graph/<ville>/` avec sha256 et ETag |
+| `graphify-34-backups/<backupId>/_apply-plan.json`, `…/_applied/<ville>.json` | `graphify-34-snapshot.ts:165-171` | plan et marqueurs de reprise |
+| `ontology/<ville>/project-state.json` | `projectStateKey()`, `api/src/services/exploitation/project-state.ts:30` | état d'exploitation, lu par la vue Signaux |
+| `ontology/<ville>/patches.json` | `patchLogKey()`, `api/src/services/exploitation/patches.ts:105` | journal des correctifs en ajout seul |
+
+#### III.7.3 État de run engram (local, hors S3)
+
+- **Répertoire d'état.** Par défaut `.engram/`, avec `.graphify/` et `graphify-out/` reconnus comme anciens noms (`src/paths.ts@c96fc01e:11-21,147`).
+- **`profile_hash`.** Sha256 du profil normalisé et trié. Le hachage exclut `sourcePath`, `profile_hash` et `bound_source_path`, et hache le module de normalisation par son contenu (`src/ontology-profile.ts@c96fc01e:69-80,505,552,576`). D'après la conception, `profile_hash` n'inclut pas encore les registres (`SYNTHESE.md:167`, `unverified` dans le code).
+- **État du profil.** Fichier `<state>/profile/profile-state.json`, plus le profil normalisé et les registres (`src/paths.ts@c96fc01e:191-199`).
+- **Sorties d'ontologie.** Sous `<state>/ontology/` : `manifest.json`, `nodes.json`, `aliases.json`, `relations.json`, `sources.json`, `occurrences.json`, `validation.json`, `index.json` (`src/paths.ts@c96fc01e:210-220`). Le manifest suit le schéma `engram_ontology_outputs_v1` et porte `graph_hash`, `profile_hash` et `generated_at` (`src/ontology-output.ts@c96fc01e:482-490`).
+- **Cache.** Répertoire `<state>/cache/<kind>/`, avec un espace de noms `profile-<profile_hash>` quand un profil est actif (`src/paths.ts@c96fc01e:183` ; `src/cache.ts@c96fc01e:81-85,176-180,298-300`).
+
+#### III.7.4 Évaluation par occurrences typées (codée)
+
+- **Module.** `src/profile-evaluate.ts@c96fc01e` (en-tête `:1-24`). Évaluation déterministe, sans LLM. Le rapprochement se fait par égalité exacte de `(source_file, node_type, start, end)` (offsets UTF-16, intervalle demi-ouvert).
+- **Schémas.** `engram_typed_linking_gold_v1` en entrée, `engram_typed_linking_evaluation_v1` en sortie (`:23-24`).
+- **Métriques.** `mention_recall`, `set_recall`, `resolution_precision`, `unresolved_rate` (`:61-64,298-301`).
+- **Gate.** Valeurs `pass` ou `fail` seulement (`:93,339`). Une métrique `null` fait échouer un plancher (`:327`). La valeur `indeterminate`, prévue par la conception, n'est pas codée.
+- **Exposition.** Le module est importé par la seule CLI (`src/cli.ts@c96fc01e:78`), et non exporté par l'index public.
+- **Spécification.** Aucune spec dédiée sous `spec/`. Le contrat vit dans l'en-tête du module et dans `tests/profile-evaluate.test.ts@c96fc01e:227-245`. Test `not run` ici.
+- **Commande exacte** (`src/cli.ts@c96fc01e:2857-2867`) :
+
+```
+engram profile evaluate --run <occurrences.json> --gold <gold.json> \
+  [--out evaluation.json] [--profile-state <state>/profile/profile-state.json] \
+  [--corpus <racine>] [--floors <gate.json>] [--floor metrique=valeur]... \
+  [--ceiling metrique=valeur]... [--json]
+```
+
+- **Code de sortie.** Non nul si le gold est invalide ou si la gate vaut `fail` (`:2873-2949`).
+- **Version 0.18.0.** Elle est épinglée par immo et contient déjà ce module (tag `v0.18.0`, `src/profile-evaluate.ts`, ajouté par `e63ad25a` le 2026-07-17). Avec cette version, la commande s'appelle `graphify profile evaluate`.
+- **Côté immo.**
+  - Aucun `occurrences.json`, aucun appel `link`, aucun gold au format `engram_typed_linking_gold_v1` (`git grep` vide à `782d20c9`).
+  - Le profil `radar/ontology/ontology-profile.yaml@782d20c9` n'a pas de bloc `evaluation`.
+  - L'évaluation n'est donc pas applicable aujourd'hui sans un run `link` et un gold.
+
+#### III.7.5 Boucle ReferenceSet, sceau, runs, promotion (conception)
+
+Rien n'est codé à `c96fc01e`. Tout ce qui suit est spécifié dans `SYNTHESE.md` (non suivi par git) et repris dans le dossier §6.7 et les fiches G1 à G7 (`DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md@07b9920a:1087-1099,1458-1503`).
+
+- **Terminologie.**
+  - `ReferenceSet`, `ReferenceSetVersion` (`engram_reference_set_v1`), `ReferenceItem` (`SYNTHESE.md:60-66`).
+  - Partitions `dev` et `test` + `sealed: true` (`:65`).
+  - Provenance `label_provenance` ∈ {`human_single`, `human_adjudicated`, `model_consensus`, `mixed`} (`:69`).
+- **Version figée** (`:178-191`) :
+  - identité, provenance et partitions `{file, sha256, items, groups}` ;
+  - manifeste de split public et affectations privées ;
+  - sceau : `seedCommitment`, engagement de contenu inscrit dans track avant tout appel de modèle, politique `single_shot_per_frozen_candidate`, journal d'exposition en ajout seul et distinct de la version ;
+  - qualité et exclusions ;
+  - stockage : éléments privés, manifestes publics.
+- **Runs et résultats.** `engram_eval_run_v1`, `engram_eval_result_v1` (gate `pass|fail|indeterminate`), `engram_eval_comparison_v1` (`:204-212`).
+- **Promotion** (`engram_promotion_v1`, `:165-176`) : candidat, version en production, preuves, règle préenregistrée, décision track. La production refuse toute empreinte sans « go ». La commande visée est `engram promote check` (`:122`), non codée.
+- **Évaluateurs prévus** (`:235-242`) : `engram.classification@1`, `engram.span@1`, `engram.typed_occurrence@1` et `engram.graph@1` (BPMN). Seul `typed_occurrence` correspond à du code existant (`profile evaluate`).
+- **Porteurs.** sentropic porte l'humain, engram la mesure, track les décisions attestées par h2a (dossier `07b9920a:1092`).
+
+#### III.7.6 Découpage de `s3_reference_sets` en 6 objets (proposition)
+
+Le schéma actuel la représente comme une seule boîte : `s3_reference_sets {prefixe, versions, runs}` (`focus/physical-model.js@07b9920a:108-112`). Le découpage ci-dessous en fait 6 objets. Le préfixe `reference-sets/` est provisoire : le nom reste à fixer en G5. Il désigne un bucket privé de l'hôte, derrière un port du paquet (`SYNTHESE.md:190,365`). Les 6 clés sont une **proposition** : aucune n'existe dans le code.
+
+| # | Objet | Clé proposée | Contenu | Visibilité |
+|---|---|---|---|---|
+| 1 | `rs_manifest` | `reference-sets/<set_id>/v<N>/manifest.json` | `engram_reference_set_v1` : identité, profil (`profile_hash`, `registries_sha256`), provenance, partitions `{file, sha256, items, groups}`, bloc de split public, bloc sceau (`seedCommitment`, référence track), qualité, exclusions, fiche descriptive | publique (manifeste + empreintes) |
+| 2 | `rs_assignments` | `reference-sets/<set_id>/v<N>/private/assignments.json` | correspondance élément → groupe (municipalité) → partition, référencée par `privateAssignmentManifestRef` + sha256 | privée |
+| 3 | `rs_items_dev` | `reference-sets/<set_id>/v<N>/private/dev.jsonl` | `ReferenceItem` de développement : `itemId`, `groupKey`, `strata`, `input` figé + sha256, `reference`, `annotationRefs`, `tags`, `completeness` | privée, seule partition utilisable pour optimiser |
+| 4 | `rs_items_test` | `reference-sets/<set_id>/v<N>/private/test.jsonl` | mêmes champs, partition `test` scellée, `accessBudget` | privée, scellée, une passe par candidat figé |
+| 5 | `rs_exposure_log` | `reference-sets/<set_id>/v<N>/exposure.jsonl` | journal d'exposition en ajout seul : qui, quand, quel candidat, quelle partition. Il reste hors du contenu haché de la version. | privée, en ajout seul |
+| 6 | `eval_runs` | `reference-sets/<set_id>/v<N>/runs/<run_id>/{run.json, predictions.jsonl, result.json}` + `…/campaigns/<campaign_id>/comparison.json` | `engram_eval_run_v1` (candidat, bras, isolation, une ligne par élément et par tentative), `engram_eval_result_v1`, `engram_eval_comparison_v1` | privée. Les agrégats peuvent être publiés. |
+
+Trois éléments restent hors de ces 6 objets :
+- l'instantané d'annotations (interface 1, produit par sentropic, `SYNTHESE.md:139-163`) ;
+- le corpus figé (`engram_corpus_snapshot_v1`) ;
+- l'enregistrement de promotion (`engram_promotion_v1`), rattaché à `decisions_track`.
+
+Leur emplacement est `unverified` : il reste à décider.
+
+#### III.7.7 `job_evaluation` = `engram profile evaluate`
+
+- **Rôle dans le schéma.** Le nœud `job_evaluation` (`focus/physical-model.js@07b9920a:133-137`) devient l'exécution de `engram profile evaluate` (III.4) : un job Node, sans Python, qui utilise le binaire `engram` du paquet (`package.json@c96fc01e:23-25`).
+- **Entrées et sorties v1.**
+  - `--run`, soit l'objet 6 (`predictions.jsonl` au format `TypedEntityOccurrenceV1[]`) ;
+  - `--gold`, soit l'objet 3 ou 4 au format `engram_typed_linking_gold_v1` ;
+  - `--profile-state` ;
+  - `--out` pour écrire `result.json` (objet 6).
+- **Limites.**
+  - Seul l'évaluateur `typed_occurrence` existe.
+  - `classification`, `span`, `graph`, la garde de passe unique sur `test`, le journal d'exposition et `indeterminate` ne sont pas codés.
+  - Aucun job k8s ni CronJob `job_evaluation` n'existe dans immo (`git grep` vide à `782d20c9`).
+  - L'image `api` contient `@sentropic/graphify` 0.18.0, donc le binaire `graphify`. Il n'a pas été exécuté (`unverified`).
+
+```mermaid
+flowchart LR
+    A["Instantané haché des annotations validées<br/>(sentropic, conception)"] --> B["Construire ReferenceSetVersion<br/>dev / test, split groupé (conception)"]
+    B --> C["Sceau : engagement inscrit dans track<br/>avant tout appel de modèle (conception)"]
+    C --> D["Runs candidat sur dev<br/>itérations autorisées (conception)"]
+    D --> E["Candidat figé : passe unique sur test<br/>+ journal d'exposition (conception)"]
+    E --> F["job_evaluation =<br/>engram profile evaluate<br/>(CODÉ, typed_occurrence seul)"]
+    D --> F
+    F --> G{"gate pass / fail<br/>(indeterminate : conception)"}
+    G --> H["Comparaison avec la production<br/>(conception)"]
+    H --> I["Décision track go / no-go<br/>attestée h2a (conception)"]
+    I --> J["engram_promotion_v1 + garde de production<br/>engram promote check (conception)"]
+    classDef code fill:#d8f0d8,stroke:#2a7a2a;
+    classDef concept fill:#f4f4f4,stroke:#888,stroke-dasharray: 4 3;
+    class F code;
+    class A,B,C,D,E,G,H,I,J concept;
+```
 
 ---
 
