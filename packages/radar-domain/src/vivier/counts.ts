@@ -39,11 +39,11 @@ export const vivierCountsSchema = z
     // unchecked, rail and panel both combine this with stageCounts.
     stageCountsHorsZonage: vivierStageCountsSchema,
     // Residential-ELIGIBLE subset of stageCounts, used when the `r` axis is
-    // checked: zonage `oui`, no exclusion, and residential `oui` OR a complete
-    // rezoning/reform whose residential nature is simply not stated. A rezoning
-    // reshapes the zoning grid, so it CAN be residential — that is not the same
-    // epistemic state as "the minutes do not say" (R2: a reform ranks, it never
-    // gates). Only an explicit non-residential is filtered out here.
+    // checked: zonage `oui`, no exclusion, and `isResidentialEligible` —
+    // residential `oui`, a rezoning/reform whose residential nature is not
+    // stated (R2: a reform ranks, it never gates), or an early-stage unknown
+    // other than an individual authorisation (tri-state: unknown is not
+    // non-residential).
     stageCountsResEligible: vivierStageCountsSchema,
     // The same eligible records outside zonage `oui`. Combines with
     // stageCountsResEligible when both `z` unchecked and `r` checked.
@@ -115,15 +115,42 @@ const RESIDENTIAL_ELIGIBLE_INSTRUMENTS: ReadonlySet<string> = new Set([
 ]);
 
 /**
+ * Early regulatory stages: a notice of motion or a draft bylaw announces a
+ * change of the rules before it is decided. At these stages an unknown
+ * residential nature is still open, never evidence of a non-residential change.
+ */
+const EARLY_ETAPES: ReadonlySet<string> = new Set(["avis_motion", "projet_reglement"]);
+
+/**
+ * Individual authorisations (minor derogation, PIIA). Left `indetermine`, they
+ * stay genuine unknowns at every stage and are NOT eligible.
+ */
+const INDIVIDUAL_AUTHORISATION_INSTRUMENTS: ReadonlySet<string> = new Set([
+  "derogation",
+  "piia",
+]);
+
+/**
  * The `r` axis predicate — SINGLE source of truth shared by the server counters
  * and the client projection, so the rail badge and the panel list can never
- * diverge. Keeps residential `oui`, keeps a rezoning/reform whose residential
- * nature is unstated, and filters out an explicit non-residential.
+ * diverge.
+ *
+ * Residential is a tri-state (SPEC_EVOL_FILTRAGE_VIVIER_v2 §1/§3): `oui` is
+ * kept, `non` is filtered out, and `indetermine` (unknown) is NOT treated as
+ * non-residential when it is
+ *  - a rezoning/reform whose residential nature is unstated, at any stage, or
+ *  - an early-stage signal (notice of motion, draft bylaw) other than an
+ *    individual authorisation — the case of a recurring-refresh node whose
+ *    graph carries no description to establish the residential nature.
+ * A late-stage unknown that is neither a rezoning nor a reform stays filtered,
+ * so the axis keeps filtering when Précoce is unchecked.
  */
 export function isResidentialEligible(classification: VivierV2): boolean {
   if (classification.residentiel.valeur === "oui") return true;
   if (classification.residentiel.valeur === "non") return false;
-  return RESIDENTIAL_ELIGIBLE_INSTRUMENTS.has(classification.instrument);
+  if (RESIDENTIAL_ELIGIBLE_INSTRUMENTS.has(classification.instrument)) return true;
+  return EARLY_ETAPES.has(classification.etape) &&
+    !INDIVIDUAL_AUTHORISATION_INSTRUMENTS.has(classification.instrument);
 }
 
 export function countVivierClassifications(
