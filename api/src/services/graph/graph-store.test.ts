@@ -676,6 +676,34 @@ describe("server-side signal date windows", () => {
     expect(both.subsetCounts).toEqual(base.subsetCounts);
   });
 
+  it("counts an early zoning signal of unknown residential nature in the default B view", () => {
+    // Shape of production node event-26-220 (la-peche) as written by the
+    // recurring PV refresh: no description, no category, instrument `autre`.
+    const props = {
+      refs: [{ page: 4, publishedAt: "2026-07-29",
+        excerpt: "ET RÉSOLU QUE ce Conseil municipal adopte le premier projet de règlement numéro 113-006-2026",
+        documentDate: { kind: "document", value: "2026-07-29", method: "listing", status: "known", precision: "day" } }],
+      properties: { etape: "projet_reglement", status: "candidate", etape_date: "2026-07-29",
+        instrument: "autre", resolution: "26-220", reglement_number: "113-006-2026",
+        regulatoryStatus: "anticipation" },
+    };
+    const row = {
+      id: "event-26-220", citySlug: "la-peche", type: "DesignationEvent",
+      label: "Adoption du premier projet de règlement 113-006-2026",
+      category: null, description: null, etapeAnnote: "projet_reglement",
+      nbUnitesMax: null, intensite: null, props, sourceRef: null,
+    };
+    // Default view: period 3 months, PIIA and derogation exclusions, axes z/r/p.
+    const city = aggregateGraphSignalProjectionRows([row], {
+      dateFrom: "2026-07-05", dateTo: "2026-10-05", excludePiia: true, excludeDerogations: true,
+    })[0]!;
+    const v = city.vivierV2Counts;
+    expect(v.stageCounts.projet_reglement).toBe(1);
+    expect(v.stageCountsResEligible.avis_motion + v.stageCountsResEligible.projet_reglement).toBe(1);
+    expect(v.residentialUnknown).toBe(1);
+    expect(v.qualified).toBe(0);
+  });
+
   it("keeps all rows when no date window is supplied", () => {
     const rows = [
       datedSignal("dated", { properties: { date: "2025-01-01" } }),

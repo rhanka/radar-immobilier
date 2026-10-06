@@ -319,10 +319,11 @@ export function projectPrecoceVivierNodes(
  *
  * Base = nodes not excluded by the server (`exclusion_reason === null`); an
  * excluded node remains outside B for every combination. On that base, `z`
- * requires zonage `oui`, `r` requires residential ELIGIBILITY (`oui`, or a
- * rezoning/reform whose residential nature is simply unstated — a reform ranks,
- * it never gates), and `p` requires an early stage. Unchecking any axis relaxes
- * its filter without reclassification.
+ * requires zonage `oui`, `r` requires residential ELIGIBILITY (`oui`; or an
+ * unknown residential nature on a rezoning/reform or on an early-stage signal
+ * other than an individual authorisation — unknown is not non-residential),
+ * and `p` requires an early stage. Unchecking any axis relaxes its filter
+ * without reclassification.
  *
  * One missing classification makes the projection unavailable rather than
  * partial.
@@ -339,8 +340,9 @@ export function projectComposedVivierB(
     if (c.exclusion_reason !== null) return false;
     if (axes.z && c.zonage.valeur !== "oui") return false;
     // `r` reads the SHARED server predicate (isResidentialEligible), so this
-    // list and the rail badge can never diverge: residential `oui` and
-    // rezoning/reform left unstated are kept, explicit non-residential is not.
+    // list and the rail badge can never diverge: residential `oui`, unstated
+    // rezoning/reform and early-stage unknowns are kept, explicit
+    // non-residential is not.
     if (axes.r && !isResidentialEligible(c)) return false;
     if (axes.p && !isPrecoceVivierNode(node)) return false;
     return true;
@@ -397,7 +399,8 @@ export function validateVivierProjectionAuthority(
  *
  * A lit `subsetCounts[clé]` (clé composée par les axes cochés). B recompose
  * les trois axes à partir des compteurs serveur : `r` sélectionne
- * `stageCountsResEligible` (résidentiel `oui` + rezonage/refonte non précisé)
+ * `stageCountsResEligible` (résidentiel `oui` + rezonage/refonte non précisé
+ * + précoce au résidentiel inconnu)
  * ou `stageCounts` (tout indéterminé gardé), `z` ajoute le pendant
  * hors-zonage quand décoché, `p`
  * restreint aux étapes précoces. Toujours bulk : `vivierV2Counts` n'est
