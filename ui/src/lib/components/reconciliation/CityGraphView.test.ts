@@ -24,7 +24,7 @@ function makeNode(id: string, type: string, label: string): GraphNode {
 }
 
 function makeEdge(srcId: string, dstId: string, kind: string): GraphEdge {
-  return { id: `${srcId}-${dstId}`, srcId, dstId, kind, props: {} };
+  return { id: `${srcId}-${dstId}`, citySlug: "salaberry-de-valleyfield", srcId, dstId, kind, props: {} };
 }
 
 const VALLEYFIELD_NODES: GraphNode[] = [
