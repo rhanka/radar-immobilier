@@ -241,6 +241,22 @@ describe("GH #812 — city-key repair", () => {
     expect((await repairCity(db, all[GORE]!, indexOf(all), "preview")).noop).toBe(true);
   });
 
+  it("A825-02 round 2: reordered local refs (served citation = refs[0]) are measured and re-aligned", async () => {
+    const a = ref("gore", "A1", "citation a"); const b = ref("gore", "B1", "citation b");
+    const city = { nodes: [{ id: "sig-9", type: "Signal", label: "Avis", refs: [b, a] }] };
+    await insertRow(GORE, "sig-9", { id: "sig-9", type: "Signal", label: "Avis", refs: [a, b] });
+    const all = { [GORE]: prepareCityProjection(GORE, city) };
+    const preview = await repairCity(db, all[GORE]!, indexOf(all), "preview");
+    expect(preview.drift.nodesContentDiff).toBe(1);
+    expect(preview.noop).toBe(false);
+    const [still] = await db.select().from(graphNodes).where(eq(graphNodes.citySlug, GORE));
+    expect(((still!.props as { refs: Array<{ excerpt: string }> }).refs[0]!).excerpt).toBe("citation a");
+    expect((await repairCity(db, all[GORE]!, indexOf(all), "apply")).verdict).toBe("pass");
+    const [after] = await db.select().from(graphNodes).where(eq(graphNodes.citySlug, GORE));
+    expect(((after!.props as { refs: Array<{ excerpt: string }> }).refs[0]!).excerpt).toBe("citation b");
+    expect((await repairCity(db, all[GORE]!, indexOf(all), "preview")).noop).toBe(true);
+  });
+
   it("phase 1 selects only the contaminated ids", async () => {
     await seedContamination();
     const all = projections();
