@@ -26,6 +26,7 @@ FILES=(
   deploy/k8s/38-graphify34-emit-candidates-job.yaml deploy/k8s/39-export-graph-nodes-job.yaml
   deploy/k8s/40-export-gt-designation-events-job.yaml
   deploy/k8s/41-document-date-recovery-job.yaml
+  deploy/k8s/42-graph-city-key-repair-job.yaml
   deploy/k8s/34-refresh-cronjob.yaml
   deploy/k8s/refresh-cronjobs-prod/kustomization.yaml
   deploy/k8s/10-rbac.yaml deploy/k8s/11-ci-deployer-preprod-rbac.yaml
@@ -45,6 +46,9 @@ fixture() {
 }
 
 run_ok "$ROOT" 'accepts the released manifests'
+# The untouched fixture must pass, so each negative case below fails for its own mutation only
+# (a file missing from FILES would otherwise make every negative case pass vacuously).
+fixture; run_ok "$CASE_ROOT" 'accepts the untouched fixture'; rm -rf "$CASE_ROOT"
 for retired_tool in \
   tools/graphify-v23/preflight.sh tools/graphify-v23/gate.sh tools/graphify-v23/runner.sh \
   tools/graphify-v23/runner-llm-desc-validation.sh tools/grounding/stage-candidate.sh \
