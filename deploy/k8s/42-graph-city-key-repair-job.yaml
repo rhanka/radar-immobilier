@@ -1,0 +1,96 @@
+# 42-graph-city-key-repair-job.yaml — PROD one-shot Job (GH #812): re-align the PG graph of
+# each listed city on its own S3 graph/<city>/latest.json after migration 0013
+# (api/src/scripts/repair-graph-city-key.ts, spec docs/spec/SPEC_FIX_GRAPH_CITY_KEY.md §7).
+# Production twin of deploy/k8s/graph-city-key-repair/job.yaml (preprod).
+#
+# No model call. PREVIEW by default (the real code path in a transaction always rolled back,
+# no persistent PG write); `--apply` commits one all-or-nothing transaction per city. Never
+# writes latest.json; the only S3 object written is the run report
+# reports/graph-city-key/<run-id>/repair.json. A ≤ 4 KiB summary goes to the termination
+# message (printed by the workflow even without pods/log).
+#
+# NOT applied directly and NOT in kustomization.yaml: run it through the run-job workflow,
+# which renders the two placeholders, refuses to start alongside a refresh/backup/projection/
+# recovery/mapper/repair Job, deletes the previous Job and applies this one:
+#   gh workflow run run-job.yaml -f job=graph-city-key-repair -f recovery_mode=preview -f recovery_cities=all
+#   gh workflow run run-job.yaml -f job=graph-city-key-repair -f recovery_mode=apply -f recovery_cities="gore barkmere"
+#   __IMAGE__        = recovery_image, else the image served by deploy/radar-api
+#   __REPAIR_ARGS__  = "--all" (preview only) | [--apply] <city slugs>
+#
+# Network: labelled `component: graph-projection` so the projection policy
+# allow-graph-projection-to-postgres (70-networkpolicy.yaml) admits it to PG.
+#
+# Storage: graph snapshots live in the prod docs bucket. Same binding as the document-date
+# recovery Job (41): coordinates from ConfigMap radar-api, credentials from Secret
+# radar-scrape-s3-credentials. Guarded by deploy/ci/check-object-storage-bindings.sh (SCRAPE).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-graph-city-key-repair
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: graph-projection
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 5400
+  ttlSecondsAfterFinished: 604800
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: graph-projection
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: repair-graph-city-key
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          image: __IMAGE__
+          imagePullPolicy: IfNotPresent
+          workingDir: /workspace/api
+          terminationMessagePolicy: File
+          command: ["sh", "-c"]
+          args:
+            - |
+              node dist/scripts/repair-graph-city-key.js __REPAIR_ARGS__
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=448 --dns-result-order=ipv4first"
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            - name: SCRAPE_S3_ENDPOINT
+              valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_ENDPOINT } }
+            - name: SCRAPE_S3_BUCKET
+              valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_BUCKET } }
+            - name: SCRAPE_S3_REGION
+              valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_REGION } }
+            - name: SCRAPE_S3_FORCE_PATH_STYLE
+              valueFrom: { configMapKeyRef: { name: radar-api, key: SCRAPE_S3_FORCE_PATH_STYLE } }
+            - name: SCRAPE_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_ACCESS_KEY } }
+            - name: SCRAPE_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-scrape-s3-credentials, key: SCRAPE_S3_SECRET_KEY } }
+          resources:
+            requests: { cpu: 50m, memory: 256Mi }
+            limits: { cpu: 300m, memory: 640Mi }
