@@ -572,3 +572,50 @@ Open owner decisions:
 Factual check before R4 (not a decision): `lascension` vs `lascension-de-notre-seigneur` are two
 municipalities (`municipalities.qc.json:6126`, `:10897`); the R3 preview shows whether their
 graphs explain each other's rows.
+
+## 16. Dry-run of the repair (2026-10-05)
+
+The repair's own dry-run is its preview mode; on prod it can only run after migration 0013 (R2/R3,
+precondition PK `(city_slug, id)`). Before that, two checks were made without any prod write:
+
+**Read-only prod counts (2026-10-06 01:21 UTC, `default_transaction_read_only=on`)** — expected
+migration NOTICE and size:
+
+| Measure | Value |
+|---|---|
+| `graph_nodes` / NULL-city nodes / cities | 44 735 / **0** / 1 010 |
+| `graph_edges` / incident to a NULL-city node / without any endpoint | 49 148 / **0** / **0** |
+| edges with exactly one endpoint present (placed by the existing one) | 26 |
+| edges whose endpoints belong to two cities (placed at the src city) | 467 |
+| nodes carrying a `proces-verbaux-<other city>` rawRef (path rule) | 170 nodes / 109 cities (164 / 109 on 2026-10-04) |
+| table sizes | nodes 76 MB, edges 43 MB, geo_resolutions 312 kB |
+| PK / journal | `graph_nodes_pkey (id)`, 12 journal rows |
+
+Expected 0013 NOTICE in prod: 0 node and 0 edge deleted; the migration rewrites two tables of
+tens of MB (seconds, inside the 600 s CD poll).
+
+**Offline simulation of the classifier and guards** (bundled from the branch code, run locally on the
+read-only snapshot of 2026-10-04 used by the dossier: 226 cities, S3 nodes + PG rows; no network).
+Limits (`partial`): the snapshot's S3 nodes carry `id, label, type, refs, properties, status,
+description` and its PG rows no `label` / `source_ref`, so the comparison is restricted to refs,
+properties, status and description; candidate cities are limited to the 226; edges are not in the
+snapshot (edge drift not simulated).
+
+| Group | Cities | Plain projection refused today | Repair `pass` | Refused (expected) | `foreign` nodes | Missing ids inserted |
+|---|---|---|---|---|---|---|
+| G2 | 81 | 81 | 79 | 2 `refused-unknown` (rawdon `zone-rd-9`, saint-joseph-de-beauce `constraint-cptaq-lots`) | 121 | 1 834 |
+| G3 | 49 | 0 | 49 | 0 | 0 | 159 |
+| G4 | 18 | 18 | 18 | 0 | 26 | 16 |
+| G5a | 3 | 3 | 0 | 3 `refused-guard` (completeness) | 0 | — |
+| G5b | 1 | 1 | 0 | 1 `refused-guard` (completeness) | 0 | — |
+| G5c | 2 | 2 | 0 | 2 `refused-unknown` (32 rows: local ref loss) | 5 | — |
+| G6 | 1 | 1 | 0 | 1 `refused-unknown` | 0 | — |
+| G1 | 71 | 0 | 71 (excluded, Q3) | — | 0 | — |
+
+Cross-checks with the dossier: gore `bylaw-242` ← barkmere and fortierville `zone-m-04` ←
+parisville are classified `foreign` exactly as diagnosed; the 1 834 (G2) and 159 (G3) missing ids
+match the dossier counts. Total: 152 `foreign` nodes in 101 of the 226 cities; the remaining
+contaminated cities of the path rule (109) are outside the snapshot and appear in the R2 measurement.
+
+Expected list `L` at R2 (146 cities = G2 pass + G3 + G4; the R2 measurement on live data replaces
+it): ayers-cliff barkmere beauceville berthier-sur-mer boischatel bolton-ouest bouchette campbells-bay champlain chartierville cheneville chute-saint-philippe clarenceville cleveland compton danville daveluyville denholm deschaillons-sur-saint-laurent donnacona eastman esterel farnham ferme-neuve fortierville gore ham-nord ham-sud hampstead havelock herouxville hinchinbrooke hudson huntingdon kingsey-falls la-minerve lac-du-cerf lac-edouard lac-superieur lac-tremblant-nord lambton lascension lepiphanie lisle-aux-coudres low melbourne mont-laurier montcerf-lytton neuville notre-dame-de-ham notre-dame-de-lourdes--joliette notre-dame-des-bois notre-dame-des-prairies notre-dame-du-sacre-coeur-dissoudun ogden parisville petite-riviere-saint-francois piedmont plessisville portneuf prevost riviere-beaudette rougemont saint-agapit saint-aime saint-albert saint-alexis saint-alexis-des-monts saint-andre-dargenteuil saint-anicet saint-antoine-de-lisle-aux-grues saint-augustin-de-desmaures saint-barnabe-sud saint-boniface saint-casimir saint-christophe-darthabaska saint-claude saint-colomban saint-come-liniere saint-denis-de-brompton saint-esprit saint-francois-xavier-de-brompton saint-gabriel-de-brandon saint-gabriel-de-valcartier saint-gilbert saint-guillaume saint-hyacinthe saint-jacques-de-leeds saint-jerome saint-leonard-daston saint-louis saint-lucien saint-ludger saint-mathieu-du-parc saint-norbert saint-patrice-de-beaurivage saint-paul-de-lile-aux-noix saint-pie saint-polycarpe saint-raymond saint-roch-de-richelieu saint-roch-ouest saint-rosaire saint-severin--mekinac saint-stanislas-de-kostka saint-tite-des-caps saint-valere saint-valerien-de-milton saint-zotique sainte-anne-de-la-perade sainte-anne-des-lacs sainte-brigide-diberville sainte-catherine-de-hatley sainte-catherine-de-la-jacques-cartier sainte-cecile-de-milton sainte-clotilde-de-horton sainte-croix sainte-emelie-de-lenergie sainte-felicite--lislet sainte-justine-de-newton sainte-marguerite-du-lac-masson sainte-marie sainte-petronille sainte-seraphine sainte-sophie-dhalifax sainte-therese-de-la-gatineau saints-anges salaberry-de-valleyfield scott shannon stoke stoneham-et-tewkesbury stratford terrasse-vaudreuil upton val-alain val-david val-joli val-racine vercheres waterville wentworth wentworth-nord westbury westmount windsor
