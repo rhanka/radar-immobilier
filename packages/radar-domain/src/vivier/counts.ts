@@ -105,9 +105,10 @@ export const isVivierCountsInvariant = countsInvariant;
  *
  * A complete rezoning / regulatory reform rewrites the zoning grid, which
  * necessarily includes residential zones — so `indetermine` here means "the
- * minutes did not spell it out", not "this may well be non-residential". Any
- * other instrument (minor derogation, PIIA, …) left at `indetermine` stays a
- * genuine unknown and is NOT eligible.
+ * minutes did not spell it out", not "this may well be non-residential". These
+ * instruments are eligible at every stage. Other instruments left at
+ * `indetermine` are eligible only at an early stage (see `EARLY_ETAPES`), and
+ * individual authorisations (derogation, PIIA) never are.
  */
 const RESIDENTIAL_ELIGIBLE_INSTRUMENTS: ReadonlySet<string> = new Set([
   "rezonage",
