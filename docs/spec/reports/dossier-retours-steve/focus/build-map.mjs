@@ -8,22 +8,28 @@ import { erLayout, laneLayout } from './diagram-layout.js';
 import { SCENE_KINDS, MATRIX, ER_SPEC, LANE_SPECS } from './diagram-specs.js';
 
 const DOSSIER = '../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md';
+// Canonical scene sources live outside the report body (former annexe B); each scene is
+// rendered inside the chapter that carries its <!-- scene:<id> --> marker.
+const SCENES = '../SCENES_FOCUS.md';
 const markdown = await readFile(DOSSIER, 'utf8');
+const scenesMarkdown = await readFile(SCENES, 'utf8');
 const sha256 = value => createHash('sha256').update(value).digest('hex');
 // Must match portable.mjs: 64 zeros, present exactly once in the bundled page.
 const HTML_SHA256_PLACEHOLDER = '0'.repeat(64);
 
+// Scene order = order of the <!-- scene:<id> --> markers in the report.
 const expected = [
-  ['criteres-steve', "Scène 1 · les trois critères de Steve en regard de l'existant"],
-  ['modele-donnees', 'Scène 2 · stockage réel et propriétaires : Postgres, S3, geo, dépôt'],
-  ['flux-import-oracle', "Scène 3 · architecture de l'import à l'affichage, jeu de référence transversal"],
-  ['architecture-ui', 'Scène 4 · architecture UI et état de la migration'],
-  ['affichage-abc', "Scène 5 · A, B et C : ce que voit l'application, ce que mesure l'évaluation"],
+  ['criteres-steve', "Les trois critères de Steve en regard de l'existant"],
+  ['affichage-abc', "A, B et C : ce que voit l'application, ce que mesure l'évaluation"],
+  ['modele-donnees', 'Stockage réel et propriétaires : Postgres, S3, geo, dépôt'],
+  ['flux-import-oracle', "Architecture de l'import à l'affichage, jeu de référence transversal"],
+  ['architecture-ui', 'Architecture UI et état de la migration'],
 ];
-const [body, annexB] = markdown.split('\n## Annexe B — Scènes Focus');
-if (!annexB) throw Error('missing Annexe B');
+if (markdown.includes('\n## Annexe B') || markdown.includes('\n## Annexe A')) throw Error('annexes A and B are out of the report');
+const markers = [...markdown.matchAll(/<!-- scene:([\w-]+) -->/g)].map(match => match[1]);
+if (JSON.stringify(markers) !== JSON.stringify(expected.map(([id]) => id))) throw Error(`scene markers ${markers} differ from the scene list`);
 // Each scene: a Mermaid block (flowchart or erDiagram) or, for the matrix, a Markdown table.
-const matches = [...annexB.matchAll(/### `([^`]+)` — ([^\n]+)\n\n(```mermaid\n[\s\S]*?```|(?:\|[^\n]*\n)+)/g)];
+const matches = [...scenesMarkdown.matchAll(/^## `([^`]+)` — ([^\n]+)\n\n(```mermaid\n[\s\S]*?```|(?:\|[^\n]*\n)+)/gm)];
 if (matches.length !== expected.length) throw Error(`canonical scene count ${matches.length}, expected ${expected.length}`);
 const cells = line => line.trim().replace(/^\||\|$/g, '').split('|').map(cell => cell.trim());
 
@@ -101,26 +107,29 @@ for (const graph of graphs) {
   graph.sceneHash = sha256(graph.canonicalJson);
 }
 
-// Le corps du dossier, découpé sur ses titres de niveau 2 : les 12 sections,
-// puis l'annexe A (convergence). Le texte n'est pas réécrit. Seuls les blocs
-// Mermaid du corps sont remplacés par un renvoi : la page les rend en scènes
-// natives (annexe B), le Markdown reste la source lisible telle quelle.
+// Le dossier, découpé sur ses titres de niveau 2 : en-tête (0), glossaire, les 12
+// chapitres, puis les annexes I à IV. Le texte n'est pas réécrit. Les blocs Mermaid
+// suivis d'un repère sont rendus nativement ; les autres sont remplacés par un renvoi
+// (schémas des options : rendus dans les décisions). Le Markdown reste la source lisible.
 const mermaidNote = '> Diagramme : rendu dans la page, dans les scènes Focus ou dans les options de décision (source Mermaid dans le Markdown du dossier).';
-const [head, ...rest] = body.split(/\n## /);
+const [head, ...rest] = markdown.split(/\n## /);
 // A Mermaid block followed by a diagram marker is rendered natively at the marker.
 const strip = text => text.replace(/```mermaid\n(?:(?!```)[\s\S])*```\n\n(<!-- (?:diagram|lanes):[\w-]+ -->)/g, '$1').replace(/```mermaid\n[\s\S]*?```/g, mermaidNote);
-const sections = [{ id: 'entete', heading: head.split('\n')[0].replace(/^# /, ''), markdown: strip(head.split('\n').slice(1).join('\n').trim()) },
-  ...rest.map((chunk, index) => {
-    const heading = chunk.split('\n')[0].trim();
-    return { id: `section-${index + 1}`, heading, markdown: strip(chunk.split('\n').slice(1).join('\n').trim()) };
-  })];
+const title = head.split('\n')[0].replace(/^# /, '');
+const sectionId = heading => heading.startsWith('0.') ? 'entete' : heading.startsWith('Glossaire') ? 'glossaire'
+  : heading.startsWith('Annexe') ? `annexe-${heading.split(' ')[1]}` : `section-${heading.split('.')[0]}`;
+const sections = rest.map(chunk => {
+  const heading = chunk.split('\n')[0].trim();
+  return { id: sectionId(heading), heading, markdown: strip(chunk.split('\n').slice(1).join('\n').trim()) };
+});
 const decisionSections = sections.filter(section => /^(1[0-2]|[1-9])\./.test(section.heading));
-if (decisionSections.length !== 12) throw Error(`expected the 12 dossier sections, found ${decisionSections.length}`);
+if (decisionSections.length !== 12) throw Error(`expected the 12 dossier chapters, found ${decisionSections.length}`);
 const annexes = sections.filter(section => section.heading.startsWith('Annexe'));
-if (annexes.length !== 1 || !annexes[0].heading.startsWith('Annexe A')) throw Error('missing the convergence annexe');
-const header = sections[0];
+if (JSON.stringify(annexes.map(section => section.id)) !== JSON.stringify(['annexe-I', 'annexe-II', 'annexe-III', 'annexe-IV'])) throw Error('expected the annexes I to IV');
+const header = sections.find(section => section.id === 'entete');
+if (!header || sections[0] !== header) throw Error('missing the header (chapter 0) before the glossary');
 // Glossaire, en tête du dossier : rendu ouvert dans la page, juste après « Comment lire ce dossier ».
-const glossary = sections.find(section => section.heading === 'Glossaire');
+const glossary = sections.find(section => section.heading === 'Glossaire et statuts');
 if (!glossary) throw Error('missing the glossary');
 
 const choices = (await readFile('choices.js', 'utf8')) + (await readFile('roles.json', 'utf8')) + (await readFile('decision-yaml.js', 'utf8'));
@@ -131,21 +140,22 @@ const rendererSources = Object.fromEntries(await Promise.all([
 // Renderers of the matrix, table and swimlane scenes, local to this dossier.
 const diagramSources = Object.fromEntries(await Promise.all([
   'diagram-router.js', 'diagram-layout.js', 'diagram-specs.js', 'parse-er.mjs', 'DiagramFrame.svelte', 'ErDiagram.svelte',
-  'LaneDiagram.svelte', 'MatrixScene.svelte', 'Scenes.svelte', 'BarChart.svelte', 'charts.js', 'Sections.svelte', 'protocol.js', 'ZoomFrame.svelte', 'doc-diagrams.js', 'option-details.js', 'steve-model.js', 'physical-model.js', 'generic-decisions.js',
+  'LaneDiagram.svelte', 'MatrixScene.svelte', 'SceneView.svelte', 'BarChart.svelte', 'charts.js', 'Sections.svelte', 'protocol.js', 'ZoomFrame.svelte', 'doc-diagrams.js', 'option-details.js', 'steve-model.js', 'physical-model.js', 'generic-decisions.js',
 ].map(async name => [name, await readFile(name, 'utf8')])));
 
 const manifest = {
   schema: 'immo-focus-steve-decision-map/v1',
   dossier: 'docs/spec/reports/dossier-retours-steve/DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md',
-  title: header.heading,
+  title,
   // Placeholder for the page's own sha256, replaced by portable.mjs (see there).
   htmlSha256: HTML_SHA256_PLACEHOLDER,
   dossierHash: sha256(markdown), choicesHash: sha256(choices),
   reuse: 'gabarit A’, géométrie Dagre LR et routeur du kit h2a réutilisés depuis docs/architecture/focus',
   serviceRendererHash: sha256(JSON.stringify(rendererSources)), diagramRendererHash: sha256(JSON.stringify(diagramSources)),
-  artifactInputHash: sha256(JSON.stringify({ markdown, graphs, choices, rendererSources, diagramSources })),
-  mapping: 'Scène 1 : matrice (tableau Markdown) ; scène 2 : erDiagram rendu en tables et relations ; scène 3 : flowchart en couloirs verticaux, jeu de référence en bande basse ; scènes 4 et 5 : SvelteFlow natif, subgraphs en parentId.',
-  geometry: 'Scènes 4 et 5 : Dagre récursif rankdir LR et routeur orthogonal du kit, carte A’ 460 x 200 ; scènes 2 et 3 : grille explicite et routeur orthogonal A* du dossier.',
+  scenesHash: sha256(scenesMarkdown),
+  artifactInputHash: sha256(JSON.stringify({ markdown, scenesMarkdown, graphs, choices, rendererSources, diagramSources })),
+  mapping: 'criteres-steve : matrice (tableau Markdown) ; modele-donnees : erDiagram rendu en tables et relations ; flux-import-oracle et affichage-abc : flowchart en couloirs, évaluation en bande basse ; architecture-ui : SvelteFlow natif, subgraphs en parentId. Chaque scène est rendue dans le chapitre qui porte son repère.',
+  geometry: 'architecture-ui : Dagre récursif rankdir LR et routeur orthogonal du kit, carte A’ 460 x 200 ; modele-donnees, flux-import-oracle et affichage-abc : grille explicite et routeur orthogonal A* du dossier.',
   graphOrder: graphs.map(graph => graph.id),
   graphs: graphs.map(graph => ({ id: graph.id, title: graph.title, kind: graph.kind, sceneHash: graph.sceneHash, projection: graph.projection,
     nodes: (graph.nodes ?? graph.entities ?? graph.projection.rows).length, edges: (graph.edges ?? graph.relations ?? []).length, subflows: (graph.groups ?? []).length })),

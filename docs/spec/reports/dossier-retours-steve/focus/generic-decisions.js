@@ -1,13 +1,13 @@
 // Generic decisions G1 to G8: the eight owner decisions of the sentropic + engram
 // convergence (SYNTHESE.md §8), brought into this dossier with a G prefix so that they never
-// collide with the immo decisions D1 to D16. Decider: Fabien (owner). §6.7 summarises the
+// collide with the immo decisions D1 to D17. Decider: Fabien (owner). §9.5 summarises the
 // convergence; each decision says which immo decisions it conditions.
 const opt = (key, title, description, pros, cons) => ({ key, title, description, pros, cons });
 
 export const GENERIC = [
   {
     key: 'G1', question: 'G1 — Terminologie et provenance du jeu de référence', recommended: 'c', dependsOn: [],
-    intro: 'Le mot « oracle » désigne, en génie logiciel, le mécanisme qui rend le verdict d’un test, pas un jeu de réponses ; les quatre sièges de la convergence le rejettent comme nom d’objet (§6.7). '
+    intro: 'Le mot « oracle » désigne, en génie logiciel, le mécanisme qui rend le verdict d’un test, pas un jeu de réponses ; les quatre sièges de la convergence le rejettent comme nom d’objet (§9.5). '
       + 'Il faut un terme commun à immo, BPMN et aux paquets génériques avant d’écrire les contrats, et une façon de dire d’où viennent les étiquettes. '
       + 'Ce dossier applique déjà la recommandation : « jeu de référence » partout, avec l’attribut label_provenance (E = machine, « silver » ; C = un seul annotateur humain, Steve, « gold » en construction). '
       + 'Le renommage ne change aucune empreinte.',
@@ -27,7 +27,7 @@ export const GENERIC = [
   {
     key: 'G2', question: 'G2 — Porteurs et forme de l’annotation', recommended: 'b', dependsOn: ['G1'],
     intro: 'Les retours de Steve, ses annotations futures et les validations de l’équipe doivent vivre quelque part ; la même boucle existe déjà trois fois dans les domaines (immo E, brouillon C, BPMN d2d). '
-      + 'Le module comments de sentropic ne convient pas à la validation : il édite en place et supprime physiquement (§6.0, §6.7). '
+      + 'Le module comments de sentropic ne convient pas à la validation : il édite en place et supprime physiquement (§9.5, annexe III). '
       + 'Il faut décider qui porte l’annotation et sous quelle forme, avant que D2 (modèle immo) puisse être tranchée. '
       + 'Concrètement : soit immo écrit ses tables, soit un paquet générique les fournit, avec ses tables dans le Postgres d’immo.',
     recommendation: '(b) : réemploi des cibles et des auteurs de comments et de l’IdP sentropic, sans casser la sémantique du commentaire ; les données restent dans la base de l’hôte. L’évaluation reste un module d’engram, indépendant du producteur.',
@@ -54,7 +54,7 @@ export const GENERIC = [
     intro: 'Une annotation change : Steve corrige, l’équipe conteste, un retour est retiré. '
       + 'Il faut décider comment une modification est gardée, sur quoi porte une validation et comment on efface une donnée personnelle (Loi 25, décision O1 du dossier COLLAB : tombstone et rétention). '
       + 'Ce choix fixe ce que le jeu de référence peut citer : une révision précise, désignée par son empreinte. '
-      + 'Il remplace, pour les annotations, la question posée par D4 sur la suppression (§6.7).',
+      + 'Il remplace, pour les annotations, la question posée par D4 sur la suppression (§9.5).',
     recommendation: '(a) : l’absence d’écrasement est garantie par construction, une validation reste attachée à ce qu’elle a validé, et l’effacement purge le corps en gardant l’empreinte.',
     options: [
       opt('a', '(a) Révisions immuables chaînées, validation liée au hash, tombstone', 'Chaque modification crée une révision immuable (content_hash, prev_content_hash) ; une validation porte sur une révision désignée par son hash ; le statut courant est calculé ; un effacement laisse un tombstone (corps purgé, hash gardé).',
@@ -70,15 +70,15 @@ export const GENERIC = [
   },
   {
     key: 'G4', question: 'G4 — Autorité de validation et rôles', recommended: 'a', dependsOn: ['G2'],
-    intro: 'La boucle de validation demandée par l’owner (Steve annote, l’équipe ou le PO valide ou conteste, §6.3) suppose de dire qui a le droit de faire quoi. '
-      + 'Sentropic ne connaît aujourd’hui aucun rôle de revue : seulement des rôles de workspace, de tenant et globaux (§6.7). '
+    intro: 'La boucle de validation demandée par l’owner (Steve annote, l’équipe ou le PO valide ou conteste, §9.1) suppose de dire qui a le droit de faire quoi. '
+      + 'Sentropic ne connaît aujourd’hui aucun rôle de revue : seulement des rôles de workspace, de tenant et globaux (§9.5). '
       + 'Il faut décider comment ces rôles s’attribuent, ce que peut faire un agent (modèle, MCP) et qui décide d’un gel ou d’une promotion. '
       + 'D5 (compte de Steve) et D8 (cas contradictoires) en dépendent.',
     recommendation: '(a) : la compétence est liée au profil (Steve sur le ciblage, pas sur BPMN), les agents ne font que proposer, et seul un humain décide d’un gel ou d’une promotion ; une promotion exige une référence human_adjudicated.',
     options: [
       opt('a', '(a) Attributions par (workspace, profil), agents en proposition seulement', 'Chaque rôle (annotateur, validateur, adjudicateur, curateur, décideur) s’attribue pour un workspace et un profil ; un agent ou un connecteur MCP lit et propose, sans valider ; gel et promotion sont des actes humains.',
         ['Steve peut valider le ciblage sans droit sur d’autres domaines.', 'Les agents ne signent jamais (B2B2B).', 'Une promotion repose sur une référence humaine adjugée.'],
-        ['Gestion d’attributions à construire dans sentropic.', 'Rôles à désigner par l’owner (voir §6.7).']),
+        ['Gestion d’attributions à construire dans sentropic.', 'Rôles à désigner par l’owner (voir §9.5).']),
       opt('b', '(b) Dérivées des rôles de workspace', 'Les rôles de workspace existants suffisent : un éditeur peut valider, un administrateur peut geler un jeu.',
         ['Aucune nouvelle notion de rôle.', 'Rien à construire dans sentropic.'],
         ['Mélange droit d’édition et compétence métier.', 'Un éditeur quelconque pourrait valider le ciblage de Steve.']),
@@ -89,7 +89,7 @@ export const GENERIC = [
   },
   {
     key: 'G5', question: 'G5 — Scellement et stockage des jeux de référence', recommended: 'a', dependsOn: ['G1'],
-    intro: 'Un jeu de référence n’a de valeur que si sa partie test n’a jamais servi à optimiser un prompt ; le pilote C l’a montré : son test aveugle est consommé et partiellement contaminé (§9.7). '
+    intro: 'Un jeu de référence n’a de valeur que si sa partie test n’a jamais servi à optimiser un prompt ; le pilote C l’a montré : son test aveugle est consommé et partiellement contaminé (§4.1). '
       + 'Il faut décider comment la partie test est protégée et où les jeux sont stockés, sachant que le dépôt radar est public et qu’un agent en ligne de commande peut lire les fichiers. '
       + 'D10 (jeu de référence #783) et D13 (seuil de bascule) en dépendent.',
     recommendation: '(a) en v1 (garde, sceau inscrit dans track avant tout appel de modèle, journal d’exposition, stockage privé) ; (b) ou (c) obligatoire pour tout jeu qui fonde une bascule (D13). Stockage : objet privé de l’hôte, derrière un port du paquet ; manifestes publics.',
@@ -109,7 +109,7 @@ export const GENERIC = [
     key: 'G6', question: 'G6 — Règle et porteur de la promotion', recommended: 'a', dependsOn: ['G4', 'G5'],
     intro: 'Promouvoir un candidat (prompt, modèle, effort) en production doit reposer sur une preuve mesurée sur le jeu figé, pas sur une impression. '
       + 'Il faut décider si la règle est commune aux domaines, qui la décide et qui l’applique. '
-      + 'La règle immo de bascule B → C (D13) en est une instance, et D11 (benchmark #782) en fournit les preuves (§6.7).',
+      + 'La règle immo de bascule B → C (D13) en est une instance, et D11 (benchmark #782) en fournit les preuves (§9.5).',
     recommendation: '(a) : gabarit générique préenregistré, instancié par domaine ; décision dans track, attestée par h2a et jamais par l’API sentropic ; signataire humain authentifié par l’IdP ; garde de production dans engram sur l’empreinte exacte.',
     options: [
       opt('a', '(a) Gabarit générique préenregistré, décision track, garde engram', 'Critères écrits avant la passe test (contraintes critiques, non-infériorité avec marge, pas de régression par classe, coût) ; décision track à au moins deux options dont « garder la production » ; la production refuse toute empreinte sans « go ».',
@@ -131,7 +131,7 @@ export const GENERIC = [
     intro: 'Immo pourrait construire ses six tables tout de suite, puis migrer ; ou attendre les paquets génériques et en être le premier adoptant. '
       + 'La convergence recommande de ne pas construire les tables immo et d’ordonner le travail en lots L0 à L4 : contrats, parité des évaluateurs (avec un diagramme BPMN en recette), @sentropic/annotations avec une consommation réelle dans sentropic, jeu de référence C v2, boucle BPMN. '
       + 'Le pilote C actuel devient une version v0 exploratoire, jamais rescellée ; C v2 prend les 51 villes déjà vues en développement et les 52 suivantes en test aveugle. '
-      + 'D2 (modèle immo) et D15 (séquencement immo) en dépendent (§6.7).',
+      + 'D2 (modèle immo) et D15 (séquencement immo) en dépendent (§9.5).',
     recommendation: '(b) : pas de double travail, les besoins de Steve deviennent la recette du générique, et le délai est borné par les lots.',
     options: [
       opt('a', '(a) Immo construit ses tables, puis migre', 'Immo livre ses six tables (lot L1 immo), puis les migre vers les paquets génériques quand ils existent.',
@@ -149,7 +149,7 @@ export const GENERIC = [
     key: 'G8', question: 'G8 — BPMN : producteur, code d2d, constructeur silver', recommended: 'a', dependsOn: ['G6'],
     intro: 'BPMN est le second domaine qui doit valider le contrat générique : des diagrammes de processus produits par un outil et comparés à des diagrammes validés. '
       + 'Il faut décider si l’on garde le producteur actuel en n’adoptant que l’évaluation, et si le constructeur de références machine (silver) devient générique. '
-      + 'Cette décision n’a pas d’effet direct sur immo ; elle conditionne la recette « deux profils sur la même implémentation » de G7 (§6.7).',
+      + 'Cette décision n’a pas d’effet direct sur immo ; elle conditionne la recette « deux profils sur la même implémentation » de G7 (§9.5).',
     recommendation: '(a) maintenant, (b) sur mesure sur le même jeu ; constructeur silver générique seulement si BPMN le confirme comme second cas. La propriété du code d2d est à clarifier avant tout réemploi.',
     options: [
       opt('a', '(a) Garder le producteur actuel, adopter l’évaluation', 'Le producteur BPMN actuel (d2d ou F0) reste ; engram apporte seulement l’évaluateur de graphe et le protocole.',

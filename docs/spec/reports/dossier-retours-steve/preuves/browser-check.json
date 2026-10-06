@@ -1,8 +1,8 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-05T00:17:51.617Z",
+  "checkedAt": "2026-10-06T01:52:02.003Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
-  "chromiumCdpPort": "9243",
+  "chromiumCdpPort": "9263",
   "offline": {
     "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/decision-focus.html",
     "title": "Analyse des retours d’usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage",
@@ -34,10 +34,31 @@
       ]
     },
     {
+      "sceneId": "affichage-abc",
+      "kind": "lanes",
+      "sceneHash": "5ce17eb15e6b0f43d19366d776914e8f362a8daafc3a24dd8aec70389bd9422d",
+      "initialScale": 0.7517281105990783,
+      "lanes": [
+        "user",
+        "ui",
+        "backend",
+        "data"
+      ],
+      "stores": [],
+      "zone": "Application — ce que voient les utilisateurs",
+      "band": {
+        "below": true,
+        "widthShare": 1
+      },
+      "nodes": 16,
+      "edges": 19,
+      "labels": 19
+    },
+    {
       "sceneId": "modele-donnees",
       "kind": "er",
       "sceneHash": "2c9ef0b4f166a1e8f985a1eb6535b57410a2c997d29d1d2a5f717329b278ce24",
-      "initialScale": 0.3247098646034816,
+      "initialScale": 0.31552224371373305,
       "tables": 26,
       "relations": 29,
       "labels": 29,
@@ -64,7 +85,7 @@
       "sceneId": "flux-import-oracle",
       "kind": "lanes",
       "sceneHash": "ba0071f705bb3b20d21cfe044606028520c8c88c8782256090dbc604d638e0f3",
-      "initialScale": 0.7736175115207373,
+      "initialScale": 0.7517281105990783,
       "lanes": [
         "user",
         "ui",
@@ -88,7 +109,7 @@
       "sceneId": "architecture-ui",
       "kind": "flow",
       "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac",
-      "initialScale": 0.440948,
+      "initialScale": 0.428218,
       "contentInside": true,
       "overlaps": 0,
       "cards": 13,
@@ -96,38 +117,17 @@
       "groups": 3,
       "edgeLabels": 12,
       "panel": {
-        "left": 40,
-        "top": -37650.40625,
-        "width": 1345,
+        "left": 59,
+        "top": 251.078125,
+        "width": 1307,
         "height": 820
       },
-      "iconPx": 69.99301788419496,
+      "iconPx": 69.99990595108683,
       "controls": {
         "boutons": 4,
         "unUn": true,
         "minimap": true
       }
-    },
-    {
-      "sceneId": "affichage-abc",
-      "kind": "lanes",
-      "sceneHash": "5ce17eb15e6b0f43d19366d776914e8f362a8daafc3a24dd8aec70389bd9422d",
-      "initialScale": 0.7736175115207373,
-      "lanes": [
-        "user",
-        "ui",
-        "backend",
-        "data"
-      ],
-      "stores": [],
-      "zone": "Application — ce que voient les utilisateurs",
-      "band": {
-        "below": true,
-        "widthShare": 1
-      },
-      "nodes": 16,
-      "edges": 19,
-      "labels": 19
     }
   ],
   "scenesAt1920": [
@@ -145,10 +145,31 @@
       ]
     },
     {
+      "sceneId": "affichage-abc",
+      "kind": "lanes",
+      "sceneHash": "5ce17eb15e6b0f43d19366d776914e8f362a8daafc3a24dd8aec70389bd9422d",
+      "initialScale": 1,
+      "lanes": [
+        "user",
+        "ui",
+        "backend",
+        "data"
+      ],
+      "stores": [],
+      "zone": "Application — ce que voient les utilisateurs",
+      "band": {
+        "below": true,
+        "widthShare": 1
+      },
+      "nodes": 16,
+      "edges": 19,
+      "labels": 19
+    },
+    {
       "sceneId": "modele-donnees",
       "kind": "er",
       "sceneHash": "2c9ef0b4f166a1e8f985a1eb6535b57410a2c997d29d1d2a5f717329b278ce24",
-      "initialScale": 0.4347195357833656,
+      "initialScale": 0.425531914893617,
       "tables": 26,
       "relations": 29,
       "labels": 29,
@@ -199,7 +220,7 @@
       "sceneId": "architecture-ui",
       "kind": "flow",
       "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac",
-      "initialScale": 0.589816,
+      "initialScale": 0.577086,
       "contentInside": true,
       "overlaps": 0,
       "cards": 13,
@@ -207,38 +228,17 @@
       "groups": 3,
       "edgeLabels": 12,
       "panel": {
-        "left": 52.5,
-        "top": -36577,
-        "width": 1800,
+        "left": 71.5,
+        "top": -2683.8125,
+        "width": 1762,
         "height": 900
       },
-      "iconPx": 69.99667057183935,
+      "iconPx": 69.99995857419864,
       "controls": {
         "boutons": 4,
         "unUn": true,
         "minimap": true
       }
-    },
-    {
-      "sceneId": "affichage-abc",
-      "kind": "lanes",
-      "sceneHash": "5ce17eb15e6b0f43d19366d776914e8f362a8daafc3a24dd8aec70389bd9422d",
-      "initialScale": 1,
-      "lanes": [
-        "user",
-        "ui",
-        "backend",
-        "data"
-      ],
-      "stores": [],
-      "zone": "Application — ce que voient les utilisateurs",
-      "band": {
-        "below": true,
-        "widthShare": 1
-      },
-      "nodes": 16,
-      "edges": 19,
-      "labels": 19
     }
   ],
   "dark": {
@@ -262,10 +262,31 @@
         ]
       },
       {
+        "sceneId": "affichage-abc",
+        "kind": "lanes",
+        "sceneHash": "5ce17eb15e6b0f43d19366d776914e8f362a8daafc3a24dd8aec70389bd9422d",
+        "initialScale": 0.7517281105990783,
+        "lanes": [
+          "user",
+          "ui",
+          "backend",
+          "data"
+        ],
+        "stores": [],
+        "zone": "Application — ce que voient les utilisateurs",
+        "band": {
+          "below": true,
+          "widthShare": 1
+        },
+        "nodes": 16,
+        "edges": 19,
+        "labels": 19
+      },
+      {
         "sceneId": "modele-donnees",
         "kind": "er",
         "sceneHash": "2c9ef0b4f166a1e8f985a1eb6535b57410a2c997d29d1d2a5f717329b278ce24",
-        "initialScale": 0.3247098646034816,
+        "initialScale": 0.31552224371373305,
         "tables": 26,
         "relations": 29,
         "labels": 29,
@@ -292,7 +313,7 @@
         "sceneId": "flux-import-oracle",
         "kind": "lanes",
         "sceneHash": "ba0071f705bb3b20d21cfe044606028520c8c88c8782256090dbc604d638e0f3",
-        "initialScale": 0.7736175115207373,
+        "initialScale": 0.7517281105990783,
         "lanes": [
           "user",
           "ui",
@@ -316,7 +337,7 @@
         "sceneId": "architecture-ui",
         "kind": "flow",
         "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac",
-        "initialScale": 0.440948,
+        "initialScale": 0.428218,
         "contentInside": true,
         "overlaps": 0,
         "cards": 13,
@@ -324,47 +345,21 @@
         "groups": 3,
         "edgeLabels": 12,
         "panel": {
-          "left": 40,
-          "top": 17468.34375,
-          "width": 1345,
+          "left": 59,
+          "top": 47142.078125,
+          "width": 1307,
           "height": 820
         },
-        "iconPx": 69.99744726135508,
+        "iconPx": 69.99391956900458,
         "controls": {
           "boutons": 4,
           "unUn": true,
           "minimap": true
         }
-      },
-      {
-        "sceneId": "affichage-abc",
-        "kind": "lanes",
-        "sceneHash": "5ce17eb15e6b0f43d19366d776914e8f362a8daafc3a24dd8aec70389bd9422d",
-        "initialScale": 0.7736175115207373,
-        "lanes": [
-          "user",
-          "ui",
-          "backend",
-          "data"
-        ],
-        "stores": [],
-        "zone": "Application — ce que voient les utilisateurs",
-        "band": {
-          "below": true,
-          "widthShare": 1
-        },
-        "nodes": 16,
-        "edges": 19,
-        "labels": 19
       }
     ],
     "content": {
       "charts": [
-        {
-          "id": "steve-signaux",
-          "kind": "stacked",
-          "bars": 6
-        },
         {
           "id": "steve-signaux",
           "kind": "stacked",
@@ -381,47 +376,34 @@
           "bars": 10
         },
         {
+          "id": "base-b",
+          "kind": "percent",
+          "bars": 6
+        },
+        {
           "id": "classement-passes",
           "kind": "stacked",
           "bars": 10
         },
         {
-          "id": "base-b",
-          "kind": "percent",
+          "id": "steve-signaux",
+          "kind": "stacked",
           "bars": 6
         }
       ],
-      "descriptions": 75,
+      "descriptions": 79,
       "minis": [
         {
-          "id": "doc-etat-actuel",
-          "option": false,
-          "tables": 16,
-          "scale": 1
-        },
-        {
-          "id": "doc-etat-propose",
-          "option": false,
-          "tables": 26,
-          "scale": 1
-        },
-        {
-          "id": "doc-existant",
+          "id": "doc-jeux-reference",
           "option": false,
           "tables": 6,
-          "scale": 1
+          "scale": 0.647
         },
         {
           "id": "doc-modele-minimal",
           "option": false,
           "tables": 9,
-          "scale": 1
-        },
-        {
-          "id": "doc-jeux-reference",
-          "option": false,
-          "tables": 6,
-          "scale": 1
+          "scale": 0.654
         },
         {
           "id": "option-D2-a",
@@ -466,22 +448,16 @@
           "scale": 1
         },
         {
-          "id": "option-D10-a",
-          "option": true,
-          "tables": 4,
-          "scale": 0.689
+          "id": "doc-etat-actuel",
+          "option": false,
+          "tables": 16,
+          "scale": 0.382
         },
         {
-          "id": "option-D10-b",
-          "option": true,
+          "id": "doc-existant",
+          "option": false,
           "tables": 6,
-          "scale": 0.747
-        },
-        {
-          "id": "option-D10-c",
-          "option": true,
-          "tables": 4,
-          "scale": 0.739
+          "scale": 0.78
         }
       ]
     },
@@ -501,11 +477,6 @@
         "bars": 6
       },
       {
-        "id": "steve-signaux",
-        "kind": "stacked",
-        "bars": 6
-      },
-      {
         "id": "sens-classement",
         "kind": "stacked",
         "bars": 12
@@ -516,47 +487,34 @@
         "bars": 10
       },
       {
+        "id": "base-b",
+        "kind": "percent",
+        "bars": 6
+      },
+      {
         "id": "classement-passes",
         "kind": "stacked",
         "bars": 10
       },
       {
-        "id": "base-b",
-        "kind": "percent",
+        "id": "steve-signaux",
+        "kind": "stacked",
         "bars": 6
       }
     ],
-    "descriptions": 75,
+    "descriptions": 79,
     "minis": [
       {
-        "id": "doc-etat-actuel",
-        "option": false,
-        "tables": 16,
-        "scale": 1
-      },
-      {
-        "id": "doc-etat-propose",
-        "option": false,
-        "tables": 26,
-        "scale": 1
-      },
-      {
-        "id": "doc-existant",
+        "id": "doc-jeux-reference",
         "option": false,
         "tables": 6,
-        "scale": 1
+        "scale": 0.647
       },
       {
         "id": "doc-modele-minimal",
         "option": false,
         "tables": 9,
-        "scale": 1
-      },
-      {
-        "id": "doc-jeux-reference",
-        "option": false,
-        "tables": 6,
-        "scale": 1
+        "scale": 0.654
       },
       {
         "id": "option-D2-a",
@@ -601,34 +559,21 @@
         "scale": 1
       },
       {
-        "id": "option-D10-a",
-        "option": true,
-        "tables": 4,
-        "scale": 0.689
+        "id": "doc-etat-actuel",
+        "option": false,
+        "tables": 16,
+        "scale": 0.382
       },
       {
-        "id": "option-D10-b",
-        "option": true,
+        "id": "doc-existant",
+        "option": false,
         "tables": 6,
-        "scale": 0.747
-      },
-      {
-        "id": "option-D10-c",
-        "option": true,
-        "tables": 4,
-        "scale": 0.739
+        "scale": 0.78
       }
     ]
   },
   "zoom": {
     "frames": [
-      {
-        "id": "chart-steve-signaux",
-        "mode": "transform",
-        "fit": 1.458,
-        "zoomed": 2.277,
-        "dragged": false
-      },
       {
         "id": "chart-steve-signaux",
         "mode": "transform",
@@ -651,6 +596,20 @@
         "dragged": false
       },
       {
+        "id": "chart-base-b",
+        "mode": "transform",
+        "fit": 1.458,
+        "zoomed": 2.277,
+        "dragged": false
+      },
+      {
+        "id": "criteres-steve",
+        "mode": "transform",
+        "fit": 1.079,
+        "zoomed": 1.686,
+        "dragged": false
+      },
+      {
         "id": "chart-classement-passes",
         "mode": "transform",
         "fit": 1.458,
@@ -658,24 +617,24 @@
         "dragged": false
       },
       {
-        "id": "doc-etat-actuel",
+        "id": "chart-steve-signaux",
         "mode": "transform",
-        "fit": 0.413,
-        "zoomed": 0.645,
+        "fit": 1.458,
+        "zoomed": 2.277,
         "dragged": false
       },
       {
-        "id": "doc-etat-propose",
+        "id": "doc-jeux-reference",
         "mode": "transform",
-        "fit": 0.34,
-        "zoomed": 0.532,
+        "fit": 0.698,
+        "zoomed": 1.091,
         "dragged": false
       },
       {
-        "id": "doc-existant",
+        "id": "affichage-abc",
         "mode": "transform",
-        "fit": 0.841,
-        "zoomed": 1.314,
+        "fit": 0.767,
+        "zoomed": 1.199,
         "dragged": false
       },
       {
@@ -693,27 +652,6 @@
         "dragged": false
       },
       {
-        "id": "doc-jeux-reference",
-        "mode": "transform",
-        "fit": 0.698,
-        "zoomed": 1.091,
-        "dragged": false
-      },
-      {
-        "id": "chart-base-b",
-        "mode": "transform",
-        "fit": 1.458,
-        "zoomed": 2.277,
-        "dragged": false
-      },
-      {
-        "id": "criteres-steve",
-        "mode": "transform",
-        "fit": 1.048,
-        "zoomed": 1.638,
-        "dragged": false
-      },
-      {
         "id": "modele-donnees",
         "mode": "transform",
         "fit": 0.34,
@@ -723,8 +661,8 @@
       {
         "id": "flux-import-oracle",
         "mode": "transform",
-        "fit": 0.72,
-        "zoomed": 1.125,
+        "fit": 0.717,
+        "zoomed": 1.121,
         "dragged": true
       },
       {
@@ -732,13 +670,6 @@
         "mode": "native",
         "fit": null,
         "zoomed": null,
-        "dragged": false
-      },
-      {
-        "id": "affichage-abc",
-        "mode": "transform",
-        "fit": 0.77,
-        "zoomed": 1.203,
         "dragged": false
       },
       {
@@ -791,30 +722,23 @@
         "dragged": false
       },
       {
-        "id": "option-D10-a",
+        "id": "doc-etat-actuel",
         "mode": "transform",
-        "fit": 0.784,
-        "zoomed": 1.226,
+        "fit": 0.413,
+        "zoomed": 0.645,
         "dragged": false
       },
       {
-        "id": "option-D10-b",
+        "id": "doc-existant",
         "mode": "transform",
-        "fit": 0.85,
-        "zoomed": 1.328,
-        "dragged": false
-      },
-      {
-        "id": "option-D10-c",
-        "mode": "transform",
-        "fit": 0.842,
-        "zoomed": 1.315,
+        "fit": 0.841,
+        "zoomed": 1.314,
         "dragged": false
       }
     ],
     "inPage": {
-      "before": 0.325,
-      "scale": 0.406,
+      "before": 0.316,
+      "scale": 0.394,
       "inside": true,
       "overflow": false
     },
@@ -836,14 +760,15 @@
     ]
   },
   "choices": {
-    "blocks": 24,
-    "single": 24,
-    "radio": 75,
-    "recommended": 23,
+    "blocks": 25,
+    "single": 25,
+    "radio": 79,
+    "recommended": 25,
     "selected": [
       "a"
     ],
     "decides": [
+      "Fabien",
       "Fabien",
       "Fabien",
       "Fabien",
@@ -873,7 +798,7 @@
       "D12": "a",
       "D9": "1"
     },
-    "defer": 24,
+    "defer": 25,
     "jsonControls": 0,
     "copyButton": "Copier mes décisions (YAML)",
     "steps": "1. Copier, 2. ouvrir la PR, 3. coller dans un commentaire.",
@@ -975,8 +900,8 @@
   },
   "exportFilter": {
     "faridMine": 9,
-    "all": 24,
-    "fabienMine": 15,
+    "all": 25,
+    "fabienMine": 16,
     "fabienDecideur": "Fabien",
     "fabienRoles": {
       "G1": "decide",
@@ -993,11 +918,13 @@
       "D4": "decide",
       "D9": "decide",
       "D10": "decide",
-      "D11": "decide"
+      "D11": "decide",
+      "D17": "decide"
     },
     "allOptions": {
       "D1": "b",
       "D9": "1",
+      "D17": "a",
       "D12": "a"
     }
   },
@@ -1007,6 +934,10 @@
       "scale": 1
     },
     {
+      "sceneId": "affichage-abc",
+      "scale": 1
+    },
+    {
       "sceneId": "modele-donnees",
       "scale": 1
     },
@@ -1015,16 +946,12 @@
       "scale": 1
     },
     {
-      "sceneId": "affichage-abc",
-      "scale": 1
-    },
-    {
       "sceneId": "architecture-ui",
       "scale": 1,
       "clip": {
-        "x": 60,
-        "y": 66522,
-        "width": 1800,
+        "x": 79,
+        "y": 45711.1875,
+        "width": 1762,
         "height": 900
       }
     }
@@ -1033,46 +960,46 @@
     {
       "sceneId": "criteres-steve",
       "clip": {
-        "x": 52.5,
-        "y": 12842.5625,
-        "width": 1800,
-        "height": 540
-      }
-    },
-    {
-      "sceneId": "modele-donnees",
-      "clip": {
-        "x": 52.5,
-        "y": 13939.859375,
-        "width": 1800,
-        "height": 820
-      }
-    },
-    {
-      "sceneId": "flux-import-oracle",
-      "clip": {
-        "x": 52.5,
-        "y": 15277.34375,
-        "width": 1800,
-        "height": 1332
-      }
-    },
-    {
-      "sceneId": "architecture-ui",
-      "clip": {
-        "x": 52.5,
-        "y": 17138.75,
-        "width": 1800,
-        "height": 900
+        "x": 71.5,
+        "y": 14070.296875,
+        "width": 1762,
+        "height": 542.109375
       }
     },
     {
       "sceneId": "affichage-abc",
       "clip": {
-        "x": 52.5,
-        "y": 18532.515625,
-        "width": 1800,
-        "height": 1248
+        "x": 71.5,
+        "y": 32267.3125,
+        "width": 1762,
+        "height": 1250.109375
+      }
+    },
+    {
+      "sceneId": "modele-donnees",
+      "clip": {
+        "x": 71.5,
+        "y": 39033.46875,
+        "width": 1762,
+        "height": 806.109375
+      }
+    },
+    {
+      "sceneId": "flux-import-oracle",
+      "clip": {
+        "x": 71.5,
+        "y": 43447.421875,
+        "width": 1762,
+        "height": 1334.109375
+      }
+    },
+    {
+      "sceneId": "architecture-ui",
+      "clip": {
+        "x": 71.5,
+        "y": 45607.1875,
+        "width": 1762,
+        "height": 900
       }
     }
   ],
@@ -1080,23 +1007,23 @@
     ".generated/dossier-preview-1440x1000.png",
     ".generated/dossier-preview-1920x1080.png",
     ".generated/scene-1a1-criteres-steve.png",
+    ".generated/scene-1a1-affichage-abc.png",
     ".generated/scene-1a1-modele-donnees.png",
     ".generated/scene-1a1-flux-import-oracle.png",
     ".generated/scene-1a1-architecture-ui.png",
-    ".generated/scene-1a1-affichage-abc.png",
     ".generated/scene-vue-ensemble-criteres-steve.png",
+    ".generated/scene-vue-ensemble-affichage-abc.png",
     ".generated/scene-vue-ensemble-modele-donnees.png",
     ".generated/scene-vue-ensemble-flux-import-oracle.png",
     ".generated/scene-vue-ensemble-architecture-ui.png",
-    ".generated/scene-vue-ensemble-affichage-abc.png",
     ".generated/dossier-preview-dark-1440x1000.png",
     ".generated/sombre-graphique-sens.png",
     ".generated/sombre-decision-D2.png",
     ".generated/scene-sombre-criteres-steve.png",
+    ".generated/scene-sombre-affichage-abc.png",
     ".generated/scene-sombre-modele-donnees.png",
     ".generated/scene-sombre-flux-import-oracle.png",
     ".generated/scene-sombre-architecture-ui.png",
-    ".generated/scene-sombre-affichage-abc.png",
     ".generated/graphique-sens.png",
     ".generated/graphique-bruit.png",
     ".generated/decision-D2.png",

@@ -1,6 +1,6 @@
 <script>
   // Same interaction contract as Choices.svelte in the architecture chain (local draft),
-  // one answer per decision D1 to D16; the recommended option is flagged, never preselected.
+  // one answer per decision G1 to G8 and D1 to D17; the recommended option is flagged, never preselected.
   // Order of decision: Fabien's block first, then Farid's. Each decision opens with an
   // introduction and its dependencies; each option lists its advantages and drawbacks.
   // Export: a paste-ready Markdown block (```yaml … ```) for the GitHub PR, copied to the
@@ -64,7 +64,7 @@
 
 <section class="choices" id="ce-qu-on-demande" aria-labelledby="choice-title">
   <div class="flex-row">
-    <div><span class="eyebrow">§3 et §10 · Fabien décide d’abord, Farid ensuite</span><h2 id="choice-title">Décisions G1 à G8 et D1 à D16</h2></div>
+    <div><span class="eyebrow">§3.1, ch. 10 et annexe II · Fabien décide d’abord, Farid ensuite</span><h2 id="choice-title">Décisions G1 à G8 et D1 à D17</h2></div>
     <span class="badge warning">Brouillon local · rien n’est ratifié</span>
   </div>
   <div class="sequence" data-sequence>

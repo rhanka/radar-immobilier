@@ -49,7 +49,7 @@ proofs:
 	  $(FOCUS_DIR)/.generated/decision-*.png $(FOCUS_DIR)/.generated/sombre-*.png $(FOCUS_DIR)/.generated/zoom-*.png $(FOCUS_DIR)/../preuves/
 	node -e "const r=require('$(FOCUS_DIR)/.generated/browser-check.json'); \
 	  if(r.status!=='pass') throw Error('browser check did not pass'); \
-	  if(r.scenes.length!==5) throw Error('five scenes expected'); \
+	  if(r.scenes.length!==5) throw Error('five scenes expected (one per chapter marker)'); \
 	  if(r.consoleErrors.length||r.runtimeErrors.length) throw Error('console is not clean'); \
 	  if(r.externalRequests.length) throw Error('the page is not offline'); \
 	  console.log(JSON.stringify({scenes:r.scenes.map(s=>({id:s.sceneId,cards:s.cards,edges:s.edges,scale:s.initialScale})),choices:r.choices}))"
