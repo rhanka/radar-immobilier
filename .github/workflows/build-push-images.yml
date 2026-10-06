@@ -756,9 +756,16 @@ jobs:
           while :; do
             complete="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)"
             failed="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)"
-            if [ "$complete" = "True" ]; then echo "db-migrate: Job $JOB Complete"; break; fi
+            if [ "$complete" = "True" ]; then
+              echo "db-migrate: Job $JOB Complete"
+              # Bounded summary written by dist/db/migrate.js (status + NOTICE counts, e.g. 0013
+              # deleted NULL-city rows — GH #812); readable without pods/log.
+              echo "db-migrate summary: $(kubectl -n "$NAMESPACE" get pods -l job-name="$JOB" -o 'jsonpath={range .items[*]}{.status.containerStatuses[0].state.terminated.message}{end}' 2>/dev/null || true)"
+              break
+            fi
             if [ "$failed" = "True" ]; then
               echo "::error title=DB migrate FAILED::$JOB — aborting release BEFORE set-image"
+              echo "db-migrate summary: $(kubectl -n "$NAMESPACE" get pods -l job-name="$JOB" -o 'jsonpath={range .items[*]}{.status.containerStatuses[0].state.terminated.message}{end}' 2>/dev/null || true)"
               kubectl -n "$NAMESPACE" logs "job/$JOB" --tail=80 || true
               # Backstop: kill the in-cluster Job so a hung migration (blocked
               # ALTER/CREATE INDEX) actually stops — the `exit 1` only ends the CI
@@ -1348,9 +1355,16 @@ jobs:
           while :; do
             complete="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)"
             failed="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)"
-            if [ "$complete" = "True" ]; then echo "db-migrate: Job $JOB Complete"; break; fi
+            if [ "$complete" = "True" ]; then
+              echo "db-migrate: Job $JOB Complete"
+              # Bounded summary written by dist/db/migrate.js (status + NOTICE counts, e.g. 0013
+              # deleted NULL-city rows — GH #812); readable without pods/log.
+              echo "db-migrate summary: $(kubectl -n "$NAMESPACE" get pods -l job-name="$JOB" -o 'jsonpath={range .items[*]}{.status.containerStatuses[0].state.terminated.message}{end}' 2>/dev/null || true)"
+              break
+            fi
             if [ "$failed" = "True" ]; then
               echo "::error title=DB migrate FAILED (prod)::$JOB — aborting promotion BEFORE set-image"
+              echo "db-migrate summary: $(kubectl -n "$NAMESPACE" get pods -l job-name="$JOB" -o 'jsonpath={range .items[*]}{.status.containerStatuses[0].state.terminated.message}{end}' 2>/dev/null || true)"
               kubectl -n "$NAMESPACE" logs "job/$JOB" --tail=80 || true
               # Backstop: kill the in-cluster Job so a hung migration (blocked
               # ALTER/CREATE INDEX) actually stops — the `exit 1` only ends the CI

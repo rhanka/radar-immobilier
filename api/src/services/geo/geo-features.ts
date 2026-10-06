@@ -178,7 +178,8 @@ export async function buildZoneResolutionMap(
       regulatoryStatus: sql<string | null>`${graphNodes.props}->'properties'->>'regulatoryStatus'`,
     })
     .from(graphNodes)
-    .where(inArray(graphNodes.id, nodeIds));
+    // (city_slug, id): a node id is unique inside one city only (GH #812).
+    .where(and(eq(graphNodes.citySlug, citySlug), inArray(graphNodes.id, nodeIds)));
 
   const nodeMap = new Map(nodeRows.map((n) => [n.id, n]));
 
