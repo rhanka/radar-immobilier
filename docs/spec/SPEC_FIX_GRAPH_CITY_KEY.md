@@ -425,9 +425,15 @@ and re-aligned; a city with an `unknown` row refused before any mutation; a G5c-
 refused by the unchanged completeness guard and rolled back. `migrate-idempotence.spec.ts` (drift
 replay of 0013), `refresh-018.spec.ts` and the rest of the suite green.
 
-Not covered by automated tests (`not covered`): `recover-document-dates --apply` after a repair,
-`mapper` with `RESET=1` (exercised in preprod R5), the `run-job.yaml` branches (exercised by the
-preprod run), a real S3 listing for phase 2 (exercised by the preprod R2 measurement).
+Added after the PR #825 review: a local guarded value coinciding with another city's row is refused
+by both the plain projection and the repair; node content drift of a `clean` row is measured and
+re-aligned; CLI outcomes for a missing, unreadable or access-denied target and for a failed report
+upload (exit 1, termination summary); `mapper` `RESET=1` purges a requested city without current
+geometry, leaves other cities untouched and refuses to run without `CITIES` (script run as the Job).
+
+Not covered by automated tests (`not covered`): `recover-document-dates --apply` after a repair, the
+`run-job.yaml` branches (exercised by the preprod run), a real S3 listing for phase 2 (exercised by
+the preprod R2 measurement).
 
 CI: `make k8s-validate ENV=ci`; object-storage binding check.
 
