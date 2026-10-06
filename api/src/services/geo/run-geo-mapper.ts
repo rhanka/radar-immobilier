@@ -65,9 +65,14 @@ async function main() {
     ORDER BY city_slug
   `);
 
-  const cityList = citiesWithGeo.rows
-    .map((r) => r.city_slug)
-    .filter((c) => !CITIES_FILTER || CITIES_FILTER.includes(c));
+  // RESET: every requested city is purged, even without current geometry (its old geo rows must
+  // go; its signals then resolve to geo_unresolved) — review SOL-825-03. Otherwise: cities with
+  // current geometry, optionally restricted to CITIES (append-only, unchanged).
+  const cityList = RESET
+    ? [...new Set(CITIES_FILTER!)].sort()
+    : citiesWithGeo.rows
+        .map((r) => r.city_slug)
+        .filter((c) => !CITIES_FILTER || CITIES_FILTER.includes(c));
 
   console.log(`Villes cibles : ${cityList.join(", ")}`);
   console.log(`Total : ${cityList.length} villes\n`);

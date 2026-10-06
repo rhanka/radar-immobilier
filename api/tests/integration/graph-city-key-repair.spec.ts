@@ -211,6 +211,36 @@ describe("GH #812 — city-key repair", () => {
     expect((await repairCity(db, all[GORE]!, indexOf(all), "preview")).noop).toBe(true);
   });
 
+  it("A825-01: a local guarded value coinciding with another city's row is not dropped by the repair", async () => {
+    // gore's OWN zone-h-1 carries nb_unites_max=4; its latest.json drops it; barkmere holds the same
+    // id, label and property plus its own evidence. A plain projection refuses the loss; so must the repair.
+    await insertRow(GORE, "zone-h-1", { id: "zone-h-1", type: "Zone", label: "Zone H-1", properties: { nb_unites_max: 4 } });
+    const goreNow = { nodes: [{ id: "zone-h-1", type: "Zone", label: "Zone H-1" }] };
+    const barkNow = { nodes: [{ id: "zone-h-1", type: "Zone", label: "Zone H-1", properties: { nb_unites_max: 4 }, refs: [ref("barkmere", "B7")] }] };
+    const all = { [GORE]: prepareCityProjection(GORE, goreNow), [BARK]: prepareCityProjection(BARK, barkNow) };
+    const report = await repairCity(db, all[GORE]!, indexOf(all), "apply");
+    expect(report.classes.foreign).toBe(0);
+    expect(report.verdict).toBe("refused-guard");
+    expect(report.applied).toBe(false);
+    const [kept] = await db.select().from(graphNodes).where(eq(graphNodes.citySlug, GORE));
+    expect(JSON.stringify(kept!.props)).toContain("nb_unites_max");
+  });
+
+  it("A825-02: node-content drift of a clean row is measured (not a no-op) and re-aligned by apply", async () => {
+    await insertRow(GORE, "bylaw-242", { ...s3[GORE].nodes[0]!, label: "old local label" });
+    await insertRow(GORE, "zone-c-6", s3[GORE].nodes[1]!);
+    await insertRow(GORE, "sig-1", s3[GORE].nodes[2]!);
+    await db.insert(graphEdges).values({ citySlug: GORE, srcId: "bylaw-242", dstId: "zone-c-6", kind: "regulates", props: {} });
+    const all = projections();
+    const preview = await repairCity(db, all[GORE]!, indexOf(all), "preview");
+    expect(preview.classes).toEqual({ clean: 3, foreign: 0, unknown: 0 });
+    expect(preview.drift.nodesContentDiff).toBe(1);
+    expect(preview.noop).toBe(false);
+    expect((await repairCity(db, all[GORE]!, indexOf(all), "apply")).verdict).toBe("pass");
+    expect((await goreBylaw())!.label).toBe("Règlement 242 (gore)");
+    expect((await repairCity(db, all[GORE]!, indexOf(all), "preview")).noop).toBe(true);
+  });
+
   it("phase 1 selects only the contaminated ids", async () => {
     await seedContamination();
     const all = projections();

@@ -28,7 +28,8 @@
  * primary key of graph_nodes is (city_slug, id). The run-job workflow refuses to
  * start while a refresh, backup, projection, recovery, mapper or repair Job runs.
  *
- * Exit: 0 when every city passes (or is a no-op), 1 when a city is refused or errors,
+ * Exit: 0 when every city passes (or is a no-op) and the report is uploaded; 1 when a city is
+ * refused, errors or is unavailable (no readable latest.json), or the report upload fails;
  * 2 on a usage or precondition error.
  */
 import { writeFile } from "node:fs/promises";
@@ -36,7 +37,7 @@ import { writeFile } from "node:fs/promises";
 import { eq, sql } from "drizzle-orm";
 
 import { loadConfig } from "../config.js";
-import { createDb } from "../db/client.js";
+import { createDb, type Database } from "../db/client.js";
 import { graphNodes } from "../db/schema.js";
 import { createLogger } from "../logger.js";
 import {
@@ -47,14 +48,14 @@ import {
   type ComparableNodeRow,
 } from "../services/graph/city-key-repair.js";
 import { prepareCityProjection, type CityProjection } from "../services/graph/graph-store.js";
-import { getScrapeObjectStore, type S3ObjectStore } from "../storage/s3-object-store.js";
+import { getScrapeObjectStore, isMissingObjectError, type S3ObjectStore } from "../storage/s3-object-store.js";
 
 const decoder = new TextDecoder();
 const TERMINATION_LOG = "/dev/termination-log";
 const TERMINATION_MAX = 4000;
 const SLUG = /^[a-z0-9][a-z0-9-]*$/;
 
-interface Args {
+export interface Args {
   apply: boolean;
   all: boolean;
   cities: string[];
@@ -81,17 +82,37 @@ export function parseArgs(argv: readonly string[]): Args | { error: string } {
   return args;
 }
 
-async function readProjection(store: S3ObjectStore, city: string): Promise<CityProjection | null> {
+/** Why a target city could not be repaired before its transaction: no object, a storage error, or a file that is not a graph. */
+export interface UnavailableCity {
+  city: string;
+  cause: "not-found" | "read-failed" | "unreadable";
+  detail: string;
+}
+
+type ProjectionRead = { projection: CityProjection } | { unavailable: UnavailableCity };
+
+type RepairStore = Pick<S3ObjectStore, "get" | "list" | "put">;
+
+/** The city's projection from its latest.json, or why it is unavailable (review A825-03 / SOL-825-01). */
+async function readProjection(store: RepairStore, city: string): Promise<ProjectionRead> {
   let raw: Uint8Array;
   try {
     raw = await store.get(`graph/${city}/latest.json`);
-  } catch {
-    return null;
+  } catch (err) {
+    return { unavailable: { city, cause: isMissingObjectError(err) ? "not-found" : "read-failed", detail: String(err).slice(0, 200) } };
   }
-  return prepareCityProjection(city, JSON.parse(decoder.decode(raw)));
+  try {
+    return { projection: prepareCityProjection(city, JSON.parse(decoder.decode(raw))) };
+  } catch (err) {
+    return { unavailable: { city, cause: "unreadable", detail: String(err).slice(0, 200) } };
+  }
 }
 
-export function summarize(reports: readonly CityRepairReport[], meta: Record<string, unknown>) {
+export function summarize(
+  reports: readonly CityRepairReport[],
+  meta: Record<string, unknown>,
+  unavailable: readonly UnavailableCity[] = [],
+) {
   const by = (pred: (r: CityRepairReport) => boolean) => reports.filter(pred).map((r) => r.city);
   return {
     ...meta,
@@ -104,11 +125,124 @@ export function summarize(reports: readonly CityRepairReport[], meta: Record<str
     refusedUnknown: by((r) => r.verdict === "refused-unknown"),
     refusedGuard: by((r) => r.verdict === "refused-guard"),
     errors: by((r) => r.verdict === "error"),
+    /** Target cities never attempted: no readable latest.json (counted as errors). */
+    unavailable: unavailable.map((u) => `${u.city}:${u.cause}`),
     beforeRefused: by((r) => r.before.verdict === "refused"),
     foreignNodes: reports.reduce((n, r) => n + r.classes.foreign, 0),
     unknownNodes: reports.reduce((n, r) => n + r.classes.unknown, 0),
     citiesWithForeign: by((r) => r.classes.foreign > 0).length,
   };
+}
+
+type Summary = ReturnType<typeof summarize>;
+
+/** The bounded (≤ 4 KiB) termination summary: counts, report status and the city lists, truncated. */
+export function terminationSummary(
+  summary: Summary,
+  extra: { mode: string; runId: string; reportKey: string; reportUploaded: boolean; reportError?: string },
+): string {
+  for (const cap of [60, 30, 15, 5, 0]) {
+    const list = (xs: readonly string[]) => (xs.length > cap ? [...xs.slice(0, cap), `…+${xs.length - cap}`] : xs);
+    const body = JSON.stringify({
+      ...extra,
+      cities: summary.cities, pass: summary.pass, noop: summary.noop, foreignNodes: summary.foreignNodes, unknownNodes: summary.unknownNodes,
+      committed: list(summary.committed), refusedUnknown: list(summary.refusedUnknown), refusedGuard: list(summary.refusedGuard),
+      errors: list(summary.errors), unavailable: list(summary.unavailable), needsRepair: summary.needsRepair.length,
+    });
+    if (body.length <= TERMINATION_MAX) return body;
+  }
+  return JSON.stringify({ ...extra, truncated: true }).slice(0, TERMINATION_MAX);
+}
+
+export interface RepairDeps {
+  db: Database;
+  store: RepairStore;
+  logger: Pick<ReturnType<typeof createLogger>, "info" | "error">;
+  writeTermination: (body: string) => Promise<void>;
+}
+
+/** The repair run (see the module header). Returns the process exit code. */
+export async function runRepair(args: Args, deps: RepairDeps): Promise<number> {
+  const { db, store, logger } = deps;
+  const mode = args.apply ? "apply" : "preview";
+
+  const pk = await db.execute<{ cols: string[] }>(sql`
+    SELECT array_agg(a.attname::text ORDER BY array_position(c.conkey, a.attnum)) AS cols
+      FROM pg_constraint c JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = ANY (c.conkey)
+     WHERE c.conrelid = 'public.graph_nodes'::regclass AND c.contype = 'p'`);
+  const cols = pk.rows[0]?.cols ?? [];
+  if (cols.join(",") !== "city_slug,id") {
+    console.error(`repair-graph-city-key: precondition failed — graph_nodes primary key is (${cols.join(", ")}), expected (city_slug, id); run migration 0013 first`);
+    return 2;
+  }
+
+  const allCities = ((await store.list("graph/")) ?? [])
+    .filter((key) => /^graph\/[^/]+\/latest\.json$/.test(key))
+    .map((key) => key.split("/")[1]!)
+    .sort();
+  const targets = args.all ? allCities : [...new Set(args.cities)];
+  logger.info({ mode, runId: args.runId, targets: targets.length, s3Cities: allCities.length }, "repair-graph-city-key: start");
+
+  // Phase 1 — ids of each target city whose PG content differs from its own S3 rows.
+  const neededIds = new Set<string>();
+  const unavailable = new Map<string, UnavailableCity>();
+  for (const city of targets) {
+    const read = await readProjection(store, city);
+    if ("unavailable" in read) { unavailable.set(city, read.unavailable); continue; }
+    const pgRows = (
+      await db.select({ id: graphNodes.id, type: graphNodes.type, label: graphNodes.label, props: graphNodes.props, sourceRef: graphNodes.sourceRef })
+        .from(graphNodes).where(eq(graphNodes.citySlug, city))
+    ).map((row) => comparable({ ...row, props: (row.props ?? {}) as Record<string, unknown> }));
+    for (const id of idsWithLostContent(pgRows, read.projection)) neededIds.add(id);
+  }
+
+  // Phase 2 — same-id rows of every city's S3 file, kept only for those ids. A file that cannot be
+  // read here only removes candidates: affected rows become `unknown` (refused), never `foreign`.
+  const foreignIndex = new Map<string, Array<{ city: string; row: ComparableNodeRow }>>();
+  if (neededIds.size > 0) {
+    for (const city of allCities) {
+      const read = await readProjection(store, city);
+      if ("unavailable" in read) continue;
+      for (const row of read.projection.nodeRows) {
+        if (!neededIds.has(row.id)) continue;
+        const list = foreignIndex.get(row.id) ?? [];
+        list.push({ city, row: comparable(row) });
+        foreignIndex.set(row.id, list);
+      }
+    }
+  }
+  logger.info({ neededIds: neededIds.size, indexedIds: foreignIndex.size }, "repair-graph-city-key: foreign index built");
+
+  // Phase 3 — one transaction per city (rolled back in preview).
+  const reports: CityRepairReport[] = [];
+  for (const city of targets) {
+    if (unavailable.has(city)) continue;
+    const read = await readProjection(store, city);
+    if ("unavailable" in read) { unavailable.set(city, read.unavailable); continue; }
+    const report = await repairCity(db, read.projection, foreignIndex, mode);
+    reports.push(report);
+    console.log(JSON.stringify({ event: "repair-graph-city-key:city", ...report,
+      foreignNodes: report.foreignNodes.slice(0, 50), unknownNodes: report.unknownNodes.slice(0, 50) }));
+  }
+  for (const u of unavailable.values()) console.log(JSON.stringify({ event: "repair-graph-city-key:unavailable", ...u }));
+
+  const summary = summarize(reports, { event: "repair-graph-city-key:report", mode, runId: args.runId }, [...unavailable.values()]);
+  const reportKey = `reports/graph-city-key/${args.runId}/repair.json`;
+  let reportUploaded = true;
+  let reportError: string | undefined;
+  try {
+    await store.put(reportKey, JSON.stringify({ summary, reports, unavailable: [...unavailable.values()] }, null, 2), "application/json");
+  } catch (err) {
+    // SOL-825-02: the report is the only durable per-city record; a failed upload fails the run.
+    reportUploaded = false;
+    reportError = String(err).slice(0, 200);
+    logger.error({ reportKey, err: reportError }, "repair-graph-city-key: report upload failed");
+  }
+  console.log(JSON.stringify({ ...summary, reportKey, reportUploaded }));
+  await deps.writeTermination(terminationSummary(summary, { mode, runId: args.runId, reportKey, reportUploaded, ...(reportError ? { reportError } : {}) }));
+
+  const failures = summary.refusedUnknown.length + summary.refusedGuard.length + summary.errors.length + unavailable.size;
+  return failures > 0 || !reportUploaded ? 1 : 0;
 }
 
 async function main(): Promise<number> {
@@ -122,81 +256,13 @@ async function main(): Promise<number> {
   // Same store as recover-document-dates (graph snapshots live in the docs bucket, SCRAPE binding).
   const store = getScrapeObjectStore(config);
   const { db, pool } = createDb(config);
-  const mode = parsed.apply ? "apply" : "preview";
-
   try {
-    const pk = await db.execute<{ cols: string[] }>(sql`
-      SELECT array_agg(a.attname::text ORDER BY array_position(c.conkey, a.attnum)) AS cols
-        FROM pg_constraint c JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = ANY (c.conkey)
-       WHERE c.conrelid = 'public.graph_nodes'::regclass AND c.contype = 'p'`);
-    const cols = pk.rows[0]?.cols ?? [];
-    if (cols.join(",") !== "city_slug,id") {
-      console.error(`repair-graph-city-key: precondition failed — graph_nodes primary key is (${cols.join(", ")}), expected (city_slug, id); run migration 0013 first`);
-      return 2;
-    }
-
-    const allCities = ((await store.list("graph/")) ?? [])
-      .filter((key) => /^graph\/[^/]+\/latest\.json$/.test(key))
-      .map((key) => key.split("/")[1]!)
-      .sort();
-    const targets = parsed.all ? allCities : parsed.cities;
-    logger.info({ mode, runId: parsed.runId, targets: targets.length, s3Cities: allCities.length }, "repair-graph-city-key: start");
-
-    // Phase 1 — ids of each target city whose PG content differs from its own S3 rows.
-    const neededIds = new Set<string>();
-    const missing: string[] = [];
-    for (const city of targets) {
-      const projection = await readProjection(store, city);
-      if (!projection) { missing.push(city); continue; }
-      const pgRows = (
-        await db.select({ id: graphNodes.id, type: graphNodes.type, label: graphNodes.label, props: graphNodes.props, sourceRef: graphNodes.sourceRef })
-          .from(graphNodes).where(eq(graphNodes.citySlug, city))
-      ).map((row) => comparable({ ...row, props: (row.props ?? {}) as Record<string, unknown> }));
-      for (const id of idsWithLostContent(pgRows, projection)) neededIds.add(id);
-    }
-
-    // Phase 2 — same-id rows of every city's S3 file, kept only for those ids.
-    const foreignIndex = new Map<string, Array<{ city: string; row: ComparableNodeRow }>>();
-    if (neededIds.size > 0) {
-      for (const city of allCities) {
-        const projection = await readProjection(store, city).catch(() => null);
-        if (!projection) continue;
-        for (const row of projection.nodeRows) {
-          if (!neededIds.has(row.id)) continue;
-          const list = foreignIndex.get(row.id) ?? [];
-          list.push({ city, row: comparable(row) });
-          foreignIndex.set(row.id, list);
-        }
-      }
-    }
-    logger.info({ neededIds: neededIds.size, indexedIds: foreignIndex.size }, "repair-graph-city-key: foreign index built");
-
-    // Phase 3 — one transaction per city (rolled back in preview).
-    const reports: CityRepairReport[] = [];
-    for (const city of targets) {
-      if (missing.includes(city)) continue;
-      const projection = await readProjection(store, city);
-      if (!projection) { missing.push(city); continue; }
-      const report = await repairCity(db, projection, foreignIndex, mode);
-      reports.push(report);
-      console.log(JSON.stringify({ event: "repair-graph-city-key:city", ...report,
-        foreignNodes: report.foreignNodes.slice(0, 50), unknownNodes: report.unknownNodes.slice(0, 50) }));
-    }
-
-    const summary = summarize(reports, { event: "repair-graph-city-key:report", mode, runId: parsed.runId, missingLatestJson: missing });
-    const reportKey = `reports/graph-city-key/${parsed.runId}/repair.json`;
-    try {
-      await store.put(reportKey, JSON.stringify({ summary, reports }, null, 2), "application/json");
-    } catch (err) {
-      logger.error({ reportKey, err: String(err) }, "repair-graph-city-key: report upload failed");
-    }
-    console.log(JSON.stringify({ ...summary, reportKey }));
-    const short = JSON.stringify({ mode, runId: parsed.runId, reportKey, cities: summary.cities, pass: summary.pass,
-      refusedUnknown: summary.refusedUnknown.length, refusedGuard: summary.refusedGuard.length, errors: summary.errors.length,
-      needsRepair: summary.needsRepair.length, foreignNodes: summary.foreignNodes, unknownNodes: summary.unknownNodes });
-    await writeFile(TERMINATION_LOG, short.slice(0, TERMINATION_MAX)).catch(() => undefined);
-
-    return summary.refusedUnknown.length + summary.refusedGuard.length + summary.errors.length > 0 ? 1 : 0;
+    return await runRepair(parsed, {
+      db,
+      store,
+      logger,
+      writeTermination: (body) => writeFile(TERMINATION_LOG, body).catch(() => undefined),
+    });
   } finally {
     await pool.end();
   }
