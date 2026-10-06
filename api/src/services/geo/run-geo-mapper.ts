@@ -9,8 +9,14 @@
  *   DATABASE_URL="postgres://radar:...@127.0.0.1:5434/radar" npx tsx src/services/geo/run-geo-mapper.ts
  *
  * Options via env :
- *   CITIES="mont-tremblant,rimouski"  — restreindre à ces villes (séparé par virgule)
+ *   CITIES="mont-tremblant,rimouski"  — restreindre à ces villes (séparé par virgule ou espace)
  *   DRY_RUN="1"                       — affiche seulement, n'écrit pas en DB
+ *   RESET="1"                         — GH #812 : par ville, purge geo_resolutions ET
+ *                                       geo_unresolved de la ville puis résout à nouveau,
+ *                                       dans UNE transaction (exige CITIES). Les deux
+ *                                       tables sont en insertion seule : sans purge, les
+ *                                       résolutions calculées sur un contenu d'une autre
+ *                                       ville (avant la clé (city_slug, id)) resteraient.
  */
 
 import { drizzle } from "drizzle-orm/node-postgres";
@@ -26,9 +32,10 @@ const DATABASE_URL =
   "postgres://radar:219c0ff1da554bfd05e410b35f32a114319599423f6a96d8@127.0.0.1:5434/radar";
 
 const DRY_RUN = process.env["DRY_RUN"] === "1";
-const CITIES_FILTER = process.env["CITIES"]
-  ? process.env["CITIES"].split(",").map((s) => s.trim())
+const CITIES_FILTER = process.env["CITIES"]?.trim()
+  ? process.env["CITIES"].split(/[\s,]+/).map((s) => s.trim()).filter(Boolean)
   : null;
+const RESET = process.env["RESET"] === "1";
 
 // ─── DB setup ─────────────────────────────────────────────────────────────────
 
@@ -40,6 +47,13 @@ const db = drizzle(pool, { schema });
 async function main() {
   console.log("=== Runner geo-mapper ===");
   if (DRY_RUN) console.log("MODE DRY_RUN — aucune écriture DB");
+  if (RESET && !CITIES_FILTER) {
+    console.error("RESET=1 exige CITIES (jamais une purge de toutes les villes)");
+    await pool.end();
+    process.exitCode = 2;
+    return;
+  }
+  if (RESET) console.log(`MODE RESET — purge geo_resolutions + geo_unresolved par ville (${CITIES_FILTER!.length} villes)`);
 
   // Villes avec au moins une zone_version OU lot_version
   const citiesWithGeo = await db.execute<{ city_slug: string }>(sql`
@@ -92,7 +106,17 @@ async function main() {
         AND gn.type IN ('Signal', 'DesignationEvent')
     `);
 
-    if (nodes.rows.length === 0) continue;
+    if (nodes.rows.length === 0) {
+      if (RESET && !DRY_RUN) {
+        // No signal left: the city's geo rows all point to nodes that are gone.
+        await db.transaction(async (tx) => {
+          await tx.execute(sql`DELETE FROM geo_resolutions WHERE city_slug = ${citySlug}`);
+          await tx.execute(sql`DELETE FROM geo_unresolved WHERE city_slug = ${citySlug}`);
+        });
+        console.log(`${citySlug}: reset — aucun signal, lignes géo purgées`);
+      }
+      continue;
+    }
 
     const inputs: GeoResolveInput[] = nodes.rows.map((n) => ({
       nodeId: n.id,
@@ -113,7 +137,14 @@ async function main() {
       continue;
     }
 
-    const stats = await resolveGeoRefsBatch(db, inputs);
+    const stats = RESET
+      ? await db.transaction(async (tx) => {
+          const purgedRes = await tx.execute(sql`DELETE FROM geo_resolutions WHERE city_slug = ${citySlug}`);
+          const purgedUnres = await tx.execute(sql`DELETE FROM geo_unresolved WHERE city_slug = ${citySlug}`);
+          console.log(`${citySlug}: reset — geo_resolutions purgées=${purgedRes.rowCount ?? 0} geo_unresolved purgées=${purgedUnres.rowCount ?? 0}`);
+          return resolveGeoRefsBatch(tx as unknown as typeof db, inputs);
+        })
+      : await resolveGeoRefsBatch(db, inputs);
     totalNodes += stats.total;
     totalResolved += stats.resolvedZones + stats.resolvedLots;
     totalUnresolved += stats.unresolvedZones + stats.unresolvedLots;
