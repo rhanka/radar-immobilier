@@ -2,95 +2,217 @@ status: completed
 reviewer-host: codex
 reviewer-model: gpt-6-astra
 reviewer-effort: xhigh
-target-ref: fix/graph-city-key@143555c433153153f073dd3582218fb8224e62f1
-lens: correctness-and-migration
+target-ref: fix/graph-city-key@c4b32d24fcb5a50962940c89a006cf9193456708
+lens: residual-fix-and-migration-replay
 
 ## Reasoning
 
-Reviewed `git diff origin/main...143555c433153153f073dd3582218fb8224e62f1` and the API delta from `c5d68099` to that commit. HEAD and branch matched the requested target. Read revision 6 of `docs/spec/SPEC_FIX_GRAPH_CITY_KEY.md`, including its deviations and dry-run. This is an independent leg; no other round-2 review was consulted. No cluster or bucket was accessed, and no implementation file was changed or committed.
+Reviewed both requested targets at HEAD `c4b32d24fcb5a50962940c89a006cf9193456708`, branch `fix/graph-city-key`:
 
-The migration, city-scoped store and transaction boundaries withstood the checks below. One reproducible gap remains in the repair's content-drift measurement: it treats refs as an unordered set, although their order changes the evidence served by the API. This leaves A825-02 partially fixed.
-
-Migration evidence:
-
-- `api/drizzle/0013_graph_city_key.sql:17` sets a transaction-local 10-second lock timeout. The block reads the actual primary-key constraint name at line 31 and takes `ACCESS EXCLUSIVE` locks on both graph tables at line 45. The backfill at lines 64 and 67 runs before the primary-key swap at line 92, while IDs still uniquely identify endpoints. Source wins over destination for cross-city edges; a sole destination places an otherwise unplaced edge.
-- NULL-city incident edges are deleted before NULL-city nodes (`:53`, `:57`); only remaining unplaced edges are deleted at `:72`. The postcheck subtracts the two disjoint edge-deletion counts and the NULL-node count (`:96`). `SET NOT NULL` enforces non-NULL placement. The migration deliberately does not require both endpoints to belong to the assigned city; the readers filter those edges until projection reconciles them.
-- New node/edge/geo index names and column orders agree with `api/src/db/schema.ts:300`, `:331`, and `:654`. The geo insert conflict target agrees at `api/src/services/geo/resolve-refs.ts:115`.
-- The existing migration integration test passed: held table lock causes timeout and rollback, drifted PK name is handled, NULL/unplaced deletion counts and placements match, city-duplicate nodes/edges/geo resolutions become insertable, and statement replay is safe. `migrate-idempotence.spec.ts` also passed with the last journal row removed.
-- A separate local rehearsal used 44,735 synthetic nodes across 1,010 cities and 49,148 edges: 467 cross-city edges, 26 one-endpoint edges, no NULL-city node and no zero-endpoint edge. It also dropped `graph_nodes.created_at`, renamed the old primary key, and removed the 0012 journal row so the real Drizzle migrator applied pending 0012 and 0013 together. Output: `nodes=44735, edges=49148, null_edges=0, journal=13, placementMismatches=0`; migration took 3,289 ms. NOTICE reported zero deletions. After inserting the same ID in another city and removing the 0013 journal row, replay succeeded and the probe asserted that both copies remained. Edge-count preservation on replay was separately asserted by the existing migration integration test. This is a local structural rehearsal, not a production timing claim.
-
-Store, classifier and reader evidence:
-
-- Every graph writer uses `lockCityGraph` (`graph-store.ts:836`): legacy upsert at `:973`, normal projection at `:1123`, repair at `city-key-repair.ts:303`. Projection reads its baseline after acquiring the lock (`graph-store.ts:1126`) and checks the existing property/provenance guards before writes (`:1135`). Completeness remains a post-write check that throws through the transaction and rolls it back (`:1215`, `:1225`). The guard algorithms are unchanged in the target diff.
-- Orphan-node, dangling-edge and stale-edge deletion predicates bind `citySlug` (`graph-store.ts:1173`, `:1182`, `:1191`, `:1208`). Both upsert conflict targets include the city (`:988`, `:1045`, `:1155`). Two-city integration tests passed, including shared IDs and triples, orphan/dangling/stale deletion isolation, and the geo key.
-- Additional concurrency probes queued each of atomic projection, legacy upsert and repair behind a held city lock while its holder added guarded data. All three waited. The atomic projection then refused the new property loss; the repair saw the newly committed ref and refused it as unknown; legacy upsert preserved that ref via its existing union. The probes also verified the guarded property/ref remained stored. This establishes serialization of the PG writers; the lock does not version the S3 object, and the operational freeze remains relevant.
-- `classifyNode` now requires a lost ref with a docSha absent from the city's node/edge refs before returning foreign (`city-key-repair.ts:188`). One other city's same-ID row must explain every lost value (`:193`). Otherwise anchored losses are unknown; unanchored differences remain under the ordinary guards. Unknown refusal precedes `projectCityInTransaction` (`:358`). Preview throws `RollbackPreview` after the real projection (`:377`). Integration tests passed for foreign repair, unexplained mixed data refusal, completeness rollback, preview rollback and a second-run no-op.
-- Searched `graph_nodes`, `graphNodes`, `graph_edges`, `graphEdges`, and `node_id` across `api/`, `ui/`, `packages/`, `scripts/`, and `deploy/`, then inspected ID predicates and joins. The relevant runtime readers bind the city: neighbors (`graph-store.ts:1328`, `:1334`, `:1348`), city/MRC graphs (`:1380`, `:1480`), data-quality snapshots (`summary.ts:125`, `:137`), geo node enrichment (`geo-features.ts:182`) and proof-report correlations (`report-opportunity-proof.ts:102`). City/MRC/data-quality subgraphs require both endpoints. The MRC UI uses `(citySlug,id)` for node lookup, rendering and hover (`MrcGraphView.svelte:165`, `:173`, `:357`, `:390`). Aggregate reads remain grouped by city; MCP consumes the city-scoped graph-signals route. No additional unscoped runtime ID lookup was demonstrated.
-- The #820 identifiers `SAME_CITY_CONFLICT_GUARD`, `idsSkippedByCityGuard`, `resolveCrossCityCollisions`, `CrossCityIdCollision`, `crossCityCollisions`, and `cross-city-id-collision` have no matches in the searched runtime/test/workflow paths. The workflow removes their old log handling. Repair/mapper manifests, namespace/image selection, completion failure handling and migrate termination-summary collection were reviewed statically; deployment and release-variable values were not tested.
-
-Commands and results:
-
-```text
-rtk make test-api SCOPE='src/services/graph/city-key-repair.test.ts src/scripts/repair-graph-city-key.test.ts src/services/graph/graph-store.test.ts tests/integration/graph-city-key-migration.spec.ts tests/integration/graph-city-key-repair.spec.ts tests/integration/graph-city-key.spec.ts tests/integration/geo-mapper-reset.spec.ts tests/integration/migrate-idempotence.spec.ts' ENV=review-astra-825
-Test Files  8 passed (8)
-Tests       199 passed (199)
-
-rtk make -f Makefile -f .review-tmp/astra.mk review-astra-probes ENV=review-astra-825
-exit 0; production-shaped migration/replay, locked baselines and drift probes completed
-
-rtk make -f Makefile -f .review-tmp/astra.mk review-astra-drift ENV=review-astra-825
-exit 0; reproduced false no-op and changed API citation/PDF (see finding)
-
-rtk make -f Makefile -f .review-tmp/astra.mk review-astra-remove-test-volumes ENV=review-astra-825
-exit 0; isolated containers, network, Postgres and test dependency volumes removed
-
-rtk make clean ENV=review-astra-825
-exit 0
+```sh
+rtk git diff 143555c433153153f073dd3582218fb8224e62f1..c4b32d24fcb5a50962940c89a006cf9193456708 -- api deploy
+rtk proxy git diff origin/main...c4b32d24fcb5a50962940c89a006cf9193456708
 ```
 
-Temporary probe sources are `.review-tmp/astra-probes.ts` and `.review-tmp/astra-drift.ts`, with their Make targets in `.review-tmp/astra.mk`. No UI/browser campaign or live CI/deployment check was run for this leg.
+The whole-PR merge base is `782d20c96c54e7035438aa6fdccdc4ccba82acf4`; the local `origin/main` ref is `592b0dcbd3bca243302fda00b776ecb21a0d6724`. Read `rules/MASTER.md`, the applicable workflow/testing rules, `docs/spec/SPEC_FIX_GRAPH_CITY_KEY.md`, and the round-1/round-2 reports. No other round-3 review was read. All file:line references below refer to the requested HEAD. The existing staged review-file renames were left untouched.
+
+The round-2 residual is fixed. The migration and repair passed the exercised database checks, including an independent rehearsal matching the supplied production counts. One non-blocking compatibility gap remains in offline snapshot comparison scripts, described in Findings. No blocking defect was demonstrated in the projection comparison, migration replay, or runtime city-scoped storage paths.
+
+### Projected-content equality and convergence
+
+- `api/src/services/graph/city-key-repair.ts:145` compares `type`, `label`, normalized `sourceRef`, and the entire `props` value using `jsonEqual`. `jsonEqual` at `:82` ignores object-key order, preserves array order, distinguishes null from absent and numbers from strings, and ignores undefined object members recursively. The comparison at `:332` is independent of the loss classifier. Its result enters `noop` at `:361`; `api/src/scripts/repair-graph-city-key.ts:121` derives `needsRepair` from non-noop reports.
+- The comparison is against the prepared projection, not raw S3 nodes. `api/src/services/graph/graph-store.ts:854` parses the graph, builds rows, merges duplicate nodes/edges, and materializes severed sources before returning that projection. Schema parsing supplies the label default; `buildNodeRow` at `:174` supplies type/source defaults and derives `regulatoryStatus` at `:193`; source materialization adds refs and `sourceRef` at `:423`. These additions therefore occur on the comparison's expected side too.
+- `projectCityInTransaction` writes those exact prepared fields at `graph-store.ts:1143`, replacing `props` and `source_ref` on conflict at `:1155`. It does not add another content key after preparation. PG's `created_at` default is outside the compared fields; the repair explicitly selects the compared fields at `city-key-repair.ts:311`. City and ID are established by the city predicate and ID map. The legacy writer's ref union is a different write mode; any resulting difference from the canonical projection is real drift, not an unavoidable representation difference in the repair writer.
+- The added integration regression at `api/tests/integration/graph-city-key-repair.spec.ts:244` passed: `[A,B]` versus `[B,A]` gives `nodesContentDiff=1`, preview leaves `refs[0]` as A, apply changes it to B, and the next preview is a no-op. This matters at the serving boundary: `api/src/routes/graph-signals.ts:738` selects `refs[0]`, then uses its raw document reference at `:757` and citation/excerpt at `:774`.
+- An independent real-PG probe passed for JSONB object-key normalization, nested null/empty containers, numbers versus numeric strings, finite large/small numbers, negative zero, Unicode, omitted optional fields, explicit undefined object members, derived regulatory status, materialized source refs, and duplicate collapse. All eight prepared nodes compared equal after their first write. Three deliberate content differences were then measured, preview preserved the original stored rows, apply aligned them, and the second preview returned `nodesContentDiff=0`, `noop=true`. No representation-induced repair loop was demonstrated for these inputs. Non-JSON programmatic values are not covered; the repair CLI reads JSON files.
+
+### Runtime identity, guards and operational paths
+
+The requested unfiltered inventory was run and retained in `.review-tmp/review3-astra-id-inventory.log`:
+
+```sh
+rtk proxy rg -n 'graph_nodes|graphNodes|graph_edges|graphEdges|node_id' api/ ui/ packages/ scripts/ deploy/ > .review-tmp/review3-astra-id-inventory.log
+rtk proxy rg -n 'SAME_CITY_CONFLICT_GUARD|idsSkippedByCityGuard|resolveCrossCityCollisions|CrossCityIdCollision|crossCityCollisions|cross-city-id-collision' api ui packages scripts deploy .github
+```
+
+The second command returned no matches, exit 1. Inspection of ID lookups, joins, writers and consumers found:
+
+| Path | Evidence at the target |
+| --- | --- |
+| Node and edge writes | Both node conflict targets bind `(citySlug,id)` at `graph-store.ts:988` and `:1155`; the shared edge writer binds `(citySlug,srcId,dstId,kind)` at `:1045`. Orphan-node, dangling-edge and stale-edge deletions bind the city at `:1173`, `:1182`, `:1191`, and `:1208`. |
+| Per-city serialization and guards | `lockCityGraph` at `graph-store.ts:836` is used by legacy upsert (`:973`), projection (`:1123`) and repair (`city-key-repair.ts:308`). Projection reads its baseline after the lock (`graph-store.ts:1126`), checks row guards before writing (`:1135`), and throws on post-write completeness loss (`:1225`). Unknown repair rows are refused before projection (`city-key-repair.ts:365`). Preview throws after the real projection and rolls back (`:384`). The integration suite exercised lock waiting, local-loss refusal, unknown refusal and rollback. |
+| Graph readers | Neighbors bind city for outgoing edges, incoming edges and node resolution (`graph-store.ts:1328`, `:1334`, `:1348`). City and MRC subgraphs select city-owned edges and check both endpoints in that city (`:1413`, `:1480`). Shared-ID tests passed for both cities, edge triples, deletions and MRC resolution. |
+| Data quality / geo / proof report | `data-quality/summary.ts:125` and `:137` bind city and filter both endpoints. `geo/geo-features.ts:182` binds the graph lookup to the resolution's city. `geo/resolve-refs.ts:115` uses the widened geo conflict target. `scripts/report-opportunity-proof.ts:102` binds geo correlations, edge ownership and neighboring nodes to the source node's city. Mapper/populate/measurement node queries bind `city_slug`; consistency/source-coverage aggregates group by city. |
+| API, UI and MCP | The graph routes remain city/MRC scoped. `graph-store.ts:2207` binds signal-node reads to city. MRC UI node keys, maps, edge resolution and hover use city-qualified keys (`MrcGraphView.svelte:165`, `:173`, `:357`, `:390`; `graph-client.ts:51`). Single-city UI maps remain within their city's response. MCP `searchSignals` calls the city URL (`packages/immo-mcp/src/data-source.ts:298`) and retains city in the result. UI/browser execution is not covered by this leg. |
+| Offline exports and comparison tools | The export retains city, and cohort aggregation groups rows by city. `prove-refresh-signals.ts:52` selects all matching IDs and returns each matching row with its city; it does not overwrite colliding rows. However, `scripts/recette/diff-snap.py:26` and `dump-parity.py:32` overwrite them in ID-only dictionaries. Thus the assertion that every repository ID lookup carries city is **not** established; see ASTRA-825-R3-01. |
+
+The whole-PR workflow/manifest changes were inspected: target-specific repair/mapper manifests, served/pinned image selection, apply-all refusal, expanded busy-job check, mapper RESET rendering, and termination-message collection (`.github/workflows/run-job.yaml:343`, `:367`, `:405`, `:438`, `:534`, `:547`). Both release migration paths print the termination summary before continuing or failing (`build-push-images.yml:759`, `:1358`). `api/src/db/migrate.ts:18` collects NOTICE messages and distinguishes committed from failed/rolled-back execution. Refresh suspension and disabling image rollback remain operational steps in the design; their live state is unverified. No cluster, remote bucket, live rollout or current CI run was queried.
+
+Commands and observed test results, all on the isolated local environment:
+
+```sh
+rtk make test-api SCOPE="tests/integration/graph-city-key" ENV=review3-astra-825
+```
+
+```text
+graph-city-key-repair.spec.ts       11 passed
+graph-city-key.spec.ts              11 passed
+graph-city-key-migration.spec.ts     4 passed
+Test Files 3 passed; Tests 26 passed; exit 0
+```
+
+Additional tests used disposable Make targets in `.review-tmp/Makefile.astra`, running `npm run test --workspace=api` inside the existing test Compose container with its installed dependency volumes:
+
+```sh
+rtk make -f Makefile -f .review-tmp/Makefile.astra review3-astra-regressions ENV=review3-astra-825
+rtk make -f Makefile -f .review-tmp/Makefile.astra review3-astra-probes ENV=review3-astra-825
+rtk make object-storage-bindings-test ENV=review3-astra-825
+```
+
+```text
+city-key-repair.test.ts             21 passed
+repair-graph-city-key.test.ts       11 passed
+migrate-idempotence.spec.ts          1 passed
+geo-mapper-reset.spec.ts             2 passed
+Regression total: 4 files, 35 tests passed; exit 0
+Independent probes: 1 file, 6 tests passed; exit 0
+docs zero-writer bindings: PASS=5 FAIL=0
+ok: accepts the untouched fixture
+storage binding suite: PASS=43 FAIL=0
+hermetic storage migration suite: PASS=96 FAIL=0
+binding target exit 0
+```
+
+Logs are `.review-tmp/review3-astra-regressions.log`, `review3-astra-probes.log`, and `review3-astra-bindings.log`. The independent source/config are `.review-tmp/review3-astra.spec.ts` and `review3-astra.config.ts`. The storage suite uses local fake storage commands; the repair report-upload probe mocks the store boundary. No Python command was executed. The prescribed API test run and these additional runs total **67 passing API/probe tests**. `git diff --check origin/main...c4b32d24fcb5a50962940c89a006cf9193456708` returned no output, exit 0.
 
 ## Previous findings
 
-| Finding | Status | Evidence |
+All seven rows were checked separately against the target code and the executed tests above.
+
+| Previous finding | Status | Evidence at `c4b32d24fcb5a50962940c89a006cf9193456708` |
 | --- | --- | --- |
-| A825-01 — generic whole-row equality could erase a local guarded value | **fixed** | The whole-row-equality branch is gone. `city-key-repair.ts:188` requires a lost foreign docSha; `:211` returns clean when there is no anchor. The coincident `nb_unites_max=4` regression passed in `city-key-repair.test.ts:141` and `graph-city-key-repair.spec.ts:214`: zero foreign rows, repair refused by the guard, property retained. The normal property guard remains unchanged. |
-| A825-02 / SOL-825-04 — clean-row content drift omitted from no-op/needsRepair | **partially fixed** | `city-key-repair.ts:325` now checks losses in both directions; `:355` includes the count in no-op and `repair-graph-city-key.ts:121` derives needsRepair from no-op. The label-drift regression at `graph-city-key-repair.spec.ts:229` passed; my addition-only probe also reported `nodesContentDiff=1`. However, swapping two refs still yields zero drift/no-op while changing the API's citation and PDF. See the blocking finding below. |
-| A825-03 / SOL-825-01 — unreadable requested city disappeared with success | **fixed** | `repair-graph-city-key.ts:97` returns a per-city unavailable outcome, using `isMissingObjectError` for not-found versus read-failed and a separate unreadable parse/schema outcome. Both target read phases retain failures (`:190`, `:220`); `:129` and `:150` include them in reports/termination output; `:244` counts them toward exit 1. Tests at `repair-graph-city-key.test.ts:84`, `:93`, and `:101` passed for missing object, access denial and malformed JSON. |
-| SOL-825-02 — report-upload failure returned success | **fixed** | `repair-graph-city-key.ts:237` records `reportUploaded=false` and bounded `reportError`; `:242` writes them to the termination summary and `:245` returns 1. `terminationSummary` bounds the city lists (`:144`). Upload-failure and long-city-list tests at `repair-graph-city-key.test.ts:108` and `:125` passed. |
-| SOL-825-03 — geo RESET skipped requested cities without geometry | **fixed** | `run-geo-mapper.ts:71` takes RESET's city list from deduplicated `CITIES_FILTER`, independently of geometry. `:50` refuses missing/blank CITIES with exit 2. Both zero-signal cleanup (`:117`) and purge/rebuild (`:146`) scope their transaction to the requested city. `geo-mapper-reset.spec.ts:55` and `:67` passed: no-geometry city purged, other city preserved, missing-CITIES reset refused. |
+| **A825-01** — generic whole-row equality accepted as a foreign anchor | **fixed** | `classifyNode` at `city-key-repair.ts:193` anchors only a lost ref whose docSha is absent from the city's whole node/edge-ref set. Other-city explanations alone do not suffice; unanchored rows return clean at `:216` and remain under the guards. The unit cases at `city-key-repair.test.ts:106`, `:136`, `:142`, and the real-PG coincident-local-property regression at `graph-city-key-repair.spec.ts:214` passed: no foreign exemption, guard refusal, local property retained. |
+| **A825-02 / SOL-825-04** — clean-row content drift omitted from no-op/needsRepair | **fixed** | `city-key-repair.ts:332` measures exact content independently of class; `:361` includes it in no-op; `repair-graph-city-key.ts:121` selects non-noop cities. The label-only clean-row regression at `graph-city-key-repair.spec.ts:229` passed through preview, apply and second-preview no-op. The independent null/empty/type-drift probe also passed. |
+| **A825-03 / SOL-825-01** — unreadable requested city vanished with exit 0 | **fixed** | `repair-graph-city-key.ts:98` distinguishes not-found/read-failed; `:107` reports malformed/schema-invalid input as unreadable. Both target read phases retain unavailable outcomes (`:190`, `:221`), report and termination output include them (`:129`, `:150`, `:227`), and `:244` counts them toward exit 1. Executed tests at `repair-graph-city-key.test.ts:84`, `:93`, `:101` passed for missing object, AccessDenied and invalid JSON. |
+| **SOL-825-02** — failed report upload still exited 0 | **fixed** | `repair-graph-city-key.ts:237` records `reportUploaded=false` and `reportError`; `:242` emits them with bounded city lists; `:245` returns 1. Upload-failure and bounded-summary unit tests passed. The independent real-PG probe additionally committed a city, injected report PUT failure, and asserted exit 1, the persisted node, and `committed:["review3-astra-report"]` plus `reportUploaded:false` in the termination summary. |
+| **SOL-825-03** — geo RESET skipped requested cities without current geometry | **fixed** | `geo/run-geo-mapper.ts:71` uses the explicit deduplicated city list for RESET independently of current geometry. Missing CITIES exits 2 at `:50`; zero-signal purge at `:117` and purge/rebuild at `:146` both use city-scoped transactions. Both integration cases at `geo-mapper-reset.spec.ts:55` and `:67` passed: no-geometry city purged, other city retained, missing-CITIES invocation refused. |
+| **A825-02 residual, round 2** — refs order / null / empty containers invisible to measurement | **fixed** | `sameProjectedContent` at `city-key-repair.ts:145` uses the full JSON comparator, not `lostElements`. Unit regressions at `city-key-repair.test.ts:187` passed for reordered refs, null versus absent, empty containers and object-key order. The real-PG refs-order regression at `graph-city-key-repair.spec.ts:244` passed with drift 1, unchanged preview, aligned first ref after apply, and second no-op. Independent JSONB normalization/convergence probes passed as detailed above. |
+| **SOL-825-05**, round 2 — invalid storage fixture made negative cases pass vacuously | **fixed** | `deploy/ci/check-object-storage-bindings.test.sh:29` copies the new repair manifest. `:51` asserts that the untouched fixture passes before mutations. Executed output explicitly says `ok: accepts the untouched fixture`; the suite ends `PASS=43 FAIL=0`, target exit 0. |
 
-## Findings
+## Migration replay and deletion audit
 
-### A825-02 — Ref ordering remains invisible to node-content drift
+### Ordering, locks, schema and replay
 
-- **Severity:** blocking.
-- **File:line:** `api/src/services/graph/city-key-repair.ts:325` (comparison at `:327`), with `lostElements` at `:145` and `elementsOf` at `:109`.
-- **Evidence:** `nodesContentDiff` reuses a loss classifier, asking whether either row contains a ref object absent from the other. `lostElements` uses `.some(jsonEqual)` for each ref, so `[A,B]` and `[B,A]` compare equal for this purpose. Null-versus-absent properties and empty containers are also normalized away by this comparison; the local null-property probe likewise reported a false no-op. This is not a comparison of all projected JSON content.
+`api/drizzle/0013_graph_city_key.sql:17` sets `SET LOCAL lock_timeout = '10s'`. The block discovers the actual PK name and ordered columns from `pg_constraint` at `:31`. It recognizes the already-migrated key at `:39`; otherwise it locks both graph tables at `:45`. NULL-node incident edges are removed before those nodes (`:53`, `:57`). Edge placement uses source first, then destination (`:64`, `:67`), while the old ID-only node key still exists. The PK is replaced at `:92`, using the discovered constraint name quoted through `%I`. There is no inner COMMIT or concurrent-index operation.
 
-The decisive fixture uses a single local **Signal**, with two distinct, valid-shaped local refs A and B (different 64-character docShas, PDF keys and citations). PG starts with `[A,B]`; the city's candidate S3 projection contains `[B,A]`. No foreign city or missing ID is involved. Running the real repair and the real graph-signals route against the isolated Postgres produced:
+The real Drizzle migrator is used by both the repository integration tests and the independent probes. Its all-pending-migrations transaction behavior was demonstrated by rolling back newly applied 0012 together with failing 0013, below. The existing held-lock integration case passed in 10,022 ms and left the renamed old PK intact. The existing statement replay test and `migrate-idempotence.spec.ts` both passed.
+
+The index names and column order were queried after migration and asserted against `schema.ts:300`, `:331`, `:654`:
+
+| Index / constraint | Columns |
+| --- | --- |
+| `graph_nodes_pkey` | `(city_slug, id)` |
+| `graph_edges_city_natural_key_idx` | `(city_slug, src_id, dst_id, kind)` |
+| `graph_edges_city_src_idx` | `(city_slug, src_id)` |
+| `graph_edges_city_dst_idx` | `(city_slug, dst_id)` |
+| `geo_resolutions_city_natural_key_idx` | `(city_slug, node_id, relation_type, target_id)` |
+
+The redundant/old node-city, edge-natural/src/dst, and geo-natural indexes were asserted absent. The existing integration suite also inserted the same node ID, edge triple and geo resolution in two cities and rejected a duplicate edge within one city.
+
+### Production-shaped preservation probe
+
+Command: `rtk make -f Makefile -f .review-tmp/Makefile.astra review3-astra-probes ENV=review3-astra-825`.
+
+The first probe created a scratch DB through migration 0012, renamed the PK to `review_drifted_pk`, dropped `graph_nodes.created_at`, and seeded 44,735 synthetic nodes across 1,010 cities plus 49,148 edges. It used exactly 26 one-endpoint edges (both missing-source and missing-destination directions), 467 cross-city edges, zero NULL-city nodes, and zero zero-endpoint edges. Every node and edge carried a distinguishable payload. Copies of the complete pre-migration rows were retained inside this disposable DB for SQL `EXCEPT` checks.
+
+It then deleted the **0012 journal row only**, leaving 11 entries and the 0012 schema present, so the actual migrator had to replay 0012 and apply 0013 together. Output:
 
 ```json
 {
-  "probe": "ref-order-served-evidence",
-  "nodesContentDiff": 0,
-  "noop": true,
-  "needsRepair": [],
-  "before": {
-    "citation": "Local citation a",
-    "rawRef": "raw/proces-verbaux-review-astra-825/cas/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.pdf"
-  },
-  "after": {
-    "citation": "Local citation b",
-    "rawRef": "raw/proces-verbaux-review-astra-825/cas/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.pdf"
-  }
+  "before": {"nodes":44735,"edges":49148,"journal":12},
+  "shape": {"edges":49148,"one_endpoint":26,"no_endpoint":0,"cross_city":467},
+  "after": {"nodes":44735,"edges":49148,"journal":13},
+  "audit": {"lost_or_changed_nodes":0,"lost_or_changed_edges":0,"placement_mismatches":0,"null_nodes":0},
+  "elapsedMs":3882
 }
 ```
 
-Preview returned `pass` and rolled back; apply returned `pass` and changed the stored refs and served evidence. The consumer makes order material: `api/src/routes/graph-signals.ts:738` selects `refs[0]`, uses its PDF at `:757`, and its citation at `:774`. Therefore the measurement can omit a city from the repair list and certify a no-op even though PG serves a different primary citation/PDF from its S3 projection. The existing label-drift regression does not cover this case. This is a remaining variant of the previous finding, not a claim that this particular drift was measured in production.
+```text
+graph-city-key: nodes 44735 -> 44735 (deleted NULL-city nodes: 0); edges 49148 -> 49148 (deleted edges incident to a NULL-city node: 0, deleted edges without any existing endpoint: 0)
+```
 
-- **Fix:** Give `nodesContentDiff` an exact projected-content comparison of `type`, `label`, `sourceRef` and the full `props` JSON (object-key order ignored; array order retained). The module's `jsonEqual` already supplies those JSON semantics. Keep the loss/containment rules for classification separate: they answer whether losses are explained, not whether applying the projection changes the row. Add a regression with reordered refs that asserts `nodesContentDiff=1`, `noop=false`, inclusion in `needsRepair`, unchanged PG after preview, correct first citation/PDF after apply, and a second preview with zero drift. Also cover null/absent property and empty-container differences if the contract remains “any projected field different.”
+Every original node column and every original edge column/payload was preserved. The new edge-city column equaled `coalesce(source.city_slug,destination.city_slug)` for every edge. Cross-city and one-endpoint edges remained stored. Placement does not establish provenance; city readers require both endpoints and repair reconciles the assigned city's edges with its snapshot.
+
+After migration, the probe inserted `n-1` in two additional cities, removed the **0013 journal row**, and reran the migrator. Result: `nodes=44737, edges=49148, journal=13`, with all three city-qualified copies of `n-1` still present and the already-composite-PK NOTICE. The pre-migration PK cannot hold several cities' copies of one ID; the S3-side small fixture below contains such a collision, and this post-migration insertion/replay tests the widened stored identity directly. Migration itself does not reconstruct previously overwritten/skipped nodes; that remains the repair projection's job.
+
+This is a local structural/data-preservation rehearsal. Actual production payloads, S3 recoverability and production runtime are unverified; 3,882 ms is not a deployment timing estimate.
+
+### What can be deleted, including PG-only data
+
+The separate small fixture contained two city graphs sharing `bylaw-242` in its synthetic S3 map, three city-owned PG nodes, two NULL-city PG nodes, and seven PG edges. NULL-city nodes and the four deletion-class edges carried explicit `onlyInPg` payloads absent from that synthetic S3 map. This deliberately tests beyond the supplied production facts, which have zero such deletion candidates.
+
+| Class | Before | After | Effect |
+| --- | ---: | ---: | --- |
+| City-owned nodes | 3 | 3 | Original data retained, including PG-only payloads. |
+| NULL-city nodes | 2 | 0 | Deleted by `0013:57`, including their PG-only payloads. |
+| Ordinary intra-city edge | 1 | 1 | Placed at Gore; original payload retained. |
+| Cross-city edge | 1 | 1 | Placed at the source's city, Gore; original payload retained. |
+| One-endpoint edge | 1 | 1 | Placed at its existing destination's city, Gore; original payload retained. |
+| Edges incident to a NULL-city node | 3 | 0 | Deleted by `0013:53`, including PG-only payloads; the edge with two NULL-city endpoints is counted once. |
+| Edge with neither endpoint present | 1 | 0 | Deleted by `0013:72`, including its PG-only payload. |
+| Total nodes / edges | 5 / 7 | 3 / 3 | Journal 12 → 13. |
+
+Observed NOTICE:
+
+```text
+graph-city-key: nodes 5 -> 3 (deleted NULL-city nodes: 2); edges 7 -> 3 (deleted edges incident to a NULL-city node: 3, deleted edges without any existing endpoint: 1)
+```
+
+Thus **a universal “0013 deletes no data” claim is false**. Its allowed deletion predicates can remove data absent from S3; the migration never consults S3 or archives those rows. This is the explicit Q1/K2 and Q4/K4 design, not a new implementation finding. Conversely, the supplied production shape has none of these deletion candidates, and the independent matching fixture lost zero rows or original payloads. Recovery of any actual deleted PG-only values from S3 is unknown without inspecting that data; it must not be inferred from the count postchecks.
+
+### Unexpected-loss arithmetic and transaction rollback
+
+Two independent fault injections started at **0011**, so both 0012 and 0013 were pending. An `AFTER UPDATE` trigger on `graph_edges` removed either one additional city-owned node or one additional ordinary edge during backfill. These trigger losses were outside the deletion counters. The migration produced:
+
+```text
+graph-city-key postcheck: graph_nodes 2 <> 5 - 2
+graph-city-key postcheck: graph_edges 2 <> 7 - 3 - 1
+```
+
+For **both** probes, before and after were `nodes=5, edges=7, journal=11`; complete JSON snapshots of all original node and edge rows were equal. The renamed old PK remained `(id)`, `graph_edges.city_slug` remained absent, and the 0012 `refresh_document_outcomes` table and `refresh_outcome_status` type remained absent. This demonstrates the postcheck exception rolling back data, DDL and journal entries across both pending migrations.
+
+The arithmetic at `0013:99` and `:102` therefore catches unexpected **net row loss** in these cases. It does not prove S3 recoverability, detect a same-count payload rewrite, or prohibit the explicitly counted deletions. Those are distinct properties.
+
+Cleanup completed, exit 0 for each command:
+
+```sh
+rtk make clean ENV=review3-astra-825
+rtk make clean COMPOSE_FILES_DEV="-f docker-compose.yml -f docker-compose.test.yml" ENV=review3-astra-825
+rtk make ps COMPOSE_FILES_DEV="-f docker-compose.yml -f docker-compose.test.yml" ENV=review3-astra-825
+```
+
+Postgres/MinIO containers, the Postgres volume, both test dependency volumes and the project network were removed. The final `ps` displayed only its column header. Scratch databases and migration-folder copies were also removed by the probes. No application implementation was modified, committed or pushed; this report is the only review-owned tracked-path edit, and disposable review material is under `.review-tmp`.
+
+## Findings
+
+### ASTRA-825-R3-01 — Offline snapshot comparators still collapse different cities' nodes by ID
+
+- **Severity:** non-blocking.
+- **File:line:** `scripts/recette/diff-snap.py:26`; same issue at `scripts/recette/dump-parity.py:32`. The newly permitted stored identity comes from `api/drizzle/0013_graph_city_key.sql:92`.
+- **Evidence:** Both loaders assign rows into a dictionary keyed by `id` alone: `out[obj["id"]] = obj` / `out[o["id"]] = o`. A later city's same-ID row replaces the earlier city's row before any comparison. The membership snapshot producer retains every input row and writes its city as `c` (`api/src/services/graph/recette-membership-snapshot.prod.test.ts:103`); it does not prevent this input. `diff-snap.py:38` compares only the retained dictionary values. `gate-candidate.sh:53` consumes its outgoing count and at `:56` fails only when that count is nonzero. Filtering the baseline to the candidate's set of cities at `:32` does not fix collisions when both cities are present.
+
+  Concrete code-path counterexample, in file order:
+
+  ```text
+  old snapshot                         new snapshot
+  {"id":"shared","c":"gore","f":16}   {"id":"shared","c":"gore","f":0}
+  {"id":"shared","c":"barkmere","f":16} {"id":"shared","c":"barkmere","f":16}
+  ```
+
+  Each loader retains only Barkmere with `f=16`; the `bprime` comparison therefore has no outgoing row even though Gore left B′. The same last-row overwrite lets `dump-parity.py:62` conclude parity when only the earlier city's classification fields differ. This evidence is a deterministic source-path demonstration; the Python scripts were **not executed**, in accordance with the review constraint. The shell gate was also not executed.
+- **Impact and scope:** This is a remaining compatibility gap for multi-city PG exports now allowed by the composite key, not a regression introduced by `872ffe2b`. It can conceal differences in the offline review tools. It does not affect the repair CLI's city-scoped drift measurement or the migration's tested preservation, so it does not block the requested repair rollout on this evidence. The blanket repository-wide claim that all ID lookups are city-qualified needs this exception.
+- **Fix:** Key membership snapshots by `(c,id)` and projection dumps by `(citySlug,id)`, updating comparison/report iteration accordingly. Add fixtures with the same ID in two cities and a change only in the first city; require one named outgoing membership and a nonzero parity result respectively. No implementation change was made in this review.
 
 ## Verdict
 
-**NO-GO.** Four previous finding groups are fixed; A825-02 / SOL-825-04 remains partially fixed with a demonstrated effect on served evidence. No additional migration or city-isolation blocker was demonstrated. Correct the content-drift comparison and rerun its focused regression before treating the repair measurement as an acceptance gate.
+**GO-with-nits.** All seven previous finding rows are fixed at the reviewed commit. The exact-content correction converged after real JSONB round trips; migration 0013 preserved the production-shaped fixture, replayed after journal drift, and rolled back all pending work when either loss postcheck failed. ASTRA-825-R3-01 is the one demonstrated non-blocking remainder in offline comparison tooling. Live deployment state, actual S3 recovery and production execution remain unverified.
