@@ -13,7 +13,7 @@ const between = (from, to) => { const start = markdown.indexOf(from); assert.ok(
 const decisionText = between('\n## 10. Décisions : options et recommandations', '\n## 11. ') + between('\n## Annexe II — Fiches G1 à G8', '\n## Annexe III');
 const SCENE_ORDER = ['criteres-steve', 'affichage-abc', 'modele-donnees', 'flux-import-oracle', 'architecture-ui'];
 // Sections still being written (the others were integrated on 2026-10-06).
-const MARKERS = ['ch3-synthese', 'ch6-exploratoire'];
+const MARKERS = [];
 
 test('cinq scènes canoniques, dans l’ordre des chapitres qui les portent', () => {
   assert.deepEqual(graphs.map(graph => graph.id), SCENE_ORDER);
@@ -201,7 +201,7 @@ test('vingt-cinq décisions G1 à G8 et D1 à D17, recommandation connue ; D9 cl
   for (const text of ['0,56 à 29 Pertinent pour X = 10 %', '0,30 à 59 Pertinent pour X = 5 %', 'taux réel de 2 %']) assert.ok(byKey.D13.intro.includes(text), text);
   assert.match(byKey.D10.options.find(option => option.key === 'b').description, /au moins 50 cas, par un second annotateur humain/);
   // Registre unique au §3.1 : une ligne par décision.
-  const registry = between('\n### 3.1 ', '\n### 3.2 ');
+  const registry = between('\n### 3.1 ', '\n## 4. ');
   for (const question of questions) assert.ok(registry.includes(`| ${question.key} | `), `registre : ${question.key}`);
 });
 
@@ -311,7 +311,7 @@ test("existant et jeux de référence : schémas du texte, aucune table de jeu d
   const { parseEr } = await import('./parse-er.mjs');
   const { erLayout } = await import('./diagram-layout.js');
   const schema = await readFile('../../../../../api/src/db/schema.ts', 'utf8');
-  assert.deepEqual(Object.keys(DOC_DIAGRAMS).sort(), ['etat-actuel', 'existant', 'jeux-reference', 'modele-minimal']);
+  assert.deepEqual(Object.keys(DOC_DIAGRAMS).sort(), ['engram-store', 'etat-actuel', 'existant', 'jeux-reference', 'modele-minimal']);
   for (const [id, spec] of Object.entries(DOC_DIAGRAMS)) {
     assert.ok(markdown.includes(`\`\`\`mermaid\n${spec.er}\n\`\`\`\n\n<!-- diagram:${id} -->`), id);
     const model = parseEr(spec.er, id);
@@ -420,4 +420,22 @@ test('comptes mesurés : 121 lignes → 162 signaux → 80 documents, par verdic
   assert.ok(between('\n### 4.2 ', '\n### 4.3 ').includes(SIGNAL_COUNTS.summary));
   assert.ok(between('\n### 4.2 ', '\n### 4.3 ').includes('#14 (Saint-Jean-Baptiste') && markdown.includes('#55 (Mont-Saint-Hilaire') && markdown.includes('#58 (Sainte-Cécile-de-Milton'));
   for (const row of rows) assert.ok(markdown.includes(`| ${row.verdict} | ${row.lines} | ${row.signals} | ${row.documents} |`), row.verdict);
+});
+
+test('ch. 6 : chaque point des nuages précision / rappel reprend le tableau du §6.4', async () => {
+  const { CHARTS } = await import('./charts.js');
+  const s64 = markdown.slice(markdown.indexOf('\n### 6.4 '), markdown.indexOf('\n### 6.5 '));
+  const num = (text) => Number(text.trim().replace(',', '.'));
+  for (const [id, ri, pi] of [['pr-test-steve', 1, 2], ['pr-test-consensus', 4, 5]]) {
+    assert.equal(CHARTS[id].kind, 'scatter');
+    assert.equal(CHARTS[id].points.length, 12);
+    for (const point of CHARTS[id].points) {
+      const name = point.label.replace(/ \(.*\)$/, '');
+      const line = s64.split('\n').find((row) => row.startsWith(`| ${point.label} |`) || row.startsWith(`| ${name} `));
+      assert.ok(line, point.label);
+      const cells = line.split('|').slice(2, -1);
+      assert.equal(num(cells[ri - 1]), point.recall, `${id} ${point.label} rappel`);
+      assert.equal(num(cells[pi - 1]), point.precision, `${id} ${point.label} précision`);
+    }
+  }
 });

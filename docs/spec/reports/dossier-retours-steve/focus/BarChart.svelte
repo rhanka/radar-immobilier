@@ -11,11 +11,17 @@
   const plot = W - LABEL - RIGHT;
   const keys = Object.keys(SERIES);
   const total = row => keys.reduce((sum, key) => sum + row.values[key], 0);
-  const max = $derived(chart.kind === 'stacked' ? Math.max(...chart.rows.map(total))
+  // scatter: precision (x) against recall (y), 50–100 %, one labelled point per configuration.
+  const SX = 90, SY = 30, SW = 760, SH = 420, LO = 50;
+  const px = value => SX + ((value - LO) / (100 - LO)) * SW;
+  const py = value => SY + SH - ((value - LO) / (100 - LO)) * SH;
+  const ticks = [50, 60, 70, 80, 90, 100];
+  const offsets = $derived(chart.kind === 'scatter' ? chart.points.map((point, index) => chart.points.slice(0, index).filter(other => other.recall === point.recall && other.precision === point.precision).length) : []);
+  const max = $derived(chart.kind === 'scatter' ? 100 : chart.kind === 'stacked' ? Math.max(...chart.rows.map(total))
     : chart.kind === 'grouped' ? Math.max(...chart.rows.flatMap(row => row.values)) : 100);
   const scale = value => (value / max) * plot;
   const rowHeight = $derived(chart.kind === 'grouped' ? ROW + 18 : ROW);
-  const height = $derived(TOP * 2 + chart.rows.length * rowHeight);
+  const height = $derived(chart.kind === 'scatter' ? SY + SH + 60 : TOP * 2 + chart.rows.length * rowHeight);
   const segments = row => {
     let x = LABEL;
     return keys.map(key => { const width = scale(row.values[key]); const segment = { key, value: row.values[key], x, width }; x += width; return segment; });
@@ -27,11 +33,27 @@
   <figcaption><strong>{chart.title}</strong></figcaption>
   {#if chart.kind === 'stacked'}
     <p class="legend" aria-hidden="true">{#each keys as key}<span><i class="swatch fill-{SERIES[key].token}"></i>{SERIES[key].label}</span>{/each}</p>
+  {:else if chart.kind === 'scatter'}
+    <p class="legend" aria-hidden="true"><span><i class="swatch fill-p"></i>Astra</span><span><i class="swatch fill-s"></i>Opus</span><span><i class="swatch fill-g1"></i>Gemini</span><span><i class="swatch fill-n"></i>B′ (passe observée)</span></p>
   {:else if chart.kind === 'grouped'}
     <p class="legend" aria-hidden="true">{#each chart.series as name, index}<span><i class="swatch fill-g{index}"></i>{name}</span>{/each}</p>
   {/if}
   <ZoomFrame id={`chart-${id}`} label={chart.title} inline={false} minWidth={720}>
   <svg viewBox={`0 0 ${W} ${height}`} role="img" aria-label={chart.title}>
+    {#if chart.kind === 'scatter'}
+      {#each ticks as tick}
+        <line class="grid" x1={px(tick)} x2={px(tick)} y1={SY} y2={SY + SH} /><text class="row-detail" x={px(tick)} y={SY + SH + 18} text-anchor="middle">{tick} %</text>
+        <line class="grid" x1={SX} x2={SX + SW} y1={py(tick)} y2={py(tick)} /><text class="row-detail" x={SX - 8} y={py(tick) + 4} text-anchor="end">{tick} %</text>
+      {/each}
+      <text class="row-label" x={SX + SW / 2} y={SY + SH + 44} text-anchor="middle">Précision P ∪ S</text>
+      <text class="row-label" x={20} y={SY + SH / 2} text-anchor="middle" transform={`rotate(-90 20 ${SY + SH / 2})`}>Rappel P ∪ S</text>
+      {#each chart.points as point, index}
+        <g data-chart-point={point.label} data-recall={point.recall} data-precision={point.precision}>
+          <circle class={point.group === 'astra' ? 'fill-p' : point.group === 'opus' ? 'fill-s' : point.group === 'gemini' ? 'fill-g1' : 'fill-n'} cx={px(point.precision)} cy={py(point.recall)} r="7"><title>{point.label} : précision {fmt(point.precision)} %, rappel {fmt(point.recall)} %</title></circle>
+          <text class="row-total small" x={px(point.precision) + 10} y={py(point.recall) + 4 + offsets[index] * 14}>{point.short}</text>
+        </g>
+      {/each}
+    {:else}
     {#each chart.rows as row, index}
       {@const y = TOP + index * rowHeight}
       <g data-chart-row={row.label}>
@@ -64,6 +86,7 @@
         {/if}
       </g>
     {/each}
+    {/if}
   </svg>
   </ZoomFrame>
   <p class="chart-note">{chart.note} <span class="chart-source">Source : {chart.source}.</span></p>
@@ -87,6 +110,7 @@
   .fill-n { --swatch: var(--chart-n); fill: var(--chart-n); }
   .fill-g0 { --swatch: var(--chart-g0); fill: var(--chart-g0); }
   .fill-g1 { --swatch: var(--chart-g1); fill: var(--chart-g1); }
+  .grid { stroke: var(--st-semantic-border-subtle); stroke-width: 1; }
   .track { fill: var(--st-semantic-surface-subtle); stroke: var(--st-semantic-border-subtle); }
   .chart-note { margin: 8px 0 0; font-size: .84rem; line-height: 1.5; color: var(--st-semantic-text-secondary); }
   .chart-source { font-style: italic; }

@@ -10,6 +10,46 @@ export const SERIES = {
 };
 
 export const CHARTS = {
+  'pr-test-steve': {
+    kind: 'scatter',
+    title: 'Montrer à Steve : précision et rappel sur le test aveugle exploratoire, référence Steve (61 lignes)',
+    note: 'Un point par configuration (A = Astra, O = Opus, G = Gemini, chiffre = version du prompt ; B = B′, chiffre = passe observée). Les points d’Opus v1, v2 et v3 se superposent. Intervalles par villes de ±15 à ±20 points sur le rappel : les écarts entre configurations C ne sont pas établis. Exploratoire, non admissible pour D13.',
+    source: '§6.4, tableau des résultats (CALCUL)',
+    points: [
+      { label: 'Astra v1', short: 'A1', group: 'astra', recall: 68.6, precision: 96 },
+      { label: 'Opus v1', short: 'O1', group: 'opus', recall: 74.3, precision: 96.3 },
+      { label: 'Gemini v1', short: 'G1', group: 'gemini', recall: 77.1, precision: 93.1 },
+      { label: 'Astra v2', short: 'A2', group: 'astra', recall: 65.7, precision: 95.8 },
+      { label: 'Opus v2', short: 'O2', group: 'opus', recall: 74.3, precision: 96.3 },
+      { label: 'Gemini v2', short: 'G2', group: 'gemini', recall: 77.1, precision: 93.1 },
+      { label: 'Astra v3', short: 'A3', group: 'astra', recall: 62.9, precision: 95.7 },
+      { label: 'Opus v3', short: 'O3', group: 'opus', recall: 74.3, precision: 96.3 },
+      { label: 'Gemini v3', short: 'G3', group: 'gemini', recall: 80, precision: 93.3 },
+      { label: 'B′ passe 1 (5 filtres)', short: 'B1', group: 'bprime', recall: 74.3, precision: 70.3 },
+      { label: 'B′ passe 2 (sans Précoce)', short: 'B2', group: 'bprime', recall: 94.3, precision: 62.3 },
+      { label: 'B′ passe 3 (aucun filtre)', short: 'B3', group: 'bprime', recall: 100, precision: 57.4 },
+    ],
+  },
+  'pr-test-consensus': {
+    kind: 'scatter',
+    title: 'Montrer à Steve : précision et rappel sur le test aveugle exploratoire, référence consensus IA (R′ v1 sur les tags majoritaires)',
+    note: 'Même lecture. Le consensus IA est une référence machine corrélée aux configurations évaluées (mêmes familles de modèles, mêmes définitions) : une précision de 100 % en découle en partie.',
+    source: '§6.4, tableau des résultats (CALCUL)',
+    points: [
+      { label: 'Astra v1', short: 'A1', group: 'astra', recall: 78.1, precision: 100 },
+      { label: 'Opus v1', short: 'O1', group: 'opus', recall: 84.4, precision: 100 },
+      { label: 'Gemini v1', short: 'G1', group: 'gemini', recall: 87.5, precision: 96.6 },
+      { label: 'Astra v2', short: 'A2', group: 'astra', recall: 75, precision: 100 },
+      { label: 'Opus v2', short: 'O2', group: 'opus', recall: 84.4, precision: 100 },
+      { label: 'Gemini v2', short: 'G2', group: 'gemini', recall: 87.5, precision: 96.6 },
+      { label: 'Astra v3', short: 'A3', group: 'astra', recall: 71.9, precision: 100 },
+      { label: 'Opus v3', short: 'O3', group: 'opus', recall: 84.4, precision: 100 },
+      { label: 'Gemini v3', short: 'G3', group: 'gemini', recall: 87.5, precision: 93.3 },
+      { label: 'B′ passe 1 (5 filtres)', short: 'B1', group: 'bprime', recall: 75, precision: 64.9 },
+      { label: 'B′ passe 2 (sans Précoce)', short: 'B2', group: 'bprime', recall: 96.9, precision: 58.5 },
+      { label: 'B′ passe 3 (aucun filtre)', short: 'B3', group: 'bprime', recall: 100, precision: 52.5 },
+    ],
+  },
   'sens-classement': {
     kind: 'stacked',
     title: 'Sens de la modification × classement de Steve (124 lignes)',

@@ -267,7 +267,7 @@ const contentExpression = `(() => {
   const hit = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
   const charts = [...document.querySelectorAll('[data-chart]')].map(chart => {
     const svg = chart.querySelector('svg').getBoundingClientRect();
-    const bars = [...chart.querySelectorAll('rect[data-value]')];
+    const bars = [...chart.querySelectorAll('rect[data-value], [data-chart-point] circle')];
     if (!bars.length || bars.some(bar => bar.getBoundingClientRect().right > svg.right + 1)) throw Error('graphique ' + chart.dataset.chart + ' : barres hors cadre');
     const fills = new Set(bars.map(bar => getComputedStyle(bar).fill));
     if (fills.has('none') || fills.has('rgb(0, 0, 0)')) throw Error('graphique ' + chart.dataset.chart + ' : couleur absente');
@@ -283,13 +283,13 @@ const contentExpression = `(() => {
       for (const text of entity.querySelectorAll('text')) if (text.textContent.trim()) { const r = text.getBoundingClientRect(); if (r.right > body.right + 1 || r.left < body.left - 1) throw Error(mini.dataset.miniDiagram + ' : texte hors table'); } }
     return { id: mini.dataset.miniDiagram, option: Boolean(mini.closest('.question-block')), tables: boxes.length, scale: Number((svg.width / Number(mini.dataset.canvasWidth)).toFixed(3)) };
   });
-  if (charts.length !== 6 || descriptions !== 79 || minis.length !== 11) throw Error('contenu : ' + JSON.stringify({ charts: charts.length, descriptions, minis: minis.length }));
+  if (charts.length !== 8 || descriptions !== 79 || minis.length !== 12) throw Error('contenu : ' + JSON.stringify({ charts: charts.length, descriptions, minis: minis.length }));
   if (minis.some(mini => mini.option && mini.scale < .6)) throw Error('schéma d’option trop réduit : ' + JSON.stringify(minis));
   return { charts, descriptions, minis };
 })()`;
 const content = await evaluate(contentExpression);
 const contentCaptures = [];
-for (const [name, selector] of [['graphique-sens', '[data-chart="sens-classement"]'], ['graphique-bruit', '[data-chart="bruit-familles"]'], ['decision-D2', '[data-question="D2"]'], ['decision-D3', '[data-question="D3"]']]) {
+for (const [name, selector] of [['graphique-sens', '[data-chart="sens-classement"]'], ['graphique-bruit', '[data-chart="bruit-familles"]'], ['graphique-pr-test-steve', '[data-chart="pr-test-steve"]'], ['decision-D2', '[data-question="D2"]'], ['decision-D3', '[data-question="D3"]']]) {
   await capture(await sceneBox(selector), `.generated/${name}.png`);
   contentCaptures.push(`.generated/${name}.png`);
 }
@@ -336,8 +336,8 @@ const zoomOne = async (id, { drag = false, shot = null } = {}) => {
   return { id, mode: opened.mode, fit: opened.scale || null, zoomed, dragged: Boolean(moved) };
 };
 const zoomIds = await evaluate(`[...document.querySelectorAll('[data-zoom]')].map(frame => frame.dataset.zoom)`);
-// 5 scènes, 4 schémas du texte, 1 schéma en couloirs du texte, 7 schémas d'options (D2, D3), 6 graphiques.
-if (zoomIds.length !== 23) throw Error(`23 diagrammes zoomables attendus, ${zoomIds.length}`);
+// 5 scènes, 5 schémas du texte, 1 schéma en couloirs du texte, 7 schémas d'options (D2, D3), 8 graphiques.
+if (zoomIds.length !== 26) throw Error(`26 diagrammes zoomables attendus, ${zoomIds.length}`);
 const zoom = [];
 for (const id of zoomIds) zoom.push(await zoomOne(id, { drag: id === 'flux-import-oracle', shot: id === 'affichage-abc' ? '.generated/zoom-plein-ecran-affichage-abc.png' : null }));
 // Zoom direct dans la page, sur un grand diagramme : le panneau ne déborde pas.

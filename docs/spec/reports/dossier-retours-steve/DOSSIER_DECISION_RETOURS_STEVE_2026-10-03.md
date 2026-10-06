@@ -19,7 +19,7 @@
 - **Méthode** : lectures Node uniquement (JSZip, fast-xml-parser, exceljs, mammoth), sans Python ; recomptages reproductibles sur les lignes du classeur ; lectures de code par `git show origin/main:<fichier>`.
 - **Structure** : chapitres 0 à 12, annexes I à IV. La correspondance avec la numérotation du 2026-10-03, y compris les renvois des cartes #783 et #784, est en annexe I.6. Les scènes Focus sont placées dans les chapitres qu'elles illustrent (§2.6, §8.1, §9.2, §9.6, §9.7) ; leurs sources canoniques sont hors du rapport : [SCENES_FOCUS.md](SCENES_FOCUS.md).
 
-Conventions : **FAIT** = constaté dans une source citée · **CALCUL** = dérivé des données, méthode donnée · **JUGEMENT** = appréciation · `non vérifié` (= `unverified`), `source manquante` (= `source-gap`), `N-A` = limites déclarées. Statuts de mesure : **exploratoire** (lignes exposées, ch. 6), **confirmatoire** (test neuf préenregistré, ch. 7), `not run` (non exécuté). Statuts de donnée : `unknown`, `unverified`, `partial`, `source-gap`. Une section encore en rédaction porte un repère `A_INTEGRER` et la mention « Section en cours de rédaction ».
+Conventions : **FAIT** = constaté dans une source citée · **CALCUL** = dérivé des données, méthode donnée · **JUGEMENT** = appréciation · `non vérifié` (= `unverified`), `source manquante` (= `source-gap`), `N-A` = limites déclarées. Statuts de mesure : **exploratoire** (lignes exposées, ch. 6), **confirmatoire** (test neuf préenregistré, ch. 7), `not run` (non exécuté). Statuts de donnée : `unknown`, `unverified`, `partial`, `source-gap`.
 
 ## Glossaire et statuts
 
@@ -317,10 +317,35 @@ Existant lu sur `origin/main` `27891b10` : vue A retirée de l'UI depuis `f2c205
 
 ## 3. Synthèse et décisions demandées
 
-<!-- A_INTEGRER: ch3-synthese -->
-Section en cours de rédaction.
+Rédigé en dernier, à l'état du 2026-10-06 (registre §3.1 compris) ; les étapes non exécutées portent `not run`. L'ordre de décision est au §10.1.
 
-Ce chapitre est rédigé en dernier, après les étapes 1 à 7 du plan (§12.1). Le registre des décisions (§3.1) est à jour au 2026-10-05 ; la recommandation et les constats du §3.2 sont ceux du 2026-10-03.
+**Recommandation (JUGEMENT).** Garder B comme défaut et ne rien basculer : aucune mesure admissible pour D13 n'existe. Les 121 lignes du relevé ont servi à mettre au point les règles et les tags avec les 3 IA ; elles ne fondent qu'une mesure **exploratoire**. La prochaine étape utile est une **clarification avec Steve** : un document de questions fermées est prêt (§4.8) ; son envoi est une décision de l'owner, après accord de Farid sur la sollicitation de Steve (D8, D16). Tant que ces points ne sont pas clarifiés, **pas d'extension à de nouvelles villes** (arbitrage de l'owner). En parallèle, Fabien tranche G1 à G8 et D2 à D4 (capitalisation), et Farid décide du seuil D13 (zéro Pertinent masqué : proposition de l'owner, Fabien), dont dépend le dimensionnement du test neuf. Tout reste subordonné à la priorité n° 1 de Steve, le rafraîchissement des données (#703). Séquence de mise en œuvre recommandée (§9.6) : B0, puis L1, L2 et U1 ; le jeu de référence O1 en parallèle de U1 ; le classifieur C1 seulement après O1, D7 et un rafraîchissement stable.
+
+**Actées** : D1 (conservation intégrale), D17 (contrat d'entrée : données de la ville à la date du signal), volet « usage des 121 lignes » de D10 — toutes par l'owner. **Proposée** : D13 (zéro Pertinent masqué), à décider par Farid. Le reste du registre est à décider.
+
+**Constats (statut entre parenthèses).**
+
+| Sujet | Constat | Où |
+|---|---|---|
+| Ce que Steve a décidé | Sur les 124 lignes du relevé (121 retenues, 51 villes), seules les colonnes P (sens), Q (classement), R (code de motif) et B (passe observée) sont les décisions de Steve ; les colonnes L à T sont rédigées par l'assistant du triage (FAIT). | §2.4, §4.4 |
+| Steve dans le temps | Sur 12 dossiers communs au cahier du 10 juillet et au relevé du 21 septembre, la lecture du signal est la même 12 fois sur 12, le niveau 5 fois ; les 7 autres écarts ont une cause identifiée (CALCUL). | §4.3 |
+| Écarts et désaccords | Il n'y a pas 51 désaccords avec Steve : 51 écarts entre verdict calculé et Steve, dont 20 erreurs de notre outillage et 31 points à clarifier. Après R′ v1 et la correction des tags : **40 écarts = 12 erreurs de notre outillage + 28 points à clarifier** (12 données manquantes, 11 désaccords de jugement, 5 non convergés) (CALCUL ; classe de cause : JUGEMENT). | §4.6 |
+| Règle R′ v1 | 15 clauses tirées des règles écrites de Steve, revues par les 3 IA (3/3 « oui avec amendements »), figée par empreinte comme référence de travail. Sur les tags de référence : accord avec Steve 81/121 (R1–R7 : 70), 1 Pertinent masqué (n° 121, point d'ordre du jour contraire à R-01), rappel P∪S 83,8 %, précision 90,5 % (CALCUL, exploratoire). | §5.2 |
+| Tags | 5 tags ajoutés (instrument, finalité, nature de la source, objet de capacité, zonage associé) ; `sens` et `densification` redéfinis sur la capacité de construire ; 3 corrections reconnues 3/3 (CALCUL). | §4.5 |
+| Détection exploratoire | Un auteur de prompt isolé a écrit 3 versions (v1 → v3) sur 60 lignes train ; chaque version gelée a passé une fois le test aveugle exploratoire (61 lignes, 26 villes) avec 3 modèles en effort bas. Face à Steve : précision 93 à 96 % (B′ passe 1 : 70 %), rappel 63 à 80 % (B′ passe 1 : 74 %), 1 à 4 Pertinent masqués sur 20 ; les itérations n'améliorent pas le test (train 97–100 % : sur-ajustement). Aucun candidat retenu (CALCUL, exploratoire, non admissible pour D13). | ch. 6 |
+| Mesure confirmatoire | `not run` : test neuf sur des villes hors registre d'exposition, annoté par Steve, second annotateur humain sur au moins 50 cas (ressource `unknown`). | ch. 7 |
+| B aujourd'hui | Vue de travail (passe 1, 73 lignes) : bruit 24/73 = 32,9 % ; part P ∪ S 49/73 = 67,1 % (repère historique, pas un comparateur) (CALCUL). | §2.5, §2.6 |
+| Capitalisation | Le moteur engram est déjà une bibliothèque d'immo ; son store Postgres (6 tables) est codé mais non déployé et entre en collision de noms avec `graph_nodes` / `graph_edges` d'immo ; seul l'évaluateur `profile evaluate` existe ; la boucle jeu de référence / sceau / promotion est en conception (FAIT, preuves au commit). | §9.5, annexe III.7 |
+
+**Décisions ouvertes à court terme** (le registre complet suit, §3.1).
+
+| Qui | Décision | Pourquoi maintenant |
+|---|---|---|
+| owner | envoyer ou non les questions à Steve (§4.8) | 28 points à clarifier et 7 pratiques sans R-xx bloquent l'extension et le gel |
+| Farid | D8, D16 : accord sur la sollicitation de Steve (volume, délai) | condition de l'arbitrage (étape 2) |
+| Farid | D13 : décider du seuil proposé (zéro Pertinent masqué, k_max = 0, borne < X) | précède la ratification de l'étape 0 et fixe le dimensionnement du test neuf |
+| Fabien | D10 : ressource du second annotateur humain | condition d'une mesure confirmatoire |
+| Fabien | G1 à G8, D2 à D4 | capitalisation (stockage, versions, scellement) |
 
 ### 3.1 Registre des décisions (G1 à G8, D1 à D17)
 
@@ -355,20 +380,6 @@ Ce chapitre est rédigé en dernier, après les étapes 1 à 7 du plan (§12.1).
 | D16 | Retour à Steve | (a) renvoyer filtres réels et table de dérivation | Farid · Mathieu | à décider | avant l'étape 2 (sollicitation de Steve) | §10.3 |
 
 Notes : D10 et D13 ont été réécrites le 2026-10-05 (§10.1) ; D9 : clôture recommandée par fusion dans D10.
-
-### 3.2 Recommandation et constats du 2026-10-03 (ancien, à remplacer)
-
-**Recommandation globale (JUGEMENT).** Conserver intégralement les sources de Steve, les rattacher aux objets métier par des ancres durables, afficher son verdict en lecture seule dans les panneaux existants, construire un jeu de référence de ciblage distinct du jeu de référence d'extraction, puis développer une vue C mesurée contre B. B reste le défaut jusqu'à une bascule fondée sur la mesure. Tout cela reste subordonné à la priorité n° 1 de Steve : le rafraîchissement (#703, #786, #788).
-
-| Sujet | Constat déterminant | Recommandation |
-|---|---|---|
-| Ce que Steve a livré | **FAIT.** 7 feuilles : 124 lignes de triage (51 villes sur 103), 121 contrôles d'exclusion, 77 constats, 26 règles, 28 codes de motif ; une analyse qui pose trois critères cumulatifs. | Tout importer, sans supposer « une ligne = un signal ». |
-| Qualité de la vue de travail | **CALCUL.** Passe 1 (73 lignes) : 34 Pertinent, 15 À surveiller, 24 Non pertinent. L'analyse en retient 22 qui réunissent les trois critères. | Le défaut principal est le bruit (24/73 = 32,9 %) ; le rappel est secondaire. |
-| Annotation de signal existante | **FAIT.** L'UI envoie l'identifiant texte du graphe ; l'API (le serveur) exige un UUID, identifiant aléatoire de l'ancienne table signals (`prospect-marks.ts:107`). | Correctif B0 avant tout import. |
-| Contrat sentropic | **FAIT.** Les cibles `record` conviennent sans changement du paquet ; `delete` est une suppression physique dans la 0.2.0 publiée, alors que l'owner a ratifié une suppression qui laisse une trace (tombstone) et une durée de rétention (décision O1 du dossier COLLAB). | Lecture conforme, import immuable, aucun chemin de suppression par le paquet tant qu'il n'a pas de tombstone. |
-| UI | **FAIT.** 39 composants Svelte sur 69 importent le DS ; les 3 composants d'annotation n'en importent aucun ; la carte Signaux reste MapLibre local. | Afficher dans le panneau et le rail avec le DS, sans attendre la migration geo. |
-| Ciblage C | **FAIT.** Aucun champ « sens » ; `effet_densifiant` toujours `inconnu` ; ni « de plein droit », ni « ODJ / décision ». | C demande une extraction nouvelle, mesurée sur un jeu de référence de Steve. |
-| Jeu de référence | **FAIT.** Le jeu de référence v3 (674 unités committées, 676 en copie locale) mesure l'extraction d'actes, pas le ciblage. | Deux jeux de référence distincts : extraction (E) et ciblage (C). |
 
 ---
 
@@ -842,29 +853,74 @@ Un signal est **dans C** si aucune exclusion **établie** ne s'applique ; il est
 
 ## 6. Tentative de détection sur le jeu actuel — résultats exploratoires (lignes exposées)
 
-<!-- A_INTEGRER: ch6-exploratoire -->
-Section en cours de rédaction.
+**Statut : exploratoire (lignes exposées).** Tout résultat de ce chapitre est exploratoire : aucun résultat n'est admissible pour D13. Les 121 lignes ont toutes été annotées par les 3 IA et analysées par Steve avant la campagne ; les définitions (guide v3, règles de Steve) ont été rédigées après les avoir vues. Le test aveugle exploratoire est aveugle pour l'auteur du prompt, pas vierge. Les résultats sont rapportés contre `steve_v1` (classement du relevé) et contre le **consensus IA** (R′ v1 appliquée aux tags majoritaires des 3 IA), qui est une référence machine corrélée, jamais une seconde validation ; `steve_v2` est `not run` (arbitrage de Steve à venir, §4.8).
 
-**Statut et portée (fixés).** Tout résultat de ce chapitre est exploratoire : les 121 lignes sont exposées (§4.1) et aucun résultat n'est admissible pour D13. Les résultats sont rapportés contre `steve_v1` (classement du relevé) et `steve_v2` (après arbitrage, §4.8) ; l'accord avec la majorité IA est un accord avec une référence machine corrélée, jamais une seconde validation.
+### 6.1 Découpage homogène (arbitrage de l'owner)
 
-**Protocole sur le dev (plan v2, étapes 6 et 7 ; arbitrage de l'owner).**
-1. Découpage homogène des 121 lignes par ville en train et test aveugle, stratifié au moins sur Passe × Classement, puis sur les tags ; graine et tirage engagés dans track ; résultats marqués `pilot-exposed` et `test-informed-schema`.
-2. Trois itérations de prompt (v1 → v3) par un auteur neuf, qui ne voit que la partie train ; mesure avec `gpt-6-astra` low, `claude-opus-5-5` low et `gemini-3.8-flash-low`, sièges seulement, 3 répétitions par version, empreinte de chaque version dans track.
-3. Sortie : tags + justification citée ; verdict dérivé par R′ ; B′ passes 1 à 3 recalculées sur l'instantané.
-4. Décomposition sur les mêmes cas : tags prédits contre tags de référence ; R′(tags de référence) contre Steve ; R′(tags prédits) contre Steve ; **limites du signal seul** (aucun plafond n'est établi) ; points précision–rappel.
-5. Sélection du candidat selon la règle préenregistrée (annexe I.1), inscrite dans track avant l'ouverture du test neuf.
+- **Train** : 60 lignes, 25 villes ; **test aveugle exploratoire** : 61 lignes, 26 villes ; une ville entière d'un seul côté ; les 3 lignes exclues restent exclues (CALCUL).
+- Recherche déterministe (graine `20261005`, 2 000 initialisations puis recherche locale par ville), fonction objectif et tolérances écrites avant le tirage, **rapport d'équilibre publié avant tout prompt** (comptes seulement, aucun identifiant de ligne test). Écarts de part maximaux train / test : Classement 2,4 points, Passe 2,1, Passe × Classement 3,6, sens de Steve 4,8, tags de support ≥ 10 : 9,3 (`portee = zone_entiere`) ; verdict de faisabilité : faisable (CALCUL).
+- **Tags orphelins** (support < 5 ou présents d'un seul côté) : 15 valeurs de tags et 13 codes du motif IA. Fusion retenue : `typologie_max` `logement_unique → unifamiliale` (équivalence sémantique, même verdict R′). Fusions publiées mais non retenues (verdict R′ identique, équivalence sémantique partielle) : `usage_conditionnel → ppcmoi`, `autre → ppcmoi`, `sans_effet_capacite → non_urbanisme`, `consultation → projet_reglement`, `intermediaire → multilogement`, `bi_trifamiliale → intermediaire`, `serie_convergente indetermine → non`. Sans cible (R′ a un chemin propre) : `mixte`, `cptaq_individuelle`, `mandat`, `contrainte_acquisition = oui`. Codes de motif de Steve présents d'un seul côté : 10 (5 de chaque côté) ; leur mesure est `N-A` sur ce découpage.
 
-*Ancien, à remplacer (§9.7 du 2026-10-03, résumé antérieur au statut d'exposition).*
+### 6.2 Contrat d'entrée et scellement
 
-**À ce stade, aucune évaluation n'est faite.** Le protocole fixe l'ordre des étapes ; aucune n'a encore produit de mesure.
+- **Entrée** (D17) : l'enregistrement radar du signal et le contexte de sa ville **limité aux enregistrements datés au plus tard du signal** (30 plus récents), caviardage typé (`[PERSONNE]`, `[DEMANDEUR]`, `[ADRESSE]`). Contrôle mécanique sur les 121 entrées : 0 champ interdit (codes de motif, colonnes de l'assistant, classement, tags), 0 date postérieure au signal ; 6 descriptions radar portaient des étapes postérieures, retirées (CALCUL).
+- **Test scellé** : AES-256-GCM, clé tenue hors dépôt (jamais affichée) ; entrées et attendus en paquets séparés ; chaque accès journalisé (54 entrées, refus compris). Écart déclaré au préenregistrement : une seule clé au lieu de deux clés et d'un gardien distinct (G5 (b)) : la séparation exécutant / scoreur est procédurale.
 
-1. **Prompts v1 et v2 du pilote C éradiqués** : la v2 avait été réglée sur un agrégat qui incluait des lignes du test ; ils ne servent plus à rien, ni comme base ni comme exemple.
-2. **Étiquetage des tags** (premier jet, §4.5) sur les lignes de Steve.
-3. **Découpage optimisation / test, décidé après l'étiquetage**, en fonction des tags : toujours par ville (une ville ne traverse jamais le découpage), équilibre sur le verdict et sur les tags, aucune valeur de tag présente d'un seul côté. Les effectifs ne sont pas figés à ce stade.
-4. **Nouvelle v1 du prompt** écrite par un auteur qui ne voit que la partie optimisation, les **3 critères** de Steve et les **catégories** (tags, motifs) : aucune ligne du test, aucun résultat antérieur.
-5. **Test réservé scellé** : gelé et engagé dans track avant tout appel de modèle ; **un seul passage, après gel du prompt**. Toute modification ensuite exige des lignes neuves (les 52 villes suivantes, C v2).
+### 6.3 Protocole : auteur, gel, exécutants
 
-Ce pilote reste `v0` exploratoire (G7) : il éclaire, il ne fonde pas la bascule D13 (G5).
+- **Auteur de prompt** : une session neuve et isolée par version (Claude Opus 5.5, effort max, siège, répertoire vide, outils désactivés, sans MCP ni clé). Il ne reçoit que le **bac à sable** : les 60 lignes train avec le classement, le sens et le code de Steve, les définitions sans aucun compte (codes de motif, règles de Steve sans R-14 ni R-16 et sans phrase citant une ville, un règlement ou une ligne, guide des tags v2 + v3), le schéma de sortie ; aux versions 2 et 3, son prompt précédent et le **rapport train** de la version précédente. Il ne voit jamais l'analyse de Steve du 21 septembre, le cahier de juillet, le tableau de référence complet, R′ ni aucune donnée test. Chaque message est contrôlé mécaniquement avant envoi (identifiants, villes, nœuds, numéros de règlement test, sous-chaînes de 12 mots de l'analyse) : conforme pour v1, v2, v3.
+- **Exécutants distincts** : `gpt-6-astra` effort low (codex exec), `claude-opus-5-5` effort low (claude -p), `gemini-3.8-flash-low` (agy sous bwrap) ; un appel par signal ; sortie : 18 tags, verdict à 3 classes, « montrer » (= Pertinent ou À surveiller), justification et citation. 18 passes (3 versions × 3 modèles × train et test) : 1 089 appels, 0 échec, 0 appel d'outil (CALCUL).
+- **Gel** : chaque version est commitée dans un dépôt local puis inscrite au registre de gel **avant** tout appel, train compris : v1 `7b2353f8…` (03:10Z), v2 `104c9779…` (04:29Z), v3 `16e7cfcc…` (05:02Z), le 2026-10-06.
+- **Une passe test par version gelée et par modèle**, journalisée ; aucun score test calculé avant le gel de v3 et la fin des 9 passes ; aucun retour du test vers l'auteur ; pas de v4.
+
+**Garantie « personne ne regarde le test pour optimiser un prompt » (FAIT, preuves générées depuis les journaux).** Ordre vérifié pour chaque version : appel auteur → contrôle du message (conforme) → gel → passes train → passes test. Ouvertures des attendus test avant la fin des 9 passes : **0** ; refus journalisés : 6. Limites : le préparateur / exécutant / scoreur a lu tout le matériau, test compris, et n'écrit aucun prompt ; le contrôle des messages est mécanique (il ne détecte pas une paraphrase) ; les journaux sont locaux, non signés.
+
+### 6.4 Résultats sur le test aveugle exploratoire (61 lignes, 26 villes)
+
+Steve sur le test : 20 Pertinent, 15 À surveiller, 26 Non pertinent ; consensus IA : 11 / 21 / 29. Rappel et précision de « montrer à Steve » (montré = P ∪ S), en % ; IC 95 % bootstrap par villes de ±15 à ±20 points sur le rappel ; Pertinent masqués = Pertinent de Steve (ou du consensus) classés Non pertinent (CALCUL).
+
+| Système | Rappel (Steve) | Précision (Steve) | Pertinent masqués (Steve) | Rappel (consensus IA) | Précision (consensus IA) | Pertinent masqués (consensus IA) | Accord 3 classes (Steve) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Astra v1 | 68,6 | 96,0 | 3 | 78,1 | 100,0 | 4 | 67,2 |
+| Opus v1 | 74,3 | 96,3 | 2 | 84,4 | 100,0 | 3 | 70,5 |
+| Gemini v1 | 77,1 | 93,1 | 1 | 87,5 | 96,6 | 2 | 68,9 |
+| Astra v2 | 65,7 | 95,8 | 4 | 75,0 | 100,0 | 4 | 65,6 |
+| Opus v2 | 74,3 | 96,3 | 2 | 84,4 | 100,0 | 3 | 68,9 |
+| Gemini v2 | 77,1 | 93,1 | 1 | 87,5 | 96,6 | 2 | 70,5 |
+| Astra v3 | 62,9 | 95,7 | 4 | 71,9 | 100,0 | 4 | 65,6 |
+| Opus v3 | 74,3 | 96,3 | 2 | 84,4 | 100,0 | 3 | 70,5 |
+| Gemini v3 | 80,0 | 93,3 | 1 | 87,5 | 93,3 | 2 | 68,9 |
+| B′ passe 1 (5 filtres) | 74,3 | 70,3 | 2 | 75,0 | 64,9 | 3 | — |
+| B′ passe 2 (sans Précoce) | 94,3 | 62,3 | 0 | 96,9 | 58,5 | 0 | — |
+| B′ passe 3 (aucun filtre) | 100,0 | 57,4 | 0 | 100,0 | 52,5 | 0 | — |
+
+B′ = passe **observée** par Steve (colonne B), flag `observed-pass-not-recomputed` : aucun recalcul des filtres hors production n'était disponible.
+
+<!-- chart:pr-test-steve -->
+
+<!-- chart:pr-test-consensus -->
+
+**Détection des tags (CALCUL, test, accord moyen % / κ moyen sur les 18 tags, contre la majorité des 3 IA).**
+
+| Version | Astra | Opus | Gemini |
+|---|---|---|---|
+| v1 | 87,6 / 0,68 | 87,0 / 0,68 | 87,4 / 0,65 |
+| v2 | 91,1 / 0,69 | 91,2 / 0,69 | 90,2 / 0,72 |
+| v3 | 90,5 / 0,68 | 90,9 / 0,69 | 90,3 / 0,72 |
+
+Tags faibles en κ malgré un accord élevé (classes rares) : `serie_convergente` (κ 0,00), `refonte_complete`, `rattache_a`, `zonage_associe`.
+
+**Train (indicatif, biaisé : l'auteur a vu ces lignes et reçu le rapport train).** Accord 3 classes avec Steve : 96,7 à 100 % pour les trois versions et les trois modèles ; accord moyen des tags : 85–87 % (v1), 95–97 % (v2), 97–98 % (v3).
+
+### 6.5 Lecture (JUGEMENT, exploratoire)
+
+- Les 9 configurations C sont **plus précises** que B′ à toutes les passes (93 à 96 % contre 57 à 70 % face à Steve) et ont un rappel **du même ordre que B′ passe 1** (63 à 80 % contre 74 %) ; elles masquent 1 à 4 Pertinent de Steve sur 20 (B′ passe 1 : 2). Aucune n'atteint « zéro Pertinent masqué » (D13).
+- **Les itérations n'améliorent pas le test** : Opus est identique en v1, v2, v3 ; Gemini gagne une ligne en v3 ; Astra en perd une à chaque version. Le train atteint 97–100 % : l'écart d'environ 30 points entre train et test indique un **sur-ajustement des consignes du prompt au train**. Les tags gagnent 3 à 4 points de v1 à v2, puis plafonnent.
+- La précision de 100 % contre le consensus IA reflète en partie la parenté des références (mêmes familles de modèles, mêmes définitions) : c'est un accord avec une référence corrélée.
+- **limites du signal seul** (aucun plafond établi) : sur le dev, 12 des 40 écarts de R′ v1 reposent sur une donnée absente du signal (§4.6) ; un prompt ne peut pas les retrouver.
+- **Candidat** : aucun n'est retenu. La règle de sélection préenregistrée (annexe I.1 : Pertinent masqués ≤ seuil, puis précision P ∪ S) ne s'applique qu'au test neuf ; sur ce test exploratoire, Gemini v3 et Gemini v1 ont le moins de Pertinent masqués (1) avec la précision la plus basse des neuf (93 %). Aucune décision ne s'en déduit.
+
+Fichiers (hors dépôt, empreintes en annexe I.2) : rapport d'équilibre, protocole du test, garantie, agrégats et graphiques de la campagne (`ch6/`).
 
 ---
 
@@ -1695,7 +1751,7 @@ Source : plan v2 du jeu de référence C (2026-10-05) et sa revue (annexe IV). L
 | Tableau de référence C, `reference-c.csv` (privé, non commité) | `f47ec61f0c14ad38e844732871ad5edaf0e1cc9bbda7e70b334ed91770703d07` |
 | R′ v1, `derive-verdict-rprime-v1.mjs` (hors dépôt, §5.2) | `e5836deb69a6165907966868e6e06fedac582c7a74741b0cd89097a6cfa501a2` |
 | Tableaux de R′ v1, `rule-r-prime/v1/tableaux-v1.md` (hors dépôt, §4.6) | `a678e991ede0792ca0f9a32822552251b1583990554a7d1a27a228434a0bab7c` (relevée le 2026-10-06) |
-| Questions à Steve, `rapport-suivi/QUESTIONS-STEVE.md` (privé, non envoyé, §4.8) | `c8f8ef63ea6aaa318c44be01635988770477d4cbd97e61e1c66ee68a3cc6b6d3` (relevée le 2026-10-06 ; document de travail, susceptible d'évoluer avant envoi) |
+| Questions à Steve, `rapport-suivi/QUESTIONS-STEVE.md` (privé, non envoyé, §4.8) | `251601dc02184cf195593be468333b8847a993fd681867fe56af2c7c7208075d` (relevée le 2026-10-06 ; document de travail, susceptible d'évoluer avant envoi) |
 
 Manifeste `engram_reference_set_v1` du jeu de référence C v2 : `not run` (étape 5).
 
@@ -2456,6 +2512,8 @@ erDiagram
     }
 ```
 
+<!-- diagram:engram-store -->
+
 Les relations sont logiques : la DDL ne déclare aucune clé étrangère.
 
 **Collision avec immo.**
@@ -2568,23 +2626,18 @@ Leur emplacement est `unverified` : il reste à décider.
   - Aucun job k8s ni CronJob `job_evaluation` n'existe dans immo (`git grep` vide à `782d20c9`).
   - L'image `api` contient `@sentropic/graphify` 0.18.0, donc le binaire `graphify`. Il n'a pas été exécuté (`unverified`).
 
-```mermaid
-flowchart LR
-    A["Instantané haché des annotations validées<br/>(sentropic, conception)"] --> B["Construire ReferenceSetVersion<br/>dev / test, split groupé (conception)"]
-    B --> C["Sceau : engagement inscrit dans track<br/>avant tout appel de modèle (conception)"]
-    C --> D["Runs candidat sur dev<br/>itérations autorisées (conception)"]
-    D --> E["Candidat figé : passe unique sur test<br/>+ journal d'exposition (conception)"]
-    E --> F["job_evaluation =<br/>engram profile evaluate<br/>(CODÉ, typed_occurrence seul)"]
-    D --> F
-    F --> G{"gate pass / fail<br/>(indeterminate : conception)"}
-    G --> H["Comparaison avec la production<br/>(conception)"]
-    H --> I["Décision track go / no-go<br/>attestée h2a (conception)"]
-    I --> J["engram_promotion_v1 + garde de production<br/>engram promote check (conception)"]
-    classDef code fill:#d8f0d8,stroke:#2a7a2a;
-    classDef concept fill:#f4f4f4,stroke:#888,stroke-dasharray: 4 3;
-    class F code;
-    class A,B,C,D,E,G,H,I,J concept;
-```
+| Étape | Objet | État |
+|---|---|---|
+| 1 | Instantané haché des annotations validées (sentropic) | conception |
+| 2 | Construire la version du jeu de référence (`ReferenceSetVersion`) : dev / test, découpage groupé | conception |
+| 3 | Sceau : engagement inscrit dans track avant tout appel de modèle | conception |
+| 4 | Runs du candidat sur dev, itérations autorisées | conception |
+| 5 | Candidat figé : passe unique sur test et journal d'exposition | conception |
+| 6 | `job_evaluation` = `engram profile evaluate` (depuis 4 ou 5) | **codé**, évaluateur `typed_occurrence` seul |
+| 7 | Garde `pass` / `fail` (`indeterminate` non codé) | codé en partie |
+| 8 | Comparaison avec la production | conception |
+| 9 | Décision track go / no-go, attestée h2a | conception |
+| 10 | `engram_promotion_v1` et garde de production (`engram promote check`) | conception |
 
 ---
 

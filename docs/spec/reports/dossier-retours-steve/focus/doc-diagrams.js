@@ -7,6 +7,73 @@ import { PHYSICAL } from './physical-model.js';
 export const DIAGRAM_MARKER = /<!-- diagram:([\w-]+) -->/;
 
 export const DOC_DIAGRAMS = {
+  // Annexe III.7 — store Postgres d'engram (codé, non déployé dans immo) ; relations logiques, aucune clé étrangère.
+  'engram-store': {
+    title: 'Store Postgres d’engram : 6 tables (codé à c96fc01e, non déployé dans immo)',
+    layers: ['Métadonnées', 'Graphe', 'Dérivés'],
+    placement: {
+      graph_meta: { col: 0, row: 0 }, graph_group_counts: { col: 0, row: 1 },
+      graph_nodes: { col: 1, row: 0 }, graph_edges: { col: 1, row: 1 },
+      graph_positions: { col: 2, row: 0 }, graph_tombstones: { col: 2, row: 1 },
+    },
+    existing: [],
+    labels: { city_slug: 'city_slug', source_id_target_id: 'source_id, target_id', node_id: 'node_id', snapshot_id: 'snapshot_id', edge_triple: 'triplet d’arête' },
+    colGap: 190,
+    er: `erDiagram
+    graph_meta ||--o{ graph_nodes : city_slug
+    graph_nodes ||--o{ graph_edges : source_id_target_id
+    graph_nodes ||--o{ graph_positions : node_id
+    graph_meta ||--o{ graph_group_counts : snapshot_id
+    graph_nodes ||..o{ graph_tombstones : node_id
+    graph_edges ||..o{ graph_tombstones : edge_triple
+    graph_meta {
+        text city_slug PK
+        text topology_signature
+        text pushed_at
+        text tool_version
+    }
+    graph_nodes {
+        text city_slug PK
+        text id PK
+        text label
+        text type
+        int community
+        jsonb props
+    }
+    graph_edges {
+        text city_slug PK
+        text source_id PK
+        text target_id PK
+        text relation PK
+        text confidence
+        jsonb props
+    }
+    graph_group_counts {
+        text city_slug PK
+        text axis PK
+        text key PK
+        text snapshot_id
+        int count
+    }
+    graph_positions {
+        text city_slug PK
+        text layout_id PK
+        text node_id PK
+        float x
+        float y
+        int degree
+    }
+    graph_tombstones {
+        text city_slug PK
+        text target_kind PK
+        text node_id PK
+        text edge_source PK
+        text edge_target PK
+        text edge_relation PK
+        bigint t
+        text reason
+    }`,
+  },
   // Annexe III.1 — physical model, current state. The proposed state is the modele-donnees
   // scene (§9.2), not repeated in the text (PHYSICAL['etat-propose'] stays for the tests).
   'etat-actuel': PHYSICAL['etat-actuel'],
