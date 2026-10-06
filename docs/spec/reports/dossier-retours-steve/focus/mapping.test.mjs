@@ -59,7 +59,7 @@ test('repères de rédaction : sections en attente, chacune signalée', () => {
 test('écarts et désaccords : 51 écarts = 20 erreurs d’outillage + 31 points à clarifier ; après R′ v1, 40 = 12 + 28', () => {
   assert.ok(!/(?<!pas )51 désaccords/.test(markdown), '« 51 désaccords » ne doit plus apparaître');
   const s46 = between('\n### 4.6 ', '\n### 4.7 ');
-  for (const text of ['| **Écarts (verdict calculé ≠ Steve)** | **51** | **40** |', '| *Nos erreurs d’outillage* | **20** | **12** |', '| *Points à clarifier avec Steve* | **31** | **28** |',
+  for (const text of ['| **Écarts (verdict calculé ≠ Steve)** | **51** | **40** |', '| *Nos erreurs d’outillage* (provisoire pour P1 / P3, à confirmer par Steve) | **20** | **12** |', '| *Points à clarifier avec Steve* | **31** | **28** |',
     '**il n’y a pas 51 désaccords avec Steve.**', '**12 données manquantes**', '**11 désaccords de jugement**', '**5 non convergés**'])
     assert.ok(s46.includes(text.replace(/’/g, "'")), text);
   assert.equal(14 + 6 + 12 + 10 + 5 + 4, 51);
