@@ -1,11 +1,11 @@
 {
   "output": "docs/spec/reports/dossier-retours-steve/decision-focus.html",
-  "bytes": 1043954,
-  "htmlSha256": "fb6c436449ef4bb29961dbcd03dc78e5120fa0db6496dc246941d8785c96d150",
-  "embeddedSha256": "8440f369568bf7aa6c295aeacbf566ed48a449c6fb5cb1b553806fb8456c909b",
+  "bytes": 1117748,
+  "htmlSha256": "c6c6e822f3d600add90b365776de1040d1bf81740051b8f201b2e9913e209653",
+  "embeddedSha256": "7937763390f2deaf3e0df0608eeff466ed1c09498c1fee58bb37a1d9f0833434",
   "embeddedSha256Rule": "sha256 of the file with the embedded value replaced by 64 zeros",
-  "dossierHash": "b1341f453d89a6c37ddc5ffc75e43cc11a912c70a1432064758f8b987b4005d7",
-  "artifactInputHash": "39e52f24eece613b5774fd15e77da1aed8dbba4505eb30256553da39aaa92c16",
+  "dossierHash": "d0de7678fc0028504e9e57a0e132a30373414e8faca2543349f340c6f90b0ccc",
+  "artifactInputHash": "b6acb3103bc8e5a812dfbac076b04e60b62b75c05a09f00a8397f434bdc84d60",
   "graphs": [
     {
       "id": "criteres-steve",
@@ -40,7 +40,7 @@
       "nodes": 13,
       "edges": 12,
       "subflows": 3,
-      "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac"
+      "sceneHash": "daa153ab307b4b5a0b90dd3611cbccaa5f26f69ba8bae737e3074916d206d2b0"
     }
   ]
 }
