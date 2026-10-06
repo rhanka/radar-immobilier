@@ -20,8 +20,21 @@
 #                       in build-push-images.yml; its Role grants batch/jobs create/get/list/
 #                       watch/delete + deployments/pods read, but NOT pods/log, so the Job
 #                       log step cannot read the report in preprod — see that step).
-#   Only `projection` and `document-date-recovery` have a preprod manifest; any other job
-#   with target=preprod is refused before the kubeconfig is even written.
+#   Preprod is supported for `projection`, `document-date-recovery`, `graph-city-key-repair`,
+#   `mapper`, `refresh-suspend` and `refresh-resume`; any other job with target=preprod is
+#   refused before the kubeconfig is even written.
+#
+# GH #812 (spec docs/spec/SPEC_FIX_GRAPH_CITY_KEY.md §7.3–7.4):
+#   (workflow_dispatch inputs are kept at 10: the repair reuses recovery_mode / recovery_cities,
+#   the mapper reuses project_cities.)
+#   graph-city-key-repair  recovery_mode=preview|apply, recovery_cities="all" (preview only) or
+#                          slugs; summary printed from the Job termination message (works
+#                          without pods/log), full report in S3 reports/graph-city-key/<run-id>/.
+#   mapper                 project_cities = slugs ⇒ per city, purge geo_resolutions + geo_unresolved
+#                          and resolve again in one transaction (RESET=1); empty ⇒ every city with
+#                          OGC data, append-only as before.
+#   refresh-suspend/resume patch CronJob radar-refresh-pv spec.suspend (owner decision Q2), read
+#                          back; no Job is created.
 name: Run one-shot job
 on:
   workflow_dispatch:
@@ -40,8 +53,11 @@ on:
           - export-graph-nodes
           - export-gt
           - document-date-recovery
+          - graph-city-key-repair
+          - refresh-suspend
+          - refresh-resume
       target:
-        description: "Target environment: prod (namespace radar-immobilier) or preprod (radar-immobilier-preprod; projection and document-date-recovery only)"
+        description: "Target environment: prod (namespace radar-immobilier) or preprod (radar-immobilier-preprod; projection, document-date-recovery, graph-city-key-repair, mapper, refresh-suspend, refresh-resume)"
         required: true
         type: choice
         options:
@@ -64,12 +80,12 @@ on:
         type: string
         default: "25"
       project_cities:
-        description: "For job=projection: space-separated slugs to project S3→PG (empty ⇒ all cities)"
+        description: "For job=projection: space-separated slugs to project S3→PG (empty ⇒ all cities). For job=mapper: slugs whose geo rows are purged and rebuilt (empty ⇒ every city with OGC data, no purge)"
         required: false
         type: string
         default: ""
       recovery_mode:
-        description: "For job=document-date-recovery: preview (read-only) or apply (writes graph + PG)"
+        description: "For job=document-date-recovery or graph-city-key-repair: preview (read-only) or apply (writes PG; recovery also writes graph)"
         required: false
         type: choice
         options:
@@ -82,12 +98,12 @@ on:
         type: boolean
         default: false
       recovery_cities:
-        description: "For job=document-date-recovery: space-separated city slugs (empty ⇒ every graph/<city>/latest.json)"
+        description: "For job=document-date-recovery: space-separated city slugs (empty ⇒ every graph/<city>/latest.json). For job=graph-city-key-repair: slugs, or 'all' (preview only = measurement of every city)"
         required: false
         type: string
         default: ""
       recovery_image:
-        description: "For job=projection or document-date-recovery: ghcr.io/rhanka/radar-api:<tag> or @sha256:<digest> (empty ⇒ image served by deploy/radar-api in the target namespace)"
+        description: "For job=projection, document-date-recovery, graph-city-key-repair or mapper: ghcr.io/rhanka/radar-api:<tag> or @sha256:<digest> (empty ⇒ image served by deploy/radar-api in the target namespace)"
         required: false
         type: string
         default: ""
@@ -104,7 +120,7 @@ jobs:
     # activeDeadlineSeconds 5400 and the wait below observes it for 5700s, so the run
     # needs 110 min (setup + wait + logs) to report the real outcome. projection: the wait
     # below observes it for 3900s, so 70 min.
-    timeout-minutes: ${{ github.event.inputs.job == 'document-date-recovery' && 110 || (github.event.inputs.job == 'projection' && 70 || 20) }}
+    timeout-minutes: ${{ (github.event.inputs.job == 'document-date-recovery' || github.event.inputs.job == 'graph-city-key-repair') && 110 || ((github.event.inputs.job == 'projection' || github.event.inputs.job == 'mapper') && 70 || 20) }}
     env:
       TARGET: ${{ github.event.inputs.target || 'prod' }}
       NAMESPACE: ${{ github.event.inputs.target == 'preprod' && 'radar-immobilier-preprod' || 'radar-immobilier' }}
@@ -120,8 +136,8 @@ jobs:
           esac
           if [ "${TARGET}" = "preprod" ]; then
             case "${JOB}" in
-              projection|document-date-recovery) ;;
-              *) echo "::error title=No preprod manifest::job=${JOB} has no preprod manifest; target=preprod supports projection and document-date-recovery only. Nothing was applied."; exit 1 ;;
+              projection|document-date-recovery|graph-city-key-repair|mapper|refresh-suspend|refresh-resume) ;;
+              *) echo "::error title=No preprod manifest::job=${JOB} has no preprod manifest; target=preprod supports projection, document-date-recovery, graph-city-key-repair, mapper, refresh-suspend and refresh-resume only. Nothing was applied."; exit 1 ;;
             esac
           fi
           echo "target=${TARGET} namespace=${NAMESPACE} job=${JOB}"
@@ -206,8 +222,25 @@ jobs:
           wait_seconds=3900
           case "${{ github.event.inputs.job }}" in
             mapper)
-              echo "file=deploy/k8s/35-run-geo-mapper-job.yaml" >> "$GITHUB_OUTPUT"
+              if [ "${TARGET}" = "preprod" ]; then
+                echo "file=deploy/k8s/geo-mapper-preprod/job.yaml" >> "$GITHUB_OUTPUT"
+              else
+                echo "file=deploy/k8s/35-run-geo-mapper-job.yaml" >> "$GITHUB_OUTPUT"
+              fi
               echo "name=radar-run-geo-mapper" >> "$GITHUB_OUTPUT" ;;
+            graph-city-key-repair)
+              if [ "${TARGET}" = "preprod" ]; then
+                echo "file=deploy/k8s/graph-city-key-repair/job.yaml" >> "$GITHUB_OUTPUT"
+              else
+                echo "file=deploy/k8s/42-graph-city-key-repair-job.yaml" >> "$GITHUB_OUTPUT"
+              fi
+              echo "name=radar-graph-city-key-repair" >> "$GITHUB_OUTPUT"
+              # Job activeDeadlineSeconds is 5400; observe past it to see the real outcome.
+              wait_seconds=5700 ;;
+            refresh-suspend|refresh-resume)
+              # No Job: the Apply step patches CronJob radar-refresh-pv and reads it back.
+              echo "file=" >> "$GITHUB_OUTPUT"
+              echo "name=" >> "$GITHUB_OUTPUT" ;;
             snapshot)
               echo "file=deploy/k8s/35-consistency-snapshot-job.yaml" >> "$GITHUB_OUTPUT"
               echo "name=radar-consistency-snapshot-once" >> "$GITHUB_OUTPUT" ;;
@@ -272,6 +305,20 @@ jobs:
           JOB_NAME: ${{ steps.resolve.outputs.name }}
         run: |
           set -euo pipefail
+          # refresh-suspend / refresh-resume (GH #812, owner decision Q2): no Job, a patch of the
+          # refresh CronJob read back, then stop. Never alongside a running refresh pass.
+          if [ "${JOB}" = "refresh-suspend" ] || [ "${JOB}" = "refresh-resume" ]; then
+            want=true; [ "${JOB}" = "refresh-resume" ] && want=false
+            kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv -o name \
+              || { echo "::error title=No refresh CronJob::cronjob/radar-refresh-pv not found in ${NAMESPACE}. Nothing was patched."; exit 1; }
+            kubectl -n "$NAMESPACE" patch cronjob radar-refresh-pv --type merge -p "{\"spec\":{\"suspend\":${want}}}"
+            got="$(kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv -o jsonpath='{.spec.suspend}')"
+            if [ "${got}" != "${want}" ]; then
+              echo "::error title=Suspend not applied::cronjob/radar-refresh-pv spec.suspend reads '${got:-<empty>}', expected ${want}."; exit 1
+            fi
+            echo "cronjob/radar-refresh-pv spec.suspend=${got} (${TARGET})" | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           # backup_id must be a safe token (used in a sed replacement + S3 prefix).
           if [ -n "${BACKUP_ID}" ] && ! printf '%s' "${BACKUP_ID}" | grep -Eq '^[A-Za-z0-9._-]+$'; then
             echo "::error title=Invalid backup_id::backup_id must match [A-Za-z0-9._-]+"; exit 1
@@ -294,7 +341,10 @@ jobs:
           # are no-ops for the other jobs.
           recovery_image=""
           recovery_args=""
-          if [ "${JOB}" = "projection" ] || [ "${JOB}" = "document-date-recovery" ]; then
+          repair_args=""
+          mapper_cities=""
+          mapper_reset=""
+          if [ "${JOB}" = "projection" ] || [ "${JOB}" = "document-date-recovery" ] || [ "${JOB}" = "graph-city-key-repair" ] || [ "${JOB}" = "mapper" ]; then
             image_re='^ghcr\.io/rhanka/radar-api(:[A-Za-z0-9._-]+|@sha256:[0-9a-f]{64})$'
             recovery_image="${RECOVERY_IMAGE}"
             if [ -z "${recovery_image}" ]; then
@@ -314,12 +364,12 @@ jobs:
             # the refresh writes the same graphs; namespace memory quota.
             jobs_table="$(kubectl -n "$NAMESPACE" get jobs -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{range .metadata.ownerReferences[*]}{.kind}/{.name}{end}{"\t"}{.status.active}{"\t"}{.status.startTime}{"\n"}{end}')" \
               || { echo "::error title=Cannot list Jobs::kubectl get jobs in ${NAMESPACE} failed (RBAC or API), so a running refresh/backup cannot be ruled out. Nothing was applied."; exit 1; }
-            busy="$(printf '%s\n' "${jobs_table}" | awk -F'\t' '($3 + 0) > 0 && ($1 ~ /^radar-refresh-pv/ || $2 ~ /^CronJob\/radar-refresh/ || $1 ~ /^radar-backup/ || $1 ~ /^db-backup-/ || $2 ~ /^CronJob\/.*backup/ || $1 == "radar-graph-projection-only" || $1 == "radar-document-date-recovery") { printf "%s (started %s) ", $1, ($4 == "" ? "unknown" : $4) }')"
+            busy="$(printf '%s\n' "${jobs_table}" | awk -F'\t' '($3 + 0) > 0 && ($1 ~ /^radar-refresh-pv/ || $2 ~ /^CronJob\/radar-refresh/ || $1 ~ /^radar-backup/ || $1 ~ /^db-backup-/ || $2 ~ /^CronJob\/.*backup/ || $1 == "radar-graph-projection-only" || $1 == "radar-document-date-recovery" || $1 == "radar-graph-city-key-repair" || $1 == "radar-run-geo-mapper") { printf "%s (started %s) ", $1, ($4 == "" ? "unknown" : $4) }')"
             if [ -n "${busy}" ]; then
               echo "active Job(s) found: ${busy}"
               echo "::error title=${JOB} refused — Job(s) active in ${NAMESPACE}::${busy}— retry once they have finished. Nothing was applied."; exit 1
             fi
-            echo "pre-check OK: no active refresh, backup, projection or recovery Job in ${NAMESPACE}"
+            echo "pre-check OK: no active refresh, backup, projection, recovery, repair or mapper Job in ${NAMESPACE}"
           fi
           if [ "${JOB}" = "projection" ]; then
             echo "projection: target=${TARGET} image=${recovery_image} cities=${PROJECT_CITIES:-<all>}"
@@ -353,20 +403,60 @@ jobs:
               echo "- args: \`${recovery_args:-<none>}\`"
             } >> "$GITHUB_STEP_SUMMARY"
           fi
+          if [ "${JOB}" = "graph-city-key-repair" ]; then
+            REPAIR_MODE="${RECOVERY_MODE}"
+            REPAIR_CITIES="${RECOVERY_CITIES}"
+            case "${REPAIR_MODE}" in
+              preview|apply) ;;
+              *) echo "::error title=Invalid recovery_mode::recovery_mode must be preview or apply"; exit 1 ;;
+            esac
+            if [ -z "${REPAIR_CITIES// }" ]; then
+              echo "::error title=Missing recovery_cities::graph-city-key-repair needs city slugs in recovery_cities, or 'all' with recovery_mode=preview. Nothing was applied."; exit 1
+            fi
+            if [ "${REPAIR_CITIES}" = "all" ]; then
+              if [ "${REPAIR_MODE}" != "preview" ]; then
+                echo "::error title=apply needs explicit cities::recovery_cities=all is preview only (the measurement). Nothing was applied."; exit 1
+              fi
+              repair_args="--all"
+            else
+              if ! [[ "${REPAIR_CITIES}" =~ ^[a-z0-9\ -]+$ ]]; then
+                echo "::error title=Invalid recovery_cities::recovery_cities must be lowercase slugs separated by spaces"; exit 1
+              fi
+              repair_args="${REPAIR_CITIES}"
+              if [ "${REPAIR_MODE}" = "apply" ]; then repair_args="--apply ${repair_args}"; fi
+            fi
+            repair_args="--run-id graph-city-key-${TARGET}-${GITHUB_RUN_ID} ${repair_args}"
+            echo "graph-city-key-repair: target=${TARGET} mode=${REPAIR_MODE} image=${recovery_image} args=${repair_args}"
+            {
+              echo "### graph-city-key-repair (${REPAIR_MODE}, ${TARGET})"
+              echo ""
+              echo "- image: \`${recovery_image}\`"
+              echo "- args: \`${repair_args}\`"
+              echo "- report: \`reports/graph-city-key/graph-city-key-${TARGET}-${GITHUB_RUN_ID}/repair.json\`"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ "${JOB}" = "mapper" ]; then
+            # project_cities (validated above) = the cities whose geo rows are purged and rebuilt
+            # (GH #812); empty = every city with OGC data, append-only, no purge.
+            mapper_cities="${PROJECT_CITIES}"
+            if [ -n "${mapper_cities// }" ]; then mapper_reset="1"; fi
+            echo "mapper: target=${TARGET} image=${recovery_image} cities=${mapper_cities:-<all>} reset=${mapper_reset:-0}"
+          fi
           # Template BACKUP_ID (placeholder only present in the apply manifest;
           # a no-op for every other job). Empty ⇒ the manifest's date-based
           # default phaseA-144-<UTC> kicks in. Rendered BEFORE the delete below, so a
           # refused manifest leaves the previous Job in place.
           rendered="${RUNNER_TEMP}/run-job-manifest.yaml"
           sed -e "s/__BACKUP_ID__/${BACKUP_ID}/" -e "s/__SCRAPE_CITIES__/${SCRAPE_CITIES}/" -e "s/__SCRAPE_CHUNK_SIZE__/${SCRAPE_CHUNK_SIZE}/" -e "s/__PROJECT_CITIES__/${PROJECT_CITIES}/" \
-            -e "s#__IMAGE__#${recovery_image}#" -e "s#__RECOVERY_ARGS__#${recovery_args}#" "${MANIFEST}" >"${rendered}"
+            -e "s#__IMAGE__#${recovery_image}#" -e "s#__RECOVERY_ARGS__#${recovery_args}#" -e "s#__REPAIR_ARGS__#${repair_args}#" \
+            -e "s#__MAPPER_CITIES__#${mapper_cities}#" -e "s#__MAPPER_RESET__#${mapper_reset}#" "${MANIFEST}" >"${rendered}"
           # The rendered manifest must declare the target namespace (a prod manifest can
           # never be applied to preprod, nor the reverse) and keep no unrendered image.
           if ! grep -Eq "^  namespace: ${NAMESPACE}\$" "${rendered}"; then
             echo "::error title=Manifest namespace mismatch::${MANIFEST} does not declare namespace ${NAMESPACE}. Nothing was applied."; exit 1
           fi
-          if grep -q '__IMAGE__' "${rendered}"; then
-            echo "::error title=Unrendered image::${MANIFEST} still contains __IMAGE__. Nothing was applied."; exit 1
+          if grep -Eq '__(IMAGE|REPAIR_ARGS|MAPPER_CITIES|MAPPER_RESET)__' "${rendered}"; then
+            echo "::error title=Unrendered placeholder::${MANIFEST} still contains a placeholder. Nothing was applied."; exit 1
           fi
           kubectl -n "$NAMESPACE" delete job "${JOB_NAME}" --ignore-not-found
           # ConfigMap(s) FIRST (the Job mounts them). apply is idempotent.
@@ -382,6 +472,7 @@ jobs:
         run: |
           set -eu
           NAME="${{ steps.resolve.outputs.name }}"
+          if [ -z "${NAME}" ]; then echo "${JOB}: no Job to wait for"; exit 0; fi
           # Poll the Job to a TERMINAL state (Complete OR Failed) with a deadline that
           # EXCEEDS its activeDeadlineSeconds (jobs 37/38 use 3600s → 3900s here;
           # document-date-recovery uses 5400s → 5700s, see Resolve), so this workflow
@@ -405,7 +496,7 @@ jobs:
             # cannot start (unknown image tag, missing Secret/ConfigMap key) would otherwise
             # hold the namespace memory quota and this run for the whole deadline. Four polls
             # in a row ⇒ red + delete.
-            if [ "${JOB}" = "document-date-recovery" ] || [ "${JOB}" = "projection" ]; then
+            if [ "${JOB}" = "document-date-recovery" ] || [ "${JOB}" = "projection" ] || [ "${JOB}" = "graph-city-key-repair" ] || [ "${JOB}" = "mapper" ]; then
               reason="$(kubectl -n "$NAMESPACE" get pods -l job-name="$NAME" -o jsonpath='{.items[*].status.containerStatuses[*].state.waiting.reason}' 2>/dev/null || echo '')"
               case " ${reason} " in
                 *" ImagePullBackOff "*|*" ErrImagePull "*|*" InvalidImageName "*|*" CreateContainerConfigError "*|*" CreateContainerError "*)
@@ -436,13 +527,41 @@ jobs:
           # there; the outcome (Complete/Failed) above is still authoritative, the report is
           # read owner-side until that grant exists.
           logs_note="Job log not readable with the ${TARGET} credential (preprod: no pods/log grant) — read it owner-side: kubectl -n ${NAMESPACE} logs job/${JOB_NAME}"
-          if [ "${JOB}" = "projection" ] && [ "${APPLY_OUTCOME}" = "success" ]; then
-            # Every aborted city, every cross-city-id-collision (GH #812: node ids NOT
-            # written because their row belongs to another city — the repair list) and the
-            # final summary line, whatever the log length.
+          if [ -z "${JOB_NAME}" ]; then
+            echo "${JOB}: no Job (CronJob patch only)."; exit 0
+          fi
+          # projection / document-date-recovery also write a ≤ 4 KiB summary to the termination
+          # message (GH #812): the only report readable with the preprod credential.
+          if { [ "${JOB}" = "projection" ] || [ "${JOB}" = "document-date-recovery" ]; } && [ "${APPLY_OUTCOME}" = "success" ]; then
+            term="$(kubectl -n "$NAMESPACE" get pods -l job-name="${JOB_NAME}" -o jsonpath='{range .items[*]}{.status.containerStatuses[0].state.terminated.message}{end}' 2>/dev/null || true)"
+            if [ -n "${term}" ]; then
+              { echo ""; echo "Termination summary:"; echo '```json'; printf '%s\n' "${term}"; echo '```'; } | tee -a "$GITHUB_STEP_SUMMARY"
+            fi
+          fi
+          if [ "${JOB}" = "graph-city-key-repair" ]; then
+            if [ "${APPLY_OUTCOME}" != "success" ]; then
+              echo "graph-city-key-repair: Job not (re)applied by this run — no report." | tee -a "$GITHUB_STEP_SUMMARY"
+            else
+              # The ≤ 4 KiB summary written by the script to /dev/termination-log: readable with
+              # get on pods (granted in preprod too), unlike pods/log.
+              term="$(kubectl -n "$NAMESPACE" get pods -l job-name="${JOB_NAME}" -o jsonpath='{range .items[*]}{.status.containerStatuses[0].state.terminated.message}{end}' 2>/dev/null || true)"
+              {
+                echo ""
+                if [ -n "${term}" ]; then echo '```json'; printf '%s\n' "${term}"; echo '```'; else echo "No termination message (Job still running or failed before the end)."; fi
+              } | tee -a "$GITHUB_STEP_SUMMARY"
+              log="${RUNNER_TEMP}/graph-city-key-repair.log"
+              if kubectl -n "$NAMESPACE" logs "job/${JOB_NAME}" >"${log}" 2>&1; then
+                grep -E 'repair-graph-city-key:(report|city)' "${log}" | grep -E '"verdict":"(refused|error)|repair-graph-city-key:report' || echo "(no refused city line)"
+                echo "--- last 20 log lines ---"; tail -n 20 "${log}"
+              else
+                echo "${logs_note}"
+              fi
+            fi
+          elif [ "${JOB}" = "projection" ] && [ "${APPLY_OUTCOME}" = "success" ]; then
+            # Every aborted city and the final summary line, whatever the log length.
             log="${RUNNER_TEMP}/projection.log"
             if kubectl -n "$NAMESPACE" logs "job/${JOB_NAME}" >"${log}" 2>&1; then
-              grep -E 'cross-city-id-collision|ABORTÉE|upsert échoué|terminé|fatal' "${log}" || echo "(no projection summary line in the Job log)"
+              grep -E 'ABORTÉE|upsert échoué|terminé|fatal' "${log}" || echo "(no projection summary line in the Job log)"
               echo "--- last 20 log lines ---"
               tail -n 20 "${log}"
               summary="$(grep -F 'project-graph-from-s3: terminé' "${log}" || true)"
@@ -472,7 +591,7 @@ jobs:
             # report line also goes to the run summary.
             log="${RUNNER_TEMP}/document-date-recovery.log"
             kubectl -n "$NAMESPACE" logs "job/${JOB_NAME}" >"${log}" 2>&1 || echo "${logs_note}" | tee -a "$GITHUB_STEP_SUMMARY"
-            grep -E 'recover-document-dates:(city|report)|recover: written|HALT|aborted|fatal|cross-city-id-collision' "${log}" || echo "(no recovery line in the Job log)"
+            grep -E 'recover-document-dates:(city|report)|recover: written|HALT|aborted|fatal' "${log}" || echo "(no recovery line in the Job log)"
             echo "--- last 20 log lines ---"
             tail -n 20 "${log}"
             report="$(grep -F 'recover-document-dates:report' "${log}" || true)"
