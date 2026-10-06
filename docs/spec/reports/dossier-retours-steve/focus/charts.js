@@ -14,7 +14,7 @@ export const CHARTS = {
     kind: 'stacked',
     title: 'Sens de la modification × classement de Steve (124 lignes)',
     note: 'Entre parenthèses : lignes de la passe 1 (vue de travail, 73 signaux). 23 assouplissements sont Non pertinent, surtout des autorisations au cas par cas : le sens seul ne suffit pas (§5.3).',
-    source: '§2.2 et §5.3, feuille Triage (CALCUL)',
+    source: '§2.3 et §4.2, feuille Triage (CALCUL)',
     rows: [
       { label: 'Assouplissement', values: { P: 27, S: 5, N: 23 }, extra: 35 },
       { label: 'Indéterminé', values: { P: 7, S: 21, N: 10 }, extra: 21 },
@@ -27,7 +27,7 @@ export const CHARTS = {
     kind: 'grouped',
     title: 'Les Non pertinent par motif : passe 1 (24 sur 73) et ensemble du relevé (55 sur 124)',
     note: 'Chaque famille correspond à un critère ou une exclusion de Steve. La première barre est le bruit de sa vue de travail ; la seconde, le même motif sur les 124 lignes.',
-    source: '§2.2, motifs de la feuille Triage (CALCUL, recompté par motif)',
+    source: '§2.3, motifs de la feuille Triage (CALCUL, recompté par motif)',
     series: ['Passe 1', '124 lignes'],
     rows: [
       { label: 'Hors résidentiel ou hors urbanisme', detail: 'N-NON-RES, N-FAUX-POSITIF', values: [3, 10] },
@@ -51,7 +51,7 @@ export const CHARTS = {
     kind: 'stacked',
     title: 'Classement de Steve par passe (124 lignes)',
     note: 'Passe 1 : ses cinq filtres cochés ; passe 2 : sans le filtre Précoce ; passe 3 : aucun filtre. 34 des 40 Pertinent sont en passe 1, 38 en passe 1 ou 2.',
-    source: '§5.2, feuille Triage (CALCUL)',
+    source: '§4.2, feuille Triage (CALCUL)',
     rows: [
       { label: '1 — 5 filtres', values: { P: 34, S: 15, N: 24 } },
       { label: '2 — sans Précoce', values: { P: 4, S: 11, N: 18 } },
@@ -61,14 +61,14 @@ export const CHARTS = {
   },
   'base-b': {
     kind: 'percent',
-    title: 'Base B mesurée sur la vue de travail de Steve (passe 1, 73 signaux)',
-    note: 'Point de départ de la comparaison B → C (D13). Le bruit est la part des signaux affichés que Steve juge Non pertinent.',
-    source: '§9.3 (CALCUL)',
+    title: 'Repère historique : passe 1 observée par Steve (vue de travail, 73 signaux)',
+    note: 'Repère seulement, jamais comparateur de D13 (B′ passe 1 est recalculé sur l’instantané, §7.2). Le bruit est la part des signaux affichés que Steve juge Non pertinent.',
+    source: '§2.5 (CALCUL)',
     rows: [
       { label: 'Bruit (Non pertinent)', value: 32.9, ratio: '24/73', tone: 'n' },
-      { label: 'Précision P ∪ S', value: 67.1, ratio: '49/73' },
-      { label: 'Précision P', value: 46.6, ratio: '34/73' },
-      { label: 'Précision « trois critères »', value: 30.1, ratio: '22/73' },
+      { label: 'Part P ∪ S', value: 67.1, ratio: '49/73' },
+      { label: 'Part P', value: 46.6, ratio: '34/73' },
+      { label: 'Part « trois critères »', value: 30.1, ratio: '22/73' },
       { label: 'Part des P en passe 1', value: 85, ratio: '34/40' },
       { label: 'Part des P en passe 1 ou 2', value: 95, ratio: '38/40' },
     ],

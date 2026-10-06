@@ -2,23 +2,24 @@
 
 ## 0. En-tête
 
-- **Date** : 2026-10-03 ; restructuré le 2026-10-05 selon la table des matières validée par la revue du plan (annexe IV). Analyse de Steve Chaperon datée du 21 septembre 2026 (date du mail de transmission).
+- **Date** : créé le 2026-10-03 ; restructuré le 2026-10-05 selon la table des matières validée par la revue du plan (annexe IV) ; **dernière mise à jour le 2026-10-06** (tour 3 d'étiquetage, R′ v1 figée par empreinte comme référence de travail, décomposition des écarts : §4.5, §4.6, §5.2 ; journal en annexe I.4). Analyse de Steve Chaperon datée du 21 septembre 2026 (date du mail de transmission).
 - **Type** : dossier de décision, rapport unique « retours de Steve ».
 - **Nature** : dossier consolidé, issu de deux dossiers rédigés indépendamment (auteur A et auteur B), réconciliés point par point. Le journal de cette consolidation (chiffres, constats, options, arbitrages entre auteurs) est sorti du rapport : [JOURNAL_CONSOLIDATION.md](JOURNAL_CONSOLIDATION.md), versionné avec ce dossier ; ses points laissés à la décision sont repris au §10.4.
 - **Destinataire** : Farid (Product Owner), qui décide le produit, le backlog et les priorités. **Validation technique** : Fabien (AI Builder) pour l'architecture, l'IA, le jeu de référence et le modèle de données. Consultés : Steve (client, utilisateur principal) et Mathieu (Product Manager).
-- **Statut** : **PROPOSITION**. Aucune décision n'est prise, sauf D1 et D17, actées par l'owner (2026-10-04 et 2026-10-05). Aucun code, aucune migration, aucun import, aucune action prod ou cluster.
+- **Owner du dossier** : Fabien, mandant du dossier, distinct du Product Owner (Farid) ; « l'owner » désigne Fabien dans tout le dossier.
+- **Statut** : **PROPOSITION**. Aucune décision n'est prise, sauf D1 et D17, actées par Fabien (owner) les 2026-10-04 et 2026-10-05, et l'usage des 121 lignes (volet de D10, arbitré par Fabien le 2026-10-05, §4.1) ; D13 est une proposition de Fabien (owner), à acter avec Farid. Aucun code, aucune migration, aucun import, aucune écriture prod ou cluster ; lectures seules en production le 2026-10-05 (§4.2, §4.4).
 - **Cartes** : #783 (nouveau jeu de référence), #784 (données de Steve en annotations), #797 (orientation du jeu de référence, décisions PO), #760 (tri et classement), #761 (filtres), #697 et #782 (benchmark), #703 (rafraîchissement), #786, #787 et #788 (dates et URL), #725 (jeu de référence v3), #812 (clé du graphe).
 - **Sources** :
   - classeur de Steve, **version Google Drive qui fait foi** (dossier partagé « Immo.Zonage », fichier `radar-triage-signaux.xlsx`), exporté par onglet le 2026-10-05, empreintes par onglet en annexe I.2 ; sur les colonnes A à T de Triage, contenu identique au fichier local reçu, sha256 `c7e19f46feb78c245fcd04b3e64fd4ac6f174f2d30ff1d4c77aa5a2bf0dc1bb8` ;
   - `Analyse Radar 21 sept.docx`, sha256 `2dbc1d6f87a92ca128815575eb8e6830d5b552cd15b7c2b1e52a93d05ae067ff` ;
   - cahier du 10 juillet 2026 (« Bilan du prototype et recommandations »), signé Steve Chaperon, hors git (§4.3) ;
-  - radar-immobilier `origin/main` `27891b10` ; branches `origin/feat/t1-model-benchmark-real` (jeu de référence v3) et `origin/lane/conductor` (dossier COLLAB du 2026-08-16, absent de `main`) ;
-  - sentropic `origin/main` `7d1002505` ;
+  - radar-immobilier `origin/main` à deux états : `27891b10` (2026-10-02 ; §2.5, §2.6, §9.7, annexe III.6) et `782d20c9` (2026-10-04, descendant de `27891b10`, donc le plus récent ; §9.5, annexe III.7) ; annexes III.1 à III.3 : `origin/main` sans commit précisé (`unknown` entre les deux) ; branches `origin/feat/t1-model-benchmark-real` (jeu de référence v3) et `origin/lane/conductor` (dossier COLLAB du 2026-08-16, absent de `main`) ; #812 (clé du graphe) : décidée, branche `fix/graph-city-key` non fusionnée, PK `id` seule sur `782d20c9` (§9.5, annexe III.7.1) ;
+  - sentropic `origin/main` `7d1002505` ; graphify (engram) `c96fc01e` et sent-tech-design-system `d681d612` (§9.5, annexe III.7) ;
   - plan v2 du jeu de référence C et sa revue en cinq tours (Astra max, Opus 5.5 max, Gemini 3.8 high), 2026-10-05 (annexes I et IV) ; tableau de référence C du 2026-10-05, privé, non commité (§4.4).
 - **Méthode** : lectures Node uniquement (JSZip, fast-xml-parser, exceljs, mammoth), sans Python ; recomptages reproductibles sur les lignes du classeur ; lectures de code par `git show origin/main:<fichier>`.
 - **Structure** : chapitres 0 à 12, annexes I à IV. La correspondance avec la numérotation du 2026-10-03, y compris les renvois des cartes #783 et #784, est en annexe I.6. Les scènes Focus sont placées dans les chapitres qu'elles illustrent (§2.6, §8.1, §9.2, §9.6, §9.7) ; leurs sources canoniques sont hors du rapport : [SCENES_FOCUS.md](SCENES_FOCUS.md).
 
-Conventions : **FAIT** = constaté dans une source citée · **CALCUL** = dérivé des données, méthode donnée · **JUGEMENT** = appréciation · `non vérifié`, `source manquante`, `N-A` = limites déclarées. Statuts de mesure : **exploratoire** (lignes exposées, ch. 6), **confirmatoire** (test neuf préenregistré, ch. 7), `not run` (non exécuté). Statuts de donnée : `unknown`, `unverified`, `partial`, `source-gap`. Une section encore en rédaction porte un repère `A_INTEGRER` et la mention « Section en cours de rédaction ».
+Conventions : **FAIT** = constaté dans une source citée · **CALCUL** = dérivé des données, méthode donnée · **JUGEMENT** = appréciation · `non vérifié` (= `unverified`), `source manquante` (= `source-gap`), `N-A` = limites déclarées. Statuts de mesure : **exploratoire** (lignes exposées, ch. 6), **confirmatoire** (test neuf préenregistré, ch. 7), `not run` (non exécuté). Statuts de donnée : `unknown`, `unverified`, `partial`, `source-gap`. Une section encore en rédaction porte un repère `A_INTEGRER` et la mention « Section en cours de rédaction ».
 
 ## Glossaire et statuts
 
@@ -47,24 +48,38 @@ Les termes employés sans définition dans la suite du dossier, dans l'ordre où
 | PV, MRC | Procès-verbal d'une séance du conseil ; municipalité régionale de comté (regroupement de municipalités). |
 | Annotation | Note ou verdict attaché à un objet du radar (ville, zone, lot, signal, règlement). |
 | Ancre | La référence qui attache un retour de Steve à son objet : une ligne de la table `annotation_targets` du paquet `@sentropic/annotations` (`annotation_cibles` dans la version précédente), ville + id texte du graphe (§9.2). |
-| UUID, identifiant texte | UUID : identifiant aléatoire d'une ligne de base de données. Les signaux du graphe ont un identifiant texte (« signal-… ») ; l'API actuelle des notes exige un UUID, d'où le défaut corrigé par B0. |
-| B0 et lots L1, L2, U1, O1, C1, C2 | Les étapes de mise en œuvre proposées (§9.6). B0 : petit correctif qui répare l'annotation des signaux (l'API accepte l'identifiant texte). L1 : tables et import ; L2 : API de lecture ; U1 : affichage ; O1 : jeu de référence de ciblage ; C1, C2 : sélection C puis bascule. |
+| UUID, identifiant texte | UUID : identifiant aléatoire d'une ligne de base de données. Les signaux du graphe ont un identifiant texte (« signal-… ») ; l'API actuelle des notes exige un UUID, d'où le défaut à corriger par B0. |
+| B0 et lots immo L1, L2, U1, U2, O1, C1, C2, L7 ; lots génériques G-L0 à G-L4 | Les étapes de mise en œuvre immo proposées (§9.6). B0 : petit correctif qui répare l'annotation des signaux (l'API accepte l'identifiant texte). L1 : tables et import ; L2 : API de lecture ; U1 : affichage en lecture seule ; U2 : annotation et validation dans l'application ; O1 : jeu de référence de ciblage ; C1, C2 : sélection C puis bascule ; L7 : organisation #760 (archiver, classer, lier, épingler). Les lots G-L0 à G-L4 sont la séquence générique de la convergence sentropic + engram (§9.5, G7), distincte des lots immo. |
 | Tombstone | Marque laissée à la place d'un élément supprimé (qui, quand, pourquoi), au lieu de l'effacer physiquement ; exigée par la décision owner O1 du dossier COLLAB, à ne pas confondre avec l'objectif O1 ni le lot O1. |
 | Jeu de référence (`ReferenceSet`) | Ancien nom : « oracle », abandonné (G1). Jeu de réponses de référence, vérifiées, qui sert **uniquement** à l'évaluation hors ligne du radar ou d'un modèle ; publié en **versions figées** (`ReferenceSetVersion`), partitions développement et test aveugle scellé ; porté par engram. |
 | Jeu de référence E | Le jeu de référence d'extraction existant (674 unités committées, 676 en copie locale) : a-t-on bien extrait l'acte d'un procès-verbal ? `label_provenance` = `model_consensus` (« silver »). |
 | Jeu de référence C | Le jeu de référence de ciblage proposé (#783), construit à partir des annotations validées de Steve : fallait-il montrer ce signal ? `label_provenance` = `human_single` pour le pilote (« gold » en construction). |
 | `label_provenance`, gold, silver | Provenance des étiquettes : `human_single` (un humain), `human_adjudicated` (humains, désaccords tranchés : « gold »), `model_consensus` (consensus de modèles : « silver »), `mixed`. |
-| sentropic, engram, track | Plateformes communes. sentropic porte l'humain (identités, commentaires, annotations, validations) ; engram porte la mesure (jeux de référence, runs, évaluateurs, garde de promotion) ; track porte les décisions (gel, promotion). §9.5. |
-| Tags | Attributs qui expliquent un verdict (résidentiel, sens, densification, exclusions, type d'acte et tags complémentaires) ; le verdict s'en dérive par une règle déterministe (R1–R7 aujourd'hui, R′ demain, §5.2). Le code de motif est une sortie explicative, pas un tag d'entrée (§2.4). |
+| sentropic, engram, track | Plateformes communes. sentropic porte l'humain (identités, commentaires, annotations, validations) ; son module `comments` (0.2.0) définit la cible d'un commentaire, et les annotations relèvent de `@sentropic/annotations` si G2 (b) est retenue. engram porte la mesure (jeux de référence, runs, évaluateurs, garde de promotion) ; track porte les décisions (gel, promotion). §9.3, §9.5. |
+| Tags | Attributs qui expliquent un verdict (résidentiel, sens, densification, exclusions, type d'acte et tags complémentaires) ; le verdict s'en dérive par une règle déterministe (R1–R7 jusqu'au guide v2, R′ v1 depuis, §5.2). Le code de motif est une sortie explicative, pas un tag d'entrée (§2.4). |
 | κ (kappa) | Accord entre deux annotateurs corrigé du hasard (1 = accord parfait, 0 = hasard). |
 | Benchmark | Campagne de mesure qui compare plusieurs modèles ou réglages sur le même jeu de référence (#782). |
 | Précision, rappel, bruit | Précision : part des signaux affichés qui sont utiles. Rappel : part des signaux utiles qui sont affichés. Bruit : part des signaux affichés qui sont inutiles. |
-| Seuil D13 | La règle écrite à l'avance au-delà de laquelle C remplace B à l'écran (décision D13 : proposition de l'owner, à acter avec Farid ; §7.2). |
+| Seuil D13 | La règle écrite à l'avance au-delà de laquelle C remplace B à l'écran (décision D13 : proposition de Fabien, owner, à acter avec Farid ; §7.2). |
 | Design system (DS), composants geo | Bibliothèque commune de composants d'interface (boutons, badges, cartes) et de cartographie, partagée par les applications sentropic. |
-| sentropic, contrat d'annotation | Plateforme commune ; son module de commentaires (comments) définit comment une annotation désigne sa cible. |
 | MCP | Model Context Protocol : accès en lecture aux données du radar depuis un assistant (outils search_signals, query_zoning_events). |
 | Cartes #nnn | Tickets GitHub du projet (#783 nouveau jeu de référence, #784 données de Steve…). |
-| `non vérifié`, `source manquante`, `N-A` | Ce que le dossier n'a pas pu établir, faute d'accès ou de source. |
+| `non vérifié`, `source manquante`, `N-A` | Ce que le dossier n'a pas pu établir, faute d'accès ou de source ; `non vérifié` = `unverified`, `source manquante` = `source-gap`. |
+| Owner, Product Owner | Owner : Fabien, mandant du dossier (§0, §1.2) ; il a acté D1 et D17, arbitré l'usage des 121 lignes (volet de D10) et propose D13. Product Owner : Farid, qui décide le produit (§1.2). |
+| DesignationEvent | Type de nœud du graphe qui porte un événement de désignation ; avec `Signal`, c'est l'un des deux types de signaux (§4.2, annexe III.1). |
+| Usage conditionnel, Loi 31 | Deux autorisations accordées à un projet précis par le conseil : l'usage conditionnel autorise un usage sur un immeuble ; la Loi 31 permet d'autoriser un projet résidentiel en dérogation au règlement. Rangées parmi les autorisations individuelles (K5, V05). |
+| IdP | Identity Provider (fournisseur d'identité) : service d'authentification partagé de sentropic, qui fournit l'identifiant sujet (`sub`) d'un compte (§9.2, §9.3). |
+| PII, `pii_status` | Personally Identifiable Information : donnée qui permet d'identifier une personne (Loi 25). `pii_status` : champ proposé pour tracer la détection et le caviardage des textes, selon D6 (§9.4). |
+| OCR | Reconnaissance optique de caractères : conversion d'un document numérisé en texte (§4.4). |
+| SSE | Server-Sent Events : événements poussés du serveur vers le navigateur (lot L2, annexe III.3). |
+| DAG | Graphe orienté acyclique : enchaînement de tâches du service geo (#699), cité comme futur exécutant du graphe (§9.2). |
+| BPMN, d2d | BPMN (Business Process Model and Notation) : notation standard des diagrammes de processus ; ici, second domaine du contrat générique, des diagrammes produits par un outil et comparés à des diagrammes validés (G8). d2d : producteur BPMN actuel, code d'un dépôt Airbus dont la propriété est `non vérifié` (G8). |
+| h2a | Outil de coordination et de signature entre agents ; il atteste les décisions track de gel et de promotion (§9.2, §9.5, G6). |
+| PRINCIPAL, CONTROL-RECETTE | Rôles nommés par SYNTHESE.md pour la promotion : le PRINCIPAL décide, sous veto de CONTROL-RECETTE. Titulaires : à désigner par Fabien (owner) (§9.5). |
+| Porte 2 | Jalon dont dépend le montage par défaut du moteur geo partagé (annexe III.6) ; contenu : `source-gap` dans ce dossier. |
+| `z/m/p` | Mention associée au profil A (§8.1) ; sens : `source-gap` dans ce dossier. |
+| bwrap | Bubblewrap : outil Linux de bac à sable qui limite ce que l'outil en ligne de commande peut lire ou écrire (§4.5). |
+| Séries et numérotations | Identifiants homonymes, qualifiés par leur objet sans renumérotation. Tours : revue du plan T1 à T5 (annexe IV) ; points T1 à T8 de la table des matières (annexe IV) ; tours d'étiquetage 1 à 3 (§4.5) ; tours de revue de R′ 1 et 2 (§5.2). Clauses : X01 à X16 de R′ stricte, V01 à V15 de R′ v1 (correspondance X → V : `source-gap` dans ce dossier). Amendements « Astra A1 », « Opus A9 »… de la revue de R′, distincts des points A1 à A8 de la revue du plan. Rubriques R0 à R6 du rapport d'évaluation (annexe I.7), distinctes des règles R1–R7 et R-01 à R-26. Pratiques P1 à P3 (§4.6). Versions : pilote C v0 (G7) ; guide d'annotation v1 à v3 (§4.5) ; R′ stricte puis R′ v1 (§5.2) ; prompts v1 et v2 du pilote (éradiqués), distincts de la nouvelle série v1 à v3 (ch. 6) ; jeu de référence C v2 (plan v2, §4.9 ; « v1 » dans le dossier du 2026-10-03) ; schéma de données : version du paquet `unknown`. « # » et « n° » : numéro de ligne de Triage (colonne #), distinct de la ligne Excel. « 121 » : 121 lignes retenues (Triage) ou 121 contrôles d'exclusion (Écartés). |
 
 **Termes et statuts de l'évaluation** (plan v2, annexe I).
 
@@ -73,23 +88,27 @@ Les termes employés sans définition dans la suite du dossier, dans l'ordre où
 | Jeu de référence C v2, manifeste | Version du jeu de référence de ciblage décrite par un manifeste `engram_reference_set_v1` : provenance de chaque étiquette, règle de sélection, exclusions, accords, mentions (`flags`). |
 | `steve_v1`, `steve_v2a`, `steve_v2`, `steve_test`, `human2_test` | Provenance des étiquettes humaines : classement historique du relevé ; réannotation par Steve sans arguments IA ; adjudication par Steve après exposition aux arguments IA ; annotation du test neuf ; second annotateur humain sur le test. Une étiquette non réexaminée n'est pas renommée. |
 | Majorité IA | Valeur posée par au moins deux des trois modèles annotateurs (Astra, Opus, Gemini) ; « consensus » est réservé à l'accord 3/3. Référence machine corrélée, jamais une validation. |
-| R1–R7, R′ | R1–R7 : règle actuelle qui dérive le verdict des tags (`derive-verdict.mjs`). R′ : la règle de décision issue des règles de Steve, à geler en v1 (§5.2), modifiable seulement par D8. |
-| Écart, désaccord | Écart : le verdict dérivé des tags des 3 IA diffère du classement de Steve (51 écarts sur 121 lignes, avant R′ v1). Désaccord : écart qui ne vient pas de notre outillage ; avant R′ v1, 31 sur 51 (§4.6). |
+| R1–R7, R′ | R1–R7 : règle historique qui dérive le verdict des tags (`derive-verdict.mjs`), employée jusqu'au guide v2. R′ : la règle de décision issue des règles de Steve ; R′ v1 est figée par empreinte comme référence de travail (§5.2) et sera gelée au sens du plan à l'étape 5, après l'arbitrage de Steve (étape 2) ; modifiable seulement par D8. |
+| Écart, désaccord de jugement, point à clarifier | Écart : le verdict dérivé des tags des 3 IA diffère du classement de Steve (51 écarts sur 121 lignes avant R′ v1, 40 après). Point à clarifier : écart qui ne vient pas de notre outillage (31 sur 51 avant R′ v1, 28 sur 40 après, §4.6). Désaccord de jugement : sous-ensemble des points à clarifier où le texte disponible suffit à décider (5 avant R′ v1, 11 après) ; les autres sont des données manquantes ou des non convergés. |
 | d1, d2 | Donnée qui explique le classement de Steve : présente ailleurs dans immo (d1 : autre signal, règlement, PV de la même ville) ou absente d'immo (d2 : texte du règlement, site de la ville, connaissance du terrain). |
 | Montré, masqué, Pertinent masqué | Montré : verdict dérivé P ou S, échec d'exécution ou entrée non lue (réserve de Steve) ; masqué : verdict N. Pertinent masqué : cas que Steve classe P et dont aucun signal n'est montré (§5.4). |
 | Précision P ∪ S, P seul | Part des cas montrés que Steve classe P ou S ; « P seul » est le second point de fonctionnement. |
 | B′ passes 1, 2, 3 | B′ recalculé sur l'instantané du corpus : passe 1 = comparateur de D13 ; passe 2 = descriptif ; passe 3 = témoin « tout montrer » (§2.5). |
 | Dev, test, test neuf, exposé | Dev : lignes de mise au point (les 121 lignes du relevé). Test neuf : unités jamais exposées, tirées hors du registre d'exposition. Exposé : déjà vu par un modèle, un auteur de prompt ou une analyse avec les colonnes de Steve (§4.1). |
+| Train, test aveugle exploratoire | Découpage par ville des 121 lignes exposées (ch. 6) : l'aveugle ne vaut que pour l'auteur des nouveaux prompts ; sans valeur confirmatoire ni admissibilité pour D13. « Test » seul désigne le test neuf confirmatoire (ch. 7) ; le test scellé de G5 en est la protection. |
 | Exploratoire, confirmatoire, `not run` | Exploratoire : résultat sur des lignes exposées, non admissible pour D13 (ch. 6). Confirmatoire : résultat préenregistré sur test neuf (ch. 7). `not run` : non exécuté. |
 | `pass`, `fail`, `indeterminate`, k_max, X | Statuts de l'analyse primaire (§7.2) ; k_max : nombre de Pertinent masqués toléré (0 proposé) ; X : borne maximale admise du taux de Pertinent masqués, fixée par Farid (D13). |
 | Rôles de l'évaluation | Préparateur (voit les étiquettes, n'écrit ni n'exécute de prompt), auteur (dev seulement), exécutant (entrées du test seulement), scoreur (attendus et script gelé), gardien (clés du test scellé). |
-| `unknown`, `unverified`, `partial`, `source-gap` | Inconnu à ce jour ; affirmé sans vérification ; vérifié en partie ; source absente. |
+| `unknown`, `unverified`, `partial`, `source-gap` | Inconnu à ce jour ; affirmé sans vérification ; vérifié en partie ; source absente (`unverified` = `non vérifié`, `source-gap` = `source manquante`). |
+| Préenregistrement, scellement, adjudication | Préenregistrement : étape 0 du plan, analyses et règles écrites avant toute passe sur le test (annexe I.1). Scellement : protection de la partie test d'un jeu de référence (G5). Adjudication : un humain désigné tranche un désaccord entre étiquettes ; d'où `human_adjudicated`. |
+| Intersection-union, Clopper-Pearson, bootstrap par ville | Intersection-union : l'analyse primaire passe seulement si chacune de ses hypothèses passe (§7.2). Clopper-Pearson : intervalle exact pour une proportion binomiale. Bootstrap par ville : rééchantillonnage avec remise des villes, pour tenir compte de la corrélation entre signaux d'une même ville. |
+| Holm, McNemar, F1 | Holm : procédure séquentielle qui contrôle l'erreur sur une famille de tests (§7.2). McNemar : test de proportions appariées, cité par la revue du plan (annexe IV). F1 : moyenne harmonique de la précision et du rappel (§5.4). |
 
 ---
 
 ## 1. Intention, objectifs et destinataires
 
-Reformulation de la demande de l'owner, avant toute modélisation. Chaque objectif renvoie au chapitre qui y répond et aux décisions qu'il appelle.
+Reformulation de la demande de l'owner (Fabien), avant toute modélisation. Chaque objectif renvoie au chapitre qui y répond et aux décisions qu'il appelle.
 
 ### 1.1 Objectifs de l'owner
 
@@ -106,20 +125,20 @@ Objectifs du plan v2 rattachés (annexe I) : M1, jeu de référence C v2 avec pr
 
 Les objectifs O1 à O6 n'emploient aucun terme technique ; les termes repris ensuite sont expliqués dans le glossaire, en tête du dossier.
 
-Contraintes de forme : 0 Python (Node/TS uniquement) ; aucune action prod ou cluster ; aucun chiffre inventé (`non vérifié`, `source manquante`, `N-A` quand la source manque).
+Contraintes de forme : 0 Python (Node/TS uniquement) ; aucune écriture prod ou cluster ; aucun chiffre inventé (`non vérifié`, `source manquante`, `N-A` quand la source manque).
 
 **FAIT.** #783 et #784 n'ont pas de corps de cadrage : leur titre est tout le cadrage. #760 et #761 attendaient « le document d'analyse de Steve » ; il est disponible, sans que leurs autres critères soient clos pour autant.
 
 ### 1.2 Destinataires et rôles
 
-Ce dossier s'adresse à **Farid**. Il est rédigé pour le produit ; la partie technique y figure pour validation par **Fabien**.
+Ce dossier s'adresse à **Farid**. Il est rédigé pour le produit ; la partie technique y figure pour validation par **Fabien**, qui est aussi l'owner du dossier (§0).
 
 | Personne | Rôle | Ce qu'on attend de lui dans ce dossier |
 |---|---|---|
 | Steve Chaperon | Client (financeur) et utilisateur principal | Ses retours sont la matière du dossier ; il est consulté sur ses critères et les cas ambigus (D7, D8), et sollicité pour l'arbitrage et l'annotation du test neuf (§12.1). |
 | Mathieu Portier | Product Manager : oriente | Consulté sur les orientations produit (priorités, exposition de la nouvelle sélection, retour à Steve). |
 | Farid | Product Owner / proxy : définit et valide le backlog | **Décide** le produit, le backlog et les priorités : 9 décisions (D5, D6, D7, D8, D12, D13, D14, D15, D16). |
-| Fabien | AI Builder : propriétaire du code, garant de la livraison | **Valide** l'architecture, les algorithmes d'IA, les modèles, le jeu de référence et la modélisation technique : 16 décisions, les huit génériques G1 à G8 (annexe II) et huit décisions immo (D1, D2, D3, D4, D9, D10, D11, D17) ; **D1 est actée par l'owner le 2026-10-04** (tout conserver), **D17 le 2026-10-05** (données de la ville à la date du signal). |
+| Fabien | AI Builder : propriétaire du code, garant de la livraison | **Valide** l'architecture, les algorithmes d'IA, les modèles, le jeu de référence et la modélisation technique : 16 décisions, les huit génériques G1 à G8 (annexe II) et huit décisions immo (D1, D2, D3, D4, D9, D10, D11, D17). Owner du dossier : **il a acté D1 le 2026-10-04** (tout conserver), **D17 le 2026-10-05** (données de la ville à la date du signal) et l'usage des 121 lignes (volet de D10, 2026-10-05). |
 
 Chaque décision porte la mention « Décide : … · Consulté : … » (registre au §3.1, fiches au ch. 10 et en annexe II).
 
@@ -152,8 +171,8 @@ Passe 1 → 34 Pertinent, 15 À surveiller, 24 Non pertinent (bruit 24/73 = 32,9
 > **Passe 1, 124 lignes : de quoi parle-t-on ?**
 >
 > - **Qui, quand, sur quoi.** Steve Chaperon a relevé le 21 septembre 2026 les signaux que le radar lui affichait pour la période du 15 au 21 septembre, avec une période d'affichage réglée sur six mois. Il a travaillé depuis l'interface et les outils MCP en lecture (`search_signals`, `query_zoning_events`), sans accès au code, et a trié 51 municipalités sur 103 (§4.2).
-> - **Trois passes, selon sa règle R-26.** **Passe 1** : sa vue de travail quotidienne : **73 signaux**. Passe 2 : les mêmes sans le filtre Précoce : 33 signaux de plus. Passe 3 : aucun filtre : 17 de plus, pour repérer ce que les filtres cachaient à tort ou laissaient passer. Un cas est hors radar.
-> - **« 124 lignes ».** La feuille Triage complète, toutes passes confondues : 73 + 33 + 17 + 1 = 124. Une ligne n'est pas toujours un signal : la #112 en traite deux, la #55 décrit un dossier absent du radar. 121 lignes sont retenues pour le jeu de référence (§4.2).
+> - **Trois passes, selon sa règle R-26** (comptes dans le tableau ci-dessus). **Passe 1** : sa vue de travail quotidienne. Les passes 2 et 3 retirent des filtres pour repérer ce qu'ils cachaient à tort ou laissaient passer. Un cas est hors radar.
+> - **« 124 lignes ».** La feuille Triage complète, toutes passes confondues (somme ci-dessus). Une ligne n'est pas toujours un signal : la #112 en traite deux, la #55 décrit un dossier absent du radar. 121 lignes sont retenues pour le jeu de référence (§4.2).
 > - **Comment lire les chiffres.** « Passe 1 » mesure ce que Steve voit chaque jour : c'est là que se mesure le bruit (24 sur 73). « 124 lignes » couvre tout ce qu'il a examiné, y compris ce que ses filtres masquaient.
 
 - **FAIT.** Le relevé repose sur ce qu'affiche l'interface et sur les outils MCP en lecture. Steve écrit qu'il n'a pas eu accès au code et que la majorité des procès-verbaux n'ont pas été contre-vérifiés à la source.
@@ -226,12 +245,13 @@ Vérifié au tour 5 de la revue du plan contre le classeur (annexe IV) et recomp
 
 - **CALCUL.** Un code de motif correspond à un seul classement : 24 codes employés, aucune exception sur les 124 lignes. Le code de motif est donc une **sortie de décision** de Steve, pas une donnée d'entrée : il sort des tags d'entrée et reste une sortie explicative, notée par famille, car plusieurs codes se recouvrent (PIIA, unifamilial, concordance, CPTAQ).
 - **FAIT.** Les règles R-01 à R-26 portent une source datée attribuée à Steve, mais leur rédaction est celle de l'assistant (« Steve va plus loin », « J'avais conclu… ») ; R-14 et R-16 sont des textes de l'assistant. La règle de décision R′ (§5.2) est tirée des R-xx attribuées à Steve, R-14 et R-16 exclues.
-- **FAIT.** Le positif est **P ∪ S** : un À surveiller reste montré (R-13, R-21). Le dossier distingue la **cible de classement** (le verdict de Steve, P, S ou N) et l'**affichage par passe** (R-26 : ce que chaque passe montre).
+- **FAIT.** R-13 et R-21 maintiennent un À surveiller à l'affichage. Le dossier distingue la **cible de classement** (le verdict de Steve, P, S ou N) et l'**affichage par passe** (R-26 : ce que chaque passe montre).
+- **JUGEMENT (3 relecteurs sur 3, tour 5, annexe IV).** Le positif de la mesure est **P ∪ S** ; P seul reste un second point de fonctionnement (§5.4). Convention à ratifier avec les définitions de l'étape 0 (annexe I.1, point 0.4).
 - **CALCUL.** 67,1 % = 49/73 : part des lignes P ou S parmi les 73 lignes de la passe 1 observée, population des 124 lignes du relevé ; P seul : 34/73 = 46,6 %. C'est une mesure de la valeur de ce que montrait la vue de travail, pas de la justesse du filtre (R-26).
-- **FAIT.** La colonne B (passe : 73 / 33 / 17 / 1 hors radar) est une **observation de Steve** ; la colonne O (« Filtrage — le filtre a-t-il eu raison ? ») est un **jugement de l'assistant**, cité comme tel (position de 2 relecteurs sur 3). Date d'observation de chaque ligne : `source-gap`.
+- **FAIT.** La colonne B (passe : 73 / 33 / 17 / 1 hors radar) est une **observation de Steve** ; la colonne O (« Filtrage — le filtre a-t-il eu raison ? ») est un **jugement de l'assistant**, cité comme tel (rédaction de l'assistant établie au §4.4 pour les colonnes L à T hors P, Q et R ; au tour 5 : 2 relecteurs sur 3). Date d'observation de chaque ligne : `source-gap`.
 - **CALCUL.** Part de Pertinent par passe : 34/73 = 46,6 % ; 4/33 = 12,1 % ; 2/17 = 11,8 %. La passe est corrélée au classement : elle reste hors des entrées (D17) et sert de strate au découpage (ch. 6).
-- **JUGEMENT (3 relecteurs sur 3).** Steve lit le sens comme l'effet sur la capacité de construire : R-22 (Saint-Victor : un maximum « resserré » pour densifier) et R-06 (condition 2). La définition de `sens` et de `densification` est à préciser dans le guide d'annotation, sinon un Pertinent risque d'être masqué par la règle R4 (D13).
-- **À soumettre à Steve (D8, §4.8)** : 7 labels contraires à ses propres règles (S-RESTRICTIF ×2 contre R-21 ; S-PPCMOI-SERIE ×2 contre R-11 ; S-PLANIFIE ×2 contre R-05 ; S-PREEMPTION ×1 contre R-24) ; la modification de R1 qu'appelle R-18 (CPTAQ à fin résidentielle, contraire à l'exclusion `cptaq_individuelle`, d'où un nouveau tag `finalite`) ; la condition « à l'initiative de la Ville » des codes P-NOUV-ZONE et P-PERIM-URB, contraire à R-04.
+- **JUGEMENT (3 relecteurs sur 3).** Steve lit le sens comme l'effet sur la capacité de construire : R-22 (Saint-Victor : un maximum « resserré » pour densifier) et R-06 (condition 2). Le guide v3 redéfinit `sens` et `densification` sur l'effet sur la capacité (§4.5), à confirmer par Steve (§4.8, bloc A) ; sinon un Pertinent risque d'être masqué par la clause V08 de R′ v1 (D13). La règle R4 de R1–R7, qui portait ce risque, est historique.
+- **À soumettre à Steve (D8, §4.8)** : 7 labels contraires à ses propres règles selon la liste du tour 5 (S-RESTRICTIF ×2 contre R-21 ; S-PPCMOI-SERIE ×2 contre R-11 ; S-PLANIFIE ×2 contre R-05 ; S-PREEMPTION ×1 contre R-24). Après R′ v1 (§4.6) : 4 restent en écart comme labels contraires (n° 73 S-PPCMOI-SERIE, n° 92 S-RESTRICTIF, n° 120 S-PLANIFIE, n° 122 S-PREEMPTION) ; n° 102 (S-PPCMOI-SERIE) est comptée en donnée manquante d1 ; les deux autres (un S-RESTRICTIF, un S-PLANIFIE) ne sont pas en écart après R′ v1, numéros de ligne `unknown` dans les sources citées. Une contradiction repérée dans les sources n'est pas la cause principale attribuée à un écart calculé. S'y ajoutent la prise en compte de R-18 par le tag `finalite` (clauses V07, V09, V13 : CPTAQ à fin résidentielle, contraire à l'exclusion `cptaq_individuelle`) et la condition « à l'initiative de la Ville » des codes P-NOUV-ZONE et P-PERIM-URB, contraire à R-04.
 - **FAIT.** Codes sans exemple dans le relevé : P-TYPO-INTERM, N-RETIRE, N-DOUBLON, N-HORS-TERR (mesure `N-A` sur ce jeu, à couvrir à l'extension).
 
 ### 2.5 Le comparateur B′ : ce que montre le radar aujourd'hui
@@ -240,24 +260,24 @@ Vérifié au tour 5 de la revue du plan contre le classeur (annexe IV) et recomp
 - **FAIT.** Le sélecteur A/B a été retiré du rail (`f2c20573`, 2026-08-22) : `SignauxRail` rend directement B, les anciennes clés A sont normalisées vers B. Les comptes A sont encore calculés côté serveur.
 - **Conséquence.** Ajouter C n'est pas ajouter un troisième onglet à un sélecteur actif : toute comparaison A/B/C est un mécanisme à réexposer.
 
-**B′ dans la mesure (plan v2).** B′ n'est comparé à C qu'en montré / masqué, recalculé sur l'instantané du corpus, jamais déduit de la colonne « passe » : passe 1 = comparateur de D13 ; passe 2 = descriptif ; passe 3 = témoin « tout montrer ». Les résultats portent la mention `pool-limited-to-shown-items` : Steve n'a annoté que ce que ses passes lui montraient (§7.4).
+**B′ dans la mesure (plan v2).** B′ n'est comparé à C qu'en montré / masqué, recalculé sur l'instantané du corpus, jamais déduit de la colonne « passe » : passe 1 = comparateur de D13 ; passe 2 = descriptif ; passe 3 = témoin « tout montrer ». Les résultats sur le relevé portent la mention `pool-limited-to-shown-items` : Steve n'a annoté que ce que ses passes lui montraient ; sur le test neuf, la mention dépend du tirage (§7.3, §7.4).
 
-**Base B mesurée sur le relevé (CALCUL, passe 1 = 73).**
+**Repère historique : passe 1 observée par Steve (CALCUL sur la colonne passe du relevé, 73 lignes ; pas un résultat de B′ recalculé).**
 
 | Mesure | Valeur | Calcul |
 |---|---:|---|
 | Bruit (Non pertinent) | 32,9 % | 24/73 |
-| Précision P ∪ S | 67,1 % | 49/73 |
-| Précision P | 46,6 % | 34/73 |
-| Précision « trois critères » | 30,1 % | 22/73 |
+| Part P ∪ S | 67,1 % | 49/73 |
+| Part P | 46,6 % | 34/73 |
+| Part « trois critères » | 30,1 % | 22/73 |
 | Part des P en passe 1 | 85 % | 34/40 |
 | Part des P en passe 1 ou 2 | 95 % | 38/40 |
 
 <!-- chart:base-b -->
 
-Biais : 124 signaux sur 146, 51 villes sur 103, choisies dans l'ordre du relevé ; non représentatif du parc (JUGEMENT).
+Biais : 124 lignes de triage, alors que le classeur annonce 146 signaux captés ; 51 villes sur 103, choisies dans l'ordre du relevé ; non représentatif du parc (JUGEMENT).
 
-Les 67,1 % sont rapportés à titre de repère, jamais utilisés comme seuil (D13).
+La part P ∪ S de la passe 1 observée par Steve (67,1 %) est rapportée à titre de repère, jamais utilisée comme seuil ni comme comparateur (D13, §7.2) ; « précision » et « B′ recalculé » sont réservés aux mesures faites sur l'instantané du corpus.
 
 #### Filtres reconstitués dans le classeur (R-16), confrontés au code
 
@@ -287,7 +307,7 @@ Existant lu sur `origin/main` `27891b10` : vue A retirée de l'UI depuis `f2c205
 | Exclusion « autorisation individuelle » | Exclusions PIIA (sans preuve résidentielle) et dérogation ; PPCMOI, usage conditionnel, Loi 31 et CPTAQ individuelle ne sont pas exclus. | **Partiel** | 8 autorisations individuelles affichées (V2-PRECEDENT). |
 | Exclusion « point d'ordre du jour » | Aucune distinction ODJ / décision dans les propriétés lues. | **Absent** | 3 points d'ordre du jour affichés (Mont-Tremblant). |
 | Ne rien masquer d'illisible (réserve) | B′ garde le résidentiel indéterminé pour certains instruments ; pas de notion de sens ni de mixte. | **Partiel** | 34 des 40 Pertinent sont dans la vue de travail (85 %) ; 6 n'apparaissent qu'en passe 2 ou 3 ; 7 dossiers manqués alors que « l'information existait dans la base du radar » (analyse, §4). |
-| Mesure de tout cela | Le jeu de référence 674/676 note l'extraction (étape + citation) sur 100 procès-verbaux (PV) ; aucun jeu de référence ne note le ciblage ni le post-filtrage. | **Absent** | Bruit de la vue de travail : 24/73 = **32,9 %** ; précision « trois critères » : 22/73 = **30,1 %** ; précision P ∪ S : 49/73 = 67,1 %. |
+| Mesure de tout cela | Le jeu de référence 674/676 note l'extraction (étape + citation) sur 100 procès-verbaux (PV) ; aucun jeu de référence ne note le ciblage ni le post-filtrage. | **Absent** | Bruit de la vue de travail : 24/73 = **32,9 %** ; part « trois critères » : 22/73 = **30,1 %** ; part P ∪ S : 49/73 = 67,1 % (passe 1 observée par Steve, §2.5). |
 
 **Lecture (JUGEMENT).** Le radar actuel filtre par **nature d'instrument et étape** ; Steve demande un filtre par **effet du règlement** (sens et nombre d'unités). Deux des trois critères n'ont aujourd'hui aucune donnée, ce qui explique que C demande une extraction nouvelle (§5.1) et un jeu de référence de ciblage distinct (§4.9). La scène ci-dessous met les critères de Steve en regard de l'existant.
 
@@ -304,35 +324,37 @@ Ce chapitre est rédigé en dernier, après les étapes 1 à 7 du plan (§12.1).
 
 ### 3.1 Registre des décisions (G1 à G8, D1 à D17)
 
-**Ordre de décision.** Fabien décide d'abord les huit décisions génériques G1 à G8 (convergence sentropic + engram, §9.5 ; fiches en annexe II), puis ses huit décisions immo (D1, D2, D3, D4, D9, D10, D11, D17) ; D1 et D17 sont déjà actées par l'owner, les autres sont prises telles quelles, sauf incohérence avec une autre décision. Farid décide ensuite ses neuf décisions produit (D5, D6, D7, D8, D12, D13, D14, D15, D16), en connaissant les choix de Fabien. Si un choix de Farid contredit un choix de Fabien, on revient à Fabien sur ce seul point. Échéances : plan v2 pour G5 (b), D8, D10, D13 et D17 ; JUGEMENT pour les autres.
+**Ordre de décision.** Fabien décide d'abord les huit décisions génériques G1 à G8 (convergence sentropic + engram, §9.5 ; fiches en annexe II), puis ses huit décisions immo (D1, D2, D3, D4, D9, D10, D11, D17) ; D1, D17 et le volet « usage des 121 lignes » de D10 sont déjà actés par Fabien (owner) ; les autres sont à décider par Fabien et ne sont pas rouvertes par Farid, sauf incohérence avec une autre décision (§10.1). Farid décide ensuite ses neuf décisions produit (D5, D6, D7, D8, D12, D13, D14, D15, D16), en connaissant les choix de Fabien. Si un choix de Farid contredit un choix de Fabien, on revient à Fabien sur ce seul point. Échéances : plan v2 pour G5 (b), D8, D10 et D17 ; D7, D11, D12 et D13 réalignées le 2026-10-06 sur leurs dépendances (D13 précède la ratification de l'étape 0, qui préenregistre X et k_max) ; JUGEMENT pour les autres. Statuts : tranchée, tranchée en partie ou à décider ; la recommandation est donnée à part.
 
 | # | Décision | Option recommandée | Décide · Consulté | Statut | Échéance | Fiche |
 |---|---|---|---|---|---|---|
-| G1 | Terminologie et provenance | (c) « jeu de référence » + `label_provenance` | Fabien · Farid | à décider | avant L0 (contrats) | annexe II |
-| G2 | Porteurs et forme de l'annotation | (b) paquet frère `@sentropic/annotations` | Fabien · Farid | à décider | avant L0 | annexe II |
-| G3 | Version et effacement | (a) révisions immuables, validation liée au hash, tombstone | Fabien · Farid | à décider | avant L0 | annexe II |
-| G4 | Autorité de validation et rôles | (a) attributions par (workspace, profil), agents en proposition | Fabien · Farid | à décider | avant L0 | annexe II |
+| G1 | Terminologie et provenance | (c) « jeu de référence » + `label_provenance` | Fabien · Farid | à décider | avant G-L0 (contrats) | annexe II |
+| G2 | Porteurs et forme de l'annotation | (b) paquet frère `@sentropic/annotations` | Fabien · Farid | à décider | avant G-L0 | annexe II |
+| G3 | Version et effacement | (a) révisions immuables, validation liée au hash, tombstone | Fabien · Farid | à décider | avant G-L0 | annexe II |
+| G4 | Autorité de validation et rôles | (a) attributions par (workspace, profil), agents en proposition | Fabien · Farid | à décider | avant G-L0 | annexe II |
 | G5 | Scellement et stockage | (a) procédural en v1 ; (b) ou (c) pour tout jeu qui fonde D13 | Fabien · Farid | à décider | (b) avant l'étape 8 (scellement du test neuf) | annexe II |
 | G6 | Règle de promotion | (a) gabarit préenregistré, décision track, garde engram | Fabien · Farid | à décider | avant D13 | annexe II |
-| G7 | Séquencement, tables immo, pilote C | (b) générique d'abord, immo premier adoptant | Fabien · Farid | à décider | avant L0 | annexe II |
-| G8 | BPMN | (a) garder le producteur, adopter l'évaluation | Fabien · Farid | à décider | avant L1 (parité des évaluateurs) | annexe II |
-| D1 | Périmètre de conservation | (b) tout le classeur et l'analyse, brut immuable | Fabien · Farid, Steve, Mathieu | **tranchée** (owner, 2026-10-04) | — | §10.2 |
-| D2 | Modèle de données immo | (a) immo = profil + données | Fabien · Farid | à décider | avant L1 | §10.2 |
+| G7 | Séquencement, tables immo, pilote C | (b) générique d'abord, immo premier adoptant | Fabien · Farid | à décider | avant G-L0 | annexe II |
+| G8 | BPMN | (a) garder le producteur, adopter l'évaluation | Fabien · Farid | à décider | avant G-L1 (parité des évaluateurs) | annexe II |
+| D1 | Périmètre de conservation | (b) tout le classeur et l'analyse, brut immuable | Fabien · Farid, Steve, Mathieu | **tranchée** (Fabien, owner, 2026-10-04) | — | §10.2 |
+| D2 | Modèle de données immo | (a) immo = profil + données | Fabien · Farid | à décider | avant L1 immo | §10.2 |
 | D3 | Ancre signal et correctif | (a) clé texte namespacée + instantané observé ; B0 immédiat | Fabien · Farid | à décider | avant B0 | §10.2 |
-| D4 | Conformité sentropic et suppression | (a) cibles et lecture conformes, import immuable, demande de tombstone | Fabien · Farid | à décider | avant L1 | §10.2 |
-| D9 | Sens de « double annotation » | (4) clore : provenance par champ, portée par D10 | Fabien · Farid | **proposée close** | avec D10 | §10.2 |
-| D10 | Jeu de référence #783 | (b) 121 lignes en mise au point et en découpage exploratoire ; test confirmatoire neuf ; second annotateur humain ≥ 50 cas | Fabien · Steve, Farid | **réécrite** (usage des 121 lignes : arbitrage de l'owner du 2026-10-05) | avant l'étape 6 ; second annotateur avant l'étape 8 | §10.2 |
-| D11 | Benchmark #782 | volet ciblage séparé | Fabien · Farid | à décider | avant la campagne #782 suivante | §10.2 |
-| D17 | Contrat d'entrée | (a) données de la ville à la date du signal ; colonnes L à T hors entrée | Fabien · Steve, Farid | **tranchée** (owner, 2026-10-05) | avant l'étape 4 | §10.2 |
-| D5 | Auteur des retours importés | (c) compte Steve, pour l'import et la saisie | Farid · Steve, Fabien | à décider | avant L1 | §10.3 |
+| D4 | Conformité sentropic et suppression | (a) commentaires de l'équipe : cibles et lecture conformes, import immuable, demande de tombstone | Fabien · Farid | à décider | avant L1 immo | §10.2 |
+| D9 | Sens de « double annotation » | (d) clore : provenance par champ, portée par D10 | Fabien · Farid | à décider (clôture recommandée) | avec D10 | §10.2 |
+| D10 | Jeu de référence #783 | (b) 121 lignes en mise au point et en découpage exploratoire ; test confirmatoire neuf ; second annotateur humain ≥ 50 cas | Fabien · Steve, Farid | **tranchée en partie** (usage des 121 lignes : Fabien, owner, 2026-10-05) ; à décider (test neuf, second annotateur) | avant l'étape 6 ; second annotateur avant l'étape 8 | §10.2 |
+| D11 | Benchmark #782 | (a) volet ciblage séparé | Fabien · Farid | à décider | avant la campagne #782 suivante, et avant D13 (dépendance) | §10.2 |
+| D17 | Contrat d'entrée | (a) données de la ville à la date du signal ; colonnes L à T hors entrée | Fabien · Steve, Farid | **tranchée** (Fabien, owner, 2026-10-05) | avant l'étape 4 | §10.2 |
+| D5 | Auteur des retours importés | (c) compte Steve, pour l'import et la saisie | Farid · Steve, Fabien | à décider | avant L1 immo | §10.3 |
 | D6 | Visibilité et données personnelles | (c) approuvés, verbatims caviardés | Farid · Steve, Mathieu, Fabien | à décider | avant U1 | §10.3 |
-| D7 | Définition de C v1 | K1–K9 + trois états | Farid · Steve, Mathieu, Fabien | à décider | avant C1 | §10.3 |
-| D8 | Cas contradictoires | revue métier par Steve et Mathieu, abstention en attendant | Farid · Steve, Mathieu | à décider | avant l'étape 2 (arbitrage, avant tout gel) | §10.3 |
-| D12 | Exposition A/B/C | (a) C en shadow, comparaison UAT, puis remplacement de B | Farid · Steve, Mathieu, Fabien | point ouvert | avant C2 | §10.3 |
-| D13 | Seuil de bascule B → C | (a) zéro Pertinent masqué (k_max = 0, borne < X), précision P ∪ S > B′ passe 1, parité | Farid · Steve, Mathieu, Fabien | **réécrite** : proposition de l'owner, à acter avec Farid | avant l'étape 8 | §10.3 |
+| D7 | Définition de C v1 | (b) K1–K9 + trois états | Farid · Steve, Mathieu, Fabien | à décider | cadrage avant l'étape 2 (requis par D8 et D16) ; règle complète avant C1 | §10.3 |
+| D8 | Cas contradictoires | (a) revue métier par Steve et Mathieu, cas `contested` en attendant | Farid · Steve, Mathieu | à décider | avant l'étape 2 (arbitrage, avant le gel du dev à l'étape 5) | §10.3 |
+| D12 | Exposition A/B/C | (a) C en shadow, comparaison UAT, puis remplacement de B | Farid · Steve, Mathieu, Fabien | à décider | avant D13 (dépendance) ; mise en œuvre avant C2 | §10.3 |
+| D13 | Seuil de bascule B → C | (a) zéro Pertinent masqué (k_max = 0, borne < X), précision P ∪ S > B′ passe 1, parité | Farid · Steve, Mathieu, Fabien | à décider par Farid ; proposition de Fabien (owner) du 2026-10-05 | avant la ratification de l'étape 0 (X et k_max, point 0.5) | §10.3 |
 | D14 | Première livraison UI | (a) panneau + rail + DS ciblé | Farid · Mathieu, Fabien | à décider | avant U1 | §10.3 |
 | D15 | Séquencement | (a) B0, import et jeu de référence en parallèle de la fraîcheur | Farid · Mathieu, Fabien | à décider | maintenant | §10.3 |
-| D16 | Retour à Steve | renvoyer filtres réels et table de dérivation | Farid · Mathieu | à décider | avant l'étape 2 (sollicitation de Steve) | §10.3 |
+| D16 | Retour à Steve | (a) renvoyer filtres réels et table de dérivation | Farid · Mathieu | à décider | avant l'étape 2 (sollicitation de Steve) | §10.3 |
+
+Notes : D10 et D13 ont été réécrites le 2026-10-05 (§10.1) ; D9 : clôture recommandée par fusion dans D10.
 
 ### 3.2 Recommandation et constats du 2026-10-03 (ancien, à remplacer)
 
@@ -352,24 +374,24 @@ Ce chapitre est rédigé en dernier, après les étapes 1 à 7 du plan (§12.1).
 
 ## 4. Analyse des données en profondeur
 
-Ce chapitre décrit ce que contiennent les données de Steve, ce qu'on peut en tirer et à quelles conditions. Les sections 4.5 à 4.9 dépendent de résultats en cours (étiquetage, écarts, arbitrage) ; elles portent un repère de rédaction.
+Ce chapitre décrit ce que contiennent les données de Steve, ce qu'on peut en tirer et à quelles conditions. Les sections 4.5 à 4.9 dépendent de résultats en cours (étiquetage, écarts, arbitrage) ; leurs étapes non exécutées portent `not run`.
 
 ### 4.1 Statut d'exposition et limites des données
 
 **Statut d'exposition (consensus des 3 relecteurs, annexe IV).**
 - **FAIT.** Les 121 lignes retenues (51 villes) portent l'aveugle consommé du pilote C (`v0`, exploratoire, jamais rescellé). L'analyse d'écart les a traitées comme un seul ensemble, avec toutes les colonnes du classeur ; les tags complémentaires, les consignes corrigées du guide d'annotation et les 10 propositions de règle en dérivent.
-- **Conséquence.** **Aucune de ces lignes ne sert de test confirmatoire.** Chiffrer, effacer ou redécouper ne change pas leur historique d'exposition (registre en annexe I.3). Tout résultat obtenu sur elles est exploratoire (ch. 6) ; la mesure qui fonde D13 se fait sur un test neuf (ch. 7).
+- **Conséquence (JUGEMENT : consensus des 3 relecteurs, annexe IV, A1 ; usage arbitré par Fabien, D10).** **Aucune de ces lignes ne sert de test confirmatoire.** Chiffrer, effacer ou redécouper ne change pas leur historique d'exposition (registre en annexe I.3). Tout résultat obtenu sur elles est exploratoire (ch. 6) ; la mesure qui fonde D13 se fait sur un test neuf (ch. 7).
 - « Sans aucune contamination » devient « indépendance du test documentée » : registre d'exposition, journal, limites de vérification déclarées (annexe I).
-- **Usage arbitré par l'owner (2026-10-05, D10).** Les 121 lignes servent à la mise au point des règles (R′) et des tags avec les 3 IA ; elles sont aussi découpées de façon homogène par ville en train et test aveugle pour les premiers prompts, aux résultats exploratoires. L'extension à de nouvelles villes n'a lieu qu'après la clarification des désaccords avec Steve (§4.6, §4.8).
+- **Usage arbitré par Fabien (owner, 2026-10-05, volet de D10).** Les 121 lignes servent à la mise au point des règles (R′) et des tags avec les 3 IA ; elles sont aussi découpées de façon homogène par ville en train et test aveugle exploratoire pour les premiers prompts, aux résultats exploratoires. L'extension à de nouvelles villes n'a lieu qu'après la clarification avec Steve des points listés au §4.8 (blocs A, B et D).
 
 **Limites, à côté des chiffres qu'elles affectent.**
 - Maquette de l'interface simplifiée annoncée par Steve et Mathieu : non fournie.
-- Taux de résolution des identifiants de Steve contre le graphe actuel : `non vérifié` (aucune requête de résolution en prod ou préprod ; les 162 nœuds cités par les 121 lignes ont été relus en lecture seule le 2026-10-05).
+- Résolution des identifiants de Steve contre le graphe actuel : `partial`. Sur les 121 lignes, les 162 nœuds cités ont été relus en production le 2026-10-05 (lecture seule) : 9 lignes citent au moins un signal disparu et le nœud de #14 est absent du graphe (§4.2). Non exécutés : le taux de résolution de l'import (préprod restaurée, lot L1 immo, §9.4) et la résolution des onglets Écartés et Constats.
 - SHA déployé du 15 au 21 septembre : `non vérifié` (`30-api.yaml` utilise `:latest`) ; classification serveur exacte au moment du relevé : non archivée (`source manquante`).
 - Notes de cellule du classeur : `unverified` (l'export CSV ne les porte pas). Date d'observation de chaque ligne par Steve : `source-gap`.
 - Compteurs de l'onglet Synthèse incohérents avec Triage (qualité du filtrage sur 123 lignes, 95 initiateurs normalisés sur 124, dates postérieures à la révision affichée) : tout compte du dossier est recalculé depuis Triage (§4.2).
 - Fuite temporelle dans les colonnes de l'assistant (ligne de Triage citée au tour 5 : signal du 2026-04-14, la colonne L cite un second projet adopté le 2026-05-05) : ces colonnes sont exclues de toute entrée (D17, §5.3).
-- Biais de sélection : Steve n'a annoté que ce que ses passes lui montraient ; le rappel mesuré sur ce jeu ne compte pas les opportunités jamais extraites (sept dossiers manqués, §4.2) : mention `pool-limited-to-shown-items`. 51 villes sur 103, prises dans l'ordre du relevé : non représentatif du parc (JUGEMENT).
+- Biais de sélection : Steve n'a annoté que ce que ses passes lui montraient ; le rappel mesuré sur ce jeu ne compte pas les opportunités jamais montrées à Steve, y compris celles dont l'information existait dans la base du radar (sept dossiers manqués, §4.2 ; leur présence parmi les 124 lignes : `unknown`) : mention `pool-limited-to-shown-items`. 51 villes sur 103, prises dans l'ordre du relevé : non représentatif du parc (JUGEMENT).
 
 ### 4.2 Relevé de Steve : inventaire et comptes
 
@@ -379,11 +401,11 @@ Ce chapitre décrit ce que contiennent les données de Steve, ce qu'on peut en t
 
 #### Inventaire du classeur
 
-**FAIT.** 7 feuilles visibles, 433 lignes ayant au moins une valeur, 4 392 cellules non vides, 47 cellules de formule, aucun hyperlien Excel. Auteur de chaque onglet : position retenue au tour 5 de la revue (annexe IV).
+**FAIT.** 7 feuilles visibles, 433 lignes ayant au moins une valeur, 4 392 cellules non vides, 47 cellules de formule, aucun hyperlien Excel. Auteur de chaque onglet : position retenue au tour 5 de la revue (annexe IV), JUGEMENT des relecteurs sauf pour Triage (FAIT établi au §4.4).
 
 | Feuille | Contenu mesuré | Auteur (tour 5) | Usage à l'import |
 |---|---|---|---|
-| Triage | 124 lignes (Excel 6–129), 20 colonnes A:T toutes renseignées, 51 municipalités | mixte : B, P, Q, R de Steve ; L à T hors P, Q, R de l'assistant (§4.4) | Évaluations individuelles ou groupées |
+| Triage | 124 lignes (Excel 6–129), 20 colonnes A:T toutes renseignées, 51 municipalités | mixte : B, P, Q, R de Steve ; L à T hors P, Q, R de l'assistant (FAIT, §4.4) | Évaluations individuelles ou groupées |
 | Écartés par les filtres | 121 lignes (5–125), 8 colonnes, 46 municipalités ; certaines lignes regroupent plusieurs enregistrements | assistant, validations de Steve citées | Évaluations d'exclusion, dont lignes agrégées |
 | Constats transversaux | 77 constats C-01…C-82 (numéros absents : 40, 50, 62, 70, 71), 7 colonnes | assistant (3 relecteurs sur 3) | Constats rattachés aux villes ou à un artefact |
 | Règles de classement | 26 règles R-01…R-26 | mixte : décisions attribuées à Steve, rédaction de l'assistant ; R-14 et R-16 de l'assistant | Référentiel daté et sourcé |
@@ -419,7 +441,7 @@ Ce sont des distributions d'annotations, pas une précision ni un rappel du syst
 | Restriction | 0 | 3 | 7 | 10 | 6 |
 | Mixte | 5 | 0 | 2 | 7 | 5 |
 
-Lecture (JUGEMENT) : 23 assouplissements sont Non pertinent, surtout des autorisations au cas par cas (V2-PRECEDENT). Le sens seul ne suffit pas : il faut aussi « de plein droit » (R-06). Trois restrictions sont À surveiller (S-RESTRICTIF), ce qui tempère R-21 ; ces labels sont à soumettre à Steve (§2.4).
+Lecture (JUGEMENT) : 23 assouplissements sont Non pertinent, surtout des autorisations au cas par cas (V2-PRECEDENT). Le sens seul ne suffit pas : il faut aussi « de plein droit » (R-06). Trois lignes Restriction sont classées À surveiller (croisement sens × classement), ce qui tempère R-21. À distinguer des codes S-RESTRICTIF : la liste du tour 5 en compte 2 contraires à R-21, dont 1 reste en écart après R′ v1 (n° 92 ; §2.4, §4.6). Ces labels sont à soumettre à Steve (§4.8).
 
 **Motifs, exclusions et constats (CALCUL).**
 
@@ -454,7 +476,7 @@ Codes jamais employés : P-TYPO-INTERM, N-RETIRE, N-DOUBLON, N-HORS-TERR.
 | Info | 7 | | |
 | V2 | 4 | | |
 
-Le bandeau de la feuille indique encore « 3 sur 25 » erreurs vérifiées : texte ancien, incohérent avec les 18 lignes actuelles.
+Anomalie du classeur source (onglet Constats transversaux, rédigé par l'assistant du triage) : son bandeau indique « 3 sur 25 » erreurs vérifiées, contre 18 lignes « Erreur vérifiée ».
 
 **Qualité du filtrage (colonne O, jugement de l'assistant ; Synthèse, valeurs mémorisées)** : Correct 88, Fuite 25, Anomalie 7, À vérifier 3, Non évalué 0, soit 123 sur 124. Un regroupement par préfixe des 81 libellés libres de la colonne O donne 88 / 25 / 8 / 3 en rangeant ANOMALIE, ABSENT et SORTI DE LA VUE ensemble ; l'écart d'une ligne tient à ce regroupement.
 
@@ -487,10 +509,9 @@ Le bandeau de la feuille indique encore « 3 sur 25 » erreurs vérifiées : tex
 **CALCUL, recompté.** La correspondance est exacte en effectifs. L'analyse n'énonce pas la règle de passage : le rangement des 5 « Mixte » dans « sens non donné » reste une reconstitution, à confirmer par Steve (D8).
 
 Apports de l'analyse :
-- **Trois critères cumulatifs** : résidentiel, assouplissement, densification (« pas deux sur trois — les trois ») ; la densification exige plus d'unités qu'avant.
+- **Trois critères cumulatifs et réserve d'asymétrie** : citations au §2.2 et au §2.3 ; règle opérationnelle au §5.1.
 - **Cinq exclusions** : pas un règlement d'urbanisme ; pas d'effet sur la capacité de construire ; sens restrictif ; point d'ordre du jour et non décision ; autorisation individuelle et non règle générale.
-- **Réserve d'asymétrie** : un sens indéterminé reste affiché, un règlement mixte ne disparaît jamais (R-13, R-21, C-57, C-66).
-- **Sept dossiers manqués** alors que « l'information existait dans la base » : Saint-Michel (36 logements, résumé tronqué), Richelieu, Deux-Montagnes 1770, Mascouche 1103-81, Sainte-Anne-des-Plaines 1079-1, Saint-Jérôme 0351-006, Saint-Gilbert U-161-2026 (affiché comme projet alors qu'il est en vigueur).
+- **Sept dossiers manqués** alors que « l'information existait dans la base du radar » : Saint-Michel (36 logements, résumé tronqué), Richelieu, Deux-Montagnes 1770, Mascouche 1103-81, Sainte-Anne-des-Plaines 1079-1, Saint-Jérôme 0351-006, Saint-Gilbert U-161-2026 (affiché comme projet alors qu'il est en vigueur).
 - **Interface souhaitée** : archiver sans supprimer ; classer ; lier les signaux d'un même règlement ou secteur ; garder en alerte (épingler hors période, notifier à chaque étape).
 - **Suite** : 52 municipalités restent à relever selon la même méthode.
 
@@ -518,7 +539,7 @@ Source : analyse de cohérence du 2026-10-05, relue par Astra max et Opus 5.5 ma
 
 **Qui a écrit quoi dans le classeur (FAIT, vérifié sur les 124 lignes).** Les colonnes **L à T** de Triage, hors P, Q et R (Objet du signal, Analyse, Niveau de preuve, Filtrage, Suite à donner, Recommandation au radar), sont **rédigées par l'assistant du triage** : la colonne M tutoie Steve dans 35 lignes et le nomme à la troisième personne dans 23 ; S le tutoie dans 4 lignes ; T dans 7, le nomme dans 3 et contient « je n'ai pas vu le code ». Seules **P (sens), Q (classement) et R (code de motif)** sont les décisions de Steve, avec **B** (passe observée). La colonne S s'intitule « Suite à donner (Steve) », mais son texte est celui de l'assistant. Les textes de Steve lui-même sont l'analyse signée du 21 septembre et le cahier du 10 juillet.
 
-Conséquences : les colonnes L à T ne sont ni des entrées des modèles (D17) ni une référence ; la colonne N devient `niveau_preuve_assistant`, descriptive, et la strate « source de Steve » est retirée ; une contradiction avec la seule colonne M n'est pas une incohérence de Steve.
+Conséquences : les textes de l'assistant dans L à T, hors P, Q et R, ne servent ni d'entrées ni de références ; P, Q et R sont des références humaines ; B, P, Q et R ne sont jamais des entrées des modèles (D17, §5.3) ; la colonne N devient `niveau_preuve_assistant`, descriptive, et la strate « source de Steve » est retirée ; une contradiction avec la seule colonne M n'est pas une incohérence de Steve.
 
 | Ce qui vient de Steve | Où | Comment il est pris en compte |
 |---|---|---|
@@ -533,23 +554,23 @@ Conséquences : les colonnes L à T ne sont ni des entrées des modèles (D17) n
 
 **Aucun input mis de côté (CALCUL, tableau de référence C).** Les 605 champs non vides des colonnes M, N, O, S et T sur les 121 lignes ont tous un statut (intégré ou sans objet), avec le nombre de modèles qui l'ont traité : 3 sur 3 pour 595 champs, 2 sur 3 pour 10. Statut cellule par cellule (contradictoire, non exploitable) et audit humain de 30 cellules tirées à graine : `not run` (étape 1 du plan, §12.1).
 
-**Le tableau de référence C (2026-10-05).** Il assemble, pour les 121 lignes, les colonnes A à T du classeur et des colonnes ajoutées ; chaque citation porte sa provenance (décision de Steve, texte de Steve, règle R-xx, cahier de juillet, texte de l'assistant). Emplacement : **privé, non commité**, car il contient le relevé de Steve et des extraits lus en production ; l'emplacement d'archivage et le partage avec Farid (Google Sheet) sont à décider par l'owner. Empreintes en annexe I.2. Aucune colonne de découpage n'y est publiée.
+**Le tableau de référence C (2026-10-05).** Il assemble, pour les 121 lignes, les colonnes A à T du classeur et des colonnes ajoutées ; chaque citation porte sa provenance (décision de Steve, texte de Steve, règle R-xx, cahier de juillet, texte de l'assistant). Emplacement : **privé, non commité**, car il contient le relevé de Steve et des extraits lus en production ; l'emplacement d'archivage et le partage avec Farid (Google Sheet) sont à décider par Fabien (owner). Empreintes en annexe I.2. Aucune colonne de découpage n'y est publiée.
 
 | Groupe de colonnes | Contenu | Contrôle |
 |---|---|---|
 | Liens | lien du PV dans immo (route publique de l'API, `#page`) ; lien le plus proche du signal (vue ville, `mode=signal`) ; identifiants des nœuds du graphe | PV : **80 documents distincts sur 80, HTTP 200**, contenu téléchargé et lu ; 4 lignes sans document rattaché au nœud ; lien direct vers un signal : non disponible (l'URL ne restaure pas la sélection) |
 | Citations | citation littérale du nœud, avec la page ; passage du document portant le n° de règlement quand la citation n'est qu'un en-tête | 144 citations : 102 trouvées telles quelles dans le document, 24 dont le début est trouvé, 18 non retrouvées dans le texte extrait (OCR, mise en page) |
-| Tags des 3 IA | valeur majoritaire et accord par tag ; relation `rattache_a` ; corrections du guide v2 | §4.5 (en cours) |
-| Verdict | verdict dérivé par R1–R7 des tags majoritaires, accord des 3 IA, écart avec Steve | §4.6 (en cours) |
+| Tags des 3 IA | valeur majoritaire et accord par tag ; relation `rattache_a` ; corrections du guide v2 | §4.5 |
+| Verdict | verdict dérivé par R1–R7 des tags majoritaires, accord des 3 IA, écart avec Steve | §4.6 |
 | Motivation, inputs, critère | motivation de Steve (extraits vérifiés mot pour mot dans leur source) ; inputs du relevé pris en compte ; critère détectable proposé | 726 extraits vérifiés, 82 introuvables écartés, 11 sources mal déclarées corrigées |
 | Contexte | annotation historique datée (cahier du 10 juillet) ; « à soumettre à Steve » | §4.3, §4.8 |
 | Cause | classe et description de la cause d'écart ; liens immo de la cause (d1), revérifiés en production ; source hors immo (d2) | 19 liens d1, tous présents en production ; 10 lignes d2, 1 URL externe vérifiée |
 
 ### 4.5 Étiquetage de référence v0 par les 3 IA et accords (pilote exposé)
 
-**Statut : exploratoire (lignes exposées).** Les tags ci-dessous décrivent les 121 lignes du relevé ; ils servent à la mise au point des règles et des tags avec les 3 IA (arbitrage de l'owner), jamais à une mesure confirmatoire.
+**Statut : exploratoire (lignes exposées).** Les tags ci-dessous décrivent les 121 lignes du relevé ; ils servent à la mise au point des règles et des tags avec les 3 IA (arbitrage de Fabien, owner), jamais à une mesure confirmatoire.
 
-**Méthode (FAIT).** Trois annotateurs IA indépendants, sièges seulement, sans outil ni fichier : Astra (`gpt-6-astra`, effort max), Claude Opus 5.5 (effort max), Gemini 3.8 (high, sous `bwrap`, toute réponse ayant appelé un outil rejetée). Entrée : le texte du signal tel que le radar le sert (libellé, propriétés, extraits verbatim du document source), lots de 10 lignes groupées par ville ; ni le classement de Steve, ni ses colonnes, ni celles de l'assistant ne sont montrés. Majorité par tag (3/3 ou 2/3), sinon `non convergé` ; votes individuels et justifications conservés.
+**Méthode (FAIT).** Trois annotateurs IA, sièges seulement, sans outil ni fichier, indépendants aux tours 2 et 3 (au tour 1, Opus relisait Astra ; `type_acte` et `motif` en restent hérités, voir les limites) : Astra (`gpt-6-astra`, effort max), Claude Opus 5.5 (effort max), Gemini 3.8 (high, sous `bwrap`, toute réponse ayant appelé un outil rejetée). Entrée : le texte du signal tel que le radar le sert (libellé, propriétés, extraits verbatim du document source), lots de 10 lignes groupées par ville ; ni le classement de Steve, ni ses colonnes, ni celles de l'assistant ne sont montrés. Majorité par tag (3/3 ou 2/3), sinon `non convergé` ; votes individuels et justifications conservés.
 
 | Tour | Guide | Tags posés |
 |---|---|---|
@@ -583,11 +604,11 @@ Conséquences : les colonnes L à T ne sont ni des entrées des modèles (D17) n
 
 `nature_source` est le tag le moins stable (73 accords 3/3) : la nature de la pièce (procès-verbal, ordre du jour, avis) n'est souvent pas énoncée dans l'extrait servi. Un tag non convergé prend la valeur `indetermine` (règle prudente : une absence d'information n'est jamais négative).
 
-**Corrections de tags reconnus faux par les 3 IA (3/3, CALCUL).** Trois corrections explicites, chacune avec sa preuve : n° 9 (`sans_effet_capacite` non établi : « bâtiments accessoires » n'établit pas l'absence d'effet sur les marges et l'implantation, R-06 (2)) ; n° 71 (`cptaq_individuelle` retiré, contrôle mécanique de l'analyse d'écart) ; n° 120 (`usage_conditionnel` faux : premier projet d'un règlement modificateur de zonage ; `instrument` corrigé en `zonage`). Les autres tags contestés à 2/3 seulement (n° 51, 93, 94, 100) restent tels quels et sont comptés comme erreurs de nos tags non corrigées (§4.6). Effet sur le verdict : n° 120 passe de Non pertinent à Pertinent (Steve : À surveiller, code fondé sur l'étape, §4.8) ; n° 9 et 71 restent Non pertinent pour une autre raison (§4.6).
+**Corrections de tags reconnus faux par les 3 IA (3/3, CALCUL).** Trois corrections explicites, chacune avec sa preuve : n° 9 (`sans_effet_capacite` non établi : « bâtiments accessoires » n'établit pas l'absence d'effet sur les marges et l'implantation, R-06 (2)) ; n° 71 (`cptaq_individuelle` retiré, contrôle mécanique de l'analyse d'écart) ; n° 120 (`usage_conditionnel` faux : premier projet d'un règlement modificateur de zonage ; `instrument` corrigé en `zonage`). Les autres tags contestés à 2/3 seulement (n° 51, 93, 94, 100) restent tels quels et sont comptés comme erreurs présumées de nos tags selon la majorité (2/3), non corrigées (§4.6, §4.7). Effet sur le verdict : n° 120 passe de Non pertinent à Pertinent (Steve : À surveiller, code fondé sur l'étape, §4.8) ; n° 9 et 71 restent Non pertinent pour une autre raison (§4.6).
 
-**Ancien premier jet (guide v2, règle R1–R7).** Verdict dérivé : 51 À surveiller, 57 Non pertinent, 13 Pertinent ; égal à Steve sur 70 lignes ; accord des 3 IA sur le verdict : 3/3 sur 96 lignes, 2/3 sur 22, 1/3 sur 3. Le guide v2 a changé `residentiel`, `sens` ou `exclusions` sur 38 lignes (verdict changé : 17).
+**Référence avant R′ (guide v2, règle R1–R7)** : état historique, chiffres au §4.6, sous « Mesure globale ».
 
-Limites : `type_acte` et `motif` restent ceux du tour 1 ; `motif` n'est jamais une entrée de règle (un code = un classement chez Steve, §2.4) ; l'extrait servi est parfois mal apparié au signal (n° 85, défaut d'ingestion) ; 6 descriptions radar contenaient des étapes postérieures à la date du signal (retirées des entrées du ch. 6, pas de ces annotations).
+Limites : `type_acte` et `motif` restent ceux du tour 1 (tour non indépendant : Opus relisait Astra) ; `motif` n'est jamais une entrée de règle (un code = un classement chez Steve, §2.4) ; l'extrait servi est parfois mal apparié au signal (n° 85, défaut d'ingestion) ; 6 descriptions radar contenaient des étapes postérieures à la date du signal (retirées des entrées du ch. 6, pas de ces annotations).
 
 ### 4.6 Analyse d'écart
 
@@ -595,12 +616,12 @@ Limites : `type_acte` et `motif` restent ceux du tour 1 ; `motif` n'est jamais u
 
 **Décomposition (CALCUL, 121 lignes ; JUGEMENT du pilote pour la classe de cause des écarts restants, appuyé sur la revue des 3 IA et l'analyse d'écart).**
 
-| | Avant : règle R1–R7, tags v2 | Après : R′ v1 gelée, tags v3 corrigés |
+| | Avant : règle R1–R7, tags v2 | Après : R′ v1 figée, tags v3 corrigés |
 |---|---:|---:|
 | **Écarts (verdict calculé ≠ Steve)** | **51** | **40** |
 | *Nos erreurs d'outillage* | **20** | **12** |
 | — notre règle (critère de Steve absent de la règle) | 14 | 7 (pratiques sans R-xx, P1 et P3, en attente de Steve) |
-| — nos tags (erreur d'étiquetage des IA) | 6 | 4 (accord 2/3 seulement, non corrigés) |
+| — nos tags (erreur d'étiquetage des IA) | 6 | 4 (erreurs présumées selon la majorité, 2/3, non corrigées) |
 | — notre entrée (document mal apparié au signal) | — | 1 |
 | *Points à clarifier avec Steve* | **31** | **28** |
 | — donnée manquante : hors immo (d2) | 10 | 9 |
@@ -637,32 +658,34 @@ Pourquoi trois écarts « notre règle » deviennent des points à clarifier : R
 
 Ces chiffres décrivent l'accord de R′ appliquée aux **tags de référence** avec Steve, sur des lignes qui ont servi à mettre au point R′ et les tags : ils sont biaisés à la hausse et ne mesurent aucun prompt (ch. 6). Le Pertinent masqué restant (n° 121) est un Pertinent de Steve sur un point d'ordre du jour, contraire à R-01 (§4.8).
 
+**Référence avant R′ : guide v2, règle R1–R7 (état historique, CALCUL).** Verdict dérivé : 51 À surveiller, 57 Non pertinent, 13 Pertinent ; égal à Steve sur 70 lignes ; accord des 3 IA sur le verdict : 3/3 sur 96 lignes, 2/3 sur 22, 1/3 sur 3. Le guide v2 a changé `residentiel`, `sens` ou `exclusions` sur 38 lignes (verdict changé : 17).
+
 Détail par ligne (n°, verdict calculé, clause, cause) : tableau de référence privé et `rule-r-prime/v1/tableaux-v1.md` (hors dépôt, empreintes en annexe I.2).
 
 ### 4.7 Motivations, classes de cause, critères détectables
 
-**Classes de cause (définitions du tableau de référence C, appliquées sans changement).** Accord ; erreur d'étiquetage IA (tag majoritaire faux au regard du texte même du signal, retenue seulement à 3/3 et après contrôle mécanique) ; donnée dans immo (d1, information présente ailleurs dans immo, enregistrement revérifié en production) ; donnée hors immo (d2) ; règle différente (Steve applique de façon cohérente un critère que la règle n'encode pas, à 3/3) ; incohérence de Steve (sa décision P / Q / R se contredit ou contredit son propre texte ; une contradiction avec la seule colonne M de l'assistant n'en est pas une) ; tag manquant ; non convergé ; non vérifié. Deux classes ajoutées après R′ v1 : **label contraire à ses règles** (le classement de Steve contredit une R-xx qu'il a énoncée, liste du tour 5) et **notre entrée** (l'extrait servi ne correspond pas au signal).
+**Classes de cause (définitions du tableau de référence C, appliquées sans changement).** Accord ; erreur d'étiquetage IA (tag majoritaire faux au regard du texte même du signal, retenue seulement à 3/3 et après contrôle mécanique) ; donnée dans immo (d1, information présente ailleurs dans immo, enregistrement revérifié en production) ; donnée hors immo (d2) ; règle différente (Steve applique de façon cohérente un critère que la règle n'encode pas, à 3/3) ; incohérence de Steve (sa décision P / Q / R se contredit ou contredit son propre texte ; une contradiction avec la seule colonne M de l'assistant n'en est pas une) ; tag manquant ; non convergé ; non vérifié. Deux classes ajoutées après R′ v1 : **label contraire à ses règles** (le classement de Steve contredit une R-xx qu'il a énoncée, liste du tour 5) et **notre entrée** (l'extrait servi ne correspond pas au signal). Après R′ v1, les erreurs de tags se répartissent en **erreurs reconnues et contrôlées** (3/3 et contrôle mécanique : n° 9, 71, 120, corrigées, §4.5) et **erreurs présumées selon la majorité** (2/3 : n° 51, 93, 94, 100, non corrigées, comptées au §4.6).
 
 **Méthode (FAIT).** Passe indépendante des 3 modèles sur les 121 lignes (critères et analyse signée de Steve, onglets Codes de motif et Règles de classement, enregistrements immo de la ville, colonnes du relevé avec leur auteur), puis réconciliation sur les lignes non unanimes. Accord des modèles sur la classe : 3/3 sur 38 écarts, 2/3 sur 13. Vérification mécanique : 19 liens d1 tous présents en production ; 10 lignes d2, dont 1 URL externe vérifiée. Après R′ v1, la revue des 3 IA (tour 2) a réexaminé la cause des 41 écarts de R′ stricte : cause jugée juste 3/3 sur 8 lignes, partielle ou fausse sur les autres ; ses causes corrigées fondent la reclassification du §4.6.
 
-**Motivations de Steve (CALCUL).** Motivation retrouvée 3/3 sur 119 lignes, 2/3 sur 2. 726 extraits cités vérifiés mot pour mot dans leur source : décision de Steve 300, analyse signée du 21 septembre 210, règle R-xx énoncée par Steve 163, texte de l'assistant 39, cahier du 10 juillet 14 ; 82 extraits introuvables écartés ; 11 sources mal déclarées corrigées. Chaque motivation reformulée est marquée interprétative ; sa validation par Steve sur échantillon reste `not run` (étape 2d du plan).
+**Motivations de Steve (CALCUL).** Motivation retrouvée 3/3 sur 119 lignes, 2/3 sur 2. 726 extraits cités vérifiés mot pour mot dans leur source : décision de Steve 300, analyse signée du 21 septembre 210, règle R-xx énoncée par Steve 163, texte de l'assistant 39, cahier du 10 juillet 14 ; 82 extraits introuvables écartés ; 11 sources mal déclarées corrigées. Chaque motivation reformulée est marquée interprétative ; sa validation par Steve sur échantillon reste `not run` (étape 2d du plan, §12.1).
 
 **Critère détectable proposé (CALCUL, 121 lignes).** Tag existant 79, règle 23, donnée à acquérir hors immo 10, donnée à ajouter à l'entrée depuis immo 5, nouveau tag 2, non détectable 2. Sur les écarts : règle 21, tag existant 11, d2 10, d1 5, nouveau tag 2, non détectable 2. Les critères de type « règle » ne passent jamais directement dans R′ : ils passent par Steve (D8) ; ceux de type « nouveau tag » ont été tranchés par la revue de R′ (§4.5).
 
-**Ce que disent les causes (JUGEMENT).**
+**Ce que disent les causes (JUGEMENT ; effectifs : §4.6 ; classes de cause jugées par le pilote).**
 - Les **données manquantes** (12 points) relèvent d'abord de la couverture : 9 sur 12 sont hors immo (contenu de règlements non publiés dans le PV, consultations, grilles). Elles ne se corrigent pas par un prompt ; elles appellent une acquisition de données datées (décision de périmètre, D17 : rien de postérieur à la date du signal) ou restent `source-gap`.
 - Les **désaccords de jugement** (11 points) sont des cas où le texte disponible suffit à décider et où la décision de Steve diffère de ses propres règles ou de ses autres décisions : ils se tranchent par une question fermée à Steve (§4.8).
 - Les **pratiques sans R-xx** (P1 : unifamilial seul ; P3 : concordance territoriale et refonte → Pertinent) expliquent 7 écarts ; les 3 IA proposent de les soumettre à Steve plutôt que de les coder (3/3, risque de surajustement élevé).
 
 ### 4.8 Conséquences et arbitrage de Steve
 
-**Statut : document prêt, non envoyé.** L'envoi à Steve est une décision de l'owner (D16, D8). Le document contient des codes de Steve par ligne et des extraits de procès-verbaux : il reste en emplacement privé, hors du dépôt public (chemin local du pilote : `rapport-suivi/QUESTIONS-STEVE.md`, empreinte en annexe I.2).
+**Statut : document prêt, non envoyé.** L'envoi à Steve est une décision de Farid (D16, D8). Le document contient des codes de Steve par ligne et des extraits de procès-verbaux : il reste en emplacement privé, hors du dépôt public (chemin local du pilote : `rapport-suivi/QUESTIONS-STEVE.md`, empreinte en annexe I.2).
 
 **Forme.** Une question **fermée** (oui / non) par cas, avec la ligne, la règle en jeu recopiée mot pour mot depuis l'onglet « Règles de classement » (contrôle automatique de sous-chaîne) et la citation verbatim du signal. Les questions sont reprises des propositions convergentes de la revue des 3 IA (tour 2), réécrites pour être fermées.
 
 | Bloc | Questions | Lignes |
 |---|---:|---|
-| A. Questions de principe (une réponse vaut pour plusieurs lignes) | 6 | P3 concordances et refontes (n° 10, 50, 52, 84, 113, 117) ; P1 unifamilial seul (n° 86) ; R-18 dans R1 (CPTAQ : exclusion à fin résidentielle de plein droit, autorisation non pertinente ; n° 34, 71, 81, 103, 112) ; définition de `sens` sur la capacité (n° 9, 27, 80, 94) ; « ou » de R-03 ; portée d'« À surveiller » (flux v1 ou veille ; n° 73, 92, 102, 122) |
+| A. Questions de principe (une réponse vaut pour plusieurs lignes) | 6 | P3 concordances et refontes (n° 10, 50, 52, 84, 113, 117) ; P1 unifamilial seul (n° 86) ; R-18 dans R′ (clauses V07, V09, V13 ; CPTAQ : exclusion à fin résidentielle de plein droit, autorisation non pertinente ; n° 34, 71, 81, 103, 112) ; définition de `sens` sur la capacité (n° 9, 27, 80, 94) ; « ou » de R-03 ; portée d'« À surveiller » (flux v1 ou veille ; n° 73, 92, 102, 122) |
 | B. Une question par ligne : donnée manquante | 12 | d2 : n° 16, 35, 36, 43, 44, 49, 69, 70, 76 ; d1 : n° 6, 80, 102 |
 | B. Une question par ligne : désaccord de jugement | 11 | incohérences : n° 23, 34, 71, 88, 104, 111, 121 ; labels contraires à ses règles : n° 73, 92, 120, 122 |
 | B. Une question par ligne : non convergé | 5 | n° 1, 2, 9, 27, 114 |
@@ -670,39 +693,39 @@ Détail par ligne (n°, verdict calculé, clause, cause) : tableau de référenc
 | C. Écarts dus à notre outillage (aucune question) | 0 | n° 51, 93, 94, 100 (nos tags) ; n° 85 (notre entrée) |
 | D. Cahier de juillet à confirmer | 3 | n° 46, 53, 56 (§4.3) |
 
-**Ce que les réponses changent (JUGEMENT).** Une réponse sur une donnée manquante ne change pas R′ : elle décide si la ligne reste dans la référence avec la strate `source-gap`. Une réponse de jugement ou de principe peut modifier une étiquette (`steve_v2`, provenance « après exposition aux arguments IA ») ou une clause de R′ (via D8 seulement) ; toute modification de R′ fait réexaminer tous les cas touchés. Tant qu'un cas n'est pas tranché, il est marqué `contested` et publié avec et sans.
+**Ce que les réponses changent (JUGEMENT).** Une réponse sur une donnée manquante ne change pas R′ : elle décide si la ligne reste dans la référence avec la strate `source-gap`. Une réponse de jugement ou de principe peut modifier une étiquette (`steve_v2`, provenance « après exposition aux arguments IA ») ou une clause de R′ (via D8 seulement) ; toute modification de R′ fait réexaminer tous les cas touchés. Tant qu'un cas n'est pas tranché, il garde son étiquette du relevé (`steve_v1`), porte le statut `contested`, et les résultats sont publiés avec et sans ces cas ; la lecture principale et son dénominateur sont à fixer par D8.
 
-**Ordre recommandé.** D'abord le réexamen à l'aveugle d'un lot de 50 cas (les cas à soumettre + des cas en accord, sans tags ni verdict calculé), qui mesure l'accord de Steve entre deux dates (étape 2a) ; ensuite seulement les questions ci-dessus (étape 2b). Sans accord de Farid sur la sollicitation de Steve (volume, délai), aucune de ces étapes n'est lancée.
+**Ordre recommandé.** D'abord le réexamen à l'aveugle d'un lot de 50 cas (les cas à soumettre + des cas en accord, sans tags ni verdict calculé), qui mesure l'accord de Steve entre deux dates (étape 2a du plan, §12.1) ; ensuite seulement les questions ci-dessus (étape 2b). Sans accord de Farid sur la sollicitation de Steve (volume, délai), aucune de ces étapes n'est lancée.
 
-**Extension à de nouvelles villes.** Elle n'a pas lieu tant que ces points ne sont pas clarifiés (arbitrage de l'owner, D10).
+**Extension à de nouvelles villes.** Elle n'a pas lieu tant que les points des blocs A, B et D ne sont pas clarifiés (arbitrage de Fabien, owner, volet de D10).
 
 ### 4.9 Jeu de référence C v2
 
-Sens retenu de la « double annotation » : la **provenance par champ** (D9, proposée close). Chaque étiquette garde sa source ; une étiquette non réexaminée n'est jamais renommée.
+Sens retenu de la « double annotation » : la **provenance par champ** (D9, clôture recommandée). Chaque étiquette garde sa source ; une étiquette non réexaminée n'est jamais renommée.
 
 | Champ | Provenance | État au 2026-10-06 |
 |---|---|---|
 | Classement, sens, code de motif | `steve_v1` (relevé du 21 sept., colonnes Q, P, R) | 121 lignes, inchangées |
-| Réexamen à l'aveugle | `steve_v2a` | `not run` (étape 2a, accord de Farid requis) |
+| Réexamen à l'aveugle | `steve_v2a` | `not run` (étape 2a du plan, §12.1 ; accord de Farid requis) |
 | Adjudication après exposition aux arguments | `steve_v2` | `not run` (questions du §4.8) |
 | Tags v2 et v3 | annotations IA individuelles (Astra, Opus, Gemini) + majorité IA avec votes | fait (§4.5) ; 3 corrections 3/3 tracées |
-| Verdict calculé | R′ v1 (tags de référence) | fait (§4.6) ; R′ v1 gelée par empreinte (§5.2) |
+| Verdict calculé | R′ v1 (tags de référence) | fait (§4.6) ; R′ v1 figée par empreinte comme référence de travail, gel du plan à l'étape 5 (§5.2) |
 | Cause de l'écart, motivation, critère détectable | 3 IA, réconciliation, vérification mécanique | fait (§4.7) |
 | Annotation historique datée | cahier du 10 juillet | 12 paires ; contrôle et adjudication seulement (§4.3) |
-| Audit humain des tags qui changent R′ (`residentiel`, `sens`, `densification`, `portee`, `instrument`) | humain | `not run` (≥ 50 cas, étape 4 du plan) |
+| Audit humain des tags qui changent R′ (`residentiel`, `sens`, `densification`, `portee`, `instrument`) | humain | `not run` (≥ 50 cas, étape 4 du plan, §12.1) |
 
-**Manifeste.** Le jeu C v2 se décrit par un manifeste `engram_reference_set_v1` : provenance par étiquette, règle de sélection (121 lignes sur 124 ; exclues : #14, #55, #58), `completeness`, exclusions, accords par paire, flags (`pilot-exposed`, `test-informed-schema`), fiche descriptive. Le découpage train / test aveugle du ch. 6 est une propriété de la campagne exploratoire, pas du jeu : il n'est pas publié dans le tableau de référence.
+**Manifeste.** Le jeu C v2 se décrit par un manifeste `engram_reference_set_v1` : provenance par étiquette, règle de sélection (121 lignes sur 124 ; exclues : #14, #55, #58), `completeness`, exclusions, accords par paire, flags (`pilot-exposed`, `test-informed-schema`), fiche descriptive. Le découpage train / test aveugle exploratoire du ch. 6 est une propriété de la campagne exploratoire, pas du jeu : il n'est pas publié dans le tableau de référence. Libellé retenu : jeu de référence C v2 (pilote : v0 ; « v1 » est le libellé du dossier du 2026-10-03 ; correspondance des versions au glossaire, « Séries et numérotations »).
 
-**Stockage.** Les données de Steve et les extraits lus en production restent en emplacement privé (dépôt radar public : seuls manifestes, empreintes et agrégats). Le modèle de stockage cible (six objets S3 privés sous un préfixe de jeu de référence, store engram non déployé dans immo) est décrit au §9 et en annexe III.7 ; le choix du préfixe relève de G5.
+**Stockage.** Les données de Steve et les extraits lus en production restent en emplacement privé (dépôt radar public : seuls manifestes, empreintes et agrégats). Le modèle de stockage cible (six objets S3 privés sous un préfixe de jeu de référence, store engram non déployé dans immo) est décrit au §9.2 (stockage réel), au §9.5 et en annexe III.7.6 ; le choix du préfixe relève de G5.
 
 **Jeux de référence E et C.** Le jeu E (extraction, 674 unités committées, 676 en copie locale à committer et geler) reste inchangé et note l'extraction ; le jeu C note la sélection. Le benchmark #782 publie deux volets séparés, jamais fusionnés (D10, D11).
 
 ```mermaid
 erDiagram
     consensus_modeles ||--|| jeu_ref_e_v3 : construit
-    annotations ||--|| jeu_ref_c_v1 : adjugees_gelees
+    annotations ||--|| jeu_ref_c_v2 : adjugees_gelees
     jeu_ref_e_v3 ||--|| volet_extraction : note
-    jeu_ref_c_v1 ||--|| volet_ciblage : note_b_puis_c
+    jeu_ref_c_v2 ||--|| volet_ciblage : note_b_puis_c
     consensus_modeles {
       text methode "7 passes, 3 familles de modèles"
       text arbitrage "vote unanime + arbitrage"
@@ -717,10 +740,10 @@ erDiagram
       int taille "674 sur 100 documents"
       text stockage "fichiers JSON du dépôt"
     }
-    jeu_ref_c_v1 {
+    jeu_ref_c_v2 {
       text question "fallait-il montrer ce signal ?"
       text unite "signal, regroupé par dossier"
-      text jeux "dev 51 villes, test 52 villes"
+      text jeux "dev 51 villes, test neuf (§7.3)"
       text stockage "reference_set_versions + JSON gelé"
     }
     volet_extraction {
@@ -737,11 +760,11 @@ erDiagram
 
 ## 5. Définition opérationnelle de C
 
-Une seule définition de C : critères (D7), règle de décision R′ (D8), contrat d'entrée (D17), unité, définitions et métriques (plan v2, étape 0). Les chapitres 6 et 7 l'appliquent.
+La définition de C réunit les critères K1–K9 à trois états (D7), la règle de décision R′ à trois verdicts (D8), le contrat d'entrée (D17), l'unité, les définitions et les métriques (plan v2, étape 0). La mesure des chapitres 6 et 7 porte sur R′ (§5.4) ; la correspondance entre les états de D7 et les verdicts P / S / N de R′ reste à établir avec D7 (§5.1).
 
 ### 5.1 Critères K1 à K9 et règle d'asymétrie (D7)
 
-Un signal est **dans C** si aucune exclusion **établie** ne s'applique ; il est **confirmé** si les critères requis sont étayés, **à instruire** sinon. Les décisions de Steve (sens, classement, code de motif) servent de référence ; par critère, la référence est directe pour le sens, déduite du code de motif quand il l'implique, sinon `unknown` (§4.4).
+Un signal est **dans C** si aucune exclusion **établie** ne s'applique ; il est **confirmé** si les critères requis sont étayés, **à instruire** sinon. Un verdict P calculé par R′ v1 ne vaut pas encore confirmation des trois critères : K4 est plus strict que V13 (§5.2), et la correspondance entre R′ et ces états reste à arbitrer avec D7. Les décisions de Steve (sens, classement, code de motif) servent de référence ; par critère, la référence est directe pour le sens, déduite du code de motif quand il l'implique, sinon `unknown` (§4.4).
 
 | # | Critère | Règle de Steve | Donnée disponible (FAIT) | Donnée à produire |
 |---|---|---|---|---|
@@ -757,11 +780,11 @@ Un signal est **dans C** si aucune exclusion **établie** ne s'applique ; il est
 
 **Règle d'asymétrie (contraignante).** Une absence de données n'est jamais une preuve négative. Si K3 ou K4 sont `indéterminé`, le signal reste dans C, état « à instruire ». On ne masque que ce qui est établi hors critères. Par construction, C ne dégrade pas le rappel sur les cas illisibles ; son gain porte sur la précision. Deux compteurs distincts, « confirmés » et « à instruire », évitent de présenter une conservation prudente comme une opportunité avérée.
 
-**Correspondance des états.** Confirmé et à instruire → montré ; exclu prouvé → masqué ; échec d'exécution ou entrée non lue → montré (réserve de Steve). Les écarts entre K1–K9 (D7) et R′ seront listés après le gel de R′ v1 et soumis à Farid (`unknown` à ce jour).
+**Correspondance des états.** Confirmé et à instruire → montré ; exclu prouvé → masqué ; échec d'exécution ou entrée non lue → montré (réserve de Steve). Les écarts entre K1–K9 (D7) et R′ v1 sont listés à la fin du §5.2 et soumis à Farid avec D7. La mesure (ch. 6 et 7) porte sur R′ v1 (§5.4) ; la correspondance des trois états avec P / S / N est à établir avec D7 et D8 avant la mesure confirmatoire, et chaque campagne identifie la version de R′ effectivement gelée.
 
 ### 5.2 Règle de décision R′
 
-**R′ v1 est gelée** (2026-10-06, empreinte sha256 `e5836deb69a6165907966868e6e06fedac582c7a74741b0cd89097a6cfa501a2` du fichier `derive-verdict-rprime-v1.mjs`, hors dépôt). Elle tire un verdict P / S / N des **seuls tags** ; elle ne lit jamais le code de motif, les décisions de Steve, les colonnes de l'assistant, la passe ni la ville. **Statut : référence de travail**, pas une règle validée par Steve ; toute modification passe par D8 (revue métier de Steve et Mathieu, décision de Farid), jamais pour améliorer un score.
+**R′ v1 est figée par empreinte comme référence de travail** (2026-10-06, empreinte sha256 `e5836deb69a6165907966868e6e06fedac582c7a74741b0cd89097a6cfa501a2` du fichier `derive-verdict-rprime-v1.mjs`, hors dépôt, reportée en annexe I.2) ; son gel au sens du plan a lieu à l'étape 5, après l'arbitrage de Steve (étape 2). Elle tire un verdict P / S / N des **seuls tags** ; elle ne lit jamais le code de motif, les décisions de Steve, les colonnes de l'assistant, la passe ni la ville. **Statut : référence de travail**, pas une règle validée par Steve ; toute modification passe par D8 (revue métier de Steve et Mathieu, décision de Farid), jamais pour améliorer un score.
 
 **Construction (FAIT).** Point de départ : R′ stricte, où chaque clause dérive d'une règle R-xx attribuée à Steve par la colonne « Source » de l'onglet « Règles de classement » (R-14 et R-16, rédigées par l'assistant, ne fondent rien). Revue par les 3 IA en deux tours (avis indépendant, puis réconciliation, chaque changement de position justifié par une R-xx citée mot pour mot) : verdict 3/3 « oui avec amendements ». Fidélité des clauses au tour 2 : 9 fidèles à 3/3 ou 2/3, X05, X08, X16 « élargissent » (3/3), X13 « restreint » (3/3), X06 et X10 « trahissent » (3/3), X14 et X15 « trahissent » (2/3). Choix d'interprétation : le « ou » de R-03 fidèle (3/3) ; l'inférence typologique de densification (R-08) et la lecture de R-22 par `rattache_a` infidèles (3/3). Seuls les amendements majoritaires sont intégrés.
 
@@ -783,6 +806,8 @@ Un signal est **dans C** si aucune exclusion **établie** ne s'applique ; il est
 | V14 | R-06 (1), R-13 | immeubles désignés sans plein droit établi | S | Opus A1, Gemini A3 |
 | V15 | R-13, R-21 (2) | sinon (au moins un critère non établi, aucun en échec) | S | inchangée |
 
+**Note sur V08, à valider en D8.** La valeur du tag et le traitement de la clause sont deux niveaux distincts : le guide v3 annote `sens` = assouplissement pour un resserrement qui sert à densifier (R-22, §4.5) ; V08 traite une restriction qui densifie comme un cas mixte. Leur correspondance est à faire valider en D8 ; les formulations du guide et de la règle seront ensuite harmonisées.
+
 **Retirés de R′ stricte** : la clause « mandat → À surveiller » (R-25 régit l'horizon d'affichage, pas le verdict ; 2/3) ; l'inférence de densification tirée de la seule typologie ; la lecture de `rattache_a` pour le lotissement. **Non retenus** (pas de majorité) : exiger densification ≠ non dans le test positif (Gemini seul), exiger une preuve positive de capacité (Astra seul), un tag `droit_plein_droit` (désaccord), la préemption → Non pertinent (Opus seul ; question à Steve, §4.8). **Hors R′ v1, soumis à Steve** : P1 (unifamilial seul → Non pertinent) et P3 (concordance territoriale ou refonte → Pertinent), 3/3 « proposer à Steve » ; P2 (contrainte territoriale plafonne à S) rejetée 2/3.
 
 **Mesure sur les 121 lignes (CALCUL, exploratoire, biaisée à la hausse : lignes de mise au point).** Accord avec Steve 81/121 (R1–R7 : 70 ; R′ stricte : 80) ; Pertinent masqués 1 (n° 121, point d'ordre du jour contraire à R-01) ; rappel P∪S 57/68 = 83,8 %, précision P∪S 57/63 = 90,5 %. Détail et décomposition des écarts : §4.6.
@@ -791,15 +816,15 @@ Un signal est **dans C** si aucune exclusion **établie** ne s'applique ; il est
 
 ### 5.3 Contrat d'entrée (D17)
 
-- **Entrée** : le signal et le contexte d1 de sa ville (autres signaux, métadonnées des documents), reconstruit par une procédure déterministe appliquée à **tous** les cas, **coupé à la date du signal** : rien de postérieur (arbitrage de l'owner du 2026-10-05). Entrée rendue et sha256 figés.
-- **Hors entrée** : les colonnes L à T du classeur (hors P, Q, R), les verdicts, codes de motif et passes de Steve, ses analyses et les causes d'écart ; d2 (donnée hors immo), tant qu'aucune récupération uniforme, datée et disponible en production n'existe (choix de tâche) : strate `source-gap`, cas conservés au dénominateur.
+- **Entrée** : le signal et le contexte d1 de sa ville (autres signaux, métadonnées des documents), reconstruit par une procédure déterministe appliquée à **tous** les cas, **coupé à la date du signal** : rien de postérieur (arbitrage de Fabien, owner, du 2026-10-05). Entrée rendue et sha256 figés.
+- **Hors entrée** : les colonnes L à T du classeur (hors P, Q, R), textes de l'assistant ; les décisions et observations de Steve (colonnes B, P, Q et R : passe, sens, classement, code de motif), ses analyses et les causes d'écart ; d2 (donnée hors immo), tant qu'aucune récupération uniforme, datée et disponible en production n'existe (choix de tâche) : strate `source-gap`, cas conservés au dénominateur.
 - **Conditions secondaires** : coupure à la date de revue de Steve (évaluation rétrospective, annoncée comme telle) ; signal seul, sur le dev, où `rattache_a` est `not covered`.
 - Le contrat servi aux modèles et les informations autorisées à Steve pour établir la référence sont documentés séparément.
 
 ### 5.4 Unité, agrégation, définitions et métriques
 
 - **Unité** : l'enregistrement radar (signal- ou event-), une étape par ligne (R-07 : « ne pas regrouper ») ; un dossier est une relation `rattache_a`, jamais une fusion. Dev : cas = ligne de Steve, avec la correspondance publiée cas → signaux → documents → ville. Test : annotation par signal, cas = dossier défini par le `rattache_a` de référence, fixé avant les prédictions et appliqué à tous les bras. Grappe : la ville. « 162 » désigne les nœuds distincts cités par les 121 lignes (§4.2), pas un compte du classeur.
-- **Agrégation** : un cas est montré si au moins un de ses signaux l'est ; verdict de cas à 3 classes = maximum P > S > N par défaut, soumis à Steve (étape 2c).
+- **Agrégation** : un cas est montré si au moins un de ses signaux l'est ; verdict de cas à 3 classes = maximum P > S > N par défaut, soumis à Steve (étape 2c du plan, §12.1).
 - **Définitions** : montré = verdict dérivé P ou S, ou échec d'exécution, ou entrée non lue ; Pertinent masqué = cas P sans aucun signal montré ; précision P ∪ S = part des cas montrés classés P ou S ; bruit = cas N montrés (compte et part) ; P seul = second point de fonctionnement ; échecs au dénominateur, taux d'échec plafonné (préenregistré). Une référence manquante reste une couverture inconnue, jamais un négatif.
 
 **Métriques.**
@@ -808,7 +833,7 @@ Un signal est **dans C** si aucune exclusion **établie** ne s'applique ; il est
 |---|---|---|
 | Par tag | précision, rappel et F1 par valeur ; κ (kappa de Cohen) entre Steve et le modèle, et entre deux annotateurs humains quand il y en a deux | Où le modèle se trompe sur les faits (sens, densification, exclusions) |
 | Classification | précision, rappel et F1 de « montrer » (P ∪ S) ; **bruit** = part des N montrés ; **Pertinents perdus** = P masqués (contrainte critique : aucun) | Utilité pour Steve |
-| Baseline | les mêmes métriques pour les filtres B actuels, passes 1, 2 et 3 (§2.5, §4.2) ; par exemple bruit de B en passe 1 = 24/73 = 32,9 % | Ce que C doit battre (D13) |
+| Baseline | les mêmes métriques pour B′ passes 1, 2 et 3, recalculées sur l'instantané, sur les mêmes cas que C (§7.2) ; les valeurs du relevé (bruit de la passe 1 observée par Steve : 24/73, §2.5) restent un repère | Ce que C doit battre (D13) |
 
 - κ : accord brut, prévalence et supports à côté ; accords avant réconciliation séparés de l'accord candidat–référence ; κ par valeur pour les exclusions (plusieurs valeurs) ; κ pondéré seulement avec ordinalité et poids justifiés.
 - Graphiques : **points** précision–rappel (pas de courbe sans score continu), par configuration, référence et définition du positif, avec intervalle par ville ; comptes bruts (Pertinent masqués) à côté des ratios ; nombre de villes contributrices.
@@ -849,7 +874,7 @@ Ce pilote reste `v0` exploratoire (G7) : il éclaire, il ne fonde pas la bascule
 
 ### 7.1 Préenregistrement (résumé de l'étape 0)
 
-- Ratifié par l'owner avant toute graine, annotation neuve ou appel de modèle évalué ; le consensus des 3 IA, dont les familles sont évaluées, ne suffit pas.
+- Ratifié par Fabien (owner) avant toute graine, annotation neuve ou appel de modèle évalué ; le consensus des 3 IA, dont les familles sont évaluées, ne suffit pas.
 - Sources figées (instantané du classeur, sha256 par onglet), registre d'exposition (toute ville exposée sort du vivier test), unité, agrégation et définitions du §5.4.
 - Règle de sélection hors test : Pertinent masqués sous le seuil, puis précision P ∪ S maximale, puis version la plus récente, puis coût. Le candidat est un couple prompt–modèle et sa politique d'exécution.
 - Configurations sur le test : le candidat avec les 3 modèles, obligatoire ; d'autres configurations figées peuvent passer, déclarées et hachées avant l'ouverture, en exploratoire, sans substitution possible du candidat.
@@ -859,23 +884,23 @@ Ce pilote reste `v0` exploratoire (G7) : il éclaire, il ne fonde pas la bascule
 ### 7.2 Analyse primaire et seuil (D13)
 
 - **Analyse primaire unique**, intersection-union : `pass` si (1) et (2) passent ; `fail` si l'un échoue ou si le taux d'échec dépasse le plafond ; `indeterminate` sinon. (2) ne compte qu'après le `pass` de (1).
-- **(1) Pertinent masqués** : k sur n ; borne supérieure exacte unilatérale à 95 % (Clopper-Pearson) sur n effectif (pondérations, effet de grappe ville). `pass` si k ≤ k_max et borne < X ; `fail` si k > k_max. Proposition de l'owner : k_max = 0 (D13). Zéro observé seul ne démontre pas un faible risque (P(0 | taux de 5 %, n = 20) ≈ 36 %).
+- **(1) Pertinent masqués** : k sur n ; borne supérieure exacte unilatérale à 95 % (Clopper-Pearson) sur n effectif (pondérations, effet de grappe ville). `pass` si k ≤ k_max et borne < X ; `fail` si k > k_max. Proposition de Fabien (owner) : k_max = 0 (D13). Zéro observé seul ne démontre pas un faible risque (P(0 | taux de 5 %, n = 20) ≈ 36 %).
 - **(2) Précision P ∪ S** : différence entre le candidat et B′ passe 1, sur les mêmes cas ; intervalle bilatéral à 95 % par bootstrap des villes (au moins 10 000 tirages). `pass` si la borne inférieure est positive, `fail` si la borne supérieure est négative.
-- **Caractéristique opératoire (CALCUL binomial, cas indépendants)** : avec k_max = 0 et un taux réel de Pertinent masqués de 2 %, P(pass) ≈ 0,56 à 29 Pertinent pour X = 10 % et ≈ 0,30 à 59 Pertinent pour X = 5 %. Repères de taille : au moins 29 Pertinent (borne < 10 % à 0 observé) ou 59 (< 5 %), avant correction de l'effet de grappe ; une vingtaine de Pertinent ne donneraient que des estimations peu précises (0 sur 20 laisse une borne de 13,9 %).
-- Les 67,1 % historiques (B′ passe 1 sur le relevé, autre population) sont rapportés, jamais utilisés comme comparateur.
+- **Caractéristique opératoire (CALCUL binomial a priori, sous l'hypothèse d'un taux réel de 2 % et de cas indépendants ; valeurs reprises des relecteurs, non recalculées indépendamment, annexe IV)** : avec k_max = 0 et un taux réel de Pertinent masqués de 2 %, P(pass) ≈ 0,56 à 29 Pertinent pour X = 10 % et ≈ 0,30 à 59 Pertinent pour X = 5 %. Repères de taille : au moins 29 Pertinent (borne < 10 % à 0 observé) ou 59 (< 5 %), avant correction de l'effet de grappe ; une vingtaine de Pertinent ne donneraient que des estimations peu précises (0 sur 20 laisse une borne de 13,9 %).
+- La part P ∪ S de la passe 1 observée par Steve (49/73 = 67,1 %, relevé, autre population) est rapportée, jamais utilisée comme comparateur ; « B′ recalculé » désigne seulement la mesure sur l'instantané, sur les mêmes cas.
 - Famille secondaire (Holm) : le statut primaire des deux autres modèles avec le même prompt ; variante à figer à la ratification.
 
 ### 7.3 Échantillonnage, annotation et scellement (étape 8)
 
 - Test neuf à deux degrés dans le vivier éligible (villes hors registre d'exposition) : villes, puis documents tirés à probabilités connues, stratifiés sur l'état de B′ passe 1 ; graine et tirage engagés dans track avant toute annotation.
-- Steve annote selon le guide gelé (`steve_test`), avec les sources consultées par cas, dans une interface sans indicateur B′ ; un second annotateur humain (`human2_test`) annote au moins 50 cas, aveugle à Steve, à B′ et aux tags IA, tirés après l'annotation de Steve et avant toute prédiction (ressource `unknown`, D10) ; sans lui, mention `single-human-annotator`.
+- Steve annote selon le guide gelé (`steve_test`), avec les sources consultées par cas, dans une interface sans indicateur B′ ; un second annotateur humain (`human2_test`) annote au moins 50 cas, aveugle à Steve, à B′ et aux tags IA, tirés après l'annotation de Steve et avant toute prédiction (ressource `unknown`, D10) ; sans lui, mention `single-human-annotator`. Un tel résultat peut être publié ; son admissibilité pour une bascule, alors que G4 (a) exige une référence `human_adjudicated` pour toute promotion, est à arbitrer (D10, D13).
 - Scellement G5 (b) : deux paquets chiffrés (entrées, attendus), deux clés, un gardien distinct de l'auteur et de l'exécutant ; engagement de contenu dans track.
 
 ### 7.4 Passe non adaptative (étape 9)
 
 - Une passe par configuration ; reprises automatiques préenregistrées ; toutes les tentatives conservées ; tous les bras dans une fenêtre courte déclarée.
 - Rôles en liste blanche (glossaire) ; chaque appel isolé : répertoire vide ne contenant que l'entrée, HOME neuf, aucune configuration MCP, aucun droit de lecture sur le dépôt, le stockage scellé et les tables immo.
-- B′ passes 1, 2 et 3 recalculées sur l'instantané du corpus ; B′ comparé uniquement en montré / masqué ; mention `pool-limited-to-shown-items`.
+- B′ passes 1, 2 et 3 recalculées sur l'instantané du corpus ; B′ comparé uniquement en montré / masqué. La population couverte est celle du tirage du §7.3 (documents tirés à probabilités connues dans le vivier éligible, stratifiés sur l'état de B′ passe 1, montré ou masqué). La mention `pool-limited-to-shown-items` reste sur les résultats historiques (§2.5) ; elle ne s'applique au test neuf que si son tirage se limite aux unités montrées, avec une justification propre (`not run`).
 - Aucun retour vers l'auteur ; aucune version 4 sur ce test.
 
 ### 7.5 Résultats
@@ -932,9 +957,9 @@ Condensé de la modélisation et de la première mise en œuvre : ce qui sert au
 
 ### 9.1 Vision de l'owner et besoins de Steve
 
-On part de ce que Steve a produit et de ce qu'il demande, pas des tables existantes. Les tables `prospect_marks` et `prospect_notes` (annexe III.2) restent telles quelles : elles servent au travail de l'équipe sur les lots, et les étendre mélangerait deux usages sans couvrir les besoins de Steve ; elles ne sont ni étendues ni réutilisées.
+On part de ce que Steve a produit et de ce qu'il demande, pas des tables existantes. Les tables `prospect_marks` et `prospect_notes` (annexe III.2) servent au travail de l'équipe sur les lots : `prospect_marks` reste inchangée ; `prospect_notes` reçoit seulement le correctif B0 (ancre texte, comparaison auteur, annexe III.1). Pour les retours de Steve, elles ne sont ni étendues ni réutilisées : les étendre mélangerait deux usages sans couvrir ses besoins ; les retours structurés sont portés par le modèle cible du §9.2.
 
-**Vision de l'owner.** Steve poursuit son travail d'annotation, de validation et de triage **dans l'application**, avec son propre compte. L'application porte des **boucles de validation** : Steve annote, l'équipe ou le PO valide ou conteste, la décision est gardée et chaque changement crée une nouvelle version. Les annotations sont donc des **données d'application vivantes en Postgres**, pas seulement un import. Le jeu de référence C est **stocké** (versions gelées tirées des annotations validées), mais l'**évaluation et l'optimisation des prompts d'engram se font hors ligne**, jamais dans l'application.
+**Vision de l'owner (Fabien).** Steve poursuit son travail d'annotation, de validation et de triage **dans l'application**, avec son propre compte. L'application porte des **boucles de validation** : Steve annote, l'équipe ou le PO valide ou conteste, la décision est gardée et chaque changement crée une nouvelle version. Les annotations sont donc des **données d'application vivantes en Postgres**, pas seulement un import. Le jeu de référence C est **stocké** (versions gelées tirées des annotations validées), mais l'**évaluation et l'optimisation des prompts d'engram se font hors ligne**, jamais dans l'application.
 
 **Architecture des données : cinq ensembles.** Chacun est marqué par son **propriétaire** (immo, sentropic, engram, track), **existe** ou **proposé** (titre du couloir, bordure pleine ou en tirets) et **en ligne** (zone du haut) ou **hors ligne** (bande du bas) ; les flèches disent qui alimente qui.
 
@@ -992,15 +1017,17 @@ Où chaque table nouvelle se rattache à l'existant (signal, ville, PV, zone, lo
 |---|---|---|---|
 | 1 | Garder son verdict sur chaque signal : Pertinent, À surveiller, Non pertinent, avec motif, sens, passe (feuille Triage, 124 lignes) | classement, code de motif, sens, passe | `annotation_revisions` (sentropic) |
 | 2 | Garder sans perte ses 121 contrôles d'exclusion, 77 constats et 26 règles (autres feuilles) | feuille, ligne, référence (#, C-xx, R-xx), toutes les cellules brutes | `annotation_revisions` (sentropic) |
-| 3 | Relier ses 28 codes de motif à ses critères et exclusions (table de dérivation relue par Steve, D7, D8) | code → critère K1 à K9 ou exclusion, règle R-xx | schéma d'étiquettes du profil (immo) |
+| 3 | Relier ses 28 codes de motif à ses critères et exclusions (table de dérivation à établir, `not run`, relue par Steve : D7, D8, D16) | code → critère K1 à K9 ou exclusion, règle R-xx | schéma d'étiquettes du profil (immo) |
 | 4 | Une ligne vise 1 à N objets : signal, ville, règlement (la #7 nomme deux événements ; une ligne agrégée vise une ville) | type d'objet, ville, id texte, état du rattachement, ce que Steve a vu | `annotation_targets` (sentropic) |
 | 5 | Savoir d'où vient chaque verdict | fichier (sha256), nom, révision, auteur, importateur ; feuille et ligne | `annotation_sources`, `annotation_revisions` (sentropic) |
 | 6 | Recevoir les révisions et les 52 villes suivantes sans rien écraser | nouveau fichier ; ligne qui en remplace une autre ; statut active, retirée, remplacée | `annotation_sources`, `annotation_revisions` (sentropic) |
-| 7 | Voir son avis sur le signal dans l'outil : badge, section « Avis de Steve », compteurs (U1) | lecture par ville + id du signal | `annotation_targets` → `annotation_revisions` (sentropic) |
+| 7 | Voir son avis sur le signal dans l'outil : badge, section « Retour du relevé de Steve » (décision de Steve et texte de l'assistant séparés), compteurs (U1) | lecture par ville + id du signal | `annotation_targets` → `annotation_revisions` (sentropic) |
 | 8 | Archiver, classer, lier, épingler (#760) | états durables par utilisateur | hors du périmètre, voir plus bas |
 | 9 | Jeu de référence C : un jeu gelé, versionné, avec un développement (les 121 lignes, 51 villes) et un test neuf (villes hors registre d'exposition), D10 | liste des annotations validées retenues, partition, empreinte du fichier gelé | `ReferenceSetVersion` (engram) |
 | 10 | Poursuivre son annotation, sa validation et son triage dans l'application (vision owner) | saisie avec son propre compte, origine « saisie », nouvelle version à chaque changement | `annotation_revisions` (sentropic), `account_users` (immo) |
 | 11 | Boucle de validation : l'équipe ou le PO valide ou conteste, la décision est gardée | décideur (compte), décision, motif, date ; statut courant de l'annotation | `annotation_validations` (sentropic) |
+
+**Table de dérivation (besoin 3).** Elle relie chaque code de motif à un critère K1–K9 ou à une exclusion, à la règle R-xx qui le justifie et à son classement. Elle n'est pas jointe à ce dossier : `not run`, à établir avant sa relecture par Steve (D7, D16). Elle explique les codes et sert à déduire les tags de référence quand le code l'implique (§4.4, §5.1) ; R′ ne la lit jamais (§5.2).
 
 ### 9.2 Modèle cible par propriétaire
 
@@ -1059,7 +1086,7 @@ erDiagram
     reference_set_versions {
       text id PK "ReferenceSet@version"
       text label_provenance "human_single pour C"
-      text partitions "dev 51 villes, test 52"
+      text partitions "dev 51 villes, test neuf"
       text manifest_sha256 "gel décidé dans track"
     }
     eval_runs {
@@ -1071,7 +1098,7 @@ erDiagram
 
 <!-- diagram:modele-minimal -->
 
-**Sort des six tables du brouillon** (convergence 4/4 des sièges, synthèse §6.1) : immo ne les construit pas.
+**Sort des six tables du brouillon** (convergence 4/4 des sièges, SYNTHESE.md, §6.1) : immo ne les construit pas si G7 (b) et D2 (a) sont retenues (recommandation, à décider).
 
 | Table immo du brouillon | Devient | Propriétaire |
 |---|---|---|
@@ -1098,10 +1125,10 @@ Les six tables immo de la version précédente restent décrites comme option b 
 
 - **engram = moteur de détection et d'évaluation.** Aujourd'hui, la librairie `@sentropic/graphify` 0.18.0 (futur `@sentropic/engram`) est **exécutée dans le job immo** `radar-refresh-pv` (CronJob, image `ghcr.io/rhanka/radar-api`) ; elle produit le graphe, que **le job immo écrit** dans `graph/<ville>/latest.json` sur le **S3 d'immo** (bucket `radar-immobilier-docs`), puis **projette** dans `graph_nodes` / `graph_edges` du **Postgres d'immo**. Format et code du graphe : engram ; exécution : job immo (demain : DAG geo, #699) ; stockage : S3 et Postgres d'immo. L'évaluation (jeu de référence, runs) est l'autre moitié d'engram, hors ligne.
 - **sentropic = propriétaire du modèle d'annotation** (paquet `@sentropic/annotations`), mais ses tables `annotation_*` sont **installées et stockées dans le Postgres d'immo**, par les migrations du paquet ; les octets du classeur vont dans le **S3 d'immo**, par le port du paquet.
-- **Jeux de référence et runs** : stockage objet privé de l'hôte derrière un port du paquet (synthèse §3.3), donc un **préfixe privé du S3 d'immo** (nom à fixer, `non vérifié`) ; manifestes et empreintes publics dans le dépôt. **Option, pas un fait** : la synthèse évoque aussi un port de stockage commun ; un stockage propre à engram n'est pas recommandé.
+- **Jeux de référence et runs** : stockage objet privé de l'hôte derrière un port du paquet (SYNTHESE.md, §3.3), donc un **préfixe privé du S3 d'immo** (nom à fixer, `non vérifié`) ; manifestes et empreintes publics dans le dépôt. **Option, pas un fait** : SYNTHESE.md évoque aussi un port de stockage commun ; un stockage propre à engram n'est pas recommandé.
 - **track** : les décisions de gel et de promotion sont des événements dans les fichiers `.track/` du dépôt d'immo, attestés par h2a.
 
-Immo ne construit pas de tables d'annotation : les annotations vivent dans les tables du paquet générique `@sentropic/annotations`, installées dans le Postgres d'immo ; le jeu de référence et les runs appartiennent à engram ; les décisions de gel et de promotion à track ; immo apporte son profil de domaine et ses données.
+Si G7 (b) et D2 (a) sont retenues (recommandation, à décider), immo ne construit pas de tables d'annotation : les annotations vivent dans les tables du paquet générique `@sentropic/annotations`, installées dans le Postgres d'immo ; le jeu de référence et les runs appartiennent à engram ; les décisions de gel et de promotion à track ; immo apporte son profil de domaine et ses données.
 
 <!-- scene:modele-donnees -->
 
@@ -1121,7 +1148,7 @@ Immo ne construit pas de tables d'annotation : les annotations vivent dans les t
 
 **Contraintes établies (FAIT ; détail en annexe III.3).**
 - **Identité des objets** : les signaux sont des nœuds `graph_nodes` à identifiant texte, dont la stabilité n'est **pas garantie** (`upsertGraphAtomic` supprime les nœuds orphelins d'une ville) ; villes, zones, lots et documents ont des clés stables ; la clé de règlement est peu fiable (C-05, C-26).
-- **Défaut 1** : l'UI envoie l'identifiant texte du signal, l'API exige un UUID de l'ancienne table `signals` (`prospect-marks.ts:107`), que plus aucun code de `main` n'alimente : corrigé par B0. **Défaut 2** : comparaison de l'auteur (`account_users.id` contre sujet IdP). **Défaut 3** : badge de comptage rempli seulement à l'ouverture de la fiche.
+- **Défaut 1** : l'UI envoie l'identifiant texte du signal, l'API exige un UUID de l'ancienne table `signals` (`prospect-marks.ts:107`), que plus aucun code de `main` n'alimente : à corriger par B0 (incompatibilité constatée dans le code ; effet en production `non vérifié`, annexe III.3). **Défaut 2** : comparaison de l'auteur (`account_users.id` contre sujet IdP). **Défaut 3** : badge de comptage rempli seulement à l'ouverture de la fiche.
 - **Taille** : une cellule du classeur atteint 17 114 caractères, au-delà du corps de note de 10 000.
 - **Contrat sentropic** (`@sentropic/comments` 0.2.0) : les cibles `record` conviennent sans changement du paquet ; la suppression est physique, en écart avec la décision owner O1 (tombstone et rétention) ; le routeur Hono a une énumération fermée ; aucune référence au paquet dans Radar aujourd'hui.
 
@@ -1142,9 +1169,9 @@ Mesures lexicales des identifiants candidats : annexe III.4. Ordre de résolutio
 **Import idempotent.**
 
 1. **Script Node/TS** (exceljs en dépendance de développement d'`api/`), **dry-run par défaut**, via une cible Make. Rapport : comptes par feuille et par statut de résolution, écarts avec les comptes déclarés (124/146, 51/103, 121, 77, 26, 28).
-2. **Idempotence** : un sha256 déjà importé ne produit aucune écriture ; une nouvelle révision ajoute ses lignes, chacune reliée par `remplace_id` à la ligne qu'elle remplace (même fichier d'origine, feuille et référence) ; une ligne absente de la révision suivante passe au statut « retirée », jamais supprimée ; une transaction par fichier ; deux imports concurrents des mêmes octets convergent sans doublon ni double notification.
+2. **Idempotence** : un sha256 déjà importé ne produit aucune écriture ; une nouvelle révision ajoute ses lignes, chacune reliée par `prev_content_hash` à la révision qu'elle remplace (même fichier d'origine, feuille et référence) ; une ligne absente de la révision suivante passe au statut « retirée », jamais supprimée ; une transaction par fichier ; deux imports concurrents des mêmes octets convergent sans doublon ni double notification.
 3. **Lignes non rattachables** : jamais rejetées. Une cible « ville » toujours créée depuis la colonne Ville ; id abrégé résolu par ville + suffixe, sinon « ambiguë » ou « non résolue » ; ligne agrégée → cible « ville » ; id complet absent du graphe → « disparue », instantané `vu_par_steve` affichable.
-4. **Mesure de résolution avant tout affichage** : part des identifiants encore présents dans `graph_nodes` d'une préprod restaurée. C'est un critère de sortie du lot L1.
+4. **Mesure de résolution avant tout affichage** : part des identifiants encore présents dans `graph_nodes` d'une préprod restaurée. C'est un critère de sortie du lot L1 immo.
 5. **Qualité à traiter dès l'import (FAIT)** : 4 dates partielles ou composites sur 124 ; 7 états `firm` hors liste de validation ; 66 « Procès-verbal » dans la colonne Type, hors liste d'étapes ; 29 initiateurs et 46 portées hors listes déroulantes ; 40 libellés de MRC non normalisés (dériver la MRC du registre) ; la Synthèse ne compte que 95 initiateurs normalisés sur 124. Toutes les cellules sont conservées ; les recomptages sont publiés avec leurs règles et une catégorie explicite pour les valeurs non reconnues.
 6. **Données personnelles** : détection sur les verbatims, `pii_status` renseigné ; affichage selon D6.
 7. **Retrait** : désactiver la publication d'un lot sans effacer source, évaluations ni réponses ultérieures des utilisateurs.
@@ -1157,12 +1184,12 @@ FAIT pour la source : synthèse convergée de quatre sièges (engram et sentropi
 - **Terminologie (G1)** : « oracle » est abandonné comme nom d'objet ; on dit **jeu de référence** (`ReferenceSet`), **version figée** (`ReferenceSetVersion`), **élément de référence** (`ReferenceItem`), partitions `dev` et `test` scellée ; la provenance est l'attribut `label_provenance` (`human_single`, `human_adjudicated`, `model_consensus`, `mixed`) : E = `model_consensus` (« silver ») ; le pilote C = `human_single` (un seul annotateur), « gold » en construction.
 - **Répartition (G2)** : **sentropic porte l'humain** (identités par l'IdP partagé déjà utilisé par immo, commentaires, annotations versionnées, validations, adjudications, export haché) dans un paquet frère `@sentropic/annotations` ; **engram porte la mesure** (jeu de référence figé, split dev / test aveugle, sceau, runs, évaluateurs pluggables, statistiques, garde de promotion) ; **track porte les décisions** de gel et de promotion, attestées par h2a ; **le domaine** apporte un profil et des données.
 - **Deux interfaces seulement** : un instantané haché des annotations validées, de sentropic vers engram (engram ne lit jamais la base vivante ; aucune partition dans l'export) ; un enregistrement de promotion qui lie la décision track aux empreintes du candidat.
-- **Immo = profil + données** : profil `radar/ontology/ontology-profile.yaml` complété (schéma d'étiquettes C, évaluateurs `classification`, `span`, `typed_occurrence`, règle D13, unité de groupe = municipalité) ; données : PV, E, C, classeur de Steve, registre des municipalités. Immo ne construit pas ses six tables (G7).
-- **Séquencement (G7)** : L0 contrats ; L1 parité des évaluateurs + un diagramme BPMN en recette ; L2 `@sentropic/annotations` et import, consommé dans sentropic ; L3 jeu de référence C v2 (51 villes en développement, 52 en test aveugle) ; L4 boucle BPMN. Le pilote C actuel devient `v0`, `flags: [exploratory, single-annotator]`, non admissible pour D13.
-- **Rôles à désigner par l'owner** : responsable de la politique d'annotation, validateurs et arbitres, responsable du gel (Fabien proposé), gardien du test aveugle, décideur de promotion (le PRINCIPAL, sous veto de CONTROL-RECETTE).
+- **Immo = profil + données** : profil `radar/ontology/ontology-profile.yaml` complété (schéma d'étiquettes C, évaluateurs `classification`, `span`, `typed_occurrence`, règle D13, unité de groupe = municipalité) ; données : PV, E, C, classeur de Steve, registre des municipalités. Immo ne construit pas ses six tables si G7 (b) et D2 (a) sont retenues (recommandation, à décider).
+- **Séquencement (G7)**, lots génériques notés G-L0 à G-L4 pour les distinguer des lots immo (§9.6) : G-L0 contrats ; G-L1 parité des évaluateurs + un diagramme BPMN en recette ; G-L2 `@sentropic/annotations` et import, consommé dans sentropic ; G-L3 jeu de référence C v2 (selon SYNTHESE.md : 51 villes en développement, 52 en test aveugle ; remplacé par D10 réécrite : test neuf sur des villes hors registre d'exposition, §7.3) ; G-L4 boucle BPMN. Le pilote C actuel devient `v0`, `flags: [exploratory, single-annotator]`, non admissible pour D13.
+- **Rôles à désigner par Fabien (owner)** : responsable de la politique d'annotation, validateurs et arbitres, responsable du gel (Fabien proposé), gardien du test aveugle, décideur de promotion (le PRINCIPAL, sous veto de CONTROL-RECETTE).
 - **Points ouverts de la synthèse** (§9 de la source) : refs lues différentes entre sièges ; port de stockage commun à décider ; consommation réelle exigée côté sentropic ; parseur de profil engram qui ignore les blocs inconnus ; profils sans registre ; petits effectifs (puissance faible) ; propriété du code BPMN d2d `non vérifié` ; chiffrage `non vérifié`.
 
-**Articulation avec les décisions immo.** D2 devient « adoption du générique » (options revues). D4 est modifiée : les annotations relèvent de G2 et G3, D4 ne porte plus que sur les commentaires de l'équipe. D3, D5, D9, D10, D11, D13 et D15 gardent leurs options et dépendent désormais de G1 à G7. Aucune décision immo n'est sans objet.
+**Articulation avec les décisions immo.** D2 devient « adoption du générique » (options revues). D4 est modifiée : les annotations relèvent de G2 et G3, D4 ne porte plus que sur les commentaires de l'équipe. D3, D5, D11 et D15 gardent leurs options. D9 est à décider (clôture recommandée) ; D10 et D13 sont réécrites (§10.1). Chaque fiche indique ses dépendances envers G1 à G7 ; G8 n'a pas d'effet direct sur immo (annexe II). Aucune décision immo n'est sans objet.
 
 #### Modèle engram vérifié (état au commit `c96fc01e`)
 
@@ -1174,14 +1201,10 @@ Références : engram = dépôt `graphify` au commit `c96fc01e` (paquet `@sentro
 
 **Ce qu'immo doit faire, ou ne pas faire.** Ne pas créer le store engram dans le schéma par défaut de sa base (voir la collision ci-dessous). Ne pas construire ses tables d'annotation (G7 (b), recommandé, en attente de décision). Compléter son profil avec les blocs `evaluation`, `promotion` et le schéma d'étiquettes (`SYNTHESE.md:287-293`). Choisir le préfixe S3 privé (G5). Passer à `@sentropic/engram` ≥ 0.19 s'il veut le binaire `engram` : la v0.18.0 n'expose que `graphify` (`package.json@c96fc01e:23-25`).
 
-**Collisions et prérequis.**
-- **Tables `graph_nodes` et `graph_edges`.** Mêmes noms, schémas incompatibles. Immo : PK `id` seule, `city_slug` nullable, arêtes `src_id`/`dst_id`/`kind` (`api/src/db/schema.ts@782d20c9:285-290,314-319`). Engram : PK `(city_slug, id)`, arêtes `source_id`/`target_id`/`relation` (`src/storage/postgres.ts@c96fc01e:397-421`). Le `CREATE TABLE IF NOT EXISTS` ne fait rien en silence sur la table immo, puis les upserts échouent.
-- **Index.** L'index `graph_nodes_city_type_idx` porte le même nom des deux côtés (`postgres.ts@c96fc01e:490`, `schema.ts@782d20c9:299`).
-- **Parade.** Option `schema` du store (`postgres.ts@c96fc01e:577`) ou base séparée.
-- **Artefact `graph/{citySlug}/latest.json`.** Le store engram le réécrit à chaque push, avec `force: true` (`postgres.ts@c96fc01e:990-994`), sous un répertoire local (`target`, `:585`). C'est le même chemin que la clé canonique S3 d'immo (`api/src/storage/object-store.ts@782d20c9:46`). Il ne faut jamais faire pointer `target` sur le bucket.
-- **Homonymes.**
-  - Le terme « sealed » d'engram-memory désigne une enveloppe chiffrée de mémoire (`engram-memory/contracts/index.ts@c96fc01e:462`), pas le sceau d'un jeu de référence.
-  - « 6 tables » désigne deux choses différentes : le store engram, et les 6 tables d'annotation du dossier §6.3.
+**Collisions et prérequis** (résumé ; tables, index, clés et preuves en annexe III.7.1).
+- **Tables `graph_nodes` et `graph_edges`, index `graph_nodes_city_type_idx`** : mêmes noms côté immo et côté engram, schémas incompatibles (immo à `782d20c9` : PK `id` seule ; engram : PK `(city_slug, id)`) ; le store engram créé dans le schéma par défaut d'immo échouerait à ses upserts. #812 passe immo en PK `(city_slug, id)` sur une branche non fusionnée. Prérequis : ne pas créer le store engram dans le schéma par défaut ; parade : option `schema` du store ou base séparée.
+- **Artefact `graph/{citySlug}/latest.json`** : le store engram le réécrit à chaque push sous son répertoire local `target`, au même chemin que la clé canonique S3 d'immo ; ne jamais faire pointer `target` sur le bucket.
+- **Homonymes** : « sealed » d'engram-memory désigne une enveloppe chiffrée de mémoire, pas le sceau d'un jeu de référence ; « 6 tables » désigne soit le store engram, soit les 6 tables immo de l'option (b) de D2 (§9.2, annexe III.5).
 
 | Objet | État | Preuve |
 |---|---|---|
@@ -1203,18 +1226,18 @@ Détail technique, tables, clés S3 et diagrammes : annexe III.7.
 | Lot | Contenu | Sortie observable | Taille (JUGEMENT) | Dépend de |
 |---|---|---|---|---|
 | **B0** — réparer l'ancre signal | Ancre texte du graphe acceptée par l'API pour les notes de signal, sans clé étrangère ; correction de la comparaison auteur (`account_users.id` contre `sub`) ; tests sur un id réel `signal-…` | Une note sur un signal réel est créée, relue et éditée en préprod, preuve navigateur | S | D3 |
-| **L1** — schéma et import | Migration nouvelle (tables du §9.2) ; script Node/TS dry-run puis réel en préprod ; rapport de résolution | 124 + 121 + 77 + 26 + 28 lignes stockées ; ré-import du même fichier = 0 écriture ; taux de résolution mesuré | M | D1, D2, D3 |
+| **L1** — schéma et import | Migration nouvelle (tables du §9.2) ; script Node/TS dry-run puis réel en préprod ; rapport de résolution | 124 + 121 + 77 + 26 + 28 lignes stockées ; ré-import du même fichier = 0 écriture ; taux de résolution mesuré | M | D1, D2, D3, D5 (compte de Steve vérifié avant l'import) ; G-L2 livré si G7 (b) |
 | **L2** — ancres et API lecture | Résolution sur snapshot ; `GET` par entité, lecture groupée par lot d'ancres (badges), lecture complète d'un retour sans limite de 10 000 ; cibles désignées selon le contrat sentropic (`kind:'record'`) ; événement SSE étendu | Contrat zod et tests ; une seule requête par vue pour les compteurs | S–M | L1, D4, D6 |
-| **U1** — affichage lecture seule | Dans `SignauxSelPanel` : badge de classement (vert, jaune, rouge), sens et code, section « Avis de Steve » (analyse, suite, niveau de preuve, provenance, statut de résolution) ; compteurs P / S / N par ville dans le rail ; migration DS des 3 composants `collab/*` | Exemples réels consultables avec contenu complet ; aucun nouveau `<button>` brut | M | L2, D14 |
-| **U2** — annotation et validation dans l'application | Steve annote, trie et corrige avec son compte ; l'équipe ou le PO valide ou conteste avec un motif ; chaque changement est une nouvelle version (tables `annotation_revisions`, `annotation_validations`, §9.2) | Une boucle complète en préprod : annotation de Steve, contestation, correction, validation, historique lisible | M | U1, D2, D5 |
-| **O1** — jeu de référence de ciblage v1 | Export `reference-set-ciblage-steve-v1.json` depuis les évaluations et ancres ; partitions ; scoreur Node pour B (et C ensuite) | Tableau précision / rappel de B sur le jeu de référence | S–M | L1, D10 |
-| **C1** — classifieur C en shadow | Extraction du sens par disposition, de la portée (plein droit / individuel), de la nature de la source (ODJ / PV), de l'effet sur les unités ; prédicat C côté serveur en parallèle de B | Précision / rappel de C contre B | L | O1, D7 |
+| **U1** — affichage lecture seule | Dans `SignauxSelPanel` : badge de classement (vert, jaune, rouge) ; section « Retour du relevé de Steve » en deux blocs, « Décision de Steve » (passe, sens, classement, code de motif) et « Texte de l'assistant du triage » (colonnes L à T hors P, Q, R : analyse, niveau de preuve, suite, recommandation), avec provenance et statut de résolution ; compteurs P / S / N par ville dans le rail ; migration DS des 3 composants `collab/*` | Exemples réels consultables avec contenu complet ; aucun nouveau `<button>` brut | M | L2, D14 |
+| **U2** — annotation et validation dans l'application | Steve annote, trie et corrige avec son compte ; l'équipe ou le PO valide ou conteste avec un motif ; chaque changement est une nouvelle version (tables `annotation_revisions`, `annotation_validations`, §9.2) | Une boucle complète en préprod : annotation de Steve, contestation, correction, validation, historique lisible | M | U1, D2, D5 ; G-L2 si G7 (b) |
+| **O1** — jeu de référence de ciblage C v2 | Export `reference-set-ciblage-steve-v2.json` (nom proposé) depuis les évaluations et ancres ; partitions ; scoreur Node pour B (et C ensuite) | Tableau précision / rappel de B sur le jeu de référence | S–M | L1, D10 |
+| **C1** — classifieur C en shadow | Extraction du sens par disposition, de la portée (plein droit / individuel), de la nature de la source (ODJ / PV), de l'effet sur les unités ; prédicat C côté serveur en parallèle de B | Précision / rappel de C contre B | L | O1, D7 ; rafraîchissement stable (#703) |
 | **C2** — comparaison et bascule | Diff B → C nommé ; parité API / rail / carte / panneau ; bascule si le seuil D13 est franchi | Décision de Farid sur mesure | S | C1, D12, D13 |
 | **L7** — organisation #760 | Archiver, classer, lier, épingler hors période ; alertes seulement sur événement fiable | États durables et réversibles | N-A | maquette Steve/Mathieu, #703 |
 
-Première valeur livrable : **B0 + L1 + L2 + U1**. O1 avance en parallèle de U1 une fois sources et ancres stabilisées. Les tailles S/M/L sont des appréciations, pas des charges mesurées.
+Lots immo ; les lots génériques G-L0 à G-L4 sont au §9.5. Première valeur livrable : **B0 + L1 + L2 + U1**. O1 avance en parallèle de U1 une fois sources et ancres stabilisées. Les tailles S/M/L sont des appréciations, pas des charges mesurées.
 
-**Parcours U1 depuis un signal.** Un badge « Retour de Steve » ouvre une section du panneau : classement original, code et sens ; analyse, niveau de preuve, suite proposée, recommandation ; fichier, feuille, numéro, ligne, révision ; état du rattachement et autres objets de la même ligne ; adjudication C distincte de la source le moment venu ; réponses des utilisateurs sous la restitution, sans édition du retour importé.
+**Parcours U1 depuis un signal.** Un badge « Retour de Steve » ouvre la section « Retour du relevé de Steve » du panneau : bloc « Décision de Steve » (classement original, code, sens, passe) ; bloc « Texte de l'assistant du triage » (analyse, niveau de preuve, suite proposée, recommandation) ; fichier, feuille, numéro, ligne, révision ; état du rattachement et autres objets de la même ligne ; adjudication C distincte de la source le moment venu ; aucune édition du retour importé. Les réponses libres relèvent du futur fil de commentaires (D4), hors U1 ; la validation et la contestation sont livrées en U2.
 
 **Compteurs.** Un retour publié sur plusieurs objets ne compte qu'une fois dans le total d'import. Afficher séparément nombre de retours, nombre d'entités annotées et nombre de rattachements à confirmer. Les compteurs d'annotations ne changent pas le nombre de signaux des vues.
 
@@ -1243,16 +1266,16 @@ La scène ci-dessous montre l'architecture de l'import à l'affichage : utilisat
 
 ### 10.1 Ordre de décision et lecture des fiches
 
-**Ordre de décision.** Fabien décide d’abord les huit décisions génériques G1 à G8 (convergence sentropic + engram, §9.5 ; fiches en annexe II), puis ses huit décisions immo (D1, D2, D3, D4, D9, D10, D11, D17) : D1 et D17 sont déjà actées par l’owner (2026-10-04 et 2026-10-05) ; les autres sont prises telles quelles, sauf incohérence avec une autre décision. Farid décide ensuite ses neuf décisions (D5, D6, D7, D8, D12, D13, D14, D15, D16), en connaissant les choix de Fabien. Si un choix de Farid contredit un choix de Fabien (par exemple D1 « tout conserver » avec D2 = (c), une table de contrôle qui n’affiche rien), on revient à Fabien sur ce seul point.
+**Ordre de décision.** Fabien décide d’abord les huit décisions génériques G1 à G8 (convergence sentropic + engram, §9.5 ; fiches en annexe II), puis ses huit décisions immo (D1, D2, D3, D4, D9, D10, D11, D17) : D1 et D17 sont déjà actées par Fabien (owner) les 2026-10-04 et 2026-10-05, ainsi que le volet « usage des 121 lignes » de D10 ; les autres sont à décider par Fabien et ne sont pas rouvertes par Farid, sauf incohérence avec une autre décision. Farid décide ensuite ses neuf décisions (D5, D6, D7, D8, D12, D13, D14, D15, D16), en connaissant les choix de Fabien. Si un choix de Farid contredit un choix de Fabien (par exemple D1 « tout conserver » avec D2 = (c), une table de contrôle qui n’affiche rien), on revient à Fabien sur ce seul point.
 
-Chaque fiche s'ouvre sur une courte introduction (le problème, pourquoi maintenant, ce qui change selon le choix, les renvois au dossier), dit de quelles décisions elle dépend, puis détaille chaque option : ce qui est proposé, ses avantages et ses inconvénients. Les schémas de tables des options de D2 et D3 sont en annexe III.5. Les coûts sont des jugements relatifs de périmètre, pas des estimations d'heures ni de budget (`N-A` jusqu'à l'inventaire des rattachements). Changements du 2026-10-05 : D9 proposée close (fusion dans D10) ; D10 et D13 réécrites ; D17 nouvelle, actée par l'owner.
+Chaque fiche s'ouvre sur une courte introduction (le problème, pourquoi maintenant, ce qui change selon le choix, les renvois au dossier), dit de quelles décisions elle dépend, puis détaille chaque option : ce qui est proposé, ses avantages et ses inconvénients. Les schémas de tables des options de D2 et D3 sont en annexe III.5. Les coûts sont des jugements relatifs de périmètre, pas des estimations d'heures ni de budget (`N-A` jusqu'à l'inventaire des rattachements). Changements du 2026-10-05 : D9, clôture recommandée (fusion dans D10, à décider) ; D10 et D13 réécrites ; D17 nouvelle, actée par Fabien (owner). Les options sont lettrées (a), (b)… dans l’ordre des tableaux, comme au registre (§3.1).
 
 ### 10.2 Étape 1 · Fabien décide d’abord (G1 à G8 en annexe II, puis architecture, données, jeu de référence, contrat d'entrée)
 
 #### D1 — Périmètre de conservation des retours de Steve
-**Étape 1 · Décide : Fabien · Consulté : Farid, Steve, Mathieu.** **Tranchée : actée par l’owner le 2026-10-04, option (b) Tout le classeur et l’analyse, brut immuable.**
+**Étape 1 · Décide : Fabien · Consulté : Farid, Steve, Mathieu.** **Tranchée : actée par Fabien (owner) le 2026-10-04, option (b) Tout le classeur et l’analyse, brut immuable.**
 
-Décision actée par l’owner le 2026-10-04 : on conserve tous les retours de Steve ; c’est sa décision, il en a besoin pour le jeu de référence. Steve a livré un classeur de 7 feuilles (124 lignes de triage, 121 contrôles d’exclusion, 77 constats, 26 règles, 28 codes de motif) et une analyse écrite qui pose ses trois critères (§2, §4.2). Ce choix fixe ce que l’équipe pourra montrer sur les objets du radar et ce que le jeu de référence pourra mesurer (D10). Conséquence pour D2 : « tout conserver » suppose un modèle qui garde toutes les lignes, l’option a (ou b) de D2.
+Décision actée par Fabien (owner) le 2026-10-04 : on conserve tous les retours de Steve ; c’est sa décision, il en a besoin pour le jeu de référence. Steve a livré un classeur de 7 feuilles (124 lignes de triage, 121 contrôles d’exclusion, 77 constats, 26 règles, 28 codes de motif) et une analyse écrite qui pose ses trois critères (§2, §4.2). Ce choix fixe ce que l’équipe pourra montrer sur les objets du radar et ce que le jeu de référence pourra mesurer (D10). Conséquence pour D2 : « tout conserver » suppose un modèle qui garde toutes les lignes, l’option a (ou b) de D2.
 
 **Dépend de :** aucune décision antérieure. **Conditionne :** D2 (Modèle de données immo : adoption du générique).
 
@@ -1262,19 +1285,19 @@ Décision actée par l’owner le 2026-10-04 : on conserve tous les retours de S
 | **(b) Tout le classeur et l’analyse, brut immuable** (recommandée) | On importe les 7 feuilles et l’analyse du 21 septembre, sans rien modifier : 124 lignes de triage, 121 contrôles d’exclusion, 77 constats, 26 règles, 28 codes, et la Synthèse avec ses formules et leurs valeurs mémorisées. L’analyse est conservée à part, comme annotation distincte. | • Aucune perte : chaque cellule, formule et valeur mémorisée.<br>• Le jeu de référence (D10) dispose des exclusions et des règles.<br>• Les 52 villes suivantes s’importeront de la même façon. | • Plus de tables et de curation (rattachements à vérifier).<br>• Import un peu plus long à écrire et à recetter. |
 | (c) Notes libres seules | Chaque ligne devient une note de texte libre sur une ville ou un signal, dans l’UI des notes actuelle. Le classement, le motif et le sens ne sont plus des champs : ils sont dans le texte. | • Surface existante : les notes des lots et des signaux.<br>• Aucun schéma nouveau : livrable vite. | • Perd la structure (classement, motif, sens), les groupes et la provenance.<br>• Inutilisable pour le jeu de référence ; une note est limitée à 10 000 caractères. |
 
-**Recommandation : (b) Tout le classeur et l’analyse, brut immuable.** Tranchée : (b), tout conserver, actée par l’owner le 2026-10-04 ; les options a et c restent affichées pour mémoire.
+**Recommandation : (b) Tout le classeur et l’analyse, brut immuable.** Tranchée : (b), tout conserver, actée par Fabien (owner) le 2026-10-04 ; les options a et c restent affichées pour mémoire.
 
 #### D2 — Modèle de données immo : adoption du générique
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+**Étape 1 · Décide : Fabien · Consulté : Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1).
 
 La convergence sentropic + engram (G2, G7) attribue les annotations, révisions et validations à un paquet générique, @sentropic/annotations, et le jeu de référence à engram ; elle recommande qu’immo ne construise pas ses propres tables. Il reste à décider comment immo s’y inscrit : en premier adoptant, qui apporte un profil (schéma d’étiquettes : verdicts, 28 motifs, critères, sens) et ses données (graphe, documents, rattachements geo, classeur de Steve), ou en construisant d’abord six tables à lui. L’état initial et l’état proposé, objet par objet et par propriétaire, sont à l’annexe III et au §9.2 ; les besoins de Steve au §9.1. L’import (L1), l’affichage (U1, U2) et le jeu de référence C (O1) en dépendent.
 
-**Dépend de :** D1 (Périmètre de conservation des retours de Steve), G2 (Porteurs et forme de l’annotation), G7 (Séquencement, tables immo et pilote C). **Conditionne :** D3 (Ancre signal et correctif B0), D4 (Conformité sentropic et suppression), D9 (Sens de « double annotation » (proposée close)), D10 (Jeu de référence #783), D5 (Auteur des retours importés).
+**Dépend de :** D1 (Périmètre de conservation des retours de Steve), G2 (Porteurs et forme de l’annotation), G7 (Séquencement, tables immo et pilote C). **Conditionne :** D3 (Ancre signal et correctif B0), D4 (Conformité sentropic et suppression), D9 (Sens de « double annotation » (clôture recommandée)), D10 (Jeu de référence #783), D5 (Auteur des retours importés).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **(a) Adopter le générique : immo = profil + données** (recommandée) | Immo ne crée aucune table d’annotation. Il écrit son profil de domaine (schéma d’étiquettes : verdict Pertinent / À surveiller / Non pertinent, 28 motifs reliés aux critères K1 à K9 et aux exclusions, sens, règle de promotion D13) et branche @sentropic/annotations sur son Postgres et son S3 : le classeur de Steve est importé une fois, Steve annote et l’équipe valide dans l’application, chaque révision est immuable et liée à son hash. Les annotations validées partent, en instantané haché, vers un jeu de référence engram. | • Aucune table d’annotation propre à immo : pas de migration ultérieure.<br>• Les besoins de Steve servent de recette au paquet générique, sur le PG et le S3 d’immo.<br>• Mêmes règles de version, de validation et de jeu de référence que les autres domaines (BPMN). | • Dépend du calendrier de @sentropic/annotations (L2) et d’engram (L0, L1).<br>• Un profil de domaine à écrire et à faire valider (schéma d’étiquettes, règle D13). |
-| (b) Six tables immo, puis migration | Immo construit d’abord les six tables de la version précédente du dossier (retours_fichiers, annotations, validations, motifs, annotation_cibles, reference_set_versions), les utilise, puis les migre vers @sentropic/annotations et engram quand ils seront prêts : annotations → annotation_revisions, validations → annotation_validations, annotation_cibles → annotation_targets, motifs → profil, reference_set_versions → ReferenceSetVersion. | • Livrable sans attendre le générique.<br>• Modèle déjà décrit et testé dans les versions précédentes du dossier. | • Réimplémentation que la convergence interdit (« prevent each new app … from inventing a private model »).<br>• Migration vers @sentropic/annotations à faire ensuite, avec reprise des données.<br>• Deux modèles à maintenir pendant la transition. |
+| **(a) Adopter le générique : immo = profil + données** (recommandée) | Immo ne crée aucune table d’annotation. Il écrit son profil de domaine (schéma d’étiquettes : verdict Pertinent / À surveiller / Non pertinent, 28 motifs reliés aux critères K1 à K9 et aux exclusions, sens, règle de promotion D13) et branche @sentropic/annotations sur son Postgres et son S3 : le classeur de Steve est importé une fois, Steve annote et l’équipe valide dans l’application, chaque révision est immuable et liée à son hash. Les annotations validées partent, en instantané haché, vers un jeu de référence engram. | • Aucune table d’annotation propre à immo : pas de migration ultérieure.<br>• Les besoins de Steve servent de recette au paquet générique, sur le PG et le S3 d’immo.<br>• Mêmes règles de version, de validation et de jeu de référence que les autres domaines (BPMN). | • Dépend du calendrier de @sentropic/annotations (G-L2) et d’engram (G-L0, G-L1).<br>• Un profil de domaine à écrire et à faire valider (schéma d’étiquettes, règle D13). |
+| (b) Six tables immo, puis migration | Immo construit d’abord les six tables de la version précédente du dossier (retours_fichiers, annotations, validations, motifs, annotation_cibles, reference_set_versions), les utilise, puis les migre vers @sentropic/annotations et engram quand ils seront prêts : annotations → annotation_revisions, validations → annotation_validations, annotation_cibles → annotation_targets, motifs → profil, reference_set_versions → ReferenceSetVersion. | • Livrable sans attendre le générique.<br>• Modèle déjà décrit et testé dans les versions précédentes du dossier. | • Réimplémentation que la convergence déconseille (« prevent each new app … from inventing a private model »).<br>• Migration vers @sentropic/annotations à faire ensuite, avec reprise des données.<br>• Deux modèles à maintenir pendant la transition. |
 | (c) Table de contrôle seule (jeu de référence) | On crée une seule table de contrôle qui recopie le classeur pour mesurer le radar, sans aucun lien vers ce qui est affiché. Le nom de table est indicatif. Rien n’apparaît dans le panneau du signal : Steve ne retrouve pas son verdict sur le signal qu’il a trié ; seul le jeu de référence lit la table. | • Rapide : une table.<br>• Respecte le précédent du 2026-06-11 : la mesure ne nourrit pas la production. | • Rien d’affichable : ne répond pas à #784 (« attaché à l’élément associé »).<br>• Steve ne peut ni annoter ni valider dans l’application.<br>• Une seconde structure sera nécessaire plus tard. |
 | (d) Attendre le générique sans borne | On ne construit rien côté immo et on attend que @sentropic/annotations et engram soient livrés, sans délai convenu. En attendant, le classeur reste un fichier hors de l’outil et Steve ne peut ni annoter ni valider dans l’application. | • Aucun travail côté immo maintenant.<br>• Aucune dette de transition. | • Steve ne voit rien dans l’outil tant que le paquet n’est pas livré.<br>• Aucun délai : la recette de Steve n’est pas planifiée. |
 
@@ -1283,15 +1306,15 @@ La convergence sentropic + engram (G2, G7) attribue les annotations, révisions 
 Schéma de table par option : annexe III.5.
 
 #### D3 — Ancre signal et correctif B0
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+**Étape 1 · Décide : Fabien · Consulté : Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1).
 
-Une ancre est la référence qui attache une annotation à un objet du radar (signal, ville, zone, lot…) ; c’est une ligne de la table annotation_cibles (ville + id texte, §9.2). Aujourd’hui l’annotation d’un signal est cassée : l’UI envoie l’identifiant texte du graphe (« signal-… »), alors que l’API exige un UUID, identifiant aléatoire de l’ancienne table signals que plus aucun code n’alimente (§9.3, défaut 1). « B0 » est le petit lot correctif qui répare cela (§9.6). Sans ancre fiable, aucun retour de Steve ne s’affiche sur son signal. Risque connu : une ré-extraction du graphe peut supprimer ou renommer des identifiants (graph-store.ts, annexe III).
+Une ancre est la référence qui attache une annotation à un objet du radar (signal, ville, zone, lot…) ; c’est une ligne de la table annotation_targets (ville + id texte, §9.2). Aujourd’hui l’annotation d’un signal est cassée : l’UI envoie l’identifiant texte du graphe (« signal-… »), alors que l’API exige un UUID, identifiant aléatoire de l’ancienne table signals que plus aucun code n’alimente (§9.3, défaut 1). « B0 » est le petit lot correctif qui répare cela (§9.6). Sans ancre fiable, aucun retour de Steve ne s’affiche sur son signal. Risque connu : une ré-extraction du graphe peut supprimer ou renommer des identifiants (graph-store.ts, annexe III).
 
 **Dépend de :** G2 (Porteurs et forme de l’annotation), D2 (Modèle de données immo : adoption du générique). **Conditionne :** D14 (Première livraison UI), D15 (Séquencement).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **(a) Clé texte namespacée + instantané observé, B0 immédiat** (recommandée) | On stocke la cible sous forme de texte (« radar.signal:<ville>:<id> ») dans annotation_cibles (ville + id texte du graphe), sans clé étrangère vers le graphe, avec un instantané de ce que Steve a vu (ville, date, type, verbatim). B0 corrige l’API pour accepter cet identifiant texte. Si une ré-extraction supprime le signal, l’ancre passe « disparue » et le panneau montre l’instantané au lieu de perdre le retour. | • Survit à la ré-extraction : l’ancre passe « disparue » au lieu d’effacer l’annotation, et l’instantané observé (ville, date, type, verbatim) reste lisible.<br>• Répare tout de suite l’annotation existante (B0, taille S).<br>• Aucune clé étrangère vers le graphe, donc aucune suppression en cascade. | • Si l’extraction renomme un identifiant, un rapprochement est nécessaire (file de revue).<br>• La clé texte n’est pas une identité métier définitive. |
+| **(a) Clé texte namespacée + instantané observé, B0 immédiat** (recommandée) | On stocke la cible sous forme de texte (« radar.signal:<ville>:<id> ») dans annotation_targets (ville + id texte du graphe), sans clé étrangère vers le graphe, avec un instantané de ce que Steve a vu (ville, date, type, verbatim). B0 corrige l’API pour accepter cet identifiant texte. Si une ré-extraction supprime le signal, l’ancre passe « disparue » et le panneau montre l’instantané au lieu de perdre le retour. | • Survit à la ré-extraction : l’ancre passe « disparue » au lieu d’effacer l’annotation, et l’instantané observé (ville, date, type, verbatim) reste lisible.<br>• Répare tout de suite l’annotation existante (B0, taille S).<br>• Aucune clé étrangère vers le graphe, donc aucune suppression en cascade. | • Si l’extraction renomme un identifiant, un rapprochement est nécessaire (file de revue).<br>• La clé texte n’est pas une identité métier définitive. |
 | (b) Attendre une clé métier stable | On n’ancre rien tant qu’une clé métier stable (dossier réglementaire, étape) n’existe pas dans une ontologie du radar. Aucun lot B0 : l’annotation de signal reste en échec 400 et les retours de Steve ne s’affichent sur aucun signal. | • Identité propre et stable par conception.<br>• Évite plus tard tout rapprochement d’identifiants. | • Dépend d’une ontologie qui n’existe pas : bloquant, sans date.<br>• L’annotation de signal reste cassée en attendant. |
 | (c) Passer par l’UUID signals | On garde le contrat v1 : une annotation de signal pointe vers l’UUID de la table signals. Mais aucun code de main n’écrit dans signals : il n’existe aucun UUID à viser pour les 124 lignes de Steve. L’ancre ne peut pas être créée. | • Contrat v1 (migration 0011) inchangé.<br>• Aucune nouvelle colonne d’ancre à créer. | • Aucune insertion dans signals sur main : l’ancre est impossible en pratique.<br>• Maintient le défaut actuel (refus 400 attendu). |
 
@@ -1300,22 +1323,22 @@ Une ancre est la référence qui attache une annotation à un objet du radar (si
 Schéma de table par option : annexe III.5.
 
 #### D4 — Conformité sentropic et suppression
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+**Étape 1 · Décide : Fabien · Consulté : Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1).
 
-Modifiée par G2 et G3 : les annotations de Steve passent par @sentropic/annotations (révisions immuables, tombstone) ; D4 ne porte plus que sur les commentaires de l’équipe et la conformité de lecture. Les annotations doivent suivre le contrat du module comments de sentropic, la plateforme commune (exigence E3, §9.3). Ce module, en version 0.2.0, supprime physiquement un commentaire ; or l’owner a décidé (O1, dossier COLLAB) qu’une suppression laisse une trace (« tombstone ») et une durée de rétention. Il faut décider comment être conforme sans contredire O1, avant l’import (L1) et l’API de lecture (L2). Concrètement : peut-on supprimer un retour de Steve, et par quel chemin ?
+Modifiée par G2 et G3 : les annotations de Steve passent par @sentropic/annotations (révisions immuables, tombstone) ; D4 ne porte plus que sur les commentaires de l’équipe et la conformité de lecture. Les commentaires de l’équipe doivent suivre le contrat du module comments de sentropic, la plateforme commune (exigence E3, §9.3). Ce module, en version 0.2.0, supprime physiquement un commentaire ; or l’owner a décidé (O1, dossier COLLAB) qu’une suppression laisse une trace (« tombstone ») et une durée de rétention. Il faut décider comment être conforme sans contredire O1, avant l’import (L1) et l’API de lecture (L2). Concrètement : peut-on supprimer un commentaire de l’équipe, et par quel chemin ?
 
 **Dépend de :** G2 (Porteurs et forme de l’annotation), G3 (Sémantique de version et effacement), D2 (Modèle de données immo : adoption du générique). **Conditionne :** D5 (Auteur des retours importés), D6 (Visibilité et données personnelles), D14 (Première livraison UI).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **(a) Cibles et lecture conformes, import immuable, demande de tombstone** (recommandée) | Les annotations utilisent les cibles et la lecture du module comments, sans modifier le paquet. Les retours importés sont immuables : aucun bouton de suppression. Les validations et contestations vivent dans les tables du radar (validations) ; un fil de commentaires sentropic pourra s’ajouter avec le port complet. On demande à sentropic une version avec tombstone, puis on adopte le port complet. | • Respecte O1 et la ligne COLLAB « le paquet porte l’intégrité ».<br>• Livrable maintenant : cibles et lecture conformes, sans modifier le paquet.<br>• Premier lot en lecture seule : aucune suppression à gérer tant que le paquet n’a pas de tombstone. | • Conformité partielle : pas encore le port complet CommentStore.<br>• Une demande à sentropic (tombstone) à suivre.<br>• Une migration vers le port complet plus tard. |
-| (b) Adaptateur CommentStore à tombstone hôte | On écrit un adaptateur CommentStore côté radar dont le delete pose une marque (tombstone) au lieu d’effacer. Les retours et réponses passent tout de suite par le port complet. Mais le delete du port ne supprime plus vraiment : sa sémantique diffère de celle du paquet. | • Port complet utilisé dès maintenant.<br>• Un seul chemin d’écriture et de lecture : celui du port. | • Contredit COLLAB §2 : un tombstone porté seulement par Radar est un piège.<br>• Un delete qui ne supprime pas trahit la sémantique du port.<br>• Dette à défaire quand sentropic livrera. |
-| (c) Attendre le port complet | On attend que sentropic publie un paquet avec tombstone et rétention, puis on branche tout dessus. Aucun retour de Steve n’est affiché avant cette version, sans date connue. | • Conformité intégrale, aucun écart.<br>• Aucune migration ultérieure vers le port complet. | • Bloquant tant que sentropic n’a pas livré, sans date.<br>• Rien d’affiché pour Steve en attendant. |
+| **(a) Cibles et lecture conformes, import immuable, demande de tombstone** (recommandée) | Les commentaires de l’équipe utilisent les cibles et la lecture du module comments, sans modifier le paquet. Les retours importés sont immuables : aucun bouton de suppression. Les annotations, révisions et validations relèvent de G2, G3 et D2 (annotation_validations du paquet), pas de D4 ; un fil de commentaires sentropic pourra s’ajouter avec le port complet. On demande à sentropic une version avec tombstone, puis on adopte le port complet. | • Respecte O1 et la ligne COLLAB « le paquet porte l’intégrité ».<br>• Livrable maintenant : cibles et lecture conformes, sans modifier le paquet.<br>• Premier lot en lecture seule : aucune suppression à gérer tant que le paquet n’a pas de tombstone. | • Conformité partielle : pas encore le port complet CommentStore.<br>• Une demande à sentropic (tombstone) à suivre.<br>• Une migration vers le port complet plus tard. |
+| (b) Adaptateur CommentStore à tombstone hôte | On écrit un adaptateur CommentStore côté radar dont le delete pose une marque (tombstone) au lieu d’effacer. Les commentaires de l’équipe passent tout de suite par le port complet. Mais le delete du port ne supprime plus vraiment : sa sémantique diffère de celle du paquet. | • Port complet utilisé dès maintenant.<br>• Un seul chemin d’écriture et de lecture : celui du port. | • Contredit COLLAB §2 : un tombstone porté seulement par Radar est un piège.<br>• Un delete qui ne supprime pas trahit la sémantique du port.<br>• Dette à défaire quand sentropic livrera. |
+| (c) Attendre le port complet | On attend que sentropic publie un paquet avec tombstone et rétention, puis on branche tout dessus. Aucun commentaire de l’équipe n’est ouvert avant cette version, sans date connue. | • Conformité intégrale, aucun écart.<br>• Aucune migration ultérieure vers le port complet. | • Bloquant tant que sentropic n’a pas livré, sans date.<br>• Aucun fil de commentaires pour l’équipe en attendant. |
 
 **Recommandation : (a) Cibles et lecture conformes, import immuable, demande de tombstone.** (a), puis adoption du port complet quand sentropic publiera la version avec tombstone. Réserve : le dossier COLLAB n’est pas sur main (non vérifié) ; s’il était abandonné, (b) redeviendrait défendable.
 
-#### D9 — Sens de « double annotation » (proposée close)
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision. **Proposée close (fusion dans D10).**
+#### D9 — Sens de « double annotation » (clôture recommandée)
+**Étape 1 · Décide : Fabien · Consulté : Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1). **Clôture recommandée (fusion dans D10), à décider.**
 
 La demande initiale parle de « double annotation (ancienne / nouvelle) » sans dire ce qui est comparé à quoi. La revue du plan (annexe IV) a retenu une lecture : la provenance par champ, où chaque étiquette du jeu de référence C v2 garde sa source (steve_v1, steve_v2a, steve_v2, steve_test, annotations IA individuelles, majorité IA) (§4.9). Les trois lectures initiales restent mesurables dans ce schéma, et D10 fixe déjà l’usage de chaque provenance. La proposition est de clore D9 en la fusionnant dans D10.
 
@@ -1323,30 +1346,30 @@ La demande initiale parle de « double annotation (ancienne / nouvelle) » sans 
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| Steve contre classification radar | Le jeu « steve-source » (verdict de Steve) est comparé à la classification du radar : B′ reconstituée à la date du relevé, puis C. Exemple : sur la passe 1, Steve juge 24 signaux sur 73 Non pertinent alors que B les affiche ; c’est cet écart que l’on mesure ligne par ligne. | • Mesure directement l’écart entre ce que Steve juge et ce que le radar montre (B aujourd’hui, C demain).<br>• C’est la lecture qui sert la bascule B → C (D13). | • La classification serveur de septembre n’est pas archivée : la version radar sera reconstituée, en partie.<br>• Ne mesure pas l’accord entre deux humains. |
-| Ancienne grille de Steve contre grille C | On compare deux grilles humaines de Steve : son classement actuel (P/S/N, motif) et un nouvel étiquetage selon les critères C. Steve repasse sur les mêmes lignes ; le jeu de référence mesure l’évolution de ses critères, pas le radar. | • Suit l’évolution des critères de Steve dans le temps.<br>• Utile si Steve réétiquette ses lignes avec les critères C. | • Exige un second passage de Steve sur les mêmes lignes.<br>• Ne dit rien de la qualité du radar. |
-| Jeu de référence 676 contre jeu de référence Steve | On rapproche le jeu de référence d’extraction (676 unités sur 100 procès-verbaux) et le jeu de référence de Steve (124 lignes). Le pont passe par les documents communs, probablement peu nombreux (non vérifié). | • Relie l’extraction (jeu de référence E) et le ciblage (jeu de référence C).<br>• Réutilise deux références déjà constituées (674/676 et le tableur). | • Compare deux questions différentes : « a-t-on extrait l’acte ? » contre « fallait-il le montrer ? ».<br>• Recouvrement des deux corpus probablement faible (non vérifié). |
-| **(4) Clore D9 : provenance par champ, portée par D10** (recommandée) | D9 n’est plus une décision séparée : le jeu de référence C v2 garde, pour chaque champ, la provenance de son étiquette (steve_v1 historique, steve_v2a réannotation sans arguments IA, steve_v2 adjudication, steve_test, annotations IA individuelles et majorité IA). La « double annotation » devient une propriété du manifeste, décidée avec D10. | • Une seule décision (D10) fixe le jeu de référence et l’usage de chaque provenance.<br>• Les trois lectures restent mesurables : chaque étiquette garde sa source (label_provenance, versions de Steve). | • Le terme « double annotation » de la demande initiale sort du registre.<br>• Suppose que D10 soit tranchée avec la provenance par champ explicite. |
+| (a) Steve contre classification radar | Le jeu « steve-source » (verdict de Steve) est comparé à la classification du radar : B′ reconstituée à la date du relevé, puis C. Exemple : sur la passe 1, Steve juge 24 signaux sur 73 Non pertinent alors que B les affiche ; c’est cet écart que l’on mesure ligne par ligne. | • Mesure directement l’écart entre ce que Steve juge et ce que le radar montre (B aujourd’hui, C demain).<br>• C’est la lecture qui sert la bascule B → C (D13). | • La classification serveur de septembre n’est pas archivée : la version radar sera reconstituée, en partie.<br>• Ne mesure pas l’accord entre deux humains. |
+| (b) Ancienne grille de Steve contre grille C | On compare deux grilles humaines de Steve : son classement actuel (P/S/N, motif) et un nouvel étiquetage selon les critères C. Steve repasse sur les mêmes lignes ; le jeu de référence mesure l’évolution de ses critères, pas le radar. | • Suit l’évolution des critères de Steve dans le temps.<br>• Utile si Steve réétiquette ses lignes avec les critères C. | • Exige un second passage de Steve sur les mêmes lignes.<br>• Ne dit rien de la qualité du radar. |
+| (c) Jeu de référence 676 contre jeu de référence Steve | On rapproche le jeu de référence d’extraction (676 unités sur 100 procès-verbaux) et le jeu de référence de Steve (124 lignes). Le pont passe par les documents communs, probablement peu nombreux (non vérifié). | • Relie l’extraction (jeu de référence E) et le ciblage (jeu de référence C).<br>• Réutilise deux références déjà constituées (674/676 et le tableur). | • Compare deux questions différentes : « a-t-on extrait l’acte ? » contre « fallait-il le montrer ? ».<br>• Recouvrement des deux corpus probablement faible (non vérifié). |
+| **(d) Clore D9 : provenance par champ, portée par D10** (recommandée) | D9 n’est plus une décision séparée : le jeu de référence C v2 garde, pour chaque champ, la provenance de son étiquette (steve_v1 historique, steve_v2a réannotation sans arguments IA, steve_v2 adjudication, steve_test, annotations IA individuelles et majorité IA). La « double annotation » devient une propriété du manifeste, décidée avec D10. | • Une seule décision (D10) fixe le jeu de référence et l’usage de chaque provenance.<br>• Les trois lectures restent mesurables : chaque étiquette garde sa source (label_provenance, versions de Steve). | • Le terme « double annotation » de la demande initiale sort du registre.<br>• Suppose que D10 soit tranchée avec la provenance par champ explicite. |
 
-**Recommandation : (4) Clore D9 : provenance par champ, portée par D10.** (4) : clore D9. La provenance par champ couvre les trois lectures (Steve contre radar avec B′ recalculé, ancienne contre nouvelle annotation de Steve, rapprochement E / C) ; le sujet est porté par D10.
+**Recommandation : (d) Clore D9 : provenance par champ, portée par D10.** (d) : clore D9. La provenance par champ couvre les trois lectures (Steve contre radar avec B′ recalculé, ancienne contre nouvelle annotation de Steve, rapprochement E / C) ; le sujet est porté par D10.
 
 #### D10 — Jeu de référence #783
-**Étape 1 · Décide : Fabien · Consulté : Steve, Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+**Étape 1 · Décide : Fabien · Consulté : Steve, Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1).
 
-Les 121 lignes retenues du relevé (51 villes) sont exposées : le pilote C v0 les a consommées et l’analyse d’écart les a lues avec toutes les colonnes de Steve (§4.1). Elles ne peuvent donc pas fonder seules un test confirmatoire, quel que soit le découpage. L’arbitrage de l’owner du 2026-10-05 leur donne deux usages : la mise au point des règles et des tags avec les 3 IA, et un découpage homogène par ville en train et test aveugle pour les premiers prompts, aux résultats exploratoires (ch. 6). L’extension à de nouvelles villes attend la clarification des 31 désaccords avec Steve (avant R′ v1, §4.6) ; la mesure qui fonde D13 exige un test neuf (ch. 7).
+Les 121 lignes retenues du relevé (51 villes) sont exposées : le pilote C v0 les a consommées et l’analyse d’écart les a lues avec toutes les colonnes de Steve (§4.1). Elles ne peuvent donc pas fonder seules un test confirmatoire, quel que soit le découpage. L’arbitrage de Fabien (owner) du 2026-10-05 leur donne deux usages : la mise au point des règles et des tags avec les 3 IA, et un découpage homogène par ville en train et test aveugle exploratoire pour les premiers prompts (ch. 6). L’extension à de nouvelles villes attend la clarification avec Steve des points listés au §4.8 (blocs A, B et D ; 28 points à clarifier après R′ v1, §4.6) ; la mesure qui fonde D13 exige un test neuf (ch. 7).
 
-**Dépend de :** G1 (Terminologie et provenance du jeu de référence), G5 (Scellement et stockage des jeux de référence), G7 (Séquencement, tables immo et pilote C), D2 (Modèle de données immo : adoption du générique), D9 (Sens de « double annotation » (proposée close)). **Conditionne :** D11 (Benchmark #782), D17 (Contrat d’entrée : données de la ville à la date du signal), D7 (Définition de C v1), D8 (Cas contradictoires (Saint-Victor, Amos, CPTAQ, seconds projets, ODJ, S-RESTRICTIF)), D12 (Exposition A/B/C (point ouvert)), D13 (Seuil de bascule B → C (proposition de l’owner à acter)), D15 (Séquencement).
+**Dépend de :** G1 (Terminologie et provenance du jeu de référence), G5 (Scellement et stockage des jeux de référence), G7 (Séquencement, tables immo et pilote C), D2 (Modèle de données immo : adoption du générique), D9 (Sens de « double annotation » (clôture recommandée)). **Conditionne :** D11 (Benchmark #782), D17 (Contrat d’entrée : données de la ville à la date du signal), D7 (Définition de C v1), D8 (Cas contradictoires (Saint-Victor, Amos, CPTAQ, seconds projets, ODJ, S-RESTRICTIF)), D12 (Exposition A/B/C (point ouvert)), D13 (Seuil de bascule B → C (proposition de l’owner à acter)), D15 (Séquencement).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| Lecture littérale : la moitié des 121 lignes en test | Les 121 lignes sont redécoupées par ville, une moitié servant de test aveugle pour toute la suite, sans annotation neuve. Les résultats portent les mentions exploratory, pilot-exposed et test-informed-schema : les tags, consignes et propositions de règle dérivent déjà de ces lignes, et aucune mesure n’est admissible pour D13. | • Aucune annotation neuve demandée à Steve.<br>• Résultats disponibles tôt, sur des données déjà relues. | • Aucune mesure admissible pour D13 : le test est exposé.<br>• Écartée par les 3 relecteurs de la revue du plan (annexe IV, A1). |
-| **121 lignes en mise au point et en découpage exploratoire, test confirmatoire neuf** (recommandée) | Les 121 lignes servent à la mise au point des règles (R′) et des tags avec les 3 IA ; elles sont aussi découpées de façon homogène par ville (stratifié au moins sur Passe × Classement, puis sur les tags) en train et test aveugle pour les premiers prompts, aux résultats exploratoires. L’extension à de nouvelles villes vient après la clarification des désaccords avec Steve. Le test confirmatoire est un échantillon neuf de villes hors registre d’exposition, annoté par Steve et, sur au moins 50 cas, par un second annotateur humain. | • Toutes les lignes de Steve servent : règles, tags, premiers prompts.<br>• Seule voie vers une mesure admissible pour D13 (test neuf, scellé selon G5 b).<br>• Fiabilité de la référence mesurée par un second annotateur humain. | • Annotation neuve par Steve : volume unknown tant que la faisabilité n’est pas chiffrée (annexe I).<br>• Second annotateur humain : ressource unknown à ce jour. |
-| Campagne C entièrement nouvelle | On lance une campagne d’annotation neuve, conçue pour le ciblage C, sur un nouveau corpus. Les 124 lignes de Steve servent seulement d’exemples ; la comparaison avec l’historique se fait à part. | • Conçue pour le besoin réel, sans biais d’affichage.<br>• Peut couvrir d’emblée les 52 villes restantes avec la méthode C. | • Comparaison moins directe avec l’historique.<br>• Repart de zéro : délai et coût d’annotation les plus élevés. |
+| (a) Lecture littérale : la moitié des 121 lignes en test | Les 121 lignes sont redécoupées par ville, une moitié servant de test aveugle pour toute la suite, sans annotation neuve. Les résultats portent les mentions exploratory, pilot-exposed et test-informed-schema : les tags, consignes et propositions de règle dérivent déjà de ces lignes, et aucune mesure n’est admissible pour D13. | • Aucune annotation neuve demandée à Steve.<br>• Résultats disponibles tôt, sur des données déjà relues. | • Aucune mesure admissible pour D13 : le test est exposé.<br>• Écartée par les 3 relecteurs de la revue du plan (annexe IV, A1). |
+| **(b) 121 lignes en mise au point et en découpage exploratoire, test confirmatoire neuf** (recommandée) | Les 121 lignes servent à la mise au point des règles (R′) et des tags avec les 3 IA ; elles sont aussi découpées de façon homogène par ville (stratifié au moins sur Passe × Classement, puis sur les tags) en train et test aveugle exploratoire pour les premiers prompts. L’extension à de nouvelles villes vient après la clarification avec Steve des points listés au §4.8. Le test confirmatoire est un échantillon neuf de villes hors registre d’exposition, annoté par Steve et, sur au moins 50 cas, par un second annotateur humain. | • Toutes les lignes de Steve servent : règles, tags, premiers prompts.<br>• Seule voie vers une mesure admissible pour D13 (test neuf, scellé selon G5 b).<br>• Fiabilité de la référence mesurée par un second annotateur humain. | • Annotation neuve par Steve : volume unknown tant que la faisabilité n’est pas chiffrée (annexe I).<br>• Second annotateur humain : ressource unknown à ce jour. |
+| (c) Campagne C entièrement nouvelle | On lance une campagne d’annotation neuve, conçue pour le ciblage C, sur un nouveau corpus. Les 124 lignes de Steve servent seulement d’exemples ; la comparaison avec l’historique se fait à part. | • Conçue pour le besoin réel, sans biais d’affichage.<br>• Peut couvrir d’emblée les 52 villes restantes avec la méthode C. | • Comparaison moins directe avec l’historique.<br>• Repart de zéro : délai et coût d’annotation les plus élevés. |
 
-**Recommandation : 121 lignes en mise au point et en découpage exploratoire, test confirmatoire neuf.** (b) : seule option qui utilise toutes les lignes de Steve pour la mise au point tout en gardant une mesure admissible pour D13. Les résultats sur les 121 lignes restent exploratoires ; le test neuf est annoté par Steve et, sur au moins 50 cas, par un second annotateur humain (ressource unknown). Le jeu E (extraction) reste séparé et inchangé.
+**Recommandation : (b) 121 lignes en mise au point et en découpage exploratoire, test confirmatoire neuf.** (b) : seule option qui utilise toutes les lignes de Steve pour la mise au point tout en gardant une mesure admissible pour D13. Les résultats sur les 121 lignes restent exploratoires ; le test neuf est annoté par Steve et, sur au moins 50 cas, par un second annotateur humain (ressource unknown). Le jeu E (extraction) reste séparé et inchangé. À arbitrer avec D13 et G4 : sans second annotateur, le résultat porte la mention single-human-annotator et peut être publié ; son admissibilité pour une bascule, alors que G4 (a) exige une référence human_adjudicated pour toute promotion, reste à décider.
 
 #### D11 — Benchmark #782
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+**Étape 1 · Décide : Fabien · Consulté : Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1).
 
 Le benchmark #782 compare des modèles et des réglages sur un même jeu de référence. Si on y ajoute la mesure du ciblage (B, puis C), il faut décider si elle rejoint les métriques d’extraction ou forme un volet à part (§8.2). Le choix fixe aussi le sort du prompt d’extraction gelé (immo-pv-extraction-v9) : lui faire produire sens, effet et portée romprait la comparabilité des campagnes v10 et v11. Ce que verra Farid : un tableau unique, ou deux tableaux qui ne se mélangent pas.
 
@@ -1354,30 +1377,30 @@ Le benchmark #782 compare des modèles et des réglages sur un même jeu de réf
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **Volet ciblage séparé** (recommandée) | Le rapport du benchmark #782 garde son tableau d’extraction inchangé et ajoute un tableau « ciblage » : précision et rappel de l’historique, de B, puis de C, sur le jeu de référence C. Le prompt gelé immo-pv-extraction-v9 n’est pas modifié ; l’enrichir serait une nouvelle version, décidée à part. | • Extraction et ciblage restent comparables chacun dans le temps.<br>• Colonnes historique, B et C distinctes : l’effet de C se lit directement.<br>• Tout changement du contrat d’extraction devient une nouvelle version, décidée à part. | • Deux tableaux à lire.<br>• Pont entre les deux seulement sur les 100 documents du corpus commun. |
-| Métriques fusionnées | Un seul tableau et un seul score mêlent l’extraction (étape et citation) et le ciblage (fallait-il montrer le signal). | • Un seul tableau, un seul score.<br>• Lecture plus simple pour un public non technique. | • Mélange deux questions différentes : un F1 fusionné ne dit plus rien.<br>• Perd la comparabilité avec les campagnes passées. |
+| **(a) Volet ciblage séparé** (recommandée) | Le rapport du benchmark #782 garde son tableau d’extraction inchangé et ajoute un tableau « ciblage » : précision et rappel de l’historique, de B, puis de C, sur le jeu de référence C. Le prompt gelé immo-pv-extraction-v9 n’est pas modifié ; l’enrichir serait une nouvelle version, décidée à part. | • Extraction et ciblage restent comparables chacun dans le temps.<br>• Colonnes historique, B et C distinctes : l’effet de C se lit directement.<br>• Tout changement du contrat d’extraction devient une nouvelle version, décidée à part. | • Deux tableaux à lire.<br>• Pont entre les deux seulement sur les 100 documents du corpus commun. |
+| (b) Métriques fusionnées | Un seul tableau et un seul score mêlent l’extraction (étape et citation) et le ciblage (fallait-il montrer le signal). | • Un seul tableau, un seul score.<br>• Lecture plus simple pour un public non technique. | • Mélange deux questions différentes : un F1 fusionné ne dit plus rien.<br>• Perd la comparabilité avec les campagnes passées. |
 
-**Recommandation : Volet ciblage séparé.** Volet ciblage séparé : c’est la condition pour comparer B et C sans casser l’historique de l’extraction.
+**Recommandation : (a) Volet ciblage séparé.** (a) : c’est la condition pour comparer B et C sans casser l’historique de l’extraction.
 
 #### D17 — Contrat d’entrée : données de la ville à la date du signal
-**Étape 1 · Décide : Fabien · Consulté : Steve, Farid.** **Tranchée : actée par l’owner le 2026-10-05, option (a) Signal + données de la ville à la date du signal.**
+**Étape 1 · Décide : Fabien · Consulté : Steve, Farid.** **Tranchée : actée par Fabien (owner) le 2026-10-05, option (a) Signal + données de la ville à la date du signal.**
 
-Un modèle évalué ne doit recevoir que ce qui serait disponible en production au moment de la détection. Le classeur montre une fuite : une colonne de l’assistant cite, pour un signal du 2026-04-14, un second projet adopté le 2026-05-05 (§2.4). L’owner a tranché le 2026-10-05 : les données de la ville entrent à la date du signal, rien de postérieur, et les colonnes L à T du classeur (hors P, Q, R) restent hors entrée (§5.3). La décision fixe l’entrée des itérations de prompt (ch. 6) et du test neuf (ch. 7) ; elle précède la ré-annotation (étape 4 du plan).
+Un modèle évalué ne doit recevoir que ce qui serait disponible en production au moment de la détection. Le classeur montre une fuite : une colonne de l’assistant cite, pour un signal du 2026-04-14, un second projet adopté le 2026-05-05 (§4.1). Fabien (owner) a tranché le 2026-10-05 : les données de la ville entrent à la date du signal, rien de postérieur, et restent hors entrée les colonnes L à T du classeur (hors P, Q, R) comme les décisions de Steve en B, P, Q et R (§5.3). La décision fixe l’entrée des itérations de prompt (ch. 6) et du test neuf (ch. 7) ; elle précède la ré-annotation (étape 4 du plan).
 
 **Dépend de :** D10 (Jeu de référence #783).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **(a) Signal + données de la ville à la date du signal** (recommandée) | L’entrée d’un cas est le signal et le contexte d1 de sa ville (autres signaux, métadonnées des documents), reconstruit par une procédure déterministe appliquée à tous les cas et coupé à la date du signal : rien de postérieur. Les colonnes L à T du classeur (textes de l’assistant) et les verdicts, motifs et passes de Steve ne sont jamais en entrée ; d2 reste hors entrée. | • Évaluation réaliste : le modèle voit ce que la production verrait à la détection.<br>• Ferme la fuite temporelle constatée dans les colonnes de l’assistant.<br>• Même règle sur le dev et sur le test neuf. | • Écart possible avec Steve, qui a jugé avec une information postérieure (jusqu’au 21 septembre).<br>• Reconstruction datée du contexte à écrire et à vérifier (sha256 de l’entrée rendue). |
+| **(a) Signal + données de la ville à la date du signal** (recommandée) | L’entrée d’un cas est le signal et le contexte d1 de sa ville (autres signaux, métadonnées des documents), reconstruit par une procédure déterministe appliquée à tous les cas et coupé à la date du signal : rien de postérieur. Les colonnes L à T du classeur (textes de l’assistant, hors P, Q, R) et les décisions de Steve (colonnes B, P, Q et R : passe, sens, classement, code de motif) ne sont jamais en entrée ; d2 reste hors entrée. | • Évaluation réaliste : le modèle voit ce que la production verrait à la détection.<br>• Ferme la fuite temporelle constatée dans les colonnes de l’assistant.<br>• Même règle sur le dev et sur le test neuf. | • Écart possible avec Steve, qui a jugé avec une information postérieure (jusqu’au 21 septembre).<br>• Reconstruction datée du contexte à écrire et à vérifier (sha256 de l’entrée rendue). |
 | (b) Signal + données de la ville à la date de revue de Steve | Le contexte d1 est coupé à la date à laquelle Steve a relu le signal (au plus tard le 21 septembre 2026 pour le relevé), et à la date d’annotation pour le test. L’entrée est plus proche de ce que Steve savait ; l’évaluation devient rétrospective et doit être annoncée comme telle. | • Plus proche de l’information dont Steve disposait.<br>• Moins de cas où Steve juge sur une donnée absente de l’entrée. | • Information postérieure au signal, indisponible en production au moment de la détection.<br>• Résultat rétrospectif : ne mesure pas la détection précoce que Steve demande. |
 | (c) Signal seul | Chaque cas n’est évalué que sur le texte et les métadonnées de son signal, sans autre signal ni document de la ville. C’est la condition la plus simple ; la relation rattache_a et toute règle qui regroupe les étapes d’un même dossier y sont not covered. | • Entrée minimale, sans reconstruction de contexte.<br>• Sert de condition expérimentale secondaire sur le dev. | • Rattachement des étapes d’un même dossier (rattache_a, R-07) non couvert.<br>• Pénalise les cas où Steve s’appuie sur le contexte de la ville (donnée dans immo). |
 
-**Recommandation : (a) Signal + données de la ville à la date du signal.** Tranchée : (a), actée par l’owner le 2026-10-05. L’autre coupure (date de revue de Steve) est publiée en analyse secondaire, comme évaluation rétrospective ; le signal seul reste une condition expérimentale secondaire sur le dev.
+**Recommandation : (a) Signal + données de la ville à la date du signal.** Tranchée : (a), actée par Fabien (owner) le 2026-10-05. L’autre coupure (date de revue de Steve) est publiée en analyse secondaire, comme évaluation rétrospective ; le signal seul reste une condition expérimentale secondaire sur le dev.
 
 ### 10.3 Étape 2 · Farid décide ensuite (produit, affichage, priorités)
 
 #### D5 — Auteur des retours importés
-**Étape 2 · Décide : Farid · Consulté : Steve, Fabien.** Décidée après les décisions de Fabien.
+**Étape 2 · Décide : Farid · Consulté : Steve, Fabien.** À décider par Farid, après les décisions de Fabien.
 
 Steve poursuivra son annotation dans l’application (vision owner, §9.1) : ses retours importés et ses annotations futures doivent porter le même auteur. Aujourd’hui il n’a pas de compte vérifié, et ce n’est pas lui qui lance l’import. Il faut décider qui est affiché comme auteur, sans usurper son identité ni effacer celle de l’importateur (exigence E5, §9.3). Effet visible : la ligne « auteur » de chaque annotation dans le panneau du signal, et le nom de qui valide ou conteste.
 
@@ -1387,14 +1410,14 @@ Steve poursuivra son annotation dans l’application (vision owner, §9.1) : ses
 |---|---|---|---|
 | (a) Auteur documentaire externe + importateur tracé | Chaque retour importé affiche « Steve Chaperon — importé par <nom> ». Steve est un auteur externe (ext:chaperon:steve) sans compte ; l’importateur réel est enregistré à part. Steve ne peut pas annoter lui-même tant que cette identité externe est utilisée. | • Le contenu est attribué à son vrai auteur sans attendre la création d’un compte.<br>• L’importateur réel est tracé : on sait qui a chargé quoi. | • Steve ne peut ni annoter ni valider dans l’application sous ce nom externe.<br>• Deux identités pour la même personne le jour où il aura un compte. |
 | (b) Importateur seul comme auteur | Le retour est affiché comme écrit par la personne qui a lancé l’import ; le nom de Steve n’apparaît que dans la provenance (fichier, feuille, ligne). | • Aucune identité externe à gérer.<br>• Aucun libellé spécial à afficher. | • Le texte de Steve est attribué à l’importateur : faux pour le lecteur.<br>• Perd la valeur de la parole du client et empêche la boucle de validation. |
-| **(c) Compte Steve, pour l’import et la saisie** (recommandée) | On crée et vérifie un compte pour Steve. Ses retours importés sont attribués à ce compte (l’importateur est tracé dans importe_par), et ses annotations, triages et réponses aux contestations dans l’application portent le même compte. | • Une seule identité : ses retours importés et ses annotations futures portent son compte.<br>• Il annote, trie et répond aux contestations lui-même dans l’application.<br>• L’importateur reste tracé à part (importe_par). | • Compte à créer et vérifier avant l’import.<br>• Droits à cadrer : Steve annote, l’équipe ou le PO valide. |
+| **(c) Compte Steve, pour l’import et la saisie** (recommandée) | On crée et vérifie un compte pour Steve. Ses décisions importées (colonnes B, P, Q et R) sont attribuées à ce compte ; les textes de l’assistant du triage (colonnes L à T hors P, Q, R) gardent leur auteur documentaire, et l’importateur est tracé avec la source de l’import (annotation_sources, §9.1). Ses annotations, triages et réponses aux contestations dans l’application portent le même compte. | • Une seule identité : ses retours importés et ses annotations futures portent son compte.<br>• Il annote, trie et répond aux contestations lui-même dans l’application.<br>• L’importateur reste tracé à part, avec la source de l’import. | • Compte à créer et vérifier avant l’import.<br>• Droits à cadrer : Steve annote, l’équipe ou le PO valide. |
 
-**Recommandation : (c) Compte Steve, pour l’import et la saisie.** (c) : Steve annote et valide avec son propre compte ; ses retours importés lui sont attribués, l’importateur est tracé à part. (a) ne vaut que si la création du compte tarde.
+**Recommandation : (c) Compte Steve, pour l’import et la saisie.** (c) : Steve annote et valide avec son propre compte ; ses décisions importées lui sont attribuées, les textes de l’assistant gardent leur auteur et l’importateur est tracé à part. (a) ne vaut que si la création du compte tarde.
 
 #### D6 — Visibilité et données personnelles
-**Étape 2 · Décide : Farid · Consulté : Steve, Mathieu, Fabien.** Décidée après les décisions de Fabien.
+**Étape 2 · Décide : Farid · Consulté : Steve, Mathieu, Fabien.** À décider par Farid, après les décisions de Fabien.
 
-Le constat C-79 du classeur (onglet Constats transversaux, rédigé par l’assistant du triage) signale des noms de particuliers en clair dans des résumés de signaux (§12) ; les verbatims importés peuvent en contenir aussi. Règle actuelle des notes (migration 0011) : tout utilisateur approuvé lit tout. Il faut décider qui voit les retours et s’ils sont caviardés avant le premier affichage (U1), au regard de la Loi 25 (exigence E9). Le module comments de sentropic ne masque pas les données personnelles : c’est au radar de le faire (D4, D5).
+Le constat C-79 du classeur (onglet Constats transversaux, rédigé par l’assistant du triage) signale des noms de particuliers en clair dans des résumés de signaux (§12.3) ; les verbatims importés peuvent en contenir aussi. Règle actuelle des notes (migration 0011) : tout utilisateur approuvé lit tout. Il faut décider qui voit les retours et s’ils sont caviardés avant le premier affichage (U1), au regard de la Loi 25 (exigence E9). Le module comments de sentropic ne masque pas les données personnelles : c’est au radar de le faire (D4, D5).
 
 **Dépend de :** D4 (Conformité sentropic et suppression), D5 (Auteur des retours importés). **Conditionne :** D14 (Première livraison UI).
 
@@ -1407,37 +1430,37 @@ Le constat C-79 du classeur (onglet Constats transversaux, rédigé par l’assi
 **Recommandation : (c) Approuvés, verbatims caviardés.** (c) : toute l’équipe garde l’accès aux retours, et les noms de particuliers sont masqués, dans les retours comme dans les résumés de signaux.
 
 #### D7 — Définition de C v1
-**Étape 2 · Décide : Farid · Consulté : Steve, Mathieu, Fabien.** Décidée après les décisions de Fabien.
+**Étape 2 · Décide : Farid · Consulté : Steve, Mathieu, Fabien.** À décider par Farid, après les décisions de Fabien.
 
 C est la nouvelle sélection de signaux proposée, alignée sur les trois critères de Steve : résidentiel, assouplissement, densification (§2.3, scène criteres-steve). Aujourd’hui, deux de ces trois critères n’ont aucune donnée au radar. Steve pose une réserve : un signal dont le sens n’est pas lisible doit rester affiché (« masquer ce qui n’a pas pu être lu transformerait une lacune en dossier manqué »). Il faut fixer la règle de C avant de la développer (lot C1) ; elle sera mesurée par le jeu de référence de ciblage (D10), sur la lecture de la double annotation retenue (D9). Les critères K1 à K9 sont détaillés au §5.1.
 
-**Dépend de :** D9 (Sens de « double annotation » (proposée close)), D10 (Jeu de référence #783). **Conditionne :** D8 (Cas contradictoires (Saint-Victor, Amos, CPTAQ, seconds projets, ODJ, S-RESTRICTIF)), D12 (Exposition A/B/C (point ouvert)), D16 (Retour à Steve).
+**Dépend de :** D9 (Sens de « double annotation » (clôture recommandée)), D10 (Jeu de référence #783). **Conditionne :** D8 (Cas contradictoires (Saint-Victor, Amos, CPTAQ, seconds projets, ODJ, S-RESTRICTIF)), D12 (Exposition A/B/C (point ouvert)), D16 (Retour à Steve).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| Triplet strict pour toute visibilité | C n’affiche que les signaux qui réunissent les trois critères de façon établie. Exemple : sur la passe 1, seuls 22 signaux sur 73 resteraient ; les 12 Pertinent dont le sens n’est pas donné disparaîtraient. | • Flux court et lisible : seulement ce qui réunit les trois critères (22 sur 73).<br>• Plus simple à calculer : un signal entre ou non. | • Masque les indéterminés : contredit la réserve explicite de Steve.<br>• Perte de rappel sur les dossiers mal lus. |
-| **K1–K9 + trois états** (recommandée) | C applique les critères K1 à K9 (§5.1) avec trois états : confirmé (critères étayés), à instruire (sens ou effet non déterminable, reste visible), exclu prouvé (masqué, raison affichée). Deux compteurs distincts « confirmés » et « à instruire ». Aucun seuil de taille de projet ni filtre sur l’origine privée. | • Respecte les trois critères et la réserve : on ne masque que ce qui est établi hors critères.<br>• Trois états (confirmé, à instruire, exclu prouvé) et deux compteurs : un cas incertain n’est pas présenté comme une opportunité. | • Le flux garde du travail manuel (les « à instruire »).<br>• Exige des extractions nouvelles (sens, effet sur les unités, portée) : lot C1 de taille L. |
-| B inchangé, critères pour trier | La sélection affichée reste B ; les critères de Steve servent seulement à trier la liste (les « trois critères » en premier). Aucun signal n’entre ni ne sort. | • Aucun changement d’appartenance, aucun risque.<br>• Aucune extraction nouvelle à développer. | • Le bruit connu (24 sur 73) persiste.<br>• Ne répond pas à Steve : « ce n’est pas une question de hiérarchie ». |
+| (a) Triplet strict pour toute visibilité | C n’affiche que les signaux qui réunissent les trois critères de façon établie. Exemple : sur la passe 1, seuls 22 signaux sur 73 resteraient ; les 12 Pertinent dont le sens n’est pas donné disparaîtraient. | • Flux court et lisible : seulement ce qui réunit les trois critères (22 sur 73).<br>• Plus simple à calculer : un signal entre ou non. | • Masque les indéterminés : contredit la réserve explicite de Steve.<br>• Perte de rappel sur les dossiers mal lus. |
+| **(b) K1–K9 + trois états** (recommandée) | C applique les critères K1 à K9 (§5.1) avec trois états : confirmé (critères étayés), à instruire (sens ou effet non déterminable, reste visible), exclu prouvé (masqué, raison affichée). Deux compteurs distincts « confirmés » et « à instruire ». Aucun seuil de taille de projet ni filtre sur l’origine privée. | • Respecte les trois critères et la réserve : on ne masque que ce qui est établi hors critères.<br>• Trois états (confirmé, à instruire, exclu prouvé) et deux compteurs : un cas incertain n’est pas présenté comme une opportunité. | • Le flux garde du travail manuel (les « à instruire »).<br>• Exige des extractions nouvelles (sens, effet sur les unités, portée) : lot C1 de taille L. |
+| (c) B inchangé, critères pour trier | La sélection affichée reste B ; les critères de Steve servent seulement à trier la liste (les « trois critères » en premier). Aucun signal n’entre ni ne sort. | • Aucun changement d’appartenance, aucun risque.<br>• Aucune extraction nouvelle à développer. | • Le bruit connu (24 sur 73) persiste.<br>• Ne répond pas à Steve : « ce n’est pas une question de hiérarchie ». |
 
-**Recommandation : K1–K9 + trois états.** K1–K9 + trois états, après relecture de la table de dérivation par Steve : c’est la seule règle qui applique ses trois critères sans masquer ce qui n’a pas pu être lu. Aucun seuil de taille de projet ni filtre sur l’origine privée.
+**Recommandation : (b) K1–K9 + trois états.** (b), après relecture par Steve de la table de dérivation (à établir, `not run`, §9.1) : c’est la seule règle qui applique ses trois critères sans masquer ce qui n’a pas pu être lu. Aucun seuil de taille de projet ni filtre sur l’origine privée. La correspondance entre ces trois états et les verdicts P / S / N de R′ reste à arbitrer : un P calculé par R′ v1 ne vaut pas confirmation des trois critères (§5.1, §5.2).
 
 #### D8 — Cas contradictoires (Saint-Victor, Amos, CPTAQ, seconds projets, ODJ, S-RESTRICTIF)
-**Étape 2 · Décide : Farid · Consulté : Steve, Mathieu.** Décidée après les décisions de Fabien.
+**Étape 2 · Décide : Farid · Consulté : Steve, Mathieu.** À décider par Farid, après les décisions de Fabien.
 
-Certains cas ne se tranchent pas par une règle automatique : Saint-Victor (un resserrement qui favorise pourtant la densification), Amos (logement sur commerce), portée de l’exception CPTAQ, seconds projets, points d’ordre du jour, trois restrictions « À surveiller » (§4.8). Le tableur et l’analyse de Steve se contredisent parfois sur ces cas, et 7 labels de Steve contredisent ses propres règles (§2.4). Il faut décider qui les arbitre avant de geler le jeu de référence (D10) et la règle C (D7) ; sinon le jeu de référence sanctionnera le bon comportement.
+Certains cas ne se tranchent pas par une règle automatique : Saint-Victor (un resserrement qui favorise pourtant la densification), portée de l’exception CPTAQ, seconds projets, points d’ordre du jour, trois lignes Restriction classées « À surveiller » (§4.2, §4.8), et Amos (logement sur commerce), point du 2026-10-03 absent de la liste actuelle du §4.8. Le tableur et l’analyse de Steve se contredisent parfois sur ces cas, et 7 labels de Steve contredisent ses propres règles selon la liste du tour 5, dont 4 restent en écart après R′ v1 (§2.4, §4.6). Il faut décider qui les arbitre avant de geler le jeu de référence (D10) et la règle C (D7) ; sinon le jeu de référence sanctionnera le bon comportement.
 
 **Dépend de :** D7 (Définition de C v1), D10 (Jeu de référence #783). **Conditionne :** D16 (Retour à Steve).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **Revue métier, abstention en attendant** (recommandée) | Steve et Mathieu examinent les cas listés au §4.8 sur exemples et preuves (Saint-Victor, Amos, CPTAQ, seconds projets, ODJ, trois S-RESTRICTIF). Tant qu’un cas n’est pas tranché, il est marqué « abstention » dans le jeu de référence : il ne compte ni pour ni contre. | • Steve et Mathieu tranchent sur exemples et preuves : la règle reste celle du client.<br>• En attendant, abstention explicite : ces cas ne comptent ni pour ni contre. | • Demande du temps à Steve et Mathieu.<br>• Quelques cas restent ouverts plus longtemps. |
-| Arbitrage par l’équipe | L’équipe tranche elle-même chaque cas à partir de l’analyse et des règles de Steve, puis lui présente le résultat. | • Plus rapide.<br>• Ne mobilise ni Steve ni Mathieu. | • Risque de prêter à Steve une règle qu’il n’a pas posée.<br>• Le jeu de référence refléterait l’avis de l’équipe, pas celui du client. |
-| Statu quo | Les cas restent dans le jeu de référence avec l’étiquette du tableur, sans statut particulier, même quand le tableur et l’analyse se contredisent. | • Aucun effort.<br>• Le jeu de référence peut être gelé tout de suite. | • Cas sans statut dans le jeu de référence : mesures faussées.<br>• Désaccords invisibles. |
+| **(a) Revue métier, cas contestés en attendant** (recommandée) | Steve et Mathieu examinent sur exemples et preuves les cas listés au §4.8 (Saint-Victor, CPTAQ, seconds projets, ODJ, labels contraires à ses règles) et le cas Amos du 2026-10-03, hors de cette liste. Tant qu’un cas n’est pas tranché, il garde son étiquette du relevé, porte le statut contested et les résultats sont publiés avec et sans ces cas (§4.8) ; la lecture principale et son dénominateur sont à fixer par cette décision. | • Steve et Mathieu tranchent sur exemples et preuves : la règle reste celle du client.<br>• En attendant, statut contested explicite : résultats publiés avec et sans ces cas. | • Demande du temps à Steve et Mathieu.<br>• Quelques cas restent ouverts plus longtemps. |
+| (b) Arbitrage par l’équipe | L’équipe tranche elle-même chaque cas à partir de l’analyse et des règles de Steve, puis lui présente le résultat. | • Plus rapide.<br>• Ne mobilise ni Steve ni Mathieu. | • Risque de prêter à Steve une règle qu’il n’a pas posée.<br>• Le jeu de référence refléterait l’avis de l’équipe, pas celui du client. |
+| (c) Statu quo | Les cas restent dans le jeu de référence avec l’étiquette du tableur, sans statut particulier, même quand le tableur et l’analyse se contredisent. | • Aucun effort.<br>• Le jeu de référence peut être gelé tout de suite. | • Cas sans statut dans le jeu de référence : mesures faussées.<br>• Désaccords invisibles. |
 
-**Recommandation : Revue métier, abstention en attendant.** (a) : la règle reste celle du client, et les cas ouverts ne faussent pas la mesure pendant qu’ils sont arbitrés.
+**Recommandation : (a) Revue métier, cas contestés en attendant.** (a) : la règle reste celle du client, et les cas ouverts ne faussent pas la mesure pendant qu’ils sont arbitrés.
 
 #### D12 — Exposition A/B/C (point ouvert)
-**Étape 2 · Décide : Farid · Consulté : Steve, Mathieu, Fabien.** Décidée après les décisions de Fabien.
+**Étape 2 · Décide : Farid · Consulté : Steve, Mathieu, Fabien.** À décider par Farid, après les décisions de Fabien.
 
 Aujourd’hui l’écran montre la sélection B ; le sélecteur A/B a été retiré en août (§2.5). La demande initiale parle d’un « mécanisme A/B étendu en C », mais les règles de partage validées le 1er octobre (#787, item 4) demandent de ne pas réintroduire de choix entre plusieurs viviers. Les deux lectures sont défendables (§8.1) : Farid tranche. Concrètement : Steve verra-t-il un sélecteur A/B/C, ou une seule sélection qui change le jour où C est prouvée meilleure (D13) ? La règle C (D7) et sa mesure (D10, D11) doivent être connues.
 
@@ -1453,22 +1476,22 @@ Aujourd’hui l’écran montre la sélection B ; le sélecteur A/B a été reti
 **Recommandation : (a) C en shadow, comparaison réservée UAT, puis remplacement de B.** (a), avec des emprunts à (c) : interface simple pour Steve, conforme à #787, retour arrière immédiat. Si Farid veut un sélecteur visible, (b).
 
 #### D13 — Seuil de bascule B → C (proposition de l’owner à acter)
-**Étape 2 · Décide : Farid · Consulté : Steve, Mathieu, Fabien.** Décidée après les décisions de Fabien. **Proposition de l’owner à acter avec Farid.**
+**Étape 2 · Décide : Farid · Consulté : Steve, Mathieu, Fabien.** À décider par Farid, après les décisions de Fabien. **Proposition de Fabien (owner) du 2026-10-05, à acter avec Farid.**
 
-Si C tourne en parallèle de B (D12), il faut écrire à l’avance quand C remplace B ; sans seuil écrit, la bascule se décidera à l’impression. L’owner propose le 2026-10-05 de traduire « aucun Pertinent masqué » par zéro Pertinent masqué sur le test neuf (k_max = 0), avec une borne supérieure exacte sous un seuil X à fixer par Farid (§7.2). Zéro observé seul ne prouve pas un faible risque : avec un taux réel de 2 %, la probabilité de pass vaut environ 0,56 à 29 Pertinent pour X = 10 % et 0,30 à 59 Pertinent pour X = 5 % (CALCUL binomial, annexe I). Le comparateur est B′ passe 1 recalculé sur les mêmes cas ; les 67,1 % observés sur le relevé (49/73) sont rapportés, jamais utilisés comme seuil.
+Si C tourne en parallèle de B (D12), il faut écrire à l’avance quand C remplace B ; sans seuil écrit, la bascule se décidera à l’impression. Fabien (owner) propose le 2026-10-05 de traduire « aucun Pertinent masqué » par zéro Pertinent masqué sur le test neuf (k_max = 0), avec une borne supérieure exacte sous un seuil X à fixer par Farid (§7.2). Zéro observé seul ne prouve pas un faible risque : avec un taux réel de 2 %, la probabilité de pass vaut environ 0,56 à 29 Pertinent pour X = 10 % et 0,30 à 59 Pertinent pour X = 5 % (CALCUL binomial, annexe I). Le comparateur est B′ passe 1 recalculé sur les mêmes cas ; la part P ∪ S de la passe 1 observée par Steve (49/73 = 67,1 %) est rapportée, jamais utilisée comme seuil.
 
 **Dépend de :** G6 (Règle et porteur de la promotion), D10 (Jeu de référence #783), D11 (Benchmark #782), D12 (Exposition A/B/C (point ouvert)).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **Zéro Pertinent masqué (k_max = 0, borne < X), précision P ∪ S > B′ passe 1, parité** (recommandée) | C remplace B seulement si, sur le test neuf : aucun signal que Steve juge Pertinent n’est masqué (k_max = 0) et la borne supérieure exacte du taux de Pertinent masqués est sous X ; puis la différence de précision P ∪ S entre C et B′ passe 1, sur les mêmes cas, a une borne inférieure positive (bootstrap par ville) ; l’API, le rail, la carte et le panneau montrent les mêmes ensembles ; Farid fait la recette. | • Protège la réserve de Steve : aucun Pertinent masqué, borne publiée.<br>• Exige un gain réel de précision contre B′ passe 1, sur les mêmes cas.<br>• Statuts pass, fail, indeterminate écrits avant la passe ; parité entre écrans (#786). | • Taille du test liée à X : environ 29 Pertinent (X = 10 %) ou 59 (X = 5 %), avant effet de grappe.<br>• Avec un taux réel de 2 %, P(pass) ≈ 0,56 (29 P, X = 10 %) ou 0,30 (59 P, X = 5 %). |
-| Seuil chiffré différent | Farid écrit d’autres chiffres dans le commentaire (par exemple une précision minimale ou un rappel minimal), mesurés par le même jeu de référence. | • Farid fixe ses propres chiffres (à écrire dans le commentaire).<br>• Peut refléter un compromis métier que Farid connaît mieux. | • À préciser.<br>• Risque d’un seuil non mesurable par le jeu de référence. |
-| Bascule sur recette seule | La bascule se décide sur la recette de Farid seule, sans mesure chiffrée par le jeu de référence. | • Rapide : recette de Farid seulement.<br>• Ne dépend pas de l’achèvement du jeu test. | • Sans mesure, aucune garantie de non-régression.<br>• Contraire à l’objet du jeu de référence de ciblage. |
+| **(a) Zéro Pertinent masqué (k_max = 0, borne < X), précision P ∪ S > B′ passe 1, parité** (recommandée) | C remplace B seulement si, sur le test neuf : aucun cas classé Pertinent par Steve n’est entièrement masqué (k_max = 0, unité du §5.4) et la borne supérieure exacte du taux de Pertinent masqués est sous X ; puis la différence de précision P ∪ S entre C et B′ passe 1, sur les mêmes cas, a une borne inférieure positive (bootstrap par ville) ; l’API, le rail, la carte et le panneau montrent les mêmes ensembles ; Farid fait la recette. | • Protège la réserve de Steve : aucun Pertinent masqué, borne publiée.<br>• Exige un gain réel de précision contre B′ passe 1, sur les mêmes cas.<br>• Statuts pass, fail, indeterminate écrits avant la passe ; parité entre écrans (#786). | • Taille du test liée à X : environ 29 Pertinent (X = 10 %) ou 59 (X = 5 %), avant effet de grappe.<br>• Avec un taux réel de 2 %, P(pass) ≈ 0,56 (29 P, X = 10 %) ou 0,30 (59 P, X = 5 %). |
+| (b) Seuil chiffré différent | Farid écrit d’autres chiffres dans le commentaire (par exemple une précision minimale ou un rappel minimal), mesurés par le même jeu de référence. | • Farid fixe ses propres chiffres (à écrire dans le commentaire).<br>• Peut refléter un compromis métier que Farid connaît mieux. | • À préciser.<br>• Risque d’un seuil non mesurable par le jeu de référence. |
+| (c) Bascule sur recette seule | La bascule se décide sur la recette de Farid seule, sans mesure chiffrée par le jeu de référence. | • Rapide : recette de Farid seulement.<br>• Ne dépend pas de l’achèvement du jeu test. | • Sans mesure, aucune garantie de non-régression.<br>• Contraire à l’objet du jeu de référence de ciblage. |
 
-**Recommandation : Zéro Pertinent masqué (k_max = 0, borne < X), précision P ∪ S > B′ passe 1, parité.** (a) : proposition de l’owner, à acter avec Farid. Statut pass si les deux critères passent (masquage, puis précision P ∪ S contre B′ passe 1), fail si l’un échoue, indeterminate sinon ; X (10 % ou 5 %) fixe la taille du test. Résidentiel et Zonage ne sont retirés qu’après une décision #761 fondée sur la mesure.
+**Recommandation : (a) Zéro Pertinent masqué (k_max = 0, borne < X), précision P ∪ S > B′ passe 1, parité.** (a) : proposition de Fabien (owner), à acter avec Farid. Statut pass si les deux critères passent (masquage, puis précision P ∪ S contre B′ passe 1), fail si l’un échoue, indeterminate sinon ; X (10 % ou 5 %) fixe la taille du test. Résidentiel et Zonage ne sont retirés qu’après une décision #761 fondée sur la mesure. Toute exigence supplémentaire par signal est une condition distincte, à décider. À arbitrer aussi : un résultat portant la mention single-human-annotator (sans second annotateur, D10) peut être publié ; son admissibilité pour la bascule, alors que G4 (a) exige une référence human_adjudicated pour toute promotion, reste à décider.
 
 #### D14 — Première livraison UI
-**Étape 2 · Décide : Farid · Consulté : Mathieu, Fabien.** Décidée après les décisions de Fabien.
+**Étape 2 · Décide : Farid · Consulté : Mathieu, Fabien.** À décider par Farid, après les décisions de Fabien.
 
 Une fois les retours en base, il faut les montrer. L’UI est en migration : 39 composants Svelte sur 69 utilisent le design system, les 3 composants d’annotation aucun, et la carte Signaux est un composant local MapLibre de 2 761 lignes destiné à être remplacé (§9.7, scène architecture-ui). Il faut choisir où le retour de Steve apparaît en premier : dans le panneau du signal et le rail, ou directement sur la carte. Le choix décide si #784 avance sans attendre la migration geo. Il suppose l’ancre réparée (D3), la lecture conforme (D4) et la règle de visibilité (D6).
 
@@ -1476,15 +1499,15 @@ Une fois les retours en base, il faut les montrer. L’UI est en migration : 39 
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **(a) Panneau + rail + DS ciblé** (recommandée) | Dans le panneau du signal, un badge « Retour de Steve » (vert, jaune, rouge) ouvre une section « Avis de Steve » : classement, motif, sens, analyse, provenance, état du rattachement. Dans le rail, des compteurs P / S / N par ville. Les 3 composants d’annotation passent au design system. Rien sur la carte au premier lot. | • Valeur immédiate : badge et section « Avis de Steve » dans le panneau, compteurs P / S / N dans le rail.<br>• Aucun code ajouté à un composant à remplacer.<br>• Les 3 composants d’annotation migrent au design system dans le même lot. | • Pas d’indicateur sur la carte au premier lot.<br>• Les badges par signal exigent la lecture groupée du lot L2. |
-| (b) Pastilles sur la carte actuelle dès L3 | En plus du panneau, des pastilles colorées sur la carte Signaux actuelle (composant local MapLibre de 2 761 lignes) dès le lot L3. | • Visibilité cartographique immédiate.<br>• L’ancre ne dépend pas du moteur de carte. | • Code ajouté à un composant de 2 761 lignes voué au remplacement.<br>• Double travail à la migration geo. |
+| **(a) Panneau + rail + DS ciblé** (recommandée) | Dans le panneau du signal, un badge « Retour de Steve » (vert, jaune, rouge) ouvre une section « Retour du relevé de Steve » en deux blocs : « Décision de Steve » (passe, sens, classement, code de motif) et « Texte de l’assistant du triage » (colonnes L à T hors P, Q, R), avec provenance et état du rattachement. Dans le rail, des compteurs P / S / N par ville. Les 3 composants d’annotation passent au design system. Rien sur la carte au premier lot. | • Valeur immédiate : badge et section « Retour du relevé de Steve » dans le panneau, compteurs P / S / N dans le rail.<br>• Aucun code ajouté à un composant à remplacer.<br>• Les 3 composants d’annotation migrent au design system dans le même lot. | • Pas d’indicateur sur la carte au premier lot.<br>• Les badges par signal exigent la lecture groupée du lot L2. |
+| (b) Pastilles sur la carte actuelle dès U1 | En plus du panneau, des pastilles colorées sur la carte Signaux actuelle (composant local MapLibre de 2 761 lignes) dès le lot U1, premier lot d’affichage (§9.6). | • Visibilité cartographique immédiate.<br>• L’ancre ne dépend pas du moteur de carte. | • Code ajouté à un composant de 2 761 lignes voué au remplacement.<br>• Double travail à la migration geo. |
 | (c) Migration geo complète d’abord | On termine d’abord la migration de la carte vers les composants geo partagés (Porte 2), puis on affiche les retours sur la nouvelle carte et dans le panneau. | • Expérience cohérente d’emblée.<br>• Aucun code d’annotation à reprendre après la migration. | • Dépend de la « Porte 2 » (moteur geo désactivé aujourd’hui).<br>• Retarde #784 sans date. |
 | (d) Tableau de retours séparé seul | Un écran séparé liste tous les retours de Steve (filtrable par ville, motif, statut de rattachement), sans rien afficher sur les objets du radar. | • Toute la donnée consultable en un seul écran.<br>• Utile comme outil de curation des rattachements. | • N’annote pas l’élément associé : ne répond pas à #784.<br>• Un écran de plus. |
 
 **Recommandation : (a) Panneau + rail + DS ciblé.** (a) : valeur visible tout de suite, sans investir dans un composant de carte destiné à être remplacé.
 
 #### D15 — Séquencement
-**Étape 2 · Décide : Farid · Consulté : Mathieu, Fabien.** Décidée après les décisions de Fabien.
+**Étape 2 · Décide : Farid · Consulté : Mathieu, Fabien.** À décider par Farid, après les décisions de Fabien.
 
 La priorité n° 1 de Steve reste la fraîcheur des signaux (#703, rafraîchissement quotidien). Le travail de ce dossier peut avancer en parallèle ou attendre. B0 (D3), l’import (L1) et le jeu de référence (O1, D10) ne touchent pas la chaîne de rafraîchissement ; le classifieur C (C1), lui, a besoin de signaux frais (§12.2). Le choix fixe quand Steve verra ses retours dans l’outil (D14).
 
@@ -1492,13 +1515,13 @@ La priorité n° 1 de Steve reste la fraîcheur des signaux (#703, rafraîchisse
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **(a) B0, import et jeu de référence en parallèle de la fraîcheur** (recommandée) | B0, l’import (L1) et le jeu de référence de ciblage (O1) démarrent maintenant, en parallèle de #703, car ils ne touchent pas la chaîne de rafraîchissement. Le classifieur C (C1) attend que le rafraîchissement soit stable. | • Valeur livrée tôt : annotation réparée, retours visibles, jeu de référence prêt.<br>• Aucune interférence avec la chaîne de rafraîchissement.<br>• C1 démarre sur des signaux stabilisés. | • Deux chantiers en parallèle à suivre.<br>• L’attention de l’équipe est partagée. |
+| **(a) B0, import et jeu de référence en parallèle de la fraîcheur** (recommandée) | B0, l’import (L1) et le jeu de référence de ciblage (O1) démarrent en parallèle de #703, car ils ne touchent pas la chaîne de rafraîchissement, dès que leurs prérequis sont levés (§9.6) : D3 pour B0 ; D5 et, si G7 (b), le lot générique G-L2 pour L1 ; L1 et D10 pour O1. Le classifieur C (C1) attend que le rafraîchissement soit stable. | • Valeur livrée tôt : annotation réparée, retours visibles, jeu de référence prêt.<br>• Aucune interférence avec la chaîne de rafraîchissement.<br>• C1 démarre sur des signaux stabilisés. | • Deux chantiers en parallèle à suivre.<br>• L’attention de l’équipe est partagée. |
 | (b) Tout après #703 | Tout le travail de ce dossier attend la clôture de #703 (rafraîchissement quotidien en production). | • Une seule priorité à la fois.<br>• Aucun risque d’interférence, même indirecte, avec le rafraîchissement. | • Rien de visible pour Steve sur ses retours avant #703.<br>• L’annotation de signal reste cassée plus longtemps. |
 
 **Recommandation : (a) B0, import et jeu de référence en parallèle de la fraîcheur.** (a) : livre tôt ce qui ne gêne pas le rafraîchissement, et garde C1 pour après sa stabilisation.
 
 #### D16 — Retour à Steve
-**Étape 2 · Décide : Farid · Consulté : Mathieu.** Décidée après les décisions de Fabien.
+**Étape 2 · Décide : Farid · Consulté : Mathieu.** À décider par Farid, après les décisions de Fabien.
 
 Le classeur reconstitue le fonctionnement des filtres observé à l’écran ; sa règle R-16, rédigée par l’assistant du triage, note qu’« une seule réponse des développeurs remplacerait toute cette reconstitution » (§2.5). Le dossier a confronté cette reconstitution au code. Il faut décider si on lui renvoie maintenant la définition réelle des filtres et la table qui relie ses codes de motif aux critères C (D7, D8), ou si on attend C.
 
@@ -1506,22 +1529,22 @@ Le classeur reconstitue le fonctionnement des filtres observé à l’écran ; s
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **Renvoyer filtres réels et table de dérivation** (recommandée) | Mathieu et Farid envoient à Steve la définition réelle des cinq filtres (§2.5, lue dans le code) et la table qui relie ses 28 codes de motif aux critères C, pour qu’il la corrige avant le développement de C. | • Répond directement à la question posée en R-16.<br>• Lui permet de corriger la table de dérivation avant le développement de C.<br>• Renforce la confiance du client. | • Un aller-retour à préparer (relecture par Mathieu et Farid).<br>• Une partie de ses observations date de septembre, en partie périmée depuis #793. |
-| Ne rien renvoyer avant C | On ne répond pas à la question posée en R-16 avant que C soit développée ; il reçoit alors directement la nouvelle sélection. | • Évite un aller-retour intermédiaire.<br>• La réponse portera directement sur C, déjà développée. | • Steve continue à deviner le fonctionnement des filtres.<br>• Erreurs de dérivation découvertes trop tard. |
+| **(a) Renvoyer filtres réels et table de dérivation** (recommandée) | Mathieu et Farid envoient à Steve la définition réelle des cinq filtres (§2.5, lue dans le code) et la table qui relie ses 28 codes de motif aux critères C (table à établir, not run, §9.1), pour qu’il la corrige avant le développement de C. | • Répond directement à la question posée en R-16.<br>• Lui permet de corriger la table de dérivation avant le développement de C.<br>• Renforce la confiance du client. | • Un aller-retour à préparer (relecture par Mathieu et Farid).<br>• Une partie de ses observations date de septembre, en partie périmée depuis #793. |
+| (b) Ne rien renvoyer avant C | On ne répond pas à la question posée en R-16 avant que C soit développée ; il reçoit alors directement la nouvelle sélection. | • Évite un aller-retour intermédiaire.<br>• La réponse portera directement sur C, déjà développée. | • Steve continue à deviner le fonctionnement des filtres.<br>• Erreurs de dérivation découvertes trop tard. |
 
-**Recommandation : Renvoyer filtres réels et table de dérivation.** Renvoyer, par Mathieu et Farid après relecture : répond à sa question et lui permet de corriger la table de dérivation avant que C soit développée.
+**Recommandation : (a) Renvoyer filtres réels et table de dérivation.** (a) : renvoyer, par Mathieu et Farid après relecture : répond à sa question et lui permet de corriger la table de dérivation avant que C soit développée.
 
 ### 10.4 Points laissés à la décision (ancienne annexe A du journal de consolidation)
 
-Repris du journal de consolidation ([JOURNAL_CONSOLIDATION.md](JOURNAL_CONSOLIDATION.md), A.4) et mis à jour au 2026-10-05.
+Repris du journal de consolidation ([JOURNAL_CONSOLIDATION.md](JOURNAL_CONSOLIDATION.md), A.4) et mis à jour au 2026-10-06.
 
-| Point | Décideur | État au 2026-10-05 |
+| Point | Décideur | État au 2026-10-06 |
 |---|---|---|
-| D9 : sens exact de « double annotation » | Fabien, Farid consulté | proposée close : provenance par champ, portée par D10 |
-| D12 : C en shadow avec comparaison UAT, ou sélecteur A/B/C visible | Farid ; Steve, Mathieu, Fabien consultés | point ouvert |
-| D13 : seuil chiffré de bascule | Farid ; Steve, Mathieu, Fabien consultés | réécrite : zéro Pertinent masqué, borne < X, comparateur B′ passe 1 ; proposition de l'owner à acter avec Farid |
+| D9 : sens exact de « double annotation » | Fabien, Farid consulté | à décider, clôture recommandée : provenance par champ, portée par D10 |
+| D12 : C en shadow avec comparaison UAT, ou sélecteur A/B/C visible | Farid ; Steve, Mathieu, Fabien consultés | à décider |
+| D13 : seuil chiffré de bascule | Farid ; Steve, Mathieu, Fabien consultés | à décider par Farid : proposition de Fabien (owner) du 2026-10-05 (zéro Pertinent masqué, borne < X, comparateur B′ passe 1), réécrite le 2026-10-05 |
 | D4, réserve : statut du dossier COLLAB hors `main` ; s'il n'est plus valable, l'adaptateur à tombstone hôte redevient une option | Fabien | ouvert, `non vérifié` |
-| D8 : cas métier contradictoires, à faire trancher avec Steve | Farid | ouvert ; ordre du jour enrichi au tour 5 (§2.4, §4.8) |
+| D8 : cas métier contradictoires, à faire trancher avec Steve | Farid | à décider ; ordre du jour enrichi au tour 5 et après R′ v1 (§2.4, §4.6, §4.8) |
 | D10 : ressource du second annotateur humain (au moins 50 cas) | Fabien ; profil désigné par Farid | `unknown` |
 | D17 : coupure temporelle du contexte | Fabien (owner) | tranchée le 2026-10-05 : date du signal |
 
@@ -1533,7 +1556,7 @@ Repris du journal de consolidation ([JOURNAL_CONSOLIDATION.md](JOURNAL_CONSOLIDA
 |---|---|---|
 | Dérive des ids du graphe (ré-extraction, nœuds orphelins supprimés) | Annotations orphelines, jeu de référence inapplicable | Ancres texte + instantané `observed` + statut `vanished` ; mesure de résolution en L1 ; clé métier stable en suivi |
 | Plusieurs objets par ligne, ids abrégés, alias de villes | Note attribuée au mauvais objet | Aperçu de résolution, rôles des liens, revue des ambiguïtés |
-| Tableur, analyse et règles se contredisent | Jeu de référence qui sanctionne le bon comportement | Sources immuables, provenance par champ (§4.9), arbitrage de Steve (§4.8), désaccords publiés avant notation |
+| Tableur, analyse et règles se contredisent | Jeu de référence qui sanctionne le bon comportement | Sources immuables, provenance par champ (§4.9), arbitrage de Steve (§4.8), cas `contested` publiés avant notation (D8) |
 | Échantillon biaisé (51 villes, ordre du relevé ; corpus déjà filtré) | C réglée sur un sous-ensemble ; rappel surestimé | Test neuf sur des villes hors registre d'exposition ; extension documentaire |
 | Vue de Steve datée du 15–21 septembre | Constats de filtres périmés | §2.5 ; refaire C-49 et C-55 sur la version actuelle |
 | Tension R-21 / S-RESTRICTIF ; sens par disposition | Perte d'un droit nouveau ou d'une étape utile | D8 ; sens par disposition ; un mixte reste visible |
@@ -1561,22 +1584,22 @@ Repris du journal de consolidation ([JOURNAL_CONSOLIDATION.md](JOURNAL_CONSOLIDA
 
 ### 12.1 Étapes du plan v2 (jeu de référence C et évaluation)
 
-| Étape | Contenu | Statut au 2026-10-05 | Dépend de | Porteur |
+| Étape | Contenu | Statut au 2026-10-06 | Dépend de | Porteur |
 |---|---|---|---|---|
-| 0 | Socle et préenregistrement : sources, registre d'exposition, unité, définitions, analyse primaire, sélection, dimensionnement, faisabilité (annexe I.1) | rédigée ; `not run` (à ratifier par l'owner) | D13, D17 | owner (ratification) ; Fabien |
-| 1 | Analyse des inputs de Steve sur les 121 lignes (inputs 2 à 5 de l'owner) | `partial` : tableau de référence C (§4.4), cohérence avec le cahier de juillet (§4.3) ; statut cellule par cellule et audit de 30 cellules `not run` | 0 | équipe IA (sessions d'analyse) |
-| 2 | Arbitrage de Steve avant tout gel : lot de 50 cas, contradictions, 10 propositions, R′ table complète | `not run` | 1 ; D8, D16 | Steve, Mathieu ; décision de Farid |
-| 3 | Contrat d'entrée | décidé (D17, owner, 2026-10-05) ; mise en œuvre `not run` | 1 | Fabien |
-| 4 | Schéma v2 et ré-annotation indépendante de tous les tags sur tous les cas par 3 annotateurs ; audit humain d'au moins 50 cas | `partial` : tour 2 indépendant sur `residentiel`, `sens`, `exclusions` et 7 tags complémentaires ; `densification`, `type_acte`, `motif` du tour 1 (§4.5) | 3 ; D17 | équipe IA ; audit humain |
-| 5 | Gel du dev : empreintes de R′, du schéma, du contrat, de l'agrégation, du scoreur ; tableau de référence dev en emplacement privé | `not run` | 2, 4 | Fabien (gel) |
-| 6 | Partition : découpage homogène des 121 lignes (exploratoire) ; test neuf à deux degrés (villes hors registre) | `not run` | 5 ; D10 | préparateur |
+| 0 | Socle et préenregistrement : sources, registre d'exposition, unité, définitions, analyse primaire, sélection, dimensionnement, faisabilité (annexe I.1) | rédigée ; `not run` (à ratifier par Fabien, owner, après D13 : X et k_max) | D13, D17 | Fabien (owner : ratification ; rédaction) |
+| 1 | Analyse des inputs de Steve sur les 121 lignes (inputs 2 à 5 de l'owner, annexe I.1) | `partial` : tableau de référence C (§4.4), cohérence avec le cahier de juillet (§4.3) ; statut cellule par cellule et audit de 30 cellules `not run` | 0 | équipe IA (sessions d'analyse) |
+| 2 | Arbitrage de Steve avant le gel du dev (étape 5) : 2a réexamen à l'aveugle d'un lot de 50 cas (§4.8) ; 2b questions fermées des blocs A à D (§4.8) ; 2c règle d'agrégation des cas (§5.4) ; 2d validation des motivations sur échantillon (§4.7) ; contradictions et clauses de R′ v1 (§5.2), via D8 ; 10 propositions de règle de l'analyse d'écart (§4.1 ; liste et sort : `source-gap` dans ce dossier ; P1 et P3 sont soumises au bloc A) | `not run` | 1 ; D7 (cadrage), D8, D16 | Steve, Mathieu ; décision de Farid |
+| 3 | Contrat d'entrée | décidé (D17, Fabien, owner, 2026-10-05) ; mise en œuvre `not run` | 1 | Fabien |
+| 4 | Schéma v2 et ré-annotation indépendante de tous les tags sur tous les cas par 3 annotateurs ; audit humain d'au moins 50 cas | `partial` : tour 2 indépendant (`residentiel`, `sens`, `exclusions`, 7 tags complémentaires) ; tour 3 indépendant (`sens` et `densification` redéfinis sur la capacité, 5 tags retenus par la revue de R′) ; `type_acte` et `motif` du tour 1, non indépendant ; audit humain `not run` (§4.5) | 3 ; D17 | équipe IA ; audit humain |
+| 5 | Gel du dev : empreintes de R′, du schéma, du contrat, de l'agrégation, du scoreur ; tableau de référence dev en emplacement privé | `not run` (R′ v1 déjà figée par empreinte comme référence de travail, §5.2) | 2, 4 | Fabien (gel) |
+| 6 | Partition : découpage homogène des 121 lignes (train et test aveugle exploratoire) ; test neuf à deux degrés (villes hors registre) | `not run` | 5 ; D10 | préparateur |
 | 7 | Trois itérations de prompt hors test ; sélection préenregistrée | `not run` | 6 | auteur neuf |
 | 8 | Test neuf : annotation `steve_test` (+ `human2_test`, au moins 50 cas) ; scellement G5 (b) | `not run` | 7 ; D10, D13, G5 | Steve ; second annotateur ; gardien |
 | 9 | Passe test non adaptative ; isolement des bras ; B′ recalculé | `not run` | 8 | exécutant ; scoreur |
 | 10 | Rapport intégré à ce dossier (ch. 4 à 7, annexe I) | `not run` | 9 | Fabien |
-| 11 | Livraison du tableau de référence : privé, puis Google Sheet partagé avec Farid ; aucune ligne test avant clôture | `not run` (le tableau du 2026-10-05 n'est ni commité ni partagé) | 5, 9 | owner (emplacement, partage) |
+| 11 | Livraison du tableau de référence : privé, puis Google Sheet partagé avec Farid ; aucune ligne test avant clôture | `not run` (le tableau du 2026-10-05 n'est ni commité ni partagé) | 5, 9 | Fabien (owner : emplacement, partage) |
 
-**Extension à de nouvelles villes** (train et test étendus, annotation convergée des 3 IA) : seulement après la clarification des 31 désaccords avec Steve (avant R′ v1, §4.6). Ordre de prise en compte des 10 inputs de l'owner : annexe I.1.
+**Extension à de nouvelles villes** (train et test étendus, annotation convergée des 3 IA) : seulement après la clarification avec Steve des points listés au §4.8 (blocs A, B et D ; 28 points à clarifier après R′ v1, 31 avant, §4.6). Les 10 inputs de l'owner, leur objectif et leur étape : annexe I.1.
 
 ### 12.2 Capitalisation et cartes
 
@@ -1586,7 +1609,7 @@ Première valeur livrable : B0, puis L1, L2 et U1 (§9.6) ; O1 avance en parall�
 |---|---|---|
 | #784 | Sources, import, rattachement, restitution (B0, L1, L2, U1) | Importer un fichier ne clôt ni le jeu de référence ni C |
 | #797 | Orientation du jeu de référence : D7, D8, D12, D13 (réécrite), D16 | Aucune bascule sans le seuil D13 mesuré sur le test neuf |
-| #783 | Jeu de référence C v2 (plan v2, étapes 0 à 11), provenance par champ (D9 proposée close), lot O1 | Aucun résultat C avant campagne ou rescoring valide |
+| #783 | Jeu de référence C v2 (plan v2, étapes 0 à 11), provenance par champ (D9, clôture recommandée), lot O1 | Aucun résultat C avant campagne ou rescoring valide |
 | #760 | Parcours manuel et états utilisateur, avec la maquette (L7) | Pas d'extraction ni de benchmark |
 | #761 | Rôle des filtres, second projet, sens, comparaison C | Rafraîchissement quotidien ≠ précocité réglementaire |
 | #782 | Résultats post-B′ et post-C à côté de l'extraction | Ne pas appeler « v11 final » le rapport v11alpha |
@@ -1617,7 +1640,7 @@ Constats du classeur (onglet rédigé par l'assistant du triage, validations de 
 
 ## Annexe I — Préenregistrement et traçabilité
 
-Source : plan v2 du jeu de référence C (2026-10-05) et sa revue (annexe IV). Rien n'est exécuté ni ratifié à ce jour.
+Source : plan v2 du jeu de référence C (2026-10-05) et sa revue (annexe IV). Le préenregistrement n'est pas ratifié et le test confirmatoire n'a pas été exécuté ; les travaux préparatoires et exploratoires réalisés sont indiqués dans les tableaux de statut (I.1, §12.1).
 
 ### I.1 Étape 0 du plan : préenregistrement (à ratifier)
 
@@ -1636,9 +1659,24 @@ Source : plan v2 du jeu de référence C (2026-10-05) et sa revue (annexe IV). R
 | 0.11 Dimensionnement | méthode fixée à l'étape 0, taille calculée après l'étape 7 ; repères 29 et 59 Pertinent ; effet dev biaisé à la hausse | à ratifier |
 | 0.12 Faisabilité | comptage, sans étiquette, des signaux, documents et états B′ passe 1 du vivier éligible ; confrontation à la capacité d'annotation de Steve | `not run` |
 
-**Gouvernance.** L'owner ratifie l'étape 0 ; D17 précède l'étape 4 ; D13 précède l'étape 8. R′ ne change que par D8. La ratification est humaine : le consensus des 3 IA, dont les familles sont évaluées, ne suffit pas.
+**Gouvernance.** Fabien (owner) ratifie l'étape 0 ; D17 précède l'étape 4 ; D13 précède la ratification de l'étape 0, qui préenregistre X et k_max (point 0.5), et D11 et D12, dont D13 dépend, la précèdent (registre, §3.1). R′ ne change que par D8. La ratification est humaine : le consensus des 3 IA, dont les familles sont évaluées, ne suffit pas.
 
 **Ordre de prise en compte des 10 inputs de l'owner** : inputs 1 et 10 (étape 0.1) ; input 2, puis 3 et 4, puis 5 (étape 1) ; arbitrage de Steve (étape 2) et contrat d'entrée (étape 3) ; input 6 (étape 4) ; input 9 pour le dev (étape 5) ; input 7 (étapes 6, 7, 8) ; input 8 (préenregistré en 0.3 à 0.8, exécuté aux étapes 9 et 10) ; input 9 pour les lignes test, après clôture.
+
+**Les 10 inputs de l'owner** (addendum de Fabien au plan, 2026-10-05 ; libellés repris de la revue du plan, annexe IV ; objectif associé : JUGEMENT).
+
+| # | Input | Objectif (§1.1) | Étape du plan (§12.1) |
+|---|---|---|---|
+| 1 | Classeur Drive de référence commun | O5 | 0.1 |
+| 2 | Aucun input de Steve mis de côté | O1, O5 | 1 |
+| 3 | Motivation de Steve → critère détectable | O5, O6 | 1 ; validation 2d |
+| 4 | Classes de cause précisées | O5 | 1 ; statuts finaux après 2b |
+| 5 | Cohérence avec le premier rapport (gold Steve 30, vivier B) | O5 | 1, avant 2 |
+| 6 | Nouveaux tags par les 3 IA ; orphelins | O5, O6 | 4 |
+| 7 | Découpage, 3 itérations low, aucun regard sur le test | O6 | 6, 7, 8 |
+| 8 | Évaluation contre Steve et majorité IA, B′, graphiques précision–rappel | O6 | 0.3 à 0.8 ; 9, 10 |
+| 9 | Tableau de référence commité + Google Sheet | O4, O5 | 5 (dev), 11 |
+| 10 | Vocabulaire convergé | O4 | 0.1, transversal |
 
 ### I.2 Manifestes et empreintes
 
@@ -1655,6 +1693,9 @@ Source : plan v2 du jeu de référence C (2026-10-05) et sa revue (annexe IV). R
 | `Analyse Radar 21 sept.docx` | `2dbc1d6f87a92ca128815575eb8e6830d5b552cd15b7c2b1e52a93d05ae067ff` |
 | Tableau de référence C, `reference-c.xlsx` (privé, non commité) | `4a81b4d744a8dd76f768f401cc9d2b3b675abb65159f651b4d4b6ef585956afb` |
 | Tableau de référence C, `reference-c.csv` (privé, non commité) | `f47ec61f0c14ad38e844732871ad5edaf0e1cc9bbda7e70b334ed91770703d07` |
+| R′ v1, `derive-verdict-rprime-v1.mjs` (hors dépôt, §5.2) | `e5836deb69a6165907966868e6e06fedac582c7a74741b0cd89097a6cfa501a2` |
+| Tableaux de R′ v1, `rule-r-prime/v1/tableaux-v1.md` (hors dépôt, §4.6) | `a678e991ede0792ca0f9a32822552251b1583990554a7d1a27a228434a0bab7c` (relevée le 2026-10-06) |
+| Questions à Steve, `rapport-suivi/QUESTIONS-STEVE.md` (privé, non envoyé, §4.8) | `c8f8ef63ea6aaa318c44be01635988770477d4cbd97e61e1c66ee68a3cc6b6d3` (relevée le 2026-10-06 ; document de travail, susceptible d'évoluer avant envoi) |
 
 Manifeste `engram_reference_set_v1` du jeu de référence C v2 : `not run` (étape 5).
 
@@ -1678,12 +1719,15 @@ Vérification du registre dans track, engram et l'historique git : `not run` (é
 | 2026-07-10 | Cahier « Bilan du prototype et recommandations » de Steve (30 villes notées) |
 | 2026-09-21 | Relevé de Steve (124 lignes, 51 villes) et analyse signée |
 | 2026-10-03 | Dossier de décision consolidé (auteurs A et B) |
-| 2026-10-04 | D1 actée par l'owner ; synthèse sentropic + engram (G1 à G8) |
-| 2026-10-05 | Revue du plan en quatre tours puis tour 5 sur le classeur ; arbitrages de l'owner (découpage, D17, D13) ; tableau de référence C ; cohérence avec le cahier de juillet ; version Drive du classeur déclarée comme faisant foi ; restructuration de ce dossier |
+| 2026-10-04 | D1 actée par Fabien (owner) ; synthèse sentropic + engram (G1 à G8) |
+| 2026-10-05 | Revue du plan en quatre tours puis tour 5 sur le classeur ; arbitrages de Fabien, owner (usage des 121 lignes, D17 ; proposition D13) ; tableau de référence C ; cohérence avec le cahier de juillet ; version Drive du classeur déclarée comme faisant foi ; restructuration de ce dossier |
+| 2026-10-06 | Tour 3 d'étiquetage (guide v3) ; R′ v1 figée par empreinte comme référence de travail ; décomposition des écarts après R′ v1 (40 = 12 erreurs d'outillage + 28 points à clarifier) ; relecture de cohérence du dossier |
+
+États historiques conservés : colonne « Avant » et référence avant R′ du §4.6 ; recommandation du 2026-10-03 (§3.2, à remplacer).
 
 ### I.5 Écarts au préenregistrement
 
-`N-A` : rien n'est encore préenregistré ni exécuté.
+`N-A` : le préenregistrement n'est pas ratifié et le test confirmatoire n'a pas été exécuté ; aucun écart ne peut encore être constaté. Les travaux exploratoires (§4.5 à §4.7) ne relèvent pas du préenregistrement.
 
 ### I.6 Table de correspondance : numérotation du 2026-10-03 → numérotation actuelle
 
@@ -1705,7 +1749,7 @@ Vérification du registre dans track, engram et l'historique git : `not run` (é
 | §6.2 Exigences | §9.3 |
 | §6.3 Besoins de Steve et modèle cible | §9.1 et §9.2 |
 | §6.4 Ancres et rattachement ; §6.5 Import idempotent | §9.4 (mesures lexicales en annexe III.4) |
-| §6.6 Double annotation | §4.9 ; D9 proposée close |
+| §6.6 Double annotation | §4.9 ; D9, clôture recommandée |
 | §6.7 Convergence sentropic + engram | §9.5 |
 | §7 Première mise en œuvre | §9.6 |
 | §8 Focus migration UI | §9.7 ; annexe III.6 |
@@ -1729,9 +1773,9 @@ Vérification du registre dans track, engram et l'historique git : `not run` (é
 | Intention et objectifs ; ce que veut Steve, ses 3 critères, écart avec le radar (24/73 = 32,9 % ; 34 des 40 Pertinent affichés) | ch. 1 ; ch. 2 (§2.3, §2.5, §2.6) |
 | Modèle de données des retours de Steve en base, conforme au contrat sentropic | §9.1 à §9.4 ; annexe III |
 | Première mise en œuvre (lots B0, L1, L2, U1) ; migration UI | §9.6 ; §9.7 et annexe III.6 |
-| Nouveau jeu de référence de ciblage, double annotation, affichage A/B/C | §4.9 (D9 proposée close) ; ch. 8 |
+| Nouveau jeu de référence de ciblage, double annotation, affichage A/B/C | §4.9 (D9, clôture recommandée) ; ch. 8 |
 | « 16 décisions » D1 à D16 | registre au §3.1 (G1 à G8, D1 à D17) ; fiches au ch. 10 et en annexe II |
-| #783, mise en œuvre : double annotation (D9), double jeu E / C, dev 51 villes et test 52 villes (D10), volet ciblage (D11), lots O1, C1, C2 | D9 proposée close ; D10 réécrite (§10.2) ; §8.2 ; §9.6 et ch. 12 |
+| #783, mise en œuvre : double annotation (D9), double jeu E / C, dev 51 villes et test 52 villes (D10), volet ciblage (D11), lots O1, C1, C2 | D9, clôture recommandée ; D10 réécrite (§10.2) ; §8.2 ; §9.6 et ch. 12 |
 | #797, orientation : D7, D8, D12, D13, D16 | §10.3 (D13 réécrite) |
 
 ### I.7 Correspondance de la structure du rapport d'évaluation (R0 à R6)
@@ -1745,11 +1789,11 @@ R0 → glossaire ; R1 → annexe I ; R2 → §4.4 à §4.9 ; R3 et R4 → ch. 7 
 Décisions génériques de la convergence sentropic + engram (§9.5), décidées par Fabien, Farid consulté ; une ligne chacune au registre (§3.1).
 
 #### G1 — Terminologie et provenance du jeu de référence
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+**Étape 1 · Décide : Fabien · Consulté : Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1).
 
 Le mot « oracle » désigne, en génie logiciel, le mécanisme qui rend le verdict d’un test, pas un jeu de réponses ; les quatre sièges de la convergence le rejettent comme nom d’objet (§9.5). Il faut un terme commun à immo, BPMN et aux paquets génériques avant d’écrire les contrats, et une façon de dire d’où viennent les étiquettes. Ce dossier applique déjà la recommandation : « jeu de référence » partout, avec l’attribut label_provenance (E = machine, « silver » ; C = un seul annotateur humain, Steve, « gold » en construction). Le renommage ne change aucune empreinte.
 
-**Dépend de :** aucune décision antérieure. **Conditionne :** G2 (Porteurs et forme de l’annotation), G5 (Scellement et stockage des jeux de référence), D9 (Sens de « double annotation » (proposée close)), D10 (Jeu de référence #783).
+**Dépend de :** aucune décision antérieure. **Conditionne :** G2 (Porteurs et forme de l’annotation), G5 (Scellement et stockage des jeux de référence), D9 (Sens de « double annotation » (clôture recommandée)), D10 (Jeu de référence #783).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
@@ -1760,7 +1804,7 @@ Le mot « oracle » désigne, en génie logiciel, le mécanisme qui rend le verd
 **Recommandation : (c) « Jeu de référence » (ReferenceSet) + label_provenance.** (c) : seul terme exact pour E comme pour C, aligné sur les usages établis (HF evaluate, spaCy, VIM) ; la provenance devient un attribut au lieu d’un mot dans le nom.
 
 #### G2 — Porteurs et forme de l’annotation
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+**Étape 1 · Décide : Fabien · Consulté : Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1).
 
 Les retours de Steve, ses annotations futures et les validations de l’équipe doivent vivre quelque part ; la même boucle existe déjà trois fois dans les domaines (immo E, brouillon C, BPMN d2d). Le module comments de sentropic ne convient pas à la validation : il édite en place et supprime physiquement (§9.5, annexe III). Il faut décider qui porte l’annotation et sous quelle forme, avant que D2 (modèle immo) puisse être tranchée. Concrètement : soit immo écrit ses tables, soit un paquet générique les fournit, avec ses tables dans le Postgres d’immo.
 
@@ -1769,7 +1813,7 @@ Les retours de Steve, ses annotations futures et les validations de l’équipe 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
 | (a) Le domaine (six tables immo) | Chaque domaine écrit ses tables d’annotation : pour immo, les six tables de la version précédente du dossier. | • Livrable vite, sans attendre un paquet.<br>• Modèle sur mesure pour Steve. | • Réimplémentation : chaque domaine refait la boucle (« prevent each new app … from inventing a private model »).<br>• Pas de mise en commun avec BPMN ni avec sentropic. |
-| **(b) Paquet frère @sentropic/annotations** (recommandée) | Un nouveau paquet sentropic porte annotations, révisions, validations, adjudications et cibles, avec un adaptateur Postgres (./pg) installé dans la base de l’hôte et un port vers son stockage objet ; comments reçoit seulement deux évolutions (tombstone, types ouverts déplacés vers le port hôte, sans changement d’UI). | • Une seule implémentation pour immo, BPMN et sentropic.<br>• Réemploi de CommentTarget, CommentAuthor et de l’IdP partagé.<br>• Données dans la base de l’hôte (résidence des données respectée). | • Paquet à créer, avec une consommation réelle dans sentropic exigée dès L2.<br>• Immo dépend de son calendrier (G7). |
+| **(b) Paquet frère @sentropic/annotations** (recommandée) | Un nouveau paquet sentropic porte annotations, révisions, validations, adjudications et cibles, avec un adaptateur Postgres (./pg) installé dans la base de l’hôte et un port vers son stockage objet ; comments reçoit seulement deux évolutions (tombstone, types ouverts déplacés vers le port hôte, sans changement d’UI). | • Une seule implémentation pour immo, BPMN et sentropic.<br>• Réemploi de CommentTarget, CommentAuthor et de l’IdP partagé.<br>• Données dans la base de l’hôte (résidence des données respectée). | • Paquet à créer, avec une consommation réelle dans sentropic exigée dès G-L2.<br>• Immo dépend de son calendrier (G7). |
 | (c) Étendre comments | On ajoute révisions, validations et statuts au module comments existant : un commentaire devient aussi une annotation validable. | • Un seul module à connaître.<br>• Pas de nouveau paquet. | • Casse la sémantique du commentaire : « résolu » n’est pas « validé ».<br>• Les quatre sièges rejettent cette voie. |
 | (d) h2a ou track | Les annotations sont portées par h2a ou par track, à côté des décisions, dans leurs propres journaux. | • Proche des outils de décision existants.<br>• Pas de nouveau paquet à publier. | • Hors de leur rôle : track porte des décisions, pas des données métier.<br>• Pas d’écran ni de cible métier dans ces outils. |
 | (e) Tout dans engram, en fichiers | Annotations et validations sont des fichiers versionnés dans le dépôt, lus par engram. | • Simple pour un jeu figé.<br>• Versionnage par git. | • Pas de saisie dans l’application ni de boucle de validation pour Steve.<br>• Données personnelles dans un dépôt. |
@@ -1777,7 +1821,7 @@ Les retours de Steve, ses annotations futures et les validations de l’équipe 
 **Recommandation : (b) Paquet frère @sentropic/annotations.** (b) : réemploi des cibles et des auteurs de comments et de l’IdP sentropic, sans casser la sémantique du commentaire ; les données restent dans la base de l’hôte. L’évaluation reste un module d’engram, indépendant du producteur.
 
 #### G3 — Sémantique de version et effacement
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+**Étape 1 · Décide : Fabien · Consulté : Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1).
 
 Une annotation change : Steve corrige, l’équipe conteste, un retour est retiré. Il faut décider comment une modification est gardée, sur quoi porte une validation et comment on efface une donnée personnelle (Loi 25, décision O1 du dossier COLLAB : tombstone et rétention). Ce choix fixe ce que le jeu de référence peut citer : une révision précise, désignée par son empreinte. Il remplace, pour les annotations, la question posée par D4 sur la suppression (§9.5).
 
@@ -1792,7 +1836,7 @@ Une annotation change : Steve corrige, l’équipe conteste, un retour est retir
 **Recommandation : (a) Révisions immuables chaînées, validation liée au hash, tombstone.** (a) : l’absence d’écrasement est garantie par construction, une validation reste attachée à ce qu’elle a validé, et l’effacement purge le corps en gardant l’empreinte.
 
 #### G4 — Autorité de validation et rôles
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+**Étape 1 · Décide : Fabien · Consulté : Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1).
 
 La boucle de validation demandée par l’owner (Steve annote, l’équipe ou le PO valide ou conteste, §9.1) suppose de dire qui a le droit de faire quoi. Sentropic ne connaît aujourd’hui aucun rôle de revue : seulement des rôles de workspace, de tenant et globaux (§9.5). Il faut décider comment ces rôles s’attribuent, ce que peut faire un agent (modèle, MCP) et qui décide d’un gel ou d’une promotion. D5 (compte de Steve) et D8 (cas contradictoires) en dépendent.
 
@@ -1800,14 +1844,14 @@ La boucle de validation demandée par l’owner (Steve annote, l’équipe ou le
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
-| **(a) Attributions par (workspace, profil), agents en proposition seulement** (recommandée) | Chaque rôle (annotateur, validateur, adjudicateur, curateur, décideur) s’attribue pour un workspace et un profil ; un agent ou un connecteur MCP lit et propose, sans valider ; gel et promotion sont des actes humains. | • Steve peut valider le ciblage sans droit sur d’autres domaines.<br>• Les agents ne signent jamais (B2B2B).<br>• Une promotion repose sur une référence humaine adjugée. | • Gestion d’attributions à construire dans sentropic.<br>• Rôles à désigner par l’owner (voir §9.5). |
+| **(a) Attributions par (workspace, profil), agents en proposition seulement** (recommandée) | Chaque rôle (annotateur, validateur, adjudicateur, curateur, décideur) s’attribue pour un workspace et un profil ; un agent ou un connecteur MCP lit et propose, sans valider ; gel et promotion sont des actes humains. | • Steve peut valider le ciblage sans droit sur d’autres domaines.<br>• Les agents ne signent jamais.<br>• Une promotion repose sur une référence humaine adjugée. | • Gestion d’attributions à construire dans sentropic.<br>• Rôles à désigner par Fabien, owner (voir §9.5). |
 | (b) Dérivées des rôles de workspace | Les rôles de workspace existants suffisent : un éditeur peut valider, un administrateur peut geler un jeu. | • Aucune nouvelle notion de rôle.<br>• Rien à construire dans sentropic. | • Mélange droit d’édition et compétence métier.<br>• Un éditeur quelconque pourrait valider le ciblage de Steve. |
 | (c) Validation par la machine seule | Un modèle ou une règle valide automatiquement les annotations, sans intervention de l’équipe ni du PO. | • Rapide, sans charge humaine.<br>• Aucune attente de validation. | • Circularité : le jeu de référence noterait des modèles avec des étiquettes de modèles.<br>• Contraire à la vision owner (validation par l’équipe ou le PO). |
 
 **Recommandation : (a) Attributions par (workspace, profil), agents en proposition seulement.** (a) : la compétence est liée au profil (Steve sur le ciblage, pas sur BPMN), les agents ne font que proposer, et seul un humain décide d’un gel ou d’une promotion ; une promotion exige une référence human_adjudicated.
 
 #### G5 — Scellement et stockage des jeux de référence
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+**Étape 1 · Décide : Fabien · Consulté : Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1).
 
 Un jeu de référence n’a de valeur que si sa partie test n’a jamais servi à optimiser un prompt ; le pilote C l’a montré : son test aveugle est consommé et partiellement contaminé (§4.1). Il faut décider comment la partie test est protégée et où les jeux sont stockés, sachant que le dépôt radar est public et qu’un agent en ligne de commande peut lire les fichiers. D10 (jeu de référence #783) et D13 (seuil de bascule) en dépendent.
 
@@ -1822,7 +1866,7 @@ Un jeu de référence n’a de valeur que si sa partie test n’a jamais servi �
 **Recommandation : (a) Procédural : garde, sceau track, journal d’exposition.** (a) en v1 (garde, sceau inscrit dans track avant tout appel de modèle, journal d’exposition, stockage privé) ; (b) ou (c) obligatoire pour tout jeu qui fonde une bascule (D13). Stockage : objet privé de l’hôte, derrière un port du paquet ; manifestes publics.
 
 #### G6 — Règle et porteur de la promotion
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+**Étape 1 · Décide : Fabien · Consulté : Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1).
 
 Promouvoir un candidat (prompt, modèle, effort) en production doit reposer sur une preuve mesurée sur le jeu figé, pas sur une impression. Il faut décider si la règle est commune aux domaines, qui la décide et qui l’applique. La règle immo de bascule B → C (D13) en est une instance, et D11 (benchmark #782) en fournit les preuves (§9.5).
 
@@ -1838,22 +1882,22 @@ Promouvoir un candidat (prompt, modèle, effort) en production doit reposer sur 
 **Recommandation : (a) Gabarit générique préenregistré, décision track, garde engram.** (a) : gabarit générique préenregistré, instancié par domaine ; décision dans track, attestée par h2a et jamais par l’API sentropic ; signataire humain authentifié par l’IdP ; garde de production dans engram sur l’empreinte exacte.
 
 #### G7 — Séquencement, tables immo et pilote C
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+**Étape 1 · Décide : Fabien · Consulté : Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1).
 
-Immo pourrait construire ses six tables tout de suite, puis migrer ; ou attendre les paquets génériques et en être le premier adoptant. La convergence recommande de ne pas construire les tables immo et d’ordonner le travail en lots L0 à L4 : contrats, parité des évaluateurs (avec un diagramme BPMN en recette), @sentropic/annotations avec une consommation réelle dans sentropic, jeu de référence C v2, boucle BPMN. Le pilote C actuel devient une version v0 exploratoire, jamais rescellée ; C v2 prend les 51 villes déjà vues en développement et les 52 suivantes en test aveugle. D2 (modèle immo) et D15 (séquencement immo) en dépendent (§9.5).
+Immo pourrait construire ses six tables tout de suite, puis migrer ; ou attendre les paquets génériques et en être le premier adoptant. La convergence recommande de ne pas construire les tables immo et d’ordonner le travail en lots génériques G-L0 à G-L4 : contrats, parité des évaluateurs (avec un diagramme BPMN en recette), @sentropic/annotations avec une consommation réelle dans sentropic, jeu de référence C v2, boucle BPMN. Le pilote C actuel devient une version v0 exploratoire, jamais rescellée ; Selon la convergence, C v2 prend les 51 villes déjà vues en développement et les 52 suivantes en test aveugle ; ce test est remplacé par le test neuf de D10 réécrite (villes hors registre d’exposition, §7.3). D2 (modèle immo) et D15 (séquencement immo) en dépendent (§9.5).
 
 **Dépend de :** G2 (Porteurs et forme de l’annotation). **Conditionne :** D2 (Modèle de données immo : adoption du générique), D10 (Jeu de référence #783), D15 (Séquencement).
 
 | Option | Description | Avantages | Inconvénients |
 |---|---|---|---|
 | (a) Immo construit ses tables, puis migre | Immo livre ses six tables (lot L1 immo), puis les migre vers les paquets génériques quand ils existent. | • Valeur immédiate pour Steve.<br>• Aucune dépendance aux autres dépôts. | • Double travail et migration de données.<br>• Deux modèles pendant la transition. |
-| **(b) Générique d’abord, immo premier adoptant, délai borné** (recommandée) | L0 contrats ; L1 parité des évaluateurs (renotation sans appel de modèle) + un diagramme BPMN en recette ; L2 @sentropic/annotations et import, consommé dans sentropic ; L3 jeu de référence C v2 (52 villes en test) ; L4 boucle BPMN. | • Une seule implémentation.<br>• Les besoins de Steve servent de recette.<br>• Pilote C reclassé en v0 exploratoire, sans être rescellé. | • Steve attend L2 pour annoter dans l’application.<br>• Dépend de la coordination entre trois dépôts. |
+| **(b) Générique d’abord, immo premier adoptant, délai borné** (recommandée) | G-L0 contrats ; G-L1 parité des évaluateurs (renotation sans appel de modèle) + un diagramme BPMN en recette ; G-L2 @sentropic/annotations et import, consommé dans sentropic ; G-L3 jeu de référence C v2 (52 villes en test selon la convergence, remplacé par le test neuf de D10 réécrite, §7.3) ; G-L4 boucle BPMN. | • Une seule implémentation.<br>• Les besoins de Steve servent de recette.<br>• Pilote C reclassé en v0 exploratoire, sans être rescellé. | • Steve attend G-L2 pour annoter dans l’application.<br>• Dépend de la coordination entre trois dépôts. |
 | (c) Attendre sans borne | Immo n’engage rien tant que les paquets génériques ne sont pas livrés, sans date convenue. | • Aucun travail immédiat.<br>• Aucune dette de transition. | • Aucun calendrier pour Steve.<br>• La boucle reste refaite à la main dans les domaines. |
 
 **Recommandation : (b) Générique d’abord, immo premier adoptant, délai borné.** (b) : pas de double travail, les besoins de Steve deviennent la recette du générique, et le délai est borné par les lots.
 
 #### G8 — BPMN : producteur, code d2d, constructeur silver
-**Étape 1 · Décide : Fabien · Consulté : Farid.** Prise telle quelle, sauf incohérence avec une autre décision.
+**Étape 1 · Décide : Fabien · Consulté : Farid.** À décider par Fabien ; non rouverte par Farid sauf incohérence avec une autre décision (§10.1).
 
 BPMN est le second domaine qui doit valider le contrat générique : des diagrammes de processus produits par un outil et comparés à des diagrammes validés. Il faut décider si l’on garde le producteur actuel en n’adoptant que l’évaluation, et si le constructeur de références machine (silver) devient générique. Cette décision n’a pas d’effet direct sur immo ; elle conditionne la recette « deux profils sur la même implémentation » de G7 (§9.5).
 
@@ -2009,7 +2053,7 @@ Qui lit quoi : la collecte et le refresh écrivent S3, puis projettent dans Post
 
 | Cible | Objet physique existant | Clé utilisée | Clé existante ou nouvelle |
 |---|---|---|---|
-| Signal | nœud `graph_nodes` de type `Signal` ou `DesignationEvent` | `city_slug` + `id` texte | clé `(city_slug, id)` décidée pour #812 |
+| Signal | nœud `graph_nodes` de type `Signal` ou `DesignationEvent` | `city_slug` + `id` texte | clé `(city_slug, id)` décidée pour #812 (branche `fix/graph-city-key` non fusionnée ; PK `id` seule sur `782d20c9`, annexe III.7.1) |
 | Ville | registre `QC_MUNICIPALITIES` (pas de table) | `city_slug` | existante |
 | PV, document | objet S3 `raw/proces-verbaux-<ville>/cas/<sha>.pdf` et ligne `documents` | `sha256` (+ page) | existante |
 | Zone | `zone_versions`, copie de `qc-zonage-<ville>` du service geo | `canonical_id` `ogc:zones:<ville>:<code>` | existante |
@@ -2037,7 +2081,7 @@ Qui lit quoi : la collecte et le refresh écrivent S3, puis projettent dans Post
 | `zone_versions`, `lot_versions`, `geo_resolutions`, `geo_unresolved` | Postgres d'immo (copie du service geo) | immo | pull OGC, mapper G1 | inchangé | `canonical_id` réutilisé comme clé de cible | — |
 | `signals`, `prospect_marks` | Postgres d'immo | immo | application immo | inchangé | `signals` orpheline ; `prospect_marks` pour l'équipe | — |
 | Collections `qc-zonage-*`, `qc-lots-*`, `qc-zoning-events-*` | service geo (PostGIS, S3 geo : `non vérifié`) | geo | service geo | inchangé | Aucune collection ni API nouvelle | — |
-| Six tables immo du brouillon | — | — | — | **abandonnées** | Remplacées par les tables du paquet (§9.2) | G7, D2 |
+| Six tables immo du brouillon | — | — | — | **abandonnées si D2 (a)** | Remplacées par les tables du paquet (§9.2) dans le scénario recommandé G7 (b) et D2 (a), à décider ; avec D2 (b), construites puis migrées | G7, D2 |
 | Supprimé de l'existant | — | — | — | **aucun** | Rien de ce qui existe n'est supprimé | — |
 
 ### III.2 Annotations existantes : deux tables, aucune table de jeu de référence
@@ -2102,7 +2146,7 @@ erDiagram
 2. **Une seule cible par note**, alors qu'une ligne du classeur vise 1 à N objets (la ligne #7 nomme deux événements ; une ligne agrégée vise une ville).
 3. **10 000 caractères au plus** : la cellule E57 des Constats en compte 17 114.
 4. **Aucune provenance** (fichier, sha256, feuille, ligne, révision) **ni verdict structuré** (classement, motif, sens, filtrage) : on ne peut ni réimporter sans doublon, ni construire un jeu de référence.
-5. **L'ancre signal est cassée (défaut corrigé par B0)** : l'UI envoie l'identifiant texte du graphe (`signal-…`, table `graph_nodes`), l'API exige l'UUID de la table `signals`, que plus aucun code de `main` n'alimente.
+5. **L'ancre signal est cassée (défaut à corriger par B0)** : l'UI envoie l'identifiant texte du graphe (`signal-…`, table `graph_nodes`), l'API exige l'UUID de la table `signals`, que plus aucun code de `main` n'alimente.
 
 **Aucune table de jeu de référence n'existe en base aujourd'hui.** Le jeu de référence actuel (jeu de référence d'extraction v3, dit E) est un ensemble de fichiers JSON versionnés dans le dépôt, hors de `main` : `docs/reviews/refresh-benchmark/v101b/oracle-v3/` sur la branche `feat/t1-model-benchmark-real` (commit `dd0561f6`, 674 éléments sur 100 documents) ; la version 676 n'existe qu'en copie locale. Les campagnes du benchmark #782 lisent ces fichiers. Le §4.9 décrit comment le jeu de référence de ciblage C s'y ajoute.
 
@@ -2262,8 +2306,8 @@ Schéma de l’option D3 (a) Clé texte namespacée + instantané observé, B0 i
 
 ```mermaid
 erDiagram
-    annotation_cibles }o..o| graph_nodes : cle_texte_sans_fk
-    annotation_cibles {
+    annotation_targets }o..o| graph_nodes : cle_texte_sans_fk
+    annotation_targets {
       uuid id PK
       text city_slug "ville"
       text cible_id "signal-… (texte)"
@@ -2279,8 +2323,8 @@ Schéma de l’option D3 (b) Attendre une clé métier stable :
 
 ```mermaid
 erDiagram
-    annotation_cibles }o..o| cle_metier_stable : attend
-    annotation_cibles {
+    annotation_targets }o..o| cle_metier_stable : attend
+    annotation_targets {
       uuid id PK
       text business_key "à définir"
     }
@@ -2424,6 +2468,8 @@ Les relations sont logiques : la DDL ne déclare aucune clé étrangère.
 
 La branche immo `fix/graph-city-key` (non fusionnée, `.worktrees/fix-812-city-scoped-pk`) passe immo en PK `(city_slug, id)`. Les noms de colonnes des arêtes restent différents. Parade : un schéma dédié (option `schema`) ou une base séparée.
 
+Détail repris du §9.5. Immo : `city_slug` nullable, arêtes `src_id`/`dst_id`/`kind` (`api/src/db/schema.ts@782d20c9:285-290,314-319`) ; engram : arêtes `source_id`/`target_id`/`relation` (`src/storage/postgres.ts@c96fc01e:397-421`). Le `CREATE TABLE IF NOT EXISTS` du store ne fait rien en silence sur la table immo, puis les upserts échouent. Option `schema` du store : `postgres.ts@c96fc01e:577`. Le store réécrit `graph/{citySlug}/latest.json` à chaque push, avec `force: true` (`postgres.ts@c96fc01e:990-994`), sous `target` (`:585`), même chemin que la clé canonique S3 d'immo (`api/src/storage/object-store.ts@782d20c9:46`). Homonyme « sealed » : `engram-memory/contracts/index.ts@c96fc01e:462`.
+
 #### III.7.2 Clés S3 exactes et producteurs
 
 Engram n'écrit pas sur S3 : aucun `@aws-sdk` ni `S3Client` sous `src/` à `c96fc01e`. S3 n'a pas été listé, donc toutes les présences sont `unverified (S3 non listé)`.
@@ -2471,7 +2517,7 @@ engram profile evaluate --run <occurrences.json> --gold <gold.json> \
 
 #### III.7.5 Boucle ReferenceSet, sceau, runs, promotion (conception)
 
-Rien n'est codé à `c96fc01e`. Tout ce qui suit est spécifié dans `SYNTHESE.md` (non suivi par git) et repris dans le dossier §6.7 et les fiches G1 à G7 (`DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md@07b9920a:1087-1099,1458-1503`).
+Rien n'est codé à `c96fc01e`. Tout ce qui suit est spécifié dans `SYNTHESE.md` (non suivi par git) et repris dans le dossier §6.7 de la version `07b9920a` (aujourd'hui §9.5) et les fiches G1 à G7 (`DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md@07b9920a:1087-1099,1458-1503`).
 
 - **Terminologie.**
   - `ReferenceSet`, `ReferenceSetVersion` (`engram_reference_set_v1`), `ReferenceItem` (`SYNTHESE.md:60-66`).
@@ -2510,7 +2556,7 @@ Leur emplacement est `unverified` : il reste à décider.
 
 #### III.7.7 `job_evaluation` = `engram profile evaluate`
 
-- **Rôle dans le schéma.** Le nœud `job_evaluation` (`focus/physical-model.js@07b9920a:133-137`) devient l'exécution de `engram profile evaluate` (III.4) : un job Node, sans Python, qui utilise le binaire `engram` du paquet (`package.json@c96fc01e:23-25`).
+- **Rôle dans le schéma.** Le nœud `job_evaluation` (`focus/physical-model.js@07b9920a:133-137`) devient l'exécution de `engram profile evaluate` (III.7.4) : un job Node, sans Python, qui utilise le binaire `engram` du paquet (`package.json@c96fc01e:23-25`).
 - **Entrées et sorties v1.**
   - `--run`, soit l'objet 6 (`predictions.jsonl` au format `TypedEntityOccurrenceV1[]`) ;
   - `--gold`, soit l'objet 3 ou 4 au format `engram_typed_linking_gold_v1` ;
@@ -2571,7 +2617,7 @@ Motif bloquant commun (3/3) : redécouper les 121 lignes exposées ne peut pas p
 
 **Table des matières (points T1 à T8, accord au T4).** Analyse en profondeur après « Ce que veut Steve », registre en tête rédigé en dernier (T1) ; chapitre distinct pour la définition de C (T3) ; détection scindée en exploratoire et confirmatoire (T4) ; capitalisation condensée dans le corps, détail en annexe (T5) ; registre unique au ch. 3, fiches G en annexe II, fiches D au ch. 10 (T6) ; annexe A sortie vers un journal externe, scènes ventilées dans les chapitres (T7) ; « limites du signal seul » au lieu de « plafond du signal seul » (T8).
 
-**Points arbitrés par l'owner le 2026-10-05.** Accès des 3 IA au classeur (refusé aux tours 1 à 4 par le contrôle de permissions, accordé au tour 5) ; usage des 121 lignes et extension après clarification des désaccords (D10) ; date du signal pour le contexte d'entrée (D17) ; zéro Pertinent masqué (D13, à acter avec Farid). Restent mineurs : la variante de la famille secondaire et le découpage interne facultatif du dev.
+**Points arbitrés par Fabien (owner) le 2026-10-05.** Accès des 3 IA au classeur (refusé aux tours 1 à 4 par le contrôle de permissions, accordé au tour 5) ; usage des 121 lignes et extension après clarification des points à clarifier avec Steve (D10, §4.8) ; date du signal pour le contexte d'entrée (D17) ; zéro Pertinent masqué (D13 : proposition, à acter avec Farid). Restent mineurs : la variante de la famille secondaire et le découpage interne facultatif du dev.
 
 **Tour 5 : le classeur vérifié.** Verdicts retenus sur les 12 points vérifiés : code de motif = sortie de décision (3/3) ; biais des propositions 3, 8, 9, 10 partiel (2/3) ; positif P ∪ S maintenu avec la distinction classement / affichage par passe (3/3) ; R′ intégrée avec provenance, R-14 et R-16 exclues (3/3) ; inputs de Steve = P, Q, R + B, colonnes L à T de l'assistant (3/3) ; strate « source de Steve » retirée (3/3) ; colonne B observation de Steve, colonne O jugement de l'assistant (2/3) ; unité = enregistrement radar, une étape par ligne, « 162 » absent du classeur (3/3) ; correspondance colonnes → tags `partial` (3/3) ; une paire touchant L à T n'est pas une incohérence de Steve (3/3) ; premier rapport, gold 30 et vivier B absents du classeur (3/3) ; 67,1 % = 49/73, part P ∪ S en passe 1 observée (3/3). Nouveaux constats : §2.4, §4.1, §5.2, §12.3.
 

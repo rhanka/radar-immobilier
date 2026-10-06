@@ -157,7 +157,7 @@ export const STEVE_MODEL = {
     reference_set_versions {
       text id PK "ReferenceSet@version"
       text label_provenance "human_single pour C"
-      text partitions "dev 51 villes, test 52"
+      text partitions "dev 51 villes, test neuf"
       text manifest_sha256 "gel décidé dans track"
     }
     eval_runs {

@@ -37,7 +37,7 @@ export const GENERIC = [
         ['Réimplémentation : chaque domaine refait la boucle (« prevent each new app … from inventing a private model »).', 'Pas de mise en commun avec BPMN ni avec sentropic.']),
       opt('b', '(b) Paquet frère @sentropic/annotations', 'Un nouveau paquet sentropic porte annotations, révisions, validations, adjudications et cibles, avec un adaptateur Postgres (./pg) installé dans la base de l’hôte et un port vers son stockage objet ; comments reçoit seulement deux évolutions (tombstone, types ouverts déplacés vers le port hôte, sans changement d’UI).',
         ['Une seule implémentation pour immo, BPMN et sentropic.', 'Réemploi de CommentTarget, CommentAuthor et de l’IdP partagé.', 'Données dans la base de l’hôte (résidence des données respectée).'],
-        ['Paquet à créer, avec une consommation réelle dans sentropic exigée dès L2.', 'Immo dépend de son calendrier (G7).']),
+        ['Paquet à créer, avec une consommation réelle dans sentropic exigée dès G-L2.', 'Immo dépend de son calendrier (G7).']),
       opt('c', '(c) Étendre comments', 'On ajoute révisions, validations et statuts au module comments existant : un commentaire devient aussi une annotation validable.',
         ['Un seul module à connaître.', 'Pas de nouveau paquet.'],
         ['Casse la sémantique du commentaire : « résolu » n’est pas « validé ».', 'Les quatre sièges rejettent cette voie.']),
@@ -77,8 +77,8 @@ export const GENERIC = [
     recommendation: '(a) : la compétence est liée au profil (Steve sur le ciblage, pas sur BPMN), les agents ne font que proposer, et seul un humain décide d’un gel ou d’une promotion ; une promotion exige une référence human_adjudicated.',
     options: [
       opt('a', '(a) Attributions par (workspace, profil), agents en proposition seulement', 'Chaque rôle (annotateur, validateur, adjudicateur, curateur, décideur) s’attribue pour un workspace et un profil ; un agent ou un connecteur MCP lit et propose, sans valider ; gel et promotion sont des actes humains.',
-        ['Steve peut valider le ciblage sans droit sur d’autres domaines.', 'Les agents ne signent jamais (B2B2B).', 'Une promotion repose sur une référence humaine adjugée.'],
-        ['Gestion d’attributions à construire dans sentropic.', 'Rôles à désigner par l’owner (voir §9.5).']),
+        ['Steve peut valider le ciblage sans droit sur d’autres domaines.', 'Les agents ne signent jamais.', 'Une promotion repose sur une référence humaine adjugée.'],
+        ['Gestion d’attributions à construire dans sentropic.', 'Rôles à désigner par Fabien, owner (voir §9.5).']),
       opt('b', '(b) Dérivées des rôles de workspace', 'Les rôles de workspace existants suffisent : un éditeur peut valider, un administrateur peut geler un jeu.',
         ['Aucune nouvelle notion de rôle.', 'Rien à construire dans sentropic.'],
         ['Mélange droit d’édition et compétence métier.', 'Un éditeur quelconque pourrait valider le ciblage de Steve.']),
@@ -129,17 +129,17 @@ export const GENERIC = [
   {
     key: 'G7', question: 'G7 — Séquencement, tables immo et pilote C', recommended: 'b', dependsOn: ['G2'],
     intro: 'Immo pourrait construire ses six tables tout de suite, puis migrer ; ou attendre les paquets génériques et en être le premier adoptant. '
-      + 'La convergence recommande de ne pas construire les tables immo et d’ordonner le travail en lots L0 à L4 : contrats, parité des évaluateurs (avec un diagramme BPMN en recette), @sentropic/annotations avec une consommation réelle dans sentropic, jeu de référence C v2, boucle BPMN. '
-      + 'Le pilote C actuel devient une version v0 exploratoire, jamais rescellée ; C v2 prend les 51 villes déjà vues en développement et les 52 suivantes en test aveugle. '
+      + 'La convergence recommande de ne pas construire les tables immo et d’ordonner le travail en lots génériques G-L0 à G-L4 : contrats, parité des évaluateurs (avec un diagramme BPMN en recette), @sentropic/annotations avec une consommation réelle dans sentropic, jeu de référence C v2, boucle BPMN. '
+      + 'Le pilote C actuel devient une version v0 exploratoire, jamais rescellée ; Selon la convergence, C v2 prend les 51 villes déjà vues en développement et les 52 suivantes en test aveugle ; ce test est remplacé par le test neuf de D10 réécrite (villes hors registre d’exposition, §7.3). '
       + 'D2 (modèle immo) et D15 (séquencement immo) en dépendent (§9.5).',
     recommendation: '(b) : pas de double travail, les besoins de Steve deviennent la recette du générique, et le délai est borné par les lots.',
     options: [
       opt('a', '(a) Immo construit ses tables, puis migre', 'Immo livre ses six tables (lot L1 immo), puis les migre vers les paquets génériques quand ils existent.',
         ['Valeur immédiate pour Steve.', 'Aucune dépendance aux autres dépôts.'],
         ['Double travail et migration de données.', 'Deux modèles pendant la transition.']),
-      opt('b', '(b) Générique d’abord, immo premier adoptant, délai borné', 'L0 contrats ; L1 parité des évaluateurs (renotation sans appel de modèle) + un diagramme BPMN en recette ; L2 @sentropic/annotations et import, consommé dans sentropic ; L3 jeu de référence C v2 (52 villes en test) ; L4 boucle BPMN.',
+      opt('b', '(b) Générique d’abord, immo premier adoptant, délai borné', 'G-L0 contrats ; G-L1 parité des évaluateurs (renotation sans appel de modèle) + un diagramme BPMN en recette ; G-L2 @sentropic/annotations et import, consommé dans sentropic ; G-L3 jeu de référence C v2 (52 villes en test selon la convergence, remplacé par le test neuf de D10 réécrite, §7.3) ; G-L4 boucle BPMN.',
         ['Une seule implémentation.', 'Les besoins de Steve servent de recette.', 'Pilote C reclassé en v0 exploratoire, sans être rescellé.'],
-        ['Steve attend L2 pour annoter dans l’application.', 'Dépend de la coordination entre trois dépôts.']),
+        ['Steve attend G-L2 pour annoter dans l’application.', 'Dépend de la coordination entre trois dépôts.']),
       opt('c', '(c) Attendre sans borne', 'Immo n’engage rien tant que les paquets génériques ne sont pas livrés, sans date convenue.',
         ['Aucun travail immédiat.', 'Aucune dette de transition.'],
         ['Aucun calendrier pour Steve.', 'La boucle reste refaite à la main dans les domaines.']),

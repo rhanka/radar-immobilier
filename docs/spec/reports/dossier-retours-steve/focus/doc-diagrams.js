@@ -68,14 +68,14 @@ export const DOC_DIAGRAMS = {
       text id PK "signal-… (texte)"
     }`,
   },
-  // §4.9 (ancien, à remplacer) — old jeu de référence (extraction, E) and new jeu de référence (targeting, C), two separate
+  // §4.9 — old jeu de référence (extraction, E) and new jeu de référence (targeting, C), two separate
   // sections of benchmark #782. Boxes are artefacts, columns their main properties.
   'jeux-reference': {
     title: 'Ancien jeu de référence (E, extraction) et nouveau jeu de référence (C, ciblage) : deux volets du benchmark #782',
     layers: ['Sources', 'Jeux de référence, versions gelées', 'Benchmark #782'],
     placement: {
       consensus_modeles: { col: 0, row: 0 }, annotations: { col: 0, row: 1 },
-      jeu_ref_e_v3: { col: 1, row: 0 }, jeu_ref_c_v1: { col: 1, row: 1 },
+      jeu_ref_e_v3: { col: 1, row: 0 }, jeu_ref_c_v2: { col: 1, row: 1 },
       volet_extraction: { col: 2, row: 0 }, volet_ciblage: { col: 2, row: 1 },
     },
     existing: ['consensus_modeles', 'jeu_ref_e_v3', 'volet_extraction'],
@@ -83,9 +83,9 @@ export const DOC_DIAGRAMS = {
     colGap: 190,
     er: `erDiagram
     consensus_modeles ||--|| jeu_ref_e_v3 : construit
-    annotations ||--|| jeu_ref_c_v1 : adjugees_gelees
+    annotations ||--|| jeu_ref_c_v2 : adjugees_gelees
     jeu_ref_e_v3 ||--|| volet_extraction : note
-    jeu_ref_c_v1 ||--|| volet_ciblage : note_b_puis_c
+    jeu_ref_c_v2 ||--|| volet_ciblage : note_b_puis_c
     consensus_modeles {
       text methode "7 passes, 3 familles de modèles"
       text arbitrage "vote unanime + arbitrage"
@@ -100,10 +100,10 @@ export const DOC_DIAGRAMS = {
       int taille "674 sur 100 documents"
       text stockage "fichiers JSON du dépôt"
     }
-    jeu_ref_c_v1 {
+    jeu_ref_c_v2 {
       text question "fallait-il montrer ce signal ?"
       text unite "signal, regroupé par dossier"
-      text jeux "dev 51 villes, test 52 villes"
+      text jeux "dev 51 villes, test neuf (§7.3)"
       text stockage "reference_set_versions + JSON gelé"
     }
     volet_extraction {
