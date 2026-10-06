@@ -10,6 +10,9 @@
 // Output files are created exclusively (flag 'wx'): an existing file or symlink at the
 // target path is refused, never overwritten or followed. Unseal writes plaintext in mode
 // 0600 into an output directory that is created in mode 0700, or must already be 0700.
+/* global console */
+import process from 'node:process';
+import { Buffer } from 'node:buffer';
 import { createCipheriv, createDecipheriv, randomBytes, createHash } from 'node:crypto';
 import { readFileSync, writeFileSync, existsSync, mkdirSync, statSync, lstatSync } from 'node:fs';
 import { basename, join, resolve, dirname } from 'node:path';
