@@ -569,6 +569,14 @@ city-scoped store and readers; the blockers were in the repair and mapper paths.
 | SOL-825-02 | blocking | A failed report upload still gave exit 0. | `reportUploaded` / `reportError` in the termination summary, exit 1; the summary carries the bounded city lists; CLI test. |
 | SOL-825-03 | blocking | `RESET=1` skipped requested cities without current geometry. | RESET iterates the requested cities; integration test (purge without geometry, other cities untouched, refusal without `CITIES`). |
 
+Round 2 (implementation `143555c4`): Sol **GO-with-nits** (all round-1 findings fixed; nit SOL-825-05:
+the storage-binding test fixture missed the new manifest — fixed, the untouched fixture is now
+asserted to pass). Astra **NO-GO** on one residual: `nodesContentDiff` reused the classifier's loss
+rules, blind to ref order (the served citation is `refs[0]`) and to null-versus-absent — fixed after
+round 2 by an exact projected-content comparison (`sameProjectedContent`: type, label, source_ref,
+full props JSON with array order kept), with unit and integration regressions. The fix after round 2
+was not re-reviewed (one relaunch allowed by the owner's brief).
+
 ## 15. Revision 6 — deviations from revision 5 and open owner decisions
 
 Implementation branch `fix/graph-city-key` (worktree `.worktrees/fix-812-city-scoped-pk`).
