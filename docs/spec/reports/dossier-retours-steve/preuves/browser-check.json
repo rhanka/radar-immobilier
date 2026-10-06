@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-06T01:52:02.003Z",
+  "checkedAt": "2026-10-06T05:54:07.260Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
   "chromiumCdpPort": "9263",
   "offline": {
@@ -108,7 +108,7 @@
     {
       "sceneId": "architecture-ui",
       "kind": "flow",
-      "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac",
+      "sceneHash": "daa153ab307b4b5a0b90dd3611cbccaa5f26f69ba8bae737e3074916d206d2b0",
       "initialScale": 0.428218,
       "contentInside": true,
       "overlaps": 0,
@@ -118,11 +118,11 @@
       "edgeLabels": 12,
       "panel": {
         "left": 59,
-        "top": 251.078125,
+        "top": 4321.328125,
         "width": 1307,
         "height": 820
       },
-      "iconPx": 69.99990595108683,
+      "iconPx": 69.99962088527339,
       "controls": {
         "boutons": 4,
         "unUn": true,
@@ -219,7 +219,7 @@
     {
       "sceneId": "architecture-ui",
       "kind": "flow",
-      "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac",
+      "sceneHash": "daa153ab307b4b5a0b90dd3611cbccaa5f26f69ba8bae737e3074916d206d2b0",
       "initialScale": 0.577086,
       "contentInside": true,
       "overlaps": 0,
@@ -229,7 +229,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 71.5,
-        "top": -2683.8125,
+        "top": 768.40625,
         "width": 1762,
         "height": 900
       },
@@ -336,7 +336,7 @@
       {
         "sceneId": "architecture-ui",
         "kind": "flow",
-        "sceneHash": "755869fede014f3ea1d54057e679bcc4a55ff2c3d73f420f38b02517ed4f6aac",
+        "sceneHash": "daa153ab307b4b5a0b90dd3611cbccaa5f26f69ba8bae737e3074916d206d2b0",
         "initialScale": 0.428218,
         "contentInside": true,
         "overlaps": 0,
@@ -346,7 +346,7 @@
         "edgeLabels": 12,
         "panel": {
           "left": 59,
-          "top": 47142.078125,
+          "top": 58616.328125,
           "width": 1307,
           "height": 820
         },
@@ -389,6 +389,16 @@
           "id": "steve-signaux",
           "kind": "stacked",
           "bars": 6
+        },
+        {
+          "id": "pr-test-steve",
+          "kind": "scatter",
+          "bars": 12
+        },
+        {
+          "id": "pr-test-consensus",
+          "kind": "scatter",
+          "bars": 12
         }
       ],
       "descriptions": 79,
@@ -458,6 +468,12 @@
           "option": false,
           "tables": 6,
           "scale": 0.78
+        },
+        {
+          "id": "doc-engram-store",
+          "option": false,
+          "tables": 6,
+          "scale": 0.986
         }
       ]
     },
@@ -500,6 +516,16 @@
         "id": "steve-signaux",
         "kind": "stacked",
         "bars": 6
+      },
+      {
+        "id": "pr-test-steve",
+        "kind": "scatter",
+        "bars": 12
+      },
+      {
+        "id": "pr-test-consensus",
+        "kind": "scatter",
+        "bars": 12
       }
     ],
     "descriptions": 79,
@@ -569,6 +595,12 @@
         "option": false,
         "tables": 6,
         "scale": 0.78
+      },
+      {
+        "id": "doc-engram-store",
+        "option": false,
+        "tables": 6,
+        "scale": 0.986
       }
     ]
   },
@@ -628,6 +660,20 @@
         "mode": "transform",
         "fit": 0.698,
         "zoomed": 1.091,
+        "dragged": false
+      },
+      {
+        "id": "chart-pr-test-steve",
+        "mode": "transform",
+        "fit": 1.458,
+        "zoomed": 2.277,
+        "dragged": false
+      },
+      {
+        "id": "chart-pr-test-consensus",
+        "mode": "transform",
+        "fit": 1.458,
+        "zoomed": 2.277,
         "dragged": false
       },
       {
@@ -733,6 +779,13 @@
         "mode": "transform",
         "fit": 0.841,
         "zoomed": 1.314,
+        "dragged": false
+      },
+      {
+        "id": "doc-engram-store",
+        "mode": "transform",
+        "fit": 1.064,
+        "zoomed": 1.663,
         "dragged": false
       }
     ],
@@ -950,7 +1003,7 @@
       "scale": 1,
       "clip": {
         "x": 79,
-        "y": 45711.1875,
+        "y": 56567.40625,
         "width": 1762,
         "height": 900
       }
@@ -961,7 +1014,7 @@
       "sceneId": "criteres-steve",
       "clip": {
         "x": 71.5,
-        "y": 14070.296875,
+        "y": 15505.546875,
         "width": 1762,
         "height": 542.109375
       }
@@ -970,7 +1023,7 @@
       "sceneId": "affichage-abc",
       "clip": {
         "x": 71.5,
-        "y": 32267.3125,
+        "y": 41763.03125,
         "width": 1762,
         "height": 1250.109375
       }
@@ -979,7 +1032,7 @@
       "sceneId": "modele-donnees",
       "clip": {
         "x": 71.5,
-        "y": 39033.46875,
+        "y": 48693.96875,
         "width": 1762,
         "height": 806.109375
       }
@@ -988,7 +1041,7 @@
       "sceneId": "flux-import-oracle",
       "clip": {
         "x": 71.5,
-        "y": 43447.421875,
+        "y": 54303.640625,
         "width": 1762,
         "height": 1334.109375
       }
@@ -997,7 +1050,7 @@
       "sceneId": "architecture-ui",
       "clip": {
         "x": 71.5,
-        "y": 45607.1875,
+        "y": 56463.40625,
         "width": 1762,
         "height": 900
       }
@@ -1026,6 +1079,7 @@
     ".generated/scene-sombre-architecture-ui.png",
     ".generated/graphique-sens.png",
     ".generated/graphique-bruit.png",
+    ".generated/graphique-pr-test-steve.png",
     ".generated/decision-D2.png",
     ".generated/decision-D3.png",
     ".generated/zoom-plein-ecran-affichage-abc.png",
