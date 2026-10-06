@@ -14,6 +14,7 @@ SCRAPE_FILES=(
   deploy/k8s/33-scrape-job.yaml
   deploy/k8s/33b-scrape-cities-job.yaml
   deploy/k8s/41-document-date-recovery-job.yaml
+  deploy/k8s/42-graph-city-key-repair-job.yaml
 )
 FILES=("${GRAPH_FILES[@]}" "${SCRAPE_FILES[@]}" deploy/k8s/36-db-migrate-job.yaml)
 PUBLIC_IMAGE_FILES=(

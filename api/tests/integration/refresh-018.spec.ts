@@ -271,8 +271,10 @@ describe("refresh 0.18 real storage integration", () => {
   it("resumes PG after S3 publication without a second model call", async () => {
     const city = `refresh-018-${randomUUID()}`;
     const fx = await fixture(city);
+    // The projection now opens its city transaction first (per-city lock, GH #812).
     const failingDb = { insert: db.insert.bind(db),
-      select() { throw new Error("injected PG failure"); } } as unknown as Database;
+      select() { throw new Error("injected PG failure"); },
+      transaction() { throw new Error("injected PG failure"); } } as unknown as Database;
     try {
       await expect(runPvRefresh(options(city, fx, failingDb))).rejects.toThrow("injected PG failure");
       expect(await store.head(canonicalGraphKey(city))).not.toBeNull();
