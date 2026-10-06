@@ -27,7 +27,8 @@
     },
     "officeparser": {
       "pdfjs-dist": "npm:empty-npm-package@1.0.0"
-    }
+    },
+    "@sentropic/design-system-svelte": "^0.35.1"
   },
   "scripts": {
     "data:polygons": "node --experimental-strip-types radar/data-prep/fetch-municipal-polygons.ts"

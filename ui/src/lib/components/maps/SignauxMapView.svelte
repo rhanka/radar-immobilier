@@ -608,19 +608,12 @@
     updateGeoLayers();
   }
 
-  function handleDateBasisChange(next: DocumentDateBasis): void {
-    dateBasis = dateBasisForTimeRange(timeRange, next);
-    syncFilterRoute();
-    void load();
-    reconcileToVisibleNodes();
-    updateGeoLayers();
-  }
-
-  function handleTimeRangeChange(next: SignalTimeRange): void {
+  function handleTimeRangeChange(next: SignalTimeRange, basis: DocumentDateBasis = dateBasis): void {
     timeRange = normalizeSignalTimeRange(next);
     dateRange = dateRangeFromSignalTimeRange(timeRange);
-    // A relative preset always falls back to document dates.
-    dateBasis = dateBasisForTimeRange(timeRange, dateBasis);
+    // The rail commits the range and its « Base de date » together (picker
+    // « Appliquer »); a relative preset always falls back to document dates.
+    dateBasis = dateBasisForTimeRange(timeRange, basis);
     syncFilterRoute();
     // #4 — re-charge les comptes BULK date-cohérents pour la nouvelle fenêtre
     // (rail + badges de toutes les villes), pas seulement la lentille locale.
@@ -2487,7 +2480,6 @@
       onFilterChange={handleFilterChange}
       onExclusionsChange={handleExclusionsChange}
       onTimeRangeChange={handleTimeRangeChange}
-      onDateBasisChange={handleDateBasisChange}
     />
   </svelte:fragment>
 
