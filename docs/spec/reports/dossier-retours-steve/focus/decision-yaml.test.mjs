@@ -97,17 +97,17 @@ test('"Je suis" filter: own decisions only (decider or named validator), "toutes
   // This dossier names no validation: own decisions = decisions decided.
   // D1 is decided by the owner (Fabien) since 2026-10-04.
   assert.equal(mine('Farid').length, 9);
-  // Fabien also decides the eight generic decisions G1 to G8.
-  assert.equal(mine('Fabien').length, 15);
+  // Fabien also decides the eight generic decisions G1 to G8, and D17 (owner, 2026-10-05).
+  assert.equal(mine('Fabien').length, 16);
   assert.ok(mine('Farid').every(record => record.decide === 'Farid' && record.role === 'decide'));
   // D9: Fabien decides, Farid is only consulted, so it is not one of Farid's.
   assert.ok(questions.find(question => question.key === 'D9').consulted.includes('Farid'));
   assert.ok(!mine('Farid').some(record => record.id === 'D9'));
   assert.ok(mine('Fabien').some(record => record.id === 'D9'));
   const all = decisionRecords(questions, {}, 'Farid', 'all');
-  assert.equal(all.length, 24);
+  assert.equal(all.length, 25);
   assert.equal(all.find(record => record.id === 'D9').role, null);
-  assert.equal(new Set([...mine('Farid'), ...mine('Fabien')].map(record => record.id)).size, 24);
+  assert.equal(new Set([...mine('Farid'), ...mine('Fabien')].map(record => record.id)).size, 25);
 });
 
 test('records: option id and label, statut, commentaire; unknown option rejected', () => {
@@ -197,6 +197,6 @@ test('round trip on the real dossier: yaml and js-yaml read back every header an
 
 test('the JSON pack stays available internally, for the backend connection', () => {
   const pack = responsePack({ dossier: 'x', dossierHash: 'h', artifactInputHash: 'i' }, { D12: 'a' });
-  assert.equal(pack.responses.length, 24);
+  assert.equal(pack.responses.length, 25);
   assert.equal(pack.responses.find(response => response.key === 'D12').selection, 'a');
 });

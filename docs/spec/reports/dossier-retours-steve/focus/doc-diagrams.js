@@ -7,11 +7,12 @@ import { PHYSICAL } from './physical-model.js';
 export const DIAGRAM_MARKER = /<!-- diagram:([\w-]+) -->/;
 
 export const DOC_DIAGRAMS = {
-  // §6.0 — physical model: current state and proposed state (statuses).
-  ...PHYSICAL,
-  // §6.3 — the minimal model proposed from Steve’s needs (same as scene 2 and D2 option a).
+  // Annexe III.1 — physical model, current state. The proposed state is the modele-donnees
+  // scene (§9.2), not repeated in the text (PHYSICAL['etat-propose'] stays for the tests).
+  'etat-actuel': PHYSICAL['etat-actuel'],
+  // §9.2 — the minimal model proposed from Steve’s needs (same as D2 option a).
   'modele-minimal': { title: 'Modèle cible par propriétaire : sentropic (annotations), immo (profil, données), engram (jeu de référence)', ...STEVE_MODEL },
-  // §6.0 — what exists on main today (schema.ts, migrations 0005 and 0011).
+  // Annexe III.2 — what exists on main today (schema.ts, migrations 0005 and 0011).
   existant: {
     title: 'Existant sur main : deux tables d’annotation, aucune table de jeu de référence',
     layers: ['Annotations existantes', 'Tables référencées', 'Graphe (identifiants texte)'],
@@ -67,7 +68,7 @@ export const DOC_DIAGRAMS = {
       text id PK "signal-… (texte)"
     }`,
   },
-  // §9.3 — old jeu de référence (extraction, E) and new jeu de référence (targeting, C), two separate
+  // §4.9 (ancien, à remplacer) — old jeu de référence (extraction, E) and new jeu de référence (targeting, C), two separate
   // sections of benchmark #782. Boxes are artefacts, columns their main properties.
   'jeux-reference': {
     title: 'Ancien jeu de référence (E, extraction) et nouveau jeu de référence (C, ciblage) : deux volets du benchmark #782',

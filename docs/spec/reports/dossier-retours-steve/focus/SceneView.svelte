@@ -1,45 +1,45 @@
 <script>
-  // Une forme par contenu : matrice (scène 1), entité-relation (scène 2), architecture
-  // en couloirs avec le jeu de référence en bande basse (scène 3) ; les composants (scènes 4 et 5)
-  // gardent Flow.svelte de la chaîne existante (SvelteFlow, Dagre LR, carte A' 460 x 200).
+  // Une scène, rendue dans le chapitre qui porte son repère <!-- scene:<id> -->.
+  // Une forme par contenu : matrice (criteres-steve), entité-relation (modele-donnees),
+  // couloirs avec l'évaluation en bande basse (flux-import-oracle, affichage-abc) ; les
+  // composants (architecture-ui) gardent Flow.svelte de la chaîne existante (SvelteFlow,
+  // Dagre LR, carte A' 460 x 200). Sources canoniques : SCENES_FOCUS.md, hors du rapport.
   import Flow from '../../../../architecture/focus/Flow.svelte';
   import ZoomFrame from './ZoomFrame.svelte';
   import MatrixScene from './MatrixScene.svelte';
   import ErDiagram from './ErDiagram.svelte';
   import LaneDiagram from './LaneDiagram.svelte';
-  let { graphs } = $props();
+  let { graph } = $props();
   const sceneInfo = {
     'criteres-steve': {
-      badge: '§2 · ce que veut Steve',
+      badge: '§2.6 · ce que veut Steve',
       lede: "Une matrice : une ligne par critère de Steve et par exclusion transversale ; ce qu'il demande, ce que fait le radar aujourd'hui, la couverture (partiel ou absent) et le bruit que chaque écart laisse dans sa vue de travail (passe 1, 73 signaux).",
-      note: "Les 24 signaux de bruit de la passe 1 se répartissent par critère : 3 hors résidentiel ou hors urbanisme, 4 resserrements, 6 sans effet sur la capacité, 8 autorisations individuelles, 3 points d'ordre du jour. Le radar filtre par nature d'instrument et par étape ; Steve demande un filtre par effet du règlement, sens et nombre d'unités, pour lequel aucune donnée n'existe encore (§2.3).",
+      note: "Les 24 signaux de bruit de la passe 1 se répartissent par critère : 3 hors résidentiel ou hors urbanisme, 4 resserrements, 6 sans effet sur la capacité, 8 autorisations individuelles, 3 points d'ordre du jour. Le radar filtre par nature d'instrument et par étape ; Steve demande un filtre par effet du règlement, sens et nombre d'unités, pour lequel aucune donnée n'existe encore.",
     },
     'modele-donnees': {
-      badge: '§6.0 · stockage réel et propriétaires',
+      badge: '§9.2 · stockage réel et propriétaires',
       lede: "Les colonnes sont le stockage réel : exécution (jobs et application), Postgres d'immo (tables immo, puis tables du paquet @sentropic/annotations installées chez immo), S3 d'immo (bucket radar-immobilier-docs), service geo, dépôt git d'immo (code, profil, .track). Le badge de chaque boîte est le propriétaire du schéma ou du code : engram (détection et évaluation), sentropic (annotations), track (décisions), immo, geo. Vert : nouveau ; orange : modifié ; gris : inchangé ; rien n'est supprimé.",
       note: "engram ne stocke rien lui-même : sa librairie (@sentropic/graphify 0.18.0, futur @sentropic/engram) est exécutée par le job immo radar-refresh-pv, qui écrit graph/<ville>/latest.json sur le S3 d'immo puis le projette dans graph_nodes. Les tables annotation_* appartiennent à sentropic mais vivent dans le Postgres d'immo ; les jeux de référence vont dans un préfixe privé du S3 d'immo ; les décisions dans .track/.",
     },
     'flux-import-oracle': {
-      badge: '§6.5, §7, §9.3 · architecture et jeu de référence',
+      badge: '§9.6 · architecture et jeu de référence',
       lede: "Une architecture en couloirs verticaux, de gauche à droite : les utilisateurs, les écrans de l'UI, les fonctions backend (collecte, détection de signal, import, rattachement, API), puis les données sur les composants réels, S3 et PostgreSQL. Le jeu de référence est en bas, en bande transversale : un système d'évaluation hors ligne, alimenté par les annotations stockées en base.",
-      note: "Le jeu de référence de ciblage C et le jeu de référence d'extraction E restent séparés jusqu'au benchmark, où ils alimentent deux volets distincts. L'analyse du 21 septembre entre comme annotation distincte de l'adjudication : elle n'écrase pas les classes du tableur, qui font foi pour l'import. L'import est un acte owner distinct, sur l'image Node existante de l'API (§6.5).",
+      note: "Le jeu de référence de ciblage C et le jeu de référence d'extraction E restent séparés jusqu'au benchmark, où ils alimentent deux volets distincts. L'analyse du 21 septembre entre comme annotation distincte de l'adjudication : elle n'écrase pas les classes du tableur, qui font foi pour l'import. L'import est un acte owner distinct, sur l'image Node existante de l'API (§9.4).",
     },
     'architecture-ui': {
-      badge: '§8 · état mesuré sur main 27891b10',
+      badge: '§9.7 · état mesuré sur main 27891b10',
       lede: "Trois conteneurs : l'UI (Vite + Svelte 5), l'API Hono et les paquets sentropic. Les cartes pleines sont constatées dans le code ; les cartes « nouveau » et « nouvelle » sont les ajouts proposés pour la première livraison.",
       note: "La carte Signaux reste un MapLibre local de 2 761 lignes ; les composants geo partagés ne servent qu'au pilote #/geo et le moteur 3D est désactivé. L'avis de Steve se monte dans le panneau et le rail avec les composants DS déjà adoptés : la première livraison n'attend pas la migration geo.",
     },
     'affichage-abc': {
-      badge: '§9.5 · D12 et D13 ouverts',
+      badge: '§8.1 · D12 ouvert, D13 à acter',
       lede: "Deux zones. En haut, l'application : ce que voient les utilisateurs et où chaque élément vit (écran, backend, base). Steve et l'équipe voient B, par défaut et sans sélecteur ; C est calculée en shadow par le backend sur le même snapshot, et ne se voit qu'en recette UAT. En bas, l'évaluation hors ligne, un job sans écran : référence A gelée, diff B → C nommé, jeu de référence C, mesure, seuil de bascule, puis décision de Farid, seule à faire passer les utilisateurs de B à C.",
-      note: "À l'écran, C a trois états : « confirmé » et « à instruire » sont visibles, « exclu prouvé » est masqué avec sa raison ; une absence de donnée n'est jamais une exclusion, l'indéterminé et le mixte restent donc visibles. L'exposition de la comparaison (UAT seulement ou sélecteur visible, D12) et le seuil chiffré de bascule (D13) sont laissés à Farid.",
+      note: "À l'écran, C a trois états : « confirmé » et « à instruire » sont visibles, « exclu prouvé » est masqué avec sa raison ; une absence de donnée n'est jamais une exclusion, l'indéterminé et le mixte restent donc visibles. L'exposition de la comparaison (UAT seulement ou sélecteur visible, D12) est laissée à Farid ; le seuil de bascule (D13 : zéro Pertinent masqué, borne < X, comparateur B′ passe 1) est une proposition de l'owner à acter avec Farid.",
     },
   };
 </script>
 
-<section class="scenes" aria-label="Cinq scènes du dossier de décision">
-  {#each graphs as graph}
-    <article class="scene" data-scene={graph.id} data-scene-hash={graph.sceneHash}>
+<article class="scene" data-scene={graph.id} data-scene-hash={graph.sceneHash}>
       <header class="flex-row">
         <div><span class="eyebrow">{graph.date} · dossier de décision</span><h2>{graph.title}</h2></div>
         <span class="badge warning">{sceneInfo[graph.id].badge}</span>
@@ -57,9 +57,9 @@
       {/if}
       <p class="scene-note">{sceneInfo[graph.id].note}</p>
       {#if graph.kind === 'matrix'}
-        <p class="inventory">{graph.projection.rows.length} lignes · matrice tirée du tableau canonique de l’annexe B.</p>
+        <p class="inventory">{graph.projection.rows.length} lignes · matrice tirée du tableau canonique de SCENES_FOCUS.md.</p>
       {:else if graph.kind === 'er'}
-        <p class="inventory">{graph.entities.length} tables · {graph.relations.length} relations · diagramme entité-relation tiré du bloc <code>erDiagram</code> de l’annexe B.</p>
+        <p class="inventory">{graph.entities.length} tables · {graph.relations.length} relations · diagramme entité-relation tiré du bloc <code>erDiagram</code> de SCENES_FOCUS.md.</p>
       {:else if graph.kind === 'lanes'}
         <p class="inventory">{graph.nodes.length} blocs · {graph.edges.length} liens · {graph.projection.laneKinds.length} couloirs{#if graph.projection.zone}{' dans la zone « application »'}{/if}{#if graph.projection.stores} · {graph.projection.stores} magasins de données{/if} · 1 bande d’évaluation hors ligne · grille explicite et routage orthogonal.</p>
       {:else}
@@ -67,12 +67,9 @@
       {/if}
       <details><summary>Source canonique de cette scène</summary><pre>{graph.source}</pre></details>
     </article>
-  {/each}
-</section>
 
 <style>
-  .scenes { display: grid; gap: 40px; margin-block: 36px; }
-  .scene { border-top: 4px solid var(--st-semantic-data-category1); padding-top: 16px; min-width: 0; }
+  .scene { margin-block: 22px 30px; border-top: 4px solid var(--st-semantic-data-category1); padding-top: 16px; min-width: 0; }
   .scene h2 { margin: 4px 0; }
   .scene-id, .inventory { font-size: .78rem; color: var(--st-semantic-text-secondary); overflow-wrap: anywhere; }
   .scene-note { padding: 12px 14px; border-left: 5px solid var(--st-semantic-data-category2); background: var(--st-semantic-surface-subtle); font-size: .9rem; line-height: 1.55; }

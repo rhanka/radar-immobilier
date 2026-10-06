@@ -1,6 +1,6 @@
 // Option descriptions (what is concretely proposed: what is built or not, where, what the
 // user or the jeu de référence sees, an example from Steve's data) and, where a picture helps, a
-// small entity-relationship diagram per option (D2, D3). Merged into choices.js by key.
+// small entity-relationship diagram per option (D2, D3 ; schémas en annexe III du dossier). Merged into choices.js by key.
 
 export const DESCRIPTIONS = {
   D2: {
@@ -23,11 +23,17 @@ export const DESCRIPTIONS = {
     1: 'Le jeu « steve-source » (verdict de Steve) est comparé à la classification du radar : B′ reconstituée à la date du relevé, puis C. Exemple : sur la passe 1, Steve juge 24 signaux sur 73 Non pertinent alors que B les affiche ; c’est cet écart que l’on mesure ligne par ligne.',
     2: 'On compare deux grilles humaines de Steve : son classement actuel (P/S/N, motif) et un nouvel étiquetage selon les critères C. Steve repasse sur les mêmes lignes ; le jeu de référence mesure l’évolution de ses critères, pas le radar.',
     3: 'On rapproche le jeu de référence d’extraction (676 unités sur 100 procès-verbaux) et le jeu de référence de Steve (124 lignes). Le pont passe par les documents communs, probablement peu nombreux (non vérifié).',
+    4: 'D9 n’est plus une décision séparée : le jeu de référence C v2 garde, pour chaque champ, la provenance de son étiquette (steve_v1 historique, steve_v2a réannotation sans arguments IA, steve_v2 adjudication, steve_test, annotations IA individuelles et majorité IA). La « double annotation » devient une propriété du manifeste, décidée avec D10.',
   },
   D10: {
-    a: 'Les 124 lignes du tableur deviennent l’unique jeu de référence, à la place de la version 674/676. Rapide à constituer, mais il ne contient que ce que l’écran montrait à Steve : les sept dossiers manqués (« l’information existait dans la base ») n’y figurent pas.',
-    b: 'Deux jeux de référence versionnés et gelés par empreinte. E reste le jeu de référence d’extraction (676 unités). C est construit à partir des évaluations et ancres de Steve, adjugées et étayées. Développement sur ses 51 villes, test sur les 52 suivantes, jamais vues ; toutes les unités d’un même dossier dans la même partition.',
+    a: 'Les 121 lignes sont redécoupées par ville, une moitié servant de test aveugle pour toute la suite, sans annotation neuve. Les résultats portent les mentions exploratory, pilot-exposed et test-informed-schema : les tags, consignes et propositions de règle dérivent déjà de ces lignes, et aucune mesure n’est admissible pour D13.',
+    b: 'Les 121 lignes servent à la mise au point des règles (R′) et des tags avec les 3 IA ; elles sont aussi découpées de façon homogène par ville (stratifié au moins sur Passe × Classement, puis sur les tags) en train et test aveugle pour les premiers prompts, aux résultats exploratoires. L’extension à de nouvelles villes vient après la clarification des désaccords avec Steve. Le test confirmatoire est un échantillon neuf de villes hors registre d’exposition, annoté par Steve et, sur au moins 50 cas, par un second annotateur humain.',
     c: 'On lance une campagne d’annotation neuve, conçue pour le ciblage C, sur un nouveau corpus. Les 124 lignes de Steve servent seulement d’exemples ; la comparaison avec l’historique se fait à part.',
+  },
+  D17: {
+    a: 'L’entrée d’un cas est le signal et le contexte d1 de sa ville (autres signaux, métadonnées des documents), reconstruit par une procédure déterministe appliquée à tous les cas et coupé à la date du signal : rien de postérieur. Les colonnes L à T du classeur (textes de l’assistant) et les verdicts, motifs et passes de Steve ne sont jamais en entrée ; d2 reste hors entrée.',
+    b: 'Le contexte d1 est coupé à la date à laquelle Steve a relu le signal (au plus tard le 21 septembre 2026 pour le relevé), et à la date d’annotation pour le test. L’entrée est plus proche de ce que Steve savait ; l’évaluation devient rétrospective et doit être annoncée comme telle.',
+    c: 'Chaque cas n’est évalué que sur le texte et les métadonnées de son signal, sans autre signal ni document de la ville. C’est la condition la plus simple ; la relation rattache_a et toute règle qui regroupe les étapes d’un même dossier y sont not covered.',
   },
   D11: {
     a: 'Le rapport du benchmark #782 garde son tableau d’extraction inchangé et ajoute un tableau « ciblage » : précision et rappel de l’historique, de B, puis de C, sur le jeu de référence C. Le prompt gelé immo-pv-extraction-v9 n’est pas modifié ; l’enrichir serait une nouvelle version, décidée à part.',
@@ -46,26 +52,26 @@ export const DESCRIPTIONS = {
   D6: {
     a: 'Tout utilisateur approuvé voit tous les retours, verbatims compris, comme pour les notes actuelles (règle 0011). Aucun masquage.',
     b: 'Seuls les administrateurs et Steve voient les retours ; le reste de l’équipe ne les voit pas dans le panneau.',
-    c: 'Tout utilisateur approuvé voit les retours, mais les noms de particuliers sont masqués avant affichage, dans les verbatims importés comme dans les résumés de signaux (demande C-79 de Steve). Une colonne pii_status trace le traitement.',
+    c: 'Tout utilisateur approuvé voit les retours, mais les noms de particuliers sont masqués avant affichage, dans les verbatims importés comme dans les résumés de signaux (constat C-79). Une colonne pii_status trace le traitement.',
   },
   D7: {
     S: 'C n’affiche que les signaux qui réunissent les trois critères de façon établie. Exemple : sur la passe 1, seuls 22 signaux sur 73 resteraient ; les 12 Pertinent dont le sens n’est pas donné disparaîtraient.',
-    K: 'C applique les critères K1 à K9 (§9.2) avec trois états : confirmé (critères étayés), à instruire (sens ou effet non déterminable, reste visible), exclu prouvé (masqué, raison affichée). Deux compteurs distincts « confirmés » et « à instruire ». Aucun seuil de taille de projet ni filtre sur l’origine privée.',
+    K: 'C applique les critères K1 à K9 (§5.1) avec trois états : confirmé (critères étayés), à instruire (sens ou effet non déterminable, reste visible), exclu prouvé (masqué, raison affichée). Deux compteurs distincts « confirmés » et « à instruire ». Aucun seuil de taille de projet ni filtre sur l’origine privée.',
     T: 'La sélection affichée reste B ; les critères de Steve servent seulement à trier la liste (les « trois critères » en premier). Aucun signal n’entre ni ne sort.',
   },
   D8: {
-    a: 'Steve et Mathieu examinent les cas listés au §9.2 sur exemples et preuves (Saint-Victor, Amos, CPTAQ, seconds projets, ODJ, trois S-RESTRICTIF). Tant qu’un cas n’est pas tranché, il est marqué « abstention » dans le jeu de référence : il ne compte ni pour ni contre.',
+    a: 'Steve et Mathieu examinent les cas listés au §4.8 sur exemples et preuves (Saint-Victor, Amos, CPTAQ, seconds projets, ODJ, trois S-RESTRICTIF). Tant qu’un cas n’est pas tranché, il est marqué « abstention » dans le jeu de référence : il ne compte ni pour ni contre.',
     b: 'L’équipe tranche elle-même chaque cas à partir de l’analyse et des règles de Steve, puis lui présente le résultat.',
     c: 'Les cas restent dans le jeu de référence avec l’étiquette du tableur, sans statut particulier, même quand le tableur et l’analyse se contredisent.',
   },
   D12: {
-    a: 'Steve et l’équipe continuent de voir B, sans sélecteur. C est calculée en parallèle par le backend ; une page de comparaison B / C n’est accessible qu’en recette UAT et aux administrateurs. Le jour où le seuil D13 est franchi et que Farid décide, C remplace B à l’écran (scène 5).',
+    a: 'Steve et l’équipe continuent de voir B, sans sélecteur. C est calculée en parallèle par le backend ; une page de comparaison B / C n’est accessible qu’en recette UAT et aux administrateurs. Le jour où le seuil D13 est franchi et que Farid décide, C remplace B à l’écran (scène affichage-abc, §8.1).',
     b: 'Un sélecteur A / B / C apparaît dans le rail pour tous les utilisateurs, avec un mode comparatif ; le choix est porté dans l’URL (filter.targeting=a|b|c).',
     c: 'On n’expose pas C comme un tout : on ajoute à B, un par un, les critères de C (sens, plein droit, second projet), chacun livré quand il est prêt.',
     d: 'On construit une seconde application dédiée à C, avec sa propre carte, ses filtres et ses notes ; Steve choisit l’une ou l’autre application.',
   },
   D13: {
-    a: 'C remplace B seulement si, sur le jeu test des 52 villes : aucun signal que Steve juge Pertinent n’est masqué ; la précision P ∪ S de C dépasse celle de B (67,1 % sur la passe 1) ; l’API, le rail, la carte et le panneau montrent les mêmes ensembles ; Farid fait la recette.',
+    a: 'C remplace B seulement si, sur le test neuf : aucun signal que Steve juge Pertinent n’est masqué (k_max = 0) et la borne supérieure exacte du taux de Pertinent masqués est sous X ; puis la différence de précision P ∪ S entre C et B′ passe 1, sur les mêmes cas, a une borne inférieure positive (bootstrap par ville) ; l’API, le rail, la carte et le panneau montrent les mêmes ensembles ; Farid fait la recette.',
     b: 'Farid écrit d’autres chiffres dans le commentaire (par exemple une précision minimale ou un rappel minimal), mesurés par le même jeu de référence.',
     c: 'La bascule se décide sur la recette de Farid seule, sans mesure chiffrée par le jeu de référence.',
   },
@@ -80,8 +86,8 @@ export const DESCRIPTIONS = {
     b: 'Tout le travail de ce dossier attend la clôture de #703 (rafraîchissement quotidien en production).',
   },
   D16: {
-    a: 'Mathieu et Farid envoient à Steve la définition réelle des cinq filtres (§5.7, lue dans le code) et la table qui relie ses 28 codes de motif aux critères C, pour qu’il la corrige avant le développement de C.',
-    b: 'On ne répond pas à sa question R-16 avant que C soit développée ; il reçoit alors directement la nouvelle sélection.',
+    a: 'Mathieu et Farid envoient à Steve la définition réelle des cinq filtres (§2.5, lue dans le code) et la table qui relie ses 28 codes de motif aux critères C, pour qu’il la corrige avant le développement de C.',
+    b: 'On ne répond pas à la question posée en R-16 avant que C soit développée ; il reçoit alors directement la nouvelle sélection.',
   },
 };
 
@@ -125,85 +131,6 @@ export const DIAGRAMS = {
       text target_id
       text author_id
       text body "ni classement ni provenance"
-    }`,
-    },
-  },
-  D10: {
-    a: {
-      colGap: 180,
-      layers: ['Source', 'Jeu de référence unique', 'Benchmark #782'],
-      placement: { annotations: { col: 0, row: 0 }, jeu_ref_tableur: { col: 1, row: 0 }, jeu_ref_e_v3: { col: 1, row: 1 }, benchmark: { col: 2, row: 0 } },
-      existing: ['jeu_ref_e_v3'],
-      labels: { remplace: 'remplace', note_tout: 'note tout' },
-      er: `erDiagram
-    annotations ||--|| jeu_ref_tableur : remplace
-    jeu_ref_tableur ||--|| benchmark : note_tout
-    annotations {
-      text source "124 lignes de Steve"
-    }
-    jeu_ref_tableur {
-      text unite "ce que l'écran montrait"
-      text biais "7 dossiers manqués absents"
-    }
-    jeu_ref_e_v3 {
-      text statut "retiré, historique perdu"
-    }
-    benchmark {
-      text tableau "un seul, extraction et ciblage"
-    }`,
-    },
-    b: {
-      colGap: 180,
-      layers: ['Sources', 'Deux jeux de référence gelés', 'Benchmark #782, deux volets'],
-      placement: { consensus_modeles: { col: 0, row: 0 }, annotations: { col: 0, row: 1 }, jeu_ref_e_v3: { col: 1, row: 0 }, jeu_ref_c_v1: { col: 1, row: 1 },
-        volet_extraction: { col: 2, row: 0 }, volet_ciblage: { col: 2, row: 1 } },
-      existing: ['consensus_modeles', 'jeu_ref_e_v3', 'volet_extraction'],
-      labels: { adjugees_gelees: 'adjugées, gelées', note_b_puis_c: 'note B puis C' },
-      er: `erDiagram
-    consensus_modeles ||--|| jeu_ref_e_v3 : construit
-    annotations ||--|| jeu_ref_c_v1 : adjugees_gelees
-    jeu_ref_e_v3 ||--|| volet_extraction : note
-    jeu_ref_c_v1 ||--|| volet_ciblage : note_b_puis_c
-    consensus_modeles {
-      text methode "7 passes, 3 familles"
-    }
-    annotations {
-      text source "verdicts de Steve"
-    }
-    jeu_ref_e_v3 {
-      int taille "674 / 100 documents"
-    }
-    jeu_ref_c_v1 {
-      text jeux "dev 51 villes, test 52"
-    }
-    volet_extraction {
-      text mesure "inchangée"
-    }
-    volet_ciblage {
-      text mesure "précision, rappel"
-    }`,
-    },
-    c: {
-      colGap: 180,
-      layers: ['Nouvelle campagne', 'Jeu de référence C neuf', 'Benchmark #782'],
-      placement: { campagne_c: { col: 0, row: 0 }, annotations: { col: 0, row: 1 }, jeu_ref_c_neuf: { col: 1, row: 0 }, volet_ciblage: { col: 2, row: 0 } },
-      existing: [],
-      labels: { exemples: 'exemples seulement' },
-      er: `erDiagram
-    campagne_c ||--|| jeu_ref_c_neuf : construit
-    annotations }o..o| jeu_ref_c_neuf : exemples
-    jeu_ref_c_neuf ||--|| volet_ciblage : note
-    campagne_c {
-      text corpus "nouveau, conçu pour C"
-    }
-    annotations {
-      text role "124 lignes, exemples"
-    }
-    jeu_ref_c_neuf {
-      text comparaison "historique à part"
-    }
-    volet_ciblage {
-      text mesure "précision, rappel"
     }`,
     },
   },

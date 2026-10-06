@@ -1,10 +1,9 @@
 <script>
-  import Scenes from './Scenes.svelte';
   import Sections from './Sections.svelte';
   import DecisionChoices from './DecisionChoices.svelte';
   import { PROTOCOL, SIGNAL_COUNTS } from './protocol.js';
   import BarChart from './BarChart.svelte';
-  import { graphs, header, glossary, decisionSections, annexes, manifest } from './.generated/data.json';
+  import { header, glossary, decisionSections, annexes, manifest } from './.generated/data.json';
   const [intention, wants, synthesis, ...body] = decisionSections;
 </script>
 
@@ -13,7 +12,7 @@
     <header class="masthead">
       <div class="flex-row">
         <span class="eyebrow">Dossier de décision · pour Farid (Product Owner), validation technique Fabien · 21 septembre 2026</span>
-        <span class="badge warning">5 SCÈNES · 12 SECTIONS · 24 DÉCISIONS · 3 OCTOBRE 2026</span>
+        <span class="badge warning">5 SCÈNES · 12 CHAPITRES · 25 DÉCISIONS · 5 OCTOBRE 2026</span>
       </div>
       <h1>Analyse des retours d’usage<br>du 21 septembre 2026</h1>
       <p class="subtitle">Capitalisation des données annotées, vers de nouveaux critères de ciblage</p>
@@ -21,7 +20,8 @@
         Sur sa vue de travail (73 signaux), 24 sont du bruit et 22 seulement réunissent ses trois critères :
         résidentiel, assouplissement, densification. Le dossier propose de conserver tout le classeur avec sa provenance,
         de l’afficher sur les objets concernés selon le contrat d’annotation de la plateforme commune sentropic, et de construire un jeu de référence de ciblage
-        qui mesure une nouvelle sélection proposée (vue C) contre la sélection affichée aujourd’hui (vue B) — sans toucher à la priorité n° 1 de Steve, le rafraîchissement.</p>
+        qui mesure une nouvelle sélection proposée (vue C) contre la sélection affichée aujourd’hui (vue B) — sans toucher à la priorité n° 1 de Steve, le rafraîchissement.
+        Les 121 lignes retenues sont exposées : elles servent à la mise au point (résultats exploratoires) ; la mesure qui fonde la bascule se fera sur un test neuf.</p>
       <section class="protocol" data-protocol aria-labelledby="protocol-title">
         <h2 id="protocol-title">{PROTOCOL.title}</h2>
         <table>
@@ -44,18 +44,19 @@
         <span><strong>22 / 73</strong> trois critères réunis</span>
         <span><strong>39 / 69</strong> composants Svelte avec le DS</span>
         <span><strong>2 CRITÈRES SUR 3</strong> sans donnée au radar</span>
-        <span><strong>3 POINTS OUVERTS</strong> D9 · D12 · D13</span>
+        <span><strong>51 ÉCARTS</strong> dont 31 désaccords avec Steve (avant R′ v1)</span>
+        <span><strong>À ACTER</strong> D13 · OUVERT D12 · D9 PROPOSÉE CLOSE</span>
       </div>
     </header>
 
     <section class="reading-map" aria-label="Comment lire ce dossier">
       <h2>Comment lire ce dossier</h2>
       <ol>
-        <li><strong>D’abord l’intention de l’owner et ce que veut Steve</strong>, dépliées : objectifs et renvois, destinataires et rôles (§1.1), glossaire en tête, trois critères cités et chiffrés, écart avec l’existant.</li>
-        <li><strong>La synthèse et les 16 décisions</strong>, dépliées, puis les neuf autres sections dans leur texte d’origine.</li>
-        <li><strong>Cinq scènes</strong> : critères de Steve en regard de l’existant (matrice), modèle de données (entité-relation), architecture de l’import à l’affichage avec le jeu de référence transversal (couloirs), architecture UI, affichage A/B/C.</li>
-        <li><strong>Les décisions G1 à G8 et D1 à D16, dans l’ordre où elles se prennent</strong> : Fabien décide d’abord les 8 décisions génériques (convergence sentropic + engram), puis ses 7 décisions techniques immo (D1 déjà actée par l’owner le 2026-10-04 ; les autres prises telles quelles sauf incohérence), puis Farid ses 9 décisions produit. Chacune s’ouvre sur une introduction, ses dépendances et, par option, avantages et inconvénients ; sélectionnables, à copier en YAML dans la PR GitHub — brouillon local seulement.</li>
-        <li><strong>L’annexe A</strong> : convergence et divergences entre les deux auteurs, avec la source qui tranche.</li>
+        <li><strong>D’abord l’intention de l’owner et ce que veut Steve</strong>, dépliées : objectifs O1 à O6 et renvois, destinataires et rôles (§1.2), glossaire et statuts en tête, relevé en trois passes, trois critères cités et chiffrés, décisions de Steve ligne par ligne, comparateur B′, écart avec l’existant.</li>
+        <li><strong>La synthèse et le registre des 25 décisions</strong> (G1 à G8, D1 à D17), dépliés, puis les chapitres 4 à 12 : analyse des données en profondeur, définition de C, détection exploratoire, mesure confirmatoire (<code>not run</code>), exposition A/B/C, capitalisation, fiches de décision, risques, plan.</li>
+        <li><strong>Cinq scènes, dans les chapitres qu’elles illustrent</strong> : critères de Steve (§2.6), affichage A/B/C (§8.1), stockage réel et propriétaires (§9.2), architecture de l’import à l’affichage (§9.6), architecture UI (§9.7) ; elles s’affichent à l’ouverture du chapitre.</li>
+        <li><strong>Les décisions G1 à G8 et D1 à D17, dans l’ordre où elles se prennent</strong> : Fabien décide d’abord les 8 décisions génériques, puis ses 8 décisions immo (D1 et D17 déjà actées par l’owner ; les autres prises telles quelles sauf incohérence), puis Farid ses 9 décisions produit. Chacune s’ouvre sur une introduction, ses dépendances et, par option, avantages et inconvénients ; sélectionnables, à copier en YAML dans la PR GitHub — brouillon local seulement.</li>
+        <li><strong>Les annexes I à IV</strong> : préenregistrement et traçabilité (avec la correspondance des anciens numéros), fiches G1 à G8, modèle physique et détails techniques, revue du plan. Le journal de consolidation entre les deux auteurs est hors du rapport (<code>JOURNAL_CONSOLIDATION.md</code>).</li>
       </ol>
       <p class="caption">Conventions : <code>FAIT</code> = constaté dans une source citée · <code>CALCUL</code> = dérivé des
         données · <code>JUGEMENT</code> = appréciation · <code>non vérifié</code>, <code>source manquante</code>,
@@ -66,14 +67,13 @@
     <Sections sections={[header]} label="En-tête du dossier" open={false} />
     <Sections sections={[intention, wants]} label="Intention du dossier et ce que veut Steve" open={true} />
     <Sections sections={[synthesis]} label="Synthèse et décisions demandées" open={true} />
-    <Sections sections={body} label="Les sections du dossier" open={false} />
-    <Scenes {graphs} />
+    <Sections sections={body} label="Les chapitres du dossier" open={false} />
     <DecisionChoices {manifest} />
-    <Sections sections={annexes} label="Annexe du dossier" open={false} />
+    <Sections sections={annexes} label="Annexes du dossier" open={false} />
 
     <footer>
       <strong>Preuves embarquées · page autonome hors ligne</strong>
-      <p>Cinq scènes tirées des sources canoniques de l’annexe B : une matrice (tableau Markdown), un diagramme
+      <p>Cinq scènes tirées des sources canoniques de <code>SCENES_FOCUS.md</code> (hors du rapport), rendues dans leurs chapitres : une matrice (tableau Markdown), un diagramme
         entité-relation (<code>erDiagram</code>), une architecture en couloirs (<code>flowchart</code>, un couloir par
         <code>subgraph</code>, jeu de référence en bande basse), puis deux scènes de composants en SvelteFlow natif, conteneurs
         <code>parentId</code> réels, gabarit A’ 460 × 200, Dagre <code>rankdir LR</code> et routeur orthogonal du kit h2a —
