@@ -123,7 +123,7 @@ test('records: option id and label, statut, commentaire; unknown option rejected
   assert.equal(byId.D1.statut, 'tranchee');
   assert.equal(byId.D1.option, 'b');
   assert.equal(byId.D1.decide, 'Fabien');
-  assert.match(byId.D1.commentaire, /Actée par l’owner le 2026-10-04/);
+  assert.match(byId.D1.commentaire, /Actée par Fabien \(owner\) le 2026-10-04/);
   assert.equal(byId.D5.statut, 'non_traitee');
   assert.equal(byId.D5.option, null);
   assert.equal(byId.D9.option, '1');

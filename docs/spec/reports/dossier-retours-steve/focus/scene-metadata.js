@@ -38,7 +38,7 @@ const scenes = {
       SSP: O('ui', 'web', { code: 'C-03', role: 'Panneau · signal', name: 'SignauxSelPanel', detail: 'DS partiel · 16 boutons bruts' }),
       RAIL: O('ui', 'web', { code: 'C-04', role: 'Rail · DS', name: 'SignauxRail', detail: 'vivier B seul (f2c20573)' }),
       COL: O('ui', 'unknown', { code: 'C-05', role: 'Notes · non DS', name: 'collab/* · 3 composants', detail: '0 sur 3 importent le DS' }),
-      AV: P('ui', 'check', { code: 'C-06', role: 'Nouveau · U1', name: 'Avis de Steve', detail: 'Badge · Card · Alert' }),
+      AV: P('ui', 'check', { code: 'C-06', role: 'Nouveau · U1', name: 'Retour de Steve', detail: 'Badge · Card · Alert' }),
       GV: O('ui', 'map', { code: 'C-07', role: 'Pilote · geo', name: 'GeoView sur #/geo', detail: 'GeoMap + GeoDetailPanel' }),
       U2: BOX(IMMO, 'observed', 'active', { code: 'U2', name: 'api · Hono' }),
       GS: O('route', 'api', { code: 'R-01', role: 'Route · vivier', name: '/api/graph-signals', detail: 'B′ calculé côté serveur' }),

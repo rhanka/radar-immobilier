@@ -305,7 +305,7 @@ flowchart LR
     SSP["SignauxSelPanel"]
     RAIL["SignauxRail"]
     COL["collab/*"]
-    AV["Avis de Steve"]
+    AV["Retour de Steve"]
     GV["GeoView"]
   end
   subgraph U2["api · Hono"]
