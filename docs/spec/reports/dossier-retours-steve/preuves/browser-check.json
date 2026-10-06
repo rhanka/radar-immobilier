@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-06T05:54:07.260Z",
+  "checkedAt": "2026-10-06T06:12:27.457Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
   "chromiumCdpPort": "9263",
   "offline": {
@@ -118,7 +118,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 59,
-        "top": 4321.328125,
+        "top": 4675.28125,
         "width": 1307,
         "height": 820
       },
@@ -229,7 +229,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 71.5,
-        "top": 768.40625,
+        "top": 2184.15625,
         "width": 1762,
         "height": 900
       },
@@ -346,7 +346,7 @@
         "edgeLabels": 12,
         "panel": {
           "left": 59,
-          "top": 58616.328125,
+          "top": 59034.28125,
           "width": 1307,
           "height": 820
         },
@@ -1003,7 +1003,7 @@
       "scale": 1,
       "clip": {
         "x": 79,
-        "y": 56567.40625,
+        "y": 56828.15625,
         "width": 1762,
         "height": 900
       }
@@ -1023,7 +1023,7 @@
       "sceneId": "affichage-abc",
       "clip": {
         "x": 71.5,
-        "y": 41763.03125,
+        "y": 42023.78125,
         "width": 1762,
         "height": 1250.109375
       }
@@ -1032,7 +1032,7 @@
       "sceneId": "modele-donnees",
       "clip": {
         "x": 71.5,
-        "y": 48693.96875,
+        "y": 48954.71875,
         "width": 1762,
         "height": 806.109375
       }
@@ -1041,7 +1041,7 @@
       "sceneId": "flux-import-oracle",
       "clip": {
         "x": 71.5,
-        "y": 54303.640625,
+        "y": 54564.390625,
         "width": 1762,
         "height": 1334.109375
       }
@@ -1050,7 +1050,7 @@
       "sceneId": "architecture-ui",
       "clip": {
         "x": 71.5,
-        "y": 56463.40625,
+        "y": 56724.15625,
         "width": 1762,
         "height": 900
       }
