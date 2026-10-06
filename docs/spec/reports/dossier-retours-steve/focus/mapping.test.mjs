@@ -185,7 +185,7 @@ test('A/B/C : deux zones, application en couloirs (écran, backend, base) et év
   assertGeometry(abc, abc.edges);
 });
 
-test('vingt-cinq décisions G1 à G8 et D1 à D17, recommandation connue ; D9 proposée close, D17 actée par l’owner', () => {
+test('vingt-cinq décisions G1 à G8 et D1 à D17, recommandation connue ; D9 clôture recommandée, D17 actée par Fabien (owner)', () => {
   // Ordre de décision : le bloc de Fabien d'abord, puis celui de Farid.
   assert.deepEqual(questions.map(question => question.key), ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'D1', 'D2', 'D3', 'D4', 'D9', 'D10', 'D11', 'D17', 'D5', 'D6', 'D7', 'D8', 'D12', 'D13', 'D14', 'D15', 'D16']);
   assert.deepEqual(questions.map(question => question.step), [...Array(16).fill(1), ...Array(9).fill(2)]);
@@ -194,7 +194,7 @@ test('vingt-cinq décisions G1 à G8 et D1 à D17, recommandation connue ; D9 pr
   for (const question of questions) assert.ok(question.options.some(option => option.key === question.recommended), question.key);
   const byKey = Object.fromEntries(questions.map(question => [question.key, question]));
   assert.equal(byKey.D9.recommended, '4');
-  assert.match(byKey.D9.question, /proposée close/);
+  assert.match(byKey.D9.question, /clôture recommandée/);
   assert.deepEqual([byKey.D17.decides, byKey.D17.consulted, byKey.D17.decided.option, byKey.D17.decided.date], ['Fabien', 'Steve, Farid', 'a', '2026-10-05']);
   assert.match(byKey.D17.options.find(option => option.key === 'a').description, /coupé à la date du signal/);
   assert.match(byKey.D13.options.find(option => option.key === 'a').title, /k_max = 0/);
@@ -324,7 +324,7 @@ test("existant et jeux de référence : schémas du texte, aucune table de jeu d
   assert.ok(!/pgTable\(\s*"oracle/.test(schema), "aucune table de jeu de référence sur main");
   const s6 = between('\n### III.2 ', '\n### III.3 ');
   assert.match(s6, /Aucune table de jeu de référence n'existe en base aujourd'hui/);
-  for (const reason of ['Auteur avec compte obligatoire', 'Une seule cible par note', '10 000 caractères au plus', 'Aucune provenance', 'défaut corrigé par B0']) assert.ok(s6.includes(reason), reason);
+  for (const reason of ['Auteur avec compte obligatoire', 'Une seule cible par note', '10 000 caractères au plus', 'Aucune provenance', 'défaut à corriger par B0']) assert.ok(s6.includes(reason), reason);
   // Former §9.3 now sits in §4.9, marked « ancien, à remplacer ».
   const s93 = between('\n### 4.9 ', '\n## 5. ');
   assert.match(s93, /provenance par champ/);
