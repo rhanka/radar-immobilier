@@ -38,6 +38,16 @@ describe("residential-tristate-dry-run", () => {
       missingPersistedFields: ["instrument"] });
   });
 
+  it("merges a repeated canonical node id like the projection writer", () => {
+    const rows = rowsFromCanonicalGraph("la-peche", {
+      nodes: [draftBylaw, { ...draftBylaw, refs: [{ page: 5, publishedAt: "2026-07-29" }] }],
+    });
+    expect(rows).toHaveLength(1);
+    expect(summarize(rows.map((row) => auditRow(row, window)))).toMatchObject({
+      nodes: 1, eligibilityChanged: { nodes: 1 }, defaultView: { after: 1 },
+    });
+  });
+
   it("summarizes nodes, cities and the default view, and never requires a write", () => {
     const rows = rowsFromNdjson([
       JSON.stringify({ id: "event-26-220", type: "DesignationEvent", city_slug: "la-peche",

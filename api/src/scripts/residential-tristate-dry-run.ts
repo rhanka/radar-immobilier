@@ -50,6 +50,7 @@ import {
 import {
   buildNodeRow,
   classifyGraphNodeVivierV2,
+  mergeNodeRows,
   type GraphifyNode,
 } from "../services/graph/graph-store.js";
 
@@ -181,10 +182,12 @@ export function summarize(audits: readonly NodeAudit[], exampleCount = 10): TriS
   };
 }
 
-/** Rows of a canonical `latest.json`, projected with the writer's own row builder. */
+/**
+ * Rows of a canonical `latest.json`, projected with the writer's own row builder
+ * and merged by id exactly as `upsertGraph` / `upsertGraphAtomic` do.
+ */
 export function rowsFromCanonicalGraph(citySlug: string, graph: { nodes?: GraphifyNode[] }): ProjectedSignalRow[] {
-  return (graph.nodes ?? [])
-    .map((node) => buildNodeRow(node, citySlug))
+  return mergeNodeRows((graph.nodes ?? []).map((node) => buildNodeRow(node, citySlug)))
     .filter((row) => SIGNAL_TYPES.has(row.type))
     .map((row) => ({ id: row.id, citySlug, type: row.type, label: row.label, props: row.props,
       sourceRef: row.sourceRef ?? null }));
