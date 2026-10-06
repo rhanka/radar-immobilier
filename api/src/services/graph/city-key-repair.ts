@@ -141,6 +141,11 @@ function presentIn(element: LostElement, row: ComparableNodeRow): boolean {
   return jsonEqual(element.value, value);
 }
 
+/** Exact equality of the projected content of two rows (array order kept, object key order ignored). */
+export function sameProjectedContent(a: ComparableNodeRow, b: ComparableNodeRow): boolean {
+  return a.type === b.type && a.label === b.label && (a.sourceRef ?? null) === (b.sourceRef ?? null) && jsonEqual(a.props, b.props);
+}
+
 /** Elements of the PG row `pg` that the projection of `s3` (C's own row, or absent) would lose. */
 export function lostElements(pg: ComparableNodeRow, s3: ComparableNodeRow | undefined): LostElement[] {
   const elements = elementsOf(pg);
@@ -321,10 +326,12 @@ export async function repairCity(
         pgNodes: pgRows.length,
         idsMissingInPg: [...s3ById.keys()].filter((id) => !pgIds.has(id)).length,
         idsNotInS3: pgRows.filter((row) => !s3ById.has(row.id)).length,
-        // A825-02: `clean` is not equality; the measurement counts every content difference.
+        // A825-02: `clean` is not equality; the measurement compares the exact projected content
+        // (type, label, source_ref, full props JSON: object key order ignored, ARRAY ORDER KEPT —
+        // the served citation is refs[0]), not the loss rules of the classifier.
         nodesContentDiff: pgRows.filter((row) => {
           const s3 = s3ById.get(row.id);
-          return s3 !== undefined && (lostElements(row, s3).length > 0 || lostElements(s3, row).length > 0);
+          return s3 !== undefined && !sameProjectedContent(row, s3);
         }).length,
         edgesMissingInPg: [...s3EdgeKeys].filter((key) => !pgEdgeKeys.has(key)).length,
         edgesNotInS3: [...pgEdgeKeys].filter((key) => !s3EdgeKeys.has(key)).length,

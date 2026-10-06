@@ -4,6 +4,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  sameProjectedContent,
   cityDocShas,
   classifyNode,
   comparable,
@@ -180,5 +181,20 @@ describe("cityDocShas / idsWithLostContent", () => {
     const pg = projection.nodeRows.map(comparable);
     pg[1] = { ...pg[1]!, label: "C-6 (barkmere)" };
     expect(idsWithLostContent(pg, projection)).toEqual(["zone-c-6"]);
+  });
+});
+
+describe("sameProjectedContent (measurement, review A825-02 round 2)", () => {
+  const a = ref("gore", "A"); const b = ref("gore", "B");
+  it("sees a reordered refs array (the served citation is refs[0])", () => {
+    expect(sameProjectedContent(row("gore", "s", { refs: [a, b] }), row("gore", "s", { refs: [b, a] }))).toBe(false);
+    expect(sameProjectedContent(row("gore", "s", { refs: [a, b] }), row("gore", "s", { refs: [a, b] }))).toBe(true);
+  });
+  it("sees null versus absent and empty containers, ignores object key order", () => {
+    expect(sameProjectedContent(row("gore", "s", { properties: { x: null } }), row("gore", "s", { properties: {} }))).toBe(false);
+    expect(sameProjectedContent(row("gore", "s", { properties: {} }), row("gore", "s"))).toBe(false);
+    const p1 = row("gore", "s", { properties: { x: 1, y: 2 } });
+    const p2 = { ...p1, props: { properties: { y: 2, x: 1 } } };
+    expect(sameProjectedContent(p1, p2)).toBe(true);
   });
 });
