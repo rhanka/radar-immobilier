@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import {
   DataQualityCitySummary,
   type DataQualityCitySummaryT,
@@ -126,16 +126,16 @@ async function loadDbSnapshot(
 
   let edges: GraphSnapshot["edges"] = [];
   if (nodes.length > 0) {
-    const nodeIds = nodes.map((node) => node.id);
-    const nodeSet = new Set(nodeIds);
+    // Edges of this city only (GH #812: a node id is unique inside one city).
+    const nodeSet = new Set(nodes.map((node) => node.id));
     const candidateEdges = await db
       .select({
         srcId: graphEdges.srcId,
         dstId: graphEdges.dstId,
       })
       .from(graphEdges)
-      .where(inArray(graphEdges.srcId, nodeIds));
-    edges = candidateEdges.filter((edge) => nodeSet.has(edge.dstId));
+      .where(eq(graphEdges.citySlug, citySlug));
+    edges = candidateEdges.filter((edge) => nodeSet.has(edge.srcId) && nodeSet.has(edge.dstId));
   }
 
   const zones = await db

@@ -17,24 +17,34 @@
  *   - ok → { kind: "ok"; … }
  */
 
-/** A graph node as returned by GET /api/graph/:city. */
+/**
+ * A graph node as returned by GET /api/graph/:city.
+ * A node id is unique inside ONE city only: across cities (MRC view) a node is
+ * identified by `(citySlug, id)` — see `graphNodeKey` (GH #812).
+ */
 export interface GraphNode {
   id: string;
   type: string;
   label: string;
-  citySlug: string | null;
+  citySlug: string;
   /** Serialised JSON (community, source_file, …). */
   props: Record<string, unknown>;
   sourceRef: string | null;
 }
 
-/** A graph edge as returned by GET /api/graph/:city. */
+/** A graph edge as returned by GET /api/graph/:city. Both endpoints are nodes of `citySlug`. */
 export interface GraphEdge {
   id: string;
+  citySlug: string;
   srcId: string;
   dstId: string;
   kind: string;
   props: Record<string, unknown>;
+}
+
+/** Key of a node across cities: `(citySlug, id)` (GH #812). */
+export function graphNodeKey(citySlug: string, id: string): string {
+  return `${citySlug}\u0000${id}`;
 }
 
 /** The full city sub-graph. */

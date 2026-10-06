@@ -19,6 +19,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   fetchMrcs,
   fetchMrcGraph,
+  graphNodeKey,
   type MrcSummary,
   type GraphNode,
   type GraphEdge,
@@ -73,17 +74,20 @@ const MOCK_MRC_NODES: GraphNode[] = [
 ];
 
 const MOCK_MRC_EDGES: GraphEdge[] = [
+  // An edge belongs to ONE city graph: both endpoints are nodes of its citySlug (GH #812).
   {
     id: "edge-1",
-    srcId: "bylaw-bh-1",
+    citySlug: "salaberry-de-valleyfield",
+    srcId: "zone-vf-1",
     dstId: "zone-vf-1",
     kind: "regulates",
     props: {},
   },
   {
     id: "edge-2",
+    citySlug: "saint-louis",
     srcId: "de-sl-1",
-    dstId: "zone-vf-1",
+    dstId: "de-sl-1",
     kind: "changes_designation",
     props: {},
   },
@@ -457,5 +461,42 @@ describe("MrcGraphView — helpers d'affichage", () => {
   });
   it("edgeLabel préserve les relations courtes", () => {
     expect(edgeLabel("regulates")).toBe("regulates");
+  });
+});
+
+// ── GH #812 : deux villes de la MRC peuvent porter le même id de nœud ─────────
+
+describe("MRC graph — identité (citySlug, id) des nœuds", () => {
+  const SHARED_NODES: GraphNode[] = [
+    { id: "bylaw-242", type: "Bylaw", label: "Règl. 242 (gore)", citySlug: "gore", props: {}, sourceRef: null },
+    { id: "bylaw-242", type: "Bylaw", label: "Règl. 242 (barkmere)", citySlug: "barkmere", props: {}, sourceRef: null },
+    { id: "zone-c-6", type: "Zone", label: "C-6 (gore)", citySlug: "gore", props: {}, sourceRef: null },
+    { id: "zone-c-6", type: "Zone", label: "C-6 (barkmere)", citySlug: "barkmere", props: {}, sourceRef: null },
+  ];
+  const SHARED_EDGES: GraphEdge[] = [
+    { id: "e-gore", citySlug: "gore", srcId: "bylaw-242", dstId: "zone-c-6", kind: "regulates", props: {} },
+    { id: "e-bark", citySlug: "barkmere", srcId: "bylaw-242", dstId: "zone-c-6", kind: "regulates", props: {} },
+  ];
+
+  it("graphNodeKey distingue le même id dans deux villes", () => {
+    expect(graphNodeKey("gore", "bylaw-242")).not.toBe(graphNodeKey("barkmere", "bylaw-242"));
+    expect(graphNodeKey("gore", "bylaw-242")).toBe(graphNodeKey("gore", "bylaw-242"));
+  });
+
+  it("aucune clé de nœud dupliquée : les deux nœuds bylaw-242 restent distincts", () => {
+    const keys = SHARED_NODES.map((n) => graphNodeKey(n.citySlug, n.id));
+    expect(new Set(keys).size).toBe(SHARED_NODES.length);
+  });
+
+  it("chaque arête résout ses extrémités dans SA ville", () => {
+    const byKey = new Map(SHARED_NODES.map((n) => [graphNodeKey(n.citySlug, n.id), n]));
+    for (const edge of SHARED_EDGES) {
+      const src = byKey.get(graphNodeKey(edge.citySlug, edge.srcId));
+      const dst = byKey.get(graphNodeKey(edge.citySlug, edge.dstId));
+      expect(src?.citySlug).toBe(edge.citySlug);
+      expect(dst?.citySlug).toBe(edge.citySlug);
+    }
+    const gore = SHARED_EDGES[0]!;
+    expect(byKey.get(graphNodeKey(gore.citySlug, gore.srcId))?.label).toBe("Règl. 242 (gore)");
   });
 });

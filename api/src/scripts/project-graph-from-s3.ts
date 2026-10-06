@@ -28,6 +28,8 @@
  *   { nodes: [{ id, label, file_type? }], links: [{ source, target, relation }] }
  */
 
+import { writeFile } from "node:fs/promises";
+
 import { loadConfig, resolveGraphS3Config } from "../config.js";
 import { createLogger } from "../logger.js";
 import { createDb } from "../db/client.js";
@@ -81,11 +83,8 @@ async function main(): Promise<void> {
   let aborted = 0;
   let totalDeletedNodes = 0;
   let totalDeletedEdges = 0;
+  let totalDeletedStaleEdges = 0;
   const abortedCities: string[] = [];
-  // GH #812 — node ids NOT written because their row belongs to another city.
-  // Reported (never silently dropped) so the repair can list them; they do not
-  // change the exit code: the city itself is projected, minus those ids.
-  const crossCityCollisions: Array<{ city: string; id: string; ownerCitySlug: string | null }> = [];
 
   for (const key of keys) {
     // Extraire le citySlug depuis la clé : graph/<citySlug>/latest.json
@@ -128,6 +127,7 @@ async function main(): Promise<void> {
       const result = await upsertGraphAtomic(db, citySlug, graphJson);
       totalDeletedNodes += result.deletedNodes;
       totalDeletedEdges += result.deletedEdges;
+      totalDeletedStaleEdges += result.deletedStaleEdges;
       if (result.aborted) {
         aborted++;
         abortedCities.push(citySlug);
@@ -148,19 +148,10 @@ async function main(): Promise<void> {
             edges: result.edgeCount,
             deletedNodes: result.deletedNodes,
             deletedEdges: result.deletedEdges,
-            crossCityIdCollisions: result.crossCityCollisions.length,
+            deletedStaleEdges: result.deletedStaleEdges,
           },
           "project-graph-from-s3: ville projetée",
         );
-        for (const collision of result.crossCityCollisions) {
-          crossCityCollisions.push({ city: citySlug, ...collision });
-        }
-        if (result.crossCityCollisions.length > 0) {
-          logger.warn(
-            { citySlug, crossCityCollisions: result.crossCityCollisions },
-            "project-graph-from-s3: cross-city-id-collision — ids not written (row owned by another city)",
-          );
-        }
         ok++;
       }
     } catch (err) {
@@ -178,12 +169,16 @@ async function main(): Promise<void> {
       total: keys.length,
       deletedNodes: totalDeletedNodes,
       deletedEdges: totalDeletedEdges,
+      deletedStaleEdges: totalDeletedStaleEdges,
       ...(abortedCities.length > 0 ? { abortedCities } : {}),
-      crossCityIdCollisions: crossCityCollisions.length,
-      ...(crossCityCollisions.length > 0 ? { crossCityCollisions } : {}),
     },
     "project-graph-from-s3: terminé",
   );
+  // ≤ 4 KiB summary in the termination message, readable by the run-job workflow with the
+  // preprod credential, which has no pods/log (GH #812).
+  await writeFile("/dev/termination-log", JSON.stringify({ event: "project-graph-from-s3:report", ok, aborted, skipped,
+    errors, total: keys.length, deletedNodes: totalDeletedNodes, deletedEdges: totalDeletedEdges,
+    deletedStaleEdges: totalDeletedStaleEdges, abortedCities }).slice(0, 4000)).catch(() => undefined);
 
   await pool.end();
   // Visibilité d'échec : exit !=0 si au moins une ville abortée OU une erreur.

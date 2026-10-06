@@ -8,8 +8,10 @@ import {
   numeric,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
@@ -270,8 +272,10 @@ export const opportunityDossiers = pgTable(
 
 /**
  * Graph nodes — one row per graphify node (entity or document concept).
- * `id` is the graphify node id (string slug, not a UUID) so upserts are
- * purely idempotent on the natural key.
+ * `id` is the graphify node id (string slug, not a UUID). Ids are unique INSIDE
+ * one city only (`bylaw-242` exists in several cities), exactly like S3
+ * `graph/<city>/latest.json`: the primary key is `(city_slug, id)` (GH #812,
+ * migration 0013_graph_city_key) and every upsert / read by id binds the city.
  *
  * Index additionnels (migration 0003_graph_indexes) :
  *   - composite (city_slug, type) → queryNeighbors / subgraphForCity filtres croisés
@@ -284,17 +288,17 @@ export const opportunityDossiers = pgTable(
 export const graphNodes = pgTable(
   "graph_nodes",
   {
-    id: text("id").primaryKey(),
+    id: text("id").notNull(),
     type: text("type").notNull().default("concept"), // graphify file_type
     label: text("label").notNull(),
-    citySlug: text("city_slug"), // null = cross-city / global
+    citySlug: text("city_slug").notNull(), // the city whose latest.json holds the node
     props: jsonb("props").notNull().default({}), // community, source_file, …
     sourceRef: text("source_ref"), // S3 key / raw ref
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
+    pk: primaryKey({ name: "graph_nodes_pkey", columns: [t.citySlug, t.id] }),
     byType: index("graph_nodes_type_idx").on(t.type),
-    byCity: index("graph_nodes_city_idx").on(t.citySlug),
     // Composite : filtre ville + type en une passe (migration 0003)
     byCityType: index("graph_nodes_city_type_idx").on(t.citySlug, t.type),
     // GIN JSONB sur props (migration 0003)
@@ -303,9 +307,10 @@ export const graphNodes = pgTable(
 );
 
 /**
- * Graph edges — one row per graphify link.
- * Composite natural key (srcId, dstId, kind) drives idempotent upserts:
- * conflicting rows update props only (no duplicate edges).
+ * Graph edges — one row per graphify link of ONE city graph.
+ * Composite natural key (citySlug, srcId, dstId, kind) drives idempotent upserts:
+ * conflicting rows update props only (no duplicate edges). Both endpoints are
+ * nodes of the same city (GH #812, migration 0013_graph_city_key).
  *
  * Index additionnel (migration 0003_graph_indexes) :
  *   - GIN JSONB sur props → requêtes @> sur les métadonnées d'arête
@@ -314,16 +319,18 @@ export const graphEdges = pgTable(
   "graph_edges",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    srcId: text("src_id").notNull(), // → graph_nodes.id (soft ref)
-    dstId: text("dst_id").notNull(), // → graph_nodes.id (soft ref)
+    citySlug: text("city_slug").notNull(), // → graph_nodes.city_slug (soft ref)
+    srcId: text("src_id").notNull(), // → graph_nodes (city_slug, id) (soft ref)
+    dstId: text("dst_id").notNull(), // → graph_nodes (city_slug, id) (soft ref)
     kind: text("kind").notNull(), // graphify relation
     props: jsonb("props").notNull().default({}), // confidence, source_file, …
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
     byKind: index("graph_edges_kind_idx").on(t.kind),
-    bySrc: index("graph_edges_src_idx").on(t.srcId),
-    byDst: index("graph_edges_dst_idx").on(t.dstId),
+    naturalKey: uniqueIndex("graph_edges_city_natural_key_idx").on(t.citySlug, t.srcId, t.dstId, t.kind),
+    bySrc: index("graph_edges_city_src_idx").on(t.citySlug, t.srcId),
+    byDst: index("graph_edges_city_dst_idx").on(t.citySlug, t.dstId),
     // GIN JSONB sur props (migration 0003)
     propsGin: index("graph_edges_props_gin_idx").using("gin", t.props),
   }),
@@ -623,7 +630,9 @@ export const prospectContactAccessLog = pgTable(
 
 /**
  * Arêtes de résolution géo — Signal/DesignationEvent → Zone ou Lot.
- * Clé naturelle : (node_id, relation_type, target_id) — idempotent.
+ * Clé naturelle : (city_slug, node_id, relation_type, target_id) — idempotent.
+ * Le nœud source est (city_slug, node_id) : un id de nœud n'est unique que dans
+ * une ville (GH #812, migration 0013_graph_city_key).
  */
 export const geoResolutions = pgTable(
   "geo_resolutions",
@@ -642,6 +651,7 @@ export const geoResolutions = pgTable(
     resolvedAt: timestamp("resolved_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => ({
+    naturalKey: uniqueIndex("geo_resolutions_city_natural_key_idx").on(t.citySlug, t.nodeId, t.relationType, t.targetId),
     byNode: index("geo_resolutions_node_idx").on(t.nodeId),
     byCity: index("geo_resolutions_city_idx").on(t.citySlug),
   }),
