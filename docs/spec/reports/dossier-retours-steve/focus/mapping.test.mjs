@@ -12,7 +12,8 @@ const between = (from, to) => { const start = markdown.indexOf(from); assert.ok(
 // Decision fiches: D1 to D17 in chapter 10, G1 to G8 in annexe II.
 const decisionText = between('\n## 10. Décisions : options et recommandations', '\n## 11. ') + between('\n## Annexe II — Fiches G1 à G8', '\n## Annexe III');
 const SCENE_ORDER = ['criteres-steve', 'affichage-abc', 'modele-donnees', 'flux-import-oracle', 'architecture-ui'];
-const MARKERS = ['ch3-synthese', '4.5-etiquetage', '4.6-ecarts', '4.7-causes', '4.8-arbitrage-steve', '4.9-reference-v2', 'ch5-rprime', 'ch6-exploratoire', 'ch9-engram', 'annIII-engram'];
+// Sections still being written (the others were integrated on 2026-10-06).
+const MARKERS = ['ch3-synthese', 'ch6-exploratoire'];
 
 test('cinq scènes canoniques, dans l’ordre des chapitres qui les portent', () => {
   assert.deepEqual(graphs.map(graph => graph.id), SCENE_ORDER);
@@ -49,18 +50,20 @@ test('table des matières : en-tête, glossaire, douze chapitres, annexes I à I
   assert.match(between('\n### I.6 ', '\n### I.7 '), /Renvois des cartes #783 et #784/);
 });
 
-test('repères de rédaction : dix sections en attente, chacune signalée', () => {
+test('repères de rédaction : sections en attente, chacune signalée', () => {
   const found = [...markdown.matchAll(/^<!-- A_INTEGRER: ([\w.-]+) -->\nSection en cours de rédaction\.$/gm)].map(match => match[1]);
   assert.deepEqual(found, MARKERS);
   assert.equal((markdown.match(/<!-- A_INTEGRER/g) ?? []).length, MARKERS.length);
 });
 
-test('51 écarts, 31 désaccords avec Steve (avant R′ v1) : la distinction est explicite', () => {
+test('écarts et désaccords : 51 écarts = 20 erreurs d’outillage + 31 points à clarifier ; après R′ v1, 40 = 12 + 28', () => {
   assert.ok(!/(?<!pas )51 désaccords/.test(markdown), '« 51 désaccords » ne doit plus apparaître');
   const s46 = between('\n### 4.6 ', '\n### 4.7 ');
-  for (const text of ['**51 écarts**', '14 écarts viennent de **notre** règle R1–R7', '6 de **nos** tags', '**31 désaccords (avant R′ v1)**', '12 non convergés', '10 fondés sur une donnée hors immo (d2)', '5 incohérences apparentes de Steve', '4 fondés sur une donnée présente ailleurs dans immo (d1)'])
-    assert.ok(s46.includes(text), text);
+  for (const text of ['| **Écarts (verdict calculé ≠ Steve)** | **51** | **40** |', '| *Nos erreurs d’outillage* | **20** | **12** |', '| *Points à clarifier avec Steve* | **31** | **28** |',
+    '**il n’y a pas 51 désaccords avec Steve.**', '**12 données manquantes**', '**11 désaccords de jugement**', '**5 non convergés**'])
+    assert.ok(s46.includes(text.replace(/’/g, "'")), text);
   assert.equal(14 + 6 + 12 + 10 + 5 + 4, 51);
+  assert.equal(7 + 4 + 1 + 9 + 3 + 7 + 4 + 5, 40);
 });
 
 test('inputs de Steve : colonnes L à T de l’assistant, P, Q, R de Steve ; tableau de référence C', () => {
@@ -324,10 +327,9 @@ test("existant et jeux de référence : schémas du texte, aucune table de jeu d
   for (const reason of ['Auteur avec compte obligatoire', 'Une seule cible par note', '10 000 caractères au plus', 'Aucune provenance', 'défaut corrigé par B0']) assert.ok(s6.includes(reason), reason);
   // Former §9.3 now sits in §4.9, marked « ancien, à remplacer ».
   const s93 = between('\n### 4.9 ', '\n## 5. ');
-  assert.match(s93, /Ancien, à remplacer/);
-  assert.match(s93, /#### Ancien jeu de référence → nouveau jeu de référence : la proposition/);
-  assert.match(s93, /Rien n'est remplacé/);
-  assert.match(s93, /décision \*\*D10\*\*/);
+  assert.match(s93, /provenance par champ/);
+  assert.match(s93, /<!-- diagram:jeux-reference -->/);
+  assert.match(s93, /\(D10, D11\)/);
 });
 
 test('§9.1 et §9.2 : besoins de Steve → données, modèle minimal, ce qu\'il ne fait pas, tables existantes laissées telles quelles', async () => {
