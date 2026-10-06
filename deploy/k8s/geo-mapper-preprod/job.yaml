@@ -1,4 +1,4 @@
-# run-geo-mapper-job.yaml — RE-RUN du mapper géo (Signal/DesignationEvent → zone/lot).
+# geo-mapper-preprod — PREPROD, jumeau de deploy/k8s/35-run-geo-mapper-job.yaml (prod). RE-RUN du mapper géo (Signal/DesignationEvent → zone/lot).
 #
 # Régénère geo_resolutions / geo_unresolved (idempotent, upsert) à partir des
 # graph_nodes déjà projetés en DB, avec l'extraction multi-source de la PR #282.
@@ -12,12 +12,12 @@
 #   __MAPPER_CITIES__  = villes séparées par des espaces (vide ⇒ toutes les villes avec données OGC)
 #   __MAPPER_RESET__   = "1" (dès que des villes sont listées) ⇒ par ville, purge geo_resolutions + geo_unresolved puis résolution,
 #                        dans une transaction (GH #812, exige des villes) ; "" sinon.
-# Jumeau préprod : deploy/k8s/geo-mapper-preprod/job.yaml.
+# Préprod : -f target=preprod. Mêmes secrets PG (radar-db-credentials), pas de S3.
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: radar-run-geo-mapper
-  namespace: radar-immobilier
+  namespace: radar-immobilier-preprod
   labels:
     app.kubernetes.io/name: radar-immobilier
     app.kubernetes.io/part-of: sentropic

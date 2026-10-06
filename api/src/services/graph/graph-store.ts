@@ -2,15 +2,14 @@
  * WP A.3.1 — Graph store service.
  *
  * Persists graphify graph.json output (nodes + links) into the Postgres
- * `graph_nodes` / `graph_edges` tables. All writes are idempotent:
- *   - nodes   → INSERT … ON CONFLICT (id) DO UPDATE SET (label, type, props)
- *               WHERE the existing row has the same city_slug (GH #812: a row
- *               of another city is never overwritten; reported as
- *               `cross-city-id-collision`)
- *   - edges   → INSERT … ON CONFLICT (src_id, dst_id, kind) DO UPDATE SET props
+ * `graph_nodes` / `graph_edges` tables. Node ids are unique inside ONE city
+ * only (GH #812), so every key carries the city. All writes are idempotent:
+ *   - nodes   → INSERT … ON CONFLICT (city_slug, id) DO UPDATE SET (label, type, props)
+ *   - edges   → INSERT … ON CONFLICT (city_slug, src_id, dst_id, kind) DO UPDATE SET props
+ * Every writer takes the per-city advisory lock first (`lockCityGraph`).
  *
  * Read helpers cover the two main access patterns:
- *   - `queryNeighbors(nodeId)`    → all edges incident on a node + their endpoints
+ *   - `queryNeighbors(city, nodeId)` → all edges incident on a node + their endpoints
  *   - `subgraphForCity(citySlug)` → all nodes + edges for a city scope
  *   - `subgraphForMrc(mrc)`       → merged subgraph for all cities in an MRC
  *   - `listMrcs(db)`              → MRC list with ingested node counts
@@ -607,7 +606,7 @@ export function isCompleteSignalProps(
  * peuvent donc jamais faire aborter une reprojection graphify légitime.
  */
 export function countCompleteSignals(
-  nodeRows: Array<{ type: string; props: Record<string, unknown> }>,
+  nodeRows: ReadonlyArray<{ type: string; props: Record<string, unknown> }>,
   options: { ignoreProvisional?: boolean } = {},
 ): number {
   let count = 0;
@@ -821,99 +820,147 @@ export function findMissingSourceRefs(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * A node id of the incoming graph whose `graph_nodes` row belongs to ANOTHER city
- * (or to the cross-city scope, `city_slug IS NULL`) — GH #812.
- *
- * `graph_nodes` is keyed by `id` alone while graphify ids are only unique within a
- * city (`bylaw-242` exists in gore AND barkmere). The upsert therefore refuses to
- * overwrite such a row (see `SAME_CITY_CONFLICT_GUARD`): the incoming node is NOT
- * written, the owner's row stays untouched, and the collision is reported here so
- * the repair (DOSSIER_DECISION_VILLES_ECART §6, D2) can find every skipped id.
+ * The write surface shared by a Drizzle database handle and a Drizzle transaction.
+ * Every graph writer runs its city work on a transaction (`DbTx`).
  */
-export interface CrossCityIdCollision {
-  /** The colliding node id (present in the incoming graph, not written). */
-  id: string;
-  /** `city_slug` of the row that kept the id (null = cross-city/global row). */
-  ownerCitySlug: string | null;
+export type DbTx = Parameters<Parameters<Database["transaction"]>[0]>[0];
+type GraphReader = Pick<Database, "select">;
+
+/**
+ * K9 (spec §4) — per-city writer lock. Every graph writer (`upsertGraph`,
+ * `upsertGraphAtomic`, the city-key repair) takes it FIRST in its city
+ * transaction, then reads its guard baseline, evaluates the guards and writes,
+ * so no writer can slip between another writer's guard read and its write.
+ * Transaction-scoped (released at commit/rollback) and re-entrant in a session.
+ */
+export async function lockCityGraph(tx: Pick<Database, "execute">, citySlug: string): Promise<void> {
+  await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`graph-city:${citySlug}`}))`);
+}
+
+/** A city graph turned into DB rows: what one projection writes. Pure. */
+export interface CityProjection {
+  citySlug: string;
+  nodeRows: NodeRow[];
+  edgeRows: EdgeRow[];
+  severedSource: SourceMaterializationResult;
 }
 
 /**
- * GH #812 interim guard (decision D3(a) of 2026-10-04): `ON CONFLICT (id) DO UPDATE`
- * only applies when the existing row belongs to the SAME city scope as the incoming
- * row. `IS NOT DISTINCT FROM` keeps the cross-city path (`city_slug` null on both
- * sides) updatable. A row of another city is never overwritten; its id is reported
- * as a `cross-city-id-collision`. The structural fix (PK `(city_slug, id)`) is
- * tracked separately (D2).
+ * Turn a graphify `latest.json` into the rows a projection of `citySlug` writes:
+ * schema parse, node/edge row builders, duplicate collapse and the severed-source
+ * materialization. Pure, shared by the projection (`upsertGraphAtomic`) and the
+ * city-key repair, so a repair preview simulates exactly what the projection does.
  */
-const SAME_CITY_CONFLICT_GUARD = sql`${graphNodes.citySlug} IS NOT DISTINCT FROM excluded.city_slug`;
-
-/**
- * Pure: ids of `rows` that the guarded upsert did NOT return. With
- * `ON CONFLICT … DO UPDATE … WHERE <guard>`, Postgres returns every inserted or
- * updated row; a row skipped by the guard is absent from RETURNING. `rows` are
- * already deduplicated by `mergeNodeRows`, so each id appears once.
- */
-export function idsSkippedByCityGuard(rows: readonly NodeRow[], returnedIds: Iterable<string>): string[] {
-  const written = new Set(returnedIds);
-  return rows.filter((row) => !written.has(row.id)).map((row) => row.id);
+export function prepareCityProjection(citySlug: string, graphJson: unknown): CityProjection {
+  const parsed = graphifyGraphSchema.parse(graphJson);
+  const links = [...(parsed.links ?? []), ...(parsed.edges ?? [])];
+  const nodeRows = mergeNodeRows(parsed.nodes.map((n) => buildNodeRow(n, citySlug)));
+  const edgeRows = mergeEdgeRows(links.map(buildEdgeRow));
+  // Re-materialize the per-event source the projection would otherwise sever onto served nodes as
+  // a CONFORMING cited-source ref (docSha+page+evidence) → hasPdfLink stays true, phantoms cannot
+  // recur, and the ref passes validateCitedSourceRef.
+  const severedSource = materializeSeveredSources(nodeRows, links, parsed.nodes);
+  return { citySlug, nodeRows, edgeRows, severedSource };
 }
 
-/** Resolve the owner city of each id skipped by the guard (read inside the same tx). */
-async function resolveCrossCityCollisions(
-  reader: Pick<Database, "select">,
-  skippedIds: readonly string[],
-): Promise<CrossCityIdCollision[]> {
-  if (skippedIds.length === 0) return [];
-  const owners = await reader
-    .select({ id: graphNodes.id, citySlug: graphNodes.citySlug })
-    .from(graphNodes)
-    .where(inArray(graphNodes.id, [...skippedIds]));
-  const ownerById = new Map(owners.map((row) => [row.id, row.citySlug]));
-  return [...skippedIds]
-    .sort((a, b) => a.localeCompare(b))
-    .map((id) => ({ id, ownerCitySlug: ownerById.get(id) ?? null }));
+/** Key of an edge inside one city graph. */
+export function edgeKey(edge: { srcId: string; dstId: string; kind: string }): string {
+  return `${edge.srcId}\u0000${edge.dstId}\u0000${edge.kind}`;
+}
+
+export type ProjectionGuardVerdict =
+  | { verdict: "pass" }
+  | { verdict: "refused"; gate: "gate1-business-property" | "gate3-source-ref" | "gate2-completeness"; reason: string };
+
+/**
+ * Gates 1 and 3 of the projection, pure: business properties and source docShas
+ * present on the baseline rows must survive in the candidate rows. Gate 2
+ * (completeness count) is evaluated by the writer on the projected state.
+ */
+export function evaluateRowGuards(
+  citySlug: string,
+  baselineRows: readonly BusinessPropertySnapshotRow[],
+  candidateRows: readonly BusinessPropertySnapshotRow[],
+  intendedRemovals: ReadonlySet<string> = new Set(),
+): ProjectionGuardVerdict {
+  const propertyRegressions = findMissingBusinessProperties(baselineRows, candidateRows, citySlug, intendedRemovals);
+  if (propertyRegressions.length > 0) {
+    const details = propertyRegressions
+      .map(({ nodeId, missingKeys }) => `${nodeId}: ${missingKeys.join(", ")}`)
+      .join("; ");
+    return {
+      verdict: "refused",
+      gate: "gate1-business-property",
+      reason:
+        `business-property regression for ${citySlug}: ` +
+        `existing values would disappear or degrade (${details}); projection refused`,
+    };
+  }
+  // gate3 — SOURCE-REF PROVENANCE : REPLACE réécrit props.refs par-nœud ; ni gate1
+  // (business-props) ni gate2 (complétude COUNT) ne protègent l'IDENTITÉ de la
+  // provenance source (docSha du PV). Un candidat qui écrase/omet le docSha propre
+  // d'un nœud existant passerait silencieusement → provenance perdue. On refuse.
+  const sourceRefRegressions = findMissingSourceRefs(baselineRows, candidateRows, citySlug, intendedRemovals);
+  if (sourceRefRegressions.length > 0) {
+    const details = sourceRefRegressions
+      .map(({ nodeId, missingDocShas }) => `${nodeId}: ${missingDocShas.join(", ")}`)
+      .join("; ");
+    return {
+      verdict: "refused",
+      gate: "gate3-source-ref",
+      reason:
+        `source-ref provenance regression for ${citySlug}: ` +
+        `existing source docSha(s) would disappear (${details}); projection refused`,
+    };
+  }
+  return { verdict: "pass" };
 }
 
 /**
- * One structured, greppable log line per projection that hit a collision, so the
- * repair can list every skipped id from the job logs (`cross-city-id-collision`).
+ * All three guards of a projection evaluated without a database: gates 1 and 3 on
+ * the rows, gate 2 on the completeness count (the projected state of the city is
+ * exactly `candidateRows`). Used for the repair's "before" verdicts.
  */
-function logCrossCityCollisions(citySlug: string | null, collisions: readonly CrossCityIdCollision[]): void {
-  if (collisions.length === 0) return;
-  console.warn(
-    JSON.stringify({
-      event: "graph-store:cross-city-id-collision",
-      city: citySlug,
-      count: collisions.length,
-      collisions,
-    }),
-  );
+export function evaluateProjectionGuards(
+  citySlug: string,
+  baselineRows: ReadonlyArray<BusinessPropertySnapshotRow & { type: string }>,
+  candidateRows: ReadonlyArray<BusinessPropertySnapshotRow & { type: string }>,
+): ProjectionGuardVerdict {
+  const rowVerdict = evaluateRowGuards(citySlug, baselineRows, candidateRows);
+  if (rowVerdict.verdict === "refused") return rowVerdict;
+  const completeBefore = countCompleteSignals(baselineRows, { ignoreProvisional: true });
+  const completeAfter = countCompleteSignals(candidateRows, { ignoreProvisional: true });
+  if (completeAfter < completeBefore) {
+    return {
+      verdict: "refused",
+      gate: "gate2-completeness",
+      reason: `régression de preuves pour ${citySlug} : signaux complets ${completeBefore} → ${completeAfter}`,
+    };
+  }
+  return { verdict: "pass" };
 }
 
 export interface UpsertResult {
-  /** Nodes in the incoming graph (after id dedup), including the ones skipped by the city guard. */
+  /** Nodes in the incoming graph (after id dedup). */
   nodeCount: number;
   edgeCount: number;
-  /** Incoming node ids NOT written because their row belongs to another city (GH #812). */
-  crossCityCollisions: CrossCityIdCollision[];
 }
 
 /**
  * Ingest a city-scoped graphify graph.json into Postgres (idempotent).
  *
- * Nodes are upserted by their natural text `id`, but only over a row of the
- * same city scope: a row of another city is left untouched and its id is
- * returned in `crossCityCollisions` (GH #812). Edges are upserted by the
- * (src_id, dst_id, kind) triple (unique index `graph_edges_natural_key_idx`).
- * Re-running with the same graph.json is safe and produces no duplicate rows.
+ * Nodes are upserted by `(city_slug, id)`, edges by `(city_slug, src_id, dst_id,
+ * kind)` (GH #812: ids are unique inside one city only). One transaction under
+ * the per-city lock (K9). Re-running with the same graph.json is safe and
+ * produces no duplicate rows. Never deletes (that is `upsertGraphAtomic`'s job).
  *
  * @param db       Drizzle database handle
- * @param citySlug City scope injected on every node (nullable for cross-city)
+ * @param citySlug City whose graph this is (every node and edge is written under it)
  * @param graphJson Raw parsed object (validated via graphifyGraphSchema)
  */
 export async function upsertGraph(
   db: Database,
-  citySlug: string | null,
+  citySlug: string,
   graphJson: unknown,
 ): Promise<UpsertResult> {
   const parsed = graphifyGraphSchema.parse(graphJson);
@@ -922,100 +969,87 @@ export async function upsertGraph(
   const nodeRows = mergeNodeRows(parsed.nodes.map((n) => buildNodeRow(n, citySlug)));
   const edgeRows = mergeEdgeRows(links.map(buildEdgeRow));
 
-  // Upsert nodes (ON CONFLICT on pk = id, same city scope only — GH #812)
-  let crossCityCollisions: CrossCityIdCollision[] = [];
-  if (nodeRows.length > 0) {
-    const written = await db
-      .insert(graphNodes)
-      .values(
-        nodeRows.map((r) => ({
-          id: r.id,
-          type: r.type,
-          label: r.label,
-          citySlug: r.citySlug,
-          props: r.props,
-          sourceRef: r.sourceRef,
-        })),
-      )
-      .onConflictDoUpdate({
-        target: graphNodes.id,
-        set: {
-          label: sql`excluded.label`,
-          type: sql`excluded.type`,
-          // Citation-safety — the worker-live FRESHNESS path (exploitation.ts →
-          // this PURE upsert) has NONE of upsertGraphAtomic's gates (gate3 /
-          // materializeSeveredSources / completeness). A wholesale
-          // `props = excluded.props` would DROP an existing node's provenance refs
-          // (e.g. the projection-materialized citations) when a fresh re-detection
-          // re-emits the same node id with fewer/no refs. Instead: take the fresh
-          // detection's props but keep `props.refs` NON-REGRESSING — union
-          // existing ∪ incoming, deduped. When the existing node has no refs,
-          // behave exactly as before (take excluded.props verbatim). Legitimate ref
-          // removal remains the projection path's job (upsertGraphAtomic + gate3
-          // intendedRemovals), never this freshness upsert.
-          props: sql`
-            CASE
-              WHEN coalesce(${graphNodes.props} -> 'refs', '[]'::jsonb) = '[]'::jsonb
-                THEN excluded.props
-              ELSE jsonb_set(
-                excluded.props,
-                '{refs}',
-                (
-                  SELECT coalesce(jsonb_agg(DISTINCT e), '[]'::jsonb)
-                  FROM jsonb_array_elements(
-                    (${graphNodes.props} -> 'refs')
-                      || coalesce(excluded.props -> 'refs', '[]'::jsonb)
-                  ) AS e
+  await db.transaction(async (tx) => {
+    await lockCityGraph(tx, citySlug);
+    if (nodeRows.length > 0) {
+      await tx
+        .insert(graphNodes)
+        .values(
+          nodeRows.map((r) => ({
+            id: r.id,
+            type: r.type,
+            label: r.label,
+            citySlug,
+            props: r.props,
+            sourceRef: r.sourceRef,
+          })),
+        )
+        .onConflictDoUpdate({
+          target: [graphNodes.citySlug, graphNodes.id],
+          set: {
+            label: sql`excluded.label`,
+            type: sql`excluded.type`,
+            // Citation-safety — the worker-live FRESHNESS path (exploitation.ts →
+            // this PURE upsert) has NONE of upsertGraphAtomic's gates (gate3 /
+            // materializeSeveredSources / completeness). A wholesale
+            // `props = excluded.props` would DROP an existing node's provenance refs
+            // (e.g. the projection-materialized citations) when a fresh re-detection
+            // re-emits the same node id with fewer/no refs. Instead: take the fresh
+            // detection's props but keep `props.refs` NON-REGRESSING — union
+            // existing ∪ incoming, deduped. When the existing node has no refs,
+            // behave exactly as before (take excluded.props verbatim). Legitimate ref
+            // removal remains the projection path's job (upsertGraphAtomic + gate3
+            // intendedRemovals), never this freshness upsert.
+            props: sql`
+              CASE
+                WHEN coalesce(${graphNodes.props} -> 'refs', '[]'::jsonb) = '[]'::jsonb
+                  THEN excluded.props
+                ELSE jsonb_set(
+                  excluded.props,
+                  '{refs}',
+                  (
+                    SELECT coalesce(jsonb_agg(DISTINCT e), '[]'::jsonb)
+                    FROM jsonb_array_elements(
+                      (${graphNodes.props} -> 'refs')
+                        || coalesce(excluded.props -> 'refs', '[]'::jsonb)
+                    ) AS e
+                  )
                 )
-              )
-            END
-          `,
-          sourceRef: sql`excluded.source_ref`,
-        },
-        setWhere: SAME_CITY_CONFLICT_GUARD,
-      })
-      .returning({ id: graphNodes.id });
-    crossCityCollisions = await resolveCrossCityCollisions(
-      db,
-      idsSkippedByCityGuard(nodeRows, written.map((row) => row.id)),
-    );
-    logCrossCityCollisions(citySlug, crossCityCollisions);
-  }
+              END
+            `,
+            sourceRef: sql`excluded.source_ref`,
+          },
+        });
+    }
+    await upsertEdgeRows(tx, citySlug, edgeRows);
+  });
 
-  // Upsert edges (ON CONFLICT on the natural-key unique index)
-  if (edgeRows.length > 0) {
-    await db
-      .insert(graphEdges)
-      .values(
-        edgeRows.map((r) => ({
-          srcId: r.srcId,
-          dstId: r.dstId,
-          kind: r.kind,
-          props: r.props,
-        })),
-      )
-      .onConflictDoUpdate({
-        target: [graphEdges.srcId, graphEdges.dstId, graphEdges.kind],
-        set: {
-          props: sql`excluded.props`,
-        },
-      });
-  }
+  return { nodeCount: nodeRows.length, edgeCount: edgeRows.length };
+}
 
-  return { nodeCount: nodeRows.length, edgeCount: edgeRows.length, crossCityCollisions };
+/** Upsert the edges of one city on `(city_slug, src_id, dst_id, kind)`. */
+async function upsertEdgeRows(tx: DbTx, citySlug: string, edgeRows: readonly EdgeRow[]): Promise<void> {
+  if (edgeRows.length === 0) return;
+  await tx
+    .insert(graphEdges)
+    .values(
+      edgeRows.map((r) => ({
+        citySlug,
+        srcId: r.srcId,
+        dstId: r.dstId,
+        kind: r.kind,
+        props: r.props,
+      })),
+    )
+    .onConflictDoUpdate({
+      target: [graphEdges.citySlug, graphEdges.srcId, graphEdges.dstId, graphEdges.kind],
+      set: { props: sql`excluded.props` },
+    });
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Projection atomique par ville (anti preuves-fantômes + gate de complétude)
 // ─────────────────────────────────────────────────────────────────────────────
-
-/** Erreur sentinelle servant à rollbacker la transaction d'une ville régressée. */
-class GraphCompletenessAbort extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "GraphCompletenessAbort";
-  }
-}
 
 export interface UpsertAtomicResult {
   /** Nombre de nœuds projetés (présents dans le nouveau graphe). */
@@ -1026,15 +1060,181 @@ export interface UpsertAtomicResult {
   deletedNodes: number;
   /** Nombre d'arêtes pendantes supprimées (référençant un nœud supprimé). */
   deletedEdges: number;
+  /** Arêtes de la ville absentes du nouveau graphe, supprimées (K7). */
+  deletedStaleEdges: number;
   /** true si la ville a été abortée (rollback) suite à une régression de preuves. */
   aborted: boolean;
-  /** Message d'alerte loggable quand aborted=true (ou skip cross-city). */
+  /** Message d'alerte loggable quand aborted=true. */
   reason?: string;
+}
+
+/** Erreur sentinelle servant à rollbacker la transaction d'une ville régressée. */
+export class GraphCompletenessAbort extends Error {
+  constructor(readonly result: UpsertAtomicResult) {
+    super(result.reason);
+    this.name = "GraphCompletenessAbort";
+  }
+}
+
+export interface ProjectCityOptions {
   /**
-   * Incoming node ids NOT written because their row belongs to another city
-   * (GH #812). Empty when the projection was refused before writing, or rolled back.
+   * Node ids this projection deletes ON PURPOSE (removal-only tools such as
+   * purge-avis-bylaws). They are exempt from the business-property and
+   * source-ref guards — their disappearance is intended, not a silent data loss.
    */
-  crossCityCollisions: CrossCityIdCollision[];
+  intendedRemovals?: ReadonlySet<string>;
+  /**
+   * Node ids of the city's CURRENT rows left out of the guard baseline: the
+   * city-key repair passes the rows proven to carry another city's content
+   * (spec K10/K11). Every other current row stays guarded. Default: none.
+   */
+  baselineExcludeIds?: ReadonlySet<string>;
+}
+
+const DELETE_CHUNK = 5000;
+
+/**
+ * The body of a city projection, inside the caller's transaction: per-city lock,
+ * guard baseline read AFTER the lock (K9), gates 1 and 3, upserts, city-scoped
+ * deletions (orphan nodes, their dangling edges, edges absent from the new graph),
+ * then gate 2 (completeness) on the projected state.
+ *
+ * Returns `{ aborted: true }` WITHOUT writing when gate 1 or 3 refuses. Throws
+ * `GraphCompletenessAbort` when gate 2 refuses, so the caller's transaction rolls
+ * back every write of the city.
+ */
+export async function projectCityInTransaction(
+  tx: DbTx,
+  projection: CityProjection,
+  options: ProjectCityOptions = {},
+): Promise<UpsertAtomicResult> {
+  const { citySlug, nodeRows, edgeRows } = projection;
+  const intendedRemovals = options.intendedRemovals ?? new Set<string>();
+  const baselineExclude = options.baselineExcludeIds ?? new Set<string>();
+  const result: UpsertAtomicResult = {
+    nodeCount: nodeRows.length,
+    edgeCount: edgeRows.length,
+    deletedNodes: 0,
+    deletedEdges: 0,
+    deletedStaleEdges: 0,
+    aborted: false,
+  };
+
+  await lockCityGraph(tx, citySlug);
+
+  // Guard baseline: the city's current PG rows, read under the lock.
+  const currentRows = await tx
+    .select({ id: graphNodes.id, type: graphNodes.type, props: graphNodes.props })
+    .from(graphNodes)
+    .where(eq(graphNodes.citySlug, citySlug));
+  const baselineRows = currentRows
+    .filter((row) => !baselineExclude.has(row.id))
+    .map((row) => ({ id: row.id, type: row.type, props: (row.props ?? {}) as Record<string, unknown> }));
+  const completeBefore = countCompleteSignals(baselineRows, { ignoreProvisional: true });
+
+  const rowVerdict = evaluateRowGuards(citySlug, baselineRows, nodeRows, intendedRemovals);
+  if (rowVerdict.verdict === "refused") {
+    return { ...result, aborted: true, reason: rowVerdict.reason };
+  }
+
+  // 1. upsert nœuds sur (city_slug, id)
+  if (nodeRows.length > 0) {
+    await tx
+      .insert(graphNodes)
+      .values(
+        nodeRows.map((r) => ({
+          id: r.id,
+          type: r.type,
+          label: r.label,
+          citySlug,
+          props: r.props,
+          sourceRef: r.sourceRef,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: [graphNodes.citySlug, graphNodes.id],
+        set: {
+          label: sql`excluded.label`,
+          type: sql`excluded.type`,
+          props: sql`excluded.props`,
+          sourceRef: sql`excluded.source_ref`,
+        },
+      });
+  }
+
+  // 2. upsert arêtes sur (city_slug, src_id, dst_id, kind)
+  await upsertEdgeRows(tx, citySlug, edgeRows);
+
+  // 3. SUPPRESSION des nœuds orphelins de CETTE ville, puis de leurs arêtes
+  //    pendantes — toujours bornées à la ville (jamais une autre ville).
+  const newNodeIds = nodeRows.map((r) => r.id);
+  const orphanCond =
+    newNodeIds.length > 0
+      ? and(eq(graphNodes.citySlug, citySlug), notInArray(graphNodes.id, newNodeIds))
+      : eq(graphNodes.citySlug, citySlug);
+  const orphanIds = (await tx.select({ id: graphNodes.id }).from(graphNodes).where(orphanCond)).map((r) => r.id);
+
+  if (orphanIds.length > 0) {
+    const danglingEdges = await tx
+      .delete(graphEdges)
+      .where(
+        and(
+          eq(graphEdges.citySlug, citySlug),
+          or(inArray(graphEdges.srcId, orphanIds), inArray(graphEdges.dstId, orphanIds)),
+        ),
+      )
+      .returning({ id: graphEdges.id });
+    result.deletedEdges = danglingEdges.length;
+
+    const deleted = await tx
+      .delete(graphNodes)
+      .where(and(eq(graphNodes.citySlug, citySlug), inArray(graphNodes.id, orphanIds)))
+      .returning({ id: graphNodes.id });
+    result.deletedNodes = deleted.length;
+  }
+
+  // 4. SUPPRESSION des arêtes de la ville absentes du nouveau graphe (K7) : la
+  //    projection réconcilie les arêtes comme les nœuds.
+  const newEdgeKeys = new Set(edgeRows.map(edgeKey));
+  const cityEdges = await tx
+    .select({ id: graphEdges.id, srcId: graphEdges.srcId, dstId: graphEdges.dstId, kind: graphEdges.kind })
+    .from(graphEdges)
+    .where(eq(graphEdges.citySlug, citySlug));
+  const staleEdgeIds = cityEdges.filter((e) => !newEdgeKeys.has(edgeKey(e))).map((e) => e.id);
+  for (let i = 0; i < staleEdgeIds.length; i += DELETE_CHUNK) {
+    const chunk = staleEdgeIds.slice(i, i + DELETE_CHUNK);
+    const removed = await tx
+      .delete(graphEdges)
+      .where(and(eq(graphEdges.citySlug, citySlug), inArray(graphEdges.id, chunk)))
+      .returning({ id: graphEdges.id });
+    result.deletedStaleEdges += removed.length;
+  }
+
+  // 5. GATE DE COMPLÉTUDE : signaux complets APRÈS (état projeté, dans la
+  //    transaction) comparés à AVANT (baseline lue sous le verrou).
+  const afterSignalRows = await tx
+    .select({ type: graphNodes.type, props: graphNodes.props })
+    .from(graphNodes)
+    .where(and(eq(graphNodes.citySlug, citySlug), inArray(graphNodes.type, ["Signal", "DesignationEvent"])));
+  const completeAfter = countCompleteSignals(
+    afterSignalRows.map((r) => ({ type: r.type, props: (r.props ?? {}) as Record<string, unknown> })),
+    { ignoreProvisional: true },
+  );
+  if (completeAfter < completeBefore) {
+    // Annule TOUTE la transaction de cette ville (upsert + suppressions).
+    throw new GraphCompletenessAbort({
+      ...result,
+      deletedNodes: 0,
+      deletedEdges: 0,
+      deletedStaleEdges: 0,
+      aborted: true,
+      reason:
+        `régression de preuves pour ${citySlug} : signaux complets ` +
+        `${completeBefore} → ${completeAfter} (rollback, projection ignorée)`,
+    });
+  }
+
+  return result;
 }
 
 /**
@@ -1042,38 +1242,28 @@ export interface UpsertAtomicResult {
  *
  * Contrairement à `upsertGraph` (upsert pur, conserve indéfiniment les nœuds
  * disparus → « preuves fantômes »), cette variante exécute dans UNE transaction
- * par ville :
- *   1. upsert des nœuds/arêtes présents (conserve l'existant, idempotent) ;
- *      a node id whose row belongs to ANOTHER city is not written (the owner's
- *      row stays untouched) and is returned in `crossCityCollisions` + logged as
- *      `cross-city-id-collision` — GH #812 interim guard. Edges are still keyed by
- *      (src_id, dst_id, kind) without a city (structural fix: D2) ;
- *   2. SUPPRESSION des nœuds de cette `city_slug` ABSENTS du nouveau graphe ;
- *   3. SUPPRESSION des arêtes devenues pendantes (référençant un nœud qu'on vient
- *      de supprimer) et qui ne sont pas dans le nouveau graphe ;
- *   4. GATE DE PROPRIÉTÉS MÉTIER : si une clé existante sous
- *      `props.properties` disparaît pour un nœud, la ville est refusée avant
- *      toute écriture ;
- *   5. GATE DE COMPLÉTUDE : si le nombre de signaux « complets » (Signal/
- *      DesignationEvent avec ref citation+rawRef) APRÈS < AVANT, la transaction
- *      est ABORTÉE (rollback). On n'écrase JAMAIS une citation/rawRef présente
- *      par du vide ; en cas de régression on aborte la ville (le plus sûr).
- *
- * Cas `citySlug === null` (nœuds cross-city/globaux) : AUCUNE suppression n'est
- * effectuée (impossible de scoper sûrement la suppression sans risquer d'effacer
- * des nœuds d'autres villes) — on se contente d'un upsert pur, comme `upsertGraph`.
+ * par ville, sous le verrou de la ville (K9) :
+ *   1. GATE DE PROPRIÉTÉS MÉTIER et GATE DE PROVENANCE (docSha), évaluées sur
+ *      l'état PG lu sous le verrou : refus avant toute écriture ;
+ *   2. upsert des nœuds sur (city_slug, id) et des arêtes sur
+ *      (city_slug, src_id, dst_id, kind) — GH #812 : un id n'est unique que dans
+ *      une ville, une autre ville n'est jamais touchée ;
+ *   3. SUPPRESSION des nœuds de cette ville ABSENTS du nouveau graphe, de leurs
+ *      arêtes pendantes, et des arêtes de la ville absentes du nouveau graphe ;
+ *   4. GATE DE COMPLÉTUDE : si le nombre de signaux « complets » APRÈS < AVANT,
+ *      la transaction est ABORTÉE (rollback).
  *
  * La fonction NE throw PAS en cas d'abort (les autres villes doivent continuer) :
  * elle retourne `{ aborted: true, reason }`. Elle peut throw sur erreur DB
  * inattendue (laissée remonter à l'appelant pour comptage `errors`).
  *
  * @param db       Drizzle database handle
- * @param citySlug City scope injecté sur chaque nœud (null = cross-city → pas de suppression)
+ * @param citySlug City whose graph this is
  * @param graphJson Objet brut (validé via graphifyGraphSchema)
  */
 export async function upsertGraphAtomic(
   db: Database,
-  citySlug: string | null,
+  citySlug: string,
   graphJson: unknown,
   /**
    * Node ids this projection deletes ON PURPOSE (removal-only tools such as
@@ -1083,237 +1273,28 @@ export async function upsertGraphAtomic(
    */
   intendedRemovals: ReadonlySet<string> = new Set(),
 ): Promise<UpsertAtomicResult> {
-  const parsed = graphifyGraphSchema.parse(graphJson);
-  const links = [...(parsed.links ?? []), ...(parsed.edges ?? [])];
-
-  const nodeRows = mergeNodeRows(parsed.nodes.map((n) => buildNodeRow(n, citySlug)));
-  const edgeRows = mergeEdgeRows(links.map(buildEdgeRow));
-  // Re-materialize the per-event source the projection would otherwise sever onto served nodes as
-  // a CONFORMING cited-source ref (docSha+page+evidence) → hasPdfLink stays true, phantoms cannot
-  // recur, and the ref passes validateCitedSourceRef. §521-ét observability (gates b/c/d): emit the
-  // denominators + closed-enumeration shrinkage counter UNCONDITIONALLY (even at zero) so "ran, 0 to
-  // do" ≠ "step never ran"; a high `materialized` rate signals a graphify producer gap to fix upstream.
-  const severedSource = materializeSeveredSources(nodeRows, links, parsed.nodes);
+  const projection = prepareCityProjection(citySlug, graphJson);
+  // §521-ét observability (gates b/c/d): emit the denominators + closed-enumeration shrinkage
+  // counter UNCONDITIONALLY (even at zero) so "ran, 0 to do" ≠ "step never ran"; a high
+  // `materialized` rate signals a graphify producer gap to fix upstream.
+  const severedSource = projection.severedSource;
   console.info(
-    `[graph-store] severed-source materialization ${citySlug ?? "(cross-city)"}: ` +
+    `[graph-store] severed-source materialization ${citySlug}: ` +
       `raisedSignals=${severedSource.raisedSignals} withSourcedEvent=${severedSource.withSourcedEvent} ` +
       `alreadySourced=${severedSource.alreadySourced} materialized=${severedSource.materialized} ` +
       `skipped=${JSON.stringify(severedSource.skipped)}`,
   );
-  const newNodeIds = nodeRows.map((r) => r.id);
-
-  // Cas cross-city : upsert pur, aucune suppression (impossible de scoper sûrement).
-  if (citySlug === null) {
-    const base = await upsertGraph(db, citySlug, graphJson);
-    return {
-      nodeCount: base.nodeCount,
-      edgeCount: base.edgeCount,
-      deletedNodes: 0,
-      deletedEdges: 0,
-      aborted: false,
-      reason: "cross-city (citySlug=null) : upsert pur sans suppression",
-      crossCityCollisions: base.crossCityCollisions,
-    };
-  }
-
-  let result: UpsertAtomicResult = {
-    nodeCount: nodeRows.length,
-    edgeCount: edgeRows.length,
-    deletedNodes: 0,
-    deletedEdges: 0,
-    aborted: false,
-    crossCityCollisions: [],
-  };
-
-  // Compte des signaux complets AVANT projection (état PG actuel de la ville),
-  // mesuré hors-transaction pour servir de référence au gate de non-régression.
-  const beforeRows = await db
-    .select({ id: graphNodes.id, type: graphNodes.type, props: graphNodes.props })
-    .from(graphNodes)
-    .where(eq(graphNodes.citySlug, citySlug));
-  const completeBefore = countCompleteSignals(
-    beforeRows.map((r) => ({
-      type: r.type,
-      props: (r.props ?? {}) as Record<string, unknown>,
-    })),
-    { ignoreProvisional: true },
-  );
-
-  const propertyRegressions = findMissingBusinessProperties(
-    beforeRows.map((row) => ({ id: row.id, props: (row.props ?? {}) as Record<string, unknown> })),
-    nodeRows,
-    citySlug,
-    intendedRemovals,
-  );
-  if (propertyRegressions.length > 0) {
-    const details = propertyRegressions
-      .map(({ nodeId, missingKeys }) => `${nodeId}: ${missingKeys.join(", ")}`)
-      .join("; ");
-    return {
-      ...result,
-      aborted: true,
-      reason:
-        `business-property regression for ${citySlug}: ` +
-        `existing values would disappear or degrade (${details}); projection refused`,
-    };
-  }
-
-  // gate3 — SOURCE-REF PROVENANCE : REPLACE réécrit props.refs par-nœud ; ni gate1
-  // (business-props) ni gate2 (complétude COUNT) ne protègent l'IDENTITÉ de la
-  // provenance source (docSha du PV). Un candidat qui écrase/omet le docSha propre
-  // d'un nœud existant passerait silencieusement → provenance perdue. On aborte.
-  const sourceRefRegressions = findMissingSourceRefs(
-    beforeRows.map((row) => ({ id: row.id, props: (row.props ?? {}) as Record<string, unknown> })),
-    nodeRows,
-    citySlug,
-    intendedRemovals,
-  );
-  if (sourceRefRegressions.length > 0) {
-    const details = sourceRefRegressions
-      .map(({ nodeId, missingDocShas }) => `${nodeId}: ${missingDocShas.join(", ")}`)
-      .join("; ");
-    return {
-      ...result,
-      aborted: true,
-      reason:
-        `source-ref provenance regression for ${citySlug}: ` +
-        `existing source docSha(s) would disappear (${details}); projection refused`,
-    };
-  }
 
   try {
-    await db.transaction(async (tx) => {
-      // 1. upsert nœuds (ON CONFLICT pk = id, même ville seulement — GH #812)
-      if (nodeRows.length > 0) {
-        const written = await tx
-          .insert(graphNodes)
-          .values(
-            nodeRows.map((r) => ({
-              id: r.id,
-              type: r.type,
-              label: r.label,
-              citySlug: r.citySlug,
-              props: r.props,
-              sourceRef: r.sourceRef,
-            })),
-          )
-          .onConflictDoUpdate({
-            target: graphNodes.id,
-            set: {
-              label: sql`excluded.label`,
-              type: sql`excluded.type`,
-              props: sql`excluded.props`,
-              sourceRef: sql`excluded.source_ref`,
-            },
-            setWhere: SAME_CITY_CONFLICT_GUARD,
-          })
-          .returning({ id: graphNodes.id });
-        result.crossCityCollisions = await resolveCrossCityCollisions(
-          tx,
-          idsSkippedByCityGuard(nodeRows, written.map((row) => row.id)),
-        );
-      }
-
-      // 2. upsert arêtes (ON CONFLICT clé naturelle src_id,dst_id,kind)
-      if (edgeRows.length > 0) {
-        await tx
-          .insert(graphEdges)
-          .values(
-            edgeRows.map((r) => ({
-              srcId: r.srcId,
-              dstId: r.dstId,
-              kind: r.kind,
-              props: r.props,
-            })),
-          )
-          .onConflictDoUpdate({
-            target: [graphEdges.srcId, graphEdges.dstId, graphEdges.kind],
-            set: { props: sql`excluded.props` },
-          });
-      }
-
-      // 3. SUPPRESSION des nœuds orphelins de CETTE ville (jamais les null, jamais
-      //    une autre ville). Récupère d'abord leurs ids pour purger leurs arêtes.
-      const orphanCond =
-        newNodeIds.length > 0
-          ? and(eq(graphNodes.citySlug, citySlug), notInArray(graphNodes.id, newNodeIds))
-          : eq(graphNodes.citySlug, citySlug);
-
-      const orphanRows = await tx
-        .select({ id: graphNodes.id })
-        .from(graphNodes)
-        .where(orphanCond);
-      const orphanIds = orphanRows.map((r) => r.id);
-
-      if (orphanIds.length > 0) {
-        // 4. SUPPRESSION des arêtes pendantes : src_id OU dst_id pointe vers un
-        //    nœud orphelin qu'on supprime. Prudence : on ne touche QUE celles-là.
-        const danglingEdges = await tx
-          .delete(graphEdges)
-          .where(
-            or(
-              inArray(graphEdges.srcId, orphanIds),
-              inArray(graphEdges.dstId, orphanIds),
-            ),
-          )
-          .returning({ id: graphEdges.id });
-        result.deletedEdges = danglingEdges.length;
-
-        const deleted = await tx
-          .delete(graphNodes)
-          .where(
-            and(eq(graphNodes.citySlug, citySlug), inArray(graphNodes.id, orphanIds)),
-          )
-          .returning({ id: graphNodes.id });
-        result.deletedNodes = deleted.length;
-      }
-
-      // 5. GATE DE COMPLÉTUDE : compte les signaux complets APRÈS projection
-      //    (état projeté, dans la transaction) et compare à AVANT (count calculé
-      //    sur l'état PG d'origine, hors transaction). Si APRÈS < AVANT → rollback.
-      const afterSignalRows = await tx
-        .select({ type: graphNodes.type, props: graphNodes.props })
-        .from(graphNodes)
-        .where(
-          and(
-            eq(graphNodes.citySlug, citySlug),
-            inArray(graphNodes.type, ["Signal", "DesignationEvent"]),
-          ),
-        );
-      const completeAfter = countCompleteSignals(
-        afterSignalRows.map((r) => ({
-          type: r.type,
-          props: (r.props ?? {}) as Record<string, unknown>,
-        })),
-        { ignoreProvisional: true },
-      );
-
-      if (completeAfter < completeBefore) {
-        result = {
-          ...result,
-          deletedNodes: 0,
-          deletedEdges: 0,
-          crossCityCollisions: [],
-          aborted: true,
-          reason:
-            `régression de preuves pour ${citySlug} : signaux complets ` +
-            `${completeBefore} → ${completeAfter} (rollback, projection ignorée)`,
-        };
-        // Annule TOUTE la transaction de cette ville (upsert + suppressions).
-        throw new GraphCompletenessAbort(result.reason!);
-      }
-    });
+    return await db.transaction((tx) => projectCityInTransaction(tx, projection, { intendedRemovals }));
   } catch (err) {
     if (err instanceof GraphCompletenessAbort) {
       // Abort attendu : la transaction a été rollbackée, on retourne le résultat
       // marqué aborted sans propager (les autres villes continuent).
-      return result;
+      return err.result;
     }
     throw err;
   }
-
-  logCrossCityCollisions(citySlug, result.crossCityCollisions);
-  return result;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1327,27 +1308,30 @@ export interface Neighbor {
 }
 
 /**
- * All edges incident on `nodeId` (outgoing + incoming), with the connected
- * node record attached. Empty array when the node has no edges.
+ * All edges of `citySlug` incident on node `(citySlug, nodeId)` (outgoing +
+ * incoming), with the connected node record of the same city attached. Empty
+ * array when the node has no edges. A node id alone is ambiguous across cities
+ * (GH #812), so the city is required.
  *
  * Fix N+1 : les nœuds voisins sont chargés en une seule requête `inArray`
  * plutôt qu'un SELECT par arête.
  */
 export async function queryNeighbors(
-  db: Database,
+  db: GraphReader,
+  citySlug: string,
   nodeId: string,
 ): Promise<Neighbor[]> {
   // Outgoing edges (nodeId → dst)
   const outEdges = await db
     .select()
     .from(graphEdges)
-    .where(eq(graphEdges.srcId, nodeId));
+    .where(and(eq(graphEdges.citySlug, citySlug), eq(graphEdges.srcId, nodeId)));
 
   // Incoming edges (src → nodeId)
   const inEdges = await db
     .select()
     .from(graphEdges)
-    .where(eq(graphEdges.dstId, nodeId));
+    .where(and(eq(graphEdges.citySlug, citySlug), eq(graphEdges.dstId, nodeId)));
 
   // Collect all neighbour ids to fetch in a single round-trip.
   const neighbourIds = [
@@ -1357,11 +1341,11 @@ export async function queryNeighbors(
 
   if (neighbourIds.length === 0) return [];
 
-  // Single query for all neighbour nodes (replaces the per-edge SELECT).
+  // Single query for all neighbour nodes of the same city.
   const neighbourNodes = await db
     .select()
     .from(graphNodes)
-    .where(inArray(graphNodes.id, neighbourIds));
+    .where(and(eq(graphNodes.citySlug, citySlug), inArray(graphNodes.id, neighbourIds)));
 
   const nodeMap = new Map(neighbourNodes.map((n) => [n.id, n]));
 
@@ -1391,11 +1375,11 @@ export interface Subgraph {
 }
 
 /**
- * Return all nodes tagged with `citySlug` plus all edges where BOTH endpoints
- * are in that city node set.
+ * Return all nodes of `citySlug` plus the edges of that city whose BOTH
+ * endpoints are nodes of the city.
  */
 export async function subgraphForCity(
-  db: Database,
+  db: GraphReader,
   citySlug: string,
 ): Promise<Subgraph> {
   const nodes = await db
@@ -1416,24 +1400,19 @@ export async function subgraphForCity(
 
   const nodeIds = new Set(nodes.map((n) => n.id));
 
-  // Pull all edges where src is in the city set; filter dstId in application
-  // layer (avoids a large IN clause for small graphs).
-  const candidateEdges = await db
+  const cityEdges = await db
     .select({
       id: graphEdges.id,
+      citySlug: graphEdges.citySlug,
       srcId: graphEdges.srcId,
       dstId: graphEdges.dstId,
       kind: graphEdges.kind,
       props: graphEdges.props,
     })
     .from(graphEdges)
-    .where(
-      or(
-        ...Array.from(nodeIds).map((id) => eq(graphEdges.srcId, id)),
-      ),
-    );
+    .where(eq(graphEdges.citySlug, citySlug));
 
-  const edges = candidateEdges.filter((e) => nodeIds.has(e.dstId));
+  const edges = cityEdges.filter((e) => nodeIds.has(e.srcId) && nodeIds.has(e.dstId));
 
   return { citySlug, nodes, edges };
 }
@@ -1446,7 +1425,9 @@ export async function subgraphForCity(
  * Merged subgraph for all cities in an MRC.
  *
  * Queries QC_MUNICIPALITIES to resolve which city slugs belong to `mrc`, then
- * fetches all nodes + intra-MRC edges in a single pass.
+ * fetches all nodes + intra-city edges in a single pass. Two cities of the MRC
+ * can hold the same node id: a node is identified by `(citySlug, id)` and every
+ * edge carries its `citySlug` (GH #812).
  */
 export interface MrcSubgraph {
   mrc: string;
@@ -1455,15 +1436,20 @@ export interface MrcSubgraph {
   edges: (typeof graphEdges.$inferSelect)[];
 }
 
+/** Key of a node across cities. */
+export function cityNodeKey(citySlug: string, id: string): string {
+  return `${citySlug}\u0000${id}`;
+}
+
 /**
- * Return all graph nodes whose citySlug belongs to `mrc`, plus all edges where
- * BOTH endpoints are in that MRC node set.
+ * Return all graph nodes whose citySlug belongs to `mrc`, plus the edges of
+ * those cities whose BOTH endpoints are nodes of the edge's city.
  *
  * Returns empty nodes/edges (not an error) when no data has been ingested for
  * any city in the requested MRC.
  */
 export async function subgraphForMrc(
-  db: Database,
+  db: GraphReader,
   mrc: string,
 ): Promise<MrcSubgraph> {
   // Resolve all city slugs that belong to this MRC (case-sensitive match on
@@ -1486,17 +1472,17 @@ export async function subgraphForMrc(
     return { mrc, citySlugs, nodes: [], edges: [] };
   }
 
-  const nodeIds = new Set(nodes.map((n) => n.id));
-  const nodeIdList = Array.from(nodeIds);
+  const nodeKeys = new Set(nodes.map((n) => cityNodeKey(n.citySlug, n.id)));
 
-  // Fetch candidate edges where srcId is in the MRC node set.
   const candidateEdges = await db
     .select()
     .from(graphEdges)
-    .where(inArray(graphEdges.srcId, nodeIdList));
+    .where(inArray(graphEdges.citySlug, citySlugs));
 
-  // Keep only edges where both endpoints are inside the MRC node set.
-  const edges = candidateEdges.filter((e) => nodeIds.has(e.dstId));
+  // Keep only edges whose endpoints are both nodes of the edge's city.
+  const edges = candidateEdges.filter(
+    (e) => nodeKeys.has(cityNodeKey(e.citySlug, e.srcId)) && nodeKeys.has(cityNodeKey(e.citySlug, e.dstId)),
+  );
 
   return { mrc, citySlugs, nodes, edges };
 }
