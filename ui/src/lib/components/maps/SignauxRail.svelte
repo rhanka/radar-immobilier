@@ -79,21 +79,29 @@
   /** Parent-owned DS temporal selection shared by both Vivier tabs. */
   export let timeRange: SignalTimeRange = defaultSignalTimeRange();
   export let dateBasis: DocumentDateBasis = "document";
-  export let onDateBasisChange: (next: DocumentDateBasis) => void = () => {};
   /**
    * Date basis only applies to a custom period (owner decision): a relative
-   * preset always reads document dates. It belongs to the custom tab of the DS
-   * picker; until the DS ships that slot, the switch is shown right under the
-   * picker, and only while a custom period is active. The internal value stays `scrap` (API
-   * contract); the UI only ever says « Date d'acquisition ».
+   * preset always reads document dates. The choice lives in the « Personnalisé »
+   * tab of the DS picker (`customExtra` slot), above Début / Fin, and is staged
+   * with the range: the radio edits a DRAFT reseeded on every open, committed
+   * only by « Appliquer » (the DS emits an absolute range on Apply only), and
+   * discarded by Annuler / Échap / outside click. It is never rendered in the
+   * rail itself. The internal value stays `scrap` (API contract); the UI only
+   * ever says « Date d'acquisition ».
    */
   const DATE_BASIS_ITEMS = [
     { value: "document", label: "Date du document" },
     { value: "scrap", label: "Date d'acquisition" },
   ];
-  $: showDateBasis = timeRange.mode === "absolute";
-  function selectDateBasis(next: string): void {
-    if ((next === "document" || next === "scrap") && next !== dateBasis) onDateBasisChange(next);
+  let draftDateBasis: DocumentDateBasis = dateBasis;
+  function handleTimeRangePickerOpen(open: boolean): void {
+    if (open) draftDateBasis = dateBasis;
+  }
+  function selectDraftDateBasis(next: string): void {
+    if (next === "document" || next === "scrap") draftDateBasis = next;
+  }
+  function handleTimeRangePick(next: SignalTimeRange): void {
+    onTimeRangeChange(next, next.mode === "absolute" ? draftDateBasis : "document");
   }
 
   /**
@@ -119,8 +127,13 @@
   export let onFilterChange: (subsetKey: string) => void = () => {};
   /** Appelé quand une exclusion d'affichage de B est cochée/décochée. */
   export let onExclusionsChange: (next: VivierBExclusions) => void = () => {};
-  /** Called when the canonical DS temporal control changes its range. */
-  export let onTimeRangeChange: (next: SignalTimeRange) => void = () => {};
+  /**
+   * Called when the canonical DS temporal control commits a range: a relative
+   * preset (basis forced to `document`) or « Appliquer » on a custom period
+   * (basis = the staged « Base de date » choice). One call, so the parent
+   * reloads once for the range and its basis together.
+   */
+  export let onTimeRangeChange: (next: SignalTimeRange, basis: DocumentDateBasis) => void = () => {};
 
   // The DS resolves presets when the user opens/selects them. Refresh the
   // upper bound then, rather than pinning a long-lived rail to its mount time.
@@ -404,26 +417,28 @@
       <TimeRangePicker
         class="signals-time-range-picker"
         value={timeRange}
-        onChange={onTimeRangeChange}
+        onChange={handleTimeRangePick}
+        onOpenChange={handleTimeRangePickerOpen}
         presets={SIGNAL_TIME_RANGE_PRESETS}
         size="sm"
         locale="fr-CA"
         max={timeRangeMax}
         label="Période des signaux"
         formatRange={formatSignalTimeRange}
-      />
+      >
+        {#snippet customExtra()}
+          <RadioGroup
+            class="signals-date-basis"
+            legend="Base de date"
+            name="signals-date-basis"
+            orientation="horizontal"
+            options={DATE_BASIS_ITEMS}
+            value={draftDateBasis}
+            onchange={selectDraftDateBasis}
+          />
+        {/snippet}
+      </TimeRangePicker>
     </div>
-    {#if showDateBasis}
-      <RadioGroup
-        class="signals-date-basis"
-        legend="Base de date"
-        name="signals-date-basis"
-        orientation="horizontal"
-        options={DATE_BASIS_ITEMS}
-        value={dateBasis}
-        onchange={selectDateBasis}
-      />
-    {/if}
     <div class="vivier-toggles">
       <!-- Trois axes COMBINABLES, librement cochables/décochables (défauts
            Zonage ✓, Résidentiel ✓, Précoce ✗). Décocher un axe RELÂCHE le filtre
@@ -540,10 +555,6 @@
   }
 
   /* Interim date-basis switch: same compact choice token as the rail toggles. */
-  .vivier-panel :global(.signals-date-basis .st-choice) {
-    --st-component-selection-choiceLabelFontSize: var(--rail-fs-small, 0.75rem);
-  }
-
   .vivier-toggles :global(.st-choice) {
     --st-component-selection-choiceLabelFontSize: var(--rail-fs-small, 0.75rem);
   }
