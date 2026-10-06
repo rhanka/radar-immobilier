@@ -69,5 +69,7 @@ instead of being treated as non-residential.
       B′ contract updated.
 - [x] **Lot 3 — Data dry-run**: `residential-tristate-dry-run.ts` (read-only,
       `--apply` refused, S3 canonical or PG dump source).
-- [ ] **Lot gate**: `make typecheck`, `make lint`, `make test-api`, `make test-ui`
-      on `ENV=test-sigres`.
+- [x] **Lot gate** (`ENV=test-sigres`, stack removed with `make clean`):
+      `make typecheck` exit 0, `make lint` exit 0, `make test` exit 0 — api
+      2131 passed / 6 skipped, ui 1639 passed / 10 todo, radar-domain 292,
+      radar-sources 1293, radar-scoring 57, immo-mcp 64.
