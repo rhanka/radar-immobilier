@@ -19,14 +19,14 @@
  *   - `lost` = every ref object of P absent from S (compared on all its fields) plus
  *     every projected field of P absent from or different in S (`label`, `type`,
  *     `source_ref`, root `props` keys, `props.properties` values).
- *   - `clean`   : `lost` is empty, OR nothing in `lost` is anchored to another city
- *     and P is not another city's row: the difference is the city's own evolution,
- *     handled by the standard guards exactly like a refresh projection.
+ *   - `clean`   : `lost` is empty, OR nothing in `lost` is anchored to another city:
+ *     the difference is handled by the standard guards exactly like a refresh projection
+ *     (a ref-less contaminated row whose loss a guard protects refuses the city).
  *   - `foreign` : `lost` is explained by the same-id row of ONE other city D (every
  *     lost ref is contained in a ref of D, every lost field has the same value in D),
  *     and the contamination is anchored: a lost ref carries a docSha that appears
- *     nowhere in C's file, or P equals D's row on every projected field (D's refs may
- *     carry fields added since, e.g. a recovered date).
+ *     nowhere in C's file (a lost ref is matched by containment: D's ref may carry
+ *     fields added since, e.g. a recovered date).
  *   - `unknown` : a lost ref carries a docSha foreign to C's file but no single other
  *     city explains all of `lost` (mixed or changed content). A city with any
  *     `unknown` row is refused before any mutation.
@@ -204,19 +204,10 @@ export function classifyNode(
     };
   }
 
-  // Not anchored: foreign only when P IS the other city's row — every element of P is in D
-  // and every field of D is in P (refs one way: D may have gained ref fields since, e.g. a
-  // recovered date). A partial coincidence (a generic label shared by two cities) is the
-  // city's own evolution, left to the standard guards.
-  const wholeRow = elementsOf(pg);
-  const sameRow = explaining.filter(
-    (candidate) =>
-      wholeRow.every((element) => presentIn(element, candidate.row)) &&
-      elementsOf(candidate.row).every((element) => element.kind === "ref" || presentIn(element, pg)),
-  );
-  if (sameRow.length > 0) {
-    return { id: pg.id, class: "foreign", lost, explainedBy: sameRow.map((c) => c.city).sort() };
-  }
+  // Not anchored: no city-specific provenance proves the lost values came from another city.
+  // Generic fields (label, type, properties) identical in two cities do not tell a foreign row
+  // from a local one (review A825-01), so the row stays under the ordinary guards: a lost
+  // guarded value refuses the city, as in a refresh projection.
   return { id: pg.id, class: "clean", lost };
 }
 
@@ -242,6 +233,8 @@ export interface CityDrift {
   pgNodes: number;
   idsMissingInPg: number;
   idsNotInS3: number;
+  /** Rows present on both sides whose projected content differs (either direction), whatever their class. */
+  nodesContentDiff: number;
   edgesMissingInPg: number;
   edgesNotInS3: number;
   /** Edges present on both sides whose props differ (evidence overwritten by another city). */
@@ -293,7 +286,7 @@ export async function repairCity(
   const report: CityRepairReport = {
     city,
     mode,
-    drift: { s3Nodes: projection.nodeRows.length, pgNodes: 0, idsMissingInPg: 0, idsNotInS3: 0, edgesMissingInPg: 0, edgesNotInS3: 0, edgesContentDiff: 0 },
+    drift: { s3Nodes: projection.nodeRows.length, pgNodes: 0, idsMissingInPg: 0, idsNotInS3: 0, nodesContentDiff: 0, edgesMissingInPg: 0, edgesNotInS3: 0, edgesContentDiff: 0 },
     classes: { clean: 0, foreign: 0, unknown: 0 },
     foreignNodes: [],
     unknownNodes: [],
@@ -328,6 +321,11 @@ export async function repairCity(
         pgNodes: pgRows.length,
         idsMissingInPg: [...s3ById.keys()].filter((id) => !pgIds.has(id)).length,
         idsNotInS3: pgRows.filter((row) => !s3ById.has(row.id)).length,
+        // A825-02: `clean` is not equality; the measurement counts every content difference.
+        nodesContentDiff: pgRows.filter((row) => {
+          const s3 = s3ById.get(row.id);
+          return s3 !== undefined && (lostElements(row, s3).length > 0 || lostElements(s3, row).length > 0);
+        }).length,
         edgesMissingInPg: [...s3EdgeKeys].filter((key) => !pgEdgeKeys.has(key)).length,
         edgesNotInS3: [...pgEdgeKeys].filter((key) => !s3EdgeKeys.has(key)).length,
         // A-R5-1: an edge triple shared by two cities had its props overwritten by the other city
@@ -354,7 +352,7 @@ export async function repairCity(
       report.before = evaluateProjectionGuards(city, pgRows, projection.nodeRows);
       const d = report.drift;
       report.noop =
-        foreignIds.size === 0 && report.unknownNodes.length === 0 && d.idsMissingInPg === 0 && d.idsNotInS3 === 0 &&
+        foreignIds.size === 0 && report.unknownNodes.length === 0 && d.idsMissingInPg === 0 && d.idsNotInS3 === 0 && d.nodesContentDiff === 0 &&
         d.edgesMissingInPg === 0 && d.edgesNotInS3 === 0 && d.edgesContentDiff === 0;
 
       if (report.unknownNodes.length > 0) {

@@ -132,16 +132,19 @@ describe("classifyNode (K11)", () => {
     expect(classifyNode(pg, s3, [{ city: "barkmere", row: bark }], goreShas).class).toBe("unknown");
   });
 
-  it("foreign: ref-less contamination when the PG row is another city's whole row (zone node)", () => {
+  it("clean (not foreign): ref-less equality with another city's row proves nothing (review A825-01)", () => {
     const bark = row("barkmere", "zone-c-6", { label: "C-6 (barkmere)", description: "zone commerciale barkmere" });
     const s3 = row("gore", "zone-c-6", { label: "C-6 (gore)" });
-    expect(classifyNode({ ...bark }, s3, [{ city: "barkmere", row: bark }], goreShas).class).toBe("foreign");
+    expect(classifyNode({ ...bark }, s3, [{ city: "barkmere", row: bark }], goreShas).class).toBe("clean");
   });
 
-  it("foreign: a foreign sourceRef / root prop only, when the row is the other city's row", () => {
-    const bark = row("barkmere", "x", { label: "same", source_file: "raw/proces-verbaux-barkmere/cas/B1.pdf" });
-    const s3 = row("gore", "x", { label: "same" });
-    expect(classifyNode({ ...bark }, s3, [{ city: "barkmere", row: bark }], goreShas).class).toBe("foreign");
+  it("clean (not foreign): a city's own guarded value coinciding with another city's row stays guarded (A825-01)", () => {
+    // gore's own zone-h-1 with nb_unites_max=4; its S3 file drops the property; barkmere has the
+    // same id/label/property plus its own evidence. The row must stay in the guard baseline.
+    const pg = row("gore", "zone-h-1", { label: "Zone H-1", properties: { nb_unites_max: 4 } });
+    const s3 = row("gore", "zone-h-1", { label: "Zone H-1" });
+    const bark = row("barkmere", "zone-h-1", { label: "Zone H-1", properties: { nb_unites_max: 4 }, refs: [ref("barkmere", "B7")] });
+    expect(classifyNode(pg, s3, [{ city: "barkmere", row: bark }], goreShas).class).toBe("clean");
   });
 
   it("clean: the city's own evolution (label changed, no foreign anchor, not another city's row)", () => {
