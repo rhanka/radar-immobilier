@@ -232,6 +232,9 @@ verify-renders:
 	  test -s "$$tmp/prod.contract" || { echo "empty refresh contract projection" >&2; exit 1; }; \
 	  diff -u "$$tmp/preprod.contract" "$$tmp/prod.contract" \
 	    || { echo "refresh overlay parity failed: preprod and prod diverge outside the four intended differences (namespace, memory envelope, S3 binding, refresh hour list) — see the diff above (< preprod, > prod)" >&2; exit 1; }; \
+	  quiesce="$$(grep -E '^ +QUIESCE_CRONJOBS: ' "$(ROOT)/.github/workflows/bascule-preprod.yml" | sed -E 's/^ +QUIESCE_CRONJOBS: *//')"; \
+	  case ",$$quiesce," in *,radar-refresh-pv,*) ;; *) echo "refresh pending watchdog contract failed: QUIESCE_CRONJOBS of .github/workflows/bascule-preprod.yml must list radar-refresh-pv (got: $$quiesce)" >&2; exit 1;; esac; \
+	  case ",$$quiesce," in *,radar-refresh-pending-watchdog,*) ;; *) echo "refresh pending watchdog contract failed: QUIESCE_CRONJOBS of .github/workflows/bascule-preprod.yml must list radar-refresh-pending-watchdog, or an active watchdog Job trips the bascule G2 guard (got: $$quiesce)" >&2; exit 1;; esac; \
 	  awk -v min_minutes=$(REFRESH_STAGGER_MIN_MINUTES) -f "$(STAGGER_AWK)" "$$tmp/preprod.yaml" "$$tmp/prod.yaml" \
 	    || { echo "refresh stagger failed: the closest prod and preprod refresh starts must be at least $(REFRESH_STAGGER_MIN_MINUTES) minutes apart (incident 2026-10-09)" >&2; exit 1; }
 
