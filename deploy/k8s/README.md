@@ -300,9 +300,9 @@ operator actions.
 ## Production refresh CronJobs
 
 - Arm the CD step with `gh variable set REFRESH_CRONJOB_PROD_ENABLED --body true`.
-- It first applies on the next `v*` tag; the 03:17/04:30 UTC schedules stay outside, and must never overlap, the release backup window.
+- It first applies on the next `v*` tag. `radar-refresh-pv` starts at `0 5,11,17,23 * * *` UTC in prod and `30 5,11,17,23 * * *` UTC in preprod (incident 2026-10-09: the same minute on the same node blocked both RWO keyring attachments). Start a release outside the refresh windows (prod 05:00, 11:00, 17:00, 23:00 UTC; preprod 05:30, 11:30, 17:30, 23:30 UTC; 1 h 30–2 h each), so the release backup is not competing with a starting pass.
 - Disarm future applies by setting the variable to `false`; suspend already-deployed CronJobs with `suspend: true`.
-- The CronJobs scrape and parse/exploit deterministically, then project `graph/<city>/latest.json` from S3 into Postgres.
+- `radar-refresh-pv` acquires, extracts, publishes `graph/<city>/latest.json` and projects it into Postgres. `radar-refresh-pending-watchdog` (every 5 min, ServiceAccount `radar-refresh-watchdog`, owner-applied RBAC) deletes a refresh pod still `Pending` 15 min after its creation, so the pass fails and releases its requests instead of holding them until the 5 h 30 Job deadline.
 - Capitalized `Signal` materialization remains owned by graphify v2.3 plus publication of `graph/<city>/latest.json`; these CronJobs do not replace it.
 
 ## Manual deploy (human, with cluster creds)

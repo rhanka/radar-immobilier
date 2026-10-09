@@ -295,12 +295,32 @@ et rougit si `suspend` n'est pas `false` ou si l'image n'est pas l'empreinte
 promue.
 
 Le régime appliqué est celui de la base `deploy/k8s/34-refresh-cronjob.yaml`,
-inchangé entre les deux environnements depuis #736 : `--all` sur les ~528
-villes, **quatre passages par jour** (`17 5,11,17,23` UTC), échéance de Job
-`19800 s` (5 h 30) et arrêt propre du balayage à `18900000 ms` (5 h 15).
+commun aux deux environnements depuis #736 : `--all` sur les ~528 villes,
+**quatre passages par jour**, échéance de Job `19800 s` (5 h 30) et arrêt
+propre du balayage à `18900000 ms` (5 h 15). Horaires (UTC) :
+
+| Environnement | Planification | Lancements UTC | Toronto, heure d'été (heure normale) |
+| --- | --- | --- | --- |
+| Production | `0 5,11,17,23 * * *` | 05:00, 11:00, 17:00, 23:00 | 01:00, 07:00, 13:00, 19:00 (00:00, 06:00, 12:00, 18:00) |
+| Préproduction | `30 5,11,17,23 * * *` | 05:30, 11:30, 17:30, 23:30 | 01:30, 07:30, 13:30, 19:30 (00:30, 06:30, 12:30, 18:30) |
+
+Le décalage d'une demi-heure date de l'incident du 2026-10-09 : avec le même
+horaire (`17 5,11,17,23`), les deux pods demandaient l'attachement de leur PVC
+keyring RWO au même nœud à la même minute ; le CSI ne s'en est pas remis, les
+deux passages sont restés Pending 4 h 30 en gardant leurs requests CPU, et la
+sauvegarde de release prod est restée `FailedScheduling`.
+
 `verify-renders` refuse toute divergence entre le rendu préprod et le rendu
-prod en dehors de trois différences voulues : namespace, enveloppe mémoire,
-liaison S3.
+prod en dehors de quatre différences voulues : namespace, enveloppe mémoire,
+liaison S3, minute de lancement du refresh. Il exige aussi les mêmes heures des
+deux côtés et au moins 15 minutes entre les deux minutes de lancement.
+
+Le même rendu porte le gardien `radar-refresh-pending-watchdog`
+(`deploy/k8s/34-refresh-pending-watchdog.yaml`) : toutes les 5 minutes, il
+supprime un pod `radar-refresh-pv-*` encore `Pending` 15 minutes après sa
+création. Le Job de passage (`backoffLimit: 0`) échoue alors au lieu de garder
+ses requests jusqu'à son échéance de 5 h 30 ; un pod `Running` n'est jamais
+touché. L'étape relit aussi ce CronJob (actif, même empreinte).
 
 ## À vérifier AVANT de définir la variable
 
@@ -326,7 +346,16 @@ liaison S3.
 4. **Occupation du créneau.** Quatre passages de 5 h 30 au pire occupent le pod
    presque en continu, là où le régime précédent était nocturne. Décider si le
    surge `radar-api` doit rester possible, et sinon quand.
-5. **Pic RSS du balayage.** Aucun pic de `refresh-pv --all` n'a jamais été
+5. **Identité du gardien des pods Pending.** Le ServiceAccount
+   `radar-refresh-watchdog` et son Role (pods `get/list/delete`, ce namespace
+   seulement) sont dans `deploy/k8s/10-rbac.yaml` ; le jumeau préprod est dans
+   `deploy/k8s/11-ci-deployer-preprod-rbac.yaml`. Leur apply est un acte
+   cluster-admin (poc-k8s). Sans eux, chaque Job du gardien échoue en
+   `FailedCreate` (ServiceAccount introuvable) puis s'arrête à son échéance de
+   180 s : le refresh tourne, mais un pod bloqué en `Pending` n'est plus borné.
+   Le gardien demande aussi 10m CPU / 64 Mi (limite 100m / 128 Mi) : il doit
+   tenir dans la marge de quota du namespace, à relire sur le cluster.
+6. **Pic RSS du balayage.** Aucun pic de `refresh-pv --all` n'a jamais été
    mesuré ; les chiffres disponibles (OOM à 512 Mi, pic 815 Mi, plateau
    305-426 Mi à 3 Gi) viennent de `worker-live`, un proxy de ce chemin de code.
    La consigne « validate peak RSS » de l'overlay prod n'est pas encore levée.
@@ -337,4 +366,6 @@ liaison S3.
 Remettre `REFRESH_CRONJOB_PROD_ENABLED` à autre chose que `'true'` empêche les
 promotions suivantes de redéployer le CronJob, mais **ne suspend pas** celui qui
 tourne déjà : suspendre est un acte explicite
-(`kubectl -n radar-immobilier patch cronjob radar-refresh-pv --type=merge -p '{"spec":{"suspend":true}}'`).
+(`kubectl -n radar-immobilier patch cronjob radar-refresh-pv --type=merge -p '{"spec":{"suspend":true}}'`). Le gardien
+`radar-refresh-pending-watchdog` peut rester actif : sans pod de passage, il ne
+fait rien.

@@ -4,8 +4,11 @@
 # la section Sources → « Cohérence E2E » (E0 PV→signaux + E1 signaux→zones).
 #
 # Schedule: 04:45 UTC. This snapshot remains suspended independently of
-# radar-refresh-pv (05:17 UTC), which now owns acquisition and projection.
-# Reassess snapshot timing before activation: E0 reads projected graph_nodes.
+# radar-refresh-pv (prod 05:00 UTC, preprod 05:30 UTC), which now owns
+# acquisition and projection. With activeDeadlineSeconds 900 the snapshot ends
+# by 05:00 when it starts on time, but startingDeadlineSeconds 600 lets it start
+# up to 04:55 and overlap the 05:00 prod pass. Reassess snapshot timing before
+# activation: E0 reads projected graph_nodes.
 #
 # Dépendance honnête : E1 lit exclusivement la sortie du mapper #74
 # (`run-geo-mapper.ts` → `geo_resolutions`/`geo_unresolved`). Ce mapper n'est PAS

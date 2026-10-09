@@ -86,7 +86,7 @@ conteneurs : `requests {cpu 50m, memory 96Mi}`, `limits {cpu 150m, memory 256Mi}
 | Manifeste | Type | Rôle | Cadence |
 | --- | --- | --- | --- |
 | `33-scrape-job.yaml` | Job one-shot | scrape+parse+exploit (worker-live, `LIVE_SCRAPE_EXPLOIT=1`) → `raw/ parsed/ ontology/` SCW. HEAD-skip CAS, S3-only, AUCUN LLM | à la demande |
-| `34-refresh-cronjob.yaml` › `radar-refresh-pv` | CronJob | Acquisition, extraction, canonical publication and PG projection | **Daily 05:17 UTC**; replaces the former pair (2026-09-18) |
+| `34-refresh-cronjob.yaml` › `radar-refresh-pv` | CronJob | Acquisition, extraction, canonical publication and PG projection | **Four passes a day**: prod 05:00, 11:00, 17:00, 23:00 UTC; preprod 05:30, 11:30, 17:30, 23:30 UTC (since 2026-10-09); replaces the former pair (2026-09-18) |
 
 **Cadences DÉCOUPLÉES** volontairement (brainstorm §4.1) : le scrape déterministe
 (gratuit) tourne tous les jours ; la projection suit. **graphify N'EST PAS
