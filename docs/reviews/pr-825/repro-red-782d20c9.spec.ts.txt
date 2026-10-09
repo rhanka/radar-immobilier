@@ -1,0 +1,26 @@
+// GH #812 reproduction on origin/main (red expected): two cities, same node id.
+// Run on a detached worktree of origin/main 782d20c9 as api/tests/integration/graph-city-key-repro.spec.ts:
+//   make test-api SCOPE=tests/integration/graph-city-key-repro.spec.ts ENV=test-812-red ; make clean ENV=test-812-red
+import { eq, like } from "drizzle-orm";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { loadConfig } from "../../src/config.js";
+import { createDb, type Database } from "../../src/db/client.js";
+import { graphNodes } from "../../src/db/schema.js";
+import { subgraphForCity, upsertGraphAtomic } from "../../src/services/graph/graph-store.js";
+
+const SHARED = "__812_bylaw-242";
+let db: Database; let pool: ReturnType<typeof createDb>["pool"];
+beforeAll(async () => { ({ db, pool } = createDb(loadConfig())); await db.delete(graphNodes).where(like(graphNodes.id, "__812_%")); });
+afterAll(async () => { await pool.end(); });
+const g = (city: string) => ({ nodes: [{ id: SHARED, type: "Bylaw", label: `242 (${city})`,
+  refs: [{ docSha: `SHA_${city}`, rawRef: `raw/proces-verbaux-${city}/cas/SHA_${city}.pdf`, excerpt: city }] }] });
+
+describe("GH #812 repro", () => {
+  it("two cities with the same node id keep two rows, each with its own content", async () => {
+    await upsertGraphAtomic(db, "gore", g("gore"));
+    await upsertGraphAtomic(db, "barkmere", g("barkmere"));
+    const rows = await db.select().from(graphNodes).where(eq(graphNodes.id, SHARED));
+    expect(rows.map((r) => `${r.citySlug}:${r.label}`).sort()).toEqual(["barkmere:242 (barkmere)", "gore:242 (gore)"]);
+    expect((await subgraphForCity(db, "barkmere")).nodes.map((n) => n.id)).toContain(SHARED);
+  });
+});

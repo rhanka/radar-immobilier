@@ -24,7 +24,6 @@ import {
   findMissingSourceRefs,
   countCompleteSignals,
   isCompleteSignalProps,
-  idsSkippedByCityGuard,
   queryNeighbors,
   subgraphForCity,
   subgraphForMrc,
@@ -1412,7 +1411,7 @@ describe("queryNeighbors — fix N+1 : un seul inArray pour les nœuds voisins",
     } as unknown;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await queryNeighbors(db as any, "zone_a");
+    const result = await queryNeighbors(db as any, "valleyfield", "zone_a");
 
     // Un seul SELECT sur graphNodes pour tous les voisins
     expect(nodeSelectCount).toBe(1);
@@ -1440,7 +1439,7 @@ describe("queryNeighbors — fix N+1 : un seul inArray pour les nœuds voisins",
     } as unknown;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await queryNeighbors(db as any, "node_orphelin");
+    const result = await queryNeighbors(db as any, "valleyfield", "node_orphelin");
     // Aucune arête → pas de SELECT sur graphNodes (court-circuit)
     expect(callIdx).toBe(2); // seulement outEdges + inEdges
     expect(result).toHaveLength(0);
@@ -1626,20 +1625,6 @@ describe("isMulti4Plus — dimension 4+ détection", () => {
   });
 });
 
-describe("idsSkippedByCityGuard — GH #812 cross-city collision detection (pure)", () => {
-  const row = (id: string): ReturnType<typeof buildNodeRow> =>
-    buildNodeRow({ id, label: id, type: "Bylaw" }, "barkmere");
-
-  it("returns the ids absent from RETURNING (skipped by the same-city guard)", () => {
-    const rows = [row("bylaw-242"), row("bylaw-134"), row("zone-c-6")];
-    expect(idsSkippedByCityGuard(rows, ["bylaw-134"])).toEqual(["bylaw-242", "zone-c-6"]);
-  });
-
-  it("returns nothing when every row was inserted or updated", () => {
-    const rows = [row("bylaw-242"), row("bylaw-134")];
-    expect(idsSkippedByCityGuard(rows, ["bylaw-134", "bylaw-242"])).toEqual([]);
-  });
-});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. DB-bound tests — skipped when no POSTGRES_HOST env var
@@ -1694,7 +1679,7 @@ describe.skipIf(!DB_AVAILABLE)("DB-bound: upsertGraph (integration)", () => {
   it("queryNeighbors returns outgoing and incoming edges for a node", async () => {
     const db = await getDb();
     await upsertGraph(db, "valleyfield", FIXTURE_GRAPH);
-    const neighbors = await queryNeighbors(db, "zone_a");
+    const neighbors = await queryNeighbors(db, "valleyfield", "zone_a");
     const outgoing = neighbors.filter((n) => n.direction === "out");
     const incoming = neighbors.filter((n) => n.direction === "in");
     expect(outgoing.length).toBeGreaterThan(0);
@@ -1937,151 +1922,8 @@ describe.skipIf(!DB_AVAILABLE)("DB-bound: upsertGraphAtomic (atomique + gate)", 
   });
 });
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 2ter. DB-bound — GH #812 : garde-fou ON CONFLICT (id) limité à la même ville
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe.skipIf(!DB_AVAILABLE)("DB-bound: cross-city id collision guard (GH #812)", () => {
-  const OWNER = "__test_collision_gore__";
-  const OTHER = "__test_collision_barkmere__";
-  const SHARED = "__test_collision__:bylaw-242";
-  const GLOBAL = "__test_collision__:global-node";
-
-  async function getDb() {
-    const { createDb } = await import("../../db/client.js");
-    const { loadConfig } = await import("../../config.js");
-    const config = loadConfig({
-      POSTGRES_HOST: process.env.POSTGRES_HOST ?? "postgres",
-      POSTGRES_PORT: process.env.POSTGRES_PORT ?? "5432",
-      POSTGRES_USER: process.env.POSTGRES_USER ?? "radar",
-      POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD ?? "changeme-dev-only",
-      POSTGRES_DB: process.env.POSTGRES_DB ?? "radar",
-    });
-    return createDb(config).db;
-  }
-
-  async function reset(db: Awaited<ReturnType<typeof getDb>>) {
-    const { graphNodes, graphEdges } = await import("../../db/schema.js");
-    const { inArray, like, or } = await import("drizzle-orm");
-    await db
-      .delete(graphEdges)
-      .where(or(like(graphEdges.srcId, "__test_collision%"), like(graphEdges.dstId, "__test_collision%")));
-    await db
-      .delete(graphNodes)
-      .where(or(inArray(graphNodes.citySlug, [OWNER, OTHER]), like(graphNodes.id, "__test_collision%")));
-  }
-
-  async function readNode(db: Awaited<ReturnType<typeof getDb>>, id: string) {
-    const { graphNodes } = await import("../../db/schema.js");
-    const { eq } = await import("drizzle-orm");
-    const [row] = await db.select().from(graphNodes).where(eq(graphNodes.id, id));
-    return row;
-  }
-
-  const ownerGraph = {
-    nodes: [
-      {
-        id: SHARED,
-        type: "Bylaw",
-        label: "Règlement 242 (gore)",
-        refs: [{ docSha: "SHA_GORE", rawRef: "raw/proces-verbaux-gore/SHA_GORE.pdf", excerpt: "gore 242" }],
-      },
-    ],
-  };
-  const otherGraph = {
-    nodes: [
-      {
-        id: SHARED,
-        type: "Bylaw",
-        label: "Règlement 242 (barkmere)",
-        refs: [{ docSha: "SHA_BARK", rawRef: "raw/proces-verbaux-barkmere/SHA_BARK.pdf", excerpt: "barkmere 242" }],
-      },
-      { id: `${SHARED}:barkmere-only`, type: "Zone", label: "Zone propre à barkmere" },
-    ],
-  };
-
-  it("same-city re-projection still updates the row (no collision reported)", async () => {
-    const db = await getDb();
-    await reset(db);
-    expect((await upsertGraphAtomic(db, OWNER, ownerGraph)).crossCityCollisions).toEqual([]);
-
-    const updated = structuredClone(ownerGraph);
-    updated.nodes[0]!.label = "Règlement 242 (gore, mis à jour)";
-    const result = await upsertGraphAtomic(db, OWNER, updated);
-    expect(result.aborted).toBe(false);
-    expect(result.crossCityCollisions).toEqual([]);
-    expect((await readNode(db, SHARED))!.label).toBe("Règlement 242 (gore, mis à jour)");
-    await reset(db);
-  });
-
-  it("upsertGraphAtomic: another city's row is untouched, the collision is reported, the rest is written", async () => {
-    const db = await getDb();
-    await reset(db);
-    await upsertGraphAtomic(db, OWNER, ownerGraph);
-    const before = await readNode(db, SHARED);
-
-    const result = await upsertGraphAtomic(db, OTHER, otherGraph);
-    expect(result.aborted).toBe(false);
-    expect(result.crossCityCollisions).toEqual([{ id: SHARED, ownerCitySlug: OWNER }]);
-
-    const after = await readNode(db, SHARED);
-    expect(after).toEqual(before); // label, props (refs), city_slug, source_ref: all unchanged
-    expect(after!.citySlug).toBe(OWNER);
-    expect(JSON.stringify(after!.props)).not.toContain("SHA_BARK");
-    // The non-colliding node of the other city IS written, under that city.
-    expect((await readNode(db, `${SHARED}:barkmere-only`))!.citySlug).toBe(OTHER);
-    await reset(db);
-  });
-
-  it("the owner city's next projection is no longer refused by the provenance guard (gore case)", async () => {
-    const db = await getDb();
-    await reset(db);
-    await upsertGraphAtomic(db, OWNER, ownerGraph);
-    await upsertGraphAtomic(db, OTHER, otherGraph);
-    // Before the guard, OTHER overwrote the owner's refs and this re-projection
-    // was refused as a source-ref provenance regression (postgres-regression-refused).
-    const again = await upsertGraphAtomic(db, OWNER, ownerGraph);
-    expect(again.aborted).toBe(false);
-    expect(again.reason).toBeUndefined();
-    expect(again.crossCityCollisions).toEqual([]);
-    await reset(db);
-  });
-
-  it("upsertGraph (pure freshness path): another city's row is untouched and reported", async () => {
-    const db = await getDb();
-    await reset(db);
-    await upsertGraph(db, OWNER, ownerGraph);
-    const before = await readNode(db, SHARED);
-
-    const result = await upsertGraph(db, OTHER, otherGraph);
-    expect(result.crossCityCollisions).toEqual([{ id: SHARED, ownerCitySlug: OWNER }]);
-    expect(await readNode(db, SHARED)).toEqual(before);
-    await reset(db);
-  });
-
-  it("cross-city scope (citySlug=null): null rows stay updatable, city rows are not overwritten", async () => {
-    const db = await getDb();
-    await reset(db);
-    await upsertGraph(db, null, { nodes: [{ id: GLOBAL, type: "Concept", label: "global v1" }] });
-    const nullUpdate = await upsertGraph(db, null, { nodes: [{ id: GLOBAL, type: "Concept", label: "global v2" }] });
-    expect(nullUpdate.crossCityCollisions).toEqual([]);
-    expect((await readNode(db, GLOBAL))!.label).toBe("global v2");
-
-    await upsertGraphAtomic(db, OWNER, ownerGraph);
-    const nullOverCity = await upsertGraphAtomic(db, null, otherGraph);
-    expect(nullOverCity.crossCityCollisions).toEqual([{ id: SHARED, ownerCitySlug: OWNER }]);
-    expect((await readNode(db, SHARED))!.label).toBe("Règlement 242 (gore)");
-
-    // …and a city projection does not overwrite a global (null) row either.
-    const cityOverNull = await upsertGraphAtomic(db, OTHER, {
-      nodes: [{ id: GLOBAL, type: "Concept", label: "hijack" }],
-    });
-    expect(cityOverNull.crossCityCollisions).toEqual([{ id: GLOBAL, ownerCitySlug: null }]);
-    expect((await readNode(db, GLOBAL))!.label).toBe("global v2");
-    await reset(db);
-  });
-});
-
+// GH #812 — the city key (city_slug, id) is covered end to end by
+// api/tests/integration/graph-city-key.spec.ts (two cities, same id).
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 5. Signal flag helpers — isPrecoceSignal, buildSubsetKey — pure tests
