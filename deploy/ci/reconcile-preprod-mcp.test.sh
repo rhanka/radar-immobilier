@@ -64,13 +64,24 @@ case " $* " in
 esac
 FAKE
 chmod +x "$T/bin/kubectl"
+# python3 shim: records every call. The immo-mcp branch must not use Python
+# (owner rule: no Python in repos/jobs); pre-existing kfilter.py calls for the
+# other objects are delegated to the real interpreter, untouched here.
+REAL_PYTHON3="$(command -v python3 || true)"
+cat >"$T/bin/python3" <<'SHIM'
+#!/usr/bin/env bash
+echo "python3 $*" >>"$CALLS"
+[ -n "$REAL_PYTHON3" ] || { echo "python3 not installed" >&2; exit 127; }
+exec "$REAL_PYTHON3" "$@"
+SHIM
+chmod +x "$T/bin/python3"
 STATE="$T/state"; mkdir -p "$STATE"
 
 # run <case-id> <MOCK_GET> [MOCK_PATCH_FAIL] [MOCK_APPLY_CHANGES] [MOCK_FAIL_READ] -> RC, CALLS
 # (state kept in $STATE across runs, so multi-run cases share it)
 run() {
   CALLS="$T/calls.$1"; : >"$CALLS"
-  PATH="$T/bin:$PATH" REAL_KUBECTL="$REAL_KUBECTL" CALLS="$CALLS" STATE="$STATE" MOCK_GET="$2" \
+  PATH="$T/bin:$PATH" REAL_KUBECTL="$REAL_KUBECTL" REAL_PYTHON3="$REAL_PYTHON3" CALLS="$CALLS" STATE="$STATE" MOCK_GET="$2" \
     MOCK_PATCH_FAIL="${3:-0}" MOCK_APPLY_CHANGES="${4:-0}" MOCK_FAIL_READ="${5:-}" \
     NAMESPACE=radar-immobilier-preprod \
     bash "$HERE/reconcile-preprod.sh" >"$T/out.$1" 2>&1
@@ -79,8 +90,9 @@ run() {
 state() { printf '%s' "$1" >"$STATE/rv"; printf '%s' "$2" >"$STATE/ann"; }
 has() { grep -qx -- "$2" "$1"; }
 calls() { paste -sd'|' "$CALLS"; }
-# No call outside the expected protocol (the fake exits non-zero on those too).
-clean() { ! grep -q '^unexpected\|^bad patch' "$CALLS"; }
+# No call outside the expected protocol (the fake exits non-zero on those too),
+# and no Python call touching immo-mcp-config.
+clean() { ! grep -q '^unexpected\|^bad patch\|^python3 .*immo-mcp-config' "$CALLS"; }
 line() { grep -n -- "$2" "$1" | head -1 | cut -d: -f1; }
 
 state 100 ''; run absent absent
