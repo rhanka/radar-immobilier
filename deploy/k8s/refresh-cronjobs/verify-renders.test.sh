@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+# Hermetic tests for `refresh-018.mk verify-renders`: the released overlays pass,
+# and each mutation of a copy fails for its own reason only.
+#
+# Covered: the prod/preprod start-minute stagger (incident 2026-10-09), the shared
+# hours, the pending-pod watchdog CronJob and its coupling with the refresh pod
+# (label selector, Job prefix, backoffLimit 0).
+#
+# Usage: bash deploy/k8s/refresh-cronjobs/verify-renders.test.sh
+set -uo pipefail
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+SRC="$(cd "$HERE/../../.." && pwd)"
+PASS=0 FAIL=0
+ok() { PASS=$((PASS + 1)); echo "ok: $1"; }
+bad() { FAIL=$((FAIL + 1)); echo "FAIL: $1" >&2; }
+
+CASES=()
+trap 'rm -rf "${CASES[@]}"' EXIT
+fixture() {
+  CASE_ROOT="$(mktemp -d)"; CASES+=("$CASE_ROOT")
+  mkdir -p "$CASE_ROOT/deploy/k8s"
+  cp "$SRC"/deploy/k8s/34-refresh-cronjob.yaml "$SRC"/deploy/k8s/34-refresh-keyring-pvc.yaml \
+     "$SRC"/deploy/k8s/34-refresh-pending-watchdog.yaml "$CASE_ROOT/deploy/k8s/"
+  cp -r "$SRC/deploy/k8s/refresh-cronjobs" "$SRC/deploy/k8s/refresh-cronjobs-prod" "$CASE_ROOT/deploy/k8s/"
+  mkdir -p "$CASE_ROOT/.github/workflows" && cp "$SRC/.github/workflows/bascule-preprod.yml" "$CASE_ROOT/.github/workflows/"
+}
+verify() { make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-018.mk" verify-renders ENV=test-refresh-renders 2>&1; }
+run_ok() { local out; out="$(verify)" && ok "$1" || { bad "$1"; printf '%s\n' "$out" | tail -5 >&2; }; }
+run_bad() {
+  local out
+  out="$(verify)" && { bad "$1 (passed)"; return; }
+  grep -Fq "$2" <<<"$out" && ok "$1" || { bad "$1 (expected: $2)"; printf '%s\n' "$out" | tail -5 >&2; }
+}
+PRE="deploy/k8s/refresh-cronjobs/kustomization.yaml"
+PROD="deploy/k8s/refresh-cronjobs-prod/kustomization.yaml"
+BASE="deploy/k8s/34-refresh-cronjob.yaml"
+DOG="deploy/k8s/34-refresh-pending-watchdog.yaml"
+
+fixture; run_ok "released overlays pass"
+
+P='s#value: "0 0,6,12,18 \* \* \*"#value: "%s"#'
+pre_sched() { sed -i "$(printf "$P" "$1")" "$CASE_ROOT/$PRE"; }
+
+fixture; pre_sched "0 5,11,17,23 * * *"
+run_bad "preprod on the prod hours (same starts)" "refresh stagger failed"
+
+fixture; pre_sched "30 0,6,12,18 * * *"
+run_bad "preprod off the hour (minute differs from prod)" "refresh overlay parity failed"
+
+fixture; pre_sched "0 0,6,12 * * *"
+run_bad "preprod with fewer passes than prod" "refresh overlay parity failed"
+
+fixture; pre_sched "0 4,10,16,22 * * *"
+run_ok "another hour list on the hour, one hour away, passes (relational, not pinned)"
+
+fixture; sed -i 's#value: "900" }#value: "3400" }#' "$CASE_ROOT/$DOG"
+run_bad "a stalled pod outlives the one-hour gap" "not before the other environment starts"
+
+fixture; sed -i 's#value: "900" }#value: "3300" }#' "$CASE_ROOT/$DOG"
+run_bad "deadline + period exactly equal to the gap is refused" "not before the other environment starts"
+
+fixture; sed -i 's#value: "900" }#value: "3299" }#' "$CASE_ROOT/$DOG"
+run_ok "deadline + period just below the gap passes"
+
+fixture; sed -i '/34-refresh-pending-watchdog.yaml/d' "$CASE_ROOT/$PROD"
+run_bad "prod render without the watchdog" "refresh pending watchdog contract failed"
+
+fixture; sed -i '/name: radar-refresh-pending-watchdog/,/value: false/s/value: false/value: true/' "$CASE_ROOT/$PRE"
+run_bad "preprod watchdog left suspended" "refresh pending watchdog contract failed"
+
+fixture; sed -i '/app.kubernetes.io\/instance: radar-refresh-pv/d' "$CASE_ROOT/$BASE"
+run_bad "refresh pod without the watchdog selector label" "refresh pending watchdog contract failed"
+
+fixture; sed -i 's#value: "app.kubernetes.io/instance=radar-refresh-pv"#value: "app.kubernetes.io/instance=other"#' "$CASE_ROOT/$DOG"
+run_bad "watchdog selecting another label" "refresh pending watchdog contract failed"
+
+fixture; sed -i '/REFRESH_PENDING_DEADLINE_SECONDS/d' "$CASE_ROOT/$DOG"
+run_bad "watchdog without its pending deadline" "refresh pending watchdog contract failed"
+
+fixture; sed -i 's#value: "900" }#value: "19800" }#' "$CASE_ROOT/$DOG"
+run_bad "watchdog deadline not shorter than the slot stagger" "refresh pending watchdog contract failed"
+
+fixture; sed -i '0,/      backoffLimit: 0/s//      backoffLimit: 1/' "$CASE_ROOT/$BASE"
+run_bad "refresh Job retrying a deleted pod" "refresh pending watchdog contract failed"
+
+fixture; sed -i '/^            app.kubernetes.io\/instance: radar-refresh-pv$/d' "$CASE_ROOT/$BASE"
+sed -i '0,/^    app.kubernetes.io\/component: graph-projection$/s//&\n    app.kubernetes.io\/instance: radar-refresh-pv/' "$CASE_ROOT/$BASE"
+run_bad "selector label moved to the CronJob metadata (not on the pods)" "refresh pending watchdog contract failed"
+
+fixture; sed -i '/^            app.kubernetes.io\/instance: radar-refresh-pv$/d' "$CASE_ROOT/$BASE"
+sed -i 's/^  jobTemplate:$/&\n    metadata:\n      labels:\n        app.kubernetes.io\/instance: radar-refresh-pv/' "$CASE_ROOT/$BASE"
+run_bad "selector label moved to the Job template metadata (not on the pods)" "refresh pending watchdog contract failed"
+
+fixture; sed -i 's#value: "900" }#value: "59" }#' "$CASE_ROOT/$DOG"
+run_bad "watchdog deadline below the 60 s floor the script enforces" "refresh pending watchdog contract failed"
+
+fixture; sed -i 's#value: "900" }#value: "60" }#' "$CASE_ROOT/$DOG"
+run_ok "watchdog deadline at the 60 s floor passes"
+
+fixture; sed -i 's#schedule: "0 5,11,17,23 \* \* \*"#schedule: "0 * * * *"#' "$CASE_ROOT/$BASE"
+pre_sched "0 * * * *"
+run_bad "hourly schedules (slot timing not checkable) are refused" "refresh stagger failed"
+
+fixture; pre_sched "0 0,0,12,18 * * *"
+run_bad "a repeated preprod hour (3 real passes counted as 4) is refused" "refresh stagger failed"
+
+fixture; sed -i 's#schedule: "0 5,11,17,23 \* \* \*"#schedule: "17 5,11,17,23 * * *"#' "$CASE_ROOT/$BASE"
+pre_sched "17 0,6,12,18 * * *"
+run_bad "both refreshes off the hour (shared minute 17) are refused" "refresh stagger failed"
+
+fixture; sed -i 's/radar-refresh-pv,radar-refresh-pending-watchdog,/radar-refresh-pv,/' "$CASE_ROOT/.github/workflows/bascule-preprod.yml"
+run_bad "bascule quiesce list without the watchdog" "refresh pending watchdog contract failed"
+
+fixture; W="$CASE_ROOT/.github/workflows/bascule-preprod.yml"; line="$(grep -E '^ +QUIESCE_CRONJOBS: ' "$W")"
+sed -i '/^ \+QUIESCE_CRONJOBS: /d' "$W"; awk -v l="$line" '{ print } /^  served-ids:$/ { s = 1 } s && /^    env:$/ { print l; s = 0 }' "$W" > "$W.tmp" && mv "$W.tmp" "$W"
+run_bad "watchdog quiesce list moved to another job (served-ids)" "refresh pending watchdog contract failed"
+
+fixture; W="$CASE_ROOT/.github/workflows/bascule-preprod.yml"
+printf '        env:\n          QUIESCE_CRONJOBS: radar-refresh-pv,radar-consistency-snapshot\n' >> "$W"
+run_bad "a second (step-level) QUIESCE_CRONJOBS override" "refresh pending watchdog contract failed"
+
+# refresh-stagger.awk alone, on minimal renders: adjacent hours make a real
+# cross-hour proximity (preprod 04:50, prod 05:00) that the overlays cannot reach.
+stagger_case() { # $1 preprod schedule, $2 prod schedule
+  local dir; dir="$(mktemp -d)"; CASES+=("$dir")
+  local dog='kind: CronJob
+metadata:
+  name: radar-refresh-pending-watchdog
+spec:
+  schedule: "*/5 * * * *"
+            - name: REFRESH_PENDING_DEADLINE_SECONDS
+              value: "900"'
+  printf 'kind: CronJob\nmetadata:\n  name: radar-refresh-pv\nspec:\n  schedule: "%s"\n---\n%s\n' "$1" "$dog" >"$dir/preprod.yaml"
+  printf 'kind: CronJob\nmetadata:\n  name: radar-refresh-pv\nspec:\n  schedule: "%s"\n' "$2" >"$dir/prod.yaml"
+  awk -v min_minutes=15 -f "$HERE/refresh-stagger.awk" "$dir/preprod.yaml" "$dir/prod.yaml" 2>&1
+}
+out="$(stagger_case "50 4,5 * * *" "0 4,5 * * *")" && bad "adjacent hours: preprod 04:50 vs prod 05:00 (passed)" \
+  || { grep -Fq "closest prod and preprod starts are 10 min apart" <<<"$out" && ok "adjacent hours: preprod 04:50 vs prod 05:00 refused" || bad "adjacent hours (got: $out)"; }
+out="$(stagger_case "0 3,4 * * *" "0 5,6 * * *")" && ok "adjacent hour lists, on the hour, 60 min apart pass" || bad "adjacent hour lists 60 min apart (got: $out)"
+out="$(stagger_case "30 5,11 * * *" "0 5,24 * * *")" && bad "hour 24 accepted" \
+  || { grep -Fq "hour list 0-23" <<<"$out" && ok "hour outside 0-23 refused" || bad "hour 24 (got: $out)"; }
+
+echo "verify-renders tests: $PASS passed, $FAIL failed"
+[ "$FAIL" -eq 0 ]

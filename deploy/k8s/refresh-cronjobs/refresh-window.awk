@@ -24,10 +24,17 @@
 # toujours) : mieux vaut une garde partielle annoncée qu'une arithmétique
 # cron muette et fausse.
 
+#
+# Seul le CronJob `radar-refresh-pv` est lu : le rendu porte aussi le gardien
+# `radar-refresh-pending-watchdog`, dont les durées (minutes) sont gardées par
+# refresh-watchdog.awk.
+
 function fail(msg) { print "refresh-window: " msg > "/dev/stderr"; bad = 1 }
 
-/^kind:[ \t]/ { kind = $2 }
+/^kind:[ \t]/ { kind = $2; obj = "" }
 kind != "CronJob" { next }
+/^  name:[ \t]/ { obj = $2 }
+obj != "radar-refresh-pv" { next }
 
 /^[ ]+schedule:[ \t]/ { sched = substr($0, index($0, "schedule:") + 10); gsub(/"/, "", sched) }
 /^[ ]+activeDeadlineSeconds:[ \t]/ { ads = $2 + 0 }
