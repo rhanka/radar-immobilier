@@ -19,10 +19,11 @@
 # `radar-refresh-pv-*`, still Pending 900 s (15 min) after its creation, with
 # uid + resourceVersion preconditions (a pod that changed since the list, e.g.
 # turned Running, is refused by the API and left alone). The refresh Job has
-# `backoffLimit: 0`: the deleted pod counts as its single failure, no
-# replacement pod is created, and the Job is marked Failed once the controller
-# has processed the terminating pod; the scheduler releases the requests when
-# the pod object is gone. Nominal timing: deletion requested 15 to 20 minutes
+# `backoffLimit: 0`: the deleted pod counts as its single failure and no
+# replacement pod is created; the Job controller records the failure
+# (FailureTarget) and sets the terminal Failed condition once the pod has
+# finished terminating. The scheduler releases the requests when it observes the
+# pod deleted or in a terminal phase (accepting the DELETE is not that). Nominal timing: deletion requested 15 to 20 minutes
 # after creation, when the watchdog itself is scheduled on time (it needs
 # schedulable capacity, quota and the RBAC below; none of this is reserved).
 #

@@ -80,7 +80,7 @@ END {
          " min: both keyring volumes would be attached together again (incident 2026-10-09)")
   if (deadline <= 0 || period <= 0)
     fail("pending watchdog deadline/period not found in the preprod render")
-  else if (deadline + period > gap * 60)
+  else if (deadline + period >= gap * 60)
     fail("the pending watchdog requests the deletion of a stalled pod after up to " deadline + period " s (nominal), not before the other environment starts (" gap * 60 " s later)")
   if (!bad)
     printf "refresh-stagger: ok — prod \"%s\", preprod \"%s\": closest starts %d min apart; nominal watchdog deletion request by %d s\n", \
