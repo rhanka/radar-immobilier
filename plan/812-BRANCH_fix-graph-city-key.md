@@ -15,7 +15,7 @@ Give every city its own node and edge id space in Postgres (`graph_nodes` PK `(c
 - All new text in English. Discussions with the user may be in French.
 - 0 Python (scripts and jobs in Node/TS only).
 - No manual cluster, database or bucket access: every measure, repair and recovery runs through `run-job.yaml` or the CD.
-- Runs outside refresh windows (prod 05:00, 11:00, 17:00, 23:00 UTC; preprod 05:30, 11:30, 17:30, 23:30 UTC since 2026-10-09; 1 h 30–2 h each) and outside 02:23 UTC, one job at a time; never `--heal` on G1, G2, G3, G4, G5c, G6; G1 stays under D1.
+- Runs outside refresh windows (prod 05:00, 11:00, 17:00, 23:00 UTC; preprod 00:00, 06:00, 12:00, 18:00 UTC since 2026-10-09; 1 h 30–2 h each) and outside 02:23 UTC, one job at a time; never `--heal` on G1, G2, G3, G4, G5c, G6; G1 stays under D1.
 - No commit or PR attribution lines of any kind.
 
 ## Branch Scope Boundaries (MANDATORY)
