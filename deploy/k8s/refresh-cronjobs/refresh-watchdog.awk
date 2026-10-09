@@ -78,7 +78,7 @@ END {
   if (!bad && ads > 0 && deadline + period >= ads / 2)
     fail("pending deadline " deadline " s + period " period " s is not well below the refresh Job deadline " ads " s")
   if (!bad)
-    printf "refresh-watchdog: ok — a refresh pod Pending %d s is deleted within %d s (watchdog every %d s); refresh Job deadline %d s\n", \
-      deadline, deadline + period, period, ads
+    printf "refresh-watchdog: ok — configured: pending deadline %d s + watchdog period %d s = nominal deletion request by %d s (not a measured bound); refresh Job deadline %d s\n", \
+      deadline, period, deadline + period, ads
   exit bad
 }
