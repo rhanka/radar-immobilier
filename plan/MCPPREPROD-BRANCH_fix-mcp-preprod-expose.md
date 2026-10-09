@@ -21,12 +21,14 @@ must stay byte-identical.
   - `deploy/ci/check-preprod-auth-isolation.sh`
   - `deploy/ci/check-preprod-auth-isolation.test.sh`
   - `deploy/ci/reconcile-preprod.sh`
+  - `deploy/ci/reconcile-preprod-mcp.test.sh`
   - `docs/reviews/pr-*/**` (this PR's review dossier)
   - `plan/MCPPREPROD-BRANCH_fix-mcp-preprod-expose.md`
 - **Forbidden Paths**: `Makefile`, `docker-compose*.yml`, `rules/**`,
   `CLAUDE.md`, `AGENTS.md`, `GEMINI.md`, other `plan/*-BRANCH_*.md`,
   `deploy/k8s/**`.
-- **Conditional Paths**: `.github/workflows/build-push-images.yml` (comments
+- **Conditional Paths**: `.github/workflows/ci.yml` (one test step) and
+  `.github/workflows/build-push-images.yml` (comments
   of the `deploy-preprod` job only, see MCPPREPROD-EX1).
 
 ## Feedback Loop
@@ -34,6 +36,9 @@ must stay byte-identical.
   `deploy-preprod` comments state that preprod cannot apply the immo-mcp
   ConfigMap; after this change it does (reconcile). Comment-only edit inside
   `deploy-preprod`; impact none on prod; rollback = revert the hunk.
+- MCPPREPROD-EX2 (`.github/workflows/ci.yml`): one quality step running the
+  hermetic `deploy/ci/reconcile-preprod-mcp.test.sh` (review ASTRA-837-02);
+  impact: CI runtime of a few seconds, no prod effect; rollback = drop the step.
 
 ## Orchestration Mode
 - [x] Mono-branch + single final test cycle.
@@ -44,7 +49,7 @@ must stay byte-identical.
   - [x] Live read-only diagnosis (preprod Ingress `/` only, immo-mcp-config
         carries prod resource/public URL, prod PRM under `/mcp`).
   - [x] Capture prod renders before the change.
-- [ ] **Lot 1 — Preprod overlay renders the MCP like prod**
+- [x] **Lot 1 — Preprod overlay renders the MCP like prod**
   - [x] Tests first: auth-isolation cases for immo-mcp-config and Ingress hosts.
   - [x] Overlay adds 40/41, pins the MCP resource/issuer/public URL, rewrites
         every Ingress to the preprod host and TLS Secret.
@@ -52,5 +57,10 @@ must stay byte-identical.
   - [x] Lot gate: `make k8s-validate ENV=mcp-preprod`, auth-isolation tests,
         prod renders identical before/after.
 - [ ] **Lot 2 — PR handoff**
-  - [ ] Push, PR (Refs #835), CI green.
-  - [ ] Two blind Codex review legs, GO.
+  - [x] Push, PR #837 (Refs #835).
+  - [x] Review round 1: astra GO-with-nits (ASTRA-837-01/02), sol GO-with-nits
+        (SOL-837-01/02); fixes: reconcile restarts the MCP on ConfigMap change
+        and fails on lookup errors (hermetic test), isolated Ingress test
+        mutations, IdP handoff completed in the PR body.
+  - [ ] CI green.
+  - [ ] Review round 2, GO.
