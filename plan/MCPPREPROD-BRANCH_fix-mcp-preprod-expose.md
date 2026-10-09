@@ -69,4 +69,6 @@ must stay byte-identical.
         a strict stateful fake (8 cases).
   - [x] Review round 4: both GO-with-nits (test coverage of the apply
         arguments/content and read failures); fixed (11 cases).
-  - [ ] Review round 5, GO.
+  - [x] Review round 5: astra GO; sol GO-with-nits (applied-document
+        assertion missed RADAR_API_BASE_URL); fixed with a byte comparison.
+  - [ ] Review round 6, GO.
