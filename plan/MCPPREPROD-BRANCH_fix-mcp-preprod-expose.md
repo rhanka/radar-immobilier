@@ -67,4 +67,6 @@ must stay byte-identical.
         resourceVersion pod-template annotation.
   - [x] Review round 3: both GO-with-nits, same test-coverage gap; fixed with
         a strict stateful fake (8 cases).
-  - [ ] Review round 4, GO.
+  - [x] Review round 4: both GO-with-nits (test coverage of the apply
+        arguments/content and read failures); fixed (11 cases).
+  - [ ] Review round 5, GO.
