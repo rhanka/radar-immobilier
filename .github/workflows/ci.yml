@@ -42,6 +42,9 @@ jobs:
       - name: Validate preprod auth isolation (offline render, no PROD auth value)
         run: bash deploy/ci/check-preprod-auth-isolation.test.sh
 
+      - name: Validate preprod reconcile immo-mcp branch (hermetic, fake kubectl)
+        run: bash deploy/ci/reconcile-preprod-mcp.test.sh
+
       - name: Validate daily prod backup logic (offline selftest)
         run: node deploy/ci/backup/backup-daily.selftest.mjs
 
