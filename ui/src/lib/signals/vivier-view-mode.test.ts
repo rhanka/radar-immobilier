@@ -309,6 +309,28 @@ describe("Vivier A / B view contract", () => {
       .toEqual({ available: false, count: null, nodes: [] });
   });
 
+  it("default B view keeps an early zoning signal whose residential nature is unknown", () => {
+    // event-26-220 (la-peche): first draft bylaw, no description nor category in
+    // the graph → instrument `autre`, residential `indetermine`, stage
+    // `projet_reglement`. Unknown is not non-residential: it stays in the view.
+    const earlyUnknown = node("event-26-220", true, false, true,
+      classification("oui", "indetermine", null, "autre", "projet_reglement"));
+    const lateUnknown = node("late-unknown", true, false, false,
+      classification("oui", "indetermine", null, "autre", "adoption"));
+    const nodes = [earlyUnknown, lateUnknown];
+    expect(projectNodesForVivierKey(nodes, null, "vivier-v2").nodes.map((n) => n.id))
+      .toEqual(["event-26-220"]);
+    // With Précoce unchecked, the late unknown (not a rezoning) stays filtered by r.
+    expect(projectComposedVivierB(nodes, { z: true, r: true, p: false }).nodes.map((n) => n.id))
+      .toEqual(["event-26-220"]);
+    expect(projectComposedVivierB(nodes, { z: true, r: false, p: false }).count).toBe(2);
+    // Rail parity: the bulk server counter reads the same shared predicate.
+    const vivierV2Counts = countVivierClassifications(
+      nodes.map((n) => vivierV2Schema.parse(n.classification) as VivierV2),
+    );
+    expect(countForVivierCity({ subsetCounts: {}, vivierV2Counts }, "vivier-v2")).toBe(1);
+  });
+
   it("marks B unavailable rather than inventing a client classification", () => {
     const unclassified = { ...SUTTON_RAW[0]!, classification: undefined };
     expect(projectNodesForVivierKey([unclassified], SUTTON_AUTHORITY, "vivier-v2")).toEqual({
