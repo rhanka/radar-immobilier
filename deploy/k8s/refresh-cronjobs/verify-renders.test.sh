@@ -112,6 +112,14 @@ run_bad "both refreshes off the hour (shared minute 17) are refused" "refresh st
 fixture; sed -i 's/radar-refresh-pv,radar-refresh-pending-watchdog,/radar-refresh-pv,/' "$CASE_ROOT/.github/workflows/bascule-preprod.yml"
 run_bad "bascule quiesce list without the watchdog" "refresh pending watchdog contract failed"
 
+fixture; W="$CASE_ROOT/.github/workflows/bascule-preprod.yml"; line="$(grep -E '^ +QUIESCE_CRONJOBS: ' "$W")"
+sed -i '/^ \+QUIESCE_CRONJOBS: /d' "$W"; awk -v l="$line" '{ print } /^  served-ids:$/ { s = 1 } s && /^    env:$/ { print l; s = 0 }' "$W" > "$W.tmp" && mv "$W.tmp" "$W"
+run_bad "watchdog quiesce list moved to another job (served-ids)" "refresh pending watchdog contract failed"
+
+fixture; W="$CASE_ROOT/.github/workflows/bascule-preprod.yml"
+printf '        env:\n          QUIESCE_CRONJOBS: radar-refresh-pv,radar-consistency-snapshot\n' >> "$W"
+run_bad "a second (step-level) QUIESCE_CRONJOBS override" "refresh pending watchdog contract failed"
+
 # refresh-stagger.awk alone, on minimal renders: adjacent hours make a real
 # cross-hour proximity (preprod 04:50, prod 05:00) that the overlays cannot reach.
 stagger_case() { # $1 preprod schedule, $2 prod schedule
