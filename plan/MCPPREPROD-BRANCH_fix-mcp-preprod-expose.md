@@ -59,7 +59,7 @@ must stay byte-identical.
 - [ ] **Lot 2 — PR handoff**
   - [x] Push, PR #837 (Refs #835).
   - [x] Review round 1: astra GO-with-nits (ASTRA-837-01/02), sol GO-with-nits
-        (SOL-837-01/02); fixes: reconcile restarts the MCP on ConfigMap change
+        (SOL-837-01/02); fixes: reconcile rolls the MCP on ConfigMap change
         and fails on lookup errors (hermetic test), isolated Ingress test
         mutations, IdP handoff completed in the PR body.
   - [ ] CI green.
