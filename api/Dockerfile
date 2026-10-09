@@ -80,6 +80,7 @@ RUN npm install --no-save esbuild@0.24.0 \
   "    'api/src/scripts/graphify-34-enrich.ts'," \
   "    'api/src/scripts/emit-graphify34-candidates.ts'," \
   "    'api/src/scripts/refresh-pv.ts'," \
+  "    'api/src/scripts/refresh-pending-watchdog.ts'," \
   "    'api/src/scripts/repair-graph-city-key.ts'," \
   "    'api/src/services/geo/run-geo-mapper.ts'," \
   "    'api/src/services/geo/run-populate-geo.ts'," \
