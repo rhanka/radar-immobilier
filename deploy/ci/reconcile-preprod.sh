@@ -18,8 +18,8 @@
 #   - ConfigMap immo-mcp-config             (#835: the overlay pins the MCP OAuth
 #                                            resource/issuer + public URL to preprod;
 #                                            applied only while the radar-immo-mcp
-#                                            Deployment exists, which the set-image
-#                                            step then rolls onto the new env)
+#                                            Deployment exists; restarted when the
+#                                            ConfigMap changed, see step 4b)
 #   - Deployment radar-api, radar-ui        (#611: securityContext; pre-flight-present)
 #   - CronJob    radar-consistency-snapshot (#611: securityContext)
 # EXCLUDED: the Namespace (PSS labels = operator act, cluster-scoped), Services /
@@ -76,9 +76,12 @@ kf() { python3 deploy/ci/kfilter.py "$@"; }
 # immo MCP (#835): ConfigMap immo-mcp-config is reconciled only while the
 # radar-immo-mcp Deployment exists (same guard as the prod `deploy` job's
 # "Apply immo-mcp declarative config"): the SA cannot create Deployments, so an
-# absent connector stays absent and no orphan ConfigMap is created.
+# absent connector stays absent and no orphan ConfigMap is created. Only
+# NotFound means absent: any other lookup failure (RBAC, transport) stops the
+# release here (`set -e` on the assignment) instead of silently skipping.
 MCP_PRESENT=0
-if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
+mcp_deploy="$(kubectl -n "$NAMESPACE" get deploy radar-immo-mcp --ignore-not-found -o name)"
+if [ -n "$mcp_deploy" ]; then
   MCP_PRESENT=1
 else
   echo "radar-immo-mcp Deployment absent in ${NAMESPACE} — skipping ConfigMap immo-mcp-config"
@@ -114,12 +117,27 @@ kf --name-prefix radar-ui-nginx "$RENDER" ConfigMap \
 kf "$RENDER" ConfigMap radar-api \
   | kubectl apply --server-side --field-manager="$FM" --force-conflicts -f -
 
-# 4b. immo-mcp-config (#835) — before set-image, which rolls radar-immo-mcp to
-#     the pushed sha, so the new pod reads the preprod resource/issuer (envFrom
-#     is read at pod start). Fail-closed like the CMs above.
+# 4b. immo-mcp-config (#835). envFrom is read at pod start, and set-image only
+#     rolls radar-immo-mcp when the pushed sha differs from the live image (a
+#     same-sha re-run does not). So when the live ConfigMap differs from the
+#     render (`kubectl diff` exit 1; >1 = error, fail-closed), the Deployment is
+#     restarted after the apply; an unchanged ConfigMap restarts nothing.
 if [ "$MCP_PRESENT" = 1 ]; then
-  kf "$RENDER" ConfigMap immo-mcp-config \
+  mcp_cm="$(kf "$RENDER" ConfigMap immo-mcp-config)"
+  mcp_cm_diff=0
+  printf '%s\n' "$mcp_cm" \
+    | kubectl diff --server-side --field-manager="$FM" --force-conflicts -f - >/dev/null \
+    || mcp_cm_diff=$?
+  if [ "$mcp_cm_diff" -gt 1 ]; then
+    echo "::error title=immo-mcp-config diff failed::kubectl diff exit ${mcp_cm_diff} — aborting before set-image"
+    exit 1
+  fi
+  printf '%s\n' "$mcp_cm" \
     | kubectl apply --server-side --field-manager="$FM" --force-conflicts -f -
+  if [ "$mcp_cm_diff" -eq 1 ]; then
+    echo "immo-mcp-config changed — restarting radar-immo-mcp so the pod reads it"
+    kubectl -n "$NAMESPACE" rollout restart deploy/radar-immo-mcp
+  fi
 fi
 
 # 5. CronJob (#611 securityContext).
