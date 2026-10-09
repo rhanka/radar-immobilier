@@ -323,7 +323,10 @@ création, avec préconditions uid + resourceVersion. Le Job de passage
 (`backoffLimit: 0`) échoue alors au lieu de garder ses requests jusqu'à son
 échéance de 5 h 30 ; un pod vu `Running`, ou qui a changé depuis la liste, n'est
 pas supprimé. Délai nominal : 15 à 20 minutes, si le gardien est lui-même
-ordonnancé à temps (rien ne lui réserve de capacité). L'étape relit aussi ce CronJob (actif, même empreinte).
+ordonnancé à temps (rien ne lui réserve de capacité). La bascule préprod le
+met au repos comme `radar-refresh-pv` (`QUIESCE_CRONJOBS` du job `bascule` de
+`.github/workflows/bascule-preprod.yml`, vérifié par `verify-renders`) : sinon
+un Job du gardien encore actif ferait refuser la restauration par la garde G2. L'étape relit aussi ce CronJob (actif, même empreinte).
 
 ## À vérifier AVANT de définir la variable
 

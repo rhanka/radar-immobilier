@@ -212,6 +212,12 @@ jobs:
       # ── Contrôle positif source + cible cluster + smoke ───────────────────
       EXPECTED_DATABASE: ${{ vars.BASCULE_EXPECTED_DATABASE }}
       PREPROD_NAMESPACE: ${{ vars.BASCULE_PREPROD_NAMESPACE || 'radar-immobilier-preprod' }}
+      # Quiesce / drain / G2 / un-quiesce targets (default of bascule.mjs quiesceTargets()
+      # PLUS radar-refresh-pending-watchdog, PR #838): the watchdog CronJob launches a
+      # short Job every 5 min in preprod; left active, such a Job trips the G2
+      # "Job batch ACTIF" refusal. Set here, not in bascule.mjs, so that this change
+      # does not touch deploy/ci/bascule-preprod/** (which re-applies the prod bundle).
+      QUIESCE_CRONJOBS: radar-refresh-pv,radar-refresh-pending-watchdog,radar-consistency-snapshot,radar-populate-geo-daily
       PREPROD_HEALTH_URL: ${{ vars.BASCULE_PREPROD_HEALTH_URL }}
       # Repli d'un-quiesce quand le quiesce est fait à la main (SKIP_QUIESCE) :
       # aucun état enregistré → l'un-quiesce scale-back à partir de cette carte.

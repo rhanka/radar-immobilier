@@ -11,7 +11,8 @@
 # The overlays now share the MINUTE and the number of passes (refresh-contract.awk
 # projects them) and differ only by the HOUR LIST (intended divergence n°4: prod
 # 5,11,17,23, preprod 0,6,12,18). This guard checks:
-#   1. both schedules use the form `<minute 0-59> <hour list 0-23> * * *`;
+#   1. both schedules use the form `<minute 0-59> <hour list 0-23, no repeat> * * *`,
+#      with minute 0 (owner decision 2026-10-09: every refresh on the hour);
 #   2. the closest pair of real daily starts (prod vs preprod, wrapping at
 #      midnight) is at least `min_minutes` apart;
 #   3. the pending-pod watchdog of the preprod render requests the deletion of a stalled pod
@@ -42,13 +43,16 @@ file == 1 && /kind: CronJob\n/ && /\n  name: radar-refresh-pending-watchdog\n/ {
   if (every ~ /^\*\/[0-9]+ /) { split(every, w, / +/); period = substr(w[1], 3) * 60 }
 }
 
-function validSchedule(s, f,   n, h, k, i) {
+function validSchedule(s, f,   n, h, k, i, seen) {
   n = split(s, f, / +/)
   if (n != 5 || f[1] !~ /^[0-9]+$/ || f[1] + 0 > 59) return 0
   if (f[3] != "*" || f[4] != "*" || f[5] != "*") return 0
   if (f[2] !~ /^[0-9]+(,[0-9]+)*$/) return 0
   k = split(f[2], h, ",")
-  for (i = 1; i <= k; i++) if (h[i] + 0 > 23) return 0
+  for (i = 1; i <= k; i++) {
+    if (h[i] + 0 > 23 || ((h[i] + 0) in seen)) return 0  # out of range, or a repeated hour (no extra pass)
+    seen[h[i] + 0] = 1
+  }
   return 1
 }
 
@@ -58,6 +62,9 @@ END {
     fail("radar-refresh-pv schedules must use `<minute 0-59> <hour list 0-23> * * *` (preprod « " sched[1] " », prod « " sched[2] " »)")
     exit 1
   }
+  # Owner decision 2026-10-09: every refresh starts ON THE HOUR (minute 0).
+  if (a[1] + 0 != 0 || b[1] + 0 != 0)
+    fail("radar-refresh-pv must start on the hour (minute 0): preprod « " sched[1] " », prod « " sched[2] " » (owner decision 2026-10-09)")
   # Closest pair of REAL daily starts, across environments, around midnight
   # (1440 min): only the hours actually scheduled count.
   kb = split(b[2], hb, ","); ka = split(a[2], ha, ",")

@@ -23,6 +23,7 @@ fixture() {
   cp "$SRC"/deploy/k8s/34-refresh-cronjob.yaml "$SRC"/deploy/k8s/34-refresh-keyring-pvc.yaml \
      "$SRC"/deploy/k8s/34-refresh-pending-watchdog.yaml "$CASE_ROOT/deploy/k8s/"
   cp -r "$SRC/deploy/k8s/refresh-cronjobs" "$SRC/deploy/k8s/refresh-cronjobs-prod" "$CASE_ROOT/deploy/k8s/"
+  mkdir -p "$CASE_ROOT/.github/workflows" && cp "$SRC/.github/workflows/bascule-preprod.yml" "$CASE_ROOT/.github/workflows/"
 }
 verify() { make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-018.mk" verify-renders ENV=test-refresh-renders 2>&1; }
 run_ok() { local out; out="$(verify)" && ok "$1" || { bad "$1"; printf '%s\n' "$out" | tail -5 >&2; }; }
@@ -95,6 +96,16 @@ fixture; sed -i 's#schedule: "0 5,11,17,23 \* \* \*"#schedule: "0 * * * *"#' "$C
 pre_sched "0 * * * *"
 run_bad "hourly schedules (slot timing not checkable) are refused" "refresh stagger failed"
 
+fixture; pre_sched "0 0,0,12,18 * * *"
+run_bad "a repeated preprod hour (3 real passes counted as 4) is refused" "refresh stagger failed"
+
+fixture; sed -i 's#schedule: "0 5,11,17,23 \* \* \*"#schedule: "17 5,11,17,23 * * *"#' "$CASE_ROOT/$BASE"
+pre_sched "17 0,6,12,18 * * *"
+run_bad "both refreshes off the hour (shared minute 17) are refused" "refresh stagger failed"
+
+fixture; sed -i 's/radar-refresh-pv,radar-refresh-pending-watchdog,/radar-refresh-pv,/' "$CASE_ROOT/.github/workflows/bascule-preprod.yml"
+run_bad "bascule quiesce list without the watchdog" "refresh pending watchdog contract failed"
+
 # refresh-stagger.awk alone, on minimal renders: adjacent hours make a real
 # cross-hour proximity (preprod 04:50, prod 05:00) that the overlays cannot reach.
 stagger_case() { # $1 preprod schedule, $2 prod schedule
@@ -112,7 +123,7 @@ spec:
 }
 out="$(stagger_case "50 4,5 * * *" "0 4,5 * * *")" && bad "adjacent hours: preprod 04:50 vs prod 05:00 (passed)" \
   || { grep -Fq "closest prod and preprod starts are 10 min apart" <<<"$out" && ok "adjacent hours: preprod 04:50 vs prod 05:00 refused" || bad "adjacent hours (got: $out)"; }
-out="$(stagger_case "30 4,5 * * *" "0 4,5 * * *")" && ok "adjacent hours 30 min apart pass" || bad "adjacent hours 30 min apart (got: $out)"
+out="$(stagger_case "0 3,4 * * *" "0 5,6 * * *")" && ok "adjacent hour lists, on the hour, 60 min apart pass" || bad "adjacent hour lists 60 min apart (got: $out)"
 out="$(stagger_case "30 5,11 * * *" "0 5,24 * * *")" && bad "hour 24 accepted" \
   || { grep -Fq "hour list 0-23" <<<"$out" && ok "hour outside 0-23 refused" || bad "hour 24 (got: $out)"; }
 
