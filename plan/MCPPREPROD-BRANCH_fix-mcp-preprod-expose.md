@@ -62,5 +62,9 @@ must stay byte-identical.
         (SOL-837-01/02); fixes: reconcile rolls the MCP on ConfigMap change
         and fails on lookup errors (hermetic test), isolated Ingress test
         mutations, IdP handoff completed in the PR body.
-  - [ ] CI green.
-  - [ ] Review round 2, GO.
+  - [x] CI green (eb35da93).
+  - [x] Review round 2: both GO-with-nits, same retry gap; fixed with the
+        resourceVersion pod-template annotation.
+  - [x] Review round 3: both GO-with-nits, same test-coverage gap; fixed with
+        a strict stateful fake (8 cases).
+  - [ ] Review round 4, GO.
