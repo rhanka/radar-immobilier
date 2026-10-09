@@ -38,23 +38,23 @@ DOG="deploy/k8s/34-refresh-pending-watchdog.yaml"
 
 fixture; run_ok "released overlays pass"
 
-fixture; sed -i 's#value: "30 5,11,17,23 \* \* \*"#value: "0 5,11,17,23 * * *"#' "$CASE_ROOT/$PRE"
-run_bad "preprod and prod on the same minute" "refresh stagger failed"
+P='s#value: "0 0,6,12,18 \* \* \*"#value: "%s"#'
+pre_sched() { sed -i "$(printf "$P" "$1")" "$CASE_ROOT/$PRE"; }
 
-fixture; sed -i 's#value: "30 5,11,17,23 \* \* \*"#value: "10 5,11,17,23 * * *"#' "$CASE_ROOT/$PRE"
-run_bad "preprod only 10 minutes after prod" "refresh stagger failed"
+fixture; pre_sched "0 5,11,17,23 * * *"
+run_bad "preprod on the prod hours (same starts)" "refresh stagger failed"
 
-fixture; sed -i 's#value: "30 5,11,17,23 \* \* \*"#value: "50 5,11,17,23 * * *"#' "$CASE_ROOT/$PRE"
-run_ok "preprod :50 is 50 min after prod and 5 h 10 before the next prod start (real daily starts)"
+fixture; pre_sched "30 0,6,12,18 * * *"
+run_bad "preprod off the hour (minute differs from prod)" "refresh overlay parity failed"
 
-fixture; sed -i 's#value: "30 5,11,17,23 \* \* \*"#value: "30 5,11,17 * * *"#' "$CASE_ROOT/$PRE"
-run_bad "preprod hours diverge from prod" "refresh overlay parity failed"
+fixture; pre_sched "0 0,6,12 * * *"
+run_bad "preprod with fewer passes than prod" "refresh overlay parity failed"
 
-fixture; sed -i 's#value: "30 5,11,17,23 \* \* \*"#value: "25 5,11,17,23 * * *"#' "$CASE_ROOT/$PRE"
-run_ok "another minute far enough away passes (relational, not pinned)"
+fixture; pre_sched "0 4,10,16,22 * * *"
+run_ok "another hour list on the hour, one hour away, passes (relational, not pinned)"
 
-fixture; sed -i 's#value: "30 5,11,17,23 \* \* \*"#value: "17 5,11,17,23 * * *"#' "$CASE_ROOT/$PRE"
-run_bad "17 minutes apart, but a stalled pod outlives the gap" "not before the other environment starts"
+fixture; sed -i 's#value: "900" }#value: "3400" }#' "$CASE_ROOT/$DOG"
+run_bad "a stalled pod outlives the one-hour gap" "not before the other environment starts"
 
 fixture; sed -i '/34-refresh-pending-watchdog.yaml/d' "$CASE_ROOT/$PROD"
 run_bad "prod render without the watchdog" "refresh pending watchdog contract failed"
@@ -92,7 +92,7 @@ fixture; sed -i 's#value: "900" }#value: "60" }#' "$CASE_ROOT/$DOG"
 run_ok "watchdog deadline at the 60 s floor passes"
 
 fixture; sed -i 's#schedule: "0 5,11,17,23 \* \* \*"#schedule: "0 * * * *"#' "$CASE_ROOT/$BASE"
-sed -i 's#value: "30 5,11,17,23 \* \* \*"#value: "30 * * * *"#' "$CASE_ROOT/$PRE"
+pre_sched "0 * * * *"
 run_bad "hourly schedules (slot timing not checkable) are refused" "refresh stagger failed"
 
 # refresh-stagger.awk alone, on minimal renders: adjacent hours make a real

@@ -163,8 +163,10 @@ render-prod:
 # Depuis l'incident du 2026-10-09 (prod et préprod lancées à la même minute sur
 # le même nœud, PVC keyring RWO bloqués à l'attachement, 4 h 30 de Pending),
 # deux blocs s'ajoutent, eux aussi relationnels :
-#   - DÉCALAGE (refresh-stagger.awk) : mêmes heures des deux côtés, minutes de
-#     lancement à au moins REFRESH_STAGGER_MIN_MINUTES l'une de l'autre ;
+#   - DÉCALAGE (refresh-stagger.awk) : forme `<minute> <heures> * * *`, et les
+#     lancements prod et préprod les plus proches à au moins
+#     REFRESH_STAGGER_MIN_MINUTES l'un de l'autre (la minute et le nombre de
+#     passages, communs, sont gardés par la parité) ;
 #   - GARDIEN DES PODS PENDING (refresh-watchdog.awk) : le CronJob
 #     radar-refresh-pending-watchdog est rendu, actif, câblé sur le label du pod
 #     de passage, et le Job de passage garde `backoffLimit: 0`.
@@ -229,9 +231,9 @@ verify-renders:
 	  awk -f "$(CONTRACT_AWK)" "$$tmp/prod.yaml" | sort > "$$tmp/prod.contract"; \
 	  test -s "$$tmp/prod.contract" || { echo "empty refresh contract projection" >&2; exit 1; }; \
 	  diff -u "$$tmp/preprod.contract" "$$tmp/prod.contract" \
-	    || { echo "refresh overlay parity failed: preprod and prod diverge outside the four intended differences (namespace, memory envelope, S3 binding, refresh start minute) — see the diff above (< preprod, > prod)" >&2; exit 1; }; \
+	    || { echo "refresh overlay parity failed: preprod and prod diverge outside the four intended differences (namespace, memory envelope, S3 binding, refresh hour list) — see the diff above (< preprod, > prod)" >&2; exit 1; }; \
 	  awk -v min_minutes=$(REFRESH_STAGGER_MIN_MINUTES) -f "$(STAGGER_AWK)" "$$tmp/preprod.yaml" "$$tmp/prod.yaml" \
-	    || { echo "refresh stagger failed: prod and preprod refresh passes must start at least $(REFRESH_STAGGER_MIN_MINUTES) minutes apart, on the same hours (incident 2026-10-09)" >&2; exit 1; }
+	    || { echo "refresh stagger failed: the closest prod and preprod refresh starts must be at least $(REFRESH_STAGGER_MIN_MINUTES) minutes apart (incident 2026-10-09)" >&2; exit 1; }
 
 .PHONY: seed-preprod
 seed-preprod: guard-preprod

@@ -82,12 +82,13 @@ spec:
   # borné par la durée d'un passage, pas par une fenêtre de session de siège.
   # Heures rondes en UTC : 05:00, 11:00, 17:00, 23:00 (01:00, 07:00, 13:00,
   # 19:00 à Toronto en heure d'été, une heure plus tôt en heure normale).
-  # C'est l'horaire de PRODUCTION ; l'overlay préprod le décale à la
-  # demi-heure (`30 5,11,17,23 * * *`). Pourquoi décaler : le 2026-10-09, les
-  # deux pods, lancés à la même minute sur le même nœud, ont demandé ensemble
-  # l'attachement de leur PVC keyring RWO ; le CSI ne s'en est pas remis et les
-  # deux passages sont restés Pending 4 h 30. `verify-renders` exige les mêmes
-  # heures des deux côtés et au moins 15 minutes d'écart entre les minutes.
+  # C'est l'horaire de PRODUCTION ; l'overlay préprod le décale d'une heure,
+  # toujours à l'heure pile (`0 0,6,12,18 * * *` : 00:00, 06:00, 12:00, 18:00).
+  # Pourquoi décaler : le 2026-10-09, les deux pods, lancés à la même minute sur
+  # le même nœud, ont demandé ensemble l'attachement de leur PVC keyring RWO ;
+  # le CSI ne s'en est pas remis et les deux passages sont restés Pending
+  # 4 h 30. `verify-renders` exige la même minute, le même nombre de passages, et
+  # au moins 15 minutes entre les lancements prod et préprod les plus proches.
   schedule: "0 5,11,17,23 * * *"
   timeZone: "Etc/UTC"
   concurrencyPolicy: Forbid
