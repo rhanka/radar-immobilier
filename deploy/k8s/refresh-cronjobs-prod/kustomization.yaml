@@ -15,7 +15,8 @@
 #   - `--all` : le balayage couvre les ~528 villes configurées, et non plus un
 #     slug en dur (c'était le bug #734 : le job tournait sans rien rafraîchir
 #     d'autre qu'une ville) ;
-#   - quatre passages par jour, `schedule: "17 5,11,17,23 * * *"` ;
+#   - quatre passages par jour, `schedule: "0 5,11,17,23 * * *"` (05:00,
+#     11:00, 17:00, 23:00 UTC ; la préproduction tourne à la demi-heure) ;
 #   - `activeDeadlineSeconds: 19800` (5 h 30) et
 #     `REFRESH_SWEEP_DEADLINE_MS: 18900000` (5 h 15), pour que le balayage
 #     s'arrête de lui-même, curseur écrit, avant le SIGTERM du contrôleur ;
@@ -24,16 +25,26 @@
 # seule fois, et les deux overlays suivent. `verify-renders` refuse désormais
 # tout écart entre le rendu préprod et le rendu prod (refresh-contract.awk).
 #
-# LES TROIS SEULES DIVERGENCES VOULUES AVEC LA PRÉPRODUCTION
-# ----------------------------------------------------------
+# LES QUATRE SEULES DIVERGENCES VOULUES AVEC LA PRÉPRODUCTION
+# -----------------------------------------------------------
 #   1. le namespace ;
 #   2. l'enveloppe mémoire (voir le bloc dédié plus bas) ;
 #   3. la liaison de stockage : la préproduction pointe explicitement son propre
 #      seau, la production hérite du ConfigMap `radar-api`
 #      (`SCRAPE_S3_BUCKET: radar-immobilier-docs`) et du Secret
 #      `radar-scrape-s3-credentials`. Garde dédiée :
-#      deploy/ci/check-object-storage-bindings.sh.
+#      deploy/ci/check-object-storage-bindings.sh ;
+#   4. la MINUTE de lancement de `radar-refresh-pv` : la production garde celle
+#      de la base (`0`, heure ronde), la préproduction la remplace par `30`. Les
+#      heures restent communes, et `verify-renders` exige au moins 15 minutes
+#      d'écart (incident 2026-10-09 : même minute, même nœud, course à
+#      l'attachement des PVC keyring RWO).
 # Toute autre divergence fait rougir la CI.
+#
+# Le gardien `radar-refresh-pending-watchdog` (../34-refresh-pending-watchdog.yaml)
+# est rendu ici comme en préproduction : un pod de passage encore Pending 15 min
+# après sa création est supprimé, le Job échoue et libère ses requests. Son
+# ServiceAccount et son Role sont dans deploy/k8s/10-rbac.yaml (apply owner).
 #
 # Le placeholder `newTag` est FAIL-LOUD : rendre ou appliquer cet overlay sans
 # l'étape de substitution produit un tag impossible à tirer (et non `:latest`),
@@ -45,7 +56,7 @@
 # NB rendu : `kubectl apply -k` ne peut PAS être utilisé — la base vit un
 # répertoire au-dessus et le load-restrictor par défaut l'interdit. Il faut
 # `kubectl kustomize --load-restrictor LoadRestrictionsNone`, qui n'émet que le
-# CronJob et son PVC keyring, jamais le bundle complet.
+# CronJob, son PVC keyring et le CronJob gardien, jamais le bundle complet.
 #
 # RBAC : l'apply a besoin de `batch/cronjobs` ET de `persistentvolumeclaims` sur
 # `radar-ci-deployer` (deploy/k8s/10-rbac.yaml). Depuis que le PVC keyring est
@@ -60,6 +71,7 @@ namespace: radar-immobilier
 resources:
   - ../34-refresh-cronjob.yaml
   - ../34-refresh-keyring-pvc.yaml
+  - ../34-refresh-pending-watchdog.yaml
 
 images:
   - name: ghcr.io/rhanka/radar-api
@@ -69,6 +81,14 @@ patches:
   - target:
       kind: CronJob
       name: radar-refresh-pv
+    patch: |
+      - op: replace
+        path: /spec/suspend
+        value: false
+
+  - target:
+      kind: CronJob
+      name: radar-refresh-pending-watchdog
     patch: |
       - op: replace
         path: /spec/suspend

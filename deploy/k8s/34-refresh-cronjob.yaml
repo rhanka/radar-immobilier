@@ -80,7 +80,15 @@ spec:
   suspend: true
   # Quatre passages par jour, créneaux de 6 h. Voir l'en-tête : le nombre est
   # borné par la durée d'un passage, pas par une fenêtre de session de siège.
-  schedule: "17 5,11,17,23 * * *"
+  # Heures rondes en UTC : 05:00, 11:00, 17:00, 23:00 (01:00, 07:00, 13:00,
+  # 19:00 à Toronto en heure d'été, une heure plus tôt en heure normale).
+  # C'est l'horaire de PRODUCTION ; l'overlay préprod le décale à la
+  # demi-heure (`30 5,11,17,23 * * *`). Pourquoi décaler : le 2026-10-09, les
+  # deux pods, lancés à la même minute sur le même nœud, ont demandé ensemble
+  # l'attachement de leur PVC keyring RWO ; le CSI ne s'en est pas remis et les
+  # deux passages sont restés Pending 4 h 30. `verify-renders` exige les mêmes
+  # heures des deux côtés et au moins 15 minutes d'écart entre les minutes.
+  schedule: "0 5,11,17,23 * * *"
   timeZone: "Etc/UTC"
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 600
@@ -95,6 +103,9 @@ spec:
       # ici, contre 5 h 15 pour REFRESH_SWEEP_DEADLINE_MS : le balayage s'arrête
       # de lui-même, curseur à jour, avant le SIGKILL du contrôleur, et le
       # passage suivant ne trouve jamais le précédent encore en vol.
+      # Cette échéance court dès le début du Job, phase Pending comprise : elle
+      # ne borne donc PAS un pod qui ne démarre jamais. C'est le rôle du gardien
+      # 34-refresh-pending-watchdog.yaml (15 min de Pending au plus).
       activeDeadlineSeconds: 19800
       ttlSecondsAfterFinished: 86400
       template:
@@ -103,6 +114,10 @@ spec:
             app.kubernetes.io/name: radar-immobilier
             app.kubernetes.io/part-of: sentropic
             app.kubernetes.io/component: graph-projection
+            # Sélecteur du gardien 34-refresh-pending-watchdog.yaml : un pod de
+            # passage encore Pending 15 min après sa création est supprimé, et
+            # le Job (backoffLimit: 0) échoue au lieu de garder ses requests.
+            app.kubernetes.io/instance: radar-refresh-pv
         spec:
           restartPolicy: Never
           # Le SIGTERM d'activeDeadlineSeconds arme le signal d'arrêt du
