@@ -29,3 +29,5 @@ history:
 unverified (stated by both legs): live rollout and pod health, no-op server-side apply resourceVersion behaviour on the live API server, operator Ingress installation, IdP client and account state, authenticated end-to-end acceptance.
 
 observed-deviation: legs launched with codex exec directly (seat, no API key), one leg at a time in the foreground; runs longer than 10 min continued in the background of the tool. Logs kept outside the repo.
+
+round 7 (single leg, coordinator request: no new Python): delta 6448a90d..61df07ae replaces the PR's new kfilter.py (python3) calls for ConfigMap immo-mcp-config with a `node -e` filter (`mcp_cm`), and the hermetic test fails on any python3 call touching immo-mcp-config. Pre-existing kf calls for other objects unchanged (out of scope). Leg docs/reviews/pr-837/leg-astra.md (gpt-6-astra, xhigh, target 61df07ae): GO, no finding.
