@@ -66,6 +66,13 @@ EOF
   printf '%s\n' 'jobs:' '  x:' '    steps:' '      - run: echo "https://h/build.json"' \
     >"$CASE_ROOT/.github/workflows/w.yml"
 }
+# Literal (non-pattern) replacement in the fixture Dockerfile; a missing anchor is a test failure.
+replace() {
+  local content
+  content="$(cat "$CASE_ROOT/api/Dockerfile")"
+  [[ "$content" == *"$1"* ]] || { bad "fixture anchor not found: $1"; return 1; }
+  printf '%s\n' "${content//"$1"/"$2"}" >"$CASE_ROOT/api/Dockerfile"
+}
 absent_job() { printf '%s\n' '              node dist/scripts/absent.js __ARGS__' >>"$CASE_ROOT/deploy/k8s/job.yaml"; }
 
 run_ok "$ROOT" 'accepts the released manifests and api/Dockerfile'
@@ -136,6 +143,75 @@ run_bad "$CASE_ROOT" 'rejects an API entry outside its outbase' 'packages/immo-m
 fixture "  \"    'api/src/scripts/absent.ts', // still listed: '//' and '/*' inside strings are text\" \\"
 absent_job
 run_ok "$CASE_ROOT" 'keeps an active entry followed by a trailing JS comment'
+
+# ASTRA-832-R2-01: output options must be complete string literals; absent != non-literal.
+OPTS="outdir: 'api/dist', outbase: 'api/src', entryNames: '[dir]/[name]',"
+IMPORT="\"import { build } from 'esbuild';\" \\"
+
+fixture
+replace "$OPTS" "outdir: 'api/dist', outbase: 'api/src', entryNames: '[dir]/[name]' + '-different',"
+run_bad "$CASE_ROOT" 'rejects an entryNames concatenation' 'entryNames is not a plain string literal'
+
+fixture
+replace "$OPTS" "outdir: 'api/dist' + '/different', outbase: 'api/src', entryNames: '[dir]/[name]',"
+run_bad "$CASE_ROOT" 'rejects an outdir concatenation' 'outdir is not a plain string literal'
+
+fixture
+replace "$OPTS" "outdir: 'api/dist', outbase: 'api/src', entryNames: names,"
+replace "$IMPORT" "$IMPORT
+  \"const names = '[name]';\" \\"
+run_bad "$CASE_ROOT" 'rejects an entryNames variable' 'entryNames is not a plain string literal'
+
+fixture
+replace "$OPTS" "outdir: 'api/dist', outbase: 'api/src', entryNames: \\\`[name]\\\`,"
+run_bad "$CASE_ROOT" 'rejects an entryNames template literal' 'entryNames is not a plain string literal'
+
+fixture
+replace "$OPTS" "outdir: 'api/dist', outbase: 'api/src', entryNames: '[name]',"
+run_bad "$CASE_ROOT" 'rejects a literal entryNames other than [dir]/[name]' 'only [dir]/[name] is mapped'
+
+fixture
+replace "$OPTS" "outdir: 'api/dist', outbase: 'api/src',"
+run_ok "$CASE_ROOT" 'accepts an absent entryNames (esbuild default [dir]/[name])'
+
+fixture
+replace "$OPTS" "outdir: 'api/dist', outbase: 'api' + '/src', entryNames: '[dir]/[name]',"
+run_bad "$CASE_ROOT" 'rejects an outbase expression' 'outbase is not a plain string literal'
+
+fixture
+replace "$OPTS" "outdir: 'api/dist', outbase: 'api/src', entryNames,"
+run_bad "$CASE_ROOT" 'rejects a shorthand entryNames property' 'entryNames is not a plain string literal'
+
+fixture
+replace "$OPTS" "outdir: 'api/dist', outbase: 'api/src', 'entryNames': '[name]',"
+run_bad "$CASE_ROOT" 'reads a quoted entryNames key' 'only [dir]/[name] is mapped'
+
+fixture
+replace "$OPTS" "$OPTS entryNames: '[name]',"
+run_bad "$CASE_ROOT" 'rejects a duplicated entryNames key' 'entryNames is not a plain string literal'
+
+fixture
+replace "$OPTS" "$OPTS ...extra,"
+run_bad "$CASE_ROOT" 'rejects a spread in the build options' 'spread'
+
+fixture
+replace "$OPTS" "$OPTS ['entry' + 'Names']: '[name]',"
+run_bad "$CASE_ROOT" 'rejects a computed key in the build options' 'computed key'
+
+fixture
+replace "$OPTS" "outdir: 'api\\\\x2fdist', outbase: 'api/src', entryNames: '[dir]/[name]',"
+run_bad "$CASE_ROOT" 'rejects an escape sequence in an output option' 'outdir is not a plain string literal'
+
+# ASTRA-832-R2-02: syntax checks apply to the selected api/dist build only.
+fixture
+replace "entryPoints: ['packages/immo-mcp/src/server-http.ts']," "entryPoints: [serverEntry],"
+replace "$IMPORT" "$IMPORT
+  \"const serverEntry = 'packages/immo-mcp/src/server-http.ts';\" \\"
+run_ok "$CASE_ROOT" 'accepts a variable in the entryPoints of the independent immo-mcp build'
+
+fixture
+replace "outdir: 'packages/immo-mcp/dist'," "outdir: dir,"
+run_bad "$CASE_ROOT" 'rejects a non-literal outdir in another build (output tree unknown)' 'outdir is not a plain string literal'
 
 # ASTRA-832-02: two references sharing one separator are both checked.
 fixture
