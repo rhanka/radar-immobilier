@@ -77,8 +77,8 @@ absent_job() { printf '%s\n' '              node dist/scripts/absent.js __ARGS__
 
 run_ok "$ROOT" 'accepts the released manifests and api/Dockerfile'
 released="$(bash "$CHECK" "$ROOT" 2>&1)"
-grep -Fq ', 17 entrypoint(s))' <<<"$released" && ok 'counts the 17 active API entrypoints of api/Dockerfile' \
-  || bad "counts the 17 active API entrypoints of api/Dockerfile (got: $released)"
+grep -Fq ', 18 entrypoint(s))' <<<"$released" && ok 'counts the 18 active API entrypoints of api/Dockerfile' \
+  || bad "counts the 18 active API entrypoints of api/Dockerfile (got: $released)"
 
 fixture
 run_ok "$CASE_ROOT" 'accepts the untouched fixture'

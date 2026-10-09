@@ -10,6 +10,9 @@ PLACEHOLDER := ghcr.io/rhanka/radar-api:PINNED-BY-CI-AT-RELEASE-DO-NOT-APPLY-UNE
 API_IMAGE := ghcr.io/rhanka/radar-api
 CONTRACT_AWK := $(OVERLAY)/refresh-contract.awk
 WINDOW_AWK := $(OVERLAY)/refresh-window.awk
+WATCHDOG_AWK := $(OVERLAY)/refresh-watchdog.awk
+STAGGER_AWK := $(OVERLAY)/refresh-stagger.awk
+REFRESH_STAGGER_MIN_MINUTES := 15
 
 .PHONY: guard-preprod
 guard-preprod:
@@ -156,6 +159,18 @@ render-prod:
 #     suivant ;
 #   - l'enveloppe mémoire de production reste épinglée en toutes lettres, avec
 #     le message d'erreur qui manquait.
+#
+# Depuis l'incident du 2026-10-09 (prod et préprod lancées à la même minute sur
+# le même nœud, PVC keyring RWO bloqués à l'attachement, 4 h 30 de Pending),
+# deux blocs s'ajoutent, eux aussi relationnels :
+#   - DÉCALAGE (refresh-stagger.awk) : forme `<minute> <heures> * * *`, et les
+#     lancements prod et préprod les plus proches à au moins
+#     REFRESH_STAGGER_MIN_MINUTES l'un de l'autre (la minute et le nombre de
+#     passages, communs, sont gardés par la parité) ;
+#   - GARDIEN DES PODS PENDING (refresh-watchdog.awk) : le CronJob
+#     radar-refresh-pending-watchdog est rendu, actif, câblé sur le label du pod
+#     de passage, et le Job de passage garde `backoffLimit: 0`.
+# Les tests de mutation de ces blocs : verify-renders.test.sh (CI).
 
 .PHONY: verify-renders
 verify-renders:
@@ -166,13 +181,15 @@ verify-renders:
 	  for render in "$$tmp/preprod.yaml" "$$tmp/prod.yaml"; do \
 	    test -s "$$render" || { echo "empty refresh render: $$render" >&2; exit 1; }; \
 	    awk 'BEGIN{RS="\n---\n"} /[^[:space:]]/ { if ($$0 !~ /apiVersion:/ || $$0 !~ /kind:/) { print "missing apiVersion/kind in refresh render" > "/dev/stderr"; bad=1 } } END{ exit bad }' "$$render"; \
-	    test "$$(grep -c '^kind: CronJob$$' "$$render")" -eq 1 \
-	      || { echo "refresh render must contain exactly one CronJob: $$render" >&2; exit 1; }; \
+	    awk -f "$(WATCHDOG_AWK)" "$$render" \
+	      || { echo "refresh pending watchdog contract failed: $$render" >&2; exit 1; }; \
+	    test "$$(grep -c '^kind: CronJob$$' "$$render")" -eq 2 \
+	      || { echo "refresh render must contain exactly two CronJobs (radar-refresh-pv, radar-refresh-pending-watchdog): $$render" >&2; exit 1; }; \
 	    test "$$(grep -c '^kind: PersistentVolumeClaim$$' "$$render")" -eq 1; \
-	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ { \
-	      pv=($$0 ~ /name: radar-refresh-pv\n/); \
-	      if (!pv || $$0 !~ /suspend: false/) exit 1; \
-	      if (pv && ($$0 !~ /name: REFRESH_PROVIDER\n[ ]+value: openai\n/ \
+	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { \
+	      pv=1; \
+	      if ($$0 !~ /suspend: false/) exit 1; \
+	      if (($$0 !~ /name: REFRESH_PROVIDER\n[ ]+value: openai\n/ \
 	        || $$0 !~ /name: REFRESH_MODEL\n[ ]+value: gpt-6-astra\n/ \
 	        || $$0 !~ /name: REFRESH_REASONING_EFFORT\n[ ]+value: medium\n/ \
 	        || $$0 !~ /name: REFRESH_PRIMARY_QUALITY_ATTEMPTS\n[ ]+value: "2"/ \
@@ -184,8 +201,8 @@ verify-renders:
 	        || $$0 !~ /name: REFRESH_VERIFY_MODEL\n[ ]+value: gemini-3.8-flash\n/ \
 	        || $$0 !~ /name: REFRESH_VERIFY_REASONING_EFFORT\n[ ]+value: low\n/ \
 	        || $$0 !~ /name: REFRESH_MAX_OUTPUT_TOKENS\n[ ]+value: "32768"/)) exit 1; \
-	    }' "$$render" || { echo "refresh activation/model contract failed: $$render" >&2; exit 1; }; \
-	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ { \
+	    } END { if (!pv) exit 1 }' "$$render" || { echo "refresh activation/model contract failed: $$render" >&2; exit 1; }; \
+	    awk 'BEGIN{RS="\n---\n"} /kind: CronJob/ && /\n  name: radar-refresh-pv\n/ { pv=1; \
 	      if ($$0 !~ /- dist\/scripts\/refresh-pv\.js\n[ ]+- --all\n[ ]+env:/) exit 1; \
 	      if ($$0 ~ /refresh-pv\.js\n[ ]+- [a-z]/) exit 1; \
 	      if ($$0 !~ /activeDeadlineSeconds: [0-9]+\n/) exit 1; \
@@ -197,7 +214,7 @@ verify-renders:
 	      if ($$0 !~ /name: REFRESH_MAX_DOCUMENT_FAILURES\n/) exit 1; \
 	      if ($$0 !~ /name: REFRESH_SWEEP_CITY_RESERVE_MS\n/) exit 1; \
 	      if ($$0 !~ /name: REFRESH_SWEEP_MAX_FAILURE_RATE\n/) exit 1; \
-	    }' "$$render" || { echo "refresh whole-list sweep contract failed: $$render" >&2; exit 1; }; \
+	    } END { if (!pv) exit 1 }' "$$render" || { echo "refresh whole-list sweep contract failed: $$render" >&2; exit 1; }; \
 	    awk 'function flush(){if(active && literal && reference){print "mixed value/valueFrom: " name > "/dev/stderr"; bad=1} literal=0; reference=0} \
 	      /^[[:space:]]*- name:/ {flush(); active=1; name=$$0; next} \
 	      active && /^[[:space:]]+value:[[:space:]]/ {literal=1} \
@@ -214,7 +231,15 @@ verify-renders:
 	  awk -f "$(CONTRACT_AWK)" "$$tmp/prod.yaml" | sort > "$$tmp/prod.contract"; \
 	  test -s "$$tmp/prod.contract" || { echo "empty refresh contract projection" >&2; exit 1; }; \
 	  diff -u "$$tmp/preprod.contract" "$$tmp/prod.contract" \
-	    || { echo "refresh overlay parity failed: preprod and prod diverge outside the three intended differences (namespace, memory envelope, S3 binding) — see the diff above (< preprod, > prod)" >&2; exit 1; }
+	    || { echo "refresh overlay parity failed: preprod and prod diverge outside the four intended differences (namespace, memory envelope, S3 binding, refresh hour list) — see the diff above (< preprod, > prod)" >&2; exit 1; }; \
+	  wf="$(ROOT)/.github/workflows/bascule-preprod.yml"; \
+	  test "$$(grep -cE '^ +QUIESCE_CRONJOBS:' "$$wf")" -eq 1 \
+	    || { echo "refresh pending watchdog contract failed: QUIESCE_CRONJOBS must be set exactly once in $$wf (job bascule env), no job- or step-level override" >&2; exit 1; }; \
+	  quiesce="$$(awk '/^  [A-Za-z0-9_-]+:$$/ { job = $$1 } job == "bascule:" && /^    env:$$/ { inenv = 1; next } inenv && /^    [A-Za-z]/ { inenv = 0 } inenv && /^      QUIESCE_CRONJOBS: / { sub(/^      QUIESCE_CRONJOBS: */, ""); print }' "$$wf")"; \
+	  case ",$$quiesce," in *,radar-refresh-pv,*) ;; *) echo "refresh pending watchdog contract failed: QUIESCE_CRONJOBS of .github/workflows/bascule-preprod.yml must list radar-refresh-pv (got: $$quiesce)" >&2; exit 1;; esac; \
+	  case ",$$quiesce," in *,radar-refresh-pending-watchdog,*) ;; *) echo "refresh pending watchdog contract failed: QUIESCE_CRONJOBS of .github/workflows/bascule-preprod.yml must list radar-refresh-pending-watchdog, or an active watchdog Job trips the bascule G2 guard (got: $$quiesce)" >&2; exit 1;; esac; \
+	  awk -v min_minutes=$(REFRESH_STAGGER_MIN_MINUTES) -f "$(STAGGER_AWK)" "$$tmp/preprod.yaml" "$$tmp/prod.yaml" \
+	    || { echo "refresh stagger failed: the closest prod and preprod refresh starts must be at least $(REFRESH_STAGGER_MIN_MINUTES) minutes apart (incident 2026-10-09)" >&2; exit 1; }
 
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
