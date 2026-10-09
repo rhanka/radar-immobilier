@@ -385,6 +385,9 @@ k8s-validate: ## Validate the radar/sentropic-app manifests offline (no cluster)
 	@$(KUBECTL) kustomize $(K8S_MANIFEST_DIR) \
 	  | awk 'BEGIN{RS="\n---\n"} /[^[:space:]]/ { if ($$0 !~ /apiVersion:/ || $$0 !~ /kind:/) { print "missing apiVersion/kind in a document"; bad=1 } } END{ exit bad }'
 	@$(MAKE) --no-print-directory document-date-recovery-validate
+	@echo "[k8s-validate] every Job script is an esbuild entrypoint of api/Dockerfile…"
+	@bash deploy/ci/check-image-entrypoints.sh
+	@bash deploy/ci/check-image-entrypoints.test.sh >/dev/null
 	@if [ "$(K8S_VALIDATE_WITH_CLUSTER)" = "1" ]; then \
 	  echo "[k8s-validate] server-side dry-run (KUBECONFIG required)…"; \
 	  $(KUBECTL) apply --dry-run=server -k $(K8S_MANIFEST_DIR); \
