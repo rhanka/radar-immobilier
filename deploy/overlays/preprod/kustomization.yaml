@@ -40,6 +40,16 @@ namespace: radar-immobilier-preprod
 
 resources:
   - ../../k8s
+  # immo MCP (GH #835). The base keeps 40/41 out of its own `resources:` (prod
+  # applies them as files: build-push-images.yml `deploy` + k8s-apply-mcp.yaml),
+  # so preprod lists the SAME files here instead of a copy: every key and path
+  # stays aligned with prod, and only the env-specific values are patched below
+  # (patch-immo-mcp-config.yaml, patch-ingress-preprod-host.yaml).
+  # What the CD applies from this: ConfigMap immo-mcp-config only
+  # (deploy/ci/reconcile-preprod.sh). The Ingress is operator-applied; the
+  # Deployment/Service already exist live and stay rolled by set-image.
+  - ../../k8s/40-immo-mcp-http-deploy.yaml
+  - ../../k8s/41-immo-mcp-ingress.yaml
 
 configMapGenerator:
   - name: radar-ui-nginx
@@ -88,6 +98,31 @@ patches:
       kind: ConfigMap
       name: radar-sentropic-auth
     path: patch-radar-sentropic-auth.yaml
+
+# immo MCP preprod values (GH #835): own resource, preprod IdP as issuer (same
+# rule as prod: MCP issuer = the app's IdP), preprod public URL. Scopes and the
+# rest of the ConfigMap are inherited from the prod base. Applied by
+# reconcile-preprod.sh; guarded by check-preprod-auth-isolation.sh.
+  - target:
+      kind: ConfigMap
+      name: immo-mcp-config
+    path: patch-immo-mcp-config.yaml
+# Preprod host + TLS Secret on EVERY Ingress (UI `radar` and MCP
+# `radar-immo-mcp`), so the operator-applied render routes
+# preprod.immo.sent-tech.ca/{,mcp} and never claims a PROD host.
+  - target:
+      kind: Ingress
+    path: patch-ingress-preprod-host.yaml
+# radar-immo-mcp requests.cpu = the live preprod value (10m, single
+# constrained preprod node, same reason as the radar-api patch below) so the
+# render matches what runs; the CD does not apply this Deployment today.
+  - target:
+      kind: Deployment
+      name: radar-immo-mcp
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 10m
 
 # CPU pressure fix (nœud préprod unique OVH saturé, 95%/1749m requests — pod
 # radar-api Pending "Insufficient cpu" sur le rollout image 0e8807b, breakdown

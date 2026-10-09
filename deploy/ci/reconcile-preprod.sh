@@ -15,6 +15,11 @@
 #                                            CronJob AND the api; per-env OIDC auth:
 #                                            the overlay pins every auth key to the
 #                                            preprod IdP + client, see step 2b)
+#   - ConfigMap immo-mcp-config             (#835: the overlay pins the MCP OAuth
+#                                            resource/issuer + public URL to preprod;
+#                                            applied only while the radar-immo-mcp
+#                                            Deployment exists; the pod is rolled when
+#                                            the ConfigMap changed, see step 4b)
 #   - Deployment radar-api, radar-ui        (#611: securityContext; pre-flight-present)
 #   - CronJob    radar-consistency-snapshot (#611: securityContext)
 # EXCLUDED: the Namespace (PSS labels = operator act, cluster-scoped), Services /
@@ -23,7 +28,9 @@
 # it to the preprod IdP so the render is PROD-free, but it is still not applied —
 # radar-api is NOW reconciled: the preprod overlay patches its per-env storage
 # buckets AND its auth keys, so applying it no longer leaks base PROD values),
-# and the radar-maildev / radar-obscura Deployments
+# the radar-immo-mcp Deployment/Service (live since the bascule; image rolled by
+# set-image, spec not reconciled yet), and the radar-maildev / radar-obscura
+# Deployments
 # (the SA has no `create`, so an absent one would 403). A comprehensive reconcile
 # is a documented PR follow-up (grant deployments:create OR patch-existing-only,
 # plus an ns-agnostic audit of the env ConfigMaps).
@@ -66,10 +73,49 @@ bash deploy/ci/check-preprod-auth-isolation.sh "$RENDER"
 
 kf() { python3 deploy/ci/kfilter.py "$@"; }
 
+# immo-mcp-config document of the render, byte-for-byte, WITHOUT Python (owner
+# rule: no Python in repos/jobs; node is on the runner). kustomize separates
+# documents with a line that is exactly `---`; the match is on top-level
+# `kind: ConfigMap` and `metadata.name: immo-mcp-config`. Exactly one document
+# or a non-zero exit (set -e / pipefail stop the release).
+mcp_cm() {
+  node -e '
+    const text = require("fs").readFileSync(process.argv[1], "utf8");
+    const docs = text.split(/^---[ \t]*$/m).filter((d) => d.trim() !== "").filter((d) => {
+      if (!/^kind:[ \t]+ConfigMap[ \t]*$/m.test(d)) return false;
+      const meta = d.match(/^metadata:\n((?:[ \t].*\n?)*)/m);
+      return meta !== null && /^  name:[ \t]+immo-mcp-config[ \t]*$/m.test(meta[1]);
+    });
+    if (docs.length !== 1) {
+      process.stderr.write("mcp_cm: expected 1 immo-mcp-config ConfigMap, got " + docs.length + "\n");
+      process.exit(1);
+    }
+    process.stdout.write(docs[0].replace(/^\n+|\n+$/g, "") + "\n");
+  ' "$RENDER"
+}
+
+# immo MCP (#835): ConfigMap immo-mcp-config is reconciled only while the
+# radar-immo-mcp Deployment exists (same guard as the prod `deploy` job's
+# "Apply immo-mcp declarative config"): the SA cannot create Deployments, so an
+# absent connector stays absent and no orphan ConfigMap is created. Only
+# NotFound means absent: any other lookup failure (RBAC, transport) stops the
+# release here (`set -e` on the assignment) instead of silently skipping.
+MCP_PRESENT=0
+mcp_deploy="$(kubectl -n "$NAMESPACE" get deploy radar-immo-mcp --ignore-not-found -o name)"
+if [ -n "$mcp_deploy" ]; then
+  MCP_PRESENT=1
+else
+  echo "radar-immo-mcp Deployment absent in ${NAMESPACE} — skipping ConfigMap immo-mcp-config"
+fi
+
 targeted() {
   kf --name-prefix radar-ui-nginx "$RENDER" ConfigMap
   echo ---
   kf "$RENDER" ConfigMap radar-api
+  if [ "$MCP_PRESENT" = 1 ]; then
+    echo ---
+    mcp_cm
+  fi
   echo ---
   kf "$RENDER" Deployment radar-api
   echo ---
@@ -92,6 +138,28 @@ kf --name-prefix radar-ui-nginx "$RENDER" ConfigMap \
 kf "$RENDER" ConfigMap radar-api \
   | kubectl apply --server-side --field-manager="$FM" --force-conflicts -f -
 
+# 4b. immo-mcp-config (#835). envFrom is read at pod start, and set-image only
+#     rolls radar-immo-mcp when the pushed sha differs from the live image (a
+#     same-sha re-run does not). So the pod template carries the ConfigMap's
+#     resourceVersion (annotation sentropic.dev/immo-mcp-config-rv): after the
+#     apply, the annotation is patched whenever it differs from the live
+#     ConfigMap, which rolls the pod. Any ConfigMap change (render or manual
+#     drift) bumps the resourceVersion; a no-op apply does not. Retry-safe: if
+#     the patch fails, the next run still sees the stale annotation and patches.
+if [ "$MCP_PRESENT" = 1 ]; then
+  mcp_cm \
+    | kubectl apply --server-side --field-manager="$FM" --force-conflicts -f -
+  mcp_cm_rv="$(kubectl -n "$NAMESPACE" get configmap immo-mcp-config -o jsonpath='{.metadata.resourceVersion}')"
+  : "${mcp_cm_rv:?immo-mcp-config has no resourceVersion after apply}"
+  mcp_tpl_rv="$(kubectl -n "$NAMESPACE" get deploy radar-immo-mcp \
+    -o jsonpath='{.spec.template.metadata.annotations.sentropic\.dev/immo-mcp-config-rv}')"
+  if [ "$mcp_tpl_rv" != "$mcp_cm_rv" ]; then
+    echo "immo-mcp-config rv ${mcp_cm_rv} != pod template rv '${mcp_tpl_rv}' — rolling radar-immo-mcp"
+    kubectl -n "$NAMESPACE" patch deploy radar-immo-mcp --type merge \
+      -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"sentropic.dev/immo-mcp-config-rv\":\"${mcp_cm_rv}\"}}}}}"
+  fi
+fi
+
 # 5. CronJob (#611 securityContext).
 kf "$RENDER" CronJob radar-consistency-snapshot \
   | kubectl apply --server-side --field-manager="$FM" --force-conflicts -f -
@@ -103,4 +171,4 @@ kf "$RENDER" Deployment radar-api \
 kf "$RENDER" Deployment radar-ui \
   | kubectl apply --server-side --field-manager="$FM" --force-conflicts -f -
 
-echo "reconcile OK — preprod durables applied (radar-ui-nginx + radar-api CMs, radar-api/radar-ui Deployments, radar-consistency-snapshot CronJob)."
+echo "reconcile OK — preprod durables applied (radar-ui-nginx + radar-api CMs, immo-mcp-config when radar-immo-mcp exists, radar-api/radar-ui Deployments, radar-consistency-snapshot CronJob)."
