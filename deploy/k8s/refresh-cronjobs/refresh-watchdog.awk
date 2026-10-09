@@ -40,7 +40,10 @@ BEGIN { RS = "\n---\n" }
   if ($0 !~ /\n[ ]+automountServiceAccountToken: true\n/)
     fail("the watchdog needs automountServiceAccountToken: true (it calls the Kubernetes API)")
   deadline = envValue($0, "REFRESH_PENDING_DEADLINE_SECONDS")
-  if (deadline !~ /^[0-9]+$/) fail("REFRESH_PENDING_DEADLINE_SECONDS missing or not a number of seconds")
+  # Same floor as readWatchdogConfig (api/src/scripts/refresh-pending-watchdog.ts):
+  # below 60 s the script refuses to start, so the render must refuse it too.
+  if (deadline !~ /^[0-9]+$/ || deadline + 0 < 60)
+    fail("REFRESH_PENDING_DEADLINE_SECONDS missing, not a number of seconds, or below 60 (the script refuses it)")
   if (envValue($0, "REFRESH_WATCHDOG_JOB_PREFIX") != "radar-refresh-pv-")
     fail("REFRESH_WATCHDOG_JOB_PREFIX must be radar-refresh-pv- (the refresh CronJob name + '-')")
   if (envValue($0, "REFRESH_WATCHDOG_POD_SELECTOR") != "app.kubernetes.io/instance=radar-refresh-pv")
@@ -57,7 +60,10 @@ BEGIN { RS = "\n---\n" }
 
 /kind: CronJob\n/ && /\n  name: radar-refresh-pv\n/ {
   pv++
-  if ($0 !~ /\n[ ]+app\.kubernetes\.io\/instance: radar-refresh-pv\n/)
+  # The label must sit on the POD template (spec.jobTemplate.spec.template.metadata.labels,
+  # keys at 12 spaces in the rendered YAML): a label on the CronJob or on the Job
+  # template metadata does not reach the pods the watchdog lists.
+  if ($0 !~ /\n      template:\n        metadata:\n(          [^\n]*\n|            [^\n]*\n)*          labels:\n(            [^\n]+\n)*            app\.kubernetes\.io\/instance: radar-refresh-pv\n/)
     fail("the refresh pod template lacks the label app.kubernetes.io/instance: radar-refresh-pv that the watchdog selects")
   if ($0 !~ /\n      backoffLimit: 0\n/)
     fail("the refresh Job must keep backoffLimit: 0 (a deleted pending pod fails the Job instead of being replaced)")
