@@ -25,6 +25,15 @@ run_bad() {
   if out="$(bash "$CHECK" "$1" 2>&1)"; then bad "$2 (accepted)"; return; fi
   grep -Fq -- "$3" <<<"$out" && ok "$2" || bad "$2 (rejected without: $3)"
 }
+# Same, and the regression must produce exactly ONE diagnostic (isolation).
+run_bad_one() {
+  local out n
+  if out="$(bash "$CHECK" "$1" 2>&1)"; then bad "$2 (accepted)"; return; fi
+  n="$(grep -c '^FAIL: ' <<<"$out")"
+  if ! grep -Fq -- "$3" <<<"$out"; then bad "$2 (rejected without: $3)"
+  elif [ "$n" -ne 1 ]; then bad "$2 ($n diagnostics, expected 1)"
+  else ok "$2"; fi
+}
 fixture() {
   CASE_ROOT="$(mktemp -d)"
   (cd "$ROOT" && cp -r --parents deploy/k8s deploy/overlays/preprod "$CASE_ROOT")
@@ -93,14 +102,27 @@ run_bad "$CASE_ROOT" 'rejects a render without ConfigMap immo-mcp-config (no vac
 
 # Ingress (operator-applied from this render): a PROD host or the PROD TLS
 # Secret in a preprod Ingress would let preprod claim immo.sent-tech.ca routes.
-fixture; sed -i 's#value: preprod.immo.sent-tech.ca#value: immo.sent-tech.ca#' "$CASE_ROOT/$INGRESS_PATCH"
-run_bad "$CASE_ROOT" 'rejects a PROD host on the preprod MCP Ingress' 'Ingress/radar-immo-mcp: PROD routing host -> - host: immo.sent-tech.ca'; rm -rf "$CASE_ROOT"
+# Each case re-injects ONE prod value into ONE rendered field (a later patch
+# appended to the fixture overlay) and requires that single diagnostic only.
+reinject() { # <ingress name> <json path> <value>
+  printf '  - target:\n      kind: Ingress\n      name: %s\n    patch: |\n      - op: replace\n        path: %s\n        value: %s\n' \
+    "$1" "$2" "$3" >>"$CASE_ROOT/$OVERLAY"
+}
+fixture; reinject radar-immo-mcp /spec/rules/0/host immo.sent-tech.ca
+run_bad_one "$CASE_ROOT" 'rejects a PROD rule host on the preprod MCP Ingress only' 'Ingress/radar-immo-mcp: PROD routing host -> - host: immo.sent-tech.ca'; rm -rf "$CASE_ROOT"
 
-fixture; sed -i 's#value: preprod.immo.sent-tech.ca#value: immo.sent-tech.ca#' "$CASE_ROOT/$INGRESS_PATCH"
-run_bad "$CASE_ROOT" 'rejects a PROD host on the preprod UI Ingress' 'Ingress/radar: PROD routing host -> - host: immo.sent-tech.ca'; rm -rf "$CASE_ROOT"
+fixture; reinject radar /spec/rules/0/host immo.sent-tech.ca
+run_bad_one "$CASE_ROOT" 'rejects a PROD rule host on the preprod UI Ingress only' 'Ingress/radar: PROD routing host -> - host: immo.sent-tech.ca'; rm -rf "$CASE_ROOT"
 
-fixture; sed -i 's#value: radar-immo-preprod-tls#value: radar-immo-tls#' "$CASE_ROOT/$INGRESS_PATCH"
-run_bad "$CASE_ROOT" 'rejects the PROD TLS Secret on a preprod Ingress' 'PROD TLS secret -> secretName: radar-immo-tls'; rm -rf "$CASE_ROOT"
+fixture; reinject radar-immo-mcp /spec/tls/0/hosts/0 immo.sent-tech.ca
+run_bad_one "$CASE_ROOT" 'rejects a PROD TLS host on the preprod MCP Ingress only' 'Ingress/radar-immo-mcp: PROD routing host -> - immo.sent-tech.ca'; rm -rf "$CASE_ROOT"
+
+fixture; reinject radar-immo-mcp /spec/tls/0/secretName radar-immo-tls
+run_bad_one "$CASE_ROOT" 'rejects the PROD TLS Secret on the preprod MCP Ingress only' 'Ingress/radar-immo-mcp: PROD TLS secret -> secretName: radar-immo-tls'; rm -rf "$CASE_ROOT"
+
+# The shared host patch itself reverted to PROD: every Ingress field is caught.
+fixture; sed -i 's#value: preprod.immo.sent-tech.ca#value: immo.sent-tech.ca#' "$CASE_ROOT/$INGRESS_PATCH"
+run_bad "$CASE_ROOT" 'rejects the shared Ingress host patch reverted to PROD' 'Ingress/radar: PROD routing host -> - immo.sent-tech.ca'; rm -rf "$CASE_ROOT"
 
 EMPTY="$(mktemp)"
 run_bad "$EMPTY" 'rejects a render without ConfigMap radar-api (no vacuous pass)' 'not found in the render'; rm -f "$EMPTY"
