@@ -9,8 +9,10 @@
 # from the `printf '%s\n' "<line>"...` RUN of api/Dockerfile (Dockerfile `#` comment lines
 # dropped, as Docker does), JS `//` and `/* */` comments are stripped outside strings, and
 # the build call whose `outdir` is 'api/dist' is selected: its `entryPoints` map to
-# dist/<path relative to outbase>.js (entryNames [dir]/[name]). Any other build call
-# (packages/immo-mcp) is an independent build and contributes nothing.
+# dist/<path relative to outbase>.js (entryNames [dir]/[name]). outdir, outbase and a present
+# entryNames must be complete string literals: any other expression fails (mapping unknown).
+# Any other build call (packages/immo-mcp) is an independent build and contributes nothing;
+# only its outdir must be readable, its entryPoints syntax is not checked.
 #
 # Scanned: deploy/**/*.y*ml and .github/workflows/*.y*ml, full-line comments ignored.
 # Out of scope: packages/immo-mcp/dist (second esbuild call) and apps/*/dist (other images);
@@ -90,13 +92,18 @@ END {
 }
 AWK
 
-# Stage 2 — esbuild program -> one `build|<n>|<outdir>|<outbase>|<entryNames>` record per
-# build( call and one `entry|<n>|<source>` record per string of its entryPoints array.
-# Comments are stripped outside strings; string bodies are masked so keys, brackets and
-# parentheses are only found in code. Regex literals are not tokenized.
+# Stage 2 — esbuild program -> per build( call, one record
+#   build|<n>|<outdir>|<outbase>|<entryNames>|<opaque reason>
+# where each option is `A|` (absent), `L|<value>` (a complete, escape-free string literal)
+# or `X|` (present but anything else: expression, variable, template, shorthand, repeated key),
+# followed by `entry|<n>|<source>` records or one `entryerr|<n>|<reason>` record.
+# Only TOP-LEVEL properties of the options object are read; a spread or computed key makes
+# the call opaque. Comments are stripped outside strings and string bodies are masked, so
+# keys, commas and brackets are only found in code. Regex literals are not tokenized.
 read -r -d '' PROGRAM_TO_BUILDS <<'AWK'
 function fail_parse(msg) { print msg > "/dev/stderr"; err = msg; exit 1 }
 function ident(ch) { return ch ~ /[A-Za-z0-9_$]/ }
+function blank(ch) { return ch ~ /[ \t\n]/ }
 function close_of(open, oc, cc,   k, depth, ch) {
   depth = 0
   for (k = open; k <= length(mask); k++) {
@@ -106,36 +113,79 @@ function close_of(open, oc, cc,   k, depth, ch) {
   }
   return 0
 }
-# Position just after `<key>:` in mask[from..to], or 0.
-function key_value(key, from, to,   seg, p, off, k, ch) {
-  seg = substr(mask, from, to - from + 1); off = 0
-  while ((p = index(seg, key)) > 0) {
-    k = from + off + p - 1
-    if (!ident(substr(mask, k - 1, 1)) && !ident(substr(mask, k + length(key), 1))) {
-      k += length(key)
-      while (substr(mask, k, 1) ~ /[ \t\n]/) k++
-      if (substr(mask, k, 1) == ":") { k++; while (substr(mask, k, 1) ~ /[ \t\n]/) k++; return k }
-    }
-    off += p + length(key) - 1; seg = substr(seg, p + length(key))
+function trim_l(a, b) { while (a <= b && blank(substr(mask, a, 1))) a++; return a }
+function trim_r(a, b) { while (b >= a && blank(substr(mask, b, 1))) b--; return b }
+# Split mask[a..b] at depth-0 commas into SEG_A[1..n] / SEG_B[1..n] (untrimmed).
+function split_top(a, b,   k, depth, ch, n, start) {
+  n = 0; depth = 0; start = a
+  for (k = a; k <= b; k++) {
+    ch = substr(mask, k, 1)
+    if (ch == "(" || ch == "{" || ch == "[") depth++
+    else if (ch == ")" || ch == "}" || ch == "]") depth--
+    else if (ch == "," && depth == 0) { n++; SEG_A[n] = start; SEG_B[n] = k - 1; start = k + 1 }
   }
-  return 0
+  n++; SEG_A[n] = start; SEG_B[n] = b
+  return n
 }
-function string_at(k,   q, e) {
-  q = substr(mask, k, 1)
-  if (q != "'" && q != "\"") return ""
-  e = index(substr(mask, k + 1), q)
-  return substr(code, k + 1, e - 1)
+# Value of the escape-free '...' or "..." literal spanning EXACTLY mask[a..b]; sets LIT_OK.
+function literal(a, b,   q) {
+  LIT_OK = 0; q = substr(mask, a, 1)
+  if ((q != "'" && q != "\"") || b <= a || index(substr(mask, a + 1), q) != b - a) return ""
+  if (index(substr(code, a + 1, b - a - 1), "\\")) return ""
+  LIT_OK = 1; return substr(code, a + 1, b - a - 1)
+}
+# One top-level property mask[a..b] of the options object of build call n.
+function prop(n, a, b,   c, k, key) {
+  a = trim_l(a, b); b = trim_r(a, b)
+  if (a > b) return
+  if (substr(mask, a, 3) == "...") { OPAQUE[n] = "spread in the build options"; return }
+  c = substr(mask, a, 1)
+  if (c == "[") { OPAQUE[n] = "computed key in the build options"; return }
+  if (c == "'" || c == "\"") {
+    k = a + index(substr(mask, a + 1), c)
+    key = literal(a, k)
+    if (!LIT_OK) { OPAQUE[n] = "unparsed property key in the build options"; return }
+    k++
+  } else {
+    k = a; while (k <= b && ident(substr(mask, k, 1))) k++
+    key = substr(code, a, k - a)
+    if (key == "") { OPAQUE[n] = "unparsed property in the build options"; return }
+  }
+  k = trim_l(k, b)
+  SEEN[n, key]++; VA[n, key] = 0; VB[n, key] = 0
+  if (k > b || substr(mask, k, 1) == "(") return          # shorthand or method: no literal value
+  if (substr(mask, k, 1) != ":") { OPAQUE[n] = "unparsed property " key " in the build options"; return }
+  VA[n, key] = trim_l(k + 1, b); VB[n, key] = b
+}
+function opt(n, key,   v) {
+  if (!SEEN[n, key]) return "A|"
+  if (SEEN[n, key] > 1 || !VA[n, key]) return "X|"
+  v = literal(VA[n, key], VB[n, key])
+  return LIT_OK ? "L|" v : "X|"
+}
+function entries(n,   a, b, m, i, s, sa, sb, out) {
+  if (SEEN[n, "entryPoints"] != 1 || !VA[n, "entryPoints"]) { print "entryerr|" n "|no single entryPoints property with a value"; return }
+  a = VA[n, "entryPoints"]; b = VB[n, "entryPoints"]
+  if (substr(mask, a, 1) != "[" || close_of(a, "[", "]") != b) { print "entryerr|" n "|entryPoints is not an array literal"; return }
+  m = split_top(a + 1, b - 1); out = ""
+  for (i = 1; i <= m; i++) {
+    sa = trim_l(SEG_A[i], SEG_B[i]); sb = trim_r(sa, SEG_B[i])
+    if (sa > sb) { if (i == m) continue; print "entryerr|" n "|empty entryPoints element"; return }
+    s = literal(sa, sb)
+    if (!LIT_OK) { print "entryerr|" n "|unsupported entryPoints element (only plain string literals)"; return }
+    out = out "entry|" n "|" s "\n"
+  }
+  printf "%s", out
 }
 { text = text $0 "\n" }
 END {
-  if (err != "") exit 1
   n = length(text); i = 1; code = ""; mask = ""
   while (i <= n) {
     c = substr(text, i, 1); d = substr(text, i + 1, 1)
     if (c == "/" && d == "/") { j = index(substr(text, i), "\n"); i += j - 1; continue }
     if (c == "/" && d == "*") {
       j = index(substr(text, i + 2), "*/")
-      if (!j) { print "unterminated /* comment in the esbuild program" > "/dev/stderr"; exit 1 }
+      if (!j) fail_parse("unterminated /* comment in the esbuild program")
       i += j + 3; code = code " "; mask = mask " "; continue
     }
     if (c == "'" || c == "\"" || c == "`") {
@@ -147,7 +197,7 @@ END {
         if (c == "\n" && q != "`") break
         code = code c; mask = mask "_"; i++
       }
-      if (substr(text, i, 1) != q) { print "unterminated string in the esbuild program" > "/dev/stderr"; exit 1 }
+      if (substr(text, i, 1) != q) fail_parse("unterminated string in the esbuild program")
       code = code q; mask = mask q; i++; continue
     }
     code = code c; mask = mask c; i++
@@ -158,26 +208,13 @@ END {
     if (!ident(substr(mask, k - 1, 1))) {
       open = k + 5; shut = close_of(open, "(", ")")
       if (!shut) fail_parse("unbalanced build( call in the esbuild program")
-      nbuild++
-      outdir = ""; outbase = ""; names = ""
-      v = key_value("outdir", open, shut); if (v) outdir = string_at(v)
-      v = key_value("outbase", open, shut); if (v) outbase = string_at(v)
-      v = key_value("entryNames", open, shut); if (v) names = string_at(v)
-      print "build|" nbuild "|" outdir "|" outbase "|" names
-      v = key_value("entryPoints", open, shut)
-      if (!v || substr(mask, v, 1) != "[") fail_parse("build call " nbuild " has no entryPoints array literal")
-      e = close_of(v, "[", "]")
-      for (k2 = v + 1; k2 < e; k2++) {
-        ch = substr(mask, k2, 1)
-        if (ch ~ /[ \t\n,]/) continue
-        if (ch != "'" && ch != "\"") fail_parse("unsupported entryPoints element in build call " nbuild " (only plain string literals)")
-        s = string_at(k2)
-        print "entry|" nbuild "|" s
-        k2 += length(s) + 1
-        while (substr(mask, k2 + 1, 1) ~ /[ \t\n]/) k2++
-        nx = substr(mask, k2 + 1, 1)
-        if (nx != "," && k2 + 1 != e) fail_parse("unsupported entryPoints element in build call " nbuild " (only plain string literals)")
-      }
+      nbuild++; OPAQUE[nbuild] = ""
+      ob = trim_l(open + 1, shut - 1)
+      cb = (substr(mask, ob, 1) == "{") ? close_of(ob, "{", "}") : 0
+      if (!cb || trim_l(cb + 1, shut - 1) != shut) OPAQUE[nbuild] = "build options are not a single object literal"
+      else { m = split_top(ob + 1, cb - 1); for (i = 1; i <= m; i++) prop(nbuild, SEG_A[i], SEG_B[i]) }
+      print "build|" nbuild "|" opt(nbuild, "outdir") "|" opt(nbuild, "outbase") "|" opt(nbuild, "entryNames") "|" OPAQUE[nbuild]
+      if (OPAQUE[nbuild] == "") entries(nbuild)
     }
     off += p + 5; seg = substr(seg, p + 6)
   }
@@ -188,20 +225,31 @@ AWK
 program="$(awk "$DOCKERFILE_TO_PROGRAM" "$DOCKERFILE")" || die "cannot rebuild the esbuild program from api/Dockerfile"
 builds="$(printf '%s\n' "$program" | awk "$PROGRAM_TO_BUILDS")" || die "cannot parse the esbuild program of api/Dockerfile"
 
-API_BUILD="" OUTBASE="" NAMES=""
-while IFS='|' read -r kind idx outdir outbase names; do
-  [ "$kind" = build ] && [ "$outdir" = "$API_OUTDIR" ] || continue
+# Every build call must have a known output tree; only the api/dist one is then checked further.
+API="the '$API_OUTDIR' esbuild build call of api/Dockerfile"
+API_BUILD="" OUTBASE_STATE="" OUTBASE="" NAMES_STATE="" NAMES=""
+while IFS='|' read -r kind idx od_state od ob_state ob en_state en opaque; do
+  [ "$kind" = build ] || continue
+  [ -z "$opaque" ] || die "esbuild build call $idx of api/Dockerfile: $opaque (output tree unknown)"
+  [ "$od_state" != X ] || die "esbuild build call $idx of api/Dockerfile: outdir is not a plain string literal (output tree unknown)"
+  [ "$od_state" = L ] && [ "$od" = "$API_OUTDIR" ] || continue
   [ -z "$API_BUILD" ] || die "more than one esbuild build call has outdir '$API_OUTDIR' in api/Dockerfile"
-  API_BUILD="$idx" OUTBASE="$outbase" NAMES="$names"
+  API_BUILD="$idx" OUTBASE_STATE="$ob_state" OUTBASE="$ob" NAMES_STATE="$en_state" NAMES="$en"
 done <<<"$builds"
 [ -n "$API_BUILD" ] || die "no esbuild build call with outdir '$API_OUTDIR' in api/Dockerfile"
-[ -n "$OUTBASE" ] || die "the '$API_OUTDIR' esbuild build call has no outbase: emitted paths are unknown"
-[ -z "$NAMES" ] || [ "$NAMES" = '[dir]/[name]' ] || die "the '$API_OUTDIR' esbuild build call uses entryNames '$NAMES' (only [dir]/[name] is mapped)"
+case "$OUTBASE_STATE" in
+  A) die "$API has no outbase: emitted paths are unknown" ;;
+  X) die "$API: outbase is not a plain string literal (emitted paths unknown)" ;;
+esac
+case "$NAMES_STATE" in
+  X) die "$API: entryNames is not a plain string literal (emitted paths unknown)" ;;
+  L) [ "$NAMES" = '[dir]/[name]' ] || die "$API uses entryNames '$NAMES' (only [dir]/[name] is mapped)" ;;
+esac   # A: esbuild default [dir]/[name]
+ENTRY_ERROR="$(awk -F'|' -v k="$API_BUILD" '$1 == "entryerr" && $2 == k { print $3 }' <<<"$builds")"
+[ -z "$ENTRY_ERROR" ] || die "$API: $ENTRY_ERROR"
 
-mapfile -t ENTRY_SOURCES < <(while IFS='|' read -r kind idx src _; do
-  [ "$kind" = entry ] && [ "$idx" = "$API_BUILD" ] && printf '%s\n' "$src"
-done <<<"$builds" | sort -u)
-[ "${#ENTRY_SOURCES[@]}" -gt 0 ] || die "the '$API_OUTDIR' esbuild build call of api/Dockerfile lists no entrypoint"
+mapfile -t ENTRY_SOURCES < <(awk -F'|' -v k="$API_BUILD" '$1 == "entry" && $2 == k { print $3 }' <<<"$builds" | sort -u)
+[ "${#ENTRY_SOURCES[@]}" -gt 0 ] || die "$API lists no entrypoint"
 declare -A EMITTED=()
 for src in "${ENTRY_SOURCES[@]}"; do
   case "$src" in
