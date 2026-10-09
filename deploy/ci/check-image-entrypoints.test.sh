@@ -15,18 +15,49 @@ run_bad() {
   output="$(bash "$CHECK" "$1" 2>&1)" && { bad "$2"; return; }
   grep -Fq "$3" <<<"$output" && ok "$2" || bad "$2 (expected: $3)"
 }
+NOT_LISTED='dist/scripts/absent.js but api/src/scripts/absent.ts is not an esbuild entrypoint'
 
 CASES=()
 trap 'rm -rf "${CASES[@]}"' EXIT
-# Minimal tree: a Dockerfile with two entrypoints, their sources, one Job running each.
+# Minimal tree shaped like the real api/Dockerfile: one RUN writes the esbuild program with
+# printf '%s\n' "<line>"..., an API build (outdir api/dist, outbase api/src) with two entries,
+# and an independent immo-mcp build. One Job runs each listed API script.
+# $1: extra Dockerfile lines inside the API entryPoints array; $2: extra lines after both builds.
 fixture() {
   CASE_ROOT="$(mktemp -d)"; CASES+=("$CASE_ROOT")
   mkdir -p "$CASE_ROOT/api/src/scripts" "$CASE_ROOT/deploy/k8s" "$CASE_ROOT/.github/workflows"
-  printf '%s\n' \
-    'RUN printf "%s\n" \' \
-    "  \"    'api/src/index.ts',\" \\" \
-    "  \"    'api/src/scripts/present.ts',\" \\" \
-    '  > /workspace/esbuild.mjs' >"$CASE_ROOT/api/Dockerfile"
+  {
+    cat <<'EOF'
+FROM node:24-bookworm-slim AS build
+# Bundle ALL runtime entrypoints: 'api/src/scripts/absent.ts' is NOT one (prose comment).
+RUN npm install --no-save esbuild@0.24.0 \
+ && printf '%s\n' \
+  "import { build } from 'esbuild';" \
+  "await build({" \
+  "  entryPoints: [" \
+  "    'api/src/index.ts'," \
+  "    'api/src/scripts/present.ts'," \
+EOF
+    [ -z "${1:-}" ] || printf '%s\n' "$1"
+    cat <<'EOF'
+  "  ]," \
+  "  bundle: true, platform: 'node', format: 'esm', target: 'node24'," \
+  "  outdir: 'api/dist', outbase: 'api/src', entryNames: '[dir]/[name]'," \
+  "  plugins: [{ name: 'ext', setup(b){ b.onResolve({ filter: /^[^.\/]/ }, a => null); } }]," \
+  "});" \
+  "// SECOND, separate build call: 'api/src/scripts/absent.ts' in a comment is no entry." \
+  "await build({" \
+  "  entryPoints: ['packages/immo-mcp/src/server-http.ts']," \
+  "  outdir: 'packages/immo-mcp/dist', outbase: 'packages/immo-mcp/src'," \
+  "  banner: { js: 'import { createRequire as __cr } from \"node:module\";' }," \
+  "});" \
+EOF
+    [ -z "${2:-}" ] || printf '%s\n' "$2"
+    cat <<'EOF'
+  "// end of program" > /workspace/esbuild.mjs \
+ && node /workspace/esbuild.mjs
+EOF
+  } >"$CASE_ROOT/api/Dockerfile"
   : >"$CASE_ROOT/api/src/index.ts"
   : >"$CASE_ROOT/api/src/scripts/present.ts"
   : >"$CASE_ROOT/api/src/scripts/absent.ts"
@@ -35,16 +66,23 @@ fixture() {
   printf '%s\n' 'jobs:' '  x:' '    steps:' '      - run: echo "https://h/build.json"' \
     >"$CASE_ROOT/.github/workflows/w.yml"
 }
+absent_job() { printf '%s\n' '              node dist/scripts/absent.js __ARGS__' >>"$CASE_ROOT/deploy/k8s/job.yaml"; }
 
 run_ok "$ROOT" 'accepts the released manifests and api/Dockerfile'
+released="$(bash "$CHECK" "$ROOT" 2>&1)"
+grep -Fq ', 17 entrypoint(s))' <<<"$released" && ok 'counts the 17 active API entrypoints of api/Dockerfile' \
+  || bad "counts the 17 active API entrypoints of api/Dockerfile (got: $released)"
 
 fixture
 run_ok "$CASE_ROOT" 'accepts the untouched fixture'
 
 fixture
-printf '%s\n' '              node dist/scripts/absent.js __ARGS__' >>"$CASE_ROOT/deploy/k8s/job.yaml"
-run_bad "$CASE_ROOT" 'rejects a Job script missing from the esbuild entrypoints (GH #812)' \
-  'dist/scripts/absent.js but api/src/scripts/absent.ts is not an esbuild entrypoint'
+absent_job
+run_bad "$CASE_ROOT" 'rejects a Job script missing from the esbuild entrypoints (GH #812)' "$NOT_LISTED"
+
+fixture "  \"    'api/src/scripts/absent.ts',\" \\"
+absent_job
+run_ok "$CASE_ROOT" 'accepts the same Job once its entry is active in the API build'
 
 fixture
 mkdir -p "$CASE_ROOT/deploy/k8s/sub"
@@ -59,9 +97,51 @@ fixture
 printf '%s\n' 'command: ["node", "dist/scripts/ghost.js"]' >>"$CASE_ROOT/deploy/k8s/job.yaml"
 run_bad "$CASE_ROOT" 'rejects a script with no source at all' 'no source api/src/scripts/ghost.ts exists'
 
-fixture
-printf '%s\n' "  \"    'api/src/scripts/gone.ts',\" \\" >>"$CASE_ROOT/api/Dockerfile"
+fixture "  \"    'api/src/scripts/gone.ts',\" \\"
 run_bad "$CASE_ROOT" 'rejects a Dockerfile entrypoint whose source is gone' 'entrypoint api/src/scripts/gone.ts does not exist'
+
+# ASTRA-832-01: only ACTIVE entries of the API build count.
+fixture "#  \"    'api/src/scripts/absent.ts',\" \\"
+absent_job
+run_bad "$CASE_ROOT" 'rejects an entry commented out with a Dockerfile # line' "$NOT_LISTED"
+
+fixture "  \"    // 'api/src/scripts/absent.ts',\" \\"
+absent_job
+run_bad "$CASE_ROOT" 'rejects an entry commented out with a JS // comment' "$NOT_LISTED"
+
+fixture "  \"    /* disabled:\" \\
+  \"    'api/src/scripts/absent.ts',\" \\
+  \"    */\" \\"
+absent_job
+run_bad "$CASE_ROOT" 'rejects an entry inside a JS /* */ block comment' "$NOT_LISTED"
+
+fixture '' "  \"await build({ entryPoints: ['api/src/scripts/absent.ts'], outdir: 'other/dist', outbase: 'api/src' });\" \\"
+absent_job
+run_bad "$CASE_ROOT" 'rejects an entry that belongs to another build call (outdir other/dist)' "$NOT_LISTED"
+
+fixture "  \"    'api/src/scripts/present.ts'.replace('//', '/* x */'),\" \\"
+run_bad "$CASE_ROOT" 'rejects an entryPoints element that is not a plain string' 'unsupported entryPoints element'
+
+fixture
+sed -i "s#outdir: 'api/dist', ##" "$CASE_ROOT/api/Dockerfile"
+run_bad "$CASE_ROOT" 'rejects a Dockerfile without an api/dist build call' "no esbuild build call with outdir 'api/dist'"
+
+fixture
+sed -i "s#outbase: 'api/src', ##" "$CASE_ROOT/api/Dockerfile"
+run_bad "$CASE_ROOT" 'rejects an API build without an explicit outbase' "has no outbase"
+
+fixture "  \"    'packages/immo-mcp/src/other.ts',\" \\"
+run_bad "$CASE_ROOT" 'rejects an API entry outside its outbase' 'packages/immo-mcp/src/other.ts is outside outbase api/src'
+
+fixture "  \"    'api/src/scripts/absent.ts', // still listed: '//' and '/*' inside strings are text\" \\"
+absent_job
+run_ok "$CASE_ROOT" 'keeps an active entry followed by a trailing JS comment'
+
+# ASTRA-832-02: two references sharing one separator are both checked.
+fixture
+printf '%s\n' '          for f in dist/scripts/present.js dist/scripts/absent.js; do node "$f"; done' \
+  >>"$CASE_ROOT/deploy/k8s/job.yaml"
+run_bad "$CASE_ROOT" 'rejects the second of two one-space-separated references' 'job.yaml:3 runs dist/scripts/absent.js'
 
 fixture
 printf '%s\n' '# historic: node dist/scripts/absent.js was missing' '    # node dist/scripts/absent.js' \
@@ -71,8 +151,21 @@ run_ok "$CASE_ROOT" 'ignores full-line comments'
 fixture
 printf '%s\n' 'image: x' 'command: ["node", "packages/immo-mcp/dist/server-http.js"]' \
   'command: ["node", "apps/auth-idp/dist/index.js"]' 'url: "https://h/dist/build.json"' \
-  >>"$CASE_ROOT/deploy/k8s/job.yaml"
+  'map: dist/scripts/absent.js.map' >>"$CASE_ROOT/deploy/k8s/job.yaml"
 run_ok "$CASE_ROOT" 'ignores other dist trees and non-.js files'
+
+# ASTRA-832-04: an empty or failed enumeration is not success.
+fixture
+rm -rf "$CASE_ROOT/.github"
+run_bad "$CASE_ROOT" 'rejects a root without .github/workflows' 'scan directory .github/workflows not found'
+
+fixture
+rm -f "$CASE_ROOT/deploy/k8s/job.yaml" "$CASE_ROOT/.github/workflows/w.yml"
+run_bad "$CASE_ROOT" 'rejects an empty YAML inventory' 'no YAML file under deploy/ or .github/workflows/'
+
+fixture
+printf '%s\n' 'kind: ConfigMap' >"$CASE_ROOT/deploy/k8s/job.yaml"
+run_bad "$CASE_ROOT" 'rejects a scan that finds no dist/ reference at all' 'no dist/<path>.js reference found'
 
 echo "check-image-entrypoints tests: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
