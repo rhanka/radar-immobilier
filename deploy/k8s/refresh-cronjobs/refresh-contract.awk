@@ -7,17 +7,23 @@
 #           pas de l'autre est une divergence d'overlay, et fait rougir la CI.
 #
 # Pourquoi une projection plutôt qu'un `diff` des deux rendus : les deux
-# overlays DOIVENT diverger sur trois points, et sur trois seulement :
+# overlays DOIVENT diverger sur quatre points, et sur quatre seulement :
 #   1. `namespace` — radar-immobilier-preprod contre radar-immobilier ;
 #   2. l'enveloppe mémoire — `memory:` des requests/limits et le
 #      `--max-old-space-size` de NODE_OPTIONS (la prod tient dans une marge
 #      plus basse ; cette valeur reste épinglée à part dans `verify-renders`) ;
 #   3. la liaison de stockage S3 — la préprod pointe son propre seau, la prod
 #      hérite du ConfigMap `radar-api` (la garde dédiée est
-#      deploy/ci/check-object-storage-bindings.sh).
-# Ces trois points ne sont PAS projetés. Tout le reste — schéma d'exécution,
+#      deploy/ci/check-object-storage-bindings.sh) ;
+#   4. la LISTE D'HEURES de `radar-refresh-pv` — prod 5,11,17,23, préprod
+#      0,6,12,18, une heure plus tard (incident 2026-10-09). La minute, le
+#      nombre de passages et les champs jour restent projetés ; l'écart minimal
+#      entre les lancements prod et préprod est gardé par refresh-stagger.awk.
+# Ces quatre points ne sont PAS projetés. Tout le reste — schéma d'exécution,
 # échéances, commande `--all`, variables de balayage, PVC keyring, CPU,
-# contexte de sécurité — l'est, et doit coïncider au caractère près.
+# contexte de sécurité, gardien des pods Pending — l'est, et doit coïncider au
+# caractère près. Chaque ligne d'un CronJob est préfixée par son nom : le rendu
+# porte deux CronJobs (radar-refresh-pv, radar-refresh-pending-watchdog).
 #
 # La projection ne fige AUCUNE valeur : elle exige qu'un réglage changé d'un
 # côté le soit de l'autre. Un ajustement d'exploitation reste une modification
@@ -30,16 +36,17 @@ function emitEnv() {
     # NODE_OPTIONS porte le plafond de tas, divergence voulue ; SCRAPE_S3_*
     # porte la liaison de stockage, divergence voulue.
     if (envName != "NODE_OPTIONS" && envName !~ /^SCRAPE_S3_/)
-      print "env " envName " = " trim(envBuf)
+      print obj " env " envName " = " trim(envBuf)
     envName = ""
     envBuf = ""
   }
 }
 
-BEGIN { kind = ""; envName = ""; envBuf = ""; inEnv = 0; inCmd = 0; cmdBlock = 0 }
+BEGIN { kind = ""; obj = ""; envName = ""; envBuf = ""; inEnv = 0; inCmd = 0; cmdBlock = 0 }
 
-/^---[ \t]*$/ { emitEnv(); kind = ""; inEnv = 0; inCmd = 0; next }
-/^kind:[ \t]/ { emitEnv(); kind = trim(substr($0, 6)); inEnv = 0; inCmd = 0; next }
+/^---[ \t]*$/ { emitEnv(); kind = ""; obj = ""; inEnv = 0; inCmd = 0; next }
+/^kind:[ \t]/ { emitEnv(); kind = trim(substr($0, 6)); obj = ""; inEnv = 0; inCmd = 0; cmdBlock = 0; next }
+/^  name:[ \t]/ { obj = trim(substr($0, 9)) }
 
 # Le PVC keyring est court et entièrement contractuel : classe, mode d'accès,
 # taille. Seul le namespace en est retiré.
@@ -60,7 +67,7 @@ kind != "CronJob" { next }
 inCmd {
   if ($0 ~ /^[ ]+- /) {
     cmdIndex++
-    print "command[" cmdBlock "][" cmdIndex "] = " trim(substr($0, index($0, "- ") + 2))
+    print obj " command[" cmdBlock "][" cmdIndex "] = " trim(substr($0, index($0, "- ") + 2))
     next
   }
   inCmd = 0
@@ -81,8 +88,20 @@ inEnv {
 
 # --- scalaires du contrat ---------------------------------------------------
 # `memory` est délibérément absent : c'est la divergence voulue n°2.
-/^[ ]+(- )?(schedule|timeZone|concurrencyPolicy|startingDeadlineSeconds|successfulJobsHistoryLimit|failedJobsHistoryLimit|suspend|backoffLimit|activeDeadlineSeconds|ttlSecondsAfterFinished|restartPolicy|terminationGracePeriodSeconds|serviceAccountName|workingDir|imagePullPolicy|claimName|secretName|defaultMode|mountPath|sizeLimit|storage|cpu|readOnlyRootFilesystem|allowPrivilegeEscalation|runAsNonRoot|runAsUser|runAsGroup|fsGroup|type):[ \t]/ {
-  print "spec " trim($0)
+# La liste d'heures de `radar-refresh-pv` est la divergence voulue n°4 : la
+# minute, le nombre de passages et les champs jour/mois sont projetés, pas les
+# heures elles-mêmes.
+kind == "CronJob" && obj == "radar-refresh-pv" && /^  schedule:[ \t]/ {
+  s = trim(substr($0, 12)); gsub(/["']/, "", s)
+  n = split(s, sf, / +/)
+  passes = (n >= 2) ? split(sf[2], sh, ",") : 0
+  print obj " spec schedule minute: " sf[1]
+  print obj " spec schedule passes per day: " passes
+  print obj " spec schedule day fields: " sf[3] " " sf[4] " " sf[5]
+  next
+}
+/^[ ]+(- )?(schedule|timeZone|concurrencyPolicy|startingDeadlineSeconds|successfulJobsHistoryLimit|failedJobsHistoryLimit|suspend|backoffLimit|activeDeadlineSeconds|ttlSecondsAfterFinished|restartPolicy|terminationGracePeriodSeconds|serviceAccountName|workingDir|imagePullPolicy|claimName|secretName|defaultMode|mountPath|sizeLimit|storage|cpu|readOnlyRootFilesystem|allowPrivilegeEscalation|runAsNonRoot|runAsUser|runAsGroup|fsGroup|type|automountServiceAccountToken):[ \t]/ {
+  print obj " spec " trim($0)
 }
 
 END { emitEnv() }
