@@ -6,7 +6,8 @@
 # Cases: Deployment absent (NotFound), annotation current (no roll), ConfigMap
 # changed by the apply (roll, then a settled re-run does not), annotation
 # missing on an existing Deployment, lookup failure, empty resourceVersion, and
-# a patch failure followed by a same-image retry that must still roll.
+# a patch failure followed by a same-image retry that must still roll; the
+# applied document content and failing version reads are checked too.
 set -uo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -33,16 +34,25 @@ case " $* " in
       *) echo 'Error from server (Forbidden): deployments.apps "radar-immo-mcp" is forbidden' >&2; exit 1 ;;
     esac ;;
   " -n radar-immobilier-preprod get configmap immo-mcp-config -o $RV_PATH ")
-    echo "read rv" >>"$CALLS"; cat "$STATE/rv" ;;
+    echo "read rv" >>"$CALLS"; cat "$STATE/rv"
+    # A failing read may still print: the caller must not swallow the status.
+    if [ "${MOCK_FAIL_READ:-}" = rv ]; then exit 18; fi ;;
   " -n radar-immobilier-preprod get deploy radar-immo-mcp -o $ANN_PATH ")
-    echo "read ann" >>"$CALLS"; cat "$STATE/ann" ;;
+    echo "read ann" >>"$CALLS"; cat "$STATE/ann"
+    if [ "${MOCK_FAIL_READ:-}" = ann ]; then exit 19; fi ;;
   *" diff "*) cat >/dev/null; exit 1 ;;
-  *" apply --server-side "*)
-    names="$(grep -E '^  name: ' | sed 's/^  name: //' | paste -sd, -)"
+  " apply --server-side --field-manager=cd-preprod --force-conflicts -f - ")
+    # Exact persisting apply only (no dry-run, no namespace override, manifest
+    # from stdin); the immo-mcp-config document is kept for content checks.
+    doc="$(cat)"
+    names="$(printf '%s\n' "$doc" | grep -E '^  name: ' | sed 's/^  name: //' | paste -sd, -)"
     echo "apply $names" >>"$CALLS"
-    # A changed immo-mcp-config bumps its resourceVersion, like the API server.
-    if [ "$names" = immo-mcp-config ] && [ "${MOCK_APPLY_CHANGES:-0}" = 1 ]; then
-      printf '%s' "$(( $(cat "$STATE/rv") + 1 ))" >"$STATE/rv"
+    if [ "$names" = immo-mcp-config ]; then
+      printf '%s\n' "$doc" >"$STATE/applied-mcp"
+      # A changed immo-mcp-config bumps its resourceVersion, like the API server.
+      if [ "${MOCK_APPLY_CHANGES:-0}" = 1 ]; then
+        printf '%s' "$(( $(cat "$STATE/rv") + 1 ))" >"$STATE/rv"
+      fi
     fi ;;
   " -n radar-immobilier-preprod patch deploy radar-immo-mcp --type merge -p "*)
     if [ "${MOCK_PATCH_FAIL:-0}" = 1 ]; then echo "patch-failed" >>"$CALLS"; exit 23; fi
@@ -56,12 +66,13 @@ FAKE
 chmod +x "$T/bin/kubectl"
 STATE="$T/state"; mkdir -p "$STATE"
 
-# run <case-id> <MOCK_GET> [MOCK_PATCH_FAIL] [MOCK_APPLY_CHANGES] -> RC, CALLS
+# run <case-id> <MOCK_GET> [MOCK_PATCH_FAIL] [MOCK_APPLY_CHANGES] [MOCK_FAIL_READ] -> RC, CALLS
 # (state kept in $STATE across runs, so multi-run cases share it)
 run() {
   CALLS="$T/calls.$1"; : >"$CALLS"
   PATH="$T/bin:$PATH" REAL_KUBECTL="$REAL_KUBECTL" CALLS="$CALLS" STATE="$STATE" MOCK_GET="$2" \
-    MOCK_PATCH_FAIL="${3:-0}" MOCK_APPLY_CHANGES="${4:-0}" NAMESPACE=radar-immobilier-preprod \
+    MOCK_PATCH_FAIL="${3:-0}" MOCK_APPLY_CHANGES="${4:-0}" MOCK_FAIL_READ="${5:-}" \
+    NAMESPACE=radar-immobilier-preprod \
     bash "$HERE/reconcile-preprod.sh" >"$T/out.$1" 2>&1
   RC=$?
 }
@@ -100,6 +111,24 @@ state 100 ''; run first present
 if [ "$RC" -eq 0 ] && clean && has "$CALLS" 'patch rv=100'; then
   ok 'present Deployment without the annotation: pod template annotated'
 else bad "missing annotation (rc=$RC): $(calls)"; fi
+
+# What was applied is the guarded preprod document, not a truncated copy.
+A="$STATE/applied-mcp"
+if [ -f "$A" ] && has "$A" 'kind: ConfigMap' && has "$A" '  namespace: radar-immobilier-preprod' \
+  && has "$A" '  IMMO_MCP_OAUTH_ISSUER: https://preprod.auth.sent-tech.ca' \
+  && has "$A" '  IMMO_MCP_OAUTH_RESOURCE: https://preprod.immo.sent-tech.ca/mcp' \
+  && has "$A" '  RADAR_PUBLIC_BASE_URL: https://preprod.immo.sent-tech.ca' \
+  && has "$A" '  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: immo:read immo:search immo:documents:read'; then
+  ok 'applied immo-mcp-config = preprod namespace, issuer, resource, public URL, prod scopes'
+else bad "applied immo-mcp-config content: $(paste -sd'|' "$A" 2>/dev/null)"; fi
+
+# A failing version read (even after printing a value) stops the release.
+for r in rv ann; do
+  state 101 100; run "readfail-$r" present 0 0 "$r"
+  if [ "$RC" -ne 0 ] && clean && ! grep -q '^patch\|^apply radar-consistency-snapshot' "$CALLS"; then
+    ok "failed $r read: script stops before the patch and the later applies"
+  else bad "failed $r read (rc=$RC): $(calls)"; fi
+done
 
 state 100 100; run lookup error
 if [ "$RC" -ne 0 ] && ! grep -q '^apply' "$CALLS"; then
