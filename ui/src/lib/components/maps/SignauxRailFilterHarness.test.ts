@@ -20,7 +20,7 @@ type TriState = "oui" | "non" | "indetermine";
 function node(
   id: string,
   instrument: string,
-  opts: { residentiel?: TriState; props?: Record<string, unknown> } = {},
+  opts: { residentiel?: TriState; etape?: string; props?: Record<string, unknown> } = {},
 ): GraphSignalNode {
   return {
     id,
@@ -35,8 +35,8 @@ function node(
       residentiel: { valeur: opts.residentiel ?? "oui", source: "t", confiance: 0.9 },
       effet_densifiant: "inconnu",
       instrument,
-      etape: "avis_motion",
-      etapes_historique: ["avis_motion"],
+      etape: opts.etape ?? "avis_motion",
+      etapes_historique: [opts.etape ?? "avis_motion"],
       exclusion_reason: null,
       provenance: { extrait: "" },
       confiance: 0.9,
@@ -91,26 +91,31 @@ describe("Vivier B filter pipeline — rail toggles change the visible count", (
     expect(getByTestId("visible-count").textContent).toBe("3");
   });
 
-  it("m1.4 — r axis keeps unstated rezonings, filters genuine unknowns, reveals all when unchecked", async () => {
+  it("m1.4 — r axis keeps unstated rezonings and early unknowns, filters late unknowns, reveals all when unchecked", async () => {
     const detailNodes = [
       node("qualifie", "rezonage", { residentiel: "oui" }),
       // Rezonage au résidentiel non précisé → éligible (R2 : une refonte
       // classe, elle ne barre jamais).
       node("a-confirmer", "rezonage", { residentiel: "indetermine" }),
-      // Instrument non-rezonage au résidentiel non précisé → vraie inconnue,
-      // reste filtrée : c'est ce qui garantit que `r` filtre encore quelque
-      // chose. (`autre` plutôt que `derogation` pour isoler l'axe `r` des
-      // exclusions par instrument du rail.)
-      node("inconnu-vrai", "autre", { residentiel: "indetermine" }),
+      // Étape précoce au résidentiel inconnu → éligible : inconnu n'est pas
+      // non résidentiel (tri-état). Cas réel event-26-220.
+      node("precoce-inconnu", "autre", { residentiel: "indetermine" }),
+      // Étape tardive, instrument non-rezonage, résidentiel inconnu → reste
+      // filtrée par r : c'est ce qui garantit que `r` filtre encore quelque
+      // chose quand Précoce est décoché.
+      node("tardif-inconnu", "autre", { residentiel: "indetermine", etape: "adoption" }),
     ];
     const { container, getByTestId } = render(Harness, {
       props: { detailNodes, initialSubsetKey: "vivier-v2" },
     });
-    // Default (r=true): residential `oui` + rezonage non précisé.
-    expect(getByTestId("visible-count").textContent).toBe("2");
+    // Default (z, r, p): the late node is outside Précoce.
+    expect(getByTestId("visible-count").textContent).toBe("3");
+    // Uncheck p: the late unknown is still filtered by r.
+    await fireEvent.click(axisBoxes(container)[2]!);
+    expect(getByTestId("visible-count").textContent).toBe("3");
     // Uncheck r: every indéterminé reappears.
     await fireEvent.click(axisBoxes(container)[1]!);
-    expect(getByTestId("visible-count").textContent).toBe("3");
+    expect(getByTestId("visible-count").textContent).toBe("4");
   });
 });
 
