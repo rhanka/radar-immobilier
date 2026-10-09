@@ -15,10 +15,10 @@
 #   3. la liaison de stockage S3 — la préprod pointe son propre seau, la prod
 #      hérite du ConfigMap `radar-api` (la garde dédiée est
 #      deploy/ci/check-object-storage-bindings.sh) ;
-#   4. la MINUTE de lancement de `radar-refresh-pv` — prod à l'heure ronde,
-#      préprod à la demi-heure (incident 2026-10-09). Seul le premier champ de
-#      la planification est retiré ; les heures restent projetées, et l'écart
-#      minimal entre les deux minutes est gardé par refresh-stagger.awk.
+#   4. la LISTE D'HEURES de `radar-refresh-pv` — prod 5,11,17,23, préprod
+#      0,6,12,18, une heure plus tard (incident 2026-10-09). La minute, le
+#      nombre de passages et les champs jour restent projetés ; l'écart minimal
+#      entre les lancements prod et préprod est gardé par refresh-stagger.awk.
 # Ces quatre points ne sont PAS projetés. Tout le reste — schéma d'exécution,
 # échéances, commande `--all`, variables de balayage, PVC keyring, CPU,
 # contexte de sécurité, gardien des pods Pending — l'est, et doit coïncider au
@@ -88,11 +88,16 @@ inEnv {
 
 # --- scalaires du contrat ---------------------------------------------------
 # `memory` est délibérément absent : c'est la divergence voulue n°2.
-# La minute de `radar-refresh-pv` est la divergence voulue n°4 : seuls les
-# champs heures/jours de sa planification sont projetés.
+# La liste d'heures de `radar-refresh-pv` est la divergence voulue n°4 : la
+# minute, le nombre de passages et les champs jour/mois sont projetés, pas les
+# heures elles-mêmes.
 kind == "CronJob" && obj == "radar-refresh-pv" && /^  schedule:[ \t]/ {
-  s = trim(substr($0, 12)); gsub(/["']/, "", s); sub(/^[^ ]+ +/, "", s)
-  print obj " spec schedule (hours, minute excluded): " s
+  s = trim(substr($0, 12)); gsub(/["']/, "", s)
+  n = split(s, sf, / +/)
+  passes = (n >= 2) ? split(sf[2], sh, ",") : 0
+  print obj " spec schedule minute: " sf[1]
+  print obj " spec schedule passes per day: " passes
+  print obj " spec schedule day fields: " sf[3] " " sf[4] " " sf[5]
   next
 }
 /^[ ]+(- )?(schedule|timeZone|concurrencyPolicy|startingDeadlineSeconds|successfulJobsHistoryLimit|failedJobsHistoryLimit|suspend|backoffLimit|activeDeadlineSeconds|ttlSecondsAfterFinished|restartPolicy|terminationGracePeriodSeconds|serviceAccountName|workingDir|imagePullPolicy|claimName|secretName|defaultMode|mountPath|sizeLimit|storage|cpu|readOnlyRootFilesystem|allowPrivilegeEscalation|runAsNonRoot|runAsUser|runAsGroup|fsGroup|type|automountServiceAccountToken):[ \t]/ {

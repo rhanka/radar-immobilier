@@ -8,14 +8,14 @@
 # minute; the CSI attach timed out, then reported "already attached" and never
 # reconciled. Both passes stayed Pending for 4 h 30.
 #
-# The overlays now share the HOURS (refresh-contract.awk projects them) and
-# differ only by the start MINUTE (intended divergence n°4). This guard checks:
-#   1. both schedules use the form `<minute> <hour list> * * *`, with the same
-#      hour list and day fields;
+# The overlays now share the MINUTE and the number of passes (refresh-contract.awk
+# projects them) and differ only by the HOUR LIST (intended divergence n°4: prod
+# 5,11,17,23, preprod 0,6,12,18). This guard checks:
+#   1. both schedules use the form `<minute 0-59> <hour list 0-23> * * *`;
 #   2. the closest pair of real daily starts (prod vs preprod, wrapping at
 #      midnight) is at least `min_minutes` apart;
-#   3. the pending-pod watchdog of the preprod render removes a stalled pod
-#      (deadline + one period) before the other environment starts.
+#   3. the pending-pod watchdog of the preprod render requests the deletion of a stalled pod
+#      (deadline + one period, nominal) before the other environment starts.
 # Nothing is pinned: any pair of minutes that keeps these relations passes.
 
 function fail(msg) { print "refresh-stagger: " msg > "/dev/stderr"; bad = 1 }
@@ -58,15 +58,13 @@ END {
     fail("radar-refresh-pv schedules must use `<minute 0-59> <hour list 0-23> * * *` (preprod « " sched[1] " », prod « " sched[2] " »)")
     exit 1
   }
-  if (a[2] != b[2])
-    fail("preprod « " sched[1] " » and prod « " sched[2] " » must share the same hours")
   # Closest pair of REAL daily starts, across environments, around midnight
   # (1440 min): only the hours actually scheduled count.
-  k = split(b[2], hours, ",")
+  kb = split(b[2], hb, ","); ka = split(a[2], ha, ",")
   gap = 1440
-  for (i = 1; i <= k; i++)
-    for (j = 1; j <= k; j++) {
-      d = (hours[i] * 60 + b[1]) - (hours[j] * 60 + a[1]); if (d < 0) d = -d
+  for (i = 1; i <= kb; i++)
+    for (j = 1; j <= ka; j++) {
+      d = (hb[i] * 60 + b[1]) - (ha[j] * 60 + a[1]); if (d < 0) d = -d
       if (1440 - d < d) d = 1440 - d
       if (d < gap) gap = d
     }
@@ -76,9 +74,9 @@ END {
   if (deadline <= 0 || period <= 0)
     fail("pending watchdog deadline/period not found in the preprod render")
   else if (deadline + period > gap * 60)
-    fail("the pending watchdog removes a stalled pod after up to " deadline + period " s, not before the other environment starts (" gap * 60 " s later)")
+    fail("the pending watchdog requests the deletion of a stalled pod after up to " deadline + period " s (nominal), not before the other environment starts (" gap * 60 " s later)")
   if (!bad)
-    printf "refresh-stagger: ok — prod minute %d, preprod minute %d, hours %s: closest starts %d min apart; a stalled pod is removed within %d s\n", \
-      b[1], a[1], b[2], gap, deadline + period
+    printf "refresh-stagger: ok — prod \"%s\", preprod \"%s\": closest starts %d min apart; nominal watchdog deletion request by %d s\n", \
+      sched[2], sched[1], gap, deadline + period
   exit bad
 }
