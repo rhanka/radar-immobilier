@@ -19,7 +19,7 @@
     "@radar/scoring": "*",
     "@radar/sources": "*",
     "@sentropic/chat-ui": "^0.33.0",
-    "@sentropic/design-system-svelte": "^0.34.71",
+    "@sentropic/design-system-svelte": "^0.35.1",
     "@sentropic/design-system-themes": "^0.11.0",
     "@sentropic/design-system-tokens": "^0.11.0",
     "@sentropic/geo-core": "^0.6.0",

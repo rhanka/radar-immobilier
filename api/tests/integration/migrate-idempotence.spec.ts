@@ -50,11 +50,12 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
     "re-applies the last migration without error when its journal row is missing but its schema is already present, " +
       "and re-registers exactly that row",
     async () => {
-      // Sanity: this test is written against 0012_refresh_document_outcomes
-      // being the last migration (idempotent guards added there). If the
-      // journal's last entry changes, this assertion fails loudly instead of
-      // silently testing the wrong migration's drift.
-      expect(lastEntry.tag).toBe("0012_refresh_document_outcomes");
+      // Sanity: this test is written against 0013_graph_city_key being the last
+      // migration (idempotent: node/edge block skipped when the PK is already
+      // (city_slug, id), guarded index statements; 0012 carries the same
+      // guards). If the journal's last entry changes, this assertion fails
+      // loudly instead of silently testing the wrong migration's drift.
+      expect(lastEntry.tag).toBe("0013_graph_city_key");
 
       // ── 1. Known-clean state: (re)apply every migration ────────────────
       // migrate() only replays what is not yet recorded past the latest
@@ -157,6 +158,14 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
       }
       expect(rerunRow.hash).toBe(lastRow.hash);
       expect(rerunRow.created_at).toBe(lastRow.created_at);
+
+      // 0013 replayed on a schema that already has it: the PK stays (city_slug, id).
+      const pkAfterRerun = await pool.query<{ cols: string[] }>(
+        `SELECT array_agg(a.attname::text ORDER BY array_position(c.conkey, a.attnum)) AS cols
+           FROM pg_constraint c JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = ANY (c.conkey)
+          WHERE c.conrelid = 'graph_nodes'::regclass AND c.contype = 'p'`,
+      );
+      expect(pkAfterRerun.rows[0]?.cols).toEqual(["city_slug", "id"]);
 
       const afterRerunCount = await pool.query<{ count: string }>(
         `SELECT count(*)::text AS count FROM ${MIGRATIONS_SCHEMA}."${MIGRATIONS_TABLE}"`,

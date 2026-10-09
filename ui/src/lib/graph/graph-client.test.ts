@@ -27,6 +27,7 @@ const MOCK_NODE_ZONE: GraphNode = {
 
 const MOCK_EDGE: GraphEdge = {
   id: "edge-uuid-1",
+  citySlug: "salaberry-de-valleyfield",
   srcId: "bylaw-1",
   dstId: "zone-1",
   kind: "regulates",

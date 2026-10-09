@@ -31,10 +31,11 @@ function makeNode(id: string, citySlug: string) {
   };
 }
 
-/** Minimal graph_edges row shape. */
-function makeEdge(srcId: string, dstId: string, kind = "régi_par") {
+/** Minimal graph_edges row shape (an edge belongs to one city graph, GH #812). */
+function makeEdge(srcId: string, dstId: string, kind = "régi_par", citySlug = "salaberry-de-valleyfield") {
   return {
-    id: `${srcId}->${dstId}`,
+    id: `${citySlug}:${srcId}->${dstId}`,
+    citySlug,
     srcId,
     dstId,
     kind,
@@ -198,6 +199,33 @@ describe("GET /api/graph/mrc/:mrc", () => {
     expect(body.citySlugs).toContain("beauharnois");
     expect(body.nodeCount).toBe(3);
     expect(body.edgeCount).toBe(1);
+  });
+
+  it("GH #812: two cities holding the same node id → both nodes, each edge carries its citySlug", async () => {
+    const nodes = [
+      makeNode("bylaw-242", "salaberry-de-valleyfield"),
+      makeNode("zone-c-6", "salaberry-de-valleyfield"),
+      makeNode("bylaw-242", "beauharnois"),
+      makeNode("zone-c-6", "beauharnois"),
+    ];
+    const edges = [
+      makeEdge("bylaw-242", "zone-c-6", "regulates", "salaberry-de-valleyfield"),
+      makeEdge("bylaw-242", "zone-c-6", "regulates", "beauharnois"),
+      // dst absent from its own city → not served even though the id exists in the other city
+      makeEdge("bylaw-242", "lot-9", "touches", "beauharnois"),
+    ];
+    const db = makeMockDb([nodes, edges]);
+    const res = await graphRoute({ db }).request("/api/graph/mrc/Beauharnois-Salaberry");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      nodes: Array<{ id: string; citySlug: string }>;
+      edges: Array<{ citySlug: string; srcId: string; dstId: string }>;
+    };
+    expect(body.nodes.filter((n) => n.id === "bylaw-242").map((n) => n.citySlug).sort()).toEqual(
+      ["beauharnois", "salaberry-de-valleyfield"],
+    );
+    expect(body.edges.map((e) => e.citySlug).sort()).toEqual(["beauharnois", "salaberry-de-valleyfield"]);
+    expect(body.edges.every((e) => e.dstId === "zone-c-6")).toBe(true);
   });
 });
 
