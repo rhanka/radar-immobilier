@@ -14,18 +14,25 @@
  * mounts every volume before the first init container.
  *
  * So this runs OUTSIDE the refresh pod, as its own small CronJob, with a
- * ServiceAccount that can only get/list/delete pods in its namespace. Each run:
+ * ServiceAccount that can only list and delete pods in its namespace. Each run:
  *   1. lists the pods carrying the refresh pod label (REFRESH_WATCHDOG_POD_SELECTOR);
  *   2. keeps those owned by a Job whose name starts with REFRESH_WATCHDOG_JOB_PREFIX,
  *      still in phase Pending, not already being deleted, created at least
  *      REFRESH_PENDING_DEADLINE_SECONDS ago;
- *   3. deletes each of them with a uid precondition (never a recreated pod).
+ *   3. deletes each of them with uid AND resourceVersion preconditions: if the pod
+ *      changed since the list (e.g. it turned Running), the API answers 409 and the
+ *      pod is left alone; a later run re-evaluates it.
  *
  * A deleted, non-terminal pod counts as a failure for the Job controller; the
- * refresh Job has `backoffLimit: 0`, so the Job turns Failed at once, without a
- * replacement pod, and the pod's requests are released when the kubelet
- * confirms termination. A Running pod is never touched: the maximum duration
- * of a real pass is unchanged.
+ * refresh Job has `backoffLimit: 0`, so no replacement pod is created and the Job
+ * is marked Failed once the controller has processed the terminating pod. The
+ * scheduler releases the pod's requests when the pod object is gone (kubelet
+ * confirms termination). A pod observed Running is never selected, and the
+ * resourceVersion precondition refuses the delete if it started after the list,
+ * as far as the API has seen it (kubelet status reporting is asynchronous).
+ * Timing is nominal: the first watchdog run that observes an overdue Pending pod
+ * requests its deletion (15 to 20 minutes after creation when the watchdog itself
+ * is scheduled on time).
  *
  * Exit 0 after a clean run (with or without deletions), 1 on any API or
  * configuration error, so the watchdog Job itself turns red.
@@ -42,21 +49,26 @@ export interface WatchdogConfig {
 export interface PodSummary {
   readonly name: string;
   readonly uid: string;
+  readonly resourceVersion: string;
   readonly phase: string;
   readonly createdAtMs: number;
   readonly deleting: boolean;
   readonly ownerJob: string | null;
 }
 
+export type DeleteOutcome = "accepted" | "gone" | "changed";
+
 export interface KubePodApi {
   listPods(selector: string): Promise<unknown>;
-  deletePod(name: string, uid: string): Promise<void>;
+  /** "accepted": deletion requested; "gone": 404; "changed": 409, the pod changed since the list. */
+  deletePod(name: string, uid: string, resourceVersion: string): Promise<DeleteOutcome>;
 }
 
 export interface WatchdogReport {
   readonly checked: number;
   readonly pending: number;
-  readonly removed: string[];
+  readonly deletionRequested: string[];
+  readonly skipped: string[];
 }
 
 export function readWatchdogConfig(env: Record<string, string | undefined>): WatchdogConfig {
@@ -91,6 +103,7 @@ export function parsePods(list: unknown): PodSummary[] {
     return {
       name: text(metadata.name),
       uid: text(metadata.uid),
+      resourceVersion: text(metadata.resourceVersion),
       phase: text(record(record(item).status).phase),
       createdAtMs: Date.parse(text(metadata.creationTimestamp)),
       deleting: Boolean(metadata.deletionTimestamp),
@@ -105,6 +118,7 @@ export function selectStalledPods(pods: readonly PodSummary[], nowMs: number, co
     && !pod.deleting
     && pod.name !== ""
     && pod.uid !== ""
+    && pod.resourceVersion !== ""
     && pod.ownerJob !== null
     && pod.ownerJob.startsWith(config.jobPrefix)
     && Number.isFinite(pod.createdAtMs)
@@ -119,15 +133,25 @@ export async function runWatchdog(
 ): Promise<WatchdogReport> {
   const pods = parsePods(await api.listPods(config.selector));
   const stalled = selectStalledPods(pods, nowMs, config);
-  const removed: string[] = [];
+  const deletionRequested: string[] = [];
+  const skipped: string[] = [];
   for (const pod of stalled) {
     const ageSeconds = Math.floor((nowMs - pod.createdAtMs) / 1000);
     log(`refresh-pending-watchdog: deleting pod ${pod.name} (Job ${pod.ownerJob}): `
       + `pending ${ageSeconds} s >= ${config.deadlineSeconds} s`);
-    await api.deletePod(pod.name, pod.uid);
-    removed.push(pod.name);
+    const outcome = await api.deletePod(pod.name, pod.uid, pod.resourceVersion);
+    if (outcome === "accepted") deletionRequested.push(pod.name);
+    else {
+      skipped.push(pod.name);
+      log(`refresh-pending-watchdog: pod ${pod.name} not deleted (${outcome === "gone" ? "already gone" : "changed since the list"})`);
+    }
   }
-  const report = { checked: pods.length, pending: pods.filter((pod) => pod.phase === "Pending").length, removed };
+  const report = {
+    checked: pods.length,
+    pending: pods.filter((pod) => pod.phase === "Pending").length,
+    deletionRequested,
+    skipped,
+  };
   log(`refresh-pending-watchdog: ${JSON.stringify(report)}`);
   return report;
 }
@@ -171,14 +195,17 @@ function inClusterApi(): KubePodApi {
       if (res.status !== 200) throw new Error(`list pods: HTTP ${res.status} ${res.text.slice(0, 200)}`);
       return JSON.parse(res.text) as unknown;
     },
-    async deletePod(name, uid) {
-      const body = JSON.stringify({ apiVersion: "v1", kind: "DeleteOptions", preconditions: { uid } });
+    async deletePod(name, uid, resourceVersion) {
+      const body = JSON.stringify({ apiVersion: "v1", kind: "DeleteOptions", preconditions: { uid, resourceVersion } });
       const res = await call("DELETE", `${base}/${encodeURIComponent(name)}`, body);
-      // 404: already gone; 409: the uid precondition no longer matches (another pod).
-      if (res.status === 404 || res.status === 409) return;
+      // 404: already gone; 409: uid or resourceVersion precondition failed (the pod
+      // changed since the list, e.g. it turned Running, or it is another pod).
+      if (res.status === 404) return "gone";
+      if (res.status === 409) return "changed";
       if (res.status < 200 || res.status > 299) {
         throw new Error(`delete pod ${name}: HTTP ${res.status} ${res.text.slice(0, 200)}`);
       }
+      return "accepted";
     },
   };
 }

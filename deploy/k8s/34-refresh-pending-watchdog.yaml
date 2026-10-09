@@ -14,15 +14,19 @@
 #   - nothing inside the refresh pod can act: kubelet mounts every volume,
 #     the keyring PVC included, before the first init container.
 #
-# What it does, every 5 minutes: it deletes any pod labelled
+# What it does, every 5 minutes: it requests the deletion of any pod labelled
 # `app.kubernetes.io/instance=radar-refresh-pv`, owned by a Job named
-# `radar-refresh-pv-*`, still Pending 900 s (15 min) after its creation. The
-# refresh Job has `backoffLimit: 0`: the deleted pod counts as its single
-# failure, the Job turns Failed (BackoffLimitExceeded) with no replacement pod,
-# and the requests are released. A Running pod is never touched. A stalled pod
-# is therefore removed 15 to 20 minutes after its creation.
+# `radar-refresh-pv-*`, still Pending 900 s (15 min) after its creation, with
+# uid + resourceVersion preconditions (a pod that changed since the list, e.g.
+# turned Running, is refused by the API and left alone). The refresh Job has
+# `backoffLimit: 0`: the deleted pod counts as its single failure, no
+# replacement pod is created, and the Job is marked Failed once the controller
+# has processed the terminating pod; the scheduler releases the requests when
+# the pod object is gone. Nominal timing: deletion requested 15 to 20 minutes
+# after creation, when the watchdog itself is scheduled on time (it needs
+# schedulable capacity, quota and the RBAC below; none of this is reserved).
 #
-# Identity: ServiceAccount `radar-refresh-watchdog`, pods get/list/delete in its
+# Identity: ServiceAccount `radar-refresh-watchdog`, pods list/delete in its
 # own namespace only (prod: deploy/k8s/10-rbac.yaml; preprod:
 # deploy/k8s/11-ci-deployer-preprod-rbac.yaml). Those grants are applied
 # owner-side (cluster-admin, poc-k8s); until they exist, the watchdog Job cannot

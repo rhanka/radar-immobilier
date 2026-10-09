@@ -4,6 +4,7 @@ import {
   readWatchdogConfig,
   runWatchdog,
   selectStalledPods,
+  type DeleteOutcome,
   type KubePodApi,
   type WatchdogConfig,
 } from "./refresh-pending-watchdog.js";
@@ -20,6 +21,7 @@ function pod(name: string, phase: string, createdAt: string, extra: Record<strin
     metadata: {
       name,
       uid: `uid-${name}`,
+      resourceVersion: `rv-${name}`,
       creationTimestamp: createdAt,
       ownerReferences: [{ kind: "Job", name: name.replace(/-[a-z0-9]{5}$/, "") }],
       ...extra,
@@ -90,16 +92,17 @@ describe("selectStalledPods", () => {
 });
 
 describe("runWatchdog", () => {
-  function fakeApi(items: unknown[], failDelete = false) {
+  function fakeApi(items: unknown[], failDelete = false, outcome: DeleteOutcome = "accepted") {
     const calls: string[] = [];
     const api: KubePodApi = {
       async listPods(selector) {
         calls.push(`list ${selector}`);
         return { items };
       },
-      async deletePod(name, uid) {
-        calls.push(`delete ${name} ${uid}`);
+      async deletePod(name, uid, resourceVersion) {
+        calls.push(`delete ${name} ${uid} ${resourceVersion}`);
         if (failDelete) throw new Error("forbidden");
+        return outcome;
       },
     };
     return { api, calls };
@@ -114,9 +117,9 @@ describe("runWatchdog", () => {
     const report = await runWatchdog(api, CONFIG, NOW, (line) => lines.push(line));
     expect(calls).toEqual([
       "list app.kubernetes.io/instance=radar-refresh-pv",
-      "delete radar-refresh-pv-29811300-aaaaa uid-radar-refresh-pv-29811300-aaaaa",
+      "delete radar-refresh-pv-29811300-aaaaa uid-radar-refresh-pv-29811300-aaaaa rv-radar-refresh-pv-29811300-aaaaa",
     ]);
-    expect(report).toEqual({ checked: 2, pending: 1, removed: ["radar-refresh-pv-29811300-aaaaa"] });
+    expect(report).toEqual({ checked: 2, pending: 1, deletionRequested: ["radar-refresh-pv-29811300-aaaaa"], skipped: [] });
     expect(lines.join("\n")).toContain("pending 1200 s >= 900 s");
   });
 
@@ -124,11 +127,44 @@ describe("runWatchdog", () => {
     const { api, calls } = fakeApi([pod("radar-refresh-pv-1-aaaaa", "Running", "2026-10-09T01:00:00Z")]);
     const report = await runWatchdog(api, CONFIG, NOW, () => undefined);
     expect(calls).toHaveLength(1);
-    expect(report.removed).toEqual([]);
+    expect(report.deletionRequested).toEqual([]);
   });
 
   it("propagates a delete failure so the watchdog Job turns red", async () => {
     const { api } = fakeApi([pod("radar-refresh-pv-1-aaaaa", "Pending", "2026-10-09T04:00:00Z")], true);
     await expect(runWatchdog(api, CONFIG, NOW, () => undefined)).rejects.toThrow("forbidden");
+  });
+});
+
+describe("runWatchdog — stale observations", () => {
+  it.each([
+    ["changed", "changed since the list"],
+    ["gone", "already gone"],
+  ] as const)("reports a %s pod as skipped, never as deleted", async (outcome, message) => {
+    const calls: string[] = [];
+    const api: KubePodApi = {
+      async listPods() {
+        return { items: [pod("radar-refresh-pv-1-aaaaa", "Pending", "2026-10-09T04:00:00Z")] };
+      },
+      async deletePod(name, uid, resourceVersion) {
+        calls.push(`${name} ${uid} ${resourceVersion}`);
+        return outcome;
+      },
+    };
+    const lines: string[] = [];
+    const report = await runWatchdog(api, CONFIG, NOW, (line) => lines.push(line));
+    expect(calls).toEqual(["radar-refresh-pv-1-aaaaa uid-radar-refresh-pv-1-aaaaa rv-radar-refresh-pv-1-aaaaa"]);
+    expect(report.deletionRequested).toEqual([]);
+    expect(report.skipped).toEqual(["radar-refresh-pv-1-aaaaa"]);
+    expect(lines.join("\n")).toContain(message);
+  });
+
+  it("never selects a pod without a resourceVersion (no precondition possible)", () => {
+    const pods = parsePods({ items: [{
+      metadata: { name: "radar-refresh-pv-1-aaaaa", uid: "u1", creationTimestamp: "2026-10-09T04:00:00Z",
+        ownerReferences: [{ kind: "Job", name: "radar-refresh-pv-1" }] },
+      status: { phase: "Pending" },
+    }] });
+    expect(selectStalledPods(pods, NOW, CONFIG)).toEqual([]);
   });
 });
