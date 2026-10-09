@@ -110,4 +110,18 @@ describe("document date window", () => {
     expect(matchesDocumentDateWindow({ createdAt: "2026-09-29T12:00:00Z", refs: [{ rawRef: "raw/a.pdf" }] }, period))
       .toBe(false);
   });
+
+  it("accepts the last-week and last-month UI windows with inclusive civil bounds", () => {
+    const week = { dateFrom: "2026-10-02", dateTo: "2026-10-09" };
+    const month = { dateFrom: "2026-09-09", dateTo: "2026-10-09" };
+    const at = (publishedAt: string) => ({ refs: [{ publishedAt }] });
+    expect(matchesDocumentDateWindow(at("2026-10-02"), week)).toBe(true);
+    expect(matchesDocumentDateWindow(at("2026-10-09"), week)).toBe(true);
+    expect(matchesDocumentDateWindow(at("2026-10-01"), week)).toBe(false);
+    expect(matchesDocumentDateWindow(at("2026-10-01"), month)).toBe(true);
+    expect(matchesDocumentDateWindow(at("2026-09-08"), month)).toBe(false);
+    // Relative presets always read document dates: an old document collected this week stays out.
+    const collectedThisWeek = { refs: [{ publishedAt: "2026-07-28", fetchedAt: "2026-10-05T12:00:00.000Z" }] };
+    expect(matchesDocumentDateWindow(collectedThisWeek, { ...week, dateBasis: "document" })).toBe(false);
+  });
 });

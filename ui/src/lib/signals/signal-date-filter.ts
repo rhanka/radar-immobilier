@@ -25,11 +25,13 @@ export interface SignalTimeRangePreset {
 }
 
 /**
- * Domain labels for the canonical DS TimeRangePicker. Its preset resolver
- * needs a duration, while Radar normalizes the selected range to calendar
- * months below before it reaches the display lens.
+ * Domain labels for the canonical DS TimeRangePicker, in display order. Its
+ * preset resolver needs a duration, while Radar normalizes the selected range
+ * to calendar days/months below before it reaches the display lens.
  */
 export const SIGNAL_TIME_RANGE_PRESETS: SignalTimeRangePreset[] = [
+  { token: "7d", label: "Dernière semaine", durationMs: 7 * DAY_MS },
+  { token: "1mo", label: "Dernier mois", durationMs: 30 * DAY_MS },
   { token: "3mo", label: "3 derniers mois", durationMs: 90 * DAY_MS },
   { token: "6mo", label: "6 derniers mois", durationMs: 180 * DAY_MS },
   { token: "12mo", label: "12 derniers mois", durationMs: 365 * DAY_MS },
@@ -39,7 +41,12 @@ export const SIGNAL_TIME_RANGE_PRESETS: SignalTimeRangePreset[] = [
   { token: "all", label: "Illimité", durationMs: 100 * 365 * DAY_MS },
 ];
 
+const DAYS_BY_PRESET: Record<string, number> = {
+  "7d": 7,
+};
+
 const MONTHS_BY_PRESET: Record<string, number> = {
+  "1mo": 1,
   "3mo": 3,
   "6mo": 6,
   "12mo": 12,
@@ -62,26 +69,43 @@ function calendarMonthsAgo(to: number, months: number): number {
   ).getTime();
 }
 
+/** Same local time-of-day, N calendar days earlier (DST-safe, unlike N × 24 h). */
+function calendarDaysAgo(to: number, days: number): number {
+  const end = new Date(to);
+  return new Date(
+    end.getFullYear(),
+    end.getMonth(),
+    end.getDate() - days,
+    end.getHours(),
+    end.getMinutes(),
+    end.getSeconds(),
+    end.getMilliseconds(),
+  ).getTime();
+}
+
 function signalTimeRangeForPreset(token: string, to: number): SignalTimeRange | null {
+  const days = DAYS_BY_PRESET[token];
   const months = MONTHS_BY_PRESET[token];
-  if (!months) return null;
+  if (!days && !months) return null;
 
   return {
     mode: "relative",
     relative: token,
-    from: calendarMonthsAgo(to, months),
+    from: days ? calendarDaysAgo(to, days) : calendarMonthsAgo(to, months),
     to,
   };
 }
 
-/** The Radar opens on its established six-calendar-month temporal lens. */
+/** The Radar opens on the last week (owner decision 2026-10-09). */
+export const DEFAULT_SIGNAL_TIME_RANGE_PRESET = "7d";
+
 export function defaultSignalTimeRange(now = Date.now()): SignalTimeRange {
-  return signalTimeRangeForPreset("6mo", now)!;
+  return signalTimeRangeForPreset(DEFAULT_SIGNAL_TIME_RANGE_PRESET, now)!;
 }
 
 /**
  * The DS resolves custom presets as a duration. Convert Radar's relative
- * month presets to their calendar-month equivalent before filtering data.
+ * presets to their calendar-day/month equivalent before filtering data.
  */
 export function normalizeSignalTimeRange(
   range: SignalTimeRange,
