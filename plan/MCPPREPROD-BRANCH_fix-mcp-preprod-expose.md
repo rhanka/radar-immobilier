@@ -56,7 +56,7 @@ must stay byte-identical.
   - [x] CD reconcile applies ConfigMap immo-mcp-config when the Deployment exists.
   - [x] Lot gate: `make k8s-validate ENV=mcp-preprod`, auth-isolation tests,
         prod renders identical before/after.
-- [ ] **Lot 2 — PR handoff**
+- [x] **Lot 2 — PR handoff**
   - [x] Push, PR #837 (Refs #835).
   - [x] Review round 1: astra GO-with-nits (ASTRA-837-01/02), sol GO-with-nits
         (SOL-837-01/02); fixes: reconcile rolls the MCP on ConfigMap change
@@ -71,4 +71,4 @@ must stay byte-identical.
         arguments/content and read failures); fixed (11 cases).
   - [x] Review round 5: astra GO; sol GO-with-nits (applied-document
         assertion missed RADAR_API_BASE_URL); fixed with a byte comparison.
-  - [ ] Review round 6, GO.
+  - [x] Review round 6: astra GO, sol GO (consensus GO, DOSSIER.md).
