@@ -60,6 +60,8 @@ RUN npm run typecheck --workspace=packages/immo-mcp
 # resolves to a real file — the previous single-entry build only emitted
 # `api/dist/index.js`, so `dist/scripts/project-graph-from-s3.js` was MISSING
 # and the projection Job died with MODULE_NOT_FOUND (douleur D1).
+# Guard: deploy/ci/check-image-entrypoints.sh (run by `make k8s-validate`) fails
+# when a manifest/workflow runs a `dist/<path>.js` that is not listed here (GH #812).
 RUN npm install --no-save esbuild@0.24.0 \
  && printf '%s\n' \
   "import { build } from 'esbuild';" \
@@ -78,7 +80,9 @@ RUN npm install --no-save esbuild@0.24.0 \
   "    'api/src/scripts/graphify-34-enrich.ts'," \
   "    'api/src/scripts/emit-graphify34-candidates.ts'," \
   "    'api/src/scripts/refresh-pv.ts'," \
+  "    'api/src/scripts/repair-graph-city-key.ts'," \
   "    'api/src/services/geo/run-geo-mapper.ts'," \
+  "    'api/src/services/geo/run-populate-geo.ts'," \
   "    'api/src/services/consistency/run-consistency-snapshot.ts'," \
   "  ]," \
   "  bundle: true, platform: 'node', format: 'esm', target: 'node24'," \
