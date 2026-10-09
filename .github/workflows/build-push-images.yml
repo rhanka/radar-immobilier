@@ -976,8 +976,10 @@ jobs:
       # and independent gate in promote-prod. Gated by
       # REFRESH_CRONJOB_PREPROD_ENABLED — armed by the owner AFTER the diag PASS.
       # Needs batch/cronjobs on the preprod deployer
-      # (deploy/k8s/11-…rbac.yaml, owner-applied). Once live, the CronJobs run
-      # nightly (03:17 scrape / 04:30 projection) → refresh on preprod.immo.
+      # (deploy/k8s/11-…rbac.yaml, owner-applied). Once live, radar-refresh-pv runs
+      # at 00:00, 06:00, 12:00, 18:00 UTC (prod: 05:00, 11:00, 17:00, 23:00), and
+      # radar-refresh-pending-watchdog every 5 min requests the deletion of a refresh pod still Pending
+      # 15 min after creation (its SA/Role are in the same 11-…rbac.yaml).
       - name: Deploy refresh CronJobs (preprod)
         if: ${{ vars.REFRESH_CRONJOB_PREPROD_ENABLED == 'true' }}
         env:
@@ -992,7 +994,7 @@ jobs:
           kustomize edit set image ghcr.io/rhanka/radar-api=ghcr.io/rhanka/radar-api:${SHA}
           kustomize build --load-restrictor LoadRestrictionsNone . | kubectl -n "$NAMESPACE" apply -f -
           echo "refresh CronJobs deployed to ${NAMESPACE} (radar-api:${SHA}, suspend:false):"
-          kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv -o wide || true
+          kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv radar-refresh-pending-watchdog -o wide || true
 
       - name: Deployment status — success (preprod)
         if: success() && steps.deployment.outputs.id != ''
@@ -1415,7 +1417,9 @@ jobs:
           fi
 
       # §6-prod DEPLOY REFRESH CRONJOB (prod) — jumeau prod de l'étape préprod :
-      # applique + dé-suspend `radar-refresh-pv` dans radar-immobilier via
+      # applique + dé-suspend `radar-refresh-pv` (05:00, 11:00, 17:00, 23:00 UTC)
+      # et son gardien `radar-refresh-pending-watchdog` (toutes les 5 min, SA/Role
+      # dans deploy/k8s/10-rbac.yaml) dans radar-immobilier via
       # l'overlay refresh-cronjobs-prod. Placée APRÈS la promotion des images :
       # le CronJob doit porter exactement l'empreinte que les Deployments
       # viennent de recevoir, jamais une plus ancienne ni une plus récente.
@@ -1460,6 +1464,14 @@ jobs:
             exit 1
           fi
           echo "refresh CronJob armed: suspend=${live_suspend}, image=${live_image}"
+          # Même preuve pour le gardien des pods Pending, rendu par le même overlay.
+          dog_suspend="$(kubectl -n "$NAMESPACE" get cronjob radar-refresh-pending-watchdog -o jsonpath='{.spec.suspend}')"
+          dog_image="$(kubectl -n "$NAMESPACE" get cronjob radar-refresh-pending-watchdog -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}')"
+          if [ "$dog_suspend" = "true" ] || [ "$dog_image" != "${IMAGE_PREFIX}/radar-api@${DIG_API}" ]; then
+            echo "::error title=Refresh pending watchdog not armed as expected::suspend='${dog_suspend}' image='${dog_image}' expected image='${IMAGE_PREFIX}/radar-api@${DIG_API}'"
+            exit 1
+          fi
+          echo "refresh pending watchdog armed: suspend=${dog_suspend}, image=${dog_image}"
 
       # Le saut de l'étape ci-dessus est SILENCIEUX par défaut : une promotion
       # verte ne prouve alors rien sur le rafraîchissement. Même parti pris que
