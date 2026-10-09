@@ -16,7 +16,8 @@
 #     slug en dur (c'était le bug #734 : le job tournait sans rien rafraîchir
 #     d'autre qu'une ville) ;
 #   - quatre passages par jour, `schedule: "0 5,11,17,23 * * *"` (05:00,
-#     11:00, 17:00, 23:00 UTC ; la préproduction tourne à la demi-heure) ;
+#     11:00, 17:00, 23:00 UTC ; la préproduction tourne une heure plus tard,
+#     `0 0,6,12,18 * * *`) ;
 #   - `activeDeadlineSeconds: 19800` (5 h 30) et
 #     `REFRESH_SWEEP_DEADLINE_MS: 18900000` (5 h 15), pour que le balayage
 #     s'arrête de lui-même, curseur écrit, avant le SIGTERM du contrôleur ;
@@ -34,11 +35,12 @@
 #      (`SCRAPE_S3_BUCKET: radar-immobilier-docs`) et du Secret
 #      `radar-scrape-s3-credentials`. Garde dédiée :
 #      deploy/ci/check-object-storage-bindings.sh ;
-#   4. la MINUTE de lancement de `radar-refresh-pv` : la production garde celle
-#      de la base (`0`, heure ronde), la préproduction la remplace par `30`. Les
-#      heures restent communes, et `verify-renders` exige au moins 15 minutes
-#      d'écart (incident 2026-10-09 : même minute, même nœud, course à
-#      l'attachement des PVC keyring RWO).
+#   4. la LISTE D'HEURES de `radar-refresh-pv` : la production garde celle de
+#      la base (`5,11,17,23`), la préproduction la remplace par `0,6,12,18`, une
+#      heure plus tard. La minute (`0`, heure pile) et le nombre de passages
+#      restent communs, et `verify-renders` exige au moins 15 minutes entre les
+#      lancements les plus proches (incident 2026-10-09 : même minute, même
+#      nœud, course à l'attachement des PVC keyring RWO).
 # Toute autre divergence fait rougir la CI.
 #
 # Le gardien `radar-refresh-pending-watchdog` (../34-refresh-pending-watchdog.yaml)
