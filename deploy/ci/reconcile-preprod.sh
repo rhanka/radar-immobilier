@@ -73,6 +73,27 @@ bash deploy/ci/check-preprod-auth-isolation.sh "$RENDER"
 
 kf() { python3 deploy/ci/kfilter.py "$@"; }
 
+# immo-mcp-config document of the render, byte-for-byte, WITHOUT Python (owner
+# rule: no Python in repos/jobs; node is on the runner). kustomize separates
+# documents with a line that is exactly `---`; the match is on top-level
+# `kind: ConfigMap` and `metadata.name: immo-mcp-config`. Exactly one document
+# or a non-zero exit (set -e / pipefail stop the release).
+mcp_cm() {
+  node -e '
+    const text = require("fs").readFileSync(process.argv[1], "utf8");
+    const docs = text.split(/^---[ \t]*$/m).filter((d) => d.trim() !== "").filter((d) => {
+      if (!/^kind:[ \t]+ConfigMap[ \t]*$/m.test(d)) return false;
+      const meta = d.match(/^metadata:\n((?:[ \t].*\n?)*)/m);
+      return meta !== null && /^  name:[ \t]+immo-mcp-config[ \t]*$/m.test(meta[1]);
+    });
+    if (docs.length !== 1) {
+      process.stderr.write("mcp_cm: expected 1 immo-mcp-config ConfigMap, got " + docs.length + "\n");
+      process.exit(1);
+    }
+    process.stdout.write(docs[0].replace(/^\n+|\n+$/g, "") + "\n");
+  ' "$RENDER"
+}
+
 # immo MCP (#835): ConfigMap immo-mcp-config is reconciled only while the
 # radar-immo-mcp Deployment exists (same guard as the prod `deploy` job's
 # "Apply immo-mcp declarative config"): the SA cannot create Deployments, so an
@@ -93,7 +114,7 @@ targeted() {
   kf "$RENDER" ConfigMap radar-api
   if [ "$MCP_PRESENT" = 1 ]; then
     echo ---
-    kf "$RENDER" ConfigMap immo-mcp-config
+    mcp_cm
   fi
   echo ---
   kf "$RENDER" Deployment radar-api
@@ -126,7 +147,7 @@ kf "$RENDER" ConfigMap radar-api \
 #     drift) bumps the resourceVersion; a no-op apply does not. Retry-safe: if
 #     the patch fails, the next run still sees the stale annotation and patches.
 if [ "$MCP_PRESENT" = 1 ]; then
-  kf "$RENDER" ConfigMap immo-mcp-config \
+  mcp_cm \
     | kubectl apply --server-side --field-manager="$FM" --force-conflicts -f -
   mcp_cm_rv="$(kubectl -n "$NAMESPACE" get configmap immo-mcp-config -o jsonpath='{.metadata.resourceVersion}')"
   : "${mcp_cm_rv:?immo-mcp-config has no resourceVersion after apply}"
