@@ -18,10 +18,10 @@ describe("router compatibility", () => {
     const cleanup = router.initRouter();
     expect(Object.fromEntries(new URLSearchParams(window.location.search))).toEqual({
       mode: "signal", "filter.residentiel": "1", "filter.excludePiia": "1",
-      "filter.excludeDerogations": "1", "filter.period": "6mo",
+      "filter.excludeDerogations": "1", "filter.period": "7d",
     });
     expect(get(router.activeGeoRoute)?.state.filters).toEqual({
-      residentiel: ["1"], excludePiia: ["1"], excludeDerogations: ["1"], period: ["6mo"],
+      residentiel: ["1"], excludePiia: ["1"], excludeDerogations: ["1"], period: ["7d"],
     });
     expect(window.location.search).not.toContain("subset");
     cleanup();
@@ -33,7 +33,7 @@ describe("router compatibility", () => {
       const cleanup = router.initRouter();
       expect(Object.fromEntries(new URLSearchParams(window.location.search))).toEqual({
         mode: "signal", "filter.zonage": "1", "filter.residentiel": "1", "filter.precoce": "1",
-        "filter.excludePiia": "1", "filter.excludeDerogations": "1", "filter.period": "6mo", "filter.lots": "0",
+        "filter.excludePiia": "1", "filter.excludeDerogations": "1", "filter.period": "7d", "filter.lots": "0",
       });
       expect(get(router.activeGeoRoute)?.state.filters).not.toHaveProperty("legacyLayers");
       cleanup();
@@ -70,6 +70,16 @@ describe("router compatibility", () => {
     expect(filters).toEqual({ dateFrom: ["2026-09-28"], dateTo: ["2026-10-01"], dateBasis: ["acquisition"] });
     expect(readGeoFilters(filters).dateBasis).toBe("scrap");
     cleanup();
+  });
+
+  it("should keep an explicit period of an existing link instead of the last-week default", async () => {
+    for (const period of ["3mo", "6mo", "12mo", "all"]) {
+      const router = await loadRouterAt(`/geo/city/val-des-monts?mode=signal&filter.period=${period}`);
+      const cleanup = router.initRouter();
+      expect(new URLSearchParams(window.location.search).get("filter.period")).toBe(period);
+      expect(get(router.activeGeoRoute)?.state.filters.period).toEqual([period]);
+      cleanup();
+    }
   });
 
   it("should read document dates for a relative link that carries an acquisition basis", async () => {

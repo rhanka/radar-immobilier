@@ -7,7 +7,10 @@ import {
   filterNodesByDocumentDate,
   formatSignalTimeRange,
   normalizeSignalTimeRange,
+  signalDocumentDateWindow,
+  SIGNAL_TIME_RANGE_PRESETS,
 } from "./signal-date-filter.js";
+import { matchesDocumentDateWindow } from "@radar/domain";
 
 function node(id: string, props: Record<string, unknown>): GraphSignalNode {
   return {
@@ -22,16 +25,61 @@ function node(id: string, props: Record<string, unknown>): GraphSignalNode {
 }
 
 describe("signal date filter", () => {
-  it("defaults to the established rolling six-calendar-month lens", () => {
-    const now = new Date(2026, 6, 23, 10, 30).getTime();
+  it("offers last week and last month before the existing month presets, in order", () => {
+    expect(SIGNAL_TIME_RANGE_PRESETS.map(({ token, label }) => [token, label])).toEqual([
+      ["7d", "Dernière semaine"],
+      ["1mo", "Dernier mois"],
+      ["3mo", "3 derniers mois"],
+      ["6mo", "6 derniers mois"],
+      ["12mo", "12 derniers mois"],
+      ["all", "Illimité"],
+    ]);
+  });
+
+  it("defaults to the rolling last-week lens (seven calendar days)", () => {
+    const now = new Date(2026, 9, 9, 10, 30).getTime();
     const range = defaultSignalTimeRange(now);
 
     expect(range).toEqual({
       mode: "relative",
-      relative: "6mo",
-      from: new Date(2026, 0, 23, 10, 30).getTime(),
+      relative: "7d",
+      from: new Date(2026, 9, 2, 10, 30).getTime(),
       to: now,
     });
+    expect(formatSignalTimeRange(range, "fr-CA")).toBe("Dernière semaine");
+    expect(dateRangeFromSignalTimeRange(range)).toEqual({ start: new Date(2026, 9, 2), end: new Date(2026, 9, 9) });
+  });
+
+  it("resolves last week across a month boundary and last month as one calendar month", () => {
+    const at = new Date(2026, 2, 3, 8, 0).getTime();
+    expect(normalizeSignalTimeRange({ mode: "relative", relative: "7d", from: 0, to: 0 }, at))
+      .toEqual({ mode: "relative", relative: "7d", from: new Date(2026, 1, 24, 8, 0).getTime(), to: at });
+    expect(normalizeSignalTimeRange({ mode: "relative", relative: "1mo", from: 0, to: 0 }, at))
+      .toEqual({ mode: "relative", relative: "1mo", from: new Date(2026, 1, 3, 8, 0).getTime(), to: at });
+    // Month-end clamp, same rule as the existing month presets.
+    const endOfMarch = new Date(2026, 2, 31, 9, 0).getTime();
+    expect(normalizeSignalTimeRange({ mode: "relative", relative: "1mo", from: 0, to: 0 }, endOfMarch).from)
+      .toBe(new Date(2026, 1, 28, 9, 0).getTime());
+    expect(formatSignalTimeRange({ mode: "relative", relative: "1mo", from: 0, to: 0 }, "fr-CA")).toBe("Dernier mois");
+  });
+
+  it("applies the same last-week window on the client panel and through the API window function", () => {
+    const now = new Date(2026, 9, 9, 10, 30).getTime();
+    const range = dateRangeFromSignalTimeRange(defaultSignalTimeRange(now));
+    const nodes = [
+      node("today", { refs: [{ publishedAt: "2026-10-09" }] }),
+      node("first-day", { refs: [{ publishedAt: "2026-10-02" }] }),
+      node("eight-days", { refs: [{ publishedAt: "2026-10-01" }] }),
+      node("stage-only", { properties: { etape_date: "2026-10-05" } }),
+      node("undated", {}),
+    ];
+    const panel = filterNodesByDocumentDate(nodes, range).map(({ id }) => id);
+    // Window sent to /api/graph-signals/by-city (rail + map counts), filtered by the API function.
+    const window = signalDocumentDateWindow(range);
+    expect(window).toEqual({ dateBasis: "document", dateFrom: "2026-10-02", dateTo: "2026-10-09" });
+    const api = nodes.filter((n) => matchesDocumentDateWindow(n.props, window)).map(({ id }) => id);
+    expect(panel).toEqual(["today", "first-day", "stage-only"]);
+    expect(api).toEqual(panel);
   });
 
   it("« Illimité » (token all) : bornes nulles → tous les signaux, même sans date", () => {
@@ -148,7 +196,7 @@ describe("dateBasisForTimeRange", () => {
   it("keeps the acquisition basis only for a custom period", () => {
     expect(dateBasisForTimeRange({ mode: "absolute", from: 1, to: 2 }, "scrap")).toBe("scrap");
     expect(dateBasisForTimeRange({ mode: "absolute", from: 1, to: 2 }, "document")).toBe("document");
-    for (const relative of ["3mo", "6mo", "12mo", "all"]) {
+    for (const relative of ["7d", "1mo", "3mo", "6mo", "12mo", "all"]) {
       expect(dateBasisForTimeRange({ mode: "relative", relative, from: 0, to: 0 }, "scrap")).toBe("document");
     }
   });
