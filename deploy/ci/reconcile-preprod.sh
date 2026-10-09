@@ -18,8 +18,8 @@
 #   - ConfigMap immo-mcp-config             (#835: the overlay pins the MCP OAuth
 #                                            resource/issuer + public URL to preprod;
 #                                            applied only while the radar-immo-mcp
-#                                            Deployment exists; restarted when the
-#                                            ConfigMap changed, see step 4b)
+#                                            Deployment exists; the pod is rolled when
+#                                            the ConfigMap changed, see step 4b)
 #   - Deployment radar-api, radar-ui        (#611: securityContext; pre-flight-present)
 #   - CronJob    radar-consistency-snapshot (#611: securityContext)
 # EXCLUDED: the Namespace (PSS labels = operator act, cluster-scoped), Services /
@@ -119,24 +119,23 @@ kf "$RENDER" ConfigMap radar-api \
 
 # 4b. immo-mcp-config (#835). envFrom is read at pod start, and set-image only
 #     rolls radar-immo-mcp when the pushed sha differs from the live image (a
-#     same-sha re-run does not). So when the live ConfigMap differs from the
-#     render (`kubectl diff` exit 1; >1 = error, fail-closed), the Deployment is
-#     restarted after the apply; an unchanged ConfigMap restarts nothing.
+#     same-sha re-run does not). So the pod template carries the ConfigMap's
+#     resourceVersion (annotation sentropic.dev/immo-mcp-config-rv): after the
+#     apply, the annotation is patched whenever it differs from the live
+#     ConfigMap, which rolls the pod. Any ConfigMap change (render or manual
+#     drift) bumps the resourceVersion; a no-op apply does not. Retry-safe: if
+#     the patch fails, the next run still sees the stale annotation and patches.
 if [ "$MCP_PRESENT" = 1 ]; then
-  mcp_cm="$(kf "$RENDER" ConfigMap immo-mcp-config)"
-  mcp_cm_diff=0
-  printf '%s\n' "$mcp_cm" \
-    | kubectl diff --server-side --field-manager="$FM" --force-conflicts -f - >/dev/null \
-    || mcp_cm_diff=$?
-  if [ "$mcp_cm_diff" -gt 1 ]; then
-    echo "::error title=immo-mcp-config diff failed::kubectl diff exit ${mcp_cm_diff} — aborting before set-image"
-    exit 1
-  fi
-  printf '%s\n' "$mcp_cm" \
+  kf "$RENDER" ConfigMap immo-mcp-config \
     | kubectl apply --server-side --field-manager="$FM" --force-conflicts -f -
-  if [ "$mcp_cm_diff" -eq 1 ]; then
-    echo "immo-mcp-config changed — restarting radar-immo-mcp so the pod reads it"
-    kubectl -n "$NAMESPACE" rollout restart deploy/radar-immo-mcp
+  mcp_cm_rv="$(kubectl -n "$NAMESPACE" get configmap immo-mcp-config -o jsonpath='{.metadata.resourceVersion}')"
+  : "${mcp_cm_rv:?immo-mcp-config has no resourceVersion after apply}"
+  mcp_tpl_rv="$(kubectl -n "$NAMESPACE" get deploy radar-immo-mcp \
+    -o jsonpath='{.spec.template.metadata.annotations.sentropic\.dev/immo-mcp-config-rv}')"
+  if [ "$mcp_tpl_rv" != "$mcp_cm_rv" ]; then
+    echo "immo-mcp-config rv ${mcp_cm_rv} != pod template rv '${mcp_tpl_rv}' — rolling radar-immo-mcp"
+    kubectl -n "$NAMESPACE" patch deploy radar-immo-mcp --type merge \
+      -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"sentropic.dev/immo-mcp-config-rv\":\"${mcp_cm_rv}\"}}}}}"
   fi
 fi
 
