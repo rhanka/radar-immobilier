@@ -127,19 +127,19 @@ try {
   await check('Zonage', false); await check('Résidentiel', true); await check('Précoce', false);
   await check('Exclure PIIA sans projet résidentiel', true); await check('Exclure dérogations mineures', true);
   await expect(page).toHaveURL(/filter.residentiel=1/);
-  await expect(page).toHaveURL(/filter.period=6mo/);
+  await expect(page).toHaveURL(/filter.period=7d/);
   expect(page.url()).not.toContain('filter.subset');
   await page.screenshot({ path: `${proof}/02-normalized-old-link.png` });
   results.push('Old residual-vivier link normalizes to named restrictions and the defaults it used to show, without adding a second vivier.');
   await open('/geo/city/val-des-monts?layers=zones');
   for (const label of ['Zonage', 'Résidentiel', 'Précoce', 'Exclure PIIA sans projet résidentiel', 'Exclure dérogations mineures']) await check(label, true);
   await expect(page).toHaveURL(/filter.lots=0/);
-  await expect(page).toHaveURL(/filter.period=6mo/);
+  await expect(page).toHaveURL(/filter.period=7d/);
   expect(page.url()).not.toContain('layers=');
   results.push('Old zones-only link (layers=zones) keeps the default filters plus its zones-only layer.');
   await open('/geo/city/val-des-monts?mode=signal');
   for (const label of ['Zonage', 'Résidentiel', 'Précoce', 'Exclure PIIA sans projet résidentiel', 'Exclure dérogations mineures']) await check(label, true);
-  await expect(page.getByRole('button', { name: 'Période des signaux 6 derniers mois', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Période des signaux Dernière semaine', exact: true })).toBeVisible();
   for (const label of ['Zonage', 'Résidentiel', 'Précoce', 'Exclure PIIA sans projet résidentiel', 'Exclure dérogations mineures']) { await box(label).uncheck(); await check(label, false); }
   await page.getByRole('button', { name: /^Période des signaux/ }).click();
   await page.getByText('Relatif', { exact: true }).click();
