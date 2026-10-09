@@ -112,15 +112,25 @@ if [ "$RC" -eq 0 ] && clean && has "$CALLS" 'patch rv=100'; then
   ok 'present Deployment without the annotation: pod template annotated'
 else bad "missing annotation (rc=$RC): $(calls)"; fi
 
-# What was applied is the guarded preprod document, not a truncated copy.
+# What was applied is the WHOLE guarded preprod document (byte-compared with the
+# immo-mcp-config document of an independent render; POSIX awk split on ---),
+# plus the env-specific values named explicitly.
 A="$STATE/applied-mcp"
-if [ -f "$A" ] && has "$A" 'kind: ConfigMap' && has "$A" '  namespace: radar-immobilier-preprod' \
+"$REAL_KUBECTL" kustomize --load-restrictor LoadRestrictionsNone "$HERE/../overlays/preprod" \
+  | awk '/^---$/ { if (keep) printf "%s", doc; doc = ""; keep = 0; k = 0; next }
+         { doc = doc $0 "\n" }
+         /^kind: ConfigMap$/ { k = 1 }
+         /^  name: immo-mcp-config$/ { if (k) keep = 1 }
+         END { if (keep) printf "%s", doc }' >"$T/expected-mcp"
+if [ -s "$T/expected-mcp" ] && [ -f "$A" ] && cmp -s "$T/expected-mcp" "$A" \
+  && has "$A" '  namespace: radar-immobilier-preprod' \
   && has "$A" '  IMMO_MCP_OAUTH_ISSUER: https://preprod.auth.sent-tech.ca' \
   && has "$A" '  IMMO_MCP_OAUTH_RESOURCE: https://preprod.immo.sent-tech.ca/mcp' \
   && has "$A" '  RADAR_PUBLIC_BASE_URL: https://preprod.immo.sent-tech.ca' \
+  && has "$A" '  RADAR_API_BASE_URL: http://radar-api:3000' \
   && has "$A" '  IMMO_MCP_OAUTH_SCOPES_SUPPORTED: immo:read immo:search immo:documents:read'; then
-  ok 'applied immo-mcp-config = preprod namespace, issuer, resource, public URL, prod scopes'
-else bad "applied immo-mcp-config content: $(paste -sd'|' "$A" 2>/dev/null)"; fi
+  ok 'applied immo-mcp-config = the full rendered preprod document'
+else bad "applied immo-mcp-config differs from the render: $(diff "$T/expected-mcp" "$A" 2>&1 | paste -sd'|' -)"; fi
 
 # A failing version read (even after printing a value) stops the release.
 for r in rv ann; do
