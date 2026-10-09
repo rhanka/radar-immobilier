@@ -7,7 +7,10 @@
 # It transforms the base ../34-refresh-cronjob.yaml (ns radar-immobilier,
 # suspend:true — the prod-dormant default) into the preprod-active instance:
 #   - namespace -> radar-immobilier-preprod
-#   - suspend   -> false only for radar-refresh-pv
+#   - suspend   -> false for radar-refresh-pv and radar-refresh-pending-watchdog
+#   - schedule  -> `30 5,11,17,23 * * *` UTC for radar-refresh-pv: the prod base
+#                  runs on the hour, preprod on the half hour (incident
+#                  2026-10-09: same minute, same node, RWO keyring attach race)
 #   - image     -> pinned by CI to the deploy-preprod release :<sha> (no :latest)
 #
 # Applied ONLY by the deploy-preprod "Deploy refresh CronJobs (preprod)" step, in
@@ -20,7 +23,8 @@
 # NB command: `kubectl apply -k` can NOT be used — the base CronJob lives one dir
 # up (../34) and kustomize's default load-restrictor forbids a parent-dir
 # resource. `kustomize build --load-restrictor LoadRestrictionsNone` still emits
-# ONLY the refresh CronJob and its keyring PVC (never the full bundle).
+# ONLY the refresh CronJob, its keyring PVC and the pending-pod watchdog CronJob
+# (never the full bundle).
 #
 # The `newTag` placeholder is FAIL-LOUD: building/applying this overlay WITHOUT
 # the `kustomize edit set image` step yields an unpullable tag (not :latest), so
@@ -38,6 +42,7 @@ namespace: radar-immobilier-preprod
 resources:
   - ../34-refresh-cronjob.yaml
   - ../34-refresh-keyring-pvc.yaml
+  - ../34-refresh-pending-watchdog.yaml
 
 images:
   - name: ghcr.io/rhanka/radar-api
@@ -46,9 +51,24 @@ images:
 patches:
   # One causally ordered acquisition -> Graphify -> publish -> PG workload is
   # the only preprod refresh (legacy scrape/projection CronJobs removed 2026-09-18).
+  # Preprod starts on the half hour: 05:30, 11:30, 17:30, 23:30 UTC, 30 minutes
+  # after prod. Intended divergence n°4 (refresh-contract.awk): only the MINUTE
+  # differs; the hours stay shared, and verify-renders requires >= 15 minutes
+  # between the two minutes.
   - target:
       kind: CronJob
       name: radar-refresh-pv
+    patch: |
+      - op: replace
+        path: /spec/suspend
+        value: false
+      - op: replace
+        path: /spec/schedule
+        value: "30 5,11,17,23 * * *"
+
+  - target:
+      kind: CronJob
+      name: radar-refresh-pending-watchdog
     patch: |
       - op: replace
         path: /spec/suspend
