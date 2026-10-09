@@ -22,7 +22,8 @@ import {
  *   `dateFrom`+`dateTo` (inclusive civil dates). A fully unrestricted snapshot
  *   is written as `period=all` so it stays distinct from the defaults.
  * - legacy `subset=vivier-v2[|-z|-r|-p|p]` (retired multi-vivier syntax) is
- *   normalized to the sole residual vivier, with product defaults elsewhere;
+ *   normalized to the sole residual vivier, with product defaults elsewhere except an explicit period
+ *   (`period` or `dateFrom`+`dateTo`), which keeps its meaning;
  * - legacy top-level `lots=0` / `layers=zones` without any `filter.*` key
  *   (parsed as `legacyLayers`) keeps the product defaults, zones only;
  * - date basis: `dateBasis=acquisition` (acquisition clock, internal value
@@ -106,6 +107,15 @@ function readTimeRange(value: (key: string) => string | undefined, now: number):
     : unrestrictedTimeRange();
 }
 
+/** A recognized relative `period`, or a valid custom `dateFrom`+`dateTo` window. */
+function hasExplicitPeriod(value: (key: string) => string | undefined): boolean {
+  const period = value("period");
+  if (period && RELATIVE_PERIODS.has(period)) return true;
+  const from = civilDate(value("dateFrom"));
+  const to = civilDate(value("dateTo"));
+  return from !== null && to !== null && from <= to;
+}
+
 /** URL spelling of the acquisition clock; the domain value stays `scrap` (API contract). */
 const ACQUISITION_DATE_BASIS_PARAM = "acquisition";
 const ACQUISITION_DATE_BASIS_URL_VALUES = new Set([ACQUISITION_DATE_BASIS_PARAM, "scrap"]);
@@ -123,6 +133,12 @@ export function readGeoFilters(filters: Record<string, readonly string[]>, now =
     const defaults = defaultGeoFilters(now);
     if (legacy) defaults.axes = bAxesFromVivierKey(legacy.includes("vivier-v2") ? legacy.join("|") : "vivier-v2");
     if (value("lots") === "0") defaults.lotsEnabled = false;
+    // An explicit period on a legacy link keeps its meaning; only an absent or
+    // invalid one takes the product default (last week).
+    if (hasExplicitPeriod(value)) {
+      defaults.timeRange = readTimeRange(value, now);
+      defaults.dateBasis = dateBasisForTimeRange(defaults.timeRange, readDateBasis(value));
+    }
     return defaults;
   }
   const category = EVAL_CATEGORIES.find(({ id }) => id === value("lotCategory"))?.id ?? "all";

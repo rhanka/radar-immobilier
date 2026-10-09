@@ -171,4 +171,21 @@ describe("shareable geographic restrictions", () => {
     expect(readGeoFilters({ period: ["all"] }, opened).timeRange.relative).toBe("all");
     expect(sameTimeRange(readGeoFilters({ period: ["7d"] }).timeRange, readGeoFilters({ period: ["1mo"] }).timeRange)).toBe(false);
   });
+
+  it("should keep an explicit period carried by a legacy residual-vivier link", () => {
+    const opened = new Date(2026, 9, 9, 10, 30).getTime();
+    for (const period of ["7d", "1mo", "3mo", "6mo", "12mo"]) {
+      const state = readGeoFilters({ subset: ["vivier-v2"], period: [period] }, opened);
+      expect(state.timeRange).toMatchObject({ mode: "relative", relative: period, to: opened });
+      expect(state.axes).toEqual({ z: true, r: true, p: true });
+      expect(writeGeoFilters(state).period).toEqual([period]);
+    }
+    expect(readGeoFilters({ subset: ["vivier-v2"], period: ["all"] }, opened).timeRange.relative).toBe("all");
+    const custom = readGeoFilters({ subset: ["vivier-v2"], dateFrom: ["2026-05-01"], dateTo: ["2026-05-31"], dateBasis: ["acquisition"] }, opened);
+    expect(custom.timeRange.mode).toBe("absolute");
+    expect(custom.dateBasis).toBe("scrap");
+    expect(writeGeoFilters(custom)).toMatchObject({ dateFrom: ["2026-05-01"], dateTo: ["2026-05-31"], dateBasis: ["acquisition"] });
+    // Invalid or absent period on a legacy link: the new last-week default.
+    expect(readGeoFilters({ subset: ["vivier-v2"], period: ["2w"] }, opened).timeRange.relative).toBe("7d");
+  });
 });
