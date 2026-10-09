@@ -57,6 +57,12 @@ run_ok "another hour list on the hour, one hour away, passes (relational, not pi
 fixture; sed -i 's#value: "900" }#value: "3400" }#' "$CASE_ROOT/$DOG"
 run_bad "a stalled pod outlives the one-hour gap" "not before the other environment starts"
 
+fixture; sed -i 's#value: "900" }#value: "3300" }#' "$CASE_ROOT/$DOG"
+run_bad "deadline + period exactly equal to the gap is refused" "not before the other environment starts"
+
+fixture; sed -i 's#value: "900" }#value: "3299" }#' "$CASE_ROOT/$DOG"
+run_ok "deadline + period just below the gap passes"
+
 fixture; sed -i '/34-refresh-pending-watchdog.yaml/d' "$CASE_ROOT/$PROD"
 run_bad "prod render without the watchdog" "refresh pending watchdog contract failed"
 

@@ -24,10 +24,11 @@
  *      pod is left alone; a later run re-evaluates it.
  *
  * A deleted, non-terminal pod counts as a failure for the Job controller; the
- * refresh Job has `backoffLimit: 0`, so no replacement pod is created and the Job
- * is marked Failed once the controller has processed the terminating pod. The
- * scheduler releases the pod's requests when the pod object is gone (kubelet
- * confirms termination). A pod observed Running is never selected, and the
+ * refresh Job has `backoffLimit: 0`, so no replacement pod is created; the Job
+ * controller first records the failure (FailureTarget) and sets the terminal
+ * Failed condition only once the pod has finished terminating. The scheduler
+ * releases the pod's requests when it observes the pod deleted or in a terminal
+ * phase; accepting the DELETE is not that observation. A pod observed Running is never selected, and the
  * resourceVersion precondition refuses the delete if it started after the list,
  * as far as the API has seen it (kubelet status reporting is asynchronous).
  * Timing is nominal: the first watchdog run that observes an overdue Pending pod
