@@ -82,6 +82,16 @@ describe("router compatibility", () => {
     }
   });
 
+  it("should keep an explicit period when a legacy residual-vivier link is canonicalized", async () => {
+    const router = await loadRouterAt("/geo/city/val-des-monts?filter.subset=vivier-v2&filter.period=6mo");
+    const cleanup = router.initRouter();
+    const search = new URLSearchParams(window.location.search);
+    expect(search.get("filter.period")).toBe("6mo");
+    expect(search.has("filter.subset")).toBe(false);
+    expect(get(router.activeGeoRoute)?.state.filters.period).toEqual(["6mo"]);
+    cleanup();
+  });
+
   it("should read document dates for a relative link that carries an acquisition basis", async () => {
     const router = await loadRouterAt("/geo?mode=signal&filter.period=3mo&filter.dateBasis=acquisition#/geo");
     const cleanup = router.initRouter();
