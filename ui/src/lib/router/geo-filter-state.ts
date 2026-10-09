@@ -14,10 +14,11 @@ import {
  * Shareable geographic filter snapshot (`filter.<key>` query parameters).
  *
  * Grammar:
- * - no `filter.*` key at all: product defaults (entry links, old bookmarks);
+ * - no `filter.*` key at all: product defaults (entry links, old bookmarks),
+ *   period included (last week, `period=7d`);
  * - at least one `filter.*` key: authoritative snapshot, every omitted
  *   restriction is unchecked/unrestricted (a dates-only link clears the rest);
- * - period: `period=<3mo|6mo|12mo|all>` (relative, resolved when opened) XOR
+ * - period: `period=<7d|1mo|3mo|6mo|12mo|all>` (relative, resolved when opened) XOR
  *   `dateFrom`+`dateTo` (inclusive civil dates). A fully unrestricted snapshot
  *   is written as `period=all` so it stays distinct from the defaults.
  * - legacy `subset=vivier-v2[|-z|-r|-p|p]` (retired multi-vivier syntax) is
