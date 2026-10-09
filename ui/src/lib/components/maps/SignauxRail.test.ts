@@ -249,7 +249,19 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
     expect(container.querySelector(".signals-time-range-picker-wrap")).toBeInstanceOf(HTMLElement);
     expect(container.querySelector(".signals-time-range-picker")).toBeInstanceOf(HTMLElement);
     expect(container.querySelector(".st-datePicker")).toBeNull();
-    expect(getByRole(container, "button", { name: /Période des signaux.*6 derniers mois/i })).toBeInstanceOf(HTMLButtonElement);
+    expect(getByRole(container, "button", { name: /Période des signaux.*Dernière semaine/i })).toBeInstanceOf(HTMLButtonElement);
+  });
+
+  it("lists last week and last month before the month presets, with last week selected by default", async () => {
+    const { container } = renderRail();
+    await fireEvent.click(getByRole(container, "button", { name: /Période des signaux.*Dernière semaine/i }));
+    const list = getByRole(document.body, "listbox", { name: "Plages relatives" });
+    const options = within(list).getAllByRole("option");
+    expect(options.map((option) => option.textContent?.trim())).toEqual([
+      "Dernière semaine", "Dernier mois", "3 derniers mois", "6 derniers mois", "12 derniers mois", "Illimité",
+    ]);
+    expect(options.filter((option) => option.getAttribute("aria-selected") === "true")
+      .map((option) => option.textContent?.trim())).toEqual(["Dernière semaine"]);
   });
 
   it("emits the selected DS relative period for the parent-owned A/B lens", async () => {
@@ -259,7 +271,7 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
     });
 
     await fireEvent.click(
-      getByRole(container, "button", { name: /Période des signaux.*6 derniers mois/i }),
+      getByRole(container, "button", { name: /Période des signaux.*Dernière semaine/i }),
     );
     await fireEvent.click(getByText(document.body, "3 derniers mois"));
 
@@ -275,9 +287,11 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
       props: { entries: [], onTimeRangeChange },
     });
     const trigger = () =>
-      getByRole(container, "button", { name: /Période des signaux.*derniers mois/i });
+      getByRole(container, "button", { name: /Période des signaux/i });
 
     for (const [label, relative] of [
+      ["Dernier mois", "1mo"],
+      ["Dernière semaine", "7d"],
       ["3 derniers mois", "3mo"],
       ["6 derniers mois", "6mo"],
       ["12 derniers mois", "12mo"],
@@ -294,7 +308,7 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
   it("positions the opened temporal overlay from its trigger and refreshes it on scroll", async () => {
     const { container } = renderRail();
     const trigger = getByRole(container, "button", {
-      name: /Période des signaux.*6 derniers mois/i,
+      name: /Période des signaux.*Dernière semaine/i,
     });
     let triggerTop = 36;
     vi.spyOn(trigger, "getBoundingClientRect").mockImplementation(
@@ -324,7 +338,7 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
     document.body.append(themed);
     try {
       const { container } = render(SignauxRail, { target: themed, props: { entries: [] } });
-      await fireEvent.click(getByRole(container, "button", { name: /Période des signaux.*6 derniers mois/i }));
+      await fireEvent.click(getByRole(container, "button", { name: /Période des signaux.*Dernière semaine/i }));
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       const popover = getByRole(document.body, "dialog", { name: "Période des signaux" });
       expect(popover.parentElement).toBe(themed);

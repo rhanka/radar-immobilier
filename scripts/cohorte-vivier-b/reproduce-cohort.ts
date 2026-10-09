@@ -40,7 +40,7 @@ import { classifyVivierSignal } from "../../api/src/services/graph/vivier-v2.ts"
 import { projectComposedVivierB, DEFAULT_B_AXES } from "../../ui/src/lib/signals/vivier-view-mode.ts";
 import {
   filterNodesByEtapeDate,
-  defaultSignalTimeRange,
+  normalizeSignalTimeRange,
   dateRangeFromSignalTimeRange,
 } from "../../ui/src/lib/signals/signal-date-filter.ts";
 import {
@@ -81,7 +81,10 @@ const nodes = raw.map((r) => {
   } as any;
 });
 
-const range = dateRangeFromSignalTimeRange(defaultSignalTimeRange(NOW));
+// Pinned to the six-month preset this cohort was taken with (the product default is now 7d).
+const range = dateRangeFromSignalTimeRange(
+  normalizeSignalTimeRange({ mode: "relative", relative: "6mo", from: 0, to: NOW }, NOW),
+);
 const projected = projectComposedVivierB(nodes as any, DEFAULT_B_AXES);
 const dated = filterNodesByEtapeDate(projected.nodes as any, range as any);
 const filtered = applyVivierBExclusions(dated as any, DEFAULT_VIVIER_B_EXCLUSIONS);
