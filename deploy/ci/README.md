@@ -302,9 +302,9 @@ propre du balayage à `18900000 ms` (5 h 15). Horaires (UTC) :
 | Environnement | Planification | Lancements UTC | Toronto, heure d'été (heure normale) |
 | --- | --- | --- | --- |
 | Production | `0 5,11,17,23 * * *` | 05:00, 11:00, 17:00, 23:00 | 01:00, 07:00, 13:00, 19:00 (00:00, 06:00, 12:00, 18:00) |
-| Préproduction | `30 5,11,17,23 * * *` | 05:30, 11:30, 17:30, 23:30 | 01:30, 07:30, 13:30, 19:30 (00:30, 06:30, 12:30, 18:30) |
+| Préproduction | `0 0,6,12,18 * * *` | 00:00, 06:00, 12:00, 18:00 | 20:00 (veille), 02:00, 08:00, 14:00 (19:00 veille, 01:00, 07:00, 13:00) |
 
-Le décalage d'une demi-heure date de l'incident du 2026-10-09 : avec le même
+Le décalage d'une heure (toujours à l'heure pile) date de l'incident du 2026-10-09 : avec le même
 horaire (`17 5,11,17,23`), les deux pods demandaient l'attachement de leur PVC
 keyring RWO au même nœud à la même minute ; le CSI ne s'en est pas remis, les
 deux passages sont restés Pending 4 h 30 en gardant leurs requests CPU, et la
@@ -312,15 +312,18 @@ sauvegarde de release prod est restée `FailedScheduling`.
 
 `verify-renders` refuse toute divergence entre le rendu préprod et le rendu
 prod en dehors de quatre différences voulues : namespace, enveloppe mémoire,
-liaison S3, minute de lancement du refresh. Il exige aussi les mêmes heures des
-deux côtés et au moins 15 minutes entre les deux minutes de lancement.
+liaison S3, liste d'heures du refresh. La minute (`0`) et le nombre de passages
+restent communs, et les lancements prod et préprod les plus proches doivent être
+séparés d'au moins 15 minutes (60 minutes aujourd'hui).
 
 Le même rendu porte le gardien `radar-refresh-pending-watchdog`
 (`deploy/k8s/34-refresh-pending-watchdog.yaml`) : toutes les 5 minutes, il
-supprime un pod `radar-refresh-pv-*` encore `Pending` 15 minutes après sa
-création. Le Job de passage (`backoffLimit: 0`) échoue alors au lieu de garder
-ses requests jusqu'à son échéance de 5 h 30 ; un pod `Running` n'est jamais
-touché. L'étape relit aussi ce CronJob (actif, même empreinte).
+demande la suppression d'un pod `radar-refresh-pv-*` encore `Pending` 15 minutes après sa
+création, avec préconditions uid + resourceVersion. Le Job de passage
+(`backoffLimit: 0`) échoue alors au lieu de garder ses requests jusqu'à son
+échéance de 5 h 30 ; un pod vu `Running`, ou qui a changé depuis la liste, n'est
+pas supprimé. Délai nominal : 15 à 20 minutes, si le gardien est lui-même
+ordonnancé à temps (rien ne lui réserve de capacité). L'étape relit aussi ce CronJob (actif, même empreinte).
 
 ## À vérifier AVANT de définir la variable
 
@@ -347,7 +350,7 @@ touché. L'étape relit aussi ce CronJob (actif, même empreinte).
    presque en continu, là où le régime précédent était nocturne. Décider si le
    surge `radar-api` doit rester possible, et sinon quand.
 5. **Identité du gardien des pods Pending.** Le ServiceAccount
-   `radar-refresh-watchdog` et son Role (pods `get/list/delete`, ce namespace
+   `radar-refresh-watchdog` et son Role (pods `list/delete`, ce namespace
    seulement) sont dans `deploy/k8s/10-rbac.yaml` ; le jumeau préprod est dans
    `deploy/k8s/11-ci-deployer-preprod-rbac.yaml`. Leur apply est un acte
    cluster-admin (poc-k8s). Sans eux, chaque Job du gardien échoue en
