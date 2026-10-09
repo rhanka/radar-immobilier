@@ -1,0 +1,25 @@
+# PREPROD routing host + TLS Secret for EVERY Ingress of the render (the UI
+# Ingress `radar` from 60-ingress.yaml and the MCP Ingress `radar-immo-mcp`
+# from 41-immo-mcp-ingress.yaml). JSON 6902 ops on index 0: both base Ingresses
+# carry exactly one rule and one TLS entry; a future Ingress with another shape
+# makes the render fail instead of silently keeping a PROD host.
+#
+# Values = the live preprod Ingress `radar` (host preprod.immo.sent-tech.ca,
+# Secret radar-immo-preprod-tls issued by cert-manager through that Ingress's
+# `cert-manager.io/cluster-issuer` annotation). The MCP Ingress reuses the same
+# Secret without the annotation, exactly like prod (41-immo-mcp-ingress.yaml).
+#
+# Ingresses are NOT applied by the CD (the preprod deployer Role has no
+# networking.k8s.io grant, on purpose: an Ingress on the shared Traefik can
+# claim any host). The k8s operator applies them from this render; the guard
+# deploy/ci/check-preprod-auth-isolation.sh rejects a PROD host or the PROD
+# TLS Secret in any rendered Ingress.
+- op: replace
+  path: /spec/rules/0/host
+  value: preprod.immo.sent-tech.ca
+- op: replace
+  path: /spec/tls/0/hosts/0
+  value: preprod.immo.sent-tech.ca
+- op: replace
+  path: /spec/tls/0/secretName
+  value: radar-immo-preprod-tls

@@ -45,11 +45,11 @@ must stay byte-identical.
         carries prod resource/public URL, prod PRM under `/mcp`).
   - [x] Capture prod renders before the change.
 - [ ] **Lot 1 — Preprod overlay renders the MCP like prod**
-  - [ ] Tests first: auth-isolation cases for immo-mcp-config and Ingress hosts.
-  - [ ] Overlay adds 40/41, pins the MCP resource/issuer/public URL, rewrites
+  - [x] Tests first: auth-isolation cases for immo-mcp-config and Ingress hosts.
+  - [x] Overlay adds 40/41, pins the MCP resource/issuer/public URL, rewrites
         every Ingress to the preprod host and TLS Secret.
-  - [ ] CD reconcile applies ConfigMap immo-mcp-config when the Deployment exists.
-  - [ ] Lot gate: `make k8s-validate ENV=mcp-preprod`, auth-isolation tests,
+  - [x] CD reconcile applies ConfigMap immo-mcp-config when the Deployment exists.
+  - [x] Lot gate: `make k8s-validate ENV=mcp-preprod`, auth-isolation tests,
         prod renders identical before/after.
 - [ ] **Lot 2 — PR handoff**
   - [ ] Push, PR (Refs #835), CI green.

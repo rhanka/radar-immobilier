@@ -546,10 +546,10 @@ jobs:
   #   - namespace radar-immobilier-preprod + preprod-scoped SA kubeconfig
   #     (secret KUBE_CONFIG_DATA_PREPROD, exported by poc-k8s from
   #     deploy/k8s/11-ci-deployer-preprod-rbac.yaml);
-  #   - NO "Apply immo-mcp declarative config" step (DESIGN §2.8 — drift
-  #     self-heal is PROD-only: 40-immo-mcp hardcodes namespace radar-immobilier
-  #     and the preprod deployer Role is deployments-only, it cannot apply a
-  #     ConfigMap); and no radar-immo-mcp roll (preprod has no MCP connector);
+  #   - no separate "Apply immo-mcp declarative config" step: the immo-mcp
+  #     ConfigMap is reconciled from the preprod overlay (namespace + preprod
+  #     resource/issuer/public URL, #835) by deploy/ci/reconcile-preprod.sh, and
+  #     radar-immo-mcp is rolled by set-image like api/ui (guarded: absent => skip);
   #   - the GitHub Deployment is recorded as environment=preprod (transient),
   #     never production.
   # Runs ALONGSIDE the legacy `deploy` job (main -> prod) until the tag->prod
@@ -799,9 +799,10 @@ jobs:
       - name: Reconcile preprod manifests (server-side apply — targeted)
         run: bash deploy/ci/reconcile-preprod.sh
 
-      # NOTE: NO "Apply immo-mcp declarative config" here (DESIGN §2.8) — drift
-      # self-heal is PROD-only: 40-immo-mcp hardcodes namespace radar-immobilier
-      # and the preprod deployer Role cannot apply ConfigMaps/Services.
+      # NOTE: no separate "Apply immo-mcp declarative config" step here: the
+      # reconcile above applies ConfigMap immo-mcp-config from the preprod overlay
+      # (#835) while radar-immo-mcp exists; the set-image below then rolls the pod
+      # onto it. The preprod Ingress stays operator-applied (no Ingress grant).
       - name: Roll preprod deployments to pushed sha
         id: roll
         env:
@@ -816,8 +817,8 @@ jobs:
           # radar-api ; sans ce set-image il restait sur son ancien registre/tag
           # (constat k8s 2026-09-11 : ancien tag privé pendant que
           # api/ui étaient sur ghcr.io/…:1a1d218). Guardé : absent ⇒ skip. Le
-          # Deployment est patché seulement (pas d'apply de 40-immo-mcp ici, cf.
-          # NOTE ci-dessus : namespace hardcodé prod + Role préprod sans CM/SVC).
+          # Deployment est patché seulement : son ConfigMap immo-mcp-config vient
+          # du reconcile ci-dessus (#835), son spec n'est pas réappliqué.
           if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
             kubectl -n "$NAMESPACE" set image deploy/radar-immo-mcp \
               mcp="${IMAGE_PREFIX}/radar-api:${SHA}"
