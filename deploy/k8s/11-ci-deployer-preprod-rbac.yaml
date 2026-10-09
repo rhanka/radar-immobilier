@@ -152,3 +152,56 @@ subjects:
   - kind: ServiceAccount
     name: radar-ci-deployer-preprod
     namespace: radar-immobilier-preprod
+---
+# REFRESH PENDING WATCHDOG (2026-10-09) — preprod twin of the identity declared in
+# deploy/k8s/10-rbac.yaml for the CronJob radar-refresh-pending-watchdog
+# (deploy/k8s/34-refresh-pending-watchdog.yaml, applied with the refresh CronJob
+# by « Deploy refresh CronJobs (preprod) »). Pods get/list/delete in THIS
+# namespace only. The pod mounts its token explicitly
+# (automountServiceAccountToken: true on the pod spec). Applying it is a
+# cluster-admin act (poc-k8s, owner GO): the CI SA cannot grant it to itself.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: radar-refresh-watchdog
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: refresh-watchdog
+    app.kubernetes.io/env: preprod
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: radar-refresh-watchdog
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: refresh-watchdog
+    app.kubernetes.io/env: preprod
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: radar-refresh-watchdog
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: refresh-watchdog
+    app.kubernetes.io/env: preprod
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: radar-refresh-watchdog
+subjects:
+  - kind: ServiceAccount
+    name: radar-refresh-watchdog
+    namespace: radar-immobilier-preprod
