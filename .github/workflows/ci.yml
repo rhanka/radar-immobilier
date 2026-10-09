@@ -36,6 +36,9 @@ jobs:
       - name: Validate refresh overlays (preprod and prod)
         run: make -f deploy/k8s/refresh-cronjobs/refresh-018.mk verify-renders ENV=ci
 
+      - name: Validate refresh render guards (mutation tests — stagger, pending watchdog)
+        run: bash deploy/k8s/refresh-cronjobs/verify-renders.test.sh
+
       - name: Validate object-storage contracts (offline)
         run: bash deploy/ci/check-object-storage-bindings.test.sh
 
