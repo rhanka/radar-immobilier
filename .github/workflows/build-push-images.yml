@@ -977,8 +977,8 @@ jobs:
       # REFRESH_CRONJOB_PREPROD_ENABLED — armed by the owner AFTER the diag PASS.
       # Needs batch/cronjobs on the preprod deployer
       # (deploy/k8s/11-…rbac.yaml, owner-applied). Once live, radar-refresh-pv runs
-      # at 05:30, 11:30, 17:30, 23:30 UTC (prod: on the hour), and
-      # radar-refresh-pending-watchdog every 5 min fails a refresh pod still Pending
+      # at 00:00, 06:00, 12:00, 18:00 UTC (prod: 05:00, 11:00, 17:00, 23:00), and
+      # radar-refresh-pending-watchdog every 5 min requests the deletion of a refresh pod still Pending
       # 15 min after creation (its SA/Role are in the same 11-…rbac.yaml).
       - name: Deploy refresh CronJobs (preprod)
         if: ${{ vars.REFRESH_CRONJOB_PREPROD_ENABLED == 'true' }}

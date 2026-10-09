@@ -4,7 +4,7 @@
 
 `deploy/k8s/34-refresh-cronjob.yaml` now declares only `radar-refresh-pv`
 (four passes a day; since 2026-10-09 prod starts at 05:00, 11:00, 17:00,
-23:00 UTC and preprod at 05:30, 11:30, 17:30, 23:30 UTC, with the pending-pod
+23:00 UTC and preprod at 00:00, 06:00, 12:00, 18:00 UTC, with the pending-pod
 watchdog `deploy/k8s/34-refresh-pending-watchdog.yaml` rendered alongside):
 bounded PV acquisition, extraction, canonical publication and
 PostgreSQL projection in one workload. Both refresh overlays emit this CronJob
