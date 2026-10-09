@@ -801,8 +801,9 @@ jobs:
 
       # NOTE: no separate "Apply immo-mcp declarative config" step here: the
       # reconcile above applies ConfigMap immo-mcp-config from the preprod overlay
-      # (#835) while radar-immo-mcp exists and restarts it when that ConfigMap
-      # changed. The preprod Ingress stays operator-applied (no Ingress grant).
+      # (#835) while radar-immo-mcp exists and rolls it (pod-template annotation =
+      # the ConfigMap resourceVersion) when that ConfigMap changed. The preprod
+      # Ingress stays operator-applied (no Ingress grant).
       - name: Roll preprod deployments to pushed sha
         id: roll
         env:
