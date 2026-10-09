@@ -1,0 +1,91 @@
+# refresh-pending-watchdog — bound the PENDING phase of a refresh pass.
+#
+# Incident 2026-10-09: the prod and preprod `radar-refresh-pv` pods started in
+# the same minute on the same node and both asked for their RWO keyring volume.
+# The CSI attach timed out, then answered "already attached" and never
+# reconciled. Both pods stayed Init:0/1 for 4 h 30, holding their CPU requests;
+# the prod release backup stayed FailedScheduling (Insufficient cpu).
+#
+# Why a separate CronJob, and not a field of the refresh Job:
+#   - Kubernetes has no native bound on the Pending phase. The Job's
+#     `activeDeadlineSeconds` (19800 s) counts from the Job start, Pending
+#     included, and cannot be shortened without cutting a real pass (~4 h
+#     observed);
+#   - nothing inside the refresh pod can act: kubelet mounts every volume,
+#     the keyring PVC included, before the first init container.
+#
+# What it does, every 5 minutes: it deletes any pod labelled
+# `app.kubernetes.io/instance=radar-refresh-pv`, owned by a Job named
+# `radar-refresh-pv-*`, still Pending 900 s (15 min) after its creation. The
+# refresh Job has `backoffLimit: 0`: the deleted pod counts as its single
+# failure, the Job turns Failed (BackoffLimitExceeded) with no replacement pod,
+# and the requests are released. A Running pod is never touched. A stalled pod
+# is therefore removed 15 to 20 minutes after its creation.
+#
+# Identity: ServiceAccount `radar-refresh-watchdog`, pods get/list/delete in its
+# own namespace only (prod: deploy/k8s/10-rbac.yaml; preprod:
+# deploy/k8s/11-ci-deployer-preprod-rbac.yaml). Those grants are applied
+# owner-side (cluster-admin, poc-k8s); until they exist, the watchdog Job cannot
+# create its pod (FailedCreate) and stops at its own activeDeadlineSeconds.
+#
+# Image: the release radar-api image, pinned with the refresh CronJob by the same
+# overlay step (0 new image, Node only, no dependency). Base dormant
+# (suspend: true); both refresh overlays activate it.
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: radar-refresh-pending-watchdog
+  namespace: radar-immobilier
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: refresh-watchdog
+spec:
+  suspend: true
+  schedule: "*/5 * * * *"
+  timeZone: "Etc/UTC"
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 120
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      activeDeadlineSeconds: 180
+      ttlSecondsAfterFinished: 3600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: radar-immobilier
+            app.kubernetes.io/part-of: sentropic
+            app.kubernetes.io/component: refresh-watchdog
+        spec:
+          restartPolicy: Never
+          serviceAccountName: radar-refresh-watchdog
+          # The only pod of this workspace that talks to the Kubernetes API.
+          automountServiceAccountToken: true
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            runAsGroup: 1001
+            fsGroup: 1001
+            seccompProfile: { type: RuntimeDefault }
+          containers:
+            - name: refresh-pending-watchdog
+              image: ghcr.io/rhanka/radar-api:latest
+              imagePullPolicy: IfNotPresent
+              workingDir: /workspace/api
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities: { drop: ["ALL"] }
+              command: ["node", "dist/scripts/refresh-pending-watchdog.js"]
+              env:
+                - { name: NODE_OPTIONS, value: "--max-old-space-size=64" }
+                - { name: REFRESH_PENDING_DEADLINE_SECONDS, value: "900" }
+                - { name: REFRESH_WATCHDOG_JOB_PREFIX, value: "radar-refresh-pv-" }
+                - { name: REFRESH_WATCHDOG_POD_SELECTOR, value: "app.kubernetes.io/instance=radar-refresh-pv" }
+              resources:
+                requests: { cpu: 10m, memory: 64Mi }
+                limits: { cpu: 100m, memory: 128Mi }
