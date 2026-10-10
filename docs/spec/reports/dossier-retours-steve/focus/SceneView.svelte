@@ -1,7 +1,7 @@
 <script>
   // Une scène, rendue dans le chapitre qui porte son repère <!-- scene:<id> -->.
   // Une forme par contenu : matrice (criteres-steve), entité-relation (modele-donnees),
-  // couloirs avec l'évaluation en bande basse (flux-import-oracle, affichage-abc) ; les
+  // couloirs avec l'évaluation en bande basse (flux-import-reference, affichage-abc) ; les
   // composants (architecture-ui) gardent Flow.svelte de la chaîne existante (SvelteFlow,
   // Dagre LR, carte A' 460 x 200). Sources canoniques : SCENES_FOCUS.md, hors du rapport.
   import Flow from '../../../../architecture/focus/Flow.svelte';
@@ -21,7 +21,7 @@
       lede: "Les colonnes sont le stockage réel : exécution (jobs et application), Postgres d'immo (tables immo, puis tables du paquet @sentropic/annotations installées chez immo), S3 d'immo (bucket radar-immobilier-docs), service geo, dépôt git d'immo (code, profil, .track). Le badge de chaque boîte est le propriétaire du schéma ou du code : engram (détection et évaluation), sentropic (annotations), track (décisions), immo, geo. Vert : nouveau ; orange : modifié ; gris : inchangé ; rien n'est supprimé.",
       note: "engram ne stocke rien lui-même : sa librairie (@sentropic/graphify 0.18.0, futur @sentropic/engram) est exécutée par le job immo radar-refresh-pv, qui écrit graph/<ville>/latest.json sur le S3 d'immo puis le projette dans graph_nodes. Les tables annotation_* appartiennent à sentropic mais vivent dans le Postgres d'immo ; les jeux de référence vont dans un préfixe privé du S3 d'immo ; les décisions dans .track/.",
     },
-    'flux-import-oracle': {
+    'flux-import-reference': {
       badge: '§9.6 · architecture et jeu de référence',
       lede: "Une architecture en couloirs verticaux, de gauche à droite : les utilisateurs, les écrans de l'UI, les fonctions backend (collecte, détection de signal, import, rattachement, API), puis les données sur les composants réels, S3 et PostgreSQL. Le jeu de référence est en bas, en bande transversale : un système d'évaluation hors ligne, alimenté par les annotations stockées en base.",
       note: "Le jeu de référence de ciblage C et le jeu de référence d'extraction E restent séparés jusqu'au benchmark, où ils alimentent deux volets distincts. L'analyse du 21 septembre entre comme annotation distincte de l'adjudication : elle n'écrase pas les classes du tableur, qui font foi pour l'import. L'import est un acte owner distinct, sur l'image Node existante de l'API (§9.4).",

@@ -1,72 +1,24 @@
 <script>
   import Sections from './Sections.svelte';
   import DecisionChoices from './DecisionChoices.svelte';
-  import { PROTOCOL, SIGNAL_COUNTS } from './protocol.js';
-  import BarChart from './BarChart.svelte';
-  import { header, glossary, decisionSections, annexes, manifest } from './.generated/data.json';
-  const [intention, wants, synthesis, ...body] = decisionSections;
+  import { header, decisionSections, annexes, manifest } from './.generated/data.json';
+  // Plan adopté (§B6) : l'ouverture, les chapitres 1 à 3 dépliés, puis les chapitres 4 à 10,
+  // le bloc de copie des décisions et les annexes A à F, repliés.
+  const [intention, wants, rule, ...body] = decisionSections;
 </script>
 
 <div data-st-theme="entropic">
   <main class="dossier">
     <header class="masthead">
       <div class="flex-row">
-        <span class="eyebrow">Dossier de décision · pour Farid (Product Owner), validation technique Fabien · 21 septembre 2026</span>
-        <span class="badge warning">5 SCÈNES · 12 CHAPITRES · 25 DÉCISIONS · 5 OCTOBRE 2026</span>
+        <span class="eyebrow" data-banner>{manifest.banner}</span>
       </div>
       <h1>Analyse des retours d’usage<br>du 21 septembre 2026</h1>
       <p class="subtitle">Capitalisation des données annotées, vers de nouveaux critères de ciblage</p>
-      <p class="lede">Steve Chaperon (Chaperon Immobilier), client et utilisateur du radar, a trié 124 signaux de 51 municipalités, contrôlé 121 exclusions et posé 26 règles.
-        Sur sa vue de travail (73 signaux), 24 sont du bruit et 22 seulement réunissent ses trois critères :
-        résidentiel, assouplissement, densification. Le dossier propose de conserver tout le classeur avec sa provenance,
-        de l’afficher sur les objets concernés selon le contrat d’annotation de la plateforme commune sentropic, et de construire un jeu de référence de ciblage
-        qui mesure une nouvelle sélection proposée (vue C) contre la sélection affichée aujourd’hui (vue B) — sans toucher à la priorité n° 1 de Steve, le rafraîchissement.
-        Les 121 lignes retenues sont exposées : elles servent à la mise au point (résultats exploratoires) ; la mesure qui fonde la bascule se fera sur un test neuf.</p>
-      <section class="protocol" data-protocol aria-labelledby="protocol-title">
-        <h2 id="protocol-title">{PROTOCOL.title}</h2>
-        <table>
-          <thead><tr><th scope="col">Passe</th><th scope="col">Filtres</th><th scope="col" class="num">Signaux</th><th scope="col">But</th></tr></thead>
-          <tbody>{#each PROTOCOL.passes as row}<tr data-pass={row.pass}><th scope="row">{row.pass}</th><td>{row.filters}</td><td class="num">{row.signals}</td><td>{row.aim}</td></tr>{/each}</tbody>
-        </table>
-        <p>{PROTOCOL.summary}</p>
-        <h2 class="counts-title">{SIGNAL_COUNTS.title}</h2>
-        <table data-signal-counts>
-          <thead><tr><th scope="col">Verdict</th><th scope="col" class="num">Lignes</th><th scope="col" class="num">Signaux distincts</th><th scope="col" class="num">Documents distincts</th><th scope="col">Types</th></tr></thead>
-          <tbody>{#each SIGNAL_COUNTS.rows as row}<tr><th scope="row">{row.verdict}</th><td class="num">{row.lines}</td><td class="num">{row.signals}</td><td class="num">{row.documents}</td><td>{row.detail}</td></tr>{/each}
-          <tr><th scope="row">Total</th><td class="num">{SIGNAL_COUNTS.total.lines}</td><td class="num">{SIGNAL_COUNTS.total.signals}</td><td class="num">{SIGNAL_COUNTS.total.documents}</td><td>{SIGNAL_COUNTS.total.cities} villes</td></tr></tbody>
-        </table>
-        <p>{SIGNAL_COUNTS.summary}</p>
-        <BarChart id="steve-signaux" />
-      </section>
-      <div class="truth-strip">
-        <span><strong>124 LIGNES</strong> 40 P · 29 S · 55 N</span>
-        <span><strong>PASSE 1</strong> 34 / 15 / 24 sur 73</span>
-        <span><strong>22 / 73</strong> trois critères réunis</span>
-        <span><strong>39 / 69</strong> composants Svelte avec le DS</span>
-        <span><strong>2 CRITÈRES SUR 3</strong> sans donnée au radar</span>
-        <span><strong>51 ÉCARTS</strong> dont 31 désaccords avec Steve (avant R′ v1)</span>
-        <span><strong>À ACTER</strong> D13 · OUVERT D12 · D9 PROPOSÉE CLOSE</span>
-      </div>
     </header>
 
-    <section class="reading-map" aria-label="Comment lire ce dossier">
-      <h2>Comment lire ce dossier</h2>
-      <ol>
-        <li><strong>D’abord l’intention de l’owner et ce que veut Steve</strong>, dépliées : objectifs O1 à O6 et renvois, destinataires et rôles (§1.2), glossaire et statuts en tête, relevé en trois passes, trois critères cités et chiffrés, décisions de Steve ligne par ligne, comparateur B′, écart avec l’existant.</li>
-        <li><strong>La synthèse et le registre des 25 décisions</strong> (G1 à G8, D1 à D17), dépliés, puis les chapitres 4 à 12 : analyse des données en profondeur, définition de C, détection exploratoire, mesure confirmatoire (<code>not run</code>), exposition A/B/C, capitalisation, fiches de décision, risques, plan.</li>
-        <li><strong>Cinq scènes, dans les chapitres qu’elles illustrent</strong> : critères de Steve (§2.6), affichage A/B/C (§8.1), stockage réel et propriétaires (§9.2), architecture de l’import à l’affichage (§9.6), architecture UI (§9.7) ; elles s’affichent à l’ouverture du chapitre.</li>
-        <li><strong>Les décisions G1 à G8 et D1 à D17, dans l’ordre où elles se prennent</strong> : Fabien décide d’abord les 8 décisions génériques, puis ses 8 décisions immo (D1 et D17 déjà actées par l’owner ; les autres prises telles quelles sauf incohérence), puis Farid ses 9 décisions produit. Chacune s’ouvre sur une introduction, ses dépendances et, par option, avantages et inconvénients ; sélectionnables, à copier en YAML dans la PR GitHub — brouillon local seulement.</li>
-        <li><strong>Les annexes I à IV</strong> : préenregistrement et traçabilité (avec la correspondance des anciens numéros), fiches G1 à G8, modèle physique et détails techniques, revue du plan. Le journal de consolidation entre les deux auteurs est hors du rapport (<code>JOURNAL_CONSOLIDATION.md</code>).</li>
-      </ol>
-      <p class="caption">Conventions : <code>FAIT</code> = constaté dans une source citée · <code>CALCUL</code> = dérivé des
-        données · <code>JUGEMENT</code> = appréciation · <code>non vérifié</code>, <code>source manquante</code>,
-        <code>N-A</code> = limites déclarées.</p>
-    </section>
-
-    <Sections sections={[glossary]} label="Glossaire" open={true} />
-    <Sections sections={[header]} label="En-tête du dossier" open={false} />
-    <Sections sections={[intention, wants]} label="Intention du dossier et ce que veut Steve" open={true} />
-    <Sections sections={[synthesis]} label="Synthèse et décisions demandées" open={true} />
+    <Sections sections={[header]} label="Ouverture" open={true} />
+    <Sections sections={[intention, wants, rule]} label="Intention, ce que veut Steve, comment un signal est retenu ou écarté" open={true} />
     <Sections sections={body} label="Les chapitres du dossier" open={false} />
     <DecisionChoices {manifest} />
     <Sections sections={annexes} label="Annexes du dossier" open={false} />
@@ -88,24 +40,9 @@
 
 <style>
   .subtitle { margin: 6px 0 18px; font-size: 1.6rem; font-weight: 600; line-height: 1.3; color: var(--st-semantic-text-secondary); }
-  .protocol { margin: 22px 0 8px; padding: 16px 20px; max-width: 1200px; border-left: 5px solid var(--st-semantic-data-category2); background: var(--st-semantic-surface-subtle); }
-  .protocol { overflow-x: auto; }
   @media (max-width: 640px) {
     :global(.dossier) { padding: 20px 16px 40px; }
-    :global(.truth-strip) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .protocol { padding: 12px; }
-    .protocol table { min-width: 560px; }
   }
-  .protocol .counts-title { margin-top: 18px; }
-  .protocol h2 { margin: 0 0 10px; font-size: 1.1rem; }
-  .protocol table { width: 100%; border-collapse: collapse; font-size: .9rem; }
-  .protocol th, .protocol td { padding: 8px 10px; border-bottom: 1px solid var(--st-semantic-border-subtle); text-align: left; vertical-align: top; }
-  .protocol .num, .protocol tbody th { white-space: nowrap; }
-  .protocol .num { text-align: right; }
-  .protocol p { margin: 10px 0 0; font-size: .92rem; line-height: 1.55; }
-  .reading-map { margin-block: 28px; padding: 22px 24px; border: 1px solid var(--st-semantic-border-subtle); background: var(--st-semantic-surface-subtle); }
-  .reading-map h2 { margin-top: 0; font-size: 1.3rem; }
-  .reading-map ol { margin: 0 0 14px; padding-left: 22px; line-height: 1.7; font-size: .95rem; }
   footer { margin-top: 44px; padding-top: 20px; border-top: 3px solid var(--st-semantic-border-strong); }
   :global(.prose table) { display: block; overflow-x: auto; max-width: 100%; }
   /* Light theme extras (coverage colours), then the dark theme: system preference unless

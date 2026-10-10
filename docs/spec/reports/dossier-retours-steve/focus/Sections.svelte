@@ -12,7 +12,8 @@
   import SceneView from './SceneView.svelte';
   import { DOC_DIAGRAMS } from './doc-diagrams.js';
   import LaneDiagram from './LaneDiagram.svelte';
-  import { docLanes, graphs } from './.generated/data.json';
+  import MermaidDiagram from './MermaidDiagram.svelte';
+  import { docLanes, docMermaid, graphs } from './.generated/data.json';
   let { sections, label, open = true } = $props();
   const graphById = Object.fromEntries(graphs.map(graph => [graph.id, graph]));
   // Open state per section, set by the toggle event; until then, the `open` prop.
@@ -20,7 +21,7 @@
   const html = source => DOMPurify.sanitize(marked.parse(source, { async: false, gfm: true }));
   // Markers <!-- kind:<id> -->: [text, kind, id, text, kind, id, text…].
   const parts = source => {
-    const split = source.split(/<!-- (chart|diagram|lanes|scene):([\w-]+) -->/g), out = [];
+    const split = source.split(/<!-- (chart|diagram|lanes|mermaid|scene):([\w-]+) -->/g), out = [];
     for (let index = 0; index < split.length; index += 3) {
       out.push({ text: split[index] });
       if (index + 2 < split.length) out.push({ kind: split[index + 1], id: split[index + 2] });
@@ -38,6 +39,7 @@
           {#if part.kind === 'chart'}<BarChart id={part.id} />
           {:else if part.kind === 'diagram'}<figure class="doc-diagram" data-doc-diagram={part.id}><figcaption><strong>{DOC_DIAGRAMS[part.id].title}</strong></figcaption><MiniEr id={`doc-${part.id}`} spec={DOC_DIAGRAMS[part.id]} /></figure>
           {:else if part.kind === 'lanes'}<figure class="doc-diagram" data-doc-lanes={part.id}><LaneDiagram graph={docLanes[part.id]} /></figure>
+          {:else if part.kind === 'mermaid'}{#if opened[section.id] ?? open}<MermaidDiagram id={part.id} source={docMermaid[part.id]} />{:else}<p class="scene-placeholder" data-mermaid-placeholder={part.id}>Schéma : affiché à l’ouverture de la section.</p>{/if}
           {:else if part.kind === 'scene'}{#if opened[section.id] ?? open}<SceneView graph={graphById[part.id]} />{:else}<p class="scene-placeholder" data-scene-placeholder={part.id}>Scène <code>{part.id}</code> : affichée à l’ouverture de la section.</p>{/if}
           {:else}{@html html(part.text)}{/if}
         {/each}

@@ -1,7 +1,7 @@
 // Content and placement of the three scenes that are not component diagrams:
 //   criteres-steve      matrix (Markdown table of Annexe B)
 //   modele-donnees      entity-relationship diagram (Mermaid erDiagram of Annexe B)
-//   flux-import-oracle  architecture in vertical swimlanes, jeu de référence band at the bottom
+//   flux-import-reference  architecture in vertical swimlanes, jeu de référence band at the bottom
 //                       (Mermaid flowchart of Annexe B, one subgraph per lane)
 // Evidence: observed = exists on origin/main 27891b10; declared = proposed by the
 // dossier, not built; historical = frozen reference.
@@ -11,7 +11,7 @@ import { PHYSICAL } from './physical-model.js';
 export const SCENE_KINDS = {
   'criteres-steve': 'matrix',
   'modele-donnees': 'er',
-  'flux-import-oracle': 'lanes',
+  'flux-import-reference': 'lanes',
   'architecture-ui': 'flow',
   'affichage-abc': 'lanes',
 };
@@ -156,4 +156,4 @@ const ARCH = {
   edges: { 'S3G|GRN': 'observed', 'ORE|BEN': 'observed' },
 };
 
-export const LANE_SPECS = { 'flux-import-oracle': FLUX, 'affichage-abc': ABC, 'architecture-donnees': ARCH };
+export const LANE_SPECS = { 'flux-import-reference': FLUX, 'affichage-abc': ABC, 'architecture-donnees': ARCH };
