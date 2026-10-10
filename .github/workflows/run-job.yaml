@@ -576,7 +576,7 @@ jobs:
             # Every aborted city and the final summary line, whatever the log length.
             log="${RUNNER_TEMP}/projection.log"
             if kubectl -n "$NAMESPACE" logs "job/${JOB_NAME}" >"${log}" 2>&1; then
-              grep -E 'ABORTÉE|upsert échoué|terminé|fatal' "${log}" || echo "(no projection summary line in the Job log)"
+              grep -E 'ABORTÉE|upsert échoué|terminé|fatal|changements déclarés' "${log}" || echo "(no projection summary line in the Job log)"
               echo "--- last 20 log lines ---"
               tail -n 20 "${log}"
               summary="$(grep -F 'project-graph-from-s3: terminé' "${log}" || true)"
