@@ -192,11 +192,17 @@ ok("refreshJobName — charset RFC1123 [a-z0-9-] uniquement", /^[a-z0-9-]+$/.tes
   eq("docs-sync — source vide ⇒ « rien à copier », exit 0 (écart immo, inchangé)", [r7.code, r7.copies.length], [0, 0]);
 }
 
-// ── Cadence du run planifié : HEBDOMADAIRE, dimanche 03:17 UTC (décision owner 2026-09-26) ──
+// ── Scheduled run cadence: DAILY, 04:00 UTC on the hour (owner request 2026-10-10,
+// "restore daily"; weekly Sunday 03:17 UTC from 2026-09-26 to 2026-10-10) ──
 {
   const wf = readFileSync(join(import.meta.dirname, "../../../.github/workflows/bascule-preprod.yml"), "utf8");
-  const crons = [...wf.matchAll(/^\s*- cron: '([^']*)'/mg)].map((x) => x[1]);
-  eq("bascule-preprod.yml — un seul cron, hebdomadaire dimanche 03:17 UTC", crons, ["17 3 * * 0"]);
+  // Every active `- cron:` entry, whatever its quoting (comment lines ignored).
+  const crons = wf.split("\n").filter((x) => !/^\s*#/.test(x)).map((x) => x.match(/^\s*-\s*cron:\s*(.*)$/)).filter(Boolean)
+    .map((m) => m[1].replace(/^'([^']*)'.*$/, "$1").replace(/^"([^"]*)".*$/, "$1").replace(/\s+#.*$/, "").trim());
+  eq("bascule-preprod.yml — a single cron, daily 04:00 UTC on the hour", crons, ["0 4 * * *"]);
+  // The RELATIONAL window guard (restore after the daily backup, clear of every
+  // RENDERED refresh start) lives in deploy/k8s/refresh-cronjobs/bascule-window.awk,
+  // run by `refresh-018.mk verify-renders` (CI) on the prod and preprod renders.
   ok("bascule-preprod.yml — run planifié armé par vars.BASCULE_SCHEDULE_ENABLED (inchangé)",
     wf.includes("github.event_name != 'schedule' || vars.BASCULE_SCHEDULE_ENABLED == 'true'"));
   // A scheduled run = MODE=restore from the LATEST complete backup, 24 h guard active.
