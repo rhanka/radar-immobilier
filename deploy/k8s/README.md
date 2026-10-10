@@ -304,6 +304,7 @@ operator actions.
 - Disarm future applies by setting the variable to `false`; suspend already-deployed CronJobs with `suspend: true`.
 - `radar-refresh-pv` acquires, extracts, publishes `graph/<city>/latest.json` and projects it into Postgres. `radar-refresh-pending-watchdog` (every 5 min, ServiceAccount `radar-refresh-watchdog`, owner-applied RBAC) requests the deletion of a refresh pod still `Pending` 15 min after its creation (uid + resourceVersion preconditions), so the pass fails and releases its requests instead of holding them until the 5 h 30 Job deadline.
 - Capitalized `Signal` materialization remains owned by graphify v2.3 plus publication of `graph/<city>/latest.json`; these CronJobs do not replace it.
+- The daily prod → preprod restore (`.github/workflows/bascule-preprod.yml`, cron `0 4 * * *` UTC, `MODE=restore` from the latest complete backup at most 24 h old, normally the backup of the day; armed by `BASCULE_SCHEDULE_ENABLED`) quiesces the preprod `radar-refresh-pv` and `radar-refresh-pending-watchdog` CronJobs during the restore: a preprod refresh Job still running from 00:00 is deleted, and the un-quiesce patches the recorded `suspend` values back (a failed patch fails the un-quiesce step). The guard `refresh-cronjobs/bascule-window.awk` (run by `verify-renders`) keeps the restore slot after the daily backup and off every rendered refresh start. Slot rationale: `deploy/ci/bascule-preprod/README.md` "Daily schedule (04:00 UTC)".
 
 ## Manual deploy (human, with cluster creds)
 

@@ -164,8 +164,10 @@ export function makeCiSecrets(h) {
       die(`${spec} — Secret ${ns}/${name} not readable: it must be PRE-CREATED (k8s) with get/update granted by name to the bascule SA.`);
     }
     const ann = run("kubectl", ["-n", ns, "get", "secret", name, "-o", "jsonpath={.metadata.annotations}"], { capture: true, allowFail: true });
+    // A failed annotation read must not turn into a replace that drops them.
+    if (ann.status !== 0) die(`${spec} — annotations of Secret ${ns}/${name} not readable (status ${ann.status}): rewrite refused.`);
     const manifest = buildSecretManifest({
-      name, namespace: ns, values, labels: parseJsonObject(lab.stdout), annotations: ann.status === 0 ? parseJsonObject(ann.stdout) : {},
+      name, namespace: ns, values, labels: parseJsonObject(lab.stdout), annotations: parseJsonObject(ann.stdout),
     });
     const tmp = writePrivateManifest(manifest);
     try {
