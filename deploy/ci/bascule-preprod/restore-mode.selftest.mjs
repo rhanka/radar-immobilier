@@ -882,6 +882,15 @@ async function cliSuite() {
       '  *"patch cronjob radar-refresh-pv "*) exit 1 ;;', ...common]);
     const qPatch = runCli("quiesce");
     ok("CLI quiesce — failed suspend patch ⇒ exit 1, named", qPatch.status === 1 && /patch suspend=true a échoué pour : radar-refresh-pv/.test(qPatch.stdout));
+    // S1 (chain): a failed delete of the previous freshness Job still re-suspends the prod CronJob
+    fakeK(['  *"delete job radar-bascule-freshness "*) exit 1 ;;']);
+    const kcfg = join(tmp, "kubeconfig-prod-fake");
+    writeFileSync(kcfg, "");
+    const s1 = runCli("dump", { MODE: "chain", DUMP_KUBECONFIG: kcfg });
+    const s1Log = readFileSync(failLog, "utf8");
+    ok("CLI dump (S1) — failed delete of the previous freshness Job ⇒ no apply, prod CronJob re-suspended, exit 1",
+      s1.status === 1 && !/ apply /.test(s1Log) && /suspend":false/.test(s1Log) && /suspend":true/.test(s1Log) &&
+      s1Log.indexOf('suspend":false') < s1Log.indexOf('suspend":true'));
   }
   // failure-summary: reads the workdir pointers of this run (PIN of D)
   const sumFile = join(tmp, "summary.md");

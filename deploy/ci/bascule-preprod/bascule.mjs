@@ -876,7 +876,12 @@ function runJobFromTemplate({ tmpl, jobName, vars, timeoutSec, failClosed = true
   writeFileSync(rendered, renderTemplate(join(import.meta.dirname, tmpl), vars), { mode: 0o600 });
   // Jobs immuables : on supprime l'éventuelle instance précédente (idempotent).
   const delPrev = run("kubectl", ["-n", ns, "delete", "job", jobName, "--ignore-not-found"], { allowFail: true });
-  if (delPrev.status !== 0) die(`Job ${jobName} — suppression de l'instance précédente a échoué (status ${delPrev.status}) : refusé (un ancien Job ne doit pas passer pour neuf).`);
+  if (delPrev.status !== 0) {
+    const msg = `Job ${jobName} — suppression de l'instance précédente a échoué (status ${delPrev.status}) : refusé (un ancien Job ne doit pas passer pour neuf).`;
+    // failClosed=false callers (S1) must still run their cleanup (re-suspend).
+    if (!failClosed) { warn(msg); return { ok: false, state: "delete-failed", jobName, uid: null }; }
+    die(msg);
+  }
   run("kubectl", ["-n", ns, "apply", "-f", rendered]);
   // uid of THIS Job instance: its verdict is read only from its own pods (a pod of
   // the deleted previous instance may still be listed under the same job-name).
@@ -1143,7 +1148,8 @@ function cmdForceRefresh() {
       // Démarrage confirmé sans échec : le balayage se poursuit en tâche de fond
       // (sémantique CronJob). VERT (async) — suivi via le rapport durable
       // refresh/018/sweep/latest.json et `kubectl get job`.
-      log(`force-refresh OK (async) — Job ${jobName} démarré (.status=${v.state}) ; le balayage continue en tâche de fond. Suivi : kubectl -n ${ns} get job ${jobName}.`);
+      const started = v.state === "active" ? "démarré" : "créé, démarrage non confirmé";
+      log(`force-refresh OK (async) — Job ${jobName} ${started} (.status=${v.state}) ; le balayage continue en tâche de fond. Suivi : kubectl -n ${ns} get job ${jobName}.`);
       return;
     }
     spawnSync("bash", ["-lc", "sleep 10"], { stdio: "ignore" });
