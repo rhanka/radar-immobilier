@@ -834,6 +834,30 @@ async function cliSuite() {
     ok("CLI unquiesce — CronJob patch killed by a signal ⇒ exit 1, named, remaining CronJobs still patched",
       uqSig.status === 1 && /patch cronjob\/radar-refresh-pv suspend=false/.test(uqSig.stdout + uqSig.stderr) &&
       /patch cronjob radar-refresh-pending-watchdog /.test(sl) && !/cronjob\/radar-refresh-pv suspend restauré/.test(uqSig.stdout + uqSig.stderr));
+    // quiesce/G2 presence lookup: only a successful empty answer means absent
+    const fakeK = (lines) => { writeFileSync(join(failBin, "kubectl"), ["#!/usr/bin/env bash", `echo "$*" >> "${failLog}"`,
+      'case "$*" in', ...lines, "esac", "exit 0", ""].join("\n"), { mode: 0o755 }); writeFileSync(failLog, ""); };
+    const runCli = (cmd, extra = {}) => spawnSync(process.execPath, [join(DIR, "bascule.mjs"), cmd],
+      { env: { ...env, PATH: `${failBin}:${process.env.PATH}`, BASCULE_WORKDIR: join(tmp, `q-${cmd}-${Math.random()}`), ...extra }, encoding: "utf8" });
+    const common = ['  *"jsonpath={.spec.replicas}"*) printf 1 ;;', '  *"jsonpath={.status.replicas}"*) printf 0 ;;',
+      '  *"jsonpath={.spec.suspend}"*) printf false ;;', '  *"get jobs -o json"*) printf \'{"items":[]}\' ;;'];
+    fakeK(['  *"get cronjob radar-refresh-pv --ignore-not-found -o name"*) kill -TERM "$$" ;;', ...common]);
+    const qSig = runCli("quiesce");
+    ok("CLI quiesce — CronJob presence lookup killed by a signal ⇒ exit 1 before any scale/patch (not treated as absent)",
+      qSig.status === 1 && /presence unknown/.test(qSig.stdout) && !/ scale | patch /.test(readFileSync(failLog, "utf8")));
+    fakeK(['  *"get cronjob radar-refresh-pv --ignore-not-found -o name"*) exit 1 ;;', ...common]);
+    eq("CLI quiesce — CronJob presence lookup failing (exit 1) ⇒ refused", runCli("quiesce").status, 1);
+    fakeK(['  *"get cronjob radar-populate-geo-daily --ignore-not-found -o name"*) : ;;',
+      '  *"get cronjob "*"--ignore-not-found -o name"*) printf "cronjob.batch/x" ;;', ...common]);
+    const qOk = runCli("quiesce");
+    const qLog = readFileSync(failLog, "utf8");
+    ok("CLI quiesce — successful empty lookup = absent CronJob skipped; present ones suspended",
+      qOk.status === 0 && /patch cronjob radar-refresh-pv /.test(qLog) && !/patch cronjob radar-populate-geo-daily /.test(qLog));
+    // Secret rewrite: a failed annotation read refuses the replace (no metadata loss)
+    fakeK(['  *"jsonpath={.metadata.labels}"*) printf "{}" ;;', '  *"jsonpath={.metadata.annotations}"*) kill -TERM "$$" ;;']);
+    const annFail = runCli("docs-secret-fill", { RADAR_DOCS_SYNC_ACCESS_KEY: "0".repeat(32), RADAR_DOCS_SYNC_SECRET_KEY: "f".repeat(40) });
+    ok("CLI docs-secret-fill — annotation read killed by a signal ⇒ exit 1, no replace",
+      annFail.status === 1 && /annotations of Secret/.test(annFail.stdout) && !/ replace /.test(readFileSync(failLog, "utf8")));
   }
   // failure-summary: reads the workdir pointers of this run (PIN of D)
   const sumFile = join(tmp, "summary.md");

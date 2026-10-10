@@ -581,8 +581,12 @@ function quiesceTargets() {
 function presentCronjobs(ns, cronjobs) {
   const present = [];
   for (const c of cronjobs) {
-    const r = run("kubectl", ["-n", ns, "get", "cronjob", c, "-o", "name"], { capture: true, allowFail: true });
-    if (r.status === 0) present.push(c);
+    // Only a SUCCESSFUL empty answer (--ignore-not-found) means absent; any
+    // failed or interrupted lookup is unknown → refuse (fail-closed), never
+    // treated as absence (it would drop a live consumer from quiesce and G2).
+    const r = run("kubectl", ["-n", ns, "get", "cronjob", c, "--ignore-not-found", "-o", "name"], { capture: true, allowFail: true });
+    if (r.status !== 0) die(`quiesce/G2 — lookup of cronjob/${c} failed (status ${r.status}): presence unknown, refused.`);
+    if ((r.stdout || "").trim()) present.push(c);
     else log(`quiesce — cronjob/${c} absent en préprod → ignoré (rien à quiescer).`);
   }
   return present;
