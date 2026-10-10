@@ -718,7 +718,10 @@ function cmdUnquiesce() {
     else log(`deploy/${d} restauré à ${rep} replica(s), rollout prêt.`);
   }
   for (const [c, sus] of Object.entries(state.cronjobs || {})) {
-    run("kubectl", ["-n", ns, "patch", "cronjob", c, "-p", `{"spec":{"suspend":${sus ? "true" : "false"}}}`], { allowFail: true });
+    // A failed patch leaves the CronJob suspended (refresh/watchdog stopped):
+    // keep trying the others, then fail the step (errs) instead of logging success.
+    const pc = run("kubectl", ["-n", ns, "patch", "cronjob", c, "-p", `{"spec":{"suspend":${sus ? "true" : "false"}}}`], { allowFail: true });
+    if (pc.status !== 0) { errs.push(`patch cronjob/${c} suspend=${!!sus} a échoué`); continue; }
     log(`cronjob/${c} suspend restauré à ${!!sus}.`);
   }
   if (errs.length) {

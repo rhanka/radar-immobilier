@@ -807,6 +807,24 @@ async function cliSuite() {
   ok("CLI unquiesce — no quiesce recorded, SKIP_QUIESCE≠true ⇒ no-op (0 scale)", uq.status === 0 && !/scale/.test(readFileSync(kubectlLog, "utf8").slice(beforeUq)));
   const uqManual = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "unquiesce"], { env: { ...uqEnv, SKIP_QUIESCE: "true" }, encoding: "utf8" });
   ok("CLI unquiesce — declared manual quiesce (SKIP_QUIESCE=true) ⇒ UNQUIESCE_REPLICAS applied", uqManual.status === 0 && /scale deploy\/radar-api --replicas=2/.test(readFileSync(kubectlLog, "utf8").slice(beforeUq)));
+  // un-quiesce: a failed CronJob suspend patch fails the step, the others are still patched
+  {
+    const failBin = join(tmp, "bin-patch-fail");
+    mkdirSync(failBin, { recursive: true });
+    const failLog = join(tmp, "kubectl-patch-fail.log");
+    writeFileSync(join(failBin, "kubectl"), ["#!/usr/bin/env bash", `echo "$*" >> "${failLog}"`,
+      'case "$*" in *"patch cronjob radar-refresh-pv "*) exit 1 ;; esac', "exit 0", ""].join("\n"), { mode: 0o755 });
+    const uqWork = join(tmp, "uq-fail-work");
+    mkdirSync(uqWork, { recursive: true });
+    writeFileSync(join(uqWork, "quiesce-state.json"), JSON.stringify({ deployments: { "radar-api": 1 },
+      cronjobs: { "radar-refresh-pv": false, "radar-refresh-pending-watchdog": false } }));
+    const uqFail = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "unquiesce"],
+      { env: { ...env, PATH: `${failBin}:${process.env.PATH}`, BASCULE_WORKDIR: uqWork }, encoding: "utf8" });
+    const fl = readFileSync(failLog, "utf8");
+    ok("CLI unquiesce — failed CronJob patch ⇒ exit 1, named, remaining CronJobs still patched",
+      uqFail.status === 1 && /patch cronjob\/radar-refresh-pv suspend=false/.test(uqFail.stdout + uqFail.stderr) &&
+      /patch cronjob radar-refresh-pending-watchdog /.test(fl) && !/cronjob\/radar-refresh-pv suspend restauré/.test(uqFail.stdout + uqFail.stderr));
+  }
   // failure-summary: reads the workdir pointers of this run (PIN of D)
   const sumFile = join(tmp, "summary.md");
   writeFileSync(sumFile, "");
