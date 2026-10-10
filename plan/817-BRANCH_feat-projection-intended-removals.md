@@ -79,7 +79,7 @@ Give the `projection` job two bounded, validated declarations for ONE city: inte
   - [x] Validator script, `run-job.yaml` routing, `__PROJECTION_ARGS__` in both manifests, CI step.
   - [x] Lot gate: `make k8s-validate ENV=ci`, shell test.
 
-- [ ] **Lot 3 — Docs, PR, review**
+- [x] **Lot 3 — Docs, PR, review**
   - [x] Spec §17 (contract, brigham list, runbook).
-  - [ ] PR `Refs #817` with the 21 ids, the loss and the runbook; CI green.
-  - [ ] Two blind Codex reviews in `docs/reviews/pr-<n>/`; fix until GO.
+  - [x] PR `Refs #817` with the 21 ids, the loss and the runbook; CI green.
+  - [x] Two blind Codex reviews in `docs/reviews/pr-<n>/`; fix until GO.
