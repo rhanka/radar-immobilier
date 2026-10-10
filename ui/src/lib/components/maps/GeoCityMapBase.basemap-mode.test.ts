@@ -45,7 +45,7 @@ const mapMocks = vi.hoisted(() => {
     removeSource = vi.fn();
     addControl = vi.fn();
     remove = vi.fn();
-    getLayer = vi.fn(() => undefined);
+    getLayer = vi.fn((_id: string): unknown => undefined);
     getSource = vi.fn(() => undefined);
     getCanvas = vi.fn(() => ({ style: {} as Record<string, string> }));
     getContainer = vi.fn(() => document.createElement("div"));

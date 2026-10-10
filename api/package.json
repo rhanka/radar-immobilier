@@ -28,7 +28,7 @@
     "@sentropic/llm-mesh": "0.19.2",
     "@sentropic/llm-mesh-refresh": "npm:@sentropic/llm-mesh@0.19.2",
     "drizzle-orm": "^0.45.2",
-    "hono": "^4.5.0",
+    "hono": "^4.13.13",
     "jose": "^6.2.3",
     "pg": "^8.12.0",
     "pino": "^9.3.0",
@@ -39,6 +39,6 @@
     "drizzle-kit": "^0.31.10",
     "tsx": "^4.16.0",
     "typescript": "5.4.5",
-    "vitest": "^3.2.6"
+    "vitest": "^5.0.3"
   }
 }
