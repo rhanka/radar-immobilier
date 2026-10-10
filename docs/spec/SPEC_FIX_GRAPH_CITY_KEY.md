@@ -709,9 +709,14 @@ the node.
      kept node (a declared loss does not exempt its refs);
   3. any planned removal not declared (including nodes without business property or ref,
      which gates 1 and 3 do not see) ⇒ refused, no write;
-  4. the PG rows of the declared nodes and the city edges the projection deletes are read and
-     logged (`lignes PG avant changements déclarés (retour arrière)`), then the usual writes;
+  4. the PG rows of the declared nodes and the city edges the projection deletes are read
+     (before any write) into the result, then the usual writes;
   5. gate2 (completeness) as usual on the projected state; a regression rolls back the city.
+  The script logs the rows read at step 4 (`lignes PG avant changements déclarés (retour
+  arrière)`) once the city transaction has ended, i.e. after the commit in apply mode; the
+  preview logs the same rows without committing anything. Declared mode is exclusive with
+  `intendedRemovals` and with the repair's `baselineExcludeIds` (throws before the lock,
+  review SOL-853-01): its guards always see the city's full current rows.
 - **Preview.** The whole projection runs and is rolled back; the result carries
   `preview: true`.
 - **Report.** Termination summary (≤ 4 000 characters, readable in preprod) adds `preview` and
@@ -744,13 +749,18 @@ D="remove=desg-evt-vente-taxes,lot-3521520,signal-subdiv-3520533,source-brigham-
 |---|---|---|---|
 | 0 | served image contains this change | `curl -s https://preprod.immo.sent-tech.ca/build.json` (prod: `https://immo.sent-tech.ca/build.json`) | sha = merge commit or later; else stop (the job runs the served image) |
 | 1 | suspend refresh | `gh workflow run run-job.yaml -f job=refresh-suspend -f target=$T` | `spec.suspend=true` |
-| 2 | measure before (read-only) | `gh workflow run run-job.yaml -f job=graph-city-key-repair -f target=$T -f recovery_mode=preview -f recovery_cities=brigham` | brigham `refused-guard` gate1, drift 36/22/35/21/1, foreign 1; any other value ⇒ stop |
-| 3 | preview (read-only, rolled back) — confirms `muni-brigham` in S3 | `gh workflow run run-job.yaml -f job=projection -f target=$T -f project_cities=brigham -f recovery_mode=preview -f recovery_cities="$D"` | termination summary: `ok=1 aborted=0 preview=true deletedNodes=21`, `plannedRemovals` = the 21 ids, `plannedLosses=["muni-brigham:flag"]`, `declaredNotInPlan=[]`, `undeclaredRemovals=[]`; anything else ⇒ stop |
-| 4 | apply (writes PG brigham) | same as 3 with `-f recovery_mode=apply` | `ok=1 aborted=0 deletedNodes=21`, same `declared`; the job log keeps the before rows (prod: workflow log; preprod: owner-side `kubectl logs`) |
+| 2 | measure before (no PG/graph change; writes the diagnostic S3 report `reports/graph-city-key/<run-id>/repair.json`) | `gh workflow run run-job.yaml -f job=graph-city-key-repair -f target=$T -f recovery_mode=preview -f recovery_cities=brigham` | the run is red BY DESIGN (brigham refused); brigham `refused-guard` gate1, drift 36/22/35/21/1, foreign 1 (per-city drift: prod workflow log; preprod: report or owner-side pod log); any other value ⇒ stop |
+| 3 | preview (rolled back, no write) — confirms `muni-brigham` in S3 | `gh workflow run run-job.yaml -f job=projection -f target=$T -f project_cities=brigham -f recovery_mode=preview -f recovery_cities="$D"` | termination summary: `ok=1 aborted=0 preview=true deletedNodes=21`, `plannedRemovals` = the 21 ids (sorted), `plannedLosses=["muni-brigham:flag"]`, `declaredNotInPlan=[]`, `undeclaredRemovals=[]`; anything else ⇒ stop |
+| 3b | save the rollback material (read-only) | prod: the `lignes PG avant changements déclarés` line of the step-3 workflow log; preprod: `KUBECONFIG=~/.kube/radar-immobilier-preprod-cert-ro.kubeconfig kubectl -n radar-immobilier-preprod logs job/radar-graph-projection-only`; plus the identifier of the latest daily PG backup | the line holds 22 nodes (21 removals + `muni-brigham` with `flag`) and the deleted edges; not retrievable ⇒ stop |
+| 4 | apply (writes PG brigham) | same as 3 with `-f recovery_mode=apply` | `ok=1 aborted=0 deletedNodes=21`, same `declared`, same before-rows as 3b |
 | 5 | geo rows of brigham | `gh workflow run run-job.yaml -f job=mapper -f target=$T -f project_cities=brigham` | Complete, RESET 1 city |
-| 6 | measure after (read-only) | `gh workflow run run-job.yaml -f job=graph-city-key-repair -f target=$T -f recovery_mode=preview -f recovery_cities=all` | brigham `pass`, `noop`, drift 0, foreign 0; total `foreignNodes=0`; other cities unchanged versus the last measurement |
+| 6 | measure after (no PG/graph change; writes the diagnostic S3 report) | `gh workflow run run-job.yaml -f job=graph-city-key-repair -f target=$T -f recovery_mode=preview -f recovery_cities=all` | brigham `pass`, `noop`, drift 0, foreign 0; total `foreignNodes=0`; other cities unchanged versus the last measurement (the run stays red for the other listed refused cities) |
 | 7 | resume refresh | `gh workflow run run-job.yaml -f job=refresh-resume -f target=$T` | `spec.suspend=false` |
 
-Prod starts only after a conforming preprod (steps 2–6 as expected). Rollback of step 4: the
-logged rows (nodes with their full `props`, deleted edges) and the daily PG backup; S3 is
-untouched.
+Prod starts only after a conforming preprod (steps 2–6 as expected). S3 `graph/brigham/` is
+never written. Rollback of step 4 (city restore, not run by this change): PG held 22 brigham
+nodes, so the 22 rows saved at 3b are the complete June node set; the restore deletes every
+brigham node and edge (the 36 projected nodes, among them the 35 new ones), re-inserts the 22
+saved nodes and the saved deleted edges, then the June edges that S3 also holds (same
+`(src, dst, kind)`, `edgesContentDiff` 0 at step 2) — or restores brigham from the backup
+identified at 3b. Not covered: a rehearsed restore.
