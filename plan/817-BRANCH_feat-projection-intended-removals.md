@@ -22,6 +22,8 @@ Give the `projection` job two bounded, validated declarations for ONE city: inte
   - `api/src/scripts/project-graph-from-s3.ts`
   - `api/src/scripts/projection-args.ts`
   - `api/src/scripts/projection-args.test.ts`
+  - `api/src/scripts/projection-termination.ts`
+  - `api/src/scripts/projection-termination.test.ts`
   - `deploy/k8s/32-graph-projection-only-job.yaml`
   - `deploy/k8s/graph-projection-preprod/job.yaml`
   - `deploy/ci/projection-declared-args.sh`
