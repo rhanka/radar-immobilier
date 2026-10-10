@@ -824,6 +824,16 @@ async function cliSuite() {
     ok("CLI unquiesce — failed CronJob patch ⇒ exit 1, named, remaining CronJobs still patched",
       uqFail.status === 1 && /patch cronjob\/radar-refresh-pv suspend=false/.test(uqFail.stdout + uqFail.stderr) &&
       /patch cronjob radar-refresh-pending-watchdog /.test(fl) && !/cronjob\/radar-refresh-pv suspend restauré/.test(uqFail.stdout + uqFail.stderr));
+    // same contract when kubectl is killed by a signal (spawnSync status null)
+    writeFileSync(join(failBin, "kubectl"), ["#!/usr/bin/env bash", `echo "$*" >> "${failLog}"`,
+      'case "$*" in *"patch cronjob radar-refresh-pv "*) kill -TERM "$$" ;; esac', "exit 0", ""].join("\n"), { mode: 0o755 });
+    writeFileSync(failLog, "");
+    const uqSig = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "unquiesce"],
+      { env: { ...env, PATH: `${failBin}:${process.env.PATH}`, BASCULE_WORKDIR: uqWork }, encoding: "utf8" });
+    const sl = readFileSync(failLog, "utf8");
+    ok("CLI unquiesce — CronJob patch killed by a signal ⇒ exit 1, named, remaining CronJobs still patched",
+      uqSig.status === 1 && /patch cronjob\/radar-refresh-pv suspend=false/.test(uqSig.stdout + uqSig.stderr) &&
+      /patch cronjob radar-refresh-pending-watchdog /.test(sl) && !/cronjob\/radar-refresh-pv suspend restauré/.test(uqSig.stdout + uqSig.stderr));
   }
   // failure-summary: reads the workdir pointers of this run (PIN of D)
   const sumFile = join(tmp, "summary.md");
