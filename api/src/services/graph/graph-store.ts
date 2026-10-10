@@ -1132,6 +1132,14 @@ export interface UpsertAtomicResult {
   reason?: string;
   /** GH #817 — the plan read against the declared changes (declared mode only). */
   declared?: DeclaredChangesReport;
+  /**
+   * GH #817 — declared mode, guards passed: the current PG rows of the declared nodes and
+   * the city edges the projection deletes, read before any write (rollback material).
+   */
+  declaredBaseline?: {
+    nodes: Array<{ id: string; type: string; label: string; props: unknown; sourceRef: string | null }>;
+    edges: Array<{ srcId: string; dstId: string; kind: string; props: unknown }>;
+  };
   /** GH #817 — true when the projection ran in preview: every write was rolled back. */
   preview?: boolean;
 }
@@ -1246,6 +1254,27 @@ export async function projectCityInTransaction(
       reason:
         `undeclared removal(s) for ${citySlug}: ${result.declared.undeclaredRemovals.join(", ")}; projection refused`,
     };
+  }
+
+  // Declared mode: the PG rows the projection is about to delete or change, read before
+  // any write, for the job log (rollback material). Explicit columns: `created_at` is
+  // absent from the prod tables (drift, cf. 39-export-graph-nodes-job.yaml).
+  if (declared) {
+    const affectedIds = [...new Set([...declared.removals, ...declared.propertyLosses.keys()])];
+    const nodes = affectedIds.length > 0
+      ? await tx
+          .select({ id: graphNodes.id, type: graphNodes.type, label: graphNodes.label, props: graphNodes.props, sourceRef: graphNodes.sourceRef })
+          .from(graphNodes)
+          .where(and(eq(graphNodes.citySlug, citySlug), inArray(graphNodes.id, affectedIds)))
+      : [];
+    const keptEdgeKeys = new Set(edgeRows.map(edgeKey));
+    const edges = (
+      await tx
+        .select({ srcId: graphEdges.srcId, dstId: graphEdges.dstId, kind: graphEdges.kind, props: graphEdges.props })
+        .from(graphEdges)
+        .where(eq(graphEdges.citySlug, citySlug))
+    ).filter((e) => !keptEdgeKeys.has(edgeKey(e)) || declared.removals.has(e.srcId) || declared.removals.has(e.dstId));
+    result.declaredBaseline = { nodes, edges };
   }
 
   // 1. upsert nœuds sur (city_slug, id)
