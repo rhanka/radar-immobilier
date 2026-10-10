@@ -707,6 +707,12 @@ export function findMissingBusinessProperties(
   afterRows: readonly BusinessPropertySnapshotRow[],
   citySlug: string,
   intendedRemovals: ReadonlySet<string> = new Set(),
+  /**
+   * GH #817 — declared losses: node id → business keys whose disappearance is
+   * accepted on that node only (validated against the plan by checkDeclaredChanges).
+   * Every other key of the node, and every other node, stays guarded.
+   */
+  acceptedPropertyLosses: ReadonlyMap<string, ReadonlySet<string>> = new Map(),
 ): BusinessPropertyRegression[] {
   const afterById = new Map(afterRows.map((row) => [row.id, row]));
   const regressions: BusinessPropertyRegression[] = [];
@@ -719,8 +725,10 @@ export function findMissingBusinessProperties(
     if (intendedRemovals.has(beforeRow.id)) continue;
     const before = businessProperties(beforeRow.props);
     const after = businessProperties(afterById.get(beforeRow.id)?.props ?? {});
+    const accepted = acceptedPropertyLosses.get(beforeRow.id);
     const missingKeys = Object.keys(before)
       .filter((key) => hasBusinessProperty(before, key) && !hasBusinessProperty(after, key))
+      .filter((key) => !accepted?.has(key))
       .sort();
     if (missingKeys.length > 0) {
       regressions.push({ citySlug, nodeId: beforeRow.id, missingKeys });
@@ -882,8 +890,15 @@ export function evaluateRowGuards(
   baselineRows: readonly BusinessPropertySnapshotRow[],
   candidateRows: readonly BusinessPropertySnapshotRow[],
   intendedRemovals: ReadonlySet<string> = new Set(),
+  acceptedPropertyLosses: ReadonlyMap<string, ReadonlySet<string>> = new Map(),
 ): ProjectionGuardVerdict {
-  const propertyRegressions = findMissingBusinessProperties(baselineRows, candidateRows, citySlug, intendedRemovals);
+  const propertyRegressions = findMissingBusinessProperties(
+    baselineRows,
+    candidateRows,
+    citySlug,
+    intendedRemovals,
+    acceptedPropertyLosses,
+  );
   if (propertyRegressions.length > 0) {
     const details = propertyRegressions
       .map(({ nodeId, missingKeys }) => `${nodeId}: ${missingKeys.join(", ")}`)
@@ -914,6 +929,55 @@ export function evaluateRowGuards(
     };
   }
   return { verdict: "pass" };
+}
+
+/**
+ * GH #817 (spec SPEC_FIX_GRAPH_CITY_KEY §17) — changes an operator DECLARES for one
+ * city projection: node ids to delete, and business properties to drop from nodes the
+ * candidate keeps. Nothing else may be removed or lost.
+ */
+export interface DeclaredChanges {
+  /** Node ids the projection must delete: current rows of the city absent from the candidate. */
+  removals: ReadonlySet<string>;
+  /** Node id → `props.properties` keys the projection may drop from that node (kept by the candidate). */
+  propertyLosses: ReadonlyMap<string, ReadonlySet<string>>;
+}
+
+/** The projection plan read against the declarations. Every list is sorted. */
+export interface DeclaredChangesReport {
+  /** Current rows of the city absent from the candidate (what the projection deletes). */
+  plannedRemovals: string[];
+  /** `id:key` business properties of rows kept by the candidate that would disappear (gate1 view). */
+  plannedLosses: string[];
+  /** `remove:<id>` / `lose:<id>:<key>` declared but not in the plan. Non-empty ⇒ the city is refused. */
+  declaredNotInPlan: string[];
+  /** Planned removals not declared. Non-empty ⇒ the city is refused. */
+  undeclaredRemovals: string[];
+}
+
+/** Read the projection plan against the declared changes. Pure. */
+export function checkDeclaredChanges(
+  currentRows: readonly BusinessPropertySnapshotRow[],
+  candidateRows: readonly BusinessPropertySnapshotRow[],
+  declared: DeclaredChanges,
+): DeclaredChangesReport {
+  const candidateIds = new Set(candidateRows.map((row) => row.id));
+  const plannedRemovals = currentRows.filter((row) => !candidateIds.has(row.id)).map((row) => row.id).sort();
+  const removalSet = new Set(plannedRemovals);
+  const keptRows = currentRows.filter((row) => candidateIds.has(row.id));
+  const plannedLosses = findMissingBusinessProperties(keptRows, candidateRows, "")
+    .flatMap(({ nodeId, missingKeys }) => missingKeys.map((key) => `${nodeId}:${key}`))
+    .sort();
+  const lossSet = new Set(plannedLosses);
+
+  const declaredNotInPlan = [
+    ...[...declared.removals].filter((id) => !removalSet.has(id)).map((id) => `remove:${id}`),
+    ...[...declared.propertyLosses].flatMap(([id, keys]) =>
+      [...keys].filter((key) => !lossSet.has(`${id}:${key}`)).map((key) => `lose:${id}:${key}`),
+    ),
+  ].sort();
+  const undeclaredRemovals = plannedRemovals.filter((id) => !declared.removals.has(id));
+  return { plannedRemovals, plannedLosses, declaredNotInPlan, undeclaredRemovals };
 }
 
 /**
@@ -1066,6 +1130,10 @@ export interface UpsertAtomicResult {
   aborted: boolean;
   /** Message d'alerte loggable quand aborted=true. */
   reason?: string;
+  /** GH #817 — the plan read against the declared changes (declared mode only). */
+  declared?: DeclaredChangesReport;
+  /** GH #817 — true when the projection ran in preview: every write was rolled back. */
+  preview?: boolean;
 }
 
 /** Erreur sentinelle servant à rollbacker la transaction d'une ville régressée. */
@@ -1089,6 +1157,14 @@ export interface ProjectCityOptions {
    * (spec K10/K11). Every other current row stays guarded. Default: none.
    */
   baselineExcludeIds?: ReadonlySet<string>;
+  /**
+   * GH #817 (spec §17) — declared mode: the projection deletes exactly
+   * `declared.removals` and may drop exactly `declared.propertyLosses`. A declaration
+   * absent from the plan, or a planned removal not declared, refuses the city before
+   * any write; gates 1, 2 and 3 run as usual with only the declared items exempt.
+   * Exclusive with `intendedRemovals`.
+   */
+  declared?: DeclaredChanges;
 }
 
 const DELETE_CHUNK = 5000;
@@ -1109,7 +1185,12 @@ export async function projectCityInTransaction(
   options: ProjectCityOptions = {},
 ): Promise<UpsertAtomicResult> {
   const { citySlug, nodeRows, edgeRows } = projection;
-  const intendedRemovals = options.intendedRemovals ?? new Set<string>();
+  const declared = options.declared;
+  if (declared && options.intendedRemovals && options.intendedRemovals.size > 0) {
+    throw new Error("projectCityInTransaction: `declared` and `intendedRemovals` are exclusive");
+  }
+  const intendedRemovals = declared?.removals ?? options.intendedRemovals ?? new Set<string>();
+  const acceptedPropertyLosses = declared?.propertyLosses ?? new Map<string, ReadonlySet<string>>();
   const baselineExclude = options.baselineExcludeIds ?? new Set<string>();
   const result: UpsertAtomicResult = {
     nodeCount: nodeRows.length,
@@ -1132,9 +1213,39 @@ export async function projectCityInTransaction(
     .map((row) => ({ id: row.id, type: row.type, props: (row.props ?? {}) as Record<string, unknown> }));
   const completeBefore = countCompleteSignals(baselineRows, { ignoreProvisional: true });
 
-  const rowVerdict = evaluateRowGuards(citySlug, baselineRows, nodeRows, intendedRemovals);
+  // GH #817 — declared mode: every declaration must be in the plan BEFORE any exemption
+  // applies (a declared removal of a node the candidate keeps would otherwise hide its loss).
+  if (declared) {
+    result.declared = checkDeclaredChanges(
+      currentRows.map((row) => ({ id: row.id, props: (row.props ?? {}) as Record<string, unknown> })),
+      nodeRows,
+      declared,
+    );
+    if (result.declared.declaredNotInPlan.length > 0) {
+      return {
+        ...result,
+        aborted: true,
+        reason:
+          `declared change(s) absent from the plan for ${citySlug}: ` +
+          `${result.declared.declaredNotInPlan.join(", ")}; projection refused`,
+      };
+    }
+  }
+
+  const rowVerdict = evaluateRowGuards(citySlug, baselineRows, nodeRows, intendedRemovals, acceptedPropertyLosses);
   if (rowVerdict.verdict === "refused") {
     return { ...result, aborted: true, reason: rowVerdict.reason };
+  }
+
+  // Declared mode refuses EVERY other removal, including nodes without business property
+  // or source ref that gates 1 and 3 do not see.
+  if (result.declared && result.declared.undeclaredRemovals.length > 0) {
+    return {
+      ...result,
+      aborted: true,
+      reason:
+        `undeclared removal(s) for ${citySlug}: ${result.declared.undeclaredRemovals.join(", ")}; projection refused`,
+    };
   }
 
   // 1. upsert nœuds sur (city_slug, id)
@@ -1272,6 +1383,12 @@ export async function upsertGraphAtomic(
    * OTHER node stays guarded. Default empty = current strict behaviour.
    */
   intendedRemovals: ReadonlySet<string> = new Set(),
+  /**
+   * GH #817 (spec §17) — `declared`: declared mode (see `ProjectCityOptions.declared`);
+   * `preview`: run the whole projection, guards included, then roll it back and return
+   * its result with `preview: true`. Both absent = unchanged behaviour.
+   */
+  options: { declared?: DeclaredChanges; preview?: boolean } = {},
 ): Promise<UpsertAtomicResult> {
   const projection = prepareCityProjection(citySlug, graphJson);
   // §521-ét observability (gates b/c/d): emit the denominators + closed-enumeration shrinkage
@@ -1285,15 +1402,29 @@ export async function upsertGraphAtomic(
       `skipped=${JSON.stringify(severedSource.skipped)}`,
   );
 
+  const cityOptions: ProjectCityOptions = options.declared ? { intendedRemovals, declared: options.declared } : { intendedRemovals };
   try {
-    return await db.transaction((tx) => projectCityInTransaction(tx, projection, { intendedRemovals }));
+    return await db.transaction(async (tx) => {
+      const result = await projectCityInTransaction(tx, projection, cityOptions);
+      if (options.preview) throw new ProjectionPreviewRollback(result);
+      return result;
+    });
   } catch (err) {
     if (err instanceof GraphCompletenessAbort) {
       // Abort attendu : la transaction a été rollbackée, on retourne le résultat
       // marqué aborted sans propager (les autres villes continuent).
-      return err.result;
+      return options.preview ? { ...err.result, preview: true } : err.result;
     }
+    if (err instanceof ProjectionPreviewRollback) return { ...err.result, preview: true };
     throw err;
+  }
+}
+
+/** Sentinel rolling back a preview projection (GH #817) once its result is known. */
+class ProjectionPreviewRollback extends Error {
+  constructor(readonly result: UpsertAtomicResult) {
+    super("projection preview: rolled back");
+    this.name = "ProjectionPreviewRollback";
   }
 }
 
