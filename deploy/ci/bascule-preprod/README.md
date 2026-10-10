@@ -10,9 +10,11 @@ prod → restore préprod → migrations → copie docs → recon → flip servi
 > **A scheduled run is `MODE=restore` from the LATEST `complete` backup** (the
 > source is the last verified backup, never a live prod dump): `BACKUP_ID` latest =
 > `manifests/latest.json` `latestComplete`, 24 h freshness guard active (refused
-> otherwise, before any quiesce), auto-CONFIRM of the day. Cron `17 3 * * 0`
-> (Sunday 03:17 UTC) and the arming gate `BASCULE_SCHEDULE_ENABLED` unchanged. A
-> `workflow_dispatch` keeps its inputs (default `chain`).
+> otherwise, before any quiesce), auto-CONFIRM of the day. Cron `0 4 * * *`
+> (**daily, 04:00 UTC** on the hour, owner request 2026-10-10 "restore daily";
+> weekly Sunday 03:17 UTC from 2026-09-26 to 2026-10-10), armed by
+> `BASCULE_SCHEDULE_ENABLED` (unchanged gate). A `workflow_dispatch` keeps its
+> inputs (default `chain`). Slot rationale: section "Daily schedule (04:00 UTC)".
 
 > **CD-native v2 (toute action de prod pilotée par du code, 0 owner-in-the-loop)** —
 > l'apply du bundle prod (2 SealedSecrets + VAP + RBAC T1 + RO-role + CronJob dump)
@@ -21,7 +23,7 @@ prod → restore préprod → migrations → copie docs → recon → flip servi
 > token éphémère, plus aucun `kubectl apply` owner-direct, plus aucune
 > matérialisation GH-secret des 2 creds (SealedSecrets committées, matérialisées
 > par le controller sealed-secrets in-cluster). La bascule tourne en
-> **planification hebdomadaire** (dimanche 03:17 UTC, `bascule-preprod.yml`, `schedule`) ; le refresh reste
+> **planification quotidienne** (04:00 UTC, `bascule-preprod.yml`, `schedule`) ; le refresh reste
 > GH-triggerable à la demande (`bascule-refresh.yml`), découplé de la bascule.
 > Flux complet, install 1×, secrets GH devenus supprimables et gestes éliminés :
 > **`CD_NATIVE_MIGRATION.md`**.
@@ -301,6 +303,27 @@ Logic: `restore-mode.mjs` (runner, kubectl only) + `backup-restore.cjs` (in-pod
 steps, embedded verbatim in the Job templates with `node -e`, image radar-api =
 Node + `@aws-sdk/client-s3`, 0 python, 0 new image). The scheduled restore stays
 gated by `BASCULE_SCHEDULE_ENABLED` (armed by the k8s lane; OFF by default).
+
+### Daily schedule (04:00 UTC)
+
+Cron `0 4 * * *` (UTC, on the hour). Neighbouring schedules, all UTC:
+
+| Time | Workload | Relation to the restore |
+| --- | --- | --- |
+| 00:00, 06:00, 12:00, 18:00 | preprod refresh `radar-refresh-pv` (runs observed 1 h 30 to 4 h, `activeDeadlineSeconds` 5 h 30) | a Job still running from 00:00 is **deleted by the quiesce** (owned by a quiesced CronJob), the CronJob is suspended during the restore and its original `suspend` is put back by the un-quiesce; its database work is replaced by the restore anyway |
+| every 5 min | preprod `radar-refresh-pending-watchdog` | in `QUIESCE_CRONJOBS`: suspended during the restore, then put back (an active watchdog Job would trip G2) |
+| 02:23 | prod backup `radar-backup-daily` (7 to 45 min observed) | the restore picks `latest` = the backup of the day; age reference = dump start, ~1.6 h at 04:00. If the backup of the day is missing or still running, `latest` is the previous day (~25.6 h) and R0 refuses it **before any quiesce** (preprod untouched) |
+| 05:00, 11:00, 17:00, 23:00 | prod refresh | not touched by the restore; shares the single node. Restores observed 18 to 50 min end before 05:00 |
+| 04:40 | sentropic IdP identities sync prod → preprod (sentropic side) | independent; CPU only |
+
+Durations: the job timeout is 330 min (sum of the runner-side Job waits
+~260 min). A restore that runs past 06:00 (or 06:10, `startingDeadlineSeconds`
+600 of `radar-refresh-pv`) makes the preprod refresh skip its 06:00 pass (the
+CronJob is suspended until the un-quiesce); the next pass is 12:00. GitHub may
+start a top-of-hour schedule late; the margins above absorb a delay of the
+order of an hour. `bascule.selftest.mjs` binds the slot relationally: on the
+hour, >= 60 min after the backup start, on no refresh start hour, >= 60 min
+before the next refresh start.
 
 ### Inputs
 
