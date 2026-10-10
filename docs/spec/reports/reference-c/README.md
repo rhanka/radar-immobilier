@@ -3,14 +3,21 @@
 Reference table built from the client's triage workbook (121 signals, 80 documents, 51 cities,
 survey of 2026-09-21). The repository is public, so the content is committed **encrypted only**.
 
+Version of 2026-10-10 (final state, supersedes the converged state of 2026-10-06 carried by PR #831): final tags
+with their provenance, verdict derived by rule R′ v1.1 in the retained configuration (with R-a and R-k, without R-d′),
+evaluated rows and rows set aside (non-converged object that changes the verdict), cause class of each gap (e, b, a1, a2,
+ap) with its follow-up, indicator y, D17 variant in separate columns. Columns taken from the Triage tab carry the native
+header of Triage row 5. A concordance script checks the 121 rows against the final pass and the adopted figures.
+Previous sealed versions: commit history of this folder.
+
 ## Files
 
 | Sealed file | Content | SHA-256 of plaintext |
 |---|---|---|
-| `reference-c.xlsx.sealed` | Original 7 workbook tabs + "Référence C" (121 rows, 54 columns, short headers) + "Référence C — légende" (column, author, full definition) + class definitions | `4a81b4d744a8dd76f768f401cc9d2b3b675abb65159f651b4d4b6ef585956afb` |
-| `reference-c.csv.sealed` | "Référence C" tab, UTF-8 with BOM | `f47ec61f0c14ad38e844732871ad5edaf0e1cc9bbda7e70b334ed91770703d07` |
-| `reference-c-legende.csv.sealed` | Legend: short column name, author, full definition | `37d2244a5645bb80396c58534782cf2dab0fa820b6af593124789589d20f6644` |
-| `README.md.sealed` | Column definitions, method, counts, verified links | `3b34c5bc8f78f9cd512a805e88e79c45c405c7a19101685bc65b3eae1290c599` |
+| `reference-c.xlsx.sealed` | Original 7 workbook tabs + "Référence C" (121 rows, 62 columns; A–T with the native Triage headers) + "Référence C — légende" (column, source, definition) + "Référence C — classes" (cause classes and follow-ups) | `2e4ca30c2468b8a6fd3afaa76215de826faae3f9fd30d821647f1aa9a78a2e62` |
+| `reference-c.csv.sealed` | "Référence C" tab, UTF-8 with BOM | `189cecee842b5be178f17ecdee7ad77dfbe84362c716a8d08318d57b32968673` |
+| `reference-c-legende.csv.sealed` | Legend: column, source, definition | `e45e518dfdcff5218d2bc22c9746717803122dfdf08353cf952c7430994401fa` |
+| `README.md.sealed` | Columns, classes, figures, removed columns, input hashes, statuses | `666959b17dc3135d1d97203d828f8604624075ec3006849833257620fc74168b` |
 
 ## Key
 
