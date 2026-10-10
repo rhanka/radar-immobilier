@@ -154,6 +154,13 @@ async function main(): Promise<void> {
         declaredReport = result.declared;
         logger.info({ citySlug, preview, ...result.declared }, "project-graph-from-s3: plan vs changements déclarés");
       }
+      if (result.declaredBaseline) {
+        // Rollback material: the PG rows (declared nodes, deleted edges) before this projection.
+        logger.info(
+          { citySlug, preview, nodes: result.declaredBaseline.nodes, edges: result.declaredBaseline.edges },
+          "project-graph-from-s3: lignes PG avant changements déclarés (retour arrière)",
+        );
+      }
       totalDeletedNodes += result.deletedNodes;
       totalDeletedEdges += result.deletedEdges;
       totalDeletedStaleEdges += result.deletedStaleEdges;
