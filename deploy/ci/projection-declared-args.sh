@@ -15,6 +15,9 @@
 # [A-Za-z0-9._:,=-] and spaces, so it is safe in the manifest's sed rendering (delimiter
 # '#') and in its `sh -c` command line. On refusal: message on stderr, exit 1, no output.
 set -euo pipefail
+# ASCII ranges and byte order whatever the runner locale (review ASTRA-853-01): under a
+# UTF-8 locale `[A-Za-z]` matches accented letters, which the TypeScript parser refuses.
+export LC_ALL=C
 
 ID_RE='[A-Za-z0-9][A-Za-z0-9._-]{0,127}'
 KEY_RE='[A-Za-z0-9_]{1,64}'
@@ -34,6 +37,7 @@ case "${MODE:-}" in
   *) die "recovery_mode must be preview or apply (got '${MODE:-}')" ;;
 esac
 
+case "${PROJECT_CITIES:-}" in *$'\n'*|*$'\r'*) die "project_cities must be a single line" ;; esac
 read -r -a cities <<<"${PROJECT_CITIES:-}"
 [ "${#cities[@]}" -eq 1 ] || die "declared changes need exactly one city in project_cities (got ${#cities[@]})"
 [[ "${cities[0]}" =~ ^[a-z0-9]+(-{1,2}[a-z0-9]+)*$ ]] || die "invalid city slug '${cities[0]}'"
