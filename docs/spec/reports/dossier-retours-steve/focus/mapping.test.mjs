@@ -28,6 +28,29 @@ test('cinq scènes canoniques, dans l’ordre des chapitres qui les portent', ()
     ['flux-import-reference', '\n### 8.4 ', '\n### 8.5 '], ['architecture-ui', '\n### 8.5 ', '\n## 9. ']]) assert.ok(between(from, to).includes(`<!-- scene:${id} -->`), id);
 });
 
+// Renvois de la page vers le dossier (badges des scènes, en-tête de la copie interactive,
+// titres des schémas en plein écran) : lus dans le Markdown, chaque cible existe.
+test('renvois : badge de chaque scène = section qui la porte, en-tête de la copie = §9.2 à §9.4, titres des schémas', async () => {
+  const { docMermaidTitles } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
+  const headingOf = number => markdown.match(new RegExp(`^#{2,4} ${number.replace('.', '\\.')}\\.? `, 'm'));
+  assert.deepEqual(Object.fromEntries(graphs.map(graph => [graph.id, graph.section])),
+    { 'criteres-steve': '2.6', 'affichage-abc': '7.2', 'modele-donnees': '8.2', 'flux-import-reference': '8.4', 'architecture-ui': '8.5' });
+  for (const graph of graphs) assert.ok(headingOf(graph.section), `${graph.id} : §${graph.section} sans titre dans le dossier`);
+  const sceneView = await readFile('SceneView.svelte', 'utf8');
+  assert.ok(!/badge: '§/.test(sceneView), 'aucun numéro de section écrit à la main dans les badges');
+  assert.ok(sceneView.includes('§{graph.section} · {sceneInfo[graph.id].badge}'));
+  const choicesView = await readFile('DecisionChoices.svelte', 'utf8');
+  const refs = choicesView.match(/data-section-refs="([^"]+)">([^<]+)</);
+  assert.ok(refs, 'en-tête de la copie interactive');
+  assert.deepEqual(refs[1].split(' '), ['9.2', '9.3', '9.4']);
+  assert.deepEqual([...refs[2].matchAll(/§(\d+\.\d+)/g)].map(match => match[1]), ['9.2', '9.3', '9.4']);
+  assert.ok(!/annexe II\b|ch\. 10/.test(refs[2]));
+  for (const number of refs[1].split(' ')) assert.ok(headingOf(number), `§${number}`);
+  assert.match(headingOf('9.2').input.slice(headingOf('9.2').index), /^### 9\.2 Registre des décisions/);
+  assert.deepEqual(docMermaidTitles, { 'regle-b-c': '3. Comment un signal est retenu ou écarté',
+    'd10-test-etendu': 'D10 — Jeu de référence de ciblage : sur quoi se mesurera la bascule' });
+});
+
 test('table des matières : ouverture, dix chapitres, annexes A à F (plan du §B6, version figée L5)', async () => {
   const level2 = [...markdown.matchAll(/^## (.+)$/gm)].map(match => match[1]);
   assert.deepEqual(level2, ['Ouverture', '1. L\'intention de l\'owner', '2. Ce que veut Steve', '3. Comment un signal est retenu ou écarté',

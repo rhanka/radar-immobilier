@@ -9,30 +9,32 @@
   import MatrixScene from './MatrixScene.svelte';
   import ErDiagram from './ErDiagram.svelte';
   import LaneDiagram from './LaneDiagram.svelte';
+  // The badge points to the section that carries the scene: `graph.section`, read by
+  // build-map.mjs from the heading above the scene marker (current numbering).
   let { graph } = $props();
   const sceneInfo = {
     'criteres-steve': {
-      badge: '§2.6 · ce que veut Steve',
+      badge: 'ce que veut Steve',
       lede: "Une matrice : une ligne par critère de Steve et par exclusion transversale ; ce qu'il demande, ce que fait le radar aujourd'hui, la couverture (partiel ou absent) et le bruit que chaque écart laisse dans sa vue de travail (passe 1, 73 signaux).",
       note: "Les 24 signaux de bruit de la passe 1 se répartissent par critère : 3 hors résidentiel ou hors urbanisme, 4 resserrements, 6 sans effet sur la capacité, 8 autorisations individuelles, 3 points d'ordre du jour. Le radar filtre par nature d'instrument et par étape ; Steve demande un filtre par effet du règlement, sens et nombre d'unités, pour lequel aucune donnée n'existe encore.",
     },
     'modele-donnees': {
-      badge: '§9.2 · stockage réel et propriétaires',
+      badge: 'stockage réel et propriétaires',
       lede: "Les colonnes sont le stockage réel : exécution (jobs et application), Postgres d'immo (tables immo, puis tables du paquet @sentropic/annotations installées chez immo), S3 d'immo (bucket radar-immobilier-docs), service geo, dépôt git d'immo (code, profil, .track). Le badge de chaque boîte est le propriétaire du schéma ou du code : engram (détection et évaluation), sentropic (annotations), track (décisions), immo, geo. Vert : nouveau ; orange : modifié ; gris : inchangé ; rien n'est supprimé.",
       note: "engram ne stocke rien lui-même : sa librairie (@sentropic/graphify 0.18.0, futur @sentropic/engram) est exécutée par le job immo radar-refresh-pv, qui écrit graph/<ville>/latest.json sur le S3 d'immo puis le projette dans graph_nodes. Les tables annotation_* appartiennent à sentropic mais vivent dans le Postgres d'immo ; les jeux de référence vont dans un préfixe privé du S3 d'immo ; les décisions dans .track/.",
     },
     'flux-import-reference': {
-      badge: '§9.6 · architecture et jeu de référence',
+      badge: 'architecture et jeu de référence',
       lede: "Une architecture en couloirs verticaux, de gauche à droite : les utilisateurs, les écrans de l'UI, les fonctions backend (collecte, détection de signal, import, rattachement, API), puis les données sur les composants réels, S3 et PostgreSQL. Le jeu de référence est en bas, en bande transversale : un système d'évaluation hors ligne, alimenté par les annotations stockées en base.",
       note: "Le jeu de référence de ciblage C et le jeu de référence d'extraction E restent séparés jusqu'au benchmark, où ils alimentent deux volets distincts. L'analyse du 21 septembre entre comme annotation distincte de l'adjudication : elle n'écrase pas les classes du tableur, qui font foi pour l'import. L'import est un acte owner distinct, sur l'image Node existante de l'API (§9.4).",
     },
     'architecture-ui': {
-      badge: '§9.7 · état mesuré sur main 27891b10',
+      badge: 'état mesuré sur main 27891b10',
       lede: "Trois conteneurs : l'UI (Vite + Svelte 5), l'API Hono et les paquets sentropic. Les cartes pleines sont constatées dans le code ; les cartes « nouveau » et « nouvelle » sont les ajouts proposés pour la première livraison.",
       note: "La carte Signaux reste un MapLibre local de 2 761 lignes ; les composants geo partagés ne servent qu'au pilote #/geo et le moteur 3D est désactivé. L'avis de Steve se monte dans le panneau et le rail avec les composants DS déjà adoptés : la première livraison n'attend pas la migration geo.",
     },
     'affichage-abc': {
-      badge: '§8.1 · D12 ouvert, D13 à acter',
+      badge: 'D12 ouvert, D13 à acter',
       lede: "Deux zones. En haut, l'application : ce que voient les utilisateurs et où chaque élément vit (écran, backend, base). Steve et l'équipe voient B, par défaut et sans sélecteur ; C est calculée en shadow par le backend sur le même snapshot, et ne se voit qu'en recette UAT. En bas, l'évaluation hors ligne, un job sans écran : référence A gelée, diff B → C nommé, jeu de référence C, mesure, seuil de bascule, puis décision de Farid, seule à faire passer les utilisateurs de B à C.",
       note: "À l'écran, C a trois états : « confirmé » et « à instruire » sont visibles, « exclu prouvé » est masqué avec sa raison ; une absence de donnée n'est jamais une exclusion, l'indéterminé et le mixte restent donc visibles. L'exposition de la comparaison (UAT seulement ou sélecteur visible, D12) est laissée à Farid ; le seuil de bascule (D13 : zéro Pertinent masqué, borne < X, comparateur B′ passe 1) est une proposition de l'owner à acter avec Farid.",
     },
@@ -42,7 +44,7 @@
 <article class="scene" data-scene={graph.id} data-scene-hash={graph.sceneHash}>
       <header class="flex-row">
         <div><span class="eyebrow">{graph.date} · dossier de décision</span><h2>{graph.title}</h2></div>
-        <span class="badge warning">{sceneInfo[graph.id].badge}</span>
+        <span class="badge warning" data-scene-section={graph.section}>§{graph.section} · {sceneInfo[graph.id].badge}</span>
       </header>
       <p class="scene-id"><code>{graph.id}</code> · <code>{graph.sceneHash.slice(0, 12)}…</code></p>
       <p class="lede">{sceneInfo[graph.id].lede}</p>

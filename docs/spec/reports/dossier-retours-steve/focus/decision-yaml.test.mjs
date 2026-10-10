@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 // Two independent YAML readers, from the repository root node_modules (the Makefile
 // mounts it at /node_modules): `yaml` (YAML 1.2 core) and `js-yaml` (with timestamps).
 import YAML from 'yaml';
@@ -131,15 +132,17 @@ test('records: option id and label, statut, commentaire; unknown option rejected
   assert.throws(() => decisionRecords(questions, { selections: { D1: 'z' } }, 'Farid', 'all'), /Unknown option z for D1/);
 });
 
-// The manifest built from the dossier (`make map`), with a page sha256 in place of the
-// placeholder that portable.mjs replaces.
+// The manifest built from the dossier (`make map`). The export header quotes the sha256
+// of the served Markdown (`dossierHash`), checked here against the file itself.
 const realManifest = async () => {
   const { manifest } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
-  return { ...manifest, htmlSha256: '0b'.repeat(32) };
+  return manifest;
 };
+const markdownSha256 = async () => createHash('sha256').update(await readFile('../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md', 'utf8')).digest('hex');
 
 test('export block: fenced YAML without quotes, agreed header, one entry per own decision', async () => {
   const manifest = await realManifest();
+  assert.equal(manifest.dossierHash, await markdownSha256());
   assert.equal(manifest.title, 'Analyse des retours d\'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage');
   const state = { selections: { D12: 'a', D9: 'a' }, comments: { D12: 'ligne 1\nligne 2' } };
   const now = new Date('2026-10-04T13:25:28Z');
@@ -150,7 +153,7 @@ test('export block: fenced YAML without quotes, agreed header, one entry per own
   assert.equal(lines.at(-1), '```');
   assert.deepEqual(lines.slice(1, 9), [
     'dossier: >-', `  ${manifest.title}`, 'fichier: DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md',
-    `version: 2026-10-10 · sha256:${'0b'.repeat(32)}`, 'decideur: Farid', `date: ${isoWithOffset(now)}`,
+    `version: 2026-10-10 · sha256:${await markdownSha256()}`, 'decideur: Farid', `date: ${isoWithOffset(now)}`,
     `coller_dans: ${DECISIONS_TARGET_URL}`, 'decisions:',
   ]);
   assert.equal(DECISIONS_TARGET_URL, 'https://github.com/rhanka/radar-immobilier/pull/794');
@@ -181,7 +184,7 @@ test('round trip on the real dossier: yaml and js-yaml read back every header an
       const yaml = text.slice('```yaml\n'.length, -'\n```'.length);
       const expected = {
         dossier: manifest.title, fichier: 'DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md',
-        version: `2026-10-10 · sha256:${'0b'.repeat(32)}`, decideur: person, date: isoWithOffset(now), coller_dans: DECISIONS_TARGET_URL,
+        version: `2026-10-10 · sha256:${manifest.dossierHash}`, decideur: person, date: isoWithOffset(now), coller_dans: DECISIONS_TARGET_URL,
         decisions: records.map(record => ({ ...record, commentaire: record.commentaire ? `${record.commentaire}\n` : '' })),
       };
       for (const [name, load] of Object.entries(READERS)) {
