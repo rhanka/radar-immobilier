@@ -858,6 +858,30 @@ async function cliSuite() {
     const annFail = runCli("docs-secret-fill", { RADAR_DOCS_SYNC_ACCESS_KEY: "0".repeat(32), RADAR_DOCS_SYNC_SECRET_KEY: "f".repeat(40) });
     ok("CLI docs-secret-fill — annotation read killed by a signal ⇒ exit 1, no replace",
       annFail.status === 1 && /annotations of Secret/.test(annFail.stdout) && !/ replace /.test(readFileSync(failLog, "utf8")));
+    // G2: an unreadable current replica count refuses the restore (never read as 0)
+    writeFileSync(join(failBin, "kubectl"), ["#!/usr/bin/env bash",
+      'case "$*" in *"jsonpath={.status.replicas}"*) echo "$*" >> "' + failLog + '"; kill -TERM "$$" ;; esac',
+      `exec "${join(bin, "kubectl")}" "$@"`, ""].join("\n"), { mode: 0o755 });
+    writeFileSync(failLog, "");
+    const beforeG2 = readFileSync(kubectlLog, "utf8").length;
+    const g2Sig = spawnSync(process.execPath, [join(DIR, "bascule.mjs"), "restore-backup"],
+      { env: { ...env, PATH: `${failBin}:${process.env.PATH}` }, encoding: "utf8" });
+    ok("CLI restore-backup — G2 current replicas unreadable (signal) ⇒ refused, no rollback/restore apply",
+      g2Sig.status === 1 && /status\.replicas illisible/.test(g2Sig.stdout) && !/ apply /.test(readFileSync(kubectlLog, "utf8").slice(beforeG2)));
+    // quiesce: unreadable original suspend / Job list refuse (no guessed state, no skipped drain)
+    fakeK(['  *"get cronjob "*"--ignore-not-found -o name"*) printf "cronjob.batch/x" ;;',
+      '  *"jsonpath={.spec.suspend}"*) kill -TERM "$$" ;;', ...common.filter((l) => !/spec.suspend/.test(l))]);
+    const qSus = runCli("quiesce");
+    ok("CLI quiesce — original suspend unreadable ⇒ exit 1 before any scale/patch",
+      qSus.status === 1 && /suspend d'origine/.test(qSus.stdout) && !/ scale | patch /.test(readFileSync(failLog, "utf8")));
+    fakeK(['  *"get cronjob "*"--ignore-not-found -o name"*) printf "cronjob.batch/x" ;;',
+      '  *"get jobs -o json"*) kill -TERM "$$" ;;', ...common.filter((l) => !/get jobs/.test(l))]);
+    const qJobs = runCli("quiesce");
+    ok("CLI quiesce — Job list unreadable ⇒ exit 1 (drain unknown, not QUIESCE OK)", qJobs.status === 1 && /drain des Jobs en vol inconnu/.test(qJobs.stdout) && !/QUIESCE OK/.test(qJobs.stdout));
+    fakeK(['  *"get cronjob "*"--ignore-not-found -o name"*) printf "cronjob.batch/x" ;;',
+      '  *"patch cronjob radar-refresh-pv "*) exit 1 ;;', ...common]);
+    const qPatch = runCli("quiesce");
+    ok("CLI quiesce — failed suspend patch ⇒ exit 1, named", qPatch.status === 1 && /patch suspend=true a échoué pour : radar-refresh-pv/.test(qPatch.stdout));
   }
   // failure-summary: reads the workdir pointers of this run (PIN of D)
   const sumFile = join(tmp, "summary.md");
