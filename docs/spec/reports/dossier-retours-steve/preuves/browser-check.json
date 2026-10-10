@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-06T06:12:27.457Z",
+  "checkedAt": "2026-10-10T09:30:53.254Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
   "chromiumCdpPort": "9263",
   "offline": {
@@ -23,7 +23,7 @@
     {
       "sceneId": "criteres-steve",
       "kind": "matrix",
-      "sceneHash": "0049d207cb0c8e8b37bc14353443e243cb23de307275cc73202e1978dbea5ab0",
+      "sceneHash": "0954467486fd59288ec397a1f638dd066cbebfe7f4e830b587f0412451125cc1",
       "rows": 5,
       "coverage": [
         "partiel",
@@ -82,9 +82,9 @@
       ]
     },
     {
-      "sceneId": "flux-import-oracle",
+      "sceneId": "flux-import-reference",
       "kind": "lanes",
-      "sceneHash": "ba0071f705bb3b20d21cfe044606028520c8c88c8782256090dbc604d638e0f3",
+      "sceneHash": "5f2f4138d413877f1be9e378041ec5ebe6acc3468fbe07e4a7a5e840016d7173",
       "initialScale": 0.7517281105990783,
       "lanes": [
         "user",
@@ -118,11 +118,11 @@
       "edgeLabels": 12,
       "panel": {
         "left": 59,
-        "top": 4675.28125,
+        "top": 8624.234375,
         "width": 1307,
         "height": 820
       },
-      "iconPx": 69.99962088527339,
+      "iconPx": 69.99848062201963,
       "controls": {
         "boutons": 4,
         "unUn": true,
@@ -134,7 +134,7 @@
     {
       "sceneId": "criteres-steve",
       "kind": "matrix",
-      "sceneHash": "0049d207cb0c8e8b37bc14353443e243cb23de307275cc73202e1978dbea5ab0",
+      "sceneHash": "0954467486fd59288ec397a1f638dd066cbebfe7f4e830b587f0412451125cc1",
       "rows": 5,
       "coverage": [
         "partiel",
@@ -193,9 +193,9 @@
       ]
     },
     {
-      "sceneId": "flux-import-oracle",
+      "sceneId": "flux-import-reference",
       "kind": "lanes",
-      "sceneHash": "ba0071f705bb3b20d21cfe044606028520c8c88c8782256090dbc604d638e0f3",
+      "sceneHash": "5f2f4138d413877f1be9e378041ec5ebe6acc3468fbe07e4a7a5e840016d7173",
       "initialScale": 1,
       "lanes": [
         "user",
@@ -229,7 +229,7 @@
       "edgeLabels": 12,
       "panel": {
         "left": 71.5,
-        "top": 2184.15625,
+        "top": 7163.453125,
         "width": 1762,
         "height": 900
       },
@@ -251,7 +251,7 @@
       {
         "sceneId": "criteres-steve",
         "kind": "matrix",
-        "sceneHash": "0049d207cb0c8e8b37bc14353443e243cb23de307275cc73202e1978dbea5ab0",
+        "sceneHash": "0954467486fd59288ec397a1f638dd066cbebfe7f4e830b587f0412451125cc1",
         "rows": 5,
         "coverage": [
           "partiel",
@@ -310,9 +310,9 @@
         ]
       },
       {
-        "sceneId": "flux-import-oracle",
+        "sceneId": "flux-import-reference",
         "kind": "lanes",
-        "sceneHash": "ba0071f705bb3b20d21cfe044606028520c8c88c8782256090dbc604d638e0f3",
+        "sceneHash": "5f2f4138d413877f1be9e378041ec5ebe6acc3468fbe07e4a7a5e840016d7173",
         "initialScale": 0.7517281105990783,
         "lanes": [
           "user",
@@ -346,7 +346,7 @@
         "edgeLabels": 12,
         "panel": {
           "left": 59,
-          "top": 59034.28125,
+          "top": 40524.234375,
           "width": 1307,
           "height": 820
         },
@@ -361,11 +361,6 @@
     "content": {
       "charts": [
         {
-          "id": "steve-signaux",
-          "kind": "stacked",
-          "bars": 6
-        },
-        {
           "id": "sens-classement",
           "kind": "stacked",
           "bars": 12
@@ -376,11 +371,6 @@
           "bars": 10
         },
         {
-          "id": "base-b",
-          "kind": "percent",
-          "bars": 6
-        },
-        {
           "id": "classement-passes",
           "kind": "stacked",
           "bars": 10
@@ -388,6 +378,11 @@
         {
           "id": "steve-signaux",
           "kind": "stacked",
+          "bars": 6
+        },
+        {
+          "id": "base-b",
+          "kind": "percent",
           "bars": 6
         },
         {
@@ -401,7 +396,7 @@
           "bars": 12
         }
       ],
-      "descriptions": 79,
+      "descriptions": 81,
       "minis": [
         {
           "id": "doc-jeux-reference",
@@ -488,11 +483,6 @@
   "content": {
     "charts": [
       {
-        "id": "steve-signaux",
-        "kind": "stacked",
-        "bars": 6
-      },
-      {
         "id": "sens-classement",
         "kind": "stacked",
         "bars": 12
@@ -503,11 +493,6 @@
         "bars": 10
       },
       {
-        "id": "base-b",
-        "kind": "percent",
-        "bars": 6
-      },
-      {
         "id": "classement-passes",
         "kind": "stacked",
         "bars": 10
@@ -515,6 +500,11 @@
       {
         "id": "steve-signaux",
         "kind": "stacked",
+        "bars": 6
+      },
+      {
+        "id": "base-b",
+        "kind": "percent",
         "bars": 6
       },
       {
@@ -528,7 +518,7 @@
         "bars": 12
       }
     ],
-    "descriptions": 79,
+    "descriptions": 81,
     "minis": [
       {
         "id": "doc-jeux-reference",
@@ -607,13 +597,6 @@
   "zoom": {
     "frames": [
       {
-        "id": "chart-steve-signaux",
-        "mode": "transform",
-        "fit": 1.458,
-        "zoomed": 2.277,
-        "dragged": false
-      },
-      {
         "id": "chart-sens-classement",
         "mode": "transform",
         "fit": 1.458,
@@ -628,17 +611,17 @@
         "dragged": false
       },
       {
-        "id": "chart-base-b",
-        "mode": "transform",
-        "fit": 1.458,
-        "zoomed": 2.277,
-        "dragged": false
-      },
-      {
         "id": "criteres-steve",
         "mode": "transform",
         "fit": 1.079,
         "zoomed": 1.686,
+        "dragged": false
+      },
+      {
+        "id": "regle-b-c",
+        "mode": "transform",
+        "fit": 0.329,
+        "zoomed": 0.514,
         "dragged": false
       },
       {
@@ -660,20 +643,6 @@
         "mode": "transform",
         "fit": 0.698,
         "zoomed": 1.091,
-        "dragged": false
-      },
-      {
-        "id": "chart-pr-test-steve",
-        "mode": "transform",
-        "fit": 1.458,
-        "zoomed": 2.277,
-        "dragged": false
-      },
-      {
-        "id": "chart-pr-test-consensus",
-        "mode": "transform",
-        "fit": 1.458,
-        "zoomed": 2.277,
         "dragged": false
       },
       {
@@ -705,7 +674,7 @@
         "dragged": false
       },
       {
-        "id": "flux-import-oracle",
+        "id": "flux-import-reference",
         "mode": "transform",
         "fit": 0.717,
         "zoomed": 1.121,
@@ -716,6 +685,13 @@
         "mode": "native",
         "fit": null,
         "zoomed": null,
+        "dragged": false
+      },
+      {
+        "id": "d10-test-etendu",
+        "mode": "transform",
+        "fit": 1.257,
+        "zoomed": 1.964,
         "dragged": false
       },
       {
@@ -768,6 +744,27 @@
         "dragged": false
       },
       {
+        "id": "chart-base-b",
+        "mode": "transform",
+        "fit": 1.458,
+        "zoomed": 2.277,
+        "dragged": false
+      },
+      {
+        "id": "chart-pr-test-steve",
+        "mode": "transform",
+        "fit": 1.458,
+        "zoomed": 2.277,
+        "dragged": false
+      },
+      {
+        "id": "chart-pr-test-consensus",
+        "mode": "transform",
+        "fit": 1.458,
+        "zoomed": 2.277,
+        "dragged": false
+      },
+      {
         "id": "doc-etat-actuel",
         "mode": "transform",
         "fit": 0.413,
@@ -815,8 +812,8 @@
   "choices": {
     "blocks": 25,
     "single": 25,
-    "radio": 79,
-    "recommended": 25,
+    "radio": 81,
+    "recommended": 24,
     "selected": [
       "a"
     ],
@@ -849,7 +846,7 @@
     ],
     "persisted": {
       "D12": "a",
-      "D9": "1"
+      "D9": "a"
     },
     "defer": 25,
     "jsonControls": 0,
@@ -976,7 +973,7 @@
     },
     "allOptions": {
       "D1": "b",
-      "D9": "1",
+      "D9": "a",
       "D17": "a",
       "D12": "a"
     }
@@ -995,7 +992,7 @@
       "scale": 1
     },
     {
-      "sceneId": "flux-import-oracle",
+      "sceneId": "flux-import-reference",
       "scale": 1
     },
     {
@@ -1003,7 +1000,7 @@
       "scale": 1,
       "clip": {
         "x": 79,
-        "y": 56828.15625,
+        "y": 40119.453125,
         "width": 1762,
         "height": 900
       }
@@ -1014,16 +1011,16 @@
       "sceneId": "criteres-steve",
       "clip": {
         "x": 71.5,
-        "y": 15505.546875,
+        "y": 9344,
         "width": 1762,
-        "height": 542.109375
+        "height": 564.109375
       }
     },
     {
       "sceneId": "affichage-abc",
       "clip": {
         "x": 71.5,
-        "y": 42023.78125,
+        "y": 26773.96875,
         "width": 1762,
         "height": 1250.109375
       }
@@ -1032,16 +1029,16 @@
       "sceneId": "modele-donnees",
       "clip": {
         "x": 71.5,
-        "y": 48954.71875,
+        "y": 33704.90625,
         "width": 1762,
         "height": 806.109375
       }
     },
     {
-      "sceneId": "flux-import-oracle",
+      "sceneId": "flux-import-reference",
       "clip": {
         "x": 71.5,
-        "y": 54564.390625,
+        "y": 37855.6875,
         "width": 1762,
         "height": 1334.109375
       }
@@ -1050,7 +1047,7 @@
       "sceneId": "architecture-ui",
       "clip": {
         "x": 71.5,
-        "y": 56724.15625,
+        "y": 40015.453125,
         "width": 1762,
         "height": 900
       }
@@ -1062,12 +1059,12 @@
     ".generated/scene-1a1-criteres-steve.png",
     ".generated/scene-1a1-affichage-abc.png",
     ".generated/scene-1a1-modele-donnees.png",
-    ".generated/scene-1a1-flux-import-oracle.png",
+    ".generated/scene-1a1-flux-import-reference.png",
     ".generated/scene-1a1-architecture-ui.png",
     ".generated/scene-vue-ensemble-criteres-steve.png",
     ".generated/scene-vue-ensemble-affichage-abc.png",
     ".generated/scene-vue-ensemble-modele-donnees.png",
-    ".generated/scene-vue-ensemble-flux-import-oracle.png",
+    ".generated/scene-vue-ensemble-flux-import-reference.png",
     ".generated/scene-vue-ensemble-architecture-ui.png",
     ".generated/dossier-preview-dark-1440x1000.png",
     ".generated/sombre-graphique-sens.png",
@@ -1075,7 +1072,7 @@
     ".generated/scene-sombre-criteres-steve.png",
     ".generated/scene-sombre-affichage-abc.png",
     ".generated/scene-sombre-modele-donnees.png",
-    ".generated/scene-sombre-flux-import-oracle.png",
+    ".generated/scene-sombre-flux-import-reference.png",
     ".generated/scene-sombre-architecture-ui.png",
     ".generated/graphique-sens.png",
     ".generated/graphique-bruit.png",
