@@ -33,7 +33,10 @@
       "@google-cloud/spanner": "npm:empty-npm-package@1.0.0"
     },
     "@sentropic/design-system-svelte": "^0.35.1",
-    "@ai-sdk/provider-utils@4.0.27": "4.0.33"
+    "@ai-sdk/provider-utils@4.0.27": "4.0.33",
+    "drizzle-kit": {
+      "@esbuild-kit/esm-loader": "npm:empty-npm-package@1.0.0"
+    }
   },
   "scripts": {
     "data:polygons": "node --experimental-strip-types radar/data-prep/fetch-municipal-polygons.ts"
