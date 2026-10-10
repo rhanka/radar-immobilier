@@ -192,11 +192,41 @@ ok("refreshJobName — charset RFC1123 [a-z0-9-] uniquement", /^[a-z0-9-]+$/.tes
   eq("docs-sync — source vide ⇒ « rien à copier », exit 0 (écart immo, inchangé)", [r7.code, r7.copies.length], [0, 0]);
 }
 
-// ── Cadence du run planifié : HEBDOMADAIRE, dimanche 03:17 UTC (décision owner 2026-09-26) ──
+// ── Scheduled run cadence: DAILY, 04:00 UTC on the hour (owner request 2026-10-10,
+// "restore daily"; weekly Sunday 03:17 UTC from 2026-09-26 to 2026-10-10) ──
 {
   const wf = readFileSync(join(import.meta.dirname, "../../../.github/workflows/bascule-preprod.yml"), "utf8");
   const crons = [...wf.matchAll(/^\s*- cron: '([^']*)'/mg)].map((x) => x[1]);
-  eq("bascule-preprod.yml — un seul cron, hebdomadaire dimanche 03:17 UTC", crons, ["17 3 * * 0"]);
+  eq("bascule-preprod.yml — a single cron, daily 04:00 UTC on the hour", crons, ["0 4 * * *"]);
+  // RELATIONAL window guard: the restore slot stays after the daily prod backup
+  // (so `latest` is the backup of the day, 24 h guard) and off every refresh start
+  // (shared node; incident 2026-10-09: same minute, same node), with >= 60 min
+  // before the next refresh start (restores observed 18-50 min).
+  const rd = (p) => readFileSync(join(import.meta.dirname, "../../..", p), "utf8");
+  const schedOf = (txt, re) => { const m = txt.match(re); return m ? m[1] : null; };
+  const restoreCron = crons[0] || "";
+  const backupCron = schedOf(rd("deploy/ci/backup/cronjob-backup-daily.yaml"), /^\s+schedule:\s*"([^"]+)"/m);
+  const prodCron = schedOf(rd("deploy/k8s/34-refresh-cronjob.yaml"), /^\s+schedule:\s*"([^"]+)"/m);
+  const preprodCron = schedOf(rd("deploy/k8s/refresh-cronjobs/kustomization.yaml"), /path: \/spec\/schedule\s*\n\s*value:\s*"([^"]+)"/);
+  const daily = (c) => {
+    const f = (c || "").trim().split(/\s+/);
+    if (f.length !== 5 || f.slice(2).join(" ") !== "* * *" || !/^\d+$/.test(f[0])) return null;
+    const hours = f[1].split(",").map(Number);
+    return hours.every((h) => Number.isInteger(h) && h >= 0 && h < 24) ? { minute: Number(f[0]), hours } : null;
+  };
+  const r = daily(restoreCron), b = daily(backupCron), pr = daily(prodCron), pp = daily(preprodCron);
+  ok(`window guard — every schedule parsed as daily (restore=${restoreCron}, backup=${backupCron}, prod refresh=${prodCron}, preprod refresh=${preprodCron})`,
+    !!(r && b && pr && pp && r.hours.length === 1 && b.hours.length === 1));
+  if (r && b && pr && pp) {
+    const rMin = r.hours[0] * 60 + r.minute;
+    const bMin = b.hours[0] * 60 + b.minute;
+    ok("window guard — restore on the hour (owner decision: on-the-hour schedules)", r.minute === 0);
+    ok(`window guard — restore >= 60 min after the daily backup start, same day (gap ${rMin - bMin} min; backups observed 7-45 min)`, rMin - bMin >= 60);
+    const refreshStarts = [...pr.hours.map((h) => h * 60 + pr.minute), ...pp.hours.map((h) => h * 60 + pp.minute)];
+    ok("window guard — restore hour is no refresh start hour (prod or preprod)", !refreshStarts.includes(rMin));
+    const nextGap = Math.min(...refreshStarts.map((s) => (s - rMin + 1440) % 1440).filter((d) => d > 0));
+    ok(`window guard — >= 60 min before the next refresh start (gap ${nextGap} min; restores observed 18-50 min)`, nextGap >= 60);
+  }
   ok("bascule-preprod.yml — run planifié armé par vars.BASCULE_SCHEDULE_ENABLED (inchangé)",
     wf.includes("github.event_name != 'schedule' || vars.BASCULE_SCHEDULE_ENABLED == 'true'"));
   // A scheduled run = MODE=restore from the LATEST complete backup, 24 h guard active.
