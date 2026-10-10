@@ -546,10 +546,10 @@ jobs:
   #   - namespace radar-immobilier-preprod + preprod-scoped SA kubeconfig
   #     (secret KUBE_CONFIG_DATA_PREPROD, exported by poc-k8s from
   #     deploy/k8s/11-ci-deployer-preprod-rbac.yaml);
-  #   - NO "Apply immo-mcp declarative config" step (DESIGN §2.8 — drift
-  #     self-heal is PROD-only: 40-immo-mcp hardcodes namespace radar-immobilier
-  #     and the preprod deployer Role is deployments-only, it cannot apply a
-  #     ConfigMap); and no radar-immo-mcp roll (preprod has no MCP connector);
+  #   - no separate "Apply immo-mcp declarative config" step: the immo-mcp
+  #     ConfigMap is reconciled from the preprod overlay (namespace + preprod
+  #     resource/issuer/public URL, #835) by deploy/ci/reconcile-preprod.sh, and
+  #     radar-immo-mcp is rolled by set-image like api/ui (guarded: absent => skip);
   #   - the GitHub Deployment is recorded as environment=preprod (transient),
   #     never production.
   # Runs ALONGSIDE the legacy `deploy` job (main -> prod) until the tag->prod
@@ -756,9 +756,16 @@ jobs:
           while :; do
             complete="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)"
             failed="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)"
-            if [ "$complete" = "True" ]; then echo "db-migrate: Job $JOB Complete"; break; fi
+            if [ "$complete" = "True" ]; then
+              echo "db-migrate: Job $JOB Complete"
+              # Bounded summary written by dist/db/migrate.js (status + NOTICE counts, e.g. 0013
+              # deleted NULL-city rows — GH #812); readable without pods/log.
+              echo "db-migrate summary: $(kubectl -n "$NAMESPACE" get pods -l job-name="$JOB" -o 'jsonpath={range .items[*]}{.status.containerStatuses[0].state.terminated.message}{end}' 2>/dev/null || true)"
+              break
+            fi
             if [ "$failed" = "True" ]; then
               echo "::error title=DB migrate FAILED::$JOB — aborting release BEFORE set-image"
+              echo "db-migrate summary: $(kubectl -n "$NAMESPACE" get pods -l job-name="$JOB" -o 'jsonpath={range .items[*]}{.status.containerStatuses[0].state.terminated.message}{end}' 2>/dev/null || true)"
               kubectl -n "$NAMESPACE" logs "job/$JOB" --tail=80 || true
               # Backstop: kill the in-cluster Job so a hung migration (blocked
               # ALTER/CREATE INDEX) actually stops — the `exit 1` only ends the CI
@@ -792,9 +799,11 @@ jobs:
       - name: Reconcile preprod manifests (server-side apply — targeted)
         run: bash deploy/ci/reconcile-preprod.sh
 
-      # NOTE: NO "Apply immo-mcp declarative config" here (DESIGN §2.8) — drift
-      # self-heal is PROD-only: 40-immo-mcp hardcodes namespace radar-immobilier
-      # and the preprod deployer Role cannot apply ConfigMaps/Services.
+      # NOTE: no separate "Apply immo-mcp declarative config" step here: the
+      # reconcile above applies ConfigMap immo-mcp-config from the preprod overlay
+      # (#835) while radar-immo-mcp exists and rolls it (pod-template annotation =
+      # the ConfigMap resourceVersion) when that ConfigMap changed. The preprod
+      # Ingress stays operator-applied (no Ingress grant).
       - name: Roll preprod deployments to pushed sha
         id: roll
         env:
@@ -809,8 +818,8 @@ jobs:
           # radar-api ; sans ce set-image il restait sur son ancien registre/tag
           # (constat k8s 2026-09-11 : ancien tag privé pendant que
           # api/ui étaient sur ghcr.io/…:1a1d218). Guardé : absent ⇒ skip. Le
-          # Deployment est patché seulement (pas d'apply de 40-immo-mcp ici, cf.
-          # NOTE ci-dessus : namespace hardcodé prod + Role préprod sans CM/SVC).
+          # Deployment est patché seulement : son ConfigMap immo-mcp-config vient
+          # du reconcile ci-dessus (#835), son spec n'est pas réappliqué.
           if kubectl -n "$NAMESPACE" get deploy radar-immo-mcp >/dev/null 2>&1; then
             kubectl -n "$NAMESPACE" set image deploy/radar-immo-mcp \
               mcp="${IMAGE_PREFIX}/radar-api:${SHA}"
@@ -969,8 +978,10 @@ jobs:
       # and independent gate in promote-prod. Gated by
       # REFRESH_CRONJOB_PREPROD_ENABLED — armed by the owner AFTER the diag PASS.
       # Needs batch/cronjobs on the preprod deployer
-      # (deploy/k8s/11-…rbac.yaml, owner-applied). Once live, the CronJobs run
-      # nightly (03:17 scrape / 04:30 projection) → refresh on preprod.immo.
+      # (deploy/k8s/11-…rbac.yaml, owner-applied). Once live, radar-refresh-pv runs
+      # at 00:00, 06:00, 12:00, 18:00 UTC (prod: 05:00, 11:00, 17:00, 23:00), and
+      # radar-refresh-pending-watchdog every 5 min requests the deletion of a refresh pod still Pending
+      # 15 min after creation (its SA/Role are in the same 11-…rbac.yaml).
       - name: Deploy refresh CronJobs (preprod)
         if: ${{ vars.REFRESH_CRONJOB_PREPROD_ENABLED == 'true' }}
         env:
@@ -985,7 +996,7 @@ jobs:
           kustomize edit set image ghcr.io/rhanka/radar-api=ghcr.io/rhanka/radar-api:${SHA}
           kustomize build --load-restrictor LoadRestrictionsNone . | kubectl -n "$NAMESPACE" apply -f -
           echo "refresh CronJobs deployed to ${NAMESPACE} (radar-api:${SHA}, suspend:false):"
-          kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv -o wide || true
+          kubectl -n "$NAMESPACE" get cronjob radar-refresh-pv radar-refresh-pending-watchdog -o wide || true
 
       - name: Deployment status — success (preprod)
         if: success() && steps.deployment.outputs.id != ''
@@ -1348,9 +1359,16 @@ jobs:
           while :; do
             complete="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Complete")].status}' 2>/dev/null || true)"
             failed="$(kubectl -n "$NAMESPACE" get job "$JOB" -o 'jsonpath={.status.conditions[?(@.type=="Failed")].status}' 2>/dev/null || true)"
-            if [ "$complete" = "True" ]; then echo "db-migrate: Job $JOB Complete"; break; fi
+            if [ "$complete" = "True" ]; then
+              echo "db-migrate: Job $JOB Complete"
+              # Bounded summary written by dist/db/migrate.js (status + NOTICE counts, e.g. 0013
+              # deleted NULL-city rows — GH #812); readable without pods/log.
+              echo "db-migrate summary: $(kubectl -n "$NAMESPACE" get pods -l job-name="$JOB" -o 'jsonpath={range .items[*]}{.status.containerStatuses[0].state.terminated.message}{end}' 2>/dev/null || true)"
+              break
+            fi
             if [ "$failed" = "True" ]; then
               echo "::error title=DB migrate FAILED (prod)::$JOB — aborting promotion BEFORE set-image"
+              echo "db-migrate summary: $(kubectl -n "$NAMESPACE" get pods -l job-name="$JOB" -o 'jsonpath={range .items[*]}{.status.containerStatuses[0].state.terminated.message}{end}' 2>/dev/null || true)"
               kubectl -n "$NAMESPACE" logs "job/$JOB" --tail=80 || true
               # Backstop: kill the in-cluster Job so a hung migration (blocked
               # ALTER/CREATE INDEX) actually stops — the `exit 1` only ends the CI
@@ -1401,7 +1419,9 @@ jobs:
           fi
 
       # §6-prod DEPLOY REFRESH CRONJOB (prod) — jumeau prod de l'étape préprod :
-      # applique + dé-suspend `radar-refresh-pv` dans radar-immobilier via
+      # applique + dé-suspend `radar-refresh-pv` (05:00, 11:00, 17:00, 23:00 UTC)
+      # et son gardien `radar-refresh-pending-watchdog` (toutes les 5 min, SA/Role
+      # dans deploy/k8s/10-rbac.yaml) dans radar-immobilier via
       # l'overlay refresh-cronjobs-prod. Placée APRÈS la promotion des images :
       # le CronJob doit porter exactement l'empreinte que les Deployments
       # viennent de recevoir, jamais une plus ancienne ni une plus récente.
@@ -1446,6 +1466,14 @@ jobs:
             exit 1
           fi
           echo "refresh CronJob armed: suspend=${live_suspend}, image=${live_image}"
+          # Même preuve pour le gardien des pods Pending, rendu par le même overlay.
+          dog_suspend="$(kubectl -n "$NAMESPACE" get cronjob radar-refresh-pending-watchdog -o jsonpath='{.spec.suspend}')"
+          dog_image="$(kubectl -n "$NAMESPACE" get cronjob radar-refresh-pending-watchdog -o jsonpath='{.spec.jobTemplate.spec.template.spec.containers[0].image}')"
+          if [ "$dog_suspend" = "true" ] || [ "$dog_image" != "${IMAGE_PREFIX}/radar-api@${DIG_API}" ]; then
+            echo "::error title=Refresh pending watchdog not armed as expected::suspend='${dog_suspend}' image='${dog_image}' expected image='${IMAGE_PREFIX}/radar-api@${DIG_API}'"
+            exit 1
+          fi
+          echo "refresh pending watchdog armed: suspend=${dog_suspend}, image=${dog_image}"
 
       # Le saut de l'étape ci-dessus est SILENCIEUX par défaut : une promotion
       # verte ne prouve alors rien sur le rafraîchissement. Même parti pris que

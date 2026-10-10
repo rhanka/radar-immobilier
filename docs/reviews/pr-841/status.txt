@@ -1,0 +1,12 @@
+exit=0 astra round1
+exit=0 sol round1
+exit=0 astra round2
+exit=0 sol round2
+exit=0 astra round3
+exit=0 sol round3
+exit=0 astra round4
+exit=0 sol round4
+exit=0 astra round5
+exit=0 sol round5
+exit=0 astra round6
+exit=0 sol round6

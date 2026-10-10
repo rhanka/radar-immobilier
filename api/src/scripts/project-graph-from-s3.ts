@@ -28,6 +28,8 @@
  *   { nodes: [{ id, label, file_type? }], links: [{ source, target, relation }] }
  */
 
+import { writeFile } from "node:fs/promises";
+
 import { loadConfig, resolveGraphS3Config } from "../config.js";
 import { createLogger } from "../logger.js";
 import { createDb } from "../db/client.js";
@@ -81,6 +83,7 @@ async function main(): Promise<void> {
   let aborted = 0;
   let totalDeletedNodes = 0;
   let totalDeletedEdges = 0;
+  let totalDeletedStaleEdges = 0;
   const abortedCities: string[] = [];
 
   for (const key of keys) {
@@ -124,6 +127,7 @@ async function main(): Promise<void> {
       const result = await upsertGraphAtomic(db, citySlug, graphJson);
       totalDeletedNodes += result.deletedNodes;
       totalDeletedEdges += result.deletedEdges;
+      totalDeletedStaleEdges += result.deletedStaleEdges;
       if (result.aborted) {
         aborted++;
         abortedCities.push(citySlug);
@@ -144,6 +148,7 @@ async function main(): Promise<void> {
             edges: result.edgeCount,
             deletedNodes: result.deletedNodes,
             deletedEdges: result.deletedEdges,
+            deletedStaleEdges: result.deletedStaleEdges,
           },
           "project-graph-from-s3: ville projetée",
         );
@@ -164,10 +169,16 @@ async function main(): Promise<void> {
       total: keys.length,
       deletedNodes: totalDeletedNodes,
       deletedEdges: totalDeletedEdges,
+      deletedStaleEdges: totalDeletedStaleEdges,
       ...(abortedCities.length > 0 ? { abortedCities } : {}),
     },
     "project-graph-from-s3: terminé",
   );
+  // ≤ 4 KiB summary in the termination message, readable by the run-job workflow with the
+  // preprod credential, which has no pods/log (GH #812).
+  await writeFile("/dev/termination-log", JSON.stringify({ event: "project-graph-from-s3:report", ok, aborted, skipped,
+    errors, total: keys.length, deletedNodes: totalDeletedNodes, deletedEdges: totalDeletedEdges,
+    deletedStaleEdges: totalDeletedStaleEdges, abortedCities }).slice(0, 4000)).catch(() => undefined);
 
   await pool.end();
   // Visibilité d'échec : exit !=0 si au moins une ville abortée OU une erreur.
