@@ -9,10 +9,10 @@
 
 function fail(msg) { print "bascule-crons: " msg > "/dev/stderr"; bad = 1 }
 
-/^[^ #][^:]*:/ { inon = ($0 ~ /^"?on"?:[ \t]*$/); insched = 0; next }
+/^[^ #][^:]*:/ { inon = ($0 ~ /^"?on"?:[ \t]*(#.*)?$/); insched = 0; next }
 !inon { next }
 /^[ \t]*(#.*)?$/ { next }
-/^  [A-Za-z_"-]/ { insched = ($0 ~ /^  schedule:[ \t]*$/); next }
+/^  [A-Za-z_"-]/ { insched = ($0 ~ /^  schedule:[ \t]*(#.*)?$/); next }
 !insched { next }
 {
   line = $0
