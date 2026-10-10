@@ -87,9 +87,10 @@ const FILL_COLOR = ["get", "score"] as unknown as ExpressionSpecification;
 
 // Flush des microtâches (import dynamique maplibre + onMount + effets Svelte) :
 // les timers sont factices, mais les promesses/effets restent sur la vraie
-// file de microtâches.
+// file de microtâches. Vitest 5 resolves a mocked dynamic import over more
+// microtask turns than Vitest 3 (12 no longer suffice), hence the margin.
 async function flushMicrotasks(): Promise<void> {
-  for (let i = 0; i < 12; i += 1) await Promise.resolve();
+  for (let i = 0; i < 100; i += 1) await Promise.resolve();
   await tick();
 }
 
