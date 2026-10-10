@@ -501,6 +501,7 @@ function assertQuiesced() {
     const spec = run("kubectl", ["-n", ns, "get", "deploy", d, "-o", "jsonpath={.spec.replicas}"], { capture: true, allowFail: true });
     if (spec.status !== 0) { problems.push(`deploy/${d} illisible (${spec.stderr.trim() || "absent ?"})`); continue; }
     const cur = run("kubectl", ["-n", ns, "get", "deploy", d, "-o", "jsonpath={.status.replicas}"], { capture: true, allowFail: true });
+    if (cur.status !== 0) { problems.push(`deploy/${d} status.replicas illisible (status ${cur.status}) — drain inconnu`); continue; }
     const specR = (spec.stdout || "0").trim() || "0";
     const curR = (cur.stdout || "0").trim() || "0";
     if (specR !== "0" || curR !== "0") problems.push(`deploy/${d} non quiesce (spec.replicas=${specR}, status.replicas=${curR})`);
@@ -623,6 +624,7 @@ function cmdQuiesce() {
     }
     for (const c of presentCrons) {
       const r = run("kubectl", ["-n", ns, "get", "cronjob", c, "-o", "jsonpath={.spec.suspend}"], { capture: true, allowFail: true });
+      if (r.status !== 0) die(`quiesce — suspend d'origine de cronjob/${c} illisible (status ${r.status}) : refusé avant toute mutation.`);
       state.cronjobs[c] = (r.stdout || "").trim() === "true";
     }
     writeFileSync(statePath, `${JSON.stringify(state)}\n`, { mode: 0o600 });
@@ -630,7 +632,8 @@ function cmdQuiesce() {
   }
   // Appliquer le quiesce (idempotent).
   for (const d of deployments) run("kubectl", ["-n", ns, "scale", `deploy/${d}`, "--replicas=0"]);
-  for (const c of presentCrons) run("kubectl", ["-n", ns, "patch", "cronjob", c, "-p", '{"spec":{"suspend":true}}'], { allowFail: true });
+  const unsuspended = presentCrons.filter((c) => run("kubectl", ["-n", ns, "patch", "cronjob", c, "-p", '{"spec":{"suspend":true}}'], { allowFail: true }).status !== 0);
+  if (unsuspended.length) die(`quiesce — patch suspend=true a échoué pour : ${unsuspended.join(", ")} (l'un-quiesce always() restaure l'état enregistré).`);
   // Attendre le drain (status.replicas → 0) pour que G2 passe immédiatement après.
   const deadline = Date.now() + Number(opt("QUIESCE_TIMEOUT", "300")) * 1000;
   // Drainer les Jobs EN VOL des cronjobs suspendus. Un Job déjà lancé continue
@@ -642,7 +645,7 @@ function cmdQuiesce() {
   if (presentCrons.length) {
     const jr = run("kubectl", ["-n", ns, "get", "jobs", "-o", "json"], { capture: true, allowFail: true });
     if (jr.status !== 0) {
-      warn(`quiesce — liste des Jobs illisible (${(jr.stderr || "").trim() || "kubectl get jobs a échoué"}) ; drain des Jobs en vol sauté (G2 reste la barrière).`);
+      die(`quiesce — liste des Jobs illisible (${(jr.stderr || "").trim() || "kubectl get jobs a échoué"}) : drain des Jobs en vol inconnu, refusé.`);
     } else {
       let items = [];
       try { items = JSON.parse(jr.stdout || "{}").items || []; } catch { items = []; }
@@ -653,14 +656,15 @@ function cmdQuiesce() {
         const name = j?.metadata?.name;
         if (owner && active && name) {
           warn(`quiesce — Job en vol ${name} (cronjob ${owner.name}, active) → suppression pour libérer le restore.`);
-          run("kubectl", ["-n", ns, "delete", "job", name, "--wait=false"], { allowFail: true });
+          const del = run("kubectl", ["-n", ns, "delete", "job", name, "--wait=false"], { allowFail: true });
+          if (del.status !== 0) warn(`quiesce — suppression du Job ${name} a échoué (status ${del.status}) ; attente jusqu'au délai, G2 tranchera.`);
           drained.push(name);
         }
       }
       for (const name of drained) {
         for (;;) {
-          const g = run("kubectl", ["-n", ns, "get", "job", name, "-o", "jsonpath={.status.active}"], { capture: true, allowFail: true });
-          const stillActive = g.status === 0 && (g.stdout || "").trim() !== "" && (g.stdout || "").trim() !== "0";
+          const g = run("kubectl", ["-n", ns, "get", "job", name, "--ignore-not-found", "-o", "jsonpath={.status.active}"], { capture: true, allowFail: true });
+          const stillActive = g.status !== 0 || ((g.stdout || "").trim() !== "" && (g.stdout || "").trim() !== "0");
           if (!stillActive) { log(`Job en vol ${name} drainé (supprimé/inactif).`); break; }
           if (Date.now() >= deadline) { warn(`quiesce — Job en vol ${name} pas encore disparu dans le délai ; G2 tranchera.`); break; }
           spawnSync("bash", ["-lc", "sleep 5"], { stdio: "ignore" });
@@ -670,8 +674,9 @@ function cmdQuiesce() {
   }
   for (const d of deployments) {
     for (;;) {
-      const cur = run("kubectl", ["-n", ns, "get", "deploy", d, "-o", "jsonpath={.status.replicas}"], { capture: true, allowFail: true }).stdout.trim();
-      if (!cur || cur === "0") { log(`deploy/${d} drainé (status.replicas=${cur || "0"})`); break; }
+      const cr = run("kubectl", ["-n", ns, "get", "deploy", d, "-o", "jsonpath={.status.replicas}"], { capture: true, allowFail: true });
+      const cur = cr.status === 0 ? (cr.stdout || "").trim() : `<illisible, status ${cr.status}>`;
+      if (cr.status === 0 && (!cur || cur === "0")) { log(`deploy/${d} drainé (status.replicas=${cur || "0"})`); break; }
       if (Date.now() >= deadline) die(`quiesce — deploy/${d} non drainé (status.replicas=${cur}) dans le délai.`);
       spawnSync("bash", ["-lc", "sleep 5"], { stdio: "ignore" });
     }
@@ -870,7 +875,8 @@ function runJobFromTemplate({ tmpl, jobName, vars, timeoutSec, failClosed = true
   const rendered = join(dir, `${jobName}.rendered.yaml`);
   writeFileSync(rendered, renderTemplate(join(import.meta.dirname, tmpl), vars), { mode: 0o600 });
   // Jobs immuables : on supprime l'éventuelle instance précédente (idempotent).
-  run("kubectl", ["-n", ns, "delete", "job", jobName, "--ignore-not-found"], { allowFail: true });
+  const delPrev = run("kubectl", ["-n", ns, "delete", "job", jobName, "--ignore-not-found"], { allowFail: true });
+  if (delPrev.status !== 0) die(`Job ${jobName} — suppression de l'instance précédente a échoué (status ${delPrev.status}) : refusé (un ancien Job ne doit pas passer pour neuf).`);
   run("kubectl", ["-n", ns, "apply", "-f", rendered]);
   // uid of THIS Job instance: its verdict is read only from its own pods (a pod of
   // the deleted previous instance may still be listed under the same job-name).
@@ -883,7 +889,8 @@ function runJobFromTemplate({ tmpl, jobName, vars, timeoutSec, failClosed = true
     // STATUS-ONLY : un seul get -o json, interprété par classifyJobStatus.
     const st = run("kubectl", ["-n", ns, "get", "job", jobName, "-o", "jsonpath={.status}"], { capture: true, allowFail: true });
     let status = {};
-    try { status = st.stdout && st.stdout.trim() ? JSON.parse(st.stdout) : {}; } catch { status = {}; }
+    // Parsed only from a SUCCESSFUL read; a failed/interrupted read is pending.
+    try { status = st.status === 0 && st.stdout && st.stdout.trim() ? JSON.parse(st.stdout) : {}; } catch { status = {}; }
     const v = classifyJobStatus(status);
     if (v.done && v.ok) { log(`Job ${jobName} terminé OK (.status=succeeded)`); return { ok: true, state: "succeeded", jobName, uid }; }
     if (v.done && !v.ok) {
@@ -1112,7 +1119,8 @@ function cmdForceRefresh() {
 
   // Job immuable : purge une éventuelle instance homonyme (rejeu) puis crée depuis
   // le CronJob. create --from=cronjob ignore spec.suspend (précipitation à la demande).
-  run("kubectl", ["-n", ns, "delete", "job", jobName, "--ignore-not-found"], { allowFail: true });
+  const delPrev = run("kubectl", ["-n", ns, "delete", "job", jobName, "--ignore-not-found"], { allowFail: true });
+  if (delPrev.status !== 0) die(`force-refresh — suppression du Job ${jobName} précédent a échoué (status ${delPrev.status}) : refusé.`);
   run("kubectl", ["-n", ns, "create", "job", jobName, `--from=cronjob/${cronjob}`]);
   log(`Job ${ns}/${jobName} créé depuis cronjob/${cronjob} — refresh précipité (hors planning).`);
 
@@ -1120,7 +1128,8 @@ function cmdForceRefresh() {
   for (;;) {
     const st = run("kubectl", ["-n", ns, "get", "job", jobName, "-o", "jsonpath={.status}"], { capture: true, allowFail: true });
     let status = {};
-    try { status = st.stdout && st.stdout.trim() ? JSON.parse(st.stdout) : {}; } catch { status = {}; }
+    // Parsed only from a SUCCESSFUL read; a failed/interrupted read is pending.
+    try { status = st.status === 0 && st.stdout && st.stdout.trim() ? JSON.parse(st.stdout) : {}; } catch { status = {}; }
     const v = classifyJobStatus(status);
     if (v.done && v.ok) { log(`force-refresh OK — Job ${jobName} terminé (.status=succeeded).`); return; }
     if (v.done && !v.ok) {
@@ -1130,6 +1139,7 @@ function cmdForceRefresh() {
       if (waitComplete) {
         die(`force-refresh — Job ${jobName} non terminé dans ${completeTimeoutSec}s (FORCE_REFRESH_WAIT_COMPLETE=1) — inspecter in-cluster (0 logs runner).`);
       }
+      if (st.status !== 0) die(`force-refresh — état du Job ${jobName} illisible (status ${st.status}) au délai : démarrage non confirmé.`);
       // Démarrage confirmé sans échec : le balayage se poursuit en tâche de fond
       // (sémantique CronJob). VERT (async) — suivi via le rapport durable
       // refresh/018/sweep/latest.json et `kubectl get job`.
