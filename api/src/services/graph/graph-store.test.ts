@@ -2163,6 +2163,28 @@ describe.skipIf(!DB_AVAILABLE)("DB-bound: upsertGraphAtomic (atomique + gate)", 
     await cleanCity(db, city);
   });
 
+  it("(j) declared mode refuses baseline exclusions (review SOL-853-01) — nothing written", async () => {
+    const db = await getDb();
+    const city = "__test_declared_exclusive__";
+    await cleanCity(db, city);
+    await upsertGraphAtomic(db, city, juneGraph);
+    const { projectCityInTransaction, prepareCityProjection } = await import("./graph-store.js");
+
+    await expect(
+      db.transaction((tx) =>
+        projectCityInTransaction(tx, prepareCityProjection(city, julyGraph), {
+          declared: declare(["lot-june", "bylaw-foreign"]),
+          baselineExcludeIds: new Set(["muni"]),
+        }),
+      ),
+    ).rejects.toThrow(/exclusive/);
+    const after = await cityIds(db, city);
+    expect(after.ids).toEqual(["bylaw-foreign", "lot-june", "muni"]);
+    expect(after.props.get("muni")?.properties).toEqual({ flag: "x", name: "Brigham" });
+
+    await cleanCity(db, city);
+  });
+
   it("(i) gate2 is evaluated normally: a declared removal cannot lower the complete-signal count", async () => {
     const db = await getDb();
     const city = "__test_declared_gate2__";
