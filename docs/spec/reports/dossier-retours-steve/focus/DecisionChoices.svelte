@@ -84,7 +84,7 @@
             <h4 id={`question-${question.key}`}>{question.question}</h4>
             <span class="badge" class:warning={question.mode === 'multi'}>{question.mode === 'multi' ? 'plusieurs réponses' : 'une seule réponse'}</span>
           </div>
-          {#if question.decided}<p class="decided" data-decided={question.decided.option}><span class="badge selected">Tranchée · actée par l’owner le {question.decided.date}</span> {question.decided.note}</p>{/if}
+          {#if question.decided}<p class="decided" data-decided={question.decided.option}><span class="badge selected">Tranchée · {question.decided.date}</span> {question.decided.note}</p>{/if}
           <p class="roles" data-decides={question.decides}><span class="badge step" data-step={question.step}>Étape {question.step} · {question.decides} décide</span> <span class="badge">Consulté : {question.consulted}</span>{#if question.family === 'générique'} <span class="badge generic">Décision générique · sentropic, engram, track</span>{/if}{#if question.decides === 'Fabien'} <span class="role-note">validation technique, prise telle quelle sauf incohérence</span>{:else} <span class="role-note">après les décisions de Fabien</span>{/if}</p>
           <p class="intro" data-intro>{question.intro}</p>
           <p class="deps" data-depends-on={question.dependsOn.join(' ')}>

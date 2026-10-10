@@ -1,4 +1,4 @@
-// Les choix exposés sont exactement les décisions G1 à G8 (annexe II) et D1 à D17 (ch. 10) du dossier
+// Les choix exposés sont exactement les décisions G1 à G8 (§9.3) et D1 à D17 (ch. 9) du dossier
 // « retours de Steve », dans l'ordre de décision (Fabien, puis Farid). Une réponse par décision.
 // Rien n'est ratifié ici : la page ne produit qu'un brouillon local exportable.
 import roles from './roles.json' with { type: 'json' };
@@ -10,24 +10,24 @@ import { GENERIC } from './generic-decisions.js';
 export const DECISIONS_TARGET_URL = 'https://github.com/rhanka/radar-immobilier/pull/794';
 export const DECISIONS_TARGET_LABEL = 'Ouvrir la PR #794 sur GitHub';
 // The dossier carries no revision label: its date stands for the revision.
-export const DOSSIER_REVISION = '2026-10-03';
+export const DOSSIER_REVISION = '2026-10-10';
 // The "Je suis" selector. This dossier names no validation beside the decider,
 // so a person's own decisions are the ones they decide.
 export const PEOPLE = ['Farid', 'Fabien'];
 
-// Ordre de décision : Fabien décide d'abord G1 à G8 puis ses huit décisions immo (D1 actée, architecture,
+// Ordre de décision : Fabien décide d'abord G1 à G8 puis ses huit décisions immo (D1 tranchée, architecture,
 // données, jeu de référence, contrat d'entrée D17) ; une fois décidées, Farid ne les rouvre pas, sauf incohérence avec une autre décision.
 // Farid décide ensuite les neuf siennes (produit, affichage, priorités), en connaissant
 // les choix de Fabien. Chaque décision : une introduction (problème, pourquoi maintenant,
 // ce qui change selon le choix, renvois au dossier), ses dépendances, puis des options
 // avec avantages et inconvénients. Identifiants, décideurs et options inchangés.
 export const STEPS = [
-  { id: 'fabien', step: 1, decides: 'Fabien', label: 'Étape 1 · Fabien décide d’abord (décisions génériques G1 à G8, puis architecture, données, jeu de référence)' },
-  { id: 'farid', step: 2, decides: 'Farid', label: 'Étape 2 · Farid décide ensuite (produit, affichage, priorités)' },
+  { id: 'fabien', step: 1, decides: 'Fabien', label: 'Tour de Fabien · Fabien décide d’abord (décisions génériques G1 à G8, puis architecture, données, jeu de référence)' },
+  { id: 'farid', step: 2, decides: 'Farid', label: 'Tour de Farid · Farid décide ensuite (produit, affichage, priorités)' },
 ];
-export const SEQUENCE = 'Fabien décide d’abord les huit décisions génériques G1 à G8 (convergence sentropic + engram, §9.5 ; fiches en annexe II), puis ses huit décisions immo (D1, D2, D3, D4, D9, D10, D11, D17) : D1 et D17 sont déjà actées par Fabien (owner), ainsi que le volet « usage des 121 lignes » de D10 ; les autres sont à décider par Fabien et ne sont pas rouvertes par Farid, sauf incohérence avec une autre décision. '
-  + 'Farid décide ensuite ses neuf décisions (D5, D6, D7, D8, D12, D13, D14, D15, D16), en connaissant les choix de Fabien. '
-  + 'Si un choix de Farid contredit un choix de Fabien (par exemple D1 « tout conserver » avec D2 = (c), une table de contrôle qui n’affiche rien), on revient à Fabien sur ce seul point.';
+export const SEQUENCE = 'Tour de Fabien. Fabien tranche d\'abord ses 16 décisions : architecture, IA, jeu de référence et données. Deux sont tranchées (D1, D17) et une l\'est en partie (D10). Ses choix valent tels quels, sauf incohérence avec ceux de Farid (règle posée par Fabien le 04/10 à 14:22). '
+  + 'Tour de Farid. Farid tranche ensuite ses 9 décisions, une fois les choix de Fabien posés, dans cet ordre : montrer les retours de Steve : D5 (auteur affiché), D6 (qui les voit, noms masqués), D14 (où les montrer d\'abord), D15 (en parallèle du rafraîchissement ou après) ; sélection C : D7 (règle de C), D8 (qui tranche quand la règle et Steve divergent), D16 (ce qu\'on demande et renvoie à Steve), D12 (comment C est montrée), D13 (seuil de remplacement). '
+  + 'Incohérence. Si un choix de Farid contredit un choix de Fabien, on revient à Fabien sur ce seul point.';
 
 const q = (key, question, recommended, text, options) => ({
   key, mode: 'single', question, recommended, options,
@@ -38,17 +38,17 @@ const q = (key, question, recommended, text, options) => ({
 const o = (key, title, pros, cons, description) => ({ key, title, pros, cons, description });
 
 export const questions = [
-  // ——— Étape 1 · Fabien : décisions génériques G1 à G8 (convergence sentropic + engram), puis immo ———
+  // ——— Tour de Fabien : décisions génériques G1 à G8 (convergence sentropic + engram), puis immo ———
   ...GENERIC.map(g => q(g.key, g.question, g.recommended, { intro: g.intro, dependsOn: g.dependsOn, recommendation: g.recommendation, family: 'générique' },
     g.options.map(option => o(option.key, option.title, option.pros, option.cons, option.description)))),
   q('D1', 'D1 — Périmètre de conservation des retours de Steve', 'b', {
-    decided: { option: 'b', by: 'Fabien (owner)', date: '2026-10-04', note: 'Actée par Fabien (owner) le 2026-10-04 : on conserve tous les retours de Steve ; il en a besoin pour le jeu de référence.' },
-    intro: 'Décision actée par Fabien (owner) le 2026-10-04 : on conserve tous les retours de Steve ; c’est sa décision, il en a besoin pour le jeu de référence. '
+    decided: { option: 'b', by: 'Fabien (owner)', date: '2026-10-02', note: 'Tranchée : demande de Fabien (owner) du 2026-10-02. Trace : « je voudrais que tous les retours de steve soient stockés en base (données tableur), attachés aux éléments associés (ville, zone etc), suivant l\'annotation qu\'on avait prévu de faire » (demande du 02/10, 17:39).' },
+    intro: 'Décision tranchée : demande de Fabien (owner) du 2026-10-02 : on conserve tous les retours de Steve ; c’est sa décision, il en a besoin pour le jeu de référence. '
       + 'Steve a livré un classeur de 7 feuilles (124 lignes de triage, 121 contrôles d’exclusion, 77 constats, 26 règles, 28 codes de motif) et une analyse écrite qui pose ses trois critères (§2, §4.2). '
       + 'Ce choix fixe ce que l’équipe pourra montrer sur les objets du radar et ce que le jeu de référence pourra mesurer (D10). '
       + 'Conséquence pour D2 : « tout conserver » suppose un modèle qui garde toutes les lignes, l’option a (ou b) de D2.',
     dependsOn: [],
-    recommendation: 'Tranchée : (b), tout conserver, actée par Fabien (owner) le 2026-10-04 ; les options a et c restent affichées pour mémoire.',
+    recommendation: 'Tranchée : (b), tout conserver, tranchée : demande de Fabien (owner) du 2026-10-02 ; les options a et c restent affichées pour mémoire.',
   }, [
     o('a', '(a) Triage seul',
       ['Rapide : une feuille, 124 lignes.', 'Moins de rattachements à vérifier à l’import.'],
@@ -63,7 +63,7 @@ export const questions = [
   q('D2', 'D2 — Modèle de données immo : adoption du générique', 'a', {
     intro: 'La convergence sentropic + engram (G2, G7) attribue les annotations, révisions et validations à un paquet générique, @sentropic/annotations, et le jeu de référence à engram ; elle recommande qu’immo ne construise pas ses propres tables. '
       + 'Il reste à décider comment immo s’y inscrit : en premier adoptant, qui apporte un profil (schéma d’étiquettes : verdicts, 28 motifs, critères, sens) et ses données (graphe, documents, rattachements geo, classeur de Steve), ou en construisant d’abord six tables à lui. '
-      + 'L’état initial et l’état proposé, objet par objet et par propriétaire, sont à l’annexe III et au §9.2 ; les besoins de Steve au §9.1. '
+      + 'L’état initial et l’état proposé, objet par objet et par propriétaire, sont à l’annexe C et au §8.2 ; les besoins de Steve au §8.1. '
       + 'L’import (L1), l’affichage (U1, U2) et le jeu de référence C (O1) en dépendent.',
     dependsOn: ['D1', 'G2', 'G7'],
     recommendation: '(a) : aucun double travail, les besoins de Steve deviennent la recette du paquet générique, et immo ne garde que ce qui lui est propre (profil, données, résolveur d’ancres, écrans). (b) ne vaut que si le paquet générique prend un retard non borné.',
@@ -82,10 +82,10 @@ export const questions = [
       ['Steve ne voit rien dans l’outil tant que le paquet n’est pas livré.', 'Aucun délai : la recette de Steve n’est pas planifiée.']),
   ]),
   q('D3', 'D3 — Ancre signal et correctif B0', 'a', {
-    intro: 'Une ancre est la référence qui attache une annotation à un objet du radar (signal, ville, zone, lot…) ; c’est une ligne de la table annotation_targets (ville + id texte, §9.2). '
-      + 'Aujourd’hui l’annotation d’un signal est cassée : l’UI envoie l’identifiant texte du graphe (« signal-… »), alors que l’API exige un UUID, identifiant aléatoire de l’ancienne table signals que plus aucun code n’alimente (§9.3, défaut 1). '
-      + '« B0 » est le petit lot correctif qui répare cela (§9.6). Sans ancre fiable, aucun retour de Steve ne s’affiche sur son signal. '
-      + 'Risque connu : une ré-extraction du graphe peut supprimer ou renommer des identifiants (graph-store.ts, annexe III).',
+    intro: 'Une ancre est la référence qui attache une annotation à un objet du radar (signal, ville, zone, lot…) ; c’est une ligne de la table annotation_targets (ville + id texte, §8.2). '
+      + 'Aujourd’hui l’annotation d’un signal est cassée : l’UI envoie l’identifiant texte du graphe (« signal-… »), alors que l’API exige un UUID, identifiant aléatoire de l’ancienne table signals que plus aucun code n’alimente (annexe C.7, défaut 1). '
+      + '« B0 » est le petit lot correctif qui répare cela (§8.4). Sans ancre fiable, aucun retour de Steve ne s’affiche sur son signal. '
+      + 'Risque connu : une ré-extraction du graphe peut supprimer ou renommer des identifiants (graph-store.ts, annexe C).',
     dependsOn: ['G2', 'D2'],
     recommendation: '(a) avec B0 tout de suite : c’est le seul choix qui rend l’annotation de signal utilisable maintenant et qui ne perd rien à la ré-extraction. Une clé métier stable reste un suivi séparé.',
   }, [
@@ -101,7 +101,7 @@ export const questions = [
   ]),
   q('D4', 'D4 — Conformité sentropic et suppression', 'a', {
     intro: 'Modifiée par G2 et G3 : les annotations de Steve passent par @sentropic/annotations (révisions immuables, tombstone) ; D4 ne porte plus que sur les commentaires de l’équipe et la conformité de lecture. '
-      + 'Les commentaires de l’équipe doivent suivre le contrat du module comments de sentropic, la plateforme commune (exigence E3, §9.3). '
+      + 'Les commentaires de l’équipe doivent suivre le contrat du module comments de sentropic, la plateforme commune (exigence E3, annexe C.7). '
       + 'Ce module, en version 0.2.0, supprime physiquement un commentaire ; or l’owner a décidé (O1, dossier COLLAB) qu’une suppression laisse une trace (« tombstone ») et une durée de rétention. '
       + 'Il faut décider comment être conforme sans contredire O1, avant l’import (L1) et l’API de lecture (L2). '
       + 'Concrètement : peut-on supprimer un commentaire de l’équipe, et par quel chemin ?',
@@ -118,47 +118,48 @@ export const questions = [
       ['Conformité intégrale, aucun écart.', 'Aucune migration ultérieure vers le port complet.'],
       ['Bloquant tant que sentropic n’a pas livré, sans date.', 'Aucun fil de commentaires pour l’équipe en attendant.']),
   ]),
-  q('D9', 'D9 — Sens de « double annotation » (clôture recommandée)', '4', {
+  q('D9', 'D9 — Sens de « double annotation »', 'd', {
     intro: 'La demande initiale parle de « double annotation (ancienne / nouvelle) » sans dire ce qui est comparé à quoi. '
-      + 'La revue du plan (annexe IV) a retenu une lecture : la provenance par champ, où chaque étiquette du jeu de référence C v2 garde sa source (steve_v1, steve_v2a, steve_v2, steve_test, annotations IA individuelles, majorité IA) (§4.9). '
+      + 'La revue du plan (annexe B.11) a retenu une lecture : la provenance par champ, où chaque étiquette du jeu de référence C v2 garde sa source (steve_v1, steve_v2a, steve_v2, steve_test, annotations IA individuelles, majorité IA) (§4.8). '
       + 'Les trois lectures initiales restent mesurables dans ce schéma, et D10 fixe déjà l’usage de chaque provenance. '
       + 'La proposition est de clore D9 en la fusionnant dans D10.',
     dependsOn: ['G1', 'D2'],
     recommendation: '(d) : clore D9. La provenance par champ couvre les trois lectures (Steve contre radar avec B′ recalculé, ancienne contre nouvelle annotation de Steve, rapprochement E / C) ; le sujet est porté par D10.',
   }, [
-    o('1', '(a) Steve contre classification radar',
+    o('a', '(a) Steve contre classification radar',
       ['Mesure directement l’écart entre ce que Steve juge et ce que le radar montre (B aujourd’hui, C demain).', 'C’est la lecture qui sert la bascule B → C (D13).'],
       ['La classification serveur de septembre n’est pas archivée : la version radar sera reconstituée, en partie.', 'Ne mesure pas l’accord entre deux humains.']),
-    o('2', '(b) Ancienne grille de Steve contre grille C',
+    o('b', '(b) Ancienne grille de Steve contre grille C',
       ['Suit l’évolution des critères de Steve dans le temps.', 'Utile si Steve réétiquette ses lignes avec les critères C.'],
       ['Exige un second passage de Steve sur les mêmes lignes.', 'Ne dit rien de la qualité du radar.']),
-    o('3', '(c) Jeu de référence 676 contre jeu de référence Steve',
+    o('c', '(c) Jeu de référence 676 contre jeu de référence Steve',
       ['Relie l’extraction (jeu de référence E) et le ciblage (jeu de référence C).', 'Réutilise deux références déjà constituées (674/676 et le tableur).'],
       ['Compare deux questions différentes : « a-t-on extrait l’acte ? » contre « fallait-il le montrer ? ».', 'Recouvrement des deux corpus probablement faible (non vérifié).']),
-    o('4', '(d) Clore D9 : provenance par champ, portée par D10',
+    o('d', '(d) Clore D9 : provenance par champ, portée par D10',
       ['Une seule décision (D10) fixe le jeu de référence et l’usage de chaque provenance.', 'Les trois lectures restent mesurables : chaque étiquette garde sa source (label_provenance, versions de Steve).'],
       ['Le terme « double annotation » de la demande initiale sort du registre.', 'Suppose que D10 soit tranchée avec la provenance par champ explicite.']),
   ]),
-  q('D10', 'D10 — Jeu de référence #783', 'b', {
-    intro: 'Les 121 lignes retenues du relevé (51 villes) sont exposées : le pilote C v0 les a consommées et l’analyse d’écart les a lues avec toutes les colonnes de Steve (§4.1). '
-      + 'Elles ne peuvent donc pas fonder seules un test confirmatoire, quel que soit le découpage. '
-      + 'L’arbitrage de Fabien (owner) du 2026-10-05 leur donne deux usages : la mise au point des règles et des tags avec les 3 IA, et un découpage homogène par ville en train et test aveugle exploratoire pour les premiers prompts (ch. 6). '
-      + 'L’extension à de nouvelles villes attend la clarification avec Steve des points listés au §4.8 (blocs A, B et D ; 28 points à clarifier après R′ v1, §4.6) ; la mesure qui fonde D13 exige un test neuf (ch. 7).',
-    dependsOn: ['G1', 'G5', 'G7', 'D2', 'D9'],
-    recommendation: '(b) : seule option qui utilise toutes les lignes de Steve pour la mise au point tout en gardant une mesure admissible pour D13. Les résultats sur les 121 lignes restent exploratoires ; le test neuf est annoté par Steve et, sur au moins 50 cas, par un second annotateur humain (ressource unknown). Le jeu E (extraction) reste séparé et inchangé. À arbitrer avec D13 et G4 : sans second annotateur, le résultat porte la mention single-human-annotator et peut être publié ; son admissibilité pour une bascule, alors que G4 (a) exige une référence human_adjudicated pour toute promotion, reste à décider.',
+  q('D10', 'D10 — Jeu de référence de ciblage : sur quoi se mesurera la bascule', 'b', {
+    intro: 'Ce qui reste à décider. Le test étendu suffit-il à fonder la bascule (D13), ou un humain doit-il en vérifier une partie ? La réponse doit rester cohérente avec G4. '
+      + 'À savoir. La règle de C a été mise au point sur les 121 lignes, moitié aveugle comprise (chapitre 3). Sur cette moitié, son accord avec Steve est donc biaisé à la hausse.',
+    dependsOn: ['G1', 'G4', 'G5', 'G7', 'D2', 'D9'],
+    recommendation: '(JUGEMENT). C\'est la seule option qui garde le plan d\'extension et qui donne à la bascule une référence vérifiée par un humain là où elle est incertaine.',
   }, [
-    o('a', '(a) Lecture littérale : la moitié des 121 lignes en test',
-      ['Aucune annotation neuve demandée à Steve.', 'Résultats disponibles tôt, sur des données déjà relues.'],
-      ['Aucune mesure admissible pour D13 : le test est exposé.', 'Écartée par les 3 relecteurs de la revue du plan (annexe IV, A1).']),
-    o('b', '(b) 121 lignes en mise au point et en découpage exploratoire, test confirmatoire neuf',
-      ['Toutes les lignes de Steve servent : règles, tags, premiers prompts.', 'Seule voie vers une mesure admissible pour D13 (test neuf, scellé selon G5 b).', 'Fiabilité de la référence mesurée par un second annotateur humain.'],
-      ['Annotation neuve par Steve : volume unknown tant que la faisabilité n’est pas chiffrée (annexe I).', 'Second annotateur humain : ressource unknown à ce jour.']),
-    o('c', '(c) Campagne C entièrement nouvelle',
-      ['Conçue pour le besoin réel, sans biais d’affichage.', 'Peut couvrir d’emblée les 52 villes restantes avec la méthode C.'],
-      ['Comparaison moins directe avec l’historique.', 'Repart de zéro : délai et coût d’annotation les plus élevés.']),
+    o('a', '(a) Le test étendu, tel que décidé',
+      ['Aucune charge pour Steve. Un grand volume est possible. La méthode est la même que sur les 121 lignes.'],
+      ['Les annotateurs sont de la même famille que les modèles évalués : la mesure peut récompenser leurs erreurs communes. Si G4 (a) est retenue, ce test ne peut fonder aucune bascule.'],
+      'Sur les nouvelles villes, la bonne réponse est celle de l\'annotation convergée des trois modèles ; Steve n\'annote pas. Sur la moitié aveugle des 121 lignes, son classement sert aussi de référence.'),
+    o('b', '(b) Le test étendu, plus une vérification par Steve d\'une partie',
+      ['Le plan et son volume sont gardés. Steve ne traite qu\'une partie des cas. L\'échantillon mesure l\'erreur de la référence machine.'],
+      ['Elle demande du temps à Steve. La référence mêle deux provenances : G4 doit dire si elle suffit. Les résultats sont publiés par provenance.'],
+      'Comme (a). Puis, avant que les candidats passent sur le test, Steve annote à l\'aveugle deux groupes de cas pris dans les nouvelles villes, sans voir les étiquettes des modèles : ceux où les modèles ne convergent pas, et un échantillon tiré au hasard des autres. La taille de l\'échantillon est fixée avant le tirage. Cette option complète la décision du 5 octobre sans la changer.'),
+    o('c', '(c) Annotation par Steve de la part nouvelle du test, avec un second annotateur humain sur une partie',
+      ['La référence est humaine, donc compatible avec G4 (a), et sa fiabilité est mesurée.'],
+      ['C\'est la charge la plus lourde pour Steve. La disponibilité d\'un second annotateur est unknown. L\'option revient sur une décision du 5 octobre.'],
+      'Steve annote les nouvelles villes du test selon le guide figé. Un second annotateur humain en annote au moins 50, sans voir les réponses de Steve. Pour le test de la bascule, cette option remplace l\'annotation convergée décidée le 5 octobre.'),
   ]),
   q('D11', 'D11 — Benchmark #782', 'a', {
-    intro: 'Le benchmark #782 compare des modèles et des réglages sur un même jeu de référence. Si on y ajoute la mesure du ciblage (B, puis C), il faut décider si elle rejoint les métriques d’extraction ou forme un volet à part (§8.2). '
+    intro: 'Le benchmark #782 compare des modèles et des réglages sur un même jeu de référence. Si on y ajoute la mesure du ciblage (B, puis C), il faut décider si elle rejoint les métriques d’extraction ou forme un volet à part (§7.3). '
       + 'Le choix fixe aussi le sort du prompt d’extraction gelé (immo-pv-extraction-v9) : lui faire produire sens, effet et portée romprait la comparabilité des campagnes v10 et v11. '
       + 'Ce que verra Farid : un tableau unique, ou deux tableaux qui ne se mélangent pas.',
     dependsOn: ['G6', 'D10'],
@@ -176,10 +177,10 @@ export const questions = [
     decided: { option: 'a', by: 'Fabien (owner)', date: '2026-10-05', note: 'Arbitrage de Fabien (owner) du 2026-10-05 : données de la ville prises à la date du signal, rien de postérieur ; colonnes L à T du classeur hors entrée.' },
     intro: 'Un modèle évalué ne doit recevoir que ce qui serait disponible en production au moment de la détection. '
       + 'Le classeur montre une fuite : une colonne de l’assistant cite, pour un signal du 2026-04-14, un second projet adopté le 2026-05-05 (§4.1). '
-      + 'Fabien (owner) a tranché le 2026-10-05 : les données de la ville entrent à la date du signal, rien de postérieur, et restent hors entrée les colonnes L à T du classeur (hors P, Q, R) comme les décisions de Steve en B, P, Q et R (§5.3). '
+      + 'Fabien (owner) a tranché le 2026-10-05 : les données de la ville entrent à la date du signal, rien de postérieur, et restent hors entrée les colonnes L à T du classeur (hors P, Q, R) comme les décisions de Steve en B, P, Q et R (annexe B.7). '
       + 'La décision fixe l’entrée des itérations de prompt (ch. 6) et du test neuf (ch. 7) ; elle précède la ré-annotation (étape 4 du plan).',
     dependsOn: ['D10'],
-    recommendation: 'Tranchée : (a), actée par Fabien (owner) le 2026-10-05. L’autre coupure (date de revue de Steve) est publiée en analyse secondaire, comme évaluation rétrospective ; le signal seul reste une condition expérimentale secondaire sur le dev.',
+    recommendation: 'Tranchée : (a), décidée par Fabien le 5 octobre. L’autre coupure (date de revue de Steve) est publiée en analyse secondaire, comme évaluation rétrospective ; le signal seul reste une condition expérimentale secondaire sur le dev.',
   }, [
     o('a', '(a) Signal + données de la ville à la date du signal',
       ['Évaluation réaliste : le modèle voit ce que la production verrait à la détection.', 'Ferme la fuite temporelle constatée dans les colonnes de l’assistant.', 'Même règle sur le dev et sur le test neuf.'],
@@ -192,11 +193,11 @@ export const questions = [
       ['Rattachement des étapes d’un même dossier (rattache_a, R-07) non couvert.', 'Pénalise les cas où Steve s’appuie sur le contexte de la ville (donnée dans immo).']),
   ]),
 
-  // ——— Étape 2 · Farid ———
+  // ——— Tour de Farid ———
   q('D5', 'D5 — Auteur des retours importés', 'c', {
-    intro: 'Steve poursuivra son annotation dans l’application (vision owner, §9.1) : ses retours importés et ses annotations futures doivent porter le même auteur. '
+    intro: 'Steve poursuivra son annotation dans l’application (vision owner, §8.1) : ses retours importés et ses annotations futures doivent porter le même auteur. '
       + 'Aujourd’hui il n’a pas de compte vérifié, et ce n’est pas lui qui lance l’import. '
-      + 'Il faut décider qui est affiché comme auteur, sans usurper son identité ni effacer celle de l’importateur (exigence E5, §9.3). '
+      + 'Il faut décider qui est affiché comme auteur, sans usurper son identité ni effacer celle de l’importateur (exigence E5, annexe C.7). '
       + 'Effet visible : la ligne « auteur » de chaque annotation dans le panneau du signal, et le nom de qui valide ou conteste.',
     dependsOn: ['G4', 'D2', 'D4'],
     recommendation: '(c) : Steve annote et valide avec son propre compte ; ses décisions importées lui sont attribuées, les textes de l’assistant gardent leur auteur et l’importateur est tracé à part. (a) ne vaut que si la création du compte tarde.',
@@ -212,7 +213,7 @@ export const questions = [
       ['Compte à créer et vérifier avant l’import.', 'Droits à cadrer : Steve annote, l’équipe ou le PO valide.']),
   ]),
   q('D6', 'D6 — Visibilité et données personnelles', 'c', {
-    intro: 'Le constat C-79 du classeur (onglet Constats transversaux, rédigé par l’assistant du triage) signale des noms de particuliers en clair dans des résumés de signaux (§12.3) ; les verbatims importés peuvent en contenir aussi. '
+    intro: 'Le constat C-79 du classeur (onglet Constats transversaux, rédigé par l’assistant du triage) signale des noms de particuliers en clair dans des résumés de signaux (§10.4) ; les verbatims importés peuvent en contenir aussi. '
       + 'Règle actuelle des notes (migration 0011) : tout utilisateur approuvé lit tout. '
       + 'Il faut décider qui voit les retours et s’ils sont caviardés avant le premier affichage (U1), au regard de la Loi 25 (exigence E9). '
       + 'Le module comments de sentropic ne masque pas les données personnelles : c’est au radar de le faire (D4, D5).',
@@ -229,45 +230,52 @@ export const questions = [
       ['Toute l’équipe voit les retours.', 'Noms de particuliers masqués dans les retours et dans les résumés de signaux : répond à C-79.'],
       ['Détection des données personnelles à écrire et tester (colonne pii_status).', 'Un caviardage peut masquer un nom utile (élu, promoteur) : règles à préciser.']),
   ]),
-  q('D7', 'D7 — Définition de C v1', 'K', {
-    intro: 'C est la nouvelle sélection de signaux proposée, alignée sur les trois critères de Steve : résidentiel, assouplissement, densification (§2.3, scène criteres-steve). Aujourd’hui, deux de ces trois critères n’ont aucune donnée au radar. '
-      + 'Steve pose une réserve : un signal dont le sens n’est pas lisible doit rester affiché (« masquer ce qui n’a pas pu être lu transformerait une lacune en dossier manqué »). '
-      + 'Il faut fixer la règle de C avant de la développer (lot C1) ; elle sera mesurée par le jeu de référence de ciblage (D10), sur la lecture de la double annotation retenue (D9). '
-      + 'Les critères K1 à K9 sont détaillés au §5.1.',
+  q('D7', 'D7 — La règle de la nouvelle sélection (C)', 'b', {
+    intro: 'C est la nouvelle sélection proposée, alignée sur les trois critères de Steve (chapitre 2). Le chapitre 3 montre comment elle trancherait. '
+      + 'Son principe doit être arrêté avant de la développer (lot C1) : c\'est ce principe que mesurera le jeu de référence (D10). '
+      + 'Les clauses de détail n\'en font pas partie ; elles ne changent que par D8.',
     dependsOn: ['D9', 'D10'],
-    recommendation: '(b), après relecture par Steve de la table de dérivation (à établir, `not run`, §9.1) : c’est la seule règle qui applique ses trois critères sans masquer ce qui n’a pas pu être lu. Aucun seuil de taille de projet ni filtre sur l’origine privée. La correspondance entre ces trois états et les verdicts P / S / N de R′ reste à arbitrer : un P calculé par R′ v1 ne vaut pas confirmation des trois critères (§5.1, §5.2).',
+    recommendation: 'À savoir avant de choisir (b). « Pertinent » n\'établit pas toujours la hausse de logements (chapitre 3).',
   }, [
-    o('S', '(a) Triplet strict pour toute visibilité',
-      ['Flux court et lisible : seulement ce qui réunit les trois critères (22 sur 73).', 'Plus simple à calculer : un signal entre ou non.'],
-      ['Masque les indéterminés : contredit la réserve explicite de Steve.', 'Perte de rappel sur les dossiers mal lus.']),
-    o('K', '(b) K1–K9 + trois états',
-      ['Respecte les trois critères et la réserve : on ne masque que ce qui est établi hors critères.', 'Trois états (confirmé, à instruire, exclu prouvé) et deux compteurs : un cas incertain n’est pas présenté comme une opportunité.'],
-      ['Le flux garde du travail manuel (les « à instruire »).', 'Exige des extractions nouvelles (sens, effet sur les unités, portée) : lot C1 de taille L.']),
-    o('T', '(c) B inchangé, critères pour trier',
-      ['Aucun changement d’appartenance, aucun risque.', 'Aucune extraction nouvelle à développer.'],
-      ['Le bruit connu (24 sur 73) persiste.', 'Ne répond pas à Steve : « ce n’est pas une question de hiérarchie ».']),
+    o('a', '(a) Seulement les signaux qui réunissent les trois critères',
+      ['Un flux court ; un calcul simple.'],
+      ['Masque ce qui n\'a pas pu être lu, contre la réserve explicite de Steve. Des dossiers mal lus sont perdus.'],
+      'C n\'affiche que les signaux dont l\'habitation, l\'assouplissement et la hausse de logements sont établis ; tout le reste est masqué. Au plus 22 lignes sur 73 resteraient, si la lecture du radar égalait la sienne. Les 12 qu\'il classe Pertinent sans que le sens soit clairement une ouverture disparaîtraient.'),
+    o('b', '(b) Règle à trois verdicts',
+      ['Applique les critères et les exclusions de Steve sans masquer ce qui n\'a pas pu être lu. Un cas incertain n\'est jamais présenté comme une opportunité.'],
+      ['Les « À surveiller » restent à trier à la main. Il faut lire ce que le radar n\'extrait pas aujourd\'hui : sens, effet sur les logements, portée, nature de la pièce. C\'est le lot C1, le plus gros.'],
+      'Un signal est Non pertinent, donc masqué avec sa raison, seulement si une exclusion de Steve est établie. Il est Pertinent si l\'habitation, le plein droit et l\'ouverture sont établis, À surveiller sinon. Pertinent et À surveiller sont affichés, avec deux compteurs séparés (chapitre 3).'),
+    o('c', '(c) Sélection B inchangée, critères pour trier',
+      ['Aucun risque.'],
+      ['Le bruit reste. Ne répond pas à Steve : « Ce n\'est pas une question de hiérarchie ».'],
+      'Aucun signal n\'entre ni ne sort ; les critères de Steve ordonnent la liste.'),
   ]),
-  q('D8', 'D8 — Cas contradictoires (Saint-Victor, Amos, CPTAQ, seconds projets, ODJ, S-RESTRICTIF)', 'a', {
-    intro: 'Certains cas ne se tranchent pas par une règle automatique : Saint-Victor (un resserrement qui favorise pourtant la densification), portée de l’exception CPTAQ, seconds projets, points d’ordre du jour, trois lignes Restriction classées « À surveiller » (§4.2, §4.8), et Amos (logement sur commerce), point du 2026-10-03 absent de la liste actuelle du §4.8. '
-      + 'Le tableur et l’analyse de Steve se contredisent parfois sur ces cas, et 7 labels de Steve contredisent ses propres règles selon la liste du tour 5, dont 4 restent en écart après R′ v1 (§2.4, §4.6). '
-      + 'Il faut décider qui les arbitre avant de geler le jeu de référence (D10) et la règle C (D7) ; sinon le jeu de référence sanctionnera le bon comportement.',
+  q('D8', 'D8 — Qui tranche quand la règle et Steve divergent', 'a', {
+    intro: 'La règle et ses ajouts. La règle proposée (chapitre 3, « Comment un signal est retenu ou écarté ») compte 15 clauses, tirées des règles que Steve a énoncées pendant le triage. Le dossier propose d\'y ajouter 7 clauses, tirées pour la plupart des codes de motif de son classeur. Par exemple, d\'après le code P-VILLE-TERRITOIRE, une concordance au schéma ou une refonte complète est Pertinente. '
+      + 'Leur effet. Les chiffres du dossier (89 accords et 24 écarts sur 113 lignes) sont calculés avec ces clauses. Mesurées une à une, elles mettent la règle d\'accord avec Steve sur 17 lignes ; deux de ces lignes (n° 94 et 100) ne peuvent être évaluées qu\'avec l\'une d\'elles. Une seule ligne passe en désaccord (n° 53). '
+      + 'Ce qu\'elles ne savent pas faire. Sur 3 lignes (n° 53, 54 et 114), la règle, avec ces clauses, donne Pertinent alors que Steve classe autrement. Seul le n° 53 tient à une clause prise seule (« Zone créée ou agrandie »). Steve y applique un critère qu\'elles n\'encodent pas : portée floue, contrainte, modification accessoire. '
+      + 'Comment elles ont été retenues. Selon une règle écrite avant le calcul : chaque clause met la règle d\'accord avec Steve sur plus de lignes qu\'elle n\'en met en désaccord ; elle passe le contrôle du seuil de remplacement (D13), avec et sans le n° 121 ; elle ne fait masquer aucune ligne que Steve montre (annexe D). '
+      + 'Ce qui est à décider. La règle ne change jamais pour améliorer un score : elle ne change que par cette décision, après l\'avis de Steve et de Mathieu. Il faut décider qui tranche ces clauses et toute modification future de la règle, et ce qui vaut en attendant. Sinon, le jeu de référence compterait comme une faute le comportement que Steve attend.',
     dependsOn: ['D7', 'D10'],
-    recommendation: '(a) : la règle reste celle du client, et les cas ouverts ne faussent pas la mesure pendant qu’ils sont arbitrés.',
+    recommendation: '',
   }, [
-    o('a', '(a) Revue métier, cas contestés en attendant',
-      ['Steve et Mathieu tranchent sur exemples et preuves : la règle reste celle du client.', 'En attendant, statut contested explicite : résultats publiés avec et sans ces cas.'],
-      ['Demande du temps à Steve et Mathieu.', 'Quelques cas restent ouverts plus longtemps.']),
-    o('b', '(b) Arbitrage par l’équipe',
-      ['Plus rapide.', 'Ne mobilise ni Steve ni Mathieu.'],
-      ['Risque de prêter à Steve une règle qu’il n’a pas posée.', 'Le jeu de référence refléterait l’avis de l’équipe, pas celui du client.']),
+    o('a', '(a) Revue par Steve et Mathieu, cas contestés en attendant',
+      ['La règle reste celle du client', 'rien n\'est réétiqueté en attendant'],
+      ['Demande du temps à Steve et à Mathieu', 'des lignes restent ouvertes'],
+      'Steve et Mathieu examinent chaque clause sur les lignes qu\'elle change. En attendant, l\'étiquette de Steve ne change pas : la ligne porte le statut « contesté », et les résultats sont publiés avec et sans elle'),
+    o('b', '(b) L\'équipe tranche, puis informe Steve',
+      ['Plus rapide'],
+      ['Risque de prêter à Steve une règle qu\'il n\'a pas posée'],
+      'L\'équipe choisit les clauses d\'après les règles écrites de Steve'),
     o('c', '(c) Statu quo',
-      ['Aucun effort.', 'Le jeu de référence peut être gelé tout de suite.'],
-      ['Cas sans statut dans le jeu de référence : mesures faussées.', 'Désaccords invisibles.']),
+      ['Aucun effort'],
+      ['L\'écart reste invisible et fausse la mesure'],
+      'La règle garde ses 15 clauses, sans ajout ; les lignes gardent leur étiquette, sans statut'),
   ]),
-  q('D12', 'D12 — Exposition A/B/C (point ouvert)', 'a', {
+  q('D12', 'D12 — Exposition A/B/C', 'a', {
     intro: 'Aujourd’hui l’écran montre la sélection B ; le sélecteur A/B a été retiré en août (§2.5). '
       + 'La demande initiale parle d’un « mécanisme A/B étendu en C », mais les règles de partage validées le 1er octobre (#787, item 4) demandent de ne pas réintroduire de choix entre plusieurs viviers. '
-      + 'Les deux lectures sont défendables (§8.1) : Farid tranche. '
+      + 'Les deux lectures sont défendables (§7.2) : Farid tranche. '
       + 'Concrètement : Steve verra-t-il un sélecteur A/B/C, ou une seule sélection qui change le jour où C est prouvée meilleure (D13) ? La règle C (D7) et sa mesure (D10, D11) doivent être connues.',
     dependsOn: ['D7', 'D10', 'D11'],
     recommendation: '(a), avec des emprunts à (c) : interface simple pour Steve, conforme à #787, retour arrière immédiat. Si Farid veut un sélecteur visible, (b).',
@@ -285,26 +293,32 @@ export const questions = [
       ['Liberté totale de simplification.', 'Aucun risque pour l’écran actuel de Steve.'],
       ['Duplique sélection, filtres et notes.', 'Deux applications à maintenir.']),
   ]),
-  q('D13', 'D13 — Seuil de bascule B → C (proposition de l’owner à acter)', 'a', {
-    intro: 'Si C tourne en parallèle de B (D12), il faut écrire à l’avance quand C remplace B ; sans seuil écrit, la bascule se décidera à l’impression. '
-      + 'Fabien (owner) propose le 2026-10-05 de traduire « aucun Pertinent masqué » par zéro Pertinent masqué sur le test neuf (k_max = 0), avec une borne supérieure exacte sous un seuil X à fixer par Farid (§7.2). '
-      + 'Zéro observé seul ne prouve pas un faible risque : avec un taux réel de 2 %, la probabilité de pass vaut environ 0,56 à 29 Pertinent pour X = 10 % et 0,30 à 59 Pertinent pour X = 5 % (CALCUL binomial, annexe I). '
-      + 'Le comparateur est B′ passe 1 recalculé sur les mêmes cas ; la part P ∪ S de la passe 1 observée par Steve (49/73 = 67,1 %) est rapportée, jamais utilisée comme seuil.',
+  q('D13', 'D13 — Seuil de bascule : à quelle condition C remplace B à l\'écran', null, {
+    intro: 'Si C est calculée en parallèle de B (D12), il faut écrire avant la mesure à quelle condition C remplace B ; sinon, la bascule se décidera à l\'impression. '
+      + 'Fabien propose que C ne masque aucun cas jugé Pertinent sur le test. Mais un zéro observé sur un petit test ne prouve presque rien. '
+      + 'Il faut donc aussi un plafond X sur la part de Pertinent que C pourrait masquer en réalité. C\'est X que vous choisissez ; il fixe la taille minimale du test, donc la charge d\'annotation (D10).',
     dependsOn: ['G6', 'D10', 'D11', 'D12'],
-    recommendation: '(a) : proposition de Fabien (owner), à acter avec Farid. Statut pass si les deux critères passent (masquage, puis précision P ∪ S contre B′ passe 1), fail si l’un échoue, indeterminate sinon ; X (10 % ou 5 %) fixe la taille du test. Résidentiel et Zonage ne sont retirés qu’après une décision #761 fondée sur la mesure. Toute exigence supplémentaire par signal est une condition distincte, à décider. À arbitrer aussi : un résultat portant la mention single-human-annotator (sans second annotateur, D10) peut être publié ; son admissibilité pour la bascule, alors que G4 (a) exige une référence human_adjudicated pour toute promotion, reste à décider.',
+    recommendation: 'Le dossier ne recommande pas de valeur de X : c\'est un arbitrage entre exigence et taille du test, qui vous revient. Il déconseille (d).',
   }, [
-    o('a', '(a) Zéro Pertinent masqué (k_max = 0, borne < X), précision P ∪ S > B′ passe 1, parité',
-      ['Protège la réserve de Steve : aucun Pertinent masqué, borne publiée.', 'Exige un gain réel de précision contre B′ passe 1, sur les mêmes cas.', 'Statuts pass, fail, indeterminate écrits avant la passe ; parité entre écrans (#786).'],
-      ['Taille du test liée à X : environ 29 Pertinent (X = 10 %) ou 59 (X = 5 %), avant effet de grappe.', 'Avec un taux réel de 2 %, P(pass) ≈ 0,56 (29 P, X = 10 %) ou 0,30 (59 P, X = 5 %).']),
-    o('b', '(b) Seuil chiffré différent',
-      ['Farid fixe ses propres chiffres (à écrire dans le commentaire).', 'Peut refléter un compromis métier que Farid connaît mieux.'],
-      ['À préciser.', 'Risque d’un seuil non mesurable par le jeu de référence.']),
-    o('c', '(c) Bascule sur recette seule',
-      ['Rapide : recette de Farid seulement.', 'Ne dépend pas de l’achèvement du jeu test.'],
-      ['Sans mesure, aucune garantie de non-régression.', 'Contraire à l’objet du jeu de référence de ciblage.']),
+    o('a', '(a) X = 10 %',
+      ['Le test le plus petit.'],
+      ['Un plafond plus haut est toléré.'],
+      'Le test doit compter au moins 29 cas jugés Pertinent. Si C masque en réalité 2 % des Pertinent, elle passe le critère 1 environ 56 fois sur 100.'),
+    o('b', '(b) X = 5 %',
+      ['Une garantie deux fois plus stricte.'],
+      ['Un test environ deux fois plus grand. Davantage de résultats « indéterminé ».'],
+      'Le test doit compter au moins 59 cas jugés Pertinent. Si C masque en réalité 2 % des Pertinent, elle passe le critère 1 environ 30 fois sur 100.'),
+    o('c', '(c) Une autre valeur de X',
+      ['Votre arbitrage.'],
+      ['La taille du test se recalcule : sous 5 %, il devient plus grand encore.'],
+      'Vous écrivez X dans le champ x:.'),
+    o('d', '(d) Bascule sur recette seule',
+      ['Rapide.'],
+      ['Aucune garantie de non-régression. Contraire à l\'objet du jeu de référence, et à G6 (a) si elle est retenue.'],
+      'Aucune mesure ; votre recette décide.'),
   ]),
   q('D14', 'D14 — Première livraison UI', 'a', {
-    intro: 'Une fois les retours en base, il faut les montrer. L’UI est en migration : 39 composants Svelte sur 69 utilisent le design system, les 3 composants d’annotation aucun, et la carte Signaux est un composant local MapLibre de 2 761 lignes destiné à être remplacé (§9.7, scène architecture-ui). '
+    intro: 'Une fois les retours en base, il faut les montrer. L’UI est en migration : 39 composants Svelte sur 69 utilisent le design system, les 3 composants d’annotation aucun, et la carte Signaux est un composant local MapLibre de 2 761 lignes destiné à être remplacé (§8.5, scène architecture-ui). '
       + 'Il faut choisir où le retour de Steve apparaît en premier : dans le panneau du signal et le rail, ou directement sur la carte. '
       + 'Le choix décide si #784 avance sans attendre la migration geo. Il suppose l’ancre réparée (D3), la lecture conforme (D4) et la règle de visibilité (D6).',
     dependsOn: ['D3', 'D4', 'D6'],
@@ -318,14 +332,14 @@ export const questions = [
       ['Code ajouté à un composant de 2 761 lignes voué au remplacement.', 'Double travail à la migration geo.']),
     o('c', '(c) Migration geo complète d’abord',
       ['Expérience cohérente d’emblée.', 'Aucun code d’annotation à reprendre après la migration.'],
-      ['Dépend de la « Porte 2 » (moteur geo désactivé aujourd’hui).', 'Retarde #784 sans date.']),
+      ['Dépend de l\'activation du moteur de carte partagé, désactivé aujourd\'hui, sans date d\'activation connue.', 'Retarde d\'autant l\'affichage des retours de Steve.']),
     o('d', '(d) Tableau de retours séparé seul',
       ['Toute la donnée consultable en un seul écran.', 'Utile comme outil de curation des rattachements.'],
       ['N’annote pas l’élément associé : ne répond pas à #784.', 'Un écran de plus.']),
   ]),
   q('D15', 'D15 — Séquencement', 'a', {
     intro: 'La priorité n° 1 de Steve reste la fraîcheur des signaux (#703, rafraîchissement quotidien). Le travail de ce dossier peut avancer en parallèle ou attendre. '
-      + 'B0 (D3), l’import (L1) et le jeu de référence (O1, D10) ne touchent pas la chaîne de rafraîchissement ; le classifieur C (C1), lui, a besoin de signaux frais (§12.2). '
+      + 'B0 (D3), l’import (L1) et le jeu de référence (O1, D10) ne touchent pas la chaîne de rafraîchissement ; le classifieur C (C1), lui, a besoin de signaux frais (§10.3). '
       + 'Le choix fixe quand Steve verra ses retours dans l’outil (D14).',
     dependsOn: ['G7', 'D3', 'D10', 'D14'],
     recommendation: '(a) : livre tôt ce qui ne gêne pas le rafraîchissement, et garde C1 pour après sa stabilisation.',
@@ -337,18 +351,26 @@ export const questions = [
       ['Une seule priorité à la fois.', 'Aucun risque d’interférence, même indirecte, avec le rafraîchissement.'],
       ['Rien de visible pour Steve sur ses retours avant #703.', 'L’annotation de signal reste cassée plus longtemps.']),
   ]),
-  q('D16', 'D16 — Retour à Steve', 'a', {
-    intro: 'Le classeur reconstitue le fonctionnement des filtres observé à l’écran ; sa règle R-16, rédigée par l’assistant du triage, note qu’« une seule réponse des développeurs remplacerait toute cette reconstitution » (§2.5). Le dossier a confronté cette reconstitution au code. '
-      + 'Il faut décider si on lui renvoie maintenant la définition réelle des filtres et la table qui relie ses codes de motif aux critères C (D7, D8), ou si on attend C.',
+  q('D16', 'D16 — Ce qu\'on demande et ce qu\'on renvoie à Steve', 'a', {
+    intro: 'Condition de Fabien. Pas d\'extension à d\'autres villes « tant qu\'on n\'aura pas clarifié les 48 cas ou les 3 IA ne sont pas en accord avec Steve » (5 octobre). Les 48 cas sont ceux du compte de cette date. Aujourd\'hui, sur les 113 lignes évaluées, la règle proposée et Steve diffèrent sur 24 lignes, chacune avec sa suite (page d\'ouverture ; chapitre 4, « Les données de Steve, analysées en profondeur »). '
+      + 'Ce qui est demandé à Steve. 7 de ces écarts ne se tranchent que par sa réponse. 5 questions fermées les couvrent : c\'est tout le volume demandé dans l\'option recommandée (a) ; l\'option (b) y ajoute un réexamen de 50 cas. '
+      + 'Où lire les questions. Le texte sera versé dans le classeur partagé avec Farid (dossier Immo.Zonage), comme le tableau de référence (« Nouvel onglet du classeur », option recommandée, Fabien, 5 octobre). Il le sera à un endroit auquel Steve n\'a pas accès avant cette décision, une fois cet accès vérifié. Dans le dépôt public, il ne sera versé que chiffré, comme le tableau de référence (« Dépôt public, fichier chiffré », Fabien, 5 octobre). '
+      + 'Filtres. Le classeur demande aussi la définition exacte des filtres. La règle R-16, rédigée par l\'assistant du triage, le dit : « LA BONNE DÉMARCHE est de demander aux développeurs la définition exacte des cinq filtres ».',
     dependsOn: ['D7', 'D8'],
-    recommendation: '(a) : renvoyer, par Mathieu et Farid après relecture : répond à sa question et lui permet de corriger la table de dérivation avant que C soit développée.',
+    recommendation: 'Le bloc YAML de D16 porte deux champs de plus : delai_jours et envoi.',
   }, [
-    o('a', '(a) Renvoyer filtres réels et table de dérivation',
-      ['Répond directement à la question posée en R-16.', 'Lui permet de corriger la table de dérivation avant le développement de C.', 'Renforce la confiance du client.'],
-      ['Un aller-retour à préparer (relecture par Mathieu et Farid).', 'Une partie de ses observations date de septembre, en partie périmée depuis #793.']),
-    o('b', '(b) Ne rien renvoyer avant C',
-      ['Évite un aller-retour intermédiaire.', 'La réponse portera directement sur C, déjà développée.'],
-      ['Steve continue à deviner le fonctionnement des filtres.', 'Erreurs de dérivation découvertes trop tard.']),
+    o('a', '(a) Envoyer maintenant les questions et la définition réelle des filtres',
+      ['Demande courte, regroupée par principe', 'répond à la question du classeur sur les filtres', 'prépare la levée de la condition que Fabien a posée à l\'extension'],
+      ['Un aller-retour à préparer (relecture par Mathieu et Farid)'],
+      'Partent les 5 questions fermées, avec la définition des cinq filtres et du retrait en amont, lue dans le code déployé au moment de l\'envoi. La table qui relie les codes de motif de Steve aux critères de C suivra quand elle sera établie (not run)'),
+    o('b', '(b) (a), plus un réexamen à l\'aveugle de 50 cas',
+      ['Mesure la stabilité de ses classements, que rien ne mesure aujourd\'hui. Son cahier de juillet et le relevé ne se comparent que sur l\'objet et le sens de la modification (même lecture dans 12 paires sur 12, chapitre 4), pas sur le classement.'],
+      ['Charge nettement plus lourde.'],
+      'Steve reclasse 50 lignes sans voir son classement de septembre ni la règle'),
+    o('c', '(c) Ne rien envoyer avant que C soit développée',
+      ['Un seul aller-retour'],
+      ['L\'extension reste bloquée', 'Steve continue de deviner le fonctionnement des filtres'],
+      'Un seul envoi, plus tard'),
   ]),
 ];
 
@@ -364,7 +386,7 @@ for (const question of questions) for (const option of question.options) {
 export const usedBy = Object.fromEntries(questions.map(question => [question.key,
   questions.filter(other => other.dependsOn.includes(question.key)).map(other => other.key)]));
 
-export const minimalValidAnswer = 'Une option par décision G1 à G8 et D1 à D16 ; à défaut, au minimum G2, G7, D9, D12 et D13';
+export const minimalValidAnswer = 'Chaque décideur répond à ses décisions, ou marque une décision « différée »';
 
 // The block the copy button puts in the clipboard: ```yaml, the YAML, ```.
 // `manifest.htmlSha256` is the page's own hash, injected by portable.mjs.

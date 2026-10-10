@@ -9,9 +9,13 @@ const { graphs, decisionSections, annexes, manifest, header, glossary } = JSON.p
 const markdown = await readFile('../DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md', 'utf8');
 // Text between two headings of the dossier (the second one excluded).
 const between = (from, to) => { const start = markdown.indexOf(from); assert.ok(start >= 0, from); const end = markdown.indexOf(to, start + from.length); assert.ok(end > start, to); return markdown.slice(start, end); };
-// Decision fiches: D1 to D17 in chapter 10, G1 to G8 in annexe II.
-const decisionText = between('\n## 10. Décisions : options et recommandations', '\n## 11. ') + between('\n## Annexe II — Fiches G1 à G8', '\n## Annexe III');
-const SCENE_ORDER = ['criteres-steve', 'affichage-abc', 'modele-donnees', 'flux-import-oracle', 'architecture-ui'];
+// Decision fiches: G1 to G8 and D1 to D17 in chapter 9 (plan adopted in §B6, version figée L5).
+const decisionText = between('\n## 9. Décisions', '\n## 10. ');
+// Text compared without Markdown marks: the fiches mix tables, lists and bold labels, the
+// interactive copy keeps plain sentences (one source of text, aligned by this test).
+const plain = text => text.replace(/<br>/g, ' ').replace(/[*`]/g, '').replace(/^\s*[-•]\s+/gm, ' ').replace(/\s+/g, ' ').replace(/’/g, "'").trim();
+const sentences = text => plain(text).split(/(?<=[.?!»)])\s+(?=[A-ZÀ-Ý«(0-9])/).filter(Boolean);
+const SCENE_ORDER = ['criteres-steve', 'affichage-abc', 'modele-donnees', 'flux-import-reference', 'architecture-ui'];
 // Sections still being written (the others were integrated on 2026-10-06).
 const MARKERS = [];
 
@@ -19,35 +23,42 @@ test('cinq scènes canoniques, dans l’ordre des chapitres qui les portent', ()
   assert.deepEqual(graphs.map(graph => graph.id), SCENE_ORDER);
   assert.equal(manifest.graphs.length, 5);
   assert.deepEqual([...markdown.matchAll(/<!-- scene:([\w-]+) -->/g)].map(match => match[1]), SCENE_ORDER);
-  // Each scene sits in its chapter: §2.6, §8.1, §9.2, §9.6, §9.7.
-  for (const [id, from, to] of [['criteres-steve', '\n### 2.6 ', '\n## 3. '], ['affichage-abc', '\n### 8.1 ', '\n### 8.2 '], ['modele-donnees', '\n### 9.2 ', '\n### 9.3 '],
-    ['flux-import-oracle', '\n### 9.6 ', '\n### 9.7 '], ['architecture-ui', '\n### 9.7 ', '\n## 10. ']]) assert.ok(between(from, to).includes(`<!-- scene:${id} -->`), id);
+  // Each scene sits in its chapter: §2.6, §7.2, §8.2, §8.4, §8.5.
+  for (const [id, from, to] of [['criteres-steve', '\n### 2.6 ', '\n## 3. '], ['affichage-abc', '\n### 7.2 ', '\n### 7.3 '], ['modele-donnees', '\n### 8.2 ', '\n### 8.3 '],
+    ['flux-import-reference', '\n### 8.4 ', '\n### 8.5 '], ['architecture-ui', '\n### 8.5 ', '\n## 9. ']]) assert.ok(between(from, to).includes(`<!-- scene:${id} -->`), id);
 });
 
-test('table des matières : en-tête, glossaire, douze chapitres, annexes I à IV ; annexes A et B sorties du rapport', async () => {
+test('table des matières : ouverture, dix chapitres, annexes A à F (plan du §B6, version figée L5)', async () => {
   const level2 = [...markdown.matchAll(/^## (.+)$/gm)].map(match => match[1]);
-  assert.deepEqual(level2, ['0. En-tête', 'Glossaire et statuts', '1. Intention, objectifs et destinataires', '2. Ce que veut Steve', '3. Synthèse et décisions demandées',
-    '4. Analyse des données en profondeur', '5. Définition opérationnelle de C', '6. Tentative de détection sur le jeu actuel — résultats exploratoires (lignes exposées)',
-    '7. Mesure confirmatoire sur test neuf', '8. Exposition A/B/C et benchmark', '9. Capitalisation : données et première mise en œuvre', '10. Décisions : options et recommandations',
-    '11. Risques', '12. Plan et suites', 'Annexe I — Préenregistrement et traçabilité', 'Annexe II — Fiches G1 à G8', 'Annexe III — Modèle physique et détails techniques', 'Annexe IV — Revue du plan']);
+  assert.deepEqual(level2, ['Ouverture', '1. L\'intention de l\'owner', '2. Ce que veut Steve', '3. Comment un signal est retenu ou écarté',
+    '4. Les données de Steve, analysées en profondeur', '5. Ce qu\'on demande à Steve', '6. Tentative de détection sur les données actuelles',
+    '7. Comment C remplacerait B', '8. Capitaliser les retours de Steve', '9. Décisions', '10. Risques et suites',
+    'Annexe A — Mesures', 'Annexe B — Méthode', 'Annexe C — Modèle physique et détail technique', 'Annexe D — Règle de décision complète',
+    'Annexe E — Glossaire complet', 'Annexe F — Sources et traçabilité']);
   const chapter4 = [...between('\n## 4. ', '\n## 5. ').matchAll(/^### (4\.\d) /gm)].map(match => match[1]);
-  assert.deepEqual(chapter4, ['4.1', '4.2', '4.3', '4.4', '4.5', '4.6', '4.7', '4.8', '4.9']);
-  assert.equal(decisionSections.length, 12);
-  assert.match(decisionSections[0].heading, /^1\. Intention, objectifs et destinataires/);
-  assert.match(decisionSections[1].heading, /^2\. Ce que veut Steve/);
-  assert.deepEqual(annexes.map(section => section.id), ['annexe-I', 'annexe-II', 'annexe-III', 'annexe-IV']);
-  assert.equal(header.heading, '0. En-tête');
-  assert.equal(glossary.heading, 'Glossaire et statuts');
-  for (const section of [...decisionSections, ...annexes]) assert.ok(!section.markdown.includes('```mermaid'), section.heading);
-  assert.ok(!/^## Annexe [AB]\b/m.test(markdown));
-  // The consolidation journal and the canonical scenes live beside the report, linked from the header.
+  assert.deepEqual(chapter4, ['4.1', '4.2', '4.3', '4.4', '4.5', '4.6', '4.7', '4.8']);
+  assert.equal(decisionSections.length, 10);
+  assert.match(decisionSections[0].heading, /^1\. L'intention de l'owner/);
+  assert.match(decisionSections[2].heading, /^3\. Comment un signal est retenu ou écarté/);
+  assert.deepEqual(annexes.map(section => section.id), ['annexe-A', 'annexe-B', 'annexe-C', 'annexe-D', 'annexe-E', 'annexe-F']);
+  assert.equal(header.heading, 'Ouverture');
+  assert.equal(glossary.heading, 'Annexe E — Glossaire complet');
+  for (const section of [header, ...decisionSections, ...annexes]) assert.ok(!section.markdown.includes('```mermaid'), section.heading);
+  // One version date, with the frozen-version mention, in the banner under the title.
+  assert.match(manifest.banner, /^Dossier de décision · pour Farid \(Product Owner\) · validation technique : Fabien \(AI Builder\) · version du 10 octobre 2026 · version figée L5$/);
+  // Banners required by Z13⁗, word for word.
+  assert.ok(between('\n## 3. ', '\n## 4. ').startsWith('\n## 3. Comment un signal est retenu ou écarté\n\n> **fidélité en cours de contrôle**\n'));
+  assert.ok(between('\n## 6. ', '\n## 7. ').includes('\n> **L4b en cours**\n'));
+  assert.equal(markdown.split('\n> **en cours de vote**\n').length - 1, 4);
+  // The consolidation journal and the canonical scenes live beside the report.
   const journal = await readFile('../JOURNAL_CONSOLIDATION.md', 'utf8');
   for (const part of ['## A.1 Chiffres', '## A.2 Constats', '## A.3 Options, recommandations et décisions', '## A.4 Points laissés à la décision']) assert.ok(journal.includes(part), part);
-  const head = between('\n## 0. En-tête', '\n## Glossaire');
-  assert.ok(head.includes('[JOURNAL_CONSOLIDATION.md](JOURNAL_CONSOLIDATION.md)') && head.includes('[SCENES_FOCUS.md](SCENES_FOCUS.md)'));
-  assert.ok(head.includes('annexe I.6'));
-  assert.match(between('\n### I.6 ', '\n### I.7 '), /\| §9\.3 Nouveau jeu de référence \| §4\.9/);
-  assert.match(between('\n### I.6 ', '\n### I.7 '), /Renvois des cartes #783 et #784/);
+  const sources = between('\n## Annexe F', '\n### F.5 ');
+  assert.ok(sources.includes('[JOURNAL_CONSOLIDATION.md](JOURNAL_CONSOLIDATION.md)') && sources.includes('[SCENES_FOCUS.md](SCENES_FOCUS.md)'));
+  assert.match(between('\n### F.4 ', '\n### F.5 '), /\| §9\.3 Nouveau jeu de référence \| §4\.9/);
+  assert.match(between('\n### F.4 ', '\n### F.5 '), /Renvois des cartes #783 et #784/);
+  // Full text of the questions to Steve: never in clear in the public report (D16).
+  assert.ok(!markdown.includes('159-04-2026') && !markdown.includes('26-06-163'));
 });
 
 test('repères de rédaction : sections en attente, chacune signalée', () => {
@@ -56,20 +67,25 @@ test('repères de rédaction : sections en attente, chacune signalée', () => {
   assert.equal((markdown.match(/<!-- A_INTEGRER/g) ?? []).length, MARKERS.length);
 });
 
-test('écarts et désaccords : 51 écarts = 20 erreurs d’outillage + 31 points à clarifier ; après R′ v1, 40 = 12 + 28', () => {
-  assert.ok(!/(?<!pas )51 désaccords/.test(markdown), '« 51 désaccords » ne doit plus apparaître');
+test('écarts et suites : 113 lignes évaluées, 89 accords, 24 écarts, une suite chacun ; ouverture et §4.6 concordants', () => {
   const s46 = between('\n### 4.6 ', '\n### 4.7 ');
-  for (const text of ['| **Écarts (verdict calculé ≠ Steve)** | **51** | **40** |', '| *Nos erreurs d’outillage* (provisoire pour P1 / P3, à confirmer par Steve) | **20** | **12** |', '| *Points à clarifier avec Steve* | **31** | **28** |',
-    '**il n’y a pas 51 désaccords avec Steve.**', '**12 données manquantes**', '**11 désaccords de jugement**', '**5 non convergés**'])
-    assert.ok(s46.includes(text.replace(/’/g, "'")), text);
-  assert.equal(14 + 6 + 12 + 10 + 5 + 4, 51);
-  assert.equal(7 + 4 + 1 + 9 + 3 + 7 + 4 + 5, 40);
+  const rows = s46.split('\n').filter(line => /^\| [A-ZÉ].*\| \d+ \|$/.test(line));
+  assert.deepEqual(rows.map(line => Number(line.split('|').at(-2))), [7, 3, 3, 7, 4]);
+  assert.equal(rows.reduce((sum, line) => sum + Number(line.split('|').at(-2)), 0), 24);
+  assert.ok(s46.includes('La règle donne le classement de Steve sur 89 lignes et s\'en écarte sur 24.'));
+  const opening = between('\n## Ouverture', '\n## 1. ');
+  assert.ok(opening.includes('Sur 113 lignes évaluées, la règle proposée'));
+  assert.ok(opening.includes('| C45-bis | 114 | 90 | 24 |'));
+  // Y phrase after C45-ter (rule of B9b §3.3): only n° 119 is cited.
+  for (const text of [opening, s46]) assert.ok(text.includes('serait masquée selon l\'une de ces valeurs (n° 119).'));
+  const body = between('\n## Ouverture', '\n## Annexe A');
+  for (const word of ['erreurs de notre outillage', '51 désaccords', 'actée par', 'flux-import-oracle']) assert.ok(!body.includes(word), word);
 });
 
 test('inputs de Steve : colonnes L à T de l’assistant, P, Q, R de Steve ; tableau de référence C', () => {
   const s44 = between('\n### 4.4 ', '\n### 4.5 ');
   for (const text of ['Les colonnes **L à T** de Triage, hors P, Q et R', '**rédigées par l\'assistant du triage**', 'Seules **P (sens), Q (classement) et R (code de motif)** sont les décisions de Steve', '**B** (passe observée)',
-    '**80 documents distincts sur 80, HTTP 200**', '**privé, non commité**']) assert.ok(s44.includes(text), text);
+    '**80 documents distincts sur 80, HTTP 200**', 'Emplacement décidé par Fabien : « Dépôt public, fichier chiffré »', '3 sur 3 pour les 605 champs']) assert.ok(s44.includes(text), text);
   const s43 = between('\n### 4.3 ', '\n### 4.4 ');
   for (const text of ['**12 paires**', '**Lecture identique dans 12 paires sur 12**', '**dans 5 paires sur 12**', 'Les **7 autres**']) assert.ok(s43.includes(text), text);
   assert.match(between('\n### 4.1 ', '\n### 4.2 '), /\*\*Aucune de ces lignes ne sert de test confirmatoire\.\*\*/);
@@ -137,7 +153,7 @@ test('scène 2 : stockage réel en colonnes, propriétaire du schéma ou du code
 });
 
 test('architecture en couloirs : utilisateurs, UI, backend, données S3 et PostgreSQL ; jeu de référence en bande basse', () => {
-  const lanes = graphs.find(graph => graph.id === 'flux-import-oracle');
+  const lanes = graphs.find(graph => graph.id === 'flux-import-reference');
   assert.equal(lanes.kind, 'lanes');
   assert.deepEqual(lanes.layout.lanes.map(lane => lane.kind), ['user', 'ui', 'backend', 'data']);
   for (const [index, lane] of lanes.layout.lanes.entries()) if (index) assert.ok(lane.x >= lanes.layout.lanes[index - 1].x + lanes.layout.lanes[index - 1].width);
@@ -157,7 +173,7 @@ test('architecture en couloirs : utilisateurs, UI, backend, données S3 et Postg
 
 test('les chiffres des cartes sont ceux du dossier', () => {
   const card = (sceneId, id) => graphs.find(graph => graph.id === sceneId).nodes.find(node => node.id === id).metadata;
-  assert.match(graphs.find(graph => graph.id === 'flux-import-oracle').nodes.find(node => node.id === 'STV').detail, /7 feuilles/);
+  assert.match(graphs.find(graph => graph.id === 'flux-import-reference').nodes.find(node => node.id === 'STV').detail, /7 feuilles/);
   assert.match(card('architecture-ui', 'GCB').detail, /2 761 lignes/);
   assert.match(card('architecture-ui', 'DS').detail, /39 sur 69/);
   assert.match(card('architecture-ui', 'COL').detail, /0 sur 3/);
@@ -185,23 +201,30 @@ test('A/B/C : deux zones, application en couloirs (écran, backend, base) et év
   assertGeometry(abc, abc.edges);
 });
 
-test('vingt-cinq décisions G1 à G8 et D1 à D17, recommandation connue ; D9 clôture recommandée, D17 actée par Fabien (owner)', () => {
-  // Ordre de décision : le bloc de Fabien d'abord, puis celui de Farid.
+test('vingt-cinq décisions G1 à G8 et D1 à D17 dans l’ordre des tours ; D1 et D17 tranchées par Fabien, D13 sans recommandation', () => {
+  // Ordre de décision : le tour de Fabien d'abord, puis celui de Farid.
   assert.deepEqual(questions.map(question => question.key), ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'D1', 'D2', 'D3', 'D4', 'D9', 'D10', 'D11', 'D17', 'D5', 'D6', 'D7', 'D8', 'D12', 'D13', 'D14', 'D15', 'D16']);
   assert.deepEqual(questions.map(question => question.step), [...Array(16).fill(1), ...Array(9).fill(2)]);
   assert.deepEqual(questions.filter(question => question.family === 'générique').map(question => question.key), ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8']);
   assert.ok(questions.every(question => (question.step === 1) === (question.decides === 'Fabien')));
-  for (const question of questions) assert.ok(question.options.some(option => option.key === question.recommended), question.key);
+  // Options lettered everywhere (a), (b)… ; the recommended one exists, D13 recommends no value of X.
+  for (const question of questions) {
+    assert.ok(question.options.every(option => /^[a-z]$/.test(option.key) && option.title.startsWith(`(${option.key})`)), question.key);
+    if (question.key === 'D13') assert.equal(question.recommended, null);
+    else assert.ok(question.options.some(option => option.key === question.recommended), question.key);
+  }
   const byKey = Object.fromEntries(questions.map(question => [question.key, question]));
-  assert.equal(byKey.D9.recommended, '4');
-  assert.match(byKey.D9.question, /clôture recommandée/);
+  assert.equal(byKey.D9.recommended, 'd');
+  assert.equal(byKey.D9.question, 'D9 — Sens de « double annotation »');
+  assert.deepEqual([byKey.D1.decides, byKey.D1.decided.option, byKey.D1.decided.date], ['Fabien', 'b', '2026-10-02']);
   assert.deepEqual([byKey.D17.decides, byKey.D17.consulted, byKey.D17.decided.option, byKey.D17.decided.date], ['Fabien', 'Steve, Farid', 'a', '2026-10-05']);
-  assert.match(byKey.D17.options.find(option => option.key === 'a').description, /coupé à la date du signal/);
-  assert.match(byKey.D13.options.find(option => option.key === 'a').title, /k_max = 0/);
-  for (const text of ['0,56 à 29 Pertinent pour X = 10 %', '0,30 à 59 Pertinent pour X = 5 %', 'taux réel de 2 %']) assert.ok(byKey.D13.intro.includes(text), text);
-  assert.match(byKey.D10.options.find(option => option.key === 'b').description, /au moins 50 cas, par un second annotateur humain/);
-  // Registre unique au §3.1 : une ligne par décision.
-  const registry = between('\n### 3.1 ', '\n## 4. ');
+  assert.deepEqual([byKey.D7.question, byKey.D7.recommended], ['D7 — La règle de la nouvelle sélection (C)', 'b']);
+  assert.deepEqual([byKey.D8.question, byKey.D8.consulted], ['D8 — Qui tranche quand la règle et Steve divergent', 'Steve, Mathieu, Fabien']);
+  assert.deepEqual([byKey.D16.question, byKey.D16.consulted], ['D16 — Ce qu\'on demande et ce qu\'on renvoie à Steve', 'Mathieu, Fabien']);
+  assert.match(byKey.D10.options.find(option => option.key === 'b').description, /Steve annote à l'aveugle deux groupes de cas pris dans les nouvelles villes/);
+  assert.match(byKey.D13.options.find(option => option.key === 'a').title, /X = 10 %/);
+  // Registre unique au §9.2 : une ligne par décision.
+  const registry = between('\n### 9.2 ', '\n### 9.3 ');
   for (const question of questions) assert.ok(registry.includes(`| ${question.key} | `), `registre : ${question.key}`);
 });
 
@@ -219,23 +242,23 @@ test('critères de Steve : une matrice, trois critères, deux exclusions, bruit 
   assert.match(total.radar, /34 des 40/);
 });
 
-test('chaque décision : introduction, dépendances antérieures, avantages et inconvénients par option, recommandation motivée', async () => {
+test('chaque décision : introduction, dépendances antérieures, avantages et inconvénients par option, alignée sur sa fiche du ch. 9', async () => {
   const order = questions.map(question => question.key);
-  const section10 = decisionText;
-  assert.match(section10, /Fabien décide d’abord les huit décisions génériques G1 à G8/);
+  const section9 = plain(decisionText);
+  assert.ok(section9.includes('Tour de Fabien. Fabien tranche d\'abord ses 16 décisions'));
   for (const question of questions) {
-    const sentences = question.intro.split(/(?<=[.?!»)])\s+(?=[A-ZÀ-Ý«])/).length;
-    assert.ok(sentences >= 3 && sentences <= 6 && question.intro.length <= 900, `${question.key} : introduction de ${sentences} phrases`);
-    assert.match(question.intro, /§\d|scène/, `${question.key} : renvoi au dossier`);
+    // The interactive copy repeats its fiche: every sentence of the introduction is in chapter 9.
+    for (const sentence of sentences(question.intro)) assert.ok(section9.includes(sentence), `${question.key} : phrase absente du ch. 9 : ${sentence}`);
+    assert.match(question.intro, /§\d|scène|chapitre|annexe|D\d+/, `${question.key} : renvoi au dossier`);
     // Une décision ne dépend que de décisions prises avant elle.
     for (const key of question.dependsOn) assert.ok(order.indexOf(key) < order.indexOf(question.key), `${question.key} dépend de ${key}, décidée après`);
     for (const option of question.options) {
-      assert.ok(option.pros.length >= 2 && option.pros.length <= 4, `${question.key}/${option.key} avantages`);
-      assert.ok(option.cons.length >= 2 && option.cons.length <= 4, `${question.key}/${option.key} inconvénients`);
-      for (const item of [...option.pros, ...option.cons]) assert.ok(section10.includes(item), `${question.key}/${option.key} absent du §10 : ${item}`);
+      assert.ok(option.pros.length >= 1 && option.pros.length <= 4, `${question.key}/${option.key} avantages`);
+      assert.ok(option.cons.length >= 1 && option.cons.length <= 4, `${question.key}/${option.key} inconvénients`);
+      for (const item of [...option.pros, ...option.cons]) assert.ok(section9.includes(plain(item)), `${question.key}/${option.key} absent du ch. 9 : ${item}`);
     }
-    assert.ok(question.recommendation.length > 40, question.key);
-    assert.ok(section10.includes(`#### ${question.question}`) && section10.includes(question.intro), `${question.key} : §10 désaligné`);
+    assert.equal(typeof question.recommendation, 'string', question.key);
+    assert.ok(decisionText.includes(`#### ${question.question}`), `${question.key} : titre absent du ch. 9`);
   }
   assert.ok(!/honn[êe]te/i.test(markdown + JSON.stringify(questions)));
 });
@@ -249,7 +272,7 @@ test('graphiques : chaque valeur reprend un tableau du dossier, repères présen
   const rowIn = (text, start) => text.split('\n').find(line => line.startsWith(`| ${start} |`))?.split('|').slice(1, -1).map(cell => cell.trim().replaceAll('*', ''));
   const s42 = section('\n### 4.2 ', '\n### 4.3 ');
   const s53 = s42.split('**Sens de la modification × classement (CALCUL).**')[1].split('**Motifs')[0], s52 = s42.split('**Classement par passe (CALCUL, feuille Triage).**')[1].split('**Sens de la')[0];
-  const s93 = section('\n### 2.5 ', '\n### 2.6 ');
+  const s93 = section('\n### A.4 ', '\n### A.5 ');
   for (const item of CHARTS['sens-classement'].rows) {
     const [, p, s, n, total, pass1] = rowIn(s53, item.label);
     assert.deepEqual([Number(p), Number(s), Number(n), Number(total), Number(pass1)],
@@ -274,19 +297,19 @@ test('graphiques : chaque valeur reprend un tableau du dossier, repères présen
 test('options : description concrète pour chacune, schéma de tables pour D2 et D3, géométrie propre', async () => {
   const { parseEr } = await import('./parse-er.mjs');
   const { erLayout } = await import('./diagram-layout.js');
-  const section10 = decisionText;
+  const section9 = plain(decisionText);
   for (const question of questions) for (const option of question.options) {
-    assert.ok(option.description.length >= 80, `${question.key}/${option.key} description trop courte`);
-    assert.ok(section10.includes(option.description), `${question.key}/${option.key} description absente du §10`);
+    assert.ok(option.description.length >= 10, `${question.key}/${option.key} description trop courte`);
+    assert.ok(section9.includes(plain(option.description)), `${question.key}/${option.key} description absente du ch. 9`);
   }
   const withDiagram = questions.flatMap(question => question.options.filter(option => option.diagram).map(option => `${question.key}/${option.key}`));
   assert.deepEqual(withDiagram, ['D2/a', 'D2/b', 'D2/c', 'D2/d', 'D3/a', 'D3/b', 'D3/c']);
-  const annex35 = between('\n### III.5 ', '\n### III.6 ');
+  // Option schemas stay in their fiches (interactive copy); the former annexe III.5 is removed (B5.4, point 5).
+  assert.ok(!markdown.includes('Schémas des options de D2 et D3'));
   for (const question of questions) for (const option of question.options.filter(item => item.diagram)) {
     const model = parseEr(option.diagram.er, option.key);
     const layout = erLayout(model, option.diagram);
-    // Schemas in annexe III.5; D2 (a) is the target model of §9.2, given once (no duplicate).
-    assert.ok((question.key === 'D2' && option.key === 'a' ? between('\n### 9.2 ', '\n### 9.3 ') : annex35).includes(option.diagram.er), `${question.key}/${option.key} schéma absent`);
+    if (question.key === 'D2' && option.key === 'a') assert.ok(between('\n### 8.2 ', '\n### 8.3 ').includes(option.diagram.er), 'D2/a : modèle cible du §8.2');
     assertGeometry({ id: `${question.key}/${option.key}`, layout }, model.relations);
   }
 });
@@ -298,7 +321,10 @@ test('introduction : protocole des trois passes et glossaire, avant toute mesure
   for (const row of PROTOCOL.passes) assert.ok(markdown.includes(`| ${row.pass} | ${row.filters} | ${row.signals} | ${row.aim} |`), row.pass);
   assert.ok(markdown.includes(PROTOCOL.summary));
   assert.equal(PROTOCOL.passes.reduce((sum, row) => sum + row.signals, 0) + 1, 124);
-  const glossaryText = markdown.split('\n## Glossaire et statuts\n')[1].split('\n## 1. ')[0];
+  const glossaryText = between('\n## Annexe E — Glossaire complet\n', '\n## Annexe F');
+  // Glossaire de tête dans l'ouverture : quinze termes au plus (B1″).
+  const headTerms = between('**Glossaire de tête**', '\n---').split('\n').filter(line => line.startsWith('| ') && !line.startsWith('| Terme'));
+  assert.equal(headTerms.length, 13);
   // First column of the glossary table: the defined terms.
   const terms = glossaryText.split('\n').filter(line => line.startsWith('| ')).map(line => line.split('|')[1]).join(' ; ');
   for (const term of ['Passe 1', '124 lignes', 'B′', 'Profil A gelé', 'Shadow', 'Jeu de référence C', 'Jeu de référence E', 'Seuil D13', 'Ancre', 'B0', 'Tombstone',
@@ -322,18 +348,18 @@ test("existant et jeux de référence : schémas du texte, aucune table de jeu d
   for (const table of ['prospect_marks', 'prospect_notes'])
     for (const column of existing.entities.find(entity => entity.id === table).attributes) assert.ok(schema.includes(`("${column.name}"`), `${table}.${column.name}`);
   assert.ok(!/pgTable\(\s*"oracle/.test(schema), "aucune table de jeu de référence sur main");
-  const s6 = between('\n### III.2 ', '\n### III.3 ');
+  const s6 = between('\n### C.2 ', '\n### C.3 ');
   assert.match(s6, /Aucune table de jeu de référence n'existe en base aujourd'hui/);
   for (const reason of ['Auteur avec compte obligatoire', 'Une seule cible par note', '10 000 caractères au plus', 'Aucune provenance', 'défaut à corriger par B0']) assert.ok(s6.includes(reason), reason);
-  // Former §9.3 now sits in §4.9, marked « ancien, à remplacer ».
-  const s93 = between('\n### 4.9 ', '\n## 5. ');
+  // Jeu de référence C v2 : §4.8.
+  const s93 = between('\n### 4.8 ', '\n## 5. ');
   assert.match(s93, /provenance par champ/);
   assert.match(s93, /<!-- diagram:jeux-reference -->/);
   assert.match(s93, /\(D10, D11\)/);
 });
 
 test('§9.1 et §9.2 : besoins de Steve → données, modèle minimal, ce qu\'il ne fait pas, tables existantes laissées telles quelles', async () => {
-  const s63 = between('\n### 9.1 ', '\n### 9.3 ');
+  const s63 = between('\n### 8.1 ', '\n### 8.3 ');
   assert.match(s63, /\*\*Besoins de Steve → données nécessaires\.\*\*/);
   assert.equal(s63.split('\n').filter(line => /^\| [1-9] \|/.test(line)).length, 9);
   for (const table of ['retours_fichiers', 'annotations', 'validations', 'motifs', 'annotation_cibles', 'reference_set_versions']) assert.ok(s63.includes(`| \`${table}\` |`), table);
@@ -351,19 +377,19 @@ test('§9.1 et §9.2 : besoins de Steve → données, modèle minimal, ce qu\'il
   assertGeometry(arch, arch.edges);
   assert.match(s63, /Vision de l'owner/);
   const d1 = questions.find(question => question.key === 'D1');
-  assert.deepEqual([d1.decides, d1.step, d1.decided.option, d1.decided.date], ['Fabien', 1, 'b', '2026-10-04']);
+  assert.deepEqual([d1.decides, d1.step, d1.decided.option, d1.decided.date], ['Fabien', 1, 'b', '2026-10-02']);
   assert.equal(questions.find(question => question.key === 'D5').recommended, 'c');
   const d2 = questions.find(question => question.key === 'D2');
   assert.deepEqual(d2.options.map(option => option.key), ['a', 'b', 'c', 'd']);
   assert.equal(d2.recommended, 'a');
-  assert.ok(!/annotation_(?:raw_rows|assessments|anchors|codes|rules|findings)|label_set|prospect_notes v1/.test(between('\n## 9. ', '\n### 9.6 ')), 'plus de tables M3 au ch. 9');
+  assert.ok(!/annotation_(?:raw_rows|assessments|anchors|codes|rules|findings)|label_set|prospect_notes v1/.test(between('\n## 8. ', '\n### 8.4 ')), 'plus de tables M3 au ch. 9');
 });
 
 test('annexe III.1 : état initial physique (PG, S3, geo), état proposé avec statuts (scène modele-donnees), rattachement des cibles, tableau des écarts', async () => {
   const { PHYSICAL } = await import('./physical-model.js');
   const { parseEr } = await import('./parse-er.mjs');
   const schema = await readFile('../../../../../api/src/db/schema.ts', 'utf8');
-  const s60 = between('\n### III.1 ', '\n### III.2 ');
+  const s60 = between('\n### C.1 ', '\n### C.2 ');
   // Chaque table Postgres du schéma « État actuel » existe dans schema.ts.
   const current = parseEr(PHYSICAL['etat-actuel'].er, 'actuel');
   const pgTables = current.entities.map(entity => entity.id).filter(id => !id.startsWith('s3_') && !['registre_villes', 'geo_ogc', 'job_refresh', 'app_immo'].includes(id));
@@ -379,52 +405,49 @@ test('annexe III.1 : état initial physique (PG, S3, geo), état proposé avec s
   for (const kind of ['Signal', 'Ville', 'PV, document', 'Zone', 'Lot']) assert.ok(s60.includes(`| ${kind} |`), kind);
   // The proposed state is drawn once, as the modele-donnees scene (§9.2): no duplicate in the text.
   assert.ok(s60.includes('<!-- diagram:etat-actuel -->') && !markdown.includes('<!-- diagram:etat-propose -->'));
-  assert.ok(s60.includes('est la scène `modele-donnees` (§9.2)'));
+  assert.ok(s60.includes('est la scène `modele-donnees` (§8.2)'));
 });
 
-test('convergence : « jeu de référence » partout, §9.5, définitions et métriques (§5.4), statut exploratoire et confirmatoire', async () => {
+test('convergence : « jeu de référence » partout, §8.3, définitions et métriques (annexe B.6), statut exploratoire et confirmatoire', async () => {
   // « oracle » ne reste que dans des chemins ou noms de fichiers réels, et dans le glossaire comme ancien nom.
-  const stray = markdown.split('\n').flatMap(line => [...line.matchAll(/(?<![-_/.\w])[Oo]racles?(?![-_/\w]|\.\w)/g)].map(() => line))
+  const stray = markdown.slice(0, markdown.indexOf('\n### F.5 ')).split('\n').flatMap(line => [...line.matchAll(/(?<![-_/.\w])[Oo]racles?(?![-_/\w]|\.\w)/g)].map(() => line))
     .filter(line => !line.includes('« oracle »'));
   assert.deepEqual(stray, []);
-  for (const heading of ['### 9.5 Convergence sentropic + engram', '### 4.5 Étiquetage de référence v0', '### 5.4 Unité, agrégation, définitions et métriques', '### 5.3 Contrat d\'entrée (D17)'])
+  for (const heading of ['### 8.3 Convergence sentropic + engram', '### 4.5 Étiquetage de référence v0', '### B.6 Unité, agrégation, définitions et métriques', '### B.7 Contrat d\'entrée (D17)'])
     assert.ok(markdown.includes(heading), heading);
-  const s54 = between('\n### 5.4 ', '\n## 6. ');
+  const s54 = between('\n### B.6 ', '\n### B.7 ');
   for (const text of ['enregistrement radar', 'rattache_a', 'Pertinent masqué', 'précision P ∪ S', 'kappa', 'Pertinents perdus', 'passes 1, 2 et 3', 'P > S > N'])
     assert.ok(s54.includes(text), text);
   assert.ok(between('\n### 4.1 ', '\n### 4.2 ').includes('pool-limited-to-shown-items'));
-  const s53 = between('\n### 5.3 ', '\n### 5.4 ');
+  const s53 = between('\n### B.7 ', '\n### B.8 ');
   for (const text of ['**coupé à la date du signal**', 'les colonnes L à T du classeur (hors P, Q, R)']) assert.ok(s53.includes(text), text);
-  const s6 = between('\n## 6. ', '\n## 7. ');
+  // Former exploratory campaign (v1 to v3): measures in annexe A.7, protocol in annexe B.8.
+  const s6 = between('\n### A.7 ', '\n## Annexe B') + between('\n### B.8 ', '\n### B.9 ');
   for (const text of ['Tout résultat de ce chapitre est exploratoire', 'aucun résultat n\'est admissible pour D13', '**limites du signal seul**', 'Passe × Classement']) assert.ok(s6.includes(text), text);
   assert.ok(!/plafond du signal seul/i.test(s6));
-  const s7 = between('\n## 7. ', '\n## 8. ');
+  const s7 = between('\n### B.5 ', '\n### B.6 ');
   for (const text of ['k_max = 0', 'P(pass) ≈ 0,56 à 29 Pertinent pour X = 10 %', '≈ 0,30 à 59 Pertinent pour X = 5 %', '`pass`', '`fail`', '`indeterminate`', 'au moins 50 cas']) assert.ok(s7.includes(text), text);
-  for (const key of ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8']) assert.ok(between('\n## Annexe II', '\n## Annexe III').includes(`#### ${key} — `), key);
-  for (const key of ['D1', 'D9', 'D10', 'D13', 'D17']) assert.ok(between('\n## 10. ', '\n## 11. ').includes(`#### ${key} — `), key);
-  const plan = between('\n### 12.1 ', '\n### 12.2 ');
+  for (const key of ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8']) assert.ok(between('\n### 9.3 ', '\n### 9.4 ').includes(`#### ${key} — `), key);
+  for (const key of ['D1', 'D9', 'D10', 'D13', 'D17']) assert.ok(decisionText.includes(`#### ${key} — `), key);
+  const plan = between('\n### 10.2 ', '\n### 10.3 ');
   for (const step of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]) assert.ok(plan.includes(`\n| ${step} | `), `étape ${step}`);
   assert.ok(!/honn[êe]te/i.test(markdown + (await readFile('../JOURNAL_CONSOLIDATION.md', 'utf8')) + (await readFile('../SCENES_FOCUS.md', 'utf8'))));
 });
 
-test('comptes mesurés : 121 lignes → 162 signaux → 80 documents, par verdict', async () => {
-  const { SIGNAL_COUNTS } = await import('./protocol.js');
+test('comptes mesurés : 121 lignes → 162 enregistrements → 80 documents, par verdict', async () => {
   const { CHARTS } = await import('./charts.js');
-  const { rows, total } = SIGNAL_COUNTS;
-  assert.equal(rows.reduce((sum, row) => sum + row.lines, 0), total.lines);
-  assert.equal(rows.reduce((sum, row) => sum + row.signals, 0), total.signals);
-  assert.equal(total.single + total.multi, total.lines);
-  assert.deepEqual(CHARTS['steve-signaux'].rows.map(row => [row.values.P, row.values.S, row.values.N]), [rows.map(row => row.lines), rows.map(row => row.signals)]);
-  // Given once, in §4.2 (relevé de Steve : inventaire et comptes).
-  assert.equal(markdown.split(SIGNAL_COUNTS.summary).length, 2);
-  assert.ok(between('\n### 4.2 ', '\n### 4.3 ').includes(SIGNAL_COUNTS.summary));
-  assert.ok(between('\n### 4.2 ', '\n### 4.3 ').includes('#14 (Saint-Jean-Baptiste') && markdown.includes('#55 (Mont-Saint-Hilaire') && markdown.includes('#58 (Sainte-Cécile-de-Milton'));
-  for (const row of rows) assert.ok(markdown.includes(`| ${row.verdict} | ${row.lines} | ${row.signals} | ${row.documents} |`), row.verdict);
+  const s42 = between('\n### 4.2 ', '\n### 4.3 ');
+  const rows = [['Pertinent', 39, 55, 36], ['À surveiller', 29, 38, 26], ['Non pertinent', 53, 69, 39]];
+  for (const [verdict, lines, records, documents] of rows) assert.ok(s42.includes(`| ${verdict} | ${lines} | ${records} | ${documents} |`), verdict);
+  assert.ok(s42.includes('| **Total** | **121** | **162** | **80** (distincts, pas la somme) |'));
+  assert.deepEqual(CHARTS['steve-signaux'].rows.map(row => [row.values.P, row.values.S, row.values.N]), [rows.map(row => row[1]), rows.map(row => row[2])]);
+  assert.ok(s42.includes('→ 162 enregistrements distincts du radar'));
+  assert.ok(s42.includes('#14 (Saint-Jean-Baptiste') && markdown.includes('#55 (Mont-Saint-Hilaire') && markdown.includes('#58 (Sainte-Cécile-de-Milton'));
 });
 
-test('ch. 6 : chaque point des nuages précision / rappel reprend le tableau du §6.4', async () => {
+test('détection exploratoire : chaque point des nuages précision / rappel reprend le tableau de l\'annexe A.7', async () => {
   const { CHARTS } = await import('./charts.js');
-  const s64 = markdown.slice(markdown.indexOf('\n### 6.4 '), markdown.indexOf('\n### 6.5 '));
+  const s64 = between('\n### A.7 ', '\n#### Lecture (JUGEMENT, exploratoire)');
   const num = (text) => Number(text.trim().replace(',', '.'));
   for (const [id, ri, pi] of [['pr-test-steve', 1, 2], ['pr-test-consensus', 4, 5]]) {
     assert.equal(CHARTS[id].kind, 'scatter');

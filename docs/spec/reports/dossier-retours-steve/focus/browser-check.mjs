@@ -62,7 +62,7 @@ await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, de
 await call('Page.navigate', { url: focusFile });
 // Scenes are mounted when their chapter opens: open every section of the dossier first.
 const OPEN_ALL = `(() => { const all = document.querySelectorAll('details.dossier-section'); for (const details of all) details.open = true; return all.length; })()`;
-await waitUntil(`document.querySelectorAll('details.dossier-section').length === 18`, 'les 18 sections du dossier sont absentes');
+await waitUntil(`document.querySelectorAll('details.dossier-section').length === 17`, 'les 17 sections du dossier sont absentes');
 await evaluate(OPEN_ALL);
 const READY = `document.querySelectorAll('.scene').length === 5 && document.querySelectorAll('.flow').length === 1 && document.querySelectorAll('.scene [data-diagram]').length === 4 && document.querySelectorAll('[data-node-kind]').length > 0`;
 await waitUntil(READY, 'les cinq scènes sont absentes');
@@ -156,7 +156,7 @@ const checkExpression = `(() => {
     return { sceneId: graph.id, kind: 'lanes', sceneHash: graph.sceneHash, initialScale: scale, lanes: lanes.map(lane => lane.kind), stores: stores.map(store => store.label),
       zone: graph.projection.zone, band: { below: true, widthShare: Number((band.width / (lanesBox.right - lanesBox.left)).toFixed(3)) }, nodes: nodes.length, edges: edges.length, labels: labels.length };
   };
-  if (!document.querySelector('.masthead').textContent.includes('5 SCÈNES · 12 CHAPITRES · 25 DÉCISIONS')) throw Error('bandeau absent');
+  if (!document.querySelector('.masthead [data-banner]').textContent.includes('version figée L5')) throw Error('bandeau de version absent');
   const metrics = [];
   for (const graph of graphs) {
     if (graph.kind !== 'flow') { metrics.push(checkDiagram(graph)); continue; }
@@ -283,7 +283,7 @@ const contentExpression = `(() => {
       for (const text of entity.querySelectorAll('text')) if (text.textContent.trim()) { const r = text.getBoundingClientRect(); if (r.right > body.right + 1 || r.left < body.left - 1) throw Error(mini.dataset.miniDiagram + ' : texte hors table'); } }
     return { id: mini.dataset.miniDiagram, option: Boolean(mini.closest('.question-block')), tables: boxes.length, scale: Number((svg.width / Number(mini.dataset.canvasWidth)).toFixed(3)) };
   });
-  if (charts.length !== 8 || descriptions !== 79 || minis.length !== 12) throw Error('contenu : ' + JSON.stringify({ charts: charts.length, descriptions, minis: minis.length }));
+  if (charts.length !== 7 || descriptions !== 81 || minis.length !== 12) throw Error('contenu : ' + JSON.stringify({ charts: charts.length, descriptions, minis: minis.length }));
   if (minis.some(mini => mini.option && mini.scale < .6)) throw Error('schéma d’option trop réduit : ' + JSON.stringify(minis));
   return { charts, descriptions, minis };
 })()`;
@@ -337,9 +337,9 @@ const zoomOne = async (id, { drag = false, shot = null } = {}) => {
 };
 const zoomIds = await evaluate(`[...document.querySelectorAll('[data-zoom]')].map(frame => frame.dataset.zoom)`);
 // 5 scènes, 5 schémas du texte, 1 schéma en couloirs du texte, 7 schémas d'options (D2, D3), 8 graphiques.
-if (zoomIds.length !== 26) throw Error(`26 diagrammes zoomables attendus, ${zoomIds.length}`);
+if (zoomIds.length !== 27) throw Error(`27 diagrammes zoomables attendus, ${zoomIds.length} : ${zoomIds.join(', ')}`);
 const zoom = [];
-for (const id of zoomIds) zoom.push(await zoomOne(id, { drag: id === 'flux-import-oracle', shot: id === 'affichage-abc' ? '.generated/zoom-plein-ecran-affichage-abc.png' : null }));
+for (const id of zoomIds) zoom.push(await zoomOne(id, { drag: id === 'flux-import-reference', shot: id === 'affichage-abc' ? '.generated/zoom-plein-ecran-affichage-abc.png' : null }));
 // Zoom direct dans la page, sur un grand diagramme : le panneau ne déborde pas.
 const inPage = await evaluate(`(() => { const frame = document.querySelector('[data-zoom="modele-donnees"]'), before = Number(frame.dataset.scale);
   frame.querySelector('[data-action="zoom-in"]').click(); return before; })()`);
@@ -369,10 +369,10 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 1920, height: 10
 // Les décisions : une réponse par décision, réellement sélectionnable, copiée en YAML.
 // EXPECT : ce que le dossier porte (décisions, options, filtres « Je suis », PR cible).
 const EXPECT = {
-  picks: [['D12', 'b'], ['D12', 'a'], ['D9', '1']], selectedQuestion: 'D12', selectedOption: 'a', persisted: [['D12', 'a'], ['D9', '1']],
-  storagePrefix: 'immo-steve-decision-responses:', blocks: 25, options: 79, recommended: 25, decides: { Farid: 9, Fabien: 16 },
+  picks: [['D12', 'b'], ['D12', 'a'], ['D9', 'a']], selectedQuestion: 'D12', selectedOption: 'a', persisted: [['D12', 'a'], ['D9', 'a']],
+  storagePrefix: 'immo-steve-decision-responses:', blocks: 25, options: 81, recommended: 24, decides: { Farid: 9, Fabien: 16 },
   url: 'https://github.com/rhanka/radar-immobilier/pull/794', mine: { Farid: 9, Fabien: 16 },
-  faridAnswered: ['D12'], notFarid: ['D9'], faridRoles: { D12: 'decide' }, fabienRoles: { D9: 'decide' }, allOptions: { D1: 'b', D9: '1', D17: 'a', D12: 'a' },
+  faridAnswered: ['D12'], notFarid: ['D9'], faridRoles: { D12: 'decide' }, fabienRoles: { D9: 'decide' }, allOptions: { D1: 'b', D9: 'a', D17: 'a', D12: 'a' },
   headerKeys: ['dossier', 'fichier', 'version', 'decideur', 'date', 'coller_dans'],
   title: 'Analyse des retours d\'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage',
 };
@@ -518,7 +518,7 @@ for (const graph of graphs.filter(item => item.kind === 'flow')) {
 
 // Vue d'ensemble par scène, après retour au fitView (rechargement de la page).
 await call('Page.navigate', { url: focusFile });
-await waitUntil(`document.querySelectorAll('details.dossier-section').length === 18`, 'rechargement : sections absentes');
+await waitUntil(`document.querySelectorAll('details.dossier-section').length === 17`, 'rechargement : sections absentes');
 await evaluate(OPEN_ALL);
 await waitUntil(READY, 'rechargement hors ligne sans les cinq scènes');
 await pause(500);
@@ -541,7 +541,7 @@ for (const graph of graphs) {
 await call('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'dark' }] });
 await call('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
 await call('Page.navigate', { url: focusFile });
-await waitUntil(`document.querySelectorAll('details.dossier-section').length === 18`, 'thème sombre : sections absentes');
+await waitUntil(`document.querySelectorAll('details.dossier-section').length === 17`, 'thème sombre : sections absentes');
 await evaluate(OPEN_ALL);
 await waitUntil(READY, 'thème sombre : scènes absentes');
 await pause(500);

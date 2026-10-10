@@ -53,7 +53,7 @@ export const CHARTS = {
   'sens-classement': {
     kind: 'stacked',
     title: 'Sens de la modification × classement de Steve (124 lignes)',
-    note: 'Entre parenthèses : lignes de la passe 1 (vue de travail, 73 signaux). 23 assouplissements sont Non pertinent, surtout des autorisations au cas par cas : le sens seul ne suffit pas (§5.3).',
+    note: 'Entre parenthèses : lignes de la passe 1 (vue de travail, 73 lignes). 23 assouplissements sont Non pertinent, surtout des autorisations au cas par cas : le sens seul ne suffit pas (§5.3).',
     source: '§2.3 et §4.2, feuille Triage (CALCUL)',
     rows: [
       { label: 'Assouplissement', values: { P: 27, S: 5, N: 23 }, extra: 35 },
@@ -79,12 +79,12 @@ export const CHARTS = {
   },
   'steve-signaux': {
     kind: 'stacked',
-    title: 'Lignes de Steve et signaux distincts du radar, par verdict (121 lignes retenues)',
-    note: 'Une ligne peut viser plusieurs signaux : 121 lignes → 162 signaux distincts. Les documents (80 distincts) ne s’additionnent pas par verdict : un même PV peut porter des signaux de verdicts différents.',
+    title: 'Lignes de Steve et enregistrements distincts du radar, par verdict (121 lignes retenues)',
+    note: 'Une ligne peut viser plusieurs signaux : 121 lignes → 162 enregistrements distincts. Les documents (80 distincts) ne s’additionnent pas par verdict : un même PV peut porter des signaux de verdicts différents.',
     source: 'items.json, nodes.json du premier jet (recompté)',
     rows: [
       { label: 'Lignes de Steve', values: { P: 39, S: 29, N: 53 } },
-      { label: 'Signaux distincts', values: { P: 55, S: 38, N: 69 } },
+      { label: 'Enregistrements distincts', values: { P: 55, S: 38, N: 69 } },
     ],
   },
   'classement-passes': {
@@ -101,9 +101,9 @@ export const CHARTS = {
   },
   'base-b': {
     kind: 'percent',
-    title: 'Repère historique : passe 1 observée par Steve (vue de travail, 73 signaux)',
-    note: 'Repère seulement, jamais comparateur de D13 (B′ passe 1 est recalculé sur l’instantané, §7.2). Le bruit est la part des signaux affichés que Steve juge Non pertinent.',
-    source: '§2.5 (CALCUL)',
+    title: 'Repère historique : passe 1 observée par Steve (vue de travail, 73 lignes)',
+    note: 'Repère seulement, jamais comparateur de D13 (B′ passe 1 est recalculé sur l’instantané, annexe B.5.2). Le bruit est la part des signaux affichés que Steve juge Non pertinent.',
+    source: 'annexe A.4 (CALCUL)',
     rows: [
       { label: 'Bruit (Non pertinent)', value: 32.9, ratio: '24/73', tone: 'n' },
       { label: 'Part P ∪ S', value: 67.1, ratio: '49/73' },

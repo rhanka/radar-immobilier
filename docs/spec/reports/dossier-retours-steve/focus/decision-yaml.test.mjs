@@ -111,10 +111,10 @@ test('"Je suis" filter: own decisions only (decider or named validator), "toutes
 });
 
 test('records: option id and label, statut, commentaire; unknown option rejected', () => {
-  const state = { selections: { D12: 'a', D9: '1', D13: 'b' }, comments: { D12: 'Voir #787 : oui' }, deferred: { D13: true } };
+  const state = { selections: { D12: 'a', D9: 'a', D13: 'b' }, comments: { D12: 'Voir #787 : oui' }, deferred: { D13: true } };
   const byId = Object.fromEntries(decisionRecords(questions, state, 'Farid', 'all').map(record => [record.id, record]));
   assert.deepEqual(byId.D12, {
-    id: 'D12', titre: 'Exposition A/B/C (point ouvert)', role: 'decide', decide: 'Farid', consulte: 'Steve, Mathieu, Fabien',
+    id: 'D12', titre: 'Exposition A/B/C', role: 'decide', decide: 'Farid', consulte: 'Steve, Mathieu, Fabien',
     option: 'a', option_libelle: '(a) C en shadow, comparaison réservée UAT, puis remplacement de B', statut: 'tranchee', commentaire: 'Voir #787 : oui',
   });
   assert.equal(byId.D13.statut, 'differee');
@@ -123,10 +123,10 @@ test('records: option id and label, statut, commentaire; unknown option rejected
   assert.equal(byId.D1.statut, 'tranchee');
   assert.equal(byId.D1.option, 'b');
   assert.equal(byId.D1.decide, 'Fabien');
-  assert.match(byId.D1.commentaire, /Actée par Fabien \(owner\) le 2026-10-04/);
+  assert.match(byId.D1.commentaire, /Tranchée : demande de Fabien \(owner\) du 2026-10-02/);
   assert.equal(byId.D5.statut, 'non_traitee');
   assert.equal(byId.D5.option, null);
-  assert.equal(byId.D9.option, '1');
+  assert.equal(byId.D9.option, 'a');
   for (const record of Object.values(byId)) assert.ok(STATUSES.includes(record.statut));
   assert.throws(() => decisionRecords(questions, { selections: { D1: 'z' } }, 'Farid', 'all'), /Unknown option z for D1/);
 });
@@ -141,7 +141,7 @@ const realManifest = async () => {
 test('export block: fenced YAML without quotes, agreed header, one entry per own decision', async () => {
   const manifest = await realManifest();
   assert.equal(manifest.title, 'Analyse des retours d\'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage');
-  const state = { selections: { D12: 'a', D9: '1' }, comments: { D12: 'ligne 1\nligne 2' } };
+  const state = { selections: { D12: 'a', D9: 'a' }, comments: { D12: 'ligne 1\nligne 2' } };
   const now = new Date('2026-10-04T13:25:28Z');
   const { text, records } = exportBlock(manifest, state, 'Farid', 'mine', now);
   assert.ok(!text.includes('"'), 'no double quote in the export');
@@ -150,7 +150,7 @@ test('export block: fenced YAML without quotes, agreed header, one entry per own
   assert.equal(lines.at(-1), '```');
   assert.deepEqual(lines.slice(1, 9), [
     'dossier: >-', `  ${manifest.title}`, 'fichier: DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md',
-    `version: 2026-10-03 · sha256:${'0b'.repeat(32)}`, 'decideur: Farid', `date: ${isoWithOffset(now)}`,
+    `version: 2026-10-10 · sha256:${'0b'.repeat(32)}`, 'decideur: Farid', `date: ${isoWithOffset(now)}`,
     `coller_dans: ${DECISIONS_TARGET_URL}`, 'decisions:',
   ]);
   assert.equal(DECISIONS_TARGET_URL, 'https://github.com/rhanka/radar-immobilier/pull/794');
@@ -159,11 +159,11 @@ test('export block: fenced YAML without quotes, agreed header, one entry per own
   assert.ok(!text.includes('id: D9'));
   const d12 = text.split('  - id: D12\n')[1].split('\n  - id: ')[0];
   assert.equal(d12, [
-    '    titre: Exposition A/B/C (point ouvert)', '    role: decide', '    decide: Farid', '    consulte: Steve, Mathieu, Fabien',
+    '    titre: Exposition A/B/C', '    role: decide', '    decide: Farid', '    consulte: Steve, Mathieu, Fabien',
     '    option: a', '    option_libelle: (a) C en shadow, comparaison réservée UAT, puis remplacement de B', '    statut: tranchee',
     '    commentaire: |', '      ligne 1', '      ligne 2',
   ].join('\n'));
-  assert.match(exportBlock(manifest, state, 'Fabien', 'mine', now).text, /\n {2}- id: D10\n {4}titre: >-\n {6}Jeu de référence #783\n/);
+  assert.match(exportBlock(manifest, state, 'Fabien', 'mine', now).text, /\n {2}- id: D10\n {4}titre: >-\n {6}Jeu de référence de ciblage : sur quoi se mesurera la bascule\n/);
   assert.equal(decisionsYaml({}, []).split('\n').at(-1), 'decisions: []');
 });
 
@@ -181,7 +181,7 @@ test('round trip on the real dossier: yaml and js-yaml read back every header an
       const yaml = text.slice('```yaml\n'.length, -'\n```'.length);
       const expected = {
         dossier: manifest.title, fichier: 'DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md',
-        version: `2026-10-03 · sha256:${'0b'.repeat(32)}`, decideur: person, date: isoWithOffset(now), coller_dans: DECISIONS_TARGET_URL,
+        version: `2026-10-10 · sha256:${'0b'.repeat(32)}`, decideur: person, date: isoWithOffset(now), coller_dans: DECISIONS_TARGET_URL,
         decisions: records.map(record => ({ ...record, commentaire: record.commentaire ? `${record.commentaire}\n` : '' })),
       };
       for (const [name, load] of Object.entries(READERS)) {
