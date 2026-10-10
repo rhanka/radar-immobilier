@@ -113,7 +113,9 @@ function run(cmd, args, { env = {}, capture = false, allowFail = false, input } 
     if (capture && res.stderr) console.log(res.stderr);
     die(`${cmd} a retourné un code non nul (${res.status})`);
   }
-  return { status: res.status ?? 0, stdout: res.stdout ?? "", stderr: res.stderr ?? "" };
+  // A child killed by a signal has status null: a failure, never a success.
+  if (res.status === null) warn(`${cmd} interrompu par le signal ${res.signal ?? "<inconnu>"}.`);
+  return { status: res.status ?? 1, stdout: res.stdout ?? "", stderr: res.stderr ?? "" };
 }
 
 // ── GARDE G3 : CONFIRM explicite = GO owner matérialisé ─────────────────────
