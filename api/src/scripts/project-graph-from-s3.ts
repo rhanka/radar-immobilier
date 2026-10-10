@@ -46,6 +46,7 @@ import {
 } from "../storage/s3-object-store.js";
 import { upsertGraphAtomic, type DeclaredChangesReport } from "../services/graph/graph-store.js";
 import { parseProjectionArgs } from "./projection-args.js";
+import { declaredTerminationSummary } from "./projection-termination.js";
 
 const decoder = new TextDecoder();
 
@@ -218,7 +219,7 @@ async function main(): Promise<void> {
   const report = { event: "project-graph-from-s3:report", ok, aborted, skipped,
     errors, total: keys.length, deletedNodes: totalDeletedNodes, deletedEdges: totalDeletedEdges,
     deletedStaleEdges: totalDeletedStaleEdges, abortedCities };
-  const termination = declared ? declaredTermination(report, preview, declaredReport) : JSON.stringify(report).slice(0, 4000);
+  const termination = declared ? declaredTerminationSummary(report, preview, declaredReport) : JSON.stringify(report).slice(0, 4000);
   await writeFile("/dev/termination-log", termination).catch(() => undefined);
 
   await pool.end();
@@ -226,31 +227,6 @@ async function main(): Promise<void> {
   // déclaré (une seule ville), tout ce qui n'est pas « la ville projetée » échoue aussi
   // (latest.json absent ou illisible : la déclaration n'a pas été vérifiée).
   process.exit(aborted > 0 || errors > 0 || (declared !== undefined && ok !== 1) ? 1 : 0);
-}
-
-/** Declared-mode termination summary (GH #817), kept valid JSON under 4 000 chars by shrinking the lists. */
-function declaredTermination(
-  report: Record<string, unknown>,
-  preview: boolean,
-  declared: DeclaredChangesReport | undefined,
-): string {
-  for (const cap of [64, 24, 8, 0]) {
-    const list = (xs: readonly string[]) => (xs.length > cap ? [...xs.slice(0, cap), `…+${xs.length - cap}`] : xs);
-    const body = JSON.stringify({
-      ...report,
-      preview,
-      declared: declared
-        ? {
-            plannedRemovals: list(declared.plannedRemovals),
-            plannedLosses: list(declared.plannedLosses),
-            declaredNotInPlan: list(declared.declaredNotInPlan),
-            undeclaredRemovals: list(declared.undeclaredRemovals),
-          }
-        : null,
-    });
-    if (body.length <= 4000) return body;
-  }
-  return JSON.stringify({ ...report, preview, declared: "truncated" }).slice(0, 4000);
 }
 
 main().catch((err) => {
