@@ -247,7 +247,11 @@ verify-renders:
 	    || { echo "bascule window contract failed: unreadable on.schedule in $$wf" >&2; exit 1; }; \
 	  test "$$(printf "%s\n" "$$crons" | grep -c .)" -eq 1 \
 	    || { echo "bascule window contract failed: $$wf must carry exactly one active on.schedule cron (got: $$(printf "%s" "$$crons" | tr "\n" "|"))" >&2; exit 1; }; \
-	  awk -v restore="$$crons" -f "$(BASCULE_WINDOW_AWK)" "$$tmp/preprod.yaml" "$$tmp/prod.yaml" "$(BACKUP_DAILY_MANIFEST)" \
+	  mkdir "$$tmp/backup" && cp "$(BACKUP_DAILY_MANIFEST)" "$$tmp/backup/manifest.yaml" \
+	    && printf "resources:\n  - manifest.yaml\n" > "$$tmp/backup/kustomization.yaml" \
+	    && kubectl kustomize "$$tmp/backup" > "$$tmp/backup.yaml" \
+	    || { echo "bascule window contract failed: cannot render $(BACKUP_DAILY_MANIFEST) (canonical YAML documents are required)" >&2; exit 1; }; \
+	  awk -v restore="$$crons" -f "$(BASCULE_WINDOW_AWK)" "$$tmp/preprod.yaml" "$$tmp/prod.yaml" "$$tmp/backup.yaml" \
 	    || { echo "bascule window contract failed: the daily restore slot of $$wf must stay after the daily backup and clear of every refresh start" >&2; exit 1; }
 
 .PHONY: seed-preprod
