@@ -1,0 +1,775 @@
+{
+  "status": "pass",
+  "checkedAt": "2026-10-04T16:31:49.763Z",
+  "url": "file:///home/antoinefa/src/radar-immobilier/.worktrees/dossier-villes-ecart/docs/spec/reports/dossier-villes-ecart/focus/../decision-focus.html",
+  "chromiumCdpPort": "9245",
+  "offline": {
+    "url": "file:///home/antoinefa/src/radar-immobilier/.worktrees/dossier-villes-ecart/docs/spec/reports/dossier-villes-ecart/decision-focus.html",
+    "title": "Villes en écart S3 / PG",
+    "external": 0,
+    "blockedExternal": true
+  },
+  "themes": [
+    {
+      "mode": "light",
+      "status": "pass",
+      "theme": "light",
+      "backgroundLuminance": 1,
+      "contrast": {
+        "text": 16.27,
+        "secondary": 6.12,
+        "card": 16.27,
+        "figure": 16.27,
+        "badge": 14.89,
+        "option": 16.27
+      },
+      "viewports": [
+        {
+          "width": 1440,
+          "height": 1000
+        },
+        {
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "width": 390,
+          "height": 844
+        }
+      ]
+    },
+    {
+      "mode": "dark",
+      "status": "pass",
+      "theme": "dark",
+      "backgroundLuminance": 0.0073,
+      "contrast": {
+        "text": 15.71,
+        "secondary": 9.27,
+        "card": 14.13,
+        "figure": 14.13,
+        "badge": 11.52,
+        "option": 15.71
+      },
+      "viewports": [
+        {
+          "width": 1440,
+          "height": 1000
+        },
+        {
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "width": 390,
+          "height": 844
+        }
+      ]
+    }
+  ],
+  "viewports": [
+    {
+      "mode": "light",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "mode": "light",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "mode": "light",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "mode": "dark",
+      "width": 1440,
+      "height": 1000
+    },
+    {
+      "mode": "dark",
+      "width": 1920,
+      "height": 1080
+    },
+    {
+      "mode": "dark",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "scenes": [
+    {
+      "sceneId": "architecture-ecart",
+      "sceneHash": "91a98a462f0d9b0bd2a41012036d97bb2848b9a4614b6d3673e997260cd994f2",
+      "initialScale": 0.419583,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 17,
+      "edges": 20,
+      "groups": 6,
+      "edgeLabels": 20,
+      "panel": {
+        "left": 40,
+        "top": 5405.5,
+        "width": 1345,
+        "height": 820
+      },
+      "iconPx": 69.99951253685207,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "scenesAt1920": [
+    {
+      "sceneId": "architecture-ecart",
+      "sceneHash": "91a98a462f0d9b0bd2a41012036d97bb2848b9a4614b6d3673e997260cd994f2",
+      "initialScale": 0.561238,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 17,
+      "edges": 20,
+      "groups": 6,
+      "edgeLabels": 20,
+      "panel": {
+        "left": 52.5,
+        "top": 5045.9375,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99993067780514,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "figure": {
+    "texts": 60,
+    "width": 1321,
+    "height": 660.5,
+    "groups": [
+      {
+        "id": "G1",
+        "cities": 71
+      },
+      {
+        "id": "G2",
+        "cities": 81
+      },
+      {
+        "id": "G3",
+        "cities": 49
+      },
+      {
+        "id": "G4",
+        "cities": 18
+      },
+      {
+        "id": "G5a",
+        "cities": 3
+      },
+      {
+        "id": "G5b",
+        "cities": 1
+      },
+      {
+        "id": "G5c",
+        "cities": 2
+      },
+      {
+        "id": "G6",
+        "cities": 1
+      }
+    ],
+    "total": 226,
+    "bars": [
+      {
+        "id": "G1",
+        "ratio": 0.877,
+        "shared": false
+      },
+      {
+        "id": "G2",
+        "ratio": 1,
+        "shared": true
+      },
+      {
+        "id": "G3",
+        "ratio": 0.605,
+        "shared": true
+      },
+      {
+        "id": "G4",
+        "ratio": 0.222,
+        "shared": true
+      },
+      {
+        "id": "G5a",
+        "ratio": 0.037,
+        "shared": false
+      },
+      {
+        "id": "G5b",
+        "ratio": 0.012,
+        "shared": false
+      },
+      {
+        "id": "G5c",
+        "ratio": 0.025,
+        "shared": true
+      },
+      {
+        "id": "G6",
+        "ratio": 0.012,
+        "shared": false
+      }
+    ]
+  },
+  "choices": {
+    "blocks": 7,
+    "single": 7,
+    "radio": 19,
+    "recommended": 7,
+    "selected": [
+      "C"
+    ],
+    "decides": [
+      "Fabien",
+      "Fabien",
+      "Fabien",
+      "Fabien",
+      "Fabien",
+      "Fabien",
+      "Fabien"
+    ],
+    "details": [
+      {
+        "key": "D1",
+        "intro": true,
+        "options": [
+          {
+            "key": "a",
+            "parts": [
+              "description",
+              "mini",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 856,
+            "pros": 3,
+            "cons": 2
+          },
+          {
+            "key": "b",
+            "parts": [
+              "description",
+              "mini",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 228,
+            "pros": 1,
+            "cons": 2
+          },
+          {
+            "key": "c",
+            "parts": [
+              "description",
+              "mini",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 389,
+            "pros": 1,
+            "cons": 2
+          }
+        ],
+        "ordered": true,
+        "complete": true,
+        "recommendation": true
+      },
+      {
+        "key": "D4",
+        "intro": true,
+        "options": [
+          {
+            "key": "a",
+            "parts": [
+              "description",
+              "mini",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 482,
+            "pros": 2,
+            "cons": 1
+          },
+          {
+            "key": "b",
+            "parts": [
+              "description",
+              "mini",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 214,
+            "pros": 1,
+            "cons": 1
+          }
+        ],
+        "ordered": true,
+        "complete": true,
+        "recommendation": true
+      },
+      {
+        "key": "D5",
+        "intro": true,
+        "options": [
+          {
+            "key": "a",
+            "parts": [
+              "description",
+              "mini",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 438,
+            "pros": 2,
+            "cons": 2
+          },
+          {
+            "key": "b",
+            "parts": [
+              "description",
+              "mini",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 200,
+            "pros": 1,
+            "cons": 1
+          }
+        ],
+        "ordered": true,
+        "complete": true,
+        "recommendation": true
+      },
+      {
+        "key": "D2",
+        "intro": true,
+        "options": [
+          {
+            "key": "A",
+            "parts": [
+              "description",
+              "mini",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 765,
+            "pros": 2,
+            "cons": 2
+          },
+          {
+            "key": "B",
+            "parts": [
+              "description",
+              "mini",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 697,
+            "pros": 2,
+            "cons": 2
+          },
+          {
+            "key": "C",
+            "parts": [
+              "description",
+              "mini",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 785,
+            "pros": 2,
+            "cons": 2
+          }
+        ],
+        "ordered": true,
+        "complete": true,
+        "recommendation": true
+      },
+      {
+        "key": "D3",
+        "intro": true,
+        "options": [
+          {
+            "key": "a",
+            "parts": [
+              "description",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 621,
+            "pros": 2,
+            "cons": 2
+          },
+          {
+            "key": "b",
+            "parts": [
+              "description",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 387,
+            "pros": 1,
+            "cons": 2
+          },
+          {
+            "key": "c",
+            "parts": [
+              "description",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 285,
+            "pros": 1,
+            "cons": 2
+          }
+        ],
+        "ordered": true,
+        "complete": true,
+        "recommendation": true
+      },
+      {
+        "key": "D6",
+        "intro": true,
+        "options": [
+          {
+            "key": "a",
+            "parts": [
+              "description",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 500,
+            "pros": 2,
+            "cons": 1
+          },
+          {
+            "key": "b",
+            "parts": [
+              "description",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 194,
+            "pros": 1,
+            "cons": 1
+          },
+          {
+            "key": "c",
+            "parts": [
+              "description",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 166,
+            "pros": 1,
+            "cons": 1
+          }
+        ],
+        "ordered": true,
+        "complete": true,
+        "recommendation": true
+      },
+      {
+        "key": "D7",
+        "intro": true,
+        "options": [
+          {
+            "key": "a",
+            "parts": [
+              "description",
+              "mini",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 428,
+            "pros": 2,
+            "cons": 2
+          },
+          {
+            "key": "b",
+            "parts": [
+              "description",
+              "mini",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 149,
+            "pros": 1,
+            "cons": 1
+          },
+          {
+            "key": "c",
+            "parts": [
+              "description",
+              "mini",
+              "method",
+              "pros",
+              "cons"
+            ],
+            "description": 271,
+            "pros": 1,
+            "cons": 1
+          }
+        ],
+        "ordered": true,
+        "complete": true,
+        "recommendation": true
+      }
+    ],
+    "minis": [
+      {
+        "id": "D1-a",
+        "type": "bars",
+        "overflow": false,
+        "bars": 4,
+        "rows": 0
+      },
+      {
+        "id": "D1-b",
+        "type": "bars",
+        "overflow": false,
+        "bars": 2,
+        "rows": 0
+      },
+      {
+        "id": "D1-c",
+        "type": "bars",
+        "overflow": false,
+        "bars": 3,
+        "rows": 0
+      },
+      {
+        "id": "D4-a",
+        "type": "bars",
+        "overflow": false,
+        "bars": 3,
+        "rows": 0
+      },
+      {
+        "id": "D4-b",
+        "type": "bars",
+        "overflow": false,
+        "bars": 2,
+        "rows": 0
+      },
+      {
+        "id": "D5-a",
+        "type": "bars",
+        "overflow": false,
+        "bars": 3,
+        "rows": 0
+      },
+      {
+        "id": "D5-b",
+        "type": "bars",
+        "overflow": false,
+        "bars": 2,
+        "rows": 0
+      },
+      {
+        "id": "D2-A",
+        "type": "table",
+        "overflow": false,
+        "bars": 0,
+        "rows": 2
+      },
+      {
+        "id": "D2-B",
+        "type": "table",
+        "overflow": false,
+        "bars": 0,
+        "rows": 2
+      },
+      {
+        "id": "D2-C",
+        "type": "table",
+        "overflow": false,
+        "bars": 0,
+        "rows": 2
+      },
+      {
+        "id": "D7-a",
+        "type": "bars",
+        "overflow": false,
+        "bars": 3,
+        "rows": 0
+      },
+      {
+        "id": "D7-b",
+        "type": "bars",
+        "overflow": false,
+        "bars": 2,
+        "rows": 0
+      },
+      {
+        "id": "D7-c",
+        "type": "bars",
+        "overflow": false,
+        "bars": 3,
+        "rows": 0
+      }
+    ],
+    "persisted": {
+      "D2": "C",
+      "D3": "a"
+    },
+    "defer": 7,
+    "jsonControls": 0,
+    "copyButton": "Copier mes décisions (YAML)",
+    "steps": "1. Copier, 2. ouvrir la PR, 3. coller dans un commentaire.",
+    "person": "Fabien",
+    "scope": "mine",
+    "link": {
+      "href": "https://github.com/rhanka/radar-immobilier/pull/815",
+      "target": "_blank",
+      "rel": "noopener",
+      "text": "Ouvrir la PR #815 sur GitHub"
+    },
+    "first": [
+      "```yaml",
+      "dossier: >-"
+    ],
+    "decideur": "Fabien",
+    "collerDans": "https://github.com/rhanka/radar-immobilier/pull/815",
+    "quoted": false,
+    "entries": [
+      {
+        "id": "D1",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D2",
+        "role": "decide",
+        "option": "C",
+        "statut": "tranchee"
+      },
+      {
+        "id": "D3",
+        "role": "decide",
+        "option": "a",
+        "statut": "tranchee"
+      },
+      {
+        "id": "D4",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D5",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D6",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      },
+      {
+        "id": "D7",
+        "role": "decide",
+        "option": "null",
+        "statut": "non_traitee"
+      }
+    ],
+    "answered": [
+      "D2",
+      "D3"
+    ]
+  },
+  "copy": {
+    "realClick": "copied",
+    "clipboardMatchesZone": true,
+    "status": "7 décision(s) copiée(s) en YAML. Ouvrez la PR et collez-les dans un commentaire.",
+    "forcedRefusal": {
+      "message": "Copie refusée par le navigateur (fréquent dans un artefact publié). Le bloc YAML ci-dessous est sélectionné : copiez-le avec Ctrl+C (Cmd+C sur Mac), puis collez-le dans un commentaire de la PR.",
+      "focused": true,
+      "selectedAll": true
+    },
+    "hasDecisions": true
+  },
+  "exportFilter": {
+    "fabienMine": 7,
+    "faridMine": 0,
+    "faridEmpty": true,
+    "faridHint": true,
+    "faridDecideur": "Farid",
+    "all": 7,
+    "allOptions": {
+      "D2": "C",
+      "D3": "a"
+    },
+    "allRoles": [
+      "null"
+    ]
+  },
+  "captures": [
+    ".generated/dossier-preview-1440x1000-light.png",
+    ".generated/dossier-preview-1920x1080-light.png",
+    ".generated/dossier-preview-390x844-light.png",
+    ".generated/dossier-preview-1440x1000-dark.png",
+    ".generated/dossier-preview-1920x1080-dark.png",
+    ".generated/dossier-preview-390x844-dark.png",
+    ".generated/figure-tables-light.png",
+    ".generated/figure-ou-prod-preprod-light.png",
+    ".generated/figure-methode-light.png",
+    ".generated/figure-groupes-barres-light.png",
+    ".generated/figure-decision-D1-light.png",
+    ".generated/figure-decision-D2-light.png",
+    ".generated/figure-tables-dark.png",
+    ".generated/figure-ou-prod-preprod-dark.png",
+    ".generated/figure-methode-dark.png",
+    ".generated/figure-groupes-barres-dark.png",
+    ".generated/figure-decision-D1-dark.png",
+    ".generated/figure-decision-D2-dark.png",
+    ".generated/scene-1a1-architecture-ecart-light.png",
+    ".generated/scene-vue-ensemble-architecture-ecart-light.png",
+    ".generated/scene-1a1-architecture-ecart-dark.png",
+    ".generated/scene-vue-ensemble-architecture-ecart-dark.png"
+  ],
+  "consoleErrors": [],
+  "runtimeErrors": [],
+  "externalRequests": []
+}
