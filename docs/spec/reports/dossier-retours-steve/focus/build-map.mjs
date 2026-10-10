@@ -100,7 +100,20 @@ const canonicalProjection = graph => ({
     dashed: edge.dashed, both: edge.both, evidenceClass: edge.metadata.evidenceClass,
     runtimeState: edge.metadata.runtimeState })).sort((a, b) => a.id.localeCompare(b.id)),
 });
+// Heading that carries a marker: the last Markdown heading (## to ####) above it. The
+// scene badges and the full-screen titles of the text diagrams are read from it, so they
+// follow the current numbering of the dossier (no section number written by hand).
+const headingAbove = marker => {
+  const at = markdown.indexOf(marker);
+  if (at < 0 || markdown.indexOf(marker, at + 1) >= 0) throw Error(`expected the marker ${marker} exactly once`);
+  const heading = [...markdown.slice(0, at).matchAll(/^#{2,4} (.+)$/gm)].at(-1)?.[1].trim();
+  if (!heading) throw Error(`no heading above ${marker}`);
+  return heading;
+};
 for (const graph of graphs) {
+  // Section number of the scene, e.g. "2.6" for "### 2.6 Écart avec l'existant…".
+  graph.section = headingAbove(`<!-- scene:${graph.id} -->`).match(/^(\d+(?:\.\d+)*)\.? /)?.[1];
+  if (!graph.section) throw Error(`${graph.id}: the heading above the scene has no section number`);
   if (graph.kind === 'flow') graph.projection = canonicalProjection(graph);
   graph.canonicalJson = JSON.stringify(graph.projection).normalize('NFC');
   graph.sceneHash = sha256(graph.canonicalJson);
@@ -171,5 +184,8 @@ const docLanes = Object.fromEntries([...markdown.matchAll(/```mermaid\n((?:(?!``
 // marker, rendered natively in the page by mermaid (offline bundle).
 const docMermaid = Object.fromEntries([...markdown.matchAll(/```mermaid\n((?:(?!```)[\s\S])*)```\n\n<!-- mermaid:([\w-]+) -->/g)]
   .map(([, source, id]) => [id, source]));
-await writeFile('.generated/data.json', JSON.stringify({ graphs, sections, header, glossary, decisionSections, annexes, manifest, docLanes, docMermaid }));
+// Full-screen title of each of these flowcharts: the heading that carries its marker (text of
+// the dossier), not the technical id.
+const docMermaidTitles = Object.fromEntries(Object.keys(docMermaid).map(id => [id, headingAbove(`<!-- mermaid:${id} -->`)]));
+await writeFile('.generated/data.json', JSON.stringify({ graphs, sections, header, glossary, decisionSections, annexes, manifest, docLanes, docMermaid, docMermaidTitles }));
 console.log(JSON.stringify(manifest.graphs.map(graph => ({ id: graph.id, nodes: graph.nodes, edges: graph.edges, subflows: graph.subflows }))));

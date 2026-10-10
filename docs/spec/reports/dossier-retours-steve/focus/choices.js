@@ -389,11 +389,12 @@ export const usedBy = Object.fromEntries(questions.map(question => [question.key
 export const minimalValidAnswer = 'Chaque décideur répond à ses décisions, ou marque une décision « différée »';
 
 // The block the copy button puts in the clipboard: ```yaml, the YAML, ```.
-// `manifest.htmlSha256` is the page's own hash, injected by portable.mjs.
+// `version` quotes the sha256 of the served Markdown of the dossier (`manifest.dossierHash`,
+// same value as `dossierHash` in portable.json), not the hash of this page.
 export function exportBlock(manifest, state, person, scope = 'mine', now = new Date()) {
   const header = {
     dossier: manifest.title, fichier: manifest.dossier.split('/').pop(),
-    version: `${DOSSIER_REVISION} · sha256:${manifest.htmlSha256}`,
+    version: `${DOSSIER_REVISION} · sha256:${manifest.dossierHash}`,
     decideur: person, date: isoWithOffset(now), coller_dans: DECISIONS_TARGET_URL,
   };
   const records = decisionRecords(questions, state, person, scope);

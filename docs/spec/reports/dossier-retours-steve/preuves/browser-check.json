@@ -1,6 +1,6 @@
 {
   "status": "pass",
-  "checkedAt": "2026-10-10T09:30:53.254Z",
+  "checkedAt": "2026-10-10T10:21:35.129Z",
   "url": "file:///home/antoinefa/src/radar-immobilier/tmp/dossier-yaml-plain/docs/spec/reports/dossier-retours-steve/focus/../decision-focus.html",
   "chromiumCdpPort": "9263",
   "offline": {
@@ -474,10 +474,12 @@
     },
     "zoom": {
       "id": "modele-donnees",
+      "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
       "mode": "transform",
       "fit": 0.34,
       "zoomed": 0.532,
-      "dragged": false
+      "dragged": false,
+      "escapeClosed": true
     }
   },
   "content": {
@@ -594,196 +596,287 @@
       }
     ]
   },
+  "references": {
+    "badges": [
+      {
+        "scene": "criteres-steve",
+        "badge": "§2.6 · ce que veut Steve",
+        "target": "2.6 Écart avec l'existant, critère par critère"
+      },
+      {
+        "scene": "affichage-abc",
+        "badge": "§7.2 · D12 ouvert, D13 à acter",
+        "target": "7.2 Affichage A/B/C (D12)"
+      },
+      {
+        "scene": "modele-donnees",
+        "badge": "§8.2 · stockage réel et propriétaires",
+        "target": "8.2 Modèle cible par propriétaire"
+      },
+      {
+        "scene": "flux-import-reference",
+        "badge": "§8.4 · architecture et jeu de référence",
+        "target": "8.4 Première mise en œuvre : lots"
+      },
+      {
+        "scene": "architecture-ui",
+        "badge": "§8.5 · état mesuré sur main 27891b10",
+        "target": "8.5 État de la migration UI (résumé)"
+      }
+    ],
+    "header": {
+      "text": "§9.2, §9.3 et §9.4 · Fabien décide d’abord, Farid ensuite",
+      "targets": [
+        "9.2 Registre des décisions (G1 à G8, D1 à D17)",
+        "9.3 Tour de Fabien · Fabien décide d’abord (G1 à G8, puis architecture, données, jeu de référence, contrat d'entrée)",
+        "9.4 Tour de Farid · Farid décide ensuite (produit, affichage, priorités)"
+      ]
+    }
+  },
   "zoom": {
     "frames": [
       {
         "id": "chart-sens-classement",
+        "title": "Sens de la modification × classement de Steve (124 lignes)",
         "mode": "transform",
         "fit": 1.458,
         "zoomed": 2.277,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "chart-bruit-familles",
+        "title": "Les Non pertinent par motif : passe 1 (24 sur 73) et ensemble du relevé (55 sur 124)",
         "mode": "transform",
         "fit": 1.458,
         "zoomed": 2.277,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "criteres-steve",
+        "title": "Les trois critères de Steve en regard de l'existant",
         "mode": "transform",
         "fit": 1.079,
         "zoomed": 1.686,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "regle-b-c",
+        "title": "3. Comment un signal est retenu ou écarté",
         "mode": "transform",
         "fit": 0.329,
         "zoomed": 0.514,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "chart-classement-passes",
+        "title": "Classement de Steve par passe (124 lignes)",
         "mode": "transform",
         "fit": 1.458,
         "zoomed": 2.277,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "chart-steve-signaux",
+        "title": "Lignes de Steve et enregistrements distincts du radar, par verdict (121 lignes retenues)",
         "mode": "transform",
         "fit": 1.458,
         "zoomed": 2.277,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "doc-jeux-reference",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 0.698,
         "zoomed": 1.091,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "affichage-abc",
+        "title": "Deux zones : application en couloirs (utilisateurs, écrans, backend, base) et évaluation hors ligne en bas",
         "mode": "transform",
         "fit": 0.767,
         "zoomed": 1.199,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "architecture-donnees",
+        "title": "Deux zones : application en couloirs (utilisateurs, écrans, backend, base) et évaluation hors ligne en bas",
         "mode": "transform",
         "fit": 0.655,
         "zoomed": 1.023,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "doc-modele-minimal",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 0.705,
         "zoomed": 1.102,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "modele-donnees",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 0.34,
         "zoomed": 0.532,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "flux-import-reference",
+        "title": "Architecture en couloirs : utilisateurs, écrans UI, fonctions backend, données S3 et PostgreSQL ; jeu de référence transversal en bas",
         "mode": "transform",
         "fit": 0.717,
         "zoomed": 1.121,
-        "dragged": true
+        "dragged": true,
+        "escapeClosed": true
       },
       {
         "id": "architecture-ui",
+        "title": "Architecture UI et état de la migration",
         "mode": "native",
         "fit": null,
         "zoomed": null,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "d10-test-etendu",
+        "title": "D10 — Jeu de référence de ciblage : sur quoi se mesurera la bascule",
         "mode": "transform",
         "fit": 1.257,
         "zoomed": 1.964,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "option-D2-a",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 0.705,
         "zoomed": 1.102,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "option-D2-b",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 0.727,
         "zoomed": 1.136,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "option-D2-c",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 1.428,
         "zoomed": 2.231,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "option-D2-d",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 2.647,
         "zoomed": 4,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "option-D3-a",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 1.219,
         "zoomed": 1.905,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "option-D3-b",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 1.394,
         "zoomed": 2.178,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "option-D3-c",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 1.32,
         "zoomed": 2.062,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "chart-base-b",
+        "title": "Repère historique : passe 1 observée par Steve (vue de travail, 73 lignes)",
         "mode": "transform",
         "fit": 1.458,
         "zoomed": 2.277,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "chart-pr-test-steve",
+        "title": "Montrer à Steve : précision et rappel sur le test aveugle exploratoire, référence Steve (61 lignes)",
         "mode": "transform",
         "fit": 1.458,
         "zoomed": 2.277,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "chart-pr-test-consensus",
+        "title": "Montrer à Steve : précision et rappel sur le test aveugle exploratoire, référence consensus IA (R′ v1 sur les tags majoritaires)",
         "mode": "transform",
         "fit": 1.458,
         "zoomed": 2.277,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "doc-etat-actuel",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 0.413,
         "zoomed": 0.645,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "doc-existant",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 0.841,
         "zoomed": 1.314,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "doc-engram-store",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 1.064,
         "zoomed": 1.663,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       }
     ],
     "inPage": {
@@ -795,17 +888,21 @@
     "mobile": [
       {
         "id": "modele-donnees",
+        "title": "Diagramme entité-relation : tables, colonnes clés, relations et cardinalités",
         "mode": "transform",
         "fit": 0.1,
         "zoomed": 0.156,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       },
       {
         "id": "criteres-steve",
+        "title": "Les trois critères de Steve en regard de l'existant",
         "mode": "transform",
         "fit": 0.398,
         "zoomed": 0.622,
-        "dragged": false
+        "dragged": false,
+        "escapeClosed": true
       }
     ]
   },
@@ -873,6 +970,7 @@
       "dossierStyle": ">-",
       "dossier": "Analyse des retours d'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage",
       "decideur": "Farid",
+      "version": "2026-10-10 · sha256:24b68a8f4380257d4bb6e98b03a44ea553122eef996833b116626940e1a93e46",
       "coller_dans": "https://github.com/rhanka/radar-immobilier/pull/794",
       "decisions": true,
       "doubleQuotes": false
