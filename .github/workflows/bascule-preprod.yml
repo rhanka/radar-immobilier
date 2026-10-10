@@ -56,14 +56,17 @@ on:
   # 04:00 UTC, à l'heure pile (demande owner 2026-10-10 « remettre la sync prod
   # vers preprod (restore daily) » ; hebdomadaire dimanche 03:17 UTC du
   # 2026-09-26 au 2026-10-10). Why 04:00 UTC: after the daily prod backup
-  # (radar-backup-daily, 02:23 UTC, 7-45 min observed) so `latest` is the backup
-  # of the day (24 h guard: a failed or late backup is refused by R0 before any
-  # quiesce); before the prod refresh (05:00) and the preprod refresh (06:00) for
-  # an observed 18-50 min restore; on none of their start hours (node shared with
-  # prod). A preprod refresh Job still running from 00:00 is deleted by the
-  # quiesce (QUIESCE_CRONJOBS below), then the CronJob suspend is restored by the
-  # un-quiesce. GitHub may start a top-of-hour schedule late; the margins above
-  # absorb it. Bound by test: bascule.selftest.mjs.
+  # (radar-backup-daily, 02:23 UTC, 7-45 min observed), so the latest complete
+  # backup is normally the backup of the day; R0 refuses a latest complete
+  # backup older than 24 h before any quiesce (age check, no same-day check).
+  # Configured starts: 60 min before the prod refresh (05:00), 120 min before
+  # the preprod refresh (06:00), on none of their start hours (node shared with
+  # prod); restores observed 18-50 min. A preprod refresh Job still running
+  # from 00:00 is deleted by the quiesce (QUIESCE_CRONJOBS below); the
+  # un-quiesce patches the recorded CronJob suspend back. A late GitHub start or
+  # a long restore can overlap the prod refresh (not measured, not bounded).
+  # Guard on the rendered schedules: deploy/k8s/refresh-cronjobs/bascule-window.awk
+  # (refresh-018.mk verify-renders); slot table: deploy/ci/bascule-preprod/README.md.
   # GitHub interdit une variable de dépôt dans le littéral cron → la CADENCE est
   # figée ici ; l'ARMEMENT est la variable de dépôt BASCULE_SCHEDULE_ENABLED (voir
   # `if` du job `bascule`), OFF par défaut, pour qu'une fusion ne déclenche jamais

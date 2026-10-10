@@ -310,20 +310,27 @@ Cron `0 4 * * *` (UTC, on the hour). Neighbouring schedules, all UTC:
 
 | Time | Workload | Relation to the restore |
 | --- | --- | --- |
-| 00:00, 06:00, 12:00, 18:00 | preprod refresh `radar-refresh-pv` (runs observed 1 h 30 to 4 h, `activeDeadlineSeconds` 5 h 30) | a Job still running from 00:00 is **deleted by the quiesce** (owned by a quiesced CronJob), the CronJob is suspended during the restore and its original `suspend` is put back by the un-quiesce; its database work is replaced by the restore anyway |
-| every 5 min | preprod `radar-refresh-pending-watchdog` | in `QUIESCE_CRONJOBS`: suspended during the restore, then put back (an active watchdog Job would trip G2) |
-| 02:23 | prod backup `radar-backup-daily` (7 to 45 min observed) | the restore picks `latest` = the backup of the day; age reference = dump start, ~1.6 h at 04:00. If the backup of the day is missing or still running, `latest` is the previous day (~25.6 h) and R0 refuses it **before any quiesce** (preprod untouched) |
-| 05:00, 11:00, 17:00, 23:00 | prod refresh | not touched by the restore; shares the single node. Restores observed 18 to 50 min end before 05:00 |
+| 00:00, 06:00, 12:00, 18:00 | preprod refresh `radar-refresh-pv` (runs observed 1 h 30 to 4 h, `activeDeadlineSeconds` 5 h 30) | a Job still running from 00:00 is **deleted by the quiesce** (owned by a quiesced CronJob); the CronJob is suspended during the restore, and the un-quiesce patches back its recorded `suspend` (a failed patch fails the un-quiesce step); its database work is replaced by the restore anyway |
+| every 5 min | preprod `radar-refresh-pending-watchdog` | in `QUIESCE_CRONJOBS`: suspended during the restore, then patched back the same way (an active watchdog Job would trip G2) |
+| 02:23 | prod backup `radar-backup-daily` (7 to 45 min observed; `startingDeadlineSeconds` 3600, `activeDeadlineSeconds` 3 h) | R0 picks `latestComplete` if it is at most 24 h old (age reference = dump start); there is no same-day check. Normal outcome after an on-time backup: the backup of the day, ~1.6 h old at 04:00. Example: if the backup of the day is missing or still running and the previous one started at 02:23, it is ~25.6 h old and R0 refuses it **before any quiesce** (preprod untouched); a previous-day backup that started later (e.g. a delayed or re-run dump) can still be under 24 h and is then restored |
+| 05:00, 11:00, 17:00, 23:00 | prod refresh | not touched by the restore; shares the single node. Nominal margin: 60 min between the configured starts; with the 50 min upper observed restore, 10 min. A late GitHub start or a longer restore overlaps the prod refresh (CPU sharing, no guard) |
 | 04:40 | sentropic IdP identities sync prod → preprod (sentropic side) | independent; CPU only |
 
-Durations: the job timeout is 330 min (sum of the runner-side Job waits
-~260 min). A restore that runs past 06:00 (or 06:10, `startingDeadlineSeconds`
-600 of `radar-refresh-pv`) makes the preprod refresh skip its 06:00 pass (the
-CronJob is suspended until the un-quiesce); the next pass is 12:00. GitHub may
-start a top-of-hour schedule late; the margins above absorb a delay of the
-order of an hour. `bascule.selftest.mjs` binds the slot relationally: on the
-hour, >= 60 min after the backup start, on no refresh start hour, >= 60 min
-before the next refresh start.
+Durations: observed restores take 18 to 50 min; the job timeout is 330 min
+(sum of the runner-side Job waits ~260 min). If the restore still holds
+`radar-refresh-pv` suspended at 06:00, the 06:00 pass is missed while suspended:
+an un-quiesce within 10 min (`startingDeadlineSeconds` 600, `concurrencyPolicy`
+Forbid) lets the controller start it right away; later, it is skipped and the
+next pass is 12:00 (once the un-quiesce restored `suspend: false`). GitHub may
+start a top-of-hour schedule late; nothing measures or bounds that delay.
+
+Guard: `deploy/k8s/refresh-cronjobs/bascule-window.awk`, run by
+`refresh-018.mk verify-renders` (CI), compares CONFIGURED start times only — the
+single active cron of this workflow (`bascule-crons.awk`, any quoting), the
+RENDERED prod and preprod `radar-refresh-pv` and `radar-backup-daily` selected
+by name, all Etc/UTC: on the hour, >= 60 min after the backup start the same UTC
+day, on no refresh start, >= 60 min before the next refresh start. Mutation
+cases: `verify-renders.test.sh`.
 
 ### Inputs
 
