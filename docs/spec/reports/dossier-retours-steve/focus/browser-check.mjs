@@ -6,7 +6,7 @@
 // sections sont ouvertes avant les contrôles. Onglet neuf, fermé à la fin.
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
-const { graphs } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
+const { graphs, manifest } = JSON.parse(await readFile('.generated/data.json', 'utf8'));
 const port = process.env.CDP_PORT ?? '9243';
 const base = `http://127.0.0.1:${port}`;
 const focusFileRoot = process.env.FOCUS_FILE_ROOT;
@@ -288,6 +288,26 @@ const contentExpression = `(() => {
   return { charts, descriptions, minis };
 })()`;
 const content = await evaluate(contentExpression);
+// Renvois vers le dossier : le badge de chaque scène nomme la section qui la porte (titre le
+// plus proche au-dessus), l'en-tête de la copie interactive nomme des sections présentes.
+const references = await evaluate(`(() => {
+  const headings = [...document.querySelectorAll('.dossier-section summary strong, .dossier-section .prose h2, .dossier-section .prose h3, .dossier-section .prose h4')];
+  const target = number => headings.find(heading => new RegExp('^' + number.replace('.', '\\\\.') + '\\\\.? ').test(heading.textContent.trim()));
+  const before = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+  const badges = [...document.querySelectorAll('.scene')].map(scene => {
+    const badge = scene.querySelector('[data-scene-section]'), number = badge.dataset.sceneSection, heading = target(number);
+    const above = headings.filter(item => before(item, scene)).at(-1);
+    if (!badge.textContent.trim().startsWith('§' + number + ' · ') || !heading || above !== heading)
+      throw Error('badge de la scène ' + scene.dataset.scene + ' : ' + badge.textContent.trim() + ' ; titre au-dessus : ' + above?.textContent.trim());
+    return { scene: scene.dataset.scene, badge: badge.textContent.trim(), target: heading.textContent.trim() };
+  });
+  const eyebrow = document.querySelector('.choices [data-section-refs]');
+  const cited = [...eyebrow.textContent.matchAll(/§(\\d+\\.\\d+)/g)].map(match => match[1]);
+  if (JSON.stringify(cited) !== JSON.stringify(eyebrow.dataset.sectionRefs.split(' ')) || /annexe II\\b|ch\\. 10/.test(eyebrow.textContent)) throw Error('en-tête de la copie : ' + eyebrow.textContent);
+  const header = { text: eyebrow.textContent.trim(), targets: cited.map(number => { const heading = target(number);
+    if (!heading) throw Error('en-tête de la copie : §' + number + ' sans cible'); return heading.textContent.trim(); }) };
+  return { badges, header };
+})()`);
 const contentCaptures = [];
 for (const [name, selector] of [['graphique-sens', '[data-chart="sens-classement"]'], ['graphique-bruit', '[data-chart="bruit-familles"]'], ['graphique-pr-test-steve', '[data-chart="pr-test-steve"]'], ['decision-D2', '[data-question="D2"]'], ['decision-D3', '[data-question="D3"]']]) {
   await capture(await sceneBox(selector), `.generated/${name}.png`);
@@ -304,10 +324,12 @@ const zoomOne = async (id, { drag = false, shot = null } = {}) => {
   const opened = await evaluate(`(() => { const frame = document.querySelector('${sel}'), rect = frame.getBoundingClientRect();
     return { open: frame.dataset.zoomOpen, mode: frame.dataset.zoomMode, scale: Number(frame.dataset.scale), rect: { left: rect.left, top: rect.top, width: rect.width, height: rect.height },
       locked: document.documentElement.classList.contains('zoom-frame-open'), flowH: frame.querySelector('.flow')?.getBoundingClientRect().height ?? null,
-      focus: document.activeElement?.dataset.action ?? null }; })()`);
+      focus: document.activeElement?.dataset.action ?? null, title: frame.querySelector('.zoom-title')?.textContent.trim() ?? '' }; })()`);
   const W = await evaluate('innerWidth'), H = await evaluate('innerHeight');
   if (opened.open !== 'true' || !opened.locked || Math.abs(opened.rect.left) > 1 || Math.abs(opened.rect.top) > 1 || Math.abs(opened.rect.width - W) > 1 || Math.abs(opened.rect.height - H) > 1 || opened.focus !== 'close')
     throw Error(`plein écran ${id} : ${JSON.stringify(opened)}`);
+  // The full-screen title is a human title (dossier text), never the technical id.
+  if (!opened.title || opened.title === id || opened.title === id.replace(/^chart-/, '')) throw Error(`plein écran ${id} : titre ${JSON.stringify(opened.title)}`);
   if (opened.mode === 'native' && opened.flowH < H * 0.7) throw Error(`plein écran ${id} : scène trop petite ${opened.flowH}`);
   // Capture at the fitted full-screen view, before zooming.
   if (shot) await capture({ x: 0, y: await evaluate('scrollY'), width: W, height: H }, shot);
@@ -333,7 +355,7 @@ const zoomOne = async (id, { drag = false, shot = null } = {}) => {
   await pause(200);
   const closed = await evaluate(`({ open: document.querySelector('${sel}').dataset.zoomOpen, locked: document.documentElement.classList.contains('zoom-frame-open') })`);
   if (overflow || closed.open !== 'false' || closed.locked) throw Error(`fermeture ${id} : ${JSON.stringify({ overflow, ...closed })}`);
-  return { id, mode: opened.mode, fit: opened.scale || null, zoomed, dragged: Boolean(moved) };
+  return { id, title: opened.title, mode: opened.mode, fit: opened.scale || null, zoomed, dragged: Boolean(moved), escapeClosed: true };
 };
 const zoomIds = await evaluate(`[...document.querySelectorAll('[data-zoom]')].map(frame => frame.dataset.zoom)`);
 // 5 scènes, 5 schémas du texte, 1 schéma en couloirs du texte, 7 schémas d'options (D2, D3), 8 graphiques.
@@ -374,6 +396,8 @@ const EXPECT = {
   url: 'https://github.com/rhanka/radar-immobilier/pull/794', mine: { Farid: 9, Fabien: 16 },
   faridAnswered: ['D12'], notFarid: ['D9'], faridRoles: { D12: 'decide' }, fabienRoles: { D9: 'decide' }, allOptions: { D1: 'b', D9: 'a', D17: 'a', D12: 'a' },
   headerKeys: ['dossier', 'fichier', 'version', 'decideur', 'date', 'coller_dans'],
+  // sha256 of the served Markdown (dossierHash of the manifest and of portable.json).
+  version: `2026-10-10 · sha256:${manifest.dossierHash}`,
   title: 'Analyse des retours d\'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage',
 };
 const pickScript = picks => `(() => { ${picks.map(([question, option]) =>
@@ -389,7 +413,7 @@ const readExport = `(() => {
     role: field(chunk, 'role'), option: field(chunk, 'option'), statut: field(chunk, 'statut') }));
   const head = text.split('\\ndecisions:')[0];
   const header = { fenced: text.startsWith('\`\`\`yaml\\n'), keys: [...head.matchAll(/^([a-z_]+):/gm)].map(match => match[1]),
-    dossierStyle: (head.match(/^dossier: (.*)$/m) || [])[1], dossier: field(head, 'dossier', ''), decideur: field(head, 'decideur', ''),
+    dossierStyle: (head.match(/^dossier: (.*)$/m) || [])[1], dossier: field(head, 'dossier', ''), decideur: field(head, 'decideur', ''), version: field(head, 'version', ''),
     coller_dans: field(head, 'coller_dans', ''), decisions: text.includes('\\ndecisions:\\n'), doubleQuotes: text.includes('"') };
   return { text, entries, header };
 })()`;
@@ -429,7 +453,7 @@ if (choices.blocks !== EXPECT.blocks || choices.single !== EXPECT.blocks || choi
   || !choices.link || choices.link.href !== EXPECT.url || choices.link.target !== '_blank' || !choices.link.rel.split(' ').includes('noopener')
   || !choices.header.fenced || JSON.stringify(choices.header.keys) !== JSON.stringify(EXPECT.headerKeys) || choices.header.doubleQuotes
   || choices.header.dossierStyle !== '>-' || choices.header.dossier !== EXPECT.title || choices.header.decideur !== 'Farid'
-  || choices.header.coller_dans !== EXPECT.url || !choices.header.decisions
+  || choices.header.coller_dans !== EXPECT.url || !choices.header.decisions || choices.header.version !== EXPECT.version
   || choices.entries.length !== EXPECT.mine.Farid || JSON.stringify(choices.answered) !== JSON.stringify(EXPECT.faridAnswered)
   || own[EXPECT.selectedQuestion]?.option !== EXPECT.selectedOption || own[EXPECT.selectedQuestion]?.role !== 'decide'
   || EXPECT.notFarid.some(id => own[id]) || Object.entries(EXPECT.faridRoles).some(([id, role]) => own[id]?.role !== role))
@@ -575,7 +599,7 @@ const report = {
   offline: { ...offline, blockedExternal: true },
   viewports: viewports.map(viewport => ({ width: viewport.width, height: viewport.height })),
   scenes: viewports[0].metrics, scenesAt1920: viewports[1].metrics,
-  dark: { ...dark, scenes: darkMetrics, content: darkContent, zoom: darkZoom }, content, zoom: { frames: zoom, inPage: { before: inPage, ...inPageAfter }, mobile }, choices, copy, exportFilter, oneToOne, overview,
+  dark: { ...dark, scenes: darkMetrics, content: darkContent, zoom: darkZoom }, content, references, zoom: { frames: zoom, inPage: { before: inPage, ...inPageAfter }, mobile }, choices, copy, exportFilter, oneToOne, overview,
   captures: ['.generated/dossier-preview-1440x1000.png', '.generated/dossier-preview-1920x1080.png',
     ...graphs.map(graph => `.generated/scene-1a1-${graph.id}.png`),
     ...graphs.map(graph => `.generated/scene-vue-ensemble-${graph.id}.png`),
