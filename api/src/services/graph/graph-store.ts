@@ -1170,7 +1170,7 @@ export interface ProjectCityOptions {
    * `declared.removals` and may drop exactly `declared.propertyLosses`. A declaration
    * absent from the plan, or a planned removal not declared, refuses the city before
    * any write; gates 1, 2 and 3 run as usual with only the declared items exempt.
-   * Exclusive with `intendedRemovals`.
+   * Exclusive with `intendedRemovals` and `baselineExcludeIds` (throws).
    */
   declared?: DeclaredChanges;
 }
@@ -1194,8 +1194,14 @@ export async function projectCityInTransaction(
 ): Promise<UpsertAtomicResult> {
   const { citySlug, nodeRows, edgeRows } = projection;
   const declared = options.declared;
+  // Declared mode guards the city's FULL current rows: an exemption source other than the
+  // declarations (removal-only `intendedRemovals`, repair `baselineExcludeIds`) would let an
+  // undeclared loss through (review SOL-853-01).
   if (declared && options.intendedRemovals && options.intendedRemovals.size > 0) {
     throw new Error("projectCityInTransaction: `declared` and `intendedRemovals` are exclusive");
+  }
+  if (declared && options.baselineExcludeIds && options.baselineExcludeIds.size > 0) {
+    throw new Error("projectCityInTransaction: `declared` and `baselineExcludeIds` are exclusive");
   }
   const intendedRemovals = declared?.removals ?? options.intendedRemovals ?? new Set<string>();
   const acceptedPropertyLosses = declared?.propertyLosses ?? new Map<string, ReadonlySet<string>>();
