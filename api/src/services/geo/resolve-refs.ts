@@ -83,8 +83,12 @@ export interface GeoResolveResult {
 // mais ne sont pas encore dans schema.ts (hand-authored DDL).
 // On utilise db.execute(sql`...`) pour les inserts dans ces tables.
 
-/** INSERT dans geo_resolutions (idempotent via ON CONFLICT DO NOTHING). */
-async function insertResolution(
+/**
+ * INSERT dans geo_resolutions (idempotent via ON CONFLICT DO NOTHING). Clé naturelle
+ * (city_slug, node_id, relation_type, target_id) : un id de nœud n’est unique que dans une
+ * ville (GH #812). Exportée pour le test d’intégration de la clé.
+ */
+export async function insertResolution(
   db: Database,
   params: {
     nodeId: string;
@@ -108,7 +112,7 @@ async function insertResolution(
        ${params.relationType}, ${params.targetId}, ${params.targetType},
        ${params.extraitBrut}, ${params.scoreConfiance}, ${params.provenance},
        ${params.asOfDate ?? null})
-    ON CONFLICT (node_id, relation_type, target_id) DO NOTHING
+    ON CONFLICT (city_slug, node_id, relation_type, target_id) DO NOTHING
   `);
 }
 

@@ -14,8 +14,9 @@ de production et rejoue le pipeline :
 2. `projectComposedVivierB(nodes, DEFAULT_B_AXES={z,r,p:true})` (`ui/src/lib/signals/vivier-view-mode.ts`)
    = **INTERSECTION** : `exclusion_reason===null ∧ zonage.valeur==='oui' ∧ isResidentialEligible(c)
    ∧ etape∈{avis_motion, projet_reglement}`.
-3. `filterNodesByEtapeDate(nodes, dateRangeFromSignalTimeRange(defaultSignalTimeRange(now)))`
-   (`ui/src/lib/signals/signal-date-filter.ts`) = **6 mois calendaires**,
+3. `filterNodesByEtapeDate(nodes, dateRangeFromSignalTimeRange(normalizeSignalTimeRange({ mode: "relative", relative: "6mo" }, now)))`
+   (`ui/src/lib/signals/signal-date-filter.ts`) = préréglage explicite **6 mois calendaires** (le défaut produit
+   était 6 mois au moment de la cohorte ; il est « Dernière semaine » depuis #834),
    `[startOfDay(today−6mois), endOfDay(today)]` inclusif ; **dates nulles GARDÉES** (le client n'invente
    pas de récence — le miroir serveur `isSignalInDateRange`, lui, les DROP : c'est LA divergence qui faisait
    sous-compter l'agrégat).

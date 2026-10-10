@@ -300,10 +300,11 @@ operator actions.
 ## Production refresh CronJobs
 
 - Arm the CD step with `gh variable set REFRESH_CRONJOB_PROD_ENABLED --body true`.
-- It first applies on the next `v*` tag; the 03:17/04:30 UTC schedules stay outside, and must never overlap, the release backup window.
+- It first applies on the next `v*` tag. `radar-refresh-pv` starts at `0 5,11,17,23 * * *` UTC in prod and `0 0,6,12,18 * * *` UTC in preprod, one hour later and still on the hour (incident 2026-10-09: the same minute on the same node blocked both RWO keyring attachments). Start a release outside the refresh windows (prod 05:00, 11:00, 17:00, 23:00 UTC; preprod 00:00, 06:00, 12:00, 18:00 UTC; 1 h 30–2 h each), so the release backup is not competing with a starting pass.
 - Disarm future applies by setting the variable to `false`; suspend already-deployed CronJobs with `suspend: true`.
-- The CronJobs scrape and parse/exploit deterministically, then project `graph/<city>/latest.json` from S3 into Postgres.
+- `radar-refresh-pv` acquires, extracts, publishes `graph/<city>/latest.json` and projects it into Postgres. `radar-refresh-pending-watchdog` (every 5 min, ServiceAccount `radar-refresh-watchdog`, owner-applied RBAC) requests the deletion of a refresh pod still `Pending` 15 min after its creation (uid + resourceVersion preconditions), so the pass fails and releases its requests instead of holding them until the 5 h 30 Job deadline.
 - Capitalized `Signal` materialization remains owned by graphify v2.3 plus publication of `graph/<city>/latest.json`; these CronJobs do not replace it.
+- The daily prod → preprod restore (`.github/workflows/bascule-preprod.yml`, cron `0 4 * * *` UTC, `MODE=restore` from the latest complete backup at most 24 h old, normally the backup of the day; armed by `BASCULE_SCHEDULE_ENABLED`) quiesces the preprod `radar-refresh-pv` and `radar-refresh-pending-watchdog` CronJobs during the restore: a preprod refresh Job still running from 00:00 is deleted, and the un-quiesce patches the recorded `suspend` values back (a failed patch fails the un-quiesce step). The guard `refresh-cronjobs/bascule-window.awk` (run by `verify-renders`) keeps the restore slot after the daily backup and off every rendered refresh start. Slot rationale: `deploy/ci/bascule-preprod/README.md` "Daily schedule (04:00 UTC)".
 
 ## Manual deploy (human, with cluster creds)
 
