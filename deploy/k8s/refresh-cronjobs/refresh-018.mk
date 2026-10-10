@@ -12,6 +12,9 @@ CONTRACT_AWK := $(OVERLAY)/refresh-contract.awk
 WINDOW_AWK := $(OVERLAY)/refresh-window.awk
 WATCHDOG_AWK := $(OVERLAY)/refresh-watchdog.awk
 STAGGER_AWK := $(OVERLAY)/refresh-stagger.awk
+BASCULE_CRONS_AWK := $(OVERLAY)/bascule-crons.awk
+BASCULE_WINDOW_AWK := $(OVERLAY)/bascule-window.awk
+BACKUP_DAILY_MANIFEST := $(ROOT)/deploy/ci/backup/cronjob-backup-daily.yaml
 REFRESH_STAGGER_MIN_MINUTES := 15
 
 .PHONY: guard-preprod
@@ -239,7 +242,13 @@ verify-renders:
 	  case ",$$quiesce," in *,radar-refresh-pv,*) ;; *) echo "refresh pending watchdog contract failed: QUIESCE_CRONJOBS of .github/workflows/bascule-preprod.yml must list radar-refresh-pv (got: $$quiesce)" >&2; exit 1;; esac; \
 	  case ",$$quiesce," in *,radar-refresh-pending-watchdog,*) ;; *) echo "refresh pending watchdog contract failed: QUIESCE_CRONJOBS of .github/workflows/bascule-preprod.yml must list radar-refresh-pending-watchdog, or an active watchdog Job trips the bascule G2 guard (got: $$quiesce)" >&2; exit 1;; esac; \
 	  awk -v min_minutes=$(REFRESH_STAGGER_MIN_MINUTES) -f "$(STAGGER_AWK)" "$$tmp/preprod.yaml" "$$tmp/prod.yaml" \
-	    || { echo "refresh stagger failed: the closest prod and preprod refresh starts must be at least $(REFRESH_STAGGER_MIN_MINUTES) minutes apart (incident 2026-10-09)" >&2; exit 1; }
+	    || { echo "refresh stagger failed: the closest prod and preprod refresh starts must be at least $(REFRESH_STAGGER_MIN_MINUTES) minutes apart (incident 2026-10-09)" >&2; exit 1; }; \
+	  crons="$$(awk -f "$(BASCULE_CRONS_AWK)" "$$wf")" \
+	    || { echo "bascule window contract failed: unreadable on.schedule in $$wf" >&2; exit 1; }; \
+	  test "$$(printf "%s\n" "$$crons" | grep -c .)" -eq 1 \
+	    || { echo "bascule window contract failed: $$wf must carry exactly one active on.schedule cron (got: $$(printf "%s" "$$crons" | tr "\n" "|"))" >&2; exit 1; }; \
+	  awk -v restore="$$crons" -f "$(BASCULE_WINDOW_AWK)" "$$tmp/preprod.yaml" "$$tmp/prod.yaml" "$(BACKUP_DAILY_MANIFEST)" \
+	    || { echo "bascule window contract failed: the daily restore slot of $$wf must stay after the daily backup and clear of every refresh start" >&2; exit 1; }
 
 .PHONY: seed-preprod
 seed-preprod: guard-preprod
