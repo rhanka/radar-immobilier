@@ -56,6 +56,15 @@ expect_refused "sed delimiter" "brigham" "remove=a#b" "apply" "invalid remove li
 expect_refused "ampersand" "brigham" "remove=a&b" "apply" "invalid remove list"
 expect_refused "slash" "brigham" "remove=a/b" "apply" "invalid remove list"
 expect_refused "newline" "brigham" $'remove=a\nlose=b:k' "apply" "single line"
+expect_refused "carriage return" "brigham" $'remove=a\r' "apply" "single line"
+expect_refused "two cities on two lines" $'brigham\ndanville' "remove=a" "apply" "single line"
+# Non-ASCII refused whatever the caller's locale (parity with projection-args.ts, ASTRA-853-01).
+for loc in C C.UTF-8 fr_FR.UTF-8 en_US.UTF-8; do
+  out="$(LC_ALL="$loc" PROJECT_CITIES=brigham DECLARATIONS="remove=é" MODE=apply bash "$CHECK" 2>&1)" \
+    && bad "non-ASCII id accepted under LC_ALL=$loc ($out)" || ok "non-ASCII id refused under LC_ALL=$loc"
+  out="$(LC_ALL="$loc" PROJECT_CITIES=brigham DECLARATIONS="lose=a:é" MODE=apply bash "$CHECK" 2>&1)" \
+    && bad "non-ASCII key accepted under LC_ALL=$loc ($out)" || ok "non-ASCII key refused under LC_ALL=$loc"
+done
 expect_refused "empty id" "brigham" "remove=a,,b" "apply" "invalid remove list"
 expect_refused "leading dash id" "brigham" "remove=-a" "apply" "invalid remove list"
 expect_refused "loss without key" "brigham" "lose=a" "apply" "invalid lose list"
