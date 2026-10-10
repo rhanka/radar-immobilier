@@ -28,6 +28,10 @@
     "officeparser": {
       "pdfjs-dist": "npm:empty-npm-package@1.0.0"
     },
+    "@sentropic/graphify": {
+      "csv-parse": "7.0.3",
+      "@google-cloud/spanner": "npm:empty-npm-package@1.0.0"
+    },
     "@sentropic/design-system-svelte": "^0.35.1"
   },
   "scripts": {
