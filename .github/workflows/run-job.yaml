@@ -35,6 +35,12 @@
 #                          OGC data, append-only as before.
 #   refresh-suspend/resume patch CronJob radar-refresh-pv spec.suspend (owner decision Q2), read
 #                          back; no Job is created.
+#
+# GH #817 (spec SPEC_FIX_GRAPH_CITY_KEY §17) — projection with DECLARED CHANGES (still 10 inputs):
+#   projection             recovery_cities = "remove=<id>,… lose=<id>:<key>,…" for the ONE city of
+#                          project_cities; recovery_mode = preview (default: run then rollback) or
+#                          apply. Validated by deploy/ci/projection-declared-args.sh. Empty
+#                          recovery_cities ⇒ the projection is unchanged (recovery_mode ignored).
 name: Run one-shot job
 on:
   workflow_dispatch:
@@ -85,7 +91,7 @@ on:
         type: string
         default: ""
       recovery_mode:
-        description: "For job=document-date-recovery or graph-city-key-repair: preview (read-only) or apply (writes PG; recovery also writes graph)"
+        description: "For job=document-date-recovery or graph-city-key-repair: preview (read-only) or apply (writes PG; recovery also writes graph). For job=projection with declared changes: preview (rolled back) or apply"
         required: false
         type: choice
         options:
@@ -98,7 +104,7 @@ on:
         type: boolean
         default: false
       recovery_cities:
-        description: "For job=document-date-recovery: space-separated city slugs (empty ⇒ every graph/<city>/latest.json). For job=graph-city-key-repair: slugs, or 'all' (preview only = measurement of every city)"
+        description: "For job=document-date-recovery: space-separated city slugs (empty ⇒ every graph/<city>/latest.json). For job=graph-city-key-repair: slugs, or 'all' (preview only = measurement of every city). For job=projection: declared changes of the one project_cities city, 'remove=<id>,… lose=<id>:<key>,…' (empty ⇒ none)"
         required: false
         type: string
         default: ""
@@ -344,6 +350,7 @@ jobs:
           repair_args=""
           mapper_cities=""
           mapper_reset=""
+          projection_args=""
           if [ "${JOB}" = "projection" ] || [ "${JOB}" = "document-date-recovery" ] || [ "${JOB}" = "graph-city-key-repair" ] || [ "${JOB}" = "mapper" ]; then
             image_re='^ghcr\.io/rhanka/radar-api(:[A-Za-z0-9._-]+|@sha256:[0-9a-f]{64})$'
             recovery_image="${RECOVERY_IMAGE}"
@@ -372,12 +379,19 @@ jobs:
             echo "pre-check OK: no active refresh, backup, projection, recovery, repair or mapper Job in ${NAMESPACE}"
           fi
           if [ "${JOB}" = "projection" ]; then
-            echo "projection: target=${TARGET} image=${recovery_image} cities=${PROJECT_CITIES:-<all>}"
+            # GH #817: declared changes (recovery_cities + recovery_mode, reused inputs) → script
+            # flags; empty recovery_cities ⇒ empty flags, the projection is unchanged.
+            decl_err="${RUNNER_TEMP}/projection-declared-args.err"
+            if ! projection_args="$(DECLARATIONS="${RECOVERY_CITIES}" MODE="${RECOVERY_MODE}" bash deploy/ci/projection-declared-args.sh 2>"${decl_err}")"; then
+              echo "::error title=Invalid projection declarations::$(cat "${decl_err}") Nothing was applied."; exit 1
+            fi
+            echo "projection: target=${TARGET} image=${recovery_image} cities=${PROJECT_CITIES:-<all>} declared=${projection_args:-<none>}"
             {
               echo "### projection (${TARGET})"
               echo ""
               echo "- image: \`${recovery_image}\`"
               echo "- cities: \`${PROJECT_CITIES:-<all>}\`"
+              echo "- declared changes: \`${projection_args:-<none>}\`"
             } >> "$GITHUB_STEP_SUMMARY"
           fi
           if [ "${JOB}" = "document-date-recovery" ]; then
@@ -449,13 +463,14 @@ jobs:
           rendered="${RUNNER_TEMP}/run-job-manifest.yaml"
           sed -e "s/__BACKUP_ID__/${BACKUP_ID}/" -e "s/__SCRAPE_CITIES__/${SCRAPE_CITIES}/" -e "s/__SCRAPE_CHUNK_SIZE__/${SCRAPE_CHUNK_SIZE}/" -e "s/__PROJECT_CITIES__/${PROJECT_CITIES}/" \
             -e "s#__IMAGE__#${recovery_image}#" -e "s#__RECOVERY_ARGS__#${recovery_args}#" -e "s#__REPAIR_ARGS__#${repair_args}#" \
-            -e "s#__MAPPER_CITIES__#${mapper_cities}#" -e "s#__MAPPER_RESET__#${mapper_reset}#" "${MANIFEST}" >"${rendered}"
+            -e "s#__MAPPER_CITIES__#${mapper_cities}#" -e "s#__MAPPER_RESET__#${mapper_reset}#" \
+            -e "s#__PROJECTION_ARGS__#${projection_args}#" "${MANIFEST}" >"${rendered}"
           # The rendered manifest must declare the target namespace (a prod manifest can
           # never be applied to preprod, nor the reverse) and keep no unrendered image.
           if ! grep -Eq "^  namespace: ${NAMESPACE}\$" "${rendered}"; then
             echo "::error title=Manifest namespace mismatch::${MANIFEST} does not declare namespace ${NAMESPACE}. Nothing was applied."; exit 1
           fi
-          if grep -Eq '__(IMAGE|REPAIR_ARGS|MAPPER_CITIES|MAPPER_RESET)__' "${rendered}"; then
+          if grep -Eq '__(IMAGE|REPAIR_ARGS|MAPPER_CITIES|MAPPER_RESET|PROJECTION_ARGS)__' "${rendered}"; then
             echo "::error title=Unrendered placeholder::${MANIFEST} still contains a placeholder. Nothing was applied."; exit 1
           fi
           kubectl -n "$NAMESPACE" delete job "${JOB_NAME}" --ignore-not-found
