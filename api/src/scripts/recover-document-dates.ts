@@ -26,6 +26,8 @@
  * Output: one JSON line per city (`recover-document-dates:city`) and a final JSON report line
  * (`recover-document-dates:report`) on stdout.
  */
+import { writeFile } from "node:fs/promises";
+
 import { loadConfig } from "../config.js";
 import { createLogger } from "../logger.js";
 import { createDb } from "../db/client.js";
@@ -177,6 +179,12 @@ async function main(): Promise<void> {
 
   report.metadataReadErrors = metadata.readErrors;
   console.log(JSON.stringify({ event: "recover-document-dates:report", ...report }));
+  // ≤ 4 KiB summary in the termination message: the report the run-job workflow can read with
+  // the preprod credential, which has no pods/log (GH #812).
+  await writeFile("/dev/termination-log", JSON.stringify({ event: "recover-document-dates:report", mode: report.mode,
+    heal: report.heal, cities: report.cities, citiesChanged: report.citiesChanged, citiesWritten: report.citiesWritten,
+    citiesSkipped: report.citiesSkipped, citiesDrift: report.citiesDrift, citiesHalted: report.citiesHalted,
+    citiesAborted: report.citiesAborted, metadataReadErrors: report.metadataReadErrors }).slice(0, 4000)).catch(() => undefined);
   await pool.end();
   process.exit(report.citiesHalted > 0 || report.citiesAborted > 0 ? 1 : 0);
 }
