@@ -22,10 +22,9 @@ const expected = [
   ['criteres-steve', "Les trois critères de Steve en regard de l'existant"],
   ['affichage-abc', "A, B et C : ce que voit l'application, ce que mesure l'évaluation"],
   ['modele-donnees', 'Stockage réel et propriétaires : Postgres, S3, geo, dépôt'],
-  ['flux-import-oracle', "Architecture de l'import à l'affichage, jeu de référence transversal"],
+  ['flux-import-reference', "Architecture de l'import à l'affichage, jeu de référence transversal"],
   ['architecture-ui', 'Architecture UI et état de la migration'],
 ];
-if (markdown.includes('\n## Annexe B') || markdown.includes('\n## Annexe A')) throw Error('annexes A and B are out of the report');
 const markers = [...markdown.matchAll(/<!-- scene:([\w-]+) -->/g)].map(match => match[1]);
 if (JSON.stringify(markers) !== JSON.stringify(expected.map(([id]) => id))) throw Error(`scene markers ${markers} differ from the scene list`);
 // Each scene: a Mermaid block (flowchart or erDiagram) or, for the matrix, a Markdown table.
@@ -107,30 +106,33 @@ for (const graph of graphs) {
   graph.sceneHash = sha256(graph.canonicalJson);
 }
 
-// Le dossier, découpé sur ses titres de niveau 2 : en-tête (0), glossaire, les 12
-// chapitres, puis les annexes I à IV. Le texte n'est pas réécrit. Les blocs Mermaid
+// Le dossier, découpé sur ses titres de niveau 2, selon le plan adopté (§B6) : l'ouverture,
+// les 10 chapitres, puis les annexes A à F. Le texte n'est pas réécrit. Les blocs Mermaid
 // suivis d'un repère sont rendus nativement ; les autres sont remplacés par un renvoi
 // (schémas des options : rendus dans les décisions). Le Markdown reste la source lisible.
 const mermaidNote = '> Diagramme : rendu dans la page, dans les scènes Focus ou dans les options de décision (source Mermaid dans le Markdown du dossier).';
 const [head, ...rest] = markdown.split(/\n## /);
 // A Mermaid block followed by a diagram marker is rendered natively at the marker.
-const strip = text => text.replace(/```mermaid\n(?:(?!```)[\s\S])*```\n\n(<!-- (?:diagram|lanes):[\w-]+ -->)/g, '$1').replace(/```mermaid\n[\s\S]*?```/g, mermaidNote);
+const strip = text => text.replace(/```mermaid\n(?:(?!```)[\s\S])*```\n\n(<!-- (?:diagram|lanes|mermaid):[\w-]+ -->)/g, '$1').replace(/```mermaid\n[\s\S]*?```/g, mermaidNote);
 const title = head.split('\n')[0].replace(/^# /, '');
-const sectionId = heading => heading.startsWith('0.') ? 'entete' : heading.startsWith('Glossaire') ? 'glossaire'
+// Version banner: the bold line under the title (one version date only).
+const banner = head.split('\n').slice(1).map(line => line.trim()).find(Boolean)?.replace(/^\*\*|\*\*$/g, '') ?? '';
+if (!/version figée L5/.test(banner)) throw Error('missing the version banner under the title');
+const sectionId = heading => heading === 'Ouverture' ? 'ouverture'
   : heading.startsWith('Annexe') ? `annexe-${heading.split(' ')[1]}` : `section-${heading.split('.')[0]}`;
 const sections = rest.map(chunk => {
   const heading = chunk.split('\n')[0].trim();
   return { id: sectionId(heading), heading, markdown: strip(chunk.split('\n').slice(1).join('\n').trim()) };
 });
-const decisionSections = sections.filter(section => /^(1[0-2]|[1-9])\./.test(section.heading));
-if (decisionSections.length !== 12) throw Error(`expected the 12 dossier chapters, found ${decisionSections.length}`);
+const decisionSections = sections.filter(section => /^(10|[1-9])\./.test(section.heading));
+if (decisionSections.length !== 10) throw Error(`expected the 10 dossier chapters, found ${decisionSections.length}`);
 const annexes = sections.filter(section => section.heading.startsWith('Annexe'));
-if (JSON.stringify(annexes.map(section => section.id)) !== JSON.stringify(['annexe-I', 'annexe-II', 'annexe-III', 'annexe-IV'])) throw Error('expected the annexes I to IV');
-const header = sections.find(section => section.id === 'entete');
-if (!header || sections[0] !== header) throw Error('missing the header (chapter 0) before the glossary');
-// Glossaire, en tête du dossier : rendu ouvert dans la page, juste après « Comment lire ce dossier ».
-const glossary = sections.find(section => section.heading === 'Glossaire et statuts');
-if (!glossary) throw Error('missing the glossary');
+if (JSON.stringify(annexes.map(section => section.id)) !== JSON.stringify(['annexe-A', 'annexe-B', 'annexe-C', 'annexe-D', 'annexe-E', 'annexe-F'])) throw Error('expected the annexes A to F');
+const header = sections.find(section => section.id === 'ouverture');
+if (!header || sections[0] !== header) throw Error('missing the opening before chapter 1');
+// Glossaire complet : annexe E (le glossaire de tête est dans l'ouverture).
+const glossary = sections.find(section => section.id === 'annexe-E');
+if (!glossary) throw Error('missing the glossary (annexe E)');
 
 const choices = (await readFile('choices.js', 'utf8')) + (await readFile('roles.json', 'utf8')) + (await readFile('decision-yaml.js', 'utf8'));
 const rendererSources = Object.fromEntries(await Promise.all([
@@ -140,13 +142,13 @@ const rendererSources = Object.fromEntries(await Promise.all([
 // Renderers of the matrix, table and swimlane scenes, local to this dossier.
 const diagramSources = Object.fromEntries(await Promise.all([
   'diagram-router.js', 'diagram-layout.js', 'diagram-specs.js', 'parse-er.mjs', 'DiagramFrame.svelte', 'ErDiagram.svelte',
-  'LaneDiagram.svelte', 'MatrixScene.svelte', 'SceneView.svelte', 'BarChart.svelte', 'charts.js', 'Sections.svelte', 'protocol.js', 'ZoomFrame.svelte', 'doc-diagrams.js', 'option-details.js', 'steve-model.js', 'physical-model.js', 'generic-decisions.js',
+  'LaneDiagram.svelte', 'MatrixScene.svelte', 'SceneView.svelte', 'BarChart.svelte', 'charts.js', 'Sections.svelte', 'protocol.js', 'ZoomFrame.svelte', 'MermaidDiagram.svelte', 'doc-diagrams.js', 'option-details.js', 'steve-model.js', 'physical-model.js', 'generic-decisions.js',
 ].map(async name => [name, await readFile(name, 'utf8')])));
 
 const manifest = {
   schema: 'immo-focus-steve-decision-map/v1',
   dossier: 'docs/spec/reports/dossier-retours-steve/DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md',
-  title,
+  title, banner,
   // Placeholder for the page's own sha256, replaced by portable.mjs (see there).
   htmlSha256: HTML_SHA256_PLACEHOLDER,
   dossierHash: sha256(markdown), choicesHash: sha256(choices),
@@ -154,8 +156,8 @@ const manifest = {
   serviceRendererHash: sha256(JSON.stringify(rendererSources)), diagramRendererHash: sha256(JSON.stringify(diagramSources)),
   scenesHash: sha256(scenesMarkdown),
   artifactInputHash: sha256(JSON.stringify({ markdown, scenesMarkdown, graphs, choices, rendererSources, diagramSources })),
-  mapping: 'criteres-steve : matrice (tableau Markdown) ; modele-donnees : erDiagram rendu en tables et relations ; flux-import-oracle et affichage-abc : flowchart en couloirs, évaluation en bande basse ; architecture-ui : SvelteFlow natif, subgraphs en parentId. Chaque scène est rendue dans le chapitre qui porte son repère.',
-  geometry: 'architecture-ui : Dagre récursif rankdir LR et routeur orthogonal du kit, carte A’ 460 x 200 ; modele-donnees, flux-import-oracle et affichage-abc : grille explicite et routeur orthogonal A* du dossier.',
+  mapping: 'criteres-steve : matrice (tableau Markdown) ; modele-donnees : erDiagram rendu en tables et relations ; flux-import-reference et affichage-abc : flowchart en couloirs, évaluation en bande basse ; architecture-ui : SvelteFlow natif, subgraphs en parentId. Chaque scène est rendue dans le chapitre qui porte son repère.',
+  geometry: 'architecture-ui : Dagre récursif rankdir LR et routeur orthogonal du kit, carte A’ 460 x 200 ; modele-donnees, flux-import-reference et affichage-abc : grille explicite et routeur orthogonal A* du dossier.',
   graphOrder: graphs.map(graph => graph.id),
   graphs: graphs.map(graph => ({ id: graph.id, title: graph.title, kind: graph.kind, sceneHash: graph.sceneHash, projection: graph.projection,
     nodes: (graph.nodes ?? graph.entities ?? graph.projection.rows).length, edges: (graph.edges ?? graph.relations ?? []).length, subflows: (graph.groups ?? []).length })),
@@ -165,5 +167,9 @@ await mkdir('.generated', { recursive: true });
 // Lane diagrams of the text: the Mermaid block just above each <!-- lanes:<id> --> marker.
 const docLanes = Object.fromEntries([...markdown.matchAll(/```mermaid\n((?:(?!```)[\s\S])*)```\n\n<!-- lanes:([\w-]+) -->/g)]
   .map(([, source, id]) => [id, laneScene(source, id, id)]));
-await writeFile('.generated/data.json', JSON.stringify({ graphs, sections, header, glossary, decisionSections, annexes, manifest, docLanes }));
+// Flowcharts of the text (decision rule, D10): the Mermaid block just above each <!-- mermaid:<id> -->
+// marker, rendered natively in the page by mermaid (offline bundle).
+const docMermaid = Object.fromEntries([...markdown.matchAll(/```mermaid\n((?:(?!```)[\s\S])*)```\n\n<!-- mermaid:([\w-]+) -->/g)]
+  .map(([, source, id]) => [id, source]));
+await writeFile('.generated/data.json', JSON.stringify({ graphs, sections, header, glossary, decisionSections, annexes, manifest, docLanes, docMermaid }));
 console.log(JSON.stringify(manifest.graphs.map(graph => ({ id: graph.id, nodes: graph.nodes, edges: graph.edges, subflows: graph.subflows }))));
