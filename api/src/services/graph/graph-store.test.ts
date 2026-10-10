@@ -2058,6 +2058,10 @@ describe.skipIf(!DB_AVAILABLE)("DB-bound: upsertGraphAtomic (atomique + gate)", 
       declaredNotInPlan: [],
       undeclaredRemovals: [],
     });
+    // rollback material: the June rows of the declared nodes and the deleted edge, read before writing
+    expect(r.declaredBaseline?.nodes.map((n) => n.id).sort()).toEqual(["bylaw-foreign", "lot-june", "muni"]);
+    expect(r.declaredBaseline?.nodes.find((n) => n.id === "muni")?.props).toMatchObject({ properties: { flag: "x" } });
+    expect(r.declaredBaseline?.edges.map((e) => `${e.srcId}>${e.dstId}`)).toEqual(["lot-june>muni"]);
     const after = await cityIds(db, city);
     expect(after.ids).toEqual(["lot-july", "muni"]);
     expect(after.props.get("muni")?.properties).toEqual({ name: "Brigham" });
