@@ -22,6 +22,9 @@ import {
   upsertGraphAtomic,
   findMissingBusinessProperties,
   findMissingSourceRefs,
+  checkDeclaredChanges,
+  evaluateRowGuards,
+  type DeclaredChanges,
   countCompleteSignals,
   isCompleteSignalProps,
   queryNeighbors,
@@ -481,6 +484,86 @@ describe("source-ref provenance gate (gate3) — findMissingSourceRefs", () => {
     const before = [withRefs("sig:1", [])];
     const after = [withRefs("sig:1", [])];
     expect(findMissingSourceRefs(before, after, "x")).toEqual([]);
+  });
+});
+
+// GH #817 (D7 brigham) — declared changes: intended removals (ids) and accepted
+// business-property losses (`id:key`), checked against the projection plan.
+describe("declared changes — checkDeclaredChanges + gate1 accepted losses", () => {
+  type Row = { id: string; props: Record<string, unknown> };
+  const node = (id: string, properties: Record<string, unknown> = {}, extra: Record<string, unknown> = {}): Row => ({
+    id,
+    props: { properties, ...extra },
+  });
+  const declared = (removals: string[], losses: Array<[string, string[]]> = []): DeclaredChanges => ({
+    removals: new Set(removals),
+    propertyLosses: new Map(losses.map(([id, keys]) => [id, new Set(keys)])),
+  });
+  // Shape of brigham: two PG-only nodes, one shared node losing `flag`, one new S3 node.
+  const current = [
+    node("lot-1", { no_lot: "1" }),
+    node("bylaw-foreign", { status: "adopte" }, { refs: [{ docSha: "SHA_OTHER_CITY" }] }),
+    node("muni", { flag: "x", name: "Brigham" }),
+  ];
+  const candidate = [node("muni", { name: "Brigham" }), node("lot-2", { no_lot: "2" })];
+
+  it("reports the exact plan: removals = current rows absent from the candidate, losses = gate1 keys of surviving rows", () => {
+    const report = checkDeclaredChanges(current, candidate, declared(["lot-1", "bylaw-foreign"], [["muni", ["flag"]]]));
+    expect(report).toEqual({
+      plannedRemovals: ["bylaw-foreign", "lot-1"],
+      plannedLosses: ["muni:flag"],
+      declaredNotInPlan: [],
+      undeclaredRemovals: [],
+    });
+  });
+
+  it("lists a declared removal of a node the candidate keeps as absent from the plan", () => {
+    const report = checkDeclaredChanges(current, candidate, declared(["lot-1", "bylaw-foreign", "muni"], [["muni", ["flag"]]]));
+    expect(report.declaredNotInPlan).toEqual(["remove:muni"]);
+  });
+
+  it("lists a declared removal of an id the city does not hold as absent from the plan", () => {
+    const report = checkDeclaredChanges(current, candidate, declared(["lot-1", "bylaw-foreign", "lot-404"]));
+    expect(report.declaredNotInPlan).toEqual(["remove:lot-404"]);
+  });
+
+  it("lists a declared loss of a key that survives, of a removed node, or of an unknown node as absent from the plan", () => {
+    const report = checkDeclaredChanges(
+      current,
+      candidate,
+      declared(["lot-1", "bylaw-foreign"], [["muni", ["flag", "name"]], ["lot-1", ["no_lot"]], ["ghost", ["k"]]]),
+    );
+    expect(report.declaredNotInPlan).toEqual(["lose:ghost:k", "lose:lot-1:no_lot", "lose:muni:name"]);
+  });
+
+  it("lists every planned removal that is not declared", () => {
+    const report = checkDeclaredChanges(current, candidate, declared(["lot-1"]));
+    expect(report.undeclaredRemovals).toEqual(["bylaw-foreign"]);
+  });
+
+  it("gate1 exempts exactly the accepted key of the accepted node", () => {
+    const losses = new Map([["muni", new Set(["flag"])]]);
+    expect(findMissingBusinessProperties(current, candidate, "b", new Set(["lot-1", "bylaw-foreign"]), losses)).toEqual([]);
+    // the same loss on another key, or on another node, stays a regression
+    const otherKey = new Map([["muni", new Set(["name"])]]);
+    expect(findMissingBusinessProperties(current, candidate, "b", new Set(["lot-1", "bylaw-foreign"]), otherKey)).toEqual([
+      { citySlug: "b", nodeId: "muni", missingKeys: ["flag"] },
+    ]);
+  });
+
+  it("evaluateRowGuards: declared removals and loss pass gate1 and gate3; an undeclared removal stays refused by gate1", () => {
+    const losses = new Map([["muni", new Set(["flag"])]]);
+    expect(evaluateRowGuards("b", current, candidate, new Set(["lot-1", "bylaw-foreign"]), losses)).toEqual({ verdict: "pass" });
+    const refused = evaluateRowGuards("b", current, candidate, new Set(["lot-1"]), losses);
+    expect(refused).toMatchObject({ verdict: "refused", gate: "gate1-business-property" });
+    expect(refused.verdict === "refused" && refused.reason).toContain("bylaw-foreign: status");
+  });
+
+  it("evaluateRowGuards: gate3 still refuses a surviving node whose own docSha would disappear", () => {
+    const cur = [node("sig", { k: "v" }, { refs: [{ docSha: "SHA_PV" }] })];
+    const cand = [node("sig", { k: "v" }, { refs: [] })];
+    const losses = new Map([["sig", new Set(["k"])]]);
+    expect(evaluateRowGuards("b", cur, cand, new Set(), losses)).toMatchObject({ verdict: "refused", gate: "gate3-source-ref" });
   });
 });
 
