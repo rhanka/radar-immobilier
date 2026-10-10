@@ -15,6 +15,13 @@
  * Usage :
  *   tsx src/scripts/project-graph-from-s3.ts                  # toutes les villes
  *   tsx src/scripts/project-graph-from-s3.ts drummondville ogden joliette
+ *   tsx src/scripts/project-graph-from-s3.ts --remove=<id>,… --lose=<id>:<key>,… [--preview] <ville>
+ *
+ * Changements déclarés (GH #817, spec SPEC_FIX_GRAPH_CITY_KEY §17) : pour UNE ville,
+ * `--remove` liste les nœuds que la projection doit supprimer, `--lose` les propriétés
+ * métier qu'elle peut retirer d'un nœud conservé ; toute autre suppression ou perte est
+ * refusée, une déclaration absente du plan aussi (exit 1). `--preview` exécute puis
+ * annule (rollback). Sans ces options : comportement inchangé.
  *
  * Variables d'environnement (lues depuis process.env) :
  *   GRAPH_S3_ENDPOINT, GRAPH_S3_BUCKET, GRAPH_S3_ACCESS_KEY, GRAPH_S3_SECRET_KEY
@@ -37,13 +44,16 @@ import {
   createScrapeS3Client,
   S3ObjectStore,
 } from "../storage/s3-object-store.js";
-import { upsertGraphAtomic } from "../services/graph/graph-store.js";
+import { upsertGraphAtomic, type DeclaredChangesReport } from "../services/graph/graph-store.js";
+import { parseProjectionArgs } from "./projection-args.js";
 
 const decoder = new TextDecoder();
 
 async function main(): Promise<void> {
   const config = loadConfig();
   const logger = createLogger(config.LOG_LEVEL);
+  // Arguments validated BEFORE any connection: an invalid declaration touches nothing.
+  const args = parseProjectionArgs(process.argv.slice(2));
   const graphS3Config = resolveGraphS3Config(config);
 
   logger.info(
@@ -61,7 +71,20 @@ async function main(): Promise<void> {
   const { db, pool } = createDb(config);
 
   // Slugs explicites en arguments, ou toutes les villes disponibles.
-  const argSlugs = process.argv.slice(2);
+  const argSlugs = args.slugs;
+  const { declared, preview } = args;
+  if (declared) {
+    logger.info(
+      {
+        city: argSlugs[0],
+        preview,
+        removals: [...declared.removals],
+        propertyLosses: [...declared.propertyLosses].flatMap(([id, keys]) => [...keys].map((key) => `${id}:${key}`)),
+      },
+      "project-graph-from-s3: changements déclarés",
+    );
+  }
+  let declaredReport: DeclaredChangesReport | undefined;
 
   let keys: string[];
   if (argSlugs.length > 0) {
@@ -124,7 +147,13 @@ async function main(): Promise<void> {
     }
 
     try {
-      const result = await upsertGraphAtomic(db, citySlug, graphJson);
+      const result = declared
+        ? await upsertGraphAtomic(db, citySlug, graphJson, undefined, { declared, preview })
+        : await upsertGraphAtomic(db, citySlug, graphJson);
+      if (result.declared) {
+        declaredReport = result.declared;
+        logger.info({ citySlug, preview, ...result.declared }, "project-graph-from-s3: plan vs changements déclarés");
+      }
       totalDeletedNodes += result.deletedNodes;
       totalDeletedEdges += result.deletedEdges;
       totalDeletedStaleEdges += result.deletedStaleEdges;
@@ -150,7 +179,9 @@ async function main(): Promise<void> {
             deletedEdges: result.deletedEdges,
             deletedStaleEdges: result.deletedStaleEdges,
           },
-          "project-graph-from-s3: ville projetée",
+          result.preview
+            ? "project-graph-from-s3: ville simulée (preview, rollback)"
+            : "project-graph-from-s3: ville projetée",
         );
         ok++;
       }
@@ -171,18 +202,48 @@ async function main(): Promise<void> {
       deletedEdges: totalDeletedEdges,
       deletedStaleEdges: totalDeletedStaleEdges,
       ...(abortedCities.length > 0 ? { abortedCities } : {}),
+      ...(declared ? { preview, declared: declaredReport ?? null } : {}),
     },
     "project-graph-from-s3: terminé",
   );
   // ≤ 4 KiB summary in the termination message, readable by the run-job workflow with the
   // preprod credential, which has no pods/log (GH #812).
-  await writeFile("/dev/termination-log", JSON.stringify({ event: "project-graph-from-s3:report", ok, aborted, skipped,
+  const report = { event: "project-graph-from-s3:report", ok, aborted, skipped,
     errors, total: keys.length, deletedNodes: totalDeletedNodes, deletedEdges: totalDeletedEdges,
-    deletedStaleEdges: totalDeletedStaleEdges, abortedCities }).slice(0, 4000)).catch(() => undefined);
+    deletedStaleEdges: totalDeletedStaleEdges, abortedCities };
+  const termination = declared ? declaredTermination(report, preview, declaredReport) : JSON.stringify(report).slice(0, 4000);
+  await writeFile("/dev/termination-log", termination).catch(() => undefined);
 
   await pool.end();
-  // Visibilité d'échec : exit !=0 si au moins une ville abortée OU une erreur.
-  process.exit(aborted > 0 || errors > 0 ? 1 : 0);
+  // Visibilité d'échec : exit !=0 si au moins une ville abortée OU une erreur. En mode
+  // déclaré (une seule ville), tout ce qui n'est pas « la ville projetée » échoue aussi
+  // (latest.json absent ou illisible : la déclaration n'a pas été vérifiée).
+  process.exit(aborted > 0 || errors > 0 || (declared !== undefined && ok !== 1) ? 1 : 0);
+}
+
+/** Declared-mode termination summary (GH #817), kept valid JSON under 4 000 chars by shrinking the lists. */
+function declaredTermination(
+  report: Record<string, unknown>,
+  preview: boolean,
+  declared: DeclaredChangesReport | undefined,
+): string {
+  for (const cap of [64, 24, 8, 0]) {
+    const list = (xs: readonly string[]) => (xs.length > cap ? [...xs.slice(0, cap), `…+${xs.length - cap}`] : xs);
+    const body = JSON.stringify({
+      ...report,
+      preview,
+      declared: declared
+        ? {
+            plannedRemovals: list(declared.plannedRemovals),
+            plannedLosses: list(declared.plannedLosses),
+            declaredNotInPlan: list(declared.declaredNotInPlan),
+            undeclaredRemovals: list(declared.undeclaredRemovals),
+          }
+        : null,
+    });
+    if (body.length <= 4000) return body;
+  }
+  return JSON.stringify({ ...report, preview, declared: "truncated" }).slice(0, 4000);
 }
 
 main().catch((err) => {
