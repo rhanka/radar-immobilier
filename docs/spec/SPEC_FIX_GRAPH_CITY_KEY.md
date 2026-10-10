@@ -648,3 +648,109 @@ contaminated cities of the path rule (109) are outside the snapshot and appear i
 
 Expected list `L` at R2 (146 cities = G2 pass + G3 + G4; the R2 measurement on live data replaces
 it): ayers-cliff barkmere beauceville berthier-sur-mer boischatel bolton-ouest bouchette campbells-bay champlain chartierville cheneville chute-saint-philippe clarenceville cleveland compton danville daveluyville denholm deschaillons-sur-saint-laurent donnacona eastman esterel farnham ferme-neuve fortierville gore ham-nord ham-sud hampstead havelock herouxville hinchinbrooke hudson huntingdon kingsey-falls la-minerve lac-du-cerf lac-edouard lac-superieur lac-tremblant-nord lambton lascension lepiphanie lisle-aux-coudres low melbourne mont-laurier montcerf-lytton neuville notre-dame-de-ham notre-dame-de-lourdes--joliette notre-dame-des-bois notre-dame-des-prairies notre-dame-du-sacre-coeur-dissoudun ogden parisville petite-riviere-saint-francois piedmont plessisville portneuf prevost riviere-beaudette rougemont saint-agapit saint-aime saint-albert saint-alexis saint-alexis-des-monts saint-andre-dargenteuil saint-anicet saint-antoine-de-lisle-aux-grues saint-augustin-de-desmaures saint-barnabe-sud saint-boniface saint-casimir saint-christophe-darthabaska saint-claude saint-colomban saint-come-liniere saint-denis-de-brompton saint-esprit saint-francois-xavier-de-brompton saint-gabriel-de-brandon saint-gabriel-de-valcartier saint-gilbert saint-guillaume saint-hyacinthe saint-jacques-de-leeds saint-jerome saint-leonard-daston saint-louis saint-lucien saint-ludger saint-mathieu-du-parc saint-norbert saint-patrice-de-beaurivage saint-paul-de-lile-aux-noix saint-pie saint-polycarpe saint-raymond saint-roch-de-richelieu saint-roch-ouest saint-rosaire saint-severin--mekinac saint-stanislas-de-kostka saint-tite-des-caps saint-valere saint-valerien-de-milton saint-zotique sainte-anne-de-la-perade sainte-anne-des-lacs sainte-brigide-diberville sainte-catherine-de-hatley sainte-catherine-de-la-jacques-cartier sainte-cecile-de-milton sainte-clotilde-de-horton sainte-croix sainte-emelie-de-lenergie sainte-felicite--lislet sainte-justine-de-newton sainte-marguerite-du-lac-masson sainte-marie sainte-petronille sainte-seraphine sainte-sophie-dhalifax sainte-therese-de-la-gatineau saints-anges salaberry-de-valleyfield scott shannon stoke stoneham-et-tewkesbury stratford terrasse-vaudreuil upton val-alain val-david val-joli val-racine vercheres waterville wentworth wentworth-nord westbury westmount windsor
+
+## 17. Projection with declared changes (#817, D7 brigham, 2026-10-10)
+
+**Owner decision (2026-10-10, three options):** "21 removals + 1 declared loss — option
+*intended removals* limited to the 21 nodes, each verified in the plan, plus a second
+declaration *accepted property loss* limited to `muni-brigham:flag`. Any other removal or
+loss stays refused." Plan: `plan/817-BRANCH_feat-projection-intended-removals.md`.
+
+### 17.1 What the brigham projection changes (FACT, read-only)
+
+The plain projection `project_cities=brigham` was refused by gate1 on 2026-10-10 in preprod
+(run 38050034580) and prod (run 38052026597) with the same 22 entries. They are **21 node
+removals and 1 property loss**, not 22 removals:
+
+| Fact | Source |
+|---|---|
+| S3 36 nodes, PG 22, `idsMissingInPg` 35, `idsNotInS3` 21, `nodesContentDiff` 1, classes clean 21 + foreign 1 | repair preview prod run 38051412679 (`repair-graph-city-key:city`), identical in preprod run 38049303553 |
+| identical 22 gate1 entries (ids and keys) in preprod and prod | prod job log 114212915196; preprod pod log quoted in `.ops-812/CONTROLE-gemini-817.md` §F |
+| PG-only types: DesignationEvent 3, Lot 8, Signal 3, Source 4, Bylaw 3 — no Municipality | dossier proof `preuves/diagnostic/rows.json` (prod) and `preprod-2026-10-04.json` |
+| `bylaw-2025-05` `inS3=false` (danville content, missing key `status`); `muni-brigham` `inS3=true` (missing key `flag`) | dossier proof `preuves/diagnostic/contam2.json` (read-only SELECT + S3 Get, 2026-10-04) |
+
+The journals counted "21 PG-only nodes + `bylaw-2025-05`": `muni-brigham` is not PG-only (it
+is the one shared node and loses `flag`), and `bylaw-2025-05` is one of the 21 PG-only nodes.
+That `muni-brigham` is still in S3 on the day of the operation is confirmed read-only by the
+preview run of the runbook (§17.4): a declared loss is in the plan only if the candidate keeps
+the node.
+
+**Declared removals (21, all absent from S3):**
+`desg-evt-vente-taxes`, `desg-evt-subdiv-3520533`, `desg-evt-subdiv-3521520` (DesignationEvent);
+`lot-3520533`, `lot-3521520`, `lot-3522133`, `lot-6519613`, `lot-6715283`, `lot-6715284`,
+`lot-6715716`, `lot-6715717` (Lot); `signal-subdiv-3520533`, `signal-subdiv-3521520`,
+`signal-derogation-ppcmoi-brigham` (Signal); `source-brigham-html-pv-budget-2026-01-22`,
+`source-brigham-html-pv-2026-01-22-extra`, `source-brigham-html-pv-2026-02-03`,
+`source-brigham-html-pv-2026-03-03` (Source); `bylaw-06-102`, `bylaw-2026-01-circ`,
+`bylaw-2025-05` (Bylaw; `bylaw-2025-05` is the foreign node, danville content).
+
+**Declared loss (1):** `muni-brigham:flag`.
+
+### 17.2 Contract
+
+- **Inputs.** `project-graph-from-s3 --remove=<id>,… --lose=<id>:<key>,… [--preview] <city>`:
+  exactly one city; ids `[A-Za-z0-9][A-Za-z0-9._-]{0,127}`, keys `[A-Za-z0-9_]{1,64}`; at most
+  64 removals and 16 losses; no duplicate; a node is never both removed and losing a key;
+  `--preview` only with a declaration (`api/src/scripts/projection-args.ts`). `run-job.yaml`
+  keeps 10 inputs (R6-4): for `job=projection`, `recovery_cities` carries
+  `remove=… lose=…` and `recovery_mode` is `preview` (default) or `apply`;
+  `deploy/ci/projection-declared-args.sh` validates them (one lowercase slug in
+  `project_cities`, single line, ≤ 4096 characters, same bounds) and renders
+  `__PROJECTION_ARGS__`. Empty `recovery_cities` ⇒ empty placeholder ⇒ the projection command
+  and behaviour are those of before (`recovery_mode` ignored).
+- **Order inside the city transaction** (`projectCityInTransaction`, after the city lock):
+  1. plan check (`checkDeclaredChanges`): planned removals = current rows absent from the
+     candidate; planned losses = gate1 keys of rows the candidate keeps. Any declaration
+     absent from the plan (`remove:<id>` / `lose:<id>:<key>`) ⇒ refused, no write;
+  2. gate1 and gate3 as usual, with exactly the declared removals exempt (as
+     `intendedRemovals`: a deleted node necessarily loses its keys and refs) and exactly the
+     declared keys exempt on the declared nodes; every other loss, and every undeclared removal
+     of a node with business properties, stays refused by gate1; gate3 stays armed for every
+     kept node (a declared loss does not exempt its refs);
+  3. any planned removal not declared (including nodes without business property or ref,
+     which gates 1 and 3 do not see) ⇒ refused, no write;
+  4. the PG rows of the declared nodes and the city edges the projection deletes are read and
+     logged (`lignes PG avant changements déclarés (retour arrière)`), then the usual writes;
+  5. gate2 (completeness) as usual on the projected state; a regression rolls back the city.
+- **Preview.** The whole projection runs and is rolled back; the result carries
+  `preview: true`.
+- **Report.** Termination summary (≤ 4 000 characters, readable in preprod) adds `preview` and
+  `declared` = `plannedRemovals`, `plannedLosses`, `declaredNotInPlan`, `undeclaredRemovals`.
+  Exit 1 if the city is refused, errors, or is not projected (`ok ≠ 1`, e.g. `latest.json`
+  absent).
+- **Unchanged.** Calls without declarations (the refresh, `projection` without
+  `recovery_cities`, the repair, `purge-avis-bylaws`) run the same code path with empty
+  exemptions. Edges are not guarded today and the declared mode does not guard them either;
+  the deleted ones are logged.
+
+### 17.3 Expected effect on brigham (JUDGEMENT from the facts above)
+
+PG brigham becomes the projection of S3 `graph/brigham/latest.json` (36 nodes, its edges),
+21 nodes deleted, `muni-brigham.flag` dropped, `bylaw-2025-05` (foreign) gone: 0 foreign node
+in the environment. Complete signals 0 → 9 (dossier D7; gate2 cannot refuse an increase).
+S3 is not written.
+
+### 17.4 Runbook (after merge and deploy; preprod, then prod)
+
+Outside the refresh windows (prod 05:00, 11:00, 17:00, 23:00 UTC; preprod 00:00, 06:00, 12:00,
+18:00 UTC; 1 h 30–2 h each) and 02:23 UTC; one job at a time; tool:
+`gh workflow run run-job.yaml -R rhanka/radar-immobilier`. `T` = `preprod`, then `prod`.
+
+```
+D="remove=desg-evt-vente-taxes,lot-3521520,signal-subdiv-3520533,source-brigham-html-pv-budget-2026-01-22,source-brigham-html-pv-2026-02-03,bylaw-06-102,lot-3520533,lot-6715717,source-brigham-html-pv-2026-03-03,lot-3522133,signal-subdiv-3521520,source-brigham-html-pv-2026-01-22-extra,signal-derogation-ppcmoi-brigham,desg-evt-subdiv-3520533,lot-6519613,bylaw-2026-01-circ,lot-6715283,lot-6715284,lot-6715716,desg-evt-subdiv-3521520,bylaw-2025-05 lose=muni-brigham:flag"
+```
+
+| # | Step | Command (`-R rhanka/radar-immobilier` implied) | Expected / stop |
+|---|---|---|---|
+| 0 | served image contains this change | `curl -s https://preprod.immo.sent-tech.ca/build.json` (prod: `https://immo.sent-tech.ca/build.json`) | sha = merge commit or later; else stop (the job runs the served image) |
+| 1 | suspend refresh | `gh workflow run run-job.yaml -f job=refresh-suspend -f target=$T` | `spec.suspend=true` |
+| 2 | measure before (read-only) | `gh workflow run run-job.yaml -f job=graph-city-key-repair -f target=$T -f recovery_mode=preview -f recovery_cities=brigham` | brigham `refused-guard` gate1, drift 36/22/35/21/1, foreign 1; any other value ⇒ stop |
+| 3 | preview (read-only, rolled back) — confirms `muni-brigham` in S3 | `gh workflow run run-job.yaml -f job=projection -f target=$T -f project_cities=brigham -f recovery_mode=preview -f recovery_cities="$D"` | termination summary: `ok=1 aborted=0 preview=true deletedNodes=21`, `plannedRemovals` = the 21 ids, `plannedLosses=["muni-brigham:flag"]`, `declaredNotInPlan=[]`, `undeclaredRemovals=[]`; anything else ⇒ stop |
+| 4 | apply (writes PG brigham) | same as 3 with `-f recovery_mode=apply` | `ok=1 aborted=0 deletedNodes=21`, same `declared`; the job log keeps the before rows (prod: workflow log; preprod: owner-side `kubectl logs`) |
+| 5 | geo rows of brigham | `gh workflow run run-job.yaml -f job=mapper -f target=$T -f project_cities=brigham` | Complete, RESET 1 city |
+| 6 | measure after (read-only) | `gh workflow run run-job.yaml -f job=graph-city-key-repair -f target=$T -f recovery_mode=preview -f recovery_cities=all` | brigham `pass`, `noop`, drift 0, foreign 0; total `foreignNodes=0`; other cities unchanged versus the last measurement |
+| 7 | resume refresh | `gh workflow run run-job.yaml -f job=refresh-resume -f target=$T` | `spec.suspend=false` |
+
+Prod starts only after a conforming preprod (steps 2–6 as expected). Rollback of step 4: the
+logged rows (nodes with their full `props`, deleted edges) and the daily PG backup; S3 is
+untouched.
