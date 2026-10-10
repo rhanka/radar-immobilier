@@ -64,20 +64,20 @@ Give the `projection` job two bounded, validated declarations for ONE city: inte
   - [x] Confirm command style: `make ... <vars> ENV=<env>` with `ENV` last.
   - [x] Declare `BR817-EX1`, `BR817-EX2`.
 
-- [ ] **Lot 1 — Guards and script**
-  - [ ] Tests first: declared removals accepted, undeclared removal refused, declaration absent from the plan refused, accepted loss limited to its key, city without option unchanged, preview rolls back, argument parser bounds.
-  - [ ] `checkDeclaredChanges` + accepted losses in gate1; declared mode in `projectCityInTransaction`; `upsertGraphAtomic` options (`declared`, `preview`).
-  - [ ] `projection-args.ts` parser; script wiring and termination summary.
-  - [ ] Lot gate:
-    - [ ] `make typecheck ENV=test-projection-declared` + `make lint ENV=test-projection-declared`
-    - [ ] `make test-api SCOPE=... ENV=test-projection-declared` then `make clean ENV=test-projection-declared`
+- [x] **Lot 1 — Guards and script**
+  - [x] Tests first: declared removals accepted, undeclared removal refused, declaration absent from the plan refused, accepted loss limited to its key, city without option unchanged, preview rolls back, argument parser bounds.
+  - [x] `checkDeclaredChanges` + accepted losses in gate1; declared mode in `projectCityInTransaction`; `upsertGraphAtomic` options (`declared`, `preview`).
+  - [x] `projection-args.ts` parser; script wiring and termination summary.
+  - [x] Lot gate:
+    - [x] `make typecheck ENV=test-projection-declared` + `make lint ENV=test-projection-declared`
+    - [x] `make test-api SCOPE=... ENV=test-projection-declared` then `make clean ENV=test-projection-declared`
 
-- [ ] **Lot 2 — Workflow and manifests**
-  - [ ] Tests first: `deploy/ci/projection-declared-args.test.sh`.
-  - [ ] Validator script, `run-job.yaml` routing, `__PROJECTION_ARGS__` in both manifests, CI step.
-  - [ ] Lot gate: `make k8s-validate ENV=ci`, shell test.
+- [x] **Lot 2 — Workflow and manifests**
+  - [x] Tests first: `deploy/ci/projection-declared-args.test.sh`.
+  - [x] Validator script, `run-job.yaml` routing, `__PROJECTION_ARGS__` in both manifests, CI step.
+  - [x] Lot gate: `make k8s-validate ENV=ci`, shell test.
 
 - [ ] **Lot 3 — Docs, PR, review**
-  - [ ] Spec §17 (contract, brigham list, runbook).
+  - [x] Spec §17 (contract, brigham list, runbook).
   - [ ] PR `Refs #817` with the 21 ids, the loss and the runbook; CI green.
   - [ ] Two blind Codex reviews in `docs/reviews/pr-<n>/`; fix until GO.
