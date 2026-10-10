@@ -52,8 +52,21 @@ name: bascule-preprod (iso-prod)
 run-name: "bascule-preprod ${{ github.event_name == 'schedule' && 'restore' || inputs.MODE || 'chain' }} ${{ inputs.CYCLE_ID }}"
 
 on:
-  # CD-native-v2 : la bascule est AUTOMATISÉE par une planification HEBDOMADAIRE
-  # (dimanche 03:17 UTC, décision owner 2026-09-26 ; auparavant quotidienne).
+  # CD-native-v2 : la bascule est AUTOMATISÉE par une planification QUOTIDIENNE,
+  # 04:00 UTC, à l'heure pile (demande owner 2026-10-10 « remettre la sync prod
+  # vers preprod (restore daily) » ; hebdomadaire dimanche 03:17 UTC du
+  # 2026-09-26 au 2026-10-10). Why 04:00 UTC: after the daily prod backup
+  # (radar-backup-daily, 02:23 UTC, 7-45 min observed), so the latest complete
+  # backup is normally the backup of the day; R0 refuses a latest complete
+  # backup older than 24 h before any quiesce (age check, no same-day check).
+  # Configured starts: 60 min before the prod refresh (05:00), 120 min before
+  # the preprod refresh (06:00), on none of their start hours (node shared with
+  # prod); restores observed 18-50 min. A preprod refresh Job still running
+  # from 00:00 is deleted by the quiesce (QUIESCE_CRONJOBS below); the
+  # un-quiesce patches the recorded CronJob suspend back. A late GitHub start or
+  # a long restore can overlap the prod refresh (not measured, not bounded).
+  # Guard on the rendered schedules: deploy/k8s/refresh-cronjobs/bascule-window.awk
+  # (refresh-018.mk verify-renders); slot table: deploy/ci/bascule-preprod/README.md.
   # GitHub interdit une variable de dépôt dans le littéral cron → la CADENCE est
   # figée ici ; l'ARMEMENT est la variable de dépôt BASCULE_SCHEDULE_ENABLED (voir
   # `if` du job `bascule`), OFF par défaut, pour qu'une fusion ne déclenche jamais
@@ -61,7 +74,7 @@ on:
   # ci-dessous reste (1re fois / à la demande). The scheduled run is MODE=restore
   # from the latest complete backup (see the job env), never a refresh.
   schedule:
-    - cron: '17 3 * * 0'
+    - cron: '0 4 * * *'
   workflow_dispatch:
     inputs:
       CONFIRM:

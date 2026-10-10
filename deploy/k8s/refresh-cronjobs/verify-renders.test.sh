@@ -4,7 +4,8 @@
 #
 # Covered: the prod/preprod start-minute stagger (incident 2026-10-09), the shared
 # hours, the pending-pod watchdog CronJob and its coupling with the refresh pod
-# (label selector, Job prefix, backoffLimit 0).
+# (label selector, Job prefix, backoffLimit 0),
+# and the daily bascule-preprod restore slot (bascule-crons.awk, bascule-window.awk).
 #
 # Usage: bash deploy/k8s/refresh-cronjobs/verify-renders.test.sh
 set -uo pipefail
@@ -24,6 +25,7 @@ fixture() {
      "$SRC"/deploy/k8s/34-refresh-pending-watchdog.yaml "$CASE_ROOT/deploy/k8s/"
   cp -r "$SRC/deploy/k8s/refresh-cronjobs" "$SRC/deploy/k8s/refresh-cronjobs-prod" "$CASE_ROOT/deploy/k8s/"
   mkdir -p "$CASE_ROOT/.github/workflows" && cp "$SRC/.github/workflows/bascule-preprod.yml" "$CASE_ROOT/.github/workflows/"
+  mkdir -p "$CASE_ROOT/deploy/ci/backup" && cp "$SRC/deploy/ci/backup/cronjob-backup-daily.yaml" "$CASE_ROOT/deploy/ci/backup/"
 }
 verify() { make --no-print-directory -f "$CASE_ROOT/deploy/k8s/refresh-cronjobs/refresh-018.mk" verify-renders ENV=test-refresh-renders 2>&1; }
 run_ok() { local out; out="$(verify)" && ok "$1" || { bad "$1"; printf '%s\n' "$out" | tail -5 >&2; }; }
@@ -51,8 +53,8 @@ run_bad "preprod off the hour (minute differs from prod)" "refresh overlay parit
 fixture; pre_sched "0 0,6,12 * * *"
 run_bad "preprod with fewer passes than prod" "refresh overlay parity failed"
 
-fixture; pre_sched "0 4,10,16,22 * * *"
-run_ok "another hour list on the hour, one hour away, passes (relational, not pinned)"
+fixture; pre_sched "0 1,7,13,19 * * *"
+run_ok "another hour list on the hour, two hours away, passes (relational, not pinned)"
 
 fixture; sed -i 's#value: "900" }#value: "3400" }#' "$CASE_ROOT/$DOG"
 run_bad "a stalled pod outlives the one-hour gap" "not before the other environment starts"
@@ -119,6 +121,90 @@ run_bad "watchdog quiesce list moved to another job (served-ids)" "refresh pendi
 fixture; W="$CASE_ROOT/.github/workflows/bascule-preprod.yml"
 printf '        env:\n          QUIESCE_CRONJOBS: radar-refresh-pv,radar-consistency-snapshot\n' >> "$W"
 run_bad "a second (step-level) QUIESCE_CRONJOBS override" "refresh pending watchdog contract failed"
+
+# Daily bascule-preprod restore slot (0 4 * * * UTC): checked on the RENDERED
+# refresh CronJobs and on radar-backup-daily selected by name.
+WF=".github/workflows/bascule-preprod.yml"
+BK="deploy/ci/backup/cronjob-backup-daily.yaml"
+restore_cron() { sed -i "s|^    - cron: '0 4 \* \* \*'\$|    - cron: $1|" "$CASE_ROOT/$WF"; }
+W_FAIL="must stay after the daily backup and clear of every refresh start"
+
+fixture; pre_sched "0 4,10,16,22 * * *"
+run_bad "preprod refresh starting with the restore (04:00)" "$W_FAIL"
+
+fixture; sed -i '0,/^        value: false$/s//        value: false\n      - op: replace\n        path: \/spec\/schedule\n        value: "0 4,10,16,22 * * *"/' "$CASE_ROOT/$PROD"
+run_bad "prod overlay patch moving the prod refresh to 04:00" "$W_FAIL"
+
+fixture; printf '\n  - target:\n      kind: CronJob\n      name: radar-refresh-pv\n    patch: |\n      - op: replace\n        path: /spec/schedule\n        value: "0 4,10,16,22 * * *"\n' >> "$CASE_ROOT/$PRE"
+run_bad "later preprod patch overriding the first schedule to 04:00" "$W_FAIL"
+
+fixture; restore_cron "'0 3 * * *'"
+run_bad "restore 37 min after the backup start" "$W_FAIL"
+
+fixture; restore_cron "'30 4 * * *'"
+run_bad "restore off the hour" "$W_FAIL"
+
+fixture; restore_cron "'0 4 * * 1-5'"
+run_bad "restore not daily (weekdays only)" "$W_FAIL"
+
+fixture; restore_cron "'0 4,16 * * *'"
+run_bad "restore twice a day" "$W_FAIL"
+
+fixture; restore_cron "'0 5 * * *'"
+run_bad "restore starting with the prod refresh (05:00)" "$W_FAIL"
+
+fixture; restore_cron "'0 1 * * *'"
+run_bad "restore at 01:00, before the backup of the day (previous-day backup)" "$W_FAIL"
+
+fixture; restore_cron "'0 4 * * *'"; sed -i "s|^    - cron: '0 4 \* \* \*'\$|&\n    - cron: \"0 5 * * *\"|" "$CASE_ROOT/$WF"
+run_bad "a second, double-quoted active cron" "exactly one active on.schedule cron"
+
+fixture; sed -i "s|^    - cron: '0 4 \* \* \*'\$|&\n    - cron: 0 5 * * *|" "$CASE_ROOT/$WF"
+run_bad "a second, unquoted active cron" "exactly one active on.schedule cron"
+
+fixture; sed -i "s|^    - cron: '0 4 \* \* \*'\$|&\n    - kron: '0 5 * * *'|" "$CASE_ROOT/$WF"
+run_bad "an unreadable on.schedule line" "unreadable on.schedule"
+
+fixture; restore_cron '"0 4 * * *"'
+run_ok "the restore cron double-quoted passes"
+
+fixture; restore_cron '0 4 * * *  # daily'
+run_ok "the restore cron unquoted with a trailing comment passes"
+
+fixture; sed -i "s|^    - cron: '0 4 \* \* \*'\$|&\n    # - cron: '0 5 * * *'|" "$CASE_ROOT/$WF"
+run_ok "a commented-out extra cron is ignored"
+
+fixture; sed -i 's#^  timeZone: "Etc/UTC"$#  timeZone: "America/Toronto"#' "$CASE_ROOT/$BK"
+run_bad "daily backup moved off UTC" "$W_FAIL"
+
+fixture; sed -i 's#^  schedule: "23 2 \* \* \*"$#  schedule: "23 3 * * *"#' "$CASE_ROOT/$BK"
+run_bad "daily backup moved to 03:23 (37 min before the restore)" "$W_FAIL"
+
+fixture; sed -i 's#^  name: radar-backup-daily$#  name: radar-backup-other#' "$CASE_ROOT/$BK"
+run_bad "no radar-backup-daily CronJob in the backup manifest" "$W_FAIL"
+
+fixture; printf -- '---\napiVersion: batch/v1\nkind: CronJob\nmetadata:\n  name: radar-backup-early\nspec:\n  schedule: "0 1 * * *"\n  timeZone: "Etc/UTC"\n---\n' > "$CASE_ROOT/$BK.tmp"; cat "$CASE_ROOT/$BK" >> "$CASE_ROOT/$BK.tmp"; mv "$CASE_ROOT/$BK.tmp" "$CASE_ROOT/$BK"
+sed -i 's#^  schedule: "23 2 \* \* \*"$#  schedule: "23 3 * * *"#' "$CASE_ROOT/$BK"
+run_bad "an unrelated first CronJob does not stand in for radar-backup-daily" "$W_FAIL"
+
+early_doc() { # $1 separator line placed after an unrelated first CronJob (01:00)
+  printf -- 'apiVersion: batch/v1\nkind: CronJob\nmetadata:\n  name: radar-backup-early\nspec:\n  schedule: "0 1 * * *"\n  timeZone: "Etc/UTC"\n  jobTemplate: { spec: { template: { spec: { restartPolicy: Never, containers: [ { name: x, image: x } ] } } } }\n%s\n' "$1" > "$CASE_ROOT/$BK.tmp"
+  cat "$CASE_ROOT/$BK" >> "$CASE_ROOT/$BK.tmp"; mv "$CASE_ROOT/$BK.tmp" "$CASE_ROOT/$BK"
+}
+fixture; early_doc '--- # next YAML document'; sed -i 's#^  schedule: "23 2 \* \* \*"$#  schedule: "23 3 * * *"#' "$CASE_ROOT/$BK"
+run_bad "commented YAML separator does not let the first CronJob stand in for radar-backup-daily" "$W_FAIL"
+
+fixture; early_doc '---   '; sed -i 's#^  timeZone: "Etc/UTC"$#  timeZone: "America/Toronto"#; 0,/America\/Toronto/s//Etc\/UTC/' "$CASE_ROOT/$BK"
+run_bad "spaced YAML separator does not hide the real backup time zone" "$W_FAIL"
+
+fixture; sed -i 's#^  name: radar-backup-daily$#  name: "radar-backup-daily"#' "$CASE_ROOT/$BK"
+run_ok "a quoted backup metadata name passes (canonical render)"
+
+fixture; sed -i 's#^  schedule:$#  schedule: \# daily restore#' "$CASE_ROOT/$WF"
+run_ok "a comment on the on.schedule key passes"
+
+fixture; sed -i 's#^on:$#on: \# triggers#' "$CASE_ROOT/$WF"
+run_ok "a comment on the on: key passes"
 
 # refresh-stagger.awk alone, on minimal renders: adjacent hours make a real
 # cross-hour proximity (preprod 04:50, prod 05:00) that the overlays cannot reach.
