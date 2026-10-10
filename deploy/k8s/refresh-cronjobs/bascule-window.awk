@@ -2,8 +2,9 @@
 # backup it restores and of every refresh start.
 #
 # Input: the preprod render, the prod render, then the daily backup manifest
-# (`awk -v restore="<cron>" -f bascule-window.awk preprod.yaml prod.yaml
-# deploy/ci/backup/cronjob-backup-daily.yaml`). `restore` is the single active
+# RENDERED by kubectl kustomize (canonical `---` separators, so a record is one
+# object) — `awk -v restore="<cron>" -f bascule-window.awk preprod.yaml
+# prod.yaml backup.yaml`, as refresh-018.mk verify-renders does. `restore` is the single active
 # cron of .github/workflows/bascule-preprod.yml (extracted by bascule-crons.awk;
 # GitHub schedules are UTC). Optional `-v backup_gap=<min>` (default 60) and
 # `-v refresh_gap=<min>` (default 60).

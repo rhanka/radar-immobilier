@@ -127,7 +127,7 @@ run_bad "a second (step-level) QUIESCE_CRONJOBS override" "refresh pending watch
 WF=".github/workflows/bascule-preprod.yml"
 BK="deploy/ci/backup/cronjob-backup-daily.yaml"
 restore_cron() { sed -i "s|^    - cron: '0 4 \* \* \*'\$|    - cron: $1|" "$CASE_ROOT/$WF"; }
-W_FAIL="bascule window contract failed"
+W_FAIL="must stay after the daily backup and clear of every refresh start"
 
 fixture; pre_sched "0 4,10,16,22 * * *"
 run_bad "preprod refresh starting with the restore (04:00)" "$W_FAIL"
@@ -186,6 +186,25 @@ run_bad "no radar-backup-daily CronJob in the backup manifest" "$W_FAIL"
 fixture; printf -- '---\napiVersion: batch/v1\nkind: CronJob\nmetadata:\n  name: radar-backup-early\nspec:\n  schedule: "0 1 * * *"\n  timeZone: "Etc/UTC"\n---\n' > "$CASE_ROOT/$BK.tmp"; cat "$CASE_ROOT/$BK" >> "$CASE_ROOT/$BK.tmp"; mv "$CASE_ROOT/$BK.tmp" "$CASE_ROOT/$BK"
 sed -i 's#^  schedule: "23 2 \* \* \*"$#  schedule: "23 3 * * *"#' "$CASE_ROOT/$BK"
 run_bad "an unrelated first CronJob does not stand in for radar-backup-daily" "$W_FAIL"
+
+early_doc() { # $1 separator line placed after an unrelated first CronJob (01:00)
+  printf -- 'apiVersion: batch/v1\nkind: CronJob\nmetadata:\n  name: radar-backup-early\nspec:\n  schedule: "0 1 * * *"\n  timeZone: "Etc/UTC"\n  jobTemplate: { spec: { template: { spec: { restartPolicy: Never, containers: [ { name: x, image: x } ] } } } }\n%s\n' "$1" > "$CASE_ROOT/$BK.tmp"
+  cat "$CASE_ROOT/$BK" >> "$CASE_ROOT/$BK.tmp"; mv "$CASE_ROOT/$BK.tmp" "$CASE_ROOT/$BK"
+}
+fixture; early_doc '--- # next YAML document'; sed -i 's#^  schedule: "23 2 \* \* \*"$#  schedule: "23 3 * * *"#' "$CASE_ROOT/$BK"
+run_bad "commented YAML separator does not let the first CronJob stand in for radar-backup-daily" "$W_FAIL"
+
+fixture; early_doc '---   '; sed -i 's#^  timeZone: "Etc/UTC"$#  timeZone: "America/Toronto"#; 0,/America\/Toronto/s//Etc\/UTC/' "$CASE_ROOT/$BK"
+run_bad "spaced YAML separator does not hide the real backup time zone" "$W_FAIL"
+
+fixture; sed -i 's#^  name: radar-backup-daily$#  name: "radar-backup-daily"#' "$CASE_ROOT/$BK"
+run_ok "a quoted backup metadata name passes (canonical render)"
+
+fixture; sed -i 's#^  schedule:$#  schedule: \# daily restore#' "$CASE_ROOT/$WF"
+run_ok "a comment on the on.schedule key passes"
+
+fixture; sed -i 's#^on:$#on: \# triggers#' "$CASE_ROOT/$WF"
+run_ok "a comment on the on: key passes"
 
 # refresh-stagger.awk alone, on minimal renders: adjacent hours make a real
 # cross-hour proximity (preprod 04:50, prod 05:00) that the overlays cannot reach.

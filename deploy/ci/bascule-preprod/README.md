@@ -327,7 +327,7 @@ start a top-of-hour schedule late; nothing measures or bounds that delay.
 Guard: `deploy/k8s/refresh-cronjobs/bascule-window.awk`, run by
 `refresh-018.mk verify-renders` (CI), compares CONFIGURED start times only — the
 single active cron of this workflow (`bascule-crons.awk`, any quoting), the
-RENDERED prod and preprod `radar-refresh-pv` and `radar-backup-daily` selected
+RENDERED prod and preprod `radar-refresh-pv` and `radar-backup-daily` (backup manifest rendered by kubectl kustomize) selected
 by name, all Etc/UTC: on the hour, >= 60 min after the backup start the same UTC
 day, on no refresh start, >= 60 min before the next refresh start. Mutation
 cases: `verify-renders.test.sh`.
