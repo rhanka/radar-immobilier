@@ -36,11 +36,17 @@ jobs:
       - name: Validate refresh overlays (preprod and prod)
         run: make -f deploy/k8s/refresh-cronjobs/refresh-018.mk verify-renders ENV=ci
 
+      - name: Validate refresh render guards (mutation tests — stagger, pending watchdog)
+        run: bash deploy/k8s/refresh-cronjobs/verify-renders.test.sh
+
       - name: Validate object-storage contracts (offline)
         run: bash deploy/ci/check-object-storage-bindings.test.sh
 
       - name: Validate preprod auth isolation (offline render, no PROD auth value)
         run: bash deploy/ci/check-preprod-auth-isolation.test.sh
+
+      - name: Validate preprod reconcile immo-mcp branch (hermetic, fake kubectl)
+        run: bash deploy/ci/reconcile-preprod-mcp.test.sh
 
       - name: Validate daily prod backup logic (offline selftest)
         run: node deploy/ci/backup/backup-daily.selftest.mjs

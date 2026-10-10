@@ -1,0 +1,80 @@
+# geo-mapper-preprod — PREPROD, jumeau de deploy/k8s/35-run-geo-mapper-job.yaml (prod). RE-RUN du mapper géo (Signal/DesignationEvent → zone/lot).
+#
+# Régénère geo_resolutions / geo_unresolved (idempotent, upsert) à partir des
+# graph_nodes déjà projetés en DB, avec l'extraction multi-source de la PR #282.
+# N'a PAS besoin de S3 : lit graph_nodes + zone_versions/lot_versions en PG, écrit
+# geo_resolutions/geo_unresolved en PG.
+#
+# Lancé par le workflow run-job (jamais appliqué tel quel : trois placeholders) :
+#   gh workflow run run-job.yaml -f job=mapper                                   # toutes les villes
+#   gh workflow run run-job.yaml -f job=mapper -f project_cities="gore barkmere"   # purge + rebuild
+#   __IMAGE__          = recovery_image, sinon l'image servie par deploy/radar-api
+#   __MAPPER_CITIES__  = villes séparées par des espaces (vide ⇒ toutes les villes avec données OGC)
+#   __MAPPER_RESET__   = "1" (dès que des villes sont listées) ⇒ par ville, purge geo_resolutions + geo_unresolved puis résolution,
+#                        dans une transaction (GH #812, exige des villes) ; "" sinon.
+# Préprod : -f target=preprod. Mêmes secrets PG (radar-db-credentials), pas de S3.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-run-geo-mapper
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: geo-mapper
+spec:
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        # IMPORTANT : la NetworkPolicy allow-graph-projection-to-postgres
+        # n'autorise QUE le component=graph-projection à joindre postgres:5432.
+        # Le geo-mapper fait partie de la chaîne de projection geo → on réutilise
+        # ce component pour que le pod soit autorisé à se connecter à la DB.
+        app.kubernetes.io/component: graph-projection
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: run-geo-mapper
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          image: __IMAGE__
+          imagePullPolicy: IfNotPresent
+          workingDir: /workspace/api
+          command: ["node", "dist/services/geo/run-geo-mapper.js"]
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: CITIES
+              value: "__MAPPER_CITIES__"
+            - name: RESET
+              value: "__MAPPER_RESET__"
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=200 --dns-result-order=ipv4first"
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            # run-geo-mapper.ts lit DATABASE_URL explicite (fallback localhost sinon).
+            # On le construit depuis les vars POSTGRES_* (host/port de la configMap radar-api).
+            - name: DATABASE_URL
+              value: "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 150m, memory: 256Mi }

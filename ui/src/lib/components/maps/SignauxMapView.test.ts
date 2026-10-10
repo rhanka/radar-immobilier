@@ -111,6 +111,7 @@ import SignauxMapView from "./SignauxMapView.svelte";
 import { fetchAllLots } from "$lib/maps/lots-client.js";
 import { loadSignauxZones } from "$lib/maps/signaux-zones-loader.js";
 import { fetchCptaqConstraints } from "$lib/maps/cptaq-client.js";
+import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
 
 /** Une zone réelle avec géométrie — le drill zones est alimenté. */
 function fixtureZones(citySlug: string): GeoZonesResponse {
@@ -249,13 +250,27 @@ describe("SignauxMapView — deep-link zones-only (?lots=0)", () => {
     const view = render(SignauxMapView, { props: { geoRoute: cityRoute() } });
     await waitFor(() => expect((screen.getByLabelText("Zonage") as HTMLInputElement).checked).toBe(true));
     for (const label of labels) expect((screen.getByLabelText(label) as HTMLInputElement).checked).toBe(true);
-    expect(screen.getByText("6 derniers mois")).toBeTruthy();
+    expect(screen.getByText("Dernière semaine")).toBeTruthy();
 
     setSearch("?mode=signal&filter.period=all");
     await view.rerender({ geoRoute: cityRoute() });
     await waitFor(() => expect((screen.getByLabelText("Zonage") as HTMLInputElement).checked).toBe(false));
     for (const label of labels) expect((screen.getByLabelText(label) as HTMLInputElement).checked).toBe(false);
     expect(screen.getByText("Illimité")).toBeTruthy();
+  });
+
+  it("loads the rail and map counts of a filterless link on the last-week document window", async () => {
+    vi.mocked(fetchGraphSignalsByCity).mockClear();
+    setSearch("?mode=signal");
+    render(SignauxMapView, { props: { geoRoute: cityRoute() } });
+    await waitFor(() => expect(vi.mocked(fetchGraphSignalsByCity)).toHaveBeenCalled());
+    const civil = (date: Date) =>
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    const today = new Date();
+    const weekAgo = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
+    expect(vi.mocked(fetchGraphSignalsByCity)).toHaveBeenLastCalledWith("", expect.objectContaining({
+      dateBasis: "document", dateFrom: civil(weekAgo), dateTo: civil(today),
+    }));
   });
 
   it("(a) ?lots=0 : fetchAllLots N'EST PAS appelé, les zones se chargent quand même", async () => {

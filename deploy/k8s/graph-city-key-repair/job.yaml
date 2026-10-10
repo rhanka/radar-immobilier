@@ -1,0 +1,83 @@
+# graph-city-key-repair — PREPROD one-shot Job (GH #812): re-align the PG graph of each
+# listed city on its own S3 graph/<city>/latest.json after migration 0013
+# (api/src/scripts/repair-graph-city-key.ts, spec docs/spec/SPEC_FIX_GRAPH_CITY_KEY.md §7).
+# Preprod twin of deploy/k8s/42-graph-city-key-repair-job.yaml (prod).
+#
+# PREVIEW by default (rolled-back transaction, no persistent PG write); `--apply` commits one
+# all-or-nothing transaction per city. Never writes latest.json; the run report goes to
+# reports/graph-city-key/<run-id>/repair.json and a ≤ 4 KiB summary to the termination
+# message, which the workflow prints (the preprod CI account has no pods/log).
+#
+# NOT applied directly and NOT in any kustomization: run it through the run-job workflow:
+#   gh workflow run run-job.yaml -f target=preprod -f job=graph-city-key-repair -f recovery_mode=preview -f recovery_cities=all
+#   __IMAGE__        = recovery_image, else the image served by deploy/radar-api (preprod)
+#   __REPAIR_ARGS__  = "--all" (preview only) | [--apply] <city slugs>
+#
+# Network: labelled `component: graph-projection` so the projection egress policies
+# (PG + object storage) apply unchanged, as for the preprod document-date-recovery Job.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-graph-city-key-repair
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: graph-projection
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 5400
+  ttlSecondsAfterFinished: 604800
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: graph-projection
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: repair-graph-city-key
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          image: __IMAGE__
+          imagePullPolicy: IfNotPresent
+          workingDir: /workspace/api
+          terminationMessagePolicy: File
+          command: ["sh", "-c"]
+          args:
+            - |
+              node dist/scripts/repair-graph-city-key.js __REPAIR_ARGS__
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=448 --dns-result-order=ipv4first"
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            # Graph snapshots share the preprod docs bucket (SCRAPE_S3_* from the radar-api
+            # ConfigMap). Same credentials as the preprod refresh CronJob and recovery Job:
+            # radar-scrape-s3-credentials does not exist in preprod.
+            - name: SCRAPE_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
+            - name: SCRAPE_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }
+          resources:
+            requests: { cpu: 50m, memory: 256Mi }
+            limits: { cpu: 300m, memory: 640Mi }

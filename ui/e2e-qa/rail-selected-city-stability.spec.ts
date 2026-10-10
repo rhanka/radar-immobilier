@@ -52,6 +52,12 @@ const FILLER_SLUGS = [
 ];
 
 /** Date ISO (YYYY-MM-DD) à `monthsAgo` mois d'aujourd'hui, jour 15 (loin des bornes). */
+function isoDaysAgo(daysAgo: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString().slice(0, 10);
+}
+
 function isoMonthsAgo(monthsAgo: number): string {
   const d = new Date();
   d.setMonth(d.getMonth() - monthsAgo);
@@ -118,12 +124,12 @@ function bulkCounts(qualified: number) {
 
 /**
  * NDBC : bulk serveur = 4 (tous qualifiés précoces), mais UN SEUL dans la plage
- * de dates par défaut (6 mois) — les 3 autres ont 9 mois. C'est l'écart
+ * de dates par défaut (dernière semaine) — les 3 autres ont 9 mois. C'est l'écart
  * « rail 4 / détail 1 » rapporté par le PO : une lentille d'affichage (plage de
  * dates), pas des signaux perdus.
  */
 const NDBC_NODES = [
-  signalNode("ndbc-recent", NDBC_SLUG, isoMonthsAgo(1)),
+  signalNode("ndbc-recent", NDBC_SLUG, isoDaysAgo(2)),
   signalNode("ndbc-vieux-1", NDBC_SLUG, isoMonthsAgo(9)),
   signalNode("ndbc-vieux-2", NDBC_SLUG, isoMonthsAgo(9)),
   signalNode("ndbc-vieux-3", NDBC_SLUG, isoMonthsAgo(9)),

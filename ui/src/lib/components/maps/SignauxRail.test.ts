@@ -1,6 +1,6 @@
 /** SignauxRail A/B tabs, combinable A axes, and flat city-list contracts. */
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, fireEvent, cleanup, getByRole, getByText } from "@testing-library/svelte";
+import { render, fireEvent, cleanup, getByRole, getByText, within } from "@testing-library/svelte";
 import SignauxRail from "./SignauxRail.svelte";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { VivierV2Counts } from "@radar/domain";
@@ -11,49 +11,101 @@ const CUSTOM_RANGE = {
   mode: "absolute" as const, from: new Date(2026, 8, 29).getTime(), to: new Date(2026, 8, 30).getTime(),
 };
 
-it("removes the separate « Filtrer selon » menu and never shows the word scrap", () => {
+it("removes the separate « Filtrer selon » menu and never shows the word scrap", async () => {
   const view = render(SignauxRail, { props: { entries: [], dateBasis: "scrap", timeRange: CUSTOM_RANGE } });
   expect(view.queryByRole("combobox", { name: "Filtrer selon" })).toBeNull();
   expect(view.container.textContent).not.toMatch(/filtrer selon/i);
-  expect(view.container.textContent).not.toMatch(/scrap/i);
-  const labelled = Array.from(view.container.querySelectorAll("[aria-label],[title]"))
+  await openPicker(view.container);
+  expect(document.body.textContent).not.toMatch(/scrap/i);
+  const labelled = Array.from(document.body.querySelectorAll("[aria-label],[title]"))
     .map((el) => `${el.getAttribute("aria-label") ?? ""} ${el.getAttribute("title") ?? ""}`);
   expect(labelled.join(" ")).not.toMatch(/scrap/i);
 });
 
-it("keeps the date basis hidden on the default relative period", () => {
-  const view = render(SignauxRail, { props: { entries: [] } });
-  expect(view.queryByRole("group", { name: "Base de date" })).toBeNull();
-});
+/** Opens the DS period picker of the rail (its popover is portaled out of the rail). */
+async function openPicker(container: HTMLElement): Promise<HTMLElement> {
+  await fireEvent.click(getByRole(container, "button", { name: /Période des signaux/ }));
+  return document.body;
+}
 
-it("offers document (default) or acquisition dates for a custom period", async () => {
-  const onDateBasisChange = vi.fn();
-  const view = render(SignauxRail, { props: { entries: [], timeRange: CUSTOM_RANGE, onDateBasisChange } });
-  const group = view.getByRole("group", { name: "Base de date" });
-  const documentDate = getByRole(group, "radio", { name: "Date du document" }) as HTMLInputElement;
-  const acquisitionDate = getByRole(group, "radio", { name: "Date d'acquisition" }) as HTMLInputElement;
-  expect(documentDate.checked).toBe(true);
-  expect(acquisitionDate.checked).toBe(false);
-  await fireEvent.click(acquisitionDate);
-  expect(onDateBasisChange).toHaveBeenCalledOnce();
-  expect(onDateBasisChange).toHaveBeenCalledWith("scrap");
-});
+function dateBasisGroup(): HTMLElement {
+  return within(document.body).getByRole("group", { name: "Base de date" });
+}
 
-it("restores the acquisition basis alongside a custom period", () => {
-  const view = render(SignauxRail, { props: { entries: [], dateBasis: "scrap", timeRange: CUSTOM_RANGE } });
-  expect((view.getByRole("radio", { name: "Date d'acquisition" }) as HTMLInputElement).checked).toBe(true);
-  expect(view.getByRole("button", { name: "Période des signaux 2026-09-29 – 2026-09-30" })).toBeTruthy();
-});
-
-it("shows the date basis only for a custom period, never for a relative preset", () => {
-  for (const relative of ["3mo", "6mo", "12mo", "all"]) {
-    const view = render(SignauxRail, { props: {
-      entries: [], dateBasis: "scrap", timeRange: { mode: "relative", relative, from: 0, to: 0 },
-    } });
+it("never renders the date basis in the rail itself, even for a custom period", () => {
+  for (const timeRange of [CUSTOM_RANGE, { mode: "relative" as const, relative: "6mo", from: 0, to: 0 }]) {
+    const view = render(SignauxRail, { props: { entries: [], dateBasis: "scrap", timeRange } });
     expect(view.queryByRole("group", { name: "Base de date" })).toBeNull();
     expect(view.queryByRole("radio", { name: "Date d'acquisition" })).toBeNull();
     cleanup();
   }
+});
+
+it("offers the date basis in the « Personnalisé » tab of the picker, above Début / Fin", async () => {
+  const view = render(SignauxRail, { props: { entries: [], timeRange: CUSTOM_RANGE } });
+  await openPicker(view.container);
+  const group = dateBasisGroup();
+  const slot = group.closest(".st-timeRangePicker__customExtra");
+  expect(slot).toBeInstanceOf(HTMLElement);
+  expect(group.closest(".st-timeRangePicker__custom")).toBeInstanceOf(HTMLElement);
+  const debut = within(document.body).getByLabelText("Début");
+  expect(group.compareDocumentPosition(debut) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect((getByRole(group, "radio", { name: "Date du document" }) as HTMLInputElement).checked).toBe(true);
+  expect((getByRole(group, "radio", { name: "Date d'acquisition" }) as HTMLInputElement).checked).toBe(false);
+});
+
+it("keeps the date basis out of the « Relatif » tab and shows it on « Personnalisé »", async () => {
+  const view = render(SignauxRail, { props: { entries: [] } });
+  await openPicker(view.container);
+  expect(within(document.body).queryByRole("group", { name: "Base de date" })).toBeNull();
+  await fireEvent.click(within(document.body).getByRole("tab", { name: "Personnalisé" }));
+  expect((getByRole(dateBasisGroup(), "radio", { name: "Date du document" }) as HTMLInputElement).checked).toBe(true);
+});
+
+it("stages the basis: choosing acquisition emits nothing until « Appliquer », which commits range + basis together", async () => {
+  const onTimeRangeChange = vi.fn();
+  const view = render(SignauxRail, { props: { entries: [], timeRange: CUSTOM_RANGE, onTimeRangeChange } });
+  await openPicker(view.container);
+  await fireEvent.click(getByRole(dateBasisGroup(), "radio", { name: "Date d'acquisition" }));
+  expect(onTimeRangeChange).not.toHaveBeenCalled();
+  await fireEvent.click(within(document.body).getByRole("button", { name: "Appliquer" }));
+  expect(onTimeRangeChange).toHaveBeenCalledOnce();
+  expect(onTimeRangeChange).toHaveBeenCalledWith(
+    expect.objectContaining({ mode: "absolute", from: CUSTOM_RANGE.from, to: CUSTOM_RANGE.to }),
+    "scrap",
+  );
+});
+
+it("« Annuler » discards the staged basis; reopening reseeds it from the applied basis", async () => {
+  const onTimeRangeChange = vi.fn();
+  const view = render(SignauxRail, { props: { entries: [], timeRange: CUSTOM_RANGE, onTimeRangeChange } });
+  await openPicker(view.container);
+  await fireEvent.click(getByRole(dateBasisGroup(), "radio", { name: "Date d'acquisition" }));
+  await fireEvent.click(within(document.body).getByRole("button", { name: "Annuler" }));
+  expect(onTimeRangeChange).not.toHaveBeenCalled();
+  expect(within(document.body).queryByRole("group", { name: "Base de date" })).toBeNull();
+  await openPicker(view.container);
+  expect((getByRole(dateBasisGroup(), "radio", { name: "Date du document" }) as HTMLInputElement).checked).toBe(true);
+});
+
+it("restores the acquisition basis in the « Personnalisé » tab alongside a custom period", async () => {
+  const view = render(SignauxRail, { props: { entries: [], dateBasis: "scrap", timeRange: CUSTOM_RANGE } });
+  expect(view.getByRole("button", { name: "Période des signaux 2026-09-29 – 2026-09-30" })).toBeTruthy();
+  await openPicker(view.container);
+  expect((getByRole(dateBasisGroup(), "radio", { name: "Date d'acquisition" }) as HTMLInputElement).checked).toBe(true);
+});
+
+it("a relative preset always commits the document basis, whatever was staged", async () => {
+  const onTimeRangeChange = vi.fn();
+  const view = render(SignauxRail, { props: { entries: [], dateBasis: "scrap", timeRange: CUSTOM_RANGE, onTimeRangeChange } });
+  await openPicker(view.container);
+  await fireEvent.click(getByRole(dateBasisGroup(), "radio", { name: "Date d'acquisition" }));
+  await fireEvent.click(within(document.body).getByRole("tab", { name: "Relatif" }));
+  await fireEvent.click(getByText(document.body, "3 derniers mois"));
+  expect(onTimeRangeChange).toHaveBeenLastCalledWith(
+    expect.objectContaining({ mode: "relative", relative: "3mo" }),
+    "document",
+  );
 });
 
 /** Comptes v2 serveur : total = qualified + residentialUnknown + Σ exclusions. */
@@ -197,7 +249,19 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
     expect(container.querySelector(".signals-time-range-picker-wrap")).toBeInstanceOf(HTMLElement);
     expect(container.querySelector(".signals-time-range-picker")).toBeInstanceOf(HTMLElement);
     expect(container.querySelector(".st-datePicker")).toBeNull();
-    expect(getByRole(container, "button", { name: /Période des signaux.*6 derniers mois/i })).toBeInstanceOf(HTMLButtonElement);
+    expect(getByRole(container, "button", { name: /Période des signaux.*Dernière semaine/i })).toBeInstanceOf(HTMLButtonElement);
+  });
+
+  it("lists last week and last month before the month presets, with last week selected by default", async () => {
+    const { container } = renderRail();
+    await fireEvent.click(getByRole(container, "button", { name: /Période des signaux.*Dernière semaine/i }));
+    const list = getByRole(document.body, "listbox", { name: "Plages relatives" });
+    const options = within(list).getAllByRole("option");
+    expect(options.map((option) => option.textContent?.trim())).toEqual([
+      "Dernière semaine", "Dernier mois", "3 derniers mois", "6 derniers mois", "12 derniers mois", "Illimité",
+    ]);
+    expect(options.filter((option) => option.getAttribute("aria-selected") === "true")
+      .map((option) => option.textContent?.trim())).toEqual(["Dernière semaine"]);
   });
 
   it("emits the selected DS relative period for the parent-owned A/B lens", async () => {
@@ -207,12 +271,13 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
     });
 
     await fireEvent.click(
-      getByRole(container, "button", { name: /Période des signaux.*6 derniers mois/i }),
+      getByRole(container, "button", { name: /Période des signaux.*Dernière semaine/i }),
     );
     await fireEvent.click(getByText(document.body, "3 derniers mois"));
 
     expect(onTimeRangeChange).toHaveBeenLastCalledWith(
       expect.objectContaining({ mode: "relative", relative: "3mo" }),
+      "document",
     );
   });
 
@@ -222,9 +287,11 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
       props: { entries: [], onTimeRangeChange },
     });
     const trigger = () =>
-      getByRole(container, "button", { name: /Période des signaux.*derniers mois/i });
+      getByRole(container, "button", { name: /Période des signaux/i });
 
     for (const [label, relative] of [
+      ["Dernier mois", "1mo"],
+      ["Dernière semaine", "7d"],
       ["3 derniers mois", "3mo"],
       ["6 derniers mois", "6mo"],
       ["12 derniers mois", "12mo"],
@@ -233,6 +300,7 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
       await fireEvent.click(getByText(document.body, label));
       expect(onTimeRangeChange).toHaveBeenLastCalledWith(
         expect.objectContaining({ mode: "relative", relative }),
+        "document",
       );
     }
   });
@@ -240,7 +308,7 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
   it("positions the opened temporal overlay from its trigger and refreshes it on scroll", async () => {
     const { container } = renderRail();
     const trigger = getByRole(container, "button", {
-      name: /Période des signaux.*6 derniers mois/i,
+      name: /Période des signaux.*Dernière semaine/i,
     });
     let triggerTop = 36;
     vi.spyOn(trigger, "getBoundingClientRect").mockImplementation(
@@ -270,7 +338,7 @@ describe("SignauxRail — vivier B (vue unique, sans onglets)", () => {
     document.body.append(themed);
     try {
       const { container } = render(SignauxRail, { target: themed, props: { entries: [] } });
-      await fireEvent.click(getByRole(container, "button", { name: /Période des signaux.*6 derniers mois/i }));
+      await fireEvent.click(getByRole(container, "button", { name: /Période des signaux.*Dernière semaine/i }));
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
       const popover = getByRole(document.body, "dialog", { name: "Période des signaux" });
       expect(popover.parentElement).toBe(themed);

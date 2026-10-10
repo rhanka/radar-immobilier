@@ -46,7 +46,7 @@ describe("shareable geographic restrictions", () => {
       expect(state.lotsEnabled).toBe(false);
       expect(writeGeoFilters(state)).toEqual({
         zonage: ["1"], residentiel: ["1"], precoce: ["1"], excludePiia: ["1"], excludeDerogations: ["1"],
-        period: ["6mo"], lots: ["0"],
+        period: ["7d"], lots: ["0"],
       });
     }
   });
@@ -84,7 +84,7 @@ describe("shareable geographic restrictions", () => {
   });
 
   it("should ignore the acquisition basis for relative and unrestricted periods", () => {
-    for (const period of ["3mo", "6mo", "12mo"]) {
+    for (const period of ["7d", "1mo", "3mo", "6mo", "12mo"]) {
       const state = readGeoFilters({ dateBasis: ["acquisition"], period: [period] });
       expect(state.dateBasis).toBe("document");
       expect(writeGeoFilters(state)).toEqual({ period: [period] });
@@ -102,7 +102,7 @@ describe("shareable geographic restrictions", () => {
     expect(state.axes).toEqual({ z: false, r: true, p: false });
     expect(subsetFromGeoFilters(writeGeoFilters(state))).toBe(keyForVivierB(state.axes));
     expect(writeGeoFilters(state)).toEqual({
-      residentiel: ["1"], excludePiia: ["1"], excludeDerogations: ["1"], period: ["6mo"],
+      residentiel: ["1"], excludePiia: ["1"], excludeDerogations: ["1"], period: ["7d"],
     });
   });
 
@@ -122,9 +122,9 @@ describe("shareable geographic restrictions", () => {
     const state = readGeoFilters(parseGeoQuery("?mode=signal").filters);
     expect(state.axes).toEqual({ z: true, r: true, p: true });
     expect(state.exclusions).toEqual({ piiaSansProjetResidentiel: true, derogationsMineures: true });
-    expect(state.timeRange).toMatchObject({ mode: "relative", relative: "6mo" });
+    expect(state.timeRange).toMatchObject({ mode: "relative", relative: "7d" });
     expect(writeGeoFilters(state)).toEqual({
-      zonage: ["1"], residentiel: ["1"], precoce: ["1"], excludePiia: ["1"], excludeDerogations: ["1"], period: ["6mo"],
+      zonage: ["1"], residentiel: ["1"], precoce: ["1"], excludePiia: ["1"], excludeDerogations: ["1"], period: ["7d"],
     });
   });
 
@@ -145,5 +145,47 @@ describe("shareable geographic restrictions", () => {
     expect(writeGeoFilters(state)).toEqual({ period: ["3mo"] });
     expect(sameTimeRange(state.timeRange, readGeoFilters({ period: ["3mo"] }).timeRange)).toBe(true);
     expect(sameTimeRange(state.timeRange, readGeoFilters({ period: ["6mo"] }).timeRange)).toBe(false);
+  });
+
+  it("should open an old link without a period on the last-week default", () => {
+    const opened = new Date(2026, 9, 9, 10, 30).getTime();
+    for (const query of ["?mode=signal", "", "?lots=0", "?subset=vivier-v2"]) {
+      const state = readGeoFilters(parseGeoQuery(query).filters, opened);
+      expect(state.timeRange).toEqual({
+        mode: "relative", relative: "7d", from: new Date(2026, 9, 2, 10, 30).getTime(), to: opened,
+      });
+      expect(writeGeoFilters(state).period).toEqual(["7d"]);
+    }
+  });
+
+  it("should share last week and last month and keep every explicit period link valid", () => {
+    const opened = new Date(2026, 9, 9, 10, 30).getTime();
+    for (const period of ["7d", "1mo", "3mo", "6mo", "12mo"]) {
+      const url = buildGeoQuery({ filters: { period: [period] } });
+      expect(url).toBe(`?mode=signal&filter.period=${period}`);
+      const state = readGeoFilters(parseGeoQuery(url).filters, opened);
+      expect(state.timeRange).toMatchObject({ mode: "relative", relative: period, to: opened });
+      expect(writeGeoFilters(state)).toEqual({ period: [period] });
+    }
+    expect(readGeoFilters({ period: ["1mo"] }, opened).timeRange.from).toBe(new Date(2026, 8, 9, 10, 30).getTime());
+    expect(readGeoFilters({ period: ["all"] }, opened).timeRange.relative).toBe("all");
+    expect(sameTimeRange(readGeoFilters({ period: ["7d"] }).timeRange, readGeoFilters({ period: ["1mo"] }).timeRange)).toBe(false);
+  });
+
+  it("should keep an explicit period carried by a legacy residual-vivier link", () => {
+    const opened = new Date(2026, 9, 9, 10, 30).getTime();
+    for (const period of ["7d", "1mo", "3mo", "6mo", "12mo"]) {
+      const state = readGeoFilters({ subset: ["vivier-v2"], period: [period] }, opened);
+      expect(state.timeRange).toMatchObject({ mode: "relative", relative: period, to: opened });
+      expect(state.axes).toEqual({ z: true, r: true, p: true });
+      expect(writeGeoFilters(state).period).toEqual([period]);
+    }
+    expect(readGeoFilters({ subset: ["vivier-v2"], period: ["all"] }, opened).timeRange.relative).toBe("all");
+    const custom = readGeoFilters({ subset: ["vivier-v2"], dateFrom: ["2026-05-01"], dateTo: ["2026-05-31"], dateBasis: ["acquisition"] }, opened);
+    expect(custom.timeRange.mode).toBe("absolute");
+    expect(custom.dateBasis).toBe("scrap");
+    expect(writeGeoFilters(custom)).toMatchObject({ dateFrom: ["2026-05-01"], dateTo: ["2026-05-31"], dateBasis: ["acquisition"] });
+    // Invalid or absent period on a legacy link: the new last-week default.
+    expect(readGeoFilters({ subset: ["vivier-v2"], period: ["2w"] }, opened).timeRange.relative).toBe("7d");
   });
 });

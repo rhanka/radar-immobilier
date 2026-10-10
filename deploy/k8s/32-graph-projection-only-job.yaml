@@ -12,14 +12,15 @@
 # 31-graph-projection-job.yaml (qui chaîne backfill-0004 → migrate → projection).
 # Ensuite, ce job-ci suffit.
 #
-# Usage one-shot (toutes les villes) :
-#   kubectl apply -f deploy/k8s/32-graph-projection-only-job.yaml -n radar-immobilier
-#   kubectl wait job/radar-graph-projection-only --for=condition=complete -n radar-immobilier --timeout=900s
-#   kubectl logs -l job-name=radar-graph-projection-only -n radar-immobilier
-#   kubectl delete job radar-graph-projection-only -n radar-immobilier
-#
-# Cibler des villes : ajouter les slugs en args, p.ex.
-#   command: ["node", "dist/scripts/project-graph-from-s3.js", "sherbrooke", "ogden"]
+# Run it through the run-job workflow (it renders the placeholders, refuses to start
+# alongside a refresh/backup/projection/recovery Job, deletes the previous Job, applies):
+#   gh workflow run run-job.yaml -f job=projection                                  # every city
+#   gh workflow run run-job.yaml -f job=projection -f project_cities="sherbrooke ogden"
+#   __IMAGE__           = recovery_image input, else the image served by deploy/radar-api
+#                         (never :latest — on the preprod-first CD, :latest is main, not
+#                         the release tag prod serves)
+#   __PROJECT_CITIES__  = space-separated slugs (empty ⇒ every city)
+# Preprod twin: deploy/k8s/graph-projection-preprod/job.yaml (run-job target=preprod).
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -54,8 +55,8 @@ spec:
             capabilities:
               drop:
                 - ALL
-          image: ghcr.io/rhanka/radar-api:latest
-          imagePullPolicy: Always
+          image: __IMAGE__
+          imagePullPolicy: IfNotPresent
           workingDir: /workspace/api
           # __PROJECT_CITIES__ = slugs espace-séparés (sed par run-job). Vide ⇒ toutes
           # les villes (comportement par défaut préservé) ; ciblé ⇒ projection additive

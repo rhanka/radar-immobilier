@@ -295,12 +295,38 @@ et rougit si `suspend` n'est pas `false` ou si l'image n'est pas l'empreinte
 promue.
 
 Le régime appliqué est celui de la base `deploy/k8s/34-refresh-cronjob.yaml`,
-inchangé entre les deux environnements depuis #736 : `--all` sur les ~528
-villes, **quatre passages par jour** (`17 5,11,17,23` UTC), échéance de Job
-`19800 s` (5 h 30) et arrêt propre du balayage à `18900000 ms` (5 h 15).
+commun aux deux environnements depuis #736 : `--all` sur les ~528 villes,
+**quatre passages par jour**, échéance de Job `19800 s` (5 h 30) et arrêt
+propre du balayage à `18900000 ms` (5 h 15). Horaires (UTC) :
+
+| Environnement | Planification | Lancements UTC | Toronto, heure d'été (heure normale) |
+| --- | --- | --- | --- |
+| Production | `0 5,11,17,23 * * *` | 05:00, 11:00, 17:00, 23:00 | 01:00, 07:00, 13:00, 19:00 (00:00, 06:00, 12:00, 18:00) |
+| Préproduction | `0 0,6,12,18 * * *` | 00:00, 06:00, 12:00, 18:00 | 20:00 (veille), 02:00, 08:00, 14:00 (19:00 veille, 01:00, 07:00, 13:00) |
+
+Le décalage d'une heure (toujours à l'heure pile) date de l'incident du 2026-10-09 : avec le même
+horaire (`17 5,11,17,23`), les deux pods demandaient l'attachement de leur PVC
+keyring RWO au même nœud à la même minute ; le CSI ne s'en est pas remis, les
+deux passages sont restés Pending 4 h 30 en gardant leurs requests CPU, et la
+sauvegarde de release prod est restée `FailedScheduling`.
+
 `verify-renders` refuse toute divergence entre le rendu préprod et le rendu
-prod en dehors de trois différences voulues : namespace, enveloppe mémoire,
-liaison S3.
+prod en dehors de quatre différences voulues : namespace, enveloppe mémoire,
+liaison S3, liste d'heures du refresh. La minute (`0`) et le nombre de passages
+restent communs, et les lancements prod et préprod les plus proches doivent être
+séparés d'au moins 15 minutes (60 minutes aujourd'hui).
+
+Le même rendu porte le gardien `radar-refresh-pending-watchdog`
+(`deploy/k8s/34-refresh-pending-watchdog.yaml`) : toutes les 5 minutes, il
+demande la suppression d'un pod `radar-refresh-pv-*` encore `Pending` 15 minutes après sa
+création, avec préconditions uid + resourceVersion. Le Job de passage
+(`backoffLimit: 0`) échoue alors au lieu de garder ses requests jusqu'à son
+échéance de 5 h 30 ; un pod vu `Running`, ou qui a changé depuis la liste, n'est
+pas supprimé. Délai nominal : 15 à 20 minutes, si le gardien est lui-même
+ordonnancé à temps (rien ne lui réserve de capacité). La bascule préprod le
+met au repos comme `radar-refresh-pv` (`QUIESCE_CRONJOBS` du job `bascule` de
+`.github/workflows/bascule-preprod.yml`, vérifié par `verify-renders`) : sinon
+un Job du gardien encore actif ferait refuser la restauration par la garde G2. L'étape relit aussi ce CronJob (actif, même empreinte).
 
 ## À vérifier AVANT de définir la variable
 
@@ -326,7 +352,16 @@ liaison S3.
 4. **Occupation du créneau.** Quatre passages de 5 h 30 au pire occupent le pod
    presque en continu, là où le régime précédent était nocturne. Décider si le
    surge `radar-api` doit rester possible, et sinon quand.
-5. **Pic RSS du balayage.** Aucun pic de `refresh-pv --all` n'a jamais été
+5. **Identité du gardien des pods Pending.** Le ServiceAccount
+   `radar-refresh-watchdog` et son Role (pods `list/delete`, ce namespace
+   seulement) sont dans `deploy/k8s/10-rbac.yaml` ; le jumeau préprod est dans
+   `deploy/k8s/11-ci-deployer-preprod-rbac.yaml`. Leur apply est un acte
+   cluster-admin (poc-k8s). Sans eux, chaque Job du gardien échoue en
+   `FailedCreate` (ServiceAccount introuvable) puis s'arrête à son échéance de
+   180 s : le refresh tourne, mais un pod bloqué en `Pending` n'est plus borné.
+   Le gardien demande aussi 10m CPU / 64 Mi (limite 100m / 128 Mi) : il doit
+   tenir dans la marge de quota du namespace, à relire sur le cluster.
+6. **Pic RSS du balayage.** Aucun pic de `refresh-pv --all` n'a jamais été
    mesuré ; les chiffres disponibles (OOM à 512 Mi, pic 815 Mi, plateau
    305-426 Mi à 3 Gi) viennent de `worker-live`, un proxy de ce chemin de code.
    La consigne « validate peak RSS » de l'overlay prod n'est pas encore levée.
@@ -337,4 +372,6 @@ liaison S3.
 Remettre `REFRESH_CRONJOB_PROD_ENABLED` à autre chose que `'true'` empêche les
 promotions suivantes de redéployer le CronJob, mais **ne suspend pas** celui qui
 tourne déjà : suspendre est un acte explicite
-(`kubectl -n radar-immobilier patch cronjob radar-refresh-pv --type=merge -p '{"spec":{"suspend":true}}'`).
+(`kubectl -n radar-immobilier patch cronjob radar-refresh-pv --type=merge -p '{"spec":{"suspend":true}}'`). Le gardien
+`radar-refresh-pending-watchdog` peut rester actif : sans pod de passage, il ne
+fait rien.

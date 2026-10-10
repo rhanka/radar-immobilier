@@ -21,6 +21,7 @@
   import {
     fetchMrcs,
     fetchMrcGraph,
+    graphNodeKey,
     type MrcGraph,
     type MrcSummary,
     type GraphNode,
@@ -29,6 +30,8 @@
 
   // ── Types internes ────────────────────────────────────────────────────────
   interface PositionedNode extends GraphNode {
+    /** `(citySlug, id)`: two cities of the MRC can hold the same node id (GH #812). */
+    key: string;
     x: number;
     y: number;
   }
@@ -88,7 +91,7 @@
   let graphError: string | null = null;
   let graphEmpty = false;
 
-  let hoveredNodeId: string | null = null;
+  let hoveredNodeKey: string | null = null;
 
   // ── Chargement de la liste des MRCs ──────────────────────────────────────
   async function loadMrcs(): Promise<void> {
@@ -158,7 +161,8 @@
       const y = TOP_MARGIN + row * ROW_HEIGHT;
       for (let col = 0; col < group.length; col++) {
         const x = LEFT_MARGIN + col * COL_WIDTH + COL_WIDTH / 2;
-        positioned.push({ ...group[col]!, x, y });
+        const node = group[col]!;
+        positioned.push({ ...node, key: graphNodeKey(node.citySlug, node.id), x, y });
       }
       row++;
     }
@@ -166,7 +170,7 @@
   }
 
   $: positioned = graph ? positionNodes(graph.nodes) : [];
-  $: nodeById = new Map<string, PositionedNode>(positioned.map((n) => [n.id, n]));
+  $: nodeByKey = new Map<string, PositionedNode>(positioned.map((n) => [n.key, n]));
 
   // Compteurs pour la légende
   $: nodeCount = graph?.nodeCount ?? 0;
@@ -350,9 +354,9 @@
           {/each}
 
           <!-- Arêtes -->
-          {#each graph.edges as edge (edge.id ?? `${edge.srcId}-${edge.dstId}-${edge.kind}`)}
-            {@const src = nodeById.get(edge.srcId)}
-            {@const dst = nodeById.get(edge.dstId)}
+          {#each graph.edges as edge (edge.id ?? `${edge.citySlug}-${edge.srcId}-${edge.dstId}-${edge.kind}`)}
+            {@const src = nodeByKey.get(graphNodeKey(edge.citySlug, edge.srcId))}
+            {@const dst = nodeByKey.get(graphNodeKey(edge.citySlug, edge.dstId))}
             {#if src && dst}
               {@const mx = (src.x + dst.x) / 2}
               {@const my = (src.y + dst.y) / 2}
@@ -383,17 +387,17 @@
           {/each}
 
           <!-- Nœuds -->
-          {#each positioned as node (node.id)}
+          {#each positioned as node (node.key)}
             {@const c = typeColor(node.type)}
-            {@const isHovered = hoveredNodeId === node.id}
+            {@const isHovered = hoveredNodeKey === node.key}
             <g
               role="button"
               aria-label={`${node.type} : ${node.label}`}
               tabindex="0"
-              onmouseenter={() => (hoveredNodeId = node.id)}
-              onmouseleave={() => (hoveredNodeId = null)}
-              onfocus={() => (hoveredNodeId = node.id)}
-              onblur={() => (hoveredNodeId = null)}
+              onmouseenter={() => (hoveredNodeKey = node.key)}
+              onmouseleave={() => (hoveredNodeKey = null)}
+              onfocus={() => (hoveredNodeKey = node.key)}
+              onblur={() => (hoveredNodeKey = null)}
               style="cursor:default"
             >
               <circle

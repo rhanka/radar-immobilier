@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { countsInvariant, countVivierClassifications, vivierCountsSchema } from "./counts.js";
+import {
+  countsInvariant,
+  countVivierClassifications,
+  isResidentialEligible,
+  vivierCountsSchema,
+} from "./counts.js";
 import { vivierV2Schema, type VivierV2 } from "./vivier-v2.js";
 
 const value = (overrides: Partial<VivierV2> = {}): VivierV2 =>
@@ -91,8 +96,9 @@ describe("vivier_v2 named counts", () => {
     expect(counts.residentialUnknown).toBe(1);
     expect(counts.stageCounts.projet_reglement).toBe(1);
     expect(counts.stageCounts.avis_motion + counts.stageCounts.projet_reglement).toBe(1);
-    // stageCountsResEligible excludes the indéterminé — the `r` axis can now filter.
-    expect(counts.stageCountsResEligible.projet_reglement).toBe(0);
+    // An early-stage unknown is residential-UNKNOWN, not non-residential: the
+    // checked `r` axis keeps it (tri-state, SPEC_EVOL_FILTRAGE_VIVIER_v2 §1/§3).
+    expect(counts.stageCountsResEligible.projet_reglement).toBe(1);
     expect(countsInvariant(counts)).toBe(true);
   });
 
@@ -148,5 +154,50 @@ describe("vivier_v2 named counts", () => {
     expect(() => countVivierClassifications([invalid])).toThrow(
       "a non-residential classification must have an exclusion reason",
     );
+  });
+
+  describe("r axis tri-state: unknown is not non-residential", () => {
+    const unknown = { valeur: "indetermine", source: "test", confiance: 0 } as const;
+
+    // Production node event-26-220 (la-peche): a first draft bylaw whose minutes
+    // replace zone H-027 by C-015. The graph carries neither a description nor a
+    // category, so the instrument is `autre` and the residential nature unknown.
+    const earlyUnknownDraft = value({
+      residentiel: unknown,
+      instrument: "autre",
+      etape: "projet_reglement",
+    });
+
+    it("keeps an early zoning signal whose residential nature is unknown", () => {
+      expect(isResidentialEligible(earlyUnknownDraft)).toBe(true);
+      expect(isResidentialEligible({ ...earlyUnknownDraft, etape: "avis_motion" })).toBe(true);
+      const counts = countVivierClassifications([earlyUnknownDraft]);
+      expect(counts.stageCountsResEligible.projet_reglement).toBe(1);
+      // The epistemic partition is unchanged: still `residentialUnknown`.
+      expect(counts.qualified).toBe(0);
+      expect(counts.residentialUnknown).toBe(1);
+      expect(countsInvariant(counts)).toBe(true);
+    });
+
+    it("keeps filtering a late-stage unknown that is neither a rezoning nor a reform", () => {
+      expect(isResidentialEligible({ ...earlyUnknownDraft, etape: "adoption" })).toBe(false);
+      expect(isResidentialEligible({ ...earlyUnknownDraft, etape: "inconnu" })).toBe(false);
+      expect(isResidentialEligible({ ...earlyUnknownDraft, etape: "adoption", instrument: "rezonage" }))
+        .toBe(true);
+    });
+
+    it("keeps filtering individual authorisations (derogation, PIIA) left unknown, even early", () => {
+      expect(isResidentialEligible({ ...earlyUnknownDraft, instrument: "derogation" })).toBe(false);
+      expect(isResidentialEligible({ ...earlyUnknownDraft, instrument: "piia" })).toBe(false);
+    });
+
+    it("never lets an explicit non-residential through", () => {
+      expect(isResidentialEligible(value({
+        residentiel: { valeur: "non", source: "test", confiance: 1 },
+        exclusion_reason: "non_residentiel_franc",
+        instrument: "autre",
+        etape: "avis_motion",
+      }))).toBe(false);
+    });
   });
 });

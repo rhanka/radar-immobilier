@@ -5,13 +5,14 @@
 # N'a PAS besoin de S3 : lit graph_nodes + zone_versions/lot_versions en PG, écrit
 # geo_resolutions/geo_unresolved en PG.
 #
-# Usage one-shot (toutes les villes avec données OGC) :
-#   kubectl apply -f deploy/k8s/35-run-geo-mapper-job.yaml -n radar-immobilier
-#   kubectl wait job/radar-run-geo-mapper --for=condition=complete -n radar-immobilier --timeout=900s
-#   kubectl logs -l job-name=radar-run-geo-mapper -n radar-immobilier
-#   kubectl delete job radar-run-geo-mapper -n radar-immobilier
-#
-# Cibler des villes : env CITIES="mont-tremblant,rimouski".
+# Lancé par le workflow run-job (jamais appliqué tel quel : trois placeholders) :
+#   gh workflow run run-job.yaml -f job=mapper                                   # toutes les villes
+#   gh workflow run run-job.yaml -f job=mapper -f project_cities="gore barkmere"   # purge + rebuild
+#   __IMAGE__          = recovery_image, sinon l'image servie par deploy/radar-api
+#   __MAPPER_CITIES__  = villes séparées par des espaces (vide ⇒ toutes les villes avec données OGC)
+#   __MAPPER_RESET__   = "1" (dès que des villes sont listées) ⇒ par ville, purge geo_resolutions + geo_unresolved puis résolution,
+#                        dans une transaction (GH #812, exige des villes) ; "" sinon.
+# Jumeau préprod : deploy/k8s/geo-mapper-preprod/job.yaml.
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -50,14 +51,18 @@ spec:
             capabilities:
               drop:
                 - ALL
-          image: ghcr.io/rhanka/radar-api:latest
-          imagePullPolicy: Always
+          image: __IMAGE__
+          imagePullPolicy: IfNotPresent
           workingDir: /workspace/api
           command: ["node", "dist/services/geo/run-geo-mapper.js"]
           envFrom:
             - configMapRef:
                 name: radar-api
           env:
+            - name: CITIES
+              value: "__MAPPER_CITIES__"
+            - name: RESET
+              value: "__MAPPER_RESET__"
             - name: NODE_OPTIONS
               value: "--max-old-space-size=200 --dns-result-order=ipv4first"
             - name: POSTGRES_USER

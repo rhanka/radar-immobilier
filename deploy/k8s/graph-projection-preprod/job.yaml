@@ -1,0 +1,89 @@
+# graph-projection-preprod — PREPROD one-shot Job: project graph/<city>/latest.json into
+# the preprod Postgres (api/src/scripts/project-graph-from-s3.ts). Preprod twin of
+# deploy/k8s/32-graph-projection-only-job.yaml (prod).
+#
+# NOT applied directly and NOT in any kustomization: run it through the run-job workflow,
+# which renders the two placeholders, refuses to start alongside a refresh/backup/
+# projection/recovery Job, deletes the previous Job and applies this one:
+#   gh workflow run run-job.yaml -f target=preprod -f job=projection -f project_cities="gore barkmere"
+#   __IMAGE__           = recovery_image input, else the image served by deploy/radar-api (preprod)
+#   __PROJECT_CITIES__  = space-separated slugs (empty ⇒ every graph/<city>/latest.json)
+# Procedure and windows: docs/spec/SPEC_EVOL_DOCUMENT_DATES.md (Production run).
+#
+# Network: labelled `component: graph-projection` so the projection egress policies
+# (PG + object storage) apply unchanged, as for the preprod document-date-recovery Job.
+#
+# Storage: graph snapshots live in the preprod docs bucket. Coordinates (GRAPH_S3_*) come
+# from ConfigMap radar-api, whose bucket is overridden to radar-immobilier-docs-preprod by
+# deploy/overlays/preprod. Credentials: Secret radar-docs-s3-credentials, the same Secret as
+# the preprod refresh CronJob and the preprod document-date-recovery Job
+# (radar-graph-s3-credentials / radar-scrape-s3-credentials are prod-only names).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: radar-graph-projection-only
+  namespace: radar-immobilier-preprod
+  labels:
+    app.kubernetes.io/name: radar-immobilier
+    app.kubernetes.io/part-of: sentropic
+    app.kubernetes.io/component: graph-projection
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 604800
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: radar-immobilier
+        app.kubernetes.io/component: graph-projection
+    spec:
+      restartPolicy: Never
+      serviceAccountName: radar-app
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: project-graph
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL
+          image: __IMAGE__
+          imagePullPolicy: IfNotPresent
+          workingDir: /workspace/api
+          command: ["sh", "-c"]
+          args:
+            - |
+              node dist/scripts/project-graph-from-s3.js __PROJECT_CITIES__
+          envFrom:
+            - configMapRef:
+                name: radar-api
+          env:
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=200 --dns-result-order=ipv4first"
+            - name: POSTGRES_USER
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_USER } }
+            - name: POSTGRES_PASSWORD
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_PASSWORD } }
+            - name: POSTGRES_DB
+              valueFrom: { secretKeyRef: { name: radar-db-credentials, key: POSTGRES_DB } }
+            - name: GRAPH_S3_ENDPOINT
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_ENDPOINT } }
+            - name: GRAPH_S3_BUCKET
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_BUCKET } }
+            - name: GRAPH_S3_REGION
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_REGION } }
+            - name: GRAPH_S3_FORCE_PATH_STYLE
+              valueFrom: { configMapKeyRef: { name: radar-api, key: GRAPH_S3_FORCE_PATH_STYLE } }
+            - name: GRAPH_S3_ACCESS_KEY
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_ACCESS_KEY } }
+            - name: GRAPH_S3_SECRET_KEY
+              valueFrom: { secretKeyRef: { name: radar-docs-s3-credentials, key: DOCS_S3_SECRET_KEY } }
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 150m, memory: 256Mi }

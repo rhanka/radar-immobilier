@@ -1,0 +1,30 @@
+# PREPROD settings of the immo MCP server (ConfigMap immo-mcp-config, read by
+# the radar-immo-mcp Deployment through envFrom; base:
+# deploy/k8s/40-immo-mcp-http-deploy.yaml, which carries the PROD values).
+# Strategic-merge patch: only the keys that name an environment are changed;
+# every other key (scopes, data mode, port, api wiring) is inherited from the
+# base so preprod and prod stay aligned by construction (GH #835).
+#
+# - IMMO_MCP_OAUTH_RESOURCE: the canonical resource = token audience, advertised
+#   in the RFC 9728 PRM at <resource>/.well-known/oauth-protected-resource and in
+#   the 401 `WWW-Authenticate: resource_metadata=...` challenge. Before this
+#   patch preprod advertised the PROD resource, so a client following the
+#   challenge was sent to prod.
+# - IMMO_MCP_OAUTH_ISSUER: same mechanism as prod, where the MCP issuer is the
+#   app's own IdP (prod: auth.sent-tech.ca for both radar-api and the MCP).
+#   search_signals forwards the user's bearer to radar-api, which only accepts
+#   tokens from SENTROPIC_IDP_ISSUER (preprod: preprod.auth.sent-tech.ca, see
+#   patch-radar-api-auth.yaml) with audience `${AUTH_CALLBACK_BASE_URL}/mcp`;
+#   a token from the PROD IdP would be rejected there.
+# - RADAR_PUBLIC_BASE_URL: base of the URLs the MCP hands back (get_pv_pdf).
+#
+# Guarded by deploy/ci/check-preprod-auth-isolation.sh (CI + reconcile), which
+# also requires the MCP issuer to equal the radar-api issuer.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: immo-mcp-config
+data:
+  IMMO_MCP_OAUTH_ISSUER: "https://preprod.auth.sent-tech.ca"
+  IMMO_MCP_OAUTH_RESOURCE: "https://preprod.immo.sent-tech.ca/mcp"
+  RADAR_PUBLIC_BASE_URL: "https://preprod.immo.sent-tech.ca"
