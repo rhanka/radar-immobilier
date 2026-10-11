@@ -3,11 +3,12 @@
 # deploy/k8s/32-graph-projection-only-job.yaml (prod).
 #
 # NOT applied directly and NOT in any kustomization: run it through the run-job workflow,
-# which renders the two placeholders, refuses to start alongside a refresh/backup/
+# which renders the placeholders, refuses to start alongside a refresh/backup/
 # projection/recovery Job, deletes the previous Job and applies this one:
 #   gh workflow run run-job.yaml -f target=preprod -f job=projection -f project_cities="gore barkmere"
 #   __IMAGE__           = recovery_image input, else the image served by deploy/radar-api (preprod)
 #   __PROJECT_CITIES__  = space-separated slugs (empty ⇒ every graph/<city>/latest.json)
+#   __PROJECTION_ARGS__ = declared changes of ONE city (GH #817), see the prod twin; empty otherwise
 # Procedure and windows: docs/spec/SPEC_EVOL_DOCUMENT_DATES.md (Production run).
 #
 # Network: labelled `component: graph-projection` so the projection egress policies
@@ -59,7 +60,7 @@ spec:
           command: ["sh", "-c"]
           args:
             - |
-              node dist/scripts/project-graph-from-s3.js __PROJECT_CITIES__
+              node dist/scripts/project-graph-from-s3.js __PROJECTION_ARGS__ __PROJECT_CITIES__
           envFrom:
             - configMapRef:
                 name: radar-api

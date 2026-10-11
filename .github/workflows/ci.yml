@@ -48,6 +48,9 @@ jobs:
       - name: Validate preprod reconcile immo-mcp branch (hermetic, fake kubectl)
         run: bash deploy/ci/reconcile-preprod-mcp.test.sh
 
+      - name: Validate projection declared-changes inputs (offline, GH #817)
+        run: bash deploy/ci/projection-declared-args.test.sh
+
       - name: Validate daily prod backup logic (offline selftest)
         run: node deploy/ci/backup/backup-daily.selftest.mjs
 
