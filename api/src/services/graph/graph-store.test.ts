@@ -22,6 +22,9 @@ import {
   upsertGraphAtomic,
   findMissingBusinessProperties,
   findMissingSourceRefs,
+  checkDeclaredChanges,
+  evaluateRowGuards,
+  type DeclaredChanges,
   countCompleteSignals,
   isCompleteSignalProps,
   queryNeighbors,
@@ -481,6 +484,86 @@ describe("source-ref provenance gate (gate3) — findMissingSourceRefs", () => {
     const before = [withRefs("sig:1", [])];
     const after = [withRefs("sig:1", [])];
     expect(findMissingSourceRefs(before, after, "x")).toEqual([]);
+  });
+});
+
+// GH #817 (D7 brigham) — declared changes: intended removals (ids) and accepted
+// business-property losses (`id:key`), checked against the projection plan.
+describe("declared changes — checkDeclaredChanges + gate1 accepted losses", () => {
+  type Row = { id: string; props: Record<string, unknown> };
+  const node = (id: string, properties: Record<string, unknown> = {}, extra: Record<string, unknown> = {}): Row => ({
+    id,
+    props: { properties, ...extra },
+  });
+  const declared = (removals: string[], losses: Array<[string, string[]]> = []): DeclaredChanges => ({
+    removals: new Set(removals),
+    propertyLosses: new Map(losses.map(([id, keys]) => [id, new Set(keys)])),
+  });
+  // Shape of brigham: two PG-only nodes, one shared node losing `flag`, one new S3 node.
+  const current = [
+    node("lot-1", { no_lot: "1" }),
+    node("bylaw-foreign", { status: "adopte" }, { refs: [{ docSha: "SHA_OTHER_CITY" }] }),
+    node("muni", { flag: "x", name: "Brigham" }),
+  ];
+  const candidate = [node("muni", { name: "Brigham" }), node("lot-2", { no_lot: "2" })];
+
+  it("reports the exact plan: removals = current rows absent from the candidate, losses = gate1 keys of surviving rows", () => {
+    const report = checkDeclaredChanges(current, candidate, declared(["lot-1", "bylaw-foreign"], [["muni", ["flag"]]]));
+    expect(report).toEqual({
+      plannedRemovals: ["bylaw-foreign", "lot-1"],
+      plannedLosses: ["muni:flag"],
+      declaredNotInPlan: [],
+      undeclaredRemovals: [],
+    });
+  });
+
+  it("lists a declared removal of a node the candidate keeps as absent from the plan", () => {
+    const report = checkDeclaredChanges(current, candidate, declared(["lot-1", "bylaw-foreign", "muni"], [["muni", ["flag"]]]));
+    expect(report.declaredNotInPlan).toEqual(["remove:muni"]);
+  });
+
+  it("lists a declared removal of an id the city does not hold as absent from the plan", () => {
+    const report = checkDeclaredChanges(current, candidate, declared(["lot-1", "bylaw-foreign", "lot-404"]));
+    expect(report.declaredNotInPlan).toEqual(["remove:lot-404"]);
+  });
+
+  it("lists a declared loss of a key that survives, of a removed node, or of an unknown node as absent from the plan", () => {
+    const report = checkDeclaredChanges(
+      current,
+      candidate,
+      declared(["lot-1", "bylaw-foreign"], [["muni", ["flag", "name"]], ["lot-1", ["no_lot"]], ["ghost", ["k"]]]),
+    );
+    expect(report.declaredNotInPlan).toEqual(["lose:ghost:k", "lose:lot-1:no_lot", "lose:muni:name"]);
+  });
+
+  it("lists every planned removal that is not declared", () => {
+    const report = checkDeclaredChanges(current, candidate, declared(["lot-1"]));
+    expect(report.undeclaredRemovals).toEqual(["bylaw-foreign"]);
+  });
+
+  it("gate1 exempts exactly the accepted key of the accepted node", () => {
+    const losses = new Map([["muni", new Set(["flag"])]]);
+    expect(findMissingBusinessProperties(current, candidate, "b", new Set(["lot-1", "bylaw-foreign"]), losses)).toEqual([]);
+    // the same loss on another key, or on another node, stays a regression
+    const otherKey = new Map([["muni", new Set(["name"])]]);
+    expect(findMissingBusinessProperties(current, candidate, "b", new Set(["lot-1", "bylaw-foreign"]), otherKey)).toEqual([
+      { citySlug: "b", nodeId: "muni", missingKeys: ["flag"] },
+    ]);
+  });
+
+  it("evaluateRowGuards: declared removals and loss pass gate1 and gate3; an undeclared removal stays refused by gate1", () => {
+    const losses = new Map([["muni", new Set(["flag"])]]);
+    expect(evaluateRowGuards("b", current, candidate, new Set(["lot-1", "bylaw-foreign"]), losses)).toEqual({ verdict: "pass" });
+    const refused = evaluateRowGuards("b", current, candidate, new Set(["lot-1"]), losses);
+    expect(refused).toMatchObject({ verdict: "refused", gate: "gate1-business-property" });
+    expect(refused.verdict === "refused" && refused.reason).toContain("bylaw-foreign: status");
+  });
+
+  it("evaluateRowGuards: gate3 still refuses a surviving node whose own docSha would disappear", () => {
+    const cur = [node("sig", { k: "v" }, { refs: [{ docSha: "SHA_PV" }] })];
+    const cand = [node("sig", { k: "v" }, { refs: [] })];
+    const losses = new Map([["sig", new Set(["k"])]]);
+    expect(evaluateRowGuards("b", cur, cand, new Set(), losses)).toMatchObject({ verdict: "refused", gate: "gate3-source-ref" });
   });
 });
 
@@ -1917,6 +2000,208 @@ describe.skipIf(!DB_AVAILABLE)("DB-bound: upsertGraphAtomic (atomique + gate)", 
     const [persisted] = await db.select().from(graphNodes).where(eq(graphNodes.id, nodeId));
     const persistedProperties = ((persisted?.props ?? {}) as Record<string, unknown>).properties;
     expect(Object.keys((persistedProperties ?? {}) as Record<string, unknown>)).toHaveLength(39);
+
+    await cleanCity(db, city);
+  });
+
+  // ── GH #817 (D7 brigham) — declared changes ────────────────────────────────
+  // June PG graph: two PG-only nodes (one carrying another city's docSha) and a
+  // shared municipality node; July S3 graph: the municipality without `flag`, one new lot.
+  const juneGraph = {
+    nodes: [
+      { id: "lot-june", type: "Lot", label: "Lot juin", properties: { no_lot: "1" } },
+      {
+        id: "bylaw-foreign",
+        type: "Bylaw",
+        label: "Bylaw",
+        properties: { status: "adopte" },
+        refs: [{ docSha: "SHA_OTHER_CITY", rawRef: "raw/proces-verbaux-danville/cas/SHA_OTHER_CITY.pdf" }],
+      },
+      { id: "muni", type: "Municipality", label: "Brigham", properties: { flag: "x", name: "Brigham" } },
+    ],
+    edges: [{ source: "lot-june", target: "muni", type: "in" }],
+  };
+  const julyGraph = {
+    nodes: [
+      { id: "muni", type: "Municipality", label: "Brigham", properties: { name: "Brigham" } },
+      { id: "lot-july", type: "Lot", label: "Lot juillet", properties: { no_lot: "2" } },
+    ],
+  };
+  const declare = (removals: string[], losses: Array<[string, string[]]> = []) => ({
+    removals: new Set(removals),
+    propertyLosses: new Map(losses.map(([id, keys]) => [id, new Set(keys)] as const)),
+  });
+  async function cityIds(db: Awaited<ReturnType<typeof getDb>>, city: string) {
+    const { graphNodes } = await import("../../db/schema.js");
+    const { eq } = await import("drizzle-orm");
+    const rows = await db.select().from(graphNodes).where(eq(graphNodes.citySlug, city));
+    return {
+      ids: rows.map((r) => r.id).sort(),
+      props: new Map(rows.map((r) => [r.id, (r.props ?? {}) as Record<string, unknown>])),
+    };
+  }
+
+  it("(d) declared removals + accepted loss → projected exactly as the candidate, plan reported", async () => {
+    const db = await getDb();
+    const city = "__test_declared_accept__";
+    await cleanCity(db, city);
+    expect((await upsertGraphAtomic(db, city, juneGraph)).aborted).toBe(false);
+
+    const r = await upsertGraphAtomic(db, city, julyGraph, undefined, {
+      declared: declare(["lot-june", "bylaw-foreign"], [["muni", ["flag"]]]),
+    });
+    expect(r.aborted).toBe(false);
+    expect(r.deletedNodes).toBe(2);
+    expect(r.declared).toEqual({
+      plannedRemovals: ["bylaw-foreign", "lot-june"],
+      plannedLosses: ["muni:flag"],
+      declaredNotInPlan: [],
+      undeclaredRemovals: [],
+    });
+    // rollback material: the June rows of the declared nodes and the deleted edge, read before writing
+    expect(r.declaredBaseline?.nodes.map((n) => n.id).sort()).toEqual(["bylaw-foreign", "lot-june", "muni"]);
+    expect(r.declaredBaseline?.nodes.find((n) => n.id === "muni")?.props).toMatchObject({ properties: { flag: "x" } });
+    expect(r.declaredBaseline?.edges.map((e) => `${e.srcId}>${e.dstId}`)).toEqual(["lot-june>muni"]);
+    const after = await cityIds(db, city);
+    expect(after.ids).toEqual(["lot-july", "muni"]);
+    expect(after.props.get("muni")?.properties).toEqual({ name: "Brigham" });
+
+    await cleanCity(db, city);
+  });
+
+  it("(e) an undeclared removal of a business-bearing node stays refused by gate1 — nothing written", async () => {
+    const db = await getDb();
+    const city = "__test_declared_undeclared_gate1__";
+    await cleanCity(db, city);
+    await upsertGraphAtomic(db, city, juneGraph);
+
+    const r = await upsertGraphAtomic(db, city, julyGraph, undefined, {
+      declared: declare(["lot-june"], [["muni", ["flag"]]]),
+    });
+    expect(r.aborted).toBe(true);
+    expect(r.reason).toContain("business-property regression");
+    expect(r.reason).toContain("bylaw-foreign: status");
+    expect((await cityIds(db, city)).ids).toEqual(["bylaw-foreign", "lot-june", "muni"]);
+
+    await cleanCity(db, city);
+  });
+
+  it("(e2) an undeclared removal of a node without business property is refused too", async () => {
+    const db = await getDb();
+    const city = "__test_declared_undeclared_bare__";
+    await cleanCity(db, city);
+    await upsertGraphAtomic(db, city, {
+      nodes: [...juneGraph.nodes, { id: "bare", type: "Concept", label: "No business property" }],
+    });
+
+    const r = await upsertGraphAtomic(db, city, julyGraph, undefined, {
+      declared: declare(["lot-june", "bylaw-foreign"], [["muni", ["flag"]]]),
+    });
+    expect(r.aborted).toBe(true);
+    expect(r.reason).toContain("undeclared removal");
+    expect(r.reason).toContain("bare");
+    expect((await cityIds(db, city)).ids).toEqual(["bare", "bylaw-foreign", "lot-june", "muni"]);
+
+    await cleanCity(db, city);
+  });
+
+  it("(f) a declaration absent from the plan fails the city — nothing written", async () => {
+    const db = await getDb();
+    const city = "__test_declared_not_in_plan__";
+    await cleanCity(db, city);
+    await upsertGraphAtomic(db, city, juneGraph);
+
+    for (const declared of [
+      declare(["lot-june", "bylaw-foreign", "lot-404"], [["muni", ["flag"]]]),
+      declare(["lot-june", "bylaw-foreign"], [["muni", ["flag"]], ["muni", ["name"]]]),
+      declare(["lot-june", "bylaw-foreign"], [["muni", ["flag", "name"]]]),
+    ]) {
+      const r = await upsertGraphAtomic(db, city, julyGraph, undefined, { declared });
+      expect(r.aborted).toBe(true);
+      expect(r.reason).toContain("absent from the plan");
+    }
+    expect((await cityIds(db, city)).ids).toEqual(["bylaw-foreign", "lot-june", "muni"]);
+
+    await cleanCity(db, city);
+  });
+
+  it("(g) without the option the same projection is refused exactly as before", async () => {
+    const db = await getDb();
+    const city = "__test_declared_none__";
+    await cleanCity(db, city);
+    await upsertGraphAtomic(db, city, juneGraph);
+
+    const r = await upsertGraphAtomic(db, city, julyGraph);
+    expect(r.aborted).toBe(true);
+    expect(r.declared).toBeUndefined();
+    expect(r.preview).toBeUndefined();
+    expect(r.reason).toMatch(/^business-property regression for __test_declared_none__: existing values would disappear or degrade \(/);
+    for (const part of ["lot-june: no_lot", "bylaw-foreign: status", "muni: flag"]) expect(r.reason).toContain(part);
+    expect((await cityIds(db, city)).ids).toEqual(["bylaw-foreign", "lot-june", "muni"]);
+
+    await cleanCity(db, city);
+  });
+
+  it("(h) preview runs the declared projection and rolls it back", async () => {
+    const db = await getDb();
+    const city = "__test_declared_preview__";
+    await cleanCity(db, city);
+    await upsertGraphAtomic(db, city, juneGraph);
+
+    const r = await upsertGraphAtomic(db, city, julyGraph, undefined, {
+      declared: declare(["lot-june", "bylaw-foreign"], [["muni", ["flag"]]]),
+      preview: true,
+    });
+    expect(r.aborted).toBe(false);
+    expect(r.preview).toBe(true);
+    expect(r.deletedNodes).toBe(2);
+    expect(r.declared?.plannedLosses).toEqual(["muni:flag"]);
+    const after = await cityIds(db, city);
+    expect(after.ids).toEqual(["bylaw-foreign", "lot-june", "muni"]);
+    expect(after.props.get("muni")?.properties).toEqual({ flag: "x", name: "Brigham" });
+
+    await cleanCity(db, city);
+  });
+
+  it("(j) declared mode refuses baseline exclusions (review SOL-853-01) — nothing written", async () => {
+    const db = await getDb();
+    const city = "__test_declared_exclusive__";
+    await cleanCity(db, city);
+    await upsertGraphAtomic(db, city, juneGraph);
+    const { projectCityInTransaction, prepareCityProjection } = await import("./graph-store.js");
+
+    await expect(
+      db.transaction((tx) =>
+        projectCityInTransaction(tx, prepareCityProjection(city, julyGraph), {
+          declared: declare(["lot-june", "bylaw-foreign"]),
+          baselineExcludeIds: new Set(["muni"]),
+        }),
+      ),
+    ).rejects.toThrow(/exclusive/);
+    const after = await cityIds(db, city);
+    expect(after.ids).toEqual(["bylaw-foreign", "lot-june", "muni"]);
+    expect(after.props.get("muni")?.properties).toEqual({ flag: "x", name: "Brigham" });
+
+    await cleanCity(db, city);
+  });
+
+  it("(i) gate2 is evaluated normally: a declared removal cannot lower the complete-signal count", async () => {
+    const db = await getDb();
+    const city = "__test_declared_gate2__";
+    await cleanCity(db, city);
+    await upsertGraphAtomic(db, city, {
+      nodes: [
+        { id: "sig", type: "Signal", label: "Signal complet", refs: [{ excerpt: "ADOPTION REGLEMENT 1", rawRef: "preuve.pdf" }] },
+        { id: "muni", type: "Municipality", label: "M" },
+      ],
+    });
+
+    const r = await upsertGraphAtomic(db, city, { nodes: [{ id: "muni", type: "Municipality", label: "M" }] }, undefined, {
+      declared: declare(["sig"]),
+    });
+    expect(r.aborted).toBe(true);
+    expect(r.reason).toContain("signaux complets 1 → 0");
+    expect((await cityIds(db, city)).ids).toEqual(["muni", "sig"]);
 
     await cleanCity(db, city);
   });
