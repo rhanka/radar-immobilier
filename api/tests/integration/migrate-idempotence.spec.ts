@@ -54,10 +54,15 @@ describe("single host migration authority and legacy retirement", () => {
     const author = await pool.query("INSERT INTO account_users(sub, status) VALUES ('ordinary-migration-author', 'approved') RETURNING id");
     await pool.query("INSERT INTO prospect_notes(no_lot, city_slug, author_id, body) VALUES ('synthetic-lot', 'synthetic-city', $1, 'synthetic-body')", [author.rows[0].id]);
     try {
-      await promisify(execFile)(process.execPath, ["--import", "tsx", "src/db/migrate.ts"], {
-        cwd: fileURLToPath(new URL("../../", import.meta.url)),
-        env: { ...process.env, POSTGRES_DB: database },
-      });
+      try {
+        await promisify(execFile)(process.execPath, ["--import", "tsx", "src/db/migrate.ts"], {
+          cwd: fileURLToPath(new URL("../../", import.meta.url)),
+          env: { ...process.env, POSTGRES_DB: database },
+        });
+      } catch (error) {
+        const failure = error as Error & { stdout?: string; stderr?: string };
+        throw new Error(`Migration entrypoint failed: ${failure.stdout ?? ""} ${failure.stderr ?? ""}`, { cause: error });
+      }
       expect((await pool.query("SELECT count(*)::int AS count FROM prospect_notes")).rows[0].count).toBe(1);
     } finally {
       await pool.query("DELETE FROM prospect_notes WHERE author_id = $1", [author.rows[0].id]);

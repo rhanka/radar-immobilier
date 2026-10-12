@@ -35,4 +35,15 @@ export class PgAnnotationHostRepository implements AnnotationHostRepository {
       frozenDigest: r.frozen_digest, currentDigest: r.current_digest,
       available: r.unavailable_at === null }));
   }
+
+  async resourceLinks(ref: ResourceRef) {
+    const result = await this.database.query<{ to_namespace: string; to_kind: string; to_id: string;
+      relation: "same-native-object" | "corrected-mapping"; evidence_ref: string; canonical_conversion_ref: string | null }>(
+      `SELECT to_namespace, to_kind, to_id, relation, evidence_ref, canonical_conversion_ref
+       FROM annotation_resource_links WHERE tenant_id = $1 AND workspace_id = $2
+         AND from_namespace = $3 AND from_kind = $4 AND from_id = $5 ORDER BY to_namespace, to_kind, to_id`,
+      [ref.scope.tenantId, ref.scope.workspaceId, ref.namespace, ref.kind, ref.id]);
+    return result.rows.map((r) => ({ target: { scope: ref.scope, namespace: r.to_namespace, kind: r.to_kind, id: r.to_id },
+      relation: r.relation, evidenceRef: r.evidence_ref, canonicalConversionRef: r.canonical_conversion_ref }));
+  }
 }
