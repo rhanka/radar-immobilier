@@ -67,7 +67,7 @@
   - [x] Update security evidence and only proven resolved rows, retain null owner signatures; clean the dedicated test stack and hand off the exact patch. No merge or deployment.
 - [ ] **Lot 4 — Owner-authorized publication and review**
   - [x] Record publication authorization and commit boundaries; baseline diff/new-file hashes exactly match the reviewed snapshot before documentation updates.
-  - [ ] Commit verified dependency manifests and generated lockfile.
+  - [x] Commit verified dependency manifests and generated lockfile; exact implementation bytes remain identical to the reviewed snapshot.
   - [ ] Commit CSS-native Tailwind configuration and compatibility tests.
   - [ ] Commit component utility migrations in bounded groups.
   - [ ] Commit MapLibre startup, named exports and unit-test adaptations.
