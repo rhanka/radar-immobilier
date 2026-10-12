@@ -99,6 +99,7 @@
   - [x] Keep historical resources unresolved and deny review even with a permissive grant; only frozen source bytes permit candidate preparation.
   - [ ] Prepare a complete synthetic workbook inventory/manifest and explicit map-category dispositions, without canonical writes.
   - [x] Inventory raw workbook bytes, native version-local cells/rows, formulas/cache/hidden metadata, coverage and source absences on synthetic fixtures.
+  - [x] Decode a synthetic Google Sheets response with exact original-byte retention and explicit unavailable Drive sidecars; feedback mappings are qualified source text cells.
   - [ ] Require locked API image installation and document every contracts resolver.
 - [ ] **Lot 10 — Qualify operational guards and reconcile the reviews.**
   - [x] Implement pre-copy deployment fence bound to an exact operation receipt; suspend ordinary restore and image-only rollback pending canonical recovery qualification.
