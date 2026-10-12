@@ -57,6 +57,7 @@
   - [x] Remove API note commands and qualify endpoint retirement.
   - [x] Remove legacy integration assertions and cleanup while retaining marks/contact coverage.
   - [ ] Delete UI clients, subscriptions, components and mounts; preserve marks.
+  - [x] Remove lot/signal panel mounts and ambient annotation badges.
 - [ ] **Lot 5 — Guard migration/retirement and document operational eradication.**
   - [x] Account for every historical SQL and the known 0009 journal omission.
   - [x] Serialize host DDL and guarded legacy retirement with checksum/predecessor checks.
