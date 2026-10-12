@@ -25,6 +25,7 @@
   - [x] `docs/spec/reports/dossier-retours-steve/README.md`, `docs/spec/ANNOTATIONS_STEVE_PREPARATION.md`.
   - [x] `.github/workflows/build-push-images.yml`, `.github/workflows/rollback.yml`, `.github/workflows/bascule-preprod.yml`, `deploy/ci/annotations-guard.sh`, `deploy/ci/annotations-guard.test.mjs`, `deploy/ci/rollback-release.sh`.
   - [x] `.github/workflows/ci.yml`, `docs/spec/SPEC_FIX_GRAPH_CITY_KEY.md`.
+  - [x] `deploy/ci/check-image-entrypoints.test.sh` under BR1001-EX9.
 - [x] **Forbidden Paths (must not change)**:
   - [x] `Makefile`, `docker-compose*.yml`, `rules/**`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, other branch plans, other repositories.
 - [x] **Conditional Paths**:
@@ -46,6 +47,8 @@
 - [x] BR1001-EX7: the required complete immutable installation lock fills resolved/integrity metadata for 710 existing exact-version entries and exceeds 150 lines as one generated artifact; no versions or dependency edges change, image install becomes npm ci, rollback by reverting this software-qualification commit before adoption.
 - [x] BR1001-EX8: allow CI wiring of the new offline operation/software gates and the corrected migration-summary literals in the graph spec; these verify the evidenced review fixes, no environment activation, rollback by reverting these verification/documentation hunks.
 - [x] ANNOTATIONS-D6: automatic approval review rejected the public branch push because the request authorized local implementation, not this exact public destination/payload; no remote write occurred and no bypass was attempted. Owner approval is required for push/draft PR; remote CI remains pending.
+- [x] ANNOTATIONS-D7: owner approved publication on 2026-10-12; draft PR #859 is open, with no merge authorized. D6 records the earlier refusal only.
+- [x] BR1001-EX9: permit the image-entrypoint regression assertion because CI run 38305299067 reproducibly expects 18 instead of the 20 shipped entries, including both guarded annotation operators; preserve every negative mutation check, no runtime/deployment change, rollback by reverting this assertion.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch; sequential writes; independent design reviewers read only.
@@ -113,3 +116,7 @@
   - [x] Current quality/build/image smoke, exact reconstruction, four operation guards and actual-path C2 pass; six software/13 source identities verify.
   - [x] Reconcile the owner-supplied NO-GO findings with explicit dispositions and preserved verdicts at 4012f568; exact author launch metadata remains unanswered, no fresh consensus claimed.
   - [ ] Fresh independent code consensus and triggering-merge acceptance remain open; module/live operation/security qualification and remote CI are not inferred.
+- [ ] **Lot 11 — Resolve draft PR image-entrypoint CI regression.**
+  - [x] Reproduce run 38305299067 locally with `make k8s-validate ENV=test-annotations-host`; the checker accepts all 20 entries and only the stale 18-entry assertion fails.
+  - [x] Align the expected inventory with both guarded operator scripts; all 39 hermetic cases, offline K8s render and branch/scope checks pass.
+  - [ ] Push the authorized draft branch update and verify remote CI on its full head SHA; preserve draft and owner merge gate.
