@@ -17,4 +17,5 @@ annotations-test: annotations-contract-check
 
 annotations-retire-empty:
 	@case "$(ENV)" in test-*|e2e-*) ;; *) echo 'Use an isolated test environment for this qualification target'; exit 1;; esac
-	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T api npm run annotations:retire-empty --workspace=api
+	@test -n "$(CLOSED_WINDOW_REF)" || { echo 'Pass CLOSED_WINDOW_REF=<authorized-cutover-reference>'; exit 1; }
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm -T api npm run annotations:retire-empty --workspace=api -- --closed-window-ref="$(CLOSED_WINDOW_REF)"
