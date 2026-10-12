@@ -88,9 +88,9 @@
   - [x] Package catalog-only 0009 attestation with checks on columns, constraints and indexes; native/extension/attestation receipts commit together under the same bounded lock.
   - [x] Qualify step rollback, retry, concurrent migration, and synthetic database restoration before/after retirement; 34 scoped tests pass.
   - [x] Qualify the extended host schema and assignment history in 36 integration/retired-route tests; repeatable assertions bind the new membership UUID, preserving prior audit history.
-- [ ] **Lot 9 — Complete immo-owned synthetic preparation and contract receipt.**
+- [x] **Lot 9 — Complete immo-owned synthetic preparation and contract receipt.**
   - [x] Preserve frozen historical bytes for preparation without granting exact-context review through the canonical resolver.
-  - [ ] Retain and acknowledge the exact frozen manifest, receipt and erratum; replay the entire vector corpus.
+  - [x] Retain and acknowledge the exact frozen manifest, receipt and erratum; replay the entire vector corpus.
   - [x] Retain the exact frozen manifest/receipt/erratum, acknowledge their digests and preserve the producer reserves and immo D4 authority.
   - [x] Replay all 11 record, 6 canonical, 8 geometry and 12 rejection vectors; all 50 host/contract unit tests pass.
   - [x] Correct host capacity/error/identity/evidence boundaries and retain assignment/resource history.
@@ -108,4 +108,7 @@
   - [x] Implement pre-copy deployment fence bound to an exact operation receipt; suspend ordinary restore and image-only rollback pending canonical recovery qualification.
   - [x] Block ordinary promotion during unqualified adoption, incompatible rollback and preprod restore before their first mutation/copy; a refused restore cannot execute its always() unquiesce path.
   - [x] Document operator entrypoints, merge/deployment prerequisites, remaining immo and module acceptance separately; no live database/catalog/arming proof is inferred.
-  - [ ] Run current scoped/full gates, image smoke, scope checks and independent review; report any external gate accurately.
+  - [x] Default make test passes 5,629 tests (API 2,302, UI 1,624, MCP/domain/scoring/sources 64/289/57/1,293); no worker/timeout override. Final extra catalog guard passes the 36-test scoped integration campaign.
+  - [x] Current quality/build/image smoke, exact reconstruction, four operation guards and actual-path C2 pass; six software/13 source identities verify.
+  - [x] Reconcile the owner-supplied NO-GO findings with explicit dispositions and preserved verdicts at 4012f568; exact author launch metadata remains unanswered, no fresh consensus claimed.
+  - [ ] Fresh independent code consensus and triggering-merge acceptance remain open; module/live operation/security qualification and remote CI are not inferred.
