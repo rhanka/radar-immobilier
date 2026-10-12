@@ -25,6 +25,10 @@
     "@sentropic/geo-map-engine": {
       "@sentropic/geo-core": "0.6.1"
     },
+    "@sentropic/geo-ui-svelte": {
+      "@sentropic/geo-core": "0.6.1"
+    },
+    "maplibre-gl": "6.4.1",
     "officeparser": {
       "pdfjs-dist": "npm:empty-npm-package@1.0.0"
     },
