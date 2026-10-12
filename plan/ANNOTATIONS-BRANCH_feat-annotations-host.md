@@ -51,6 +51,7 @@
   - [x] Implement shared-contract host ports and Postgres assignment reads.
   - [x] Install assignment/resource schema and qualify revocation/version denials.
 - [x] **Lot 3 — Compose the canonical module and prepare synthetic Steve units.**
+  - [x] Verify every M1 canonical/hash vector, deterministic retry and faithful provenance.
 - [ ] **Lot 4 — Remove legacy domain/API/UI/MCP consumers and adapt retained tests.**
   - [x] Remove domain note contracts, Drizzle exports and dormant MCP note scope.
   - [x] Remove API note commands and qualify endpoint retirement.
