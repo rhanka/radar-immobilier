@@ -4,6 +4,7 @@ import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
 import { loadGeoKeyIndex } from "./services/sources/document-resolver.js";
+import { PgAnnotationHostRepository } from "./services/annotations/pg-host-repository.js";
 import {
   createObjectStore,
   getGeoDocumentsReader,
@@ -69,6 +70,16 @@ const app = createApp({
   db: dbHandle.db,
   auth,
   tem,
+  annotations: {
+    repository: new PgAnnotationHostRepository(dbHandle.pool),
+    approvedPrincipal: async (sub) => {
+      const result = await dbHandle.pool.query(
+        "SELECT 1 FROM account_users WHERE sub = $1 AND status = 'approved' LIMIT 1", [sub],
+      );
+      return result.rows.length === 1;
+    },
+    ...(auth.enabled ? { sessionSecret: auth.sessionSecret } : {}),
+  },
 });
 
 // Ensure the raw-metadata bucket exists before serving RECUEIL collect requests.

@@ -28,6 +28,7 @@
 - [x] ANNOTATIONS-D3: both independent design reviews reconciled in the spec; source-version, authentication and receipt gaps remain explicit M3 qualification requirements.
 - [x] ANNOTATIONS-EX1: whole-file legacy deletions and immutable software archives may exceed 150 diff lines where splitting would retain broken partial artifacts; isolate each removal/receipt, preserve the source history, and roll back by reverting that commit.
 - [x] ANNOTATIONS-EX2: allow `api/src/index.ts` and `api/src/db/{host-migrations,migration-assets,retire-legacy-notes}.ts` for required production composition and guarded installation; no live operation, rollback by reverting these host changes.
+- [x] ANNOTATIONS-EX3: allow retirement CLI and `api/Dockerfile` to ship the exact contract archive and guard entrypoint; no image promotion, rollback by reverting those files.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch; sequential writes; independent design reviewers read only.
