@@ -698,7 +698,7 @@
         <button
           type="button"
           aria-label="Actualiser"
-          class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          class="rounded-sm p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
           on:click={() => { if (selectedEvalCity) selectEvalCity(selectedEvalCity); }}
           disabled={isLoadingEval}
         >
@@ -863,7 +863,7 @@
 
     <!-- ─── Panneau côte à côte : Zonage + Lots ───────────────────────────── -->
     {#if selectedEvalCity}
-      <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div class="rounded-xl border border-slate-200 bg-white shadow-xs overflow-hidden">
         <!-- En-tête ville avec résumé -->
         <div class="border-b border-slate-100 px-4 py-3 flex items-center justify-between bg-teal-50">
           <div>
@@ -926,7 +926,7 @@
                   </span>
                   <button
                     type="button"
-                    class="rounded p-1 text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-700"
+                    class="rounded-sm p-1 text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-700"
                     on:click={reloadZonage}
                     aria-label="Recharger les changements de zonage"
                     title="Recharger"
@@ -1014,7 +1014,7 @@
                   </span>
                   <button
                     type="button"
-                    class="rounded p-1 text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-700"
+                    class="rounded-sm p-1 text-slate-400 transition-colors hover:bg-amber-50 hover:text-amber-700"
                     on:click={reloadLots}
                     aria-label="Recharger les lots"
                     title="Recharger"
@@ -1298,7 +1298,7 @@
       </div>
     {:else}
       <!-- En-tête signal -->
-      <div class="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+      <div class="rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-xs">
         <div class="flex items-center justify-between gap-3 flex-wrap">
           <div>
             <h2 class="text-base font-semibold text-slate-900">
@@ -1330,7 +1330,7 @@
 
       {#if evalAvailable}
         <!-- Grille d'évaluation (5 axes) -->
-        <div class="rounded-xl border border-teal-200 bg-white shadow-sm overflow-hidden">
+        <div class="rounded-xl border border-teal-200 bg-white shadow-xs overflow-hidden">
           <div class="border-b border-teal-100 px-4 py-3 bg-teal-50 flex items-center gap-2">
             <BarChart3 class="h-4 w-4 text-teal-600" aria-hidden="true" />
             <span class="text-sm font-semibold text-teal-900">Grille d'évaluation /100</span>
@@ -1400,7 +1400,7 @@
         />
 
       {:else}
-        <div class="rounded-xl border border-slate-100 bg-white shadow-sm p-6">
+        <div class="rounded-xl border border-slate-100 bg-white shadow-xs p-6">
           <div class="flex items-start gap-3">
             <Info class="h-5 w-5 shrink-0 mt-0.5 text-slate-400" aria-hidden="true" />
             <div>
