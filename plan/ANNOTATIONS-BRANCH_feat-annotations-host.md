@@ -12,24 +12,30 @@
 - [x] Ports: API 8897, UI 5397, mail UI 1197, PG 5597, S3 9197, Obscura 9297, SMTP 1097.
 
 ## Branch Scope Boundaries (MANDATORY)
-- [x] Allowed Paths: `api/src/services/annotations/**`, `api/src/routes/annotations*`, `api/src/app.ts`, `api/annotations-host.mk`.
-- [x] Allowed Paths: `api/src/db/{schema,migrate}.ts`, `api/src/db/scripts/backfill-0009-tracking.ts`, `api/src/services/prospect/marks-service.ts`, `api/src/routes/prospect-marks*`.
-- [x] Allowed Paths: `api/tests/**`, `api/drizzle/0014_annotations_host.sql`, `api/drizzle/meta/_journal.json`.
-- [x] Allowed Paths: `packages/radar-domain/src/**`, `packages/immo-mcp/{src/auth-context.ts,README.md}`.
-- [x] Allowed Paths: legacy `ui/src/lib/collab/**`, `ui/src/lib/components/collab/**`, prospect client and tests, lot/signal panels and tests, `ui/e2e-qa/**`.
-- [x] Allowed Paths: `api/package.json`, `package-lock.json`, `vendor/comments-m1/**`, `docs/spec/SPEC_EVOL_ANNOTATIONS_HOST.md`, this plan.
-- [x] Forbidden Paths: `Makefile`, `docker-compose*.yml`, `rules/**`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, other branch plans, other repositories.
-- [x] Conditional Paths: deployment/restore/docs prescriptions only after an evidenced blocking need.
+- [x] **Allowed Paths (implementation scope)**:
+  - [x] `api/src/services/annotations/**`, `api/src/routes/annotations*`, `api/src/app.ts`, `api/src/index.ts`, `api/annotations-host.mk`, `api/Dockerfile`.
+  - [x] `api/src/db/**`, `api/src/services/prospect/marks-service.ts`, `api/src/routes/prospect-marks*`.
+  - [x] `api/tests/**`, `api/drizzle/0014_annotations_host.sql`, `api/drizzle/meta/_journal.json`.
+  - [x] `packages/radar-domain/src/**`, `packages/immo-mcp/src/auth-context.ts`, `packages/immo-mcp/README.md`.
+  - [x] `ui/src/lib/collab/**`, `ui/src/lib/components/collab/**`, `ui/src/lib/prospect/prospect-marks-client*`.
+  - [x] `ui/src/lib/components/maps/LotFichePanel*`, `ui/src/lib/components/maps/SignauxSelPanel*`, `ui/e2e-qa/**`.
+  - [x] `api/package.json`, `package-lock.json`, `vendor/comments-m1/**`, `docs/spec/SPEC_EVOL_ANNOTATIONS_HOST.md`, `docs/spec/ANNOTATIONS_ERADICATION.md`, `docs/spec/ANNOTATIONS_HOST_REVIEW.md`, `plan/ANNOTATIONS-BRANCH_feat-annotations-host.md`.
+  - [x] `docs/spec/SPEC_CONTRAT_ANCRE_ANNOTATIONS_v1.md`, `docs/spec/SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`, `docs/spec/SPEC_CONSOLIDATED_2026-07.md`.
+  - [x] `docs/spec/reports/wp4-produit-coverage.md`, `docs/spec/reports/wp5-plateforme.md`, `docs/spec/mcp/immo-mcp-provider-v0.md`.
+- [x] **Forbidden Paths (must not change)**:
+  - [x] `Makefile`, `docker-compose*.yml`, `rules/**`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, other branch plans, other repositories.
+- [x] **Conditional Paths**:
+  - [x] `.github/workflows/**`, `deploy/**` only after an evidenced blocking need and explicit exception.
 - [x] Exceptions require rationale, impact and rollback in Feedback Loop.
 
 ## Feedback Loop
 - [x] ANNOTATIONS-D1: latest owner decision accepts M1 without waiting for formal freeze; cluster-mesh owns storage/API.
 - [x] ANNOTATIONS-D2: M1 declares but does not deliver M2/M3 runtime; synthetic seams never enable a production fallback.
 - [x] ANNOTATIONS-D3: both independent design reviews reconciled in the spec; source-version, authentication and receipt gaps remain explicit M3 qualification requirements.
-- [x] ANNOTATIONS-EX1: complete legacy consumer removals and immutable software artifacts may exceed 150 diff lines where splitting would retain broken partial artifacts; isolate each removal/receipt, preserve the source history, and roll back by reverting that commit.
-- [x] ANNOTATIONS-EX2: allow `api/src/index.ts` and `api/src/db/{host-migrations,migration-assets,retire-legacy-notes}.ts` for required production composition and guarded installation; no live operation, rollback by reverting these host changes.
-- [x] ANNOTATIONS-EX3: allow retirement CLI and `api/Dockerfile` to ship the exact contract archive and guard entrypoint; no image promotion, rollback by reverting those files.
-- [x] ANNOTATIONS-EX4: allow the eradication inventory and supersession notices in the six former annotation/MCP specs and reports; preserve owner quotations/history, rollback by reverting the notices.
+- [x] BR1001-EX1: complete legacy consumer removals and immutable software artifacts may exceed 150 diff lines where splitting would retain broken partial artifacts; isolate each removal/receipt, preserve the source history, and roll back by reverting that commit.
+- [x] BR1001-EX2: allow `api/src/index.ts` and `api/src/db/{host-migrations,migration-assets,retire-legacy-notes}.ts` for required production composition and guarded installation; no live operation, rollback by reverting these host changes.
+- [x] BR1001-EX3: allow retirement CLI and `api/Dockerfile` to ship the exact contract archive and guard entrypoint; no image promotion, rollback by reverting those files.
+- [x] BR1001-EX4: allow the eradication inventory and supersession notices in the six former annotation/MCP specs and reports; preserve owner quotations/history, rollback by reverting the notices.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch; sequential writes; independent design reviewers read only.
@@ -38,16 +44,17 @@
 - [x] Root UAT remains unchanged; operational adoption requires integrated module qualification.
 
 ## Plan / Todo (lot-based)
-- [x] Lot 0 — Read rules, reference specs, owner decisions and exact M1 surfaces.
-- [x] Lot 1 — Reconcile independent design reviews and pin the shared contract.
-- [ ] Lot 2 — Implement explicit host membership, capabilities and resource resolver.
+- [x] **Lot 0 — Read rules, reference specs, owner decisions and exact M1 surfaces.**
+- [x] **Lot 1 — Reconcile independent design reviews and pin the shared contract.**
+- [ ] **Lot 2 — Implement explicit host membership, capabilities and resource resolver.**
   - [x] Implement shared-contract host ports and Postgres assignment reads.
   - [ ] Install assignment/resource schema and qualify revocation/version denials.
-- [x] Lot 3 — Compose the canonical module and prepare synthetic Steve units.
-- [ ] Lot 4 — Remove legacy domain/API/UI/MCP consumers and adapt retained tests.
+- [x] **Lot 3 — Compose the canonical module and prepare synthetic Steve units.**
+- [ ] **Lot 4 — Remove legacy domain/API/UI/MCP consumers and adapt retained tests.**
   - [x] Remove domain note contracts, Drizzle exports and dormant MCP note scope.
   - [x] Remove API note commands and qualify endpoint retirement.
   - [ ] Delete UI clients, subscriptions, components and mounts; preserve marks.
-- [ ] Lot 5 — Guard migration/retirement and document operational eradication.
-- [ ] Lot 6 — Run scoped tests, static checks, build and independent review.
-- [ ] Lot 7 — Commit selective atomic changes and provide evidence plus bounded M2/M3 handoff.
+- [ ] **Lot 5 — Guard migration/retirement and document operational eradication.**
+  - [x] Account for every historical SQL and the known 0009 journal omission.
+- [ ] **Lot 6 — Run scoped tests, static checks, build and independent review.**
+- [ ] **Lot 7 — Commit selective atomic changes and provide evidence plus bounded M2/M3 handoff.**
