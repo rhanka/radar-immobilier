@@ -23,11 +23,13 @@ export interface AnnotationHostRepository {
 export function snapshotResource(input: {
   scope: CanonicalScope; namespace: string; citySlug: string;
   kind: string; nativeId: string; sourceVersion: string;
+  nativeIdentityEvidence?: string;
 }): ResourceRef {
   if (!isCanonicalScope(input.scope) ||
       [input.namespace, input.citySlug, input.kind, input.nativeId, input.sourceVersion]
         .some((s) => typeof s !== "string" || s.length === 0) ||
-      (input.namespace === "immo.graph" && input.nativeId.startsWith("gn-"))) {
+      (input.namespace === "immo.graph" && (input.nativeId.startsWith("gn-") ||
+        (/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(input.nativeId) && !input.nativeIdentityEvidence?.trim())))) {
     throw new Error("A qualified native resource identity and version are required");
   }
   return { scope: input.scope, namespace: input.namespace, kind: input.kind,
@@ -44,7 +46,8 @@ export function createAnnotationHostPorts(repository: AnnotationHostRepository) 
     if (resources.length === 0) return "unavailable";
     if (resources.length !== 1) return "unresolved";
     const resource = resources[0]!;
-    if (!resource.available || resource.currentDigest === null) return "unavailable";
+    if (!resource.available) return "unavailable";
+    if (resource.currentDigest === null) return "unresolved";
     return resource.frozenDigest === resource.currentDigest ? "exact" : "source-changed";
   }
   const capabilities: CapabilityCheckPort = {

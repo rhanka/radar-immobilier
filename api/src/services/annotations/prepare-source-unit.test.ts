@@ -52,6 +52,17 @@ describe("synthetic source preparation against exact M1", () => {
     expect(prepared.records.map((r) => r.kind)).toEqual(["annotation-revision"]);
   });
 
+  it("should preserve an unknown historical binding without making it reviewable", async () => {
+    const historical = { ...resource, namespace: "immo.history", kind: "historical-source" };
+    const source = { variant: "unknown" as const, classification: "historical-snapshot-unavailable" };
+    const prepared = await prepareSyntheticSourceUnit({ ...input, primary: { resource: historical, source } },
+      registration, host(), SYNTHETIC_CAPACITY);
+    const structure = prepared.records[0]!;
+    if (structure.kind !== "thread-structure-revision") throw new Error("Unexpected candidate");
+    expect(structure.primary.source).toEqual(source);
+    expect(await host().resolveBinding(registration.principal, structure.primary)).toBe("unresolved");
+  });
+
   it("should reject real data, missing access, unknown bindings and excessive bodies without truncation", async () => {
     await expect(prepareSyntheticSourceUnit({ ...input, dataClass: "real" } as unknown as SyntheticSourceContribution,
       registration, host(), SYNTHETIC_CAPACITY)).rejects.toThrow(/synthetic/);
