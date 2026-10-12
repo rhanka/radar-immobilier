@@ -35,6 +35,8 @@ Display zones and lots once data and the MapLibre style are ready, in either arr
 - [x] Lifecycle verification: 27 tests pass across fallback, style-load recovery and basemap modes after the fix; no unhandled errors. MapLibre source confirms `style.load` follows `_loaded=true`, while `isStyleLoaded()` also waits for sources/tiles.
 - [x] Integration boundary prepared: the MapLibre double stores painted source data and rejects premature or duplicate sources/layers; the real map and loader components will be mounted together.
 - [x] Three integration tests pass: data before delayed style, progressive pages after style, and retry after a real request error. Workspace typecheck passes (zero errors).
+- [x] Integration assertions verify stable visible counters (Zones 1 / Lots 2), progressive source updates and both zones/lots arriving after style readiness. Full-workspace lint passes.
+- [ ] Attention — harness peer review: automatic approval review rejected the first `h2a_run` for code disclosure to the external model gateway without explicit destination authorization; second leg not launched, no consensus verdict. Evidence: ignored `tmp/856-review/review.md`; owner authorization required for peer review.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch**: one local map lifecycle correction; regression tests use the real Svelte components and a MapLibre boundary double.
@@ -57,7 +59,7 @@ Display zones and lots once data and the MapLibre style are ready, in either arr
   - [x] Lot gate: scoped map lifecycle tests.
 - [ ] **Lot 2 — Verify complete geo loading behavior**
   - [x] Cover both data/style arrival orders using the real SignauxMapView and GeoCityMapBase.
-  - [ ] Verify pagination, retry, stable counters and no false unavailable messages.
+  - [x] Verify pagination, retry, stable counters and no false unavailable messages.
   - [ ] Lot gate: UI suite, typecheck, lint and production UI build.
   - [ ] Harness branch/scope verification and review evidence.
 - [ ] **Lot 3 — Reviewable delivery**

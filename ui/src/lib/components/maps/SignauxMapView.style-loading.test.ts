@@ -65,6 +65,10 @@ function expectSettled(): void {
   expect(screen.queryByText("Chargement des lots…")).toBeNull();
   expect(screen.queryByText("Zones indisponibles.")).toBeNull();
   expect(screen.queryByText("Lots indisponibles.")).toBeNull();
+  for (const [label, count] of [["Zones", 1], ["Lots", 2]] as const) {
+    const summary = screen.getByText(label, { selector: "summary span" }).closest("summary");
+    expect(summary?.textContent?.replace(/\s+/g, " ").trim()).toBe(`${label} ${count}`);
+  }
   const map = styleLoadingMaps[0];
   expect((map.sources.get("selected-zones")!.data as GeoZonesResponse["featureCollection"]).features).toHaveLength(1);
   expect((map.sources.get("selected-lots")!.data as LotsResponse["featureCollection"]).features).toHaveLength(2);
@@ -99,6 +103,10 @@ describe("SignauxMapView with the real map component and delayed style", () => {
 
   it("should paint successive lot pages when the style arrives before the data", async () => {
     let publish!: (count: number) => void;
+    let publishZones!: () => void;
+    vi.mocked(loadSignauxZones).mockImplementationOnce(() => new Promise((resolve) => {
+      publishZones = () => resolve({ tier: "collection", response: zones });
+    }));
     vi.mocked(fetchAllLots).mockImplementationOnce((_city, opts = {}) => new Promise((resolve) => {
       publish = (count) => { opts.onPage?.(lots(count), count - 1); if (count === 2) resolve(lots()); };
     }));
@@ -106,7 +114,9 @@ describe("SignauxMapView with the real map component and delayed style", () => {
     await flush();
     styleLoadingMaps[0].finishStyle();
     await flush();
+    expect(screen.getAllByText("Chargement des zones…").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Chargement des lots…").length).toBeGreaterThan(0);
+    publishZones();
     publish(1);
     await flush();
     expect((styleLoadingMaps[0].sources.get("selected-lots")!.data as LotsResponse["featureCollection"]).features).toHaveLength(1);
