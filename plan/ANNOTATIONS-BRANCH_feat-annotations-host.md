@@ -45,6 +45,7 @@
 - [x] BR1001-EX6: permit the Steve report supersession notice and preparation spec to close the inventory and retain immo-owned IM-1/IM-2 work; preserve historic decisions, rollback by reverting the notices/preparation changes.
 - [x] BR1001-EX7: the required complete immutable installation lock fills resolved/integrity metadata for 710 existing exact-version entries and exceeds 150 lines as one generated artifact; no versions or dependency edges change, image install becomes npm ci, rollback by reverting this software-qualification commit before adoption.
 - [x] BR1001-EX8: allow CI wiring of the new offline operation/software gates and the corrected migration-summary literals in the graph spec; these verify the evidenced review fixes, no environment activation, rollback by reverting these verification/documentation hunks.
+- [x] ANNOTATIONS-D6: automatic approval review rejected the public branch push because the request authorized local implementation, not this exact public destination/payload; no remote write occurred and no bypass was attempted. Owner approval is required for push/draft PR; remote CI remains pending.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch; sequential writes; independent design reviewers read only.

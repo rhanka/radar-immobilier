@@ -104,3 +104,11 @@ or treating incoming reports as fresh consensus on these bytes.
 Operational adoption separately requires the qualified cluster-mesh M2/M3 module,
 typed import/readback receipts, real assignments and Farid D5/D6, as detailed in
 [the eradication handoff](ANNOTATIONS_ERADICATION.md).
+
+## Remote publication status
+
+The attempted push was rejected by automatic approval review: local implementation
+authorization did not explicitly cover this exact public repository destination
+and code/documentation payload. No push or PR was created. The complete branch is
+committed locally; owner approval is needed before publishing it and starting
+remote PR CI. This refusal is preserved rather than bypassed through another tool.
