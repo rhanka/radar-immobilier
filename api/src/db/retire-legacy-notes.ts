@@ -31,6 +31,13 @@ export async function retireEmptyLegacyNotes(pool: pg.Pool,
     );
     let deletedCount = 0;
     if (catalog.rows[0]?.table_name) {
+      const existing = await client.query<{ receipt: string | null }>(
+        "SELECT to_regclass('drizzle.radar_legacy_retirement')::text AS receipt",
+      );
+      if (existing.rows[0]?.receipt &&
+          (await client.query("SELECT 1 FROM drizzle.radar_legacy_retirement WHERE id = 1")).rows.length > 0) {
+        throw new Error("Retired legacy catalogue was resurrected; refusing to reuse an old aggregate receipt");
+      }
       await client.query("LOCK TABLE prospect_notes IN ACCESS EXCLUSIVE MODE");
       const counts = await client.query<{ active: string; deleted: string }>(
         `SELECT count(*) FILTER (WHERE deleted_at IS NULL)::text AS active,
