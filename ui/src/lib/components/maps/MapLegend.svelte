@@ -45,7 +45,7 @@
     <ul class="mb-2 grid gap-1.5 sm:grid-cols-2" data-testid="legend-hierarchy">
       {#each hierarchy as entry (entry.label)}
         <li class="flex items-center gap-1.5 text-xs text-slate-600">
-          <span class="inline-block h-3 w-5 rounded-sm" style={`background:${entry.color}; opacity:0.72;`}></span>
+          <span class="inline-block h-3 w-5 rounded-xs" style={`background:${entry.color}; opacity:0.72;`}></span>
           {entry.label}
         </li>
       {/each}
@@ -55,7 +55,7 @@
   <ul class="grid gap-1.5 sm:grid-cols-2">
     {#each legend as entry (entry.label)}
       <li class="flex items-center gap-1.5 text-xs text-slate-600">
-        <span class="inline-block h-3 w-5 rounded-sm" style={`background:${entry.color}; opacity:0.65;`}></span>
+        <span class="inline-block h-3 w-5 rounded-xs" style={`background:${entry.color}; opacity:0.65;`}></span>
         {entry.label}
       </li>
     {/each}

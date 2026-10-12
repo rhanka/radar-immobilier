@@ -114,7 +114,7 @@
               type="button"
               class={`w-full rounded-md border px-3 py-2 text-left text-sm transition ${
                 activeScoreType === type.id
-                  ? "border-teal-600 bg-teal-600 text-white shadow-sm"
+                  ? "border-teal-600 bg-teal-600 text-white shadow-xs"
                   : "border-slate-200 bg-white text-slate-700 hover:border-teal-400 hover:bg-slate-50"
               }`}
               aria-pressed={activeScoreType === type.id}
@@ -161,7 +161,7 @@
         />
       </div>
 
-      <div class="mb-4 rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm">
+      <div class="mb-4 rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-xs">
         <p class="text-sm text-slate-600">
           Chaque signal recoit une valeur /10 selon son <strong>TYPE</strong> (priorite reglementaire),
           affichee avec une confiance. La valeur et la confiance sont affichees separement et ne sont jamais multipliees.
@@ -214,7 +214,7 @@
         </div>
       </Card>
 
-      <div class="mt-4 rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm">
+      <div class="mt-4 rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-xs">
         <p class="text-xs text-slate-500">
           <strong class="text-slate-700">Lecture :</strong>
           Un signal de type "Zonage residentiel" a une valeur de priorite de 10/10 independamment de sa confiance.
@@ -237,7 +237,7 @@
       </div>
 
       <!-- ── Poids des axes d'abord (pleine largeur, vue d'ensemble) ──────── -->
-      <div class="mb-6 rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-sm">
+      <div class="mb-6 rounded-lg border border-slate-200 bg-white px-5 py-4 shadow-xs">
         <h2 class="mb-3 text-sm font-semibold text-slate-950">
           Poids des axes (V1) : vue d'ensemble du score /100
         </h2>
@@ -318,7 +318,7 @@
                 </div>
                 {#each LEVELS as lvl}
                   <div class="flex items-start gap-3 px-4 py-2.5">
-                    <span class="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded bg-slate-100 text-xs font-bold text-slate-600">
+                    <span class="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-sm bg-slate-100 text-xs font-bold text-slate-600">
                       {lvl}
                     </span>
                     <label class="sr-only" for={`grille-${row.axis}-${lvl}`}>
@@ -326,7 +326,7 @@
                     </label>
                     <textarea
                       id={`grille-${row.axis}-${lvl}`}
-                      class="min-h-[3.25rem] w-full resize-y rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm leading-5 text-slate-700 shadow-sm focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300"
+                      class="min-h-[3.25rem] w-full resize-y rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-sm leading-5 text-slate-700 shadow-xs focus:border-teal-400 focus:outline-hidden focus:ring-1 focus:ring-teal-300"
                       bind:value={editableLevels[row.axis][lvl]}
                       rows="2"
                     ></textarea>
@@ -402,7 +402,7 @@
                         >
                           {#snippet trigger()}
                             <div
-                              class={`rounded border px-3 py-2 cursor-default ${
+                              class={`rounded-sm border px-3 py-2 cursor-default ${
                                 axisScore.availability === "non-disponible"
                                   ? "border-slate-200 bg-slate-50"
                                   : "border-teal-100 bg-teal-50"
