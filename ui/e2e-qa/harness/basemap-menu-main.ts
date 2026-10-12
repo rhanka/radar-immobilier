@@ -8,11 +8,15 @@
 import "../../src/app.css";
 import { mount } from "svelte";
 import BasemapMenuHarness from "./BasemapMenuHarness.svelte";
+import { initializeMaplibreWorker } from "$lib/maps/maplibre-worker.js";
 
 const target = document.getElementById("harness-root");
 if (!target) throw new Error("Missing #harness-root");
 
-mount(BasemapMenuHarness, { target });
-
-const ready = document.getElementById("ready");
-if (ready) ready.textContent = "ready";
+async function bootstrap(): Promise<void> {
+  await initializeMaplibreWorker();
+  mount(BasemapMenuHarness, { target: target! });
+  const ready = document.getElementById("ready");
+  if (ready) ready.textContent = "ready";
+}
+void bootstrap();
