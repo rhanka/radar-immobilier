@@ -69,6 +69,8 @@
   - [x] Record publication authorization and commit boundaries; baseline diff/new-file hashes exactly match the reviewed snapshot before documentation updates.
   - [x] Commit verified dependency manifests and generated lockfile; exact implementation bytes remain identical to the reviewed snapshot.
   - [ ] Commit CSS-native Tailwind configuration and compatibility tests.
+    - [x] Commit CSS-native configuration, preserved palette and removed superseded v3 configuration.
+    - [ ] Commit the six CSS compatibility checks.
   - [ ] Commit component utility migrations in bounded groups.
   - [ ] Commit MapLibre startup, named exports and unit-test adaptations.
   - [ ] Commit worker hosting and browser acceptance harness.
