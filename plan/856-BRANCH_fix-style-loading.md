@@ -38,6 +38,7 @@ Display zones and lots once data and the MapLibre style are ready, in either arr
 - [x] Integration assertions verify stable visible counters (Zones 1 / Lots 2), progressive source updates and both zones/lots arriving after style readiness. Full-workspace lint passes.
 - [x] Final local gates: 1,661 UI tests pass (125 files; 10 existing TODO tests), workspace typecheck/lint, API+UI build and browser-runtime bundle smoke pass. Harness branch/scope checks pass; diff whitespace check passes. Commands use `make -f tmp/856-tools.mk` with the dedicated test environment.
 - [ ] Browser/UAT validation of the patched branch remains owner-controlled; the incident reports establish the production symptom, while the new component tests use a MapLibre boundary double rather than WebGL.
+- [x] Delivery: branch pushed; draft PR https://github.com/rhanka/radar-immobilier/pull/857 opened against `main`, linked to #856, with validation results and explicit review/UAT limits. No merge or deployment performed.
 - [ ] Attention — harness peer review: automatic approval review rejected the first `h2a_run` for code disclosure to the external model gateway without explicit destination authorization; second leg not launched, no consensus verdict. Evidence: ignored `tmp/856-review/review.md`; owner authorization required for peer review.
 
 ## Orchestration Mode (AI-selected)
@@ -67,7 +68,8 @@ Display zones and lots once data and the MapLibre style are ready, in either arr
   - [ ] Two-peer harness review: awaiting authorization after automatic launch refusal.
 - [ ] **Lot 3 — Reviewable delivery**
   - [x] Commit selectively in atomic changes, preserving test evidence in this plan.
-  - [ ] Push branch and open a draft PR; verify CI.
+  - [x] Push branch and open a draft PR.
+  - [ ] Verify GitHub CI green.
   - [ ] Present evidence, limitations and remaining owner validation.
 - [ ] **Lot 4 — Owner-controlled merge & close**
   - [ ] Owner authorizes merge/deployment.
