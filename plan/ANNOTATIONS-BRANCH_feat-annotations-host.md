@@ -60,10 +60,11 @@
   - [x] Remove lot/signal panel mounts and ambient annotation badges.
   - [x] Delete private UI note types, HTTP client and SSE subscription with their suites.
   - [x] Load lot marks independently of retired note endpoints.
-- [ ] **Lot 5 — Guard migration/retirement and document operational eradication.**
+- [x] **Lot 5 — Guard migration/retirement and document operational eradication.**
   - [x] Account for every historical SQL and the known 0009 journal omission.
   - [x] Serialize host DDL and guarded legacy retirement with checksum/predecessor checks.
   - [x] Wire migration entrypoint and standalone empty/deleted-only retirement CLI.
   - [x] Qualify fresh install, receipt drift, active-note refusal and aggregate-only deleted retirement.
+  - [x] Publish the exact eradication inventory, operational sequence and bounded M2/M3 handoff.
 - [ ] **Lot 6 — Run scoped tests, static checks, build and independent review.**
 - [ ] **Lot 7 — Commit selective atomic changes and provide evidence plus bounded M2/M3 handoff.**

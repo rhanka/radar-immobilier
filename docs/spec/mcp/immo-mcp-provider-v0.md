@@ -1,5 +1,7 @@
 # Immo MCP provider v0 — cadrage build
 
+> Annotation update (2026-10-12): legacy note storage, API, UI and note scopes in this document are superseded by [the shared annotations host](../SPEC_EVOL_ANNOTATIONS_HOST.md). The original text remains historical evidence; it does not authorize recreating the removed model or retaining deleted notes.
+
 Track item: `01KW1S7E7WQKPAVKJX18RZ8116`
 
 ## Objectif produit

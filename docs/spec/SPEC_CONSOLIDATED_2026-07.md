@@ -1,5 +1,7 @@
 # SPEC CONSOLIDÉE — Radar Immobilier (2026-07)
 
+> Annotation update (2026-10-12): legacy note storage, API, UI and note scopes in this document are superseded by [the shared annotations host](SPEC_EVOL_ANNOTATIONS_HOST.md). The original text remains historical evidence; it does not authorize recreating the removed model or retaining deleted notes.
+
 Statut : document interne de synthèse (état réel + architecture + dettes + feuille de route).
 Date : 2026-07-03.
 Auteur : volet Opus d'un double consensus (analyse parallèle Codex).
