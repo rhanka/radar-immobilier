@@ -16,6 +16,7 @@ const pool = new pg.Pool({ host: config.POSTGRES_HOST, port: config.POSTGRES_POR
   user: config.POSTGRES_USER, password: config.POSTGRES_PASSWORD, database });
 const folder = fileURLToPath(new URL("../../drizzle", import.meta.url));
 const assets = await loadMigrationAssets(folder);
+const cutover = { closedWindowRef: "synthetic-closed-window", migrationsFolder: folder };
 beforeAll(async () => { await admin.query('CREATE DATABASE "' + database + '"'); });
 afterAll(async () => {
   await pool.end();
@@ -67,16 +68,16 @@ describe("single host migration authority and legacy retirement", () => {
   it("should install schema before refusing active-note retirement and count deleted notes only", async () => {
     const author = await pool.query("INSERT INTO account_users(sub, status) VALUES ('synthetic-legacy-author', 'approved') RETURNING id");
     await pool.query("INSERT INTO prospect_notes(no_lot, city_slug, author_id, body) VALUES ('synthetic-lot', 'synthetic-city', $1, 'synthetic-active-body')", [author.rows[0].id]);
-    await expect(retireEmptyLegacyNotes(pool)).rejects.toThrow(/canonical conversion receipts/);
+    await expect(retireEmptyLegacyNotes(pool, cutover)).rejects.toThrow(/canonical conversion receipts/);
     expect((await pool.query("SELECT body FROM prospect_notes")).rows[0].body).toBe("synthetic-active-body");
     expect((await pool.query("SELECT to_regclass('annotation_workspaces') AS table_name")).rows[0].table_name).toBe("annotation_workspaces");
     await pool.query("UPDATE prospect_notes SET deleted_at = now()");
-    expect(await retireEmptyLegacyNotes(pool)).toBe(1);
+    expect(await retireEmptyLegacyNotes(pool, cutover)).toBe(1);
     expect((await pool.query("SELECT to_regclass('prospect_notes') AS table_name")).rows[0].table_name).toBeNull();
     expect((await pool.query("SELECT count(*)::int AS count FROM pg_type WHERE typname = 'prospect_note_target'")).rows[0].count).toBe(0);
     const columns = await pool.query("SELECT column_name FROM information_schema.columns WHERE table_schema = 'drizzle' AND table_name = 'radar_legacy_retirement'");
-    expect(columns.rows.map((r) => r.column_name)).toEqual(["id", "deleted_note_count", "retired_at"]);
-    expect(await retireEmptyLegacyNotes(pool)).toBe(1);
+    expect(columns.rows.map((r) => r.column_name)).toEqual(["id", "deleted_note_count", "closed_window_ref", "retired_at"]);
+    expect(await retireEmptyLegacyNotes(pool, cutover)).toBe(1);
     await runHostMigrations(pool, folder);
     expect((await pool.query("SELECT to_regclass('prospect_notes') AS table_name")).rows[0].table_name).toBeNull();
   });

@@ -10,12 +10,14 @@ import { loadConfig } from "../../src/config.js";
 import { createDb } from "../../src/db/client.js";
 import { runHostMigrations } from "../../src/db/host-migrations.js";
 import { loadMigrationAssets } from "../../src/db/migration-assets.js";
+import { retireEmptyLegacyNotes } from "../../src/db/retire-legacy-notes.js";
 
 const config = loadConfig();
 const { pool: admin } = createDb(config);
 const database = "annotations_adoption_" + process.pid;
-const pool = new pg.Pool({ host: config.POSTGRES_HOST, port: config.POSTGRES_PORT,
-  user: config.POSTGRES_USER, password: config.POSTGRES_PASSWORD, database });
+const poolOptions = { host: config.POSTGRES_HOST, port: config.POSTGRES_PORT,
+  user: config.POSTGRES_USER, password: config.POSTGRES_PASSWORD, database };
+let pool = new pg.Pool(poolOptions);
 const folder = fileURLToPath(new URL("../../drizzle", import.meta.url));
 const assets = await loadMigrationAssets(folder);
 let oldFolder: string;
@@ -39,6 +41,8 @@ afterAll(async () => {
 
 describe("adoption of native Drizzle history", () => {
   it("should refuse an unqualified manual 0009 without mutation", async () => {
+    await expect(retireEmptyLegacyNotes(pool, { closedWindowRef: "synthetic-window", migrationsFolder: folder }))
+      .rejects.toThrow(/Host schema/);
     const migration = assets.find((a) => a.tag.startsWith("0009"))!;
     for (const sql of migration.statements) await pool.query(sql);
     await expect(runHostMigrations(pool, folder)).rejects.toThrow(/explicit catalog attestation/);
@@ -64,5 +68,47 @@ describe("adoption of native Drizzle history", () => {
     expect(attestation.rows).toEqual([{ authority_ref: "synthetic-window", catalog_digest: expect.stringMatching(/^[a-f0-9]{64}$/) }]);
     await runHostMigrations(pool, folder);
     expect((await pool.query("SELECT count(*)::int AS n FROM drizzle.radar_migration_attestations")).rows[0].n).toBe(1);
+  });
+
+  it("should roll back only the failing DDL step and retry without repeating committed predecessors", async () => {
+    const failing = await mkdtemp(join(tmpdir(), "annotations-failing-step-"));
+    try {
+      await cp(folder, failing, { recursive: true });
+      const path = join(failing, "meta/_journal.json");
+      const journal = JSON.parse(await readFile(path, "utf8")) as { entries: unknown[] };
+      journal.entries.push({ idx: journal.entries.length, tag: "0015_synthetic_failure", when: 1_900_000_000_000 });
+      await writeFile(path, JSON.stringify(journal));
+      await writeFile(join(failing, "0015_synthetic_failure.sql"),
+        "CREATE TABLE synthetic_rolled_back(id int);--> statement-breakpoint SELECT missing_synthetic_function();");
+      await expect(runHostMigrations(pool, failing)).rejects.toThrow(/missing_synthetic_function/);
+      expect((await pool.query("SELECT to_regclass('synthetic_rolled_back') AS t")).rows[0].t).toBeNull();
+      expect((await pool.query("SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations")).rows[0].n).toBe(15);
+      await Promise.all([runHostMigrations(pool, folder), runHostMigrations(pool, folder)]);
+      expect((await pool.query("SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations")).rows[0].n).toBe(15);
+    } finally { await rm(failing, { recursive: true, force: true }); }
+  });
+
+  it("should keep a pre-adoption restore closed for explicit retirement and never recreate legacy after adoption", async () => {
+    const cutover = { closedWindowRef: "synthetic-closed-window", migrationsFolder: folder };
+    for (const phase of ["before", "after"]) {
+      const restoredName = database + "_restored";
+      await pool.end();
+      await admin.query('CREATE DATABASE "' + restoredName + '" TEMPLATE "' + database + '"');
+      pool = new pg.Pool(poolOptions);
+      const restored = new pg.Pool({ ...poolOptions, database: restoredName });
+      try {
+        await runHostMigrations(restored, folder);
+        const catalog = await restored.query("SELECT to_regclass('prospect_notes') AS t");
+        expect(catalog.rows[0].t).toBe(phase === "before" ? "prospect_notes" : null);
+        await expect(retireEmptyLegacyNotes(restored, { ...cutover, closedWindowRef: "" })).rejects.toThrow(/window/);
+        expect(await retireEmptyLegacyNotes(restored, cutover)).toBe(0);
+        await runHostMigrations(restored, folder);
+        expect((await restored.query("SELECT to_regclass('prospect_notes') AS t")).rows[0].t).toBeNull();
+      } finally {
+        await restored.end();
+        await admin.query('DROP DATABASE "' + restoredName + '"');
+      }
+      if (phase === "before") await retireEmptyLegacyNotes(pool, cutover);
+    }
   });
 });

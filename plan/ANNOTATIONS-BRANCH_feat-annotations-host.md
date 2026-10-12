@@ -79,10 +79,10 @@
 - [x] **Lot 7 — Commit selective atomic changes and provide evidence plus bounded M2/M3 handoff.**
 - [ ] **Lot 8 — Resolve migration and retirement blockers on synthetic restored databases.**
   - [x] Remove destructive retirement from ordinary migrations; regression runs the actual deployment entrypoint with an active synthetic note.
-  - [ ] Remove retirement from ordinary migrations; require the installed host schema and bounded locks for explicit retirement.
+  - [x] Remove retirement from ordinary migrations; explicit retirement requires a closed-window reference, verified 0014 receipt/catalog and five-second lock bounds.
   - [x] Ship controlled catalog attestation for manual 0009 under the migration lock; native Drizzle upgrade, divergent catalog and missing final receipt qualify in 32 scoped tests.
   - [x] Package catalog-only 0009 attestation with checks on columns, constraints and indexes; native/extension/attestation receipts commit together under the same bounded lock.
-  - [ ] Qualify step rollback, retry, concurrent migration, and restoration before/after retirement.
+  - [x] Qualify step rollback, retry, concurrent migration, and synthetic database restoration before/after retirement; 34 scoped tests pass.
 - [ ] **Lot 9 — Complete immo-owned synthetic preparation and contract receipt.**
   - [ ] Retain and acknowledge the exact frozen manifest, receipt and erratum; replay the entire vector corpus.
   - [ ] Correct host capacity/error/identity/evidence boundaries and retain assignment/resource history.
