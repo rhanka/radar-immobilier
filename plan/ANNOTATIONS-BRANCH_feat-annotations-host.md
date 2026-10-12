@@ -116,7 +116,7 @@
   - [x] Current quality/build/image smoke, exact reconstruction, four operation guards and actual-path C2 pass; six software/13 source identities verify.
   - [x] Reconcile the owner-supplied NO-GO findings with explicit dispositions and preserved verdicts at 4012f568; exact author launch metadata remains unanswered, no fresh consensus claimed.
   - [ ] Fresh independent code consensus and triggering-merge acceptance remain open; module/live operation/security qualification and remote CI are not inferred.
-- [ ] **Lot 11 — Resolve draft PR image-entrypoint CI regression.**
+- [x] **Lot 11 — Resolve draft PR image-entrypoint CI regression.**
   - [x] Reproduce run 38305299067 locally with `make k8s-validate ENV=test-annotations-host`; the checker accepts all 20 entries and only the stale 18-entry assertion fails.
   - [x] Align the expected inventory with both guarded operator scripts; all 39 hermetic cases, offline K8s render and branch/scope checks pass.
-  - [ ] Push the authorized draft branch update and verify remote CI on its full head SHA; preserve draft and owner merge gate.
+  - [x] Push the authorized draft branch update; CI run 38306524703 and repository policy pass on `c2427907cfb7fb0e6d57427530698c406b1269f3`, including all 5,629 tests. Preserve draft and owner merge gate.
