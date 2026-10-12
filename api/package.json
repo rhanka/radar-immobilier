@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "tsx src/db/migrate.ts"
+    "db:migrate": "tsx src/db/migrate.ts",
+    "annotations:retire-empty": "tsx src/db/scripts/retire-empty-legacy-notes.ts"
   },
   "dependencies": {
     "@sentropic/comments": "file:../vendor/comments-m1/sentropic-comments-0.3.0.tgz",
