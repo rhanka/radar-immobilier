@@ -57,5 +57,6 @@
 - [ ] **Lot 5 — Guard migration/retirement and document operational eradication.**
   - [x] Account for every historical SQL and the known 0009 journal omission.
   - [x] Serialize host DDL and guarded legacy retirement with checksum/predecessor checks.
+  - [x] Wire migration entrypoint and standalone empty/deleted-only retirement CLI.
 - [ ] **Lot 6 — Run scoped tests, static checks, build and independent review.**
 - [ ] **Lot 7 — Commit selective atomic changes and provide evidence plus bounded M2/M3 handoff.**

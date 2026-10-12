@@ -1,13 +1,14 @@
 import { writeFile } from "node:fs/promises";
 
-import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { runHostMigrations } from "./host-migrations.js";
+import { retireEmptyLegacyNotes } from "./retire-legacy-notes.js";
 import { createDb } from "./client.js";
 import { loadConfig } from "../config.js";
 import { createLogger } from "../logger.js";
 
 const config = loadConfig();
 const logger = createLogger(config.LOG_LEVEL);
-const { db, pool } = createDb(config);
+const { pool } = createDb(config);
 
 // Hand-authored migrations report their counts with RAISE NOTICE (e.g. 0013: deleted
 // NULL-city nodes and unplaced edges, GH #812). Every NOTICE is logged, and a bounded summary
@@ -29,17 +30,18 @@ async function writeSummary(summary: Record<string, unknown>): Promise<void> {
   await writeFile(TERMINATION_LOG, body).catch(() => undefined);
 }
 
-migrate(db, { migrationsFolder: "drizzle" })
-  .then(async () => {
+runHostMigrations(pool, "drizzle")
+  .then(() => retireEmptyLegacyNotes(pool))
+  .then(async (deletedNoteCount) => {
     logger.info("migrations applied");
-    await writeSummary({ status: "committed" });
+    await writeSummary({ status: "committed", deletedNoteCount });
     return pool.end();
   })
   .then(() => process.exit(0))
   .catch(async (err) => {
     logger.error({ err }, "migration failed");
     const cause = (err as { cause?: { message?: string } }).cause?.message;
-    await writeSummary({ status: "failed-rolled-back", error: String((err as Error).message ?? err).slice(0, 300), cause });
+    await writeSummary({ status: "failed-current-step-rolled-back", error: String((err as Error).message ?? err).slice(0, 300), cause });
     void pool.end();
     process.exit(1);
   });
