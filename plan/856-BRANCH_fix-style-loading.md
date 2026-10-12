@@ -33,6 +33,7 @@ Display zones and lots once data and the MapLibre style are ready, in either arr
 - [x] Evidence: the six-second fallback sets `mapReady` despite failed base-layer setup; lots pagination then reports the rendering exception as a fetch failure.
 - [x] Regression baseline: three new lifecycle cases fail on the original component (premature readiness, missing style-load setup, finalization after unmount); the three original cases pass.
 - [x] Lifecycle verification: 27 tests pass across fallback, style-load recovery and basemap modes after the fix; no unhandled errors. MapLibre source confirms `style.load` follows `_loaded=true`, while `isStyleLoaded()` also waits for sources/tiles.
+- [x] Integration boundary prepared: the MapLibre double stores painted source data and rejects premature or duplicate sources/layers; the real map and loader components will be mounted together.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch**: one local map lifecycle correction; regression tests use the real Svelte components and a MapLibre boundary double.
