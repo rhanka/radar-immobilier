@@ -243,6 +243,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Suspend incompatible restore before any copy or mutation
+        run: bash deploy/ci/annotations-guard.sh "$MODE"
+
       - name: Compute CONFIRM_EXPECTED (anti-rejeu = date du jour UTC) + auto-CONFIRM planifié
         env:
           EVENT_NAME: ${{ github.event_name }}
