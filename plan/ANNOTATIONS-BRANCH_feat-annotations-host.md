@@ -105,6 +105,6 @@
   - [x] Require complete immutable lock/archive identities, pin the build image, install only backend workspaces with npm ci and use the locked bundler; image build/operator smoke and all workspace quality gates pass.
 - [ ] **Lot 10 — Qualify operational guards and reconcile the reviews.**
   - [x] Implement pre-copy deployment fence bound to an exact operation receipt; suspend ordinary restore and image-only rollback pending canonical recovery qualification.
-  - [ ] Block ordinary promotion during unqualified adoption, incompatible rollback and preprod restore before their first mutation/copy.
+  - [x] Block ordinary promotion during unqualified adoption, incompatible rollback and preprod restore before their first mutation/copy; a refused restore cannot execute its always() unquiesce path.
   - [ ] Document operator entrypoints, merge/deployment prerequisites, remaining immo and module acceptance separately.
   - [ ] Run current scoped/full gates, image smoke, scope checks and independent review; report any external gate accurately.

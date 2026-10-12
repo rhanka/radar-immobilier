@@ -4,6 +4,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
+import process from 'node:process';
 
 const root = mkdtempSync(join(tmpdir(), 'annotations-guard-'));
 const trace = join(root, 'calls');
@@ -45,6 +46,8 @@ test('guards every release path, restore and automatic/manual rollback before mu
   }
   const restore = readFileSync('.github/workflows/bascule-preprod.yml', 'utf8');
   assert.ok(restore.indexOf('annotations-guard.sh "$MODE"') < restore.indexOf('- name: Compute CONFIRM_EXPECTED'));
+  const unquiesce = restore.slice(restore.indexOf('id: unquiesce'));
+  assert.match(unquiesce.split('run: node "$CLI" unquiesce')[0], /steps\.annotations_guard\.outcome == 'success'/);
   const rollback = readFileSync('deploy/ci/rollback-release.sh', 'utf8');
   assert.ok(rollback.indexOf('/annotations-guard.sh" rollback') < rollback.indexOf('for d in $DEPLOYMENTS'));
   assert.match(readFileSync('.github/workflows/rollback.yml', 'utf8'), /bash deploy\/ci\/rollback-release\.sh/);
