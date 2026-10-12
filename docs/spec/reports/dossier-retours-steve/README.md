@@ -1,5 +1,12 @@
 # Analyse des retours d'usage du 21 septembre 2026 : capitalisation des données annotées, vers de nouveaux critères de ciblage
 
+> **Annotation architecture superseded on 2026-10-12.** The dossier, standalone
+> render and Focus sources below are historical evidence. Their private-note,
+> in-place editing and UI-dependent import prescriptions are superseded by
+> [the annotations host specification](../../SPEC_EVOL_ANNOTATIONS_HOST.md) and
+> [the eradication plan](../../ANNOTATIONS_ERADICATION.md). Owner quotations and
+> business feedback remain unchanged; no old decision form reopens D1–D4.
+
 - Source : [DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md](DOSSIER_DECISION_RETOURS_STEVE_2026-10-03.md). Consolidation de deux dossiers indépendants ; la convergence point par point est en annexe A.
 - Rendu : [decision-focus.html](decision-focus.html), page h2a Focus autonome et hors ligne, construite par `focus/Makefile`.
 - Preuves : [preuves/](preuves/) (contrôle Chromium, captures, empreintes).
