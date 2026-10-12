@@ -15,7 +15,7 @@
   };
 </script>
 
-<section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+<section class="rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
   <div class="mb-3 flex items-center gap-2">
     <Info class="h-4 w-4 text-teal-700" aria-hidden="true" />
     <h1 class="text-sm font-semibold text-slate-950">Critères et acronymes</h1>
@@ -26,7 +26,7 @@
       <div class="group relative">
         <button
           type="button"
-          class="inline-flex h-8 items-center rounded-full border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-700 transition hover:border-teal-500 hover:bg-teal-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"
+          class="inline-flex h-8 items-center rounded-full border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-700 transition hover:border-teal-500 hover:bg-teal-50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-teal-700 focus-visible:ring-offset-2"
           aria-label={criterion.label}
           aria-expanded={activeCriterionId === criterion.id}
           aria-controls={`criterion-tooltip-${criterion.id}`}

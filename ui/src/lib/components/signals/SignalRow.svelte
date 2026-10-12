@@ -122,11 +122,11 @@
     .filter((s) => s.meta !== undefined) as Array<{ ref: string; meta: { label: string; url: string } }>;
 </script>
 
-<div class={`rounded-lg border bg-white shadow-sm transition ${isEcarte ? "border-slate-100 opacity-60" : "border-slate-200"}`}>
+<div class={`rounded-lg border bg-white shadow-xs transition ${isEcarte ? "border-slate-100 opacity-60" : "border-slate-200"}`}>
   <!-- En-tête de la carte : toujours visible (collapsed) -->
   <button
     type="button"
-    class="flex w-full items-center gap-4 px-4 py-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 rounded-lg"
+    class="flex w-full items-center gap-4 px-4 py-3 text-left focus:outline-hidden focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 rounded-lg"
     aria-expanded={expanded}
     on:click={toggle}
   >
@@ -219,7 +219,7 @@
                   href={src.meta.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="inline-flex items-center gap-1.5 text-sm text-teal-700 underline decoration-teal-300 hover:decoration-teal-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
+                  class="inline-flex items-center gap-1.5 text-sm text-teal-700 underline decoration-teal-300 hover:decoration-teal-600 focus:outline-hidden focus-visible:ring-2 focus-visible:ring-teal-500"
                 >
                   {src.meta.label}
                   <ExternalLink class="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
