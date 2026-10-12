@@ -68,6 +68,7 @@
   - [x] Publish the exact eradication inventory, operational sequence and bounded M2/M3 handoff.
 - [ ] **Lot 6 — Run scoped tests, static checks, build and independent review.**
   - [x] Host and PostgreSQL scoped tests, full API with four workers, full UI/packages pass.
+  - [x] Reconcile per-workspace totals from captured logs; 5,575 passing tests overall.
   - [x] Workspace typecheck/full lint, build, API image smoke, artifact reconstruction and C1/C2 pass.
   - [ ] Complementary code consensus: selection-failed; exact author model/effort are missing, no leg dispatched.
 - [x] **Lot 7 — Commit selective atomic changes and provide evidence plus bounded M2/M3 handoff.**

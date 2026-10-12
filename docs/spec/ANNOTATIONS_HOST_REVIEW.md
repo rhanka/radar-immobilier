@@ -25,7 +25,7 @@ data, deployment, root UAT checkout or remote team messages were changed.
 | PostgreSQL assignment/migration/retirement and retained route tests | 24 passed |
 | Full API, four workers, isolated test stack | 2,248 passed; 6 existing skips |
 | Full UI | 1,624 passed; 10 existing todos |
-| Domain / scoring / MCP / sources | 64 / 289 / 57 / 1,293 passed |
+| Domain / scoring / MCP / sources | 289 / 57 / 64 / 1,293 passed |
 | Workspace typecheck | Pass; seven Svelte warnings |
 | Changed-file and full workspace lint | Pass |
 | API/UI build and API production image build | Pass; M1 builders and retirement entrypoint load in image |
