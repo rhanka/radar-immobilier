@@ -97,7 +97,7 @@
   - [x] Qualify the corrected host boundaries on 13 unit tests, including absent capacity and unknown historical evidence.
   - [x] Retain immutable source snapshots and append-only assignment/version-link history; match the SQL capability CHECK with M1.
   - [x] Keep historical resources unresolved and deny review even with a permissive grant; only frozen source bytes permit candidate preparation.
-  - [ ] Prepare a complete synthetic workbook inventory/manifest and explicit map-category dispositions, without canonical writes.
+  - [x] Prepare the synthetic workbook inventory/manifest and explicit map-category dispositions, without canonical writes; real collector/export/domain matching remains immo-owned qualification.
   - [x] Inventory raw workbook bytes, native version-local cells/rows, formulas/cache/hidden metadata, coverage and source absences on synthetic fixtures.
   - [x] Decode a synthetic Google Sheets response with exact original-byte retention and explicit unavailable Drive sidecars; feedback mappings are qualified source text cells.
   - [x] Prepare every homogeneous contribution through M1 builders and a common import manifest; separate prepared/blocked counts, stable retry and no durable-success claim.

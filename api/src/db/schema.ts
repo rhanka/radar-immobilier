@@ -374,7 +374,7 @@ export const accountUserStatusEvents = pgTable(
 // ═══════════════════════════════════════════════════════════════════════════
 // Inc 1 — Marquage d'équipe Steve (SPEC_EVOL_INTEGRATION_CARTE_STEVE §4.1)
 //
-// Quatre tables :
+// Three retained prospect tables:
 //   prospect_marks              — marquages append-only par lot + dimension
 //   prospect_contacts           — couche CRM/PII séparée (Loi 25)
 //   prospect_contact_access_log — journal d'accès PII (Loi 25)
