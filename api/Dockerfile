@@ -36,6 +36,7 @@ COPY packages/radar-scoring/package.json packages/radar-scoring/
 COPY packages/radar-sources/package.json packages/radar-sources/
 COPY packages/immo-mcp/package.json packages/immo-mcp/
 COPY api/package.json api/
+COPY vendor/comments-m1/sentropic-comments-0.3.0.tgz vendor/comments-m1/
 RUN npm install --workspaces --include-workspace-root
 COPY packages/radar-domain packages/radar-domain
 COPY packages/radar-scoring packages/radar-scoring
@@ -69,6 +70,7 @@ RUN npm install --no-save esbuild@0.24.0 \
   "  entryPoints: [" \
   "    'api/src/index.ts'," \
   "    'api/src/db/migrate.ts'," \
+  "    'api/src/db/scripts/retire-empty-legacy-notes.ts'," \
   "    'api/src/db/scripts/backfill-0004-tracking.ts'," \
   "    'api/src/scripts/project-graph-from-s3.ts'," \
   "    'api/src/scripts/purge-avis-bylaws.ts'," \

@@ -29,6 +29,7 @@ import { sourceCoverageRoute } from "./routes/source-coverage.js";
 import { sourceConsistencyRoute } from "./routes/source-consistency.js";
 import { prospectMarksRoute } from "./routes/prospect-marks.js";
 import { documentsRoute, type DocumentsDeps } from "./routes/documents.js";
+import { annotationsRoute, type AnnotationsDeps } from "./routes/annotations.js";
 
 export type AppDeps = HealthDeps &
   SourcesDeps &
@@ -51,6 +52,8 @@ export type AppDeps = HealthDeps &
     authOptions?: AuthRouteOptions;
     /** Config Scaleway TEM optionnelle pour les emails d'invitation. */
     tem?: TemConfig;
+    /** Exact canonical cluster-mesh module and explicit immo host assignments. */
+    annotations?: AnnotationsDeps;
     /**
      * Seams de la couverture sources (source-coverage) : fetch injectable
      * (tests OFFLINE — jamais de réseau en unit), base OGC geo et TTL du cache
@@ -124,6 +127,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", signalsDetailRoute(deps));
   app.route("/", opportunitesRoute(deps));
   app.route("/", prospectMarksRoute(deps.auth?.enabled && deps.auth.sessionSecret ? { db: deps.db, sessionSecret: deps.auth.sessionSecret } : { db: deps.db }));
+  app.route("/api/v1/annotations", annotationsRoute(deps.annotations));
 
   app.get("/", (c) => c.json({ name: "radar-immobilier-api", status: "up" }));
 
