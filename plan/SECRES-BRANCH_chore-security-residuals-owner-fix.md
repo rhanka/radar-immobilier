@@ -71,11 +71,11 @@
   - [x] Commit CSS-native Tailwind configuration and compatibility tests.
     - [x] Commit CSS-native configuration, preserved palette and removed superseded v3 configuration.
     - [x] Commit the six CSS compatibility checks.
-  - [ ] Commit component utility migrations in bounded groups.
+  - [x] Commit component utility migrations in bounded groups.
     - [x] Commit signals and source review utility migrations.
     - [x] Commit map wrappers and opportunity views utility migrations.
     - [x] Commit shell and administration utility migrations.
-  - [ ] Commit MapLibre startup, named exports and unit-test adaptations.
+  - [x] Commit MapLibre startup, named exports and unit-test adaptations.
   - [ ] Commit worker hosting and browser acceptance harness.
   - [ ] Commit proven security-register resolutions and findings.
   - [ ] Push a clean descendant to the unchanged PR #854 remote branch.
