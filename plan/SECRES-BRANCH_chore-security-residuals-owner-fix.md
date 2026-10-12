@@ -81,8 +81,8 @@
     - [x] Commit real-engine/browser fixtures and browser assertions.
       - [x] Commit real-engine/native/provider fixtures and worker-ready entry points.
       - [x] Commit browser worker, attribution and remount assertions.
-  - [ ] Commit proven security-register resolutions and findings.
+  - [x] Commit proven security-register resolutions and findings.
     - [x] Commit MapLibre and Tailwind remediation evidence without accepting risk.
-    - [ ] Commit only the eleven proven resolved register rows; retain unsigned low residuals.
+    - [x] Commit only the eleven proven resolved register rows; retain unsigned low residuals.
   - [ ] Push a clean descendant to the unchanged PR #854 remote branch.
   - [ ] Verify new CI on the full pushed SHA and reconcile Opus/Fable technical reviews.
