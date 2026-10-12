@@ -1,23 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /**
- * RÉSILIENCE `load` — `mapReady` ne doit JAMAIS rester figé sur l'event `'load'`
- * de MapLibre. Sous flap réseau (ERR_NETWORK_CHANGED du navigateur partagé),
- * `'load'` peut ne JAMAIS fire (une requête que `map.loaded()` attend est
- * avortée) → l'overlay « Chargement de la carte… » resterait affiché
- * indéfiniment. Le socle pose donc un REPLI-timeout (`MAP_READY_FALLBACK_MS`)
- * qui force la finalisation (couches + `mapReady = true`) une SEULE fois.
- *
- * Ce test rend le VRAI `GeoCityMapBase` (maplibre-gl MOCKÉ — le composant est
- * sinon jamais monté en jsdom, cf. GeoCityMapBase.controls-responsive.test.ts)
- * et prouve, avec des timers factices :
- *   1. `'load'` ne fire pas → après 6 s l'overlay « Chargement… » disparaît ;
- *   2. `'load'` fire → finalisation UNE fois (pas de double `addSource`), et le
- *      repli est annulé (aucune seconde pose après avance des timers) ;
- *   3. `'load'` fire deux fois → garde d'idempotence (toujours un seul
- *      `addSource("cities-polygons")`).
- *
- * Pur : aucun WebGL, aucune API, aucun Docker — maplibre + le sélecteur de fond
- * satellite sont mockés, `fetch` est stubé (rejet → try/catch du composant).
+ * Real component, fake MapLibre and timers: readiness requires a loaded style,
+ * but must not wait for raster tiles or a missing map `load` event. The double
+ * rejects premature source/layer creation just like MapLibre. Finalization must
+ * remain idempotent and stop if the component unmounts during its asset fetch.
  */
 import { cleanup, render } from "@testing-library/svelte";
 import { tick } from "svelte";
@@ -29,8 +15,11 @@ const mapMocks = vi.hoisted(() => {
   const instances: FakeMap[] = [];
   class FakeMap {
     handlers = new Map<string, Array<(e?: any) => void>>();
-    addSource = vi.fn();
-    addLayer = vi.fn();
+    styleReady = true;
+    tilesReady = true;
+    isStyleLoaded = vi.fn(() => this.styleReady && this.tilesReady);
+    addSource = vi.fn(() => this.checkStyle());
+    addLayer = vi.fn(() => this.checkStyle());
     setPaintProperty = vi.fn();
     setLayoutProperty = vi.fn();
     moveLayer = vi.fn();
@@ -52,6 +41,9 @@ const mapMocks = vi.hoisted(() => {
     fitBounds = vi.fn();
     constructor(_options: unknown) {
       instances.push(this);
+    }
+    checkStyle(): void {
+      if (!this.styleReady) throw new Error("Style is not done loading.");
     }
     // Surcharge maplibre : on(type, handler) OU on(type, layer, handler).
     on(type: string, a: unknown, b?: unknown): void {
@@ -124,6 +116,73 @@ afterEach(() => {
 });
 
 describe("GeoCityMapBase — résilience mapReady (repli si `load` ne fire pas)", () => {
+  it("should wait for a delayed style after the fallback and finalize once without map load", async () => {
+    const onReady = vi.fn();
+    const { container } = render(GeoCityMapBase, {
+      props: { fillColorExpression: FILL_COLOR, onReady },
+    });
+    await flushMicrotasks();
+    const map = mapMocks.instances[0];
+    map.styleReady = false;
+    map.tilesReady = false;
+
+    await vi.advanceTimersByTimeAsync(6000);
+    await flushMicrotasks();
+    expect(overlayText(container)).toBe(true);
+    expect(map.addSource).not.toHaveBeenCalled();
+    expect(onReady).not.toHaveBeenCalled();
+
+    map.styleReady = true;
+    map.fire("style.load");
+    await flushMicrotasks();
+    expect(overlayText(container)).toBe(false);
+    expect(citiesSourceCalls(map)).toBe(1);
+    expect(onReady).toHaveBeenCalledTimes(1);
+    map.fire("load");
+    map.fire("style.load");
+    await flushMicrotasks();
+    expect(citiesSourceCalls(map)).toBe(1);
+    expect(onReady).toHaveBeenCalledTimes(1);
+  });
+
+  it("should finalize on style load while raster tiles are still pending", async () => {
+    const onReady = vi.fn();
+    const { container } = render(GeoCityMapBase, {
+      props: { fillColorExpression: FILL_COLOR, onReady },
+    });
+    await flushMicrotasks();
+    const map = mapMocks.instances[0];
+    map.tilesReady = false;
+    map.fire("style.load");
+    await flushMicrotasks();
+    expect(map.isStyleLoaded()).toBe(false);
+    expect(overlayText(container)).toBe(false);
+    expect(onReady).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(6000);
+    expect(citiesSourceCalls(map)).toBe(1);
+  });
+
+  it("should ignore boundary data received after unmount during finalization", async () => {
+    let finishFetch!: (value: { ok: boolean; json: () => Promise<unknown> }) => void;
+    vi.mocked(fetch).mockImplementationOnce(() => new Promise((resolve) => {
+      finishFetch = resolve as typeof finishFetch;
+    }));
+    const onReady = vi.fn();
+    const { unmount } = render(GeoCityMapBase, {
+      props: { fillColorExpression: FILL_COLOR, onReady },
+    });
+    await flushMicrotasks();
+    const map = mapMocks.instances[0];
+    map.fire("load");
+    await flushMicrotasks();
+    unmount();
+    finishFetch({ ok: true, json: async () => ({ type: "FeatureCollection", features: [] }) });
+    await flushMicrotasks();
+    expect(map.remove).toHaveBeenCalledTimes(1);
+    expect(map.addSource).not.toHaveBeenCalled();
+    expect(onReady).not.toHaveBeenCalled();
+  });
+
   it("REPLI : `load` jamais émis → après MAP_READY_FALLBACK_MS l'overlay « Chargement… » disparaît", async () => {
     const onReady = vi.fn();
     const { container } = render(GeoCityMapBase, {
