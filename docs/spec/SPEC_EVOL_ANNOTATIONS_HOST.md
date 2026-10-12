@@ -48,6 +48,28 @@ M1 is Sentropic commit `7b8e5daf022cc58819dfdfae43cd89a703a82f96`.
 - Fresh database migration and guarded upgrade/retirement; immutable SQL checksums,
   0009 gap and non-monotone journal recognized rather than silently skipped.
 
+## Independent design reconciliation
+
+Two blind read-only reviews covered contract correctness and eradication/security.
+Both permit synthetic host work and require M2/M3 before operational conversion.
+
+- Accepted: M1 resolver has no source-version argument. Immo uses explicitly
+  version-specific snapshot IDs and separately verifies source indicators. A new
+  snapshot is a new primary resource; moving to it needs the common linked
+  conversion, never an in-place annotation retargeting.
+- Accepted: bind capability/resolver calls to the authenticated OIDC subject and
+  require an existing approved account. M1 does not specify an authentication
+  context key; its real router must qualify this boundary at M3.
+- Accepted: schema installation and destructive retirement are separate phases
+  under one migration/cutover lock. No active-note retirement is enabled by M1:
+  the declared import DTO lacks a payload channel and its unit receipts do not
+  yet enumerate the canonical results required for reconciliation.
+- Accepted: freeze technical registration/execution inputs during preparation,
+  validate source indicators explicitly, and never equate synthetic builder
+  output with durable import success or receipt completeness.
+- Accepted: qualify all migration predecessors and checksums, including 0009,
+  and remove the lot marks/notes Promise.all before removing the notes endpoint.
+
 ## Operational handoff
 
 Sentropic owns M2/M3 module entrypoints, durable adapter and canonical router.
