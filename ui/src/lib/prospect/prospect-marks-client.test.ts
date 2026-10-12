@@ -4,7 +4,6 @@ import {
   activePipelineMark,
   computeProspectCounters,
   createProspectMark,
-  createProspectNote,
   prospectStatusLabel,
   type ProspectMark,
 } from "./prospect-marks-client.js";
@@ -107,14 +106,6 @@ describe("prospect marks client — écriture (POST)", () => {
     const body = JSON.parse(f.mock.calls[0][1].body as string);
     expect(body.prixDemande).toBe(450000);
     expect(body.lienAnnonce).toBe("https://x");
-  });
-
-  it("createProspectNote POST la note et retourne la note", async () => {
-    const note = { id: "n1", noLot: "42", citySlug: "delson", body: "à rappeler", mode: "real" as const, createdAt: "2026-06-29T00:00:00Z" };
-    const f = mockFetchOnce(201, { ok: true, note });
-    const res = await createProspectNote({ noLot: "42", citySlug: "delson", body: "à rappeler" });
-    expect(res).toEqual(note);
-    expect(String(f.mock.calls[0][0])).toContain("/api/v1/prospects/notes");
   });
 
   it("lève quand l'API renvoie une erreur HTTP", async () => {
