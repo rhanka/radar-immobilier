@@ -1,7 +1,7 @@
 # Feature: Immo annotations host
 
 ## Objective
-- [ ] Implement the immo host against M1 and remove active legacy annotation code.
+- [x] Implement the immo host against M1 and remove active legacy annotation code.
 
 ## Scope / Guardrails
 - [x] Isolated worktree `tmp/annotations-host`, branch `feat/annotations-host`.
@@ -67,4 +67,7 @@
   - [x] Qualify fresh install, receipt drift, active-note refusal and aggregate-only deleted retirement.
   - [x] Publish the exact eradication inventory, operational sequence and bounded M2/M3 handoff.
 - [ ] **Lot 6 — Run scoped tests, static checks, build and independent review.**
-- [ ] **Lot 7 — Commit selective atomic changes and provide evidence plus bounded M2/M3 handoff.**
+  - [x] Host and PostgreSQL scoped tests, full API with four workers, full UI/packages pass.
+  - [x] Workspace typecheck/full lint, build, API image smoke, artifact reconstruction and C1/C2 pass.
+  - [ ] Complementary code consensus: selection-failed; exact author model/effort are missing, no leg dispatched.
+- [x] **Lot 7 — Commit selective atomic changes and provide evidence plus bounded M2/M3 handoff.**
