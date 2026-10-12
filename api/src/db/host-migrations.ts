@@ -17,6 +17,13 @@ export async function runHostMigrations(pool: pg.Pool, folder: string,
     await client.query("SET lock_timeout = '5s'");
     await client.query("SELECT pg_advisory_lock(hashtext($1))", [HOST_MIGRATION_LOCK]);
     locked = true;
+    const retirement = await client.query<{ receipt: string | null; legacy: string | null }>(
+      "SELECT to_regclass('drizzle.radar_legacy_retirement')::text AS receipt, to_regclass('public.prospect_notes')::text AS legacy",
+    );
+    if (retirement.rows[0]?.receipt && retirement.rows[0].legacy &&
+        (await client.query("SELECT 1 FROM drizzle.radar_legacy_retirement WHERE id = 1")).rows.length > 0) {
+      throw new Error("Retired legacy catalogue was resurrected; closed restore qualification is required");
+    }
     const catalog = await client.query<{ table_name: string | null }>(
       "SELECT to_regclass('drizzle.__drizzle_migrations')::text AS table_name",
     );

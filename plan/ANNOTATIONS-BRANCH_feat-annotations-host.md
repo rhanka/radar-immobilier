@@ -81,6 +81,7 @@
   - [ ] Complementary code consensus: selection-failed; exact author model/effort are missing, no leg dispatched.
 - [x] **Lot 7 — Commit selective atomic changes and provide evidence plus bounded M2/M3 handoff.**
 - [ ] **Lot 8 — Resolve migration and retirement blockers on synthetic restored databases.**
+  - [x] Refuse a resurrected legacy catalog alongside an old retirement receipt before migration or aggregate reuse; synthetic partial-restore regression passes.
   - [x] Remove destructive retirement from ordinary migrations; regression runs the actual deployment entrypoint with an active synthetic note.
   - [x] Remove retirement from ordinary migrations; explicit retirement requires a closed-window reference, verified 0014 receipt/catalog and five-second lock bounds.
   - [x] Ship controlled catalog attestation for manual 0009 under the migration lock; native Drizzle upgrade, divergent catalog and missing final receipt qualify in 32 scoped tests.

@@ -110,5 +110,11 @@ describe("adoption of native Drizzle history", () => {
       }
       if (phase === "before") await retireEmptyLegacyNotes(pool, cutover);
     }
+    await pool.query("CREATE TABLE prospect_notes(id integer)");
+    try {
+      await expect(runHostMigrations(pool, folder)).rejects.toThrow(/resurrected/);
+      await expect(retireEmptyLegacyNotes(pool, cutover)).rejects.toThrow(/resurrected/);
+      expect((await pool.query("SELECT deleted_note_count FROM drizzle.radar_legacy_retirement")).rows[0].deleted_note_count).toBe("0");
+    } finally { await pool.query("DROP TABLE prospect_notes"); }
   });
 });
