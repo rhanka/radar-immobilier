@@ -1,0 +1,28 @@
+{
+  "dataClass": "synthetic",
+  "sourceId": "synthetic-workbook",
+  "citySlug": "synthetic-city",
+  "coverage": {
+    "typed-values": "captured", "formulas": "captured", "cached-values": "captured",
+    "hidden-elements": "captured", "notes": "captured", "comments": "captured",
+    "attachments": "captured", "other-objects": "captured"
+  },
+  "sheets": [{
+    "sheetId": "native-tab", "title": "Synthetic hidden sheet", "hidden": true,
+    "cells": [{ "a1": "B2", "row": 2, "hidden": true,
+      "value": { "type": "number", "lexical": "0.10" }, "formula": "=A2/10",
+      "cachedValue": { "type": "number", "lexical": "0.10" }, "note": "Exact source note\r\n" }],
+    "contributions": [{
+      "id": "human", "row": 2, "cells": ["B2"],
+      "body": { "text": "Synthetic contribution\r\n😀 with exact spacing  ",
+        "codec": { "format": "plain", "codecId": "plain-v1", "specDigest": "spec-digest-plain-1", "extensions": [] } },
+      "attribution": { "variant": "human", "assertionClass": "source-declared", "evidence": "synthetic-source-cell" }
+    }, {
+      "id": "assistant", "row": 2, "cells": ["B2"],
+      "body": { "text": "Synthetic assistant context",
+        "codec": { "format": "plain", "codecId": "plain-v1", "specDigest": "spec-digest-plain-1", "extensions": [] } },
+      "attribution": { "variant": "unknown", "classification": "assistant-identity-unproven" }
+    }]
+  }],
+  "attachments": [{ "sourceId": "missing-synthetic-analysis", "status": "absent" }]
+}
