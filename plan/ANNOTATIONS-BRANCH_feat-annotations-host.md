@@ -27,6 +27,7 @@
 - [x] ANNOTATIONS-D2: M1 declares but does not deliver M2/M3 runtime; synthetic seams never enable a production fallback.
 - [x] ANNOTATIONS-D3: both independent design reviews reconciled in the spec; source-version, authentication and receipt gaps remain explicit M3 qualification requirements.
 - [x] ANNOTATIONS-EX1: whole-file legacy deletions and immutable software archives may exceed 150 diff lines where splitting would retain broken partial artifacts; isolate each removal/receipt, preserve the source history, and roll back by reverting that commit.
+- [x] ANNOTATIONS-EX2: allow `api/src/index.ts` and `api/src/db/{host-migrations,migration-assets,retire-legacy-notes}.ts` for required production composition and guarded installation; no live operation, rollback by reverting these host changes.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch; sequential writes; independent design reviewers read only.
@@ -38,6 +39,8 @@
 - [x] Lot 0 — Read rules, reference specs, owner decisions and exact M1 surfaces.
 - [x] Lot 1 — Reconcile independent design reviews and pin the shared contract.
 - [ ] Lot 2 — Implement explicit host membership, capabilities and resource resolver.
+  - [x] Implement shared-contract host ports and Postgres assignment reads.
+  - [ ] Install assignment/resource schema and qualify revocation/version denials.
 - [ ] Lot 3 — Compose the canonical module and prepare synthetic Steve units.
 - [ ] Lot 4 — Remove legacy domain/API/UI/MCP consumers and adapt retained tests.
 - [ ] Lot 5 — Guard migration/retirement and document operational eradication.
