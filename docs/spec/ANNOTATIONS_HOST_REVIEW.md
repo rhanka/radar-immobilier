@@ -107,8 +107,17 @@ typed import/readback receipts, real assignments and Farid D5/D6, as detailed in
 
 ## Remote publication status
 
-The attempted push was rejected by automatic approval review: local implementation
-authorization did not explicitly cover this exact public repository destination
-and code/documentation payload. No push or PR was created. The complete branch is
-committed locally; owner approval is needed before publishing it and starting
-remote PR CI. This refusal is preserved rather than bypassed through another tool.
+The initial push was rejected by automatic approval review because publication
+authorization was missing. The owner then explicitly approved publication on
+2026-10-12. [Draft PR #859](https://github.com/rhanka/radar-immobilier/pull/859)
+is open; no merge is authorized. The earlier refusal remains part of the history.
+
+CI run `38305299067` on `9e21f57f0bd5bcf142c87c9e633696ac19b0614a`
+passed repository policy and the annotation operation/software gates, then failed
+offline K8s validation: its regression expected 18 API image entrypoints while
+the image ships 20, including controlled adoption and guarded retirement. The
+same failure was reproduced locally; the inventory assertion is updated while
+the entrypoint checker and all negative mutation cases remain unchanged.
+All 39 hermetic cases, `make k8s-validate ENV=test-annotations-host`, harness
+C1/C2 and `git diff --check` pass after this correction. Remote CI for the new
+head remains pending at publication; no fresh code consensus is implied.
