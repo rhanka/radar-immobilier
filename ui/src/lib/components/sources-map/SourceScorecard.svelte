@@ -287,7 +287,7 @@
     <div class="min-w-0">
       <div class="flex flex-wrap items-center gap-2">
         <span
-          class="h-3 w-3 shrink-0 rounded-sm border border-slate-300"
+          class="h-3 w-3 shrink-0 rounded-xs border border-slate-300"
           style="background-color: {colorForCity(city)};"
           aria-hidden="true"
         ></span>
@@ -311,7 +311,7 @@
       {#if onClose}
         <button
           type="button"
-          class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+          class="rounded-sm p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
           aria-label="Fermer"
           on:click={() => onClose?.()}
         >
