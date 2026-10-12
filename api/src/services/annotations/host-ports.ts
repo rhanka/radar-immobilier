@@ -49,7 +49,7 @@ export function createAnnotationHostPorts(repository: AnnotationHostRepository) 
   }
   const capabilities: CapabilityCheckPort = {
     async check(principal, capability, targets) {
-      if (!principal || targets.length === 0) return false;
+      if (!principal || targets.length === 0 || targets.some((target) => !isResourceRef(target))) return false;
       const first = targets[0]!.scope;
       for (const target of targets) {
         if (!isResourceRef(target) || target.scope.tenantId !== first.tenantId ||
