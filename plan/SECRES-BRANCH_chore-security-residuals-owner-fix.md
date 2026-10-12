@@ -72,6 +72,7 @@
     - [x] Commit CSS-native configuration, preserved palette and removed superseded v3 configuration.
     - [x] Commit the six CSS compatibility checks.
   - [ ] Commit component utility migrations in bounded groups.
+    - [x] Commit map wrappers and opportunity views utility migrations.
     - [x] Commit shell and administration utility migrations.
   - [ ] Commit MapLibre startup, named exports and unit-test adaptations.
   - [ ] Commit worker hosting and browser acceptance harness.
