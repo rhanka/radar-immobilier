@@ -36,6 +36,7 @@
 - [x] BR1001-EX2: allow `api/src/index.ts` and `api/src/db/{host-migrations,migration-assets,retire-legacy-notes}.ts` for required production composition and guarded installation; no live operation, rollback by reverting these host changes.
 - [x] BR1001-EX3: allow retirement CLI and `api/Dockerfile` to ship the exact contract archive and guard entrypoint; no image promotion, rollback by reverting those files.
 - [x] BR1001-EX4: allow the eradication inventory and supersession notices in the six former annotation/MCP specs and reports; preserve owner quotations/history, rollback by reverting the notices.
+- [x] ANNOTATIONS-D4: full-suite evidence found the 0012 fixture retaining new 0014 and silently skipping 0013; bound its journal to 0012. Local full API qualification uses four workers after connection/timeouts under concurrent builds; no timeout is increased.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch; sequential writes; independent design reviewers read only.
