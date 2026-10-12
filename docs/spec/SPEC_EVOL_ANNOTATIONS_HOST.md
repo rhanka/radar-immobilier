@@ -9,6 +9,8 @@ under the private `plan-immo-injection` dossier. The subsequent owner decisions
 place canonical storage and HTTP composition in a cluster-mesh module and accept
 M1 as sufficient for immo development. They supersede the local comments/pg plan.
 M1 is Sentropic commit `7b8e5daf022cc58819dfdfae43cd89a703a82f96`.
+The exact frozen manifest `e027fdbb…`, producer receipt `095e1d50…` and interface
+erratum `057d4792…` are retained and acknowledged in `vendor/comments-m1`.
 
 ## Decisions
 
@@ -32,6 +34,10 @@ M1 is Sentropic commit `7b8e5daf022cc58819dfdfae43cd89a703a82f96`.
   counters, badges, notes scopes and their tests. Marks and contacts remain usable.
   Historical SQL remains immutable; new guarded retirement refuses active notes
   until a verified canonical conversion. Deleted notes have aggregate counts only.
+- D8: Ordinary migration is schema-only. Manual 0009 adoption requires explicit
+  operator-reference/catalog qualification; destructive retirement requires a
+  closed-window reference and verified host catalog/receipt. Fenced promotion,
+  suspended ordinary restore and forward recovery precede real adoption.
 - D7: No live database, deployment, root UAT checkout or restore is changed here.
   The operational plan closes old replicas/SSE buffers and incompatible restores.
   Existing backups expire normally; no new copy of notes is created.
@@ -71,6 +77,13 @@ Both permit synthetic host work and require M2/M3 before operational conversion.
   and remove the lot marks/notes Promise.all before removing the notes endpoint.
 
 ## Operational handoff
+
+Immo's current preparation includes a synthetic Google response reader, complete
+captured workbook inventory, common M1 candidate/manifest construction and explicit
+map-category dispositions. The production collectors/domain matching, policies,
+integrated service/readback, closure/orchestration, backing/events and operating
+acceptance remain immo work; see [source preparation](ANNOTATIONS_STEVE_PREPARATION.md).
+Source/assignment metadata history and explicit source version links are installed.
 
 Sentropic owns M2/M3 module entrypoints, durable adapter and canonical router.
 Immo qualifies the exact delivered artifacts and integrated synthetic import before
