@@ -46,9 +46,9 @@
 ## Plan / Todo (lot-based)
 - [x] **Lot 0 — Read rules, reference specs, owner decisions and exact M1 surfaces.**
 - [x] **Lot 1 — Reconcile independent design reviews and pin the shared contract.**
-- [ ] **Lot 2 — Implement explicit host membership, capabilities and resource resolver.**
+- [x] **Lot 2 — Implement explicit host membership, capabilities and resource resolver.**
   - [x] Implement shared-contract host ports and Postgres assignment reads.
-  - [ ] Install assignment/resource schema and qualify revocation/version denials.
+  - [x] Install assignment/resource schema and qualify revocation/version denials.
 - [x] **Lot 3 — Compose the canonical module and prepare synthetic Steve units.**
 - [ ] **Lot 4 — Remove legacy domain/API/UI/MCP consumers and adapt retained tests.**
   - [x] Remove domain note contracts, Drizzle exports and dormant MCP note scope.
