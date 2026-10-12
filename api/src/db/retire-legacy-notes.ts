@@ -17,7 +17,9 @@ export async function retireEmptyLegacyNotes(pool: pg.Pool,
       to_regclass('public.annotation_tenants') IS NOT NULL AND
       to_regclass('public.annotation_workspaces') IS NOT NULL AND
       to_regclass('public.annotation_memberships') IS NOT NULL AND
-      to_regclass('public.annotation_resources') IS NOT NULL AS installed`);
+      to_regclass('public.annotation_resources') IS NOT NULL AND
+      to_regclass('public.annotation_assignment_history') IS NOT NULL AND
+      to_regclass('public.annotation_resource_links') IS NOT NULL AS installed`);
     if (!hostCatalog.rows[0]?.installed) throw new Error("Host schema must be installed before retirement");
     const installed = await client.query(`SELECT 1 FROM drizzle.radar_migration_steps s
       JOIN drizzle.__drizzle_migrations m ON m.hash = s.checksum
