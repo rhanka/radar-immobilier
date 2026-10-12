@@ -1,0 +1,1087 @@
+{
+  "_meta": {
+    "source": {
+      "cohort": "feat/set-167-canonical:docs/spec/reports/set-167-bprime.tsv",
+      "gold": "feat/recette-rejeu-harness:docs/reports/recette/gold-steve-30.expected.json",
+      "rubric": "docs/reports/analyse-vivier-b/{prompt_analyse.md,README.md,corpus_contexte.md}",
+      "graphs": "SCW s3://radar-immobilier-docs-pocs/graph/<graph_city_slug>/latest.json (read-only, retrieved 2026-08-02)",
+      "classifier": "api/src/services/graph/vivier-v2.ts classifyVivierSignal + @radar/domain isResidentialEligible"
+    },
+    "method": {
+      "name": "B — GOLD plus calibrated SILVER proxy",
+      "unit": "city score is the maximum score of its real Signal/DesignationEvent nodes",
+      "base": "per eligible node: +2 early stage (avis_motion|projet_reglement), +2 residential-eligible (isResidentialEligible), +2 zoning=yes; all three must hold on the same node to reach 6",
+      "bonus": "+2 bounded urban regulatory reform and +2 explicit regulation-number reference, awarded only after the 6-point intersection; bonuses never admit a node",
+      "threshold": "in_bprime=true iff score>=6",
+      "target": "for SILVER positives, measured count of nodes in the three-way intersection"
+    },
+    "calibration": {
+      "evaluated": 29,
+      "agreed": 25,
+      "accuracy": 0.8620689655172413,
+      "matrix": {
+        "TP": 23,
+        "FP": 4,
+        "FN": 0,
+        "TN": 2
+      }
+    },
+    "composition": {
+      "total": 167,
+      "gold": 6,
+      "silver_scored": 156,
+      "silver_no_graph": 5
+    },
+    "no_graph_key_exception": "The 5 UNMATCHED rows have no graph_city_slug; their canonical cohort slug is used only as a unique JSON key and is not asserted as a graph slug.",
+    "anti_invention": "Only real SCW graph nodes are scored. Six GOLD verdicts are copied from Steve verbatim. Five cities without graph_city_slug remain null and unscored. No graph, score, target, or verdict is fabricated.",
+    "gold_meta": {
+      "source": "docs/reports/recette/RECETTE_VIVIER_BPRIME_STEVE30.md (colonne « B′ cible »)",
+      "verite_terrain": "GOLD — évaluation humaine Steve (30 villes). Anti-invention : verdict repris tel quel ; slugs résolus contre les dossiers graphes SCW réels.",
+      "axe": "bprime (précoce ∩ résidentiel-éligible ∩ zonage)",
+      "in_bprime": "true = ville attendue DANS B′ (Steve ≥ seuil / ✓N) ; false = faux positif attendu DEHORS (✗0)",
+      "target": "compte-cible Steve (informatif — mesuré sur la donnée de Steve ; le compte sur graphes frais peut différer légitimement). Le gate DUR = in_bprime (in/out).",
+      "ambigus_hors_gate_dur": [
+        "hemmingford--les-jardins-de-napierville / --2 : slug ambigu (3 doublons DB, verdict Steve 0/0/1) — à assainir, hors gate dur",
+        "notre-dame-de-lourdes--joliette : slug ambigu (Joliette vs L'Érable) — hors gate dur ; --lerable seul est gold ✓2"
+      ]
+    }
+  },
+  "westmount": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/westmount/latest.json — signaux précoces=2, résidentiels-éligibles=1, zonage=3, intersection B′=1"
+  },
+  "saint-lambert": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-lambert/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "hampstead": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/hampstead/latest.json — signaux précoces=0, résidentiels-éligibles=3, zonage=4, intersection B′=0"
+  },
+  "mont-royal": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/mont-royal/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=5, intersection B′=0"
+  },
+  "montreal-ouest": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/montreal-ouest/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "cote-saint-luc": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/cote-saint-luc/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=1, intersection B′=0"
+  },
+  "longueuil": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/longueuil/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=4, intersection B′=0"
+  },
+  "brossard": {
+    "in_bprime": null,
+    "provenance": "silver",
+    "note": "no-graph-yet — pas de graphe, non scoré (anti-invention)"
+  },
+  "sainte-catherine": {
+    "in_bprime": false,
+    "note": "16 signaux ; seul qualifié = adoption ; reste indét",
+    "provenance": "gold"
+  },
+  "la-prairie": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/la-prairie/latest.json — signaux précoces=0, résidentiels-éligibles=8, zonage=11, intersection B′=0"
+  },
+  "delson": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/delson/latest.json — signaux précoces=2, résidentiels-éligibles=3, zonage=14, intersection B′=1"
+  },
+  "candiac": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/candiac/latest.json — signaux précoces=1, résidentiels-éligibles=4, zonage=7, intersection B′=1"
+  },
+  "montreal-est": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/montreal-est/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=1, intersection B′=0"
+  },
+  "boucherville": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/boucherville/latest.json — signaux précoces=2, résidentiels-éligibles=4, zonage=7, intersection B′=1"
+  },
+  "dorval": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/dorval/latest.json — signaux précoces=2, résidentiels-éligibles=6, zonage=13, intersection B′=1"
+  },
+  "lile-dorval": {
+    "in_bprime": null,
+    "provenance": "silver",
+    "note": "no-graph-yet — pas de graphe, non scoré (anti-invention)"
+  },
+  "saint-constant": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/saint-constant/latest.json — signaux précoces=3, résidentiels-éligibles=8, zonage=15, intersection B′=1"
+  },
+  "saint-bruno-de-montarville": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/saint-bruno-de-montarville/latest.json — signaux précoces=1, résidentiels-éligibles=4, zonage=10, intersection B′=1"
+  },
+  "carignan": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/carignan/latest.json — signaux précoces=0, résidentiels-éligibles=12, zonage=17, intersection B′=0"
+  },
+  "dollard-des-ormeaux": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/dollard-des-ormeaux/latest.json — signaux précoces=2, résidentiels-éligibles=1, zonage=3, intersection B′=1"
+  },
+  "pointe-claire": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/pointe-claire/latest.json — signaux précoces=2, résidentiels-éligibles=3, zonage=27, intersection B′=1"
+  },
+  "saint-philippe": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-philippe/latest.json — signaux précoces=1, résidentiels-éligibles=3, zonage=8, intersection B′=0"
+  },
+  "saint-mathieu": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-mathieu/latest.json — signaux précoces=0, résidentiels-éligibles=7, zonage=12, intersection B′=0"
+  },
+  "chateauguay": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/chateauguay/latest.json — signaux précoces=0, résidentiels-éligibles=1, zonage=1, intersection B′=0"
+  },
+  "sainte-julie": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/sainte-julie/latest.json — signaux précoces=0, résidentiels-éligibles=3, zonage=7, intersection B′=0"
+  },
+  "saint-basile-le-grand": {
+    "in_bprime": true,
+    "target": 3,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/saint-basile-le-grand/latest.json — signaux précoces=4, résidentiels-éligibles=4, zonage=6, intersection B′=3"
+  },
+  "chambly": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/chambly/latest.json — signaux précoces=1, résidentiels-éligibles=1, zonage=1, intersection B′=1"
+  },
+  "rosemere": {
+    "in_bprime": false,
+    "note": "faux positif — densification commerciale lue résidentielle",
+    "provenance": "gold"
+  },
+  "varennes": {
+    "in_bprime": true,
+    "target": 3,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/varennes/latest.json — signaux précoces=6, résidentiels-éligibles=4, zonage=8, intersection B′=3"
+  },
+  "kirkland": {
+    "in_bprime": null,
+    "provenance": "silver",
+    "note": "no-graph-yet — pas de graphe, non scoré (anti-invention)"
+  },
+  "bois-des-filion": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/bois-des-filion/latest.json — signaux précoces=0, résidentiels-éligibles=3, zonage=7, intersection B′=0"
+  },
+  "saint-isidore--roussillon": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-isidore--roussillon/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "beaconsfield": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/beaconsfield/latest.json — signaux précoces=0, résidentiels-éligibles=2, zonage=16, intersection B′=0"
+  },
+  "lorraine": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/lorraine/latest.json — signaux précoces=0, résidentiels-éligibles=1, zonage=9, intersection B′=0"
+  },
+  "lery": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/lery/latest.json — signaux précoces=1, résidentiels-éligibles=10, zonage=27, intersection B′=0"
+  },
+  "mercier": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/mercier/latest.json — signaux précoces=0, résidentiels-éligibles=8, zonage=10, intersection B′=0"
+  },
+  "charlemagne": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/charlemagne/latest.json — signaux précoces=0, résidentiels-éligibles=8, zonage=14, intersection B′=0"
+  },
+  "boisbriand": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/boisbriand/latest.json — signaux précoces=0, résidentiels-éligibles=2, zonage=9, intersection B′=0"
+  },
+  "deux-montagnes": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/deux-montagnes/latest.json — signaux précoces=1, résidentiels-éligibles=4, zonage=9, intersection B′=1"
+  },
+  "mcmasterville": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/mcmasterville/latest.json — signaux précoces=1, résidentiels-éligibles=4, zonage=7, intersection B′=1"
+  },
+  "sainte-therese": {
+    "in_bprime": true,
+    "target": 2,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/sainte-therese/latest.json — signaux précoces=5, résidentiels-éligibles=2, zonage=7, intersection B′=2"
+  },
+  "saint-mathias-sur-richelieu": {
+    "in_bprime": true,
+    "target": 2,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/saint-mathias-sur-richelieu/latest.json — signaux précoces=6, résidentiels-éligibles=2, zonage=8, intersection B′=2"
+  },
+  "saint-mathieu-de-beloeil": {
+    "in_bprime": true,
+    "target": 2,
+    "note": "avis motion, logement abordable",
+    "provenance": "gold"
+  },
+  "saint-amable": {
+    "in_bprime": true,
+    "target": 3,
+    "note": "712-46/47, avis motion",
+    "provenance": "gold"
+  },
+  "terrebonne": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/terrebonne/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-remi": {
+    "in_bprime": true,
+    "target": 2,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/saint-remi/latest.json — signaux précoces=6, résidentiels-éligibles=2, zonage=8, intersection B′=2"
+  },
+  "otterburn-park": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/otterburn-park/latest.json — signaux précoces=0, résidentiels-éligibles=4, zonage=8, intersection B′=0"
+  },
+  "saint-jacques-le-mineur": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-jacques-le-mineur/latest.json — signaux précoces=0, résidentiels-éligibles=3, zonage=6, intersection B′=0"
+  },
+  "richelieu": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/richelieu/latest.json — signaux précoces=1, résidentiels-éligibles=8, zonage=15, intersection B′=1"
+  },
+  "beloeil": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/beloeil/latest.json — signaux précoces=0, résidentiels-éligibles=2, zonage=7, intersection B′=0"
+  },
+  "baie-durfe": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/baie-durfe/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=3, intersection B′=0"
+  },
+  "sainte-marthe-sur-le-lac": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/sainte-marthe-sur-le-lac/latest.json — signaux précoces=7, résidentiels-éligibles=0, zonage=27, intersection B′=0"
+  },
+  "saint-jean-sur-richelieu": {
+    "in_bprime": true,
+    "target": 3,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/saint-jean-sur-richelieu/latest.json — signaux précoces=10, résidentiels-éligibles=5, zonage=31, intersection B′=3"
+  },
+  "mascouche": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/mascouche/latest.json — signaux précoces=2, résidentiels-éligibles=1, zonage=3, intersection B′=1"
+  },
+  "saint-eustache": {
+    "in_bprime": true,
+    "target": 49,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/saint-eustache/latest.json — signaux précoces=98, résidentiels-éligibles=50, zonage=219, intersection B′=49"
+  },
+  "notre-dame-de-lile-perrot": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/notre-dame-de-lile-perrot/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "repentigny": {
+    "in_bprime": true,
+    "target": 2,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/repentigny/latest.json — signaux précoces=2, résidentiels-éligibles=4, zonage=4, intersection B′=2"
+  },
+  "saint-edouard": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-edouard/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "sainte-anne-de-bellevue": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/sainte-anne-de-bellevue/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-michel": {
+    "in_bprime": true,
+    "target": 4,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/saint-michel/latest.json — signaux précoces=8, résidentiels-éligibles=9, zonage=24, intersection B′=4"
+  },
+  "blainville": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/blainville/latest.json — signaux précoces=1, résidentiels-éligibles=7, zonage=9, intersection B′=0"
+  },
+  "pointe-calumet": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/pointe-calumet/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=5, intersection B′=0"
+  },
+  "mont-saint-hilaire": {
+    "in_bprime": true,
+    "target": 2,
+    "note": "S2 habitation dans B",
+    "provenance": "gold"
+  },
+  "senneville": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/senneville/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=1, intersection B′=0"
+  },
+  "marieville": {
+    "in_bprime": null,
+    "provenance": "silver",
+    "note": "no-graph-yet — pas de graphe, non scoré (anti-invention)"
+  },
+  "lile-perrot": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/lile-perrot/latest.json — signaux précoces=0, résidentiels-éligibles=13, zonage=20, intersection B′=0"
+  },
+  "vercheres": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/vercheres/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=5, intersection B′=0"
+  },
+  "saint-marc-sur-richelieu": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-marc-sur-richelieu/latest.json — signaux précoces=0, résidentiels-éligibles=1, zonage=2, intersection B′=0"
+  },
+  "sainte-martine": {
+    "in_bprime": true,
+    "target": 8,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/sainte-martine/latest.json — signaux précoces=16, résidentiels-éligibles=16, zonage=46, intersection B′=8"
+  },
+  "beauharnois": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/beauharnois/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "sainte-anne-des-plaines": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/sainte-anne-des-plaines/latest.json — signaux précoces=3, résidentiels-éligibles=3, zonage=14, intersection B′=1"
+  },
+  "saint-urbain-premier": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/saint-urbain-premier/latest.json — signaux précoces=1, résidentiels-éligibles=5, zonage=9, intersection B′=1"
+  },
+  "terrasse-vaudreuil": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/terrasse-vaudreuil/latest.json — signaux précoces=1, résidentiels-éligibles=1, zonage=6, intersection B′=0"
+  },
+  "saint-joseph-du-lac": {
+    "in_bprime": true,
+    "target": 3,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/saint-joseph-du-lac/latest.json — signaux précoces=3, résidentiels-éligibles=11, zonage=20, intersection B′=3"
+  },
+  "saint-jean-baptiste": {
+    "in_bprime": true,
+    "target": 4,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/saint-jean-baptiste/latest.json — signaux précoces=4, résidentiels-éligibles=8, zonage=12, intersection B′=4"
+  },
+  "pincourt": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/pincourt/latest.json — signaux précoces=2, résidentiels-éligibles=4, zonage=11, intersection B′=0"
+  },
+  "calixa-lavallee": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/calixa-lavallee/latest.json — signaux précoces=0, résidentiels-éligibles=4, zonage=7, intersection B′=0"
+  },
+  "lile-cadieux": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/lile-cadieux/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "pointe-des-cascades": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/pointe-des-cascades/latest.json — signaux précoces=0, résidentiels-éligibles=1, zonage=7, intersection B′=0"
+  },
+  "saint-charles-sur-richelieu": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/saint-charles-sur-richelieu/latest.json — signaux précoces=1, résidentiels-éligibles=0, zonage=7, intersection B′=0"
+  },
+  "napierville": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/napierville/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "vaudreuil-sur-le-lac": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/vaudreuil-sur-le-lac/latest.json — signaux précoces=0, résidentiels-éligibles=2, zonage=2, intersection B′=0"
+  },
+  "saint-blaise-sur-richelieu": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/saint-blaise-sur-richelieu/latest.json — signaux précoces=2, résidentiels-éligibles=1, zonage=12, intersection B′=1"
+  },
+  "mont-saint-gregoire": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/mont-saint-gregoire/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "sainte-madeleine": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/sainte-madeleine/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-cyprien-de-napierville": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-cyprien-de-napierville/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-patrice-de-sherrington": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/saint-patrice-de-sherrington/latest.json — signaux précoces=2, résidentiels-éligibles=3, zonage=8, intersection B′=1"
+  },
+  "saint-roch-de-lachigan": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-roch-de-lachigan/latest.json — signaux précoces=1, résidentiels-éligibles=1, zonage=9, intersection B′=0"
+  },
+  "sainte-angele-de-monnoir": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/sainte-angele-de-monnoir/latest.json — signaux précoces=1, résidentiels-éligibles=5, zonage=13, intersection B′=1"
+  },
+  "lepiphanie": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/lepiphanie/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "oka": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/oka/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "sainte-marie-madeleine": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/sainte-marie-madeleine/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-etienne-de-beauharnois": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-etienne-de-beauharnois/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "sainte-clotilde": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/sainte-clotilde/latest.json — signaux précoces=5, résidentiels-éligibles=4, zonage=22, intersection B′=1"
+  },
+  "vaudreuil-dorion": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/vaudreuil-dorion/latest.json — signaux précoces=6, résidentiels-éligibles=0, zonage=43, intersection B′=0"
+  },
+  "rougemont": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/rougemont/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-roch-ouest": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-roch-ouest/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-sulpice": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-sulpice/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "lassomption": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/lassomption/latest.json — signaux précoces=0, résidentiels-éligibles=3, zonage=6, intersection B′=0"
+  },
+  "howick": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/howick/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=3, intersection B′=0"
+  },
+  "mirabel": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/mirabel/latest.json — signaux précoces=0, résidentiels-éligibles=5, zonage=9, intersection B′=0"
+  },
+  "sainte-anne-de-sabrevois": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/sainte-anne-de-sabrevois/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-lin-laurentides": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-lin-laurentides/latest.json — signaux précoces=0, résidentiels-éligibles=5, zonage=7, intersection B′=0"
+  },
+  "saint-damase--les-maskoutains": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-damase--les-maskoutains/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-antoine-sur-richelieu": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-antoine-sur-richelieu/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-denis-sur-richelieu": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-denis-sur-richelieu/latest.json — signaux précoces=0, résidentiels-éligibles=1, zonage=7, intersection B′=0"
+  },
+  "tres-saint-sacrement": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/tres-saint-sacrement/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "la-presentation": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/la-presentation/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "sainte-brigide-diberville": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/sainte-brigide-diberville/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=3, intersection B′=0"
+  },
+  "les-cedres": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/les-cedres/latest.json — signaux précoces=0, résidentiels-éligibles=6, zonage=8, intersection B′=0"
+  },
+  "saint-esprit": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-esprit/latest.json — signaux précoces=3, résidentiels-éligibles=2, zonage=24, intersection B′=0"
+  },
+  "saint-valentin": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-valentin/latest.json — signaux précoces=0, résidentiels-éligibles=2, zonage=2, intersection B′=0"
+  },
+  "sainte-sophie": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/sainte-sophie/latest.json — signaux précoces=6, résidentiels-éligibles=0, zonage=22, intersection B′=0"
+  },
+  "hudson": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/hudson/latest.json — signaux précoces=4, résidentiels-éligibles=1, zonage=6, intersection B′=1"
+  },
+  "saint-alexandre": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/saint-alexandre/latest.json — signaux précoces=6, résidentiels-éligibles=0, zonage=15, intersection B′=0"
+  },
+  "saint-chrysostome": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-chrysostome/latest.json — signaux précoces=0, résidentiels-éligibles=1, zonage=1, intersection B′=0"
+  },
+  "hemmingford--les-jardins-de-napierville": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/hemmingford--les-jardins-de-napierville/latest.json — signaux précoces=0, résidentiels-éligibles=2, zonage=4, intersection B′=0"
+  },
+  "saint-cesaire": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-cesaire/latest.json — signaux précoces=4, résidentiels-éligibles=3, zonage=13, intersection B′=0"
+  },
+  "saint-paul-de-lile-aux-noix": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/saint-paul-de-lile-aux-noix/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=2, intersection B′=0"
+  },
+  "saint-louis-de-gonzague--beauharnois-salaberry": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/saint-louis-de-gonzague--beauharnois-salaberry/latest.json — signaux précoces=3, résidentiels-éligibles=1, zonage=4, intersection B′=1"
+  },
+  "salaberry-de-valleyfield": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/salaberry-de-valleyfield/latest.json — signaux précoces=0, résidentiels-éligibles=5, zonage=8, intersection B′=0"
+  },
+  "saint-lazare": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-lazare/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-bernard-de-lacolle": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-bernard-de-lacolle/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-alexis": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-alexis/latest.json — signaux précoces=1, résidentiels-éligibles=1, zonage=4, intersection B′=0"
+  },
+  "sainte-marie-salome": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/sainte-marie-salome/latest.json — signaux précoces=2, résidentiels-éligibles=0, zonage=3, intersection B′=0"
+  },
+  "lavaltrie": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/lavaltrie/latest.json — signaux précoces=0, résidentiels-éligibles=3, zonage=9, intersection B′=0"
+  },
+  "contrecoeur": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/contrecoeur/latest.json — signaux précoces=0, résidentiels-éligibles=5, zonage=9, intersection B′=0"
+  },
+  "henryville": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/henryville/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=1, intersection B′=0"
+  },
+  "saint-jerome": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/saint-jerome/latest.json — signaux précoces=3, résidentiels-éligibles=4, zonage=10, intersection B′=1"
+  },
+  "saint-placide": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-placide/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-jacques": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/saint-jacques/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=2, intersection B′=0"
+  },
+  "hemmingford--les-jardins-de-napierville--2": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/hemmingford--les-jardins-de-napierville--2/latest.json — signaux précoces=1, résidentiels-éligibles=1, zonage=2, intersection B′=1"
+  },
+  "saint-colomban": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-colomban/latest.json — signaux précoces=3, résidentiels-éligibles=0, zonage=10, intersection B′=0"
+  },
+  "saint-hyacinthe": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-hyacinthe/latest.json — signaux précoces=5, résidentiels-éligibles=4, zonage=22, intersection B′=0"
+  },
+  "lacolle": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/lacolle/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-sebastien--le-haut-richelieu": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-sebastien--le-haut-richelieu/latest.json — signaux précoces=2, résidentiels-éligibles=2, zonage=4, intersection B′=0"
+  },
+  "saint-paul": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-paul/latest.json — signaux précoces=6, résidentiels-éligibles=2, zonage=20, intersection B′=0"
+  },
+  "saint-pie": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-pie/latest.json — signaux précoces=22, résidentiels-éligibles=3, zonage=37, intersection B′=0"
+  },
+  "havelock": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/havelock/latest.json — signaux précoces=1, résidentiels-éligibles=1, zonage=2, intersection B′=0"
+  },
+  "sainte-sabine--brome-missisquoi": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/sainte-sabine--brome-missisquoi/latest.json — signaux précoces=4, résidentiels-éligibles=0, zonage=5, intersection B′=0"
+  },
+  "saint-bernard-de-michaudville": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-bernard-de-michaudville/latest.json — signaux précoces=5, résidentiels-éligibles=0, zonage=9, intersection B′=0"
+  },
+  "crabtree": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/crabtree/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=1, intersection B′=0"
+  },
+  "coteau-du-lac": {
+    "in_bprime": true,
+    "target": 2,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/coteau-du-lac/latest.json — signaux précoces=3, résidentiels-éligibles=3, zonage=11, intersection B′=2"
+  },
+  "sainte-julienne": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/sainte-julienne/latest.json — signaux précoces=0, résidentiels-éligibles=4, zonage=16, intersection B′=0"
+  },
+  "farnham": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/farnham/latest.json — signaux précoces=0, résidentiels-éligibles=2, zonage=3, intersection B′=0"
+  },
+  "saint-paul-dabbotsford": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-paul-dabbotsford/latest.json — signaux précoces=0, résidentiels-éligibles=2, zonage=6, intersection B′=0"
+  },
+  "saint-clet": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-clet/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-roch-de-richelieu": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/saint-roch-de-richelieu/latest.json — signaux précoces=2, résidentiels-éligibles=2, zonage=16, intersection B′=1"
+  },
+  "saint-jude": {
+    "in_bprime": true,
+    "target": 2,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/saint-jude/latest.json — signaux précoces=4, résidentiels-éligibles=2, zonage=4, intersection B′=2"
+  },
+  "noyan": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/noyan/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "ormstown": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/ormstown/latest.json — signaux précoces=1, résidentiels-éligibles=4, zonage=7, intersection B′=1"
+  },
+  "ange-gardien": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/ange-gardien/latest.json — signaux précoces=0, résidentiels-éligibles=3, zonage=6, intersection B′=0"
+  },
+  "saint-ours": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/saint-ours/latest.json — signaux précoces=2, résidentiels-éligibles=4, zonage=6, intersection B′=1"
+  },
+  "prevost": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/prevost/latest.json — signaux précoces=0, résidentiels-éligibles=3, zonage=4, intersection B′=0"
+  },
+  "saint-stanislas-de-kostka": {
+    "in_bprime": true,
+    "target": 2,
+    "note": "refonte 451-2025 (précoce)",
+    "provenance": "gold"
+  },
+  "saint-calixte": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/saint-calixte/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=5, intersection B′=0"
+  },
+  "saint-barnabe-sud": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-barnabe-sud/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "notre-dame-de-stanbridge": {
+    "in_bprime": null,
+    "provenance": "silver",
+    "note": "no-graph-yet — pas de graphe, non scoré (anti-invention)"
+  },
+  "franklin": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 8,
+    "note": "SCW graph/franklin/latest.json — signaux précoces=1, résidentiels-éligibles=1, zonage=2, intersection B′=1"
+  },
+  "saint-pierre": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-pierre/latest.json — signaux précoces=0, résidentiels-éligibles=1, zonage=3, intersection B′=0"
+  },
+  "saint-liguori": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 0,
+    "note": "SCW graph/saint-liguori/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=0, intersection B′=0"
+  },
+  "saint-hippolyte": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/saint-hippolyte/latest.json — signaux précoces=10, résidentiels-éligibles=2, zonage=48, intersection B′=0"
+  },
+  "venise-en-quebec": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/venise-en-quebec/latest.json — signaux précoces=0, résidentiels-éligibles=2, zonage=3, intersection B′=0"
+  },
+  "clarenceville": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 2,
+    "note": "SCW graph/clarenceville/latest.json — signaux précoces=0, résidentiels-éligibles=0, zonage=1, intersection B′=0"
+  },
+  "joliette": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/joliette/latest.json — signaux précoces=0, résidentiels-éligibles=3, zonage=6, intersection B′=0"
+  },
+  "les-coteaux": {
+    "in_bprime": false,
+    "provenance": "silver",
+    "score": 4,
+    "note": "SCW graph/les-coteaux/latest.json — signaux précoces=0, résidentiels-éligibles=1, zonage=6, intersection B′=0"
+  },
+  "saint-dominique": {
+    "in_bprime": true,
+    "target": 1,
+    "provenance": "silver",
+    "score": 6,
+    "note": "SCW graph/saint-dominique/latest.json — signaux précoces=6, résidentiels-éligibles=3, zonage=4, intersection B′=1"
+  }
+}
