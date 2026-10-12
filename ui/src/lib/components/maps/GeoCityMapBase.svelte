@@ -398,12 +398,8 @@
     [-55, 63],
   ];
 
-  // Résilience `load` — repli si l'event `'load'` de MapLibre ne fire pas (flap
-  // réseau / requête de tuile avortée qui laisse `map.loaded()` en attente, ex.
-  // ERR_NETWORK_CHANGED sous navigateur partagé) : au bout de ce délai, on force
-  // la finalisation (pose des couches + `mapReady = true`) pour ne jamais laisser
-  // l'overlay « Chargement… » figé. 6 s = marge confortable au-delà du `load`
-  // nominal, sans laisser l'utilisateur devant un écran vide trop longtemps.
+  // Retry initialization if map load is missing; a timer cannot make the style
+  // ready. `style.load` normally starts setup before raster tiles finish loading.
   const MAP_READY_FALLBACK_MS = 6000;
 
   type MapLayerEvent = {
@@ -484,10 +480,8 @@
    * sont liés qu'UNE fois (`citiesInteractionsBound`) → l'appeler plusieurs fois ne
    * double JAMAIS une source, une couche ou un écouteur. Extrait de la finalisation
    * pour que le filet de récupération (onglet caché / canvas taille-nulle) puisse
-   * sûrement rejouer le même chemin. Enveloppée : sur un style pas tout à fait prêt
-   * (chemin de repli), `addSource`/`addLayer` peut throw → on `console.warn` sans
-   * jamais figer l'overlay « Chargement… » (les couches zones/lots restent posées
-   * par la sync réactive gatée sur `mapReady`).
+   * sûrement rejouer le même chemin. Called only after style readiness has been
+   * established by finalization; unexpected layer errors are logged below.
    */
   function ensureBaseCityLayers(
     m: import("maplibre-gl").Map,
@@ -590,9 +584,7 @@
         });
       }
     } catch (err) {
-      // Repli : style pas tout à fait prêt → on n'a pas pu poser les couches
-      // villes, mais on lève quand même l'overlay (dégradation gracieuse).
-      console.warn("cities-polygons layer setup failed (repli load):", err);
+      console.warn("cities-polygons layer setup failed:", err);
     }
   }
 
@@ -1935,14 +1927,14 @@
       });
       if (sat?.attributionResolver) wireSatelliteAttribution(m, sat.attributionResolver);
 
-      // Résilience `load` — CORPS de finalisation EXTRAIT et IDEMPOTENT. Il est
-      // déclenché soit par l'event `'load'` de MapLibre (chemin nominal), soit
-      // par le repli-timeout si `'load'` ne fire jamais (flap réseau). Le garde
-      // synchrone en tête (`mapSetupStarted`, posé AVANT tout `await`) interdit
-      // toute double-exécution si les deux déclencheurs se croisent — sans lui,
-      // un second passage referait `addSource` → throw « source already exists ».
+      // `style.load` permits mutations before raster tiles are available.
+      // isStyleLoaded() also waits for sources, so use it only as a recovery
+      // check when the style event has not been observed.
+      let styleReady = false;
       const finalizeMapSetup = async (): Promise<void> => {
-        if (mapSetupStarted) return;
+        if (mapInstance !== m || mapSetupStarted) return;
+        if (!styleReady && !m.isStyleLoaded()) return;
+        styleReady = true;
         mapSetupStarted = true;
         // Finalisation engagée → annule le repli s'il est encore en vol (chemin
         // nominal : le timeout ne fera jamais un second passage).
@@ -1963,16 +1955,11 @@
         } catch (err) {
           console.warn("municipalities.geojson fetch error:", err);
         }
+        // The asset request may outlive unmount or a basemap reconstruction.
+        if (mapInstance !== m) return;
         cacheCityBoundaries(polygonsData);
 
-        // Pose des couches de base villes (source + choroplèthe/contour/labels +
-        // interactions) — IDEMPOTENTE (gardée par getSource/getLayer + liaison
-        // unique des handlers), donc sûre à rejouer depuis le filet de récupération
-        // (onglet caché / canvas taille-nulle). Enveloppée côté fonction : sur le
-        // CHEMIN DE REPLI le style peut ne pas être tout à fait prêt → addSource/
-        // addLayer throw, on `console.warn` MAIS on pose quand même `mapReady = true`
-        // plus bas (objectif = ne JAMAIS laisser l'overlay « Chargement… » figé).
-        // Les couches zones/lots sont posées par la sync réactive gatée sur `mapReady`.
+        // Base and business layers are installed only on the current, ready style.
         ensureBaseCityLayers(m, polygonsData);
 
         mapReady = true;
@@ -2004,12 +1991,14 @@
       // §5.3 — écoute des erreurs : repli OSM au 1er échec dur attribué à `sat-2d`
       // (discriminateur source-gap, cf. isSatelliteTileError). No-op hors satellite.
       m.on("error", (e: unknown) => handleMapError(e));
-      // Chemin nominal (primaire) : l'event `'load'` de MapLibre.
-      m.on("load", () => void finalizeMapSetup());
-      // Repli : si `'load'` ne fire pas dans le délai imparti (flap réseau, tuile
-      // stuck, requête que `map.loaded()` attend et qui est avortée), on force la
-      // finalisation UNE SEULE fois — le garde d'idempotence côté finalizeMapSetup
-      // absorbe toute course avec un `'load'` tardif.
+      const handleStyleReady = () => {
+        styleReady = true;
+        void finalizeMapSetup();
+      };
+      m.on("style.load", handleStyleReady);
+      m.on("load", handleStyleReady);
+      // A missed event can be recovered only if MapLibre confirms readiness.
+      // A late style event still finalizes after an unsuccessful timer attempt.
       readyFallbackTimer = setTimeout(() => {
         void finalizeMapSetup();
       }, MAP_READY_FALLBACK_MS);
