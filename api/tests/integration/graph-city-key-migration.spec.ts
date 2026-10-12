@@ -18,6 +18,7 @@ import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { loadConfig } from "../../src/config.js";
+import { runHostMigrations } from "../../src/db/host-migrations.js";
 
 const MIGRATIONS = fileURLToPath(new URL("../../drizzle", import.meta.url));
 const SCRATCH_DB = `radar_m0013_${process.pid}`;
@@ -54,7 +55,12 @@ async function migrateFolder(folder: string, notices: string[] = []): Promise<vo
   });
   pool.on("connect", (c) => c.on("notice", (n) => notices.push(n.message ?? "")));
   try {
-    await migrate(drizzle(pool), { migrationsFolder: folder });
+    if (folder === upTo0012) {
+      // Reproduce the native predecessor; qualify upgrades with the production runner.
+      await migrate(drizzle(pool), { migrationsFolder: folder });
+    } else {
+      await runHostMigrations(pool, folder);
+    }
   } finally {
     await pool.end();
   }
@@ -118,7 +124,7 @@ describe("migration 0013_graph_city_key", () => {
       await holder.query("SELECT count(*) FROM graph_nodes"); // ACCESS SHARE until COMMIT
       const error = await migrateFolder(MIGRATIONS).then(() => null, (err: unknown) => err as Error & { cause?: Error });
       expect(error).not.toBeNull();
-      // drizzle wraps the driver error ("Failed query: …"); the cause is the lock timeout.
+      // The production runner must preserve the driver's lock-timeout evidence.
       expect(`${error!.message} ${error!.cause?.message ?? ""}`).toMatch(/lock timeout/i);
     } finally {
       await holder.query("ROLLBACK");
