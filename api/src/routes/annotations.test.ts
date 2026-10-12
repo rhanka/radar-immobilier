@@ -23,11 +23,11 @@ function setup(options: Partial<AnnotationsDeps> = {}, includeModule = true) {
   });
   const approvedPrincipal = vi.fn(async () => true);
   const deps: AnnotationsDeps = {
-    sessionSecret, approvedPrincipal,
+    sessionSecret, approvedPrincipal, capacity: SYNTHETIC_CAPACITY,
     repository: { hasCapability: async () => true, resources: async () => [{ ref: resource,
       sourceVersion: "v1", frozenDigest: "a".repeat(64), currentDigest: "a".repeat(64), available: true }] },
     ...(includeModule ? { module: { createCanonicalCommentsRouter: factory,
-      store: {} as CanonicalCommandStore, capacity: SYNTHETIC_CAPACITY } } : {}),
+      store: {} as CanonicalCommandStore } } : {}),
     ...options,
   };
   return { app: new Hono().route("/api/v1/annotations", annotationsRoute(deps)), factory, approvedPrincipal };
@@ -55,7 +55,11 @@ describe("authenticated canonical module composition", () => {
     const { app } = setup({}, false);
     const response = await app.request("/api/v1/annotations", { method: "POST", headers: { cookie: await cookie("subject-a") } });
     expect(response.status).toBe(503);
-    expect((await response.json()).code).toBe("unavailable");
+    expect(await response.text()).toContain("unavailable");
+    const missingCapacity = setup({ capacity: undefined });
+    expect((await missingCapacity.app.request("/api/v1/annotations", { method: "POST",
+      headers: { cookie: await cookie("subject-a") } })).status).toBe(503);
+    expect(missingCapacity.factory).not.toHaveBeenCalled();
   });
 
   it("should bind every port call to each authenticated subject under concurrency", async () => {
@@ -70,5 +74,6 @@ describe("authenticated canonical module composition", () => {
     expect(spoofed.status).toBe(403);
     expect(await spoofed.json()).toEqual({ allowed: false, resolved: "unavailable" });
     expect(factory).toHaveBeenCalledTimes(1);
+    expect(factory).toHaveBeenCalledWith(expect.anything(), { capacity: SYNTHETIC_CAPACITY });
   });
 });

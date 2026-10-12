@@ -27,6 +27,10 @@ describe("annotations host authorization and exact snapshots", () => {
     }
     expect(() => snapshotResource({ scope: SYNTHETIC_SCOPE, namespace: "immo.graph",
       citySlug: "city-a", kind: "regulation", nativeId: "gn-display", sourceVersion: "v1" })).toThrow();
+    const uuid = { scope: SYNTHETIC_SCOPE, namespace: "immo.graph", citySlug: "city-a",
+      kind: "signal", nativeId: "00000000-0000-0000-0000-000000000001", sourceVersion: "v1" };
+    expect(() => snapshotResource(uuid)).toThrow();
+    expect(() => snapshotResource({ ...uuid, nativeIdentityEvidence: "qualified-graph-identity-proof" })).not.toThrow();
   });
 
   it("should deny an unconfigured sensitive capability and recheck revocation", async () => {
@@ -59,6 +63,8 @@ describe("annotations host authorization and exact snapshots", () => {
     change([resource]);
     expect(await ports.resolver.resolve("subject-a", ref)).toBe("source-changed");
     change([resource, resource]);
+    expect(await ports.resolver.resolve("subject-a", ref)).toBe("unresolved");
+    change([{ ...resource, currentDigest: null }]);
     expect(await ports.resolver.resolve("subject-a", ref)).toBe("unresolved");
     change([{ ...resource, available: false }]);
     expect(await ports.resolver.resolve("subject-a", ref)).toBe("unavailable");

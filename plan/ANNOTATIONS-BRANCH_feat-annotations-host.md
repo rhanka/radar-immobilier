@@ -87,6 +87,7 @@
   - [ ] Retain and acknowledge the exact frozen manifest, receipt and erratum; replay the entire vector corpus.
   - [ ] Correct host capacity/error/identity/evidence boundaries and retain assignment/resource history.
   - [x] Keep capacity in host options, leave module absence outside the closed canonical wire, require UUID-native evidence, distinguish unresolved digests, and prepare unknown historical sources without review authority.
+  - [x] Qualify the corrected host boundaries on 13 unit tests, including absent capacity and unknown historical evidence.
   - [ ] Prepare a complete synthetic workbook inventory/manifest and explicit map-category dispositions, without canonical writes.
   - [ ] Require locked API image installation and document every contracts resolver.
 - [ ] **Lot 10 — Qualify operational guards and reconcile the reviews.**
