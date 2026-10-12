@@ -1,7 +1,6 @@
 import { writeFile } from "node:fs/promises";
 
 import { runHostMigrations } from "./host-migrations.js";
-import { retireEmptyLegacyNotes } from "./retire-legacy-notes.js";
 import { createDb } from "./client.js";
 import { loadConfig } from "../config.js";
 import { createLogger } from "../logger.js";
@@ -13,7 +12,8 @@ const { pool } = createDb(config);
 // Hand-authored migrations report their counts with RAISE NOTICE (e.g. 0013: deleted
 // NULL-city nodes and unplaced edges, GH #812). Every NOTICE is logged, and a bounded summary
 // (committed vs failed + the notices) goes to the termination message, which the CD prints
-// without needing pods/log. Notices of a failed run describe work that was rolled back.
+// without needing pods/log. Each DDL step commits separately; a failed step rolls back
+// while earlier steps remain committed. Legacy retirement is an explicit cutover operation.
 const TERMINATION_LOG = "/dev/termination-log";
 const notices: string[] = [];
 pool.on("connect", (client) => {
@@ -31,10 +31,9 @@ async function writeSummary(summary: Record<string, unknown>): Promise<void> {
 }
 
 runHostMigrations(pool, "drizzle")
-  .then(() => retireEmptyLegacyNotes(pool))
-  .then(async (deletedNoteCount) => {
+  .then(async () => {
     logger.info("migrations applied");
-    await writeSummary({ status: "committed", deletedNoteCount });
+    await writeSummary({ status: "committed" });
     return pool.end();
   })
   .then(() => process.exit(0))
