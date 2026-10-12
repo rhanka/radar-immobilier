@@ -1,7 +1,7 @@
 # Feature: Immo annotations host
 
 ## Objective
-- [x] Implement the immo host against M1 and remove active legacy annotation code.
+- [ ] Implement the immo host against M1, remove active legacy annotation code and resolve the independent implementation reviews.
 
 ## Scope / Guardrails
 - [x] Isolated worktree `tmp/annotations-host`, branch `feat/annotations-host`.
@@ -22,6 +22,8 @@
   - [x] `api/package.json`, `package-lock.json`, `vendor/comments-m1/**`, `docs/spec/SPEC_EVOL_ANNOTATIONS_HOST.md`, `docs/spec/ANNOTATIONS_ERADICATION.md`, `docs/spec/ANNOTATIONS_HOST_REVIEW.md`, `plan/ANNOTATIONS-BRANCH_feat-annotations-host.md`.
   - [x] `docs/spec/SPEC_CONTRAT_ANCRE_ANNOTATIONS_v1.md`, `docs/spec/SPEC_EVOL_INTEGRATION_CARTE_STEVE.md`, `docs/spec/SPEC_CONSOLIDATED_2026-07.md`.
   - [x] `docs/spec/reports/wp4-produit-coverage.md`, `docs/spec/reports/wp5-plateforme.md`, `docs/spec/mcp/immo-mcp-provider-v0.md`.
+  - [x] `docs/spec/reports/dossier-retours-steve/README.md`, `docs/spec/ANNOTATIONS_STEVE_PREPARATION.md`.
+  - [x] `.github/workflows/build-push-images.yml`, `.github/workflows/rollback.yml`, `.github/workflows/bascule-preprod.yml`, `deploy/ci/annotations-guard.sh`, `deploy/ci/annotations-guard.test.mjs`, `deploy/ci/rollback-release.sh`.
 - [x] **Forbidden Paths (must not change)**:
   - [x] `Makefile`, `docker-compose*.yml`, `rules/**`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, other branch plans, other repositories.
 - [x] **Conditional Paths**:
@@ -37,6 +39,9 @@
 - [x] BR1001-EX3: allow retirement CLI and `api/Dockerfile` to ship the exact contract archive and guard entrypoint; no image promotion, rollback by reverting those files.
 - [x] BR1001-EX4: allow the eradication inventory and supersession notices in the six former annotation/MCP specs and reports; preserve owner quotations/history, rollback by reverting the notices.
 - [x] ANNOTATIONS-D4: full-suite evidence found the 0012 fixture retaining new 0014 and silently skipping 0013; bound its journal to 0012. Local full API qualification uses four workers after connection/timeouts under concurrent builds; no timeout is increased.
+- [x] ANNOTATIONS-D5: owner-supplied Opus 5.5 max and Fable 5.1 max reviews both reject merge at 80105624; accept the evidenced migration/cutover blockers and preserve both original verdicts.
+- [x] BR1001-EX5: permit the named deployment/rollback/restore guard paths because ordinary CD can retire legacy before conversion, copy it during cutover or restore an incompatible writer; offline qualification only, no live configuration change, rollback by reverting these guard changes before adoption.
+- [x] BR1001-EX6: permit the Steve report supersession notice and preparation spec to close the inventory and retain immo-owned IM-1/IM-2 work; preserve historic decisions, rollback by reverting the notices/preparation changes.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch; sequential writes; independent design reviewers read only.
@@ -72,3 +77,16 @@
   - [x] Workspace typecheck/full lint, build, API image smoke, artifact reconstruction and C1/C2 pass.
   - [ ] Complementary code consensus: selection-failed; exact author model/effort are missing, no leg dispatched.
 - [x] **Lot 7 — Commit selective atomic changes and provide evidence plus bounded M2/M3 handoff.**
+- [ ] **Lot 8 — Resolve migration and retirement blockers on synthetic restored databases.**
+  - [ ] Remove retirement from ordinary migrations; require the installed host schema and bounded locks for explicit retirement.
+  - [ ] Ship controlled catalog attestation for manual 0009 under the migration lock; qualify native Drizzle upgrades and receipt drift.
+  - [ ] Qualify step rollback, retry, concurrent migration, and restoration before/after retirement.
+- [ ] **Lot 9 — Complete immo-owned synthetic preparation and contract receipt.**
+  - [ ] Retain and acknowledge the exact frozen manifest, receipt and erratum; replay the entire vector corpus.
+  - [ ] Correct host capacity/error/identity/evidence boundaries and retain assignment/resource history.
+  - [ ] Prepare a complete synthetic workbook inventory/manifest and explicit map-category dispositions, without canonical writes.
+  - [ ] Require locked API image installation and document every contracts resolver.
+- [ ] **Lot 10 — Qualify operational guards and reconcile the reviews.**
+  - [ ] Block ordinary promotion during unqualified adoption, incompatible rollback and preprod restore before their first mutation/copy.
+  - [ ] Document operator entrypoints, merge/deployment prerequisites, remaining immo and module acceptance separately.
+  - [ ] Run current scoped/full gates, image smoke, scope checks and independent review; report any external gate accurately.
