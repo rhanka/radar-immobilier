@@ -77,6 +77,8 @@
     - [x] Commit shell and administration utility migrations.
   - [x] Commit MapLibre startup, named exports and unit-test adaptations.
   - [ ] Commit worker hosting and browser acceptance harness.
+    - [x] Commit same-origin worker CSP, JS MIME and missing-worker 404 parity.
+    - [ ] Commit real-engine/browser fixtures and browser assertions.
   - [ ] Commit proven security-register resolutions and findings.
   - [ ] Push a clean descendant to the unchanged PR #854 remote branch.
   - [ ] Verify new CI on the full pushed SHA and reconcile Opus/Fable technical reviews.
