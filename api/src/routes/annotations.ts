@@ -12,7 +12,6 @@ import { createAnnotationHostPorts, type AnnotationHostRepository } from "../ser
 export interface CanonicalAnnotationsModule {
   createCanonicalCommentsRouter: CanonicalRouterFactory<Hono>;
   store: CanonicalCommandStore;
-  capacity: CapacityDescriptor;
 }
 
 export interface AnnotationsDeps {
@@ -20,6 +19,7 @@ export interface AnnotationsDeps {
   approvedPrincipal(sub: string): Promise<boolean>;
   sessionSecret?: string;
   module?: CanonicalAnnotationsModule;
+  capacity?: CapacityDescriptor;
   decisions?: DecisionResolutionPort;
 }
 
@@ -36,14 +36,14 @@ export function annotationsRoute(deps?: AnnotationsDeps) {
     if (!(await deps.approvedPrincipal(session.sub))) {
       return c.json({ code: "denied", message: "Access denied" }, 403);
     }
-    if (!deps.module) {
-      return c.json({ code: "unavailable", message: "Canonical annotations module is unavailable" }, 503);
+    if (!deps.module || !deps.capacity) {
+      return c.text("Canonical annotations module or host capacity is unavailable", 503);
     }
     c.set("session", session);
     await principals.run(session.sub, next);
     return;
   });
-  if (deps?.module) {
+  if (deps?.module && deps.capacity) {
     const host = createAnnotationHostPorts(deps.repository);
     const router = deps.module.createCanonicalCommentsRouter({
       store: deps.module.store,
@@ -52,7 +52,7 @@ export function annotationsRoute(deps?: AnnotationsDeps) {
       resolver: { resolve: (claimed, resource) => claimed === principals.getStore()
         ? host.resolver.resolve(claimed, resource) : Promise.resolve("unavailable") },
       decisions: deps.decisions ?? host.decisions,
-    }, { capacity: deps.module.capacity });
+    }, { capacity: deps.capacity });
     // M3 must qualify the session context convention; port calls are independently bound.
     app.route("/", router);
   }

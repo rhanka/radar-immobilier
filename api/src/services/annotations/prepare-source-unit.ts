@@ -45,7 +45,11 @@ export async function prepareSyntheticSourceUnit(
     throw new Error("Source unit access denied");
   }
   for (const target of targets) {
-    if (await host.resolveBinding(registration.principal, target) !== "exact") {
+    const historical = target.source.variant === "unknown" &&
+      target.resource.namespace === "immo.history" && target.resource.kind === "historical-source";
+    const outcome = historical ? await host.resolver.resolve(registration.principal, target.resource)
+      : await host.resolveBinding(registration.principal, target);
+    if (outcome !== "exact") {
       throw new Error("Source unit requires qualified exact resource bindings");
     }
   }
