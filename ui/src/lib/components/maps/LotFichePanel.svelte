@@ -46,18 +46,12 @@
     activeMarketMark,
     activePipelineMark,
     createProspectMark,
-    fetchProspectLotState,
+    fetchProspectMarksForLot,
     prospectStatusLabel,
     type ProspectMark,
     type ProspectMode,
     type PipelineStatus,
   } from "$lib/prospect/prospect-marks-client.js";
-  // §2 (PR2) : notes d'équipe unifiées (endpoint `/api/v1/prospects/notes`,
-  // cible "lot") + temps réel SSE — réutilise les composants collab. Ouvert à
-  // tous les approuvés (serveur = autorité author-only), indépendant du gate
-  // `allowMarquage` qui ne garde plus que le marquage pipeline/marché.
-  import SignalAnnotations from "$lib/components/collab/SignalAnnotations.svelte";
-  import AnnotationBadge from "$lib/components/collab/AnnotationBadge.svelte";
   import {
     assignmentStateLabel,
     auditCodeLabel,
@@ -150,8 +144,6 @@
   let prospectError: string | null = null;
   let prospectMarks: ProspectMark[] = [];
   let prospectRequestKey = "";
-  /** Nombre d'annotations §2 (cible lot) — pilote le badge ambiant. */
-  let annotationCount = 0;
 
   $: citySlug = lot?.properties.citySlug ?? "";
   $: mapsUrl = lotCentroid
@@ -172,7 +164,6 @@
     } else if (!key && prospectRequestKey) {
       prospectRequestKey = "";
       prospectMarks = [];
-      annotationCount = 0;
       prospectError = null;
       prospectLoading = false;
     }
@@ -197,9 +188,9 @@
     prospectLoading = true;
     prospectError = null;
     try {
-      const state = await fetchProspectLotState(noLotValue, citySlugValue);
+      const marks = await fetchProspectMarksForLot(noLotValue, citySlugValue);
       if (prospectRequestKey !== `${citySlugValue}::${noLotValue}`) return;
-      prospectMarks = state.marks;
+      prospectMarks = marks;
     } catch (e) {
       if (prospectRequestKey !== `${citySlugValue}::${noLotValue}`) return;
       prospectMarks = [];
@@ -212,7 +203,6 @@
   }
 
   // ── Écriture marquage pipeline/marché (append-only, gatée allowMarquage) ────
-  // Les NOTES d'équipe sont désormais gérées par SignalAnnotations (§2 unifié).
   let prospectSaving = false;
 
   const PIPELINE_ACTIONS: Array<{ statut: PipelineStatus; label: string }> = [
@@ -648,14 +638,14 @@
         {/if}
       </section>
 
-      <!-- Section Marquage équipe + notes (CS-L3) ─────────────────────────── -->
-      <section aria-labelledby="section-notes">
+      <!-- Section Marquage équipe (CS-L3) ─────────────────────────── -->
+      <section aria-labelledby="section-marquage">
         <h3
-          id="section-notes"
+          id="section-marquage"
           class="mb-2 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-slate-500"
         >
           <MessageSquare class="h-3.5 w-3.5 text-teal-600 shrink-0" aria-hidden="true" />
-          Marquage équipe & notes
+          Marquage équipe
         </h3>
 
         {#if !citySlug}
@@ -670,14 +660,14 @@
             class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs text-slate-400"
             data-testid="fiche-prospect-loading"
           >
-            Chargement des marques et notes…
+            Chargement des marques…
           </div>
         {:else if prospectError}
           <div
             class="rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-800"
             data-testid="fiche-prospect-error"
           >
-            Marquage/notes indisponibles — {prospectError}.
+            Marquage indisponible — {prospectError}.
           </div>
         {:else}
           <div class="space-y-3" data-testid="fiche-prospect-state">
@@ -718,7 +708,7 @@
                 </div>
                 {#if !lotVersionId}
                   <p class="text-[11px] text-slate-400 italic" data-testid="fiche-prospect-no-version">
-                    Statuts pipeline/marché désactivés : ce lot n'expose pas encore son identifiant de version (lotVersionId) côté collection geo. Les notes d'équipe restent possibles ci-dessous.
+                    Statuts pipeline/marché désactivés : ce lot n'expose pas encore son identifiant de version (lotVersionId) côté collection geo.
                   </p>
                 {/if}
               </div>
@@ -730,23 +720,6 @@
           </div>
         {/if}
 
-        <!-- Notes d'équipe §2 (endpoint unifié + temps réel SSE) — ouvert à tous
-             les approuvés (serveur = autorité author-only ; édition/suppression
-             seulement sur ses propres notes). Indépendant du gate allowMarquage. -->
-        {#if citySlug && noLot}
-          <div class="mt-3 border-t border-slate-100 pt-3" data-testid="fiche-annotations">
-            <div class="mb-1.5 flex items-center gap-2">
-              <span class="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-                Notes d'équipe
-              </span>
-              <AnnotationBadge count={annotationCount} />
-            </div>
-            <SignalAnnotations
-              target={{ type: "lot", id: noLot, citySlug }}
-              onCount={(n) => (annotationCount = n)}
-            />
-          </div>
-        {/if}
       </section>
 
       <!-- Section Lien Google Maps ─────────────────────────────────────────── -->

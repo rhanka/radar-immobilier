@@ -8,7 +8,7 @@
  *
  * No MapLibre, no API: pure click → focus → detail reactivity loop.
  */
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import { render, fireEvent, cleanup } from "@testing-library/svelte";
 import type { MunicipalityT } from "@radar/domain";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
@@ -21,21 +21,7 @@ import {
 } from "$lib/maps/selection-bucket.js";
 import Harness from "./SignauxSelPanelHarness.svelte";
 
-// §2 — les fiches signal dépliées montent SignalAnnotations, qui appelle le
-// client annotations au mount. On le mocke pour garder ces tests hermétiques
-// (aucun fetch réel ; les fiches restent testées à l'identique).
-vi.mock("$lib/collab/annotations-client.js", () => ({
-  listAnnotations: vi.fn(async () => []),
-  createAnnotation: vi.fn(async () => {}),
-  editAnnotation: vi.fn(async () => {}),
-  deleteAnnotation: vi.fn(async () => {}),
-}));
-// §2 PR2 — SignalAnnotations s'abonne au flux SSE au mount ; on le neutralise
-// (aucun EventSource réel en jsdom).
-vi.mock("$lib/collab/prospect-notes-stream.js", () => ({
-  subscribeNoteFrames: () => () => {},
-  noteMatchesTarget: () => false,
-}));
+
 
 /**
  * État de sélection avec une ZONE active (focusée), utilisé par les tests du
