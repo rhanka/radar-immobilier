@@ -46,7 +46,7 @@
 - [ ] Lot 3 — Compose the canonical module and prepare synthetic Steve units.
 - [ ] Lot 4 — Remove legacy domain/API/UI/MCP consumers and adapt retained tests.
   - [x] Remove domain note contracts, Drizzle exports and dormant MCP note scope.
-  - [ ] Remove API note commands and qualify endpoint retirement.
+  - [x] Remove API note commands and qualify endpoint retirement.
   - [ ] Delete UI clients, subscriptions, components and mounts; preserve marks.
 - [ ] Lot 5 — Guard migration/retirement and document operational eradication.
 - [ ] Lot 6 — Run scoped tests, static checks, build and independent review.
