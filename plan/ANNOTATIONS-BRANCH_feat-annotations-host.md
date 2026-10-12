@@ -56,5 +56,6 @@
   - [ ] Delete UI clients, subscriptions, components and mounts; preserve marks.
 - [ ] **Lot 5 — Guard migration/retirement and document operational eradication.**
   - [x] Account for every historical SQL and the known 0009 journal omission.
+  - [x] Serialize host DDL and guarded legacy retirement with checksum/predecessor checks.
 - [ ] **Lot 6 — Run scoped tests, static checks, build and independent review.**
 - [ ] **Lot 7 — Commit selective atomic changes and provide evidence plus bounded M2/M3 handoff.**
