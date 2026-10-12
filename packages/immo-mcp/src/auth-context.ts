@@ -32,7 +32,6 @@ export const IMMO_SCOPES = {
   read: "immo:read",
   search: "immo:search",
   documentsRead: "immo:documents:read",
-  notesWrite: "immo:notes:write",
   decisionsPropose: "immo:decisions:propose",
   admin: "immo:admin",
 } as const;

@@ -17,9 +17,9 @@ Cadrage : `docs/spec/mcp/immo-mcp-provider-v0.md` · plan : `docs/spec/reports/w
 | `list_documents` | `immo:documents:read` | `GET /api/documents/raw` |
 | `read_document_excerpt` | `immo:documents:read` | `GET /api/documents/raw` (extrait borné + redaction) |
 
-Mutations (`notes`, `ProspectMark`, `decisions:propose`) = **hors v0**, non
-enregistrées. Les scopes `immo:notes:write` / `immo:decisions:propose` /
-`immo:admin` sont définis mais non exposés.
+Mutations (`ProspectMark`, `decisions:propose`) are outside v0 and are not registered.
+The `immo:decisions:propose` and `immo:admin` scopes are defined but not exposed.
+Future annotations use the shared canonical module and its capabilities.
 
 ## Principes
 
