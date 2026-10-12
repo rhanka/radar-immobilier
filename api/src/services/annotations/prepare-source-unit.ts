@@ -47,7 +47,7 @@ export async function prepareSyntheticSourceUnit(
   for (const target of targets) {
     const historical = target.source.variant === "unknown" &&
       target.resource.namespace === "immo.history" && target.resource.kind === "historical-source";
-    const outcome = historical ? await host.resolver.resolve(registration.principal, target.resource)
+    const outcome = historical ? (await host.canPrepareHistoricalSource(registration.principal, target.resource) ? "exact" : "unresolved")
       : await host.resolveBinding(registration.principal, target);
     if (outcome !== "exact") {
       throw new Error("Source unit requires qualified exact resource bindings");

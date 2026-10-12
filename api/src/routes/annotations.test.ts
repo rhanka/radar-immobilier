@@ -10,7 +10,7 @@ const sessionSecret = "synthetic-secret-with-enough-bytes";
 const resource = snapshotResource({ scope: SYNTHETIC_SCOPE, namespace: "immo.graph",
   citySlug: "synthetic-city", kind: "signal", nativeId: "native-id", sourceVersion: "v1" });
 
-function setup(options: Partial<AnnotationsDeps> = {}, includeModule = true) {
+function setup(options: Partial<AnnotationsDeps> = {}, includeModule = true, includeCapacity = true) {
   const factory = vi.fn((ports: CanonicalHttpPorts) => {
     // Structural module double: proves the host's wiring, no canonical store or command implementation.
     const router = new Hono();
@@ -23,7 +23,8 @@ function setup(options: Partial<AnnotationsDeps> = {}, includeModule = true) {
   });
   const approvedPrincipal = vi.fn(async () => true);
   const deps: AnnotationsDeps = {
-    sessionSecret, approvedPrincipal, capacity: SYNTHETIC_CAPACITY,
+    sessionSecret, approvedPrincipal,
+    ...(includeCapacity ? { capacity: SYNTHETIC_CAPACITY } : {}),
     repository: { hasCapability: async () => true, resources: async () => [{ ref: resource,
       sourceVersion: "v1", frozenDigest: "a".repeat(64), currentDigest: "a".repeat(64), available: true }] },
     ...(includeModule ? { module: { createCanonicalCommentsRouter: factory,
@@ -56,7 +57,7 @@ describe("authenticated canonical module composition", () => {
     const response = await app.request("/api/v1/annotations", { method: "POST", headers: { cookie: await cookie("subject-a") } });
     expect(response.status).toBe(503);
     expect(await response.text()).toContain("unavailable");
-    const missingCapacity = setup({ capacity: undefined });
+    const missingCapacity = setup({}, true, false);
     expect((await missingCapacity.app.request("/api/v1/annotations", { method: "POST",
       headers: { cookie: await cookie("subject-a") } })).status).toBe(503);
     expect(missingCapacity.factory).not.toHaveBeenCalled();

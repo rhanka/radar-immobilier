@@ -37,6 +37,7 @@ export function snapshotResource(input: {
 }
 
 export function createAnnotationHostPorts(repository: AnnotationHostRepository) {
+  const historical = (ref: ResourceRef) => ref.namespace === "immo.history" && ref.kind === "historical-source";
   async function readable(principal: string, ref: ResourceRef): Promise<boolean> {
     return isResourceRef(ref) && repository.hasCapability(principal, ref.scope, "read");
   }
@@ -47,6 +48,7 @@ export function createAnnotationHostPorts(repository: AnnotationHostRepository) 
     if (resources.length !== 1) return "unresolved";
     const resource = resources[0]!;
     if (!resource.available) return "unavailable";
+    if (historical(ref)) return "unresolved";
     if (resource.currentDigest === null) return "unresolved";
     return resource.frozenDigest === resource.currentDigest ? "exact" : "source-changed";
   }
@@ -55,6 +57,7 @@ export function createAnnotationHostPorts(repository: AnnotationHostRepository) 
       if (!principal || targets.length === 0 || targets.some((target) => !isResourceRef(target))) return false;
       const first = targets[0]!.scope;
       for (const target of targets) {
+        if (capability === "review" && historical(target)) return false;
         if (!isResourceRef(target) || target.scope.tenantId !== first.tenantId ||
             target.scope.workspaceId !== first.workspaceId ||
             !(await readable(principal, target)) ||
@@ -75,5 +78,11 @@ export function createAnnotationHostPorts(repository: AnnotationHostRepository) 
     const [registered] = await repository.resources(binding.resource);
     return registered?.sourceVersion === binding.source.sourceVersion ? "exact" : "source-changed";
   }
-  return { capabilities, resolver, decisions, resolveBinding };
+  async function canPrepareHistoricalSource(principal: string, ref: ResourceRef): Promise<boolean> {
+    if (!historical(ref) || !(await readable(principal, ref))) return false;
+    const rows = await repository.resources(ref);
+    return rows.length === 1 && rows[0]!.available && rows[0]!.currentDigest !== null &&
+      rows[0]!.currentDigest === rows[0]!.frozenDigest;
+  }
+  return { capabilities, resolver, decisions, resolveBinding, canPrepareHistoricalSource };
 }
