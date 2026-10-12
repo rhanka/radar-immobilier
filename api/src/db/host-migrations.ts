@@ -1,14 +1,20 @@
 import type pg from "pg";
 import { loadMigrationAssets } from "./migration-assets.js";
+import { qualify0009Catalog } from "./catalog-0009.js";
 
 export const HOST_MIGRATION_LOCK = "radar-annotations-migration-cutover";
 
 /** Single host authority, full predecessor/hash checks, one transaction per DDL step. */
-export async function runHostMigrations(pool: pg.Pool, folder: string): Promise<void> {
+export async function runHostMigrations(pool: pg.Pool, folder: string,
+  options: { attestationRef?: string } = {}): Promise<void> {
+  if (options.attestationRef !== undefined && !options.attestationRef.trim()) {
+    throw new Error("A nonempty operator attestation reference is required");
+  }
   const assets = await loadMigrationAssets(folder);
   const client = await pool.connect();
   let locked = false;
   try {
+    await client.query("SET lock_timeout = '5s'");
     await client.query("SELECT pg_advisory_lock(hashtext($1))", [HOST_MIGRATION_LOCK]);
     locked = true;
     const catalog = await client.query<{ table_name: string | null }>(
@@ -33,9 +39,11 @@ export async function runHostMigrations(pool: pg.Pool, folder: string): Promise<
       "SELECT to_regclass('public.account_invitations')::text AS table_name",
     );
     const migration0009 = assets.find((a) => a.tag === "0009_account_invitations")!;
-    if (invitations.rows[0]?.table_name && !appliedByWhen.has(migration0009.when)) {
+    const manual0009 = !!invitations.rows[0]?.table_name && !appliedByWhen.has(migration0009.when);
+    if (manual0009 && !options.attestationRef) {
       throw new Error("0009 schema lacks a qualified receipt; explicit catalog attestation is required");
     }
+    const catalogDigest = invitations.rows[0]?.table_name ? await qualify0009Catalog(client) : null;
     if (!invitations.rows[0]?.table_name && appliedByWhen.has(migration0009.when)) {
       throw new Error("0009 receipt has no schema; refusing drift");
     }
@@ -47,6 +55,9 @@ export async function runHostMigrations(pool: pg.Pool, folder: string): Promise<
       await client.query(`CREATE TABLE IF NOT EXISTS drizzle.radar_migration_steps
         (tag text PRIMARY KEY, checksum text NOT NULL, predecessor_checksum text,
          applied_at timestamptz NOT NULL DEFAULT now())`);
+      await client.query(`CREATE TABLE IF NOT EXISTS drizzle.radar_migration_attestations
+        (tag text PRIMARY KEY, checksum text NOT NULL, catalog_digest text NOT NULL,
+         authority_ref text NOT NULL, attested_at timestamptz NOT NULL DEFAULT now())`);
       await client.query("COMMIT");
     } catch (error) { await client.query("ROLLBACK"); throw error; }
     const extension = await client.query<{ tag: string; checksum: string; predecessor_checksum: string | null }>(
@@ -65,7 +76,13 @@ export async function runHostMigrations(pool: pg.Pool, folder: string): Promise<
       await client.query("BEGIN");
       try {
         if (!appliedByWhen.has(asset.when)) {
-          for (const statement of asset.statements) await client.query(statement);
+          if (manual0009 && asset.tag === migration0009.tag) {
+            await client.query(`INSERT INTO drizzle.radar_migration_attestations
+              (tag, checksum, catalog_digest, authority_ref) VALUES ($1, $2, $3, $4)`,
+            [asset.tag, asset.checksum, catalogDigest, options.attestationRef]);
+          } else {
+            for (const statement of asset.statements) await client.query(statement);
+          }
           await client.query("INSERT INTO drizzle.__drizzle_migrations(hash, created_at) VALUES ($1, $2)",
             [asset.checksum, asset.when]);
         }
@@ -75,7 +92,8 @@ export async function runHostMigrations(pool: pg.Pool, folder: string): Promise<
       } catch (error) { await client.query("ROLLBACK"); throw error; }
     }
   } finally {
-    if (locked) await client.query("SELECT pg_advisory_unlock(hashtext($1))", [HOST_MIGRATION_LOCK]);
-    client.release();
+    try {
+      if (locked) await client.query("SELECT pg_advisory_unlock(hashtext($1))", [HOST_MIGRATION_LOCK]);
+    } finally { client.release(); }
   }
 }

@@ -70,6 +70,7 @@ RUN npm install --no-save esbuild@0.24.0 \
   "  entryPoints: [" \
   "    'api/src/index.ts'," \
   "    'api/src/db/migrate.ts'," \
+  "    'api/src/db/scripts/adopt-host-migrations.ts'," \
   "    'api/src/db/scripts/retire-empty-legacy-notes.ts'," \
   "    'api/src/db/scripts/backfill-0004-tracking.ts'," \
   "    'api/src/scripts/project-graph-from-s3.ts'," \

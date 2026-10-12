@@ -1,4 +1,6 @@
 import { fileURLToPath } from "node:url";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import pg from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { loadConfig } from "../../src/config.js";
@@ -45,6 +47,21 @@ describe("single host migration authority and legacy retirement", () => {
     await pool.query("DELETE FROM drizzle.__drizzle_migrations WHERE created_at = $1", [invitation.when]);
     await expect(runHostMigrations(pool, folder)).rejects.toThrow(/0009 schema lacks/);
     await pool.query("INSERT INTO drizzle.__drizzle_migrations(hash, created_at) VALUES ($1, $2)", [invitation.checksum, invitation.when]);
+  });
+
+  it("should run the deployment entrypoint without retiring active legacy notes", async () => {
+    const author = await pool.query("INSERT INTO account_users(sub, status) VALUES ('ordinary-migration-author', 'approved') RETURNING id");
+    await pool.query("INSERT INTO prospect_notes(no_lot, city_slug, author_id, body) VALUES ('synthetic-lot', 'synthetic-city', $1, 'synthetic-body')", [author.rows[0].id]);
+    try {
+      await promisify(execFile)(process.execPath, ["--import", "tsx", "src/db/migrate.ts"], {
+        cwd: fileURLToPath(new URL("../../", import.meta.url)),
+        env: { ...process.env, POSTGRES_DB: database },
+      });
+      expect((await pool.query("SELECT count(*)::int AS count FROM prospect_notes")).rows[0].count).toBe(1);
+    } finally {
+      await pool.query("DELETE FROM prospect_notes WHERE author_id = $1", [author.rows[0].id]);
+      await pool.query("DELETE FROM account_users WHERE id = $1", [author.rows[0].id]);
+    }
   });
 
   it("should install schema before refusing active-note retirement and count deleted notes only", async () => {
