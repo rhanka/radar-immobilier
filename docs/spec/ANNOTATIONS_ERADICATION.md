@@ -48,17 +48,46 @@ mutation. This branch does not silently run the historical backfill or invent an
 attestation. Immo must provide a catalog-verified controlled attestation before
 adopting on such a database. A fresh isolated installation executes 0009 normally.
 
-The migrator's final retirement takes an exclusive table lock and counts active
-and deleted rows without extracting deleted bodies, authors or identifiers.
-Any active row refuses retirement and release; the already installed host schema
-remains available for subsequent qualified conversion. M1 alone cannot prove that
+Ordinary migrations never retire notes and never inspect note content. Controlled
+adoption is packaged as `dist/db/scripts/adopt-host-migrations.js`, run from
+`/workspace/api` with `--attestation-ref=<authorized-operation-reference>` and the
+existing migration Job's database environment. It qualifies 0009's columns,
+constraints and indexes under the common migration lock, then commits its native,
+extension and catalog-attestation receipts together. Divergence refuses mutation.
+No historical backfill is invoked automatically. Prod/preprod catalogs remain unobserved.
+
+Explicit `dist/db/scripts/retire-empty-legacy-notes.js` requires
+`--closed-window-ref=<authorized-cutover-reference>`, the verified 0014 receipt
+and host catalog, and bounded advisory/table locks. It counts active/deleted rows
+without extracting deleted bodies, authors or identifiers. An active row refuses
+retirement; ordinary schema migrations still succeed and preserve those rows.
+The installed schema remains available for qualified conversion. M1 cannot prove that
 conversion: its import DTO has no payload channel and its unit receipt does not
 yet list every canonical result needed for reconciliation.
 Empty/deleted-only retirement drops the table/type without CASCADE and atomically
-retains only the aggregate deleted count. Retry preserves that count. Applied
+retains only the aggregate deleted count and operation reference/time. Retry preserves that count. Applied
 history never re-creates the table; drifted historical restores are refused.
 
 ## Operational sequence
+
+**Merge/deployment prerequisite:** this preparation is not a deployable canonical
+runtime. Ordinary CD is fenced before backup, migration or rollout. Before a
+triggering merge/promotion, the designated operator must produce the prod/preprod
+catalog and aggregate active/deleted counts, exercise controlled 0009 adoption on
+a qualified restored copy, qualify M2/M3 and the closed conversion/retirement,
+prove assignments/D5/D6/Q4, and obtain the exact release authorization. None is
+inferred from the synthetic tests or the owner-approved D1–D4 principles.
+
+`radar-annotations-cutover` is an operator-owned ConfigMap in each namespace.
+The deployment guard requires `phase=canonical`, this full `releaseCommit`,
+`legacyRetired=true`, `moduleQualified=true` and an `evidenceRef` linking the
+operator's verified dossier. This is an authorization receipt, not an automatic
+catalog probe or self-issued proof. No map/arming variable was changed here.
+Current ordinary chain/restore and image-only rollback are refused; an early
+restore refusal cannot execute `always()` unquiesce. Choose the reference's
+**suspended daily restore** modality and disarm `BASCULE_SCHEDULE_ENABLED` before
+integrated adoption. A later restore needs a separately qualified closed path.
+Inspect older workflow refs and every running Job/backup task before closing.
 
 1. Sentropic delivers the exact M2/M3 cluster-mesh module, storage/migration assets,
    router, payload/service import interface and complete typed result receipts.
@@ -83,6 +112,39 @@ history never re-creates the table; drifted historical restores are refused.
    separate acceptance results.
 
 ## Bounded remaining handoff
+
+Immo also retains its own work: production Google full-grid/Drive/analysis/map
+collection; actual zone/listing/mark/position matching and attribution; integrated
+import/readback and linked corrections; backing deletion/reference/hold policies,
+durable event delivery, G4 authority, operating lock/closure across phases, restore
+and backup qualification, and source-by-source reconciliation. The synthetic
+[workbook and category preparation](ANNOTATIONS_STEVE_PREPARATION.md) does not
+replace these acceptance results and does not wait for UI-I.
+
+Host tenant/workspace/membership/resource changes have append-only metadata
+history. Frozen source snapshots cannot be edited; explicit source version links
+carry evidence and, after canonical use, the common conversion receipt reference.
+No canonical body/revision/review or source-unit-to-comment truth is stored here.
+
+The API image requires a complete lock and verified retained archives, installs
+only backend workspaces with `npm ci`, and uses the locked bundler. All 710 added
+archive metadata entries retain their original exact versions/dependency edges.
+The complete contracts resolver matrix is:
+
+| Resolver | Requested range | Installed copy | Boundary |
+|---|---|---|---|
+| chat-core 0.1.2 | ^0.1.0 | root contracts 0.1.1 | Existing chat wire |
+| events 0.1.1 | ^0.1.0 | root contracts 0.1.1 | Existing event wire |
+| comments 0.3.0 | ^0.3.0 | nested contracts 0.3.0 | M1 canonical ports/types |
+
+No contracts package was forced/deduplicated and no chat/UI range changed. Immo
+passes the common canonical structs/opaque IDs; it does not pass old TenantContext
+or EventEnvelope objects into them. Actual M2/M3 journal/transport interoperability
+must qualify that boundary. The software validator checks all archive identities
+and the 13 frozen source assets named by the retained manifest at installation.
+Npm checks do not cover image OS layers or attest vendored-code security. The local
+backend image install reported one HIGH advisory; no exception is granted here.
+Dependency/image security qualification remains a release gate for its maintainer.
 
 Sentropic owns M2/M3: observable acceptance is a delivered module installed from
 retained exact artifacts that commits one synthetic source unit atomically,

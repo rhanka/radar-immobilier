@@ -80,7 +80,7 @@
   - [x] Workspace typecheck/full lint, build, API image smoke, artifact reconstruction and C1/C2 pass.
   - [ ] Complementary code consensus: selection-failed; exact author model/effort are missing, no leg dispatched.
 - [x] **Lot 7 — Commit selective atomic changes and provide evidence plus bounded M2/M3 handoff.**
-- [ ] **Lot 8 — Resolve migration and retirement blockers on synthetic restored databases.**
+- [x] **Lot 8 — Resolve migration and retirement blockers on synthetic restored databases.**
   - [x] Refuse a resurrected legacy catalog alongside an old retirement receipt before migration or aggregate reuse; synthetic partial-restore regression passes.
   - [x] Remove destructive retirement from ordinary migrations; regression runs the actual deployment entrypoint with an active synthetic note.
   - [x] Remove retirement from ordinary migrations; explicit retirement requires a closed-window reference, verified 0014 receipt/catalog and five-second lock bounds.
@@ -93,7 +93,7 @@
   - [ ] Retain and acknowledge the exact frozen manifest, receipt and erratum; replay the entire vector corpus.
   - [x] Retain the exact frozen manifest/receipt/erratum, acknowledge their digests and preserve the producer reserves and immo D4 authority.
   - [x] Replay all 11 record, 6 canonical, 8 geometry and 12 rejection vectors; all 50 host/contract unit tests pass.
-  - [ ] Correct host capacity/error/identity/evidence boundaries and retain assignment/resource history.
+  - [x] Correct host capacity/error/identity/evidence boundaries and retain assignment/resource history.
   - [x] Keep capacity in host options, leave module absence outside the closed canonical wire, require UUID-native evidence, distinguish unresolved digests, and prepare unknown historical sources without review authority.
   - [x] Qualify the corrected host boundaries on 13 unit tests, including absent capacity and unknown historical evidence.
   - [x] Retain immutable source snapshots and append-only assignment/version-link history; match the SQL capability CHECK with M1.
@@ -102,10 +102,10 @@
   - [x] Inventory raw workbook bytes, native version-local cells/rows, formulas/cache/hidden metadata, coverage and source absences on synthetic fixtures.
   - [x] Decode a synthetic Google Sheets response with exact original-byte retention and explicit unavailable Drive sidecars; feedback mappings are qualified source text cells.
   - [x] Prepare every homogeneous contribution through M1 builders and a common import manifest; separate prepared/blocked counts, stable retry and no durable-success claim.
-  - [ ] Require locked API image installation and document every contracts resolver.
+  - [x] Require locked API image installation and document every contracts resolver; coexistence of root 0.1.1 and comments-nested 0.3.0 is explicit and does not bridge old event types.
   - [x] Require complete immutable lock/archive identities, pin the build image, install only backend workspaces with npm ci and use the locked bundler; image build/operator smoke and all workspace quality gates pass.
 - [ ] **Lot 10 — Qualify operational guards and reconcile the reviews.**
   - [x] Implement pre-copy deployment fence bound to an exact operation receipt; suspend ordinary restore and image-only rollback pending canonical recovery qualification.
   - [x] Block ordinary promotion during unqualified adoption, incompatible rollback and preprod restore before their first mutation/copy; a refused restore cannot execute its always() unquiesce path.
-  - [ ] Document operator entrypoints, merge/deployment prerequisites, remaining immo and module acceptance separately.
+  - [x] Document operator entrypoints, merge/deployment prerequisites, remaining immo and module acceptance separately; no live database/catalog/arming proof is inferred.
   - [ ] Run current scoped/full gates, image smoke, scope checks and independent review; report any external gate accurately.
