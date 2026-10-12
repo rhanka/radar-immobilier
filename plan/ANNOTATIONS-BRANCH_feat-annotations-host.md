@@ -24,6 +24,7 @@
   - [x] `docs/spec/reports/wp4-produit-coverage.md`, `docs/spec/reports/wp5-plateforme.md`, `docs/spec/mcp/immo-mcp-provider-v0.md`.
   - [x] `docs/spec/reports/dossier-retours-steve/README.md`, `docs/spec/ANNOTATIONS_STEVE_PREPARATION.md`.
   - [x] `.github/workflows/build-push-images.yml`, `.github/workflows/rollback.yml`, `.github/workflows/bascule-preprod.yml`, `deploy/ci/annotations-guard.sh`, `deploy/ci/annotations-guard.test.mjs`, `deploy/ci/rollback-release.sh`.
+  - [x] `.github/workflows/ci.yml`, `docs/spec/SPEC_FIX_GRAPH_CITY_KEY.md`.
 - [x] **Forbidden Paths (must not change)**:
   - [x] `Makefile`, `docker-compose*.yml`, `rules/**`, `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, other branch plans, other repositories.
 - [x] **Conditional Paths**:
@@ -43,6 +44,7 @@
 - [x] BR1001-EX5: permit the named deployment/rollback/restore guard paths because ordinary CD can retire legacy before conversion, copy it during cutover or restore an incompatible writer; offline qualification only, no live configuration change, rollback by reverting these guard changes before adoption.
 - [x] BR1001-EX6: permit the Steve report supersession notice and preparation spec to close the inventory and retain immo-owned IM-1/IM-2 work; preserve historic decisions, rollback by reverting the notices/preparation changes.
 - [x] BR1001-EX7: the required complete immutable installation lock fills resolved/integrity metadata for 710 existing exact-version entries and exceeds 150 lines as one generated artifact; no versions or dependency edges change, image install becomes npm ci, rollback by reverting this software-qualification commit before adoption.
+- [x] BR1001-EX8: allow CI wiring of the new offline operation/software gates and the corrected migration-summary literals in the graph spec; these verify the evidenced review fixes, no environment activation, rollback by reverting these verification/documentation hunks.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch; sequential writes; independent design reviewers read only.
@@ -84,6 +86,7 @@
   - [x] Ship controlled catalog attestation for manual 0009 under the migration lock; native Drizzle upgrade, divergent catalog and missing final receipt qualify in 32 scoped tests.
   - [x] Package catalog-only 0009 attestation with checks on columns, constraints and indexes; native/extension/attestation receipts commit together under the same bounded lock.
   - [x] Qualify step rollback, retry, concurrent migration, and synthetic database restoration before/after retirement; 34 scoped tests pass.
+  - [x] Qualify the extended host schema and assignment history in 36 integration/retired-route tests; repeatable assertions bind the new membership UUID, preserving prior audit history.
 - [ ] **Lot 9 — Complete immo-owned synthetic preparation and contract receipt.**
   - [ ] Retain and acknowledge the exact frozen manifest, receipt and erratum; replay the entire vector corpus.
   - [x] Retain the exact frozen manifest/receipt/erratum, acknowledge their digests and preserve the producer reserves and immo D4 authority.
@@ -91,6 +94,8 @@
   - [ ] Correct host capacity/error/identity/evidence boundaries and retain assignment/resource history.
   - [x] Keep capacity in host options, leave module absence outside the closed canonical wire, require UUID-native evidence, distinguish unresolved digests, and prepare unknown historical sources without review authority.
   - [x] Qualify the corrected host boundaries on 13 unit tests, including absent capacity and unknown historical evidence.
+  - [x] Retain immutable source snapshots and append-only assignment/version-link history; match the SQL capability CHECK with M1.
+  - [x] Keep historical resources unresolved and deny review even with a permissive grant; only frozen source bytes permit candidate preparation.
   - [ ] Prepare a complete synthetic workbook inventory/manifest and explicit map-category dispositions, without canonical writes.
   - [ ] Require locked API image installation and document every contracts resolver.
 - [ ] **Lot 10 — Qualify operational guards and reconcile the reviews.**
