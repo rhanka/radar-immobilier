@@ -3,6 +3,10 @@ ANNOTATIONS_ARCHIVE := vendor/comments-m1/sentropic-comments-0.3.0.tgz
 ANNOTATIONS_SOURCE := vendor/comments-m1/source.tar
 
 .PHONY: annotations-contract-check annotations-contract-rebuild annotations-test annotations-retire-empty
+.PHONY: annotations-ops-test
+annotations-ops-test:
+	$(COMPOSE_RUN_API_NODEPS) node --test deploy/ci/annotations-guard.test.mjs
+
 annotations-contract-check:
 	@echo 'dd7656275b56ac8903103e44295b6f2c5b2173890d7e49a530ab2c3f5766eb98  $(ANNOTATIONS_SOURCE)' | sha256sum -c -
 	@echo '16fb88cee3869b810a7b3215e0807fbc2445e458501cc6153510af8cedff3f0c  $(ANNOTATIONS_ARCHIVE)' | sha256sum -c -

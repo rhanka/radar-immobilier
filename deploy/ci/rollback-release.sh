@@ -47,6 +47,8 @@ STATUS_TIMEOUT="${ROLLBACK_STATUS_TIMEOUT:-180}"
 SERVED_TIMEOUT="${SERVED_CHECK_TIMEOUT:-150}"
 POLL="${SERVED_POLL_INTERVAL:-10}"
 
+bash "$(dirname "${BASH_SOURCE[0]}")/annotations-guard.sh" rollback
+
 log "env=${ROLLBACK_ENV} ns=${NAMESPACE} deployments='${DEPLOYMENTS}' failed_ref=${FAILED_REF:-<manual>}"
 
 # --- G1: a previous revision must exist for EVERY target (pre-flight) --------
