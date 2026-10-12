@@ -43,7 +43,7 @@
 - [ ] Lot 2 — Implement explicit host membership, capabilities and resource resolver.
   - [x] Implement shared-contract host ports and Postgres assignment reads.
   - [ ] Install assignment/resource schema and qualify revocation/version denials.
-- [ ] Lot 3 — Compose the canonical module and prepare synthetic Steve units.
+- [x] Lot 3 — Compose the canonical module and prepare synthetic Steve units.
 - [ ] Lot 4 — Remove legacy domain/API/UI/MCP consumers and adapt retained tests.
   - [x] Remove domain note contracts, Drizzle exports and dormant MCP note scope.
   - [x] Remove API note commands and qualify endpoint retirement.
