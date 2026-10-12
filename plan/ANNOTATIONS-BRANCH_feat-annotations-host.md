@@ -86,9 +86,11 @@
 - [ ] **Lot 9 — Complete immo-owned synthetic preparation and contract receipt.**
   - [ ] Retain and acknowledge the exact frozen manifest, receipt and erratum; replay the entire vector corpus.
   - [ ] Correct host capacity/error/identity/evidence boundaries and retain assignment/resource history.
+  - [x] Keep capacity in host options, leave module absence outside the closed canonical wire, require UUID-native evidence, distinguish unresolved digests, and prepare unknown historical sources without review authority.
   - [ ] Prepare a complete synthetic workbook inventory/manifest and explicit map-category dispositions, without canonical writes.
   - [ ] Require locked API image installation and document every contracts resolver.
 - [ ] **Lot 10 — Qualify operational guards and reconcile the reviews.**
+  - [x] Implement pre-copy deployment fence bound to an exact operation receipt; suspend ordinary restore and image-only rollback pending canonical recovery qualification.
   - [ ] Block ordinary promotion during unqualified adoption, incompatible rollback and preprod restore before their first mutation/copy.
   - [ ] Document operator entrypoints, merge/deployment prerequisites, remaining immo and module acceptance separately.
   - [ ] Run current scoped/full gates, image smoke, scope checks and independent review; report any external gate accurately.
