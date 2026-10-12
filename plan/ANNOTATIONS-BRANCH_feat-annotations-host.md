@@ -102,6 +102,7 @@
   - [x] Decode a synthetic Google Sheets response with exact original-byte retention and explicit unavailable Drive sidecars; feedback mappings are qualified source text cells.
   - [x] Prepare every homogeneous contribution through M1 builders and a common import manifest; separate prepared/blocked counts, stable retry and no durable-success claim.
   - [ ] Require locked API image installation and document every contracts resolver.
+  - [x] Require complete immutable lock/archive identities, pin the build image, install only backend workspaces with npm ci and use the locked bundler; image build/operator smoke and all workspace quality gates pass.
 - [ ] **Lot 10 — Qualify operational guards and reconcile the reviews.**
   - [x] Implement pre-copy deployment fence bound to an exact operation receipt; suspend ordinary restore and image-only rollback pending canonical recovery qualification.
   - [ ] Block ordinary promotion during unqualified adoption, incompatible rollback and preprod restore before their first mutation/copy.
