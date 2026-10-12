@@ -25,6 +25,8 @@
 ## Feedback Loop
 - [x] ANNOTATIONS-D1: latest owner decision accepts M1 without waiting for formal freeze; cluster-mesh owns storage/API.
 - [x] ANNOTATIONS-D2: M1 declares but does not deliver M2/M3 runtime; synthetic seams never enable a production fallback.
+- [x] ANNOTATIONS-D3: both independent design reviews reconciled in the spec; source-version, authentication and receipt gaps remain explicit M3 qualification requirements.
+- [x] ANNOTATIONS-EX1: whole-file legacy deletions and immutable software archives may exceed 150 diff lines where splitting would retain broken partial artifacts; isolate each removal/receipt, preserve the source history, and roll back by reverting that commit.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch; sequential writes; independent design reviewers read only.
@@ -34,7 +36,7 @@
 
 ## Plan / Todo (lot-based)
 - [x] Lot 0 — Read rules, reference specs, owner decisions and exact M1 surfaces.
-- [ ] Lot 1 — Reconcile independent design reviews and pin the shared contract.
+- [x] Lot 1 — Reconcile independent design reviews and pin the shared contract.
 - [ ] Lot 2 — Implement explicit host membership, capabilities and resource resolver.
 - [ ] Lot 3 — Compose the canonical module and prepare synthetic Steve units.
 - [ ] Lot 4 — Remove legacy domain/API/UI/MCP consumers and adapt retained tests.
