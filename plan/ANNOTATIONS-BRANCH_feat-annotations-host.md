@@ -55,6 +55,7 @@
 - [ ] **Lot 4 — Remove legacy domain/API/UI/MCP consumers and adapt retained tests.**
   - [x] Remove domain note contracts, Drizzle exports and dormant MCP note scope.
   - [x] Remove API note commands and qualify endpoint retirement.
+  - [x] Remove legacy integration assertions and cleanup while retaining marks/contact coverage.
   - [ ] Delete UI clients, subscriptions, components and mounts; preserve marks.
 - [ ] **Lot 5 — Guard migration/retirement and document operational eradication.**
   - [x] Account for every historical SQL and the known 0009 journal omission.
