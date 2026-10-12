@@ -52,11 +52,11 @@
   - [x] Install assignment/resource schema and qualify revocation/version denials.
 - [x] **Lot 3 — Compose the canonical module and prepare synthetic Steve units.**
   - [x] Verify every M1 canonical/hash vector, deterministic retry and faithful provenance.
-- [ ] **Lot 4 — Remove legacy domain/API/UI/MCP consumers and adapt retained tests.**
+- [x] **Lot 4 — Remove legacy domain/API/UI/MCP consumers and adapt retained tests.**
   - [x] Remove domain note contracts, Drizzle exports and dormant MCP note scope.
   - [x] Remove API note commands and qualify endpoint retirement.
   - [x] Remove legacy integration assertions and cleanup while retaining marks/contact coverage.
-  - [ ] Delete UI clients, subscriptions, components and mounts; preserve marks.
+  - [x] Delete UI clients, subscriptions, components and mounts; preserve marks.
   - [x] Remove lot/signal panel mounts and ambient annotation badges.
   - [x] Delete private UI note types, HTTP client and SSE subscription with their suites.
   - [x] Load lot marks independently of retired note endpoints.
