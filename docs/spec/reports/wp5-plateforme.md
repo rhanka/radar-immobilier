@@ -1,5 +1,7 @@
 # WP5 — Plateforme & Scale : plans prêts à exécuter
 
+> Annotation update (2026-10-12): legacy note storage, API, UI and note scopes in this document are superseded by [the shared annotations host](../SPEC_EVOL_ANNOTATIONS_HOST.md). The original text remains historical evidence; it does not authorize recreating the removed model or retaining deleted notes.
+
 Baseline lecture : `f678149`. Document de planification (lecture seule Track, aucun commit, aucune
 branche, aucune modification produit). Deux sujets indépendants : **A) MCP immo (à construire)** et
 **B) Auth durable (diagnostic + fix)**.

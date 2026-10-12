@@ -1,5 +1,7 @@
 # SPEC — Intégration 100 % des features de la carte de Steve dans les écrans radar existants
 
+> Annotation update (2026-10-12): legacy note storage, API, UI and note scopes in this document are superseded by [the shared annotations host](SPEC_EVOL_ANNOTATIONS_HOST.md). The original text remains historical evidence; it does not authorize recreating the removed model or retaining deleted notes.
+
 > Statut : **intention / cadrage d'intégration**. Ne crée **aucun nouvel écran** : chaque feature
 > de l'outil de Steve est rattachée à l'**une des quatre vues déjà prévues** du radar
 > (**Signaux** / **Opportunités** / **Évaluation** / **Sources**) et à leurs couches/contrôles
