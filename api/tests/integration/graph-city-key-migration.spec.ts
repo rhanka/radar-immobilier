@@ -72,7 +72,7 @@ beforeAll(async () => {
   await cp(MIGRATIONS, upTo0012, { recursive: true });
   const journalPath = join(upTo0012, "meta", "_journal.json");
   const journal = JSON.parse(await readFile(journalPath, "utf8")) as { entries: Array<{ tag: string }> };
-  journal.entries = journal.entries.filter((entry) => entry.tag !== "0013_graph_city_key");
+  journal.entries = journal.entries.filter((entry) => Number(entry.tag.slice(0, 4)) <= 12);
   await writeFile(journalPath, JSON.stringify(journal));
   await migrateFolder(upTo0012);
 
