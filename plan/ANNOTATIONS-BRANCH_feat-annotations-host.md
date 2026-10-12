@@ -88,6 +88,7 @@
   - [x] Qualify step rollback, retry, concurrent migration, and synthetic database restoration before/after retirement; 34 scoped tests pass.
   - [x] Qualify the extended host schema and assignment history in 36 integration/retired-route tests; repeatable assertions bind the new membership UUID, preserving prior audit history.
 - [ ] **Lot 9 — Complete immo-owned synthetic preparation and contract receipt.**
+  - [x] Preserve frozen historical bytes for preparation without granting exact-context review through the canonical resolver.
   - [ ] Retain and acknowledge the exact frozen manifest, receipt and erratum; replay the entire vector corpus.
   - [x] Retain the exact frozen manifest/receipt/erratum, acknowledge their digests and preserve the producer reserves and immo D4 authority.
   - [x] Replay all 11 record, 6 canonical, 8 geometry and 12 rejection vectors; all 50 host/contract unit tests pass.

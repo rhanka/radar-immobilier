@@ -48,6 +48,10 @@ describe("synthetic source preparation against exact M1", () => {
     const structure = prepared.records[0]!;
     if (structure.kind !== "thread-structure-revision") throw new Error("Unexpected candidate");
     expect(structure.primary.source).toEqual(source);
+    expect(await host().resolver.resolve(registration.principal, historical)).toBe("unresolved");
+    const permissive = createAnnotationHostPorts({ hasCapability: async () => true,
+      resources: async (ref) => [{ ref, sourceVersion: "source-v1", frozenDigest: "a".repeat(64), currentDigest: "a".repeat(64), available: true }] });
+    expect(await permissive.capabilities.check(registration.principal, "review", [historical])).toBe(false);
     expect(await host().resolveBinding(registration.principal, structure.primary)).toBe("unresolved");
   });
 
