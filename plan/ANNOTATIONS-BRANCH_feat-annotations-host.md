@@ -100,6 +100,7 @@
   - [ ] Prepare a complete synthetic workbook inventory/manifest and explicit map-category dispositions, without canonical writes.
   - [x] Inventory raw workbook bytes, native version-local cells/rows, formulas/cache/hidden metadata, coverage and source absences on synthetic fixtures.
   - [x] Decode a synthetic Google Sheets response with exact original-byte retention and explicit unavailable Drive sidecars; feedback mappings are qualified source text cells.
+  - [x] Prepare every homogeneous contribution through M1 builders and a common import manifest; separate prepared/blocked counts, stable retry and no durable-success claim.
   - [ ] Require locked API image installation and document every contracts resolver.
 - [ ] **Lot 10 — Qualify operational guards and reconcile the reviews.**
   - [x] Implement pre-copy deployment fence bound to an exact operation receipt; suspend ordinary restore and image-only rollback pending canonical recovery qualification.
