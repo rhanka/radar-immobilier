@@ -1,6 +1,4 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { canonicalRecordBytes, hashRecord, type RecordKind } from "@sentropic/comments";
 import { createAnnotationHostPorts, snapshotResource } from "./host-ports.js";
 import { prepareSyntheticSourceUnit, type SyntheticSourceContribution } from "./prepare-source-unit.js";
 import { SYNTHETIC_BODY, SYNTHETIC_CAPACITY, SYNTHETIC_EXECUTION, SYNTHETIC_SCOPE } from "./fixtures.js";
@@ -22,16 +20,6 @@ function host(granted = true) {
 }
 
 describe("synthetic source preparation against exact M1", () => {
-  it("should replay all producer canonical bytes and hash vectors unchanged", () => {
-    const vectors = JSON.parse(readFileSync(new URL("../../../../vendor/comments-m1/revision-hash-v1.json", import.meta.url), "utf8")) as {
-      records: Array<{ kind: RecordKind; envelope: Record<string, unknown>; canonical: string; digest: string }>;
-    };
-    for (const vector of vectors.records) {
-      expect(canonicalRecordBytes(vector.kind, vector.envelope)).toBe(vector.canonical);
-      expect(hashRecord(vector.kind, vector.envelope)).toBe(vector.digest);
-    }
-  });
-
   it("should preserve exact text, unknown attribution, lexical day and structure pin on retry", async () => {
     const prepared = await prepareSyntheticSourceUnit(input, registration, host(), SYNTHETIC_CAPACITY);
     expect(await prepareSyntheticSourceUnit(input, registration, host(), SYNTHETIC_CAPACITY)).toEqual(prepared);

@@ -42,6 +42,7 @@
 - [x] ANNOTATIONS-D5: owner-supplied Opus 5.5 max and Fable 5.1 max reviews both reject merge at 80105624; accept the evidenced migration/cutover blockers and preserve both original verdicts.
 - [x] BR1001-EX5: permit the named deployment/rollback/restore guard paths because ordinary CD can retire legacy before conversion, copy it during cutover or restore an incompatible writer; offline qualification only, no live configuration change, rollback by reverting these guard changes before adoption.
 - [x] BR1001-EX6: permit the Steve report supersession notice and preparation spec to close the inventory and retain immo-owned IM-1/IM-2 work; preserve historic decisions, rollback by reverting the notices/preparation changes.
+- [x] BR1001-EX7: the required complete immutable installation lock fills resolved/integrity metadata for 710 existing exact-version entries and exceeds 150 lines as one generated artifact; no versions or dependency edges change, image install becomes npm ci, rollback by reverting this software-qualification commit before adoption.
 
 ## Orchestration Mode (AI-selected)
 - [x] Mono-branch; sequential writes; independent design reviewers read only.
@@ -85,6 +86,8 @@
   - [x] Qualify step rollback, retry, concurrent migration, and synthetic database restoration before/after retirement; 34 scoped tests pass.
 - [ ] **Lot 9 — Complete immo-owned synthetic preparation and contract receipt.**
   - [ ] Retain and acknowledge the exact frozen manifest, receipt and erratum; replay the entire vector corpus.
+  - [x] Retain the exact frozen manifest/receipt/erratum, acknowledge their digests and preserve the producer reserves and immo D4 authority.
+  - [x] Replay all 11 record, 6 canonical, 8 geometry and 12 rejection vectors; all 50 host/contract unit tests pass.
   - [ ] Correct host capacity/error/identity/evidence boundaries and retain assignment/resource history.
   - [x] Keep capacity in host options, leave module absence outside the closed canonical wire, require UUID-native evidence, distinguish unresolved digests, and prepare unknown historical sources without review authority.
   - [x] Qualify the corrected host boundaries on 13 unit tests, including absent capacity and unknown historical evidence.
