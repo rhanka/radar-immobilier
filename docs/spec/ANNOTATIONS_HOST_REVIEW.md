@@ -32,6 +32,7 @@ data, deployment, root UAT checkout or remote team messages were changed.
 | Production UI server-runtime bundle smoke | Pass |
 | Harness branch and full path inventory scope checks | C1/C2 pass |
 | Whitespace/diff integrity | Pass |
+| Remote PR CI on full head `c2427907cfb7fb0e6d57427530698c406b1269f3` | Quality gates and repository policy pass; 5,629 tests passed |
 
 The default `make test ... ENV=test-annotations-host` passes across all workspaces:
 **5,629 tests**, without a timeout/worker override. Captured log:
@@ -119,5 +120,12 @@ the image ships 20, including controlled adoption and guarded retirement. The
 same failure was reproduced locally; the inventory assertion is updated while
 the entrypoint checker and all negative mutation cases remain unchanged.
 All 39 hermetic cases, `make k8s-validate ENV=test-annotations-host`, harness
-C1/C2 and `git diff --check` pass after this correction. Remote CI for the new
-head remains pending at publication; no fresh code consensus is implied.
+C1/C2 and `git diff --check` pass after this correction.
+
+[CI run `38306524703`](https://github.com/rhanka/radar-immobilier/actions/runs/38306524703)
+completed successfully on `c2427907cfb7fb0e6d57427530698c406b1269f3`:
+all offline gates, installation, typecheck, lint, build, UI bundle smoke and
+5,629 tests passed (API 2,302; UI 1,624; MCP/domain/scoring/sources
+64/289/57/1,293; six skips and ten existing todos). Repository policy also passed.
+The captured log is `tmp/annotations-ci-38306524703.log`; no fresh code consensus,
+live adoption or owner merge authorization is implied by this CI result.
