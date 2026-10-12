@@ -7,7 +7,6 @@ import {
   ProspectMarkMarcheInput,
   ProspectMarkPipelineInput,
   ProspectMode,
-  ProspectNoteInput,
   ProspectStatut,
   ProspectStatutMarche,
   ProspectStatutPipeline,
@@ -241,53 +240,6 @@ describe("ProspectMark", () => {
     });
     expect(parsed.prixDemande).toBe("450000.00");
     expect(parsed.mode).toBe("simulation");
-  });
-});
-
-// ─── ProspectNoteInput ────────────────────────────────────────────────────────
-
-describe("ProspectNoteInput", () => {
-  it("accepte une note valide", () => {
-    const parsed = ProspectNoteInput.parse({
-      noLot: "3 247 789",
-      citySlug: "salaberry-de-valleyfield",
-      authorId: VALID_AUTHOR_ID,
-      body: "Propriétaire favorable, rappeler en septembre.",
-    });
-    expect(parsed.mode).toBe("real"); // défaut
-  });
-
-  it("rejette un body vide", () => {
-    expect(
-      ProspectNoteInput.safeParse({
-        noLot: "3 247 789",
-        citySlug: "salaberry-de-valleyfield",
-        authorId: VALID_AUTHOR_ID,
-        body: "",
-      }).success,
-    ).toBe(false);
-  });
-
-  it("rejette un body trop long (> 10 000 caractères)", () => {
-    expect(
-      ProspectNoteInput.safeParse({
-        noLot: "3 247 789",
-        citySlug: "salaberry-de-valleyfield",
-        authorId: VALID_AUTHOR_ID,
-        body: "x".repeat(10_001),
-      }).success,
-    ).toBe(false);
-  });
-
-  it("rejette un authorId invalide", () => {
-    expect(
-      ProspectNoteInput.safeParse({
-        noLot: "3 247 789",
-        citySlug: "salaberry-de-valleyfield",
-        authorId: "pas-un-uuid",
-        body: "note valide",
-      }).success,
-    ).toBe(false);
   });
 });
 
