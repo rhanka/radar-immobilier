@@ -7,6 +7,13 @@ import {
   type ImmoHttpConfig,
 } from "./server-http.js";
 import type { Hono } from "hono";
+import type {
+  DataSourceCallContext,
+  ImmoDataSource,
+  SearchSignalsArgs,
+} from "./data-source.js";
+import { MockDataSource } from "./data-source.js";
+import type { MockSignal } from "./mocks.js";
 
 // Same resource-server settings as server-http.test.ts (`resource` == token `aud`).
 const ISSUER = "https://auth.test.local";
@@ -120,5 +127,74 @@ describe("mcp http session ownership", () => {
       body: JSON.stringify(searchLotsCall(92)),
     });
     expect(retry.status).toBe(200);
+  });
+
+  it("keeps the session for the same subject with a refreshed token and forwards the new bearer", async () => {
+    let lastAccessToken: string | undefined | null = null;
+    class RecordingDataSource extends MockDataSource {
+      override async searchSignals(
+        args: SearchSignalsArgs,
+        ctx: DataSourceCallContext = {},
+      ): Promise<MockSignal[]> {
+        lastAccessToken = ctx.accessToken;
+        return [
+          {
+            id: "sig-x",
+            city: args.city,
+            type: "rezonage",
+            etape: "avis_motion",
+            etape_date: "2026-01-01",
+            reglement_number: "R-1",
+            zone_ref: "H-1",
+            no_lot: null,
+            summary: "signal reel",
+            source_document_id: "doc-1",
+          },
+        ];
+      }
+    }
+    const data: ImmoDataSource & { lastAccessToken: string | undefined | null } =
+      new RecordingDataSource();
+    const app = createImmoHttpApp(BASE_CONFIG, { keySource, data });
+
+    const tokenA = await signToken({ sub: "user-1" });
+    const sessionId = await initialize(app, tokenA);
+
+    // Same subject, freshly minted token (no reconnection expected). The `jti`
+    // keeps both tokens distinct even when signed within the same second.
+    const tokenA2 = await signToken({ sub: "user-1", jti: "refreshed-2" });
+    expect(tokenA2).not.toBe(tokenA);
+    const callRes = await app.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token: tokenA2, sessionId }),
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 2,
+        method: "tools/call",
+        params: { name: "search_signals", arguments: { city: "longueuil" } },
+      }),
+    });
+    expect(callRes.status).toBe(200);
+    expect(lastAccessToken).toBe(tokenA2);
+  });
+
+  it("applies a removed scope to the next request on the same session", async () => {
+    const app = createImmoHttpApp(BASE_CONFIG, { keySource });
+    const full = await signToken({ sub: "user-1" });
+    const sessionId = await initialize(app, full);
+
+    // Route gate still passes (immo:read kept) but immo:search was removed.
+    const reduced = await signToken({ sub: "user-1", scope: "immo:read" });
+    const res = await app.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token: reduced, sessionId }),
+      body: JSON.stringify(searchLotsCall(2)),
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as {
+      result?: { content?: { type: string; text?: string }[]; isError?: boolean };
+    };
+    expect(body.result?.isError).toBe(true);
+    expect(body.result?.content?.[0]?.text ?? "").toContain("scope_denied:immo:search");
   });
 });
