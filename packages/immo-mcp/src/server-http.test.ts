@@ -82,9 +82,7 @@ beforeAll(async () => {
 
 describe("immo-mcp remote (Streamable HTTP + OAuth RS)", () => {
   it("(a) serves the RFC 9728 PRM and rejects an unauthenticated /mcp with WWW-Authenticate", async () => {
-    // PRM is mounted under the resource's own path ("/mcp"), matching what
-    // protectedResourceMetadataUrl() advertises in the 401 challenge below —
-    // see server-http.ts's createImmoHttpApp() comment + BLOCKERS.md item 1.
+    // The installed 0.1.0 challenge keeps advertising the historical URL.
     const prm = await app.request(`/mcp${PRM_PATH}`);
     expect(prm.status).toBe(200);
     const prmDoc = (await prm.json()) as Record<string, unknown>;
@@ -106,7 +104,7 @@ describe("immo-mcp remote (Streamable HTTP + OAuth RS)", () => {
     expect(challenge).toContain(`resource_metadata="${RESOURCE}${PRM_PATH}"`);
   });
 
-  it("(b) with a valid token, an initialize + tool call round-trips through the transport", async () => {
+  it("(b) accepts the original MCP-audience token for initialize and tool calls", async () => {
     const token = await signToken();
 
     const initRes = await postMcp(
@@ -219,6 +217,31 @@ describe("immo-mcp remote (Streamable HTTP + OAuth RS)", () => {
     );
     expect(res.status).toBe(401);
     expect(res.headers.get("www-authenticate") ?? "").toContain('error="invalid_token"');
+  });
+
+  it("rejects an exchanged API-audience token at MCP ingress", async () => {
+    const token = await signToken({
+      act: { sub: "immo-mcp-workload" }, client_id: "immo-mcp-workload",
+    }, { audience: new URL(RESOURCE).origin });
+    const res = await postMcp({
+      jsonrpc: "2.0", id: 1, method: "initialize",
+      params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "t", version: "0" } },
+    }, { token });
+    expect(res.status).toBe(401);
+    expect(res.headers.get("mcp-session-id")).toBeNull();
+    expect(res.headers.get("www-authenticate")).toContain('error="invalid_token"');
+  });
+
+  it("keeps authenticated GET and DELETE routed to the transport", async () => {
+    const token = await signToken();
+    const missingSession = await app.request("/mcp", { headers: mcpHeaders({ token }) });
+    expect(missingSession.status).toBe(400);
+    expect((await missingSession.json()).error.message).toBe("Missing mcp-session-id header");
+    const unknownSession = await app.request("/mcp", {
+      method: "DELETE", headers: mcpHeaders({ token, sessionId: "unknown-session" }),
+    });
+    expect(unknownSession.status).toBe(404);
+    expect((await unknownSession.json()).error.message).toBe("Unknown or expired MCP session");
   });
 });
 
