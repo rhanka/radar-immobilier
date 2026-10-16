@@ -802,6 +802,13 @@ describe("protect middleware", () => {
     ["DELETE", SIGNALS_PATH], ["HEAD", SIGNALS_PATH], ["OPTIONS", SIGNALS_PATH],
     ["GET", "/api/protected"], ["GET", "/api/graph-signals"],
     ["GET", "/api/graph-signals/"], ["GET", `${SIGNALS_PATH}/detail`],
+    ["GET", "/api/graph-signals/by-city"], ["GET", "/api/graph-signals/by-city?dateFrom=2026-01-01"],
+    ["GET", "/API/graph-signals/mont-tremblant"], ["GET", "/api/Graph-signals/mont-tremblant"],
+    ["GET", "/api/graph-signals/BY-CITY"], ["GET", "/api/graph-signals/Mont-Tremblant"],
+    ["GET", "/api//graph-signals/mont-tremblant"], ["GET", "/api/graph-signals//mont-tremblant"],
+    ["GET", "/api/graph-signals/mont-tremblant%2Fdetail"], ["GET", "/api/graph-signals/mont-tremblant%2fdetail"],
+    ["GET", "/api/graph-signals%2Fmont-tremblant"], ["GET", "/api/graph-signals/%62y-city"],
+    ["GET", `${SIGNALS_PATH}/`], ["GET", "/api/graph-signals/by-city/"],
     ["GET", "/api/graph-signals-other/mont-tremblant"],
     ["GET", "/api/geo/collections-private"], ["GET", "/api/documents/raw-private"],
   ])("refuses %s %s outside the delegation profile", async (method, path) => {

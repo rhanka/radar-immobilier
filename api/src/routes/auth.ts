@@ -551,6 +551,12 @@ async function fetchAccountStatus(db: Database, sub: string): Promise<string | n
   return rows.length > 0 ? rows[0]!.status : null;
 }
 
+// Explicit delegated route list. Keep reserved literals aligned with graph-signals.ts;
+// `by-city` is the only literal route and exposes an aggregate across all cities.
+const DELEGATED_READ_ROUTES = [
+  { method: "GET", prefix: "/api/graph-signals/", reservedSegments: new Set(["by-city"]) },
+];
+
 /**
  * Session-protect middleware. When `auth.enabled` is false it is a no-op
  * (local dev / tests stay open). When enabled, every non-public route requires
@@ -634,10 +640,14 @@ export function protect(
         }
       }
       if (!claims) return c.json({ error: "unauthenticated" }, 401);
-      if (
-        !claims.scopes.includes("immo:search") || c.req.method !== "GET" ||
-        !/^\/api\/graph-signals\/[^/]+$/.test(path)
-      ) {
+      const allowedRoute = DELEGATED_READ_ROUTES.some(({ method, prefix, reservedSegments }) => {
+        if (c.req.method !== method || !path.startsWith(prefix)) return false;
+        const city = path.slice(prefix.length);
+        // Only canonical city slugs; reject encoded aliases and separators.
+        return city !== "" && city === city.toLowerCase() &&
+          !city.includes("/") && !city.includes("%") && !reservedSegments.has(city);
+      });
+      if (!claims.scopes.includes("immo:search") || !allowedRoute) {
         return c.json({ error: "forbidden" }, 403);
       }
       const { sub } = claims;

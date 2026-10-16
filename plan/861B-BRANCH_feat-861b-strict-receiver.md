@@ -34,10 +34,10 @@
 - [x] **Lot 0 — Références et conservation**
   - [x] Lire règles, rapports de correction et diff complet v7 → v8 ; la v8 conserve le contrat du récepteur et ajoute des obligations de provenance, séparation et qualification.
   - [x] Tests isolés `ENV=test-861b-historique` : API 18871, UI 15871, Maildev UI 11871, Postgres 15872, S3 19871, Obscura 19872, SMTP 11872 ; vérifier les ports avant démarrage, compose test sans publication hôte.
-- [ ] **Lot 1 — Récepteur et profil de lecture (§6, B-M1)**
-  - [ ] Vérifier signature, issuer, expiration/not-before, sujet humain non vide, audience API unique (chaîne ou tableau singleton), acteur/client et compte approuvé ; exposer les claims vérifiés au middleware.
-  - [ ] Autoriser seulement scope `immo:search` et GET `/api/graph-signals/:city`, segment canonique unique sans `by-city` ; interdire agrégat, variantes de casse, doubles slashs, encodages et slash final avec 403 et aucun handler métier.
-  - [ ] Préserver tests positifs, refus du jeton MCP à l'API, audience multiple/incorrecte, issuer/clé/signature/expiration, comptes inconnus/suspendus et régressions cookies/routes publiques ; aucun cookie ne masque les tests négatifs bearer.
+- [x] **Lot 1 — Récepteur et profil de lecture (§6, B-M1)**
+  - [x] Vérifier signature, issuer, expiration/not-before, sujet humain non vide, audience API unique (chaîne ou tableau singleton), acteur/client et compte approuvé ; exposer les claims vérifiés au middleware.
+  - [x] Autoriser seulement scope `immo:search` et GET `/api/graph-signals/:city`, segment canonique unique sans `by-city` ; interdire agrégat, variantes de casse, doubles slashs, encodages et slash final avec 403 et aucun handler métier.
+  - [x] Préserver tests positifs, refus du jeton MCP à l'API, audience multiple/incorrecte, issuer/clé/signature/expiration, comptes inconnus/suspendus et régressions cookies/routes publiques ; aucun cookie ne masque les tests négatifs bearer.
 - [ ] **Lot 2 — Acteur et motifs de refus (B-m4/B-m5)**
   - [ ] N'accepter que `act: { sub: expectedWorkload }` ; refuser clés supplémentaires/acteur imbriqué/client incorrect, avec réponse HTTP uniforme 401 et aucun handler.
   - [ ] Vérifier messages exacts et propriétés jose `code/claim/reason` dans les tests unitaires ; l'API ne divulgue pas ces détails.
