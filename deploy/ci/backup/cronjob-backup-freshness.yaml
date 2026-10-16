@@ -14,7 +14,8 @@
 # Same script as the backup (ConfigMap radar-backup-daily-script, mode
 # `freshness`), same pinned radar-api image: 0 python, 0 new image. No DB access,
 # no write right. Applied by bascule-bundle-cd.yml job `apply-backup`.
-# 06:53 UTC: after the backup window (02:23 + 3 h activeDeadlineSeconds).
+# 06:53 UTC: after 02:23 + 1 h controller delay + 12000 s Job deadline
+# + 120 s termination grace = 06:45 (Pending is included in the Job deadline).
 # =============================================================================
 apiVersion: batch/v1
 kind: CronJob
