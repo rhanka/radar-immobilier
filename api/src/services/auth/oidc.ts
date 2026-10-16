@@ -242,19 +242,20 @@ export async function verifyIdToken(
   return out;
 }
 
-/** Verified USER access-token claims we act on (per-user MCP path). */
+/** Verified delegated access-token claims used by the API route profile. */
 export interface VerifiedAccessToken {
   sub: string;
+  aud: string;
+  act: { sub: string };
+  clientId: string;
+  scopes: string[];
+  exp: number;
 }
 
 /**
- * Verify a USER access token (bearer) presented on the api against OUR IdP JWKS.
- *
- * Mandatory checks (D4, option A): valid signature (`getKey`, the IdP JWKS),
- * `iss` == our IdP, `exp` not passed (both enforced by `jose.jwtVerify`), `aud`
- * in the bounded allowlist `audiences` (jose matches ANY aud value), and a
- * non-empty `sub`. Unlike `verifyIdToken` there is NO nonce and the audience is
- * the resource allowlist (api origin + `${origin}/mcp`), NOT the client_id.
+ * Verify a delegated bearer against our IdP JWKS, exact single API audience,
+ * expiry, human subject and signed workload actor/client. jose's audience
+ * matching alone allows multi-audience tokens, so equality is checked below.
  *
  * The token is NEVER logged. `getKey` is injectable so tests verify a
  * test-signed JWT against a local key; production passes a cached
@@ -265,6 +266,7 @@ export async function verifyAccessToken(
   opts: {
     issuer: string;
     audiences: string[];
+    workloadClientId: string;
     getKey: JWTVerifyGetKey;
     now?: number;
   },
@@ -272,10 +274,33 @@ export async function verifyAccessToken(
   const { payload } = await jwtVerify(accessToken, opts.getKey, {
     issuer: opts.issuer,
     audience: opts.audiences,
+    requiredClaims: ["sub", "exp", "aud", "iss"],
     ...(opts.now !== undefined ? { currentDate: new Date(opts.now) } : {}),
   });
-  if (typeof payload.sub !== "string" || payload.sub === "") {
+  const audience = Array.isArray(payload.aud) && payload.aud.length === 1
+    ? payload.aud[0] : payload.aud;
+  if (opts.audiences.length !== 1 || audience !== opts.audiences[0]) {
+    throw new Error("access_token audience mismatch");
+  }
+  if (typeof payload.sub !== "string" || payload.sub.trim() === "") {
     throw new Error("access_token missing sub");
   }
-  return { sub: payload.sub };
+  const actor = payload.act;
+  if (
+    !opts.workloadClientId || !actor || typeof actor !== "object" ||
+    Array.isArray(actor) || !("sub" in actor) || actor.sub !== opts.workloadClientId
+  ) {
+    throw new Error("access_token actor mismatch");
+  }
+  if (payload.client_id !== opts.workloadClientId) {
+    throw new Error("access_token client mismatch");
+  }
+  return {
+    sub: payload.sub,
+    aud: audience as string,
+    act: { sub: opts.workloadClientId },
+    clientId: opts.workloadClientId,
+    scopes: typeof payload.scope === "string" ? payload.scope.split(/\s+/).filter(Boolean) : [],
+    exp: payload.exp!,
+  };
 }

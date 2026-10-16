@@ -697,7 +697,10 @@ describe("protect middleware", () => {
     pubJwk.kid = "k1";
     pubJwk.alg = "EdDSA";
     const getKey = createLocalJWKSet({ keys: [pubJwk] });
-    const builder = new SignJWT({})
+    const builder = new SignJWT({
+      act: { sub: AUTH_ON.bearerWorkloadClientId },
+      client_id: AUTH_ON.bearerWorkloadClientId, scope: "immo:search",
+    })
       .setProtectedHeader({ alg: "EdDSA", kid: "k1" })
       .setIssuer(opts.iss ?? AUTH_ON.issuer)
       .setAudience(opts.aud ?? "https://immo.example.test")
