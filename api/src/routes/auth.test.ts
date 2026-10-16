@@ -25,7 +25,8 @@ const AUTH_ON: AuthConfig = {
   sessionTtlSeconds: 3600,
   sessionAbsoluteTtlSeconds: 7200,
   jwksUri: "https://auth.example.test/.well-known/jwks.json",
-  bearerAudiences: ["https://immo.example.test", "https://immo.example.test/mcp"],
+  bearerAudiences: ["https://immo.example.test"],
+  bearerWorkloadClientId: "immo-mcp-workload",
 };
 
 const AUTH_OFF: AuthConfig = { ...AUTH_ON, enabled: false };
@@ -699,7 +700,7 @@ describe("protect middleware", () => {
     const builder = new SignJWT({})
       .setProtectedHeader({ alg: "EdDSA", kid: "k1" })
       .setIssuer(opts.iss ?? AUTH_ON.issuer)
-      .setAudience(opts.aud ?? "https://immo.example.test/mcp")
+      .setAudience(opts.aud ?? "https://immo.example.test")
       .setSubject(opts.sub)
       .setIssuedAt();
     builder.setExpirationTime(opts.exp ?? "5m");
