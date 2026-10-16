@@ -160,6 +160,9 @@ const envSchema = z.object({
    * presented on the api, e.g. by the immo-mcp per-user path). Defaults to
    * `${issuer}/.well-known/jwks.json` (the sentropic IdP convention). */
   SENTROPIC_IDP_JWKS_URI: optStr(z.string().url()),
+  /** Required signed actor and client_id for delegated API bearers.
+   * Defaults to immo-mcp-workload; this is a client identity, not a secret. */
+  SENTROPIC_MCP_WORKLOAD_CLIENT_ID: optStr(z.string().trim().min(1)),
   /** This app's registered oauth_clients id at the IdP. */
   SENTROPIC_OAUTH_CLIENT_ID: optStr(z.string().min(1)),
   /** Confidential client secret (client_secret_basic). Secret. */
@@ -333,12 +336,12 @@ export interface AuthConfig {
    */
   readonly jwksUri: string;
   /**
-   * Allowlist of `aud` values accepted on a user bearer token: the api origin
-   * AND `${origin}/mcp` (the immo-mcp resource). Bounded to our own origin so a
-   * token minted for another audience/resource is rejected. Empty when auth is
-   * disabled.
+   * Dedicated delegated-bearer audience: the API origin only. Tokens must
+   * contain exactly this one audience; the MCP resource is not accepted.
    */
   readonly bearerAudiences: string[];
+  /** Required act.sub and client_id, set by SENTROPIC_MCP_WORKLOAD_CLIENT_ID. */
+  readonly bearerWorkloadClientId: string;
 }
 
 /**
@@ -366,9 +369,13 @@ export function resolveAuthConfig(config: AppConfig): AuthConfig {
   const jwksUri =
     config.SENTROPIC_IDP_JWKS_URI ??
     (issuerNoSlash !== "" ? `${issuerNoSlash}/.well-known/jwks.json` : "");
-  // Bounded to OUR origin: the api itself and the immo-mcp resource `${origin}/mcp`.
   const bearerAudiences =
-    appBaseUrlNoSlash !== "" ? [appBaseUrlNoSlash, `${appBaseUrlNoSlash}/mcp`] : [];
+    appBaseUrlNoSlash !== "" ? [new URL(appBaseUrlNoSlash).origin] : [];
+  if (enabled && bearerAudiences.length === 0) {
+    console.warn(
+      "[auth] AUTH_CALLBACK_BASE_URL is missing: delegated bearer authentication will reject every token; cookie authentication remains enabled.",
+    );
+  }
 
   return {
     enabled,
@@ -383,6 +390,7 @@ export function resolveAuthConfig(config: AppConfig): AuthConfig {
     sessionAbsoluteTtlSeconds: config.SESSION_ABSOLUTE_TTL_SECONDS,
     jwksUri,
     bearerAudiences,
+    bearerWorkloadClientId: config.SENTROPIC_MCP_WORKLOAD_CLIENT_ID ?? "immo-mcp-workload",
   };
 }
 
