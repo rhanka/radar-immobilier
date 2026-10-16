@@ -7,6 +7,22 @@ server-side copy, recon), then migrate, flip and smoke; `MODE=list` lists the
 available backups. See `../bascule-preprod/README.md` "Restore from a backup". The
 manual procedure below stays the reference for any other target.
 
+The daily GitHub trigger stays at **04:00 UTC** (owner decision, #844); its
+observed 5–7 h scheduling delay is accepted. The prod backup starts at 02:23
+with an effective CPU request of 50m and a **12000 s** Job deadline, including
+Pending: 3600 s Pending + 8320 s internal budget + 80 s margin. It can still
+be running at 04:00 or overlap the 05:00 prod refresh. The configured latest
+end is 06:45 including the one-hour controller delay and termination grace;
+see `README.md` for the full calculation.
+
+A scheduled restore selects the latest **complete** backup and keeps the
+**24 h** freshness guard, measured from `pg.dumpStartedAt`, before any quiesce.
+For an on-time 02:23 dump and a GitHub start delayed to 09:00–11:00, that age
+is 6 h 37–8 h 37. If today's complete backup is unavailable, yesterday's
+02:23 dump is already 25 h 37 old at 04:00 and is refused; a later previous-day
+dump can still qualify. A longer backup deadline does not relax that guard,
+make a partial backup restorable, or wait for a running backup to finish.
+
 Identities:
 
 | Identity (k8s Secret) | Namespace | Reads | Used for |
