@@ -25,7 +25,8 @@ const AUTH: AuthConfig = {
   sessionTtlSeconds: 3600,
   sessionAbsoluteTtlSeconds: 7200,
   jwksUri: "https://auth.example.test/.well-known/jwks.json",
-  bearerAudiences: ["https://immo.example.test", "https://immo.example.test/mcp"],
+  bearerAudiences: ["https://immo.example.test"],
+  bearerWorkloadClientId: "immo-mcp-workload",
 };
 
 const DISCOVERY: OidcDiscovery = {
