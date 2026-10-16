@@ -166,14 +166,32 @@ describe("loadConfig", () => {
       expect(auth.clientId).toBe("radar-immobilier");
     });
 
-    it("derives the IdP JWKS URI and the bearer audience allowlist (per-user MCP, D4)", () => {
+    it("derives the IdP JWKS URI and the single API bearer audience", () => {
       const auth = resolveAuthConfig(loadConfig(OIDC_ENV));
       expect(auth.jwksUri).toBe("https://auth.example.test/.well-known/jwks.json");
-      // api origin + `${origin}/mcp` (the immo-mcp resource), bounded to our origin.
-      expect(auth.bearerAudiences).toEqual([
-        "https://immo.example.test",
-        "https://immo.example.test/mcp",
-      ]);
+      expect(auth.bearerAudiences).toEqual(["https://immo.example.test"]);
+      expect(auth.bearerWorkloadClientId).toBe("immo-mcp-workload");
+    });
+
+    it.each(["https://immo.example.test/", "https://immo.example.test/app/"])(
+      "uses only the origin for the bearer audience when the app URL is %s",
+      (appBaseUrl) => {
+        const auth = resolveAuthConfig(loadConfig({ ...OIDC_ENV, AUTH_CALLBACK_BASE_URL: appBaseUrl }));
+        expect(auth.bearerAudiences).toEqual(["https://immo.example.test"]);
+      },
+    );
+
+    it("honours SENTROPIC_MCP_WORKLOAD_CLIENT_ID for both actor and client checks", () => {
+      const auth = resolveAuthConfig(loadConfig({
+        ...OIDC_ENV, SENTROPIC_MCP_WORKLOAD_CLIENT_ID: "immo-mcp-preprod-workload",
+      }));
+      expect(auth.bearerWorkloadClientId).toBe("immo-mcp-preprod-workload");
+    });
+
+    it("defaults an unset workload identity and rejects whitespace-only configuration", () => {
+      const auth = resolveAuthConfig(loadConfig({ ...OIDC_ENV, SENTROPIC_MCP_WORKLOAD_CLIENT_ID: "" }));
+      expect(auth.bearerWorkloadClientId).toBe("immo-mcp-workload");
+      expect(() => loadConfig({ ...OIDC_ENV, SENTROPIC_MCP_WORKLOAD_CLIENT_ID: " " })).toThrow();
     });
 
     it("honours an explicit SENTROPIC_IDP_JWKS_URI override", () => {
