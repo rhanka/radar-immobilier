@@ -371,6 +371,11 @@ export function resolveAuthConfig(config: AppConfig): AuthConfig {
     (issuerNoSlash !== "" ? `${issuerNoSlash}/.well-known/jwks.json` : "");
   const bearerAudiences =
     appBaseUrlNoSlash !== "" ? [new URL(appBaseUrlNoSlash).origin] : [];
+  if (enabled && bearerAudiences.length === 0) {
+    console.warn(
+      "[auth] AUTH_CALLBACK_BASE_URL is missing: delegated bearer authentication will reject every token; cookie authentication remains enabled.",
+    );
+  }
 
   return {
     enabled,

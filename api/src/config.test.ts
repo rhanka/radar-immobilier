@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   loadConfig,
   resolveAuthConfig,
@@ -142,6 +142,8 @@ describe("loadConfig", () => {
   });
 
   describe("OIDC enabled (all required vars present and non-empty)", () => {
+    afterEach(() => vi.restoreAllMocks());
+
     const OIDC_ENV: NodeJS.ProcessEnv = {
       ...BASE_ENV,
       SENTROPIC_IDP_ISSUER: "https://auth.example.test",
@@ -171,6 +173,24 @@ describe("loadConfig", () => {
       expect(auth.jwksUri).toBe("https://auth.example.test/.well-known/jwks.json");
       expect(auth.bearerAudiences).toEqual(["https://immo.example.test"]);
       expect(auth.bearerWorkloadClientId).toBe("immo-mcp-workload");
+    });
+
+    it.each([undefined, ""])("warns when AUTH_CALLBACK_BASE_URL is %s without disabling cookie auth", (baseUrl) => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const auth = resolveAuthConfig(loadConfig({ ...OIDC_ENV, AUTH_CALLBACK_BASE_URL: baseUrl }));
+      expect(auth.enabled).toBe(true);
+      expect(auth.sessionSecret).toBe(OIDC_ENV.SESSION_SECRET);
+      expect(auth.bearerAudiences).toEqual([]);
+      expect(warn).toHaveBeenCalledExactlyOnceWith(
+        "[auth] AUTH_CALLBACK_BASE_URL is missing: delegated bearer authentication will reject every token; cookie authentication remains enabled.",
+      );
+    });
+
+    it("does not warn for disabled auth or a configured bearer audience", () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      resolveAuthConfig(loadConfig(BASE_ENV));
+      resolveAuthConfig(loadConfig(OIDC_ENV));
+      expect(warn).not.toHaveBeenCalled();
     });
 
     it.each(["https://immo.example.test/", "https://immo.example.test/app/"])(
