@@ -197,6 +197,12 @@ test-api: ## Run API tests (SCOPE=<file> for scoped runs)
 test-ui: ## Run UI unit tests (SCOPE=<file> for scoped runs)
 	$(COMPOSE_RUN_API_NODEPS) npm run test --workspace=ui $(if $(SCOPE),-- $(SCOPE),)
 
+.PHONY: test-immo-mcp
+test-immo-mcp: ## Run isolated MCP tests (SCOPE=<file>, excludes service E2E)
+	$(DOCKER_COMPOSE) $(COMPOSE_FILES_TEST) run --rm --no-deps -T api sh -c "\
+	  npm ci && \
+	  npm run test --workspace=packages/immo-mcp -- --exclude '**/*.e2e.test.ts' $(SCOPE)"
+
 .PHONY: test-e2e
 test-e2e: ## Run Playwright e2e tests (E2E_SPEC=<file> for scoped runs)
 	@echo "[test-e2e] no e2e suite yet — placeholder for BR-07+"
