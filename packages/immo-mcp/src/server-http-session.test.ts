@@ -7,6 +7,7 @@ import {
   DEFAULT_SESSION_MAX_LIFETIME_MS,
   createImmoHttpApp,
   getMcpSessionCount,
+  loadHttpConfig,
   type ImmoHttpConfig,
 } from "./server-http.js";
 import type { Hono } from "hono";
@@ -318,5 +319,39 @@ describe("mcp http session expiry", () => {
       body: JSON.stringify(searchLotsCall(2)),
     });
     expect(res.status).toBe(404);
+  });
+});
+
+describe("loadHttpConfig session timeouts", () => {
+  const baseEnv = {
+    IMMO_MCP_OAUTH_ISSUER: ISSUER,
+    IMMO_MCP_OAUTH_RESOURCE: RESOURCE,
+  };
+
+  it("defaults to a 30-minute idle timeout and a bounded maximum lifetime", () => {
+    const config = loadHttpConfig({ ...baseEnv });
+    expect(config.sessionIdleTimeoutMs).toBe(DEFAULT_SESSION_IDLE_TIMEOUT_MS);
+    expect(config.sessionIdleTimeoutMs).toBe(30 * 60 * 1000);
+    expect(config.sessionMaxLifetimeMs).toBe(DEFAULT_SESSION_MAX_LIFETIME_MS);
+  });
+
+  it("reads explicit timeouts from the environment", () => {
+    const config = loadHttpConfig({
+      ...baseEnv,
+      IMMO_MCP_SESSION_IDLE_TIMEOUT_MS: "60000",
+      IMMO_MCP_SESSION_MAX_LIFETIME_MS: "3600000",
+    });
+    expect(config.sessionIdleTimeoutMs).toBe(60_000);
+    expect(config.sessionMaxLifetimeMs).toBe(3_600_000);
+  });
+
+  it("falls back to defaults on invalid timeouts", () => {
+    const config = loadHttpConfig({
+      ...baseEnv,
+      IMMO_MCP_SESSION_IDLE_TIMEOUT_MS: "not-a-number",
+      IMMO_MCP_SESSION_MAX_LIFETIME_MS: "-5",
+    });
+    expect(config.sessionIdleTimeoutMs).toBe(DEFAULT_SESSION_IDLE_TIMEOUT_MS);
+    expect(config.sessionMaxLifetimeMs).toBe(DEFAULT_SESSION_MAX_LIFETIME_MS);
   });
 });
