@@ -3,14 +3,19 @@
 Reference table built from the client's triage workbook (121 signals, 80 documents, 51 cities,
 survey of 2026-09-21). The repository is public, so the content is committed **encrypted only**.
 
+Version of 2026-10-06 (converged state): tags converged by three AI annotators (unanimous after up to three
+reconciliation rounds, one tag left non-converged and flagged), verdict derived by the frozen rule R′ v1, gap causes
+recomputed (rule questions, missing data, judgement disagreements, non-converged; no residual tooling-error class), one
+source quotation corrected (line 85). Previous sealed version: commit history of this folder.
+
 ## Files
 
 | Sealed file | Content | SHA-256 of plaintext |
 |---|---|---|
-| `reference-c.xlsx.sealed` | Original 7 workbook tabs + "Référence C" (121 rows, 54 columns, short headers) + "Référence C — légende" (column, author, full definition) + class definitions | `4a81b4d744a8dd76f768f401cc9d2b3b675abb65159f651b4d4b6ef585956afb` |
-| `reference-c.csv.sealed` | "Référence C" tab, UTF-8 with BOM | `f47ec61f0c14ad38e844732871ad5edaf0e1cc9bbda7e70b334ed91770703d07` |
-| `reference-c-legende.csv.sealed` | Legend: short column name, author, full definition | `37d2244a5645bb80396c58534782cf2dab0fa820b6af593124789589d20f6644` |
-| `README.md.sealed` | Column definitions, method, counts, verified links | `3b34c5bc8f78f9cd512a805e88e79c45c405c7a19101685bc65b3eae1290c599` |
+| `reference-c.xlsx.sealed` | Original 7 workbook tabs + "Référence C" (121 rows, 54 columns, short headers) + "Référence C — légende" (column, author, full definition) + class definitions | `1ab758da29ed2dcd0def6cdbe1e9c215efa9e00263feb813c2a504dcf4130c7d` |
+| `reference-c.csv.sealed` | "Référence C" tab, UTF-8 with BOM | `385272e0daca7137cf579e8bca4f2ddeac1c7444dcc1961bfae947174c9e7be2` |
+| `reference-c-legende.csv.sealed` | Legend: short column name, author, full definition | `9010669042cf489850b6f9aef8b6cac104a94cc8a6cb51d1879899538002b413` |
+| `README.md.sealed` | Column definitions, method, counts, verified links | `e1b5e0a3402df9130e60a91e182f7a8b61598cebc2227f2af7e3300a99455b4a` |
 
 ## Key
 
