@@ -242,23 +242,43 @@ describe("verifyAccessToken (delegated API bearer)", () => {
     expect((await verify(await sign({ aud: [AUTH.appBaseUrl] }))).aud).toBe(AUTH.appBaseUrl);
   });
 
+  const audienceError = { message: "access_token audience mismatch" };
+  const subjectError = { message: "access_token missing sub" };
+  const actorError = { message: "access_token actor mismatch" };
+  const clientError = { message: "access_token client mismatch" };
+  const claimError = { code: "ERR_JWT_CLAIM_VALIDATION_FAILED", reason: "check_failed" };
+  const expiredError = { code: "ERR_JWT_EXPIRED", claim: "exp", reason: "check_failed" };
+
   it.each([
-    ["multiple audiences", { aud: [AUTH.appBaseUrl, `${AUTH.appBaseUrl}/mcp`] }],
-    ["repeated audience", { aud: [AUTH.appBaseUrl, AUTH.appBaseUrl] }],
-    ["MCP audience", { aud: `${AUTH.appBaseUrl}/mcp` }],
-    ["audience with a trailing slash", { aud: `${AUTH.appBaseUrl}/` }],
-    ["missing expiry", { exp: undefined }],
-    ["expired token", { exp: NOW / 1000 - 1 }],
-    ["future not-before", { nbf: NOW / 1000 + 60 }],
-    ["wrong issuer", { iss: "https://other.example.test" }],
-    ["blank subject", { sub: " " }],
-    ["missing actor", { act: undefined }],
-    ["malformed actor", { act: "immo-mcp-workload" }],
-    ["wrong actor", { act: { sub: "other-workload" } }],
-    ["missing client", { client_id: undefined }],
-    ["wrong client", { client_id: "immo-mcp" }],
-  ] as [string, Record<string, unknown>][])("rejects %s", async (_name, overrides) => {
-    await expect(verify(await sign(overrides))).rejects.toThrow();
+    ["multiple audiences", { aud: [AUTH.appBaseUrl, `${AUTH.appBaseUrl}/mcp`] }, audienceError],
+    ["repeated audience", { aud: [AUTH.appBaseUrl, AUTH.appBaseUrl] }, audienceError],
+    ["MCP audience", { aud: `${AUTH.appBaseUrl}/mcp` }, { ...claimError, claim: "aud" }],
+    ["wrong audience", { aud: "https://other.example.test" }, { ...claimError, claim: "aud" }],
+    ["audience with a trailing slash", { aud: `${AUTH.appBaseUrl}/` }, { ...claimError, claim: "aud" }],
+    ["missing audience", { aud: undefined }, { ...claimError, claim: "aud", reason: "missing" }],
+    ["missing expiry", { exp: undefined }, { ...claimError, claim: "exp", reason: "missing" }],
+    ["expired token", { exp: NOW / 1000 - 1 }, expiredError],
+    ["expiry boundary", { exp: NOW / 1000 }, expiredError],
+    ["future not-before", { nbf: NOW / 1000 + 60 }, { ...claimError, claim: "nbf" }],
+    ["wrong issuer", { iss: "https://other.example.test" }, { ...claimError, claim: "iss" }],
+    ["missing subject", { sub: undefined }, { ...claimError, claim: "sub", reason: "missing" }],
+    ["empty subject", { sub: "" }, subjectError],
+    ["blank subject", { sub: " " }, subjectError],
+    ["missing actor", { act: undefined }, actorError],
+    ["null actor", { act: null }, actorError],
+    ["malformed actor", { act: "immo-mcp-workload" }, actorError],
+    ["array actor", { act: [{ sub: AUTH.bearerWorkloadClientId }] }, actorError],
+    ["missing actor subject", { act: {} }, actorError],
+    ["non-string actor subject", { act: { sub: 42 } }, actorError],
+    ["empty actor subject", { act: { sub: "" } }, actorError],
+    ["wrong actor", { act: { sub: "other-workload" } }, actorError],
+    ["nested actor", { act: { sub: AUTH.bearerWorkloadClientId, act: { sub: "previous-workload" } } }, actorError],
+    ["actor with extra claims", { act: { sub: AUTH.bearerWorkloadClientId, role: "admin" } }, actorError],
+    ["missing client", { client_id: undefined }, clientError],
+    ["wrong client", { client_id: "immo-mcp" }, clientError],
+    ["malformed client", { client_id: [AUTH.bearerWorkloadClientId] }, clientError],
+  ] as [string, Record<string, unknown>, Record<string, string>][])("rejects %s", async (_name, overrides, error) => {
+    await expect(verify(await sign(overrides))).rejects.toMatchObject(error);
   });
 
   it("rejects configuration permitting several audiences", async () => {
@@ -276,7 +296,7 @@ describe("verifyAccessToken (delegated API bearer)", () => {
     const pair = await generateKeyPair("EdDSA", { crv: "Ed25519" });
     const token = await new SignJWT(baseClaims)
       .setProtectedHeader({ alg: "EdDSA", kid: "delegation-key" }).sign(pair.privateKey);
-    await expect(verify(token)).rejects.toThrow();
+    await expect(verify(token)).rejects.toMatchObject({ code: "ERR_JWS_SIGNATURE_VERIFICATION_FAILED" });
   });
 });
 describe("verifyIdToken (JWKS, EdDSA)", () => {
@@ -340,7 +360,7 @@ describe("verifyIdToken (JWKS, EdDSA)", () => {
         expectedNonce: "wrong-nonce",
         getKey,
       }),
-    ).rejects.toThrow(/nonce mismatch/);
+    ).rejects.toThrow("id_token nonce mismatch");
   });
 
   it("rejects a wrong audience", async () => {
@@ -355,7 +375,7 @@ describe("verifyIdToken (JWKS, EdDSA)", () => {
         expectedNonce: "n",
         getKey,
       }),
-    ).rejects.toThrow();
+    ).rejects.toMatchObject({ code: "ERR_JWT_CLAIM_VALIDATION_FAILED", claim: "aud", reason: "check_failed" });
   });
 
   it("rejects a wrong issuer", async () => {
@@ -370,7 +390,7 @@ describe("verifyIdToken (JWKS, EdDSA)", () => {
         expectedNonce: "n",
         getKey,
       }),
-    ).rejects.toThrow();
+    ).rejects.toMatchObject({ code: "ERR_JWT_CLAIM_VALIDATION_FAILED", claim: "iss", reason: "check_failed" });
   });
 
   it("rejects a token signed by an unknown key", async () => {
@@ -388,6 +408,6 @@ describe("verifyIdToken (JWKS, EdDSA)", () => {
         expectedNonce: "n",
         getKey: otherGetKey,
       }),
-    ).rejects.toThrow();
+    ).rejects.toMatchObject({ code: "ERR_JWKS_NO_MATCHING_KEY" });
   });
 });

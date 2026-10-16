@@ -288,7 +288,8 @@ export async function verifyAccessToken(
   const actor = payload.act;
   if (
     !opts.workloadClientId || !actor || typeof actor !== "object" ||
-    Array.isArray(actor) || !("sub" in actor) || actor.sub !== opts.workloadClientId
+    Array.isArray(actor) || Object.keys(actor).length !== 1 ||
+    !("sub" in actor) || actor.sub !== opts.workloadClientId
   ) {
     throw new Error("access_token actor mismatch");
   }
