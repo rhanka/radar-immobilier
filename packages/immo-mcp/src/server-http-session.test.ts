@@ -6,6 +6,7 @@ import {
   DEFAULT_SESSION_IDLE_TIMEOUT_MS,
   DEFAULT_SESSION_MAX_LIFETIME_MS,
   createImmoHttpApp,
+  getMcpSessionCount,
   type ImmoHttpConfig,
 } from "./server-http.js";
 import type { Hono } from "hono";
@@ -200,5 +201,122 @@ describe("mcp http session ownership", () => {
     };
     expect(body.result?.isError).toBe(true);
     expect(body.result?.content?.[0]?.text ?? "").toContain("scope_denied:immo:search");
+  });
+});
+
+describe("mcp http session expiry", () => {
+  it("treats an idle session as unknown and frees its memory", async () => {
+    let now = Date.now();
+    const app = createImmoHttpApp(
+      { ...BASE_CONFIG, sessionIdleTimeoutMs: 60_000, sessionMaxLifetimeMs: 3_600_000 },
+      { keySource, clock: () => now },
+    );
+    const token = await signToken({ sub: "user-1" });
+    const sessionId = await initialize(app, token);
+    expect(getMcpSessionCount(app)).toBe(1);
+
+    now += 61_000;
+    const res = await app.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token, sessionId }),
+      body: JSON.stringify(searchLotsCall(2)),
+    });
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({
+      jsonrpc: "2.0",
+      error: { code: -32000, message: "Unknown or expired MCP session" },
+      id: null,
+    });
+    expect(getMcpSessionCount(app)).toBe(0);
+  });
+
+  it("frees expired sessions that receive no further request when a new session opens", async () => {
+    let now = Date.now();
+    const app = createImmoHttpApp(
+      { ...BASE_CONFIG, sessionIdleTimeoutMs: 60_000, sessionMaxLifetimeMs: 3_600_000 },
+      { keySource, clock: () => now },
+    );
+    await initialize(app, await signToken({ sub: "user-1" }));
+    expect(getMcpSessionCount(app)).toBe(1);
+
+    now += 61_000;
+    await initialize(app, await signToken({ sub: "user-2" }));
+    expect(getMcpSessionCount(app)).toBe(1);
+  });
+
+  it("treats a session past its maximum lifetime as unknown even when active", async () => {
+    let now = Date.now();
+    const app = createImmoHttpApp(
+      { ...BASE_CONFIG, sessionIdleTimeoutMs: 3_600_000, sessionMaxLifetimeMs: 60_000 },
+      { keySource, clock: () => now },
+    );
+    const token = await signToken({ sub: "user-1" });
+    const sessionId = await initialize(app, token);
+
+    // Activity inside the window keeps the session alive before the cap.
+    now += 10_000;
+    const alive = await app.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token, sessionId }),
+      body: JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" }),
+    });
+    expect(alive.status).toBe(202);
+
+    now += 51_000; // 61s after creation, past the 60s cap.
+    const res = await app.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token, sessionId }),
+      body: JSON.stringify(searchLotsCall(3)),
+    });
+    expect(res.status).toBe(404);
+    expect(getMcpSessionCount(app)).toBe(0);
+  });
+
+  it("keeps an active session alive across idle windows below the timeout", async () => {
+    let now = Date.now();
+    const app = createImmoHttpApp(
+      { ...BASE_CONFIG, sessionIdleTimeoutMs: 60_000, sessionMaxLifetimeMs: 3_600_000 },
+      { keySource, clock: () => now },
+    );
+    const token = await signToken({ sub: "user-1" });
+    const sessionId = await initialize(app, token);
+
+    now += 50_000;
+    const first = await app.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token, sessionId }),
+      body: JSON.stringify(searchLotsCall(2)),
+    });
+    expect(first.status).toBe(200);
+
+    // 50s after the last activity: still within the refreshed idle window.
+    now += 50_000;
+    const second = await app.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token, sessionId }),
+      body: JSON.stringify(searchLotsCall(3)),
+    });
+    expect(second.status).toBe(200);
+    expect(getMcpSessionCount(app)).toBe(1);
+  });
+
+  it("frees the session on DELETE", async () => {
+    const app = createImmoHttpApp(BASE_CONFIG, { keySource });
+    const token = await signToken({ sub: "user-1" });
+    const sessionId = await initialize(app, token);
+    expect(getMcpSessionCount(app)).toBe(1);
+
+    await app.request("/mcp", {
+      method: "DELETE",
+      headers: mcpHeaders({ token, sessionId }),
+    });
+    expect(getMcpSessionCount(app)).toBe(0);
+
+    const res = await app.request("/mcp", {
+      method: "POST",
+      headers: mcpHeaders({ token, sessionId }),
+      body: JSON.stringify(searchLotsCall(2)),
+    });
+    expect(res.status).toBe(404);
   });
 });
