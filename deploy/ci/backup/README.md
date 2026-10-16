@@ -54,8 +54,8 @@ so every doc the DB references is in the inventory.
 
 ## How a run works
 
-Schedule `23 2 * * *` UTC (after the 23:17 UTC refresh, before the 04:45 / 05:17
-UTC jobs), `concurrencyPolicy: Forbid`, `activeDeadlineSeconds: 10800`,
+Schedule `23 2 * * *` UTC (before the 04:00 restore and 05:00 prod refresh
+starts), `concurrencyPolicy: Forbid`, `activeDeadlineSeconds: 12000`,
 `backoffLimit: 1`. One pod, three sequential steps, **one identity each**:
 
 1. **initContainer `dump`** — `postgis/postgis:16-3.4` (already in the cluster),
@@ -77,6 +77,11 @@ UTC jobs), `concurrencyPolicy: Forbid`, `activeDeadlineSeconds: 10800`,
    exited 0; executes the plan **only when it records a `complete` backup**,
    re-checks that every key is dated and outside the daily window, and puts
    delete-markers only (no VersionId). It never reads an object.
+
+CPU requests are `dump: 50m`, `backup: 50m`, `purge: 10m`. Kubernetes reserves
+`max(largest init request, sum of main-container requests)` = **50m** for this
+pod. CPU limits stay 1 / 500m / 200m respectively; lowering the dump request
+reduces its scheduling reservation, not its CPU limit.
 
 `pg_restore --list` runs on the local file before upload and the sha256 of the
 uploaded object is re-read after upload: identical bytes, so the uploaded dump
@@ -101,7 +106,10 @@ re-dump prod for nothing.)
 CD input `backup_run_now`) escapes `concurrencyPolicy: Forbid`. The `dump` step
 therefore refuses (exit 2) any Job whose name is not `radar-backup-daily-<n>`
 (i.e. not created by the CronJob controller) inside the scheduled window
-02:00–05:30 UTC, before touching the database.
+02:00–06:45 UTC, before touching the database. The end covers the 02:23 schedule,
+up to 3600 s of controller delay (`startingDeadlineSeconds`), 12000 s of Job
+deadline and 120 s termination grace. Controller delay before Job creation is
+separate from Pending after creation; Pending consumes the Job deadline.
 
 The docs copy is idempotent and resumable: an initial seed larger than the
 90-minute budget ends as `partial` and continues the next night (or with a
@@ -159,12 +167,24 @@ behaviour):
   inventory.bytes=…`.
 - **Budget vs deadline** (selftest, static): 1800 s (dump + PG upload margin) +
   5400 s budget + 640 s (longest request) + 3 × 120 s (final writes) + 120 s grace
-  = 8320 s < `activeDeadlineSeconds` 10 800 s — margin 2480 s. The normal end is
-  the budget, never the kill.
+  = **8320 s** of internal execution budget. `activeDeadlineSeconds: 12000`
+  (3 h 20) includes Pending and retries: **3600 s Pending + 8320 s + 80 s margin**.
+  One hour is the scheduling allowance, not a measured upper bound. Longer
+  Pending, a retry, or a pre-docs phase exceeding the 1800 s allowance can still
+  exhaust the shared Job deadline; no new 8320 s budget is granted per retry.
+- **Neighbouring schedules:** from 02:23 to the 05:00 prod refresh there are
+  9420 s, leaving only 1100 s (18 min 20) of Pending with the full internal
+  budget. Allowing one hour of Pending can overlap that refresh. With an on-time
+  Job creation the deadline is 05:43 (05:45 including termination grace); with
+  the full controller delay it is 06:43 (06:45 with grace), still before the
+  06:53 freshness check. These are configured envelopes, not a guarantee of
+  controller/kubelet timing or of backup completion before the 04:00 restore.
+  The restore keeps its complete-backup and 24 h freshness guards (see `RESTORE.md`).
 
 ## Freshness check — `radar-backup-freshness`
 
-Daily at 06:53 UTC (after the backup window), identity `radar-backup-reader`.
+Daily at 06:53 UTC (8 min after the configured latest backup end, including
+controller delay and termination grace), identity `radar-backup-reader`.
 Reads `manifests/latest.json` and fails (exit 5) when:
 
 - the newest backup is older than `FRESHNESS_MAX_AGE_DAYS` (1: today or yesterday);
@@ -270,8 +290,8 @@ dispatch or a push touching the bundle still re-applies it).
 `dump` step) against the namespace quota: `limits.cpu` measured at ≈ 2350m /
 2500m and the node at ≈ 97 % of requests during the first run. Avoid concurrent
 manual launches during the day (manual backup runs, one-shot Jobs, bundle
-re-applies) while a backup runs; the scheduled 02:23 UTC run is alone by design,
-and manual backup runs are refused inside 02:00–05:30 UTC.
+re-applies) while a backup runs. Manual backup runs are refused inside
+02:00–06:45 UTC; a delayed scheduled backup can still overlap the 05:00 prod refresh.
 
 Arming (repo variables): `BASCULE_BUNDLE_CD_ENABLED=true` and
 `BACKUP_DAILY_CD_ENABLED=true`, set by the k8s lane after it re-applied
@@ -329,7 +349,7 @@ scratch database.
 — for both ratios 0 disables the relative check; after a legitimate large
 cleanup, set it to 0 by PR for one run, then back — `RETENTION_*` (see
 `RETENTION.md`), `PURGE_DRY_RUN` (false), `SCHEDULED_WINDOW_START/END`
-(0200/0530), `FRESHNESS_MAX_AGE_DAYS` (1), `FRESHNESS_MAX_INCOMPLETE_DAYS` (3).
+(0200/0645), `FRESHNESS_MAX_AGE_DAYS` (1), `FRESHNESS_MAX_INCOMPLETE_DAYS` (3).
 S3 deadlines (all three modes, set explicitly on `backup`, defaults elsewhere):
 `S3_CONNECT_TIMEOUT_MS` (10 000), `S3_REQUEST_TIMEOUT_MS` (120 000),
 `S3_META_TIMEOUT_MS` (30 000), `S3_MIN_THROUGHPUT_BYTES_PER_SEC` (8 MiB/s);

@@ -42,7 +42,8 @@ metadata:
     app.kubernetes.io/component: db-backup
     role: daily-backup
 spec:
-  # 02:23 UTC: after the 23:17 UTC refresh, before the 04:45/05:17 UTC jobs.
+  # 02:23 UTC: before the 04:00 restore and 05:00 prod refresh starts.
+  # A long Pending/run can overlap them; restore still requires a fresh complete backup.
   schedule: "23 2 * * *"
   timeZone: "Etc/UTC"
   suspend: false
@@ -57,7 +58,9 @@ spec:
       # valid manifest, manifest written as incomplete (docs errors). A
       # `partial` backup (docs seed still pending) exits 0: not a failure.
       backoffLimit: 1
-      activeDeadlineSeconds: 10800
+      # Job wall clock includes Pending and retries: 3600 s Pending allowance +
+      # 8320 s internal budget + 80 s margin. Not a fresh deadline per pod.
+      activeDeadlineSeconds: 12000
       ttlSecondsAfterFinished: 259200
       # batch/v1 PodFailurePolicyRule: `action` + exactly one of `onExitCodes`
       # {operator, values (unique, ascending, no 0 with In)} / `onPodConditions`
@@ -174,9 +177,9 @@ spec:
                 # Job name (label set by the Job controller) for the manual-run guard.
                 - name: JOB_NAME
                   valueFrom: { fieldRef: { fieldPath: "metadata.labels['job-name']" } }
-                # 02:00-05:30 UTC covers the 02:23 run and its 3 h activeDeadlineSeconds.
+                # 02:23 + 1 h controller delay + 12000 s Job deadline + 120 s grace = 06:45.
                 - { name: SCHEDULED_WINDOW_START, value: "0200" }
-                - { name: SCHEDULED_WINDOW_END, value: "0530" }
+                - { name: SCHEDULED_WINDOW_END, value: "0645" }
                 - { name: EXPECTED_DATABASE, value: "radar" }
                 # RO SELECT-only role (pg_read_all_data), provisioned by the bascule bundle.
                 - { name: PGUSER,     valueFrom: { secretKeyRef: { name: radar-db-ro-prod, key: POSTGRES_USER } } }
@@ -184,7 +187,7 @@ spec:
                 - { name: PGDATABASE, valueFrom: { secretKeyRef: { name: radar-db-ro-prod, key: POSTGRES_DB } } }
               securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: ["ALL"] } }
               resources:
-                requests: { cpu: 100m, memory: 128Mi }
+                requests: { cpu: 50m, memory: 128Mi }
                 limits: { cpu: "1", memory: 512Mi }
               volumeMounts:
                 - { name: work, mountPath: /work }
@@ -219,8 +222,8 @@ spec:
                 # manifest (partial) + latest.json are written, exit 0. It cuts well
                 # before the kill: 1800 (dump + PG upload margin) + 5400 (budget) + 640
                 # (longest request: 5 GiB CopyObject at 8 MiB/s) + 360 (3 final writes)
-                # + 120 (grace) = 8320 s < activeDeadlineSeconds 10800 — margin 2480 s
-                # (checked by the selftest).
+                # + 120 (grace) = 8320 s. With 3600 s Pending: 11920 < 12000 s,
+                # leaving 80 s margin (checked by the selftest).
                 - { name: DOCS_COPY_BUDGET_SECONDS, value: "5400" }
                 # Per-request S3 deadlines (incident 2026-09-26: one CopyObject hung
                 # forever, geo). Every S3 call: wall-clock deadline (AbortSignal + race)

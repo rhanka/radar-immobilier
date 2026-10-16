@@ -879,8 +879,14 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
   const iInit = cj.indexOf('\n          initContainers:'); const iDump = cj.indexOf('- name: dump');
   const iBackup = cj.indexOf('- name: backup'); const iMain = cj.indexOf('\n          containers:'); const iPurge = cj.indexOf('- name: purge');
   ok('steps: initContainers [dump, backup] then containers [purge]', iInit > 0 && iInit < iDump && iDump < iBackup && iBackup < iMain && iMain < iPurge &&
+    (cj.slice(iInit, iMain).match(/\n {12}- name: /g) || []).length === 2 &&
     (cj.slice(iMain).match(/\n {12}- name: /g) || []).length === 1);
   const initPart = cj.slice(iInit, iMain); const purgePart = cj.slice(iMain);
+  const cpuRequests = (part) => [...part.matchAll(/requests: \{ cpu: (\d+)m, memory: [^}]+\}/g)].map((m) => Number(m[1]));
+  const initCpu = cpuRequests(initPart); const mainCpu = cpuRequests(purgePart);
+  eq('CPU requests: dump 50m, backup 50m, purge 10m; no step above 50m', [initCpu, mainCpu], [[50, 50], [10]]);
+  eq('effective pod CPU request = max(largest init, sum of main containers) = 50m',
+    Math.max(...initCpu, mainCpu.reduce((sum, cpu) => sum + cpu, 0)), 50);
   ok('backup step mounts the writer only (no purger, no reader)', /name: radar-backup-writer, key: S3_SECRET_KEY/.test(initPart) &&
     !initPart.includes('radar-backup-purger') && !initPart.includes('radar-backup-reader'));
   ok('purge step mounts the purger only (no writer, no reader)', /name: radar-backup-purger, key: S3_SECRET_KEY/.test(purgePart) &&
@@ -922,7 +928,7 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
     eq(`${file}: podFailurePolicy matches the batch/v1 schema (${rules.length} rules)`, problems, []);
   }
   ok('manual-run guard: non-CronJob Job refused in the scheduled window', cj.includes("fieldPath: \"metadata.labels['job-name']\"") &&
-    cj.includes('radar-backup-daily-[0-9]*)') && /SCHEDULED_WINDOW_START, value: "0200"/.test(cj) && /SCHEDULED_WINDOW_END, value: "0530"/.test(cj));
+    cj.includes('radar-backup-daily-[0-9]*)') && /SCHEDULED_WINDOW_START, value: "0200"/.test(cj) && /SCHEDULED_WINDOW_END, value: "0645"/.test(cj));
   const active = (t) => t.split('\n').filter((l) => !/^\s*(#|\/\/)/.test(l)).join('\n');
   ok('no python in any active line of the backup bundle', !/python|\.py\b/i.test(active(cj) + active(read('deploy/ci/backup/backup-daily.cjs'))));
   const cfgKeys = ['S3_ENDPOINT', 'S3_REGION', 'S3_ACCESS_KEY', 'S3_SECRET_KEY', 'BACKUP_BUCKET', 'SOURCE_DOCS_BUCKET', 'EXPECTED_BACKUP_BUCKET',
@@ -943,13 +949,25 @@ const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
   // margin) + docs budget + the longest request deadline in flight (a CopyObject of
   // 5 GiB, the S3 single-copy maximum: immo never uses multipart copy) + the final
   // writes (inventory, manifest, latest.json: 3 request deadlines) + the grace.
+  // The Job deadline also counts Pending (and retries): reserve one hour before
+  // the pod starts, without taking it out of the internal execution budget.
   const deadlineS = Number((/activeDeadlineSeconds: (\d+)/.exec(cj) || [])[1]);
   const graceS = Number((/terminationGracePeriodSeconds: (\d+)/.exec(cj) || [])[1]);
   const maxCopyS = lib.requestDeadlineMs({ cfg }, 'body', 5 * 1024 ** 3) / 1000;
   const finalS = 3 * lib.requestDeadlineMs({ cfg }, 'body', 0) / 1000;
   const totalS = 1800 + cfg.docsBudgetSeconds + maxCopyS + finalS + graceS;
-  ok(`budget + max request deadline + final writes + grace < activeDeadlineSeconds (1800 + ${cfg.docsBudgetSeconds} + ${maxCopyS} + ${finalS} + ${graceS} = ${totalS} < ${deadlineS}, margin ${deadlineS - totalS} s)`,
-    Number.isFinite(totalS) && totalS < deadlineS && deadlineS === 10800);
+  const pendingS = 3600;
+  eq('internal execution budget stays 8320 s; Job deadline is 12000 s', [totalS, deadlineS], [8320, 12000]);
+  ok(`Pending + internal budget < activeDeadlineSeconds (${pendingS} + ${totalS} < ${deadlineS}, margin ${deadlineS - pendingS - totalS} s)`,
+    Number.isFinite(totalS) && pendingS + totalS < deadlineS && deadlineS - pendingS - totalS === 80);
+  const startDeadlineS = Number((/^  startingDeadlineSeconds: (\d+)/m.exec(cj) || [])[1]);
+  const latestEndS = (2 * 60 + 23) * 60 + startDeadlineS + deadlineS + graceS;
+  const manualEnd = /SCHEDULED_WINDOW_END, value: "(\d{2})(\d{2})"/.exec(cj);
+  const manualEndS = manualEnd ? (Number(manualEnd[1]) * 60 + Number(manualEnd[2])) * 60 : NaN;
+  eq('latest scheduled end including controller delay and termination grace = 06:45 UTC',
+    [startDeadlineS, latestEndS, manualEndS], [3600, (6 * 60 + 45) * 60, (6 * 60 + 45) * 60]);
+  ok('manual-run refusal covers the scheduled envelope; freshness at 06:53 stays later',
+    manualEndS >= latestEndS && latestEndS < (6 * 60 + 53) * 60);
   eq('terminationGracePeriodSeconds = TERMINATION_GRACE_SECONDS (final writes capped to the real grace)', [graceS, cfg.terminationGraceSeconds], [120, 120]);
   eq('CronJob S3 deadlines: connect 10 s, request 120 s, meta 30 s, 8 MiB/s; budget 5400 s', [cfg.timeouts, cfg.docsBudgetSeconds],
     [{ connectMs: 10000, requestMs: 120000, metaMs: 30000, minBytesPerSec: 8388608 }, 5400]);
