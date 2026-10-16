@@ -12,6 +12,7 @@ import { getMcpAuthContext, mcpAuthRoutes, requireMcpAuth } from "@sentropic/mcp
 import { fromRemoteJwks } from "@sentropic/oauth-verify";
 import type { AccessTokenClaims, TokenKeySource } from "@sentropic/oauth-verify";
 import { IMMO_SCOPES, type ImmoMcpAuthContext } from "./auth-context.js";
+import type { ToolContext } from "./tools.js";
 import { createDataSource, type ImmoDataSource } from "./data-source.js";
 import { createRawDataSource, type RawDataSource } from "./raw-data.js";
 import { IMMO_MCP_NAME, IMMO_MCP_VERSION } from "./meta.js";
@@ -133,10 +134,63 @@ function buildHttpScopedServer(
   auth: ImmoMcpAuthContext,
   data: ImmoDataSource,
   raw: RawDataSource,
-): McpServer {
+): { server: McpServer; toolCtx: ToolContext } {
+  // `toolCtx` is shared by reference with the registered tool handlers: replacing
+  // its `auth` on every request rebinds the tools to the CURRENT request identity
+  // (scopes + bearer) without rebuilding the session's server/transport.
+  const toolCtx: ToolContext = { auth, data, raw };
   const server = new McpServer({ name: IMMO_MCP_NAME, version: IMMO_MCP_VERSION });
-  registerTools(server, { auth, data, raw });
-  return server;
+  registerTools(server, toolCtx);
+  return { server, toolCtx };
+}
+
+/** Identity a session is bound to at `initialize` time. */
+interface SessionOwner {
+  /** Token subject — always bound. */
+  sub: string;
+  /** OAuth client (`azp`, falling back to `client_id`) — bound when the auth context exposes it. */
+  clientId?: string | undefined;
+}
+
+interface SessionEntry {
+  transport: WebStandardStreamableHTTPServerTransport;
+  server: McpServer;
+  /** Mutable holder shared with the session's tool handlers (see `buildHttpScopedServer`). */
+  toolCtx: ToolContext;
+  owner: SessionOwner;
+}
+
+/** Read the OAuth client identity from verified claims (`azp`, else `client_id`). */
+function ownerClientId(mcpAuth: McpAuthContext): string | undefined {
+  const claims = mcpAuth.claims as Record<string, unknown>;
+  const raw = claims["azp"] ?? claims["client_id"];
+  return typeof raw === "string" && raw.length > 0 ? raw : undefined;
+}
+
+function sessionOwnerFromMcp(mcpAuth: McpAuthContext): SessionOwner {
+  const owner: SessionOwner = { sub: mcpAuth.sub };
+  const clientId = ownerClientId(mcpAuth);
+  if (clientId !== undefined) owner.clientId = clientId;
+  return owner;
+}
+
+/**
+ * True when the current request identity matches the session owner. The `sub`
+ * must always match; the client is additionally required to match when BOTH
+ * the session owner and the current request expose one (a refreshed token for
+ * the same user keeps the session).
+ */
+function isSessionOwner(owner: SessionOwner, mcpAuth: McpAuthContext): boolean {
+  if (mcpAuth.sub !== owner.sub) return false;
+  const currentClientId = ownerClientId(mcpAuth);
+  if (
+    owner.clientId !== undefined &&
+    currentClientId !== undefined &&
+    currentClientId !== owner.clientId
+  ) {
+    return false;
+  }
+  return true;
 }
 
 /** Test/wiring overrides — keeps the prod path env-only while letting tests inject a key source. */
@@ -151,11 +205,6 @@ export interface ImmoHttpDeps {
   raw?: RawDataSource;
   /** Override the token key source (default = remote JWKS off the issuer/jwksUri). */
   keySource?: TokenKeySource;
-}
-
-interface SessionEntry {
-  transport: WebStandardStreamableHTTPServerTransport;
-  server: McpServer;
 }
 
 /**
@@ -201,30 +250,47 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
   const jsonRpcError = (c: Context, status: 400 | 404, message: string): Response =>
     c.json({ jsonrpc: "2.0", error: { code: -32000, message }, id: null }, status);
 
+  // The same "unknown session" response is returned for unknown ids, expired
+  // sessions AND owner mismatches, so a rejected request reveals nothing about
+  // which case applied.
+  const unknownSession = (c: Context): Response =>
+    jsonRpcError(c, 404, "Unknown or expired MCP session");
+
+  const currentAuth = (c: Context): { mcpAuth: McpAuthContext; auth: ImmoMcpAuthContext } => {
+    const mcpAuth = getMcpAuthContext(c);
+    // Identity, scopes AND raw bearer come from the CURRENT request (verified
+    // upstream by the resource server guard): tools act per-request (D4), so a
+    // refreshed token or a removed scope applies to the very next request.
+    const auth = authContextFromMcp(mcpAuth, {
+      audience: config.resource,
+      dataMode: data.mode === "http" ? "real" : "simulation",
+      accessToken: extractBearerToken(c.req.header("authorization")),
+    });
+    return { mcpAuth, auth };
+  };
+
   const handleMcp = async (c: Context): Promise<Response> => {
     const sessionId = c.req.header("mcp-session-id");
 
     if (sessionId) {
       const entry = sessions.get(sessionId);
-      if (!entry) return jsonRpcError(c, 404, "Unknown or expired MCP session");
+      if (!entry) return unknownSession(c);
+      const { mcpAuth, auth } = currentAuth(c);
+      // Owner mismatch: reject WITHOUT touching the transport, with the exact
+      // unknown-session response.
+      if (!isSessionOwner(entry.owner, mcpAuth)) return unknownSession(c);
+      entry.toolCtx.auth = auth;
       return entry.transport.handleRequest(c.req.raw);
     }
 
     // No session yet: only a POST (the `initialize` request) may open one.
     if (c.req.method !== "POST") return jsonRpcError(c, 400, "Missing mcp-session-id header");
 
-    // Capture the RAW verified bearer so tools can act PER-USER (D4). The MCP
-    // resource server already verified it on THIS request; we only pass it
-    // through to the data source (which forwards it to the radar API). NOTE:
-    // captured at session `initialize` time and reused for the session's tools —
-    // a token that expires mid-session would need a fresh session (documented
-    // limitation of the per-session auth model).
-    const auth = authContextFromMcp(getMcpAuthContext(c), {
-      audience: config.resource,
-      dataMode: data.mode === "http" ? "real" : "simulation",
-      accessToken: extractBearerToken(c.req.header("authorization")),
-    });
-    const server = buildHttpScopedServer(auth, data, raw);
+    // The session is bound to the opening request's identity; later requests
+    // rebind identity, scopes and the RAW verified bearer (D4) before reaching
+    // the transport (see the session branch above).
+    const { mcpAuth, auth } = currentAuth(c);
+    const { server, toolCtx } = buildHttpScopedServer(auth, data, raw);
     const transport = new WebStandardStreamableHTTPServerTransport({
       sessionIdGenerator: () => randomUUID(),
       enableJsonResponse: true,
@@ -235,7 +301,14 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
     };
     await server.connect(transport);
     const response = await transport.handleRequest(c.req.raw);
-    if (transport.sessionId) sessions.set(transport.sessionId, { transport, server });
+    if (transport.sessionId) {
+      sessions.set(transport.sessionId, {
+        transport,
+        server,
+        toolCtx,
+        owner: sessionOwnerFromMcp(mcpAuth),
+      });
+    }
     return response;
   };
 
