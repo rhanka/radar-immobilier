@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { createImmoHttpApp, type ImmoHttpConfig } from "./server-http.js";
 
@@ -61,4 +62,14 @@ describe("OAuth protected resource discovery", () => {
     expect(res.headers.get("www-authenticate")).toContain('error="invalid_token"');
   });
 
+  it("keeps the transport prefix and routes only the canonical metadata path exactly to MCP", () => {
+    const ingress = readFileSync(new URL("../../../deploy/k8s/41-immo-mcp-ingress.yaml", import.meta.url), "utf8");
+    const routes = [...ingress.matchAll(
+      /- path: (\S+)\n\s+pathType: (\S+)\n\s+backend:\n\s+service:\n\s+name: (\S+)\n\s+port:\n\s+name: (\S+)/g,
+    )].map(([, path, type, service, port]) => ({ path, type, service, port }));
+    expect(routes).toEqual([
+      { path: "/mcp", type: "Prefix", service: "radar-immo-mcp", port: "http" },
+      { path: CANONICAL_PATH, type: "Exact", service: "radar-immo-mcp", port: "http" },
+    ]);
+  });
 });
