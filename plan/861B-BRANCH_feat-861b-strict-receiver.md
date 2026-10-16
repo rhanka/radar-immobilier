@@ -38,9 +38,9 @@
   - [x] Vérifier signature, issuer, expiration/not-before, sujet humain non vide, audience API unique (chaîne ou tableau singleton), acteur/client et compte approuvé ; exposer les claims vérifiés au middleware.
   - [x] Autoriser seulement scope `immo:search` et GET `/api/graph-signals/:city`, segment canonique unique sans `by-city` ; interdire agrégat, variantes de casse, doubles slashs, encodages et slash final avec 403 et aucun handler métier.
   - [x] Préserver tests positifs, refus du jeton MCP à l'API, audience multiple/incorrecte, issuer/clé/signature/expiration, comptes inconnus/suspendus et régressions cookies/routes publiques ; aucun cookie ne masque les tests négatifs bearer.
-- [ ] **Lot 2 — Acteur et motifs de refus (B-m4/B-m5)**
-  - [ ] N'accepter que `act: { sub: expectedWorkload }` ; refuser clés supplémentaires/acteur imbriqué/client incorrect, avec réponse HTTP uniforme 401 et aucun handler.
-  - [ ] Vérifier messages exacts et propriétés jose `code/claim/reason` dans les tests unitaires ; l'API ne divulgue pas ces détails.
+- [x] **Lot 2 — Acteur et motifs de refus (B-m4/B-m5)**
+  - [x] N'accepter que `act: { sub: expectedWorkload }` ; refuser clés supplémentaires/acteur imbriqué/client incorrect, avec réponse HTTP uniforme 401 et aucun handler.
+  - [x] Vérifier messages exacts et propriétés jose `code/claim/reason` dans les tests unitaires ; l'API ne divulgue pas ces détails.
 - [ ] **Lot 3 — Audience absente (Fable m3)**
   - [ ] Tester avertissement pour URL absente/vide, absence d'avertissement avec configuration valide/auth désactivée, bearer 401 et cookie valide 200.
 - [x] **Lot 4 — Conservation des preuves de correction**

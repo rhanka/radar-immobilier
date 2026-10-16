@@ -748,6 +748,8 @@ describe("protect middleware", () => {
     ["non-string actor subject", { act: { sub: 42 } }],
     ["empty actor subject", { act: { sub: "" } }],
     ["wrong actor", { act: { sub: "other-workload" } }],
+    ["nested actor", { act: { sub: "immo-mcp-workload", act: { sub: "previous-workload" } } }],
+    ["actor with extra claims", { act: { sub: "immo-mcp-workload", role: "admin" } }],
     ["wrong client", { client_id: "immo-mcp" }],
     ["missing client", { client_id: undefined }],
     ["malformed client", { client_id: ["immo-mcp-workload"] }],
