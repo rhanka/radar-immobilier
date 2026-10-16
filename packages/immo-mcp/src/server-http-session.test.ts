@@ -3,6 +3,8 @@ import { SignJWT, generateKeyPair } from "jose";
 import type { KeyLike } from "jose";
 import type { TokenKeySource } from "@sentropic/oauth-verify";
 import {
+  DEFAULT_SESSION_IDLE_TIMEOUT_MS,
+  DEFAULT_SESSION_MAX_LIFETIME_MS,
   createImmoHttpApp,
   type ImmoHttpConfig,
 } from "./server-http.js";
@@ -26,6 +28,8 @@ const BASE_CONFIG: ImmoHttpConfig = {
   scopesSupported: ["immo:read", "immo:search", "immo:documents:read"],
   port: 0,
   dataMode: "simulation",
+  sessionIdleTimeoutMs: DEFAULT_SESSION_IDLE_TIMEOUT_MS,
+  sessionMaxLifetimeMs: DEFAULT_SESSION_MAX_LIFETIME_MS,
 };
 
 let publicKey: KeyLike;
