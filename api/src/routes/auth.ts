@@ -30,6 +30,7 @@ import {
   exchangeCode,
   fetchDiscovery,
   verifyAccessToken,
+  type VerifiedAccessToken,
   verifyIdToken,
   type FetchLike,
   type OidcDiscovery,
@@ -507,13 +508,9 @@ export function authRoute(
  *    Public so the URL handed out by immo-mcp `get_pv_pdf` is fetchable by the
  *    MCP client, mirroring the geo-owned S3 archive direction.
  *
- * `/api/graph-signals` is DELIBERATELY NOT public: it stays session-protected
- * so the MCP serves signals under the REAL, per-user identity (D4). The
- * immo-mcp `search_signals` tool forwards the current user's own bearer token
- * (see packages/immo-mcp/src/data-source.ts) rather than a shared machine
- * credential, and `protect` (below) ACCEPTS that user bearer — verified against
- * OUR IdP JWKS, audience-bounded, approved-account — so the call is per-user
- * end-to-end. An unauthenticated caller still gets 401.
+ * `/api/graph-signals` remains protected. MCP calls require an exchanged API
+ * bearer preserving the human subject, with the signed workload actor/client,
+ * `immo:search` and an approved account. Browser sessions keep their own flow.
  */
 const PUBLIC_PREFIXES = [
   // k8s probes must be reachable WITHOUT auth: the (unauthenticated) kubelet
@@ -559,11 +556,9 @@ async function fetchAccountStatus(db: Database, sub: string): Promise<string | n
  * (local dev / tests stay open). When enabled, every non-public route requires
  * an authenticated identity, resolved in this priority:
  *   1. a valid radar session cookie (browsers), OR
- *   2. a per-user IdP bearer token (D4, option A) — the immo-mcp pod forwards
- *      the CURRENT user's OWN access token (`Authorization: Bearer`), verified
- *      against OUR IdP JWKS, audience bounded to our origin + `${origin}/mcp`,
- *      then authorised against the approved-accounts table. This NEVER opens a
- *      route publicly; the token is never logged.
+ *   2. an IdP delegated bearer with the single API audience and workload
+ *      actor/client, limited to the signals read profile and approved accounts.
+ *      The token is never logged.
  * Browser navigations without an identity get a 302 to /login; API/XHR get a
  * 401 JSON. The verified identity is exposed on the context as `c.get("session")`.
  */
@@ -620,27 +615,32 @@ export function protect(
       return next();
     }
 
-    // No valid radar session cookie — try a per-user IdP bearer (D4, option A).
+    // No valid radar session cookie — try an exchanged API bearer.
     const bearer = extractBearerToken(c.req.header("authorization"));
     if (bearer) {
       const getKey = resolveBearerKeyGetter();
-      let sub: string | null = null;
+      let claims: VerifiedAccessToken | null = null;
       if (getKey) {
         try {
-          // Signature (JWKS) + iss + exp + aud-allowlist + sub are all enforced.
-          const claims = await verifyAccessToken(bearer, {
+          claims = await verifyAccessToken(bearer, {
             issuer: auth.issuer,
             audiences: auth.bearerAudiences,
             workloadClientId: auth.bearerWorkloadClientId,
             getKey,
             now: nowFn(),
           });
-          sub = claims.sub;
         } catch {
-          sub = null; // invalid / expired / wrong iss / wrong aud → treat as no id
+          claims = null;
         }
       }
-      if (!sub) return c.json({ error: "unauthenticated" }, 401);
+      if (!claims) return c.json({ error: "unauthenticated" }, 401);
+      if (
+        !claims.scopes.includes("immo:search") || c.req.method !== "GET" ||
+        !/^\/api\/graph-signals\/[^/]+$/.test(path)
+      ) {
+        return c.json({ error: "forbidden" }, 403);
+      }
+      const { sub } = claims;
 
       // Per-user authorisation: a bearer may carry ANY IdP user, so require an
       // APPROVED radar account (stricter than the cookie path, where an unknown
