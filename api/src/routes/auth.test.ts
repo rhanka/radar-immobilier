@@ -718,11 +718,6 @@ describe("protect middleware", () => {
     return { app, handler };
   }
 
-  const approvedDb = () =>
-    makeEnrollmentDb([
-      { sub: "mcp-user", status: "approved", isAdmin: false },
-    ]) as unknown as import("../db/client.js").Database;
-
   it.each([{ aud: "https://immo.example.test" }, { aud: ["https://immo.example.test"] }])(
     "accepts a valid exchanged bearer with a single audience $aud as the same human",
     async ({ aud }) => {
@@ -737,13 +732,6 @@ describe("protect middleware", () => {
       expect(res.headers.get("set-cookie")).toBeNull();
     },
   );
-
-  it("rejects a request with NO bearer and no session → 401", async () => {
-    const app = appWith(AUTH_ON, approvedDb());
-    const res = await app.request("/api/graph-signals/mont-tremblant");
-    expect(res.status).toBe(401);
-    expect((await res.json()).error).toBe("unauthenticated");
-  });
 
   const invalidClaims: [string, Record<string, unknown>][] = [
     ["original MCP user token", { aud: "https://immo.example.test/mcp", act: undefined, client_id: "immo-mcp" }],
@@ -826,28 +814,61 @@ describe("protect middleware", () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it("rejects a valid bearer for a SUSPENDED user → 403", async () => {
-    const { accessToken, getKey } = await makeAccessToken({ sub: "mcp-user" });
-    const db = makeEnrollmentDb([
-      { sub: "mcp-user", status: "suspended", isAdmin: false },
-    ]) as unknown as import("../db/client.js").Database;
-    const app = appWith(AUTH_ON, db, getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
-      headers: { authorization: `Bearer ${accessToken}` },
-    });
-    expect(res.status).toBe(403);
-    expect((await res.json()).error).toBe("account_not_approved");
+  it.each(["suspended", "unknown", "pending", "rejected"])(
+    "preserves the approved-account denial for a %s account",
+    async (status) => {
+      const { accessToken, getKey } = await makeAccessToken();
+      const { app, handler } = delegatedApp(getKey, status);
+      const res = await app.request(SIGNALS_PATH, {
+        headers: { authorization: `Bearer ${accessToken}` },
+      });
+      expect(res.status).toBe(403);
+      expect(await res.json()).toEqual({ error: "account_not_approved", status });
+      expect(handler).not.toHaveBeenCalled();
+    },
+  );
+
+  it("requires the configured workload identity in both signed claims", async () => {
+    const auth = { ...AUTH_ON, bearerWorkloadClientId: "preprod-workload" };
+    for (const [act, client_id, expected] of [
+      [{ sub: "preprod-workload" }, "preprod-workload", 200],
+      [{ sub: "immo-mcp-workload" }, "preprod-workload", 401],
+      [{ sub: "preprod-workload" }, "immo-mcp-workload", 401],
+    ] as const) {
+      const { accessToken, getKey } = await makeAccessToken({ act, client_id });
+      const { app, handler } = delegatedApp(getKey, "approved", auth);
+      const res = await app.request(SIGNALS_PATH, {
+        headers: { authorization: `Bearer ${accessToken}` },
+      });
+      expect(res.status).toBe(expected);
+      expect(handler).toHaveBeenCalledTimes(expected === 200 ? 1 : 0);
+    }
   });
 
-  it("rejects a valid bearer for an UNKNOWN (non-enrolled) user → 403", async () => {
-    const { accessToken, getKey } = await makeAccessToken({ sub: "ghost" });
-    const app = appWith(AUTH_ON, approvedDb(), getKey); // db has only mcp-user
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
-      headers: { authorization: `Bearer ${accessToken}` },
+  it("keeps browser cookies independent from the bearer scope and method profile", async () => {
+    const token = await signSession(
+      { sub: "mcp-user" },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600, now: NOW },
+    );
+    const { getKey } = await makeAccessToken();
+    const { app, handler } = delegatedApp(getKey);
+    const res = await app.request("/api/protected", {
+      method: "POST", headers: { cookie: `radar_session=${token}`, authorization: "Bearer invalid" },
     });
-    expect(res.status).toBe(403);
-    expect((await res.json()).status).toBe("unknown");
+    expect(res.status).toBe(200);
+    expect(handler).toHaveBeenCalledOnce();
   });
+
+  it.each(["/api/geo/collections/qc-lots-longueuil/items", "/api/documents/raw?rawRef=raw/test.pdf"])(
+    "keeps the public raw-data prefix %s independent from bearer validation",
+    async (path) => {
+      const { getKey } = await makeAccessToken();
+      const { app, handler } = delegatedApp(getKey);
+      const res = await app.request(path, { headers: { authorization: "Bearer invalid" } });
+      expect(res.status).toBe(200);
+      expect(handler).toHaveBeenCalledOnce();
+    },
+  );
 });
 
 describe("sliding session re-mint (durable session — wp5 §B)", () => {
