@@ -41,11 +41,11 @@
 - [x] **Lot 2 — Acteur et motifs de refus (B-m4/B-m5)**
   - [x] N'accepter que `act: { sub: expectedWorkload }` ; refuser clés supplémentaires/acteur imbriqué/client incorrect, avec réponse HTTP uniforme 401 et aucun handler.
   - [x] Vérifier messages exacts et propriétés jose `code/claim/reason` dans les tests unitaires ; l'API ne divulgue pas ces détails.
-- [ ] **Lot 3 — Audience absente (Fable m3)**
-  - [ ] Tester avertissement pour URL absente/vide, absence d'avertissement avec configuration valide/auth désactivée, bearer 401 et cookie valide 200.
+- [x] **Lot 3 — Audience absente (Fable m3)**
+  - [x] Tester avertissement pour URL absente/vide, absence d'avertissement avec configuration valide/auth désactivée, bearer 401 et cookie valide 200.
 - [x] **Lot 4 — Conservation des preuves de correction**
   - [x] Historique précédent : 13 échecs attendus / 179 réussites avant correction ; puis 192 tests ciblés, 2 348 tests API réussis / 6 ignorés, typecheck/lint à 0 et nettoyage complet ; `RAPPORT-ASTRA-861B-FIX.md` distingue ces exécutions.
-  - [ ] Rejouer la suite API complète, typecheck/lint et les étapes intermédiaires ; consigner résultats et nettoyage dans le rapport d'historique.
+  - [x] Campagne du présent mandat : API complète 2 348 réussites / 6 ignorés, typecheck/lint à 0 (7 avertissements Svelte inchangés), huit étapes API intermédiaires typecheck/tests à 0 ; `down -v` et absence des ressources du projet vérifiés. Résultats, identité du code et SHA dans `RAPPORT-ASTRA-861-HISTORIQUE.md`, journaux `astra-861-historique-logs/`.
 - [ ] **Lot 5 — Prérequis amont, i-cond (§§4/6/7/10/11)**
   - [ ] Q-A1 « Tout attend la fusion » : #679 entier, registre/pages compris, doit être fusionné ; consigner publications auth-hono/cluster-mesh, tuple exact qualifié et reçus IdP déployé/M3 protégé de l'environnement avant 2b-MCP.
   - [ ] mcp-auth 0.2.2 est publié depuis `2026-10-16T08:18:02.527Z` ; vérifier signature de provenance (source `6138a8d5514763a405ad8735582a9d3b64548dab`, workflow, digest du sujet) et intégrité de l'archive du §7 avant consommation. Pas de republication ou nouveau GO #675 ; 861-a reste sur 0.1.0.

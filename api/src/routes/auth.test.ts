@@ -823,6 +823,25 @@ describe("protect middleware", () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
+  it("rejects bearers when no API audience is configured while preserving cookie access", async () => {
+    const { accessToken, getKey } = await makeAccessToken();
+    const { app, handler } = delegatedApp(getKey, "approved", {
+      ...AUTH_ON, appBaseUrl: "", bearerAudiences: [],
+    });
+    const res = await app.request(SIGNALS_PATH, {
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: "unauthenticated" });
+    expect(handler).not.toHaveBeenCalled();
+    const token = await signSession({ sub: "mcp-user" }, {
+      sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600, now: NOW,
+    });
+    const browser = await app.request(SIGNALS_PATH, { headers: { cookie: `radar_session=${token}` } });
+    expect(browser.status).toBe(200);
+    expect(handler).toHaveBeenCalledOnce();
+  });
+
   it.each(["suspended", "unknown", "pending", "rejected"])(
     "preserves the approved-account denial for a %s account",
     async (status) => {
