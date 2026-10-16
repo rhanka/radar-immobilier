@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { Hono } from "hono";
 import {
   SignJWT,
@@ -681,34 +681,41 @@ describe("protect middleware", () => {
     });
   });
 
-  // ── Per-user IdP bearer (D4, option A): the api accepts the user's OWN token ─
-  // The immo-mcp pod forwards it on /api/graph-signals; the api verifies it
-  // against OUR IdP JWKS and authorises per-user. NOT a public route.
+  // Delegated bearer cases use signed tokens, a fixed clock and no session cookie.
+  const NOW = 1_800_000_000_000;
+  const SIGNALS_PATH = "/api/graph-signals/mont-tremblant";
 
-  /** Sign a USER access token + return the matching local JWKS getter. */
-  async function makeAccessToken(opts: {
-    sub: string;
-    aud?: string | string[];
-    iss?: string;
-    exp?: number; // epoch seconds (past → expired)
-  }): Promise<{ accessToken: string; getKey: JWTVerifyGetKey }> {
+  async function makeAccessToken(
+    overrides: Record<string, unknown> = {},
+  ): Promise<{ accessToken: string; getKey: JWTVerifyGetKey }> {
     const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
-    const pubJwk: JWK = await exportJWK(publicKey);
-    pubJwk.kid = "k1";
-    pubJwk.alg = "EdDSA";
+    const pubJwk: JWK = { ...await exportJWK(publicKey), kid: "k1", alg: "EdDSA" };
     const getKey = createLocalJWKSet({ keys: [pubJwk] });
-    const builder = new SignJWT({
+    const accessToken = await new SignJWT({
+      iss: AUTH_ON.issuer, aud: AUTH_ON.appBaseUrl, sub: "mcp-user",
       act: { sub: AUTH_ON.bearerWorkloadClientId },
       client_id: AUTH_ON.bearerWorkloadClientId, scope: "immo:search",
-    })
-      .setProtectedHeader({ alg: "EdDSA", kid: "k1" })
-      .setIssuer(opts.iss ?? AUTH_ON.issuer)
-      .setAudience(opts.aud ?? "https://immo.example.test")
-      .setSubject(opts.sub)
-      .setIssuedAt();
-    builder.setExpirationTime(opts.exp ?? "5m");
-    const accessToken = await builder.sign(privateKey);
+      iat: NOW / 1000, exp: NOW / 1000 + 300, ...overrides,
+    }).setProtectedHeader({ alg: "EdDSA", kid: "k1" }).sign(privateKey);
     return { accessToken, getKey };
+  }
+
+  function delegatedApp(
+    getKey: JWTVerifyGetKey,
+    status = "approved",
+    auth = AUTH_ON,
+  ) {
+    const db = makeEnrollmentDb(
+      status === "unknown" ? [] : [{ sub: "mcp-user", status, isAdmin: false }],
+    ) as unknown as import("../db/client.js").Database;
+    const handler = vi.fn();
+    const app = new Hono();
+    app.use("*", protect(auth, { db, bearerGetKey: getKey, now: () => NOW }));
+    app.all("*", (c) => {
+      handler(c.get("session" as never));
+      return c.json({ ok: true, nodes: [] });
+    });
+    return { app, handler };
   }
 
   const approvedDb = () =>
@@ -716,27 +723,20 @@ describe("protect middleware", () => {
       { sub: "mcp-user", status: "approved", isAdmin: false },
     ]) as unknown as import("../db/client.js").Database;
 
-  it("accepts a valid IdP bearer for an APPROVED user → 200 (per-user)", async () => {
-    const { accessToken, getKey } = await makeAccessToken({ sub: "mcp-user" });
-    const app = appWith(AUTH_ON, approvedDb(), getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
-      headers: { authorization: `Bearer ${accessToken}` },
-    });
-    expect(res.status).toBe(200);
-    expect((await res.json()).ok).toBe(true);
-  });
-
-  it("accepts the api-origin audience too (aud allowlist)", async () => {
-    const { accessToken, getKey } = await makeAccessToken({
-      sub: "mcp-user",
-      aud: "https://immo.example.test",
-    });
-    const app = appWith(AUTH_ON, approvedDb(), getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
-      headers: { authorization: `Bearer ${accessToken}` },
-    });
-    expect(res.status).toBe(200);
-  });
+  it.each([{ aud: "https://immo.example.test" }, { aud: ["https://immo.example.test"] }])(
+    "accepts a valid exchanged bearer with a single audience $aud as the same human",
+    async ({ aud }) => {
+      const { accessToken, getKey } = await makeAccessToken({ aud });
+      const { app, handler } = delegatedApp(getKey);
+      const res = await app.request(SIGNALS_PATH, {
+        headers: { authorization: `Bearer ${accessToken}` },
+      });
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ ok: true, nodes: [] });
+      expect(handler).toHaveBeenCalledExactlyOnceWith({ sub: "mcp-user", via: "bearer" });
+      expect(res.headers.get("set-cookie")).toBeNull();
+    },
+  );
 
   it("rejects a request with NO bearer and no session → 401", async () => {
     const app = appWith(AUTH_ON, approvedDb());
