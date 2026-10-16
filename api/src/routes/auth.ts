@@ -631,6 +631,7 @@ export function protect(
           const claims = await verifyAccessToken(bearer, {
             issuer: auth.issuer,
             audiences: auth.bearerAudiences,
+            workloadClientId: auth.bearerWorkloadClientId,
             getKey,
             now: nowFn(),
           });

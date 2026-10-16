@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { SignJWT, generateKeyPair, exportJWK, type JWK } from "jose";
 import { createLocalJWKSet } from "jose";
 import {
@@ -8,6 +8,7 @@ import {
   exchangeCode,
   fetchDiscovery,
   verifyIdToken,
+  verifyAccessToken,
   type FetchLike,
   type OidcDiscovery,
 } from "./oidc.js";
@@ -199,6 +200,85 @@ describe("exchangeCode", () => {
   });
 });
 
+describe("verifyAccessToken (delegated API bearer)", () => {
+  const NOW = 1_800_000_000_000;
+  let privateKey: Awaited<ReturnType<typeof generateKeyPair>>["privateKey"];
+  let getKey: ReturnType<typeof createLocalJWKSet>;
+  const baseClaims = {
+    iss: AUTH.issuer, aud: AUTH.appBaseUrl, sub: "human-42",
+    act: { sub: AUTH.bearerWorkloadClientId }, client_id: AUTH.bearerWorkloadClientId,
+    scope: "immo:read immo:search", iat: NOW / 1000, exp: NOW / 1000 + 300,
+  };
+  beforeAll(async () => {
+    const pair = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    privateKey = pair.privateKey;
+    getKey = createLocalJWKSet({ keys: [{
+      ...await exportJWK(pair.publicKey), kid: "delegation-key", alg: "EdDSA",
+    }] });
+  });
+
+  function sign(overrides: Record<string, unknown> = {}) {
+    return new SignJWT({ ...baseClaims, ...overrides })
+      .setProtectedHeader({ alg: "EdDSA", kid: "delegation-key" }).sign(privateKey);
+  }
+
+  function verify(token: string, audiences = AUTH.bearerAudiences) {
+    return verifyAccessToken(token, {
+      issuer: AUTH.issuer, audiences, workloadClientId: AUTH.bearerWorkloadClientId,
+      getKey, now: NOW,
+    });
+  }
+
+  it("retains the verified human, audience, actor, client, scopes and expiry", async () => {
+    const claims = await verify(await sign({ scope: " immo:read  immo:search " }));
+    expect(claims).toEqual({
+      sub: "human-42", aud: AUTH.appBaseUrl, act: { sub: AUTH.bearerWorkloadClientId },
+      clientId: AUTH.bearerWorkloadClientId, scopes: ["immo:read", "immo:search"],
+      exp: NOW / 1000 + 300,
+    });
+  });
+
+  it("accepts a singleton audience array and returns its exact audience", async () => {
+    expect((await verify(await sign({ aud: [AUTH.appBaseUrl] }))).aud).toBe(AUTH.appBaseUrl);
+  });
+
+  it.each([
+    ["multiple audiences", { aud: [AUTH.appBaseUrl, `${AUTH.appBaseUrl}/mcp`] }],
+    ["repeated audience", { aud: [AUTH.appBaseUrl, AUTH.appBaseUrl] }],
+    ["MCP audience", { aud: `${AUTH.appBaseUrl}/mcp` }],
+    ["audience with a trailing slash", { aud: `${AUTH.appBaseUrl}/` }],
+    ["missing expiry", { exp: undefined }],
+    ["expired token", { exp: NOW / 1000 - 1 }],
+    ["future not-before", { nbf: NOW / 1000 + 60 }],
+    ["wrong issuer", { iss: "https://other.example.test" }],
+    ["blank subject", { sub: " " }],
+    ["missing actor", { act: undefined }],
+    ["malformed actor", { act: "immo-mcp-workload" }],
+    ["wrong actor", { act: { sub: "other-workload" } }],
+    ["missing client", { client_id: undefined }],
+    ["wrong client", { client_id: "immo-mcp" }],
+  ] as [string, Record<string, unknown>][])("rejects %s", async (_name, overrides) => {
+    await expect(verify(await sign(overrides))).rejects.toThrow();
+  });
+
+  it("rejects configuration permitting several audiences", async () => {
+    await expect(verify(await sign(), [AUTH.appBaseUrl, `${AUTH.appBaseUrl}/mcp`])).rejects.toThrow(
+      "access_token audience mismatch",
+    );
+  });
+
+  it("does not invent scopes when the claim is missing or malformed", async () => {
+    expect((await verify(await sign({ scope: undefined }))).scopes).toEqual([]);
+    expect((await verify(await sign({ scope: ["immo:search"] }))).scopes).toEqual([]);
+  });
+
+  it("rejects a signature that does not match the trusted key", async () => {
+    const pair = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+    const token = await new SignJWT(baseClaims)
+      .setProtectedHeader({ alg: "EdDSA", kid: "delegation-key" }).sign(pair.privateKey);
+    await expect(verify(token)).rejects.toThrow();
+  });
+});
 describe("verifyIdToken (JWKS, EdDSA)", () => {
   async function makeIdToken(opts: {
     nonce?: string;
