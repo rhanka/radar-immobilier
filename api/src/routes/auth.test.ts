@@ -795,6 +795,37 @@ describe("protect middleware", () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
+  it.each([undefined, "", "immo:read", "immo:search:all", ["immo:search"]].map((scope) => ({ scope })))(
+    "refuses delegation with scope $scope with 403 before the business handler",
+    async ({ scope }) => {
+      const { accessToken, getKey } = await makeAccessToken({ scope });
+      const { app, handler } = delegatedApp(getKey);
+      const res = await app.request(SIGNALS_PATH, {
+        headers: { authorization: `Bearer ${accessToken}` },
+      });
+      expect(res.status).toBe(403);
+      expect(await res.json()).toEqual({ error: "forbidden" });
+      expect(handler).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    ["POST", SIGNALS_PATH], ["PUT", SIGNALS_PATH], ["PATCH", SIGNALS_PATH],
+    ["DELETE", SIGNALS_PATH], ["HEAD", SIGNALS_PATH], ["OPTIONS", SIGNALS_PATH],
+    ["GET", "/api/protected"], ["GET", "/api/graph-signals"],
+    ["GET", "/api/graph-signals/"], ["GET", `${SIGNALS_PATH}/detail`],
+    ["GET", "/api/graph-signals-other/mont-tremblant"],
+    ["GET", "/api/geo/collections-private"], ["GET", "/api/documents/raw-private"],
+  ])("refuses %s %s outside the delegation profile", async (method, path) => {
+    const { accessToken, getKey } = await makeAccessToken();
+    const { app, handler } = delegatedApp(getKey);
+    const res = await app.request(path, {
+      method, headers: { authorization: `Bearer ${accessToken}` },
+    });
+    expect(res.status).toBe(403);
+    expect(handler).not.toHaveBeenCalled();
+  });
+
   it("rejects a valid bearer for a SUSPENDED user → 403", async () => {
     const { accessToken, getKey } = await makeAccessToken({ sub: "mcp-user" });
     const db = makeEnrollmentDb([
