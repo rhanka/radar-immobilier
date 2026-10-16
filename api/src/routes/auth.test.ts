@@ -745,51 +745,54 @@ describe("protect middleware", () => {
     expect((await res.json()).error).toBe("unauthenticated");
   });
 
-  it("rejects an EXPIRED bearer → 401", async () => {
-    const { accessToken, getKey } = await makeAccessToken({
-      sub: "mcp-user",
-      exp: Math.floor(Date.now() / 1000) - 60,
-    });
-    const app = appWith(AUTH_ON, approvedDb(), getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
+  const invalidClaims: [string, Record<string, unknown>][] = [
+    ["original MCP user token", { aud: "https://immo.example.test/mcp", act: undefined, client_id: "immo-mcp" }],
+    ["MCP audience even with actor", { aud: "https://immo.example.test/mcp" }],
+    ["wrong audience", { aud: "https://other.example.test" }],
+    ["multiple audiences", { aud: [AUTH_ON.appBaseUrl, `${AUTH_ON.appBaseUrl}/mcp`] }],
+    ["duplicate audiences", { aud: [AUTH_ON.appBaseUrl, AUTH_ON.appBaseUrl] }],
+    ["missing audience", { aud: undefined }],
+    ["missing actor", { act: undefined }],
+    ["null actor", { act: null }],
+    ["string actor", { act: "immo-mcp-workload" }],
+    ["array actor", { act: [{ sub: "immo-mcp-workload" }] }],
+    ["missing actor subject", { act: {} }],
+    ["non-string actor subject", { act: { sub: 42 } }],
+    ["empty actor subject", { act: { sub: "" } }],
+    ["wrong actor", { act: { sub: "other-workload" } }],
+    ["wrong client", { client_id: "immo-mcp" }],
+    ["missing client", { client_id: undefined }],
+    ["malformed client", { client_id: ["immo-mcp-workload"] }],
+    ["wrong issuer", { iss: "https://evil.example.test" }],
+    ["expired token", { exp: NOW / 1000 - 1 }],
+    ["expiry boundary", { exp: NOW / 1000 }],
+    ["missing expiry", { exp: undefined }],
+    ["not yet valid", { nbf: NOW / 1000 + 60 }],
+    ["missing subject", { sub: undefined }],
+    ["empty subject", { sub: "" }],
+    ["blank subject", { sub: " " }],
+  ];
+
+  it.each(invalidClaims)("rejects %s with 401 before the business handler", async (_name, claims) => {
+    const { accessToken, getKey } = await makeAccessToken(claims);
+    const { app, handler } = delegatedApp(getKey);
+    const res = await app.request(SIGNALS_PATH, {
       headers: { authorization: `Bearer ${accessToken}` },
     });
     expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: "unauthenticated" });
+    expect(handler).not.toHaveBeenCalled();
   });
 
-  it("rejects a bearer from the WRONG issuer → 401", async () => {
-    const { accessToken, getKey } = await makeAccessToken({
-      sub: "mcp-user",
-      iss: "https://evil.example",
-    });
-    const app = appWith(AUTH_ON, approvedDb(), getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
+  it("rejects a bearer signed with another key before the business handler", async () => {
+    const { accessToken } = await makeAccessToken();
+    const { getKey } = await makeAccessToken();
+    const { app, handler } = delegatedApp(getKey);
+    const res = await app.request(SIGNALS_PATH, {
       headers: { authorization: `Bearer ${accessToken}` },
     });
     expect(res.status).toBe(401);
-  });
-
-  it("rejects a bearer with the WRONG audience → 401", async () => {
-    const { accessToken, getKey } = await makeAccessToken({
-      sub: "mcp-user",
-      aud: "https://someone-else.example/mcp",
-    });
-    const app = appWith(AUTH_ON, approvedDb(), getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
-      headers: { authorization: `Bearer ${accessToken}` },
-    });
-    expect(res.status).toBe(401);
-  });
-
-  it("rejects a valid bearer whose signature does not match the JWKS → 401", async () => {
-    const { accessToken } = await makeAccessToken({ sub: "mcp-user" });
-    // Different keypair than the token was signed with.
-    const { getKey } = await makeAccessToken({ sub: "other" });
-    const app = appWith(AUTH_ON, approvedDb(), getKey);
-    const res = await app.request("/api/graph-signals/mont-tremblant", {
-      headers: { authorization: `Bearer ${accessToken}` },
-    });
-    expect(res.status).toBe(401);
+    expect(handler).not.toHaveBeenCalled();
   });
 
   it("rejects a valid bearer for a SUSPENDED user → 403", async () => {
