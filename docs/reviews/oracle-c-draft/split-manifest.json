@@ -1,0 +1,111 @@
+{
+ "createdAt": "2026-10-04T21:59:14.910Z",
+ "seed": 20261004,
+ "restarts": 400,
+ "partitionUnit": "municipality",
+ "weights": {
+  "verdict": 3,
+  "motifFamily": 2,
+  "sens": 2,
+  "pass": 2,
+  "region": 1,
+  "docType": 1,
+  "nodeKind": 1,
+  "length": 1,
+  "citySize": 1
+ },
+ "blindChosenBy": "seeded coin flip after balance search",
+ "source": {
+  "workbook": "radar-triage-signaux.xlsx",
+  "sha256": "c7e19f46feb78c245fcd04b3e64fd4ac6f174f2d30ff1d4c77aa5a2bf0dc1bb8",
+  "graphNodesReadFrom": "pod/radar-api-5c66ddb9bd-c9rqz",
+  "readAt": "2026-10-04T21:03:21.314Z"
+ },
+ "lengthTerciles": [
+  743,
+  1115
+ ],
+ "counts": {
+  "optim": 60,
+  "blind": 61,
+  "excluded": 3
+ },
+ "sha256": {
+  "optim": "d724ed80e7f412a00958ad147906a405d14cfa442d9050c89d8b47a07da7e0c5",
+  "blind": "51e32d2a3f30b1373555c213fac2a40411322d85601dacc2e855464f639c1e2c"
+ },
+ "balance": {
+  "verdict": {
+   "chi2": 0.07073207707613668,
+   "df": 2,
+   "p": 0.9652520321426967,
+   "cramerV": 0.02417772984512689,
+   "minExpected": 14.380165289256198,
+   "maxShareGap": 0.023770491803278726
+  },
+  "motifFamily": {
+   "chi2": 4.491431807415412,
+   "df": 8,
+   "p": 0.8102897153249291,
+   "cramerV": 0.1926636217236263,
+   "minExpected": 1.9834710743801653,
+   "maxShareGap": 0.06666666666666667
+  },
+  "sens": {
+   "chi2": 0.23039941808887052,
+   "df": 4,
+   "p": 0.993852763130741,
+   "cramerV": 0.043636308531108246,
+   "minExpected": 3.4710743801652892,
+   "maxShareGap": 0.017486338797814208
+  },
+  "pass": {
+   "chi2": 0.1024108590962397,
+   "df": 2,
+   "p": 0.9500834752646757,
+   "cramerV": 0.029092451535279035,
+   "minExpected": 7.43801652892562,
+   "maxShareGap": 0.01857923497267759
+  },
+  "region": {
+   "chi2": 0.2403761450048814,
+   "df": 2,
+   "p": 0.8867536470559243,
+   "cramerV": 0.04457106360391396,
+   "minExpected": 6.446280991735537,
+   "maxShareGap": 0.043169398907103806
+  },
+  "docType": {
+   "chi2": 0.2956050312607691,
+   "df": 2,
+   "p": 0.8626014484256632,
+   "cramerV": 0.049426883244638065,
+   "minExpected": 8.925619834710744,
+   "maxShareGap": 0.04453551912568304
+  },
+  "nodeKind": {
+   "chi2": 0.0822602461946725,
+   "df": 2,
+   "p": 0.9597042421340674,
+   "cramerV": 0.026073679169049322,
+   "minExpected": 10.413223140495868,
+   "maxShareGap": 0.019398907103825136
+  },
+  "length": {
+   "chi2": 0.01612688258030116,
+   "df": 2,
+   "p": 0.9919689810488342,
+   "cramerV": 0.011544696675305203,
+   "minExpected": 19.834710743801654,
+   "maxShareGap": 0.010928961748633892
+  },
+  "citySize": {
+   "chi2": 0.11334037467892452,
+   "df": 2,
+   "p": 0.9449056598300847,
+   "cramerV": 0.030605511127835626,
+   "minExpected": 9.421487603305785,
+   "maxShareGap": 0.025136612021857907
+  }
+ }
+}
