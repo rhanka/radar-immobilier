@@ -124,7 +124,13 @@ function createAuthStore() {
         authenticated,
         authDisabled,
         loginBlocked,
-        user: data.user ?? null,
+        // The API preserves the account status even in a 403 response.
+        // Map equivalent statuses onto the existing account screens.
+        user: data.user ? {
+          ...data.user,
+          status: data.user.status === "invited" ? "pending"
+            : data.user.status === "suspended" ? "rejected" : data.user.status,
+        } : null,
       });
     } catch {
       // /me injoignable : on ne boucle pas vers le login (le réseau, pas l'auth,
