@@ -367,40 +367,42 @@ export function authRoute(
         const account = existing[0]!;
 
         if (account.status !== "approved") {
-          // A pending invitation for this email is an explicit admin decision
-          // and PRIMES over any non-approved status — including
-          // `rejected`/`suspended`. Without this, a stale negative
-          // `account_users.status` would shadow a fresh invitation (the login
-          // reads account status, not the invitation), so the invitee would
-          // land on /rejected despite being re-invited.
-          let hasInvitation = false;
-          if (user.email) {
-            const invitations = await options.db
-              .select()
-              .from(accountInvitations)
-              .where(eq(accountInvitations.email, user.email))
-              .limit(1);
-            hasInvitation = invitations.some((inv) => inv.status === "pending");
-          }
+          // Only `pending`/`invited` accounts can be auto-approved by a valid
+          // invitation. A `suspended`/`rejected` account is NEVER reactivated
+          // by an invitation: only an explicit admin status change reactivates
+          // it. Revoked/expired invitations are ignored, and only the retained
+          // invitation is consumed, by its id.
+          if (account.status === "pending" || account.status === "invited") {
+            let validInvitation: RetainedInvitation | null = null;
+            if (user.email) {
+              const invitations = await options.db
+                .select()
+                .from(accountInvitations)
+                .where(eq(accountInvitations.email, user.email));
+              validInvitation = pickValidInvitation(
+                invitations as RetainedInvitation[],
+                nowFn(),
+              );
+            }
 
-          if (hasInvitation && user.email) {
-            const now = new Date(nowFn());
-            await options.db
-              .update(accountUsers)
-              .set({ status: "approved", approvedAt: now, approvedBy: "invitation" })
-              .where(eq(accountUsers.sub, user.sub));
-            await options.db
-              .update(accountInvitations)
-              .set({ status: "accepted", acceptedAt: now })
-              .where(eq(accountInvitations.email, user.email));
-            // continue to session minting (approved)
-          } else if (account.status === "pending" || account.status === "invited") {
-            await mintSessionCookie(c, sessionClaims);
-            return c.redirect(`${auth.appBaseUrl}/pending`, 302);
+            if (validInvitation && user.email) {
+              const now = new Date(nowFn());
+              await options.db
+                .update(accountUsers)
+                .set({ status: "approved", approvedAt: now, approvedBy: "invitation" })
+                .where(eq(accountUsers.sub, user.sub));
+              await options.db
+                .update(accountInvitations)
+                .set({ status: "accepted", acceptedAt: now })
+                .where(eq(accountInvitations.id, validInvitation.id));
+              // continue to session minting (approved)
+            } else {
+              await mintSessionCookie(c, sessionClaims);
+              return c.redirect(`${auth.appBaseUrl}/pending`, 302);
+            }
           } else {
-            // rejected / suspended (or any other non-approved status) and no
-            // pending invitation: keep the negative status. This MUST NOT depend
-            // on `user.email` — an emailless token must never bypass the gate.
+            // Keep the session only for the status screen; an invitation
+            // cannot reactivate this account, even without an email claim.
             await mintSessionCookie(c, sessionClaims);
             return c.redirect(`${auth.appBaseUrl}/rejected`, 302);
           }
