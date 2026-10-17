@@ -163,9 +163,9 @@ export function authRoute(
   /**
    * Mint and set the RP session cookie for an authenticated user.
    *
-   * IMPORTANT: this is called for EVERY authenticated user, including those
-   * whose account status is `pending`/`rejected`/`suspended`. Previously the
-   * callback redirected non-approved users to `/pending` (or `/rejected`)
+   * Non-approved users keep a session for `/me` to render their account status.
+   * Protected routes still require approval. Previously the callback
+   * redirected non-approved users to `/pending` (or `/rejected`)
    * WITHOUT setting the session cookie. The SPA then probed `/api/v1/auth/me`,
    * got `authenticated:false` (no cookie), and the auth guard bounced back to
    * `/login` — which the IdP silently re-authorized — producing an infinite
@@ -302,9 +302,9 @@ export function authRoute(
       return c.json({ error: "id_token_invalid", detail: String(e) }, 401);
     }
 
-    // Claims carried in the RP session cookie. Built once and reused for both
-    // the success path and the not-yet-approved paths (so the cookie is always
-    // set — see mintSessionCookie's note on the ping-pong bug).
+    // Claims carried in the RP session cookie. Built once and reused for the
+    // success path and the non-approved paths (limited session for the status
+    // screen — see mintSessionCookie's note on the ping-pong bug).
     const sessionClaims = {
       sub: user.sub,
       ...(user.name !== undefined ? { name: user.name } : {}),
@@ -322,29 +322,33 @@ export function authRoute(
 
       if (existing.length === 0) {
         // First login: create account. Auto-approve for the designated admin
-        // or for users with a pending invitation matching their email.
+        // or for users with a valid (pending, unexpired) invitation matching
+        // their email. Only the retained invitation is consumed, by its id.
         const isAdmin = user.email === "admin@sent-tech.ca";
 
         // Check invitation by email
-        let hasInvitation = false;
+        let validInvitation: RetainedInvitation | null = null;
         if (!isAdmin && user.email) {
           const invitations = await options.db
             .select()
             .from(accountInvitations)
-            .where(eq(accountInvitations.email, user.email))
-            .limit(1);
-          hasInvitation = invitations.some((inv) => inv.status === "pending");
+            .where(eq(accountInvitations.email, user.email));
+          validInvitation = pickValidInvitation(
+            invitations as RetainedInvitation[],
+            nowFn(),
+          );
 
-          if (hasInvitation) {
-            // Mark invitation as accepted
+          if (validInvitation) {
+            // Mark ONLY the retained invitation as accepted (by id — never
+            // by email, which would also consume revoked/expired rows).
             await options.db
               .update(accountInvitations)
               .set({ status: "accepted", acceptedAt: new Date(nowFn()) })
-              .where(eq(accountInvitations.email, user.email));
+              .where(eq(accountInvitations.id, validInvitation.id));
           }
         }
 
-        const autoApproved = isAdmin || hasInvitation;
+        const autoApproved = isAdmin || validInvitation !== null;
         await options.db.insert(accountUsers).values({
           sub: user.sub,
           email: user.email ?? null,
@@ -363,40 +367,42 @@ export function authRoute(
         const account = existing[0]!;
 
         if (account.status !== "approved") {
-          // A pending invitation for this email is an explicit admin decision
-          // and PRIMES over any non-approved status — including
-          // `rejected`/`suspended`. Without this, a stale negative
-          // `account_users.status` would shadow a fresh invitation (the login
-          // reads account status, not the invitation), so the invitee would
-          // land on /rejected despite being re-invited.
-          let hasInvitation = false;
-          if (user.email) {
-            const invitations = await options.db
-              .select()
-              .from(accountInvitations)
-              .where(eq(accountInvitations.email, user.email))
-              .limit(1);
-            hasInvitation = invitations.some((inv) => inv.status === "pending");
-          }
+          // Only `pending`/`invited` accounts can be auto-approved by a valid
+          // invitation. A `suspended`/`rejected` account is NEVER reactivated
+          // by an invitation: only an explicit admin status change reactivates
+          // it. Revoked/expired invitations are ignored, and only the retained
+          // invitation is consumed, by its id.
+          if (account.status === "pending" || account.status === "invited") {
+            let validInvitation: RetainedInvitation | null = null;
+            if (user.email) {
+              const invitations = await options.db
+                .select()
+                .from(accountInvitations)
+                .where(eq(accountInvitations.email, user.email));
+              validInvitation = pickValidInvitation(
+                invitations as RetainedInvitation[],
+                nowFn(),
+              );
+            }
 
-          if (hasInvitation && user.email) {
-            const now = new Date(nowFn());
-            await options.db
-              .update(accountUsers)
-              .set({ status: "approved", approvedAt: now, approvedBy: "invitation" })
-              .where(eq(accountUsers.sub, user.sub));
-            await options.db
-              .update(accountInvitations)
-              .set({ status: "accepted", acceptedAt: now })
-              .where(eq(accountInvitations.email, user.email));
-            // continue to session minting (approved)
-          } else if (account.status === "pending" || account.status === "invited") {
-            await mintSessionCookie(c, sessionClaims);
-            return c.redirect(`${auth.appBaseUrl}/pending`, 302);
+            if (validInvitation && user.email) {
+              const now = new Date(nowFn());
+              await options.db
+                .update(accountUsers)
+                .set({ status: "approved", approvedAt: now, approvedBy: "invitation" })
+                .where(eq(accountUsers.sub, user.sub));
+              await options.db
+                .update(accountInvitations)
+                .set({ status: "accepted", acceptedAt: now })
+                .where(eq(accountInvitations.id, validInvitation.id));
+              // continue to session minting (approved)
+            } else {
+              await mintSessionCookie(c, sessionClaims);
+              return c.redirect(`${auth.appBaseUrl}/pending`, 302);
+            }
           } else {
-            // rejected / suspended (or any other non-approved status) and no
-            // pending invitation: keep the negative status. This MUST NOT depend
-            // on `user.email` — an emailless token must never bypass the gate.
+            // Keep the session only for the status screen; an invitation
+            // cannot reactivate this account, even without an email claim.
             await mintSessionCookie(c, sessionClaims);
             return c.redirect(`${auth.appBaseUrl}/rejected`, 302);
           }
@@ -455,12 +461,6 @@ export function authRoute(
     });
     if (!session) return c.json({ authenticated: false });
 
-    // Sliding re-mint: the SPA polls /me, so this is where a returning user's
-    // 15-day window is silently extended (no IdP round-trip). No-op until the
-    // session crosses its half-life.
-    await maybeSlideSession(c, auth, session, nowFn());
-
-    // Enrich with account status if DB is available.
     let status: string | undefined;
     let isAdmin: boolean | undefined;
     if (options.db) {
@@ -469,13 +469,23 @@ export function authRoute(
         .from(accountUsers)
         .where(eq(accountUsers.sub, session.sub))
         .limit(1);
-      if (rows.length > 0) {
-        status = rows[0]!.status;
-        isAdmin = rows[0]!.isAdmin;
+      if (rows.length === 0) {
+        return c.json(
+          { error: "account_not_approved", status: "unknown" },
+          403,
+        );
       }
+      status = rows[0]!.status;
+      isAdmin = status === "approved" && rows[0]!.isAdmin;
     }
 
+    // Keep the identity in a refused response for the SPA's status screen.
+    // Only approved accounts extend their session window.
+    const refused = status !== undefined && status !== "approved";
+    if (!refused) await maybeSlideSession(c, auth, session, nowFn());
+
     return c.json({
+      ...(refused ? { error: "account_not_approved", status } : {}),
       authenticated: true,
       user: {
         sub: session.sub,
@@ -484,7 +494,7 @@ export function authRoute(
         ...(status !== undefined ? { status } : {}),
         ...(isAdmin !== undefined ? { isAdmin } : {}),
       },
-    });
+    }, refused ? 403 : 200);
   });
 
   return app;
@@ -542,6 +552,31 @@ function extractBearerToken(header: string | undefined): string | undefined {
   if (!header) return undefined;
   const match = /^Bearer\s+(.+)$/i.exec(header.trim());
   return match ? match[1]!.trim() : undefined;
+}
+
+/** A retained invitation: the single row an acceptance may consume. */
+export interface RetainedInvitation {
+  id: string;
+  status: string;
+  expiresAt: Date | string | null;
+}
+
+/**
+ * Pick a valid invitation among rows for one email (`pending` and unexpired).
+ * `revoked`/`accepted`/`expired`
+ * rows and rows past `expires_at` are ignored. Returns null when none is
+ * valid. Pure (testable): `nowMs` is epoch milliseconds.
+ */
+export function pickValidInvitation<T extends RetainedInvitation>(
+  invitations: T[],
+  nowMs: number,
+): T | null {
+  return invitations.find((inv) => {
+    if (inv.status !== "pending") return false;
+    if (inv.expiresAt === null || inv.expiresAt === undefined) return true;
+    const exp = new Date(inv.expiresAt).getTime();
+    return Number.isFinite(exp) && exp > nowMs;
+  }) ?? null;
 }
 
 /** Radar account status for a `sub`, or `null` when no account row exists. */
@@ -608,8 +643,11 @@ export function protect(
     if (session) {
       if (options.db) {
         const status = await fetchAccountStatus(options.db, session.sub);
-        if (status !== null && status !== "approved") {
-          return c.json({ error: "account_not_approved", status }, 403);
+        if (status !== "approved") {
+          return c.json(
+            { error: "account_not_approved", status: status ?? "unknown" },
+            403,
+          );
         }
       }
       // Sliding re-mint on every approved protected request: a user actively
