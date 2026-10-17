@@ -1238,6 +1238,32 @@ describe("enrollment — OIDC callback with DB", () => {
     ).toBe("revoked");
   });
 
+  it("existing pending user with an EXPIRED invitation stays pending (not approved)", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "pending-expired",
+      email: "pendexp@example.com",
+      existingUsers: [
+        {
+          sub: "pending-expired",
+          email: "pendexp@example.com",
+          status: "pending",
+          isAdmin: false,
+        },
+      ],
+      existingInvitations: [
+        {
+          id: "inv-x",
+          email: "pendexp@example.com",
+          status: "pending",
+          expiresAt: new Date("2020-01-01T00:00:00Z"),
+        },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/pending`);
+    expect((dbMock._users[0] as { status: string }).status).toBe("pending");
+  });
+
   it("new user with a VALID invitation is approved and the invitation is consumed by id", async () => {
     const { res, dbMock } = await makeCallback({
       sub: "new-invited",
@@ -1257,6 +1283,30 @@ describe("enrollment — OIDC callback with DB", () => {
       value: "inv-ok",
       set: expect.objectContaining({ status: "accepted" }),
     });
+  });
+
+  it("existing pending user with a VALID invitation is approved (by id)", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "pending-invited",
+      email: "pendok@example.com",
+      existingUsers: [
+        {
+          sub: "pending-invited",
+          email: "pendok@example.com",
+          status: "pending",
+          isAdmin: false,
+        },
+      ],
+      existingInvitations: [
+        { id: "inv-p", email: "pendok@example.com", status: "pending" },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
+    expect((dbMock._users[0] as { status: string }).status).toBe("approved");
+    expect(
+      dbMock._updates.find((u) => u.table === "account_invitations"),
+    ).toMatchObject({ field: "id", value: "inv-p" });
   });
 
   it("rejected user without an invitation keeps a session for the status screen", async () => {
