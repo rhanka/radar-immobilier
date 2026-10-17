@@ -7,6 +7,7 @@
 //   POST /api/v1/admin/users/:sub/status  -> set approved/rejected/suspended
 //   POST /api/v1/admin/invitations       -> envoyer une invitation (admin only)
 //   GET  /api/v1/admin/invitations       -> lister les invitations (admin only)
+//   POST /api/v1/admin/invitations/:id/revoke -> revoke an invitation (admin only)
 //
 // All routes require an authenticated session with isAdmin === true in
 // account_users. Returns 401 if no session, 403 if not admin.
@@ -376,6 +377,46 @@ export function adminRoute(deps: AdminDeps): Hono {
       .orderBy(desc(accountInvitations.invitedAt));
 
     return c.json({ ok: true, invitations });
+  });
+
+  /** Revoke a pending invitation (admin only). */
+  app.post("/api/v1/admin/invitations/:id/revoke", async (c) => {
+    const result = await requireAdmin(c, deps);
+    if (isResponse(result)) return result as Response;
+
+    const id = c.req.param("id");
+    if (!z.string().uuid().safeParse(id).success) {
+      return c.json({ error: "invalid_invitation_id" }, 400);
+    }
+    const rows = await deps.db
+      .select()
+      .from(accountInvitations)
+      .where(eq(accountInvitations.id, id))
+      .limit(1);
+    if (rows.length === 0) {
+      return c.json({ error: "not_found" }, 404);
+    }
+    const invitation = rows[0]!;
+    if (invitation.status !== "pending") {
+      return c.json(
+        { error: "invitation_not_pending", status: invitation.status },
+        409,
+      );
+    }
+
+    await deps.db
+      .update(accountInvitations)
+      .set({ status: "revoked" })
+      .where(eq(accountInvitations.id, id));
+
+    return c.json({
+      ok: true,
+      invitation: {
+        id: invitation.id,
+        email: invitation.email,
+        status: "revoked",
+      },
+    });
   });
 
   return app;

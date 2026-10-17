@@ -629,3 +629,100 @@ describe("adminRoute — invitations", () => {
     expect(db._inserts.some((i) => i["reason"] === "reinvited")).toBe(false);
   });
 });
+
+describe("adminRoute — invitation revocation", () => {
+  const adminUser = {
+    id: "a1",
+    sub: "admin-sub",
+    email: "admin@sent-tech.ca",
+    name: "Admin Principal",
+    status: "approved",
+    isAdmin: true,
+    createdAt: new Date(),
+    approvedAt: null,
+    approvedBy: null,
+  };
+  const pendingUser = {
+    id: "b1",
+    sub: "pending-sub",
+    email: "bob@example.com",
+    name: "Bob",
+    status: "pending",
+    isAdmin: false,
+    createdAt: new Date(),
+    approvedAt: null,
+    approvedBy: null,
+  };
+
+  async function makeAdminSession() {
+    return signSession(
+      { sub: adminUser.sub },
+      { sessionSecret: SESSION_SECRET, ttlSeconds: 3600 },
+    );
+  }
+
+  function pendingInvitation() {
+    return {
+      id: "10000000-0000-4000-8000-000000000001",
+      email: "guest@example.com",
+      token: "tok-revoke-1",
+      status: "pending",
+      invitedBy: adminUser.sub,
+      invitedAt: new Date("2026-06-21T10:00:00Z"),
+      acceptedAt: null,
+      expiresAt: null,
+      note: null,
+    };
+  }
+
+  it("POST /invitations/:id/revoke without a session returns 401", async () => {
+    const db = makeDbWithInvitations([adminUser], [pendingInvitation()]);
+    const app = adminRoute({ db, sessionSecret: SESSION_SECRET });
+    const res = await app.request(
+      "/api/v1/admin/invitations/10000000-0000-4000-8000-000000000001/revoke",
+      { method: "POST" },
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it("POST /invitations/:id/revoke with a non-admin session returns 403", async () => {
+    const db = makeDbWithInvitations([adminUser, pendingUser], [pendingInvitation()]);
+    const app = adminRoute({ db, sessionSecret: SESSION_SECRET });
+    const token = await signSession(
+      { sub: pendingUser.sub },
+      { sessionSecret: SESSION_SECRET, ttlSeconds: 3600 },
+    );
+    const res = await app.request(
+      "/api/v1/admin/invitations/10000000-0000-4000-8000-000000000001/revoke",
+      { method: "POST", headers: { cookie: `radar_session=${token}` } },
+    );
+    expect(res.status).toBe(403);
+  });
+
+  it("POST /invitations/:id/revoke changes only the selected invitation", async () => {
+    const db = makeDbWithInvitations([adminUser], [pendingInvitation()]);
+    const app = adminRoute({ db, sessionSecret: SESSION_SECRET });
+    const token = await makeAdminSession();
+    const res = await app.request(
+      "/api/v1/admin/invitations/10000000-0000-4000-8000-000000000001/revoke",
+      { method: "POST", headers: { cookie: `radar_session=${token}` } },
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({
+      ok: true,
+      invitation: {
+        id: "10000000-0000-4000-8000-000000000001",
+        email: "guest@example.com",
+        status: "revoked",
+      },
+    });
+    expect(db._updates).toHaveLength(1);
+    expect(db._updates[0]).toMatchObject({
+      field: "id",
+      value: "10000000-0000-4000-8000-000000000001",
+      set: { status: "revoked" },
+    });
+  });
+
+
+});
