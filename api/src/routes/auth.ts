@@ -163,9 +163,9 @@ export function authRoute(
   /**
    * Mint and set the RP session cookie for an authenticated user.
    *
-   * IMPORTANT: this is called for EVERY authenticated user, including those
-   * whose account status is `pending`/`rejected`/`suspended`. Previously the
-   * callback redirected non-approved users to `/pending` (or `/rejected`)
+   * Non-approved users keep a session for `/me` to render their account status.
+   * Protected routes still require approval. Previously the callback
+   * redirected non-approved users to `/pending` (or `/rejected`)
    * WITHOUT setting the session cookie. The SPA then probed `/api/v1/auth/me`,
    * got `authenticated:false` (no cookie), and the auth guard bounced back to
    * `/login` — which the IdP silently re-authorized — producing an infinite
@@ -302,9 +302,9 @@ export function authRoute(
       return c.json({ error: "id_token_invalid", detail: String(e) }, 401);
     }
 
-    // Claims carried in the RP session cookie. Built once and reused for both
-    // the success path and the not-yet-approved paths (so the cookie is always
-    // set — see mintSessionCookie's note on the ping-pong bug).
+    // Claims carried in the RP session cookie. Built once and reused for the
+    // success path and the non-approved paths (limited session for the status
+    // screen — see mintSessionCookie's note on the ping-pong bug).
     const sessionClaims = {
       sub: user.sub,
       ...(user.name !== undefined ? { name: user.name } : {}),
@@ -461,12 +461,6 @@ export function authRoute(
     });
     if (!session) return c.json({ authenticated: false });
 
-    // Sliding re-mint: the SPA polls /me, so this is where a returning user's
-    // 15-day window is silently extended (no IdP round-trip). No-op until the
-    // session crosses its half-life.
-    await maybeSlideSession(c, auth, session, nowFn());
-
-    // Enrich with account status if DB is available.
     let status: string | undefined;
     let isAdmin: boolean | undefined;
     if (options.db) {
@@ -475,13 +469,23 @@ export function authRoute(
         .from(accountUsers)
         .where(eq(accountUsers.sub, session.sub))
         .limit(1);
-      if (rows.length > 0) {
-        status = rows[0]!.status;
-        isAdmin = rows[0]!.isAdmin;
+      if (rows.length === 0) {
+        return c.json(
+          { error: "account_not_approved", status: "unknown" },
+          403,
+        );
       }
+      status = rows[0]!.status;
+      isAdmin = status === "approved" && rows[0]!.isAdmin;
     }
 
+    // Keep the identity in a refused response for the SPA's status screen.
+    // Only approved accounts extend their session window.
+    const refused = status !== undefined && status !== "approved";
+    if (!refused) await maybeSlideSession(c, auth, session, nowFn());
+
     return c.json({
+      ...(refused ? { error: "account_not_approved", status } : {}),
       authenticated: true,
       user: {
         sub: session.sub,
@@ -490,7 +494,7 @@ export function authRoute(
         ...(status !== undefined ? { status } : {}),
         ...(isAdmin !== undefined ? { isAdmin } : {}),
       },
-    });
+    }, refused ? 403 : 200);
   });
 
   return app;
@@ -639,8 +643,11 @@ export function protect(
     if (session) {
       if (options.db) {
         const status = await fetchAccountStatus(options.db, session.sub);
-        if (status !== null && status !== "approved") {
-          return c.json({ error: "account_not_approved", status }, 403);
+        if (status !== "approved") {
+          return c.json(
+            { error: "account_not_approved", status: status ?? "unknown" },
+            403,
+          );
         }
       }
       // Sliding re-mint on every approved protected request: a user actively
