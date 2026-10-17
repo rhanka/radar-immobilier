@@ -2554,7 +2554,7 @@
     <svelte:fragment slot="overlay-bottom-left">
       {#if !selectedCity}
         <div
-          class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+          class="rounded-sm border border-slate-200 bg-white/95 px-3 py-2 shadow-xs"
           data-testid="map-legend-signaux"
         >
           <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Légende — signaux / ville</p>
@@ -2566,7 +2566,7 @@
               { color: "#e2e8f0", label: "Aucun signal (0)" },
             ] as item (item.label)}
               <li class="flex items-center gap-2 text-xs text-slate-600">
-                <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                <span class="h-3 w-3 shrink-0 rounded-xs border border-slate-300" style="background-color: {item.color};"></span>
                 {item.label}
               </li>
             {/each}
@@ -2575,7 +2575,7 @@
       {:else}
         {#if affectationLegendEntries.length > 0}
           <div
-            class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+            class="rounded-sm border border-slate-200 bg-white/95 px-3 py-2 shadow-xs"
             data-testid="map-legend-zonage"
           >
             <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Zonage</p>
@@ -2611,13 +2611,13 @@
                       on:focus={() => mapApi?.setCptaqLegendEmphasis(true)}
                       on:blur={() => mapApi?.setCptaqLegendEmphasis(false)}
                     >
-                      <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                      <span class="h-3 w-3 shrink-0 rounded-xs border border-slate-300" style="background-color: {item.color};"></span>
                       <span class:line-through={!cptaqEnabled}>{item.label}</span>
                     </button>
                   </li>
                 {:else}
                   <li class="flex items-center gap-2 text-xs text-slate-600">
-                    <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                    <span class="h-3 w-3 shrink-0 rounded-xs border border-slate-300" style="background-color: {item.color};"></span>
                     {item.label}
                   </li>
                 {/if}
@@ -2642,14 +2642,14 @@
         {/if}
         {#if displayedLots.features.length > 0}
           <div
-            class="rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+            class="rounded-sm border border-slate-200 bg-white/95 px-3 py-2 shadow-xs"
             data-testid="map-legend-lots"
           >
             <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Lots</p>
             <ul class="space-y-1">
               {#each visibleLotLegendEntries as item (item.category)}
                 <li class="flex items-center gap-2 text-xs text-slate-600">
-                  <span class="h-3 w-3 shrink-0 rounded-sm border border-slate-300" style="background-color: {item.color};"></span>
+                  <span class="h-3 w-3 shrink-0 rounded-xs border border-slate-300" style="background-color: {item.color};"></span>
                   {item.label}
                 </li>
               {/each}
@@ -2675,7 +2675,7 @@
 
     <svelte:fragment slot="overlay-top-left">
       {#if selectedCity && (zonesLoading || lotsLoading || zonesError || lotsError || geoNotices.length > 0 || cptaqLoading || cptaqError)}
-        <div class="max-w-sm space-y-1 rounded border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-sm">
+        <div class="max-w-sm flex flex-col gap-1 rounded-sm border border-slate-200 bg-white/95 px-3 py-2 text-xs text-slate-700 shadow-xs">
           <!-- Waiter PAR COUCHE : chacune affiche son propre état. -->
           {#if zonesLoading}
             <p class="m-0 font-semibold text-slate-500">Chargement des zones…</p>
