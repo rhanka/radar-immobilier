@@ -276,10 +276,10 @@ describe("GET /api/v1/auth/me", () => {
     expect(body.user.name).toBe("Carol");
   });
 
-  it("never invents isAdmin: a session without a matching DB account is NOT admin", async () => {
+  it("never invents isAdmin: a session without a matching DB account is 403, never admin", async () => {
     // Guard against "logged in as admin without enrollment": admin is only ever
     // sourced from account_users.isAdmin in the DB. A valid session with no DB
-    // row (or a non-admin row) must report no admin flag.
+    // row is treated as not approved (403, same body as other status refusals).
     const token = await signSession(
       { sub: "ghost", email: "fabien.antoine@gmail.com" },
       { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600 },
@@ -289,10 +289,11 @@ describe("GET /api/v1/auth/me", () => {
     const res = await app.request("/api/v1/auth/me", {
       headers: { cookie: `radar_session=${token}` },
     });
-    const body = await res.json();
-    expect(body.authenticated).toBe(true);
-    expect(body.user.isAdmin).toBeUndefined();
-    expect(body.user.status).toBeUndefined();
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      error: "account_not_approved",
+      status: "unknown",
+    });
   });
 });
 
@@ -1321,6 +1322,74 @@ describe("enrollment — OIDC callback with DB", () => {
     expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/rejected`);
     expect(readSetCookie(res, "radar_session")).toBeTruthy();
   });
+});
+
+// ── Account-status enforcement (cookie path + /me) ──────────────────────────
+// Only "approved" grants access on protected routes. A missing account row is
+// treated as not approved (403). /me keeps identity and status in its 403
+// response so the SPA can render the account status screen.
+describe("account status enforcement — cookie path (protect) + /me", () => {
+  function protectedAppWithDb(
+    db: import("../db/client.js").Database,
+  ): Hono {
+    const app = new Hono();
+    app.use("*", protect(AUTH_ON, { db }));
+    app.get("/api/protected", (c) => c.json({ secret: true }));
+    return app;
+  }
+
+  async function sessionFor(sub: string): Promise<string> {
+    return signSession(
+      { sub },
+      { sessionSecret: AUTH_ON.sessionSecret, ttlSeconds: 3600 },
+    );
+  }
+
+  it("protect: missing account row → 403 account_not_approved (unknown)", async () => {
+    const db = makeEnrollmentDb([
+      { sub: "someone-else", status: "approved", isAdmin: false },
+    ]) as unknown as import("../db/client.js").Database;
+    const app = protectedAppWithDb(db);
+    const res = await app.request("/api/protected", {
+      headers: { cookie: `radar_session=${await sessionFor("ghost")}` },
+    });
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      error: "account_not_approved",
+      status: "unknown",
+    });
+  });
+
+  it.each(["pending", "invited", "rejected", "suspended"])(
+    "protect: status %s → 403 account_not_approved",
+    async (status) => {
+      const db = makeEnrollmentDb([
+        { sub: "user-1", status, isAdmin: false },
+      ]) as unknown as import("../db/client.js").Database;
+      const app = protectedAppWithDb(db);
+      const res = await app.request("/api/protected", {
+        headers: { cookie: `radar_session=${await sessionFor("user-1")}` },
+      });
+      expect(res.status).toBe(403);
+      expect(await res.json()).toEqual({
+        error: "account_not_approved",
+        status,
+      });
+    },
+  );
+
+  it("protect: approved → 200", async () => {
+    const db = makeEnrollmentDb([
+      { sub: "user-1", status: "approved", isAdmin: false },
+    ]) as unknown as import("../db/client.js").Database;
+    const app = protectedAppWithDb(db);
+    const res = await app.request("/api/protected", {
+      headers: { cookie: `radar_session=${await sessionFor("user-1")}` },
+    });
+    expect(res.status).toBe(200);
+  });
+
+
 });
 
 describe("pickValidInvitation — retained invitation (C)", () => {
