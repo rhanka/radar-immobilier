@@ -544,6 +544,31 @@ function extractBearerToken(header: string | undefined): string | undefined {
   return match ? match[1]!.trim() : undefined;
 }
 
+/** A retained invitation: the single row an acceptance may consume. */
+export interface RetainedInvitation {
+  id: string;
+  status: string;
+  expiresAt: Date | string | null;
+}
+
+/**
+ * Pick a valid invitation among rows for one email (`pending` and unexpired).
+ * `revoked`/`accepted`/`expired`
+ * rows and rows past `expires_at` are ignored. Returns null when none is
+ * valid. Pure (testable): `nowMs` is epoch milliseconds.
+ */
+export function pickValidInvitation<T extends RetainedInvitation>(
+  invitations: T[],
+  nowMs: number,
+): T | null {
+  return invitations.find((inv) => {
+    if (inv.status !== "pending") return false;
+    if (inv.expiresAt === null || inv.expiresAt === undefined) return true;
+    const exp = new Date(inv.expiresAt).getTime();
+    return Number.isFinite(exp) && exp > nowMs;
+  }) ?? null;
+}
+
 /** Radar account status for a `sub`, or `null` when no account row exists. */
 async function fetchAccountStatus(db: Database, sub: string): Promise<string | null> {
   const rows = await db
