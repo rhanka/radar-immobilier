@@ -171,7 +171,7 @@
             type="button"
             class={`flex w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-left text-sm transition ${
               statusFilter === null
-                ? "border-teal-600 bg-teal-600 text-white shadow-sm"
+                ? "border-teal-600 bg-teal-600 text-white shadow-xs"
                 : "border-slate-200 bg-white text-slate-700 hover:border-teal-400 hover:bg-slate-50"
             }`}
             aria-current={statusFilter === null ? "true" : undefined}
@@ -186,7 +186,7 @@
               type="button"
               class={`flex w-full items-center gap-2 rounded-md border px-3 py-2 text-left text-sm transition ${
                 statusFilter === col.statut
-                  ? "border-teal-600 bg-teal-600 text-white shadow-sm"
+                  ? "border-teal-600 bg-teal-600 text-white shadow-xs"
                   : "border-slate-200 bg-white text-slate-700 hover:border-teal-400 hover:bg-slate-50"
               }`}
               aria-current={statusFilter === col.statut ? "true" : undefined}
@@ -228,14 +228,14 @@
       <!-- Ajouter une demande -->
       <div>
         {#if showAddForm}
-          <div class="space-y-2 rounded-md border border-slate-200 bg-white p-3 shadow-sm">
+          <div class="space-y-2 rounded-md border border-slate-200 bg-white p-3 shadow-xs">
             <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
               Nouvelle demande
             </p>
             <label class="sr-only" for="backlog-titre">Titre de la demande</label>
             <input
               id="backlog-titre"
-              class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 shadow-sm focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300"
+              class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 shadow-xs focus:border-teal-400 focus:outline-hidden focus:ring-1 focus:ring-teal-300"
               placeholder="Titre"
               bind:value={newTitre}
               disabled={submitting}
@@ -243,7 +243,7 @@
             <label class="sr-only" for="backlog-desc">Description (optionnelle)</label>
             <textarea
               id="backlog-desc"
-              class="min-h-[3rem] w-full resize-y rounded-md border border-slate-200 px-2.5 py-1.5 text-sm leading-5 text-slate-700 shadow-sm focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300"
+              class="min-h-[3rem] w-full resize-y rounded-md border border-slate-200 px-2.5 py-1.5 text-sm leading-5 text-slate-700 shadow-xs focus:border-teal-400 focus:outline-hidden focus:ring-1 focus:ring-teal-300"
               placeholder="Description (optionnelle)"
               rows="2"
               bind:value={newDescription}
@@ -292,10 +292,10 @@
           Backlog
         </h1>
         <p class="mt-1 text-sm text-slate-500">
-          Backlog réel, replié depuis le système <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">track</code>
-          (<code class="rounded bg-slate-100 px-1 py-0.5 text-xs">.track/events.jsonl</code>) : statut = dernière
-          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">realization.transition</code>, annoté de la dernière
-          <code class="rounded bg-slate-100 px-1 py-0.5 text-xs">acceptance.run</code>.
+          Backlog réel, replié depuis le système <code class="rounded-sm bg-slate-100 px-1 py-0.5 text-xs">track</code>
+          (<code class="rounded-sm bg-slate-100 px-1 py-0.5 text-xs">.track/events.jsonl</code>) : statut = dernière
+          <code class="rounded-sm bg-slate-100 px-1 py-0.5 text-xs">realization.transition</code>, annoté de la dernière
+          <code class="rounded-sm bg-slate-100 px-1 py-0.5 text-xs">acceptance.run</code>.
         </p>
       </div>
 
@@ -304,7 +304,7 @@
         <div class="flex items-center gap-2">
           <button
             type="button"
-            class="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm transition hover:bg-slate-50"
+            class="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-xs transition hover:bg-slate-50"
             on:click={togglePause}
             aria-pressed={paused}
             title={paused ? "Reprendre le rafraîchissement automatique" : "Mettre en pause le rafraîchissement automatique"}
@@ -319,7 +319,7 @@
           </button>
           <button
             type="button"
-            class="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm transition hover:bg-slate-50"
+            class="flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-xs transition hover:bg-slate-50"
             on:click={refreshNow}
             disabled={loading}
           >
@@ -362,7 +362,7 @@
       {#each visibleColumns as col}
         {@const Icon = COLUMN_ICONS[col.statut]}
         {@const columnItems = itemsFor(col.statut)}
-        <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div class="rounded-lg border border-slate-200 bg-white shadow-xs">
           <div class="flex items-center gap-2 border-b border-slate-100 px-4 py-3">
             <Icon class="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
             <h2 class="text-sm font-semibold text-slate-950">{col.label}</h2>
@@ -391,7 +391,7 @@
                     </span>
                     <span class="min-w-0 flex-1">
                       <span class="flex flex-wrap items-center gap-2">
-                        <span class="rounded bg-slate-100 px-1.5 py-0.5 text-[11px] font-bold text-slate-600">
+                        <span class="rounded-sm bg-slate-100 px-1.5 py-0.5 text-[11px] font-bold text-slate-600">
                           {item.code}
                         </span>
                         <Badge tone={statutTone(item.statut)}>{col.label}</Badge>

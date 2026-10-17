@@ -45,7 +45,7 @@
             </div>
             <button
               type="button"
-              class="absolute left-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white/95 text-slate-600 shadow-sm hover:bg-slate-50"
+              class="absolute left-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white/95 text-slate-600 shadow-xs hover:bg-slate-50"
               onclick={() => (leftDrawerOpen = true)}
               aria-label={controlsDrawerTitle}
             >
@@ -54,7 +54,7 @@
             {#if $$slots.sel}
               <button
                 type="button"
-                class="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white/95 text-slate-600 shadow-sm hover:bg-slate-50"
+                class="absolute right-3 top-3 z-20 flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white/95 text-slate-600 shadow-xs hover:bg-slate-50"
                 onclick={() => (rightDrawerOpen = true)}
                 aria-label={selDrawerTitle}
               >
