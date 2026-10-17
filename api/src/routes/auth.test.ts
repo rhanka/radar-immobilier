@@ -8,7 +8,7 @@ import {
   type JWK,
   type JWTVerifyGetKey,
 } from "jose";
-import { authRoute, protect } from "./auth.js";
+import { authRoute, protect, pickValidInvitation } from "./auth.js";
 import type { AuthConfig } from "../config.js";
 import type { OidcDiscovery, FetchLike } from "../services/auth/oidc.js";
 import { signSession, verifySession } from "../services/auth/session.js";
@@ -945,7 +945,13 @@ function parseEqFilter(filter: unknown): { field: string; value: string } | null
  */
 function makeEnrollmentDb(
   initialUsers: { sub: string; email?: string; status: string; isAdmin: boolean }[] = [],
-  initialInvitations: { email: string; status: string }[] = [],
+  initialInvitations: {
+    id?: string;
+    email: string;
+    status: string;
+    expiresAt?: Date | string | null;
+    invitedAt?: Date | string | null;
+  }[] = [],
 ) {
   const users = [...initialUsers] as Record<string, unknown>[];
   const invitations = [...initialInvitations] as Record<string, unknown>[];
@@ -972,17 +978,19 @@ function makeEnrollmentDb(
       from: (table: unknown) => {
         const collection = collectionFor(table);
         return {
-          where: (filter: unknown) => ({
-            limit: (n: number) => {
-              const parsed = parseEqFilter(filter);
-              if (!parsed) return Promise.resolve(collection.slice(0, n));
-              return Promise.resolve(
-                collection
-                  .filter((u) => u[parsed.field] === parsed.value)
-                  .slice(0, n),
-              );
-            },
-          }),
+          where: (filter: unknown) => {
+            const parsed = parseEqFilter(filter);
+            const filtered = parsed
+              ? collection.filter((u) => u[parsed.field] === parsed.value)
+              : [...collection];
+            return {
+              limit: (n: number) => Promise.resolve(filtered.slice(0, n)),
+              then: (
+                resolve: (v: unknown[]) => unknown,
+                reject?: (e: unknown) => unknown,
+              ) => Promise.resolve(filtered).then(resolve, reject),
+            };
+          },
         };
       },
     }),
@@ -1023,7 +1031,13 @@ describe("enrollment — OIDC callback with DB", () => {
     sub: string;
     email?: string;
     existingUsers?: { sub: string; email?: string; status: string; isAdmin: boolean }[];
-    existingInvitations?: { email: string; status: string }[];
+    existingInvitations?: {
+      id?: string;
+      email: string;
+      status: string;
+      expiresAt?: Date | string | null;
+      invitedAt?: Date | string | null;
+    }[];
   }) {
     const { idToken, getKey } = await makeIdToken({
       nonce: "NONCE",
@@ -1158,4 +1172,56 @@ describe("enrollment — OIDC callback with DB", () => {
     expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/rejected`);
     expect(readSetCookie(res, "radar_session")).toBeTruthy();
   });
+});
+
+describe("pickValidInvitation — retained invitation (C)", () => {
+  const NOW = Date.parse("2026-06-22T12:00:00Z");
+
+  it("ignores revoked/accepted/expired rows", () => {
+    expect(
+      pickValidInvitation(
+        [
+          { id: "r", status: "revoked", expiresAt: null },
+          { id: "a", status: "accepted", expiresAt: null },
+          { id: "e", status: "expired", expiresAt: null },
+        ],
+        NOW,
+      ),
+    ).toBeNull();
+  });
+
+  it("ignores a pending row past expires_at, honours a live one", () => {
+    const kept = pickValidInvitation(
+      [
+        {
+          id: "old",
+          status: "pending",
+          expiresAt: new Date("2020-01-01T00:00:00Z"),
+        },
+        { id: "live", status: "pending", expiresAt: null },
+      ],
+      NOW,
+    );
+    expect(kept?.id).toBe("live");
+  });
+
+  it("treats expires_at == now as expired (strictly future required)", () => {
+    expect(
+      pickValidInvitation(
+        [
+          {
+            id: "edge",
+            status: "pending",
+            expiresAt: new Date(NOW),
+          },
+        ],
+        NOW,
+      ),
+    ).toBeNull();
+  });
+
+  it("returns null when nothing is valid", () => {
+    expect(pickValidInvitation([], NOW)).toBeNull();
+  });
+
 });
