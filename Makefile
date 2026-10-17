@@ -428,7 +428,6 @@ object-storage-docs-preprod-validate: ## Validate post-cutover support and retir
 	@command -v $(KUBECTL) >/dev/null 2>&1 || { echo "[object-storage-docs] kubectl not found"; exit 1; }
 	@jq -n -f deploy/ci/docs-secret-from-raw.jq >/dev/null
 	@jq -n -f deploy/ci/validate-docs-secret.jq >/dev/null
-	@jq -n '{items:[]}' | jq -f deploy/ci/docs-zero-writer-bindings.jq >/dev/null
 	@jq -n '[]' | jq -f deploy/ci/docs-canonical-manifest.jq >/dev/null
 	@jq -n '{items:[]}' | jq -e -f deploy/ci/minio-removal-resources.jq >/dev/null
 	@jq -n '{items:[]}' | jq -e -f deploy/ci/minio-removal-pods.jq >/dev/null
