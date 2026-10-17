@@ -11,7 +11,14 @@ run_ok() { bash "$CHECK" "$1" >/dev/null 2>&1 && ok "$2" || bad "$2"; }
 run_bad() { bash "$CHECK" "$1" >/dev/null 2>&1 && bad "$2" || ok "$2"; }
 run_retired() {
   local output status
-  output="$(bash "$ROOT/$1" 2>&1)"; status=$?
+  if [[ "$1" == object-storage-* ]]; then
+    output="$(make --no-print-directory -C "$ROOT" \
+      -f <(sed '/^-include \.env$/d' "$ROOT/Makefile") "$1" \
+      DOCKER_COMPOSE='docker compose --env-file /dev/null' COMPOSE_DISABLE_ENV_FILE=1 \
+      ENV=test-object-storage-bindings 2>&1)"; status=$?
+  else
+    output="$(bash "$ROOT/$1" 2>&1)"; status=$?
+  fi
   [ "$status" -ne 0 ] && grep -Fq 'retired:' <<<"$output" && ok "$2" || bad "$2"
 }
 
@@ -53,7 +60,8 @@ for retired_tool in \
   tools/graphify-v23/preflight.sh tools/graphify-v23/gate.sh tools/graphify-v23/runner.sh \
   tools/graphify-v23/runner-llm-desc-validation.sh tools/grounding/stage-candidate.sh \
   tools/grounding/gate-grounding.sh tools/grounding/worker-grounding.sh \
-  tools/grounding/drive-grounding.sh; do
+  tools/grounding/drive-grounding.sh \
+  object-storage-docs-preprod-fence object-storage-minio-preprod-remove; do
   run_retired "$retired_tool" "fails closed: $retired_tool"
 done
 
@@ -153,6 +161,11 @@ run_bad "$CASE_ROOT" 'rejects a restored preprod MinIO inventory Job'; rm -rf "$
 fixture; sed -i '/object-storage-docs-prod-start:/,/^$$/s/retired: no legacy PROD inventory can be started/kubectl create -f inventory-job.yaml/' \
   "$CASE_ROOT/deploy/ci/object-storage-prod.mk"
 run_bad "$CASE_ROOT" 'rejects a rearmed PROD migration launcher'; rm -rf "$CASE_ROOT"
+
+for target in object-storage-docs-preprod-fence object-storage-minio-preprod-remove; do
+  fixture; sed -i "/^$target:/,/^$/s/exit 1/kubectl create -f retired.yaml/" "$CASE_ROOT/Makefile"
+  run_bad "$CASE_ROOT" "rejects a rearmed preprod migration launcher: $target"; rm -rf "$CASE_ROOT"
+done
 
 fixture; sed -i 's/S3_BUCKET=radar-immobilier-raw/S3_BUCKET=changed/' "$CASE_ROOT/.env.example"
 run_bad "$CASE_ROOT" 'protects local development settings'; rm -rf "$CASE_ROOT"
