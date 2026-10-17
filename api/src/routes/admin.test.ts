@@ -724,5 +724,40 @@ describe("adminRoute — invitation revocation", () => {
     });
   });
 
+  it("POST /invitations/:id/revoke with an unknown id returns 404", async () => {
+    const db = makeDbWithInvitations([adminUser], [pendingInvitation()]);
+    const app = adminRoute({ db, sessionSecret: SESSION_SECRET });
+    const token = await makeAdminSession();
+    const res = await app.request(
+      "/api/v1/admin/invitations/10000000-0000-4000-8000-000000000002/revoke",
+      { method: "POST", headers: { cookie: `radar_session=${token}` } },
+    );
+    expect(res.status).toBe(404);
+  });
 
+  it("POST /invitations/:id/revoke with an invalid id returns 400", async () => {
+    const db = makeDbWithInvitations([adminUser], [pendingInvitation()]);
+    const app = adminRoute({ db, sessionSecret: SESSION_SECRET });
+    const token = await makeAdminSession();
+    const res = await app.request("/api/v1/admin/invitations/invalid/revoke", {
+      method: "POST", headers: { cookie: `radar_session=${token}` },
+    });
+    expect(res.status).toBe(400);
+    expect(db._updates).toHaveLength(0);
+  });
+
+  it("POST /invitations/:id/revoke with an accepted invitation returns 409", async () => {
+    const db = makeDbWithInvitations(
+      [adminUser],
+      [{ ...pendingInvitation(), status: "accepted" }],
+    );
+    const app = adminRoute({ db, sessionSecret: SESSION_SECRET });
+    const token = await makeAdminSession();
+    const res = await app.request(
+      "/api/v1/admin/invitations/10000000-0000-4000-8000-000000000001/revoke",
+      { method: "POST", headers: { cookie: `radar_session=${token}` } },
+    );
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toBe("invitation_not_pending");
+  });
 });
