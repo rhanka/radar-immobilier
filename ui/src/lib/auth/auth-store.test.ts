@@ -49,6 +49,24 @@ describe("auth-store — sondage /me non-caché", () => {
     expect(state.authenticated).toBe(false);
     expect(state.user).toBeNull();
   });
+
+  it.each([
+    ["pending", "pending"], ["invited", "pending"],
+    ["rejected", "rejected"], ["suspended", "rejected"],
+  ])("keeps the %s account on the %s screen after a 403 from /me", async (status, screen) => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      status: 403,
+      json: async () => ({
+        error: "account_not_approved", status, authenticated: true,
+        user: { sub: "u1", status, isAdmin: false },
+      }),
+    }));
+    await authStore.checkSession();
+    expect(get(authStore)).toMatchObject({
+      authenticated: true, loginBlocked: false,
+      user: { sub: "u1", status: screen, isAdmin: false },
+    });
+  });
 });
 
 describe("auth-store — prompt=login CONDITIONNEL (session durable, wp5 §B)", () => {
