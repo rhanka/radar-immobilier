@@ -1110,24 +1110,19 @@ describe("enrollment — OIDC callback with DB", () => {
     expect(readSetCookie(res, "radar_session")).toBeTruthy();
   });
 
-  it("existing suspended user is redirected to /rejected WITH a session cookie", async () => {
+  it("existing suspended user keeps a session for the account status screen", async () => {
     const { res } = await makeCallback({
       sub: "suspended-user",
       existingUsers: [{ sub: "suspended-user", status: "suspended", isAdmin: false }],
     });
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/rejected`);
-    // The session cookie is now set even for non-approved users so the SPA can
-    // resolve /me to authenticated:true (status:suspended) and render the
-    // static RejectedView — `protect` still 403s every protected API route, so
-    // setting the cookie does NOT grant access; it only stops the ping-pong.
     expect(readSetCookie(res, "radar_session")).toBeTruthy();
   });
 
-  it("rejected user WITH a pending invitation is re-approved and lands on the app", async () => {
-    // Bug prod (fabien.antoine@gmail.com) : un compte 'rejected' réinvité voyait
-    // « refusé » au login car le callback ne consultait l'invitation que pour
-    // les statuts pending/invited. L'invitation pending doit PRIMER.
+  it("rejected user with a pending invitation keeps the rejected status", async () => {
+    // A suspended/rejected account is never reactivated by an invitation:
+    // only an explicit admin status change reactivates it.
     const { res, dbMock } = await makeCallback({
       sub: "rejected-then-reinvited",
       email: "comeback@example.com",
@@ -1139,25 +1134,46 @@ describe("enrollment — OIDC callback with DB", () => {
           isAdmin: false,
         },
       ],
-      existingInvitations: [{ email: "comeback@example.com", status: "pending" }],
+      existingInvitations: [
+        { id: "inv-1", email: "comeback@example.com", status: "pending" },
+      ],
     });
-    // Accès accordé : redirigé vers l'app, pas vers /rejected.
     expect(res.status).toBe(302);
-    expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/rejected`);
     expect(readSetCookie(res, "radar_session")).toBeTruthy();
+    expect((dbMock._users[0] as { status: string }).status).toBe("rejected");
+    expect(
+      dbMock._updates.some((u) => u.table === "account_users"),
+    ).toBe(false);
+    // The invitation is left untouched (still pending, never consumed by id).
+    expect(
+      (dbMock._invitations[0] as { status: string }).status,
+    ).toBe("pending");
+  });
 
-    // Le compte est passé 'approved' via le flux invitation.
-    const userUpdate = dbMock._updates.find(
-      (u) => u.table === "account_users" && u.value === "rejected-then-reinvited",
-    );
-    expect(userUpdate).toBeDefined();
-    expect(userUpdate!.set).toMatchObject({ status: "approved", approvedBy: "invitation" });
-    expect((dbMock._users[0] as { status: string }).status).toBe("approved");
-
-    // L'invitation est marquée 'accepted'.
-    const invUpdate = dbMock._updates.find((u) => u.table === "account_invitations");
-    expect(invUpdate).toBeDefined();
-    expect(invUpdate!.set).toMatchObject({ status: "accepted" });
+  it("suspended user with a pending invitation keeps the suspended status", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "suspended-then-reinvited",
+      email: "back@example.com",
+      existingUsers: [
+        {
+          sub: "suspended-then-reinvited",
+          email: "back@example.com",
+          status: "suspended",
+          isAdmin: false,
+        },
+      ],
+      existingInvitations: [
+        { id: "inv-9", email: "back@example.com", status: "pending" },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/rejected`);
+    expect(readSetCookie(res, "radar_session")).toBeTruthy();
+    expect((dbMock._users[0] as { status: string }).status).toBe("suspended");
+    expect(
+      (dbMock._invitations[0] as { status: string }).status,
+    ).toBe("pending");
   });
 
   it("new user with a REVOKED invitation stays pending (invitation ignored)", async () => {
@@ -1243,7 +1259,7 @@ describe("enrollment — OIDC callback with DB", () => {
     });
   });
 
-  it("rejected user WITHOUT a pending invitation still lands on /rejected", async () => {
+  it("rejected user without an invitation keeps a session for the status screen", async () => {
     const { res } = await makeCallback({
       sub: "stays-rejected",
       email: "nope@example.com",
