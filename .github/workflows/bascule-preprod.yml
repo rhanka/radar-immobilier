@@ -538,13 +538,18 @@ jobs:
 
       # UN-QUIESCE — rétablit préprod (scale-back aux replicas enregistrés +
       # rollout status) APRÈS le flip et AVANT le smoke. `if: always()` : joué
-      # même si une étape précédente a échoué, pour ne JAMAIS laisser préprod à
-      # terre (0 pod → /health KO). No-op if no quiesce was recorded in this run
+      # Runs after failures too; Node keeps preprod closed unless migration
+      # and database/document restoration succeeded. The workflow forwards
+      # outcomes only. No-op if no quiesce was recorded in this run
       # (and SKIP_QUIESCE≠true). Own budget: 2 rollouts × ROLLOUT_TIMEOUT 300 s.
       - name: UN-QUIESCE consommateurs préprod (reprise — après S5, avant S7)
         id: unquiesce
         if: ${{ always() && !inputs.DRY_RUN && env.MODE != 'list' }}
         timeout-minutes: 15
+        env:
+          O_MIGRATE: ${{ steps.migrate.outcome }}
+          O_RESTORE: ${{ env.MODE == 'restore' && steps.restore_backup.outcome || steps.restore_chain.outcome }}
+          O_DOCS: ${{ env.MODE == 'restore' && steps.docs_backup.outcome || steps.docs_chain.outcome }}
         run: node "$CLI" unquiesce
 
       # NO S6: the bascule never refreshes (owner decision: "a restore is a
