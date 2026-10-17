@@ -1,5 +1,7 @@
 # SPEC — Contrat d'ancre des annotations (i-arch#1) — v1
 
+> Annotation update (2026-10-12): legacy note storage, API, UI and note scopes in this document are superseded by [the shared annotations host](SPEC_EVOL_ANNOTATIONS_HOST.md). The original text remains historical evidence; it does not authorize recreating the removed model or retaining deleted notes.
+
 > **Statut** : contrat held pour gate i-cond + revue extraction (faisabilité).
 > **Auteur** : i-arch (contrat). **Implémentation** : lane extraction (migration `0011` hand-authored + route Hono/zod + service + tests).
 > **Décision produit** : owner D1–D4 + ruling « Option A forward-looking » (mono-client).

@@ -111,30 +111,6 @@ export const ProspectMarkInput = z.discriminatedUnion("dimension", [
 ]);
 export type ProspectMarkInputT = z.infer<typeof ProspectMarkInput>;
 
-// ─── Notes ────────────────────────────────────────────────────────────────────
-
-/** Note persistée (append-only, immuable une fois insérée). */
-export const ProspectNote = z.object({
-  id: z.string().uuid(),
-  noLot: z.string().min(1),
-  citySlug: z.string().min(1),
-  authorId: z.string().uuid(),
-  body: z.string().min(1).max(10_000),
-  mode: ProspectMode,
-  createdAt: z.string().min(4),
-});
-export type ProspectNoteT = z.infer<typeof ProspectNote>;
-
-/** Input pour créer une note. */
-export const ProspectNoteInput = z.object({
-  noLot: z.string().min(1),
-  citySlug: z.string().min(1),
-  authorId: z.string().uuid(),
-  body: z.string().min(1).max(10_000),
-  mode: ProspectMode.default("real"),
-});
-export type ProspectNoteInputT = z.infer<typeof ProspectNoteInput>;
-
 // ─── Contacts PII (couche CRM séparée, Loi 25) ────────────────────────────────
 
 /**

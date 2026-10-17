@@ -28,15 +28,19 @@
 # its dist/ must exist here — sharing the CI job/matrix row rather than
 # standing up a dedicated Dockerfile+pipeline for a low-traffic POC surface.
 
-FROM node:24-bookworm-slim AS build
+FROM node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS build
 WORKDIR /workspace
-COPY package.json package-lock.json* tsconfig.base.json ./
+COPY package.json package-lock.json tsconfig.base.json ./
 COPY packages/radar-domain/package.json packages/radar-domain/
 COPY packages/radar-scoring/package.json packages/radar-scoring/
 COPY packages/radar-sources/package.json packages/radar-sources/
 COPY packages/immo-mcp/package.json packages/immo-mcp/
 COPY api/package.json api/
-RUN npm install --workspaces --include-workspace-root
+COPY ui/package.json ui/
+COPY vendor/comments-m1 vendor/comments-m1/
+RUN node vendor/comments-m1/verify.mjs \
+ && npm ci --workspace=api --workspace=packages/immo-mcp --workspace=packages/radar-domain \
+    --workspace=packages/radar-scoring --workspace=packages/radar-sources --include-workspace-root
 COPY packages/radar-domain packages/radar-domain
 COPY packages/radar-scoring packages/radar-scoring
 COPY packages/radar-sources packages/radar-sources
@@ -62,13 +66,14 @@ RUN npm run typecheck --workspace=packages/immo-mcp
 # and the projection Job died with MODULE_NOT_FOUND (douleur D1).
 # Guard: deploy/ci/check-image-entrypoints.sh (run by `make k8s-validate`) fails
 # when a manifest/workflow runs a `dist/<path>.js` that is not listed here (GH #812).
-RUN npm install --no-save esbuild@0.24.0 \
- && printf '%s\n' \
+RUN printf '%s\n' \
   "import { build } from 'esbuild';" \
   "await build({" \
   "  entryPoints: [" \
   "    'api/src/index.ts'," \
   "    'api/src/db/migrate.ts'," \
+  "    'api/src/db/scripts/adopt-host-migrations.ts'," \
+  "    'api/src/db/scripts/retire-empty-legacy-notes.ts'," \
   "    'api/src/db/scripts/backfill-0004-tracking.ts'," \
   "    'api/src/scripts/project-graph-from-s3.ts'," \
   "    'api/src/scripts/purge-avis-bylaws.ts'," \
@@ -116,7 +121,7 @@ RUN IMMO_MCP_OAUTH_ISSUER=https://idp.example IMMO_MCP_OAUTH_RESOURCE=https://im
     IMMO_MCP_HTTP_PORT=18848 IMMO_MCP_DATA_MODE=mock \
     timeout 5 node packages/immo-mcp/dist/server-http.js; test $? -eq 124
 
-FROM node:24-bookworm-slim AS runtime
+FROM node:24-bookworm-slim@sha256:0e0ff40c39bc087845bfb27465a0df4ea419520094bc35842ff83dd8cbe6f9b6 AS runtime
 ENV NODE_ENV=production
 WORKDIR /workspace
 # poppler-utils ships `pdftotext`, which the live-scrape worker shells out to in

@@ -62,9 +62,10 @@
  * LE created_at (BIGINT)
  * ----------------------
  * Drizzle stocke `folderMillis` = champ `when` du _journal.json (ms epoch).
- * On utilise 1781740000000, identique au `when` que la branche zero-copy
- * (commit f405eec) assigne à l'entrée idx 9 du journal, et postérieur à 0008
- * (1781730000000). Cohérence journal ↔ tracking garantie.
+ * Historical 0009 timestamp: 1781740000000, after 0008 (1781730000000).
+ * The current journal's idx 9 is 0010, not 0009. This historical script is
+ * not the annotations migration authority: the host runner checks every
+ * predecessor/checksum and refuses unqualified manual schema attestation.
  */
 
 import crypto from "node:crypto";
@@ -78,7 +79,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ── Paramètres de la migration 0009 ─────────────────────────────────────────
 const SQL_PATH = resolve(__dirname, "../../../drizzle/0009_account_invitations.sql");
-const MIGRATION_WHEN = 1781740000000; // = `when` de l'entrée idx 9 du journal (zero-copy L1)
+const MIGRATION_WHEN = 1781740000000; // Historical 0009 time; current idx 9 belongs to 0010.
 
 // Hash calculé comme drizzle : SHA256 du contenu texte du fichier
 const sqlContent = readFileSync(SQL_PATH, "utf-8");

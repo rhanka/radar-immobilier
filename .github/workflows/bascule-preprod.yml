@@ -243,6 +243,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Suspend incompatible restore before any copy or mutation
+        id: annotations_guard
+        run: bash deploy/ci/annotations-guard.sh "$MODE"
+
       - name: Compute CONFIRM_EXPECTED (anti-rejeu = date du jour UTC) + auto-CONFIRM planifié
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -543,7 +547,7 @@ jobs:
       # (and SKIP_QUIESCE≠true). Own budget: 2 rollouts × ROLLOUT_TIMEOUT 300 s.
       - name: UN-QUIESCE consommateurs préprod (reprise — après S5, avant S7)
         id: unquiesce
-        if: ${{ always() && !inputs.DRY_RUN && env.MODE != 'list' }}
+        if: ${{ always() && steps.annotations_guard.outcome == 'success' && !inputs.DRY_RUN && env.MODE != 'list' }}
         timeout-minutes: 15
         run: node "$CLI" unquiesce
 
