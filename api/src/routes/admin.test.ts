@@ -529,9 +529,8 @@ describe("adminRoute — invitations", () => {
     expect((await res.json()).error).toBe("invalid_json");
   });
 
-  it("POST /invitations réhabilite un compte 'rejected' existant en 'pending' + audite", async () => {
-    // Bug prod : un email avec un vieux account_users 'rejected' réinvité
-    // restait 'rejected' → l'invité voyait « refusé » malgré l'invitation.
+  it("POST /invitations preserves a rejected account without a status event", async () => {
+    // Reactivation requires an explicit admin status change.
     const rejectedUser = {
       id: "r1",
       sub: "rejected-sub",
@@ -560,25 +559,45 @@ describe("adminRoute — invitations", () => {
     });
     expect(res.status).toBe(200);
 
-    // Le compte rejected doit avoir été repassé en 'pending'.
-    const statusUpdate = db._updates.find(
-      (u) => u.field === "sub" && u.value === rejectedUser.sub,
-    );
-    expect(statusUpdate).toBeDefined();
-    expect(statusUpdate!.set).toEqual({ status: "pending" });
+    // The rejected account keeps its status.
+    expect(
+      db._updates.some((u) => u.value === rejectedUser.sub),
+    ).toBe(false);
+    // No reactivation event is recorded.
+    expect(db._inserts.some((i) => i["reason"] === "reinvited")).toBe(false);
+    // The invitation itself is still recorded.
+    expect(
+      db._inserts.some((i) => i["email"] === "comeback@example.com"),
+    ).toBe(true);
+  });
 
-    // Un événement d'audit 'reinvited' doit avoir été journalisé.
-    const auditEvent = db._inserts.find(
-      (i) => i["toStatus"] === "pending" && i["reason"] === "reinvited",
-    );
-    expect(auditEvent).toBeDefined();
-    expect(auditEvent).toMatchObject({
-      userSub: rejectedUser.sub,
-      fromStatus: "rejected",
-      toStatus: "pending",
-      actorSub: adminUser.sub,
-      reason: "reinvited",
+  it("POST /invitations preserves a suspended account", async () => {
+    const suspendedUser = {
+      id: "s1",
+      sub: "suspended-sub",
+      email: "paused@example.com",
+      name: "Paused",
+      status: "suspended",
+      isAdmin: false,
+      createdAt: new Date(),
+      approvedAt: null,
+      approvedBy: null,
+    };
+    const db = makeDbWithInvitations([adminUser, suspendedUser]);
+    const app = adminRoute({ db, sessionSecret: SESSION_SECRET });
+    const token = await makeAdminSession();
+    const res = await app.request("/api/v1/admin/invitations", {
+      method: "POST",
+      headers: {
+        cookie: `radar_session=${token}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ email: "paused@example.com" }),
     });
+    expect(res.status).toBe(200);
+    expect(
+      db._updates.some((u) => u.value === suspendedUser.sub),
+    ).toBe(false);
   });
 
   it("POST /invitations ne touche PAS un compte 'approved' existant", async () => {
