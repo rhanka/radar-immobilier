@@ -1389,6 +1389,53 @@ describe("account status enforcement — cookie path (protect) + /me", () => {
     expect(res.status).toBe(200);
   });
 
+  it("/me: missing account row → 403 account_not_approved (unknown)", async () => {
+    const db = makeEnrollmentDb([
+      { sub: "someone-else", status: "approved", isAdmin: false },
+    ]) as unknown as import("../db/client.js").Database;
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY, db });
+    const res = await app.request("/api/v1/auth/me", {
+      headers: { cookie: `radar_session=${await sessionFor("ghost")}` },
+    });
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      error: "account_not_approved",
+      status: "unknown",
+    });
+  });
+
+  it.each(["pending", "invited", "rejected", "suspended"])(
+    "/me: status %s returns 403 with the identity needed by the status screen",
+    async (status) => {
+      const db = makeEnrollmentDb([
+        { sub: "user-1", status, isAdmin: false },
+      ]) as unknown as import("../db/client.js").Database;
+      const app = authRoute(AUTH_ON, { discovery: DISCOVERY, db });
+      const res = await app.request("/api/v1/auth/me", {
+        headers: { cookie: `radar_session=${await sessionFor("user-1")}` },
+      });
+      expect(res.status).toBe(403);
+      expect(await res.json()).toEqual({
+        error: "account_not_approved",
+        status,
+        authenticated: true,
+        user: { sub: "user-1", status, isAdmin: false },
+      });
+      expect(readSetCookie(res, "radar_session")).toBeFalsy();
+    },
+  );
+
+  it("/me: approved → 200", async () => {
+    const db = makeEnrollmentDb([
+      { sub: "user-1", status: "approved", isAdmin: false },
+    ]) as unknown as import("../db/client.js").Database;
+    const app = authRoute(AUTH_ON, { discovery: DISCOVERY, db });
+    const res = await app.request("/api/v1/auth/me", {
+      headers: { cookie: `radar_session=${await sessionFor("user-1")}` },
+    });
+    expect(res.status).toBe(200);
+    expect((await res.json()).authenticated).toBe(true);
+  });
 
 });
 
