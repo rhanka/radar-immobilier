@@ -322,29 +322,33 @@ export function authRoute(
 
       if (existing.length === 0) {
         // First login: create account. Auto-approve for the designated admin
-        // or for users with a pending invitation matching their email.
+        // or for users with a valid (pending, unexpired) invitation matching
+        // their email. Only the retained invitation is consumed, by its id.
         const isAdmin = user.email === "admin@sent-tech.ca";
 
         // Check invitation by email
-        let hasInvitation = false;
+        let validInvitation: RetainedInvitation | null = null;
         if (!isAdmin && user.email) {
           const invitations = await options.db
             .select()
             .from(accountInvitations)
-            .where(eq(accountInvitations.email, user.email))
-            .limit(1);
-          hasInvitation = invitations.some((inv) => inv.status === "pending");
+            .where(eq(accountInvitations.email, user.email));
+          validInvitation = pickValidInvitation(
+            invitations as RetainedInvitation[],
+            nowFn(),
+          );
 
-          if (hasInvitation) {
-            // Mark invitation as accepted
+          if (validInvitation) {
+            // Mark ONLY the retained invitation as accepted (by id — never
+            // by email, which would also consume revoked/expired rows).
             await options.db
               .update(accountInvitations)
               .set({ status: "accepted", acceptedAt: new Date(nowFn()) })
-              .where(eq(accountInvitations.email, user.email));
+              .where(eq(accountInvitations.id, validInvitation.id));
           }
         }
 
-        const autoApproved = isAdmin || hasInvitation;
+        const autoApproved = isAdmin || validInvitation !== null;
         await options.db.insert(accountUsers).values({
           sub: user.sub,
           email: user.email ?? null,
