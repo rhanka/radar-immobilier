@@ -1160,6 +1160,89 @@ describe("enrollment — OIDC callback with DB", () => {
     expect(invUpdate!.set).toMatchObject({ status: "accepted" });
   });
 
+  it("new user with a REVOKED invitation stays pending (invitation ignored)", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "new-revoked",
+      email: "revoked@example.com",
+      existingInvitations: [
+        { id: "inv-r", email: "revoked@example.com", status: "revoked" },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/pending`);
+    expect(dbMock._inserted[0]!.status).toBe("pending");
+  });
+
+  it("new user with an EXPIRED invitation stays pending (expires_at honoured)", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "new-expired",
+      email: "expired@example.com",
+      existingInvitations: [
+        {
+          id: "inv-e",
+          email: "expired@example.com",
+          status: "pending",
+          expiresAt: new Date("2020-01-01T00:00:00Z"),
+        },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(`${AUTH_ON.appBaseUrl}/pending`);
+    expect(dbMock._inserted[0]!.status).toBe("pending");
+  });
+
+  it("acceptance consumes ONLY the retained invitation, by id", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "new-chooses-valid",
+      email: "multi@example.com",
+      existingInvitations: [
+        { id: "inv-old-revoked", email: "multi@example.com", status: "revoked" },
+        {
+          id: "inv-valid",
+          email: "multi@example.com",
+          status: "pending",
+          invitedAt: new Date("2026-06-22T10:00:00Z"),
+        },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
+    const invUpdates = dbMock._updates.filter(
+      (u) => u.table === "account_invitations",
+    );
+    expect(invUpdates).toHaveLength(1);
+    expect(invUpdates[0]).toMatchObject({
+      field: "id",
+      value: "inv-valid",
+      set: expect.objectContaining({ status: "accepted" }),
+    });
+    // The revoked row is untouched.
+    expect(
+      (dbMock._invitations.find((r) => (r as { id: string }).id === "inv-old-revoked") as { status: string }).status,
+    ).toBe("revoked");
+  });
+
+  it("new user with a VALID invitation is approved and the invitation is consumed by id", async () => {
+    const { res, dbMock } = await makeCallback({
+      sub: "new-invited",
+      email: "invited@example.com",
+      existingInvitations: [
+        { id: "inv-ok", email: "invited@example.com", status: "pending" },
+      ],
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe(AUTH_ON.appBaseUrl);
+    expect(dbMock._inserted[0]!.status).toBe("approved");
+    const invUpdate = dbMock._updates.find(
+      (u) => u.table === "account_invitations",
+    );
+    expect(invUpdate).toMatchObject({
+      field: "id",
+      value: "inv-ok",
+      set: expect.objectContaining({ status: "accepted" }),
+    });
+  });
+
   it("rejected user WITHOUT a pending invitation still lands on /rejected", async () => {
     const { res } = await makeCallback({
       sub: "stays-rejected",
