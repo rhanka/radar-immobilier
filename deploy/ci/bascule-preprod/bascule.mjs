@@ -687,8 +687,9 @@ function cmdQuiesce() {
 // =============================================================================
 // UN-QUIESCE — rétablit préprod (scale-back aux replicas enregistrés + rollout
 // status ; restaure le suspend d'origine des CronJobs). PAS de CONFIRM : c'est
-// une action de REPRISE, jouée en `if: always()` par le workflow pour ne jamais
-// laisser préprod à terre après un échec. Repli manuel : UNQUIESCE_REPLICAS
+// Resume runs with `if: always()`, but requires successful migration and
+// restoration of the database and documents. Without recorded quiesce it
+// remains a no-op. Manual quiesce uses UNQUIESCE_REPLICAS
 // ("radar-api=1,radar-immo-mcp=1") si aucun état enregistré (quiesce manuel).
 // =============================================================================
 function cmdUnquiesce() {
@@ -717,6 +718,12 @@ function cmdUnquiesce() {
       if (n) state.deployments[n.trim()] = Number.parseInt((v || "1").trim(), 10);
     }
     log(`restauration depuis UNQUIESCE_REPLICAS (quiesce manuel) : ${JSON.stringify(state.deployments)}`);
+  }
+  // Missing, cancelled or skipped outcomes also keep preprod closed.
+  const unsuccessful = ["O_MIGRATE", "O_RESTORE", "O_DOCS"]
+    .filter((name) => opt(name, "") !== "success");
+  if (unsuccessful.length) {
+    die(`UN-QUIESCE refused — preprod stays closed: ${unsuccessful.map((name) => `${name}=${opt(name, "missing")}`).join(", ")}. Migration and database/document restoration must succeed before reopening.`);
   }
   const rolloutTimeout = opt("ROLLOUT_TIMEOUT", "300");
   const errs = [];
