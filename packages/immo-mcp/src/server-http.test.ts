@@ -2,7 +2,13 @@ import { beforeAll, describe, expect, it } from "vitest";
 import { SignJWT, generateKeyPair } from "jose";
 import type { KeyLike } from "jose";
 import type { TokenKeySource } from "@sentropic/oauth-verify";
-import { createImmoHttpApp, extractBearerToken, type ImmoHttpConfig } from "./server-http.js";
+import {
+  DEFAULT_SESSION_IDLE_TIMEOUT_MS,
+  DEFAULT_SESSION_MAX_LIFETIME_MS,
+  createImmoHttpApp,
+  extractBearerToken,
+  type ImmoHttpConfig,
+} from "./server-http.js";
 import type { Hono } from "hono";
 import type {
   DataSourceCallContext,
@@ -25,6 +31,8 @@ const CONFIG: ImmoHttpConfig = {
   scopesSupported: SUPPORTED,
   port: 0,
   dataMode: "simulation",
+  sessionIdleTimeoutMs: DEFAULT_SESSION_IDLE_TIMEOUT_MS,
+  sessionMaxLifetimeMs: DEFAULT_SESSION_MAX_LIFETIME_MS,
 };
 
 let publicKey: KeyLike;

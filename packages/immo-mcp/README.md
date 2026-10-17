@@ -133,6 +133,8 @@ qui sert le même MCP sur **HTTP** derrière un **OAuth 2.1 Resource Server** :
 | `IMMO_MCP_OAUTH_REQUIRED_SCOPE` | `immo:read` | gate de scope grossier sur la route `/mcp` |
 | `IMMO_MCP_OAUTH_SCOPES_SUPPORTED` | `immo:read immo:search immo:documents:read` | scopes annoncés dans le PRM |
 | `IMMO_MCP_HTTP_PORT` | `8848` | port d'écoute |
+| `IMMO_MCP_SESSION_IDLE_TIMEOUT_MS` | `1800000` (30 min) | inactivité max d'une session MCP avant fermeture + libération mémoire |
+| `IMMO_MCP_SESSION_MAX_LIFETIME_MS` | `28800000` (8 h) | durée de vie maximale d'une session MCP, même active |
 
 ### Lancer le serveur HTTP
 
