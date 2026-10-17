@@ -74,7 +74,7 @@ const mapMocks = vi.hoisted(() => {
   return { instances, FakeMap };
 });
 
-vi.mock("maplibre-gl", () => ({ default: { Map: mapMocks.FakeMap } }));
+vi.mock("maplibre-gl", () => ({ Map: mapMocks.FakeMap }));
 
 // ── Adapter satellite geo-map-engine MOCKÉ (zéro-copie du vrai contrat) ────────
 // §5.3 — l'attribution DOIT être résolvable, sinon le socle REFUSE le raster et

@@ -108,7 +108,7 @@
               {#snippet trigger()}
                 <button
                   type="button"
-                  class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-yellow-400 bg-yellow-50 text-yellow-700 transition hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  class="inline-flex h-6 w-6 items-center justify-center rounded-full border border-yellow-400 bg-yellow-50 text-yellow-700 transition hover:bg-yellow-100 focus:outline-hidden focus:ring-2 focus:ring-yellow-400"
                   aria-label="Explication des deux tris"
                   aria-expanded={helpOpen}
                   title="Pourquoi deux tris ?"
@@ -123,7 +123,7 @@
                     <p class="text-sm font-semibold text-slate-900">Pourquoi deux tris ?</p>
                     <button
                       type="button"
-                      class="text-slate-400 hover:text-slate-600 focus:outline-none"
+                      class="text-slate-400 hover:text-slate-600 focus:outline-hidden"
                       on:click={closeHelp}
                       aria-label="Fermer"
                     >x</button>
