@@ -204,14 +204,14 @@
         {#if canWrite}
           <p class="text-xs leading-5 text-slate-400">
             Écriture activée. Accepter / rejeter un appariement persiste une
-            décision <code class="rounded bg-slate-100 px-1 text-xs">graphify_ontology_patch_v1</code>
+            décision <code class="rounded-sm bg-slate-100 px-1 text-xs">graphify_ontology_patch_v1</code>
             (route protégée par jeton) puis re-réconcilie l'état.
           </p>
         {:else}
           <p class="text-xs leading-5 text-slate-400">
             Lecture seule. L'écriture (accepter / rejeter un appariement) passe par
             le cœur write-guarded du studio, activé par un jeton
-            (<code class="rounded bg-slate-100 px-1 text-xs">x-radar-write-token</code>)
+            (<code class="rounded-sm bg-slate-100 px-1 text-xs">x-radar-write-token</code>)
             non configuré dans cet environnement.
           </p>
         {/if}
@@ -233,7 +233,7 @@
       <nav class="mt-4 flex gap-0" aria-label="Onglets du studio">
         <button
           type="button"
-          class={`inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
+          class={`inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors focus:outline-hidden ${
             activeTab === "ontologie"
               ? "border-teal-600 text-teal-700"
               : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
@@ -246,7 +246,7 @@
         </button>
         <button
           type="button"
-          class={`inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
+          class={`inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors focus:outline-hidden ${
             activeTab === "graphe"
               ? "border-teal-600 text-teal-700"
               : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
@@ -260,7 +260,7 @@
         </button>
         <button
           type="button"
-          class={`inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none ${
+          class={`inline-flex items-center gap-1.5 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors focus:outline-hidden ${
             activeTab === "mrc"
               ? "border-teal-600 text-teal-700"
               : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
@@ -294,7 +294,7 @@
       <p class="max-w-prose rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-600">
         État du projet graphify <span class="font-semibold text-slate-800">par ville</span>
         (D1) : entités canoniques par type, file de candidats
-        <code class="rounded bg-slate-100 px-1 text-xs">entity_match</code>
+        <code class="rounded-sm bg-slate-100 px-1 text-xs">entity_match</code>
         et mentions brutes avec leur provenance S3. Données
         <span class="font-semibold text-teal-700">réelles</span> issues des rôles,
         avis publics, adresses et règlements (données réelles ; aucune donnée
@@ -344,7 +344,7 @@
                 </div>
                 <ul class="space-y-1.5">
                   {#each group.entities as e (e.id)}
-                    <li class="rounded border border-slate-100 bg-slate-50 px-2 py-1.5">
+                    <li class="rounded-sm border border-slate-100 bg-slate-50 px-2 py-1.5">
                       <div class="flex items-center gap-1.5">
                         <span class="truncate text-sm text-slate-800" title={e.label}>
                           {e.label}
@@ -373,7 +373,7 @@
                           </label>
                           <select
                             id={`set-status-${e.id}`}
-                            class="w-full rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-slate-600 disabled:opacity-50"
+                            class="w-full rounded-sm border border-slate-200 bg-white px-1.5 py-1 text-xs text-slate-600 disabled:opacity-50"
                             disabled={pendingCanonicalId !== null}
                             title="Changer le statut de réconciliation (set_status)"
                             value=""

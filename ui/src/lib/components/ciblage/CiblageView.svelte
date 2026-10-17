@@ -190,7 +190,7 @@
         <p class="text-xs leading-5 text-slate-400">
           Un plan est une <span class="font-semibold text-slate-600">déclaration pure</span> :
           l'enregistrer ne déclenche AUCUNE collecte. L'identifiant du plan sera
-          inscrit sur chaque document brut collecté (<code class="rounded bg-slate-100 px-1 text-[11px]">ciblagePlanId</code>)
+          inscrit sur chaque document brut collecté (<code class="rounded-sm bg-slate-100 px-1 text-[11px]">ciblagePlanId</code>)
           par l'exécution recueil (lot suivant).
         </p>
       </div>
@@ -209,7 +209,7 @@
       <p class="mt-2 max-w-prose rounded-md border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-600">
         Déclarez <span class="font-semibold text-slate-800">ce que</span> le radar
         doit collecter : villes pilotes, sources réelles du catalogue
-        <code class="rounded bg-slate-100 px-1 text-xs">prioritySources</code>, et
+        <code class="rounded-sm bg-slate-100 px-1 text-xs">prioritySources</code>, et
         cadence. Aucune donnée fabriquée, aucune I/O : enregistrer un plan ne
         lance pas de collecte (le recueil est le lot suivant).
       </p>
@@ -248,7 +248,7 @@
             <Badge tone="info">{lastJob.totals.mentions} mention{lastJob.totals.mentions !== 1 ? "s" : ""}</Badge>
           </div>
           <p class="text-xs text-slate-500">
-            Job <code class="rounded bg-slate-100 px-1 font-mono text-[11px]">{lastJob.id}</code>.
+            Job <code class="rounded-sm bg-slate-100 px-1 font-mono text-[11px]">{lastJob.id}</code>.
             Détail par source dans la console
             <span class="font-medium text-slate-700">Jobs (T4)</span>.
           </p>
@@ -274,7 +274,7 @@
             </label>
             <input
               id="ciblage-label"
-              class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 shadow-sm focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300"
+              class="w-full rounded-md border border-slate-200 px-2.5 py-1.5 text-sm text-slate-700 shadow-xs focus:border-teal-400 focus:outline-hidden focus:ring-1 focus:ring-teal-300"
               placeholder="ex. Veille Valleyfield, avis publics"
               bind:value={form.label}
               disabled={saving}
@@ -328,7 +328,7 @@
                         >
                           <input
                             type="checkbox"
-                            class="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-400"
+                            class="h-4 w-4 rounded-sm border-slate-300 text-teal-600 focus:ring-teal-400"
                             checked={form.sourceBindingIds.includes(b.sourceId)}
                             onchange={() => toggleBinding(b.sourceId)}
                             disabled={saving}
@@ -375,7 +375,7 @@
           <label class="flex items-center gap-2 text-sm text-slate-700">
             <input
               type="checkbox"
-              class="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-400"
+              class="h-4 w-4 rounded-sm border-slate-300 text-teal-600 focus:ring-teal-400"
               bind:checked={form.enabled}
               disabled={saving}
             />
@@ -389,7 +389,7 @@
             </label>
             <textarea
               id="ciblage-notes"
-              class="min-h-[3rem] w-full resize-y rounded-md border border-slate-200 px-2.5 py-1.5 text-sm leading-5 text-slate-700 shadow-sm focus:border-teal-400 focus:outline-none focus:ring-1 focus:ring-teal-300"
+              class="min-h-[3rem] w-full resize-y rounded-md border border-slate-200 px-2.5 py-1.5 text-sm leading-5 text-slate-700 shadow-xs focus:border-teal-400 focus:outline-hidden focus:ring-1 focus:ring-teal-300"
               rows="2"
               bind:value={form.notes}
               disabled={saving}
@@ -491,7 +491,7 @@
               </div>
 
               {#if plan.notes}
-                <p class="rounded border border-slate-100 bg-slate-50 px-2 py-1 text-xs text-slate-500">
+                <p class="rounded-sm border border-slate-100 bg-slate-50 px-2 py-1 text-xs text-slate-500">
                   {plan.notes}
                 </p>
               {/if}

@@ -37,9 +37,9 @@
         <div class="inline-flex rounded-md border border-slate-200 bg-slate-50 p-1">
           <button
             type="button"
-            class={`rounded px-3 py-2 text-sm font-semibold ${
+            class={`rounded-sm px-3 py-2 text-sm font-semibold ${
               activePanel === "sources"
-                ? "bg-white text-slate-950 shadow-sm"
+                ? "bg-white text-slate-950 shadow-xs"
                 : "text-slate-600 hover:text-slate-950"
             }`}
             on:click={() => {
@@ -50,9 +50,9 @@
           </button>
           <button
             type="button"
-            class={`rounded px-3 py-2 text-sm font-semibold ${
+            class={`rounded-sm px-3 py-2 text-sm font-semibold ${
               activePanel === "challenge"
-                ? "bg-white text-slate-950 shadow-sm"
+                ? "bg-white text-slate-950 shadow-xs"
                 : "text-slate-600 hover:text-slate-950"
             }`}
             on:click={() => {
@@ -92,7 +92,7 @@
       </div>
 
       <div class="space-y-4">
-        <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <div class="rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
           <div class="mb-3 flex items-center gap-2">
             <LayoutDashboard class="h-4 w-4 text-teal-700" aria-hidden="true" />
             <h2 class="text-sm font-semibold text-slate-950">Mode revue ecran</h2>

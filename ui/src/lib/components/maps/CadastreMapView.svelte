@@ -90,10 +90,10 @@
       const data = await ensureLayers();
       // Import dynamique : MapLibre n'est chargé qu'au montage côté navigateur
       // (jamais en SSR / test jsdom sans WebGL).
-      const maplibre = (await import("maplibre-gl")).default;
+      const { Map: MapLibreMap } = await import("maplibre-gl");
       legend = scoreLegend(container);
 
-      const m = new maplibre.Map({
+      const m = new MapLibreMap({
         container,
         style: {
           version: 8,
@@ -294,7 +294,7 @@
 
   <!-- Conteneur MapLibre -->
   <div class="relative min-h-[320px] flex-1">
-    <div bind:this={container} class="absolute inset-0" data-testid="maplibre-container"></div>
+    <div bind:this={container} class="map-canvas" data-testid="maplibre-container"></div>
 
     {#if loading && !loadError}
       <div class="absolute inset-0 flex items-center justify-center bg-slate-50/60 text-sm text-slate-400">
@@ -305,14 +305,14 @@
     <!-- Légende (couleurs = tokens DS via score-color-scale) -->
     {#if legend.length > 0}
       <div
-        class="absolute bottom-3 left-3 rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-xs shadow-sm"
+        class="absolute bottom-3 left-3 rounded-lg border border-slate-200 bg-white/95 px-3 py-2 text-xs shadow-xs"
         data-testid="score-legend"
       >
         <p class="mb-1 font-semibold text-slate-600">Potentiel par lot</p>
         <ul class="space-y-0.5">
           {#each legend as entry (entry.label)}
             <li class="flex items-center gap-2">
-              <span class="inline-block h-3 w-3 rounded-sm" style={`background:${entry.color}`}></span>
+              <span class="inline-block h-3 w-3 rounded-xs" style={`background:${entry.color}`}></span>
               <span class="text-slate-600">{entry.label}</span>
             </li>
           {/each}
@@ -404,3 +404,11 @@
     {/if}
   </div>
 </div>
+
+<style>
+  /* Keep the map host above MapLibre's unlayered position: relative rule. */
+  .map-canvas {
+    position: absolute;
+    inset: 0;
+  }
+</style>
