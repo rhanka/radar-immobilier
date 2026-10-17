@@ -20,6 +20,10 @@
 #                         (never :latest — on the preprod-first CD, :latest is main, not
 #                         the release tag prod serves)
 #   __PROJECT_CITIES__  = space-separated slugs (empty ⇒ every city)
+#   __PROJECTION_ARGS__ = declared changes of ONE city (GH #817, spec SPEC_FIX_GRAPH_CITY_KEY §17):
+#                         "--remove=<id>,… --lose=<id>:<key>,… [--preview]", built by
+#                         deploy/ci/projection-declared-args.sh from recovery_cities /
+#                         recovery_mode; empty for every projection without declarations.
 # Preprod twin: deploy/k8s/graph-projection-preprod/job.yaml (run-job target=preprod).
 apiVersion: batch/v1
 kind: Job
@@ -64,7 +68,7 @@ spec:
           command: ["sh", "-c"]
           args:
             - |
-              node dist/scripts/project-graph-from-s3.js __PROJECT_CITIES__
+              node dist/scripts/project-graph-from-s3.js __PROJECTION_ARGS__ __PROJECT_CITIES__
           envFrom:
             - configMapRef:
                 name: radar-api
