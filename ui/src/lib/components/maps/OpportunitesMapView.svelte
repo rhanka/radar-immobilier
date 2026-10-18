@@ -112,7 +112,7 @@
       <button
         type="button"
         aria-label="Actualiser"
-        class="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+        class="rounded-sm p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
         on:click={load}
         disabled={loading}
       >
@@ -214,8 +214,8 @@
               type="button"
               class={`w-full rounded-xl border text-left transition-all ${
                 isExpanded
-                  ? "border-teal-300 bg-teal-50 shadow-sm"
-                  : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm"
+                  ? "border-teal-300 bg-teal-50 shadow-xs"
+                  : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-xs"
               } px-4 py-3`}
               on:click={() => toggleSelected(item)}
             >

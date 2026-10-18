@@ -62,7 +62,7 @@ RUN npm run typecheck --workspace=packages/immo-mcp
 # and the projection Job died with MODULE_NOT_FOUND (douleur D1).
 # Guard: deploy/ci/check-image-entrypoints.sh (run by `make k8s-validate`) fails
 # when a manifest/workflow runs a `dist/<path>.js` that is not listed here (GH #812).
-RUN npm install --no-save esbuild@0.24.0 \
+RUN npm install --no-save esbuild@0.25.12 \
  && printf '%s\n' \
   "import { build } from 'esbuild';" \
   "await build({" \

@@ -1823,7 +1823,7 @@
     // au repos), l'emphase hover/focus étant transitoire.
     cptaqLegendEmphasized = false;
     try {
-      const maplibre = (await import("maplibre-gl")).default;
+      const { Map: MapLibreMap } = await import("maplibre-gl");
       // C10 — fond « neutral-gray » : aplat gris + raster OSM DÉSATURÉ
       // (saturation -1) et éclairci, pour faire ressortir zones/lots façon
       // carte de référence. Aucune dépendance tuiles supplémentaire.
@@ -1903,7 +1903,7 @@
       const baseLayers = sat
         ? [{ id: "sat-2d-background", type: "raster" as const, source: "sat-2d" }]
         : osmBaseLayers;
-      const m = new maplibre.Map({
+      const m = new MapLibreMap({
         container: mapContainer,
         // §5 R3 P1 — EXCLUT le contrôle d'attribution PAR DÉFAUT de MapLibre.
         // Sans cette option, MapLibre injecte un `AttributionControl` compact
@@ -2190,7 +2190,7 @@
   data-last-camera-command={lastCameraCommand}
   data-map-zoom={mapZoom}
 >
-  <div bind:this={mapContainer} class="absolute inset-0"></div>
+  <div bind:this={mapContainer} class="map-canvas"></div>
 
   <!-- ── §5 R3 — ATTRIBUTION légale : overlay LÉGER, PETIT, CENTRÉ sur la bande de
        contrôles bas, CONTEXTUEL à la layer active. Remplace le contrôle
@@ -2400,7 +2400,7 @@
     >
       {#if segments.length > 0}
         <div
-          class="inline-flex w-fit flex-nowrap overflow-hidden whitespace-nowrap rounded border border-slate-200 bg-white/95 text-xs shadow-sm"
+          class="inline-flex w-fit flex-nowrap overflow-hidden whitespace-nowrap rounded-sm border border-slate-200 bg-white/95 text-xs shadow-xs"
         >
           {#each segments as seg (seg.label)}
             {@const segActive = seg.active ?? activeSegment === seg.label}
@@ -2458,7 +2458,7 @@
           <slot name="overlay-bottom-left" />
           {#if legend}
             <div
-              class="max-w-xs rounded border border-slate-200 bg-white/95 px-3 py-2 shadow-sm"
+              class="max-w-xs rounded-sm border border-slate-200 bg-white/95 px-3 py-2 shadow-xs"
             >
               <p
                 class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400"
@@ -2469,7 +2469,7 @@
                 {#each legend.items as item (item.label)}
                   <li class="flex items-center gap-2 text-xs text-slate-600">
                     <span
-                      class="h-3 w-3 rounded-sm border border-slate-300 shrink-0"
+                      class="h-3 w-3 rounded-xs border border-slate-300 shrink-0"
                       style="background-color: {item.color};"
                     ></span>
                     {item.label}
@@ -2495,6 +2495,12 @@
 </div>
 
 <style>
+  /* Keep the map host above MapLibre's unlayered position: relative rule. */
+  .map-canvas {
+    position: absolute;
+    inset: 0;
+  }
+
   /* §5.1 — boutons de contrôle carte (Mesure, Fond de carte, Légende) : 32×32 px,
      même bordure / rayon / focus / état actif, tokens DS (replis slate). */
   .map-ctrl-btn {

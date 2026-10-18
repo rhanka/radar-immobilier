@@ -311,7 +311,7 @@
               value={inviteLink}
               onclick={(e) => (e.currentTarget as HTMLInputElement).select()}
               class="flex-1 rounded-md border border-slate-300 bg-slate-50 px-3 py-2 font-mono
-                     text-xs text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1
+                     text-xs text-slate-800 focus:border-blue-500 focus:outline-hidden focus:ring-1
                      focus:ring-blue-500"
             />
             <Button type="button" variant="secondary" size="sm" onclick={copyInviteLink}>
@@ -337,7 +337,7 @@
             placeholder="steve@example.com"
             disabled={inviting}
             class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
-                   placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1
+                   placeholder-slate-400 focus:border-blue-500 focus:outline-hidden focus:ring-1
                    focus:ring-blue-500 disabled:opacity-50"
           />
         </div>
@@ -353,7 +353,7 @@
             disabled={inviting}
             maxlength="500"
             class="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900
-                   placeholder-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1
+                   placeholder-slate-400 focus:border-blue-500 focus:outline-hidden focus:ring-1
                    focus:ring-blue-500 disabled:opacity-50"
           />
         </div>

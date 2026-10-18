@@ -23,9 +23,9 @@
     "@sentropic/design-system-themes": "^0.11.0",
     "@sentropic/design-system-tokens": "^0.11.0",
     "@sentropic/geo-core": "^0.6.0",
-    "@sentropic/geo-map-engine": "^0.6.0",
-    "@sentropic/geo-ui-svelte": "^0.1.1",
-    "maplibre-gl": "^5.24.0",
+    "@sentropic/geo-map-engine": "0.6.3",
+    "@sentropic/geo-ui-svelte": "0.6.3",
+    "maplibre-gl": "6.4.1",
     "pdfjs-dist": "^4.10.38",
     "svelte": "^5.0.0",
     "svelte-streamdown": "^3.0.1"
@@ -33,15 +33,15 @@
   "devDependencies": {
     "@playwright/test": "^1.61.0",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "@tailwindcss/postcss": "4.3.3",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/svelte": "^5.2.4",
     "@tsconfig/svelte": "^5.0.0",
     "@types/node": "^20.14.2",
-    "autoprefixer": "^10.4.17",
     "jsdom": "^24.0.0",
     "postcss": "^8.4.38",
     "svelte-check": "^4.0.0",
-    "tailwindcss": "^3.4.4",
+    "tailwindcss": "4.3.3",
     "vite": "^6.4.3",
     "vitest": "^5.0.3"
   }
