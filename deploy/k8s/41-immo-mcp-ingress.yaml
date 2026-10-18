@@ -1,14 +1,15 @@
 # Public route for the remote immo MCP server on the SAME host as the radar
 # UI: https://immo.sent-tech.ca/mcp (Streamable HTTP transport, OAuth-gated,
-# AND the RFC 9728 PRM at https://immo.sent-tech.ca/mcp/.well-known/oauth-protected-resource,
-# unauthenticated).
+# AND public PRM at /mcp/.well-known/oauth-protected-resource and
+# /.well-known/oauth-protected-resource/mcp).
 #
-# PREPARED, NOT APPLIED — not wired into kustomization.yaml yet (mirrors how
-# 31/32/33 one-shot Jobs are deliberately left out: `kubectl apply -f` by hand
-# once the prerequisites below are resolved). See
-# docs/spec/mcp/immo-mcp-remote-deploy.md and
-# docs/spec/mcp/immo-mcp-remote-deploy-BLOCKERS.md (§1/§2 now RESOLVED — see
-# below — the remaining gate is the real IdP issuer, runbook §4).
+# Preprod: render deploy/overlays/preprod (already includes this Ingress), run
+# deploy/ci/check-preprod-auth-isolation.sh on that SAME full render, then have
+# the k8s operator apply its reviewed Ingress. Record render SHA-256, guard
+# output, apply receipt and resulting API/MCP image digests; no CI ingress grant.
+# Prod: reviewed 41-only apply; if 30/40 are needed, pin promoted image digests
+# BEFORE any apply/restart. Never use k8s-apply-mcp.yaml unmodified.
+# Full procedure: plan/861A-BRANCH_feat-861a-prm-fixtures.md (spec v7 §§6/7/11).
 #
 # Why a SEPARATE Ingress object (not a path added to 60-ingress.yaml)
 # ---------------------------------------------------------------------
@@ -19,23 +20,12 @@
 # adding more specific paths on the same host is standard practice and avoids
 # touching the working UI Ingress. This file is that second object.
 #
-# ONE path routes to the mcp Service (was two — history below)
+# Transport and metadata routes to the MCP Service
 # ---------------------------------------------------------------------
 # `/mcp` (Prefix) covers BOTH the MCP transport (`POST/GET/DELETE /mcp`) AND
-# the RFC 9728 PRM (`GET /mcp/.well-known/oauth-protected-resource`), because
-# `server-http.ts`'s `createImmoHttpApp()` now mounts `@sentropic/mcp-auth`'s
-# `mcpAuthRoutes()` under `/mcp` (`app.route("/mcp", mcpAuthRoutes(mcp))`),
-# matching what `protectedResourceMetadataUrl()` advertises in the 401
-# `WWW-Authenticate: ... resource_metadata="https://immo.sent-tech.ca/mcp/.well-known/oauth-protected-resource"`
-# challenge. This FIXES BLOCKERS.md item 1 (previously: `mcpAuthRoutes()` was
-# mounted at the Hono app's own root, serving the PRM at the BARE
-# `/.well-known/oauth-protected-resource` — a different URL than the one
-# advertised, and a strict RFC 9728 client following the header literally
-# 404'd). The extra `Exact /.well-known/oauth-protected-resource` rule this
-# file used to carry is GONE: the app no longer serves anything there, so
-# routing to it would just 404 at the mcp Service instead of (as before)
-# falling through to the UI's SPA catch-all — either way dead weight, so it
-# was dropped rather than kept as a no-op.
+# historical PRM (`GET /mcp/.well-known/oauth-protected-resource`) advertised
+# by mcp-auth 0.1.0. The canonical RFC 9728 path is routed with Exact matching
+# to the same backend; the UI keeps the root catch-all.
 #
 # No `cert-manager.io/cluster-issuer` annotation here on purpose: 60-ingress.yaml
 # already requests the `immo.sent-tech.ca` cert into the SAME `radar-immo-tls`
@@ -77,6 +67,13 @@ spec:
         paths:
           - path: /mcp
             pathType: Prefix
+            backend:
+              service:
+                name: radar-immo-mcp
+                port:
+                  name: http
+          - path: /.well-known/oauth-protected-resource/mcp
+            pathType: Exact
             backend:
               service:
                 name: radar-immo-mcp
