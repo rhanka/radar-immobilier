@@ -41,7 +41,10 @@ if ! diff <(extract "$CLUSTER") <(extract "$PREPROD"); then
   echo "Keep the add_header/server_tokens directives identical (only the /api/geo/collections upstream may differ)." >&2
   exit 1
 fi
-if ! diff <(extract_js_block "$CLUSTER") <(extract_js_block "$PREPROD"); then
+cluster_js="$(extract_js_block "$CLUSTER")"
+preprod_js="$(extract_js_block "$PREPROD")"
+if [ "$cluster_js" != "$preprod_js" ]; then
+  diff <(printf "%s\n" "$cluster_js") <(printf "%s\n" "$preprod_js") || true
   echo "ERROR: nginx worker location-block divergence between" >&2
   echo "  $CLUSTER" >&2
   echo "  $PREPROD" >&2
