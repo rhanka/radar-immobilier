@@ -20,7 +20,12 @@ COMPOSE="$DIR/../../../ui/nginx/default.conf"
 PREPROD="$DIR/../../../deploy/overlays/preprod/nginx/default.conf"
 
 extract() { grep -E '^[[:space:]]*(add_header|server_tokens)\b' "$1" | sed 's/^[[:space:]]*//' | sort; }
-extract_js_block() { awk '/location ~ \\.(js|mjs)/,/^[[:space:]]*}$/' "$1"; }
+extract_js_block() {
+  local block
+  block="$(awk 'index($0, "location ~ \\.(js|mjs)$") { f = 1 } f { print } f && /^[[:space:]]*}$/ { exit }' "$1")"
+  if [ -z "$block" ]; then echo "ERROR: worker location block not found in $1" >&2; exit 1; fi
+  printf "%s\n" "$block"
+}
 
 if ! diff <(extract "$CLUSTER") <(extract "$COMPOSE"); then
   echo "ERROR: nginx security-header divergence between" >&2
