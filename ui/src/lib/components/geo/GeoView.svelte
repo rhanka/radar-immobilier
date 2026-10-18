@@ -194,7 +194,7 @@
               id="geo-city-select"
               bind:value={selectedCity}
               on:change={syncCityUrl}
-              class="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-8 text-sm text-slate-800 shadow-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
+              class="w-full appearance-none rounded-md border border-slate-200 bg-white py-2 pl-3 pr-8 text-sm text-slate-800 shadow-xs focus:border-teal-500 focus:outline-hidden focus:ring-1 focus:ring-teal-500"
             >
               <option value="" disabled>Choisir une ville…</option>
               {#each cities as city}
@@ -314,7 +314,7 @@
       <!-- Empty-state si ville sélectionnée mais aucune donnée -->
       {#if selectedCity && !dataLoading && zonesCount === 0 && lotsCount === 0 && oppsCount === 0 && !dataError}
         <div class="pointer-events-none absolute bottom-6 left-1/2 -translate-x-1/2">
-          <div class="pointer-events-auto rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 shadow text-center">
+          <div class="pointer-events-auto rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-3 shadow-sm text-center">
             <Info class="mx-auto mb-1 h-5 w-5 text-amber-500" aria-hidden="true" />
             <p class="text-xs font-medium text-amber-800">
               Aucune donnée géo disponible pour {cityLabel(selectedCity)}.

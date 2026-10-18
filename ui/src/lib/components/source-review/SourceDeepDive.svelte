@@ -103,7 +103,7 @@
   </div>
 {/snippet}
 
-<section class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+<section class="rounded-lg border border-slate-200 bg-white p-4 shadow-xs">
   <div class="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 pb-4">
     <div>
       <p class="text-xs font-semibold uppercase tracking-wide text-teal-700">
