@@ -8,6 +8,7 @@ import "@fontsource-variable/inter";
 import "./app.css";
 import { mount } from "svelte";
 import App from "./App.svelte";
+import { initializeMaplibreWorker } from "./lib/maps/maplibre-worker";
 
 const target = document.getElementById("app");
 
@@ -15,6 +16,9 @@ if (!target) {
   throw new Error("Missing #app root");
 }
 
-const app = mount(App, { target });
+async function bootstrap(root: HTMLElement) {
+  await initializeMaplibreWorker();
+  return mount(App, { target: root });
+}
 
-export default app;
+export default bootstrap(target);

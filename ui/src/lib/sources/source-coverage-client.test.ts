@@ -155,7 +155,7 @@ describe("buildFillColorExpression — anti-survente", () => {
     for (const [name, expr] of Object.entries(cases)) {
       // `createExpression` valide l'arité du `match` : un `["match", input,
       // fallback]` sans paire (l'ancien bug) est rejeté (result === "error").
-      const parsed = createExpression(expr);
+      const parsed = createExpression(expr, "fill-color");
       expect(parsed.result, `${name}: ${JSON.stringify(parsed)}`).toBe("success");
     }
   });

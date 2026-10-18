@@ -421,7 +421,7 @@
           {#if turn.kind === "user"}
             {@const userKey = `u-${turns.indexOf(turn)}`}
             <div class="group flex flex-col items-end">
-              <div class="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-sm bg-blue-700 px-3 py-2 text-sm text-white">
+              <div class="max-w-[85%] whitespace-pre-wrap break-words rounded-2xl rounded-br-xs bg-blue-700 px-3 py-2 text-sm text-white">
                 {turn.content}
               </div>
               <MessageActions
@@ -444,7 +444,7 @@
               <div class="min-w-0 max-w-[88%]">
                 <p class="mb-1 text-[11px] text-slate-500">Assistant radar</p>
                 {#if turn.status === "failed"}
-                  <div class="rounded-2xl rounded-bl-sm border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+                  <div class="rounded-2xl rounded-bl-xs border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
                     {turn.finalContent}
                     {#if turn.retryContent}
                       <button
@@ -460,7 +460,7 @@
                   </div>
                 {:else}
                   <div
-                    class="rounded-2xl rounded-bl-sm border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
+                    class="rounded-2xl rounded-bl-xs border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900"
                     use:registerBubble={turn.streamId}
                   >
                     {#if turn.restored}
@@ -509,7 +509,7 @@
     <div class="flex items-end gap-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
       <textarea
         bind:this={textareaEl}
-        class="max-h-32 min-h-[2.25rem] w-full flex-1 resize-none border-0 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 disabled:opacity-60"
+        class="max-h-32 min-h-[2.25rem] w-full flex-1 resize-none border-0 bg-transparent text-sm text-slate-900 outline-hidden placeholder:text-slate-400 disabled:opacity-60"
         rows="1"
         placeholder={configured
           ? "Questionner ce signal"

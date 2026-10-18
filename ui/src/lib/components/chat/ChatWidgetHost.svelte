@@ -113,7 +113,7 @@
                droit (le flottant se superposerait + masquerait le déclencheur).
                Hors carte, la bascule reste disponible (préférence utilisateur). -->
           <button
-            class="flex h-7 w-7 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+            class="flex h-7 w-7 items-center justify-center rounded-sm text-slate-500 hover:bg-slate-100 hover:text-slate-800"
             type="button"
             title={isDocked ? "Passer en fenetre flottante" : "Ancrer le chat"}
             aria-label={isDocked ? "Passer en fenetre flottante" : "Ancrer le chat"}
@@ -127,7 +127,7 @@
           </button>
         {/if}
         <button
-          class="flex h-7 w-7 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+          class="flex h-7 w-7 items-center justify-center rounded-sm text-slate-500 hover:bg-slate-100 hover:text-slate-800"
           type="button"
           title="Fermer le chat"
           aria-label="Fermer le chat"
