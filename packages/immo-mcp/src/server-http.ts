@@ -244,6 +244,7 @@ export interface ImmoHttpDeps {
 /**
  * Build the Hono app exposing:
  *   - GET  /mcp/.well-known/oauth-protected-resource  → RFC 9728 PRM (public)
+ *   - GET  /.well-known/oauth-protected-resource/mcp  → canonical PRM (public)
  *   - *    /mcp                                        → OAuth RS guard (401/403 + WWW-Authenticate)
  *   - POST/GET/DELETE /mcp                             → MCP Streamable HTTP transport (stateful)
  */
@@ -262,18 +263,14 @@ export function createImmoHttpApp(config: ImmoHttpConfig, deps: ImmoHttpDeps = {
 
   const app = new Hono();
 
-  // RFC 9728 Protected Resource Metadata (default-off in raw mcp-auth → turned ON here).
-  // Mounted under the resource's OWN path (`/mcp`), not the app root: `resource` is
-  // `https://.../mcp` (a non-empty path), and @sentropic/mcp-auth@0.1.0's
-  // `protectedResourceMetadataUrl()` advertises `${resource}/.well-known/oauth-protected-resource`
-  // in the 401 `WWW-Authenticate: resource_metadata="..."` challenge — i.e. it APPENDS the
-  // well-known suffix after the full resource URL, path included. Mounting the routes at "/"
-  // would serve the PRM at the bare `/.well-known/oauth-protected-resource`, which disagrees
-  // with that advertised URL and 404s for any RFC-9728-compliant client (see
-  // docs/spec/mcp/immo-mcp-remote-deploy-BLOCKERS.md item 1). `.use("/mcp", requireMcpAuth(...))`
-  // below only guards the EXACT `/mcp` path (Hono doesn't treat a bare path as a wildcard
-  // prefix), so it does not shadow this PRM sub-route — verified locally, see the runbook.
+  // Keep the historical mount first: mcp-auth 0.1.0 advertises this URL.
+  // The same instance supplies root discovery before the transport guard.
   app.route("/mcp", mcpAuthRoutes(mcp));
+  app.route("/", mcpAuthRoutes(mcp));
+  // Version 0.1.0 only registers the bare well-known path at the root mount.
+  app.get("/.well-known/oauth-protected-resource/mcp", (c) => c.json(mcp.metadata(), 200, {
+    "Cache-Control": "public, max-age=300",
+  }));
 
   // OAuth Resource Server guard: validates the bearer (issuer/audience/scope), or returns
   // 401/403 with the proper WWW-Authenticate (resource_metadata + scope) challenge.
