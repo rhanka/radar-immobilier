@@ -42,8 +42,8 @@ function isHidden(raw: string | null): boolean {
   return raw === "1" || (raw !== null && raw.toLowerCase() === "true");
 }
 
-function readHiddenColumns(ws: XmlNode, sheetName: string): number[] {
-  const hidden = new Set<number>();
+export function readHiddenColumns(ws: XmlNode, sheetName: string): number[] {
+  const intervals: Array<{ min: number; max: number }> = [];
   for (const col of childElements(ws, "cols").flatMap((cols) => childElements(cols, "col"))) {
     const minRaw = attr(col, "min");
     const maxRaw = attr(col, "max");
@@ -54,10 +54,24 @@ function readHiddenColumns(ws: XmlNode, sheetName: string): number[] {
       throw new SteveCaptureError(`invalid column span "${minRaw}:${maxRaw}" in sheet "${sheetName}"`);
     }
     if (isHidden(attr(col, "hidden"))) {
-      for (let c = min; c <= max; c++) hidden.add(c);
+      intervals.push({ min, max });
     }
   }
-  return [...hidden].sort((a, b) => a - b);
+  intervals.sort((a, b) => a.min - b.min || a.max - b.max);
+  const merged: Array<{ min: number; max: number }> = [];
+  for (const interval of intervals) {
+    const previous = merged[merged.length - 1];
+    if (previous !== undefined && interval.min <= previous.max + 1) {
+      previous.max = Math.max(previous.max, interval.max);
+    } else {
+      merged.push({ ...interval });
+    }
+  }
+  const hidden: number[] = [];
+  for (const { min, max } of merged) {
+    for (let col = min; col <= max; col++) hidden.push(col);
+  }
+  return hidden;
 }
 
 function readUncaptured(ws: XmlNode): Array<{ feature: UncapturedFeatureName; detail: string | null }> {
