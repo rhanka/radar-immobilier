@@ -922,9 +922,13 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
           ...(excludeDerogations ? { excludeDerogations: true } : {}),
         }
       : undefined;
-    const cities = dateRange
-      ? await listCitiesWithSignalNodes(deps.db, dateRange)
-      : await listCitiesWithSignalNodes(deps.db);
+    // Discard native rows inside the store before counts and partitions.
+    const discarded = readDiscardedKeys(c, deps);
+    const cities = discarded.size > 0
+      ? await listCitiesWithSignalNodes(deps.db, dateRange, { discarded })
+      : dateRange
+        ? await listCitiesWithSignalNodes(deps.db, dateRange)
+        : await listCitiesWithSignalNodes(deps.db);
     const totalCount = cities.reduce((sum, city) => sum + city.signalCount, 0);
     return c.json({ ok: true, totalCount, cities });
   });

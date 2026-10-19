@@ -12,6 +12,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Hono } from "hono";
 import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
+import { countsInvariant } from "@radar/domain";
 
 import { graphSignalsRoute } from "./graph-signals.js";
 import type { Database } from "../db/client.js";
@@ -35,6 +36,8 @@ import {
   buildNodeRow,
   listCitiesWithSignalNodes,
   getSignalNodesForCity,
+  type GraphSignalProjectionRow,
+  type CitySignalCounts,
 } from "../services/graph/graph-store.js";
 import {
   SUTTON_A_IDS,
@@ -891,5 +894,86 @@ describe("city detail with native discards", () => {
     } finally {
       log.mockRestore();
     }
+  });
+});
+
+function lot2ProjectionRows(): GraphSignalProjectionRow[] {
+  const row = (id: string, citySlug: string, category: string, label: string): GraphSignalProjectionRow => ({
+    id, citySlug, type: "Signal", category, label, description: label,
+    etapeAnnote: "avis_motion", nbUnitesMax: "8", sourceRef: null,
+    props: { properties: { category, description: label, etape: "avis_motion", nb_unites_max: "8" } },
+  });
+  return [
+    row("qualified", "drummondville", "ppcmoi", "PPCMOI résidentiel"),
+    row("unknown", "drummondville", "rezonage", "Avis de motion"),
+    row("excluded", "drummondville", "piia", "PIIA centre commercial"),
+    row("drop", "drummondville", "ppcmoi", "PPCMOI résidentiel"),
+    { ...row("drop-event", "drummondville", "rezonage", "Avis de motion"), type: "DesignationEvent" },
+    row("drop", "sutton", "ppcmoi", "PPCMOI résidentiel"),
+  ];
+}
+
+async function serveCities(rows: GraphSignalProjectionRow[], port?: DiscardedSignalsPort, query = "") {
+  const actual = await vi.importActual<typeof import("../services/graph/graph-store.js")>(
+    "../services/graph/graph-store.js",
+  );
+  vi.mocked(listCitiesWithSignalNodes).mockImplementationOnce(actual.listCitiesWithSignalNodes);
+  // Only the DB projection is stubbed: the route and store filter both run.
+  const db = { select: () => ({ from: () => ({ where: async () => rows }) }) } as unknown as Database;
+  const app = graphSignalsRoute({ db, store: new MemoryStore(), ...(port ? { discarded: port } : {}) });
+  const res = await app.request(`/api/graph-signals/by-city${query}`);
+  const body = await res.json() as { totalCount: number; cities: CitySignalCounts[] };
+  return { status: res.status, body };
+}
+
+describe("by-city with native discards through the real store", () => {
+  it.each([
+    { name: "empty port", dropped: [], query: "" },
+    { name: "two native keys", dropped: [3, 4], query: "" },
+    { name: "recreated nodes", dropped: [3, 4], query: "" },
+    { name: "showDiscarded=1", dropped: [3, 4], query: "?showDiscarded=1" },
+    { name: "showDiscarded=true", dropped: [3, 4], query: "?showDiscarded=true" },
+    { name: "B display exclusions", dropped: [3, 4], query: "?excludePiia=1" },
+    { name: "all discarded", dropped: [0, 1, 2, 3, 4, 5], query: "" },
+  ])("matches the reference dataset with $name", async ({ name, dropped, query }) => {
+    const rows = lot2ProjectionRows();
+    const port = stubDiscarded(dropped.map((i) => {
+      const r = rows[i]!;
+      return discardedSignalKey(r.citySlug, r.type, r.id);
+    }));
+    if (name === "recreated nodes") rows[3] = { ...rows[3]!, label: "Recreated", props: {} };
+    const show = query === "?showDiscarded=1";
+    const kept = show ? rows : rows.filter((_, i) => !dropped.includes(i));
+    const reference = await serveCities(kept, undefined, query);
+    const actual = await serveCities(rows, port, query);
+    expect(reference.status).toBe(200);
+    expect(actual).toEqual(reference);
+    expect(actual.body.totalCount).toBe(kept.length);
+    expect(port.forViewer).toHaveBeenCalledTimes(show ? 0 : 1);
+    for (const city of actual.body.cities) {
+      const counts = city.vivierV2Counts;
+      const excluded = Object.values(counts.excludedByReason).reduce((sum, n) => sum + n, 0);
+      expect(countsInvariant(counts)).toBe(true);
+      expect(counts.total).toBe(counts.qualified + counts.residentialUnknown + excluded);
+    }
+    if (name === "two native keys") {
+      expect(actual.body.cities[0]!.vivierV2Counts).toMatchObject({
+        total: 3, qualified: 1, residentialUnknown: 1,
+      });
+      expect(actual.body.cities.map((city) => city.signalCount)).toEqual([3, 1]);
+    }
+  });
+
+  it("uses the session viewer on by-city despite a forged query and header", async () => {
+    const port = stubDiscarded([]);
+    const app = new Hono();
+    app.use("*", async (c, next) => {
+      c.set("session" as never, { sub: "viewer-2" } as never);
+      await next();
+    });
+    app.route("/", routeWithDiscarded(port));
+    vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([]);
+    await app.request("/api/graph-signals/by-city?viewer=spoofed", { headers: { "x-user-id": "spoofed" } });
+    expect(port.forViewer).toHaveBeenCalledWith("viewer-2");
   });
 });

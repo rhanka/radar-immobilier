@@ -29,6 +29,7 @@ import {
   classifyVivierSignal,
   type VivierSignalInput,
 } from "./vivier-v2.js";
+import { filterDiscardedSignals } from "./discarded-signals.js";
 
 export {
   classifyVivierSignal,
@@ -2325,9 +2326,15 @@ export function aggregateGraphSignalProjectionRows(
   });
 }
 
+export interface ListCitiesWithSignalNodesOptions {
+  /** Native discard keys for this viewer; applied before aggregation. */
+  discarded?: ReadonlySet<string>;
+}
+
 export async function listCitiesWithSignalNodes(
   db: Database,
   dateRange?: GraphSignalDateRange,
+  options: ListCitiesWithSignalNodesOptions = {},
 ): Promise<CitySignalCounts[]> {
   // One row per individual signal node (no count grouping in SQL) so both
   // contracts are derived from the same source projection.
@@ -2353,7 +2360,10 @@ export async function listCitiesWithSignalNodes(
       ),
     );
 
-  return aggregateGraphSignalProjectionRows(rows, dateRange);
+  const kept = options.discarded !== undefined && options.discarded.size > 0
+    ? filterDiscardedSignals(rows, options.discarded)
+    : rows;
+  return aggregateGraphSignalProjectionRows(kept, dateRange);
 }
 
 /**
