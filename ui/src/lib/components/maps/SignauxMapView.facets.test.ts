@@ -1,10 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/svelte";
-import { CITY_SLUG, NODES, cityRoute, openFirstSignalCard } from "./SignauxMapView.facets.fixtures.js";
+import { tick } from "svelte";
+import { CITY_SLUG, NODES, setAuth, deferred, cityRoute, openFirstSignalCard } from "./SignauxMapView.facets.fixtures.js";
 import SignauxMapView from "./SignauxMapView.svelte";
 import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
-import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
-import { fetchCityFacets, postFacetCommand } from "$lib/signals/signal-facets-client.js";
+import { fetchGraphSignalDetail, GraphSignalsHttpError } from "$lib/signals/graph-signal-detail-client.js";
+import { fetchCityFacets, fetchReasonCodes, postFacetCommand, SignalFacetError } from "$lib/signals/signal-facets-client.js";
 
 describe("SignauxMapView — reveal forwarding", () => {
   it("forwards showDiscarded=1 to detail and by-city, default stays hidden", async () => {
@@ -119,3 +120,101 @@ describe("SignauxMapView — write then three re-reads", () => {
   });
 });
 
+describe("SignauxMapView — viewer isolation", () => {
+  it("ignores heads still in flight when the viewer logs out", async () => {
+    const pending = deferred<Awaited<ReturnType<typeof fetchCityFacets>>>();
+    vi.mocked(fetchCityFacets).mockReturnValue(pending.promise);
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await openFirstSignalCard();
+    setAuth(null);
+    await screen.findByTestId("facets-unavailable-note");
+    pending.resolve({ heads: [{
+      id: "old-head", target: { citySlug: CITY_SLUG, type: "Signal", id: "sig-1" },
+      facet: "selection", basket: "pertinent", state: "active", reasonCode: null,
+      verdict: "pertinent", createdAt: "2026-10-19T12:00:00.000Z",
+      targetAvailable: true, changedSinceArchive: null,
+    }] });
+    await tick();
+    await tick();
+    expect(screen.queryByTestId("facet-badge-pertinent")).toBeNull();
+  });
+
+  it("refreshes detail and counters when the viewer logs out", async () => {
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await openFirstSignalCard();
+    const detailCalls = vi.mocked(fetchGraphSignalDetail).mock.calls.length;
+    const bulkCalls = vi.mocked(fetchGraphSignalsByCity).mock.calls.length;
+    setAuth(null);
+    await waitFor(() => expect(vi.mocked(fetchGraphSignalDetail).mock.calls.length).toBeGreaterThan(detailCalls));
+    expect(vi.mocked(fetchGraphSignalsByCity).mock.calls.length).toBeGreaterThan(bulkCalls);
+  });
+
+  it("loads codes after approval without a change of sub", async () => {
+    setAuth("tester-1", "pending");
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await screen.findByTestId("facets-unavailable-note");
+    expect(vi.mocked(fetchReasonCodes)).not.toHaveBeenCalled();
+    setAuth("tester-1");
+    await waitFor(() => expect(vi.mocked(fetchReasonCodes)).toHaveBeenCalled());
+  });
+
+  it("ignores a previous viewer's delayed codebook", async () => {
+    const pending = deferred<Awaited<ReturnType<typeof fetchReasonCodes>>>();
+    vi.mocked(fetchReasonCodes).mockReturnValueOnce(pending.promise);
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await waitFor(() => expect(vi.mocked(fetchReasonCodes)).toHaveBeenCalled());
+    setAuth("tester-2");
+    await waitFor(() => expect(vi.mocked(fetchReasonCodes).mock.calls.length).toBeGreaterThan(1));
+    await openFirstSignalCard();
+    pending.resolve({ profileId: "old-profile", codes: [{ code: "P-OLD", verdict: "pertinent" }] });
+    await tick();
+    await tick();
+    expect(screen.queryByRole("option", { name: "P-OLD" })).toBeNull();
+    expect(screen.getByRole("option", { name: "P-DENSITE" })).toBeTruthy();
+  });
+});
+
+describe("SignauxMapView — unavailable archive reads", () => {
+  it("shows an explicit 503 error for detail and counters", async () => {
+    vi.mocked(fetchGraphSignalDetail).mockRejectedValue(new GraphSignalsHttpError("discarded_signals_unavailable", 503));
+    vi.mocked(fetchGraphSignalsByCity).mockRejectedValue(new GraphSignalsHttpError("discarded_signals_unavailable", 503));
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await waitFor(() => expect(screen.getAllByText(/discarded_signals_unavailable/)).toHaveLength(2));
+    expect(screen.queryByRole("button", { name: /First zonage signal/ })).toBeNull();
+  });
+});
+
+describe("SignauxMapView — Annuler restores with one key per retry", () => {
+  it("restores on Annuler and reuses the key when retrying", async () => {
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await openFirstSignalCard();
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    await screen.findByTestId("discarded-notice");
+    const restore = deferred<unknown>();
+    vi.mocked(postFacetCommand).mockImplementationOnce(async () => {
+      await restore.promise;
+      throw new SignalFacetError(409, "idempotency_key_conflict");
+    });
+    const annuler = () =>
+      [...screen.getByTestId("discarded-notice").querySelectorAll("button")].find(
+        (button) => button.textContent === "Annuler",
+      )!;
+    await fireEvent.click(annuler());
+    expect(annuler().disabled).toBe(true);
+    restore.resolve(null);
+    await waitFor(() => expect(screen.getByTestId("discarded-action-error")).toBeTruthy());
+    expect(screen.getByTestId("discarded-action-error").textContent).toContain("Conflit de clé");
+    await fireEvent.click(annuler());
+    await waitFor(() =>
+      expect(vi.mocked(postFacetCommand).mock.calls.filter((call) => call[1] === "restore")).toHaveLength(2),
+    );
+    const restores = vi.mocked(postFacetCommand).mock.calls.filter((call) => call[1] === "restore");
+    expect(restores[0]![2]).toEqual({
+      target: { citySlug: CITY_SLUG, type: "Signal", id: "sig-1" },
+    });
+    expect(restores[0]![3]).toBe(restores[1]![3]);
+  });
+});
