@@ -27,6 +27,8 @@ import type { XmlNode } from "./xml.js";
 import { childElements, deepText, documentElement, firstChild, spreadsheetText } from "./xml-query.js";
 import { localName } from "./xml-token.js";
 import { unzip } from "./zip.js";
+import { createXmlBudget } from "./xml-budget.js";
+import type { XmlBudget } from "./xml-budget.js";
 
 const REL_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
 const OFFICE_DOCUMENT_TYPE = `${REL_NS}/officeDocument`;
@@ -62,8 +64,8 @@ interface PackageRel {
   type: string;
 }
 
-function readRels(bytes: Uint8Array, part: string): PackageRel[] {
-  const root = documentElement(parseXml(decodeUtf8(bytes, part)));
+function readRels(bytes: Uint8Array, part: string, budget: XmlBudget): PackageRel[] {
+  const root = documentElement(parseXml(decodeUtf8(bytes, part), budget));
   if (root === null || root.name !== "Relationships") {
     throw new SteveCaptureError(`expected a Relationships element in "${part}"`);
   }
@@ -101,10 +103,10 @@ function sheetRelationshipId(ancestors: readonly XmlNode[], node: XmlNode, sheet
   throw new SteveCaptureError(`sheet "${sheetName}" has no relationship id`);
 }
 
-function readSharedStrings(files: Map<string, Uint8Array>, path: string): string[] {
+function readSharedStrings(files: Map<string, Uint8Array>, path: string, budget: XmlBudget): string[] {
   const file = files.get(path);
   if (file === undefined) return [];
-  const root = documentElement(parseXml(decodeUtf8(file, path)));
+  const root = documentElement(parseXml(decodeUtf8(file, path), budget));
   if (root === null || root.name !== "sst") {
     throw new SteveCaptureError(`expected a shared strings element in "${path}"`);
   }
@@ -156,10 +158,11 @@ function workbookLevelUncaptured(parts: string[]): UncapturedFeature[] {
 }
 
 export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
+  const budget = createXmlBudget();
   const sha256 = createHash("sha256").update(input).digest("hex");
   const files = unzip(input);
   const packageRelsFile = files.get("_rels/.rels");
-  const packageRels = packageRelsFile === undefined ? [] : readRels(packageRelsFile, "_rels/.rels");
+  const packageRels = packageRelsFile === undefined ? [] : readRels(packageRelsFile, "_rels/.rels", budget);
   const officeDoc = packageRels.find((rel) => rel.type === OFFICE_DOCUMENT_TYPE);
   const workbookPath = officeDoc === undefined
     ? "xl/workbook.xml"
@@ -168,7 +171,7 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
   if (workbookFile === undefined) {
     throw new SteveCaptureError(`missing required part "${workbookPath}"`);
   }
-  const workbook = documentElement(parseXml(decodeUtf8(workbookFile, workbookPath)));
+  const workbook = documentElement(parseXml(decodeUtf8(workbookFile, workbookPath), budget));
   if (workbook === null || workbook.name !== "workbook") {
     throw new SteveCaptureError(`expected a "workbook" root element in "${workbookPath}"`);
   }
@@ -179,13 +182,13 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
   const workbookDir = posix.dirname(`/${workbookPath}`);
   const relsPath = posix.resolve(workbookDir, "_rels", `${posix.basename(workbookPath)}.rels`).slice(1);
   const relsFile = files.get(relsPath);
-  const rels = relsFile === undefined ? [] : readRels(relsFile, relsPath);
+  const rels = relsFile === undefined ? [] : readRels(relsFile, relsPath, budget);
   const relsById = new Map(rels.map((rel) => [rel.id, rel]));
   const sharedStringsRel = rels.find((rel) => rel.type === SHARED_STRINGS_TYPE);
   const sharedStringsPath = sharedStringsRel === undefined
     ? posix.resolve(workbookDir, "sharedStrings.xml").slice(1)
     : resolvePart(workbookDir, sharedStringsRel.target, "shared strings");
-  const sharedStrings = readSharedStrings(files, sharedStringsPath);
+  const sharedStrings = readSharedStrings(files, sharedStringsPath, budget);
   const sheets: SheetInfo[] = [];
   const inventory: WorkbookInventory = {
     sha256,
@@ -235,7 +238,7 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
       throw new SteveCaptureError(`sheet "${name}" part "${path}" is missing`);
     }
     sheets.push({ name, order: index, state: sheetState(node.attrs["state"] ?? null, name), sheetId, relationshipId: rid, part: path });
-    const parsed = parseSheetXml(name, decodeUtf8(part, path), sharedStrings, sheetId);
+    const parsed = parseSheetXml(name, decodeUtf8(part, path), sharedStrings, sheetId, budget);
     for (const cell of parsed.cells) inventory.cells.push(cell);
     for (const rule of parsed.validations) inventory.dataValidations.push(rule);
     if (parsed.autoFilter !== null) inventory.autoFilters.push(parsed.autoFilter);
