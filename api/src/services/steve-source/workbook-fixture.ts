@@ -1,6 +1,12 @@
 /**
  * In-memory `.xlsx` ZIP assembler for steve-source tests.
- * Entries are deflated with `node:zlib` deflateRaw, except one stored entry.
+ * Entries are deflated with `node:zlib` deflateRaw, except stored entries.
+ *
+ * ZIP record signatures below are written as the explicit little-endian byte
+ * sequences from the APPNOTE specification (`PK\x03\x04`, `PK\x01\x02`,
+ * `PK\x05\x06`). They intentionally duplicate the specification bytes instead
+ * of importing the reader's constants, so a wrong reader signature cannot be
+ * masked by the fixture.
  */
 
 import { deflateRawSync } from "node:zlib";
@@ -17,6 +23,13 @@ import {
 } from "./workbook-parts.js";
 
 export { ACCENTED_TEXT, EXPECTED_CODES, LONG_TEXT } from "./workbook-parts.js";
+
+/** Local file header signature `PK\x03\x04`, as literal specification bytes. */
+const LOCAL_HEADER_BYTES = [0x50, 0x4b, 0x03, 0x04];
+/** Central directory header signature `PK\x01\x02`, as literal bytes. */
+const CENTRAL_HEADER_BYTES = [0x50, 0x4b, 0x01, 0x02];
+/** End-of-central-directory signature `PK\x05\x06`, as literal bytes. */
+const EOCD_BYTES = [0x50, 0x4b, 0x05, 0x06];
 
 function u16(value: number): Uint8Array {
   const dv = new DataView(new ArrayBuffer(2));
@@ -39,9 +52,14 @@ interface ZipPart {
   offset: number;
 }
 
-export function buildSyntheticWorkbook(overrides: Record<string, string> = {}): Uint8Array {
+export function buildSyntheticWorkbook(
+  overrides: Record<string, string> = {},
+  extra: Record<string, string> = {},
+  stored: readonly string[] = [],
+): Uint8Array {
   const encoder = new TextEncoder();
-  const inputs: Array<{ name: string; content: string; compress: boolean }> = [
+  const storedNames = new Set(stored);
+  const baseInputs: Array<{ name: string; content: string; compress: boolean }> = [
     { name: "[Content_Types].xml", content: contentTypesXml(), compress: false },
     { name: "_rels/.rels", content: packageRelsXml(), compress: true },
     { name: "xl/workbook.xml", content: workbookXml(), compress: true },
@@ -51,6 +69,10 @@ export function buildSyntheticWorkbook(overrides: Record<string, string> = {}): 
     { name: "xl/worksheets/sheet2.xml", content: codesSheetXml(), compress: true },
     { name: "xl/worksheets/sheet3.xml", content: archiveSheetXml(), compress: true },
   ];
+  const inputs = [
+    ...baseInputs,
+    ...Object.entries(extra).map(([name, content]) => ({ name, content, compress: true })),
+  ];
   const chunks: Uint8Array[] = [];
   const central: Uint8Array[] = [];
   let total = 0;
@@ -59,19 +81,23 @@ export function buildSyntheticWorkbook(overrides: Record<string, string> = {}): 
     chunks.push(part);
     total += part.length;
   };
+  const pushBytes = (values: number[]): void => {
+    push(Uint8Array.from(values));
+  };
   const parts: ZipPart[] = inputs.map((input) => {
     const raw = encoder.encode(overrides[input.name] ?? input.content);
-    const data = input.compress ? Uint8Array.from(deflateRawSync(raw)) : raw;
+    const compress = input.compress && !storedNames.has(input.name);
+    const data = compress ? Uint8Array.from(deflateRawSync(raw)) : raw;
     const nameBytes = encoder.encode(input.name);
     const part: ZipPart = {
       name: input.name,
       raw,
       data,
-      method: input.compress ? 8 : 0,
+      method: compress ? 8 : 0,
       crc: crc32(raw),
       offset,
     };
-    push(u32(0x04034b50));
+    pushBytes(LOCAL_HEADER_BYTES);
     push(u16(20));
     push(u16(0x0800));
     push(u16(part.method));
@@ -91,7 +117,7 @@ export function buildSyntheticWorkbook(overrides: Record<string, string> = {}): 
   for (const part of parts) {
     const nameBytes = encoder.encode(part.name);
     const entries: Uint8Array[] = [
-      u32(0x02014b50),
+      Uint8Array.from(CENTRAL_HEADER_BYTES),
       u16(20),
       u16(20),
       u16(0x0800),
@@ -117,7 +143,7 @@ export function buildSyntheticWorkbook(overrides: Record<string, string> = {}): 
   }
   const centralOffset = total;
   for (const entry of central) push(entry);
-  push(u32(0x06050b50));
+  pushBytes(EOCD_BYTES);
   push(u16(0));
   push(u16(0));
   push(u16(parts.length));
