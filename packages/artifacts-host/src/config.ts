@@ -1,9 +1,9 @@
-
 export interface ArtifactsConfigInput {
   readonly storageScope?: string | undefined;
   readonly orgId?: string | undefined;
   readonly s3Bucket?: string | undefined;
   readonly s3Endpoint?: string | undefined;
+  readonly s3Region?: string | undefined;
   readonly s3AccessKey?: string | undefined;
   readonly s3SecretKey?: string | undefined;
 }
@@ -17,6 +17,7 @@ export type ArtifactsStorageConfig =
       readonly orgId: string;
       readonly s3Bucket: string;
       readonly s3Endpoint: string;
+      readonly s3Region: string;
       readonly s3AccessKey: string;
       readonly s3SecretKey: string;
     }
@@ -36,6 +37,7 @@ export function readArtifactsEnv(
     orgId: env["ARTIFACTS_ORG_ID"],
     s3Bucket: env["ARTIFACTS_S3_BUCKET"],
     s3Endpoint: env["ARTIFACTS_S3_ENDPOINT"],
+    s3Region: env["ARTIFACTS_S3_REGION"],
     s3AccessKey: env["ARTIFACTS_S3_ACCESS_KEY"],
     s3SecretKey: env["ARTIFACTS_S3_SECRET_KEY"],
   };
@@ -49,6 +51,7 @@ export function resolveArtifactsStorageConfig(
     orgId: input.orgId,
     s3Bucket: input.s3Bucket,
     s3Endpoint: input.s3Endpoint,
+    s3Region: input.s3Region,
     s3AccessKey: input.s3AccessKey,
     s3SecretKey: input.s3SecretKey,
   };
@@ -57,6 +60,7 @@ export function resolveArtifactsStorageConfig(
     orgId: "ARTIFACTS_ORG_ID",
     s3Bucket: "ARTIFACTS_S3_BUCKET",
     s3Endpoint: "ARTIFACTS_S3_ENDPOINT",
+    s3Region: "ARTIFACTS_S3_REGION",
     s3AccessKey: "ARTIFACTS_S3_ACCESS_KEY",
     s3SecretKey: "ARTIFACTS_S3_SECRET_KEY",
   };
@@ -77,6 +81,9 @@ export function resolveArtifactsStorageConfig(
       if (!["http:", "https:"].includes(endpoint.protocol)) throw new Error("invalid endpoint");
     } catch { throw new Error("invalid ARTIFACTS_S3_ENDPOINT: expected an http(s) URL"); }
   }
+  if (present(input.s3Region) && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(input.s3Region!.trim())) {
+    throw new Error("invalid ARTIFACTS_S3_REGION: expected a lowercase region identifier");
+  }
 
   // Partial config is closed: name the missing variables only, never values.
   const missing = (
@@ -91,11 +98,6 @@ export function resolveArtifactsStorageConfig(
   const orgId = values.orgId!.trim();
   const s3Bucket = values.s3Bucket!.trim();
   const s3Endpoint = values.s3Endpoint!.trim();
-  if (orgId === "" || s3Bucket === "") {
-    throw new Error(
-      "invalid ARTIFACTS_* config: ARTIFACTS_ORG_ID and ARTIFACTS_S3_BUCKET must be non-empty",
-    );
-  }
   const endpoint = new URL(s3Endpoint);
 
   return {
@@ -104,6 +106,7 @@ export function resolveArtifactsStorageConfig(
     orgId,
     s3Bucket,
     s3Endpoint: endpoint.toString().replace(/\/$/, ""),
+    s3Region: values.s3Region!.trim(),
     s3AccessKey: values.s3AccessKey!,
     s3SecretKey: values.s3SecretKey!,
   };
