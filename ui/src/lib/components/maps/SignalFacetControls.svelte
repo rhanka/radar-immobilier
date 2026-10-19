@@ -106,6 +106,30 @@
 </script>
 
 <div class="facet-controls" data-testid="signal-facet-controls" data-target={describeTarget()}>
+  {#if !codesReady}
+    <Alert
+      tone="info"
+      title="Classement indisponible"
+      message={codesError ?? "Codes de motif illisibles — réessayez le chargement de la ville."}
+    />
+  {/if}
+
+  {#if error}
+    <Alert tone="error" title="Écriture refusée" message={error} />
+    <div class="facet-error-actions">
+      <Button
+        variant="secondary"
+        size="sm"
+        type="button"
+        disabled={inactive}
+        onclick={retry}
+        data-testid="facet-retry"
+      >
+        Réessayer
+      </Button>
+    </div>
+  {/if}
+
   <div class="facet-baskets">
     <div class="facet-row" data-testid="facet-row-pertinent">
       <span class="facet-name">Pertinent</span>
@@ -240,4 +264,90 @@
     </div>
   </div>
 
+  <div class="facet-archive" data-testid="facet-row-archive">
+    {#if state.archived}
+      <span class="facet-name">Écarté{#if state.archiveCode} · {state.archiveCode}{/if}</span>
+      <div class="facet-actions">
+        <Button
+          variant="secondary"
+          size="sm"
+          type="button"
+          disabled={inactive}
+          onclick={() => run("restore", { target })}
+          data-testid="facet-restore"
+        >
+          Restaurer
+        </Button>
+      </div>
+    {:else}
+      <span class="facet-name">Écarter</span>
+      <p class="facet-hint">Archive le signal avec un code obligatoire. Les paniers sont conservés.</p>
+      <Select
+        label="Code de motif (requis) — Écarter"
+        size="sm"
+        bind:value={discardCode}
+        disabled={inactive}
+        data-testid="facet-select-discard"
+      >
+        <option value="">Choisir un code…</option>
+        {#each discardCodes as row (row.code)}
+          <option value={row.code}>{row.code}</option>
+        {/each}
+      </Select>
+      <div class="facet-actions">
+        <Button
+          variant="primary"
+          size="sm"
+          type="button"
+          disabled={inactive || !discardCode}
+          onclick={() => run("discard", { target, reasonCode: discardCode })}
+          data-testid="facet-discard-submit"
+        >
+          Valider
+        </Button>
+      </div>
+    {/if}
+  </div>
 </div>
+
+<style>
+  .facet-controls {
+    display: grid;
+    gap: 0.625rem;
+    margin-top: 0.625rem;
+    padding-top: 0.625rem;
+    border-top: 1px solid rgb(226 232 240);
+  }
+  .facet-baskets {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .facet-row,
+  .facet-archive {
+    display: grid;
+    gap: 0.375rem;
+  }
+  .facet-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgb(51 65 85);
+  }
+  .facet-state {
+    font-size: 0.75rem;
+    color: rgb(71 85 105);
+  }
+  .facet-hint {
+    margin: 0;
+    font-size: 0.75rem;
+    color: rgb(100 116 139);
+  }
+  .facet-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+  .facet-error-actions {
+    display: flex;
+    gap: 0.375rem;
+  }
+</style>
