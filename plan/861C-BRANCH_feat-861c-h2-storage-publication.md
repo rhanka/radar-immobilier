@@ -74,6 +74,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
 - [ ] **Opus review corrections**
   - [x] D1: isolate configuration failure from unavailable storage startup; log schema/hash, organization and DB causes precisely; never query a failed backend for approval.
   - [x] D1-a: extract and test the startup resolver (invalid config, open mode, storage failure).
+  - [x] D1-b/D2: keep the startup test inside rootDir; real empty-schema/offline-Postgres integrations pass; read guards also accept absent fetch metadata.
   - [x] D2/D9c/D9e: allow same-origin reads without Origin; retain POST guards.
   - [x] D3: require and use ARTIFACTS_S3_REGION (seventh storage variable); synthetic configuration includes all seven values.
   - [ ] D4: exclude nested .env* and refuse them in image-smoke.

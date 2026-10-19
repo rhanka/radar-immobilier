@@ -149,9 +149,11 @@ describe("controlRoute read origins", () => {
     const reads = new Hono().route("/", controlRoute({ auth: AUTH,
       accounts: stubAccounts({ "sub-ok": "approved" }),
       backend: { handle: async () => ({ status: 200, body: { total: 0 } }) } }));
-    const response = await reads.request("/list", { method,
-      headers: { cookie: await cookieFor("sub-ok"), "sec-fetch-site": "same-origin" } });
-    expect(response.status).toBe(200);
+    for (const fetchHeaders of [{}, { "sec-fetch-site": "same-origin" }]) {
+      const response = await reads.request("/list", { method,
+        headers: { cookie: await cookieFor("sub-ok"), ...fetchHeaders } });
+      expect(response.status).toBe(200);
+    }
   });
 
   it.each(["GET", "HEAD"])("refuses foreign Origin or fetch site on %s", async (method) => {
