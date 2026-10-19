@@ -46,3 +46,21 @@ import { crc32 } from "./crc32.js";
 it("matches the standard ZIP CRC-32 reference vector", () => {
   expect(crc32(new TextEncoder().encode("123456789"))).toBe(0xcbf43926);
 });
+
+import { parseCell } from "./cell-parse.js";
+
+describe("stored cell values", () => {
+  it("keeps a shared formula and its own cached value without evaluating it", () => {
+    const node = documentElement(parseXml('<c r="C3"><f t="shared" si="2"/><v>0</v></c>'));
+    if (node === null) throw new Error("missing cell");
+    expect(parseCell("Sheet", node, 3, 3, [])).toMatchObject({
+      address: "C3", type: "n", raw: "0", cachedValue: "0",
+      formula: { text: "", kind: "shared", si: 2 },
+    });
+  });
+  it("ignores style-only cells", () => {
+    const node = documentElement(parseXml('<c r="A1" s="1"/>'));
+    if (node === null) throw new Error("missing cell");
+    expect(parseCell("Sheet", node, 1, 1, [])).toBeNull();
+  });
+});
