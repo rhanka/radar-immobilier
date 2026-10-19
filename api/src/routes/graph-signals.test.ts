@@ -19,6 +19,7 @@ import type { Database } from "../db/client.js";
 import type { ObjectInfo, ObjectStore } from "../storage/object-store.js";
 import {
   discardedSignalKey,
+  unionDiscardedSignals,
   type DiscardedSignalKey,
   type DiscardedSignalsPort,
 } from "../services/graph/discarded-signals.js";
@@ -1013,5 +1014,68 @@ describe("by-city with native discards through the real store", () => {
     } finally {
       log.mockRestore();
     }
+  });
+});
+
+describe("discard union D(viewer) = common ∪ personal (detail)", () => {
+  const COMMON = new Set([discardedSignalKey("drummondville", "Signal", "sig-common")]);
+  const PERSONAL: Record<string, Set<DiscardedSignalKey>> = {
+    alice: new Set([discardedSignalKey("drummondville", "Signal", "sig-alice")]),
+    bob: new Set([discardedSignalKey("drummondville", "Signal", "sig-bob")]),
+  };
+  const forViewer = vi.fn<DiscardedSignalsPort["forViewer"]>(async (viewer) =>
+    unionDiscardedSignals(COMMON, viewer === null ? undefined : PERSONAL[viewer]),
+  );
+  const unionPort: DiscardedSignalsPort = { forViewer };
+
+  function unionNodes() {
+    const props = {};
+    return [
+      makeNode("sig-common", "drummondville", "Signal", props),
+      makeNode("sig-alice", "drummondville", "Signal", props),
+      makeNode("sig-bob", "drummondville", "Signal", props),
+      makeNode("sig-keep", "drummondville", "Signal", props),
+    ];
+  }
+
+  async function serveIds(app: Hono, query = "") {
+    const res = await app.request(`/api/graph-signals/drummondville${query}`);
+    const body = (await res.json()) as { nodes?: { id: string }[] };
+    return { status: res.status, ids: (body.nodes ?? []).map((n) => n.id), body };
+  }
+
+  it("isolates viewers on one app, then reveals the baseline for both", async () => {
+    let current: string | null = null;
+    const app = new Hono();
+    app.use("*", async (c, next) => {
+      if (current !== null) c.set("session" as never, { sub: current } as never);
+      await next();
+    });
+    app.route("/", graphSignalsRoute({ db: mockDb, store: new MemoryStore(), discarded: unionPort }));
+    for (let i = 0; i < 5; i++) vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(unionNodes());
+
+    current = "alice";
+    const alice = await serveIds(app);
+    current = "bob";
+    const bob = await serveIds(app);
+    current = "alice";
+    const aliceAgain = await serveIds(app);
+    current = "alice";
+    const aliceReveal = await serveIds(app, "?showDiscarded=1");
+    current = "bob";
+    const bobReveal = await serveIds(app, "?showDiscarded=1");
+
+    expect(alice.status).toBe(200);
+    // Union: the common key stays hidden for alice although her personal
+    // scope omits it; her personal key hides too.
+    expect(alice.ids).toEqual(["sig-bob", "sig-keep"]);
+    expect(bob.ids).toEqual(["sig-alice", "sig-keep"]);
+    // Same app, no cross-viewer state: alice sees the same set again.
+    expect(aliceAgain).toEqual(alice);
+    // Reveal reproduces the full population for both viewers...
+    expect(aliceReveal.ids).toEqual(["sig-common", "sig-alice", "sig-bob", "sig-keep"]);
+    expect(bobReveal.ids).toEqual(aliceReveal.ids);
+    // ...without calling the port.
+    expect(forViewer.mock.calls.map(([viewer]) => viewer)).toEqual(["alice", "bob", "alice"]);
   });
 });
