@@ -33,8 +33,10 @@ import {
   listCitiesWithSignalNodes,
 } from "../services/graph/graph-store.js";
 import {
+  EMPTY_DISCARDED_KEYS,
   EMPTY_DISCARDED_SIGNALS,
   filterDiscardedSignals,
+  type DiscardedSignalKey,
   type DiscardedSignalsPort,
 } from "../services/graph/discarded-signals.js";
 import { resolveGraphSignalsViewer } from "./auth.js";
@@ -61,17 +63,15 @@ export interface GraphSignalsDeps {
   discarded?: DiscardedSignalsPort;
 }
 
-const NO_DISCARDED: ReadonlySet<string> = new Set<string>();
-
 /** Resolve once per request; showDiscarded=1 bypasses the port. */
-function readDiscardedKeys(c: Context, deps: GraphSignalsDeps): ReadonlySet<string> {
-  if (c.req.query("showDiscarded") === "1") return NO_DISCARDED;
+function readDiscardedKeys(c: Context, deps: GraphSignalsDeps): ReadonlySet<DiscardedSignalKey> {
+  if (c.req.query("showDiscarded") === "1") return EMPTY_DISCARDED_KEYS;
   const port = deps.discarded ?? EMPTY_DISCARDED_SIGNALS;
   try {
-    return port.forViewer(resolveGraphSignalsViewer(c)) ?? NO_DISCARDED;
+    return port.forViewer(resolveGraphSignalsViewer(c)) ?? EMPTY_DISCARDED_KEYS;
   } catch (error) {
     console.error("[graph-signals] discarded-signals port failed, serving full set:", error);
-    return NO_DISCARDED;
+    return EMPTY_DISCARDED_KEYS;
   }
 }
 
