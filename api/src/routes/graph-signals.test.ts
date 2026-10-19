@@ -10,11 +10,16 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { Hono } from "hono";
 import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
 
 import { graphSignalsRoute } from "./graph-signals.js";
 import type { Database } from "../db/client.js";
 import type { ObjectInfo, ObjectStore } from "../storage/object-store.js";
+import {
+  discardedSignalKey,
+  type DiscardedSignalsPort,
+} from "../services/graph/discarded-signals.js";
 
 // Mock the graph-store module so tests do not touch Postgres.
 vi.mock("../services/graph/graph-store.js", async (importOriginal) => {
@@ -808,5 +813,83 @@ describe("GET /api/graph-signals/:city", () => {
     const body = (await res.json()) as { nodes: Array<{ etape: string | null; regulatoryStatus: string }> };
     expect(body.nodes[0]!.etape).toBeNull();
     expect(body.nodes[0]!.regulatoryStatus).toBe("anticipation");
+  });
+});
+
+function stubDiscarded(keys: string[]) {
+  return { forViewer: vi.fn<DiscardedSignalsPort["forViewer"]>(() => new Set(keys)) };
+}
+
+const routeWithDiscarded = (discarded: DiscardedSignalsPort, db = mockDb) =>
+  graphSignalsRoute({ db, store: new MemoryStore(), discarded });
+
+function lot2CityNodes() {
+  const props = { properties: { category: "rezonage", etape: "avis_motion", nb_unites_max: "6" } };
+  return [
+    makeNode("sig-keep", "drummondville", "Signal", props),
+    makeNode("sig-drop", "drummondville", "Signal", props),
+    makeNode("evt-drop", "drummondville", "DesignationEvent", props),
+    makeNode("sig-drop", "drummondville", "DesignationEvent", props),
+  ];
+}
+
+async function serveCity(nodes: ReturnType<typeof lot2CityNodes>, port?: DiscardedSignalsPort, query = "") {
+  vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(
+    nodes as unknown as Awaited<ReturnType<typeof getSignalNodesForCity>>,
+  );
+  const app = port ? routeWithDiscarded(port) : freshRoute();
+  const res = await app.request(`/api/graph-signals/drummondville${query}`);
+  return { status: res.status, body: await res.json() };
+}
+
+describe("city detail with native discards", () => {
+  it.each([
+    { name: "empty port", dropped: [], query: "" },
+    { name: "two native keys", dropped: [1, 2], query: "" },
+    { name: "recreated nodes", dropped: [1, 2], query: "" },
+    { name: "showDiscarded=1", dropped: [1, 2], query: "?showDiscarded=1" },
+    { name: "showDiscarded=true", dropped: [1, 2], query: "?showDiscarded=true" },
+    { name: "all discarded", dropped: [0, 1, 2, 3], query: "" },
+  ])("matches the reference dataset with $name", async ({ name, dropped, query }) => {
+    const nodes = lot2CityNodes();
+    const port = stubDiscarded(dropped.map((i) => {
+      const n = nodes[i]!;
+      return discardedSignalKey(n.citySlug, n.type, n.id);
+    }));
+    if (name === "recreated nodes") nodes[1] = { ...nodes[1]!, label: "Recreated", props: {} };
+    const show = query === "?showDiscarded=1";
+    const kept = show ? nodes : nodes.filter((_, i) => !dropped.includes(i));
+    const reference = await serveCity(kept);
+    expect(reference.status).toBe(kept.length ? 200 : 404);
+    expect(await serveCity(nodes, port, query)).toEqual(reference);
+    expect(port.forViewer).toHaveBeenCalledTimes(show ? 0 : 1);
+    if (!show) expect(port.forViewer).toHaveBeenCalledWith(null);
+  });
+
+  it("uses the session viewer and ignores client-supplied viewer identities", async () => {
+    const port = stubDiscarded([]);
+    const app = new Hono();
+    app.use("*", async (c, next) => {
+      c.set("session" as never, { sub: "viewer-1" } as never);
+      await next();
+    });
+    app.route("/", routeWithDiscarded(port));
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([]);
+    await app.request("/api/graph-signals/drummondville?viewer=spoofed", {
+      headers: { "x-user-id": "spoofed" },
+    });
+    expect(port.forViewer).toHaveBeenCalledWith("viewer-1");
+  });
+
+  it("serves the reference dataset if the injected port fails", async () => {
+    const nodes = lot2CityNodes();
+    const reference = await serveCity(nodes);
+    const port = { forViewer: () => { throw new Error("unavailable"); } };
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      expect(await serveCity(nodes, port)).toEqual(reference);
+    } finally {
+      log.mockRestore();
+    }
   });
 });
