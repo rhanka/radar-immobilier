@@ -18,7 +18,7 @@ export function deriveIdempotencyKey(input: IdempotencyKeyInput): string {
 function canonicalize(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(canonicalize);
   if (value !== null && typeof value === "object") {
-    const out: Record<string, unknown> = {};
+    const out: Record<string, unknown> = Object.create(null);
     for (const key of Object.keys(value).sort()) {
       out[key] = canonicalize((value as Record<string, unknown>)[key]);
     }
