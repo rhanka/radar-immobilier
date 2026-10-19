@@ -83,4 +83,4 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] D7/D9b: assert the 0015 tag and lifecycle object before/after drift and replay; reject mismatched journal hashes without a scope write.
   - [ ] D8: restrict artifact tooling and worker configuration scope.
   - [ ] D9d: use independent literal SHA-256 vectors.
-  - [ ] D10: remove dead code, tidy requested formatting and document cleanup.
+  - [x] D10-a: delete unreachable config checks and leading blank lines; fix requested indentation. Image cleanup and six skipped-test names are recorded in the report.
