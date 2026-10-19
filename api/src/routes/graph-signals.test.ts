@@ -15,6 +15,9 @@ import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
 import { countsInvariant } from "@radar/domain";
 
 import { graphSignalsRoute } from "./graph-signals.js";
+import { protect } from "./auth.js";
+import type { AuthConfig } from "../config.js";
+import { signSession } from "../services/auth/session.js";
 import type { Database } from "../db/client.js";
 import type { ObjectInfo, ObjectStore } from "../storage/object-store.js";
 import {
@@ -882,7 +885,7 @@ describe("city detail with native discards", () => {
       await next();
     });
     app.route("/", routeWithDiscarded(port));
-    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(lot2CityNodes());
+    mockCityNodes(lot2CityNodes());
     const res = await app.request("/api/graph-signals/drummondville?viewer=spoofed", {
       headers: { "x-user-id": "spoofed" },
     });
@@ -1017,6 +1020,137 @@ describe("by-city with native discards through the real store", () => {
   });
 });
 
+const TEST_AUTH: AuthConfig = {
+  enabled: true,
+  issuer: "https://auth.example.test",
+  clientId: "radar-immobilier",
+  clientSecret: "test-secret",
+  redirectUri: "https://immo.example.test/api/v1/auth/oauth/callback",
+  scopes: "openid profile email",
+  appBaseUrl: "https://immo.example.test",
+  sessionSecret: "test-session-secret-32-bytes-padding!",
+  sessionTtlSeconds: 3600,
+  sessionAbsoluteTtlSeconds: 7200,
+  jwksUri: "https://auth.example.test/.well-known/jwks.json",
+  bearerAudiences: ["https://immo.example.test", "https://immo.example.test/mcp"],
+};
+
+/** Minimal account-status DB: `protect` only reads the status of one sub. */
+function accountDbWithStatus(status: string | null): Database {
+  const limit = async () => (status === null ? [] : [{ status }]);
+  const where = () => ({ limit });
+  const from = () => ({ where });
+  const select = () => ({ from });
+  return { select } as unknown as Database;
+}
+
+/**
+ * Real auth wiring for the discard routes: the `protect` middleware (same
+ * order as `createApp`: protect first, then the route) plus the real
+ * `graphSignalsRoute`. The graph store stays mocked; the account table is a
+ * stub returning one fixed status.
+ */
+function authedApp(opts: {
+  port: DiscardedSignalsPort;
+  accountStatus?: string | null;
+}): Hono {
+  const db = accountDbWithStatus(opts.accountStatus ?? "approved");
+  const app = new Hono();
+  app.use(
+    "*",
+    protect(TEST_AUTH, {
+      db,
+    }),
+  );
+  app.route(
+    "/",
+    graphSignalsRoute({
+      db: mockDb,
+      store: new MemoryStore(),
+      discarded: opts.port,
+      auth: TEST_AUTH,
+    }),
+  );
+  return app;
+}
+
+async function sessionCookie(sub: string): Promise<string> {
+  const token = await signSession(
+    { sub },
+    { sessionSecret: TEST_AUTH.sessionSecret, ttlSeconds: 3600 },
+  );
+  return `radar_session=${token}`;
+}
+
+function mockCityNodes(nodes: ReturnType<typeof makeNode>[]) {
+  vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(
+    nodes as unknown as Awaited<ReturnType<typeof getSignalNodesForCity>>,
+  );
+}
+
+describe("session wiring through protect (detail and by-city)", () => {
+  it("resolves forViewer from the verified session cookie, ignoring spoofed identity hints", async () => {
+    const port = stubDiscarded([]);
+    const app = authedApp({ port });
+    mockCityNodes([makeNode("sig-001", "drummondville", "Signal")]);
+    const res = await app.request("/api/graph-signals/drummondville?viewer=bob", {
+      headers: { cookie: await sessionCookie("alice"), "x-user-id": "bob" },
+    });
+    expect(res.status).toBe(200);
+    expect(port.forViewer).toHaveBeenCalledWith("alice");
+  });
+
+  it("resolves forViewer from the session cookie on by-city", async () => {
+    const port = stubDiscarded([]);
+    const app = authedApp({ port });
+    vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([]);
+    const res = await app.request("/api/graph-signals/by-city", {
+      headers: { cookie: await sessionCookie("viewer-2") },
+    });
+    expect(res.status).toBe(200);
+    expect(port.forViewer).toHaveBeenCalledWith("viewer-2");
+  });
+
+  it("refuses a pending account before the discard port (403, port untouched)", async () => {
+    const port = stubDiscarded([]);
+    const app = authedApp({ port, accountStatus: "pending" });
+    const res = await app.request("/api/graph-signals/drummondville", {
+      headers: { cookie: await sessionCookie("alice") },
+    });
+    expect(res.status).toBe(403);
+    expect(port.forViewer).not.toHaveBeenCalled();
+    expect(getSignalNodesForCity).not.toHaveBeenCalled();
+  });
+
+  it("serves anonymously in open mode (no session, auth disabled)", async () => {
+    const port = stubDiscarded([]);
+    mockCityNodes([makeNode("sig-001", "drummondville", "Signal")]);
+    const res = await routeWithDiscarded(port).request("/api/graph-signals/drummondville");
+    expect(res.status).toBe(200);
+    expect(port.forViewer).toHaveBeenCalledWith(null);
+  });
+
+  it("answers 503 when auth is enabled but no session reached the route (wiring error, never anonymous)", async () => {
+    const port = stubDiscarded([]);
+    const app = graphSignalsRoute({
+      db: mockDb,
+      store: new MemoryStore(),
+      discarded: port,
+      auth: TEST_AUTH,
+    });
+    mockCityNodes([makeNode("sig-001", "drummondville", "Signal")]);
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const res = await app.request("/api/graph-signals/drummondville");
+      expect(res.status).toBe(503);
+      expect(await res.json()).toEqual({ ok: false, error: "discarded_signals_unavailable" });
+      expect(port.forViewer).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+    }
+  });
+});
+
 describe("discard union D(viewer) = common ∪ personal (detail)", () => {
   const COMMON = new Set([discardedSignalKey("drummondville", "Signal", "sig-common")]);
   const PERSONAL: Record<string, Set<DiscardedSignalKey>> = {
@@ -1052,7 +1186,7 @@ describe("discard union D(viewer) = common ∪ personal (detail)", () => {
       await next();
     });
     app.route("/", graphSignalsRoute({ db: mockDb, store: new MemoryStore(), discarded: unionPort }));
-    for (let i = 0; i < 5; i++) vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(unionNodes());
+    for (let i = 0; i < 5; i++) mockCityNodes(unionNodes());
 
     current = "alice";
     const alice = await serveIds(app);
