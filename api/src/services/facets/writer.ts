@@ -7,10 +7,11 @@ import { digest, FacetError, resolveTarget, type SignalTarget } from "./target.j
 
 export type Basket = "pertinent" | "a_surveiller";
 export interface FacetCommand {
-  action: "select";
+  action: "select" | "deselect" | "discard" | "restore";
   target: SignalTarget;
-  basket?: Basket;
-  reasonCode?: string;
+  basket?: Basket | undefined;
+  reasonCode?: string | undefined;
+  deselect?: Basket[] | undefined;
   commandKey: string;
 }
 type Tx = Parameters<Parameters<Database["transaction"]>[0]>[0];
@@ -24,13 +25,28 @@ export async function approvedOwner(db: Pick<Database, "select">, sub: string) {
 export async function writeFacet(db: Database, sub: string, command: FacetCommand) {
   return db.transaction(async (tx) => {
     const ownerId = await approvedOwner(tx, sub);
-    const { target, basket } = command;
-    if (!basket) throw new FacetError(422, "basket_required");
-    const key = JSON.stringify(["personal", ownerId, "selection", basket, target.citySlug, target.type, target.id]);
-    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`);
+    const { target, basket, action } = command;
+    const selection = action === "select" || action === "deselect";
+    if (selection && !basket) throw new FacetError(422, "basket_required");
+    const facet = selection ? "selection" : "archive";
+    const removals = action === "discard" ? [...new Set(command.deselect ?? [])] : [];
+    const locks = [[facet, selection ? basket : null], ...removals.map((b) => ["selection", b])]
+      .map(([f, b]) => JSON.stringify(["personal", ownerId, f, b, target.citySlug, target.type, target.id]));
+    for (const key of [...new Set(locks)].sort()) {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`);
+    }
     const fingerprint = await resolveTarget(tx, target);
-    await validateReason(tx, command.reasonCode, basket);
-    return transition(tx, ownerId, command, "selection", basket, "active", fingerprint);
+    if (action === "discard" && command.reasonCode === undefined) throw new FacetError(422, "reason_code_required");
+    if (action === "select" || action === "discard") {
+      await validateReason(tx, command.reasonCode, selection ? basket! : "non_pertinent");
+    }
+    const active = action === "select" || action === "discard";
+    const event = await transition(tx, ownerId, command, facet, selection ? basket! : null,
+      active ? "active" : "inactive", fingerprint, active ? command.reasonCode ?? null : null);
+    for (const removed of removals) {
+      await transition(tx, ownerId, command, "selection", removed, "inactive", fingerprint, null);
+    }
+    return event;
   });
 }
 async function validateReason(tx: Tx, code: string | undefined, verdict: string) {
@@ -43,7 +59,7 @@ async function validateReason(tx: Tx, code: string | undefined, verdict: string)
 }
 async function transition(
   tx: Tx, ownerId: string, command: FacetCommand, facet: string,
-  basket: Basket | null, state: string, fingerprint: string,
+  basket: Basket | null, state: string, fingerprint: string, reasonCode: string | null,
 ) {
   const { target } = command;
   const [head] = await tx.select().from(facetEvents).where(and(
@@ -53,7 +69,6 @@ async function transition(
     basket === null ? isNull(facetEvents.basket) : eq(facetEvents.basket, basket),
     isNull(facetEvents.supersededBy),
   ));
-  const reasonCode = command.reasonCode ?? null;
   if (head?.state === state && head.reasonCode === reasonCode) return head;
   if (!head && state === "inactive") return null;
   const id = randomUUID();
