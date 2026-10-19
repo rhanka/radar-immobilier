@@ -28,6 +28,7 @@ import { dataQualityRoute, type DataQualityDeps } from "./routes/data-quality.js
 import { sourceCoverageRoute } from "./routes/source-coverage.js";
 import { sourceConsistencyRoute } from "./routes/source-consistency.js";
 import { prospectMarksRoute } from "./routes/prospect-marks.js";
+import { signalFacetsRoute } from "./routes/signal-facets.js";
 import { documentsRoute, type DocumentsDeps } from "./routes/documents.js";
 
 export type AppDeps = HealthDeps &
@@ -116,6 +117,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", sourceConsistencyRoute({ db: deps.db }));
   app.route("/", documentsRoute(deps));
   app.route("/", graphSignalsRoute(deps));
+  app.route("/", signalFacetsRoute(deps));
   app.route("/", graphRoute(deps));
   app.route("/", geoLotsRoute());
   app.route("/", geoZonesRoute({ db: deps.db }));
