@@ -42,6 +42,8 @@ describe("discovery routes on 0.1.0", () => {
     [LEGACY_PATH, 200],
     [CANONICAL_PATH, 200],
     [BARE_PATH, 200],
+    ["/mcp/.well-known/oauth-protected-resource/mcp", 404],
+    ["/mcp/mcp/.well-known/oauth-protected-resource", 404],
     ["/MCP/.well-known/oauth-protected-resource", 404],
     ["/.well-known/oauth-protected-resource/MCP", 404],
     ["/mcp//.well-known/oauth-protected-resource", 404],
@@ -57,14 +59,11 @@ describe("discovery routes on 0.1.0", () => {
       app.request(CANONICAL_PATH),
       app.request(BARE_PATH),
     ]);
-    expect(canonical.status).toBe(legacy.status);
-    expect(bare.status).toBe(legacy.status);
-    expect(legacy.headers.get("content-type")).toContain("application/json");
-    expect(legacy.headers.get("cache-control")).toBe("public, max-age=300");
-    expect(canonical.headers.get("cache-control")).toBe(
-      legacy.headers.get("cache-control"),
-    );
-    expect(bare.headers.get("cache-control")).toBe(legacy.headers.get("cache-control"));
+    for (const response of [legacy, canonical, bare]) {
+      expect(response.status).toBe(200);
+      expect(response.headers.get("content-type")).toContain("application/json");
+      expect(response.headers.get("cache-control")).toBe("public, max-age=300");
+    }
     const [legacyDoc, canonicalDoc, bareDoc] = await Promise.all([
       legacy.json(),
       canonical.json(),
@@ -72,11 +71,12 @@ describe("discovery routes on 0.1.0", () => {
     ]);
     expect(canonicalDoc).toEqual(legacyDoc);
     expect(bareDoc).toEqual(legacyDoc);
-    expect(legacyDoc).toMatchObject({
+    expect(legacyDoc).toEqual({
       resource: RESOURCE,
       authorization_servers: [ISSUER],
       scopes_supported: SCOPES,
       bearer_methods_supported: ["header"],
+      dpop_signing_alg_values_supported: ["EdDSA"],
     });
   });
 });

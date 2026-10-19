@@ -9,6 +9,10 @@ import {
 // Group 1a: full 401 golden on 0.1.0 (status, challenge, body) for every /mcp method.
 const RESOURCE = "https://immo.test.local/mcp";
 const ISSUER = "https://auth.test.local";
+const LEGACY_METADATA_URL = "https://immo.test.local/mcp/.well-known/oauth-protected-resource";
+const MISSING_AUTH_BODY = '{"error":{"code":"invalid_token","message":"Authorization header is required."}}';
+const MISSING_AUTH_CHALLENGE = 'Bearer error="invalid_token", error_description="Authorization header is required.", ' +
+  `resource_metadata="${LEGACY_METADATA_URL}"`;
 
 const config: ImmoHttpConfig = {
   issuer: ISSUER,
@@ -64,13 +68,11 @@ describe("401 golden on 0.1.0", () => {
     "refuses %s /mcp without auth (401 + invalid_token challenge)",
     async (method) => {
       const res = await unauthenticated(method);
-      expect(res).toMatchInlineSnapshot(`
-        {
-          "body": "{"error":{"code":"invalid_token","message":"Authorization header is required."}}",
-          "challenge": "Bearer error="invalid_token", error_description="Authorization header is required.", resource_metadata="https://immo.test.local/mcp/.well-known/oauth-protected-resource"",
-          "status": 401,
-        }
-      `);
+      expect(res).toEqual({
+        status: 401,
+        challenge: MISSING_AUTH_CHALLENGE,
+        body: MISSING_AUTH_BODY,
+      });
     },
   );
 
