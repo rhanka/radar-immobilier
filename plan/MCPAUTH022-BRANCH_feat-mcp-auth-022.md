@@ -56,7 +56,7 @@ Capture the 0.1.0 behavior net (plan, isolated runner, group 1 and 2 tests) with
 - [ ] **Lot 1 — filet 0.1.0 (this lot)**
   - [x] Plan + isolated runner (`BR-EX1`).
   - [x] Group 1a: full 401 golden (status, challenge, body) on POST, GET, DELETE.
-  - [ ] Group 1b: exact GET discovery route table; identical JSON and Cache-Control on both discovery URLs and the bare route.
+  - [x] Group 1b: exact GET discovery route table; identical JSON and Cache-Control on both discovery URLs and the bare route.
   - [ ] Group 2: client-mismatch rejection (`azp` over `client_id`), simulated restart, egress spy (Bearer only to graph-signals, none to raw data).
   - [x] Lot gate:
     - [x] `typecheck` + `lint` via the runner
