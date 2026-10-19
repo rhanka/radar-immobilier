@@ -2,7 +2,7 @@
 
 ## Objective
 - [x] Ship lot H1 host dispatch: content origins (`<artifactUuid>.<base>`, `<releaseUuid>.pinned.<base>`) never reach app auth, admin routes or the SPA, while every other host keeps the current chain.
-- [x] Apply and verify the eight fixes from `REVUE-OPUS-CODE.md`.
+- [x] Apply and verify the eight fixes from the Opus code review of 2026-10-19.
 
 ## Scope / Guardrails
 - [x] Branch `feat/861c-h1-host-dispatch` from `origin/main` `7a474439`.
@@ -10,7 +10,7 @@
 - [x] Preserve the four existing commits; atomic fixes at most 150 changed lines, English Conventional Commits subjects only, no body or trailer.
 - [x] Tests via `tools/artifact-host.mk` on `ENV=test-861c-h1` only, then the full API suite, then `down -v`.
 - [x] Root checkout and `ENV=dev` stay reserved for the user.
-- [x] Use the assigned `.worktrees/861c-h1` only; no push or PR.
+- [x] Use the assigned `.worktrees/861c-h1` only.
 - [x] Test ports: API 18895, UI 15895, Maildev UI 11895, Postgres 15896, S3 19895, Obscura 19896, Maildev SMTP 11896; test compose publishes none.
 - [x] Reports, review and `LOT-H1.md` remain uncommitted; never read `.env`.
 
@@ -20,7 +20,7 @@
   - [x] `api/src/app.ts`
   - [x] `api/src/index.ts`
   - [x] `tools/artifact-host.mk`
-  - [x] `LOT-H1.md`, `REVUE-OPUS-CODE.md` (read-only context)
+  - [x] `api/package.json`, `package-lock.json` (exact `@sentropic/artifacts` 0.1.1)
   - [x] `plan/861C-BRANCH_feat-861c-h1-host-dispatch.md` (this file)
 - [x] **Forbidden Paths (must not change in this branch)**:
   - [x] `Makefile`
