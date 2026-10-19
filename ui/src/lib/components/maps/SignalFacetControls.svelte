@@ -106,4 +106,138 @@
 </script>
 
 <div class="facet-controls" data-testid="signal-facet-controls" data-target={describeTarget()}>
+  <div class="facet-baskets">
+    <div class="facet-row" data-testid="facet-row-pertinent">
+      <span class="facet-name">Pertinent</span>
+      {#if state.pertinent}
+        <span class="facet-state" data-testid="facet-state-pertinent">Dans le panier{#if state.pertinentCode} · {state.pertinentCode}{/if}</span>
+        <Select
+          label="Code (facultatif) — Pertinent"
+          size="sm"
+          bind:value={pertinentCode}
+          disabled={inactive}
+          data-testid="facet-select-pertinent"
+        >
+          <option value="">Sans code</option>
+          {#each pertinentCodes as row (row.code)}
+            <option value={row.code}>{row.code}</option>
+          {/each}
+        </Select>
+        <div class="facet-actions">
+          <Button
+            variant="secondary"
+            size="sm"
+            type="button"
+            disabled={inactive || pertinentCode === (state.pertinentCode ?? "")}
+            onclick={() => selectBasket("pertinent", pertinentCode)}
+            data-testid="facet-update-pertinent-code"
+          >
+            Changer le code
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            type="button"
+            disabled={inactive}
+            onclick={() => deselectBasket("pertinent")}
+            data-testid="facet-toggle-pertinent"
+          >
+            Retirer
+          </Button>
+        </div>
+      {:else}
+        <Select
+          label="Code (facultatif) — Pertinent"
+          size="sm"
+          bind:value={pertinentCode}
+          disabled={inactive}
+          data-testid="facet-select-pertinent"
+        >
+          <option value="">Sans code</option>
+          {#each pertinentCodes as row (row.code)}
+            <option value={row.code}>{row.code}</option>
+          {/each}
+        </Select>
+        <div class="facet-actions">
+          <Button
+            variant="secondary"
+            size="sm"
+            type="button"
+            disabled={inactive}
+            onclick={() => selectBasket("pertinent", pertinentCode)}
+            data-testid="facet-toggle-pertinent"
+          >
+            Ajouter
+          </Button>
+        </div>
+      {/if}
+    </div>
+
+    <div class="facet-row" data-testid="facet-row-watching">
+      <span class="facet-name">À surveiller</span>
+      {#if state.watching}
+        <span class="facet-state" data-testid="facet-state-watching">Dans le panier{#if state.watchingCode} · {state.watchingCode}{/if}</span>
+        <Select
+          label="Code (facultatif) — À surveiller"
+          size="sm"
+          bind:value={watchingCode}
+          disabled={inactive}
+          data-testid="facet-select-watching"
+        >
+          <option value="">Sans code</option>
+          {#each watchingCodes as row (row.code)}
+            <option value={row.code}>{row.code}</option>
+          {/each}
+        </Select>
+        <div class="facet-actions">
+          <Button
+            variant="secondary"
+            size="sm"
+            type="button"
+            disabled={inactive || watchingCode === (state.watchingCode ?? "")}
+            onclick={() => selectBasket("a_surveiller", watchingCode)}
+            data-testid="facet-update-watching-code"
+          >
+            Changer le code
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            type="button"
+            disabled={inactive}
+            onclick={() => deselectBasket("a_surveiller")}
+            data-testid="facet-toggle-watching"
+          >
+            Retirer
+          </Button>
+        </div>
+      {:else}
+        <Select
+          label="Code (facultatif) — À surveiller"
+          size="sm"
+          bind:value={watchingCode}
+          disabled={inactive}
+          data-testid="facet-select-watching"
+        >
+          <option value="">Sans code</option>
+          {#each watchingCodes as row (row.code)}
+            <option value={row.code}>{row.code}</option>
+          {/each}
+        </Select>
+        <div class="facet-actions">
+          <Button
+            variant="secondary"
+            size="sm"
+            type="button"
+            disabled={inactive}
+            onclick={() => selectBasket("a_surveiller", watchingCode)}
+            data-testid="facet-toggle-watching"
+          >
+            Ajouter
+          </Button>
+        </div>
+      {/if}
+    </div>
+  </div>
+
 </div>
