@@ -35,9 +35,16 @@ export function readPatternCodes(
     );
   }
   const codes: string[] = [];
+  const seen = new Set<string>();
   for (const cell of cells) {
     if (cell.col !== header.col || cell.row <= header.row) continue;
     if (cell.value === null || cell.value === "") continue;
+    if (seen.has(cell.value)) {
+      throw new SteveCaptureError(
+        `duplicate pattern code "${cell.value}" in sheet "${lookup.sheet}"`,
+      );
+    }
+    seen.add(cell.value);
     codes.push(cell.value);
   }
   return codes;
