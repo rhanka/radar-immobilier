@@ -6,7 +6,7 @@
  * verdict and never on the prefix.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildFacetTarget, codesForVerdict, indexFacetHeads, type FacetHead } from "./signal-facets-client.js";
+import { buildFacetTarget, codesForVerdict, fetchCityFacets, fetchReasonCodes, indexFacetHeads, type FacetHead } from "./signal-facets-client.js";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 
 function signalNode(overrides: Partial<GraphSignalNode> = {}): GraphSignalNode {
@@ -47,7 +47,23 @@ function head(overrides: Partial<FacetHead>): FacetHead {
   };
 }
 
+function stubFetch(handler: (url: string, init?: RequestInit) => Response): {
+  calls: Array<{ url: string; init?: RequestInit }>;
+} {
+  const calls: Array<{ url: string; init?: RequestInit }> = [];
+  vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
+    calls.push({ url, init });
+    return handler(url, init);
+  });
+  return { calls };
+}
 
+function jsonResponse(status: number, payload: unknown): Response {
+  return new Response(JSON.stringify(payload), {
+    status,
+    headers: { "content-type": "application/json" },
+  });
+}
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -134,6 +150,58 @@ describe("indexFacetHeads", () => {
       changedSinceArchive: false,
       targetAvailable: true,
     });
+  });
+});
+
+describe("facet reads", () => {
+  it("should preserve distinct native targets when indexing public DTO heads", async () => {
+    stubFetch(() => jsonResponse(200, { ok: true, heads: [
+      head({ reasonCode: "P-DENSITE", targetAvailable: false }),
+      head({
+        id: "archive-1",
+        target: { citySlug: "ville-synth", type: "DesignationEvent", id: "sig-1" },
+        facet: "archive",
+        basket: null,
+        reasonCode: "N-ADMIN",
+        verdict: "non_pertinent",
+        changedSinceArchive: true,
+      }),
+    ] }));
+    const { heads } = await fetchCityFacets("", "ville-synth");
+    const byTarget = indexFacetHeads(heads);
+    expect([...byTarget.keys()]).toEqual(["Signal/sig-1", "DesignationEvent/sig-1"]);
+    expect(byTarget.get("Signal/sig-1")).toMatchObject({
+      pertinent: true,
+      pertinentCode: "P-DENSITE",
+      archived: false,
+      targetAvailable: false,
+    });
+    expect(byTarget.get("DesignationEvent/sig-1")).toMatchObject({
+      pertinent: false,
+      archived: true,
+      archiveCode: "N-ADMIN",
+      changedSinceArchive: true,
+      targetAvailable: true,
+    });
+  });
+
+  it("GET reason-codes carries no query string", async () => {
+    const { calls } = stubFetch(() =>
+      jsonResponse(200, { ok: true, profileId: "immo-steve-2026-09", codes: CODES }),
+    );
+    const res = await fetchReasonCodes("");
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.url).toBe("/api/v1/signal-facets/reason-codes");
+    expect(res.codes).toHaveLength(5);
+  });
+
+  it("GET cities/:city carries no query string", async () => {
+    const { calls } = stubFetch(() =>
+      jsonResponse(200, { ok: true, heads: [head({})] }),
+    );
+    await fetchCityFacets("", "ville-synth");
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.url).toBe("/api/v1/signal-facets/cities/ville-synth");
   });
 });
 
