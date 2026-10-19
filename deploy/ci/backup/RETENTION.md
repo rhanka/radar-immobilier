@@ -23,6 +23,13 @@ daily window. A partial/incomplete day purges nothing. A leaked writer key can
 therefore not erase history; a leaked purger key can only put delete-markers on
 dated objects, recoverable for 7 days (object lock + version grace).
 
+The 12000 s Job deadline includes Pending and retries: it reserves 3600 s for
+Pending, preserves the 8320 s internal budget (including 5400 s for docs copy),
+and leaves 80 s margin. CPU requests are 50m / 50m / 10m for dump / backup /
+purge (effective pod request 50m). These settings do not change the retention
+tiers or authorize a purge after a partial/incomplete backup. See `README.md`
+for the timing envelope and its limits.
+
 The job never deletes a version. A purged object becomes a noncurrent version,
 stays readable by version id for 7 more days (restore grace), then the lifecycle
 removes it (object lock has long ended by then: the lock counts from the write,
