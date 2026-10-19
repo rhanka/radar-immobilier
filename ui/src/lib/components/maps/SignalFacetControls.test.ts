@@ -101,3 +101,78 @@ describe("SignalFacetControls — discard requires a code", () => {
   });
 });
 
+describe("SignalFacetControls — baskets and restoration", () => {
+  it("keeps controls inactive until the confirmed write has been reloaded", async () => {
+    let finishReload!: () => void;
+    const reloaded = new Promise<void>((resolve) => { finishReload = resolve; });
+    const onSaved = vi.fn(() => reloaded);
+    renderControls({ onSaved });
+    await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    expect((screen.getByTestId("facet-toggle-watching") as HTMLButtonElement).disabled).toBe(true);
+    finishReload();
+    await waitFor(() => expect((screen.getByTestId("facet-toggle-watching") as HTMLButtonElement).disabled).toBe(false));
+  });
+
+  it("adds to a basket with an optional code", async () => {
+    const { postCommand, onSaved } = renderControls();
+    await fireEvent.change(screen.getByLabelText("Code (facultatif) — Pertinent"), {
+      target: { value: "P-DENSITE" },
+    });
+    await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select"));
+    expect(postCommand.mock.calls[0]![2]).toEqual({
+      target: TARGET,
+      basket: "pertinent",
+      reasonCode: "P-DENSITE",
+    });
+  });
+
+  it("offers removal or a code change on an active basket", async () => {
+    const { postCommand } = renderControls({
+      state: { ...emptyTargetFacetState(), pertinent: true, pertinentCode: "P-DENSITE" },
+    });
+    expect(screen.getByTestId("facet-state-pertinent").textContent).toContain("P-DENSITE");
+    await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
+    await waitFor(() => expect(postCommand).toHaveBeenCalledTimes(1));
+    expect(postCommand.mock.calls[0]![1]).toBe("deselect");
+  });
+
+  it.each(["pertinent", "a_surveiller"] as const)("clears the optional code in %s without removing the basket", async (basket) => {
+    const watching = basket === "a_surveiller";
+    const { postCommand } = renderControls({ state: {
+      ...emptyTargetFacetState(),
+      pertinent: !watching, pertinentCode: watching ? null : "P-DENSITE",
+      watching, watchingCode: watching ? "N-LEURRE" : null,
+    } });
+    const update = screen.getByTestId(watching ? "facet-update-watching-code" : "facet-update-pertinent-code") as HTMLButtonElement;
+    expect(update.disabled).toBe(false);
+    await fireEvent.click(update);
+    await waitFor(() => expect(postCommand).toHaveBeenCalled());
+    expect(postCommand.mock.calls[0]!.slice(1, 3)).toEqual(["select", { target: TARGET, basket }]);
+  });
+
+  it("shows Restaurer instead of the discard form on an archived signal", async () => {
+    const { postCommand, onSaved } = renderControls({
+      state: {
+        ...emptyTargetFacetState(),
+        archived: true,
+        archiveCode: "N-ADMIN",
+        changedSinceArchive: true,
+      },
+    });
+    expect(screen.queryByTestId("facet-discard-submit")).toBeNull();
+    await fireEvent.click(screen.getByTestId("facet-restore"));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("restore"));
+    expect(postCommand.mock.calls[0]![1]).toBe("restore");
+    expect(postCommand.mock.calls[0]![2]).toEqual({ target: TARGET });
+  });
+
+  it("inactivates every control when codes are unreadable", () => {
+    renderControls({ codes: null, codesError: "Codes de motif illisibles (test)." });
+    expect(screen.getByText(/Codes de motif illisibles/)).toBeTruthy();
+    for (const testId of ["facet-toggle-pertinent", "facet-toggle-watching"]) {
+      expect((screen.getByTestId(testId) as HTMLButtonElement).disabled).toBe(true);
+    }
+  });
+});
