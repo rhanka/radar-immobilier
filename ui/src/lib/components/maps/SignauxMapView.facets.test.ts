@@ -100,6 +100,7 @@ describe("SignauxMapView — write then three re-reads", () => {
 
   it("keeps zero-archive ids, order and counters with and without reveal", async () => {
     const orders: string[][] = [];
+    const identities: string[][] = [];
     const counters: string[] = [];
     for (const search of ["?filter.period=all", "?filter.period=all&filter.showDiscarded=1"]) {
       const view = render(SignauxMapView, { props: { geoRoute: cityRoute(search) } });
@@ -108,6 +109,9 @@ describe("SignauxMapView — write then three re-reads", () => {
       orders.push(
         [...view.container.querySelectorAll(".sel-entity-label")].map((el) => el.textContent ?? ""),
       );
+      identities.push([...view.container.querySelectorAll("[data-signal-node]")].map(
+        (el) => el.getAttribute("data-signal-node") ?? "",
+      ));
       counters.push(view.container.querySelector(".rail-count-strong")?.textContent ?? "");
       cleanup();
     }
@@ -116,6 +120,7 @@ describe("SignauxMapView — write then three re-reads", () => {
     expect(orders[0]).toHaveLength(2);
     expect(new Set(orders[0])).toEqual(new Set(["First zonage signal", "Second zonage signal"]));
     expect(orders[1]).toEqual(orders[0]);
+    expect(identities).toEqual([["sig-1", "sig-2"], ["sig-1", "sig-2"]]);
     expect(counters).toEqual(["2", "2"]);
   });
 });
