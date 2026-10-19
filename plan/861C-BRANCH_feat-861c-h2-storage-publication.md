@@ -46,7 +46,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] Storage configuration (c7).
   - [x] Configuration regression tests.
   - [x] Account approval reader and tests (c13).
-  - [ ] Dedicated pool, key/hash derivation and advisory locks (c10).
+  - [x] Dedicated pool, key/hash derivation and advisory locks (c10).
   - [ ] Idempotency regression tests.
   - [ ] Publication policy (c11).
   - [ ] Publication policy regression tests.
