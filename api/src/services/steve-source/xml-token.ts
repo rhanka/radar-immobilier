@@ -22,10 +22,9 @@ export function decodeEntities(input: string): string {
           return "'";
         default: {
           const body = entity.slice(1, -1);
-          const code =
-            body.startsWith("#x") || body.startsWith("#X")
-              ? Number.parseInt(body.slice(2), 16)
-              : Number.parseInt(body.slice(1), 10);
+          const code = body.startsWith("#x")
+            ? Number.parseInt(body.slice(2), 16)
+            : Number.parseInt(body.slice(1), 10);
           if (!Number.isFinite(code) || code === 0 || (code >= 0xd800 && code <= 0xdfff)) {
             throw new SteveCaptureError("invalid XML entity");
           }
@@ -41,7 +40,9 @@ export function decodeEntities(input: string): string {
 }
 
 export function parseTag(inner: string): { tagName: string; attrs: Record<string, string> } {
-  const attrs: Record<string, string> = {};
+  // Null-prototype map: an attribute literally named `__proto__` stays an own
+  // property instead of mutating the object prototype.
+  const attrs: Record<string, string> = Object.create(null) as Record<string, string>;
   const nameMatch = /^\s*([^\s/=]+)/.exec(inner);
   const rawName = nameMatch?.[1] ?? "";
   const rest = rawName === "" ? "" : inner.slice(inner.indexOf(rawName) + rawName.length);
