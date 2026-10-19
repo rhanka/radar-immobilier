@@ -1,4 +1,3 @@
-
 import { Hono, type Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { getCookie } from "hono/cookie";
@@ -48,18 +47,18 @@ async function guard(
   if (!session) {
     return jsonError(c, 401, { error: "unauthenticated" });
   }
-  // A failed startup probe must not query the same unavailable database.
-  if (!deps.backend) return jsonError(c, 503, { error: "capability_unavailable" });
-  const status = await readAccountStatus(deps.accounts, session.sub);
-  if (!isApprovedAccountStatus(status)) {
-    return c.json({ error: "account_not_approved", status: status ?? "unknown" }, 403);
-  }
   const origin = c.req.header("origin");
   const read = c.req.method === "GET" || c.req.method === "HEAD";
   const fetchSite = c.req.header("sec-fetch-site");
   if ((read ? origin !== undefined && origin !== deps.auth.appBaseUrl : origin !== deps.auth.appBaseUrl) ||
     (read && fetchSite !== undefined && fetchSite !== "same-origin")) {
     return jsonError(c, 403, { error: "forbidden_origin" });
+  }
+  // A failed startup probe must not query the same unavailable database.
+  if (!deps.backend) return jsonError(c, 503, { error: "capability_unavailable" });
+  const status = await readAccountStatus(deps.accounts, session.sub);
+  if (!isApprovedAccountStatus(status)) {
+    return c.json({ error: "account_not_approved", status: status ?? "unknown" }, 403);
   }
   return { session };
 }

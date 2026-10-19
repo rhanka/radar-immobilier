@@ -31,7 +31,6 @@ export async function startArtifactControl(options: {
   try {
     if (!contentBase) throw new Error("artifact content base disabled");
     const host = await composeArtifactHost(pool, parsed);
-    if (!host) throw new Error("artifact schema or scope unavailable");
     const backend = createArtifactControl(host, parsed.storageScope, contentBase);
     logger.info({ storageScope: parsed.storageScope, s3Bucket: parsed.s3Bucket }, "artifact control enabled");
     return { auth, accounts: pool, backend };
