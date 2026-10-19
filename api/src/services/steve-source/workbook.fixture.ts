@@ -20,9 +20,9 @@ import {
   sharedStringsXml,
   workbookRelsXml,
   workbookXml,
-} from "./workbook-parts.js";
+} from "./workbook-parts.fixture.js";
 
-export { ACCENTED_TEXT, EXPECTED_CODES, LONG_TEXT } from "./workbook-parts.js";
+export { ACCENTED_TEXT, EXPECTED_CODES, LONG_TEXT } from "./workbook-parts.fixture.js";
 
 /** Local file header signature `PK\x03\x04`, as literal specification bytes. */
 const LOCAL_HEADER_BYTES = [0x50, 0x4b, 0x03, 0x04];

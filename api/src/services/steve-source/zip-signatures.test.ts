@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSyntheticWorkbook } from "./workbook-fixture.js";
+import { buildSyntheticWorkbook } from "./workbook.fixture.js";
 function dataView(bytes: Uint8Array): DataView {
   return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 }
