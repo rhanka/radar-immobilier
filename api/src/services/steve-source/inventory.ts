@@ -171,6 +171,8 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
     dataValidations: [],
     definedNames: readDefinedNames(workbook),
     autoFilters: [],
+    hiddenRows: [],
+    hiddenColumns: [],
   };
   const seenNames = new Set<string>();
   const seenIds = new Set<number>();
@@ -211,6 +213,12 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
     for (const cell of parsed.cells) inventory.cells.push(cell);
     for (const rule of parsed.validations) inventory.dataValidations.push(rule);
     if (parsed.autoFilter !== null) inventory.autoFilters.push(parsed.autoFilter);
+    for (const row of parsed.hiddenRows) {
+      inventory.hiddenRows.push({ sheet: name, sheetId, row });
+    }
+    for (const col of parsed.hiddenColumns) {
+      inventory.hiddenColumns.push({ sheet: name, sheetId, col });
+    }
   });
   return inventory;
 }

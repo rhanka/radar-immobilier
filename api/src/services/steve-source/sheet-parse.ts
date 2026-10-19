@@ -3,7 +3,7 @@
  * Cell details live in `cell-parse.ts`.
  */
 
-import { parseCell, parseRowNumber } from "./cell-parse.js";
+import { parseCell, parseRowNumber, parseStrictInt } from "./cell-parse.js";
 import { parseA1 } from "./cell-ref.js";
 import { SteveCaptureError } from "./types.js";
 import type {
@@ -19,11 +19,37 @@ export interface ParsedSheet {
   cells: CellRecord[];
   validations: DataValidationRule[];
   autoFilter: AutoFilterRecord | null;
+  hiddenRows: number[];
+  hiddenColumns: number[];
 }
 
 function attr(node: XmlNode, name: string): string | null {
   const value = node.attrs[name];
   return value === undefined ? null : value;
+}
+
+function isHidden(raw: string | null): boolean {
+  return raw === "1" || (raw !== null && raw.toLowerCase() === "true");
+}
+
+function readHiddenColumns(ws: XmlNode, sheetName: string): number[] {
+  const cols = firstChild(ws, "cols");
+  if (cols === null) return [];
+  const hidden = new Set<number>();
+  for (const col of childElements(cols, "col")) {
+    const minRaw = attr(col, "min");
+    const maxRaw = attr(col, "max");
+    if (minRaw === null || maxRaw === null) continue;
+    const min = parseStrictInt(minRaw, `column min in sheet "${sheetName}"`);
+    const max = parseStrictInt(maxRaw, `column max in sheet "${sheetName}"`);
+    if (min < 1 || max > 16384 || min > max) {
+      throw new SteveCaptureError(`invalid column span "${minRaw}:${maxRaw}" in sheet "${sheetName}"`);
+    }
+    if (isHidden(attr(col, "hidden"))) {
+      for (let c = min; c <= max; c++) hidden.add(c);
+    }
+  }
+  return [...hidden].sort((a, b) => a - b);
 }
 
 export function parseSheetXml(
@@ -38,6 +64,7 @@ export function parseSheetXml(
   }
   const cells: CellRecord[] = [];
   const seen = new Set<string>();
+  const hiddenRows: number[] = [];
   const sheetData = firstChild(ws, "sheetData");
   if (sheetData !== null) {
     let rowFallback = 0;
@@ -46,6 +73,7 @@ export function parseSheetXml(
       const rowAttr = attr(rowNode, "r");
       const rowNum = rowAttr === null ? rowFallback : parseRowNumber(rowAttr, sheetName);
       rowFallback = rowNum;
+      if (isHidden(attr(rowNode, "hidden"))) hiddenRows.push(rowNum);
       let colFallback = 0;
       for (const cell of childElements(rowNode, "c")) {
         const refAttr = cell.attrs["r"];
@@ -99,5 +127,7 @@ export function parseSheetXml(
     autoFilter: autoFilterRef === null || autoFilter === null ? null : {
       sheet: sheetName, ref: autoFilterRef, definition: autoFilter,
     },
+    hiddenRows,
+    hiddenColumns: readHiddenColumns(ws, sheetName),
   };
 }
