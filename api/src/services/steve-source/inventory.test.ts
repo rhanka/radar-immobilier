@@ -42,6 +42,16 @@ describe("captureWorkbookInventory sheets", () => {
     ]);
   });
 
+  it("reads the relationship id whatever namespace prefix the writer used", () => {
+    const relNs = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+    const renamed = workbookXml()
+      .replace('xmlns:r="', 'xmlns:x="')
+      .replaceAll("r:id=", "x:id=");
+    expect(renamed).toContain(`xmlns:x="${relNs}"`);
+    const inventory = captureWorkbookInventory(buildSyntheticWorkbook({ "xl/workbook.xml": renamed }));
+    expect(inventory.sheets.map((sheet) => sheet.relationshipId)).toEqual(["rId1", "rId2", "rId3"]);
+  });
+
   const invalidSheets: Array<[string, Record<string, string>, RegExp]> = [
     ["duplicate name", { "xl/workbook.xml": workbookXml().replace('name="Codes"', 'name="LOTS"') }, /duplicate sheet name/],
     ["duplicate sheet id", { "xl/workbook.xml": workbookXml().replace('sheetId="2"', 'sheetId="1"') }, /duplicate sheet id/],
