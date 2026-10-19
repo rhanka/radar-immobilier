@@ -16,8 +16,6 @@ export default defineConfig({
     },
   },
   test: {
-    // Bound concurrent DB pools and PostGIS scratch-database creation.
-    maxWorkers: 4,
     include: ["tests/**/*.spec.ts", "src/**/*.test.ts"],
     testTimeout: 20000,
     hookTimeout: 20000,
