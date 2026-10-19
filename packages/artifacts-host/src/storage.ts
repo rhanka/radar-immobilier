@@ -11,20 +11,20 @@ export async function initializeArtifactScope(
   pool: pg.Pool,
   scope: string,
   orgId: string,
-): Promise<boolean> {
+): Promise<void> {
   const table = await pool.query("SELECT to_regclass('drizzle.__drizzle_migrations') AS journal");
-  if (!table.rows[0]?.journal) return false;
+  if (!table.rows[0]?.journal) throw new Error("artifact schema unavailable: migration journal absent");
   const migration = await pool.query(
     "SELECT 1 FROM drizzle.__drizzle_migrations WHERE created_at = $1 AND hash = $2",
     [ARTIFACTS_LIFECYCLE_WHEN, ARTIFACTS_LIFECYCLE_HASH],
   );
-  if (!migration.rowCount) return false;
+  if (!migration.rowCount) throw new Error("artifact schema unavailable: 0015 absent or hash mismatch");
   await pool.query(
     "INSERT INTO artifacts.storage_scopes (id, org_id) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING",
     [scope, orgId],
   );
   const row = await pool.query("SELECT org_id FROM artifacts.storage_scopes WHERE id = $1", [scope]);
-  return row.rows[0]?.org_id === orgId;
+  if (row.rows[0]?.org_id !== orgId) throw new Error("artifact scope organization mismatch");
 }
 
 /** Route an execute() and all its work through its leased lock connection.
