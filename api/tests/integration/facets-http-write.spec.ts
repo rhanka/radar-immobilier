@@ -22,6 +22,11 @@ it("should enforce browser identity, strict commands and domain errors", async (
     return response;
   };
   const body = { target, basket: "pertinent" };
+  for (const reasonCode of ["", "p-densite", "-N-ADMIN", "N--ADMIN", "N-ADMIN-", "N_ADMIN", " N-ADMIN", "N-ADMIN\n"]) {
+    for (const action of ["select", "discard"]) {
+      expect((await post(action, { ...(action === "select" ? body : { target }), reasonCode })).status).toBe(400);
+    }
+  }
   expect((await post("select", body, null)).status).toBe(400);
   expect((await post("select", body, "invalid")).status).toBe(400);
   expect((await post("select", { ...body, target: { ...target, id: `native${String.fromCharCode(0)}id` } })).status).toBe(400);
@@ -37,7 +42,10 @@ it("should enforce browser identity, strict commands and domain errors", async (
   const key = randomUUID();
   const first = await post("select", body, key);
   expect(first.status).toBe(200);
-  expect(await (await post("select", body, key)).json()).toEqual(await first.json());
+  const firstBody = await first.json();
+  expect(firstBody.event).toEqual({ id: expect.any(String), target, facet: "selection", basket: "pertinent",
+    state: "active", reasonCode: null, verdict: null, createdAt: expect.any(String) });
+  expect(await (await post("select", body, key.toUpperCase())).json()).toEqual(firstBody);
   expect((await post("select", { ...body, reasonCode: "P-DENSITE" }, key)).status).toBe(409);
   expect((await post("deselect", body)).status).toBe(200);
   expect((await post("discard", { target, reasonCode: "N-ADMIN" })).status).toBe(200);
@@ -60,5 +68,16 @@ it("should reject writes authenticated by a verified per-user bearer", async () 
       headers: { authorization: `Bearer ${bearer}`, "Idempotency-Key": randomUUID() },
       body: JSON.stringify({ target, basket: "pertinent" }) });
     expect(response.status).toBe(403);
+  }
+  for (const method of ["PUT", "PATCH", "DELETE", "OPTIONS"]) {
+    const response = await app.request("/api/v1/signal-facets/select", { method,
+      headers: { authorization: `Bearer ${bearer}` } });
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({ error: "browser_session_required" });
+  }
+  for (const method of ["GET", "HEAD"]) {
+    const response = await app.request("/api/v1/signal-facets/reason-codes", { method,
+      headers: { authorization: `Bearer ${bearer}` } });
+    expect(response.status).toBe(200);
   }
 });
