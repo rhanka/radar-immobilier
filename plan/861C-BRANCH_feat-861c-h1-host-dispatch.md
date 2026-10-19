@@ -47,9 +47,9 @@
 - [x] No UI surface impacted; no UAT session required.
 
 ## Plan / Todo (lot-based)
-- [ ] **Lot H1-1 — lib-owned routing (point 1)**
-  - [ ] Delegate to `parseContentHost` from `@sentropic/artifacts/content/routing`
-  - [ ] Contract tests: 8 existing cases plus `<uuid>-<uuid>` and trailing-dot forms
+- [x] **Lot H1-1 — lib-owned routing (point 1)**
+  - [x] Delegate to `parseContentHost` from `@sentropic/artifacts/content/routing`
+  - [x] Contract tests: 8 existing cases plus `<uuid>-<uuid>` and trailing-dot forms
   - [x] Installed 0.1.1 export and isolated ESM import verified; no MCP modules loaded
 - [ ] **Lot H1-2 — fail-fast config (points 2, 6)**
   - [ ] Invalid base throws at startup; unset stays disabled; `localhost` accepted
