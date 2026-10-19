@@ -44,7 +44,7 @@ export interface CellFormula {
 
 export interface CellRecord {
   sheet: string;
-  /** Stable owning-sheet identity. */
+  /** Stable owning-sheet identity, copied from `SheetInfo.sheetId`. */
   sheetId: number;
   address: string;
   row: number;
@@ -54,7 +54,7 @@ export interface CellRecord {
   value: string | null;
   formula: CellFormula | null;
   cachedValue: string | null;
-  /** Style index from the cell s attribute. */
+  /** Style index from the cell `s` attribute, or null when absent. */
   style: number | null;
 }
 
@@ -124,6 +124,10 @@ export interface WorkbookInventory {
   dataValidations: DataValidationRule[];
   definedNames: DefinedNameRecord[];
   autoFilters: AutoFilterRecord[];
+  /** Sorted list of every ZIP entry name in the archive. */
+  parts: string[];
   hiddenRows: HiddenRowRecord[];
   hiddenColumns: HiddenColumnRecord[];
+  /** Features present in the file but not projected into typed fields. */
+  uncaptured: UncapturedFeature[];
 }
