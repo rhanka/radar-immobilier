@@ -92,3 +92,18 @@ END $$;
 --> statement-breakpoint
 CREATE OR REPLACE TRIGGER facet_events_immutable
   BEFORE UPDATE OR DELETE ON facet_events FOR EACH ROW EXECUTE FUNCTION guard_facet_event();
+--> statement-breakpoint
+-- A no-op must consume its key without creating a domain event.
+CREATE TABLE IF NOT EXISTS facet_commands (
+  owner_id uuid NOT NULL REFERENCES account_users(id) ON DELETE RESTRICT,
+  command_key uuid NOT NULL,
+  command_digest text NOT NULL CHECK (command_digest ~ '^[a-f0-9]{64}$'),
+  result jsonb NOT NULL,
+  PRIMARY KEY (owner_id, command_key)
+);
+CREATE OR REPLACE FUNCTION guard_facet_command() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'facet commands are immutable';
+END $$;
+CREATE OR REPLACE TRIGGER facet_commands_immutable
+  BEFORE UPDATE OR DELETE ON facet_commands FOR EACH ROW EXECUTE FUNCTION guard_facet_command();

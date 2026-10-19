@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import type { Database } from "../../db/client.js";
-import { accountUsers, facetEvents, facetReasonCodes } from "../../db/schema.js";
+import { accountUsers, facetCommands, facetEvents, facetReasonCodes } from "../../db/schema.js";
 import { FACET_PROFILE } from "./codebook.js";
-import { digest, FacetError, resolveTarget, type SignalTarget } from "./target.js";
+import { FacetError, resolveTarget, type SignalTarget } from "./target.js";
+import { facetCommandDigest, readCommand } from "./commands.js";
 
 export type Basket = "pertinent" | "a_surveiller";
 export interface FacetCommand {
@@ -32,9 +33,13 @@ export async function writeFacet(db: Database, sub: string, command: FacetComman
     const removals = action === "discard" ? [...new Set(command.deselect ?? [])] : [];
     const locks = [[facet, selection ? basket : null], ...removals.map((b) => ["selection", b])]
       .map(([f, b]) => JSON.stringify(["personal", ownerId, f, b, target.citySlug, target.type, target.id]));
+    locks.push(JSON.stringify(["command", ownerId, command.commandKey]));
     for (const key of [...new Set(locks)].sort()) {
       await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${key}, 0))`);
     }
+    const commandDigest = facetCommandDigest(command);
+    const replay = await readCommand(tx, ownerId, command.commandKey, commandDigest);
+    if (replay !== undefined) return replay;
     const fingerprint = await resolveTarget(tx, target);
     if (action === "discard" && command.reasonCode === undefined) throw new FacetError(422, "reason_code_required");
     if (action === "select" || action === "discard") {
@@ -46,7 +51,10 @@ export async function writeFacet(db: Database, sub: string, command: FacetComman
     for (const removed of removals) {
       await transition(tx, ownerId, command, "selection", removed, "inactive", fingerprint, null);
     }
-    return event;
+    const result = event ? { ...event, createdAt: event.createdAt.toISOString() } : null;
+    await tx.insert(facetCommands).values({ ownerId, commandKey: command.commandKey,
+      commandDigest, result: { event: result } });
+    return result;
   });
 }
 async function validateReason(tx: Tx, code: string | undefined, verdict: string) {
@@ -79,7 +87,7 @@ async function transition(
     profileId: reasonCode ? FACET_PROFILE : null,
     verdict: reasonCode ? (facet === "archive" ? "non_pertinent" : basket) : null,
     observedFingerprint: fingerprint, commandKey: command.commandKey,
-    commandDigest: digest(command), supersedes: head?.id ?? null,
+    commandDigest: facetCommandDigest(command), supersedes: head?.id ?? null,
   }).returning();
   return event!;
 }
