@@ -43,6 +43,7 @@
 
   let busy = false;
   let error: string | null = null;
+  let unconfirmed = false;
   let commandKey: string | null = null;
   let lastIntent: string | null = null;
   let pertinentCode = "";
@@ -77,6 +78,7 @@
       discardCode = "";
       await onSaved(action);
     } catch (err) {
+      unconfirmed = !(err instanceof SignalFacetError) || err.status === null;
       error =
         err instanceof SignalFacetError
           ? facetErrorMessage(err)
@@ -115,7 +117,7 @@
   {/if}
 
   {#if error}
-    <Alert tone="error" title="Écriture refusée" message={error} />
+    <Alert tone="error" title={unconfirmed ? "Écriture non confirmée" : "Écriture refusée"} message={error} />
     <div class="facet-error-actions">
       <Button
         variant="secondary"
