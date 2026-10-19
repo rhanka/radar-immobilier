@@ -17,7 +17,7 @@
  *   Returns 404 when no signal nodes exist for the city.
  */
 
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 import {
   classifyBPrime,
   readRegulatoryStatus,
@@ -32,6 +32,12 @@ import {
   getSignalNodesForCity,
   listCitiesWithSignalNodes,
 } from "../services/graph/graph-store.js";
+import {
+  EMPTY_DISCARDED_SIGNALS,
+  filterDiscardedSignals,
+  resolveGraphSignalsViewer,
+  type DiscardedSignalsPort,
+} from "../services/graph/discarded-signals.js";
 import type { Database } from "../db/client.js";
 import type { ObjectStore } from "../storage/object-store.js";
 import {
@@ -51,6 +57,22 @@ export interface GraphSignalsDeps {
    * `DOC_ENRICHMENT_BUDGET_MS`. Surtout utile aux tests.
    */
   docEnrichmentBudgetMs?: number;
+  /** Native discard keys for the session viewer; empty by default. */
+  discarded?: DiscardedSignalsPort;
+}
+
+const NO_DISCARDED: ReadonlySet<string> = new Set<string>();
+
+/** Resolve once per request; showDiscarded=1 bypasses the port. */
+function readDiscardedKeys(c: Context, deps: GraphSignalsDeps): ReadonlySet<string> {
+  if (c.req.query("showDiscarded") === "1") return NO_DISCARDED;
+  const port = deps.discarded ?? EMPTY_DISCARDED_SIGNALS;
+  try {
+    return port.forViewer(resolveGraphSignalsViewer(c)) ?? NO_DISCARDED;
+  } catch (error) {
+    console.error("[graph-signals] discarded-signals port failed, serving full set:", error);
+    return NO_DISCARDED;
+  }
 }
 
 export interface GraphSignalDocRef {
@@ -912,7 +934,9 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
     const city = c.req.param("city");
     // Un échec ici (DB down) est non-récupérable → 5xx légitime. L'enrichissement
     // documentaire, lui, est best-effort et NE DOIT PAS produire de 5xx.
-    const nodes = await getSignalNodesForCity(deps.db, city);
+    // Filter native nodes before cards, enrichment and legacy projection.
+    const stored = await getSignalNodesForCity(deps.db, city);
+    const nodes = filterDiscardedSignals(stored, readDiscardedKeys(c, deps));
     if (nodes.length === 0) {
       return c.json({ ok: false, error: "no_signal_nodes", citySlug: city }, 404);
     }
