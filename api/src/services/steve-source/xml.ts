@@ -13,14 +13,13 @@ import type { XmlNode } from "./types.js";
 export type { XmlNode } from "./types.js";
 
 import { decodeEntities, findTagEnd, localName, parseTag } from "./xml-token.js";
+import { createXmlBudget, MAX_XML_CELLS, MAX_XML_ELEMENTS } from "./xml-budget.js";
+import type { XmlBudget } from "./xml-budget.js";
+export { MAX_XML_CELLS, MAX_XML_ELEMENTS } from "./xml-budget.js";
 
 /** Deepest element nesting accepted; deeper input is rejected, not recursed. */
 export const MAX_XML_DEPTH = 64;
-/** Per-part allocation budgets, including empty and self-closing elements. */
-export const MAX_XML_ELEMENTS = 500_000;
-export const MAX_XML_CELLS = 250_000;
-
-export function parseXml(source: string): XmlNode {
+export function parseXml(source: string, budget: XmlBudget = createXmlBudget()): XmlNode {
   const root: XmlNode = {
     name: "#document",
     attrs: Object.create(null) as Record<string, string>,
@@ -34,8 +33,6 @@ export function parseXml(source: string): XmlNode {
     return node;
   };
   let i = 0;
-  let elements = 0;
-  let cells = 0;
   while (i < source.length) {
     const lt = source.indexOf("<", i);
     if (lt === -1) {
@@ -73,13 +70,13 @@ export function parseXml(source: string): XmlNode {
       let inner = source.slice(lt + 1, end);
       const selfClosing = inner.endsWith("/");
       if (selfClosing) inner = inner.slice(0, -1);
-      const { tagName, attrs } = parseTag(inner);
+      const { tagName, attrs } = parseTag(inner, budget);
       if (tagName === "") throw new SteveCaptureError("empty tag name");
-      if (++elements > MAX_XML_ELEMENTS) {
-        throw new SteveCaptureError(`XML part exceeds the ${String(MAX_XML_ELEMENTS)}-element limit`);
+      if (++budget.elements > MAX_XML_ELEMENTS) {
+        throw new SteveCaptureError(`XML capture exceeds the ${String(MAX_XML_ELEMENTS)}-element limit`);
       }
-      if (tagName === "c" && ++cells > MAX_XML_CELLS) {
-        throw new SteveCaptureError(`XML part exceeds the ${String(MAX_XML_CELLS)}-cell limit`);
+      if (tagName === "c" && ++budget.cells > MAX_XML_CELLS) {
+        throw new SteveCaptureError(`XML capture exceeds the ${String(MAX_XML_CELLS)}-cell limit`);
       }
       if (stack.length > MAX_XML_DEPTH) {
         throw new SteveCaptureError(

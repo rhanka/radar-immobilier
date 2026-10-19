@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
 import { MAX_XML_CELLS, MAX_XML_ELEMENTS } from "./xml.js";
 
-describe("XML per-part allocation budgets", () => {
+describe("XML allocation budgets", () => {
   it.each([
     ["elements", "<a/>", MAX_XML_ELEMENTS - 1, `${String(MAX_XML_ELEMENTS)}-element`],
     ["cells", "<c/>", MAX_XML_CELLS, `${String(MAX_XML_CELLS)}-cell`],
@@ -18,7 +18,7 @@ describe("XML per-part allocation budgets", () => {
         const count = ${String(count)};
         assert.doesNotThrow(() => parseXml('<root>' + unit.repeat(count) + '</root>'));
         assert.throws(() => parseXml('<root>' + unit.repeat(count + 1) + '</root>'),
-          { name: 'SteveCaptureError', message: 'XML part exceeds the ${message} limit' }
+          { name: 'SteveCaptureError', message: 'XML capture exceeds the ${message} limit' }
         );
         assert.doesNotThrow(() => parseXml('<root><c/></root>'));
       `], { timeout: 5000, encoding: "utf8" });
@@ -40,7 +40,7 @@ describe("XML per-part allocation budgets", () => {
           const bytes = buildSyntheticWorkbook({ [part]: '<root>' + '<a/>'.repeat(3000000) + '</root>' });
           assert.ok(bytes.length < 20000);
           assert.throws(() => captureWorkbookInventory(bytes),
-            { name: 'SteveCaptureError', message: 'XML part exceeds the 500000-element limit' });
+            { name: 'SteveCaptureError', message: 'XML capture exceeds the 500000-element limit' });
         }
       `], { timeout: 5000, encoding: "utf8" });
     expect(result.error).toBeUndefined();
