@@ -3,8 +3,11 @@
 # Standalone entry point: it NEVER includes the root Makefile (which reads
 # .env) and NEVER extends a compose file with `env_file`. Every compose
 # invocation runs with COMPOSE_DISABLE_ENV_FILE=1 and an explicit
-# --env-file /dev/null; only synthetic test values from the process
-# environment reach the containers. Any ENV outside test-*/e2e-* is refused.
+# --env-file /dev/null. Host-inherited overrides below are emptied so compose
+# `${VAR:-default}` interpolation falls back to the synthetic defaults in
+# docker-compose.yml; only those defaults plus the exported test ports and
+# ARTIFACTS_CONTENT_BASE reach the containers. Any ENV outside test-*/e2e-*
+# is refused.
 #
 # Usage:
 #   make -f tools/artifact-host.mk test-api SCOPE=src/artifacts API_PORT=18895 UI_PORT=15895 MAILDEV_UI_PORT=11895 ENV=test-861c-h1
@@ -21,6 +24,23 @@ ARTIFACTS_CONTENT_BASE ?=
 export API_PORT UI_PORT MAILDEV_UI_PORT ARTIFACTS_CONTENT_BASE
 export COMPOSE_PROJECT_NAME := radar-$(ENV)
 export COMPOSE_DISABLE_ENV_FILE := 1
+
+# Neutralize host-inherited values that docker-compose.yml interpolates into
+# the api container (which runs npm ci): empty forces each `${VAR:-default}`
+# to its synthetic default instead of a caller-shell secret or override.
+export POSTGRES_USER :=
+export POSTGRES_PASSWORD :=
+export POSTGRES_DB :=
+export S3_REGION :=
+export S3_BUCKET :=
+export S3_ACCESS_KEY :=
+export S3_SECRET_KEY :=
+export OPENAI_API_KEY :=
+export ANTHROPIC_API_KEY :=
+export GEMINI_API_KEY :=
+export GOOGLE_API_KEY :=
+export MISTRAL_API_KEY :=
+export COHERE_API_KEY :=
 
 DOCKER_COMPOSE ?= docker compose
 COMPOSE_FILES := -f docker-compose.yml -f docker-compose.test.yml
