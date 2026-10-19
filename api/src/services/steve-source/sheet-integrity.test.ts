@@ -13,6 +13,4 @@ describe("worksheet coordinate integrity", () => {
       `<sheetData><row r="3"><c r="A7"><v>1</v></c></row></sheetData>`,
     ), [], 4)).toThrow(/outside row 3/);
   });
-
-
 });
