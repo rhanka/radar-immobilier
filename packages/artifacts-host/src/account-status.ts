@@ -1,4 +1,3 @@
-
 export interface AccountStatusQueryable {
   query(
     text: string,
