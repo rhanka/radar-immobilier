@@ -14,8 +14,16 @@ export type { XmlNode } from "./types.js";
 
 import { decodeEntities, findTagEnd, localName, parseTag } from "./xml-token.js";
 
+/** Deepest element nesting accepted; deeper input is rejected, not recursed. */
+export const MAX_XML_DEPTH = 64;
+
 export function parseXml(source: string): XmlNode {
-  const root: XmlNode = { name: "#document", attrs: {}, children: [], text: "" };
+  const root: XmlNode = {
+    name: "#document",
+    attrs: Object.create(null) as Record<string, string>,
+    children: [],
+    text: "",
+  };
   const stack: XmlNode[] = [root];
   const current = (): XmlNode => {
     const node = stack[stack.length - 1];
@@ -62,9 +70,16 @@ export function parseXml(source: string): XmlNode {
       if (selfClosing) inner = inner.slice(0, -1);
       const { tagName, attrs } = parseTag(inner);
       if (tagName === "") throw new SteveCaptureError("empty tag name");
+      if (stack.length > MAX_XML_DEPTH) {
+        throw new SteveCaptureError(
+          `XML element nesting exceeds the ${String(MAX_XML_DEPTH)}-level limit`,
+        );
+      }
       const node: XmlNode = { name: tagName, attrs, children: [], text: "" };
       current().children.push(node);
-      if (!selfClosing) stack.push(node);
+      if (!selfClosing) {
+        stack.push(node);
+      }
       i = end + 1;
     }
   }
