@@ -15,6 +15,7 @@ import type {
 import { parseXml } from "./xml.js";
 import type { XmlNode } from "./xml.js";
 import { childElements, deepText, documentElement, firstChild } from "./xml-query.js";
+import type { XmlBudget } from "./xml-budget.js";
 
 export interface ParsedSheet {
   cells: CellRecord[];
@@ -115,8 +116,9 @@ export function parseSheetXml(
   xmlText: string,
   sharedStrings: readonly string[],
   sheetId: number,
+  budget?: XmlBudget,
 ): ParsedSheet {
-  const ws = documentElement(parseXml(xmlText));
+  const ws = documentElement(parseXml(xmlText, budget));
   if (ws === null || ws.name !== "worksheet") {
     throw new SteveCaptureError(`expected a worksheet element in sheet "${sheetName}"`);
   }
