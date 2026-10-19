@@ -49,6 +49,8 @@ describe("artifact Postgres and S3 publication", () => {
     expect(parseContentHost(new URL(receipt.pinnedUrl).host, "pages.example.test")?.kind).toBe("pinned");
     expect(receipt.digest).toMatch(/^[a-f0-9]{64}$/);
     expect((await h.control.handle("publish", "alice", { ...body, files: [{ ...file, text: "changed" }] })).status).toBe(409);
+    expect((await h.control.handle("publish", "alice", { ...body,
+      profile: JSON.parse('{"__proto__":{"title":"changed"}}') })).status).toBe(409);
     const key1 = await h.control.handle("ensure", "alice", { bindingName: "shared-key", idempotencyKey: "same" });
     const key2 = await h.control.handle("ensure", "bob", { bindingName: "shared-key", idempotencyKey: "same" });
     expect((key1.body as { artifactId: string }).artifactId).not.toBe((key2.body as { artifactId: string }).artifactId);

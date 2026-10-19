@@ -48,6 +48,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] Account approval reader and tests (c13).
   - [x] Dedicated pool, key/hash derivation and advisory locks (c10).
   - [x] Idempotency regression tests.
+  - [x] Preserve all JSON keys in parameter hashing.
   - [x] Publication policy (c11).
   - [x] Publication policy regression tests.
   - [x] Schema/scope bootstrap and connection routing (c8).
