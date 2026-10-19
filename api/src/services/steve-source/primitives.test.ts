@@ -64,3 +64,12 @@ describe("stored cell values", () => {
     expect(parseCell("Sheet", node, 1, 1, [])).toBeNull();
   });
 });
+
+import { parseSheetXml } from "./sheet-parse.js";
+
+it("keeps numeric sorting across sparse worksheet rows and columns", () => {
+  const parsed = parseSheetXml("Sheet", `<worksheet><sheetData>
+    <row r="10"><c r="AA10"><v>2</v></c><c r="B10"><v>1</v></c></row>
+    <row r="2"><c r="A2"><v>0</v></c></row></sheetData></worksheet>`, []);
+  expect(parsed.cells.map((cell) => cell.address)).toEqual(["A2", "B10", "AA10"]);
+});
