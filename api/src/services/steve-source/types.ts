@@ -124,4 +124,6 @@ export interface WorkbookInventory {
   dataValidations: DataValidationRule[];
   definedNames: DefinedNameRecord[];
   autoFilters: AutoFilterRecord[];
+  hiddenRows: HiddenRowRecord[];
+  hiddenColumns: HiddenColumnRecord[];
 }

@@ -167,3 +167,22 @@ describe("captureWorkbookInventory corrupt input", () => {
     expect(() => captureWorkbookInventory(bytes)).toThrow(SteveCaptureError);
   });
 });
+
+describe("hidden worksheet structure", () => {
+  it("captures hidden rows, hidden columns and the cell style index", () => {
+    const inventory = captureWorkbookInventory(buildSyntheticWorkbook({
+      "xl/worksheets/sheet1.xml":
+        `<worksheet><cols><col min="2" max="3" hidden="1"/><col min="5" max="5"/></cols><sheetData>` +
+        `<row r="1" hidden="1"><c r="A1" s="3"><v>7</v></c><c r="B1"><v>8</v></c></row>` +
+        `</sheetData></worksheet>`,
+    }));
+    expect(inventory.hiddenRows).toEqual([{ sheet: "Lots", sheetId: 1, row: 1 }]);
+    expect(inventory.hiddenColumns).toEqual([
+      { sheet: "Lots", sheetId: 1, col: 2 },
+      { sheet: "Lots", sheetId: 1, col: 3 },
+    ]);
+    expect(inventory.cells.filter((cell) => cell.sheet === "Lots").map((cell) => cell.style))
+      .toEqual([3, null]);
+  });
+
+});
