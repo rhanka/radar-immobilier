@@ -66,8 +66,8 @@ describe("stored cell values", () => {
   it("keeps a shared formula and its own cached value without evaluating it", () => {
     const node = documentElement(parseXml('<c r="C3"><f t="shared" si="2"/><v>0</v></c>'));
     if (node === null) throw new Error("missing cell");
-    expect(parseCell("Sheet", node, 3, 3, [])).toMatchObject({
-      address: "C3", type: "n", raw: "0", cachedValue: "0", style: null,
+    expect(parseCell("Sheet", node, 3, 3, [], 7)).toMatchObject({
+      address: "C3", type: "n", raw: "0", cachedValue: "0", sheetId: 7, style: null,
       formula: { text: "", kind: "shared", si: 2 },
     });
   });
@@ -75,20 +75,20 @@ describe("stored cell values", () => {
   it("ignores style-only cells", () => {
     const node = documentElement(parseXml('<c r="A1" s="1"/>'));
     if (node === null) throw new Error("missing cell");
-    expect(parseCell("Sheet", node, 1, 1, [])).toBeNull();
+    expect(parseCell("Sheet", node, 1, 1, [], 7)).toBeNull();
   });
 
   it("captures the style index without interpreting it", () => {
     const node = documentElement(parseXml('<c r="B2" s="3"><v>1</v></c>'));
     if (node === null) throw new Error("missing cell");
-    expect(parseCell("Sheet", node, 2, 2, [])?.style).toBe(3);
+    expect(parseCell("Sheet", node, 2, 2, [], 7)?.style).toBe(3);
   });
 
   it.each(['<c r="B2" s="0x10"><v>1</v></c>', '<c r="B2" s=""><v>1</v></c>'])(
     "rejects non-canonical style index %s", (xml) => {
       const node = documentElement(parseXml(xml));
       if (node === null) throw new Error("missing cell");
-      expect(() => parseCell("Sheet", node, 2, 2, [])).toThrow(SteveCaptureError);
+      expect(() => parseCell("Sheet", node, 2, 2, [], 7)).toThrow(SteveCaptureError);
     },
   );
 });
@@ -97,8 +97,9 @@ describe("worksheet assembly", () => {
   it("keeps numeric sorting across sparse worksheet rows and columns", () => {
     const parsed = parseSheetXml("Sheet", `<worksheet><sheetData>
       <row r="10"><c r="AA10"><v>2</v></c><c r="B10"><v>1</v></c></row>
-      <row r="2"><c r="A2"><v>0</v></c></row></sheetData></worksheet>`, []);
+      <row r="2"><c r="A2"><v>0</v></c></row></sheetData></worksheet>`, [], 7);
     expect(parsed.cells.map((cell) => cell.address)).toEqual(["A2", "B10", "AA10"]);
+    expect(parsed.cells.every((cell) => cell.sheetId === 7)).toBe(true);
   });
 });
 
@@ -108,6 +109,7 @@ describe("generated workbook", () => {
     const before = bytes.slice();
     const inventory = captureWorkbookInventory(bytes);
     expect(inventory.sheets).toHaveLength(3);
+    expect(inventory.sheets.map((sheet) => sheet.sheetId)).toEqual([1, 2, 3]);
     expect(bytes).toEqual(before);
   });
 });

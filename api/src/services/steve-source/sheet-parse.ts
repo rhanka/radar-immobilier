@@ -30,6 +30,7 @@ export function parseSheetXml(
   sheetName: string,
   xmlText: string,
   sharedStrings: readonly string[],
+  sheetId: number,
 ): ParsedSheet {
   const ws = documentElement(parseXml(xmlText));
   if (ws === null || ws.name !== "worksheet") {
@@ -68,7 +69,7 @@ export function parseSheetXml(
           );
         }
         seen.add(key);
-        const record = parseCell(sheetName, cell, row, col, sharedStrings);
+        const record = parseCell(sheetName, cell, row, col, sharedStrings, sheetId);
         if (record !== null) cells.push(record);
       }
     }
