@@ -65,7 +65,7 @@ Capture the 0.1.0 behavior net (plan, isolated runner, group 1 and 2 tests) with
 - [ ] **Opus review corrections — points 1–9**
   - [x] Points 2–4, 9: standalone compose, shell-secret canary, recursive preflight, guarded cleanup, scope globs and exception ID.
   - [x] Points 1, 6, 8: exact discovery surface/documents and literal 401 golden.
-  - [ ] Points 5, 7: complete raw-data egress invariant, labelled 0.1.0 passthrough and exact stale-session rejection.
+  - [x] Points 5, 7: complete raw-data egress invariant, labelled 0.1.0 passthrough and exact stale-session rejection.
   - [ ] Final runner gates, unchanged fixture SHAs and full cleanup.
 - [ ] **Lot N — Merge & close**
   - [ ] Push branch.
