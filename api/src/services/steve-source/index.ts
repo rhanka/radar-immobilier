@@ -22,4 +22,4 @@ export type {
   WorkbookInventory,
   XmlNode,
 } from "./types.js";
-export { MAX_XML_DEPTH } from "./xml.js";
+export { MAX_XML_DEPTH, MAX_XML_ELEMENTS, MAX_XML_CELLS } from "./xml.js";
