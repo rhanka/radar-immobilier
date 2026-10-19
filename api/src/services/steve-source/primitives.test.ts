@@ -73,3 +73,13 @@ it("keeps numeric sorting across sparse worksheet rows and columns", () => {
     <row r="2"><c r="A2"><v>0</v></c></row></sheetData></worksheet>`, []);
   expect(parsed.cells.map((cell) => cell.address)).toEqual(["A2", "B10", "AA10"]);
 });
+
+import { captureWorkbookInventory } from "./inventory.js";
+import { buildSyntheticWorkbook } from "./workbook-fixture.js";
+
+it("captures the generated workbook without changing its bytes", () => {
+  const bytes = buildSyntheticWorkbook();
+  const before = bytes.slice();
+  expect(captureWorkbookInventory(bytes).sheets).toHaveLength(3);
+  expect(bytes).toEqual(before);
+});
