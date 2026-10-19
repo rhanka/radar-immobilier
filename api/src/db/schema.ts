@@ -764,7 +764,19 @@ export const refreshDocumentOutcomes = pgTable("refresh_document_outcomes", {
   byStatus: index("refresh_document_outcomes_status_idx").on(t.status),
 }));
 
+// Hand-authored CHECK constraints and composite reason FK: migration 0014.
+export const facetReasonCodes = pgTable("facet_reason_codes", {
+  profileId: text("profile_id").notNull(),
+  code: text("code").notNull(),
+  verdict: text("verdict").notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.profileId, t.code] }),
+  classifiedCode: uniqueIndex("facet_reason_codes_classified_idx")
+    .on(t.profileId, t.code, t.verdict),
+}));
+
 export const schema = {
+  facetReasonCodes,
   refreshDocumentOutcomes,
   sources,
   ingestions,
