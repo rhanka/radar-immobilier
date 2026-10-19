@@ -11,15 +11,24 @@
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Hono } from "hono";
+import {
+  SignJWT,
+  generateKeyPair,
+  exportJWK,
+  createLocalJWKSet,
+  type JWK,
+  type JWTVerifyGetKey,
+} from "jose";
 import { buildRawDocumentRecord, rawMetaKey } from "@radar/sources";
 import { countsInvariant } from "@radar/domain";
 
 import { graphSignalsRoute } from "./graph-signals.js";
+import { createApp } from "../app.js";
 import { protect } from "./auth.js";
 import type { AuthConfig } from "../config.js";
-import { signSession } from "../services/auth/session.js";
 import type { Database } from "../db/client.js";
 import type { ObjectInfo, ObjectStore } from "../storage/object-store.js";
+import { signSession } from "../services/auth/session.js";
 import {
   discardedSignalKey,
   unionDiscardedSignals,
@@ -1053,6 +1062,7 @@ function accountDbWithStatus(status: string | null): Database {
 function authedApp(opts: {
   port: DiscardedSignalsPort;
   accountStatus?: string | null;
+  bearerGetKey?: JWTVerifyGetKey;
 }): Hono {
   const db = accountDbWithStatus(opts.accountStatus ?? "approved");
   const app = new Hono();
@@ -1060,6 +1070,7 @@ function authedApp(opts: {
     "*",
     protect(TEST_AUTH, {
       db,
+      ...(opts.bearerGetKey ? { bearerGetKey: opts.bearerGetKey } : {}),
     }),
   );
   app.route(
@@ -1082,6 +1093,24 @@ async function sessionCookie(sub: string): Promise<string> {
   return `radar_session=${token}`;
 }
 
+/** Sign a user access token + return the matching local JWKS getter. */
+async function makeBearerToken(sub: string): Promise<{ accessToken: string; getKey: JWTVerifyGetKey }> {
+  const { publicKey, privateKey } = await generateKeyPair("EdDSA", { crv: "Ed25519" });
+  const pubJwk: JWK = await exportJWK(publicKey);
+  pubJwk.kid = "k1";
+  pubJwk.alg = "EdDSA";
+  const getKey = createLocalJWKSet({ keys: [pubJwk] });
+  const accessToken = await new SignJWT({})
+    .setProtectedHeader({ alg: "EdDSA", kid: "k1" })
+    .setIssuer(TEST_AUTH.issuer)
+    .setAudience("https://immo.example.test/mcp")
+    .setSubject(sub)
+    .setIssuedAt()
+    .setExpirationTime("5m")
+    .sign(privateKey);
+  return { accessToken, getKey };
+}
+
 function mockCityNodes(nodes: ReturnType<typeof makeNode>[]) {
   vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(
     nodes as unknown as Awaited<ReturnType<typeof getSignalNodesForCity>>,
@@ -1089,6 +1118,22 @@ function mockCityNodes(nodes: ReturnType<typeof makeNode>[]) {
 }
 
 describe("session wiring through protect (detail and by-city)", () => {
+  it.each(["drummondville", "by-city"])("uses the verified cookie through createApp on %s", async (path) => {
+    const port = stubDiscarded([]);
+    const app = createApp({
+      db: accountDbWithStatus("approved"), store: new MemoryStore(),
+      auth: TEST_AUTH, discarded: port,
+      checkDb: async () => ({ ok: true }), checkObjectStore: async () => ({ ok: true }),
+    });
+    if (path === "by-city") vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([]);
+    else mockCityNodes(lot2CityNodes());
+    const res = await app.request(`/api/graph-signals/${path}?viewer=bob`, {
+      headers: { cookie: await sessionCookie("alice"), "x-user-id": "bob" },
+    });
+    expect(res.status).toBe(200);
+    expect(port.forViewer).toHaveBeenCalledExactlyOnceWith("alice");
+  });
+
   it("resolves forViewer from the verified session cookie, ignoring spoofed identity hints", async () => {
     const port = stubDiscarded([]);
     const app = authedApp({ port });
@@ -1098,6 +1143,18 @@ describe("session wiring through protect (detail and by-city)", () => {
     });
     expect(res.status).toBe(200);
     expect(port.forViewer).toHaveBeenCalledWith("alice");
+  });
+
+  it("resolves forViewer from a verified user Bearer [REDACTED] an approved account", async () => {
+    const port = stubDiscarded([]);
+    const { accessToken, getKey } = await makeBearerToken("bob");
+    const app = authedApp({ port, bearerGetKey: getKey });
+    mockCityNodes([makeNode("sig-001", "drummondville", "Signal")]);
+    const res = await app.request("/api/graph-signals/drummondville?viewer=alice", {
+      headers: { authorization: `Bearer ${accessToken}` },
+    });
+    expect(res.status).toBe(200);
+    expect(port.forViewer).toHaveBeenCalledWith("bob");
   });
 
   it("resolves forViewer from the session cookie on by-city", async () => {
