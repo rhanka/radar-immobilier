@@ -4,6 +4,7 @@ import type { AuthConfig } from "../config.js";
 import type { Database } from "../db/client.js";
 import type { ObjectStore } from "../storage/object-store.js";
 import type { OidcDiscovery } from "../services/auth/oidc.js";
+import { signSession } from "../services/auth/session.js";
 
 const AUTH: AuthConfig = {
   enabled: true, issuer: "https://auth.example.test", clientId: "radar-immobilier",
@@ -84,6 +85,64 @@ describe("contentGate on a content host", () => {
   it("uses Host even when it disagrees with the request URL", async () => {
     const res = await app.request(`http://${APP_HOST}/`, { headers: { host: STABLE } });
     expect(res.status).toBe(404);
+    expectDenyHeaders(res);
+  });
+
+  it("classifies a trailing-dot Host at the gate", async () => {
+    const res = await app.request(`http://${APP_HOST}/`, { headers: { host: `${STABLE}.` } });
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "not_found" });
+    expectDenyHeaders(res);
+  });
+});
+
+describe("contentGate probes on a content host", () => {
+  it.each(["GET", "HEAD"])("serves %s probes without a session cookie", async (method) => {
+    for (const path of ["/livez", "/health"]) {
+      const res = await app.request(`http://${STABLE}${path}`, { method });
+      expect(res.status, path).toBe(200);
+      if (method === "GET") expect((await res.json()).status, path).toBe("ok");
+      else expect(await res.text(), path).toBe("");
+      expect(res.headers.get("set-cookie"), path).toBeNull();
+    }
+  });
+
+  it("denies probe paths for other methods", async () => {
+    for (const path of ["/livez", "/health"]) {
+      const res = await app.request(`http://${STABLE}${path}`, { method: "POST" });
+      expect(res.status, path).toBe(404);
+      expect(await res.json(), path).toEqual({ error: "not_found" });
+      expectDenyHeaders(res);
+    }
+  });
+});
+
+describe("contentGate threat scenarios", () => {
+  it("denies browser navigations without redirecting to login", async () => {
+    expect((await app.request(`http://${APP_HOST}/api/v1/admin/users`, {
+      headers: { accept: "text/html" },
+    })).status).toBe(302);
+    const res = await app.request(`http://${STABLE}/api/v1/admin/users`, {
+      headers: { accept: "text/html" },
+    });
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: "unauthenticated" });
+    expectDenyHeaders(res);
+  });
+
+  it("denies requests bearing a valid session cookie", async () => {
+    const token = await signSession(
+      { sub: "user-1" },
+      { sessionSecret: AUTH.sessionSecret, ttlSeconds: 3600 },
+    );
+    expect((await app.request(`http://${APP_HOST}/api/v1/auth/login`, {
+      headers: { cookie: `radar_session=${token}` },
+    })).status).toBe(302);
+    const res = await app.request(`http://${STABLE}/api/v1/auth/login`, {
+      headers: { cookie: `radar_session=${token}` },
+    });
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: "unauthenticated" });
     expectDenyHeaders(res);
   });
 });

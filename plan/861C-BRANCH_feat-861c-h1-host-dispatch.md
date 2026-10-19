@@ -2,7 +2,7 @@
 
 ## Objective
 - [x] Ship lot H1 host dispatch: content origins (`<artifactUuid>.<base>`, `<releaseUuid>.pinned.<base>`) never reach app auth, admin routes or the SPA, while every other host keeps the current chain.
-- [ ] Apply and verify the eight fixes from `REVUE-OPUS-CODE.md`.
+- [x] Apply and verify the eight fixes from `REVUE-OPUS-CODE.md`.
 
 ## Scope / Guardrails
 - [x] Branch `feat/861c-h1-host-dispatch` from `origin/main` `7a474439`.
@@ -54,16 +54,16 @@
 - [x] **Lot H1-2 — fail-fast config (points 2, 6)**
   - [x] Invalid base throws at startup; unset stays disabled; `localhost` accepted
   - [x] Tested helper covers `index.ts`; a lone root dot must throw
-- [ ] **Lot H1-3 — gate hardening (points 3, 4, 8)**
-  - [ ] Probe bypass limited to GET/HEAD with gate-level tests
-  - [ ] `Accept: text/html` and valid-cookie threat scenarios
-  - [ ] Stale comments corrected in `app.ts` and `content-app.ts`
+- [x] **Lot H1-3 — gate hardening (points 3, 4, 8)**
+  - [x] Probe bypass limited to GET/HEAD with gate-level tests
+  - [x] `Accept: text/html` and valid-cookie threat scenarios
+  - [x] Stale comments corrected in `app.ts` and `content-app.ts`
 - [x] **Lot H1-4 — tooling and plan (points 5, 7)**
   - [x] Host env neutralized in `tools/artifact-host.mk`
   - [x] This branch plan file
-- [ ] **Lot gate**
-  - [ ] Scoped `src/artifacts` suite
-  - [ ] Full API suite without `ARTIFACTS_CONTENT_BASE`
-  - [ ] Full API suite with `ARTIFACTS_CONTENT_BASE=pages.example.net`
-  - [ ] Workspace typecheck and lint
-  - [ ] `down -v --remove-orphans` and absence of project resources verified
+- [x] **Lot gate**
+  - [x] Scoped `src/artifacts` suite: 34 tests passed
+  - [x] Full API without `ARTIFACTS_CONTENT_BASE`: 2311 passed, 6 skipped
+  - [x] Full API with `ARTIFACTS_CONTENT_BASE=pages.example.net`: 2311 passed, 6 skipped
+  - [x] Six-workspace typecheck and lint passed; 7 UI warnings recorded in the external report
+  - [x] `down -v --remove-orphans`: zero project containers, volumes or networks; all seven ports free

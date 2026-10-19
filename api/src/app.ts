@@ -74,7 +74,7 @@ export function createApp(deps: AppDeps): Hono {
     app.use("*", contentGate(deps.contentHost.contentBase));
   }
 
-  // Auth is wired first so the protect middleware runs before every business
+  // Auth runs after the content gate, so protect still fronts every business
   // route. When `deps.auth` is absent or disabled both are inert no-ops.
   if (deps.auth) {
     app.use("*", protect(deps.auth, { db: deps.db }));
