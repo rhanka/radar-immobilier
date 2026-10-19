@@ -6,7 +6,7 @@
  * verdict and never on the prefix.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildFacetTarget, codesForVerdict, fetchCityFacets, fetchReasonCodes, indexFacetHeads, type FacetHead } from "./signal-facets-client.js";
+import { buildFacetTarget, codesForVerdict, createCommandKey, facetErrorMessage, fetchCityFacets, fetchReasonCodes, indexFacetHeads, postFacetCommand, SignalFacetError, SubScopedCache, type FacetHead } from "./signal-facets-client.js";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 
 function signalNode(overrides: Partial<GraphSignalNode> = {}): GraphSignalNode {
@@ -205,3 +205,111 @@ describe("facet reads", () => {
   });
 });
 
+describe("facet writes", () => {
+  it("POSTs the strict body with the caller idempotency key", async () => {
+    const { calls } = stubFetch(() =>
+      jsonResponse(200, { ok: true, event: { id: "event-1" } }),
+    );
+    const key = createCommandKey();
+    const event = await postFacetCommand(
+      "",
+      "discard",
+      { target: { citySlug: "ville-synth", type: "Signal", id: "sig-1" }, reasonCode: "N-ADMIN" },
+      key,
+    );
+    expect(event).toEqual({ id: "event-1" });
+    const init = calls[0]!.init!;
+    expect(calls[0]!.url).toBe("/api/v1/signal-facets/discard");
+    expect(init.method).toBe("POST");
+    expect((init.headers as Record<string, string>)["Idempotency-Key"]).toBe(key);
+    expect(JSON.parse(init.body as string)).toEqual({
+      target: { citySlug: "ville-synth", type: "Signal", id: "sig-1" },
+      reasonCode: "N-ADMIN",
+    });
+  });
+
+  it("reuses the same key when retrying the same intention", async () => {
+    const { calls } = stubFetch((url, init) => {
+      const key = (init?.headers as Record<string, string>)["Idempotency-Key"];
+      return key === "retry-key"
+        ? jsonResponse(200, { ok: true, event: null })
+        : jsonResponse(409, { error: "idempotency_key_conflict" });
+    });
+    const body = {
+      target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" },
+      basket: "pertinent" as const,
+    };
+    await expect(postFacetCommand("", "select", body, "other-key")).rejects.toMatchObject({
+      status: 409,
+    });
+    await expect(postFacetCommand("", "select", body, "retry-key")).resolves.toBeNull();
+    await expect(postFacetCommand("", "select", body, "retry-key")).resolves.toBeNull();
+    expect(calls.map((call) => (call.init?.headers as Record<string, string>)["Idempotency-Key"])).toEqual([
+      "other-key",
+      "retry-key",
+      "retry-key",
+    ]);
+  });
+
+  it("maps failures by status and server code", async () => {
+    stubFetch((url) => {
+      if (url.endsWith("/select")) return jsonResponse(422, { error: "reason_code_required" });
+      if (url.endsWith("/discard")) return jsonResponse(422, { error: "invalid_reason_code" });
+      if (url.endsWith("/restore")) return jsonResponse(404, { error: "signal_not_found" });
+      return jsonResponse(401, { error: "unauthenticated" });
+    });
+    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" } };
+    await expect(postFacetCommand("", "select", body, "k1")).rejects.toMatchObject({
+      status: 422,
+      code: "reason_code_required",
+    });
+    expect(facetErrorMessage(new SignalFacetError(422, "reason_code_required"))).toContain(
+      "Code requis",
+    );
+    expect(facetErrorMessage(new SignalFacetError(422, "invalid_reason_code"))).toContain(
+      "Code invalide",
+    );
+    expect(facetErrorMessage(new SignalFacetError(422, "basket_required"))).toContain(
+      "Code requis ou invalide",
+    );
+    expect(facetErrorMessage(new SignalFacetError(404, "signal_not_found"))).toContain(
+      "Signal introuvable",
+    );
+    expect(facetErrorMessage(new SignalFacetError(401, "unauthenticated"))).toContain(
+      "Connexion requise",
+    );
+    expect(facetErrorMessage(new SignalFacetError(403, "account_not_approved"))).toContain(
+      "Compte non approuvé",
+    );
+    expect(
+      facetErrorMessage(new SignalFacetError(403, "browser_session_required")),
+    ).toContain("Session navigateur requise");
+    expect(facetErrorMessage(new SignalFacetError(409, "idempotency_key_conflict"))).toContain(
+      "Conflit de clé",
+    );
+  });
+
+  it("reports a network failure as unconfirmed, never as refused", async () => {
+    vi.stubGlobal("fetch", async () => {
+      throw new TypeError("fetch failed");
+    });
+    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" } };
+    const failure = await postFacetCommand("", "restore", body, "k1").catch((err) => err);
+    expect(failure).toBeInstanceOf(SignalFacetError);
+    if (!(failure instanceof SignalFacetError)) throw new Error("Expected a facet failure");
+    expect(failure.status).toBeNull();
+    expect(facetErrorMessage(failure)).toBe("Écriture non confirmée — Réessayer.");
+  });
+});
+
+describe("SubScopedCache", () => {
+  it("purges entries when the sub changes", () => {
+    const cache = new SubScopedCache<number>();
+    cache.write("alice", "delson", 3);
+    expect(cache.read("alice", "delson")).toBe(3);
+    expect(cache.read("bob", "delson")).toBeUndefined();
+    cache.write("bob", "delson", 5);
+    expect(cache.read("bob", "delson")).toBe(5);
+    expect(cache.read("alice", "delson")).toBeUndefined();
+  });
+});
