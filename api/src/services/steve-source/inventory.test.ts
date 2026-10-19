@@ -15,6 +15,8 @@ import {
   buildSyntheticWorkbook,
 } from "./workbook.fixture.js";
 
+import { workbookRelsXml, workbookXml } from "./workbook-parts.fixture.js";
+
 function cellAt(cells: CellRecord[], address: string): CellRecord {
   const found = cells.filter((cell) => cell.sheet === "Lots").find((cell) => cell.address === address);
   if (found === undefined) throw new Error(`missing test cell ${address}`);
@@ -40,6 +42,21 @@ describe("captureWorkbookInventory sheets", () => {
     ]);
   });
 
+  const invalidSheets: Array<[string, Record<string, string>, RegExp]> = [
+    ["duplicate name", { "xl/workbook.xml": workbookXml().replace('name="Codes"', 'name="LOTS"') }, /duplicate sheet name/],
+    ["duplicate sheet id", { "xl/workbook.xml": workbookXml().replace('sheetId="2"', 'sheetId="1"') }, /duplicate sheet id/],
+    ["duplicate part", { "xl/_rels/workbook.xml.rels": workbookRelsXml().replace("sheet2.xml", "sheet1.xml") }, /duplicate sheet part/],
+    ["missing sheet id", { "xl/workbook.xml": workbookXml().replace(' sheetId="2"', "") }, /has no sheet id/],
+    ["zero sheet id", { "xl/workbook.xml": workbookXml().replace('sheetId="2"', 'sheetId="0"') }, /invalid sheet id/],
+    ["unsafe sheet id", { "xl/workbook.xml": workbookXml().replace('sheetId="2"', 'sheetId="9007199254740992"') }, /invalid sheet id/],
+    ["hex sheet id", { "xl/workbook.xml": workbookXml().replace('sheetId="2"', 'sheetId="0x2"') }, /invalid sheet id/],
+    ["missing relationship id", { "xl/workbook.xml": workbookXml().replace(' r:id="rId2"', "") }, /has no relationship id/],
+    ["unknown relationship", { "xl/workbook.xml": workbookXml().replace('r:id="rId2"', 'r:id="rId9"') }, /unknown relationship/],
+  ];
+  it.each(invalidSheets)("rejects sheets with %s", (_label, overrides, message) => {
+    expect(() => captureWorkbookInventory(buildSyntheticWorkbook(overrides))).toThrow(SteveCaptureError);
+    expect(() => captureWorkbookInventory(buildSyntheticWorkbook(overrides))).toThrow(message);
+  });
 });
 
 describe("captureWorkbookInventory cells", () => {
