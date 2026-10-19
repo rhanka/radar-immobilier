@@ -1592,6 +1592,71 @@
     }
   }
 
+  /**
+   * After a confirmed write, reload detail, heads and by-city in parallel
+   * under their guards. A failed read gets a distinct recorded-but-not-
+   * reloaded message and a reads-only retry.
+   */
+  async function reloadAfterFacetWrite(citySlug: string): Promise<boolean> {
+    facetReloadError = null;
+    const [detailOk, headsOk, bulkOk] = await Promise.all([
+      selectedCity ? loadDetailForCity(citySlug) : Promise.resolve(true),
+      loadFacetHeads(citySlug),
+      load(),
+    ]);
+    const ok = detailOk && headsOk && bulkOk;
+    if (!ok) facetReloadError = "Les données affichées peuvent être périmées.";
+    return ok;
+  }
+
+  /** Confirmed card write: clear the city cache and reload all three reads. */
+  async function handleFacetSaved(action: FacetAction, target: FacetTarget): Promise<void> {
+    const label = detailNodes.find((node) => node.id === target.id)?.label ?? target.id;
+    detailCache.delete(target.citySlug);
+    const ok = await reloadAfterFacetWrite(target.citySlug);
+    // Discard in the default view: show and focus the undo notice.
+    if (ok && action === "discard" && !showDiscarded) {
+      discardedNotice = { target, label };
+      discardedActionError = null;
+      undoCommandKey = null;
+    }
+  }
+
+  function handleRetryFacetReads(): void {
+    if (selectedCity) void reloadAfterFacetWrite(selectedCity.municipality.slug);
+  }
+
+  /**
+   * Undo the discard with restore. Reuse the same key on retry, then reload
+   * after the confirmed write.
+   */
+  async function handleUndoDiscard(target: FacetTarget): Promise<void> {
+    if (undoBusy || !discardedNotice) return;
+    undoBusy = true;
+    discardedActionError = null;
+    try {
+      if (!undoCommandKey) undoCommandKey = createCommandKey();
+      await postFacetCommand("", "restore", { target }, undoCommandKey);
+      undoCommandKey = null;
+      discardedNotice = null;
+      detailCache.delete(target.citySlug);
+      await reloadAfterFacetWrite(target.citySlug);
+    } catch (err) {
+      discardedActionError =
+        err instanceof SignalFacetError
+          ? facetErrorMessage(err)
+          : "Écriture non confirmée — Réessayer.";
+    } finally {
+      undoBusy = false;
+    }
+  }
+
+  function handleDismissDiscardedNotice(): void {
+    discardedNotice = null;
+    discardedActionError = null;
+    undoCommandKey = null;
+  }
+
   /** « Réessayer » du panneau : recharge uniquement le détail signaux. */
   function retryDetail(): void {
     if (selectedCity) void loadDetailForCity(selectedCity.municipality.slug);
@@ -2926,6 +2991,22 @@
       onRetryGeo={retryGeo}
       hoveredSignalId={hoveredEvidenceSignalId}
       onHoverSignal={setHoveredEvidenceSignal}
+      facetHeads={activeFacetHeads}
+      reasonCodes={facetCodes}
+      facetCodesError={facetCodesError}
+      facetCodesLoading={facetCodesLoading}
+      facetsAllowed={facetsAllowed}
+      facetsNote={facetsNote}
+      showDiscarded={showDiscarded}
+      onToggleShowDiscarded={handleToggleShowDiscarded}
+      onFacetSaved={handleFacetSaved}
+      facetReloadError={facetReloadError}
+      onRetryFacetReads={handleRetryFacetReads}
+      discardedNotice={discardedNotice}
+      discardedActionError={discardedActionError}
+      {undoBusy}
+      onUndoDiscard={handleUndoDiscard}
+      onDismissDiscardedNotice={handleDismissDiscardedNotice}
     />
   </svelte:fragment>
 </ViewLayout>
