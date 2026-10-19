@@ -58,6 +58,10 @@ describe("deriveIdempotencyKey", () => {
 });
 
 describe("computeParamsHash", () => {
+  it("detects changes in JSON keys named __proto__", () => {
+    const profile = JSON.parse('{"__proto__":{"title":"changed"}}');
+    expect(computeParamsHash({ profile })).not.toBe(computeParamsHash({ profile: {} }));
+  });
   it("is order-insensitive on object keys", () => {
     expect(computeParamsHash({ b: 2, a: 1 })).toBe(computeParamsHash({ a: 1, b: 2 }));
   });
