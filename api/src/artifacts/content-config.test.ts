@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveContentHostConfig } from "./content-config.js";
+import { contentHostAppOption, resolveContentHostConfig } from "./content-config.js";
 
 const resolve = (contentBase?: string) => resolveContentHostConfig({ contentBase });
 
@@ -16,6 +16,11 @@ describe("resolveContentHostConfig", () => {
     });
   });
 
+  it("accepts localhost for local e2e", () => {
+    expect(resolve("localhost")).toEqual({ enabled: true, contentBase: "localhost" });
+    expect(resolve("  Localhost.  ")).toEqual({ enabled: true, contentBase: "localhost" });
+  });
+
   it("leaves application-domain policy to @sentropic/artifacts", () => {
     for (const base of ["pages.sent-tech.ca", "sent-tech.ca", "preprod.immo.sent-tech.ca"]) {
       expect(resolve(base)).toEqual({ enabled: true, contentBase: base });
@@ -28,15 +33,33 @@ describe("resolveContentHostConfig", () => {
     });
   });
 
-  it("refuses malformed bases", () => {
+  it("throws on an explicit but malformed base (fail-fast, never silently disabled)", () => {
     const bad = [
+      ".",
       "https://x.example.net", "x.example.net:3000", "x.example.net/p",
       "127.0.0.1", "::1", "not a host", "nodot", "-x.example.net",
       "x-.example.net", "x..example.net", "x.example.net..", "x_1.example.net",
       `${"a".repeat(64)}.example.net`, `${"a".repeat(63)}.${"b".repeat(63)}.${"c".repeat(63)}.${"d".repeat(63)}`,
     ];
     for (const base of bad) {
-      expect(resolve(base), base).toEqual({ enabled: false, reason: "content_base_invalid" });
+      expect(() => resolve(base), base).toThrow("invalid ARTIFACTS_CONTENT_BASE");
     }
+  });
+});
+
+describe("contentHostAppOption", () => {
+  it("spreads nothing when disabled (index.ts keeps the current chain)", () => {
+    expect(contentHostAppOption({ enabled: false, reason: "content_base_unset" })).toEqual({});
+  });
+
+  it("spreads the wired contentHost when enabled (index.ts wiring)", () => {
+    const resolved = resolve("pages.example.net");
+    expect(contentHostAppOption(resolved)).toEqual({ contentHost: resolved });
+  });
+
+  it("never sees an invalid base (resolve throws before the wiring)", () => {
+    expect(() => contentHostAppOption(resolve("not a host"))).toThrow(
+      "invalid ARTIFACTS_CONTENT_BASE",
+    );
   });
 });
