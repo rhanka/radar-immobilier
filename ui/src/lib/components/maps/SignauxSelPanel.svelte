@@ -19,7 +19,7 @@
    * reste affiché pour signaler un filtre actif.
    */
   import { tick } from "svelte";
-  import { Alert, Badge, Search } from "@sentropic/design-system-svelte";
+  import { Alert, Badge, Checkbox, Search } from "@sentropic/design-system-svelte";
   import { normalizeLotKey, zoneSearchKey } from "@radar/domain";
   import { rankBySearch } from "$lib/maps/entity-search.js";
   import { ExternalLink, FileText, FileX, RefreshCw, X } from "@lucide/svelte";
@@ -31,6 +31,16 @@
     type SignalDocRef,
     type SignalEvidence,
   } from "$lib/signals/graph-signal-detail-client.js";
+  import SignalFacetControls from "$lib/components/maps/SignalFacetControls.svelte";
+  import {
+    buildFacetTarget,
+    emptyTargetFacetState,
+    postFacetCommand,
+    type FacetAction,
+    type FacetTarget,
+    type ReasonCode,
+    type TargetFacetState,
+  } from "$lib/signals/signal-facets-client.js";
   import { nodeMatchesSubset } from "$lib/signals/graph-signal-filter.js";
   import {
     isPiiaLie,
@@ -187,6 +197,37 @@
    */
   export let hoveredSignalId: string | null = null;
   export let onHoverSignal: (id: string | null) => void = () => {};
+
+  // ── Personal baskets (lot 4) ──────────────────────────────────────────────
+  // City facet heads, indexed by the parent as `<type>/<id>`.
+  export let facetHeads: Map<string, TargetFacetState> = new Map();
+  export let reasonCodes: ReasonCode[] | null = null;
+  export let facetCodesError: string | null = null;
+  export let facetCodesLoading = false;
+  // Calls, controls and reveal require an authenticated, approved account
+  // with authentication enabled; otherwise show an explicit note.
+  export let facetsAllowed = false;
+  export let facetsNote: string | null = null;
+  export let showDiscarded = false;
+  export let onToggleShowDiscarded: (show: boolean) => void = () => {};
+  export let facetPostCommand: typeof postFacetCommand = postFacetCommand;
+  export let onFacetSaved: (action: FacetAction, target: FacetTarget) => void | Promise<void> = () => {};
+  export let facetReloadError: string | null = null;
+  export let onRetryFacetReads: () => void = () => {};
+  export let discardedNotice: { target: FacetTarget; label: string } | null = null;
+  export let discardedActionError: string | null = null;
+  export let undoBusy = false;
+  export let onUndoDiscard: (target: FacetTarget) => void = () => {};
+  export let onDismissDiscardedNotice: () => void = () => {};
+
+  function facetStateFor(node: GraphSignalNode): TargetFacetState {
+    return facetHeads.get(`${node.type}/${node.id}`) ?? emptyTargetFacetState();
+  }
+
+  /** Focus the discard notice on mount so undo is keyboard-accessible. */
+  function focusOnMount(node: HTMLElement): void {
+    node.focus();
+  }
 
   // Conteneur scrollable des fiches (pour amener en vue la fiche cross-survolée).
   let entityListEl: HTMLDivElement | null = null;
@@ -1110,6 +1151,38 @@
         </button>
       </div>
     {/if}
+    {#if facetReloadError}
+      <div class="sel-alert" data-testid="facet-reload-error">
+        <Alert tone="error" title="Classement enregistré, rechargement impossible" message={facetReloadError} />
+        <button type="button" class="sel-retry" on:click={onRetryFacetReads}>
+          <RefreshCw class="h-3 w-3" aria-hidden="true" />
+          Réessayer
+        </button>
+      </div>
+    {/if}
+    {#if discardedNotice}
+      {@const notice = discardedNotice}
+      <div
+        class="sel-notice"
+        role="alert"
+        tabindex="-1"
+        use:focusOnMount
+        data-testid="discarded-notice"
+      >
+        <Alert tone="info" title="Signal écarté" message={`« ${notice.label} » est écarté.`} />
+        {#if discardedActionError}
+          <p class="sel-notice-error" data-testid="discarded-action-error">{discardedActionError}</p>
+        {/if}
+        <div class="sel-notice-actions">
+          <button type="button" class="sel-retry" disabled={undoBusy} on:click={() => onUndoDiscard(notice.target)}>
+            Annuler
+          </button>
+          <button type="button" class="sel-retry" disabled={undoBusy} on:click={onDismissDiscardedNotice}>
+            Fermer
+          </button>
+        </div>
+      </div>
+    {/if}
     {#if zonesError}
       <div class="sel-alert">
         <Alert tone="warning" title="Zones indisponibles" message={zonesError} />
@@ -1140,6 +1213,17 @@
             {#if detailLoading}–{:else if detailError}n/d{:else if focusedZoneCode}{zoneScopedDetailNodes.length}/{totalSignalCount}{:else if signalIsFiltered}{filteredSignalCount}/{totalSignalCount}{:else}{totalSignalCount}{/if}
           </span>
         </summary>
+        {#if facetsAllowed}
+          <div class="sel-reveal-row" data-testid="show-discarded-row">
+            <Checkbox
+              label="Montrer les écartés"
+              checked={showDiscarded}
+              onchange={(event) => onToggleShowDiscarded(event.currentTarget.checked)}
+            />
+          </div>
+        {:else if facetsNote}
+          <p class="sel-muted" data-testid="facets-unavailable-note">{facetsNote}</p>
+        {/if}
         <div class="sel-entities" bind:this={entityListEl}>
           {#if detailLoading}
             <div class="sel-loading">
@@ -1167,6 +1251,7 @@
               {#if key}
                 {@const nodeVisual = visual(selectionState, key)}
                 {@const stageLabel = signalStageLabel(node)}
+                {@const facetState = facetStateFor(node)}
                 <!-- #86 — fiche : ancre de scroll (data-signal-node) + état
                      cross-survolé quand le viewer survole ce signal. Survoler
                      la fiche notifie le parent (→ le surlignage PDF pulse). -->
@@ -1211,12 +1296,26 @@
                         {stageLabel}
                       </span>
                     {/if}
+                    {#if facetState.pertinent}
+                      <Badge tone="success" size="sm" data-testid="facet-badge-pertinent">Pertinent</Badge>
+                    {/if}
+                    {#if facetState.watching}
+                      <Badge tone="info" size="sm" data-testid="facet-badge-watching">À surveiller</Badge>
+                    {/if}
+                    {#if facetState.archived}
+                      <Badge tone="neutral" size="sm" data-testid="facet-badge-archived">Écarté{#if facetState.archiveCode} · {facetState.archiveCode}{/if}</Badge>
+                    {/if}
+                    {#if facetState.archived && facetState.changedSinceArchive}
+                      <Badge tone="warning" size="sm" data-testid="facet-badge-changed">modifié depuis l'écart</Badge>
+                    {/if}
                     <AnnotationBadge count={annotationCounts[node.id] ?? 0} />
                   </button>
 
                   {#if nodeVisual.focused}
                     {@const evidence = signalEvidence(node)}
                     {@const coPv = coPvSignalCount(node)}
+                    {@const facetCardState = facetStateFor(node)}
+                    {@const facetCardTarget = buildFacetTarget(node)}
                     <div class="sel-entity-detail">
                       <!-- ID du signal + pastille couleur : lien visuel avec le
                            surlignage de la preuve (#84). La pastille reprend la
@@ -1382,6 +1481,19 @@
                           {/if}
                         </div>
                       </div>
+                      {#if facetsAllowed && facetCardTarget}
+                        <SignalFacetControls
+                          target={facetCardTarget}
+                          state={facetCardState}
+                          codes={reasonCodes}
+                          codesError={facetCodesError}
+                          codesLoading={facetCodesLoading}
+                          postCommand={facetPostCommand}
+                          onSaved={(action) => onFacetSaved(action, facetCardTarget)}
+                        />
+                      {:else if facetsNote}
+                        <p class="sel-muted" data-testid="facet-card-note">{facetsNote}</p>
+                      {/if}
                       <!-- §2 Domaine collaboratif : notes d'équipe sur ce signal,
                            chargées à l'ouverture de la fiche (lazy). -->
                       <SignalAnnotations
@@ -2826,5 +2938,36 @@
 
   .zone-signal-link:hover {
     text-decoration: underline;
+  }
+
+  /* Lot 4 — discarded reveal at the top of the signals bucket. */
+  .sel-reveal-row {
+    padding: 0.45rem 0.85rem 0.1rem;
+  }
+
+  /* Lot 4 — focused discard notice with undo. */
+  .sel-notice {
+    margin: 0.6rem 0.85rem 0;
+    padding: 0.55rem 0.6rem;
+    border: 1px solid var(--st-semantic-border-subtle, #e2e8f0);
+    border-radius: var(--st-radius-sm, 4px);
+    background: var(--st-semantic-surface-subtle, #f8fafc);
+  }
+
+  .sel-notice:focus {
+    outline: 2px solid var(--st-semantic-border-focus, #0f766e);
+    outline-offset: 1px;
+  }
+
+  .sel-notice-error {
+    margin: 0.4rem 0 0;
+    color: #b91c1c;
+    font-size: var(--signaux-fs-small);
+  }
+
+  .sel-notice-actions {
+    display: flex;
+    gap: 0.375rem;
+    margin-top: 0.45rem;
   }
 </style>
