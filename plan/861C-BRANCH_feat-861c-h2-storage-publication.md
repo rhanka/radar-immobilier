@@ -48,7 +48,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] Account approval reader and tests (c13).
   - [x] Dedicated pool, key/hash derivation and advisory locks (c10).
   - [x] Idempotency regression tests.
-  - [ ] Publication policy (c11).
+  - [x] Publication policy (c11).
   - [ ] Publication policy regression tests.
   - [ ] Schema/scope bootstrap and connection routing (c8).
   - [ ] Postgres/S3, lifecycle and SQL ensure composition (c8, c9).
