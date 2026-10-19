@@ -102,6 +102,23 @@ describe("SignalFacetControls — discard requires a code", () => {
 });
 
 describe("SignalFacetControls — baskets and restoration", () => {
+  it.each([new SignalFacetError(null, null), new TypeError("fetch failed")])(
+    "should label an unconfirmed write without a refusal: %s",
+    async (failure) => {
+      const postCommand = postCommandMock();
+      postCommand.mockRejectedValueOnce(failure);
+      const { onSaved } = renderControls({ postCommand });
+      await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
+      await screen.findByText("Écriture non confirmée — Réessayer.");
+      expect(screen.queryByText("Écriture refusée")).toBeNull();
+      expect(onSaved).not.toHaveBeenCalled();
+      expect(screen.queryByTestId("facet-state-pertinent")).toBeNull();
+      await fireEvent.click(screen.getByTestId("facet-retry"));
+      await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select"));
+      expect(postCommand.mock.calls[0]![3]).toBe(postCommand.mock.calls[1]![3]);
+    },
+  );
+
   it("keeps controls inactive until the confirmed write has been reloaded", async () => {
     let finishReload!: () => void;
     const reloaded = new Promise<void>((resolve) => { finishReload = resolve; });
