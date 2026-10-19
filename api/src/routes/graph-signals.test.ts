@@ -821,7 +821,7 @@ describe("GET /api/graph-signals/:city", () => {
 });
 
 function stubDiscarded(keys: DiscardedSignalKey[]) {
-  return { forViewer: vi.fn<DiscardedSignalsPort["forViewer"]>(() => new Set(keys)) };
+  return { forViewer: vi.fn<DiscardedSignalsPort["forViewer"]>(async () => new Set(keys)) };
 }
 
 const routeWithDiscarded = (discarded: DiscardedSignalsPort, db = mockDb) =>
@@ -833,6 +833,9 @@ function lot2CityNodes() {
     makeNode("sig-keep", "drummondville", "Signal", props),
     makeNode("sig-drop", "drummondville", "Signal", props),
     makeNode("evt-drop", "drummondville", "DesignationEvent", props),
+    // Impossible in base (storage keys are city+id, so one city+id holds a
+    // single node): proves discard keys are type-sensitive — hiding the
+    // Signal must not hide the DesignationEvent sharing its id.
     makeNode("sig-drop", "drummondville", "DesignationEvent", props),
   ];
 }
@@ -878,23 +881,35 @@ describe("city detail with native discards", () => {
       await next();
     });
     app.route("/", routeWithDiscarded(port));
-    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([]);
-    await app.request("/api/graph-signals/drummondville?viewer=spoofed", {
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(lot2CityNodes());
+    const res = await app.request("/api/graph-signals/drummondville?viewer=spoofed", {
       headers: { "x-user-id": "spoofed" },
     });
+    expect(res.status).toBe(200);
     expect(port.forViewer).toHaveBeenCalledWith("viewer-1");
   });
 
-  it("serves the reference dataset if the injected port fails", async () => {
+  it("answers 503 discarded_signals_unavailable when the injected port rejects", async () => {
     const nodes = lot2CityNodes();
-    const reference = await serveCity(nodes);
-    const port = { forViewer: () => { throw new Error("unavailable"); } };
+    const port: DiscardedSignalsPort = {
+      forViewer: async () => { throw new Error("unavailable"); },
+    };
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     try {
-      expect(await serveCity(nodes, port)).toEqual(reference);
+      const { status, body } = await serveCity(nodes, port);
+      expect(status).toBe(503);
+      expect(body).toEqual({ ok: false, error: "discarded_signals_unavailable" });
     } finally {
       log.mockRestore();
     }
+  });
+
+  it("never calls the port when the city has no nodes (404)", async () => {
+    const port = stubDiscarded([]);
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce([]);
+    const res = await routeWithDiscarded(port).request("/api/graph-signals/nowhere");
+    expect(res.status).toBe(404);
+    expect(port.forViewer).not.toHaveBeenCalled();
   });
 });
 
@@ -940,6 +955,7 @@ describe("by-city with native discards through the real store", () => {
     const rows = lot2ProjectionRows();
     const port = stubDiscarded(dropped.map((i) => {
       const r = rows[i]!;
+      // Fixture rows always carry a city (projection rows allow null).
       return discardedSignalKey(r.citySlug!, r.type, r.id);
     }));
     if (name === "recreated nodes") rows[3] = { ...rows[3]!, label: "Recreated", props: {} };
@@ -952,10 +968,9 @@ describe("by-city with native discards through the real store", () => {
     expect(actual.body.totalCount).toBe(kept.length);
     expect(port.forViewer).toHaveBeenCalledTimes(show ? 0 : 1);
     for (const city of actual.body.cities) {
-      const counts = city.vivierV2Counts;
-      const excluded = Object.values(counts.excludedByReason).reduce((sum, n) => sum + n, 0);
-      expect(countsInvariant(counts)).toBe(true);
-      expect(counts.total).toBe(counts.qualified + counts.residentialUnknown + excluded);
+      // The domain invariant already encodes total = qualified +
+      // residentialUnknown + excludedByReason; assert it once.
+      expect(countsInvariant(city.vivierV2Counts)).toBe(true);
     }
     if (name === "two native keys") {
       expect(actual.body.cities[0]!.vivierV2Counts).toMatchObject({
@@ -976,5 +991,27 @@ describe("by-city with native discards through the real store", () => {
     vi.mocked(listCitiesWithSignalNodes).mockResolvedValueOnce([]);
     await app.request("/api/graph-signals/by-city?viewer=spoofed", { headers: { "x-user-id": "spoofed" } });
     expect(port.forViewer).toHaveBeenCalledWith("viewer-2");
+  });
+
+  it("answers 503 discarded_signals_unavailable on by-city when the port rejects, without cities", async () => {
+    const rows = lot2ProjectionRows();
+    const port: DiscardedSignalsPort = {
+      forViewer: async () => { throw new Error("unavailable"); },
+    };
+    // No store mock is queued here: the route rejects before aggregating, so
+    // nothing may consume a queued implementation (it would leak into later tests).
+    const db = {
+      select: () => ({ from: () => ({ where: async () => rows }) }),
+    } as unknown as Database;
+    const app = graphSignalsRoute({ db, store: new MemoryStore(), discarded: port });
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const res = await app.request("/api/graph-signals/by-city");
+      expect(res.status).toBe(503);
+      expect(await res.json()).toEqual({ ok: false, error: "discarded_signals_unavailable" });
+      expect(listCitiesWithSignalNodes).not.toHaveBeenCalled();
+    } finally {
+      log.mockRestore();
+    }
   });
 });

@@ -30,7 +30,7 @@ export type DiscardedViewer = string | null;
 
 /** Injected port; implementations must return native keys only. */
 export interface DiscardedSignalsPort {
-  forViewer(viewer: DiscardedViewer): ReadonlySet<DiscardedSignalKey>;
+  forViewer(viewer: DiscardedViewer): Promise<ReadonlySet<DiscardedSignalKey>>;
 }
 
 /** The single shared empty key set (default port + reveal bypass). */
@@ -39,7 +39,7 @@ export const EMPTY_DISCARDED_KEYS: ReadonlySet<DiscardedSignalKey> =
 
 /** Default port: empty for every viewer. */
 export const EMPTY_DISCARDED_SIGNALS: DiscardedSignalsPort = {
-  forViewer: () => EMPTY_DISCARDED_KEYS,
+  forViewer: async () => EMPTY_DISCARDED_KEYS,
 };
 
 /** Minimal native identity shared by projection rows and served nodes. */

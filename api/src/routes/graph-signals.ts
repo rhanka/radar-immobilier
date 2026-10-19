@@ -15,6 +15,16 @@
  *   Returns Signal + DesignationEvent nodes for one city.
  *   Response: { ok: true, citySlug, nodes: [{ id, type, label, citySlug, sourceRef, createdAt, props }] }
  *   Returns 404 when no signal nodes exist for the city.
+ *
+ * Discarded signals (lot 2, no storage): both routes hide the viewer discard
+ * set D(viewer) BEFORE aggregation and pagination — detail before cards and
+ * legacyProjection, by-city before aggregateGraphSignalProjectionRows. Keys
+ * are native (city_slug, type, id); the viewer comes from the verified session
+ * set by `protect`; the default port is empty (baseline parity).
+ * `showDiscarded=1` reveals the full population B(F) on both routes WITHOUT
+ * calling the port. A failing port (or a missing session while auth is
+ * enabled) is an error: 503 { ok: false, error: "discarded_signals_unavailable" }
+ * carrying neither nodes nor cities — never a silent full set.
  */
 
 import { Hono, type Context } from "hono";
@@ -61,18 +71,31 @@ export interface GraphSignalsDeps {
   docEnrichmentBudgetMs?: number;
   /** Native discard keys for the session viewer; empty by default. */
   discarded?: DiscardedSignalsPort;
+  /**
+   * OIDC wiring. When auth is enabled the viewer MUST come from the verified
+   * session set by `protect`; a missing session is a wiring error (reject),
+   * never an anonymous viewer. Absent/disabled means open mode (tests, local
+   * dev): the viewer is anonymous (null).
+   */
+  auth?: { enabled: boolean };
 }
 
-/** Resolve once per request; showDiscarded=1 bypasses the port. */
-function readDiscardedKeys(c: Context, deps: GraphSignalsDeps): ReadonlySet<DiscardedSignalKey> {
+/**
+ * Resolve the viewer discard set once per request. `showDiscarded=1` reveals
+ * the full population WITHOUT calling the port. Any port failure rejects;
+ * callers answer 503 `discarded_signals_unavailable` (failure is an error,
+ * never an empty discarded set).
+ */
+async function readDiscardedKeys(
+  c: Context,
+  deps: GraphSignalsDeps,
+): Promise<ReadonlySet<DiscardedSignalKey>> {
   if (c.req.query("showDiscarded") === "1") return EMPTY_DISCARDED_KEYS;
-  const port = deps.discarded ?? EMPTY_DISCARDED_SIGNALS;
-  try {
-    return port.forViewer(resolveGraphSignalsViewer(c)) ?? EMPTY_DISCARDED_KEYS;
-  } catch (error) {
-    console.error("[graph-signals] discarded-signals port failed, serving full set:", error);
-    return EMPTY_DISCARDED_KEYS;
+  const viewer = resolveGraphSignalsViewer(c);
+  if (viewer === null && deps.auth?.enabled === true) {
+    throw new Error("graph-signals viewer unavailable (auth enabled, no session)");
   }
+  return (deps.discarded ?? EMPTY_DISCARDED_SIGNALS).forViewer(viewer);
 }
 
 export interface GraphSignalDocRef {
@@ -923,7 +946,17 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
         }
       : undefined;
     // Discard native rows inside the store before counts and partitions.
-    const discarded = readDiscardedKeys(c, deps);
+    let discarded: ReadonlySet<DiscardedSignalKey>;
+    try {
+      discarded = await readDiscardedKeys(c, deps);
+    } catch (error) {
+      console.error("[graph-signals] discarded-signals port failed:", error);
+      return c.json({ ok: false, error: "discarded_signals_unavailable" }, 503);
+    }
+    // Three explicit call shapes (not one options bag): the unfiltered
+    // branches keep the exact baseline invocation so metamorphic tests prove
+    // parity with the reference dataset; the filtered branch applies native
+    // keys before aggregation.
     const cities = discarded.size > 0
       ? await listCitiesWithSignalNodes(deps.db, dateRange, { discarded })
       : dateRange
@@ -939,8 +972,20 @@ export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
     // Un échec ici (DB down) est non-récupérable → 5xx légitime. L'enrichissement
     // documentaire, lui, est best-effort et NE DOIT PAS produire de 5xx.
     // Filter native nodes before cards, enrichment and legacy projection.
+    // Unknown cities short-circuit BEFORE the discard port: a 404 needs no
+    // viewer resolution and never calls the port.
     const stored = await getSignalNodesForCity(deps.db, city);
-    const nodes = filterDiscardedSignals(stored, readDiscardedKeys(c, deps));
+    if (stored.length === 0) {
+      return c.json({ ok: false, error: "no_signal_nodes", citySlug: city }, 404);
+    }
+    let discarded: ReadonlySet<DiscardedSignalKey>;
+    try {
+      discarded = await readDiscardedKeys(c, deps);
+    } catch (error) {
+      console.error("[graph-signals] discarded-signals port failed:", error);
+      return c.json({ ok: false, error: "discarded_signals_unavailable" }, 503);
+    }
+    const nodes = filterDiscardedSignals(stored, discarded);
     if (nodes.length === 0) {
       return c.json({ ok: false, error: "no_signal_nodes", citySlug: city }, 404);
     }
