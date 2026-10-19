@@ -43,7 +43,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
 ## Plan / Todo (lot-based)
 - [ ] **Lot H2-a — package and storage primitives**
   - [ ] Dependency pin and lock (c1).
-  - [ ] Storage configuration (c7).
+  - [x] Storage configuration (c7).
   - [ ] Configuration regression tests.
   - [ ] Account approval reader and tests (c13).
   - [ ] Dedicated pool, key/hash derivation and advisory locks (c10).
