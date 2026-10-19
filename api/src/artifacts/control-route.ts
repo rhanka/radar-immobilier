@@ -30,7 +30,7 @@ export interface ControlRouteDeps {
 
 export const CONTROL_MAX_BODY_BYTES = 2 * 1024 * 1024;
 
-function jsonError(c: Context, status: 400 | 401 | 403 | 413 | 415, body: Record<string, string>): Response {
+function jsonError(c: Context, status: 400 | 401 | 403 | 413 | 415 | 503, body: Record<string, string>): Response {
   return c.json(body, status);
 }
 
@@ -48,11 +48,17 @@ async function guard(
   if (!session) {
     return jsonError(c, 401, { error: "unauthenticated" });
   }
+  // A failed startup probe must not query the same unavailable database.
+  if (!deps.backend) return jsonError(c, 503, { error: "capability_unavailable" });
   const status = await readAccountStatus(deps.accounts, session.sub);
   if (!isApprovedAccountStatus(status)) {
     return c.json({ error: "account_not_approved", status: status ?? "unknown" }, 403);
   }
-  if (c.req.header("origin") !== deps.auth.appBaseUrl) {
+  const origin = c.req.header("origin");
+  const read = c.req.method === "GET" || c.req.method === "HEAD";
+  const fetchSite = c.req.header("sec-fetch-site");
+  if ((read ? origin !== undefined && origin !== deps.auth.appBaseUrl : origin !== deps.auth.appBaseUrl) ||
+    (read && fetchSite !== undefined && fetchSite !== "same-origin")) {
     return jsonError(c, 403, { error: "forbidden_origin" });
   }
   return { session };

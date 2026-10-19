@@ -30,7 +30,8 @@ function stubAccounts(statuses: Record<string, string>): AccountStatusQueryable 
 
 const app = new Hono().route(
   "/api/v1/artifacts/control",
-  controlRoute({ auth: AUTH, accounts: stubAccounts({ "sub-ok": "approved", "sub-pending": "pending" }) }),
+  controlRoute({ auth: AUTH, accounts: stubAccounts({ "sub-ok": "approved", "sub-pending": "pending" }),
+    backend: { handle: async () => ({ status: 503, body: { error: "capability_unavailable" } }) } }),
 );
 
 async function cookieFor(sub: string): Promise<string> {
@@ -124,8 +125,8 @@ describe("controlRoute body guards", () => {
   });
 });
 
-describe("controlRoute operations (backend pending c12)", () => {
-  it("passes fully-guarded POSTs to the backend (503 until c12)", async () => {
+describe("controlRoute unavailable backend", () => {
+  it("returns 503 for fully guarded POSTs when storage is unavailable", async () => {
     const res = await postEnsure({ sub: "sub-ok", contentType: "application/json", body: "{}" });
     expect(res.status).toBe(503);
     expect(await res.json()).toEqual({ error: "capability_unavailable" });
@@ -140,5 +141,25 @@ describe("controlRoute operations (backend pending c12)", () => {
   it("still guards GETs for anonymous callers", async () => {
     const res = await app.request(META_URL, { headers: { host: APP_HOST, origin: AUTH.appBaseUrl } });
     expect(res.status).toBe(401);
+  });
+});
+
+describe("controlRoute read origins", () => {
+  it.each(["GET", "HEAD"])("accepts same-origin %s without Origin", async (method) => {
+    const reads = new Hono().route("/", controlRoute({ auth: AUTH,
+      accounts: stubAccounts({ "sub-ok": "approved" }),
+      backend: { handle: async () => ({ status: 200, body: { total: 0 } }) } }));
+    const response = await reads.request("/list", { method,
+      headers: { cookie: await cookieFor("sub-ok"), "sec-fetch-site": "same-origin" } });
+    expect(response.status).toBe(200);
+  });
+
+  it.each(["GET", "HEAD"])("refuses foreign Origin or fetch site on %s", async (method) => {
+    for (const headers of [{ origin: "https://foreign.example" },
+      { "sec-fetch-site": "cross-site" }, { "sec-fetch-site": "same-site" }]) {
+      const response = await app.request(META_URL, { method,
+        headers: { ...headers, cookie: await cookieFor("sub-ok") } });
+      expect(response.status).toBe(403);
+    }
   });
 });
