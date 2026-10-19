@@ -14,9 +14,13 @@ it("should enforce browser identity, strict commands and domain errors", async (
   const { sub, target } = await facetFixture(db);
   const app = facetHttp(db);
   const cookie = await facetCookie(sub);
-  const post = (action: string, body: unknown, key: string | null = randomUUID(), session = cookie) =>
-    app.request(`/api/v1/signal-facets/${action}`, { method: "POST", body: JSON.stringify(body),
+  const post = async (action: string, body: unknown, key: string | null = randomUUID(), session = cookie) => {
+    const response = await app.request(`/api/v1/signal-facets/${action}`, { method: "POST", body: JSON.stringify(body),
       headers: { "content-type": "application/json", cookie: session, ...(key ? { "Idempotency-Key": key } : {}) } });
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(response.headers.get("vary")).toBe("Cookie, Authorization");
+    return response;
+  };
   const body = { target, basket: "pertinent" };
   expect((await post("select", body, null)).status).toBe(400);
   expect((await post("select", body, "invalid")).status).toBe(400);

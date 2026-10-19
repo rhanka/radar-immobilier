@@ -29,6 +29,7 @@ import { sourceCoverageRoute } from "./routes/source-coverage.js";
 import { sourceConsistencyRoute } from "./routes/source-consistency.js";
 import { prospectMarksRoute } from "./routes/prospect-marks.js";
 import { signalFacetsRoute } from "./routes/signal-facets.js";
+import { privateSignalResponse } from "./services/facets/private-response.js";
 import { documentsRoute, type DocumentsDeps } from "./routes/documents.js";
 
 export type AppDeps = HealthDeps &
@@ -65,6 +66,8 @@ export type AppDeps = HealthDeps &
 /** Compose the Hono application from injected dependencies. */
 export function createApp(deps: AppDeps): Hono {
   const app = new Hono();
+  app.use("/api/graph-signals/*", privateSignalResponse);
+  app.use("/api/v1/signal-facets/*", privateSignalResponse);
 
   // Auth is wired first so the protect middleware runs before every business
   // route. When `deps.auth` is absent or disabled both are inert no-ops.

@@ -19,7 +19,10 @@ it("should read the runtime codebook and isolate personal heads and availability
   const get = (path: string, session = cookie) => app.request(path, { headers: { cookie: session } });
   expect((await get(cityPath, "")).status).toBe(401);
   expect((await get(`${cityPath}?scope=personal`)).status).toBe(400);
-  const codes = await (await get("/api/v1/signal-facets/reason-codes")).json();
+  const codeResponse = await get("/api/v1/signal-facets/reason-codes");
+  expect(codeResponse.headers.get("cache-control")).toBe("private, no-store");
+  expect(codeResponse.headers.get("vary")).toBe("Cookie, Authorization");
+  const codes = await codeResponse.json();
   expect(codes.profileId).toBe("immo-steve-2026-09");
   expect(codes.codes).toHaveLength(28);
   expect(codes.codes.find((row: { code: string }) => row.code === "V2-PRECEDENT").verdict).toBe("non_pertinent");
