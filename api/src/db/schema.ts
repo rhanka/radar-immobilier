@@ -11,6 +11,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -771,10 +772,11 @@ export const facetReasonCodes = pgTable("facet_reason_codes", {
   verdict: text("verdict").notNull(),
 }, (t) => ({
   pk: primaryKey({ columns: [t.profileId, t.code] }),
-  classifiedCode: uniqueIndex("facet_reason_codes_classified_idx")
+  classifiedCode: unique("facet_reason_codes_classified_key")
     .on(t.profileId, t.code, t.verdict),
 }));
 
+// Partial indexes and immutability triggers are hand-authored in migration 0014.
 export const facetEvents = pgTable("facet_events", {
   id: uuid("id").primaryKey().defaultRandom(),
   scope: text("scope").notNull().default("personal"),
@@ -803,6 +805,7 @@ export const facetCommands = pgTable("facet_commands", {
   commandKey: uuid("command_key").notNull(),
   commandDigest: text("command_digest").notNull(),
   result: jsonb("result").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({ pk: primaryKey({ columns: [t.ownerId, t.commandKey] }) }));
 
 export const schema = {
