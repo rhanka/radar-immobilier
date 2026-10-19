@@ -7,6 +7,11 @@
  */
 
 import { buildSyntheticWorkbook } from "../workbook.fixture.js";
+import { buildGraphSet } from "./graph-set.js";
+import type {
+  IdentifiedGraphSet,
+  SyntheticGraph,
+} from "./graph-set.js";
 import type { MunicipalityRef } from "./municipality.js";
 
 export interface TriageFixtureRow {
@@ -98,6 +103,15 @@ export function buildTriageWorkbook(
     "xl/workbook.xml": triageWorkbookXml(),
     "xl/worksheets/sheet1.xml": triageSheetXml(rows, headers),
   });
+}
+
+export const TEST_SNAPSHOT_ID = "synthetic-d3-v1";
+
+export function buildTestGraphSet(
+  graphs: SyntheticGraph[],
+  snapshotId = TEST_SNAPSHOT_ID,
+): IdentifiedGraphSet {
+  return buildGraphSet(snapshotId, graphs);
 }
 
 export function syntheticMunicipalities(): MunicipalityRef[] {
