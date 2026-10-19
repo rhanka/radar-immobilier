@@ -6,6 +6,7 @@
  */
 
 import type { DocumentDateBasis, VivierV2Counts } from "@radar/domain";
+import { GraphSignalsHttpError } from "./graph-signal-detail-client.js";
 
 export interface GraphSignalCityItem {
   citySlug: string;
@@ -48,6 +49,11 @@ export interface GraphSignalsByCityOptions {
   dateBasis?: DocumentDateBasis;
   excludePiia?: boolean;
   excludeDerogations?: boolean;
+  /**
+   * Reveal discarded signals: `showDiscarded=1` recalculates counters on
+   * the complete B(F) population. Hidden by default; forward unchanged.
+   */
+  showDiscarded?: boolean;
 }
 
 export async function fetchGraphSignalsByCity(
@@ -60,10 +66,11 @@ export async function fetchGraphSignalsByCity(
   if (opts.dateBasis === "scrap") params.set("dateBasis", "scrap");
   if (opts.excludePiia) params.set("excludePiia", "1");
   if (opts.excludeDerogations) params.set("excludeDerogations", "1");
+  if (opts.showDiscarded === true) params.set("showDiscarded", "1");
   const qs = params.toString();
   const res = await fetch(
     `${baseUrl}/api/graph-signals/by-city${qs ? `?${qs}` : ""}`,
   );
-  if (!res.ok) throw new Error(`graph-signals/by-city: ${res.status}`);
+  if (!res.ok) throw new GraphSignalsHttpError(`graph-signals/by-city: ${res.status}`, res.status);
   return res.json();
 }

@@ -52,4 +52,20 @@ describe("fetchGraphSignalsByCity — #4 fenêtre date (dateFrom/dateTo)", () =>
     expect(Object.fromEntries(params)).toEqual({ dateFrom: "2026-09-29", dateTo: "2026-09-30",
       dateBasis: "scrap", excludePiia: "1", excludeDerogations: "1" });
   });
+
+  it("forwards the reveal verbatim (showDiscarded=1), default stays hidden", async () => {
+    const { calls } = stubFetch();
+    await fetchGraphSignalsByCity("", { showDiscarded: true });
+    expect(calls[0]).toBe("/api/graph-signals/by-city?showDiscarded=1");
+    await fetchGraphSignalsByCity("");
+    expect(calls[1]).toBe("/api/graph-signals/by-city");
+  });
+
+  it("throws a typed error carrying the HTTP status", async () => {
+    vi.stubGlobal("fetch", async () => new Response("unavailable", { status: 503 }));
+    const failure = await fetchGraphSignalsByCity("").catch((err) => err);
+    expect(failure?.name).toBe("GraphSignalsHttpError");
+    expect(failure?.status).toBe(503);
+    expect(String(failure?.message)).toBe("graph-signals/by-city: 503");
+  });
 });
