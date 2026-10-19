@@ -23,3 +23,20 @@ describe("XML text", () => {
     expect(() => decodeEntities(text)).toThrow(SteveCaptureError);
   });
 });
+
+import { parseXml } from "./xml.js";
+import { documentElement, spreadsheetText } from "./xml-query.js";
+
+describe("OOXML parsing", () => {
+  it("reads namespaces, comments, CDATA, escaped attributes and rich runs", () => {
+    const node = documentElement(parseXml(`<?xml version="1.0"?><!--test-->
+      <s:si xmlns:s="urn:test" label="A &gt; B"><r><t><![CDATA[Île & façade]]></t></r></s:si>`));
+    expect(node?.attrs["label"]).toBe("A > B");
+    expect(node === null ? null : spreadsheetText(node)).toBe("Île & façade");
+  });
+  it.each(["<a/><b/>", "<a></b>", "<a>", '<a x="1" x="2"/>', "<a x=no/>", "<!DOCTYPE a><a/>"])(
+    "rejects malformed or unsupported XML %s", (xml) => {
+      expect(() => parseXml(xml)).toThrow(SteveCaptureError);
+    },
+  );
+});
