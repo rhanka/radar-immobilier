@@ -46,6 +46,14 @@ export function createArtifactControl(host: Host, scope: string, contentBase: st
       if (body.storageScopeId !== undefined && body.storageScopeId !== scope) return invalid();
       const artifactId = body.artifactId;
       if ((op === "publish" || op === "meta") && !isArtifactId(artifactId)) return invalid();
+      let stableUrl: string | undefined;
+      if (op === "publish") {
+        try {
+          stableUrl = `https://${String(artifactId)}.${contentBase}/`;
+          const stable = parseContentHost(new URL(stableUrl).host, contentBase);
+          if (stable?.kind !== "stable" || stable.artifactId !== artifactId) return invalid();
+        } catch { return invalid(); }
+      }
       const write = op === "ensure" || op === "publish";
       if (write && (typeof body.idempotencyKey !== "string" || !body.idempotencyKey.trim() ||
         body.idempotencyKey.length > 256)) return invalid();
@@ -77,12 +85,9 @@ export function createArtifactControl(host: Host, scope: string, contentBase: st
       if (op !== "publish" || response.status !== 201) return response;
       const result = response.body as { releaseId: string; manifest: string };
       const manifest = JSON.parse(result.manifest) as { digest: string };
-      const stableUrl = `https://${String(artifactId)}.${contentBase}/`;
       const pinnedUrl = `https://${result.releaseId}.pinned.${contentBase}/`;
-      const stable = parseContentHost(new URL(stableUrl).host, contentBase);
       const pinned = parseContentHost(new URL(pinnedUrl).host, contentBase);
-      if (stable?.kind !== "stable" || stable.artifactId !== artifactId ||
-        pinned?.kind !== "pinned" || pinned.releaseId !== result.releaseId) throw new Error("invalid content links");
+      if (pinned?.kind !== "pinned" || pinned.releaseId !== result.releaseId) throw new Error("invalid content links");
       return { status: 201, body: { artifactId, releaseId: result.releaseId, digest: manifest.digest,
         stableUrl, pinnedUrl } };
     },
