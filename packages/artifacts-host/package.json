@@ -1,0 +1,27 @@
+{
+  "name": "@radar/artifacts-host",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared artifact storage/publication helpers for radar-immobilier (ARTIFACTS_* config, idempotency keys, publish policy, account status).",
+  "license": "UNLICENSED",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@sentropic/artifacts": "0.1.2",
+    "@aws-sdk/client-s3": "^3.980.0",
+    "pg": "^8.12.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.6",
+    "typescript": "5.4.5",
+    "vitest": "^5.0.3"
+  }
+}
