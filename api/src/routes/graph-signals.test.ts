@@ -1079,3 +1079,76 @@ describe("discard union D(viewer) = common ∪ personal (detail)", () => {
     expect(forViewer.mock.calls.map(([viewer]) => viewer)).toEqual(["alice", "bob", "alice"]);
   });
 });
+
+describe("discard union D(viewer) = common ∪ personal (by-city)", () => {
+  const keyOf = (row: { citySlug: string | null; type: string; id: string }) =>
+    discardedSignalKey(row.citySlug!, row.type, row.id);
+
+  it("hides common ∪ personal per viewer on one app, reveal restores both", async () => {
+    const rows = lot2ProjectionRows();
+    const COMMON = new Set([keyOf(rows[3]!)]);
+    const PERSONAL: Record<string, Set<DiscardedSignalKey>> = {
+      alice: new Set([keyOf(rows[0]!)]),
+      bob: new Set<DiscardedSignalKey>(),
+    };
+    const forViewer = vi.fn<DiscardedSignalsPort["forViewer"]>(async (viewer) =>
+      unionDiscardedSignals(COMMON, viewer === null ? undefined : PERSONAL[viewer]),
+    );
+
+    const db = {
+      select: () => ({ from: () => ({ where: async () => rows }) }),
+    } as unknown as Database;
+    let current: string | null = null;
+    const app = new Hono();
+    app.use("*", async (c, next) => {
+      if (current !== null) c.set("session" as never, { sub: current } as never);
+      await next();
+    });
+    app.route("/", graphSignalsRoute({ db, store: new MemoryStore(), discarded: { forViewer } }));
+
+    const actual = await vi.importActual<typeof import("../services/graph/graph-store.js")>(
+      "../services/graph/graph-store.js",
+    );
+    for (let i = 0; i < 5; i++) {
+      vi.mocked(listCitiesWithSignalNodes).mockImplementationOnce(actual.listCitiesWithSignalNodes);
+    }
+
+    async function serveTotals(query = "") {
+      const res = await app.request(`/api/graph-signals/by-city${query}`);
+      const body = (await res.json()) as { totalCount: number; cities: CitySignalCounts[] };
+      for (const city of body.cities) expect(countsInvariant(city.vivierV2Counts)).toBe(true);
+      return {
+        status: res.status,
+        total: body.totalCount,
+        counts: new Map(body.cities.map((city) => [city.citySlug, city.signalCount])),
+      };
+    }
+
+    current = "alice";
+    const alice = await serveTotals();
+    current = "bob";
+    const bob = await serveTotals();
+    current = "alice";
+    const aliceAgain = await serveTotals();
+    current = "alice";
+    const aliceReveal = await serveTotals("?showDiscarded=1");
+    current = "bob";
+    const bobReveal = await serveTotals("?showDiscarded=1");
+
+    // Baseline: drummondville 5, sutton 1.
+    expect(aliceReveal.total).toBe(6);
+    expect(bobReveal.total).toBe(6);
+    expect(bobReveal.counts).toEqual(aliceReveal.counts);
+    // Alice hides the common row plus her personal row (the common row stays
+    // hidden although her personal scope omits it); bob hides only common.
+    expect(alice.status).toBe(200);
+    expect(alice.total).toBe(4);
+    expect(alice.counts.get("drummondville")).toBe(3);
+    expect(bob.total).toBe(5);
+    expect(bob.counts.get("drummondville")).toBe(4);
+    expect(bob.counts.get("sutton")).toBe(1);
+    // No cross-viewer state on the shared app.
+    expect(aliceAgain).toEqual(alice);
+    expect(forViewer.mock.calls.map(([viewer]) => viewer)).toEqual(["alice", "bob", "alice"]);
+  });
+});
