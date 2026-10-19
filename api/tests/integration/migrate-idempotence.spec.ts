@@ -51,6 +51,7 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
     "re-applies the last migration without error when its journal row is missing but its schema is already present, " +
       "and re-registers exactly that row",
     async () => {
+      expect(lastEntry.tag).toBe("0015_artifacts_lifecycle");
       // The journal selects the current last migration, including appended
       // package migrations. Its persisted hash must match those exact bytes.
       const expectedHash = createHash("sha256")
@@ -74,6 +75,8 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
         `SELECT count(*)::text AS count FROM ${MIGRATIONS_SCHEMA}."${MIGRATIONS_TABLE}"`,
       );
       expect(Number(beforeCount.rows[0]?.count)).toBe(journal.entries.length);
+      const lifecycleBefore = await pool.query("SELECT to_regclass('artifacts.artifact_access') AS relation");
+      expect(lifecycleBefore.rows[0]?.relation).toBe("artifacts.artifact_access");
 
       const typeCountBeforeDrift = await pool.query<{ count: string }>(
         `SELECT count(*)::text AS count FROM pg_type WHERE typname = 'refresh_outcome_status'`,
@@ -122,6 +125,8 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
         `SELECT count(*)::text AS count FROM pg_type WHERE typname = 'refresh_outcome_status'`,
       );
       expect(Number(typeCountAfterDrift.rows[0]?.count)).toBe(1);
+      const lifecycleAfterDrift = await pool.query("SELECT to_regclass('artifacts.artifact_access') AS relation");
+      expect(lifecycleAfterDrift.rows[0]?.relation).toBe("artifacts.artifact_access");
 
       // ── 3. Re-run migrate() on the drifted journal ──────────────────────
       // drizzle's migrator compares each migration file's folderMillis
@@ -155,6 +160,8 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
       }
       expect(rerunRow.hash).toBe(lastRow.hash);
       expect(rerunRow.created_at).toBe(lastRow.created_at);
+      const lifecycleAfterReplay = await pool.query("SELECT to_regclass('artifacts.artifact_access') AS relation");
+      expect(lifecycleAfterReplay.rows[0]?.relation).toBe("artifacts.artifact_access");
 
       // 0013 replayed on a schema that already has it: the PK stays (city_slug, id).
       const pkAfterRerun = await pool.query<{ cols: string[] }>(
