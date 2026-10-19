@@ -30,9 +30,9 @@ export async function startHarness(name: string) {
   const pool = createArtifactsPool({ ...params, database });
   await migrate(drizzle(pool), { migrationsFolder });
   const config = { enabled: true as const, storageScope: "h2_scope", orgId: "h2_org",
-    s3Bucket: `h2-artifacts-${name}`, s3Endpoint: env.S3_ENDPOINT,
+    s3Bucket: `h2-artifacts-${name}`, s3Endpoint: env.S3_ENDPOINT, s3Region: "us-east-1",
     s3AccessKey: env.S3_ACCESS_KEY, s3SecretKey: env.S3_SECRET_KEY };
-  const s3 = new S3Client({ endpoint: config.s3Endpoint, forcePathStyle: true, region: "us-east-1",
+  const s3 = new S3Client({ endpoint: config.s3Endpoint, forcePathStyle: true, region: config.s3Region,
     credentials: { accessKeyId: config.s3AccessKey, secretAccessKey: config.s3SecretKey } });
   await s3.send(new CreateBucketCommand({ Bucket: config.s3Bucket }));
   const blobs = createS3BlobStore({ client: s3, bucket: config.s3Bucket });

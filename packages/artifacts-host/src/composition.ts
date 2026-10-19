@@ -25,7 +25,7 @@ export async function composeArtifactHost(
     return acl?.storageScopeId === config.storageScope ? acl : undefined;
   };
   const client = new S3Client({
-    endpoint: config.s3Endpoint, region: "us-east-1", forcePathStyle: true,
+    endpoint: config.s3Endpoint, region: config.s3Region, forcePathStyle: true,
     credentials: { accessKeyId: config.s3AccessKey, secretAccessKey: config.s3SecretKey },
   });
   const blobs = injectedBlobs ?? createS3BlobStore({ client, bucket: config.s3Bucket });

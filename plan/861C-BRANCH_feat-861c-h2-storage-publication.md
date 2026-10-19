@@ -74,7 +74,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
 - [ ] **Opus review corrections**
   - [ ] D1: isolate configuration failure from unavailable storage startup.
   - [x] D2/D9c/D9e: allow same-origin reads without Origin; retain POST guards.
-  - [ ] D3: require and use ARTIFACTS_S3_REGION (seventh storage variable).
+  - [x] D3: require and use ARTIFACTS_S3_REGION (seventh storage variable); synthetic configuration includes all seven values.
   - [ ] D4: exclude nested .env* and refuse them in image-smoke.
   - [ ] D5: bound lock/S3 waits and handle idle pool errors.
   - [ ] D6: validate stable content links before publication.

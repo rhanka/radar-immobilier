@@ -10,6 +10,7 @@ const FULL: ArtifactsConfigInput = {
   orgId: "org-1",
   s3Bucket: "radar-artifacts-dedicated",
   s3Endpoint: "https://s3.example.net",
+  s3Region: "ca-central-1",
   s3AccessKey: "AKIAEXAMPLE",
   s3SecretKey: "secret-example",
 };
@@ -26,6 +27,7 @@ describe("resolveArtifactsStorageConfig", () => {
         orgId: "   ",
         s3Bucket: undefined,
         s3Endpoint: "",
+        s3Region: " ",
         s3AccessKey: "",
         s3SecretKey: "  ",
       }),
@@ -44,7 +46,7 @@ describe("resolveArtifactsStorageConfig", () => {
     const result = resolveArtifactsStorageConfig({ storageScope: "scope-1",
       s3AccessKey: "AKIAEXAMPLE", s3SecretKey: "secret-example" });
     expect(result).toEqual({ enabled: false, reason: "artifacts_config_incomplete",
-      missing: ["ARTIFACTS_ORG_ID", "ARTIFACTS_S3_BUCKET", "ARTIFACTS_S3_ENDPOINT"] });
+      missing: ["ARTIFACTS_ORG_ID", "ARTIFACTS_S3_BUCKET", "ARTIFACTS_S3_ENDPOINT", "ARTIFACTS_S3_REGION"] });
     for (const value of ["AKIAEXAMPLE", "secret-example", "scope-1"]) {
       expect(JSON.stringify(result)).not.toContain(value);
     }
@@ -70,16 +72,26 @@ describe("resolveArtifactsStorageConfig", () => {
     expect(() => resolveArtifactsStorageConfig({ storageScope: "bad/scope" })).toThrow("invalid ARTIFACTS_STORAGE_SCOPE");
     expect(() => resolveArtifactsStorageConfig({ s3Endpoint: "ftp://invalid.example" })).toThrow("invalid ARTIFACTS_S3_ENDPOINT");
   });
+  it("closes when the region is missing and rejects malformed complete or partial regions", () => {
+    expect(resolveArtifactsStorageConfig({ ...FULL, s3Region: undefined })).toEqual({
+      enabled: false, reason: "artifacts_config_incomplete", missing: ["ARTIFACTS_S3_REGION"],
+    });
+    for (const s3Region of ["CA-central-1", "https://region", "region space", "-region"]) {
+      expect(() => resolveArtifactsStorageConfig({ ...FULL, s3Region })).toThrow("invalid ARTIFACTS_S3_REGION");
+      expect(() => resolveArtifactsStorageConfig({ s3Region })).toThrow("invalid ARTIFACTS_S3_REGION");
+    }
+  });
 });
 
 describe("readArtifactsEnv", () => {
-  it("maps the six ARTIFACTS_* variables and ignores the rest", () => {
+  it("maps the seven ARTIFACTS_* variables and ignores the rest", () => {
     expect(
       readArtifactsEnv({
         ARTIFACTS_STORAGE_SCOPE: "scope-1",
         ARTIFACTS_ORG_ID: "org-1",
         ARTIFACTS_S3_BUCKET: "bucket-1",
         ARTIFACTS_S3_ENDPOINT: "https://s3.example.net",
+        ARTIFACTS_S3_REGION: "ca-central-1",
         ARTIFACTS_S3_ACCESS_KEY: "AK",
         ARTIFACTS_S3_SECRET_KEY: "SK",
         UNRELATED: "x",
@@ -89,6 +101,7 @@ describe("readArtifactsEnv", () => {
       orgId: "org-1",
       s3Bucket: "bucket-1",
       s3Endpoint: "https://s3.example.net",
+      s3Region: "ca-central-1",
       s3AccessKey: "AK",
       s3SecretKey: "SK",
     });
