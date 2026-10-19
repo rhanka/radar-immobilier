@@ -223,3 +223,102 @@ export async function postFacetCommand(
   const payload = (await res.json()) as { event?: unknown };
   return payload.event ?? null;
 }
+
+export interface ReasonCodesResponse {
+  profileId: string;
+  codes: ReasonCode[];
+}
+
+/** GET reason-codes with no query string (any parameter is a server 400). */
+export async function fetchReasonCodes(
+  baseUrl: string,
+  opts: FacetRequestOptions = {},
+): Promise<ReasonCodesResponse> {
+  const res = await fetchWithTimeout(requestUrl(baseUrl, "/api/v1/signal-facets/reason-codes"), {
+    signal: opts.signal,
+    timeoutMs: opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
+  });
+  if (!res.ok) throw new SignalFacetError(res.status, await readErrorCode(res));
+  const payload = (await res.json()) as { profileId: string; codes: ReasonCode[] };
+  return { profileId: payload.profileId, codes: payload.codes };
+}
+
+export interface CityFacetsResponse {
+  heads: FacetHead[];
+}
+
+/** GET cities/:city with no query string (any parameter is a server 400). */
+export async function fetchCityFacets(
+  baseUrl: string,
+  city: string,
+  opts: FacetRequestOptions = {},
+): Promise<CityFacetsResponse> {
+  const res = await fetchWithTimeout(
+    requestUrl(baseUrl, `/api/v1/signal-facets/cities/${encodeURIComponent(city)}`),
+    {
+      signal: opts.signal,
+      timeoutMs: opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
+    },
+  );
+  if (!res.ok) throw new SignalFacetError(res.status, await readErrorCode(res));
+  const payload = (await res.json()) as { heads: FacetHead[] };
+  return { heads: payload.heads };
+}
+
+/**
+ * French user-facing copy of a write failure, by HTTP status and server
+ * error code. A null status (network/timeout) is unconfirmed: same-key retry.
+ */
+export function facetErrorMessage(error: SignalFacetError): string {
+  if (error.status === null) return "Écriture non confirmée — Réessayer.";
+  switch (error.status) {
+    case 401:
+      return "Connexion requise — connectez-vous pour classer ce signal.";
+    case 403:
+      if (error.code === "browser_session_required") {
+        return "Session navigateur requise — rouvrez l'application dans votre navigateur.";
+      }
+      return "Compte non approuvé ou session navigateur requise.";
+    case 404:
+      return "Signal introuvable — il a peut-être été retiré du graphe.";
+    case 409:
+      return "Conflit de clé — rechargez les données puis réessayez.";
+    case 422:
+      if (error.code === "reason_code_required") return "Code requis — choisissez un code de motif.";
+      if (error.code === "invalid_reason_code") return "Code invalide pour ce classement.";
+      return "Code requis ou invalide.";
+    default:
+      return `Écriture refusée (${error.status}) — réessayez.`;
+  }
+}
+
+/**
+ * Sub-scoped cache: entries are indexed under the authenticated `sub` and
+ * purged as a whole whenever the sub changes, so personal facet state is
+ * never reused across viewers.
+ */
+export class SubScopedCache<T> {
+  private sub: string | null = null;
+  private entries = new Map<string, T>();
+
+  private align(sub: string | null): void {
+    if (sub !== this.sub) {
+      this.entries.clear();
+      this.sub = sub;
+    }
+  }
+
+  read(sub: string | null, key: string): T | undefined {
+    this.align(sub);
+    return this.entries.get(key);
+  }
+
+  write(sub: string | null, key: string, value: T): void {
+    this.align(sub);
+    this.entries.set(key, value);
+  }
+
+  clear(): void {
+    this.entries.clear();
+  }
+}
