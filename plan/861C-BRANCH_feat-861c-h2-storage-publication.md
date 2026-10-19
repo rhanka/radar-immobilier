@@ -80,7 +80,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [ ] D4: exclude nested .env* and refuse them in image-smoke.
   - [ ] D5: bound lock/S3 waits and handle idle pool errors.
   - [x] D6: validate stable content links before publication (three invalid-origin cases, zero backend calls).
-  - [ ] D7/D9b: assert lifecycle drift objects and reject mismatched hashes.
+  - [x] D7/D9b: assert the 0015 tag and lifecycle object before/after drift and replay; reject mismatched journal hashes without a scope write.
   - [ ] D8: restrict artifact tooling and worker configuration scope.
   - [ ] D9d: use independent literal SHA-256 vectors.
   - [ ] D10: remove dead code, tidy requested formatting and document cleanup.
