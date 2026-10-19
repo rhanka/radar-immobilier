@@ -53,26 +53,15 @@ export function parseRowNumber(raw: string, sheetName: string): number {
 
 export function parseStyleIndex(raw: string | null, sheetName: string, where: string): number | null {
   if (raw === null) return null;
-  const style = parseStrictInt(raw, `style index at ${where} in sheet "${sheetName}"`);
-  if (style < 0) {
-    throw new SteveCaptureError(`invalid style index "${raw}" at ${where} in sheet "${sheetName}"`);
-  }
-  return style;
+  return parseStrictInt(raw, `style index at ${where} in sheet "${sheetName}"`);
 }
 
 function parseFormula(cell: XmlNode, sheetName: string, where: string): CellFormula | null {
   const f = firstChild(cell, "f");
   if (f === null) return null;
   const siAttr = attr(f, "si");
-  let si: number | null = null;
-  if (siAttr !== null) {
-    si = parseStrictInt(siAttr, `shared formula index at ${where} in sheet "${sheetName}"`);
-    if (si < 0) {
-      throw new SteveCaptureError(
-        `invalid shared formula index "${siAttr}" at ${where} in sheet "${sheetName}"`,
-      );
-    }
-  }
+  const si = siAttr === null ? null
+    : parseStrictInt(siAttr, `shared formula index at ${where} in sheet "${sheetName}"`);
   return { text: f.text, kind: attr(f, "t"), ref: attr(f, "ref"), si };
 }
 

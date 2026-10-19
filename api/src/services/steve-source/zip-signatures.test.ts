@@ -21,6 +21,4 @@ describe("ZIP specification signatures", () => {
     const centralOffset = dv.getUint32(bytes.length - 22 + 16, true);
     expect(dv.getUint32(centralOffset, true)).toBe(0x02014b50);
   });
-
-
 });
