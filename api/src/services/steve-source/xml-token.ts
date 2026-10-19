@@ -1,4 +1,6 @@
 import { SteveCaptureError } from "./types.js";
+import { MAX_XML_ATTRIBUTES, MAX_XML_ATTRIBUTES_PER_ELEMENT } from "./xml-budget.js";
+import type { XmlBudget } from "./xml-budget.js";
 
 export function localName(raw: string): string {
   const sep = raw.indexOf(":");
@@ -39,7 +41,7 @@ export function decodeEntities(input: string): string {
   );
 }
 
-export function parseTag(inner: string): { tagName: string; attrs: Record<string, string> } {
+export function parseTag(inner: string, budget: XmlBudget): { tagName: string; attrs: Record<string, string> } {
   // Null-prototype map: an attribute literally named `__proto__` stays an own
   // property instead of mutating the object prototype.
   const attrs: Record<string, string> = Object.create(null) as Record<string, string>;
@@ -49,7 +51,14 @@ export function parseTag(inner: string): { tagName: string; attrs: Record<string
   const attrRe = /\s+([^\s=]+)\s*=\s*("[^"]*"|'[^']*')/y;
   let m: RegExpExecArray | null;
   let consumed = 0;
+  let attributes = 0;
   while ((m = attrRe.exec(rest)) !== null) {
+    if (++attributes > MAX_XML_ATTRIBUTES_PER_ELEMENT) {
+      throw new SteveCaptureError(`XML exceeds the ${String(MAX_XML_ATTRIBUTES_PER_ELEMENT)}-attribute per-element limit`);
+    }
+    if (++budget.attributes > MAX_XML_ATTRIBUTES) {
+      throw new SteveCaptureError(`XML capture exceeds the ${String(MAX_XML_ATTRIBUTES)}-attribute limit`);
+    }
     const key = m[1] ?? "";
     const quoted = m[2] ?? '""';
     if (Object.hasOwn(attrs, key)) {
