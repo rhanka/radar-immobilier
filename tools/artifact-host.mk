@@ -93,7 +93,7 @@ typecheck: guard-env ## Typecheck all workspaces using only the test stack
 
 lint: guard-env ## Lint the workspace using only the test stack
 	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
-	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npx eslint ."
+	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npx eslint . --ignore-pattern 'tmp/**'"
 
 .PHONY: down
 down: guard-env ## Stop the stack and remove volumes/orphans
