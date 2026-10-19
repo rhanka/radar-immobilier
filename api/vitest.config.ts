@@ -10,9 +10,14 @@ export default defineConfig({
       "@radar/domain": fileURLToPath(
         new URL("../packages/radar-domain/src/index.ts", import.meta.url),
       ),
+      "@radar/artifacts-host": fileURLToPath(
+        new URL("../packages/artifacts-host/src/index.ts", import.meta.url),
+      ),
     },
   },
   test: {
+    // Bound concurrent DB pools and PostGIS scratch-database creation.
+    maxWorkers: 4,
     include: ["tests/**/*.spec.ts", "src/**/*.test.ts"],
     testTimeout: 20000,
     hookTimeout: 20000,
