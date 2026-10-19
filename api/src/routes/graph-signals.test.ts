@@ -19,6 +19,7 @@ import type { Database } from "../db/client.js";
 import type { ObjectInfo, ObjectStore } from "../storage/object-store.js";
 import {
   discardedSignalKey,
+  type DiscardedSignalKey,
   type DiscardedSignalsPort,
 } from "../services/graph/discarded-signals.js";
 
@@ -819,7 +820,7 @@ describe("GET /api/graph-signals/:city", () => {
   });
 });
 
-function stubDiscarded(keys: string[]) {
+function stubDiscarded(keys: DiscardedSignalKey[]) {
   return { forViewer: vi.fn<DiscardedSignalsPort["forViewer"]>(() => new Set(keys)) };
 }
 
@@ -939,7 +940,7 @@ describe("by-city with native discards through the real store", () => {
     const rows = lot2ProjectionRows();
     const port = stubDiscarded(dropped.map((i) => {
       const r = rows[i]!;
-      return discardedSignalKey(r.citySlug, r.type, r.id);
+      return discardedSignalKey(r.citySlug!, r.type, r.id);
     }));
     if (name === "recreated nodes") rows[3] = { ...rows[3]!, label: "Recreated", props: {} };
     const show = query === "?showDiscarded=1";
