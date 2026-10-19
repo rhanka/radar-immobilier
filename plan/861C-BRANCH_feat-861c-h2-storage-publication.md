@@ -60,7 +60,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] Core migration and journal (c3).
   - [x] Lifecycle migration and journal (c4).
   - [x] Migration provenance tests (c5).
-  - [ ] Cookie-only control guards (c14).
+  - [x] Cookie-only control guards (c14).
   - [ ] Auth-only application mount and startup wiring (c14).
   - [ ] Offline HTTP guard regression tests (c15).
   - [ ] Postgres/S3 publication and concurrency tests (c15).
