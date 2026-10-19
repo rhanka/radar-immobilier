@@ -10,6 +10,7 @@ import type {
   AutoFilterRecord,
   CellRecord,
   DataValidationRule,
+  UncapturedFeatureName,
 } from "./types.js";
 import { parseXml } from "./xml.js";
 import type { XmlNode } from "./xml.js";
@@ -21,11 +22,19 @@ export interface ParsedSheet {
   autoFilter: AutoFilterRecord | null;
   hiddenRows: number[];
   hiddenColumns: number[];
+  uncaptured: Array<{ feature: UncapturedFeatureName; detail: string | null }>;
 }
 
 function attr(node: XmlNode, name: string): string | null {
   const value = node.attrs[name];
   return value === undefined ? null : value;
+}
+
+function hasDescendantNamed(node: XmlNode, name: string): boolean {
+  for (const child of node.children) {
+    if (child.name === name || hasDescendantNamed(child, name)) return true;
+  }
+  return false;
 }
 
 function isHidden(raw: string | null): boolean {
@@ -50,6 +59,57 @@ function readHiddenColumns(ws: XmlNode, sheetName: string): number[] {
     }
   }
   return [...hidden].sort((a, b) => a - b);
+}
+
+function readUncaptured(ws: XmlNode): Array<{ feature: UncapturedFeatureName; detail: string | null }> {
+  const found: Array<{ feature: UncapturedFeatureName; detail: string | null }> = [];
+  const merges = firstChild(ws, "mergeCells");
+  if (merges !== null) {
+    const count = childElements(merges, "mergeCell").length;
+    found.push({
+      feature: "mergeCells",
+      detail: `${String(count)} merged range(s) present; ranges not captured`,
+    });
+  }
+  const links = firstChild(ws, "hyperlinks");
+  if (links !== null) {
+    found.push({
+      feature: "hyperlinks",
+      detail: `${String(childElements(links, "hyperlink").length)} hyperlink(s) present; targets not captured`,
+    });
+  }
+  const tables = firstChild(ws, "tableParts");
+  if (tables !== null) {
+    found.push({
+      feature: "tables",
+      detail: `${String(childElements(tables, "tablePart").length)} table part(s) present; tables not captured`,
+    });
+  }
+  const ext = firstChild(ws, "extLst");
+  if (ext !== null) {
+    found.push({ feature: "extensionList", detail: "worksheet extension list present; contents not captured" });
+    if (hasDescendantNamed(ext, "dataValidation")) {
+      found.push({
+        feature: "dataValidationExtensions",
+        detail: "data validations carried by the extension list (x14) are not captured",
+      });
+    }
+  }
+  if (firstChild(ws, "legacyDrawing") !== null || firstChild(ws, "drawing") !== null) {
+    found.push({ feature: "drawings", detail: "drawing reference present; drawings and comments not captured" });
+  }
+  const conditional = childElements(ws, "conditionalFormatting");
+  if (conditional.length > 0) {
+    found.push({
+      feature: "conditionalFormatting",
+      detail: `${String(conditional.length)} conditional formatting block(s) present; rules not captured`,
+    });
+  }
+  const pivots = firstChild(ws, "pivotTableParts");
+  if (pivots !== null) {
+    found.push({ feature: "pivotTables", detail: "pivot table parts present; pivot tables not captured" });
+  }
+  return found;
 }
 
 export function parseSheetXml(
@@ -129,5 +189,6 @@ export function parseSheetXml(
     },
     hiddenRows,
     hiddenColumns: readHiddenColumns(ws, sheetName),
+    uncaptured: readUncaptured(ws),
   };
 }

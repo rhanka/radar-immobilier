@@ -19,6 +19,7 @@ import type {
   DefinedNameRecord,
   SheetInfo,
   SheetVisibility,
+  UncapturedFeature,
   WorkbookInventory,
 } from "./types.js";
 import { parseXml } from "./xml.js";
@@ -131,6 +132,29 @@ function parseSheetId(raw: string | null, sheetName: string): number {
   return sheetId;
 }
 
+function workbookLevelUncaptured(parts: string[]): UncapturedFeature[] {
+  const found: UncapturedFeature[] = [];
+  const none = (feature: UncapturedFeature["feature"], detail: string): void => {
+    found.push({ sheet: null, sheetId: null, feature, detail });
+  };
+  if (parts.some((part) => part === "xl/styles.xml" || part.endsWith("/styles.xml"))) {
+    none(
+      "styleDefinitions",
+      "styles part present; per-cell style indexes are captured, definitions are not",
+    );
+  }
+  if (parts.some((part) => part.startsWith("xl/comments"))) {
+    none("comments", "comment parts present; comments are not captured");
+  }
+  if (parts.some((part) => part.startsWith("xl/drawings/"))) {
+    none("drawings", "drawing parts present; drawings are not captured");
+  }
+  if (parts.some((part) => part.startsWith("xl/tables/"))) {
+    none("tables", "table parts present; tables are not captured");
+  }
+  return found;
+}
+
 export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
   const sha256 = createHash("sha256").update(input).digest("hex");
   const files = unzip(input);
@@ -171,8 +195,10 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
     dataValidations: [],
     definedNames: readDefinedNames(workbook),
     autoFilters: [],
+    parts: [...files.keys()].sort(),
     hiddenRows: [],
     hiddenColumns: [],
+    uncaptured: [],
   };
   const seenNames = new Set<string>();
   const seenIds = new Set<number>();
@@ -219,6 +245,10 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
     for (const col of parsed.hiddenColumns) {
       inventory.hiddenColumns.push({ sheet: name, sheetId, col });
     }
+    for (const item of parsed.uncaptured) {
+      inventory.uncaptured.push({ sheet: name, sheetId, feature: item.feature, detail: item.detail });
+    }
   });
+  for (const item of workbookLevelUncaptured(inventory.parts)) inventory.uncaptured.push(item);
   return inventory;
 }
