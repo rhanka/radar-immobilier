@@ -79,6 +79,43 @@ export interface AutoFilterRecord {
   definition: XmlNode;
 }
 
+export interface HiddenRowRecord {
+  sheet: string;
+  sheetId: number;
+  row: number;
+}
+
+export interface HiddenColumnRecord {
+  sheet: string;
+  sheetId: number;
+  col: number;
+}
+
+/**
+ * Vocabulary of workbook features that the capture detects but does not
+ * project into typed fields. Each entry names the feature and where it was
+ * seen so callers can prove coverage gaps instead of silently ignoring them.
+ */
+export type UncapturedFeatureName =
+  | "mergeCells"
+  | "hyperlinks"
+  | "tables"
+  | "comments"
+  | "drawings"
+  | "extensionList"
+  | "dataValidationExtensions"
+  | "styleDefinitions"
+  | "conditionalFormatting"
+  | "pivotTables";
+
+export interface UncapturedFeature {
+  /** Owning sheet name, or null for workbook-level parts. */
+  sheet: string | null;
+  sheetId: number | null;
+  feature: UncapturedFeatureName;
+  detail: string | null;
+}
+
 export interface WorkbookInventory {
   sha256: string;
   sheets: SheetInfo[];
