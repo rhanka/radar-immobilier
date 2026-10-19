@@ -775,7 +775,31 @@ export const facetReasonCodes = pgTable("facet_reason_codes", {
     .on(t.profileId, t.code, t.verdict),
 }));
 
+export const facetEvents = pgTable("facet_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  scope: text("scope").notNull().default("personal"),
+  ownerId: uuid("owner_id").notNull().references(() => accountUsers.id),
+  actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
+  targetType: text("target_type").notNull().default("signal"),
+  citySlug: text("city_slug").notNull(),
+  nodeType: text("node_type").notNull(),
+  nodeId: text("node_id").notNull(),
+  facet: text("facet").notNull(),
+  basket: text("basket"),
+  state: text("state").notNull(),
+  profileId: text("profile_id"),
+  reasonCode: text("reason_code"),
+  verdict: text("verdict"),
+  observedFingerprint: text("observed_fingerprint").notNull(),
+  commandKey: uuid("command_key").notNull(),
+  commandDigest: text("command_digest").notNull(),
+  supersedes: uuid("supersedes").references((): AnyPgColumn => facetEvents.id),
+  supersededBy: uuid("superseded_by").references((): AnyPgColumn => facetEvents.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const schema = {
+  facetEvents,
   facetReasonCodes,
   refreshDocumentOutcomes,
   sources,
