@@ -7,6 +7,7 @@
  */
 
 import { buildSyntheticWorkbook } from "../workbook.fixture.js";
+import type { MunicipalityRef } from "./municipality.js";
 
 export interface TriageFixtureRow {
   number?: string;
@@ -97,4 +98,13 @@ export function buildTriageWorkbook(
     "xl/workbook.xml": triageWorkbookXml(),
     "xl/worksheets/sheet1.xml": triageSheetXml(rows, headers),
   });
+}
+
+export function syntheticMunicipalities(): MunicipalityRef[] {
+  return [
+    { slug: "ville-synth-a", name: "Ville Synth A", mrc: "MRC Synth Nord" },
+    { slug: "ville-synth-b", name: "Ville Synth B", mrc: null },
+    { slug: "bourg-homonyme-nord", name: "Bourg Homonyme", mrc: "MRC Nord" },
+    { slug: "bourg-homonyme-sud", name: "Bourg Homonyme", mrc: "MRC Sud" },
+  ];
 }
