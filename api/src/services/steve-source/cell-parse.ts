@@ -5,9 +5,12 @@
  * (`is`) or a formula (`f`). Shared-formula daughters (empty `f` with `si`)
  * keep their own cached value; the master text is resolved by the caller
  * through the matching `si`.
+ *
+ * Coordinates are resolved once by the sheet parser and passed in: this
+ * module never re-parses the `r` reference.
  */
 
-import { columnIndexToLetters, parseA1 } from "./cell-ref.js";
+import { columnIndexToLetters } from "./cell-ref.js";
 import { SteveCaptureError } from "./types.js";
 import type { CellFormula, CellRecord, CellType } from "./types.js";
 import { firstChild, spreadsheetText } from "./xml-query.js";
@@ -30,12 +33,31 @@ function isCellType(value: string): value is CellType {
   );
 }
 
+/** Strict non-negative integer: `Number()` would accept `""` or `"0x10"`. */
+export function parseStrictInt(raw: string, what: string): number {
+  if (!/^\d+$/.test(raw)) {
+    throw new SteveCaptureError(`invalid ${what} "${raw}"`);
+  }
+  const value = Number(raw);
+  if (!Number.isSafeInteger(value)) throw new SteveCaptureError(`invalid ${what} "${raw}"`);
+  return value;
+}
+
 export function parseRowNumber(raw: string, sheetName: string): number {
-  const row = Number(raw);
-  if (!Number.isInteger(row) || row < 1 || row > 1048576) {
+  const row = parseStrictInt(raw, `row number in sheet "${sheetName}"`);
+  if (row < 1 || row > 1048576) {
     throw new SteveCaptureError(`invalid row number "${raw}" in sheet "${sheetName}"`);
   }
   return row;
+}
+
+export function parseStyleIndex(raw: string | null, sheetName: string, where: string): number | null {
+  if (raw === null) return null;
+  const style = parseStrictInt(raw, `style index at ${where} in sheet "${sheetName}"`);
+  if (style < 0) {
+    throw new SteveCaptureError(`invalid style index "${raw}" at ${where} in sheet "${sheetName}"`);
+  }
+  return style;
 }
 
 function parseFormula(cell: XmlNode, sheetName: string, where: string): CellFormula | null {
@@ -44,8 +66,8 @@ function parseFormula(cell: XmlNode, sheetName: string, where: string): CellForm
   const siAttr = attr(f, "si");
   let si: number | null = null;
   if (siAttr !== null) {
-    si = Number(siAttr);
-    if (!Number.isInteger(si) || si < 0) {
+    si = parseStrictInt(siAttr, `shared formula index at ${where} in sheet "${sheetName}"`);
+    if (si < 0) {
       throw new SteveCaptureError(
         `invalid shared formula index "${siAttr}" at ${where} in sheet "${sheetName}"`,
       );
@@ -57,18 +79,11 @@ function parseFormula(cell: XmlNode, sheetName: string, where: string): CellForm
 export function parseCell(
   sheetName: string,
   cell: XmlNode,
-  rowNum: number,
-  colFallback: number,
+  row: number,
+  col: number,
   sharedStrings: readonly string[],
 ): CellRecord | null {
   const refAttr = attr(cell, "r");
-  let row = rowNum;
-  let col = colFallback;
-  if (refAttr !== null) {
-    const pos = parseA1(refAttr);
-    row = pos.row;
-    col = pos.col;
-  }
   const where = refAttr ?? `R${String(row)}C${String(col)}`;
   const typeAttr = attr(cell, "t") ?? "n";
   if (!isCellType(typeAttr)) {
@@ -112,5 +127,6 @@ export function parseCell(
     value,
     formula,
     cachedValue: formula === null ? null : vText,
+    style: parseStyleIndex(attr(cell, "s"), sheetName, where),
   };
 }
