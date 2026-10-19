@@ -52,7 +52,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] Publication policy regression tests.
   - [x] Schema/scope bootstrap and connection routing (c8).
   - [x] Postgres/S3, lifecycle and SQL ensure composition (c8, c9).
-  - [ ] HTTP library facade (c12).
+  - [x] HTTP library facade (c12).
   - [ ] Shared package entrypoint and checks (c6).
 - [ ] **Lot H2-b — migration and HTTP integration**
   - [ ] Test tooling, dotenv exclusion and image wiring (c2, c6).
