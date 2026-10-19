@@ -46,13 +46,13 @@ export function parseTag(inner: string): { tagName: string; attrs: Record<string
   const nameMatch = /^\s*([^\s/=]+)/.exec(inner);
   const rawName = nameMatch?.[1] ?? "";
   const rest = rawName === "" ? "" : inner.slice(inner.indexOf(rawName) + rawName.length);
-  const attrRe = /([^\s=]+)\s*=\s*("[^"]*"|'[^']*')/g;
+  const attrRe = /\s+([^\s=]+)\s*=\s*("[^"]*"|'[^']*')/y;
   let m: RegExpExecArray | null;
   let consumed = 0;
   while ((m = attrRe.exec(rest)) !== null) {
     const key = m[1] ?? "";
     const quoted = m[2] ?? '""';
-    if (rest.slice(consumed, m.index).trim() !== "" || Object.hasOwn(attrs, key)) {
+    if (Object.hasOwn(attrs, key)) {
       throw new SteveCaptureError("invalid or duplicate XML attribute");
     }
     attrs[key] = decodeEntities(quoted.slice(1, -1));
