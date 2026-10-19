@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS facet_reason_codes (
   code text NOT NULL,
   verdict text NOT NULL CHECK (verdict IN ('pertinent', 'a_surveiller', 'non_pertinent')),
   PRIMARY KEY (profile_id, code),
-  UNIQUE (profile_id, code, verdict)
+  CONSTRAINT facet_reason_codes_classified_key UNIQUE (profile_id, code, verdict)
 );
 --> statement-breakpoint
 INSERT INTO facet_reason_codes (profile_id, code, verdict) VALUES
@@ -59,15 +59,15 @@ CREATE TABLE IF NOT EXISTS facet_events (
   supersedes uuid REFERENCES facet_events(id) ON DELETE RESTRICT,
   superseded_by uuid REFERENCES facet_events(id) ON DELETE RESTRICT DEFERRABLE INITIALLY DEFERRED,
   created_at timestamptz NOT NULL DEFAULT now(),
-  CHECK (actor_id = owner_id),
-  CHECK ((facet = 'selection' AND basket IS NOT NULL AND basket IN ('pertinent', 'a_surveiller'))
+  CONSTRAINT chk_facet_events_actor_owner CHECK (actor_id = owner_id),
+  CONSTRAINT chk_facet_events_basket CHECK ((facet = 'selection' AND basket IS NOT NULL AND basket IN ('pertinent', 'a_surveiller'))
       OR (facet = 'archive' AND basket IS NULL)),
-  CHECK ((profile_id IS NULL AND reason_code IS NULL AND verdict IS NULL)
+  CONSTRAINT chk_facet_events_classified_reason CHECK ((profile_id IS NULL AND reason_code IS NULL AND verdict IS NULL)
       OR (profile_id IS NOT NULL AND reason_code IS NOT NULL AND verdict IS NOT NULL
           AND ((facet = 'selection' AND verdict = basket)
             OR (facet = 'archive' AND verdict = 'non_pertinent')))),
-  CHECK (facet <> 'archive' OR state <> 'active' OR reason_code IS NOT NULL),
-  CHECK (supersedes IS DISTINCT FROM id AND superseded_by IS DISTINCT FROM id),
+  CONSTRAINT chk_facet_events_archive_reason CHECK (facet <> 'archive' OR state <> 'active' OR reason_code IS NOT NULL),
+  CONSTRAINT chk_facet_events_chain CHECK (supersedes IS DISTINCT FROM id AND superseded_by IS DISTINCT FROM id),
   FOREIGN KEY (profile_id, reason_code, verdict)
     REFERENCES facet_reason_codes(profile_id, code, verdict)
 );
@@ -92,6 +92,8 @@ END $$;
 --> statement-breakpoint
 CREATE OR REPLACE TRIGGER facet_events_immutable
   BEFORE UPDATE OR DELETE ON facet_events FOR EACH ROW EXECUTE FUNCTION guard_facet_event();
+CREATE OR REPLACE TRIGGER facet_events_no_truncate
+  BEFORE TRUNCATE ON facet_events FOR EACH STATEMENT EXECUTE FUNCTION guard_facet_event();
 --> statement-breakpoint
 -- A no-op must consume its key without creating a domain event.
 CREATE TABLE IF NOT EXISTS facet_commands (
@@ -99,6 +101,7 @@ CREATE TABLE IF NOT EXISTS facet_commands (
   command_key uuid NOT NULL,
   command_digest text NOT NULL CHECK (command_digest ~ '^[a-f0-9]{64}$'),
   result jsonb NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (owner_id, command_key)
 );
 CREATE OR REPLACE FUNCTION guard_facet_command() RETURNS trigger LANGUAGE plpgsql AS $$
@@ -107,3 +110,5 @@ BEGIN
 END $$;
 CREATE OR REPLACE TRIGGER facet_commands_immutable
   BEFORE UPDATE OR DELETE ON facet_commands FOR EACH ROW EXECUTE FUNCTION guard_facet_command();
+CREATE OR REPLACE TRIGGER facet_commands_no_truncate
+  BEFORE TRUNCATE ON facet_commands FOR EACH STATEMENT EXECUTE FUNCTION guard_facet_command();
