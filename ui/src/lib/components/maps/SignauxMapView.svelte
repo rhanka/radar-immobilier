@@ -586,6 +586,46 @@
     ? (facetHeadsByCity.get(selectedCity.municipality.slug) ?? EMPTY_FACET_HEADS)
     : EMPTY_FACET_HEADS;
 
+  // Keep viewers isolated: clear heads, codes and details together on sub
+  // changes, then reload under the new viewer's request guards.
+  $: {
+    const sub = currentUserSub;
+    const context = `${sub ?? ""}/${facetsAllowed}`;
+    if (appliedFacetContext !== context) {
+      const initial = appliedFacetContext === null;
+      appliedFacetContext = context;
+      facetCodesSub = sub;
+      facetHeadsGuard.cancel();
+      facetCodesGuard.cancel();
+      detailGuard.cancel();
+      bulkLoadVersion += 1;
+      facetHeadsByCity = new Map();
+      facetCodes = null;
+      facetCodesError = null;
+      facetCodesLoading = false;
+      facetReloadError = null;
+      discardedNotice = null;
+      discardedActionError = null;
+      undoCommandKey = null;
+      undoBusy = false;
+      detailCache.clear();
+      detailNodes = [];
+      detailLegacyProjection = null;
+      activeEvidence = null;
+      activeDocument = null;
+      activeSource = null;
+      hoveredEvidenceSignalId = null;
+      if (!initial) {
+        void load();
+        if (selectedCity) void loadDetailForCity(selectedCity.municipality.slug);
+      }
+      if (facetsAllowed && sub) {
+        void loadReasonCodes();
+        if (selectedCity) void loadFacetHeads(selectedCity.municipality.slug);
+      }
+    }
+  }
+
   let appliedGeoRouteKey: string | null = null;
   let pendingRouteZoneKey: string | null = null;
   let pendingRouteLotId: string | null = null;
@@ -2066,6 +2106,12 @@
     if (appliedGeoRouteKey === key) return;
     appliedGeoRouteKey = key;
     const filters = readGeoFilters(route.state.filters);
+    // Every reveal transition clears details and heads and reloads all three
+    // reads (back, forward, reload, checkbox), preserving server order.
+    const nextShowDiscarded = filters.showDiscarded === true;
+    const revealChanged = appliedShowDiscarded !== null && appliedShowDiscarded !== nextShowDiscarded;
+    appliedShowDiscarded = nextShowDiscarded;
+    showDiscarded = nextShowDiscarded;
     const layersChanged = lotsEnabled !== filters.lotsEnabled;
     lotsEnabled = filters.lotsEnabled ?? true;
     // A relative period is resolved when read: only a different period reloads.
@@ -2092,7 +2138,17 @@
       else if (selectedCity && cptaqAvailable) void loadCptaq(selectedCity.municipality.slug);
     }
     applyActiveSubsetKey(subsetFromGeoFilters(route.state.filters));
-    if (dateChanged) void load();
+    if (revealChanged) {
+      detailCache.clear();
+      facetHeadsByCity = new Map();
+      void load();
+      if (selectedCity) {
+        void loadDetailForCity(selectedCity.municipality.slug);
+        void loadFacetHeads(selectedCity.municipality.slug);
+      }
+    } else if (dateChanged) {
+      void load();
+    }
     updateGeoLayers();
 
     if (route.level === "region") {
