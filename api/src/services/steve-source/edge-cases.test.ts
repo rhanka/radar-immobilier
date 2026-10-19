@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { captureWorkbookInventory } from "./inventory.js";
 import { parseSheetXml } from "./sheet-parse.js";
 import { SteveCaptureError } from "./types.js";
-import { buildSyntheticWorkbook } from "./workbook-fixture.js";
-import { workbookRelsXml, workbookXml } from "./workbook-parts.js";
+import { buildSyntheticWorkbook } from "./workbook.fixture.js";
+import { workbookRelsXml, workbookXml } from "./workbook-parts.fixture.js";
 
 const sheet = (body: string): string => `<worksheet>${body}</worksheet>`;
 const captureSheet = (body: string) => captureWorkbookInventory(buildSyntheticWorkbook({
