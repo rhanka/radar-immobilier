@@ -53,20 +53,3 @@ export function filterDiscardedSignals<T extends DiscardableSignal>(
   );
 }
 
-/**
- * Viewer from the request session set by the `protect` middleware
- * (`c.get("session")`): the session `sub`, else `null` (open mode / tests).
- */
-export function resolveGraphSignalsViewer(context: unknown): DiscardedViewer {
-  const get = (context as { get?: unknown } | null | undefined)?.get;
-  if (typeof get !== "function") return null;
-  let session: unknown;
-  try {
-    session = (get as (key: string) => unknown).call(context, "session");
-  } catch {
-    return null;
-  }
-  if (typeof session !== "object" || session === null) return null;
-  const sub = (session as Record<string, unknown>).sub;
-  return typeof sub === "string" && sub.length > 0 ? sub : null;
-}

@@ -35,9 +35,9 @@ import {
 import {
   EMPTY_DISCARDED_SIGNALS,
   filterDiscardedSignals,
-  resolveGraphSignalsViewer,
   type DiscardedSignalsPort,
 } from "../services/graph/discarded-signals.js";
+import { resolveGraphSignalsViewer } from "./auth.js";
 import type { Database } from "../db/client.js";
 import type { ObjectStore } from "../storage/object-store.js";
 import {
