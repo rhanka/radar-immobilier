@@ -41,8 +41,8 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
 - No UI change or root UAT session is requested. Verification uses the test stack only.
 
 ## Plan / Todo (lot-based)
-- [ ] **Lot H2-a — package and storage primitives**
-  - [ ] Dependency pin and lock (c1).
+- [x] **Lot H2-a — package and storage primitives**
+  - [x] Dependency pin and lock (c1).
   - [x] Storage configuration (c7).
   - [x] Configuration regression tests.
   - [x] Account approval reader and tests (c13).
@@ -55,7 +55,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] Postgres/S3, lifecycle and SQL ensure composition (c8, c9).
   - [x] HTTP library facade (c12).
   - [x] Shared package entrypoint and checks (c6).
-- [ ] **Lot H2-b — migration and HTTP integration**
+- [x] **Lot H2-b — migration and HTTP integration**
   - [x] Test tooling, dotenv exclusion and image wiring (c2, c6).
   - [x] Exclude generated verification snapshots from lint.
   - [x] Migration drift and historical boundary tests (c5).
@@ -67,7 +67,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] Offline HTTP guard regression tests (c15).
   - [x] Postgres/S3 publication and concurrency tests (c15).
   - [x] HTTP negatives and migration startup tests (c15).
-- [ ] **Lot gate**
-  - [ ] Targeted suites, complete API with configuration absent and present, MCP.
-  - [ ] Typecheck, lint, image-smoke.
-  - [ ] Local report, atomic commits, down -v and zero remaining stack resources.
+- [x] **Lot gate**
+  - [x] Targeted suites, complete API with configuration absent and present, MCP.
+  - [x] Typecheck, lint, image-smoke.
+  - [x] Local report, atomic commits, down -v and zero remaining stack resources.
