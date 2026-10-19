@@ -72,7 +72,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] Targeted suites, complete API with configuration absent and present, MCP.
   - [x] Typecheck, lint, image-smoke.
   - [x] Local report, atomic commits, down -v and zero remaining stack resources.
-- [ ] **Opus review corrections**
+- [x] **Opus review corrections**
   - [x] D1: isolate configuration failure from unavailable storage startup; log schema/hash, organization and DB causes precisely; never query a failed backend for approval.
   - [x] D1-a: extract and test the startup resolver (invalid config, open mode, storage failure).
   - [x] D1-b/D2: keep the startup test inside rootDir; real empty-schema/offline-Postgres integrations pass; read guards also accept absent fetch metadata.
@@ -85,4 +85,6 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] D7/D9b: assert the 0015 tag and lifecycle object before/after drift and replay; reject mismatched journal hashes without a scope write.
   - [x] D8: remove generic install/run/commit targets; inspect is read-only; retain the alias and remove global maxWorkers.
   - [x] D9d: use three independent literal SHA-256 vectors calculated with sha256sum, including UTF-8.
-  - [x] D10-a: delete unreachable config checks and leading blank lines; fix requested indentation. Image cleanup and six skipped-test names are recorded in the report.
+  - [x] D10: delete unreachable config checks and leading blank lines; fix indentation; name all six skipped tests; remove smoke image, stack resources, snapshots and node_modules.
+  - [x] Final gates: 40 shared tests; 69 targeted API tests; full API twice (2345 passed, 6 skipped); 96 MCP tests; typecheck, lint and image-smoke passed. Latest diagnostic change passes its own checks and the final snapshot.
+- [ ] **Every-commit-green constraint**: 8/11 code snapshots pass; 74810538 has unhandled pool teardown errors before D5, 4b29f8c5 and 9da3a9d4 have test type errors fixed by 96dcfad5. Preserve history as instructed; complete evidence is in RAPPORT-SOL-H2.md.
