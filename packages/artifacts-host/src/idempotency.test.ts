@@ -144,9 +144,9 @@ describe("withArtifactAdvisoryLock", () => {
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
     const pool = createArtifactsPool({ host: "unused", port: 1, user: "test", password: "test", database: "test" });
     try {
-      const error = new Error("idle connection lost");
+      const error = Object.assign(new Error("idle connection lost"), { client: { password: "test-sensitive" } });
       expect(() => pool.emit("error", error)).not.toThrow();
-      expect(log).toHaveBeenCalledWith("artifact pool idle client error", error);
+      expect(log).toHaveBeenCalledWith("artifact pool idle client error", "idle connection lost");
     } finally { log.mockRestore(); await pool.end(); }
   });
 

@@ -52,7 +52,7 @@ export function createArtifactsPool(
     connectionTimeoutMillis: 3000,
     max,
   });
-  pool.on("error", (error) => console.error("artifact pool idle client error", error));
+  pool.on("error", (error) => console.error("artifact pool idle client error", error.message));
   return pool;
 }
 

@@ -7,6 +7,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
 - Use the assigned .worktrees/861c-h2 checkout and stacked branch; source library is read-only.
 - No dotenv reads, native runtimes, external writes, pushes or PRs.
 - Exact @sentropic/artifacts 0.1.2; two byte-identical package migrations are explicitly authorized.
+- The atomic storage group contains ARTIFACTS_STORAGE_SCOPE, ARTIFACTS_ORG_ID, ARTIFACTS_S3_BUCKET, ARTIFACTS_S3_ENDPOINT, ARTIFACTS_S3_REGION, ARTIFACTS_S3_ACCESS_KEY and ARTIFACTS_S3_SECRET_KEY; ARTIFACTS_CONTENT_BASE is separate.
 - Make only; ENV=test-861c-h2 last. Test ports: API 18903, UI 15903, Maildev UI 11903, Postgres 15904, S3 19903, Obscura 19904, SMTP 11904. The test compose overlay publishes no host ports.
 - Root dev/UAT remains reserved. Commits have English subjects only, at most 150 changed lines.
 
@@ -28,7 +29,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
 
 ## Feedback Loop
 - Resolved: inherited lock mismatch prevented npm ci; regenerated in the test container with only artifact/workspace metadata changed.
-- Resolved: the 0013 scratch journal must exclude all later migrations. Four test workers bound concurrent database startup on this 32-CPU host; no timeout was increased.
+- Resolved: the 0013 scratch journal must exclude all later migrations. Opus corrections remove the global worker cap; local verification uses --no-file-parallelism after concurrent scratch-database checkpoints (13.907 s observed). No timeout was increased.
 - Review: local source and executable acceptance review completed; complementary peer selection unavailable (no live model catalog; inherited author's exact model unavailable). No consensus claimed.
 - Migration numbering may collide with #859; the second merged branch must renumber, preserving byte content and journal order.
 
@@ -79,6 +80,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] D3: require and use ARTIFACTS_S3_REGION (seventh storage variable); synthetic configuration includes all seven values.
   - [x] D4: exclude nested .env* except .env.example; four nested refusal probes pass; smoke image cleanup runs on every exit.
   - [x] D5: bound lock wait to 3 s with local timeout reset, explicit 409 conflict; S3 request/connection deadlines 5 s/3 s with throwOnRequestTimeout; handle idle pool errors.
+  - [x] D5-b: log only the idle error message, excluding the attached pg client; package tests, API/package typechecks and targeted lint pass.
   - [x] D6: validate stable content links before publication (three invalid-origin cases, zero backend calls).
   - [x] D7/D9b: assert the 0015 tag and lifecycle object before/after drift and replay; reject mismatched journal hashes without a scope write.
   - [x] D8: remove generic install/run/commit targets; inspect is read-only; retain the alias and remove global maxWorkers.
