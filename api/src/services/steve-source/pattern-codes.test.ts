@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { captureWorkbookInventory } from "./inventory.js";
 import { readPatternCodes } from "./pattern-codes.js";
 import { SteveCaptureError } from "./types.js";
-import { buildSyntheticWorkbook, EXPECTED_CODES } from "./workbook-fixture.js";
+import { buildSyntheticWorkbook, EXPECTED_CODES } from "./workbook.fixture.js";
 
 describe("readPatternCodes", () => {
   it("reads different codes under a relocated accented header and preserves values", () => {
