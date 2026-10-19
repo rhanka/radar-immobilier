@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { createApp } from "./app.js";
-import { resolveContentHostConfig } from "./artifacts/content-config.js";
+import { contentHostAppOption, resolveContentHostConfig } from "./artifacts/content-config.js";
 import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
@@ -58,8 +58,9 @@ logger.info(
     : "Scaleway TEM mailer disabled (invitation links will be logged to stdout)",
 );
 
-// Optional artifact content origin (861c). Closed by default: without an
-// explicit, valid ARTIFACTS_CONTENT_BASE the API keeps the current chain.
+// Optional artifact content origin (861c). Closed by default: unset or empty
+// keeps the current chain. An explicit but malformed ARTIFACTS_CONTENT_BASE
+// throws here and stops startup (fail-fast, never silently disabled).
 const contentHost = resolveContentHostConfig({
   contentBase: process.env["ARTIFACTS_CONTENT_BASE"],
 });
@@ -80,7 +81,7 @@ const app = createApp({
   db: dbHandle.db,
   auth,
   tem,
-  ...(contentHost.enabled ? { contentHost } : {}),
+  ...contentHostAppOption(contentHost),
 });
 
 // Ensure the raw-metadata bucket exists before serving RECUEIL collect requests.

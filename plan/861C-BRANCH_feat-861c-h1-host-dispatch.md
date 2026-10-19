@@ -51,9 +51,9 @@
   - [x] Delegate to `parseContentHost` from `@sentropic/artifacts/content/routing`
   - [x] Contract tests: 8 existing cases plus `<uuid>-<uuid>` and trailing-dot forms
   - [x] Installed 0.1.1 export and isolated ESM import verified; no MCP modules loaded
-- [ ] **Lot H1-2 — fail-fast config (points 2, 6)**
-  - [ ] Invalid base throws at startup; unset stays disabled; `localhost` accepted
-  - [ ] Tested helper covers `index.ts`; a lone root dot must throw
+- [x] **Lot H1-2 — fail-fast config (points 2, 6)**
+  - [x] Invalid base throws at startup; unset stays disabled; `localhost` accepted
+  - [x] Tested helper covers `index.ts`; a lone root dot must throw
 - [ ] **Lot H1-3 — gate hardening (points 3, 4, 8)**
   - [ ] Probe bypass limited to GET/HEAD with gate-level tests
   - [ ] `Accept: text/html` and valid-cookie threat scenarios

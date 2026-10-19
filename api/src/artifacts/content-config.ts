@@ -1,16 +1,17 @@
 /**
  * Artifact content-host config (861c lot H1). ARTIFACTS_CONTENT_BASE is
- * optional: unset stays disabled (closed by default). Only hostname syntax
- * is validated here. The address scheme and domain policy are owned by
- * @sentropic/artifacts (design #692 in progress).
+ * optional: unset or empty stays disabled (closed by default). An explicit but
+ * malformed value throws at startup (fail-fast: a mistyped base must stop the
+ * process, never run silently disabled). Only hostname syntax is validated
+ * here. The address scheme and domain policy are owned by
+ * @sentropic/artifacts. `localhost` is accepted as a base for local e2e
+ * (`<uuid>.localhost` origins); every other single-label name stays invalid.
  */
 export interface ContentHostConfigInput {
   readonly contentBase?: string | undefined;
 }
 
-export type ContentHostDisabledReason =
-  | "content_base_unset"
-  | "content_base_invalid";
+export type ContentHostDisabledReason = "content_base_unset";
 
 export type ContentHostConfig =
   | { readonly enabled: true; readonly contentBase: string }
@@ -23,8 +24,10 @@ const IPV4_RE = /^\d{1,3}(?:\.\d{1,3}){3}$/;
 export function resolveContentHostConfig(
   input: ContentHostConfigInput,
 ): ContentHostConfig {
-  const raw = (input.contentBase ?? "").trim().toLowerCase().replace(/\.$/, "");
+  let raw = (input.contentBase ?? "").trim().toLowerCase();
   if (raw === "") return { enabled: false, reason: "content_base_unset" };
+  if (raw.endsWith(".")) raw = raw.slice(0, -1);
+  if (raw === "localhost") return { enabled: true, contentBase: raw };
   if (
     raw.length > 253 ||
     raw.includes(":") ||
@@ -32,7 +35,26 @@ export function resolveContentHostConfig(
     IPV4_RE.test(raw) ||
     !HOSTNAME_RE.test(raw)
   ) {
-    return { enabled: false, reason: "content_base_invalid" };
+    throw new Error(
+      `invalid ARTIFACTS_CONTENT_BASE ${JSON.stringify(input.contentBase)}: expected a bare hostname (e.g. pages.example.net) or localhost`,
+    );
   }
   return { enabled: true, contentBase: raw };
+}
+
+export interface ContentHostAppOption {
+  readonly contentHost?: Extract<ContentHostConfig, { readonly enabled: true }>;
+}
+
+/**
+ * Map a resolved content-host config to the createApp option spread used in
+ * index.ts: disabled resolves to no option (the gate stays unwired), enabled
+ * resolves to the wired contentHost. An invalid base never reaches this
+ * helper — resolveContentHostConfig throws first.
+ */
+export function contentHostAppOption(
+  resolved: ContentHostConfig,
+): ContentHostAppOption {
+  if (!resolved.enabled) return {};
+  return { contentHost: resolved };
 }
