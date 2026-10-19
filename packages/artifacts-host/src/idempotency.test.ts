@@ -1,8 +1,8 @@
-import { createHash } from "node:crypto";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import pg from "pg";
 import {
   computeParamsHash,
+  createArtifactsPool,
   deriveIdempotencyKey,
   withArtifactAdvisoryLock,
 } from "./idempotency.js";
@@ -15,14 +15,10 @@ const INPUT = {
   clientKey: "client-key-1",
 };
 
-function sha256Hex(text: string): string {
-  return createHash("sha256").update(text, "utf8").digest("hex");
-}
-
 describe("deriveIdempotencyKey", () => {
   it("is sha256(scope|sub|op|artifactId|clientKey) over UTF-8 bytes", () => {
     expect(deriveIdempotencyKey(INPUT)).toBe(
-      sha256Hex("scope-1|user-sub-1|publish|123e4567-e89b-12d3-a456-426614174000|client-key-1"),
+      "9a159e31bdd2a0415be1bf65c70e37c29d5076365616af5acc356ee8210c8ff1",
     );
   });
 
@@ -49,15 +45,18 @@ describe("deriveIdempotencyKey", () => {
   it("counts multibyte content in UTF-8 bytes", () => {
     const withAccent = deriveIdempotencyKey({ ...INPUT, clientKey: "Été 🏠" });
     expect(withAccent).toBe(
-      sha256Hex(
-        `scope-1|user-sub-1|publish|123e4567-e89b-12d3-a456-426614174000|Été 🏠`,
-      ),
+      "cdbd12ef59da02ab7ad392f06f60bb101f49b78635be07ea0d6c3210ae08afa4",
     );
     expect(withAccent).not.toBe(deriveIdempotencyKey(INPUT));
   });
 });
 
 describe("computeParamsHash", () => {
+  it("matches a fixed canonical JSON SHA-256 vector computed with sha256sum", () => {
+    expect(computeParamsHash({ b: 2, a: 1 })).toBe(
+      "43258cff783fe7036d8a43033f830adfc60ec037382473548ac742b888292777",
+    );
+  });
   it("detects changes in JSON keys named __proto__", () => {
     const profile = JSON.parse('{"__proto__":{"title":"changed"}}');
     expect(computeParamsHash({ profile })).not.toBe(computeParamsHash({ profile: {} }));
@@ -110,10 +109,15 @@ describe("withArtifactAdvisoryLock", () => {
     );
     expect(result).toBe("receipt");
     expect(queries.map((q) => q.text)).toEqual([
+      "BEGIN",
+      "SELECT set_config('lock_timeout', $1, true)",
       "SELECT pg_advisory_lock(('x' || $1)::bit(64)::bigint)",
+      "SELECT set_config('lock_timeout', '0', true)",
+      "COMMIT",
       "SELECT pg_advisory_unlock(('x' || $1)::bit(64)::bigint)",
     ]);
-    expect(queries[0]!.params).toEqual([deriveIdempotencyKey(INPUT).slice(0, 16)]);
+    expect(queries[1]!.params).toEqual(["3000ms"]);
+    expect(queries[2]!.params).toEqual([deriveIdempotencyKey(INPUT).slice(0, 16)]);
     expect(releases.count).toBe(1);
   });
 
@@ -126,10 +130,24 @@ describe("withArtifactAdvisoryLock", () => {
       }),
     ).rejects.toThrow("boom");
     expect(queries.map((q) => q.text)).toEqual([
+      "BEGIN",
+      "SELECT set_config('lock_timeout', $1, true)",
       "SELECT pg_advisory_lock(('x' || $1)::bit(64)::bigint)",
+      "SELECT set_config('lock_timeout', '0', true)",
+      "COMMIT",
       "SELECT pg_advisory_unlock(('x' || $1)::bit(64)::bigint)",
     ]);
     expect(releases.count).toBe(1);
+  });
+
+  it("handles idle pool errors without an unhandled EventEmitter error", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const pool = createArtifactsPool({ host: "unused", port: 1, user: "test", password: "test", database: "test" });
+    try {
+      const error = new Error("idle connection lost");
+      expect(() => pool.emit("error", error)).not.toThrow();
+      expect(log).toHaveBeenCalledWith("artifact pool idle client error", error);
+    } finally { log.mockRestore(); await pool.end(); }
   });
 
   it("refuses a non-hex key without touching the pool", async () => {
@@ -138,5 +156,19 @@ describe("withArtifactAdvisoryLock", () => {
       withArtifactAdvisoryLock(fakePool(queries, { count: 0 }), "not-hex!!", async () => undefined),
     ).rejects.toThrow("keyHex must be hex");
     expect(queries).toEqual([]);
+  });
+  it("rolls back a timed out acquisition without invoking the body", async () => {
+    const query = vi.fn(async (sql: string) => {
+      if (sql.includes("pg_advisory_lock(")) throw Object.assign(new Error("lock timeout"), { code: "55P03" });
+      return { rows: [] };
+    });
+    const release = vi.fn();
+    const pool = { connect: async () => ({ query, release }) } as unknown as pg.Pool;
+    const body = vi.fn();
+    await expect(withArtifactAdvisoryLock(pool, deriveIdempotencyKey(INPUT), body))
+      .rejects.toThrow("artifact advisory lock timeout conflict");
+    expect(query).toHaveBeenLastCalledWith("ROLLBACK");
+    expect(body).not.toHaveBeenCalled();
+    expect(release).toHaveBeenCalledWith(false);
   });
 });

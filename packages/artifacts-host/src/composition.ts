@@ -27,6 +27,7 @@ export async function composeArtifactHost(
   const client = new S3Client({
     endpoint: config.s3Endpoint, region: config.s3Region, forcePathStyle: true,
     credentials: { accessKeyId: config.s3AccessKey, secretAccessKey: config.s3SecretKey },
+    requestHandler: { requestTimeout: 5000, connectionTimeout: 3000, throwOnRequestTimeout: true },
   });
   const blobs = injectedBlobs ?? createS3BlobStore({ client, bucket: config.s3Bucket });
   const lifecycle = createLifecycleService(store, undefined, store);
