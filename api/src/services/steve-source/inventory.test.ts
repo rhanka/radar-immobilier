@@ -13,7 +13,7 @@ import {
   EXPECTED_CODES,
   LONG_TEXT,
   buildSyntheticWorkbook,
-} from "./workbook-fixture.js";
+} from "./workbook.fixture.js";
 
 function cellAt(cells: CellRecord[], address: string): CellRecord {
   const found = cells.filter((cell) => cell.sheet === "Lots").find((cell) => cell.address === address);

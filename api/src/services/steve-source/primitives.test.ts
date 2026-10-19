@@ -75,7 +75,7 @@ it("keeps numeric sorting across sparse worksheet rows and columns", () => {
 });
 
 import { captureWorkbookInventory } from "./inventory.js";
-import { buildSyntheticWorkbook } from "./workbook-fixture.js";
+import { buildSyntheticWorkbook } from "./workbook.fixture.js";
 
 it("captures the generated workbook without changing its bytes", () => {
   const bytes = buildSyntheticWorkbook();
