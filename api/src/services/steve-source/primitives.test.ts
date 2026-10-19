@@ -40,3 +40,9 @@ describe("OOXML parsing", () => {
     },
   );
 });
+
+import { crc32 } from "./crc32.js";
+
+it("matches the standard ZIP CRC-32 reference vector", () => {
+  expect(crc32(new TextEncoder().encode("123456789"))).toBe(0xcbf43926);
+});
