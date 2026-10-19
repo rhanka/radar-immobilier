@@ -52,11 +52,26 @@
   } from "$lib/signals/graph-signals-by-city-client.js";
   import {
     fetchGraphSignalDetail,
+    GraphSignalsHttpError,
     type GraphSignalNode,
     type LegacyZmpProjection,
     type SignalDocRef,
     type SignalEvidence,
   } from "$lib/signals/graph-signal-detail-client.js";
+  import {
+    createCommandKey,
+    facetErrorMessage,
+    fetchCityFacets,
+    fetchReasonCodes,
+    indexFacetHeads,
+    postFacetCommand,
+    SignalFacetError,
+    type FacetAction,
+    type FacetTarget,
+    type ReasonCode,
+    type TargetFacetState,
+  } from "$lib/signals/signal-facets-client.js";
+  import { authStore } from "$lib/auth/auth-store.js";
   import {
     buildOverlaySignals,
     buildNavSignals,
@@ -532,6 +547,45 @@
   // ── Cache multi-villes : nœuds par ville ──────────────────────────────────
   /** Cache des nœuds détail par ville slug (pour recoloration aplats filtrée). */
   const detailCache = new Map<string, GraphSignalNode[]>();
+
+  // ── Personal baskets (lot 4) ──────────────────────────────────────────────
+  // Read city heads and reason codes only for authenticated, approved users
+  // with authentication enabled. Clear heads and detailCache on sub changes.
+  // Revealing discarded signals clears the cache and reloads all three reads.
+  const facetHeadsGuard = new RequestGuard();
+  const facetCodesGuard = new RequestGuard();
+  const EMPTY_FACET_HEADS: Map<string, TargetFacetState> = new Map();
+  // URL-only reveal: applyGeoRoute restores back/forward/reload state;
+  // the checkbox writes it through syncFilterRoute, never localStorage.
+  let showDiscarded = false;
+  let appliedShowDiscarded: boolean | null = null;
+  let facetCodes: ReasonCode[] | null = null;
+  let facetCodesLoading = false;
+  let facetCodesError: string | null = null;
+  let facetCodesSub: string | null = null;
+  let facetHeadsByCity = new Map<string, Map<string, TargetFacetState>>();
+  let appliedFacetContext: string | null = null;
+  let facetReloadError: string | null = null;
+  let discardedNotice: { target: FacetTarget; label: string } | null = null;
+  let discardedActionError: string | null = null;
+  let undoCommandKey: string | null = null;
+  let undoBusy = false;
+
+  $: authState = $authStore;
+  $: currentUserSub = authState.user?.sub ?? null;
+  $: facetsAllowed =
+    authState.authenticated && !authState.authDisabled && authState.user?.status === "approved";
+  $: facetsNote = !authState.authenticated
+    ? "Connexion requise pour classer les signaux."
+    : authState.authDisabled
+      ? "Classement indisponible quand l'authentification est désactivée."
+      : authState.user?.status !== "approved"
+        ? "Compte non approuvé — le classement est réservé aux comptes approuvés."
+        : null;
+  $: activeFacetHeads = facetsAllowed && selectedCity
+    ? (facetHeadsByCity.get(selectedCity.municipality.slug) ?? EMPTY_FACET_HEADS)
+    : EMPTY_FACET_HEADS;
+
   let appliedGeoRouteKey: string | null = null;
   let pendingRouteZoneKey: string | null = null;
   let pendingRouteLotId: string | null = null;
@@ -626,8 +680,13 @@
     return writeGeoFilters({
       axes: bAxesFromVivierKey(activeSubsetKey), exclusions: vivierBExclusions,
       timeRange, dateBasis, lots: lotDataFilter, zoneKinds: zoneKindFilter, zoneMillesime: zoneMillesimeFilter, lotsEnabled,
-      cptaqEnabled, citySearch, zoneSearch, lotSearch,
+      cptaqEnabled, citySearch, zoneSearch, lotSearch, showDiscarded,
     });
+  }
+
+  function handleToggleShowDiscarded(show: boolean): void {
+    showDiscarded = show;
+    syncFilterRoute();
   }
 
   function syncFilterRoute(): void {
@@ -1421,7 +1480,8 @@
     villeZoomed = true; // C1 — caméra cadrée sur la ville (état zoomé)
 
     // Les ressources partent EN PARALLÈLE avec leurs gardes anti-course :
-    // détail, zones/lots et sonde légère de disponibilité CPTAQ.
+    // Detail, zones/lots, CPTAQ availability, facet heads and the codebook
+    // (the codebook is loaded once per viewer).
     void loadDetailForCity(entry.municipality.slug);
     void loadGeoForCity(entry.municipality.slug);
     void probeCptaqAvailability(entry.municipality.slug);
@@ -1431,8 +1491,10 @@
    * Charge le détail signaux (panneau droit) d'une ville avec garde anti-course
    * et timeout. Une réponse en retard/annulée (changement de ville) est ignorée ;
    * un échec bascule la couche en état d'erreur SANS toucher aux zones/lots.
+   * Forward the reveal unchanged; a 503 discarded_signals_unavailable is
+   * an explicit error. Return true only after fresh data has been applied.
    */
-  async function loadDetailForCity(citySlug: string): Promise<void> {
+  async function loadDetailForCity(citySlug: string): Promise<boolean> {
     const lease = detailGuard.lease();
     detailLoading = true;
     detailError = null;
@@ -1440,28 +1502,38 @@
     try {
       const res = await fetchGraphSignalDetail(citySlug, "", DEFAULT_REQUEST_TIMEOUT_MS, {
         signal: lease.signal,
+        ...(showDiscarded ? { showDiscarded: true as const } : {}),
       });
-      if (!lease.isCurrent()) return; // réponse périmée → on ignore
+      if (!lease.isCurrent()) return false; // réponse périmée → on ignore
       if (!res.ok && res.nodes.length === 0) {
         // 404 — ville sans signaux graphify (état vide explicite, pas une erreur)
         detailNodes = [];
         detailLegacyProjection = null;
         detailError = null;
-        return;
+        reconcileToVisibleNodes();
+        return true;
       }
       detailNodes = res.nodes;
       detailLegacyProjection = res.legacyProjection;
       // Alimenter le cache multi-villes (recoloration aplats filtrée)
       detailCache.set(citySlug, res.nodes);
+      // Classification/reveal can remove signals: reconcile selection,
+      // hover and evidence against the visible nodes.
+      reconcileToVisibleNodes();
       // Ne pas auto-focaliser le 1er signal : l'utilisateur choisit lui-même
       // quel signal ouvrir (clic dans le panneau droit).
       updateGeoLayers();
+      return true;
     } catch (e) {
       // Abort (changement de ville) → réponse périmée à ignorer, pas une erreur.
-      if (!lease.isCurrent() || isAbortError(e)) return;
+      if (!lease.isCurrent() || isAbortError(e)) return false;
       console.warn("Signal detail load failed:", e);
-      detailError = "Signaux indisponibles.";
+      detailError =
+        e instanceof GraphSignalsHttpError && e.status === 503
+          ? "Signaux écartés indisponibles (discarded_signals_unavailable) — rechargement impossible."
+          : "Signaux indisponibles.";
       detailLegacyProjection = null;
+      return false;
     } finally {
       if (lease.isCurrent()) detailLoading = false;
     }
@@ -2415,7 +2487,7 @@
 
   // ── Chargement API ─────────────────────────────────────────────────────────
   let bulkLoadVersion = 0;
-  async function load() {
+  async function load(): Promise<boolean> {
     const version = ++bulkLoadVersion;
     loading = true;
     loadError = null;
@@ -2427,13 +2499,19 @@
         ...signalDocumentDateWindow(dateRange, dateBasis),
         excludePiia: vivierBExclusions.piiaSansProjetResidentiel,
         excludeDerogations: vivierBExclusions.derogationsMineures,
+        ...(showDiscarded ? { showDiscarded: true as const } : {}),
       });
-      if (version !== bulkLoadVersion) return;
+      if (version !== bulkLoadVersion) return false;
       graphItems = res.cities;
+      return true;
     } catch (e) {
-      if (version !== bulkLoadVersion) return;
+      if (version !== bulkLoadVersion) return false;
       console.warn("Signals by city load failed:", e);
-      loadError = "Données des signaux indisponibles.";
+      loadError =
+        e instanceof GraphSignalsHttpError && e.status === 503
+          ? "Données des signaux indisponibles — signaux écartés indisponibles (discarded_signals_unavailable)."
+          : "Données des signaux indisponibles.";
+      return false;
     } finally {
       if (version === bulkLoadVersion) loading = false;
     }
