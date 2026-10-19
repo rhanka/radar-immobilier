@@ -5,13 +5,13 @@ describe("worksheet coordinate integrity", () => {
   it("rejects duplicate cells at the same address", () => {
     expect(() => parseSheetXml("Dup", sheet(
       `<sheetData><row r="1"><c r="A1"><v>1</v></c><c r="A1"><v>2</v></c></row></sheetData>`,
-    ), [])).toThrow(/duplicate cell/);
+    ), [], 4)).toThrow(/duplicate cell/);
   });
 
   it("rejects cells whose reference sits outside their row", () => {
     expect(() => parseSheetXml("Skew", sheet(
       `<sheetData><row r="3"><c r="A7"><v>1</v></c></row></sheetData>`,
-    ), [])).toThrow(/outside row 3/);
+    ), [], 4)).toThrow(/outside row 3/);
   });
 
 

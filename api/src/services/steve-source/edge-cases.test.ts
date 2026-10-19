@@ -14,7 +14,7 @@ describe("faithful workbook edge cases", () => {
   it("advances omitted coordinates from preceding explicit coordinates, including blank cells", () => {
     const parsed = parseSheetXml("Sparse", sheet(`<sheetData>
       <row r="10"><c r="D10"/><c><v>11</v></c></row>
-      <row><c><v>12</v></c></row></sheetData>`), []);
+      <row><c><v>12</v></c></row></sheetData>`), [], 9);
     expect(parsed.cells.map((cell) => cell.address)).toEqual(["E10", "A11"]);
   });
 
