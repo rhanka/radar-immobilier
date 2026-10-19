@@ -16,6 +16,9 @@ import { decodeEntities, findTagEnd, localName, parseTag } from "./xml-token.js"
 
 /** Deepest element nesting accepted; deeper input is rejected, not recursed. */
 export const MAX_XML_DEPTH = 64;
+/** Per-part allocation budgets, including empty and self-closing elements. */
+export const MAX_XML_ELEMENTS = 500_000;
+export const MAX_XML_CELLS = 250_000;
 
 export function parseXml(source: string): XmlNode {
   const root: XmlNode = {
@@ -31,6 +34,8 @@ export function parseXml(source: string): XmlNode {
     return node;
   };
   let i = 0;
+  let elements = 0;
+  let cells = 0;
   while (i < source.length) {
     const lt = source.indexOf("<", i);
     if (lt === -1) {
@@ -70,6 +75,12 @@ export function parseXml(source: string): XmlNode {
       if (selfClosing) inner = inner.slice(0, -1);
       const { tagName, attrs } = parseTag(inner);
       if (tagName === "") throw new SteveCaptureError("empty tag name");
+      if (++elements > MAX_XML_ELEMENTS) {
+        throw new SteveCaptureError(`XML part exceeds the ${String(MAX_XML_ELEMENTS)}-element limit`);
+      }
+      if (tagName === "c" && ++cells > MAX_XML_CELLS) {
+        throw new SteveCaptureError(`XML part exceeds the ${String(MAX_XML_CELLS)}-cell limit`);
+      }
       if (stack.length > MAX_XML_DEPTH) {
         throw new SteveCaptureError(
           `XML element nesting exceeds the ${String(MAX_XML_DEPTH)}-level limit`,
