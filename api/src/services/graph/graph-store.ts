@@ -29,7 +29,7 @@ import {
   classifyVivierSignal,
   type VivierSignalInput,
 } from "./vivier-v2.js";
-import { filterDiscardedSignals } from "./discarded-signals.js";
+import { filterDiscardedSignals, type DiscardedSignalKey } from "./discarded-signals.js";
 
 export {
   classifyVivierSignal,
@@ -2328,7 +2328,7 @@ export function aggregateGraphSignalProjectionRows(
 
 export interface ListCitiesWithSignalNodesOptions {
   /** Native discard keys for this viewer; applied before aggregation. */
-  discarded?: ReadonlySet<string>;
+  discarded?: ReadonlySet<DiscardedSignalKey>;
 }
 
 export async function listCitiesWithSignalNodes(
@@ -2360,7 +2360,9 @@ export async function listCitiesWithSignalNodes(
       ),
     );
 
-  const kept = options.discarded !== undefined && options.discarded.size > 0
+  // `filterDiscardedSignals` already short-circuits on an empty set, so the
+  // size guard lives in that single fast path instead of being repeated here.
+  const kept = options.discarded !== undefined
     ? filterDiscardedSignals(rows, options.discarded)
     : rows;
   return aggregateGraphSignalProjectionRows(kept, dateRange);
