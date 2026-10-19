@@ -100,11 +100,23 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
     definedNames: readDefinedNames(workbook),
     autoFilters: [],
   };
+  const seenNames = new Set<string>();
+  const seenIds = new Set<number>();
+  const seenParts = new Set<string>();
   const sheetNodes = childElements(sheetsHolder, "sheet");
   sheetNodes.forEach((node, index) => {
     const name = node.attrs["name"];
     if (name === undefined) throw new SteveCaptureError(`sheet #${String(index)} has no name`);
+    const lowered = name.toLowerCase();
+    if (seenNames.has(lowered)) {
+      throw new SteveCaptureError(`duplicate sheet name "${name}"`);
+    }
+    seenNames.add(lowered);
     const sheetId = parseSheetId(node.attrs["sheetId"] ?? null, name);
+    if (seenIds.has(sheetId)) {
+      throw new SteveCaptureError(`duplicate sheet id ${String(sheetId)} on sheet "${name}"`);
+    }
+    seenIds.add(sheetId);
     const rid = node.attrs["r:id"];
     if (rid === undefined) {
       throw new SteveCaptureError(`sheet "${name}" has no relationship id`);
@@ -114,6 +126,10 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
       throw new SteveCaptureError(`sheet "${name}" points to unknown relationship "${rid}"`);
     }
     const path = posix.resolve("/xl", target).slice(1);
+    if (seenParts.has(path)) {
+      throw new SteveCaptureError(`duplicate sheet part "${path}" on sheet "${name}"`);
+    }
+    seenParts.add(path);
     const part = files.get(path);
     if (part === undefined) {
       throw new SteveCaptureError(`sheet "${name}" part "${path}" is missing`);
