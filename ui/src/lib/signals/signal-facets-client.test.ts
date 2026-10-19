@@ -6,7 +6,7 @@
  * verdict and never on the prefix.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildFacetTarget, codesForVerdict } from "./signal-facets-client.js";
+import { buildFacetTarget, codesForVerdict, indexFacetHeads, type FacetHead } from "./signal-facets-client.js";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 
 function signalNode(overrides: Partial<GraphSignalNode> = {}): GraphSignalNode {
@@ -31,6 +31,21 @@ const CODES = [
   { code: "S-VEILLE", verdict: "a_surveiller" },
 ];
 
+function head(overrides: Partial<FacetHead>): FacetHead {
+  return {
+    id: "event-1",
+    target: { citySlug: "ville-synth", type: "Signal", id: "sig-1" },
+    facet: "selection",
+    basket: "pertinent",
+    state: "active",
+    reasonCode: null,
+    verdict: "pertinent",
+    createdAt: "2026-10-19T12:00:00.000Z",
+    targetAvailable: true,
+    changedSinceArchive: null,
+    ...overrides,
+  };
+}
 
 
 
@@ -74,6 +89,51 @@ describe("codesForVerdict", () => {
       "N-LEURRE",
       "S-VEILLE",
     ]);
+  });
+});
+
+describe("indexFacetHeads", () => {
+  it("aggregates active selection and archive heads per target", () => {
+    const byTarget = indexFacetHeads([
+      head({ basket: "pertinent", reasonCode: "P-DENSITE" }),
+      head({ id: "event-2", basket: "a_surveiller", reasonCode: null }),
+      head({
+        id: "event-3",
+        facet: "archive",
+        basket: null,
+        state: "active",
+        reasonCode: "N-ADMIN",
+        verdict: "non_pertinent",
+        changedSinceArchive: true,
+      }),
+    ]);
+    expect(byTarget.get("Signal/sig-1")).toEqual({
+      pertinent: true,
+      pertinentCode: "P-DENSITE",
+      watching: true,
+      watchingCode: null,
+      archived: true,
+      archiveCode: "N-ADMIN",
+      changedSinceArchive: true,
+      targetAvailable: true,
+    });
+  });
+
+  it("ignores inactive heads and unknown facets", () => {
+    const byTarget = indexFacetHeads([
+      head({ state: "inactive" }),
+      head({ id: "event-2", facet: "unknown", basket: null }),
+    ]);
+    expect(byTarget.get("Signal/sig-1")).toEqual({
+      pertinent: false,
+      pertinentCode: null,
+      watching: false,
+      watchingCode: null,
+      archived: false,
+      archiveCode: null,
+      changedSinceArchive: false,
+      targetAvailable: true,
+    });
   });
 });
 
