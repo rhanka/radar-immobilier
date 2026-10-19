@@ -17,7 +17,7 @@ export async function composeArtifactHost(
   config: Extract<ArtifactsStorageConfig, { enabled: true }>,
   injectedBlobs?: PublicationBlobStore,
 ) {
-  if (!await initializeArtifactScope(pool, config.storageScope, config.orgId)) return undefined;
+  await initializeArtifactScope(pool, config.storageScope, config.orgId);
   const store = createLockedArtifactStore(pool);
   const getAcl = store.getArtifactAcl;
   store.getArtifactAcl = async (id) => {
