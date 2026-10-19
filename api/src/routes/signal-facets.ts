@@ -5,6 +5,7 @@ import { FacetError } from "../services/facets/target.js";
 import { writeFacet } from "../services/facets/writer.js";
 import { readCityFacets, readReasonCodes } from "../services/facets/reader.js";
 import { FACET_PROFILE } from "../services/facets/codebook.js";
+import { privateSignalResponse } from "../services/facets/private-response.js";
 
 const target = z.object({
   citySlug: z.string().min(1).max(128).regex(/^[a-z0-9-]+$/),
@@ -21,6 +22,7 @@ const schemas = {
 export interface SignalFacetsDeps { db: Database; auth?: { enabled: boolean } }
 export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
   const app = new Hono();
+  app.use("/api/v1/signal-facets/*", privateSignalResponse);
   app.use("/api/v1/signal-facets/*", async (c, next) => {
     const session = c.get("session" as never) as { sub?: string; via?: string } | undefined;
     if (!deps.auth?.enabled || !session?.sub) return c.json({ error: "unauthenticated" }, 401);
