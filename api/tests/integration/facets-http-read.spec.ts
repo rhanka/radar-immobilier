@@ -27,7 +27,11 @@ it("should read the runtime codebook and isolate personal heads and availability
   expect(codes.codes).toHaveLength(28);
   expect(codes.codes.find((row: { code: string }) => row.code === "V2-PRECEDENT").verdict).toBe("non_pertinent");
   await writeFacet(db, alice.sub, { action: "discard", target: alice.target, reasonCode: "N-ADMIN", commandKey: randomUUID() });
-  expect((await (await get(cityPath)).json()).heads).toMatchObject([{ targetAvailable: true, changedSinceArchive: false }]);
+  expect((await (await get(cityPath)).json()).heads).toEqual([{
+    id: expect.any(String), target: alice.target, facet: "archive", basket: null, state: "active",
+    reasonCode: "N-ADMIN", verdict: "non_pertinent", createdAt: expect.any(String),
+    targetAvailable: true, changedSinceArchive: false,
+  }]);
   expect((await (await get(cityPath, await facetCookie(bob.sub))).json()).heads).toEqual([]);
   await db.update(graphNodes).set({ label: "Changed synthetic content" }).where(eq(graphNodes.citySlug, alice.target.citySlug));
   expect((await (await get(cityPath)).json()).heads).toMatchObject([{ targetAvailable: true, changedSinceArchive: true }]);

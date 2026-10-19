@@ -10,15 +10,14 @@ export function createDiscardedSignalsReader(db: Database): DiscardedSignalsPort
   return {
     async forViewer(sub) {
       if (sub === null) return EMPTY_DISCARDED_KEYS;
-      return db.transaction(async (tx) => {
-        const ownerId = await approvedOwner(tx, sub);
-        const rows = await tx.select().from(facetEvents).where(and(
-          eq(facetEvents.scope, "personal"), eq(facetEvents.ownerId, ownerId),
-          eq(facetEvents.facet, "archive"), eq(facetEvents.state, "active"),
-          isNull(facetEvents.supersededBy),
-        ));
-        return new Set(rows.map((row) => discardedSignalKey(row.citySlug, row.nodeType, row.nodeId)));
-      });
+      const ownerId = await approvedOwner(db, sub);
+      const rows = await db.select({ citySlug: facetEvents.citySlug, nodeType: facetEvents.nodeType,
+        nodeId: facetEvents.nodeId }).from(facetEvents).where(and(
+        eq(facetEvents.scope, "personal"), eq(facetEvents.ownerId, ownerId),
+        eq(facetEvents.facet, "archive"), eq(facetEvents.state, "active"),
+        isNull(facetEvents.supersededBy),
+      ));
+      return new Set(rows.map((row) => discardedSignalKey(row.citySlug, row.nodeType, row.nodeId)));
     },
   };
 }
