@@ -46,6 +46,8 @@ export interface CellRecord {
   value: string | null;
   formula: CellFormula | null;
   cachedValue: string | null;
+  /** Style index from the cell s attribute. */
+  style: number | null;
 }
 
 export interface DataValidationRule {
