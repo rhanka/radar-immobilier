@@ -4,6 +4,10 @@
  * Reads the central directory, then extracts stored (method 0) and deflated
  * (method 8, via `node:zlib` inflateRaw) entries. Any structural problem
  * raises an explicit `SteveCaptureError` instead of returning partial data.
+ *
+ * Signature constants below are the standard APPNOTE values (`PK\x03\x04`,
+ * `PK\x01\x02`, `PK\x05\x06`); the test fixture writes the same bytes as
+ * explicit literals without importing these constants.
  */
 
 import { inflateRawSync } from "node:zlib";
@@ -14,9 +18,37 @@ const LOCAL_HEADER_SIG = 0x04034b50;
 const CENTRAL_HEADER_SIG = 0x02014b50;
 const EOCD_SIG = 0x06054b50;
 const MAX_EOCD_COMMENT = 65535;
+/** Maximum compressed archive input (50 MiB). */
+const MAX_ARCHIVE_SIZE = 50 * 1024 * 1024;
+/** Largest declared uncompressed size accepted for one entry (64 MiB). */
+const MAX_ENTRY_SIZE = 64 * 1024 * 1024;
+/** Largest cumulative declared size accepted for the archive (256 MiB). */
+const MAX_TOTAL_SIZE = 256 * 1024 * 1024;
+/** Largest compressed input accepted for one entry (50 MiB). */
+const MAX_ENTRY_COMPRESSED_SIZE = 50 * 1024 * 1024;
+/** Data-descriptor flag: CRC and sizes follow the compressed payload. */
+const FLAG_DATA_DESCRIPTOR = 0x08;
+
+interface CentralEntry {
+  flags: number;
+  method: number;
+  compSize: number;
+  expectedCrc: number;
+  size: number;
+  localOffset: number;
+  name: string;
+}
 
 function view(bytes: Uint8Array): DataView {
   return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+}
+
+function decodeName(bytes: Uint8Array, what: string): string {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    throw new SteveCaptureError(`invalid ZIP archive: entry name is not valid UTF-8 for "${what}"`);
+  }
 }
 
 function findEocd(bytes: Uint8Array): number {
@@ -31,6 +63,9 @@ function findEocd(bytes: Uint8Array): number {
 }
 
 export function unzip(bytes: Uint8Array): Map<string, Uint8Array> {
+  if (bytes.length > MAX_ARCHIVE_SIZE) {
+    throw new SteveCaptureError("invalid ZIP archive: input exceeds the 50 MiB archive limit");
+  }
   if (bytes.length < 22) {
     throw new SteveCaptureError("invalid ZIP archive: file too small");
   }
@@ -46,9 +81,12 @@ export function unzip(bytes: Uint8Array): Map<string, Uint8Array> {
   if (centralOffset + centralSize !== eocd) {
     throw new SteveCaptureError("invalid ZIP archive: central directory offset out of range");
   }
-  const decoder = new TextDecoder();
-  const out = new Map<string, Uint8Array>();
+  // First pass: validate the whole central directory (including every declared
+  // size) before extracting or inflating anything.
+  const entries: CentralEntry[] = [];
+  const names = new Set<string>();
   let cursor = centralOffset;
+  let totalDeclared = 0;
   for (let n = 0; n < count; n++) {
     if (cursor + 46 > bytes.length) {
       throw new SteveCaptureError("invalid ZIP archive: truncated central directory");
@@ -75,29 +113,100 @@ export function unzip(bytes: Uint8Array): Map<string, Uint8Array> {
     if (nameStart + nameLen > bytes.length) {
       throw new SteveCaptureError("invalid ZIP archive: truncated entry name");
     }
-    const name = decoder.decode(bytes.slice(nameStart, nameStart + nameLen));
+    const name = decodeName(bytes.subarray(nameStart, nameStart + nameLen), `entry #${String(n)}`);
     cursor = nameStart + nameLen + extraLen + commentLen;
-    if (cursor > eocd || out.has(name)) {
+    if (cursor > eocd || names.has(name)) {
       throw new SteveCaptureError("invalid ZIP archive: duplicate or truncated directory entry");
     }
+    names.add(name);
     if (name.endsWith("/")) continue;
+    if (compSize > MAX_ENTRY_COMPRESSED_SIZE) {
+      throw new SteveCaptureError(
+        `invalid ZIP archive: compressed size of "${name}" exceeds the 50 MiB entry limit`,
+      );
+    }
+    if (size > MAX_ENTRY_SIZE) {
+      throw new SteveCaptureError(
+        `invalid ZIP archive: declared size of "${name}" exceeds the 64 MiB per-entry limit`,
+      );
+    }
+    totalDeclared += size;
+    if (totalDeclared > MAX_TOTAL_SIZE) {
+      throw new SteveCaptureError(
+        "invalid ZIP archive: cumulative declared size exceeds the 256 MiB archive limit",
+      );
+    }
+    entries.push({ flags, method, compSize, expectedCrc, size, localOffset, name });
+  }
+  if (cursor !== eocd) throw new SteveCaptureError("invalid ZIP archive: inconsistent entry count");
+  // Second pass: extract entries against their local headers.
+  const out = new Map<string, Uint8Array>();
+  const used: Array<{ start: number; end: number }> = [];
+  for (const entry of entries) {
+    const { flags, method, compSize, expectedCrc, size, localOffset, name } = entry;
     if (localOffset + 30 > bytes.length) {
       throw new SteveCaptureError(`invalid ZIP archive: truncated local header for "${name}"`);
     }
     if (dv.getUint32(localOffset, true) !== LOCAL_HEADER_SIG) {
       throw new SteveCaptureError(`invalid ZIP archive: bad local header for "${name}"`);
     }
+    const localFlags = dv.getUint16(localOffset + 6, true);
+    const localMethod = dv.getUint16(localOffset + 8, true);
+    const localCrc = dv.getUint32(localOffset + 14, true);
+    const localCompSize = dv.getUint32(localOffset + 18, true);
+    const localSize = dv.getUint32(localOffset + 22, true);
     const localNameLen = dv.getUint16(localOffset + 26, true);
     const localExtraLen = dv.getUint16(localOffset + 28, true);
+    if (localOffset + 30 + localNameLen + localExtraLen > bytes.length) {
+      throw new SteveCaptureError(`invalid ZIP archive: truncated local header for "${name}"`);
+    }
+    const localName = decodeName(
+      bytes.subarray(localOffset + 30, localOffset + 30 + localNameLen),
+      name,
+    );
+    if (localName !== name || localMethod !== method || localFlags !== flags) {
+      throw new SteveCaptureError(
+        `invalid ZIP archive: local header does not match central entry for "${name}"`,
+      );
+    }
+    const hasDescriptor = (flags & FLAG_DATA_DESCRIPTOR) !== 0;
+    const matches = (local: number, central: number): boolean =>
+      local === central || (hasDescriptor && local === 0);
+    if (!matches(localCrc, expectedCrc) || !matches(localCompSize, compSize) || !matches(localSize, size)) {
+      throw new SteveCaptureError(
+        `invalid ZIP archive: local sizes do not match central entry for "${name}"`,
+      );
+    }
     const dataStart = localOffset + 30 + localNameLen + localExtraLen;
     if (dataStart + compSize > centralOffset) {
       throw new SteveCaptureError(`invalid ZIP archive: truncated entry data for "${name}"`);
     }
-    const raw = bytes.slice(dataStart, dataStart + compSize);
-    let content = raw;
+    let dataEnd = dataStart + compSize;
+    if (hasDescriptor) {
+      if (dataEnd + 12 > centralOffset) {
+        throw new SteveCaptureError(`invalid ZIP archive: truncated data descriptor for "${name}"`);
+      }
+      const descriptor = dataEnd + (dv.getUint32(dataEnd, true) === 0x08074b50 ? 4 : 0);
+      if (descriptor + 12 > centralOffset || dv.getUint32(descriptor, true) !== expectedCrc ||
+          dv.getUint32(descriptor + 4, true) !== compSize || dv.getUint32(descriptor + 8, true) !== size) {
+        throw new SteveCaptureError(`invalid ZIP archive: data descriptor mismatch for "${name}"`);
+      }
+      dataEnd = descriptor + 12;
+    }
+    const span = { start: localOffset, end: dataEnd };
+    for (const other of used) {
+      if (span.start < other.end && other.start < span.end) {
+        throw new SteveCaptureError(
+          `invalid ZIP archive: overlapping entry data for "${name}"`,
+        );
+      }
+    }
+    used.push(span);
+    const raw = bytes.subarray(dataStart, dataStart + compSize);
+    let content: Uint8Array = raw;
     if (method === 8) {
       try {
-        content = Uint8Array.from(inflateRawSync(raw));
+        content = inflateRawSync(raw, { maxOutputLength: Math.max(1, size) });
       } catch {
         throw new SteveCaptureError(`invalid ZIP archive: cannot inflate entry "${name}"`);
       }
@@ -111,6 +220,5 @@ export function unzip(bytes: Uint8Array): Map<string, Uint8Array> {
     }
     out.set(name, content);
   }
-  if (cursor !== eocd) throw new SteveCaptureError("invalid ZIP archive: inconsistent entry count");
   return out;
 }
