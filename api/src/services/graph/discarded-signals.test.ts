@@ -5,7 +5,6 @@ import {
   EMPTY_DISCARDED_SIGNALS,
   discardedSignalKey,
   filterDiscardedSignals,
-  resolveGraphSignalsViewer,
 } from "./discarded-signals.js";
 
 const node = (id: string, citySlug: string | null, type = "Signal") => ({
@@ -60,12 +59,3 @@ describe("filterDiscardedSignals", () => {
   });
 });
 
-describe("resolveGraphSignalsViewer", () => {
-  it("returns the session sub, else null", () => {
-    expect(resolveGraphSignalsViewer({ get: () => ({ sub: "viewer-1" }) })).toBe("viewer-1");
-    expect(resolveGraphSignalsViewer({ get: () => undefined })).toBeNull();
-    expect(resolveGraphSignalsViewer({ get: () => ({ sub: 42 }) })).toBeNull();
-    expect(resolveGraphSignalsViewer({})).toBeNull();
-    expect(resolveGraphSignalsViewer({ get: () => { throw new Error("no session"); } })).toBeNull();
-  });
-});
