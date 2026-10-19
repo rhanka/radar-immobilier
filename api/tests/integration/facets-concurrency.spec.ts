@@ -38,3 +38,20 @@ it("should record no-op keys and serialize overlapping multi-head commands", asy
   expect(events).toHaveLength(5);
   expect(events.filter((event) => event.supersededBy === null)).toHaveLength(3);
 });
+it("should serialize mixed-case command keys across different target locks", async () => {
+  const { sub, target, ownerId } = await facetFixture(db);
+  const other = await facetFixture(db);
+  const key = randomUUID();
+  const results = await Promise.allSettled(Array.from({ length: 8 }, (_, i) => writeFacet(db, sub, {
+    action: "select", basket: "pertinent", target: i % 2 ? target : other.target,
+    commandKey: i % 2 ? key.toUpperCase() : key,
+  })));
+  const successes = results.filter((result) => result.status === "fulfilled");
+  expect(successes).toHaveLength(4);
+  for (const result of successes) expect(result).toEqual(successes[0]);
+  for (const result of results.filter((result) => result.status === "rejected")) {
+    expect(result.reason).toMatchObject({ status: 409, message: "idempotency_key_conflict" });
+  }
+  expect(await db.select().from(facetCommands).where(eq(facetCommands.ownerId, ownerId))).toHaveLength(1);
+  expect(await db.select().from(facetEvents).where(eq(facetEvents.ownerId, ownerId))).toHaveLength(1);
+});
