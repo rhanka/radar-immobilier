@@ -79,12 +79,14 @@ test-mcp: guard-env ## Run the immo-mcp workspace suites
 	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npm run test --workspace=@radar/immo-mcp"
 
 .PHONY: image-smoke
-image-smoke: guard-env ## Build --target build, refuse on .env, smoke-boot API+MCP bundles, check api/drizzle
-	@if test -e .env || test -e api/.env; then echo "[artifact-host] refused: .env present in build context" >&2; exit 1; fi
-	docker build --target build -t radar-artifact-host-smoke:local -f api/Dockerfile .
-	@docker run --rm radar-artifact-host-smoke:local sh -c 'test -s /workspace/api/drizzle/0014_artifacts_core.sql && test -s /workspace/api/drizzle/0015_artifacts_lifecycle.sql && echo "[artifact-host] api/drizzle present in image"'
-	@docker run --rm -e PORT=18999 radar-artifact-host-smoke:local sh -c "timeout 6 node api/dist/index.js"; test $$? -eq 124
-	@docker run --rm -e IMMO_MCP_OAUTH_ISSUER=https://idp.example -e IMMO_MCP_OAUTH_RESOURCE=https://immo.example/mcp -e IMMO_MCP_HTTP_PORT=18848 -e IMMO_MCP_DATA_MODE=mock radar-artifact-host-smoke:local sh -c "timeout 5 node packages/immo-mcp/dist/server-http.js"; test $$? -eq 124
+image-smoke: guard-env ## Build --target build, refuse .env*, smoke-boot API+MCP bundles, check api/drizzle
+	@set -e; trap 'docker image rm radar-artifact-host-smoke:local >/dev/null 2>&1 || true' EXIT INT TERM; \
+	if test -n "$$(find . -name '.env*' ! -name '.env.example' -print -quit)"; then \
+	  echo "[artifact-host] refused: .env* present in build context" >&2; exit 1; fi; \
+	docker build --target build -t radar-artifact-host-smoke:local -f api/Dockerfile .; \
+	docker run --rm radar-artifact-host-smoke:local sh -c 'test -s /workspace/api/drizzle/0014_artifacts_core.sql && test -s /workspace/api/drizzle/0015_artifacts_lifecycle.sql && echo "[artifact-host] api/drizzle present in image"'; \
+	status=0; docker run --rm -e PORT=18999 radar-artifact-host-smoke:local sh -c "timeout 6 node api/dist/index.js" || status=$$?; test $$status -eq 124; \
+	status=0; docker run --rm -e IMMO_MCP_OAUTH_ISSUER=https://idp.example -e IMMO_MCP_OAUTH_RESOURCE=https://immo.example/mcp -e IMMO_MCP_HTTP_PORT=18848 -e IMMO_MCP_DATA_MODE=mock radar-artifact-host-smoke:local sh -c "timeout 5 node packages/immo-mcp/dist/server-http.js" || status=$$?; test $$status -eq 124
 
 .PHONY: typecheck lint
 typecheck: guard-env ## Typecheck all workspaces using only the test stack
@@ -99,18 +101,8 @@ lint: guard-env ## Lint the workspace using only the test stack
 down: guard-env ## Stop the stack and remove volumes/orphans
 	$(COMPOSE) down -v --remove-orphans
 
-.PHONY: install run inspect commit
-install: guard-env
-	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
-	$(COMPOSE) run --rm --no-deps -T api npm install --ignore-scripts
-
-run: guard-env
-	$(COMPOSE) run --rm --no-deps -T api sh -c '$(CMD)'
-
+.PHONY: inspect
 inspect: guard-env
 	docker ps -a --filter label=com.docker.compose.project=radar-$(ENV)
 	docker volume ls --filter label=com.docker.compose.project=radar-$(ENV)
 	docker network ls --filter label=com.docker.compose.project=radar-$(ENV)
-
-commit:
-	git commit -m "$(MSG)"
