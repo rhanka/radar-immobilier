@@ -15,6 +15,11 @@
  * positional `gn-…` display ids from signals-live are never used here.
  */
 
+import {
+  fetchWithTimeout,
+  RequestTimeoutError,
+  DEFAULT_REQUEST_TIMEOUT_MS,
+} from "$lib/net/fetch-with-timeout.js";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 
 export type FacetBasket = "pertinent" | "a_surveiller";
@@ -140,4 +145,81 @@ export function indexFacetHeads(heads: readonly FacetHead[]): Map<string, Target
     }
   }
   return byTarget;
+}
+
+/** One idempotency key per intention, minted by the caller. */
+export function createCommandKey(): string {
+  return globalThis.crypto.randomUUID();
+}
+
+export interface FacetRequestOptions {
+  signal?: AbortSignal;
+  timeoutMs?: number;
+}
+
+/**
+ * Write failure: `status` is the HTTP status, `code` the server error string
+ * ({error} body). A network/timeout failure has status/code null — the write
+ * is then unconfirmed and the caller must offer a retry with the same key.
+ */
+export class SignalFacetError extends Error {
+  readonly status: number | null;
+  readonly code: string | null;
+  constructor(status: number | null, code: string | null, message?: string) {
+    super(message ?? `signal-facets: ${status ?? "network-error"}`);
+    this.name = "SignalFacetError";
+    this.status = status;
+    this.code = code;
+  }
+}
+
+async function readErrorCode(res: Response): Promise<string | null> {
+  try {
+    const body = (await res.json()) as { error?: unknown };
+    return typeof body.error === "string" ? body.error : null;
+  } catch {
+    return null;
+  }
+}
+
+function requestUrl(baseUrl: string, path: string): string {
+  return `${baseUrl}${path}`;
+}
+
+/**
+ * POST one facet command. The caller owns the idempotency key: mint one per
+ * intention with createCommandKey() and pass the SAME key when retrying that
+ * intention. Returns the resulting event (null when the command is a no-op).
+ */
+export async function postFacetCommand(
+  baseUrl: string,
+  action: FacetAction,
+  body: FacetCommandBody,
+  commandKey: string,
+  opts: FacetRequestOptions = {},
+): Promise<unknown> {
+  let res: Response;
+  try {
+    res = await fetchWithTimeout(requestUrl(baseUrl, `/api/v1/signal-facets/${action}`), {
+      signal: opts.signal,
+      timeoutMs: opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
+      init: {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "Idempotency-Key": commandKey,
+        },
+        // Same-origin session cookie (fetch default): no bearer, no actor.
+        body: JSON.stringify(body),
+      },
+    });
+  } catch (err) {
+    if (err instanceof RequestTimeoutError) throw new SignalFacetError(null, null);
+    throw new SignalFacetError(null, null);
+  }
+  if (!res.ok) {
+    throw new SignalFacetError(res.status, await readErrorCode(res));
+  }
+  const payload = (await res.json()) as { event?: unknown };
+  return payload.event ?? null;
 }
