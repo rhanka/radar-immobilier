@@ -13,7 +13,13 @@ export type {
   CellType,
   DataValidationRule,
   DefinedNameRecord,
+  HiddenColumnRecord,
+  HiddenRowRecord,
   SheetInfo,
   SheetVisibility,
+  UncapturedFeature,
+  UncapturedFeatureName,
   WorkbookInventory,
+  XmlNode,
 } from "./types.js";
+export { MAX_XML_DEPTH } from "./xml.js";
