@@ -34,7 +34,6 @@ function dataView(bytes: Uint8Array): DataView {
   return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 }
 
-
 describe("ZIP protection limits", () => {
   it("rejects a declared size above the 64 MiB per-entry limit", () => {
     const bytes = buildSyntheticWorkbook();
