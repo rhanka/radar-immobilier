@@ -55,7 +55,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] HTTP library facade (c12).
   - [x] Shared package entrypoint and checks (c6).
 - [ ] **Lot H2-b — migration and HTTP integration**
-  - [ ] Test tooling, dotenv exclusion and image wiring (c2, c6).
+  - [x] Test tooling, dotenv exclusion and image wiring (c2, c6).
   - [x] Migration drift and historical boundary tests (c5).
   - [x] Core migration and journal (c3).
   - [x] Lifecycle migration and journal (c4).
