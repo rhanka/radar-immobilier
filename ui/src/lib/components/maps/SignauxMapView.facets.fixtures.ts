@@ -1,5 +1,12 @@
-import { vi } from "vitest";
+// Synthetic map fixtures and isolated client mocks for facet tests.
+import { afterEach, beforeEach, vi } from "vitest";
+import { cleanup, fireEvent, screen } from "@testing-library/svelte";
+import type { Writable } from "svelte/store";
+import { authStore, type AuthState } from "$lib/auth/auth-store.js";
+import { buildCityMapEntries } from "$lib/maps/maps-data.js";
+import { parseGeoQuery, type GeoRoute } from "$lib/router/geo-route.js";
 import type { GeoZonesResponse } from "$lib/maps/geo-zones-client.js";
+import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
 
 vi.mock("$lib/components/maps/GeoCityMapBase.svelte", async () => {
   const stub = await import("./test-stubs/GeoCityMapBaseStub.svelte");
@@ -112,6 +119,21 @@ vi.mock("$lib/maps/lots-client.js", async (importOriginal) => {
   };
 });
 
+import { fetchAllLots } from "$lib/maps/lots-client.js";
+import { loadSignauxZones } from "$lib/maps/signaux-zones-loader.js";
+import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
+import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
+import {
+  fetchCityFacets,
+  fetchReasonCodes,
+  postFacetCommand,
+} from "$lib/signals/signal-facets-client.js";
+
+const CODES = [
+  { code: "P-DENSITE", verdict: "pertinent" },
+  { code: "N-ADMIN", verdict: "non_pertinent" },
+];
+
 function fixtureZones(citySlug: string): GeoZonesResponse {
   return {
     ok: true,
@@ -123,4 +145,98 @@ function fixtureZones(citySlug: string): GeoZonesResponse {
     warnings: [],
     featureCollection: { type: "FeatureCollection", features: [] },
   };
+}
+
+function classification(): GraphSignalNode["classification"] {
+  return {
+    zonage: { valeur: "oui", source: "test", confiance: 0.95 },
+    residentiel: { valeur: "oui", source: "test", confiance: 0.9 },
+    effet_densifiant: "inconnu",
+    instrument: "zonage",
+    etape: "avis_motion",
+    etapes_historique: ["avis_motion"],
+    exclusion_reason: null,
+    provenance: { extrait: "" },
+    confiance: 0.9,
+  } as unknown as GraphSignalNode["classification"];
+}
+
+function signalNode(id: string, label: string): GraphSignalNode {
+  return {
+    id,
+    type: "Signal",
+    label,
+    citySlug: CITY_SLUG,
+    sourceRef: `raw/proces-verbaux-ville/cas/${id}.pdf`,
+    createdAt: "2026-05-19T12:00:00.000Z",
+    description: `Synthetic ${label}.`,
+    publishedAt: "2026-05-19",
+    props: { description: `Synthetic ${label}.` },
+    classification: classification(),
+  };
+}
+
+export const CITY_SLUG = buildCityMapEntries([])[0]!.municipality.slug;
+export const NODES = [signalNode("sig-1", "First zonage signal"), signalNode("sig-2", "Second zonage signal")];
+
+export function setAuth(sub: string | null, status: "pending" | "approved" = "approved"): void {
+  (authStore as unknown as Writable<AuthState>).set({
+    loading: false, authenticated: sub !== null, authDisabled: false, loginBlocked: false,
+    user: sub ? { sub, status } : null,
+  });
+}
+
+export function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((done) => { resolve = done; });
+  return { promise, resolve };
+}
+
+export function cityRoute(search: string): GeoRoute {
+  return { level: "city", citySlug: CITY_SLUG, state: parseGeoQuery(search) };
+}
+
+function setSearch(search: string): void {
+  window.history.replaceState({}, "", `/geo/city/${CITY_SLUG}${search}`);
+}
+
+function mockPopulations(): void {
+  vi.mocked(fetchGraphSignalsByCity).mockResolvedValue({
+    ok: true,
+    totalCount: 2,
+    cities: [{ citySlug: CITY_SLUG, signalCount: 2, subsetCounts: {} }],
+  });
+  vi.mocked(fetchGraphSignalDetail).mockResolvedValue({
+    ok: true,
+    citySlug: CITY_SLUG,
+    legacyProjection: null,
+    nodes: NODES,
+  });
+}
+
+afterEach(() => {
+  cleanup();
+  setSearch("");
+  localStorage.clear();
+});
+
+beforeEach(() => {
+  setAuth("tester-1");
+  vi.mocked(fetchGraphSignalsByCity).mockReset();
+  vi.mocked(fetchGraphSignalDetail).mockReset();
+  vi.mocked(fetchCityFacets).mockReset();
+  vi.mocked(fetchReasonCodes).mockReset();
+  vi.mocked(postFacetCommand).mockReset();
+  mockPopulations();
+  vi.mocked(fetchReasonCodes).mockResolvedValue({ profileId: "immo-steve-2026-09", codes: CODES });
+  vi.mocked(fetchCityFacets).mockResolvedValue({ heads: [] });
+  vi.mocked(postFacetCommand).mockResolvedValue({ id: "event-1" });
+  vi.mocked(fetchAllLots).mockClear();
+  vi.mocked(loadSignauxZones).mockClear();
+});
+
+export async function openFirstSignalCard(): Promise<void> {
+  await screen.findByRole("button", { name: /First zonage signal/ });
+  await fireEvent.click(screen.getByRole("button", { name: /First zonage signal/ }));
+  await screen.findByTestId("signal-facet-controls");
 }
