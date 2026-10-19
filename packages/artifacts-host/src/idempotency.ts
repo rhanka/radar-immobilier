@@ -1,4 +1,3 @@
-
 import { createHash } from "node:crypto";
 import pg from "pg";
 
@@ -44,7 +43,7 @@ export function createArtifactsPool(
   params: ArtifactsPoolParams,
   max = 5,
 ): pg.Pool {
-  return new pg.Pool({
+  const pool = new pg.Pool({
     host: params.host,
     port: params.port,
     user: params.user,
@@ -53,6 +52,8 @@ export function createArtifactsPool(
     connectionTimeoutMillis: 3000,
     max,
   });
+  pool.on("error", (error) => console.error("artifact pool idle client error", error));
+  return pool;
 }
 
 const ADVISORY_KEY_RE = /^[0-9a-f]{16,}[0-9a-f]*$/i;
@@ -68,6 +69,7 @@ export async function withArtifactAdvisoryLock<T>(
   const lockId = keyHex.slice(0, 16);
   const client = await pool.connect();
   let discard = false;
+  let locked = false;
   const unlock = async () => {
     try {
       await client.query("SELECT pg_advisory_unlock(('x' || $1)::bit(64)::bigint)", [lockId]);
@@ -78,16 +80,28 @@ export async function withArtifactAdvisoryLock<T>(
   };
   try {
     try {
+      await client.query("BEGIN");
+      await client.query("SELECT set_config('lock_timeout', $1, true)", ["3000ms"]);
       await client.query(
         "SELECT pg_advisory_lock(('x' || $1)::bit(64)::bigint)",
         [lockId],
       );
-      const result = await body(client);
-      return result;
-    } finally {
-      await unlock();
+      locked = true;
+      await client.query("SELECT set_config('lock_timeout', '0', true)");
+      await client.query("COMMIT");
+    } catch (error) {
+      try { await client.query("ROLLBACK"); } catch { discard = true; }
+      if ((error as { code?: string }).code === "55P03") {
+        throw new Error("artifact advisory lock timeout conflict", { cause: error });
+      }
+      throw error;
     }
+    return await body(client);
   } finally {
-    client.release(discard);
+    try {
+      if (locked) await unlock();
+    } finally {
+      client.release(discard);
+    }
   }
 }
