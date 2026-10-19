@@ -1485,6 +1485,8 @@
     void loadDetailForCity(entry.municipality.slug);
     void loadGeoForCity(entry.municipality.slug);
     void probeCptaqAvailability(entry.municipality.slug);
+    void loadReasonCodes();
+    void loadFacetHeads(entry.municipality.slug);
   }
 
   /**
@@ -1536,6 +1538,57 @@
       return false;
     } finally {
       if (lease.isCurrent()) detailLoading = false;
+    }
+  }
+
+  /**
+   * Read the reason codebook once per viewer. Unreadable codes disable the
+   * controls with a message while leaving signal reads available.
+   */
+  async function loadReasonCodes(): Promise<boolean> {
+    if (!facetsAllowed || !currentUserSub) return false;
+    if (facetCodes !== null && facetCodesSub === currentUserSub) return true;
+    if (facetCodesLoading) return false;
+    const lease = facetCodesGuard.lease();
+    const sub = currentUserSub;
+    facetCodesLoading = true;
+    facetCodesError = null;
+    try {
+      // GET reason-codes rejects query parameters with 400.
+      const res = await fetchReasonCodes("", { signal: lease.signal });
+      if (!lease.isCurrent()) return false;
+      facetCodes = res.codes;
+      facetCodesSub = sub;
+      return true;
+    } catch (err) {
+      if (!lease.isCurrent() || isAbortError(err)) return false;
+      console.warn("Facet reason codes load failed:", err);
+      facetCodes = null;
+      facetCodesError = "Codes de motif illisibles — classement indisponible.";
+      return false;
+    } finally {
+      if (lease.isCurrent()) facetCodesLoading = false;
+    }
+  }
+
+  /**
+   * Read city heads under a dedicated request guard, without query params.
+   * Return true only after fresh heads have been applied for this viewer.
+   */
+  async function loadFacetHeads(citySlug: string): Promise<boolean> {
+    if (!facetsAllowed || !currentUserSub) return false;
+    const lease = facetHeadsGuard.lease();
+    try {
+      const res = await fetchCityFacets("", citySlug, { signal: lease.signal });
+      if (!lease.isCurrent()) return false;
+      const next = new Map(facetHeadsByCity);
+      next.set(citySlug, indexFacetHeads(res.heads));
+      facetHeadsByCity = next;
+      return true;
+    } catch (err) {
+      if (!lease.isCurrent() || isAbortError(err)) return false;
+      console.warn("Facet heads load failed:", err);
+      return false;
     }
   }
 
