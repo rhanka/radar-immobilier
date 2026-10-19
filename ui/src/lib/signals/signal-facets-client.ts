@@ -240,6 +240,11 @@ export async function fetchReasonCodes(
   });
   if (!res.ok) throw new SignalFacetError(res.status, await readErrorCode(res));
   const payload = (await res.json()) as { profileId: string; codes: ReasonCode[] };
+  if (!Array.isArray(payload.codes) || !payload.codes.every(
+    (row) => row && typeof row.code === "string" && typeof row.verdict === "string",
+  )) {
+    throw new Error("Invalid reason codes response");
+  }
   return { profileId: payload.profileId, codes: payload.codes };
 }
 

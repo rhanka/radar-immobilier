@@ -185,6 +185,14 @@ describe("facet reads", () => {
     });
   });
 
+  it.each([{}, { codes: null }, { codes: [null] }, { codes: [{ code: "P-BAD", verdict: 1 }] }])(
+    "should reject an unreadable codebook returned with HTTP 200: %j",
+    async (payload) => {
+      stubFetch(() => jsonResponse(200, payload));
+      await expect(fetchReasonCodes("")).rejects.toThrow("Invalid reason codes response");
+    },
+  );
+
   it("GET reason-codes carries no query string", async () => {
     const { calls } = stubFetch(() =>
       jsonResponse(200, { ok: true, profileId: "immo-steve-2026-09", codes: CODES }),
