@@ -1,10 +1,9 @@
-
 import { resolveContentPath } from "@sentropic/artifacts/content/routing";
 
 export interface PublishFileInput {
   readonly path: string;
   readonly mediaType: string;
-    readonly sizeBytes: number;
+  readonly sizeBytes: number;
 }
 
 export const PUBLISH_MAX_FILES = 32;
