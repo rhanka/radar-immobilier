@@ -37,16 +37,16 @@ describe("discardedSignalKey", () => {
   it("rejects unbranded strings where a key is expected", () => {
     const port: DiscardedSignalsPort = {
       // @ts-expect-error — raw strings are not discard keys
-      forViewer: () => new Set(["drummondville|Signal|sig-001"]),
+      forViewer: async () => new Set(["drummondville|Signal|sig-001"]),
     };
-    expect(port.forViewer(null).size).toBe(1);
+    expect(port.forViewer(null)).toBeInstanceOf(Promise);
   });
 });
 
 describe("EMPTY_DISCARDED_SIGNALS", () => {
-  it("returns the shared empty set for anonymous and named viewers", () => {
-    expect(EMPTY_DISCARDED_SIGNALS.forViewer(null)).toBe(EMPTY_DISCARDED_KEYS);
-    expect((EMPTY_DISCARDED_SIGNALS.forViewer("viewer-1")).size).toBe(0);
+  it("resolves the shared empty set for anonymous and named viewers", async () => {
+    expect(await EMPTY_DISCARDED_SIGNALS.forViewer(null)).toBe(EMPTY_DISCARDED_KEYS);
+    expect((await EMPTY_DISCARDED_SIGNALS.forViewer("viewer-1")).size).toBe(0);
   });
 });
 
