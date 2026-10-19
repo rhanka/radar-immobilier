@@ -63,7 +63,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] Cookie-only control guards (c14).
   - [x] Auth-only application mount and startup wiring (c14).
   - [x] Offline HTTP guard regression tests (c15).
-  - [ ] Postgres/S3 publication and concurrency tests (c15).
+  - [x] Postgres/S3 publication and concurrency tests (c15).
   - [ ] HTTP negatives and migration startup tests (c15).
 - [ ] **Lot gate**
   - [ ] Targeted suites, complete API with configuration absent and present, MCP.
