@@ -60,6 +60,7 @@ export interface CellRecord {
 
 export interface DataValidationRule {
   sheet: string;
+  sheetId: number;
   sqref: string | null;
   type: string | null;
   formula1: string | null;
@@ -75,6 +76,7 @@ export interface DefinedNameRecord {
 
 export interface AutoFilterRecord {
   sheet: string;
+  sheetId: number;
   ref: string;
   definition: XmlNode;
 }
