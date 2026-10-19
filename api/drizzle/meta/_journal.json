@@ -92,6 +92,20 @@
       "when": 1791100000000,
       "tag": "0013_graph_city_key",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1791100001000,
+      "tag": "0014_artifacts_core",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791100002000,
+      "tag": "0015_artifacts_lifecycle",
+      "breakpoints": true
     }
   ]
 }
