@@ -6,12 +6,12 @@
  * fixtures only.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/svelte";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/svelte";
 import type { MunicipalityT } from "@radar/domain";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
 import { createSelectionBucketState, makeKey } from "$lib/maps/selection-bucket.js";
-import type { TargetFacetState } from "$lib/signals/signal-facets-client.js";
+import type { TargetFacetState, postFacetCommand } from "$lib/signals/signal-facets-client.js";
 import Harness from "./SignauxSelPanelHarness.svelte";
 
 vi.mock("$lib/collab/annotations-client.js", () => ({
@@ -127,3 +127,135 @@ describe("SignauxSelPanel — facet badges", () => {
   });
 });
 
+describe("SignauxSelPanel — reveal checkbox gating", () => {
+  it("shows the checkbox when allowed and forwards the toggle", async () => {
+    const onToggleShowDiscarded = vi.fn();
+    render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [makeSignal()],
+        unfilteredSignalCount: 1,
+        facetsAllowed: true,
+        showDiscarded: false,
+        onToggleShowDiscarded,
+      },
+    });
+    const checkbox = screen.getByLabelText("Montrer les écartés") as HTMLInputElement;
+    expect(checkbox.checked).toBe(false);
+    await fireEvent.click(checkbox);
+    expect(onToggleShowDiscarded).toHaveBeenCalledWith(true);
+    expect(screen.queryByTestId("facets-unavailable-note")).toBeNull();
+  });
+
+  it("shows an explicit note instead of controls when not allowed", () => {
+    render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [makeSignal()],
+        unfilteredSignalCount: 1,
+        selectionState: focusedState("sig-1"),
+        facetsAllowed: false,
+        facetsNote: "Connexion requise pour classer les signaux.",
+      },
+    });
+    expect(screen.queryByLabelText("Montrer les écartés")).toBeNull();
+    expect(screen.getByTestId("facets-unavailable-note").textContent).toContain("Connexion requise");
+    expect(screen.queryByTestId("signal-facet-controls")).toBeNull();
+    expect(screen.getByTestId("facet-card-note").textContent).toContain("Connexion requise");
+  });
+});
+
+describe("SignauxSelPanel — controls and discard notice", () => {
+  it("mounts the controls in the unfolded card and reports saves", async () => {
+    const postCommand = vi.fn<typeof postFacetCommand>(async () => null);
+    const onFacetSaved = vi.fn();
+    render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [makeSignal()],
+        unfilteredSignalCount: 1,
+        selectionState: focusedState("sig-1"),
+        facetsAllowed: true,
+        reasonCodes: CODES,
+        facetHeads: new Map(),
+        facetPostCommand: postCommand,
+        onFacetSaved,
+      },
+    });
+    expect(screen.getByTestId("signal-facet-controls")).toBeTruthy();
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    await waitFor(() => expect(onFacetSaved).toHaveBeenCalledTimes(1));
+    expect(onFacetSaved.mock.calls[0]![0]).toBe("discard");
+    expect(onFacetSaved.mock.calls[0]![1]).toEqual({
+      citySlug: "delson",
+      type: "DesignationEvent",
+      id: "sig-1",
+    });
+    expect(postCommand.mock.calls[0]![2]).toEqual({
+      target: { citySlug: "delson", type: "DesignationEvent", id: "sig-1" },
+      reasonCode: "N-ADMIN",
+    });
+  });
+
+  it("renders no controls for a node without citySlug", () => {
+    const node = makeSignal();
+    node.citySlug = null;
+    render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [node],
+        unfilteredSignalCount: 1,
+        selectionState: focusedState("sig-1"),
+        facetsAllowed: true,
+        reasonCodes: CODES,
+        facetHeads: new Map(),
+      },
+    });
+    expect(screen.queryByTestId("signal-facet-controls")).toBeNull();
+  });
+
+  it("focuses the discard notice and undoes on Annuler", async () => {
+    const onUndoDiscard = vi.fn();
+    const onDismiss = vi.fn();
+    const target = { citySlug: "delson", type: "DesignationEvent" as const, id: "sig-1" };
+    render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [makeSignal()],
+        unfilteredSignalCount: 1,
+        facetsAllowed: true,
+        discardedNotice: { target, label: "Synthetic zonage signal" },
+        onUndoDiscard,
+        onDismissDiscardedNotice: onDismiss,
+      },
+    });
+    const notice = screen.getByTestId("discarded-notice");
+    expect(notice.contains(document.activeElement)).toBe(true);
+    const buttons = within(notice).getAllByRole("button");
+    await fireEvent.click(buttons.find((button) => button.textContent === "Annuler")!);
+    expect(onUndoDiscard).toHaveBeenCalledWith(target);
+    await fireEvent.click(buttons.find((button) => button.textContent === "Fermer")!);
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the reload failure with a reads-only retry", async () => {
+    const onRetryFacetReads = vi.fn();
+    render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [makeSignal()],
+        unfilteredSignalCount: 1,
+        facetsAllowed: true,
+        facetReloadError: "Les données affichées peuvent être périmées.",
+        onRetryFacetReads,
+      },
+    });
+    const alert = screen.getByTestId("facet-reload-error");
+    expect(alert.textContent).toContain("rechargement impossible");
+    await fireEvent.click(within(alert).getByRole("button", { name: "Réessayer" }));
+    expect(onRetryFacetReads).toHaveBeenCalledTimes(1);
+  });
+});
