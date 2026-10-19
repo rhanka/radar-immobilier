@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { fileURLToPath } from "node:url";
 
 import { migrate } from "drizzle-orm/node-postgres/migrator";
@@ -50,12 +51,10 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
     "re-applies the last migration without error when its journal row is missing but its schema is already present, " +
       "and re-registers exactly that row",
     async () => {
-      // Sanity: this test is written against 0013_graph_city_key being the last
-      // migration (idempotent: node/edge block skipped when the PK is already
-      // (city_slug, id), guarded index statements; 0012 carries the same
-      // guards). If the journal's last entry changes, this assertion fails
-      // loudly instead of silently testing the wrong migration's drift.
-      expect(lastEntry.tag).toBe("0013_graph_city_key");
+      // The journal selects the current last migration, including appended
+      // package migrations. Its persisted hash must match those exact bytes.
+      const expectedHash = createHash("sha256")
+        .update(readFileSync(`${migrationsFolder}/${lastEntry.tag}.sql`)).digest("hex");
 
       // ── 1. Known-clean state: (re)apply every migration ────────────────
       // migrate() only replays what is not yet recorded past the latest
@@ -63,7 +62,7 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
       // test Postgres is already fully migrated (the `make test` /
       // `make test-api` flow runs `db:migrate` before vitest) or genuinely
       // vierge (this file run alone against a fresh Postgres). Either way it
-      // converges on a clean database whose journal is complete up to 0012.
+      // converges on a clean database whose journal is complete up to 0015.
       //
       // Deliberately NOT a `DROP SCHEMA public CASCADE`: this Postgres is
       // shared with the other integration spec files in the same test run
@@ -94,13 +93,14 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
           `expected at least one row in ${MIGRATIONS_SCHEMA}.${MIGRATIONS_TABLE} after migrate()`,
         );
       }
-      // Confirms the max-id row really is 0012's row (same folderMillis as
+      // Confirms the max-id row really is 0015's row (same folderMillis as
       // the journal's last entry) before we delete it below.
       expect(lastRow.created_at).toBe(String(lastEntry.when));
+      expect(lastRow.hash).toBe(expectedHash);
 
       // ── 2. Simulate the "restored from prod" drift ──────────────────────
-      // The schema already has 0012 (the refresh_outcome_* types + the
-      // refresh_document_outcomes table), but its journal row is gone — the
+      // The schema already has 0015 (artifact lifecycle, sources and grants),
+      // but its journal row is gone — the
       // bookkeeping is behind the schema, as seen after a prod restore whose
       // dump predates a `drizzle.__drizzle_migrations` insert. Only the
       // journal's bookkeeping row is touched; no application table/column is
@@ -117,7 +117,7 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
         journal.entries.length - 1,
       );
 
-      // Schema untouched by the delete: the type/table from 0012 are still there.
+      // Earlier application schema is untouched by this journal-only drift.
       const typeCountAfterDrift = await pool.query<{ count: string }>(
         `SELECT count(*)::text AS count FROM pg_type WHERE typname = 'refresh_outcome_status'`,
       );
@@ -125,11 +125,8 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
 
       // ── 3. Re-run migrate() on the drifted journal ──────────────────────
       // drizzle's migrator compares each migration file's folderMillis
-      // against only the remaining last row's created_at (now 0011's), so it
-      // decides 0012 needs replaying. Without 0012's idempotent guards (DO/
-      // EXCEPTION around the CREATE TYPEs, IF NOT EXISTS on the table/
-      // indexes) this throws "type ... already exists". This is the core
-      // assertion of this test: it must NOT throw.
+      // against only the remaining last row's created_at (now 0014's), so it
+      // replays 0015's guarded columns, constraint and tables/indexes.
       let rerunError: unknown = null;
       try {
         await migrate(db, { migrationsFolder });
@@ -138,7 +135,7 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
       }
       expect(
         rerunError,
-        `migrate() must succeed replaying 0012 on a schema that already has it, ` +
+        `migrate() must succeed replaying 0015 on a schema that already has it, ` +
           `got: ${String(rerunError)}`,
       ).toBeNull();
 
@@ -153,7 +150,7 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
       const rerunRow = lastRowAfterRerun.rows[0];
       if (!rerunRow) {
         throw new Error(
-          `expected the ${MIGRATIONS_SCHEMA}.${MIGRATIONS_TABLE} row for 0012 to be re-inserted`,
+          `expected the ${MIGRATIONS_SCHEMA}.${MIGRATIONS_TABLE} row for 0015 to be re-inserted`,
         );
       }
       expect(rerunRow.hash).toBe(lastRow.hash);
