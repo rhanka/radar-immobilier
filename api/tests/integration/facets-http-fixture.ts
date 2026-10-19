@@ -5,6 +5,7 @@ import type { AuthConfig } from "../../src/config.js";
 import { protect } from "../../src/routes/auth.js";
 import { signalFacetsRoute } from "../../src/routes/signal-facets.js";
 import { signSession } from "../../src/services/auth/session.js";
+import { privateSignalResponse } from "../../src/services/facets/private-response.js";
 
 export const facetAuth: AuthConfig = {
   enabled: true, issuer: "https://auth.example.test", clientId: "test-client",
@@ -16,6 +17,7 @@ export const facetAuth: AuthConfig = {
 };
 export function facetHttp(db: Database, auth = facetAuth, bearerGetKey?: JWTVerifyGetKey) {
   const app = new Hono();
+  app.use("/api/v1/signal-facets/*", privateSignalResponse);
   app.use("*", protect(auth, { db, ...(bearerGetKey ? { bearerGetKey } : {}) }));
   app.route("/", signalFacetsRoute({ db, auth }));
   return app;
