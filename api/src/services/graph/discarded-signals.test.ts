@@ -6,6 +6,8 @@ import {
   EMPTY_DISCARDED_SIGNALS,
   discardedSignalKey,
   filterDiscardedSignals,
+  unionDiscardedSignals,
+  type DiscardedSignalKey,
   type DiscardedSignalsPort,
 } from "./discarded-signals.js";
 
@@ -47,6 +49,27 @@ describe("EMPTY_DISCARDED_SIGNALS", () => {
   it("resolves the shared empty set for anonymous and named viewers", async () => {
     expect(await EMPTY_DISCARDED_SIGNALS.forViewer(null)).toBe(EMPTY_DISCARDED_KEYS);
     expect((await EMPTY_DISCARDED_SIGNALS.forViewer("viewer-1")).size).toBe(0);
+  });
+});
+
+describe("unionDiscardedSignals", () => {
+  it("unites common and personal scopes; absent scopes add nothing", () => {
+    const common = new Set([discardedSignalKey("drummondville", "Signal", "sig-common")]);
+    const personal = new Set([discardedSignalKey("drummondville", "Signal", "sig-mine")]);
+    expect(unionDiscardedSignals(common, personal, undefined)).toEqual(
+      new Set<DiscardedSignalKey>([...common, ...personal]),
+    );
+    expect(unionDiscardedSignals(undefined, undefined).size).toBe(0);
+  });
+
+  it("keeps a common key discarded when the personal scope omits it", () => {
+    const items = [node("sig-common", "drummondville"), node("sig-mine", "drummondville")];
+    const common = new Set([discardedSignalKey("drummondville", "Signal", "sig-common")]);
+    // Union, not override: omitting the common key from the personal scope
+    // does not unhide it.
+    expect(filterDiscardedSignals(items, unionDiscardedSignals(common, new Set()))).toEqual([
+      node("sig-mine", "drummondville"),
+    ]);
   });
 });
 
