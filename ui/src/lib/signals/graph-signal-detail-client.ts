@@ -558,6 +558,26 @@ export interface FetchGraphSignalDetailOptions {
    * périmée est IGNORÉE par l'appelant, pas transformée en erreur affichée.
    */
   signal?: AbortSignal;
+  /**
+   * Reveal discarded signals: `showDiscarded=1` returns the complete B(F)
+   * population. Hidden by default; forward this flag unchanged.
+   */
+  showDiscarded?: boolean;
+}
+
+/**
+ * HTTP failure of a graph-signals read. The message keeps the historical
+ * `<route>: <status>` shape; `status` lets callers tell an explicit
+ * discarded-reader outage (503 `discarded_signals_unavailable`, never an
+ * empty list) from other failures.
+ */
+export class GraphSignalsHttpError extends Error {
+  readonly status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "GraphSignalsHttpError";
+    this.status = status;
+  }
 }
 
 export async function fetchGraphSignalDetail(
@@ -567,8 +587,9 @@ export async function fetchGraphSignalDetail(
   opts: FetchGraphSignalDetailOptions = {},
 ): Promise<GraphSignalDetailResponse> {
   try {
+    const suffix = opts.showDiscarded === true ? "?showDiscarded=1" : "";
     const res = await fetchWithTimeout(
-      `${baseUrl}/api/graph-signals/${encodeURIComponent(citySlug)}`,
+      `${baseUrl}/api/graph-signals/${encodeURIComponent(citySlug)}${suffix}`,
       { signal: opts.signal, timeoutMs },
     );
     if (!res.ok) {
@@ -576,7 +597,7 @@ export async function fetchGraphSignalDetail(
       if (res.status === 404) {
         return { ok: false, citySlug, legacyProjection: null, nodes: [] };
       }
-      throw new Error(`graph-signals/${citySlug}: ${res.status}`);
+      throw new GraphSignalsHttpError(`graph-signals/${citySlug}: ${res.status}`, res.status);
     }
     return res.json();
   } catch (err) {
