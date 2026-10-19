@@ -50,12 +50,8 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
     "re-applies the last migration without error when its journal row is missing but its schema is already present, " +
       "and re-registers exactly that row",
     async () => {
-      // Sanity: this test is written against 0013_graph_city_key being the last
-      // migration (idempotent: node/edge block skipped when the PK is already
-      // (city_slug, id), guarded index statements; 0012 carries the same
-      // guards). If the journal's last entry changes, this assertion fails
-      // loudly instead of silently testing the wrong migration's drift.
-      expect(lastEntry.tag).toBe("0013_graph_city_key");
+      // Keep the replay assertion anchored to the personal facets migration.
+      expect(lastEntry.tag).toBe("0014_facets_signal");
 
       // ── 1. Known-clean state: (re)apply every migration ────────────────
       // migrate() only replays what is not yet recorded past the latest
@@ -171,6 +167,20 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
         `SELECT count(*)::text AS count FROM ${MIGRATIONS_SCHEMA}."${MIGRATIONS_TABLE}"`,
       );
       expect(Number(afterRerunCount.rows[0]?.count)).toBe(journal.entries.length);
+
+      const codes = await pool.query<{ verdict: string; count: number }>(
+        `SELECT verdict, count(*)::int AS count FROM facet_reason_codes
+         WHERE profile_id = 'immo-steve-2026-09' GROUP BY verdict ORDER BY verdict`,
+      );
+      expect(codes.rows).toEqual([
+        { verdict: "a_surveiller", count: 8 },
+        { verdict: "non_pertinent", count: 12 },
+        { verdict: "pertinent", count: 8 },
+      ]);
+      const precedent = await pool.query(
+        `SELECT verdict FROM facet_reason_codes WHERE code = 'V2-PRECEDENT'`,
+      );
+      expect(precedent.rows).toEqual([{ verdict: "non_pertinent" }]);
 
       // ... and the schema is intact: exactly one type, one table (no
       // duplicate created by the replay).
