@@ -82,6 +82,7 @@ export function parseCell(
   row: number,
   col: number,
   sharedStrings: readonly string[],
+  sheetId: number,
 ): CellRecord | null {
   const refAttr = attr(cell, "r");
   const where = refAttr ?? `R${String(row)}C${String(col)}`;
@@ -119,6 +120,7 @@ export function parseCell(
   }
   return {
     sheet: sheetName,
+    sheetId,
     address: `${columnIndexToLetters(col)}${String(row)}`,
     row,
     col,
