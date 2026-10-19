@@ -48,4 +48,17 @@ describe("readPatternCodes", () => {
       SteveCaptureError,
     );
   });
+
+  it("rejects duplicate codes under the header", () => {
+    const inventory = captureWorkbookInventory(buildSyntheticWorkbook({
+      "xl/worksheets/sheet2.xml": `<worksheet><sheetData>
+        <row r="1"><c r="A1" t="inlineStr"><is><t>Motif</t></is></c></row>
+        <row r="2"><c r="A2" t="inlineStr"><is><t>DUP</t></is></c></row>
+        <row r="3"><c r="A3" t="inlineStr"><is><t>DUP</t></is></c></row>
+      </sheetData></worksheet>`,
+    }));
+    expect(() => readPatternCodes(inventory, { sheet: "Codes", headerLabel: "Motif" })).toThrow(
+      /duplicate pattern code/,
+    );
+  });
 });
