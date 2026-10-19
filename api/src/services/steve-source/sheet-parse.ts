@@ -42,10 +42,8 @@ function isHidden(raw: string | null): boolean {
 }
 
 function readHiddenColumns(ws: XmlNode, sheetName: string): number[] {
-  const cols = firstChild(ws, "cols");
-  if (cols === null) return [];
   const hidden = new Set<number>();
-  for (const col of childElements(cols, "col")) {
+  for (const col of childElements(ws, "cols").flatMap((cols) => childElements(cols, "col"))) {
     const minRaw = attr(col, "min");
     const maxRaw = attr(col, "max");
     if (minRaw === null || maxRaw === null) continue;
@@ -171,6 +169,7 @@ export function parseSheetXml(
       const formula2 = firstChild(rule, "formula2");
       validations.push({
         sheet: sheetName,
+        sheetId,
         sqref: attr(rule, "sqref"),
         type: attr(rule, "type"),
         formula1: formula1 === null ? null : deepText(formula1),
@@ -185,7 +184,7 @@ export function parseSheetXml(
     cells,
     validations,
     autoFilter: autoFilterRef === null || autoFilter === null ? null : {
-      sheet: sheetName, ref: autoFilterRef, definition: autoFilter,
+      sheet: sheetName, sheetId, ref: autoFilterRef, definition: autoFilter,
     },
     hiddenRows,
     hiddenColumns: readHiddenColumns(ws, sheetName),
