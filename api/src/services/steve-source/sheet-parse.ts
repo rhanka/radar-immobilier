@@ -6,7 +6,11 @@
 import { parseCell, parseRowNumber } from "./cell-parse.js";
 import { parseA1 } from "./cell-ref.js";
 import { SteveCaptureError } from "./types.js";
-import type { AutoFilterRecord, CellRecord, DataValidationRule } from "./types.js";
+import type {
+  AutoFilterRecord,
+  CellRecord,
+  DataValidationRule,
+} from "./types.js";
 import { parseXml } from "./xml.js";
 import type { XmlNode } from "./xml.js";
 import { childElements, deepText, documentElement, firstChild } from "./xml-query.js";
@@ -32,6 +36,7 @@ export function parseSheetXml(
     throw new SteveCaptureError(`expected a worksheet element in sheet "${sheetName}"`);
   }
   const cells: CellRecord[] = [];
+  const seen = new Set<string>();
   const sheetData = firstChild(ws, "sheetData");
   if (sheetData !== null) {
     let rowFallback = 0;
@@ -42,8 +47,28 @@ export function parseSheetXml(
       rowFallback = rowNum;
       let colFallback = 0;
       for (const cell of childElements(rowNode, "c")) {
-        colFallback = cell.attrs["r"] === undefined ? colFallback + 1 : parseA1(cell.attrs["r"]).col;
-        const record = parseCell(sheetName, cell, rowNum, colFallback, sharedStrings);
+        const refAttr = cell.attrs["r"];
+        let row = rowNum;
+        let col = colFallback + 1;
+        if (refAttr !== undefined) {
+          const pos = parseA1(refAttr);
+          if (pos.row !== rowNum) {
+            throw new SteveCaptureError(
+              `cell "${refAttr}" outside row ${String(rowNum)} in sheet "${sheetName}"`,
+            );
+          }
+          row = pos.row;
+          col = pos.col;
+        }
+        colFallback = col;
+        const key = `${String(row)}:${String(col)}`;
+        if (seen.has(key)) {
+          throw new SteveCaptureError(
+            `duplicate cell at R${String(row)}C${String(col)} in sheet "${sheetName}"`,
+          );
+        }
+        seen.add(key);
+        const record = parseCell(sheetName, cell, row, col, sharedStrings);
         if (record !== null) cells.push(record);
       }
     }
