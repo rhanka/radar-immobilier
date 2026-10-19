@@ -77,10 +77,10 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] D1-b/D2: keep the startup test inside rootDir; real empty-schema/offline-Postgres integrations pass; read guards also accept absent fetch metadata.
   - [x] D2/D9c/D9e: allow same-origin reads without Origin; retain POST guards.
   - [x] D3: require and use ARTIFACTS_S3_REGION (seventh storage variable); synthetic configuration includes all seven values.
-  - [ ] D4: exclude nested .env* and refuse them in image-smoke.
+  - [x] D4: exclude nested .env* except .env.example; four nested refusal probes pass; smoke image cleanup runs on every exit.
   - [x] D5: bound lock wait to 3 s with local timeout reset, explicit 409 conflict; S3 request/connection deadlines 5 s/3 s with throwOnRequestTimeout; handle idle pool errors.
   - [x] D6: validate stable content links before publication (three invalid-origin cases, zero backend calls).
   - [x] D7/D9b: assert the 0015 tag and lifecycle object before/after drift and replay; reject mismatched journal hashes without a scope write.
-  - [ ] D8: restrict artifact tooling and worker configuration scope.
+  - [x] D8: remove generic install/run/commit targets; inspect is read-only; retain the alias and remove global maxWorkers.
   - [x] D9d: use three independent literal SHA-256 vectors calculated with sha256sum, including UTF-8.
   - [x] D10-a: delete unreachable config checks and leading blank lines; fix requested indentation. Image cleanup and six skipped-test names are recorded in the report.
