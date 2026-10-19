@@ -16,16 +16,18 @@ export interface FacetCommand {
   commandKey: string;
 }
 type Tx = Parameters<Parameters<Database["transaction"]>[0]>[0];
-export async function approvedOwner(db: Pick<Database, "select">, sub: string) {
-  const [owner] = await db.select().from(accountUsers).where(and(
+export async function approvedOwner(db: Pick<Database, "select">, sub: string, lock = false) {
+  const query = db.select({ id: accountUsers.id }).from(accountUsers).where(and(
     eq(accountUsers.sub, sub), eq(accountUsers.status, "approved"),
-  )).for("share");
+  ));
+  const [owner] = await (lock ? query.for("share") : query);
   if (!owner) throw new FacetError(403, "account_not_approved");
   return owner.id;
 }
 export async function writeFacet(db: Database, sub: string, command: FacetCommand) {
+  command = { ...command, commandKey: command.commandKey.toLowerCase() };
   return db.transaction(async (tx) => {
-    const ownerId = await approvedOwner(tx, sub);
+    const ownerId = await approvedOwner(tx, sub, true);
     const { target, basket, action } = command;
     const selection = action === "select" || action === "deselect";
     if (selection && !basket) throw new FacetError(422, "basket_required");
