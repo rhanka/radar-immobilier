@@ -92,17 +92,21 @@ describe("sessions and egress on 0.1.0", () => {
     const staleId = await initialize(first, token);
     const restarted = createImmoHttpApp(CONFIG, { keySource });
     const stale = await restarted.request("/mcp", { method: "GET", headers: headers(token, staleId) });
-    expect(stale.status).toBe(404);
-    expect(await initialize(restarted, token)).not.toBe(staleId);
+    const staleCall = await callTool(restarted, token, staleId, "search_signals", { city: "longueuil" }, 2);
+    for (const response of [stale, staleCall]) {
+      expect(response.status).toBe(404);
+      expect(await response.text()).toBe('{"jsonrpc":"2.0","error":{"code":-32000,"message":"Unknown or expired MCP session"},"id":null}');
+      expect(response.headers.get("www-authenticate")).toBeNull();
+    }
+    await initialize(restarted, token);
   });
 
-  it("forwards the user bearer only to graph-signals, never to raw data", async () => {
-    const seen: { url: string; authorization: string | null }[] = [];
+  async function captureEgress(calls: [string, unknown, number][]) {
+    const seen: Request[] = [];
     const spy: typeof fetch = async (input, init) => {
-      const url = input instanceof Request ? input.url : String(input);
-      const auth = new Headers(init?.headers ?? (input instanceof Request ? input.headers : undefined)).get("authorization");
-      seen.push({ url, authorization: auth });
-      const path = new URL(url).pathname;
+      const request = new Request(input, init);
+      seen.push(request);
+      const path = new URL(request.url).pathname;
       if (path === "/api/graph-signals/longueuil") {
         return Response.json({ nodes: [{ id: "sig-1", type: "Signal" }] });
       }
@@ -119,26 +123,37 @@ describe("sessions and egress on 0.1.0", () => {
     });
     const token = await signToken();
     const sessionId = await initialize(app, token);
-    const calls: [string, unknown, number][] = [
-      ["search_signals", { city: "longueuil" }, 10],
-      ["get_zones_geojson", { city: "longueuil", limit: 2 }, 11],
-      ["query_zoning_events", { muni_slug: "longueuil" }, 12],
-      ["get_pv_pdf", { rawRef: "raw/proces-verbaux-longueuil/cas/abc.pdf" }, 13],
-    ];
     for (const [name, args, id] of calls) {
       const response = await callTool(app, token, sessionId, name, args, id);
       expect(response.status).toBe(200);
       expect((await response.json()).result.isError).not.toBe(true);
     }
-    const graph = seen.filter((s) => s.url.includes("/api/graph-signals/"));
-    expect(graph).toHaveLength(1);
-    expect(graph[0]?.url).toBe(`${BASE_URL}/api/graph-signals/longueuil`);
-    expect(graph[0]?.authorization).toBe(`Bearer ${token}`);
-    const raw = seen.filter((s) => !s.url.includes("/api/graph-signals/"));
-    expect(raw.map((s) => new URL(s.url).pathname)).toEqual([
+    return { seen, token };
+  }
+
+  it("keeps the exact raw-data request inventory free of user credentials", async () => {
+    const { seen, token } = await captureEgress([
+      ["get_zones_geojson", { city: "longueuil", limit: 2 }, 11],
+      ["query_zoning_events", { muni_slug: "longueuil" }, 12],
+      ["get_pv_pdf", { rawRef: "raw/proces-verbaux-longueuil/cas/abc.pdf" }, 13],
+    ]);
+    expect(seen.map((request) => new URL(request.url).pathname)).toEqual([
       "/api/geo/collections/qc-zonage-longueuil/items",
       "/api/geo/collections/qc-zoning-events-longueuil/items", "/api/documents/raw",
     ]);
-    for (const entry of raw) expect(entry.authorization).toBeNull();
+    for (const request of seen) {
+      expect(request.headers.get("authorization")).toBeNull();
+      expect(request.headers.get("cookie")).toBeNull();
+      expect(request.url).not.toContain(token);
+      for (const value of request.headers.values()) expect(value).not.toContain(token);
+    }
+  });
+
+  it("forwards the user bearer to graph-signals on 0.1.0", async () => {
+    const { seen, token } = await captureEgress([
+      ["search_signals", { city: "longueuil" }, 10],
+    ]);
+    expect(seen.map((request) => request.url)).toEqual([`${BASE_URL}/api/graph-signals/longueuil`]);
+    expect(seen[0]?.headers.get("authorization")).toBe(`Bearer ${token}`);
   });
 });
