@@ -33,6 +33,25 @@ describe("parseContentHost", () => {
     expect(parse(`${ARTIFACT}.${RELEASE}.${BASE}`)).toEqual({ kind: "other" });
   });
 
+  it("refuses a single label concatenating two UUIDs", () => {
+    expect(parse(`${ARTIFACT}-${RELEASE}.${BASE}`)).toEqual({ kind: "other" });
+  });
+
+  it("accepts a single DNS root dot on host and base", () => {
+    expect(parse(`${ARTIFACT}.${BASE}.`)).toEqual({
+      kind: "stable", artifactId: ARTIFACT,
+    });
+    expect(parse(`${ARTIFACT}.${BASE}`, `${BASE}.`)).toEqual({
+      kind: "stable", artifactId: ARTIFACT,
+    });
+  });
+
+  it("refuses an otherwise stable host past 253 characters", () => {
+    const longBase = `${"a".repeat(60)}.${"b".repeat(60)}.${"c".repeat(60)}.${"d".repeat(34)}`;
+    expect(`${ARTIFACT}.${longBase}`).toHaveLength(254);
+    expect(parse(`${ARTIFACT}.${longBase}`, longBase)).toEqual({ kind: "other" });
+  });
+
   it("refuses extra labels", () => {
     for (const host of [`extra.${ARTIFACT}.${BASE}`, `a.b.${BASE}`, `.${BASE}`]) {
       expect(parse(host), host).toEqual({ kind: "other" });
