@@ -1,0 +1,44 @@
+import { Hono } from "hono";
+import { z } from "zod";
+import type { Database } from "../db/client.js";
+import { FacetError } from "../services/facets/target.js";
+import { writeFacet } from "../services/facets/writer.js";
+
+const target = z.object({
+  citySlug: z.string().min(1).max(128).regex(/^[a-z0-9-]+$/),
+  type: z.enum(["Signal", "DesignationEvent"]),
+  id: z.string().min(1).max(512).refine((id) => !id.includes(String.fromCharCode(0))),
+}).strict();
+const basket = z.enum(["pertinent", "a_surveiller"]);
+const schemas = {
+  select: z.object({ target, basket, reasonCode: z.string().max(128).optional() }).strict(),
+  deselect: z.object({ target, basket }).strict(),
+  discard: z.object({ target, reasonCode: z.string().max(128).optional(), deselect: z.array(basket).max(2).optional() }).strict(),
+  restore: z.object({ target }).strict(),
+};
+export interface SignalFacetsDeps { db: Database; auth?: { enabled: boolean } }
+export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
+  const app = new Hono();
+  app.use("/api/v1/signal-facets/*", async (c, next) => {
+    const session = c.get("session" as never) as { sub?: string; via?: string } | undefined;
+    if (!deps.auth?.enabled || !session?.sub) return c.json({ error: "unauthenticated" }, 401);
+    if (c.req.method === "POST" && session.via === "bearer") return c.json({ error: "browser_session_required" }, 403);
+    return next();
+  });
+  for (const action of ["select", "deselect", "discard", "restore"] as const) {
+    app.post(`/api/v1/signal-facets/${action}`, async (c) => {
+      const parsed = schemas[action].safeParse(await c.req.json().catch(() => null));
+      const key = z.string().uuid().safeParse(c.req.header("Idempotency-Key"));
+      if (!parsed.success || !key.success) return c.json({ error: "invalid_facet_command" }, 400);
+      const session = c.get("session" as never) as { sub: string };
+      try {
+        const event = await writeFacet(deps.db, session.sub, { ...parsed.data, action, commandKey: key.data });
+        return c.json({ ok: true, event });
+      } catch (error) {
+        if (error instanceof FacetError) return c.json({ error: error.message }, error.status);
+        throw error;
+      }
+    });
+  }
+  return app;
+}
