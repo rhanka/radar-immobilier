@@ -130,10 +130,10 @@ describe("captureWorkbookInventory workbook features", () => {
   it("captures dropdown validations, defined names and autofilters", () => {
     const inventory = captureWorkbookInventory(buildSyntheticWorkbook());
     expect(inventory.dataValidations).toMatchObject([
-      { sheet: "Lots", sqref: "A2:A4", type: "list", formula1: '"Choix A,Choix B"' },
+      { sheet: "Lots", sheetId: 1, sqref: "A2:A4", type: "list", formula1: '"Choix A,Choix B"' },
     ]);
     expect(inventory.definedNames).toMatchObject([{ name: "LotsList", value: "Lots!$A:$A" }]);
-    expect(inventory.autoFilters).toMatchObject([{ sheet: "Lots", ref: "A1:G10" }]);
+    expect(inventory.autoFilters).toMatchObject([{ sheet: "Lots", sheetId: 1, ref: "A1:G10" }]);
   });
 
   it("exposes resolved shared strings", () => {
@@ -142,6 +142,15 @@ describe("captureWorkbookInventory workbook features", () => {
     expect(inventory.sharedStrings).toEqual(
       expect.arrayContaining([...EXPECTED_CODES, "Motif"]),
     );
+  });
+
+  it("preserves a non-sequential sheet id on renamed-sheet validations and filters", () => {
+    const inventory = captureWorkbookInventory(buildSyntheticWorkbook({
+      "xl/workbook.xml": workbookXml().replace('sheetId="1"', 'sheetId="71"')
+        .replace('name="Lots"', 'name="Renamed"'),
+    }));
+    expect(inventory.dataValidations).toMatchObject([{ sheet: "Renamed", sheetId: 71 }]);
+    expect(inventory.autoFilters).toMatchObject([{ sheet: "Renamed", sheetId: 71 }]);
   });
 });
 
@@ -163,7 +172,8 @@ describe("captureWorkbookInventory coverage proof", () => {
   it("captures hidden rows, hidden columns and the cell style index", () => {
     const inventory = captureWorkbookInventory(buildSyntheticWorkbook({
       "xl/worksheets/sheet1.xml":
-        `<worksheet><cols><col min="2" max="3" hidden="1"/><col min="5" max="5"/></cols><sheetData>` +
+        `<worksheet><cols><col min="2" max="3" hidden="1"/><col min="5" max="5"/></cols>` +
+        `<cols><col min="3" max="4" hidden="true"/></cols><sheetData>` +
         `<row r="1" hidden="1"><c r="A1" s="3"><v>7</v></c><c r="B1"><v>8</v></c></row>` +
         `</sheetData></worksheet>`,
     }));
@@ -171,6 +181,7 @@ describe("captureWorkbookInventory coverage proof", () => {
     expect(inventory.hiddenColumns).toEqual([
       { sheet: "Lots", sheetId: 1, col: 2 },
       { sheet: "Lots", sheetId: 1, col: 3 },
+      { sheet: "Lots", sheetId: 1, col: 4 },
     ]);
     expect(inventory.cells.filter((cell) => cell.sheet === "Lots").map((cell) => cell.style))
       .toEqual([3, null]);
@@ -217,10 +228,12 @@ describe("captureWorkbookInventory determinism", () => {
     expect(bytes).toEqual(buildSyntheticWorkbook());
   });
 
-  it("matches the frozen fingerprint of the synthetic workbook", () => {
-    const inventory = captureWorkbookInventory(buildSyntheticWorkbook());
+  it.each([false, true])("matches the frozen semantic fingerprint (stored=%s)", (stored) => {
+    // Archive bytes may differ between zlib versions; freeze the semantic inventory.
+    const parts = stored ? captureWorkbookInventory(buildSyntheticWorkbook()).parts : [];
+    const { sha256: _sha256, ...inventory } = captureWorkbookInventory(buildSyntheticWorkbook({}, {}, parts));
     expect(createHash("sha256").update(JSON.stringify(inventory)).digest("hex"))
-      .toBe("3b25ece90bb22fffd88be2e7f4a4a766b0c1cee0fe4817ef119f29c0592f2806");
+      .toBe("ec9dcf2c46697b4703ea6de73610c3fa9a3a8777e03fc71c7f6b122f4cf643f3");
     expect(inventory.sharedStrings).toEqual([ACCENTED_TEXT, "Motif", ...EXPECTED_CODES]);
     expect(inventory.hiddenRows).toEqual([]);
     expect(inventory.hiddenColumns).toEqual([]);
