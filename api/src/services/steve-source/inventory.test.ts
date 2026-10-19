@@ -14,7 +14,6 @@ import {
   LONG_TEXT,
   buildSyntheticWorkbook,
 } from "./workbook.fixture.js";
-
 import { workbookRelsXml, workbookXml } from "./workbook-parts.fixture.js";
 
 function cellAt(cells: CellRecord[], address: string): CellRecord {
@@ -76,6 +75,8 @@ describe("captureWorkbookInventory cells", () => {
     expect(a1.type).toBe("s");
     expect(a1.raw).toBe("0");
     expect(a1.value).toBe(ACCENTED_TEXT);
+    expect(a1.sheetId).toBe(1);
+    expect(a1.style).toBeNull();
   });
 
   it("captures numbers, booleans, errors and formula strings with cached values", () => {
@@ -144,31 +145,21 @@ describe("captureWorkbookInventory workbook features", () => {
   });
 });
 
-describe("captureWorkbookInventory determinism", () => {
-  it("same bytes give the same sha256 and an identical inventory", () => {
-    const bytes = buildSyntheticWorkbook();
-    const first = captureWorkbookInventory(bytes);
-    const second = captureWorkbookInventory(bytes.slice());
-    expect(first.sha256).toBe(createHash("sha256").update(bytes).digest("hex"));
-    expect(second).toEqual(first);
-    expect(JSON.stringify(second)).toBe(JSON.stringify(first));
-    expect(bytes).toEqual(buildSyntheticWorkbook());
-  });
-});
-
-describe("captureWorkbookInventory corrupt input", () => {
-  it("rejects non-ZIP bytes with an explicit error", () => {
-    const bytes = new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0x01, 0x02]);
-    expect(() => captureWorkbookInventory(bytes)).toThrow(SteveCaptureError);
+describe("captureWorkbookInventory coverage proof", () => {
+  it("exposes the sorted list of ZIP parts", () => {
+    const inventory = captureWorkbookInventory(buildSyntheticWorkbook());
+    expect(inventory.parts).toEqual([
+      "[Content_Types].xml",
+      "_rels/.rels",
+      "xl/_rels/workbook.xml.rels",
+      "xl/sharedStrings.xml",
+      "xl/workbook.xml",
+      "xl/worksheets/sheet1.xml",
+      "xl/worksheets/sheet2.xml",
+      "xl/worksheets/sheet3.xml",
+    ]);
   });
 
-  it("rejects a truncated workbook with an explicit error", () => {
-    const bytes = buildSyntheticWorkbook().slice(0, 120);
-    expect(() => captureWorkbookInventory(bytes)).toThrow(SteveCaptureError);
-  });
-});
-
-describe("hidden worksheet structure", () => {
   it("captures hidden rows, hidden columns and the cell style index", () => {
     const inventory = captureWorkbookInventory(buildSyntheticWorkbook({
       "xl/worksheets/sheet1.xml":
@@ -185,4 +176,88 @@ describe("hidden worksheet structure", () => {
       .toEqual([3, null]);
   });
 
+  it("lists detected features that are not captured", () => {
+    const inventory = captureWorkbookInventory(
+      buildSyntheticWorkbook(
+        {
+          "xl/worksheets/sheet1.xml":
+            `<worksheet><sheetData><row r="1"><c r="A1"><v>1</v></c></row></sheetData>` +
+            `<mergeCells><mergeCell ref="A1:B1"/></mergeCells>` +
+            `<hyperlinks><hyperlink ref="A1" r:id="rIdH1"/></hyperlinks>` +
+            `<tableParts><tablePart r:id="rIdT1"/></tableParts>` +
+            `<extLst><ext><x14><dataValidation/></x14></ext></extLst>` +
+            `</worksheet>`,
+        },
+        { "xl/styles.xml": `<styleSheet><fonts><font><b/></font></fonts></styleSheet>` },
+      ),
+    );
+    const features = inventory.uncaptured.map((item) => `${String(item.sheet)}:${item.feature}`);
+    expect(features).toEqual(
+      expect.arrayContaining([
+        "Lots:mergeCells",
+        "Lots:hyperlinks",
+        "Lots:tables",
+        "Lots:extensionList",
+        "Lots:dataValidationExtensions",
+        "null:styleDefinitions",
+      ]),
+    );
+  });
+});
+
+describe("captureWorkbookInventory determinism", () => {
+  it("same bytes give the same sha256 and an identical inventory", () => {
+    const bytes = buildSyntheticWorkbook();
+    const first = captureWorkbookInventory(bytes);
+    const second = captureWorkbookInventory(bytes.slice());
+    expect(first.sha256).toBe(createHash("sha256").update(bytes).digest("hex"));
+    expect(first.sha256).toMatch(/^[0-9a-f]{64}$/);
+    expect(second).toEqual(first);
+    expect(JSON.stringify(second)).toBe(JSON.stringify(first));
+    expect(bytes).toEqual(buildSyntheticWorkbook());
+  });
+
+  it("matches the frozen fingerprint of the synthetic workbook", () => {
+    const inventory = captureWorkbookInventory(buildSyntheticWorkbook());
+    expect(createHash("sha256").update(JSON.stringify(inventory)).digest("hex"))
+      .toBe("3b25ece90bb22fffd88be2e7f4a4a766b0c1cee0fe4817ef119f29c0592f2806");
+    expect(inventory.sharedStrings).toEqual([ACCENTED_TEXT, "Motif", ...EXPECTED_CODES]);
+    expect(inventory.hiddenRows).toEqual([]);
+    expect(inventory.hiddenColumns).toEqual([]);
+    expect(inventory.uncaptured).toEqual([]);
+    expect(inventory.cells.map((cell) => [
+      cell.sheet, cell.sheetId, cell.address, cell.type, cell.raw, cell.value,
+      cell.style, cell.formula, cell.cachedValue,
+    ])).toEqual([
+      ["Lots", 1, "A1", "s", "0", ACCENTED_TEXT, null, null, null],
+      ["Lots", 1, "B1", "n", "7", "7", null, null, null],
+      ["Lots", 1, "E1", "n", "13.5", "13.5", null, { text: "SUM(B1:B2)", kind: "shared", ref: "E1:E3", si: 0 }, "13.5"],
+      ["Lots", 1, "B2", "n", "6.5", "6.5", null, null, null],
+      ["Lots", 1, "E2", "n", "13.5", "13.5", null, { text: "", kind: "shared", ref: null, si: 0 }, "13.5"],
+      ["Lots", 1, "E3", "n", "13.5", "13.5", null, { text: "", kind: "shared", ref: null, si: 0 }, "13.5"],
+      ["Lots", 1, "D4", "inlineStr", LONG_TEXT, LONG_TEXT, null, null, null],
+      ["Lots", 1, "F5", "b", "1", "1", null, null, null],
+      ["Lots", 1, "G6", "e", "#DIV/0!", "#DIV/0!", null, null, null],
+      ["Lots", 1, "C7", "str", "ab", "ab", null, { text: 'CONCAT("a","b")', kind: null, ref: null, si: null }, "ab"],
+      ["Codes", 2, "A1", "s", "1", "Motif", null, null, null],
+      ["Codes", 2, "A2", "s", "2", "SYN-ALPHA", null, null, null],
+      ["Codes", 2, "A3", "s", "3", "SYN-BÊTA", null, null, null],
+      ["Codes", 2, "A4", "s", "4", "SYN-GAMMA", null, null, null],
+      ["Archive", 3, "A1", "n", "42", "42", null, null, null],
+    ]);
+  });
+});
+
+describe("captureWorkbookInventory corrupt input", () => {
+  it("rejects non-ZIP bytes with an explicit error", () => {
+    const bytes = new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0x01, 0x02]);
+    expect(() => captureWorkbookInventory(bytes)).toThrow(SteveCaptureError);
+    expect(() => captureWorkbookInventory(bytes)).toThrow(/file too small/);
+  });
+
+  it("rejects a truncated workbook with an explicit error", () => {
+    const bytes = buildSyntheticWorkbook().slice(0, 120);
+    expect(() => captureWorkbookInventory(bytes)).toThrow(SteveCaptureError);
+    expect(() => captureWorkbookInventory(bytes)).toThrow(/end-of-central-directory/);
+  });
 });
