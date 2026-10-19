@@ -691,7 +691,7 @@ export function protect(
       return next();
     }
 
-    if (isBrowserNavigation(c.req.header("accept"))) {
+    if (isBrowserNavigation(c.req.header("accept")) && !path.startsWith("/api/v1/signal-facets/")) {
       return c.redirect("/api/v1/auth/login", 302);
     }
     return c.json({ error: "unauthenticated" }, 401);
