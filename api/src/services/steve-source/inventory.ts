@@ -27,11 +27,19 @@ function sheetState(raw: string | null, sheetName: string): SheetVisibility {
   throw new SteveCaptureError(`unsupported sheet state "${raw}" on sheet "${sheetName}"`);
 }
 
+function decodeUtf8(bytes: Uint8Array, part: string): string {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    throw new SteveCaptureError(`invalid UTF-8 in part "${part}"`);
+  }
+}
+
 function readRelationships(files: Map<string, Uint8Array>): Map<string, string> {
   const rels = new Map<string, string>();
   const relsFile = files.get("xl/_rels/workbook.xml.rels");
   if (relsFile === undefined) return rels;
-  const root = documentElement(parseXml(new TextDecoder().decode(relsFile)));
+  const root = documentElement(parseXml(decodeUtf8(relsFile, "xl/_rels/workbook.xml.rels")));
   if (root === null) return rels;
   for (const rel of childElements(root, "Relationship")) {
     const id = rel.attrs["Id"];
@@ -44,7 +52,7 @@ function readRelationships(files: Map<string, Uint8Array>): Map<string, string> 
 function readSharedStrings(files: Map<string, Uint8Array>): string[] {
   const file = files.get("xl/sharedStrings.xml");
   if (file === undefined) return [];
-  const root = documentElement(parseXml(new TextDecoder().decode(file)));
+  const root = documentElement(parseXml(decodeUtf8(file, "xl/sharedStrings.xml")));
   if (root === null || root.name !== "sst") {
     throw new SteveCaptureError('expected a shared strings element in "xl/sharedStrings.xml"');
   }
@@ -75,12 +83,11 @@ function parseSheetId(raw: string | null, sheetName: string): number {
 export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
   const sha256 = createHash("sha256").update(input).digest("hex");
   const files = unzip(input);
-  const decoder = new TextDecoder();
   const workbookFile = files.get("xl/workbook.xml");
   if (workbookFile === undefined) {
     throw new SteveCaptureError('missing required part "xl/workbook.xml"');
   }
-  const workbook = documentElement(parseXml(decoder.decode(workbookFile)));
+  const workbook = documentElement(parseXml(decodeUtf8(workbookFile, "xl/workbook.xml")));
   if (workbook === null || workbook.name !== "workbook") {
     throw new SteveCaptureError('expected a "workbook" root element in "xl/workbook.xml"');
   }
@@ -135,9 +142,9 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
       throw new SteveCaptureError(`sheet "${name}" part "${path}" is missing`);
     }
     sheets.push({ name, order: index, state: sheetState(node.attrs["state"] ?? null, name), sheetId, relationshipId: rid, part: path });
-    const parsed = parseSheetXml(name, decoder.decode(part), sharedStrings, sheetId);
-    inventory.cells.push(...parsed.cells);
-    inventory.dataValidations.push(...parsed.validations);
+    const parsed = parseSheetXml(name, decodeUtf8(part, path), sharedStrings, sheetId);
+    for (const cell of parsed.cells) inventory.cells.push(cell);
+    for (const rule of parsed.validations) inventory.dataValidations.push(rule);
     if (parsed.autoFilter !== null) inventory.autoFilters.push(parsed.autoFilter);
   });
   return inventory;
