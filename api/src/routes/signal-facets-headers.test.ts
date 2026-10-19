@@ -54,7 +54,7 @@ describe("personal signal response headers", () => {
   });
   it("should propagate storage errors from the persistent discard adapter", async () => {
     const failure = new Error("synthetic storage failure");
-    const reader = createDiscardedSignalsReader({ transaction: async () => { throw failure; } } as unknown as Database);
+    const reader = createDiscardedSignalsReader({ select: () => { throw failure; } } as unknown as Database);
     await expect(reader.forViewer("synthetic-sub")).rejects.toBe(failure);
   });
 });
