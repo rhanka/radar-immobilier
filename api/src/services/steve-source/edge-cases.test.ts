@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { parseRowNumber } from "./cell-parse.js";
+import { crc32 } from "./crc32.js";
 import { captureWorkbookInventory } from "./inventory.js";
 import { parseSheetXml } from "./sheet-parse.js";
 import { SteveCaptureError } from "./types.js";
@@ -10,12 +12,57 @@ const captureSheet = (body: string) => captureWorkbookInventory(buildSyntheticWo
   "xl/worksheets/sheet1.xml": sheet(body),
 }));
 
+/** Corrupt the stored shared-strings bytes and repair both CRC fields. */
+function invalidUtf8Workbook(): Uint8Array {
+  const bytes = buildSyntheticWorkbook({}, {}, ["xl/sharedStrings.xml"]);
+  const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  let offset = 0;
+  let dataStart = 0;
+  let dataLen = 0;
+  let localOffset = 0;
+  for (let guard = 0; guard < 64; guard++) {
+    const nameLen = dv.getUint16(offset + 26, true);
+    const extraLen = dv.getUint16(offset + 28, true);
+    const compSize = dv.getUint32(offset + 18, true);
+    const name = new TextDecoder().decode(bytes.subarray(offset + 30, offset + 30 + nameLen));
+    const start = offset + 30 + nameLen + extraLen;
+    if (name === "xl/sharedStrings.xml") {
+      dataStart = start;
+      dataLen = compSize;
+      localOffset = offset;
+      break;
+    }
+    offset = start + compSize;
+  }
+  if (dataStart === 0) throw new Error("missing stored shared strings");
+  bytes[dataStart] = 0xff;
+  const fixed = crc32(bytes.subarray(dataStart, dataStart + dataLen));
+  dv.setUint32(localOffset + 14, fixed, true);
+  const eocd = bytes.length - 22;
+  const count = dv.getUint16(eocd + 10, true);
+  const centralOffset = dv.getUint32(eocd + 16, true);
+  let cursor = centralOffset;
+  for (let n = 0; n < count; n++) {
+    const nameLen = dv.getUint16(cursor + 28, true);
+    const extraLen = dv.getUint16(cursor + 30, true);
+    const commentLen = dv.getUint16(cursor + 32, true);
+    const name = new TextDecoder().decode(bytes.subarray(cursor + 46, cursor + 46 + nameLen));
+    if (name === "xl/sharedStrings.xml") {
+      dv.setUint32(cursor + 16, fixed, true);
+      break;
+    }
+    cursor = cursor + 46 + nameLen + extraLen + commentLen;
+  }
+  return bytes;
+}
+
 describe("faithful workbook edge cases", () => {
   it("advances omitted coordinates from preceding explicit coordinates, including blank cells", () => {
     const parsed = parseSheetXml("Sparse", sheet(`<sheetData>
       <row r="10"><c r="D10"/><c><v>11</v></c></row>
       <row><c><v>12</v></c></row></sheetData>`), [], 9);
     expect(parsed.cells.map((cell) => cell.address)).toEqual(["E10", "A11"]);
+    expect(parsed.cells.every((cell) => cell.sheetId === 9)).toBe(true);
   });
 
   it("excludes empty values and keeps formulas without cached results", () => {
@@ -74,23 +121,60 @@ describe("faithful workbook edge cases", () => {
   it("rejects invalid shared-string indices instead of coercing them to zero", () => {
     expect(() => captureSheet('<sheetData><row><c t="s"><v> </v></c></row></sheetData>'))
       .toThrow(SteveCaptureError);
+    expect(() => captureSheet('<sheetData><row><c t="s"><v> </v></c></row></sheetData>'))
+      .toThrow(/out of range/);
   });
 
-  it.each(["crc", "size", "count", "comment"])("rejects corrupt ZIP %s", (field) => {
+  it.each(["0x10", "", " 12", "1.5"])("rejects non-canonical row number %s", (raw) => {
+    expect(() => parseRowNumber(raw, "Rows")).toThrow(SteveCaptureError);
+    expect(() => parseRowNumber(raw, "Rows")).toThrow(/row number/);
+  });
+
+  it.each(["0x10", "", "9007199254740992"])("rejects non-canonical shared formula index %s", (raw) => {
+    expect(() => captureSheet(
+      `<sheetData><row r="1"><c r="A1"><f t="shared" si="${raw}"/><v>1</v></c></row></sheetData>`,
+    )).toThrow(/shared formula index/);
+  });
+
+  it("rejects parts that are not valid UTF-8", () => {
+    expect(() => captureWorkbookInventory(invalidUtf8Workbook())).toThrow(/invalid UTF-8/);
+  });
+
+  const corruptZip: Array<[string, RegExp]> = [
+    ["crc", /size or CRC mismatch/],
+    ["size", /size or CRC mismatch/],
+    ["count", /inconsistent entry count/],
+    ["comment", /end-of-central-directory/],
+  ];
+  it.each(corruptZip)("rejects corrupt ZIP %s with an explicit message", (field, message) => {
     const bytes = buildSyntheticWorkbook();
-    const view = new DataView(bytes.buffer);
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
     const end = bytes.length - 22;
     const central = view.getUint32(end + 16, true);
-    if (field === "crc") view.setUint32(central + 16, 0, true);
-    if (field === "size") view.setUint32(central + 24, 0, true);
-    if (field === "count") view.setUint16(end + 10, 1, true);
+    const localOffset = view.getUint32(central + 42, true);
+    if (field === "crc") {
+      view.setUint32(central + 16, 0, true);
+      view.setUint32(localOffset + 14, 0, true);
+    }
+    if (field === "size") {
+      view.setUint32(central + 24, 0, true);
+      view.setUint32(localOffset + 22, 0, true);
+    }
+    if (field === "count") {
+      view.setUint16(end + 8, 1, true);
+      view.setUint16(end + 10, 1, true);
+    }
     if (field === "comment") view.setUint16(end + 20, 1, true);
     expect(() => captureWorkbookInventory(bytes)).toThrow(SteveCaptureError);
+    expect(() => captureWorkbookInventory(bytes)).toThrow(message);
   });
 
   it("rejects a ZIP containing malformed workbook XML", () => {
     expect(() => captureWorkbookInventory(buildSyntheticWorkbook({
       "xl/workbook.xml": "<workbook><sheets></workbook>",
     }))).toThrow(SteveCaptureError);
+    expect(() => captureWorkbookInventory(buildSyntheticWorkbook({
+      "xl/workbook.xml": "<workbook><sheets></workbook>",
+    }))).toThrow(/mismatched closing tag/);
   });
 });
