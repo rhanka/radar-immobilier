@@ -4,6 +4,10 @@
  * `discardedSignalKey` (never a `gn-` prefix, never a legacy UUID); a node
  * recreated with the same triple stays discarded. The per-viewer set comes
  * from the injected port; the default port is empty (no production effect).
+ *
+ * Viewer union: D(viewer) = common ∪ personal(viewer). Combine scopes with
+ * `unionDiscardedSignals`: a key present in any scope stays discarded even
+ * when absent from the others.
  */
 
 /** Separator illegal in slugs/ids, so distinct triples never collide. */
@@ -41,6 +45,18 @@ export const EMPTY_DISCARDED_KEYS: ReadonlySet<DiscardedSignalKey> =
 export const EMPTY_DISCARDED_SIGNALS: DiscardedSignalsPort = {
   forViewer: async () => EMPTY_DISCARDED_KEYS,
 };
+
+/** Unite discard scopes (common ∪ personal); absent scopes add nothing. */
+export function unionDiscardedSignals(
+  ...sets: ReadonlyArray<ReadonlySet<DiscardedSignalKey> | undefined>
+): ReadonlySet<DiscardedSignalKey> {
+  const out = new Set<DiscardedSignalKey>();
+  for (const set of sets) {
+    if (set === undefined) continue;
+    for (const key of set) out.add(key);
+  }
+  return out;
+}
 
 /** Minimal native identity shared by projection rows and served nodes. */
 export interface DiscardableSignal {
