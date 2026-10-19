@@ -11,3 +11,15 @@ describe("workbook coordinates", () => {
     expect(() => parseA1(ref)).toThrow(SteveCaptureError);
   });
 });
+
+import { decodeEntities } from "./xml-token.js";
+
+describe("XML text", () => {
+  it("decodes accents, escaped markup and numeric references once", () => {
+    expect(decodeEntities("&#xCE;le &amp; fa&#231;ade &amp;lt;"))
+      .toBe("Île & façade &lt;");
+  });
+  it.each(["&unknown;", "&amp", "&#0;", "&#x110000;"])("rejects %s", (text) => {
+    expect(() => decodeEntities(text)).toThrow(SteveCaptureError);
+  });
+});
