@@ -16,9 +16,12 @@ import type {
   SheetVisibility,
   WorkbookInventory,
 } from "./types.js";
+import type { XmlNode } from "./xml.js";
 import { parseXml } from "./xml.js";
 import { childElements, deepText, documentElement, firstChild, spreadsheetText } from "./xml-query.js";
 import { unzip } from "./zip.js";
+
+const REL_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
 
 function sheetState(raw: string | null, sheetName: string): SheetVisibility {
   if (raw === null || raw === "visible") return "visible";
@@ -47,6 +50,22 @@ function readRelationships(files: Map<string, Uint8Array>): Map<string, string> 
     if (id !== undefined && target !== undefined) rels.set(id, target);
   }
   return rels;
+}
+
+/** Resolve the relationship namespace in the sheet element's scope. */
+function sheetRelationshipId(ancestors: readonly XmlNode[], node: XmlNode, sheetName: string): string {
+  const namespaces = new Map<string, string>();
+  for (const ancestor of [...ancestors, node]) {
+    for (const [key, value] of Object.entries(ancestor.attrs)) {
+      if (key.startsWith("xmlns:")) namespaces.set(key.slice(6), value);
+    }
+  }
+  for (const [key, value] of Object.entries(node.attrs)) {
+    const separator = key.indexOf(":");
+    if (separator > 0 && key.slice(separator + 1) === "id" &&
+        namespaces.get(key.slice(0, separator)) === REL_NS) return value;
+  }
+  throw new SteveCaptureError(`sheet "${sheetName}" has no relationship id`);
 }
 
 function readSharedStrings(files: Map<string, Uint8Array>): string[] {
@@ -124,10 +143,7 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
       throw new SteveCaptureError(`duplicate sheet id ${String(sheetId)} on sheet "${name}"`);
     }
     seenIds.add(sheetId);
-    const rid = node.attrs["r:id"];
-    if (rid === undefined) {
-      throw new SteveCaptureError(`sheet "${name}" has no relationship id`);
-    }
+    const rid = sheetRelationshipId([workbook, sheetsHolder], node, name);
     const target = rels.get(rid);
     if (target === undefined) {
       throw new SteveCaptureError(`sheet "${name}" points to unknown relationship "${rid}"`);
