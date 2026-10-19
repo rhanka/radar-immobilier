@@ -7,6 +7,7 @@
 
 import { createHash } from "node:crypto";
 import { posix } from "node:path";
+import { parseStrictInt } from "./cell-parse.js";
 import { parseSheetXml } from "./sheet-parse.js";
 import { SteveCaptureError } from "./types.js";
 import type {
@@ -60,6 +61,17 @@ function readDefinedNames(workbook: NonNullable<ReturnType<typeof documentElemen
   }));
 }
 
+function parseSheetId(raw: string | null, sheetName: string): number {
+  if (raw === null) {
+    throw new SteveCaptureError(`sheet "${sheetName}" has no sheet id`);
+  }
+  const sheetId = parseStrictInt(raw, `sheet id of sheet "${sheetName}"`);
+  if (sheetId < 1) {
+    throw new SteveCaptureError(`invalid sheet id "${raw}" on sheet "${sheetName}"`);
+  }
+  return sheetId;
+}
+
 export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
   const sha256 = createHash("sha256").update(input).digest("hex");
   const files = unzip(input);
@@ -92,6 +104,7 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
   sheetNodes.forEach((node, index) => {
     const name = node.attrs["name"];
     if (name === undefined) throw new SteveCaptureError(`sheet #${String(index)} has no name`);
+    const sheetId = parseSheetId(node.attrs["sheetId"] ?? null, name);
     const rid = node.attrs["r:id"];
     if (rid === undefined) {
       throw new SteveCaptureError(`sheet "${name}" has no relationship id`);
@@ -105,8 +118,8 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
     if (part === undefined) {
       throw new SteveCaptureError(`sheet "${name}" part "${path}" is missing`);
     }
-    sheets.push({ name, order: index, state: sheetState(node.attrs["state"] ?? null, name) });
-    const parsed = parseSheetXml(name, decoder.decode(part), sharedStrings);
+    sheets.push({ name, order: index, state: sheetState(node.attrs["state"] ?? null, name), sheetId, relationshipId: rid, part: path });
+    const parsed = parseSheetXml(name, decoder.decode(part), sharedStrings, sheetId);
     inventory.cells.push(...parsed.cells);
     inventory.dataValidations.push(...parsed.validations);
     if (parsed.autoFilter !== null) inventory.autoFilters.push(parsed.autoFilter);

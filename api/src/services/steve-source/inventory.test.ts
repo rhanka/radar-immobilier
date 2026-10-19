@@ -22,14 +22,24 @@ function cellAt(cells: CellRecord[], address: string): CellRecord {
 }
 
 describe("captureWorkbookInventory sheets", () => {
-  it("lists sheets in workbook order with visibility", () => {
+  it("lists sheets in workbook order with stable identity", () => {
     const inventory = captureWorkbookInventory(buildSyntheticWorkbook());
     expect(inventory.sheets).toEqual([
-      { name: "Lots", order: 0, state: "visible" },
-      { name: "Codes", order: 1, state: "visible" },
-      { name: "Archive", order: 2, state: "hidden" },
+      {
+        name: "Lots", order: 0, state: "visible",
+        sheetId: 1, relationshipId: "rId1", part: "xl/worksheets/sheet1.xml",
+      },
+      {
+        name: "Codes", order: 1, state: "visible",
+        sheetId: 2, relationshipId: "rId2", part: "xl/worksheets/sheet2.xml",
+      },
+      {
+        name: "Archive", order: 2, state: "hidden",
+        sheetId: 3, relationshipId: "rId3", part: "xl/worksheets/sheet3.xml",
+      },
     ]);
   });
+
 });
 
 describe("captureWorkbookInventory cells", () => {

@@ -25,6 +25,12 @@ export interface SheetInfo {
   name: string;
   order: number;
   state: SheetVisibility;
+  /** 1-based `sheetId` from `xl/workbook.xml`, the stable sheet identity. */
+  sheetId: number;
+  /** Relationship id (`r:id`) that links the sheet to its part. */
+  relationshipId: string;
+  /** Resolved worksheet part path, e.g. `xl/worksheets/sheet1.xml`. */
+  part: string;
 }
 
 export type CellType = "s" | "str" | "n" | "b" | "e" | "inlineStr" | "d";
@@ -38,6 +44,8 @@ export interface CellFormula {
 
 export interface CellRecord {
   sheet: string;
+  /** Stable owning-sheet identity. */
+  sheetId: number;
   address: string;
   row: number;
   col: number;
