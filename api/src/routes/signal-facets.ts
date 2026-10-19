@@ -3,6 +3,8 @@ import { z } from "zod";
 import type { Database } from "../db/client.js";
 import { FacetError } from "../services/facets/target.js";
 import { writeFacet } from "../services/facets/writer.js";
+import { readCityFacets, readReasonCodes } from "../services/facets/reader.js";
+import { FACET_PROFILE } from "../services/facets/codebook.js";
 
 const target = z.object({
   citySlug: z.string().min(1).max(128).regex(/^[a-z0-9-]+$/),
@@ -23,6 +25,9 @@ export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
     const session = c.get("session" as never) as { sub?: string; via?: string } | undefined;
     if (!deps.auth?.enabled || !session?.sub) return c.json({ error: "unauthenticated" }, 401);
     if (c.req.method === "POST" && session.via === "bearer") return c.json({ error: "browser_session_required" }, 403);
+    if (c.req.method === "GET" && !z.object({}).strict().safeParse(c.req.query()).success) {
+      return c.json({ error: "invalid_facet_query" }, 400);
+    }
     return next();
   });
   for (const action of ["select", "deselect", "discard", "restore"] as const) {
@@ -40,5 +45,26 @@ export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
       }
     });
   }
+  app.get("/api/v1/signal-facets/reason-codes", async (c) => {
+    const session = c.get("session" as never) as { sub: string };
+    try {
+      const codes = await readReasonCodes(deps.db, session.sub);
+      return c.json({ ok: true, profileId: FACET_PROFILE, codes });
+    } catch (error) {
+      if (error instanceof FacetError) return c.json({ error: error.message }, error.status);
+      throw error;
+    }
+  });
+  app.get("/api/v1/signal-facets/cities/:city", async (c) => {
+    const session = c.get("session" as never) as { sub: string };
+    const city = c.req.param("city");
+    if (!target.shape.citySlug.safeParse(city).success) return c.json({ error: "invalid_city" }, 400);
+    try {
+      return c.json({ ok: true, heads: await readCityFacets(deps.db, session.sub, city) });
+    } catch (error) {
+      if (error instanceof FacetError) return c.json({ error: error.message }, error.status);
+      throw error;
+    }
+  });
   return app;
 }
