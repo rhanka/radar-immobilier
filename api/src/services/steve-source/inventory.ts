@@ -87,18 +87,24 @@ function resolvePart(baseDirAbs: string, target: string, what: string): string {
   return resolved;
 }
 
-/** Resolve the relationship namespace in the sheet element's scope. */
-function sheetRelationshipId(ancestors: readonly XmlNode[], node: XmlNode, sheetName: string): string {
+function inheritedNamespaces(ancestors: readonly XmlNode[]): Map<string, string> {
   const namespaces = new Map<string, string>();
-  for (const ancestor of [...ancestors, node]) {
+  for (const ancestor of ancestors) {
     for (const [key, value] of Object.entries(ancestor.attrs)) {
       if (key.startsWith("xmlns:")) namespaces.set(key.slice(6), value);
     }
   }
+  return namespaces;
+}
+
+/** Local declarations shadow the inherited bindings without copying their table. */
+function sheetRelationshipId(namespaces: ReadonlyMap<string, string>, node: XmlNode, sheetName: string): string {
   for (const [key, value] of Object.entries(node.attrs)) {
     const separator = key.indexOf(":");
+    const prefix = key.slice(0, separator);
+    const namespace = node.attrs[`xmlns:${prefix}`] ?? namespaces.get(prefix);
     if (separator > 0 && key.slice(separator + 1) === "id" &&
-        namespaces.get(key.slice(0, separator)) === REL_NS) return value;
+        namespace === REL_NS) return value;
   }
   throw new SteveCaptureError(`sheet "${sheetName}" has no relationship id`);
 }
@@ -207,6 +213,7 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
   const seenIds = new Set<number>();
   const seenParts = new Set<string>();
   const sheetNodes = childElements(sheetsHolder, "sheet");
+  const namespaces = inheritedNamespaces([workbook, sheetsHolder]);
   sheetNodes.forEach((node, index) => {
     const name = node.attrs["name"];
     if (name === undefined) throw new SteveCaptureError(`sheet #${String(index)} has no name`);
@@ -220,7 +227,7 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
       throw new SteveCaptureError(`duplicate sheet id ${String(sheetId)} on sheet "${name}"`);
     }
     seenIds.add(sheetId);
-    const rid = sheetRelationshipId([workbook, sheetsHolder], node, name);
+    const rid = sheetRelationshipId(namespaces, node, name);
     const rel = relsById.get(rid);
     if (rel === undefined) {
       throw new SteveCaptureError(`sheet "${name}" points to unknown relationship "${rid}"`);
