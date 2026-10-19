@@ -798,7 +798,15 @@ export const facetEvents = pgTable("facet_events", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const facetCommands = pgTable("facet_commands", {
+  ownerId: uuid("owner_id").notNull().references(() => accountUsers.id),
+  commandKey: uuid("command_key").notNull(),
+  commandDigest: text("command_digest").notNull(),
+  result: jsonb("result").notNull(),
+}, (t) => ({ pk: primaryKey({ columns: [t.ownerId, t.commandKey] }) }));
+
 export const schema = {
+  facetCommands,
   facetEvents,
   facetReasonCodes,
   refreshDocumentOutcomes,
