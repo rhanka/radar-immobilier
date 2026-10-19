@@ -12,7 +12,7 @@ import { SteveCaptureError } from "./types.js";
 
 const LOCAL_HEADER_SIG = 0x04034b50;
 const CENTRAL_HEADER_SIG = 0x02014b50;
-const EOCD_SIG = 0x06050b50;
+const EOCD_SIG = 0x06054b50;
 const MAX_EOCD_COMMENT = 65535;
 
 function view(bytes: Uint8Array): DataView {
