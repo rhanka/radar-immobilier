@@ -60,6 +60,27 @@ describe("fetchGraphSignalDetail — reveal", () => {
     expect(bare?.status).toBe(503);
     expect(bare?.code).toBeNull();
   });
+
+  it("fails a stalled body with the timeout message instead of hanging", async () => {
+    vi.stubGlobal(
+      "fetch",
+      async (_url: string, init?: RequestInit) =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              init?.signal?.addEventListener(
+                "abort",
+                () => controller.error(new DOMException("Aborted", "AbortError")),
+                { once: true },
+              );
+            },
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        ),
+    );
+    const failure = await fetchGraphSignalDetail("ville-synth", "", 10).catch((err) => err);
+    expect(String(failure?.message)).toContain("timeout after 10ms");
+  });
 });
 
 describe("extractDocRefs", () => {

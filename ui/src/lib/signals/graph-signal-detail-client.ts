@@ -10,7 +10,8 @@
 import type { RegulatoryStatusT, VivierV2 } from "@radar/domain";
 
 import {
-  fetchWithTimeout,
+  fetchJsonWithTimeout,
+  readJsonErrorCode,
   RequestTimeoutError,
   DEFAULT_REQUEST_TIMEOUT_MS,
 } from "$lib/net/fetch-with-timeout.js";
@@ -583,16 +584,6 @@ export class GraphSignalsHttpError extends Error {
   }
 }
 
-/** Server `{error}` body field of a failed graph-signals read, if any. */
-export async function readGraphErrorCode(res: Response): Promise<string | null> {
-  try {
-    const body = (await res.json()) as { error?: unknown };
-    return typeof body.error === "string" ? body.error : null;
-  } catch {
-    return null;
-  }
-}
-
 export async function fetchGraphSignalDetail(
   citySlug: string,
   baseUrl = "",
@@ -601,22 +592,27 @@ export async function fetchGraphSignalDetail(
 ): Promise<GraphSignalDetailResponse> {
   try {
     const suffix = opts.showDiscarded === true ? "?showDiscarded=1" : "";
-    const res = await fetchWithTimeout(
+    // Bounded headers AND body: a stalled body still fails with
+    // `RequestTimeoutError` instead of blocking the caller forever.
+    const res = await fetchJsonWithTimeout<GraphSignalDetailResponse>(
       `${baseUrl}/api/graph-signals/${encodeURIComponent(citySlug)}${suffix}`,
       { signal: opts.signal, timeoutMs },
     );
     if (!res.ok) {
-      // 404 = ville sans signaux dans la DB — état vide honnête
+      // 404 = city with no signal nodes in the DB — explicit empty state
       if (res.status === 404) {
         return { ok: false, citySlug, legacyProjection: null, nodes: [] };
       }
       throw new GraphSignalsHttpError(
         `graph-signals/${citySlug}: ${res.status}`,
         res.status,
-        await readGraphErrorCode(res),
+        readJsonErrorCode(res.json),
       );
     }
-    return res.json();
+    if (res.json === null) {
+      throw new Error(`graph-signals/${citySlug}: empty JSON body`);
+    }
+    return res.json;
   } catch (err) {
     // Timeout interne → message dédié (contrat historique). Un abort EXTERNE
     // (AbortError) est relevé tel quel pour que l'appelant ignore la réponse.
@@ -726,7 +722,7 @@ function eventDateEpoch(dateStr: string | null): number {
  * Extrait, du détail signal, les RÈGLEMENTS rattachables à une zone, indexés par
  * `zoneRefComparableKey(zone_ref)`.
  *
- * Mécanique (rattachement HONNÊTE, même-nœud) : un nœud `DesignationEvent` qui
+ * Mécanique (rattachement vérifié, même-nœud) : un nœud `DesignationEvent` qui
  * porte à la fois un `reglement_number` ET un `zone_ref` structuré rattache ce
  * numéro (+ sa `sourceUrl` publique) à cette zone. Un nœud qui ne porte que l'un
  * des deux n'engendre AUCUN rattachement — on n'invente jamais de lien
