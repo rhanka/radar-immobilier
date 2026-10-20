@@ -90,7 +90,10 @@ export interface HiddenRowRecord {
 export interface HiddenColumnRecord {
   sheet: string;
   sheetId: number;
-  col: number;
+  /** First hidden 1-based column index in the merged interval (inclusive). */
+  min: number;
+  /** Last hidden 1-based column index in the merged interval (inclusive). */
+  max: number;
 }
 
 /**

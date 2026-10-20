@@ -252,8 +252,8 @@ export function captureWorkbookInventory(input: Uint8Array): WorkbookInventory {
     for (const row of parsed.hiddenRows) {
       inventory.hiddenRows.push({ sheet: name, sheetId, row });
     }
-    for (const col of parsed.hiddenColumns) {
-      inventory.hiddenColumns.push({ sheet: name, sheetId, col });
+    for (const range of parsed.hiddenColumns) {
+      inventory.hiddenColumns.push({ sheet: name, sheetId, min: range.min, max: range.max });
     }
     for (const item of parsed.uncaptured) {
       inventory.uncaptured.push({ sheet: name, sheetId, feature: item.feature, detail: item.detail });

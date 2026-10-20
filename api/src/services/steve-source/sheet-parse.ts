@@ -22,7 +22,8 @@ export interface ParsedSheet {
   validations: DataValidationRule[];
   autoFilter: AutoFilterRecord | null;
   hiddenRows: number[];
-  hiddenColumns: number[];
+  /** Merged hidden-column intervals; one record per contiguous span. */
+  hiddenColumns: Array<{ min: number; max: number }>;
   uncaptured: Array<{ feature: UncapturedFeatureName; detail: string | null }>;
 }
 
@@ -42,7 +43,7 @@ function isHidden(raw: string | null): boolean {
   return raw === "1" || (raw !== null && raw.toLowerCase() === "true");
 }
 
-export function readHiddenColumns(ws: XmlNode, sheetName: string): number[] {
+export function readHiddenColumns(ws: XmlNode, sheetName: string): Array<{ min: number; max: number }> {
   const intervals: Array<{ min: number; max: number }> = [];
   for (const col of childElements(ws, "cols").flatMap((cols) => childElements(cols, "col"))) {
     const minRaw = attr(col, "min");
@@ -67,11 +68,7 @@ export function readHiddenColumns(ws: XmlNode, sheetName: string): number[] {
       merged.push({ ...interval });
     }
   }
-  const hidden: number[] = [];
-  for (const { min, max } of merged) {
-    for (let col = min; col <= max; col++) hidden.push(col);
-  }
-  return hidden;
+  return merged;
 }
 
 function readUncaptured(ws: XmlNode): Array<{ feature: UncapturedFeatureName; detail: string | null }> {

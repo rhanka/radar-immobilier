@@ -179,9 +179,7 @@ describe("captureWorkbookInventory coverage proof", () => {
     }));
     expect(inventory.hiddenRows).toEqual([{ sheet: "Lots", sheetId: 1, row: 1 }]);
     expect(inventory.hiddenColumns).toEqual([
-      { sheet: "Lots", sheetId: 1, col: 2 },
-      { sheet: "Lots", sheetId: 1, col: 3 },
-      { sheet: "Lots", sheetId: 1, col: 4 },
+      { sheet: "Lots", sheetId: 1, min: 2, max: 4 },
     ]);
     expect(inventory.cells.filter((cell) => cell.sheet === "Lots").map((cell) => cell.style))
       .toEqual([3, null]);
