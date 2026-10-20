@@ -74,17 +74,37 @@
    * focus to the body), or to the first enabled control when the write
    * replaced it. Only repairs a lost focus — never steals a moved one.
    */
+  function isStillFocusable(element: HTMLElement | null): element is HTMLElement {
+    if (!element || !rootEl?.contains(element)) return false;
+    if (!element.isConnected) return false;
+    if ((element as HTMLButtonElement).disabled) return false;
+    if (element.getAttribute("aria-disabled") === "true") return false;
+    return true;
+  }
+
+  function focusFallback(): void {
+    const fallback = rootEl?.querySelector<HTMLElement>(
+      "button:not([disabled]), select:not([disabled])",
+    );
+    if (fallback) {
+      fallback.focus({ preventScroll: true });
+      return;
+    }
+    rootEl
+      ?.closest("[data-signal-node]")
+      ?.querySelector<HTMLElement>(".sel-entity-head")
+      ?.focus({ preventScroll: true });
+  }
+
   function restoreFocus(trigger: HTMLElement | null): void {
     if (typeof document === "undefined") return;
     const active = document.activeElement;
-    if (trigger && rootEl?.contains(trigger) && (active === document.body || active === trigger)) {
-      trigger.focus({ preventScroll: true });
-      return;
-    }
-    if (active === document.body) {
-      rootEl
-        ?.querySelector<HTMLElement>("button:not([disabled]), select:not([disabled])")
-        ?.focus({ preventScroll: true });
+    if (active === document.body || active === trigger) {
+      if (isStillFocusable(trigger)) {
+        trigger.focus({ preventScroll: true });
+        return;
+      }
+      focusFallback();
     }
   }
 

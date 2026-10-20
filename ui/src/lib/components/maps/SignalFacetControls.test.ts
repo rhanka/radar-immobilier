@@ -248,4 +248,45 @@ describe("SignalFacetControls — baskets and restoration", () => {
       expect(screen.getByTestId("signal-facet-controls").contains(document.activeElement)).toBe(true),
     );
   });
+
+  it("focuses a fallback control when a code change disables its trigger", async () => {
+    const extended: ReasonCode[] = [...CODES, { code: "P-NEW", verdict: "pertinent" }];
+    const postCommand = postCommandMock(async () => null);
+    const onSaved = vi.fn(async (): Promise<void> => {
+      await view.rerender({
+        state: { ...emptyTargetFacetState(), pertinent: true, pertinentCode: "P-NEW" },
+        codes: extended,
+      });
+    });
+    const view = render(SignalFacetControls, {
+      props: {
+        target: TARGET,
+        state: { ...emptyTargetFacetState(), pertinent: true, pertinentCode: "P-DENSITE" },
+        codes: extended,
+        codesError: null,
+        codesLoading: false,
+        disabled: false,
+        postCommand,
+        onSaved,
+        onRetryCodes: vi.fn(),
+      },
+    });
+    await fireEvent.change(screen.getByLabelText("Code (facultatif) — Pertinent"), {
+      target: { value: "P-NEW" },
+    });
+    const trigger = screen.getByTestId("facet-update-pertinent-code") as HTMLButtonElement;
+    expect(trigger.disabled).toBe(false);
+    trigger.focus();
+    await fireEvent.click(trigger);
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(
+        (screen.getByTestId("facet-update-pertinent-code") as HTMLButtonElement).disabled,
+      ).toBe(true),
+    );
+    await waitFor(() => expect(document.activeElement).not.toBe(document.body));
+    expect(screen.getByTestId("signal-facet-controls").contains(document.activeElement)).toBe(true);
+    expect(document.activeElement).not.toBe(trigger);
+    expect((document.activeElement as HTMLButtonElement).disabled).toBe(false);
+  });
 });
