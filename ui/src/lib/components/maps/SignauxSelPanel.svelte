@@ -19,7 +19,7 @@
    * reste affiché pour signaler un filtre actif.
    */
   import { tick } from "svelte";
-  import { Alert, Badge, Checkbox, Search } from "@sentropic/design-system-svelte";
+  import { Alert, Badge, Button, Checkbox, Search } from "@sentropic/design-system-svelte";
   import { normalizeLotKey, zoneSearchKey } from "@radar/domain";
   import { rankBySearch } from "$lib/maps/entity-search.js";
   import { ExternalLink, FileText, FileX, RefreshCw, X } from "@lucide/svelte";
@@ -35,8 +35,10 @@
   import {
     buildFacetTarget,
     emptyTargetFacetState,
+    facetStateKey,
     postFacetCommand,
     type FacetAction,
+    type FacetHeadsStatus,
     type FacetTarget,
     type ReasonCode,
     type TargetFacetState,
@@ -201,6 +203,13 @@
   // ── Personal baskets (lot 4) ──────────────────────────────────────────────
   // City facet heads, indexed by the parent as `<type>/<id>`.
   export let facetHeads: Map<string, TargetFacetState> = new Map();
+  /**
+   * Read state of the city's heads. Badges stay hidden and controls stay
+   * inactive until `ready`; an unknown city never renders as untagged.
+   */
+  export let facetHeadsState: FacetHeadsStatus = "ready";
+  /** Silent post-write re-read in flight: controls stay visible but inactive. */
+  export let facetReloading = false;
   export let reasonCodes: ReasonCode[] | null = null;
   export let facetCodesError: string | null = null;
   export let facetCodesLoading = false;
@@ -221,8 +230,10 @@
   export let onDismissDiscardedNotice: () => void = () => {};
 
   function facetStateFor(node: GraphSignalNode): TargetFacetState {
-    return facetHeads.get(`${node.type}/${node.id}`) ?? emptyTargetFacetState();
+    return facetHeads.get(facetStateKey(node)) ?? emptyTargetFacetState();
   }
+
+  $: facetHeadsReady = facetHeadsState === "ready";
 
   /** Focus the discard notice on mount so undo is keyboard-accessible. */
   function focusOnMount(node: HTMLElement): void {
@@ -1154,10 +1165,10 @@
     {#if facetReloadError}
       <div class="sel-alert" data-testid="facet-reload-error">
         <Alert tone="error" title="Classement enregistré, rechargement impossible" message={facetReloadError} />
-        <button type="button" class="sel-retry" on:click={onRetryFacetReads}>
+        <Button variant="secondary" size="sm" type="button" disabled={facetReloading} onclick={onRetryFacetReads}>
           <RefreshCw class="h-3 w-3" aria-hidden="true" />
           Réessayer
-        </button>
+        </Button>
       </div>
     {/if}
     {#if discardedNotice}
@@ -1221,6 +1232,23 @@
               onchange={(event) => onToggleShowDiscarded(event.currentTarget.checked)}
             />
           </div>
+          {#if !facetHeadsReady}
+            {#if facetHeadsState === "loading"}
+              <p class="sel-muted" data-testid="facet-heads-loading">Chargement du classement…</p>
+            {:else if facetHeadsState === "error"}
+              <div class="sel-alert" data-testid="facet-heads-error">
+                <Alert
+                  tone="error"
+                  title="Classement indisponible"
+                  message="Les paniers de cette ville n'ont pas pu être lus."
+                />
+                <Button variant="secondary" size="sm" type="button" disabled={facetReloading} onclick={onRetryFacetReads}>
+                  <RefreshCw class="h-3 w-3" aria-hidden="true" />
+                  Réessayer
+                </Button>
+              </div>
+            {/if}
+          {/if}
         {:else if facetsNote}
           <p class="sel-muted" data-testid="facets-unavailable-note">{facetsNote}</p>
         {/if}
@@ -1233,18 +1261,33 @@
           {:else if detailError}
             <p class="sel-empty">Projection des signaux indisponible.</p>
           {:else if zoneScopedDetailNodes.length === 0}
-            <!-- Zone active sans signal rattaché, plage de dates qui masque tout,
-                 ou ville sans rien d'indexé : messages distincts (jamais
-                 prétendre que la ville n'a rien quand c'est le scope zone). -->
-            <p class="sel-empty">
-              {#if focusedZoneCode && filteredDetailNodes.length > 0}
-                Aucun signal rattaché à la zone active.
-              {:else if unfilteredSignalCount > 0}
-                Aucun signal dans la plage de dates sélectionnée.
-              {:else}
-                Aucun signal indexé pour cette ville.
-              {/if}
-            </p>
+            {#if facetsAllowed && facetHeadsReady && !showDiscarded && unfilteredSignalCount === 0 && !focusedZoneCode && [...facetHeads.values()].some((state) => state.archived)}
+              <!-- Active archive heads explain an empty default detail read. -->
+              <div class="sel-empty" data-testid="facet-all-archived">
+                <p class="sel-empty">Tous les signaux sont écartés.</p>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  type="button"
+                  onclick={() => onToggleShowDiscarded(true)}
+                >
+                  Montrer les écartés
+                </Button>
+              </div>
+            {:else}
+              <!-- Zone active sans signal rattaché, plage de dates qui masque tout,
+                   ou ville sans rien d'indexé : messages distincts (jamais
+                   prétendre que la ville n'a rien quand c'est le scope zone). -->
+              <p class="sel-empty">
+                {#if focusedZoneCode && filteredDetailNodes.length > 0}
+                  Aucun signal rattaché à la zone active.
+                {:else if unfilteredSignalCount > 0}
+                  Aucun signal dans la plage de dates sélectionnée.
+                {:else}
+                  Aucun signal indexé pour cette ville.
+                {/if}
+              </p>
+            {/if}
           {:else}
             {#each zoneScopedDetailNodes as node (node.id)}
               {@const key = signalKey(node)}
@@ -1296,16 +1339,16 @@
                         {stageLabel}
                       </span>
                     {/if}
-                    {#if facetState.pertinent}
+                    {#if facetHeadsReady && facetState.pertinent}
                       <Badge tone="success" size="sm" data-testid="facet-badge-pertinent">Pertinent</Badge>
                     {/if}
-                    {#if facetState.watching}
+                    {#if facetHeadsReady && facetState.watching}
                       <Badge tone="info" size="sm" data-testid="facet-badge-watching">À surveiller</Badge>
                     {/if}
-                    {#if facetState.archived}
+                    {#if facetHeadsReady && facetState.archived}
                       <Badge tone="neutral" size="sm" data-testid="facet-badge-archived">Écarté{#if facetState.archiveCode} · {facetState.archiveCode}{/if}</Badge>
                     {/if}
-                    {#if facetState.archived && facetState.changedSinceArchive}
+                    {#if facetHeadsReady && facetState.archived && facetState.changedSinceArchive}
                       <Badge tone="warning" size="sm" data-testid="facet-badge-changed">modifié depuis l'écart</Badge>
                     {/if}
                     <AnnotationBadge count={annotationCounts[node.id] ?? 0} />
@@ -1488,8 +1531,10 @@
                           codes={reasonCodes}
                           codesError={facetCodesError}
                           codesLoading={facetCodesLoading}
+                          disabled={facetReloading || !facetHeadsReady}
                           postCommand={facetPostCommand}
                           onSaved={(action) => onFacetSaved(action, facetCardTarget)}
+                          onRetryCodes={onRetryFacetReads}
                         />
                       {:else if facetsNote}
                         <p class="sel-muted" data-testid="facet-card-note">{facetsNote}</p>
@@ -2961,7 +3006,7 @@
 
   .sel-notice-error {
     margin: 0.4rem 0 0;
-    color: #b91c1c;
+    color: var(--st-semantic-feedback-error, #b91c1c);
     font-size: var(--signaux-fs-small);
   }
 
