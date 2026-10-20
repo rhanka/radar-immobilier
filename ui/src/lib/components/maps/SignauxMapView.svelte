@@ -1719,19 +1719,22 @@
     }
   }
 
-  /** Confirmed card write: clear the city cache and reload all three reads. */
+  /** Confirmed card write: publish the notice at once, then reload all three reads. */
   async function handleFacetSaved(action: FacetAction, target: FacetTarget): Promise<void> {
+    const operationCity = target.citySlug;
     const label = detailNodes.find((node) => node.id === target.id)?.label ?? target.id;
-    detailCache.delete(target.citySlug);
+    detailCache.delete(operationCity);
     // The notice shows as soon as the write is confirmed in the default
     // view — whatever the re-reads report. The re-read outcome only drives
-    // the reload-error banner.
-    await reloadAfterFacetWrite(target.citySlug, { silentDetail: true });
-    if (action === "discard" && !showDiscarded && selectedCity?.municipality.slug === target.citySlug) {
+    // the reload-error banner, so a hanging re-read never delays the notice.
+    if (action === "discard" && !showDiscarded && selectedCity?.municipality.slug === operationCity) {
       discardedNotice = { target, label };
       discardedActionError = null;
       undoCommandKey = null;
+      undoOperationToken += 1;
+      undoBusy = false;
     }
+    await reloadAfterFacetWrite(operationCity, { silentDetail: true });
   }
 
   function handleRetryFacetReads(): void {
