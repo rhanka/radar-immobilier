@@ -95,3 +95,4 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] Cover S3 deadlines and caller cancellation before and after response headers.
   - [x] Verify stalled HTTP bodies, socket closure, pool/lock recovery and subsequent publication; complete isolated gates and cleanup.
 - [x] **Migration renumbering after H1/main integration**: preserve 0014 facets; align 0015/0016 artifact paths, timestamps, startup guards and tests; pass isolated typecheck, lint, targeted integration and API unit gates; remove stack volumes.
+- [x] **0014 replay regression**: cover journal drift from 0014 onward, preserve migration hashes, timestamps and codebook; pass lint, targeted integrations and API tests; prove discrimination with a temporary SQL mutation and byte-identical restoration.
