@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["findings"],
+  "properties": {
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "description", "kind", "category", "etape", "date", "citation", "page"],
+        "properties": {
+          "label": { "type": "string", "minLength": 5, "maxLength": 240 },
+          "description": { "type": "string", "minLength": 10, "maxLength": 700 },
+          "kind": { "type": "string", "minLength": 2, "maxLength": 80 },
+          "category": { "type": "string", "minLength": 2, "maxLength": 80 },
+          "etape": {
+            "type": "string",
+            "enum": ["avis_motion", "projet_reglement", "consultation_publique", "second_projet", "adoption", "entree_vigueur", "derogation_mineure", "piia", "ppcmoi", "usage_conditionnel", "inconnu"]
+          },
+          "date": { "type": "string", "maxLength": 10 },
+          "citation": { "type": "string", "minLength": 10, "maxLength": 1200 },
+          "page": { "type": "integer", "minimum": 1 },
+          "zone_ref": { "type": "string", "maxLength": 80 },
+          "no_lot": { "type": "string", "maxLength": 40 },
+          "reglement_number": { "type": "string", "maxLength": 80 },
+          "resolution": { "type": "string", "maxLength": 80 },
+          "outcome": { "type": "string", "maxLength": 80 }
+        }
+      }
+    }
+  }
+}
