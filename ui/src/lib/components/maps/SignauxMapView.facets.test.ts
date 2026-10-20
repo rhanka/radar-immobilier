@@ -201,7 +201,7 @@ describe("SignauxMapView — Annuler restores with one key per retry", () => {
     const restore = deferred<unknown>();
     vi.mocked(postFacetCommand).mockImplementationOnce(async () => {
       await restore.promise;
-      throw new SignalFacetError(409, "idempotency_key_conflict");
+      throw new SignalFacetError(null, null);
     });
     const annuler = () =>
       [...screen.getByTestId("discarded-notice").querySelectorAll("button")].find(
@@ -211,7 +211,7 @@ describe("SignauxMapView — Annuler restores with one key per retry", () => {
     expect(annuler().disabled).toBe(true);
     restore.resolve(null);
     await waitFor(() => expect(screen.getByTestId("discarded-action-error")).toBeTruthy());
-    expect(screen.getByTestId("discarded-action-error").textContent).toContain("Conflit de clé");
+    expect(screen.getByTestId("discarded-action-error").textContent).toContain("Écriture non confirmée");
     await fireEvent.click(annuler());
     await waitFor(() =>
       expect(vi.mocked(postFacetCommand).mock.calls.filter((call) => call[1] === "restore")).toHaveLength(2),
