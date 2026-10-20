@@ -100,6 +100,39 @@ describe("SignauxMapView — write then three re-reads", () => {
     expect(vi.mocked(postFacetCommand)).toHaveBeenCalledTimes(1);
   });
 
+  it("shows the discard notice at once while the post-write re-read hangs", async () => {
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await openFirstSignalCard();
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    const detailPending = deferred<Awaited<ReturnType<typeof fetchGraphSignalDetail>>>();
+    const headsPending = deferred<Awaited<ReturnType<typeof fetchCityFacets>>>();
+    const bulkPending = deferred<Awaited<ReturnType<typeof fetchGraphSignalsByCity>>>();
+    vi.mocked(fetchGraphSignalDetail).mockReturnValueOnce(detailPending.promise);
+    vi.mocked(fetchCityFacets).mockReturnValueOnce(headsPending.promise);
+    vi.mocked(fetchGraphSignalsByCity).mockReturnValueOnce(bulkPending.promise);
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    await waitFor(() => expect(vi.mocked(postFacetCommand)).toHaveBeenCalled());
+    const notice = await screen.findByTestId("discarded-notice");
+    expect(notice.textContent).toContain("First zonage signal");
+    const annuler = [...notice.querySelectorAll("button")].find(
+      (button) => button.textContent === "Annuler",
+    ) as HTMLButtonElement;
+    expect(annuler.disabled).toBe(false);
+    const bulkOptions = vi.mocked(fetchGraphSignalsByCity).mock.calls.at(-1)?.[1] as
+      | Record<string, unknown>
+      | undefined;
+    expect(bulkOptions).toMatchObject({});
+    expect("signal" in (bulkOptions ?? {})).toBe(true);
+    detailPending.resolve({ ok: true, citySlug: CITY_SLUG, legacyProjection: null, nodes: NODES });
+    headsPending.resolve({ heads: [] });
+    bulkPending.resolve({ ok: true, totalCount: 2, cities: [] });
+    await waitFor(() =>
+      expect((screen.getByTestId("facet-toggle-pertinent") as HTMLButtonElement).disabled).toBe(false),
+    );
+  });
+
   it("keeps zero-archive ids, order and counters with and without reveal", async () => {
     const orders: string[][] = [];
     const identities: string[][] = [];
@@ -264,6 +297,87 @@ describe("SignauxMapView — city switches during facet writes", () => {
     expect(screen.queryByTestId("discarded-notice")).toBeNull();
     expect(screen.queryByTestId("facet-reload-error")).toBeNull();
     expect(screen.getByRole("button", { name: /B first signal/ })).toBeTruthy();
+  });
+
+  it.each([false, true])("keeps city B notice and reload error (failed read: %s) when a late restore of city A succeeds", async (readFails) => {
+    mockDetailByCity();
+    const view = render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await openFirstSignalCard();
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    await screen.findByTestId("discarded-notice");
+    const restore = deferred<unknown>();
+    vi.mocked(postFacetCommand).mockImplementationOnce(() => restore.promise);
+    const annulerA = () =>
+      [...screen.getByTestId("discarded-notice").querySelectorAll("button")].find(
+        (button) => button.textContent === "Annuler",
+      )!;
+    await fireEvent.click(annulerA());
+    await view.rerender({ geoRoute: cityRoute("?filter.period=all", OTHER_CITY_SLUG) });
+    await screen.findByRole("button", { name: /B first signal/ });
+    await fireEvent.click(screen.getByRole("button", { name: /B first signal/ }));
+    await screen.findByTestId("signal-facet-controls");
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    if (readFails) vi.mocked(fetchGraphSignalsByCity).mockRejectedValueOnce(new Error("city B read failed"));
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    await waitFor(() =>
+      expect(screen.getByTestId("discarded-notice").textContent).toContain("B first signal"),
+    );
+    if (readFails) await screen.findByTestId("facet-reload-error");
+    const bulkCalls = vi.mocked(fetchGraphSignalsByCity).mock.calls.length;
+    restore.resolve(null);
+    await waitFor(() =>
+      expect(vi.mocked(fetchGraphSignalsByCity).mock.calls.length).toBeGreaterThan(bulkCalls),
+    );
+    await tick();
+    await tick();
+    expect(screen.getByTestId("discarded-notice").textContent).toContain("B first signal");
+    expect(screen.queryByTestId("discarded-action-error")).toBeNull();
+    expect(Boolean(screen.queryByTestId("facet-reload-error"))).toBe(readFails);
+  });
+
+  it("leaves city B notice clean when a late restore of city A fails", async () => {
+    mockDetailByCity();
+    const view = render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await openFirstSignalCard();
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    await screen.findByTestId("discarded-notice");
+    let rejectRestore!: (err: unknown) => void;
+    const restorePromise = new Promise<unknown>((_, reject) => {
+      rejectRestore = reject;
+    });
+    restorePromise.catch(() => {});
+    vi.mocked(postFacetCommand).mockImplementationOnce(() => restorePromise);
+    const annulerA = () =>
+      [...screen.getByTestId("discarded-notice").querySelectorAll("button")].find(
+        (button) => button.textContent === "Annuler",
+      )!;
+    await fireEvent.click(annulerA());
+    await view.rerender({ geoRoute: cityRoute("?filter.period=all", OTHER_CITY_SLUG) });
+    await screen.findByRole("button", { name: /B first signal/ });
+    await fireEvent.click(screen.getByRole("button", { name: /B first signal/ }));
+    await screen.findByTestId("signal-facet-controls");
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    await waitFor(() =>
+      expect(screen.getByTestId("discarded-notice").textContent).toContain("B first signal"),
+    );
+    rejectRestore(new SignalFacetError(null, null));
+    await tick();
+    await tick();
+    await waitFor(() =>
+      expect(screen.getByTestId("discarded-notice").textContent).toContain("B first signal"),
+    );
+    expect(screen.queryByTestId("discarded-action-error")).toBeNull();
   });
 });
 
