@@ -25,6 +25,7 @@
     type FacetAction,
     type FacetBasket,
     type FacetCommandBody,
+    type FacetCommandLaunch,
     type FacetTarget,
     type ReasonCode,
     type TargetFacetState,
@@ -40,8 +41,10 @@
   export let disabled = false;
   /** Injectable for tests; defaults to the real facet client. */
   export let postCommand: typeof postFacetCommand = postFacetCommand;
+  /** Parent-owned viewer identity, captured before each command. */
+  export let viewerKey: FacetCommandLaunch["viewerKey"] = null;
   /** The parent purges its caches and re-reads detail, heads and by-city. */
-  export let onSaved: (action: FacetAction) => void | Promise<void> = () => {};
+  export let onSaved: (action: FacetAction, launch: FacetCommandLaunch) => void | Promise<void> = () => {};
   /** Reload the reason codebook (parent-owned read). */
   export let onRetryCodes: () => void = () => {};
 
@@ -115,6 +118,9 @@
       commandKey = createCommandKey();
       lastIntent = intent;
     }
+    // Consume stale keys without reporting results to a different viewer.
+    const viewerAtStart = viewerKey;
+    const launch: FacetCommandLaunch = { viewerKey: viewerAtStart };
     const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     busy = true;
     error = null;
@@ -122,9 +128,15 @@
       await postCommand("", action, body, commandKey!);
       commandKey = null;
       lastIntent = null;
+      if (viewerAtStart !== viewerKey) return;
       discardCode = "";
-      await onSaved(action);
+      await onSaved(action, launch);
     } catch (err) {
+      if (viewerAtStart !== viewerKey) {
+        commandKey = null;
+        lastIntent = null;
+        return;
+      }
       unconfirmed = isFacetWriteUnconfirmed(err);
       if (!unconfirmed) {
         lastIntent = null;
@@ -137,7 +149,7 @@
     } finally {
       busy = false;
       await tick();
-      restoreFocus(trigger);
+      if (viewerAtStart === viewerKey) restoreFocus(trigger);
     }
   }
 
