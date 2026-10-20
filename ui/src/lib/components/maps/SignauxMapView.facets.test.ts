@@ -5,7 +5,7 @@ import { CITY_SLUG, NODES, OTHER_CITY_SLUG, setAuth, deferred, cityRoute, mockDe
 import SignauxMapView from "./SignauxMapView.svelte";
 import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
 import { fetchGraphSignalDetail, GraphSignalsHttpError } from "$lib/signals/graph-signal-detail-client.js";
-import { fetchCityFacets, fetchReasonCodes, postFacetCommand, SignalFacetError } from "$lib/signals/signal-facets-client.js";
+import { fetchCityFacets, fetchReasonCodes, postFacetCommand, SignalFacetError, type FacetHead } from "$lib/signals/signal-facets-client.js";
 
 describe("SignauxMapView — reveal forwarding", () => {
   it("forwards showDiscarded=1 to detail and by-city, default stays hidden", async () => {
@@ -303,6 +303,50 @@ describe("SignauxMapView — notice focus", () => {
     await waitFor(() =>
       expect(document.activeElement).toBe(screen.getByTestId("signals-bucket-head")),
     );
+  });
+});
+
+describe("SignauxMapView — public-format heads", () => {
+  const archiveHead: FacetHead = {
+    id: "h1",
+    target: { citySlug: CITY_SLUG, type: "Signal", id: "sig-1" },
+    facet: "archive",
+    basket: null,
+    state: "active",
+    reasonCode: "N-ADMIN",
+    verdict: "non_pertinent",
+    createdAt: "2026-10-19T12:00:00.000Z",
+    targetAvailable: true,
+    changedSinceArchive: false,
+  };
+
+  it("shows badges, re-reads the badge after a select, and restores in reveal", async () => {
+    vi.mocked(fetchCityFacets).mockResolvedValue({ heads: [archiveHead] });
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all&filter.showDiscarded=1") } });
+    // Badge from the public target:{citySlug,type,id} head shape.
+    const archived = await screen.findByTestId("facet-badge-archived");
+    expect(archived.textContent).toContain("N-ADMIN");
+    // A select write re-reads heads: the new badge appears.
+    vi.mocked(fetchCityFacets).mockResolvedValue({ heads: [archiveHead, {
+      id: "h2",
+      target: { citySlug: CITY_SLUG, type: "Signal", id: "sig-2" },
+      facet: "selection",
+      basket: "pertinent",
+      state: "active",
+      reasonCode: "P-DENSITE",
+      verdict: "pertinent",
+      createdAt: "2026-10-19T12:00:00.000Z",
+      targetAvailable: true,
+      changedSinceArchive: null,
+    }] });
+    await fireEvent.click(screen.getByRole("button", { name: /Second zonage signal/ }));
+    await fireEvent.click(await screen.findByTestId("facet-toggle-pertinent"));
+    expect(await screen.findByTestId("facet-badge-pertinent")).toBeTruthy();
+    // Restaurer is offered on the unfolded archived card in reveal.
+    vi.mocked(fetchCityFacets).mockResolvedValue({ heads: [] });
+    await fireEvent.click(screen.getByRole("button", { name: /First zonage signal/ }));
+    await fireEvent.click(await screen.findByTestId("facet-restore"));
+    await waitFor(() => expect(screen.queryByTestId("facet-badge-archived")).toBeNull());
   });
 });
 
