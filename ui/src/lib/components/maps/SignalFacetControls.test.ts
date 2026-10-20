@@ -92,7 +92,7 @@ describe("SignalFacetControls — discard requires a code", () => {
     await fireEvent.change(select, { target: { value: "N-ADMIN" } });
     expect(submit.disabled).toBe(false);
     await fireEvent.click(submit);
-    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("discard"));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("discard", { viewerKey: null }));
     expect(postCommand).toHaveBeenCalledTimes(1);
     expect(postCommand.mock.calls[0]![1]).toBe("discard");
     expect(postCommand.mock.calls[0]![2]).toEqual({ target: TARGET, reasonCode: "N-ADMIN" });
@@ -111,7 +111,7 @@ describe("SignalFacetControls — discard requires a code", () => {
     expect(onSaved).not.toHaveBeenCalled();
     expect(screen.queryByTestId("facet-retry")).toBeNull();
     await fireEvent.click(screen.getByTestId("facet-discard-submit"));
-    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("discard"));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("discard", { viewerKey: null }));
     expect(postCommand).toHaveBeenCalledTimes(2);
     expect(postCommand.mock.calls[0]![3]).not.toBe(postCommand.mock.calls[1]![3]);
   });
@@ -130,7 +130,7 @@ describe("SignalFacetControls — baskets and restoration", () => {
       expect(onSaved).not.toHaveBeenCalled();
       expect(screen.queryByTestId("facet-state-pertinent")).toBeNull();
       await fireEvent.click(screen.getByTestId("facet-retry"));
-      await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select"));
+      await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select", { viewerKey: null }));
       expect(postCommand.mock.calls[0]![3]).toBe(postCommand.mock.calls[1]![3]);
     },
   );
@@ -153,7 +153,7 @@ describe("SignalFacetControls — baskets and restoration", () => {
       target: { value: "P-DENSITE" },
     });
     await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
-    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select"));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select", { viewerKey: null }));
     expect(postCommand.mock.calls[0]![2]).toEqual({
       target: TARGET,
       basket: "pertinent",
@@ -212,7 +212,7 @@ describe("SignalFacetControls — baskets and restoration", () => {
     });
     expect(screen.queryByTestId("facet-discard-submit")).toBeNull();
     await fireEvent.click(screen.getByTestId("facet-restore"));
-    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("restore"));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("restore", { viewerKey: null }));
     expect(postCommand.mock.calls[0]![1]).toBe("restore");
     expect(postCommand.mock.calls[0]![2]).toEqual({ target: TARGET });
   });
@@ -243,7 +243,7 @@ describe("SignalFacetControls — baskets and restoration", () => {
   it("keeps focus inside the controls after a select write and reload", async () => {
     const { onSaved } = renderControls();
     await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
-    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select"));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select", { viewerKey: null }));
     await waitFor(() =>
       expect(screen.getByTestId("signal-facet-controls").contains(document.activeElement)).toBe(true),
     );

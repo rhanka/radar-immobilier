@@ -35,6 +35,7 @@
   import {
     postFacetCommand,
     type FacetAction,
+    type FacetCommandLaunch,
     type FacetHeadsStatus,
     type FacetTarget,
     type ReasonCode,
@@ -76,8 +77,14 @@
   export let showDiscarded = false;
   export let onToggleShowDiscarded: (show: boolean) => void = () => {};
   export let facetPostCommand: typeof postFacetCommand = postFacetCommand;
-  export let onFacetSaved: (action: FacetAction, target: FacetTarget) => void | Promise<void> = () => {};
+  export let facetViewerKey: FacetCommandLaunch["viewerKey"] = null;
+  export let onFacetSaved: (
+    action: FacetAction,
+    target: FacetTarget,
+    launch?: FacetCommandLaunch,
+  ) => void | Promise<void> = () => {};
   export let facetReloadError: string | null = null;
+  export let facetReloadAfterWrite = false;
   export let onRetryFacetReads: () => void = () => {};
   export let discardedNotice: { target: FacetTarget; label: string } | null = null;
   export let discardedActionError: string | null = null;
@@ -145,8 +152,10 @@
   {showDiscarded}
   onToggleShowDiscarded={handleToggleShowDiscarded}
   {facetPostCommand}
+  {facetViewerKey}
   {onFacetSaved}
   {facetReloadError}
+  {facetReloadAfterWrite}
   {onRetryFacetReads}
   {discardedNotice}
   {discardedActionError}

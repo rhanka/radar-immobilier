@@ -35,6 +35,16 @@ export interface FacetTarget {
   id: string;
 }
 
+/**
+ * Viewer context captured when a facet command launches (before its POST).
+ * The owner compares it after the POST and ignores every UI effect when the
+ * viewer moved on (account switch, logout) while the write was in flight.
+ */
+export interface FacetCommandLaunch {
+  /** Fresh identity per viewer transition, including a return to the same sub. */
+  viewerKey: { context: string } | null;
+}
+
 export interface ReasonCode {
   code: string;
   verdict: string;

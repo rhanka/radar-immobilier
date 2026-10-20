@@ -68,6 +68,7 @@
     postFacetCommand,
     SignalFacetError,
     type FacetAction,
+    type FacetCommandLaunch,
     type FacetHeadsStatus,
     type FacetTarget,
     type ReasonCode,
@@ -573,8 +574,10 @@
   let facetCodesSub: string | null = null;
   let facetHeadsByCity = new Map<string, Map<string, TargetFacetState>>();
   let facetHeadsStateByCity = new Map<string, FacetHeadsStatus>();
-  let appliedFacetContext: string | null = null;
+  let appliedFacetContext: FacetCommandLaunch["viewerKey"] = null;
   let facetReloadError: string | null = null;
+  /** True when the reload error follows a confirmed write (own banner title). */
+  let facetReloadAfterWrite = false;
   let facetReloading = false;
   let facetReloadToken = 0;
   let undoOperationToken = 0;
@@ -614,9 +617,9 @@
   $: {
     const sub = currentUserSub;
     const context = `${sub ?? ""}/${facetsAllowed}`;
-    if (appliedFacetContext !== context) {
+    if (appliedFacetContext?.context !== context) {
       const initial = appliedFacetContext === null;
-      appliedFacetContext = context;
+      appliedFacetContext = { context };
       facetCodesSub = sub;
       facetHeadsGuard.cancel();
       facetCodesGuard.cancel();
@@ -639,6 +642,7 @@
       detailCache.clear();
       detailNodes = [];
       detailLegacyProjection = null;
+      facetReloadAfterWrite = false;
       activeEvidence = null;
       activeDocument = null;
       activeSource = null;
@@ -1535,6 +1539,7 @@
     discardedActionError = null;
     undoCommandKey = null;
     facetReloadError = null;
+    facetReloadAfterWrite = false;
     undoOperationToken += 1;
     undoBusy = false;
     facetReloadToken += 1;
@@ -1687,11 +1692,13 @@
    * heads and by-city in parallel under their guards — but only for the city
    * still selected (by-city is re-read in all cases). A failed read gets a
    * distinct recorded-but-not-reloaded message and a reads-only retry; a
-   * superseded read stays silent.
+   * superseded read stays silent. `afterWrite` tags the banner context: a
+   * plain read (or a read retry with no prior write) must never announce a
+   * recorded write.
    */
   async function reloadAfterFacetWrite(
     citySlug: string,
-    opts: { silentDetail?: boolean; includeCodes?: boolean } = {},
+    opts: { silentDetail?: boolean; includeCodes?: boolean; afterWrite?: boolean } = {},
   ): Promise<boolean> {
     if (selectedCity?.municipality.slug !== citySlug) {
       await load();
@@ -1700,6 +1707,7 @@
     const token = ++facetReloadToken;
     const operationCity = citySlug;
     facetReloadError = null;
+    facetReloadAfterWrite = false;
     facetReloading = true;
     try {
       const currentAtStart = selectedCity?.municipality.slug === operationCity;
@@ -1712,16 +1720,24 @@
       if (token !== facetReloadToken) return false;
       if (selectedCity?.municipality.slug !== operationCity) return false;
       const ok = !outcomes.includes("error");
-      if (!ok) facetReloadError = "Les données affichées peuvent être périmées.";
+      if (!ok) {
+        facetReloadError = "Les données affichées peuvent être périmées.";
+        facetReloadAfterWrite = opts.afterWrite === true;
+      }
       return ok;
     } finally {
       if (token === facetReloadToken) facetReloading = false;
     }
   }
 
-  /** Confirmed card write: publish the notice at once, then reload all three reads. */
-  async function handleFacetSaved(action: FacetAction, target: FacetTarget): Promise<void> {
+  /** Publish confirmed writes only for their launching viewer, then reload. */
+  async function handleFacetSaved(
+    action: FacetAction,
+    target: FacetTarget,
+    launch?: FacetCommandLaunch,
+  ): Promise<void> {
     const operationCity = target.citySlug;
+    if (launch && launch.viewerKey !== appliedFacetContext) return;
     const label = detailNodes.find((node) => node.id === target.id)?.label ?? target.id;
     detailCache.delete(operationCity);
     // The notice shows as soon as the write is confirmed in the default
@@ -1734,23 +1750,28 @@
       undoOperationToken += 1;
       undoBusy = false;
     }
-    await reloadAfterFacetWrite(operationCity, { silentDetail: true });
+    await reloadAfterFacetWrite(operationCity, { silentDetail: true, afterWrite: true });
   }
 
+  /** A read retry must not announce a recorded write. */
   function handleRetryFacetReads(): void {
-    if (selectedCity) void reloadAfterFacetWrite(selectedCity.municipality.slug, { includeCodes: true });
+    if (selectedCity) void reloadAfterFacetWrite(selectedCity.municipality.slug, { includeCodes: true, afterWrite: false });
   }
 
   /**
    * Undo the discard with restore. Reuse the same key on retry, then reload
-   * after the confirmed write.
+   * after the confirmed write. Stale cities refresh counters only; stale
+   * viewers never affect the current viewer's reads or UI.
    */
   async function handleUndoDiscard(target: FacetTarget): Promise<void> {
     if (undoBusy || !discardedNotice) return;
     const operationToken = ++undoOperationToken;
     const operationCity = target.citySlug;
     const operationNotice = discardedNotice;
+    const operationSub = currentUserSub;
+    const operationViewer = appliedFacetContext;
     const isCurrent = () => undoOperationToken === operationToken &&
+      appliedFacetContext === operationViewer && currentUserSub === operationSub &&
       selectedCity?.municipality.slug === operationCity && discardedNotice === operationNotice;
     undoBusy = true;
     discardedActionError = null;
@@ -1759,12 +1780,22 @@
       const commandKeyForOperation = undoCommandKey;
       await postFacetCommand("", "restore", { target }, commandKeyForOperation);
       if (isCurrent()) undoCommandKey = null;
+      if (appliedFacetContext !== operationViewer) return;
       detailCache.delete(operationCity);
-      await reloadAfterFacetWrite(operationCity, { silentDetail: true });
+      if (!isCurrent()) {
+        await load();
+        return;
+      }
+      await reloadAfterFacetWrite(operationCity, { silentDetail: true, afterWrite: true });
       if (!isCurrent()) return;
       discardedNotice = null;
       await tick();
-      if (undoOperationToken === operationToken && selectedCity?.municipality.slug === operationCity) {
+      if (
+        undoOperationToken === operationToken &&
+        appliedFacetContext === operationViewer &&
+        currentUserSub === operationSub &&
+        selectedCity?.municipality.slug === operationCity
+      ) {
         selPanel?.focusSignalCard(target.id);
       }
     } catch (err) {
@@ -1815,6 +1846,7 @@
     discardedActionError = null;
     undoCommandKey = null;
     facetReloadError = null;
+    facetReloadAfterWrite = false;
     undoOperationToken += 1;
     undoBusy = false;
     facetReloadToken += 1;
@@ -3163,7 +3195,9 @@
       showDiscarded={showDiscarded}
       onToggleShowDiscarded={handleToggleShowDiscarded}
       onFacetSaved={handleFacetSaved}
+      facetViewerKey={appliedFacetContext}
       facetReloadError={facetReloadError}
+      facetReloadAfterWrite={facetReloadAfterWrite}
       onRetryFacetReads={handleRetryFacetReads}
       discardedNotice={discardedNotice}
       discardedActionError={discardedActionError}
