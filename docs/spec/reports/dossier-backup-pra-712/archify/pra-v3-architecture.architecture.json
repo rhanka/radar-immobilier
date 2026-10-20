@@ -1,0 +1,524 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "PRA v3 - architecture symetrique preprod / prod, six zones",
+    "quality_profile": "showcase",
+    "viewBox": [
+      1364,
+      620
+    ],
+    "views": [
+      {
+        "id": "symetrie",
+        "label": "Symetrie preprod / prod",
+        "focus": [
+          "cj_pp",
+          "cj_pr",
+          "bk_pp",
+          "bk_pr",
+          "rep_pp",
+          "rep_pr",
+          "pg_pp",
+          "pg_pr"
+        ],
+        "note": "Chaque rangee porte sa paire preprod / prod ; une case absente reste une carte motivee."
+      },
+      {
+        "id": "cles",
+        "label": "Cles et zones de responsabilite",
+        "focus": [
+          "plateforme",
+          "ids3",
+          "coffre",
+          "jeton"
+        ],
+        "note": "Ou vivent les cles, qui les detient, ce qu'elles ouvrent."
+      },
+      {
+        "id": "alertes",
+        "label": "Chaine d'alerte",
+        "focus": [
+          "watch",
+          "ticket",
+          "tem",
+          "owner",
+          "admin"
+        ],
+        "note": "L'alerte est evaluee hors cluster : elle survit a la perte du cluster."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "cj_pp",
+      "type": "backend",
+      "label": "CronJob N2 preprod",
+      "sublabel": "2 fois/jour - non actif",
+      "pos": [
+        30,
+        96
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "bk_pp",
+      "type": "database",
+      "label": "Bucket N2 preprod",
+      "sublabel": "quotidien seul - Q5b",
+      "pos": [
+        254,
+        96
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "rep_pp",
+      "type": "external",
+      "label": "Replique preprod",
+      "sublabel": "absente - motif Q5b",
+      "pos": [
+        478,
+        96
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "pra",
+      "type": "backend",
+      "label": "pra.yml",
+      "sublabel": "a creer - immo et geo",
+      "pos": [
+        702,
+        96
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "owner",
+      "type": "external",
+      "label": "Owner",
+      "sublabel": "declenche et acquitte",
+      "pos": [
+        926,
+        96
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "tem",
+      "type": "cloud",
+      "label": "Courriel TEM",
+      "sublabel": "second canal - Q6",
+      "pos": [
+        1150,
+        96
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "cj_pr",
+      "type": "backend",
+      "label": "CronJob N2 prod",
+      "sublabel": "2 fois/jour - non actif",
+      "pos": [
+        30,
+        200
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "bk_pr",
+      "type": "database",
+      "label": "Bucket N2 prod",
+      "sublabel": "10/5/13 - Q5 et Q7",
+      "pos": [
+        254,
+        200
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "rep_pr",
+      "type": "cloud",
+      "label": "Replique prod",
+      "sublabel": "autre region - Q8",
+      "pos": [
+        478,
+        200
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "watch",
+      "type": "backend",
+      "label": "pra-watch.yml",
+      "sublabel": "veilleur hors cluster",
+      "pos": [
+        702,
+        200
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "admin",
+      "type": "external",
+      "label": "Admin cluster",
+      "sublabel": "role tenu par l'owner",
+      "pos": [
+        926,
+        200
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "cflare",
+      "type": "cloud",
+      "label": "Cloudflare et LE",
+      "sublabel": "DNS-01 et certificats",
+      "pos": [
+        1150,
+        200
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "pg_pr",
+      "type": "database",
+      "label": "Base prod",
+      "sublabel": "1 002 MiB - point 8 j",
+      "pos": [
+        30,
+        304
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "obj_pr",
+      "type": "database",
+      "label": "Objets immo prod",
+      "sublabel": "59 017 objets - 12,53 Go",
+      "pos": [
+        254,
+        304
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "rep_geo",
+      "type": "cloud",
+      "label": "Replique geo",
+      "sublabel": "selon Q14",
+      "pos": [
+        478,
+        304
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "ticket",
+      "type": "messagebus",
+      "label": "Ticket pra-alert",
+      "sublabel": "porte l'accuse",
+      "pos": [
+        702,
+        304
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "jeton",
+      "type": "security",
+      "label": "Jeton API OVH",
+      "sublabel": "projet entier - Q19",
+      "pos": [
+        926,
+        304
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "horsovh",
+      "type": "external",
+      "label": "Option hors OVH",
+      "sublabel": "non concue - V38",
+      "pos": [
+        1150,
+        304
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "pg_pp",
+      "type": "database",
+      "label": "Base preprod",
+      "sublabel": "950 MiB - en service",
+      "pos": [
+        30,
+        408
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "geo_pr",
+      "type": "database",
+      "label": "Bucket geo prod",
+      "sublabel": "45 378 objets - 48,94 Go",
+      "pos": [
+        254,
+        408
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "cd",
+      "type": "messagebus",
+      "label": "CD armee",
+      "sublabel": "deploy, promote, rollback",
+      "pos": [
+        702,
+        408
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "coffre",
+      "type": "security",
+      "label": "Coffre sops/age",
+      "sublabel": "cle privee chez l'owner",
+      "pos": [
+        926,
+        408
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "plateforme",
+      "type": "security",
+      "label": "Plateforme et cles",
+      "sublabel": "2 cles - rotation 22/09",
+      "pos": [
+        30,
+        512
+      ],
+      "size": [
+        184,
+        66
+      ]
+    },
+    {
+      "id": "ids3",
+      "type": "security",
+      "label": "Identites S3",
+      "sublabel": "7 par environnement",
+      "pos": [
+        254,
+        512
+      ],
+      "size": [
+        184,
+        66
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "cjpp-bkpp",
+      "from": "cj_pp",
+      "to": "bk_pp",
+      "label": "depot preprod",
+      "variant": "dashed",
+      "labelDy": -52
+    },
+    {
+      "id": "bkpp-reppp",
+      "from": "bk_pp",
+      "to": "rep_pp",
+      "label": "aucune replique",
+      "variant": "dashed",
+      "labelDy": -52
+    },
+    {
+      "id": "owner-pra",
+      "from": "owner",
+      "to": "pra",
+      "label": "declenche",
+      "variant": "emphasis",
+      "labelDy": -52
+    },
+    {
+      "id": "tem-owner",
+      "from": "tem",
+      "to": "owner",
+      "label": "courriel",
+      "variant": "dashed",
+      "labelDy": -52
+    },
+    {
+      "id": "cjpr-bkpr",
+      "from": "cj_pr",
+      "to": "bk_pr",
+      "label": "depot prod",
+      "variant": "emphasis",
+      "labelDy": -52
+    },
+    {
+      "id": "bkpr-reppr",
+      "from": "bk_pr",
+      "to": "rep_pr",
+      "label": "replique",
+      "variant": "emphasis",
+      "labelDy": -52
+    },
+    {
+      "id": "reppr-watch",
+      "from": "rep_pr",
+      "to": "watch",
+      "label": "etat relu",
+      "variant": "dashed",
+      "labelDy": -52
+    },
+    {
+      "id": "watch-admin",
+      "from": "watch",
+      "to": "admin",
+      "label": "alerte",
+      "variant": "emphasis",
+      "labelDy": -52
+    },
+    {
+      "id": "cflare-admin",
+      "from": "cflare",
+      "to": "admin",
+      "label": "DNS-01",
+      "variant": "dashed",
+      "labelDy": -52
+    },
+    {
+      "id": "pgpr-objpr",
+      "from": "pg_pr",
+      "to": "obj_pr",
+      "label": "meme T0",
+      "variant": "dashed",
+      "labelDy": -52
+    },
+    {
+      "id": "ticket-jeton",
+      "from": "ticket",
+      "to": "jeton",
+      "label": "portee - Q19",
+      "variant": "dashed",
+      "labelDy": -52
+    },
+    {
+      "id": "coffre-cd",
+      "from": "coffre",
+      "to": "cd",
+      "label": "synchronise",
+      "variant": "dashed",
+      "labelDy": -52
+    },
+    {
+      "id": "pgpp-geopr",
+      "from": "pg_pp",
+      "to": "geo_pr",
+      "label": "couplage immo-geo",
+      "variant": "dashed",
+      "labelDy": -52
+    },
+    {
+      "id": "plateforme-ids3",
+      "from": "plateforme",
+      "to": "ids3",
+      "label": "descelle",
+      "variant": "dashed",
+      "labelDy": -52
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Ce que ce rendu porte",
+      "items": [
+        "Les six zones, rendues par colonnes, sans conteneur imbrique",
+        "Chaque rangee garde sa paire preprod / prod",
+        "Une case absente reste une carte motivee"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Ce qu'il ne porte pas",
+      "items": [
+        "Archify n'imbrique pas de groupes : les zones ne sont pas des cadres",
+        "Vue reduite aux rangees porteuses, pas aux 47 cartes de la page",
+        "Le rendu ELK de la page reste la reference pour les conteneurs"
+      ]
+    }
+  ]
+}

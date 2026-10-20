@@ -1,0 +1,323 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "PRA v3 — P-bi : perte totale du cluster, reconstruction",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "chemin-nominal",
+        "label": "Du GO au service rendu",
+        "focus": [
+          "owner",
+          "pra",
+          "tofu",
+          "plateforme",
+          "tenants",
+          "dns",
+          "donnees",
+          "apps",
+          "controle"
+        ],
+        "note": "Les neuf etapes de la reconstruction, du declenchement owner au controle de service."
+      },
+      {
+        "id": "garde-fous",
+        "label": "Garde-fous et preuves",
+        "focus": [
+          "pra",
+          "plan",
+          "donnees",
+          "controle",
+          "recu"
+        ],
+        "note": "Ou le processus s'arrete si un garde-fou n'est pas vert."
+      }
+    ]
+  },
+  "lanes": [
+    {
+      "id": "humain",
+      "label": "Owner et administrateur du cluster"
+    },
+    {
+      "id": "github",
+      "label": "GitHub Actions - environnement dr"
+    },
+    {
+      "id": "ovh",
+      "label": "OVH - MKS, stockage objet, DNS"
+    },
+    {
+      "id": "cluster",
+      "label": "Cluster neuf - Jobs et plateforme"
+    },
+    {
+      "id": "preuve",
+      "label": "Preuves - recus et chronometre"
+    }
+  ],
+  "phases": [
+    {
+      "id": "declenchement",
+      "label": "Declencher",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "infra",
+      "label": "Infrastructure",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "donnees-service",
+      "label": "Donnees et service",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "groups": [
+    {
+      "id": "socle",
+      "label": "Socle : cluster, plateforme, tenants",
+      "lane": "cluster",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "attente",
+      "label": "Attentes humaines hors chronometre",
+      "lane": "humain",
+      "fromCol": 0,
+      "toCol": 5,
+      "variant": "security"
+    }
+  ],
+  "mainPath": [
+    "owner",
+    "pra",
+    "plan",
+    "tofu",
+    "plateforme",
+    "tenants",
+    "donnees",
+    "apps",
+    "controle"
+  ],
+  "nodes": [
+    {
+      "id": "owner",
+      "lane": "humain",
+      "col": 0,
+      "type": "external",
+      "label": "Owner",
+      "sublabel": "operation=rebuild",
+      "tag": "approbation dr",
+      "width": 138
+    },
+    {
+      "id": "controle",
+      "lane": "humain",
+      "col": 5,
+      "type": "external",
+      "label": "GO owner",
+      "sublabel": "remise en service",
+      "tag": "hors chronometre",
+      "width": 138
+    },
+    {
+      "id": "pra",
+      "lane": "github",
+      "col": 1,
+      "type": "backend",
+      "label": "pra.yml",
+      "sublabel": "enveloppe de pra.sh",
+      "tag": "confirm + dry_run",
+      "width": 138
+    },
+    {
+      "id": "plan",
+      "lane": "github",
+      "col": 2,
+      "type": "security",
+      "label": "Plan et garde-fous",
+      "sublabel": "G1 G4 G6 G8",
+      "tag": "arret si rouge",
+      "width": 138
+    },
+    {
+      "id": "tofu",
+      "lane": "ovh",
+      "col": 2,
+      "type": "cloud",
+      "label": "Cluster MKS neuf",
+      "sublabel": "tofu, backend par region",
+      "tag": "T2 jamais mesure",
+      "width": 138
+    },
+    {
+      "id": "dns",
+      "lane": "ovh",
+      "col": 4,
+      "type": "cloud",
+      "label": "DNS et certificats",
+      "sublabel": "Cloudflare, DNS-01",
+      "width": 138
+    },
+    {
+      "id": "plateforme",
+      "lane": "cluster",
+      "col": 2,
+      "type": "backend",
+      "label": "Plateforme",
+      "sublabel": "cert-manager, Traefik",
+      "tag": "cles selon Q10",
+      "width": 138
+    },
+    {
+      "id": "tenants",
+      "lane": "cluster",
+      "col": 3,
+      "type": "backend",
+      "label": "Tenants",
+      "sublabel": "namespace, quota, kubeconfigs",
+      "width": 138
+    },
+    {
+      "id": "donnees",
+      "lane": "cluster",
+      "col": 4,
+      "type": "database",
+      "label": "restore-into",
+      "sublabel": "base immo, keyring",
+      "tag": "point verifie",
+      "width": 138
+    },
+    {
+      "id": "apps",
+      "lane": "cluster",
+      "col": 5,
+      "type": "frontend",
+      "label": "Applications",
+      "sublabel": "immo et geo par empreinte",
+      "tag": "miroir requis",
+      "width": 138
+    },
+    {
+      "id": "recu",
+      "lane": "preuve",
+      "col": 5,
+      "type": "database",
+      "label": "Recu chronometre",
+      "sublabel": "duree par etape",
+      "tag": "E1",
+      "width": 138
+    },
+    {
+      "id": "rpo",
+      "lane": "preuve",
+      "col": 4,
+      "type": "database",
+      "label": "Assertion RPO",
+      "sublabel": "source moins de 24 h",
+      "width": 138
+    }
+  ],
+  "edges": [
+    {
+      "id": "owner-pra",
+      "from": "owner",
+      "to": "pra",
+      "label": "declenche",
+      "variant": "emphasis"
+    },
+    {
+      "id": "pra-plan",
+      "from": "pra",
+      "to": "plan",
+      "label": "plan",
+      "variant": "security"
+    },
+    {
+      "id": "plan-tofu",
+      "from": "plan",
+      "to": "tofu",
+      "variant": "emphasis"
+    },
+    {
+      "id": "tofu-plateforme",
+      "from": "tofu",
+      "to": "plateforme",
+      "variant": "default"
+    },
+    {
+      "id": "plateforme-tenants",
+      "from": "plateforme",
+      "to": "tenants",
+      "variant": "default"
+    },
+    {
+      "id": "tenants-dns",
+      "from": "tenants",
+      "to": "dns",
+      "variant": "dashed"
+    },
+    {
+      "id": "tenants-donnees",
+      "from": "tenants",
+      "to": "donnees",
+      "variant": "default"
+    },
+    {
+      "id": "donnees-apps",
+      "from": "donnees",
+      "to": "apps",
+      "variant": "emphasis"
+    },
+    {
+      "id": "apps-controle",
+      "from": "apps",
+      "to": "controle",
+      "label": "controle de service",
+      "variant": "emphasis"
+    },
+    {
+      "id": "donnees-rpo",
+      "from": "donnees",
+      "to": "rpo",
+      "label": "age du point",
+      "variant": "dashed"
+    },
+    {
+      "id": "apps-recu",
+      "from": "apps",
+      "to": "recu",
+      "label": "recu",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "amber",
+      "title": "Moins de 2 h : non acquis",
+      "items": [
+        "Chemin critique estime 40 min en bas, au moins 135 min en haut",
+        "Creation du cluster MKS jamais mesuree ; IdP sentropic hors budget",
+        "Depart du chronometre non tranche par l'owner (Q18)"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Ce que la demonstration exige",
+      "items": [
+        "Cluster neuf, tenant preprod, sauvegarde de prod",
+        "Destruction verifiee du cluster d'exercice",
+        "La suite de la phrase la demonstration reste ouverte (Q2)"
+      ]
+    }
+  ]
+}

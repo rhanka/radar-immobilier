@@ -1,0 +1,736 @@
+{
+  "status": "pass",
+  "checkedAt": "2026-09-21T14:12:21.556Z",
+  "url": "file:///home/antoinefa/src/radar-immobilier/.lanes/conductor/tmp/dossier-backup-pra/docs/spec/reports/dossier-backup-pra-712/focus/../decision-focus.html",
+  "chromiumCdpPort": "9242",
+  "offline": {
+    "url": "file:///home/antoinefa/src/radar-immobilier/.lanes/conductor/tmp/dossier-backup-pra/docs/spec/reports/dossier-backup-pra-712/decision-focus.html",
+    "title": "Dossier de décision v2 · Sauvegardes et PRA immo + geo (PR #712, geo#390)",
+    "external": 0,
+    "blockedExternal": true
+  },
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "scenes": [
+    {
+      "sceneId": "architecture-sauvegardes",
+      "sceneHash": "6e95df06a398b97a4af884f0320e1730d85e237a9caddd1e6d61d0cf7bbf95de",
+      "initialScale": 0.16059,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 48,
+      "edges": 26,
+      "groups": 21,
+      "edgeLabels": 26,
+      "panel": {
+        "left": 40,
+        "top": 4825.40625,
+        "width": 1345,
+        "height": 720
+      },
+      "iconPx": 69.9994454044461,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "sequence-bout-en-bout",
+      "sceneHash": "a2b557989230e4b4ec28b237b4d5c1274413cf5564b9fa1bdca1e042e916d3f9",
+      "initialScale": 0.271324,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 20,
+      "edges": 19,
+      "groups": 4,
+      "edgeLabels": 19,
+      "panel": {
+        "left": 40,
+        "top": 6479.265625,
+        "width": 1345,
+        "height": 720
+      },
+      "iconPx": 69.99998445124648,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "mise-en-service",
+      "sceneHash": "95f735afc6f02f8036e4371879432a145c091c9afe29f3f34f86158a028ff9a7",
+      "initialScale": 0.327772,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 17,
+      "edges": 16,
+      "groups": 3,
+      "edgeLabels": 16,
+      "panel": {
+        "left": 40,
+        "top": 7902.25,
+        "width": 1345,
+        "height": 720
+      },
+      "iconPx": 69.99941317821535,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "scenesAt1920": [
+    {
+      "sceneId": "architecture-sauvegardes",
+      "sceneHash": "6e95df06a398b97a4af884f0320e1730d85e237a9caddd1e6d61d0cf7bbf95de",
+      "initialScale": 0.200497,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 48,
+      "edges": 26,
+      "groups": 21,
+      "edgeLabels": 26,
+      "panel": {
+        "left": 52.5,
+        "top": 4565.28125,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99939135622976,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "sequence-bout-en-bout",
+      "sceneHash": "a2b557989230e4b4ec28b237b4d5c1274413cf5564b9fa1bdca1e042e916d3f9",
+      "initialScale": 0.338749,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 20,
+      "edges": 19,
+      "groups": 4,
+      "edgeLabels": 19,
+      "panel": {
+        "left": 52.5,
+        "top": 6284.828125,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99991835769256,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    },
+    {
+      "sceneId": "mise-en-service",
+      "sceneHash": "95f735afc6f02f8036e4371879432a145c091c9afe29f3f34f86158a028ff9a7",
+      "initialScale": 0.409225,
+      "contentInside": true,
+      "overlaps": 0,
+      "cards": 17,
+      "edges": 16,
+      "groups": 3,
+      "edgeLabels": 16,
+      "panel": {
+        "left": 52.5,
+        "top": 7840.484375,
+        "width": 1800,
+        "height": 900
+      },
+      "iconPx": 69.99940818009652,
+      "controls": {
+        "boutons": 4,
+        "unUn": true,
+        "minimap": true
+      }
+    }
+  ],
+  "decisionPanel": {
+    "questionBlocks": 0,
+    "inputs": 0,
+    "dataQuestions": "0",
+    "decisions": [
+      "D1",
+      "D2",
+      "D3",
+      "D4",
+      "D5"
+    ],
+    "etapes": [
+      "1",
+      "2"
+    ],
+    "hasPrincipe": true,
+    "hasCible": true,
+    "hasReady": true,
+    "schema": "immo-712-backup-pra-etape1-decisions/v1",
+    "status": "statué · relu par l’owner avant commit",
+    "recordQuestions": 0
+  },
+  "oneToOne": [
+    {
+      "sceneId": "architecture-sauvegardes",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 4565.28125,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "sequence-bout-en-bout",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 6284.828125,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "sceneId": "mise-en-service",
+      "scale": 1,
+      "clip": {
+        "x": 52.5,
+        "y": 7840.484375,
+        "width": 1800,
+        "height": 900
+      }
+    }
+  ],
+  "overview": [
+    {
+      "renderer": "elk",
+      "sceneId": "architecture-sauvegardes",
+      "clip": {
+        "x": 52.5,
+        "y": 4565.28125,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "renderer": "elk",
+      "sceneId": "sequence-bout-en-bout",
+      "clip": {
+        "x": 52.5,
+        "y": 6284.828125,
+        "width": 1800,
+        "height": 900
+      }
+    },
+    {
+      "renderer": "elk",
+      "sceneId": "mise-en-service",
+      "clip": {
+        "x": 52.5,
+        "y": 7840.484375,
+        "width": 1800,
+        "height": 900
+      }
+    }
+  ],
+  "geometry": [
+    {
+      "viewport": "1440x900",
+      "renderer": "elk",
+      "sceneId": "architecture-sauvegardes",
+      "ratio": 1.696,
+      "offBorder": 0,
+      "crossings": 0,
+      "detachedLabels": 0,
+      "labelsOnCards": 0,
+      "worstSingleLinkCenterPx": 0,
+      "worstLabelDistancePx": 3,
+      "singleLinkBoxes": 17,
+      "bends": 421,
+      "boxes": 69,
+      "edges": 26,
+      "labels": 26
+    },
+    {
+      "viewport": "1440x900",
+      "renderer": "elk",
+      "sceneId": "sequence-bout-en-bout",
+      "ratio": 1.651,
+      "offBorder": 0,
+      "crossings": 0,
+      "detachedLabels": 0,
+      "labelsOnCards": 0,
+      "worstSingleLinkCenterPx": 0,
+      "worstLabelDistancePx": 0,
+      "singleLinkBoxes": 5,
+      "bends": 30,
+      "boxes": 24,
+      "edges": 19,
+      "labels": 19
+    },
+    {
+      "viewport": "1440x900",
+      "renderer": "elk",
+      "sceneId": "mise-en-service",
+      "ratio": 1.707,
+      "offBorder": 0,
+      "crossings": 0,
+      "detachedLabels": 0,
+      "labelsOnCards": 0,
+      "worstSingleLinkCenterPx": 0,
+      "worstLabelDistancePx": 3,
+      "singleLinkBoxes": 2,
+      "bends": 20,
+      "boxes": 20,
+      "edges": 16,
+      "labels": 16
+    },
+    {
+      "viewport": "1920x1080",
+      "renderer": "elk",
+      "sceneId": "architecture-sauvegardes",
+      "ratio": 1.696,
+      "offBorder": 0,
+      "crossings": 0,
+      "detachedLabels": 0,
+      "labelsOnCards": 0,
+      "worstSingleLinkCenterPx": 0,
+      "worstLabelDistancePx": 3,
+      "singleLinkBoxes": 17,
+      "bends": 421,
+      "boxes": 69,
+      "edges": 26,
+      "labels": 26
+    },
+    {
+      "viewport": "1920x1080",
+      "renderer": "elk",
+      "sceneId": "sequence-bout-en-bout",
+      "ratio": 1.651,
+      "offBorder": 0,
+      "crossings": 0,
+      "detachedLabels": 0,
+      "labelsOnCards": 0,
+      "worstSingleLinkCenterPx": 0,
+      "worstLabelDistancePx": 0,
+      "singleLinkBoxes": 5,
+      "bends": 30,
+      "boxes": 24,
+      "edges": 19,
+      "labels": 19
+    },
+    {
+      "viewport": "1920x1080",
+      "renderer": "elk",
+      "sceneId": "mise-en-service",
+      "ratio": 1.707,
+      "offBorder": 0,
+      "crossings": 0,
+      "detachedLabels": 0,
+      "labelsOnCards": 0,
+      "worstSingleLinkCenterPx": 0,
+      "worstLabelDistancePx": 3,
+      "singleLinkBoxes": 2,
+      "bends": 20,
+      "boxes": 20,
+      "edges": 16,
+      "labels": 16
+    }
+  ],
+  "printed": [
+    {
+      "renderer": "elk",
+      "bytes": 569978,
+      "pages": 20,
+      "printFit": [
+        {
+          "graph": "architecture-sauvegardes",
+          "inside": true,
+          "panel": [
+            983,
+            661
+          ]
+        },
+        {
+          "graph": "sequence-bout-en-bout",
+          "inside": true,
+          "panel": [
+            983,
+            661
+          ]
+        },
+        {
+          "graph": "mise-en-service",
+          "inside": true,
+          "panel": [
+            983,
+            661
+          ]
+        }
+      ]
+    }
+  ],
+  "legibility": [
+    {
+      "sceneId": "architecture-sauvegardes",
+      "renderer": "elk",
+      "format": "1440x900",
+      "texts": 308,
+      "zoom": 0.16059,
+      "minPx": 3.5329719415590084,
+      "minRole": "code",
+      "minPt": null,
+      "byRolePx": {
+        "liaison": 3.8541483274647885,
+        "conteneur": 5.138857487376592,
+        "depot": 3.854143115532444,
+        "code": 3.5329719415590084,
+        "titre": 5.138868278631285,
+        "detail": 3.8541524157546085
+      },
+      "fill": {
+        "blocks": 0.6061209209499622,
+        "cards": 0.1507983474887881
+      },
+      "frameRatio": 1.6924433047519836,
+      "panel": {
+        "width": 1345,
+        "height": 720
+      },
+      "panelRatio": 1.8680555555555556,
+      "faults": [
+        "1440x900 : texte le plus petit (code) à 3.53 px, porte 12 px"
+      ],
+      "modelPx": 3.5329753986697656,
+      "modelGapPx": 0.0000034571107572212156
+    },
+    {
+      "sceneId": "sequence-bout-en-bout",
+      "renderer": "elk",
+      "format": "1440x900",
+      "texts": 127,
+      "zoom": 0.271324,
+      "minPx": 5.9691267812718225,
+      "minRole": "code",
+      "minPt": null,
+      "byRolePx": {
+        "liaison": 6.5117724609375,
+        "conteneur": 8.682363630418573,
+        "depot": 6.51177272281393,
+        "code": 5.9691267812718225,
+        "titre": 8.682366227304469,
+        "detail": 6.511777253744239
+      },
+      "fill": {
+        "blocks": 0.441213977187923,
+        "cards": 0.1845792357295862
+      },
+      "frameRatio": 1.6445978878960195,
+      "panel": {
+        "width": 1345,
+        "height": 720
+      },
+      "panelRatio": 1.8680555555555556,
+      "faults": [
+        "1440x900 : texte le plus petit (code) à 5.97 px, porte 12 px"
+      ],
+      "modelPx": 5.969130787977255,
+      "modelGapPx": 0.000004006705432324509
+    },
+    {
+      "sceneId": "mise-en-service",
+      "renderer": "elk",
+      "format": "1440x900",
+      "texts": 107,
+      "zoom": 0.327772,
+      "minPx": 7.21098966971456,
+      "minRole": "code",
+      "minPt": null,
+      "byRolePx": {
+        "liaison": 7.866531999143836,
+        "conteneur": 10.488699510735177,
+        "depot": 7.866524633051383,
+        "code": 7.21098966971456,
+        "titre": 10.488712246857542,
+        "detail": 7.866534958237327
+      },
+      "fill": {
+        "blocks": 0.7544983778220966,
+        "cards": 0.2216692079804183
+      },
+      "frameRatio": 1.6987242394504416,
+      "panel": {
+        "width": 1345,
+        "height": 720
+      },
+      "panelRatio": 1.8680555555555556,
+      "faults": [
+        "1440x900 : texte le plus petit (code) à 7.21 px, porte 12 px"
+      ],
+      "modelPx": 7.210991167811581,
+      "modelGapPx": 0.0000014980970206579514
+    },
+    {
+      "sceneId": "architecture-sauvegardes",
+      "renderer": "elk",
+      "format": "1920x1080",
+      "texts": 308,
+      "zoom": 0.200497,
+      "minPx": 4.410928225384079,
+      "minRole": "code",
+      "minPt": null,
+      "byRolePx": {
+        "liaison": 4.811908560739436,
+        "conteneur": 6.415873199278372,
+        "depot": 4.811904899458779,
+        "code": 4.410928225384079,
+        "titre": 6.41589560055866,
+        "detail": 4.811923963133641
+      },
+      "fill": {
+        "blocks": 0.6061221285505628,
+        "cards": 0.15079833607508195
+      },
+      "frameRatio": 1.6924433047519836,
+      "panel": {
+        "width": 1800,
+        "height": 900
+      },
+      "panelRatio": 2,
+      "faults": [],
+      "modelPx": 4.410930363009857,
+      "modelGapPx": 0.000002137625778608765
+    },
+    {
+      "sceneId": "sequence-bout-en-bout",
+      "renderer": "elk",
+      "format": "1920x1080",
+      "texts": 127,
+      "zoom": 0.338749,
+      "minPx": 7.452475094928421,
+      "minRole": "code",
+      "minPt": null,
+      "byRolePx": {
+        "liaison": 8.129970703125,
+        "conteneur": 10.839960800394717,
+        "depot": 8.12997056811636,
+        "code": 7.452475094928421,
+        "titre": 10.83996377444134,
+        "detail": 8.12997056811636
+      },
+      "fill": {
+        "blocks": 0.44121392522255176,
+        "cards": 0.18457867045965742
+      },
+      "frameRatio": 1.6445978878960195,
+      "panel": {
+        "width": 1800,
+        "height": 900
+      },
+      "panelRatio": 2,
+      "faults": [],
+      "modelPx": 7.452477660438667,
+      "modelGapPx": 0.000002565510246022029
+    },
+    {
+      "sceneId": "mise-en-service",
+      "renderer": "elk",
+      "format": "1920x1080",
+      "texts": 107,
+      "zoom": 0.409225,
+      "minPx": 9.002935825113477,
+      "minRole": "code",
+      "minPt": null,
+      "byRolePx": {
+        "liaison": 9.821376016695206,
+        "conteneur": 13.095171813126571,
+        "depot": 9.821378859844929,
+        "code": 9.002935825113477,
+        "titre": 13.09517938198324,
+        "detail": 9.821385818692395
+      },
+      "fill": {
+        "blocks": 0.754496303332822,
+        "cards": 0.22166900030067102
+      },
+      "frameRatio": 1.6987242394504416,
+      "panel": {
+        "width": 1800,
+        "height": 900
+      },
+      "panelRatio": 2,
+      "faults": [],
+      "modelPx": 9.002944062806673,
+      "modelGapPx": 0.000008237693196022633
+    },
+    {
+      "sceneId": "architecture-sauvegardes",
+      "renderer": "elk",
+      "format": "A4-paysage",
+      "texts": 308,
+      "zoom": 0.139585,
+      "minPx": 3.07086283934183,
+      "minRole": "code",
+      "minPt": 2.3031471295063723,
+      "byRolePx": {
+        "liaison": 3.3500335693359378,
+        "conteneur": 4.46670153565585,
+        "depot": 3.3500261517418872,
+        "code": 3.07086283934183,
+        "titre": 4.466709584497207,
+        "detail": 3.350033527145737
+      },
+      "fill": {
+        "blocks": 0.606121660153535,
+        "cards": 0.15079845798446825
+      },
+      "frameRatio": 1.6924433047519836,
+      "panel": {
+        "width": 982.671875,
+        "height": 661.40625
+      },
+      "panelRatio": 1.485731159933853,
+      "faults": [
+        "A4-paysage : liaison à 2.51 pt, porte 7 pt",
+        "A4-paysage : conteneur à 3.35 pt, porte 8 pt",
+        "A4-paysage : depot à 2.51 pt, porte 8 pt",
+        "A4-paysage : code à 2.30 pt, porte 8 pt",
+        "A4-paysage : titre à 3.35 pt, porte 8 pt",
+        "A4-paysage : detail à 2.51 pt, porte 8 pt"
+      ],
+      "modelPx": 3.0708661417322833,
+      "modelGapPx": 0.000003302390453541193
+    },
+    {
+      "sceneId": "sequence-bout-en-bout",
+      "renderer": "elk",
+      "format": "A4-paysage",
+      "texts": 127,
+      "zoom": 0.242696,
+      "minPx": 5.339317279155027,
+      "minRole": "code",
+      "minPt": 4.004487959366271,
+      "byRolePx": {
+        "liaison": 5.82470703125,
+        "conteneur": 7.76627486911289,
+        "depot": 5.8247061518346674,
+        "code": 5.339317279155027,
+        "titre": 7.76627967877095,
+        "detail": 5.8247081563220044
+      },
+      "fill": {
+        "blocks": 0.44121526253962734,
+        "cards": 0.18457937498990648
+      },
+      "frameRatio": 1.6445978878960195,
+      "panel": {
+        "width": 982.671875,
+        "height": 661.40625
+      },
+      "panelRatio": 1.485731159933853,
+      "faults": [
+        "A4-paysage : liaison à 4.37 pt, porte 7 pt",
+        "A4-paysage : conteneur à 5.82 pt, porte 8 pt",
+        "A4-paysage : depot à 4.37 pt, porte 8 pt",
+        "A4-paysage : code à 4.00 pt, porte 8 pt",
+        "A4-paysage : titre à 5.82 pt, porte 8 pt",
+        "A4-paysage : detail à 4.37 pt, porte 8 pt"
+      ],
+      "modelPx": 5.339317766805452,
+      "modelGapPx": 4.876504249295976e-7
+    },
+    {
+      "sceneId": "mise-en-service",
+      "renderer": "elk",
+      "format": "A4-paysage",
+      "texts": 107,
+      "zoom": 0.283847,
+      "minPx": 6.244624132550629,
+      "minRole": "code",
+      "minPt": 4.683468099412972,
+      "byRolePx": {
+        "liaison": 6.81231605843322,
+        "conteneur": 9.083079464710094,
+        "depot": 6.81230959853257,
+        "code": 6.244624132550629,
+        "titre": 9.08308964734637,
+        "detail": 6.812319988479263
+      },
+      "fill": {
+        "blocks": 0.7544950679943844,
+        "cards": 0.2216686465816388
+      },
+      "frameRatio": 1.6987242394504416,
+      "panel": {
+        "width": 982.671875,
+        "height": 661.40625
+      },
+      "panelRatio": 1.485731159933853,
+      "faults": [
+        "A4-paysage : liaison à 5.11 pt, porte 7 pt",
+        "A4-paysage : conteneur à 6.81 pt, porte 8 pt",
+        "A4-paysage : depot à 5.11 pt, porte 8 pt",
+        "A4-paysage : code à 4.68 pt, porte 8 pt",
+        "A4-paysage : titre à 6.81 pt, porte 8 pt",
+        "A4-paysage : detail à 5.11 pt, porte 8 pt"
+      ],
+      "modelPx": 6.244626700691876,
+      "modelGapPx": 0.0000025681412472167153
+    }
+  ],
+  "legibilityFaults": [
+    "elk/architecture-sauvegardes 1440x900 : texte le plus petit (code) à 3.53 px, porte 12 px",
+    "elk/sequence-bout-en-bout 1440x900 : texte le plus petit (code) à 5.97 px, porte 12 px",
+    "elk/mise-en-service 1440x900 : texte le plus petit (code) à 7.21 px, porte 12 px",
+    "elk/architecture-sauvegardes A4-paysage : liaison à 2.51 pt, porte 7 pt",
+    "elk/architecture-sauvegardes A4-paysage : conteneur à 3.35 pt, porte 8 pt",
+    "elk/architecture-sauvegardes A4-paysage : depot à 2.51 pt, porte 8 pt",
+    "elk/architecture-sauvegardes A4-paysage : code à 2.30 pt, porte 8 pt",
+    "elk/architecture-sauvegardes A4-paysage : titre à 3.35 pt, porte 8 pt",
+    "elk/architecture-sauvegardes A4-paysage : detail à 2.51 pt, porte 8 pt",
+    "elk/sequence-bout-en-bout A4-paysage : liaison à 4.37 pt, porte 7 pt",
+    "elk/sequence-bout-en-bout A4-paysage : conteneur à 5.82 pt, porte 8 pt",
+    "elk/sequence-bout-en-bout A4-paysage : depot à 4.37 pt, porte 8 pt",
+    "elk/sequence-bout-en-bout A4-paysage : code à 4.00 pt, porte 8 pt",
+    "elk/sequence-bout-en-bout A4-paysage : titre à 5.82 pt, porte 8 pt",
+    "elk/sequence-bout-en-bout A4-paysage : detail à 4.37 pt, porte 8 pt",
+    "elk/mise-en-service A4-paysage : liaison à 5.11 pt, porte 7 pt",
+    "elk/mise-en-service A4-paysage : conteneur à 6.81 pt, porte 8 pt",
+    "elk/mise-en-service A4-paysage : depot à 5.11 pt, porte 8 pt",
+    "elk/mise-en-service A4-paysage : code à 4.68 pt, porte 8 pt",
+    "elk/mise-en-service A4-paysage : titre à 6.81 pt, porte 8 pt",
+    "elk/mise-en-service A4-paysage : detail à 5.11 pt, porte 8 pt"
+  ],
+  "legibilityDerogation": "décision owner attendue : aucun placement natif ne tient 12 px ni 8 pt, options de vue A/B/C en section 13",
+  "captures": [
+    ".generated/dossier-preview-elk-1440x900.png",
+    ".generated/dossier-preview-elk-1920x1080.png",
+    ".generated/scene-1a1-elk-architecture-sauvegardes.png",
+    ".generated/scene-1a1-elk-sequence-bout-en-bout.png",
+    ".generated/scene-1a1-elk-mise-en-service.png",
+    ".generated/scene-vue-ensemble-elk-architecture-sauvegardes.png",
+    ".generated/scene-vue-ensemble-elk-sequence-bout-en-bout.png",
+    ".generated/scene-vue-ensemble-elk-mise-en-service.png",
+    ".generated/impression-elk.pdf",
+    ".generated/scene-ajustee-1440x900-elk-architecture-sauvegardes.png",
+    ".generated/scene-ajustee-1440x900-elk-sequence-bout-en-bout.png",
+    ".generated/scene-ajustee-1440x900-elk-mise-en-service.png"
+  ],
+  "consoleErrors": [],
+  "runtimeErrors": [],
+  "externalRequests": []
+}
