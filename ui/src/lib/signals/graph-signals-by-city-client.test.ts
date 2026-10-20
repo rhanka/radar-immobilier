@@ -102,4 +102,25 @@ describe("fetchGraphSignalsByCity — #4 fenêtre date (dateFrom/dateTo)", () =>
     const failure = await fetchGraphSignalsByCity("", { timeoutMs: 10 }).catch((err) => err);
     expect(failure?.name).toBe("RequestTimeoutError");
   });
+
+  it("times out a stalled body when the headers arrive at once", async () => {
+    vi.stubGlobal(
+      "fetch",
+      async (_url: string, init?: RequestInit) =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              init?.signal?.addEventListener(
+                "abort",
+                () => controller.error(new DOMException("Aborted", "AbortError")),
+                { once: true },
+              );
+            },
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        ),
+    );
+    const failure = await fetchGraphSignalsByCity("", { timeoutMs: 10 }).catch((err) => err);
+    expect(failure?.name).toBe("RequestTimeoutError");
+  });
 });
