@@ -50,6 +50,9 @@
   let watchingCode = "";
   let discardCode = "";
 
+  $: pertinentCode = state.pertinentCode ?? "";
+  $: watchingCode = state.watchingCode ?? "";
+
   $: pertinentCodes = codes ? codesForVerdict(codes, "pertinent") : [];
   $: watchingCodes = codes ? codesForVerdict(codes, "a_surveiller") : [];
   $: discardCodes = codes ? codesForVerdict(codes, "non_pertinent") : [];
@@ -73,8 +76,6 @@
       await postCommand("", action, body, commandKey!);
       commandKey = null;
       lastIntent = null;
-      pertinentCode = "";
-      watchingCode = "";
       discardCode = "";
       await onSaved(action);
     } catch (err) {
