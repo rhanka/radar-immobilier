@@ -13,7 +13,7 @@
 import { columnIndexToLetters } from "./cell-ref.js";
 import { SteveCaptureError } from "./types.js";
 import type { CellFormula, CellRecord, CellType } from "./types.js";
-import { firstChild, spreadsheetText } from "./xml-query.js";
+import { firstChild, spreadsheetRawText, spreadsheetText } from "./xml-query.js";
 import type { XmlNode } from "./xml.js";
 
 function attr(node: XmlNode, name: string): string | null {
@@ -84,10 +84,11 @@ export function parseCell(
   const vNode = firstChild(cell, "v");
   const vText = vNode === null ? null : vNode.text;
   const isNode = firstChild(cell, "is");
+  const inlineRaw = isNode === null ? null : spreadsheetRawText(isNode);
   const inlineText = isNode === null ? null : spreadsheetText(isNode);
   const formula = parseFormula(cell, sheetName, where);
   if (vNode === null && isNode === null && formula === null) return null;
-  const raw = vText ?? inlineText;
+  const raw = vText ?? inlineRaw;
   if ((raw === null || raw === "") && formula === null) return null;
   let value = raw;
   if (typeAttr === "s") {
