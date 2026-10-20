@@ -13,7 +13,7 @@
 import { columnIndexToLetters } from "./cell-ref.js";
 import { SteveCaptureError } from "./types.js";
 import type { CellFormula, CellRecord, CellType } from "./types.js";
-import { firstChild, spreadsheetRawText, spreadsheetText } from "./xml-query.js";
+import { decodeOoxmlEscapes, firstChild, spreadsheetRawText, spreadsheetText } from "./xml-query.js";
 import type { XmlNode } from "./xml.js";
 
 function attr(node: XmlNode, name: string): string | null {
@@ -107,6 +107,8 @@ export function parseCell(
     value = resolved;
   } else if (typeAttr === "inlineStr") {
     value = inlineText;
+  } else if (typeAttr === "str") {
+    value = raw === null ? null : decodeOoxmlEscapes(raw);
   }
   return {
     sheet: sheetName,
