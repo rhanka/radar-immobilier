@@ -82,7 +82,7 @@ describe("SignauxMapView — write then three re-reads", () => {
     expect(view.container.querySelector(".rail-count-strong")?.textContent).toBe("1");
   });
 
-  it("shows the distinct message when a re-read fails after a recorded write", async () => {
+  it("shows the undo notice even when a re-read fails after a recorded write", async () => {
     render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
     await openFirstSignalCard();
     await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
@@ -90,9 +90,11 @@ describe("SignauxMapView — write then three re-reads", () => {
     });
     vi.mocked(fetchGraphSignalsByCity).mockRejectedValueOnce(new Error("bulk down"));
     await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    // The write is confirmed in the default view: the notice shows whatever
+    // the re-reads report, next to the distinct reload message.
+    expect(await screen.findByTestId("discarded-notice")).toBeTruthy();
     expect(await screen.findByTestId("facet-reload-error")).toBeTruthy();
     expect(screen.getByTestId("facet-reload-error").textContent).toContain("rechargement impossible");
-    expect(screen.queryByTestId("discarded-notice")).toBeNull();
     await fireEvent.click(within(screen.getByTestId("facet-reload-error")).getByRole("button", { name: "Réessayer" }));
     await waitFor(() => expect(screen.queryByTestId("facet-reload-error")).toBeNull());
     expect(vi.mocked(postFacetCommand)).toHaveBeenCalledTimes(1);
@@ -126,13 +128,17 @@ describe("SignauxMapView — write then three re-reads", () => {
 });
 
 describe("SignauxMapView — viewer isolation", () => {
-  it("ignores heads still in flight when the viewer logs out", async () => {
+  it("ignores the previous viewer heads when switching to another approved sub", async () => {
     const pending = deferred<Awaited<ReturnType<typeof fetchCityFacets>>>();
-    vi.mocked(fetchCityFacets).mockReturnValue(pending.promise);
+    vi.mocked(fetchCityFacets).mockReturnValueOnce(pending.promise);
     render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
     await openFirstSignalCard();
-    setAuth(null);
-    await screen.findByTestId("facets-unavailable-note");
+    const headsCalls = vi.mocked(fetchCityFacets).mock.calls.length;
+    // Switch to ANOTHER approved viewer before the old heads resolve.
+    setAuth("tester-2");
+    await waitFor(() =>
+      expect(vi.mocked(fetchCityFacets).mock.calls.length).toBeGreaterThan(headsCalls),
+    );
     pending.resolve({ heads: [{
       id: "old-head", target: { citySlug: CITY_SLUG, type: "Signal", id: "sig-1" },
       facet: "selection", basket: "pertinent", state: "active", reasonCode: null,
@@ -181,8 +187,12 @@ describe("SignauxMapView — viewer isolation", () => {
 
 describe("SignauxMapView — unavailable archive reads", () => {
   it("shows an explicit 503 error for detail and counters", async () => {
-    vi.mocked(fetchGraphSignalDetail).mockRejectedValue(new GraphSignalsHttpError("discarded_signals_unavailable", 503));
-    vi.mocked(fetchGraphSignalsByCity).mockRejectedValue(new GraphSignalsHttpError("discarded_signals_unavailable", 503));
+    vi.mocked(fetchGraphSignalDetail).mockRejectedValue(
+      new GraphSignalsHttpError("graph-signals/x: 503", 503, "discarded_signals_unavailable"),
+    );
+    vi.mocked(fetchGraphSignalsByCity).mockRejectedValue(
+      new GraphSignalsHttpError("graph-signals/by-city: 503", 503, "discarded_signals_unavailable"),
+    );
     render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
     await waitFor(() => expect(screen.getAllByText(/discarded_signals_unavailable/)).toHaveLength(2));
     expect(screen.queryByRole("button", { name: /First zonage signal/ })).toBeNull();
