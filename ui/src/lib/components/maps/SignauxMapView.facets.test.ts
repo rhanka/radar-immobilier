@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/svelte";
 import { tick } from "svelte";
-import { CITY_SLUG, NODES, setAuth, deferred, cityRoute, openFirstSignalCard } from "./SignauxMapView.facets.fixtures.js";
+import { CITY_SLUG, NODES, OTHER_CITY_SLUG, setAuth, deferred, cityRoute, mockDetailByCity, openFirstSignalCard } from "./SignauxMapView.facets.fixtures.js";
 import SignauxMapView from "./SignauxMapView.svelte";
 import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
 import { fetchGraphSignalDetail, GraphSignalsHttpError } from "$lib/signals/graph-signal-detail-client.js";
@@ -196,6 +196,113 @@ describe("SignauxMapView — unavailable archive reads", () => {
     render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
     await waitFor(() => expect(screen.getAllByText(/discarded_signals_unavailable/)).toHaveLength(2));
     expect(screen.queryByRole("button", { name: /First zonage signal/ })).toBeNull();
+  });
+
+  it("shows the generic message for a 503 without the outage body code", async () => {
+    vi.mocked(fetchGraphSignalDetail).mockRejectedValue(
+      new GraphSignalsHttpError("graph-signals/x: 503", 503, "maintenance"),
+    );
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await waitFor(() => expect(screen.getByText("Signaux indisponibles.")).toBeTruthy());
+    expect(screen.queryByText(/discarded_signals_unavailable/)).toBeNull();
+  });
+});
+
+describe("SignauxMapView — city switches during facet writes", () => {
+  it("keeps city B's list when undoing a discard after selecting B", async () => {
+    mockDetailByCity();
+    const view = render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await openFirstSignalCard();
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    await screen.findByTestId("discarded-notice");
+    const restore = deferred<unknown>();
+    vi.mocked(postFacetCommand).mockImplementationOnce(() => restore.promise);
+    const annuler = () =>
+      [...screen.getByTestId("discarded-notice").querySelectorAll("button")].find(
+        (button) => button.textContent === "Annuler",
+      )!;
+    await fireEvent.click(annuler());
+    // Select city B while the restore POST is still in flight.
+    await view.rerender({ geoRoute: cityRoute("?filter.period=all", OTHER_CITY_SLUG) });
+    await screen.findByRole("button", { name: /B first signal/ });
+    const detailCallsAfterSwitch = vi.mocked(fetchGraphSignalDetail).mock.calls.length;
+    const bulkCallsAfterSwitch = vi.mocked(fetchGraphSignalsByCity).mock.calls.length;
+    restore.resolve(null);
+    await waitFor(() => expect(vi.mocked(fetchGraphSignalsByCity).mock.calls.length).toBeGreaterThan(bulkCallsAfterSwitch));
+    await waitFor(() => expect(screen.queryByTestId("discarded-notice")).toBeNull());
+    // The late restore of city A never paints city B: stale, not an error.
+    expect(screen.queryByTestId("facet-reload-error")).toBeNull();
+    expect(screen.getByRole("button", { name: /B first signal/ })).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /First zonage signal/ })).toBeNull();
+    for (const call of vi.mocked(fetchGraphSignalDetail).mock.calls.slice(detailCallsAfterSwitch)) {
+      expect(call[0]).not.toBe(CITY_SLUG);
+    }
+  });
+
+  it("shows no notice and no banner when the city changes during the discard POST", async () => {
+    mockDetailByCity();
+    const view = render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await openFirstSignalCard();
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    const confirmed = deferred<unknown>();
+    vi.mocked(postFacetCommand).mockImplementationOnce(() => confirmed.promise);
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    await view.rerender({ geoRoute: cityRoute("?filter.period=all", OTHER_CITY_SLUG) });
+    await screen.findByRole("button", { name: /B first signal/ });
+    const bulkCalls = vi.mocked(fetchGraphSignalsByCity).mock.calls.length;
+    confirmed.resolve({ id: "event-1" });
+    // Wait until the post-write reload has settled before asserting silence.
+    await waitFor(() =>
+      expect(vi.mocked(fetchGraphSignalsByCity).mock.calls.length).toBeGreaterThan(bulkCalls),
+    );
+    // Confirmed for city A while city B is selected: no notice, no banner.
+    expect(screen.queryByTestId("discarded-notice")).toBeNull();
+    expect(screen.queryByTestId("facet-reload-error")).toBeNull();
+    expect(screen.getByRole("button", { name: /B first signal/ })).toBeTruthy();
+  });
+});
+
+describe("SignauxMapView — notice focus", () => {
+  it("focuses the restored card after a successful Annuler", async () => {
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await openFirstSignalCard();
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    await screen.findByTestId("discarded-notice");
+    const annuler = () =>
+      [...screen.getByTestId("discarded-notice").querySelectorAll("button")].find(
+        (button) => button.textContent === "Annuler",
+      )!;
+    await fireEvent.click(annuler());
+    await waitFor(() =>
+      expect(document.activeElement?.closest?.('[data-signal-node="sig-1"]')).toBeTruthy(),
+    );
+  });
+
+  it("focuses the Signaux bucket summary after Fermer", async () => {
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await openFirstSignalCard();
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    await screen.findByTestId("discarded-notice");
+    const fermer = () =>
+      [...screen.getByTestId("discarded-notice").querySelectorAll("button")].find(
+        (button) => button.textContent === "Fermer",
+      )!;
+    await fireEvent.click(fermer());
+    await waitFor(() => expect(screen.queryByTestId("discarded-notice")).toBeNull());
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByTestId("signals-bucket-head")),
+    );
   });
 });
 
