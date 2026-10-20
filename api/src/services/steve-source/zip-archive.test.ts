@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { runCaptureProbe } from "./capture-stress.fixture.js";
 import { captureWorkbookInventory } from "./inventory.js";
 import { SteveCaptureError } from "./types.js";
 import { buildSyntheticWorkbook } from "./workbook.fixture.js";
 import { buildOverlappingArchive } from "./zip-overlap.fixture.js";
+
 interface CentralEntryView {
   start: number;
   name: string;
@@ -74,6 +76,19 @@ describe("ZIP protection limits", () => {
   it("rejects entries whose local record overlaps another entry", () => {
     expect(() => captureWorkbookInventory(buildOverlappingArchive()))
       .toThrow(/overlapping entry data/);
+  });
+
+  it("reads 60000 entries within three seconds and preserves central-directory order", () => {
+    runCaptureProbe(`
+      const { unzip } = await import(${JSON.stringify(new URL("./zip.ts", import.meta.url).href)});
+      const { buildManyEntryArchive } = await import(${JSON.stringify(new URL("./zip-many.fixture.ts", import.meta.url).href)});
+      const files = unzip(buildManyEntryArchive(60000));
+      assert.equal(files.size, 60000);
+      assert.equal(files.get('m0')[0], 0);
+      assert.equal(files.get('m59999')[0], 59999 % 256);
+      assert.equal(files.keys().next().value, 'm59999');
+      assert.equal([...files.keys()].at(-1), 'm0');
+    `, 3000);
   });
 
   it("rejects duplicate entry names", () => {
