@@ -4,7 +4,7 @@ Chaque signal du panneau droit doit proposer **Pertinent**, **À surveiller** et
 
 ## Décisions appliquées
 
-La spec COLLAB et **O2, ratifiée le 16 août**, fixent le modèle : **Pertinent** et **À surveiller** sont des paniers personnels, privés par défaut ; **Écarter** active une archive indépendante, avec **code de motif de Steve obligatoire**. Tout membre approuvé peut écarter pour lui-même. L'écart commun au workspace est réservé au modérateur ; une restauration personnelle ne l'annule pas.
+La spec COLLAB et **O2, ratifiée le 16 août**, fixent le modèle : **Pertinent** et **À surveiller** sont des paniers personnels, privés par défaut ; **Écarter** active une archive indépendante, avec **code de motif de Steve obligatoire**. En livré (lot 3, PR #880), seul un compte approuvé agit pour lui-même, sans tenant, sans workspace et sans contrôle d'appartenance. La cible COLLAB (tenant, workspace, appartenance), l'écart commun réservé au modérateur, le rattachement aux workspaces, les contrôles d'appartenance et la migration ou la reprise des états personnels existants vers les workspaces sont affectés au lot 6. Une restauration personnelle ne lève pas un masquage commun.
 
 ```mermaid
 flowchart LR
@@ -14,7 +14,7 @@ flowchart LR
   A --> C
 ```
 
-Écarter conserve la sélection ; une désélection explicitement demandée constitue une transition séparée dans la même transaction. Restaurer conserve l'historique sans recréer une sélection retirée. Un refresh ne rétablit pas un écarté ; un contenu changé porte la mention « modifié depuis l'écart ».
+Écarter conserve la sélection ; une désélection explicitement demandée constitue une transition séparée dans la même transaction. Restaurer conserve l'historique sans recréer une sélection retirée. Un refresh ne rétablit pas un écarté ; un contenu changé porte la mention « modifié depuis l'écart ». Limite livrée : les commandes ne transmettent que (citySlug, type, id) et `writer.ts` calcule l'empreinte au moment de l'écriture ; si l'utilisateur voit V1 puis écarte après un refresh vers V2, l'événement porte V2 sans conflit et `changedSinceArchive` peut rester faux, même si V2 n'a jamais été vue. La transmission et la vérification de la version affichée, avec le traitement d'un changement concurrent, sont affectées au lot 6. L'empreinte ne certifie pas le contenu vu.
 
 Ces états vivent côté métier, hors annotations : première tranche du magasin de facettes généralisé, limitée aux signaux. **Aucun `ALTER` de `prospect_marks` maintenant** ; les marques de lots migreront au lot 6. Les contributions de Steve rejoindront le modèle commun via **#859**, encore brouillon. La base métier et l'UI minimale peuvent avancer sans cet import.
 
@@ -44,21 +44,21 @@ Fidélité à préserver : **47 cellules de formule** avec valeurs mémorisées,
 
 ```mermaid
 flowchart LR
-  L1["1 Capture : fait, en revue"] --> L2["2 Prédicat : en dev"]
-  L2 --> L3["3 Facettes personnelles"] --> L4["4 UI de base"]
-  L4 --> L5["5 Rapport D3"] --> L6["6 Commun et surfaces"] --> L7["7 Données Steve"]
+  L1["1 Capture : livrée #878"] --> L2["2 Prédicat : livré, vide par défaut #876"]
+  L2 --> L3["3 Facettes personnelles livrées #880"] --> L4["4 UI de base : en finalisation"]
+  L4 --> L5["5 Rapport D3 livré #879"] --> L6["6 Commun et surfaces"] --> L7["7 Données Steve"]
 ```
 
-L'ordre est **1 → 7** ; le lot 2 avance déjà sans attendre la fusion du lot 1.
+L'ordre est **1 → 7** ; les lots 1, 2, 3 et 5 sont livrés (#878, #876, #880, #879) ; le lot 4 est en finalisation.
 
 | Lot | Sortie et condition |
 |---|---|
-| **1** | `feat/steve-capture` : fait, **12 commits**, en revue ; compatible avec #859, sans dépendance de code. |
-| **2** | `feat/paniers-predicat` : en dev ; prédicat serveur, sans stockage. |
-| **3** | Facettes personnelles, acteur issu de la session, archive motivée et historique ; branchement sur 2. |
-| **4** | Après 2 et 3 : boutons, filtre, restauration, erreurs ; preuve par `make test-ui`. |
-| **5** | Après fusion de 1 : rapport D3 des 124 lignes contre un graphe synthétique ; cinq statuts exclusifs, aucune écriture. |
-| **6** | Modérateur, conflits de tête en 409, migration des marques de lots et surfaces secondaires. |
+| **1** | Capture lecture seule du classeur, livrée (PR #878) ; compatible avec #859, sans dépendance de code. |
+| **2** | Prédicat serveur des écartés, vide par défaut, livré (PR #876) ; sans stockage. |
+| **3** | Facettes personnelles livrées (PR #880), compte approuvé seul, sans tenant/workspace/appartenance ; cible (citySlug, type, id) ; migration 0014 (`facet_events` immuable, `facet_commands`, `facet_reason_codes`) ; réponse sans ownerId/actorId/commandKey/commandDigest ; branchement sur 2. |
+| **4** | En finalisation, après 2 et 3 : boutons, filtre, restauration, erreurs ; preuve par `make test-ui`. |
+| **5** | Rattachement D3 des lignes, rapport seul, livré (PR #879), après fusion de 1 : 124 lignes contre graphe synthétique ; cinq statuts exclusifs, aucune écriture. |
+| **6** | Rattachement aux workspaces, contrôles d'appartenance, migration/reprise des états personnels vers workspaces, transmission/vérification de la version affichée avec changement concurrent, modérateur, 409, migration des marques de lots et surfaces secondaires. |
 | **7** | Classement source après D6 ; import après fusion #859, qualification M2/M3 et D5/D6. |
 
 Chaque lot est découpé en commits **≤150 lignes**, avec commandes de test ciblées et nettoyage dans la [spec technique, §7](../../SPEC_PANIERS_ECARTES_STEVE.md#7-implementation-lots-and-verification).

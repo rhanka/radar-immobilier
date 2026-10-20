@@ -36,9 +36,11 @@ The [old anchor contract](SPEC_CONTRAT_ANCRE_ANNOTATIONS_v1.md) describes the ex
 
 ## 3. Identity, resources and canonical contributions
 
-The shared `TargetRef` contract carries tenant, workspace, target type, native authority, stable ID and observed version. For a signal, native identity includes municipality, native type and native ID; the facet head is looked up by that stable identity and its scope. Source version, digest and locator are evidence of what the user saw, not additional head-key fields. No FK to a volatile `signals.id`, positional `gn-…` identifier or graph row that disappears on refresh may own the history.
+The COLLAB `TargetRef` contract carries tenant, workspace, target type, native authority, stable ID and observed version. The delivered lot 3 scope is narrower: commands carry only the `(citySlug, type, id)` triplet defined in `api/src/services/facets/target.ts`, with no tenant, no workspace and no membership check. For a signal, native identity includes municipality, native type and native ID; the facet head is looked up by that stable identity and the personal owner scope. Source version, digest and locator are not additional head-key fields. No FK to a volatile `signals.id`, positional `gn-…` identifier or graph row that disappears on refresh may own the history.
 
-The server resolves target existence, account approval and workspace membership on every read/write. Actor is derived from the authenticated session/bearer and resolved to `account_users.id`. Client-supplied actor, another user's personal scope, incomplete membership and implicit `default` workspace fallbacks are rejected. Lot 3 includes the minimal explicit tenant/workspace/member binding needed for this slice, coordinated with #702/#859's host contract, without waiting for the canonical annotation runtime or creating a second membership authority.
+The delivered server checks approved-account ownership on every read/write and target existence on writes; reads retain heads for missing targets with `targetAvailable = false`. Actor is derived from the authenticated session/bearer and resolved to `account_users.id`; writes require a browser session. Client-supplied actor or scope is rejected with 400. There is no tenant/workspace/member binding in lot 3 and no second membership authority. Workspace attachment, membership controls, and migration or recovery of existing personal states into workspaces are explicitly assigned to lot 6.
+
+Observed-version limit: `writer.ts` computes the fingerprint server-side at write time through `resolveTarget` over the current graph node. The client never transmits the displayed version, so the stored `observed_fingerprint` records the content at write time without certifying the content the user saw. If the user views V1 then discards after a refresh to V2, the event carries V2 and no concurrent-change conflict is raised in the delivered scope; `changedSinceArchive` can remain false even though the user never saw V2. Transmitting and verifying the displayed version, with concurrent-change handling, is explicitly assigned to lot 6. The stored fingerprint supports `changedSinceArchive` on later reads; it does not certify the viewed content.
 
 Ordinary refresh retains the facet head. Changed content for the same proven native object remains discarded and displays **« modifié depuis l'écart »**. Removal retains history; reappearance under the same proven identity retains state. Collisions, renumbering and unproved correspondence remain unresolved instead of silently moving state. Qualify these cases using synthetic graphs in lot 3; lot 5's workbook report does not substitute for that proof.
 
@@ -50,12 +52,12 @@ Sentropic #663 and #684 are reported merged in the supplied review context. This
 
 ### 4.1 Selection and archive
 
-The generalized store is the destination of the existing marks domain. Its first migration accepts signal targets only. It stores structured facet events and current heads, never free-text annotation bodies. Physical names and migration numbers are allocated on the implementation branch; no modification of historical SQL or `prospect_marks` occurs in lot 3.
+The generalized store is the destination of the existing marks domain. Its first migration accepts signal targets only. It stores structured facet events and current heads, never free-text annotation bodies. Lot 3 delivers `api/drizzle/0014_facets_signal.sql` with `facet_events`, `facet_commands` and `facet_reason_codes`; no modification of historical SQL or `prospect_marks` occurs in lot 3.
 
 | Facet | State and head identity | Mutation semantics |
 |---|---|---|
-| `selection` | Membership in a named personal basket, Pertinent or À surveiller. One head per stable target, facet and basket scope; the basket carries tenant/workspace/owner. | Add/remove membership appends a transition. COLLAB allows the same target in multiple authorized baskets; an archive does not replace membership. No active selection/archive implies no default À surveiller; history distinguishes untouched signals from restored/cleared ones. |
-| `archive` | Active/restored, reason code, actor/time and observed target version. One head per stable target, facet and archive scope. Lot 3 supports personal scope; lot 6 adds workspace scope. | Écarter requires a valid code. Restore/undo append transitions; they do not delete history. Explicitly requested membership removals commit atomically with archive activation. |
+| `selection` | Membership in a named personal basket, Pertinent or À surveiller. One head per stable target, facet and basket scope; the delivered basket carries only the personal owner (`account_users.id`). Tenant/workspace attachment is lot 6. | Add/remove membership appends a transition. COLLAB allows the same target in multiple authorized baskets; an archive does not replace membership. No active selection/archive implies no default À surveiller; history distinguishes untouched signals from restored/cleared ones. |
+| `archive` | Active/restored, reason code, actor/time and write-time observed fingerprint (not certified viewed content). One head per stable target, facet and archive scope. Lot 3 supports personal scope; lot 6 adds workspace scope. | Écarter requires a valid code. Restore/undo append transitions; they do not delete history. Explicitly requested membership removals commit atomically with archive activation. |
 
 The domain profile provides **all 28 reason codes and each code's classification association**, under D2(a). The UI offers codes filtered for the selected action's classification; it must not infer category from a code prefix. A selection may carry a compatible code; archive activation requires a code associated with Non pertinent. The server and persisted-state constraints reject a missing, unknown or incompatible archive code, including on batch or future MCP paths. Store the structured code/profile reference, not an extra free-text reason. Additional commentary belongs in the common annotation model.
 
@@ -63,15 +65,15 @@ Qualify exact set equality between the runtime profile's codes and lot 1's `read
 
 ### 4.2 Transactions, authorization and projection
 
-Append an attributed event for each transition and preserve earlier values. Enforce one head per target/facet/scope in the database, with idempotency keys scoped by actor/workspace and transactional predecessor/successor consistency; concurrent first writes must not create two heads. Return the current heads and allowed actions. Common head mutations in lot 6 require `expected_head_id` (including an explicit absent-head expectation); mismatch returns **409** with the authorized current state, never silent last-write-wins. Re-read before retrying. Personal transitions also serialize against the current head and preserve their chain.
+Append an attributed event for each transition and preserve earlier values. Enforce one head per target/facet/scope in the database, with idempotency keys scoped by owner and transactional predecessor/successor consistency; concurrent first writes must not create two heads. Event response DTOs expose id, target triplet, facet, basket, state, reasonCode, verdict and createdAt; read heads also expose targetAvailable and changedSinceArchive. Both omit ownerId, actorId, commandKey and commandDigest. Common head mutations in lot 6 require `expected_head_id` (including an explicit absent-head expectation); mismatch returns **409** with the authorized current state, never silent last-write-wins. Re-read before retrying. Personal transitions also serialize against the current head and preserve their chain.
 
-For the supported personal/workspace scopes:
+Delivered lot 3 supports personal scope only, so `D(viewer) = D(personal viewer)`; there is no `D(workspace)` yet. From lot 6, for the supported personal/workspace scopes:
 
 ```text
 D(viewer) = D(workspace) ∪ D(personal viewer)
 ```
 
-O2 applies at the server, including restoration: only a moderator may change `D(workspace)`. Changing a personal basket or restoring a personal archive cannot clear a common archive. Lot 3 leaves workspace writes unavailable; lot 6 adds them. Restricted person/group sharing remains an open #702 delivery, using the same authorized-scope model; this slice does not claim to implement it. Common and personal states are returned separately so the UI can explain effective hiding without exposing another user's private state.
+O2 applies at the server, including restoration: only a moderator may change `D(workspace)`. Changing a personal basket or restoring a personal archive cannot clear a common archive. Lot 3 has no workspace scope; lot 6 adds workspace attachment, membership controls, and migration or recovery of existing personal states into workspaces. Restricted person/group sharing remains an open #702 delivery, using the same authorized-scope model; this slice does not claim to implement it. Common and personal states are returned separately so the UI can explain effective hiding without exposing another user's private state.
 
 There is **no automatic inheritance from Steve**. Display source classification separately under D6. Any later authorized initialization uses only resolved, non-conflicting source verdicts, the facet writer, an authorized actor and canonical provenance. D5/D6 do not bypass O2. Reimport never overwrites subsequent manual actions; a contextual link or annotation/thread archive never discards its business target.
 
@@ -99,9 +101,9 @@ The file hash was checked locally: `c7e19f46feb78c245fcd04b3e64fd4ac6f174f2d30ff
 
 Preserve all columns, including `Classement`, `Code de motif`, `Sens`, `Initiateur` and `Filtrage`. Raw, empty and unrecognized values remain distinct. Keep original bytes/hash, sheet/row/cell locators, visibility, number formats, validation ranges and other metadata. Preserve formula text and cached value independently, including the shared index/range and follower references; a follower without formula text is not a missing formula. Never evaluate formulas, execute macros or follow external links. Retain unsupported parts in the original source and report interpretation limits.
 
-**Lot 1 is done, 12 commits on `feat/steve-capture`, in review**, as supplied by the owner. Its isolated read-only Node/TypeScript reader under `api/src/services/steve-source/` is **compatible with #859, without a code dependency**. It uses native facilities without a new spreadsheet dependency, produces a deterministic inventory and tests generated synthetic workbooks. No migration, DB/S3 write, UI, domain matching or real canonical inscription belongs to that lot.
+**Lot 1 is delivered as read-only capture of Steve's workbook (PR #878).** Its isolated read-only Node/TypeScript reader under `api/src/services/steve-source/` is **compatible with #859, without a code dependency**. It uses native facilities without a new spreadsheet dependency, produces a deterministic inventory and tests generated synthetic workbooks. No migration, DB/S3 write, UI, domain matching or real canonical inscription belongs to that lot.
 
-**Lot 5 is a report, not an import.** After lot 1 is merged, read the 124 Triage rows against an identified synthetic graph through the D3 resolver, without persistence. Emit one exclusive status per row using this order: required graph/resource unavailable → `unavailable`; otherwise conflicting candidates → `ambiguous`; otherwise at least one intended target and all intended targets resolved → `fully_resolved`; otherwise at least one resolved → `partially_resolved`; otherwise → `unresolved`. The five totals must sum to **124**. Do not claim counts for these buckets before running the report, or invent graph nodes to make real rows match. A synthetic graph does not establish production correspondence.
+**Lot 5 is delivered as a D3 row-attachment report, not an import (PR #879).** After lot 1 is merged, read the 124 Triage rows against an identified synthetic graph through the D3 resolver, without persistence. Emit one exclusive status per row using this order: required graph/resource unavailable → `unavailable`; otherwise conflicting candidates → `ambiguous`; otherwise at least one intended target and all intended targets resolved → `fully_resolved`; otherwise at least one resolved → `partially_resolved`; otherwise → `unresolved`. The five totals must sum to **124**. Do not claim counts for these buckets before running the report, or invent graph nodes to make real rows match. A synthetic graph does not establish production correspondence.
 
 Keep rows, source units, contributions, links and distinct signals as separate counts. Unresolved material remains available in the original source; row-level diagnostics stay transient/private, with no client rows in tracked artifacts or fixtures. Lot 5 writes no DB/S3/canonical state.
 
@@ -109,7 +111,7 @@ Before D5/D6, real material is inspection/recount/report-only, without inscripti
 
 ## 6. Basic UI, server predicate and surfaces
 
-Lot 2 introduces an injectable server discard-reader port, **without storage**, and exercises it with synthetic discarded identities. Its explicitly empty implementation preserves baseline behavior until lot 3 is wired. Once a persistent reader is configured, reader failure is an error, not an empty discarded set. No hidden storage or note dependency is introduced.
+Lot 2 is delivered as a server discarded predicate, empty by default (PR #876). It introduces an injectable server discard-reader port, **without storage**, and exercises it with synthetic discarded identities. Its explicitly empty implementation preserves baseline behavior until lot 3 is wired. Once a persistent reader is configured, reader failure is an error, not an empty discarded set. No hidden storage or note dependency is introduced.
 
 Let `B(F)` be the existing ordered signal population under the same filters, and `D(viewer)` the authorized archived identities:
 
@@ -136,22 +138,22 @@ Lot 4 proves the basic path, not complete secondary-surface or multi-tab coverag
 
 ## 7. Implementation lots and verification
 
-The order is **1 → 2 → 3 → 4 → 5 → 6 → 7**. Lot 2 is already in development while lot 1 is in review; only lot 5 specifically requires lot 1's merge. Lot 4 depends on both 2 and 3. Custom UI #861 proceeds in parallel; neither its mockup nor #859 blocks the basic signal controls. Statuses of lots 1/2 are owner-supplied, not implementation/test claims by this pass.
+The order is **1 → 2 → 3 → 4 → 5 → 6 → 7**. Lots 1, 2, 3 and 5 are delivered (PRs #878, #876, #880, #879); lot 4 is finalizing. Only lot 5 specifically requires lot 1's merge. Lot 4 depends on both 2 and 3. Custom UI #861 proceeds in parallel; neither its mockup nor #859 blocks the basic signal controls. Statuses of lots 1–5 are owner-supplied, not implementation/test claims by this pass.
 
 For **every lot**, each atomic commit is **≤150 changed lines**, including tests/plan updates, with selective staging; split each slice below further when needed. These are implementation commit boundaries, not commits made by this design task. All implementation/jobs use Node/TypeScript and native binaries. Tests use synthetic data, isolated `ENV=test-*`, no live endpoints; `ENV` is always last. Run the lot's `make clean` even after a test failure. Existing Makefile test targets are the basis; no preliminary infrastructure lot is added.
 
-### Lot 1 — Faithful workbook capture — done, in review / #784
+### Lot 1 — Faithful workbook capture — delivered read-only / PR #878
 
-`feat/steve-capture`, 12 commits reported. Commit boundaries, each ≤150 lines: archive/XML reader; cell/formula/cache inventory; validations/names/filters and `readPatternCodes`; synthetic fidelity cases, split as needed. Review the actual commits against that cap; their sizes were not measured here. Acceptance: deterministic complete inventory, master/follower distinction and metadata counts; no DB/S3 writes. Compatible with #859, without a code dependency.
+PR #878, delivered read-only capture. Commit boundaries, each ≤150 lines: archive/XML reader; cell/formula/cache inventory; validations/names/filters and `readPatternCodes`; synthetic fidelity cases, split as needed. Acceptance: deterministic complete inventory, master/follower distinction and metadata counts; no DB/S3 writes. Compatible with #859, without a code dependency.
 
 ```sh
 make test-api SCOPE=src/services/steve-source ENV=test-steve-capture
 make clean ENV=test-steve-capture
 ```
 
-### Lot 2 — Server discarded predicate, without storage — in development / #760, #702
+### Lot 2 — Server discarded predicate, empty by default — delivered / PR #876
 
-`feat/paniers-predicat`. Commit slices, each ≤150 lines: injectable reader/identity predicate; detail integration; aggregate integration; parity and failure cases. Acceptance: synthetic personal/common unions, baseline/reveal equality, unchanged classification and correct partitions, with no database migration or writer. No #859 dependency.
+PR #876, delivered empty by default without storage. Commit slices, each ≤150 lines: injectable reader/identity predicate; detail integration; aggregate integration; parity and failure cases. Acceptance: empty default preserves baseline, reveal reproduces baseline, unchanged classification and correct partitions, with no database migration or writer. No #859 dependency.
 
 ```sh
 make test-api SCOPE=src/services/graph ENV=test-paniers-predicat
@@ -159,44 +161,47 @@ make test-api SCOPE=src/routes/graph-signals ENV=test-paniers-predicat
 make clean ENV=test-paniers-predicat
 ```
 
-### Lot 3 — Personal signal facets — after 2 / #702, #760
+### Lot 3 — Personal signal facets, approved account only — delivered / PR #880
 
-Commit slices, each ≤150 lines: scoped target/profile contract; minimal membership binding and signal-only store migration; selection transitions; archive/code/restoration transitions; authenticated routes; lot 2 adapter; concurrency/refresh tests. Keep migrations compatible with the actual runner and existing lot marks. Acceptance: two approved users have independent baskets/archives; spoofed or revoked identities fail; mandatory codes, one head, atomic optional deselection, idempotency and refresh continuity hold. No `ALTER` of `prospect_marks` and no canonical annotation dependency.
+PR #880, delivered storage and API for personal facets: approved account only, no tenant, no workspace, no membership check. Commit slices, each ≤150 lines: scoped `(citySlug, type, id)` target/profile contract; signal-only store migration `0014` (`facet_events` append-only, `facet_commands`, `facet_reason_codes`); selection transitions; archive/code/restoration transitions; authenticated routes; lot 2 adapter; concurrency/refresh tests. Keep migrations compatible with the actual runner and existing lot marks. Acceptance: two approved users have independent baskets/archives; spoofed or revoked identities fail; mandatory codes, one head, atomic optional deselection, idempotency and refresh continuity hold. Response DTOs omit ownerId, actorId, commandKey and commandDigest. No `ALTER` of `prospect_marks` and no canonical annotation dependency.
+
+The route is `api/src/routes/signal-facets.ts`; its HTTP tests are `api/tests/integration/facets-http-read.spec.ts` and `api/tests/integration/facets-http-write.spec.ts`. `SCOPE` filters test-path substrings: `tests/integration/facets-` covers the `facets-*.spec.ts` files without relying on shell glob expansion.
 
 ```sh
-make test-api SCOPE=src/services/prospect ENV=test-paniers-facettes
-make test-api SCOPE=src/routes/prospect ENV=test-paniers-facettes
-make test-api SCOPE=tests/integration/prospect ENV=test-paniers-facettes
+make test-api SCOPE=src/services/facets ENV=test-paniers-facettes
+make test-api SCOPE=tests/integration/facets-http- ENV=test-paniers-facettes
+make test-api SCOPE=tests/integration/facets- ENV=test-paniers-facettes
 make clean ENV=test-paniers-facettes
 ```
 
-### Lot 4 — Basic signal UI — after 2 and 3 / #760, #702
+### Lot 4 — Basic signal UI — finalizing / after 2 and 3
 
 Commit slices, each ≤150 lines: facet client and controls; filtered code chooser; URL reveal/restoration; detail/aggregate refresh and errors; UI interaction cases. Acceptance through `make test-ui`: buttons, mandatory archive code, failure distinction, URL reload/back/forward, focus and primary counts. No new real-time, reconnect, regulatory or PDF work.
 
 ```sh
-make test-ui SCOPE=src/lib/prospect ENV=test-paniers-ui
+make test-ui SCOPE=src/lib/signals ENV=test-paniers-ui
+make test-ui SCOPE=src/lib/router ENV=test-paniers-ui
 make test-ui SCOPE=src/lib/components/maps ENV=test-paniers-ui
 make clean ENV=test-paniers-ui
 ```
 
-### Lot 5 — D3 matching report only — after lot 1 is merged / #784
+### Lot 5 — D3 row attachment, report only — delivered / PR #879
 
-Commit slices, each ≤150 lines: matching/report adapter under `steve-source`; five exclusive status rules; synthetic graph cases and no-write assertions. Acceptance: 124 source rows accounted for, five buckets summing to 124, distinct signal counts separate, no invented match and no persistence. Run real source inspection only in the authorized read-only context; tracked test inputs remain synthetic.
+PR #879, delivered D3 row-attachment report without persistence. Commit slices, each ≤150 lines: matching/report adapter under `steve-source`; five exclusive status rules; synthetic graph cases and no-write assertions. Acceptance: 124 source rows accounted for, five buckets summing to 124, distinct signal counts separate, no invented match and no persistence. Run real source inspection only in the authorized read-only context; tracked test inputs remain synthetic.
 
 ```sh
 make test-api SCOPE=src/services/steve-source ENV=test-steve-rattachements
 make clean ENV=test-steve-rattachements
 ```
 
-### Lot 6 — Workspace archive, lot migration and secondary surfaces / #702, #760
+### Lot 6 — Workspace attachment, membership, personal-state migration, displayed-version check and secondary surfaces / #702, #760
 
-Commit slices, each ≤150 lines: moderator capabilities and `expected_head_id`/409; lossless lot mapping and conflict report; guarded facet cutover; MCP reveal parameter; regulatory/PDF projection; authorized event/refetch integration; scoped acceptance cases. Acceptance: personal restoration cannot lift common hiding; unauthorized shared writes fail; lossless lot history and one post-cutover authority; UI/MCP/secondary-surface parity and reconnect isolation. Preserve #859's stream-drain requirements; sharing and chat remain open #702 work.
+Commit slices, each ≤150 lines: workspace attachment and membership controls; migration or recovery of existing personal states into workspaces; moderator capabilities and `expected_head_id`/409; transmission and verification of the displayed version with concurrent-change handling; lossless lot mapping and conflict report; guarded facet cutover; MCP reveal parameter; regulatory/PDF projection; authorized event/refetch integration; scoped acceptance cases. Acceptance: personal restoration cannot lift common hiding; unauthorized shared writes fail; personal states migrate without silent loss; concurrent version changes conflict instead of silent overwrite; lossless lot history and one post-cutover authority; UI/MCP/secondary-surface parity and reconnect isolation. Preserve #859's stream-drain requirements; sharing and chat remain open #702 work.
 
 ```sh
-make test-api SCOPE=src/services/prospect ENV=test-paniers-commun
-make test-api SCOPE=src/routes/prospect ENV=test-paniers-commun
-make test-api SCOPE=tests/integration/prospect ENV=test-paniers-commun
+make test-api SCOPE=src/services/facets ENV=test-paniers-commun
+make test-api SCOPE=tests/integration/facets-http- ENV=test-paniers-commun
+make test-api SCOPE=tests/integration/facets- ENV=test-paniers-commun
 make test-ui SCOPE=src/lib/components/maps ENV=test-paniers-commun
 make test-immo-mcp SCOPE=src/data-source.test.ts ENV=test-paniers-commun
 make clean ENV=test-paniers-commun
@@ -222,7 +227,7 @@ Rollback must preserve source/history and must not reopen retired `prospect_note
 |---|---|
 | **#702 — P1 since 12 October** | Own the collaborative domain: annotations on signals/cities, baskets, archive, sharing and chat. This signal slice delivers personal baskets/archive and then common archive; #859 carries annotation host/eradication. Keep the remaining annotation, sharing and chat obligations open; do not close #702 on the signal slice alone. |
 | **#760 — last recorded P2, Kanban: to prioritize** | Replace obsolete “Steve document awaited” and mockup prerequisites: workbook received; 18 October authorizes basic signal UI without waiting for Steve/Mathieu's mockup, superseding the old dossier's UI hold. Replace tentative states with Pertinent / À surveiller baskets and Non pertinent archive, using the profile's codebook. Own manual triage, reveal/restoration and parity, linked to #702's domain rather than a parallel store. Do not invent a new priority/status. |
-| **#784 — P2** | Capture lot 1 is done/in review; D3 report is lot 5; source display and canonical import are lot 7. Correct stale “no implementation started” wording without claiming real data is imported. |
+| **#784 — P2** | Read-only capture lot 1 is delivered in PR #878; report-only D3 attachment lot 5 is delivered in PR #879; source display and canonical import remain lot 7. Correct stale “no implementation started” wording without claiming real data is imported. |
 | **#859 — draft** | Link both #702 and #784; retain its review/adoption conditions. It is a lot 7 import dependency, not the start of the basket chain. |
 | **#761 — P2, backlog** | Business-filter reassessment remains separate from manual archive. Workbook is received; do not imply an automatic decision to remove filters. |
 | **#797 / #783 — P2** | Preserve product orientation / oracle implementation split; neither blocks manual facets or capture. |
