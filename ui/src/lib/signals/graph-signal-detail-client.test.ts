@@ -47,6 +47,19 @@ describe("fetchGraphSignalDetail — reveal", () => {
     expect(failure?.name).toBe("GraphSignalsHttpError");
     expect(failure?.status).toBe(503);
   });
+
+  it("carries the server error body code, null when the body is unreadable", async () => {
+    stubFetch(
+      () => new Response(JSON.stringify({ error: "discarded_signals_unavailable" }), { status: 503 }),
+    );
+    const outage = await fetchGraphSignalDetail("ville-synth").catch((err) => err);
+    expect(outage?.status).toBe(503);
+    expect(outage?.code).toBe("discarded_signals_unavailable");
+    stubFetch(() => new Response("unavailable", { status: 503 }));
+    const bare = await fetchGraphSignalDetail("ville-synth").catch((err) => err);
+    expect(bare?.status).toBe(503);
+    expect(bare?.code).toBeNull();
+  });
 });
 
 describe("extractDocRefs", () => {
