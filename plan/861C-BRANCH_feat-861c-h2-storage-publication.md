@@ -14,7 +14,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
   - api/package.json, package-lock.json, .dockerignore, tools/artifact-host.mk
-  - api/drizzle/0014_artifacts_core.sql, api/drizzle/0015_artifacts_lifecycle.sql, api/drizzle/meta/_journal.json
+  - api/drizzle/0015_artifacts_core.sql, api/drizzle/0016_artifacts_lifecycle.sql, api/drizzle/meta/_journal.json
   - api/tests/integration/**, api/src/artifacts/control-route*.ts, api/vitest.config.ts
   - packages/artifacts-host/**, api/Dockerfile, api/src/app.ts, api/src/index.ts
   - plan/861C-BRANCH_feat-861c-h2-storage-publication.md
@@ -31,7 +31,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
 - Resolved: inherited lock mismatch prevented npm ci; regenerated in the test container with only artifact/workspace metadata changed.
 - Resolved: the 0013 scratch journal must exclude all later migrations. Opus corrections remove the global worker cap; local verification uses --no-file-parallelism after concurrent scratch-database checkpoints (13.907 s observed). No timeout was increased.
 - Review: local source and executable acceptance review completed; complementary peer selection unavailable (no live model catalog; inherited author's exact model unavailable). No consensus claimed.
-- Migration numbering may collide with #859; the second merged branch must renumber, preserving byte content and journal order.
+- Resolved: H1/main adds 0014 facets; H2 artifact copies follow as 0015/0016 with increasing timestamps, unchanged SQL bytes and an aligned startup guard.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch** (assigned stacked worktree, no history transfer)
@@ -82,7 +82,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] D5: bound lock wait to 3 s with local timeout reset, explicit 409 conflict; S3 request/connection deadlines 5 s/3 s with throwOnRequestTimeout; handle idle pool errors.
   - [x] D5-b: log only the idle error message, excluding the attached pg client; package tests, API/package typechecks and targeted lint pass.
   - [x] D6: validate stable content links before publication (three invalid-origin cases, zero backend calls).
-  - [x] D7/D9b: assert the 0015 tag and lifecycle object before/after drift and replay; reject mismatched journal hashes without a scope write.
+  - [x] D7/D9b: assert the lifecycle tag and object before/after drift and replay; reject mismatched journal hashes without a scope write.
   - [x] D8: remove generic install/run/commit targets; inspect is read-only; retain the alias and remove global maxWorkers.
   - [x] D9d: use three independent literal SHA-256 vectors calculated with sha256sum, including UTF-8.
   - [x] D10: delete unreachable config checks and leading blank lines; fix indentation; name all six skipped tests; remove smoke image, stack resources, snapshots and node_modules.
@@ -94,3 +94,4 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
   - [x] Bound complete S3 operations and keep cancellation active through body consumption.
   - [x] Cover S3 deadlines and caller cancellation before and after response headers.
   - [x] Verify stalled HTTP bodies, socket closure, pool/lock recovery and subsequent publication; complete isolated gates and cleanup.
+- [x] **Migration renumbering after H1/main integration**: preserve 0014 facets; align 0015/0016 artifact paths, timestamps, startup guards and tests; pass isolated typecheck, lint, targeted integration and API unit gates; remove stack volumes.
