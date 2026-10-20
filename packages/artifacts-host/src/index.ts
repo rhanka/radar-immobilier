@@ -15,6 +15,13 @@ export {
   type IdempotencyKeyInput,
 } from "./idempotency.js";
 export {
+  ArtifactS3TimeoutError,
+  S3_OPERATION_TIMEOUT_MS,
+  createTimeoutBlobStore,
+  createTimeoutS3Client,
+  withS3Timeout,
+} from "./s3-timeout.js";
+export {
   BINDING_NAME_MAX_LENGTH,
   PUBLISH_MAX_FILE_BYTES,
   PUBLISH_MAX_FILES,

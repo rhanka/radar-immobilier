@@ -8,6 +8,7 @@ import type { ForkService } from "@sentropic/artifacts/server/fork";
 import type { ArtifactService } from "@sentropic/artifacts/server/service";
 import type { ArtifactsStorageConfig } from "./config.js";
 import { createLockedArtifactStore, initializeArtifactScope } from "./storage.js";
+import { createTimeoutBlobStore, createTimeoutS3Client, S3_OPERATION_TIMEOUT_MS } from "./s3-timeout.js";
 
 const refuse = async (): Promise<never> => { throw new Error("capability unavailable"); };
 export const unavailableForks: ForkService = { fork: refuse, setState: refuse, track: refuse };
@@ -29,7 +30,11 @@ export async function composeArtifactHost(
     credentials: { accessKeyId: config.s3AccessKey, secretAccessKey: config.s3SecretKey },
     requestHandler: { requestTimeout: 5000, connectionTimeout: 3000, throwOnRequestTimeout: true },
   });
-  const blobs = injectedBlobs ?? createS3BlobStore({ client, bucket: config.s3Bucket });
+  const timeoutClient = createTimeoutS3Client(client, S3_OPERATION_TIMEOUT_MS);
+  const baseBlobs = injectedBlobs ?? createS3BlobStore({ client: timeoutClient, bucket: config.s3Bucket });
+  // Bound every blob operation including body streaming after headers, so a
+  // stalled S3 response fails fast and frees the advisory lock + connection.
+  const blobs = createTimeoutBlobStore(baseBlobs, S3_OPERATION_TIMEOUT_MS);
   const lifecycle = createLifecycleService(store, undefined, store);
   const publication = createPublicationService({ state: store, blobs, intents: store, idempotency: store });
   const artifacts: ArtifactService = {
