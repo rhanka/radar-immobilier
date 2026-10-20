@@ -84,7 +84,7 @@ image-smoke: guard-env ## Build --target build, refuse .env*, smoke-boot API+MCP
 	if test -n "$$(find . -name '.env*' ! -name '.env.example' -print -quit)"; then \
 	  echo "[artifact-host] refused: .env* present in build context" >&2; exit 1; fi; \
 	docker build --target build -t radar-artifact-host-smoke:local -f api/Dockerfile .; \
-	docker run --rm radar-artifact-host-smoke:local sh -c 'test -s /workspace/api/drizzle/0014_artifacts_core.sql && test -s /workspace/api/drizzle/0015_artifacts_lifecycle.sql && echo "[artifact-host] api/drizzle present in image"'; \
+	docker run --rm radar-artifact-host-smoke:local sh -c 'test -s /workspace/api/drizzle/0015_artifacts_core.sql && test -s /workspace/api/drizzle/0016_artifacts_lifecycle.sql && echo "[artifact-host] api/drizzle present in image"'; \
 	status=0; docker run --rm -e PORT=18999 radar-artifact-host-smoke:local sh -c "timeout 6 node api/dist/index.js" || status=$$?; test $$status -eq 124; \
 	status=0; docker run --rm -e IMMO_MCP_OAUTH_ISSUER=https://idp.example -e IMMO_MCP_OAUTH_RESOURCE=https://immo.example/mcp -e IMMO_MCP_HTTP_PORT=18848 -e IMMO_MCP_DATA_MODE=mock radar-artifact-host-smoke:local sh -c "timeout 5 node packages/immo-mcp/dist/server-http.js" || status=$$?; test $$status -eq 124
 
