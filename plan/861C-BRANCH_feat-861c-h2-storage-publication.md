@@ -91,6 +91,6 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
 - [ ] **Astra P1 remediation**
   - [x] Guard the reserved Postgres client throughout acquisition, work and unlock; preserve the first failure and discard the broken client.
   - [x] Cover reserved-client events and real backend termination, then reacquire the same key.
-  - [ ] Bound complete S3 operations and keep cancellation active through body consumption.
+  - [x] Bound complete S3 operations and keep cancellation active through body consumption.
   - [ ] Cover S3 deadlines and caller cancellation before and after response headers.
   - [ ] Verify stalled HTTP bodies, socket closure, pool/lock recovery and subsequent publication; complete isolated gates and cleanup.
