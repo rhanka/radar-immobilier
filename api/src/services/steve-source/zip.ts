@@ -139,9 +139,9 @@ export function unzip(bytes: Uint8Array): Map<string, Uint8Array> {
     entries.push({ flags, method, compSize, expectedCrc, size, localOffset, name });
   }
   if (cursor !== eocd) throw new SteveCaptureError("invalid ZIP archive: inconsistent entry count");
-  // Second pass: extract entries against their local headers.
-  const out = new Map<string, Uint8Array>();
-  const used: Array<{ start: number; end: number }> = [];
+  // Second pass: locate every entry against its local header, then detect
+  // overlaps on intervals sorted by offset (O(n log n)) before inflating.
+  const placed: Array<{ entry: CentralEntry; dataStart: number; dataEnd: number }> = [];
   for (const entry of entries) {
     const { flags, method, compSize, expectedCrc, size, localOffset, name } = entry;
     if (localOffset + 30 > bytes.length) {
@@ -193,15 +193,25 @@ export function unzip(bytes: Uint8Array): Map<string, Uint8Array> {
       }
       dataEnd = descriptor + 12;
     }
-    const span = { start: localOffset, end: dataEnd };
-    for (const other of used) {
-      if (span.start < other.end && other.start < span.end) {
-        throw new SteveCaptureError(
-          `invalid ZIP archive: overlapping entry data for "${name}"`,
-        );
-      }
+    placed.push({ entry, dataStart, dataEnd });
+  }
+  const byOffset = [...placed].sort(
+    (a, b) => a.entry.localOffset - b.entry.localOffset || a.dataEnd - b.dataEnd,
+  );
+  for (let index = 1; index < byOffset.length; index++) {
+    const previous = byOffset[index - 1];
+    const current = byOffset[index];
+    if (previous === undefined || current === undefined) continue;
+    if (current.entry.localOffset < previous.dataEnd &&
+        previous.entry.localOffset < current.dataEnd) {
+      throw new SteveCaptureError(
+        `invalid ZIP archive: overlapping entry data for "${current.entry.name}"`,
+      );
     }
-    used.push(span);
+  }
+  const out = new Map<string, Uint8Array>();
+  for (const { entry, dataStart } of placed) {
+    const { method, compSize, expectedCrc, size, name } = entry;
     const raw = bytes.subarray(dataStart, dataStart + compSize);
     let content: Uint8Array = raw;
     if (method === 8) {
