@@ -240,6 +240,27 @@
     node.focus();
   }
 
+  /**
+   * Focus the head button of a restored signal card (after a successful
+   * undo). No-op when the card is absent (city changed since the undo).
+   */
+  export function focusSignalCard(id: string): void {
+    void tick().then(() => {
+      entityListEl
+        ?.querySelector<HTMLElement>(
+          `[data-signal-node="${cssAttrEscape(id)}"] .sel-entity-head`,
+        )
+        ?.focus({ preventScroll: true });
+    });
+  }
+
+  /** Focus the Signaux bucket summary (after dismissing the notice). */
+  export function focusSignalsBucket(): void {
+    void tick().then(() => {
+      signalsBucketHead?.focus({ preventScroll: true });
+    });
+  }
+
   // Conteneur scrollable des fiches (pour amener en vue la fiche cross-survolée).
   let entityListEl: HTMLDivElement | null = null;
   // §2 — nombre de notes par signal (renseigné à l'ouverture de la fiche → badge).
@@ -898,6 +919,7 @@
   // désigne une zone / un lot / un signal, on déplie son bucket et on scrolle
   // la fiche en vue (détail complet, pas un simple survol).
   let bucketsEl: HTMLDivElement | null = null;
+  let signalsBucketHead: HTMLElement | null = null;
   $: void revealFocusedEntity(selectionState.focusedKey);
   async function revealFocusedEntity(key: SelectionKey | null): Promise<void> {
     if (!key) return;
@@ -1173,26 +1195,42 @@
     {/if}
     {#if discardedNotice}
       {@const notice = discardedNotice}
-      <div
-        class="sel-notice"
-        role="alert"
-        tabindex="-1"
-        use:focusOnMount
-        data-testid="discarded-notice"
-      >
-        <Alert tone="info" title="Signal écarté" message={`« ${notice.label} » est écarté.`} />
-        {#if discardedActionError}
-          <p class="sel-notice-error" data-testid="discarded-action-error">{discardedActionError}</p>
-        {/if}
-        <div class="sel-notice-actions">
-          <button type="button" class="sel-retry" disabled={undoBusy} on:click={() => onUndoDiscard(notice.target)}>
-            Annuler
-          </button>
-          <button type="button" class="sel-retry" disabled={undoBusy} on:click={onDismissDiscardedNotice}>
-            Fermer
-          </button>
+      {#key notice}
+        <!-- Single live region: the design-system Alert already carries
+             role="status", so the wrapper carries none. The key block
+             remounts (and refocuses) on every new notice, not just on mount. -->
+        <div
+          class="sel-notice"
+          tabindex="-1"
+          use:focusOnMount
+          data-testid="discarded-notice"
+        >
+          <Alert tone="info" title="Signal écarté" message={`« ${notice.label} » est écarté.`} />
+          {#if discardedActionError}
+            <p class="sel-notice-error" data-testid="discarded-action-error">{discardedActionError}</p>
+          {/if}
+          <div class="sel-notice-actions">
+            <Button
+              variant="secondary"
+              size="sm"
+              type="button"
+              disabled={undoBusy}
+              onclick={() => onUndoDiscard(notice.target)}
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              type="button"
+              disabled={undoBusy}
+              onclick={onDismissDiscardedNotice}
+            >
+              Fermer
+            </Button>
+          </div>
         </div>
-      </div>
+      {/key}
     {/if}
     {#if zonesError}
       <div class="sel-alert">
@@ -1216,7 +1254,12 @@
     <div class="sel-buckets" bind:this={bucketsEl}>
       <!-- #8 : replié par défaut ; s'ouvre aussi via un lien croisé zone→signal -->
       <details class="sel-bucket" bind:open={signalsBucketOpen}>
-        <summary class="sel-bucket-head">
+        <summary
+          class="sel-bucket-head"
+          bind:this={signalsBucketHead}
+          tabindex="-1"
+          data-testid="signals-bucket-head"
+        >
           <span class="sel-bucket-name">Signaux</span>
           <!-- #6 : "–" pendant le chargement ; N/M quand la liste est restreinte
                (zone active — 01KZGM07 item 2 — ou filtre subset). -->
