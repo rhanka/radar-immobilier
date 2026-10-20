@@ -10,6 +10,9 @@ export default defineConfig({
       "@radar/domain": fileURLToPath(
         new URL("../packages/radar-domain/src/index.ts", import.meta.url),
       ),
+      "@radar/artifacts-host": fileURLToPath(
+        new URL("../packages/artifacts-host/src/index.ts", import.meta.url),
+      ),
     },
   },
   test: {
