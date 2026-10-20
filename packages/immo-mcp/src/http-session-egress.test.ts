@@ -86,6 +86,22 @@ describe("sessions and egress on 0.1.0", () => {
     expect(control.status).toBe(200);
   });
 
+  it("rejects the session when the fallback client_id differs (no azp)", async () => {
+    const app = createImmoHttpApp(CONFIG, { keySource });
+    const sessionId = await initialize(app, await signToken({ client_id: "client-a" }));
+    const mismatch = await app.request("/mcp", {
+      method: "POST", headers: headers(await signToken({ client_id: "client-b" }), sessionId),
+      body: JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/list" }),
+    });
+    expect(mismatch.status).toBe(404);
+    expect(((await mismatch.json()) as { error: { message: string } }).error.message).toBe("Unknown or expired MCP session");
+    const control = await app.request("/mcp", {
+      method: "POST", headers: headers(await signToken({ client_id: "client-a" }), sessionId),
+      body: JSON.stringify({ jsonrpc: "2.0", id: 3, method: "tools/list" }),
+    });
+    expect(control.status).toBe(200);
+  });
+
   it("loses transport ids on restart and reinitializes with the same token", async () => {
     const token = await signToken();
     const first = createImmoHttpApp(CONFIG, { keySource });

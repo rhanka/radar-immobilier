@@ -67,9 +67,10 @@ Capture the 0.1.0 behavior net (plan, isolated runner, group 1 and 2 tests) with
   - [x] Points 1, 6, 8: exact discovery surface/documents and literal 401 golden.
   - [x] Points 5, 7: complete raw-data egress invariant, labelled 0.1.0 passthrough and exact stale-session rejection.
   - [x] Final runner gates: 114 tests in 10 files, typecheck and lint passed; fixture SHAs unchanged; dependencies, containers, volumes and networks removed.
-- [ ] **Astra review corrections — PR 877**
+- [x] **Astra review corrections — PR 877**
   - [x] P2: incomplete file traversal refuses Docker; four `test-guard` cases, old-guard mutation, 114 MCP tests, typecheck and lint pass.
-  - [ ] Minor: session client binding also rejects a changed `client_id` without `azp`.
+  - [x] Minor: session client binding also rejects a changed `client_id` without `azp`; mutation detects the missing fallback.
+  - [x] Final gates: five session tests, 115 MCP tests in 10 files, typecheck and lint pass.
 - [ ] **Lot N — Merge & close**
   - [ ] Push branch.
   - [ ] Open PR (or merge directly if solo dev).
