@@ -90,7 +90,7 @@ Implement LOT-H2 c1–c15 on H1: durable private bindings, bounded static public
 - [x] **Every-commit-green constraint**: all 12 correction snapshots pass API/package typechecks and targeted tests after the authorized local rebase; startup test fixed in 2327fb8a and 67ec4bde, remaining integrations in ae069ca1. 74810538 also passes without 57P01. The 26 protected SHAs and final code tree are unchanged; test stack resources are removed.
 - [ ] **Astra P1 remediation**
   - [x] Guard the reserved Postgres client throughout acquisition, work and unlock; preserve the first failure and discard the broken client.
-  - [ ] Cover reserved-client events and real backend termination, then reacquire the same key.
+  - [x] Cover reserved-client events and real backend termination, then reacquire the same key.
   - [ ] Bound complete S3 operations and keep cancellation active through body consumption.
   - [ ] Cover S3 deadlines and caller cancellation before and after response headers.
   - [ ] Verify stalled HTTP bodies, socket closure, pool/lock recovery and subsequent publication; complete isolated gates and cleanup.
