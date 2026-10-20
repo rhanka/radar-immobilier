@@ -48,7 +48,16 @@ export function spreadsheetRawText(node: XmlNode): string {
   }).join("");
 }
 
-/** Read displayed rich-text runs, excluding indentation and phonetic guides. */
+/**
+ * Read displayed rich-text runs, excluding indentation and phonetic guides.
+ * Each `<t>` fragment is decoded once, before concatenation, so an escape
+ * split across two runs (e.g. `_x00` + `41_`) stays literal instead of
+ * decoding to `A`.
+ */
 export function spreadsheetText(node: XmlNode): string {
-  return decodeOoxmlEscapes(spreadsheetRawText(node));
+  return node.children.map((child) => {
+    if (child.name === "t") return decodeOoxmlEscapes(child.text);
+    if (child.name === "r") return spreadsheetText(child);
+    return "";
+  }).join("");
 }
