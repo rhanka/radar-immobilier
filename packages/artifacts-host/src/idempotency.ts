@@ -56,7 +56,44 @@ export function createArtifactsPool(
   return pool;
 }
 
+/** Typed failure for a Postgres connection lost while a client is reserved. */
+export class ArtifactConnectionError extends Error {
+  readonly code = "artifact_connection_lost";
+  constructor(message = "artifact postgres connection lost", options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = "ArtifactConnectionError";
+  }
+}
+
 const ADVISORY_KEY_RE = /^[0-9a-f]{16,}[0-9a-f]*$/i;
+
+const CONNECTION_FAILURE_CODES = new Set([
+  "08000",
+  "08001",
+  "08003",
+  "08004",
+  "08006",
+  "08007",
+  "57P01",
+  "57P02",
+  "57P03",
+  "ECONNREFUSED",
+  "ECONNRESET",
+  "EHOSTUNREACH",
+  "ENOTFOUND",
+  "EPIPE",
+  "ERR_SOCKET_CLOSED",
+  "ETIMEDOUT",
+]);
+
+function isConnectionFailure(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const code = (error as { code?: unknown }).code;
+  if (code === "55P03") return false;
+  if (typeof code === "string" && CONNECTION_FAILURE_CODES.has(code)) return true;
+  const message = error instanceof Error ? error.message : String(error);
+  return /terminating connection|connection terminated|connection reset|socket hang up|broken pipe|connection error|connection closed/i.test(message);
+}
 
 export async function withArtifactAdvisoryLock<T>(
   pool: pg.Pool,
@@ -70,38 +107,96 @@ export async function withArtifactAdvisoryLock<T>(
   const client = await pool.connect();
   let discard = false;
   let locked = false;
-  const unlock = async () => {
+  let connectionError: unknown = null;
+  let rejectOnConnectionError: ((reason: ArtifactConnectionError) => void) | undefined;
+  const connectionLost = new Promise<never>((_, reject) => {
+    rejectOnConnectionError = reject;
+  });
+  // The race below may already be settled when the connection fails during
+  // unlock/release: keep a no-op branch so the rejection is never unhandled.
+  void connectionLost.catch(() => {});
+  // pg-pool removes its error handler from reserved clients and pool "error"
+  // only covers idle clients, so guard the reserved client for the whole
+  // reservation. Without this listener the "error" event would throw.
+  const onClientError = (error: Error): void => {
+    if (connectionError !== null) return;
+    connectionError = error;
+    discard = true;
+    rejectOnConnectionError?.(
+      new ArtifactConnectionError("artifact postgres connection lost", { cause: error }),
+    );
+  };
+  client.on("error", onClientError);
+  const guard = <U>(work: Promise<U>): Promise<U> => Promise.race([work, connectionLost]);
+  const cleanup = async (): Promise<void> => {
     try {
-      await client.query("SELECT pg_advisory_unlock(('x' || $1)::bit(64)::bigint)", [lockId]);
+      // A dead session already released its advisory lock: never query it.
+      if (locked && connectionError === null) {
+        await guard(client.query("SELECT pg_advisory_unlock(('x' || $1)::bit(64)::bigint)", [lockId]));
+      }
+      if (connectionError !== null) {
+        throw new ArtifactConnectionError("artifact postgres connection lost", { cause: connectionError });
+      }
     } catch (error) {
       discard = true;
+      if (connectionError === null && isConnectionFailure(error)) connectionError = error;
+      if (connectionError !== null) {
+        throw new ArtifactConnectionError("artifact postgres connection lost", { cause: connectionError });
+      }
       throw error;
+    } finally {
+      client.removeListener("error", onClientError);
+      // Pass an error to destroy the broken client instead of pooling it.
+      if (connectionError instanceof Error) {
+        client.release(connectionError);
+      } else if (connectionError !== null) {
+        client.release(new ArtifactConnectionError("artifact postgres connection lost", { cause: connectionError }));
+      } else if (discard) {
+        client.release(new Error("artifact pool client discarded"));
+      } else {
+        client.release();
+      }
     }
   };
   try {
     try {
-      await client.query("BEGIN");
-      await client.query("SELECT set_config('lock_timeout', $1, true)", ["3000ms"]);
-      await client.query(
+      await guard(client.query("BEGIN"));
+      await guard(client.query("SELECT set_config('lock_timeout', $1, true)", ["3000ms"]));
+      await guard(client.query(
         "SELECT pg_advisory_lock(('x' || $1)::bit(64)::bigint)",
         [lockId],
-      );
+      ));
       locked = true;
-      await client.query("SELECT set_config('lock_timeout', '0', true)");
-      await client.query("COMMIT");
+      await guard(client.query("SELECT set_config('lock_timeout', '0', true)"));
+      await guard(client.query("COMMIT"));
     } catch (error) {
-      try { await client.query("ROLLBACK"); } catch { discard = true; }
+      if (connectionError === null) {
+        try { await guard(client.query("ROLLBACK")); } catch { discard = true; }
+      }
       if ((error as { code?: string }).code === "55P03") {
         throw new Error("artifact advisory lock timeout conflict", { cause: error });
       }
       throw error;
     }
-    return await body(client);
-  } finally {
-    try {
-      if (locked) await unlock();
-    } finally {
-      client.release(discard);
+    if (connectionError !== null) {
+      throw new ArtifactConnectionError("artifact postgres connection lost", { cause: connectionError });
     }
+    const result = await Promise.race([body(client), connectionLost]);
+    if (connectionError !== null) {
+      throw new ArtifactConnectionError("artifact postgres connection lost", { cause: connectionError });
+    }
+    return result;
+  } catch (error) {
+    if (connectionError !== null) {
+      throw new ArtifactConnectionError("artifact postgres connection lost", { cause: connectionError });
+    }
+    if (isConnectionFailure(error)) {
+      connectionError = error;
+      discard = true;
+      throw new ArtifactConnectionError("artifact postgres connection lost", { cause: error });
+    }
+    throw error;
+  } finally {
+    await cleanup();
   }
 }
