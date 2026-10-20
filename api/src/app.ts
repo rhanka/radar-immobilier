@@ -31,6 +31,8 @@ import { dataQualityRoute, type DataQualityDeps } from "./routes/data-quality.js
 import { sourceCoverageRoute } from "./routes/source-coverage.js";
 import { sourceConsistencyRoute } from "./routes/source-consistency.js";
 import { prospectMarksRoute } from "./routes/prospect-marks.js";
+import { signalFacetsRoute } from "./routes/signal-facets.js";
+import { privateSignalResponse } from "./services/facets/private-response.js";
 import { documentsRoute, type DocumentsDeps } from "./routes/documents.js";
 
 export type AppDeps = HealthDeps &
@@ -74,6 +76,8 @@ export type AppDeps = HealthDeps &
 /** Compose the Hono application from injected dependencies. */
 export function createApp(deps: AppDeps): Hono {
   const app = new Hono();
+  app.use("/api/graph-signals/*", privateSignalResponse);
+  app.use("/api/v1/signal-facets/*", privateSignalResponse);
 
   // Content hosts dispatch FIRST, before protect: never app auth or SPA.
   if (deps.contentHost?.enabled) {
@@ -136,6 +140,7 @@ export function createApp(deps: AppDeps): Hono {
   app.route("/", sourceConsistencyRoute({ db: deps.db }));
   app.route("/", documentsRoute(deps));
   app.route("/", graphSignalsRoute(deps));
+  app.route("/", signalFacetsRoute(deps));
   app.route("/", graphRoute(deps));
   app.route("/", geoLotsRoute());
   app.route("/", geoZonesRoute({ db: deps.db }));

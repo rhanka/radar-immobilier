@@ -4,8 +4,8 @@ import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 
 const migrations = [
-  ["0014_artifacts_core", "0001_artifacts.sql", "7b12713b949a956ad0b4c370a16e80fb4625a99a5097769ed0653df5973dc533"],
-  ["0015_artifacts_lifecycle", "0002_lifecycle.sql", "fdfbe97f84774b47a207e66915f7426926650e85b6dbb9a4d80272591df624fd"],
+  ["0015_artifacts_core", "0001_artifacts.sql", "7b12713b949a956ad0b4c370a16e80fb4625a99a5097769ed0653df5973dc533"],
+  ["0016_artifacts_lifecycle", "0002_lifecycle.sql", "fdfbe97f84774b47a207e66915f7426926650e85b6dbb9a4d80272591df624fd"],
 ] as const;
 const journal = JSON.parse(readFileSync(new URL("../../drizzle/meta/_journal.json", import.meta.url), "utf8")) as {
   entries: { tag: string; when: number }[];
