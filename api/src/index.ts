@@ -6,6 +6,7 @@ import { contentHostAppOption, resolveContentHostConfig } from "./artifacts/cont
 import { loadConfig, resolveAuthConfig, resolveTemConfig } from "./config.js";
 import { createLogger } from "./logger.js";
 import { createDb, makeDbProbe } from "./db/client.js";
+import { createDiscardedSignalsReader } from "./services/facets/discarded-reader.js";
 import { loadGeoKeyIndex } from "./services/sources/document-resolver.js";
 import {
   createObjectStore,
@@ -97,6 +98,7 @@ const app = createApp({
   ...(geoKeyIndex ? { geoKeyIndex } : {}),
   ontologyWriteToken: config.RADAR_ONTOLOGY_WRITE_TOKEN,
   db: dbHandle.db,
+  discarded: createDiscardedSignalsReader(dbHandle.db),
   auth,
   tem,
   ...contentHostAppOption(contentHost),

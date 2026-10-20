@@ -72,8 +72,12 @@ beforeAll(async () => {
   await cp(MIGRATIONS, upTo0012, { recursive: true });
   const journalPath = join(upTo0012, "meta", "_journal.json");
   const journal = JSON.parse(await readFile(journalPath, "utf8")) as { entries: Array<{ tag: string }> };
-  // Keep the historical boundary even after later migrations are appended.
-  journal.entries = journal.entries.filter((entry) => entry.tag < "0013_graph_city_key");
+  const cityKeyIndex = journal.entries.findIndex((entry) => entry.tag === "0013_graph_city_key");
+  expect(cityKeyIndex).toBeGreaterThan(0);
+  // Exclude the target AND every later migration: a newer journal timestamp
+  // would otherwise make the migrator skip 0013 when testing the upgrade.
+  journal.entries = journal.entries.slice(0, cityKeyIndex);
+  expect(journal.entries.at(-1)?.tag).toBe("0012_refresh_document_outcomes");
   await writeFile(journalPath, JSON.stringify(journal));
   await migrateFolder(upTo0012);
 
