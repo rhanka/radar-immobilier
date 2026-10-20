@@ -6,6 +6,8 @@ import {
   type AuthRouteOptions,
 } from "./routes/auth.js";
 import { healthRoute, type HealthDeps } from "./routes/health.js";
+import { contentGate } from "./artifacts/content-app.js";
+import type { ContentHostConfig } from "./artifacts/content-config.js";
 import { chatRoute } from "./routes/chat.js";
 import { automationRoute } from "./routes/automation.js";
 import { sourcesRoute, type SourcesDeps } from "./routes/sources.js";
@@ -61,6 +63,8 @@ export type AppDeps = HealthDeps &
     fetchImpl?: typeof fetch;
     geoBaseUrl?: string;
     geoListingTtlMs?: number;
+    /** Artifact content dispatch (861c); absent/disabled keeps the chain. */
+    contentHost?: ContentHostConfig;
   };
 
 /** Compose the Hono application from injected dependencies. */
@@ -69,7 +73,12 @@ export function createApp(deps: AppDeps): Hono {
   app.use("/api/graph-signals/*", privateSignalResponse);
   app.use("/api/v1/signal-facets/*", privateSignalResponse);
 
-  // Auth is wired first so the protect middleware runs before every business
+  // Content hosts dispatch FIRST, before protect: never app auth or SPA.
+  if (deps.contentHost?.enabled) {
+    app.use("*", contentGate(deps.contentHost.contentBase));
+  }
+
+  // Auth runs after the content gate, so protect still fronts every business
   // route. When `deps.auth` is absent or disabled both are inert no-ops.
   if (deps.auth) {
     app.use("*", protect(deps.auth, { db: deps.db }));
