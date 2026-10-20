@@ -8,9 +8,10 @@
 import type { DocumentDateBasis, VivierV2Counts } from "@radar/domain";
 import {
   DEFAULT_REQUEST_TIMEOUT_MS,
-  fetchWithTimeout,
+  fetchJsonWithTimeout,
+  readJsonErrorCode,
 } from "$lib/net/fetch-with-timeout.js";
-import { GraphSignalsHttpError, readGraphErrorCode } from "./graph-signal-detail-client.js";
+import { GraphSignalsHttpError } from "./graph-signal-detail-client.js";
 
 export interface GraphSignalCityItem {
   citySlug: string;
@@ -76,7 +77,9 @@ export async function fetchGraphSignalsByCity(
   if (opts.excludeDerogations) params.set("excludeDerogations", "1");
   if (opts.showDiscarded === true) params.set("showDiscarded", "1");
   const qs = params.toString();
-  const res = await fetchWithTimeout(
+  // Bounded headers AND body: a stalled body still fails with
+  // `RequestTimeoutError` instead of blocking the caller forever.
+  const res = await fetchJsonWithTimeout<GraphSignalsByCityResponse>(
     `${baseUrl}/api/graph-signals/by-city${qs ? `?${qs}` : ""}`,
     {
       signal: opts.signal,
@@ -87,8 +90,11 @@ export async function fetchGraphSignalsByCity(
     throw new GraphSignalsHttpError(
       `graph-signals/by-city: ${res.status}`,
       res.status,
-      await readGraphErrorCode(res),
+      readJsonErrorCode(res.json),
     );
   }
-  return res.json();
+  if (res.json === null) {
+    throw new GraphSignalsHttpError("graph-signals/by-city: empty JSON body", res.status, null);
+  }
+  return res.json;
 }

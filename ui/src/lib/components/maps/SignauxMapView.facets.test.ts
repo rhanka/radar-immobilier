@@ -133,6 +133,49 @@ describe("SignauxMapView — write then three re-reads", () => {
     );
   });
 
+  it("shows a reload error and re-enables the controls when the by-city body stalls", async () => {
+    const actual =
+      await vi.importActual<typeof import("$lib/signals/graph-signals-by-city-client.js")>(
+        "$lib/signals/graph-signals-by-city-client.js",
+      );
+    vi.stubGlobal(
+      "fetch",
+      async (_url: string, init?: RequestInit) =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              init?.signal?.addEventListener(
+                "abort",
+                () => controller.error(new DOMException("Aborted", "AbortError")),
+                { once: true },
+              );
+            },
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        ),
+    );
+    vi.mocked(fetchGraphSignalsByCity).mockImplementation((baseUrl, opts) =>
+      actual.fetchGraphSignalsByCity(baseUrl, { ...opts, timeoutMs: 20 }),
+    );
+    try {
+      render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+      await openFirstSignalCard();
+      await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+        target: { value: "N-ADMIN" },
+      });
+      await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+      // The write is confirmed: the notice shows at once, then the stalled
+      // by-city body times out and the reload error appears.
+      expect(await screen.findByTestId("discarded-notice")).toBeTruthy();
+      expect(await screen.findByTestId("facet-reload-error")).toBeTruthy();
+      await waitFor(() =>
+        expect((screen.getByTestId("facet-toggle-pertinent") as HTMLButtonElement).disabled).toBe(false),
+      );
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("keeps zero-archive ids, order and counters with and without reveal", async () => {
     const orders: string[][] = [];
     const identities: string[][] = [];
