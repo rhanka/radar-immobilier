@@ -16,7 +16,9 @@
  */
 
 import {
-  fetchWithTimeout,
+  fetchJsonWithTimeout,
+  type JsonFetchResult,
+  readJsonErrorCode,
   RequestTimeoutError,
   DEFAULT_REQUEST_TIMEOUT_MS,
 } from "$lib/net/fetch-with-timeout.js";
@@ -179,15 +181,6 @@ export class SignalFacetError extends Error {
   }
 }
 
-async function readErrorCode(res: Response): Promise<string | null> {
-  try {
-    const body = (await res.json()) as { error?: unknown };
-    return typeof body.error === "string" ? body.error : null;
-  } catch {
-    return null;
-  }
-}
-
 function requestUrl(baseUrl: string, path: string): string {
   return `${baseUrl}${path}`;
 }
@@ -204,30 +197,36 @@ export async function postFacetCommand(
   commandKey: string,
   opts: FacetRequestOptions = {},
 ): Promise<unknown> {
-  let res: Response;
+  // Bounded headers AND body: a stalled body still fails with
+  // `RequestTimeoutError` instead of blocking the caller forever.
+  let res: JsonFetchResult<{ event?: unknown }>;
   try {
-    res = await fetchWithTimeout(requestUrl(baseUrl, `/api/v1/signal-facets/${action}`), {
-      signal: opts.signal,
-      timeoutMs: opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
-      init: {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "Idempotency-Key": commandKey,
+    res = await fetchJsonWithTimeout<{ event?: unknown }>(
+      requestUrl(baseUrl, `/api/v1/signal-facets/${action}`),
+      {
+        signal: opts.signal,
+        timeoutMs: opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
+        init: {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            "Idempotency-Key": commandKey,
+          },
+          // Same-origin session cookie (fetch default): no bearer, no actor.
+          body: JSON.stringify(body),
         },
-        // Same-origin session cookie (fetch default): no bearer, no actor.
-        body: JSON.stringify(body),
       },
-    });
+    );
   } catch (err) {
     if (err instanceof RequestTimeoutError) throw new SignalFacetError(null, null);
     throw new SignalFacetError(null, null);
   }
   if (!res.ok) {
-    throw new SignalFacetError(res.status, await readErrorCode(res));
+    throw new SignalFacetError(res.status, readJsonErrorCode(res.json));
   }
-  const payload = (await res.json()) as { event?: unknown };
-  return payload.event ?? null;
+  // An unreadable success body leaves the write unconfirmed: same-key retry.
+  if (res.json === null) throw new SignalFacetError(null, null);
+  return res.json.event ?? null;
 }
 
 export interface ReasonCodesResponse {
@@ -240,13 +239,16 @@ export async function fetchReasonCodes(
   baseUrl: string,
   opts: FacetRequestOptions = {},
 ): Promise<ReasonCodesResponse> {
-  const res = await fetchWithTimeout(requestUrl(baseUrl, "/api/v1/signal-facets/reason-codes"), {
-    signal: opts.signal,
-    timeoutMs: opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
-  });
-  if (!res.ok) throw new SignalFacetError(res.status, await readErrorCode(res));
-  const payload = (await res.json()) as { profileId: string; codes: ReasonCode[] };
-  if (!Array.isArray(payload.codes) || !payload.codes.every(
+  const res = await fetchJsonWithTimeout<{ profileId: string; codes: ReasonCode[] }>(
+    requestUrl(baseUrl, "/api/v1/signal-facets/reason-codes"),
+    {
+      signal: opts.signal,
+      timeoutMs: opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
+    },
+  );
+  if (!res.ok) throw new SignalFacetError(res.status, readJsonErrorCode(res.json));
+  const payload = res.json as { profileId: string; codes: ReasonCode[] } | null;
+  if (!payload || !Array.isArray(payload.codes) || !payload.codes.every(
     (row) => row && typeof row.code === "string" && typeof row.verdict === "string",
   )) {
     throw new Error("Invalid reason codes response");
@@ -264,16 +266,16 @@ export async function fetchCityFacets(
   city: string,
   opts: FacetRequestOptions = {},
 ): Promise<CityFacetsResponse> {
-  const res = await fetchWithTimeout(
+  const res = await fetchJsonWithTimeout<{ heads: FacetHead[] }>(
     requestUrl(baseUrl, `/api/v1/signal-facets/cities/${encodeURIComponent(city)}`),
     {
       signal: opts.signal,
       timeoutMs: opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
     },
   );
-  if (!res.ok) throw new SignalFacetError(res.status, await readErrorCode(res));
-  const payload = (await res.json()) as { heads: FacetHead[] };
-  return { heads: payload.heads };
+  if (!res.ok) throw new SignalFacetError(res.status, readJsonErrorCode(res.json));
+  if (res.json === null) throw new Error("signal-facets: empty JSON body");
+  return { heads: res.json.heads };
 }
 
 /**

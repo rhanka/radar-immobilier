@@ -65,6 +65,26 @@ function jsonResponse(status: number, payload: unknown): Response {
   });
 }
 
+/** Headers at once, body stalled: the stream never closes, like a hung body. */
+function stubStalledBody(status = 200): void {
+  vi.stubGlobal(
+    "fetch",
+    async (_url: string, init?: RequestInit) =>
+      new Response(
+        new ReadableStream({
+          start(controller) {
+            init?.signal?.addEventListener(
+              "abort",
+              () => controller.error(new DOMException("Aborted", "AbortError")),
+              { once: true },
+            );
+          },
+        }),
+        { status, headers: { "content-type": "application/json" } },
+      ),
+  );
+}
+
 afterEach(() => vi.unstubAllGlobals());
 
 describe("buildFacetTarget", () => {
@@ -211,6 +231,20 @@ describe("facet reads", () => {
     expect(calls).toHaveLength(1);
     expect(calls[0]!.url).toBe("/api/v1/signal-facets/cities/ville-synth");
   });
+
+  it("times out a stalled heads body instead of blocking the panel", async () => {
+    stubStalledBody(200);
+    const failure = await fetchCityFacets("", "ville-synth", { timeoutMs: 10 }).catch(
+      (err) => err,
+    );
+    expect(failure?.name).toBe("RequestTimeoutError");
+  });
+
+  it("times out a stalled codebook body instead of blocking the controls", async () => {
+    stubStalledBody(200);
+    const failure = await fetchReasonCodes("", { timeoutMs: 10 }).catch((err) => err);
+    expect(failure?.name).toBe("RequestTimeoutError");
+  });
 });
 
 describe("facet writes", () => {
@@ -280,6 +314,18 @@ describe("facet writes", () => {
     });
     const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" } };
     const failure = await postFacetCommand("", "restore", body, "k1").catch((err) => err);
+    expect(failure).toBeInstanceOf(SignalFacetError);
+    if (!(failure instanceof SignalFacetError)) throw new Error("Expected a facet failure");
+    expect(failure.status).toBeNull();
+    expect(facetErrorMessage(failure)).toBe("Écriture non confirmée — Réessayer.");
+  });
+
+  it("reports a stalled write body as unconfirmed, never as refused", async () => {
+    stubStalledBody(200);
+    const body = { target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" } };
+    const failure = await postFacetCommand("", "select", body, "k1", { timeoutMs: 10 }).catch(
+      (err) => err,
+    );
     expect(failure).toBeInstanceOf(SignalFacetError);
     if (!(failure instanceof SignalFacetError)) throw new Error("Expected a facet failure");
     expect(failure.status).toBeNull();
