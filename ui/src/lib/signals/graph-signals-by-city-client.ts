@@ -6,6 +6,12 @@
  */
 
 import type { DocumentDateBasis, VivierV2Counts } from "@radar/domain";
+import {
+  DEFAULT_REQUEST_TIMEOUT_MS,
+  fetchJsonWithTimeout,
+  readJsonErrorCode,
+} from "$lib/net/fetch-with-timeout.js";
+import { GraphSignalsHttpError } from "./graph-signal-detail-client.js";
 
 export interface GraphSignalCityItem {
   citySlug: string;
@@ -48,6 +54,15 @@ export interface GraphSignalsByCityOptions {
   dateBasis?: DocumentDateBasis;
   excludePiia?: boolean;
   excludeDerogations?: boolean;
+  /**
+   * Reveal discarded signals: `showDiscarded=1` recalculates counters on
+   * the complete B(F) population. Hidden by default; forward unchanged.
+   */
+  showDiscarded?: boolean;
+  /** External abort (latest-wins guard). Distinct from the inner timeout. */
+  signal?: AbortSignal;
+  /** Max wait before the read fails instead of hanging. */
+  timeoutMs?: number;
 }
 
 export async function fetchGraphSignalsByCity(
@@ -60,10 +75,26 @@ export async function fetchGraphSignalsByCity(
   if (opts.dateBasis === "scrap") params.set("dateBasis", "scrap");
   if (opts.excludePiia) params.set("excludePiia", "1");
   if (opts.excludeDerogations) params.set("excludeDerogations", "1");
+  if (opts.showDiscarded === true) params.set("showDiscarded", "1");
   const qs = params.toString();
-  const res = await fetch(
+  // Bounded headers AND body: a stalled body still fails with
+  // `RequestTimeoutError` instead of blocking the caller forever.
+  const res = await fetchJsonWithTimeout<GraphSignalsByCityResponse>(
     `${baseUrl}/api/graph-signals/by-city${qs ? `?${qs}` : ""}`,
+    {
+      signal: opts.signal,
+      timeoutMs: opts.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
+    },
   );
-  if (!res.ok) throw new Error(`graph-signals/by-city: ${res.status}`);
-  return res.json();
+  if (!res.ok) {
+    throw new GraphSignalsHttpError(
+      `graph-signals/by-city: ${res.status}`,
+      res.status,
+      readJsonErrorCode(res.json),
+    );
+  }
+  if (res.json === null) {
+    throw new GraphSignalsHttpError("graph-signals/by-city: empty JSON body", res.status, null);
+  }
+  return res.json;
 }
