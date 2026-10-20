@@ -4,7 +4,7 @@ import { tick } from "svelte";
 import { CITY_SLUG, NODES, cityRoute, deferred, openFirstSignalCard, setAuth } from "./SignauxMapView.facets.fixtures.js";
 import SignauxMapView from "./SignauxMapView.svelte";
 import { fetchGraphSignalDetail } from "$lib/signals/graph-signal-detail-client.js";
-import { fetchCityFacets, fetchReasonCodes, type FacetHead } from "$lib/signals/signal-facets-client.js";
+import { fetchCityFacets, fetchReasonCodes, postFacetCommand, type FacetHead } from "$lib/signals/signal-facets-client.js";
 
 const archiveHead: FacetHead = {
   id: "archive-1", target: { citySlug: CITY_SLUG, type: "Signal", id: "sig-1" },
@@ -115,5 +115,29 @@ describe("SignauxMapView — facet regression paths", () => {
     await tick();
     await tick();
     expect(screen.queryByTestId("facet-reload-error")).toBeNull();
+  });
+
+  it("should finish a reveal spinner when a silent post-write re-read supersedes it", async () => {
+    const view = render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await openFirstSignalCard();
+    const write = deferred<Awaited<ReturnType<typeof postFacetCommand>>>();
+    vi.mocked(postFacetCommand).mockReturnValueOnce(write.promise);
+    await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
+    await waitFor(() => expect(postFacetCommand).toHaveBeenCalled());
+    const reveal = deferred<Awaited<ReturnType<typeof fetchGraphSignalDetail>>>();
+    vi.mocked(fetchGraphSignalDetail).mockReturnValueOnce(reveal.promise);
+    await view.rerender({ geoRoute: cityRoute("?filter.period=all&filter.showDiscarded=1") });
+    await waitFor(() => expect(screen.getByText("Chargement des signaux…")).toBeTruthy());
+    const silent = deferred<Awaited<ReturnType<typeof fetchGraphSignalDetail>>>();
+    vi.mocked(fetchGraphSignalDetail).mockReturnValueOnce(silent.promise);
+    write.resolve(null);
+    await waitFor(() =>
+      expect(vi.mocked(fetchGraphSignalDetail).mock.results.at(-1)?.value).toBe(silent.promise),
+    );
+    silent.resolve({ ok: true, citySlug: CITY_SLUG, legacyProjection: null, nodes: NODES });
+    await waitFor(() => expect(screen.queryByText("Chargement des signaux…")).toBeNull());
+    reveal.resolve({ ok: true, citySlug: CITY_SLUG, legacyProjection: null, nodes: NODES });
+    await tick();
+    await tick();
   });
 });

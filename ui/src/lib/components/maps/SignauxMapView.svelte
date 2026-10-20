@@ -576,6 +576,9 @@
   let appliedFacetContext: string | null = null;
   let facetReloadError: string | null = null;
   let facetReloading = false;
+  let facetReloadToken = 0;
+  let undoOperationToken = 0;
+  const bulkGuard = new RequestGuard();
   let discardedNotice: { target: FacetTarget; label: string } | null = null;
   let discardedActionError: string | null = null;
   let undoCommandKey: string | null = null;
@@ -618,7 +621,10 @@
       facetHeadsGuard.cancel();
       facetCodesGuard.cancel();
       detailGuard.cancel();
+      bulkGuard.cancel();
       bulkLoadVersion += 1;
+      facetReloadToken += 1;
+      undoOperationToken += 1;
       facetHeadsByCity = new Map();
       facetHeadsStateByCity = new Map();
       facetCodes = null;
@@ -1529,6 +1535,10 @@
     discardedActionError = null;
     undoCommandKey = null;
     facetReloadError = null;
+    undoOperationToken += 1;
+    undoBusy = false;
+    facetReloadToken += 1;
+    facetReloading = false;
     // Contrat « lot suivant » : changement de ville → plus de lot caméra de
     // référence (le prochain lot cliqué est un PREMIER lot, cadrage existant).
     cameraLot = null;
@@ -1613,7 +1623,7 @@
       detailLegacyProjection = null;
       return "error";
     } finally {
-      if (lease.isCurrent() && !silent) detailLoading = false;
+      if (lease.isCurrent()) detailLoading = false;
     }
   }
 
@@ -1683,21 +1693,29 @@
     citySlug: string,
     opts: { silentDetail?: boolean; includeCodes?: boolean } = {},
   ): Promise<boolean> {
+    if (selectedCity?.municipality.slug !== citySlug) {
+      await load();
+      return false;
+    }
+    const token = ++facetReloadToken;
+    const operationCity = citySlug;
     facetReloadError = null;
     facetReloading = true;
     try {
-      const current = selectedCity?.municipality.slug === citySlug;
+      const currentAtStart = selectedCity?.municipality.slug === operationCity;
       const outcomes = await Promise.all([
-        current ? loadDetailForCity(citySlug, { silent: opts.silentDetail }) : Promise.resolve("stale" as FacetReadOutcome),
-        current ? loadFacetHeads(citySlug) : Promise.resolve("stale" as FacetReadOutcome),
+        currentAtStart ? loadDetailForCity(operationCity, { silent: opts.silentDetail }) : Promise.resolve("stale" as FacetReadOutcome),
+        currentAtStart ? loadFacetHeads(operationCity) : Promise.resolve("stale" as FacetReadOutcome),
         load(),
         opts.includeCodes ? loadReasonCodes() : Promise.resolve("ok" as FacetReadOutcome),
       ]);
+      if (token !== facetReloadToken) return false;
+      if (selectedCity?.municipality.slug !== operationCity) return false;
       const ok = !outcomes.includes("error");
       if (!ok) facetReloadError = "Les données affichées peuvent être périmées.";
       return ok;
     } finally {
-      facetReloading = false;
+      if (token === facetReloadToken) facetReloading = false;
     }
   }
 
@@ -1726,25 +1744,35 @@
    */
   async function handleUndoDiscard(target: FacetTarget): Promise<void> {
     if (undoBusy || !discardedNotice) return;
+    const operationToken = ++undoOperationToken;
+    const operationCity = target.citySlug;
+    const operationNotice = discardedNotice;
+    const isCurrent = () => undoOperationToken === operationToken &&
+      selectedCity?.municipality.slug === operationCity && discardedNotice === operationNotice;
     undoBusy = true;
     discardedActionError = null;
     try {
       if (!undoCommandKey) undoCommandKey = createCommandKey();
-      await postFacetCommand("", "restore", { target }, undoCommandKey);
-      undoCommandKey = null;
+      const commandKeyForOperation = undoCommandKey;
+      await postFacetCommand("", "restore", { target }, commandKeyForOperation);
+      if (isCurrent()) undoCommandKey = null;
+      detailCache.delete(operationCity);
+      await reloadAfterFacetWrite(operationCity, { silentDetail: true });
+      if (!isCurrent()) return;
       discardedNotice = null;
-      detailCache.delete(target.citySlug);
-      await reloadAfterFacetWrite(target.citySlug, { silentDetail: true });
       await tick();
-      selPanel?.focusSignalCard(target.id);
+      if (undoOperationToken === operationToken && selectedCity?.municipality.slug === operationCity) {
+        selPanel?.focusSignalCard(target.id);
+      }
     } catch (err) {
+      if (!isCurrent()) return;
       if (!isFacetWriteUnconfirmed(err)) undoCommandKey = null;
       discardedActionError =
         err instanceof SignalFacetError
           ? facetErrorMessage(err)
           : "Écriture non confirmée — Réessayer.";
     } finally {
-      undoBusy = false;
+      if (undoOperationToken === operationToken) undoBusy = false;
     }
   }
 
@@ -1784,6 +1812,10 @@
     discardedActionError = null;
     undoCommandKey = null;
     facetReloadError = null;
+    undoOperationToken += 1;
+    undoBusy = false;
+    facetReloadToken += 1;
+    facetReloading = false;
     zonesError = null;
     lotsError = null;
     zonesLoading = false;
@@ -2728,6 +2760,7 @@
   let bulkLoadVersion = 0;
   async function load(): Promise<FacetReadOutcome> {
     const version = ++bulkLoadVersion;
+    const lease = bulkGuard.lease();
     loading = true;
     loadError = null;
     try {
@@ -2739,12 +2772,13 @@
         excludePiia: vivierBExclusions.piiaSansProjetResidentiel,
         excludeDerogations: vivierBExclusions.derogationsMineures,
         ...(showDiscarded ? { showDiscarded: true as const } : {}),
+        signal: lease.signal,
       });
-      if (version !== bulkLoadVersion) return "stale";
+      if (version !== bulkLoadVersion || !lease.isCurrent()) return "stale";
       graphItems = res.cities;
       return "ok";
     } catch (e) {
-      if (version !== bulkLoadVersion) return "stale";
+      if (version !== bulkLoadVersion || !lease.isCurrent() || isAbortError(e)) return "stale";
       console.warn("Signals by city load failed:", e);
       loadError =
         e instanceof GraphSignalsHttpError &&
@@ -2754,7 +2788,7 @@
           : "Données des signaux indisponibles.";
       return "error";
     } finally {
-      if (version === bulkLoadVersion) loading = false;
+      if (version === bulkLoadVersion && lease.isCurrent()) loading = false;
     }
   }
 
