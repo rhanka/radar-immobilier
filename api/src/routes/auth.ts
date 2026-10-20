@@ -697,3 +697,17 @@ export function protect(
     return c.json({ error: "unauthenticated" }, 401);
   };
 }
+
+/**
+ * Viewer for the graph-signals discard predicate, read from the session set
+ * by `protect` (`c.get("session")`): the verified session `sub`, else `null`
+ * (open mode — auth disabled — or session-less tests). A missing session
+ * while auth is enabled is a wiring error, never an anonymous viewer:
+ * callers must reject it instead of serving unfiltered data.
+ */
+export function resolveGraphSignalsViewer(c: Context): string | null {
+  const session = c.get("session" as never) as unknown;
+  if (typeof session !== "object" || session === null) return null;
+  const sub = (session as Record<string, unknown>).sub;
+  return typeof sub === "string" && sub.length > 0 ? sub : null;
+}

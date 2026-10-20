@@ -8,7 +8,7 @@ import {
   type JWK,
   type JWTVerifyGetKey,
 } from "jose";
-import { authRoute, protect, pickValidInvitation } from "./auth.js";
+import { authRoute, protect, pickValidInvitation, resolveGraphSignalsViewer } from "./auth.js";
 import type { AuthConfig } from "../config.js";
 import type { OidcDiscovery, FetchLike } from "../services/auth/oidc.js";
 import { signSession, verifySession } from "../services/auth/session.js";
@@ -1489,4 +1489,30 @@ describe("pickValidInvitation — retained invitation (C)", () => {
     expect(pickValidInvitation([], NOW)).toBeNull();
   });
 
+});
+
+describe("resolveGraphSignalsViewer — session sub for the discard port", () => {
+  async function viewerOf(sessionValue: unknown, present: boolean): Promise<string | null> {
+    let seen: string | null | "unset" = "unset";
+    const app = new Hono();
+    app.use("*", async (c, next) => {
+      if (present) c.set("session" as never, sessionValue as never);
+      await next();
+    });
+    app.get("/", (c) => {
+      seen = resolveGraphSignalsViewer(c);
+      return c.json({ ok: true });
+    });
+    await app.request("/");
+    expect(seen).not.toBe("unset");
+    return seen as string | null;
+  }
+
+  it("returns the session sub, else null", async () => {
+    expect(await viewerOf({ sub: "viewer-1" }, true)).toBe("viewer-1");
+    expect(await viewerOf(undefined, true)).toBeNull();
+    expect(await viewerOf({ sub: 42 }, true)).toBeNull();
+    expect(await viewerOf({ sub: "" }, true)).toBeNull();
+    expect(await viewerOf(null, false)).toBeNull();
+  });
 });
