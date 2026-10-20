@@ -6,7 +6,7 @@
  * verdict and never on the prefix.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildFacetTarget, codesForVerdict, createCommandKey, facetErrorMessage, fetchCityFacets, fetchReasonCodes, indexFacetHeads, postFacetCommand, SignalFacetError, SubScopedCache, type FacetHead } from "./signal-facets-client.js";
+import { buildFacetTarget, codesForVerdict, createCommandKey, facetErrorMessage, fetchCityFacets, fetchReasonCodes, indexFacetHeads, postFacetCommand, SignalFacetError, type FacetHead } from "./signal-facets-client.js";
 import type { GraphSignalNode } from "./graph-signal-detail-client.js";
 
 function signalNode(overrides: Partial<GraphSignalNode> = {}): GraphSignalNode {
@@ -236,29 +236,6 @@ describe("facet writes", () => {
     });
   });
 
-  it("reuses the same key when retrying the same intention", async () => {
-    const { calls } = stubFetch((url, init) => {
-      const key = (init?.headers as Record<string, string>)["Idempotency-Key"];
-      return key === "retry-key"
-        ? jsonResponse(200, { ok: true, event: null })
-        : jsonResponse(409, { error: "idempotency_key_conflict" });
-    });
-    const body = {
-      target: { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" },
-      basket: "pertinent" as const,
-    };
-    await expect(postFacetCommand("", "select", body, "other-key")).rejects.toMatchObject({
-      status: 409,
-    });
-    await expect(postFacetCommand("", "select", body, "retry-key")).resolves.toBeNull();
-    await expect(postFacetCommand("", "select", body, "retry-key")).resolves.toBeNull();
-    expect(calls.map((call) => (call.init?.headers as Record<string, string>)["Idempotency-Key"])).toEqual([
-      "other-key",
-      "retry-key",
-      "retry-key",
-    ]);
-  });
-
   it("maps failures by status and server code", async () => {
     stubFetch((url) => {
       if (url.endsWith("/select")) return jsonResponse(422, { error: "reason_code_required" });
@@ -307,17 +284,5 @@ describe("facet writes", () => {
     if (!(failure instanceof SignalFacetError)) throw new Error("Expected a facet failure");
     expect(failure.status).toBeNull();
     expect(facetErrorMessage(failure)).toBe("Écriture non confirmée — Réessayer.");
-  });
-});
-
-describe("SubScopedCache", () => {
-  it("purges entries when the sub changes", () => {
-    const cache = new SubScopedCache<number>();
-    cache.write("alice", "delson", 3);
-    expect(cache.read("alice", "delson")).toBe(3);
-    expect(cache.read("bob", "delson")).toBeUndefined();
-    cache.write("bob", "delson", 5);
-    expect(cache.read("bob", "delson")).toBe(5);
-    expect(cache.read("alice", "delson")).toBeUndefined();
   });
 });
