@@ -6,7 +6,7 @@
  */
 
 import type { DocumentDateBasis, VivierV2Counts } from "@radar/domain";
-import { GraphSignalsHttpError } from "./graph-signal-detail-client.js";
+import { GraphSignalsHttpError, readGraphErrorCode } from "./graph-signal-detail-client.js";
 
 export interface GraphSignalCityItem {
   citySlug: string;
@@ -71,6 +71,12 @@ export async function fetchGraphSignalsByCity(
   const res = await fetch(
     `${baseUrl}/api/graph-signals/by-city${qs ? `?${qs}` : ""}`,
   );
-  if (!res.ok) throw new GraphSignalsHttpError(`graph-signals/by-city: ${res.status}`, res.status);
+  if (!res.ok) {
+    throw new GraphSignalsHttpError(
+      `graph-signals/by-city: ${res.status}`,
+      res.status,
+      await readGraphErrorCode(res),
+    );
+  }
   return res.json();
 }

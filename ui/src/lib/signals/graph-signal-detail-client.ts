@@ -567,16 +567,29 @@ export interface FetchGraphSignalDetailOptions {
 
 /**
  * HTTP failure of a graph-signals read. The message keeps the historical
- * `<route>: <status>` shape; `status` lets callers tell an explicit
- * discarded-reader outage (503 `discarded_signals_unavailable`, never an
- * empty list) from other failures.
+ * `<route>: <status>` shape; `status` plus the server `{error}` body field
+ * (`code`) let callers tell an explicit discarded-reader outage (503
+ * `discarded_signals_unavailable`, never an empty list) from other failures.
+ * A bare status is never enough: only the body code proves the outage.
  */
 export class GraphSignalsHttpError extends Error {
   readonly status: number;
-  constructor(message: string, status: number) {
+  readonly code: string | null;
+  constructor(message: string, status: number, code: string | null = null) {
     super(message);
     this.name = "GraphSignalsHttpError";
     this.status = status;
+    this.code = code;
+  }
+}
+
+/** Server `{error}` body field of a failed graph-signals read, if any. */
+export async function readGraphErrorCode(res: Response): Promise<string | null> {
+  try {
+    const body = (await res.json()) as { error?: unknown };
+    return typeof body.error === "string" ? body.error : null;
+  } catch {
+    return null;
   }
 }
 
@@ -597,7 +610,11 @@ export async function fetchGraphSignalDetail(
       if (res.status === 404) {
         return { ok: false, citySlug, legacyProjection: null, nodes: [] };
       }
-      throw new GraphSignalsHttpError(`graph-signals/${citySlug}: ${res.status}`, res.status);
+      throw new GraphSignalsHttpError(
+        `graph-signals/${citySlug}: ${res.status}`,
+        res.status,
+        await readGraphErrorCode(res),
+      );
     }
     return res.json();
   } catch (err) {

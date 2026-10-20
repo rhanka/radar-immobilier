@@ -68,4 +68,19 @@ describe("fetchGraphSignalsByCity — #4 fenêtre date (dateFrom/dateTo)", () =>
     expect(failure?.status).toBe(503);
     expect(String(failure?.message)).toBe("graph-signals/by-city: 503");
   });
+
+  it("carries the server error body code, null when the body is unreadable", async () => {
+    vi.stubGlobal(
+      "fetch",
+      async () =>
+        new Response(JSON.stringify({ error: "discarded_signals_unavailable" }), { status: 503 }),
+    );
+    const outage = await fetchGraphSignalsByCity("").catch((err) => err);
+    expect(outage?.status).toBe(503);
+    expect(outage?.code).toBe("discarded_signals_unavailable");
+    vi.stubGlobal("fetch", async () => new Response("unavailable", { status: 503 }));
+    const bare = await fetchGraphSignalsByCity("").catch((err) => err);
+    expect(bare?.status).toBe(503);
+    expect(bare?.code).toBeNull();
+  });
 });
