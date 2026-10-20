@@ -50,6 +50,7 @@ import {
   type DiscardedSignalsPort,
 } from "../services/graph/discarded-signals.js";
 import { resolveGraphSignalsViewer } from "./auth.js";
+import { privateSignalResponse } from "../services/facets/private-response.js";
 import type { Database } from "../db/client.js";
 import type { ObjectStore } from "../storage/object-store.js";
 import {
@@ -928,6 +929,7 @@ function mergeEvidenceWithDocRefs(
 
 export function graphSignalsRoute(deps: GraphSignalsDeps): Hono {
   const app = new Hono();
+  app.use("/api/graph-signals/*", privateSignalResponse);
 
   // GET /api/graph-signals/by-city
   app.get("/api/graph-signals/by-city", async (c) => {
