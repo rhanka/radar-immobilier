@@ -20,7 +20,7 @@
    *  - NE touche PAS API/OIDC/PG/geo
    *  - NE déclenche PAS l'activation zonage-au-zoom (Phase 2)
    */
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import { Checkbox, IconButton } from "@sentropic/design-system-svelte";
   // §5 R2 point 2 — déclencheur chat = bulle DANS un carré (glyph lucide
   // `MessageSquare`, PAS `MessageCircle`). Le bouton vit dans la rangée de
@@ -64,13 +64,21 @@
     fetchCityFacets,
     fetchReasonCodes,
     indexFacetHeads,
+    isFacetWriteUnconfirmed,
     postFacetCommand,
     SignalFacetError,
     type FacetAction,
+    type FacetHeadsStatus,
     type FacetTarget,
     type ReasonCode,
     type TargetFacetState,
   } from "$lib/signals/signal-facets-client.js";
+
+  /**
+   * Outcome of one facet-area read. `stale` (superseded lease: the viewer or
+   * the city moved on) is not a failure — only `error` raises the banner.
+   */
+  type FacetReadOutcome = "ok" | "stale" | "error";
   import { authStore } from "$lib/auth/auth-store.js";
   import {
     buildOverlaySignals,
@@ -564,12 +572,24 @@
   let facetCodesError: string | null = null;
   let facetCodesSub: string | null = null;
   let facetHeadsByCity = new Map<string, Map<string, TargetFacetState>>();
+  let facetHeadsStateByCity = new Map<string, FacetHeadsStatus>();
   let appliedFacetContext: string | null = null;
   let facetReloadError: string | null = null;
+  let facetReloading = false;
   let discardedNotice: { target: FacetTarget; label: string } | null = null;
   let discardedActionError: string | null = null;
   let undoCommandKey: string | null = null;
   let undoBusy = false;
+  let selPanel: {
+    focusSignalCard(id: string): void;
+    focusSignalsBucket(): void;
+  } | null = null;
+
+  function setFacetHeadsState(citySlug: string, status: FacetHeadsStatus): void {
+    const next = new Map(facetHeadsStateByCity);
+    next.set(citySlug, status);
+    facetHeadsStateByCity = next;
+  }
 
   $: authState = $authStore;
   $: currentUserSub = authState.user?.sub ?? null;
@@ -600,10 +620,12 @@
       detailGuard.cancel();
       bulkLoadVersion += 1;
       facetHeadsByCity = new Map();
+      facetHeadsStateByCity = new Map();
       facetCodes = null;
       facetCodesError = null;
       facetCodesLoading = false;
       facetReloadError = null;
+      facetReloading = false;
       discardedNotice = null;
       discardedActionError = null;
       undoCommandKey = null;
@@ -1533,12 +1555,18 @@
    * Charge le détail signaux (panneau droit) d'une ville avec garde anti-course
    * et timeout. Une réponse en retard/annulée (changement de ville) est ignorée ;
    * un échec bascule la couche en état d'erreur SANS toucher aux zones/lots.
-   * Forward the reveal unchanged; a 503 discarded_signals_unavailable is
-   * an explicit error. Return true only after fresh data has been applied.
+   * Forward the reveal unchanged; a 503 is explicit only with the
+   * discarded_signals_unavailable body code. Silent post-write re-reads keep
+   * the list in place (no spinner, no unmount) and only disable controls.
+   * Returns `stale` when superseded — never an error banner for that.
    */
-  async function loadDetailForCity(citySlug: string): Promise<boolean> {
+  async function loadDetailForCity(
+    citySlug: string,
+    opts: { silent?: boolean } = {},
+  ): Promise<FacetReadOutcome> {
     const lease = detailGuard.lease();
-    detailLoading = true;
+    const silent = opts.silent === true;
+    if (!silent) detailLoading = true;
     detailError = null;
     detailLegacyProjection = null;
     try {
@@ -1546,14 +1574,14 @@
         signal: lease.signal,
         ...(showDiscarded ? { showDiscarded: true as const } : {}),
       });
-      if (!lease.isCurrent()) return false; // réponse périmée → on ignore
+      if (!lease.isCurrent()) return "stale"; // réponse périmée → on ignore
       if (!res.ok && res.nodes.length === 0) {
         // 404 — ville sans signaux graphify (état vide explicite, pas une erreur)
         detailNodes = [];
         detailLegacyProjection = null;
         detailError = null;
         reconcileToVisibleNodes();
-        return true;
+        return "ok";
       }
       detailNodes = res.nodes;
       detailLegacyProjection = res.legacyProjection;
@@ -1565,19 +1593,19 @@
       // Ne pas auto-focaliser le 1er signal : l'utilisateur choisit lui-même
       // quel signal ouvrir (clic dans le panneau droit).
       updateGeoLayers();
-      return true;
+      return "ok";
     } catch (e) {
       // Abort (changement de ville) → réponse périmée à ignorer, pas une erreur.
-      if (!lease.isCurrent() || isAbortError(e)) return false;
+      if (!lease.isCurrent() || isAbortError(e)) return "stale";
       console.warn("Signal detail load failed:", e);
       detailError =
         e instanceof GraphSignalsHttpError && e.status === 503
           ? "Signaux écartés indisponibles (discarded_signals_unavailable) — rechargement impossible."
           : "Signaux indisponibles.";
       detailLegacyProjection = null;
-      return false;
+      return "error";
     } finally {
-      if (lease.isCurrent()) detailLoading = false;
+      if (lease.isCurrent() && !silent) detailLoading = false;
     }
   }
 
@@ -1585,10 +1613,10 @@
    * Read the reason codebook once per viewer. Unreadable codes disable the
    * controls with a message while leaving signal reads available.
    */
-  async function loadReasonCodes(): Promise<boolean> {
-    if (!facetsAllowed || !currentUserSub) return false;
-    if (facetCodes !== null && facetCodesSub === currentUserSub) return true;
-    if (facetCodesLoading) return false;
+  async function loadReasonCodes(): Promise<FacetReadOutcome> {
+    if (!facetsAllowed || !currentUserSub) return "stale";
+    if (facetCodes !== null && facetCodesSub === currentUserSub) return "ok";
+    if (facetCodesLoading) return "stale";
     const lease = facetCodesGuard.lease();
     const sub = currentUserSub;
     facetCodesLoading = true;
@@ -1596,16 +1624,16 @@
     try {
       // GET reason-codes rejects query parameters with 400.
       const res = await fetchReasonCodes("", { signal: lease.signal });
-      if (!lease.isCurrent()) return false;
+      if (!lease.isCurrent()) return "stale";
       facetCodes = res.codes;
       facetCodesSub = sub;
-      return true;
+      return "ok";
     } catch (err) {
-      if (!lease.isCurrent() || isAbortError(err)) return false;
+      if (!lease.isCurrent() || isAbortError(err)) return "stale";
       console.warn("Facet reason codes load failed:", err);
       facetCodes = null;
       facetCodesError = "Codes de motif illisibles — classement indisponible.";
-      return false;
+      return "error";
     } finally {
       if (lease.isCurrent()) facetCodesLoading = false;
     }
@@ -1613,40 +1641,56 @@
 
   /**
    * Read city heads under a dedicated request guard, without query params.
-   * Return true only after fresh heads have been applied for this viewer.
+   * Tracks a per-city read state so the panel hides badges and inactivates
+   * controls until `ready`. Failed head reads never prove archive presence.
    */
-  async function loadFacetHeads(citySlug: string): Promise<boolean> {
-    if (!facetsAllowed || !currentUserSub) return false;
+  async function loadFacetHeads(citySlug: string): Promise<FacetReadOutcome> {
+    if (!facetsAllowed || !currentUserSub) return "stale";
     const lease = facetHeadsGuard.lease();
+    setFacetHeadsState(citySlug, "loading");
     try {
       const res = await fetchCityFacets("", citySlug, { signal: lease.signal });
-      if (!lease.isCurrent()) return false;
+      if (!lease.isCurrent()) return "stale";
       const next = new Map(facetHeadsByCity);
       next.set(citySlug, indexFacetHeads(res.heads));
       facetHeadsByCity = next;
-      return true;
+      setFacetHeadsState(citySlug, "ready");
+      return "ok";
     } catch (err) {
-      if (!lease.isCurrent() || isAbortError(err)) return false;
+      if (!lease.isCurrent() || isAbortError(err)) return "stale";
       console.warn("Facet heads load failed:", err);
-      return false;
+      setFacetHeadsState(citySlug, "error");
+      return "error";
     }
   }
 
   /**
-   * After a confirmed write, reload detail, heads and by-city in parallel
-   * under their guards. A failed read gets a distinct recorded-but-not-
-   * reloaded message and a reads-only retry.
+   * After a confirmed write, reload detail (silently: the card stays mounted),
+   * heads and by-city in parallel under their guards — but only for the city
+   * still selected (by-city is re-read in all cases). A failed read gets a
+   * distinct recorded-but-not-reloaded message and a reads-only retry; a
+   * superseded read stays silent.
    */
-  async function reloadAfterFacetWrite(citySlug: string): Promise<boolean> {
+  async function reloadAfterFacetWrite(
+    citySlug: string,
+    opts: { silentDetail?: boolean; includeCodes?: boolean } = {},
+  ): Promise<boolean> {
     facetReloadError = null;
-    const [detailOk, headsOk, bulkOk] = await Promise.all([
-      selectedCity ? loadDetailForCity(citySlug) : Promise.resolve(true),
-      loadFacetHeads(citySlug),
-      load(),
-    ]);
-    const ok = detailOk && headsOk && bulkOk;
-    if (!ok) facetReloadError = "Les données affichées peuvent être périmées.";
-    return ok;
+    facetReloading = true;
+    try {
+      const current = selectedCity?.municipality.slug === citySlug;
+      const outcomes = await Promise.all([
+        current ? loadDetailForCity(citySlug, { silent: opts.silentDetail }) : Promise.resolve("stale" as FacetReadOutcome),
+        current ? loadFacetHeads(citySlug) : Promise.resolve("stale" as FacetReadOutcome),
+        load(),
+        opts.includeCodes ? loadReasonCodes() : Promise.resolve("ok" as FacetReadOutcome),
+      ]);
+      const ok = !outcomes.includes("error");
+      if (!ok) facetReloadError = "Les données affichées peuvent être périmées.";
+      return ok;
+    } finally {
+      facetReloading = false;
+    }
   }
 
   /** Confirmed card write: clear the city cache and reload all three reads. */
@@ -1663,7 +1707,7 @@
   }
 
   function handleRetryFacetReads(): void {
-    if (selectedCity) void reloadAfterFacetWrite(selectedCity.municipality.slug);
+    if (selectedCity) void reloadAfterFacetWrite(selectedCity.municipality.slug, { includeCodes: true });
   }
 
   /**
@@ -1680,8 +1724,11 @@
       undoCommandKey = null;
       discardedNotice = null;
       detailCache.delete(target.citySlug);
-      await reloadAfterFacetWrite(target.citySlug);
+      await reloadAfterFacetWrite(target.citySlug, { silentDetail: true });
+      await tick();
+      selPanel?.focusSignalCard(target.id);
     } catch (err) {
+      if (!isFacetWriteUnconfirmed(err)) undoCommandKey = null;
       discardedActionError =
         err instanceof SignalFacetError
           ? facetErrorMessage(err)
@@ -1695,6 +1742,7 @@
     discardedNotice = null;
     discardedActionError = null;
     undoCommandKey = null;
+    selPanel?.focusSignalsBucket();
   }
 
   /** « Réessayer » du panneau : recharge uniquement le détail signaux. */
@@ -2661,7 +2709,7 @@
 
   // ── Chargement API ─────────────────────────────────────────────────────────
   let bulkLoadVersion = 0;
-  async function load(): Promise<boolean> {
+  async function load(): Promise<FacetReadOutcome> {
     const version = ++bulkLoadVersion;
     loading = true;
     loadError = null;
@@ -2675,17 +2723,17 @@
         excludeDerogations: vivierBExclusions.derogationsMineures,
         ...(showDiscarded ? { showDiscarded: true as const } : {}),
       });
-      if (version !== bulkLoadVersion) return false;
+      if (version !== bulkLoadVersion) return "stale";
       graphItems = res.cities;
-      return true;
+      return "ok";
     } catch (e) {
-      if (version !== bulkLoadVersion) return false;
+      if (version !== bulkLoadVersion) return "stale";
       console.warn("Signals by city load failed:", e);
       loadError =
         e instanceof GraphSignalsHttpError && e.status === 503
           ? "Données des signaux indisponibles — signaux écartés indisponibles (discarded_signals_unavailable)."
           : "Données des signaux indisponibles.";
-      return false;
+      return "error";
     } finally {
       if (version === bulkLoadVersion) loading = false;
     }
@@ -3015,6 +3063,7 @@
        Lots ; leur état est porté ici (peinture carte, zéro refetch). ─────── -->
   <svelte:fragment slot="sel">
     <SignauxSelPanel
+      bind:this={selPanel}
       {selectedCity}
       detailNodes={filteredDetailNodes}
       unfilteredSignalCount={detailNodes.length}
@@ -3048,6 +3097,8 @@
       hoveredSignalId={hoveredEvidenceSignalId}
       onHoverSignal={setHoveredEvidenceSignal}
       facetHeads={activeFacetHeads}
+      facetHeadsState={facetHeadsStateByCity.get(selectedCity?.municipality.slug ?? "") ?? "loading"}
+      facetReloading={facetReloading}
       reasonCodes={facetCodes}
       facetCodesError={facetCodesError}
       facetCodesLoading={facetCodesLoading}
