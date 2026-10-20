@@ -1257,7 +1257,6 @@
         <summary
           class="sel-bucket-head"
           bind:this={signalsBucketHead}
-          tabindex="-1"
           data-testid="signals-bucket-head"
         >
           <span class="sel-bucket-name">Signaux</span>

@@ -334,6 +334,28 @@ describe("SignauxSelPanel — heads read state", () => {
     expect((screen.getByTestId("facet-toggle-pertinent") as HTMLButtonElement).disabled).toBe(true);
   });
 
+  it("keeps the Signaux summary in the tab order when closed", async () => {
+    render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [makeSignal()],
+        unfilteredSignalCount: 1,
+        facetsAllowed: true,
+        reasonCodes: CODES,
+        facetHeads: new Map(),
+      },
+    });
+    const summary = screen.getByTestId("signals-bucket-head");
+    expect(summary.tagName.toLowerCase()).toBe("summary");
+    expect(summary.getAttribute("tabindex")).toBeNull();
+    expect((summary as HTMLElement).tabIndex).toBeGreaterThanOrEqual(0);
+    expect(summary.closest("details")?.open).toBe(false);
+    summary.focus();
+    expect(document.activeElement).toBe(summary);
+    await fireEvent.click(summary);
+    await waitFor(() => expect(summary.closest("details")?.open).toBe(true));
+  });
+
   it("offers the reveal on an empty view with confirmed active archives", async () => {
     const onToggleShowDiscarded = vi.fn();
     render(Harness, {
