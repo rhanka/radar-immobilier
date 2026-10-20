@@ -161,12 +161,12 @@ function classification(): GraphSignalNode["classification"] {
   } as unknown as GraphSignalNode["classification"];
 }
 
-function signalNode(id: string, label: string): GraphSignalNode {
+function signalNode(citySlug: string, id: string, label: string): GraphSignalNode {
   return {
     id,
     type: "Signal",
     label,
-    citySlug: CITY_SLUG,
+    citySlug,
     sourceRef: `raw/proces-verbaux-ville/cas/${id}.pdf`,
     createdAt: "2026-05-19T12:00:00.000Z",
     description: `Synthetic ${label}.`,
@@ -177,11 +177,19 @@ function signalNode(id: string, label: string): GraphSignalNode {
 }
 
 export const CITY_SLUG = buildCityMapEntries([])[0]!.municipality.slug;
-export const NODES = [signalNode("sig-1", "First zonage signal"), signalNode("sig-2", "Second zonage signal")];
+export const OTHER_CITY_SLUG = buildCityMapEntries([])[1]!.municipality.slug;
+export const NODES = [
+  signalNode(CITY_SLUG, "sig-1", "First zonage signal"),
+  signalNode(CITY_SLUG, "sig-2", "Second zonage signal"),
+];
+export const OTHER_NODES = [
+  signalNode(OTHER_CITY_SLUG, "sig-b1", "B first signal"),
+  signalNode(OTHER_CITY_SLUG, "sig-b2", "B second signal"),
+];
 
-export function setAuth(sub: string | null, status: "pending" | "approved" = "approved"): void {
+export function setAuth(sub: string | null, status: "pending" | "approved" = "approved", authDisabled = false): void {
   (authStore as unknown as Writable<AuthState>).set({
-    loading: false, authenticated: sub !== null, authDisabled: false, loginBlocked: false,
+    loading: false, authenticated: sub !== null, authDisabled, loginBlocked: false,
     user: sub ? { sub, status } : null,
   });
 }
@@ -192,8 +200,18 @@ export function deferred<T>() {
   return { promise, resolve };
 }
 
-export function cityRoute(search: string): GeoRoute {
-  return { level: "city", citySlug: CITY_SLUG, state: parseGeoQuery(search) };
+export function cityRoute(search: string, slug: string = CITY_SLUG): GeoRoute {
+  return { level: "city", citySlug: slug, state: parseGeoQuery(search) };
+}
+
+/** Detail populations answered per city, so city switches change the list. */
+export function mockDetailByCity(): void {
+  vi.mocked(fetchGraphSignalDetail).mockImplementation(async (citySlug: string) => ({
+    ok: true,
+    citySlug,
+    legacyProjection: null,
+    nodes: citySlug === OTHER_CITY_SLUG ? OTHER_NODES : NODES,
+  }));
 }
 
 function setSearch(search: string): void {
@@ -221,6 +239,7 @@ afterEach(() => {
 });
 
 beforeEach(() => {
+  Element.prototype.scrollIntoView = vi.fn();
   setAuth("tester-1");
   vi.mocked(fetchGraphSignalsByCity).mockReset();
   vi.mocked(fetchGraphSignalDetail).mockReset();

@@ -11,7 +11,7 @@ import type { MunicipalityT } from "@radar/domain";
 import type { CityMapEntry } from "$lib/maps/maps-data.js";
 import type { GraphSignalNode } from "$lib/signals/graph-signal-detail-client.js";
 import { createSelectionBucketState, makeKey } from "$lib/maps/selection-bucket.js";
-import type { TargetFacetState, postFacetCommand } from "$lib/signals/signal-facets-client.js";
+import type { FacetHeadsStatus, TargetFacetState, postFacetCommand } from "$lib/signals/signal-facets-client.js";
 import Harness from "./SignauxSelPanelHarness.svelte";
 
 vi.mock("$lib/collab/annotations-client.js", () => ({
@@ -233,6 +233,8 @@ describe("SignauxSelPanel — controls and discard notice", () => {
       },
     });
     const notice = screen.getByTestId("discarded-notice");
+    expect(notice.getAttribute("role")).toBeNull();
+    expect(within(notice).getAllByRole("status")).toHaveLength(1);
     expect(notice.contains(document.activeElement)).toBe(true);
     const buttons = within(notice).getAllByRole("button");
     await fireEvent.click(buttons.find((button) => button.textContent === "Annuler")!);
@@ -257,5 +259,100 @@ describe("SignauxSelPanel — controls and discard notice", () => {
     expect(alert.textContent).toContain("rechargement impossible");
     await fireEvent.click(within(alert).getByRole("button", { name: "Réessayer" }));
     expect(onRetryFacetReads).toHaveBeenCalledTimes(1);
+  });
+
+  it("refocuses the notice when a new notice replaces the previous one", async () => {
+    const target = { citySlug: "delson", type: "DesignationEvent" as const, id: "sig-1" };
+    const view = render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [makeSignal()],
+        unfilteredSignalCount: 1,
+        facetsAllowed: true,
+        discardedNotice: { target, label: "Synthetic zonage signal" },
+      },
+    });
+    expect(screen.getByTestId("discarded-notice").contains(document.activeElement)).toBe(true);
+    (document.activeElement as HTMLElement | null)?.blur();
+    await view.rerender({
+      discardedNotice: { target: { ...target, id: "sig-2" }, label: "Second signal" },
+    });
+    await waitFor(() =>
+      expect(screen.getByTestId("discarded-notice").contains(document.activeElement)).toBe(true),
+    );
+  });
+});
+
+describe("SignauxSelPanel — heads read state", () => {
+  function headedProps(overrides: {
+    facetHeadsState?: FacetHeadsStatus;
+    facetReloading?: boolean;
+    onRetryFacetReads?: () => void;
+  } = {}) {
+    const {
+      facetHeadsState = "ready" as FacetHeadsStatus,
+      facetReloading = false,
+      onRetryFacetReads = () => {},
+    } = overrides;
+    return {
+      selectedCity: makeCity(),
+      detailNodes: [makeSignal()],
+      unfilteredSignalCount: 1,
+      selectionState: focusedState("sig-1"),
+      facetsAllowed: true,
+      reasonCodes: CODES,
+      facetHeads: new Map([
+        ["DesignationEvent/sig-1", facetState({ pertinent: true, pertinentCode: "P-DENSITE" })],
+      ]),
+      facetHeadsState,
+      facetReloading,
+      onRetryFacetReads,
+    };
+  }
+
+  it("hides badges and inactivates controls while heads load", () => {
+    render(Harness, { props: headedProps({ facetHeadsState: "loading" }) });
+    expect(screen.queryByTestId("facet-badge-pertinent")).toBeNull();
+    expect(screen.getByTestId("facet-heads-loading").textContent).toContain("Chargement du classement");
+    expect(screen.getByTestId("signal-facet-controls")).toBeTruthy();
+    expect((screen.getByTestId("facet-toggle-pertinent") as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("shows a retry on heads error without any badge", async () => {
+    const onRetryFacetReads = vi.fn();
+    render(Harness, { props: headedProps({ facetHeadsState: "error", onRetryFacetReads }) });
+    expect(screen.queryByTestId("facet-badge-pertinent")).toBeNull();
+    await fireEvent.click(
+      within(screen.getByTestId("facet-heads-error")).getByRole("button", { name: "Réessayer" }),
+    );
+    expect(onRetryFacetReads).toHaveBeenCalledTimes(1);
+  });
+
+  it("inactivates controls while a silent re-read is in flight", () => {
+    render(Harness, { props: headedProps({ facetReloading: true }) });
+    expect(screen.getByTestId("facet-badge-pertinent")).toBeTruthy();
+    expect((screen.getByTestId("facet-toggle-pertinent") as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("offers the reveal on an empty view with confirmed active archives", async () => {
+    const onToggleShowDiscarded = vi.fn();
+    render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [],
+        unfilteredSignalCount: 0,
+        facetsAllowed: true,
+        reasonCodes: CODES,
+        facetHeadsState: "ready",
+        facetHeads: new Map([["DesignationEvent/sig-1", facetState({ archived: true })]]),
+        showDiscarded: false,
+        onToggleShowDiscarded,
+      },
+    });
+    expect(screen.getByTestId("facet-all-archived").textContent).toContain(
+      "Tous les signaux sont écartés.",
+    );
+    await fireEvent.click(screen.getByRole("button", { name: "Montrer les écartés" }));
+    expect(onToggleShowDiscarded).toHaveBeenCalledWith(true);
   });
 });
