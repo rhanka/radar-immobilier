@@ -2,17 +2,24 @@ import { describe, it } from "vitest";
 import { runCaptureProbe } from "./capture-stress.fixture.js";
 
 describe("capture CPU bounds", () => {
-  it("merges 499990 overlapping column spans before expanding at most 16384 columns", () => {
+  it("merges 499990 overlapping column spans into one interval without expansion", () => {
     runCaptureProbe(`
       const { readHiddenColumns } = await import(${JSON.stringify(new URL("./sheet-parse.ts", import.meta.url).href)});
       const col = { name: 'col', attrs: { min: '1', max: '16384', hidden: '1' }, children: [], text: '' };
       const cols = { name: 'cols', attrs: {}, children: Array(499990).fill(col), text: '' };
       const ws = { name: 'worksheet', attrs: {}, children: [cols], text: '' };
       const hidden = readHiddenColumns(ws, 'Synthetic');
-      assert.equal(hidden.length, 16384);
-      assert.equal(hidden[0], 1);
-      assert.equal(hidden.at(-1), 16384);
+      assert.deepEqual(hidden, [{ min: 1, max: 16384 }]);
     `, 2000);
+  });
+
+  it("keeps ten full-width hidden intervals bounded without per-column objects", () => {
+    runCaptureProbe(`
+      const sheet = '<worksheet><cols><col min="2" max="16384" hidden="1"/></cols></worksheet>';
+      const inventory = captureWorkbookInventory(repeatedSheetWorkbook(10, sheet));
+      assert.equal(inventory.hiddenColumns.length, 10);
+      assert.deepEqual(inventory.hiddenColumns[0], { sheet: 'Synthetic 1', sheetId: 1, min: 2, max: 16384 });
+    `);
   });
 
   it("rejects an archive with 499990 hidden full-width column spans within five seconds", () => {

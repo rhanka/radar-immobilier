@@ -11,6 +11,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
@@ -764,7 +765,53 @@ export const refreshDocumentOutcomes = pgTable("refresh_document_outcomes", {
   byStatus: index("refresh_document_outcomes_status_idx").on(t.status),
 }));
 
+// Hand-authored CHECK constraints and composite reason FK: migration 0014.
+export const facetReasonCodes = pgTable("facet_reason_codes", {
+  profileId: text("profile_id").notNull(),
+  code: text("code").notNull(),
+  verdict: text("verdict").notNull(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.profileId, t.code] }),
+  classifiedCode: unique("facet_reason_codes_classified_key")
+    .on(t.profileId, t.code, t.verdict),
+}));
+
+// Partial indexes and immutability triggers are hand-authored in migration 0014.
+export const facetEvents = pgTable("facet_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  scope: text("scope").notNull().default("personal"),
+  ownerId: uuid("owner_id").notNull().references(() => accountUsers.id),
+  actorId: uuid("actor_id").notNull().references(() => accountUsers.id),
+  targetType: text("target_type").notNull().default("signal"),
+  citySlug: text("city_slug").notNull(),
+  nodeType: text("node_type").notNull(),
+  nodeId: text("node_id").notNull(),
+  facet: text("facet").notNull(),
+  basket: text("basket"),
+  state: text("state").notNull(),
+  profileId: text("profile_id"),
+  reasonCode: text("reason_code"),
+  verdict: text("verdict"),
+  observedFingerprint: text("observed_fingerprint").notNull(),
+  commandKey: uuid("command_key").notNull(),
+  commandDigest: text("command_digest").notNull(),
+  supersedes: uuid("supersedes").references((): AnyPgColumn => facetEvents.id),
+  supersededBy: uuid("superseded_by").references((): AnyPgColumn => facetEvents.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const facetCommands = pgTable("facet_commands", {
+  ownerId: uuid("owner_id").notNull().references(() => accountUsers.id),
+  commandKey: uuid("command_key").notNull(),
+  commandDigest: text("command_digest").notNull(),
+  result: jsonb("result").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({ pk: primaryKey({ columns: [t.ownerId, t.commandKey] }) }));
+
 export const schema = {
+  facetCommands,
+  facetEvents,
+  facetReasonCodes,
   refreshDocumentOutcomes,
   sources,
   ingestions,

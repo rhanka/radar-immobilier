@@ -178,3 +178,81 @@ describe("faithful workbook edge cases", () => {
     }))).toThrow(/mismatched closing tag/);
   });
 });
+
+describe("OOXML control escape decoding", () => {
+  it("decodes shared strings once", () => {
+    const bytes = buildSyntheticWorkbook({
+      "xl/sharedStrings.xml": "<sst><si><t>_x000D_</t></si><si><t>_x005F_x0041_</t></si></sst>",
+      "xl/worksheets/sheet1.xml": sheet(
+        '<sheetData><row r="1"><c r="A1" t="s"><v>0</v></c><c r="B1" t="s"><v>1</v></c></row></sheetData>',
+      ),
+      "xl/worksheets/sheet2.xml": sheet("<sheetData/>"),
+    });
+    const inventory = captureWorkbookInventory(bytes);
+    expect(inventory.sharedStrings.slice(0, 2)).toEqual(["\r", "_x0041_"]);
+    const values = inventory.cells.filter((cell) => cell.sheet === "Lots").map((cell) => cell.value);
+    expect(values).toEqual(["\r", "_x0041_"]);
+  });
+
+  it("decodes inline strings once and preserves the raw text", () => {
+    const inventory = captureSheet(
+      '<sheetData><row r="1"><c r="A1" t="inlineStr"><is><t>_x000D_</t></is></c>' +
+      '<c r="B1" t="inlineStr"><is><t>_x005F_x0041_</t></is></c></row></sheetData>',
+    );
+    const cells = inventory.cells.filter((cell) => cell.sheet === "Lots");
+    expect(cells.map((cell) => cell.value)).toEqual(["\r", "_x0041_"]);
+    expect(cells.map((cell) => cell.raw)).toEqual(["_x000D_", "_x005F_x0041_"]);
+  });
+
+  it("decodes rich text runs once", () => {
+    const bytes = buildSyntheticWorkbook({
+      "xl/sharedStrings.xml": "<sst><si><r><t>_x000D_</t></r><r><t>_x005F_x0041_</t></r></si></sst>",
+      "xl/worksheets/sheet1.xml": sheet(
+        '<sheetData><row r="1"><c r="A1" t="s"><v>0</v></c>' +
+        '<c r="B1" t="inlineStr"><is><r><t>A_x000D_</t></r><r><t>B_x005F_x0041_</t></r></is></c>' +
+        "</row></sheetData>",
+      ),
+      "xl/worksheets/sheet2.xml": sheet("<sheetData/>"),
+    });
+    const inventory = captureWorkbookInventory(bytes);
+    expect(inventory.sharedStrings[0]).toBe("\r_x0041_");
+    const byAddress = new Map(inventory.cells.filter((cell) => cell.sheet === "Lots").map((cell) => [cell.address, cell]));
+    expect(byAddress.get("A1")?.value).toBe("\r_x0041_");
+    expect(byAddress.get("B1")?.value).toBe("A\rB_x0041_");
+    expect(byAddress.get("B1")?.raw).toBe("A_x000D_B_x005F_x0041_");
+  });
+
+  it("keeps an escape split across shared rich text runs literal", () => {
+    const bytes = buildSyntheticWorkbook({
+      "xl/sharedStrings.xml": "<sst><si><r><t>_x00</t></r><r><t>41_</t></r></si><si><t>_x005F_x0041_</t></si></sst>",
+      "xl/worksheets/sheet1.xml": sheet(
+        '<sheetData><row r="1"><c r="A1" t="s"><v>0</v></c><c r="B1" t="s"><v>1</v></c></row></sheetData>',
+      ),
+      "xl/worksheets/sheet2.xml": sheet("<sheetData/>"),
+    });
+    const inventory = captureWorkbookInventory(bytes);
+    expect(inventory.sharedStrings.slice(0, 2)).toEqual(["_x0041_", "_x0041_"]);
+    const cells = inventory.cells.filter((cell) => cell.sheet === "Lots");
+    expect(cells.map((cell) => cell.value)).toEqual(["_x0041_", "_x0041_"]);
+  });
+
+  it("keeps an escape split across inline rich text runs literal", () => {
+    const inventory = captureSheet(
+      '<sheetData><row r="1"><c r="A1" t="inlineStr"><is><r><t>_x00</t></r><r><t>41_</t></r></is></c></row></sheetData>',
+    );
+    const cell = inventory.cells.find((cell) => cell.sheet === "Lots");
+    expect(cell?.value).toBe("_x0041_");
+    expect(cell?.raw).toBe("_x0041_");
+  });
+
+  it("decodes formula string results and preserves the raw text", () => {
+    const inventory = captureSheet(
+      '<sheetData><row r="1"><c r="A1" t="str"><f>CHAR(13)</f><v>_x000D_</v></c>' +
+      '<c r="B1" t="str"><f>CONCAT("_",CHAR(65))</f><v>_x005F_x0041_</v></c></row></sheetData>',
+    );
+    const cells = inventory.cells.filter((cell) => cell.sheet === "Lots");
+    expect(cells.map((cell) => cell.value)).toEqual(["\r", "_x0041_"]);
+    expect(cells.map((cell) => cell.raw)).toEqual(["_x000D_", "_x005F_x0041_"]);
+    expect(cells.map((cell) => cell.cachedValue)).toEqual(["_x000D_", "_x005F_x0041_"]);
+  });
+});

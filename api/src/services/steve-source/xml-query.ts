@@ -22,10 +22,41 @@ export function deepText(node: XmlNode): string {
   return out;
 }
 
-/** Read displayed rich-text runs, excluding indentation and phonetic guides. */
-export function spreadsheetText(node: XmlNode): string {
+/**
+ * Decode one OOXML `_xHHHH_` escape pass over the original text.
+ * `String.replace` scans the input once without rescanning replacements,
+ * so `_x005F_x0041_` yields the literal `_x0041_` instead of `A`.
+ */
+export function decodeOoxmlEscapes(input: string): string {
+  return input.replace(/_x([0-9A-Fa-f]{4})_/g, (match: string, hex: string): string => {
+    const code = Number.parseInt(hex, 16);
+    if (!Number.isFinite(code)) return match;
+    try {
+      return String.fromCodePoint(code);
+    } catch {
+      return match;
+    }
+  });
+}
+
+/** Collect displayed rich-text runs without decoding, excluding phonetic guides. */
+export function spreadsheetRawText(node: XmlNode): string {
   return node.children.map((child) => {
     if (child.name === "t") return child.text;
+    if (child.name === "r") return spreadsheetRawText(child);
+    return "";
+  }).join("");
+}
+
+/**
+ * Read displayed rich-text runs, excluding indentation and phonetic guides.
+ * Each `<t>` fragment is decoded once, before concatenation, so an escape
+ * split across two runs (e.g. `_x00` + `41_`) stays literal instead of
+ * decoding to `A`.
+ */
+export function spreadsheetText(node: XmlNode): string {
+  return node.children.map((child) => {
+    if (child.name === "t") return decodeOoxmlEscapes(child.text);
     if (child.name === "r") return spreadsheetText(child);
     return "";
   }).join("");
