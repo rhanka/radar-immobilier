@@ -52,4 +52,75 @@ describe("fetchGraphSignalsByCity — #4 fenêtre date (dateFrom/dateTo)", () =>
     expect(Object.fromEntries(params)).toEqual({ dateFrom: "2026-09-29", dateTo: "2026-09-30",
       dateBasis: "scrap", excludePiia: "1", excludeDerogations: "1" });
   });
+
+  it("forwards the reveal verbatim (showDiscarded=1), default stays hidden", async () => {
+    const { calls } = stubFetch();
+    await fetchGraphSignalsByCity("", { showDiscarded: true });
+    expect(calls[0]).toBe("/api/graph-signals/by-city?showDiscarded=1");
+    await fetchGraphSignalsByCity("");
+    expect(calls[1]).toBe("/api/graph-signals/by-city");
+  });
+
+  it("throws a typed error carrying the HTTP status", async () => {
+    vi.stubGlobal("fetch", async () => new Response("unavailable", { status: 503 }));
+    const failure = await fetchGraphSignalsByCity("").catch((err) => err);
+    expect(failure?.name).toBe("GraphSignalsHttpError");
+    expect(failure?.status).toBe(503);
+    expect(String(failure?.message)).toBe("graph-signals/by-city: 503");
+  });
+
+  it("carries the server error body code, null when the body is unreadable", async () => {
+    vi.stubGlobal(
+      "fetch",
+      async () =>
+        new Response(JSON.stringify({ error: "discarded_signals_unavailable" }), { status: 503 }),
+    );
+    const outage = await fetchGraphSignalsByCity("").catch((err) => err);
+    expect(outage?.status).toBe(503);
+    expect(outage?.code).toBe("discarded_signals_unavailable");
+    vi.stubGlobal("fetch", async () => new Response("unavailable", { status: 503 }));
+    const bare = await fetchGraphSignalsByCity("").catch((err) => err);
+    expect(bare?.status).toBe(503);
+    expect(bare?.code).toBeNull();
+  });
+
+  it("aborts on an already-aborted signal instead of hanging", async () => {
+    vi.stubGlobal("fetch", () => new Promise<Response>(() => {}));
+    const controller = new AbortController();
+    controller.abort();
+    const failure = await fetchGraphSignalsByCity("", {
+      signal: controller.signal,
+      timeoutMs: 1000,
+    }).catch((err) => err);
+    expect(failure?.name).toBe("AbortError");
+  });
+
+  it("times out a hanging read instead of blocking controls", async () => {
+    vi.stubGlobal("fetch", (_url: string, init?: RequestInit) => new Promise<Response>((_, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true });
+    }));
+    const failure = await fetchGraphSignalsByCity("", { timeoutMs: 10 }).catch((err) => err);
+    expect(failure?.name).toBe("RequestTimeoutError");
+  });
+
+  it("times out a stalled body when the headers arrive at once", async () => {
+    vi.stubGlobal(
+      "fetch",
+      async (_url: string, init?: RequestInit) =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              init?.signal?.addEventListener(
+                "abort",
+                () => controller.error(new DOMException("Aborted", "AbortError")),
+                { once: true },
+              );
+            },
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        ),
+    );
+    const failure = await fetchGraphSignalsByCity("", { timeoutMs: 10 }).catch((err) => err);
+    expect(failure?.name).toBe("RequestTimeoutError");
+  });
 });
