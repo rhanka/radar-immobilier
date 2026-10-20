@@ -6,6 +6,7 @@ export {
   type ArtifactsStorageConfig,
 } from "./config.js";
 export {
+  ArtifactConnectionError,
   computeParamsHash,
   createArtifactsPool,
   deriveIdempotencyKey,
