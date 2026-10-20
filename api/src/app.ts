@@ -8,6 +8,7 @@ import {
 import { healthRoute, type HealthDeps } from "./routes/health.js";
 import { contentGate } from "./artifacts/content-app.js";
 import type { ContentHostConfig } from "./artifacts/content-config.js";
+import { controlRoute, type ControlRouteDeps } from "./artifacts/control-route.js";
 import { chatRoute } from "./routes/chat.js";
 import { automationRoute } from "./routes/automation.js";
 import { sourcesRoute, type SourcesDeps } from "./routes/sources.js";
@@ -65,6 +66,11 @@ export type AppDeps = HealthDeps &
     geoListingTtlMs?: number;
     /** Artifact content dispatch (861c); absent/disabled keeps the chain. */
     contentHost?: ContentHostConfig;
+    /**
+     * Artifact control plane (861c H2); mounted only when auth is enabled.
+     * Absent keeps the chain (open mode or ARTIFACTS_* unset).
+     */
+    artifactsControl?: ControlRouteDeps;
   };
 
 /** Compose the Hono application from injected dependencies. */
@@ -76,6 +82,11 @@ export function createApp(deps: AppDeps): Hono {
   // Content hosts dispatch FIRST, before protect: never app auth or SPA.
   if (deps.contentHost?.enabled) {
     app.use("*", contentGate(deps.contentHost.contentBase));
+  }
+
+  // Control requests use the official cookie guard before general bearer auth.
+  if (deps.auth?.enabled && deps.artifactsControl) {
+    app.route("/api/v1/artifacts/control", controlRoute(deps.artifactsControl));
   }
 
   // Auth runs after the content gate, so protect still fronts every business

@@ -1,0 +1,95 @@
+import { isArtifactId } from "@sentropic/artifacts/contracts";
+import { parseContentHost } from "@sentropic/artifacts/content/routing";
+import type { HttpResponse } from "@sentropic/artifacts/http";
+import type { composeArtifactHost } from "./composition.js";
+import { computeParamsHash, deriveIdempotencyKey } from "./idempotency.js";
+import { validateBindingName, validatePublishFiles } from "./publish-policy.js";
+
+export interface ArtifactControl {
+  handle(op: string, actorId: string, body: unknown): Promise<HttpResponse>;
+}
+type Host = NonNullable<Awaited<ReturnType<typeof composeArtifactHost>>>;
+const invalid = (): HttpResponse => ({ status: 400, body: { error: "invalid_request" } });
+
+function filesForPublication(raw: unknown) {
+  if (!Array.isArray(raw) || raw.length > 32) throw new Error("invalid files");
+  const files = raw.map((entry: unknown) => {
+    if (!entry || typeof entry !== "object") throw new Error("invalid file");
+    const file = entry as Record<string, unknown>;
+    if (typeof file.path !== "string" || typeof file.mimeType !== "string") throw new Error("invalid file");
+    if (("text" in file) === ("bytes" in file)) throw new Error("invalid bytes");
+    let bytes: number[];
+    if ("text" in file) {
+      if (typeof file.text !== "string") throw new Error("invalid text");
+      bytes = Array.from(new TextEncoder().encode(file.text));
+    } else {
+      if (!Array.isArray(file.bytes) || !file.bytes.every((b: unknown) =>
+        typeof b === "number" && Number.isInteger(b) && b >= 0 && b <= 255)) throw new Error("invalid bytes");
+      bytes = file.bytes;
+    }
+    return { path: file.path, mimeType: file.mimeType, bytes };
+  });
+  if (validatePublishFiles(files.map((f) => ({
+    path: f.path, mediaType: f.mimeType, sizeBytes: f.bytes.length,
+  }))).length) throw new Error("invalid publication");
+  return files;
+}
+
+export function createArtifactControl(host: Host, scope: string, contentBase: string): ArtifactControl {
+  return {
+    async handle(op, actorId, raw) {
+      if (!["ensure", "publish", "meta", "list"].includes(op)) {
+        return { status: 503, body: { error: "capability_unavailable" } };
+      }
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) return invalid();
+      const body = raw as Record<string, unknown>;
+      if (body.storageScopeId !== undefined && body.storageScopeId !== scope) return invalid();
+      const artifactId = body.artifactId;
+      if ((op === "publish" || op === "meta") && !isArtifactId(artifactId)) return invalid();
+      let stableUrl: string | undefined;
+      if (op === "publish") {
+        try {
+          stableUrl = `https://${String(artifactId)}.${contentBase}/`;
+          const stable = parseContentHost(new URL(stableUrl).host, contentBase);
+          if (stable?.kind !== "stable" || stable.artifactId !== artifactId) return invalid();
+        } catch { return invalid(); }
+      }
+      const write = op === "ensure" || op === "publish";
+      if (write && (typeof body.idempotencyKey !== "string" || !body.idempotencyKey.trim() ||
+        body.idempotencyKey.length > 256)) return invalid();
+      let effective: Record<string, unknown>;
+      try {
+        if (op === "ensure") {
+          if (typeof body.bindingName !== "string" || validateBindingName(body.bindingName).length) return invalid();
+          effective = { bindingName: body.bindingName, storageScopeId: scope, parameters: body.parameters ?? {} };
+        } else if (op === "publish") {
+          if (body.profile !== undefined && (!body.profile || typeof body.profile !== "object" || Array.isArray(body.profile))) return invalid();
+          effective = { artifactId, profile: body.profile ?? {}, files: filesForPublication(body.files),
+            source: { kind: "inline-original" } };
+        } else if (op === "meta") {
+          effective = {};
+        } else {
+          effective = { limit: body.limit === undefined ? 20 : Number(body.limit),
+            offset: body.offset === undefined ? 0 : Number(body.offset) };
+        }
+      } catch { return invalid(); }
+      if (write) {
+        effective.paramsHash = computeParamsHash(effective);
+        effective.idempotencyKey = deriveIdempotencyKey({ scope, sub: actorId, op,
+          artifactId: typeof artifactId === "string" && op === "publish" ? artifactId : "",
+          clientKey: body.idempotencyKey as string });
+      }
+      const response = await host.app.handle({ actorId, body: effective,
+        method: op === "meta" ? "GET" : "POST",
+        path: op === "meta" ? `/meta/${String(artifactId)}` : `/${op}` });
+      if (op !== "publish" || response.status !== 201) return response;
+      const result = response.body as { releaseId: string; manifest: string };
+      const manifest = JSON.parse(result.manifest) as { digest: string };
+      const pinnedUrl = `https://${result.releaseId}.pinned.${contentBase}/`;
+      const pinned = parseContentHost(new URL(pinnedUrl).host, contentBase);
+      if (pinned?.kind !== "pinned" || pinned.releaseId !== result.releaseId) throw new Error("invalid content links");
+      return { status: 201, body: { artifactId, releaseId: result.releaseId, digest: manifest.digest,
+        stableUrl, pinnedUrl } };
+    },
+  };
+}
