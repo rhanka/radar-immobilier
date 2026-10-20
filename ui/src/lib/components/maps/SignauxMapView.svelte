@@ -595,10 +595,10 @@
   $: currentUserSub = authState.user?.sub ?? null;
   $: facetsAllowed =
     authState.authenticated && !authState.authDisabled && authState.user?.status === "approved";
-  $: facetsNote = !authState.authenticated
-    ? "Connexion requise pour classer les signaux."
-    : authState.authDisabled
-      ? "Classement indisponible quand l'authentification est désactivée."
+  $: facetsNote = authState.authDisabled
+    ? "Classement indisponible quand l'authentification est désactivée."
+    : !authState.authenticated
+      ? "Connexion requise pour classer les signaux."
       : authState.user?.status !== "approved"
         ? "Compte non approuvé — le classement est réservé aux comptes approuvés."
         : null;
@@ -1523,6 +1523,12 @@
     detailNodes = [];
     detailLegacyProjection = null;
     geoNotices = [];
+    // A new city owns its own notice state: never show, undo or reload the
+    // previous city's write here.
+    discardedNotice = null;
+    discardedActionError = null;
+    undoCommandKey = null;
+    facetReloadError = null;
     // Contrat « lot suivant » : changement de ville → plus de lot caméra de
     // référence (le prochain lot cliqué est un PREMIER lot, cadrage existant).
     cameraLot = null;
@@ -1599,7 +1605,9 @@
       if (!lease.isCurrent() || isAbortError(e)) return "stale";
       console.warn("Signal detail load failed:", e);
       detailError =
-        e instanceof GraphSignalsHttpError && e.status === 503
+        e instanceof GraphSignalsHttpError &&
+        e.status === 503 &&
+        e.code === "discarded_signals_unavailable"
           ? "Signaux écartés indisponibles (discarded_signals_unavailable) — rechargement impossible."
           : "Signaux indisponibles.";
       detailLegacyProjection = null;
@@ -1697,9 +1705,11 @@
   async function handleFacetSaved(action: FacetAction, target: FacetTarget): Promise<void> {
     const label = detailNodes.find((node) => node.id === target.id)?.label ?? target.id;
     detailCache.delete(target.citySlug);
-    const ok = await reloadAfterFacetWrite(target.citySlug);
-    // Discard in the default view: show and focus the undo notice.
-    if (ok && action === "discard" && !showDiscarded) {
+    // The notice shows as soon as the write is confirmed in the default
+    // view — whatever the re-reads report. The re-read outcome only drives
+    // the reload-error banner.
+    await reloadAfterFacetWrite(target.citySlug, { silentDetail: true });
+    if (action === "discard" && !showDiscarded && selectedCity?.municipality.slug === target.citySlug) {
       discardedNotice = { target, label };
       discardedActionError = null;
       undoCommandKey = null;
@@ -1760,6 +1770,7 @@
     // en retard ne repeindra la carte après « Fermer ».
     detailGuard.cancel();
     geoGuard.cancel();
+    facetHeadsGuard.cancel();
     resetCptaq();
     selectedCity = null;
     pendingRouteZoneKey = null;
@@ -1767,6 +1778,12 @@
     detailLegacyProjection = null;
     detailError = null;
     detailLoading = false;
+    // A closed selection owns no notice state: never show, undo or reload
+    // the previous city's write after « Fermer ».
+    discardedNotice = null;
+    discardedActionError = null;
+    undoCommandKey = null;
+    facetReloadError = null;
     zonesError = null;
     lotsError = null;
     zonesLoading = false;
@@ -2154,8 +2171,9 @@
     if (appliedGeoRouteKey === key) return;
     appliedGeoRouteKey = key;
     const filters = readGeoFilters(route.state.filters);
-    // Every reveal transition clears details and heads and reloads all three
-    // reads (back, forward, reload, checkbox), preserving server order.
+    // Every reveal transition clears details and reloads all three reads
+    // (back, forward, reload, checkbox), preserving server order. Heads are
+    // keyed by signal target and stay valid across the reveal — never wiped.
     const nextShowDiscarded = filters.showDiscarded === true;
     const revealChanged = appliedShowDiscarded !== null && appliedShowDiscarded !== nextShowDiscarded;
     appliedShowDiscarded = nextShowDiscarded;
@@ -2188,7 +2206,6 @@
     applyActiveSubsetKey(subsetFromGeoFilters(route.state.filters));
     if (revealChanged) {
       detailCache.clear();
-      facetHeadsByCity = new Map();
       void load();
       if (selectedCity) {
         void loadDetailForCity(selectedCity.municipality.slug);
@@ -2730,7 +2747,9 @@
       if (version !== bulkLoadVersion) return "stale";
       console.warn("Signals by city load failed:", e);
       loadError =
-        e instanceof GraphSignalsHttpError && e.status === 503
+        e instanceof GraphSignalsHttpError &&
+        e.status === 503 &&
+        e.code === "discarded_signals_unavailable"
           ? "Données des signaux indisponibles — signaux écartés indisponibles (discarded_signals_unavailable)."
           : "Données des signaux indisponibles.";
       return "error";
