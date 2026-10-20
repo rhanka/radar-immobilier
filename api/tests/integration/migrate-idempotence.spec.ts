@@ -42,6 +42,54 @@ if (!lastEntry) {
 const MIGRATIONS_SCHEMA = "drizzle";
 const MIGRATIONS_TABLE = "__drizzle_migrations";
 
+type MigrationJournalRow = { hash: string; created_at: string };
+
+// Shared read helpers for the drift scenarios below. They only read the
+// migration journal and the migrated schema; they never alter either.
+async function countJournalRows(): Promise<number> {
+  const result = await pool.query<{ count: string }>(
+    `SELECT count(*)::text AS count FROM ${MIGRATIONS_SCHEMA}."${MIGRATIONS_TABLE}"`,
+  );
+  return Number(result.rows[0]?.count);
+}
+
+async function readJournalRowsSince(
+  since: string,
+): Promise<MigrationJournalRow[]> {
+  const result = await pool.query<MigrationJournalRow>(
+    `SELECT hash, created_at FROM ${MIGRATIONS_SCHEMA}."${MIGRATIONS_TABLE}" WHERE created_at >= $1 ORDER BY created_at ASC`,
+    [since],
+  );
+  return result.rows.map((row) => ({
+    hash: row.hash,
+    created_at: String(row.created_at),
+  }));
+}
+
+async function expectCodebookIntact(): Promise<void> {
+  const codes = await pool.query<{ verdict: string; count: number }>(
+    `SELECT verdict, count(*)::int AS count FROM facet_reason_codes
+     WHERE profile_id = 'immo-steve-2026-09' GROUP BY verdict ORDER BY verdict`,
+  );
+  expect(codes.rows).toEqual([
+    { verdict: "a_surveiller", count: 8 },
+    { verdict: "non_pertinent", count: 12 },
+    { verdict: "pertinent", count: 8 },
+  ]);
+  const precedent = await pool.query(
+    `SELECT verdict FROM facet_reason_codes WHERE code = 'V2-PRECEDENT'`,
+  );
+  expect(precedent.rows).toEqual([{ verdict: "non_pertinent" }]);
+}
+
+async function expectRelationPresent(name: string): Promise<void> {
+  const found = await pool.query<{ relation: string | null }>(
+    "SELECT to_regclass($1) AS relation",
+    [name],
+  );
+  expect(found.rows[0]?.relation).toBe(name);
+}
+
 afterAll(async () => {
   await pool.end();
 });
@@ -203,6 +251,86 @@ describe("drizzle migrate() idempotence on a prod-restore journal drift", () => 
           `WHERE table_schema = 'public' AND table_name = 'refresh_document_outcomes'`,
       );
       expect(Number(tableCountAfterRerun.rows[0]?.count)).toBe(1);
+    },
+  );
+
+  it(
+    "re-applies 0014_facets_signal with 0015 and 0016 when every journal row from 0014 onward is missing, " +
+      "and re-registers those rows with identical hashes and timestamps",
+    async () => {
+      // drizzle's migrator replays a migration file only when its folderMillis
+      // is newer than the created_at of the LAST REMAINING journal row, so
+      // deleting only 0014's row would never replay 0014 (0016's row would
+      // still be the cutoff). The drift must drop every row from 0014 onward:
+      // 0014, 0015 and 0016. The cutoff is read from the journal by tag, so no
+      // timestamp is hardcoded here.
+      const replayStart = journal.entries.findIndex(
+        (entry) => entry.tag === "0014_facets_signal",
+      );
+      expect(replayStart).toBeGreaterThanOrEqual(0);
+      const replayEntries = journal.entries.slice(replayStart);
+      expect(replayEntries.map((entry) => entry.tag)).toEqual([
+        "0014_facets_signal",
+        "0015_artifacts_core",
+        "0016_artifacts_lifecycle",
+      ]);
+      const firstReplay = replayEntries[0];
+      if (!firstReplay) {
+        throw new Error(
+          "expected 0014_facets_signal in the migrations journal",
+        );
+      }
+      const replaySince = String(firstReplay.when);
+
+      // ── 1. Known-clean state: (re)apply every migration ────────────────
+      // Same shared-Postgres discipline as the first scenario (no DROP
+      // SCHEMA): this Postgres is shared with the other integration specs.
+      await migrate(db, { migrationsFolder });
+      expect(await countJournalRows()).toBe(journal.entries.length);
+
+      const rowsBeforeDrift = await readJournalRowsSince(replaySince);
+      expect(rowsBeforeDrift).toHaveLength(replayEntries.length);
+
+      // ── 2. Simulate the drift: journal behind the schema from 0014 on ──
+      // Only journal bookkeeping rows are touched; no application table is
+      // altered, mirroring a restore whose dump predates those inserts.
+      const deleted = await pool.query(
+        `DELETE FROM ${MIGRATIONS_SCHEMA}."${MIGRATIONS_TABLE}" WHERE created_at >= $1`,
+        [replaySince],
+      );
+      expect(deleted.rowCount).toBe(replayEntries.length);
+      expect(await countJournalRows()).toBe(
+        journal.entries.length - replayEntries.length,
+      );
+
+      // ── 3. Re-run migrate() on the drifted journal ─────────────────────
+      let rerunError: unknown = null;
+      try {
+        await migrate(db, { migrationsFolder });
+      } catch (err) {
+        rerunError = err;
+      }
+      expect(
+        rerunError,
+        `migrate() must succeed replaying 0014, 0015 and 0016 on a schema that already has them, ` +
+          `got: ${String(rerunError)}`,
+      ).toBeNull();
+
+      // ── 4. The dropped rows are re-registered identically ──────────────
+      // Row ids are new (appended), but each migration's hash and created_at
+      // must match the state captured before the drift.
+      const rowsAfterReplay = await readJournalRowsSince(replaySince);
+      expect(rowsAfterReplay).toEqual(rowsBeforeDrift);
+      expect(await countJournalRows()).toBe(journal.entries.length);
+
+      // The 0014 codebook survives its replay (INSERT ... ON CONFLICT DO
+      // NOTHING): 28 codes, 8 watched / 12 out of scope / 8 selected.
+      await expectCodebookIntact();
+
+      // ... and the artifact objects from 0015 (core) and 0016 (lifecycle)
+      // are intact, not duplicated by the replay.
+      await expectRelationPresent("artifacts.artifacts");
+      await expectRelationPresent("artifacts.artifact_access");
     },
   );
 });
