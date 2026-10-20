@@ -35,6 +35,7 @@
   import {
     postFacetCommand,
     type FacetAction,
+    type FacetHeadsStatus,
     type FacetTarget,
     type ReasonCode,
     type TargetFacetState,
@@ -65,6 +66,8 @@
   // Lot 4 — mirror the personal basket props owned by SignauxMapView,
   // with neutral defaults for the harness.
   export let facetHeads: Map<string, TargetFacetState> = new Map();
+  export let facetHeadsState: FacetHeadsStatus = "ready";
+  export let facetReloading = false;
   export let reasonCodes: ReasonCode[] | null = null;
   export let facetCodesError: string | null = null;
   export let facetCodesLoading = false;
@@ -132,6 +135,8 @@
   onToggleKey={toggleBucketKey}
   {onOpenSource}
   {facetHeads}
+  {facetHeadsState}
+  {facetReloading}
   {reasonCodes}
   {facetCodesError}
   {facetCodesLoading}
