@@ -38,6 +38,7 @@
     facetStateKey,
     postFacetCommand,
     type FacetAction,
+    type FacetCommandLaunch,
     type FacetHeadsStatus,
     type FacetTarget,
     type ReasonCode,
@@ -220,8 +221,16 @@
   export let showDiscarded = false;
   export let onToggleShowDiscarded: (show: boolean) => void = () => {};
   export let facetPostCommand: typeof postFacetCommand = postFacetCommand;
-  export let onFacetSaved: (action: FacetAction, target: FacetTarget) => void | Promise<void> = () => {};
+  /** Context identity forwarded through each command's onSaved callback. */
+  export let facetViewerKey: FacetCommandLaunch["viewerKey"] = null;
+  export let onFacetSaved: (
+    action: FacetAction,
+    target: FacetTarget,
+    launch?: FacetCommandLaunch,
+  ) => void | Promise<void> = () => {};
   export let facetReloadError: string | null = null;
+  /** Only confirmed writes get the recorded-write error title. */
+  export let facetReloadAfterWrite = false;
   export let onRetryFacetReads: () => void = () => {};
   export let discardedNotice: { target: FacetTarget; label: string } | null = null;
   export let discardedActionError: string | null = null;
@@ -1186,7 +1195,13 @@
     {/if}
     {#if facetReloadError}
       <div class="sel-alert" data-testid="facet-reload-error">
-        <Alert tone="error" title="Classement enregistré, rechargement impossible" message={facetReloadError} />
+        <Alert
+          tone="error"
+          title={facetReloadAfterWrite
+            ? "Classement enregistré, rechargement impossible"
+            : "Classement illisible, rechargement impossible"}
+          message={facetReloadError}
+        />
         <Button variant="secondary" size="sm" type="button" disabled={facetReloading} onclick={onRetryFacetReads}>
           <RefreshCw class="h-3 w-3" aria-hidden="true" />
           Réessayer
@@ -1575,7 +1590,8 @@
                           codesLoading={facetCodesLoading}
                           disabled={facetReloading || !facetHeadsReady}
                           postCommand={facetPostCommand}
-                          onSaved={(action) => onFacetSaved(action, facetCardTarget)}
+                          viewerKey={facetViewerKey}
+                          onSaved={(action, launch) => onFacetSaved(action, facetCardTarget, launch)}
                           onRetryCodes={onRetryFacetReads}
                         />
                       {:else if facetsNote}
