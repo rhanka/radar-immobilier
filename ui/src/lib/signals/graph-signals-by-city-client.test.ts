@@ -83,4 +83,23 @@ describe("fetchGraphSignalsByCity — #4 fenêtre date (dateFrom/dateTo)", () =>
     expect(bare?.status).toBe(503);
     expect(bare?.code).toBeNull();
   });
+
+  it("aborts on an already-aborted signal instead of hanging", async () => {
+    vi.stubGlobal("fetch", () => new Promise<Response>(() => {}));
+    const controller = new AbortController();
+    controller.abort();
+    const failure = await fetchGraphSignalsByCity("", {
+      signal: controller.signal,
+      timeoutMs: 1000,
+    }).catch((err) => err);
+    expect(failure?.name).toBe("AbortError");
+  });
+
+  it("times out a hanging read instead of blocking controls", async () => {
+    vi.stubGlobal("fetch", (_url: string, init?: RequestInit) => new Promise<Response>((_, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(new DOMException("Aborted", "AbortError")), { once: true });
+    }));
+    const failure = await fetchGraphSignalsByCity("", { timeoutMs: 10 }).catch((err) => err);
+    expect(failure?.name).toBe("RequestTimeoutError");
+  });
 });
