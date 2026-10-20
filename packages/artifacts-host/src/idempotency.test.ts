@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import pg from "pg";
+import { EventEmitter } from "node:events";
 import {
   computeParamsHash,
   createArtifactsPool,
@@ -85,7 +86,7 @@ interface RecordedCall {
 function fakePool(queries: RecordedCall[], releases: { count: number }) {
   return {
     async connect() {
-      return {
+      return Object.assign(new EventEmitter(), {
         async query(text: string, params: unknown[] = []) {
           queries.push({ text, params });
           return { rows: [] };
@@ -93,7 +94,7 @@ function fakePool(queries: RecordedCall[], releases: { count: number }) {
         release() {
           releases.count += 1;
         },
-      };
+      });
     },
   } as unknown as pg.Pool;
 }
@@ -163,12 +164,12 @@ describe("withArtifactAdvisoryLock", () => {
       return { rows: [] };
     });
     const release = vi.fn();
-    const pool = { connect: async () => ({ query, release }) } as unknown as pg.Pool;
+    const pool = { connect: async () => Object.assign(new EventEmitter(), { query, release }) } as unknown as pg.Pool;
     const body = vi.fn();
     await expect(withArtifactAdvisoryLock(pool, deriveIdempotencyKey(INPUT), body))
       .rejects.toThrow("artifact advisory lock timeout conflict");
     expect(query).toHaveBeenLastCalledWith("ROLLBACK");
     expect(body).not.toHaveBeenCalled();
-    expect(release).toHaveBeenCalledWith(false);
+    expect(release).toHaveBeenCalledWith();
   });
 });
