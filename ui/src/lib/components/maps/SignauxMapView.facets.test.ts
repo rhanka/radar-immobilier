@@ -94,6 +94,7 @@ describe("SignauxMapView — write then three re-reads", () => {
     // the re-reads report, next to the distinct reload message.
     expect(await screen.findByTestId("discarded-notice")).toBeTruthy();
     expect(await screen.findByTestId("facet-reload-error")).toBeTruthy();
+    expect(screen.getByTestId("facet-reload-error").textContent).toContain("Classement enregistré");
     expect(screen.getByTestId("facet-reload-error").textContent).toContain("rechargement impossible");
     await fireEvent.click(within(screen.getByTestId("facet-reload-error")).getByRole("button", { name: "Réessayer" }));
     await waitFor(() => expect(screen.queryByTestId("facet-reload-error")).toBeNull());
@@ -421,6 +422,104 @@ describe("SignauxMapView — city switches during facet writes", () => {
       expect(screen.getByTestId("discarded-notice").textContent).toContain("B first signal"),
     );
     expect(screen.queryByTestId("discarded-action-error")).toBeNull();
+  });
+});
+
+describe("SignauxMapView — account isolation of late facet writes", () => {
+  async function switchAccount(sub: string) {
+    const calls = vi.mocked(fetchReasonCodes).mock.calls.length;
+    setAuth(sub);
+    await waitFor(() => expect(vi.mocked(fetchReasonCodes).mock.calls.length).toBeGreaterThan(calls));
+    await tick();
+  }
+
+  const cases = [false, true].flatMap((switchBack) => [false, true].map((fails) => ({ switchBack, fails })));
+
+  it.each(cases)("drops a late discard (switch back: $switchBack, failure: $fails)", async ({ switchBack, fails }) => {
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await openFirstSignalCard();
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    const confirmed = deferred<unknown>();
+    vi.mocked(postFacetCommand).mockImplementationOnce(async () => {
+      await confirmed.promise;
+      if (fails) throw new SignalFacetError(null, null);
+    });
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    // Another approved account takes over while the discard POST is in flight.
+    await switchAccount("tester-2");
+    if (switchBack) await switchAccount("tester-1");
+    const reads = [fetchGraphSignalDetail, fetchCityFacets, fetchGraphSignalsByCity].map(
+      (read) => vi.mocked(read).mock.calls.length,
+    );
+    confirmed.resolve({ id: "event-2" });
+    await confirmed.promise;
+    await tick();
+    await tick();
+    // The late confirmation belongs to the previous account: no notice, no
+    // error and no banner for the new viewer — and no restore POST follows.
+    expect(screen.queryByTestId("discarded-notice")).toBeNull();
+    expect(screen.queryByTestId("discarded-action-error")).toBeNull();
+    expect(screen.queryByTestId("facet-reload-error")).toBeNull();
+    expect(vi.mocked(postFacetCommand)).toHaveBeenCalledTimes(1);
+    expect([fetchGraphSignalDetail, fetchCityFacets, fetchGraphSignalsByCity].map(
+      (read) => vi.mocked(read).mock.calls.length,
+    )).toEqual(reads);
+  });
+
+  it.each(cases)("drops a late restore (switch back: $switchBack, failure: $fails)", async ({ switchBack, fails }) => {
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    await openFirstSignalCard();
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    await screen.findByTestId("discarded-notice");
+    const restored = deferred<unknown>();
+    vi.mocked(postFacetCommand).mockImplementationOnce(async () => {
+      await restored.promise;
+      if (fails) throw new SignalFacetError(null, null);
+    });
+    const annuler = () =>
+      [...screen.getByTestId("discarded-notice").querySelectorAll("button")].find(
+        (button) => button.textContent === "Annuler",
+      )!;
+    await fireEvent.click(annuler());
+    // Another approved account takes over while the restore POST is in flight.
+    await switchAccount("tester-2");
+    if (switchBack) await switchAccount("tester-1");
+    const reads = [fetchGraphSignalDetail, fetchCityFacets, fetchGraphSignalsByCity].map(
+      (read) => vi.mocked(read).mock.calls.length,
+    );
+    // A stale restore must not start any read, even one that would fail.
+    vi.mocked(fetchGraphSignalsByCity).mockRejectedValueOnce(new Error("bulk down"));
+    restored.resolve(null);
+    await restored.promise;
+    await tick();
+    await tick();
+    expect(screen.queryByTestId("discarded-notice")).toBeNull();
+    expect(screen.queryByTestId("discarded-action-error")).toBeNull();
+    expect(screen.queryByTestId("facet-reload-error")).toBeNull();
+    expect(vi.mocked(postFacetCommand)).toHaveBeenCalledTimes(2);
+    expect([fetchGraphSignalDetail, fetchCityFacets, fetchGraphSignalsByCity].map(
+      (read) => vi.mocked(read).mock.calls.length,
+    )).toEqual(reads);
+  });
+});
+
+describe("SignauxMapView — initial read retry banner", () => {
+  it("does not announce a recorded write when an initial read retry fails", async () => {
+    vi.mocked(fetchCityFacets).mockRejectedValueOnce(new Error("heads down"));
+    render(SignauxMapView, { props: { geoRoute: cityRoute("?filter.period=all") } });
+    const headsError = await screen.findByTestId("facet-heads-error");
+    vi.mocked(fetchCityFacets).mockRejectedValueOnce(new Error("heads still down"));
+    await fireEvent.click(within(headsError).getByRole("button", { name: "Réessayer" }));
+    const banner = await screen.findByTestId("facet-reload-error");
+    expect(banner.textContent).toContain("rechargement impossible");
+    expect(banner.textContent).toContain("Classement illisible");
+    expect(banner.textContent).not.toContain("enregistré");
+    expect(vi.mocked(postFacetCommand)).not.toHaveBeenCalled();
   });
 });
 
