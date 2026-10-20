@@ -3,7 +3,7 @@ import type pg from "pg";
 import { createPostgresArtifactStore } from "@sentropic/artifacts/adapters/postgres";
 import { withArtifactAdvisoryLock } from "./idempotency.js";
 
-export const ARTIFACTS_LIFECYCLE_WHEN = 1791100002000;
+export const ARTIFACTS_LIFECYCLE_WHEN = 1791200002000;
 export const ARTIFACTS_LIFECYCLE_HASH = "fdfbe97f84774b47a207e66915f7426926650e85b6dbb9a4d80272591df624fd";
 
 /** No DDL at startup. A missing migration disables only artifact operations. */
@@ -18,7 +18,7 @@ export async function initializeArtifactScope(
     "SELECT 1 FROM drizzle.__drizzle_migrations WHERE created_at = $1 AND hash = $2",
     [ARTIFACTS_LIFECYCLE_WHEN, ARTIFACTS_LIFECYCLE_HASH],
   );
-  if (!migration.rowCount) throw new Error("artifact schema unavailable: 0015 absent or hash mismatch");
+  if (!migration.rowCount) throw new Error("artifact schema unavailable: 0016 absent or hash mismatch");
   await pool.query(
     "INSERT INTO artifacts.storage_scopes (id, org_id) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING",
     [scope, orgId],

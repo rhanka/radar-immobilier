@@ -42,7 +42,7 @@ describe("artifact control startup", () => {
     expect(compose).not.toHaveBeenCalled();
   });
 
-  it.each(["connect ECONNREFUSED postgres:5432", "artifact schema unavailable: 0015 absent or hash mismatch",
+  it.each(["connect ECONNREFUSED postgres:5432", "artifact schema unavailable: 0016 absent or hash mismatch",
     "artifact scope organization mismatch"])("keeps API live and control at 503 for %s", async (message) => {
     const query = vi.fn().mockRejectedValue(new Error("database unavailable"));
     const pool = { query } as unknown as ReturnType<typeof artifacts.createArtifactsPool>;
