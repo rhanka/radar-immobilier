@@ -245,4 +245,14 @@ describe("OOXML control escape decoding", () => {
     expect(cell?.raw).toBe("_x0041_");
   });
 
+  it("decodes formula string results and preserves the raw text", () => {
+    const inventory = captureSheet(
+      '<sheetData><row r="1"><c r="A1" t="str"><f>CHAR(13)</f><v>_x000D_</v></c>' +
+      '<c r="B1" t="str"><f>CONCAT("_",CHAR(65))</f><v>_x005F_x0041_</v></c></row></sheetData>',
+    );
+    const cells = inventory.cells.filter((cell) => cell.sheet === "Lots");
+    expect(cells.map((cell) => cell.value)).toEqual(["\r", "_x0041_"]);
+    expect(cells.map((cell) => cell.raw)).toEqual(["_x000D_", "_x005F_x0041_"]);
+    expect(cells.map((cell) => cell.cachedValue)).toEqual(["_x000D_", "_x005F_x0041_"]);
+  });
 });
