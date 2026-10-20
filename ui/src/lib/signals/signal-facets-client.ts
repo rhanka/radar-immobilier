@@ -84,9 +84,15 @@ export function emptyTargetFacetState(): TargetFacetState {
 }
 
 /** Map key of one signal target (`<type>/<id>`). */
-export function facetStateKey(target: Pick<FacetTarget, "type" | "id">): string {
+export function facetStateKey(target: { type: string; id: string }): string {
   return `${target.type}/${target.id}`;
 }
+
+/**
+ * Read state of one city's facet heads. Unknown heads never imply that
+ * the signal is unclassified; only a successful read is authoritative.
+ */
+export type FacetHeadsStatus = "loading" | "ready" | "error";
 
 /**
  * Native facet target of a graph node, or null when the node carries no
@@ -274,8 +280,12 @@ export async function fetchCityFacets(
  * French user-facing copy of a write failure, by HTTP status and server
  * error code. A null status (network/timeout) is unconfirmed: same-key retry.
  */
+export function isFacetWriteUnconfirmed(error: unknown): boolean {
+  return !(error instanceof SignalFacetError) || error.status === null || error.status >= 500;
+}
+
 export function facetErrorMessage(error: SignalFacetError): string {
-  if (error.status === null) return "Écriture non confirmée — Réessayer.";
+  if (isFacetWriteUnconfirmed(error)) return "Écriture non confirmée — Réessayer.";
   switch (error.status) {
     case 401:
       return "Connexion requise — connectez-vous pour classer ce signal.";
@@ -293,37 +303,6 @@ export function facetErrorMessage(error: SignalFacetError): string {
       if (error.code === "invalid_reason_code") return "Code invalide pour ce classement.";
       return "Code requis ou invalide.";
     default:
-      return `Écriture refusée (${error.status}) — réessayez.`;
-  }
-}
-
-/**
- * Sub-scoped cache: entries are indexed under the authenticated `sub` and
- * purged as a whole whenever the sub changes, so personal facet state is
- * never reused across viewers.
- */
-export class SubScopedCache<T> {
-  private sub: string | null = null;
-  private entries = new Map<string, T>();
-
-  private align(sub: string | null): void {
-    if (sub !== this.sub) {
-      this.entries.clear();
-      this.sub = sub;
-    }
-  }
-
-  read(sub: string | null, key: string): T | undefined {
-    this.align(sub);
-    return this.entries.get(key);
-  }
-
-  write(sub: string | null, key: string, value: T): void {
-    this.align(sub);
-    this.entries.set(key, value);
-  }
-
-  clear(): void {
-    this.entries.clear();
+      return `Écriture refusée (${error.status}).`;
   }
 }
