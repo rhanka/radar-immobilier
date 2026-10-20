@@ -29,22 +29,29 @@ function renderControls(options: {
   state?: TargetFacetState;
   codes?: ReasonCode[] | null;
   codesError?: string | null;
+  codesLoading?: boolean;
+  disabled?: boolean;
   postCommand?: ReturnType<typeof postCommandMock>;
   onSaved?: (action: FacetAction) => void;
+  onRetryCodes?: () => void;
 } = {}) {
   const postCommand = options.postCommand ?? postCommandMock();
   const onSaved = options.onSaved ?? vi.fn();
+  const onRetryCodes = options.onRetryCodes ?? vi.fn();
   const view = render(SignalFacetControls, {
     props: {
       target: TARGET,
       state: options.state ?? emptyTargetFacetState(),
       codes: options.codes === undefined ? CODES : options.codes,
       codesError: options.codesError ?? null,
+      codesLoading: options.codesLoading ?? false,
+      disabled: options.disabled ?? false,
       postCommand,
       onSaved,
+      onRetryCodes,
     },
   });
-  return { view, postCommand, onSaved: onSaved as ReturnType<typeof vi.fn> };
+  return { view, postCommand, onSaved: onSaved as ReturnType<typeof vi.fn>, onRetryCodes: onRetryCodes as ReturnType<typeof vi.fn> };
 }
 
 function optionsOf(label: string): string[] {
@@ -67,6 +74,13 @@ describe("SignalFacetControls — verdict-filtered code lists", () => {
     const select = screen.getByLabelText("Code de motif (requis) — Écarter");
     expect(within(select).getByRole("option", { name: "P-BIDON" })).toBeTruthy();
   });
+
+  it("should name each basket group and its otherwise duplicate actions", () => {
+    renderControls();
+    expect(within(screen.getByRole("group", { name: "Pertinent" })).getByRole("button", { name: "Ajouter au panier Pertinent" })).toBeTruthy();
+    expect(within(screen.getByRole("group", { name: "À surveiller" })).getByRole("button", { name: "Ajouter au panier À surveiller" })).toBeTruthy();
+    expect(within(screen.getByRole("group", { name: "Écarter" })).getByRole("button", { name: "Valider l'écart du signal" })).toBeTruthy();
+  });
 });
 
 describe("SignalFacetControls — discard requires a code", () => {
@@ -84,25 +98,27 @@ describe("SignalFacetControls — discard requires a code", () => {
     expect(postCommand.mock.calls[0]![2]).toEqual({ target: TARGET, reasonCode: "N-ADMIN" });
   });
 
-  it("shows a 422 failure, keeps the previous state, and retries with the same key", async () => {
+  it.each([401, 403, 404, 409, 422])("should reject %s without retrying a refused intention", async (status) => {
     const postCommand = postCommandMock();
-    postCommand.mockRejectedValueOnce(new SignalFacetError(422, "invalid_reason_code"));
+    postCommand.mockRejectedValueOnce(new SignalFacetError(status, "invalid_reason_code"));
     const { onSaved } = renderControls({ postCommand });
     await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
       target: { value: "P-BIDON" },
     });
     await fireEvent.click(screen.getByTestId("facet-discard-submit"));
-    await waitFor(() => expect(screen.getByText(/Code invalide/)).toBeTruthy());
+    await screen.findByText("Écriture refusée");
+    if (status === 422) expect(screen.getByText(/Code invalide/)).toBeTruthy();
     expect(onSaved).not.toHaveBeenCalled();
-    await fireEvent.click(screen.getByTestId("facet-retry"));
+    expect(screen.queryByTestId("facet-retry")).toBeNull();
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
     await waitFor(() => expect(onSaved).toHaveBeenCalledWith("discard"));
     expect(postCommand).toHaveBeenCalledTimes(2);
-    expect(postCommand.mock.calls[0]![3]).toBe(postCommand.mock.calls[1]![3]);
+    expect(postCommand.mock.calls[0]![3]).not.toBe(postCommand.mock.calls[1]![3]);
   });
 });
 
 describe("SignalFacetControls — baskets and restoration", () => {
-  it.each([new SignalFacetError(null, null), new TypeError("fetch failed")])(
+  it.each([new SignalFacetError(null, null), new TypeError("fetch failed"), new SignalFacetError(503, "unavailable")])(
     "should label an unconfirmed write without a refusal: %s",
     async (failure) => {
       const postCommand = postCommandMock();
@@ -207,5 +223,29 @@ describe("SignalFacetControls — baskets and restoration", () => {
     for (const testId of ["facet-toggle-pertinent", "facet-toggle-watching"]) {
       expect((screen.getByTestId(testId) as HTMLButtonElement).disabled).toBe(true);
     }
+  });
+
+  it("shows a distinct loading label while codes load, without claiming failure", () => {
+    renderControls({ codes: null, codesLoading: true });
+    expect(screen.getByText("Chargement des codes…")).toBeTruthy();
+    expect(screen.queryByText(/illisibles/)).toBeNull();
+    expect(screen.queryByTestId("facet-retry-codes")).toBeNull();
+    expect((screen.getByTestId("facet-toggle-pertinent") as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("offers a codes-only retry after a real codebook failure", async () => {
+    const onRetryCodes = vi.fn();
+    renderControls({ codes: null, codesError: "Codes de motif illisibles (test).", onRetryCodes });
+    await fireEvent.click(screen.getByTestId("facet-retry-codes"));
+    expect(onRetryCodes).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps focus inside the controls after a select write and reload", async () => {
+    const { onSaved } = renderControls();
+    await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select"));
+    await waitFor(() =>
+      expect(screen.getByTestId("signal-facet-controls").contains(document.activeElement)).toBe(true),
+    );
   });
 });
