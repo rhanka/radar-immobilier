@@ -34,7 +34,7 @@ function renderControls(options: {
 } = {}) {
   const postCommand = options.postCommand ?? postCommandMock();
   const onSaved = options.onSaved ?? vi.fn();
-  render(SignalFacetControls, {
+  const view = render(SignalFacetControls, {
     props: {
       target: TARGET,
       state: options.state ?? emptyTargetFacetState(),
@@ -44,7 +44,7 @@ function renderControls(options: {
       onSaved,
     },
   });
-  return { postCommand, onSaved: onSaved as ReturnType<typeof vi.fn> };
+  return { view, postCommand, onSaved: onSaved as ReturnType<typeof vi.fn> };
 }
 
 function optionsOf(label: string): string[] {
@@ -163,10 +163,26 @@ describe("SignalFacetControls — baskets and restoration", () => {
       watching, watchingCode: watching ? "N-LEURRE" : null,
     } });
     const update = screen.getByTestId(watching ? "facet-update-watching-code" : "facet-update-pertinent-code") as HTMLButtonElement;
+    const select = screen.getByLabelText(`Code (facultatif) — ${watching ? "À surveiller" : "Pertinent"}`) as HTMLSelectElement;
+    expect(select.value).toBe(watching ? "N-LEURRE" : "P-DENSITE");
+    expect(update.disabled).toBe(true);
+    await fireEvent.change(select, { target: { value: "" } });
     expect(update.disabled).toBe(false);
     await fireEvent.click(update);
     await waitFor(() => expect(postCommand).toHaveBeenCalled());
     expect(postCommand.mock.calls[0]!.slice(1, 3)).toEqual(["select", { target: TARGET, basket }]);
+  });
+
+  it("should resynchronize both selected codes when heads change", async () => {
+    const { view } = renderControls();
+    await view.rerender({ state: {
+      ...emptyTargetFacetState(), pertinent: true, pertinentCode: "P-DENSITE",
+      watching: true, watchingCode: "S-VEILLE",
+    } });
+    expect((screen.getByLabelText("Code (facultatif) — Pertinent") as HTMLSelectElement).value).toBe("P-DENSITE");
+    expect((screen.getByLabelText("Code (facultatif) — À surveiller") as HTMLSelectElement).value).toBe("S-VEILLE");
+    expect((screen.getByTestId("facet-update-pertinent-code") as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByTestId("facet-update-watching-code") as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("shows Restaurer instead of the discard form on an archived signal", async () => {
