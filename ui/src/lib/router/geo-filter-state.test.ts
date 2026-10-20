@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildGeoQuery, parseGeoQuery } from "./geo-route.js";
-import { readGeoFilters, writeGeoFilters, subsetFromGeoFilters, sameTimeRange } from "./geo-filter-state.js";
+import { readGeoFilters, writeGeoFilters, subsetFromGeoFilters, sameTimeRange, unrestrictedGeoFilters } from "./geo-filter-state.js";
 import { keyForVivierB } from "$lib/signals/vivier-view-mode.js";
 
 describe("shareable geographic restrictions", () => {
@@ -135,6 +135,45 @@ describe("shareable geographic restrictions", () => {
     expect(state.axes).toEqual({ z: false, r: false, p: false });
     expect(state.exclusions).toEqual({ piiaSansProjetResidentiel: false, derogationsMineures: false });
     expect(state.timeRange.relative).toBe("all");
+  });
+
+  it("should carry the discarded reveal in the URL only, never as a restriction", () => {
+    // Written only when true; preserve an explicitly unrestricted snapshot.
+    expect(writeGeoFilters({ ...unrestrictedGeoFilters(), showDiscarded: true })).toEqual({
+      showDiscarded: ["1"],
+      period: ["all"],
+    });
+    expect(writeGeoFilters(unrestrictedGeoFilters())).toEqual({ period: ["all"] });
+    // Read back identically through the URL grammar.
+    const revealed = readGeoFilters(
+      parseGeoQuery(buildGeoQuery({ filters: writeGeoFilters({ ...unrestrictedGeoFilters(), showDiscarded: true }) })).filters,
+    );
+    expect(revealed.showDiscarded).toBe(true);
+    // A reveal-only link still opens on the product defaults (plus reveal).
+    const defaults = readGeoFilters(parseGeoQuery("?filter.showDiscarded=1").filters);
+    expect(defaults.showDiscarded).toBe(true);
+    expect(defaults.axes).toEqual({ z: true, r: true, p: true });
+    expect(defaults.timeRange).toMatchObject({ mode: "relative", relative: "7d" });
+    // Combined with restrictions, the reveal survives the round-trip.
+    const combined = readGeoFilters(parseGeoQuery("?filter.zonage=1&filter.showDiscarded=1").filters);
+    expect(combined.showDiscarded).toBe(true);
+    expect(combined.axes).toEqual({ z: true, r: false, p: false });
+    expect(buildGeoQuery({ filters: writeGeoFilters(combined) })).toBe(
+      "?mode=signal&filter.showDiscarded=1&filter.zonage=1",
+    );
+    // Absent or invalid values mean hidden; the reveal never leaks elsewhere.
+    expect(readGeoFilters({}).showDiscarded).toBe(false);
+    expect(readGeoFilters({ showDiscarded: ["0"] }).showDiscarded).toBe(false);
+    expect(subsetFromGeoFilters({ showDiscarded: ["1"] })).toBe(
+      subsetFromGeoFilters({}),
+    );
+  });
+
+  it("should preserve unrestricted filters when reveal is the only enabled option", () => {
+    const state = { ...unrestrictedGeoFilters(), showDiscarded: true };
+    const filters = writeGeoFilters(state);
+    expect(filters.period).toEqual(["all"]);
+    expect(readGeoFilters(filters)).toEqual(state);
   });
 
   it("should resolve a shared relative period when opened, without stale bounds", () => {
