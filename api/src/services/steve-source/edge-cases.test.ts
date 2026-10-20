@@ -221,4 +221,28 @@ describe("OOXML control escape decoding", () => {
     expect(byAddress.get("B1")?.value).toBe("A\rB_x0041_");
     expect(byAddress.get("B1")?.raw).toBe("A_x000D_B_x005F_x0041_");
   });
+
+  it("keeps an escape split across shared rich text runs literal", () => {
+    const bytes = buildSyntheticWorkbook({
+      "xl/sharedStrings.xml": "<sst><si><r><t>_x00</t></r><r><t>41_</t></r></si><si><t>_x005F_x0041_</t></si></sst>",
+      "xl/worksheets/sheet1.xml": sheet(
+        '<sheetData><row r="1"><c r="A1" t="s"><v>0</v></c><c r="B1" t="s"><v>1</v></c></row></sheetData>',
+      ),
+      "xl/worksheets/sheet2.xml": sheet("<sheetData/>"),
+    });
+    const inventory = captureWorkbookInventory(bytes);
+    expect(inventory.sharedStrings.slice(0, 2)).toEqual(["_x0041_", "_x0041_"]);
+    const cells = inventory.cells.filter((cell) => cell.sheet === "Lots");
+    expect(cells.map((cell) => cell.value)).toEqual(["_x0041_", "_x0041_"]);
+  });
+
+  it("keeps an escape split across inline rich text runs literal", () => {
+    const inventory = captureSheet(
+      '<sheetData><row r="1"><c r="A1" t="inlineStr"><is><r><t>_x00</t></r><r><t>41_</t></r></is></c></row></sheetData>',
+    );
+    const cell = inventory.cells.find((cell) => cell.sheet === "Lots");
+    expect(cell?.value).toBe("_x0041_");
+    expect(cell?.raw).toBe("_x0041_");
+  });
+
 });
