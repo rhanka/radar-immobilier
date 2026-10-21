@@ -3,6 +3,11 @@
  */
 
 export {
+  REAL_GRAPH_ADAPTER_VERSION,
+  extractGraphNodeTokens,
+} from "./graph-adapter.js";
+export type { GraphAdapterTokens } from "./graph-adapter.js";
+export {
   D3_RULE_VERSION,
   resolveTriageRow,
   tripletKey,
