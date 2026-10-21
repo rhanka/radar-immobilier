@@ -85,6 +85,10 @@ test-mcp: guard-env ## Run the immo-mcp workspace suites (service E2E excluded)
 test-h3-proxy: guard-env ## Isolated nginx control-limit check (H3 unit 10, no compose stack)
 	bash tools/h3-nginx-control-limit.sh
 
+.PHONY: image-runtime-smoke
+image-runtime-smoke: guard-env ## Build the runtime image, smoke-test api + content-deny modes, refuse unknown mode (H3 unit 9)
+	sh tools/h3-image-runtime-smoke.sh
+
 .PHONY: image-smoke
 image-smoke: guard-env ## Build --target build, refuse .env*, smoke-boot API+MCP bundles, check api/drizzle
 	@set -e; trap 'docker image rm radar-artifact-host-smoke:local >/dev/null 2>&1 || true' EXIT INT TERM; \
@@ -103,6 +107,14 @@ typecheck: guard-env ## Typecheck all workspaces using only the test stack
 lint: guard-env ## Lint the workspace using only the test stack
 	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
 	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npx eslint . --ignore-pattern 'tmp/**'"
+
+.PHONY: build-api check-image-entrypoints
+build-api: guard-env ## Run the exact CI API build, including declaration emit
+	@trap '$(COMPOSE) down -v --remove-orphans >/dev/null 2>&1 || true' EXIT INT TERM; \
+	$(COMPOSE) run --rm --no-deps -T api sh -c "npm ci && npm run build --workspace=api"
+
+check-image-entrypoints: guard-env
+	bash deploy/ci/check-image-entrypoints.sh
 
 .PHONY: down
 down: guard-env ## Stop the stack and remove volumes/orphans
