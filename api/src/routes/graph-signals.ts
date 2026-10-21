@@ -51,6 +51,7 @@ import {
 } from "../services/graph/discarded-signals.js";
 import { resolveGraphSignalsViewer } from "./auth.js";
 import { privateSignalResponse } from "../services/facets/private-response.js";
+import { targetFingerprint } from "../services/facets/target.js";
 import type { Database } from "../db/client.js";
 import type { ObjectStore } from "../storage/object-store.js";
 import {
@@ -127,6 +128,8 @@ export interface GraphSignalCard {
   label: string;
   citySlug: string | null;
   sourceRef: string | null;
+  /** Content fingerprint of the exact stored node served here (6B displayed-version capture). */
+  facetFingerprint: string;
   createdAt: string | null;
   description: string | null;
   publishedAt: string | null;
@@ -505,6 +508,7 @@ function buildSignalCard(
     label: node.label,
     citySlug: node.citySlug,
     sourceRef: node.sourceRef,
+    facetFingerprint: targetFingerprint(node),
     createdAt: node.createdAt ? node.createdAt.toISOString() : null,
     description,
     publishedAt: firstPublishedAt,

@@ -6,8 +6,7 @@ import { schema } from "../../src/db/schema.js";
 import { loadConfig } from "../../src/config.js";
 import { readCityFacets, readReasonCodes } from "../../src/services/facets/reader.js";
 import { createDiscardedSignalsReader } from "../../src/services/facets/discarded-reader.js";
-import { writeFacet } from "../../src/services/facets/writer.js";
-import { facetFixture } from "./facets-fixture.js";
+import { facetFixture, writeDisplayedFacet as writeFacet } from "./facets-fixture.js";
 
 const { db, pool } = createDb(loadConfig());
 afterAll(() => pool.end());
