@@ -75,6 +75,7 @@ Selected mappings (exact method/path only, no generic proxy):
 - [ ] Real-provider parity, conflict, private metadata, pagination and pre-dispatch admission evidence.
 - [x] Added composed-provider tests with shared PostgreSQL/S3 and the existing HTTP control route.
 - [x] Corrected the composed fixture name to satisfy S3 bucket naming; retained the initial failure log.
+- [x] Aligned list assertions and mocks with the selected provider's `{ total, artifacts }` response.
 - [ ] Four copied-source mutation failures, restored and checked with `cmp`.
 - [x] Parity cases with preparation mocks: minimal profile, HTTP↔MCP replay, changed-content conflict
       including file order, key boundaries, forged refusals, foreign metadata/pagination, suspension/expiry.
