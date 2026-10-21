@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "configVersion": "immo-artifacts.v1",
+  "provider": {
+    "id": "sentropic.artifacts",
+    "selectionStatus": "unselected",
+    "reason": "awaiting published capability-selection, effective-profile, finalization and typed-failure contracts"
+  },
+  "requiredContracts": {
+    "capabilitySelection": "pending-upstream",
+    "effectiveProfile": "immo-artifacts.v1",
+    "durableCommandIdentity": "immo-artifacts.v1",
+    "finalizationAuthorization": "pending-upstream",
+    "typedFailure": "pending-upstream"
+  },
+  "invocationScope": "immo:read",
+  "selection": [
+    { "tool": "artifacts_ensure", "operation": "ensure", "method": "POST", "path": "/ensure", "command": "ensure" },
+    { "tool": "artifacts_publish", "operation": "publish", "method": "POST", "path": "/publish", "command": "publish" },
+    { "tool": "artifacts_list", "operation": "list", "method": "POST", "path": "/list", "command": "list" },
+    { "tool": "artifacts_get", "operation": "meta", "method": "GET", "path": "/meta/{artifactId}", "command": "meta" }
+  ],
+  "effectiveProfile": {
+    "artifacts_ensure": {
+      "required": ["bindingName", "idempotencyKey"],
+      "bindingName": { "minLength": 1, "maxLength": 128 },
+      "parameters": { "allowed": "empty-object-only" },
+      "storageScope": "server-owned trusted configuration"
+    },
+    "artifacts_publish": {
+      "required": ["artifactId", "files", "idempotencyKey"],
+      "artifactId": "lowercase UUID validated by the library",
+      "profile": { "shape": "flat primitive record", "default": {} },
+      "provenance": { "fixed": "inline-original" },
+      "files": {
+        "minCount": 1,
+        "maxCount": 32,
+        "maxDecodedBytesPerFile": 262144,
+        "maxDecodedBytesTotal": 262144,
+        "entry": "path plus mimeType plus exactly one of text or bytes",
+        "textEncoding": "UTF-8 bytes",
+        "byteRange": "integers 0 through 255",
+        "mimeTypes": ["text/html", "text/css", "text/javascript", "application/json"],
+        "paths": "unique canonical paths; no empty or traversal segments, backslashes, percent-encoding, query or fragment markers",
+        "reservedFirstSegments": ["api", "__artifacts", "livez", "health"]
+      }
+    },
+    "artifacts_list": {
+      "required": [],
+      "limit": { "minimum": 1, "maximum": 100, "default": 20 },
+      "offset": { "minimum": 0, "default": 0 },
+      "note": "Authorization precedes pagination."
+    },
+    "artifacts_get": {
+      "required": ["artifactId"],
+      "artifactId": "lowercase UUID validated by the library"
+    },
+    "closedArguments": ["actor", "owner", "tenant", "storageScope", "internalIdempotencyKey", "paramsHash"],
+    "callerKey": {
+      "type": "string",
+      "rule": "trimmed value is nonempty; original holds at most 256 UTF-16 code units and is preserved verbatim"
+    }
+  },
+  "durableIdentity": {
+    "internalKey": "SHA-256 UTF-8(storageScope | sub | operation | artifactIdOrEmpty | originalCallerKey)",
+    "paramsHash": "effective command after scope binding, defaults, text-to-byte conversion and forced provenance; object keys sorted, array order significant",
+    "conflict": "same key with changed effective content is a conflict and creates no new release",
+    "payloadHashInKey": false
+  },
+  "activation": {
+    "requiresFinalizationBinding": true,
+    "requiresErrorBinding": true,
+    "unselectedUntilQualified": true
+  },
+  "provenance": {
+    "design": "conception-h4-v3",
+    "section": "P3",
+    "owner": "immo",
+    "values": "non-secret identifiers and opaque references only"
+  }
+}
