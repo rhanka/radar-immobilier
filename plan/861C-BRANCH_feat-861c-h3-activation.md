@@ -141,7 +141,7 @@ Review integration (both non-blocking points):
 - [x] Shared denial module and H1 header reuse.
 - [x] Host and probe behavior regression coverage.
 - [x] Isolated HTTP listener and import-graph checks.
-- [ ] Runtime bundling and strict service-mode selection.
+- [x] Runtime bundling and strict service-mode selection.
 - [ ] Real-image smoke and isolated CI build targets.
 
 ## Verification
