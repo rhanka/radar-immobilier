@@ -7,10 +7,10 @@
  * else at least one resolved yields `partially_resolved`; else `unresolved`.
  */
 
+import { extractGraphNodeTokens } from "./graph-adapter.js";
 import {
   findGraph,
   isGraphNodeType,
-  normalizeGraphReglementProp,
   splitReglementTokens,
 } from "./graph-set.js";
 import type { IdentifiedGraphSet } from "./graph-set.js";
@@ -52,11 +52,8 @@ function candidatesForToken(
   const out: D3ResolvedTriplet[] = [];
   for (const node of nodes) {
     if (!isGraphNodeType(node.type)) continue;
-    const first = normalizeGraphReglementProp(node.props["reglement_number"]);
-    const second = normalizeGraphReglementProp(
-      node.props["cible_reglement_numero"],
-    );
-    if (first === token || second === token) {
+    const { tokens } = extractGraphNodeTokens(node.props);
+    if (tokens.includes(token)) {
       out.push({ slug, type: node.type, id: node.id });
     }
   }
