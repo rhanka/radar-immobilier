@@ -237,6 +237,45 @@ async function getPvPdfHandler(
   return jsonResult(await ctx.raw.getPvPdf(args));
 }
 
+interface ReglementProvenanceToolArgs {
+  muni_slug: string;
+  zone_code?: string | undefined;
+}
+
+async function getReglementProvenanceHandler(
+  rawArgs: Record<string, unknown>,
+  ctx: InvocationContext,
+): Promise<ToolTextResult> {
+  const args = rawArgs as unknown as ReglementProvenanceToolArgs;
+  assertScope(ctx.auth, IMMO_SCOPES.read);
+  return jsonResult(
+    await ctx.raw.getReglementProvenance({ city: args.muni_slug, zone: args.zone_code }),
+  );
+}
+
+interface QueryZoningEventsToolArgs {
+  muni_slug: string;
+  zone_code?: string | undefined;
+  document_type?: string | undefined;
+  decision_state?: string | undefined;
+}
+
+async function queryZoningEventsHandler(
+  rawArgs: Record<string, unknown>,
+  ctx: InvocationContext,
+): Promise<ToolTextResult> {
+  const args = rawArgs as unknown as QueryZoningEventsToolArgs;
+  assertScope(ctx.auth, IMMO_SCOPES.read);
+  return jsonResult(
+    await ctx.raw.queryZoningEvents({
+      city: args.muni_slug,
+      zoneCode: args.zone_code,
+      documentType: args.document_type,
+      decisionState: args.decision_state,
+    }),
+  );
+}
+
 /**
  * One handler per tool, keyed by exact tool name. The SDK registrar and the
  * future cluster-mesh bridge resolve through this map: there is no second
@@ -253,4 +292,6 @@ export const TOOL_HANDLERS: Readonly<Record<string, ToolHandler>> = Object.freez
   get_lots_geojson: getLotsGeojsonHandler,
   get_grille_pdf: getGrillePdfHandler,
   get_pv_pdf: getPvPdfHandler,
+  get_reglement_provenance: getReglementProvenanceHandler,
+  query_zoning_events: queryZoningEventsHandler,
 });
