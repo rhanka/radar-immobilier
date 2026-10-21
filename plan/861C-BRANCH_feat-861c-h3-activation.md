@@ -100,91 +100,96 @@ Review integration (both non-blocking points):
   - [x] Success, refusal and account-switch cache tests.
   - [x] Parent-handler exception cache tests.
 
-## Deliverables (second PR)
+## Deliverables (earlier PRs, merged and unchanged)
 
-- [x] **Review rework A — publication proofs**: complete stub receipts
-      (`releaseId`, `manifest` with digest) and valid `artifactId`; a
-      successful H3-admitted publication returning the full receipt; separate
-      entry-denial and final-reread-denial cases.
-- [x] **Review rework B — unmounted prefix cache** (§5.3, T29): the control
-      prefix stays mounted with the private policy when the capability is
-      absent; covered through `createApp` for anonymous, unavailable,
-      origin and Bearer [REDACTED] responses.
-- [ ] **Unit 7 — BLOCKED on an upstream dependency** (T05, T13): a publish
-      revoked (suspension, cohort removal, expiration) while the provider is
-      blocked is refused to the caller with no receipt and accounted
-      (`unauthorized_at_commit`); provider lock/connection/S3 failures map
-      to typed statuses and are accounted through the below-layer probe.
-      The unit is NOT done: the 403 masks a possibly committed provider
-      publication (release, S3 objects, idempotency result, current pointer)
-      that a later replay can receipt, and Radar has no safe retraction for
-      it. Blocked on the upstream request below (provider `authorizeCommit`
-      mechanism after waits and before durable finalization).
-- [x] **Unit 10 — nginx control route limit** (T11 transport part):
-      `client_max_body_size 2m` on `/api/v1/artifacts/control` in the
-      preprod overlay; isolated test config plus a proxy check proving a
-      valid >1 MiB body passes, exactly 2 MiB passes, 2 MiB + 1 is refused,
-      the generic route still refuses >1 MiB, and a chunked body past the
-      limit is refused.
+- [x] Units 1-4, review rework A/B, unit 10: merged (see Git history).
+- [ ] Unit 7 stays BLOCKED on the upstream `authorizeCommit` request below.
+
+## Deliverables (third PR)
+
+- [ ] **Unit 8 — isolated denial listener** (§5.4, T02/T23/T24): new
+      `api/src/artifacts/content-deny.ts` exposes the shared denial
+      response plus `createContentDenyApp()`, which denies every request
+      unconditionally (401 under `/api/*`, 404 elsewhere), serves only
+      GET/HEAD `/livez` and `/health`, never redirects, serves HTML or
+      emits a cookie. `content-app.ts` reuses the shared response with no
+      behavior change. `content-deny-server.ts` starts the app standalone
+      with no application import. `content-deny.test.ts` denies every host
+      form (stable, pinned, case/port/dot variants, non-UUID, extra labels,
+      two UUIDs, foreign, apex, IP, single label, overlong, underscore,
+      empty segments, missing dot) across pages, API routes, all methods,
+      forged forwarding headers, cookies and HTML Accept, plus probe cases.
+      `content-deny-isolation.test.ts` pins the import graph and the
+      `PORT`-only environment reads, including side-effect imports. The HTTP
+      listener supplies a fixed internal authority to Hono before URL conversion,
+      so malformed Host values get the same denial. No host policy is added.
+- [ ] **Unit 9 — runtime image entrypoint and smoke** (§6.4): new
+      `api/docker-entrypoint.sh` validates the mode (`api` default,
+      `content-deny`, anything else refused with exit 2). `api/Dockerfile`
+      bundles `content-deny-server.ts`, copies the entrypoint, and sets
+      `ENTRYPOINT`/`CMD ["api"]` (manifests with `command:` bypass it).
+      The esbuild metadata guard rejects application dependencies in the denial
+      bundle. Empty modes and extra arguments also fail with exit 2.
+      New `tools/h3-image-runtime-smoke.sh` plus the `image-runtime-smoke`
+      Make target build the real runtime image and prove both modes boot
+      with closed denial, and that an unknown mode is refused. Isolated
+      (no root Makefile, no `.env`, internal network, no host ports),
+      `ENV` last, trap cleanup, no Python.
+
+## Integration checkpoints
+
+- [ ] Shared denial module and H1 header reuse.
+- [ ] Host and probe behavior regression coverage.
+- [ ] Isolated HTTP listener and import-graph checks.
+- [ ] Runtime bundling and strict service-mode selection.
+- [ ] Real-image smoke and isolated CI build targets.
 
 ## Verification
 
-Ports: API 18973, UI 15973, Maildev UI 11973; the test compose publishes none.
-Environment: `test-861c-h3-p2`. Proxy containers use an internal project network,
-with ports 8080 and 3000 inside that network and no host ports. The proxy loads
-the actual preprod server block, with a valid publication and 1024 decoded bytes.
+Ports: API 18983, UI 15983, Maildev UI 11983; the test compose publishes none.
+Environment: `test-861c-h3-p3`. Smoke containers use an internal project network
+with no host ports.
 
 ```sh
-rtk make -f tools/artifact-host.mk test-host SCOPE=src/artifacts API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
-rtk make -f tools/artifact-host.mk test-api SCOPE="--exclude tests/integration/** --no-file-parallelism" API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
-rtk make -f tools/artifact-host.mk test-api SCOPE="tests/integration/artifacts --no-file-parallelism" API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
-rtk make -f tools/artifact-host.mk test-h3-proxy API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
-rtk make -f tools/artifact-host.mk typecheck API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
-rtk make -f tools/artifact-host.mk lint API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
-rtk make -f tools/artifact-host.mk down API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
-rtk make -f tools/artifact-host.mk inspect API_PORT=18973 UI_PORT=15973 MAILDEV_UI_PORT=11973 ENV=test-861c-h3-p2
+rtk make -f tools/artifact-host.mk test-host SCOPE=src/artifacts API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
+rtk make -f tools/artifact-host.mk test-api SCOPE="--exclude tests/integration/** --no-file-parallelism" API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
+rtk make -f tools/artifact-host.mk test-api SCOPE="tests/integration/artifacts --no-file-parallelism" API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
+rtk make -f tools/artifact-host.mk image-runtime-smoke API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
+rtk make -f tools/artifact-host.mk typecheck API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
+rtk make -f tools/artifact-host.mk lint API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
+rtk make -f tools/artifact-host.mk build-api API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
+rtk make -f tools/artifact-host.mk check-image-entrypoints API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
+rtk make -f tools/artifact-host.mk down API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
+rtk make -f tools/artifact-host.mk inspect API_PORT=18983 UI_PORT=15983 MAILDEV_UI_PORT=11983 ENV=test-861c-h3-p3
 ```
 
 `ENV` stays last in every command. Teardown (`down -v --remove-orphans`) must be
 followed by `inspect` proving no project containers, volumes or networks remain.
 
-- [x] Complete admission receipt fixtures verified (90 package tests pass).
-- [x] Unmounted capability cache regressions verified (3 cases pass).
-- [x] Commit authorization and write-only failure ledger verified.
-- [x] Blocked-provider revocation tests verified.
-- [x] Provider failure and read-exclusion tests verified.
-- [x] Probe-mapped provider failures and revocation residue against the real
-      stack: four `artifacts-commit-probe.spec.ts` cases pass through the composed
-      provider. Unit 7 stays blocked until the upstream contract below lands.
-- [x] Concurrent dispatches retain separate typed causes (regression reproduced
-      before AsyncLocalStorage isolation); connection acquisition is typed too.
-- [x] Astra correction gates: 97 package tests, 67 targeted API tests,
-      2537 API tests outside integration (7 skipped), 21 artifact integrations,
-      lint, and ten proxy boundary cases pass. Seven Svelte warnings remain.
-- [x] Discrimination in a copy: removing below-HTTP reporters breaks both 503
-      mappings; restoration passes four cases and `cmp`. Removing the nginx
-      path boundary breaks the neighboring-route case; restoration passes ten.
-- [x] Nginx production configuration boundary verified.
-- [x] Container-only proxy check and mutation proofs verified.
-- [x] Final gates, per-commit typechecks, bundle and teardown verified.
+- [ ] Deny behavior: every host form refused with identical closed headers
+      (`content-deny.test.ts`, new cases; `content-app.test.ts` unchanged).
+- [ ] Deny isolation: import graph and `PORT`-only reads pinned
+      (`content-deny-isolation.test.ts`).
+- [ ] No regression on the H1 gate: existing `content-app`/`content-host`/
+      `content-config` suites stay green.
+- [ ] Real-image smoke: `image-runtime-smoke` passes (both modes boot with
+      closed denial; unknown mode refused), then `down` + `inspect` prove no
+      project containers, volumes or networks remain.
+- [ ] Per-commit typechecks, lint, and `check-image-entrypoints.sh` stay green
+      (the new esbuild entrypoint is picked up automatically).
+- [ ] Discrimination in a copy: removing the shared denial reuse breaks the
+      H1 gate cases; removing the Dockerfile entrypoint line breaks the
+      runtime smoke; restoration passes.
 
-Evidence before astra corrections: 90 package tests, 67 targeted API tests, 2537 API tests outside
-`tests/integration` (7 skipped), 17 artifact integration tests and 6 proxy cases
-pass. Lint and all nine commit source states pass typecheck (7 Svelte warnings).
-Mutation proofs: three revocation failures, three unmounted-cache failures and
-nginx 413 instead of 201 without the size directive; restored copies pass `cmp`.
-Qualification uses local ignored Compose overrides for TCP readiness, isolated
-workspace dependency volumes and in-memory PostgreSQL integration data. No test
-timeout is increased. Physical database durability is not covered by that run.
-Full commands, failed attempts, image identities, commit IDs and cleanup counts
-are recorded in the uncommitted `RAPPORT-SOL-H3-P2.md` and ignored logs.
+No shell or test was run while writing this PR (execution consigne); the
+testing agent runs the gates above and records results in `RAPPORT-MUSE-H3-P3.md`.
 
 ## Not covered (later H3 units)
 
-Provider quota binding and migration, denial listener, runtime image smoke,
-preprod resources (11-14), render/operator preflight, rollback documentation,
-production startup wiring of the activation reader and ledger, deployed proxy,
-TLS and routing. Physical prevention inside provider transactions is `unverified`.
+Provider quota binding (5) and migration (6), unit 7 (blocked, see below),
+preprod resources (11-14), render/operator preflight, rollback documentation
+(15), deployed proxy, TLS and routing. Physical prevention inside provider
+transactions is `unverified`.
 
 ## Upstream request — provider commit-time authorization (blocks unit 7)
 
