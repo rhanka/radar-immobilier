@@ -28,6 +28,11 @@ export interface SearchSignalsArgs {
   city: string;
   etape?: string | undefined;
   query?: string | undefined;
+  /**
+   * 6C reveal: true forwards `showDiscarded=1` to the radar API so archived
+   * signals are included. False or omitted preserves default hiding.
+   */
+  showDiscarded?: boolean | undefined;
   limit: number;
 }
 
@@ -118,6 +123,8 @@ export class MockDataSource implements ImmoDataSource {
     return { ...lot, related_signals: related };
   }
 
+  // Mock fixtures carry no discard dimension: showDiscarded is accepted and
+  // ignored here; hiding and reveal are enforced server-side in http mode.
   async searchSignals(args: SearchSignalsArgs): Promise<MockSignal[]> {
     const city = norm(args.city);
     const q = args.query ? norm(args.query) : null;
@@ -286,16 +293,21 @@ export class HttpDataSource implements ImmoDataSource {
    * user's identity: `ctx.accessToken` is forwarded as `Authorization: Bearer`
    * (per-user auth, D4). A 404 (the city has no signal node) maps to an EMPTY
    * list, not an error (anti-invention). A 401/403 is surfaced as an explicit
-   * `unauthenticated` error. The etape/query/limit filters are applied
-   * client-side, mirroring MockDataSource.searchSignals so the tool contract is
-   * identical.
+   * `unauthenticated` error. `showDiscarded: true` forwards `showDiscarded=1`
+   * so the API reveals archived signals under the same per-user auth; false or
+   * omission preserves default hiding. The etape/query/limit filters are
+   * applied client-side, mirroring MockDataSource.searchSignals so the tool
+   * contract is identical.
    */
   async searchSignals(
     args: SearchSignalsArgs,
     ctx: DataSourceCallContext = {},
   ): Promise<MockSignal[]> {
     const slug = citySlug(args.city);
-    const url = `${this.baseUrl}/api/graph-signals/${encodeURIComponent(slug)}`;
+    // 6C reveal: forwarded BEFORE search and limit; the API applies its own
+    // hiding predicate under the same per-user auth. Absent/false = hidden.
+    const reveal = args.showDiscarded === true ? "?showDiscarded=1" : "";
+    const url = `${this.baseUrl}/api/graph-signals/${encodeURIComponent(slug)}${reveal}`;
     // Forward the user's OWN token so the api applies its normal per-user auth.
     const headers: Record<string, string> = { accept: "application/json" };
     if (ctx.accessToken) headers.authorization = `Bearer ${ctx.accessToken}`;
