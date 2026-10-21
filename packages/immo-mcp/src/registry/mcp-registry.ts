@@ -6,9 +6,13 @@
  * registry and no fetch import in this module.
  */
 import {
+  ARTIFACT_DURABLE_IDENTITY,
+  ARTIFACT_EFFECTIVE_REQUIRED,
   ARTIFACT_INVOCATION_SCOPE,
   ARTIFACT_PROFILE_REVISION,
   ARTIFACT_SELECTION,
+  REQUIRED_PROVIDER_CONTRACTS,
+  isArtifactToolName,
   type ArtifactToolName,
 } from "./artifact-profile.js";
 import { IMMO_TOOL_BINDINGS, IMMO_TOOL_SCOPES, isImmoToolName } from "./immo-provider.js";
@@ -72,6 +76,35 @@ export function canonicalize(value: unknown): unknown {
   return value;
 }
 
+export function checkEffectiveProfile(
+  required: Record<string, readonly string[]> = ARTIFACT_EFFECTIVE_REQUIRED as Record<string, readonly string[]>,
+  durableIdentity: { readonly payloadHashInKey: boolean } = ARTIFACT_DURABLE_IDENTITY,
+  requiredContracts: {
+    readonly effectiveProfile: string;
+    readonly durableCommandIdentity: string;
+  } = REQUIRED_PROVIDER_CONTRACTS,
+): void {
+  for (const tool of ["artifacts_ensure", "artifacts_publish"] as const) {
+    if (!required[tool]?.includes("idempotencyKey")) {
+      throw new RegistryError("unavailable_capability", `artifact tool ${tool} must require idempotencyKey`);
+    }
+  }
+  if (!required["artifacts_publish"]?.includes("artifactId") ||
+    !required["artifacts_publish"]?.includes("files")) {
+    throw new RegistryError("unavailable_capability", "artifact tool artifacts_publish must require artifactId and files");
+  }
+  if (!required["artifacts_get"]?.includes("artifactId")) {
+    throw new RegistryError("unavailable_capability", "artifact tool artifacts_get must require artifactId");
+  }
+  if (durableIdentity.payloadHashInKey !== false) {
+    throw new RegistryError("unavailable_capability", "durable identity must not embed a payload hash in the key");
+  }
+  if (requiredContracts.effectiveProfile !== ARTIFACT_PROFILE_REVISION ||
+    requiredContracts.durableCommandIdentity !== ARTIFACT_PROFILE_REVISION) {
+    throw new RegistryError("incompatible_version", "effective profile and durable identity must track the profile revision");
+  }
+}
+
 export function checkTool(def: RegistryToolDefinition, allowedScopes: readonly string[]): void {
   if (typeof def.name !== "string" || !TOOL_NAME_RE.test(def.name)) {
     throw new RegistryError("malformed_parameter", `tool name ${JSON.stringify(def.name)} is malformed`);
@@ -82,7 +115,8 @@ export function checkTool(def: RegistryToolDefinition, allowedScopes: readonly s
     throw new RegistryError("missing_binding", `tool ${def.name} has no handler binding`);
   }
   if (!DEFAULT_ALLOWED_SCOPES.includes(def.scope) || !allowedScopes.includes(def.scope) ||
-    (isImmoToolName(def.name) && def.scope !== IMMO_TOOL_SCOPES[def.name])) {
+    (isImmoToolName(def.name) && def.scope !== IMMO_TOOL_SCOPES[def.name]) ||
+    (isArtifactToolName(def.name) && def.scope !== ARTIFACT_INVOCATION_SCOPE)) {
     throw new RegistryError("generic_scope", `tool ${def.name} scope ${def.scope} is not an Immo scope`);
   }
 }
@@ -101,6 +135,7 @@ export function checkArtifact(request: ArtifactActivationRequest, providers: rea
   if (request.selection.length !== ARTIFACT_SELECTION.length) {
     throw new RegistryError("unavailable_capability", "artifact selection must list exactly four tools");
   }
+  checkEffectiveProfile();
   const selected = new Set<string>();
   for (const entry of request.selection) {
     if (selected.has(entry.tool)) {
@@ -108,8 +143,12 @@ export function checkArtifact(request: ArtifactActivationRequest, providers: rea
     }
     selected.add(entry.tool);
     const expected = ARTIFACT_SELECTION.find((item) => item.tool === (entry.tool as ArtifactToolName));
-    if (!expected || !provider.tools.some(({ name }) => name === entry.tool)) {
+    const declared = provider.tools.find(({ name }) => name === entry.tool);
+    if (!expected || !declared) {
       throw new RegistryError("unavailable_capability", `artifact tool ${entry.tool} is not selectable`);
+    }
+    if (declared.scope !== ARTIFACT_INVOCATION_SCOPE) {
+      throw new RegistryError("generic_scope", `artifact tool ${entry.tool} scope must be immo:read`);
     }
     if (expected.operation !== entry.operation || expected.method !== entry.method || expected.path !== entry.path) {
       throw new RegistryError("unavailable_capability", `artifact tool ${entry.tool} mapping is not supported`);

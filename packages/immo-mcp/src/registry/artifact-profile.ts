@@ -8,6 +8,7 @@
 export const ARTIFACT_PROVIDER_ID = "sentropic.artifacts" as const;
 export const ARTIFACT_INVOCATION_SCOPE = "immo:read" as const;
 export const ARTIFACT_PROFILE_REVISION = "immo-artifacts.v1" as const;
+export const ARTIFACT_PROVIDER_VERSION = "0.1.4" as const;
 
 export const ARTIFACT_TOOL_NAMES = [
   "artifacts_ensure",
@@ -70,6 +71,69 @@ export const ARTIFACT_FORBIDDEN_CALLER_FIELDS: readonly string[] = [
   "internalIdempotencyKey",
   "paramsHash",
 ];
+
+export const ARTIFACT_EFFECTIVE_REQUIRED: Record<ArtifactToolName, readonly string[]> = {
+  artifacts_ensure: ["bindingName", "idempotencyKey"],
+  artifacts_publish: ["artifactId", "files", "idempotencyKey"],
+  artifacts_list: [],
+  artifacts_get: ["artifactId"],
+};
+
+export const ARTIFACT_DURABLE_IDENTITY = {
+  internalKey: "SHA-256 UTF-8(storageScope | sub | operation | artifactIdOrEmpty | originalCallerKey)",
+  paramsHash: "effective command after scope binding, defaults, text-to-byte conversion and forced provenance; object keys sorted, array order significant",
+  conflict: "same key with changed effective content is a conflict and creates no new release",
+  payloadHashInKey: false,
+} as const;
+
+/** Detached effective profile; every field participates in candidate integrity. */
+export function artifactEffectiveProfile() {
+  return {
+    artifacts_ensure: {
+      required: [...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_ensure],
+      bindingName: { minLength: ARTIFACT_LIMITS.bindingNameMin, maxLength: ARTIFACT_LIMITS.bindingNameMax },
+      parameters: { allowed: "empty-object-only" },
+      storageScope: "server-owned trusted configuration",
+    },
+    artifacts_publish: {
+      required: [...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_publish],
+      artifactId: "lowercase UUID validated by the library",
+      profile: { shape: "flat primitive record", default: {} },
+      provenance: { fixed: "inline-original" },
+      files: {
+        minCount: ARTIFACT_LIMITS.filesMin,
+        maxCount: ARTIFACT_LIMITS.filesMax,
+        maxDecodedBytesPerFile: ARTIFACT_LIMITS.decodedBytesPerFile,
+        maxDecodedBytesTotal: ARTIFACT_LIMITS.decodedBytesTotal,
+        entry: "path plus mimeType plus exactly one of text or bytes",
+        textEncoding: "UTF-8 bytes",
+        byteRange: "integers 0 through 255",
+        mimeTypes: [...ARTIFACT_MIME_TYPES],
+        paths: "unique canonical paths; no empty or traversal segments, backslashes, percent-encoding, query or fragment markers",
+        reservedFirstSegments: [...ARTIFACT_RESERVED_FIRST_SEGMENTS],
+      },
+    },
+    artifacts_list: {
+      required: [...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_list],
+      limit: {
+        minimum: ARTIFACT_LIMITS.listLimitMin,
+        maximum: ARTIFACT_LIMITS.listLimitMax,
+        default: ARTIFACT_LIMITS.listLimitDefault,
+      },
+      offset: { minimum: ARTIFACT_LIMITS.listOffsetMin, default: ARTIFACT_LIMITS.listOffsetDefault },
+      note: "Authorization precedes pagination.",
+    },
+    artifacts_get: {
+      required: [...ARTIFACT_EFFECTIVE_REQUIRED.artifacts_get],
+      artifactId: "lowercase UUID validated by the library",
+    },
+    closedArguments: [...ARTIFACT_FORBIDDEN_CALLER_FIELDS],
+    callerKey: {
+      type: "string",
+      rule: `trimmed value is nonempty; original holds at most ${ARTIFACT_LIMITS.callerKeyMaxUtf16} UTF-16 code units and is preserved verbatim`,
+    },
+  };
+}
 
 export type ProviderContractStatus = "immo-artifacts.v1" | "pending-upstream";
 
