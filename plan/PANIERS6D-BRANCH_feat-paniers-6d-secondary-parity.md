@@ -24,8 +24,9 @@ indicators) while preserving each consumer's non-basket population.
 ## Branch Scope Boundaries (MANDATORY)
 - **Allowed Paths (implementation scope)**:
   - `ui/src/lib/components/maps/SignauxMapView.svelte`
-  - `ui/src/lib/components/maps/SignalPdfOverlay.svelte` (BR6D-EX1)
+  - `ui/src/lib/components/maps/SignalPdfOverlay.svelte` (BR6D-EX1, BR6D-EX2)
   - `ui/src/lib/components/maps/SignauxSelPanel.svelte`
+  - `ui/src/lib/components/maps/SignauxSelPanel.test.ts`
   - `ui/src/lib/signals/pdf-overlay-signals.ts`
   - `ui/src/lib/signals/pdf-overlay-signals.test.ts`
   - `ui/src/lib/maps/signaux-reglements.ts`
@@ -55,6 +56,10 @@ indicators) while preserving each consumer's non-basket population.
 - Reason: two rendered-PDF regressions prove an archived co-signal's hover card remains open and stale citations survive reload.
 - Impact: refresh or close the existing card when signal inputs change; no remount, API or geographic change.
 - Rollback: revert the isolated hover reconciliation commit; keep its regression tests to expose the gap.
+- BR6D-EX2: the astra-fix execution brief authorizes refreshing PDF highlights and badges.
+- Reason: the retained current signal ID misses removed co-signals and changed citations on the same page.
+- Impact: refresh mounted pages with existing render-token cancellation; no API or geographic change.
+- Rollback: revert the isolated PDF refresh commit; retain its rendered regression tests.
 - 6D needs no owner decision (reference design, section 6D).
 - Local Git metadata and a bundle are authorized by the execution brief; shared Git metadata stays read-only.
 - [x] Evidence reconciliation rebuilds current nodes and uses the current visible IDs synchronously.
@@ -107,6 +112,11 @@ indicators) while preserving each consumer's non-basket population.
     - [x] UI tests: `src/lib/maps` (including cadastral-indicator parity).
 - [x] **Lot 6D-4 — Docs consolidation**
   - [x] Record locally validated state; CI, operational qualification and merge remain outstanding.
+- [ ] **Lot 6D-R — Astra review corrections**
+  - [x] Refresh PDF badges/highlights after reload, including an explicitly deferred text read.
+  - [ ] Mark unavailable regulatory counts explicitly while preserving demo PDFs and geography.
+  - [ ] Discriminate both fixes in a working copy; restore and verify with `cmp`.
+  - [ ] Pass indexed typechecks, lint and all three UI directories; remove private test resources.
 - [ ] **Lot 6D-5 — Merge & close**
   - [ ] Push branch.
   - [ ] Open PR (or merge directly if solo dev).
