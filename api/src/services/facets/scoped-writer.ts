@@ -20,7 +20,7 @@ import {
 } from "../../db/schema.js";
 import { lockWorkspace } from "../workspaces/mutations.js";
 import { approvedAccountId, resolveWorkspaceAccess } from "../workspaces/store.js";
-import { facetCommandDigest, readCommand } from "./commands.js";
+import { facetCommandDigest, historicalCommandDigest, readCommand } from "./commands.js";
 import { facetEventResponse } from "./response.js";
 import {
   FacetError,
@@ -36,10 +36,19 @@ import { resolveStream, type StreamRef } from "./scoped-reader.js";
 import { appendScopedTransition, assertScopedExpectations } from "./scoped-transition.js";
 import type { Basket, FacetCommand } from "./writer.js";
 
+/** Pre-6B payload: no displayed fingerprint, recovery only, never a new command. */
+export type HistoricalScopedCommand = Omit<FacetCommand, "expectedHeadId" | "displayedFingerprint"> & {
+  expectedHeadId?: string | null;
+  displayedFingerprint?: never;
+};
+
 export async function writeScopedPersonalFacet(
-  db: Database, sub: string, workspaceId: string, command: FacetCommand,
+  db: Database, sub: string, workspaceId: string, command: FacetCommand | HistoricalScopedCommand,
 ) {
-  if (command.expectedHeadId === undefined || command.displayedFingerprint === undefined) {
+  if (command.displayedFingerprint === undefined) {
+    return recoverScopedHistoricalFacet(db, sub, workspaceId, command);
+  }
+  if (command.expectedHeadId === undefined) {
     throw new FacetError(400, "invalid_facet_command");
   }
   const key = command.commandKey.toLowerCase();
@@ -135,5 +144,42 @@ export async function writeScopedPersonalFacet(
       ownerId: accountId, commandKey: key, workspaceId, status: "resolved", commandDigest,
     }).onConflictDoNothing();
     return result;
+  });
+}
+
+/**
+ * Exact recovery of a pre-6B receipt (pre-6A or 6A, no displayed
+ * fingerprint). The receipt and its qualified context are returned
+ * byte-identical; a missing receipt never falls through to a mutation.
+ */
+async function recoverScopedHistoricalFacet(
+  db: Database, sub: string, workspaceId: string, command: HistoricalScopedCommand,
+) {
+  return db.transaction(async (tx) => {
+    await lockWorkspace(tx, workspaceId);
+    const accountId = await approvedAccountId(tx, sub, true);
+    await resolveWorkspaceAccess(tx, workspaceId, sub);
+    requireScopedEpoch(await scopedEpochFor(tx, workspaceId), workspaceId);
+    const unresolved = await tx.select({ id: facetEvents.id }).from(facetEvents)
+      .leftJoin(facetEventBindings, eq(facetEventBindings.eventId, facetEvents.id))
+      .where(sql`${facetEvents.ownerId} = ${accountId} AND ${facetEventBindings.eventId} IS NULL`).limit(1);
+    if (unresolved.length > 0) throw new FacetError(409, "personal_history_unresolved");
+    const key = command.commandKey.toLowerCase();
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${JSON.stringify(
+      ["scoped-command", accountId, key])}, 0))`);
+    const commandDigest = historicalCommandDigest({ ...command, commandKey: key });
+    const [contextRow] = await tx.select().from(facetCommandContexts).where(sql`
+      ${facetCommandContexts.ownerId} = ${accountId} AND ${facetCommandContexts.commandKey} = ${key}`);
+    const [receiptRow] = await tx.select().from(facetCommands).where(sql`
+      ${facetCommands.ownerId} = ${accountId} AND ${facetCommands.commandKey} = ${key}`);
+    if (receiptRow && (!contextRow || contextRow.status !== "resolved")) {
+      throw new FacetError(409, "command_context_unresolved");
+    }
+    if (contextRow && contextRow.workspaceId !== workspaceId.toLowerCase()) {
+      throw new FacetError(409, "idempotency_key_conflict");
+    }
+    const replay = await readCommand(tx, accountId, key, commandDigest);
+    if (replay === undefined) throw new FacetError(400, "invalid_facet_command");
+    return replay;
   });
 }
