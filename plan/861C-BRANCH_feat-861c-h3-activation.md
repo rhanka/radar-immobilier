@@ -57,6 +57,7 @@ Review integration (both non-blocking points):
   - `tools/artifact-host.mk` (`test-h3-proxy` target only)
   - `RAPPORT-MUSE-H3-P2.md`, `RAPPORT-SOL-H3-P2.md` (uncommitted deliverables)
   - `tmp/861c-h3-p2/**` (ignored logs, copies, local Git and bundle)
+  - `tmp/861c-h3-p2-fix/**` (astra correction evidence and local Git)
 - **Forbidden Paths (must not change in this branch)**:
   - `api/src/config.ts`, root `Makefile`, root `docker-compose*.yml`
   - `rules/**`, agent bootstrap files, other `plan/*-BRANCH_*.md`
@@ -69,6 +70,18 @@ Review integration (both non-blocking points):
   - `api/src/app.ts` — closed-capability control mount (review rework, guards unchanged)
   - `api/src/index.ts`, `api/src/artifacts/control-route-startup.ts`
     — deferred (production wiring of the activation reader and ledger)
+  - `packages/artifacts-host/src/composition.ts` — threads an optional
+    failure sink (`onProviderFailure`) into the locked store and the timeout
+    blob wrapper (astra review point 2, no behavior change when absent)
+  - `packages/artifacts-host/src/storage.ts` — forwards the sink to the
+    lock path, reporting only lock-minted failures (same review point)
+  - `packages/artifacts-host/src/s3-timeout.ts` — forwards the sink to the
+    blob wrapper (same review point)
+  - `packages/artifacts-host/src/idempotency.ts` — preserve typed connection
+    acquisition failures before provider HTTP conversion (same review point)
+  - `api/tests/integration/artifacts-commit-probe.spec.ts` — new real-stack
+    proof for the probe mapping and the revocation residue (astra points
+    1b-1c and 2, isolated database and bucket, no new harness dependency)
 
 ## Deliverables
 
@@ -105,13 +118,16 @@ Review integration (both non-blocking points):
       prefix stays mounted with the private policy when the capability is
       absent; covered through `createApp` for anonymous, unavailable,
       origin and Bearer [REDACTED] responses.
-- [x] **Unit 7 — commit-time authorization and failure accounting** (T05, T13):
-      a publish revoked (suspension, cohort removal, expiration) while the
-      provider is blocked is refused to the caller with no receipt and
-      accounted (`unauthorized_at_commit`); provider lock/connection/S3
-      failures map to typed statuses and are accounted. Prevention inside
-      the provider transaction is `unverified` (missing provider hook,
-      described in `facade.ts`).
+- [ ] **Unit 7 — BLOCKED on an upstream dependency** (T05, T13): a publish
+      revoked (suspension, cohort removal, expiration) while the provider is
+      blocked is refused to the caller with no receipt and accounted
+      (`unauthorized_at_commit`); provider lock/connection/S3 failures map
+      to typed statuses and are accounted through the below-layer probe.
+      The unit is NOT done: the 403 masks a possibly committed provider
+      publication (release, S3 objects, idempotency result, current pointer)
+      that a later replay can receipt, and Radar has no safe retraction for
+      it. Blocked on the upstream request below (provider `authorizeCommit`
+      mechanism after waits and before durable finalization).
 - [x] **Unit 10 — nginx control route limit** (T11 transport part):
       `client_max_body_size 2m` on `/api/v1/artifacts/control` in the
       preprod overlay; isolated test config plus a proxy check proving a
@@ -145,11 +161,14 @@ followed by `inspect` proving no project containers, volumes or networks remain.
 - [x] Commit authorization and write-only failure ledger verified.
 - [x] Blocked-provider revocation tests verified.
 - [x] Provider failure and read-exclusion tests verified.
+- [ ] Probe-mapped provider failures and revocation residue against the real
+      stack: `artifacts-commit-probe.spec.ts` authored, run pending (other
+      agent). Unit 7 stays blocked until the upstream request below lands.
 - [x] Nginx production configuration boundary verified.
 - [x] Container-only proxy check and mutation proofs verified.
 - [x] Final gates, per-commit typechecks, bundle and teardown verified.
 
-Final evidence: 90 package tests, 67 targeted API tests, 2537 API tests outside
+Evidence before astra corrections: 90 package tests, 67 targeted API tests, 2537 API tests outside
 `tests/integration` (7 skipped), 17 artifact integration tests and 6 proxy cases
 pass. Lint and all nine commit source states pass typecheck (7 Svelte warnings).
 Mutation proofs: three revocation failures, three unmounted-cache failures and
@@ -166,6 +185,59 @@ Provider quota binding and migration, denial listener, runtime image smoke,
 preprod resources (11-14), render/operator preflight, rollback documentation,
 production startup wiring of the activation reader and ledger, deployed proxy,
 TLS and routing. Physical prevention inside provider transactions is `unverified`.
+
+## Upstream request — provider commit-time authorization (blocks unit 7)
+
+**Context.** Radar's facade (`packages/artifacts-host/src/facade.ts`) rereads
+admission after the provider dispatch settles. When revocation lands while
+the provider is blocked (lock, connection, S3), the 403 masks a publication
+the provider may already have committed: `releases` row (`ready`), S3
+objects, idempotency result and current pointer persist, and replaying the
+same idempotency key after re-approval receipts that publication. The
+provider sources (`@sentropic/artifacts@0.1.2`) are not installed in this
+checkout and could not be fetched, so no retraction operation usable from
+the facade was found; 0016 widens release states without exposing a
+facade-level retire. Direct SQL/S3 surgery from Radar would bypass provider
+invariants (current pointer, idempotency replay, blob refcounts/GC pins)
+and is therefore NOT implemented.
+
+**Owner and contract (H4 v3).** Sentropic supplies a generic, supported
+authorization mechanism. H3 supplies current admission/object/quota policy;
+H4 binds it through HTTP and MCP. The host supplies an immutable, request-bound
+callback identifying verified actor, operation, scope and object, never tool
+arguments or mutable global app state. The provider invokes it after relevant
+lock, connection and S3 waits and before durable finalization. It covers
+release readiness, current pointer, provenance/lifecycle, and idempotency success;
+for `ensure`, binding and ACL/lifecycle effects also belong to that boundary.
+No unchecked connection/lock wait may follow the decision: coordinated writes,
+revalidation or a qualified authorization revision must retain its validity.
+Unavailable authority and revocation fail closed, with
+`unauthorized_at_commit` accounting. Retraction alone does not satisfy H4.
+
+**Typed failure contract.** Sentropic must preserve the original typed cause
+privately, before HTTP conversion, correlated to the immutable invocation.
+Both transports and the write ledger consume that same classified outcome:
+S3/connection unavailability → 503/`provider_unavailable`; genuine conflicts →
+409/`provider_conflict`; finalization denial → refusal/`unauthorized_at_commit`;
+unexpected failures → sanitized 500/`provider_error`. Internal causes must not
+reach public bodies. The Radar probe is a temporary local classification seam,
+not proof of the absent upstream contract or MCP parity.
+
+**Acceptance criteria.** Through real `createHttpArtifactApp` or
+`composeArtifactHost`, block each relevant boundary, revoke, then inspect
+PostgreSQL/S3 from another instance or after reconnect/restart. Denial leaves
+no ready publication, advanced pointer or reusable idempotency success.
+Earlier staging may leave only accounted, nonvisible intermediate objects with
+a bounded cleanup/recovery rule; zero raw S3 objects is not the H4 requirement.
+Reauthorize and retry the same key: it must execute a newly authorized attempt,
+never retrieve denied success. Replay of an earlier valid success remains
+subject to current admission/object authorization. Cover `ensure`, quotas,
+provenance/lifecycle and both HTTP/MCP outcomes as well as publication.
+Inject typed failures below the real HTTP app, asserting sanitized status/body,
+one correlated write-ledger entry, no read entries, and MCP code/retry parity.
+
+Until the upstream lands, `artifacts-commit-probe.spec.ts` ("documents the
+uncompensated residue") pins the leak and must be inverted when it does.
 
 ## Feedback Loop
 
