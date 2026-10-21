@@ -2,7 +2,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 import type { Database } from "../db/client.js";
 import { FacetError, FacetHeadConflictError } from "../services/facets/target.js";
-import { writeFacet } from "../services/facets/writer.js";
+import { recoverHistoricalFacet, writeFacet } from "../services/facets/writer.js";
 import { readCityFacets, readReasonCodes } from "../services/facets/reader.js";
 import { FACET_PROFILE } from "../services/facets/codebook.js";
 import { privateSignalResponse } from "../services/facets/private-response.js";
@@ -48,6 +48,12 @@ const schemas = {
   discard: discardSchema,
   restore: z.object({ target, expectedHeadId }).strict(),
 };
+const historicalSchemas = {
+  select: z.object({ target, basket, reasonCode }).strict(),
+  deselect: z.object({ target, basket }).strict(),
+  discard: z.object({ target, reasonCode, deselect: z.array(basket).max(2).optional() }).strict(),
+  restore: z.object({ target }).strict(),
+};
 export interface SignalFacetsDeps { db: Database; auth?: { enabled: boolean } }
 export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
   const app = new Hono();
@@ -63,12 +69,18 @@ export function signalFacetsRoute(deps: SignalFacetsDeps): Hono {
   });
   for (const action of ["select", "deselect", "discard", "restore"] as const) {
     app.post(`/api/v1/signal-facets/${action}`, async (c) => {
-      const parsed = schemas[action].safeParse(await c.req.json().catch(() => null));
+      const body = await c.req.json().catch(() => null);
+      const parsed = schemas[action].safeParse(body);
       const key = z.string().uuid().transform((value) => value.toLowerCase()).safeParse(c.req.header("Idempotency-Key"));
-      if (!parsed.success || !key.success) return c.json({ error: "invalid_facet_command" }, 400);
+      if (!key.success) return c.json({ error: "invalid_facet_command" }, 400);
+      const historical = parsed.success ? null : historicalSchemas[action].safeParse(body);
+      if (!parsed.success && !historical?.success) return c.json({ error: "invalid_facet_command" }, 400);
       const session = c.get("session" as never) as { sub: string };
       try {
-        const event = await writeFacet(deps.db, session.sub, { ...parsed.data, action, commandKey: key.data });
+        const event = parsed.success
+          ? await writeFacet(deps.db, session.sub, { ...parsed.data, action, commandKey: key.data })
+          : await recoverHistoricalFacet(deps.db, session.sub,
+            { ...historical!.data!, action, commandKey: key.data });
         return c.json({ ok: true, event: event ? facetEventResponse(event) : null });
       } catch (error) {
         if (error instanceof FacetHeadConflictError) {
