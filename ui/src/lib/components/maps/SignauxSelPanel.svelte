@@ -232,6 +232,8 @@
   /** Only confirmed writes get the recorded-write error title. */
   export let facetReloadAfterWrite = false;
   export let onRetryFacetReads: () => void = () => {};
+  /** Reload heads/detail/by-city after a 409 head conflict in the controls. */
+  export let onFacetHeadsStale: () => void = () => {};
   export let discardedNotice: { target: FacetTarget; label: string } | null = null;
   export let discardedActionError: string | null = null;
   export let undoBusy = false;
@@ -1593,6 +1595,7 @@
                           viewerKey={facetViewerKey}
                           onSaved={(action, launch) => onFacetSaved(action, facetCardTarget, launch)}
                           onRetryCodes={onRetryFacetReads}
+                          onHeadsStale={onFacetHeadsStale}
                         />
                       {:else if facetsNote}
                         <p class="sel-muted" data-testid="facet-card-note">{facetsNote}</p>

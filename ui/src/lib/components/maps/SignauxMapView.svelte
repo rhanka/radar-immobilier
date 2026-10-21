@@ -585,6 +585,7 @@
   let discardedNotice: { target: FacetTarget; label: string } | null = null;
   let discardedActionError: string | null = null;
   let undoCommandKey: string | null = null;
+  let undoExpectedHeadId: string | null = null;
   let undoBusy = false;
   let selPanel: {
     focusSignalCard(id: string): void;
@@ -638,6 +639,7 @@
       discardedNotice = null;
       discardedActionError = null;
       undoCommandKey = null;
+      undoExpectedHeadId = null;
       undoBusy = false;
       detailCache.clear();
       detailNodes = [];
@@ -1538,6 +1540,7 @@
     discardedNotice = null;
     discardedActionError = null;
     undoCommandKey = null;
+    undoExpectedHeadId = null;
     facetReloadError = null;
     facetReloadAfterWrite = false;
     undoOperationToken += 1;
@@ -1747,10 +1750,16 @@
       discardedNotice = { target, label };
       discardedActionError = null;
       undoCommandKey = null;
+      undoExpectedHeadId = launch?.confirmedHeadId ?? null;
       undoOperationToken += 1;
       undoBusy = false;
     }
     await reloadAfterFacetWrite(operationCity, { silentDetail: true, afterWrite: true });
+  }
+
+  /** Reload after a 409 head conflict: stale heads need a new intention. */
+  function handleFacetHeadsStale(): void {
+    if (selectedCity) void reloadAfterFacetWrite(selectedCity.municipality.slug, { silentDetail: true, afterWrite: false });
   }
 
   /** A read retry must not announce a recorded write. */
@@ -1778,8 +1787,12 @@
     try {
       if (!undoCommandKey) undoCommandKey = createCommandKey();
       const commandKeyForOperation = undoCommandKey;
-      await postFacetCommand("", "restore", { target }, commandKeyForOperation);
-      if (isCurrent()) undoCommandKey = null;
+      const expectedHeadId = undoExpectedHeadId;
+      await postFacetCommand("", "restore", { target, expectedHeadId }, commandKeyForOperation);
+      if (isCurrent()) {
+        undoCommandKey = null;
+        undoExpectedHeadId = null;
+      }
       if (appliedFacetContext !== operationViewer) return;
       detailCache.delete(operationCity);
       if (!isCurrent()) {
@@ -1805,6 +1818,9 @@
         err instanceof SignalFacetError
           ? facetErrorMessage(err)
           : "Écriture non confirmée — Réessayer.";
+      if (err instanceof SignalFacetError && err.code === "facet_head_conflict") {
+        await reloadAfterFacetWrite(operationCity, { silentDetail: true, afterWrite: false });
+      }
     } finally {
       if (undoOperationToken === operationToken) undoBusy = false;
     }
@@ -1814,6 +1830,7 @@
     discardedNotice = null;
     discardedActionError = null;
     undoCommandKey = null;
+    undoExpectedHeadId = null;
     selPanel?.focusSignalsBucket();
   }
 
@@ -1845,6 +1862,7 @@
     discardedNotice = null;
     discardedActionError = null;
     undoCommandKey = null;
+    undoExpectedHeadId = null;
     facetReloadError = null;
     facetReloadAfterWrite = false;
     undoOperationToken += 1;
@@ -3199,6 +3217,7 @@
       facetReloadError={facetReloadError}
       facetReloadAfterWrite={facetReloadAfterWrite}
       onRetryFacetReads={handleRetryFacetReads}
+      onFacetHeadsStale={handleFacetHeadsStale}
       discardedNotice={discardedNotice}
       discardedActionError={discardedActionError}
       {undoBusy}
