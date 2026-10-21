@@ -18,6 +18,7 @@
   import {
     codesForVerdict,
     createCommandKey,
+    expectedHeadIdFor,
     facetErrorMessage,
     isFacetWriteUnconfirmed,
     postFacetCommand,
@@ -39,6 +40,17 @@
   export let codesLoading = false;
   /** Parent-level inactivation (not allowed, reload in flight). */
   export let disabled = false;
+  /**
+   * Parent reload after a 409 head conflict (stale heads, new intention
+   * required). Carries the launched target, its launch context and the
+   * refusal copy, so the parent keeps the refusal visible when the reload
+   * removes the card and ignores late conflicts from another city/viewer.
+   */
+  export let onHeadsStale: (
+    target: FacetTarget,
+    launch: FacetCommandLaunch,
+    message: string,
+  ) => void = () => {};
   /** Injectable for tests; defaults to the real facet client. */
   export let postCommand: typeof postFacetCommand = postFacetCommand;
   /** Parent-owned viewer identity, captured before each command. */
@@ -125,12 +137,16 @@
     busy = true;
     error = null;
     try {
-      await postCommand("", action, body, commandKey!);
+      const event = await postCommand("", action, body, commandKey!);
       commandKey = null;
       lastIntent = null;
       if (viewerAtStart !== viewerKey) return;
       discardCode = "";
-      await onSaved(action, launch);
+      await onSaved(action, {
+        ...launch,
+        confirmedHeadId: event && typeof event === "object" && "id" in event && typeof event.id === "string"
+          ? event.id : null,
+      });
     } catch (err) {
       if (viewerAtStart !== viewerKey) {
         commandKey = null;
@@ -142,10 +158,15 @@
         lastIntent = null;
         commandKey = null;
       }
-      error =
+      const refusalMessage =
         err instanceof SignalFacetError
           ? facetErrorMessage(err)
           : "Écriture non confirmée — Réessayer.";
+      if (err instanceof SignalFacetError
+        && (err.code === "facet_head_conflict" || err.code === "command_context_unresolved")) {
+        onHeadsStale(body.target, launch, refusalMessage);
+      }
+      error = refusalMessage;
     } finally {
       busy = false;
       await tick();
@@ -164,11 +185,12 @@
       target,
       basket,
       ...(code ? { reasonCode: code } : {}),
+      expectedHeadId: expectedHeadIdFor(state, "select", basket),
     });
   }
 
   function deselectBasket(basket: FacetBasket): void {
-    void run("deselect", { target, basket });
+    void run("deselect", { target, basket, expectedHeadId: expectedHeadIdFor(state, "deselect", basket) });
   }
 </script>
 
@@ -368,7 +390,7 @@
           size="sm"
           type="button"
           disabled={inactive}
-          onclick={() => run("restore", { target })}
+          onclick={() => run("restore", { target, expectedHeadId: expectedHeadIdFor(state, "restore") })}
           aria-label="Restaurer le signal écarté"
           data-testid="facet-restore"
         >
@@ -396,7 +418,7 @@
           size="sm"
           type="button"
           disabled={inactive || !discardCode}
-          onclick={() => run("discard", { target, reasonCode: discardCode })}
+          onclick={() => run("discard", { target, reasonCode: discardCode, expectedHeadId: expectedHeadIdFor(state, "discard") })}
           aria-label="Valider l'écart du signal"
           data-testid="facet-discard-submit"
         >

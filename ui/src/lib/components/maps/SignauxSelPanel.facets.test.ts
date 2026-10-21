@@ -70,10 +70,13 @@ function facetState(overrides: Partial<TargetFacetState> = {}): TargetFacetState
   return {
     pertinent: false,
     pertinentCode: null,
+    pertinentHeadId: null,
     watching: false,
     watchingCode: null,
+    watchingHeadId: null,
     archived: false,
     archiveCode: null,
+    archiveHeadId: null,
     changedSinceArchive: false,
     targetAvailable: true,
     ...overrides,
@@ -197,6 +200,7 @@ describe("SignauxSelPanel — controls and discard notice", () => {
     expect(postCommand.mock.calls[0]![2]).toEqual({
       target: { citySlug: "delson", type: "DesignationEvent", id: "sig-1" },
       reasonCode: "N-ADMIN",
+      expectedHeadId: null,
     });
   });
 
@@ -259,6 +263,30 @@ describe("SignauxSelPanel — controls and discard notice", () => {
     expect(alert.textContent).toContain("rechargement impossible");
     await fireEvent.click(within(alert).getByRole("button", { name: "Réessayer" }));
     expect(onRetryFacetReads).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the parent conflict refusal visible with its target", async () => {
+    const onDismissFacetConflict = vi.fn();
+    render(Harness, {
+      props: {
+        selectedCity: makeCity(),
+        detailNodes: [makeSignal()],
+        unfilteredSignalCount: 1,
+        facetsAllowed: true,
+        facetConflictNotice: {
+          target: { citySlug: "delson", type: "DesignationEvent", id: "sig-1" },
+          message: "Données périmées — rechargez les données puis réessayez.",
+        },
+        onDismissFacetConflict,
+      },
+    });
+    const notice = screen.getByTestId("facet-conflict-notice");
+    expect(notice.textContent).toContain("sig-1");
+    expect(notice.textContent).toContain("delson");
+    expect(notice.textContent).toMatch(/Données périmées/);
+    expect(within(notice).getByRole("alert")).toBeTruthy();
+    await fireEvent.click(within(notice).getByRole("button", { name: "Fermer" }));
+    expect(onDismissFacetConflict).toHaveBeenCalledTimes(1);
   });
 
   it("refocuses the notice when a new notice replaces the previous one", async () => {

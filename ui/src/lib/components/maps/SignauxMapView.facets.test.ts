@@ -636,6 +636,7 @@ describe("SignauxMapView — Annuler restores with one key per retry", () => {
     const restores = vi.mocked(postFacetCommand).mock.calls.filter((call) => call[1] === "restore");
     expect(restores[0]![2]).toEqual({
       target: { citySlug: CITY_SLUG, type: "Signal", id: "sig-1" },
+      expectedHeadId: "event-1",
     });
     expect(restores[0]![3]).toBe(restores[1]![3]);
   });

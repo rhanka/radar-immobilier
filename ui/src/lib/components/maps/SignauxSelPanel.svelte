@@ -39,6 +39,7 @@
     postFacetCommand,
     type FacetAction,
     type FacetCommandLaunch,
+    type FacetConflictNotice,
     type FacetHeadsStatus,
     type FacetTarget,
     type ReasonCode,
@@ -232,6 +233,21 @@
   /** Only confirmed writes get the recorded-write error title. */
   export let facetReloadAfterWrite = false;
   export let onRetryFacetReads: () => void = () => {};
+  /**
+   * Reload heads/detail/by-city after a 409 head conflict in the controls.
+   * Carries the launched target, its launch context and the refusal copy.
+   */
+  export let onFacetHeadsStale: (
+    target: FacetTarget,
+    launch: FacetCommandLaunch,
+    message: string,
+  ) => void = () => {};
+  /**
+   * Parent-owned 409 refusal: survives the removal of the signal card from
+   * the detail list. Rendered in the single live region below.
+   */
+  export let facetConflictNotice: FacetConflictNotice | null = null;
+  export let onDismissFacetConflict: () => void = () => {};
   export let discardedNotice: { target: FacetTarget; label: string } | null = null;
   export let discardedActionError: string | null = null;
   export let undoBusy = false;
@@ -1208,6 +1224,29 @@
         </Button>
       </div>
     {/if}
+    {#if facetConflictNotice}
+      {@const conflict = facetConflictNotice}
+      <!-- The design-system error Alert provides the single live region
+           with role="alert". Parent-owned, so the refusal
+           outlives the signal card removed by the post-409 reload. -->
+      <div class="sel-notice" data-testid="facet-conflict-notice">
+        <Alert
+          tone="error"
+          title="Écriture refusée"
+          message={`${conflict.target.type} ${conflict.target.id} (${conflict.target.citySlug}) — ${conflict.message}`}
+        />
+        <div class="sel-notice-actions">
+          <Button
+            variant="secondary"
+            size="sm"
+            type="button"
+            onclick={onDismissFacetConflict}
+          >
+            Fermer
+          </Button>
+        </div>
+      </div>
+    {/if}
     {#if discardedNotice}
       {@const notice = discardedNotice}
       {#key notice}
@@ -1593,6 +1632,7 @@
                           viewerKey={facetViewerKey}
                           onSaved={(action, launch) => onFacetSaved(action, facetCardTarget, launch)}
                           onRetryCodes={onRetryFacetReads}
+                          onHeadsStale={onFacetHeadsStale}
                         />
                       {:else if facetsNote}
                         <p class="sel-muted" data-testid="facet-card-note">{facetsNote}</p>
