@@ -100,10 +100,46 @@ interface ReadDocumentExcerptToolArgs {
   maxChars: number;
 }
 
+async function searchLotsHandler(
+  rawArgs: Record<string, unknown>,
+  ctx: InvocationContext,
+): Promise<ToolTextResult> {
+  const args = rawArgs as unknown as SearchLotsToolArgs;
+  assertScope(ctx.auth, IMMO_SCOPES.search);
+  const lots = await ctx.data.searchLots(args);
+  return jsonResult({ city: args.city, count: lots.length, lots });
+}
+
+async function getLotCardHandler(
+  rawArgs: Record<string, unknown>,
+  ctx: InvocationContext,
+): Promise<ToolTextResult> {
+  const args = rawArgs as unknown as GetLotCardToolArgs;
+  assertScope(ctx.auth, IMMO_SCOPES.read);
+  const card = await ctx.data.getLotCard(args);
+  if (!card) return jsonResult({ found: false, city: args.city, no_lot: args.no_lot });
+  return jsonResult({ found: true, lot: card });
+}
+
+async function searchSignalsHandler(
+  rawArgs: Record<string, unknown>,
+  ctx: InvocationContext,
+): Promise<ToolTextResult> {
+  const args = rawArgs as unknown as SearchSignalsToolArgs;
+  assertScope(ctx.auth, IMMO_SCOPES.search);
+  // Per-user egress (D4): the CURRENT snapshot bearer reaches the radar API.
+  // No exchange is performed here; a later stage swaps this credential.
+  const signals = await ctx.data.searchSignals(args, authorizedCallContext(ctx));
+  return jsonResult({ city: args.city, count: signals.length, signals });
+}
+
 /**
  * One handler per tool, keyed by exact tool name. The SDK registrar and the
  * future cluster-mesh bridge resolve through this map: there is no second
  * dispatcher and no duplicated business logic.
  */
 export const TOOL_HANDLERS: Readonly<Record<string, ToolHandler>> = Object.freeze({
+  search_lots: searchLotsHandler,
+  get_lot_card: getLotCardHandler,
+  search_signals: searchSignalsHandler,
 });
