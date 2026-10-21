@@ -1,26 +1,19 @@
 import { randomUUID } from "node:crypto";
-import { captureInvocationContext, getInvocationContext } from "./invocation-context.js";
-import { ALL_TOOL_DEFINITIONS } from "./tool-definitions.js";
-import { TOOL_HANDLERS, type ToolTextResult } from "./tool-handlers.js";
-import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import {
   assertScope,
   auditToolCall,
   hashInput,
-  IMMO_SCOPES,
-  redact,
   type ImmoMcpAuthContext,
 } from "./auth-context.js";
 import type { ImmoDataSource } from "./data-source.js";
+import type { RawDataSource } from "./raw-data.js";
 import {
-  assertValidBbox,
-  RAW_GEOJSON_DEFAULT_LIMIT,
-  RAW_GEOJSON_MAX_LIMIT,
-  type Bbox,
-  type RawDataSource,
-  type RawFeatureCollectionResult,
-} from "./raw-data.js";
+  captureInvocationContext,
+  getInvocationContext,
+} from "./invocation-context.js";
+import { ALL_TOOL_DEFINITIONS } from "./tool-definitions.js";
+import { TOOL_HANDLERS, type ToolTextResult } from "./tool-handlers.js";
 
 export interface ToolContext {
   auth: ImmoMcpAuthContext;
@@ -31,9 +24,15 @@ export interface ToolContext {
 
 /**
  * Registers every read-only tool on the server: the 6 v0 domain tools
- * (backed by `ctx.data`) + the 4 raw-data tools (backed by `ctx.raw` —
+ * (backed by `ctx.data`) + the 6 raw-data tools (backed by `ctx.raw` —
  * zones/lots GeoJSON, grille & PV PDFs). Shared by BOTH transports
  * (server.ts stdio and server-http.ts Streamable HTTP).
+ *
+ * P1 keeps this function the single SDK registrar: contracts come from
+ * `tool-definitions.ts`, implementations from `tool-handlers.ts`. Each call
+ * runs on an immutable snapshot (ambient invocation when the HTTP host set
+ * one, else a fresh capture of these seeds) so concurrent requests on one
+ * session cannot exchange identities or credentials.
  */
 export function registerTools(server: McpServer, ctx: ToolContext): void {
   for (const def of ALL_TOOL_DEFINITIONS) {
@@ -72,27 +71,6 @@ export function registerTools(server: McpServer, ctx: ToolContext): void {
       },
     );
   }
-
-  // ── Raw-data tools (ad hoc representations côté client MCP) ───────────────
-  // Shared zod pieces. The DESCRIPTIONS are part of the contract: they are what
-  // guides claude.ai to stay within the size bounds (limit/bbox/truncated).
-  const bboxSchema = z
-    .tuple([z.number(), z.number(), z.number(), z.number()])
-    .optional()
-    .describe(
-      "Emprise [minLon, minLat, maxLon, maxLat] en WGS84 (ex: [-73.53, 45.52, -73.5, 45.55]). " +
-        "Obligatoire quand limit > 500.",
-    );
-  const limitSchema = z
-    .number()
-    .int()
-    .min(1)
-    .max(RAW_GEOJSON_MAX_LIMIT)
-    .default(RAW_GEOJSON_DEFAULT_LIMIT)
-    .describe(
-      `Nombre max de features retournées (défaut ${RAW_GEOJSON_DEFAULT_LIMIT}, ` +
-        `max ${RAW_GEOJSON_MAX_LIMIT} — bbox obligatoire au-delà de ${RAW_GEOJSON_DEFAULT_LIMIT}).`,
-    );
 }
 
 /** Names of the tools registered in v0 (used by tests + docs). */
