@@ -73,7 +73,7 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - [x] `src/registry/mcp-registry.test.ts`: local registry refusal cases.
   - [x] `src/registry/artifact-activation.test.ts`: artifact activation guards.
   - [x] `src/registry/validation-regressions.test.ts`: integration regression cases.
-  - [ ] `src/registry/binding-parity.test.ts`: twelve actual handler seams and scopes.
+  - [x] `src/registry/binding-parity.test.ts`: twelve actual handler seams and scopes.
   - [ ] Lot gate (same checklist as Lot 1).
 - [ ] **Lot 5 — Integration evidence and delivery**
   - [ ] Mutate copies: removed tool, duplicate name, missing finalization and missing error binding; require refusals, restore and `cmp`.
