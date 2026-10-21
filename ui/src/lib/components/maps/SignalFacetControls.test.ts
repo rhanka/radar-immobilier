@@ -11,6 +11,7 @@ import SignalFacetControls from "./SignalFacetControls.svelte";
 import { emptyTargetFacetState, SignalFacetError, type FacetAction, type ReasonCode, type TargetFacetState } from "$lib/signals/signal-facets-client.js";
 
 const TARGET = { citySlug: "ville-synth", type: "Signal" as const, id: "sig-1" };
+const FINGERPRINT = "0123456789abcdef".repeat(4);
 
 /** Prefixes contradict verdicts on purpose: filtering must follow verdict. */
 const CODES: ReasonCode[] = [
@@ -31,6 +32,7 @@ function renderControls(options: {
   codesError?: string | null;
   codesLoading?: boolean;
   disabled?: boolean;
+  displayedFingerprint?: string | null;
   postCommand?: ReturnType<typeof postCommandMock>;
   onSaved?: (action: FacetAction) => void;
   onRetryCodes?: () => void;
@@ -46,6 +48,7 @@ function renderControls(options: {
       codesError: options.codesError ?? null,
       codesLoading: options.codesLoading ?? false,
       disabled: options.disabled ?? false,
+      displayedFingerprint: options.displayedFingerprint === undefined ? FINGERPRINT : options.displayedFingerprint,
       postCommand,
       onSaved,
       onRetryCodes,
@@ -92,10 +95,11 @@ describe("SignalFacetControls — discard requires a code", () => {
     await fireEvent.change(select, { target: { value: "N-ADMIN" } });
     expect(submit.disabled).toBe(false);
     await fireEvent.click(submit);
-    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("discard", { viewerKey: null }));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("discard", { viewerKey: null, displayedFingerprint: FINGERPRINT, confirmedHeadId: null }));
     expect(postCommand).toHaveBeenCalledTimes(1);
     expect(postCommand.mock.calls[0]![1]).toBe("discard");
-    expect(postCommand.mock.calls[0]![2]).toEqual({ target: TARGET, reasonCode: "N-ADMIN" });
+    expect(postCommand.mock.calls[0]![2]).toEqual({ target: TARGET, reasonCode: "N-ADMIN",
+      expectedHeadId: null, displayedFingerprint: FINGERPRINT });
   });
 
   it.each([401, 403, 404, 409, 422])("should reject %s without retrying a refused intention", async (status) => {
@@ -111,7 +115,7 @@ describe("SignalFacetControls — discard requires a code", () => {
     expect(onSaved).not.toHaveBeenCalled();
     expect(screen.queryByTestId("facet-retry")).toBeNull();
     await fireEvent.click(screen.getByTestId("facet-discard-submit"));
-    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("discard", { viewerKey: null }));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("discard", { viewerKey: null, displayedFingerprint: FINGERPRINT, confirmedHeadId: null }));
     expect(postCommand).toHaveBeenCalledTimes(2);
     expect(postCommand.mock.calls[0]![3]).not.toBe(postCommand.mock.calls[1]![3]);
   });
@@ -130,7 +134,7 @@ describe("SignalFacetControls — baskets and restoration", () => {
       expect(onSaved).not.toHaveBeenCalled();
       expect(screen.queryByTestId("facet-state-pertinent")).toBeNull();
       await fireEvent.click(screen.getByTestId("facet-retry"));
-      await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select", { viewerKey: null }));
+      await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select", { viewerKey: null, displayedFingerprint: FINGERPRINT, confirmedHeadId: null }));
       expect(postCommand.mock.calls[0]![3]).toBe(postCommand.mock.calls[1]![3]);
     },
   );
@@ -153,22 +157,26 @@ describe("SignalFacetControls — baskets and restoration", () => {
       target: { value: "P-DENSITE" },
     });
     await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
-    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select", { viewerKey: null }));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select", { viewerKey: null, displayedFingerprint: FINGERPRINT, confirmedHeadId: null }));
     expect(postCommand.mock.calls[0]![2]).toEqual({
       target: TARGET,
       basket: "pertinent",
       reasonCode: "P-DENSITE",
+      expectedHeadId: null,
+      displayedFingerprint: FINGERPRINT,
     });
   });
 
   it("offers removal or a code change on an active basket", async () => {
     const { postCommand } = renderControls({
-      state: { ...emptyTargetFacetState(), pertinent: true, pertinentCode: "P-DENSITE" },
+      state: { ...emptyTargetFacetState(), pertinent: true, pertinentCode: "P-DENSITE", pertinentHeadId: "head-1" },
     });
     expect(screen.getByTestId("facet-state-pertinent").textContent).toContain("P-DENSITE");
     await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
     await waitFor(() => expect(postCommand).toHaveBeenCalledTimes(1));
     expect(postCommand.mock.calls[0]![1]).toBe("deselect");
+    expect(postCommand.mock.calls[0]![2]).toEqual({ target: TARGET, basket: "pertinent",
+      expectedHeadId: "head-1", displayedFingerprint: FINGERPRINT });
   });
 
   it.each(["pertinent", "a_surveiller"] as const)("clears the optional code in %s without removing the basket", async (basket) => {
@@ -186,7 +194,8 @@ describe("SignalFacetControls — baskets and restoration", () => {
     expect(update.disabled).toBe(false);
     await fireEvent.click(update);
     await waitFor(() => expect(postCommand).toHaveBeenCalled());
-    expect(postCommand.mock.calls[0]!.slice(1, 3)).toEqual(["select", { target: TARGET, basket }]);
+    expect(postCommand.mock.calls[0]!.slice(1, 3)).toEqual(["select", { target: TARGET, basket,
+      expectedHeadId: null, displayedFingerprint: FINGERPRINT }]);
   });
 
   it("should resynchronize both selected codes when heads change", async () => {
@@ -207,14 +216,16 @@ describe("SignalFacetControls — baskets and restoration", () => {
         ...emptyTargetFacetState(),
         archived: true,
         archiveCode: "N-ADMIN",
+        archiveHeadId: "archive-1",
         changedSinceArchive: true,
       },
     });
     expect(screen.queryByTestId("facet-discard-submit")).toBeNull();
     await fireEvent.click(screen.getByTestId("facet-restore"));
-    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("restore", { viewerKey: null }));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("restore", { viewerKey: null, displayedFingerprint: FINGERPRINT, confirmedHeadId: null }));
     expect(postCommand.mock.calls[0]![1]).toBe("restore");
-    expect(postCommand.mock.calls[0]![2]).toEqual({ target: TARGET });
+    expect(postCommand.mock.calls[0]![2]).toEqual({ target: TARGET, expectedHeadId: "archive-1",
+      displayedFingerprint: FINGERPRINT });
   });
 
   it("inactivates every control when codes are unreadable", () => {
@@ -243,7 +254,7 @@ describe("SignalFacetControls — baskets and restoration", () => {
   it("keeps focus inside the controls after a select write and reload", async () => {
     const { onSaved } = renderControls();
     await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
-    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select", { viewerKey: null }));
+    await waitFor(() => expect(onSaved).toHaveBeenCalledWith("select", { viewerKey: null, displayedFingerprint: FINGERPRINT, confirmedHeadId: null }));
     await waitFor(() =>
       expect(screen.getByTestId("signal-facet-controls").contains(document.activeElement)).toBe(true),
     );
@@ -254,18 +265,19 @@ describe("SignalFacetControls — baskets and restoration", () => {
     const postCommand = postCommandMock(async () => null);
     const onSaved = vi.fn(async (): Promise<void> => {
       await view.rerender({
-        state: { ...emptyTargetFacetState(), pertinent: true, pertinentCode: "P-NEW" },
+        state: { ...emptyTargetFacetState(), pertinent: true, pertinentCode: "P-NEW", pertinentHeadId: "head-new" },
         codes: extended,
       });
     });
     const view = render(SignalFacetControls, {
       props: {
         target: TARGET,
-        state: { ...emptyTargetFacetState(), pertinent: true, pertinentCode: "P-DENSITE" },
+        state: { ...emptyTargetFacetState(), pertinent: true, pertinentCode: "P-DENSITE", pertinentHeadId: "head-1" },
         codes: extended,
         codesError: null,
         codesLoading: false,
         disabled: false,
+        displayedFingerprint: FINGERPRINT,
         postCommand,
         onSaved,
         onRetryCodes: vi.fn(),
@@ -288,5 +300,107 @@ describe("SignalFacetControls — baskets and restoration", () => {
     expect(screen.getByTestId("signal-facet-controls").contains(document.activeElement)).toBe(true);
     expect(document.activeElement).not.toBe(trigger);
     expect((document.activeElement as HTMLButtonElement).disabled).toBe(false);
+  });
+});
+
+describe("SignalFacetControls — expected heads (6A)", () => {
+  it("sends the inactive archive head on a new discard instead of null", async () => {
+    const { postCommand } = renderControls({
+      state: { ...emptyTargetFacetState(), archiveHeadId: "archive-old" },
+    });
+    await fireEvent.change(screen.getByLabelText("Code de motif (requis) — Écarter"), {
+      target: { value: "N-ADMIN" },
+    });
+    await fireEvent.click(screen.getByTestId("facet-discard-submit"));
+    await waitFor(() => expect(postCommand).toHaveBeenCalledTimes(1));
+    expect(postCommand.mock.calls[0]![2]).toMatchObject({ expectedHeadId: "archive-old" });
+  });
+
+  it("surfaces a head conflict distinctly and asks the parent to reload", async () => {
+    const postCommand = postCommandMock();
+    postCommand.mockRejectedValueOnce(new SignalFacetError(409, "facet_head_conflict", undefined, { version: null, heads: [] }));
+    const onHeadsStale = vi.fn();
+    render(SignalFacetControls, {
+      props: {
+        target: TARGET,
+        state: emptyTargetFacetState(),
+        codes: CODES,
+        codesError: null,
+        codesLoading: false,
+        disabled: false,
+        displayedFingerprint: FINGERPRINT,
+        postCommand,
+        onSaved: vi.fn(),
+        onRetryCodes: vi.fn(),
+        onHeadsStale,
+      },
+    });
+    await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
+    await screen.findByText("Écriture refusée");
+    expect(screen.getByText(/Données périmées/)).toBeTruthy();
+    expect(screen.queryByTestId("facet-retry")).toBeNull();
+    expect(onHeadsStale).toHaveBeenCalledTimes(1);
+    expect(onHeadsStale.mock.calls[0]![0]).toEqual(TARGET);
+    expect(onHeadsStale.mock.calls[0]![1]).toEqual({ viewerKey: null, displayedFingerprint: FINGERPRINT });
+    expect(onHeadsStale.mock.calls[0]![2]).toMatch(/Données périmées/);
+  });
+});
+
+describe("SignalFacetControls — displayed fingerprint (6B)", () => {
+  it("keeps the original payload and key on a network retry after display changes", async () => {
+    const postCommand = postCommandMock();
+    postCommand.mockRejectedValueOnce(new SignalFacetError(null, null));
+    const { view } = renderControls({ postCommand });
+    await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
+    await screen.findByTestId("facet-retry");
+    await view.rerender({ displayedFingerprint: "b".repeat(64) });
+    await fireEvent.click(screen.getByTestId("facet-retry"));
+    await waitFor(() => expect(postCommand).toHaveBeenCalledTimes(2));
+    expect(postCommand.mock.calls[1]).toEqual(postCommand.mock.calls[0]);
+  });
+
+  it("sends the captured fingerprint with every action", async () => {
+    const { postCommand } = renderControls();
+    await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
+    await waitFor(() => expect(postCommand).toHaveBeenCalledTimes(1));
+    expect(postCommand.mock.calls[0]![2]).toMatchObject({ displayedFingerprint: FINGERPRINT });
+  });
+
+  it("surfaces a version conflict distinctly and asks the parent to reload", async () => {
+    const postCommand = postCommandMock();
+    postCommand.mockRejectedValueOnce(new SignalFacetError(409, "target_version_conflict", undefined,
+      { version: { fingerprint: "f".repeat(64) }, heads: [] }));
+    const onHeadsStale = vi.fn();
+    const onSaved = vi.fn();
+    render(SignalFacetControls, {
+      props: {
+        target: TARGET,
+        state: emptyTargetFacetState(),
+        codes: CODES,
+        codesError: null,
+        codesLoading: false,
+        disabled: false,
+        displayedFingerprint: FINGERPRINT,
+        postCommand,
+        onSaved,
+        onRetryCodes: vi.fn(),
+        onHeadsStale,
+      },
+    });
+    await fireEvent.click(screen.getByTestId("facet-toggle-pertinent"));
+    await screen.findByText("Écriture refusée");
+    expect(screen.getByText(/Contenu modifié/)).toBeTruthy();
+    expect(screen.queryByTestId("facet-retry")).toBeNull();
+    expect(onHeadsStale).toHaveBeenCalledTimes(1);
+    expect(onSaved).not.toHaveBeenCalled();
+  });
+
+  it("inactivates every control without a displayed fingerprint", async () => {
+    const { postCommand } = renderControls({ displayedFingerprint: null });
+    for (const testId of ["facet-toggle-pertinent", "facet-toggle-watching"]) {
+      expect((screen.getByTestId(testId) as HTMLButtonElement).disabled).toBe(true);
+    }
+    expect((screen.getByTestId("facet-discard-submit") as HTMLButtonElement).disabled).toBe(true);
+    expect(postCommand).not.toHaveBeenCalled();
   });
 });

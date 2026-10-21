@@ -18,6 +18,7 @@
   import {
     codesForVerdict,
     createCommandKey,
+    expectedHeadIdFor,
     facetErrorMessage,
     isFacetWriteUnconfirmed,
     postFacetCommand,
@@ -33,12 +34,25 @@
 
   export let target: FacetTarget;
   export let state: TargetFacetState;
+  /** Fingerprint of the displayed signal version; null inactivates every control. */
+  export let displayedFingerprint: string | null = null;
   /** Null when the codebook is unreadable: every control stays inactive. */
   export let codes: ReasonCode[] | null = null;
   export let codesError: string | null = null;
   export let codesLoading = false;
   /** Parent-level inactivation (not allowed, reload in flight). */
   export let disabled = false;
+  /**
+   * Parent reload after a 409 head conflict (stale heads, new intention
+   * required). Carries the launched target, its launch context and the
+   * refusal copy, so the parent keeps the refusal visible when the reload
+   * removes the card and ignores late conflicts from another city/viewer.
+   */
+  export let onHeadsStale: (
+    target: FacetTarget,
+    launch: FacetCommandLaunch,
+    message: string,
+  ) => void = () => {};
   /** Injectable for tests; defaults to the real facet client. */
   export let postCommand: typeof postFacetCommand = postFacetCommand;
   /** Parent-owned viewer identity, captured before each command. */
@@ -66,7 +80,7 @@
   $: watchingCodes = codes ? codesForVerdict(codes, "a_surveiller") : [];
   $: discardCodes = codes ? codesForVerdict(codes, "non_pertinent") : [];
   $: codesReady = codes !== null && !codesLoading;
-  $: inactive = disabled || busy || !codesReady;
+  $: inactive = disabled || busy || !codesReady || displayedFingerprint === null;
 
   function describeTarget(): string {
     return `${target.type} ${target.id}`;
@@ -111,8 +125,15 @@
     }
   }
 
-  async function run(action: FacetAction, body: FacetCommandBody): Promise<void> {
-    const intent = JSON.stringify([action, body]);
+  async function run(action: FacetAction, body: Omit<FacetCommandBody, "displayedFingerprint"> & {
+    displayedFingerprint?: string;
+  }): Promise<void> {
+    // No fingerprint, no write: a command without the displayed version would
+    // fail server-side; stay inactive instead of sending a doomed write.
+    const fingerprint = body.displayedFingerprint ?? displayedFingerprint;
+    if (fingerprint === null) return;
+    const fullBody: FacetCommandBody = { ...body, displayedFingerprint: fingerprint };
+    const intent = JSON.stringify([action, fullBody]);
     // One key per intention, reused when retrying the same intention.
     if (lastIntent !== intent) {
       commandKey = createCommandKey();
@@ -120,17 +141,21 @@
     }
     // Consume stale keys without reporting results to a different viewer.
     const viewerAtStart = viewerKey;
-    const launch: FacetCommandLaunch = { viewerKey: viewerAtStart };
+    const launch: FacetCommandLaunch = { viewerKey: viewerAtStart, displayedFingerprint: fingerprint };
     const trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     busy = true;
     error = null;
     try {
-      await postCommand("", action, body, commandKey!);
+      const event = await postCommand("", action, fullBody, commandKey!);
       commandKey = null;
       lastIntent = null;
       if (viewerAtStart !== viewerKey) return;
       discardCode = "";
-      await onSaved(action, launch);
+      await onSaved(action, {
+        ...launch,
+        confirmedHeadId: event && typeof event === "object" && "id" in event && typeof event.id === "string"
+          ? event.id : null,
+      });
     } catch (err) {
       if (viewerAtStart !== viewerKey) {
         commandKey = null;
@@ -142,10 +167,16 @@
         lastIntent = null;
         commandKey = null;
       }
-      error =
+      const refusalMessage =
         err instanceof SignalFacetError
           ? facetErrorMessage(err)
           : "Écriture non confirmée — Réessayer.";
+      if (err instanceof SignalFacetError
+        && (err.code === "facet_head_conflict" || err.code === "target_version_conflict"
+          || err.code === "command_context_unresolved")) {
+        onHeadsStale(body.target, launch, refusalMessage);
+      }
+      error = refusalMessage;
     } finally {
       busy = false;
       await tick();
@@ -164,11 +195,12 @@
       target,
       basket,
       ...(code ? { reasonCode: code } : {}),
+      expectedHeadId: expectedHeadIdFor(state, "select", basket),
     });
   }
 
   function deselectBasket(basket: FacetBasket): void {
-    void run("deselect", { target, basket });
+    void run("deselect", { target, basket, expectedHeadId: expectedHeadIdFor(state, "deselect", basket) });
   }
 </script>
 
@@ -368,7 +400,7 @@
           size="sm"
           type="button"
           disabled={inactive}
-          onclick={() => run("restore", { target })}
+          onclick={() => run("restore", { target, expectedHeadId: expectedHeadIdFor(state, "restore") })}
           aria-label="Restaurer le signal écarté"
           data-testid="facet-restore"
         >
@@ -396,7 +428,7 @@
           size="sm"
           type="button"
           disabled={inactive || !discardCode}
-          onclick={() => run("discard", { target, reasonCode: discardCode })}
+          onclick={() => run("discard", { target, reasonCode: discardCode, expectedHeadId: expectedHeadIdFor(state, "discard") })}
           aria-label="Valider l'écart du signal"
           data-testid="facet-discard-submit"
         >

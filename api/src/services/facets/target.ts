@@ -13,6 +13,32 @@ export class FacetError extends Error {
     super(message);
   }
 }
+
+/** Authorized conflict disclosure for an expected-head or displayed-version mismatch. */
+export interface FacetConflictCurrent {
+  target: SignalTarget;
+  version: { fingerprint: string } | null;
+  heads: unknown[];
+}
+
+export class FacetHeadConflictError extends FacetError {
+  readonly current: FacetConflictCurrent;
+  constructor(current: FacetConflictCurrent) {
+    super(409, "facet_head_conflict");
+    this.name = "FacetHeadConflictError";
+    this.current = current;
+  }
+}
+
+/** A write carrying a displayed signal version the stored node no longer matches. */
+export class FacetTargetVersionConflictError extends FacetError {
+  readonly current: FacetConflictCurrent;
+  constructor(current: FacetConflictCurrent) {
+    super(409, "target_version_conflict");
+    this.name = "FacetTargetVersionConflictError";
+    this.current = current;
+  }
+}
 /** JSON canonicalization sorts object keys recursively, preserving array order. */
 export function canonicalJson(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
