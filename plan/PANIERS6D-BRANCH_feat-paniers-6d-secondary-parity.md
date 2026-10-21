@@ -112,11 +112,11 @@ indicators) while preserving each consumer's non-basket population.
     - [x] UI tests: `src/lib/maps` (including cadastral-indicator parity).
 - [x] **Lot 6D-4 — Docs consolidation**
   - [x] Record locally validated state; CI, operational qualification and merge remain outstanding.
-- [ ] **Lot 6D-R — Astra review corrections**
+- [x] **Lot 6D-R — Astra review corrections**
   - [x] Refresh PDF badges/highlights after reload, including an explicitly deferred text read.
-  - [ ] Mark unavailable regulatory counts explicitly while preserving demo PDFs and geography.
-  - [ ] Discriminate both fixes in a working copy; restore and verify with `cmp`.
-  - [ ] Pass indexed typechecks, lint and all three UI directories; remove private test resources.
+  - [x] Mark unavailable regulatory counts explicitly while preserving demo PDFs and geography.
+  - [x] Discriminate both fixes in a working copy; restore and verify with `cmp`.
+  - [x] Pass indexed typechecks, lint and all three UI directories; remove private test resources.
 - [ ] **Lot 6D-5 — Merge & close**
   - [ ] Push branch.
   - [ ] Open PR (or merge directly if solo dev).
