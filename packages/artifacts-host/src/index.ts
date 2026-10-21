@@ -50,4 +50,12 @@ export {
   type AccountStatusQueryable,
 } from "./account-status.js";
 export { composeArtifactHost } from "./composition.js";
-export { createArtifactControl, type ArtifactControl } from "./facade.js";
+export {
+  createArtifactControl,
+  createMemoryCommitLedger,
+  type ArtifactControl,
+  type ArtifactControlOptions,
+  type CommitFailureLedger,
+  type CommitFailureReason,
+  type CommitFailureRecord,
+} from "./facade.js";

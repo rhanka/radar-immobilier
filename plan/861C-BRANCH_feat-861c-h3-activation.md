@@ -142,7 +142,7 @@ followed by `inspect` proving no project containers, volumes or networks remain.
 
 - [x] Complete admission receipt fixtures verified by typecheck; test gate pending.
 - [x] Unmounted capability cache regression cases implemented.
-- [ ] Commit authorization and write-only failure ledger verified.
+- [x] Commit authorization and write-only failure ledger verified.
 - [ ] Blocked-provider revocation tests verified.
 - [ ] Provider failure and read-exclusion tests verified.
 - [ ] Nginx production configuration boundary verified.
