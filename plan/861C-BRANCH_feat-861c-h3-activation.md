@@ -308,3 +308,5 @@ finalization, quotas, persistent ledger and HTTP/MCP parity remain unverified.
 - [x] P4: prove activation and credential regressions with restore and cmp.
 
 - [x] P4: default preflight to offline and stop on failed gates or probes.
+
+- [x] P4: wire the existing offline Make validation convention.
