@@ -261,3 +261,116 @@ describe("mcp adapter forged authority and unsupported routes", () => {
     expect(handle).not.toHaveBeenCalled();
   });
 });
+
+describe("mcp adapter foreign metadata and pagination", () => {
+  it("preserves identical foreign and unknown meta bodies", async () => {
+    const missing = { status: 404, body: { error: "not_found" } };
+    const handle = vi.fn(async () => missing);
+    const adapter = createMcpArtifactAdapter(stubControl(missing, handle));
+    const foreign = await adapter.execute(mcp("GET", `/meta/${ARTIFACT}`, {}), { actorId: "bob" });
+    const unknownId = "123e4567-e89b-12d3-a456-426614174009";
+    const unknown = await adapter.execute(mcp("GET", `/meta/${unknownId}`, {}), { actorId: "bob" });
+    expect(foreign).toEqual(unknown);
+    expect(foreign).toMatchObject({ ok: false, status: 404 });
+  });
+
+  it.each([
+    [{ limit: 1, offset: 0 }],
+    [{ limit: 100 }],
+    [{ offset: 5 }],
+    [{}],
+  ])("accepts valid pagination %s", async (args) => {
+    const handle = vi.fn(async () => ({ status: 200, body: { items: [], total: 0 } }));
+    const adapter = createMcpArtifactAdapter(stubControl({}, handle));
+    const result = await adapter.execute(mcp("POST", "/list", args), { actorId: "alice" });
+    expect(result.ok).toBe(true);
+    expect(handle).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    [{ limit: 0 }],
+    [{ limit: 101 }],
+    [{ limit: 1.5 }],
+    [{ limit: "20" }],
+    [{ offset: -1 }],
+    [{ offset: 1.2 }],
+    [{ limit: 20, offset: -5 }],
+  ])("refuses invalid pagination %s without dispatch", async (args) => {
+    const handle = vi.fn(async () => ({ status: 200, body: {} }));
+    const adapter = createMcpArtifactAdapter(stubControl({}, handle));
+    const result = await adapter.execute(mcp("POST", "/list", args), { actorId: "alice" });
+    expect(result).toMatchObject({ ok: false, status: 400 });
+    expect(handle).not.toHaveBeenCalled();
+  });
+
+  it("checks authorization before paginated dispatch", async () => {
+    const authority: AdmissionAuthority = {
+      readActivation: () => live(), nowMs: () => NOW, readStatus: async () => "suspended",
+    };
+    const handle = vi.fn(async () => ({ status: 200, body: { items: [], total: 0 } }));
+    const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
+    const adapter = createMcpArtifactAdapter(
+      createArtifactControl(host, "scope", "pages.example.test", authority));
+    const result = await adapter.execute(mcp("POST", "/list", { limit: 20, offset: 0 }),
+      { actorId: "alice" });
+    expect(result).toMatchObject({ ok: false, status: 403 });
+    expect(handle).not.toHaveBeenCalled();
+  });
+});
+
+describe("mcp adapter admission before dispatch", () => {
+  it.each(["suspension", "expiry"])("rereads %s after entry before provider dispatch", async (change) => {
+    let reads = 0;
+    let now = NOW;
+    const authority: AdmissionAuthority = {
+      readActivation: () => live(), nowMs: () => now,
+      readStatus: async () => {
+        if (++reads === 2) {
+          if (change === "suspension") return "suspended";
+          now = FUTURE;
+        }
+        return "approved";
+      },
+    };
+    const shared = createReplayHost();
+    const adapter = createMcpArtifactAdapter(
+      createArtifactControl(shared.host, "scope", "pages.example.test", authority));
+    expect(await adapter.execute(mcp("POST", "/publish", publishArgs()), { actorId: "alice" }))
+      .toMatchObject({ ok: false, status: 403 });
+    expect(shared.handle).not.toHaveBeenCalled();
+    expect(shared.kept.size).toBe(0);
+  });
+
+  it.each([
+    ["suspended", "suspended", live()],
+    ["expired activation", "approved", { enabled: false, reason: "activation_off" } as ActivationConfig],
+    ["non-cohort", "approved", live(["bob"])],
+  ])("refuses %s publish without dispatch", async (_n, status, activation) => {
+    const authority: AdmissionAuthority = {
+      readActivation: () => activation, nowMs: () => NOW, readStatus: async () => status,
+    };
+    const handle = vi.fn(async () => ({ status: 201, body: {} }));
+    const host = { app: { handle } } as unknown as Parameters<typeof createArtifactControl>[0];
+    const adapter = createMcpArtifactAdapter(
+      createArtifactControl(host, "scope", "pages.example.test", authority));
+    const result = await adapter.execute(mcp("POST", "/publish", publishArgs()), { actorId: "alice" });
+    expect(result).toMatchObject({ ok: false, status: 403 });
+    expect(handle).not.toHaveBeenCalled();
+  });
+
+  it("derives the same durable identity across separate instances", async () => {
+    const shared = createReplayHost();
+    const firstControl = createArtifactControl(shared.host, "scope", "pages.example.test");
+    const secondControl = createArtifactControl(shared.host, "scope", "pages.example.test");
+    const first = createMcpArtifactAdapter(firstControl);
+    const second = createMcpArtifactAdapter(secondControl);
+    expect(await first.execute(mcp("POST", "/publish", publishArgs()), { actorId: "alice" }))
+      .toMatchObject({ ok: true });
+    expect(await second.execute(mcp("POST", "/publish", publishArgs()), { actorId: "alice" }))
+      .toMatchObject({ ok: true });
+    expect(shared.kept.size).toBe(1);
+    expect(shared.bodies).toHaveLength(2);
+    expect(shared.bodies[0]?.["idempotencyKey"]).toBe(shared.bodies[1]?.["idempotencyKey"]);
+    expect(shared.bodies[0]?.["paramsHash"]).toBe(shared.bodies[1]?.["paramsHash"]);
+  });
+});
