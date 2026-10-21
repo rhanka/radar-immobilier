@@ -43,6 +43,8 @@ export interface FacetTarget {
 export interface FacetCommandLaunch {
   /** Fresh identity per viewer transition, including a return to the same sub. */
   viewerKey: { context: string } | null;
+  /** Head returned by this exact command, never inferred from a later read. */
+  confirmedHeadId?: string | null;
 }
 
 export interface ReasonCode {
@@ -74,10 +76,13 @@ export interface FacetHead {
 export interface TargetFacetState {
   pertinent: boolean;
   pertinentCode: string | null;
+  pertinentHeadId: string | null;
   watching: boolean;
   watchingCode: string | null;
+  watchingHeadId: string | null;
   archived: boolean;
   archiveCode: string | null;
+  archiveHeadId: string | null;
   changedSinceArchive: boolean;
   targetAvailable: boolean;
 }
@@ -86,10 +91,13 @@ export function emptyTargetFacetState(): TargetFacetState {
   return {
     pertinent: false,
     pertinentCode: null,
+    pertinentHeadId: null,
     watching: false,
     watchingCode: null,
+    watchingHeadId: null,
     archived: false,
     archiveCode: null,
+    archiveHeadId: null,
     changedSinceArchive: false,
     targetAvailable: true,
   };
@@ -132,9 +140,10 @@ export function codesForVerdict(
 }
 
 /**
- * Aggregate active heads by signal target. Inactive heads are history, not
- * state. Unknown rows are ignored; a missing target reads as untouched
- * (distinct from restored/cleared, which the server reports explicitly).
+ * Aggregate heads by signal target. Active heads drive badges; inactive head
+ * IDs are retained so every write can carry the head it intends to replace.
+ * Unknown rows are ignored; a missing target reads as untouched (distinct
+ * from restored/cleared, which the server reports explicitly).
  */
 export function indexFacetHeads(heads: readonly FacetHead[]): Map<string, TargetFacetState> {
   const byTarget = new Map<string, TargetFacetState>();
@@ -147,22 +156,42 @@ export function indexFacetHeads(heads: readonly FacetHead[]): Map<string, Target
     return fresh;
   };
   for (const head of heads) {
-    if (head.state !== "active") continue;
     const state = stateFor(head.target);
     state.targetAvailable = state.targetAvailable && head.targetAvailable !== false;
     if (head.facet === "selection" && head.basket === "pertinent") {
+      state.pertinentHeadId = head.id;
+      if (head.state !== "active") continue;
       state.pertinent = true;
       state.pertinentCode = head.reasonCode;
     } else if (head.facet === "selection" && head.basket === "a_surveiller") {
+      state.watchingHeadId = head.id;
+      if (head.state !== "active") continue;
       state.watching = true;
       state.watchingCode = head.reasonCode;
     } else if (head.facet === "archive") {
+      state.archiveHeadId = head.id;
+      if (head.state !== "active") continue;
       state.archived = true;
       state.archiveCode = head.reasonCode;
       state.changedSinceArchive = head.changedSinceArchive === true;
     }
   }
   return byTarget;
+}
+
+/**
+ * Expected head for one facet action, read from the indexed state captured
+ * with the intention. Null means no head exists for that stream.
+ */
+export function expectedHeadIdFor(
+  state: TargetFacetState,
+  action: FacetAction,
+  basket?: FacetBasket,
+): string | null {
+  if (action === "select" || action === "deselect") {
+    return basket === "a_surveiller" ? state.watchingHeadId : state.pertinentHeadId;
+  }
+  return state.archiveHeadId;
 }
 
 /** One idempotency key per intention, minted by the caller. */
@@ -183,12 +212,20 @@ export interface FacetRequestOptions {
 export class SignalFacetError extends Error {
   readonly status: number | null;
   readonly code: string | null;
-  constructor(status: number | null, code: string | null, message?: string) {
+  readonly current: unknown;
+  constructor(status: number | null, code: string | null, message?: string, current: unknown = null) {
     super(message ?? `signal-facets: ${status ?? "network-error"}`);
     this.name = "SignalFacetError";
     this.status = status;
     this.code = code;
+    this.current = current;
   }
+}
+
+/** Authorized `current` disclosure carried by a 409 head conflict, if any. */
+export function readJsonErrorCurrent(body: unknown): unknown {
+  if (typeof body !== "object" || body === null) return null;
+  return (body as { current?: unknown }).current ?? null;
 }
 
 function requestUrl(baseUrl: string, path: string): string {
@@ -232,7 +269,7 @@ export async function postFacetCommand(
     throw new SignalFacetError(null, null);
   }
   if (!res.ok) {
-    throw new SignalFacetError(res.status, readJsonErrorCode(res.json));
+    throw new SignalFacetError(res.status, readJsonErrorCode(res.json), undefined, readJsonErrorCurrent(res.json));
   }
   // An unreadable success body leaves the write unconfirmed: same-key retry.
   if (res.json === null) throw new SignalFacetError(null, null);
@@ -309,6 +346,12 @@ export function facetErrorMessage(error: SignalFacetError): string {
     case 404:
       return "Signal introuvable — il a peut-être été retiré du graphe.";
     case 409:
+      if (error.code === "facet_head_conflict") {
+        return "Données périmées — rechargez les données puis réessayez.";
+      }
+      if (error.code === "command_context_unresolved") {
+        return "Contexte de commande périmé — rechargez les données puis réessayez.";
+      }
       return "Conflit de clé — rechargez les données puis réessayez.";
     case 422:
       if (error.code === "reason_code_required") return "Code requis — choisissez un code de motif.";
