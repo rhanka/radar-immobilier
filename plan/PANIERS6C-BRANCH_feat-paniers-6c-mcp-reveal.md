@@ -75,21 +75,21 @@ No blockage. No exception.
   - [x] Confirm command style: `make -f tools/immo-mcp-test.mk <target> [SCOPE=<file>] ENV=<env>` with `ENV` last.
   - [x] Confirm scope and guardrails; no `BRxx-EXn` exception needed.
 
-- [ ] **Lot 1 — `showDiscarded` argument and forwarding**
-  - [ ] Add `SearchSignalsArgs.showDiscarded?: boolean` in `packages/immo-mcp/src/data-source.ts`.
-  - [ ] Forward `showDiscarded=1` in `HttpDataSource.searchSignals` only when strictly `true`; absent or `false` keeps the bare URL (default hiding).
-  - [ ] Keep etape/query filters and `limit` applied client-side after the API result, in that order.
-  - [ ] Expose `showDiscarded` as an optional boolean in the `search_signals` tool schema in `packages/immo-mcp/src/tools.ts`; no new tool, no mutation.
-  - [ ] Lot gate:
-    - [ ] `make -f tools/immo-mcp-test.mk typecheck ENV=test-6c-mcp-reveal`
-    - [ ] `make -f tools/immo-mcp-test.mk lint ENV=test-6c-mcp-reveal`
-    - [ ] `make -f tools/immo-mcp-test.mk test-immo-mcp SCOPE=src/data-source.test.ts ENV=test-6c-mcp-reveal`
-    - [ ] `make -f tools/immo-mcp-test.mk down -v ENV=test-6c-mcp-reveal` (teardown trap already covers failure paths)
+- [x] **Lot 1 — `showDiscarded` argument and forwarding**
+  - [x] Add `SearchSignalsArgs.showDiscarded?: boolean` in `packages/immo-mcp/src/data-source.ts`.
+  - [x] Forward `showDiscarded=1` in `HttpDataSource.searchSignals` only when strictly `true`; absent or `false` keeps the bare URL (default hiding).
+  - [x] Keep etape/query filters and `limit` applied client-side after the API result, in that order.
+  - [x] Expose `showDiscarded` as an optional boolean in the `search_signals` tool schema in `packages/immo-mcp/src/tools.ts`; no new tool, no mutation.
+  - [x] Lot gate:
+    - [x] `make -f tools/immo-mcp-test.mk typecheck ENV=test-paniers-6c-sol`
+    - [x] `make -f tools/immo-mcp-test.mk lint ENV=test-paniers-6c-sol`
+    - [x] `make -f tools/immo-mcp-test.mk test-immo-mcp SCOPE=src/data-source.test.ts ENV=test-paniers-6c-sol`
+    - [x] Runner trap executes `docker compose down -v --remove-orphans` after every gate, including failures.
 
 - [ ] **Lot 2 — Discriminating tests and golden re-baseline**
   - [ ] Default/false/omitted URL shape (no query string); `true` yields `?showDiscarded=1` with the user Bearer [REDACTED] forwarded.
   - [ ] Reveal-before-search-before-limit ordering; 401/403/503 propagation with the flag set; end-to-end egress through the MCP transport.
-  - [ ] Update the `search_signals` input schema in `src/fixtures/immo-tools.v1.json`; refresh the two `toolFixtureSha256` anchors.
+  - [x] Update the `search_signals` input schema in `src/fixtures/immo-tools.v1.json`; refresh the two `toolFixtureSha256` anchors.
   - [ ] Full `packages/immo-mcp` suite stays green (no narrowed run in the final gate).
   - [ ] Lot gate (same checklist as Lot 1, full `test-immo-mcp` without `SCOPE`)
 
