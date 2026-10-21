@@ -80,8 +80,8 @@ Actions with the following status should be included around tasks only if really
   - [ ] Lot gate (same checklist as Lot 1).
 - [ ] **Lot 3 — Synthetic qualification**
   - [x] Qualify every key/location with scalar, numeric and array values; empty, malformed and mixed values; frozen deterministic extraction.
-  - [ ] Add `graph-adapter.test.ts`: nested/camelCase values; arrays; repeated aliases; malformed values; competing nodes; municipality/MRC ambiguity; unchanged five-bucket accounting; frozen-input no-mutation check.
-  - [ ] Fixtures reproduce real shapes only with synthetic values; no client data.
+  - [x] Add `graph-adapter.test.ts`: nested/camelCase values; arrays; repeated aliases; malformed values; competing nodes; municipality/MRC ambiguity; unchanged five-bucket accounting; frozen-input no-mutation check.
+  - [x] Fixtures reproduce real shapes only with synthetic values; no client data.
   - [ ] Lot gate (same checklist as Lot 1).
 - [ ] **Lot N-1 — Docs consolidation**
   - [ ] Consolidate the adapter contract in scoped `d3-report/SPEC.md`.
