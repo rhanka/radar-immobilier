@@ -6,7 +6,7 @@
  */
 
 export interface ScopedViewerContext {
-  /** Fresh identity per viewer transition, including a return to the same sub. */
+  /** Fresh object per viewer transition, including a return to the same sub; compared by reference. */
   viewerKey: { context: string } | null;
   /** Explicitly selected workspace; never defaulted. */
   workspaceId: string | null;
@@ -32,13 +32,15 @@ export function assertScopedLaunchContext(context: ScopedViewerContext): string 
 
 /**
  * True only when the response context still matches the live context:
- * same viewer incarnation and same workspace. Late responses are dropped.
+ * same viewer incarnation object and same workspace. A fresh object after
+ * a reconnection, even with an identical label, is another incarnation,
+ * so late responses are dropped.
  */
 export function isLiveScopedContext(
   launched: ScopedViewerContext, current: ScopedViewerContext,
 ): boolean {
   if (launched.viewerKey === null || current.viewerKey === null) return false;
   if (launched.workspaceId === null || current.workspaceId === null) return false;
-  return launched.viewerKey.context === current.viewerKey.context
+  return launched.viewerKey === current.viewerKey
     && launched.workspaceId === current.workspaceId;
 }
