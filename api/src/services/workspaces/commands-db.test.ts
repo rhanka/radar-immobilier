@@ -64,4 +64,19 @@ describeDb("atomic and serialized workspace commands", () => {
     expect(await resolveWorkspaceAccess(db, f.workspaceId, f.member.sub))
       .toMatchObject({ moderateArchive: false });
   });
+
+  it("should conflict with the current state when an explicit-absence creation arrives late", async () => {
+    const f = await fixture();
+    const creation = { workspaceId: f.workspaceId, targetAccountId: f.outsider.id,
+      actorSub: f.manager.sub, reason: "synthetic", expectedRevision: null };
+    const results = await Promise.allSettled([addMembership(db, creation), addMembership(db, creation)]);
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(results.find((result) => result.status === "rejected")).toMatchObject({
+      reason: { status: 409, message: "workspace_revision_conflict",
+        current: { revision: 1, accountId: f.outsider.id } },
+    });
+    const events = await db.select().from(workspaceMembershipEvents)
+      .where(eq(workspaceMembershipEvents.accountId, f.outsider.id));
+    expect(events.map((event) => event.kind)).toEqual(["member_added"]);
+  });
 });
