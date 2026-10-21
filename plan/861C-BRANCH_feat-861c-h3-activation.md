@@ -73,7 +73,7 @@ Review integration (both non-blocking points):
       subjects and a future `ARTIFACTS_VALIDATION_UNTIL` enables.
   - [x] Activation parser and exports.
   - [x] Parser regression tests.
-- [ ] **Unit 3 — cohort/approval admission** (T02, T05, T17, T24; T05, T13):
+- [x] **Unit 3 — cohort/approval admission** (T02, T05, T17, T24; T05, T13):
       unknown, suspended, expired or non-cohort subjects are refused with no storage
       dispatch; authority is reread before dispatch, including suspension after entry.
       Authorization inside an in-flight provider commit remains unverified.
@@ -82,7 +82,7 @@ Review integration (both non-blocking points):
   - [x] Async query and pre-dispatch reread tests.
   - [x] HTTP admission seam.
   - [x] HTTP entry regression tests.
-  - [ ] HTTP reread regression tests.
+  - [x] HTTP reread regression tests.
 - [ ] **Unit 4 — control cache headers** (§5.3, T29): `Cache-Control: private, no-store`
       plus `Vary: Cookie, Authorization` on control successes, errors and account-switch
       responses.
