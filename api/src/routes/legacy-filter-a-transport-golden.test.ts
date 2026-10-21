@@ -33,6 +33,7 @@ vi.mock("../services/graph/graph-store.js", async (importOriginal) => {
 
 import { graphSignalsRoute } from "./graph-signals.js";
 import { getSignalNodesForCity } from "../services/graph/graph-store.js";
+import { targetFingerprint } from "../services/facets/target.js";
 import type { Database } from "../db/client.js";
 import type { ObjectInfo, ObjectStore } from "../storage/object-store.js";
 
@@ -99,13 +100,32 @@ beforeEach(() => {
 
 describe("legacy Filter A golden — GET /api/graph-signals/:city transport payload", () => {
   it("serializes EXACTLY the frozen payload (bytes read back from the response)", async () => {
-    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(cityRows(CITY));
+    const rows = cityRows(CITY);
+    vi.mocked(getSignalNodesForCity).mockResolvedValueOnce(rows);
 
     const res = await route().request(`/api/graph-signals/${CITY}`);
-    const body = JSON.parse(await res.text()) as TransportGolden["ok200"];
+    const body = JSON.parse(await res.text()) as Omit<TransportGolden["ok200"], "nodes"> & {
+      nodes: Array<Record<string, unknown>>;
+    };
 
     expect(res.status).toBe(200);
-    expect(body).toEqual(golden.ok200);
+    // 6B adds one additive field per node: the content fingerprint computed on
+    // the exact stored row. The frozen golden predates it, so compare with the
+    // fingerprint stripped — then prove every served value matches the stored row.
+    const { nodes, ...rest } = body;
+    expect(rest).toEqual({ ok: golden.ok200.ok, citySlug: golden.ok200.citySlug,
+      legacyProjection: golden.ok200.legacyProjection });
+    expect(nodes.map((node) => {
+      const card: Record<string, unknown> & { facetFingerprint?: unknown } = { ...node };
+      delete card.facetFingerprint;
+      return card;
+    })).toEqual(golden.ok200.nodes);
+    const rowsByKey = new Map(rows.map((row) => [`${row.type}/${row.id}`, row]));
+    for (const node of nodes) {
+      const row = rowsByKey.get(`${String(node.type)}/${String(node.id)}`);
+      expect(row).toBeDefined();
+      expect(node.facetFingerprint).toBe(targetFingerprint(row!));
+    }
   });
 
   it("the served legacyProjection matches the server-layer golden A ids", async () => {

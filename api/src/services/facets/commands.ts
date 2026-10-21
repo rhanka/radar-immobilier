@@ -6,8 +6,8 @@ import type { FacetCommand } from "./writer.js";
 
 export type FacetSnapshot = Omit<typeof facetEvents.$inferSelect, "createdAt"> & { createdAt: string };
 
-/** Contract version pinned into every 6A digest. */
-export const FACET_CONTRACT_VERSION = "signal-facets-v1";
+/** Contract version pinned into every 6B digest (6A used signal-facets-v1). */
+export const FACET_CONTRACT_VERSION = "signal-facets-v2";
 
 function normalizeExpectedSelectionHeads(
   value: FacetCommand["expectedSelectionHeads"],
@@ -22,13 +22,22 @@ export function facetCommandDigest(command: FacetCommand) {
     basket: command.basket ?? null, reasonCode: command.reasonCode ?? null,
     deselect: [...new Set(command.deselect ?? [])].sort(),
     expectedHeadId: command.expectedHeadId ?? null,
-    expectedSelectionHeads: normalizeExpectedSelectionHeads(command.expectedSelectionHeads) });
+    expectedSelectionHeads: normalizeExpectedSelectionHeads(command.expectedSelectionHeads),
+    displayedFingerprint: command.displayedFingerprint });
 }
 
 /** Old payloads are used exclusively to recover an immutable receipt. */
-export function historicalCommandDigest(command: Omit<FacetCommand, "expectedHeadId">) {
-  return digest({ action: command.action, target: command.target, basket: command.basket ?? null,
-    reasonCode: command.reasonCode ?? null, deselect: [...new Set(command.deselect ?? [])].sort() });
+export function historicalCommandDigest(
+  command: Omit<FacetCommand, "expectedHeadId" | "displayedFingerprint"> & {
+    expectedHeadId?: string | null;
+  },
+) {
+  const payload = { action: command.action, target: command.target, basket: command.basket ?? null,
+    reasonCode: command.reasonCode ?? null, deselect: [...new Set(command.deselect ?? [])].sort() };
+  return digest(command.expectedHeadId === undefined ? payload : {
+    ...payload, version: "signal-facets-v1", expectedHeadId: command.expectedHeadId,
+    expectedSelectionHeads: normalizeExpectedSelectionHeads(command.expectedSelectionHeads),
+  });
 }
 
 interface StoredFacetReceipt {

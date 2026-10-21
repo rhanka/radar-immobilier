@@ -4,8 +4,7 @@ import { afterAll, expect, it } from "vitest";
 import { createDb } from "../../src/db/client.js";
 import { loadConfig } from "../../src/config.js";
 import { facetEvents } from "../../src/db/schema.js";
-import { writeFacet } from "../../src/services/facets/writer.js";
-import { facetFixture } from "./facets-fixture.js";
+import { facetFixture, writeDisplayedFacet as writeFacet } from "./facets-fixture.js";
 
 const { db, pool } = createDb(loadConfig());
 afterAll(() => pool.end());

@@ -10,9 +10,8 @@ import { protect } from "../../src/routes/auth.js";
 import type { ObjectStore } from "../../src/storage/object-store.js";
 import { createDiscardedSignalsReader } from "../../src/services/facets/discarded-reader.js";
 import { readCityFacets } from "../../src/services/facets/reader.js";
-import { writeFacet } from "../../src/services/facets/writer.js";
 import { upsertGraphAtomic } from "../../src/services/graph/graph-store.js";
-import { facetFixture } from "./facets-fixture.js";
+import { facetFixture, writeDisplayedFacet as writeFacet } from "./facets-fixture.js";
 import { facetAuth, facetCookie } from "./facets-http-fixture.js";
 
 const { db, pool } = createDb(loadConfig());
