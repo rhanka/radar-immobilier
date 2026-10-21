@@ -61,6 +61,7 @@ indicators) while preserving each consumer's non-basket population.
 - [x] PDF regressions cover archives, changed evidence, out-of-filter co-signals and zero delta.
 - [x] Regulation/demo/grid and cadastral-indicator regression fixtures are implemented.
 - [x] Real detail-route fixtures exercise filtering and explicit reveal through secondary projections.
+- [x] BR6D-EX1 closes archived hover cards and refreshes retained evidence; both rendered regressions pass.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch + cherry-pick** (default for orthogonal tasks; single final test cycle)

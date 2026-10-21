@@ -375,6 +375,19 @@
     hoverCardAnchor = null;
   }
 
+  // Refetch can remove a co-signal or change the evidence shown in its card.
+  $: reconcileHoverCard(signals, resolveHoverCard);
+  function reconcileHoverCard(
+    currentSignals: OverlaySignal[],
+    resolve: (id: string) => HoverCardData | null,
+  ): void {
+    if (!hoverCard) return;
+    const signal = currentSignals.find((candidate) => candidate.id === hoverCard!.id);
+    const current = signal?.inFilter === false ? resolve(signal.id) : null;
+    if (current) hoverCard = current;
+    else closeHoverCardNow();
+  }
+
   // Liste effective des signaux à surligner. Avec `signals` non vide on est en
   // mode multi (LOT 2) ; sinon on synthétise un signal unique « courant » à
   // partir des props scalaires (LOT 1) — garde-fou de non-régression.
