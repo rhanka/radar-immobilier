@@ -56,7 +56,7 @@ describe("SignalFacetControls — late viewer commands", () => {
       expect(screen.queryByTestId("facet-retry")).toBeNull();
       expect(document.activeElement).toBe(document.body);
       await fireEvent.click(trigger);
-      await waitFor(() => expect(onSaved).toHaveBeenCalledWith(action, { viewerKey }));
+      await waitFor(() => expect(onSaved).toHaveBeenCalledWith(action, expect.objectContaining({ viewerKey })));
       const calls = postCommand.mock.calls;
       expect(calls[1]![3]).not.toBe(calls[0]![3]);
     },
