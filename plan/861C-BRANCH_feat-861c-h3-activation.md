@@ -296,3 +296,5 @@ finalization, quotas, persistent ledger and HTTP/MCP parity remain unverified.
 - [x] P4: add the credential-free denial Deployment and Service.
 
 - [x] P4: wire named patches, wildcard placeholders and denial policies.
+
+- [x] P4: detect dotted, indexed, destructured and aliased environment access.
