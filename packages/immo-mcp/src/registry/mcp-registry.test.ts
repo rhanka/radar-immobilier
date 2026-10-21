@@ -58,6 +58,16 @@ describe("local composition registry", () => {
   it("should reject unknown providers, duplicates and missing bindings", () => {
     expect(codeOf(() => compileComposition([{ id: "other", version: "1.0.0", tools: [] }]))).toBe("unknown_provider");
     expect(codeOf(() => compileComposition([immoProvider(), immoProvider()]))).toBe("duplicate_tool");
+    const disjoint: ProviderDefinition = {
+      id: "immo",
+      version: "0.0.1",
+      tools: [{
+        name: "artifacts_publish",
+        scope: "immo:read",
+        binding: { context: "data", registeredBy: "registerTools" },
+      }],
+    };
+    expect(codeOf(() => compileComposition([immoProvider(), disjoint]))).toBe("duplicate_tool");
     const base = immoProvider();
     const broken = base.tools.map((tool, index) => (index === 0
       ? { name: "search_lots", scope: "immo:search", binding: { context: "", registeredBy: "" } }
