@@ -65,6 +65,7 @@ Selected mappings (exact method/path only, no generic proxy):
 
 ## Deliverables
 
+- [x] Mock minimal calls, bidirectional replay, effective hashing and ordered file conflicts.
 - [x] Adapter types, exact routing and MCP result mapping helpers.
 - [x] Closed validation and sanitized facade delegation.
 - [x] Authority and effective-input checks (caller key, binding, profile, pagination, forged fields).
