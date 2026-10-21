@@ -123,7 +123,7 @@ Review integration (both non-blocking points):
       `PORT`-only environment reads, including side-effect imports. The HTTP
       listener supplies a fixed internal authority to Hono before URL conversion,
       so malformed Host values get the same denial. No host policy is added.
-- [ ] **Unit 9 — runtime image entrypoint and smoke** (§6.4): new
+- [x] **Unit 9 — runtime image entrypoint and smoke** (§6.4): new
       `api/docker-entrypoint.sh` validates the mode (`api` default,
       `content-deny`, anything else refused with exit 2). `api/Dockerfile`
       bundles `content-deny-server.ts`, copies the entrypoint, and sets
@@ -142,7 +142,7 @@ Review integration (both non-blocking points):
 - [x] Host and probe behavior regression coverage.
 - [x] Isolated HTTP listener and import-graph checks.
 - [x] Runtime bundling and strict service-mode selection.
-- [ ] Real-image smoke and isolated CI build targets.
+- [x] Real-image smoke and isolated CI build targets.
 
 ## Verification
 
