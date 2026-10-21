@@ -146,3 +146,118 @@ describe("mcp adapter replay parity (preparation mock)", () => {
     expect(kept.size).toBe(2);
   });
 });
+
+describe("mcp adapter changed-content conflict (preparation mock)", () => {
+  it.each([
+    ["bytes", { files: [{ path: "index.html", mimeType: "text/html", text: "changed" }] }],
+    ["path", { files: [{ path: "other.html", mimeType: "text/html", text: "hello" }] }],
+    ["mime", { files: [{ path: "index.html", mimeType: "text/css", text: "hello" }] }],
+    ["profile", { profile: { theme: "dark" } }],
+  ])("returns conflict for changed %s without a new release", async (_name, change) => {
+    const { host, kept } = createReplayHost();
+    const adapter = createMcpArtifactAdapter(createArtifactControl(host, "scope", "pages.example.test"));
+    expect(await adapter.execute(mcp("POST", "/publish", publishArgs()), { actorId: "alice" }))
+      .toMatchObject({ ok: true });
+    expect(kept.size).toBe(1);
+    const conflict = await adapter.execute(mcp("POST", "/publish", publishArgs(change)),
+      { actorId: "alice" });
+    expect(conflict).toEqual({ ok: false, status: 409, code: "conflict",
+      retryable: false, error: { error: "conflict" } });
+    expect(kept.size).toBe(1);
+  });
+});
+
+describe("mcp adapter caller key validation", () => {
+  it.each(["ensure", "publish"])("preserves the original %s caller key", async (op) => {
+    const handle = vi.fn(async () => ({ status: 201, body: {} }));
+    const adapter = createMcpArtifactAdapter(stubControl({}, handle));
+    const idempotencyKey = " \tcaller-key\n ";
+    const args = op === "ensure" ? { bindingName: "summer", idempotencyKey } : publishArgs({ idempotencyKey });
+    expect(await adapter.execute(mcp("POST", `/${op}`, args), { actorId: "alice" }))
+      .toMatchObject({ ok: true });
+    expect(handle).toHaveBeenCalledExactlyOnceWith(op, "alice", args);
+  });
+
+  it.each([
+    ["absent", {}, "POST", "/ensure"],
+    ["empty", { bindingName: "summer", idempotencyKey: "" }, "POST", "/ensure"],
+    ["blank", { bindingName: "summer", idempotencyKey: "   " }, "POST", "/ensure"],
+    ["overlong", { bindingName: "summer", idempotencyKey: "k".repeat(257) }, "POST", "/ensure"],
+    ["non-string", { bindingName: "summer", idempotencyKey: 42 }, "POST", "/ensure"],
+    ["absent publish", { artifactId: ARTIFACT, files: publishArgs().files }, "POST", "/publish"],
+  ])("refuses %s caller key without dispatch", async (_n, args, method, path) => {
+    const handle = vi.fn(async () => ({ status: 201, body: {} }));
+    const adapter = createMcpArtifactAdapter(stubControl({}, handle));
+    const result = await adapter.execute(mcp(method, path, args), { actorId: "alice" });
+    expect(result).toEqual({ ok: false, status: 400, code: "invalid_request",
+      retryable: false, error: { error: "invalid_request" } });
+    expect(handle).not.toHaveBeenCalled();
+  });
+
+  it("enforces the 256 UTF-16 boundary including surrogate pairs", async () => {
+    const handle = vi.fn(async () => ({ status: 201, body: {} }));
+    const adapter = createMcpArtifactAdapter(stubControl({}, handle));
+    const ok256 = await adapter.execute(
+      mcp("POST", "/ensure", { bindingName: "summer", idempotencyKey: "k".repeat(256) }),
+      { actorId: "alice" });
+    expect(ok256.ok).toBe(true);
+    const house = "🏠";
+    expect(house.length).toBe(2);
+    const okEmoji = await adapter.execute(
+      mcp("POST", "/ensure", { bindingName: "summer", idempotencyKey: house.repeat(128) }),
+      { actorId: "alice" });
+    expect(okEmoji.ok).toBe(true);
+    const tooLong = await adapter.execute(
+      mcp("POST", "/ensure", { bindingName: "summer", idempotencyKey: house.repeat(129) }),
+      { actorId: "alice" });
+    expect(tooLong).toMatchObject({ ok: false, status: 400 });
+    expect(handle).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("mcp adapter forged authority and unsupported routes", () => {
+  it.each([
+    [{ bindingName: "summer", idempotencyKey: "k", storageScopeId: "forged" }],
+    [{ bindingName: "summer", idempotencyKey: "k", actorId: "bob" }],
+    [{ bindingName: "summer", idempotencyKey: "k", paramsHash: "forged" }],
+    [{ bindingName: "summer", idempotencyKey: "k", source: { kind: "base-commit" } }],
+    [{ artifactId: ARTIFACT, files: publishArgs().files, idempotencyKey: "k", paramsHash: "x" }],
+    [{ artifactId: ARTIFACT, files: publishArgs().files, idempotencyKey: "k", source: { kind: "x" } }],
+    [{ artifactId: ARTIFACT, files: publishArgs().files, idempotencyKey: "k", ownerId: "bob" }],
+  ])("refuses forged server-owned fields without dispatch", async (args) => {
+    const handle = vi.fn(async () => ({ status: 201, body: {} }));
+    const adapter = createMcpArtifactAdapter(stubControl({}, handle));
+    const path = "bindingName" in args ? "/ensure" : "/publish";
+    const result = await adapter.execute(mcp("POST", path, args), { actorId: "alice" });
+    expect(result).toMatchObject({ ok: false, status: 400 });
+    expect(handle).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["GET", "/ensure"],
+    ["POST", "/fork"],
+    ["POST", "/delete"],
+    ["GET", "/list"],
+    ["POST", "/meta/abc"],
+    ["DELETE", "/publish"],
+    ["POST", "/ensure/"],
+    ["POST", "/ENSURE"],
+  ])("refuses unsupported %s %s before dispatch", async (method, path) => {
+    const handle = vi.fn(async () => ({ status: 201, body: {} }));
+    const adapter = createMcpArtifactAdapter(stubControl({}, handle));
+    const result = await adapter.execute(mcp(method, path, {}), { actorId: "alice" });
+    expect(result).toEqual({ ok: false, status: 503, code: "capability_unavailable",
+      retryable: false, error: { error: "capability_unavailable" } });
+    expect(handle).not.toHaveBeenCalled();
+  });
+
+  it("refuses a meta path and body mismatch", async () => {
+    const handle = vi.fn(async () => ({ status: 200, body: {} }));
+    const adapter = createMcpArtifactAdapter(stubControl({}, handle));
+    const other = "123e4567-e89b-12d3-a456-426614174009";
+    const result = await adapter.execute(
+      mcp("GET", `/meta/${ARTIFACT}`, { artifactId: other }), { actorId: "alice" });
+    expect(result).toMatchObject({ ok: false, status: 400 });
+    expect(handle).not.toHaveBeenCalled();
+  });
+});
