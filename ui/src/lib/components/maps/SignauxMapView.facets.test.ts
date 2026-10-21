@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/svelte";
 import { tick } from "svelte";
-import { CITY_SLUG, NODES, OTHER_CITY_SLUG, setAuth, deferred, cityRoute, mockDetailByCity, openFirstSignalCard } from "./SignauxMapView.facets.fixtures.js";
+import { CITY_SLUG, NODES, NODE_FINGERPRINT, OTHER_CITY_SLUG, setAuth, deferred, cityRoute, mockDetailByCity, openFirstSignalCard } from "./SignauxMapView.facets.fixtures.js";
 import SignauxMapView from "./SignauxMapView.svelte";
 import { fetchGraphSignalsByCity } from "$lib/signals/graph-signals-by-city-client.js";
 import { fetchGraphSignalDetail, GraphSignalsHttpError } from "$lib/signals/graph-signal-detail-client.js";
@@ -636,6 +636,8 @@ describe("SignauxMapView — Annuler restores with one key per retry", () => {
     const restores = vi.mocked(postFacetCommand).mock.calls.filter((call) => call[1] === "restore");
     expect(restores[0]![2]).toEqual({
       target: { citySlug: CITY_SLUG, type: "Signal", id: "sig-1" },
+      expectedHeadId: "event-1",
+      displayedFingerprint: NODE_FINGERPRINT,
     });
     expect(restores[0]![3]).toBe(restores[1]![3]);
   });

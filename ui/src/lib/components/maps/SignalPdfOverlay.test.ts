@@ -329,3 +329,119 @@ describe("SignalPdfOverlay recherche plein-texte", () => {
     expect(container.querySelector('.pdf-hl[data-signal-id="sig-2"]')).toBeTruthy();
   });
 });
+
+describe("SignalPdfOverlay late page request during init", () => {
+  it("should use the latest page when refreshed during dimension loading", async () => {
+    pdfMocks.getDocument.mockClear();
+    const pageTexts = [
+      "Alpha residence text unique page one",
+      "Beta municipal text unique page two",
+      "Gamma deliberation text unique page three",
+      "Delta evidence text unique page four target",
+      "Epsilon closing text unique page five",
+    ];
+    let releaseDimensions!: () => void;
+    const dimensionsGate = new Promise<void>((resolve) => {
+      releaseDimensions = () => resolve();
+    });
+    let dimensionCalls = 0;
+    const pages = pageTexts.map((text, index) => ({
+      getViewport: ({ scale }: { scale: number }) => ({
+        width: 600 * scale,
+        height: 800 * scale,
+        transform: [scale, 0, 0, -scale, 0, 800 * scale],
+      }),
+      render: vi.fn(() => {
+        pdfMocks.renderedPages.push(index + 1);
+        return { promise: Promise.resolve(), cancel: vi.fn() };
+      }),
+      getTextContent: vi.fn(async () => {
+        pdfMocks.textContentPages.push(index + 1);
+        return {
+          items: [
+            {
+              str: text,
+              transform: [1, 0, 0, 12, 40, 700],
+              width: 120,
+              height: 12,
+            },
+          ],
+        };
+      }),
+    }));
+    const doc = {
+      numPages: 5,
+      getPage: vi.fn(async (pageNumber: number) => {
+        dimensionCalls += 1;
+        if (dimensionCalls <= 5) await dimensionsGate;
+        return pages[pageNumber - 1];
+      }),
+      destroy: vi.fn(async () => undefined),
+    };
+    pdfMocks.getDocument.mockImplementationOnce(() => ({
+      promise: Promise.resolve(doc),
+    }));
+    const view = render(SignalPdfOverlay, {
+      props: {
+        rawRef: "raw/test/late-page-refresh.pdf",
+        page: 1,
+        signals: [
+          {
+            id: "sig-1",
+            label: "S1",
+            excerpt: pageTexts[0],
+            page: 1,
+            color: "#eab308",
+            current: true,
+          },
+        ],
+      },
+    });
+
+    await waitFor(() => expect(doc.getPage).toHaveBeenCalledTimes(5));
+    expect(view.container.querySelectorAll(".pdf-page-slot")).toHaveLength(0);
+
+    await view.rerender({
+      rawRef: "raw/test/late-page-refresh.pdf",
+      page: 4,
+      signals: [
+        {
+          id: "sig-4",
+          label: "S4",
+          excerpt: pageTexts[3],
+          page: 4,
+          color: "#eab308",
+          current: true,
+        },
+      ],
+    });
+    releaseDimensions();
+
+    await waitFor(() =>
+      expect(view.container.querySelectorAll(".pdf-page-slot")).toHaveLength(5),
+    );
+    await waitFor(() => expect(view.getByText("Page 4/5")).toBeTruthy());
+    await waitFor(() =>
+      expect(
+        view.container.querySelectorAll(
+          '.pdf-page-slot[data-page-number="4"] .pdf-hl[data-signal-id="sig-4"]',
+        ).length,
+      ).toBeGreaterThan(0),
+    );
+    expect(
+      scrollIntoView.mock.instances.some(
+        (element) => (element as HTMLElement).dataset.pageNumber === "4",
+      ),
+    ).toBe(true);
+    expect(
+      view.container.querySelectorAll('.pdf-hl[data-signal-id="sig-1"]').length,
+    ).toBe(0);
+    await waitFor(() => {
+      const rendered = Array.from(
+        view.container.querySelectorAll<HTMLElement>('.pdf-page-slot[data-rendered="true"]'),
+      ).map((slot) => Number(slot.dataset.pageNumber));
+      expect(rendered).toEqual([3, 4, 5]);
+    });
+    expect(pdfMocks.getDocument).toHaveBeenCalledTimes(1);
+  });
+});
