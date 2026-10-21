@@ -58,11 +58,11 @@ Build a read-only deterministic report mapping every `prospect_marks` row to its
 - No UI surface is impacted by 6F; no UAT checkpoint applies.
 
 ## Plan / Todo (lot-based)
-- [ ] **Lot 1 — Report contract and source inventory**
+- [x] **Lot 1 — Report contract and source inventory**
   - [x] `api/src/services/facets/lot-migration-report/types.ts`
   - [x] `api/src/services/facets/lot-migration-report/manifest.ts`
   - [x] `api/src/services/facets/lot-migration-report/SPEC.md`
-- [ ] **Lot 2 — Deterministic, read-only report builder**
+- [x] **Lot 2 — Deterministic, read-only report builder**
   - [x] `api/src/services/facets/lot-migration-report/digest.ts`
   - [x] `api/src/services/facets/lot-migration-report/chains.ts`
   - [x] `api/src/services/facets/lot-migration-report/target.ts`
@@ -70,7 +70,7 @@ Build a read-only deterministic report mapping every `prospect_marks` row to its
   - [x] `api/src/services/facets/lot-migration-report/diagnose.ts`
   - [x] `api/src/services/facets/lot-migration-report/report.ts`
   - [x] `api/src/services/facets/lot-migration-report/index.ts`
-- [ ] **Lot 3 — Synthetic and discriminating qualification**
+- [x] **Lot 3 — Synthetic and discriminating qualification**
   - [x] `api/src/services/facets/lot-migration-report/fixtures.ts`
   - [x] `api/src/services/facets/lot-migration-report/report.test.ts`
   - [x] `api/src/services/facets/lot-migration-report/contract.test.ts`
@@ -79,18 +79,18 @@ Build a read-only deterministic report mapping every `prospect_marks` row to its
   - [x] `api/src/services/facets/lot-migration-report/integrity.test.ts`
   - [x] `api/src/services/facets/lot-migration-report/no-write-guard.test.ts`
   - [x] `api/src/services/facets/lot-migration-report/source-db.test.ts`
-- [ ] **Lot 4 — Isolated verification (BR6F-EX1)**
+- [x] **Lot 4 — Isolated verification (BR6F-EX1)**
   - [x] `tools/make/paniers-lot6.mk`
   - [x] `tools/make/paniers-lot6-verify.sh`
   - [x] `tools/make/paniers-lot6-mutation.sh`
-  - [ ] API typecheck and facets lint pass in containers.
-  - [ ] All `src/services/facets` tests, including the read-only DB test, pass.
-  - [ ] Removing conflict detection in a copy fails tests; restoration passes `cmp` and tests.
-  - [ ] Teardown removes this test project's containers, volumes and networks (`down -v`).
-- [ ] **Lot 5 — Integrator delivery**
-  - [ ] Every commit passes API typecheck and stays within 150 lines / 15 files.
-  - [ ] Local fallback repository and bundle based on `7c56bb93` are verified.
-  - [ ] French integrator report remains uncommitted.
+  - [x] API typecheck and facets lint pass in containers.
+  - [x] All `src/services/facets` tests, including the read-only DB test, pass.
+  - [x] Removing conflict detection in a copy fails tests; restoration passes `cmp` and tests.
+  - [x] Teardown removes this test project's containers, volumes and networks (`down -v`).
+- [x] **Lot 5 — Integrator delivery**
+  - [x] Every commit passes API typecheck and stays within 150 lines / 15 files.
+  - [x] Local fallback repository and bundle based on `7c56bb93` are verified.
+  - [x] French integrator report remains uncommitted.
 - [ ] **Lot N — Merge & close**
   - [ ] Outside this task: no push, PR, CI or merge is authorized.
   - [ ] Push branch.
