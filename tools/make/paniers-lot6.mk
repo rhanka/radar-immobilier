@@ -8,16 +8,19 @@ UI_PORT ?= 15866
 MAILDEV_UI_PORT ?= 11866
 ifeq ($(LOT),6G)
 SCOPE ?= src/services/workspaces
+else ifeq ($(LOT),6H)
+SCOPE ?= src/services/facets src/services/workspaces tests/integration/facets src/services/steve-source src/services/graph/discarded-signals src/routes/scoped-signal-facets src/routes/signal-facets src/routes/graph-signals src/scripts/attach-personal-history
 else
 SCOPE ?= src/services/facets
 endif
 ACTION ?= verify
+DELIVERY_PROFILE = $(if $(filter 6H,$(LOT)),6h,6g)
 export ENV LOT API_PORT UI_PORT MAILDEV_UI_PORT SCOPE ACTION EVIDENCE_TAG CHECKPOINT_DIR
 
 .PHONY: guard verify typecheck lint test-api clean inspect diagnose commit prepare checkpoints deliver regression audit
 guard:
 	@case '$(ENV)' in test-*|e2e-*) ;; *) echo 'test-* or e2e-* ENV required'; exit 1;; esac
-	@case '$(LOT)' in 6F|6G) ;; *) echo 'LOT must be 6F or 6G'; exit 1;; esac
+	@case '$(LOT)' in 6F|6G|6H) ;; *) echo 'LOT must be 6F, 6G or 6H'; exit 1;; esac
 
 verify typecheck lint test-api: guard
 	@bash tools/make/paniers-lot6-verify.sh $@
@@ -30,16 +33,16 @@ scope-proof: guard
 	@bash tools/make/paniers-lot6g-fix-scope.sh
 
 prepare: guard
-	@bash tools/make/paniers-lot6g-deliver.sh prepare
+	@bash tools/make/paniers-lot$(DELIVERY_PROFILE)-deliver.sh prepare
 
 checkpoints: guard
 	@bash tools/make/paniers-lot6-verify.sh checkpoints
 
 deliver: guard
-	@bash tools/make/paniers-lot6g-deliver.sh finish
+	@bash tools/make/paniers-lot$(DELIVERY_PROFILE)-deliver.sh finish
 
 audit: guard
-	@bash tools/make/paniers-lot6g-deliver.sh audit
+	@bash tools/make/paniers-lot$(DELIVERY_PROFILE)-deliver.sh audit
 
 clean inspect diagnose: guard
 	@bash tools/make/paniers-lot6-verify.sh $@
