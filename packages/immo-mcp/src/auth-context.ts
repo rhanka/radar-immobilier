@@ -67,8 +67,14 @@ export function resolveAuthContext(env: NodeJS.ProcessEnv): ImmoMcpAuthContext {
   };
 }
 
-/** Throws `scope_denied:<scope>` if the auth context lacks the required scope. */
-export function assertScope(auth: ImmoMcpAuthContext, scope: string): void {
+/**
+ * Throws `scope_denied:<scope>` if the auth context lacks the required scope.
+ * Accepts frozen invocation snapshots (readonly scopes) as well as live contexts.
+ */
+export function assertScope(
+  auth: { readonly scopes: readonly string[] },
+  scope: string,
+): void {
   if (!auth.scopes.includes(scope)) {
     throw new Error(`scope_denied:${scope}`);
   }
@@ -88,7 +94,7 @@ export function hashInput(input: unknown): string {
  * tenant/user/tool/input-hash/correlationId.
  */
 export function auditToolCall(
-  auth: ImmoMcpAuthContext,
+  auth: Readonly<Omit<ImmoMcpAuthContext, "scopes" | "roles" | "workspaces">>,
   tool: string,
   inputHash: string,
   correlationId: string,
