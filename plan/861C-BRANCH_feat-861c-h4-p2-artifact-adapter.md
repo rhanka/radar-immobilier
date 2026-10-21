@@ -74,7 +74,7 @@ Selected mappings (exact method/path only, no generic proxy):
 - [x] Post-success admission outage: sanitized response, no receipt, exactly one ledger entry.
 - [ ] Real-provider parity, conflict, private metadata, pagination and pre-dispatch admission evidence.
 - [ ] Four copied-source mutation failures, restored and checked with `cmp`.
-- [ ] Parity cases with preparation mocks: minimal profile, HTTP↔MCP replay, changed-content conflict
+- [x] Parity cases with preparation mocks: minimal profile, HTTP↔MCP replay, changed-content conflict
       including file order, key boundaries, forged refusals, foreign metadata/pagination, suspension/expiry.
 - [ ] Report `RAPPORT-MUSE-H4-P2.md` with tests, commit split, commands, `not covered`/`unverified`/`BLOCKED`.
 
