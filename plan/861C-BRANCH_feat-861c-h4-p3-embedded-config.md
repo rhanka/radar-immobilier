@@ -19,7 +19,7 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - `packages/immo-mcp/config/immo-artifacts.v1.json`
   - `packages/immo-mcp/src/registry/**`
   - `RAPPORT-MUSE-H4-P3.md` (uncommitted deliverable)
-  - `RAPPORT-SOL-H4-P3.md`, `tmp/861c-h4-p3/**` (uncommitted integration evidence)
+  - `RAPPORT-SOL-H4-P3.md`, `tmp/861c-h4-p3/**`, `tmp/861c-h4-p3-fix/**` (uncommitted integration evidence)
 - **Forbidden Paths (must not change in this branch)**:
   - `Makefile`
   - `docker-compose*.yml`
@@ -40,6 +40,8 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
 - Required provider-contract revisions are recorded as `pending-upstream` in config and tests; no compatible export is claimed.
 - Integration inspection found two TypeScript errors and thirteen failing regression cases; corrections remain inside registry scope.
 - Harness consensus review is `selection-failed`: the handoff lacks supported author host/model/effort metadata; no consensus is claimed.
+- Integration gates passed: 173 tests in 16 files, including 46 registry cases; lint clean, each commit typechecked in isolation.
+- Four copy mutations were refused; byte restoration and three final `cmp` checks passed. Test-project teardown leaves zero resources.
 
 ## Orchestration Mode (AI-selected)
 - [x] **Mono-branch** (no history copying; local commits and base-relative bundle)
@@ -54,32 +56,41 @@ Prepare the data-and-contracts slice of P3: versioned Immo provider and artifact
   - [x] Read `conception-h4-v3.md` P3 scope and acceptance.
   - [x] Read `plan/BRANCH_TEMPLATE.md`, reference branch plans and immo-mcp sources.
   - [x] Confirm scope and guardrails; no `BRxx-EXn` exception required.
-- [ ] **Lot 1 — Immo provider definition and tools config**
+- [x] **Lot 1 — Immo provider definition and tools config**
   - [x] `src/registry/immo-provider.ts`: twelve locked names, scopes, bindings.
   - [x] `config/immo-tools.v1.json`: versioned embedded twelve-tool configuration.
-  - [ ] Lot gate: `typecheck` + `lint` + full `test-immo-mcp` on `ENV=test-861c-h4-p3`.
-- [ ] **Lot 2 — Artifact effective profile and selection config**
+  - [x] Lot gate: `typecheck` + `lint` + full `test-immo-mcp` on `ENV=test-861c-h4-p3`.
+- [x] **Lot 2 — Artifact effective profile and selection config**
   - [x] `src/registry/artifact-profile.ts`: four-tool selection, input bounds, caller key, durable identity, required contract revisions.
   - [x] `config/immo-artifacts.v1.json`: versioned embedded artifact configuration.
-  - [ ] Lot gate (same checklist as Lot 1).
-- [ ] **Lot 3 — Local registry validation and digest freeze**
+  - [x] Lot gate (same checklist as Lot 1).
+- [x] **Lot 3 — Local registry validation and digest freeze**
   - [x] `src/registry/mcp-registry.ts`: provider, tool, scope and contract validation.
   - [x] `src/registry/composition.ts`: detached frozen candidate and binding-aware digest.
   - [x] `src/registry/index.ts`: public re-exports.
-  - [ ] Lot gate (same checklist as Lot 1).
-- [ ] **Lot 4 — Compatibility tests**
+  - [x] Lot gate (same checklist as Lot 1).
+- [x] **Lot 4 — Compatibility tests**
   - [x] `src/registry/immo-provider.test.ts`: provider and embedded-config parity.
   - [x] `src/registry/artifact-profile.test.ts`: effective-profile parity and bounds.
   - [x] `src/registry/mcp-registry.test.ts`: local registry refusal cases.
   - [x] `src/registry/artifact-activation.test.ts`: artifact activation guards.
   - [x] `src/registry/validation-regressions.test.ts`: integration regression cases.
   - [x] `src/registry/binding-parity.test.ts`: twelve actual handler seams and scopes.
-  - [ ] Lot gate (same checklist as Lot 1).
-- [ ] **Lot 5 — Integration evidence and delivery**
-  - [ ] Mutate copies: removed tool, duplicate name, missing finalization and missing error binding; require refusals, restore and `cmp`.
-  - [ ] Audit dependencies, secrets, network-free registry and forbidden paths.
-  - [ ] Teardown with `down -v`; verify zero remaining project resources.
-  - [ ] Produce uncommitted `RAPPORT-SOL-H4-P3.md` and base-relative bundle.
+  - [x] Lot gate (same checklist as Lot 1).
+- [x] **Lot 5 — Integration evidence and delivery**
+  - [x] Mutate copies: removed tool, duplicate name, missing finalization and missing error binding; require refusals, restore and `cmp`.
+  - [x] Audit dependencies, secrets, network-free registry and forbidden paths.
+  - [x] Teardown with `down -v`; verify zero remaining project resources.
+  - [x] Produce uncommitted `RAPPORT-SOL-H4-P3.md` and base-relative bundle.
+- [ ] **Lot 5b — Astra review corrections**
+  - [x] Define the supported local artifact version and complete effective profile.
+  - [x] Enforce artifact scopes and required caller-key semantics.
+  - [ ] Compile only selected capabilities and freeze the complete profile into the digest.
+  - [ ] Export the revised registry contracts.
+  - [ ] Verify embedded required fields and durable identity parity.
+  - [ ] Cover selection, scope and provider-version refusals.
+  - [ ] Prove complete profile integrity and authorized digest evolution.
+  - [ ] Pass full gates, five copy mutations, restoration checks and resource teardown.
 - [ ] **Lot 6 — Merge and close**
   - [ ] Push branch (excluded from this integration assignment).
   - [ ] Open PR, verify CI green.
