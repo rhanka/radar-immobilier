@@ -66,9 +66,11 @@
     indexFacetHeads,
     isFacetWriteUnconfirmed,
     postFacetCommand,
+    sameFacetTarget,
     SignalFacetError,
     type FacetAction,
     type FacetCommandLaunch,
+    type FacetConflictNotice,
     type FacetHeadsStatus,
     type FacetTarget,
     type ReasonCode,
@@ -583,6 +585,8 @@
   let undoOperationToken = 0;
   const bulkGuard = new RequestGuard();
   let discardedNotice: { target: FacetTarget; label: string } | null = null;
+  /** Parent-owned 409 refusal with its native target: outlives the card. */
+  let facetConflictNotice: FacetConflictNotice | null = null;
   let discardedActionError: string | null = null;
   let undoCommandKey: string | null = null;
   let undoExpectedHeadId: string | null = null;
@@ -637,6 +641,7 @@
       facetReloadError = null;
       facetReloading = false;
       discardedNotice = null;
+      facetConflictNotice = null;
       discardedActionError = null;
       undoCommandKey = null;
       undoExpectedHeadId = null;
@@ -1538,6 +1543,7 @@
     // A new city owns its own notice state: never show, undo or reload the
     // previous city's write here.
     discardedNotice = null;
+    facetConflictNotice = null;
     discardedActionError = null;
     undoCommandKey = null;
     undoExpectedHeadId = null;
@@ -1754,12 +1760,40 @@
       undoOperationToken += 1;
       undoBusy = false;
     }
+    if (facetConflictNotice && sameFacetTarget(facetConflictNotice.target, target)) {
+      facetConflictNotice = null;
+    }
     await reloadAfterFacetWrite(operationCity, { silentDetail: true, afterWrite: true });
   }
 
-  /** Reload after a 409 head conflict: stale heads need a new intention. */
-  function handleFacetHeadsStale(): void {
-    if (selectedCity) void reloadAfterFacetWrite(selectedCity.municipality.slug, { silentDetail: true, afterWrite: false });
+  /**
+   * Reload after a 409 head conflict: stale heads need a new intention. The
+   * launched target and its launch context (viewer) are checked against the
+   * current viewer and city before any reload or state change, reusing the
+   * existing viewer, city and reload-token guards (no new guard is added: the
+   * reload below still runs under facetReloadToken). A late conflict from
+   * another city only refreshes the by-city counters and preserves the open
+   * city state, while a current-city conflict is kept in the parent notice
+   * with its target so the post-reload detail removal cannot destroy it.
+   */
+  function handleFacetHeadsStale(
+    target: FacetTarget,
+    launch: FacetCommandLaunch,
+    message: string,
+  ): void {
+    if (launch && launch.viewerKey !== appliedFacetContext) return;
+    if (target.citySlug !== selectedCity?.municipality.slug) {
+      void load();
+      return;
+    }
+    facetConflictNotice = { target, message };
+    void reloadAfterFacetWrite(target.citySlug, { silentDetail: true, afterWrite: false });
+  }
+
+  /** Dismiss the parent-owned 409 refusal and return focus to the bucket. */
+  function handleDismissFacetConflict(): void {
+    facetConflictNotice = null;
+    selPanel?.focusSignalsBucket();
   }
 
   /** A read retry must not announce a recorded write. */
@@ -1860,6 +1894,7 @@
     // A closed selection owns no notice state: never show, undo or reload
     // the previous city's write after « Fermer ».
     discardedNotice = null;
+    facetConflictNotice = null;
     discardedActionError = null;
     undoCommandKey = null;
     undoExpectedHeadId = null;
@@ -3218,6 +3253,8 @@
       facetReloadAfterWrite={facetReloadAfterWrite}
       onRetryFacetReads={handleRetryFacetReads}
       onFacetHeadsStale={handleFacetHeadsStale}
+      facetConflictNotice={facetConflictNotice}
+      onDismissFacetConflict={handleDismissFacetConflict}
       discardedNotice={discardedNotice}
       discardedActionError={discardedActionError}
       {undoBusy}
