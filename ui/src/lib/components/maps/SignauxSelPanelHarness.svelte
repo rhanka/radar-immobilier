@@ -86,6 +86,7 @@
   export let facetReloadError: string | null = null;
   export let facetReloadAfterWrite = false;
   export let onRetryFacetReads: () => void = () => {};
+  export let onFacetHeadsStale: () => void = () => {};
   export let discardedNotice: { target: FacetTarget; label: string } | null = null;
   export let discardedActionError: string | null = null;
   export let onUndoDiscard: (target: FacetTarget) => void = () => {};
@@ -157,6 +158,7 @@
   {facetReloadError}
   {facetReloadAfterWrite}
   {onRetryFacetReads}
+  {onFacetHeadsStale}
   {discardedNotice}
   {discardedActionError}
   {onUndoDiscard}
