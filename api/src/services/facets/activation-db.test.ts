@@ -26,7 +26,12 @@ describeDb("6H protected activation", () => {
     await migrate(f.db, { migrationsFolder: "drizzle" });
     await f.pool.query(readFileSync("drizzle/0018_facet_scope_bindings.sql", "utf8"));
     expect((await f.pool.query("SELECT * FROM facet_events ORDER BY id")).rows).toEqual(before);
-    expect((await f.pool.query("SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations")).rows[0].n).toBe(18);
+    const journal = JSON.parse(readFileSync("drizzle/meta/_journal.json", "utf8")) as {
+      entries: Array<{ tag: string }>;
+    };
+    expect((await f.pool.query("SELECT count(*)::int AS n FROM drizzle.__drizzle_migrations")).rows[0].n)
+      .toBe(journal.entries.length);
+    expect(journal.entries.map((entry) => entry.tag)).toContain("0018_facet_scope_bindings");
     await attach(f);
     const readback = vi.fn(async () => {
       expect((await f.pool.query("SELECT maintenance_barrier FROM facet_activation_state")).rows)
