@@ -101,11 +101,11 @@ describe("artifact activation", () => {
     const providers = [immoProvider(), artifactProvider()];
     const foreign = artifactRequest({
       selection: [...artifactRequest().selection.slice(0, 3),
-        { tool: "artifacts_delete", operation: "delete", method: "POST", path: "/delete" }],
+        { tool: "artifacts_delete", operation: "delete", method: "POST", path: "/delete", command: "delete" }],
     });
     expect(codeOf(() => compileComposition(providers, { artifact: foreign }))).toBe("unavailable_capability");
     const remappedSelection = artifactRequest().selection.map((entry) => (entry.tool === "artifacts_publish"
-      ? { tool: "artifacts_publish", operation: "publish", method: "GET", path: "/publish" }
+      ? { tool: "artifacts_publish", operation: "publish", method: "GET", path: "/publish", command: "publish" }
       : entry));
     const remapped = artifactRequest({ selection: remappedSelection });
     expect(codeOf(() => compileComposition(providers, { artifact: remapped }))).toBe("unavailable_capability");
@@ -200,5 +200,41 @@ describe("artifact activation", () => {
     expect(codeOf(() => compileComposition([immoProvider(), artifactProvider("9.9.9")], {
       artifact: artifactRequest(),
     }))).toBe("incompatible_version");
+  });
+
+  it.each(["meta", undefined, { name: "publish" }])("should reject invalid selection command %j", (command) => {
+    const providers = [immoProvider(), artifactProvider()];
+    const selection = artifactRequest().selection.map((entry) => (entry.tool === "artifacts_publish"
+      ? { ...entry, command }
+      : entry)) as unknown as ArtifactActivationRequest["selection"];
+    expect(codeOf(() => compileComposition(providers, {
+      artifact: artifactRequest({ selection }),
+    }))).toBe("unavailable_capability");
+  });
+
+  it("should detach nested selection data from the frozen candidate", () => {
+    const base = artifactRequest();
+    const selection = base.selection.map((entry) => ({
+      ...entry, detail: { name: "publish" },
+    })) as unknown as ArtifactActivationRequest["selection"];
+    const candidate = compileComposition([immoProvider(), artifactProvider()], {
+      artifact: { ...base, selection },
+    });
+    const before = JSON.stringify(candidate);
+    for (const entry of selection) {
+      (entry as unknown as { detail: { name: string } }).detail.name = "altered";
+    }
+    expect(JSON.stringify(candidate)).toBe(before);
+    expect(candidate.artifact?.selection[0]).not.toHaveProperty("detail");
+    expect(Object.isFrozen(candidate.artifact?.selection[0])).toBe(true);
+  });
+
+  it("should refuse a mutation that drops the bindingName requirement", () => {
+    expect(codeOf(() => checkEffectiveProfile({
+      artifacts_ensure: ["idempotencyKey"],
+      artifacts_publish: ["artifactId", "files", "idempotencyKey"],
+      artifacts_list: [],
+      artifacts_get: ["artifactId"],
+    }))).toBe("unavailable_capability");
   });
 });
