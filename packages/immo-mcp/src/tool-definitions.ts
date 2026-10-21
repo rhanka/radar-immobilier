@@ -83,6 +83,40 @@ export const TOOL_DEFINITIONS: readonly ToolDefinition[] = [
     },
     scope: IMMO_SCOPES.search,
   },
+  {
+    name: "get_opportunity_dossier",
+    title: "Get opportunity dossier",
+    description:
+      "Dossier d'opportunité consolidé (score, lots et signaux liés, rationale). Read-only.",
+    inputSchema: {
+      city: z.string().min(1),
+      opportunityId: z.string().min(1),
+    },
+    scope: IMMO_SCOPES.read,
+  },
+  {
+    name: "list_documents",
+    title: "List documents",
+    description:
+      "Liste les documents sources archivés (procès-verbaux, etc.) par ville. Read-only.",
+    inputSchema: {
+      city: z.string().optional(),
+      limit: z.number().int().min(1).max(100).default(20),
+    },
+    scope: IMMO_SCOPES.documentsRead,
+  },
+  {
+    name: "read_document_excerpt",
+    title: "Read document excerpt",
+    description:
+      "Lit un extrait borné d'un document source. La sortie est passée par la redaction anti-PII. Read-only.",
+    inputSchema: {
+      documentId: z.string().min(1),
+      offset: z.number().int().min(0).default(0),
+      maxChars: z.number().int().min(1).max(4000).default(1200),
+    },
+    scope: IMMO_SCOPES.documentsRead,
+  },
 ];
 
 /** Raw-data tool contracts (zones/lots GeoJSON, grille & PV PDFs, provenance). */
