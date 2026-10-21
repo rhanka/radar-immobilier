@@ -61,7 +61,7 @@ Build a read-only deterministic report mapping every `prospect_marks` row to its
 - [ ] **Lot 1 — Report contract and source inventory**
   - [x] `api/src/services/facets/lot-migration-report/types.ts`
   - [x] `api/src/services/facets/lot-migration-report/manifest.ts`
-  - [ ] `api/src/services/facets/lot-migration-report/SPEC.md`
+  - [x] `api/src/services/facets/lot-migration-report/SPEC.md`
 - [ ] **Lot 2 — Deterministic, read-only report builder**
   - [x] `api/src/services/facets/lot-migration-report/digest.ts`
   - [x] `api/src/services/facets/lot-migration-report/chains.ts`
