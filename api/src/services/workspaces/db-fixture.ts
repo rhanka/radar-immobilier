@@ -7,7 +7,7 @@ import { accountUsers } from "../../db/schema.js";
 import { initializeWorkspaceStore } from "./init-store.js";
 
 export const { db, pool } = createDb(loadConfig());
-export const describeDb = describe.skipIf(process.env.LOT_MIGRATION_DB_TEST !== "1");
+export const describeDb: ReturnType<typeof describe.skipIf> = describe.skipIf(process.env.LOT_MIGRATION_DB_TEST !== "1");
 
 export async function account(status = "approved", isAdmin = false) {
   const id = randomUUID();
