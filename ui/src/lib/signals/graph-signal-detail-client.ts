@@ -518,6 +518,12 @@ export interface GraphSignalNode {
   label: string;
   citySlug: string | null;
   sourceRef: string | null;
+  /**
+   * Content fingerprint of the exact stored node served here (6B
+   * displayed-version capture). Optional: older cached payloads predate it;
+   * current servers always send it, including on degraded cards.
+   */
+  facetFingerprint?: string;
   createdAt: string | null;
   description?: string | null;
   publishedAt?: string | null;
