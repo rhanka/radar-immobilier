@@ -82,7 +82,7 @@ Build a read-only deterministic report mapping every `prospect_marks` row to its
 - [ ] **Lot 4 — Isolated verification (BR6F-EX1)**
   - [x] `tools/make/paniers-lot6.mk`
   - [x] `tools/make/paniers-lot6-verify.sh`
-  - [ ] `tools/make/paniers-lot6-mutation.sh`
+  - [x] `tools/make/paniers-lot6-mutation.sh`
   - [ ] API typecheck and facets lint pass in containers.
   - [ ] All `src/services/facets` tests, including the read-only DB test, pass.
   - [ ] Removing conflict detection in a copy fails tests; restoration passes `cmp` and tests.
