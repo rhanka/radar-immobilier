@@ -197,6 +197,57 @@ export const RAW_TOOL_DEFINITIONS: readonly ToolDefinition[] = [
     },
     scope: IMMO_SCOPES.documentsRead,
   },
+  {
+    name: "get_reglement_provenance",
+    title: "Get règlement de zonage provenance",
+    description:
+      "Provenance du règlement de zonage en vigueur d'une ville — numéro, millésime, " +
+      "page source, URL publique du règlement — telle que geo la stampe sur la grille " +
+      "de normes (qc-zonage-norms), + la relation « modifie » (règlement ancien) quand " +
+      "servie. Passthrough VERBATIM : un champ absent = null, jamais deviné/dérivé ; seul " +
+      "reglement_url est l'URL publique (le breadcrumb interne _source_url n'est jamais " +
+      "exposé). La provenance est muni-uniforme : zone_code est accepté mais n'affecte pas " +
+      "le résultat (réservé au lien events, tool à venir). found=false si la grille de " +
+      "normes n'est pas publiée pour la ville. Read-only.",
+    inputSchema: {
+      muni_slug: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
+      zone_code: z
+        .string()
+        .optional()
+        .describe("Code de zone — accepté mais no-op pour la provenance (muni-uniforme)"),
+    },
+    scope: IMMO_SCOPES.read,
+  },
+  {
+    name: "query_zoning_events",
+    title: "Query zoning lifecycle events",
+    description:
+      "Timeline des events de cycle de vie du zonage d'une ville (avis de motion, " +
+      "projets de règlement, adoptions, entrées en vigueur, dérogations, CPTAQ…) servis " +
+      "par geo. Filtres exacts optionnels : zone_code (events liés à cette zone via " +
+      "zone_codes_resolus), document_type (avis_motion|projet_reglement|adoption|" +
+      "entree_en_vigueur|abrogation), decision_state (planned|decided). Chaque event est " +
+      "renvoyé VERBATIM (§2 : document_type, decision_state, type_instrument, bylaw_numero, " +
+      "date_iso, zone_codes_resolus, libelles_relation, url_pdf, provenance…) ; les clés " +
+      "internes préfixées « _ » (breadcrumbs) ne sont jamais exposées. decision_state=planned " +
+      "n'est JAMAIS présenté comme adopté (planned ≠ decided). Read-only.",
+    inputSchema: {
+      muni_slug: z.string().min(1).describe("Ville (slug, ex: longueuil)"),
+      zone_code: z
+        .string()
+        .optional()
+        .describe("Filtre : events liés à ce code de zone (exact, via zone_codes_resolus)"),
+      document_type: z
+        .string()
+        .optional()
+        .describe("Filtre exact : avis_motion|projet_reglement|adoption|entree_en_vigueur|abrogation"),
+      decision_state: z
+        .string()
+        .optional()
+        .describe("Filtre exact : planned|decided"),
+    },
+    scope: IMMO_SCOPES.read,
+  },
 ];
 
 /** Every tool contract in registration order (domain first, raw-data second). */
